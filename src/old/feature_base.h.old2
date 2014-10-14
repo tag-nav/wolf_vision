@@ -1,0 +1,72 @@
+/**
+ * \file feature_base.h
+ *
+ *  Created on: 04/08/2014
+ *     \author: jsola
+ */
+
+#ifndef FEATURE_BASE_H_
+#define FEATURE_BASE_H_
+
+#include "wolf.h"
+
+class FeatureBase : public NodeConstrainer
+{
+    protected:
+        VectorXs measurement_;          ///< Measurement according to sensor data analysis
+
+    public:
+        /**
+         * Constructor from dims
+         * @param _dim_exp the dimension of the expectation
+         * \param _dim_err the dimension of the error
+         *
+         * Note: Correspondence is always a BOTTOM node in the Wolf tree.
+         */
+        FeatureBase(unsigned int _dim_meas) :
+                NodeConstrainer(MID), measurement_(_dim_meas)
+        {
+            measurement_ << 0.0, 0.0;
+        }
+
+        /**
+         * Constructor from dims
+         * @param _dim_exp the dimension of the expectation
+         * \param _dim_err the dimension of the error
+         *
+         * Note: Correspondence is always a BOTTOM node in the Wolf tree.
+         */
+        FeatureBase(const NodeShrPtr & _un_ptr, unsigned int _dim_meas) :
+                NodeConstrainer(MID, _un_ptr), measurement_(_dim_meas)
+        {
+            measurement_ << 0.0, 0.0;
+        }
+
+        virtual ~FeatureBase()
+        {
+            //
+        }
+
+        VectorXs& measurement()
+        {
+            return measurement_;
+        }
+
+        const VectorXs& measurement() const
+        {
+            return measurement_;
+        }
+
+        /** \brief Prints node label
+         *
+         * Prints node label
+         *
+         **/
+        virtual void printLabel(ostream & _ost = cout) const
+        {
+            _ost <<"FEATURE";
+        }
+
+};
+
+#endif /* FEATURE_BASE_H_ */

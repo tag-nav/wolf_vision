@@ -1,0 +1,343 @@
+/*
+ * \file node_linked.h
+ *
+ *  Created on: 01/07/2014
+ *      Author: acorominas
+ */
+
+#ifndef NODE_LINKED_H_
+#define NODE_LINKED_H_
+
+//std
+#include <iostream>
+#include <memory>
+#include <list>
+
+//wolf
+#include "wolf.h"
+#include "node_base.h"
+
+using namespace std;
+
+/** \brief Node element of the Wolf Tree
+ *
+ * Inherit from this class to implement a node element to be placed somewhere at the Wolf Tree.
+ * A node has four main data members: 
+ * - An integer indicating tree location (see NodeLocation enum at wolf.h)
+ * - down_node_list_: A list of shared pointers to NodeLinked objects.
+ * - up_node_: A weak pointer to a NodeLinked object 
+ * - An unique ID to identify it over the whole Wolf Tree (inherited from NodeBase)
+ *
+ */
+class NodeLinked : public NodeBase, 
+                   public enable_shared_from_this<NodeLinked>
+{
+    public:
+        //typedefs 
+        typedef shared_ptr<NodeLinked> NodeShrPtr; ///< typedef, shared pointer to NodeLinked
+        typedef weak_ptr<NodeLinked> NodeWeakPtr; ///< typedef, weak pointer to UpNode type
+        typedef list<NodeShrPtr> NodeList; ///< typedef, list of pointers to NodeLinked
+        typedef list<NodeShrPtr>::iterator NodeListIter; ///< typedef, iterator for a list of pointers to NodeLinked
+    
+    protected:
+        NodeLocation location_; ///< node location at the Wolf Tree        
+        NodeList down_node_list_; ///<  A list of shared pointers to NodeLinked objects (down nodes)
+        NodeWeakPtr up_node_wptr_;///< Weak pointer to up node
+
+    public:
+        /** \brief Default constructor
+         * 
+         * Defaul constructor
+         * \param _loc Placement within Wolf tree. NodeLocation type declared at file wolf.h
+         * 
+         */
+        NodeLinked(const NodeLocation _loc) :
+            location_(_loc)
+        {
+//            cout << "NodeLinked::constructor with location. Id: " << node_id_ << endl;
+            //
+        }
+        
+        /** \brief Constructor with pointer to up node
+         * 
+         * Construct and link to up node
+         * \param _loc Placement within Wolf tree. NodeLocation type declared at file wolf.h
+         * \param _un_ptr pointer to up node
+         * 
+         */
+        NodeLinked(const NodeLocation _loc, const NodeShrPtr & _un_ptr) :
+            location_(_loc)
+        {
+//            cout << "NodeLinked::constructor with location and pointer. Id: " << node_id_ << endl;
+            linkToUpNode(_un_ptr);
+        }
+        
+        /** \brief Destructor
+         * 
+         * Destructor
+         * 
+         */
+        virtual ~NodeLinked()
+        {
+            //removes all down nodes
+            if ( location_ != BOTTOM )
+            {
+                // for (auto iter = down_node_list_.begin(); iter != down_node_list_.end(); ++iter) iter->reset(); //reset pointers will effectively free memory, if they were the last owners to the objects
+                down_node_list_.clear();//This line is enough and the for-loop above can be safely skipped since these shared pointers were the unique pointers to created objects. Valgrind Checked!
+            }
+        }
+        
+        /** \brief Returns a reference to the down node list
+         * 
+         * Returns a reference to the down node list
+         * 
+         */
+        NodeList & downNodeList()
+        {
+            return down_node_list_;
+        }
+
+        /** \brief Returns a constant reference to the down node list
+         * 
+         * Returns a constant reference to the down node list
+         * 
+         */
+        const NodeList & downNodeList() const
+        {
+            return down_node_list_;
+        }
+        
+        /** \brief Returns a shared pointer to up node. 
+         * 
+         * Returns a shared pointer to up node. 
+         * Throw "WEAK" if object pointer by up_node_wptr_ has been destroyed. 
+         *          
+         */
+        NodeShrPtr upNodePtr() const
+        {
+            if ( up_node_wptr_.expired() ) //TOP case , or unlinked case
+            {
+                return NULL;
+            }
+            else // MID and BOTTOM cases
+            {
+                NodeShrPtr sptr = up_node_wptr_.lock();
+                if (!sptr)
+                {
+                    std::cerr << __FILE__ << ":" << __LINE__ << " Node::upNodePtr throws weak" << std::endl;
+                    throw "WEAK";
+                }
+                return sptr;
+            }
+        }
+        
+        /** \brief Returns a reference to up node. 
+         * 
+         * Returns a reference to up node. 
+         * Throw "WEAK" if object pointer by up_node_wptr_ has been destroyed. 
+         *          
+         */
+        NodeLinked & upNode(void)
+        {
+            return *(upNodePtr());
+        }
+        
+        /** \brief Returns a constant reference to UpNode. 
+         * 
+         * Returns a constant reference to UpNode. 
+         * Throw "WEAK" if object pointer by up_node_wptr_ has been destroyed. 
+         *          
+         */
+        const NodeLinked & upNode(void) const
+        {
+            return *(upNodePtr());
+        }
+
+        /** \brief Add a down node to the list
+         * 
+         * Add a linked node to the down_node_list_. The link from down to up node is set.
+         * @param _ptr pointer to the node to be added
+         * 
+         */
+        void addDownNode(const NodeShrPtr & _ptr)
+        {
+            if ( !isBottom() )
+            {
+                _ptr->linkToUpNode( shared_from_this() );
+                down_node_list_.push_back(_ptr);
+            }
+        }
+        
+        /** \brief Register a down node to the list
+         *
+         * Register a linked node to the down_node_list_. The link from down to up node is NOT set.
+         * @param _ptr pointer to the node to be added
+         *
+         */
+        void registerDownNode(const NodeShrPtr & _ptr)
+        {
+            if ( !isBottom() )
+            {
+                down_node_list_.push_back(_ptr);
+            }
+        }
+
+        /** \brief Remove a down node from the multimap, given an iterator
+         * 
+         * Remove a down node from the multimap
+         * @param _iter an iterator to a particular down node in the list
+         * 
+         */
+        void removeDownNode(const NodeListIter & _iter)
+        {
+            // cout << "Node::removeDownNode(_iter)" << endl;
+            (*_iter)->unlinkFromUpNode();
+            down_node_list_.erase(_iter);
+        }
+
+        /** \brief Remove a down node from the list, given a node id
+         * 
+         * Remove a down node from the multimap
+         * @param _id node id
+         * 
+         */
+        void removeDownNode(const unsigned int _id)
+        {
+            // cout << "Node::removeDownNode(_id)" << endl;
+            for (auto iter = down_node_list_.begin(); iter != down_node_list_.end(); ++iter)
+            {
+                if ( (*iter)->getId() == _id )
+                {
+                    removeDownNode(iter);
+                    break; //avoid comparison of iter and list.end(), otherwise Valgrind claimed
+                }
+            }
+        }
+        
+        /** \brief Link to UpNode.
+         * 
+         * Link to UpNode.
+         * @param _un_ptr pointer to UpNode
+         * 
+         */
+        void linkToUpNode(const NodeShrPtr & _un_ptr)
+        {
+            if ( isTop() )
+                up_node_wptr_.reset();
+            else
+                up_node_wptr_ = _un_ptr;
+        }
+        
+        /** \brief Unlink from the UpNode. 
+         * 
+         * Remove the link from the UpNode
+         * 
+         */
+        void unlinkFromUpNode()
+        {
+            // cout << "Node::unlinkFromUpNode()" << endl;
+            if ( location_ != TOP )
+                up_node_wptr_.reset();
+        }
+        
+        /** \brief Returns true if this node at the TOP
+         * 
+         * Returns true if this node is at the TOP of the Wolf tree (location_ == TOP)
+         * Otherwise, it returns false
+         * 
+         **/
+        bool isTop() const
+        {
+            if ( location_ == TOP ) return true;
+            else return false;
+        }
+        
+        /** \brief Returns true if this node is terminus
+         * 
+         * Returns true if this node is at the BOTTOM of the Wolf tree (location_ == BOTTOM)
+         * Otherwise, it returns false
+         * 
+         **/
+        bool isBottom() const
+        {
+            if ( location_ == BOTTOM ) return true;
+            else return false;
+        }
+        
+        shared_ptr<NodeLinked> getTop()
+        {
+            NodeShrPtr nl_sptr = up_node_wptr_.lock();
+            if ( isTop() )
+            {
+                return shared_from_this();
+            }
+            else
+            {
+                return nl_sptr->getTop();
+            }
+        }
+
+        /** \brief Print some info
+         * 
+         * Print some info to provided ostream
+         * @param _ntabs the number of tabs to br printed before any line. (Used to concatenated calls)
+         * @param _ost an ostream where to print info. Default is std::cout
+         * 
+         */
+        void print(unsigned int _ntabs = 0, ostream & _ost = cout) const
+        {
+            unsigned int ii;
+
+            //increment tabulator count
+            _ntabs++;
+
+            //node itself
+            for (ii=0; ii<_ntabs-1; ii++) _ost << "\t";
+            printLabel(_ost);
+            _ost << " " << node_id_ << " : ";
+            switch(location_)
+            {
+                case TOP: _ost << "TOP" << endl; break;
+                case MID: _ost << "MID" << endl; break;
+                case BOTTOM: _ost << "BOT" << endl; break;
+                default: _ost << "*" << endl; break;
+            }
+
+            //up node
+            if ( ( location_ != TOP ) && ( !up_node_wptr_.expired() ) )
+            {
+                for (ii=0; ii<_ntabs-1; ii++) _ost << "\t";
+                NodeShrPtr sptr = up_node_wptr_.lock();
+                _ost << "\tUp Node: " << sptr->getId() << endl;
+            }
+
+            //down node list
+            if ( location_ != BOTTOM )
+            {
+                for (ii=0; ii<_ntabs-1; ii++) _ost << "\t";
+                //_ost << "\tdown_node_list_.size(): " << down_node_list_.size() << endl;
+                _ost << "\tDown Node List: [ ";
+                for (auto iter = down_node_list_.begin(); iter != down_node_list_.end(); ++iter)
+                {
+                    _ost << (*iter)->getId() << " ";
+                }
+                _ost << "]" << endl;
+
+                for (auto iter = down_node_list_.begin(); iter != down_node_list_.end(); ++iter)
+                {
+                    (*iter)->print(_ntabs, _ost);
+                }
+            }
+        }
+
+        /** \brief Prints node label
+         * 
+         * Prints node label
+         * 
+         **/                                
+        virtual void printLabel(ostream & _ost = cout) const
+        {
+            _ost <<"NODE-L";
+        }
+};
+#endif

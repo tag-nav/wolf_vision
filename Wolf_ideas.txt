@@ -1,0 +1,96 @@
+This file serves as a guideline for future developments. 
+
+As the ideas here get implemented, we advise you add a /////// OK tag indicating the work is done and working.
+
+
+1. Getters ///////////// OK
+============
+source	return
+  vvv	>>>
+		shptr	ptr		obj		map
+shptr	&		.get()	*		/		
+ptr		/		.		*		/
+obj		/		/		&		/		
+map		/		/		/		&		state: norm; error: const
+
+
+2. Classes
+===============
+
+IDEA: Allow Vehicles, Frames, Captures, Features to live out of the node for enhanced reusability. 
+
+In the WOLF nodes, we can have like this:
+
+class FrameBase
+{
+State* state_ptr;
+}
+
+class NodeConstrainer
+{
+virtual computeError()
+}
+
+class NodeFrameBase : public FrameBase, public NodeConstrainer
+{
+computeError() <-- in case we want to overload
+}
+
+
+3. Precomputing constant values ////////////// OK
+===============================
+
+PinHole::precomputeConstants() // call in in constructor /////////// OK
+{
+	intrinsic_matrix_ = bla bla bla;
+	inverse_intrinsic_matrix_ = bla bla bla
+}
+
+Capture::precomputeGlobalPose() // call from Capture::precomputeConstants(), see below //////////// OK
+{
+	global_pose_ = bla bla bla
+	inverse_global_pose_ = bla bla bla
+}
+
+Capture::precomputeConstants() ////////////////// OK
+{
+	precomputeGlobalPose();
+	for (trans_sensor_iter = bla bla)
+	{
+		trans_sensor_iter->precomputeConstants();
+	}
+}
+
+TransSensor::precomputeConstants() = 0; /////////////// OK
+
+TransPinHole::precomputeConstants() /////////////// OK
+{
+	capture_own->globalPose()
+	capture_other->inverseGlobalPose()
+	computePoseRelative()
+	sensor_own->inverseIntrinsicMatrix()
+	sensor_other->intrinsicMatrix()
+	fundamental_ = bla bla
+}
+
+NodeConstrainer::precomputeConstants() ///////////////// OK
+{
+	for (iter = bla bla bla)
+	{
+		*iter->precomputeConstants();
+	}
+}
+
+TOP::computeError() //////////////////// OK
+{
+	precomputeConstants();
+	for (iter = bla bla bla)
+	{
+		*iter->compputeError();
+	}
+}
+
+CorrespondenceBase::precomputeConstants() //////////////// OK not overloaded.
+{
+	// Leave it blank or simply do not overload it. Nobody will call it anyway.
+}

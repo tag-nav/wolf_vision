@@ -1,0 +1,54 @@
+
+#include "frame.h"
+
+// Initialize static counter
+unsigned int Frame::frame_id_count_ = 0;
+
+Frame::Frame(const FrameType _ftype, const scalar_t _ts, const shared_ptr<StatePose> & _state_ptr) :
+    NodeConstrainer(TOP, 10), 
+    frame_id_(++frame_id_count_),
+    frame_type_(_ftype),
+    time_stamp_(_ts),
+    state_(_state_ptr)
+{
+    //
+}
+
+Frame::~Frame()
+{
+    //
+}
+
+StatePose & Frame::pose()
+{
+    return *(state_);
+}
+
+void Frame::setFrameType(const FrameType _ftype)
+{
+    frame_type_ = _ftype;
+}
+
+bool Frame::isKey() const
+{
+    if (frame_type_ == KEY_FRAME) return true;
+    else return false;
+}
+
+unsigned int Frame::frameId() const
+{
+    return frame_id_;
+}
+
+TimeStamp & Frame::timeStamp()
+{
+    return time_stamp_;
+}
+
+// 
+// ostream& operator<<(ostream & os, Frame<StateType>& fr)
+// {
+//     os << "(" << fr.id() << ":" << fr.ts().get() << ")";
+//     return os;
+// }
+// 

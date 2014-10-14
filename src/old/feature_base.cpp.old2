@@ -1,0 +1,9 @@
+/**
+ * \file feature_base.cpp
+ *
+ *  Created on: 04/08/2014
+ *     \author: jsola
+ */
+
+#include "feature_base.h"
+

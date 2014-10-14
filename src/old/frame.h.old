@@ -1,0 +1,160 @@
+/*
+ * frame.h
+ *
+ *  Created on: July 11, 2014
+ *      \author: acorominas
+ */
+
+#ifndef FRAME_H_
+#define FRAME_H_
+
+//std
+#include <memory>
+
+//wolf
+#include "wolf.h"
+#include "time_stamp.h"
+#include "state_pose.h"
+#include "node_constrainer.h"
+
+//namespaces
+using namespace std;
+using namespace Eigen;
+
+/**
+ * \brief Class for frames and keyframes
+ * \param StateType the class of state of the mobile platform
+ *
+ * A Frame contains all time-variant data belonging to a vehicle at a given moment. It is defined by the arrival of
+ * relevant information from one of the embarked sensors. It contains:
+ * - A time stamp
+ * - A state of the moving platform
+ * - A list of measurements, acting as constraints (list inherited from NodeConstrainer, which is inherited from NodeLinked)
+ *
+ */
+//template<class StateT>
+class Frame : public NodeConstrainer
+{
+        typedef shared_ptr<StatePose> StatePosePtr;
+
+    protected:
+        static unsigned int frame_id_count_; ///< object counter acts as simple ID factory
+        unsigned int frame_id_; ///< Frame identifier
+        FrameType frame_type_; ///< indicates whether the frame is KEY_FRAME or REGULAR_FRAME
+        TimeStamp time_stamp_; ///< Time stamp
+//        StateT state_; ///< State point associated to this frame.
+
+    protected:
+        StatePosePtr state_ptr_; ///< State associated to this frame.
+        
+    public:
+        /** \brief Constructor from type, time stamp and state. Local storage
+         * 
+         * Constructor from type, time stamp and state. Local storage
+         * \param _ftype frame type
+         * \param _ts time stamp
+         * \param _state_ptr state of the mobile platform
+         * 
+         */
+//        Frame(const FrameType _ftype, const scalar_t _ts, const StateT & _state):
+        Frame(const FrameType _ftype, const scalar_t _ts, const StatePosePtr & _state):
+            NodeConstrainer(TOP),
+            frame_id_(++frame_id_count_),
+            frame_type_(_ftype),
+            time_stamp_(_ts),
+            state_ptr_(_state)
+        {
+            //
+        };
+        
+        /** \brief Constructor from type, time stamp and state. Local storage
+         * 
+         * Constructor from type, time stamp and state. Local storage
+         * \param _ftype frame type
+         * \param _ts time stamp
+         * \param _state_ptr state of the mobile platform
+         * 
+         */
+        Frame(const FrameType _ftype, const scalar_t _ts, const StatePosePtr & _state, VectorXs & _storage, const unsigned int _idx):
+            NodeConstrainer(TOP),
+            frame_id_(++frame_id_count_),
+            frame_type_(_ftype),
+            time_stamp_(_ts),
+            state_ptr_(_state)
+        {
+            //
+        };
+
+        /** \brief Destructor
+         * 
+         * Destructor
+         * 
+         */
+        ~Frame()
+        {
+            //
+        };
+        
+        /** \brief Returns frame state
+         * 
+         * Returns a reference to the mobile platform pose at this frame
+         * 
+         */
+        StatePose & state()
+        {
+            return *state_ptr_;
+        };
+
+        /** \brief Sets Frame type
+         * 
+         * Sets wheter the frame is KEY_FRAME or REGULAR_FRAME
+         * 
+         */
+        void setFrameType(const FrameType _ftype)
+        {
+            frame_type_ = _ftype;
+        };
+
+        /** \brief Checks if it is a Key frame
+         *
+         * Returns true if this frame is KEY_FRAME
+         * 
+         */
+        bool isKey() const
+        {
+            if (frame_type_ == KEY_FRAME) return true;
+            else return false;
+        };
+
+        /** \brief Returns frame identifier
+         * 
+         * Returns frame identifier
+         * 
+         */
+        unsigned int frameId() const
+        {
+            return frame_id_;
+        };
+
+        /** \brief Returns a reference to time stamp
+         * 
+         * Returns a reference to time stamp
+         * 
+         */
+        TimeStamp & timeStamp()
+        {
+            return time_stamp_;
+        }
+
+        /** \brief Prints node label
+         *
+         * Prints node label
+         *
+         **/
+        virtual void printLabel(ostream & _ost = cout) const
+        {
+            _ost <<"FRAME";
+        }
+
+};
+#endif /* FRAME_H_ */

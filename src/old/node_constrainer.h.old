@@ -1,0 +1,273 @@
+/*
+ *
+ *  Created on: 08/07/2014
+ *      Author: acorominas
+ */
+
+#ifndef NODE_CONSTRAINER_H_
+#define NODE_CONSTRAINER_H_
+
+//wolf
+#include "wolf.h"
+#include "node_linked.h"
+
+//namespaces
+using namespace std;
+using namespace Eigen;
+
+/** \brief Node Constrainer of the Wolf Tree
+ *
+ * Node Constrainer of the Wolf Tree.
+ * \param StateT is a template parameter which indicates the state space considered for the problem
+ * 
+ * The vector expectation_ is the expected measurement, which in a general case can have different dimensionality than the error_
+ * The vector error_ is the target vector to minimize by an optimizer. It is stored remotely though an Eigen::Map
+ * 
+ * 
+ */
+class NodeConstrainer : public NodeLinked
+{
+    protected: 
+        unsigned int dim_error_; ///< dimensionality of the error         
+        Map<VectorXs> error_; ///< error vector (remote storage)
+        
+    public:
+        /** \brief Constructor with unknown dimensions
+         * 
+         * Constructor with unknown dimensions
+         * \param _loc Placement within Wolf tree. NodeLocation type declared at file wolf.h
+         * 
+         **/
+        NodeConstrainer(const NodeLocation _loc) :
+            NodeLinked(_loc),
+            dim_error_(0),
+            error_(NULL, 0)
+        {
+            //
+        }
+
+        /** \brief Constructor with known dimensions
+         *
+         * Constructor with unknown dimensions
+         * \param _loc Placement within Wolf tree. NodeLocation type declared at file wolf.h
+         * \param _dim_err Dimension of the error, if known.
+         *
+         **/
+        NodeConstrainer(const NodeLocation _loc, unsigned int _dim_err) :
+            NodeLinked(_loc),
+            dim_error_(_dim_err),
+            error_(NULL, 0)
+        {
+            //
+        };        
+        
+        /** \brief Constructor with pointer to up node
+         *
+         * Constructor with unknown dimensions
+         * \param _loc Placement within Wolf tree. NodeLocation type declared at file wolf.h
+         * \param _dim_err Dimension of the error, if known.
+         *
+         **/
+        NodeConstrainer(const NodeLocation _loc, const NodeShrPtr & _un_ptr) :
+            NodeLinked(_loc, _un_ptr),
+            dim_error_(0),
+            error_(NULL, 0)
+        {
+            //
+        };
+
+        /** \brief Constructor with known dimensions and pointer to up node
+         *
+         * Constructor with unknown dimensions
+         * \param _loc Placement within Wolf tree. NodeLocation type declared at file wolf.h
+         * \param _dim_err Dimension of the error, if known.
+         *
+         **/
+        NodeConstrainer(const NodeLocation _loc, const NodeShrPtr & _un_ptr, unsigned int _dim_err) :
+            NodeLinked(_loc, _un_ptr),
+            dim_error_(_dim_err),
+            error_(NULL, 0)
+        {
+            //
+        };
+
+        
+        /** \brief Destructor
+         * 
+         * Destructor
+         * 
+         **/
+        ~NodeConstrainer()
+        {
+            //
+        };
+        
+        /**
+         * \brief Compute dim_error_ from scratch
+         *
+         * Recursively traverses all the tree below the current node to compute the total error dim of the node.
+         */
+        void computeDimError()
+        {
+            if (!isBottom()){
+                dim_error_ = 0;
+                shared_ptr<NodeConstrainer> nc_ptr; //TODO make this pointer a member and set at construction time.
+
+                for (auto iter = this->down_node_list_.begin(); iter != this->down_node_list_.end(); ++iter)
+                {
+                    nc_ptr = static_pointer_cast<NodeConstrainer>(*iter); // TODO  completely remove cast.
+                    nc_ptr->computeDimError();
+                    dim_error_ += nc_ptr->getDimError();
+                }
+            }
+            // else: do nothing, dim_error_ is already set for classes BOTTOM.
+        }
+
+        /** \brief Returns dim_error_
+         * 
+         * Returns dim_error_
+         * 
+         **/
+        unsigned int getDimError()
+        {
+            return dim_error_;
+        }
+        
+        /** \brief Remaps error_ vector recursively. 
+         * 
+         * Remaps error_ vector recursively. It will be called when a new node is added to down_node_list_ or recursively by a down node 
+         * \param _storage actual vector where data is stored
+         * \param _idx index from which map starts
+         * \return the new index
+         *
+         **/
+        unsigned int remap(VectorXs & _storage, const unsigned int & _idx)
+        {
+            unsigned int idx = _idx; //idx will be modified by recursive calls
+            shared_ptr<NodeConstrainer> nc_ptr;
+            
+            if ( !isBottom() )
+            {
+                for (auto iter = this->down_node_list_.begin(); iter != this->down_node_list_.end(); ++iter)
+                {
+                    nc_ptr = static_pointer_cast<NodeConstrainer>(*iter); // TODO  completely remove cast.
+                    idx = nc_ptr->remap(_storage, idx); //forwards remap() to down nodes
+                }
+                dim_error_ = idx - _idx;
+            }
+            
+            //do remap 
+            new (&error_) Map<VectorXs>(&_storage(_idx), dim_error_);
+            idx = _idx + dim_error_;
+            return idx;
+        }
+        
+        /** \brief Calls error recursively to down nodes
+         * 
+         * Calls error recursively to down nodes, up to arrive to \a BOTTOM nodes, where computeError() is called
+         * For nodes \a TOP and \a MID, this method recursively calls error() of down nodes.
+         * For nodes placed at the \a BOTTOM of the tree, it calls computeError().
+         * The result of this call is placed at the vector by %error_.
+         * 
+         **/
+        virtual void error()
+        {
+            shared_ptr<NodeConstrainer> nc_ptr;
+            
+            if ( isBottom() ) //compute the error
+            {
+                this->computeError();
+            }
+            else //forward the work
+            {
+                for (auto iter = this->down_node_list_.begin(); iter != this->down_node_list_.end(); ++iter)
+                {
+                    nc_ptr = static_pointer_cast<NodeConstrainer>(*iter); // TODO  completely remove cast.
+                    //TODO: Completely remove these kind of {static,dynamic}_pointer_cast (read below: )
+                    // The static_pointer_cast above is doing:
+                    // 1. Get the object pointed by iter, with *iter
+                    // 2. Build a shared_ptr of the casted type
+                    // (The dynamic_pointer_cast adds:  3. run-time checks for the correct types).
+                    // This is much more of a cast, because we are not directly casting an existing thing but something that has to be dereferenced.
+                    // Therefore I think we should remove even the static_pointer_cast!!
+                    nc_ptr->error(); //forwards error() to down nodes
+                }
+            }
+        };
+        
+        VectorXs getError()
+        {
+            return error_;
+        }
+
+    protected:        
+//        /* \brief Actually computes expectation
+//         */
+//        virtual void computeExpectation()
+//        {
+//            //
+//        };
+
+        /** \brief Actually computes error
+         * 
+         * Actually computes error and places the result to mapped vector error_.
+         *
+         * This method has to be implemented for \a BOTTOM nodes, that are required to actually compute an error.
+         * Non-\a BOTTOM nodes do not require to reimplement this method.
+         * 
+         * EXAMPLE OF USE.
+         *
+         * Typically, the error is computed in classes deriving from CorrespondenceBase,
+         * which are always \a BOTTOM and has this method defined as pure virtual.
+         * All other upper nodes delegate this computation down the tree.
+         *
+         * In CorrespondenceBase, the error \a r is a function of one of the types:
+         *   - 1) absolute link: \a r = g(x_own, sensor_own, measurement_own, global_reference)
+         *   - 2) relative link: \a r = g(x_own, x_other, sensor_own, sensor_other, measurement_own, measurement_other)
+         * where
+         *      - "other" refers to the corresponded object (Measurement or Feature), and
+         *      - global_reference is TBD according to each case.
+         *
+         * Typically, this function starts by calling computeExpectation() and storing the outcome \a e in CorrespondenceBase::expectation_.
+         * Then, it computes the error \a r between the measurement \a y and the expectation \a e, and stores its value in NodeConstrainer::error_.
+         * Generally, this is just
+         *      - \a r = \a g(...) = \a y - \a h(...) = \a y - \a e,
+         * where
+         *      - \a g() is the error function (see CorrespondenceBase::computeError())
+         *      - \a h() is the expectation function (see CorrespondenceBase::computeExpectation())
+         *      - \a r is the error,
+         *      - \a y is the own measurement, and
+         *      - \a e is the expectation,
+         * but sometimes a nonlinear function \a g() != \a y - \a e is needed (e.g. the epipolar constraint).
+         *
+         * The Correspondence, hence, needs to build fully derived pointers (better at construction time) to part or all of this info:
+         *   - 1) these are always required
+         *     -  weak_ptr<StateDerived>        state_own_ptr;          // Located in own Frame class
+         *     -  weak_ptr<StateDerived>        sensor_pose_own_ptr;    // Pointed from own Measurement class
+         *     -  weak_ptr<VectorXs>            sensor_par_own_ptr;     // Pointed from own Measurement class
+         *     -  weak_ptr<VectorXs>            measurement_own_ptr;    // Located in own Measurement or Feature class (one level up in the tree).
+         *   - 2) these only if relative link
+         *     -  weak_ptr<StateDerived>        state_other_ptr;        // Located in other Frame class
+         *     -  weak_ptr<StateDerived>        sensor_pose_other_ptr;  // Pointed from other Measurement class
+         *     -  weak_ptr<VectorXs>            sensor_par_other_ptr;   // Pointed from other Measurement class
+         *     -  weak_ptr<VectorXs>            measurement_other_ptr;  // Located in other Measurement or Feature class
+         *
+         **/
+        virtual void computeError()
+        {
+            //
+        }
+
+        /** \brief Prints node label
+         *
+         * Prints node label
+         *
+         **/
+        virtual void printLabel(ostream & _ost = cout) const
+        {
+            _ost <<"NODE-C";
+        }
+
+                
+};
+#endif

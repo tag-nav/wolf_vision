@@ -1,0 +1,188 @@
+/*
+ * \file test_node.cpp
+ *
+ *  Created on: 25/07/2014
+ *      Author: acorominas
+ */
+
+//wolf
+#include "node_constrainer.h"
+#include "state_pvq.h"
+
+//namespaces
+using namespace std;
+using namespace Eigen;
+
+//id count init
+unsigned int NodeBase::node_id_count_ = 0; 
+
+//class FrameN
+template<class StateT>
+class FrameN : public NodeConstrainer
+{
+    protected:
+        double time_stamp_; //just something to play
+        StateT state_;
+        
+    public:
+        FrameN(const double _ts, VectorXs & _state_storage, unsigned int _state_idx) :
+            NodeConstrainer(TOP),
+            time_stamp_(_ts), 
+            state_(_state_storage, _state_idx)
+        {
+            //
+        };
+        
+        ~FrameN()
+        {
+            
+        };
+ 
+        virtual void printLabel(ostream & _ost = cout) const
+        {
+            _ost <<"FRAME";
+        }
+
+};
+
+//class MeasurementN
+//template<class StateT>
+class MeasurementN : public NodeConstrainer
+{
+    protected:
+        unsigned int sensor_id_; //just something to play
+        
+    public:
+        MeasurementN(const unsigned int _sensor_id) :
+            NodeConstrainer(MID),
+            sensor_id_(_sensor_id)
+        {
+            //
+        };
+        
+        ~MeasurementN()
+        {
+            
+        };
+        
+        virtual void printLabel(ostream & _ost = cout) const
+        {
+            _ost <<"MEASUREMENT-sensor:" << sensor_id_;
+        };     
+};
+
+
+//class FeatureN
+class FeatureN : public NodeConstrainer
+{
+    protected:
+        Vector3s data_; //just something to play. 
+        
+    public:
+        FeatureN( unsigned int _dim_expectation, const unsigned int _dim_error, VectorXs & _storage, Vector3s & _data ) :
+            NodeConstrainer(BOTTOM, _dim_expectation, _dim_error, _storage, 0),
+            data_(_data)
+        {
+            //
+        };
+        
+        ~FeatureN()
+        {
+            
+        };
+
+    protected:
+        virtual void computeExpectation()
+        {
+            //this->expectation_ = _state.p();
+        };
+        
+        virtual void computeError()
+        {
+            //shared_ptr<NodeLinked> nl_sh_ptr = up_node_wptr_.lock();
+            
+            //computeExpectation(_state);//first calls to computeExpectation
+            //this->error_ = data_ - this->expectation_; //then computes the error. In this case it is just the difference vector
+            for ( unsigned int ii=0; ii<dim_error_; ii++ )
+            {
+                error_(ii) = node_id_ + (ii+1)/10.; //cout << error_(ii) << " ";
+            }
+            //cout << endl;
+        };
+        
+        virtual void printLabel(ostream & _ost = cout) const
+        {
+            _ost <<"FEATURE";
+        };
+};
+
+
+int main()
+{
+    VectorXs state;//state storage
+    VectorXs error;//error storage
+    vector<shared_ptr<FrameN<StatePVQ> > > trajectory;
+    shared_ptr<FrameN<StatePVQ> > frame_current;
+    shared_ptr<MeasurementN> measurement_current;
+    shared_ptr<FeatureN> feature_current;
+    Vector3s feature_data, aux;
+    StatePVQ state_point;
+    
+    cout << endl << "NodeConstrainer class test" << endl;
+    cout << "========================================================" << endl;
+
+    cout << endl << "TEST 1. Constructors" << endl;
+    state.resize(10);
+    state << 1,2,3,4,5,6,7,8,9,10;
+    
+    frame_current = shared_ptr<FrameN<StatePVQ> >(new FrameN<StatePVQ>(1.011, state, 0) );
+    trajectory.push_back( frame_current );
+    
+    measurement_current = shared_ptr<MeasurementN>(new MeasurementN(1));
+    trajectory.at(0)->addDownNode(measurement_current);
+    
+        feature_data << 10,11,12; //feature extraction result
+        feature_current = shared_ptr<FeatureN>(new FeatureN(3, 3, error, feature_data ));
+        measurement_current->addDownNode(feature_current);
+    
+        feature_data << 21,22,23; //feature extraction result
+        feature_current = shared_ptr<FeatureN>(new FeatureN(3, 3, error, feature_data ));
+        measurement_current->addDownNode(feature_current);
+    
+    measurement_current = shared_ptr<MeasurementN>(new MeasurementN(2));
+    trajectory.at(0)->addDownNode(measurement_current);
+    
+        feature_data << 31,32,33; //feature extraction result
+        feature_current = shared_ptr<FeatureN>(new FeatureN(3, 3, error, feature_data ));
+        measurement_current->addDownNode(feature_current);
+    
+        feature_data << 41,42,43; //feature extraction result
+        feature_current = shared_ptr<FeatureN>(new FeatureN(3, 3, error, feature_data ));
+        measurement_current->addDownNode(feature_current);
+        
+    for (unsigned int ii=0; ii<trajectory.size(); ii++) trajectory.at(ii)->print();
+    cout << "========================================================" << endl;    
+    
+    cout << endl << "TEST 2. Remap Error" << endl;
+    
+    //resize erroro storage
+    error.resize(12);
+    
+    //allocates index
+    unsigned int idx = 0; 
+    
+    //calls remap of the whole Wolf Tree
+    for (unsigned int ii=0; ii<trajectory.size(); ii++) trajectory.at(ii)->remap(error, idx); 
+    cout << "idx after remap()'s: " << idx << endl;
+    
+    //calls error recursively over all frames in trajectory
+    for (unsigned int ii=0; ii<trajectory.size(); ii++) trajectory.at(ii)->error(); 
+    
+    //prints error
+    cout << "error: " << error.transpose() << endl;
+
+    cout << "========================================================" << endl;    
+    cout << endl << "End NodeConstrainer class test" << endl;
+    return 0;
+}
+

@@ -1,0 +1,50 @@
+/*
+ * feature_base.h
+ *
+ *  Created on: Jun 10, 2014
+ *      Author: jsola
+ */
+
+#ifndef FEATURE_BASE_H_
+#define FEATURE_BASE_H_
+
+//wolf
+#include "wolf.h"
+#include "sensor_data_base.h"
+
+//namespaces
+using namespace std;
+using namespace Eigen;
+
+
+// forward declaration for tree nodes
+class SensorDataBase<RawType>;
+
+/** \brief Base class for features
+ *
+ * A feature is a particular element of information extracted from the sensor data. Usually, it
+ * contains:
+ * - some geometric content called the measurement (the position of a pixel, or the description of a line),
+ * - some sort of descriptor to ease data association,
+ * - a list of Correspondences to features, from older captures, or from current captures of other sensors.
+ *
+ * WARNING: this class is not completed. Just coded for completion of the tree
+ */
+template<class RawType>
+class FeatureBase : public NodeConstrainer<SensorDataBase, int, NodeTerminus>
+{
+    protected:
+
+    public:
+        FeatureBase(unsigned int _size) :
+            NodeConstrainer<SensorDataBase<RawType>, int, NodeTerminus>(BOTTOM, _size)
+        {
+            
+        };
+        
+        virtual ~FeatureBase()
+        {
+            //
+        };
+};
+#endif /* FEATURE_BASE_H_ */

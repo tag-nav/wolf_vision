@@ -1,0 +1,81 @@
+/*
+ * \file node_base.h
+ *
+ *  Created on: 01/07/2014
+ *      Author: acorominas
+ */
+
+#ifndef NODE_BASE_H
+#define NODE_BASE_H
+
+//std
+#include <iostream>
+
+using namespace std;
+
+/** \brief Base class for Nodes
+ * 
+ * Base class for all Nodes in the Wolf tree. 
+ * It implements the ID factory.
+ * 
+ **/
+class NodeBase
+{
+    protected : 
+        static unsigned int node_id_count_; ///< object counter acts as simple ID factory
+        unsigned int node_id_; ///< node id. It is unique over the whole Wolf Tree
+    
+    public : 
+        /** \brief Constructor 
+         * 
+         * Constructor
+         * 
+         **/
+        NodeBase() :
+            node_id_(++node_id_count_)
+        {
+//            cout << "NodeBase::constructor. Id: " << node_id_ << endl;
+        };
+
+        /** \brief Destructor 
+         * 
+         * Destructor
+         * 
+         **/        
+        virtual ~NodeBase()
+        {
+//            cout << "NodeBase::destructor. Id: " << node_id_ << endl;
+        };
+        
+        /** \brief Returns the node Id
+         * 
+         * Returns the node Id
+         * 
+         **/        
+        unsigned int getId() const
+        {
+            return node_id_;
+        };
+        
+        /** \brief Prints node info
+         * 
+         * Prints node info
+         * 
+         **/                
+        virtual void print(unsigned int _ntabs = 0, ostream & _ost = cout) const
+        {
+            printLabel(_ost);
+            _ost << " " << node_id_ << endl;
+        };
+
+        /** \brief Prints node label
+         * 
+         * Prints node label
+         * 
+         **/                        
+        virtual void printLabel(ostream & _ost = cout) const
+        {
+            _ost <<"NODE-B";
+        }
+};
+#endif

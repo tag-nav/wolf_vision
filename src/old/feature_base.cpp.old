@@ -1,0 +1,19 @@
+// /*
+//  * feature_base.cpp
+//  *
+//  *  Created on: Jun 10, 2014
+//  *      Author: jsola
+//  */
+// 
+// #include "feature_base.h"
+// 
+// FeatureBase::FeatureBase(unsigned int _size)
+// {
+//     //
+// }
+// 
+// FeatureBase::~FeatureBase()
+// {
+//     // TODO Auto-generated destructor stub
+// }
+// 

@@ -1,0 +1,481 @@
+/*
+ * correspondence_base.h
+ *
+ *  Created on: Jun 10, 2014
+ *      Author: jsola
+ */
+
+#ifndef CORRESPONDENCE_BASE_H_
+#define CORRESPONDENCE_BASE_H_
+
+#include <memory>
+
+#include "wolf.h"
+#include "node_constrainer.h"
+#include "feature_base.h"
+#include "sensor_capture_base.h"
+#include "frame.h"
+
+/**
+ * \brief Class for feature correspondences
+ *
+ * A Correspondence describes the link between a feature at a given frame and another feature at a previous frame.
+ * It is the result of data association. As such, it contains:
+ * - a link, an index, or a pointer, pointing to the corresponded feature,
+ * - the expected location of the corresponded feature in the current frame,
+ * - the innovation and cost derived from the error between the current feature and the expectation.
+ *
+ */
+class CorrespondenceBase : public NodeConstrainer
+{
+    public:
+        typedef shared_ptr<CorrespondenceBase> CorrespondencePtr;
+        typedef shared_ptr<FeatureBase> FeaturePtr;
+        typedef shared_ptr<SensorCaptureBase> SensorCapturePtr;
+        typedef shared_ptr<Frame> FramePtr;
+
+    protected:
+        weak_ptr<CorrespondenceBase> correspondent_wptr_;
+
+        weak_ptr<FeatureBase> feature_wptr_;
+        weak_ptr<SensorCaptureBase> sensor_capture_wptr_;
+        weak_ptr<Frame> frame_wptr_;
+
+    public:
+        VectorXs expectation_;          ///< Expected measurement according to the current state estimate
+
+        /**
+         * Constructor from dims
+         * @param _dim_exp the dimension of the expectation
+         * \param _dim_err the dimension of the error
+         *
+         * Note: Correspondence is always a BOTTOM node in the Wolf tree.
+         */
+        CorrespondenceBase(unsigned int _dim_exp, unsigned int _dim_err) :
+                NodeConstrainer(BOTTOM, _dim_err), expectation_(_dim_exp)
+        {
+        }
+
+        /**
+         * Constructor and linker from dims and up node pointer
+         * \param _un_ptr a NodeLinked pointer to the upper node
+         * @param _dim_exp the dimension of the expectation
+         * \param _dim_err the dimension of the error
+         *
+         * This constructor automatically creates pointers to base classes
+         * of Frame, SensorCaptureBase and FeatureBase, all ancestors in the wolf tree.
+         * These pointers allow accessing crucial information for the computation of the error:
+         *   - the state, via frame().state()
+         *   - the raw data, via sensorCapture().rawData()
+         *   - the sensor, via sensorCapture().sensor()
+         *   - the sensor parameters (intrinsic and extrinsic),
+         *      - intrinsic, via sensorCapture().sensor().intrinsic()
+         *      - extrinsic or pose, via sensorCapture().sensor().pose()
+         *   - and the feature measurement, via feature().measurement().
+         *
+         * In derived correspondences, you might need to access data or functionality that is only
+         * available in fully derived classes (not base classes). You can
+         * use the pointer accesses
+         *   - framePtr()
+         *   - sensorCapturePtr()
+         *   - featurePtr()
+         *
+         * and static_pointer_cast() them to the desired class. This is best done it at
+         * construction time of the derived correspondence.
+         *
+         * The equivalent information for the corresponded object may be accessed by following the
+         *   - correspondent(), or
+         *   - correspondentPtr()
+         *
+         * links, and accessing from there.
+         *
+         * Accessor helpers to the correspondent's info are also available:
+         *   - frameCorrespondent()
+         *   - sensorCaptureCorrespondent()
+         *   - featureCorrespondent()
+         *
+         * Note: Correspondence is always a BOTTOM node in the Wolf tree.
+         */
+        CorrespondenceBase(const NodeShrPtr & _un_ptr, unsigned int _dim_exp, unsigned int _dim_err) :
+                NodeConstrainer(BOTTOM, _un_ptr, _dim_err), expectation_(_dim_exp)
+        {
+            feature_wptr_ = static_pointer_cast<FeatureBase>(upNodePtr());
+            sensor_capture_wptr_ = static_pointer_cast<SensorCaptureBase>(feature_wptr_.lock()->upNodePtr());
+            frame_wptr_ = static_pointer_cast<Frame>(sensor_capture_wptr_.lock()->upNodePtr());
+        }
+
+        virtual ~CorrespondenceBase()
+        {
+            //
+        }
+
+        /**
+         * \brief Compute expectation.
+         */
+        virtual void computeExpectation(){}; // Optional
+        virtual void computeError()=0; // Mandatory
+
+        /** \brief Prints node label
+         *
+         * Prints node label
+         *
+         **/
+        virtual void printLabel(ostream & _ost = cout) const
+        {
+            _ost <<"CORRESPONDENCE";
+        }
+
+        /** \brief Access the shared pointer to feature.
+         *
+         * Access the shared pointer to feature.
+         * Throw if feature has been destroyed.
+         */
+        CorrespondencePtr correspondentPtr()
+        {
+            CorrespondencePtr cptr = correspondent_wptr_.lock();
+            if (!cptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::correspondentPtr threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return cptr;
+        }
+
+        /** \brief Access the shared pointer to correspondent.
+         *
+         * Access the shared pointer to correspondent.
+         * Throw if correspondent has been destroyed.
+         */
+        const CorrespondencePtr correspondentPtr() const
+        {
+            CorrespondencePtr cptr = correspondent_wptr_.lock();
+            if (!cptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::correspondentPtr threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return cptr;
+        }
+
+        /** \brief Access a pointer to correspondent.
+         *
+         * Access a pointer to correspondent.
+         * Throw if correspondent has been destroyed.
+         */
+        CorrespondenceBase & correspondent()
+        {
+            CorrespondencePtr cptr = correspondent_wptr_.lock();
+            if (!cptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::correspondentPtr threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return *cptr;
+        }
+
+        /** \brief Access a pointer to correspondent.
+         *
+         * Access a pointer to correspondent.
+         * Throw if correspondent has been destroyed.
+         */
+        const CorrespondenceBase & correspondent() const
+        {
+            CorrespondencePtr cptr = correspondent_wptr_.lock();
+            if (!cptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::correspondentPtr threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return *cptr;
+        }
+
+        /** \brief Access the shared pointer to feature.
+         *
+         * Access the shared pointer to feature.
+         * Throw if feature has been destroyed.
+         */
+        FeaturePtr featurePtr()
+        {
+            FeaturePtr fptr = feature_wptr_.lock();
+            if (!fptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::featurePtr threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return fptr;
+        }
+
+        /** \brief Access the shared pointer to feature.
+         *
+         * Access the shared pointer to feature.
+         * Throw if feature has been destroyed.
+         */
+        const FeaturePtr featurePtr() const
+        {
+            FeaturePtr fptr = feature_wptr_.lock();
+            if (!fptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::featurePtr threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return fptr;
+        }
+
+        /** \brief Access a reference to feature.
+         *
+         * Access a reference to feature.
+         * Throw if feature has been destroyed.
+         */
+        FeatureBase & feature()
+        {
+            FeaturePtr fptr = feature_wptr_.lock();
+            if (!fptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::featurePtr threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return *fptr;
+        }
+
+        /** \brief Access a reference to feature.
+         *
+         * Access a reference to feature.
+         * Throw if feature has been destroyed.
+         */
+        const FeatureBase & feature() const
+        {
+            FeaturePtr fptr = feature_wptr_.lock();
+            if (!fptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::featurePtr threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return *fptr;
+        }
+
+        /** \brief Access a pointer to sensor capture.
+         *
+         * Access a pointer to sensor capture.
+         * Throw if sensor capture has been destroyed.
+         */
+        SensorCapturePtr sensorCapturePtr()
+        {
+            SensorCapturePtr scptr = sensor_capture_wptr_.lock();
+            if (!scptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::sensorCapturePtr threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return scptr;
+        }
+
+        /** \brief Access a pointer to sensor capture.
+         *
+         * Access a pointer to sensor capture.
+         * Throw if sensor capture has been destroyed.
+         */
+        const SensorCapturePtr sensorCapturePtr() const
+        {
+            SensorCapturePtr scptr = sensor_capture_wptr_.lock();
+            if (!scptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::sensorCapturePtr threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return scptr;
+        }
+
+        /** \brief Access a reference to sensor capture.
+         *
+         * Access a reference to sensor capture.
+         * Throw if sensor capture has been destroyed.
+         */
+        SensorCaptureBase & sensorCapture()
+        {
+            SensorCapturePtr scptr = sensor_capture_wptr_.lock();
+            if (!scptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::sensorCapture threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return *scptr;
+        }
+
+        /** \brief Access a reference to sensor capture.
+         *
+         * Access a reference to sensor capture.
+         * Throw if sensor capture has been destroyed.
+         */
+        const SensorCaptureBase & sensorCapture() const
+        {
+            SensorCapturePtr scptr = sensor_capture_wptr_.lock();
+            if (!scptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::sensorCapture threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return *scptr;
+        }
+
+        /** \brief Access a pointer to frame.
+         *
+         * Access a pointer to frame.
+         * Throw if frame has been destroyed.
+         */
+        FramePtr framePtr()
+        {
+            FramePtr fptr = frame_wptr_.lock();
+            if (!fptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::frame threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return fptr;
+        }
+
+        /** \brief Access a pointer to frame.
+         *
+         * Access a pointer to frame.
+         * Throw if frame has been destroyed.
+         */
+        const FramePtr framePtr() const
+        {
+            FramePtr fptr = frame_wptr_.lock();
+            if (!fptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::frame threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return fptr;
+        }
+
+        /** \brief Access a reference to frame.
+         *
+         * Access a reference to frame.
+         * Throw if frame has been destroyed.
+         */
+        Frame & frame()
+        {
+            FramePtr fptr = frame_wptr_.lock();
+            if (!fptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::frame threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return *fptr;
+        }
+
+        /** \brief Access a reference to frame.
+         *
+         * Access a reference to frame.
+         * Throw if frame has been destroyed.
+         */
+        const Frame & frame() const
+        {
+            FramePtr fptr = frame_wptr_.lock();
+            if (!fptr)
+            {
+                std::cerr << __FILE__ << ":" << __LINE__ << " CorrespondenceBase::frame threw weak" << std::endl;
+                throw "WEAK";
+            }
+            return *fptr;
+        }
+
+        /** \brief Access a pointer to the correspondent's frame.
+         *
+         * Access a pointer to the correspondent's frame.
+         * Throw if either the correspondent or its frame have been destroyed.
+         */
+        FramePtr frameCorrespondentPtr()
+        {
+            return correspondentPtr()->framePtr();
+        }
+
+        /** \brief Access a pointer to the correspondent's frame.
+         *
+         * Access a pointer to the correspondent's frame.
+         * Throw if either the correspondent or its frame have been destroyed.
+         */
+        const FramePtr frameCorrespondentPtr() const
+        {
+            return correspondentPtr()->framePtr();
+        }
+
+        /** \brief Access a reference to the correspondent's frame.
+         *
+         * Access a reference to the correspondent's frame.
+         * Throw if either the correspondent or its frame have been destroyed.
+         */
+        Frame & frameCorrespondent()
+        {
+            return correspondent().frame();
+        }
+
+        /** \brief Access a reference to the correspondent's frame.
+         *
+         * Access a reference to the correspondent's frame.
+         * Throw if either the correspondent or its frame have been destroyed.
+         */
+        const Frame & frameCorrespondent() const
+        {
+            return correspondent().frame();
+        }
+
+        /** \brief Access a pointer to the correspondent's sensor capture.
+         *
+         * Access a pointer to the correspondent's sensorCapture.
+         * Throw if either the correspondent or its sensorCapture have been destroyed.
+         */
+        SensorCapturePtr sensorCaptureCorrespondentPtr()
+        {
+            return correspondentPtr()->sensorCapturePtr();
+        }
+
+        /** \brief Access a pointer to the correspondent's sensor capture.
+         *
+         * Access a pointer to the correspondent's sensorCapture.
+         * Throw if either the correspondent or its sensorCapture have been destroyed.
+         */
+        const SensorCapturePtr sensorCaptureCorrespondentPtr() const
+        {
+            return correspondentPtr()->sensorCapturePtr();
+        }
+
+        /** \brief Access a reference to the correspondent's sensor capture.
+         *
+         * Access a reference to the correspondent's sensorCapture.
+         * Throw if either the correspondent or its sensorCapture have been destroyed.
+         */
+        SensorCaptureBase & sensorCaptureCorrespondent()
+        {
+            return correspondent().sensorCapture();
+        }
+
+        /** \brief Access a reference to the correspondent's sensor capture.
+         *
+         * Access a reference to the correspondent's sensorCapture.
+         * Throw if either the correspondent or its sensorCapture have been destroyed.
+         */
+        const SensorCaptureBase & sensorCaptureCorrespondent() const
+        {
+            return correspondent().sensorCapture();
+        }
+
+
+
+
+        ///// XXX: Here old stuff waiting to be included, revised, deleted, or what.
+
+        /**
+         * \brief Frame identifier.
+         *
+         * Use this ID to help delete correspondences to frames that were removed from the Trajectory.
+         */
+//        unsigned int corresponded_frame_id;
+
+        /*
+         * Pointers to needed data
+         */
+
+};
+#endif /* CORRESPONDENCE_BASE_H_ */

@@ -1,0 +1,44 @@
+/*
+ *
+ *  Created on: 01/07/2014
+ *      Author: acorominas
+ */
+
+#ifndef NODE_TERMINUS_H
+#define NODE_TERMINUS_H_
+
+//wolf
+#include "node_base.h"
+
+using namespace std;
+
+/** \brief Node Terminus of the Wolf Tree
+ *
+ * Node Terminus of the Wolf Tree
+ * 
+ */
+//
+class NodeTerminus : public NodeBase
+{
+    public:
+        NodeTerminus()
+        {
+            //
+        };
+        
+        ~NodeTerminus()
+        {
+            //
+        };
+        
+        void unlinkFromUpNode()
+        {
+            //
+        };
+        
+        void expectation()
+        {
+            //
+        };
+};
+#endif
