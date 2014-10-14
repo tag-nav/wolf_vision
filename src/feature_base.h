@@ -22,11 +22,12 @@ class FeatureBase : public NodeConstrainer<Capture, CorrespondenceBase>
 
     protected:
 
-        /**
-         * \brief Constructor
+        /** \brief Constructor
+         * 
          * \param _capt_ptr a shared pointer to the Capture up node
          * \param _dim_measurement the dimension of the measurement space
          * \param _loc the location in the Wolf tree (TOP, MID or BOTTOM, it defaults to MID)
+         * 
          */
         FeatureBase(const CaptureShPtr& _capt_ptr, unsigned int _dim_measurement, const NodeLocation _loc = MID);
 

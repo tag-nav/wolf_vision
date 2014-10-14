@@ -27,14 +27,12 @@ class CaptureLaser2D : public Capture
          **/        
         virtual ~CaptureLaser2D();
         
-        /** \brief Computes error
+        /** \brief Extract corners and push-back to Feature down list 
          * 
-         * Computes error
-         * TODO: Check if this is the appropiate interface. There ara 3 more interfaces at NodeConstrainer to be overloaded.
+         * Extract corners and push-back to Feature down list . 
          * 
          **/
-        virtual void computeError();
-        
+        virtual void extractCorners;
 };
 
 ////////////////////////////////
@@ -53,9 +51,14 @@ inline CaptureLaser2D::~CaptureLaser2D()
     //
 }
 
-inline virtual void computeError()
+inline virtual void CaptureLaser2D::extractCorners()
 {
-    //TODO
+    //TODO by Andreu: create class FeatureCorner2D + main to test this method.
+    //TODO by Juan AC
+    // Laser ranges are at data_
+    // Scan size is data_.size()
+    // Corners should be created as FeatureCorner2D. Corner 3 params to be stored at FeatureBase::measurement_ 
+    // After creation, they have to be pushed back to down_node_list_ by means of the method Capture::addFeature(const FeatureShPtr& _f_ptr)  
 }
 
 #endif /* CAPTURE_LASER_2D_H_ */

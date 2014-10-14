@@ -82,11 +82,32 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
         virtual ~Capture();
 
     public:
+        /** \brief Set link to Frame
+         * 
+         * Set link to Frame
+         *
+         **/        
         void linkToFrame(const FrameShPtr& _frm_ptr);
 
+        /** \brief Gets up_node_ptr_
+         * 
+         * Gets up_node_ptr_, which is a pointer to the Frame owning of this Capture
+         *
+         **/                
         const FramePtr framePtr() const;
+        
+        /** \brief Gets a reference of Frame
+         * 
+         * Gets a reference of the Frame owning of this Capture
+         *
+         **/                
         const Frame& frame() const;
 
+        /** \brief Adds a Feature to the down node list
+         * 
+         * Adds a Feature to the down node list
+         *
+         **/                        
         void addFeature(const FeatureShPtr& _f_ptr);
 
         const FeatureList& featureList() const;
@@ -123,8 +144,7 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
          *  @param  _capture_other_id  Key of element to be erased.
          *  @return  The number of elements erased.
          *
-         *  This function erases all the elements located by the given key from
-         *  a %map.
+         *  This function erases all the elements located by the given key from a %map.
          *  Note that this function only erases the element, and that if
          *  the element is itself a pointer, the pointed-to memory is not touched
          *  in any way.  Managing the pointer is the user's responsibility.
