@@ -8,6 +8,9 @@
 #ifndef RAW_BASE_H_
 #define RAW_BASE_H_
 
+//std
+#include <iostream>
+
 //wolf includes
 #include "wolf.h"
 #include "time_stamp.h"
@@ -71,7 +74,13 @@ class RawBase
          * 
          **/
         void setData(unsigned int _size, const WolfScalar *_data);
-        
+
+        /** \brief Prints time stamp + data
+         * 
+         * Prints time stamp and data in a single row.  By default at std::cout. 
+         * 
+         **/
+        void print(std::ostream & ost = std::cout) const;
 };
 
 ////////////////////////////////
@@ -111,6 +120,14 @@ inline void RawBase::setData(unsigned int _size, const WolfScalar *_data)
 {
     data_.resize(_size);
     for (unsigned int ii=0; ii<_size; ii++) data_(ii) = *(&_data[ii]);
+}
+
+inline void RawBase::print(std::ostream & ost) const
+{
+    time_stamp_.print();
+    ost << " ";
+    for (unsigned int ii = 0; ii<data_.size(); ii++) ost << data_(ii) << " ";
+    ost << std::endl;
 }
 
 #endif /* RAW_BASE_H_ */

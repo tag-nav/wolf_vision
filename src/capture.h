@@ -17,6 +17,7 @@
 // Forward declarations for node templates
 class Frame;
 class FeatureBase;
+
 // Forward declarations for member pointers
 class SensorBase;
 class RawBase;
@@ -54,7 +55,7 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
 {
 
     protected:
-        RawShPtr raw_sh_ptr_; ///< Pointer to raw data
+        RawShPtr raw_sh_ptr_; ///< Pointer to raw data. This Capture is owner of raw data. 
         SensorPtr sensor_ptr_; ///< Pointer to sensor
         StatePose global_pose_; ///< Global sensor pose, the composition of the frame pose and the sensor pose
         StatePose inverse_global_pose_; ///< inverse global sensor pose
@@ -64,14 +65,20 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
 
     protected:
 
-        /**
-         * \brief Constructor
+        /** \brief Constructor
+         * 
          * \param _frm_ptr a shared pointer to the Frame up node
          * \param _sen_ptr a shared pointer to the sensor that captured the data
          * \param _loc the location in the Wolf tree (TOP, MID or BOTTOM, it defaults to MID)
+         * 
          */
         Capture(const FrameShPtr& _frm_ptr, const SensorShPtr& _sen_ptr, const NodeLocation _loc = MID);
 
+        /** \brief Destructor
+         * 
+         * Destructor
+         *
+         **/        
         virtual ~Capture();
 
     public:
@@ -102,8 +109,8 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
         bool existsTransSensor(unsigned int _capture_other_id) const;
         std::pair<TransSensorIter,bool> addTransSensor(unsigned int _capture_other_id, const TransSensorShPtr& _trans_senspr_sh_ptr);
 
-        /**
-         * \brief Get the TransSensor pointer corresponding to an ID key.
+        /** \brief Get the TransSensor pointer corresponding to an ID key.
+         * 
          * @param _capture_other_id the TransSensor identifier
          * @return the TransSensor pointer. Return NULL if TransSensor ID is not found.
          *
@@ -111,8 +118,8 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
          */
         const TransSensorPtr transSensorPtr(unsigned int _capture_other_id) const;
 
-        /**
-         *  @brief Erases elements according to the provided key.
+        /** @brief Erases elements according to the provided key.
+         *  
          *  @param  _capture_other_id  Key of element to be erased.
          *  @return  The number of elements erased.
          *

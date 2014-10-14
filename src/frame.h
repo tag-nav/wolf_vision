@@ -26,7 +26,6 @@ class Frame : public NodeConstrainer<VehicleBase, Capture>
         StateShPtr state_ptr_; ///< Pointer to state. //TODO see if we can put the object and template the class as initially.
 
     public:
-
         /** \brief Constructor
          * 
          * \param _vehicle_ptr a shared pointer to the Vehicle up node

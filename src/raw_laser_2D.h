@@ -19,7 +19,6 @@ class RawLaser2D : public RawBase
          * 
          * Constructor with arguments
          * 
-         * 
          **/
         RawLaser2D(const WolfScalar _ts);
         
