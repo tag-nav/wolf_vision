@@ -8,11 +8,17 @@
 #ifndef FEATURE_BASE_H_
 #define FEATURE_BASE_H_
 
-#include "node_constrainer.h"
-
 // Forward declarations for node templates
-class Capture;
+class CaptureBase;
 class CorrespondenceBase;
+
+// Forward declarations for member pointers
+// class SensorBase;
+// class RawBase;
+// class TransSensor;
+
+//wolf includes
+#include "node_constrainer.h"
 
 class FeatureBase : public NodeConstrainer<Capture, CorrespondenceBase>
 {
@@ -45,6 +51,14 @@ class FeatureBase : public NodeConstrainer<Capture, CorrespondenceBase>
         const CorrespondenceList& correspondenceList() const;
 
         const Eigen::VectorXs& measurement() const;
+        
+        /** \brief Generic interface to find correspondences
+         * 
+         * TBD
+         * Generic interface to check correspondence between this feature and a map model (static/slam) or a previous feature
+         *
+         **/
+        void checkCorrespondence();
 
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
@@ -93,6 +107,11 @@ inline const CorrespondenceList& FeatureBase::correspondenceList() const
 inline const Eigen::VectorXs& FeatureBase::measurement() const
 {
     return measurement_;
+}
+
+inline void FeatureBase::checkCorrespondence()
+{
+    //nothing to do in base class. Overload it to do things.
 }
 
 void FeatureBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const

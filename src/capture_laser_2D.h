@@ -8,7 +8,11 @@
 #ifndef CAPTURE_LASER_2D_H_
 #define CAPTURE_LASER_2D_H_
 
+//wolf includes
 #include "capture.h"
+
+//wolf forward declarations
+//#include "feature_corner_2D.h"
 
 class CaptureLaser2D : public Capture
 {
@@ -27,12 +31,19 @@ class CaptureLaser2D : public Capture
          **/        
         virtual ~CaptureLaser2D();
         
+        /** \brief Calls the necessary pipeline from raw scan to features.
+         * 
+         * Calls the necessary pipeline from raw scan to features.
+         * 
+         **/
+        virtual void processCapture();
+
         /** \brief Extract corners and push-back to Feature down list 
          * 
          * Extract corners and push-back to Feature down list . 
          * 
          **/
-        virtual void extractCorners;
+        virtual void extractCorners();
 };
 
 ////////////////////////////////
@@ -51,7 +62,12 @@ inline CaptureLaser2D::~CaptureLaser2D()
     //
 }
 
-inline virtual void CaptureLaser2D::extractCorners()
+inline void CaptureLaser2D::processCapture()
+{
+    extractCorners();
+}
+
+inline void CaptureLaser2D::extractCorners()
 {
     //TODO by Andreu: create class FeatureCorner2D + main to test this method.
     //TODO by Juan AC

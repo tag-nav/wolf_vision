@@ -12,11 +12,13 @@
 #ifndef SENSOR_BASE_H_
 #define SENSOR_BASE_H_
 
-#include "state_pose.h"
-#include "node_linked.h"
-// fwd declarations
+// forward declarations
 class NodeTerminus;
 class VehicleBase;
+
+//wolf includes
+#include "state_pose.h"
+#include "node_linked.h"
 
 /** \brief Base class for all kind of sensors.
  * 

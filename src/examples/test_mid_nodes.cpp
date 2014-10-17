@@ -23,8 +23,6 @@
 using namespace std;
 using namespace Eigen;
 
-unsigned int Node::node_id_count_ = 0;
-
 int main(int argc, char *argv[])
 {
 

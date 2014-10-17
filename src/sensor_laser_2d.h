@@ -8,6 +8,7 @@
 #ifndef SENSOR_LASER_2D_H_
 #define SENSOR_LASER_2D_H_
 
+//wolf includes
 #include "sensor_base.h"
 
 class SensorLaser2D : public SensorBase

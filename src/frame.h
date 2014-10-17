@@ -12,8 +12,8 @@
 #include "time_stamp.h"
 
 // Forward declarations for node templates
-class VehicleBase;
-class Capture;
+//class VehicleBase;
+//class Capture;
 // Forward declarations for member pointers
 class StatePose;
 

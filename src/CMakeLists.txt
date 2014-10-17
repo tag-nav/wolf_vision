@@ -69,6 +69,7 @@ SET(SRCS
     state_pq.cpp
     state_pqv.cpp
     state_root_base.cpp
+    node.cpp
     time_stamp.cpp)
 
 #optional HDRS and SRCS

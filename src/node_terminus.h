@@ -8,6 +8,7 @@
 #ifndef NODE_TERMINUS_H_
 #define NODE_TERMINUS_H_
 
+//wolf includes
 #include "node_constrainer.h"
 
 /**

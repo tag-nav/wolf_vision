@@ -67,6 +67,10 @@ TARGET_LINK_LIBRARIES(test_mid_nodes ${PROJECT_NAME})
 ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
 TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
 
+# test_virtual_hierarchy
+ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D)
+TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
+
 # test_eigen_jet
 #ADD_EXECUTABLE(test_eigen_jet test_eigen_jet.cpp)
 #TARGET_LINK_LIBRARIES(test_eigen_jet ${PROJECT_NAME})

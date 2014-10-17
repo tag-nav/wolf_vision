@@ -17,11 +17,13 @@
 #ifndef NODE_LINKED_H_
 #define NODE_LINKED_H_
 
+//wof includes
 #include "node.h"
 #include "wolf.h"
 
-#include <list>
-#include <memory>
+//std includes
+// #include <list>
+// #include <memory>
 
 /** \brief Linked node element in the Wolf Tree
  * 

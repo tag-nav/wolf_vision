@@ -8,14 +8,22 @@
 #ifndef CORRESPONDENCE_BASE_H_
 #define CORRESPONDENCE_BASE_H_
 
-#include "node_constrainer.h"
+// Forward declarations for node templates
+class FeatureBase;
+class NodeTerminus;
 
 // Forward declarations for node templates
 class FeatureBase;
 class NodeTerminus;
 
-// fwd dec for member pointers
-class SensorBase;
+// Forward declarations for member pointers
+// class SensorBase;
+// class RawBase;
+// class TransSensor;
+
+//wolf includes
+#include "node_constrainer.h"
+
 
 class CorrespondenceBase : public NodeConstrainer<FeatureBase, NodeTerminus>
 {
@@ -135,10 +143,9 @@ class CorrespondenceBase : public NodeConstrainer<FeatureBase, NodeTerminus>
 #include "sensor_base.h"
 
 
-CorrespondenceBase::CorrespondenceBase(const FeatureShPtr& _ft_ptr, unsigned int _dim_error,
-                                              unsigned int _dim_expectation) :
-        NodeConstrainer(BOTTOM, "CORRESPONDENCE", _ft_ptr, _dim_error), //
-        expectation_(_dim_expectation) //
+CorrespondenceBase::CorrespondenceBase(const FeatureShPtr& _ft_ptr, unsigned int _dim_error, unsigned int _dim_expectation) :
+            NodeConstrainer(BOTTOM, "CORRESPONDENCE", _ft_ptr, _dim_error), //
+            expectation_(_dim_expectation) //
 {
     //
 }

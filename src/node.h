@@ -42,77 +42,51 @@ class Node
     public:
         /** \brief Gets node ID
          *
-         * Gets node ID
+         * Gets node ID. Inline function.
 		 * 
          */
-        unsigned int nodeId() const;
+        unsigned int nodeId() const
+        {
+            return node_id_;
+        };
 
         /** \brief Gets node label
          * 
-         * Gets node label
+         * Gets node label. Inline function.
 		 * 
          */
-        std::string nodeLabel() const;
+        std::string nodeLabel() const
+        {
+            return label_;  
+        };
 
         /** \brief Print node information
          * 
-		 * Prints node information.
+		 * Prints node information. Inine function.
          * \param _ntabs number of tabulations to print at the left of the printed information
          * \param _ost output stream
          *
          * Overload this function in derived classes to adapt the printed output to each object's relevant info.
 		 * 
          */
-        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const
+        {
+            _ost << label_ << " " << node_id_ << std::endl;
+        };
 
     protected:
 
         /** \brief prints a number of tabulations.
          *
-         * Prints a number of tabulations, i.e., "\t".
+         * Prints a number of tabulations, i.e., "\t". Inline function.
          * \param _ntabs number of tabulations to print
          * \param _ost output stream
 		 * 
          */
-        void printNTabs(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
-
+        void printNTabs(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const
+        {
+                for (unsigned int i = 0; i < _ntabs; i++) _ost << "\t";
+        }
 };
-
-//////////////////////////////////////////
-//          IMPLEMENTATION
-//////////////////////////////////////////
-
-Node::Node(std::string _label) :
-        label_(_label), //
-        node_id_(++node_id_count_)
-{
-    //    std::cout << "NodeID::constructor. Id: " << node_id_ << std::endl;
-}
-
-Node::~Node()
-{
-    //    std::cout << "NodeID::destructor. Id: " << node_id_ << std::endl;
-}
-
-inline unsigned int Node::nodeId() const
-{
-    return node_id_;
-}
-
-inline std::string Node::nodeLabel() const
-{
-    return label_;
-}
-
-void Node::print(unsigned int _ntabs, std::ostream& _ost) const
-{
-    _ost << label_ << " " << node_id_ << std::endl;
-}
-
-inline void Node::printNTabs(unsigned int _ntabs, std::ostream& _ost) const
-{
-    for (unsigned int i = 0; i < _ntabs; i++)
-        _ost << "\t";
-}
 
 #endif /* NODE_H_ */

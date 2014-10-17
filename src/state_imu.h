@@ -11,7 +11,6 @@
 //wolf
 #include "state_base.h"
 
-
 /**
  * \brief Class for IMU bias states
  */

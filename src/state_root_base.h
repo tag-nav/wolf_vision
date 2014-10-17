@@ -8,7 +8,7 @@
 #ifndef STATE_ROOT_BASE_H_
 #define STATE_ROOT_BASE_H_
 
-// wolf
+// wolf includes
 #include "wolf.h"
 
 /** \brief Base class for all kind of states.

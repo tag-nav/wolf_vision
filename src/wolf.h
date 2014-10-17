@@ -113,6 +113,7 @@ class SensorBase;
 class TransSensor;
 class StatePose;
 class PinHole;
+class FeatureCorner2D;
 
 // - Vehicle
 typedef std::shared_ptr<VehicleBase> VehicleShPtr;

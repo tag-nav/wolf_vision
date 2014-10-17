@@ -8,13 +8,12 @@
 #ifndef RAW_BASE_H_
 #define RAW_BASE_H_
 
-//std
-#include <iostream>
-
 //wolf includes
 #include "wolf.h"
 #include "time_stamp.h"
 
+//std includes
+#include <iostream>
 
 /** \brief Base class for all kind of classes storing raw data.
  * 

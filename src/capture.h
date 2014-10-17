@@ -8,11 +8,6 @@
 #ifndef CAPTURE_H_
 #define CAPTURE_H_
 
-#include "node_constrainer.h"
-
-#include <map>
-#include <utility>
-#include <memory>
 
 // Forward declarations for node templates
 class Frame;
@@ -23,6 +18,13 @@ class SensorBase;
 class RawBase;
 class TransSensor;
 
+//wolf includes
+#include "node_constrainer.h"
+
+//std includes
+#include <map>
+#include <utility>
+#include <memory>
 
 
 /** \brief Base class for raw data captures from sensors
@@ -110,12 +112,39 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
          **/                        
         void addFeature(const FeatureShPtr& _f_ptr);
 
+        /** \brief Gets a const reference to feature list
+         * 
+         * Gets a const reference to feature list
+         *
+         **/                        
         const FeatureList& featureList() const;
 
+        /** \brief Gets a const ref to Raw shared pointer
+         * 
+         * Gets a const ref to Raw shared pointer
+         *
+         **/                        
         const RawShPtr& rawShPtr() const;
+        
+        /** \brief Gets a const pointer to Raw
+         * 
+         * Gets a const pointer to Raw
+         *
+         **/                                
         const RawPtr rawPtr() const;
+        
+        /** \brief Sets Raw pointer from a shared pointer
+         * 
+         * Sets Raw pointer from a shared pointer
+         *
+         **/                                
         void setRaw(RawShPtr & _raw_sh_ptr);
 
+        /** \brief Gets a pointer to SensorBase
+         * 
+         * Gets a pointer to SensorBase
+         *
+         **/                        
         SensorPtr sensorPtr() ;
         SensorBase& sensor() ;
         const SensorPtr sensorPtr() const;
@@ -150,6 +179,13 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
          *  in any way.  Managing the pointer is the user's responsibility.
          */
         unsigned int removeTransSensor(unsigned int _capture_other_id);
+        
+        /** \brief Generic processing from raw to features
+         * 
+         * Generic processing from raw to features. 
+         * 
+         **/
+        virtual void processCapture();
 
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
@@ -286,6 +322,11 @@ inline const TransSensorPtr Capture::transSensorPtr(unsigned int _capture_other_
 inline unsigned int Capture::removeTransSensor(unsigned int _capture_other_id)
 {
     return trans_sensor_map_.erase(_capture_other_id);
+}
+
+inline void Capture::processCapture()
+{
+    //nothing to do in base class. Overload it to do things.
 }
 
 void Capture::printSelf(unsigned int _ntabs, std::ostream& _ost) const
