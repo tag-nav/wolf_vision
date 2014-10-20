@@ -6,16 +6,22 @@
  */
 
 //wolf
-#include "wolf.h"
-// #include "frame.h"
-// #include "capture_laser_2D.h"
-// #include "raw_laser_2D.h"
-// #include "feature_corner_2D.h"
+#include "vehicle_base.h"
+#include "frame.h"
+#include "capture_laser_2D.h"
+#include "raw_laser_2D.h"
+#include "feature_corner_2D.h"
+#include "correspondence_base.h"
 // #include "state_pose.h"
+
+//Eigen includes
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Geometry>
 
 // std includes
 #include <math.h>
 #include <iostream>
+#include <memory>
 
 //namespaces
 using namespace std;
@@ -29,6 +35,9 @@ int main(int argc, char *argv[])
     unsigned int scan_id;
     double xx;
     double yy;
+    shared_ptr<RawLaser2D> raw_laser_shptr(new RawLaser2D(0.));//init with 0 timestamp
+    shared_ptr<CaptureLaser2D> capture_shptr;
+    shared_ptr<Frame> frame_shptr; 
     
 
     // 1.  Parse input parameters
@@ -74,6 +83,8 @@ int main(int argc, char *argv[])
     }
     
     // 3. set scan data to raw object. When wrapping with ROS, this step will be done by the callback
+   raw_laser_shptr->setData(scan_data.size(), &scan_data(0)); 
+   //raw_laser_shptr->print();
     
     
 

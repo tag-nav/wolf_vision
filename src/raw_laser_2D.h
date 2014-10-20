@@ -12,7 +12,7 @@
 
 class RawLaser2D : public RawBase
 {
-    private:
+    protected:
 
     public:
         /** \brief Constructor with arguments

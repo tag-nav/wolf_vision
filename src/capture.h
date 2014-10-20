@@ -20,6 +20,7 @@ class TransSensor;
 
 //wolf includes
 #include "node_constrainer.h"
+#include "state_pose.h"
 
 //std includes
 #include <map>

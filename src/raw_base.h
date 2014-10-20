@@ -27,7 +27,14 @@ class RawBase
         Eigen::VectorXs data_; ///< raw data
         
     protected:
-        /** \brief Constructor
+        /** \brief Constructor without arguments
+         * 
+         * Constructor without arguments
+         * 
+         */
+        RawBase();        
+        
+        /** \brief Constructor with time stamp
          * 
          * Constructor from time stamp
          * \param _ts time stamp
@@ -52,6 +59,13 @@ class RawBase
         virtual ~RawBase();
         
     public:
+
+        /** \brief Sets time stamp
+         * 
+         * Sets the time stamp
+         * 
+         **/
+        void timeStamp(const WolfScalar& _ts);        
         
         /** \brief Gets time stamp
          * 
@@ -86,6 +100,13 @@ class RawBase
 // IMPLEMENTATION
 ////////////////////////////////
 
+inline RawBase::RawBase() :
+        time_stamp_(0.), 
+        data_()
+{
+    //
+}
+
 inline RawBase::RawBase(const WolfScalar _ts) :
         time_stamp_(_ts), 
         data_()
@@ -103,6 +124,11 @@ inline RawBase::RawBase(const WolfScalar _ts, const Eigen::VectorXs& _data) :
 inline RawBase::~RawBase()
 {
     //
+}
+
+inline void RawBase::timeStamp(const &WolfScalar _ts)
+{
+    time_stamp.set(_ts);
 }
 
 inline WolfScalar RawBase::timeStamp() const

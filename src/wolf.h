@@ -109,6 +109,7 @@ class Capture;
 class FeatureBase;
 class CorrespondenceBase;
 class RawBase;
+class RawLaser2D;
 class SensorBase;
 class TransSensor;
 class StatePose;

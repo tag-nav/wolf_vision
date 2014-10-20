@@ -43,16 +43,20 @@ class FeatureCorner2D : public FeatureBase
 ////////////////////////////////
 // IMPLEMENTATION
 ////////////////////////////////
-FeatureCorner2D::FeatureCorner2D(const CaptureShPtr& _capt_ptr, unsigned int _dim_measurement, const NodeLocation _loc) :
+inline FeatureCorner2D::FeatureCorner2D(const CaptureShPtr& _capt_ptr, unsigned int _dim_measurement, const NodeLocation _loc) :
         FeatureBase(_capt_ptr, _dim_measurement, _loc)
 {
     //
 }
 
-FeatureCorner2D::~FeatureCorner2D()
+inline FeatureCorner2D::~FeatureCorner2D()
 {
-    
+    //
 }
 
+void FeatureCorner2D::checkCorrespondence()
+{
+    //To do 
+}
 
 #endif //feature_corner_2D_h_

@@ -48,7 +48,6 @@ int main()
     int num = -4294967296/2;
     cout << num << "; " << num-1 << "; " << num-(num-1) << endl;
 
-    
 
     return 0;   
 }

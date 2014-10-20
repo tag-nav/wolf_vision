@@ -58,8 +58,13 @@ class FeatureBase : public NodeConstrainer<Capture, CorrespondenceBase>
          * Generic interface to check correspondence between this feature and a map model (static/slam) or a previous feature
          *
          **/
-        void checkCorrespondence();
-
+        virtual void checkCorrespondence();
+        
+        /** \brief prints object's info
+         * 
+         * prints object's info
+         * 
+         **/
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
 };
