@@ -126,9 +126,9 @@ inline RawBase::~RawBase()
     //
 }
 
-inline void RawBase::timeStamp(const &WolfScalar _ts)
+inline void RawBase::timeStamp(const WolfScalar& _ts)
 {
-    time_stamp.set(_ts);
+    time_stamp_.set(_ts);
 }
 
 inline WolfScalar RawBase::timeStamp() const
