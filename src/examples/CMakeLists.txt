@@ -59,6 +59,10 @@ TARGET_LINK_LIBRARIES(test_map ${PROJECT_NAME})
 #ADD_EXECUTABLE(test_pointers test_pointers.cpp)
 #TARGET_LINK_LIBRARIES(test_pointers ${PROJECT_NAME})
 
+# test_shared_ptr
+ADD_EXECUTABLE(test_shared_ptr test_shared_ptr.cpp)
+TARGET_LINK_LIBRARIES(test_shared_ptr ${PROJECT_NAME})
+
 # test_mid_nodes
 ADD_EXECUTABLE(test_mid_nodes test_mid_nodes.cpp)
 TARGET_LINK_LIBRARIES(test_mid_nodes ${PROJECT_NAME})

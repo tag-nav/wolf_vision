@@ -36,7 +36,25 @@ class Foo
             cout << "Processing - " << id_ << endl;
         }
 };
-unsigned int Foo::count_ = 10;
+
+class Bar : public Foo
+{
+    protected:
+        unsigned int data_;
+    public:
+        Bar() : Foo(), data_(0)
+        {
+            //
+        }
+        Bar(unsigned int _data) : Foo(), data_(_data)
+        {
+            //
+        }
+        ~Bar()
+        {
+            //
+        }
+};
 
 //deleter 
 struct Deleter
@@ -47,6 +65,10 @@ struct Deleter
         delete p;
     }
 };
+
+
+//init static variables
+unsigned int Foo::count_ = 10;
  
 //main
 int main()

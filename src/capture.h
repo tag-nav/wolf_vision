@@ -26,6 +26,7 @@ class TransSensor;
 #include <map>
 #include <utility>
 #include <memory>
+#include <iostream>
 
 
 /** \brief Base class for raw data captures from sensors
@@ -139,7 +140,8 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
          * Sets Raw pointer from a shared pointer
          *
          **/                                
-        void setRaw(RawShPtr & _raw_sh_ptr);
+//         void setRaw(RawShPtr & _raw_sh_ptr);
+//         void setRaw(RawBase & _raw);
 
         /** \brief Gets a pointer to SensorBase
          * 
@@ -247,10 +249,15 @@ inline const RawPtr Capture::rawPtr() const
     return raw_sh_ptr_.get();
 }
 
-inline void Capture::setRaw(RawShPtr & _raw_sh_ptr)
-{
-    raw_sh_ptr_ = _raw_sh_ptr;
-}
+// inline void Capture::setRaw(RawShPtr & _raw_sh_ptr)
+// {
+//     raw_sh_ptr_ = _raw_sh_ptr;
+// }
+
+// inline void Capture::setRaw(RawBase & _raw)
+// {
+//     raw_sh_ptr_.reset(&_raw);
+// }
 
 inline SensorPtr Capture::sensorPtr()
 {

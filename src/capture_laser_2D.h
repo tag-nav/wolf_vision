@@ -69,6 +69,7 @@ inline void CaptureLaser2D::processCapture()
 
 inline void CaptureLaser2D::extractCorners()
 {
+    std::cout << "Extracting corners ... " << std::endl;
     //TODO by Andreu: create class FeatureCorner2D + main to test this method.
     //TODO by Juan AC
     // Laser ranges are at data_

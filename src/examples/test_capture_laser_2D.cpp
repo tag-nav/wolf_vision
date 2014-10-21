@@ -12,7 +12,7 @@
 #include "raw_laser_2D.h"
 #include "feature_corner_2D.h"
 #include "correspondence_base.h"
-// #include "state_pose.h"
+#include "state_pose.h"
 
 //Eigen includes
 #include <eigen3/Eigen/Dense>
@@ -35,10 +35,11 @@ int main(int argc, char *argv[])
     unsigned int scan_id;
     double xx;
     double yy;
+    VectorXs scan_data;
     shared_ptr<RawLaser2D> raw_laser_shptr(new RawLaser2D(0.));//init with 0 timestamp
-    shared_ptr<CaptureLaser2D> capture_shptr;
+    shared_ptr<CaptureLaser2D> capture_laser_shptr;
     shared_ptr<Frame> frame_shptr; 
-    
+    std::shared_ptr<StatePose> pose_shptr;
 
     // 1.  Parse input parameters
     cout << "\nTest for Laser Scan Capture - test_capture_laser_2D.cpp";
@@ -55,7 +56,6 @@ int main(int argc, char *argv[])
     cout << "Testing with scan id: " << scan_id << endl << endl;
 
     // 2. Initialize data. When wrapping with ROS, this data will come from a ROS message
-    VectorXs scan_data;
     switch(scan_id)
     {
         case 1: 
@@ -83,10 +83,19 @@ int main(int argc, char *argv[])
     }
     
     // 3. set scan data to raw object. When wrapping with ROS, this step will be done by the callback
-   raw_laser_shptr->setData(scan_data.size(), &scan_data(0)); 
-   //raw_laser_shptr->print();
-    
-    
+    raw_laser_shptr->setData(scan_data.size(), &scan_data(0)); 
+    //raw_laser_shptr->print();
+
+    // 4. Set state and new frame
+    pose_shptr.reset( new StatePose() );   
+    frame_shptr.reset( new Frame(nullptr, pose_shptr, raw_laser_shptr->timeStamp()) );
+
+    //5. Set capture and add it to frame
+    capture_laser_shptr.reset( new CaptureLaser2D(frame_shptr, nullptr) );
+    //capture_laser_shptr->setRaw(*raw_laser_shptr);
+
+    //6. Extract features
+    capture_laser_shptr->processCapture();
 
     return EXIT_SUCCESS;
 }
