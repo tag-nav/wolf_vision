@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     cout << endl;
 
     // print wolf tree ( edit option to (de)activate )
-    if ( 1 )
+    if ( 0 )
     {
         // Use clean error vectors
         // We use an external pointer to compute errors, and then re-map the wolf tree over this external pointer.
