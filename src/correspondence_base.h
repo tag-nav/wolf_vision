@@ -35,6 +35,9 @@ class CorrespondenceBase : public NodeConstrainer<FeatureBase, NodeTerminus>
         // NOTE: We access "own" data stored somewhere else up in the wolf tree
         // through accessor functions by traversing the tree up: starting at featurePtr()-> and navigating to the requested data.
         // See e.g. sensorPtr() or sensor().
+        CapturePtr capture_ptr_; ///< pointer to own capture
+        StatePtr state_ptr_; ///< pointer to own state
+        SensorPtr sensor_ptr_; ///< pointer to own's capture sensor
 
         // NOTE: Access "other" data through pointers and/or accessor functions in derived classes,
         // depending on the type of corresponded object.
@@ -145,7 +148,10 @@ class CorrespondenceBase : public NodeConstrainer<FeatureBase, NodeTerminus>
 
 CorrespondenceBase::CorrespondenceBase(const FeatureShPtr& _ft_ptr, unsigned int _dim_error, unsigned int _dim_expectation) :
             NodeConstrainer(BOTTOM, "CORRESPONDENCE", _ft_ptr, _dim_error), //
-            expectation_(_dim_expectation) //
+            expectation_(_dim_expectation), //
+            capture_ptr_(_ft_ptr->capturePtr()), //
+            state_ptr_(capture_ptr_->framePtr()->statePtr()), //
+            sensor_ptr_(capture_ptr_->sensorPtr())
 {
     //
 }
@@ -172,32 +178,32 @@ inline const FeatureBase& CorrespondenceBase::feature() const
 
 inline const CapturePtr CorrespondenceBase::capturePtr() const
 {
-    return featurePtr()->capturePtr();
+    return capture_ptr_;
 }
 
 inline const Capture& CorrespondenceBase::capture() const
 {
-    return featurePtr()->capture();
+    return *capture_ptr_;
 }
 
 inline const SensorPtr CorrespondenceBase::sensorPtr() const
 {
-    return featurePtr()->capturePtr()->sensorPtr();
+    return sensor_ptr_;
 }
 
 inline const SensorBase& CorrespondenceBase::sensor() const
 {
-    return featurePtr()->capturePtr()->sensor();
+    return *sensor_ptr_;
 }
 
 inline const StatePtr CorrespondenceBase::statePtr() const
 {
-    return featurePtr()->capturePtr()->framePtr()->statePtr();
+    return state_ptr_;
 }
 
 inline const StatePose& CorrespondenceBase::state() const
 {
-    return featurePtr()->capturePtr()->framePtr()->state();
+    return *state_ptr_;
 }
 
 inline const Eigen::VectorXs& CorrespondenceBase::expectation() const

@@ -36,6 +36,9 @@ class CorrespondenceRelative : public CorrespondenceBase
         // Access "other" data, the corresponded feature.
         // Access all data of the corresponded feature using accessor functions.
         FeaturePtr feature_other_ptr_; ///< pointer to corresponded feature
+        CapturePtr capture_other_ptr_; ///< pointer to corresponded capture
+        StatePtr state_other_ptr_; ///< pointer to corresponded state
+        SensorPtr sensor_other_ptr_; ///< pointer to corresponded capture-s sensor
 
     public:
 
@@ -67,7 +70,10 @@ class CorrespondenceRelative : public CorrespondenceBase
 CorrespondenceRelative::CorrespondenceRelative(const FeatureShPtr& _ft_ptr, const FeatureShPtr& _ft_other_ptr,
                                                unsigned int _dim_error, unsigned int _dim_expectation) :
         CorrespondenceBase(_ft_ptr, _dim_error, _dim_expectation), //
-        feature_other_ptr_(_ft_other_ptr.get()) //
+        feature_other_ptr_(_ft_other_ptr.get()), //
+        capture_other_ptr_(feature_other_ptr_->capturePtr()), //
+        state_other_ptr_(capture_other_ptr_->framePtr()->statePtr()), //
+        sensor_other_ptr_(capture_other_ptr_->sensorPtr())
 {
     //
 }
@@ -79,32 +85,32 @@ CorrespondenceRelative::~CorrespondenceRelative()
 
 inline const StatePtr CorrespondenceRelative::stateOtherPtr() const
 {
-    return featureOtherPtr()->capturePtr()->framePtr()->statePtr();
+    return state_other_ptr_;
 }
 
 inline const StatePose& CorrespondenceRelative::stateOther() const
 {
-    return featureOtherPtr()->capturePtr()->framePtr()->state();
+    return *state_other_ptr_;
 }
 
 inline const CapturePtr CorrespondenceRelative::captureOtherPtr() const
 {
-    return featureOtherPtr()->capturePtr();
+    return capture_other_ptr_;
 }
 
 inline const Capture& CorrespondenceRelative::captureOther() const
 {
-    return featureOtherPtr()->capture();
+  return *capture_other_ptr_;
 }
 
 inline const SensorPtr CorrespondenceRelative::sensorOtherPtr() const
 {
-    return featureOtherPtr()->capturePtr()->sensorPtr();
+    return sensor_other_ptr_;
 }
 
 inline const SensorBase& CorrespondenceRelative::sensorOther() const
 {
-    return featureOtherPtr()->capturePtr()->sensor();
+  return *sensor_other_ptr_;
 }
 
 inline const FeaturePtr CorrespondenceRelative::featureOtherPtr() const
