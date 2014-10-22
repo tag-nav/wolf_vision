@@ -33,8 +33,8 @@ class CorrespondenceRelative : public CorrespondenceBase
 
     private:
 
-        // Access "other" data, the corresponded feature.
-        // Access all data of the corresponded feature using accessor functions.
+        // NOTE: We access "other" data stored somewhere else up in the wolf tree
+        // through these member pointers defined at construction time.
         FeaturePtr feature_other_ptr_; ///< pointer to corresponded feature
         CapturePtr capture_other_ptr_; ///< pointer to corresponded capture
         StatePtr state_other_ptr_; ///< pointer to corresponded state

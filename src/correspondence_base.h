@@ -33,8 +33,8 @@ class CorrespondenceBase : public NodeConstrainer<FeatureBase, NodeTerminus>
         Eigen::VectorXs expectation_; ///< the expected measurement given the current state estimate
 
         // NOTE: We access "own" data stored somewhere else up in the wolf tree
-        // through accessor functions by traversing the tree up: starting at featurePtr()-> and navigating to the requested data.
-        // See e.g. sensorPtr() or sensor().
+        // through these member pointers defined at construction time.
+        // feature_ptr_ is not  necessary as we have upNodePtr() available.
         CapturePtr capture_ptr_; ///< pointer to own capture
         StatePtr state_ptr_; ///< pointer to own state
         SensorPtr sensor_ptr_; ///< pointer to own's capture sensor
