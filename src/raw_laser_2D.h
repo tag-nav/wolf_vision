@@ -28,6 +28,13 @@ class RawLaser2D : public RawBase
          * 
          **/
         virtual ~RawLaser2D();
+        
+        /** \brief Prints time stamp + data
+         * 
+         * Prints "LASER2D" , then calls RawBase::print()
+         * 
+         **/
+        virtual void print(std::ostream & ost = std::cout) const;
 
 };
 
@@ -44,6 +51,12 @@ inline RawLaser2D::RawLaser2D(const WolfScalar _ts) :
 inline RawLaser2D::~RawLaser2D()
 {
     //
+}
+
+inline void RawLaser2D::print(std::ostream & ost) const
+{
+    ost << "LASER2D: ";
+    RawBase::print();
 }
 
 #endif /*RAW_LASER_2D_H_*/

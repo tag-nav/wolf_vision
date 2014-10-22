@@ -82,9 +82,9 @@ int main(int argc, char *argv[])
             break;
     }
     
-    // 3. set scan data to raw object. When wrapping with ROS, this step will be done by the callback
+    // 3. set scan data to raw object. 
     raw_laser_shptr->setData(scan_data.size(), &scan_data(0)); 
-    //raw_laser_shptr->print();
+    raw_laser_shptr->print();
 
     // 4. Set state and new frame
     pose_shptr.reset( new StatePose() );   
@@ -92,7 +92,10 @@ int main(int argc, char *argv[])
 
     //5. Set capture and add it to frame
     capture_laser_shptr.reset( new CaptureLaser2D(frame_shptr, nullptr) );
-    //capture_laser_shptr->setRaw(*raw_laser_shptr);
+    capture_laser_shptr->setRaw(raw_laser_shptr); //TODO: Check why it doesn't work
+    //capture_laser_shptr->setRaw( *(raw_laser_shptr.get()) );
+    //raw_laser_shptr.reset();
+    capture_laser_shptr->rawPtr()->print();
 
     //6. Extract features
     capture_laser_shptr->processCapture();

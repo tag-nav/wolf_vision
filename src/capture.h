@@ -68,7 +68,6 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
         TransSensorMap trans_sensor_map_;
 
     protected:
-
         /** \brief Constructor
          * 
          * \param _frm_ptr a shared pointer to the Frame up node
@@ -140,8 +139,7 @@ class Capture : public NodeConstrainer<Frame, FeatureBase>
          * Sets Raw pointer from a shared pointer
          *
          **/                                
-//         void setRaw(RawShPtr & _raw_sh_ptr);
-//         void setRaw(RawBase & _raw);
+        void setRaw(const RawShPtr & _raw_sh_ptr);
 
         /** \brief Gets a pointer to SensorBase
          * 
@@ -249,15 +247,10 @@ inline const RawPtr Capture::rawPtr() const
     return raw_sh_ptr_.get();
 }
 
-// inline void Capture::setRaw(RawShPtr & _raw_sh_ptr)
-// {
-//     raw_sh_ptr_ = _raw_sh_ptr;
-// }
-
-// inline void Capture::setRaw(RawBase & _raw)
-// {
-//     raw_sh_ptr_.reset(&_raw);
-// }
+inline void Capture::setRaw(const RawShPtr & _raw_sh_ptr)
+{
+    raw_sh_ptr_ = _raw_sh_ptr;
+}
 
 inline SensorPtr Capture::sensorPtr()
 {

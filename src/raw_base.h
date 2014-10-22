@@ -93,7 +93,7 @@ class RawBase
          * Prints time stamp and data in a single row.  By default at std::cout. 
          * 
          **/
-        void print(std::ostream & ost = std::cout) const;
+        virtual void print(std::ostream & ost = std::cout) const;
 };
 
 ////////////////////////////////

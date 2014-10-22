@@ -31,7 +31,7 @@ class Foo
             cout << "~Foo() - Destructor - " << id_ << endl; 
         }
 
-        void doSomething()
+        virtual void doSomething()
         {
             cout << "Processing - " << id_ << endl;
         }
@@ -54,6 +54,11 @@ class Bar : public Foo
         {
             //
         }
+        
+        virtual void doSomething()
+        {
+            cout << "Processing - " << id_ << ": " << data_ << endl;
+        }        
 };
 
 //deleter 
@@ -65,6 +70,11 @@ struct Deleter
         delete p;
     }
 };
+
+void myFunction(const std::shared_ptr<Foo> & _foo_shptr)
+{
+    _foo_shptr->doSomething();
+}
 
 
 //init static variables
@@ -106,6 +116,11 @@ int main()
     cout << sh5.use_count() << "," << sh5.unique() << '\n';
     //sh5.reset();
     
-    cout << "\n***** End of test. Still two shared_ptr's owning objects. They will be deleted at the end of main\n";    
+    cout << "\n***** Checking polimorphism\n";
+    shared_ptr<Bar> bar_shptr_(new Bar(23));
+    //myFunction(sh5);
+    myFunction(bar_shptr_);
+    
+    cout << "\n***** End of test. Still three shared_ptr's owning objects. They will be deleted at the end of main\n";    
     return 0;
 }
