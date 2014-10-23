@@ -334,7 +334,9 @@ void Capture::printSelf(unsigned int _ntabs, std::ostream& _ost) const
 {
     NodeConstrainer::printSelf(_ntabs, _ost);
     printNTabs(_ntabs);
+    _ost << __LINE__ << std::endl;
     _ost << "\tSensor pose : ( " << sensor_ptr_->pose().x().transpose() << " )" << std::endl;
+    _ost << __LINE__ << std::endl;
     printNTabs(_ntabs);
     _ost << "\tSensor intrinsic : ( " << sensor_ptr_->intrinsic().transpose() << " )" << std::endl;
     printNTabs(_ntabs);

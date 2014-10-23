@@ -74,7 +74,7 @@ class SensorLaser2D : public SensorBase
 ////////////////////////////////
 
 inline SensorLaser2D::SensorLaser2D(StatePose& _sp, unsigned int _nrays, double _apert, double _rmin, double _rmax) :
-        SensorBase(_sp, _intrinsic, BOTTOM), 
+        SensorBase(_sp, BOTTOM), 
         n_rays_(_nrays), 
         aperture_(_apert), 
         range_min_(_rmin),

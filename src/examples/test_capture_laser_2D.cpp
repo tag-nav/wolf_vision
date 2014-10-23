@@ -13,6 +13,7 @@
 #include "feature_corner_2D.h"
 #include "correspondence_base.h"
 #include "state_pose.h"
+#include "sensor_laser_2d.h"
 
 //Eigen includes
 #include <eigen3/Eigen/Dense>
@@ -35,11 +36,14 @@ int main(int argc, char *argv[])
     unsigned int scan_id;
     double xx;
     double yy;
+    Vector3s v3s;
+    Quaternions quat;
     VectorXs scan_data;
-    shared_ptr<RawLaser2D> raw_laser_shptr(new RawLaser2D(0.));//init with 0 timestamp
-    shared_ptr<CaptureLaser2D> capture_laser_shptr;
     shared_ptr<Frame> frame_shptr; 
-    std::shared_ptr<StatePose> pose_shptr;
+    shared_ptr<StatePose> pose_shptr;    
+    shared_ptr<CaptureLaser2D> capture_laser_shptr;        
+    shared_ptr<RawLaser2D> raw_laser_shptr(new RawLaser2D(0.));//init with 0 timestamp
+    shared_ptr<SensorLaser2D> laser_sensor_shptr;
 
     // 1.  Parse input parameters
     cout << "\nTest for Laser Scan Capture - test_capture_laser_2D.cpp";
@@ -54,8 +58,16 @@ int main(int argc, char *argv[])
         scan_id = strtoul(argv[1], NULL, 10);
     }
     cout << "Testing with scan id: " << scan_id << endl << endl;
+    
+    // 2. Initialize device params and pose wrt vehicle
+    StatePose sensor_pose;
+    v3s << 1.,1.,1.;
+    //quat << 1.,0.,0.,0.;
+    sensor_pose.p(v3s);
+    //sensor_pose.q(quat);
+    laser_sensor_shptr.reset( new SensorLaser2D(sensor_pose, 180, M_PI, 0.1, 50.) );
 
-    // 2. Initialize data. When wrapping with ROS, this data will come from a ROS message
+    // 3. Initialize data. When wrapping with ROS, this data will come from a ROS message
     switch(scan_id)
     {
         case 1: 
@@ -82,23 +94,26 @@ int main(int argc, char *argv[])
             break;
     }
     
-    // 3. set scan data to raw object. 
+    // 4. set scan data to raw object. 
     raw_laser_shptr->setData(scan_data.size(), &scan_data(0)); 
     raw_laser_shptr->print();
 
-    // 4. Set state and new frame
+    // 5. Set state and new frame
     pose_shptr.reset( new StatePose() );   
     frame_shptr.reset( new Frame(nullptr, pose_shptr, raw_laser_shptr->timeStamp()) );
 
-    //5. Set capture and add it to frame
-    capture_laser_shptr.reset( new CaptureLaser2D(frame_shptr, nullptr) );
-    capture_laser_shptr->setRaw(raw_laser_shptr); //TODO: Check why it doesn't work
-    //capture_laser_shptr->setRaw( *(raw_laser_shptr.get()) );
-    //raw_laser_shptr.reset();
+    // 6. Set capture and add it to frame
+    capture_laser_shptr.reset( new CaptureLaser2D(frame_shptr, laser_sensor_shptr) );
+    capture_laser_shptr->setRaw(raw_laser_shptr);
     capture_laser_shptr->rawPtr()->print();
+    frame_shptr->addCapture(capture_laser_shptr);
+    capture_laser_shptr->printSelf();
 
-    //6. Extract features
+    // 7. Extract features
     capture_laser_shptr->processCapture();
+    
+    // 8. At this point, the tree should be built from frame up to features
+    frame_shptr->print();
 
     return EXIT_SUCCESS;
 }

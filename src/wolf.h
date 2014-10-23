@@ -114,6 +114,7 @@ class SensorBase;
 class TransSensor;
 class StatePose;
 class PinHole;
+class SensorLaser2D;
 class FeatureCorner2D;
 
 // - Vehicle
