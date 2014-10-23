@@ -66,7 +66,7 @@ class StatePose : public StateBase
         /** \brief Local constructor from StatePose
          * 
          * Local constructor from StatePose. 
-         * \param _x the state vector
+         * \param _pose the pose
          *  
          */
         StatePose(const StatePose& _pose);
