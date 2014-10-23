@@ -17,6 +17,8 @@ class TransPinHole : public TransSensor
 {
 
     private:
+        // We access derived sensors through these pointers defined at construction time
+        // via a dynamic_cast to the correct type.
         PinHolePtr pin_hole_own_ptr_; ///< pointer to this pin hole sensor
         PinHolePtr pin_hole_other_ptr_; ///< pointer to other pin hole sensor
 
@@ -79,6 +81,7 @@ inline void TransPinHole::precomputeConstants()
 
 inline void TransPinHole::computeExpectation(const Eigen::VectorXs & _pixel_other, Eigen::VectorXs & _epi_line) const
 {
+    // This line is equivalent and faster than doing fundamental_ * _pixel_other.homogeneous(), i.e., line = F * hmg_point.
     _epi_line = fundamental_.leftCols(2) * _pixel_other + fundamental_.rightCols(1);
 }
 
