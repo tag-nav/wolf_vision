@@ -342,7 +342,6 @@ inline void NodeConstrainer<UpperType, LowerType>::printSelf(unsigned int _ntabs
     NodeLinked<UpperType, LowerType>::printSelf(_ntabs, _ost);
     Node::printNTabs(_ntabs);
     _ost << "\tError      : ( " << error().transpose() << " )" << std::endl;
-    _ost << __LINE__ << std::endl;
 }
 
 #endif /* NODE_CONSTRAINER_H_ */

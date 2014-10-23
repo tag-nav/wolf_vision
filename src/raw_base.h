@@ -81,6 +81,13 @@ class RawBase
          **/
         const Eigen::VectorXs& rawData() const;
         
+        /** \brief Sets time stamp to now
+         * 
+         * Sets time stamp to now
+         * 
+         **/
+        void setTimeStampToNow();        
+        
         /** \brief Sets raw data
          * 
          * Sets raw data
@@ -139,6 +146,11 @@ inline WolfScalar RawBase::timeStamp() const
 inline const Eigen::VectorXs& RawBase::rawData() const
 {
     return data_;
+}
+
+inline void RawBase::setTimeStampToNow()
+{
+    time_stamp_.setToNow();
 }
 
 inline void RawBase::setData(unsigned int _size, const WolfScalar *_data)

@@ -59,15 +59,15 @@ int main(int argc, char *argv[])
     }
     cout << "Testing with scan id: " << scan_id << endl << endl;
     
-    // 2. Initialize device params and pose wrt vehicle
+    // 2. Initialize device params and pose wrt vehicle (once per execution.)
     StatePose sensor_pose;
     v3s << 1.,1.,1.;
-    //quat << 1.,0.,0.,0.;
+    quat.coeffs() << 1.,0.,0.,0.;
     sensor_pose.p(v3s);
-    //sensor_pose.q(quat);
+    sensor_pose.q(quat);
     laser_sensor_shptr.reset( new SensorLaser2D(sensor_pose, 180, M_PI, 0.1, 50.) );
 
-    // 3. Initialize data. When wrapping with ROS, this data will come from a ROS message
+    // 3. Initialize data. (Once per data arrival. When wrapping with ROS, this data will come from a ROS message)
     switch(scan_id)
     {
         case 1: 
@@ -94,26 +94,30 @@ int main(int argc, char *argv[])
             break;
     }
     
-    // 4. set scan data to raw object. 
+    // 4. set timestamp and scan data to raw laser object. 
+    raw_laser_shptr->setTimeStampToNow();
     raw_laser_shptr->setData(scan_data.size(), &scan_data(0)); 
-    raw_laser_shptr->print();
+    //raw_laser_shptr->print();
 
-    // 5. Set state and new frame
+    // 5. Creates a new state and a new frame
     pose_shptr.reset( new StatePose() );   
     frame_shptr.reset( new Frame(nullptr, pose_shptr, raw_laser_shptr->timeStamp()) );
 
-    // 6. Set capture and add it to frame
+    // 6. Creates capture and add it to frame
     capture_laser_shptr.reset( new CaptureLaser2D(frame_shptr, laser_sensor_shptr) );
     capture_laser_shptr->setRaw(raw_laser_shptr);
     capture_laser_shptr->rawPtr()->print();
     frame_shptr->addCapture(capture_laser_shptr);
-    capture_laser_shptr->printSelf();
 
     // 7. Extract features
     capture_laser_shptr->processCapture();
     
     // 8. At this point, the tree should be built from frame up to features
     frame_shptr->print();
+    
+    
+    // End of test
+    cout << "\n==============================================================\n" << endl;
 
     return EXIT_SUCCESS;
 }

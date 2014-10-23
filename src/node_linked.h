@@ -312,11 +312,15 @@ template<class UpperType, class LowerType>
 void NodeLinked<UpperType, LowerType>::print(unsigned int _ntabs, std::ostream& _ost) const
 {
     printSelf(_ntabs, _ost);
+    
     if ((location_ != TOP) && (up_node_ptr_ != nullptr))
-        _ost << __LINE__ << std::endl; printUp(_ntabs, _ost);
-
+    {
+        printUp(_ntabs, _ost);
+    }
     if (location_ != BOTTOM)
-        _ost << __LINE__ << std::endl; printDown(_ntabs, _ost);
+    {
+        printDown(_ntabs, _ost);
+    }
 }
 
 template<class UpperType, class LowerType>
@@ -346,7 +350,6 @@ void NodeLinked<UpperType, LowerType>::printUp(unsigned int _ntabs, std::ostream
 {
     printNTabs(_ntabs);
     _ost << "\tUpper Node   --> " << up_node_ptr_->nodeId() << std::endl;
-    _ost << __LINE__ << std::endl;
 }
 
 template<class UpperType, class LowerType>
@@ -364,7 +367,6 @@ void NodeLinked<UpperType, LowerType>::printDown(unsigned int _ntabs, std::ostre
     {
         down_node_ptr->print(_ntabs, _ost);
     }
-    _ost << __LINE__ << std::endl;
 }
 
 #endif /* NODE_LINKED_H_ */
