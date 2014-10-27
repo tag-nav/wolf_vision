@@ -109,7 +109,7 @@ inline WolfScalar distPointToLine(const P & _point, const L & _line)
 {
     assert(_point.size() == 2);
     assert(_line.size() == 3);
-    // Compute distance, see SolaIJCV-11 d = u' � l / sqrt(l_1^2+l_2^2)
+    // Compute distance, see SolaIJCV-11: d = u' * l / sqrt(l_1^2+l_2^2)
     // this line below is equivalent to line.dot(point_homogeneous) / line.segment(0, 2).norm();
     return (_line(0) * _point(0) + _line(1) * _point(1) + _line(2)) / _line.segment(0, 2).norm();
 }
