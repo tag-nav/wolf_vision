@@ -13,7 +13,8 @@
 #include "feature_corner_2D.h"
 #include "correspondence_base.h"
 #include "state_pose.h"
-#include "sensor_laser_2d.h"
+#include "sensor_laser_2D.h"
+
 
 //Eigen includes
 #include <eigen3/Eigen/Dense>
@@ -42,7 +43,7 @@ int main(int argc, char *argv[])
     shared_ptr<Frame> frame_shptr; 
     shared_ptr<StatePose> pose_shptr;    
     shared_ptr<CaptureLaser2D> capture_laser_shptr;        
-    shared_ptr<RawLaser2D> raw_laser_shptr(new RawLaser2D(0.));//init with 0 timestamp
+    shared_ptr<RawLaser2D> raw_laser_shptr;//(new RawLaser2D(0.));//init with 0 timestamp
     shared_ptr<SensorLaser2D> laser_sensor_shptr;
 
     // 1.  Parse input parameters
@@ -95,7 +96,7 @@ int main(int argc, char *argv[])
     }
     
     // 4. set timestamp and scan data to raw laser object. 
-    raw_laser_shptr->setTimeStampToNow();
+    raw_laser_shptr.reset( new RawLaser2D() );// time stamp of raw object is set to now
     raw_laser_shptr->setData(scan_data.size(), &scan_data(0)); 
     //raw_laser_shptr->print();
 

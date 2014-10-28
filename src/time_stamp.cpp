@@ -10,7 +10,7 @@
 TimeStamp::TimeStamp() :
         time_stamp_(0)
 {
-    //
+    setToNow();
 }
 
 TimeStamp::TimeStamp(const WolfScalar _ts) :

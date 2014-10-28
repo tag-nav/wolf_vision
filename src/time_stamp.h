@@ -34,7 +34,7 @@ class TimeStamp
     public:
         /** \brief Constructor
          *
-         * Constructor without arguments
+         * Constructor without arguments. Sets time stamp to now.
          *
          */
         TimeStamp();

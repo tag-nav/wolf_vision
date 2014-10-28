@@ -15,6 +15,13 @@ class RawLaser2D : public RawBase
     protected:
 
     public:
+        /** \brief Constructor without arguments
+         * 
+         * Constructor without arguments. Time stamp set to now.
+         * 
+         **/
+        RawLaser2D();
+        
         /** \brief Constructor with arguments
          * 
          * Constructor with arguments
@@ -41,6 +48,12 @@ class RawLaser2D : public RawBase
 ////////////////////////////////
 // IMPLEMENTATION
 ////////////////////////////////
+
+inline RawLaser2D::RawLaser2D() :
+        RawBase()
+{
+    //
+}
 
 inline RawLaser2D::RawLaser2D(const WolfScalar _ts) :
         RawBase(_ts)

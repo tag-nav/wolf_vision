@@ -1,6 +1,8 @@
 #edit the following line to add the librarie's header files
 FIND_PATH(
-      wolf_INCLUDE_DIR
+    wolf_INCLUDE_DIR
+    NAMES wolf.h
+    PATHS /usr/local/include/iri-algorithms
 )
 
 FIND_LIBRARY(

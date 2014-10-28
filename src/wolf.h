@@ -39,16 +39,16 @@ typedef double WolfScalar;        // Use this for double, 64 bit precision
 ///////////////////////////////////////////
 // Construct types for any scalar defined in the typedef scalar_t above
 ////////////////////////////////////////////
-/**
- * \brief Namespace extending Eigen definitions
+/** \brief Namespace extending Eigen definitions
  *
  * We redefine all algebra and gemoetry types to hold double or single precision floats.
  * The appended letter indicating this is 's', so that we have, e.g.,
  * - VectorXf   Vector of floats - defined by Eigen
  * - VectorXd   Vector of doubles - defined by Eigen
  * - VectorXs   Vector of either double of float, depending on the type \b scalar_t, defined by Wolf.
+ * 
  */
-namespace Eigen  // TODO see if this namespace is appropriate
+namespace Eigen  // Eigen namespace extension
 {
 // 1. Vectors and Matrices
 typedef Matrix<WolfScalar, 2, 2> Matrix2s;                ///< 2x2 matrix of real scalar_t type
@@ -69,8 +69,7 @@ typedef Quaternion<WolfScalar> Quaternions;               ///< Quaternion of rea
 typedef AngleAxis<WolfScalar> AngleAxiss;                 ///< Angle-Axis of real scalar_t type
 }
 
-/**
- * \brief Enumeration of node locations at Wolf Tree
+/** \brief Enumeration of node locations at Wolf Tree
  *
  * Enumeration of node locations at Wolf Tree.
  *
@@ -84,8 +83,7 @@ typedef enum
     BOTTOM ///< lowest level nodes. These are the ones that do not delegate any longer and have to do the job.
 } NodeLocation;
 
-/**
- * \brief Enumeration of all possible frames
+/** \brief Enumeration of all possible frames
  *
  * Enumeration of all possible frames.
  *
@@ -106,16 +104,18 @@ typedef enum
 class VehicleBase;
 class Frame;
 class Capture;
+class CaptureLaser2D;
 class FeatureBase;
+class FeatureCorner2D;
 class CorrespondenceBase;
 class RawBase;
 class RawLaser2D;
 class SensorBase;
+class SensorLaser2D;
 class TransSensor;
 class StatePose;
 class PinHole;
-class SensorLaser2D;
-class FeatureCorner2D;
+
 
 // - Vehicle
 typedef std::shared_ptr<VehicleBase> VehicleShPtr;

@@ -91,8 +91,6 @@ IF (UNIX)
   SET(CPACK_GENERATOR "DEB")
   SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "galenya - labrobotica@iri.upc.edu")
   SET(CPACK_SET_DESTDIR "ON")  # Necessary because of the absolute install paths
-#  SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libeigen3-dev (>= 3.2.1~${DISTRIB}), freeglut3-dev (>= 2.6.0)")
-
   INCLUDE(CPack)
 ELSE(UNIX)
   ADD_CUSTOM_COMMAND(

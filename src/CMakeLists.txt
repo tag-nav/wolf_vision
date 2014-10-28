@@ -20,6 +20,7 @@ SET(HDRS
     capture_gps.h
     capture.h
     capture_image.h
+    capture_laser_2D.h
     correspondence_base.h
     correspondence_global.h
     correspondence_gps_doppler.h
@@ -28,6 +29,7 @@ SET(HDRS
     correspondence_slam_landmark.h
     epipolar_constraint.h
     feature_base.h
+    feature_corner_2D.h
     frame.h
     gps_doppler.h
     gps_pseudo_range.h
@@ -39,7 +41,9 @@ SET(HDRS
     pin_hole.h
     quaternion_tools.h
     raw_base.h
+    raw_laser_2D.h
     sensor_base.h
+    sensor_laser_2D.h
     state_base.h
     state_error.h
     state_error_imu.h
