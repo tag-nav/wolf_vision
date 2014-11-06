@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
     unsigned int scan_id;
     double xx;
     double yy;
+    double th;
     Vector3s v3s;
     Quaternions quat;
     VectorXs scan_data;
@@ -71,7 +72,8 @@ int main(int argc, char *argv[])
     // 3. Initialize data. (Once per data arrival. When wrapping with ROS, this data will come from a ROS message)
     switch(scan_id)
     {
-        case 1: 
+        case 1:
+            /* This does not generate uniform angle measurements
             //invented scan, some lines and 90deg corners
             scan_data.resize(LASER_STEP_SIZE*9); 
             xx = 0; yy = -10;
@@ -88,6 +90,37 @@ int main(int argc, char *argv[])
                 if ( (ii>LASER_STEP_SIZE*8) && (ii<=LASER_STEP_SIZE*9) ) xx -= 0.05;
                 scan_data(ii) = sqrt(xx*xx+yy*yy);                    
             }
+             */
+            
+            //invented scan, some lines and 90deg corners
+            scan_data.resize(180);
+            for (unsigned int ii=0; ii<scan_data.size(); ii++) {
+                th = ii*M_PI/180.0 -M_PI/2.0;
+                yy = -10.0; xx = yy/tan(th);
+                if (xx > 2.0) {
+                    xx=2.0; yy=xx*tan(th);
+                }
+                if (yy > -8.0) {
+                    yy = -8.0; xx = yy/tan(th);
+                }
+                if (xx > 4.0) {
+                    xx=4.0; yy=xx*tan(th);
+                }
+                if (yy > -6.0) {
+                    yy = -6.0; xx = yy/tan(th);
+                }
+                if (xx > 6.0) {
+                    xx=6.0; yy=xx*tan(th);
+                }
+                if (yy > -4.0) {
+                    yy = -4.0; xx = yy/tan(th);
+                }
+                if (((th>0) || (xx*xx+yy*yy > 50*50)) || (xx*xx+yy*yy < 0.1)) {
+                    xx = 0; yy = 0;
+                }
+                scan_data(ii) = sqrt(xx*xx+yy*yy);
+            }
+            
             break;
         case 2:
             break; 
