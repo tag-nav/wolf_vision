@@ -37,12 +37,16 @@ class WolfVehicle
         std::normal_distribution<double> distribution_; //just to generate measurements
         VectorXs measurements_; //just a set of invented measurements
 
+        unsigned int measurements_size_, state_size_;
+
     public: 
         WolfVehicle() :
             state_prior_(),
             state_map_(nullptr,0),
             state_map_const_(nullptr,0),
-            distribution_(0.0,0.0001)
+            distribution_(0.0,0.01),
+			measurements_size_(0),
+			state_size_(0)
         {
             //
         }
@@ -59,26 +63,43 @@ class WolfVehicle
         
         void resizeState(unsigned int _state_size)
         {
+        	state_size_ = _state_size;
             state_prior_.resize(_state_size);
         }        
 
+        void remapState(WolfScalar *_ptr)
+        {
+        	new (&state_map_) Map<VectorXs>(_ptr, state_size_);
+
+            //std::cout << "remapState:  state_map_ = " << state_map_.transpose() << std::endl;
+        }
+
         void remapState(WolfScalar *_ptr, unsigned int _state_size)
         {
+        	state_size_ = _state_size;
             new (&state_map_) Map<VectorXs>(_ptr, _state_size);
+
+            //std::cout << "remapState:  state_map_ = " << state_map_.transpose() << std::endl;
+        }
+
+        void remapConstState(const WolfScalar * const _ptr)
+        {
+        	new (&state_map_const_) Map<const VectorXs>(_ptr, state_size_);
+
+            //std::cout << "remapConstState:  state_map_const_ = " << state_map_const_.transpose() << std::endl;
         }
 
         void remapConstState(const WolfScalar * const _ptr, unsigned int _state_size)
         {
-            new (&state_map_const_) Map<const VectorXs>(_ptr, _state_size);
-        }        
+        	state_size_ = _state_size;
+            new (&state_map_const_) Map<const VectorXs>(_ptr, state_size_);
 
-        void updateState()
-        {
-        	state_prior_ = state_map_const_;
+            //std::cout << "remapConstState:  state_map_const_ = " << state_map_const_.transpose() << std::endl;
         }
 
         void inventMeasurements(unsigned int _sz)
         {
+        	measurements_size_ = _sz;
             measurements_.resize(_sz);
             for(unsigned int ii=0; ii<_sz; ii++)
             {
@@ -100,19 +121,25 @@ class WolfVehicle
         
         // template <typename T>
         // void computeError(Map<Matrix<T,Dynamic,1>> & _residuals, unsigned int & _index)
-        void computeError(Map<VectorXs> & _residuals, unsigned int & _index)
+        void computeError(double* _residuals)
         {
-            for(unsigned int ii=_index; ii<_residuals.size(); ii++)
-            {
-                _residuals(ii) = measurements_(ii) - state_map_const_(ii); //just a trivial error function
-            }
+        	Map<VectorXs> mapped_residuals(_residuals, measurements_size_);
+
+        	//std::cout << "state_map_const  = " << state_map_const_.transpose() << std::endl;
+        	//std::cout << "measurements     = " << measurements_.transpose() << std::endl;
+
+        	mapped_residuals = measurements_ - state_map_const_;
+        	//for(unsigned int ii=0; ii< mapped_residuals.size(); ii++)
+        	//	mapped_residuals(ii) = measurements_(ii) - state_map_const_(ii); //just a trivial error function
+
+            //std::cout << "mapped_residuals = " << mapped_residuals.transpose() << std::endl << std::endl;
         }
 
         void print()
         {
             std::cout << "measurements_: " << std::endl << measurements_.transpose() << std::endl << std::endl;
-            std::cout << "state_prior_: " << std::endl << state_prior_.transpose() << std::endl << std::endl;
-            std::cout << "state_const_: " << std::endl << state_map_const_.transpose() << std::endl << std::endl;
+            std::cout << "state_prior_ : " << std::endl << state_prior_.transpose() << std::endl << std::endl;
+            std::cout << "state_const_ : " << std::endl << state_map_const_.transpose() << std::endl << std::endl;
         }
 };
 
@@ -123,78 +150,32 @@ class WolfVehicle
 class CeresWolfFunctor
 {
     protected: 
-        //WolfVehicle *vehicle_ptr_; //pointer to Wolf Vehicle object
         std::shared_ptr<WolfVehicle> vehicle_ptr_; //pointer to Wolf Vehicle object
-        std::shared_ptr<Eigen::VectorXs> state_ptr_; //pointer to state storage. 
-        std::shared_ptr<Eigen::Map<Eigen::VectorXs> > error_ptr_; //Pointer to a Map to an error vector. Ceres call to () will indicate where to map it.
-        unsigned int state_size_;
-        unsigned int error_size_;
-        
-    protected:
-        void setState(const WolfScalar * const _st) const //, unsigned int _state_size)
-        {
-            for (unsigned int ii=0; ii<state_ptr_->size(); ii++) (*state_ptr_)(ii) = _st[ii];
-        }
         
     public:
         CeresWolfFunctor(std::shared_ptr<WolfVehicle> & _wv) :
-            vehicle_ptr_(_wv),
-            state_ptr_(std::make_shared<Eigen::VectorXs>()),
-            error_ptr_(std::make_shared<Eigen::Map<Eigen::VectorXs> >(nullptr,0)),
-            state_size_(0),
-            error_size_(0)
+            vehicle_ptr_(_wv)
         {
-            //std::cout << "CeresWolfFunctor(): " << vehicle_ptr_.use_count() << " " << state_ptr_.use_count() << " " << std::endl;
+            std::cout << "CeresWolfFunctor(): " << vehicle_ptr_.use_count() << std::endl;
         }
         
         virtual ~CeresWolfFunctor()
         {
             //
         }
-                
-        void setStateSize(unsigned int _state_size)
-        {
-            state_size_ = _state_size;
-            state_ptr_->resize(_state_size);
-            vehicle_ptr_->resizeState(_state_size);
-        }
-
-        void setErrorSize(unsigned int _error_size) 
-        {
-            error_size_ = _error_size;
-        }
-        
-        void setSizes(unsigned int _state_size, unsigned int _error_size)
-        {
-            setStateSize(_state_size);
-            setErrorSize(_error_size);    
-        }
         
         bool operator()(const WolfScalar * const _x, double* _residuals) const
         {
-            unsigned int error_index = 0;
-            
-            // 1. set the state
-            //this->setState(_x); //hard copy from x_ to state_. Assumes sizes are ok
-            
-            // 2. Remap the vehicle state to the local copy
-            //vehicle_ptr_->remapConstState(state_ptr_->data(), state_size_);
-            vehicle_ptr_->remapConstState(_x, state_size_);
+            // Remap the vehicle state to the const evaluation point
+            vehicle_ptr_->remapConstState(_x);
+            //std::cout << "_x         = " << *_x << " " << *(_x+1) << " " << *(_x+2) << " " << *(_x+3) << " " << *(_x+4) << std::endl;
 
-            // 3. Remap the error to the provided address
-            new (error_ptr_.get()) Eigen::Map<Eigen::VectorXs>(_residuals, error_size_);
+            // Compute error or residuals
+            vehicle_ptr_->computeError(_residuals);
+            //std::cout << "_residuals = " << *_residuals << " " << *(_residuals+1) << " " << *(_residuals+2) << " " << *(_residuals+3) << " " << *(_residuals+4) << std::endl << std::endl;
 
-            // 4. Compute error
-            vehicle_ptr_->computeError(*error_ptr_, error_index);
-
-            // 5. return 
             return true;
         }
-        
-        void printState()
-        {
-            std::cout << "state_: " << state_ptr_->transpose() << std::endl;
-        }        
 };
 
 //This main is a single iteration of the WOLF. 
@@ -204,8 +185,8 @@ int main(int argc, char** argv)
     std::cout << " ========= Static Numeric case ===========" << std::endl << std::endl;
     
     //dimension 
-    const unsigned int DIM = 19; //just to test, all will be DIM-dimensional
-    const unsigned int SimulationSteps = 5;
+    const unsigned int DIM = 5; //just to test, all will be DIM-dimensional
+    const unsigned int SimulationSteps = 3;
     //aux vector
 //     Eigen::VectorXs aux;
     
@@ -235,7 +216,8 @@ int main(int argc, char** argv)
     ceres::Problem problem;
 
     // fixed dim problem
-    functorPtr->setSizes(DIM,DIM);
+    vehiclePtr->resizeState(DIM);
+    vehiclePtr->resizeState(DIM);
     vehiclePtr->computePrior();
     vehiclePtr->print();
 
@@ -262,9 +244,6 @@ int main(int argc, char** argv)
 
         // run Ceres Solver
         ceres::Solve(options, &problem, &summary);
-
-        // Update state values
-        vehiclePtr->updateState();
 
         //display results
         std::cout << summary.BriefReport() << "\n";
