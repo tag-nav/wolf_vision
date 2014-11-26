@@ -113,7 +113,7 @@ class WolfVehicle
         
         void computePrior()
         {
-            state_prior_.setOnes();
+            state_prior_.setZero();
         }        
         
         void computePrior(VectorXs & _v)
@@ -139,27 +139,51 @@ class WolfVehicle
 //
 //            //std::cout << "mapped_residuals = " << mapped_residuals.transpose() << std::endl << std::endl;
 //        }
+        template <typename T>
+        bool operator()(const T* const _x, T* _residuals) const
+        {
+        	//std::cout << "state_size_ = " << state_size_ << std::endl;
+        	//std::cout << "measurements_size_ = " << measurements_size_ << std::endl;
 
-        bool operator()(const WolfScalar * const _x, double* _residuals) const
-		{
-        	//std::cout << std::endl << "operator ()" << std::endl;
-			// Remap the vehicle state to the const evaluation point
+        	// Remap the vehicle state to the const evaluation point
 			//remapConstState(_x);
-        	Map<const VectorXs> state_map_const_(_x, state_size_);
+			Map<const Matrix<T,Dynamic,1>> state_map_const_(_x, state_size_);
 
 			// Compute error or residuals
 			//computeError(_residuals);
-        	Map<MatrixXs> mapped_residuals(_residuals, state_size_, measurements_size_);
+			Map<Matrix<T,Dynamic,Dynamic>> mapped_residuals(_residuals, state_size_, measurements_size_);
 
-        	//std::cout << "measurements_     = " << std::endl << measurements_ << std::endl;
-			//std::cout << "state_map_const_ * Ones(1,measurements_size_) = " << std::endl << state_map_const_ * MatrixXs::Ones(1,measurements_size_) << std::endl;
-			//std::cout << "measurements_ - state_map_const_ * Ones(1,measurements_size_) = " << std::endl << measurements_ - state_map_const_ * MatrixXs::Ones(1,measurements_size_) << std::endl;
-			mapped_residuals = measurements_ - state_map_const_ * MatrixXs::Ones(1,measurements_size_);
-			//std::cout << "mapped_residuals     = " << std::endl << mapped_residuals << std::endl;
-        	//mapped_residuals = measurements_ - state_map_const_;
-
-			return true;
-		}
+			for (unsigned int i = 0; i<measurements_size_; i++)
+			{
+				for (unsigned int j = 0; j<state_size_; j++)
+				{
+					mapped_residuals(j,i) = T(measurements_(j,i)) - state_map_const_(j);
+					//std::cout << "mapped_residuals(" << j << "," << i <<") = " << mapped_residuals(j,i) << std::endl;
+				}
+			}
+			//std::cout << "residuals computed" << std::endl << std::endl;
+        	return true;
+        }
+//        bool operator()(const WolfScalar * const _x, double* _residuals) const
+//		{
+//        	//std::cout << std::endl << "operator ()" << std::endl;
+//			// Remap the vehicle state to the const evaluation point
+//			//remapConstState(_x);
+//        	Map<const VectorXs> state_map_const_(_x, state_size_);
+//
+//			// Compute error or residuals
+//			//computeError(_residuals);
+//        	Map<MatrixXs> mapped_residuals(_residuals, state_size_, measurements_size_);
+//
+//        	//std::cout << "measurements_     = " << std::endl << measurements_ << std::endl;
+//			//std::cout << "state_map_const_ * Ones(1,measurements_size_) = " << std::endl << state_map_const_ * MatrixXs::Ones(1,measurements_size_) << std::endl;
+//			//std::cout << "measurements_ - state_map_const_ * Ones(1,measurements_size_) = " << std::endl << measurements_ - state_map_const_ * MatrixXs::Ones(1,measurements_size_) << std::endl;
+//			mapped_residuals = measurements_ - state_map_const_ * MatrixXs::Ones(1,measurements_size_);
+//			//std::cout << "mapped_residuals     = " << std::endl << mapped_residuals << std::endl;
+//        	//mapped_residuals = measurements_ - state_map_const_;
+//c
+//			return true;
+//		}
 
         void print()
         {
@@ -183,6 +207,9 @@ int main(int argc, char** argv)
     // init
     google::InitGoogleLogging(argv[0]);
     
+    using ceres::AutoDiffCostFunction;
+    using ceres::CostFunction;
+
     //wolf vehicle & ceres functor
     WolfVehicle *functorPtr = new WolfVehicle();
   
@@ -210,16 +237,20 @@ int main(int argc, char** argv)
         
         // Resizing & remapping
 
+
     	// cost function
-		ceres::NumericDiffCostFunction<WolfVehicle,ceres::CENTRAL,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>*
-		   	   cost_function_static = new ceres::NumericDiffCostFunction<WolfVehicle,ceres::CENTRAL,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>(functorPtr);
-        problem.AddResidualBlock(cost_function_static, nullptr, functorPtr->getPrior());
+		CostFunction* cost_function = new AutoDiffCostFunction<WolfVehicle,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>(functorPtr);
+    	problem.AddResidualBlock(cost_function, NULL, functorPtr->getPrior());
+
+    	//ceres::AutoDiffCostFunction<WolfVehicle,ceres::CENTRAL,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>*
+		//   	   cost_function_static = new ceres::NumericDiffCostFunction<WolfVehicle,ceres::CENTRAL,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>(functorPtr);
+        //problem.AddResidualBlock(cost_function_static, nullptr, functorPtr->getPrior());
 
         // run Ceres Solver
         ceres::Solve(options, &problem, &summary);
 
         //display results
-        //std::cout << summary.BriefReport() << "\n";
+        std::cout << summary.BriefReport() << "\n";
         functorPtr->print();
 	}
     //clean
