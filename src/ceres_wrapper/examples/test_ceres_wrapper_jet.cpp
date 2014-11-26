@@ -107,7 +107,7 @@ class WolfVehicle
             {
                 measurements_(ii) = 1 + distribution_(generator_); //just inventing a sort of noise measurements
             }
-            std::cout << "invented measurements_ = " << std::endl << measurements_.transpose() << std::endl;
+            //std::cout << "invented measurements_ = " << std::endl << measurements_.transpose() << std::endl;
 
         }
         
@@ -163,9 +163,9 @@ class WolfVehicle
 
         void print()
         {
-            std::cout << "measurements_: " << std::endl << measurements_.transpose() << std::endl << std::endl;
+            //std::cout << "measurements_: " << std::endl << measurements_.transpose() << std::endl << std::endl;
             std::cout << "state_prior_ : " << std::endl << state_prior_.transpose() << std::endl << std::endl;
-            std::cout << "state_const_ : " << std::endl << state_map_const_.transpose() << std::endl << std::endl;
+            //std::cout << "state_const_ : " << std::endl << state_map_const_.transpose() << std::endl << std::endl;
         }
 };
 
@@ -178,7 +178,7 @@ int main(int argc, char** argv)
     //dimension 
     const unsigned int STATE_DIM = 5; //just to test, all will be DIM-dimensional
     const unsigned int MEASUREMENT_DIM = 10; //just to test, all will be DIM-dimensional
-	const unsigned int SimulationSteps = 1;
+	const unsigned int SimulationSteps = 20;
     
     // init
     google::InitGoogleLogging(argv[0]);
@@ -186,13 +186,10 @@ int main(int argc, char** argv)
     //wolf vehicle & ceres functor
     WolfVehicle *functorPtr = new WolfVehicle();
   
-    // Allocate the cost function
-    ceres::NumericDiffCostFunction<WolfVehicle,ceres::CENTRAL,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>*
-           cost_function_static = new ceres::NumericDiffCostFunction<WolfVehicle,ceres::CENTRAL,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>(functorPtr);
 
     // Ceres problem initialization
     ceres::Solver::Options options;
-    options.minimizer_progress_to_stdout = true;
+    options.minimizer_progress_to_stdout = false;
     options.minimizer_type = ceres::TRUST_REGION;
     options.line_search_direction_type = ceres::LBFGS;
     options.max_num_iterations = 10;
@@ -202,7 +199,6 @@ int main(int argc, char** argv)
     // fixed dim problem
     functorPtr->resizeState(STATE_DIM);
     functorPtr->computePrior();
-    functorPtr->print();
 
     //start Wolf iteration
     for (uint i=0; i<SimulationSteps; i++)
@@ -213,19 +209,17 @@ int main(int argc, char** argv)
     	functorPtr->inventMeasurements(MEASUREMENT_DIM);
         
         // Resizing & remapping
-        // functorPtr->setSizes(DIM,DIM);
-                      
-        // Compute and gets the Prior (initial guess). This would be the prior given by Wolf
-        // functorPtr->computePrior();
 
-        // Add residual block
+    	// cost function
+		ceres::NumericDiffCostFunction<WolfVehicle,ceres::CENTRAL,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>*
+		   	   cost_function_static = new ceres::NumericDiffCostFunction<WolfVehicle,ceres::CENTRAL,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>(functorPtr);
         problem.AddResidualBlock(cost_function_static, nullptr, functorPtr->getPrior());
 
         // run Ceres Solver
         ceres::Solve(options, &problem, &summary);
 
         //display results
-        std::cout << summary.BriefReport() << "\n";
+        //std::cout << summary.BriefReport() << "\n";
         functorPtr->print();
 	}
     //clean
