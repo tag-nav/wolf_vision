@@ -30,7 +30,6 @@ class WolfVehicle
     protected:
         VectorXs state_prior_; //state storage where to compute prior
         Map<VectorXs> state_map_; //state point to be evaluated by Wolf tree constraints
-        Map<const VectorXs> state_map_const_; //state point to be evaluated by Wolf tree constraints
         
         //Just to generate fake measurements
         std::default_random_engine generator_; //just to generate measurements
@@ -43,7 +42,6 @@ class WolfVehicle
         WolfVehicle() :
             state_prior_(),
             state_map_(nullptr,0),
-            state_map_const_(nullptr,0),
             distribution_(0.0,0.01),
 			measurements_size_(0),
 			state_size_(0)
@@ -65,36 +63,6 @@ class WolfVehicle
         {
         	state_size_ = _state_size;
             state_prior_.resize(_state_size);
-        }        
-
-        void remapState(WolfScalar *_ptr)
-        {
-        	new (&state_map_) Map<VectorXs>(_ptr, state_size_);
-
-            //std::cout << "remapState:  state_map_ = " << state_map_.transpose() << std::endl;
-        }
-
-        void remapState(WolfScalar *_ptr, unsigned int _state_size)
-        {
-        	state_size_ = _state_size;
-            new (&state_map_) Map<VectorXs>(_ptr, _state_size);
-
-            //std::cout << "remapState:  state_map_ = " << state_map_.transpose() << std::endl;
-        }
-
-        void remapConstState(const WolfScalar * const _ptr)
-        {
-        	new (&state_map_const_) Map<const VectorXs>(_ptr, state_size_);
-
-            //std::cout << "remapConstState:  state_map_const_ = " << state_map_const_.transpose() << std::endl;
-        }
-
-        void remapConstState(const WolfScalar * const _ptr, unsigned int _state_size)
-        {
-        	state_size_ = _state_size;
-            new (&state_map_const_) Map<const VectorXs>(_ptr, state_size_);
-
-            //std::cout << "remapConstState:  state_map_const_ = " << state_map_const_.transpose() << std::endl;
         }
 
         void inventMeasurements(unsigned int _sz)
@@ -108,49 +76,20 @@ class WolfVehicle
                 measurements_(ii) = 1 + distribution_(generator_); //just inventing a sort of noise measurements
             }
             //std::cout << "invented measurements_ = " << std::endl << measurements_.transpose() << std::endl;
-
         }
         
         void computePrior()
         {
             state_prior_.setZero();
-        }        
-        
-        void computePrior(VectorXs & _v)
-        {
-            state_prior_.setOnes();
-            _v.resize(state_prior_.size());
-            _v = state_prior_;
         }
         
-        // template <typename T>
-        // void computeError(Map<Matrix<T,Dynamic,1>> & _residuals, unsigned int & _index)
-//        void computeError(double* _residuals)
-//        {
-//        	Map<VectorXs> mapped_residuals(_residuals, measurements_size_);
-//
-//        	//std::cout << "state_map_const  = " << state_map_const_.transpose() << std::endl;
-//        	//std::cout << "measurements     = " << measurements_.transpose() << std::endl;
-//        	std::cout << "measurements_     = " << std::endl << state_map_const_ * MatrixXs::Ones(1,measurements_size_) << std::endl;
-//        	std::cout << "state_map_const_ * Ones(1,measurements_size_) = " << std::endl << state_map_const_ * MatrixXs::Ones(1,measurements_size_) << std::endl;
-//        	mapped_residuals = (measurements_ - state_map_const_ * MatrixXs::Ones(1,measurements_size_)) * MatrixXs::Ones(measurements_size_,1);
-//        	//for(unsigned int ii=0; ii< mapped_residuals.size(); ii++)
-//        	//	mapped_residuals(ii) = measurements_(ii) - state_map_const_(ii); //just a trivial error function
-//
-//            //std::cout << "mapped_residuals = " << mapped_residuals.transpose() << std::endl << std::endl;
-//        }
         template <typename T>
         bool operator()(const T* const _x, T* _residuals) const
         {
-        	//std::cout << "state_size_ = " << state_size_ << std::endl;
-        	//std::cout << "measurements_size_ = " << measurements_size_ << std::endl;
-
         	// Remap the vehicle state to the const evaluation point
-			//remapConstState(_x);
 			Map<const Matrix<T,Dynamic,1>> state_map_const_(_x, state_size_);
 
 			// Compute error or residuals
-			//computeError(_residuals);
 			Map<Matrix<T,Dynamic,Dynamic>> mapped_residuals(_residuals, state_size_, measurements_size_);
 
 			for (unsigned int i = 0; i<measurements_size_; i++)
@@ -164,26 +103,6 @@ class WolfVehicle
 			//std::cout << "residuals computed" << std::endl << std::endl;
         	return true;
         }
-//        bool operator()(const WolfScalar * const _x, double* _residuals) const
-//		{
-//        	//std::cout << std::endl << "operator ()" << std::endl;
-//			// Remap the vehicle state to the const evaluation point
-//			//remapConstState(_x);
-//        	Map<const VectorXs> state_map_const_(_x, state_size_);
-//
-//			// Compute error or residuals
-//			//computeError(_residuals);
-//        	Map<MatrixXs> mapped_residuals(_residuals, state_size_, measurements_size_);
-//
-//        	//std::cout << "measurements_     = " << std::endl << measurements_ << std::endl;
-//			//std::cout << "state_map_const_ * Ones(1,measurements_size_) = " << std::endl << state_map_const_ * MatrixXs::Ones(1,measurements_size_) << std::endl;
-//			//std::cout << "measurements_ - state_map_const_ * Ones(1,measurements_size_) = " << std::endl << measurements_ - state_map_const_ * MatrixXs::Ones(1,measurements_size_) << std::endl;
-//			mapped_residuals = measurements_ - state_map_const_ * MatrixXs::Ones(1,measurements_size_);
-//			//std::cout << "mapped_residuals     = " << std::endl << mapped_residuals << std::endl;
-//        	//mapped_residuals = measurements_ - state_map_const_;
-//c
-//			return true;
-//		}
 
         void print()
         {
@@ -202,7 +121,7 @@ int main(int argc, char** argv)
     //dimension 
     const unsigned int STATE_DIM = 5; //just to test, all will be DIM-dimensional
     const unsigned int MEASUREMENT_DIM = 10; //just to test, all will be DIM-dimensional
-	const unsigned int SimulationSteps = 20;
+	const unsigned int SimulationSteps = 1;
     
     // init
     google::InitGoogleLogging(argv[0]);
@@ -212,7 +131,6 @@ int main(int argc, char** argv)
 
     //wolf vehicle & ceres functor
     WolfVehicle *functorPtr = new WolfVehicle();
-  
 
     // Ceres problem initialization
     ceres::Solver::Options options;
@@ -242,11 +160,7 @@ int main(int argc, char** argv)
 		CostFunction* cost_function = new AutoDiffCostFunction<WolfVehicle,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>(functorPtr);
     	problem.AddResidualBlock(cost_function, NULL, functorPtr->getPrior());
 
-    	//ceres::AutoDiffCostFunction<WolfVehicle,ceres::CENTRAL,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>*
-		//   	   cost_function_static = new ceres::NumericDiffCostFunction<WolfVehicle,ceres::CENTRAL,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>(functorPtr);
-        //problem.AddResidualBlock(cost_function_static, nullptr, functorPtr->getPrior());
-
-        // run Ceres Solver
+    	// run Ceres Solver
         ceres::Solve(options, &problem, &summary);
 
         //display results
