@@ -26,8 +26,11 @@
 class WolfVehicle
 {
     protected:
-        Eigen::VectorXs state_prior_; //state storage where to compute prior
-        Eigen::Map<Eigen::VectorXs> state_map_; //state point to be evaluated by Wolf tree constraints 
+        Eigen::VectorXs state_; //state storage where to compute prior, and where result is placed. Is the allocation for the state vector
+        Eigen::Map<const Eigen::VectorXs> state_map_; //state point to be evaluated by Wolf tree constraints 
+        Eigen::Map<Eigen::VectorXs> error_map_; //error computed by the wolf tree
+        unsigned int state_size_;
+        unsigned int error_size_;        
         
         //Just to generate fake measurements
         std::default_random_engine generator_; //just to generate measurements
@@ -36,8 +39,11 @@ class WolfVehicle
 
     public: 
         WolfVehicle() :
-            state_prior_(),
+            state_(),
             state_map_(nullptr,0),
+            error_map_(nullptr,0),
+            state_size_(0),
+            error_size_(0),
             distribution_(0.0,0.1)
         {
             //
@@ -48,21 +54,23 @@ class WolfVehicle
             //
         }
         
-        WolfScalar *getPrior()
+        void setSizes(unsigned int _state_size, unsigned int _error_size)
         {
-            return state_prior_.data();
+            state_size_ = _state_size;
+            error_size_ = _error_size;
+            state_.resize(_state_size);
         }
         
-        void resizeState(unsigned int _state_size)
+        void remapState(const WolfScalar *_ptr)
         {
-            state_prior_.resize(_state_size);
+            new (&state_map_) Eigen::Map<const Eigen::VectorXs>(_ptr, state_size_);            
         }        
 
-        void remapState(WolfScalar *_ptr, unsigned int _state_size)
+        void remapError(WolfScalar *_ptr)
         {
-            new (&state_map_) Eigen::Map<Eigen::VectorXs>(_ptr, _state_size);            
-        }        
-
+            new (&error_map_) Eigen::Map<Eigen::VectorXs>(_ptr, error_size_);            
+        }                
+        
         void inventMeasurements(unsigned int _sz)
         {
             measurements_.resize(_sz);
@@ -72,31 +80,35 @@ class WolfVehicle
             }
         }
         
-        void computePrior()
+        WolfScalar *getState()
         {
-            state_prior_.setOnes();
+            return state_.data();
         }        
-        
-        void computePrior(Eigen::VectorXs & _v)
-        {
-            state_prior_.setOnes();
-            _v.resize(state_prior_.size());
-            _v = state_prior_;
+                
+        void getState(Eigen::VectorXs & _v)
+        {  
+            _v.resize(state_.size());
+            _v = state_;
         }
         
-        void computeError(Eigen::Map<Eigen::VectorXs> & _residuals, unsigned int & _index)
+        void computePrior()
         {
-            for(unsigned int ii=_index; ii<_residuals.size(); ii++)
+            state_.setOnes();//just a fake prior
+        }                
+        
+        void computeError()
+        {
+            for(unsigned int ii=0; ii<error_map_.size(); ii++)
             {
-                _residuals(ii) = measurements_(ii) - state_map_(ii); //just a trivial error function
+                error_map_(ii) = measurements_(ii) - state_map_(ii); //just a trivial error function
             }
         }
 
         void print()
         {
             std::cout << "measurements_: " << measurements_.transpose() << std::endl;
-            std::cout << "state_prior_: " << state_prior_.transpose() << std::endl;
-            std::cout << "state_: " << state_map_.transpose() << std::endl;
+            std::cout << "state_: " << state_.transpose() << std::endl;
+            //std::cout << "state_map_: " << state_map_.transpose() << std::endl;
         }                
 };
 
@@ -107,26 +119,11 @@ class WolfVehicle
 class CeresWolfFunctor
 {
     protected: 
-        //WolfVehicle *vehicle_ptr_; //pointer to Wolf Vehicle object
         std::shared_ptr<WolfVehicle> vehicle_ptr_; //pointer to Wolf Vehicle object
-        std::shared_ptr<Eigen::VectorXs> state_ptr_; //pointer to state storage. 
-        std::shared_ptr<Eigen::Map<Eigen::VectorXs> > error_ptr_; //Pointer to a Map to an error vector. Ceres call to () will indicate where to map it.
-        unsigned int state_size_;
-        unsigned int error_size_;
-        
-    protected:
-        void setState(const WolfScalar * const _st) const //, unsigned int _state_size)
-        {
-            for (unsigned int ii=0; ii<state_ptr_->size(); ii++) (*state_ptr_)(ii) = _st[ii];
-        }
         
     public:
         CeresWolfFunctor(std::shared_ptr<WolfVehicle> & _wv) :
-            vehicle_ptr_(_wv),
-            state_ptr_(std::make_shared<Eigen::VectorXs>()),
-            error_ptr_(std::make_shared<Eigen::Map<Eigen::VectorXs> >(nullptr,0)),
-            state_size_(0),
-            error_size_(0)
+            vehicle_ptr_(_wv)
         {
             //std::cout << "CeresWolfFunctor(): " << vehicle_ptr_.use_count() << " " << state_ptr_.use_count() << " " << std::endl;
         }
@@ -135,49 +132,21 @@ class CeresWolfFunctor
         {
             //
         }
-                
-        void setStateSize(unsigned int _state_size)
-        {
-            state_size_ = _state_size;
-            state_ptr_->resize(_state_size);
-            vehicle_ptr_->resizeState(_state_size);
-        }
-
-        void setErrorSize(unsigned int _error_size) 
-        {
-            error_size_ = _error_size;
-        }
-        
-        void setSizes(unsigned int _state_size, unsigned int _error_size)
-        {
-            setStateSize(_state_size);
-            setErrorSize(_error_size);    
-        }
-        
         bool operator()(const WolfScalar * const _x, double* _residuals) const
         {
-            unsigned int error_index = 0;
-            
-            // 1. set the state
-            this->setState(_x); //hard copy from x_ to state_. Assumes sizes are ok
-            
-            // 2. Remap the vehicle state to the local copy
-            vehicle_ptr_->remapState(state_ptr_->data(), state_size_);
+            // 1. Remap the vehicle state to the provided x
+            vehicle_ptr_->remapState(_x);
 
-            // 3. Remap the error to the provided address
-            new (error_ptr_.get()) Eigen::Map<Eigen::VectorXs>(_residuals, error_size_);
+            // 2. Remap the error to the provided address
+            vehicle_ptr_->remapError(_residuals);
 
-            // 4. Compute error
-            vehicle_ptr_->computeError(*error_ptr_, error_index);
+            // 3. Compute error
+            vehicle_ptr_->computeError();
 
-            // 5. return 
+            // 4. return 
             return true;
         }
         
-        void printState()
-        {
-            std::cout << "state_: " << state_ptr_->transpose() << std::endl;
-        }        
 };
 
 //This main is a single iteration of the WOLF. 
@@ -189,47 +158,33 @@ int main(int argc, char** argv)
     //dimension 
     const unsigned int DIM = 19; //just to test, all will be DIM-dimensional
     
-    //aux vector
-//     Eigen::VectorXs aux;
-    
     // init
     google::InitGoogleLogging(argv[0]);
     
     //wolf vehicle 
-    //std::shared_ptr<WolfVehicle> vehicle(new WolfVehicle);
     std::shared_ptr<WolfVehicle> vehiclePtr(std::make_shared<WolfVehicle>());
     
     //ceres functor
     CeresWolfFunctor *functorPtr = new CeresWolfFunctor(vehiclePtr);
-    //std::shared_ptr<CeresWolfFunctor> functor(new CeresWolfFunctor(vehicle));
-    //std::shared_ptr<CeresWolfFunctor> functorPtr(std::make_shared<CeresWolfFunctor>(vehiclePtr));
   
     // Allocate the cost function !!!! Difference is to create in the sameline both objects -> in the last (): (new ... ) SEE test_ceres_basic.cpp
-   ceres::NumericDiffCostFunction<CeresWolfFunctor,ceres::CENTRAL,DIM,DIM>* 
+    ceres::NumericDiffCostFunction<CeresWolfFunctor,ceres::CENTRAL,DIM,DIM>* 
            cost_function_static = new ceres::NumericDiffCostFunction<CeresWolfFunctor,ceres::CENTRAL,DIM,DIM>(functorPtr);  
            
-//    ceres::NumericDiffCostFunction<CeresWolfFunctor,ceres::CENTRAL,DIM,DIM>
-//        *cost_function_static = new ceres::NumericDiffCostFunction<CeresWolfFunctor,ceres::CENTRAL,DIM,DIM>(new CeresWolfFunctor(vehiclePtr));  
+    //********************** start Wolf iteration *************************
            
-
-    //start Wolf iteration
-        // set measures. This will be replaced by the WOLF-ROS front-end, getting sensor readings from sensors and performing measurements to build the whole wolf tree
+        // set measures. This will be replaced by the WOLF-ROS front-end, getting sensor reading from sensors (callbacks) and performing measurements to build the whole wolf tree
         vehiclePtr->inventMeasurements(DIM);
         
         // Resizing & remapping. Dimensions may come from a call to WolfVehicle::getSizes()
-        functorPtr->setSizes(DIM,DIM);
-//         aux.resize(DIM);
-                      
+        vehiclePtr->setSizes(DIM,DIM);
+
         // Compute and gets the Prior (initial guess). This would be the prior given by Wolf
         vehiclePtr->computePrior();
-//         vehiclePtr->computePrior(aux);
                
         // build Ceres problem 
-        //ceres::Problem *problem = new ceres::Problem();
-        ceres::Problem problem;
-//         ceres::ResidualBlockId rbId = problem.AddResidualBlock(cost_function_static, nullptr, vehiclePtr->getPrior());
-        problem.AddResidualBlock(cost_function_static, nullptr, vehiclePtr->getPrior());
-//         problem.AddResidualBlock(cost_function_static, nullptr, aux.data());
+        ceres::Problem *problem = new ceres::Problem();
+        problem->AddResidualBlock(cost_function_static, nullptr, vehiclePtr->getState());
 
         // run Ceres Solver
         ceres::Solver::Options options;
@@ -238,19 +193,24 @@ int main(int argc, char** argv)
         options.line_search_direction_type = ceres::LBFGS;
         options.max_num_iterations = 10;
         ceres::Solver::Summary summary;
-        ceres::Solve(options, &problem, &summary);
+        ceres::Solve(options, problem, &summary);
 
         //display results
+        std::cout << std::endl<< "Ceres Report:" << std::endl;
         std::cout << summary.BriefReport() << "\n";
+        std::cout << std::endl << "Wolf vectors:" << std::endl;        
         vehiclePtr->print();
-        //std::cout << "aux: " << aux.transpose() << std::endl;
+        
+    //********************** end Wolf iteration *************************        
         
     //clean
-    std::cout << "Cleaning ... " << std::endl << std::endl;
-    //problem.RemoveResidualBlock(rbId);
+    //std::cout << "Cleaning ... " << std::endl << std::endl;
+    //something to do ??
+    delete problem;
+    //delete vehiclePtr;
     //delete cost_function_static;
-    //delete functorPtr;
-    
+    //delete cost_function_static;
+       
     //end Wolf iteration
     std::cout << " ========= END ===========" << std::endl << std::endl;
        
