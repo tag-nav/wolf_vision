@@ -26,7 +26,7 @@ class Foo
             cout << "Foo() - Constructor - " << id_ << endl; 
         }
         
-        ~Foo()
+        virtual ~Foo()
         { 
             cout << "~Foo() - Destructor - " << id_ << endl; 
         }
@@ -50,7 +50,7 @@ class Bar : public Foo
         {
             //
         }
-        ~Bar()
+        virtual ~Bar()
         {
             //
         }
