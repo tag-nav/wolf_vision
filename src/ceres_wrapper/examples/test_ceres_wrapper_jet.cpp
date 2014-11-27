@@ -89,17 +89,22 @@ class WolfVehicle
         	// Remap the vehicle state to the const evaluation point
 			Map<const Matrix<T,Dynamic,1>> state_map_const_(_x, state_size_);
 
-			// Compute error or residuals
+			// Map residuals vector to matrix (with sizes of the measurements matrix)
 			Map<Matrix<T,Dynamic,Dynamic>> mapped_residuals(_residuals, state_size_, measurements_size_);
 
-			for (unsigned int i = 0; i<measurements_size_; i++)
-			{
-				for (unsigned int j = 0; j<state_size_; j++)
-				{
-					mapped_residuals(j,i) = T(measurements_(j,i)) - state_map_const_(j);
-					//std::cout << "mapped_residuals(" << j << "," << i <<") = " << mapped_residuals(j,i) << std::endl;
-				}
-			}
+			// Compute error or residuals
+			mapped_residuals = measurements_.cast<T>() - state_map_const_.replicate(1,measurements_size_);
+
+			// for (unsigned int i = 0; i<measurements_size_; i++)
+			// {
+			// 	for (unsigned int j = 0; j<state_size_; j++)
+			// 	{
+			// 		mapped_residuals(j,i) = T(measurements_(j,i)) - state_map_const_(j);
+			// 		std::cout << "mapped_residuals(" << j << "," << i <<") = " << mapped_residuals(j,i) << std::endl;
+			// 		std::cout << "residuals_test  (" << j << "," << i <<") = " << residuals_test(j,i) << std::endl;
+			// 		std::cout << "diff = " << residuals_test(j,i) - mapped_residuals(j,i) << std::endl;
+			// 	}
+			// }
 			//std::cout << "residuals computed" << std::endl << std::endl;
         	return true;
         }
