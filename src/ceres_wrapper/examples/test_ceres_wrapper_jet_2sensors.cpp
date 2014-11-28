@@ -1,4 +1,4 @@
-//std includes
+// std includes
 #include <iostream>
 #include <memory>
 #include <random>
@@ -7,11 +7,11 @@
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
 
-//Ceres includes
+// Ceres includes
 #include "ceres/ceres.h"
 #include "glog/logging.h"
 
-//Wolf includes
+// Wolf includes
 #include "wolf.h"
 
 /**
@@ -33,7 +33,7 @@ class WolfVehicle
         
         //Just to generate fake measurements
         std::default_random_engine generator_; //just to generate measurements
-        std::normal_distribution<double> absolute_distribution_, distance_distribution_; //just to generate measurements
+        std::normal_distribution<WolfScalar> absolute_distribution_, distance_distribution_; //just to generate measurements
         MatrixXs absolute_measurements_, distance_measurements_; //just a set of invented measurements
 
         unsigned int absolute_measurements_size_, distance_measurements_size_, state_size_;
@@ -74,9 +74,8 @@ class WolfVehicle
         	absolute_measurements_.resize(state_size_,absolute_measurements_size_);
 
             for(unsigned int ii=0; ii<absolute_measurements_size_*state_size_; ii++)
-            {
             	absolute_measurements_(ii) = 1 + absolute_distribution_(generator_); //just inventing a sort of noise measurements
-            }
+
             //std::cout << "invented measurements_ = " << std::endl << measurements_.transpose() << std::endl;
         }
 
@@ -87,9 +86,8 @@ class WolfVehicle
         	distance_measurements_.resize(state_size_,distance_measurements_size_);
 
             for(unsigned int ii=0; ii<distance_measurements_size_*state_size_; ii++)
-            {
             	distance_measurements_(ii) = 1 + distance_distribution_(generator_); //just inventing a sort of noise measurements
-            }
+
             //std::cout << "invented measurements_ = " << std::endl << measurements_.transpose() << std::endl;
         }
         
@@ -99,17 +97,31 @@ class WolfVehicle
         }
         
         template <typename T>
+        void computeAbsoluteResiduals(const Matrix<T,Dynamic,1> &state_map_const, Matrix<T,Dynamic,Dynamic> &mapped_absolute_residuals)
+        {
+
+        }
+
+        template <typename T>
+        void computeDistanceResiduals(const Matrix<T,Dynamic,1> &state_map_const, Matrix<T,Dynamic,Dynamic> &mapped_absolute_residuals)
+        {
+
+        }
+
+        template <typename T>
         bool operator()(const T* const _x, T* _residuals) const
         {
         	// Remap the vehicle state to the const evaluation point
-			Map<const Matrix<T,Dynamic,1>> state_map_const_(_x, state_size_);
+			Map<const Matrix<T,Dynamic,1>> state_map_const(_x, state_size_);
 
 			// Map residuals vector to matrix (with sizes of the measurements matrix)
 			Map<Matrix<T,Dynamic,Dynamic>> mapped_absolute_residuals(_residuals, state_size_, absolute_measurements_size_);
 			Map<Matrix<T,Dynamic,Dynamic>> mapped_distance_residuals(_residuals + state_size_ * absolute_measurements_size_, state_size_, distance_measurements_size_);
 
 			// Compute error or residuals
-			mapped_residuals = measurements_.cast<T>() - state_map_const_.replicate(1,measurements_size_);
+			computeAbsoluteResiduals(state_map_const, mapped_absolute_residuals);
+			computeDistanceResiduals(state_map_const, mapped_distance_residuals);
+			mapped_residuals = measurements_.cast<T>() - state_map_const.replicate(1,measurements_size_);
 
 			// for (unsigned int i = 0; i<measurements_size_; i++)
 			//	for (unsigned int j = 0; j<state_size_; j++)
@@ -152,7 +164,7 @@ int main(int argc, char** argv)
     const unsigned int N_ABS_MEAS = 1; // Amount of measurements
     const unsigned int N_DIST_MEAS = 1; // Amount of measurements
     const unsigned int MEASUREMENT_DIM = STATE_DIM*N_ABS_MEAS + N_POINTS * N_DIST_MEAS;
-	const unsigned int SimulationSteps = 1;
+	const unsigned int SimulationSteps = 2;
     
     // init
     google::InitGoogleLogging(argv[0]);

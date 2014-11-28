@@ -30,7 +30,7 @@ class WolfVehicle
     protected:
         VectorXs state_prior_; //state storage where to compute prior
         Map<VectorXs> state_map_; //state point to be evaluated by Wolf tree constraints
-        
+
         //Just to generate fake measurements
         std::default_random_engine generator_; //just to generate measurements
         std::normal_distribution<double> distribution_; //just to generate measurements
@@ -72,9 +72,8 @@ class WolfVehicle
         	measurements_.resize(state_size_,measurements_size_);
 
             for(unsigned int ii=0; ii<measurements_size_*state_size_; ii++)
-            {
                 measurements_(ii) = 1 + distribution_(generator_); //just inventing a sort of noise measurements
-            }
+
             //std::cout << "invented measurements_ = " << std::endl << measurements_.transpose() << std::endl;
         }
         
@@ -95,25 +94,30 @@ class WolfVehicle
 			// Compute error or residuals
 			mapped_residuals = measurements_.cast<T>() - state_map_const_.replicate(1,measurements_size_);
 
-			// for (unsigned int i = 0; i<measurements_size_; i++)
-			//	for (unsigned int j = 0; j<state_size_; j++)
+			// std::cout << typeid(T).name() << std::endl;
+			// for (unsigned int j = 0; j<state_size_; j++)
+			// {
+			// 	std::cout << "_x(" << j <<") = " << _x[j] << std::endl;
+			// 	for (unsigned int i = 0; i<measurements_size_; i++)
 			// 		std::cout << "mapped_residuals(" << j << "," << i <<") = " << mapped_residuals(j,i) << std::endl;
+			// }
 
         	return true;
         }
-        bool operator()(const WolfScalar* const _x, WolfScalar* _residuals) const
-		{
-        	// Remap the vehicle state to the const evaluation point
-			Map<const VectorXs> state_map_const_(_x, state_size_);
 
-			// Map residuals vector to matrix (with sizes of the measurements matrix)
-			Map<MatrixXs> mapped_residuals(_residuals, state_size_, measurements_size_);
-
-			// Compute error or residuals
-			mapped_residuals = measurements_ - state_map_const_.replicate(1,measurements_size_);
-
-			return true;
-		}
+//        bool operator()(const WolfScalar* const _x, WolfScalar* _residuals) const
+//		{
+//        	// Remap the vehicle state to the const evaluation point
+//			Map<const VectorXs> state_map_const_(_x, state_size_);
+//
+//			// Map residuals vector to matrix (with sizes of the measurements matrix)
+//			Map<MatrixXs> mapped_residuals(_residuals, state_size_, measurements_size_);
+//
+//			// Compute error or residuals
+//			mapped_residuals = measurements_ - state_map_const_.replicate(1,measurements_size_);
+//
+//			return true;
+//		}
 
         void print()
         {
@@ -131,9 +135,8 @@ int main(int argc, char** argv)
     
     //dimension 
     const unsigned int STATE_DIM = 5; //just to test, all will be DIM-dimensional
-    const unsigned int MEASUREMENT_DIM = 10; //just to test, all will be DIM-dimensional
-	const unsigned int SimulationSteps = 1;
-    
+    const unsigned int MEASUREMENT_DIM = 1; //just to test, all will be DIM-dimensional
+
     // init
     google::InitGoogleLogging(argv[0]);
     
@@ -156,33 +159,30 @@ int main(int argc, char** argv)
     functorPtr->resizeState(STATE_DIM);
     functorPtr->computePrior();
 
-    //start Wolf iteration
-    for (uint i=0; i<SimulationSteps; i++)
-    {
-    	std::cout << " :::::::::::::::::::: step " << i << " ::::::::::::::::::::" << std::endl << std::endl;
+	// set measures. This will be replaced by the WOLF-ROS front-end, getting sensor readings from sensors and performing measurements to build the whole wolf tree
+	functorPtr->inventMeasurements(MEASUREMENT_DIM);
 
-        // set measures. This will be replaced by the WOLF-ROS front-end, getting sensor readings from sensors and performing measurements to build the whole wolf tree
-    	functorPtr->inventMeasurements(MEASUREMENT_DIM);
-        
-        // Resizing & remapping
-
-
-    	// cost function
-		CostFunction* cost_function = new AutoDiffCostFunction<WolfVehicle,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>(functorPtr);
-    	problem.AddResidualBlock(cost_function, NULL, functorPtr->getPrior());
-
-    	// run Ceres Solver
-        ceres::Solve(options, &problem, &summary);
-
-        //display results
-        std::cout << summary.BriefReport() << "\n";
-        functorPtr->print();
+	// cost function
+	CostFunction* cost_function = new AutoDiffCostFunction<WolfVehicle,1,1>(functorPtr);
+	for (uint st=0; st < STATE_DIM; st++)
+	{
+		problem.AddResidualBlock(cost_function, NULL, functorPtr->getPrior()+st);
 	}
+	//CostFunction* cost_function = new AutoDiffCostFunction<WolfVehicle,STATE_DIM*MEASUREMENT_DIM,STATE_DIM>(functorPtr);
+	//problem.AddResidualBlock(cost_function, NULL, functorPtr->getPrior());
+
+	// run Ceres Solver
+	ceres::Solve(options, &problem, &summary);
+
+	//display results
+	std::cout << summary.BriefReport() << "\n";
+    functorPtr->print();
+
     //clean
     std::cout << "Cleaning ... " << std::endl << std::endl;
     //problem.RemoveResidualBlock(rbId);
-    //delete cost_function_static;
-    //delete functorPtr;
+    delete cost_function;
+    delete functorPtr;
     
     //end Wolf iteration
     std::cout << " ========= END ===========" << std::endl << std::endl;

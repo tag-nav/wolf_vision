@@ -6,6 +6,10 @@ TARGET_LINK_LIBRARIES(test_ceres_wrapper_numeric ${CERES_LIBRARIES} ${PROJECT_NA
 ADD_EXECUTABLE(test_ceres_wrapper_jet test_ceres_wrapper_jet.cpp)
 TARGET_LINK_LIBRARIES(test_ceres_wrapper_jet ${CERES_LIBRARIES} ${PROJECT_NAME})
 
+# jet individual blocks test
+ADD_EXECUTABLE(test_ceres_wrapper_jet_ind_block test_ceres_wrapper_jet_ind_block.cpp)
+TARGET_LINK_LIBRARIES(test_ceres_wrapper_jet_ind_block ${CERES_LIBRARIES} ${PROJECT_NAME})
+
 # jet test with 2 sensors
 # ADD_EXECUTABLE(test_ceres_wrapper_jet test_ceres_wrapper_jet_2sensors.cpp)
 # TARGET_LINK_LIBRARIES(test_ceres_wrapper_jet ${CERES_LIBRARIES} ${PROJECT_NAME})
