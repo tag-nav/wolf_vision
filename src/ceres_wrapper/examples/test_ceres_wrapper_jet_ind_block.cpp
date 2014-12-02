@@ -34,13 +34,15 @@ class AbsoluteCorrespondence
         std::default_random_engine generator_; //just to generate measurements
         std::normal_distribution<WolfScalar> distribution_; //just to generate measurements
         VectorXs measurement_; // invented measurement
+        ceres::CostFunction* cost_function;
 
     public:
 
         AbsoluteCorrespondence(WolfScalar* _statePtr, const unsigned int & _block_size) :
         	state_block_mapped_(_statePtr,_block_size),
             distribution_(0.0,0.01),
-			measurement_(_block_size)
+			measurement_(_block_size),
+			cost_function(new ceres::AutoDiffCostFunction<AbsoluteCorrespondence,1,1>(this))
         {
         }
 
@@ -79,6 +81,11 @@ class AbsoluteCorrespondence
 			// }
 
         	return true;
+        }
+
+        void addBlock(ceres::Problem & ceres_problem)
+        {
+        	ceres_problem.AddResidualBlock(cost_function, NULL, getPrior());
         }
 };
 
@@ -153,7 +160,7 @@ int main(int argc, char** argv)
     
     //dimension 
     const unsigned int STATE_DIM = 50; //just to test, all will be DIM-dimensional
-    const unsigned int N_MEASUREMENTS = 100;
+    const unsigned int N_MEASUREMENTS = 1000;
     // init
     google::InitGoogleLogging(argv[0]);
     std::default_random_engine generator;
@@ -184,11 +191,7 @@ int main(int argc, char** argv)
 	// cost function
     std::cout << "Number of blocks: " << std::endl << wolf_problem->getCorrespondencesSize() << std::endl;
 	for (uint block=0; block < wolf_problem->getCorrespondencesSize(); block++)
-	{
-	    CostFunction* cost_function = new AutoDiffCostFunction<AbsoluteCorrespondence,1,1>(wolf_problem->getCorrespondence(block));
-		ceres_problem.AddResidualBlock(cost_function, NULL, wolf_problem->getCorrespondence(block)->getPrior());
-	    //delete cost_function;
-	}
+		wolf_problem->getCorrespondence(block)->addBlock(ceres_problem);
 
 	// run Ceres Solver
 	ceres::Solve(options, &ceres_problem, &summary);
