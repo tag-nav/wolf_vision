@@ -9,7 +9,9 @@
 #include <eigen3/Eigen/Geometry>
 
 //Ceres includes
+#include "ceres/jet.h"
 #include "ceres/ceres.h"
+#include "ceres/loss_function.h"
 #include "glog/logging.h"
 
 //Wolf includes
@@ -94,15 +96,9 @@ class correspondence_1_sparse: public correspondence_base
 
         template <typename T>
         //void compute_residuals(const Matrix<T,Dynamic,1>& _x, Matrix<T,Dynamic,1> residuals)
-        void compute_residuals(const T* const _x, T* _residuals)
+        void compute_residuals(Map<const Matrix<T,Dynamic,1>>& _st, Map<Matrix<T,Dynamic,1>> residuals) const
         {
-				// Remap the vehicle state to the const evaluation point
-				Map<const Matrix<T,Dynamic,1>> state_map_const(_x, BLOCK_SIZE);
-
-				// Map residuals vector to matrix (with sizes of the measurements matrix)
-				Map<Matrix<T,Dynamic,1>> residuals(_residuals, MEASUREMENT_SIZE);
-
-        	residuals = measurement_.cast<T>() - _x;
+        	residuals = measurement_.cast<T>() - _st;
         	// std::cout << typeid(T).name() << std::endl;
 			// for (unsigned int j = 0; j<BLOCK_SIZE; j++)
 			// {
@@ -140,18 +136,16 @@ class correspondence_1_sparse_ceres: public correspondence_ceres_base, public co
 			Map<Matrix<T,Dynamic,1>> mapped_residuals(_residuals, MEASUREMENT_SIZE);
 
 			// Compute error or residuals
-			//correspondence_1_sparse<MEASUREMENT_SIZE, BLOCK_SIZE>::template compute_residuals<T>(state_map_const, mapped_residuals);
-			//compute_residuals<T>(_x, _residuals);
-			VectorXd meas = this->measurement_;
-			mapped_residuals = meas.cast<T>() - state_map_const;
+			this->template compute_residuals<T>(state_map_const, mapped_residuals);
 
         	return true;
         }
 
         virtual void addBlock(ceres::Problem & ceres_problem)
         {
-    		//std::cout << " adding residual block...";
+        	//std::cout << " adding correspondence_1_sparse_ceres...";
         	ceres_problem.AddResidualBlock(cost_function_, NULL, this->state_block_map_.data());
+        	//std::cout << " added!" << std::endl;
         }
 };
 
@@ -178,15 +172,11 @@ class correspondence_2_sparse: public correspondence_base
         }
 
         template <typename T>
-        void compute_residuals(const Matrix<T,Dynamic,1>& _st1, const Matrix<T,Dynamic,1>& _st2, Matrix<T,Dynamic,1> residuals)
+        void compute_residuals(Map<const Matrix<T,Dynamic,1>>& _st1, Map<const Matrix<T,Dynamic,1>>& _st2, Map<Matrix<T,Dynamic,1>> residuals) const
         {
-        	residuals = measurement_.cast<T>() - _st1 - _st2;
-        	// std::cout << typeid(T).name() << std::endl;
-			// for (unsigned int j = 0; j<BLOCK_SIZE; j++)
-			// {
-			// 	std::cout << "_x(" << j <<") = " << _x[j] << std::endl;
-			// 	std::cout << "mapped_residuals(" << j <<") = " << mapped_residuals(j) << std::endl;
-			// }
+        	Matrix<T,Dynamic,1> expected_measurement = ((_st1 - _st2).transpose() * (_st1 - _st2));
+			VectorXd meas = this->measurement_;
+			residuals = (meas.cwiseProduct(meas)).cast<T>() - expected_measurement;
         }
 
         WolfScalar *getBlock1Ptr()
@@ -219,26 +209,48 @@ class correspondence_2_sparse_ceres: public correspondence_ceres_base, public co
         template <typename T>
         bool operator()(const T* const _x1, const T* const _x2, T* _residuals) const
         {
+        	// print inputs
+        	// std::cout << "_x1 = ";
+        	// for (int i=0; i < BLOCK_1_SIZE; i++)
+        	// 	std::cout << _x1[i] << " ";
+        	// std::cout << std::endl;
+        	// std::cout << "_x2 = ";
+        	// for (int i=0; i < BLOCK_2_SIZE; i++)
+        	// 	std::cout << _x2[i] << " ";
+        	// std::cout << std::endl;
+        	// std::cout << "measurement = ";
+        	// for (int i=0; i < MEASUREMENT_SIZE; i++)
+        	// 	std::cout << this->measurement_(i) << " ";
+        	// std::cout << std::endl;
+
         	// Remap the vehicle state to the const evaluation point
-			Map<const Matrix<T,Dynamic,1>> x1_map_const_(_x1, BLOCK_1_SIZE);
-			Map<const Matrix<T,Dynamic,1>> x2_map_const_(_x2, BLOCK_2_SIZE);
+			Map<const Matrix<T,Dynamic,1>> x1_map_const(_x1, BLOCK_1_SIZE);
+			Map<const Matrix<T,Dynamic,1>> x2_map_const(_x2, BLOCK_2_SIZE);
 
 			// Map residuals vector to matrix (with sizes of the measurements matrix)
 			Map<Matrix<T,Dynamic,1>> mapped_residuals(_residuals, MEASUREMENT_SIZE);
 
 			// Compute error or residuals
-			//correspondence_2_sparse<MEASUREMENT_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE>::template compute_residuals(x1_map_const_, x2_map_const_, mapped_residuals);
+			this->template compute_residuals(x1_map_const, x2_map_const, mapped_residuals);
 
-			const Matrix<T,Dynamic,1> expected_measurement = ((x1_map_const_ - x2_map_const_).transpose() * (x1_map_const_ - x2_map_const_)).cwiseSqrt();
-			VectorXd meas = this->measurement_;
-			mapped_residuals = meas.cast<T>() - expected_measurement;
+			// print outputs
+			// std::cout << "expected    = ";
+			// for (int i=0; i < MEASUREMENT_SIZE; i++)
+			// 	std::cout << expected_measurement(i) << " ";
+			// std::cout << std::endl;
+			// std::cout << "_residuals  = ";
+			// for (int i=0; i < MEASUREMENT_SIZE; i++)
+			// 	std::cout << _residuals[i] << " ";
+			// std::cout << std::endl << std::endl;
 
 			return true;
         }
 
         virtual void addBlock(ceres::Problem & ceres_problem)
         {
-        	ceres_problem.AddResidualBlock(cost_function_, NULL, correspondence_2_sparse<MEASUREMENT_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE>::state_block_1_map_.data(), correspondence_2_sparse<MEASUREMENT_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE>::state_block_2_map_.data());
+        	//std::cout << " adding correspondence_2_sparse_ceres...";
+        	ceres_problem.AddResidualBlock(cost_function_, NULL, this->state_block_1_map_.data(), this->state_block_2_map_.data());
+        	//std::cout << " added!" << std::endl;
         }
 };
 
@@ -313,12 +325,16 @@ int main(int argc, char** argv)
     const unsigned int STATE_DIM = DIM * N_STATES;
     const unsigned int MEAS_A_DIM = 3;
     const unsigned int MEAS_B_DIM = 1;
-    const unsigned int N_MEAS_A = 2;
+    const unsigned int N_MEAS_A = 100;
+    const unsigned int N_MEAS_B = 50;
+    //const double w_A = 1;
+    //const double w_B = 10;
 
     // init
     google::InitGoogleLogging(argv[0]);
     std::default_random_engine generator;
-    std::normal_distribution<WolfScalar> distribution(0.0,0.01);
+    std::normal_distribution<WolfScalar> distribution_A(0.0,0.01);
+    std::normal_distribution<WolfScalar> distribution_B(0.0,0.1);
     VectorXs actualState(STATE_DIM);
     for (uint i=0;i<STATE_DIM; i++)
     	actualState(i) = i;
@@ -331,7 +347,7 @@ int main(int argc, char** argv)
     options.minimizer_progress_to_stdout = false;
     options.minimizer_type = ceres::TRUST_REGION;
     options.line_search_direction_type = ceres::LBFGS;
-    options.max_num_iterations = 10;
+    options.max_num_iterations = 100;
     ceres::Solver::Summary summary;
     ceres::Problem ceres_problem;
 
@@ -339,28 +355,32 @@ int main(int argc, char** argv)
 	WolfProblem *wolf_problem = new WolfProblem();
     wolf_problem->resizeState(STATE_DIM);
     wolf_problem->computePrior();
+    std::cout << "Real state: " << actualState.transpose() << std::endl;
+    wolf_problem->print();
 
     // Correspondences
     // SENSOR A: Absolute measurements of the whole state
-    for (uint st=0; st < STATE_DIM; st++)
+    for(uint mA=0; mA < N_MEAS_A; mA++)
     {
-    	for(uint mA=0; st < N_MEAS_A; mA++)
+    	for (uint st=0; st < N_STATES; st++)
 		{
-			correspondence_1_sparse_ceres<MEAS_A_DIM, DIM>* corrAPtr = new correspondence_1_sparse_ceres<MEAS_A_DIM, DIM>(wolf_problem->getPrior()+st);
-			VectorXs actualMeasurement = actualState.segment(st,DIM);
-			corrAPtr->inventMeasurement(actualMeasurement,generator,distribution);
+			correspondence_1_sparse_ceres<MEAS_A_DIM, DIM>* corrAPtr = new correspondence_1_sparse_ceres<MEAS_A_DIM, DIM>(wolf_problem->getPrior()+st*DIM);
+			VectorXs actualMeasurement = actualState.segment(st*DIM,DIM);
+			corrAPtr->inventMeasurement(actualMeasurement,generator,distribution_A);
 			wolf_problem->addCorrespondence(corrAPtr);
 		}
     }
 	// SENSOR B: Relative distances between points
-	correspondence_2_sparse_ceres<MEAS_B_DIM, DIM, DIM>* corrBPtr = new correspondence_2_sparse_ceres<MEAS_B_DIM, DIM, DIM>(wolf_problem->getPrior(),wolf_problem->getPrior()+DIM);
-	VectorXs actualVector = actualState.head(DIM) - actualState.tail(DIM);
-	VectorXs actualMeasurement = (actualVector.transpose() * actualVector).cwiseSqrt();
-	corrBPtr->inventMeasurement(actualMeasurement,generator,distribution);
-	wolf_problem->addCorrespondence(corrBPtr);
+    for(uint mB=0; mB < N_MEAS_B; mB++)
+	{
+    	correspondence_2_sparse_ceres<MEAS_B_DIM, DIM, DIM>* corrBPtr = new correspondence_2_sparse_ceres<MEAS_B_DIM, DIM, DIM>(wolf_problem->getPrior(),wolf_problem->getPrior()+DIM);
+		VectorXs actualMeasurement = ((actualState.head(DIM) - actualState.tail(DIM)).transpose() * (actualState.head(DIM) - actualState.tail(DIM))).cwiseSqrt();
+		corrBPtr->inventMeasurement(actualMeasurement,generator,distribution_B);
+		wolf_problem->addCorrespondence(corrBPtr);
+	}
 
 	// cost function
-    //std::cout << "Number of blocks: " << std::endl << wolf_problem->getCorrespondencesSize() << std::endl;
+    std::cout << "Number of blocks: " << std::endl << wolf_problem->getCorrespondencesSize() << std::endl;
 	for (uint block=0; block < wolf_problem->getCorrespondencesSize(); block++)
 	{
 		//std::cout << "block " << block << "...";
