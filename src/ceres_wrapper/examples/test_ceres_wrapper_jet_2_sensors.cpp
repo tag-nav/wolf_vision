@@ -117,7 +117,7 @@ class correspondence_1_sparse_ceres: public correspondence_ceres_base, public co
 {
     public:
 
-        correspondence_1_sparse_ceres(WolfScalar* _statePtr, const unsigned int & _block_size) :
+        correspondence_1_sparse_ceres(WolfScalar* _statePtr) :
 			correspondence_ceres_base(),
         	correspondence_1_sparse<MEASUREMENT_SIZE, BLOCK_SIZE>(_statePtr)
         {
@@ -150,14 +150,9 @@ class correspondence_1_sparse_ceres: public correspondence_ceres_base, public co
 
         virtual void addBlock(ceres::Problem & ceres_problem)
         {
-    		std::cout << " adding residual block...";
+    		//std::cout << " adding residual block...";
         	ceres_problem.AddResidualBlock(cost_function_, NULL, this->state_block_map_.data());
         }
-
-//        virtual WolfScalar* getBlockPtr()
-//        {
-//            return this->state_block_map_.data();
-//        }
 };
 
 
@@ -232,9 +227,13 @@ class correspondence_2_sparse_ceres: public correspondence_ceres_base, public co
 			Map<Matrix<T,Dynamic,1>> mapped_residuals(_residuals, MEASUREMENT_SIZE);
 
 			// Compute error or residuals
-			correspondence_2_sparse<MEASUREMENT_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE>::template compute_residuals(x1_map_const_, x2_map_const_, mapped_residuals);
+			//correspondence_2_sparse<MEASUREMENT_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE>::template compute_residuals(x1_map_const_, x2_map_const_, mapped_residuals);
 
-        	return true;
+			const Matrix<T,Dynamic,1> expected_measurement = ((x1_map_const_ - x2_map_const_).transpose() * (x1_map_const_ - x2_map_const_)).cwiseSqrt();
+			VectorXd meas = this->measurement_;
+			mapped_residuals = meas.cast<T>() - expected_measurement;
+
+			return true;
         }
 
         virtual void addBlock(ceres::Problem & ceres_problem)
@@ -247,7 +246,7 @@ class WolfProblem
 {
     protected:
         VectorXs state_; //state storage
-        std::vector<correspondence_base*> correspondences_;
+        std::vector<correspondence_ceres_base*> correspondences_;
 
         unsigned int state_size_;
 
@@ -268,9 +267,9 @@ class WolfProblem
 			return state_.data();
 		}
 
-        correspondence_base* getCorrespondence(const unsigned int _idx)
+        correspondence_ceres_base* getCorrespondence(const unsigned int _idx)
         {
-        	std::cout << correspondences_.size() << " correspondences" << std::endl;
+        	//std::cout << correspondences_.size() << " correspondences" << std::endl;
         	return correspondences_[_idx];
         }
 
@@ -285,7 +284,7 @@ class WolfProblem
             state_.resize(_state_size);
         }
 
-        void addCorrespondence(correspondence_base* _absCorrPtr)
+        void addCorrespondence(correspondence_ceres_base* _absCorrPtr)
         {
         	correspondences_.push_back(_absCorrPtr);
         	//std::cout << correspondences_.size() << " correspondence added!" << std::endl;
@@ -309,13 +308,20 @@ int main(int argc, char** argv)
     std::cout << " ========= Static Numeric case ===========" << std::endl << std::endl;
     
     //dimension 
-    const unsigned int STATE_DIM = 5; //just to test, all will be DIM-dimensional
-    const unsigned int N_MEASUREMENTS = 10;
+    const unsigned int DIM = 3;
+    const unsigned int N_STATES = 2;
+    const unsigned int STATE_DIM = DIM * N_STATES;
+    const unsigned int MEAS_A_DIM = 3;
+    const unsigned int MEAS_B_DIM = 1;
+    const unsigned int N_MEAS_A = 2;
+
     // init
     google::InitGoogleLogging(argv[0]);
     std::default_random_engine generator;
     std::normal_distribution<WolfScalar> distribution(0.0,0.01);
     VectorXs actualState(STATE_DIM);
+    for (uint i=0;i<STATE_DIM; i++)
+    	actualState(i) = i;
 
     using ceres::AutoDiffCostFunction;
     using ceres::CostFunction;
@@ -333,29 +339,33 @@ int main(int argc, char** argv)
 	WolfProblem *wolf_problem = new WolfProblem();
     wolf_problem->resizeState(STATE_DIM);
     wolf_problem->computePrior();
-    for(uint st=0; st < N_MEASUREMENTS; st++)
+
+    // Correspondences
+    // SENSOR A: Absolute measurements of the whole state
+    for (uint st=0; st < STATE_DIM; st++)
     {
-    	for (uint st=0; st < STATE_DIM; st++)
+    	for(uint mA=0; st < N_MEAS_A; mA++)
 		{
-			correspondence_1_sparse_ceres<1,1> corrPtr(wolf_problem->getPrior()+st,1);
-			corrPtr.inventMeasurement(VectorXs::Zero(1),generator,distribution);
-			wolf_problem->addCorrespondence(&corrPtr);
+			correspondence_1_sparse_ceres<MEAS_A_DIM, DIM>* corrAPtr = new correspondence_1_sparse_ceres<MEAS_A_DIM, DIM>(wolf_problem->getPrior()+st);
+			VectorXs actualMeasurement = actualState.segment(st,DIM);
+			corrAPtr->inventMeasurement(actualMeasurement,generator,distribution);
+			wolf_problem->addCorrespondence(corrAPtr);
 		}
     }
+	// SENSOR B: Relative distances between points
+	correspondence_2_sparse_ceres<MEAS_B_DIM, DIM, DIM>* corrBPtr = new correspondence_2_sparse_ceres<MEAS_B_DIM, DIM, DIM>(wolf_problem->getPrior(),wolf_problem->getPrior()+DIM);
+	VectorXs actualVector = actualState.head(DIM) - actualState.tail(DIM);
+	VectorXs actualMeasurement = (actualVector.transpose() * actualVector).cwiseSqrt();
+	corrBPtr->inventMeasurement(actualMeasurement,generator,distribution);
+	wolf_problem->addCorrespondence(corrBPtr);
 
 	// cost function
-    std::cout << "Number of blocks: " << std::endl << wolf_problem->getCorrespondencesSize() << std::endl;
+    //std::cout << "Number of blocks: " << std::endl << wolf_problem->getCorrespondencesSize() << std::endl;
 	for (uint block=0; block < wolf_problem->getCorrespondencesSize(); block++)
 	{
-		std::cout << "block " << block << "...";
-		//correspondence_ceres_base *ptr = static_cast<correspondence_ceres_base*>(wolf_problem->getCorrespondence(block));
-		correspondence_1_sparse_ceres<>* ptr1 = (correspondence_1_sparse_ceres<>*)wolf_problem->getCorrespondence(block);
-		correspondence_ceres_base* ptrc= (correspondence_ceres_base*)ptr1;
-
-		std::cout << " casted...";
-		//correspondence_1_sparse_ceres<>* ptr = (correspondence_1_sparse_ceres<>*)wolf_problem->getCorrespondence(block);
-		ptrc->addBlock(ceres_problem);
-		std::cout << " added!" << std::endl;
+		//std::cout << "block " << block << "...";
+		wolf_problem->getCorrespondence(block)->addBlock(ceres_problem);
+		//std::cout << " added!" << std::endl;
 	}
 
 	// run Ceres Solver
