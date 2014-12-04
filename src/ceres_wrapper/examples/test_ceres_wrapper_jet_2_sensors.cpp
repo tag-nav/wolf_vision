@@ -28,19 +28,19 @@
  **/
 using namespace Eigen;
 
-class correspondence_base
+class CorrespondenceBase
 {
 	protected:
     	VectorXs measurement_;
 
     public:
 
-        correspondence_base(const unsigned int & _measurement_size) :
+        CorrespondenceBase(const unsigned int & _measurement_size) :
 			measurement_(_measurement_size)
         {
         }
 
-        virtual ~correspondence_base()
+        virtual ~CorrespondenceBase()
         {
         }
 
@@ -53,18 +53,18 @@ class correspondence_base
 		}
 };
 
-class correspondence_ceres_base
+class CorrespondenceCeresBase
 {
 	protected:
         ceres::CostFunction* cost_function_;
 
     public:
 
-        correspondence_ceres_base()
+        CorrespondenceCeresBase()
         {
         }
 
-        virtual ~correspondence_ceres_base()
+        virtual ~CorrespondenceCeresBase()
         {
         }
 
@@ -72,20 +72,20 @@ class correspondence_ceres_base
 };
 
 template <unsigned int MEASUREMENT_SIZE = 1, unsigned int BLOCK_SIZE = 1>
-class correspondence_1_sparse: public correspondence_base
+class Correspondence1Sparse: public CorrespondenceBase
 {
     protected:
     	Map<Matrix<WolfScalar, BLOCK_SIZE, 1>> state_block_map_;
 
     public:
 
-        correspondence_1_sparse(WolfScalar* _statePtr) :
-        	correspondence_base(MEASUREMENT_SIZE),
+        Correspondence1Sparse(WolfScalar* _statePtr) :
+        	CorrespondenceBase(MEASUREMENT_SIZE),
 			state_block_map_(_statePtr,BLOCK_SIZE)
         {
         }
 
-        virtual ~correspondence_1_sparse()
+        virtual ~Correspondence1Sparse()
         {
         }
 
@@ -109,25 +109,25 @@ class correspondence_1_sparse: public correspondence_base
 };
 
 template <unsigned int MEASUREMENT_SIZE = 1, unsigned int BLOCK_SIZE = 1>
-class correspondence_1_sparse_ceres: public correspondence_ceres_base, public correspondence_1_sparse<MEASUREMENT_SIZE, BLOCK_SIZE>
+class Correspondence1SparseCeres: public CorrespondenceCeresBase, public Correspondence1Sparse<MEASUREMENT_SIZE, BLOCK_SIZE>
 {
     public:
 
-        correspondence_1_sparse_ceres(WolfScalar* _statePtr) :
-			correspondence_ceres_base(),
-        	correspondence_1_sparse<MEASUREMENT_SIZE, BLOCK_SIZE>(_statePtr)
+        Correspondence1SparseCeres(WolfScalar* _statePtr) :
+			CorrespondenceCeresBase(),
+        	Correspondence1Sparse<MEASUREMENT_SIZE, BLOCK_SIZE>(_statePtr)
         {
-			cost_function_  = new ceres::AutoDiffCostFunction<correspondence_1_sparse_ceres,MEASUREMENT_SIZE,BLOCK_SIZE>(this);
+			cost_function_  = new ceres::AutoDiffCostFunction<Correspondence1SparseCeres,MEASUREMENT_SIZE,BLOCK_SIZE>(this);
         }
 
-        virtual ~correspondence_1_sparse_ceres()
+        virtual ~Correspondence1SparseCeres()
         {
         }
 
         template <typename T>
         bool operator()(const T* const _x, T* _residuals) const
         {
-        	//this->template compute_residuals(_x, _residuals);
+        	//std::cout << "adress of x: " << _x << std::endl;
 
         	// Remap the vehicle state to the const evaluation point
 			Map<const Matrix<T,Dynamic,1>> state_map_const(_x, BLOCK_SIZE);
@@ -152,7 +152,7 @@ class correspondence_1_sparse_ceres: public correspondence_ceres_base, public co
 
 
 template <unsigned int MEASUREMENT_SIZE = 1, unsigned int BLOCK_1_SIZE = 1, unsigned int BLOCK_2_SIZE = 1>
-class correspondence_2_sparse: public correspondence_base
+class Correspondence2Sparse: public CorrespondenceBase
 {
     protected:
 		Map<Matrix<WolfScalar, BLOCK_1_SIZE, 1>> state_block_1_map_;
@@ -160,23 +160,23 @@ class correspondence_2_sparse: public correspondence_base
 
     public:
 
-        correspondence_2_sparse(WolfScalar* _block1Ptr, WolfScalar* _block2Ptr) :
-        	correspondence_base(MEASUREMENT_SIZE),
+        Correspondence2Sparse(WolfScalar* _block1Ptr, WolfScalar* _block2Ptr) :
+        	CorrespondenceBase(MEASUREMENT_SIZE),
 			state_block_1_map_(_block1Ptr,BLOCK_1_SIZE),
 			state_block_2_map_(_block2Ptr,BLOCK_2_SIZE)
         {
         }
 
-        virtual ~correspondence_2_sparse()
+        virtual ~Correspondence2Sparse()
         {
         }
 
         template <typename T>
         void compute_residuals(Map<const Matrix<T,Dynamic,1>>& _st1, Map<const Matrix<T,Dynamic,1>>& _st2, Map<Matrix<T,Dynamic,1>> residuals) const
         {
-        	Matrix<T,Dynamic,1> expected_measurement = ((_st1 - _st2).transpose() * (_st1 - _st2));
+        	Matrix<T,Dynamic,1> expected_measurement = ((_st1 - _st2).transpose() * (_st1 - _st2)).cwiseSqrt();
 			VectorXd meas = this->measurement_;
-			residuals = (meas.cwiseProduct(meas)).cast<T>() - expected_measurement;
+			residuals = (meas).cast<T>() - expected_measurement;
         }
 
         WolfScalar *getBlock1Ptr()
@@ -191,18 +191,18 @@ class correspondence_2_sparse: public correspondence_base
 };
 
 template <unsigned int MEASUREMENT_SIZE = 1, unsigned int BLOCK_1_SIZE = 1, unsigned int BLOCK_2_SIZE = 1>
-class correspondence_2_sparse_ceres: public correspondence_ceres_base, public correspondence_2_sparse<MEASUREMENT_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE>
+class Correspondence2SparseCeres: public CorrespondenceCeresBase, public Correspondence2Sparse<MEASUREMENT_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE>
 {
     public:
 
-        correspondence_2_sparse_ceres(WolfScalar* _block1Ptr, WolfScalar* _block2Ptr) :
-			correspondence_ceres_base(),
-			correspondence_2_sparse<MEASUREMENT_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE>(_block1Ptr, _block2Ptr)
+        Correspondence2SparseCeres(WolfScalar* _block1Ptr, WolfScalar* _block2Ptr) :
+			CorrespondenceCeresBase(),
+			Correspondence2Sparse<MEASUREMENT_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE>(_block1Ptr, _block2Ptr)
         {
-			cost_function_  = new ceres::AutoDiffCostFunction<correspondence_2_sparse_ceres,MEASUREMENT_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE>(this);
+			cost_function_  = new ceres::AutoDiffCostFunction<Correspondence2SparseCeres,MEASUREMENT_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE>(this);
         }
 
-        virtual ~correspondence_2_sparse_ceres()
+        virtual ~Correspondence2SparseCeres()
         {
         }
 
@@ -258,7 +258,7 @@ class WolfProblem
 {
     protected:
         VectorXs state_; //state storage
-        std::vector<correspondence_ceres_base*> correspondences_;
+        std::vector<CorrespondenceCeresBase*> correspondences_;
 
         unsigned int state_size_;
 
@@ -279,7 +279,7 @@ class WolfProblem
 			return state_.data();
 		}
 
-        correspondence_ceres_base* getCorrespondence(const unsigned int _idx)
+        CorrespondenceCeresBase* getCorrespondence(const unsigned int _idx)
         {
         	//std::cout << correspondences_.size() << " correspondences" << std::endl;
         	return correspondences_[_idx];
@@ -296,7 +296,7 @@ class WolfProblem
             state_.resize(_state_size);
         }
 
-        void addCorrespondence(correspondence_ceres_base* _absCorrPtr)
+        void addCorrespondence(CorrespondenceCeresBase* _absCorrPtr)
         {
         	correspondences_.push_back(_absCorrPtr);
         	//std::cout << correspondences_.size() << " correspondence added!" << std::endl;
@@ -304,7 +304,7 @@ class WolfProblem
 
         void computePrior()
         {
-            state_.setZero();
+            state_.setRandom();
         }
 
         void print()
@@ -321,7 +321,7 @@ int main(int argc, char** argv)
     
     //dimension 
     const unsigned int DIM = 3;
-    const unsigned int N_STATES = 2;
+    const unsigned int N_STATES = 10;
     const unsigned int STATE_DIM = DIM * N_STATES;
     const unsigned int MEAS_A_DIM = 3;
     const unsigned int MEAS_B_DIM = 1;
@@ -364,7 +364,7 @@ int main(int argc, char** argv)
     {
     	for (uint st=0; st < N_STATES; st++)
 		{
-			correspondence_1_sparse_ceres<MEAS_A_DIM, DIM>* corrAPtr = new correspondence_1_sparse_ceres<MEAS_A_DIM, DIM>(wolf_problem->getPrior()+st*DIM);
+			Correspondence1SparseCeres<MEAS_A_DIM, DIM>* corrAPtr = new Correspondence1SparseCeres<MEAS_A_DIM, DIM>(wolf_problem->getPrior()+st*DIM);
 			VectorXs actualMeasurement = actualState.segment(st*DIM,DIM);
 			corrAPtr->inventMeasurement(actualMeasurement,generator,distribution_A);
 			wolf_problem->addCorrespondence(corrAPtr);
@@ -373,10 +373,20 @@ int main(int argc, char** argv)
 	// SENSOR B: Relative distances between points
     for(uint mB=0; mB < N_MEAS_B; mB++)
 	{
-    	correspondence_2_sparse_ceres<MEAS_B_DIM, DIM, DIM>* corrBPtr = new correspondence_2_sparse_ceres<MEAS_B_DIM, DIM, DIM>(wolf_problem->getPrior(),wolf_problem->getPrior()+DIM);
-		VectorXs actualMeasurement = ((actualState.head(DIM) - actualState.tail(DIM)).transpose() * (actualState.head(DIM) - actualState.tail(DIM))).cwiseSqrt();
-		corrBPtr->inventMeasurement(actualMeasurement,generator,distribution_B);
-		wolf_problem->addCorrespondence(corrBPtr);
+    	for (uint st_from=0; st_from < N_STATES-1; st_from++)
+    	{
+    		for (uint st_to=st_from+1; st_to < N_STATES; st_to++)
+			{
+    			Correspondence2SparseCeres<MEAS_B_DIM, DIM, DIM>* corrBPtr = new Correspondence2SparseCeres<MEAS_B_DIM, DIM, DIM>(wolf_problem->getPrior()+st_from*DIM,wolf_problem->getPrior()+st_to*DIM);
+				VectorXs actualMeasurement = ((actualState.segment(st_from*DIM,DIM) - actualState.segment(st_to*DIM,DIM)).transpose() * (actualState.segment(st_from*DIM,DIM) - actualState.segment(st_to*DIM,DIM))).cwiseSqrt();
+				corrBPtr->inventMeasurement(actualMeasurement,generator,distribution_B);
+				wolf_problem->addCorrespondence(corrBPtr);
+			}
+    	}
+//    	correspondence_2_sparse_ceres<MEAS_B_DIM, DIM, DIM>* corrBPtr = new correspondence_2_sparse_ceres<MEAS_B_DIM, DIM, DIM>(wolf_problem->getPrior(),wolf_problem->getPrior()+DIM);
+//		VectorXs actualMeasurement = ((actualState.head(DIM) - actualState.tail(DIM)).transpose() * (actualState.head(DIM) - actualState.tail(DIM))).cwiseSqrt();
+//		corrBPtr->inventMeasurement(actualMeasurement,generator,distribution_B);
+//		wolf_problem->addCorrespondence(corrBPtr);
 	}
 
 	// cost function
