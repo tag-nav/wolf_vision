@@ -167,7 +167,7 @@ int main(int argc, char** argv)
     //ceres functor
     CeresWolfFunctor *functorPtr = new CeresWolfFunctor(vehiclePtr);
   
-    // Allocate the cost function !!!! Difference is to create in the sameline both objects -> in the last (): (new ... ) SEE test_ceres_basic.cpp
+    // Allocate the cost function !!!! Difference is to create in the same line both objects -> in the last (): (new ... ) SEE test_ceres_basic.cpp
     ceres::NumericDiffCostFunction<CeresWolfFunctor,ceres::CENTRAL,DIM,DIM>* 
            cost_function_static = new ceres::NumericDiffCostFunction<CeresWolfFunctor,ceres::CENTRAL,DIM,DIM>(functorPtr);  
            

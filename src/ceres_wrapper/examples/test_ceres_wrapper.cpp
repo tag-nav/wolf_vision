@@ -68,12 +68,14 @@ class Correspondence1Sparse: public CorrespondenceBase
 {
     protected:
     	Map<Matrix<WolfScalar, BLOCK_SIZE, 1>> state_block_map_;
+    	WolfScalar* block_ptr_array_[1];
 
     public:
 
     	constexpr Correspondence1Sparse(WolfScalar* _statePtr) :
         	CorrespondenceBase(MEASUREMENT_SIZE),
-			state_block_map_(_statePtr,BLOCK_SIZE)
+			state_block_map_(_statePtr,BLOCK_SIZE),
+			block_ptr_array_  {_statePtr}
         {
         }
 
@@ -93,8 +95,13 @@ class Correspondence1Sparse: public CorrespondenceBase
 
         virtual WolfScalar** getBlockPtrArray()
         {
-        	WolfScalar* block_ptrs[1] = {state_block_map_.data()};
-        	return block_ptrs;
+//        	WolfScalar* block_ptrs[1] = {state_block_map_.data()}; // JoanV, per evitar el warning, crec que podries fer membres aquests punters, i llavors nomes tornar-los.
+//        	return block_ptrs;
+
+
+        	// JoanS --> JoanV : per evitar el warning, crec que podries fer membres aquest array de punters, i llavors nomes tornar-lo:
+//        	block_ptr_array_[0] = state_block_map_.data(); // <--- aixo potser podria anar al constructor o en algun altre lloc. // FET.
+        	return block_ptr_array_;
         }
 
 		virtual const std::vector<WolfScalar *> getBlockPtrVector()
@@ -112,13 +119,15 @@ class Correspondence2Sparse: public CorrespondenceBase
     protected:
 		Map<Matrix<WolfScalar, BLOCK_1_SIZE, 1>> state_block_1_map_;
 		Map<Matrix<WolfScalar, BLOCK_2_SIZE, 1>> state_block_2_map_;
+		WolfScalar* block_ptr_array_[2];
 
     public:
 
         Correspondence2Sparse(WolfScalar* _block1Ptr, WolfScalar* _block2Ptr) :
         	CorrespondenceBase(MEASUREMENT_SIZE),
 			state_block_1_map_(_block1Ptr,BLOCK_1_SIZE),
-			state_block_2_map_(_block2Ptr,BLOCK_2_SIZE)
+			state_block_2_map_(_block2Ptr,BLOCK_2_SIZE),
+			block_ptr_array_  {_block1Ptr, _block2Ptr}
         {
         }
 
@@ -143,8 +152,14 @@ class Correspondence2Sparse: public CorrespondenceBase
 
         virtual WolfScalar** getBlockPtrArray()
         {
-        	WolfScalar* block_ptrs[2] = {state_block_1_map_.data(), state_block_2_map_.data()};
-        	return block_ptrs;
+//        	WolfScalar* block_ptrs[2] = {state_block_1_map_.data(), state_block_2_map_.data()};
+//        	return block_ptrs;
+
+        	// JoanS --> JoanV : per evitar el warning, crec que podries fer membres aquest array de punters, i llavors nomes tornar-lo:
+//        	block_ptr_array_[0] = state_block_1_map_.data(); // <--- aixo potser podria anar al constructor o en algun altre lloc. // FET.
+//        	block_ptr_array_[1] = state_block_2_map_.data(); // <--- aixo potser podria anar al constructor o en algun altre lloc. // FET.
+        	return block_ptr_array_;
+
         }
 
 		virtual const std::vector<WolfScalar *> getBlockPtrVector()
