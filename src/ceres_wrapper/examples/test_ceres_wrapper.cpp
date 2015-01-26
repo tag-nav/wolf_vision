@@ -34,6 +34,10 @@ enum correspondenceType {
 	CORR_N_BLOCKS   = 3,
 	CORR_GPS3       = 4,
 	CORR_RANGE_ONLY = 5};
+enum parametrizationType {
+	NONE          = 0,
+	COMPLEX_ANGLE = 1,
+	QUATERNION    = 2};
 
 class StateBase
 {
@@ -51,15 +55,33 @@ class StateBase
 		{
 		}
 
-		Map<VectorXs> getMap()
+		virtual ~StateBase()
+		{
+		}
+
+		virtual Map<VectorXs> getMap()
 		{
 			return state_map_;
 		}
 
-		WolfScalar* getPointer()
+		virtual WolfScalar* getPointer()
 		{
 			return state_map_.data();
 		}
+
+		virtual WolfScalar* getPPointer()
+		{
+			return NULL;
+		}
+
+		virtual WolfScalar* getOPointer()
+		{
+			return NULL;
+		}
+
+		virtual parametrizationType isParametrized() const = 0;
+
+		virtual WolfScalar* getParametrizedPointer() = 0;
 };
 
 class StatePoint3D: public StateBase
@@ -73,6 +95,102 @@ class StatePoint3D: public StateBase
 		StatePoint3D(WolfScalar* _st_ptr) :
 			StateBase(_st_ptr, 3)
 		{
+		}
+
+		virtual ~StatePoint3D()
+		{
+		}
+
+		virtual WolfScalar* getPPointer()
+		{
+			return this->getPointer();
+		}
+
+		virtual parametrizationType isParametrized() const
+		{
+			return NONE;
+		}
+
+		virtual WolfScalar* getParametrizedPointer()
+		{
+			return NULL;
+		}
+};
+
+class StatePO: public StateBase
+{
+	public:
+		StatePO(VectorXs& _st_remote, const unsigned int _idx) :
+			StateBase(_st_remote, _idx, 4)
+		{
+		}
+
+		StatePO(WolfScalar* _st_ptr) :
+			StateBase(_st_ptr, 4)
+		{
+		}
+
+		virtual WolfScalar* getPPointer()
+		{
+			return this->getPointer();
+		}
+
+		virtual WolfScalar* getOPointer()
+		{
+			return this->getPointer()+2;
+		}
+
+		virtual ~StatePO()
+		{
+		}
+
+		virtual parametrizationType isParametrized() const
+		{
+			return COMPLEX_ANGLE;
+		}
+
+		virtual WolfScalar* getParametrizedPointer()
+		{
+			return this->state_map_.data() + 2;
+		}
+};
+
+class ComplexAngleParameterization : public ceres::LocalParameterization
+{
+	public:
+		virtual ~ComplexAngleParameterization()
+		{
+		}
+
+		virtual bool Plus(const double* x_raw, const double* delta_raw, double* x_plus_delta_raw) const
+		{
+			x_plus_delta_raw[0] = x_raw[0] * cos(delta_raw[0]) - x_raw[1] * sin(delta_raw[0]);
+			x_plus_delta_raw[1] = x_raw[1] * cos(delta_raw[0]) + x_raw[0] * sin(delta_raw[0]);
+
+			//normalize
+			double norm = sqrt(x_plus_delta_raw[0] * x_plus_delta_raw[0] + x_plus_delta_raw[1] * x_plus_delta_raw[1]);
+			std::cout << "(before normalization) norm = " << norm << std::endl;
+			x_plus_delta_raw[0] /= norm;
+			x_plus_delta_raw[1] /= norm;
+
+			return true;
+		}
+
+		virtual bool ComputeJacobian(const double* x, double* jacobian) const
+		{
+			jacobian[0] = -x[1];
+			jacobian[1] =  x[0];
+			return true;
+		}
+
+		virtual int GlobalSize() const
+		{
+			return 2;
+		}
+
+		virtual int LocalSize() const
+		{
+			return 1;
 		}
 };
 
@@ -102,13 +220,10 @@ class CorrespondenceBase
 
         virtual correspondenceType getType() const = 0;
         virtual const std::vector<WolfScalar *> getBlockPtrVector() = 0;
-
-        // TODO: provide const expressions of block and measure sizes
-        // virtual const unsigned int getMeasSize() const = 0;
-        // virtual const unsigned int* getBlockSizeArray() const = 0;
 };
 
 template <const unsigned int MEASUREMENT_SIZE = 1,
+				unsigned int BLOCK_0_SIZE = 1,
 				unsigned int BLOCK_1_SIZE = 1,
 				unsigned int BLOCK_2_SIZE = 0,
 				unsigned int BLOCK_3_SIZE = 0,
@@ -117,8 +232,7 @@ template <const unsigned int MEASUREMENT_SIZE = 1,
 				unsigned int BLOCK_6_SIZE = 0,
 				unsigned int BLOCK_7_SIZE = 0,
 				unsigned int BLOCK_8_SIZE = 0,
-				unsigned int BLOCK_9_SIZE = 0,
-				unsigned int BLOCK_10_SIZE = 0>
+				unsigned int BLOCK_9_SIZE = 0>
 class CorrespondenceSparse: public CorrespondenceBase
 {
     protected:
@@ -128,6 +242,7 @@ class CorrespondenceSparse: public CorrespondenceBase
 
     public:
 		static const unsigned int measurementSize = MEASUREMENT_SIZE;
+		static const unsigned int block0Size = BLOCK_0_SIZE;
 		static const unsigned int block1Size = BLOCK_1_SIZE;
 		static const unsigned int block2Size = BLOCK_2_SIZE;
 		static const unsigned int block3Size = BLOCK_3_SIZE;
@@ -137,20 +252,19 @@ class CorrespondenceSparse: public CorrespondenceBase
 		static const unsigned int block7Size = BLOCK_7_SIZE;
 		static const unsigned int block8Size = BLOCK_8_SIZE;
 		static const unsigned int block9Size = BLOCK_9_SIZE;
-		static const unsigned int block10Size = BLOCK_10_SIZE;
 
 		CorrespondenceSparse(WolfScalar** _blockPtrArray) :
         	CorrespondenceBase(MEASUREMENT_SIZE),
-			block_sizes_vector_({{BLOCK_1_SIZE},
-								 {BLOCK_2_SIZE},
-								 {BLOCK_3_SIZE},
-								 {BLOCK_4_SIZE},
-								 {BLOCK_5_SIZE},
-								 {BLOCK_6_SIZE},
-								 {BLOCK_7_SIZE},
-								 {BLOCK_8_SIZE},
-								 {BLOCK_9_SIZE},
-								 {BLOCK_10_SIZE}})
+			block_sizes_vector_({BLOCK_0_SIZE,
+								 BLOCK_1_SIZE,
+								 BLOCK_2_SIZE,
+								 BLOCK_3_SIZE,
+								 BLOCK_4_SIZE,
+								 BLOCK_5_SIZE,
+								 BLOCK_6_SIZE,
+								 BLOCK_7_SIZE,
+								 BLOCK_8_SIZE,
+								 BLOCK_9_SIZE})
         {
 			for (uint i = 0; i<block_sizes_vector_.size(); i++)
 			{
@@ -167,7 +281,8 @@ class CorrespondenceSparse: public CorrespondenceBase
 			}
         }
 
-		CorrespondenceSparse(WolfScalar* _state1Ptr,
+		CorrespondenceSparse(WolfScalar* _state0Ptr,
+							 WolfScalar* _state1Ptr = NULL,
 							 WolfScalar* _state2Ptr = NULL,
 							 WolfScalar* _state3Ptr = NULL,
 							 WolfScalar* _state4Ptr = NULL,
@@ -175,29 +290,28 @@ class CorrespondenceSparse: public CorrespondenceBase
 							 WolfScalar* _state6Ptr = NULL,
 							 WolfScalar* _state7Ptr = NULL,
 							 WolfScalar* _state8Ptr = NULL,
-							 WolfScalar* _state9Ptr = NULL,
-							 WolfScalar* _state10Ptr = NULL ) :
+							 WolfScalar* _state9Ptr = NULL ) :
 			CorrespondenceBase(MEASUREMENT_SIZE),
-			state_block_ptr_vector_({{_state1Ptr},
-									 {_state2Ptr},
-									 {_state3Ptr},
-									 {_state4Ptr},
-									 {_state5Ptr},
-									 {_state6Ptr},
-									 {_state7Ptr},
-									 {_state8Ptr},
-									 {_state9Ptr},
-									 {_state10Ptr}}),
-			block_sizes_vector_({{BLOCK_1_SIZE},
-								 {BLOCK_2_SIZE},
-								 {BLOCK_3_SIZE},
-								 {BLOCK_4_SIZE},
-								 {BLOCK_5_SIZE},
-								 {BLOCK_6_SIZE},
-								 {BLOCK_7_SIZE},
-								 {BLOCK_8_SIZE},
-								 {BLOCK_9_SIZE},
-								 {BLOCK_10_SIZE}})
+			state_block_ptr_vector_({_state0Ptr,
+									 _state1Ptr,
+									 _state2Ptr,
+									 _state3Ptr,
+									 _state4Ptr,
+									 _state5Ptr,
+									 _state6Ptr,
+									 _state7Ptr,
+									 _state8Ptr,
+									 _state9Ptr}),
+			block_sizes_vector_({BLOCK_0_SIZE,
+								 BLOCK_1_SIZE,
+								 BLOCK_2_SIZE,
+								 BLOCK_3_SIZE,
+								 BLOCK_4_SIZE,
+								 BLOCK_5_SIZE,
+								 BLOCK_6_SIZE,
+								 BLOCK_7_SIZE,
+								 BLOCK_8_SIZE,
+								 BLOCK_9_SIZE})
 		{
 			for (uint i = 0; i<block_sizes_vector_.size(); i++)
 			{
@@ -214,7 +328,8 @@ class CorrespondenceSparse: public CorrespondenceBase
 			}
 		}
 
-		CorrespondenceSparse(StateBase* _state1Ptr,
+		CorrespondenceSparse(StateBase* _state0Ptr,
+							 StateBase* _state1Ptr = NULL,
 							 StateBase* _state2Ptr = NULL,
 							 StateBase* _state3Ptr = NULL,
 							 StateBase* _state4Ptr = NULL,
@@ -222,29 +337,28 @@ class CorrespondenceSparse: public CorrespondenceBase
 							 StateBase* _state6Ptr = NULL,
 							 StateBase* _state7Ptr = NULL,
 							 StateBase* _state8Ptr = NULL,
-							 StateBase* _state9Ptr = NULL,
-							 StateBase* _state10Ptr = NULL ) :
+							 StateBase* _state9Ptr = NULL ) :
 			CorrespondenceBase(MEASUREMENT_SIZE),
-			state_block_ptr_vector_({{_state1Ptr->getPointer()},
-									 {_state2Ptr==NULL ? NULL : _state2Ptr->getPointer()},
-									 {_state3Ptr==NULL ? NULL : _state3Ptr->getPointer()},
-									 {_state4Ptr==NULL ? NULL : _state4Ptr->getPointer()},
-									 {_state5Ptr==NULL ? NULL : _state5Ptr->getPointer()},
-									 {_state6Ptr==NULL ? NULL : _state6Ptr->getPointer()},
-									 {_state7Ptr==NULL ? NULL : _state7Ptr->getPointer()},
-									 {_state8Ptr==NULL ? NULL : _state8Ptr->getPointer()},
-									 {_state9Ptr==NULL ? NULL : _state9Ptr->getPointer()},
-									 {_state10Ptr==NULL ? NULL : _state10Ptr->getPointer()}}),
-			block_sizes_vector_({{BLOCK_1_SIZE},
-								 {BLOCK_2_SIZE},
-								 {BLOCK_3_SIZE},
-								 {BLOCK_4_SIZE},
-								 {BLOCK_5_SIZE},
-								 {BLOCK_6_SIZE},
-								 {BLOCK_7_SIZE},
-								 {BLOCK_8_SIZE},
-								 {BLOCK_9_SIZE},
-								 {BLOCK_10_SIZE}})
+			state_block_ptr_vector_({_state0Ptr->getPointer(),
+			 	 	 	 	 	 	 _state1Ptr==NULL ? NULL : _state1Ptr->getPointer(),
+									 _state2Ptr==NULL ? NULL : _state2Ptr->getPointer(),
+									 _state3Ptr==NULL ? NULL : _state3Ptr->getPointer(),
+									 _state4Ptr==NULL ? NULL : _state4Ptr->getPointer(),
+									 _state5Ptr==NULL ? NULL : _state5Ptr->getPointer(),
+									 _state6Ptr==NULL ? NULL : _state6Ptr->getPointer(),
+									 _state7Ptr==NULL ? NULL : _state7Ptr->getPointer(),
+									 _state8Ptr==NULL ? NULL : _state8Ptr->getPointer(),
+									 _state9Ptr==NULL ? NULL : _state9Ptr->getPointer()}),
+			block_sizes_vector_({BLOCK_0_SIZE,
+								 BLOCK_1_SIZE,
+								 BLOCK_2_SIZE,
+								 BLOCK_3_SIZE,
+								 BLOCK_4_SIZE,
+								 BLOCK_5_SIZE,
+								 BLOCK_6_SIZE,
+								 BLOCK_7_SIZE,
+								 BLOCK_8_SIZE,
+								 BLOCK_9_SIZE})
 		{
 			for (uint i = 0; i<block_sizes_vector_.size(); i++)
 			{
@@ -286,7 +400,7 @@ class CorrespondenceGPS3 : public CorrespondenceSparse<3,3>
 		{
 		}
 
-		CorrespondenceGPS3(StatePoint3D* _statePtr) :
+		CorrespondenceGPS3(StateBase* _statePtr) :
 			CorrespondenceSparse(_statePtr)
 		{
 		}
@@ -347,15 +461,15 @@ class CorrespondenceRangeOnly : public CorrespondenceSparse<1,3,3>
         {
         	// print inputs
         	// std::cout << "_x1 = ";
-        	// for (int i=0; i < BLOCK_1_SIZE; i++)
+        	// for (int i=0; i < this->block1Size; i++)
         	// 	std::cout << _x1[i] << " ";
         	// std::cout << std::endl;
         	// std::cout << "_x2 = ";
-        	// for (int i=0; i < BLOCK_2_SIZE; i++)
+        	// for (int i=0; i < this->block2Size; i++)
         	// 	std::cout << _x2[i] << " ";
         	// std::cout << std::endl;
         	// std::cout << "measurement = ";
-        	// for (int i=0; i < MEASUREMENT_SIZE; i++)
+        	// for (int i=0; i < this->measurementSize; i++)
         	// 	std::cout << this->measurement_(i) << " ";
         	// std::cout << std::endl;
 
@@ -373,11 +487,83 @@ class CorrespondenceRangeOnly : public CorrespondenceSparse<1,3,3>
 
 			// print outputs
 			// std::cout << "expected    = ";
-			// for (int i=0; i < MEASUREMENT_SIZE; i++)
+			// for (int i=0; i < this->measurementSize; i++)
 			// 	std::cout << expected_measurement(i) << " ";
 			// std::cout << std::endl;
 			// std::cout << "_residuals  = ";
-			// for (int i=0; i < MEASUREMENT_SIZE; i++)
+			// for (int i=0; i < this->measurementSize; i++)
+			// 	std::cout << _residuals[i] << " ";
+			// std::cout << std::endl << std::endl;
+
+			return true;
+        }
+
+        virtual correspondenceType getType() const
+        {
+        	return CORR_RANGE_ONLY;
+        }
+};
+
+class CorrespondenceOrientedLandmark : public CorrespondenceSparse<3,4,4>
+{
+	public:
+		static const unsigned int N_BLOCKS = 2;
+
+		CorrespondenceOrientedLandmark(WolfScalar** _blockPtrs) :
+			CorrespondenceSparse(_blockPtrs)
+		{
+		}
+
+		CorrespondenceOrientedLandmark(WolfScalar* _block1Ptr, WolfScalar* _block2Ptr) :
+			CorrespondenceSparse(_block1Ptr, _block2Ptr)
+		{
+		}
+
+		CorrespondenceOrientedLandmark(StatePoint3D* _state1Ptr, StatePoint3D* _state2Ptr) :
+			CorrespondenceSparse(_state1Ptr, _state2Ptr)
+		{
+		}
+
+		~CorrespondenceOrientedLandmark()
+		{
+		}
+
+        template <typename T>
+        bool operator()(const T* const _x1, const T* const _x2, T* _residuals) const
+        {
+        	// print inputs
+        	// std::cout << "_x1 = ";
+        	// for (int i=0; i < this->block1Size; i++)
+        	// 	std::cout << _x1[i] << " ";
+        	// std::cout << std::endl;
+        	// std::cout << "_x2 = ";
+        	// for (int i=0; i < this->block2Size; i++)
+        	// 	std::cout << _x2[i] << " ";
+        	// std::cout << std::endl;
+        	// std::cout << "measurement = ";
+        	// for (int i=0; i < this->measurementSize; i++)
+        	// 	std::cout << this->measurement_(i) << " ";
+        	// std::cout << std::endl;
+
+        	// Remap the vehicle state to the const evaluation point
+			Map<const Matrix<T,Dynamic,1>> x1_map_const(_x1, this->block1Size);
+			Map<const Matrix<T,Dynamic,1>> x2_map_const(_x2, this->block2Size);
+
+			// Map residuals vector to matrix (with sizes of the measurements matrix)
+			Map<Matrix<T,Dynamic,1>> mapped_residuals(_residuals, this->measurementSize);
+
+			// Compute error or residuals
+			Matrix<T,Dynamic,1> expected_measurement = ((x1_map_const - x2_map_const).transpose() * (x1_map_const - x2_map_const)).cwiseSqrt();
+			VectorXd meas = this->measurement_;
+			mapped_residuals = (meas).cast<T>() - expected_measurement;
+
+			// print outputs
+			// std::cout << "expected    = ";
+			// for (int i=0; i < this->measurementSize; i++)
+			// 	std::cout << expected_measurement(i) << " ";
+			// std::cout << std::endl;
+			// std::cout << "_residuals  = ";
+			// for (int i=0; i < this->measurementSize; i++)
 			// 	std::cout << _residuals[i] << " ";
 			// std::cout << std::endl << std::endl;
 
@@ -459,18 +645,18 @@ class WolfProblem
         }
 };
 
-class CeresWrapper
+class CeresManager
 {
 	protected:
 		// WOLF
 		WolfProblem* wolf_problem_ptr_;
-		struct correspondence_wrapper
+		struct CorrespondenceWrapper
 		{
 			CorrespondenceBase* corr_ptr_;
 			ceres::CostFunction* cost_function_ptr_;
 			const std::vector<WolfScalar*> block_ptrs_;
 		};
-		std::list<correspondence_wrapper> correspondence_list_;
+		std::list<CorrespondenceWrapper> correspondence_list_;
 
 		// CERES
 	    ceres::Problem ceres_problem_;
@@ -484,14 +670,14 @@ class CeresWrapper
 		{
 		}
 
-		~CeresWrapper()
+		~CeresManager()
 		{
 		}
 
 		void solve(const bool display_summary)
 		{
 			if (wolf_problem_ptr_->correspondenceListChanged())
-				updateList();
+				updateCorrespondenceList();
 
 			// add Residual Blocks
 			addResidualBlocks();
@@ -514,14 +700,14 @@ class CeresWrapper
 		{
 			std::cout << "Adding residual blocks..." << std::endl;
 			//int i = 0;
-			for (std::list<correspondence_wrapper>::iterator it=correspondence_list_.begin(); it!=correspondence_list_.end(); ++it)
+			for (std::list<CorrespondenceWrapper>::iterator it=correspondence_list_.begin(); it!=correspondence_list_.end(); ++it)
 			{
 				//std::cout << i++ << " block" << std::endl;
 				ceres_problem_.AddResidualBlock(it->cost_function_ptr_, NULL, it->block_ptrs_);
 			}
 		}
 
-		void updateList()
+		void updateCorrespondenceList()
 		{
 			std::cout << "Updating Correspondence List..." << std::endl;
 			correspondence_list_.clear();
@@ -534,17 +720,11 @@ class CeresWrapper
 					case CORR_GPS3:
 					{
 						cost_function_ptr = createCostFunction<CorrespondenceGPS3>(*it);
-//						correspondence_list_.push_back(correspondence_wrapper{(*it),
-//													   createCostFunction<CorrespondenceGPS3>(*it),
-//													   (*it)->getBlockPtrVector()});
 						break;
 					}
 					case CORR_RANGE_ONLY:
 					{
 						cost_function_ptr = createCostFunction<CorrespondenceRangeOnly>(*it);
-//						correspondence_list_.push_back(correspondence_wrapper{(*it),
-//													   createCostFunction<CorrespondenceRangeOnly>(*it),
-//													   (*it)->getBlockPtrVector()});
 						break;
 					}
 					case CORR_1_BLOCK:
@@ -560,16 +740,17 @@ class CeresWrapper
 					default:
 						std::cout << "Unknown correspondence type!" << std::endl;
 				}
-				correspondence_list_.push_back(correspondence_wrapper{(*it), cost_function_ptr, (*it)->getBlockPtrVector()});
+				correspondence_list_.push_back(CorrespondenceWrapper{(*it), cost_function_ptr, (*it)->getBlockPtrVector()});
 			}
 		}
 
-		template <typename CorrespondenceHerited>
+		template <typename CorrespondenceDerived>
 		ceres::CostFunction* createCostFunction(CorrespondenceBase* _corrBasePtr)
 		{
-			CorrespondenceHerited* corrCastedPtr = static_cast<CorrespondenceHerited*>(_corrBasePtr);
-			return new ceres::AutoDiffCostFunction<CorrespondenceHerited,
+			CorrespondenceDerived* corrCastedPtr = static_cast<CorrespondenceDerived*>(_corrBasePtr);
+			return new ceres::AutoDiffCostFunction<CorrespondenceDerived,
 												   corrCastedPtr->measurementSize,
+												   corrCastedPtr->block0Size,
 												   corrCastedPtr->block1Size,
 												   corrCastedPtr->block2Size,
 												   corrCastedPtr->block3Size,
@@ -578,8 +759,7 @@ class CeresWrapper
 												   corrCastedPtr->block6Size,
 												   corrCastedPtr->block7Size,
 												   corrCastedPtr->block8Size,
-												   corrCastedPtr->block9Size,
-												   corrCastedPtr->block10Size>(corrCastedPtr);
+												   corrCastedPtr->block9Size>(corrCastedPtr);
 		}
 };
 
@@ -623,7 +803,7 @@ int main(int argc, char** argv)
     wolf_problem->print();
 
     // Ceres wrapper
-    CeresWrapper ceres_wrapper(wolf_problem, ceres_options);
+    CeresManager ceres_wrapper(wolf_problem, ceres_options);
 
 	// States pointers
 	std::vector<StatePoint3D*> state_ptr_vector_(N_STATES);

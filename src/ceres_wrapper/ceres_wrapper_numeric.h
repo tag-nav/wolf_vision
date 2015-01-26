@@ -1,12 +1,12 @@
 #ifndef _CERES_WRAPPER_H
 #define _CERES_WRAPPER_H
 
-class CeresWrapper
+class CeresManager
 {
     protected:
         
     public:
-        CeresWrapper();
-        ~CeresWrapper();
+        CeresManager();
+        ~CeresManager();
 };
 #endif

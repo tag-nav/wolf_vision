@@ -1,10 +1,10 @@
 #include "ceres_wrapper_numeric.h"
 
-CeresWrapper::CeresWrapper()
+CeresManager::CeresManager()
 {
 }
  
-CeresWrapper::~CeresWrapper()
+CeresManager::~CeresManager()
 {
 }
 
