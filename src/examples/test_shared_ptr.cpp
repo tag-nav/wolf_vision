@@ -121,6 +121,19 @@ int main()
     //myFunction(sh5);
     myFunction(bar_shptr_);
     
+    cout << "\n***** Checking the destruction outside a scope\n";
+    shared_ptr<Foo> sh6;
+    if (1)
+    {
+    	Foo myFoo2 = Foo();
+    	sh6.reset(&myFoo2);
+    	cout << "inside:\n";
+    	myFunction(sh6);
+    }
+	cout << "outside:\n";
+	myFunction(sh6);
+
+
     cout << "\n***** End of test. Still three shared_ptr's owning objects. They will be deleted at the end of main\n";    
     return 0;
 }
