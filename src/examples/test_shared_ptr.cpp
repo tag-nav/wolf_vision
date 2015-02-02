@@ -11,6 +11,24 @@
 
 using namespace std;
 
+class FooFoo
+{
+	public:
+	FooFoo()
+	{
+		cout << "FooFoo created\n";
+	}
+	~FooFoo()
+	{
+		cout << "FooFoo destroyed\n";
+	}
+
+	void sayFoo()
+	{
+		cout << "Fooooooooooooooooooofooooooooooooo!\n";
+	}
+};
+
 //Object Foo class
 class Foo
 {
@@ -122,16 +140,16 @@ int main()
     myFunction(bar_shptr_);
     
     cout << "\n***** Checking the destruction outside a scope\n";
-    shared_ptr<Foo> sh6;
+    shared_ptr<FooFoo> sh6;
     if (1)
     {
-    	Foo myFoo2 = Foo();
-    	sh6.reset(&myFoo2);
+    	FooFoo myFooFoo;
+    	sh6.reset(&myFooFoo);
     	cout << "inside:\n";
-    	myFunction(sh6);
+    	sh6->sayFoo();
     }
 	cout << "outside:\n";
-	myFunction(sh6);
+	sh6->sayFoo();
 
 
     cout << "\n***** End of test. Still three shared_ptr's owning objects. They will be deleted at the end of main\n";    
