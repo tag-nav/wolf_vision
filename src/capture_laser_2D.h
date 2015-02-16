@@ -11,6 +11,11 @@
 
 class CaptureLaser2D : public CaptureBase
 {
+    protected:
+        static unsigned int segment_window_size;//window size to extract segments
+        static double theta_min; //minimum theta between consecutive segments to detect corner. PI/6=0.52
+        static double k_sigmas;//How many std_dev are tolerated to count that a point is supporting a line
+        
     public:
         /** \brief Constructor
          * 
