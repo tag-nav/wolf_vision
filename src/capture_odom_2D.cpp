@@ -25,7 +25,8 @@ CaptureOdom2D::~CaptureOdom2D()
 
 inline void CaptureOdom2D::processCapture()
 {
-    FeatureBaseShPtr new_feature(new FeatureOdom2D(CaptureBasePtr(this),data_,data_covariance_));
+    //FeatureBaseShPtr new_feature(new FeatureOdom2D(CaptureBasePtr(this),data_,data_covariance_));
+    FeatureBaseShPtr new_feature(new FeatureOdom2D(data_,data_covariance_));
     addFeature(new_feature);
 }
 
@@ -71,6 +72,11 @@ void CaptureOdom2D::findCorrespondences()
 																				  getFramePtr()->getPreviousFrame()->getOPtr(),
 																				  getFramePtr()->getPPtr(),
 																				  getFramePtr()->getOPtr()));
+//         CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DTheta(
+//                                                                                   getFramePtr()->getPreviousFrame()->getPPtr(),
+//                                                                                   getFramePtr()->getPreviousFrame()->getOPtr(),
+//                                                                                   getFramePtr()->getPPtr(),
+//                                                                                   getFramePtr()->getOPtr()));        
 		getFeatureListPtr()->front()->addCorrespondence(odom_correspondence);
 	}
 	else
@@ -80,6 +86,11 @@ void CaptureOdom2D::findCorrespondences()
 																						 getFramePtr()->getPreviousFrame()->getOPtr(),
 																						 getFramePtr()->getPPtr(),
 																						 getFramePtr()->getOPtr()));
+//         CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DComplexAngle(
+//                                                                                          getFramePtr()->getPreviousFrame()->getPPtr(),
+//                                                                                          getFramePtr()->getPreviousFrame()->getOPtr(),
+//                                                                                          getFramePtr()->getPPtr(),
+//                                                                                          getFramePtr()->getOPtr()));        
 		getFeatureListPtr()->front()->addCorrespondence(odom_correspondence);
 	}
 }

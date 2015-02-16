@@ -27,16 +27,17 @@ for (i = Nw:Np)
     points_w = points(:,(i-Nw+1):i)
 
     //Found the best fitting line over the window. Build the system: Ax=0. Matrix A = a_ij
-//    a_00 = sum( points_w(1,:).^2 );
-//    a_01 = sum( points_w(1,:).*points_w(2,:) );
-//    a_02 = sum( points_w(1,:) );
-//    a_10 = a_01;
-//    a_11 = sum( points_w(2,:).^2 );
-//    a_12 = sum( points_w(2,:) );
-//    a_20 = a_02;
-//    a_21 = a_12;
-//    a_22 = Nw;
-//    A = [a_00 a_01 a_02; a_10 a_11 a_12; a_20 a_21 a_22; 0 0 1];
+    a_00 = sum( points_w(1,:).^2 );
+    a_01 = sum( points_w(1,:).*points_w(2,:) );
+    a_02 = sum( points_w(1,:) );
+    a_10 = a_01;
+    a_11 = sum( points_w(2,:).^2 );
+    a_12 = sum( points_w(2,:) );
+    a_20 = a_02;
+    a_21 = a_12;
+    a_22 = Nw;
+    A1 = [a_00 a_01 a_02; a_10 a_11 a_12; a_20 a_21 a_22; 0 0 1];
+    
     a_00 = sum( points_w(1,:).^2 );
     a_01 = sum( points_w(1,:).*points_w(2,:) );
     a_02 = sum( points_w(1,:) );
@@ -44,10 +45,11 @@ for (i = Nw:Np)
     a_11 = sum( points_w(2,:).^2 );
     a_12 = sum( points_w(2,:) );
     A = [a_00 a_01 a_02; a_10 a_11 a_12; 0 0 1];
-
+    
     //solve
-//    line = pinv(A)*[zeros(3,1);1];
+    line1 = pinv(A1)*[zeros(3,1);1];
     line = inv(A)*[0; 0; 1];
+    disp(line1-line);
 
     //compute error
     err = 0;

@@ -27,7 +27,8 @@ class FeatureBase : public NodeLinked<CaptureBase,CorrespondenceBase>
          * \param _dim_measurement the dimension of the measurement space
          * 
          */
-        FeatureBase(const CaptureBasePtr& _capt_ptr, unsigned int _dim_measurement);
+        //FeatureBase(const CaptureBasePtr& _capt_ptr, unsigned int _dim_measurement);
+        FeatureBase(unsigned int _dim_measurement);
 
         /** \brief Constructor from capture pointer and measure
          *
@@ -45,7 +46,8 @@ class FeatureBase : public NodeLinked<CaptureBase,CorrespondenceBase>
          * \param _meas_covariance the noise of the measurement
          *
          */
-        FeatureBase(const CaptureBasePtr& _capt_ptr, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
+        //FeatureBase(const CaptureBasePtr& _capt_ptr, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
+        FeatureBase(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
         virtual ~FeatureBase();
         

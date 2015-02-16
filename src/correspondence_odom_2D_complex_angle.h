@@ -23,7 +23,19 @@ class CorrespondenceOdom2DComplexAngle: public CorrespondenceSparse<2,2,2,2,2>
 			//
 		}
 
-		virtual ~CorrespondenceOdom2DComplexAngle()
+//         CorrespondenceOdom2DComplexAngle(WolfScalar* _block0Ptr, WolfScalar* _block1Ptr, WolfScalar* _block2Ptr, WolfScalar* _block3Ptr) :
+//             CorrespondenceSparse<2,2,2,2,2>(CORR_ODOM_2D_COMPLEX_ANGLE, _block0Ptr, _block1Ptr, _block2Ptr, _block3Ptr)
+//         {
+//             //
+//         }
+// 
+//         CorrespondenceOdom2DComplexAngle(const StateBaseShPtr& _state0Ptr, const StateBaseShPtr& _state1Ptr, const StateBaseShPtr& _state2Ptr, const StateBaseShPtr& _state3Ptr) :
+//             CorrespondenceSparse<2,2,2,2,2>(CORR_ODOM_2D_COMPLEX_ANGLE,  _state0Ptr->getPtr(), _state1Ptr->getPtr(),_state2Ptr->getPtr(), _state3Ptr->getPtr())
+//         {
+//             //
+//         }
+
+        virtual ~CorrespondenceOdom2DComplexAngle()
 		{
 			//
 		}

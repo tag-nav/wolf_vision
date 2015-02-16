@@ -62,7 +62,7 @@ class NodeLinked : public NodeBase
          * Constructor specifying up node
 		 * 
          */		
-        NodeLinked(const NodeLocation _loc, const std::string& _label, const UpperNodePtr& _up_node_ptr);
+        //NodeLinked(const NodeLocation _loc, const std::string& _label, const UpperNodePtr& _up_node_ptr);
 
         /** \brief Default destructor
          *
@@ -224,14 +224,14 @@ NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std:
 {
 }
 
-template<class UpperType, class LowerType>
-NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label, const UpperNodePtr& _up_node_ptr) :
-        NodeBase(_label), //
-        location_(_loc),
-		down_node_list_()
-{
-    linkToUpperNode(_up_node_ptr);
-}
+// template<class UpperType, class LowerType>
+// NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label, const UpperNodePtr& _up_node_ptr) :
+//         NodeBase(_label), //
+//         location_(_loc),
+// 		down_node_list_()
+// {
+//     linkToUpperNode(_up_node_ptr);
+// }
 
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::~NodeLinked()

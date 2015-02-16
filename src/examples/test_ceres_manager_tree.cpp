@@ -97,18 +97,26 @@ class WolfManager
         	// Create frame and add it to the trajectory
         	if (use_complex_angles_)
         	{
-        		FrameBaseShPtr new_frame(new FrameBase(trajectory_,
-													   _time_stamp,
-													   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-													   StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2))));
+//         		FrameBaseShPtr new_frame(new FrameBase(trajectory_,
+// 													   _time_stamp,
+// 													   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
+// 													   StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2))));
+                FrameBaseShPtr new_frame(new FrameBase(
+                                                       _time_stamp,
+                                                       StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
+                                                       StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2))));                
         		trajectory_->addFrame(new_frame);
         	}
         	else
         	{
-        		FrameBaseShPtr new_frame(new FrameBase(trajectory_,
-													   _time_stamp,
-													   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-													   StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2))));
+//         		FrameBaseShPtr new_frame(new FrameBase(trajectory_,
+// 													   _time_stamp,
+// 													   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
+// 													   StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2))));
+                FrameBaseShPtr new_frame(new FrameBase(
+                                                       _time_stamp,
+                                                       StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
+                                                       StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2))));                
         		trajectory_->addFrame(new_frame);
         	}
 

@@ -51,7 +51,9 @@ class CorrespondenceSparse: public CorrespondenceBase
          * 
          **/               
         CorrespondenceSparse(const FeatureBasePtr& _ftr_ptr, CorrespondenceType _tp, WolfScalar** _blockPtrArray) :
+        //CorrespondenceSparse(CorrespondenceType _tp, WolfScalar** _blockPtrArray) :
             CorrespondenceBase(_ftr_ptr,_tp),
+            //CorrespondenceBase(_tp),
             state_block_ptr_vector_(10),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
@@ -75,6 +77,7 @@ class CorrespondenceSparse: public CorrespondenceBase
          * 
          **/        
         CorrespondenceSparse(const FeatureBasePtr& _ftr_ptr,
+        //CorrespondenceSparse(
         					 CorrespondenceType _tp,
                              WolfScalar* _state0Ptr,
                              WolfScalar* _state1Ptr = nullptr,
@@ -87,6 +90,7 @@ class CorrespondenceSparse: public CorrespondenceBase
                              WolfScalar* _state8Ptr = nullptr,
                              WolfScalar* _state9Ptr = nullptr ) :
             CorrespondenceBase(_ftr_ptr,_tp),
+            //CorrespondenceBase(_tp),
             state_block_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {

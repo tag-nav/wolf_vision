@@ -358,15 +358,20 @@ class WolfManager
 
         	// Create frame
         	if (use_complex_angles_)
-				frames_.push_back(FrameBaseShPtr(new FrameBase(nullptr, _time_stamp,
-															   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-															   StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2)))));
+// 				frames_.push_back(FrameBaseShPtr(new FrameBase(nullptr, _time_stamp,
+// 															   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
+// 															   StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2)))));
+                frames_.push_back(FrameBaseShPtr(new FrameBase(_time_stamp,
+                                                StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
+                                                StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2)))));
 
         	else
-				frames_.push_back(FrameBaseShPtr(new FrameBase(nullptr, _time_stamp,
-						   	   	   	   	   	   	   	   	   	   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-															   StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2)))));
-
+// 				frames_.push_back(FrameBaseShPtr(new FrameBase(nullptr, _time_stamp,
+// 						   	   	   	   	   	   	   	   	   	   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
+// 															   StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2)))));
+                frames_.push_back(FrameBaseShPtr(new FrameBase(_time_stamp,
+                                                               StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
+                                                               StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2)))));                
         	// Update first free state location index
         	first_empty_state_ += use_complex_angles_ ? 4 : 3;
         }

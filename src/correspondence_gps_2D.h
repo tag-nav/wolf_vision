@@ -23,6 +23,18 @@ class CorrespondenceGPS2D: public CorrespondenceSparse<2,2>
 			//
 		}
 
+//         CorrespondenceGPS2D(WolfScalar* _statePtr) :
+//             CorrespondenceSparse<2,2>(CORR_GPS_FIX_2D, _statePtr)
+//         {
+//             //
+//         }
+// 
+//         CorrespondenceGPS2D(const StateBaseShPtr& _statePtr):
+//             CorrespondenceSparse<2,2>(CORR_GPS_FIX_2D, _statePtr->getPtr())
+//         {
+//             //
+//         }
+        
 		virtual ~CorrespondenceGPS2D()
 		{
 			//

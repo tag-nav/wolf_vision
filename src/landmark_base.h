@@ -34,7 +34,8 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
          * \param _p_ptr StateBase pointer to the position (default: nullptr)
          *
          **/
-		LandmarkBase(const MapBasePtr& _map_ptr, const LandmarkType & _tp, const StateBaseShPtr& _p_ptr);
+// 		LandmarkBase(const MapBasePtr& _map_ptr, const LandmarkType & _tp, const StateBaseShPtr& _p_ptr);
+        LandmarkBase(const LandmarkType & _tp, const StateBaseShPtr& _p_ptr);
 
 
         /** \brief Constructor with type, time stamp and state list
@@ -45,7 +46,8 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
          * \param _st_list StateBase list of the landmark estimation
          * 
          **/        
-		LandmarkBase(const MapBasePtr& _map_ptr, const LandmarkType & _tp, const StateBaseList& _st_list);
+// 		LandmarkBase(const MapBasePtr& _map_ptr, const LandmarkType & _tp, const StateBaseList& _st_list);
+        LandmarkBase(const LandmarkType & _tp, const StateBaseList& _st_list);
         
         /** \brief Destructor
          * 
