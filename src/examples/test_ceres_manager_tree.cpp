@@ -57,7 +57,7 @@ class WolfManager
         SensorBasePtr sensor_prior_;
 
     public: 
-        WolfManager(const SensorBasePtr& _sensor_prior, const unsigned int& _state_length=1000, const bool _complex_angle=false) :
+        WolfManager(const SensorBasePtr& _sensor_prior, const bool _complex_angle, const unsigned int& _state_length=1000) :
         	state_(_state_length),
 			first_empty_state_(0),
         	use_complex_angles_(_complex_angle),
@@ -277,7 +277,7 @@ int main(int argc, char** argv)
 	// Wolf manager initialization
 	SensorOdom2D odom_sensor(Eigen::MatrixXs::Zero(3,1), odom_std, odom_std);
 	SensorGPSFix gps_sensor(Eigen::MatrixXs::Zero(3,1), gps_std);
-	WolfManager* wolf_manager = new WolfManager(&odom_sensor, n_execution * (complex_angle ? 4 : 3), complex_angle);
+	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, n_execution * (complex_angle ? 4 : 3));
 
 	// Initial pose
 	pose_true << 0,0,0;

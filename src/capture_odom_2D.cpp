@@ -65,7 +65,21 @@ Eigen::VectorXs CaptureOdom2D::computePrior() const
 
 void CaptureOdom2D::findCorrespondences()
 {
-	if (getFramePtr()->getOPtr()->getStateType() == ST_THETA)
+	if (getFramePtr()->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
+	{
+		CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DComplexAngle(getFeatureListPtr()->front().get(),
+																						 getFramePtr()->getPreviousFrame()->getPPtr(),
+																						 getFramePtr()->getPreviousFrame()->getOPtr(),
+																						 getFramePtr()->getPPtr(),
+																						 getFramePtr()->getOPtr()));
+//         CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DComplexAngle(
+//                                                                                          getFramePtr()->getPreviousFrame()->getPPtr(),
+//                                                                                          getFramePtr()->getPreviousFrame()->getOPtr(),
+//                                                                                          getFramePtr()->getPPtr(),
+//                                                                                          getFramePtr()->getOPtr()));
+		getFeatureListPtr()->front()->addCorrespondence(odom_correspondence);
+	}
+	else
 	{
 		CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DTheta(getFeatureListPtr()->front().get(),
 																				  getFramePtr()->getPreviousFrame()->getPPtr(),
@@ -77,20 +91,6 @@ void CaptureOdom2D::findCorrespondences()
 //                                                                                   getFramePtr()->getPreviousFrame()->getOPtr(),
 //                                                                                   getFramePtr()->getPPtr(),
 //                                                                                   getFramePtr()->getOPtr()));        
-		getFeatureListPtr()->front()->addCorrespondence(odom_correspondence);
-	}
-	else
-	{
-		CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DComplexAngle(getFeatureListPtr()->front().get(),
-																						 getFramePtr()->getPreviousFrame()->getPPtr(),
-																						 getFramePtr()->getPreviousFrame()->getOPtr(),
-																						 getFramePtr()->getPPtr(),
-																						 getFramePtr()->getOPtr()));
-//         CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DComplexAngle(
-//                                                                                          getFramePtr()->getPreviousFrame()->getPPtr(),
-//                                                                                          getFramePtr()->getPreviousFrame()->getOPtr(),
-//                                                                                          getFramePtr()->getPPtr(),
-//                                                                                          getFramePtr()->getOPtr()));        
 		getFeatureListPtr()->front()->addCorrespondence(odom_correspondence);
 	}
 }
