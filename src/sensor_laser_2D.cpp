@@ -31,3 +31,8 @@ WolfScalar SensorLaser2D::getRangeMax() const
 {
     return params_(3);
 }
+
+WolfScalar SensorLaser2D::getRangeStdDev() const
+{
+    return params_(4);
+}

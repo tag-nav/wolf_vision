@@ -43,6 +43,6 @@ class CaptureLaser2D : public CaptureBase
          * Extract corners and push-back to Feature down list . 
          * 
          **/
-        virtual void extractCorners();
+        virtual void extractCorners(std::list<Eigen::Vector2s> & _corner_list);
 };
 #endif /* CAPTURE_LASER_2D_H_ */

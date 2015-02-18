@@ -47,21 +47,29 @@ class SensorLaser2D : public SensorBase
          * Returns aperture_
          * 
          **/        
-        double getAperture() const;
+        WolfScalar getAperture() const;
 
         /** \brief Returns range_min_
          * 
          * Returns range_min_
          * 
          **/        
-        double getRangeMin() const;
+        WolfScalar getRangeMin() const;
 
         /** \brief Returns range_max_
          * 
          * Returns range_max_
          * 
          **/        
-        double getRangeMax() const;
+        WolfScalar getRangeMax() const;
+        
+        /** \brief Returns range_max_
+         * 
+         * Returns range_max_
+         * 
+         **/        
+        WolfScalar getRangeStdDev() const;
+        
         
 };
 #endif /*SENSOR_LASER_2D_H_*/
