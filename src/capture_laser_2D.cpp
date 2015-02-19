@@ -34,7 +34,7 @@ void CaptureLaser2D::processCapture()
 unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner_list)
 {
     //local variables
-    Eigen::VectorXs points(2,data_.size());
+    Eigen::MatrixXs points(2,data_.size());
     Eigen::MatrixXs AA(3,3);
     double a00=0, a01=0, a02=0, a11=0, a12=0, azimuth, theta;
     Eigen::Vector3s line, corner, v001; 
@@ -94,7 +94,9 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
             index_list.push_back(ii); //keep the "last" point of the line in the index list
         }
     }
-    
+
+    std::cout << "CaptureLaser2D::extractCorners(): " << __LINE__ << "; line_list.size():  " << line_list.size() << std::endl;                        
+
     //if at least two lines, find corners over the line list
     if ( line_list.size() > 1 )
     {
@@ -122,8 +124,8 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
             index_it2 ++;
         }
     }
-    
-    return line_list.size();
+std::cout << "CaptureLaser2D::extractCorners(): " << __LINE__ << "; _corner_list.size():  " << _corner_list.size() << std::endl;                            
+    return _corner_list.size();
 }
 
 Eigen::VectorXs CaptureLaser2D::computePrior() const

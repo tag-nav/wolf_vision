@@ -1,6 +1,6 @@
 
-#ifndef CORRESPONDENCE_SPARSE_H_
-#define CORRESPONDENCE_SPARSE_H_
+#ifndef CONSTRAINT_SPARSE_H_
+#define CONSTRAINT_SPARSE_H_
 
 //Wolf includes
 #include "wolf.h"

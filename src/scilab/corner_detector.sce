@@ -4,20 +4,33 @@
 xdel(winsid());
 clear;
 
+//scan params:
+Ns = 720; //scan rays
+aperture = %pi; //scan aperture [rad]
+azimuth_step = aperture/Ns;
+
 //User Tunning params
-Nw = 6; //window size
+Nw = 8; //window size
 theta_th = %pi/6;
 K = 3; //How many std_dev are tolerated to count that a point is supporting a line
 r_stdev = 0.1; //ranging std dev
 
 //init
+points = [];
 result_lines = [];
 line_indexes = [];
 corners = [];
 
+//scan ranges
+ranges = read('~/dev/labrobotica/algorithms/wolf/trunk/src/scilab/scan.txt',-1,720);
+//ranges = [];
+
 //invent a set of points + noise
-points = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24  25 26  27 28  29 30  31 32  33  34  35  36  37 38  39  40  41  42  43;
-          7 6 5 4 3 2 1 2 3 4  5  6  7  8  9  10 9  8  7  6  5  4  3  3.5 4  4.5 5  5.5 6  6.5 7  7.5 7.4 7.3 7.2 7.1 7  6.9 6.8 6.7 6.6 6.5 6.4];
+//points = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24  25 26  27 28  29 30  31 32  33  34  35  36  37 38  39  40  41  42  43;
+//          7 6 5 4 3 2 1 2 3 4  5  6  7  8  9  10 9  8  7  6  5  4  3  3.5 4  4.5 5  5.5 6  6.5 7  7.5 7.4 7.3 7.2 7.1 7  6.9 6.8 6.7 6.6 6.5 6.4];
+for i=1:Ns
+   points = [points [ranges(i)*cos(aperture/2 - azimuth_step*i); ranges(i)*sin(aperture/2 - azimuth_step*i)]];
+end
 points = points + rand(points,"normal")*r_stdev;
 [xx Np] = size(points);
 

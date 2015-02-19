@@ -1,6 +1,6 @@
 
-#ifndef CORRESPONDENCE_ODOM_2D_THETA_H_
-#define CORRESPONDENCE_ODOM_2D_THETA_H_
+#ifndef CONSTRAINT_ODOM_2D_THETA_H_
+#define CONSTRAINT_ODOM_2D_THETA_H_
 
 //Wolf includes
 #include "wolf.h"

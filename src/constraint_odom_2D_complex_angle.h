@@ -4,7 +4,7 @@
 
 //Wolf includes
 #include "wolf.h"
-#include "correspondence_sparse.h"
+#include "constraint_sparse.h"
 
 class ConstraintOdom2DComplexAngle: public ConstraintSparse<2,2,2,2,2>
 {
