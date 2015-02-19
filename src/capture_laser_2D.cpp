@@ -31,7 +31,7 @@ void CaptureLaser2D::processCapture()
     
 }
 
-void CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner_list)
+unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner_list)
 {
     //local variables
     Eigen::VectorXs points(2,data_.size());
@@ -122,4 +122,17 @@ void CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner_list)
             index_it2 ++;
         }
     }
+    
+    return line_list.size();
 }
+
+Eigen::VectorXs CaptureLaser2D::computePrior() const
+{
+    return Eigen::Vector3s(1,2,3);
+}
+
+void CaptureLaser2D::findCorrespondences()
+{
+        //
+}
+
