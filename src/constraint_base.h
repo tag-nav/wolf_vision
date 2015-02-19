@@ -1,6 +1,6 @@
 
-#ifndef CORRESPONDENCE_BASE_H_
-#define CORRESPONDENCE_BASE_H_
+#ifndef CONSTRAINT_BASE_H_
+#define CONSTRAINT_BASE_H_
 
 // Forward declarations for node templates
 class FeatureBase;
@@ -16,11 +16,11 @@ class NodeTerminus;
 #include "feature_base.h"
 #include "node_terminus.h"
 
-//class CorrespondenceBase
-class CorrespondenceBase : public NodeLinked<FeatureBase,NodeTerminus>
+//class ConstraintBase
+class ConstraintBase : public NodeLinked<FeatureBase,NodeTerminus>
 {
     protected:
-        CorrespondenceType type_; //type of correspondence (types defined at wolf.h)
+        ConstraintType type_; //type of constraint (types defined at wolf.h)
         Eigen::VectorXs * measurement_ptr_; // TBD: pointer, map or copy of the feature measurement?
         Eigen::MatrixXs * measurement_covariance_ptr_; // TBD: pointer, map or copy of the feature measurement covariance?
         
@@ -30,26 +30,26 @@ class CorrespondenceBase : public NodeLinked<FeatureBase,NodeTerminus>
          * Constructor
          * 
          **/                
-        CorrespondenceBase(const FeatureBasePtr& _ftr_ptr, CorrespondenceType _tp);
-        //CorrespondenceBase(CorrespondenceType _tp);
+        ConstraintBase(const FeatureBasePtr& _ftr_ptr, ConstraintType _tp);
+        //ConstraintBase(ConstraintType _tp);
 
         /** \brief Destructor
          * 
          * Destructor
          * 
          **/        
-        virtual ~CorrespondenceBase();
+        virtual ~ConstraintBase();
 
-        /** \brief Returns the correspondence type
+        /** \brief Returns the constraint type
          * 
-         * Returns the correspondence type
+         * Returns the constraint type
          * 
          **/
-        CorrespondenceType getCorrespondenceType() const;
+        ConstraintType getConstraintType() const;
         
-        /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the correspondence
+        /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
 		 *
-		 * Returns a vector of scalar pointers to the first element of all state blocks involved in the correspondence.
+		 * Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint.
 		 *
 		 **/
         virtual const std::vector<WolfScalar*> getStateBlockPtrVector() = 0;

@@ -4,16 +4,16 @@
 
 //Wolf includes
 #include "wolf.h"
-#include "correspondence_base.h"
+#include "constraint_base.h"
 
 //TODO: 
-// - public static const may be are not necessary, since sizes are already kept in CorrespondenceBase::state_block_sizes_vector_
+// - public static const may be are not necessary, since sizes are already kept in ConstraintBase::state_block_sizes_vector_
 // 	 JVN: Yes, they are necessary for the ceres cost function constructor. Maybe, the state_block_sizes_vector_ is not necessary (it can be useful in filtering...)
-// - measurement_ptr can be set from FeatureBase::measurement_, once this correspondence is up-linked to a feature. 
+// - measurement_ptr can be set from FeatureBase::measurement_, once this constraint is up-linked to a feature.
 //   May be a simple get is enough to access this data.
 // - 
 
-//template class CorrespondenceBase
+//template class ConstraintBase
 template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE = 0,
@@ -25,7 +25,7 @@ template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_7_SIZE = 0,
                 unsigned int BLOCK_8_SIZE = 0,
                 unsigned int BLOCK_9_SIZE = 0>
-class CorrespondenceSparse: public CorrespondenceBase
+class ConstraintSparse: public ConstraintBase
 {
     protected:
         std::vector<WolfScalar*> state_block_ptr_vector_;
@@ -50,10 +50,10 @@ class CorrespondenceSparse: public CorrespondenceBase
          * JVN: Potser aquest constructor no l'utilitzarem mai.. no?
          * 
          **/               
-        CorrespondenceSparse(const FeatureBasePtr& _ftr_ptr, CorrespondenceType _tp, WolfScalar** _blockPtrArray) :
-        //CorrespondenceSparse(CorrespondenceType _tp, WolfScalar** _blockPtrArray) :
-            CorrespondenceBase(_ftr_ptr,_tp),
-            //CorrespondenceBase(_tp),
+        ConstraintSparse(const FeatureBasePtr& _ftr_ptr, ConstraintType _tp, WolfScalar** _blockPtrArray) :
+        //ConstraintSparse(ConstraintType _tp, WolfScalar** _blockPtrArray) :
+            ConstraintBase(_ftr_ptr,_tp),
+            //ConstraintBase(_tp),
             state_block_ptr_vector_(10),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
@@ -76,9 +76,9 @@ class CorrespondenceSparse: public CorrespondenceBase
          * Constructor with state pointers separated
          * 
          **/        
-        CorrespondenceSparse(const FeatureBasePtr& _ftr_ptr,
-        //CorrespondenceSparse(
-        					 CorrespondenceType _tp,
+        ConstraintSparse(const FeatureBasePtr& _ftr_ptr,
+        //ConstraintSparse(
+        					 ConstraintType _tp,
                              WolfScalar* _state0Ptr,
                              WolfScalar* _state1Ptr = nullptr,
                              WolfScalar* _state2Ptr = nullptr,
@@ -89,8 +89,8 @@ class CorrespondenceSparse: public CorrespondenceBase
                              WolfScalar* _state7Ptr = nullptr,
                              WolfScalar* _state8Ptr = nullptr,
                              WolfScalar* _state9Ptr = nullptr ) :
-            CorrespondenceBase(_ftr_ptr,_tp),
-            //CorrespondenceBase(_tp),
+            ConstraintBase(_ftr_ptr,_tp),
+            //ConstraintBase(_tp),
             state_block_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
@@ -115,14 +115,14 @@ class CorrespondenceSparse: public CorrespondenceBase
          * Destructor
          * 
          **/        
-        virtual ~CorrespondenceSparse()
+        virtual ~ConstraintSparse()
         {
             //
         }
 
         /** \brief Returns a vector of pointers to the state blocks
          * 
-         * Returns a vector of pointers to the state blocks in which this correspondence depends
+         * Returns a vector of pointers to the state blocks in which this constraint depends
          * 
          **/
         virtual const std::vector<WolfScalar*> getStateBlockPtrVector()
@@ -130,10 +130,10 @@ class CorrespondenceSparse: public CorrespondenceBase
             return state_block_ptr_vector_;
         }
 
-        // Ja és a correspondence_base...
-        /** \brief Returns a pointer to the mesaurement associated to this correspondence
+        // Ja és a constraint_base...
+        /** \brief Returns a pointer to the mesaurement associated to this constraint
          *
-         * Returns a pointer to the mesaurement associated to this correspondence.
+         * Returns a pointer to the mesaurement associated to this constraint.
          * Measurement is owned by upper-level feature
          **/
 //        const Eigen::VectorXs * getMeasurement() const
