@@ -22,11 +22,11 @@ SET(HDRS
     capture_gps_fix.h
     capture_laser_2D.h
     capture_odom_2D.h
-    correspondence_base.h
-    correspondence_sparse.h
-    correspondence_gps_2D.h
-    correspondence_odom_2D_theta.h
-    correspondence_odom_2D_complex_angle.h
+    constraint_base.h
+    constraint_sparse.h
+    constraint_gps_2D.h
+    constraint_odom_2D_theta.h
+    constraint_odom_2D_complex_angle.h
     feature_base.h
     feature_gps_fix.h
     feature_odom_2D.h
@@ -54,7 +54,7 @@ SET(SRCS
     capture_gps_fix.cpp
     capture_laser_2D.cpp
     capture_odom_2D.cpp
-    correspondence_base.cpp
+    constraint_base.cpp
     feature_base.cpp
     feature_gps_fix.cpp
     feature_odom_2D.cpp

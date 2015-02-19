@@ -46,6 +46,6 @@ class CaptureLaser2D : public CaptureBase
         virtual unsigned int extractCorners(std::list<Eigen::Vector2s> & _corner_list);
         
         virtual Eigen::VectorXs computePrior() const;
-        virtual void findCorrespondences();
+        void findCorrespondences();
 };
 #endif /* CAPTURE_LASER_2D_H_ */

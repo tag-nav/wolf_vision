@@ -27,7 +27,7 @@ FeatureOdom2D::~FeatureOdom2D()
     //
 }
 
-void FeatureOdom2D::findCorrespondences()
+void FeatureOdom2D::findConstraints()
 {
 
 }

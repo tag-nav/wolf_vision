@@ -11,10 +11,10 @@
 #include "state_base.h"
 #include "state_point.h"
 #include "state_complex_angle.h"
-#include "correspondence_sparse.h"
-#include "correspondence_gps_2D.h"
-#include "correspondence_odom_2D_theta.h"
-#include "correspondence_odom_2D_complex_angle.h"
+#include "constraint_sparse.h"
+#include "constraint_gps_2D.h"
+#include "constraint_odom_2D_theta.h"
+#include "constraint_odom_2D_complex_angle.h"
 
 // ceres wrapper includes
 #include "ceres_wrapper/complex_angle_parametrization.h"
@@ -26,7 +26,7 @@
 class CeresManager
 {
 	protected:
-		std::vector<std::pair<ceres::ResidualBlockId, CorrespondenceBasePtr>> correspondence_list_;
+		std::vector<std::pair<ceres::ResidualBlockId, ConstraintBasePtr>> constraint_list_;
 		ceres::Problem* ceres_problem_;
 
 	public:
@@ -36,11 +36,11 @@ class CeresManager
 
 		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
 
-		void addCorrespondences(std::list<CorrespondenceBasePtr>& _new_correspondences);
+		void addConstraints(std::list<ConstraintBasePtr>& _new_constraints);
 
-		void removeCorrespondences();
+		void removeConstraints();
 
-		void addCorrespondence(const CorrespondenceBasePtr& _corr_ptr);
+		void addConstraint(const ConstraintBasePtr& _corr_ptr);
 
 		void addStateUnits(std::list<StateBasePtr>& _new_state_units);
 
@@ -48,7 +48,7 @@ class CeresManager
 
 		void addStateUnit(const StateBasePtr& _st_ptr);
 
-		ceres::CostFunction* createCostFunction(const CorrespondenceBasePtr& _corrPtr);
+		ceres::CostFunction* createCostFunction(const ConstraintBasePtr& _corrPtr);
 };
 
 #endif

@@ -27,8 +27,8 @@ FeatureGPSFix::~FeatureGPSFix()
     //
 }
 
-void FeatureGPSFix::findCorrespondences()
+void FeatureGPSFix::findConstraints()
 {
-	CorrespondenceBaseShPtr gps_correspondence(new CorrespondenceGPS2D(this, getCapturePtr()->getFramePtr()->getPPtr()));
-	addCorrespondence(gps_correspondence);
+	ConstraintBaseShPtr gps_constraint(new ConstraintGPS2D(this, getCapturePtr()->getFramePtr()->getPPtr()));
+	addConstraint(gps_constraint);
 }

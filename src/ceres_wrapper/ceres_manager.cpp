@@ -30,29 +30,29 @@ ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_
 	return ceres_summary_;
 }
 
-void CeresManager::addCorrespondences(std::list<CorrespondenceBasePtr>& _new_correspondences)
+void CeresManager::addConstraints(std::list<ConstraintBasePtr>& _new_constraints)
 {
-	//std::cout << _new_correspondences.size() << " new correspondences\n";
-	while (!_new_correspondences.empty())
+	//std::cout << _new_constraints.size() << " new constraints\n";
+	while (!_new_constraints.empty())
 	{
-		addCorrespondence(_new_correspondences.front());
-		_new_correspondences.pop_front();
+		addConstraint(_new_constraints.front());
+		_new_constraints.pop_front();
 	}
 }
 
-void CeresManager::removeCorrespondences()
+void CeresManager::removeConstraints()
 {
-	for (uint i = 0; i<correspondence_list_.size(); i++)
+	for (uint i = 0; i<constraint_list_.size(); i++)
 	{
-		ceres_problem_->RemoveResidualBlock(correspondence_list_.at(i).first);
+		ceres_problem_->RemoveResidualBlock(constraint_list_.at(i).first);
 	}
-	correspondence_list_.clear();
+	constraint_list_.clear();
 }
 
-void CeresManager::addCorrespondence(const CorrespondenceBasePtr& _corr_ptr)
+void CeresManager::addConstraint(const ConstraintBasePtr& _corr_ptr)
 {
 	ceres::ResidualBlockId blockIdx = ceres_problem_->AddResidualBlock(createCostFunction(_corr_ptr), NULL, _corr_ptr->getStateBlockPtrVector());
-	correspondence_list_.push_back(std::pair<ceres::ResidualBlockId, CorrespondenceBasePtr>(blockIdx,_corr_ptr));
+	constraint_list_.push_back(std::pair<ceres::ResidualBlockId, ConstraintBasePtr>(blockIdx,_corr_ptr));
 }
 
 void CeresManager::addStateUnits(std::list<StateBasePtr>& _new_state_units)
@@ -114,14 +114,14 @@ void CeresManager::addStateUnit(const StateBasePtr& _st_ptr)
 	}
 }
 
-ceres::CostFunction* CeresManager::createCostFunction(const CorrespondenceBasePtr& _corrPtr)
+ceres::CostFunction* CeresManager::createCostFunction(const ConstraintBasePtr& _corrPtr)
 {
-	switch (_corrPtr->getCorrespondenceType())
+	switch (_corrPtr->getConstraintType())
 	{
-		case CORR_GPS_FIX_2D:
+		case CTR_GPS_FIX_2D:
 		{
-			CorrespondenceGPS2D* specific_ptr = (CorrespondenceGPS2D*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<CorrespondenceGPS2D,
+			ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<ConstraintGPS2D,
 													specific_ptr->measurementSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
@@ -135,10 +135,10 @@ ceres::CostFunction* CeresManager::createCostFunction(const CorrespondenceBasePt
 													specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
-		case CORR_ODOM_2D_COMPLEX_ANGLE:
+		case CTR_ODOM_2D_COMPLEX_ANGLE:
 		{
-			CorrespondenceOdom2DComplexAngle* specific_ptr = (CorrespondenceOdom2DComplexAngle*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<CorrespondenceOdom2DComplexAngle,
+			ConstraintOdom2DComplexAngle* specific_ptr = (ConstraintOdom2DComplexAngle*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<ConstraintOdom2DComplexAngle,
 													specific_ptr->measurementSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
@@ -152,10 +152,10 @@ ceres::CostFunction* CeresManager::createCostFunction(const CorrespondenceBasePt
 													specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
-		case CORR_ODOM_2D_THETA:
+		case CTR_ODOM_2D_THETA:
 		{
-			CorrespondenceOdom2DTheta* specific_ptr = (CorrespondenceOdom2DTheta*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<CorrespondenceOdom2DTheta,
+			ConstraintOdom2DTheta* specific_ptr = (ConstraintOdom2DTheta*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<ConstraintOdom2DTheta,
 													specific_ptr->measurementSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
@@ -170,7 +170,7 @@ ceres::CostFunction* CeresManager::createCostFunction(const CorrespondenceBasePt
 			break;
 		}
 		default:
-			std::cout << "Unknown correspondence type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
+			std::cout << "Unknown constraint type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
 
 			return nullptr;
 	}

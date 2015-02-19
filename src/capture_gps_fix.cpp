@@ -25,21 +25,20 @@ CaptureGPSFix::~CaptureGPSFix()
 
 void CaptureGPSFix::processCapture()
 {
+	// EXTRACT AND ADD FEATURES
 //     FeatureBaseShPtr new_feature = FeatureBaseShPtr(new FeatureGPSFix(CaptureBasePtr(this),data_,data_covariance_));
     FeatureBaseShPtr new_feature = FeatureBaseShPtr(new FeatureGPSFix(data_,data_covariance_));
     addFeature(new_feature);
+
+    // ADD CONSTRAINT
+    ConstraintBaseShPtr gps_constraint(new ConstraintGPS2D(getFeatureListPtr()->front().get(), getFramePtr()->getPPtr()));
+	//ConstraintBaseShPtr gps_constraint(new ConstraintGPS2D(getFramePtr()->getPPtr()));
+	getFeatureListPtr()->front()->addConstraint(gps_constraint);
 }
 
 Eigen::VectorXs CaptureGPSFix::computePrior() const
 {
 	return data_;
-}
-
-void CaptureGPSFix::findCorrespondences()
-{
-	CorrespondenceBaseShPtr gps_correspondence(new CorrespondenceGPS2D(getFeatureListPtr()->front().get(), getFramePtr()->getPPtr()));
-    //CorrespondenceBaseShPtr gps_correspondence(new CorrespondenceGPS2D(getFramePtr()->getPPtr()));
-	getFeatureListPtr()->front()->addCorrespondence(gps_correspondence);
 }
 
 //void CaptureGPSFix::printSelf(unsigned int _ntabs, std::ostream & _ost) const

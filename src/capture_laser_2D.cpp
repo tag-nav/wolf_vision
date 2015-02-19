@@ -26,8 +26,8 @@ void CaptureLaser2D::processCapture()
     //generate a feature for each corner
     //TODO 
     
-    //Establish correspondences for each feature
-    //TODO (Does it go here ?)
+    //Establish constraints for each feature
+    //TODO
     
 }
 

@@ -53,18 +53,18 @@ FeatureBaseList* CaptureBase::getFeatureListPtr()
     return getDownNodeListPtr();
 }
 
-void CaptureBase::getCorrespondenceList(CorrespondenceBaseList & _corr_list)
+void CaptureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
     std::list<FeatureBaseShPtr>::iterator f_it;
-    std::list<CorrespondenceBaseShPtr>* c_list_ptr;
-    std::list<CorrespondenceBaseShPtr>::iterator c_it;
+    std::list<ConstraintBaseShPtr>* c_list_ptr;
+    std::list<ConstraintBaseShPtr>::iterator c_it;
     
     for( f_it = down_node_list_.begin(); f_it != down_node_list_.end(); ++f_it)
     {
-        c_list_ptr = (f_it->get())->getCorrespondenceListPtr();
+        c_list_ptr = (f_it->get())->getConstraintListPtr();
         for( c_it = c_list_ptr->begin(); c_it != c_list_ptr->end(); ++c_it)
         {
-            _corr_list.push_back(*c_it);
+        	_ctr_list.push_back(*c_it);
         }
     }
 }

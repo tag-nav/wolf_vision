@@ -36,7 +36,7 @@ FeatureBase::~FeatureBase()
 //    linkToUpperNode(_capt_ptr.get());
 //}
 
-void FeatureBase::addCorrespondence(CorrespondenceBaseShPtr& _co_ptr)
+void FeatureBase::addConstraint(ConstraintBaseShPtr& _co_ptr)
 {
     addDownNode(_co_ptr);
 }
@@ -51,12 +51,12 @@ const FrameBasePtr FeatureBase::getFramePtr() const
     return upperNodePtr()->upperNodePtr();
 }
 
-// inline const CorrespondenceBaseList & FeatureBase::getCorrespondenceList() const
+// inline const ConstraintBaseList & FeatureBase::getConstraintList() const
 // {
 //     return downNodeList();
 // }
 
-CorrespondenceBaseList* FeatureBase::getCorrespondenceListPtr()
+ConstraintBaseList* FeatureBase::getConstraintListPtr()
 {
     return getDownNodeListPtr();
 }

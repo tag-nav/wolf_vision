@@ -29,10 +29,10 @@
 #include "capture_odom_2D.h"
 #include "capture_gps_fix.h"
 #include "state_base.h"
-#include "correspondence_sparse.h"
-#include "correspondence_gps_2D.h"
-#include "correspondence_odom_2D_theta.h"
-#include "correspondence_odom_2D_complex_angle.h"
+#include "constraint_sparse.h"
+#include "constraint_gps_2D.h"
+#include "constraint_odom_2D_theta.h"
+#include "constraint_odom_2D_complex_angle.h"
 
 // ceres wrapper include
 #include "ceres_wrapper/ceres_manager.h"
@@ -76,8 +76,8 @@ class WolfManager
         {
         	delete trajectory_;
 //        	std::cout << "Destroying WolfManager...\n";
-//        	std::cout << "Clearing correspondences_...\n";
-//        	correspondences_.clear();
+//        	std::cout << "Clearing constraints_...\n";
+//        	constraints_.clear();
 //        	std::cout << "Clearing frames...\n";
 //        	frames_.clear();
 //        	std::cout << "Clearing odom_captures_...\n";
@@ -129,7 +129,7 @@ class WolfManager
         	new_captures_.push(_capture);
         }
 
-        void update(std::list<StateBasePtr>& new_state_units, std::list<CorrespondenceBasePtr>& new_correspondences)
+        void update(std::list<StateBasePtr>& new_state_units, std::list<ConstraintBasePtr>& new_constraints)
         {
         	// TODO: management due to time stamps
         	while (!new_captures_.empty())
@@ -161,16 +161,16 @@ class WolfManager
 					trajectory_->getFrameListPtr()->back()->addCapture(new_capture);
         		}
 
-        		// COMPUTE CAPTURE (features, correspondences)
+        		// COMPUTE CAPTURE (features, constraints)
         		new_capture->processCapture();
-        		new_capture->findCorrespondences();
+        		//new_capture->findConstraints();
 
-        		// ADD CORRESPONDENCES TO THE new_correspondences OUTPUT PARAM
+        		// ADD CORRESPONDENCES TO THE new_constraints OUTPUT PARAM
         		for (FeatureBaseIter feature_list_iter=new_capture->getFeatureListPtr()->begin(); feature_list_iter!=new_capture->getFeatureListPtr()->end(); feature_list_iter++)
 				{
-					for (CorrespondenceBaseIter correspondence_list_iter=(*feature_list_iter)->getCorrespondenceListPtr()->begin(); correspondence_list_iter!=(*feature_list_iter)->getCorrespondenceListPtr()->end(); correspondence_list_iter++)
+					for (ConstraintBaseIter constraint_list_iter=(*feature_list_iter)->getConstraintListPtr()->begin(); constraint_list_iter!=(*feature_list_iter)->getConstraintListPtr()->end(); constraint_list_iter++)
 					{
-						new_correspondences.push_back((*correspondence_list_iter).get());
+						new_constraints.push_back((*constraint_list_iter).get());
 					}
 				}
         	}
@@ -195,9 +195,9 @@ class WolfManager
 			return st_list;
 		}
 
-        std::list<CorrespondenceBaseShPtr> getCorrespondencesList()
+        std::list<ConstraintBaseShPtr> getConstraintsList()
         {
-        	std::list<CorrespondenceBaseShPtr> corr_list;
+        	std::list<ConstraintBaseShPtr> corr_list;
 
         	for (FrameBaseIter frame_list_iter=trajectory_->getFrameListPtr()->begin(); frame_list_iter!=trajectory_->getFrameListPtr()->end(); frame_list_iter++)
 			{
@@ -205,7 +205,7 @@ class WolfManager
 				{
 					for (FeatureBaseIter feature_list_iter=(*capture_list_iter)->getFeatureListPtr()->begin(); feature_list_iter!=(*capture_list_iter)->getFeatureListPtr()->end(); feature_list_iter++)
 					{
-						corr_list.insert(corr_list.end(),(*feature_list_iter)->getCorrespondenceListPtr()->begin(), (*feature_list_iter)->getCorrespondenceListPtr()->end());
+						corr_list.insert(corr_list.end(),(*feature_list_iter)->getConstraintListPtr()->begin(), (*feature_list_iter)->getConstraintListPtr()->end());
 					}
 				}
 			}
@@ -272,7 +272,7 @@ int main(int argc, char** argv)
 	Eigen::VectorXs odom_readings(n_execution*2); // all odometry readings
 	Eigen::VectorXs gps_fix_readings(n_execution*3); //all GPS fix readings
 	std::list<StateBasePtr> new_state_units; // new state units in wolf that must be added to ceres
-	std::list<CorrespondenceBasePtr> new_correspondences; // new correspondences in wolf that must be added to ceres
+	std::list<ConstraintBasePtr> new_constraints; // new constraints in wolf that must be added to ceres
 
 	// Wolf manager initialization
 	SensorOdom2D odom_sensor(Eigen::MatrixXs::Zero(3,1), odom_std, odom_std);
@@ -323,11 +323,11 @@ int main(int argc, char** argv)
 		wolf_manager->addCapture(CaptureBaseShPtr(new CaptureGPSFix(TimeStamp(step*0.01), &gps_sensor, gps_fix_readings.segment(step*3,3), gps_std * MatrixXs::Identity(3,3))));
 
 		// updating problem
-		wolf_manager->update(new_state_units, new_correspondences);
+		wolf_manager->update(new_state_units, new_constraints);
 
-		// adding new state units and correspondences to ceres
+		// adding new state units and constraints to ceres
 		ceres_manager->addStateUnits(new_state_units);
-		ceres_manager->addCorrespondences(new_correspondences);
+		ceres_manager->addConstraints(new_constraints);
 	}
 
 	//std::cout << "Resulting tree:\n";

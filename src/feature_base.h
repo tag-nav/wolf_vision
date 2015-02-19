@@ -3,7 +3,7 @@
 
 // Forward declarations for node templates
 class CaptureBase;
-class CorrespondenceBase;
+class ConstraintBase;
 
 //std includes
 
@@ -11,10 +11,10 @@ class CorrespondenceBase;
 #include "wolf.h"
 #include "node_linked.h"
 #include "capture_base.h"
-#include "correspondence_base.h"
+#include "constraint_base.h"
 
 //class FeatureBase
-class FeatureBase : public NodeLinked<CaptureBase,CorrespondenceBase>
+class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
 {
     protected:
         Eigen::VectorXs measurement_;
@@ -53,15 +53,15 @@ class FeatureBase : public NodeLinked<CaptureBase,CorrespondenceBase>
         
         //void linkToCapture(const CaptureBaseShPtr& _capt_ptr); //JVN: inútil, el constructor ja crea el feature penjant d'una captura
         
-        void addCorrespondence(CorrespondenceBaseShPtr& _co_ptr);
+        void addConstraint(ConstraintBaseShPtr& _co_ptr);
 
         const CaptureBasePtr getCapturePtr() const;
 
         const FrameBasePtr getFramePtr() const;
         
-//         const CorrespondenceBaseList & getCorrespondenceList() const;
+//         const ConstraintBaseList & getConstraintList() const;
         
-        CorrespondenceBaseList* getCorrespondenceListPtr();
+        ConstraintBaseList* getConstraintListPtr();
         
         Eigen::VectorXs * getMeasurementPtr();
         

@@ -5,7 +5,7 @@
 
 //Wolf includes
 #include "feature_base.h"
-#include "correspondence_gps_2D.h"
+#include "constraint_gps_2D.h"
 
 //class FeatureGPSFix
 class FeatureGPSFix : public FeatureBase
@@ -40,13 +40,13 @@ class FeatureGPSFix : public FeatureBase
 
         virtual ~FeatureGPSFix();
 
-        /** \brief Generic interface to find correspondences
+        /** \brief Generic interface to find constraints
          * 
          * TBD
-         * Generic interface to find correspondences between this feature and a map (static/slam) or a previous feature
+         * Generic interface to find constraints between this feature and a map (static/slam) or a previous feature
          *
          **/
-        virtual void findCorrespondences();
+        virtual void findConstraints();
         
 };
 #endif

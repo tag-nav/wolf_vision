@@ -99,20 +99,20 @@ typedef enum
     REGULAR_FRAME ///< marks a regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
 } FrameType;
 
-/** \brief Enumeration of all possible correspondences
+/** \brief Enumeration of all possible constraints
  *
- * Enumeration of all possible correspondences.
+ * Enumeration of all possible constraints.
  *
  * You may add items to this list as needed. Be concise with names, and document your entries.
  * 
  */
 typedef enum 
 {
-    CORR_GPS_FIX_2D,			///< marks a 2D GPS Fix correspondence.
-	CORR_ODOM_2D_COMPLEX_ANGLE,	///< marks a 2D Odometry using complex angles.
-	CORR_ODOM_2D_THETA			///< marks a 2D Odometry using theta angles.
+    CTR_GPS_FIX_2D,				///< marks a 2D GPS Fix constraint.
+	CTR_ODOM_2D_COMPLEX_ANGLE,	///< marks a 2D Odometry using complex angles.
+	CTR_ODOM_2D_THETA			///< marks a 2D Odometry using theta angles.
     
-} CorrespondenceType;
+} ConstraintType;
 
 /** \brief Enumeration of all possible state parametrizations
  *
@@ -180,7 +180,7 @@ class CaptureBase;
 class CaptureLaser2D;
 class FeatureBase;
 class FeatureCorner2D;
-class CorrespondenceBase;
+class ConstraintBase;
 class RawBase;
 class RawLaser2D;
 class SensorBase;
@@ -233,11 +233,11 @@ typedef FeatureBase* FeatureBasePtr; ///< Feature pointer type
 typedef std::list<FeatureBaseShPtr> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
 
-// - Correspondence
-typedef std::shared_ptr<CorrespondenceBase> CorrespondenceBaseShPtr;
-typedef CorrespondenceBase* CorrespondenceBasePtr;
-typedef std::list<CorrespondenceBaseShPtr> CorrespondenceBaseList;
-typedef CorrespondenceBaseList::iterator CorrespondenceBaseIter;
+// - Constraint
+typedef std::shared_ptr<ConstraintBase> ConstraintBaseShPtr;
+typedef ConstraintBase* ConstraintBasePtr;
+typedef std::list<ConstraintBaseShPtr> ConstraintBaseList;
+typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
 // - Raw data
 typedef std::shared_ptr<RawBase> RawShPtr;

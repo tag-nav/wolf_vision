@@ -25,9 +25,13 @@ CaptureOdom2D::~CaptureOdom2D()
 
 inline void CaptureOdom2D::processCapture()
 {
+	// ADD FEATURE
     //FeatureBaseShPtr new_feature(new FeatureOdom2D(CaptureBasePtr(this),data_,data_covariance_));
     FeatureBaseShPtr new_feature(new FeatureOdom2D(data_,data_covariance_));
     addFeature(new_feature);
+
+    // ADD CONSTRAINT
+    addConstraints();
 }
 
 Eigen::VectorXs CaptureOdom2D::computePrior() const
@@ -63,35 +67,33 @@ Eigen::VectorXs CaptureOdom2D::computePrior() const
 	}
 }
 
-void CaptureOdom2D::findCorrespondences()
+void CaptureOdom2D::addConstraints()
 {
 	if (getFramePtr()->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
 	{
-		CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DComplexAngle(getFeatureListPtr()->front().get(),
-																						 getFramePtr()->getPreviousFrame()->getPPtr(),
-																						 getFramePtr()->getPreviousFrame()->getOPtr(),
-																						 getFramePtr()->getPPtr(),
-																						 getFramePtr()->getOPtr()));
-//         CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DComplexAngle(
-//                                                                                          getFramePtr()->getPreviousFrame()->getPPtr(),
-//                                                                                          getFramePtr()->getPreviousFrame()->getOPtr(),
-//                                                                                          getFramePtr()->getPPtr(),
-//                                                                                          getFramePtr()->getOPtr()));
-		getFeatureListPtr()->front()->addCorrespondence(odom_correspondence);
+		ConstraintBaseShPtr odom_constraint(new ConstraintOdom2DComplexAngle(getFeatureListPtr()->front().get(),
+																			 getFramePtr()->getPreviousFrame()->getPPtr(),
+																			 getFramePtr()->getPreviousFrame()->getOPtr(),
+																			 getFramePtr()->getPPtr(),
+																			 getFramePtr()->getOPtr()));
+//         ConstraintBaseShPtr odom_constraint(new ConstraintOdom2DComplexAngle(getFramePtr()->getPreviousFrame()->getPPtr(),
+//                                                                              getFramePtr()->getPreviousFrame()->getOPtr(),
+//                                                                              getFramePtr()->getPPtr(),
+//                                                                              getFramePtr()->getOPtr()));
+		getFeatureListPtr()->front()->addConstraint(odom_constraint);
 	}
 	else
 	{
-		CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DTheta(getFeatureListPtr()->front().get(),
-																				  getFramePtr()->getPreviousFrame()->getPPtr(),
-																				  getFramePtr()->getPreviousFrame()->getOPtr(),
-																				  getFramePtr()->getPPtr(),
-																				  getFramePtr()->getOPtr()));
-//         CorrespondenceBaseShPtr odom_correspondence(new CorrespondenceOdom2DTheta(
-//                                                                                   getFramePtr()->getPreviousFrame()->getPPtr(),
-//                                                                                   getFramePtr()->getPreviousFrame()->getOPtr(),
-//                                                                                   getFramePtr()->getPPtr(),
-//                                                                                   getFramePtr()->getOPtr()));        
-		getFeatureListPtr()->front()->addCorrespondence(odom_correspondence);
+		ConstraintBaseShPtr odom_constraint(new ConstraintOdom2DTheta(getFeatureListPtr()->front().get(),
+																	  getFramePtr()->getPreviousFrame()->getPPtr(),
+																	  getFramePtr()->getPreviousFrame()->getOPtr(),
+																	  getFramePtr()->getPPtr(),
+																	  getFramePtr()->getOPtr()));
+//         ConstraintBaseShPtr odom_constraint(new ConstraintOdom2DTheta(getFramePtr()->getPreviousFrame()->getPPtr(),
+//                                                                       getFramePtr()->getPreviousFrame()->getOPtr(),
+//                                                                       getFramePtr()->getPPtr(),
+//                                                                       getFramePtr()->getOPtr()));
+		getFeatureListPtr()->front()->addConstraint(odom_constraint);
 	}
 }
 

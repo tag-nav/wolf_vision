@@ -5,8 +5,8 @@
 
 //Wolf includes
 #include "feature_base.h"
-#include "correspondence_odom_2D_theta.h"
-#include "correspondence_odom_2D_complex_angle.h"
+#include "constraint_odom_2D_theta.h"
+#include "constraint_odom_2D_complex_angle.h"
 
 //class FeatureOdom2D
 class FeatureOdom2D : public FeatureBase
@@ -41,13 +41,13 @@ class FeatureOdom2D : public FeatureBase
 
         virtual ~FeatureOdom2D();
 
-        /** \brief Generic interface to find correspondences
+        /** \brief Generic interface to find constraints
          * 
          * TBD
-         * Generic interface to find correspondences between this feature and a map (static/slam) or a previous feature
+         * Generic interface to find constraints between this feature and a map (static/slam) or a previous feature
          *
          **/
-        virtual void findCorrespondences();
+        virtual void findConstraints();
         
 };
 #endif

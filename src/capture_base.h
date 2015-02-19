@@ -65,14 +65,13 @@ class CaptureBase : public NodeLinked<FrameBase,FeatureBase>
          **/                        
         FeatureBaseList* getFeatureListPtr();
         
-        /** \brief Fills the provided list with all correspondences related to this capture
+        /** \brief Fills the provided list with all constraints related to this capture
          *
-         * Fills the provided list with all correspondences related to this capture
+         * Fills the provided list with all constraints related to this capture
          * 
          *
          **/
-        //const CorrespondenceBaseList getCorrespondenceList() const;
-        void getCorrespondenceList(CorrespondenceBaseList & _corr_list);//TODO: Should be const
+        void getConstraintList(ConstraintBaseList & _ctr_list);//TODO: Should be const
 
         TimeStamp getTimeStamp() const;
 
@@ -93,13 +92,6 @@ class CaptureBase : public NodeLinked<FrameBase,FeatureBase>
         virtual void processCapture();// = 0;
 
         virtual Eigen::VectorXs computePrior() const = 0;
-
-        /** \brief Generic interface to find correspondences
-         *
-         * Generic interface to find correspondences between its features and a map (static/slam) or a previous feature
-         *
-         **/
-        virtual void findCorrespondences() = 0;
 
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 };
