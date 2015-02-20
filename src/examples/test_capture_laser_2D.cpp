@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
     
     //Device and Capture declaration
     SensorLaser2D device(device_pose, ranges.size(), M_PI, 0.2, 30.0, 0.01);
+    device.printSensorParameters();
     CaptureLaser2D capture(time_stamp, &device, ranges);
     
     //do things with the measurements

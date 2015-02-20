@@ -69,7 +69,12 @@ class SensorLaser2D : public SensorBase
          * 
          **/        
         WolfScalar getRangeStdDev() const;
-        
-        
+
+        /** \brief Prints parameters
+         * 
+         * Prints parameters
+         * 
+         **/                
+        void printSensorParameters() const;
 };
 #endif /*SENSOR_LASER_2D_H_*/

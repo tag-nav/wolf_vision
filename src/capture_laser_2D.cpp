@@ -59,7 +59,7 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
     //convert range polar data to cartesian points. Assumes clockwise order from the scan top view, and centered scan.
     for (unsigned int ii = 0; ii<data_.size(); ii++)
     {
-        azimuth = -aperture/2.+(double)ii*azimuth_step;
+        azimuth = aperture/2. - (double)ii*azimuth_step;
         points.block<2,1>(0,ii) << data_(ii)*cos(azimuth), data_(ii)*sin(azimuth); //points.row0-> x coordinate, points.row1->y coordinate
     }
     

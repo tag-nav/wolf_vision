@@ -36,3 +36,12 @@ WolfScalar SensorLaser2D::getRangeStdDev() const
 {
     return params_(4);
 }
+
+void SensorLaser2D::printSensorParameters() const
+{
+    std::cout << "LASER 2D SENSOR" << std::endl;
+    std::cout << "   aperture: " << getAperture() << std::endl;
+    std::cout << "   range min: " << getRangeMin() << std::endl;
+    std::cout << "   range max: " << getRangeMax() << std::endl;
+    std::cout << "   range std dev: " << getRangeStdDev() << std::endl;
+}

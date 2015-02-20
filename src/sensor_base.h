@@ -3,7 +3,7 @@
 
 
 //std includes
-//
+#include <iostream>
 
 //Wolf includes
 #include "wolf.h"
@@ -26,6 +26,7 @@ class SensorBase
         const SensorType getSensorType() const;
         
         const Eigen::VectorXs * getSensorPose() const;
+        
 };
 #endif
 

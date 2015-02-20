@@ -10,10 +10,10 @@ aperture = %pi; //scan aperture [rad]
 azimuth_step = aperture/Ns;
 
 //User Tunning params
-Nw = 8; //window size
+Nw = 6; //window size
 theta_th = %pi/6;
-K = 3; //How many std_dev are tolerated to count that a point is supporting a line
-r_stdev = 0.1; //ranging std dev
+K = 2; //How many std_dev are tolerated to count that a point is supporting a line
+r_stdev = 0.01; //ranging std dev
 
 //init
 points = [];
@@ -22,7 +22,7 @@ line_indexes = [];
 corners = [];
 
 //scan ranges
-ranges = read('~/dev/labrobotica/algorithms/wolf/trunk/src/scilab/scan.txt',-1,720);
+ranges = read('~/dev/labrobotica/algorithms/wolf/trunk/src/scilab/scan.txt',-1,Ns);
 //ranges = [];
 
 //invent a set of points + noise
@@ -37,7 +37,7 @@ points = points + rand(points,"normal")*r_stdev;
 //Main loop. Runs over a sliding window of Nw points
 for (i = Nw:Np)
     //set the window
-    points_w = points(:,(i-Nw+1):i)
+    points_w = points(:,(i-Nw+1):i);
 
     //Found the best fitting line over the window. Build the system: Ax=0. Matrix A = a_ij
     a_00 = sum( points_w(1,:).^2 );
@@ -85,20 +85,20 @@ end
 //corner detection
 for (i = 2:Nl)
     //compute angle diff between consecutive segments
-    cos_theta = result_lines(1:2,i-1)'*result_lines(1:2,i) / ( norm(result_lines(1:2,i-1)) * norm(result_lines(1:2,i)) )
+    cos_theta = result_lines(1:2,i-1)'*result_lines(1:2,i) / ( norm(result_lines(1:2,i-1)) * norm(result_lines(1:2,i)) );
     theta = abs(acos(cos_theta));
     
     //if angle diff greater than threshold && indexes are less than Nw, we decide corner
     if theta > theta_th then
         if (line_indexes(i)-line_indexes(i-1)) < Nw then
             //Corner found! Compute "sub-pixel" corner location as the intersection of two lines
-            corner = cross(result_lines(1:3,i-1),result_lines(1:3,i))
+            corner = cross(result_lines(1:3,i-1),result_lines(1:3,i));
             corner = corner./corner(3);//norlamlize homogeneous point
             corners = [corners corner];
             
             //display
-            disp("theta: "); disp(theta);
-            disp("index:" ); disp(line_indexes(i)-Nw+1);//line_indexes(i) indicates the end point of the segment
+            //disp("theta: "); disp(theta);
+            //disp("index:" ); disp(line_indexes(i)-Nw+1);//line_indexes(i) indicates the end point of the segment
         end
     end
 end
@@ -109,6 +109,16 @@ fig1.background = 8;
 
 //plot points
 plot(points(1,:),points(2,:),"g.");
+
+//axis settings
+ah = gca();
+ah.isoview = "on";
+ah.x_label.text = "$x [m]$";
+ah.x_label.font_size = 4;
+ah.y_label.text = "$y [m]$";
+ah.grid = [0.1,0.1,0.1];
+ah.grid_position = "background";
+
 
 //plot lines
 for i=1:Nl
