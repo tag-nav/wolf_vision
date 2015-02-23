@@ -43,5 +43,5 @@ TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
 
 IF(faramotics_FOUND)
 	ADD_EXECUTABLE(test_ceres_laser test_ceres_laser.cpp)
-	TARGET_LINK_LIBRARIES(test_ceres_laser ${GLUT_glut_LIBRARY} ${faramotics_LIBRARIES} ${PROJECT_NAME})
+    TARGET_LINK_LIBRARIES(test_ceres_laser ${GLUT_glut_LIBRARY} ${pose_state_time_LIBRARIES} ${faramotics_LIBRARIES} ${PROJECT_NAME})
 ENDIF(faramotics_FOUND)

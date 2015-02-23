@@ -1,3 +1,7 @@
+
+//std
+#include <random>
+
 //wolf
 #include "capture_laser_2D.h"
 
@@ -88,10 +92,19 @@ int main(int argc, char *argv[])
     std::list<Eigen::Vector2s> corner_list;
     std::list<Eigen::Vector2s>::iterator corner_it;
     
-    //Device and Capture declaration
+    //Create Device objects 
     SensorLaser2D device(device_pose, ranges.size(), M_PI, 0.2, 30.0, 0.01);
     device.printSensorParameters();
+    
+    //init a noise generator
+    std::default_random_engine generator(1);
+    std::normal_distribution<WolfScalar> distribution_range(0.,device.getRangeStdDev()); //odometry noise
+    
+    //Create a Capture object
     CaptureLaser2D capture(time_stamp, &device, ranges);
+
+    //add noise to measurements
+    //TODO
     
     //do things with the measurements
     capture.extractCorners(corner_list);

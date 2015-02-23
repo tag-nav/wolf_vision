@@ -1,7 +1,7 @@
 #include "capture_laser_2D.h"
 
 unsigned int CaptureLaser2D::segment_window_size = 8;//window size to extract segments
-double CaptureLaser2D::theta_min = 0.52; //minimum theta between consecutive segments to detect corner. PI/6=0.52
+double CaptureLaser2D::theta_min = 0.4; //minimum theta between consecutive segments to detect corner. PI/8=0.39
 double CaptureLaser2D::k_sigmas = 3.;//How many std_dev are tolerated to count that a point is supporting a line
 
 CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _sensor_ptr, const Eigen::VectorXs& _ranges):
@@ -36,7 +36,7 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
     //local variables
     Eigen::MatrixXs points(2,data_.size());
     Eigen::MatrixXs AA(3,3);
-    double a00=0, a01=0, a02=0, a11=0, a12=0, azimuth, theta;
+    double a00=0, a01=0, a02=0, a11=0, a12=0, azimuth, cos_theta, theta;
     Eigen::Vector3s line, corner, v001; 
     double error;
     std::list<Eigen::Vector3s> line_list;
@@ -56,7 +56,7 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
     //other inits
     v001 << 0, 0, 1;
     
-    //convert range polar data to cartesian points. Assumes clockwise order from the scan top view, and centered scan.
+    //convert range polar data to cartesian points. Assumes counterclockwise order from the scan top view, and centered scan.
     for (unsigned int ii = 0; ii<data_.size(); ii++)
     {
         azimuth = aperture/2. - (double)ii*azimuth_step;
@@ -67,6 +67,7 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
     for (unsigned int ii = segment_window_size-1; ii<data_.size(); ii++)
     {
         //Found the best fitting line over points within the window. Build the system: A*line=[0 0 1]'. Matrix A = a_ij
+        a00=0; a01=0; a02=0; a11=0; a12=0; // reset a_ij matrix terms
         for(unsigned int jj = 0; jj<segment_window_size; jj++) 
         {
             a00 += points(0,ii-jj)*points(0,ii-jj);//sum(x_i^2)
@@ -91,6 +92,7 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
         if ( error < range_std_dev*k_sigmas )
         {
             line_list.push_back(line); //keep the line in the result list
+            //std::cout << line << std::endl;
             index_list.push_back(ii); //keep the "last" point of the line in the index list
         }
     }
@@ -101,13 +103,23 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
     if ( line_list.size() > 1 )
     {
         line_it1 = line_list.begin();
-        line_it2 = line_it1 ++;
+        line_it2 = line_it1;
+        line_it2 ++;
         index_it1 = index_list.begin();
-        index_it2 = index_it1 ++;
+        index_it2 = index_it1;
+        index_it2 ++;
         while ( line_it1 != line_list.end() )
         {   
             //compute angle between lines 1 and 2
-            theta = acos ( (*line_it1).dot(*line_it2) / (*line_it1).norm()*(*line_it2).norm() );
+            cos_theta = (*line_it1).dot(*line_it2) / ( (*line_it1).norm()*(*line_it2).norm() );
+            theta = acos (cos_theta);
+            std::cout << std::endl << "cos_theta: " << cos_theta << std::endl <<
+                                      "theta: " << theta << std::endl << 
+                                      "*index_it1: " << *index_it1 << std::endl << 
+                                      "*index_it2: " << *index_it2 << std::endl;
+//                                       "   (*line_it1).dot(*line_it2): " << (*line_it1).dot(*line_it2) << std::endl <<
+//                                       "   (*line_it1).norm()*(*line_it2).norm(): " << (*line_it1).norm()*(*line_it2).norm() << std::endl;
+                                      
             
             //Check angle threshold and consecutiveness of lines in the scan
             if ( ( fabs(theta) > theta_min ) && ( ((*index_it2)-(*index_it1)) < segment_window_size ) )

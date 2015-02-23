@@ -10,9 +10,9 @@ aperture = %pi; //scan aperture [rad]
 azimuth_step = aperture/Ns;
 
 //User Tunning params
-Nw = 6; //window size
-theta_th = %pi/6;
-K = 2; //How many std_dev are tolerated to count that a point is supporting a line
+Nw = 8; //window size
+theta_th = %pi/8;
+K = 3; //How many std_dev are tolerated to count that a point is supporting a line
 r_stdev = 0.01; //ranging std dev
 
 //init

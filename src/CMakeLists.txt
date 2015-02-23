@@ -13,6 +13,7 @@ FIND_PACKAGE(faramotics QUIET) #faramotics is not required
 IF(faramotics_FOUND)
 	FIND_PACKAGE(GLUT REQUIRED)
 	FIND_PACKAGE(pose_state_time REQUIRED)
+	FIND_LIBRARY(Assimp_LIBRARIES assimp HINTS /usr/local/lib NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH)
     MESSAGE("Faramotics Library FOUND: test_ceres_laser will be built.")
 ENDIF(faramotics_FOUND)
 
