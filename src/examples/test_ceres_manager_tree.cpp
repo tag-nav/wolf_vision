@@ -75,18 +75,6 @@ class WolfManager
         virtual ~WolfManager()
         {
         	delete trajectory_;
-//        	std::cout << "Destroying WolfManager...\n";
-//        	std::cout << "Clearing constraints_...\n";
-//        	constraints_.clear();
-//        	std::cout << "Clearing frames...\n";
-//        	frames_.clear();
-//        	std::cout << "Clearing odom_captures_...\n";
-//        	odom_captures_.clear();
-//        	std::cout << "Clearing gps_captures_...\n";
-//        	gps_captures_.clear();
-//        	captures_.clear();
-//
-//        	std::cout << "all cleared...\n";
         }
 
         void createFrame(const VectorXs& _frame_state, const TimeStamp& _time_stamp)
@@ -97,10 +85,6 @@ class WolfManager
         	// Create frame and add it to the trajectory
         	if (use_complex_angles_)
         	{
-//         		FrameBaseShPtr new_frame(new FrameBase(trajectory_,
-// 													   _time_stamp,
-// 													   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-// 													   StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2))));
                 FrameBaseShPtr new_frame(new FrameBase(
                                                        _time_stamp,
                                                        StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
@@ -109,10 +93,6 @@ class WolfManager
         	}
         	else
         	{
-//         		FrameBaseShPtr new_frame(new FrameBase(trajectory_,
-// 													   _time_stamp,
-// 													   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-// 													   StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2))));
                 FrameBaseShPtr new_frame(new FrameBase(
                                                        _time_stamp,
                                                        StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
@@ -163,7 +143,6 @@ class WolfManager
 
         		// COMPUTE CAPTURE (features, constraints)
         		new_capture->processCapture();
-        		//new_capture->findConstraints();
 
         		// ADD CORRESPONDENCES TO THE new_constraints OUTPUT PARAM
         		for (FeatureBaseIter feature_list_iter=new_capture->getFeatureListPtr()->begin(); feature_list_iter!=new_capture->getFeatureListPtr()->end(); feature_list_iter++)
@@ -234,8 +213,6 @@ int main(int argc, char** argv)
 
 	clock_t t1, t2;
 	t1=clock();
-
-	NodeLinked<NodeTerminus,NodeTerminus> node(TOP,"TRAJECTORY");
 
 	unsigned int n_execution = (unsigned int) atoi(argv[1]); //number of iterations of the whole execution
 	bool complex_angle = (bool) atoi(argv[2]);
