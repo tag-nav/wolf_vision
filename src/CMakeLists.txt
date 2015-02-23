@@ -9,6 +9,13 @@ IF(Ceres_FOUND)
     MESSAGE("Ceres Library FOUND: ceres_wrapper will be built.")
 ENDIF(Ceres_FOUND)
 
+FIND_PACKAGE(faramotics QUIET) #faramotics is not required
+IF(faramotics_FOUND)
+	FIND_PACKAGE(GLUT REQUIRED)
+	FIND_PACKAGE(pose_state_time REQUIRED)
+    MESSAGE("Faramotics Library FOUND: test_ceres_laser will be built.")
+ENDIF(faramotics_FOUND)
+
 #include directories
 INCLUDE_DIRECTORIES(.)
 IF(Ceres_FOUND)

@@ -3,8 +3,8 @@ ADD_EXECUTABLE(test_node_linked test_node_linked.cpp)
 TARGET_LINK_LIBRARIES(test_node_linked ${PROJECT_NAME})
 
 # numeric test
-#ADD_EXECUTABLE(test_ceres_wrapper_numeric test_ceres_wrapper_numeric.cpp)
-#TARGET_LINK_LIBRARIES(test_ceres_wrapper_numeric ${PROJECT_NAME})
+ADD_EXECUTABLE(test_ceres_wrapper_numeric test_ceres_wrapper_numeric.cpp)
+TARGET_LINK_LIBRARIES(test_ceres_wrapper_numeric ${PROJECT_NAME})
 
 # jet test
 ADD_EXECUTABLE(test_ceres_wrapper_jet test_ceres_wrapper_jet.cpp)
@@ -17,10 +17,6 @@ TARGET_LINK_LIBRARIES(test_ceres_wrapper_jet_ind_block ${PROJECT_NAME})
 # jet test with 2 sensors
 ADD_EXECUTABLE(test_ceres_wrapper_jet_2_sensors test_ceres_wrapper_jet_2_sensors.cpp)
 TARGET_LINK_LIBRARIES(test_ceres_wrapper_jet_2_sensors ${PROJECT_NAME})
-
-# jet test different bla
-# ADD_EXECUTABLE(test_ceres_wrapper_state_units test_ceres_wrapper_state_units.cpp)
-# TARGET_LINK_LIBRARIES(test_ceres_wrapper_state_units ${PROJECT_NAME})
 
 # jet test manager
 ADD_EXECUTABLE(test_ceres_manager test_ceres_manager.cpp)
@@ -45,3 +41,7 @@ TARGET_LINK_LIBRARIES(test_ceres_manager_tree ${PROJECT_NAME})
 ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
 TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
 
+IF(faramotics_FOUND)
+	ADD_EXECUTABLE(test_ceres_laser test_ceres_laser.cpp)
+	TARGET_LINK_LIBRARIES(test_ceres_laser ${GLUT_glut_LIBRARY} ${faramotics_LIBRARIES} ${PROJECT_NAME})
+ENDIF(faramotics_FOUND)
