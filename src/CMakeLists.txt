@@ -36,6 +36,7 @@ SET(HDRS
     constraint_odom_2D_theta.h
     constraint_odom_2D_complex_angle.h
     feature_base.h
+    feature_corner_2D.h
     feature_gps_fix.h
     feature_odom_2D.h
     frame_base.h
@@ -64,6 +65,7 @@ SET(SRCS
     capture_odom_2D.cpp
     constraint_base.cpp
     feature_base.cpp
+    feature_corner_2D.cpp
     feature_gps_fix.cpp
     feature_odom_2D.cpp
     frame_base.cpp

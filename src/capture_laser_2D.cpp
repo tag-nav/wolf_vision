@@ -24,14 +24,14 @@ void CaptureLaser2D::processCapture()
     extractCorners(corners);
     
     //generate a feature for each corner
-    //TODO 
+    createFeatures(corners);
     
     //Establish constraints for each feature
     //TODO
     
 }
 
-unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner_list)
+unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner_list) const
 {
     //local variables
     Eigen::MatrixXs points(2,data_.size());
@@ -138,6 +138,22 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
     }
 std::cout << "CaptureLaser2D::extractCorners(): " << __LINE__ << "; _corner_list.size():  " << _corner_list.size() << std::endl;                            
     return _corner_list.size();
+}
+
+void CaptureLaser2D::createFeatures(std::list<Eigen::Vector2s> & _corner_list)
+{
+    std::list<Eigen::Vector2s>::iterator corner_it;
+    Eigen::Matrix2s cov_mat;
+    
+    //init constant cov
+    cov_mat << 0.01,0,0,0.01;
+    
+    //for each corner in the list create a feature
+    for (corner_it = _corner_list.begin(); corner_it != _corner_list.end(); corner_it ++)
+    {
+        std::shared_ptr<FeatureCorner2D> ft_shptr( new FeatureCorner2D( (*corner_it), cov_mat ) );
+        this->addFeature( (FeatureBaseShPtr&)ft_shptr );
+    }
 }
 
 Eigen::VectorXs CaptureLaser2D::computePrior() const

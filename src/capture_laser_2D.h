@@ -5,6 +5,7 @@
 //wolf includes
 #include "capture_base.h"
 #include "sensor_laser_2D.h"
+#include "feature_corner_2D.h"
 
 //wolf forward declarations
 //#include "feature_corner_2D.h"
@@ -43,9 +44,12 @@ class CaptureLaser2D : public CaptureBase
          * Extract corners and push-back to Feature down list . 
          * 
          **/
-        virtual unsigned int extractCorners(std::list<Eigen::Vector2s> & _corner_list);
+        virtual unsigned int extractCorners(std::list<Eigen::Vector2s> & _corner_list) const;
+        
+        virtual void createFeatures(std::list<Eigen::Vector2s> & _corner_list); //TODO: should be const ....
         
         virtual Eigen::VectorXs computePrior() const;
+        
         void findCorrespondences();
 };
 #endif /* CAPTURE_LASER_2D_H_ */

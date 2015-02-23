@@ -108,6 +108,8 @@ int main(int argc, char *argv[])
     
     //do things with the measurements
     capture.extractCorners(corner_list);
+    capture.createFeatures(corner_list);
+    capture.printSelf();
 
     //print corners
     std::cout << "CORNER LIST" << std::endl;            
