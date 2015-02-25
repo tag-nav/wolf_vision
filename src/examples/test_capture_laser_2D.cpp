@@ -89,8 +89,8 @@ int main(int argc, char *argv[])
     device_pose << 0,0,0,0,0,0; //origin, no rotation
     TimeStamp time_stamp;
     time_stamp.setToNow();
-    std::list<Eigen::Vector2s> corner_list;
-    std::list<Eigen::Vector2s>::iterator corner_it;
+    std::list<Eigen::Vector3s> corner_list;
+    std::list<Eigen::Vector3s>::iterator corner_it;
     
     //Create Device objects 
     //SensorLaser2D device(device_pose, ranges.size(), M_PI, 0.2, 30.0, 0.01);

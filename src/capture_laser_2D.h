@@ -66,11 +66,11 @@ class CaptureLaser2D : public CaptureBase
          * Extract corners and push-back to Feature down list . 
          * 
          **/
-        virtual unsigned int extractCorners(std::list<Eigen::Vector2s> & _corner_list) const;
+        virtual unsigned int extractCorners(std::list<Eigen::Vector3s> & _corner_list) const;
         
         void fitLine(unsigned int _idx_from, unsigned int _idx_to, const Eigen::MatrixXs& _points, Line& line_) const;
 
-        virtual void createFeatures(std::list<Eigen::Vector2s> & _corner_list); //TODO: should be const ....
+        virtual void createFeatures(std::list<Eigen::Vector3s> & _corner_list); //TODO: should be const ....
         
         virtual Eigen::VectorXs computePrior() const;
         

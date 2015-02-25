@@ -31,7 +31,7 @@ CaptureLaser2D::~CaptureLaser2D()
 void CaptureLaser2D::processCapture()
 {
     //variables
-    std::list<Eigen::Vector2s> corners;
+    std::list<Eigen::Vector3s> corners;
     
     //extract corners from range data
     extractCorners(corners);
@@ -44,7 +44,7 @@ void CaptureLaser2D::processCapture()
     
 }
 
-unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner_list) const
+unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector3s> & _corner_list) const
 {
 
     //local variables
@@ -80,9 +80,9 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
 			jumps.push(ii);
 			// consider jumps as a corners
 			if (ranges_(ii) < ranges_(ii-1))
-				_corner_list.push_back( Eigen::Vector2s(points(0,ii),points(1,ii)) );
+				_corner_list.push_back(points.col(ii));
 			else
-				_corner_list.push_back( Eigen::Vector2s(points(0,ii-1),points(1,ii-1)) );
+				_corner_list.push_back(points.col(ii-1));
 		}
 	}
 
@@ -224,7 +224,7 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
 					if ( (points.col(line_it1->last) - corner).head(2).norm() < max_distance && (points.col(line_it2->first) - corner).head(2).norm() < max_distance)
 					{
 						//std::cout << "Corner detected!" << std::endl;
-						_corner_list.push_back( Eigen::Vector2s(corner(0),corner(1)) );
+						_corner_list.push_back(corner);
 					}
 				}
 
@@ -247,8 +247,8 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector2s> & _corner
 	if ( _corner_list.size() > 1 )
 	{
 		// concatenate lines
-		std::list<Eigen::Vector2s>::iterator corner_it1 = _corner_list.begin();
-		std::list<Eigen::Vector2s>::iterator corner_it2 = corner_it1;
+		std::list<Eigen::Vector3s>::iterator corner_it1 = _corner_list.begin();
+		std::list<Eigen::Vector3s>::iterator corner_it2 = corner_it1;
 		corner_it2 ++;
 		while ( corner_it1 != _corner_list.end() )
 		{
@@ -293,13 +293,15 @@ void CaptureLaser2D::fitLine(unsigned int _idx_from, unsigned int _idx_to, const
     line_.error /= (_idx_to-_idx_from+1);
 }
 
-void CaptureLaser2D::createFeatures(std::list<Eigen::Vector2s> & _corner_list)
+void CaptureLaser2D::createFeatures(std::list<Eigen::Vector3s> & _corner_list)
 {
-    std::list<Eigen::Vector2s>::iterator corner_it;
-    Eigen::Matrix2s cov_mat;
+    std::list<Eigen::Vector3s>::iterator corner_it;
+    Eigen::Matrix3s cov_mat;
     
     //init constant cov
-    cov_mat << 0.01,0,0,0.01;
+    cov_mat << 0.01, 0,    0,
+    		   0,    0.01, 0,
+			   0,    0,    0.01;
     
     //for each corner in the list create a feature
     for (corner_it = _corner_list.begin(); corner_it != _corner_list.end(); corner_it ++)
