@@ -1,20 +1,21 @@
 
 #include "landmark_base.h"
 
-// LandmarkBase::LandmarkBase(const MapBasePtr& _traj_ptr, const LandmarkType & _tp,const StateBaseShPtr& _p_ptr) :
-LandmarkBase::LandmarkBase(const LandmarkType & _tp,const StateBaseShPtr& _p_ptr) :
-//             NodeLinked(MID, "FRAME", _traj_ptr),
+LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBasePtr & _p_ptr) :
             NodeLinked(MID, "FRAME"),
             type_(_tp),
+            status_(LANDMARK_CANDIDATE),
+            hit_count_(1),
 			st_list_({_p_ptr})
 {
     //
 }
-// LandmarkBase::LandmarkBase(const MapBasePtr& _traj_ptr, const LandmarkType & _tp, const StateBaseList& _st_list) :
-LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBaseList& _st_list) :
-//             NodeLinked(MID, "FRAME", _traj_ptr),
+
+LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBasePtrList& _st_list) :
             NodeLinked(MID, "FRAME"),
             type_(_tp),
+            status_(LANDMARK_CANDIDATE),
+            hit_count_(1),
 			st_list_(_st_list)
 {
     //
@@ -25,17 +26,27 @@ LandmarkBase::~LandmarkBase()
     //
 }
 
-void LandmarkBase::setType(LandmarkType _ft)
+void LandmarkBase::setStatus(LandmarkStatus _st)
 {
-    type_ = _ft;
+    status_ = _st;
 }
 
-const StateBaseShPtr LandmarkBase::getPPtr()
+void LandmarkBase::hit()
+{
+    hit_count_ ++;
+}
+
+unsigned int LandmarkBase::getHits() const
+{
+    return hit_count_;
+}
+
+const StateBasePtr LandmarkBase::getStatePtr() const
 {
 	return st_list_.front();
 }
 
-StateBaseList* LandmarkBase::getStateListPtr()
+const StateBasePtrList* LandmarkBase::getStateListPtr() const
 {
 	return &st_list_;
 }
@@ -64,6 +75,3 @@ StateBaseList* LandmarkBase::getStateListPtr()
 //    	v_ptr_->printSelf(_ntabs,_ost);
 //    }
 //}
-
-
-

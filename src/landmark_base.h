@@ -22,32 +22,29 @@ class NodeTerminus;
 class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
 {
     protected:
-		LandmarkType type_; //type of frame. Either REGULAR_FRAME or KEY_FRAME. (types defined at wolf.h)
-		StateBaseList st_list_; //List of pointers to the state corresponding to the landmark estimation
+		LandmarkType type_; //type of landmark. (types defined at wolf.h)
+		LandmarkStatus status_; //status of the landmark. (types defined at wolf.h)
+		unsigned int hit_count_; //counts how many features has been associated to this landmark
+		StateBasePtrList st_list_; //List of pointers to the state corresponding to the landmark estimation
         
     public:
         /** \brief Constructor with type, time stamp and the position state pointer
          *
-         * Constructor with type, time stamp and state pointer
-         * \param _traj_ptr pointer to the trajectory.
+         * Constructor with type, and state pointer
          * \param _tp indicates frame type. Generally either REGULAR_FRAME or KEY_FRAME. (types defined at wolf.h)
          * \param _p_ptr StateBase pointer to the position (default: nullptr)
          *
          **/
-// 		LandmarkBase(const MapBasePtr& _map_ptr, const LandmarkType & _tp, const StateBaseShPtr& _p_ptr);
-        LandmarkBase(const LandmarkType & _tp, const StateBaseShPtr& _p_ptr);
-
+        LandmarkBase(const LandmarkType & _tp, const StateBasePtr& _p_ptr);
 
         /** \brief Constructor with type, time stamp and state list
          * 
-         * Constructor with type, time stamp and state pointer
-         * \param _traj_ptr pointer to the trajectory.
+         * Constructor with type and state pointer list
          * \param _tp indicates frame type. Generally either REGULAR_FRAME or KEY_FRAME. (types defined at wolf.h)
-         * \param _st_list StateBase list of the landmark estimation
+         * \param _stp_list StateBase list of the landmark estimation
          * 
          **/        
-// 		LandmarkBase(const MapBasePtr& _map_ptr, const LandmarkType & _tp, const StateBaseList& _st_list);
-        LandmarkBase(const LandmarkType & _tp, const StateBaseList& _st_list);
+        LandmarkBase(const LandmarkType & _tp, const StateBasePtrList& _stp_list);
         
         /** \brief Destructor
          * 
@@ -56,19 +53,15 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
          **/
         virtual ~LandmarkBase();
         
-        void setType(LandmarkType _ft);
+        void setStatus(LandmarkStatus _st);
+        
+        void hit();
+        
+        unsigned int getHits() const;
 
-        const StateBaseShPtr getPPtr();
+        const StateBasePtr getStatePtr() const;
 
-        StateBaseList* getStateListPtr();
-
-        //StateBaseShPtr getOPtr() const;
-
-        //StateBaseShPtr getVPtr() const;
-
-        //StateBaseShPtr getWPtr() const;
-
-        //virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+        const StateBasePtrList* getStateListPtr() const;
         
 };
 #endif

@@ -164,6 +164,16 @@ typedef enum
 	LANDMARK_CONTAINER	///< A container landmark
 } LandmarkType;
 
+typedef enum
+{
+    LANDMARK_CANDIDATE,     ///< A landmark, just created. Association with it allowed, but not yet stablish an actual constraint for the solver
+    LANDMARK_IN_ESTIMATION, ///< A landmark being estimated. Association with it allowed, stablishing actual constraints for the solver where both vehicle and landmar states are being estimated
+    LANDMARK_ESTIMATED,     ///< A landmark estimated. Association with it allowed, stablishing actual constraints for the solver, but its value remains static, no longer optimized
+    LANDMARK_OUT_OF_VIEW,   ///< A landmark out of the field of view. Association with it is not allowed, so does not pose constraints for the solver
+    LANDMARK_OLD            ///< An old landmark. Just kept for visualization or statistical analysis. Association with it not allowed, so does not pose constraints for the solver.
+} LandmarkStatus;
+
+
 /////////////////////////////////////////////////////////////////////////
 //      TYPEDEFS FOR POINTERS AND ITERATORS IN THE WOLF TREE
 /////////////////////////////////////////////////////////////////////////
@@ -259,6 +269,8 @@ typedef std::shared_ptr<StateBase> StateBaseShPtr;
 typedef StateBase* StateBasePtr;
 typedef std::list<StateBaseShPtr> StateBaseList;
 typedef StateBaseList::iterator StateBaseIter;
+typedef std::list<StateBasePtr> StateBasePtrList;
+typedef StateBasePtrList::iterator StateBasePtrIter;
 
 typedef StatePoint<1> StateTheta;
 typedef StatePoint<1> StatePoint1D;
