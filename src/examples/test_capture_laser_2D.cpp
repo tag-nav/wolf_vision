@@ -93,7 +93,8 @@ int main(int argc, char *argv[])
     std::list<Eigen::Vector2s>::iterator corner_it;
     
     //Create Device objects 
-    SensorLaser2D device(device_pose, ranges.size(), M_PI, 0.2, 30.0, 0.01);
+    //SensorLaser2D device(device_pose, ranges.size(), M_PI, 0.2, 30.0, 0.01);
+    SensorLaser2D device(device_pose, -M_PI/2, M_PI/2, M_PI/ranges.size(), 0.2, 30.0, 0.01);
     device.printSensorParameters();
     
     //init a noise generator
@@ -107,7 +108,11 @@ int main(int argc, char *argv[])
     //TODO
     
     //do things with the measurements
+	clock_t t1, t2;
+	t1=clock();
     capture.extractCorners(corner_list);
+    t2=clock();
+	std::cout << "seconds = " << ((double)t2-t1)/CLOCKS_PER_SEC << std::endl;
     capture.createFeatures(corner_list);
     capture.printSelf();
 

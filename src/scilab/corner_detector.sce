@@ -159,7 +159,6 @@ while (j < size(result_lines,2))
         end
     end
 end
-disp(size(result_lines,2));
 
 //corner detection
 for i = 1:(size(result_lines,2)-1)
@@ -226,6 +225,9 @@ end
 //plot corners
 plot(corners(1,:),corners(2,:),"ro");
 plot(corners_jumps(1,:),corners_jumps(2,:),"bo");
+
+disp(corners);
+disp(corners_jumps);
 
 //plot jumps
 //for i=1:size(jumps,2)

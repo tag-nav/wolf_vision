@@ -2,6 +2,10 @@
 #ifndef CAPTURE_LASER_2D_H_
 #define CAPTURE_LASER_2D_H_
 
+//std includes
+#include <queue>
+#include <random>
+
 //wolf includes
 #include "capture_base.h"
 #include "sensor_laser_2D.h"
@@ -10,20 +14,38 @@
 //wolf forward declarations
 //#include "feature_corner_2D.h"
 
+struct Line{
+	Eigen::Vector3s vector;
+	WolfScalar error;
+	unsigned int last, first;
+};
+
 class CaptureLaser2D : public CaptureBase
 {
     protected:
         static unsigned int segment_window_size;//window size to extract segments
         static double theta_min; //minimum theta between consecutive segments to detect corner. PI/6=0.52
+        static double theta_max_parallel; //maximum theta between consecutive segments to fuse them in a single line.
         static double k_sigmas;//How many std_dev are tolerated to count that a point is supporting a line
+        static unsigned int max_beam_distance;//max number of beams of distance between lines to consider corner or concatenation
+        static double max_distance;//max distance between line ends to consider corner or concatenation
+        Eigen::Map<Eigen::VectorXs> ranges_; // a map to the ranges inside de data vector
+        Eigen::Map<Eigen::VectorXs> intensities_; // a map to the intensities inside the data vector
         
     public:
-        /** \brief Constructor
+        /** \brief Constructor with ranges
          * 
-         * Constructor
+         * Constructor with ranges
          * 
          **/
         CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _sensor_ptr, const Eigen::VectorXs& _ranges);
+
+        /** \brief Constructor with ranges and intensities
+         *
+         * Constructor with ranges and intensities
+         *
+         **/
+        CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities);
 
         /** \brief Destructor
          * 
@@ -46,6 +68,8 @@ class CaptureLaser2D : public CaptureBase
          **/
         virtual unsigned int extractCorners(std::list<Eigen::Vector2s> & _corner_list) const;
         
+        void fitLine(unsigned int _idx_from, unsigned int _idx_to, const Eigen::MatrixXs& _points, Line& line_) const;
+
         virtual void createFeatures(std::list<Eigen::Vector2s> & _corner_list); //TODO: should be const ....
         
         virtual Eigen::VectorXs computePrior() const;

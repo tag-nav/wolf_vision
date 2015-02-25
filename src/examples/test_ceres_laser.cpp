@@ -345,7 +345,7 @@ int main(int argc, char** argv)
 	//SensorGPSFix gps_sensor(Eigen::MatrixXs::Zero(6,1), gps_std);
 	Eigen::VectorXs laser_pose(6);
 	laser_pose << 0,0,0,0,0,0; //origin, no rotation
-	SensorLaser2D laser_sensor(Eigen::MatrixXs::Zero(6,1), 720, M_PI, 0.2, 100.0, 0.01);
+	SensorLaser2D laser_sensor(Eigen::MatrixXs::Zero(6,1),-M_PI/2, M_PI/2, M_PI/720, 0.2, 100.0, 0.01);
 	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, n_execution * (complex_angle ? 4 : 3));
 
 	// Initial pose

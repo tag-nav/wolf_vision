@@ -19,15 +19,18 @@ class SensorLaser2D : public SensorBase
          * 
          * Constructor with arguments
          * \param _sp sensor 3D pose with respect to vehicle base frame
-         * \param _nrays number of rays per scan
-         * \param _apert angular aperture [rad]
-         * \param _rmin minimum range [m]
-         * \param _rmax maximum range [m]
+         * \param _angle_min start angle of the scan [rad]
+         * \param _angle_max end angle of the scan [rad]
+         * \param _angle_increment angular distance between measurements [rad]
+         * \param _range_min minimum range value [m]
+         * \param _range_max maximum range value [m]
          * \param _range_stdev range standard deviation [m]
+         * \param _time_increment time between beams [seconds]
+         * \param _scan_time time between scans [seconds]
          * 
          **/
-        SensorLaser2D(const Eigen::VectorXs & _sp, unsigned int _nrays, WolfScalar _apert, WolfScalar _rmin, WolfScalar _rmax, WolfScalar _range_stdev);
-        
+        SensorLaser2D(const Eigen::VectorXs & _sp, WolfScalar _angle_min, WolfScalar _angle_max, WolfScalar _angle_increment, WolfScalar _range_min, WolfScalar _range_max, WolfScalar _range_stdev, WolfScalar _time_increment=0, WolfScalar _scan_time=0);
+
         /** \brief Destructor
          * 
          * Destructor
@@ -35,40 +38,61 @@ class SensorLaser2D : public SensorBase
          **/
         virtual ~SensorLaser2D();
 
-        /** \brief Returns n_rays_
-         * 
-         * Returns n_rays_
-         * 
-         **/        
-        unsigned int getNumRays() const;
-        
-        /** \brief Returns aperture_
-         * 
-         * Returns aperture_
-         * 
-         **/        
-        WolfScalar getAperture() const;
+        /** \brief Returns angle_min
+         *
+         * Returns angle_min
+         *
+         **/
+        WolfScalar getAngleMin() const;
 
-        /** \brief Returns range_min_
-         * 
-         * Returns range_min_
-         * 
-         **/        
+        /** \brief Returns angle_max
+         *
+         * Returns angle_max
+         *
+         **/
+        WolfScalar getAngleMax() const;
+
+        /** \brief Returns angle_increment
+         *
+         * Returns angle_increment
+         *
+         **/
+        WolfScalar getAngleIncrement() const;
+
+        /** \brief Returns range_min
+         *
+         * Returns range_min
+         *
+         **/
         WolfScalar getRangeMin() const;
 
-        /** \brief Returns range_max_
-         * 
-         * Returns range_max_
-         * 
-         **/        
+        /** \brief Returns range_max
+         *
+         * Returns range_max
+         *
+         **/
         WolfScalar getRangeMax() const;
         
-        /** \brief Returns range_max_
+        /** \brief Returns _range_stdev
          * 
-         * Returns range_max_
+         * Returns _range_stdev
          * 
          **/        
         WolfScalar getRangeStdDev() const;
+
+        /** \brief Returns time_increment
+         *
+         * Returns time_increment
+         *
+         **/
+        WolfScalar getTimeIncrement() const;
+
+        /** \brief Returns scan_time
+         *
+         * Returns scan_time
+         *
+         **/
+        WolfScalar getScanTime() const;
 
         /** \brief Prints parameters
          * 
