@@ -14,9 +14,8 @@ class FeatureCorner2D : public FeatureBase
         /** \brief Constructor 
          * 
          * constructor
-         * TODO: add a third component for orientation. Now just x,y.
          */
-        FeatureCorner2D(const Eigen::Vector2s & _measurement, const Eigen::Matrix2s & _meas_covariance);
+        FeatureCorner2D(const Eigen::Vector3s & _measurement, const Eigen::Matrix3s & _meas_covariance);
 
         /** \brief Destructor 
          * 
