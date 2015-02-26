@@ -31,7 +31,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 		StateBaseShPtr o_ptr_; // Orientation state unit pointer
 		StateBaseShPtr v_ptr_; // Velocity state unit pointer
 		StateBaseShPtr w_ptr_; // Angular velocity state unit pointer
-		//TBD: accelerations?
+		//TODO: accelerations?
         
     public:
         /** \brief Constructor with only time stamp

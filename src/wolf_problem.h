@@ -20,6 +20,8 @@
 class WolfProblem: public NodeBase
 {
     protected:
+		WolfScalar* state_ptr_;
+		unsigned int state_idx_last_;
         NodeLocation location_;// TODO: should it be in node_base?
         MapBaseShPtr map_ptr_;
         TrajectoryBaseShPtr trajectory_ptr_;
@@ -38,7 +40,7 @@ class WolfProblem: public NodeBase
 		 * Constructor from map and trajectory shared pointers
 		 *
 		 */
-        WolfProblem(const TrajectoryBaseShPtr& _trajectory_ptr, const MapBaseShPtr& _map_ptr={});
+        WolfProblem(WolfScalar* _state_ptr, const TrajectoryBaseShPtr& _trajectory_ptr, const MapBaseShPtr& _map_ptr={});
 
         /** \brief Default destructor
          *
@@ -46,6 +48,27 @@ class WolfProblem: public NodeBase
 		 * 
          */		
         virtual ~WolfProblem();
+
+        /** \brief Gets a pointer to the state first position
+         *
+         * Gets a pointer to the state first position
+         *
+         */
+        WolfScalar* getStatePtr();
+
+        /** \brief Gets the index of the last occupied position of the state
+		 *
+		 * Gets the index of the last occupied position of the state
+		 *
+		 */
+        const unsigned int getStateIdx() const;
+
+        /** \brief Sets the index of the last occupied position of the state
+		 *
+		 * Sets the index of the last occupied position of the state
+		 *
+		 */
+		void setStateIdx(unsigned int _idx);
 
         /** \brief Adds a map
          *

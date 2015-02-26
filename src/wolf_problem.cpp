@@ -6,8 +6,10 @@ WolfProblem::WolfProblem() :
 {
 }
 
-WolfProblem::WolfProblem(const TrajectoryBaseShPtr& _trajectory_ptr, const MapBaseShPtr& _map_ptr) :
+WolfProblem::WolfProblem(WolfScalar* _state_ptr, const TrajectoryBaseShPtr& _trajectory_ptr, const MapBaseShPtr& _map_ptr) :
         NodeBase("WOLF_PROBLEM"), //
+		state_ptr_(_state_ptr),
+		state_idx_last_(0),
         location_(TOP),
 		map_ptr_(_map_ptr),
 		trajectory_ptr_(_trajectory_ptr)
@@ -16,6 +18,21 @@ WolfProblem::WolfProblem(const TrajectoryBaseShPtr& _trajectory_ptr, const MapBa
 
 WolfProblem::~WolfProblem()
 {
+}
+
+WolfScalar* WolfProblem::getStatePtr()
+{
+	return state_ptr_;
+}
+
+const unsigned int WolfProblem::getStateIdx() const
+{
+	return state_idx_last_;
+}
+
+void WolfProblem::setStateIdx(unsigned int _idx)
+{
+	state_idx_last_ = _idx;
 }
 
 void WolfProblem::addMap(MapBaseShPtr& _map_ptr)

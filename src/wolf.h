@@ -58,6 +58,7 @@ typedef Matrix<WolfScalar, 2, 2> Matrix2s;                ///< 2x2 matrix of rea
 typedef Matrix<WolfScalar, 3, 3> Matrix3s;                ///< 3x3 matrix of real scalar_t type
 typedef Matrix<WolfScalar, 4, 4> Matrix4s;                ///< 4x4 matrix of real scalar_t type
 typedef Matrix<WolfScalar, Dynamic, Dynamic> MatrixXs;    ///< variable size matrix of real scalar_t type
+typedef Matrix<WolfScalar, 1, 1> Vector1s;                ///< 1-vector of real scalar_t type
 typedef Matrix<WolfScalar, 2, 1> Vector2s;                ///< 2-vector of real scalar_t type
 typedef Matrix<WolfScalar, 3, 1> Vector3s;                ///< 3-vector of real scalar_t type
 typedef Matrix<WolfScalar, 4, 1> Vector4s;                ///< 4-vector of real scalar_t type
@@ -110,7 +111,8 @@ typedef enum
 {
     CTR_GPS_FIX_2D,				///< marks a 2D GPS Fix constraint.
 	CTR_ODOM_2D_COMPLEX_ANGLE,	///< marks a 2D Odometry using complex angles.
-	CTR_ODOM_2D_THETA			///< marks a 2D Odometry using theta angles.
+	CTR_ODOM_2D_THETA,			///< marks a 2D Odometry using theta angles.
+	CTR_CORNER_2D_THETA			///< marks a 2D Odometry using theta angles.
     
 } ConstraintType;
 
@@ -185,6 +187,7 @@ class NodeTerminus;
 class WolfProblem;
 class MapBase;
 class LandmarkBase;
+class LandmarkCorner2D;
 class TrajectoryBase;
 class FrameBase;
 class CaptureBase;
@@ -224,6 +227,12 @@ typedef LandmarkBase* LandmarkBasePtr;
 typedef std::list<LandmarkBaseShPtr> LandmarkBaseList;
 typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
+//Landmark corner 2D
+typedef std::shared_ptr<LandmarkCorner2D> LandmarkCorner2DShPtr;
+typedef LandmarkCorner2D* LandmarkCorner2DPtr;
+typedef std::list<LandmarkCorner2DShPtr> LandmarkCorner2DList;
+typedef LandmarkCorner2DList::iterator LandmarkCorner2DIter;
+
 //Trajectory
 typedef std::shared_ptr<TrajectoryBase> TrajectoryBaseShPtr;
 typedef TrajectoryBase* TrajectoryBasePtr;
@@ -247,6 +256,12 @@ typedef std::shared_ptr<FeatureBase> FeatureBaseShPtr;
 typedef FeatureBase* FeatureBasePtr; ///< Feature pointer type
 typedef std::list<FeatureBaseShPtr> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
+
+// - Feature Corner 2D
+typedef std::shared_ptr<FeatureCorner2D> FeatureCorner2DShPtr;
+typedef FeatureCorner2D* FeatureCorner2DPtr; ///< Feature pointer type
+typedef std::list<FeatureCorner2DShPtr> FeatureCorner2DList;
+typedef FeatureCorner2DList::iterator FeatureCorner2DIter;
 
 // - Constraint
 typedef std::shared_ptr<ConstraintBase> ConstraintBaseShPtr;
@@ -294,11 +309,12 @@ typedef PinHole* PinHolePtr;
 // * You may add items to this list as needed. Be concise with names, and document your entries.
 // *
 // */
-//typedef enum FeatureType
+//typedef enum
 //{
 //    BASE,       ///< A feature of FeatureBase -- just for completeness
 //    POINT,      ///< A point feature, either 3D or 2D
 //    LINE,       ///< a line feature, 2D or 3D
+//    CORNER2D,   ///< a corner feature 2D
 //    P_RANGE,    ///< A pseudo-range measurement from GPS satellite
 //    V_DOPPLER,  ///< Doppler velocity measurement from GPS satellite
 //    GPS_FIX,    ///< A GPS fix

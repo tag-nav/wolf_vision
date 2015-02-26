@@ -116,7 +116,6 @@ class WolfManager
 {
     protected:
 		Eigen::VectorXs state_;
-		unsigned int first_empty_state_;
 		bool use_complex_angles_;
 		WolfProblemPtr problem_;
 		//TrajectoryBasePtr trajectory_;
@@ -128,10 +127,9 @@ class WolfManager
     public:
         WolfManager(const SensorBasePtr& _sensor_prior, const bool _complex_angle, const unsigned int& _state_length=1000) :
         	state_(_state_length),
-			first_empty_state_(0),
         	use_complex_angles_(_complex_angle),
 			//trajectory_(new TrajectoryBase()),
-			problem_(new WolfProblem(TrajectoryBaseShPtr(new TrajectoryBase), MapBaseShPtr(new MapBase))),
+			problem_( new WolfProblem(state_.data(),TrajectoryBaseShPtr(new TrajectoryBase), MapBaseShPtr(new MapBase))),
 			sensor_prior_(_sensor_prior)
 		{
         	Eigen::VectorXs init_frame(use_complex_angles_ ? 4 : 3);
@@ -151,15 +149,15 @@ class WolfManager
         void createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
         {
         	// Store in state_
-        	state_.segment(first_empty_state_, use_complex_angles_ ? 4 : 3) << _frame_state;
+        	state_.segment(problem_->getStateIdx()+1, use_complex_angles_ ? 4 : 3) << _frame_state;
 
         	// Create frame and add it to the trajectory
         	if (use_complex_angles_)
         	{
                 FrameBaseShPtr new_frame(new FrameBase(
                                                        _time_stamp,
-                                                       StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-                                                       StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2))));
+                                                       StateBaseShPtr(new StatePoint2D(state_.data()+problem_->getStateIdx()+1)),
+                                                       StateBaseShPtr(new StateComplexAngle(state_.data()+problem_->getStateIdx()+3))));
                 //trajectory_->addFrame(new_frame);
                 problem_->getTrajectoryPtr()->addFrame(new_frame);
         	}
@@ -167,14 +165,14 @@ class WolfManager
         	{
                 FrameBaseShPtr new_frame(new FrameBase(
                                                        _time_stamp,
-                                                       StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-                                                       StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2))));
+                                                       StateBaseShPtr(new StatePoint2D(state_.data()+problem_->getStateIdx()+1)),
+                                                       StateBaseShPtr(new StateTheta(state_.data()+problem_->getStateIdx()+3))));
         		//trajectory_->addFrame(new_frame);
         		problem_->getTrajectoryPtr()->addFrame(new_frame);
         	}
 
         	// Update first free state location index
-        	first_empty_state_ += use_complex_angles_ ? 4 : 3;
+        	problem_->setStateIdx(problem_->getStateIdx()+ use_complex_angles_ ? 4 : 3);
         }
 
         void addCapture(const CaptureBaseShPtr& _capture)

@@ -13,6 +13,8 @@
 #include "capture_base.h"
 #include "sensor_laser_2D.h"
 #include "feature_corner_2D.h"
+#include "landmark_corner_2D.h"
+#include "state_point.h"
 
 //wolf forward declarations
 //#include "feature_corner_2D.h"

@@ -351,15 +351,40 @@ void CaptureLaser2D::establishConstraints()
     {
     	//TODO
     }
-    WolfProblem* w = getTop();
+
+    //Brute force closest (xy and theta) landmark search
     for (auto feature_it = getFeatureListPtr()->begin(); feature_it != getFeatureListPtr()->end(); feature_it++ )
 	{
+		double max_distance_matching = 1; //TODO: max_distance_matching depending on localization and landmarks uncertainty
+		double max_theta_matching = 0.1; //TODO: max_theta_matching depending on localization and landmarks uncertainty
+
+		//Find the closest landmark to the feature
+    	LandmarkBasePtr _correspondent_landmark = nullptr;
+    	double min_distance=max_distance_matching;
+
     	for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++ )
 		{
-			//TODO: max_distance_matching depending on localization and landmarks uncertainty
-			double mad_distance_matching = 1;
-			//landmark_it->
+    		Eigen::Map<Eigen::Vector2s> landmark_position((*landmark_it)->getPPtr()->getPtr());
+    		WolfScalar landmark_orientation = *((*landmark_it)->getOPtr()->getPtr());
+    		Eigen::Map<Eigen::Vector2s> feature_position((*feature_it)->getMeasurementPtr()->data());
+    		WolfScalar feature_orientation = (*((*feature_it)->getMeasurementPtr()))(2);
+
+    		WolfScalar distance = (landmark_position-feature_position).norm();
+			if (distance < min_distance && fabs(landmark_orientation-feature_orientation))
+			{
+				_correspondent_landmark = (*landmark_it).get();
+				min_distance = distance;
+			}
 		}
+    	if (_correspondent_landmark == nullptr)
+    	{
+    		StateBaseShPtr new_landmark_state_position(new StatePoint<2>(getTop()->getStatePtr()+getTop()->getStateIdx()+1));
+    		StateBaseShPtr new_landmark_state_orientation(new StateTheta(getTop()->getStatePtr()+getTop()->getStateIdx()+3));
+    		LandmarkBaseShPtr new_landmark(new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation));
+    		getTop()->setStateIdx(getTop()->getStateIdx()+3);
+    		getTop()->getMapPtr()->addLandmark(new_landmark);
+    		_correspondent_landmark = LandmarkBasePtr(new_landmark.get());
+    	}
 	}
 }
 

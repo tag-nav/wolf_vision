@@ -1,25 +1,28 @@
 
 #include "landmark_base.h"
 
-LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBasePtr & _p_ptr) :
-            NodeLinked(MID, "FRAME"),
+LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBaseShPtr & _p_ptr, const StateBaseShPtr & _o_ptr, const StateBaseShPtr & _v_ptr, const StateBaseShPtr & _w_ptr) :
+            NodeLinked(MID, "LANDMARK"),
             type_(_tp),
             status_(LANDMARK_CANDIDATE),
             hit_count_(1),
-			st_list_({_p_ptr})
+			p_ptr_(_p_ptr),
+			o_ptr_(_o_ptr),
+			v_ptr_(_v_ptr),
+			w_ptr_(_w_ptr)
 {
     //
 }
 
-LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBasePtrList& _st_list) :
-            NodeLinked(MID, "FRAME"),
-            type_(_tp),
-            status_(LANDMARK_CANDIDATE),
-            hit_count_(1),
-			st_list_(_st_list)
-{
-    //
-}
+//LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBasePtrList& _st_list) :
+//            NodeLinked(MID, "LANDMARK"),
+//            type_(_tp),
+//            status_(LANDMARK_CANDIDATE),
+//            hit_count_(1),
+//			st_list_(_st_list)
+//{
+//    //
+//}
                 
 LandmarkBase::~LandmarkBase()
 {
@@ -41,15 +44,45 @@ unsigned int LandmarkBase::getHits() const
     return hit_count_;
 }
 
-const StateBasePtr LandmarkBase::getStatePtr() const
+StateBaseShPtr LandmarkBase::getPPtr() const
 {
-	return st_list_.front();
+	return p_ptr_;
 }
 
-const StateBasePtrList* LandmarkBase::getStateListPtr() const
+StateBaseShPtr LandmarkBase::getOPtr() const
 {
-	return &st_list_;
+	return o_ptr_;
 }
+
+StateBaseShPtr LandmarkBase::getVPtr() const
+{
+	return v_ptr_;
+}
+
+StateBaseShPtr LandmarkBase::getWPtr() const
+{
+	return w_ptr_;
+}
+
+void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)
+{
+	descriptor_ = _descriptor;
+}
+
+const Eigen::VectorXs LandmarkBase::getDescriptor() const
+{
+	return descriptor_;
+}
+
+//const StateBasePtr LandmarkBase::getStatePtr() const
+//{
+//	return st_list_.front();
+//}
+
+//const StateBasePtrList* LandmarkBase::getStateListPtr() const
+//{
+//	return &st_list_;
+//}
 
 //void LandmarkBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const
 //{

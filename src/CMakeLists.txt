@@ -41,6 +41,7 @@ SET(HDRS
     feature_odom_2D.h
     frame_base.h
     landmark_base.h
+    landmark_corner_2D.h
     map_base.h
     node_base.h
     node_terminus.h
@@ -71,6 +72,7 @@ SET(SRCS
     feature_odom_2D.cpp
     frame_base.cpp
     landmark_base.cpp
+    landmark_corner_2D.cpp
     map_base.cpp
     node_base.cpp
     node_terminus.cpp

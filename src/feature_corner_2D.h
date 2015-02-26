@@ -24,12 +24,13 @@ class FeatureCorner2D : public FeatureBase
          */        
         virtual ~FeatureCorner2D();
 
+        //TODO: Encara que sigui brutforce jo la búsqueda la faria a nivell capture.
         /** \brief Generic interface to find constraints
          * 
          * Generic interface to find constraints between this feature and a map (static/slam) or a previous feature
          *
          **/
-        virtual void findConstraints();
+        //virtual void findConstraints();
         
 };
 #endif
