@@ -15,7 +15,7 @@ class FeatureCorner2D : public FeatureBase
          * 
          * constructor
          */
-        FeatureCorner2D(const Eigen::Vector3s & _measurement, const Eigen::Matrix3s & _meas_covariance);
+        FeatureCorner2D(const Eigen::Vector4s & _measurement, const Eigen::Matrix4s & _meas_covariance);
 
         /** \brief Destructor 
          * 

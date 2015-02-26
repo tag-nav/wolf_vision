@@ -396,16 +396,7 @@ int main(int argc, char** argv)
 
 		//draws the device frame, scan hits and depth image
 		myRender->drawPoseAxis(devicePose);
-		myRender->drawScan(devicePose,myScan,180.*M_PI/180.,90.*M_PI/180.); //draw scan with leuze aperture params
-
-		//locate visualization view point, somewhere behind the device
-		viewPoint.setPose(devicePose);
-		viewPoint.rt.setEuler( viewPoint.rt.head(), viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
-		viewPoint.moveForward(-5);
-
-		//Set view point and render the scene
-		myRender->setViewPoint(viewPoint);
-		myRender->render();
+		myRender->drawScan(devicePose,myScan,180.*M_PI/180.,90.*M_PI/180.); //draw scan
 
 		// ADD CAPTURES ---------------------------
 		// adding new sensor captures
@@ -416,6 +407,28 @@ int main(int argc, char** argv)
 
 		// updating problem
 		wolf_manager->update(new_state_units, new_constraints);
+
+		// draw detected corners
+		std::list<Eigen::Vector4s> corner_list;
+		std::vector<double> corner_vector;
+		CaptureLaser2D last_scan(time_stamp, &laser_sensor, scan_reading);
+		last_scan.extractCorners(corner_list);
+		std::cout << "Corners detected: " << corner_list.size() << std::endl;
+		for (std::list<Eigen::Vector4s>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++ )
+		{
+			std::cout << corner_it->x() << " , " << corner_it->y() << std::endl;
+			corner_vector.push_back(corner_it->x());
+			corner_vector.push_back(corner_it->y());
+		}
+		myRender->drawCorners(devicePose,corner_vector);
+
+		//Set view point and render the scene
+		//locate visualization view point, somewhere behind the device
+		viewPoint.setPose(devicePose);
+		viewPoint.rt.setEuler( viewPoint.rt.head(), viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
+		viewPoint.moveForward(-5);
+		myRender->setViewPoint(viewPoint);
+		myRender->render();
 
 		// adding new state units and constraints to ceres
 		ceres_manager->addStateUnits(new_state_units);
@@ -429,8 +442,8 @@ int main(int argc, char** argv)
 		//constant step delay
 		dt = (t_fin_step.tv_sec+t_fin_step.tv_usec/1e6) - (t_ini_step.tv_sec+t_ini_step.tv_usec/1e9);
 		dt = dt*1e6; //dt in milliseconds
-		if (dt < 50000)
-			usleep(50000-dt);
+		if (dt < 500000)
+			usleep(500000-dt);
 	}
 
 	//std::cout << "Resulting tree:\n";

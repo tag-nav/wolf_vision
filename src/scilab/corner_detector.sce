@@ -226,8 +226,8 @@ end
 plot(corners(1,:),corners(2,:),"ro");
 plot(corners_jumps(1,:),corners_jumps(2,:),"bo");
 
-disp(corners);
-disp(corners_jumps);
+disp(corners_jumps');
+disp(corners');
 
 //plot jumps
 //for i=1:size(jumps,2)
