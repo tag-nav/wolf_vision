@@ -12,8 +12,11 @@
 #ifndef NODE_LINKED_H_
 #define NODE_LINKED_H_
 
-//wof includes
+class WolfProblem;
+
+//wolf includes
 #include "node_base.h"
+//#include "wolf_problem.h"
 #include "wolf.h"
 
 /** \brief Linked node element in the Wolf Tree
@@ -169,10 +172,11 @@ class NodeLinked : public NodeBase
         /** \brief Gets a pointer to the tree top node
          * 
          * Gets a pointer to the tree top node
-         * TODO: Review if it could return a pointer to a derived class instead of NodeBase
+         * TODO: Review if it could return a pointer to a derived class instead of NodeBase JVN: I tried to do so...
          * 
          **/
-        virtual NodeBase* getTop();
+        //virtual NodeBase* getTop();
+        virtual WolfProblem* getTop();
 
         /** \brief Prints node information
          * 
@@ -343,14 +347,27 @@ inline void NodeLinked<UpperType, LowerType>::removeDownNode(const LowerNodeIter
     down_node_list_.erase(_iter);
 }
 
+//TODO: confirm this change by the others :)
 template<class UpperType, class LowerType>
-NodeBase* NodeLinked<UpperType, LowerType>::getTop()
+WolfProblem* NodeLinked<UpperType, LowerType>::getTop()
 {
-    if (location_ == TOP) 
-        return this;
-    else
+//    if (location_ == TOP)
+//        return this;
+//    else
         return up_node_ptr_->getTop();
 }
+
+//template<class UpperType, class LowerType>
+//WolfProblem* NodeLinked<UpperType, LowerType>::getTop() //TODO: confirm by the others :)
+//{
+//    return up_node_ptr_->getTop();
+//}
+//
+//template<class LowerType>
+//WolfProblem* NodeLinked<WolfProblem, LowerType>::getTop() //TODO: confirm by the others :)
+//{
+//    return up_node_ptr_;
+//}
 
 template<class UpperType, class LowerType>
 void NodeLinked<UpperType, LowerType>::print(unsigned int _ntabs, std::ostream& _ost) const

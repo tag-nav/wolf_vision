@@ -1,6 +1,7 @@
 //wolf
 #include "node_terminus.h"
 #include "node_linked.h"
+#include "wolf_problem.h"
 
 //namespaces
 using namespace std;
@@ -12,16 +13,17 @@ using namespace std;
 class TrajectoryN;
 class FrameN;
 class MeasurementN;
+class WolfProblem;
 
 //class TrajectoryN
-class TrajectoryN : public NodeLinked<NodeTerminus,FrameN>
+class TrajectoryN : public NodeLinked<WolfProblem,FrameN>
 {
     protected:
         unsigned int length_; //just something to play
         
     public:
         TrajectoryN(const unsigned int _len) :
-            NodeLinked(TOP, "TRAJECTORY"),
+            NodeLinked(MID, "TRAJECTORY"),
             length_(_len)
         {
             //
@@ -97,6 +99,7 @@ int main()
     cout << "========================================================" << endl;
 
     cout << endl << "TEST 1. Constructors" << endl;
+    shared_ptr<WolfProblem> problem_(new WolfProblem());
     shared_ptr<TrajectoryN> trajectory_(new TrajectoryN(2));
     shared_ptr<FrameN> frame_1_(new FrameN(1.011));
     shared_ptr<FrameN> frame_2_(new FrameN(2.022));
@@ -113,6 +116,7 @@ int main()
     frame_2_->addDownNode(sensor_data_cam_2_);
     trajectory_->addDownNode(frame_1_);    
     trajectory_->addDownNode(frame_2_);
+    trajectory_->linkToUpperNode(problem_.get());
     trajectory_->print();
     cout << "========================================================" << endl;
     
@@ -132,7 +136,7 @@ int main()
     cout << "========================================================" << endl;    
     
     cout << endl << "TEST 5. getTop()" << endl;
-    NodeBase* nb_ptr = sensor_data_radar_->getTop();
+    WolfProblem* nb_ptr = sensor_data_radar_->getTop();
     //shared_ptr<TrajectoryN> nb_shptr((TrajectoryN*)nb_ptr);
     cout << "TOP node is: " << nb_ptr->nodeId() << endl;
     //cout << "nb_shptr.use_count(): " << nb_shptr.use_count() << "; value: " << nb_shptr.get() << endl;

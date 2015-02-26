@@ -2,7 +2,7 @@
 #ifndef TRAJECTORY_BASE_H_
 #define TRAJECTORY_BASE_H_
 
-class NodeTerminus;
+class WolfProblem;
 class FrameBase;
 
 //std includes
@@ -14,13 +14,14 @@ class FrameBase;
 
 //Wolf includes
 #include "wolf.h"
+#include "wolf_problem.h"
 #include "node_linked.h"
 #include "node_terminus.h"
 #include "frame_base.h"
 #include "state_base.h"
 
 //class TrajectoryBase
-class TrajectoryBase : public NodeLinked<NodeTerminus,FrameBase>
+class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
 {
     protected:
 		// JVN: No seria millor que la trajectòria de tamany fix fos una classe derivada? i implementar funcions virtuals de l'estil "manageFrames()" que elimini/remapegi

@@ -182,6 +182,7 @@ typedef enum
 
 
 class NodeTerminus;
+class WolfProblem;
 class MapBase;
 class LandmarkBase;
 class TrajectoryBase;
@@ -206,6 +207,10 @@ class PinHole;
 // typedef VehicleBase* VehiclePtr;
 // typedef std::list<VehicleShPtr> VehicleList;
 // typedef VehicleList::iterator VehicleIter;
+
+//Problem
+typedef std::shared_ptr<WolfProblem> WolfProblemShPtr;
+typedef WolfProblem* WolfProblemPtr;
 
 //Map
 typedef std::shared_ptr<MapBase> MapBaseShPtr;

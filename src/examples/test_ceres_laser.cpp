@@ -34,6 +34,8 @@
 #include "constraint_gps_2D.h"
 #include "constraint_odom_2D_theta.h"
 #include "constraint_odom_2D_complex_angle.h"
+#include "map_base.h"
+#include "wolf_problem.h"
 
 // ceres wrapper include
 #include "ceres_wrapper/ceres_manager.h"
@@ -56,7 +58,6 @@
 
 //namespaces
 using namespace std;
-using namespace Eigen;
 
 //function travel around
 void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
@@ -114,12 +115,13 @@ void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double
 class WolfManager
 {
     protected:
-		VectorXs state_;
+		Eigen::VectorXs state_;
 		unsigned int first_empty_state_;
 		bool use_complex_angles_;
-		TrajectoryBasePtr trajectory_;
-        std::vector<VectorXs> odom_captures_;
-        std::vector<VectorXs> gps_captures_;
+		WolfProblemPtr problem_;
+		//TrajectoryBasePtr trajectory_;
+        std::vector<Eigen::VectorXs> odom_captures_;
+        std::vector<Eigen::VectorXs> gps_captures_;
         std::queue<CaptureBaseShPtr> new_captures_;
         SensorBasePtr sensor_prior_;
 
@@ -128,10 +130,11 @@ class WolfManager
         	state_(_state_length),
 			first_empty_state_(0),
         	use_complex_angles_(_complex_angle),
-			trajectory_(new TrajectoryBase()),
+			//trajectory_(new TrajectoryBase()),
+			problem_(new WolfProblem(TrajectoryBaseShPtr(new TrajectoryBase), MapBaseShPtr(new MapBase))),
 			sensor_prior_(_sensor_prior)
 		{
-        	VectorXs init_frame(use_complex_angles_ ? 4 : 3);
+        	Eigen::VectorXs init_frame(use_complex_angles_ ? 4 : 3);
         	if (use_complex_angles_)
         		init_frame << 0, 0, 1, 0;
         	else
@@ -141,10 +144,11 @@ class WolfManager
 
         virtual ~WolfManager()
         {
-        	delete trajectory_;
+        	//delete trajectory_;
+        	delete problem_;
         }
 
-        void createFrame(const VectorXs& _frame_state, const TimeStamp& _time_stamp)
+        void createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
         {
         	// Store in state_
         	state_.segment(first_empty_state_, use_complex_angles_ ? 4 : 3) << _frame_state;
@@ -156,7 +160,8 @@ class WolfManager
                                                        _time_stamp,
                                                        StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
                                                        StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2))));
-        		trajectory_->addFrame(new_frame);
+                //trajectory_->addFrame(new_frame);
+                problem_->getTrajectoryPtr()->addFrame(new_frame);
         	}
         	else
         	{
@@ -164,7 +169,8 @@ class WolfManager
                                                        _time_stamp,
                                                        StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
                                                        StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2))));
-        		trajectory_->addFrame(new_frame);
+        		//trajectory_->addFrame(new_frame);
+        		problem_->getTrajectoryPtr()->addFrame(new_frame);
         	}
 
         	// Update first free state location index
@@ -189,23 +195,28 @@ class WolfManager
         		// TODO: accumulate odometries
         		if (new_capture->getSensorPtr() == sensor_prior_)
         		{
-					createFrame(VectorXs::Zero(use_complex_angles_ ? 4 : 3), new_capture->getTimeStamp());
+					createFrame(Eigen::VectorXs::Zero(use_complex_angles_ ? 4 : 3), new_capture->getTimeStamp());
 
 					// ADD CAPTURE TO THE NEW FRAME
-					trajectory_->getFrameListPtr()->back()->addCapture(new_capture);
+					//trajectory_->getFrameListPtr()->back()->addCapture(new_capture);
+					problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
 
 					// COMPUTE PRIOR
-        			trajectory_->getFrameListPtr()->back()->setState(new_capture->computePrior());
+        			//trajectory_->getFrameListPtr()->back()->setState(new_capture->computePrior());
+					problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setState(new_capture->computePrior());
 
 					// TODO: Change by something like...
 					//new_state_units.insert(new_state_units.end(), trajectory_.getFrameList.back()->getStateList().begin(), trajectory_.getFrameList.back()->getStateList().end());
-					new_state_units.push_back(trajectory_->getFrameListPtr()->back()->getPPtr().get());
-					new_state_units.push_back(trajectory_->getFrameListPtr()->back()->getOPtr().get());
+					//new_state_units.push_back(trajectory_->getFrameListPtr()->back()->getPPtr().get());
+					//new_state_units.push_back(trajectory_->getFrameListPtr()->back()->getOPtr().get());
+					new_state_units.push_back(problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getPPtr().get());
+					new_state_units.push_back(problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getOPtr().get());
         		}
         		else
         		{
         			// ADD CAPTURE TO THE NEW FRAME
-					trajectory_->getFrameListPtr()->back()->addCapture(new_capture);
+					//trajectory_->getFrameListPtr()->back()->addCapture(new_capture);
+        			problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
         		}
 
         		// COMPUTE CAPTURE (features, constraints)
@@ -222,7 +233,7 @@ class WolfManager
         	}
         }
 
-        VectorXs getState()
+        Eigen::VectorXs getState()
         {
         	return state_;
         }
@@ -231,7 +242,8 @@ class WolfManager
 		{
         	std::list<StateBasePtr> st_list;
 
-        	for (FrameBaseIter frame_list_iter=trajectory_->getFrameListPtr()->begin(); frame_list_iter!=trajectory_->getFrameListPtr()->end(); frame_list_iter++)
+        	//for (FrameBaseIter frame_list_iter=trajectory_->getFrameListPtr()->begin(); frame_list_iter!=trajectory_->getFrameListPtr()->end(); frame_list_iter++)
+        	for (FrameBaseIter frame_list_iter=problem_->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_list_iter!=problem_->getTrajectoryPtr()->getFrameListPtr()->end(); frame_list_iter++)
 			{
         		//st_list.insert(st_list.end(), (*frame_list_iter)->getStateList().begin(), (*frame_list_iter)->getStateList().end());
         		st_list.push_back((*frame_list_iter)->getPPtr().get());
@@ -245,7 +257,8 @@ class WolfManager
         {
         	std::list<ConstraintBaseShPtr> corr_list;
 
-        	for (FrameBaseIter frame_list_iter=trajectory_->getFrameListPtr()->begin(); frame_list_iter!=trajectory_->getFrameListPtr()->end(); frame_list_iter++)
+        	//for (FrameBaseIter frame_list_iter=trajectory_->getFrameListPtr()->begin(); frame_list_iter!=trajectory_->getFrameListPtr()->end(); frame_list_iter++)
+			for (FrameBaseIter frame_list_iter=problem_->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_list_iter!=problem_->getTrajectoryPtr()->getFrameListPtr()->end(); frame_list_iter++)
 			{
 				for (CaptureBaseIter capture_list_iter=(*frame_list_iter)->getCaptureListPtr()->begin(); capture_list_iter!=(*frame_list_iter)->getCaptureListPtr()->end(); capture_list_iter++)
 				{
@@ -260,7 +273,8 @@ class WolfManager
 
         void printTree()
         {
-        	trajectory_->print();
+        	//trajectory_->print();
+        	problem_->getTrajectoryPtr()->print();
         }
 };
 
@@ -401,7 +415,7 @@ int main(int argc, char** argv)
 		// ADD CAPTURES ---------------------------
 		// adding new sensor captures
 	    time_stamp.setToNow();
-		wolf_manager->addCapture(CaptureBaseShPtr(new CaptureOdom2D(time_stamp, &odom_sensor, odom_reading, odom_std * MatrixXs::Identity(2,2))));
+		wolf_manager->addCapture(CaptureBaseShPtr(new CaptureOdom2D(time_stamp, &odom_sensor, odom_reading, odom_std * Eigen::MatrixXs::Identity(2,2))));
 		//wolf_manager->addCapture(CaptureBaseShPtr(new CaptureGPSFix(time_stamp, &gps_sensor, gps_fix_reading, gps_std * MatrixXs::Identity(3,3))));
 		wolf_manager->addCapture(CaptureBaseShPtr(new CaptureLaser2D(time_stamp, &laser_sensor, scan_reading)));
 
@@ -413,10 +427,9 @@ int main(int argc, char** argv)
 		std::vector<double> corner_vector;
 		CaptureLaser2D last_scan(time_stamp, &laser_sensor, scan_reading);
 		last_scan.extractCorners(corner_list);
-		std::cout << "Corners detected: " << corner_list.size() << std::endl;
+		//std::cout << "Corners detected: " << corner_list.size() << std::endl;
 		for (std::list<Eigen::Vector4s>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++ )
 		{
-			std::cout << corner_it->x() << " , " << corner_it->y() << std::endl;
 			corner_vector.push_back(corner_it->x());
 			corner_vector.push_back(corner_it->y());
 		}
@@ -442,8 +455,8 @@ int main(int argc, char** argv)
 		//constant step delay
 		dt = (t_fin_step.tv_sec+t_fin_step.tv_usec/1e6) - (t_ini_step.tv_sec+t_ini_step.tv_usec/1e9);
 		dt = dt*1e6; //dt in milliseconds
-		if (dt < 500000)
-			usleep(500000-dt);
+		if (dt < 50000)
+			usleep(50000-dt);
 	}
 
 	//std::cout << "Resulting tree:\n";
@@ -460,8 +473,8 @@ int main(int argc, char** argv)
 	std::cout << "total seconds: " << seconds << std::endl;
 
 	// change from complex angle to theta
-	VectorXs state = wolf_manager->getState();
-	VectorXs state_theta(n_execution * 3);
+	Eigen::VectorXs state = wolf_manager->getState();
+	Eigen::VectorXs state_theta(n_execution * 3);
 	if (complex_angle)
 		for (uint ii = 0; ii<n_execution; ii++)
 			state_theta.segment(ii*3,3) << state(ii*4), state(ii*4+1), atan2(state(ii*4+2), state(ii*4+3));

@@ -21,6 +21,6 @@ class NodeTerminus : public NodeBase
 {
     public:
         virtual ~NodeTerminus();
-        virtual NodeBase* getTop();
+        virtual WolfProblem* getTop();
 };
 #endif /* NODE_TERMINUS_H_ */

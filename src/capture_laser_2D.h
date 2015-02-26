@@ -6,6 +6,9 @@
 #include <queue>
 #include <random>
 
+// Eigen ingludes
+#include <eigen3/Eigen/Geometry>
+
 //wolf includes
 #include "capture_base.h"
 #include "sensor_laser_2D.h"
@@ -77,10 +80,10 @@ class CaptureLaser2D : public CaptureBase
         
         void fitLine(unsigned int _idx_from, unsigned int _idx_to, const Eigen::MatrixXs& _points, Line& line_) const;
 
-        virtual void createFeatures(std::list<Eigen::Vector4s> & _corner_list); //TODO: should be const ....
+        virtual void createFeatures(std::list<Eigen::Vector4s> & _corner_list); //TODO: should be const .... JVN: No, because new feature is added to the list
         
+        void establishConstraints();
+
         virtual Eigen::VectorXs computePrior() const;
-        
-        void findCorrespondences();
 };
 #endif /* CAPTURE_LASER_2D_H_ */

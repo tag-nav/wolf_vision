@@ -40,8 +40,7 @@ void CaptureLaser2D::processCapture()
     createFeatures(corners);
     
     //Establish constraints for each feature
-    //TODO
-    
+
 }
 
 unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector4s> & _corner_list) const
@@ -309,10 +308,12 @@ void CaptureLaser2D::fitLine(unsigned int _idx_from, unsigned int _idx_to, const
 	line_.vector = AA.inverse().col(2);
 
 	// compute fitting error
-	line_.error = 0;
-    for(unsigned int jj = _idx_from; jj<=_idx_to; jj++)
-    	line_.error += fabs( line_.vector(0)*_points(0,jj) + line_.vector(1)*_points(1,jj) + line_.vector(2)) / sqrt( line_.vector(0)*line_.vector(0) + line_.vector(1)*line_.vector(1) );
-    line_.error /= (_idx_to-_idx_from+1);
+//	line_.error = 0;
+//    for(unsigned int jj = _idx_from; jj<=_idx_to; jj++)
+//    	line_.error += fabs( line_.vector(0)*_points(0,jj) + line_.vector(1)*_points(1,jj) + line_.vector(2)) / sqrt( line_.vector(0)*line_.vector(0) + line_.vector(1)*line_.vector(1) );
+//    line_.error /= (_idx_to-_idx_from+1);
+
+	line_.error = (_points.block(0, _idx_from, 3, _idx_to-_idx_from+1).transpose() * line_.vector).array().abs().sum()/(line_.vector.head(2).norm()*(_idx_to-_idx_from+1));
 }
 
 void CaptureLaser2D::createFeatures(std::list<Eigen::Vector4s> & _corner_list)
@@ -334,13 +335,36 @@ void CaptureLaser2D::createFeatures(std::list<Eigen::Vector4s> & _corner_list)
     }
 }
 
+void CaptureLaser2D::establishConstraints()
+{
+	Eigen::Matrix3s T = Eigen::Matrix3s::Identity();
+    T(0,2) = -*(getFramePtr()->getPPtr()->getPtr());
+    T(1,2) = -*(getFramePtr()->getPPtr()->getPtr()+1);
+
+    if (getFramePtr()->getOPtr()->getStateType() == ST_THETA)
+    {
+    	Eigen::Matrix2s rot;
+    	rot = Eigen::Rotation2D<WolfScalar>(-*(getFramePtr()->getOPtr()->getPtr()));
+    	T.topLeftCorner(2,2) = rot;
+    }
+    else
+    {
+    	//TODO
+    }
+    WolfProblem* w = getTop();
+    for (auto feature_it = getFeatureListPtr()->begin(); feature_it != getFeatureListPtr()->end(); feature_it++ )
+	{
+    	for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++ )
+		{
+			//TODO: max_distance_matching depending on localization and landmarks uncertainty
+			double mad_distance_matching = 1;
+			//landmark_it->
+		}
+	}
+}
+
 Eigen::VectorXs CaptureLaser2D::computePrior() const
 {
     return Eigen::Vector3s(1,2,3);
-}
-
-void CaptureLaser2D::findCorrespondences()
-{
-        //
 }
 

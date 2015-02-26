@@ -54,7 +54,8 @@ SET(HDRS
     state_complex_angle.h
     time_stamp.h
     trajectory_base.h
-    wolf.h)
+    wolf.h
+    wolf_problem.h)
     
 #sources
 SET(SRCS
@@ -80,7 +81,8 @@ SET(SRCS
     state_base.cpp
     state_complex_angle.cpp
     time_stamp.cpp
-    trajectory_base.cpp)
+    trajectory_base.cpp
+    wolf_problem.cpp)
 
 #optional HDRS and SRCS
 IF (Ceres_FOUND)

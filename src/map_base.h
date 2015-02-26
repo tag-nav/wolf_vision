@@ -2,7 +2,7 @@
 #ifndef MAP_BASE_H_
 #define MAP_BASE_H_
 
-class NodeTerminus;
+class WolfProblem;
 class LandmarkBase;
 
 //std includes
@@ -14,16 +14,14 @@ class LandmarkBase;
 
 //Wolf includes
 #include "wolf.h"
+#include "wolf_problem.h"
 #include "node_linked.h"
 #include "node_terminus.h"
 #include "landmark_base.h"
 
 //class MapBase
-class MapBase : public NodeLinked<NodeTerminus,LandmarkBase>
+class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
 {
-    protected:
-
-        
     public:
         /** \brief Constructor
          *
@@ -39,6 +37,13 @@ class MapBase : public NodeLinked<NodeTerminus,LandmarkBase>
          **/        
         ~MapBase();
         
+        /** \brief Adds a landmark
+		 *
+		 * Adds a landmark
+		 *
+		 **/
+        void addLandmark(LandmarkBaseShPtr& _landmark_ptr);
+
         /** \brief Returns Frame list
          * 
          * Returns FrameBase list

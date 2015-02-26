@@ -6,7 +6,7 @@ inline NodeTerminus::~NodeTerminus()
   //
 }
 
-NodeBase* NodeTerminus::getTop()
+WolfProblem* NodeTerminus::getTop()
 {
     return nullptr;
 }

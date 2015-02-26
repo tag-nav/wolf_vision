@@ -1,7 +1,7 @@
 #include "trajectory_base.h"
 
 TrajectoryBase::TrajectoryBase() : 
-    NodeLinked(TOP, "TRAJECTORY")
+    NodeLinked(MID, "TRAJECTORY")
 {
     //
 }

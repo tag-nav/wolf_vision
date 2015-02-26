@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+class WolfProblem;
+
 /** \brief Base class for Nodes
  *
  * Base class for all Nodes in the Wolf tree.
@@ -58,7 +60,8 @@ class NodeBase
          * Inherited classes should implement that method. It is required to implement a getTop() at NodeLinked level
          * 
          **/
-        virtual NodeBase* getTop() = 0;
+        //virtual NodeBase* getTop() = 0;
+        virtual WolfProblem* getTop() = 0;
 
         /** \brief Print node information
          * 
