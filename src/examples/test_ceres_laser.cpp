@@ -49,10 +49,7 @@
 #include <GL/glut.h>
 
 //faramotics includes
-#include "faramotics/window.h"
-#include "faramotics/sceneRender.h"
 #include "faramotics/dynamicSceneRender.h"
-#include "faramotics/rangeSector.h"
 #include "faramotics/rangeScan2D.h"
 #include "btr-headers/pose3d.h"
 
