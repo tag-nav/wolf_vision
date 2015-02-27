@@ -129,16 +129,5 @@ class ConstraintSparse: public ConstraintBase
         {
             return state_block_ptr_vector_;
         }
-
-        // Ja és a constraint_base...
-        /** \brief Returns a pointer to the mesaurement associated to this constraint
-         *
-         * Returns a pointer to the mesaurement associated to this constraint.
-         * Measurement is owned by upper-level feature
-         **/
-//        const Eigen::VectorXs * getMeasurement() const
-//        {
-//            return upperNode().getMeasurement();
-//        }
 };
 #endif

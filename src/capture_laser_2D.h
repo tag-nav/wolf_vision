@@ -10,6 +10,7 @@
 #include <eigen3/Eigen/Geometry>
 
 //wolf includes
+#include "constraint_corner_2D_theta.h"
 #include "capture_base.h"
 #include "sensor_laser_2D.h"
 #include "feature_corner_2D.h"

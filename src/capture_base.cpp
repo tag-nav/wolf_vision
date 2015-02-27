@@ -40,7 +40,8 @@ void CaptureBase::linkToFrame(const FrameBaseShPtr& _frm_ptr)
 // TODO: Why the linker throws an error when this function is inline...
 void CaptureBase::addFeature(FeatureBaseShPtr & _ft_ptr)
 {
-    addDownNode(_ft_ptr);
+	//std::cout << "Adding feature" << std::endl;
+	addDownNode(_ft_ptr);
 }
 
 const FrameBasePtr CaptureBase::getFramePtr() const

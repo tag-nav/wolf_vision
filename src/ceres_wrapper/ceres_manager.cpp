@@ -90,8 +90,7 @@ void CeresManager::addStateUnit(const StateBasePtr& _st_ptr)
 //					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateQuaternion*)_st_ptr.get())->BLOCK_SIZE, new QuaternionParameterization);
 //					break;
 //				}
-		case ST_POINT_1D:
-		case ST_THETA:
+		case ST_POINT_1D: // equivalent ST_THETA:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
 			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint1D*)_st_ptr)->BLOCK_SIZE, nullptr);
@@ -156,6 +155,23 @@ ceres::CostFunction* CeresManager::createCostFunction(const ConstraintBasePtr& _
 		{
 			ConstraintOdom2DTheta* specific_ptr = (ConstraintOdom2DTheta*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<ConstraintOdom2DTheta,
+													specific_ptr->measurementSize,
+													specific_ptr->block0Size,
+													specific_ptr->block1Size,
+													specific_ptr->block2Size,
+													specific_ptr->block3Size,
+													specific_ptr->block4Size,
+													specific_ptr->block5Size,
+													specific_ptr->block6Size,
+													specific_ptr->block7Size,
+													specific_ptr->block8Size,
+													specific_ptr->block9Size>(specific_ptr);
+			break;
+		}
+		case CTR_CORNER_2D_THETA:
+		{
+			ConstraintCorner2DTheta* specific_ptr = (ConstraintCorner2DTheta*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<ConstraintCorner2DTheta,
 													specific_ptr->measurementSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,

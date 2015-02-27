@@ -40,7 +40,7 @@ void CaptureLaser2D::processCapture()
     createFeatures(corners);
     
     //Establish constraints for each feature
-
+    establishConstraints();
 }
 
 unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector4s> & _corner_list) const
@@ -337,58 +337,81 @@ void CaptureLaser2D::createFeatures(std::list<Eigen::Vector4s> & _corner_list)
 
 void CaptureLaser2D::establishConstraints()
 {
-	Eigen::Matrix3s T = Eigen::Matrix3s::Identity();
-    T(0,2) = -*(getFramePtr()->getPPtr()->getPtr());
-    T(1,2) = -*(getFramePtr()->getPPtr()->getPtr()+1);
-
-    if (getFramePtr()->getOPtr()->getStateType() == ST_THETA)
-    {
-    	Eigen::Matrix2s rot;
-    	rot = Eigen::Rotation2D<WolfScalar>(-*(getFramePtr()->getOPtr()->getPtr()));
-    	T.topLeftCorner(2,2) = rot;
-    }
+	// Global transformation TODO: Change by a function
+	Eigen::Vector2s t(*getFramePtr()->getPPtr()->getPtr(),*(getFramePtr()->getPPtr()->getPtr()+1));
+	WolfScalar o = *(getFramePtr()->getOPtr()->getPtr());
+	Eigen::Matrix2s R;
+	if (getFramePtr()->getOPtr()->getStateType() == ST_THETA)
+		R << cos(o),-sin(o),
+			 sin(o), cos(o);
     else
     {
     	//TODO
     }
 
     //Brute force closest (xy and theta) landmark search
+//    std::cout << "Brute force closest (xy and theta) landmark search: N features:" << getFeatureListPtr()->size() << std::endl;
+//    std::cout << "N landmark:" << getTop()->getMapPtr()->getLandmarkListPtr()->size() << std::endl;
+//    std::cout << "Vehicle transformation: " << std::endl;
+//	std::cout << "t: " << t.transpose() << std::endl;
+//	std::cout << "rot:" << R << std::endl;
     for (auto feature_it = getFeatureListPtr()->begin(); feature_it != getFeatureListPtr()->end(); feature_it++ )
 	{
-		double max_distance_matching = 1; //TODO: max_distance_matching depending on localization and landmarks uncertainty
+		double max_distance_matching = 0.5; //TODO: max_distance_matching depending on localization and landmarks uncertainty
 		double max_theta_matching = 0.1; //TODO: max_theta_matching depending on localization and landmarks uncertainty
 
 		//Find the closest landmark to the feature
-    	LandmarkBasePtr _correspondent_landmark = nullptr;
+		LandmarkCorner2DPtr correspondent_landmark = nullptr;
     	Eigen::Map<Eigen::Vector2s> feature_position((*feature_it)->getMeasurementPtr()->data());
-    	WolfScalar feature_orientation = (*((*feature_it)->getMeasurementPtr()))(2);
+    	Eigen::Map<Eigen::Vector1s> feature_orientation = ((*feature_it)->getMeasurementPtr()->data()+2);
 
+    	Eigen::Vector2s feature_global_position = R*feature_position + t;
+    	Eigen::Vector1s feature_global_orientation;
+    	feature_global_orientation(0) = feature_orientation(0) + o;
     	double min_distance=max_distance_matching;
 
+//    	std::cout << "Feature: " << (*feature_it)->nodeId() << std::endl;
+//    	std::cout << "local position: " << feature_position.transpose() << " orientation:" << feature_orientation << std::endl;
+//    	std::cout << "global position:" << feature_global_position.transpose() << " orientation:" << feature_global_orientation << std::endl;
     	for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++ )
 		{
     		Eigen::Map<Eigen::Vector2s> landmark_position((*landmark_it)->getPPtr()->getPtr());
     		WolfScalar landmark_orientation = *((*landmark_it)->getOPtr()->getPtr());
 
-
-    		WolfScalar distance = (landmark_position-feature_position).norm();
-			if (distance < min_distance && fabs(landmark_orientation-feature_orientation))
+    		WolfScalar distance = (landmark_position-feature_global_position).norm();
+			if (distance < min_distance && fabs(landmark_orientation-feature_global_orientation(0)))
 			{
-				_correspondent_landmark = (*landmark_it).get();
+//				std::cout << "Landmark found: " << (*landmark_it)->nodeId() << std::endl;
+//				std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
+
+				correspondent_landmark = static_cast<LandmarkCorner2DPtr>((*landmark_it).get());
 				min_distance = distance;
 			}
 		}
-    	if (_correspondent_landmark == nullptr)
+    	if (correspondent_landmark == nullptr)
     	{
+//    		std::cout << "No landmark found. Creating a new one..." << std::endl;
     		StateBaseShPtr new_landmark_state_position(new StatePoint2D(getTop()->getNewStatePtr()));
-    		getTop()->addState(new_landmark_state_position, feature_position);
+    		getTop()->addState(new_landmark_state_position, feature_global_position);
     		StateBaseShPtr new_landmark_state_orientation(new StateTheta(getTop()->getNewStatePtr()));
-    		getTop()->addState(new_landmark_state_orientation, Eigen::Vector1s(feature_orientation));
-    		LandmarkBaseShPtr new_landmark(new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation));
+    		getTop()->addState(new_landmark_state_orientation, feature_global_orientation);
 
-    		getTop()->getMapPtr()->addLandmark(new_landmark);
-    		_correspondent_landmark = LandmarkBasePtr(new_landmark.get());
+    		correspondent_landmark = new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation);
+    		LandmarkBaseShPtr corr_landmark(correspondent_landmark);
+    		getTop()->getMapPtr()->addLandmark(corr_landmark);
+
+//    		std::cout << "Landmark created: " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl;
+//			std::cout << "global position: " << *new_landmark->getPPtr()->getPtr() << " " << *(new_landmark->getPPtr()->getPtr()+1) << " orientation:" << *new_landmark->getOPtr()->getPtr() << std::endl;
     	}
+
+    	// Add constraint to the correspondent landmark
+    	ConstraintBaseShPtr landmark_constraint(new ConstraintCorner2DTheta(getFeatureListPtr()->front().get(),
+    																		correspondent_landmark,
+																			getFramePtr()->getPPtr(),//_robotPPtr,
+																			getFramePtr()->getOPtr(),//_robotOPtr,
+																			correspondent_landmark->getPPtr(), //_landmarkPPtr,
+																			correspondent_landmark->getOPtr())); //_landmarkOPtr,
+    	(*feature_it)->addConstraint(landmark_constraint);
 	}
 }
 

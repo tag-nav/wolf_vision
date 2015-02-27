@@ -21,6 +21,7 @@
 #include "sensor_base.h"
 #include "sensor_odom_2D.h"
 #include "sensor_gps_fix.h"
+#include "feature_base.h"
 #include "frame_base.h"
 #include "state_point.h"
 #include "state_complex_angle.h"
@@ -34,6 +35,7 @@
 #include "constraint_gps_2D.h"
 #include "constraint_odom_2D_theta.h"
 #include "constraint_odom_2D_complex_angle.h"
+#include "trajectory_base.h"
 #include "map_base.h"
 #include "wolf_problem.h"
 
@@ -194,14 +196,10 @@ class WolfManager
 					// COMPUTE PRIOR
         			//trajectory_->getFrameListPtr()->back()->setState(new_capture->computePrior());
 					problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setState(new_capture->computePrior());
-
-					// TODO: Change by something like...
-					//new_state_units.push_back(problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getPPtr().get());
-					//new_state_units.push_back(problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getOPtr().get());
         		}
         		else
         		{
-        			// ADD CAPTURE TO THE NEW FRAME
+        			// ADD CAPTURE TO THE LAST FRAME
 					//trajectory_->getFrameListPtr()->back()->addCapture(new_capture);
         			problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
         		}
@@ -250,6 +248,11 @@ class WolfManager
 				}
 			}
         	return corr_list;
+        }
+
+        WolfProblemPtr getProblemPtr()
+        {
+        	return problem_;
         }
 
         void printTree()
@@ -305,6 +308,7 @@ int main(int argc, char** argv)
 	CrangeScan2D *myScanner;
 	Cpose3d viewPoint;
 	Cpose3d devicePose;
+	vector<Cpose3d> devicePoses;
 	vector<float> myScan;
 	string modelFileName;
 	unsigned int ii;
@@ -393,6 +397,7 @@ int main(int argc, char** argv)
 		//draws the device frame, scan hits and depth image
 		myRender->drawPoseAxis(devicePose);
 		myRender->drawScan(devicePose,myScan,180.*M_PI/180.,90.*M_PI/180.); //draw scan
+		devicePoses.push_back(devicePose);
 
 		// ADD CAPTURES ---------------------------
 		// adding new sensor captures
@@ -444,6 +449,23 @@ int main(int argc, char** argv)
 	//std::cout << "Resulting tree:\n";
 	//wolf_manager->printTree();
 
+	// Draw previous to optimization
+	std::vector<double> landmark_vector;
+	for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++ )
+	{
+		WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
+		landmark_vector.push_back(*position_ptr+2); //x
+		landmark_vector.push_back(*(position_ptr+1)+8); //y
+		landmark_vector.push_back(0.2); //z
+	}
+	myRender->drawLandmarks(landmark_vector);
+	viewPoint.setPose(devicePoses.front());
+	viewPoint.moveForward(10);
+	viewPoint.rt.setEuler( viewPoint.rt.head()+M_PI/2, viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
+	viewPoint.moveForward(-10);
+	myRender->setViewPoint(viewPoint);
+	myRender->render();
+
 	// SOLVE OPTIMIZATION ============================================================================================
 	ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
 	t2=clock();
@@ -453,6 +475,23 @@ int main(int argc, char** argv)
 	std::cout << summary.FullReport() << std::endl;
 	std::cout << "optimization seconds: " << summary.total_time_in_seconds << std::endl;
 	std::cout << "total seconds: " << seconds << std::endl;
+
+	// Draw Final result
+	landmark_vector.clear();
+	for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++ )
+	{
+		WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
+		landmark_vector.push_back(*position_ptr+2); //x
+		landmark_vector.push_back(*(position_ptr+1)+8); //y
+		landmark_vector.push_back(0.2); //z
+	}
+	myRender->drawLandmarks(landmark_vector);
+	viewPoint.setPose(devicePoses.front());
+	viewPoint.moveForward(10);
+	viewPoint.rt.setEuler( viewPoint.rt.head()+M_PI/2, viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
+	viewPoint.moveForward(-10);
+	myRender->setViewPoint(viewPoint);
+	myRender->render();
 
 	// change from complex angle to theta
 	Eigen::VectorXs state = wolf_manager->getState();

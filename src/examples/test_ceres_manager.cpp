@@ -574,8 +574,7 @@ class CeresManager
 //					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateQuaternion*)_st_ptr.get())->BLOCK_SIZE, new QuaternionParameterization);
 //					break;
 //				}
-				case ST_POINT_1D:
-				case ST_THETA:
+				case ST_POINT_1D: //equivalent case ST_THETA:
 				{
 					//std::cout << "No Local Parametrization to be added" << std::endl;
 					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint1D*)_st_ptr.get())->BLOCK_SIZE, nullptr);

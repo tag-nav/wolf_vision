@@ -125,12 +125,12 @@ typedef enum
  */
 typedef enum
 {
-	ST_POINT_1D,		///< A 1D point. No parametrization.
-	ST_POINT_2D,		///< A 2D point. No parametrization.
-	ST_POINT_3D,		///< A 3D point. No parametrization.
-	ST_THETA,			///< A 2D orientation represented by a single angle. No parametrization (equivalent to ST_POINT_1D).
-	ST_COMPLEX_ANGLE,	///< A 2D orientation represented by a complex number.
-	ST_QUATERNION		///< A 3D orientation represented by a quaternion.
+	ST_POINT_1D=1,		///< A 1D point. No parametrization.
+	ST_POINT_2D=2,		///< A 2D point. No parametrization.
+	ST_POINT_3D=3,		///< A 3D point. No parametrization.
+	ST_THETA=1,			///< A 2D orientation represented by a single angle. No parametrization (equivalent to ST_POINT_1D).
+	ST_COMPLEX_ANGLE=4,	///< A 2D orientation represented by a complex number.
+	ST_QUATERNION=5		///< A 3D orientation represented by a quaternion.
 } stateType;
 
 /** \brief Enumeration of all possible sensor types

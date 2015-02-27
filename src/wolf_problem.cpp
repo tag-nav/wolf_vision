@@ -15,6 +15,8 @@ WolfProblem::WolfProblem(const TrajectoryBaseShPtr _trajectory_ptr, const MapBas
 		map_ptr_(_map_ptr),
 		trajectory_ptr_(_trajectory_ptr)
 {
+	map_ptr_->linkToUpperNode( this );
+	trajectory_ptr_->linkToUpperNode( this );
 }
 
 WolfProblem::~WolfProblem()
@@ -34,13 +36,20 @@ void WolfProblem::addState(const StateBaseShPtr _new_state, const Eigen::VectorX
 			(*state_units_it)->setPtr(state_.data() + ( (*state_units_it)->getPtr() - old_first_pointer) );
 		std::cout << "New state size: " << state_.size() << "last idx: " << state_idx_last_ << std::endl;
 	}
+	//std::cout << "\nnew state unit: " << _new_state_values.transpose() << std::endl;
+	//std::cout << "\nPrev state: " << state_.segment(0,state_idx_last_).transpose() << std::endl;
+
 	// copy the values of the new state
 	assert(_new_state_values.size() == _new_state->getStateSize() && "Different state unit and vector sizes");
 	state_.segment(state_idx_last_,_new_state->getStateSize()) = _new_state_values;
+
 	// add the state unit to the list
 	state_list_.push_back(_new_state);
+
 	// update the last state index
 	state_idx_last_ += _new_state->getStateSize();
+
+	//std::cout << "\nPost state: " << state_.segment(0,state_idx_last_).transpose() << std::endl;
 }
 
 WolfScalar* WolfProblem::getStatePtr()
@@ -50,7 +59,7 @@ WolfScalar* WolfProblem::getStatePtr()
 
 WolfScalar* WolfProblem::getNewStatePtr()
 {
-	return state_.data()+state_idx_last_+1;
+	return state_.data()+state_idx_last_;
 }
 
 const unsigned int WolfProblem::getStateSize() const
@@ -66,11 +75,13 @@ const unsigned int WolfProblem::getStateSize() const
 void WolfProblem::addMap(const MapBaseShPtr _map_ptr)
 {
 	map_ptr_ = _map_ptr;
+	map_ptr_->linkToUpperNode( this );
 }
 
 void WolfProblem::addTrajectory(const TrajectoryBaseShPtr _trajectory_ptr)
 {
 	trajectory_ptr_ = _trajectory_ptr;
+	trajectory_ptr_->linkToUpperNode( this );
 }
 
 MapBasePtr WolfProblem::getMapPtr()

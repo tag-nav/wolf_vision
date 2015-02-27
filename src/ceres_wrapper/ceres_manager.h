@@ -15,6 +15,7 @@
 #include "constraint_gps_2D.h"
 #include "constraint_odom_2D_theta.h"
 #include "constraint_odom_2D_complex_angle.h"
+#include "constraint_corner_2D_theta.h"
 
 // ceres wrapper includes
 #include "ceres_wrapper/complex_angle_parametrization.h"

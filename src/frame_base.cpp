@@ -156,7 +156,6 @@ void FrameBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const
     	_ost << "\tAngular velocity : \n";
     	v_ptr_->printSelf(_ntabs,_ost);
     }
-
 }
 
 
