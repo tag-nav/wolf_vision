@@ -301,7 +301,7 @@ int main(int argc, char** argv)
 	//    ceres_options.max_num_iterations = 100;
 	ceres::Problem* ceres_problem = new ceres::Problem();
 	CeresManager* ceres_manager = new CeresManager(ceres_problem);
-	std::ofstream log_file;  //output file
+	std::ofstream log_file, landmark_file;  //output file
 
 	// Faramotics stuff
 	CdynamicSceneRender *myRender;
@@ -343,7 +343,7 @@ int main(int argc, char** argv)
 	//SensorGPSFix gps_sensor(Eigen::MatrixXs::Zero(6,1), gps_std);
 	Eigen::VectorXs laser_pose(6);
 	laser_pose << 0,0,0,0,0,0; //origin, no rotation
-	SensorLaser2D laser_sensor(Eigen::MatrixXs::Zero(6,1),-M_PI/2, M_PI/2, M_PI/720, 0.2, 100.0, 0.01);
+	SensorLaser2D laser_sensor(Eigen::MatrixXs::Zero(6,1),-M_PI/2, M_PI/2, M_PI/720, 0.2, 100.0, 0.0);
 	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e6);
 
 	// Initial pose
@@ -363,19 +363,20 @@ int main(int argc, char** argv)
 
 		// SENSOR DATA ---------------------------
 		// store groundtruth
-		ground_truth.segment(ii*3,3) << devicePose.pt(0), devicePose.pt(1), devicePose.rt.head();
+		ground_truth.segment(step*3,3) << devicePose.pt(0), devicePose.pt(1), devicePose.rt.head();
 
 
 		// compute odometry
-		odom_reading(0) += distribution_odom(generator);
-		odom_reading(1) += distribution_odom(generator);
+		//odom_reading(0) += distribution_odom(generator);
+		//odom_reading(1) += distribution_odom(generator);
 
 
 		// odometry integration
 		pose_odom(0) = pose_odom(0) + odom_reading(0) * cos(pose_odom(2));
 		pose_odom(1) = pose_odom(1) + odom_reading(0) * sin(pose_odom(2));
 		pose_odom(2) = pose_odom(2) + odom_reading(1);
-		odom_trajectory.segment(ii*3,3) << pose_odom;
+		odom_trajectory.segment(step*3,3) = pose_odom;
+		//std::cout << odom_trajectory.segment(0,step*3).transpose() << std::endl;
 
 
 		// compute GPS
@@ -457,6 +458,7 @@ int main(int argc, char** argv)
 		landmark_vector.push_back(*position_ptr+2); //x
 		landmark_vector.push_back(*(position_ptr+1)+8); //y
 		landmark_vector.push_back(0.2); //z
+
 	}
 	myRender->drawLandmarks(landmark_vector);
 	viewPoint.setPose(devicePoses.front());
@@ -485,11 +487,21 @@ int main(int argc, char** argv)
 		landmark_vector.push_back(*(position_ptr+1)+8); //y
 		landmark_vector.push_back(0.2); //z
 	}
-	myRender->drawLandmarks(landmark_vector);
+	//myRender->drawLandmarks(landmark_vector);
+
+	std::vector<double> odometry_vector;
+	for (unsigned int j = 0; j<n_execution; j++)
+	{
+		odometry_vector.push_back(odom_trajectory(j*3)+2); //x
+		odometry_vector.push_back(odom_trajectory(j*3+1)+8); //y
+		odometry_vector.push_back(0.2); //z
+
+	}
+	myRender->drawLandmarks(odometry_vector,1,0.5);
 	viewPoint.setPose(devicePoses.front());
 	viewPoint.moveForward(10);
 	viewPoint.rt.setEuler( viewPoint.rt.head()+M_PI/2, viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
-	viewPoint.moveForward(-10);
+	viewPoint.moveForward(-20);
 	myRender->setViewPoint(viewPoint);
 	myRender->render();
 
@@ -502,7 +514,17 @@ int main(int argc, char** argv)
 	else
 		state_theta = state;
 
-	// Print log file
+	// Landmarks
+	int i = 0;
+	Eigen::VectorXs landmarks(wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->size()*2);
+	for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++ )
+	{
+		Eigen::Map<Eigen::Vector2s> landmark((*landmark_it)->getPPtr()->getPtr());
+		landmarks.segment(i,2) = landmark;
+		i+=2;
+	}
+
+	// Print log files
 	std::string filepath = getenv("HOME") + (complex_angle ? std::string("/Desktop/log_file_3.txt") : std::string("/Desktop/log_file_2.txt"));
 	log_file.open(filepath, std::ofstream::out); //open log file
 
@@ -519,7 +541,20 @@ int main(int argc, char** argv)
 		std::cout << std::endl << "Result file " << filepath << std::endl;
 	}
 	else
-		std::cout << std::endl << "Failed to write the file " << filepath << std::endl;
+		std::cout << std::endl << "Failed to write the log file " << filepath << std::endl;
+
+	std::string filepath2 = getenv("HOME") + (complex_angle ? std::string("/Desktop/landmarks_file_3.txt") : std::string("/Desktop/landmarks_file_2.txt"));
+	landmark_file.open(filepath2, std::ofstream::out); //open log file
+
+	if (landmark_file.is_open())
+	{
+		for (unsigned int ii = 0; ii<landmarks.size(); ii+=2)
+			landmark_file << landmarks.segment(ii,2).transpose() << std::endl;
+		landmark_file.close(); //close log file
+		std::cout << std::endl << "Landmark file " << filepath << std::endl;
+	}
+	else
+		std::cout << std::endl << "Failed to write the landmark file " << filepath << std::endl;
 
 	std::cout << "Press any key for ending... " << std::endl << std::endl;
 	std::getchar();

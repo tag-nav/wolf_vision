@@ -5,6 +5,7 @@ FeatureCorner2D::FeatureCorner2D(const Eigen::Vector4s & _measurement, const Eig
     FeatureBase(_measurement, _meas_covariance)
 {
     //
+	std::cout << "feature: "<< _measurement.transpose() << std::endl;
 }
 
 FeatureCorner2D::~FeatureCorner2D()

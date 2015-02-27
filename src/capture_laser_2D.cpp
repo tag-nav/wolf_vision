@@ -78,10 +78,10 @@ unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector4s> & _corner
 			// store jumps
 			jumps.push(ii);
 			// consider jumps as a corners
-			if (ranges_(ii) < ranges_(ii-1))
-				_corner_list.push_back(Eigen::Vector4s(points(0,ii),points(1,ii),0,0)); // TODO: compute orientation
-			else
-				_corner_list.push_back(Eigen::Vector4s(points(0,ii-1),points(1,ii-1),0,0));// TODO: compute orientation
+//			if (ranges_(ii) < ranges_(ii-1))
+//				_corner_list.push_back(Eigen::Vector4s(points(0,ii),points(1,ii),0,0)); // TODO: compute orientation
+//			else
+//				_corner_list.push_back(Eigen::Vector4s(points(0,ii-1),points(1,ii-1),0,0));// TODO: compute orientation
 		}
 	}
 
@@ -318,7 +318,6 @@ void CaptureLaser2D::fitLine(unsigned int _idx_from, unsigned int _idx_to, const
 
 void CaptureLaser2D::createFeatures(std::list<Eigen::Vector4s> & _corner_list)
 {
-    std::list<Eigen::Vector4s>::iterator corner_it;
     Eigen::Matrix4s cov_mat;
     
     //init constant cov
@@ -328,7 +327,7 @@ void CaptureLaser2D::createFeatures(std::list<Eigen::Vector4s> & _corner_list)
 			   0,    0,    0,    0.01;
     
     //for each corner in the list create a feature
-    for (corner_it = _corner_list.begin(); corner_it != _corner_list.end(); corner_it ++)
+    for (auto corner_it = _corner_list.begin(); corner_it != _corner_list.end(); corner_it ++)
     {
         std::shared_ptr<FeatureCorner2D> ft_shptr( new FeatureCorner2D( (*corner_it), cov_mat ) );
         this->addFeature( (FeatureBaseShPtr&)ft_shptr );
@@ -357,8 +356,8 @@ void CaptureLaser2D::establishConstraints()
 //	std::cout << "rot:" << R << std::endl;
     for (auto feature_it = getFeatureListPtr()->begin(); feature_it != getFeatureListPtr()->end(); feature_it++ )
 	{
-		double max_distance_matching = 0.5; //TODO: max_distance_matching depending on localization and landmarks uncertainty
-		double max_theta_matching = 0.1; //TODO: max_theta_matching depending on localization and landmarks uncertainty
+		double max_distance_matching = 0.1; //TODO: max_distance_matching depending on localization and landmarks uncertainty
+		double max_theta_matching = 0.02; //TODO: max_theta_matching depending on localization and landmarks uncertainty
 
 		//Find the closest landmark to the feature
 		LandmarkCorner2DPtr correspondent_landmark = nullptr;

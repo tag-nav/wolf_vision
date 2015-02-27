@@ -30,14 +30,19 @@ ah.title.font_size = 4;
 // MANAGER - THETA
 //load log file
 data2 = read('~/Desktop/log_file_2.txt',-1,15);
+data2L = read('~/Desktop/landmarks_file_2.txt',-1,2);
+
+disp(data2L);
 
 //plot
 fig2 = figure(1);
 fig2.background = 8;
-plot(data2(2:$,13),data2(2:$,14),"g.");
+//plot(data2(2:$,13),data2(2:$,14),"g.");
 plot(data2(2:$,1),data2(2:$,2),"b-");
 plot(data2(2:$,4),data2(2:$,5),"r-");
 plot(data2(2:$,10),data2(2:$,11),"c--");
+
+plot(data2L(1:$,1),data2L(1:$,2),"k.");
 
 ah = gca();
 ah.auto_scale = "on";
@@ -45,7 +50,7 @@ ah.x_label.text = "$x [m]$";
 ah.x_label.font_size = 4;
 ah.y_label.text = "$y [m]$";
 ah.y_label.font_size = 4;
-lh =legend(["$GPS$";"$Optimization$";"$Ground\ Truth$";"$ODOM$"],4);
+lh =legend(["$Optimization$";"$Ground\ Truth$";"$ODOM$";"$Landmarks$"],4);
 lh.font_size = 3;                             
 title(strcat(["CERES_MANAGER: Theta - Time: ",string(data2(1,1))," s"]));
 ah.title.font_size = 4;
