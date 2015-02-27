@@ -24,6 +24,11 @@ WolfScalar* StateBase::getPtr()
 	return state_ptr_;
 }
 
+void StateBase::setPtr(WolfScalar* _new_ptr)
+{
+	state_ptr_ = _new_ptr;
+}
+
 void StateBase::printTabs(unsigned int _ntabs, std::ostream& _ost) const
 {
 	for (unsigned int i = 0; i < _ntabs; i++) _ost << "\t";

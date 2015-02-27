@@ -48,6 +48,13 @@ class StateBase
 		 **/
         virtual WolfScalar* getPtr();
         
+        /** \brief Set the pointer of the first element of the state
+		 *
+		 * Set the pointer of the first element of the state
+		 *
+		 **/
+        virtual void setPtr(WolfScalar* _new_ptr);
+
         /** \brief Returns the parametrization of the state unit
 		 *
 		 * Returns the parametrizationType (see wolf.h) of the state unit

@@ -28,7 +28,6 @@ class StatePoint : public StateBase
 			StateBase(_st_remote, _idx)
 		{
 			//
-        	std::cout << "state point created\n";
 		}
 
         /** \brief Constructor with scalar pointer

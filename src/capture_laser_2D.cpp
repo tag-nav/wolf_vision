@@ -360,14 +360,16 @@ void CaptureLaser2D::establishConstraints()
 
 		//Find the closest landmark to the feature
     	LandmarkBasePtr _correspondent_landmark = nullptr;
+    	Eigen::Map<Eigen::Vector2s> feature_position((*feature_it)->getMeasurementPtr()->data());
+    	WolfScalar feature_orientation = (*((*feature_it)->getMeasurementPtr()))(2);
+
     	double min_distance=max_distance_matching;
 
     	for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++ )
 		{
     		Eigen::Map<Eigen::Vector2s> landmark_position((*landmark_it)->getPPtr()->getPtr());
     		WolfScalar landmark_orientation = *((*landmark_it)->getOPtr()->getPtr());
-    		Eigen::Map<Eigen::Vector2s> feature_position((*feature_it)->getMeasurementPtr()->data());
-    		WolfScalar feature_orientation = (*((*feature_it)->getMeasurementPtr()))(2);
+
 
     		WolfScalar distance = (landmark_position-feature_position).norm();
 			if (distance < min_distance && fabs(landmark_orientation-feature_orientation))
@@ -378,10 +380,12 @@ void CaptureLaser2D::establishConstraints()
 		}
     	if (_correspondent_landmark == nullptr)
     	{
-    		StateBaseShPtr new_landmark_state_position(new StatePoint<2>(getTop()->getStatePtr()+getTop()->getStateIdx()+1));
-    		StateBaseShPtr new_landmark_state_orientation(new StateTheta(getTop()->getStatePtr()+getTop()->getStateIdx()+3));
+    		StateBaseShPtr new_landmark_state_position(new StatePoint2D(getTop()->getNewStatePtr()));
+    		getTop()->addState(new_landmark_state_position, feature_position);
+    		StateBaseShPtr new_landmark_state_orientation(new StateTheta(getTop()->getNewStatePtr()));
+    		getTop()->addState(new_landmark_state_orientation, Eigen::Vector1s(feature_orientation));
     		LandmarkBaseShPtr new_landmark(new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation));
-    		getTop()->setStateIdx(getTop()->getStateIdx()+3);
+
     		getTop()->getMapPtr()->addLandmark(new_landmark);
     		_correspondent_landmark = LandmarkBasePtr(new_landmark.get());
     	}

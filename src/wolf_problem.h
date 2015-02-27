@@ -20,27 +20,29 @@
 class WolfProblem: public NodeBase
 {
     protected:
-		WolfScalar* state_ptr_;
+		Eigen::VectorXs state_;
 		unsigned int state_idx_last_;
         NodeLocation location_;// TODO: should it be in node_base?
         MapBaseShPtr map_ptr_;
         TrajectoryBaseShPtr trajectory_ptr_;
+        //TODO: SensorBaseList sensor_list_;
+        StateBaseList state_list_;
 
     public:
 
-        /** \brief Constructor
+        /** \brief Constructor from state size
          *
-         * Constructor
+         * Constructor from state size
 		 * 
          */
-        WolfProblem();
+        WolfProblem(unsigned int _size=1e6);
 
         /** \brief Constructor from map and trajectory shared pointers
 		 *
 		 * Constructor from map and trajectory shared pointers
 		 *
 		 */
-        WolfProblem(WolfScalar* _state_ptr, const TrajectoryBaseShPtr& _trajectory_ptr, const MapBaseShPtr& _map_ptr={});
+        WolfProblem(const TrajectoryBaseShPtr _trajectory_ptr, const MapBaseShPtr _map_ptr={}, unsigned int _size=1e6);
 
         /** \brief Default destructor
          *
@@ -49,6 +51,13 @@ class WolfProblem: public NodeBase
          */		
         virtual ~WolfProblem();
 
+        /** \brief Adds a new state unit to the state
+		 *
+		 * Adds a new state unit to the state
+		 *
+		 */
+		void addState(const StateBaseShPtr _new_state, const Eigen::VectorXs& _new_state_values);
+
         /** \brief Gets a pointer to the state first position
          *
          * Gets a pointer to the state first position
@@ -56,33 +65,40 @@ class WolfProblem: public NodeBase
          */
         WolfScalar* getStatePtr();
 
-        /** \brief Gets the index of the last occupied position of the state
+        /** \brief Gets a pointer where a new state unit should be located
+         *
+         * Gets a pointer where a new state unit should be located
+         *
+         */
+        WolfScalar* getNewStatePtr();
+
+        /** \brief Gets state size
 		 *
-		 * Gets the index of the last occupied position of the state
+		 * Gets state size
 		 *
 		 */
-        const unsigned int getStateIdx() const;
+        const unsigned int getStateSize() const;
 
         /** \brief Sets the index of the last occupied position of the state
 		 *
 		 * Sets the index of the last occupied position of the state
 		 *
 		 */
-		void setStateIdx(unsigned int _idx);
+		//void setStateIdx(unsigned int _idx);
 
         /** \brief Adds a map
          *
          * Adds a map
          *
          */		
-        void addMap(MapBaseShPtr& _map_ptr);
+        void addMap(const MapBaseShPtr _map_ptr);
 
         /** \brief Adds a trajectory
 		 *
 		 * Adds a trajectory
 		 *
 		 */
-		void addTrajectory(TrajectoryBaseShPtr& _Trajectory_ptr);
+		void addTrajectory(const TrajectoryBaseShPtr _Trajectory_ptr);
 		
         /** \brief Gets a reference to map
          *
@@ -112,22 +128,20 @@ class WolfProblem: public NodeBase
          */
         TrajectoryBasePtr getTrajectoryPtr();
 
-        /** \brief Removes a down node from list, given an iterator
+        /** \brief Gets a pointer to the state units list
          *
-         * Removes a down node from the list
-         * @param _iter an iterator to the particular down node in the list that will be removed
+         * Gets a pointer to the state units list
          *
          */
-        //void removeDownNode(const LowerNodeIter& _iter);
+        StateBaseList* getStateListPtr();
 
-        /** \brief Removes a down node from the list, given a node id
-         *
-         * Removes a down node from the multimap
-         * @param _id node id of the node that will nbe removed
-         *
-         */
-        //void removeDownNode(const unsigned int _id);
-        
+        /** \brief Gets the state vector
+		 *
+		 * Gets the state vector
+		 *
+		 */
+        const Eigen::VectorXs getState() const;
+
         /** \brief get top node
 		 *
 		 * Returns a pointer to this
@@ -140,8 +154,6 @@ class WolfProblem: public NodeBase
 		 * Prints node information.
          * \param _ntabs number of tabulations to print at the left of the printed information
          * \param _ost output stream
-         *
-         * Overload this function in derived classes to adapt the printed output to each object's relevant info.
 		 * 
          */
         virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;

@@ -30,14 +30,11 @@ ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_
 	return ceres_summary_;
 }
 
-void CeresManager::addConstraints(std::list<ConstraintBasePtr>& _new_constraints)
+void CeresManager::addConstraints(const ConstraintBasePtrList& _new_constraints)
 {
 	//std::cout << _new_constraints.size() << " new constraints\n";
-	while (!_new_constraints.empty())
-	{
-		addConstraint(_new_constraints.front());
-		_new_constraints.pop_front();
-	}
+	for(auto constraint_it = _new_constraints.begin(); constraint_it!=_new_constraints.end(); constraint_it++)
+		addConstraint(*constraint_it);
 }
 
 void CeresManager::removeConstraints()
@@ -55,18 +52,21 @@ void CeresManager::addConstraint(const ConstraintBasePtr& _corr_ptr)
 	constraint_list_.push_back(std::pair<ceres::ResidualBlockId, ConstraintBasePtr>(blockIdx,_corr_ptr));
 }
 
-void CeresManager::addStateUnits(std::list<StateBasePtr>& _new_state_units)
+void CeresManager::addStateUnits(const StateBasePtrList& _new_state_units)
 {
-	while (!_new_state_units.empty())
-	{
-		addStateUnit(_new_state_units.front());
-		_new_state_units.pop_front();
-	}
+	for(auto state_unit_it = _new_state_units.begin(); state_unit_it!=_new_state_units.end(); state_unit_it++)
+		addStateUnit(*state_unit_it);
 }
 
 void CeresManager::removeStateUnit(WolfScalar* _st_ptr)
 {
 	ceres_problem_->RemoveParameterBlock(_st_ptr);
+}
+
+void CeresManager::removeStateUnits(std::list<WolfScalar*> _st_ptr_list)
+{
+	for(auto state_unit_it = _st_ptr_list.begin(); state_unit_it!=_st_ptr_list.end(); state_unit_it++)
+		ceres_problem_->RemoveParameterBlock(*state_unit_it);
 }
 
 void CeresManager::addStateUnit(const StateBasePtr& _st_ptr)

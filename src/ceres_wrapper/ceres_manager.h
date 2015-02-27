@@ -36,15 +36,17 @@ class CeresManager
 
 		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
 
-		void addConstraints(std::list<ConstraintBasePtr>& _new_constraints);
+		void addConstraints(const ConstraintBasePtrList& _new_constraints);
 
 		void removeConstraints();
 
 		void addConstraint(const ConstraintBasePtr& _corr_ptr);
 
-		void addStateUnits(std::list<StateBasePtr>& _new_state_units);
+		void addStateUnits(const StateBasePtrList& _new_state_units);
 
 		void removeStateUnit(WolfScalar* _st_ptr);
+
+		void removeStateUnits(std::list<WolfScalar*> _st_ptr_list);
 
 		void addStateUnit(const StateBasePtr& _st_ptr);
 

@@ -268,6 +268,8 @@ typedef std::shared_ptr<ConstraintBase> ConstraintBaseShPtr;
 typedef ConstraintBase* ConstraintBasePtr;
 typedef std::list<ConstraintBaseShPtr> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
+typedef std::list<ConstraintBasePtr> ConstraintBasePtrList;
+typedef ConstraintBasePtrList::iterator ConstraintBasePtrIter;
 
 // - Raw data
 typedef std::shared_ptr<RawBase> RawShPtr;
@@ -284,7 +286,7 @@ typedef TransSensor* TransSensorPtr;
 typedef std::map<unsigned int, TransSensorShPtr > TransSensorMap;
 typedef TransSensorMap::iterator TransSensorIter;
 
-// - State Pose
+// - State
 typedef std::shared_ptr<StateBase> StateBaseShPtr;
 typedef StateBase* StateBasePtr;
 typedef std::list<StateBaseShPtr> StateBaseList;
