@@ -365,11 +365,19 @@ int main(int argc, char** argv)
 		// store groundtruth
 		ground_truth.segment(step*3,3) << devicePose.pt(0), devicePose.pt(1), devicePose.rt.head();
 
+
+		// compute odometry
+		odom_reading(0) += distribution_odom(generator);
+		odom_reading(1) += distribution_odom(generator);
+
+
 		// odometry integration
 		pose_odom(0) = pose_odom(0) + odom_reading(0) * cos(pose_odom(2));
 		pose_odom(1) = pose_odom(1) + odom_reading(0) * sin(pose_odom(2));
 		pose_odom(2) = pose_odom(2) + odom_reading(1);
 		odom_trajectory.segment(step*3,3) = pose_odom;
+		//std::cout << odom_trajectory.segment(0,step*3).transpose() << std::endl;
+
 
 		// compute GPS
 		//gps_fix_reading << devicePose.pt(0), devicePose.pt(1), 0;

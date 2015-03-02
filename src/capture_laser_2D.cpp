@@ -356,7 +356,7 @@ void CaptureLaser2D::establishConstraints()
 //	std::cout << "rot:" << R << std::endl;
     for (auto feature_it = getFeatureListPtr()->begin(); feature_it != getFeatureListPtr()->end(); feature_it++ )
 	{
-		double max_distance_matching = 0.1; //TODO: max_distance_matching depending on localization and landmarks uncertainty
+		double max_distance_matching2 = 0.1; //TODO: max_distance_matching depending on localization and landmarks uncertainty
 		double max_theta_matching = 0.02; //TODO: max_theta_matching depending on localization and landmarks uncertainty
 
 		//Find the closest landmark to the feature
@@ -367,7 +367,7 @@ void CaptureLaser2D::establishConstraints()
     	Eigen::Vector2s feature_global_position = R*feature_position + t;
     	Eigen::Vector1s feature_global_orientation;
     	feature_global_orientation(0) = feature_orientation(0) + o;
-    	double min_distance=max_distance_matching;
+    	double min_distance2 = max_distance_matching2;
 
 //    	std::cout << "Feature: " << (*feature_it)->nodeId() << std::endl;
 //    	std::cout << "local position: " << feature_position.transpose() << " orientation:" << feature_orientation << std::endl;
@@ -377,8 +377,8 @@ void CaptureLaser2D::establishConstraints()
     		Eigen::Map<Eigen::Vector2s> landmark_position((*landmark_it)->getPPtr()->getPtr());
     		WolfScalar landmark_orientation = *((*landmark_it)->getOPtr()->getPtr());
 
-    		WolfScalar distance = (landmark_position-feature_global_position).norm();
-			if (distance < min_distance && fabs(landmark_orientation-feature_global_orientation(0)))
+    		WolfScalar distance2 = (landmark_position-feature_global_position).transpose() * (landmark_position-feature_global_position);
+			if (distance2 < min_distance2 && fabs(landmark_orientation-feature_global_orientation(0) < max_theta_matching))
 			{
 //				std::cout << "Landmark found: " << (*landmark_it)->nodeId() << std::endl;
 //				std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;

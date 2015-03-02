@@ -39,7 +39,7 @@ fig2 = figure(1);
 fig2.background = 8;
 //plot(data2(2:$,13),data2(2:$,14),"g.");
 plot(data2(2:$,1),data2(2:$,2),"b-");
-plot(data2(2:$,4),data2(2:$,5),"r-");
+plot(data2(2:$,4)-2,data2(2:$,5)-8,"r-");
 plot(data2(2:$,10),data2(2:$,11),"c--");
 
 plot(data2L(1:$,1),data2L(1:$,2),"k.");
