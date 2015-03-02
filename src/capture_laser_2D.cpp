@@ -403,8 +403,9 @@ void CaptureLaser2D::establishConstraints()
 //			std::cout << "global position: " << *new_landmark->getPPtr()->getPtr() << " " << *(new_landmark->getPPtr()->getPtr()+1) << " orientation:" << *new_landmark->getOPtr()->getPtr() << std::endl;
     	}
 
+    	std::cout << "Creating new constraint: Landmark " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << "& feature " << (*feature_it)->nodeId() << std::endl;
     	// Add constraint to the correspondent landmark
-    	ConstraintBaseShPtr landmark_constraint(new ConstraintCorner2DTheta(getFeatureListPtr()->front().get(),
+    	ConstraintBaseShPtr landmark_constraint(new ConstraintCorner2DTheta(feature_it->get(),
     																		correspondent_landmark,
 																			getFramePtr()->getPPtr(),//_robotPPtr,
 																			getFramePtr()->getOPtr(),//_robotOPtr,

@@ -343,7 +343,7 @@ int main(int argc, char** argv)
 	//SensorGPSFix gps_sensor(Eigen::MatrixXs::Zero(6,1), gps_std);
 	Eigen::VectorXs laser_pose(6);
 	laser_pose << 0,0,0,0,0,0; //origin, no rotation
-	SensorLaser2D laser_sensor(Eigen::MatrixXs::Zero(6,1),-M_PI/2, M_PI/2, M_PI/720, 0.2, 100.0, 0.0);
+	SensorLaser2D laser_sensor(Eigen::MatrixXs::Zero(6,1),-M_PI/2, M_PI/2, M_PI/720, 0.2, 100.0, 0.01);
 	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e6);
 
 	// Initial pose
@@ -365,19 +365,11 @@ int main(int argc, char** argv)
 		// store groundtruth
 		ground_truth.segment(step*3,3) << devicePose.pt(0), devicePose.pt(1), devicePose.rt.head();
 
-
-		// compute odometry
-		//odom_reading(0) += distribution_odom(generator);
-		//odom_reading(1) += distribution_odom(generator);
-
-
 		// odometry integration
 		pose_odom(0) = pose_odom(0) + odom_reading(0) * cos(pose_odom(2));
 		pose_odom(1) = pose_odom(1) + odom_reading(0) * sin(pose_odom(2));
 		pose_odom(2) = pose_odom(2) + odom_reading(1);
 		odom_trajectory.segment(step*3,3) = pose_odom;
-		//std::cout << odom_trajectory.segment(0,step*3).transpose() << std::endl;
-
 
 		// compute GPS
 		//gps_fix_reading << devicePose.pt(0), devicePose.pt(1), 0;
@@ -487,21 +479,17 @@ int main(int argc, char** argv)
 		landmark_vector.push_back(*(position_ptr+1)+8); //y
 		landmark_vector.push_back(0.2); //z
 	}
-	//myRender->drawLandmarks(landmark_vector);
+	myRender->drawLandmarks(landmark_vector);
 
-	std::vector<double> odometry_vector;
-	for (unsigned int j = 0; j<n_execution; j++)
-	{
-		odometry_vector.push_back(odom_trajectory(j*3)+2); //x
-		odometry_vector.push_back(odom_trajectory(j*3+1)+8); //y
-		odometry_vector.push_back(0.2); //z
-
-	}
-	myRender->drawLandmarks(odometry_vector,1,0.5);
-	viewPoint.setPose(devicePoses.front());
-	viewPoint.moveForward(10);
-	viewPoint.rt.setEuler( viewPoint.rt.head()+M_PI/2, viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
-	viewPoint.moveForward(-20);
+//	std::vector<double> odometry_vector;
+//	for (unsigned int j = 0; j<n_execution; j++)
+//	{
+//		odometry_vector.push_back(odom_trajectory(j*3)+2); //x
+//		odometry_vector.push_back(odom_trajectory(j*3+1)+8); //y
+//		odometry_vector.push_back(0.2); //z
+//
+//	}
+//	myRender->drawLandmarks(odometry_vector,1,0.5);
 	myRender->setViewPoint(viewPoint);
 	myRender->render();
 

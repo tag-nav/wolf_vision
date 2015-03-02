@@ -21,8 +21,8 @@ class ConstraintBase : public NodeLinked<FeatureBase,NodeTerminus>
 {
     protected:
         ConstraintType type_; //type of constraint (types defined at wolf.h)
-        Eigen::VectorXs * measurement_ptr_; // TBD: pointer, map or copy of the feature measurement?
-        Eigen::MatrixXs * measurement_covariance_ptr_; // TBD: pointer, map or copy of the feature measurement covariance?
+        Eigen::VectorXs * measurement_ptr_; // TODO:TBD: pointer, map or copy of the feature measurement?
+        Eigen::MatrixXs * measurement_covariance_ptr_; // TODO:TBD: pointer, map or copy of the feature measurement covariance?
         
     public:
         /** \brief Constructor

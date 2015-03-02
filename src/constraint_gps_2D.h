@@ -43,7 +43,7 @@ class ConstraintGPS2D: public ConstraintSparse<2,2>
 		template <typename T>
 		bool operator()(const T* const _x, T* _residuals) const
 		{
-			_residuals[0] = (T((*measurement_ptr_)(0))   - _x[0]) / T((*measurement_covariance_ptr_)(0,0));
+			_residuals[0] = (T((*measurement_ptr_)(0)) - _x[0]) / T((*measurement_covariance_ptr_)(0,0));
 			_residuals[1] = (T((*measurement_ptr_)(1)) - _x[1]) / T((*measurement_covariance_ptr_)(1,1));
 			return true;
 		}
