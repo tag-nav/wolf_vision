@@ -3,16 +3,22 @@
 #ifndef SENSOR_LASER_2D_H_
 #define SENSOR_LASER_2D_H_
 
-//wolf includes
+//laser_scan_utils
+#include "iri-algorithms/laser_scan_utils/scan_params.h"
+#include "iri-algorithms/laser_scan_utils/corners.h"
+
+//wolf 
 #include "sensor_base.h"
 
 class SensorLaser2D : public SensorBase
 {
-    private:
+    protected:
 //         unsigned int n_rays_; ///numper of rays per scan [#]
 //         double aperture_; ///scan aperture in [rad]
 //         double range_min_; ///minimum range [m]
 //         double range_max_; ///maximum range [m]
+        laserscanutils::ScanParams scan_params_;//TODO: Decide who holds intrinsic parameters, either SensorBase::params_ or scan_params_, but NOTH BOTH!!
+        laserscanutils::ExtractCornerParams corners_alg_params_; //parameters for corner extraction algorithm.
 
     public:
         /** \brief Constructor with arguments
@@ -29,7 +35,17 @@ class SensorLaser2D : public SensorBase
          * \param _scan_time time between scans [seconds]
          * 
          **/
-        SensorLaser2D(const Eigen::VectorXs & _sp, WolfScalar _angle_min, WolfScalar _angle_max, WolfScalar _angle_increment, WolfScalar _range_min, WolfScalar _range_max, WolfScalar _range_stdev, WolfScalar _time_increment=0, WolfScalar _scan_time=0);
+        //SensorLaser2D(const Eigen::VectorXs & _sp, WolfScalar _angle_min, WolfScalar _angle_max, WolfScalar _angle_increment, WolfScalar _range_min, WolfScalar _range_max, WolfScalar _range_stdev, WolfScalar _time_increment=0, WolfScalar _scan_time=0);
+        
+        /** \brief Constructor with arguments
+         * 
+         * Constructor with arguments
+         * \param _sp sensor 3D pose with respect to vehicle base frame
+         * \param _params struct with scan parameters. See laser_scan_utils library API for reference
+         * 
+         **/        
+        SensorLaser2D(const Eigen::VectorXs & _sp);
+        SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params);
 
         /** \brief Destructor
          * 
@@ -37,6 +53,27 @@ class SensorLaser2D : public SensorBase
          * 
          **/
         virtual ~SensorLaser2D();
+        
+        void setDefaultScanParams();
+        
+        /** \brief Set scanner intrinsic parameters
+         * 
+         * Set scanner intrinsic parameters
+         * \param _params struct with scanner intrinsic parameters. See laser_scan_utils library API for reference.
+         * 
+         **/                
+        void setScanParams(const laserscanutils::ScanParams & _params);
+        
+        void setDefaultCornerAlgParams();
+
+        /** \brief Get scanner intrinsic parameters
+         * 
+         * Get scanner intrinsic parameters
+         * 
+         **/                        
+        const laserscanutils::ScanParams & getScanParams() const;
+        
+        const laserscanutils::ExtractCornerParams & getCornerAlgParams() const;
 
         /** \brief Returns angle_min
          *

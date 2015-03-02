@@ -1,15 +1,74 @@
 #include "sensor_laser_2D.h"
 
-SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp, WolfScalar _angle_min, WolfScalar _angle_max, WolfScalar _angle_increment, WolfScalar _range_min, WolfScalar _range_max, WolfScalar _range_stdev, WolfScalar _time_increment, WolfScalar _scan_time) :
-        SensorBase(LIDAR, _sp, 8)
-//        SensorBase(LIDAR, _sp,{(WolfScalar)(_nrays), _apert, _rmin, _rmax, _range_stdev})
+// SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp, WolfScalar _angle_min, WolfScalar _angle_max, WolfScalar _angle_increment, WolfScalar _range_min, WolfScalar _range_max, WolfScalar _range_stdev, WolfScalar _time_increment, WolfScalar _scan_time) :
+//         SensorBase(LIDAR, _sp, 8)
+// //        SensorBase(LIDAR, _sp,{(WolfScalar)(_nrays), _apert, _rmin, _rmax, _range_stdev})
+// {
+//     params_ << _angle_min, _angle_max, _angle_increment, _range_min, _range_max, _range_stdev, _time_increment, _scan_time;
+// }
+
+SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp) :
+    SensorBase(LIDAR, _sp, 8)
 {
-    params_ << _angle_min, _angle_max, _angle_increment, _range_min, _range_max, _range_stdev, _time_increment, _scan_time;
+    setDefaultScanParams();
+    setDefaultCornerAlgParams();  
+}
+
+SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params) :
+    SensorBase(LIDAR, _sp, 8)
+{
+    setScanParams(_params);
+    setDefaultCornerAlgParams();  
 }
 
 SensorLaser2D::~SensorLaser2D()
 {
     //
+}
+
+void SensorLaser2D::setDefaultScanParams()
+{
+    scan_params_.angle_min_ = -M_PI/2;
+    scan_params_.angle_max_ = M_PI/2;
+    scan_params_.angle_step_ = M_PI/720;
+    scan_params_.scan_time_ = 0.01;//not relevant
+    scan_params_.range_min_ = 0.1;
+    scan_params_.range_max_ = 30;
+    scan_params_.range_std_dev_ = 0.01;
+}
+
+void SensorLaser2D::setScanParams(const laserscanutils::ScanParams & _params)
+{
+    //TODO: Decide who holds intrinsic parameters, either SensorBase::params_ or scan_params_, but NOTH BOTH!!
+    
+    params_ << _params.angle_min_, _params.angle_max_, _params.angle_step_, 
+               _params.range_min_, _params.range_max_, 
+               _params.range_std_dev_, 
+               0, _params.scan_time_; //TODO: consider time increment instead of 0 -> TODO at laserscanutils ??
+    
+    scan_params_ = _params;
+}
+
+void SensorLaser2D::setDefaultCornerAlgParams()
+{
+    //default parameters for corner extraction. TODO: get them from a file or static constants
+    corners_alg_params_.segment_window_size = 8;
+    corners_alg_params_.theta_min = 0.4;
+    corners_alg_params_.theta_max_parallel = 0.1;
+    corners_alg_params_.k_sigmas = 3;
+    corners_alg_params_.max_beam_distance = 5;
+    corners_alg_params_.max_distance = 0.5;
+
+}
+
+const laserscanutils::ScanParams & SensorLaser2D::getScanParams() const
+{
+    return scan_params_;
+}
+
+const laserscanutils::ExtractCornerParams & SensorLaser2D::getCornerAlgParams() const
+{
+    return corners_alg_params_;
 }
 
 WolfScalar SensorLaser2D::getAngleMin() const

@@ -315,7 +315,8 @@ int main(int argc, char** argv)
 	timeval t_ini_step,t_fin_step;
 	double dt;
 	//model and initial view point
-	modelFileName = "/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj";
+	//modelFileName = "/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj";
+    modelFileName = "/home/acoromin/dev/br/faramotics/models/campusNordUPC.obj";
 	devicePose.setPose(2,8,0.2,0,0,0);
 	//glut initialization
 	glutInit(&argc, argv);
@@ -343,7 +344,8 @@ int main(int argc, char** argv)
 	//SensorGPSFix gps_sensor(Eigen::MatrixXs::Zero(6,1), gps_std);
 	Eigen::VectorXs laser_pose(6);
 	laser_pose << 0,0,0,0,0,0; //origin, no rotation
-	SensorLaser2D laser_sensor(Eigen::MatrixXs::Zero(6,1),-M_PI/2, M_PI/2, M_PI/720, 0.2, 100.0, 0.01);
+	//SensorLaser2D laser_sensor(Eigen::MatrixXs::Zero(6,1),-M_PI/2, M_PI/2, M_PI/720, 0.2, 100.0, 0.01);//OLD FASHION
+	SensorLaser2D laser_sensor(Eigen::MatrixXs::Zero(6,1));
 	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e6);
 
 	// Initial pose

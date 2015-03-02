@@ -9,6 +9,10 @@
 // Eigen ingludes
 #include <eigen3/Eigen/Geometry>
 
+//laser_scan_utils
+#include "iri-algorithms/laser_scan_utils/scan_params.h"
+#include "iri-algorithms/laser_scan_utils/corners.h"
+
 //wolf includes
 #include "constraint_corner_2D_theta.h"
 #include "capture_base.h"
@@ -29,14 +33,17 @@ struct Line{
 class CaptureLaser2D : public CaptureBase
 {
     protected:
-        static unsigned int segment_window_size;//window size to extract segments
-        static double theta_min; //minimum theta between consecutive segments to detect corner. PI/6=0.52
-        static double theta_max_parallel; //maximum theta between consecutive segments to fuse them in a single line.
-        static double k_sigmas;//How many std_dev are tolerated to count that a point is supporting a line
-        static unsigned int max_beam_distance;//max number of beams of distance between lines to consider corner or concatenation
-        static double max_distance;//max distance between line ends to consider corner or concatenation
+        //constants
+//         static unsigned int segment_window_size;//window size to extract segments
+//         static double theta_min; //minimum theta between consecutive segments to detect corner. PI/6=0.52
+//         static double theta_max_parallel; //maximum theta between consecutive segments to fuse them in a single line.
+//         static double k_sigmas;//How many std_dev are tolerated to count that a point is supporting a line
+//         static unsigned int max_beam_distance;//max number of beams of distance between lines to consider corner or concatenation
+//         static double max_distance;//max distance between line ends to consider corner or concatenation
+        
         Eigen::Map<Eigen::VectorXs> ranges_; // a map to the ranges inside de data vector
         Eigen::Map<Eigen::VectorXs> intensities_; // a map to the intensities inside the data vector
+        SensorLaser2DPtr laser_ptr_; //specific pointer to sensor laser 2D object
         
     public:
         /** \brief Constructor with ranges
@@ -73,6 +80,8 @@ class CaptureLaser2D : public CaptureBase
          * 
          **/
         virtual unsigned int extractCorners(std::list<Eigen::Vector4s> & _corner_list) const;
+//         virtual unsigned int extractCorners_old(std::list<Eigen::Vector4s> & _corner_list) const;
+//         void fitLine(unsigned int _idx_from, unsigned int _idx_to, const Eigen::MatrixXs& _points, Line& line_) const;
 
         /** \brief get corners
          *
@@ -81,7 +90,7 @@ class CaptureLaser2D : public CaptureBase
          **/
         //std::list<Eigen::Vector4s> getCorners() const;
         
-        void fitLine(unsigned int _idx_from, unsigned int _idx_to, const Eigen::MatrixXs& _points, Line& line_) const;
+//         void fitLine(unsigned int _idx_from, unsigned int _idx_to, const Eigen::MatrixXs& _points, Line& line_) const;
 
         virtual void createFeatures(std::list<Eigen::Vector4s> & _corner_list); //TODO: should be const .... JVN: No, because new feature is added to the list
         

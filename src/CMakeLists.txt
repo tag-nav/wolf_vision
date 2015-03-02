@@ -6,15 +6,21 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #find dependencies. 
 FIND_PACKAGE(Ceres QUIET) #Ceres is not required
 IF(Ceres_FOUND)
-    MESSAGE("Ceres Library FOUND: ceres_wrapper will be built.")
+    MESSAGE("Ceres Library FOUND: Ceres related sources will be built.")
 ENDIF(Ceres_FOUND)
 
 FIND_PACKAGE(faramotics QUIET) #faramotics is not required
 IF(faramotics_FOUND)
 	FIND_PACKAGE(GLUT REQUIRED)
 	FIND_PACKAGE(pose_state_time REQUIRED)
-    MESSAGE("Faramotics Library FOUND: test_ceres_laser will be built.")
+    MESSAGE("Faramotics Library FOUND: Faramotics related sources will be built.")
 ENDIF(faramotics_FOUND)
+
+FIND_PACKAGE(laser_scan_utils QUIET) #laser_scan_utils is not required
+IF(laser_scan_utils_FOUND)
+    MESSAGE("laser_scan_utils Library FOUND: laser_scan_utils related sources will be built.")
+ENDIF(laser_scan_utils_FOUND)
+
 
 #include directories
 INCLUDE_DIRECTORIES(.)
@@ -26,12 +32,15 @@ IF(faramotics_FOUND)
     INCLUDE_DIRECTORIES(${faramotics_INCLUDE_DIRS})
 ENDIF(faramotics_FOUND)
 
+IF(laser_scan_utils_FOUND)
+    INCLUDE_DIRECTORIES(${laser_scan_utils_INCLUDE_DIRS})
+ENDIF(laser_scan_utils_FOUND)
+
 #headers
 SET(HDRS
     capture_base.h
     capture_relative.h
     capture_gps_fix.h
-    capture_laser_2D.h
     capture_odom_2D.h
     constraint_base.h
     constraint_sparse.h
@@ -66,7 +75,6 @@ SET(SRCS
     capture_base.cpp
     capture_relative.cpp
     capture_gps_fix.cpp
-    capture_laser_2D.cpp
     capture_odom_2D.cpp
     constraint_base.cpp
     feature_base.cpp
@@ -80,7 +88,6 @@ SET(SRCS
     node_base.cpp
     node_terminus.cpp
     sensor_base.cpp
-    sensor_laser_2D.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
     state_base.cpp
@@ -91,11 +98,22 @@ SET(SRCS
 
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
-    SET(SRCS ${SRCS} ceres_wrapper/complex_angle_parametrization.cpp)
-    SET(HDRS ${HDRS} ceres_wrapper/complex_angle_parametrization.h)
-    SET(SRCS ${SRCS} ceres_wrapper/ceres_manager.cpp)
-    SET(HDRS ${HDRS} ceres_wrapper/ceres_manager.h)
+    SET(HDRS ${HDRS} 
+        ceres_wrapper/complex_angle_parametrization.h 
+        ceres_wrapper/ceres_manager.h )
+    SET(SRCS ${SRCS} 
+        ceres_wrapper/complex_angle_parametrization.cpp 
+        ceres_wrapper/ceres_manager.cpp)
 ENDIF(Ceres_FOUND)
+
+IF (laser_scan_utils_FOUND)
+    SET(HDRS ${HDRS} 
+        capture_laser_2D.h
+        sensor_laser_2D.h)
+    SET(SRCS ${SRCS} 
+        capture_laser_2D.cpp
+        sensor_laser_2D.cpp)
+ENDIF(laser_scan_utils_FOUND)
 
 # create the shared library
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS})
@@ -104,6 +122,10 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS})
 IF (Ceres_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CERES_LIBRARIES})
 ENDIF(Ceres_FOUND)
+
+IF (laser_scan_utils_FOUND)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${laser_scan_utils_LIBRARY})
+ENDIF (laser_scan_utils_FOUND)
 
 
 #install library

@@ -1,18 +1,19 @@
 #include "capture_laser_2D.h"
 
-unsigned int CaptureLaser2D::segment_window_size = 8;//window size to extract segments
-double CaptureLaser2D::theta_min = 0.4; //minimum theta between consecutive segments to detect corner. PI/8=0.39
-double CaptureLaser2D::theta_max_parallel = 0.1; //maximum theta between consecutive segments to fuse them in a single line.
-double CaptureLaser2D::k_sigmas = 3.;//How many std_dev are tolerated to count that a point is supporting a line
-unsigned int CaptureLaser2D::max_beam_distance = 5;//max number of beams of distance between lines to consider corner or concatenation
-double CaptureLaser2D::max_distance = 0.5;//max distance between line ends to consider corner or concatenation
+
+// unsigned int CaptureLaser2D::segment_window_size = 8;//window size to extract segments
+// double CaptureLaser2D::theta_min = 0.4; //minimum theta between consecutive segments to detect corner. PI/8=0.39
+// double CaptureLaser2D::theta_max_parallel = 0.1; //maximum theta between consecutive segments to fuse them in a single line.
+// double CaptureLaser2D::k_sigmas = 3.;//How many std_dev are tolerated to count that a point is supporting a line
+// unsigned int CaptureLaser2D::max_beam_distance = 5;//max number of beams of distance between lines to consider corner or concatenation
+// double CaptureLaser2D::max_distance = 0.5;//max distance between line ends to consider corner or concatenation
 
 CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _sensor_ptr, const Eigen::VectorXs& _ranges):
 	CaptureBase(_ts, _sensor_ptr, _ranges),
 	ranges_(data_.data(), _ranges.size()),
 	intensities_(data_.data(), 0)
 {
-    // 
+    SensorLaser2DPtr laser_ptr_ = (const SensorLaser2DPtr)sensor_ptr_;
 }
 
 CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities):
@@ -20,7 +21,7 @@ CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _
 		ranges_(data_.data(), _ranges.size()),
 		intensities_(data_.data(), _intensities.size())
 {
-	//
+    SensorLaser2DPtr laser_ptr_ = (const SensorLaser2DPtr)sensor_ptr_;
 }
 
 CaptureLaser2D::~CaptureLaser2D()
@@ -34,6 +35,7 @@ void CaptureLaser2D::processCapture()
     std::list<Eigen::Vector4s> corners;
     
     //extract corners from range data
+//     extractCorners_old(corners);
     extractCorners(corners);
     
     //generate a feature for each corner
@@ -44,6 +46,12 @@ void CaptureLaser2D::processCapture()
 }
 
 unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector4s> & _corner_list) const
+{
+    laserscanutils::extractCorners(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, _corner_list);
+}
+
+/*
+unsigned int CaptureLaser2D::extractCorners_old(std::list<Eigen::Vector4s> & _corner_list) const
 {
     //local variables
     Eigen::MatrixXs points(3,data_.size());
@@ -315,6 +323,7 @@ void CaptureLaser2D::fitLine(unsigned int _idx_from, unsigned int _idx_to, const
 
 	line_.error = (_points.block(0, _idx_from, 3, _idx_to-_idx_from+1).transpose() * line_.vector).array().abs().sum()/(line_.vector.head(2).norm()*(_idx_to-_idx_from+1));
 }
+*/
 
 void CaptureLaser2D::createFeatures(std::list<Eigen::Vector4s> & _corner_list)
 {
@@ -384,7 +393,7 @@ void CaptureLaser2D::establishConstraints()
 //				std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
 
 				correspondent_landmark = static_cast<LandmarkCorner2DPtr>((*landmark_it).get());
-				min_distance = distance;
+				min_distance2 = distance2;
 			}
 		}
     	if (correspondent_landmark == nullptr)
