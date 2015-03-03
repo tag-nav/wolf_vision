@@ -19,7 +19,7 @@ StateComplexAngle::~StateComplexAngle()
 	//
 }
 
-stateType StateComplexAngle::getStateType() const
+StateType StateComplexAngle::getStateType() const
 {
 	return ST_COMPLEX_ANGLE;
 }

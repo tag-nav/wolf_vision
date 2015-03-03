@@ -46,7 +46,7 @@ void CaptureLaser2D::processCapture()
 
 unsigned int CaptureLaser2D::extractCorners(std::list<Eigen::Vector4s> & _corner_list) const
 {
-    laserscanutils::extractCorners(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, _corner_list);
+    return laserscanutils::extractCorners(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, _corner_list);
 }
 
 /*
@@ -410,8 +410,11 @@ void CaptureLaser2D::establishConstraints()
 //    		std::cout << "Landmark created: " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl;
 //			std::cout << "global position: " << *new_landmark->getPPtr()->getPtr() << " " << *(new_landmark->getPPtr()->getPtr()+1) << " orientation:" << *new_landmark->getOPtr()->getPtr() << std::endl;
     	}
+    	else
+    		correspondent_landmark->hit();
 
-    	std::cout << "Creating new constraint: Landmark " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << "& feature " << (*feature_it)->nodeId() << std::endl;
+    	//std::cout << "Creating new constraint: Landmark " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << " & feature " << (*feature_it)->nodeId() << std::endl;
+
     	// Add constraint to the correspondent landmark
     	ConstraintBaseShPtr landmark_constraint(new ConstraintCorner2DTheta(feature_it->get(),
     																		correspondent_landmark,

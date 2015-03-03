@@ -34,6 +34,11 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 			//
 		}
 
+		LandmarkCorner2DPtr getLandmarkPtr()
+		{
+			return lmk_ptr_;
+		}
+
 		template <typename T>
 		bool operator()(const T* const _robotP, const T* const _robotO, const T* const _landmarkP, const T* const _landmarkO, T* _residuals) const
 		{

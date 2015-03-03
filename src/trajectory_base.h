@@ -47,7 +47,7 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          * Add a frame to the trajectory
          *
          **/
-        void addFrame(FrameBaseShPtr& _frame_ptr);
+        void addFrame(FrameBaseShPtr _frame_ptr);
 
         /** \brief Returns a pointer to Frame list
          * 
@@ -68,7 +68,7 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          * Prints self info to std out
          *
          **/        
-        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const {};
+        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
         
 };
 #endif

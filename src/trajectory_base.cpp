@@ -11,7 +11,7 @@ TrajectoryBase::~TrajectoryBase()
     //
 }
 
-void TrajectoryBase::addFrame(FrameBaseShPtr& _frame_ptr)
+void TrajectoryBase::addFrame(FrameBaseShPtr _frame_ptr)
 {
 	addDownNode(_frame_ptr);
 }
@@ -25,3 +25,8 @@ FrameBaseList* TrajectoryBase::getFrameListPtr()
 // {
 //     return downNodeListPtr();
 // }
+
+void TrajectoryBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const
+{
+	NodeLinked::printSelf(_ntabs, _ost);
+}

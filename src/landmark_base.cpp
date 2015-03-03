@@ -39,6 +39,11 @@ void LandmarkBase::hit()
     hit_count_ ++;
 }
 
+void LandmarkBase::unHit()
+{
+    hit_count_ --;
+}
+
 unsigned int LandmarkBase::getHits() const
 {
     return hit_count_;

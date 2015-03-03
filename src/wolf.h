@@ -131,7 +131,21 @@ typedef enum
 	ST_THETA=1,			///< A 2D orientation represented by a single angle. No parametrization (equivalent to ST_POINT_1D).
 	ST_COMPLEX_ANGLE=4,	///< A 2D orientation represented by a complex number.
 	ST_QUATERNION=5		///< A 3D orientation represented by a quaternion.
-} stateType;
+} StateType;
+
+/** \brief Enumeration of all possible state status
+ *
+ * Enumeration of all possible state status.
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ *
+ */
+typedef enum
+{
+	ST_ESTIMATED,		///< State in estimation (default)
+	ST_FIXED,			///< State fixed, estimated enough or fixed infrastructure.
+	ST_REMOVED			///< Removed state. TODO: is it useful?
+} StateStatus;
 
 /** \brief Enumeration of all possible sensor types
  *

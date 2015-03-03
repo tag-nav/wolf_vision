@@ -3,8 +3,14 @@
 WolfProblem::WolfProblem(unsigned int _size) :
         NodeBase("WOLF_PROBLEM"), //
 		state_(_size),
-        location_(TOP)
+		state_idx_last_(0),
+        location_(TOP),
+        reallocated_(false)
 {
+	map_ptr_ = MapBaseShPtr(new MapBase);
+	trajectory_ptr_ = TrajectoryBaseShPtr(new TrajectoryBase);
+	map_ptr_->linkToUpperNode( this );
+	trajectory_ptr_->linkToUpperNode( this );
 }
 
 WolfProblem::WolfProblem(const TrajectoryBaseShPtr _trajectory_ptr, const MapBaseShPtr _map_ptr, unsigned int _size) :
@@ -13,7 +19,8 @@ WolfProblem::WolfProblem(const TrajectoryBaseShPtr _trajectory_ptr, const MapBas
 		state_idx_last_(0),
         location_(TOP),
 		map_ptr_(_map_ptr),
-		trajectory_ptr_(_trajectory_ptr)
+		trajectory_ptr_(_trajectory_ptr),
+        reallocated_(false)
 {
 	map_ptr_->linkToUpperNode( this );
 	trajectory_ptr_->linkToUpperNode( this );
@@ -23,7 +30,7 @@ WolfProblem::~WolfProblem()
 {
 }
 
-void WolfProblem::addState(const StateBaseShPtr _new_state, const Eigen::VectorXs& _new_state_values)
+bool WolfProblem::addState(const StateBaseShPtr _new_state, const Eigen::VectorXs& _new_state_values)
 {
 	// Check if resize should be done
 	if (state_idx_last_+_new_state->getStateSize() > state_.size())
@@ -35,6 +42,7 @@ void WolfProblem::addState(const StateBaseShPtr _new_state, const Eigen::VectorX
 		for (auto state_units_it = state_list_.begin(); state_units_it != state_list_.end(); state_units_it++)
 			(*state_units_it)->setPtr(state_.data() + ( (*state_units_it)->getPtr() - old_first_pointer) );
 		std::cout << "New state size: " << state_.size() << "last idx: " << state_idx_last_ << std::endl;
+		reallocated_ = true;
 	}
 	//std::cout << "\nnew state unit: " << _new_state_values.transpose() << std::endl;
 	//std::cout << "\nPrev state: " << state_.segment(0,state_idx_last_).transpose() << std::endl;
@@ -50,6 +58,7 @@ void WolfProblem::addState(const StateBaseShPtr _new_state, const Eigen::VectorX
 	state_idx_last_ += _new_state->getStateSize();
 
 	//std::cout << "\nPost state: " << state_.segment(0,state_idx_last_).transpose() << std::endl;
+	return reallocated_;
 }
 
 WolfScalar* WolfProblem::getStatePtr()
@@ -66,11 +75,6 @@ const unsigned int WolfProblem::getStateSize() const
 {
 	return state_idx_last_;
 }
-
-//void WolfProblem::setStateIdx(unsigned int _idx)
-//{
-//	state_idx_last_ = _idx;
-//}
 
 void WolfProblem::addMap(const MapBaseShPtr _map_ptr)
 {
@@ -115,6 +119,17 @@ void WolfProblem::printSelf(unsigned int _ntabs, std::ostream& _ost) const
 const Eigen::VectorXs WolfProblem::getState() const
 {
 	return state_;
+}
+
+bool WolfProblem::isReallocated() const
+{
+	return reallocated_;
+}
+
+
+void WolfProblem::reallocationDone()
+{
+	reallocated_ = false;
 }
 
 WolfProblem* WolfProblem::getTop()

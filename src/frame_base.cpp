@@ -6,6 +6,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, const StateBaseShPtr& _p_ptr, const S
             NodeLinked(MID, "FRAME"),
             type_(REGULAR_FRAME),
             time_stamp_(_ts),
+			status_(ST_ESTIMATED),
 			p_ptr_(_p_ptr),
 			o_ptr_(_o_ptr),
 			v_ptr_(_v_ptr),
@@ -19,6 +20,7 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, const StateBas
             NodeLinked(MID, "FRAME"),
             type_(_tp),
             time_stamp_(_ts),
+			status_(ST_ESTIMATED),
 			p_ptr_(_p_ptr),
 			o_ptr_(_o_ptr),
 			v_ptr_(_v_ptr),
@@ -32,18 +34,18 @@ FrameBase::~FrameBase()
     //
 }
 
-inline bool FrameBase::isKey() const
+bool FrameBase::isKey() const
 {
     if ( type_ == KEY_FRAME ) return true;
     else return false; 
 }
 
-inline void FrameBase::setType(FrameType _ft)
+void FrameBase::setType(FrameType _ft)
 {
     type_ = _ft;
 }
 
-inline void FrameBase::setTimeStamp(const TimeStamp & _ts)
+void FrameBase::setTimeStamp(const TimeStamp & _ts)
 {
     time_stamp_ = _ts;
 }
@@ -53,9 +55,19 @@ TimeStamp FrameBase::getTimeStamp() const
     return time_stamp_.get();
 }
         
-inline void FrameBase::getTimeStamp(TimeStamp & _ts) const
+void FrameBase::getTimeStamp(TimeStamp & _ts) const
 {
     _ts = time_stamp_.get();
+}
+
+void FrameBase::setStatus(const StateStatus& _status)
+{
+	status_ = _status;
+}
+
+StateStatus FrameBase::getStatus() const
+{
+    return status_;
 }
 
 void FrameBase::setState(const Eigen::VectorXs& _st)
@@ -138,7 +150,7 @@ void FrameBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const
     NodeLinked::printSelf(_ntabs, _ost);
     if (p_ptr_.get() != nullptr)
     {
-    	_ost << "\tPosition : \n";
+    	_ost << "\tPosition2 : \n";
     	p_ptr_->printSelf(_ntabs,_ost);
     }
     if (o_ptr_.get() != nullptr)

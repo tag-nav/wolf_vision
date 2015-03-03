@@ -44,6 +44,20 @@ class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
 		 **/
         void addLandmark(LandmarkBaseShPtr& _landmark_ptr);
 
+        /** \brief Removes a landmark
+		 *
+		 * Removes a landmark
+		 *
+		 **/
+        void removeLandmark(const LandmarkBaseIter& _landmark_iter);
+
+        /** \brief Removes a landmark
+		 *
+		 * Removes a landmark
+		 *
+		 **/
+        void removeLandmark(const LandmarkBasePtr _landmark_ptr);
+
         /** \brief Returns Frame list
          * 
          * Returns FrameBase list

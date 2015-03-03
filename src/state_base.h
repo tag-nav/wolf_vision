@@ -15,6 +15,7 @@ class StateBase
 {
     protected:
 		WolfScalar* state_ptr_;
+		StateStatus status_;
         
     public:
         /** \brief Constructor with whole state storage and index where starts the state unit
@@ -60,7 +61,21 @@ class StateBase
 		 * Returns the parametrizationType (see wolf.h) of the state unit
 		 *
 		 **/
-		virtual stateType getStateType() const = 0;
+		virtual StateType getStateType() const = 0;
+
+        /** \brief Returns the status of the state unit
+		 *
+		 * Returns the stateStatus (see wolf.h) of the state unit
+		 *
+		 **/
+		StateStatus getStateStatus() const;
+
+		/** \brief Set the status of the state unit
+		 *
+		 * Set tthe stateStatus (see wolf.h) of the state unit
+		 *
+		 **/
+		void setStateStatus(const StateStatus& _status);
 
 		/** \brief Returns the state unit size
 		 *

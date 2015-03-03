@@ -66,6 +66,8 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
         
         void hit();
         
+        void unHit();
+
         unsigned int getHits() const;
 
         StateBaseShPtr getPPtr() const;

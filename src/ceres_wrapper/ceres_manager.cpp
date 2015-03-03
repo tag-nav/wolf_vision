@@ -30,6 +30,13 @@ ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_
 	return ceres_summary_;
 }
 
+void CeresManager::addConstraint(const ConstraintBasePtr& _corr_ptr)
+{
+	ceres::ResidualBlockId blockIdx = ceres_problem_->AddResidualBlock(createCostFunction(_corr_ptr), NULL, _corr_ptr->getStateBlockPtrVector());
+	//constraint_list_.push_back(std::pair<ceres::ResidualBlockId, ConstraintBasePtr>(blockIdx,_corr_ptr));
+	constraint_map_[_corr_ptr->nodeId()] = blockIdx;
+}
+
 void CeresManager::addConstraints(const ConstraintBasePtrList& _new_constraints)
 {
 	//std::cout << _new_constraints.size() << " new constraints\n";
@@ -37,36 +44,16 @@ void CeresManager::addConstraints(const ConstraintBasePtrList& _new_constraints)
 		addConstraint(*constraint_it);
 }
 
-void CeresManager::removeConstraints()
+void CeresManager::removeConstraint(const unsigned int& _corr_idx)
 {
-	for (uint i = 0; i<constraint_list_.size(); i++)
-	{
-		ceres_problem_->RemoveResidualBlock(constraint_list_.at(i).first);
-	}
-	constraint_list_.clear();
+	ceres_problem_->RemoveResidualBlock(constraint_map_[_corr_idx]);
+	constraint_map_.erase(_corr_idx);
 }
 
-void CeresManager::addConstraint(const ConstraintBasePtr& _corr_ptr)
+void CeresManager::removeConstraints(const std::list<unsigned int>& _corr_idx_list)
 {
-	ceres::ResidualBlockId blockIdx = ceres_problem_->AddResidualBlock(createCostFunction(_corr_ptr), NULL, _corr_ptr->getStateBlockPtrVector());
-	constraint_list_.push_back(std::pair<ceres::ResidualBlockId, ConstraintBasePtr>(blockIdx,_corr_ptr));
-}
-
-void CeresManager::addStateUnits(const StateBasePtrList& _new_state_units)
-{
-	for(auto state_unit_it = _new_state_units.begin(); state_unit_it!=_new_state_units.end(); state_unit_it++)
-		addStateUnit(*state_unit_it);
-}
-
-void CeresManager::removeStateUnit(WolfScalar* _st_ptr)
-{
-	ceres_problem_->RemoveParameterBlock(_st_ptr);
-}
-
-void CeresManager::removeStateUnits(std::list<WolfScalar*> _st_ptr_list)
-{
-	for(auto state_unit_it = _st_ptr_list.begin(); state_unit_it!=_st_ptr_list.end(); state_unit_it++)
-		ceres_problem_->RemoveParameterBlock(*state_unit_it);
+	for (auto idx_it=_corr_idx_list.begin(); idx_it!=_corr_idx_list.end(); idx_it++)
+		removeConstraint(*idx_it);
 }
 
 void CeresManager::addStateUnit(const StateBasePtr& _st_ptr)
@@ -74,6 +61,7 @@ void CeresManager::addStateUnit(const StateBasePtr& _st_ptr)
 	//std::cout << "Adding a State Unit to wolf_problem... " << std::endl;
 	//_st_ptr->print();
 
+	//if (_st_ptr->getStateStatus() == ST_ESTIMATED) TODO
 	switch (_st_ptr->getStateType())
 	{
 		case ST_COMPLEX_ANGLE:
@@ -111,6 +99,39 @@ void CeresManager::addStateUnit(const StateBasePtr& _st_ptr)
 		default:
 			std::cout << "Unknown  Local Parametrization type!" << std::endl;
 	}
+}
+
+void CeresManager::addStateUnits(const StateBasePtrList& _new_state_units)
+{
+	for(auto state_unit_it = _new_state_units.begin(); state_unit_it!=_new_state_units.end(); state_unit_it++)
+		addStateUnit(*state_unit_it);
+}
+
+void CeresManager::removeStateUnit(WolfScalar* _st_ptr)
+{
+	ceres_problem_->RemoveParameterBlock(_st_ptr);
+}
+
+void CeresManager::removeStateUnits(std::list<WolfScalar*> _st_ptr_list)
+{
+	for(auto state_unit_it = _st_ptr_list.begin(); state_unit_it!=_st_ptr_list.end(); state_unit_it++)
+		removeStateUnit(*state_unit_it);
+}
+
+void CeresManager::updateStateUnitStatus(const StateBasePtr& _st_ptr)
+{
+	if (_st_ptr->getStateStatus() == ST_ESTIMATED)
+		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
+	else if (_st_ptr->getStateStatus() == ST_FIXED)
+		ceres_problem_->SetParameterBlockConstant(_st_ptr->getPtr());
+	else
+		printf("\nERROR: Update state unit status with unknown status");
+}
+
+void CeresManager::updateStateUnitStatus(const StateBasePtrList& _st_ptr_list)
+{
+	for(auto state_unit_it = _st_ptr_list.begin(); state_unit_it!=_st_ptr_list.end(); state_unit_it++)
+		updateStateUnitStatus(*state_unit_it);
 }
 
 ceres::CostFunction* CeresManager::createCostFunction(const ConstraintBasePtr& _corrPtr)

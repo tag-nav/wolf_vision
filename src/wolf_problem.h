@@ -27,6 +27,7 @@ class WolfProblem: public NodeBase
         TrajectoryBaseShPtr trajectory_ptr_;
         //TODO: SensorBaseList sensor_list_;
         StateBaseList state_list_;
+        bool reallocated_;
 
     public:
 
@@ -53,10 +54,10 @@ class WolfProblem: public NodeBase
 
         /** \brief Adds a new state unit to the state
 		 *
-		 * Adds a new state unit to the state
+		 * Adds a new state unit to the state. Returns true if a remapping has been done.
 		 *
 		 */
-		void addState(const StateBaseShPtr _new_state, const Eigen::VectorXs& _new_state_values);
+        bool addState(const StateBaseShPtr _new_state, const Eigen::VectorXs& _new_state_values);
 
         /** \brief Gets a pointer to the state first position
          *
@@ -141,6 +142,20 @@ class WolfProblem: public NodeBase
 		 *
 		 */
         const Eigen::VectorXs getState() const;
+
+        /** \brief Gets if the state has been reallocated
+		 *
+		 * Gets if the state has been reallocated
+		 *
+		 */
+        bool isReallocated() const;
+
+        /** \brief Turn off the reallocation flag
+		 *
+		 * Turn off the reallocation flag
+		 *
+		 */
+		void reallocationDone();
 
         /** \brief get top node
 		 *

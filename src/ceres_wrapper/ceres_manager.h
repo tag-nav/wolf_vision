@@ -27,7 +27,8 @@
 class CeresManager
 {
 	protected:
-		std::vector<std::pair<ceres::ResidualBlockId, ConstraintBasePtr>> constraint_list_;
+		std::map<unsigned int, ceres::ResidualBlockId> constraint_map_;
+		//std::vector<std::pair<ceres::ResidualBlockId, ConstraintBasePtr>> constraint_list_;
 		ceres::Problem* ceres_problem_;
 
 	public:
@@ -37,19 +38,25 @@ class CeresManager
 
 		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
 
-		void addConstraints(const ConstraintBasePtrList& _new_constraints);
-
-		void removeConstraints();
-
 		void addConstraint(const ConstraintBasePtr& _corr_ptr);
 
-		void addStateUnits(const StateBasePtrList& _new_state_units);
+		void addConstraints(const ConstraintBasePtrList& _new_constraints);
+
+		void removeConstraint(const unsigned int& _corr_idx);
+
+		void removeConstraints(const std::list<unsigned int>& _corr_idx_list);
+
+		void addStateUnit(const StateBasePtr& _st_ptr);
+
+		void addStateUnits(const StateBasePtrList& _st_ptr_list);
 
 		void removeStateUnit(WolfScalar* _st_ptr);
 
 		void removeStateUnits(std::list<WolfScalar*> _st_ptr_list);
 
-		void addStateUnit(const StateBasePtr& _st_ptr);
+		void updateStateUnitStatus(const StateBasePtr& _st_ptr);
+
+		void updateStateUnitStatus(const StateBasePtrList& _st_ptr_list);
 
 		ceres::CostFunction* createCostFunction(const ConstraintBasePtr& _corrPtr);
 };

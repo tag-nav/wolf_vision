@@ -46,7 +46,7 @@ class StateComplexAngle : public StateBase
 		 * Returns the parametrizationType (see wolf.h) of the state unit
 		 *
 		 **/
-		virtual stateType getStateType() const;
+		virtual StateType getStateType() const;
 
 		/** \brief Returns the state unit size
 		 *
