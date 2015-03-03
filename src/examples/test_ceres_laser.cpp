@@ -48,9 +48,10 @@
 #include <sys/time.h>
 
 //GLUT
-#include <GL/glut.h>
+// #include <GL/glut.h>
 
 //faramotics includes
+//#include "faramotics/window.h"
 #include "faramotics/dynamicSceneRender.h"
 #include "faramotics/rangeScan2D.h"
 #include "btr-headers/pose3d.h"
@@ -419,7 +420,9 @@ int main(int argc, char** argv)
     //modelFileName = "/home/andreu/dev/faramotics/models/campusNordUPC.obj";
 	devicePose.setPose(2,8,0.2,0,0,0);
 	//glut initialization
-	glutInit(&argc, argv);
+	//glutInit(&argc, argv);
+    faramotics::initGLUT(argc, argv);
+    
 	//create a viewer for the 3D model and scan points
 	myRender = new CdynamicSceneRender(1200,700,90*M_PI/180,90*700.0*M_PI/(1200.0*180.0),0.2,100);
 	myRender->loadAssimpModel(modelFileName,true); //with wireframe
