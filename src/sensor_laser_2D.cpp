@@ -14,12 +14,12 @@ SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp) :
     setDefaultCornerAlgParams();  
 }
 
-SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params) :
-    SensorBase(LIDAR, _sp, 8)
-{
-    setScanParams(_params);
-    setDefaultCornerAlgParams();  
-}
+// SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params) :
+//     SensorBase(LIDAR, _sp, 8)
+// {
+//     setScanParams(_params);
+//     setDefaultCornerAlgParams();  
+// }
 
 SensorLaser2D::~SensorLaser2D()
 {
@@ -28,25 +28,32 @@ SensorLaser2D::~SensorLaser2D()
 
 void SensorLaser2D::setDefaultScanParams()
 {
+    //TODO: Decide who holds intrinsic parameters, either SensorBase::params_ or scan_params_, but NOTH BOTH!!
+    
     scan_params_.angle_min_ = -M_PI/2;
     scan_params_.angle_max_ = M_PI/2;
     scan_params_.angle_step_ = M_PI/720;
     scan_params_.scan_time_ = 0.01;//not relevant
-    scan_params_.range_min_ = 0.1;
-    scan_params_.range_max_ = 30;
+    scan_params_.range_min_ = 0.2;
+    scan_params_.range_max_ = 100;
     scan_params_.range_std_dev_ = 0.01;
+    
+    params_ << scan_params_.angle_min_, scan_params_.angle_max_, scan_params_.angle_step_, 
+               scan_params_.range_min_, scan_params_.range_max_, 
+               scan_params_.range_std_dev_, 
+               0, scan_params_.scan_time_;     
 }
 
 void SensorLaser2D::setScanParams(const laserscanutils::ScanParams & _params)
 {
     //TODO: Decide who holds intrinsic parameters, either SensorBase::params_ or scan_params_, but NOTH BOTH!!
-    
-    params_ << _params.angle_min_, _params.angle_max_, _params.angle_step_, 
-               _params.range_min_, _params.range_max_, 
-               _params.range_std_dev_, 
-               0, _params.scan_time_; //TODO: consider time increment instead of 0 -> TODO at laserscanutils ??
-    
+        
     scan_params_ = _params;
+    
+    params_ << scan_params_.angle_min_, scan_params_.angle_max_, scan_params_.angle_step_, 
+               scan_params_.range_min_, scan_params_.range_max_, 
+               scan_params_.range_std_dev_, 
+               0, scan_params_.scan_time_;     
 }
 
 void SensorLaser2D::setDefaultCornerAlgParams()
@@ -71,7 +78,7 @@ const laserscanutils::ExtractCornerParams & SensorLaser2D::getCornerAlgParams() 
     return corners_alg_params_;
 }
 
-WolfScalar SensorLaser2D::getAngleMin() const
+/*WolfScalar SensorLaser2D::getAngleMin() const
 {
     return params_(0);
 }
@@ -109,17 +116,17 @@ WolfScalar SensorLaser2D::getTimeIncrement() const
 WolfScalar SensorLaser2D::getScanTime() const
 {
     return params_(7);
-}
+}*/
 
 void SensorLaser2D::printSensorParameters() const
 {
     std::cout << "LASER 2D SENSOR" << std::endl;
-    std::cout << "   angle min: " << getAngleMin() << std::endl;
-    std::cout << "   angle min: " << getAngleMax() << std::endl;
-    std::cout << "   angle increment: " << getAngleIncrement() << std::endl;
-    std::cout << "   range min: " << getRangeMin() << std::endl;
-    std::cout << "   range max: " << getRangeMax() << std::endl;
-    std::cout << "   range std dev: " << getRangeStdDev() << std::endl;
-    std::cout << "   time increment: " << getTimeIncrement() << std::endl;
-    std::cout << "   scan time: " << getScanTime() << std::endl;
+//     std::cout << "   angle min: " << getAngleMin() << std::endl;
+//     std::cout << "   angle min: " << getAngleMax() << std::endl;
+//     std::cout << "   angle increment: " << getAngleIncrement() << std::endl;
+//     std::cout << "   range min: " << getRangeMin() << std::endl;
+//     std::cout << "   range max: " << getRangeMax() << std::endl;
+//     std::cout << "   range std dev: " << getRangeStdDev() << std::endl;
+//     std::cout << "   time increment: " << getTimeIncrement() << std::endl;
+//     std::cout << "   scan time: " << getScanTime() << std::endl;
 }

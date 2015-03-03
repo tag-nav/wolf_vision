@@ -45,7 +45,7 @@ class SensorLaser2D : public SensorBase
          * 
          **/        
         SensorLaser2D(const Eigen::VectorXs & _sp);
-        SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params);
+        //SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params);
 
         /** \brief Destructor
          * 
@@ -72,7 +72,12 @@ class SensorLaser2D : public SensorBase
          * 
          **/                        
         const laserscanutils::ScanParams & getScanParams() const;
-        
+
+        /** \brief Get parameters for corner detection algorithm
+         * 
+         * Get parameters for corner detection algorithm
+         * 
+         **/                                
         const laserscanutils::ExtractCornerParams & getCornerAlgParams() const;
 
         /** \brief Returns angle_min
@@ -80,56 +85,56 @@ class SensorLaser2D : public SensorBase
          * Returns angle_min
          *
          **/
-        WolfScalar getAngleMin() const;
+//         WolfScalar getAngleMin() const;
 
         /** \brief Returns angle_max
          *
          * Returns angle_max
          *
          **/
-        WolfScalar getAngleMax() const;
+//         WolfScalar getAngleMax() const;
 
         /** \brief Returns angle_increment
          *
          * Returns angle_increment
          *
          **/
-        WolfScalar getAngleIncrement() const;
+//         WolfScalar getAngleIncrement() const;
 
         /** \brief Returns range_min
          *
          * Returns range_min
          *
          **/
-        WolfScalar getRangeMin() const;
+//         WolfScalar getRangeMin() const;
 
         /** \brief Returns range_max
          *
          * Returns range_max
          *
          **/
-        WolfScalar getRangeMax() const;
+//         WolfScalar getRangeMax() const;
         
         /** \brief Returns _range_stdev
          * 
          * Returns _range_stdev
          * 
          **/        
-        WolfScalar getRangeStdDev() const;
+//         WolfScalar getRangeStdDev() const;
 
         /** \brief Returns time_increment
          *
          * Returns time_increment
          *
          **/
-        WolfScalar getTimeIncrement() const;
+//         WolfScalar getTimeIncrement() const;
 
         /** \brief Returns scan_time
          *
          * Returns scan_time
          *
          **/
-        WolfScalar getScanTime() const;
+//         WolfScalar getScanTime() const;
 
         /** \brief Prints parameters
          * 

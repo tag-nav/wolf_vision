@@ -316,7 +316,8 @@ int main(int argc, char** argv)
 	double dt;
 	//model and initial view point
 	//modelFileName = "/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj";
-    modelFileName = "/home/acoromin/dev/br/faramotics/models/campusNordUPC.obj";
+    //modelFileName = "/home/acoromin/dev/br/faramotics/models/campusNordUPC.obj";
+    modelFileName = "/home/andreu/dev/faramotics/models/campusNordUPC.obj";
 	devicePose.setPose(2,8,0.2,0,0,0);
 	//glut initialization
 	glutInit(&argc, argv);
@@ -326,7 +327,7 @@ int main(int argc, char** argv)
 	//create scanner and load 3D model
 	myScanner = new CrangeScan2D(HOKUYO_UTM30LX_180DEG);//HOKUYO_UTM30LX_180DEG or LEUZE_RS4
 	myScanner->loadAssimpModel(modelFileName);
-
+    
 	//variables
 	Eigen::Vector2s odom_reading, gps_fix_reading;
 	Eigen::VectorXs odom_inc_true(n_execution*2);//invented motion
@@ -352,7 +353,7 @@ int main(int argc, char** argv)
 	pose_odom << 0,0,0;
 	ground_truth.head(3) = pose_odom;
 	odom_trajectory.head(3) = pose_odom;
-
+    
 	// START TRAJECTORY ============================================================================================
 	for (uint step=1; step < n_execution; step++)
 	{
@@ -409,7 +410,7 @@ int main(int argc, char** argv)
 		//wolf_manager->addCapture(CaptureBaseShPtr(new CaptureGPSFix(time_stamp, &gps_sensor, gps_fix_reading, gps_std * MatrixXs::Identity(3,3))));
 		wolf_manager->addCapture(CaptureBaseShPtr(new CaptureLaser2D(time_stamp, &laser_sensor, scan_reading)));
 
-		// updating problem
+        // updating problem
 		wolf_manager->update(new_state_units, new_constraints);
 
 		// draw detected corners
@@ -436,7 +437,6 @@ int main(int argc, char** argv)
 		// adding new state units and constraints to ceres
 		ceres_manager->addStateUnits(new_state_units);
 		ceres_manager->addConstraints(new_constraints);
-
 
 		// TIME MANAGEMENT ---------------------------
 		//get end time

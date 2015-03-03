@@ -6,7 +6,7 @@ clear;
 
 // CERES ODOM BATCH
 //load log file
-data = read('~/Desktop/log_file.txt',-1,14);
+data = read('~/Desktop/log_file_2.txt',-1,14);
 
 //plot
 fig1 = figure(0);

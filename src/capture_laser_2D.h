@@ -24,12 +24,6 @@
 //wolf forward declarations
 //#include "feature_corner_2D.h"
 
-struct Line{
-	Eigen::Vector3s vector;
-	WolfScalar error;
-	unsigned int last, first;
-};
-
 class CaptureLaser2D : public CaptureBase
 {
     protected:

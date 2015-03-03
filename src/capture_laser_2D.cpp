@@ -13,7 +13,7 @@ CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _
 	ranges_(data_.data(), _ranges.size()),
 	intensities_(data_.data(), 0)
 {
-    SensorLaser2DPtr laser_ptr_ = (const SensorLaser2DPtr)sensor_ptr_;
+    laser_ptr_ = (const SensorLaser2DPtr)sensor_ptr_;
 }
 
 CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities):
@@ -21,7 +21,7 @@ CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _
 		ranges_(data_.data(), _ranges.size()),
 		intensities_(data_.data(), _intensities.size())
 {
-    SensorLaser2DPtr laser_ptr_ = (const SensorLaser2DPtr)sensor_ptr_;
+    laser_ptr_ = (const SensorLaser2DPtr)sensor_ptr_;
 }
 
 CaptureLaser2D::~CaptureLaser2D()
@@ -35,7 +35,6 @@ void CaptureLaser2D::processCapture()
     std::list<Eigen::Vector4s> corners;
     
     //extract corners from range data
-//     extractCorners_old(corners);
     extractCorners(corners);
     
     //generate a feature for each corner
