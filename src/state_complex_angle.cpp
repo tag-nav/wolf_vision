@@ -29,7 +29,7 @@ unsigned int StateComplexAngle::getStateSize() const
 	return BLOCK_SIZE;
 }
 
-void StateComplexAngle::printSelf(unsigned int _ntabs, std::ostream& _ost) const
+void StateComplexAngle::print(unsigned int _ntabs, std::ostream& _ost) const
 {
 	printTabs(_ntabs);
 	_ost << *this->state_ptr_<< std::endl;

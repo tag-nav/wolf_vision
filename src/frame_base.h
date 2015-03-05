@@ -93,6 +93,8 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         void setState(const Eigen::VectorXs& _st);
 
         void addCapture(CaptureBaseShPtr& _capt_ptr);
+
+        void removeCapture(CaptureBaseIter& _capt_ptr);
         
         const TrajectoryBasePtr getTrajectoryPtr() const;
 
@@ -100,6 +102,8 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         
         CaptureBaseList* getCaptureListPtr();
         
+        void getConstraintList(ConstraintBasePtrList & _ctr_list);
+
         FrameBasePtr getPreviousFrame() const;
 
         StateBaseShPtr getPPtr() const;

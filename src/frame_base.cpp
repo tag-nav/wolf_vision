@@ -88,6 +88,11 @@ void FrameBase::addCapture(CaptureBaseShPtr & _capt_ptr)
     addDownNode(_capt_ptr);
 }
 
+void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
+{
+	removeDownNode(_capt_iter);
+}
+
 inline const TrajectoryBasePtr FrameBase::getTrajectoryPtr() const
 {
     return upperNodePtr();
@@ -101,6 +106,12 @@ inline const TrajectoryBasePtr FrameBase::getTrajectoryPtr() const
 CaptureBaseList* FrameBase::getCaptureListPtr()
 {
     return getDownNodeListPtr();
+}
+
+void FrameBase::getConstraintList(ConstraintBasePtrList & _ctr_list)
+{
+	for(auto c_it = getCaptureListPtr()->begin(); c_it != getCaptureListPtr()->end(); ++c_it)
+		(*c_it)->getConstraintList(_ctr_list);
 }
 
 FrameBase* FrameBase::getPreviousFrame() const
@@ -148,25 +159,29 @@ StateBaseShPtr FrameBase::getWPtr() const
 void FrameBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const
 {
     NodeLinked::printSelf(_ntabs, _ost);
-    if (p_ptr_.get() != nullptr)
+    if (p_ptr_)
     {
+    	printTabs(_ntabs);
     	_ost << "\tPosition2 : \n";
-    	p_ptr_->printSelf(_ntabs,_ost);
+    	p_ptr_->print(_ntabs,_ost);
     }
-    if (o_ptr_.get() != nullptr)
+    if (o_ptr_)
     {
+    	printTabs(_ntabs);
 		_ost << "\tOrientation : \n";
-		o_ptr_->printSelf(_ntabs,_ost);
+		o_ptr_->print(_ntabs,_ost);
     }
-    if (v_ptr_.get() != nullptr)
+    if (v_ptr_)
     {
+    	printTabs(_ntabs);
     	_ost << "\tVelocity : \n";
-    	v_ptr_->printSelf(_ntabs,_ost);
+    	v_ptr_->print(_ntabs,_ost);
     }
-    if (w_ptr_.get() != nullptr)
+    if (w_ptr_)
     {
+    	printTabs(_ntabs);
     	_ost << "\tAngular velocity : \n";
-    	v_ptr_->printSelf(_ntabs,_ost);
+    	v_ptr_->print(_ntabs,_ost);
     }
 }
 

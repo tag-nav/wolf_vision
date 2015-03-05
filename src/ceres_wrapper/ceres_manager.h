@@ -28,8 +28,11 @@ class CeresManager
 {
 	protected:
 		std::map<unsigned int, ceres::ResidualBlockId> constraint_map_;
+		//StateBasePtrList state_units_list_;
 		//std::vector<std::pair<ceres::ResidualBlockId, ConstraintBasePtr>> constraint_list_;
 		ceres::Problem* ceres_problem_;
+		ceres::Covariance covariance_;
+		ceres::Covariance::Options covariance_options_;
 
 	public:
 		CeresManager(ceres::Problem* _ceres_problem);
@@ -38,27 +41,36 @@ class CeresManager
 
 		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
 
+		void computeCovariances(const StateBaseList* _state_units_list, const StateBasePtr& _current_state_unit);
+
+		void update(const WolfProblemPtr _problem_ptr);
+
 		void addConstraint(const ConstraintBasePtr& _corr_ptr);
 
-		void addConstraints(const ConstraintBasePtrList& _new_constraints);
+		// TODO: not necessary
+		void addConstraints(const ConstraintBasePtrList* _new_constraints_list_ptr);
 
+		// TODO: not necessary
 		void removeConstraint(const unsigned int& _corr_idx);
 
+		// TODO: not necessary
 		void removeConstraints(const std::list<unsigned int>& _corr_idx_list);
 
 		void addStateUnit(const StateBasePtr& _st_ptr);
 
-		void addStateUnits(const StateBasePtrList& _st_ptr_list);
+		// TODO: not necessary
+		void addStateUnits(const StateBasePtrList* _st_ptr_list);
 
 		void removeStateUnit(WolfScalar* _st_ptr);
 
 		void removeStateUnits(std::list<WolfScalar*> _st_ptr_list);
 
-		void updateStateUnitStatus(const StateBasePtr& _st_ptr);
+		void updateStateUnitStatus(const StateBasePtr _st_ptr);
 
-		void updateStateUnitStatus(const StateBasePtrList& _st_ptr_list);
+		// TODO: not necessary
+		void updateStateUnitStatus(const StateBasePtrList* _st_ptr_list);
 
-		ceres::CostFunction* createCostFunction(const ConstraintBasePtr& _corrPtr);
+		ceres::CostFunction* createCostFunction(const ConstraintBasePtr _corrPtr);
 };
 
 #endif

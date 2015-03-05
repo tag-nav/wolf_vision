@@ -27,6 +27,8 @@ class CaptureOdom2D : public CaptureRelative
 
         virtual void addConstraints();
 
+        virtual void integrateCapture(const CaptureRelativePtr _new_capture);
+
         //virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 };
 #endif

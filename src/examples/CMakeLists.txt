@@ -38,6 +38,10 @@ TARGET_LINK_LIBRARIES(test_ceres_odom_iterative ${PROJECT_NAME})
 ADD_EXECUTABLE(test_ceres_manager_tree test_ceres_manager_tree.cpp)
 TARGET_LINK_LIBRARIES(test_ceres_manager_tree ${PROJECT_NAME})
 
+# test ceres covariance
+ADD_EXECUTABLE(test_ceres_covariance test_ceres_covariance.cpp)
+TARGET_LINK_LIBRARIES(test_ceres_covariance ${PROJECT_NAME})
+
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
 #     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})

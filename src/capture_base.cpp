@@ -54,20 +54,22 @@ FeatureBaseList* CaptureBase::getFeatureListPtr()
     return getDownNodeListPtr();
 }
 
-void CaptureBase::getConstraintList(ConstraintBaseList & _ctr_list)
+void CaptureBase::getConstraintList(ConstraintBasePtrList & _ctr_list)
 {
-    std::list<FeatureBaseShPtr>::iterator f_it;
-    std::list<ConstraintBaseShPtr>* c_list_ptr;
-    std::list<ConstraintBaseShPtr>::iterator c_it;
-    
-    for( f_it = down_node_list_.begin(); f_it != down_node_list_.end(); ++f_it)
-    {
-        c_list_ptr = (f_it->get())->getConstraintListPtr();
-        for( c_it = c_list_ptr->begin(); c_it != c_list_ptr->end(); ++c_it)
-        {
-        	_ctr_list.push_back(*c_it);
-        }
-    }
+//    std::list<ConstraintBaseShPtr>* c_list_ptr;
+//    std::list<ConstraintBaseShPtr>::iterator c_it;
+//
+//    for(auto f_it = down_node_list_.begin(); f_it != down_node_list_.end(); ++f_it)
+//    {
+//        c_list_ptr = (*f_it)->getConstraintListPtr();
+//        for( c_it = c_list_ptr->begin(); c_it != c_list_ptr->end(); ++c_it)
+//        {
+//        	_ctr_list.push_back(*c_it);
+//        }
+//    }
+
+	for(auto f_it = getFeatureListPtr()->begin(); f_it != getFeatureListPtr()->end(); ++f_it)
+			(*f_it)->getConstraintList(_ctr_list);
 }
 
 TimeStamp CaptureBase::getTimeStamp() const
@@ -93,6 +95,11 @@ void CaptureBase::setTimeStamp(const TimeStamp & _ts)
 void CaptureBase::setTimeStampToNow()
 {
     time_stamp_.setToNow();
+}
+
+Eigen::VectorXs CaptureBase::getData()
+{
+	return data_;
 }
 
 void CaptureBase::setData(unsigned int _size, const WolfScalar *_data)

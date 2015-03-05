@@ -2,6 +2,7 @@
 #define NODE_BASE_H_
 
 #include <iostream>
+#include "wolf.h"
 
 class WolfProblem;
 
@@ -17,6 +18,7 @@ class NodeBase
         std::string label_; ///< Text label identifying the node
         unsigned int node_id_; ///< Node id. It is unique over the whole Wolf Tree
         static unsigned int node_id_count_; ///< Object counter (acts as simple ID factory)
+        PendingStatus node_pending_; ///< Pending to be added/updated in the filter or optimizer
 
     public: 
 
@@ -34,34 +36,33 @@ class NodeBase
          */		
         virtual ~NodeBase();
 
-    //public:
         /** \brief Gets node ID
          *
          * Gets node ID. Inline function.
 		 * 
          */
-        unsigned int nodeId() const
-        {
-            return node_id_;
-        };
+        unsigned int nodeId() const;
 
         /** \brief Gets node label
          * 
          * Gets node label. Inline function.
 		 * 
          */
-        std::string nodeLabel() const
-        {
-            return label_;  
-        };
-        
-        /** \brief Inherited classes should implement that method
-         * 
-         * Inherited classes should implement that method. It is required to implement a getTop() at NodeLinked level
-         * 
-         **/
-        //virtual NodeBase* getTop() = 0;
-        virtual WolfProblem* getTop() = 0;
+        std::string nodeLabel() const;
+
+        /** \brief Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
+         *
+         * Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
+		 *
+         */
+        PendingStatus getPendingStatus() const;
+
+        /** \brief Sets the node pending status (pending or not to be added/updated in the filter or optimizer)
+         *
+         * Sets the node pending status (pending or not to be added/updated in the filter or optimizer)
+		 *
+         */
+        void setPendingStatus(PendingStatus _pending);
 
         /** \brief Print node information
          * 
@@ -72,10 +73,7 @@ class NodeBase
          * Overload this function in derived classes to adapt the printed output to each object's relevant info.
 		 * 
          */
-        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const
-        {
-            _ost << label_ << " " << node_id_ << std::endl;
-        };
+        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
     protected:
 
@@ -86,10 +84,7 @@ class NodeBase
          * \param _ost output stream
 		 * 
          */
-        void printTabs(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const
-        {
-                for (unsigned int i = 0; i < _ntabs; i++) _ost << "\t";
-        }
+        void printTabs(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 };
 
 #endif /* NODE_BASE_H_ */

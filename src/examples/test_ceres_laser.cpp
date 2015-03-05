@@ -149,17 +149,20 @@ class WolfManager
         {
         	// Create frame and add it to the trajectory
         	StateBaseShPtr new_position(new StatePoint2D(problem_->getNewStatePtr()));
+        	//new_position->setPendingStatus(NOT_PENDING);
 			problem_->addState(new_position, _frame_state.head(2));
 
 			StateBaseShPtr new_orientation;
         	if (use_complex_angles_)
         	{
         		new_orientation = StateBaseShPtr(new StateComplexAngle(problem_->getNewStatePtr()));
+        		//new_orientation->setPendingStatus(NOT_PENDING);
         		problem_->addState(new_orientation, _frame_state.tail(2));
         	}
         	else
         	{
         		new_orientation = StateBaseShPtr(new StateTheta(problem_->getNewStatePtr()));
+        		//new_orientation->setPendingStatus(NOT_PENDING);
 				problem_->addState(new_orientation, _frame_state.tail(1));
         	}
 
@@ -171,64 +174,85 @@ class WolfManager
         	new_captures_.push(_capture);
         }
 
-        void update(StateBasePtrList& new_state_units, ConstraintBasePtrList& new_constraints, StateBasePtrList& updated_state_units, std::list<WolfScalar*>& removed_state_units, std::list<unsigned int>& removed_constraints_idx)
+        void update()
         {
-        	// TODO: management due to time stamps
         	while (!new_captures_.empty())
         	{
         		// EXTRACT NEW CAPTURE
         		CaptureBaseShPtr new_capture = new_captures_.front();
         		new_captures_.pop();
 
-        		// NEW FRAME (if the specific sensor)
-        		// TODO: accumulate odometries
+        		// ODOMETRY SENSOR
         		if (new_capture->getSensorPtr() == sensor_prior_)
         		{
-					createFrame(Eigen::VectorXs::Zero(use_complex_angles_ ? 4 : 3), new_capture->getTimeStamp());
+        			//std::cout << "new TimeStamp - last Frame TimeStamp = " << new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() << std::endl;
+            		// ACCUMULATING ODOMETRIES
+        			if (new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() < 0.1)
+        			{
+        				//std::cout << "integrating odometries" << std::endl;
+        				// INTEGRATE ODOMETRY CAPTURES
+        				for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin(); capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
+        				{
+        					//std::cout << "capture: " << (*capture_it)->nodeId() << std::endl;
+        					if ((*capture_it)->getSensorPtr() == sensor_prior_)
+        					{
+        						//std::cout << "integrating captures" << std::endl;
+        						static_cast<CaptureRelativePtr>((*capture_it).get())->integrateCapture(static_cast<CaptureRelativePtr>(new_capture.get()));
+        						// UPDATE PRIOR
+        						//std::cout << "updating prior of "<< (*capture_it)->nodeId() << std::endl;
+        						problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setState((*capture_it)->computePrior());
+        						//std::cout << "updated" << std::endl;
+        						break;
+        					}
+        				}
+        			}
+        			// NEW KEY FRAME (current frame is a new one)
+        			else
+        			{
+        				//std::cout << "Computing Frame " << problem_->getTrajectoryPtr()->getFrameListPtr()->back()->nodeId() << std::endl;
+        				// COMPUTE PREVIOUS FRAME CAPTURES
+        				for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin(); capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
+        					(*capture_it)->processCapture();
 
-					// ADD CAPTURE TO THE NEW FRAME
-					//trajectory_->getFrameListPtr()->back()->addCapture(new_capture);
-					problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
+                		// NEW CURRENT FRAME
+						createFrame(Eigen::VectorXs::Zero(use_complex_angles_ ? 4 : 3), new_capture->getTimeStamp());
 
-					// COMPUTE PRIOR
-        			//trajectory_->getFrameListPtr()->back()->setState(new_capture->computePrior());
-					problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setState(new_capture->computePrior());
+						// ADD CAPTURE TO THE NEW FRAME
+						problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
 
-					// WINDOW (remove old frames) TODO: què va aquí i què als destructors
-					if (problem_->getTrajectoryPtr()->getFrameListPtr()->size() > window_size_)
-					{
-						//removeFrame(problem_->getTrajectoryPtr()->getFrameListPtr()->front().get(), removed_state_units, removed_constraints_idx);
-						fixFrame((*first_window_frame_).get(), updated_state_units);
-						first_window_frame_++;
-					}
-					else
-						first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
+						// COMPUTE PRIOR
+						problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setState(new_capture->computePrior());
+
+						// WINDOW (remove old frames) TODO: què va aquí i què als destructors
+						if (problem_->getTrajectoryPtr()->getFrameListPtr()->size() > window_size_)
+						{
+							//std::cout << "Fixing Frame " << (*first_window_frame_)->nodeId() << std::endl;
+							//removeFrame(problem_->getTrajectoryPtr()->getFrameListPtr()->front().get(), removed_state_units, removed_constraints_idx);
+							fixFrame((*first_window_frame_).get());
+							first_window_frame_++;
+						}
+						else
+							first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
+        			}
         		}
         		else
         		{
-        			// ADD CAPTURE TO THE LAST FRAME
-					//trajectory_->getFrameListPtr()->back()->addCapture(new_capture);
+        			//std::cout << "adding not odometry capture..." << std::endl;
+        			// ADD CAPTURE TO THE LAST FRAME (or substitute the same sensor previous capture)
+        			for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin(); capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
+        			{
+        				if ((*capture_it)->getSensorPtr() == new_capture->getSensorPtr())
+        				{
+        					//std::cout << "removing previous capture..." << std::endl;
+							problem_->getTrajectoryPtr()->getFrameListPtr()->back()->removeCapture(capture_it);
+							//std::cout << "removed!" << std::endl;
+							break;
+        				}
+        			}
         			problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
-        		}
-
-        		// COMPUTE CAPTURE (features, constraints)
-        		new_capture->processCapture();
-
-        		// ADD NEW CORRESPONDENCES TO THE new_constraints OUTPUT PARAM
-        		for (FeatureBaseIter feature_list_iter=new_capture->getFeatureListPtr()->begin(); feature_list_iter!=new_capture->getFeatureListPtr()->end(); feature_list_iter++)
-					for (ConstraintBaseIter constraint_list_iter=(*feature_list_iter)->getConstraintListPtr()->begin(); constraint_list_iter!=(*feature_list_iter)->getConstraintListPtr()->end(); constraint_list_iter++)
-						new_constraints.push_back((*constraint_list_iter).get());
-
-        		// ADD NEW STATE UNITS TO THE new_state_units OUTPUT PARAM
-        		auto state_unit_it=problem_->getStateListPtr()->rbegin();
-        		while (last_state_units_ != problem_->getStateListPtr()->size())
-        		{
-        			new_state_units.push_back((*state_unit_it).get());
-        			state_unit_it++;
-        			last_state_units_++;
+        			//std::cout << "added!" << std::endl;
         		}
         	}
-        	//std::cout << "All captures processed!" << std::endl;
         }
 
         void removeFrame(FrameBasePtr _removed_frame, std::list<WolfScalar*>& removed_state_units, std::list<unsigned int>& removed_constraints_idx)
@@ -293,7 +317,7 @@ class WolfManager
 			//	(*it)->printSelf();
 		}
 
-        void fixFrame(FrameBasePtr _fixed_frame, StateBasePtrList& updated_state_units)
+        void fixFrame(FrameBasePtr _fixed_frame)
 		{
 			//std::cout << "Fixing frame " << _fixed_frame->nodeId() << std::endl;
 			//_fixed_frame->print();
@@ -301,25 +325,13 @@ class WolfManager
 
 			// Frame State Units
 			if (_fixed_frame->getPPtr())
-			{
 				_fixed_frame->getPPtr()->setStateStatus(ST_FIXED);
-				updated_state_units.push_back(_fixed_frame->getPPtr().get());
-			}
 			if (_fixed_frame->getOPtr())
-			{
 				_fixed_frame->getOPtr()->setStateStatus(ST_FIXED);
-				updated_state_units.push_back(_fixed_frame->getOPtr().get());
-			}
 			if (_fixed_frame->getVPtr())
-			{
 				_fixed_frame->getVPtr()->setStateStatus(ST_FIXED);
-				updated_state_units.push_back(_fixed_frame->getVPtr().get());
-			}
 			if (_fixed_frame->getWPtr())
-			{
 				_fixed_frame->getWPtr()->setStateStatus(ST_FIXED);
-				updated_state_units.push_back(_fixed_frame->getWPtr().get());
-			}
 		}
 
         const Eigen::VectorXs getState() const
@@ -332,21 +344,9 @@ class WolfManager
         	return problem_->getStateListPtr();
 		}
 
-        std::list<ConstraintBaseShPtr> getConstraintsList()
+        void getConstraintsList(ConstraintBasePtrList& corr_list)
         {
-        	std::list<ConstraintBaseShPtr> corr_list;
-
-        	for (FrameBaseIter frame_list_iter=problem_->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_list_iter!=problem_->getTrajectoryPtr()->getFrameListPtr()->end(); frame_list_iter++)
-			{
-				for (CaptureBaseIter capture_list_iter=(*frame_list_iter)->getCaptureListPtr()->begin(); capture_list_iter!=(*frame_list_iter)->getCaptureListPtr()->end(); capture_list_iter++)
-				{
-					for (FeatureBaseIter feature_list_iter=(*capture_list_iter)->getFeatureListPtr()->begin(); feature_list_iter!=(*capture_list_iter)->getFeatureListPtr()->end(); feature_list_iter++)
-					{
-						corr_list.insert(corr_list.end(),(*feature_list_iter)->getConstraintListPtr()->begin(), (*feature_list_iter)->getConstraintListPtr()->end());
-					}
-				}
-			}
-        	return corr_list;
+        	problem_->getTrajectoryPtr()->getConstraintList(corr_list);
         }
 
         WolfProblemPtr getProblemPtr()
@@ -400,7 +400,11 @@ int main(int argc, char** argv)
 	//    ceres_options.minimizer_progress_to_stdout = false;
 	//    ceres_options.line_search_direction_type = ceres::LBFGS;
 	//    ceres_options.max_num_iterations = 100;
-	ceres::Problem* ceres_problem = new ceres::Problem();
+	ceres::Problem::Options problem_options;
+	problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+	problem_options.loss_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+	problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+	ceres::Problem* ceres_problem = new ceres::Problem(problem_options);
 	CeresManager* ceres_manager = new CeresManager(ceres_problem);
 	std::ofstream log_file, landmark_file;  //output file
 
@@ -444,7 +448,7 @@ int main(int argc, char** argv)
 	std::list<unsigned int> remove_constraints_idx; // constraints to be removed in ceres (residual blocks)
 	StateBasePtrList update_state_units; // state units to be updated in ceres (parameter blocks)
 	TimeStamp time_stamp;
-	Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(6);
+	Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(7);
 
 	// Wolf manager initialization
 	SensorOdom2D odom_sensor(Eigen::MatrixXs::Zero(6,1), odom_std, odom_std);
@@ -509,32 +513,31 @@ int main(int argc, char** argv)
 		wolf_manager->addCapture(CaptureBaseShPtr(new CaptureLaser2D(time_stamp, &laser_sensor, scan_reading)));
 
         // updating problem
-		wolf_manager->update(new_state_units, new_constraints, update_state_units, remove_state_units, remove_constraints_idx);
+		wolf_manager->update();
 		mean_times(1) += ((double)clock()-t1)/CLOCKS_PER_SEC;
 
 
 		// UPDATING CERES ---------------------------
+		//std::cout << "UPDATING CERES..." << std::endl;
 		t1=clock();
-		// adding new state units and constraints to ceres
-		ceres_manager->addStateUnits(new_state_units);
-		ceres_manager->addConstraints(new_constraints);
-		// removing and updating state units and constraints from ceres
-		ceres_manager->removeStateUnits(remove_state_units);
-		ceres_manager->updateStateUnitStatus(update_state_units);
-		//ceres_manager->removeConstraints(remove_constraints_idx);
-		new_state_units.clear();
-		new_constraints.clear();
-		update_state_units.clear();
-		remove_state_units.clear();
-		remove_constraints_idx.clear();
+		// update state units and constraints in ceres
+		ceres_manager->update(wolf_manager->getProblemPtr());
 		mean_times(2) += ((double)clock()-t1)/CLOCKS_PER_SEC;
 
 
 		// SOLVE OPTIMIZATION ---------------------------
+		//std::cout << "SOLVING..." << std::endl;
 		t1=clock();
 		ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
+		//std::cout << summary.FullReport() << std::endl;
 		mean_times(3) += ((double)clock()-t1)/CLOCKS_PER_SEC;
 
+		// COMPUTE COVARIANCES ---------------------------
+		//std::cout << "COMPUTING COVARIANCES..." << std::endl;
+		t1=clock();
+//		if (step > 2)
+//			ceres_manager->computeCovariances(wolf_manager->getProblemPtr()->getStateListPtr(), wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->back()->getPPtr().get());
+		mean_times(4) += ((double)clock()-t1)/CLOCKS_PER_SEC;
 
 		// DRAWING STUFF ---------------------------
 		t1=clock();
@@ -570,10 +573,10 @@ int main(int argc, char** argv)
 		myRender->drawPoseAxis(devicePose);
 		myRender->drawScan(devicePose,myScan,180.*M_PI/180.,90.*M_PI/180.); //draw scan
 		myRender->render();
-		mean_times(4) += ((double)clock()-t1)/CLOCKS_PER_SEC;
+		mean_times(5) += ((double)clock()-t1)/CLOCKS_PER_SEC;
 
 		// TIME MANAGEMENT ---------------------------
-		mean_times(5) += ((double)clock()-t2)/CLOCKS_PER_SEC;
+		mean_times(6) += ((double)clock()-t2)/CLOCKS_PER_SEC;
 
 		if (mean_times(5) < 0.1)
 			usleep(100000-1e-6*mean_times(5));
@@ -586,8 +589,9 @@ int main(int argc, char** argv)
 	std::cout << "  wolf managing:      " << mean_times(1) << std::endl;
 	std::cout << "  ceres managing:     " << mean_times(2) << std::endl;
 	std::cout << "  ceres optimization: " << mean_times(3) << std::endl;
-	std::cout << "  results drawing:    " << mean_times(4) << std::endl;
-	std::cout << "  loop time:          " << mean_times(5) << std::endl;
+	std::cout << "  ceres covariance:   " << mean_times(4) << std::endl;
+	std::cout << "  results drawing:    " << mean_times(5) << std::endl;
+	std::cout << "  loop time:          " << mean_times(6) << std::endl;
 
 	// Draw Final result -------------------------
 	std::vector<double> landmark_vector;

@@ -56,6 +56,14 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          **/
         FrameBaseList* getFrameListPtr();
 
+
+        /** \brief Returns a list of all constraints in the trajectory thru reference
+         *
+         * Returns a list of all constraints in the trajectory thru reference
+         *
+         **/
+        void getConstraintList(ConstraintBasePtrList & _ctr_list);
+
         /** \brief Returns a const pointer to Frame list
          * 
          * Returns a const pointer to Frame list

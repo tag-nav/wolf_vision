@@ -9,9 +9,10 @@
 
 //Wolf includes
 #include "wolf.h"
+#include "node_base.h"
 
 //class StateBase
-class StateBase
+class StateBase : public NodeBase
 {
     protected:
 		WolfScalar* state_ptr_;
@@ -89,15 +90,6 @@ class StateBase
 		 * Prints all the elements of the state unit
 		 *
 		 **/
-		virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const = 0;
-
-		/** \brief prints a number of tabulations.
-		 *
-		 * Prints a number of tabulations, i.e., "\t". Inline function.
-		 * \param _ntabs number of tabulations to print
-		 * \param _ost output stream
-		 *
-		 */
-		void printTabs(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+		virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const = 0;
 };
 #endif

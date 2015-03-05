@@ -71,7 +71,7 @@ class CaptureBase : public NodeLinked<FrameBase,FeatureBase>
          * 
          *
          **/
-        void getConstraintList(ConstraintBaseList & _ctr_list);//TODO: Should be const
+        void getConstraintList(ConstraintBasePtrList & _ctr_list);//TODO: Should be const
 
         TimeStamp getTimeStamp() const;
 
@@ -82,6 +82,8 @@ class CaptureBase : public NodeLinked<FrameBase,FeatureBase>
         void setTimeStamp(const TimeStamp & _ts);
         
         void setTimeStampToNow();
+
+        Eigen::VectorXs getData();
 
         void setData(unsigned int _size, const WolfScalar *_data);
         

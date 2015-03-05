@@ -303,8 +303,8 @@ int main(int argc, char** argv)
 		wolf_manager->update(new_state_units, new_constraints);
 
 		// adding new state units and constraints to ceres
-		ceres_manager->addStateUnits(new_state_units);
-		ceres_manager->addConstraints(new_constraints);
+		ceres_manager->addStateUnits(&new_state_units);
+		ceres_manager->addConstraints(&new_constraints);
 	}
 
 	//std::cout << "Resulting tree:\n";

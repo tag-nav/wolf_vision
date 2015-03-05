@@ -1,7 +1,8 @@
 #include "ceres_manager.h"
 
 CeresManager::CeresManager(ceres::Problem* _ceres_problem) :
-	ceres_problem_(_ceres_problem)
+	ceres_problem_(_ceres_problem),
+	covariance_(covariance_options_)
 {
 }
 
@@ -20,27 +21,74 @@ CeresManager::~CeresManager()
 
 ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_options)
 {
+	//std::cout << "Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+
 	// create summary
 	ceres::Solver::Summary ceres_summary_;
 
 	// run Ceres Solver
 	ceres::Solve(_ceres_options, ceres_problem_, &ceres_summary_);
+	//std::cout << "solved" << std::endl;
 
-	//display results
+	//return results
 	return ceres_summary_;
+}
+
+void CeresManager::computeCovariances(const StateBaseList* _state_list_ptr, const StateBasePtr& _current_state_unit)
+{
+	std::cout << "_state_list_ptr.size() " << _state_list_ptr->size() << std::endl;
+
+	// create vector of pointer pairs
+	std::vector<std::pair<const double*, const double*>> covariance_blocks;
+//	for (auto st_it = _state_list_ptr->begin(); st_it != _state_list_ptr->end(); st_it++)
+//		if ((*st_it)->getPtr() != _current_state_unit->getPtr())
+//			covariance_blocks.push_back(std::pair<const double*, const double*>((*st_it)->getPtr(),_current_state_unit->getPtr()));
+
+	WolfScalar* block_1_ptr = _current_state_unit->getPtr();
+	WolfScalar* block_2_ptr = _current_state_unit->getPtr();
+	std::cout << "are blocks? " << ceres_problem_->HasParameterBlock(block_1_ptr) << ceres_problem_->HasParameterBlock(block_2_ptr) << std::endl;
+	covariance_blocks.push_back(std::make_pair(block_1_ptr,block_2_ptr));
+	std::cout << "covariance_blocks.size() " << covariance_blocks.size() << std::endl;
+	// Compute covariances
+	covariance_.Compute(covariance_blocks, ceres_problem_);
+}
+
+void CeresManager::update(const WolfProblemPtr _problem_ptr)
+{
+	// STATE UNITS
+	for(auto state_unit_it = _problem_ptr->getStateListPtr()->begin(); state_unit_it!=_problem_ptr->getStateListPtr()->end(); state_unit_it++)
+	{
+		if ((*state_unit_it)->getPendingStatus() == ADD_PENDING)
+			addStateUnit((*state_unit_it).get());
+
+		else if((*state_unit_it)->getPendingStatus() == UPDATE_PENDING)
+			updateStateUnitStatus((*state_unit_it).get());
+	}
+	//std::cout << "state units updated!" << std::endl;
+
+	// CONSTRAINTS
+	ConstraintBasePtrList ctr_list;
+	_problem_ptr->getTrajectoryPtr()->getConstraintList(ctr_list);
+	//std::cout << "ctr_list.size() = " << ctr_list.size() << std::endl;
+	for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
+		if ((*ctr_it)->getPendingStatus() == ADD_PENDING)
+			addConstraint((*ctr_it));
+
+	//std::cout << "constraints updated!" << std::endl;
 }
 
 void CeresManager::addConstraint(const ConstraintBasePtr& _corr_ptr)
 {
 	ceres::ResidualBlockId blockIdx = ceres_problem_->AddResidualBlock(createCostFunction(_corr_ptr), NULL, _corr_ptr->getStateBlockPtrVector());
-	//constraint_list_.push_back(std::pair<ceres::ResidualBlockId, ConstraintBasePtr>(blockIdx,_corr_ptr));
 	constraint_map_[_corr_ptr->nodeId()] = blockIdx;
+
+	_corr_ptr->setPendingStatus(NOT_PENDING);
 }
 
-void CeresManager::addConstraints(const ConstraintBasePtrList& _new_constraints)
+void CeresManager::addConstraints(const ConstraintBasePtrList* _new_constraints_list_ptr)
 {
 	//std::cout << _new_constraints.size() << " new constraints\n";
-	for(auto constraint_it = _new_constraints.begin(); constraint_it!=_new_constraints.end(); constraint_it++)
+	for(auto constraint_it = _new_constraints_list_ptr->begin(); constraint_it!=_new_constraints_list_ptr->end(); constraint_it++)
 		addConstraint(*constraint_it);
 }
 
@@ -58,16 +106,14 @@ void CeresManager::removeConstraints(const std::list<unsigned int>& _corr_idx_li
 
 void CeresManager::addStateUnit(const StateBasePtr& _st_ptr)
 {
-	//std::cout << "Adding a State Unit to wolf_problem... " << std::endl;
+	//std::cout << "Adding State Unit " << _st_ptr->nodeId() << std::endl;
 	//_st_ptr->print();
 
-	//if (_st_ptr->getStateStatus() == ST_ESTIMATED) TODO
 	switch (_st_ptr->getStateType())
 	{
 		case ST_COMPLEX_ANGLE:
 		{
 			//std::cout << "Adding Complex angle Local Parametrization to the List... " << std::endl;
-			//ceres_problem_->SetParameterization(_st_ptr->getPtr(), new ComplexAngleParameterization);
 			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateComplexAngle*)_st_ptr)->BLOCK_SIZE, new ComplexAngleParameterization);
 			break;
 		}
@@ -99,11 +145,15 @@ void CeresManager::addStateUnit(const StateBasePtr& _st_ptr)
 		default:
 			std::cout << "Unknown  Local Parametrization type!" << std::endl;
 	}
+	if (_st_ptr->getStateStatus() != ST_ESTIMATED)
+		updateStateUnitStatus(_st_ptr);
+
+	_st_ptr->setPendingStatus(NOT_PENDING);
 }
 
-void CeresManager::addStateUnits(const StateBasePtrList& _new_state_units)
+void CeresManager::addStateUnits(const StateBasePtrList* _new_state_units)
 {
-	for(auto state_unit_it = _new_state_units.begin(); state_unit_it!=_new_state_units.end(); state_unit_it++)
+	for(auto state_unit_it = _new_state_units->begin(); state_unit_it!=_new_state_units->end(); state_unit_it++)
 		addStateUnit(*state_unit_it);
 }
 
@@ -118,7 +168,7 @@ void CeresManager::removeStateUnits(std::list<WolfScalar*> _st_ptr_list)
 		removeStateUnit(*state_unit_it);
 }
 
-void CeresManager::updateStateUnitStatus(const StateBasePtr& _st_ptr)
+void CeresManager::updateStateUnitStatus(const StateBasePtr _st_ptr)
 {
 	if (_st_ptr->getStateStatus() == ST_ESTIMATED)
 		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
@@ -126,16 +176,21 @@ void CeresManager::updateStateUnitStatus(const StateBasePtr& _st_ptr)
 		ceres_problem_->SetParameterBlockConstant(_st_ptr->getPtr());
 	else
 		printf("\nERROR: Update state unit status with unknown status");
+
+	_st_ptr->setPendingStatus(NOT_PENDING);
 }
 
-void CeresManager::updateStateUnitStatus(const StateBasePtrList& _st_ptr_list)
+void CeresManager::updateStateUnitStatus(const StateBasePtrList* _st_ptr_list)
 {
-	for(auto state_unit_it = _st_ptr_list.begin(); state_unit_it!=_st_ptr_list.end(); state_unit_it++)
+	for(auto state_unit_it = _st_ptr_list->begin(); state_unit_it!=_st_ptr_list->end(); state_unit_it++)
 		updateStateUnitStatus(*state_unit_it);
 }
 
-ceres::CostFunction* CeresManager::createCostFunction(const ConstraintBasePtr& _corrPtr)
+ceres::CostFunction* CeresManager::createCostFunction(const ConstraintBasePtr _corrPtr)
 {
+	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
+	//_corrPtr->print();
+
 	switch (_corrPtr->getConstraintType())
 	{
 		case CTR_GPS_FIX_2D:

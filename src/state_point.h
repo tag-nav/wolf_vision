@@ -85,7 +85,7 @@ class StatePoint : public StateBase
 		 * Prints all the elements of the state unit
 		 *
 		 **/
-		virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const
+		virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const
 		{
 			for (uint i = 0; i < BLOCK_SIZE; i++)
 			{

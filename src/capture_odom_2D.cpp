@@ -97,6 +97,15 @@ void CaptureOdom2D::addConstraints()
 	}
 }
 
+void CaptureOdom2D::integrateCapture(const CaptureRelativePtr _new_capture)
+{
+	//std::cout << "Trying to integrate CaptureOdom2D" << std::endl;
+	assert(dynamic_cast<CaptureOdom2D*>(_new_capture) && "Trying to integrate with a CaptureOdom2D a CaptureRelativePtr which is not CaptureOdom2D");
+	data_(0) += _new_capture->getData()(0);
+	data_(1) += _new_capture->getData()(1);
+	//std::cout << "integrated!" << std::endl;
+}
+
 //void CaptureOdom2D::printSelf(unsigned int _ntabs, std::ostream & _ost) const
 //{
 //    NodeLinked::printSelf(_ntabs, _ost);

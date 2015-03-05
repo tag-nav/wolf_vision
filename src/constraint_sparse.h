@@ -129,5 +129,18 @@ class ConstraintSparse: public ConstraintBase
         {
             return state_block_ptr_vector_;
         }
+
+        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const
+        {
+        	NodeLinked::printSelf(_ntabs, _ost);
+        	for (uint ii = 0; ii<state_block_sizes_vector_.size(); ii++)
+        	{
+        		printTabs(_ntabs);
+        		_ost << "block " << ii << ": ";
+        		for (uint jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
+        			_ost << *(state_block_ptr_vector_.at(ii)+jj) << " ";
+        		_ost << std::endl;
+        	}
+        }
 };
 #endif

@@ -189,6 +189,19 @@ typedef enum
     LANDMARK_OLD            ///< An old landmark. Just kept for visualization or statistical analysis. Association with it not allowed, so does not pose constraints for the solver.
 } LandmarkStatus;
 
+/** \brief Pending status of a node
+ *
+ * Enumeration of all possible pending status of a node.
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ *
+ */
+typedef enum
+{
+	NOT_PENDING,	///< A point landmark, either 3D or 2D
+	ADD_PENDING,	///< A corner landmark (2D)
+	UPDATE_PENDING	///< A container landmark
+} PendingStatus;
 
 /////////////////////////////////////////////////////////////////////////
 //      TYPEDEFS FOR POINTERS AND ITERATORS IN THE WOLF TREE
@@ -205,6 +218,7 @@ class LandmarkCorner2D;
 class TrajectoryBase;
 class FrameBase;
 class CaptureBase;
+class CaptureRelative;
 class CaptureLaser2D;
 class FeatureBase;
 class FeatureCorner2D;
@@ -224,6 +238,8 @@ class PinHole;
 // typedef VehicleBase* VehiclePtr;
 // typedef std::list<VehicleShPtr> VehicleList;
 // typedef VehicleList::iterator VehicleIter;
+
+// TODO: No seria millor que cada classe es defineixi aquests typedefs?
 
 //Problem
 typedef std::shared_ptr<WolfProblem> WolfProblemShPtr;
@@ -264,6 +280,12 @@ typedef std::shared_ptr<CaptureBase> CaptureBaseShPtr;
 typedef CaptureBase* CaptureBasePtr;
 typedef std::list<CaptureBaseShPtr> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
+
+// - Capture Relative
+typedef std::shared_ptr<CaptureRelative> CaptureRelativeShPtr;
+typedef CaptureRelative* CaptureRelativePtr;
+typedef std::list<CaptureRelativeShPtr> CaptureRelativeList;
+typedef CaptureRelativeList::iterator CaptureRelativeIter;
 
 // - Feature
 typedef std::shared_ptr<FeatureBase> FeatureBaseShPtr;

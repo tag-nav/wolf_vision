@@ -60,6 +60,6 @@ class StateComplexAngle : public StateBase
 		 * Prints all the elements of the state unit
 		 *
 		 **/
-		virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+		virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 };
 #endif

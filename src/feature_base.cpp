@@ -61,6 +61,12 @@ ConstraintBaseList* FeatureBase::getConstraintListPtr()
     return getDownNodeListPtr();
 }
 
+void FeatureBase::getConstraintList(ConstraintBasePtrList & _ctr_list)
+{
+	for(auto c_it = getConstraintListPtr()->begin(); c_it != getConstraintListPtr()->end(); ++c_it)
+		_ctr_list.push_back((*c_it).get());
+}
+
 Eigen::VectorXs * FeatureBase::getMeasurementPtr()
 {
     return &measurement_;

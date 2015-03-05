@@ -20,5 +20,7 @@ class CaptureRelative : public CaptureBase
         CaptureRelative(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
 
         virtual ~CaptureRelative();
+
+        virtual void integrateCapture(const CaptureRelativePtr _new_capture) = 0;
 };
 #endif
