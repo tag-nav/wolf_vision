@@ -1,22 +1,24 @@
 #include "ceres_manager.h"
 
-CeresManager::CeresManager(ceres::Problem* _ceres_problem) :
-	ceres_problem_(_ceres_problem),
+CeresManager::CeresManager(ceres::Problem::Options _options) :
+	ceres_problem_(new ceres::Problem(_options)),
 	covariance_(covariance_options_)
 {
 }
 
 CeresManager::~CeresManager()
 {
-//			std::vector<double*> state_units;
-//			ceres_problem_->GetParameterBlocks(&state_units);
-//
-//			for (uint i = 0; i< state_units.size(); i++)
-//				removeStateUnit(state_units.at(i));
-//
-//			std::cout << "all state units removed! \n";
-//	std::cout << "residual blocks: " << ceres_problem_->NumResidualBlocks() << "\n";
-//	std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << "\n";
+	std::vector<double*> state_units;
+
+	ceres_problem_->GetParameterBlocks(&state_units);
+
+	for (uint i = 0; i< state_units.size(); i++)
+		removeStateUnit(state_units.at(i));
+
+	std::cout << "all state units removed! \n";
+	std::cout << "residual blocks: " << ceres_problem_->NumResidualBlocks() << "\n";
+	std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << "\n";
+	delete ceres_problem_;
 }
 
 ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_options)
@@ -80,7 +82,7 @@ void CeresManager::update(const WolfProblemPtr _problem_ptr)
 void CeresManager::addConstraint(const ConstraintBasePtr& _corr_ptr)
 {
 	ceres::ResidualBlockId blockIdx = ceres_problem_->AddResidualBlock(createCostFunction(_corr_ptr), NULL, _corr_ptr->getStateBlockPtrVector());
-	constraint_map_[_corr_ptr->nodeId()] = blockIdx;
+//	constraint_map_[_corr_ptr->nodeId()] = blockIdx;
 
 	_corr_ptr->setPendingStatus(NOT_PENDING);
 }
@@ -94,8 +96,8 @@ void CeresManager::addConstraints(const ConstraintBasePtrList* _new_constraints_
 
 void CeresManager::removeConstraint(const unsigned int& _corr_idx)
 {
-	ceres_problem_->RemoveResidualBlock(constraint_map_[_corr_idx]);
-	constraint_map_.erase(_corr_idx);
+//	ceres_problem_->RemoveResidualBlock(constraint_map_[_corr_idx]);
+//	constraint_map_.erase(_corr_idx);
 }
 
 void CeresManager::removeConstraints(const std::list<unsigned int>& _corr_idx_list)

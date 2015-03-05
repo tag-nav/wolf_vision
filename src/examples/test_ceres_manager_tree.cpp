@@ -235,8 +235,11 @@ int main(int argc, char** argv)
 	//    ceres_options.minimizer_progress_to_stdout = false;
 	//    ceres_options.line_search_direction_type = ceres::LBFGS;
 	//    ceres_options.max_num_iterations = 100;
-	ceres::Problem* ceres_problem = new ceres::Problem();
-	CeresManager* ceres_manager = new CeresManager(ceres_problem);
+	ceres::Problem::Options problem_options;
+	problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+	problem_options.loss_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+	problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+	CeresManager* ceres_manager = new CeresManager(problem_options);
 	std::ofstream log_file;  //output file
 
 
@@ -351,7 +354,6 @@ int main(int argc, char** argv)
     std::cout << " ========= END ===========" << std::endl << std::endl;
 
     delete ceres_manager;
-    delete ceres_problem;
     delete wolf_manager;
 
     //exit

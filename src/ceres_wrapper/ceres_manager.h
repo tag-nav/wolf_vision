@@ -27,15 +27,13 @@
 class CeresManager
 {
 	protected:
-		std::map<unsigned int, ceres::ResidualBlockId> constraint_map_;
-		//StateBasePtrList state_units_list_;
-		//std::vector<std::pair<ceres::ResidualBlockId, ConstraintBasePtr>> constraint_list_;
+//		std::map<unsigned int, ceres::ResidualBlockId> constraint_map_;
 		ceres::Problem* ceres_problem_;
 		ceres::Covariance covariance_;
 		ceres::Covariance::Options covariance_options_;
 
 	public:
-		CeresManager(ceres::Problem* _ceres_problem);
+		CeresManager(ceres::Problem::Options _options);
 
 		~CeresManager();
 

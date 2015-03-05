@@ -404,8 +404,7 @@ int main(int argc, char** argv)
 	problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
 	problem_options.loss_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
 	problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-	ceres::Problem* ceres_problem = new ceres::Problem(problem_options);
-	CeresManager* ceres_manager = new CeresManager(ceres_problem);
+	CeresManager* ceres_manager = new CeresManager(problem_options);
 	std::ofstream log_file, landmark_file;  //output file
 
 	// Faramotics stuff
@@ -442,11 +441,6 @@ int main(int argc, char** argv)
 	Eigen::VectorXs odom_trajectory(n_execution*3); //open loop trajectory
 	Eigen::VectorXs odom_readings(n_execution*2); // all odometry readings
 	Eigen::VectorXs gps_fix_readings(n_execution*3); //all GPS fix readings
-	StateBasePtrList new_state_units; // new state units in wolf that must be added to ceres
-	ConstraintBasePtrList new_constraints; // new constraints in wolf that must be added to ceres
-	std::list<WolfScalar*> remove_state_units; // state units to be removed in ceres (parameter blocks)
-	std::list<unsigned int> remove_constraints_idx; // constraints to be removed in ceres (residual blocks)
-	StateBasePtrList update_state_units; // state units to be updated in ceres (parameter blocks)
 	TimeStamp time_stamp;
 	Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(7);
 
@@ -670,11 +664,12 @@ int main(int argc, char** argv)
 
 	std::cout << " ========= END ===========" << std::endl << std::endl;
 
-	delete ceres_manager;
-	delete ceres_problem;
-	delete wolf_manager;
     delete myRender;
     delete myScanner;
+	delete wolf_manager;
+	std::cout << "wolf deleted" << std::endl;
+	delete ceres_manager;
+	std::cout << "ceres_manager deleted" << std::endl;
 
 	//exit
 	return 0;
