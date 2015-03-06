@@ -87,11 +87,12 @@ class StatePoint : public StateBase
 		 **/
 		virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const
 		{
+			printTabs(_ntabs);
+			_ost << nodeLabel() << " " << nodeId() << std::endl;
+			printTabs(_ntabs);
 			for (uint i = 0; i < BLOCK_SIZE; i++)
-			{
-				printTabs(_ntabs);
-				_ost << *(this->state_ptr_+i) << std::endl;
-			}
+				_ost << *(this->state_ptr_+i) << " ";
+			_ost << std::endl;
 		}
 };
 #endif

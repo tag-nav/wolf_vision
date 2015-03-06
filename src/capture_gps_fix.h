@@ -13,11 +13,11 @@
 class CaptureGPSFix : public CaptureBase
 {
     public:
-		CaptureGPSFix(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr);
+		CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr);
 
-		CaptureGPSFix(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr, const Eigen::VectorXs& _data);
+		CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
 
-		CaptureGPSFix(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
+		CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
         
         virtual ~CaptureGPSFix();
         

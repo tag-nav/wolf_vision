@@ -37,7 +37,7 @@ class CaptureLaser2D : public CaptureBase
         
         Eigen::Map<Eigen::VectorXs> ranges_; // a map to the ranges inside de data vector
         Eigen::Map<Eigen::VectorXs> intensities_; // a map to the intensities inside the data vector
-        SensorLaser2DPtr laser_ptr_; //specific pointer to sensor laser 2D object
+        SensorLaser2D* laser_ptr_; //specific pointer to sensor laser 2D object
         
     public:
         /** \brief Constructor with ranges
@@ -45,14 +45,14 @@ class CaptureLaser2D : public CaptureBase
          * Constructor with ranges
          * 
          **/
-        CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _sensor_ptr, const Eigen::VectorXs& _ranges);
+        CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges);
 
         /** \brief Constructor with ranges and intensities
          *
          * Constructor with ranges and intensities
          *
          **/
-        CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities);
+        CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities);
 
         /** \brief Destructor
          * 

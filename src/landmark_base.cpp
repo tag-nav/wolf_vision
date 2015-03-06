@@ -1,7 +1,7 @@
 
 #include "landmark_base.h"
 
-LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBaseShPtr & _p_ptr, const StateBaseShPtr & _o_ptr, const StateBaseShPtr & _v_ptr, const StateBaseShPtr & _w_ptr) :
+LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBase* _p_ptr, StateBase* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
             NodeLinked(MID, "LANDMARK"),
             type_(_tp),
             status_(LANDMARK_CANDIDATE),
@@ -14,7 +14,7 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBaseShPtr & _p_p
     //
 }
 
-//LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBasePtrList& _st_list) :
+//LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBaseList& _st_list) :
 //            NodeLinked(MID, "LANDMARK"),
 //            type_(_tp),
 //            status_(LANDMARK_CANDIDATE),
@@ -26,7 +26,17 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBaseShPtr & _p_p
                 
 LandmarkBase::~LandmarkBase()
 {
-    //
+	std::cout << "deleting LandmarkBase " << nodeId() << std::endl;
+
+	// Remove Landmark State Units
+	if (p_ptr_ != nullptr)
+		getTop()->removeState(p_ptr_);
+	if (o_ptr_ != nullptr)
+		getTop()->removeState(o_ptr_);
+	if (v_ptr_ != nullptr)
+		getTop()->removeState(v_ptr_);
+	if (w_ptr_ != nullptr)
+		getTop()->removeState(w_ptr_);
 }
 
 void LandmarkBase::setStatus(LandmarkStatus _st)
@@ -49,22 +59,22 @@ unsigned int LandmarkBase::getHits() const
     return hit_count_;
 }
 
-StateBaseShPtr LandmarkBase::getPPtr() const
+StateBase* LandmarkBase::getPPtr() const
 {
 	return p_ptr_;
 }
 
-StateBaseShPtr LandmarkBase::getOPtr() const
+StateBase* LandmarkBase::getOPtr() const
 {
 	return o_ptr_;
 }
 
-StateBaseShPtr LandmarkBase::getVPtr() const
+StateBase* LandmarkBase::getVPtr() const
 {
 	return v_ptr_;
 }
 
-StateBaseShPtr LandmarkBase::getWPtr() const
+StateBase* LandmarkBase::getWPtr() const
 {
 	return w_ptr_;
 }

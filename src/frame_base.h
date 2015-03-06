@@ -28,10 +28,10 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         TimeStamp time_stamp_; //frame time stamp
         StateStatus status_; // status of the estimation of the frame state
         //Eigen::Vector3s state_; //TBD: Instead , It could be a vector/list/map of pointers to state units
-		StateBaseShPtr p_ptr_; // Position state unit pointer
-		StateBaseShPtr o_ptr_; // Orientation state unit pointer
-		StateBaseShPtr v_ptr_; // Velocity state unit pointer
-		StateBaseShPtr w_ptr_; // Angular velocity state unit pointer
+		StateBase* p_ptr_; // Position state unit pointer
+		StateBase* o_ptr_; // Orientation state unit pointer
+		StateBase* v_ptr_; // Velocity state unit pointer
+		StateBase* w_ptr_; // Angular velocity state unit pointer
 		//TODO: accelerations?
         
     public:
@@ -46,8 +46,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          * \param _w_ptr StateBase pointer to the angular velocity (default: nullptr)
          *
          **/
-//         FrameBase(const TrajectoryBasePtr & _traj_ptr, const TimeStamp& _ts, const StateBaseShPtr& _p_ptr = {}, const StateBaseShPtr& _o_ptr = {}, const StateBaseShPtr& _v_ptr = {}, const StateBaseShPtr& _w_ptr = {});
-        FrameBase(const TimeStamp& _ts, const StateBaseShPtr& _p_ptr = {}, const StateBaseShPtr& _o_ptr = {}, const StateBaseShPtr& _v_ptr = {}, const StateBaseShPtr& _w_ptr = {});
+        FrameBase(const TimeStamp& _ts, StateBase* _p_ptr = nullptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
 
         /** \brief Constructor with type, time stamp and state pointer
          * 
@@ -61,8 +60,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          * \param _w_ptr StateBase pointer to the angular velocity (default: nullptr)
          * 
          **/        
-//         FrameBase(const TrajectoryBasePtr & _traj_ptr, const FrameType & _tp, const TimeStamp& _ts, const StateBaseShPtr& _p_ptr = {}, const StateBaseShPtr& _o_ptr = {}, const StateBaseShPtr& _v_ptr = {}, const StateBaseShPtr& _w_ptr = {});
-        FrameBase(const FrameType & _tp, const TimeStamp& _ts, const StateBaseShPtr& _p_ptr = {}, const StateBaseShPtr& _o_ptr = {}, const StateBaseShPtr& _v_ptr = {}, const StateBaseShPtr& _w_ptr = {});
+        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBase* _p_ptr = nullptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
         
         /** \brief Destructor
          * 
@@ -92,27 +90,27 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 
         void setState(const Eigen::VectorXs& _st);
 
-        void addCapture(CaptureBaseShPtr& _capt_ptr);
+        void addCapture(CaptureBase* _capt_ptr);
 
         void removeCapture(CaptureBaseIter& _capt_ptr);
         
-        const TrajectoryBasePtr getTrajectoryPtr() const;
-
-        //const CaptureBaseList & captureList() const;
+        TrajectoryBase* getTrajectoryPtr() const;
         
         CaptureBaseList* getCaptureListPtr();
         
-        void getConstraintList(ConstraintBasePtrList & _ctr_list);
+        void getConstraintList(ConstraintBaseList & _ctr_list);
 
-        FrameBasePtr getPreviousFrame() const;
+        FrameBase* getPreviousFrame() const;
 
-        StateBaseShPtr getPPtr() const;
+        FrameBase* getNextFrame() const;
 
-        StateBaseShPtr getOPtr() const;
+        StateBase* getPPtr() const;
 
-        StateBaseShPtr getVPtr() const;
+        StateBase* getOPtr() const;
 
-        StateBaseShPtr getWPtr() const;
+        StateBase* getVPtr() const;
+
+        StateBase* getWPtr() const;
 
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
         

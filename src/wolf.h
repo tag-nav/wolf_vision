@@ -242,93 +242,60 @@ class PinHole;
 // TODO: No seria millor que cada classe es defineixi aquests typedefs?
 
 //Problem
-typedef std::shared_ptr<WolfProblem> WolfProblemShPtr;
+//typedef std::shared_ptr<WolfProblem> WolfProblemShPtr;
 typedef WolfProblem* WolfProblemPtr;
 
 //Map
-typedef std::shared_ptr<MapBase> MapBaseShPtr;
-typedef MapBase* MapBasePtr;
-typedef std::list<MapBaseShPtr> MapBaseList;
+typedef std::list<MapBase*> MapBaseList;
 typedef MapBaseList::iterator MapBaseIter;
 
 //Landmark
-typedef std::shared_ptr<LandmarkBase> LandmarkBaseShPtr;
-typedef LandmarkBase* LandmarkBasePtr;
-typedef std::list<LandmarkBaseShPtr> LandmarkBaseList;
+typedef std::list<LandmarkBase*> LandmarkBaseList;
 typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
 //Landmark corner 2D
-typedef std::shared_ptr<LandmarkCorner2D> LandmarkCorner2DShPtr;
-typedef LandmarkCorner2D* LandmarkCorner2DPtr;
-typedef std::list<LandmarkCorner2DShPtr> LandmarkCorner2DList;
+typedef std::list<LandmarkCorner2D*> LandmarkCorner2DList;
 typedef LandmarkCorner2DList::iterator LandmarkCorner2DIter;
 
 //Trajectory
-typedef std::shared_ptr<TrajectoryBase> TrajectoryBaseShPtr;
-typedef TrajectoryBase* TrajectoryBasePtr;
 // typedef std::list<TrajectoryBaseShPtr> TrajectoryBaseList;
 // typedef TrajectoryBaseList::iterator TrajectoryBaseIter;
 
 // - Frame
-typedef std::shared_ptr<FrameBase> FrameBaseShPtr;
-typedef FrameBase* FrameBasePtr;
-typedef std::list<FrameBaseShPtr> FrameBaseList;
+typedef std::list<FrameBase*> FrameBaseList;
 typedef FrameBaseList::iterator FrameBaseIter;
 
 // - Capture
-typedef std::shared_ptr<CaptureBase> CaptureBaseShPtr;
-typedef CaptureBase* CaptureBasePtr;
-typedef std::list<CaptureBaseShPtr> CaptureBaseList;
+typedef std::list<CaptureBase*> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
 // - Capture Relative
-typedef std::shared_ptr<CaptureRelative> CaptureRelativeShPtr;
-typedef CaptureRelative* CaptureRelativePtr;
-typedef std::list<CaptureRelativeShPtr> CaptureRelativeList;
+typedef std::list<CaptureRelative*> CaptureRelativeList;
 typedef CaptureRelativeList::iterator CaptureRelativeIter;
 
 // - Feature
-typedef std::shared_ptr<FeatureBase> FeatureBaseShPtr;
-typedef FeatureBase* FeatureBasePtr; ///< Feature pointer type
-typedef std::list<FeatureBaseShPtr> FeatureBaseList;
+typedef std::list<FeatureBase*> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
 
 // - Feature Corner 2D
-typedef std::shared_ptr<FeatureCorner2D> FeatureCorner2DShPtr;
-typedef FeatureCorner2D* FeatureCorner2DPtr; ///< Feature pointer type
-typedef std::list<FeatureCorner2DShPtr> FeatureCorner2DList;
+typedef std::list<FeatureCorner2D*> FeatureCorner2DList;
 typedef FeatureCorner2DList::iterator FeatureCorner2DIter;
 
 // - Constraint
-typedef std::shared_ptr<ConstraintBase> ConstraintBaseShPtr;
-typedef ConstraintBase* ConstraintBasePtr;
-typedef std::list<ConstraintBaseShPtr> ConstraintBaseList;
+typedef std::list<ConstraintBase*> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
-typedef std::list<ConstraintBasePtr> ConstraintBasePtrList;
-typedef ConstraintBasePtrList::iterator ConstraintBasePtrIter;
 
-// - Raw data
-typedef std::shared_ptr<RawBase> RawShPtr;
-typedef RawBase* RawPtr;
+// - Raw
 
 // - Sensors
-typedef std::shared_ptr<SensorBase> SensorBaseShPtr;
-typedef SensorBase* SensorBasePtr;
-typedef SensorLaser2D* SensorLaser2DPtr;
 
 // - transSensor
-typedef std::shared_ptr<TransSensor> TransSensorShPtr;
-typedef TransSensor* TransSensorPtr;
-typedef std::map<unsigned int, TransSensorShPtr > TransSensorMap;
+typedef std::map<unsigned int, TransSensor*> TransSensorMap;
 typedef TransSensorMap::iterator TransSensorIter;
 
 // - State
-typedef std::shared_ptr<StateBase> StateBaseShPtr;
-typedef StateBase* StateBasePtr;
-typedef std::list<StateBaseShPtr> StateBaseList;
+typedef std::list<StateBase*> StateBaseList;
 typedef StateBaseList::iterator StateBaseIter;
-typedef std::list<StateBasePtr> StateBasePtrList;
-typedef StateBasePtrList::iterator StateBasePtrIter;
 
 typedef StatePoint<1> StateTheta;
 typedef StatePoint<1> StatePoint1D;
@@ -336,7 +303,6 @@ typedef StatePoint<2> StatePoint2D;
 typedef StatePoint<3> StatePoint3D;
 
 // - Pin hole
-typedef PinHole* PinHolePtr;
 
 
 

@@ -7,8 +7,9 @@
 
 //Wolf includes
 #include "wolf.h"
+#include "node_base.h"
 
-class SensorBase
+class SensorBase : public NodeBase
 {
     protected:
         SensorType type_;//indicates sensor type. Enum defined at wolf.h

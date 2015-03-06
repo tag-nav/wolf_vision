@@ -30,8 +30,7 @@ class ConstraintBase : public NodeLinked<FeatureBase,NodeTerminus>
          * Constructor
          * 
          **/                
-        ConstraintBase(const FeatureBasePtr& _ftr_ptr, ConstraintType _tp);
-        //ConstraintBase(ConstraintType _tp);
+        ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp);
 
         /** \brief Destructor
          * 
@@ -66,14 +65,14 @@ class ConstraintBase : public NodeLinked<FeatureBase,NodeTerminus>
 		 * Returns a pointer to its capture
 		 *
 		 **/
-		FeatureBasePtr getFeaturePtr() const;
+		FeatureBase* getFeaturePtr() const;
 
         /** \brief Returns a pointer to its capture
 		 *
 		 * Returns a pointer to its capture
 		 *
 		 **/
-		CaptureBasePtr getCapturePtr() const;
+		CaptureBase* getCapturePtr() const;
 
 };
 #endif

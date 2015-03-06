@@ -13,7 +13,7 @@ NodeBase::NodeBase(std::string _label) :
 
 NodeBase::~NodeBase()
 {
-    //    std::cout << "NodeID::destructor. Id: " << node_id_ << std::endl;
+	//std::cout << "deleting NodeBase " << nodeId() << std::endl;
 }
 
 unsigned int NodeBase::nodeId() const

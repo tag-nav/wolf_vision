@@ -14,29 +14,17 @@ class FeatureOdom2D : public FeatureBase
     public:
         /** \brief Constructor from capture pointer and measure dim
          * 
-         * \param _capt_ptr a shared pointer to the Capture up node
          * \param _dim_measurement the dimension of the measurement space
          * 
          */
-// 		FeatureOdom2D(const CaptureBasePtr& _capt_ptr, unsigned int _dim_measurement);
         FeatureOdom2D(unsigned int _dim_measurement);
 
         /** \brief Constructor from capture pointer and measure
          *
-         * \param _capt_ptr a shared pointer to the Capture up node
-         * \param _measurement the measurement
-         *
-         */
-		//FeatureOdom2D(const CaptureBasePtr& _capt_ptr, const Eigen::VectorXs& _measurement);
-
-        /** \brief Constructor from capture pointer and measure
-         *
-         * \param _capt_ptr a shared pointer to the Capture up node
          * \param _measurement the measurement
          * \param _meas_covariance the noise of the measurement
          *
          */
-// 		FeatureOdom2D(const CaptureBasePtr& _capt_ptr, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
         FeatureOdom2D(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
         virtual ~FeatureOdom2D();

@@ -10,19 +10,19 @@
 class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 {
 	protected:
-		LandmarkCorner2DPtr lmk_ptr_;
+		LandmarkCorner2D* lmk_ptr_;
 
 	public:
 		static const unsigned int N_BLOCKS = 4;
 
-		ConstraintCorner2DTheta(const FeatureBasePtr& _ftr_ptr, const LandmarkCorner2DPtr& _lmk_ptr,  WolfScalar* _robotPPtr, WolfScalar* _robotOPtr, WolfScalar* _landmarkPPtr, WolfScalar* _landmarkOPtr) :
+		ConstraintCorner2DTheta(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr,  WolfScalar* _robotPPtr, WolfScalar* _robotOPtr, WolfScalar* _landmarkPPtr, WolfScalar* _landmarkOPtr) :
 			ConstraintSparse<3,2,1,2,1>(_ftr_ptr,CTR_CORNER_2D_THETA, _robotPPtr, _robotOPtr, _landmarkPPtr, _landmarkOPtr),
 			lmk_ptr_(_lmk_ptr)
 		{
 			//
 		}
 
-		ConstraintCorner2DTheta(const FeatureBasePtr& _ftr_ptr, const LandmarkCorner2DPtr& _lmk_ptr, const StateBaseShPtr& _robotPPtr, const StateBaseShPtr& _robotOPtr, const StateBaseShPtr& _landmarkPPtr, const StateBaseShPtr& _landmarkOPtr) :
+		ConstraintCorner2DTheta(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr, StateBase* _robotPPtr, StateBase* _robotOPtr, StateBase* _landmarkPPtr, StateBase* _landmarkOPtr) :
 			ConstraintSparse<3,2,1,2,1>(_ftr_ptr,CTR_CORNER_2D_THETA,  _robotPPtr->getPtr(), _robotOPtr->getPtr(),_landmarkPPtr->getPtr(), _landmarkOPtr->getPtr()),
 			lmk_ptr_(_lmk_ptr)
 		{
@@ -31,10 +31,14 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
         
 		virtual ~ConstraintCorner2DTheta()
 		{
-			//
+			std::cout << "deleting ConstraintCorner2DTheta " << nodeId() << std::endl;
+			if (lmk_ptr_->getHits() == 1)
+				getTop()->getMapPtr()->removeLandmark(lmk_ptr_);
+			else
+				lmk_ptr_->unHit();
 		}
 
-		LandmarkCorner2DPtr getLandmarkPtr()
+		LandmarkCorner2D* getLandmarkPtr()
 		{
 			return lmk_ptr_;
 		}

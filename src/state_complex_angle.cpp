@@ -32,7 +32,7 @@ unsigned int StateComplexAngle::getStateSize() const
 void StateComplexAngle::print(unsigned int _ntabs, std::ostream& _ost) const
 {
 	printTabs(_ntabs);
-	_ost << *this->state_ptr_<< std::endl;
+	_ost << nodeLabel() << " " << nodeId() << std::endl;
 	printTabs(_ntabs);
-	_ost << *(this->state_ptr_+1) << std::endl;
+	_ost << *this->state_ptr_<< " " << *(this->state_ptr_+1) << std::endl;
 }

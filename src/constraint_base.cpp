@@ -1,8 +1,6 @@
 #include "constraint_base.h"
 
-ConstraintBase::ConstraintBase(const FeatureBasePtr& _ftr_ptr, ConstraintType _tp) :
-//ConstraintBase::ConstraintBase(ConstraintType _tp) :
-//     NodeLinked(BOTTOM, "CORRESPONDENCE", _ftr_ptr),
+ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     type_(_tp),
 	measurement_ptr_(_ftr_ptr->getMeasurementPtr()),
@@ -13,7 +11,7 @@ ConstraintBase::ConstraintBase(const FeatureBasePtr& _ftr_ptr, ConstraintType _t
 
 ConstraintBase::~ConstraintBase()
 {
-	//
+	std::cout << "deleting ConstraintBase " << nodeId() << std::endl;
 }
 
 ConstraintType ConstraintBase::getConstraintType() const
@@ -26,12 +24,12 @@ const Eigen::VectorXs * ConstraintBase::getMeasurementPtr()
 	return upperNodePtr()->getMeasurementPtr();
 }
 
-FeatureBasePtr ConstraintBase::getFeaturePtr() const
+FeatureBase* ConstraintBase::getFeaturePtr() const
 {
 	return upperNodePtr();
 }
 
-CaptureBasePtr ConstraintBase::getCapturePtr() const
+CaptureBase* ConstraintBase::getCapturePtr() const
 {
 	return upperNodePtr()->upperNodePtr();
 }

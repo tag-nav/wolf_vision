@@ -42,7 +42,7 @@ class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
 		 * Adds a landmark
 		 *
 		 **/
-        void addLandmark(LandmarkBaseShPtr& _landmark_ptr);
+        void addLandmark(LandmarkBase* _landmark_ptr);
 
         /** \brief Removes a landmark
 		 *
@@ -56,21 +56,14 @@ class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
 		 * Removes a landmark
 		 *
 		 **/
-        void removeLandmark(const LandmarkBasePtr _landmark_ptr);
+        void removeLandmark(LandmarkBase* _landmark_ptr);
 
         /** \brief Returns Frame list
          * 
          * Returns FrameBase list
          * 
          **/
-        const LandmarkBaseList* getLandmarkListPtr();
-
-        /** \brief Prints self info to std out
-         *
-         * Prints self info to std out
-         *
-         **/        
-        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const {};
+        LandmarkBaseList* getLandmarkListPtr();
         
 };
 #endif

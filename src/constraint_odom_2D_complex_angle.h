@@ -11,29 +11,17 @@ class ConstraintOdom2DComplexAngle: public ConstraintSparse<2,2,2,2,2>
 	public:
 		static const unsigned int N_BLOCKS = 2;
 
-		ConstraintOdom2DComplexAngle(const FeatureBasePtr& _ftr_ptr,  WolfScalar* _block0Ptr, WolfScalar* _block1Ptr, WolfScalar* _block2Ptr, WolfScalar* _block3Ptr) :
+		ConstraintOdom2DComplexAngle(FeatureBase* _ftr_ptr,  WolfScalar* _block0Ptr, WolfScalar* _block1Ptr, WolfScalar* _block2Ptr, WolfScalar* _block3Ptr) :
 			ConstraintSparse<2,2,2,2,2>(_ftr_ptr,CTR_ODOM_2D_COMPLEX_ANGLE, _block0Ptr, _block1Ptr, _block2Ptr, _block3Ptr)
 		{
 			//
 		}
 
-		ConstraintOdom2DComplexAngle(const FeatureBasePtr& _ftr_ptr, const StateBaseShPtr& _state0Ptr, const StateBaseShPtr& _state1Ptr, const StateBaseShPtr& _state2Ptr, const StateBaseShPtr& _state3Ptr) :
+		ConstraintOdom2DComplexAngle(FeatureBase* _ftr_ptr, StateBase* _state0Ptr, StateBase* _state1Ptr, StateBase* _state2Ptr, StateBase* _state3Ptr) :
 			ConstraintSparse<2,2,2,2,2>(_ftr_ptr,CTR_ODOM_2D_COMPLEX_ANGLE,  _state0Ptr->getPtr(), _state1Ptr->getPtr(),_state2Ptr->getPtr(), _state3Ptr->getPtr())
 		{
 			//
 		}
-
-//         ConstraintOdom2DComplexAngle(WolfScalar* _block0Ptr, WolfScalar* _block1Ptr, WolfScalar* _block2Ptr, WolfScalar* _block3Ptr) :
-//             ConstraintSparse<2,2,2,2,2>(CORR_ODOM_2D_COMPLEX_ANGLE, _block0Ptr, _block1Ptr, _block2Ptr, _block3Ptr)
-//         {
-//             //
-//         }
-// 
-//         ConstraintOdom2DComplexAngle(const StateBaseShPtr& _state0Ptr, const StateBaseShPtr& _state1Ptr, const StateBaseShPtr& _state2Ptr, const StateBaseShPtr& _state3Ptr) :
-//             ConstraintSparse<2,2,2,2,2>(CORR_ODOM_2D_COMPLEX_ANGLE,  _state0Ptr->getPtr(), _state1Ptr->getPtr(),_state2Ptr->getPtr(), _state3Ptr->getPtr())
-//         {
-//             //
-//         }
 
         virtual ~ConstraintOdom2DComplexAngle()
 		{

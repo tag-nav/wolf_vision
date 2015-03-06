@@ -23,10 +23,11 @@ class WolfProblem: public NodeBase
 		Eigen::VectorXs state_;
 		unsigned int state_idx_last_;
         NodeLocation location_;// TODO: should it be in node_base?
-        MapBaseShPtr map_ptr_;
-        TrajectoryBaseShPtr trajectory_ptr_;
+        MapBase* map_ptr_;
+        TrajectoryBase* trajectory_ptr_;
         //TODO: SensorBaseList sensor_list_;
         StateBaseList state_list_;
+        std::list<WolfScalar*> removed_state_ptr_list_;
         bool reallocated_;
 
     public:
@@ -43,7 +44,7 @@ class WolfProblem: public NodeBase
 		 * Constructor from map and trajectory shared pointers
 		 *
 		 */
-        WolfProblem(const TrajectoryBaseShPtr _trajectory_ptr, const MapBaseShPtr _map_ptr={}, unsigned int _size=1e6);
+        WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr=nullptr, unsigned int _size=1e6);
 
         /** \brief Default destructor
          *
@@ -57,7 +58,14 @@ class WolfProblem: public NodeBase
 		 * Adds a new state unit to the state. Returns true if a remapping has been done.
 		 *
 		 */
-        bool addState(const StateBaseShPtr _new_state, const Eigen::VectorXs& _new_state_values);
+        bool addState(StateBase* _new_state, const Eigen::VectorXs& _new_state_values);
+
+        /** \brief Removes a new state unit of the state
+		 *
+		 * Removes a new state unit of the state
+		 *
+		 */
+        void removeState(StateBase* _state);
 
         /** \brief Gets a pointer to the state first position
          *
@@ -92,14 +100,14 @@ class WolfProblem: public NodeBase
          * Adds a map
          *
          */		
-        void addMap(const MapBaseShPtr _map_ptr);
+        void addMap(MapBase* _map_ptr);
 
         /** \brief Adds a trajectory
 		 *
 		 * Adds a trajectory
 		 *
 		 */
-		void addTrajectory(const TrajectoryBaseShPtr _Trajectory_ptr);
+		void addTrajectory(TrajectoryBase* _Trajectory_ptr);
 		
         /** \brief Gets a reference to map
          *
@@ -120,14 +128,14 @@ class WolfProblem: public NodeBase
          * Gets a pointer to map
          *
          */
-        MapBasePtr getMapPtr();
+        MapBase* getMapPtr();
 
         /** \brief Gets a pointer to map
          *
          * Gets a pointer to map
          *
          */
-        TrajectoryBasePtr getTrajectoryPtr();
+        TrajectoryBase* getTrajectoryPtr();
 
         /** \brief Gets a pointer to the state units list
          *
@@ -135,6 +143,13 @@ class WolfProblem: public NodeBase
          *
          */
         StateBaseList* getStateListPtr();
+
+        /** \brief Gets a list of wolfscalar pointers contained by removed state units (in order to delete them in ceres)
+		 *
+		 * Gets a list of wolfscalar pointers contained by removed state units (in order to delete them in ceres)
+		 *
+		 */
+        std::list<WolfScalar*>* getRemovedStateListPtr();
 
         /** \brief Gets the state vector
 		 *

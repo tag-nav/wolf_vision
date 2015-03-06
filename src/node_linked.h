@@ -16,7 +16,6 @@ class WolfProblem;
 
 //wolf includes
 #include "node_base.h"
-//#include "wolf_problem.h"
 #include "wolf.h"
 
 /** \brief Linked node element in the Wolf Tree
@@ -38,12 +37,10 @@ class NodeLinked : public NodeBase
 {
     public: 
         typedef UpperType* UpperNodePtr;
-        
-    protected:        
         typedef LowerType* LowerNodePtr;
-        typedef std::shared_ptr<LowerType> LowerNodeShPtr;
-        //typedef std::shared_ptr<UpperType> UpperNodeShPtr;
-        typedef std::list<LowerNodeShPtr> LowerNodeList;
+        
+    protected:
+        typedef std::list<LowerNodePtr> LowerNodeList;
         typedef typename LowerNodeList::iterator LowerNodeIter;
 
     protected:
@@ -123,7 +120,7 @@ class NodeLinked : public NodeBase
          * Adds a down node 
          *
          */		
-        void addDownNode(LowerNodeShPtr& _ptr);
+        void addDownNode(LowerNodePtr _ptr);
 		
         /** \brief Gets a reference to down node list
          *
@@ -240,8 +237,10 @@ NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std:
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::~NodeLinked()
 {
-    up_node_ptr_ = nullptr;
-    down_node_list_.clear();
+	//std::cout << "deleting Nodelinked " << node_id_ << " down_node_list_.size() " << down_node_list_.size() << std::endl;
+
+	while (down_node_list_.begin()!= down_node_list_.end())
+		removeDownNode(down_node_list_.begin());
 }
 
 template<class UpperType, class LowerType>
@@ -296,7 +295,7 @@ inline const UpperType& NodeLinked<UpperType, LowerType>::upperNode() const
 }
 
 template<class UpperType, class LowerType>
-inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodeShPtr& _ptr)
+inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodePtr _ptr)
 {
 	assert(!isBottom() && "Trying to add a down node to a bottom node");
 	down_node_list_.push_back(_ptr);
@@ -344,8 +343,9 @@ inline void NodeLinked<UpperType, LowerType>::removeDownNode(const unsigned int 
 template<class UpperType, class LowerType>
 inline void NodeLinked<UpperType, LowerType>::removeDownNode(const LowerNodeIter& _iter)
 {
-    (*_iter)->unlinkFromUpperNode();
+    //(*_iter)->unlinkFromUpperNode();
     down_node_list_.erase(_iter);
+    delete *_iter;
 }
 
 //TODO: confirm this change by the others :)

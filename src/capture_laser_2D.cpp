@@ -8,20 +8,20 @@
 // unsigned int CaptureLaser2D::max_beam_distance = 5;//max number of beams of distance between lines to consider corner or concatenation
 // double CaptureLaser2D::max_distance = 0.5;//max distance between line ends to consider corner or concatenation
 
-CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _sensor_ptr, const Eigen::VectorXs& _ranges):
+CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges):
 	CaptureBase(_ts, _sensor_ptr, _ranges),
 	ranges_(data_.data(), _ranges.size()),
 	intensities_(data_.data(), 0)
 {
-    laser_ptr_ = (const SensorLaser2DPtr)sensor_ptr_;
+    laser_ptr_ = (SensorLaser2D*)sensor_ptr_;
 }
 
-CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, const SensorLaser2DPtr & _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities):
+CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities):
 		CaptureBase(_ts, _sensor_ptr, _ranges),
 		ranges_(data_.data(), _ranges.size()),
 		intensities_(data_.data(), _intensities.size())
 {
-    laser_ptr_ = (const SensorLaser2DPtr)sensor_ptr_;
+    laser_ptr_ = (SensorLaser2D*)sensor_ptr_;
 }
 
 CaptureLaser2D::~CaptureLaser2D()
@@ -336,10 +336,7 @@ void CaptureLaser2D::createFeatures(std::list<Eigen::Vector4s> & _corner_list)
     
     //for each corner in the list create a feature
     for (auto corner_it = _corner_list.begin(); corner_it != _corner_list.end(); corner_it ++)
-    {
-        std::shared_ptr<FeatureCorner2D> ft_shptr( new FeatureCorner2D( (*corner_it), cov_mat ) );
-        this->addFeature( (FeatureBaseShPtr&)ft_shptr );
-    }
+        this->addFeature( (FeatureBase*)(new FeatureCorner2D( (*corner_it), cov_mat ) ) );
 }
 
 void CaptureLaser2D::establishConstraints()
@@ -368,7 +365,7 @@ void CaptureLaser2D::establishConstraints()
 		double max_theta_matching = 0.02; //TODO: max_theta_matching depending on localization and landmarks uncertainty
 
 		//Find the closest landmark to the feature
-		LandmarkCorner2DPtr correspondent_landmark = nullptr;
+		LandmarkCorner2D* correspondent_landmark = nullptr;
     	Eigen::Map<Eigen::Vector2s> feature_position((*feature_it)->getMeasurementPtr()->data());
     	Eigen::Map<Eigen::Vector1s> feature_orientation = ((*feature_it)->getMeasurementPtr()->data()+2);
 
@@ -391,20 +388,20 @@ void CaptureLaser2D::establishConstraints()
 //				std::cout << "Landmark found: " << (*landmark_it)->nodeId() << std::endl;
 //				std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
 
-				correspondent_landmark = static_cast<LandmarkCorner2DPtr>((*landmark_it).get());
+				correspondent_landmark = (LandmarkCorner2D*)(*landmark_it);
 				min_distance2 = distance2;
 			}
 		}
     	if (correspondent_landmark == nullptr)
     	{
 //    		std::cout << "No landmark found. Creating a new one..." << std::endl;
-    		StateBaseShPtr new_landmark_state_position(new StatePoint2D(getTop()->getNewStatePtr()));
+    		StateBase* new_landmark_state_position = new StatePoint2D(getTop()->getNewStatePtr());
     		getTop()->addState(new_landmark_state_position, feature_global_position);
-    		StateBaseShPtr new_landmark_state_orientation(new StateTheta(getTop()->getNewStatePtr()));
+    		StateBase* new_landmark_state_orientation = new StateTheta(getTop()->getNewStatePtr());
     		getTop()->addState(new_landmark_state_orientation, feature_global_orientation);
 
     		correspondent_landmark = new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation);
-    		LandmarkBaseShPtr corr_landmark(correspondent_landmark);
+    		LandmarkBase* corr_landmark(correspondent_landmark);
     		getTop()->getMapPtr()->addLandmark(corr_landmark);
 
 //    		std::cout << "Landmark created: " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl;
@@ -416,13 +413,18 @@ void CaptureLaser2D::establishConstraints()
     	//std::cout << "Creating new constraint: Landmark " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << " & feature " << (*feature_it)->nodeId() << std::endl;
 
     	// Add constraint to the correspondent landmark
-    	ConstraintBaseShPtr landmark_constraint(new ConstraintCorner2DTheta(feature_it->get(),
-    																		correspondent_landmark,
-																			getFramePtr()->getPPtr(),//_robotPPtr,
-																			getFramePtr()->getOPtr(),//_robotOPtr,
-																			correspondent_landmark->getPPtr(), //_landmarkPPtr,
-																			correspondent_landmark->getOPtr())); //_landmarkOPtr,
-    	(*feature_it)->addConstraint(landmark_constraint);
+//    	ConstraintBase* landmark_constraint(new ConstraintCorner2DTheta(&(*feature_it),
+//    																		correspondent_landmark,
+//																			getFramePtr()->getPPtr(),//_robotPPtr,
+//																			getFramePtr()->getOPtr(),//_robotOPtr,
+//																			correspondent_landmark->getPPtr(), //_landmarkPPtr,
+//																			correspondent_landmark->getOPtr())); //_landmarkOPtr,
+    	(*feature_it)->addConstraint(new ConstraintCorner2DTheta(*feature_it,
+																 correspondent_landmark,
+																 getFramePtr()->getPPtr(),//_robotPPtr,
+																 getFramePtr()->getOPtr(),//_robotOPtr,
+																 correspondent_landmark->getPPtr(), //_landmarkPPtr,
+																 correspondent_landmark->getOPtr())); //_landmarkOPtr,
 	}
 }
 

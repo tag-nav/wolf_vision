@@ -23,47 +23,30 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
     public:
         /** \brief Constructor from capture pointer and measure dim
          * 
-         * \param _capt_ptr a pointer to the Capture up node
          * \param _dim_measurement the dimension of the measurement space
          * 
          */
-        //FeatureBase(const CaptureBasePtr& _capt_ptr, unsigned int _dim_measurement);
         FeatureBase(unsigned int _dim_measurement);
 
         /** \brief Constructor from capture pointer and measure
          *
-         * \param _capt_ptr a pointer to the Capture up node
-         * \param _measurement the measurement
-         *
-         */
-        // measurement ha d'anar amb covariance, si cal, posem Identity com a default...
-        //FeatureBase(const CaptureBasePtr& _capt_ptr, const Eigen::VectorXs& _measurement);
-
-        /** \brief Constructor from capture pointer and measure
-         *
-         * \param _capt_ptr a shared pointer to the Capture up node
          * \param _measurement the measurement
          * \param _meas_covariance the noise of the measurement
          *
          */
-        //FeatureBase(const CaptureBasePtr& _capt_ptr, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
         FeatureBase(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
         virtual ~FeatureBase();
         
-        //void linkToCapture(const CaptureBaseShPtr& _capt_ptr); //JVN: inútil, el constructor ja crea el feature penjant d'una captura
-        
-        void addConstraint(ConstraintBaseShPtr& _co_ptr);
+        void addConstraint(ConstraintBase* _co_ptr);
 
-        const CaptureBasePtr getCapturePtr() const;
+        CaptureBase* getCapturePtr() const;
 
-        const FrameBasePtr getFramePtr() const;
-        
-//         const ConstraintBaseList & getConstraintList() const;
+        FrameBase* getFramePtr() const;
         
         ConstraintBaseList* getConstraintListPtr();
         
-        void getConstraintList(ConstraintBasePtrList & _ctr_list);
+        void getConstraintList(ConstraintBaseList & _ctr_list);
 
         Eigen::VectorXs * getMeasurementPtr();
         

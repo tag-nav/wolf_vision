@@ -1,7 +1,7 @@
 
 #include "frame_base.h"
 
-FrameBase::FrameBase(const TimeStamp& _ts, const StateBaseShPtr& _p_ptr, const StateBaseShPtr& _o_ptr, const StateBaseShPtr& _v_ptr, const StateBaseShPtr& _w_ptr) :
+FrameBase::FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
             //NodeLinked(MID, "FRAME", _traj_ptr),
             NodeLinked(MID, "FRAME"),
             type_(REGULAR_FRAME),
@@ -15,7 +15,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, const StateBaseShPtr& _p_ptr, const S
 	//
 }
 
-FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, const StateBaseShPtr& _p_ptr, const StateBaseShPtr& _o_ptr, const StateBaseShPtr& _v_ptr, const StateBaseShPtr& _w_ptr) :
+FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
             //NodeLinked(MID, "FRAME", _traj_ptr),
             NodeLinked(MID, "FRAME"),
             type_(_tp),
@@ -31,7 +31,17 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, const StateBas
                 
 FrameBase::~FrameBase()
 {
-    //
+	std::cout << "deleting FrameBase " << nodeId() << std::endl;
+
+	// Remove Frame State Units
+	if (p_ptr_ != nullptr)
+		getTop()->removeState(p_ptr_);
+	if (o_ptr_ != nullptr)
+		getTop()->removeState(o_ptr_);
+	if (v_ptr_ != nullptr)
+		getTop()->removeState(v_ptr_);
+	if (w_ptr_ != nullptr)
+		getTop()->removeState(w_ptr_);
 }
 
 bool FrameBase::isKey() const
@@ -83,32 +93,28 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
 	state_map = _st;
 }
 
-void FrameBase::addCapture(CaptureBaseShPtr & _capt_ptr)
+void FrameBase::addCapture(CaptureBase* _capt_ptr)
 {
     addDownNode(_capt_ptr);
 }
 
 void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
 {
+	std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
 	removeDownNode(_capt_iter);
 }
 
-inline const TrajectoryBasePtr FrameBase::getTrajectoryPtr() const
+TrajectoryBase* FrameBase::getTrajectoryPtr() const
 {
     return upperNodePtr();
 }
-
-// inline const CaptureBaseList & FrameBase::captureList() const
-// {
-//     return downNodeList();
-// }
 
 CaptureBaseList* FrameBase::getCaptureListPtr()
 {
     return getDownNodeListPtr();
 }
 
-void FrameBase::getConstraintList(ConstraintBasePtrList & _ctr_list)
+void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
 	for(auto c_it = getCaptureListPtr()->begin(); c_it != getCaptureListPtr()->end(); ++c_it)
 		(*c_it)->getConstraintList(_ctr_list);
@@ -116,42 +122,57 @@ void FrameBase::getConstraintList(ConstraintBasePtrList & _ctr_list)
 
 FrameBase* FrameBase::getPreviousFrame() const
 {
-    std::list<FrameBaseShPtr>::iterator f_it;
-    std::list<FrameBaseShPtr>* f_list_ptr = this->up_node_ptr_->getFrameListPtr();
+    //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
 
     //look for the position of this node in the upper list (frame list of trajectory)
-    for ( f_it = f_list_ptr->begin(); f_it != f_list_ptr->end(); ++f_it )
+    for (auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin(); f_it != getTrajectoryPtr()->getFrameListPtr()->rend(); f_it++ )
     {
-        if ( this->node_id_ == (f_it->get())->nodeId() ){
-        	f_it--;
-			return f_it->get();
+        if ( this->node_id_ == (*f_it)->nodeId() )
+        {
+        	f_it++;
+			return *f_it;
         }
     }
     std::cout << "previous frame not found!" << std::endl;
     return nullptr;
 }
 
-//inline const Eigen::Vector3s & FrameBase::state() const
-//{
-//    return state_;
-//}
+FrameBase* FrameBase::getNextFrame() const
+{
+    //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
+	auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin();
+	f_it++; //starting from second last frame
 
-StateBaseShPtr FrameBase::getPPtr() const
+    //look for the position of this node in the frame list of trajectory
+    while (f_it != getTrajectoryPtr()->getFrameListPtr()->rend())
+    {
+        if ( this->node_id_ == (*f_it)->nodeId())
+        {
+        	f_it--;
+			return *f_it;
+        }
+    	f_it++;
+    }
+    std::cout << "previous frame not found!" << std::endl;
+    return nullptr;
+}
+
+StateBase* FrameBase::getPPtr() const
 {
 	return p_ptr_;
 }
 
-StateBaseShPtr FrameBase::getOPtr() const
+StateBase* FrameBase::getOPtr() const
 {
 	return o_ptr_;
 }
 
-StateBaseShPtr FrameBase::getVPtr() const
+StateBase* FrameBase::getVPtr() const
 {
 	return v_ptr_;
 }
 
-StateBaseShPtr FrameBase::getWPtr() const
+StateBase* FrameBase::getWPtr() const
 {
 	return w_ptr_;
 }
@@ -162,28 +183,29 @@ void FrameBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const
     if (p_ptr_)
     {
     	printTabs(_ntabs);
-    	_ost << "\tPosition2 : \n";
+    	_ost << "\tPosition : \n";
+    	printTabs(_ntabs);
     	p_ptr_->print(_ntabs,_ost);
     }
     if (o_ptr_)
     {
     	printTabs(_ntabs);
 		_ost << "\tOrientation : \n";
+    	printTabs(_ntabs);
 		o_ptr_->print(_ntabs,_ost);
     }
     if (v_ptr_)
     {
     	printTabs(_ntabs);
     	_ost << "\tVelocity : \n";
+    	printTabs(_ntabs);
     	v_ptr_->print(_ntabs,_ost);
     }
     if (w_ptr_)
     {
     	printTabs(_ntabs);
     	_ost << "\tAngular velocity : \n";
+    	printTabs(_ntabs);
     	v_ptr_->print(_ntabs,_ost);
     }
 }
-
-
-

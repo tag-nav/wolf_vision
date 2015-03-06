@@ -5,21 +5,23 @@ WolfProblem::WolfProblem(unsigned int _size) :
 		state_(_size),
 		state_idx_last_(0),
         location_(TOP),
+		map_ptr_(new MapBase),
+		trajectory_ptr_(new TrajectoryBase),
         reallocated_(false)
 {
-	map_ptr_ = MapBaseShPtr(new MapBase);
-	trajectory_ptr_ = TrajectoryBaseShPtr(new TrajectoryBase);
+//	map_ptr_ = new MapBase;
+//	trajectory_ptr_ = new TrajectoryBase;
 	map_ptr_->linkToUpperNode( this );
 	trajectory_ptr_->linkToUpperNode( this );
 }
 
-WolfProblem::WolfProblem(const TrajectoryBaseShPtr _trajectory_ptr, const MapBaseShPtr _map_ptr, unsigned int _size) :
+WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, unsigned int _size) :
         NodeBase("WOLF_PROBLEM"), //
 		state_(_size),
 		state_idx_last_(0),
         location_(TOP),
-		map_ptr_(_map_ptr),
-		trajectory_ptr_(_trajectory_ptr),
+		map_ptr_(_map_ptr==nullptr ? new MapBase : _map_ptr),
+		trajectory_ptr_(_trajectory_ptr==nullptr ? new TrajectoryBase : _trajectory_ptr),
         reallocated_(false)
 {
 	map_ptr_->linkToUpperNode( this );
@@ -28,14 +30,16 @@ WolfProblem::WolfProblem(const TrajectoryBaseShPtr _trajectory_ptr, const MapBas
 
 WolfProblem::~WolfProblem()
 {
+	delete trajectory_ptr_;
+	delete map_ptr_;
 }
 
-bool WolfProblem::addState(const StateBaseShPtr _new_state, const Eigen::VectorXs& _new_state_values)
+bool WolfProblem::addState(StateBase* _new_state_ptr, const Eigen::VectorXs& _new_state_values)
 {
 	// Check if resize should be done
-	if (state_idx_last_+_new_state->getStateSize() > state_.size())
+	if (state_idx_last_+_new_state_ptr->getStateSize() > state_.size())
 	{
-		std::cout << "\nState size: " << state_.size() << " last idx: " << state_idx_last_ << " last idx + new state size: " << state_idx_last_+_new_state->getStateSize() << std::endl;
+		std::cout << "\nState size: " << state_.size() << " last idx: " << state_idx_last_ << " last idx + new state size: " << state_idx_last_+_new_state_ptr->getStateSize() << std::endl;
 		std::cout << "Resizing state and remapping al state units..." << std::endl;
 		WolfScalar* old_first_pointer = state_.data();
 		state_.resize(state_.size()*2);
@@ -48,17 +52,25 @@ bool WolfProblem::addState(const StateBaseShPtr _new_state, const Eigen::VectorX
 	//std::cout << "\nPrev state: " << state_.segment(0,state_idx_last_).transpose() << std::endl;
 
 	// copy the values of the new state
-	assert(_new_state_values.size() == _new_state->getStateSize() && "Different state unit and vector sizes");
-	state_.segment(state_idx_last_,_new_state->getStateSize()) = _new_state_values;
+	assert(_new_state_values.size() == _new_state_ptr->getStateSize() && "Different state unit and vector sizes");
+	state_.segment(state_idx_last_,_new_state_ptr->getStateSize()) = _new_state_values;
 
 	// add the state unit to the list
-	state_list_.push_back(_new_state);
+	state_list_.push_back(_new_state_ptr);
 
 	// update the last state index
-	state_idx_last_ += _new_state->getStateSize();
+	state_idx_last_ += _new_state_ptr->getStateSize();
 
 	//std::cout << "\nPost state: " << state_.segment(0,state_idx_last_).transpose() << std::endl;
 	return reallocated_;
+}
+
+void WolfProblem::removeState(StateBase* _state_ptr)
+{
+	// TODO: Reordering?
+	state_list_.remove(_state_ptr);
+	removed_state_ptr_list_.push_back(_state_ptr->getPtr());
+	delete _state_ptr;
 }
 
 WolfScalar* WolfProblem::getStatePtr()
@@ -76,31 +88,36 @@ const unsigned int WolfProblem::getStateSize() const
 	return state_idx_last_;
 }
 
-void WolfProblem::addMap(const MapBaseShPtr _map_ptr)
+void WolfProblem::addMap(MapBase* _map_ptr)
 {
 	map_ptr_ = _map_ptr;
 	map_ptr_->linkToUpperNode( this );
 }
 
-void WolfProblem::addTrajectory(const TrajectoryBaseShPtr _trajectory_ptr)
+void WolfProblem::addTrajectory(TrajectoryBase* _trajectory_ptr)
 {
 	trajectory_ptr_ = _trajectory_ptr;
 	trajectory_ptr_->linkToUpperNode( this );
 }
 
-MapBasePtr WolfProblem::getMapPtr()
+MapBase* WolfProblem::getMapPtr()
 {
-	return map_ptr_.get();
+	return map_ptr_;
 }
 
-TrajectoryBasePtr WolfProblem::getTrajectoryPtr()
+TrajectoryBase* WolfProblem::getTrajectoryPtr()
 {
-	return trajectory_ptr_.get();
+	return trajectory_ptr_;
 }
 
 StateBaseList* WolfProblem::getStateListPtr()
 {
 	return &state_list_;
+}
+
+std::list<WolfScalar*>* WolfProblem::getRemovedStateListPtr()
+{
+	return &removed_state_ptr_list_;
 }
 
 void WolfProblem::print(unsigned int _ntabs, std::ostream& _ost) const
@@ -146,5 +163,4 @@ void WolfProblem::printLower(unsigned int _ntabs, std::ostream& _ost) const
     _ntabs++;
 	map_ptr_->print(_ntabs, _ost);
 	trajectory_ptr_->print(_ntabs, _ost);
-
 }

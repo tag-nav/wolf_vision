@@ -22,18 +22,18 @@ class CaptureBase : public NodeLinked<FrameBase,FeatureBase>
 {
     protected:
         TimeStamp time_stamp_; ///< Time stamp
-        SensorBasePtr sensor_ptr_; ///< Pointer to sensor
+        SensorBase* sensor_ptr_; ///< Pointer to sensor
         Eigen::VectorXs data_; ///< raw data
         Eigen::MatrixXs data_covariance_; ///< Noise of the capture
         Eigen::Vector3s sensor_pose_global_; ///< Sensor pose in world frame: composition of the frame pose and the sensor pose. TODO: use state units
         Eigen::Vector3s inverse_sensor_pose_; ///< World pose in the sensor frame: inverse of the global_pose_. TODO: use state units
         
     public:
-        CaptureBase(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr);//TODO: to be removed ??
+        CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr);//TODO: to be removed ??
         
-        CaptureBase(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr, const Eigen::VectorXs& _data);
+        CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
 
-        CaptureBase(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
+        CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
 
         virtual ~CaptureBase();
         
@@ -42,21 +42,21 @@ class CaptureBase : public NodeLinked<FrameBase,FeatureBase>
          * Set link to Frame
          *
          **/
-        void linkToFrame(const FrameBaseShPtr& _frm_ptr);
+        void linkToFrame(FrameBase* _frm_ptr);
         
         /** \brief Adds a Feature to the down node list
          * 
          * Adds a Feature to the down node list
          *
          **/                        
-        void addFeature(FeatureBaseShPtr & _ft_ptr);        
+        void addFeature(FeatureBase* _ft_ptr);
 
         /** \brief Gets up_node_ptr_
          * 
          * Gets up_node_ptr_, which is a pointer to the Frame owning of this Capture
          *
          **/                
-        const FrameBasePtr getFramePtr() const;
+        FrameBase* getFramePtr() const;
         
         /** \brief Gets a pointer to feature list
          * 
@@ -68,14 +68,13 @@ class CaptureBase : public NodeLinked<FrameBase,FeatureBase>
         /** \brief Fills the provided list with all constraints related to this capture
          *
          * Fills the provided list with all constraints related to this capture
-         * 
          *
          **/
-        void getConstraintList(ConstraintBasePtrList & _ctr_list);//TODO: Should be const
+        void getConstraintList(ConstraintBaseList & _ctr_list);
 
         TimeStamp getTimeStamp() const;
 
-        SensorBasePtr getSensorPtr() const;
+        SensorBase* getSensorPtr() const;
         
         SensorType getSensorType() const;
         

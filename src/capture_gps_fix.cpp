@@ -1,18 +1,18 @@
 #include "capture_gps_fix.h"
 
-CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr) :
+CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
     CaptureBase(_ts, _sensor_ptr)
 {
     //
 }
 
-CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr, const Eigen::VectorXs& _data) :
+CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
 	CaptureBase(_ts, _sensor_ptr, _data)
 {
 	//
 }
 
-CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
+CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
 	CaptureBase(_ts, _sensor_ptr, _data, _data_covariance)
 {
 	//
@@ -26,14 +26,12 @@ CaptureGPSFix::~CaptureGPSFix()
 void CaptureGPSFix::processCapture()
 {
 	// EXTRACT AND ADD FEATURES
-//     FeatureBaseShPtr new_feature = FeatureBaseShPtr(new FeatureGPSFix(CaptureBasePtr(this),data_,data_covariance_));
-    FeatureBaseShPtr new_feature = FeatureBaseShPtr(new FeatureGPSFix(data_,data_covariance_));
-    addFeature(new_feature);
+//    FeatureBase* new_feature = new FeatureGPSFix(data_,data_covariance_);
+    addFeature(new FeatureGPSFix(data_,data_covariance_));
 
     // ADD CONSTRAINT
-    ConstraintBaseShPtr gps_constraint(new ConstraintGPS2D(getFeatureListPtr()->front().get(), getFramePtr()->getPPtr()));
-	//ConstraintBaseShPtr gps_constraint(new ConstraintGPS2D(getFramePtr()->getPPtr()));
-	getFeatureListPtr()->front()->addConstraint(gps_constraint);
+//    ConstraintBase* gps_constraint = new ConstraintGPS2D(getFeatureListPtr()->front(), getFramePtr()->getPPtr());
+	getFeatureListPtr()->front()->addConstraint(new ConstraintGPS2D(getFeatureListPtr()->front(), getFramePtr()->getPPtr()));
 }
 
 Eigen::VectorXs CaptureGPSFix::computePrior() const

@@ -25,11 +25,11 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
 		LandmarkType type_; //type of landmark. (types defined at wolf.h)
 		LandmarkStatus status_; //status of the landmark. (types defined at wolf.h)
 		unsigned int hit_count_; //counts how many features has been associated to this landmark
-		//StateBasePtrList st_list_; //List of pointers to the state corresponding to the landmark estimation
-		StateBaseShPtr p_ptr_; // Position state unit pointer
-		StateBaseShPtr o_ptr_; // Orientation state unit pointer
-		StateBaseShPtr v_ptr_; // Velocity state unit pointer
-		StateBaseShPtr w_ptr_; // Angular velocity state unit pointer
+		//StateBaseList st_list_; //List of pointers to the state corresponding to the landmark estimation
+		StateBase* p_ptr_; // Position state unit pointer
+		StateBase* o_ptr_; // Orientation state unit pointer
+		StateBase* v_ptr_; // Velocity state unit pointer
+		StateBase* w_ptr_; // Angular velocity state unit pointer
 		//TODO: accelerations?
 		Eigen::VectorXs descriptor_;//TODO: agree?
         
@@ -44,7 +44,7 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
          * \param _w_ptr StateBase pointer to the angular velocity (default: nullptr)
          *
          **/
-        LandmarkBase(const LandmarkType & _tp, const StateBaseShPtr& _p_ptr, const StateBaseShPtr& _o_ptr = {}, const StateBaseShPtr& _v_ptr = {}, const StateBaseShPtr& _w_ptr = {});
+        LandmarkBase(const LandmarkType & _tp, StateBase* _p_ptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
 
         /** \brief Constructor with type, time stamp and state list
          * 
@@ -53,7 +53,7 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
          * \param _stp_list StateBase list of the landmark estimation
          * 
          **/        
-        //LandmarkBase(const LandmarkType & _tp, const StateBasePtrList& _stp_list);
+        //LandmarkBase(const LandmarkType & _tp, const StateBaseList& _stp_list);
         
         /** \brief Destructor
          * 
@@ -70,20 +70,20 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
 
         unsigned int getHits() const;
 
-        StateBaseShPtr getPPtr() const;
+        StateBase* getPPtr() const;
 
-		StateBaseShPtr getOPtr() const;
+		StateBase* getOPtr() const;
 
-		StateBaseShPtr getVPtr() const;
+		StateBase* getVPtr() const;
 
-		StateBaseShPtr getWPtr() const;
+		StateBase* getWPtr() const;
 
 		void setDescriptor(const Eigen::VectorXs& _descriptor);
 
 		const Eigen::VectorXs getDescriptor() const;
 
-        //const StateBasePtr getStatePtr() const;
+        //const StateBase* getStatePtr() const;
 
-        //const StateBasePtrList* getStateListPtr() const;
+        //const StateBaseList* getStateListPtr() const;
 };
 #endif

@@ -1,18 +1,18 @@
 #include "capture_odom_2D.h"
 
-CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr) :
+CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
     CaptureRelative(_ts, _sensor_ptr)
 {
     //
 }
 
-CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr, const Eigen::VectorXs& _data) :
+CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
 	CaptureRelative(_ts, _sensor_ptr, _data)
 {
 	//
 }
 
-CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, const SensorBasePtr& _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
+CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
 	CaptureRelative(_ts, _sensor_ptr, _data, _data_covariance)
 {
 	//
@@ -26,9 +26,7 @@ CaptureOdom2D::~CaptureOdom2D()
 inline void CaptureOdom2D::processCapture()
 {
 	// ADD FEATURE
-    //FeatureBaseShPtr new_feature(new FeatureOdom2D(CaptureBasePtr(this),data_,data_covariance_));
-    FeatureBaseShPtr new_feature(new FeatureOdom2D(data_,data_covariance_));
-    addFeature(new_feature);
+    addFeature(new FeatureOdom2D(data_,data_covariance_));
 
     // ADD CONSTRAINT
     addConstraints();
@@ -38,66 +36,56 @@ Eigen::VectorXs CaptureOdom2D::computePrior() const
 {
 	assert(up_node_ptr_ != nullptr && "This Capture is not linked to any frame");
 
-	FrameBasePtr _previous_frame = getFramePtr()->getPreviousFrame();
-
-	if (_previous_frame->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
+	if (getFramePtr()->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
 	{
-		Eigen::VectorXs pose_predicted(4);
-		Eigen::Map<Eigen::VectorXs> previous_pose(_previous_frame->getPPtr()->getPtr(), 4);
+		Eigen::VectorXs prior(4);
+		Eigen::Map<Eigen::VectorXs> initial_pose(getFramePtr()->getPPtr()->getPtr(), 4);
 
-		double new_pose_predicted_2 = previous_pose(2) * cos(data_(1)) - previous_pose(3) * sin(data_(1));
-		double new_pose_predicted_3 = previous_pose(2) * sin(data_(1)) + previous_pose(3) * cos(data_(1));
-		pose_predicted(0) = previous_pose(0) + data_(0) * new_pose_predicted_2;
-		pose_predicted(1) = previous_pose(1) + data_(0) * new_pose_predicted_3;
-		pose_predicted(2) = new_pose_predicted_2;
-		pose_predicted(3) = new_pose_predicted_3;
+		double prior_2 = initial_pose(2) * cos(data_(1)) - initial_pose(3) * sin(data_(1));
+		double prior_3 = initial_pose(2) * sin(data_(1)) + initial_pose(3) * cos(data_(1));
+		prior(0) = initial_pose(0) + data_(0) * prior_2;
+		prior(1) = initial_pose(1) + data_(0) * prior_3;
+		prior(2) = prior_2;
+		prior(3) = prior_3;
 
-		return pose_predicted;
+		return prior;
 	}
 	else
 	{
-		Eigen::VectorXs pose_predicted(3);
-		Eigen::Map<Eigen::VectorXs> previous_pose(_previous_frame->getPPtr()->getPtr(), 3);
+		Eigen::VectorXs prior(3);
+		Eigen::Map<Eigen::VectorXs> initial_pose(getFramePtr()->getPPtr()->getPtr(), 3);
 
-		pose_predicted(0) = previous_pose(0) + data_(0) * cos(previous_pose(2) + (data_(1)));
-		pose_predicted(1) = previous_pose(1) + data_(0) * sin(previous_pose(2) + (data_(1)));
-		pose_predicted(2) = previous_pose(2) + data_(1);
+		prior(0) = initial_pose(0) + data_(0) * cos(initial_pose(2) + (data_(1)));
+		prior(1) = initial_pose(1) + data_(0) * sin(initial_pose(2) + (data_(1)));
+		prior(2) = initial_pose(2) + data_(1);
 
-		return pose_predicted;
+		return prior;
 	}
 }
 
 void CaptureOdom2D::addConstraints()
 {
+	assert(getFramePtr()->getNextFrame() != nullptr && "Trying to add odometry constraint in the last frame (there is no next frame)");
+
 	if (getFramePtr()->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
 	{
-		ConstraintBaseShPtr odom_constraint(new ConstraintOdom2DComplexAngle(getFeatureListPtr()->front().get(),
-																			 getFramePtr()->getPreviousFrame()->getPPtr(),
-																			 getFramePtr()->getPreviousFrame()->getOPtr(),
-																			 getFramePtr()->getPPtr(),
-																			 getFramePtr()->getOPtr()));
-//         ConstraintBaseShPtr odom_constraint(new ConstraintOdom2DComplexAngle(getFramePtr()->getPreviousFrame()->getPPtr(),
-//                                                                              getFramePtr()->getPreviousFrame()->getOPtr(),
-//                                                                              getFramePtr()->getPPtr(),
-//                                                                              getFramePtr()->getOPtr()));
-		getFeatureListPtr()->front()->addConstraint(odom_constraint);
+		getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2DComplexAngle(getFeatureListPtr()->front(),
+																					 getFramePtr()->getPPtr(),
+																					 getFramePtr()->getOPtr(),
+																					 getFramePtr()->getNextFrame()->getPPtr(),
+																					 getFramePtr()->getNextFrame()->getOPtr()));
 	}
 	else
 	{
-		ConstraintBaseShPtr odom_constraint(new ConstraintOdom2DTheta(getFeatureListPtr()->front().get(),
-																	  getFramePtr()->getPreviousFrame()->getPPtr(),
-																	  getFramePtr()->getPreviousFrame()->getOPtr(),
-																	  getFramePtr()->getPPtr(),
-																	  getFramePtr()->getOPtr()));
-//         ConstraintBaseShPtr odom_constraint(new ConstraintOdom2DTheta(getFramePtr()->getPreviousFrame()->getPPtr(),
-//                                                                       getFramePtr()->getPreviousFrame()->getOPtr(),
-//                                                                       getFramePtr()->getPPtr(),
-//                                                                       getFramePtr()->getOPtr()));
-		getFeatureListPtr()->front()->addConstraint(odom_constraint);
+		getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2DTheta(getFeatureListPtr()->front(),
+																			  getFramePtr()->getPPtr(),
+																			  getFramePtr()->getOPtr(),
+																			  getFramePtr()->getNextFrame()->getPPtr(),
+																			  getFramePtr()->getNextFrame()->getOPtr()));
 	}
 }
 
-void CaptureOdom2D::integrateCapture(const CaptureRelativePtr _new_capture)
+void CaptureOdom2D::integrateCapture(CaptureRelative* _new_capture)
 {
 	//std::cout << "Trying to integrate CaptureOdom2D" << std::endl;
 	assert(dynamic_cast<CaptureOdom2D*>(_new_capture) && "Trying to integrate with a CaptureOdom2D a CaptureRelativePtr which is not CaptureOdom2D");
