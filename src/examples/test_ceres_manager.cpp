@@ -36,11 +36,6 @@
 
 using namespace Eigen;
 
-class CaptureXBase;
-class ConstraintXBase;
-typedef std::shared_ptr<ConstraintXBase> ConstraintXShPtr;
-typedef std::shared_ptr<CaptureXBase> CaptureXShPtr;
-
 class ConstraintXBase
 {
 	protected:
@@ -158,7 +153,7 @@ class ConstraintGPS2D : public ConstraintSparse<2,2>
 		{
 		}
 
-		ConstraintGPS2D(WolfScalar* _measurementPtr, const StateBaseShPtr& _statePtr) :
+		ConstraintGPS2D(WolfScalar* _measurementPtr, StateBase* _statePtr) :
 			ConstraintSparse<2,2>(_measurementPtr, _statePtr->getPtr())
 		{
 		}
@@ -197,7 +192,7 @@ class Constraint2DOdometry : public ConstraintSparse<2,2,2,2,2>
 		{
 		}
 
-		Constraint2DOdometry(WolfScalar* _measurementPtr, const StateBaseShPtr& _state0Ptr, const StateBaseShPtr& _state1Ptr, const StateBaseShPtr& _state2Ptr, const StateBaseShPtr& _state3Ptr) :
+		Constraint2DOdometry(WolfScalar* _measurementPtr, StateBase* _state0Ptr, StateBase* _state1Ptr, StateBase* _state2Ptr, StateBase* _state3Ptr) :
 			ConstraintSparse<2,2,2,2,2>(_measurementPtr, _state0Ptr->getPtr(), _state1Ptr->getPtr(),_state2Ptr->getPtr(), _state3Ptr->getPtr())
 		{
 		}
@@ -243,7 +238,7 @@ class Constraint2DOdometryTheta : public ConstraintSparse<2,2,1,2,1>
 		{
 		}
 
-		Constraint2DOdometryTheta(WolfScalar* _measurementPtr, const StateBaseShPtr& _state0Ptr, const StateBaseShPtr& _state1Ptr, const StateBaseShPtr& _state2Ptr, const StateBaseShPtr& _state3Ptr) :
+		Constraint2DOdometryTheta(WolfScalar* _measurementPtr, StateBase* _state0Ptr, StateBase* _state1Ptr, StateBase* _state2Ptr, StateBase* _state3Ptr) :
 			ConstraintSparse<2,2,1,2,1>(_measurementPtr, _state0Ptr->getPtr(), _state1Ptr->getPtr(),_state2Ptr->getPtr(), _state3Ptr->getPtr())
 		{
 		}
@@ -277,9 +272,9 @@ class CaptureXBase
 	public:
 		VectorXs capture;
 		TimeStamp time_stamp;
-		SensorBaseShPtr sensor_ptr_; ///< Pointer to sensor
+		SensorBase* sensor_ptr_; ///< Pointer to sensor
 
-		CaptureXBase(const VectorXs& _capture, const WolfScalar& _time_stamp, const SensorBaseShPtr& _sensor_ptr) :
+		CaptureXBase(const VectorXs& _capture, const WolfScalar& _time_stamp, SensorBase* _sensor_ptr) :
 			capture(_capture),
 			time_stamp(_time_stamp),
 			sensor_ptr_(_sensor_ptr)
@@ -307,12 +302,12 @@ class WolfManager
 		VectorXs state_;
 		unsigned int first_empty_state_;
 		bool use_complex_angles_;
-		std::vector<FrameBaseShPtr> frames_;
-        std::vector<ConstraintXShPtr> constraints_;
+		std::vector<FrameBase*> frames_;
+        std::vector<ConstraintXBase*> constraints_;
         std::vector<VectorXs> odom_captures_;
         std::vector<VectorXs> gps_captures_;
-        std::queue<CaptureXShPtr> new_captures_;
-        std::vector<CaptureXShPtr> captures_;
+        std::queue<CaptureXBase*> new_captures_;
+        std::vector<CaptureXBase*> captures_;
 
     public: 
         WolfManager(const unsigned int& _state_length=1000, const bool _complex_angle=false) :
@@ -361,29 +356,29 @@ class WolfManager
 // 				frames_.push_back(FrameBaseShPtr(new FrameBase(nullptr, _time_stamp,
 // 															   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
 // 															   StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2)))));
-                frames_.push_back(FrameBaseShPtr(new FrameBase(_time_stamp,
-                                                StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-                                                StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2)))));
+                frames_.push_back(new FrameBase(_time_stamp,
+                                                new StatePoint2D(state_.data()+first_empty_state_),
+                                                new StateComplexAngle(state_.data()+first_empty_state_+2)));
 
         	else
 // 				frames_.push_back(FrameBaseShPtr(new FrameBase(nullptr, _time_stamp,
 // 						   	   	   	   	   	   	   	   	   	   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
 // 															   StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2)))));
-                frames_.push_back(FrameBaseShPtr(new FrameBase(_time_stamp,
-                                                               StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-                                                               StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2)))));                
+                frames_.push_back(new FrameBase(_time_stamp,
+                                                new StatePoint2D(state_.data()+first_empty_state_),
+                                                new StateTheta(state_.data()+first_empty_state_+2)));
         	// Update first free state location index
         	first_empty_state_ += use_complex_angles_ ? 4 : 3;
         }
 
-        void addCapture(const VectorXs& _odom_capture, const WolfScalar& _time_stamp, const SensorBaseShPtr& _sensor_ptr)
+        void addCapture(const VectorXs& _odom_capture, const WolfScalar& _time_stamp, SensorBase* _sensor_ptr)
         {
-        	new_captures_.push(CaptureXShPtr(new CaptureXBase(_odom_capture, _time_stamp, _sensor_ptr)));
+        	new_captures_.push(new CaptureXBase(_odom_capture, _time_stamp, _sensor_ptr));
         }
 
-        void computeOdomCapture(const CaptureXShPtr& _odom_capture)
+        void computeOdomCapture(CaptureXBase* _odom_capture)
 		{
-        	FrameBaseShPtr prev_frame_ptr = frames_.back();
+        	FrameBase* prev_frame_ptr = frames_.back();
 
         	// STORE CAPTURE
         	captures_.push_back(_odom_capture);
@@ -413,30 +408,30 @@ class WolfManager
 
 			// CORRESPONDENCE ODOMETRY
 			if (use_complex_angles_)
-				constraints_.push_back(ConstraintXShPtr(new Constraint2DOdometry(_odom_capture->getPtr(),
-																						   prev_frame_ptr->getPPtr()->getPtr(),
-																						   prev_frame_ptr->getOPtr()->getPtr(),
-																						   frames_.back()->getPPtr()->getPtr(),
-																						   frames_.back()->getOPtr()->getPtr())));
+				constraints_.push_back(new Constraint2DOdometry(_odom_capture->getPtr(),
+															   prev_frame_ptr->getPPtr()->getPtr(),
+															   prev_frame_ptr->getOPtr()->getPtr(),
+															   frames_.back()->getPPtr()->getPtr(),
+															   frames_.back()->getOPtr()->getPtr()));
 
 			else
-				constraints_.push_back(ConstraintXShPtr(new Constraint2DOdometryTheta(_odom_capture->getPtr(),
-																						   	    prev_frame_ptr->getPPtr()->getPtr(),
-																								prev_frame_ptr->getOPtr()->getPtr(),
-																								frames_.back()->getPPtr()->getPtr(),
-																								frames_.back()->getOPtr()->getPtr())));
+				constraints_.push_back(new Constraint2DOdometryTheta(_odom_capture->getPtr(),
+																	prev_frame_ptr->getPPtr()->getPtr(),
+																	prev_frame_ptr->getOPtr()->getPtr(),
+																	frames_.back()->getPPtr()->getPtr(),
+																	frames_.back()->getOPtr()->getPtr()));
 		}
 
-        void computeGPSCapture(const CaptureXShPtr& _gps_capture)
+        void computeGPSCapture(CaptureXBase* _gps_capture)
 		{
 			// STORE CAPTURE
         	captures_.push_back(_gps_capture);
 
 			// CORRESPONDENCE GPS
-			constraints_.push_back(ConstraintXShPtr(new ConstraintGPS2D(_gps_capture->getPtr(), frames_.back()->getPPtr()->getPtr())));
+			constraints_.push_back(new ConstraintGPS2D(_gps_capture->getPtr(), frames_.back()->getPPtr()->getPtr()));
 		}
 
-        void update(std::queue<StateBaseShPtr>& new_state_units, std::queue<ConstraintXShPtr>& new_constraints)
+        void update(std::queue<StateBase*>& new_state_units, std::queue<ConstraintXBase*>& new_constraints)
         {
         	while (!new_captures_.empty())
         	{
@@ -464,14 +459,14 @@ class WolfManager
         	return state_;
         }
 
-        ConstraintXShPtr getConstraintPrt(unsigned int i)
+        ConstraintXBase* getConstraintPrt(unsigned int i)
         {
         	return constraints_.at(i);
         }
 
-        std::queue<StateBaseShPtr> getStateUnitsPtrs(unsigned int i)
+        std::queue<StateBase*> getStateUnitsPtrs(unsigned int i)
 		{
-			return std::queue<StateBaseShPtr>({frames_.at(i)->getPPtr(),frames_.at(i)->getOPtr()});
+			return std::queue<StateBase*>({frames_.at(i)->getPPtr(),frames_.at(i)->getOPtr()});
 		}
 };
 
@@ -479,7 +474,7 @@ class CeresManager
 {
 	protected:
 
-		std::vector<std::pair<ceres::ResidualBlockId, ConstraintXShPtr>> constraint_list_;
+		std::vector<std::pair<ceres::ResidualBlockId, ConstraintXBase*>> constraint_list_;
 		ceres::Problem* ceres_problem_;
 
 	public:
@@ -513,7 +508,7 @@ class CeresManager
 			return ceres_summary_;
 		}
 
-		void addConstraints(std::queue<ConstraintXShPtr>& _new_constraints)
+		void addConstraints(std::queue<ConstraintXBase*>& _new_constraints)
 		{
 			//std::cout << _new_constraints.size() << " new constraints\n";
 			while (!_new_constraints.empty())
@@ -533,13 +528,13 @@ class CeresManager
 			std::cout << ceres_problem_->NumResidualBlocks() << " residual blocks \n";
 		}
 
-		void addConstraint(const ConstraintXShPtr& _corr_ptr)
+		void addConstraint(ConstraintXBase* _corr_ptr)
 		{
 			ceres::ResidualBlockId blockIdx = ceres_problem_->AddResidualBlock(createCostFunction(_corr_ptr), NULL, _corr_ptr->getBlockPtrVector());
-			constraint_list_.push_back(std::pair<ceres::ResidualBlockId, ConstraintXShPtr>(blockIdx,_corr_ptr));
+			constraint_list_.push_back(std::pair<ceres::ResidualBlockId, ConstraintXBase*>(blockIdx,_corr_ptr));
 		}
 
-		void addStateUnits(std::queue<StateBaseShPtr>& _new_state_units)
+		void addStateUnits(std::queue<StateBase*>& _new_state_units)
 		{
 			while (!_new_state_units.empty())
 			{
@@ -553,7 +548,7 @@ class CeresManager
 			ceres_problem_->RemoveParameterBlock(_st_ptr);
 		}
 
-		void addStateUnit(const StateBaseShPtr& _st_ptr)
+		void addStateUnit(StateBase* _st_ptr)
 		{
 			//std::cout << "Adding a State Unit to wolf_problem... " << std::endl;
 			//_st_ptr->print();
@@ -564,7 +559,7 @@ class CeresManager
 				{
 					//std::cout << "Adding Complex angle Local Parametrization to the List... " << std::endl;
 					//ceres_problem_->SetParameterization(_st_ptr->getPtr(), new ComplexAngleParameterization);
-					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateComplexAngle*)_st_ptr.get())->BLOCK_SIZE, new ComplexAngleParameterization);
+					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateComplexAngle*)_st_ptr)->BLOCK_SIZE, new ComplexAngleParameterization);
 					break;
 				}
 //				case PARAM_QUATERNION:
@@ -577,19 +572,19 @@ class CeresManager
 				case ST_POINT_1D: //equivalent case ST_THETA:
 				{
 					//std::cout << "No Local Parametrization to be added" << std::endl;
-					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint1D*)_st_ptr.get())->BLOCK_SIZE, nullptr);
+					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint1D*)_st_ptr)->BLOCK_SIZE, nullptr);
 					break;
 				}
 				case ST_POINT_2D:
 				{
 					//std::cout << "No Local Parametrization to be added" << std::endl;
-					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint2D*)_st_ptr.get())->BLOCK_SIZE, nullptr);
+					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint2D*)_st_ptr)->BLOCK_SIZE, nullptr);
 					break;
 				}
 				case ST_POINT_3D:
 				{
 					//std::cout << "No Local Parametrization to be added" << std::endl;
-					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint3D*)_st_ptr.get())->BLOCK_SIZE, nullptr);
+					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint3D*)_st_ptr)->BLOCK_SIZE, nullptr);
 					break;
 				}
 				default:
@@ -597,13 +592,13 @@ class CeresManager
 			}
 		}
 
-		ceres::CostFunction* createCostFunction(const ConstraintXShPtr& _corrPtr)
+		ceres::CostFunction* createCostFunction(ConstraintXBase* _corrPtr)
 		{
 			switch (_corrPtr->getType())
 			{
 				case CTR_GPS_FIX_2D:
 				{
-					ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr.get());
+					ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
 					return new ceres::AutoDiffCostFunction<ConstraintGPS2D,
 															specific_ptr->measurementSize,
 															specific_ptr->block0Size,
@@ -620,7 +615,7 @@ class CeresManager
 				}
 				case CTR_ODOM_2D_COMPLEX_ANGLE:
 				{
-					Constraint2DOdometry* specific_ptr = (Constraint2DOdometry*)(_corrPtr.get());
+					Constraint2DOdometry* specific_ptr = (Constraint2DOdometry*)(_corrPtr);
 					return new ceres::AutoDiffCostFunction<Constraint2DOdometry,
 															specific_ptr->measurementSize,
 															specific_ptr->block0Size,
@@ -637,7 +632,7 @@ class CeresManager
 				}
 				case CTR_ODOM_2D_THETA:
 				{
-					Constraint2DOdometryTheta* specific_ptr = (Constraint2DOdometryTheta*)(_corrPtr.get());
+					Constraint2DOdometryTheta* specific_ptr = (Constraint2DOdometryTheta*)(_corrPtr);
 					return new ceres::AutoDiffCostFunction<Constraint2DOdometryTheta,
 															specific_ptr->measurementSize,
 															specific_ptr->block0Size,
@@ -712,10 +707,10 @@ int main(int argc, char** argv)
 	Eigen::VectorXs odom_trajectory(n_execution*3); //all true poses
 	Eigen::VectorXs odom_readings(n_execution*2); // all odometry readings
 	Eigen::VectorXs gps_fix_readings(n_execution*3); //all GPS fix readings
-	std::queue<StateBaseShPtr> new_state_units; // new state units in wolf that must be added to ceres
-	std::queue<ConstraintXShPtr> new_constraints; // new constraints in wolf that must be added to ceres
-	SensorBaseShPtr odom_sensor = SensorBaseShPtr(new SensorBase(ODOM_2D, Eigen::MatrixXs::Zero(3,1),0));
-	SensorBaseShPtr gps_sensor = SensorBaseShPtr(new SensorBase(GPS_FIX, Eigen::MatrixXs::Zero(3,1),0));
+	std::queue<StateBase*> new_state_units; // new state units in wolf that must be added to ceres
+	std::queue<ConstraintXBase*> new_constraints; // new constraints in wolf that must be added to ceres
+	SensorBase* odom_sensor = new SensorBase(ODOM_2D, Eigen::MatrixXs::Zero(3,1),0);
+	SensorBase* gps_sensor = new SensorBase(GPS_FIX, Eigen::MatrixXs::Zero(3,1),0);
 
 	// Initial pose
 	pose_true << 0,0,0;

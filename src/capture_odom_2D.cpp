@@ -91,6 +91,7 @@ void CaptureOdom2D::integrateCapture(CaptureRelative* _new_capture)
 	assert(dynamic_cast<CaptureOdom2D*>(_new_capture) && "Trying to integrate with a CaptureOdom2D a CaptureRelativePtr which is not CaptureOdom2D");
 	data_(0) += _new_capture->getData()(0);
 	data_(1) += _new_capture->getData()(1);
+	data_covariance_ += _new_capture->getDataCovariance();
 	//std::cout << "integrated!" << std::endl;
 }
 

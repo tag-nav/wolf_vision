@@ -49,9 +49,41 @@ void LandmarkBase::hit()
     hit_count_ ++;
 }
 
-void LandmarkBase::unHit()
+void LandmarkBase::unhit()
 {
     hit_count_ --;
+}
+
+void LandmarkBase::fix()
+{
+	//std::cout << "Fixing frame " << nodeId() << std::endl;
+	status_ = LANDMARK_FIXED;
+
+	// Frame State Units
+	if (p_ptr_!=nullptr)
+		p_ptr_->setStateStatus(ST_FIXED);
+	if (o_ptr_!=nullptr)
+		o_ptr_->setStateStatus(ST_FIXED);
+	if (v_ptr_!=nullptr)
+		v_ptr_->setStateStatus(ST_FIXED);
+	if (w_ptr_!=nullptr)
+		w_ptr_->setStateStatus(ST_FIXED);
+}
+
+void LandmarkBase::unfix()
+{
+	//std::cout << "Unfixing frame " << nodeId() << std::endl;
+	status_ = LANDMARK_ESTIMATED;
+
+	// Frame State Units
+	if (p_ptr_!=nullptr)
+		p_ptr_->setStateStatus(ST_ESTIMATED);
+	if (o_ptr_!=nullptr)
+		o_ptr_->setStateStatus(ST_ESTIMATED);
+	if (v_ptr_!=nullptr)
+		v_ptr_->setStateStatus(ST_ESTIMATED);
+	if (w_ptr_!=nullptr)
+		w_ptr_->setStateStatus(ST_ESTIMATED);
 }
 
 unsigned int LandmarkBase::getHits() const

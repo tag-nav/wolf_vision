@@ -183,10 +183,10 @@ typedef enum
 typedef enum
 {
     LANDMARK_CANDIDATE,     ///< A landmark, just created. Association with it allowed, but not yet stablish an actual constraint for the solver
-    LANDMARK_IN_ESTIMATION, ///< A landmark being estimated. Association with it allowed, stablishing actual constraints for the solver where both vehicle and landmar states are being estimated
-    LANDMARK_ESTIMATED,     ///< A landmark estimated. Association with it allowed, stablishing actual constraints for the solver, but its value remains static, no longer optimized
+    LANDMARK_ESTIMATED, 	///< A landmark being estimated. Association with it allowed, stablishing actual constraints for the solver where both vehicle and landmark states are being estimated
+    LANDMARK_FIXED,     	///< A landmark estimated. Association with it allowed, stablishing actual constraints for the solver, but its value remains static, no longer optimized
     LANDMARK_OUT_OF_VIEW,   ///< A landmark out of the field of view. Association with it is not allowed, so does not pose constraints for the solver
-    LANDMARK_OLD            ///< An old landmark. Just kept for visualization or statistical analysis. Association with it not allowed, so does not pose constraints for the solver.
+    LANDMARK_OLD            ///< An old landmark. Association with it not allowed, but old constraints can still be taken into account by the solver.
 } LandmarkStatus;
 
 /** \brief Pending status of a node

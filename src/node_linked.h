@@ -352,10 +352,7 @@ inline void NodeLinked<UpperType, LowerType>::removeDownNode(const LowerNodeIter
 template<class UpperType, class LowerType>
 WolfProblem* NodeLinked<UpperType, LowerType>::getTop()
 {
-//    if (location_ == TOP)
-//        return this;
-//    else
-        return up_node_ptr_->getTop();
+	return up_node_ptr_->getTop();
 }
 
 //template<class UpperType, class LowerType>

@@ -84,6 +84,8 @@ class CaptureBase : public NodeLinked<FrameBase,FeatureBase>
 
         Eigen::VectorXs getData();
 
+        Eigen::MatrixXs getDataCovariance();
+
         void setData(unsigned int _size, const WolfScalar *_data);
         
         void setData(const Eigen::VectorXs& _data);

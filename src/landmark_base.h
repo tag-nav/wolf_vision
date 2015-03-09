@@ -25,6 +25,7 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
 		LandmarkType type_; //type of landmark. (types defined at wolf.h)
 		LandmarkStatus status_; //status of the landmark. (types defined at wolf.h)
 		unsigned int hit_count_; //counts how many features has been associated to this landmark
+		TimeStamp stamp_; // stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
 		//StateBaseList st_list_; //List of pointers to the state corresponding to the landmark estimation
 		StateBase* p_ptr_; // Position state unit pointer
 		StateBase* o_ptr_; // Orientation state unit pointer
@@ -44,7 +45,7 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
          * \param _w_ptr StateBase pointer to the angular velocity (default: nullptr)
          *
          **/
-        LandmarkBase(const LandmarkType & _tp, StateBase* _p_ptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
+        LandmarkBase(const LandmarkType & _tp , StateBase* _p_ptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
 
         /** \brief Constructor with type, time stamp and state list
          * 
@@ -66,7 +67,11 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
         
         void hit();
         
-        void unHit();
+        void unhit();
+
+        void fix();
+
+        void unfix();
 
         unsigned int getHits() const;
 

@@ -44,20 +44,11 @@
 
 //C includes for sleep, time and main args
 #include "unistd.h"
-#include <time.h>
-#include <sys/time.h>
-
-//GLUT
-// #include <GL/glut.h>
 
 //faramotics includes
-//#include "faramotics/window.h"
 #include "faramotics/dynamicSceneRender.h"
 #include "faramotics/rangeScan2D.h"
 #include "btr-headers/pose3d.h"
-
-//namespaces
-using namespace std;
 
 //function travel around
 void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
@@ -117,11 +108,9 @@ class WolfManager
     protected:
 		bool use_complex_angles_;
 		WolfProblem* problem_;
-        std::vector<Eigen::VectorXs> odom_captures_;
-        std::vector<Eigen::VectorXs> gps_captures_;
         std::queue<CaptureBase*> new_captures_;
         SensorBase* sensor_prior_;
-        unsigned int last_state_units_, window_size_;
+        unsigned int window_size_;
         FrameBaseIter first_window_frame_;
 
     public:
@@ -129,7 +118,6 @@ class WolfManager
         	use_complex_angles_(_complex_angle),
 			problem_(new WolfProblem(_state_length)),
 			sensor_prior_(_sensor_prior),
-			last_state_units_(0),
 			window_size_(_w_size)
 		{
         	Eigen::VectorXs init_frame(use_complex_angles_ ? 4 : 3);
@@ -149,30 +137,29 @@ class WolfManager
         {
         	// Create frame and add it to the trajectory
         	StateBase* new_position = new StatePoint2D(problem_->getNewStatePtr());
-        	//new_position->setPendingStatus(NOT_PENDING);
 			problem_->addState(new_position, _frame_state.head(2));
 
 			StateBase* new_orientation;
         	if (use_complex_angles_)
-        	{
         		new_orientation = new StateComplexAngle(problem_->getNewStatePtr());
-        		//new_orientation->setPendingStatus(NOT_PENDING);
-        		problem_->addState(new_orientation, _frame_state.tail(2));
-        	}
         	else
-        	{
         		new_orientation = new StateTheta(problem_->getNewStatePtr());
-        		//new_orientation->setPendingStatus(NOT_PENDING);
-				problem_->addState(new_orientation, _frame_state.tail(1));
-        	}
+
+			problem_->addState(new_orientation, _frame_state.tail(new_orientation->getStateSize()));
 
 			problem_->getTrajectoryPtr()->addFrame(new FrameBase(_time_stamp, new_position, new_orientation));
+
+			// add a zero odometry capture (in order to integrate)
+			problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new CaptureOdom2D(_time_stamp,
+																								  sensor_prior_,
+																								  Eigen::Vector2s::Zero(),
+																								  Eigen::Matrix2s::Zero()));
         }
 
         void addCapture(CaptureBase* _capture)
         {
         	new_captures_.push(_capture);
-        	//std::cout << "added new capture: " << _capture->nodeId() << std::endl;
+        	std::cout << "added new capture: " << _capture->nodeId() << std::endl;
         }
 
         void update()
@@ -198,23 +185,13 @@ class WolfManager
 						}
 					}
 
-					// INTEGRATING/ADDING CAPTURE & COMPUTING PRIOR
-					Eigen::VectorXs prior;
-					if (previous_relative_capture == nullptr)
-					{
-						problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
-						//std::cout << "added capture: " << new_capture->nodeId() << std::endl;
-						prior = new_capture->computePrior();
-					}
-					else
-					{
-						//std::cout << "integrating captures " << previous_relative_capture->nodeId() << " " << new_capture->nodeId() << std::endl;
-						previous_relative_capture->integrateCapture((CaptureRelative*)(new_capture));
-						prior = previous_relative_capture->computePrior();
-					}
+					// INTEGRATING ODOMETRY CAPTURE & COMPUTING PRIOR
+					std::cout << "integrating captures " << previous_relative_capture->nodeId() << " " << new_capture->nodeId() << std::endl;
+					previous_relative_capture->integrateCapture((CaptureRelative*)(new_capture));
+					Eigen::VectorXs prior = previous_relative_capture->computePrior();
 
         			// NEW KEY FRAME (if enough time from last frame)
-					//std::cout << "new TimeStamp - last Frame TimeStamp = " << new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() << std::endl;
+					std::cout << "new TimeStamp - last Frame TimeStamp = " << new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() << std::endl;
 					if (new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() > 0.1)
         			{
         				auto previous_frame_ptr = problem_->getTrajectoryPtr()->getFrameListPtr()->back();
@@ -230,7 +207,7 @@ class WolfManager
 						if (problem_->getTrajectoryPtr()->getFrameListPtr()->size() > window_size_)
 						{
 							//problem_->getTrajectoryPtr()->removeFrame(problem_->getTrajectoryPtr()->getFrameListPtr()->begin());
-							fixFrame(*first_window_frame_);
+							(*first_window_frame_)->fix();
 							first_window_frame_++;
 						}
 						else
@@ -240,7 +217,7 @@ class WolfManager
         		else
         		{
         			// ADD CAPTURE TO THE LAST FRAME (or substitute the same sensor previous capture)
-					//std::cout << "adding not odometry capture..." << std::endl;
+					std::cout << "adding not odometry capture..." << std::endl;
         			for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin(); capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
         			{
         				if ((*capture_it)->getSensorPtr() == new_capture->getSensorPtr())
@@ -255,23 +232,6 @@ class WolfManager
         		}
         	}
         }
-        // TODO: passar a fix() a frame_base i crear-hi unfix()
-        void fixFrame(FrameBase* _fixed_frame)
-		{
-			//std::cout << "Fixing frame " << _fixed_frame->nodeId() << std::endl;
-			//_fixed_frame->print();
-        	_fixed_frame->setStatus(ST_FIXED);
-
-			// Frame State Units
-			if (_fixed_frame->getPPtr())
-				_fixed_frame->getPPtr()->setStateStatus(ST_FIXED);
-			if (_fixed_frame->getOPtr())
-				_fixed_frame->getOPtr()->setStateStatus(ST_FIXED);
-			if (_fixed_frame->getVPtr())
-				_fixed_frame->getVPtr()->setStateStatus(ST_FIXED);
-			if (_fixed_frame->getWPtr())
-				_fixed_frame->getWPtr()->setStateStatus(ST_FIXED);
-		}
 
         const Eigen::VectorXs getState() const
         {

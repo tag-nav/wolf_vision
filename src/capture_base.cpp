@@ -90,6 +90,11 @@ Eigen::VectorXs CaptureBase::getData()
 	return data_;
 }
 
+Eigen::MatrixXs CaptureBase::getDataCovariance()
+{
+	return data_covariance_;
+}
+
 void CaptureBase::setData(unsigned int _size, const WolfScalar *_data)
 {
     data_.resize(_size);

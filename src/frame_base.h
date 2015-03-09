@@ -78,6 +78,10 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         
         void setType(FrameType _ft);
         
+        void fix();
+
+        void unfix();
+
         void setTimeStamp(const TimeStamp& _ts);
         
         TimeStamp getTimeStamp() const;

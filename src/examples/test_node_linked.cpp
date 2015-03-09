@@ -99,14 +99,14 @@ int main()
     cout << "========================================================" << endl;
 
     cout << endl << "TEST 1. Constructors" << endl;
-    shared_ptr<WolfProblem> problem_(new WolfProblem());
-    shared_ptr<TrajectoryN> trajectory_(new TrajectoryN(2));
-    shared_ptr<FrameN> frame_1_(new FrameN(1.011));
-    shared_ptr<FrameN> frame_2_(new FrameN(2.022));
-    shared_ptr<MeasurementN> sensor_data_cam_1_(new MeasurementN(640));
-    shared_ptr<MeasurementN> sensor_data_laser_(new MeasurementN(180));
-    shared_ptr<MeasurementN> sensor_data_cam_2_(new MeasurementN(480));
-    shared_ptr<MeasurementN> sensor_data_radar_(new MeasurementN(90));
+    WolfProblem* problem_(new WolfProblem());
+    TrajectoryN* trajectory_(new TrajectoryN(2));
+    FrameN* frame_1_(new FrameN(1.011));
+    FrameN* frame_2_(new FrameN(2.022));
+    MeasurementN* sensor_data_cam_1_(new MeasurementN(640));
+    MeasurementN* sensor_data_laser_(new MeasurementN(180));
+    MeasurementN* sensor_data_cam_2_(new MeasurementN(480));
+    MeasurementN* sensor_data_radar_(new MeasurementN(90));
     trajectory_->print();
     cout << "========================================================" << endl;    
 
@@ -116,7 +116,7 @@ int main()
     frame_2_->addDownNode(sensor_data_cam_2_);
     trajectory_->addDownNode(frame_1_);    
     trajectory_->addDownNode(frame_2_);
-    trajectory_->linkToUpperNode(problem_.get());
+    trajectory_->linkToUpperNode(problem_);
     trajectory_->print();
     cout << "========================================================" << endl;
     
@@ -128,9 +128,9 @@ int main()
     cout << endl << "TEST 4. Remove nodes" << endl;
     //check if resetting ptr previously, effectively removes object when calling removeDownNode()
     unsigned int f1_id_ = frame_1_->nodeId();
-    frame_1_.reset();
-    sensor_data_cam_1_.reset();
-    sensor_data_laser_.reset();
+    frame_1_ = nullptr;
+    sensor_data_cam_1_ = nullptr;
+    sensor_data_laser_ = nullptr;;
     trajectory_->removeDownNode(f1_id_);
     trajectory_->print();
     cout << "========================================================" << endl;    

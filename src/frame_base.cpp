@@ -55,6 +55,38 @@ void FrameBase::setType(FrameType _ft)
     type_ = _ft;
 }
 
+void FrameBase::fix()
+{
+	//std::cout << "Fixing frame " << nodeId() << std::endl;
+	status_ = ST_FIXED;
+
+	// Frame State Units
+	if (p_ptr_!=nullptr)
+		p_ptr_->setStateStatus(ST_FIXED);
+	if (o_ptr_!=nullptr)
+		o_ptr_->setStateStatus(ST_FIXED);
+	if (v_ptr_!=nullptr)
+		v_ptr_->setStateStatus(ST_FIXED);
+	if (w_ptr_!=nullptr)
+		w_ptr_->setStateStatus(ST_FIXED);
+}
+
+void FrameBase::unfix()
+{
+	//std::cout << "Unfixing frame " << nodeId() << std::endl;
+	status_ = ST_ESTIMATED;
+
+	// Frame State Units
+	if (p_ptr_!=nullptr)
+		p_ptr_->setStateStatus(ST_ESTIMATED);
+	if (o_ptr_!=nullptr)
+		o_ptr_->setStateStatus(ST_ESTIMATED);
+	if (v_ptr_!=nullptr)
+		v_ptr_->setStateStatus(ST_ESTIMATED);
+	if (w_ptr_!=nullptr)
+		w_ptr_->setStateStatus(ST_ESTIMATED);
+}
+
 void FrameBase::setTimeStamp(const TimeStamp & _ts)
 {
     time_stamp_ = _ts;

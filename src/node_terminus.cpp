@@ -1,7 +1,18 @@
 
 #include "node_terminus.h"
 
-inline NodeTerminus::~NodeTerminus()
+NodeTerminus::NodeTerminus() :
+		NodeBase("TERMINUS")
 {
   //
+}
+
+NodeTerminus::~NodeTerminus()
+{
+  //
+}
+
+WolfProblem* NodeTerminus::getTop()
+{
+	return nullptr;
 }
