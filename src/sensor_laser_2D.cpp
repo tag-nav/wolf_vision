@@ -7,7 +7,7 @@
 //     params_ << _angle_min, _angle_max, _angle_increment, _range_min, _range_max, _range_stdev, _time_increment, _scan_time;
 // }
 
-SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp) :
+SensorLaser2D::SensorLaser2D(const Eigen::Vector6s & _sp) :
     SensorBase(LIDAR, _sp, 8)
 {
     setDefaultScanParams();

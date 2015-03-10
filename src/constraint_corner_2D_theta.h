@@ -1,4 +1,3 @@
-
 #ifndef CONSTRAINT_CORNER_2D_THETA_H_
 #define CONSTRAINT_CORNER_2D_THETA_H_
 
@@ -46,23 +45,39 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 		template <typename T>
 		bool operator()(const T* const _robotP, const T* const _robotO, const T* const _landmarkP, const T* const _landmarkO, T* _residuals) const
 		{
-			//TODO: Not compute every step InvRot
+			//TODO: Not computing the transformations each iteration
 			// Mapping
 			Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_position(_landmarkP);
 			Eigen::Map<const Eigen::Matrix<T,2,1>> robot_position(_robotP);
 
-			Eigen::Matrix<T,2,2> InvRot;
-			InvRot << cos(*_robotO), sin(*_robotO),
-					 -sin(*_robotO), cos(*_robotO);
+//			std::cout << "getSensorPosition: " << std::endl;
+//			std::cout << getCapturePtr()->getSensorPtr()->getSensorPosition()->head(2).transpose() << std::endl;
+//			std::cout << "getSensorRotation: " << std::endl;
+//			std::cout << getCapturePtr()->getSensorPtr()->getSensorRotation()->topLeftCorner<2,2>() << std::endl;
+//			std::cout << "atan2: " << atan2(getCapturePtr()->getSensorPtr()->getSensorRotation()->transpose()(0,1),getCapturePtr()->getSensorPtr()->getSensorRotation()->transpose()(0,0)) << std::endl;
+
+
+			// sensor transformation
+			Eigen::Matrix<T,2,1> sensor_position = getCapturePtr()->getSensorPtr()->getSensorPosition()->head(2).cast<T>();
+			Eigen::Matrix<T,2,2> inverse_R_sensor = (getCapturePtr()->getSensorPtr()->getSensorRotation()->topLeftCorner<2,2>().transpose()).cast<T>();
+
+			Eigen::Matrix<T,2,2> inverse_R_robot;
+			inverse_R_robot << cos(*_robotO), sin(*_robotO),
+					 	 	  -sin(*_robotO), cos(*_robotO);
 
 			// Expected measurement
-			Eigen::Matrix<T,2,1> expected_landmark_relative_position = InvRot * (landmark_position - robot_position);
-			T expected_landmark_relative_orientation = (*_landmarkO) - (*_robotO);
+			Eigen::Matrix<T,2,1> expected_landmark_relative_position = inverse_R_sensor * (inverse_R_robot * (landmark_position - robot_position) - sensor_position);
+			T expected_landmark_relative_orientation = (*_landmarkO) - (*_robotO) - atan2(inverse_R_sensor(0,1),inverse_R_sensor(0,0));
+
+			while (expected_landmark_relative_orientation > T(M_PI))
+				expected_landmark_relative_orientation = expected_landmark_relative_orientation - T(2*M_PI);
+			while (expected_landmark_relative_orientation <= T(-M_PI))
+				expected_landmark_relative_orientation = expected_landmark_relative_orientation + T(2*M_PI);
 
 			// Residuals
 			_residuals[0] = (expected_landmark_relative_position(0) - T((*measurement_ptr_)(0))) / T((*measurement_covariance_ptr_)(0,0));
 			_residuals[1] = (expected_landmark_relative_position(1) - T((*measurement_ptr_)(1))) / T((*measurement_covariance_ptr_)(1,1));
-			_residuals[2] = (expected_landmark_relative_orientation - T((*measurement_ptr_)(2))) / T((*measurement_covariance_ptr_)(2,2));
+			_residuals[2] = (expected_landmark_relative_orientation - T((*measurement_ptr_)(2))) / T(100*(*measurement_covariance_ptr_)(2,2));
 
 //			std::cout << "\nCONSTRAINT: " << nodeId() << std::endl;
 //			std::cout << "Feature: " << getFeaturePtr()->nodeId() << std::endl;

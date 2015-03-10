@@ -709,8 +709,8 @@ int main(int argc, char** argv)
 	Eigen::VectorXs gps_fix_readings(n_execution*3); //all GPS fix readings
 	std::queue<StateBase*> new_state_units; // new state units in wolf that must be added to ceres
 	std::queue<ConstraintXBase*> new_constraints; // new constraints in wolf that must be added to ceres
-	SensorBase* odom_sensor = new SensorBase(ODOM_2D, Eigen::MatrixXs::Zero(3,1),0);
-	SensorBase* gps_sensor = new SensorBase(GPS_FIX, Eigen::MatrixXs::Zero(3,1),0);
+	SensorBase* odom_sensor = new SensorBase(ODOM_2D, Eigen::MatrixXs::Zero(6,1),0);
+	SensorBase* gps_sensor = new SensorBase(GPS_FIX, Eigen::MatrixXs::Zero(6,1),0);
 
 	// Initial pose
 	pose_true << 0,0,0;

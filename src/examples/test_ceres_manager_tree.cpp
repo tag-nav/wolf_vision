@@ -120,22 +120,23 @@ class WolfManager
         		// TODO: accumulate odometries
         		if (new_capture->getSensorPtr() == sensor_prior_)
         		{
-					createFrame(VectorXs::Zero(use_complex_angles_ ? 4 : 3), new_capture->getTimeStamp());
-
-					// ADD CAPTURE TO THE NEW FRAME
+        			// ADD CAPTURE TO THE PREVIOUS FRAME
 					trajectory_->getFrameListPtr()->back()->addCapture(new_capture);
 
 					// COMPUTE PRIOR
-        			trajectory_->getFrameListPtr()->back()->setState(new_capture->computePrior());
+					trajectory_->getFrameListPtr()->back()->setState(new_capture->computePrior());
 
-					// TODO: Change by something like...
+					// CREATE NEW FRAME
+					createFrame(VectorXs::Zero(use_complex_angles_ ? 4 : 3), new_capture->getTimeStamp());
+
+					// NEW STATE UNITS TO BE ADDED BY CERES
 					//new_state_units.insert(new_state_units.end(), trajectory_.getFrameList.back()->getStateList().begin(), trajectory_.getFrameList.back()->getStateList().end());
 					new_state_units.push_back(trajectory_->getFrameListPtr()->back()->getPPtr());
 					new_state_units.push_back(trajectory_->getFrameListPtr()->back()->getOPtr());
         		}
         		else
         		{
-        			// ADD CAPTURE TO THE NEW FRAME
+        			// ADD CAPTURE TO THE LAST FRAME
 					trajectory_->getFrameListPtr()->back()->addCapture(new_capture);
         		}
 
@@ -253,8 +254,8 @@ int main(int argc, char** argv)
 	std::list<ConstraintBase*> new_constraints; // new constraints in wolf that must be added to ceres
 
 	// Wolf manager initialization
-	SensorOdom2D odom_sensor(Eigen::MatrixXs::Zero(3,1), odom_std, odom_std);
-	SensorGPSFix gps_sensor(Eigen::MatrixXs::Zero(3,1), gps_std);
+	SensorOdom2D odom_sensor(Eigen::MatrixXs::Zero(6,1), odom_std, odom_std);
+	SensorGPSFix gps_sensor(Eigen::MatrixXs::Zero(6,1), gps_std);
 	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, n_execution * (complex_angle ? 4 : 3));
 
 	// Initial pose

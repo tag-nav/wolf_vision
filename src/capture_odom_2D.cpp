@@ -25,9 +25,11 @@ CaptureOdom2D::~CaptureOdom2D()
 
 inline void CaptureOdom2D::processCapture()
 {
+    //std::cout << "CaptureOdom2D::addFeature..." << std::endl;
 	// ADD FEATURE
     addFeature(new FeatureOdom2D(data_,data_covariance_));
 
+    //std::cout << "CaptureOdom2D::addConstraints..." << std::endl;
     // ADD CONSTRAINT
     addConstraints();
 }

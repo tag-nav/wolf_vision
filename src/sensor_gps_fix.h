@@ -15,7 +15,7 @@ class SensorGPSFix : public SensorBase
          * \param _noise noise standard deviation
          * 
          **/
-		SensorGPSFix(const Eigen::VectorXs & _sp, const double& _noise);
+		SensorGPSFix(const Eigen::Vector6s & _sp, const double& _noise);
         
         /** \brief Destructor
          * 

@@ -16,7 +16,7 @@ class SensorOdom2D : public SensorBase
          * \param _rot_noise_factor rotation noise factor
          * 
          **/
-		SensorOdom2D(const Eigen::VectorXs & _sp, const WolfScalar& _disp_noise_factor, const WolfScalar&  _rot_noise_factor);
+		SensorOdom2D(const Eigen::Vector6s & _sp, const WolfScalar& _disp_noise_factor, const WolfScalar&  _rot_noise_factor);
         
         /** \brief Destructor
          * 
