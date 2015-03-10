@@ -97,7 +97,7 @@ void CaptureLaser2D::establishConstraints()
     for (auto feature_it = getFeatureListPtr()->begin(); feature_it != getFeatureListPtr()->end(); feature_it++ )
 	{
 		double max_distance_matching2 = 0.5; //TODO: max_distance_matching depending on localization and landmarks uncertainty
-		double max_theta_matching = 0.2; //TODO: max_theta_matching depending on localization and landmarks uncertainty
+		double max_theta_matching = M_PI / 8; //TODO: max_theta_matching depending on localization and landmarks uncertainty
 
 		//Find the closest landmark to the feature
 		LandmarkCorner2D* correspondent_landmark = nullptr;
@@ -127,18 +127,18 @@ void CaptureLaser2D::establishConstraints()
 			{
 				if (theta_distance < max_theta_matching)
 				{
-					//std::cout << "Position & orientation near landmark found: " << (*landmark_it)->nodeId() << std::endl;
-					//std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
+//					std::cout << "Position & orientation near landmark found: " << (*landmark_it)->nodeId() << std::endl;
+//					std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
 
 					correspondent_landmark = (LandmarkCorner2D*)(*landmark_it);
 					min_distance2 = distance2;
 				}
 				else
 				{
-//					std::cout << "Feature: " << (*feature_it)->nodeId() << std::endl;
-//					std::cout << "global position:" << feature_global_position.transpose() << " orientation:" << feature_global_orientation << std::endl;
-//					std::cout << "Landmark with near position but wrong orientation: " << (*landmark_it)->nodeId() << std::endl;
-//					std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
+					std::cout << "Feature: " << (*feature_it)->nodeId() << std::endl;
+					std::cout << "global position:" << feature_global_position.transpose() << " orientation:" << feature_global_orientation << std::endl;
+					std::cout << "Landmark with near position but wrong orientation: " << (*landmark_it)->nodeId() << std::endl;
+					std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
 				}
 			}
 		}

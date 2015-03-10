@@ -112,6 +112,7 @@ class WolfManager
         SensorBase* sensor_prior_;
         unsigned int window_size_;
         FrameBaseIter first_window_frame_;
+        CaptureRelative* last_capture_relative_;
 
     public:
         WolfManager(SensorBase* _sensor_prior, const bool _complex_angle, const unsigned int& _state_length, const Eigen::VectorXs& _init_frame, const unsigned int& _w_size=10) :
@@ -151,6 +152,7 @@ class WolfManager
 																								  sensor_prior_,
 																								  Eigen::Vector2s::Zero(),
 																								  Eigen::Matrix2s::Zero()));
+			last_capture_relative_ = (CaptureRelative*)(problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->front());
         }
 
         void addCapture(CaptureBase* _capture)
@@ -171,21 +173,22 @@ class WolfManager
         		if (new_capture->getSensorPtr() == sensor_prior_)
         		{
         			// FIND PREVIOUS RELATIVE CAPTURE
-					CaptureRelative* previous_relative_capture = nullptr;
-					for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin(); capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
-					{
-						//std::cout << "capture: " << (*capture_it)->nodeId() << std::endl;
-						if ((*capture_it)->getSensorPtr() == sensor_prior_)
-						{
-							previous_relative_capture = (CaptureRelative*)(*capture_it);
-							break;
-						}
-					}
+//					CaptureRelative* previous_relative_capture = nullptr;
+//					for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin(); capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
+//					{
+//						//std::cout << "capture: " << (*capture_it)->nodeId() << std::endl;
+//						if ((*capture_it)->getSensorPtr() == sensor_prior_)
+//						{
+//							previous_relative_capture = (CaptureRelative*)(*capture_it);
+//							break;
+//						}
+//					}
 
 					// INTEGRATING ODOMETRY CAPTURE & COMPUTING PRIOR
 					//std::cout << "integrating captures " << previous_relative_capture->nodeId() << " " << new_capture->nodeId() << std::endl;
-					previous_relative_capture->integrateCapture((CaptureRelative*)(new_capture));
-					Eigen::VectorXs prior = previous_relative_capture->computePrior();
+//					previous_relative_capture->integrateCapture((CaptureRelative*)(new_capture));
+//					Eigen::VectorXs prior = previous_relative_capture->computePrior();
+        			last_capture_relative_->integrateCapture((CaptureRelative*)(new_capture));
 
         			// NEW KEY FRAME (if enough time from last frame)
 					//std::cout << "new TimeStamp - last Frame TimeStamp = " << new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() << std::endl;
@@ -196,7 +199,7 @@ class WolfManager
 
         				// NEW FRAME
         				//std::cout << "new frame" << std::endl;
-						createFrame(prior, new_capture->getTimeStamp());
+						createFrame(last_capture_relative_->computePrior(), new_capture->getTimeStamp());
 
         				// COMPUTE PREVIOUS FRAME CAPTURES
 						//std::cout << "compute prev frame" << std::endl;
@@ -237,7 +240,7 @@ class WolfManager
 
         Eigen::VectorXs getVehiclePose()
 		{
-        	return Eigen::Map<Eigen::VectorXs>(problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getPPtr()->getPtr(), use_complex_angles_ ? 4 : 3);
+        	return last_capture_relative_->computePrior();
 		}
 
         WolfProblem* getProblemPtr()
