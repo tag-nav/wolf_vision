@@ -1,10 +1,15 @@
 #include "ceres_manager.h"
 
 CeresManager::CeresManager(ceres::Problem::Options _options) :
-	ceres_problem_(new ceres::Problem(_options)),
-	covariance_(covariance_options_)
+	ceres_problem_(new ceres::Problem(_options))
 {
+	ceres::Covariance::Options covariance_options;
+	covariance_options.algorithm_type = ceres::DENSE_SVD;
+	covariance_options.null_space_rank = -1;
+	covariance_ = new ceres::Covariance(covariance_options);
 }
+//num_threads(1), use_dense_linear_algebra(true), min_singular_value_threshold(1e-12), null_space_rank(-1), apply_loss_function(false)
+
 
 CeresManager::~CeresManager()
 {
@@ -19,6 +24,7 @@ CeresManager::~CeresManager()
 	std::cout << "residual blocks: " << ceres_problem_->NumResidualBlocks() << "\n";
 	std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << "\n";
 	delete ceres_problem_;
+	delete covariance_;
 }
 
 ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_options)
@@ -36,23 +42,59 @@ ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_
 	return ceres_summary_;
 }
 
-void CeresManager::computeCovariances(StateBaseList* _state_list_ptr, StateBase* _current_state_unit)
+void CeresManager::computeCovariances(WolfProblem* _problem_ptr)//StateBaseList* _state_list_ptr, StateBase* _current_state_unit)
 {
-	std::cout << "_state_list_ptr.size() " << _state_list_ptr->size() << std::endl;
+//	std::cout << "_state_list_ptr.size() " << _state_list_ptr->size() << std::endl;
+//
+//	// create vector of pointer pairs
+//	std::vector<std::pair<const double*, const double*>> covariance_blocks;
+////	for (auto st_it = _state_list_ptr->begin(); st_it != _state_list_ptr->end(); st_it++)
+////		if ((*st_it)->getPtr() != _current_state_unit->getPtr())
+////			covariance_blocks.push_back(std::pair<const double*, const double*>((*st_it)->getPtr(),_current_state_unit->getPtr()));
+//
+//	WolfScalar* block_1_ptr = _current_state_unit->getPtr();
+//	WolfScalar* block_2_ptr = _current_state_unit->getPtr();
+//	std::cout << "are blocks? " << ceres_problem_->HasParameterBlock(block_1_ptr) << ceres_problem_->HasParameterBlock(block_2_ptr) << std::endl;
+//	covariance_blocks.push_back(std::make_pair(block_1_ptr,block_2_ptr));
+//	std::cout << "covariance_blocks.size() " << covariance_blocks.size() << std::endl;
+//	// Compute covariances
+//	covariance_.Compute(covariance_blocks, ceres_problem_);
 
-	// create vector of pointer pairs
 	std::vector<std::pair<const double*, const double*>> covariance_blocks;
-//	for (auto st_it = _state_list_ptr->begin(); st_it != _state_list_ptr->end(); st_it++)
-//		if ((*st_it)->getPtr() != _current_state_unit->getPtr())
-//			covariance_blocks.push_back(std::pair<const double*, const double*>((*st_it)->getPtr(),_current_state_unit->getPtr()));
 
-	WolfScalar* block_1_ptr = _current_state_unit->getPtr();
-	WolfScalar* block_2_ptr = _current_state_unit->getPtr();
-	std::cout << "are blocks? " << ceres_problem_->HasParameterBlock(block_1_ptr) << ceres_problem_->HasParameterBlock(block_2_ptr) << std::endl;
-	covariance_blocks.push_back(std::make_pair(block_1_ptr,block_2_ptr));
-	std::cout << "covariance_blocks.size() " << covariance_blocks.size() << std::endl;
-	// Compute covariances
-	covariance_.Compute(covariance_blocks, ceres_problem_);
+	// Last frame state units
+	double* current_position_ptr = _problem_ptr->getTrajectoryPtr()->getFrameListPtr()->back()->getPPtr()->getPtr();
+	double* current_orientation_ptr = _problem_ptr->getTrajectoryPtr()->getFrameListPtr()->back()->getOPtr()->getPtr();
+	covariance_blocks.push_back(std::make_pair(current_position_ptr,current_position_ptr));
+	covariance_blocks.push_back(std::make_pair(current_position_ptr,current_orientation_ptr));
+	covariance_blocks.push_back(std::make_pair(current_orientation_ptr,current_orientation_ptr));
+
+	// Landmarks and cross-covariance with current frame
+	for(auto landmark_it = _problem_ptr->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it!=_problem_ptr->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+	{
+		double* landmark_position_ptr = (*landmark_it)->getPPtr()->getPtr();
+		double* landmark_orientation_ptr = (*landmark_it)->getOPtr()->getPtr();
+
+		covariance_blocks.push_back(std::make_pair(landmark_position_ptr,landmark_position_ptr));
+		covariance_blocks.push_back(std::make_pair(landmark_position_ptr,current_position_ptr));
+		covariance_blocks.push_back(std::make_pair(landmark_position_ptr,current_orientation_ptr));
+		covariance_blocks.push_back(std::make_pair(landmark_position_ptr,landmark_orientation_ptr));
+		covariance_blocks.push_back(std::make_pair(landmark_orientation_ptr,landmark_orientation_ptr));
+		covariance_blocks.push_back(std::make_pair(landmark_orientation_ptr,current_position_ptr));
+		covariance_blocks.push_back(std::make_pair(landmark_orientation_ptr,current_orientation_ptr));
+	}
+	covariance_->Compute(covariance_blocks, ceres_problem_);
+
+	double c11[2 * 2];
+	double c22[1 * 1];
+	double c12[2 * 1];
+	covariance_->GetCovarianceBlock(current_position_ptr, current_position_ptr, c11);
+	covariance_->GetCovarianceBlock(current_position_ptr, current_orientation_ptr, c12);
+	covariance_->GetCovarianceBlock(current_orientation_ptr, current_orientation_ptr, c22);
+
+//	std::cout << "COV\n: " << c11[0] << " " << c11[1] << " " << c12[0] << std::endl <<
+//							   c11[2] << " " << c11[3] << " " << c12[1] << std::endl <<
+//							   c12[0] << " " << c12[1] << " " << c22[0] << std::endl;
 }
 
 void CeresManager::update(WolfProblem* _problem_ptr)

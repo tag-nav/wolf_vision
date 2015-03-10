@@ -504,6 +504,32 @@ class CeresManager
 			// run Ceres Solver
 			ceres::Solve(_ceres_options, ceres_problem_, &ceres_summary_);
 
+			// compute covariances
+			ceres::Covariance::Options covariance_options;
+			covariance_options.algorithm_type = ceres::DENSE_SVD;
+			covariance_options.null_space_rank = -1;
+			ceres::Covariance covariance_(covariance_options);
+
+			std::vector<double*> parameter_blocks;
+			ceres_problem_->GetParameterBlocks(&parameter_blocks);
+
+			std::vector<std::pair<const double*, const double*>> covariance_blocks;
+			covariance_blocks.push_back(std::make_pair(parameter_blocks[0],parameter_blocks[1]));
+			covariance_.Compute(covariance_blocks, ceres_problem_);
+
+			double covariance_12[3 * 3];
+			covariance_.GetCovarianceBlock(parameter_blocks[0], parameter_blocks[1], covariance_12);
+
+			std::cout << "12 cov: " << covariance_12[0] << " " <<
+										covariance_12[1] << " " <<
+										covariance_12[2] << " " <<
+										covariance_12[3] << " " <<
+										covariance_12[4] << " " <<
+										covariance_12[5] << " " <<
+										covariance_12[6] << " " <<
+										covariance_12[7] << " " <<
+										covariance_12[8] << " " <<std::endl;
+
 			//display results
 			return ceres_summary_;
 		}

@@ -35,8 +35,8 @@ void CaptureLaser2D::processCapture()
     std::list<Eigen::Vector4s> corners;
     
     //extract corners from range data
-    //std::cout << "CaptureLaser2D::extractCorners..." << std::endl;
     extractCorners(corners);
+    //std::cout << corners.size() << " corners extracted" << std::endl;
     
     //generate a feature for each corner
     //std::cout << "CaptureLaser2D::createFeatures..." << std::endl;
@@ -125,27 +125,26 @@ void CaptureLaser2D::establishConstraints()
     			theta_distance -= 2 * M_PI;
 			if (distance2 < min_distance2)
 			{
-
 				if (theta_distance < max_theta_matching)
 				{
-//					std::cout << "Position & orientation near landmark found: " << (*landmark_it)->nodeId() << std::endl;
-//					std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
+					//std::cout << "Position & orientation near landmark found: " << (*landmark_it)->nodeId() << std::endl;
+					//std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
 
 					correspondent_landmark = (LandmarkCorner2D*)(*landmark_it);
 					min_distance2 = distance2;
 				}
 				else
 				{
-					std::cout << "Feature: " << (*feature_it)->nodeId() << std::endl;
-					std::cout << "global position:" << feature_global_position.transpose() << " orientation:" << feature_global_orientation << std::endl;
-					std::cout << "Landmark with near position but wrong orientation: " << (*landmark_it)->nodeId() << std::endl;
-					std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
+//					std::cout << "Feature: " << (*feature_it)->nodeId() << std::endl;
+//					std::cout << "global position:" << feature_global_position.transpose() << " orientation:" << feature_global_orientation << std::endl;
+//					std::cout << "Landmark with near position but wrong orientation: " << (*landmark_it)->nodeId() << std::endl;
+//					std::cout << "global position:" << landmark_position.transpose() << " orientation:" << landmark_orientation << std::endl;
 				}
 			}
 		}
     	if (correspondent_landmark == nullptr)
     	{
-//    		std::cout << "No landmark found. Creating a new one..." << std::endl;
+    		//std::cout << "No landmark found. Creating a new one..." << std::endl;
     		StateBase* new_landmark_state_position = new StatePoint2D(getTop()->getNewStatePtr());
     		getTop()->addState(new_landmark_state_position, feature_global_position);
     		StateBase* new_landmark_state_orientation = new StateTheta(getTop()->getNewStatePtr());
@@ -155,8 +154,8 @@ void CaptureLaser2D::establishConstraints()
     		LandmarkBase* corr_landmark(correspondent_landmark);
     		getTop()->getMapPtr()->addLandmark(corr_landmark);
 
-    		std::cout << "Landmark created: " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl;
-			std::cout << "global position: " << *corr_landmark->getPPtr()->getPtr() << " " << *(corr_landmark->getPPtr()->getPtr()+1) << " orientation:" << *corr_landmark->getOPtr()->getPtr() << std::endl;
+    		//std::cout << "Landmark created: " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl;
+			//std::cout << "global position: " << *corr_landmark->getPPtr()->getPtr() << " " << *(corr_landmark->getPPtr()->getPtr()+1) << " orientation:" << *corr_landmark->getOPtr()->getPtr() << std::endl;
     	}
     	else
     		correspondent_landmark->hit();

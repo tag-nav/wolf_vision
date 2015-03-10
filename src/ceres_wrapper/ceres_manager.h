@@ -29,8 +29,7 @@ class CeresManager
 	protected:
 //		std::map<unsigned int, ceres::ResidualBlockId> constraint_map_;
 		ceres::Problem* ceres_problem_;
-		ceres::Covariance covariance_;
-		ceres::Covariance::Options covariance_options_;
+		ceres::Covariance* covariance_;
 
 	public:
 		CeresManager(ceres::Problem::Options _options);
@@ -39,7 +38,7 @@ class CeresManager
 
 		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
 
-		void computeCovariances(StateBaseList* _state_units_list, StateBase* _current_state_unit);
+		void computeCovariances(WolfProblem* _problem_ptr);//StateBaseList* _state_units_list, StateBase* _current_state_unit);
 
 		void update(const WolfProblemPtr _problem_ptr);
 

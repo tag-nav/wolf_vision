@@ -41,5 +41,6 @@ StateStatus StateBase::getStateStatus() const
 void StateBase::setStateStatus(const StateStatus& _status)
 {
 	status_=_status;
-	setPendingStatus(UPDATE_PENDING);
+	if (getPendingStatus() != ADD_PENDING)
+		setPendingStatus(UPDATE_PENDING);
 }

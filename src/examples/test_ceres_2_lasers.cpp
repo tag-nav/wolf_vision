@@ -114,18 +114,15 @@ class WolfManager
         FrameBaseIter first_window_frame_;
 
     public:
-        WolfManager(SensorBase* _sensor_prior, const bool _complex_angle, const unsigned int& _state_length, const unsigned int& _w_size=10) :
+        WolfManager(SensorBase* _sensor_prior, const bool _complex_angle, const unsigned int& _state_length, const Eigen::VectorXs& _init_frame, const unsigned int& _w_size=10) :
         	use_complex_angles_(_complex_angle),
 			problem_(new WolfProblem(_state_length)),
 			sensor_prior_(_sensor_prior),
 			window_size_(_w_size)
 		{
-        	Eigen::VectorXs init_frame(use_complex_angles_ ? 4 : 3);
-        	if (use_complex_angles_)
-        		init_frame << 2, 8, 1, 0;
-        	else
-        		init_frame << 2, 8, 0;
-        	createFrame(init_frame, 0);
+        	createFrame(_init_frame, TimeStamp());
+        	problem_->getTrajectoryPtr()->getFrameListPtr()->back()->fix();
+
 		}
 
         virtual ~WolfManager()
@@ -238,40 +235,20 @@ class WolfManager
         	}
         }
 
-        const Eigen::VectorXs getState() const
-        {
-        	return problem_->getState();
-        }
-
-        StateBaseList* getStateListPtr()
-		{
-        	return problem_->getStateListPtr();
-		}
-
         Eigen::VectorXs getVehiclePose()
 		{
         	return Eigen::Map<Eigen::VectorXs>(problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getPPtr()->getPtr(), use_complex_angles_ ? 4 : 3);
 		}
 
-        void getConstraintsList(ConstraintBaseList& corr_list)
-        {
-        	problem_->getTrajectoryPtr()->getConstraintList(corr_list);
-        }
-
         WolfProblem* getProblemPtr()
         {
         	return problem_;
-        }
-
-        void printTree()
-        {
-        	problem_->print();
         }
 };
 
 int main(int argc, char** argv)
 {
-	std::cout << "\n ========= 2D Robot with odometry and GPS ===========\n";
+	std::cout << "\n ========= 2D Robot with odometry and 2 LIDARs ===========\n";
 
 	// USER INPUT ============================================================================================
 	if (argc!=4 || atoi(argv[1])<1 || atoi(argv[1])>1100 || atoi(argv[2]) < 0 || atoi(argv[3]) < 0 || atoi(argv[3]) > 1)
@@ -283,9 +260,6 @@ int main(int argc, char** argv)
 		std::cout << "EXIT due to bad user input" << std::endl << std::endl;
 		return -1;
 	}
-
-	clock_t t1, t2;
-	t1=clock();
 
 	unsigned int n_execution = (unsigned int) atoi(argv[1]); //number of iterations of the whole execution
 	unsigned int window_size = (unsigned int) atoi(argv[2]);
@@ -317,8 +291,7 @@ int main(int argc, char** argv)
 	std::ofstream log_file, landmark_file;  //output file
 
 	// Faramotics stuff
-	Cpose3d viewPoint;
-	Cpose3d devicePose, laser1Pose, laser2Pose;
+	Cpose3d viewPoint, devicePose, laser1Pose, laser2Pose, estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose;
 	vector<Cpose3d> devicePoses;
 	vector<float> scan1, scan2;
 	string modelFileName;
@@ -333,7 +306,6 @@ int main(int argc, char** argv)
 	viewPoint.rt.setEuler( viewPoint.rt.head()+M_PI/2, viewPoint.rt.pitch()+30.*M_PI/180., viewPoint.rt.roll() );
 	viewPoint.moveForward(-15);
 	//glut initialization
-	//glutInit(&argc, argv);
     faramotics::initGLUT(argc, argv);
     
 	//create a viewer for the 3D model and scan points
@@ -345,29 +317,27 @@ int main(int argc, char** argv)
     
 	//variables
 	Eigen::Vector2s odom_reading, gps_fix_reading;
-	Eigen::VectorXs odom_inc_true(n_execution*2);//invented motion
 	Eigen::VectorXs pose_odom(3); //current odometry integred pose
 	Eigen::VectorXs ground_truth(n_execution*3); //all true poses
 	Eigen::VectorXs odom_trajectory(n_execution*3); //open loop trajectory
-	Eigen::VectorXs odom_readings(n_execution*2); // all odometry readings
-	Eigen::VectorXs gps_fix_readings(n_execution*3); //all GPS fix readings
-	TimeStamp time_stamp;
 	Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(7);
+	clock_t t1, t2;
 
 	// Wolf manager initialization
-	SensorOdom2D odom_sensor(Eigen::MatrixXs::Zero(6,1), odom_std, odom_std);
-	//SensorGPSFix gps_sensor(Eigen::MatrixXs::Zero(6,1), gps_std);
+	SensorOdom2D odom_sensor(Eigen::Vector6s::Zero(), odom_std, odom_std);
+	SensorGPSFix gps_sensor(Eigen::Vector6s::Zero(), gps_std);
 	Eigen::Vector6s laser_1_pose, laser_2_pose;
 	laser_1_pose << 1.2,0,0,0,0,0; //laser 1
 	laser_2_pose << -1.2,0,0,0,0,M_PI; //laser 2
 	SensorLaser2D laser_1_sensor(laser_1_pose);
 	SensorLaser2D laser_2_sensor(laser_2_pose);
-	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e9, window_size);
 
 	// Initial pose
 	pose_odom << 2,8,0;
 	ground_truth.head(3) = pose_odom;
 	odom_trajectory.head(3) = pose_odom;
+
+	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e9, pose_odom, window_size);
 
 	std::cout << "START TRAJECTORY..." << std::endl;
 	// START TRAJECTORY ============================================================================================
@@ -400,9 +370,9 @@ int main(int argc, char** argv)
 		odom_trajectory.segment(step*3,3) = pose_odom;
 
 		// compute GPS
-		//gps_fix_reading << devicePose.pt(0), devicePose.pt(1), 0;
-		//gps_fix_reading(0) += distribution_gps(generator);
-		//gps_fix_reading(1) += distribution_gps(generator);
+		gps_fix_reading << devicePose.pt(0), devicePose.pt(1);
+		gps_fix_reading(0) += distribution_gps(generator);
+		gps_fix_reading(1) += distribution_gps(generator);
 
 		//compute scans
 		scan1.clear();
@@ -428,12 +398,10 @@ int main(int argc, char** argv)
 		//std::cout << "ADD CAPTURES..." << std::endl;
 		t1=clock();
 		// adding new sensor captures
-	    time_stamp.setToNow();
-		wolf_manager->addCapture(new CaptureOdom2D(time_stamp, &odom_sensor, odom_reading, odom_std * Eigen::MatrixXs::Identity(2,2)));
-		//wolf_manager->addCapture(new CaptureGPSFix(time_stamp, &gps_sensor, gps_fix_reading, gps_std * MatrixXs::Identity(3,3)));
-		wolf_manager->addCapture(new CaptureLaser2D(time_stamp, &laser_1_sensor, scan1_reading));
-		wolf_manager->addCapture(new CaptureLaser2D(time_stamp, &laser_2_sensor, scan2_reading));
-
+		wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading, odom_std * Eigen::MatrixXs::Identity(2,2)));
+//		wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+		wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1_reading));
+		wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2_reading));
         // updating problem
 		wolf_manager->update();
 		mean_times(1) += ((double)clock()-t1)/CLOCKS_PER_SEC;
@@ -448,7 +416,7 @@ int main(int argc, char** argv)
 
 
 		// SOLVE OPTIMIZATION ---------------------------
-		std::cout << "SOLVING..." << std::endl;
+		//std::cout << "SOLVING..." << std::endl;
 		t1=clock();
 		ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
 		//std::cout << summary.FullReport() << std::endl;
@@ -457,8 +425,7 @@ int main(int argc, char** argv)
 		// COMPUTE COVARIANCES ---------------------------
 		//std::cout << "COMPUTING COVARIANCES..." << std::endl;
 		t1=clock();
-//		if (step > 2)
-//			ceres_manager->computeCovariances(wolf_manager->getProblemPtr()->getStateListPtr(), wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->back()->getPPtr());
+		//ceres_manager->computeCovariances(wolf_manager->getProblemPtr());
 		mean_times(4) += ((double)clock()-t1)/CLOCKS_PER_SEC;
 
 		// DRAWING STUFF ---------------------------
@@ -466,7 +433,7 @@ int main(int argc, char** argv)
 		// draw detected corners
 		std::list<Eigen::Vector4s> corner_list;
 		std::vector<double> corner_vector;
-		CaptureLaser2D last_scan(time_stamp, &laser_1_sensor, scan1_reading);
+		CaptureLaser2D last_scan(TimeStamp(), &laser_1_sensor, scan1_reading);
 		last_scan.extractCorners(corner_list);
 		for (std::list<Eigen::Vector4s>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++ )
 		{
@@ -487,15 +454,13 @@ int main(int argc, char** argv)
 		myRender->drawLandmarks(landmark_vector);
 
 		// draw localization and sensors
-		Cpose3d estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose;
 		estimated_vehicle_pose.setPose(wolf_manager->getVehiclePose()(0),wolf_manager->getVehiclePose()(1),0.2,wolf_manager->getVehiclePose()(2),0,0);
 		estimated_laser_1_pose.setPose(estimated_vehicle_pose);
 		estimated_laser_1_pose.moveForward(laser_1_pose(0));
 		estimated_laser_2_pose.setPose(estimated_vehicle_pose);
 		estimated_laser_2_pose.moveForward(laser_2_pose(0));
 		estimated_laser_2_pose.rt.setEuler( estimated_laser_2_pose.rt.head()+M_PI, estimated_laser_2_pose.rt.pitch(), estimated_laser_2_pose.rt.roll() );
-		std::vector<Cpose3d> estimated_poses_vector{estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose};
-		myRender->drawPoseAxisVector(estimated_poses_vector);
+		myRender->drawPoseAxisVector({estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose});
 
 		//Set view point and render the scene
 		//locate visualization view point, somewhere behind the device
@@ -511,12 +476,11 @@ int main(int argc, char** argv)
 		// TIME MANAGEMENT ---------------------------
 		double dt = ((double)clock()-t2)/CLOCKS_PER_SEC;
 		mean_times(6) += dt;
-
 		if (dt < 0.1)
 			usleep(100000-1e6*dt);
 
 //		std::cout << "\nTree after step..." << std::endl;
-//		wolf_manager->printTree();
+//		wolf_manager->getProblemPtr()->print();
 	}
 
 	// DISPLAY RESULTS ============================================================================================
@@ -531,7 +495,7 @@ int main(int argc, char** argv)
 	std::cout << "  loop time:          " << mean_times(6) << std::endl;
 
 //	std::cout << "\nTree before deleting..." << std::endl;
-//	wolf_manager->printTree();
+//	wolf_manager->getProblemPtr()->print();
 
 	// Draw Final result -------------------------
 	std::vector<double> landmark_vector;
@@ -584,8 +548,7 @@ int main(int argc, char** argv)
 			log_file << state_poses.segment(ii*3,3).transpose()
 					 << "\t" << ground_truth.segment(ii*3,3).transpose()
 					 << "\t" << (state_poses.segment(ii*3,3)-ground_truth.segment(ii*3,3)).transpose()
-					 << "\t" << odom_trajectory.segment(ii*3,3).transpose()
-					 << "\t" << gps_fix_readings.segment(ii*3,3).transpose() << std::endl;
+					 << "\t" << odom_trajectory.segment(ii*3,3).transpose() << std::endl;
 		log_file.close(); //close log file
 		std::cout << std::endl << "Result file " << filepath << std::endl;
 	}
