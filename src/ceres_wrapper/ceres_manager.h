@@ -11,6 +11,7 @@
 #include "state_base.h"
 #include "state_point.h"
 #include "state_complex_angle.h"
+#include "state_theta.h"
 #include "constraint_sparse.h"
 #include "constraint_gps_2D.h"
 #include "constraint_odom_2D_theta.h"
@@ -38,34 +39,20 @@ class CeresManager
 
 		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
 
-		void computeCovariances(WolfProblem* _problem_ptr);//StateBaseList* _state_units_list, StateBase* _current_state_unit);
+		void computeCovariances(WolfProblem* _problem_ptr);
 
 		void update(const WolfProblemPtr _problem_ptr);
 
 		void addConstraint(ConstraintBase* _corr_ptr);
 
-		// TODO: not necessary
-		void addConstraints(ConstraintBaseList* _new_constraints_list_ptr);
-
-		// TODO: not necessary
+		// TODO: not necessary?
 		void removeConstraint(const unsigned int& _corr_idx);
-
-		// TODO: not necessary
-		void removeConstraints(const std::list<unsigned int>& _corr_idx_list);
 
 		void addStateUnit(StateBase* _st_ptr);
 
-		// TODO: not necessary
-		void addStateUnits(StateBaseList* _st_ptr_list);
-
-		void removeStateUnit(WolfScalar* _st_ptr);
-
-		void removeStateUnits(std::list<WolfScalar*> _st_ptr_list);
+		void removeAllStateUnits();
 
 		void updateStateUnitStatus(StateBase* _st_ptr);
-
-		// TODO: not necessary
-		void updateStateUnitStatus(StateBaseList* _st_ptr_list);
 
 		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr);
 };

@@ -56,7 +56,6 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 //			std::cout << getCapturePtr()->getSensorPtr()->getSensorRotation()->topLeftCorner<2,2>() << std::endl;
 //			std::cout << "atan2: " << atan2(getCapturePtr()->getSensorPtr()->getSensorRotation()->transpose()(0,1),getCapturePtr()->getSensorPtr()->getSensorRotation()->transpose()(0,0)) << std::endl;
 
-
 			// sensor transformation
 			Eigen::Matrix<T,2,1> sensor_position = getCapturePtr()->getSensorPtr()->getSensorPosition()->head(2).cast<T>();
 			Eigen::Matrix<T,2,2> inverse_R_sensor = (getCapturePtr()->getSensorPtr()->getSensorRotation()->topLeftCorner<2,2>().transpose()).cast<T>();
@@ -75,9 +74,9 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 				expected_landmark_relative_orientation = expected_landmark_relative_orientation + T(2*M_PI);
 
 			// Residuals
-			_residuals[0] = (expected_landmark_relative_position(0) - T((*measurement_ptr_)(0))) / T((*measurement_covariance_ptr_)(0,0));
-			_residuals[1] = (expected_landmark_relative_position(1) - T((*measurement_ptr_)(1))) / T((*measurement_covariance_ptr_)(1,1));
-			_residuals[2] = (expected_landmark_relative_orientation - T((*measurement_ptr_)(2))) / T(100*(*measurement_covariance_ptr_)(2,2));
+			_residuals[0] = (expected_landmark_relative_position(0) - T(measurement_(0))) / T(measurement_covariance_(0,0));
+			_residuals[1] = (expected_landmark_relative_position(1) - T(measurement_(1))) / T(measurement_covariance_(1,1));
+			_residuals[2] = (expected_landmark_relative_orientation - T(measurement_(2))) / T(100*measurement_covariance_(2,2));
 
 //			std::cout << "\nCONSTRAINT: " << nodeId() << std::endl;
 //			std::cout << "Feature: " << getFeaturePtr()->nodeId() << std::endl;

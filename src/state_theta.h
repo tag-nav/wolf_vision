@@ -1,6 +1,6 @@
 
-#ifndef STATE_COMPLEX_ANGLE_H_
-#define STATE_COMPLEX_ANGLE_H_
+#ifndef STATE_THETA_H_
+#define STATE_THETA_H_
 
 //std includes
 #include <iostream>
@@ -11,12 +11,12 @@
 #include "wolf.h"
 #include "state_orientation.h"
 
-//class StateComplexAngle
-class StateComplexAngle : public StateOrientation
+//class StateTheta
+class StateTheta : public StateOrientation
 {
-    public:
-		static const unsigned int BLOCK_SIZE = 2;
-
+	public:
+		static const unsigned int BLOCK_SIZE = 1;
+        
         /** \brief Constructor with whole state storage and index where starts the state unit
          * 
          * Constructor with whole state storage and index where starts the state unit
@@ -24,7 +24,7 @@ class StateComplexAngle : public StateOrientation
          * \param _idx is the index of the first element of the state in the whole state vector
          * 
          **/
-		StateComplexAngle(Eigen::VectorXs& _st_remote, const unsigned int _idx);
+		StateTheta(Eigen::VectorXs& _st_remote, const unsigned int _idx);
 
         /** \brief Constructor with scalar pointer
          * 
@@ -32,14 +32,14 @@ class StateComplexAngle : public StateOrientation
          * \param _st_ptr is the pointer of the first element of the state unit
          * 
          **/
-		StateComplexAngle(WolfScalar* _st_ptr);
+		StateTheta(WolfScalar* _st_ptr);
         
         /** \brief Destructor
          * 
          * Destructor
          * 
          **/
-        virtual ~StateComplexAngle();
+        virtual ~StateTheta();
         
         /** \brief Returns the parametrization of the state unit
 		 *

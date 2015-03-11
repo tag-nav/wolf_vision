@@ -50,6 +50,10 @@
 #include "faramotics/rangeScan2D.h"
 #include "btr-headers/pose3d.h"
 
+//laser_scan_utils
+#include "iri-algorithms/laser_scan_utils/corner_detector.h"
+#include "iri-algorithms/laser_scan_utils/entities.h"
+
 //function travel around
 void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
 {
@@ -123,7 +127,6 @@ class WolfManager
 		{
         	createFrame(_init_frame, TimeStamp());
         	problem_->getTrajectoryPtr()->getFrameListPtr()->back()->fix();
-
 		}
 
         virtual ~WolfManager()
@@ -172,22 +175,8 @@ class WolfManager
         		// ODOMETRY SENSOR
         		if (new_capture->getSensorPtr() == sensor_prior_)
         		{
-        			// FIND PREVIOUS RELATIVE CAPTURE
-//					CaptureRelative* previous_relative_capture = nullptr;
-//					for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin(); capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
-//					{
-//						//std::cout << "capture: " << (*capture_it)->nodeId() << std::endl;
-//						if ((*capture_it)->getSensorPtr() == sensor_prior_)
-//						{
-//							previous_relative_capture = (CaptureRelative*)(*capture_it);
-//							break;
-//						}
-//					}
-
 					// INTEGRATING ODOMETRY CAPTURE & COMPUTING PRIOR
 					//std::cout << "integrating captures " << previous_relative_capture->nodeId() << " " << new_capture->nodeId() << std::endl;
-//					previous_relative_capture->integrateCapture((CaptureRelative*)(new_capture));
-//					Eigen::VectorXs prior = previous_relative_capture->computePrior();
         			last_capture_relative_->integrateCapture((CaptureRelative*)(new_capture));
 
         			// NEW KEY FRAME (if enough time from last frame)
@@ -434,14 +423,14 @@ int main(int argc, char** argv)
 		// DRAWING STUFF ---------------------------
 		t1=clock();
 		// draw detected corners
-		std::list<Eigen::Vector4s> corner_list;
+		std::list<laserscanutils::Corner> corner_list;
 		std::vector<double> corner_vector;
 		CaptureLaser2D last_scan(TimeStamp(), &laser_1_sensor, scan1_reading);
 		last_scan.extractCorners(corner_list);
-		for (std::list<Eigen::Vector4s>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++ )
+		for (std::list<laserscanutils::Corner>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++ )
 		{
-			corner_vector.push_back(corner_it->x());
-			corner_vector.push_back(corner_it->y());
+			corner_vector.push_back(corner_it->pt_(0));
+			corner_vector.push_back(corner_it->pt_(1));
 		}
 		myRender->drawCorners(laser1Pose,corner_vector);
 

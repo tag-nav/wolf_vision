@@ -46,14 +46,24 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 		_ctr_list.push_back((*c_it));
 }
 
-Eigen::VectorXs * FeatureBase::getMeasurementPtr()
+//Eigen::VectorXs * FeatureBase::getMeasurementPtr()
+//{
+//    return &measurement_;
+//}
+//
+//Eigen::MatrixXs * FeatureBase::getMeasurementCovariancePtr()
+//{
+//    return &measurement_covariance_;
+//}
+
+const Eigen::VectorXs& FeatureBase::getMeasurement() const
 {
-    return &measurement_;
+    return measurement_;
 }
 
-Eigen::MatrixXs * FeatureBase::getMeasurementCovariancePtr()
+const Eigen::MatrixXs& FeatureBase::getMeasurementCovariance() const
 {
-    return &measurement_covariance_;
+    return measurement_covariance_;
 }
 
 void FeatureBase::setMeasurement(const Eigen::VectorXs & _meas)

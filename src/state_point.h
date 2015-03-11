@@ -9,6 +9,7 @@
 
 //Wolf includes
 #include "wolf.h"
+#include "state_base.h"
 
 //class StateBase
 template <unsigned int SIZE>
@@ -78,6 +79,16 @@ class StatePoint : public StateBase
 		virtual unsigned int getStateSize() const
 		{
 			return BLOCK_SIZE;
+		}
+
+		/** \brief Returns the point in a vector
+		 *
+		 * Returns the point in a vector
+		 *
+		 **/
+		const Eigen::Matrix<WolfScalar, BLOCK_SIZE, 1>& getVector() const
+		{
+			return Eigen::Map<const Eigen::Matrix<WolfScalar, BLOCK_SIZE, 1>>(state_ptr_);
 		}
 
         /** \brief Prints all the elements of the state unit

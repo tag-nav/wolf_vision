@@ -2,14 +2,13 @@
 #include "state_complex_angle.h"
 
 StateComplexAngle::StateComplexAngle(Eigen::VectorXs& _st_remote, const unsigned int _idx) :
-	StateBase(_st_remote, _idx)
+		StateOrientation(_st_remote, _idx)
 {
 	//
-	std::cout << "state complex angle created\n";
 }
 
 StateComplexAngle::StateComplexAngle(WolfScalar* _st_ptr) :
-	StateBase(_st_ptr)
+		StateOrientation(_st_ptr)
 {
 	//
 }
@@ -29,10 +28,21 @@ unsigned int StateComplexAngle::getStateSize() const
 	return BLOCK_SIZE;
 }
 
+Eigen::Matrix3s StateComplexAngle::getRotationMatrix() const
+{
+	Eigen::Matrix3s R(Eigen::Matrix3s::Identity());
+	R(0,0) = *state_ptr_;
+	R(1,1) = *state_ptr_;
+	R(0,1) = -*(state_ptr_+1);
+	R(1,0) = *(state_ptr_+1);
+
+	return R;
+}
+
 void StateComplexAngle::print(unsigned int _ntabs, std::ostream& _ost) const
 {
 	printTabs(_ntabs);
 	_ost << nodeLabel() << " " << nodeId() << std::endl;
 	printTabs(_ntabs);
-	_ost << *this->state_ptr_<< " " << *(this->state_ptr_+1) << std::endl;
+	_ost << *state_ptr_<< " " << *(state_ptr_+1) << std::endl;
 }

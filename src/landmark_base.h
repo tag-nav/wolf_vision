@@ -85,7 +85,7 @@ class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
 
 		void setDescriptor(const Eigen::VectorXs& _descriptor);
 
-		const Eigen::VectorXs getDescriptor() const;
+		const Eigen::VectorXs& getDescriptor() const;
 
         //const StateBase* getStatePtr() const;
 

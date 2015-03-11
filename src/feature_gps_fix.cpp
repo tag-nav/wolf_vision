@@ -16,9 +16,3 @@ FeatureGPSFix::~FeatureGPSFix()
 {
     //
 }
-
-void FeatureGPSFix::findConstraints()
-{
-	//ConstraintBase* gps_constraint(new ConstraintGPS2D(this, getCapturePtr()->getFramePtr()->getPPtr()));
-	addConstraint(new ConstraintGPS2D(this, getCapturePtr()->getFramePtr()->getPPtr()));
-}

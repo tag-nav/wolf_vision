@@ -116,7 +116,7 @@ void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)
 	descriptor_ = _descriptor;
 }
 
-const Eigen::VectorXs LandmarkBase::getDescriptor() const
+const Eigen::VectorXs& LandmarkBase::getDescriptor() const
 {
 	return descriptor_;
 }

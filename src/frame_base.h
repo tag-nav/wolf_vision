@@ -27,7 +27,6 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         FrameType type_; //type of frame. Either REGULAR_FRAME or KEY_FRAME. (types defined at wolf.h)
         TimeStamp time_stamp_; //frame time stamp
         StateStatus status_; // status of the estimation of the frame state
-        //Eigen::Vector3s state_; //TBD: Instead , It could be a vector/list/map of pointers to state units
 		StateBase* p_ptr_; // Position state unit pointer
 		StateBase* o_ptr_; // Orientation state unit pointer
 		StateBase* v_ptr_; // Velocity state unit pointer
@@ -115,6 +114,8 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         StateBase* getVPtr() const;
 
         StateBase* getWPtr() const;
+
+        const Eigen::Matrix4s * getTransformationMatrix() const;
 
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
         

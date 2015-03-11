@@ -27,13 +27,5 @@ class FeatureGPSFix : public FeatureBase
         FeatureGPSFix(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
         virtual ~FeatureGPSFix();
-
-        /** \brief Generic interface to find constraints
-         * 
-         * Generic interface to find constraints between this feature and a map (static/slam) or a previous feature
-         *
-         **/
-        virtual void findConstraints();
-        
 };
 #endif

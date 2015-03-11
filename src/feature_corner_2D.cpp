@@ -11,8 +11,3 @@ FeatureCorner2D::~FeatureCorner2D()
 {
     //
 }
-
-//void FeatureCorner2D::findConstraints()
-//{
-//    //
-//}

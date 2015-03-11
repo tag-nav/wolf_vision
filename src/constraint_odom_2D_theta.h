@@ -36,8 +36,8 @@ class ConstraintOdom2DTheta: public ConstraintSparse<2,2,1,2,1>
 			T expected_rotation = _o2[0]-_o1[0];
 
 			// Residuals
-			_residuals[0] = (expected_range - T((*measurement_ptr_)(0))*T((*measurement_ptr_)(0))) / T((*measurement_covariance_ptr_)(0,0));
-			_residuals[1] = (expected_rotation - T((*measurement_ptr_)(1))) / T((*measurement_covariance_ptr_)(1,1));
+			_residuals[0] = (expected_range - T(measurement_(0))*T(measurement_(0))) / T(measurement_covariance_(0,0));
+			_residuals[1] = (expected_rotation - T(measurement_(1))) / T(measurement_covariance_(1,1));
 
 			return true;
 		}

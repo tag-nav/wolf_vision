@@ -48,9 +48,13 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
         
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
-        Eigen::VectorXs * getMeasurementPtr();
-        
-        Eigen::MatrixXs * getMeasurementCovariancePtr();
+//        Eigen::VectorXs * getMeasurementPtr();
+//
+//        Eigen::MatrixXs * getMeasurementCovariancePtr();
+
+        const Eigen::VectorXs & getMeasurement() const;
+
+        const Eigen::MatrixXs & getMeasurementCovariance() const;
 
         void setMeasurement(const Eigen::VectorXs & _meas);
         

@@ -50,6 +50,10 @@
 #include "faramotics/rangeScan2D.h"
 #include "btr-headers/pose3d.h"
 
+//laser_scan_utils
+#include "iri-algorithms/laser_scan_utils/corner_detector.h"
+#include "iri-algorithms/laser_scan_utils/entities.h"
+
 //function travel around
 void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
 {
@@ -436,14 +440,14 @@ int main(int argc, char** argv)
 		// DRAWING STUFF ---------------------------
 		t1=clock();
 		// draw detected corners
-		std::list<Eigen::Vector4s> corner_list;
+		std::list<laserscanutils::Corner> corner_list;
 		std::vector<double> corner_vector;
 		CaptureLaser2D last_scan(time_stamp, &laser_sensor, scan_reading);
 		last_scan.extractCorners(corner_list);
-		for (std::list<Eigen::Vector4s>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++ )
+		for (std::list<laserscanutils::Corner>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++ )
 		{
-			corner_vector.push_back(corner_it->x());
-			corner_vector.push_back(corner_it->y());
+			corner_vector.push_back(corner_it->pt_(0));
+			corner_vector.push_back(corner_it->pt_(1));
 		}
 		myRender->drawCorners(devicePose,corner_vector);
 

@@ -10,8 +10,9 @@
 #include <eigen3/Eigen/Geometry>
 
 //laser_scan_utils
-#include "iri-algorithms/laser_scan_utils/scan_params.h"
-#include "iri-algorithms/laser_scan_utils/corners.h"
+#include "iri-algorithms/laser_scan_utils/scan_basics.h"
+#include "iri-algorithms/laser_scan_utils/corner_detector.h"
+#include "iri-algorithms/laser_scan_utils/entities.h"
 
 //wolf includes
 #include "constraint_corner_2D_theta.h"
@@ -20,6 +21,8 @@
 #include "feature_corner_2D.h"
 #include "landmark_corner_2D.h"
 #include "state_point.h"
+#include "state_orientation.h"
+#include "state_theta.h"
 
 //wolf forward declarations
 //#include "feature_corner_2D.h"
@@ -73,7 +76,7 @@ class CaptureLaser2D : public CaptureBase
          * Extract corners and push-back to Feature down list . 
          * 
          **/
-        virtual unsigned int extractCorners(std::list<Eigen::Vector4s> & _corner_list) const;
+        virtual unsigned int extractCorners(std::list<laserscanutils::Corner> & _corner_list) const;
 //         virtual unsigned int extractCorners_old(std::list<Eigen::Vector4s> & _corner_list) const;
 //         void fitLine(unsigned int _idx_from, unsigned int _idx_to, const Eigen::MatrixXs& _points, Line& line_) const;
 
@@ -86,7 +89,7 @@ class CaptureLaser2D : public CaptureBase
         
 //         void fitLine(unsigned int _idx_from, unsigned int _idx_to, const Eigen::MatrixXs& _points, Line& line_) const;
 
-        virtual void createFeatures(std::list<Eigen::Vector4s> & _corner_list); //TODO: should be const .... JVN: No, because new feature is added to the list
+        virtual void createFeatures(std::list<laserscanutils::Corner> & _corner_list); //TODO: should be const .... JVN: No, because new feature is added to the list
         
         void establishConstraints();
 
