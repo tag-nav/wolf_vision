@@ -20,7 +20,7 @@ StateBase::StateBase(WolfScalar* _st_ptr) :
                 
 StateBase::~StateBase()
 {
-	std::cout << "deleting StateBase " << nodeId() << std::endl;
+	//std::cout << "deleting StateBase " << nodeId() << std::endl;
 }
 
 WolfScalar* StateBase::getPtr()

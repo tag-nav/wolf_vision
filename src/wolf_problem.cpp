@@ -67,7 +67,7 @@ bool WolfProblem::addState(StateBase* _new_state_ptr, const Eigen::VectorXs& _ne
 
 void WolfProblem::removeState(StateBase* _state_ptr)
 {
-	// TODO: Reordering?
+	// TODO: Reordering? Mandatory for filtering...
 	state_list_.remove(_state_ptr);
 	removed_state_ptr_list_.push_back(_state_ptr->getPtr());
 	delete _state_ptr;

@@ -9,7 +9,10 @@ CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
 	CaptureRelative(_ts, _sensor_ptr, _data)
 {
-	//
+	data_covariance_ = Eigen::Matrix2s::Zero();
+  data_covariance_(0,0) = _data(0)*((SensorOdom2D*)_sensor_ptr)->getDisplacementNoiseFactor();
+  data_covariance_(1,1) = _data(1)*((SensorOdom2D*)_sensor_ptr)->getRotationNoiseFactor();
+  std::cout << data_covariance_ << std::endl;
 }
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :

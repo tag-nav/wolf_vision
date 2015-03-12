@@ -47,6 +47,7 @@ SET(HDRS
     constraint_gps_2D.h
     constraint_odom_2D_theta.h
     constraint_odom_2D_complex_angle.h
+    constraint_corner_2D_theta.h
     feature_base.h
     feature_corner_2D.h
     feature_gps_fix.h
@@ -70,7 +71,8 @@ SET(HDRS
     time_stamp.h
     trajectory_base.h
     wolf.h
-    wolf_problem.h)
+    wolf_problem.h
+    wolf_manager.h)
     
 #sources
 SET(SRCS
@@ -102,16 +104,19 @@ SET(SRCS
 
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
-    SET(HDRS ${HDRS} 
+    SET(HDRS_WRAPPER
         ceres_wrapper/complex_angle_parametrization.h 
         ceres_wrapper/ceres_manager.h )
-    SET(SRCS ${SRCS} 
+    SET(SRCS_WRAPPER
         ceres_wrapper/complex_angle_parametrization.cpp 
         ceres_wrapper/ceres_manager.cpp)
+ELSE(Ceres_FOUND)
+    SET(HDRS_WRAPPER)
+    SET(SRCS_WRAPPER)
 ENDIF(Ceres_FOUND)
 
 IF (laser_scan_utils_FOUND)
-    SET(HDRS ${HDRS} 
+    SET(HDRS ${HDRS}
         capture_laser_2D.h
         sensor_laser_2D.h)
     SET(SRCS ${SRCS} 
@@ -120,7 +125,7 @@ IF (laser_scan_utils_FOUND)
 ENDIF(laser_scan_utils_FOUND)
 
 # create the shared library
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_WRAPPER})
 
 #Link the created library with ceres
 IF (Ceres_FOUND)
@@ -140,7 +145,9 @@ INSTALL(TARGETS ${PROJECT_NAME}
         
 #install headers         
 INSTALL(FILES ${HDRS} 
-      DESTINATION include/iri-algorithms)
+      DESTINATION include/iri-algorithms/wolf)
+INSTALL(FILES ${HDRS_WRAPPER} 
+      DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
 
 INSTALL(FILES ../Findwolf.cmake DESTINATION ${CMAKE_ROOT}/Modules/)
 

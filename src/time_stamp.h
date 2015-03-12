@@ -40,6 +40,13 @@ class TimeStamp
          */
         TimeStamp(const WolfScalar _ts);
 
+        /** \brief Constructor from sec and nsec
+         *
+         * Constructor from sec and nsec
+         *
+         */
+        TimeStamp(const unsigned long int _sec, const unsigned long int _nsec);
+
         /** \brief Destructor
          *
          * Destructor

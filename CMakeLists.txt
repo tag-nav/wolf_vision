@@ -95,7 +95,6 @@ IF (UNIX)
 ELSE(UNIX)
   ADD_CUSTOM_COMMAND(
     COMMENT "packaging only implemented in unix"
-    TARGET  uninstall
-  )
+    TARGET  uninstall)
 ENDIF(UNIX)
 

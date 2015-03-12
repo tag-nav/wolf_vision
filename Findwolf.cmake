@@ -2,8 +2,7 @@
 FIND_PATH(
     wolf_INCLUDE_DIR
     NAMES wolf.h
-    PATHS /usr/local/include/iri-algorithms
-)
+    PATHS /usr/local/include/iri-algorithms/wolf)
 
 FIND_LIBRARY(
     wolf_LIBRARY

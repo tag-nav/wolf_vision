@@ -111,10 +111,10 @@ void CaptureLaser2D::establishConstraints()
     								  fmod(feature_global_orientation+M_PI, 2 * M_PI)-M_PI :
 									  fmod(feature_global_orientation-M_PI, 2 * M_PI)+M_PI);
 
-    	std::cout << "-------- Feature: " << (*feature_it)->nodeId() << std::endl <<
-    				 feature_global_position.transpose() <<
-    				 "\t" << feature_global_orientation <<
-    				 "\t" << feature_aperture << std::endl;
+//    	std::cout << "-------- Feature: " << (*feature_it)->nodeId() << std::endl <<
+//    				 feature_global_position.transpose() <<
+//    				 "\t" << feature_global_orientation <<
+//    				 "\t" << feature_aperture << std::endl;
     	for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++ )
 		{
     		Eigen::Map<Eigen::Vector2s> landmark_position((*landmark_it)->getPPtr()->getPtr());
@@ -133,39 +133,35 @@ void CaptureLaser2D::establishConstraints()
 				if (distance_sq < min_distance_sq)
 				{
 
-	    			std::cout << "Close landmark candidate: " << (*landmark_it)->nodeId() << std::endl <<
-								 landmark_position.transpose() <<
-								 "\t" << landmark_orientation <<
-								 "\t" << landmark_aperture << std::endl;
+//	    			std::cout << "Close landmark candidate: " << (*landmark_it)->nodeId() << std::endl <<
+//								 landmark_position.transpose() <<
+//								 "\t" << landmark_orientation <<
+//								 "\t" << landmark_aperture << std::endl;
 	    			//std::cout << " OK!" << std::endl;
 					// Third check: ORIENTATION
 					WolfScalar theta_distance = fabs(fmod(fabs(landmark_orientation-feature_global_orientation)+M_PI, 2 * M_PI)-M_PI);// fit in (-pi, pi]
 
-					if (theta_distance < 0 || theta_distance > M_PI)
-						std::cout << "/////////////////////////////////////// theta_distance < 0 || theta_distance > M_PI" << std::endl
-								  << landmark_orientation << "\t" << feature_global_orientation << std::endl;
-
-					std::cout << " orientation diff: " << theta_distance;
+//					std::cout << " orientation diff: " << theta_distance;
 					if (theta_distance < max_theta_matching)
 					{
-		    			std::cout << " OK!" << std::endl;
-						std::cout << "Closer landmark found (satisfying orientation and aperture)" << std::endl;
+//		    			std::cout << " OK!" << std::endl;
+//						std::cout << "Closer landmark found (satisfying orientation and aperture)" << std::endl;
 
 						correspondent_landmark = (LandmarkCorner2D*)(*landmark_it);
 						min_distance_sq = distance_sq;
 					}
-		    		else
-		    			std::cout << " KO" << std::endl;
-				}
+//		    		else
+//		    			std::cout << " KO" << std::endl;
 //	    		else
 //	    			std::cout << " KO" << std::endl;
+				}
     		}
 //    		else
 //    			std::cout << " KO" << std::endl;
 		}
     	if (correspondent_landmark == nullptr)
     	{
-    		std::cout << "+++++ No landmark found. Creating a new one..." << std::endl;
+//    		std::cout << "+++++ No landmark found. Creating a new one..." << std::endl;
     		StateBase* new_landmark_state_position = new StatePoint2D(getTop()->getNewStatePtr());
     		getTop()->addState(new_landmark_state_position, feature_global_position);
     		StateBase* new_landmark_state_orientation = new StateTheta(getTop()->getNewStatePtr());
@@ -175,10 +171,10 @@ void CaptureLaser2D::establishConstraints()
     		LandmarkBase* corr_landmark(correspondent_landmark);
     		getTop()->getMapPtr()->addLandmark(corr_landmark);
 
-        	std::cout << "Landmark created: " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl <<
-        				 feature_global_position.transpose() <<
-        				 "\t" << feature_global_orientation <<
-        				 "\t" << feature_aperture << std::endl;
+//        	std::cout << "Landmark created: " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl <<
+//        				 feature_global_position.transpose() <<
+//        				 "\t" << feature_global_orientation <<
+//        				 "\t" << feature_aperture << std::endl;
     	}
     	else
     		correspondent_landmark->hit();

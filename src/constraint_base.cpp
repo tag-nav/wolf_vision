@@ -11,7 +11,7 @@ ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp) :
 
 ConstraintBase::~ConstraintBase()
 {
-	std::cout << "deleting ConstraintBase " << nodeId() << std::endl;
+	//std::cout << "deleting ConstraintBase " << nodeId() << std::endl;
 }
 
 ConstraintType ConstraintBase::getConstraintType() const

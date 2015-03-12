@@ -13,33 +13,10 @@
 #include <eigen3/Eigen/Geometry>
 
 //Ceres includes
-#include "ceres/ceres.h"
 #include "glog/logging.h"
 
 //Wolf includes
-#include "wolf.h"
-#include "sensor_base.h"
-#include "sensor_odom_2D.h"
-#include "sensor_gps_fix.h"
-#include "feature_base.h"
-#include "frame_base.h"
-#include "state_point.h"
-#include "state_complex_angle.h"
-#include "capture_base.h"
-#include "capture_relative.h"
-#include "capture_odom_2D.h"
-#include "capture_gps_fix.h"
-#include "capture_laser_2D.h"
-#include "state_base.h"
-#include "constraint_sparse.h"
-#include "constraint_gps_2D.h"
-#include "constraint_odom_2D_theta.h"
-#include "constraint_odom_2D_complex_angle.h"
-#include "trajectory_base.h"
-#include "map_base.h"
-#include "wolf_problem.h"
-
-// ceres wrapper include
+#include "wolf_manager.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 //C includes for sleep, time and main args
@@ -57,186 +34,55 @@
 //function travel around
 void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
 {
-    if (ii<=120)
-    {
-    	displacement_ = 0.1;
-    	rotation_ = 0;
-    }
-    else if ( (ii>120) && (ii<=170) )
-    {
-    	displacement_ = 0.2;
-    	rotation_ = 1.8*M_PI/180;
-    }
-    else if ( (ii>170) && (ii<=220) )
-    {
-    	displacement_ = 0;
-    	rotation_ = -1.8*M_PI/180;
-    }
-    else if ( (ii>220) && (ii<=310) )
-    {
-    	displacement_ = 0.1;
-    	rotation_ = 0;
-    }
-    else if ( (ii>310) && (ii<=487) )
-    {
-    	displacement_ = 0.1;
-    	rotation_ = -1.*M_PI/180;
-    }
-    else if ( (ii>487) && (ii<=600) )
-    {
-    	displacement_ = 0.2;
-    	rotation_ = 0;
-    }
-    else if ( (ii>600) && (ii<=700) )
-    {
-    	displacement_ = 0.1;
-    	rotation_ = -1.*M_PI/180;
-    }
-    else  if ( (ii>700) && (ii<=780) )
-    {
-    	displacement_ = 0;
-    	rotation_ = -1.*M_PI/180;
-    }
-    else
-    {
-    	displacement_ = 0.3;
-    	rotation_ = 0.0*M_PI/180;
-    }
+  if (ii<=120)
+  {
+    displacement_ = 0.1;
+    rotation_ = 0;
+  }
+  else if ( (ii>120) && (ii<=170) )
+  {
+    displacement_ = 0.2;
+    rotation_ = 1.8*M_PI/180;
+  }
+  else if ( (ii>170) && (ii<=220) )
+  {
+    displacement_ = 0;
+    rotation_ = -1.8*M_PI/180;
+  }
+  else if ( (ii>220) && (ii<=310) )
+  {
+    displacement_ = 0.1;
+    rotation_ = 0;
+  }
+  else if ( (ii>310) && (ii<=487) )
+  {
+    displacement_ = 0.1;
+    rotation_ = -1.*M_PI/180;
+  }
+  else if ( (ii>487) && (ii<=600) )
+  {
+    displacement_ = 0.2;
+    rotation_ = 0;
+  }
+  else if ( (ii>600) && (ii<=700) )
+  {
+    displacement_ = 0.1;
+    rotation_ = -1.*M_PI/180;
+  }
+  else  if ( (ii>700) && (ii<=780) )
+  {
+    displacement_ = 0;
+    rotation_ = -1.*M_PI/180;
+  }
+  else
+  {
+    displacement_ = 0.3;
+    rotation_ = 0.0*M_PI/180;
+  }
 
-    pose.moveForward(displacement_);
-    pose.rt.setEuler( pose.rt.head()+rotation_, pose.rt.pitch(), pose.rt.roll() );
+  pose.moveForward(displacement_);
+  pose.rt.setEuler( pose.rt.head()+rotation_, pose.rt.pitch(), pose.rt.roll() );
 }
-
-class WolfManager
-{
-    protected:
-		bool use_complex_angles_;
-		WolfProblem* problem_;
-        std::queue<CaptureBase*> new_captures_;
-        SensorBase* sensor_prior_;
-        unsigned int window_size_;
-        FrameBaseIter first_window_frame_;
-        CaptureRelative* last_capture_relative_;
-
-    public:
-        WolfManager(SensorBase* _sensor_prior, const bool _complex_angle, const unsigned int& _state_length, const Eigen::VectorXs& _init_frame, const unsigned int& _w_size=10) :
-        	use_complex_angles_(_complex_angle),
-			problem_(new WolfProblem(_state_length)),
-			sensor_prior_(_sensor_prior),
-			window_size_(_w_size)
-		{
-        	createFrame(_init_frame, TimeStamp());
-        	problem_->getTrajectoryPtr()->getFrameListPtr()->back()->fix();
-		}
-
-        virtual ~WolfManager()
-        {
-        	delete problem_;
-        }
-
-        void createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
-        {
-        	// Create frame and add it to the trajectory
-        	StateBase* new_position = new StatePoint2D(problem_->getNewStatePtr());
-			problem_->addState(new_position, _frame_state.head(2));
-
-			StateBase* new_orientation;
-        	if (use_complex_angles_)
-        		new_orientation = new StateComplexAngle(problem_->getNewStatePtr());
-        	else
-        		new_orientation = new StateTheta(problem_->getNewStatePtr());
-
-			problem_->addState(new_orientation, _frame_state.tail(new_orientation->getStateSize()));
-
-			problem_->getTrajectoryPtr()->addFrame(new FrameBase(_time_stamp, new_position, new_orientation));
-
-			// add a zero odometry capture (in order to integrate)
-			problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new CaptureOdom2D(_time_stamp,
-																								  sensor_prior_,
-																								  Eigen::Vector2s::Zero(),
-																								  Eigen::Matrix2s::Zero()));
-			last_capture_relative_ = (CaptureRelative*)(problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->front());
-        }
-
-        void addCapture(CaptureBase* _capture)
-        {
-        	new_captures_.push(_capture);
-        	//std::cout << "added new capture: " << _capture->nodeId() << std::endl;
-        }
-
-        void update()
-        {
-        	while (!new_captures_.empty())
-        	{
-        		// EXTRACT NEW CAPTURE
-        		CaptureBase* new_capture = new_captures_.front();
-        		new_captures_.pop();
-
-        		// ODOMETRY SENSOR
-        		if (new_capture->getSensorPtr() == sensor_prior_)
-        		{
-					// INTEGRATING ODOMETRY CAPTURE & COMPUTING PRIOR
-					//std::cout << "integrating captures " << previous_relative_capture->nodeId() << " " << new_capture->nodeId() << std::endl;
-        			last_capture_relative_->integrateCapture((CaptureRelative*)(new_capture));
-
-        			// NEW KEY FRAME (if enough time from last frame)
-					//std::cout << "new TimeStamp - last Frame TimeStamp = " << new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() << std::endl;
-					if (new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() > 0.1)
-        			{
-						//std::cout << "store prev frame" << std::endl;
-        				auto previous_frame_ptr = problem_->getTrajectoryPtr()->getFrameListPtr()->back();
-
-        				// NEW FRAME
-        				//std::cout << "new frame" << std::endl;
-						createFrame(last_capture_relative_->computePrior(), new_capture->getTimeStamp());
-
-        				// COMPUTE PREVIOUS FRAME CAPTURES
-						//std::cout << "compute prev frame" << std::endl;
-						for (auto capture_it = previous_frame_ptr->getCaptureListPtr()->begin(); capture_it != previous_frame_ptr->getCaptureListPtr()->end(); capture_it++)
-							(*capture_it)->processCapture();
-
-						// WINDOW of FRAMES (remove or fix old frames)
-						//std::cout << "frame window" << std::endl;
-						if (problem_->getTrajectoryPtr()->getFrameListPtr()->size() > window_size_)
-						{
-							//std::cout << "frame fixing" << std::endl;
-							//problem_->getTrajectoryPtr()->removeFrame(problem_->getTrajectoryPtr()->getFrameListPtr()->begin());
-							(*first_window_frame_)->fix();
-							first_window_frame_++;
-						}
-						else
-							first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
-        			}
-        		}
-        		else
-        		{
-        			// ADD CAPTURE TO THE LAST FRAME (or substitute the same sensor previous capture)
-        			//std::cout << "adding not odometry capture..." << std::endl;
-        			for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin(); capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
-        			{
-        				if ((*capture_it)->getSensorPtr() == new_capture->getSensorPtr())
-        				{
-        					//std::cout << "removing previous capture" << std::endl;
-							problem_->getTrajectoryPtr()->getFrameListPtr()->back()->removeCapture(capture_it);
-							//std::cout << "removed!" << std::endl;
-							break;
-        				}
-        			}
-        			problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
-        		}
-        	}
-        }
-
-        Eigen::VectorXs getVehiclePose()
-		{
-        	return last_capture_relative_->computePrior();
-		}
-
-        WolfProblem* getProblemPtr()
-        {
-        	return problem_;
-        }
-};
 
 int main(int argc, char** argv)
 {
@@ -259,14 +105,14 @@ int main(int argc, char** argv)
 
 	// INITIALIZATION ============================================================================================
 	//init random generators
-	WolfScalar odom_std= 0.01;
+	WolfScalar odom_std_factor= 0.1;
 	WolfScalar gps_std= 1;
 	std::default_random_engine generator(1);
-	std::normal_distribution<WolfScalar> distribution_odom(0.0, odom_std); //odometry noise
+	std::normal_distribution<WolfScalar> distribution_odom(0.0, odom_std_factor); //odometry noise
 	std::normal_distribution<WolfScalar> distribution_gps(0.0, gps_std); //GPS noise
 
 	//init google log
-	google::InitGoogleLogging(argv[0]);
+	//google::InitGoogleLogging(argv[0]);
 
 	// Ceres initialization
 	ceres::Solver::Options ceres_options;
@@ -316,7 +162,7 @@ int main(int argc, char** argv)
 	clock_t t1, t2;
 
 	// Wolf manager initialization
-	SensorOdom2D odom_sensor(Eigen::Vector6s::Zero(), odom_std, odom_std);
+	SensorOdom2D odom_sensor(Eigen::Vector6s::Zero(), odom_std_factor, odom_std_factor);
 	SensorGPSFix gps_sensor(Eigen::Vector6s::Zero(), gps_std);
 	Eigen::Vector6s laser_1_pose, laser_2_pose;
 	laser_1_pose << 1.2,0,0,0,0,0; //laser 1
@@ -329,7 +175,7 @@ int main(int argc, char** argv)
 	ground_truth.head(3) = pose_odom;
 	odom_trajectory.head(3) = pose_odom;
 
-	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e9, pose_odom, window_size);
+	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e9, pose_odom, 0.1, window_size);
 
 	std::cout << "START TRAJECTORY..." << std::endl;
 	// START TRAJECTORY ============================================================================================
@@ -352,8 +198,8 @@ int main(int argc, char** argv)
 		ground_truth.segment(step*3,3) << devicePose.pt(0), devicePose.pt(1), devicePose.rt.head();
 
 		// compute odometry
-		odom_reading(0) += distribution_odom(generator);
-		odom_reading(1) += distribution_odom(generator);
+		odom_reading(0) += distribution_odom(generator)*(odom_reading(0)+1e-3);
+		odom_reading(1) += distribution_odom(generator)*(odom_reading(1)+1e-3);
 
 		// odometry integration
 		pose_odom(0) = pose_odom(0) + odom_reading(0) * cos(pose_odom(2));
@@ -390,7 +236,7 @@ int main(int argc, char** argv)
 		//std::cout << "ADD CAPTURES..." << std::endl;
 		t1=clock();
 		// adding new sensor captures
-		wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading, odom_std * Eigen::MatrixXs::Identity(2,2)));
+		wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading));//, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
 //		wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
 		wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1_reading));
 		wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2_reading));

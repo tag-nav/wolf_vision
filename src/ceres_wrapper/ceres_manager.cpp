@@ -91,6 +91,9 @@ void CeresManager::update(WolfProblem* _problem_ptr)
 		_problem_ptr->getTrajectoryPtr()->getConstraintList(ctr_list);
 		for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
 			addConstraint(*ctr_it);
+
+		// set the wolf problem reallocation flag to false
+		_problem_ptr->reallocationDone();
 	}
 	else
 	{

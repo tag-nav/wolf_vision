@@ -17,7 +17,7 @@ FeatureBase::FeatureBase(const Eigen::VectorXs& _measurement, const Eigen::Matri
 
 FeatureBase::~FeatureBase()
 {
-	std::cout << "deleting FeatureBase " << nodeId() << std::endl;
+	//std::cout << "deleting FeatureBase " << nodeId() << std::endl;
 }
 
 void FeatureBase::addConstraint(ConstraintBase* _co_ptr)

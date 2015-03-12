@@ -26,7 +26,7 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBase* _p_ptr, StateBas
                 
 LandmarkBase::~LandmarkBase()
 {
-	std::cout << "deleting LandmarkBase " << nodeId() << std::endl;
+	//std::cout << "deleting LandmarkBase " << nodeId() << std::endl;
 
 	// Remove Landmark State Units
 	if (p_ptr_ != nullptr)
