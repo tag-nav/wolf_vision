@@ -95,8 +95,9 @@ void CaptureLaser2D::establishConstraints()
 //	std::cout << "rot:" << R << std::endl;
     for (auto feature_it = getFeatureListPtr()->begin(); feature_it != getFeatureListPtr()->end(); feature_it++ )
 	{
-    	WolfScalar max_distance_matching2 = 0.5;
-    	WolfScalar max_theta_matching = M_PI / 8;
+    	WolfScalar max_distance_matching_sq = 0.5;
+    	WolfScalar max_theta_matching = M_PI / 16;
+    	WolfScalar min_distance_sq = max_distance_matching_sq;
 
 		//Find the closest landmark to the feature
 		LandmarkCorner2D* correspondent_landmark = nullptr;
@@ -106,55 +107,65 @@ void CaptureLaser2D::establishConstraints()
 
     	Eigen::Vector2s feature_global_position = R_robot * (R_sensor * feature_position + t_sensor) + t_robot;
     	WolfScalar feature_global_orientation = feature_orientation + robot_orientation + atan2(R_sensor(1,0),R_sensor(0,0));
-    	// fit in (-pi, pi]
-    	feature_global_orientation = (feature_global_orientation > 0 ? fmod(feature_global_orientation+M_PI, 2 * M_PI)-M_PI : fmod(feature_global_orientation-M_PI, 2 * M_PI)+M_PI);
-    	//feature_global_orientation(0) = 0;
-    	double min_distance2 = max_distance_matching2;
+    	feature_global_orientation = (feature_global_orientation > 0 ? // fit in (-pi, pi]
+    								  fmod(feature_global_orientation+M_PI, 2 * M_PI)-M_PI :
+									  fmod(feature_global_orientation-M_PI, 2 * M_PI)+M_PI);
 
-    	std::cout << "Feature: " << (*feature_it)->nodeId() << std::endl;
-//    	std::cout << "local position: " << feature_position.transpose() << " orientation:" << feature_orientation << std::endl;
-    	std::cout << "global position: " << feature_global_position.transpose() <<
-    				 " orientation: " << feature_global_orientation <<
-    				 " aperture:" << feature_aperture << std::endl;
+    	std::cout << "-------- Feature: " << (*feature_it)->nodeId() << std::endl <<
+    				 feature_global_position.transpose() <<
+    				 "\t" << feature_global_orientation <<
+    				 "\t" << feature_aperture << std::endl;
     	for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++ )
 		{
     		Eigen::Map<Eigen::Vector2s> landmark_position((*landmark_it)->getPPtr()->getPtr());
-    		std::cout << "landmark: " << (*landmark_it)->nodeId() << " " << landmark_position.transpose();
-    		WolfScalar& landmark_orientation = *((*landmark_it)->getOPtr()->getPtr());
-    		std::cout << " orientation: " << landmark_orientation << std::endl;
+			WolfScalar& landmark_orientation = *((*landmark_it)->getOPtr()->getPtr());
     		const WolfScalar& landmark_aperture = (*landmark_it)->getDescriptor()(0);
 
-    		WolfScalar distance2 = (landmark_position-feature_global_position).transpose() * (landmark_position-feature_global_position);
-    		WolfScalar theta_distance = fabs(landmark_orientation-feature_global_orientation);
+    		// First check: APERTURE
+			//std::cout << " aperture diff: " << fabs(feature_aperture - landmark_aperture);
+    		if (fabs(feature_aperture - landmark_aperture) < max_theta_matching)
+    		{
+    			//std::cout << " OK!" << std::endl;
 
-    		if (theta_distance > M_PI)
-    			theta_distance -= 2 * M_PI;
-			if (distance2 < min_distance2)
-			{
-				if (theta_distance < max_theta_matching)
+    			// Second check: SQUARED DISTANCE
+				WolfScalar distance_sq = (landmark_position-feature_global_position).squaredNorm();
+				//std::cout << " distance squared: " << distance_sq;
+				if (distance_sq < min_distance_sq)
 				{
-					std::cout << "Position & orientation near landmark found: " << (*landmark_it)->nodeId() << std::endl;
-					std::cout << "global position: " << landmark_position.transpose() << " orientation: " << landmark_orientation << std::endl;
 
-					correspondent_landmark = (LandmarkCorner2D*)(*landmark_it);
-					min_distance2 = distance2;
+	    			std::cout << "Close landmark candidate: " << (*landmark_it)->nodeId() << std::endl <<
+								 landmark_position.transpose() <<
+								 "\t" << landmark_orientation <<
+								 "\t" << landmark_aperture << std::endl;
+	    			//std::cout << " OK!" << std::endl;
+					// Third check: ORIENTATION
+					WolfScalar theta_distance = fabs(fmod(fabs(landmark_orientation-feature_global_orientation)+M_PI, 2 * M_PI)-M_PI);// fit in (-pi, pi]
+
+					if (theta_distance < 0 || theta_distance > M_PI)
+						std::cout << "/////////////////////////////////////// theta_distance < 0 || theta_distance > M_PI" << std::endl
+								  << landmark_orientation << "\t" << feature_global_orientation << std::endl;
+
+					std::cout << " orientation diff: " << theta_distance;
+					if (theta_distance < max_theta_matching)
+					{
+		    			std::cout << " OK!" << std::endl;
+						std::cout << "Closer landmark found (satisfying orientation and aperture)" << std::endl;
+
+						correspondent_landmark = (LandmarkCorner2D*)(*landmark_it);
+						min_distance_sq = distance_sq;
+					}
+		    		else
+		    			std::cout << " KO" << std::endl;
 				}
-				else
-				{
-//					std::cout << "Feature: " << (*feature_it)->nodeId() << std::endl;
-//					std::cout << "global position:" << feature_global_position.transpose() <<
-//								 " orientation:" << feature_global_orientation <<
-//								 " aperture:" << feature_aperture << std::endl;
-//					std::cout << "Landmark with near position but wrong orientation: " << (*landmark_it)->nodeId() << std::endl;
-//					std::cout << "global position:" << landmark_position.transpose() <<
-//								 " orientation:" << landmark_orientation <<
-//								 " aperture:" << landmark_aperture << std::endl;
-				}
-			}
+//	    		else
+//	    			std::cout << " KO" << std::endl;
+    		}
+//    		else
+//    			std::cout << " KO" << std::endl;
 		}
     	if (correspondent_landmark == nullptr)
     	{
-    		std::cout << "No landmark found. Creating a new one..." << std::endl;
+    		std::cout << "+++++ No landmark found. Creating a new one..." << std::endl;
     		StateBase* new_landmark_state_position = new StatePoint2D(getTop()->getNewStatePtr());
     		getTop()->addState(new_landmark_state_position, feature_global_position);
     		StateBase* new_landmark_state_orientation = new StateTheta(getTop()->getNewStatePtr());
@@ -164,10 +175,10 @@ void CaptureLaser2D::establishConstraints()
     		LandmarkBase* corr_landmark(correspondent_landmark);
     		getTop()->getMapPtr()->addLandmark(corr_landmark);
 
-//    		std::cout << "Landmark created: " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl;
-//			std::cout << "global position: " << *corr_landmark->getPPtr()->getPtr() << " " << *(corr_landmark->getPPtr()->getPtr()+1) <<
-//						 " orientation: " << *corr_landmark->getOPtr()->getPtr() <<
-//						 " aperture:" << corr_landmark->getDescriptor()(0) <<  std::endl;
+        	std::cout << "Landmark created: " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl <<
+        				 feature_global_position.transpose() <<
+        				 "\t" << feature_global_orientation <<
+        				 "\t" << feature_aperture << std::endl;
     	}
     	else
     		correspondent_landmark->hit();
