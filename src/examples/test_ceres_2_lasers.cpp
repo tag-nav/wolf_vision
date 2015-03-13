@@ -198,8 +198,8 @@ int main(int argc, char** argv)
 		ground_truth.segment(step*3,3) << devicePose.pt(0), devicePose.pt(1), devicePose.rt.head();
 
 		// compute odometry
-		odom_reading(0) += distribution_odom(generator)*(odom_reading(0)+1e-3);
-		odom_reading(1) += distribution_odom(generator)*(odom_reading(1)+1e-3);
+		odom_reading(0) += distribution_odom(generator)*(odom_reading(0) == 0 ? 1e-6 : odom_reading(0));
+		odom_reading(1) += distribution_odom(generator)*(odom_reading(1) == 0 ? 1e-6 : odom_reading(1));
 
 		// odometry integration
 		pose_odom(0) = pose_odom(0) + odom_reading(0) * cos(pose_odom(2));
@@ -219,15 +219,11 @@ int main(int argc, char** argv)
 		laser1Pose.setPose(devicePose);
 		laser1Pose.moveForward(laser_1_pose(0));
 		myScanner->computeScan(laser1Pose,scan1);
-		vector<double> scan1d(scan1.begin(), scan1.end());
-		Eigen::Map<Eigen::VectorXs> scan1_reading(scan1d.data(), 720);
 		// scan 2
 		laser2Pose.setPose(devicePose);
 		laser2Pose.moveForward(laser_2_pose(0));
 		laser2Pose.rt.setEuler( laser2Pose.rt.head()+M_PI, laser2Pose.rt.pitch(), laser2Pose.rt.roll() );
 		myScanner->computeScan(laser2Pose,scan2);
-		vector<double> scan2d(scan2.begin(), scan2.end());
-		Eigen::Map<Eigen::VectorXs> scan2_reading(scan2d.data(), 720);
 
 		mean_times(0) += ((double)clock()-t1)/CLOCKS_PER_SEC;
 
@@ -238,8 +234,8 @@ int main(int argc, char** argv)
 		// adding new sensor captures
 		wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading));//, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
 //		wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
-		wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1_reading));
-		wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2_reading));
+		wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
+		wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
         // updating problem
 		wolf_manager->update();
 		mean_times(1) += ((double)clock()-t1)/CLOCKS_PER_SEC;
@@ -271,7 +267,7 @@ int main(int argc, char** argv)
 		// draw detected corners
 		std::list<laserscanutils::Corner> corner_list;
 		std::vector<double> corner_vector;
-		CaptureLaser2D last_scan(TimeStamp(), &laser_1_sensor, scan1_reading);
+		CaptureLaser2D last_scan(TimeStamp(), &laser_1_sensor, scan1);
 		last_scan.extractCorners(corner_list);
 		for (std::list<laserscanutils::Corner>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++ )
 		{

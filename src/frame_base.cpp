@@ -119,7 +119,7 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
 						  (!v_ptr_ ? 0 : v_ptr_->getStateSize()) +
 						  (!w_ptr_ ? 0 : w_ptr_->getStateSize())) &&
 						  "In FrameBase::setState wrong state size");
-	assert(!!p_ptr_ && "in FrameBase::setState(), p_ptr_ is nullptr");
+	assert(p_ptr_!=nullptr && "in FrameBase::setState(), p_ptr_ is nullptr");
 
 	Eigen::Map<Eigen::VectorXs> state_map(p_ptr_->getPtr(), _st.size());
 	state_map = _st;
@@ -132,7 +132,7 @@ void FrameBase::addCapture(CaptureBase* _capt_ptr)
 
 void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
 {
-	std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
+	//std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
 	removeDownNode(_capt_iter);
 }
 

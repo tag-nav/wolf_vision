@@ -30,9 +30,9 @@ void SensorLaser2D::setDefaultScanParams()
 {
     //TODO: Decide who holds intrinsic parameters, either SensorBase::params_ or scan_params_, but NOTH BOTH!!
     
-    scan_params_.angle_min_ = -M_PI/2;
-    scan_params_.angle_max_ = M_PI/2;
-    scan_params_.angle_step_ = M_PI/720;
+    scan_params_.angle_min_ = M_PI/2;
+    scan_params_.angle_max_ = -M_PI/2;
+    scan_params_.angle_step_ = -M_PI/720;
     scan_params_.scan_time_ = 0.01;//not relevant
     scan_params_.range_min_ = 0.2;
     scan_params_.range_max_ = 100;

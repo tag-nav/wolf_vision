@@ -37,9 +37,11 @@ class CaptureLaser2D : public CaptureBase
 //         static double k_sigmas;//How many std_dev are tolerated to count that a point is supporting a line
 //         static unsigned int max_beam_distance;//max number of beams of distance between lines to consider corner or concatenation
 //         static double max_distance;//max distance between line ends to consider corner or concatenation
-        
-        Eigen::Map<Eigen::VectorXs> ranges_; // a map to the ranges inside de data vector
-        Eigen::Map<Eigen::VectorXs> intensities_; // a map to the intensities inside the data vector
+
+        //Eigen::Map<Eigen::VectorXs> ranges_; // a map to the ranges inside de data vector
+        std::vector<float> ranges_; // ranges vector
+        //Eigen::Map<Eigen::VectorXs> intensities_; // a map to the intensities inside the data vector
+        std::vector<float> intensities_; // intensities vector
         SensorLaser2D* laser_ptr_; //specific pointer to sensor laser 2D object
         
     public:
@@ -48,14 +50,16 @@ class CaptureLaser2D : public CaptureBase
          * Constructor with ranges
          * 
          **/
-        CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges);
+        //CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges);
+        CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges);
 
         /** \brief Constructor with ranges and intensities
          *
          * Constructor with ranges and intensities
          *
          **/
-        CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities);
+        //CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities);
+        CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges, const std::vector<float>& _intensities);
 
         /** \brief Destructor
          * 

@@ -59,7 +59,7 @@ class WolfManager
         window_size_(_w_size),
         new_frame_elapsed_time_(_new_frame_elapsed_time)
     {
-      createFrame(_init_frame, TimeStamp());
+      createFrame(_init_frame, TimeStamp(0));
       problem_->getTrajectoryPtr()->getFrameListPtr()->back()->fix();
     }
 
@@ -95,7 +95,7 @@ class WolfManager
     void addCapture(CaptureBase* _capture)
     {
       new_captures_.push(_capture);
-      //std::cout << "added new capture: " << _capture->nodeId() << std::endl;
+      //std::cout << "added new capture: " << _capture->nodeId() << "stamp: " << _capture->getTimeStamp().get() << std::endl;
     }
 
     void update()
@@ -110,12 +110,14 @@ class WolfManager
         if (new_capture->getSensorPtr() == sensor_prior_)
         {
           // INTEGRATING ODOMETRY CAPTURE & COMPUTING PRIOR
-          //std::cout << "integrating captures " << previous_relative_capture->nodeId() << " " << new_capture->nodeId() << std::endl;
+          //std::cout << "integrating captures " << last_capture_relative_->nodeId() << " " << new_capture->nodeId() << std::endl;
           last_capture_relative_->integrateCapture((CaptureRelative*)(new_capture));
 
           // NEW KEY FRAME (if enough time from last frame)
           //std::cout << "new TimeStamp - last Frame TimeStamp = " << new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() << std::endl;
-          if (new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() > new_frame_elapsed_time_)
+          if (problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() == 0)
+            problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setTimeStamp(new_capture->getTimeStamp());
+          else if (new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() > new_frame_elapsed_time_)
           {
             //std::cout << "store prev frame" << std::endl;
             auto previous_frame_ptr = problem_->getTrajectoryPtr()->getFrameListPtr()->back();

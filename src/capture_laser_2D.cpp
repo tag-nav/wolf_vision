@@ -8,18 +8,31 @@
 // unsigned int CaptureLaser2D::max_beam_distance = 5;//max number of beams of distance between lines to consider corner or concatenation
 // double CaptureLaser2D::max_distance = 0.5;//max distance between line ends to consider corner or concatenation
 
-CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges):
-	CaptureBase(_ts, _sensor_ptr, _ranges),
-	ranges_(data_.data(), _ranges.size()),
-	intensities_(data_.data(), 0)
+//CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges):
+//	CaptureBase(_ts, _sensor_ptr, _ranges),
+//	ranges_(data_.data(), _ranges.size()),
+//	intensities_(data_.data(), 0)
+//{
+//    laser_ptr_ = (SensorLaser2D*)sensor_ptr_;
+//}
+CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges):
+  CaptureBase(_ts, _sensor_ptr),
+  ranges_(_ranges)
 {
     laser_ptr_ = (SensorLaser2D*)sensor_ptr_;
 }
 
-CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities):
-		CaptureBase(_ts, _sensor_ptr, _ranges),
-		ranges_(data_.data(), _ranges.size()),
-		intensities_(data_.data(), _intensities.size())
+//CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities):
+//    CaptureBase(_ts, _sensor_ptr, _ranges),
+//    ranges_(data_.data(), _ranges.size()),
+//    intensities_(data_.data(), _intensities.size())
+//{
+//      laser_ptr_ = (SensorLaser2D*)sensor_ptr_;
+//}
+CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges, const std::vector<float>& _intensities):
+		CaptureBase(_ts, _sensor_ptr),
+		ranges_(_ranges),
+		intensities_(_intensities)
 {
     laser_ptr_ = (SensorLaser2D*)sensor_ptr_;
 }
@@ -37,15 +50,15 @@ void CaptureLaser2D::processCapture()
     
     //extract corners from range data
     extractCorners(corners);
-    //std::cout << corners.size() << " corners extracted" << std::endl;
+    std::cout << corners.size() << " corners extracted" << std::endl;
     
     //generate a feature for each corner
     createFeatures(corners);
-    //std::cout << getFeatureListPtr()->size() << " Features created" << std::endl;
+    std::cout << getFeatureListPtr()->size() << " Features created" << std::endl;
     
     //Establish constraints for each feature
     establishConstraints();
-    //std::cout << "Constraints created" << std::endl;
+    std::cout << "Constraints created" << std::endl;
 }
 
 unsigned int CaptureLaser2D::extractCorners(std::list<laserscanutils::Corner> & _corner_list) const

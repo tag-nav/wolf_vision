@@ -14,7 +14,7 @@ TimeStamp::TimeStamp(const WolfScalar _ts) :
 }
 
 TimeStamp::TimeStamp(const unsigned long int _sec, const unsigned long int _nsec) :
-        time_stamp_((WolfScalar)(_sec + _nsec / 1e9))
+        time_stamp_((WolfScalar)_sec + (WolfScalar)_nsec / 1e9)
 {
     //
 }
