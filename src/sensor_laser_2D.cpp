@@ -64,7 +64,7 @@ void SensorLaser2D::setDefaultCornerAlgParams()
     corners_alg_params_.theta_max_parallel = 0.1;
     corners_alg_params_.k_sigmas = 3;
     corners_alg_params_.max_beam_distance = 5;
-    corners_alg_params_.max_distance = 0.5;
+    corners_alg_params_.max_distance = 1;
 
 }
 
