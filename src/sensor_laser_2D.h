@@ -66,6 +66,14 @@ class SensorLaser2D : public SensorBase
         
         void setDefaultCornerAlgParams();
 
+        /** \brief Set corner detection algorithm parameters
+         *
+         * Set corner detection algorithm parameters
+         * \param _params struct with corner detection algorithm parameters. See laser_scan_utils library API for reference.
+         *
+         **/
+        void setCornerAlgParams(const laserscanutils::ExtractCornerParams & _corner_alg_params);
+
         /** \brief Get scanner intrinsic parameters
          * 
          * Get scanner intrinsic parameters

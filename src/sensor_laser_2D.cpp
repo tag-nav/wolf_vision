@@ -68,6 +68,11 @@ void SensorLaser2D::setDefaultCornerAlgParams()
 
 }
 
+void SensorLaser2D::setCornerAlgParams(const laserscanutils::ExtractCornerParams & _corner_alg_params)
+{
+  corners_alg_params_ = _corner_alg_params;
+}
+
 const laserscanutils::ScanParams & SensorLaser2D::getScanParams() const
 {
     return scan_params_;
@@ -121,6 +126,8 @@ WolfScalar SensorLaser2D::getScanTime() const
 void SensorLaser2D::printSensorParameters() const
 {
     std::cout << "LASER 2D SENSOR" << std::endl;
+    scan_params_.print();
+    corners_alg_params_.print();
 //     std::cout << "   angle min: " << getAngleMin() << std::endl;
 //     std::cout << "   angle min: " << getAngleMax() << std::endl;
 //     std::cout << "   angle increment: " << getAngleIncrement() << std::endl;

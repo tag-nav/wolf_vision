@@ -63,7 +63,14 @@ void CaptureLaser2D::processCapture()
 
 unsigned int CaptureLaser2D::extractCorners(std::list<laserscanutils::Corner> & _corner_list) const
 {
-    return laserscanutils::extractCorners(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, _corner_list);
+  std::list<laserscanutils::Line> line_list;
+  laserscanutils::extractLines(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, line_list);
+  return laserscanutils::extractCorners(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), line_list, _corner_list);
+}
+
+unsigned int CaptureLaser2D::extractLines(std::list<laserscanutils::Line> & _line_list) const
+{
+    return laserscanutils::extractLines(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, _line_list);
 }
 
 void CaptureLaser2D::createFeatures(std::list<laserscanutils::Corner> & _corner_list)

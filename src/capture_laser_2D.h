@@ -84,6 +84,13 @@ class CaptureLaser2D : public CaptureBase
 //         virtual unsigned int extractCorners_old(std::list<Eigen::Vector4s> & _corner_list) const;
 //         void fitLine(unsigned int _idx_from, unsigned int _idx_to, const Eigen::MatrixXs& _points, Line& line_) const;
 
+        /** \brief Extract lines from the capture
+         *
+         * Extract lines from the capture
+         *
+         **/
+        unsigned int extractLines(std::list<laserscanutils::Line> & _line_list) const;
+
         /** \brief get corners
          *
          * Get corners

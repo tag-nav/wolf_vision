@@ -148,17 +148,20 @@ class WolfManager
         {
           // ADD CAPTURE TO THE LAST FRAME (or substitute the same sensor previous capture)
           //std::cout << "adding not odometry capture..." << std::endl;
+          bool same_sensor_capture_found = false;
           for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin(); capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
           {
             if ((*capture_it)->getSensorPtr() == new_capture->getSensorPtr())
             {
               //std::cout << "removing previous capture" << std::endl;
-              problem_->getTrajectoryPtr()->getFrameListPtr()->back()->removeCapture(capture_it);
+              //problem_->getTrajectoryPtr()->getFrameListPtr()->back()->removeCapture(capture_it);
+              same_sensor_capture_found = true;
               //std::cout << "removed!" << std::endl;
               break;
             }
           }
-          problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
+          if (!same_sensor_capture_found)
+            problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
         }
       }
     }
