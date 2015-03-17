@@ -154,7 +154,8 @@ int main(int argc, char** argv)
 	myScanner->loadAssimpModel(modelFileName);
     
 	//variables
-	Eigen::Vector2s odom_reading, gps_fix_reading;
+  Eigen::Vector3s odom_reading;
+  Eigen::Vector2s gps_fix_reading;
 	Eigen::VectorXs pose_odom(3); //current odometry integred pose
 	Eigen::VectorXs ground_truth(n_execution*3); //all true poses
 	Eigen::VectorXs odom_trajectory(n_execution*3); //open loop trajectory
@@ -175,9 +176,9 @@ int main(int argc, char** argv)
 	ground_truth.head(3) = pose_odom;
 	odom_trajectory.head(3) = pose_odom;
 
-	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e9, pose_odom, 0.1, window_size);
+	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e9, pose_odom, 0.3, window_size);
 
-	std::cout << "START TRAJECTORY..." << std::endl;
+	//std::cout << "START TRAJECTORY..." << std::endl;
 	// START TRAJECTORY ============================================================================================
 	for (uint step=1; step < n_execution; step++)
 	{
@@ -188,7 +189,8 @@ int main(int argc, char** argv)
 		//std::cout << "ROBOT MOVEMENT..." << std::endl;
 		// moves the device position
 		t1=clock();
-		motionCampus(step, devicePose, odom_reading(0), odom_reading(1));
+		motionCampus(step, devicePose, odom_reading(0), odom_reading(2));
+		odom_reading(1) = 0;
 		devicePoses.push_back(devicePose);
 
 
@@ -198,12 +200,13 @@ int main(int argc, char** argv)
 		ground_truth.segment(step*3,3) << devicePose.pt(0), devicePose.pt(1), devicePose.rt.head();
 
 		// compute odometry
-		odom_reading(0) += distribution_odom(generator)*(odom_reading(0) == 0 ? 1e-6 : odom_reading(0));
-		odom_reading(1) += distribution_odom(generator)*(odom_reading(1) == 0 ? 1e-6 : odom_reading(1));
+    odom_reading(0) += distribution_odom(generator)*(odom_reading(0) == 0 ? 1e-6 : odom_reading(0));
+    odom_reading(1) += distribution_odom(generator)*1e-6;
+		odom_reading(2) += distribution_odom(generator)*(odom_reading(2) == 0 ? 1e-6 : odom_reading(2));
 
 		// odometry integration
-		pose_odom(0) = pose_odom(0) + odom_reading(0) * cos(pose_odom(2));
-		pose_odom(1) = pose_odom(1) + odom_reading(0) * sin(pose_odom(2));
+		pose_odom(0) = pose_odom(0) + odom_reading(0) * cos(pose_odom(2)) - odom_reading(1) * sin(pose_odom(2));
+		pose_odom(1) = pose_odom(1) + odom_reading(0) * sin(pose_odom(2)) + odom_reading(1) * cos(pose_odom(2));
 		pose_odom(2) = pose_odom(2) + odom_reading(1);
 		odom_trajectory.segment(step*3,3) = pose_odom;
 

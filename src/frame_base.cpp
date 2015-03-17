@@ -114,15 +114,18 @@ StateStatus FrameBase::getStatus() const
 
 void FrameBase::setState(const Eigen::VectorXs& _st)
 {
-	assert(_st.size() == ((!p_ptr_ ? 0 : p_ptr_->getStateSize()) +
-						  (!o_ptr_ ? 0 : o_ptr_->getStateSize()) +
-						  (!v_ptr_ ? 0 : v_ptr_->getStateSize()) +
-						  (!w_ptr_ ? 0 : w_ptr_->getStateSize())) &&
-						  "In FrameBase::setState wrong state size");
+
+	assert(_st.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getStateSize()) +
+                        (o_ptr_==nullptr ? 0 : o_ptr_->getStateSize()) +
+                        (v_ptr_==nullptr ? 0 : v_ptr_->getStateSize()) +
+                        (w_ptr_==nullptr ? 0 : w_ptr_->getStateSize())) &&
+                        "In FrameBase::setState wrong state size");
 	assert(p_ptr_!=nullptr && "in FrameBase::setState(), p_ptr_ is nullptr");
 
 	Eigen::Map<Eigen::VectorXs> state_map(p_ptr_->getPtr(), _st.size());
+	//std::cout << "setting state\noriginal: " << state_map.transpose() << "\nnew: " << _st.transpose() << std::endl;
 	state_map = _st;
+  //std::cout << "setted state: " << *p_ptr_->getPtr() << " " << *(p_ptr_->getPtr()+1) << std::endl;
 }
 
 void FrameBase::addCapture(CaptureBase* _capt_ptr)

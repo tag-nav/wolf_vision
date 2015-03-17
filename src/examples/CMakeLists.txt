@@ -49,11 +49,11 @@ TARGET_LINK_LIBRARIES(test_ceres_covariance ${PROJECT_NAME})
 
 IF(faramotics_FOUND)
     IF (laser_scan_utils_FOUND)
-        ADD_EXECUTABLE(test_ceres_laser test_ceres_laser.cpp)
-        TARGET_LINK_LIBRARIES(test_ceres_laser 
-                                ${pose_state_time_LIBRARIES} 
-                                ${faramotics_LIBRARIES} 
-                                ${PROJECT_NAME})
+#        ADD_EXECUTABLE(test_ceres_laser test_ceres_laser.cpp)
+#        TARGET_LINK_LIBRARIES(test_ceres_laser 
+#                                ${pose_state_time_LIBRARIES} 
+#                                ${faramotics_LIBRARIES} 
+#                                ${PROJECT_NAME})
                                 
         ADD_EXECUTABLE(test_ceres_2_lasers test_ceres_2_lasers.cpp)
         TARGET_LINK_LIBRARIES(test_ceres_2_lasers 

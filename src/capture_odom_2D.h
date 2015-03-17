@@ -16,9 +16,9 @@ class CaptureOdom2D : public CaptureRelative
     public:
       CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr);
 
-      CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
+      CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data);
 
-      CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
+      CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance);
         
       virtual ~CaptureOdom2D();
 

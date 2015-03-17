@@ -50,15 +50,15 @@ void CaptureLaser2D::processCapture()
     
     //extract corners from range data
     extractCorners(corners);
-    std::cout << corners.size() << " corners extracted" << std::endl;
+    //std::cout << corners.size() << " corners extracted" << std::endl;
     
     //generate a feature for each corner
     createFeatures(corners);
-    std::cout << getFeatureListPtr()->size() << " Features created" << std::endl;
+    //std::cout << getFeatureListPtr()->size() << " Features created" << std::endl;
     
     //Establish constraints for each feature
     establishConstraints();
-    std::cout << "Constraints created" << std::endl;
+    //std::cout << "Constraints created" << std::endl;
 }
 
 unsigned int CaptureLaser2D::extractCorners(std::list<laserscanutils::Corner> & _corner_list) const

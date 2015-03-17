@@ -49,6 +49,7 @@ class WolfManager
     unsigned int window_size_;
     FrameBaseIter first_window_frame_;
     CaptureRelative* last_capture_relative_;
+    CaptureRelative* second_last_capture_relative_;
     WolfScalar new_frame_elapsed_time_;
 
   public:
@@ -57,7 +58,9 @@ class WolfManager
         problem_(new WolfProblem(_state_length)),
         sensor_prior_(_sensor_prior),
         window_size_(_w_size),
-        new_frame_elapsed_time_(_new_frame_elapsed_time)
+        new_frame_elapsed_time_(_new_frame_elapsed_time),
+        last_capture_relative_(nullptr),
+        second_last_capture_relative_(nullptr)
     {
       createFrame(_init_frame, TimeStamp(0));
       problem_->getTrajectoryPtr()->getFrameListPtr()->back()->fix();
@@ -85,11 +88,10 @@ class WolfManager
       problem_->getTrajectoryPtr()->addFrame(new FrameBase(_time_stamp, new_position, new_orientation));
 
       // add a zero odometry capture (in order to integrate)
-      problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new CaptureOdom2D(_time_stamp,
-                                                                          sensor_prior_,
-                                                                          Eigen::Vector2s::Zero(),
-                                                                          Eigen::Matrix2s::Zero()));
-      last_capture_relative_ = (CaptureRelative*)(problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->front());
+      CaptureOdom2D* empty_odom = new CaptureOdom2D(_time_stamp,sensor_prior_,Eigen::Vector3s::Zero(),Eigen::Matrix3s::Zero());
+      problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(empty_odom);
+      second_last_capture_relative_ = last_capture_relative_;
+      last_capture_relative_ = (CaptureRelative*)(empty_odom);
     }
 
     void addCapture(CaptureBase* _capture)
@@ -109,27 +111,32 @@ class WolfManager
         // ODOMETRY SENSOR
         if (new_capture->getSensorPtr() == sensor_prior_)
         {
-          // INTEGRATING ODOMETRY CAPTURE & COMPUTING PRIOR
-          //std::cout << "integrating captures " << last_capture_relative_->nodeId() << " " << new_capture->nodeId() << std::endl;
+          // UPDATE LAST STATE FROM SECOND LAST (optimized)
+          if (second_last_capture_relative_ != nullptr)
+            problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setState(second_last_capture_relative_->computePrior());
+
+          // INTEGRATE NEW ODOMETRY TO LAST FRAME
           last_capture_relative_->integrateCapture((CaptureRelative*)(new_capture));
 
-          // NEW KEY FRAME (if enough time from last frame)
+          // INITIALIZE STAMP OF FIRST FRAME
           //std::cout << "new TimeStamp - last Frame TimeStamp = " << new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() << std::endl;
           if (problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() == 0)
             problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setTimeStamp(new_capture->getTimeStamp());
-          else if (new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() > new_frame_elapsed_time_)
+
+          // NEW KEY FRAME (if enough time from last frame)
+          if (new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() > new_frame_elapsed_time_)
           {
             //std::cout << "store prev frame" << std::endl;
-            auto previous_frame_ptr = problem_->getTrajectoryPtr()->getFrameListPtr()->back();
+            auto second_last_frame_ptr = problem_->getTrajectoryPtr()->getFrameListPtr()->back();
 
-            // NEW FRAME
+            // NEW CURRENT FRAME
             //std::cout << "new frame" << std::endl;
             createFrame(last_capture_relative_->computePrior(), new_capture->getTimeStamp());
 
             // COMPUTE PREVIOUS FRAME CAPTURES
             //std::cout << "compute prev frame" << std::endl;
-            for (auto capture_it = previous_frame_ptr->getCaptureListPtr()->begin(); capture_it != previous_frame_ptr->getCaptureListPtr()->end(); capture_it++)
-              (*capture_it)->processCapture();
+            for (auto capture_it = second_last_frame_ptr->getCaptureListPtr()->begin(); capture_it != second_last_frame_ptr->getCaptureListPtr()->end(); capture_it++)
+                (*capture_it)->processCapture();
 
             // WINDOW of FRAMES (remove or fix old frames)
             //std::cout << "frame window" << std::endl;
@@ -168,11 +175,24 @@ class WolfManager
 
     Eigen::VectorXs getVehiclePose()
     {
+      if (second_last_capture_relative_ != nullptr)
+        problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setState(second_last_capture_relative_->computePrior());
+      //std::cout << "getVehiclePose +++++++++++++++++++++++++\n";
       return last_capture_relative_->computePrior();
     }
 
     WolfProblem* getProblemPtr()
     {
       return problem_;
+    }
+
+    void setWindowSize(const unsigned int& _size)
+    {
+      window_size_ = _size;
+    }
+
+    void setNewFrameElapsedTime( const WolfScalar& _dt)
+    {
+      new_frame_elapsed_time_ = _dt;
     }
 };
