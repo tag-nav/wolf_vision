@@ -3,12 +3,13 @@
 //init static node counter
 unsigned int NodeBase::node_id_count_ = 0;
 
-NodeBase::NodeBase(std::string _label) :
-        label_(_label), //
+NodeBase::NodeBase(std::string _label, bool _verbose) :
+        label_(_label),
         node_id_(++node_id_count_),
-		node_pending_(ADD_PENDING)
+		node_pending_(ADD_PENDING), 
+		verbose_(_verbose)
 {
-    //    std::cout << "NodeID::constructor. Id: " << node_id_ << std::endl;
+        if (verbose_) std::cout << "NodeBase::NodeBase(). Id: " << node_id_ << " Label: " << label_ << std::endl;
 }
 
 NodeBase::~NodeBase()

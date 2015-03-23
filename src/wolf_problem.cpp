@@ -11,8 +11,11 @@ WolfProblem::WolfProblem(unsigned int _size) :
 {
 //	map_ptr_ = new MapBase;
 //	trajectory_ptr_ = new TrajectoryBase;
+    std::cout << "WolfProblem::WolfProblem(): " << __LINE__ << std::endl;
 	map_ptr_->linkToUpperNode( this );
+    std::cout << "WolfProblem::WolfProblem(): " << __LINE__ << std::endl;
 	trajectory_ptr_->linkToUpperNode( this );
+    std::cout << "WolfProblem::WolfProblem(): " << __LINE__ << std::endl;
 }
 
 WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, unsigned int _size) :

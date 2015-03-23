@@ -135,9 +135,9 @@ int main(int argc, char** argv)
 	string modelFileName;
 
 	//model and initial view point
-	modelFileName = "/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj";
+	//modelFileName = "/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj";
     //modelFileName = "/home/acoromin/dev/br/faramotics/models/campusNordUPC.obj";
-    //modelFileName = "/home/andreu/dev/faramotics/models/campusNordUPC.obj";
+    modelFileName = "/home/andreu/dev/faramotics/models/campusNordUPC.obj";
 	devicePose.setPose(2,8,0.2,0,0,0);
 	viewPoint.setPose(devicePose);
 	viewPoint.moveForward(10);
@@ -176,7 +176,7 @@ int main(int argc, char** argv)
 	ground_truth.head(3) = pose_odom;
 	odom_trajectory.head(3) = pose_odom;
 
-	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e9, pose_odom, 0.3, window_size);
+	WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e6, pose_odom, 0.3, window_size);
 
 	//std::cout << "START TRAJECTORY..." << std::endl;
 	// START TRAJECTORY ============================================================================================

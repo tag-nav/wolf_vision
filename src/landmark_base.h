@@ -18,6 +18,12 @@ class NodeTerminus;
 #include "node_linked.h"
 #include "map_base.h"
 
+// why v, w and a ?
+// add descriptor as a StateBase -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
+// orientation ? -> Is it also a descriptor ?
+// init and end Time stamps 
+//
+
 //class LandmarkBase
 class LandmarkBase : public NodeLinked<MapBase,NodeTerminus>
 {

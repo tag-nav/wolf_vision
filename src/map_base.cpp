@@ -3,7 +3,7 @@
 MapBase::MapBase() :
     NodeLinked(MID, "MAP")
 {
-    //
+    std::cout << "MapBase::MapBase(): " << __LINE__ << std::endl;
 }
 
 MapBase::~MapBase()

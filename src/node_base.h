@@ -19,6 +19,7 @@ class NodeBase
         unsigned int node_id_; ///< Node id. It is unique over the whole Wolf Tree
         static unsigned int node_id_count_; ///< Object counter (acts as simple ID factory)
         PendingStatus node_pending_; ///< Pending to be added/updated in the filter or optimizer
+        bool verbose_; 
 
     public: 
 
@@ -27,7 +28,7 @@ class NodeBase
          * Constructor from label
 		 * 
          */
-        NodeBase(std::string _label);
+        NodeBase(std::string _label, bool _verbose = false);
 
         /** \brief Default destructor
          *
