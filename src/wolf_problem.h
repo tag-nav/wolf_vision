@@ -20,7 +20,8 @@
 class WolfProblem: public NodeBase
 {
     protected:
-		Eigen::VectorXs state_;
+        Eigen::VectorXs state_;
+        Eigen::SparseMatrix<WolfScalar> covariance_;
 		unsigned int state_idx_last_;
         NodeLocation location_;// TODO: should it be in node_base?
         MapBase* map_ptr_;
@@ -37,14 +38,14 @@ class WolfProblem: public NodeBase
          * Constructor from state size
 		 * 
          */
-        WolfProblem(unsigned int _size=1e6);
+        WolfProblem(unsigned int _size=1e3);
 
         /** \brief Constructor from map and trajectory shared pointers
 		 *
 		 * Constructor from map and trajectory shared pointers
 		 *
 		 */
-        WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr=nullptr, unsigned int _size=1e6);
+        WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr=nullptr, unsigned int _size=1e3);
 
         /** \brief Default destructor
          *
@@ -59,6 +60,21 @@ class WolfProblem: public NodeBase
 		 *
 		 */
         bool addState(StateBase* _new_state, const Eigen::VectorXs& _new_state_values);
+
+        /** \brief Adds a new covariance block
+         *
+         * Adds a new covariance block
+         *
+         */
+        void addCovarianceBlock(StateBase* _state1, StateBase* _state2, const Eigen::MatrixXs& _cov);
+
+        /** \brief Gets a covariance block
+         *
+         * Gets a covariance block
+         *
+         */
+        void getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov_block) const;
+        void getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::Map<Eigen::MatrixXs>& _cov_block) const;
 
         /** \brief Removes a new state unit of the state
 		 *

@@ -24,7 +24,7 @@ CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Ei
 	data_(_data),
 	data_covariance_(_data_covariance)
 {
-	//
+    //std::cout << "created CaptureBase " << nodeId() << std::endl << "covariance: " << std::endl << data_covariance_ << std::endl;
 }
 
 CaptureBase::~CaptureBase()

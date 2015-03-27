@@ -15,7 +15,7 @@
 class StateComplexAngle : public StateOrientation
 {
     public:
-		static const unsigned int BLOCK_SIZE = 2;
+        static const unsigned int BLOCK_SIZE = 2;
 
         /** \brief Constructor with whole state storage and index where starts the state unit
          * 
@@ -61,6 +61,13 @@ class StateComplexAngle : public StateOrientation
 		 *
 		 **/
 		virtual Eigen::Matrix3s getRotationMatrix() const;
+
+        /** \brief Returns a (mapped) vector of the state unit
+         *
+         * Returns a (mapped) vector of the state unit
+         *
+         **/
+        virtual Eigen::Map<const Eigen::VectorXs> getVector() const;
 
         /** \brief Prints all the elements of the state unit
 		 *

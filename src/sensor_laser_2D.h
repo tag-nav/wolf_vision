@@ -24,27 +24,12 @@ class SensorLaser2D : public SensorBase
         /** \brief Constructor with arguments
          * 
          * Constructor with arguments
-         * \param _sp sensor 3D pose with respect to vehicle base frame
-         * \param _angle_min start angle of the scan [rad]
-         * \param _angle_max end angle of the scan [rad]
-         * \param _angle_increment angular distance between measurements [rad]
-         * \param _range_min minimum range value [m]
-         * \param _range_max maximum range value [m]
-         * \param _range_stdev range standard deviation [m]
-         * \param _time_increment time between beams [seconds]
-         * \param _scan_time time between scans [seconds]
-         * 
-         **/
-        //SensorLaser2D(const Eigen::VectorXs & _sp, WolfScalar _angle_min, WolfScalar _angle_max, WolfScalar _angle_increment, WolfScalar _range_min, WolfScalar _range_max, WolfScalar _range_stdev, WolfScalar _time_increment=0, WolfScalar _scan_time=0);
-        
-        /** \brief Constructor with arguments
-         * 
-         * Constructor with arguments
-         * \param _sp sensor 3D pose with respect to vehicle base frame
+         * \param _p_ptr StateBase pointer to the sensor position
+         * \param _o_ptr StateOrientation pointer to the sensor orientation
          * \param _params struct with scan parameters. See laser_scan_utils library API for reference
          * 
          **/        
-        SensorLaser2D(const Eigen::Vector6s & _sp);
+        SensorLaser2D(StateBase* _p_ptr, StateOrientation* _o_ptr);
         //SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params);
 
         /** \brief Destructor

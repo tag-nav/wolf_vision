@@ -1,7 +1,7 @@
 #include "sensor_gps_fix.h"
 
-SensorGPSFix::SensorGPSFix(const Eigen::Vector6s & _sp, const double& _noise) :
-        SensorBase(GPS_FIX, _sp, Eigen::VectorXs::Constant(1,_noise))
+SensorGPSFix::SensorGPSFix(StateBase* _p_ptr, StateOrientation* _o_ptr, const double& _noise) :
+        SensorBase(GPS_FIX, _p_ptr, _o_ptr, Eigen::VectorXs::Constant(1,_noise))
 {
     //
 }

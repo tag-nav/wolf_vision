@@ -81,14 +81,14 @@ class StatePoint : public StateBase
 			return BLOCK_SIZE;
 		}
 
-		/** \brief Returns the point in a vector
+		/** \brief Returns the point in a (mapped) vector
 		 *
-		 * Returns the point in a vector
+		 * Returns the point in a (mapped) vector
 		 *
 		 **/
-		const Eigen::Matrix<WolfScalar, BLOCK_SIZE, 1>& getVector() const
+		virtual Eigen::Map<const Eigen::VectorXs> getVector() const
 		{
-			return Eigen::Map<const Eigen::Matrix<WolfScalar, BLOCK_SIZE, 1>>(state_ptr_);
+		    return Eigen::Map<const Eigen::VectorXs>(state_ptr_, BLOCK_SIZE);
 		}
 
         /** \brief Prints all the elements of the state unit

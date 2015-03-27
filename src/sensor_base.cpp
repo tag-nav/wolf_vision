@@ -1,57 +1,41 @@
 #include "sensor_base.h"
 
-SensorBase::SensorBase(const SensorType & _tp, const Eigen::Vector6s & _pose, const Eigen::VectorXs & _params) :
-	NodeBase("SENSOR"),
-  type_(_tp),
-	sensor_position_vehicle_(_pose.head(3)),
-	params_(_params.size())
+SensorBase::SensorBase(const SensorType & _tp, StateBase* _p_ptr, StateOrientation* _o_ptr, const Eigen::VectorXs & _params) :
+        NodeBase("SENSOR"),
+        type_(_tp),
+        p_ptr_(_p_ptr),
+        o_ptr_(_o_ptr),
+        params_(_params.size())
 {
-  params_ = _params;
-	sensor_rotation_vehicle_ = Eigen::AngleAxisd(_pose(3), Eigen::Vector3d::UnitX()) *
-                             Eigen::AngleAxisd(_pose(4), Eigen::Vector3d::UnitY()) *
-                             Eigen::AngleAxisd(_pose(5), Eigen::Vector3d::UnitZ());
+    params_ = _params;
 }
 
-SensorBase::SensorBase(const SensorType & _tp, const Eigen::Vector6s & _pose, unsigned int _params_size) :
-	NodeBase("SENSOR"),
-  type_(_tp),
-	sensor_position_vehicle_(_pose.head(3)),
-  params_(_params_size)
+SensorBase::SensorBase(const SensorType & _tp, StateBase* _p_ptr, StateOrientation* _o_ptr, unsigned int _params_size) :
+        NodeBase("SENSOR"),
+        type_(_tp),
+        p_ptr_(_p_ptr),
+        o_ptr_(_o_ptr),
+        params_(_params_size)
 {
-	sensor_rotation_vehicle_ = Eigen::AngleAxisd(_pose(3), Eigen::Vector3d::UnitX()) *
-                             Eigen::AngleAxisd(_pose(4), Eigen::Vector3d::UnitY()) *
-                             Eigen::AngleAxisd(_pose(5), Eigen::Vector3d::UnitZ());
+    //
 }
 
 SensorBase::~SensorBase()
 {
-	//std::cout << "deleting SensorBase " << nodeId() << std::endl;
+    //std::cout << "deleting SensorBase " << nodeId() << std::endl;
 }
 
 const SensorType SensorBase::getSensorType() const
 {
-  return type_;
+    return type_;
 }
 
-const Eigen::Vector3s * SensorBase::getSensorPosition() const
+StateBase* SensorBase::getPPtr() const
 {
-	//std::cout << "getSensorPosition: " << sensor_position_vehicle_.transpose() << std::endl;
-  return & sensor_position_vehicle_;
+    return p_ptr_;
 }
 
-const Eigen::Matrix3s * SensorBase::getSensorRotation() const
-{   
-	//std::cout << "getSensorRotation: " << sensor_rotation_vehicle_ << std::endl;
-  return & sensor_rotation_vehicle_;
-}
-
-void SensorBase::setSensorPose(const Eigen::Vector6s & _pose)
+StateOrientation* SensorBase::getOPtr() const
 {
-  sensor_position_vehicle_ = _pose.head(3);
-  sensor_rotation_vehicle_ = Eigen::AngleAxisd(_pose(3), Eigen::Vector3d::UnitX()) *
-                             Eigen::AngleAxisd(_pose(4), Eigen::Vector3d::UnitY()) *
-                             Eigen::AngleAxisd(_pose(5), Eigen::Vector3d::UnitZ());
+    return o_ptr_;
 }
-
-
-

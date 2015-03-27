@@ -50,6 +50,13 @@ class StateBase : public NodeBase
 		 **/
         virtual WolfScalar* getPtr();
         
+        /** \brief Returns a (mapped) vector of the state unit
+         *
+         * Returns a (mapped) vector of the state unit
+         *
+         **/
+        virtual Eigen::Map<const Eigen::VectorXs> getVector() const = 0;
+
         /** \brief Set the pointer of the first element of the state
 		 *
 		 * Set the pointer of the first element of the state

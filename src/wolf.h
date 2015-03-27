@@ -21,6 +21,7 @@
 //includes from Eigen lib
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
+#include <eigen3/Eigen/Sparse>
 
 /**
  * \brief scalar type for the Wolf project
@@ -84,7 +85,7 @@ typedef AngleAxis<WolfScalar> AngleAxiss;                 ///< Angle-Axis of rea
 typedef enum
 {
     TOP, ///< root node location. This is the one that commands jobs down the tree.
-    MID,///< middle nodes. These delegate jobs to lower nodes.
+    MID, ///< middle nodes. These delegate jobs to lower nodes.
     BOTTOM ///< lowest level nodes. These are the ones that do not delegate any longer and have to do the job.
 } NodeLocation;
 
@@ -108,13 +109,13 @@ typedef enum
  * You may add items to this list as needed. Be concise with names, and document your entries.
  * 
  */
-typedef enum 
+typedef enum
 {
     CTR_GPS_FIX_2D,				///< marks a 2D GPS Fix constraint.
-	CTR_ODOM_2D_COMPLEX_ANGLE,	///< marks a 2D Odometry using complex angles.
-	CTR_ODOM_2D_THETA,			///< marks a 2D Odometry using theta angles.
-	CTR_CORNER_2D_THETA			///< marks a 2D Odometry using theta angles.
-    
+    CTR_ODOM_2D_COMPLEX_ANGLE,	///< marks a 2D Odometry using complex angles.
+    CTR_ODOM_2D_THETA,			///< marks a 2D Odometry using theta angles.
+    CTR_CORNER_2D_THETA			///< marks a 2D Odometry using theta angles.
+
 } ConstraintType;
 
 /** \brief Enumeration of all possible state parametrizations
@@ -126,12 +127,12 @@ typedef enum
  */
 typedef enum
 {
-	ST_POINT_1D,		///< A 1D point. No parametrization.
-	ST_POINT_2D,		///< A 2D point. No parametrization.
-	ST_POINT_3D,		///< A 3D point. No parametrization.
-	ST_THETA,			///< A 2D orientation represented by a single angle. No parametrization.
-	ST_COMPLEX_ANGLE,	///< A 2D orientation represented by a complex number.
-	ST_QUATERNION		///< A 3D orientation represented by a quaternion.
+    ST_POINT_1D,		  ///< A 1D point. No parametrization.
+    ST_POINT_2D,		  ///< A 2D point. No parametrization.
+    ST_POINT_3D,		  ///< A 3D point. No parametrization.
+    ST_THETA,			    ///< A 2D orientation represented by a single angle. No parametrization.
+    ST_COMPLEX_ANGLE,	///< A 2D orientation represented by a complex number.
+    ST_QUATERNION		  ///< A 3D orientation represented by a quaternion.
 } StateType;
 
 /** \brief Enumeration of all possible state status
@@ -143,9 +144,9 @@ typedef enum
  */
 typedef enum
 {
-	ST_ESTIMATED,		///< State in estimation (default)
-	ST_FIXED,			///< State fixed, estimated enough or fixed infrastructure.
-	ST_REMOVED			///< Removed state. TODO: is it useful?
+    ST_ESTIMATED,		///< State in estimation (default)
+    ST_FIXED,			  ///< State fixed, estimated enough or fixed infrastructure.
+    ST_REMOVED			///< Removed state. TODO: is it useful?
 } StateStatus;
 
 /** \brief Enumeration of all possible sensor types
@@ -157,13 +158,13 @@ typedef enum
  */
 typedef enum
 {
-    ODOM_2D,	///< Odometry measurement from encoders: displacement and rotation.
-    IMU,		///< Inertial measurement unit with 3 acceleros, 3 gyros
-    CAMERA,		///< Regular pinhole camera
-    GPS_FIX,	///< GPS fix calculated from a GPS receiver
-    GPS_RAW,    ///< GPS pseudo ranges, doppler and satellite ephemerides
-    LIDAR,		///< Laser Range Finder, 2D
-    RADAR,		///< Radar
+    ODOM_2D,	    ///< Odometry measurement from encoders: displacement and rotation.
+    IMU,		      ///< Inertial measurement unit with 3 acceleros, 3 gyros
+    CAMERA,		    ///< Regular pinhole camera
+    GPS_FIX,	    ///< GPS fix calculated from a GPS receiver
+    GPS_RAW,      ///< GPS pseudo ranges, doppler and satellite ephemerides
+    LIDAR,		    ///< Laser Range Finder, 2D
+    RADAR,		    ///< Radar
     ABSOLUTE_POSE ///< Full absolute pose (XYZ+quaternion)
 } SensorType;
 
@@ -176,18 +177,18 @@ typedef enum
  */
 typedef enum
 {
-	LANDMARK_POINT,		///< A point landmark, either 3D or 2D
-	LANDMARK_CORNER,	///< A corner landmark (2D)
-	LANDMARK_CONTAINER	///< A container landmark
+    LANDMARK_POINT,		  ///< A point landmark, either 3D or 2D
+    LANDMARK_CORNER,	  ///< A corner landmark (2D)
+    LANDMARK_CONTAINER	///< A container landmark
 } LandmarkType;
 
 typedef enum
 {
-    LANDMARK_CANDIDATE,     ///< A landmark, just created. Association with it allowed, but not yet stablish an actual constraint for the solver
-    LANDMARK_ESTIMATED, 	///< A landmark being estimated. Association with it allowed, stablishing actual constraints for the solver where both vehicle and landmark states are being estimated
-    LANDMARK_FIXED,     	///< A landmark estimated. Association with it allowed, stablishing actual constraints for the solver, but its value remains static, no longer optimized
-    LANDMARK_OUT_OF_VIEW,   ///< A landmark out of the field of view. Association with it is not allowed, so does not pose constraints for the solver
-    LANDMARK_OLD            ///< An old landmark. Association with it not allowed, but old constraints can still be taken into account by the solver.
+    LANDMARK_CANDIDATE,   ///< A landmark, just created. Association with it allowed, but not yet stablish an actual constraint for the solver
+    LANDMARK_ESTIMATED, ///< A landmark being estimated. Association with it allowed, stablishing actual constraints for the solver where both vehicle and landmark states are being estimated
+    LANDMARK_FIXED, ///< A landmark estimated. Association with it allowed, stablishing actual constraints for the solver, but its value remains static, no longer optimized
+    LANDMARK_OUT_OF_VIEW, ///< A landmark out of the field of view. Association with it is not allowed, so does not pose constraints for the solver
+    LANDMARK_OLD          ///< An old landmark. Association with it not allowed, but old constraints can still be taken into account by the solver.
 } LandmarkStatus;
 
 /** \brief Pending status of a node
@@ -199,9 +200,9 @@ typedef enum
  */
 typedef enum
 {
-	NOT_PENDING,	///< A point landmark, either 3D or 2D
-	ADD_PENDING,	///< A corner landmark (2D)
-	UPDATE_PENDING	///< A container landmark
+    NOT_PENDING,	  ///< A point landmark, either 3D or 2D
+    ADD_PENDING,	  ///< A corner landmark (2D)
+    UPDATE_PENDING	///< A container landmark
 } PendingStatus;
 
 /////////////////////////////////////////////////////////////////////////
@@ -209,7 +210,6 @@ typedef enum
 /////////////////////////////////////////////////////////////////////////
 // - forwards for pointers
 //class VehicleBase;
-
 
 class NodeTerminus;
 class WolfProblem;
@@ -230,9 +230,8 @@ class SensorBase;
 class SensorLaser2D;
 class TransSensor;
 class StateBase;
-template <unsigned int SIZE> class StatePoint;
+template<unsigned int SIZE> class StatePoint;
 class PinHole;
-
 
 // - Vehicle
 // typedef std::shared_ptr<VehicleBase> VehicleShPtr;
@@ -304,8 +303,6 @@ typedef StatePoint<3> StatePoint3D;
 
 // - Pin hole
 
-
-
 ///** \brief Enumeration of all possible feature types
 // *
 // * Enumeration of all possible feature types.
@@ -325,6 +322,5 @@ typedef StatePoint<3> StatePoint3D;
 //    LIDAR_SCAN, ///< Full 2D laser scan
 //    LIDAR_RAY   ///< A single laser ray
 //} FeatureType;
-
 
 #endif /* WOLF_H_ */

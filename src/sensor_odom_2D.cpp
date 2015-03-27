@@ -1,7 +1,7 @@
 #include "sensor_odom_2D.h"
 
-SensorOdom2D::SensorOdom2D(const Eigen::Vector6s & _sp, const WolfScalar& _disp_noise_factor, const WolfScalar&  _rot_noise_factor) :
-        SensorBase(ODOM_2D, _sp, 2)
+SensorOdom2D::SensorOdom2D(StateBase* _p_ptr, StateOrientation* _o_ptr, const WolfScalar& _disp_noise_factor, const WolfScalar&  _rot_noise_factor) :
+        SensorBase(ODOM_2D, _p_ptr, _o_ptr, 2)
 {
     params_ << _disp_noise_factor, _rot_noise_factor;
 }

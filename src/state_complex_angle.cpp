@@ -39,6 +39,11 @@ Eigen::Matrix3s StateComplexAngle::getRotationMatrix() const
 	return R;
 }
 
+Eigen::Map<const Eigen::VectorXs> StateComplexAngle::getVector() const
+{
+    return Eigen::Map<const Eigen::VectorXs>(state_ptr_, BLOCK_SIZE);
+}
+
 void StateComplexAngle::print(unsigned int _ntabs, std::ostream& _ost) const
 {
 	printTabs(_ntabs);

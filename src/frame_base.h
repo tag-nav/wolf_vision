@@ -45,7 +45,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          * \param _w_ptr StateBase pointer to the angular velocity (default: nullptr)
          *
          **/
-        FrameBase(const TimeStamp& _ts, StateBase* _p_ptr = nullptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
+        FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
 
         /** \brief Constructor with type, time stamp and state pointer
          * 
@@ -59,7 +59,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          * \param _w_ptr StateBase pointer to the angular velocity (default: nullptr)
          * 
          **/        
-        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBase* _p_ptr = nullptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
+        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
         
         /** \brief Destructor
          * 

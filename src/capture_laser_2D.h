@@ -105,5 +105,7 @@ class CaptureLaser2D : public CaptureBase
         void establishConstraints();
 
         virtual Eigen::VectorXs computePrior() const;
+
+        WolfScalar computeMahalanobisDistance(const FeatureBase* _feature, const LandmarkBase* _landmark);
 };
 #endif /* CAPTURE_LASER_2D_H_ */

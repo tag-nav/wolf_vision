@@ -1,128 +1,109 @@
 #include "capture_odom_2D.h"
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
-    CaptureRelative(_ts, _sensor_ptr)
+        CaptureRelative(_ts, _sensor_ptr)
 {
     //
 }
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data) :
-	CaptureRelative(_ts, _sensor_ptr, _data)
+        CaptureRelative(_ts, _sensor_ptr, _data)
 {
-	data_covariance_ = Eigen::Matrix3s::Zero();
-  data_covariance_(0,0) = (_data(0) == 0 ? 1e-6 : _data(0))*((SensorOdom2D*)_sensor_ptr)->getDisplacementNoiseFactor();
-  data_covariance_(1,1) = (_data(1) == 0 ? 1e-6 : _data(1))*((SensorOdom2D*)_sensor_ptr)->getDisplacementNoiseFactor();
-  data_covariance_(2,2) = (_data(2) == 0 ? 1e-6 : _data(2))*((SensorOdom2D*)_sensor_ptr)->getRotationNoiseFactor();
+    data_covariance_ = Eigen::Matrix3s::Zero();
+    data_covariance_(0, 0) = (_data(0) == 0 ? 1e-6 : fabs(_data(0))) * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor();
+    data_covariance_(1, 1) = (_data(1) == 0 ? 1e-6 : fabs(_data(1))) * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor();
+    data_covariance_(2, 2) = (_data(2) == 0 ? 1e-6 : fabs(_data(2))) * ((SensorOdom2D*) _sensor_ptr)->getRotationNoiseFactor();
 //  std::cout << data_covariance_ << std::endl;
 }
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance) :
-	CaptureRelative(_ts, _sensor_ptr, _data, _data_covariance)
+        CaptureRelative(_ts, _sensor_ptr, _data, _data_covariance)
 {
-	//
+    //
 }
 
 CaptureOdom2D::~CaptureOdom2D()
 {
-	//std::cout << "Destroying GPS fix capture...\n";
+    //std::cout << "Destroying GPS fix capture...\n";
 }
 
 inline void CaptureOdom2D::processCapture()
 {
-  //std::cout << "CaptureOdom2D::addFeature..." << std::endl;
-	// ADD FEATURE
-  addFeature(new FeatureOdom2D(data_,data_covariance_));
+    //std::cout << "CaptureOdom2D::addFeature..." << std::endl;
+    // ADD FEATURE
+    addFeature(new FeatureOdom2D(data_, data_covariance_));
 
-  //std::cout << "CaptureOdom2D::addConstraints..." << std::endl;
-  // ADD CONSTRAINT
-  addConstraints();
+    //std::cout << "CaptureOdom2D::addConstraints..." << std::endl;
+    // ADD CONSTRAINT
+    addConstraints();
 }
 
 Eigen::VectorXs CaptureOdom2D::computePrior() const
 {
-	assert(up_node_ptr_ != nullptr && "This Capture is not linked to any frame");
+    assert(up_node_ptr_ != nullptr && "This Capture is not linked to any frame");
 
-	if (getFramePtr()->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
-	{
-		Eigen::Vector4s prior;
-		Eigen::Map<Eigen::Vector4s> initial_pose(getFramePtr()->getPPtr()->getPtr());
-		///std::cout << "initial_pose: " << initial_pose.transpose() << std::endl;
-//		WolfScalar prior_2 = initial_pose(2) * cos(data_(1)) - initial_pose(3) * sin(data_(1));
-//		WolfScalar prior_3 = initial_pose(2) * sin(data_(1)) + initial_pose(3) * cos(data_(1));
-//		prior(0) = initial_pose(0) + data_(0) * prior_2;
-//		prior(1) = initial_pose(1) + data_(0) * prior_3;
-//		prior(2) = prior_2;
-//		prior(3) = prior_3;
-    prior(0) = initial_pose(0) + data_(0) * initial_pose(2) - data_(1) * initial_pose(3);
-    prior(1) = initial_pose(1) + data_(0) * initial_pose(3) + data_(1) * initial_pose(2);
-    prior(2) = initial_pose(2) * cos(data_(2)) - initial_pose(3) * sin(data_(2));
-    prior(3) = initial_pose(2) * sin(data_(2)) + initial_pose(3) * cos(data_(2));
-    //std::cout << "data_: " << data_.transpose() << std::endl;
-    //std::cout << "prior: " << prior.transpose() << std::endl;
+    if (getFramePtr()->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
+    {
+        Eigen::Vector4s prior;
+        Eigen::Map<Eigen::Vector4s> initial_pose(getFramePtr()->getPPtr()->getPtr());
+        ///std::cout << "initial_pose: " << initial_pose.transpose() << std::endl;
+        prior(0) = initial_pose(0) + data_(0) * initial_pose(2) - data_(1) * initial_pose(3);
+        prior(1) = initial_pose(1) + data_(0) * initial_pose(3) + data_(1) * initial_pose(2);
+        prior(2) = initial_pose(2) * cos(data_(2)) - initial_pose(3) * sin(data_(2));
+        prior(3) = initial_pose(2) * sin(data_(2)) + initial_pose(3) * cos(data_(2));
+        //std::cout << "data_: " << data_.transpose() << std::endl;
+        //std::cout << "prior: " << prior.transpose() << std::endl;
 
-		return prior;
-	}
-	else
-	{
-		Eigen::Vector3s prior;
-		Eigen::Map<Eigen::Vector3s> initial_pose(getFramePtr()->getPPtr()->getPtr());
-    //std::cout << "initial_pose: " << initial_pose.transpose() << std::endl;
+        return prior;
+    }
+    else
+    {
+        Eigen::Vector3s prior;
+        Eigen::Map<Eigen::Vector3s> initial_pose(getFramePtr()->getPPtr()->getPtr());
+        //std::cout << "initial_pose: " << initial_pose.transpose() << std::endl;
+        prior(0) = initial_pose(0) + data_(0) * cos(initial_pose(2)) - data_(1) * sin(initial_pose(2));
+        prior(1) = initial_pose(1) + data_(0) * sin(initial_pose(2)) + data_(1) * cos(initial_pose(2));
+        prior(2) = initial_pose(2) + data_(2);
+        //std::cout << "data_: " << data_.transpose() << std::endl;
+        //std::cout << "prior: " << prior.transpose() << std::endl;
 
-//		prior(0) = initial_pose(0) + data_(0) * cos(initial_pose(2) + (data_(1)));
-//		prior(1) = initial_pose(1) + data_(0) * sin(initial_pose(2) + (data_(1)));
-//		prior(2) = initial_pose(2) + data_(1);
-		prior(0) = initial_pose(0) + data_(0) * cos(initial_pose(2)) - data_(1) * sin(initial_pose(2));
-    prior(1) = initial_pose(1) + data_(0) * sin(initial_pose(2)) + data_(1) * cos(initial_pose(2));
-    prior(2) = initial_pose(2) + data_(2);
-    //std::cout << "data_: " << data_.transpose() << std::endl;
-    //std::cout << "prior: " << prior.transpose() << std::endl;
-
-		return prior;
-	}
-
+        return prior;
+    }
 
 }
 
 void CaptureOdom2D::addConstraints()
 {
-	assert(getFramePtr()->getNextFrame() != nullptr && "Trying to add odometry constraint in the last frame (there is no next frame)");
+    assert(getFramePtr()->getNextFrame() != nullptr && "Trying to add odometry constraint in the last frame (there is no next frame)");
 
-	if (getFramePtr()->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
-	{
-		getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2DComplexAngle(getFeatureListPtr()->front(),
-                                                                                 getFramePtr()->getPPtr(),
-                                                                                 getFramePtr()->getOPtr(),
-                                                                                 getFramePtr()->getNextFrame()->getPPtr(),
-                                                                                 getFramePtr()->getNextFrame()->getOPtr()));
-	}
-	else
-	{
-		getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2DTheta(getFeatureListPtr()->front(),
-                                                                          getFramePtr()->getPPtr(),
-                                                                          getFramePtr()->getOPtr(),
-                                                                          getFramePtr()->getNextFrame()->getPPtr(),
-                                                                          getFramePtr()->getNextFrame()->getOPtr()));
-	}
+    if (getFramePtr()->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
+    {
+        getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2DComplexAngle(getFeatureListPtr()->front(),
+                                                                                     getFramePtr()->getPPtr(),
+                                                                                     getFramePtr()->getOPtr(),
+                                                                                     getFramePtr()->getNextFrame()->getPPtr(),
+                                                                                     getFramePtr()->getNextFrame()->getOPtr()));
+    }
+    else
+    {
+        getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2DTheta(getFeatureListPtr()->front(),
+                                                                              getFramePtr()->getPPtr(),
+                                                                              getFramePtr()->getOPtr(),
+                                                                              getFramePtr()->getNextFrame()->getPPtr(),
+                                                                              getFramePtr()->getNextFrame()->getOPtr()));
+    }
 }
 
 void CaptureOdom2D::integrateCapture(CaptureRelative* _new_capture)
 {
-	//std::cout << "Trying to integrate CaptureOdom2D" << std::endl;
-	assert(dynamic_cast<CaptureOdom2D*>(_new_capture) && "Trying to integrate with a CaptureOdom2D a CaptureRelativePtr which is not CaptureOdom2D");
+    assert(dynamic_cast<CaptureOdom2D*>(_new_capture) && "Trying to integrate with a CaptureOdom2D a CaptureRelativePtr which is not CaptureOdom2D");
 
-//	data_(0) += _new_capture->getData()(0);
-//  data_(1) += _new_capture->getData()(1);
-
-	//std::cout << "Integrate odoms: " << std::endl << data_.transpose() << std::endl << _new_capture->getData().transpose() << std::endl;
-
-	data_(0) += (_new_capture->getData()(0) * cos(data_(2)) - _new_capture->getData()(1) * sin(data_(2)));
-	data_(1) += (_new_capture->getData()(0) * sin(data_(2)) + _new_capture->getData()(1) * cos(data_(2)));
-  data_(2) += _new_capture->getData()(2);
-
-  //std::cout << "Integrated odoms: " << std::endl << data_.transpose() << std::endl;
-
-	data_covariance_ += _new_capture->getDataCovariance();
-	//std::cout << "integrated!" << std::endl;
+    //std::cout << "Integrate odoms: " << std::endl << data_.transpose() << std::endl << _new_capture->getData().transpose() << std::endl;
+    data_(0) += (_new_capture->getData()(0) * cos(data_(2)) - _new_capture->getData()(1) * sin(data_(2)));
+    data_(1) += (_new_capture->getData()(0) * sin(data_(2)) + _new_capture->getData()(1) * cos(data_(2)));
+    data_(2) += _new_capture->getData()(2);
+    data_covariance_ += _new_capture->getDataCovariance();
+    //std::cout << "Integrated odoms: " << std::endl << data_.transpose() << std::endl << data_covariance_ << std::endl;
 }
 
 //void CaptureOdom2D::printSelf(unsigned int _ntabs, std::ostream & _ost) const
@@ -133,6 +114,4 @@ void CaptureOdom2D::integrateCapture(CaptureRelative* _new_capture)
 //    //printNTabs(_ntabs);
 //    //_ost << "\tSensor intrinsic : ( " << sensor_ptr_->intrinsic().transpose() << " )" << std::endl;
 //}
-
-
 

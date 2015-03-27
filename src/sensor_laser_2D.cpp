@@ -7,8 +7,8 @@
 //     params_ << _angle_min, _angle_max, _angle_increment, _range_min, _range_max, _range_stdev, _time_increment, _scan_time;
 // }
 
-SensorLaser2D::SensorLaser2D(const Eigen::Vector6s & _sp) :
-    SensorBase(LIDAR, _sp, 8)
+SensorLaser2D::SensorLaser2D(StateBase* _p_ptr, StateOrientation* _o_ptr) :
+    SensorBase(LIDAR, _p_ptr, _o_ptr, 8)
 {
     setDefaultScanParams();
     setDefaultCornerAlgParams();  

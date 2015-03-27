@@ -11,11 +11,12 @@ class SensorGPSFix : public SensorBase
         /** \brief Constructor with arguments
          * 
          * Constructor with arguments
-         * \param _sp sensor 3D pose with respect to vehicle base frame
+         * \param _p_ptr StateBase pointer to the sensor position
+         * \param _o_ptr StateOrientation pointer to the sensor orientation
          * \param _noise noise standard deviation
          * 
          **/
-		SensorGPSFix(const Eigen::Vector6s & _sp, const double& _noise);
+		SensorGPSFix(StateBase* _p_ptr, StateOrientation* _o_ptr, const double& _noise);
         
         /** \brief Destructor
          * 

@@ -19,8 +19,8 @@ ADD_EXECUTABLE(test_ceres_wrapper_jet_2_sensors test_ceres_wrapper_jet_2_sensors
 TARGET_LINK_LIBRARIES(test_ceres_wrapper_jet_2_sensors ${PROJECT_NAME})
 
 # jet test manager
-ADD_EXECUTABLE(test_ceres_manager test_ceres_manager.cpp)
-TARGET_LINK_LIBRARIES(test_ceres_manager ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_ceres_manager test_ceres_manager.cpp)
+#TARGET_LINK_LIBRARIES(test_ceres_manager ${PROJECT_NAME})
 
 # Testing a full wolf tree avoiding template classes for NodeLinked derived classes
 ADD_EXECUTABLE(test_ceres_odom_batch test_ceres_odom_batch.cpp)
@@ -39,8 +39,8 @@ TARGET_LINK_LIBRARIES(test_ceres_odom_iterative ${PROJECT_NAME})
 #TARGET_LINK_LIBRARIES(test_ceres_manager_tree ${PROJECT_NAME})
 
 # test ceres covariance
-ADD_EXECUTABLE(test_ceres_covariance test_ceres_covariance.cpp)
-TARGET_LINK_LIBRARIES(test_ceres_covariance ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_ceres_covariance test_ceres_covariance.cpp)
+#TARGET_LINK_LIBRARIES(test_ceres_covariance ${PROJECT_NAME})
 
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)

@@ -1,4 +1,3 @@
-
 #ifndef CAPTURE_GPS_FIX_H_
 #define CAPTURE_GPS_FIX_H_
 
@@ -13,14 +12,14 @@
 class CaptureGPSFix : public CaptureBase
 {
     public:
-		CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr);
+        CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr);
 
-		CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
+        CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
 
-		CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
-        
+        CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
+
         virtual ~CaptureGPSFix();
-        
+
         virtual void processCapture();
 
         virtual Eigen::VectorXs computePrior() const;

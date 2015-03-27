@@ -172,7 +172,6 @@ class NodeLinked : public NodeBase
          * TODO: Review if it could return a pointer to a derived class instead of NodeBase JVN: I tried to do so...
          * 
          **/
-        //virtual NodeBase* getTop();
         virtual WolfProblem* getTop();
 
         /** \brief Prints node information
