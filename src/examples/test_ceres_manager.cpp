@@ -91,7 +91,7 @@ class ConstraintSparse: public ConstraintXBase
         	ConstraintXBase(_measurementPtr),
 			block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
-			for (uint i = 0; i<block_sizes_vector_.size(); i++)
+			for (unsigned int i = 0; i<block_sizes_vector_.size(); i++)
 			{
 				if (block_sizes_vector_.at(i) == 0)
 				{
@@ -118,7 +118,7 @@ class ConstraintSparse: public ConstraintXBase
 			state_block_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
 			block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
 		{
-			for (uint i = 0; i<block_sizes_vector_.size(); i++)
+			for (unsigned int i = 0; i<block_sizes_vector_.size(); i++)
 			{
 				if (block_sizes_vector_.at(i) == 0)
 				{
@@ -489,7 +489,7 @@ class CeresManager
 //			std::vector<double*> state_units;
 //			ceres_problem_->GetParameterBlocks(&state_units);
 //
-//			for (uint i = 0; i< state_units.size(); i++)
+//			for (unsigned int i = 0; i< state_units.size(); i++)
 //				removeStateUnit(state_units.at(i));
 //
 //			std::cout << "all state units removed! \n";
@@ -547,7 +547,7 @@ class CeresManager
 
 		void removeConstraints()
 		{
-			for (uint i = 0; i<constraint_list_.size(); i++)
+			for (unsigned int i = 0; i<constraint_list_.size(); i++)
 			{
 				ceres_problem_->RemoveResidualBlock(constraint_list_.at(i).first);
 			}
@@ -777,7 +777,7 @@ int main(int argc, char** argv)
 
 	// START TRAJECTORY ============================================================================================
     new_state_units = wolf_manager->getStateUnitsPtrs(0); // First pose to be added in ceres
-    for (uint step=1; step < n_execution; step++)
+    for (unsigned int step=1; step < n_execution; step++)
 	{
     	// adding sensor captures
 		wolf_manager->addCapture(odom_readings.segment(step*2,2),step,odom_sensor);
@@ -805,7 +805,7 @@ int main(int argc, char** argv)
 	VectorXs state = wolf_manager->getState();
 	VectorXs state_theta(n_execution * 3);
 	if (complex_angle)
-		for (uint ii = 0; ii<n_execution; ii++)
+		for (unsigned int ii = 0; ii<n_execution; ii++)
 			state_theta.segment(ii*3,3) << state(ii*4), state(ii*4+1), atan2(state(ii*4+2), state(ii*4+3));
 	else
 		state_theta = state;

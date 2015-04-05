@@ -181,8 +181,8 @@ int main(int argc, char** argv)
 	WolfProblem *wolf_problem = new WolfProblem();
     wolf_problem->resizeState(STATE_DIM);
     wolf_problem->computePrior();
-    for(uint st=0; st < N_MEASUREMENTS; st++)
-		for (uint st=0; st < STATE_DIM; st++)
+    for(unsigned int st=0; st < N_MEASUREMENTS; st++)
+		for (unsigned int st=0; st < STATE_DIM; st++)
 			wolf_problem->addCorrespondence(new AbsoluteCorrespondence(wolf_problem->getPrior()+st,1));
 
 	// set measures. This will be replaced by the WOLF-ROS front-end, getting sensor readings from sensors and performing measurements to build the whole wolf tree
@@ -190,7 +190,7 @@ int main(int argc, char** argv)
 
 	// cost function
     std::cout << "Number of blocks: " << std::endl << wolf_problem->getCorrespondencesSize() << std::endl;
-	for (uint block=0; block < wolf_problem->getCorrespondencesSize(); block++)
+	for (unsigned int block=0; block < wolf_problem->getCorrespondencesSize(); block++)
 		wolf_problem->getCorrespondence(block)->addBlock(ceres_problem);
 
 	// run Ceres Solver

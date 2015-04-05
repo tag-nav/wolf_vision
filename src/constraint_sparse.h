@@ -55,7 +55,7 @@ class ConstraintSparse: public ConstraintBase
             state_block_ptr_vector_(10),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
-            for (uint ii = 0; ii<state_block_sizes_vector_.size(); ii++)
+            for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
             {
                 if (state_block_sizes_vector_.at(ii) != 0)
                 {
@@ -90,7 +90,7 @@ class ConstraintSparse: public ConstraintBase
             state_block_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
-            for (uint ii = 0; ii<state_block_sizes_vector_.size(); ii++)
+            for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
             {
                 if ( (state_block_ptr_vector_.at(ii) == nullptr) && (state_block_sizes_vector_.at(ii) == 0) )
                 {
@@ -129,11 +129,11 @@ class ConstraintSparse: public ConstraintBase
         virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const
         {
         	NodeLinked::printSelf(_ntabs, _ost);
-        	for (uint ii = 0; ii<state_block_sizes_vector_.size(); ii++)
+        	for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
         	{
         		printTabs(_ntabs);
         		_ost << "block " << ii << ": ";
-        		for (uint jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
+        		for (unsigned int jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
         			_ost << *(state_block_ptr_vector_.at(ii)+jj) << " ";
         		_ost << std::endl;
         	}

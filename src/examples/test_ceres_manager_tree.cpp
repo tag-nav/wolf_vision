@@ -295,7 +295,7 @@ int main(int argc, char** argv)
 
 	// START TRAJECTORY ============================================================================================
     new_state_units = wolf_manager->getStateList(); // First pose to be added in ceres
-    for (uint step=1; step < n_execution; step++)
+    for (unsigned int step=1; step < n_execution; step++)
 	{
     	// adding new sensor captures
 		wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(step*0.01), &odom_sensor, odom_readings.segment(step*2,2), odom_std * MatrixXs::Identity(2,2)));
@@ -326,7 +326,7 @@ int main(int argc, char** argv)
 	VectorXs state = wolf_manager->getState();
 	VectorXs state_theta(n_execution * 3);
 	if (complex_angle)
-		for (uint ii = 0; ii<n_execution; ii++)
+		for (unsigned int ii = 0; ii<n_execution; ii++)
 			state_theta.segment(ii*3,3) << state(ii*4), state(ii*4+1), atan2(state(ii*4+2), state(ii*4+3));
 	else
 		state_theta = state;

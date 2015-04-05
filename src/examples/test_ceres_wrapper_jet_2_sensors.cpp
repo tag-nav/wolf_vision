@@ -336,7 +336,7 @@ int main(int argc, char** argv)
     std::normal_distribution<WolfScalar> distribution_A(0.0,0.01);
     std::normal_distribution<WolfScalar> distribution_B(0.0,0.1);
     VectorXs actualState(STATE_DIM);
-    for (uint i=0;i<STATE_DIM; i++)
+    for (unsigned int i=0;i<STATE_DIM; i++)
     	actualState(i) = i;
 
     using ceres::AutoDiffCostFunction;
@@ -360,9 +360,9 @@ int main(int argc, char** argv)
 
     // Correspondences
     // SENSOR A: Absolute measurements of the whole state
-    for(uint mA=0; mA < N_MEAS_A; mA++)
+    for(unsigned int mA=0; mA < N_MEAS_A; mA++)
     {
-    	for (uint st=0; st < N_STATES; st++)
+    	for (unsigned int st=0; st < N_STATES; st++)
 		{
 			Correspondence1SparseCeres<MEAS_A_DIM, DIM>* corrAPtr = new Correspondence1SparseCeres<MEAS_A_DIM, DIM>(wolf_problem->getPrior()+st*DIM);
 			VectorXs actualMeasurement = actualState.segment(st*DIM,DIM);
@@ -371,11 +371,11 @@ int main(int argc, char** argv)
 		}
     }
 	// SENSOR B: Relative distances between points
-    for(uint mB=0; mB < N_MEAS_B; mB++)
+    for(unsigned int mB=0; mB < N_MEAS_B; mB++)
 	{
-    	for (uint st_from=0; st_from < N_STATES-1; st_from++)
+    	for (unsigned int st_from=0; st_from < N_STATES-1; st_from++)
     	{
-    		for (uint st_to=st_from+1; st_to < N_STATES; st_to++)
+    		for (unsigned int st_to=st_from+1; st_to < N_STATES; st_to++)
 			{
     			Correspondence2SparseCeres<MEAS_B_DIM, DIM, DIM>* corrBPtr = new Correspondence2SparseCeres<MEAS_B_DIM, DIM, DIM>(wolf_problem->getPrior()+st_from*DIM,wolf_problem->getPrior()+st_to*DIM);
 				VectorXs actualMeasurement = ((actualState.segment(st_from*DIM,DIM) - actualState.segment(st_to*DIM,DIM)).transpose() * (actualState.segment(st_from*DIM,DIM) - actualState.segment(st_to*DIM,DIM))).cwiseSqrt();
@@ -391,7 +391,7 @@ int main(int argc, char** argv)
 
 	// cost function
     std::cout << "Number of blocks: " << std::endl << wolf_problem->getCorrespondencesSize() << std::endl;
-	for (uint block=0; block < wolf_problem->getCorrespondencesSize(); block++)
+	for (unsigned int block=0; block < wolf_problem->getCorrespondencesSize(); block++)
 	{
 		//std::cout << "block " << block << "...";
 		wolf_problem->getCorrespondence(block)->addBlock(ceres_problem);

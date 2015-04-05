@@ -101,7 +101,7 @@ class StatePoint : public StateBase
 			printTabs(_ntabs);
 			_ost << nodeLabel() << " " << nodeId() << std::endl;
 			printTabs(_ntabs);
-			for (uint i = 0; i < BLOCK_SIZE; i++)
+			for (unsigned int i = 0; i < BLOCK_SIZE; i++)
 				_ost << *(this->state_ptr_+i) << " ";
 			_ost << std::endl;
 		}

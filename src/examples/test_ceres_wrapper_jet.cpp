@@ -189,7 +189,7 @@ int main(int argc, char** argv)
 
 	// cost function
 	CostFunction* cost_function = new AutoDiffCostFunction<WolfVehicle,1,1>(functorPtr);
-	for (uint st=0; st < STATE_DIM; st++)
+	for (unsigned int st=0; st < STATE_DIM; st++)
 	{
 		problem.AddResidualBlock(cost_function, NULL, functorPtr->getPrior()+st);
 	}

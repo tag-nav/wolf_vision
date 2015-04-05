@@ -360,7 +360,7 @@ int main(int argc, char** argv)
 
 	std::cout << "START TRAJECTORY..." << std::endl;
 	// START TRAJECTORY ============================================================================================
-	for (uint step=1; step < n_execution; step++)
+	for (unsigned int step=1; step < n_execution; step++)
 	{
 		//get init time
 		t2=clock();
