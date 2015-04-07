@@ -284,7 +284,7 @@ WolfScalar CaptureLaser2D::computeMahalanobisDistance(const FeatureBase* _featur
         // Feature-Landmark Mahalanobis distance
         // covariance: Eigen::Matrix3s S_m = J * Sigma.selfadjointView<Eigen::Upper>() * J.transpose() + _feature_ptr->getMeasurementCovariance().topLeftCorner<3,3>();
         WolfScalar mahalanobis_distance = d_euclidean.transpose() * (J.transpose() * Sigma.selfadjointView<Eigen::Upper>() * J + _feature_ptr->getMeasurementCovariance().topLeftCorner<3,3>()).inverse() * d_euclidean;
-        std::cout << "mahalanobis_distance = " << mahalanobis_distance << std::endl;
+        //std::cout << "mahalanobis_distance = " << mahalanobis_distance << std::endl;
         return mahalanobis_distance;
     }
     else

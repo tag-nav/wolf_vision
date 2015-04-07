@@ -116,7 +116,7 @@ int main(int argc, char** argv)
 
     // Ceres initialization
     ceres::Solver::Options ceres_options;
-    ceres_options.minimizer_type = ceres::LINE_SEARCH;	//ceres::TRUST_REGION;
+    ceres_options.minimizer_type = ceres::TRUST_REGION;	//ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;

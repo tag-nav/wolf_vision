@@ -4,7 +4,8 @@ CeresManager::CeresManager(ceres::Problem::Options _options) :
 	ceres_problem_(new ceres::Problem(_options))
 {
 	ceres::Covariance::Options covariance_options;
-	covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
+    //covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
+    covariance_options.num_threads = 8;//ceres::DENSE_SVD;
 	//covariance_options.null_space_rank = -1;
 	covariance_ = new ceres::Covariance(covariance_options);
 }
