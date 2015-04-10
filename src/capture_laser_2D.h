@@ -5,6 +5,7 @@
 //std includes
 #include <queue>
 #include <random>
+#include <math.h>
 
 // Eigen ingludes
 #include <eigen3/Eigen/Geometry>
@@ -23,6 +24,7 @@
 #include "state_point.h"
 #include "state_orientation.h"
 #include "state_theta.h"
+#include "data_association/association_tree.h"
 
 //wolf forward declarations
 //#include "feature_corner_2D.h"
@@ -101,8 +103,22 @@ class CaptureLaser2D : public CaptureBase
 //         void fitLine(unsigned int _idx_from, unsigned int _idx_to, const Eigen::MatrixXs& _points, Line& line_) const;
 
         virtual void createFeatures(std::list<laserscanutils::Corner> & _corner_list); //TODO: should be const .... JVN: No, because new feature is added to the list
-        
+
+        /** \brief Create constraints given current measured features and existing landmarks
+         * 
+         * Create constraints given current measured features and existing landmarks.
+         * Uses a Brute force Nearest Neighbor linear search
+         * 
+         **/        
         void establishConstraints();
+        
+        /** \brief Create constraints given current measured features and existing landmarks
+         * 
+         * Create constraints given current measured features and existing landmarks
+         * Uses a Multi-Hypothesis Tree 
+         * 
+         **/
+        void establishConstraintsMHTree();
 
         virtual Eigen::VectorXs computePrior() const;
 

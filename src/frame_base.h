@@ -45,8 +45,8 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          * \param _w_ptr StateBase pointer to the angular velocity (default: nullptr)
          *
          **/
-        FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
-
+        FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr); //ACM: Either remove all pointer arguments from this header, or merge both constructors in a single one
+        
         /** \brief Constructor with type, time stamp and state pointer
          * 
          * Constructor with type, time stamp and state pointer
@@ -81,7 +81,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 
         void unfix();
 
-        void setTimeStamp(const TimeStamp& _ts);
+        void setTimeStamp(const TimeStamp& _ts); //ACM: if all constructors require a timestamp, do we need a set? Should we allow to change TS?
         
         TimeStamp getTimeStamp() const;
         
@@ -115,7 +115,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 
         StateBase* getWPtr() const;
 
-        const Eigen::Matrix4s * getTransformationMatrix() const;
+        const Eigen::Matrix4s * getTransformationMatrix() const; //ACM: Who owns this return matrix ?
 
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
         

@@ -72,7 +72,9 @@ SET(HDRS
     trajectory_base.h
     wolf.h
     wolf_problem.h
-    wolf_manager.h)
+    wolf_manager.h
+    data_association/association_node.h
+    data_association/association_tree.h)
     
 #sources
 SET(SRCS
@@ -100,7 +102,9 @@ SET(SRCS
     state_complex_angle.cpp
     time_stamp.cpp
     trajectory_base.cpp
-    wolf_problem.cpp)
+    wolf_problem.cpp
+    data_association/association_node.cpp
+    data_association/association_tree.cpp)
 
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
