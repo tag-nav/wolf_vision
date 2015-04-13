@@ -11,8 +11,8 @@ class SensorOdom2D : public SensorBase
         /** \brief Constructor with arguments
          * 
          * Constructor with arguments
-         * \param _p_ptr StateBase pointer to the sensor position
-         * \param _o_ptr StateOrientation pointer to the sensor orientation
+         * \param _p_ptr StateBase pointer to the sensor position wrt vehicle base
+         * \param _o_ptr StateOrientation pointer to the sensor orientation wrt vehicle base
          * \param _disp_noise_factor displacement noise factor
          * \param _rot_noise_factor rotation noise factor
          * 

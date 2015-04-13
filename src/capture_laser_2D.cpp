@@ -213,13 +213,13 @@ void CaptureLaser2D::establishConstraintsMHTree()
     std::vector<unsigned int> ft_unassociated;
     
     // Global transformation TODO: Change by a function
-    Eigen::Vector2s t_robot = getFramePtr()->getPPtr()->getVector();
-    Eigen::Matrix2s R_robot = ((StateOrientation*) (getFramePtr()->getOPtr()))->getRotationMatrix().topLeftCorner<2,2>();
-    WolfScalar& robot_orientation = *(getFramePtr()->getOPtr()->getPtr());
+//     Eigen::Vector2s t_robot = getFramePtr()->getPPtr()->getVector();
+//     Eigen::Matrix2s R_robot = ((StateOrientation*) (getFramePtr()->getOPtr()))->getRotationMatrix().topLeftCorner<2,2>();
+//     WolfScalar& robot_orientation = *(getFramePtr()->getOPtr()->getPtr());
 
     // Sensor transformation
-    Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector();
-    Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2,2>();
+//     Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector();
+//     Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2,2>();
     
     //tree object allocation and sizing
     AssociationTree tree;
@@ -233,7 +233,7 @@ void CaptureLaser2D::establishConstraintsMHTree()
         for (auto j_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); j_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); j_it++, j_ct++)
         {
             dm = sqrt(computeMahalanobisDistance(*i_it, *j_it));
-            prob = erfc(dm/1.4142136);// dm/sqrt(2)
+            prob = erfc(dm/1.4142136);// sqrt(2) = 1.4142136
             tree.setScore(i_ct,j_ct,prob);
         }
     }
@@ -243,6 +243,9 @@ void CaptureLaser2D::establishConstraintsMHTree()
     tree.computeTree();
     tree.normalizeTree();
     tree.treeDecision(ft_lk_pairs,ft_unassociated);
+    
+    //print tree 
+    
     
     // create new landmarks and new constraints according associatio result
     //to do

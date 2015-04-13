@@ -72,7 +72,9 @@ SET(HDRS
     trajectory_base.h
     wolf.h
     wolf_problem.h
-    wolf_manager.h
+    wolf_manager.h)
+
+SET(HDRS_DTASSC
     data_association/association_node.h
     data_association/association_tree.h)
     
@@ -149,9 +151,11 @@ INSTALL(TARGETS ${PROJECT_NAME}
         
 #install headers         
 INSTALL(FILES ${HDRS} 
-      DESTINATION include/iri-algorithms/wolf)
+    DESTINATION include/iri-algorithms/wolf)
+INSTALL(FILES ${HDRS_DTASSC} 
+    DESTINATION include/iri-algorithms/wolf/data_association)
 INSTALL(FILES ${HDRS_WRAPPER} 
-      DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
+    DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
 
 INSTALL(FILES ../Findwolf.cmake DESTINATION ${CMAKE_ROOT}/Modules/)
 
