@@ -1,15 +1,6 @@
 
 #include "state_base.h"
 
-StateBase::StateBase(Eigen::VectorXs& _st_remote, const unsigned int _idx) :
-			NodeBase("STATE"),
-			state_ptr_(_st_remote.data() + _idx),
-			status_(ST_ESTIMATED)
-{
-	//
-}
-
-
 StateBase::StateBase(WolfScalar* _st_ptr) :
 			NodeBase("STATE"),
 			state_ptr_(_st_ptr),
@@ -17,7 +8,15 @@ StateBase::StateBase(WolfScalar* _st_ptr) :
 {
 	//
 }
-                
+
+StateBase::StateBase(Eigen::VectorXs& _st_remote, const unsigned int _idx) :
+            NodeBase("STATE"),
+            state_ptr_(_st_remote.data() + _idx),
+            status_(ST_ESTIMATED)
+{
+    //
+}
+
 StateBase::~StateBase()
 {
 	//std::cout << "deleting StateBase " << nodeId() << std::endl;

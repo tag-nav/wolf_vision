@@ -178,8 +178,8 @@ int main(int argc, char** argv)
     ground_truth.head(3) = pose_odom;
     odom_trajectory.head(3) = pose_odom;
 
-    WolfManager* wolf_manager = new WolfManager(&odom_sensor, complex_angle, 1e3, pose_odom, Eigen::Matrix3s::Identity() * 0.01, 0.3, window_size);
-
+    WolfManager* wolf_manager = new WolfManager(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3, complex_angle);
+    
     //std::cout << "START TRAJECTORY..." << std::endl;
     // START TRAJECTORY ============================================================================================
     for (unsigned int step = 1; step < n_execution; step++)

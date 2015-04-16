@@ -19,6 +19,14 @@ class StateBase : public NodeBase
 		StateStatus status_;
         
     public:
+        /** \brief Constructor with scalar pointer
+         * 
+         * Constructor with scalar pointer
+         * \param _st_ptr is the pointer of the first element of the state unit
+         * 
+         **/
+        StateBase(WolfScalar* _st_ptr);
+
         /** \brief Constructor with whole state storage and index where starts the state unit
          * 
          * Constructor with whole state storage and index where starts the state unit
@@ -27,14 +35,6 @@ class StateBase : public NodeBase
          * 
          **/
         StateBase(Eigen::VectorXs& _st_remote, const unsigned int _idx);
-
-        /** \brief Constructor with scalar pointer
-         * 
-         * Constructor with scalar pointer
-         * \param _st_ptr is the pointer of the first element of the state unit
-         * 
-         **/
-        StateBase(WolfScalar* _st_ptr);
         
         /** \brief Destructor
          * 

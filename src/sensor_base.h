@@ -18,7 +18,15 @@ class SensorBase : public NodeBase
         StateOrientation* o_ptr_; 	    // sensor orientation state unit pointer
         Eigen::VectorXs params_;//sensor intrinsic params: offsets, scale factors, sizes, ...
 
-    public:
+    public:        
+        /** \brief Constructor without parameters
+         *
+         * Constructor without parameters. 
+         * Allows allocation of containers of StateBase, such as std::vector<SensorBase>
+         *
+         **/
+        //SensorBase();
+        
         /** \brief Constructor with parameter vector
          *
          * Constructor with parameter vector

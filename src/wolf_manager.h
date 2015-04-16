@@ -42,26 +42,39 @@
 class WolfManager
 {
     protected:
-        bool use_complex_angles_;
+        //sets the problem 
         WolfProblem* problem_;
-        std::queue<CaptureBase*> new_captures_;
+
+        //pointer to a sensor providing predictions
         SensorBase* sensor_prior_;
-        unsigned int window_size_;
+        
+        //auxiliar/temporary iterators, frames and captures
         FrameBaseIter first_window_frame_;
         CaptureRelative* last_capture_relative_;
         CaptureRelative* second_last_capture_relative_;
+        std::queue<CaptureBase*> new_captures_;
+
+        //Manager parameters
+        unsigned int window_size_;
         WolfScalar new_frame_elapsed_time_;
+        bool use_complex_angles_;
 
     public:
-        WolfManager(SensorBase* _sensor_prior, const bool _complex_angle, const unsigned int& _state_length, const Eigen::VectorXs& _init_frame,
-                const Eigen::MatrixXs& _init_frame_cov, const WolfScalar& _new_frame_elapsed_time = 0.1, const unsigned int& _w_size = 10) :
-                use_complex_angles_(_complex_angle),
+        WolfManager(const unsigned int& _state_length, 
+                    SensorBase* _sensor_prior, 
+                    const Eigen::VectorXs& _init_frame, 
+                    const Eigen::MatrixXs& _init_frame_cov, 
+                    const unsigned int& _w_size = 10, 
+                    const WolfScalar& _new_frame_elapsed_time = 0.1, 
+                    const bool _complex_angle = false) :
+                    
                 problem_(new WolfProblem(_state_length)),
                 sensor_prior_(_sensor_prior),
+                last_capture_relative_(nullptr),
+                second_last_capture_relative_(nullptr),
                 window_size_(_w_size),
                 new_frame_elapsed_time_(_new_frame_elapsed_time),
-                last_capture_relative_(nullptr),
-                second_last_capture_relative_(nullptr)
+                use_complex_angles_(_complex_angle)
         {
             assert( ((!_complex_angle && _init_frame.size() == 3 && _init_frame_cov.cols() == 3 && _init_frame_cov.rows() == 3) ||
                      (_complex_angle && _init_frame.size() == 4 && _init_frame_cov.cols() == 4 && _init_frame_cov.rows() == 4))
@@ -71,10 +84,7 @@ class WolfManager
             // Set initial covariance with a fake ODOM 2D capture to a fix frame
             createFrame(_init_frame, TimeStamp(0));
             problem_->getTrajectoryPtr()->getFrameListPtr()->back()->fix();
-            last_capture_relative_->integrateCapture((CaptureRelative*)(new CaptureOdom2D(TimeStamp(0),
-                                                                                          nullptr,
-                                                                                          Eigen::Vector3s::Zero(),
-                                                                                          _init_frame_cov)));
+            last_capture_relative_->integrateCapture((CaptureRelative*)(new CaptureOdom2D(TimeStamp(0), nullptr, Eigen::Vector3s::Zero(), _init_frame_cov)));
             createFrame(_init_frame, TimeStamp(0));
             second_last_capture_relative_->processCapture();
         }
