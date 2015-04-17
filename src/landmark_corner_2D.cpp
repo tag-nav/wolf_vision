@@ -11,3 +11,9 @@ LandmarkCorner2D::~LandmarkCorner2D()
 {
     //
 }
+
+
+WolfScalar LandmarkCorner2D::getAperture() const
+{
+    return descriptor_(0);
+}

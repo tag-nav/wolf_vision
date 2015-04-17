@@ -88,8 +88,16 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
         StateBase* getWPtr() const;
 
         void setDescriptor(const Eigen::VectorXs& _descriptor);
-
-        const Eigen::VectorXs& getDescriptor() const;
+        
+        const Eigen::VectorXs& getDescriptor() const;        
+        
+        /** \brief Returns _ii component of descriptor vector
+         * 
+         * Returns _ii component of descriptor_ vector
+         * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
+         * 
+         **/
+        WolfScalar getDescriptor(unsigned int _ii) const;
 
         //const StateBase* getStatePtr() const;
 

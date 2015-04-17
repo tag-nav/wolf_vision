@@ -24,5 +24,12 @@ class FeatureCorner2D : public FeatureBase
          */        
         virtual ~FeatureCorner2D();
         
+        /** \brief Returns aperture
+         * 
+         * Returns aperture
+         * 
+         **/
+        WolfScalar getAperture() const; 
+        
 };
 #endif

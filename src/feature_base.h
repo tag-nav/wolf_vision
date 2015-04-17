@@ -53,6 +53,14 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
 //        Eigen::MatrixXs * getMeasurementCovariancePtr();
 
         const Eigen::VectorXs & getMeasurement() const;
+        
+        /** \brief Returns _ii component of measurement vector
+         * 
+         * Returns _ii component of measurement_ vector
+         * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
+         * 
+         **/
+        WolfScalar getMeasurement(unsigned int _ii) const;
 
         const Eigen::MatrixXs & getMeasurementCovariance() const;
 

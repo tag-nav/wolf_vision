@@ -61,6 +61,11 @@ const Eigen::VectorXs& FeatureBase::getMeasurement() const
     return measurement_;
 }
 
+WolfScalar FeatureBase::getMeasurement(unsigned int _ii) const
+{
+    return measurement_(_ii);
+}
+
 const Eigen::MatrixXs& FeatureBase::getMeasurementCovariance() const
 {
     return measurement_covariance_;

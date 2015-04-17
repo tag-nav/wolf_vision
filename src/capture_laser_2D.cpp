@@ -54,6 +54,7 @@ void CaptureLaser2D::processCapture()
 
     //Establish constraints for each feature
     establishConstraints();
+    establishConstraintsMHTree();
     //std::cout << "Constraints created" << std::endl;
 }
 
@@ -207,7 +208,7 @@ void CaptureLaser2D::establishConstraints()
 void CaptureLaser2D::establishConstraintsMHTree()
 {   
     //local declarations
-    WolfScalar prob, dm;
+    WolfScalar prob, dm, apert_diff;
     unsigned int i_ct, j_ct;
     std::vector<std::pair<unsigned int, unsigned int> > ft_lk_pairs;
     std::vector<unsigned int> ft_unassociated;
@@ -226,15 +227,25 @@ void CaptureLaser2D::establishConstraintsMHTree()
     tree.resize( getFeatureListPtr()->size() , getTop()->getMapPtr()->getLandmarkListPtr()->size() );
 
     //set independent probabilities between feature-landmark pairs
-    i_ct = 0;
+    i_ct=0;
     for (auto i_it = getFeatureListPtr()->begin(); i_it != getFeatureListPtr()->end(); i_it++, i_ct++) //ii runs over extracted feature
     {
-        j_ct = 0; 
+        j_ct = 0;
         for (auto j_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); j_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); j_it++, j_ct++)
         {
-            dm = sqrt(computeMahalanobisDistance(*i_it, *j_it));
-            prob = erfc(dm/1.4142136);// sqrt(2) = 1.4142136
-            tree.setScore(i_ct,j_ct,prob);
+            //If aperture difference is small enough, proceed with Mahalanobis distance. Otherwise Set prob to 0 to force unassociation 
+            //const WolfScalar& feature_aperture = (*feature_it)->getMeasurement()(3)
+            //const WolfScalar& landmark_aperture = (*landmark_it)->getDescriptor()(0) )
+            apert_diff = fabs( (*i_it)->getMeasurement(3) - (*j_it)->getDescriptor(0) );
+            if (apert_diff < MAX_ACCEPTED_APERTURE_DIFF)
+            {
+                dm = sqrt(computeMahalanobisDistance(*i_it, *j_it));
+                if (dm<5) prob = erfc(dm/1.4142136);// sqrt(2) = 1.4142136
+                else prob = 0; 
+                tree.setScore(i_ct,j_ct,prob);
+            }
+            else 
+                tree.setScore(i_ct,j_ct,0.);//prob to 0
         }
     }
     
@@ -244,8 +255,10 @@ void CaptureLaser2D::establishConstraintsMHTree()
     tree.normalizeTree();
     tree.treeDecision(ft_lk_pairs,ft_unassociated);
     
-    //print tree 
-    
+    //print tree & score table 
+    std::cout << "-------------" << std::endl; 
+    tree.printTree();
+    tree.printScoreTable();
     
     // create new landmarks and new constraints according associatio result
     //to do

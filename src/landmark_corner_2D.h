@@ -37,5 +37,12 @@ class LandmarkCorner2D : public LandmarkBase
          **/
         virtual ~LandmarkCorner2D();
         
+        /** \brief Returns aperture
+         * 
+         * Returns aperture
+         * 
+         **/
+        WolfScalar getAperture() const;         
+        
 };
 #endif

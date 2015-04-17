@@ -121,6 +121,11 @@ const Eigen::VectorXs& LandmarkBase::getDescriptor() const
 	return descriptor_;
 }
 
+WolfScalar LandmarkBase::getDescriptor(unsigned int _ii) const
+{
+    return descriptor_(_ii);
+}
+
 //const StateBasePtr LandmarkBase::getStatePtr() const
 //{
 //	return st_list_.front();

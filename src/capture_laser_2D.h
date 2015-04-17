@@ -29,6 +29,9 @@
 //wolf forward declarations
 //#include "feature_corner_2D.h"
 
+//some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level 
+const WolfScalar MAX_ACCEPTED_APERTURE_DIFF = 5.0*M_PI/180.; //5 degrees
+
 class CaptureLaser2D : public CaptureBase
 {
     protected:
