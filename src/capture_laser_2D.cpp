@@ -122,7 +122,7 @@ void CaptureLaser2D::establishConstraints()
         Eigen::Vector2s feature_global_position = R_robot * (R_sensor * feature_position + t_sensor) + t_robot;
         WolfScalar feature_global_orientation = feature_orientation + robot_orientation + atan2(R_sensor(1, 0), R_sensor(0, 0));
         feature_global_orientation = (feature_global_orientation > 0 ? // fit in (-pi, pi]
-        fmod(feature_global_orientation + M_PI, 2 * M_PI) - M_PI : fmod(feature_global_orientation - M_PI, 2 * M_PI) + M_PI);
+                                    fmod(feature_global_orientation + M_PI, 2 * M_PI) - M_PI : fmod(feature_global_orientation - M_PI, 2 * M_PI) + M_PI);
 
 //        std::cout << "-------- Feature: " << (*feature_it)->nodeId() << std::endl << feature_global_position.transpose() << "\t" << feature_global_orientation
 //                << "\t" << feature_aperture << std::endl;
@@ -191,7 +191,9 @@ void CaptureLaser2D::establishConstraints()
 //                       "\t" << feature_aperture << std::endl;
         }
         else
+        {
             correspondent_landmark->hit();
+        }
 
         // std::cout << "Creating new constraint: Landmark " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << " & feature "
         //        << (*feature_it)->nodeId() << std::endl;
@@ -209,43 +211,42 @@ void CaptureLaser2D::establishConstraintsMHTree()
 {   
     //local declarations
     WolfScalar prob, dm, apert_diff;
-    unsigned int i_ct, j_ct;
+    unsigned int ii, jj, kk;
     std::vector<std::pair<unsigned int, unsigned int> > ft_lk_pairs;
     std::vector<unsigned int> ft_unassociated;
+    Eigen::Vector2s feature_global_position;
     
     // Global transformation TODO: Change by a function
-//     Eigen::Vector2s t_robot = getFramePtr()->getPPtr()->getVector();
-//     Eigen::Matrix2s R_robot = ((StateOrientation*) (getFramePtr()->getOPtr()))->getRotationMatrix().topLeftCorner<2,2>();
-//     WolfScalar& robot_orientation = *(getFramePtr()->getOPtr()->getPtr());
+    Eigen::Vector2s t_robot = getFramePtr()->getPPtr()->getVector();
+    Eigen::Matrix2s R_robot = ((StateOrientation*) (getFramePtr()->getOPtr()))->getRotationMatrix().topLeftCorner<2,2>();
+    WolfScalar& robot_orientation = *(getFramePtr()->getOPtr()->getPtr());
 
     // Sensor transformation
-//     Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector();
-//     Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2,2>();
+    Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector();
+    Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2,2>();
     
     //tree object allocation and sizing
     AssociationTree tree;
     tree.resize( getFeatureListPtr()->size() , getTop()->getMapPtr()->getLandmarkListPtr()->size() );
 
     //set independent probabilities between feature-landmark pairs
-    i_ct=0;
-    for (auto i_it = getFeatureListPtr()->begin(); i_it != getFeatureListPtr()->end(); i_it++, i_ct++) //ii runs over extracted feature
+    ii=0;
+    for (auto i_it = getFeatureListPtr()->begin(); i_it != getFeatureListPtr()->end(); i_it++, ii++) //ii runs over extracted feature
     {
-        j_ct = 0;
-        for (auto j_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); j_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); j_it++, j_ct++)
+        jj = 0;
+        for (auto j_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); j_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); j_it++, jj++)
         {
             //If aperture difference is small enough, proceed with Mahalanobis distance. Otherwise Set prob to 0 to force unassociation 
-            //const WolfScalar& feature_aperture = (*feature_it)->getMeasurement()(3)
-            //const WolfScalar& landmark_aperture = (*landmark_it)->getDescriptor()(0) )
             apert_diff = fabs( (*i_it)->getMeasurement(3) - (*j_it)->getDescriptor(0) );
             if (apert_diff < MAX_ACCEPTED_APERTURE_DIFF)
             {
                 dm = sqrt(computeMahalanobisDistance(*i_it, *j_it));
                 if (dm<5) prob = erfc(dm/1.4142136);// sqrt(2) = 1.4142136
                 else prob = 0; 
-                tree.setScore(i_ct,j_ct,prob);
+                tree.setScore(ii,jj,prob);
             }
             else 
-                tree.setScore(i_ct,j_ct,0.);//prob to 0
+                tree.setScore(ii,jj,0.);//prob to 0
         }
     }
     
@@ -260,8 +261,56 @@ void CaptureLaser2D::establishConstraintsMHTree()
     tree.printTree();
     tree.printScoreTable();
     
-    // create new landmarks and new constraints according associatio result
-    //to do
+    // create new landmarks for unassociated features
+    //TODO: sort ft_unassociated !!!
+    ii = 0; 
+    kk = 0;
+    for (auto i_it = getFeatureListPtr()->begin(); i_it != getFeatureListPtr()->end(); i_it++, ii++) //ii runs over extracted feature
+    {
+        if ( ii = ft_unassociated[kk] )
+        {
+            //advances index on ft_unassociated vector
+            kk++;
+            
+            //get feature on sensor frame
+            const Eigen::Vector2s& feature_position = (*feature_it)->getMeasurement().head(2);
+            const WolfScalar& feature_orientation = (*feature_it)->getMeasurement()(2);
+            const WolfScalar& feature_aperture = (*feature_it)->getMeasurement()(3);
+
+            //translate feature to world
+            feature_global_position = R_robot * (R_sensor * feature_position + t_sensor) + t_robot;
+            StateBase* new_landmark_state_position = new StatePoint2D(getTop()->getNewStatePtr());
+            getTop()->addState(new_landmark_state_position, feature_global_position);
+            StateBase* new_landmark_state_orientation = new StateTheta(getTop()->getNewStatePtr());
+            getTop()->addState(new_landmark_state_orientation, Eigen::Map < Eigen::Vector1s > (&feature_global_orientation, 1));
+                        
+            //add it to the slam as a new landmark
+            correspondent_landmark = new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation, feature_aperture);
+            LandmarkBase* corr_landmark(correspondent_landmark);
+            getTop()->getMapPtr()->addLandmark(corr_landmark);
+//          std::cout << "Landmark created: " <<
+//                       getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl <<
+//                       feature_global_position.transpose() <<
+//                       "\t" << feature_global_orientation <<
+//                       "\t" << feature_aperture << std::endl;
+        }
+    }
+    
+    //hit existing constraints according association result
+    else
+    {
+        correspondent_landmark->hit();
+    }
+
+    // std::cout << "Creating new constraint: Landmark " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << " & feature "
+    //        << (*feature_it)->nodeId() << std::endl;
+
+    // Add constraint to the correspondent landmark
+    (*feature_it)->addConstraint(new ConstraintCorner2DTheta(*feature_it, correspondent_landmark, getFramePtr()->getPPtr(),                 //_robotPPtr,
+            getFramePtr()->getOPtr(),                   //_robotOPtr,
+            correspondent_landmark->getPPtr(), //_landmarkPPtr,
+            correspondent_landmark->getOPtr())); //_landmarkOPtr,
+
 }
 
 Eigen::VectorXs CaptureLaser2D::computePrior() const
