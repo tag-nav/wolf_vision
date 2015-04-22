@@ -6,7 +6,7 @@
 #include <queue>
 #include <random>
 #include <math.h>
-#include <algorithm> //find()
+#include <algorithm> //find(), sort()
 
 // Eigen ingludes
 #include <eigen3/Eigen/Geometry>

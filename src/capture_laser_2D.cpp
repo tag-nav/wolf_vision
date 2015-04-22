@@ -260,18 +260,15 @@ void CaptureLaser2D::establishConstraintsMHTree()
     std::cout << "-------------" << std::endl; 
     tree.printTree();
     tree.printScoreTable();
-    
-    // create new landmarks for unassociated features
-    //TODO: sort ft_unassociated !!!
-    ii = 0; 
-    kk = 0;
+  /*  
+    //TODO: tree returns associated_mask vector of size of num features
+    //loop over all features
+    ii = 0; //runs over features
+    kk = 0; //runs over established pairs
     for (auto i_it = getFeatureListPtr()->begin(); i_it != getFeatureListPtr()->end(); i_it++, ii++) //ii runs over extracted feature
     {
-        if ( ii = ft_unassociated[kk] )
+        if ( associated_mask[ii] == false ) //unassociated feature case
         {
-            //advances index on ft_unassociated vector
-            kk++;
-            
             //get feature on sensor frame
             const Eigen::Vector2s& feature_position = (*feature_it)->getMeasurement().head(2);
             const WolfScalar& feature_orientation = (*feature_it)->getMeasurement()(2);
@@ -284,33 +281,27 @@ void CaptureLaser2D::establishConstraintsMHTree()
             StateBase* new_landmark_state_orientation = new StateTheta(getTop()->getNewStatePtr());
             getTop()->addState(new_landmark_state_orientation, Eigen::Map < Eigen::Vector1s > (&feature_global_orientation, 1));
                         
-            //add it to the slam as a new landmark
+            //add it to the slam map as a new landmark
             correspondent_landmark = new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation, feature_aperture);
             LandmarkBase* corr_landmark(correspondent_landmark);
             getTop()->getMapPtr()->addLandmark(corr_landmark);
-//          std::cout << "Landmark created: " <<
-//                       getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << std::endl <<
-//                       feature_global_position.transpose() <<
-//                       "\t" << feature_global_orientation <<
-//                       "\t" << feature_aperture << std::endl;
         }
+        else //feature-landmark association case
+        {
+            //TODO
+            //feature => ft_lk_pairs[kk].first(); 
+            //landmark => ft_lk_pairs[kk].second();
+            //hit landmark
+            kk++;
+        }
+        
+        // Add constraint to the correspondent landmark
+        (*feature_it)->addConstraint(new ConstraintCorner2DTheta(*feature_it, correspondent_landmark, getFramePtr()->getPPtr(),                 //_robotPPtr,
+                getFramePtr()->getOPtr(),                   //_robotOPtr,
+                correspondent_landmark->getPPtr(), //_landmarkPPtr,
+                correspondent_landmark->getOPtr())); //_landmarkOPtr,
     }
-    
-    //hit existing constraints according association result
-    else
-    {
-        correspondent_landmark->hit();
-    }
-
-    // std::cout << "Creating new constraint: Landmark " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << " & feature "
-    //        << (*feature_it)->nodeId() << std::endl;
-
-    // Add constraint to the correspondent landmark
-    (*feature_it)->addConstraint(new ConstraintCorner2DTheta(*feature_it, correspondent_landmark, getFramePtr()->getPPtr(),                 //_robotPPtr,
-            getFramePtr()->getOPtr(),                   //_robotOPtr,
-            correspondent_landmark->getPPtr(), //_landmarkPPtr,
-            correspondent_landmark->getOPtr())); //_landmarkOPtr,
-
+*/    
 }
 
 Eigen::VectorXs CaptureLaser2D::computePrior() const
