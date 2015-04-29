@@ -9,6 +9,8 @@
 //#include <memory>
 
 //pipol tracker
+#include "matrix.h"
+#include "association_solver.h"
 #include "association_node.h"
 
 /** \brief The whole decision tree
@@ -16,15 +18,11 @@
  * The whole decision tree
  * 
 */
-class AssociationTree
+class AssociationTree : public AssociationSolver
 {
     protected:
-        unsigned int nd_; //num detections
-        unsigned int nt_; //num actual targets, without counting the void target
-        std::vector< std::vector<double> > scores_;//scores table. Size is (nd_) x (nt_+1), to account for the void target
         AssociationNode root_;
         std::list<AssociationNode*> terminus_node_list_;
-//         std::list<std::weak_ptr<AssociationNode> > terminus_node_list_; //TODO Use c++11 compiler !! After RoboCup!!
 
     public:
         /** \brief Constructor
@@ -48,34 +46,15 @@ class AssociationTree
         */        
         void reset();            
         
-        /** \brief Resizes tree
+        /** \brief Resizes the problem
         * 
-        * Sets nd_ and nt_ and resizes score table
+        * Resizes the problem: 
+        * \param _n_det num of detections
+        * \param _n_tar num of targets
+        * Resizes the scores_ matrix which will allocate _n_det rows and _n_tar+1 columns to take into account void target
         * 
         */        
-        void resize(const unsigned int _n_det, const unsigned int _n_tar);
-
-        /** \brief Returns num of detections nd_
-         * 
-         * Returns num of detections nd_
-         * 
-         **/
-        unsigned int numDetections();
-        
-        /** \brief Returns num of actual targets nt_
-         * 
-         * Returns num of actual targets nt_
-         * 
-         **/
-        unsigned int numTargets();
-
-        
-        /** \brief Sets values to scores_ table
-         * 
-         * Sets value to score table, at cell ij, corresponding to detection_i and target_j
-         * 
-         **/
-        void setScore(const unsigned int _det_i, const unsigned int _tar_j, const double _m_ij);
+        void resize(const unsigned int _n_det, const unsigned int _n_tar);                
         
         /** \brief Build tree from scores
         * 
@@ -98,23 +77,27 @@ class AssociationTree
         */        
         void normalizeTree();        
         
+        /** \brief choose best terminus node
+         * 
+         * Choose best terminus node based on the best tree probability
+         * \param _best_node a reference to an iterator to a list of pointers, where returned result is placed. 
+         * At output, _best_node points the bets node in the terminus_node_list_
+         * 
+         **/
+        void chooseBestTerminus(std::list<AssociationNode*>::iterator & _best_node);
+        
         /** \brief Gets tree decision
          * 
          * Decides best hypothesis according tree computation made by computeTree()
          * Return values are: 
          * \param _pairs Returned pairs: vector of pairs (d_i, t_j)
          * \param _unassoc Returned unassociated detections: vector of (d_i)
+         * \param _associated_mask Resized to nd_. Marks true at i if detection d_i has been associated, otherwise marks false
          * 
          **/
-        void treeDecision(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<unsigned int> & _unassoc);
+        //void solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<unsigned int> & _unassoc);
+        void solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<bool> & _associated_mask);
         
-        /** \brief Prints the score table
-        * 
-        * Prints the score table
-        * 
-        */                
-        void printScoreTable() const;
-
         /** \brief Prints the tree
         * 
         * Prints the tree
