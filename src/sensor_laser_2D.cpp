@@ -59,13 +59,13 @@ void SensorLaser2D::setScanParams(const laserscanutils::ScanParams & _params)
 void SensorLaser2D::setDefaultCornerAlgParams()
 {
     //default parameters for corner extraction. TODO: get them from a file or static constants
-    corners_alg_params_.segment_window_size = 8;
-    corners_alg_params_.theta_min = 0.4;
-    corners_alg_params_.theta_max_parallel = 0.1;
-    corners_alg_params_.k_sigmas = 3;
-    corners_alg_params_.max_beam_distance = 5;
-    corners_alg_params_.max_distance = 1;
-
+    corners_alg_params_.theta_min_ = 0.4;
+    corners_alg_params_.max_distance_ = 1;
+    corners_alg_params_.line_params_.jump_dist_ut_ = 1;
+    corners_alg_params_.line_params_.window_sz_ = 8;
+    corners_alg_params_.line_params_.k_sigmas_ut_ = 3; 
+    corners_alg_params_.line_params_.concatenate_angle_ut_ = 0.1; 
+    corners_alg_params_.line_params_.concatenate_ii_ut_ = 5;
 }
 
 void SensorLaser2D::setCornerAlgParams(const laserscanutils::ExtractCornerParams & _corner_alg_params)

@@ -135,8 +135,8 @@ int main(int argc, char** argv)
     string modelFileName;
 
     //model and initial view point
-    modelFileName = "/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj";
-    //modelFileName = "/home/acoromin/dev/br/faramotics/models/campusNordUPC.obj";
+    //modelFileName = "/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj";
+    modelFileName = "/home/acoromin/dev/br/faramotics/models/campusNordUPC.obj";
     //modelFileName = "/home/andreu/dev/faramotics/models/campusNordUPC.obj";
     devicePose.setPose(2, 8, 0.2, 0, 0, 0);
     viewPoint.setPose(devicePose);

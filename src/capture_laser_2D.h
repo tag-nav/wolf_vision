@@ -12,9 +12,10 @@
 #include <eigen3/Eigen/Geometry>
 
 //laser_scan_utils
-#include "iri-algorithms/laser_scan_utils/scan_basics.h"
-#include "iri-algorithms/laser_scan_utils/corner_detector.h"
 #include "iri-algorithms/laser_scan_utils/entities.h"
+#include "iri-algorithms/laser_scan_utils/scan_basics.h"
+#include "iri-algorithms/laser_scan_utils/line_detector.h"
+#include "iri-algorithms/laser_scan_utils/corner_detector.h"
 
 //wolf includes
 #include "constraint_corner_2D_theta.h"
@@ -45,9 +46,9 @@ class CaptureLaser2D : public CaptureBase
 //         static double max_distance;//max distance between line ends to consider corner or concatenation
 
         //Eigen::Map<Eigen::VectorXs> ranges_; // a map to the ranges inside de data vector
-        std::vector<float> ranges_; // ranges vector
+        std::vector<float> ranges_; // ranges vector. Type float to match ROS LaserScan message 
         //Eigen::Map<Eigen::VectorXs> intensities_; // a map to the intensities inside the data vector
-        std::vector<float> intensities_; // intensities vector
+        std::vector<float> intensities_; // intensities vector. Type float to match ROS LaserScan message 
         SensorLaser2D* laser_ptr_; //specific pointer to sensor laser 2D object
         
     public:
@@ -56,7 +57,6 @@ class CaptureLaser2D : public CaptureBase
          * Constructor with ranges
          * 
          **/
-        //CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges);
         CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges);
 
         /** \brief Constructor with ranges and intensities
@@ -64,7 +64,6 @@ class CaptureLaser2D : public CaptureBase
          * Constructor with ranges and intensities
          *
          **/
-        //CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities);
         CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges, const std::vector<float>& _intensities);
 
         /** \brief Destructor

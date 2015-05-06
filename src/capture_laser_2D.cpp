@@ -7,18 +7,23 @@
 // unsigned int CaptureLaser2D::max_beam_distance = 5;//max number of beams of distance between lines to consider corner or concatenation
 // double CaptureLaser2D::max_distance = 0.5;//max distance between line ends to consider corner or concatenation
 
-//CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges):
+//CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<WolfScalar>& _ranges):
 //	CaptureBase(_ts, _sensor_ptr, _ranges),
 //	ranges_(data_.data(), _ranges.size()),
 //	intensities_(data_.data(), 0)
 //{
 //    laser_ptr_ = (SensorLaser2D*)sensor_ptr_;
 //}
-CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges) :
-        CaptureBase(_ts, _sensor_ptr), ranges_(_ranges)
+CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, 
+                               SensorBase* _sensor_ptr, 
+                               const std::vector<float>& _ranges) 
+                               :
+                               CaptureBase(_ts, _sensor_ptr), 
+                               ranges_(_ranges)
 {
     laser_ptr_ = (SensorLaser2D*) sensor_ptr_;
 }
+
 
 //CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _intensities):
 //    CaptureBase(_ts, _sensor_ptr, _ranges),
@@ -27,11 +32,18 @@ CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, c
 //{
 //      laser_ptr_ = (SensorLaser2D*)sensor_ptr_;
 //}
-CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges, const std::vector<float>& _intensities) :
-        CaptureBase(_ts, _sensor_ptr), ranges_(_ranges), intensities_(_intensities)
+CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts, 
+                               SensorBase* _sensor_ptr, 
+                               const std::vector<float>& _ranges, 
+                               const std::vector<float>& _intensities) 
+                               :
+                               CaptureBase(_ts, _sensor_ptr),
+                               ranges_(_ranges), 
+                               intensities_(_intensities)
 {
     laser_ptr_ = (SensorLaser2D*) sensor_ptr_;
 }
+
 
 CaptureLaser2D::~CaptureLaser2D()
 {
@@ -41,8 +53,7 @@ CaptureLaser2D::~CaptureLaser2D()
 void CaptureLaser2D::processCapture()
 {
     //variables
-    //std::list<Eigen::Vector4s> corners;
-    std::list < laserscanutils::Corner > corners;
+    std::list <laserscanutils::Corner> corners;
 
     //extract corners from range data
     this->extractCorners(corners);
@@ -60,15 +71,16 @@ void CaptureLaser2D::processCapture()
 
 unsigned int CaptureLaser2D::extractCorners(std::list<laserscanutils::Corner> & _corner_list) const
 {
-    std::list < laserscanutils::Line > line_list;
-    
-    laserscanutils::extractLines(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, line_list);
-    return laserscanutils::extractCorners(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), line_list, _corner_list);
+//     std::list < laserscanutils::Line > line_list;
+//     
+//     laserscanutils::extractLines(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, line_list);
+//     return laserscanutils::extractCorners(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), line_list, _corner_list);
+    return laserscanutils::extractCorners(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, _corner_list);
 }
 
 unsigned int CaptureLaser2D::extractLines(std::list<laserscanutils::Line> & _line_list) const
 {
-    return laserscanutils::extractLines(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, _line_list);
+    return laserscanutils::extractLines(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams().line_params_, ranges_, _line_list);
 }
 
 void CaptureLaser2D::createFeatures(std::list<laserscanutils::Corner> & _corner_list)
@@ -257,9 +269,9 @@ void CaptureLaser2D::establishConstraintsMHTree()
     tree.solve(ft_lk_pairs,associated_mask);
     
     //print tree & score table 
-    std::cout << "-------------" << std::endl; 
-    tree.printTree();
-    tree.printScoreTable();
+//     std::cout << "-------------" << std::endl; 
+//     tree.printTree();
+//     tree.printScoreTable();
 
     //loop over all features
     ii = 0; //runs over features
