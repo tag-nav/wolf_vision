@@ -1,5 +1,5 @@
-#ifndef STATE_THETA_H_
-#define STATE_THETA_H_
+#ifndef STATE_QUATERNION_H_
+#define STATE_QUATERNION_H_
 
 //std includes
 #include <iostream>
@@ -10,11 +10,12 @@
 #include "wolf.h"
 #include "state_orientation.h"
 
-//class StateTheta
-class StateTheta : public StateOrientation
+//class StateQuaternion
+//Last component is the real part.
+class StateQuaternion : public StateOrientation
 {
     public:
-        static const unsigned int BLOCK_SIZE = 1;
+        static const unsigned int BLOCK_SIZE = 4;
 
     public:
 
@@ -25,7 +26,7 @@ class StateTheta : public StateOrientation
          * \param _idx is the index of the first element of the state in the whole state vector
          *
          **/
-        StateTheta(Eigen::VectorXs& _st_remote, const unsigned int _idx);
+        StateQuaternion(Eigen::VectorXs& _st_remote, const unsigned int _idx);
 
         /** \brief Constructor with scalar pointer
          *
@@ -33,14 +34,14 @@ class StateTheta : public StateOrientation
          * \param _st_ptr is the pointer of the first element of the state unit
          *
          **/
-        StateTheta(WolfScalar* _st_ptr);
+        StateQuaternion(WolfScalar* _st_ptr);
 
         /** \brief Destructor
          *
          * Destructor
          *
          **/
-        virtual ~StateTheta();
+        virtual ~StateQuaternion();
 
         /** \brief Returns the parametrization of the state unit
          *
@@ -62,7 +63,7 @@ class StateTheta : public StateOrientation
          *
          **/
         //virtual Eigen::Matrix3s getRotationMatrix() const;
-        void rotationMatrix(Eigen::Matrix3s& R) const;
+        virtual void rotationMatrix(Eigen::Matrix3s& R) const;
 
         /** \brief Returns a (mapped) vector of the state unit
          *
@@ -71,6 +72,20 @@ class StateTheta : public StateOrientation
          **/
         virtual Eigen::Map<const Eigen::VectorXs> getVector() const;
 
+        /** \brief Returns a (mapped) quaternion of the state unit
+         *
+         * Returns a (mapped) quaternion of the state unit
+         *
+         **/
+        virtual Eigen::Map<const Eigen::Quaternions> getQuaternion() const;
+
+        /** \brief Normalizes the quaternion
+         *
+         * Normalizes the quaternion
+         *
+         **/        
+        void normalize();
+        
         /** \brief Prints all the elements of the state unit
          *
          * Prints all the elements of the state unit

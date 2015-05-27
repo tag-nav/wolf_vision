@@ -64,6 +64,7 @@ typedef Matrix<WolfScalar, 2, 1> Vector2s;                ///< 2-vector of real 
 typedef Matrix<WolfScalar, 3, 1> Vector3s;                ///< 3-vector of real scalar_t type
 typedef Matrix<WolfScalar, 4, 1> Vector4s;                ///< 4-vector of real scalar_t type
 typedef Matrix<WolfScalar, 6, 1> Vector6s;                ///< 6-vector of real scalar_t type
+typedef Matrix<WolfScalar, 7, 1> Vector7s;                ///< 7-vector of real scalar_t type
 typedef Matrix<WolfScalar, Dynamic, 1> VectorXs;          ///< variable size vector of real scalar_t type
 typedef Matrix<WolfScalar, 1, 2> RowVector2s;             ///< 2-row-vector of real scalar_t type
 typedef Matrix<WolfScalar, 1, 3> RowVector3s;             ///< 3-row-vector of real scalar_t type

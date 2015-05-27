@@ -60,7 +60,8 @@ class StateComplexAngle : public StateOrientation
 		 * Returns the 3x3 rotation matrix of the orientation
 		 *
 		 **/
-		virtual Eigen::Matrix3s getRotationMatrix() const;
+		//virtual Eigen::Matrix3s getRotationMatrix() const;
+		void rotationMatrix(Eigen::Matrix3s& R) const;
 
         /** \brief Returns a (mapped) vector of the state unit
          *

@@ -29,7 +29,7 @@ class SensorLaser2D : public SensorBase
          * \param _params struct with scan parameters. See laser_scan_utils library API for reference
          * 
          **/        
-        SensorLaser2D(StateBase* _p_ptr, StateOrientation* _o_ptr);
+        SensorLaser2D(StatePoint3D* _p_ptr, StateOrientation* _o_ptr);
         //SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params);
 
         /** \brief Destructor

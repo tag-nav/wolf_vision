@@ -27,26 +27,20 @@ unsigned int StateTheta::getStateSize() const
     return BLOCK_SIZE;
 }
 
-Eigen::Matrix3s StateTheta::getRotationMatrix() const
-{
-    Eigen::Matrix3s R(Eigen::Matrix3s::Identity());
-    R(0, 0) = cos(*state_ptr_);
-    R(1, 1) = cos(*state_ptr_);
-    R(0, 1) = -sin(*state_ptr_);
-    R(1, 0) = sin(*state_ptr_);
+// Eigen::Matrix3s StateTheta::getRotationMatrix() const
+// {
+//     Eigen::Matrix3s R(Eigen::Matrix3s::Identity());
+//     this->getRotationMatrix(R); 
+//     return R;
+// }
 
-    //std::cout << "StateTheta::getRotationMatrix()" << R << std::endl;
-    return R;
-}
-
-void StateTheta::getRotationMatrix(Eigen::Matrix3s& R) const
+void StateTheta::rotationMatrix(Eigen::Matrix3s& R) const
 {
     R = Eigen::Matrix3s::Identity();
     R(0, 0) = cos(*state_ptr_);
     R(1, 1) = cos(*state_ptr_);
     R(0, 1) = -sin(*state_ptr_);
     R(1, 0) = sin(*state_ptr_);
-
     //std::cout << "StateTheta::getRotationMatrix()" << R << std::endl;
 }
 

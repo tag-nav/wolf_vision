@@ -14,7 +14,7 @@ class SensorBase : public NodeBase
 {
     protected:
         SensorType type_;		//indicates sensor type. Enum defined at wolf.h
-        StateBase* p_ptr_;		// sensor position state unit pointer
+        StatePoint3D* p_ptr_;		// sensor position state unit pointer
         StateOrientation* o_ptr_; 	    // sensor orientation state unit pointer
         Eigen::VectorXs params_;//sensor intrinsic params: offsets, scale factors, sizes, ...
 
@@ -36,7 +36,7 @@ class SensorBase : public NodeBase
          * \param _params Vector containing the sensor parameters
          *
          **/
-        SensorBase(const SensorType & _tp, StateBase* _p_ptr, StateOrientation* _o_ptr, const Eigen::VectorXs & _params);
+        SensorBase(const SensorType & _tp, StatePoint3D* _p_ptr, StateOrientation* _o_ptr, const Eigen::VectorXs & _params);
 
         /** \brief Constructor with parameter size
          *
@@ -47,13 +47,13 @@ class SensorBase : public NodeBase
          * \param _params_size size of the vector containing the sensor parameters
          *
          **/
-        SensorBase(const SensorType & _tp, StateBase* _p_ptr, StateOrientation* _o_ptr, unsigned int _params_size);
+        SensorBase(const SensorType & _tp, StatePoint3D* _p_ptr, StateOrientation* _o_ptr, unsigned int _params_size);
 
         ~SensorBase();
 
         const SensorType getSensorType() const;
 
-        StateBase* getPPtr() const;
+        StatePoint3D* getPPtr() const;
 
         StateOrientation* getOPtr() const;
 };

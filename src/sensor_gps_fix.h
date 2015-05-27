@@ -16,7 +16,7 @@ class SensorGPSFix : public SensorBase
          * \param _noise noise standard deviation
          * 
          **/
-		SensorGPSFix(StateBase* _p_ptr, StateOrientation* _o_ptr, const double& _noise);
+		SensorGPSFix(StatePoint3D* _p_ptr, StateOrientation* _o_ptr, const double& _noise);
         
         /** \brief Destructor
          * 

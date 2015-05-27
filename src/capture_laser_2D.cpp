@@ -111,7 +111,7 @@ void CaptureLaser2D::establishConstraints()
     WolfScalar& robot_orientation = *(getFramePtr()->getOPtr()->getPtr());
 
     // Sensor transformation
-    Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector();
+    Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
     Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2, 2>();
 
     //Brute force closest (xy and theta) landmark search //TODO: B&B
@@ -223,7 +223,7 @@ void CaptureLaser2D::establishConstraints()
 void CaptureLaser2D::establishConstraintsMHTree()
 {   
     //local declarations
-    WolfScalar prob, dm, apert_diff;
+    WolfScalar prob, dm2, apert_diff;
     unsigned int ii, jj, kk;
     std::vector<std::pair<unsigned int, unsigned int> > ft_lk_pairs;
     std::vector<bool> associated_mask;
@@ -237,9 +237,9 @@ void CaptureLaser2D::establishConstraintsMHTree()
     WolfScalar& robot_orientation = *(getFramePtr()->getOPtr()->getPtr());
 
     // Sensor transformation
-    Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector();
+    Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
     Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2,2>();
-    
+
     //tree object allocation and sizing
     AssociationTree tree;
     tree.resize( getFeatureListPtr()->size() , getTop()->getMapPtr()->getLandmarkListPtr()->size() );
@@ -255,8 +255,8 @@ void CaptureLaser2D::establishConstraintsMHTree()
             apert_diff = fabs( (*i_it)->getMeasurement(3) - (*j_it)->getDescriptor(0) );
             if (apert_diff < MAX_ACCEPTED_APERTURE_DIFF)
             {
-                dm = sqrt(computeMahalanobisDistance(*i_it, *j_it));
-                if (dm<5) prob = erfc(dm/1.4142136);// sqrt(2) = 1.4142136
+                dm2 = computeMahalanobisDistance(*i_it, *j_it);//Mahalanobis squared
+                if (dm2 < 5*5) prob = erfc( sqrt(dm2)/1.4142136 );// sqrt(2) = 1.4142136
                 else prob = 0; 
                 tree.setScore(ii,jj,prob);
             }
@@ -267,7 +267,7 @@ void CaptureLaser2D::establishConstraintsMHTree()
     
     // Grows tree and make association pairs
     tree.solve(ft_lk_pairs,associated_mask);
-    
+
     //print tree & score table 
 //     std::cout << "-------------" << std::endl; 
 //     tree.printTree();
@@ -347,7 +347,7 @@ WolfScalar CaptureLaser2D::computeMahalanobisDistance(const FeatureBase* _featur
 
     Eigen::Vector2s p_robot = getFramePtr()->getPPtr()->getVector();
     Eigen::Matrix2s R_robot = ((StateOrientation*) (getFramePtr()->getOPtr()))->getRotationMatrix().topLeftCorner<2,2>();
-    Eigen::Vector2s p_sensor = getSensorPtr()->getPPtr()->getVector();
+    Eigen::Vector2s p_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
     Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2, 2>();
     Eigen::Vector2s p_landmark = _landmark_ptr->getPPtr()->getVector();
 

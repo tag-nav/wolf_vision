@@ -1,6 +1,6 @@
 #include "sensor_base.h"
 
-SensorBase::SensorBase(const SensorType & _tp, StateBase* _p_ptr, StateOrientation* _o_ptr, const Eigen::VectorXs & _params) :
+SensorBase::SensorBase(const SensorType & _tp, StatePoint3D* _p_ptr, StateOrientation* _o_ptr, const Eigen::VectorXs & _params) :
         NodeBase("SENSOR"),
         type_(_tp),
         p_ptr_(_p_ptr),
@@ -10,7 +10,7 @@ SensorBase::SensorBase(const SensorType & _tp, StateBase* _p_ptr, StateOrientati
     params_ = _params;
 }
 
-SensorBase::SensorBase(const SensorType & _tp, StateBase* _p_ptr, StateOrientation* _o_ptr, unsigned int _params_size) :
+SensorBase::SensorBase(const SensorType & _tp, StatePoint3D* _p_ptr, StateOrientation* _o_ptr, unsigned int _params_size) :
         NodeBase("SENSOR"),
         type_(_tp),
         p_ptr_(_p_ptr),
@@ -30,7 +30,7 @@ const SensorType SensorBase::getSensorType() const
     return type_;
 }
 
-StateBase* SensorBase::getPPtr() const
+StatePoint3D* SensorBase::getPPtr() const
 {
     return p_ptr_;
 }

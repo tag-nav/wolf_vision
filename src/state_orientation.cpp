@@ -18,3 +18,10 @@ StateOrientation::~StateOrientation()
 {
 	//
 }
+
+Eigen::Matrix3s StateOrientation::getRotationMatrix() const
+{
+    Eigen::Matrix3s R(Eigen::Matrix3s::Identity());
+    rotationMatrix(R); 
+    return R;
+}

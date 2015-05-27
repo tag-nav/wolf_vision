@@ -66,6 +66,7 @@ SET(HDRS
     state_base.h
     state_point.h
     state_orientation.h
+    state_quaternion.h
     state_theta.h
     state_complex_angle.h
     time_stamp.h
@@ -103,6 +104,7 @@ SET(SRCS
     sensor_gps_fix.cpp
     state_base.cpp
     state_orientation.cpp
+    state_quaternion.cpp
     state_theta.cpp
     state_complex_angle.cpp
     time_stamp.cpp

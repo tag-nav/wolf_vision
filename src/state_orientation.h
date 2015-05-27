@@ -44,7 +44,8 @@ class StateOrientation : public StateBase
          * Returns the 3x3 rotation matrix of the orientation
          *
          **/
-        virtual Eigen::Matrix3s getRotationMatrix() const = 0;
+        Eigen::Matrix3s getRotationMatrix() const;
+        virtual void rotationMatrix(Eigen::Matrix3s& R) const = 0;
 
         /** \brief Returns a (mapped) vector of the state unit
          *

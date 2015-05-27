@@ -28,15 +28,15 @@ unsigned int StateComplexAngle::getStateSize() const
 	return BLOCK_SIZE;
 }
 
-Eigen::Matrix3s StateComplexAngle::getRotationMatrix() const
+void StateComplexAngle::rotationMatrix(Eigen::Matrix3s& R) const
 {
-	Eigen::Matrix3s R(Eigen::Matrix3s::Identity());
-	R(0,0) = *state_ptr_;
-	R(1,1) = *state_ptr_;
-	R(0,1) = -*(state_ptr_+1);
-	R(1,0) = *(state_ptr_+1);
+	R = Eigen::Matrix3s::Identity();
 
-	return R;
+    R(0,0) = *state_ptr_;
+    R(1,0) = *(state_ptr_+1);
+    
+    R(0,1) = -*(state_ptr_+1);
+	R(1,1) = *state_ptr_;
 }
 
 Eigen::Map<const Eigen::VectorXs> StateComplexAngle::getVector() const

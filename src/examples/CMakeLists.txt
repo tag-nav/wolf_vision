@@ -62,3 +62,8 @@ IF(faramotics_FOUND)
                                 ${PROJECT_NAME})
     ENDIF (laser_scan_utils_FOUND)
 ENDIF(faramotics_FOUND)
+
+# Testing a eigen quaternion
+ADD_EXECUTABLE(test_state_quaternion test_state_quaternion.cpp)
+TARGET_LINK_LIBRARIES(test_state_quaternion ${PROJECT_NAME})
+

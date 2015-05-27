@@ -165,13 +165,13 @@ int main(int argc, char** argv)
     // Wolf manager initialization
     Eigen::Vector3s odom_pose = Eigen::Vector3s::Zero();
     Eigen::Vector3s gps_pose = Eigen::Vector3s::Zero();
-    Eigen::Vector3s laser_1_pose, laser_2_pose;
-    laser_1_pose << 1.2, 0, 0; //laser 1
-    laser_2_pose << -1.2, 0, M_PI; //laser 2
-    SensorOdom2D odom_sensor(new StatePoint2D(odom_pose.data()), new StateTheta(&odom_pose(2)), odom_std_factor, odom_std_factor);
-    SensorGPSFix gps_sensor(new StatePoint2D(gps_pose.data()), new StateTheta(&gps_pose(2)), gps_std);
-    SensorLaser2D laser_1_sensor(new StatePoint2D(laser_1_pose.data()), new StateTheta(&laser_1_pose(2)));
-    SensorLaser2D laser_2_sensor(new StatePoint2D(laser_2_pose.data()), new StateTheta(&laser_2_pose(2)));
+    Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
+    laser_1_pose << 1.2, 0, 0, 0; //laser 1
+    laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
+    SensorOdom2D odom_sensor(new StatePoint3D(odom_pose.data()), new StateTheta(&odom_pose(3)), odom_std_factor, odom_std_factor);
+    SensorGPSFix gps_sensor(new StatePoint3D(gps_pose.data()), new StateTheta(&gps_pose(3)), gps_std);
+    SensorLaser2D laser_1_sensor(new StatePoint3D(laser_1_pose.data()), new StateTheta(&laser_1_pose(3)));
+    SensorLaser2D laser_2_sensor(new StatePoint3D(laser_2_pose.data()), new StateTheta(&laser_2_pose(3)));
 
     // Initial pose
     pose_odom << 2, 8, 0;

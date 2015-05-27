@@ -38,6 +38,7 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 #include "wolf_problem.h"
+#include "state_quaternion.h"
 
 class WolfManager
 {
@@ -81,7 +82,7 @@ class WolfManager
                     && "Wrong init_frame state vector or covariance matrix size");
 
 
-            // Set initial covariance with a fake ODOM 2D capture to a fix frame
+            // Set initial covariance with a fake ODOM 2D capture to a fixed frame
             createFrame(_init_frame, TimeStamp(0));
             problem_->getTrajectoryPtr()->getFrameListPtr()->back()->fix();
             last_capture_relative_->integrateCapture((CaptureRelative*)(new CaptureOdom2D(TimeStamp(0), nullptr, Eigen::Vector3s::Zero(), _init_frame_cov)));
