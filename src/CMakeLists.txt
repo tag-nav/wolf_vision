@@ -37,6 +37,9 @@ IF(laser_scan_utils_FOUND)
 ENDIF(laser_scan_utils_FOUND)
 
 #headers
+SET(HDRS_BASE
+    wolf.h)
+
 SET(HDRS
     capture_base.h
     capture_relative.h
@@ -71,10 +74,9 @@ SET(HDRS
     state_complex_angle.h
     time_stamp.h
     trajectory_base.h
-    wolf.h
     wolf_problem.h
     wolf_manager.h)
-
+   
 SET(HDRS_DTASSC
     data_association/matrix.h
     data_association/association_solver.h
@@ -146,6 +148,7 @@ IF (Ceres_FOUND)
 ENDIF(Ceres_FOUND)
 
 IF (laser_scan_utils_FOUND)
+    MESSAGE("*****************************************+++ HERE: " ${laser_scan_utils_LIBRARY})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${laser_scan_utils_LIBRARY})
 ENDIF (laser_scan_utils_FOUND)
 
@@ -157,6 +160,8 @@ INSTALL(TARGETS ${PROJECT_NAME}
       ARCHIVE DESTINATION lib/iri-algorithms)
         
 #install headers         
+INSTALL(FILES ${HDRS_BASE} 
+    DESTINATION include/iri-algorithms)
 INSTALL(FILES ${HDRS} 
     DESTINATION include/iri-algorithms/wolf)
 INSTALL(FILES ${HDRS_DTASSC} 

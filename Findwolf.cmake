@@ -9,9 +9,9 @@ FIND_LIBRARY(
     NAMES wolf
     PATHS /usr/lib /usr/local/lib /usr/local/lib/iri-algorithms) 
 
-IF (wolf_INCLUDE_DIR AND wolf_LIBRARY)
+IF (wolf_INCLUDE_DIRS AND wolf_LIBRARY)
    SET(wolf_FOUND TRUE)
-ENDIF (wolf_INCLUDE_DIR AND wolf_LIBRARY)
+ENDIF (wolf_INCLUDE_DIRS AND wolf_LIBRARY)
 
 IF (wolf_FOUND)
    IF (NOT wolf_FIND_QUIETLY)

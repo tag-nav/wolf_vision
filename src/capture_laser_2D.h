@@ -12,10 +12,10 @@
 #include <eigen3/Eigen/Geometry>
 
 //laser_scan_utils
-#include "iri-algorithms/laser_scan_utils/entities.h"
-#include "iri-algorithms/laser_scan_utils/scan_basics.h"
-#include "iri-algorithms/laser_scan_utils/line_detector.h"
-#include "iri-algorithms/laser_scan_utils/corner_detector.h"
+#include "laser_scan_utils/entities.h"
+#include "laser_scan_utils/scan_basics.h"
+#include "laser_scan_utils/line_detector.h"
+#include "laser_scan_utils/corner_detector.h"
 
 //wolf includes
 #include "constraint_corner_2D_theta.h"
