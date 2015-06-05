@@ -148,7 +148,6 @@ IF (Ceres_FOUND)
 ENDIF(Ceres_FOUND)
 
 IF (laser_scan_utils_FOUND)
-    MESSAGE("*****************************************+++ HERE: " ${laser_scan_utils_LIBRARY})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${laser_scan_utils_LIBRARY})
 ENDIF (laser_scan_utils_FOUND)
 
