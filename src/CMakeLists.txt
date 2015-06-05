@@ -160,7 +160,7 @@ INSTALL(TARGETS ${PROJECT_NAME}
         
 #install headers         
 INSTALL(FILES ${HDRS_BASE} 
-    DESTINATION include/iri-algorithms)
+    DESTINATION include/iri-algorithms/wolf)
 INSTALL(FILES ${HDRS} 
     DESTINATION include/iri-algorithms/wolf)
 INSTALL(FILES ${HDRS_DTASSC} 
