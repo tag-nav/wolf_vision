@@ -21,7 +21,6 @@ IF(laser_scan_utils_FOUND)
     MESSAGE("laser_scan_utils Library FOUND: laser_scan_utils related sources will be built.")
 ENDIF(laser_scan_utils_FOUND)
 
-
 #include directories
 INCLUDE_DIRECTORIES(.)
 IF(Ceres_FOUND)
