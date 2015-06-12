@@ -4,6 +4,9 @@
  *  Created on: Jun 11, 2015
  *      Author: jvallve
  */
+
+typedef int IndexType;
+
 //std includes
 #include <cstdlib>
 #include <iostream>
@@ -15,8 +18,10 @@
 #include <queue>
 
 // eigen includes
+#define EIGEN_DEFAULT_DENSE_INDEX_TYPE IndexType
 #include <eigen3/Eigen/OrderingMethods>
 #include <eigen3/Eigen/CholmodSupport>
+#include <eigen3/Eigen/SparseLU>
 
 // ccolamd
 #include "ccolamd.h"
@@ -31,20 +36,14 @@ class CCOLAMDOrdering
         typedef Matrix<Index, Dynamic, 1> IndexVector;
 
         template<typename MatrixType>
-        void operator()(const MatrixType& mat, PermutationType& perm)
+        void operator()(const MatrixType& mat, PermutationType& perm, Index* cmember = nullptr)
         {
             Index m = mat.rows();
             Index n = mat.cols();
             Index nnz = mat.nonZeros();
 
-            std::cout << "m" << m << std::endl;
-            std::cout << "n" << n << std::endl;
-            std::cout << "nnz" << nnz << std::endl;
-
-            Index cmember[n];
             // Get the recommended value of Alen to be used by colamd
             Index Alen = ccolamd_recommended(nnz, m, n);
-            std::cout << "Alen" << Alen << std::endl;
             // Set the default parameters
             double knobs[CCOLAMD_KNOBS];
             Index stats[CCOLAMD_STATS];
@@ -56,34 +55,31 @@ class CCOLAMDOrdering
             for (Index i = 0; i < nnz; i++)
                 A(i) = mat.innerIndexPtr()[i];
 
-            std::cout << "p " << p.transpose() << std::endl;
-            // Call Colamd routine to compute the ordering
-            Index info = ccolamd(m, n, Alen, A.data(), p.data(), knobs, stats, NULL);
-            ccolamd_report (stats) ;
+            // Call CColamd routine to compute the ordering
+            Index info = compute_ccolamd(m, n, Alen, A.data(), p.data(), knobs, stats, cmember);
             if (!info)
-                std::cout << "CCOLAMD failed " << std::endl;
-            //eigen_assert(info && "COLAMD failed ");
+                assert(info && "COLAMD failed ");
 
             perm.resize(n);
-            std::cout << "p " << p.transpose() << std::endl;
-            std::cout << "perm.rows() " << perm.rows() << std::endl;
             for (Index i = 0; i < n; i++)
                 perm.indices()(p(i)) = i;
         }
+
+    private:
+        int compute_ccolamd(int &m, int &n, int &Alen, int* A, int* p, double* knobs, int* stats, int* cmember)
+        {
+            int info = ccolamd(m, n, Alen, A, p, knobs, stats, cmember);
+            //ccolamd_report (stats) ;
+            return info;
+        }
+
+        long int compute_ccolamd(long int &m, long int &n, long int &Alen, long int* A, long int* p, double* knobs, long int* stats, long int* cmember)
+        {
+            long int info = ccolamd_l(m, n, Alen, A, p, knobs, stats, cmember);
+            //ccolamd_l_report (stats) ;
+            return info;
+        }
 };
-//int ccolamd         /* returns (1) if successful, (0) otherwise*/
-//(               /* A and p arguments are modified on output */
-//    int n_row,          /* number of rows in A */
-//    int n_col,          /* number of columns in A */
-//    int Alen,           /* size of the array A */
-//    int A [ ],          /* row indices of A, of size Alen */
-//    int p [ ],          /* column pointers of A, of size n_col+1 */
-//    double knobs [CCOLAMD_KNOBS],/* parameter settings for ccolamd */
-//    int stats [CCOLAMD_STATS],  /* ccolamd output statistics and error codes */
-//    int cmember [ ]     /* Constraint set of A, of size n_col */
-//) ;
-
-
 
 //main
 int main(int argc, char *argv[])
@@ -95,16 +91,16 @@ int main(int argc, char *argv[])
         std::cout << "EXIT due to bad user input" << std::endl << std::endl;
         return -1;
     }
-    int size = atoi(argv[1]); //ordering enabled
+    IndexType size = atoi(argv[1]); //ordering enabled
 
-    SparseMatrix<double> A(size, size), Aordered(size, size);
-    CholmodSupernodalLLT < SparseMatrix<double> > solver;
-    PermutationMatrix<Dynamic, Dynamic, int> perm(size);
-    CCOLAMDOrdering<int> ordering;
+    SparseMatrix<double, ColMajor, IndexType> A(size, size), Aordered(size, size);
+    CholmodSupernodalLLT < SparseMatrix<double, ColMajor, IndexType> > solver;
+    PermutationMatrix<Dynamic, Dynamic, IndexType> perm(size);
+    CCOLAMDOrdering<IndexType> ordering;
+    Matrix<IndexType, Dynamic, 1> ordering_constraints(size);
     VectorXd b(size), bordered(size), xordered(size), x(size);
-    ;
-    clock_t t1, t2;
-    double time1, time2;
+    clock_t t1, t2, t3;
+    double time1, time2, time3;
 
     // BUILD THE PROBLEM ----------------------------
     //Fill A & b
@@ -117,8 +113,8 @@ int main(int argc, char *argv[])
         A.insert(i - 1, i) = 1;
         b(i) = i + 1;
     }
-    A.insert(size - 1, 0) = 1;
-    A.insert(0, size - 1) = 1;
+    A.insert(size - 1, 0) = 2;
+    A.insert(0, size - 1) = 2;
 
     std::cout << "Solving Ax = b:" << std::endl << "A = " << std::endl << A << std::endl << std::endl;
     std::cout << "b = " << std::endl << b.transpose() << std::endl << std::endl;
@@ -138,12 +134,16 @@ int main(int argc, char *argv[])
     std::cout << "x = " << x.transpose() << std::endl;
 
     // SOLVING AFTER REORDERING ------------------------------------
+    // ordering constraints
+    ordering_constraints(size-1) = 1;
+    ordering_constraints(0) = 1;
     // ordering
     t2 = clock();
     A.makeCompressed();
 
-    ordering(A, perm);
-    std::cout << "Reordering using AMD:" << std::endl;
+    std::cout << "Reordering using CCOLAMD:" << std::endl;
+    std::cout << "ordering_constraints = " << std::endl << ordering_constraints.transpose() << std::endl << std::endl;
+    ordering(A, perm, ordering_constraints.data());
     std::cout << "perm = " << std::endl << perm.indices().transpose() << std::endl << std::endl;
 
     bordered = perm * b;
@@ -163,5 +163,19 @@ int main(int argc, char *argv[])
     std::cout << "solved in " << time2 << "seconds" << std::endl;
     std::cout << "x = " << (perm.inverse() * xordered).transpose() << std::endl;
     std::cout << "x = " << x.transpose() << " (solution without reordering)" << std::endl;
+
+    // SOLVING AND REORDERING ------------------------------------
+    t3 = clock();
+    SparseLU<SparseMatrix<double, ColMajor, IndexType>, CCOLAMDOrdering<IndexType> > solver2;
+    solver2.compute(A);
+    if (solver2.info() != Success)
+    {
+        std::cout << "decomposition failed" << std::endl;
+        return 0;
+    }
+    x = solver2.solve(b);
+    time3 = ((double) clock() - t3) / CLOCKS_PER_SEC;
+    std::cout << "solved in " << time3 << "seconds" << std::endl;
+    std::cout << "x = " << x.transpose() << std::endl;
 }
 
