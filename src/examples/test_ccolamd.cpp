@@ -24,62 +24,9 @@ typedef int IndexType;
 #include <eigen3/Eigen/SparseLU>
 
 // ccolamd
-#include "ccolamd.h"
+#include "../wolf_solver/ccolamd_ordering.h"
 
 using namespace Eigen;
-
-template<typename Index>
-class CCOLAMDOrdering
-{
-    public:
-        typedef PermutationMatrix<Dynamic, Dynamic, Index> PermutationType;
-        typedef Matrix<Index, Dynamic, 1> IndexVector;
-
-        template<typename MatrixType>
-        void operator()(const MatrixType& mat, PermutationType& perm, Index* cmember = nullptr)
-        {
-            Index m = mat.rows();
-            Index n = mat.cols();
-            Index nnz = mat.nonZeros();
-
-            // Get the recommended value of Alen to be used by colamd
-            Index Alen = ccolamd_recommended(nnz, m, n);
-            // Set the default parameters
-            double knobs[CCOLAMD_KNOBS];
-            Index stats[CCOLAMD_STATS];
-            ccolamd_set_defaults(knobs);
-
-            IndexVector p(n + 1), A(Alen);
-            for (Index i = 0; i <= n; i++)
-                p(i) = mat.outerIndexPtr()[i];
-            for (Index i = 0; i < nnz; i++)
-                A(i) = mat.innerIndexPtr()[i];
-
-            // Call CColamd routine to compute the ordering
-            Index info = compute_ccolamd(m, n, Alen, A.data(), p.data(), knobs, stats, cmember);
-            if (!info)
-                assert(info && "COLAMD failed ");
-
-            perm.resize(n);
-            for (Index i = 0; i < n; i++)
-                perm.indices()(p(i)) = i;
-        }
-
-    private:
-        int compute_ccolamd(int &m, int &n, int &Alen, int* A, int* p, double* knobs, int* stats, int* cmember)
-        {
-            int info = ccolamd(m, n, Alen, A, p, knobs, stats, cmember);
-            //ccolamd_report (stats) ;
-            return info;
-        }
-
-        long int compute_ccolamd(long int &m, long int &n, long int &Alen, long int* A, long int* p, double* knobs, long int* stats, long int* cmember)
-        {
-            long int info = ccolamd_l(m, n, Alen, A, p, knobs, stats, cmember);
-            //ccolamd_l_report (stats) ;
-            return info;
-        }
-};
 
 //main
 int main(int argc, char *argv[])
@@ -91,13 +38,13 @@ int main(int argc, char *argv[])
         std::cout << "EXIT due to bad user input" << std::endl << std::endl;
         return -1;
     }
-    IndexType size = atoi(argv[1]); //ordering enabled
+    IndexType size = atoi(argv[1]);
 
     SparseMatrix<double, ColMajor, IndexType> A(size, size), Aordered(size, size);
     CholmodSupernodalLLT < SparseMatrix<double, ColMajor, IndexType> > solver;
     PermutationMatrix<Dynamic, Dynamic, IndexType> perm(size);
     CCOLAMDOrdering<IndexType> ordering;
-    Matrix<IndexType, Dynamic, 1> ordering_constraints(size);
+    Matrix<IndexType, Dynamic, 1> ordering_constraints = Matrix<IndexType, Dynamic, 1>::Ones(size);
     VectorXd b(size), bordered(size), xordered(size), x(size);
     clock_t t1, t2, t3;
     double time1, time2, time3;
@@ -135,8 +82,9 @@ int main(int argc, char *argv[])
 
     // SOLVING AFTER REORDERING ------------------------------------
     // ordering constraints
-    ordering_constraints(size-1) = 1;
-    ordering_constraints(0) = 1;
+    ordering_constraints(size-1) = 2;
+    ordering_constraints(0) = 2;
+
     // ordering
     t2 = clock();
     A.makeCompressed();
