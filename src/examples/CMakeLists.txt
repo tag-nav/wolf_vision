@@ -30,13 +30,15 @@ TARGET_LINK_LIBRARIES(test_ceres_odom_batch ${PROJECT_NAME})
 ADD_EXECUTABLE(test_ceres_odom_iterative test_ceres_odom_iterative.cpp)
 TARGET_LINK_LIBRARIES(test_ceres_odom_iterative ${PROJECT_NAME})
 
-# Testing a ccolamd test
-ADD_EXECUTABLE(test_ccolamd test_ccolamd.cpp)
-TARGET_LINK_LIBRARIES(test_ccolamd ${PROJECT_NAME})
-
-# Testing a ccolamd test
-ADD_EXECUTABLE(test_ccolamd_blocks test_ccolamd_blocks.cpp)
-TARGET_LINK_LIBRARIES(test_ccolamd_blocks ${PROJECT_NAME})
+IF(Suitesparse_FOUND)
+    # Testing a ccolamd test
+    ADD_EXECUTABLE(test_ccolamd test_ccolamd.cpp)
+    TARGET_LINK_LIBRARIES(test_ccolamd ${PROJECT_NAME})
+    
+    # Testing a blocks ccolamd test
+    ADD_EXECUTABLE(test_ccolamd_blocks test_ccolamd_blocks.cpp)
+    TARGET_LINK_LIBRARIES(test_ccolamd_blocks ${PROJECT_NAME})
+ENDIF(Suitesparse_FOUND)
 
 # Building and populating the wolf tree 
 # ADD_EXECUTABLE(test_wolf_tree test_wolf_tree.cpp)

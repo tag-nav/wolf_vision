@@ -189,7 +189,7 @@ INSTALL(FILES ${HDRS_DTASSC}
     DESTINATION include/iri-algorithms/wolf/data_association)
 INSTALL(FILES ${HDRS_WRAPPER} 
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
-INSTALL(FILES ${HDRS_WRAPPER} 
+INSTALL(FILES ${HDRS_SOLVER} 
     DESTINATION include/iri-algorithms/wolf/solver)
 
 INSTALL(FILES ../Findwolf.cmake DESTINATION ${CMAKE_ROOT}/Modules/)
