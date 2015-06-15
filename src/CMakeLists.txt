@@ -21,6 +21,22 @@ IF(laser_scan_utils_FOUND)
     MESSAGE("laser_scan_utils Library FOUND: laser_scan_utils related sources will be built.")
 ENDIF(laser_scan_utils_FOUND)
 
+# SuiteSparse doesn't have find*.cmake:
+FIND_PATH(
+    Suitesparse_INCLUDE_DIRS
+    NAMES SuiteSparse_config.h
+    PATHS /usr/include/suitesparse /usr/local/include/suitesparse)
+MESSAGE("Found suitesparse_INCLUDE_DIRS:" ${Suitesparse_INCLUDE_DIRS})
+
+IF(Suitesparse_INCLUDE_DIRS)
+   SET(Suitesparse_FOUND TRUE)
+   MESSAGE("Suitesparse FOUND: wolf_solver will be built.")
+ELSE (Suitesparse_INCLUDE_DIRS)
+   SET(Suitesparse_FOUND FALSE)
+   MESSAGE("Suitesparse NOT FOUND: wolf_solver won't be built.")
+ENDIF (Suitesparse_INCLUDE_DIRS)
+
+
 #include directories
 INCLUDE_DIRECTORIES(.)
 IF(Ceres_FOUND)
@@ -34,6 +50,10 @@ ENDIF(faramotics_FOUND)
 IF(laser_scan_utils_FOUND)
     INCLUDE_DIRECTORIES(${laser_scan_utils_INCLUDE_DIRS})
 ENDIF(laser_scan_utils_FOUND)
+
+IF(Suitesparse_FOUND)
+    INCLUDE_DIRECTORIES(/usr/include/suitesparse)
+ENDIF(Suitesparse_FOUND)
 
 #headers
 SET(HDRS_BASE
@@ -138,6 +158,10 @@ IF (laser_scan_utils_FOUND)
         sensor_laser_2D.cpp)
 ENDIF(laser_scan_utils_FOUND)
 
+IF (Suitesparse_FOUND)
+    ADD_SUBDIRECTORY(wolf_solver)
+ENDIF(Suitesparse_FOUND)
+
 # create the shared library
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_WRAPPER})
 
@@ -149,7 +173,6 @@ ENDIF(Ceres_FOUND)
 IF (laser_scan_utils_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${laser_scan_utils_LIBRARY})
 ENDIF (laser_scan_utils_FOUND)
-
 
 #install library
 INSTALL(TARGETS ${PROJECT_NAME}
@@ -166,6 +189,8 @@ INSTALL(FILES ${HDRS_DTASSC}
     DESTINATION include/iri-algorithms/wolf/data_association)
 INSTALL(FILES ${HDRS_WRAPPER} 
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
+INSTALL(FILES ${HDRS_WRAPPER} 
+    DESTINATION include/iri-algorithms/wolf/solver)
 
 INSTALL(FILES ../Findwolf.cmake DESTINATION ${CMAKE_ROOT}/Modules/)
 

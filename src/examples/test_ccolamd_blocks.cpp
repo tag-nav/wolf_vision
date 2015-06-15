@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     t3 = clock();
     FactorMatrix.makeCompressed();
 
-    std::cout << "Reordering using CCOLAMD:" << std::endl;
+    std::cout << "Reordering using Block CCOLAMD:" << std::endl;
     std::cout << "block_ordering_constraints = " << std::endl << block_ordering_constraints.transpose() << std::endl << std::endl;
     ordering(FactorMatrix, perm_blocks, block_ordering_constraints.data());
 

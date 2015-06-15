@@ -31,14 +31,12 @@ ADD_EXECUTABLE(test_ceres_odom_iterative test_ceres_odom_iterative.cpp)
 TARGET_LINK_LIBRARIES(test_ceres_odom_iterative ${PROJECT_NAME})
 
 # Testing a ccolamd test
-#FIND_PACKAGE(Cholmod)
-#include_directories(${CHOLMOD_INCLUDES})
-#ADD_EXECUTABLE(test_ccolamd test_ccolamd.cpp)
-#TARGET_LINK_LIBRARIES(test_ccolamd ${CHOLMOD_LIBRARIES} ${PROJECT_NAME})
-#
+ADD_EXECUTABLE(test_ccolamd test_ccolamd.cpp)
+TARGET_LINK_LIBRARIES(test_ccolamd ${PROJECT_NAME})
+
 # Testing a ccolamd test
-#ADD_EXECUTABLE(test_ccolamd_blocks test_ccolamd_blocks.cpp)
-#TARGET_LINK_LIBRARIES(test_ccolamd_blocks ${CHOLMOD_LIBRARIES} ${PROJECT_NAME})
+ADD_EXECUTABLE(test_ccolamd_blocks test_ccolamd_blocks.cpp)
+TARGET_LINK_LIBRARIES(test_ccolamd_blocks ${PROJECT_NAME})
 
 # Building and populating the wolf tree 
 # ADD_EXECUTABLE(test_wolf_tree test_wolf_tree.cpp)
