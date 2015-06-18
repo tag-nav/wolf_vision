@@ -24,7 +24,7 @@ typedef int IndexType;
 #include <eigen3/Eigen/SparseLU>
 
 // ccolamd
-#include "../wolf_solver/ccolamd_ordering.h"
+#include "solver/ccolamd_ordering.h"
 
 using namespace Eigen;
 

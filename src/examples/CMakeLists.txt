@@ -30,6 +30,11 @@ TARGET_LINK_LIBRARIES(test_ceres_odom_batch ${PROJECT_NAME})
 ADD_EXECUTABLE(test_ceres_odom_iterative test_ceres_odom_iterative.cpp)
 TARGET_LINK_LIBRARIES(test_ceres_odom_iterative ${PROJECT_NAME})
 
+# Testing Eigen Permutations
+ADD_EXECUTABLE(test_permutations test_permutations.cpp)
+TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
+
+
 IF(Suitesparse_FOUND)
     # Testing a ccolamd test
     ADD_EXECUTABLE(test_ccolamd test_ccolamd.cpp)
@@ -38,6 +43,18 @@ IF(Suitesparse_FOUND)
     # Testing a blocks ccolamd test
     ADD_EXECUTABLE(test_ccolamd_blocks test_ccolamd_blocks.cpp)
     TARGET_LINK_LIBRARIES(test_ccolamd_blocks ${PROJECT_NAME})
+    
+    # Testing an incremental blocks ccolamd test
+    ADD_EXECUTABLE(test_incremental_ccolamd_blocks test_incremental_ccolamd_blocks.cpp)
+    TARGET_LINK_LIBRARIES(test_incremental_ccolamd_blocks ${PROJECT_NAME})
+    
+    # Testing an incremental QR with block ccolamd test
+    ADD_EXECUTABLE(test_iQR test_iQR.cpp)
+    TARGET_LINK_LIBRARIES(test_iQR ${PROJECT_NAME})
+    
+    # Testing SPQR simple test
+    ADD_EXECUTABLE(test_SPQR test_SPQR.cpp)
+    TARGET_LINK_LIBRARIES(test_SPQR ${PROJECT_NAME})
 ENDIF(Suitesparse_FOUND)
 
 # Building and populating the wolf tree 

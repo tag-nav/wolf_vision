@@ -159,7 +159,7 @@ IF (laser_scan_utils_FOUND)
 ENDIF(laser_scan_utils_FOUND)
 
 IF (Suitesparse_FOUND)
-    ADD_SUBDIRECTORY(wolf_solver)
+    ADD_SUBDIRECTORY(solver)
 ENDIF(Suitesparse_FOUND)
 
 # create the shared library
