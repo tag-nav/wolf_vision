@@ -109,15 +109,16 @@ int main(int argc, char *argv[])
     int n_nodes = 0;
 
     // ordering variables
-    SparseMatrix<int> A_nodes(0,0), A_nodes_ordered(0,0);
-    PermutationMatrix<Dynamic, Dynamic, int> acc_permutation_matrix(0), acc_permutation_nodes_matrix(0);
+    //SparseMatrix<int> A_nodes(0,0);
+    SparseMatrix<int> A_nodes_ordered(0,0);
+    PermutationMatrix<Dynamic, Dynamic, int> acc_permutation_nodes_matrix(0);
 
-    CCOLAMDOrdering<int> ordering;
+    CCOLAMDOrdering<int> ordering, partial_ordering;
     VectorXi nodes_ordering_constraints;
 
     // results variables
-    clock_t t1, t2;
-    double time1=0, time2=0;
+    clock_t t1, t2, t3, t4;
+    double time1=0, time2=0, time3=0, time4=0;
 
     std::cout << "STARTING INCREMENTAL QR TEST" << std::endl << std::endl;
 
@@ -160,7 +161,6 @@ int main(int argc, char *argv[])
         {
             n_nodes++;
             // Resize accumulated permutations
-            augment_permutation(acc_permutation_matrix, n_nodes*dim);
             augment_permutation(acc_permutation_nodes_matrix, n_nodes);
 
             // Resize state
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
         A.conservativeResize(n_measurements*dim,n_nodes*dim);
         A_ordered.conservativeResize(n_measurements*dim,n_nodes*dim);
         b.conservativeResize(n_measurements*dim);
-        A_nodes.conservativeResize(n_measurements,n_nodes);
+        //A_nodes.conservativeResize(n_measurements,n_nodes);
         A_nodes_ordered.conservativeResize(n_measurements,n_nodes);
 
         // ADD MEASUREMENTS
@@ -178,13 +178,11 @@ int main(int argc, char *argv[])
         for (unsigned int j = 0; j < measurement.size(); j++)
         {
             int ordered_node = acc_permutation_nodes_matrix.indices()(measurement.at(j));
-            std::cout << "measurement.at(j) " << measurement.at(j) << std::endl;
-            std::cout << "ordered_block " << ordered_node << std::endl;
 
             add_sparse_block(2*omega, A, A.rows()-dim, measurement.at(j) * dim);
             add_sparse_block(2*omega, A_ordered, A_ordered.rows()-dim, ordered_node * dim);
 
-            A_nodes.coeffRef(A_nodes.rows()-1, measurement.at(j)) = 1;
+            //A_nodes.coeffRef(A_nodes.rows()-1, measurement.at(j)) = 1;
             A_nodes_ordered.coeffRef(A_nodes_ordered.rows()-1, ordered_node) = 1;
 
             b.segment(b.size() - dim, dim) = VectorXd::LinSpaced(dim, b.size()-dim, b.size()-1);
@@ -192,61 +190,61 @@ int main(int argc, char *argv[])
             if (min_ordered_node > ordered_node)
                 min_ordered_node = ordered_node;
         }
-        std::cout << "min_ordered_node " << min_ordered_node << std::endl;
 
-        std::cout << "Solving Ax = b" << std::endl;
-        std::cout << "A_nodes: " << std::endl << MatrixXi::Identity(A_nodes.rows(), A_nodes.rows()) * A_nodes  << std::endl << std::endl;
-        std::cout << "A_nodes_ordered: " << std::endl << MatrixXi::Identity(A_nodes.rows(), A_nodes.rows()) * A_nodes_ordered  << std::endl << std::endl;
-        std::cout << "A: " << std::endl << MatrixXd::Identity(A.rows(), A.rows()) * A  << std::endl << std::endl;
-        std::cout << "A_ordered: " << std::endl << MatrixXd::Identity(A.rows(), A.rows()) * A_ordered  << std::endl << std::endl;
-        std::cout << "b: " << std::endl << b.transpose() << std::endl << std::endl;
-
+//        std::cout << "Solving Ax = b" << std::endl;
+//        std::cout << "A_nodes: " << std::endl << MatrixXi::Identity(A_nodes.rows(), A_nodes.rows()) * A_nodes  << std::endl << std::endl;
+//        std::cout << "A_nodes_ordered: " << std::endl << MatrixXi::Identity(A_nodes_ordered.rows(), A_nodes_ordered.rows()) * A_nodes_ordered  << std::endl << std::endl;
+//        std::cout << "A: " << std::endl << MatrixXd::Identity(A.rows(), A.rows()) * A  << std::endl << std::endl;
+//        std::cout << "A_ordered: " << std::endl << MatrixXd::Identity(A.rows(), A.rows()) * A_ordered  << std::endl << std::endl;
+//        std::cout << "b: " << std::endl << b.transpose() << std::endl << std::endl;
 
         // BLOCK REORDERING ------------------------------------
         t1 = clock();
-        if (n_nodes > 1 && n_nodes - min_ordered_node > 2)
+        int subproblem_nodes = n_nodes - min_ordered_node;
+        if (n_nodes > 1 && subproblem_nodes > 2) // only reordering when involved nodes in the measurement are not the two last ones
         {
-            // ordering constraints
-            nodes_ordering_constraints.resize(A_nodes_ordered.cols());
-            nodes_ordering_constraints = A_nodes_ordered.bottomRows(1).transpose();
-            std::cout << "nodes_ordering_constraints: " << std::endl << nodes_ordering_constraints.transpose()  << std::endl << std::endl;
+            // SUBPROBLEM ORDERING (from first node variable to last one)
+            std::cout << "ordering partial problem: " << min_ordered_node << " to "<< n_nodes - 1 << std::endl;
+            t3 = clock();
+            SparseMatrix<int> sub_A_nodes_ordered = A_nodes_ordered.rightCols(subproblem_nodes);
 
-            std::cout << "old acc_permutation_nodes: " << std::endl << acc_permutation_nodes_matrix.indices().transpose()  << std::endl << std::endl;
-            std::cout << "old acc_permutation: " << std::endl << acc_permutation_matrix.indices().transpose()  << std::endl << std::endl;
+            // partial ordering constraints
+            VectorXi nodes_partial_ordering_constraints = sub_A_nodes_ordered.bottomRows(1).transpose();
 
+            // computing nodes partial ordering
             A_nodes_ordered.makeCompressed();
-            // computing nodes ordering
-            PermutationMatrix<Dynamic, Dynamic, int> permutation_nodes_matrix(A_nodes_ordered.cols());
-            ordering(A_nodes_ordered, permutation_nodes_matrix, nodes_ordering_constraints.data());
+            PermutationMatrix<Dynamic, Dynamic, int> partial_permutation_nodes_matrix(subproblem_nodes);
+            partial_ordering(sub_A_nodes_ordered, partial_permutation_nodes_matrix, nodes_partial_ordering_constraints.data());
 
-            // applying block ordering
-            PermutationMatrix<Dynamic, Dynamic, int> permutation_matrix(A_ordered.cols());
-            permutation_2_block_permutation(permutation_nodes_matrix, permutation_matrix , dim);
+            // node ordering to variable ordering
+            PermutationMatrix<Dynamic, Dynamic, int> partial_permutation_matrix(A_ordered.cols());
+            permutation_2_block_permutation(partial_permutation_nodes_matrix, partial_permutation_matrix , dim);
 
-            std::cout << "new permutation_nodes: " << std::endl << permutation_nodes_matrix.indices().transpose()  << std::endl << std::endl;
-            std::cout << "new permutation: " << std::endl << permutation_matrix.indices().transpose()  << std::endl << std::endl;
+            // apply partial orderings
+            A_nodes_ordered.rightCols(subproblem_nodes) = (A_nodes_ordered.rightCols(subproblem_nodes) * partial_permutation_nodes_matrix.transpose()).sparseView();
+            A_ordered.rightCols(subproblem_nodes * dim) = (A_ordered.rightCols(subproblem_nodes * dim) * partial_permutation_matrix.transpose()).sparseView();
 
-            A_ordered = (A_ordered * permutation_matrix.transpose()).sparseView();
-            A_ordered.makeCompressed();
-            A_nodes_ordered = (A_nodes_ordered * permutation_nodes_matrix.transpose()).sparseView();
-            A_nodes_ordered.makeCompressed();
-            A.makeCompressed();
-
-            // accumulating permutations
+            // ACCUMULATING PERMUTATIONS
+            PermutationMatrix<Dynamic, Dynamic, int> permutation_nodes_matrix(VectorXi::LinSpaced(n_nodes, 0, n_nodes - 1)); // identity permutation
+            permutation_nodes_matrix.indices().tail(subproblem_nodes) = partial_permutation_nodes_matrix.indices() + VectorXi::Constant(subproblem_nodes, n_nodes - subproblem_nodes);
             acc_permutation_nodes_matrix = permutation_nodes_matrix * acc_permutation_nodes_matrix;
-            acc_permutation_matrix = permutation_matrix * acc_permutation_matrix;
 
-            std::cout << "new acc_permutation_nodes: " << std::endl << acc_permutation_nodes_matrix.indices().transpose()  << std::endl << std::endl;
-            std::cout << "new acc_permutation: " << std::endl << acc_permutation_matrix.indices().transpose()  << std::endl << std::endl;
+            time3 += ((double) clock() - t3) / CLOCKS_PER_SEC;
+
+//            std::cout << "partial_permutation_nodes_matrix: " << std::endl << partial_permutation_nodes_matrix.indices().transpose()  << std::endl << std::endl;
+//            std::cout << "permutation_nodes_matrix:    " << std::endl << permutation_nodes_matrix.indices().transpose()  << std::endl << std::endl;
+
+            //std::cout << "A_nodes_ordered  " << std::endl << MatrixXi::Identity(A_nodes_ordered.rows(), A_nodes_ordered.rows()) * A_nodes_ordered  << std::endl << std::endl;
+
         }
-        //std::cout << "incrementally ordered A Block structure: " << std::endl << MatrixXi::Identity(A_nodes.rows(), A_nodes.rows()) * A_nodes_ordered  << std::endl << std::endl;
-        //std::cout << "accumulated ordered A Block structure: " << std::endl << A_nodes * acc_permutation_nodes_matrix.transpose()  << std::endl << std::endl;
+//        std::cout << "incrementally ordered A Block structure: " << std::endl << MatrixXi::Identity(A_nodes_ordered.rows(), A_nodes_ordered.rows()) * A_nodes_ordered  << std::endl << std::endl;
 
         //std::cout << "A: " << std::endl << MatrixXd::Identity(A.rows(), A.rows()) * A << std::endl << std::endl;
         //std::cout << "ordered A: " << std::endl << MatrixXd::Identity(A.rows(), A.rows()) * A_ordered << std::endl << std::endl;
         //std::cout << "b: " << std::endl << b.transpose() << std::endl << std::endl;
 
         // solving
+        A_nodes_ordered.makeCompressed();
         A_ordered.makeCompressed();
         solver.compute(A_ordered);
         if (solver.info() != Success)
@@ -256,6 +254,8 @@ int main(int argc, char *argv[])
         }
         //std::cout << "R: " << std::endl << solver.matrixR() << std::endl;
         x_ordered = solver.solve(b);
+        PermutationMatrix<Dynamic, Dynamic, int> acc_permutation_matrix(A_ordered.cols());
+        permutation_2_block_permutation(acc_permutation_nodes_matrix, acc_permutation_matrix , dim);
         x_ordered = acc_permutation_matrix.inverse() * x_ordered;
         time1 += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
@@ -278,7 +278,8 @@ int main(int argc, char *argv[])
         std::cout << "BLOCK REORDERING: solved in " << time1*1e3 << " ms | " << solver.matrixR().nonZeros() << " nonzeros in R"<< std::endl;
         //std::cout << "x1 = " << x.transpose() << std::endl;
         std::cout << "x = " << x.transpose() << std::endl;
-        std::cout << "x = " << x_ordered.transpose() << std::endl;
+        std::cout << "x(ordering) = " << x_ordered.transpose() << std::endl;
+        std::cout << "x - x(ordering)= " << (x-x_ordered).transpose() << std::endl;
     }
 }
 

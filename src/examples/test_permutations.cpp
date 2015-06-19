@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     std::cout << "Permutation P3 = P1 * P2" << std::endl << P3.indices().transpose() << std::endl << std::endl;
     std::cout << "P3 * A * P3.transpose()" << std::endl << P3 * A  * P3.transpose() << std::endl << std::endl;
 
-    std::cout << "Permutating indices" << std::endl;
+    std::cout << "PERMUTATING INDICES" << std::endl;
     ArrayXi acc_permutations(5);
     acc_permutations << 0,1,2,3,4;
 
@@ -86,6 +86,33 @@ int main(int argc, char *argv[])
     P4 = P1 * P2 * P3;
     std::cout << "Permutation P4 = P1 * P2 * P3:   " << P4.indices().transpose() << std::endl;
     std::cout << "P3 * (P2 * (P1 * acc_permutations)): " << (P3 * (P2 * (P1 * acc_permutations.matrix()))).transpose() << std::endl;
+    std::cout << "accumulated permutations can not be stored in vectors..." << std::endl;
+
+    std::cout << std::endl << "PARTIALL PERMUTATIONS" << std::endl;
+    PermutationMatrix<Dynamic, Dynamic, int> P5(2);
+    P5.indices()(0) = 1;
+    P5.indices()(1) = 0;
+    std::cout << "P5 (equivalent to P1 but partiall): " << std::endl << P5.indices().transpose() << std::endl;
+    std::cout << "P2: " << P2.indices().transpose() << std::endl << std::endl;
+    std::cout << "A * P2.transpose(): " << std::endl << A * P2.transpose() << std::endl << std::endl;
+    std::cout << "(A * P2.transpose()).rightCols(2) * P5.transpose(): " << std::endl << (A * P2.transpose()).rightCols(2) * P5.transpose() << std::endl << std::endl;
+    PermutationMatrix<Dynamic, Dynamic, int> P6 = P2;
+    P6.indices().tail(2) = P5 * P6.indices().tail(2);
+    std::cout << "P6 = P2, P6.indices().tail(2) = P5 * P6.indices().tail(2): " << P6.indices().transpose() << std::endl << std::endl;
+    std::cout << "A * P6.transpose(): " << std::endl << A * P6.transpose() << std::endl << std::endl;
+    std::cout << "(P1 * P2): " << std::endl << (P1 * P2).indices().transpose() << std::endl << std::endl;
+    std::cout << "A * (P1 * P2).transpose(): " << std::endl << A * (P1 * P2).transpose() << std::endl << std::endl;
+    std::cout << "Partiall permutations can not be accumulated, for doing that they should be full size" << std::endl;
+
+    std::cout << std::endl << "PERMUTATION OF MAPPED VECTORS" << std::endl;
+    std::cout << "a = " << a.transpose() << std::endl << std::endl;
+    Map<VectorXd> mapped_a(a.data(), 1);
+    std::cout << "mapped_a1 = " << mapped_a << std::endl << std::endl;
+    a = P2 * a;
+    std::cout << "a = P2 * a: " << std::endl << a.transpose() << std::endl << std::endl;
+    std::cout << "mapped_a = " << mapped_a.transpose() << std::endl << std::endl;
+    std::cout << "maps are affected of the reorderings in mapped vectors" << std::endl;
+
 
 //    Map<>
 }
