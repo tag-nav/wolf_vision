@@ -52,6 +52,13 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          **/
         virtual const std::vector<WolfScalar*> getStateBlockPtrVector() = 0;
 
+        /** \brief Returns a vector of pointers to the states
+         *
+         * Returns a vector of pointers to the state in which this constraint depends
+         *
+         **/
+        virtual const std::vector<StateBase*> getStatePtrVector() const = 0;
+
         /** \brief Returns a pointer to the feature measurement
          *
          * Returns a pointer to the feature measurement
@@ -72,6 +79,13 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          *
          **/
         CaptureBase* getCapturePtr() const;
+
+        /** \brief Returns the constraint residual size
+         *
+         * Returns the constraint residual size
+         *
+         **/
+        virtual unsigned int getSize() const = 0;
 
 };
 #endif

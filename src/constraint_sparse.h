@@ -28,6 +28,7 @@ template <const unsigned int MEASUREMENT_SIZE,
 class ConstraintSparse: public ConstraintBase
 {
     protected:
+        std::vector<StateBase*> state_ptr_vector_;
         std::vector<WolfScalar*> state_block_ptr_vector_;
         std::vector<unsigned int> state_block_sizes_vector_;
 
@@ -50,58 +51,98 @@ class ConstraintSparse: public ConstraintBase
          * JVN: Potser aquest constructor no l'utilitzarem mai.. no?
          * 
          **/               
-        ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, WolfScalar** _blockPtrArray) :
-            ConstraintBase(_ftr_ptr,_tp),
-            state_block_ptr_vector_(10),
-            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
-        {
-            for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
-            {
-                if (state_block_sizes_vector_.at(ii) != 0)
-                {
-                    state_block_ptr_vector_.at(ii) = _blockPtrArray[ii];
-                }
-                else //at the end the vector is cropped to just relevant components
-                {
-                    state_block_ptr_vector_.resize(ii); 
-                    break;
-                }
-            }
-        }
+//        ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, WolfScalar** _blockPtrArray) :
+//            ConstraintBase(_ftr_ptr,_tp),
+//            state_block_ptr_vector_(10),
+//            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
+//        {
+//            for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
+//            {
+//                if (state_block_sizes_vector_.at(ii) != 0)
+//                {
+//                    state_block_ptr_vector_.at(ii) = _blockPtrArray[ii];
+//                }
+//                else //at the end the vector is cropped to just relevant components
+//                {
+//                    state_block_ptr_vector_.resize(ii);
+//                    break;
+//                }
+//            }
+//        }
+//
+//        /** \brief Contructor with state pointer separated
+//         *
+//         * Constructor with state pointers separated
+//         *
+//         **/
+//        ConstraintSparse(FeatureBase* _ftr_ptr,
+//        					 ConstraintType _tp,
+//                             WolfScalar* _state0Ptr,
+//                             WolfScalar* _state1Ptr = nullptr,
+//                             WolfScalar* _state2Ptr = nullptr,
+//                             WolfScalar* _state3Ptr = nullptr,
+//                             WolfScalar* _state4Ptr = nullptr,
+//                             WolfScalar* _state5Ptr = nullptr,
+//                             WolfScalar* _state6Ptr = nullptr,
+//                             WolfScalar* _state7Ptr = nullptr,
+//                             WolfScalar* _state8Ptr = nullptr,
+//                             WolfScalar* _state9Ptr = nullptr ) :
+//            ConstraintBase(_ftr_ptr,_tp),
+//            state_block_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
+//            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
+//        {
+//            for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
+//            {
+//                if ( (state_block_ptr_vector_.at(ii) == nullptr) && (state_block_sizes_vector_.at(ii) == 0) )
+//                {
+//                    state_block_sizes_vector_.resize(ii);
+//                    state_block_ptr_vector_.resize(ii);
+//                    break;
+//                }
+//                else // check error cases
+//                {
+//                    assert(state_block_ptr_vector_.at(ii) != nullptr);
+//                    assert(state_block_sizes_vector_.at(ii) != 0);
+//                }
+//            }
+//        }
 
         /** \brief Contructor with state pointer separated
-         * 
+         *
          * Constructor with state pointers separated
-         * 
-         **/        
+         *
+         **/
         ConstraintSparse(FeatureBase* _ftr_ptr,
-        					 ConstraintType _tp,
-                             WolfScalar* _state0Ptr,
-                             WolfScalar* _state1Ptr = nullptr,
-                             WolfScalar* _state2Ptr = nullptr,
-                             WolfScalar* _state3Ptr = nullptr,
-                             WolfScalar* _state4Ptr = nullptr,
-                             WolfScalar* _state5Ptr = nullptr,
-                             WolfScalar* _state6Ptr = nullptr,
-                             WolfScalar* _state7Ptr = nullptr,
-                             WolfScalar* _state8Ptr = nullptr,
-                             WolfScalar* _state9Ptr = nullptr ) :
+                             ConstraintType _tp,
+                             StateBase* _state0Ptr,
+                             StateBase* _state1Ptr = nullptr,
+                             StateBase* _state2Ptr = nullptr,
+                             StateBase* _state3Ptr = nullptr,
+                             StateBase* _state4Ptr = nullptr,
+                             StateBase* _state5Ptr = nullptr,
+                             StateBase* _state6Ptr = nullptr,
+                             StateBase* _state7Ptr = nullptr,
+                             StateBase* _state8Ptr = nullptr,
+                             StateBase* _state9Ptr = nullptr ) :
             ConstraintBase(_ftr_ptr,_tp),
-            state_block_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
+            state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
+            state_block_ptr_vector_({_state0Ptr->getPtr(), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
-            for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
+            for (unsigned int ii = 1; ii<state_block_sizes_vector_.size(); ii++)
             {
-                if ( (state_block_ptr_vector_.at(ii) == nullptr) && (state_block_sizes_vector_.at(ii) == 0) )
+                if (state_ptr_vector_.at(ii) != nullptr)
                 {
+                    assert(state_block_sizes_vector_.at(ii) != 0 && "Too many non-null state pointers in ConstraintSparse constructor");
+                    state_block_ptr_vector_.at(ii) = state_ptr_vector_.at(ii)->getPtr();
+                }
+                else
+                {
+                    assert(state_block_sizes_vector_.at(ii) == 0 && "No non-null state pointers enough in ConstraintSparse constructor");
+                    state_ptr_vector_.resize(ii);
                     state_block_sizes_vector_.resize(ii);
                     state_block_ptr_vector_.resize(ii);
                     break;
-                }
-                else // check error cases
-                {
-                    assert(state_block_ptr_vector_.at(ii) != nullptr);
-                    assert(state_block_sizes_vector_.at(ii) != 0);
                 }
             }
         }
@@ -124,6 +165,26 @@ class ConstraintSparse: public ConstraintBase
         virtual const std::vector<WolfScalar*> getStateBlockPtrVector()
         {
             return state_block_ptr_vector_;
+        }
+
+        /** \brief Returns a vector of pointers to the states
+         *
+         * Returns a vector of pointers to the state in which this constraint depends
+         *
+         **/
+        virtual const std::vector<StateBase*> getStatePtrVector() const
+        {
+            return state_ptr_vector_;
+        }
+
+        /** \brief Returns the constraint residual size
+         *
+         * Returns the constraint residual size
+         *
+         **/
+        virtual unsigned int getSize() const
+        {
+            return MEASUREMENT_SIZE;
         }
 
         virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const

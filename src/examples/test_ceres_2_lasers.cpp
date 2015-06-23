@@ -135,8 +135,8 @@ int main(int argc, char** argv)
     string modelFileName;
 
     //model and initial view point
-    //modelFileName = "/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj";
-    modelFileName = "/home/acoromin/dev/br/faramotics/models/campusNordUPC.obj";
+    modelFileName = "/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj";
+    //modelFileName = "/home/acoromin/dev/br/faramotics/models/campusNordUPC.obj";
     //modelFileName = "/home/andreu/dev/faramotics/models/campusNordUPC.obj";
     devicePose.setPose(2, 8, 0.2, 0, 0, 0);
     viewPoint.setPose(devicePose);
@@ -168,8 +168,8 @@ int main(int argc, char** argv)
     Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
-    SensorOdom2D odom_sensor(new StatePoint3D(odom_pose.data()), new StateTheta(&odom_pose(3)), odom_std_factor, odom_std_factor);
-    SensorGPSFix gps_sensor(new StatePoint3D(gps_pose.data()), new StateTheta(&gps_pose(3)), gps_std);
+    SensorOdom2D odom_sensor(new StatePoint3D(odom_pose.data()), new StateTheta(&odom_pose(2)), odom_std_factor, odom_std_factor);
+    SensorGPSFix gps_sensor(new StatePoint3D(gps_pose.data()), new StateTheta(&gps_pose(2)), gps_std);
     SensorLaser2D laser_1_sensor(new StatePoint3D(laser_1_pose.data()), new StateTheta(&laser_1_pose(3)));
     SensorLaser2D laser_2_sensor(new StatePoint3D(laser_2_pose.data()), new StateTheta(&laser_2_pose(3)));
 

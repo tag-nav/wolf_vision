@@ -10,14 +10,14 @@ class ConstraintOdom2DTheta : public ConstraintSparse<3, 2, 1, 2, 1>
     public:
         static const unsigned int N_BLOCKS = 4;
 
-        ConstraintOdom2DTheta(FeatureBase*_ftr_ptr, WolfScalar* _block0Ptr, WolfScalar* _block1Ptr, WolfScalar* _block2Ptr, WolfScalar* _block3Ptr) :
-                ConstraintSparse<3, 2, 1, 2, 1>(_ftr_ptr, CTR_ODOM_2D_THETA, _block0Ptr, _block1Ptr, _block2Ptr, _block3Ptr)
-        {
-            //
-        }
+//        ConstraintOdom2DTheta(FeatureBase*_ftr_ptr, WolfScalar* _block0Ptr, WolfScalar* _block1Ptr, WolfScalar* _block2Ptr, WolfScalar* _block3Ptr) :
+//                ConstraintSparse<3, 2, 1, 2, 1>(_ftr_ptr, CTR_ODOM_2D_THETA, _block0Ptr, _block1Ptr, _block2Ptr, _block3Ptr)
+//        {
+//            //
+//        }
 
         ConstraintOdom2DTheta(FeatureBase* _ftr_ptr, StateBase* _state0Ptr, StateBase* _state1Ptr, StateBase* _state2Ptr, StateBase* _state3Ptr) :
-                ConstraintSparse<3, 2, 1, 2, 1>(_ftr_ptr, CTR_ODOM_2D_THETA, _state0Ptr->getPtr(), _state1Ptr->getPtr(), _state2Ptr->getPtr(), _state3Ptr->getPtr())
+                ConstraintSparse<3, 2, 1, 2, 1>(_ftr_ptr, CTR_ODOM_2D_THETA, _state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr)
         {
             //
         }

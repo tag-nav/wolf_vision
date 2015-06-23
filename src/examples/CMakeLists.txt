@@ -52,6 +52,10 @@ IF(Suitesparse_FOUND)
     ADD_EXECUTABLE(test_iQR test_iQR.cpp)
     TARGET_LINK_LIBRARIES(test_iQR ${PROJECT_NAME})
     
+    # Testing QR solver test tending to wolf
+    ADD_EXECUTABLE(test_iQR_wolf test_iQR_wolf.cpp)
+    TARGET_LINK_LIBRARIES(test_iQR_wolf ${PROJECT_NAME})
+    
     # Testing SPQR simple test
     ADD_EXECUTABLE(test_SPQR test_SPQR.cpp)
     TARGET_LINK_LIBRARIES(test_SPQR ${PROJECT_NAME})
@@ -81,6 +85,14 @@ IF(faramotics_FOUND)
                                 ${pose_state_time_LIBRARIES} 
                                 ${faramotics_LIBRARIES}
                                 ${PROJECT_NAME})
+                                
+        IF(Suitesparse_FOUND)
+            ADD_EXECUTABLE(test_iQR_wolf2 test_iQR_wolf2.cpp)
+            TARGET_LINK_LIBRARIES(test_iQR_wolf2 
+                                ${pose_state_time_LIBRARIES} 
+                                ${faramotics_LIBRARIES}
+                                ${PROJECT_NAME})
+        ENDIF(Suitesparse_FOUND)                      
     ENDIF (laser_scan_utils_FOUND)
 ENDIF(faramotics_FOUND)
 
