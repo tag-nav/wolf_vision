@@ -234,7 +234,7 @@ void CaptureLaser2D::establishConstraintsMHTree()
     // Global transformation TODO: Change by a function
     Eigen::Vector2s t_robot = getFramePtr()->getPPtr()->getVector();
     Eigen::Matrix2s R_robot = ((StateOrientation*) (getFramePtr()->getOPtr()))->getRotationMatrix().topLeftCorner<2,2>();
-    WolfScalar& robot_orientation = *(getFramePtr()->getOPtr()->getPtr());
+    WolfScalar& robot_orientation = *(getFramePtr()->getOPtr()->getPtr());//TODO: it only works for orientation theta
 
     // Sensor transformation
     Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
@@ -269,7 +269,7 @@ void CaptureLaser2D::establishConstraintsMHTree()
     tree.solve(ft_lk_pairs,associated_mask);
 
     //print tree & score table 
-//     std::cout << "-------------" << std::endl; 
+//     std::cout << "-------------" << std::endl;
 //     tree.printTree();
 //     tree.printScoreTable();
 
@@ -358,6 +358,7 @@ WolfScalar CaptureLaser2D::computeMahalanobisDistance(const FeatureBase* _featur
     Eigen::Map<Eigen::MatrixXs> frame_p_frame_o_cov(&Sigma(0,frame_p_size),frame_p_size,frame_o_size);
     Eigen::Map<Eigen::MatrixXs> frame_p_landmark_p_cov(&Sigma(0,frame_p_size+frame_o_size),frame_p_size,landmark_p_size);
     Eigen::Map<Eigen::MatrixXs> frame_p_landmark_o_cov(&Sigma(0,frame_p_size+frame_o_size+landmark_p_size),frame_p_size,landmark_o_size);
+
     getTop()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getPPtr(), frame_p_frame_p_cov);
     getTop()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getOPtr(), frame_p_frame_o_cov);
     getTop()->getCovarianceBlock(frame_ptr->getPPtr(), _landmark_ptr->getPPtr(), frame_p_landmark_p_cov);
@@ -366,12 +367,14 @@ WolfScalar CaptureLaser2D::computeMahalanobisDistance(const FeatureBase* _featur
     Eigen::Map<Eigen::MatrixXs> frame_o_frame_o_cov(&Sigma(frame_p_size,frame_p_size),frame_o_size,frame_o_size);
     Eigen::Map<Eigen::MatrixXs> frame_o_landmark_p_cov(&Sigma(frame_p_size,frame_p_size+frame_o_size),frame_o_size,landmark_p_size);
     Eigen::Map<Eigen::MatrixXs> frame_o_landmark_o_cov(&Sigma(frame_p_size,frame_p_size+frame_o_size+landmark_p_size),frame_o_size,landmark_o_size);
+
     getTop()->getCovarianceBlock(frame_ptr->getOPtr(), frame_ptr->getOPtr(), frame_o_frame_o_cov);
     getTop()->getCovarianceBlock(frame_ptr->getOPtr(), _landmark_ptr->getPPtr(), frame_o_landmark_p_cov);
     getTop()->getCovarianceBlock(frame_ptr->getOPtr(), _landmark_ptr->getOPtr(), frame_o_landmark_o_cov);
 
     Eigen::Map<Eigen::MatrixXs> landmark_p_landmark_p_cov(&Sigma(frame_p_size+frame_o_size,frame_p_size+frame_o_size),landmark_p_size,landmark_p_size);
     Eigen::Map<Eigen::MatrixXs> landmark_p_landmark_o_cov(&Sigma(frame_p_size+frame_o_size,frame_p_size+frame_o_size+landmark_p_size),landmark_p_size,landmark_o_size);
+
     getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), landmark_p_landmark_p_cov);
     getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), landmark_p_landmark_o_cov);
 

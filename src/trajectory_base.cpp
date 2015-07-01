@@ -26,6 +26,11 @@ FrameBaseList* TrajectoryBase::getFrameListPtr()
     return getDownNodeListPtr();
 }
 
+FrameBase* TrajectoryBase::getLastFramePtr()
+{
+    return getDownNodeListPtr()->back();
+}
+
 void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
 	for(auto fr_it = getFrameListPtr()->begin(); fr_it != getFrameListPtr()->end(); ++fr_it)

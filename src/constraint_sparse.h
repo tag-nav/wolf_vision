@@ -29,7 +29,6 @@ class ConstraintSparse: public ConstraintBase
 {
     protected:
         std::vector<StateBase*> state_ptr_vector_;
-        std::vector<WolfScalar*> state_block_ptr_vector_;
         std::vector<unsigned int> state_block_sizes_vector_;
 
     public:
@@ -44,68 +43,6 @@ class ConstraintSparse: public ConstraintBase
         static const unsigned int block7Size = BLOCK_7_SIZE;
         static const unsigned int block8Size = BLOCK_8_SIZE;
         static const unsigned int block9Size = BLOCK_9_SIZE;
-
-         /** \brief Contructor with state pointer array
-         * 
-         * Constructor with state pointer array
-         * JVN: Potser aquest constructor no l'utilitzarem mai.. no?
-         * 
-         **/               
-//        ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, WolfScalar** _blockPtrArray) :
-//            ConstraintBase(_ftr_ptr,_tp),
-//            state_block_ptr_vector_(10),
-//            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
-//        {
-//            for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
-//            {
-//                if (state_block_sizes_vector_.at(ii) != 0)
-//                {
-//                    state_block_ptr_vector_.at(ii) = _blockPtrArray[ii];
-//                }
-//                else //at the end the vector is cropped to just relevant components
-//                {
-//                    state_block_ptr_vector_.resize(ii);
-//                    break;
-//                }
-//            }
-//        }
-//
-//        /** \brief Contructor with state pointer separated
-//         *
-//         * Constructor with state pointers separated
-//         *
-//         **/
-//        ConstraintSparse(FeatureBase* _ftr_ptr,
-//        					 ConstraintType _tp,
-//                             WolfScalar* _state0Ptr,
-//                             WolfScalar* _state1Ptr = nullptr,
-//                             WolfScalar* _state2Ptr = nullptr,
-//                             WolfScalar* _state3Ptr = nullptr,
-//                             WolfScalar* _state4Ptr = nullptr,
-//                             WolfScalar* _state5Ptr = nullptr,
-//                             WolfScalar* _state6Ptr = nullptr,
-//                             WolfScalar* _state7Ptr = nullptr,
-//                             WolfScalar* _state8Ptr = nullptr,
-//                             WolfScalar* _state9Ptr = nullptr ) :
-//            ConstraintBase(_ftr_ptr,_tp),
-//            state_block_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
-//            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
-//        {
-//            for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
-//            {
-//                if ( (state_block_ptr_vector_.at(ii) == nullptr) && (state_block_sizes_vector_.at(ii) == 0) )
-//                {
-//                    state_block_sizes_vector_.resize(ii);
-//                    state_block_ptr_vector_.resize(ii);
-//                    break;
-//                }
-//                else // check error cases
-//                {
-//                    assert(state_block_ptr_vector_.at(ii) != nullptr);
-//                    assert(state_block_sizes_vector_.at(ii) != 0);
-//                }
-//            }
-//        }
 
         /** \brief Contructor with state pointer separated
          *
@@ -126,22 +63,18 @@ class ConstraintSparse: public ConstraintBase
                              StateBase* _state9Ptr = nullptr ) :
             ConstraintBase(_ftr_ptr,_tp),
             state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
-            state_block_ptr_vector_({_state0Ptr->getPtr(), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
             for (unsigned int ii = 1; ii<state_block_sizes_vector_.size(); ii++)
             {
                 if (state_ptr_vector_.at(ii) != nullptr)
-                {
                     assert(state_block_sizes_vector_.at(ii) != 0 && "Too many non-null state pointers in ConstraintSparse constructor");
-                    state_block_ptr_vector_.at(ii) = state_ptr_vector_.at(ii)->getPtr();
-                }
+
                 else
                 {
                     assert(state_block_sizes_vector_.at(ii) == 0 && "No non-null state pointers enough in ConstraintSparse constructor");
                     state_ptr_vector_.resize(ii);
                     state_block_sizes_vector_.resize(ii);
-                    state_block_ptr_vector_.resize(ii);
                     break;
                 }
             }
@@ -164,7 +97,96 @@ class ConstraintSparse: public ConstraintBase
          **/
         virtual const std::vector<WolfScalar*> getStateBlockPtrVector()
         {
-            return state_block_ptr_vector_;
+            assert(state_ptr_vector_.size() > 0 && state_ptr_vector_.size() <= 10 && "Wrong state vector size in constraint, it should be between 1 and 10");
+
+            switch (state_ptr_vector_.size())
+            {
+                case 1:
+                {
+                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr()});
+                }
+                case 2:
+                {
+                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                                     state_ptr_vector_[1]->getPtr()});
+                }
+                case 3:
+                {
+                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                                     state_ptr_vector_[1]->getPtr(),
+                                                     state_ptr_vector_[2]->getPtr()});
+                }
+                case 4:
+                {
+                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                                     state_ptr_vector_[1]->getPtr(),
+                                                     state_ptr_vector_[2]->getPtr(),
+                                                     state_ptr_vector_[3]->getPtr()});
+                }
+                case 5:
+                {
+                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                                     state_ptr_vector_[1]->getPtr(),
+                                                     state_ptr_vector_[2]->getPtr(),
+                                                     state_ptr_vector_[3]->getPtr(),
+                                                     state_ptr_vector_[4]->getPtr()});
+                }
+                case 6:
+                {
+                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                                     state_ptr_vector_[1]->getPtr(),
+                                                     state_ptr_vector_[2]->getPtr(),
+                                                     state_ptr_vector_[3]->getPtr(),
+                                                     state_ptr_vector_[4]->getPtr(),
+                                                     state_ptr_vector_[5]->getPtr()});
+                }
+                case 7:
+                {
+                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                                     state_ptr_vector_[1]->getPtr(),
+                                                     state_ptr_vector_[2]->getPtr(),
+                                                     state_ptr_vector_[3]->getPtr(),
+                                                     state_ptr_vector_[4]->getPtr(),
+                                                     state_ptr_vector_[5]->getPtr(),
+                                                     state_ptr_vector_[6]->getPtr()});
+                }
+                case 8:
+                {
+                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                                     state_ptr_vector_[1]->getPtr(),
+                                                     state_ptr_vector_[2]->getPtr(),
+                                                     state_ptr_vector_[3]->getPtr(),
+                                                     state_ptr_vector_[4]->getPtr(),
+                                                     state_ptr_vector_[5]->getPtr(),
+                                                     state_ptr_vector_[6]->getPtr(),
+                                                     state_ptr_vector_[7]->getPtr()});
+                }
+                case 9:
+                {
+                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                                     state_ptr_vector_[1]->getPtr(),
+                                                     state_ptr_vector_[2]->getPtr(),
+                                                     state_ptr_vector_[3]->getPtr(),
+                                                     state_ptr_vector_[4]->getPtr(),
+                                                     state_ptr_vector_[5]->getPtr(),
+                                                     state_ptr_vector_[6]->getPtr(),
+                                                     state_ptr_vector_[7]->getPtr(),
+                                                     state_ptr_vector_[8]->getPtr()});
+                }
+                case 10:
+                {
+                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                                     state_ptr_vector_[1]->getPtr(),
+                                                     state_ptr_vector_[2]->getPtr(),
+                                                     state_ptr_vector_[3]->getPtr(),
+                                                     state_ptr_vector_[4]->getPtr(),
+                                                     state_ptr_vector_[5]->getPtr(),
+                                                     state_ptr_vector_[6]->getPtr(),
+                                                     state_ptr_vector_[7]->getPtr(),
+                                                     state_ptr_vector_[8]->getPtr(),
+                                                     state_ptr_vector_[9]->getPtr()});
+                }
+            }
         }
 
         /** \brief Returns a vector of pointers to the states
@@ -195,7 +217,7 @@ class ConstraintSparse: public ConstraintBase
         		printTabs(_ntabs);
         		_ost << "block " << ii << ": ";
         		for (unsigned int jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
-        			_ost << *(state_block_ptr_vector_.at(ii)+jj) << " ";
+        			_ost << *(state_ptr_vector_.at(ii)->getPtr()+jj) << " ";
         		_ost << std::endl;
         	}
         }

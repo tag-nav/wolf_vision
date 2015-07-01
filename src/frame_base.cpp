@@ -128,6 +128,12 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
   //std::cout << "setted state: " << *p_ptr_->getPtr() << " " << *(p_ptr_->getPtr()+1) << std::endl;
 }
 
+Eigen::Map<Eigen::VectorXs> FrameBase::getState() const
+{
+    return Eigen::Map<Eigen::VectorXs>(p_ptr_->getPtr(),
+                                       p_ptr_->getStateSize() + o_ptr_->getStateSize() + v_ptr_->getStateSize() + w_ptr_->getStateSize());
+}
+
 void FrameBase::addCapture(CaptureBase* _capt_ptr)
 {
     addDownNode(_capt_ptr);
@@ -210,6 +216,15 @@ StateBase* FrameBase::getVPtr() const
 StateBase* FrameBase::getWPtr() const
 {
 	return w_ptr_;
+}
+
+CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
+{
+    for (auto capture_it = getCaptureListPtr()->begin(); capture_it != getCaptureListPtr()->end(); capture_it++)
+        if ((*capture_it)->getSensorPtr() == _sensor_ptr)
+            return capture_it;
+
+    return getCaptureListPtr()->end();
 }
 
 void FrameBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const

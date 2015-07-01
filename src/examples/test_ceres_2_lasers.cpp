@@ -178,7 +178,7 @@ int main(int argc, char** argv)
     ground_truth.head(3) = pose_odom;
     odom_trajectory.head(3) = pose_odom;
 
-    WolfManager* wolf_manager = new WolfManager(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3, complex_angle);
+    WolfManager<StatePoint2D, StateTheta>* wolf_manager = new WolfManager<StatePoint2D, StateTheta>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
     
     //std::cout << "START TRAJECTORY..." << std::endl;
     // START TRAJECTORY ============================================================================================
@@ -232,33 +232,33 @@ int main(int argc, char** argv)
         mean_times(0) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // ADD CAPTURES ---------------------------
-        //std::cout << "ADD CAPTURES..." << std::endl;
+        std::cout << "ADD CAPTURES..." << std::endl;
         t1 = clock();
         // adding new sensor captures
         wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading));		//, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
-//		wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
-        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
-        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
+		wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+//        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
+//        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
         // updating problem
         wolf_manager->update();
         mean_times(1) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // UPDATING CERES ---------------------------
-        //std::cout << "UPDATING CERES..." << std::endl;
+        std::cout << "UPDATING CERES..." << std::endl;
         t1 = clock();
         // update state units and constraints in ceres
         ceres_manager->update(wolf_manager->getProblemPtr());
         mean_times(2) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // SOLVE OPTIMIZATION ---------------------------
-        //std::cout << "SOLVING..." << std::endl;
+        std::cout << "SOLVING..." << std::endl;
         t1 = clock();
         ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
         //std::cout << summary.FullReport() << std::endl;
         mean_times(3) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // COMPUTE COVARIANCES ---------------------------
-        //std::cout << "COMPUTING COVARIANCES..." << std::endl;
+        std::cout << "COMPUTING COVARIANCES..." << std::endl;
         t1 = clock();
         ceres_manager->computeCovariances(wolf_manager->getProblemPtr());
         mean_times(4) += ((double) clock() - t1) / CLOCKS_PER_SEC;

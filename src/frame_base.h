@@ -95,6 +95,8 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 
         void addCapture(CaptureBase* _capt_ptr);
 
+        Eigen::Map<Eigen::VectorXs> getState() const;
+
         void removeCapture(CaptureBaseIter& _capt_ptr);
         
         TrajectoryBase* getTrajectoryPtr() const;
@@ -116,6 +118,8 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         StateBase* getWPtr() const;
 
         const Eigen::Matrix4s * getTransformationMatrix() const; //ACM: Who owns this return matrix ?
+
+        CaptureBaseIter hasCaptureOf(const SensorBase* _sensor_ptr);
 
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
         

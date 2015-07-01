@@ -40,6 +40,7 @@
 #include "wolf_problem.h"
 #include "state_quaternion.h"
 
+template <class StatePositionT, class StateOrientationT>
 class WolfManager
 {
     protected:
@@ -51,6 +52,8 @@ class WolfManager
         
         //auxiliar/temporary iterators, frames and captures
         FrameBaseIter first_window_frame_;
+        FrameBase* current_frame_;
+        FrameBase* last_frame_;
         CaptureRelative* last_capture_relative_;
         CaptureRelative* second_last_capture_relative_;
         std::queue<CaptureBase*> new_captures_;
@@ -58,36 +61,48 @@ class WolfManager
         //Manager parameters
         unsigned int window_size_;
         WolfScalar new_frame_elapsed_time_;
-        bool use_complex_angles_;
 
     public:
-        WolfManager(const unsigned int& _state_length, 
+        WolfManager(const unsigned int& _state_length,
                     SensorBase* _sensor_prior, 
                     const Eigen::VectorXs& _init_frame, 
                     const Eigen::MatrixXs& _init_frame_cov, 
                     const unsigned int& _w_size = 10, 
-                    const WolfScalar& _new_frame_elapsed_time = 0.1, 
-                    const bool _complex_angle = false) :
+                    const WolfScalar& _new_frame_elapsed_time = 0.1) :
                     
                 problem_(new WolfProblem(_state_length)),
                 sensor_prior_(_sensor_prior),
+                current_frame_(nullptr),
+                last_frame_(nullptr),
                 last_capture_relative_(nullptr),
-                second_last_capture_relative_(nullptr),
                 window_size_(_w_size),
-                new_frame_elapsed_time_(_new_frame_elapsed_time),
-                use_complex_angles_(_complex_angle)
+                new_frame_elapsed_time_(_new_frame_elapsed_time)
         {
-            assert( ((!_complex_angle && _init_frame.size() == 3 && _init_frame_cov.cols() == 3 && _init_frame_cov.rows() == 3) ||
-                     (_complex_angle && _init_frame.size() == 4 && _init_frame_cov.cols() == 4 && _init_frame_cov.rows() == 4))
-                    && "Wrong init_frame state vector or covariance matrix size");
+            assert( _init_frame.size() == StatePositionT::BLOCK_SIZE + StateOrientationT::BLOCK_SIZE &&
+                    _init_frame_cov.cols() == StatePositionT::BLOCK_SIZE + StateOrientationT::BLOCK_SIZE &&
+                    _init_frame_cov.rows() == StatePositionT::BLOCK_SIZE + StateOrientationT::BLOCK_SIZE &&
+                    "Wrong init_frame state vector or covariance matrix size");
+
+            std::cout << "initializing wolfmanager" << std::endl;
+
+            // Fake frame for prior
+            createFrame(_init_frame, TimeStamp(0));
+            problem_->getLastFramePtr()->fix();
+            first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
+            // Initial frame
+            createFrame(_init_frame, TimeStamp(0));
+            first_window_frame_++;
+
+            // Initial covariance (fake ODOM 2D capture from fake frame to initial frame)
+            CaptureRelative* initial_covariance = new CaptureOdom2D(TimeStamp(0), nullptr, Eigen::Vector3s::Zero(), _init_frame_cov);
+            last_frame_->addCapture(initial_covariance);
+            initial_covariance->processCapture();
+            last_capture_relative_ = initial_covariance;
 
 
-            // Set initial covariance with a fake ODOM 2D capture to a fixed frame
-            createFrame(_init_frame, TimeStamp(0));
-            problem_->getTrajectoryPtr()->getFrameListPtr()->back()->fix();
-            last_capture_relative_->integrateCapture((CaptureRelative*)(new CaptureOdom2D(TimeStamp(0), nullptr, Eigen::Vector3s::Zero(), _init_frame_cov)));
-            createFrame(_init_frame, TimeStamp(0));
-            second_last_capture_relative_->processCapture();
+            // Current robot frame
+            createFrame(TimeStamp(0));
+            std::cout << " wolfmanager initialized" << std::endl;
         }
 
         virtual ~WolfManager()
@@ -97,111 +112,138 @@ class WolfManager
 
         void createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
         {
+            std::cout << "creating new frame..." << std::endl;
+
+            // Store last frame
+            last_frame_ = current_frame_;
+
             // Create frame and add it to the trajectory
-            StateBase* new_position = new StatePoint2D(problem_->getNewStatePtr());
-            problem_->addState(new_position, _frame_state.head(2));
+            StatePositionT* new_position = new StatePositionT(problem_->getNewStatePtr());
+            problem_->addState(new_position, _frame_state.head(new_position->getStateSize()));
+            //std::cout << "StatePosition created" << std::endl;
 
-            StateBase* new_orientation;
-            if (use_complex_angles_)
-                new_orientation = new StateComplexAngle(problem_->getNewStatePtr());
-            else
-                new_orientation = new StateTheta(problem_->getNewStatePtr());
-
+            StateOrientationT* new_orientation = new StateOrientationT(problem_->getNewStatePtr());
             problem_->addState(new_orientation, _frame_state.tail(new_orientation->getStateSize()));
+            //std::cout << "StateOrientation created" << std::endl;
 
             problem_->getTrajectoryPtr()->addFrame(new FrameBase(_time_stamp, new_position, new_orientation));
+            //std::cout << "frame created" << std::endl;
 
-            // add a zero odometry capture (in order to integrate)
-            CaptureOdom2D* empty_odom = new CaptureOdom2D(_time_stamp, sensor_prior_, Eigen::Vector3s::Zero(), Eigen::Matrix3s::Zero());
-            problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(empty_odom);
-            second_last_capture_relative_ = last_capture_relative_;
-            last_capture_relative_ = (CaptureRelative*) (empty_odom);
+            // Store new current frame
+            current_frame_ = problem_->getLastFramePtr();
+            //std::cout << "current_frame_" << std::endl;
+
+            // no last capture relative
+            last_capture_relative_ = nullptr;
+            //std::cout << "last_frame_" << std::endl;
+
+            // Fixing or removing old frames
+            manage_window();
+            std::cout << "new frame created" << std::endl;
+        }
+
+        void createFrame(const TimeStamp& _time_stamp)
+        {
+            std::cout << "creating new frame from prior..." << std::endl;
+            createFrame(last_capture_relative_->computePrior(), _time_stamp);
         }
 
         void addCapture(CaptureBase* _capture)
         {
             new_captures_.push(_capture);
-            //std::cout << "added new capture: " << _capture->nodeId() << "stamp: " << _capture->getTimeStamp().get() << std::endl;
+            std::cout << "added new capture: " << _capture->nodeId() << " stamp: ";
+            _capture->getTimeStamp().print();
+            std::cout << std::endl;
+        }
+        void manage_window()
+        {
+            std::cout << "managing window..." << std::endl;
+            // WINDOW of FRAMES (remove or fix old frames)
+            if (problem_->getTrajectoryPtr()->getFrameListPtr()->size() > window_size_+1)
+            {
+                //std::cout << "first_window_frame_ " << (*first_window_frame_)->nodeId() << std::endl;
+                //problem_->getTrajectoryPtr()->removeFrame(problem_->getTrajectoryPtr()->getFrameListPtr()->begin());
+                (*first_window_frame_)->fix();
+                first_window_frame_++;
+            }
+            std::cout << "window managed" << std::endl;
+        }
+
+        bool check_new_frame(CaptureBase* new_capture)
+        {
+            std::cout << "checking if new frame..." << std::endl;
+            // TODO: not only time, depending on the sensor...
+            std::cout << new_capture->getTimeStamp().get() - last_frame_->getTimeStamp().get() << std::endl;
+            return new_capture->getTimeStamp().get() - last_frame_->getTimeStamp().get() > new_frame_elapsed_time_;
         }
 
         void update()
         {
+            std::cout << "updating..." << std::endl;
             while (!new_captures_.empty())
             {
                 // EXTRACT NEW CAPTURE
                 CaptureBase* new_capture = new_captures_.front();
                 new_captures_.pop();
 
+                // OVERWRITE CURRENT STAMP
+                current_frame_->setTimeStamp(new_capture->getTimeStamp());
+
+                // INITIALIZE FIRST FRAME STAMP
+                if (last_frame_->getTimeStamp().get() == 0)
+                    last_frame_->setTimeStamp(new_capture->getTimeStamp());
+
                 // ODOMETRY SENSOR
                 if (new_capture->getSensorPtr() == sensor_prior_)
                 {
-                    // UPDATE LAST STATE FROM SECOND LAST (optimized) TODO: see if it is necessary
-                    if (second_last_capture_relative_ != nullptr)
-                        problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setState(second_last_capture_relative_->computePrior());
+                    std::cout << "adding odometry capture..." << new_capture->nodeId() << std::endl;
+                    // NEW KEY FRAME ?
+                    if (check_new_frame(new_capture))
+                        createFrame(new_capture->getTimeStamp());
 
-                    // INTEGRATE NEW ODOMETRY TO LAST FRAME
-                    last_capture_relative_->integrateCapture((CaptureRelative*) (new_capture));
-
-                    // INITIALIZE STAMP OF FIRST FRAME
-                    //std::cout << "new TimeStamp - last Frame TimeStamp = " << new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() << std::endl;
-                    if (problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() == 0)
-                        problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setTimeStamp(new_capture->getTimeStamp());
-
-                    // NEW KEY FRAME (if enough time from last frame)
-                    if (new_capture->getTimeStamp().get() - problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getTimeStamp().get() > new_frame_elapsed_time_)
+                    // ADD/INTEGRATE NEW ODOMETRY TO THE LAST FRAME
+                    if (last_capture_relative_ == nullptr)
                     {
-                        //std::cout << "store prev frame" << std::endl;
-                        auto second_last_frame_ptr = problem_->getTrajectoryPtr()->getFrameListPtr()->back();
-
-                        // NEW CURRENT FRAME
-                        //std::cout << "new frame" << std::endl;
-                        createFrame(last_capture_relative_->computePrior(), new_capture->getTimeStamp());
-
-                        // COMPUTE PREVIOUS FRAME CAPTURES
-                        //std::cout << "compute prev frame" << std::endl;
-                        for (auto capture_it = second_last_frame_ptr->getCaptureListPtr()->begin(); capture_it != second_last_frame_ptr->getCaptureListPtr()->end(); capture_it++)
-                            (*capture_it)->processCapture();
-
-                        // WINDOW of FRAMES (remove or fix old frames)
-                        //std::cout << "frame window" << std::endl;
-                        if (problem_->getTrajectoryPtr()->getFrameListPtr()->size() > window_size_)
-                        {
-                            //std::cout << "frame fixing" << std::endl;
-                            //problem_->getTrajectoryPtr()->removeFrame(problem_->getTrajectoryPtr()->getFrameListPtr()->begin());
-                            (*first_window_frame_)->fix();
-                            first_window_frame_++;
-                        }
-                        else
-                            first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
+                        last_frame_->addCapture(new_capture);
+                        new_capture->processCapture();
+                        last_capture_relative_ = (CaptureRelative*)new_capture;
                     }
+                    else
+                        last_capture_relative_->integrateCapture((CaptureRelative*) (new_capture));
+                    current_frame_->setState(last_capture_relative_->computePrior());
+                    current_frame_->setTimeStamp(new_capture->getTimeStamp());
                 }
                 else
                 {
-                    // ADD CAPTURE TO THE LAST FRAME (or substitute the same sensor previous capture)
-                    //std::cout << "adding not odometry capture " << new_capture->nodeId() << std::endl;
-                    bool same_sensor_capture_found = false;
-                    for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin();
-                            capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
+                    std::cout << "adding not odometry capture..." << new_capture->nodeId() << std::endl;
+                    // NEW KEY FRAME ?
+                    if (check_new_frame(new_capture))
+                        createFrame(new_capture->getTimeStamp());
+
+                    // ADD CAPTURE TO THE CURRENT FRAME (or substitute the same sensor previous capture)
+                    std::cout << "searching repeated capture..." << new_capture->nodeId() << std::endl;
+                    CaptureBaseIter repeated_capture_it = current_frame_->hasCaptureOf(new_capture->getSensorPtr());
+
+                    if (repeated_capture_it != current_frame_->getCaptureListPtr()->end()) // repeated capture
                     {
-                        if ((*capture_it)->getSensorPtr() == new_capture->getSensorPtr())
-                        {
-                            //std::cout << "removing previous capture" << std::endl;
-                            //problem_->getTrajectoryPtr()->getFrameListPtr()->back()->removeCapture(capture_it);
-                            same_sensor_capture_found = true;
-                            //std::cout << "removed!" << std::endl;
-                            break;
-                        }
+                        std::cout << "repeated capture, keeping old capture" << new_capture->nodeId() << std::endl;
+                        //current_frame_->removeCapture(repeated_capture_it);
                     }
-                    if (!same_sensor_capture_found)
-                        problem_->getTrajectoryPtr()->getFrameListPtr()->back()->addCapture(new_capture);
+                    else
+                    {
+                        std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
+                        last_frame_->addCapture(new_capture);
+                        std::cout << "processing capture..." << new_capture->nodeId() << std::endl;
+                        new_capture->processCapture();
+                        std::cout << "processed" << std::endl;
+                    }
                 }
             }
+            std::cout << "updated" << std::endl;
         }
 
         Eigen::VectorXs getVehiclePose()
         {
-            if (second_last_capture_relative_ != nullptr)
-                problem_->getTrajectoryPtr()->getFrameListPtr()->back()->setState(second_last_capture_relative_->computePrior());
             return last_capture_relative_->computePrior();
         }
 

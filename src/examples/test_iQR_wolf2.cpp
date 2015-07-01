@@ -26,8 +26,10 @@
 #include "constraint_base.h"
 #include "wolf_manager.h"
 
-// ccolamd
+// wolf solver
 #include "solver/ccolamd_ordering.h"
+#include "solver/cost_function_base.h"
+#include "solver/cost_function_sparse.h"
 
 //C includes for sleep, time and main args
 #include "unistd.h"
@@ -132,24 +134,6 @@ void add_sparse_block(const MatrixXd& ins, SparseMatrix<double>& original, const
               original.coeffRef(r + row, c + col) += ins(r,c);
 }
 
-struct node
-{
-    public:
-        int id;
-        int dim;
-        int location;
-        int order;
-
-        node(const int _id, const int _dim, const int _location, const int _order) :
-            id(_id),
-            dim(_dim),
-            location(_location),
-            order(_order)
-        {
-
-        }
-};
-
 struct measurement
 {
     public:
@@ -157,24 +141,6 @@ struct measurement
         VectorXd error;
         int dim;
         int location;
-
-        measurement(const int _idx1, const VectorXd &_error, const int _meas_dim) :
-            nodes_idx({_idx1}),
-            error(_error),
-            dim(_meas_dim),
-            location(0)
-        {
-            //jacobians.push_back(_jacobian1);
-        }
-
-        measurement(const int _idx1, const int _idx2, const VectorXd &_error, const int _meas_dim) :
-            nodes_idx({_idx1, _idx2}),
-            error(_error),
-            dim(_meas_dim),
-            location(0)
-        {
-
-        }
 
         measurement(const std::vector<int> & _idxs, const VectorXd &_error, const int _meas_dim) :
             nodes_idx(_idxs),
@@ -195,18 +161,20 @@ class SolverQR
         VectorXd b_, x_incr_;
         int n_measurements;
         int n_nodes_;
-        std::vector<node> nodes_;
+        //std::vector<node> nodes_;
         std::vector<StateBase*> states_;
         std::vector<measurement> measurements_;
         std::vector<ConstraintBase*> constraints_;
+        std::vector<CostFunctionBase*> cost_functions_;
 
         // ordering
         SparseMatrix<int> A_nodes_;
         PermutationMatrix<Dynamic, Dynamic, int> acc_permutation_nodes_;
-        std::map<int, int> id_2_idx;
+        std::map<int, int> id_2_idx_;
 
         CCOLAMDOrdering<int> ordering_;
         VectorXi nodes_ordering_constraints_;
+        ArrayXi node_locations_;
         int n_new_measurements_;
 
         // time
@@ -224,11 +192,12 @@ class SolverQR
             n_nodes_(0),
             A_nodes_(0,0),
             acc_permutation_nodes_(0),
+            n_new_measurements_(0),
             time_ordering_(0),
             time_solving_(0),
             time_managing_(0)
         {
-            //
+            node_locations_.resize(0);
         }
 
         virtual ~SolverQR()
@@ -296,17 +265,18 @@ class SolverQR
             std::cout << "adding state unit " << _state_ptr->nodeId() << std::endl;
             if (_state_ptr->getStateStatus() == ST_ESTIMATED)
             {
-                states_.push_back(_state_ptr);
-                id_2_idx[_state_ptr->nodeId()] = states_.size()-1;
-
-                std::cout << "idx " << id_2_idx[_state_ptr->nodeId()] << std::endl;
 
                 t_managing_ = clock();
                 unsigned int node_dim = _state_ptr->getStateSize();
                 int node_idx= _state_ptr->nodeId();
 
                 n_nodes_++;
-                nodes_.push_back(node(node_idx, node_dim, x_incr_.size(), n_nodes_-1));
+                states_.push_back(_state_ptr);
+                id_2_idx_[_state_ptr->nodeId()] = states_.size()-1;
+
+                std::cout << "idx " << id_2_idx_[_state_ptr->nodeId()] << std::endl;
+
+                //nodes_.push_back(node(node_idx, node_dim, x_incr_.size(), n_nodes_-1));
 
                 // Resize accumulated permutations
                 augment_permutation(acc_permutation_nodes_, n_nodes_);
@@ -329,40 +299,27 @@ class SolverQR
             //TODO
         }
 
-        void getResidualJacobians(const ConstraintBase* _constraint_ptr, VectorXs &error, std::vector<MatrixXs>& jacobians)
-        {
-            assert(error.size() == _constraint_ptr->getSize());
-
-            if (!jacobians.empty())
-                jacobians.clear();
-
-            //TODO get the jacobian calling functor operator()
-            for (int i = 0; i < _constraint_ptr->getStatePtrVector().size(); i++)
-                if (_constraint_ptr->getStatePtrVector().at(i)->getStateStatus() == ST_ESTIMATED)
-                    jacobians.push_back(MatrixXs::Constant(_constraint_ptr->getSize(), _constraint_ptr->getStatePtrVector().at(i)->getStateSize(), 0.1) + MatrixXs::Identity(_constraint_ptr->getSize(), _constraint_ptr->getStatePtrVector().at(i)->getStateSize()));
-
-            // TODO get the error calling functor operator()
-            error = VectorXs::LinSpaced(_constraint_ptr->getSize(), _constraint_ptr->getSize() * _constraint_ptr->nodeId(), _constraint_ptr->getSize() * _constraint_ptr->nodeId()+_constraint_ptr->getSize()-1);
-        }
-
         void addConstraint(ConstraintBase* _constraint_ptr)
         {
             std::cout << "adding constraint " << _constraint_ptr->nodeId() << std::endl;
             t_managing_ = clock();
 
             constraints_.push_back(_constraint_ptr);
+            cost_functions_.push_back(createCostFunction(_constraint_ptr));
 
             int meas_dim = _constraint_ptr->getSize();
 
             std::vector<MatrixXs> jacobians(_constraint_ptr->getStatePtrVector().size());
             VectorXs error(_constraint_ptr->getSize());
 
-            getResidualJacobians(_constraint_ptr, error, jacobians);
+            cost_functions_.back()->evaluateResidualJacobians();
+            cost_functions_.back()->getResidual(error);
+            cost_functions_.back()->getJacobians(jacobians);
 
             std::vector<int> idxs;
             for (int i = 0; i < _constraint_ptr->getStatePtrVector().size(); i++)
                 if (_constraint_ptr->getStatePtrVector().at(i)->getStateStatus() == ST_ESTIMATED)
-                    idxs.push_back(id_2_idx[_constraint_ptr->getStatePtrVector().at(i)->nodeId()]);
+                    idxs.push_back(id_2_idx_[_constraint_ptr->getStatePtrVector().at(i)->nodeId()]);
 
             measurement _meas(idxs, error, meas_dim);
 
@@ -379,15 +336,15 @@ class SolverQR
             // ADD MEASUREMENTS
             for (unsigned int j = 0; j < idxs.size(); j++)
             {
-                assert(acc_permutation_nodes_.indices()(idxs.at(j)) == nodes_.at(idxs.at(j)).order);
+                assert(acc_permutation_nodes_.indices()(idxs.at(j)) == node_order(idxs.at(j)));//nodes_.at(idxs.at(j)).order);
 
-                int ordered_node = nodes_.at(idxs.at(j)).order;//acc_permutation_nodes_.indices()(_nodes_idx.at(j));
+                //int ordered_node = nodes_.at(idxs.at(j)).order;
 
-                add_sparse_block(jacobians.at(j), A_, A_.rows()-meas_dim, nodes_.at(idxs.at(j)).location);
+                add_sparse_block(jacobians.at(j), A_, A_.rows()-meas_dim, node_location(idxs.at(j)));//nodes_.at(idxs.at(j)).location);
 
-                A_nodes_.coeffRef(A_nodes_.rows()-1, ordered_node) = 1;
+                A_nodes_.coeffRef(A_nodes_.rows()-1, node_order(idxs.at(j))) = 1;
 
-                assert(jacobians.at(j).cols() == nodes_.at(idxs.at(j)).dim);
+                assert(jacobians.at(j).cols() == node_dim(idxs.at(j)));//nodes_.at(idxs.at(j)).dim);
                 assert(jacobians.at(j).rows() == meas_dim);
             }
 
@@ -431,7 +388,7 @@ class SolverQR
             // partial ordering
             else
             {
-                int first_ordered_node = nodes_.at(_first_ordered_idx).order;
+                int first_ordered_node = node_order(_first_ordered_idx);//nodes_.at(_first_ordered_idx).order;
                 int ordered_nodes = n_nodes_ - first_ordered_node;
                 int unordered_nodes = n_nodes_ - ordered_nodes;
                 if (ordered_nodes > 2) // only reordering when involved nodes in the measurement are not the two last ones
@@ -450,7 +407,7 @@ class SolverQR
                     ordering_(sub_A_nodes_, partial_permutation_nodes, nodes_ordering_constraints_.data());
 
                     // node ordering to variable ordering
-                    int ordered_variables = A_.cols() - nodes_.at(_first_ordered_idx).location;
+                    int ordered_variables = A_.cols() - node_location(_first_ordered_idx);//nodes_.at(_first_ordered_idx).location;
 //                    std::cout << "first_ordered_node " << first_ordered_node << std::endl;
 //                    std::cout << "A_.cols() " << A_.cols() << std::endl;
 //                    std::cout << "nodes_.at(_first_ordered_idx).location " << nodes_.at(_first_ordered_idx).location << std::endl;
@@ -482,18 +439,27 @@ class SolverQR
             for (int i = 0; i < n_new_measurements_; i++)
             {
                 ConstraintBase* ct_ptr = constraints_.at(constraints_.size()-1-i);
+                std::cout << "constraint: " << i << " id: " << constraints_.at(constraints_.size()-1-i)->nodeId() << std::endl;
                 for (int j = 0; j < ct_ptr->getStatePtrVector().size(); j++)
                 {
-                    int idx = id_2_idx[ct_ptr->getStatePtrVector().at(j)->nodeId()];
-                    if (first_ordered_node > nodes_.at(idx).order)
+                    if (ct_ptr->getStatePtrVector().at(j)->getStateStatus() == ST_ESTIMATED)
                     {
-                        first_ordered_idx = idx;
-                        first_ordered_node = nodes_.at(idx).order;
+                        int idx = id_2_idx_[ct_ptr->getStatePtrVector().at(j)->nodeId()];
+                        std::cout << "estimated idx " << idx << std::endl;
+                        std::cout << "node_order(idx) " << node_order(idx) << std::endl;
+                        std::cout << "first_ordered_node " << first_ordered_node << std::endl;
+                        if (first_ordered_node > node_order(idx))//nodes_.at(idx).order)
+                        {
+                            first_ordered_idx = idx;
+                            std::cout << "first_ordered_idx " << first_ordered_idx << std::endl;
+                            first_ordered_node = node_order(idx);
+                            std::cout << "first_ordered_node " << first_ordered_node << std::endl;
+                        }
                     }
                 }
             }
-//            std::cout << "first_ordered_node " << first_ordered_node << std::endl;
-//            std::cout << "first_ordered_idx " << first_ordered_idx << std::endl;
+            std::cout << "first_ordered_node " << first_ordered_node << std::endl;
+            std::cout << "first_ordered_idx " << first_ordered_idx << std::endl;
 
             bool batch = (mode !=2 || first_ordered_node == 0);
             bool order = (mode !=0 && n_nodes_ > 1);
@@ -539,8 +505,8 @@ class SolverQR
         //        std::cout << "measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]] " << measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]] << std::endl;
                 int first_ordered_measurement = measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]];
                 int ordered_measurements = A_.rows() - measurements_.at(first_ordered_measurement).location;
-                int ordered_variables = A_.cols() - nodes_.at(first_ordered_idx).location;
-                int unordered_variables = nodes_.at(first_ordered_idx).location;
+                int ordered_variables = A_.cols() - node_location(first_ordered_idx);//nodes_.at(first_ordered_idx).location;
+                int unordered_variables = node_location(first_ordered_idx);//nodes_.at(first_ordered_idx).location;
 
                 SparseMatrix<double> A_partial = A_.bottomRightCorner(ordered_measurements, ordered_variables);
                 solver_.compute(A_partial);
@@ -577,10 +543,19 @@ class SolverQR
                 }
 
             }
-            // UNDO ORDERING FOR RESULT
-            PermutationMatrix<Dynamic, Dynamic, int> acc_permutation(A_.cols());
-            permutation_2_block_permutation(acc_permutation_nodes_, acc_permutation); // TODO via pointers
-            x_incr_ = acc_permutation.inverse() * x_incr_;
+//            // UNDO ORDERING FOR RESULT
+//            PermutationMatrix<Dynamic, Dynamic, int> acc_permutation(A_.cols());
+//            permutation_2_block_permutation(acc_permutation_nodes_, acc_permutation); // TODO via pointers
+//            x_incr_ = acc_permutation.inverse() * x_incr_;
+
+            // UPDATE X VALUE
+            for (unsigned int i = 0; i<states_.size(); i++)
+            {
+                Map<VectorXs> x_i(states_.at(i)->getPtr(), states_.at(i)->getStateSize());
+                x_i += x_incr_.segment(node_location(i), states_.at(i)->getStateSize());
+            }
+
+
 
             time_solving_ += ((double) clock() - t_solving_) / CLOCKS_PER_SEC;
             n_new_measurements_ = 0;
@@ -591,28 +566,26 @@ class SolverQR
         void permutation_2_block_permutation(const PermutationMatrix<Dynamic, Dynamic, int> &_perm_nodes, PermutationMatrix<Dynamic, Dynamic, int> &perm_variables)
         {
             //std::cout << "perm_nodes: " << _perm_nodes.indices().transpose() << std::endl;
-            ArrayXi locations = perm_nodes_2_locations(_perm_nodes);
+            perm_nodes_2_locations(_perm_nodes, node_locations_);
             //std::cout << "locations: " << locations.transpose() << std::endl;
             //std::cout << "perm_variables: " << perm_variables.indices().transpose() << std::endl;
 
             int last_idx = 0;
-            for (unsigned int i = 0; i<locations.size(); i++)
+            for (unsigned int i = 0; i<node_locations_.size(); i++)
             {
-                perm_variables.indices().segment(last_idx, nodes_.at(i).dim) = VectorXi::LinSpaced(nodes_.at(i).dim, locations(i), locations(i)+nodes_.at(i).dim-1);
-                last_idx += nodes_.at(i).dim;
+                perm_variables.indices().segment(last_idx, node_dim(i)) = VectorXi::LinSpaced(node_dim(i), node_locations_(i), node_locations_(i)+node_dim(i)-1);
+                last_idx += node_dim(i);
                 //std::cout << i << " perm_variables: " << perm_variables.indices().transpose() << std::endl;
             }
             //std::cout << "perm_variables: " << perm_variables.indices().transpose() << std::endl;
         }
 
-        ArrayXi perm_nodes_2_locations(const PermutationMatrix<Dynamic, Dynamic, int> &_perm_nodes)
+        void perm_nodes_2_locations(const PermutationMatrix<Dynamic, Dynamic, int> &_perm_nodes, ArrayXi& locations)
         {
-            ArrayXi indices = _perm_nodes.indices().array();
+            locations = _perm_nodes.indices().array();
 
-            for (unsigned int i = 0; i<indices.size(); i++)
-                indices = (indices > indices(i)).select(indices + nodes_.at(i).dim-1, indices);
-
-            return indices;
+            for (unsigned int i = 0; i<locations.size(); i++)
+                locations = (locations > locations(i)).select(locations + node_dim(i)-1, locations);
         }
 
         void augment_permutation(PermutationMatrix<Dynamic, Dynamic, int> &perm, const int new_size)
@@ -624,6 +597,12 @@ class SolverQR
             new_indices.tail(dim) = ArrayXi::LinSpaced(dim, old_size, new_size-1);
             perm.resize(new_size);
             perm.indices() = new_indices;
+            std::cout << "permutation augmented" << std::endl;
+
+            // resize and update locations
+            node_locations_.conservativeResize(node_locations_.size() + 1);
+            node_locations_(node_locations_.size()-1) = x_incr_.size();
+            std::cout << "node_locations_ augmented" << std::endl;
         }
 
         void accumulate_permutation(const PermutationMatrix<Dynamic, Dynamic, int> &perm)
@@ -645,11 +624,109 @@ class SolverQR
             //std::cout << "new acc_permutation_nodes_ " << acc_permutation_nodes_.indices().transpose() << std::endl;
 
             // update nodes orders and locations
-            ArrayXi locations = perm_nodes_2_locations(acc_permutation_nodes_);
-            for (int i = 0; i < nodes_.size(); i++)
+            perm_nodes_2_locations(acc_permutation_nodes_, node_locations_);
+
+//            for (int i = 0; i < nodes_.size(); i++)
+//            {
+//                nodes_.at(i).order = acc_permutation_nodes_.indices()(i);
+//                nodes_.at(i).location = node_locations_(i);
+//            }
+        }
+
+        int node_dim(const int _idx)
+        {
+            return states_.at(_idx)->getStateSize();
+        }
+
+        int node_order(const int _idx)
+        {
+            return acc_permutation_nodes_.indices()(_idx);
+        }
+
+        int node_location(const int _idx)
+        {
+            return node_locations_(_idx);
+        }
+
+        CostFunctionBase* createCostFunction(ConstraintBase* _corrPtr)
+        {
+            //std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
+            //_corrPtr->print();
+
+            switch (_corrPtr->getConstraintType())
             {
-                nodes_.at(i).order = acc_permutation_nodes_.indices()(i);
-                nodes_.at(i).location = locations(i);
+                case CTR_GPS_FIX_2D:
+                {
+                    ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
+                    return (CostFunctionBase*)(new CostFunctionSparse<ConstraintGPS2D,
+                                                               specific_ptr->measurementSize,
+                                                               specific_ptr->block0Size,
+                                                               specific_ptr->block1Size,
+                                                               specific_ptr->block2Size,
+                                                               specific_ptr->block3Size,
+                                                               specific_ptr->block4Size,
+                                                               specific_ptr->block5Size,
+                                                               specific_ptr->block6Size,
+                                                               specific_ptr->block7Size,
+                                                               specific_ptr->block8Size,
+                                                               specific_ptr->block9Size>(specific_ptr));
+                    break;
+                }
+                case CTR_ODOM_2D_COMPLEX_ANGLE:
+                {
+                    ConstraintOdom2DComplexAngle* specific_ptr = (ConstraintOdom2DComplexAngle*)(_corrPtr);
+                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintOdom2DComplexAngle,
+                                                               specific_ptr->measurementSize,
+                                                               specific_ptr->block0Size,
+                                                               specific_ptr->block1Size,
+                                                               specific_ptr->block2Size,
+                                                               specific_ptr->block3Size,
+                                                               specific_ptr->block4Size,
+                                                               specific_ptr->block5Size,
+                                                               specific_ptr->block6Size,
+                                                               specific_ptr->block7Size,
+                                                               specific_ptr->block8Size,
+                                                               specific_ptr->block9Size>(specific_ptr);
+                    break;
+                }
+                case CTR_ODOM_2D_THETA:
+                {
+                    ConstraintOdom2DTheta* specific_ptr = (ConstraintOdom2DTheta*)(_corrPtr);
+                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintOdom2DTheta,
+                                                               specific_ptr->measurementSize,
+                                                               specific_ptr->block0Size,
+                                                               specific_ptr->block1Size,
+                                                               specific_ptr->block2Size,
+                                                               specific_ptr->block3Size,
+                                                               specific_ptr->block4Size,
+                                                               specific_ptr->block5Size,
+                                                               specific_ptr->block6Size,
+                                                               specific_ptr->block7Size,
+                                                               specific_ptr->block8Size,
+                                                               specific_ptr->block9Size>(specific_ptr);
+                    break;
+                }
+                case CTR_CORNER_2D_THETA:
+                {
+                    ConstraintCorner2DTheta* specific_ptr = (ConstraintCorner2DTheta*)(_corrPtr);
+                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintCorner2DTheta,
+                                                               specific_ptr->measurementSize,
+                                                               specific_ptr->block0Size,
+                                                               specific_ptr->block1Size,
+                                                               specific_ptr->block2Size,
+                                                               specific_ptr->block3Size,
+                                                               specific_ptr->block4Size,
+                                                               specific_ptr->block5Size,
+                                                               specific_ptr->block6Size,
+                                                               specific_ptr->block7Size,
+                                                               specific_ptr->block8Size,
+                                                               specific_ptr->block9Size>(specific_ptr);
+                    break;
+                }
+                default:
+                    std::cout << "Unknown constraint type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
+
+                    return nullptr;
             }
         }
 
@@ -753,7 +830,7 @@ int main(int argc, char *argv[])
     ground_truth.head(3) = pose_odom;
     odom_trajectory.head(3) = pose_odom;
 
-    WolfManager* wolf_manager = new WolfManager(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10);
+    WolfManager<StatePoint2D, StateTheta>* wolf_manager = new WolfManager<StatePoint2D, StateTheta>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
 
     std::cout << "STARTING INCREMENTAL QR TEST" << std::endl << std::endl;
     std::cout << "\n ========= 2D Robot with odometry and 2 LIDARs ===========\n";
@@ -811,7 +888,7 @@ int main(int argc, char *argv[])
         //std::cout << "ADD CAPTURES..." << std::endl;
         // adding new sensor captures
         wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
-//      wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+        wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
         //wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
         //wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
         // updating problem
@@ -827,7 +904,7 @@ int main(int argc, char *argv[])
 
         // SOLVE OPTIMIZATION ---------------------------
         //std::cout << "SOLVING..." << std::endl;
-        solver_unordered.solve(2);
+        solver_unordered.solve(0);
 
         std::cout << "========================= RESULTS " << step << ":" << std::endl;
         solver_unordered.print_results();

@@ -153,6 +153,13 @@ class WolfProblem: public NodeBase
          */
         TrajectoryBase* getTrajectoryPtr();
 
+        /** \brief Returns a pointer to last Frame
+         *
+         * Returns a pointer to last Frame
+         *
+         **/
+        FrameBase* getLastFramePtr();
+
         /** \brief Gets a pointer to the state units list
          *
          * Gets a pointer to the state units list

@@ -41,13 +41,19 @@ bool WolfProblem::addState(StateBase* _new_state_ptr, const Eigen::VectorXs& _ne
 	// Check if resize should be done
 	if (state_idx_last_+_new_state_ptr->getStateSize() > state_.size())
 	{
+		std::cout << "Resizing state and updating asl state units pointers..." << std::endl;
 		std::cout << "\nState size: " << state_.size() << " last idx: " << state_idx_last_ << " last idx + new state size: " << state_idx_last_+_new_state_ptr->getStateSize() << std::endl;
-		std::cout << "Resizing state and remapping al state units..." << std::endl;
-		WolfScalar* old_first_pointer = state_.data();
-		state_.resize(state_.size()*2);
+        WolfScalar* old_first_pointer = state_.data();
+		state_.conservativeResize(state_.size()*2);
+		covariance_.conservativeResize(state_.size()*2,state_.size()*2);
 		for (auto state_units_it = state_list_.begin(); state_units_it != state_list_.end(); state_units_it++)
-			(*state_units_it)->setPtr(state_.data() + ( (*state_units_it)->getPtr() - old_first_pointer) );
-		std::cout << "New state size: " << state_.size() << "last idx: " << state_idx_last_ << std::endl;
+		{
+	        //std::cout << "state unit: " << (*state_units_it)->nodeId() << std::endl;
+		    (*state_units_it)->setPtr(state_.data() + ( (*state_units_it)->getPtr() - old_first_pointer) );
+		}
+		std::cout << "----------------------------- difference of location: " << old_first_pointer - state_.data() << std::endl;
+		_new_state_ptr->setPtr(state_.data()+state_idx_last_);
+		std::cout << "New state size: " << state_.size() << " last idx: " << state_idx_last_ << std::endl;
 		reallocated_ = true;
 	}
 	//std::cout << "\nnew state unit: " << _new_state_values.transpose() << std::endl;
@@ -69,8 +75,14 @@ bool WolfProblem::addState(StateBase* _new_state_ptr, const Eigen::VectorXs& _ne
 
 void WolfProblem::addCovarianceBlock(StateBase* _state1, StateBase* _state2, const Eigen::MatrixXs& _cov)
 {
-    assert(_state1 != nullptr && _state1->getPtr() != nullptr && _state1->getPtr() < state_.data() + state_idx_last_ && _state1->getPtr() > state_.data());
-    assert(_state2 != nullptr && _state2->getPtr() != nullptr && _state2->getPtr() < state_.data() + state_idx_last_ && _state2->getPtr() > state_.data());
+    assert(_state1 != nullptr);
+    assert(_state1->getPtr() != nullptr);
+    assert(_state1->getPtr() < state_.data() + state_idx_last_);
+    assert(_state1->getPtr() > state_.data());
+    assert(_state2 != nullptr);
+    assert(_state2->getPtr() != nullptr);
+    assert(_state2->getPtr() < state_.data() + state_idx_last_);
+    assert(_state2->getPtr() > state_.data());
 
     // Guarantee that we are updating the top triangular matrix (in cross covariance case)
     bool flip = _state1->getPtr() > _state2->getPtr();
@@ -91,8 +103,14 @@ void WolfProblem::addCovarianceBlock(StateBase* _state1, StateBase* _state2, con
 
 void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov_block) const
 {
-    assert(_state1 != nullptr && _state1->getPtr() != nullptr && _state1->getPtr() < state_.data() + state_idx_last_ && _state1->getPtr() > state_.data());
-    assert(_state2 != nullptr && _state2->getPtr() != nullptr && _state2->getPtr() < state_.data() + state_idx_last_ && _state2->getPtr() > state_.data());
+    assert(_state1 != nullptr);
+    assert(_state1->getPtr() != nullptr);
+    assert(_state1->getPtr() < state_.data() + state_idx_last_);
+    assert(_state1->getPtr() > state_.data());
+    assert(_state2 != nullptr);
+    assert(_state2->getPtr() != nullptr);
+    assert(_state2->getPtr() < state_.data() + state_idx_last_);
+    assert(_state2->getPtr() > state_.data());
 
     // Guarantee that we are getting the top triangular matrix (in cross covariance case)
     bool flip = _state1->getPtr() > _state2->getPtr();
@@ -110,8 +128,14 @@ void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eig
 
 void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::Map<Eigen::MatrixXs>& _cov_block) const
 {
-    assert(_state1 != nullptr && _state1->getPtr() != nullptr && _state1->getPtr() < state_.data() + state_idx_last_ && _state1->getPtr() > state_.data());
-    assert(_state2 != nullptr && _state2->getPtr() != nullptr && _state2->getPtr() < state_.data() + state_idx_last_ && _state2->getPtr() > state_.data());
+    assert(_state1 != nullptr);
+    assert(_state1->getPtr() != nullptr);
+    assert(_state1->getPtr() < state_.data() + state_idx_last_);
+    assert(_state1->getPtr() > state_.data());
+    assert(_state2 != nullptr);
+    assert(_state2->getPtr() != nullptr);
+    assert(_state2->getPtr() < state_.data() + state_idx_last_);
+    assert(_state2->getPtr() > state_.data());
 
     // Guarantee that we are getting the top triangular matrix (in cross covariance case)
     bool flip = _state1->getPtr() > _state2->getPtr();
@@ -170,6 +194,11 @@ MapBase* WolfProblem::getMapPtr()
 TrajectoryBase* WolfProblem::getTrajectoryPtr()
 {
 	return trajectory_ptr_;
+}
+
+FrameBase* WolfProblem::getLastFramePtr()
+{
+    return trajectory_ptr_->getLastFramePtr();
 }
 
 StateBaseList* WolfProblem::getStateListPtr()

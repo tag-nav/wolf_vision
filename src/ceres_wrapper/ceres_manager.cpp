@@ -38,6 +38,8 @@ ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_
 
 void CeresManager::computeCovariances(WolfProblem* _problem_ptr)
 {
+    //std::cout << "computing covariances..." << std::endl;
+
     // CREATE DESIRED COVARIANCES LIST
 	std::vector<std::pair<const double*, const double*>> covariance_blocks;
 
@@ -74,8 +76,11 @@ void CeresManager::computeCovariances(WolfProblem* _problem_ptr)
     Eigen::MatrixXs m_oo(current_orientation->getStateSize(),current_orientation->getStateSize());
     Eigen::MatrixXs m_po(current_position->getStateSize(),current_orientation->getStateSize());
 
+    //std::cout << "getting m_pp covariance block... " << m_pp.rows() << "x" << m_pp.cols() << std::endl;
     covariance_->GetCovarianceBlock(current_position_ptr, current_position_ptr, m_pp.data());
+    //std::cout << "getting m_oo covariance block... " << m_oo.rows() << "x" << m_oo.cols() << std::endl;
     covariance_->GetCovarianceBlock(current_position_ptr, current_orientation_ptr, m_po.data());
+    //std::cout << "getting m_po covariance block... " << m_po.rows() << "x" << m_po.cols() << std::endl;
     covariance_->GetCovarianceBlock(current_orientation_ptr, current_orientation_ptr, m_oo.data());
 
     _problem_ptr->addCovarianceBlock(current_position, current_position, m_pp);
@@ -98,12 +103,19 @@ void CeresManager::computeCovariances(WolfProblem* _problem_ptr)
         Eigen::MatrixXs m_landmark_o_frame_p(landmark_orientation->getStateSize(),current_position->getStateSize());
         Eigen::MatrixXs m_landmark_o_frame_o(landmark_orientation->getStateSize(),current_orientation->getStateSize());
 
+        //std::cout << "getting m_landmark_pp covariance block... " << m_landmark_pp.rows() << "x" << m_landmark_pp.cols() << std::endl;
         covariance_->GetCovarianceBlock(landmark_position_ptr, landmark_position_ptr, m_landmark_pp.data());
+        //std::cout << "getting m_landmark_po covariance block... " << m_landmark_po.rows() << "x" << m_landmark_po.cols() << std::endl;
         covariance_->GetCovarianceBlock(landmark_position_ptr, landmark_orientation_ptr, m_landmark_po.data());
+        //std::cout << "getting m_landmark_oo covariance block... " << m_landmark_oo.rows() << "x" << m_landmark_oo.cols() << std::endl;
         covariance_->GetCovarianceBlock(landmark_orientation_ptr, landmark_orientation_ptr, m_landmark_oo.data());
+        //std::cout << "getting m_landmark_p_frame_p covariance block... " << m_landmark_p_frame_p.rows() << "x" << m_landmark_p_frame_p.cols() << std::endl;
         covariance_->GetCovarianceBlock(landmark_position_ptr, current_position_ptr, m_landmark_p_frame_p.data());
+        //std::cout << "getting m_landmark_p_frame_o covariance block... " << m_landmark_p_frame_o.rows() << "x" << m_landmark_p_frame_o.cols() << std::endl;
         covariance_->GetCovarianceBlock(landmark_position_ptr, current_orientation_ptr, m_landmark_p_frame_o.data());
+        //std::cout << "getting m_landmark_o_frame_p covariance block... " << m_landmark_o_frame_p.rows() << "x" << m_landmark_o_frame_p.cols() << std::endl;
         covariance_->GetCovarianceBlock(landmark_orientation_ptr, current_position_ptr, m_landmark_o_frame_p.data());
+        //std::cout << "getting m_landmark_o_frame_o covariance block... " << m_landmark_o_frame_o.rows() << "x" << m_landmark_o_frame_o.cols() << std::endl;
         covariance_->GetCovarianceBlock(landmark_orientation_ptr, current_orientation_ptr, m_landmark_o_frame_o.data());
 
         _problem_ptr->addCovarianceBlock(landmark_position, landmark_position, m_landmark_pp);
