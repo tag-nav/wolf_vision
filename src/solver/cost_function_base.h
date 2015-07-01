@@ -13,7 +13,7 @@
 class CostFunctionBase
 {
     protected:
-        int n_blocks_;
+        unsigned int n_blocks_;
         Eigen::MatrixXs J_0_;
         Eigen::MatrixXs J_1_;
         Eigen::MatrixXs J_2_;
@@ -55,7 +55,6 @@ class CostFunctionBase
             jacobians_({&J_0_,&J_1_,&J_2_,&J_3_,&J_4_,&J_5_,&J_6_,&J_7_,&J_8_,&J_9_}),
             block_sizes_({_block_0_size, _block_1_size, _block_2_size, _block_3_size, _block_4_size, _block_5_size, _block_6_size, _block_7_size, _block_8_size, _block_9_size})
             {
-                int last_jet_idx = 0;
                 for (unsigned int i = 1; i<n_blocks_; i++)
                 {
                     if (block_sizes_.at(i) == 0)
@@ -90,7 +89,7 @@ class CostFunctionBase
         void getJacobians(std::vector<Eigen::MatrixXs>& jacobians)
         {
             jacobians.resize(n_blocks_);
-            for (int i = 0; i<n_blocks_; i++)
+            for (unsigned int i = 0; i<n_blocks_; i++)
                 jacobians.at(i) = (*jacobians_.at(i));
         }
 };
