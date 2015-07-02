@@ -26,7 +26,7 @@
 
 using namespace Eigen;
 
-void erase_sparse_block(SparseMatrix<double>& original, const unsigned int& row, const unsigned int& Nrows, const unsigned int& col, const unsigned int& Ncols)
+void eraseSparseBlock(SparseMatrix<double>& original, const unsigned int& row, const unsigned int& Nrows, const unsigned int& col, const unsigned int& Ncols)
 {
   for (uint i = row; i < row + Nrows; i++)
     for (uint j = col; j < row + Ncols; j++)
@@ -35,7 +35,7 @@ void erase_sparse_block(SparseMatrix<double>& original, const unsigned int& row,
   original.makeCompressed();
 }
 
-void add_sparse_block(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
+void addSparseBlock(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
 {
   for (uint r=0; r<ins.rows(); ++r)
       for (uint c = 0; c < ins.cols(); c++)
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     double time1=0, time2=0, time3=0;
 
     // INITIAL STATE
-    add_sparse_block(5*omega, H, 0, 0);
+    addSparseBlock(5*omega, H, 0, 0);
     factors.insert(0,0) = 1;
     b.head(dim) = VectorXd::LinSpaced(Sequential, dim, 0, dim-1);
 
@@ -124,9 +124,9 @@ int main(int argc, char *argv[])
         factors.conservativeResize(i+1, i+1);
 
         // Odometry
-        add_sparse_block(5*omega, H, i*dim, i*dim);
-        add_sparse_block(omega, H, i*dim, (i-1)*dim);
-        add_sparse_block(omega, H, (i-1)*dim, i*dim);
+        addSparseBlock(5*omega, H, i*dim, i*dim);
+        addSparseBlock(omega, H, i*dim, (i-1)*dim);
+        addSparseBlock(omega, H, (i-1)*dim, i*dim);
         factors.insert(i,i) = 1;
         factors.insert(i,i-1) = 1;
         factors.insert(i-1,i) = 1;
@@ -134,8 +134,8 @@ int main(int argc, char *argv[])
         // Loop Closure
         if (i == size-1)
         {
-            add_sparse_block(2*omega, H, 0, i*dim);
-            add_sparse_block(2*omega, H, i*dim, 0);
+            addSparseBlock(2*omega, H, 0, i*dim);
+            addSparseBlock(2*omega, H, i*dim, 0);
             factors.insert(0,i) = 1;
             factors.insert(i,0) = 1;
         }

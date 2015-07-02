@@ -16,20 +16,13 @@
 #include <ctime>
 #include <queue>
 
-// eigen includes
-#include <eigen3/Eigen/OrderingMethods>
-#include <eigen3/Eigen/SparseQR>
-#include <Eigen/SPQRSupport>
-
 //Wolf includes
 #include "state_base.h"
 #include "constraint_base.h"
 #include "wolf_manager.h"
 
 // wolf solver
-#include "solver/ccolamd_ordering.h"
-#include "solver/cost_function_base.h"
-#include "solver/cost_function_sparse.h"
+#include "solver/qr_solver.h"
 
 //C includes for sleep, time and main args
 #include "unistd.h"
@@ -98,665 +91,32 @@ void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double
     pose.rt.setEuler(pose.rt.head() + rotation_, pose.rt.pitch(), pose.rt.roll());
 }
 
-class block_pruning
-{
-    public:
-        unsigned int col, row, Nrows, Ncols;
-        block_pruning(unsigned int _col, unsigned int _row, unsigned int _Nrows, unsigned int _Ncols) :
-                col(_col),
-                row(_row),
-                Nrows(_Nrows),
-                Ncols(_Ncols)
-        {
-            //
-        }
-        bool operator()(unsigned int i, unsigned int j, double) const
-        {
-            return (i < row || i > row + Nrows-1) || (j < col || j > col + Ncols-1);
-        }
-};
-
-void erase_sparse_block(SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col, const unsigned int& Nrows, const unsigned int& Ncols)
-{
-    // prune all non-zero elements that not satisfy the 'keep' operand
-    // elements that are not in the block rows or are not in the block columns should be kept
-    //original.prune([](int i, int j, double) { return (i < row || i > row + Nrows-1) || (j < col || j > col + Ncols-1); });
-
-    block_pruning bp(row, col, Nrows, Ncols);
-    original.prune(bp);
-}
-
-void add_sparse_block(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
-{
-  for (unsigned int r=0; r<ins.rows(); ++r)
-      for (unsigned int c = 0; c < ins.cols(); c++)
-          if (ins(r,c) != 0)
-              original.coeffRef(r + row, c + col) += ins(r,c);
-}
-
-struct measurement
-{
-    public:
-        std::vector<unsigned int> nodes_idx;
-        VectorXd error;
-        unsigned int dim;
-        unsigned int location;
-
-        measurement(const std::vector<unsigned int> & _idxs, const VectorXd &_error, const unsigned int _meas_dim) :
-            nodes_idx(_idxs),
-            error(_error),
-            dim(_meas_dim),
-            location(0)
-        {
-
-        }
-};
-
-class SolverQR
-{
-    protected:
-        std::string name_;
-        SparseQR < SparseMatrix<double>, NaturalOrdering<int>> solver_;
-        SparseMatrix<double> A_, R_;
-        VectorXd b_, x_incr_;
-        unsigned int n_measurements;
-        std::vector<StateBase*> states_;
-        std::vector<measurement> measurements_;
-        std::vector<ConstraintBase*> constraints_;
-        std::vector<CostFunctionBase*> cost_functions_;
-
-        // ordering
-        SparseMatrix<int> A_nodes_;
-        PermutationMatrix<Dynamic, Dynamic, int> acc_permutation_nodes_;
-        std::map<unsigned int, unsigned int> id_2_idx_;
-
-        CCOLAMDOrdering<int> ordering_;
-        VectorXi nodes_ordering_constraints_;
-        ArrayXi node_locations_;
-        unsigned int n_new_measurements_;
-
-        // time
-        clock_t t_ordering_, t_solving_, t_managing_;
-        double time_ordering_, time_solving_, time_managing_;
-
-
-
-    public:
-        SolverQR(const std::string &_name) :
-            name_(_name),
-            A_(0,0),
-            R_(0,0), 
-            n_measurements(0),
-            A_nodes_(0,0),
-            acc_permutation_nodes_(0),
-            n_new_measurements_(0),
-            time_ordering_(0),
-            time_solving_(0),
-            time_managing_(0)
-        {
-            node_locations_.resize(0);
-        }
-
-        virtual ~SolverQR()
-        {
-            
-        }
-
-        void update(WolfProblem* _problem_ptr)
-        {
-            // ADD/UPDATE STATE UNITS
-            for(auto state_unit_it = _problem_ptr->getStateListPtr()->begin(); state_unit_it!=_problem_ptr->getStateListPtr()->end(); state_unit_it++)
-            {
-                if ((*state_unit_it)->getPendingStatus() == ADD_PENDING)
-                    addStateUnit(*state_unit_it);
-
-                else if((*state_unit_it)->getPendingStatus() == UPDATE_PENDING)
-                    updateStateUnitStatus(*state_unit_it);
-            }
-            //std::cout << "state units updated!" << std::endl;
-
-            // REMOVE STATE UNITS
-            while (!_problem_ptr->getRemovedStateListPtr()->empty())
-            {
-                // TODO
-                _problem_ptr->getRemovedStateListPtr()->pop_front();
-            }
-            //std::cout << "state units removed!" << std::endl;
-
-            // ADD CONSTRAINTS
-            ConstraintBaseList ctr_list;
-            _problem_ptr->getTrajectoryPtr()->getConstraintList(ctr_list);
-            //std::cout << "ctr_list.size() = " << ctr_list.size() << std::endl;
-            for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
-                if ((*ctr_it)->getPendingStatus() == ADD_PENDING)
-                    addConstraint(*ctr_it);
-
-            //std::cout << "constraints updated!" << std::endl;
-        }
-
-        void addStateUnit(StateBase* _state_ptr)
-        {
-            std::cout << "adding state unit " << _state_ptr->nodeId() << std::endl;
-            if (_state_ptr->getStateStatus() == ST_ESTIMATED)
-            {
-                t_managing_ = clock();
-
-                states_.push_back(_state_ptr);
-                id_2_idx_[_state_ptr->nodeId()] = states_.size()-1;
-
-                std::cout << "idx " << id_2_idx_[_state_ptr->nodeId()] << std::endl;
-
-                //nodes_.push_back(node(node_idx, node_dim, x_incr_.size(), n_nodes_-1));
-
-                // Resize accumulated permutations
-                augment_permutation(acc_permutation_nodes_, n_nodes());
-
-                // Resize state
-                x_incr_.conservativeResize(x_incr_.size() + _state_ptr->getStateSize());
-
-                // Resize problem
-                A_.conservativeResize(A_.rows(), A_.cols() + _state_ptr->getStateSize());
-                R_.conservativeResize(R_.cols() + _state_ptr->getStateSize(), R_.cols() + _state_ptr->getStateSize());
-                //A_nodes_.conservativeResize(n_measurements, n_nodes); // not necessary
-
-                time_managing_ += ((double) clock() - t_managing_) / CLOCKS_PER_SEC;
-            }
-            _state_ptr->setPendingStatus(NOT_PENDING);
-        }
-
-        void updateStateUnitStatus(StateBase* _state_ptr)
-        {
-            //TODO
-        }
-
-        void addConstraint(ConstraintBase* _constraint_ptr)
-        {
-            std::cout << "adding constraint " << _constraint_ptr->nodeId() << std::endl;
-            t_managing_ = clock();
-
-            constraints_.push_back(_constraint_ptr);
-            cost_functions_.push_back(createCostFunction(_constraint_ptr));
-
-            unsigned int meas_dim = _constraint_ptr->getSize();
-
-            std::vector<MatrixXs> jacobians(_constraint_ptr->getStatePtrVector().size());
-            VectorXs error(_constraint_ptr->getSize());
-
-            cost_functions_.back()->evaluateResidualJacobians();
-            cost_functions_.back()->getResidual(error);
-            cost_functions_.back()->getJacobians(jacobians);
-
-            std::vector<unsigned int> idxs;
-            for (unsigned int i = 0; i < _constraint_ptr->getStatePtrVector().size(); i++)
-                if (_constraint_ptr->getStatePtrVector().at(i)->getStateStatus() == ST_ESTIMATED)
-                    idxs.push_back(id_2_idx_[_constraint_ptr->getStatePtrVector().at(i)->nodeId()]);
-
-            measurement _meas(idxs, error, meas_dim);
-
-            n_measurements++;
-            n_new_measurements_++;
-            measurements_.push_back(_meas);
-            measurements_.back().location = A_.rows();
-
-            // Resize problem
-            A_.conservativeResize(A_.rows() + meas_dim, A_.cols());
-            b_.conservativeResize(b_.size() + meas_dim);
-            A_nodes_.conservativeResize(n_measurements,n_nodes());
-
-            // ADD MEASUREMENTS
-            for (unsigned int j = 0; j < idxs.size(); j++)
-            {
-                assert(acc_permutation_nodes_.indices()(idxs.at(j)) == node_order(idxs.at(j)));//nodes_.at(idxs.at(j)).order);
-
-                //int ordered_node = nodes_.at(idxs.at(j)).order;
-
-                add_sparse_block(jacobians.at(j), A_, A_.rows()-meas_dim, node_location(idxs.at(j)));//nodes_.at(idxs.at(j)).location);
-
-                A_nodes_.coeffRef(A_nodes_.rows()-1, node_order(idxs.at(j))) = 1;
-
-                assert(jacobians.at(j).cols() == node_dim(idxs.at(j)));//nodes_.at(idxs.at(j)).dim);
-                assert(jacobians.at(j).rows() == meas_dim);
-            }
-
-            // error
-            b_.tail(meas_dim) = error;
-
-            _constraint_ptr->setPendingStatus(NOT_PENDING);
-
-            time_managing_ += ((double) clock() - t_managing_) / CLOCKS_PER_SEC;
-        }
-
-        void ordering(const int & _first_ordered_idx)
-        {
-            std::cout << "ordering from idx " << _first_ordered_idx << std::endl;
-            t_ordering_ = clock();
-
-            // full problem ordering
-            if (_first_ordered_idx == -1)
-            {
-                // ordering ordering constraints
-                nodes_ordering_constraints_.resize(n_nodes());
-                nodes_ordering_constraints_ = A_nodes_.bottomRows(1).transpose();
-
-                // computing nodes partial ordering_
-                A_nodes_.makeCompressed();
-                PermutationMatrix<Dynamic, Dynamic, int> incr_permutation_nodes(n_nodes());
-                ordering_(A_nodes_, incr_permutation_nodes, nodes_ordering_constraints_.data());
-
-                // node ordering to variable ordering
-                PermutationMatrix<Dynamic, Dynamic, int> incr_permutation(A_.cols());
-                permutation_2_block_permutation(incr_permutation_nodes, incr_permutation);
-
-                // apply partial_ordering orderings
-                A_nodes_ = (A_nodes_ * incr_permutation_nodes.transpose()).sparseView();
-                A_ = (A_ * incr_permutation.transpose()).sparseView();
-
-                // ACCUMULATING PERMUTATIONS
-                accumulate_permutation(incr_permutation_nodes);
-            }
-
-            // partial ordering
-            else
-            {
-                unsigned int first_ordered_node = node_order(_first_ordered_idx);//nodes_.at(_first_ordered_idx).order;
-                unsigned int ordered_nodes = n_nodes() - first_ordered_node;
-
-                if (ordered_nodes > 2) // only reordering when involved nodes in the measurement are not the two last ones
-                {
-                    // SUBPROBLEM ORDERING (from first node variable to last one)
-                    //std::cout << "ordering partial_ordering problem: " << _first_ordered_node << " to "<< n_nodes_ - 1 << std::endl;
-                    SparseMatrix<int> sub_A_nodes_ = A_nodes_.rightCols(ordered_nodes);
-
-                    // _partial_ordering ordering_ constraints
-                    nodes_ordering_constraints_.resize(ordered_nodes);
-                    nodes_ordering_constraints_ = sub_A_nodes_.bottomRows(1).transpose();
-
-                    // computing nodes partial ordering_
-                    sub_A_nodes_.makeCompressed();
-                    PermutationMatrix<Dynamic, Dynamic, int> partial_permutation_nodes(ordered_nodes);
-                    ordering_(sub_A_nodes_, partial_permutation_nodes, nodes_ordering_constraints_.data());
-
-                    // node ordering to variable ordering
-                    unsigned int ordered_variables = A_.cols() - node_location(_first_ordered_idx);//nodes_.at(_first_ordered_idx).location;
-//                    std::cout << "first_ordered_node " << first_ordered_node << std::endl;
-//                    std::cout << "A_.cols() " << A_.cols() << std::endl;
-//                    std::cout << "nodes_.at(_first_ordered_idx).location " << nodes_.at(_first_ordered_idx).location << std::endl;
-//                    std::cout << "ordered_variables " << ordered_variables << std::endl;
-                    PermutationMatrix<Dynamic, Dynamic, int> partial_permutation(ordered_variables);
-                    permutation_2_block_permutation(partial_permutation_nodes, partial_permutation);
-
-                    // apply partial_ordering orderings
-                    A_nodes_.rightCols(ordered_nodes) = (A_nodes_.rightCols(ordered_nodes) * partial_permutation_nodes.transpose()).sparseView();
-                    A_.rightCols(ordered_variables) = (A_.rightCols(ordered_variables) * partial_permutation.transpose()).sparseView();
-                    R_.rightCols(ordered_variables) = (R_.rightCols(ordered_variables) * partial_permutation.transpose()).sparseView();
-
-                    // ACCUMULATING PERMUTATIONS
-                    accumulate_permutation(partial_permutation_nodes);
-                }
-            }
-            time_ordering_ += ((double) clock() - t_ordering_) / CLOCKS_PER_SEC;
-        }
-
-        bool solve(const unsigned int mode)
-        {
-            if (n_new_measurements_ == 0)
-                return 1;
-
-            std::cout << "solving mode " << mode << std::endl;
-
-            unsigned int first_ordered_node = n_nodes();
-            unsigned int first_ordered_idx;
-            for (unsigned int i = 0; i < n_new_measurements_; i++)
-            {
-                ConstraintBase* ct_ptr = constraints_.at(constraints_.size()-1-i);
-                std::cout << "constraint: " << i << " id: " << constraints_.at(constraints_.size()-1-i)->nodeId() << std::endl;
-                for (unsigned int j = 0; j < ct_ptr->getStatePtrVector().size(); j++)
-                {
-                    if (ct_ptr->getStatePtrVector().at(j)->getStateStatus() == ST_ESTIMATED)
-                    {
-                        unsigned int idx = id_2_idx_[ct_ptr->getStatePtrVector().at(j)->nodeId()];
-                        //std::cout << "estimated idx " << idx << std::endl;
-                        //std::cout << "node_order(idx) " << node_order(idx) << std::endl;
-                        //std::cout << "first_ordered_node " << first_ordered_node << std::endl;
-                        if (first_ordered_node > node_order(idx))//nodes_.at(idx).order)
-                        {
-                            first_ordered_idx = idx;
-                            //std::cout << "first_ordered_idx " << first_ordered_idx << std::endl;
-                            first_ordered_node = node_order(idx);
-                            //std::cout << "first_ordered_node " << first_ordered_node << std::endl;
-                        }
-                    }
-                }
-            }
-            //std::cout << "found first_ordered_node " << first_ordered_node << std::endl;
-            //std::cout << "found first_ordered_idx " << first_ordered_idx << std::endl;
-
-            bool batch = (mode !=2 || first_ordered_node == 0);
-            bool order = (mode !=0 && n_nodes() > 1);
-
-            // BATCH
-            if (batch)
-            {
-                // REORDER
-                if (order)
-                    ordering(-1);
-
-                //print_problem();
-
-                // SOLVE
-                t_solving_ = clock();
-                A_.makeCompressed();
-                solver_.compute(A_);
-                if (solver_.info() != Success)
-                {
-                    std::cout << "decomposition failed" << std::endl;
-                    return 0;
-                }
-                x_incr_ = solver_.solve(b_);
-                R_ = solver_.matrixR();
-                //std::cout << "R" << std::endl << MatrixXd::Identity(R_.cols(), R_.cols()) * R_ << std::endl;
-                time_solving_ += ((double) clock() - t_solving_) / CLOCKS_PER_SEC;
-            }
-            // INCREMENTAL
-            else
-            {
-                // REORDER SUBPROBLEM
-                ordering(first_ordered_idx);
-                //print_problem();
-
-                // SOLVE ORDERED SUBPROBLEM
-                t_solving_= clock();
-                A_nodes_.makeCompressed();
-                A_.makeCompressed();
-
-                // finding measurements block
-                SparseMatrix<int> measurements_to_initial = A_nodes_.col(first_ordered_node);
-        //        std::cout << "measurements_to_initial " << measurements_to_initial << std::endl;
-        //        std::cout << "measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]] " << measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]] << std::endl;
-                unsigned int first_ordered_measurement = measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]];
-                unsigned int ordered_measurements = A_.rows() - measurements_.at(first_ordered_measurement).location;
-                unsigned int ordered_variables = A_.cols() - node_location(first_ordered_idx);//nodes_.at(first_ordered_idx).location;
-                unsigned int unordered_variables = node_location(first_ordered_idx);//nodes_.at(first_ordered_idx).location;
-
-                SparseMatrix<double> A_partial = A_.bottomRightCorner(ordered_measurements, ordered_variables);
-                solver_.compute(A_partial);
-                if (solver_.info() != Success)
-                {
-                    std::cout << "decomposition failed" << std::endl;
-                    return 0;
-                }
-                //std::cout << "R new" << std::endl << MatrixXd::Identity(A_partial.cols(), A_partial.cols()) * solver_.matrixR() << std::endl;
-                x_incr_.tail(ordered_variables) = solver_.solve(b_.tail(ordered_measurements));
-
-                // store new part of R
-                erase_sparse_block(R_, unordered_variables, unordered_variables, ordered_variables, ordered_variables);
-                //std::cout << "R" << std::endl << MatrixXd::Identity(R_.rows(), R_.rows()) * R_ << std::endl;
-                add_sparse_block(solver_.matrixR(), R_, unordered_variables, unordered_variables);
-                //std::cout << "R" << std::endl << MatrixXd::Identity(R_.rows(), R_.rows()) * R_ << std::endl;
-                R_.makeCompressed();
-
-                // solving not ordered subproblem
-                if (unordered_variables > 0)
-                {
-                    //std::cout << "--------------------- solving unordered part" << std::endl;
-                    SparseMatrix<double> R1 = R_.topLeftCorner(unordered_variables, unordered_variables);
-                    //std::cout << "R1" << std::endl << MatrixXd::Identity(R1.rows(), R1.rows()) * R1 << std::endl;
-                    SparseMatrix<double> R2 = R_.topRightCorner(unordered_variables, ordered_variables);
-                    //std::cout << "R2" << std::endl << MatrixXd::Identity(R2.rows(), R2.rows()) * R2 << std::endl;
-                    solver_.compute(R1);
-                    if (solver_.info() != Success)
-                    {
-                        std::cout << "decomposition failed" << std::endl;
-                        return 0;
-                    }
-                    x_incr_.head(unordered_variables) = solver_.solve(b_.head(unordered_variables) - R2 * x_incr_.tail(ordered_variables));
-                }
-
-            }
-//            // UNDO ORDERING FOR RESULT
-//            PermutationMatrix<Dynamic, Dynamic, int> acc_permutation(A_.cols());
-//            permutation_2_block_permutation(acc_permutation_nodes_, acc_permutation); // TODO via pointers
-//            x_incr_ = acc_permutation.inverse() * x_incr_;
-
-            // UPDATE X VALUE
-            for (unsigned int i = 0; i<states_.size(); i++)
-            {
-                Map<VectorXs> x_i(states_.at(i)->getPtr(), states_.at(i)->getStateSize());
-                x_i += x_incr_.segment(node_location(i), states_.at(i)->getStateSize());
-            }
-
-
-
-            time_solving_ += ((double) clock() - t_solving_) / CLOCKS_PER_SEC;
-            n_new_measurements_ = 0;
-            return 1;
-        }
-
-
-        void permutation_2_block_permutation(const PermutationMatrix<Dynamic, Dynamic, int> &_perm_nodes, PermutationMatrix<Dynamic, Dynamic, int> &perm_variables)
-        {
-            //std::cout << "perm_nodes: " << _perm_nodes.indices().transpose() << std::endl;
-            perm_nodes_2_locations(_perm_nodes, node_locations_);
-            //std::cout << "locations: " << locations.transpose() << std::endl;
-            //std::cout << "perm_variables: " << perm_variables.indices().transpose() << std::endl;
-
-            unsigned int last_idx = 0;
-            for (unsigned int i = 0; i<node_locations_.size(); i++)
-            {
-                perm_variables.indices().segment(last_idx, node_dim(i)) = VectorXi::LinSpaced(node_dim(i), node_locations_(i), node_locations_(i)+node_dim(i)-1);
-                last_idx += node_dim(i);
-                //std::cout << i << " perm_variables: " << perm_variables.indices().transpose() << std::endl;
-            }
-            //std::cout << "perm_variables: " << perm_variables.indices().transpose() << std::endl;
-        }
-
-        void perm_nodes_2_locations(const PermutationMatrix<Dynamic, Dynamic, int> &_perm_nodes, ArrayXi& locations)
-        {
-            locations = _perm_nodes.indices().array();
-
-            for (unsigned int i = 0; i<locations.size(); i++)
-                locations = (locations > locations(i)).select(locations + node_dim(i)-1, locations);
-        }
-
-        void augment_permutation(PermutationMatrix<Dynamic, Dynamic, int> &perm, const unsigned int new_size)
-        {
-            unsigned int old_size = perm.indices().size();
-            unsigned int dim = new_size - old_size;
-            VectorXi new_indices(new_size);
-            new_indices.head(old_size)= perm.indices();
-            new_indices.tail(dim) = ArrayXi::LinSpaced(dim, old_size, new_size-1);
-            perm.resize(new_size);
-            perm.indices() = new_indices;
-            std::cout << "permutation augmented" << std::endl;
-
-            // resize and update locations
-            node_locations_.conservativeResize(node_locations_.size() + 1);
-            node_locations_(node_locations_.size()-1) = x_incr_.size();
-            std::cout << "node_locations_ augmented" << std::endl;
-        }
-
-        void accumulate_permutation(const PermutationMatrix<Dynamic, Dynamic, int> &perm)
-        {
-            print_name();
-            //std::cout << std::endl << "old acc_permutation_nodes_ " << acc_permutation_nodes_.indices().transpose() << std::endl;
-            //std::cout << "incr perm " << perm.indices().transpose() << std::endl;
-
-            // acumulate permutation
-            if (perm.size() == acc_permutation_nodes_.size()) //full permutation
-                acc_permutation_nodes_ = perm * acc_permutation_nodes_;
-            else //partial permutation
-            {
-                PermutationMatrix<Dynamic, Dynamic, int> incr_permutation_nodes(VectorXi::LinSpaced(n_nodes(), 0, n_nodes() - 1)); // identity permutation
-                incr_permutation_nodes.indices().tail(perm.size()) = perm.indices() + VectorXi::Constant(perm.size(), n_nodes() - perm.size());
-                //std::cout << "incr perm " << incr_permutation_nodes.indices().transpose() << std::endl;
-                acc_permutation_nodes_ = incr_permutation_nodes * acc_permutation_nodes_;
-            }
-            //std::cout << "new acc_permutation_nodes_ " << acc_permutation_nodes_.indices().transpose() << std::endl;
-
-            // update nodes orders and locations
-            perm_nodes_2_locations(acc_permutation_nodes_, node_locations_);
-
-//            for (int i = 0; i < nodes_.size(); i++)
-//            {
-//                nodes_.at(i).order = acc_permutation_nodes_.indices()(i);
-//                nodes_.at(i).location = node_locations_(i);
-//            }
-        }
-
-        unsigned int node_dim(const unsigned int _idx)
-        {
-            assert(_idx < n_nodes());
-            return states_.at(_idx)->getStateSize();
-        }
-
-        unsigned int node_order(const unsigned int _idx)
-        {
-            assert(_idx < n_nodes());
-            assert(_idx < acc_permutation_nodes_.indices().size());
-            return acc_permutation_nodes_.indices()(_idx);
-        }
-
-        unsigned int node_location(const unsigned int _idx)
-        {
-            assert(_idx < n_nodes());
-            assert(_idx < node_locations_.size());
-            return node_locations_(_idx);
-        }
-
-        unsigned int n_nodes()
-        {
-            return states_.size();
-        }
-
-        CostFunctionBase* createCostFunction(ConstraintBase* _corrPtr)
-        {
-            //std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
-            //_corrPtr->print();
-
-            switch (_corrPtr->getConstraintType())
-            {
-                case CTR_GPS_FIX_2D:
-                {
-                    ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
-                    return (CostFunctionBase*)(new CostFunctionSparse<ConstraintGPS2D,
-                                                               specific_ptr->measurementSize,
-                                                               specific_ptr->block0Size,
-                                                               specific_ptr->block1Size,
-                                                               specific_ptr->block2Size,
-                                                               specific_ptr->block3Size,
-                                                               specific_ptr->block4Size,
-                                                               specific_ptr->block5Size,
-                                                               specific_ptr->block6Size,
-                                                               specific_ptr->block7Size,
-                                                               specific_ptr->block8Size,
-                                                               specific_ptr->block9Size>(specific_ptr));
-                    break;
-                }
-                case CTR_ODOM_2D_COMPLEX_ANGLE:
-                {
-                    ConstraintOdom2DComplexAngle* specific_ptr = (ConstraintOdom2DComplexAngle*)(_corrPtr);
-                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintOdom2DComplexAngle,
-                                                               specific_ptr->measurementSize,
-                                                               specific_ptr->block0Size,
-                                                               specific_ptr->block1Size,
-                                                               specific_ptr->block2Size,
-                                                               specific_ptr->block3Size,
-                                                               specific_ptr->block4Size,
-                                                               specific_ptr->block5Size,
-                                                               specific_ptr->block6Size,
-                                                               specific_ptr->block7Size,
-                                                               specific_ptr->block8Size,
-                                                               specific_ptr->block9Size>(specific_ptr);
-                    break;
-                }
-                case CTR_ODOM_2D_THETA:
-                {
-                    ConstraintOdom2DTheta* specific_ptr = (ConstraintOdom2DTheta*)(_corrPtr);
-                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintOdom2DTheta,
-                                                               specific_ptr->measurementSize,
-                                                               specific_ptr->block0Size,
-                                                               specific_ptr->block1Size,
-                                                               specific_ptr->block2Size,
-                                                               specific_ptr->block3Size,
-                                                               specific_ptr->block4Size,
-                                                               specific_ptr->block5Size,
-                                                               specific_ptr->block6Size,
-                                                               specific_ptr->block7Size,
-                                                               specific_ptr->block8Size,
-                                                               specific_ptr->block9Size>(specific_ptr);
-                    break;
-                }
-                case CTR_CORNER_2D_THETA:
-                {
-                    ConstraintCorner2DTheta* specific_ptr = (ConstraintCorner2DTheta*)(_corrPtr);
-                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintCorner2DTheta,
-                                                               specific_ptr->measurementSize,
-                                                               specific_ptr->block0Size,
-                                                               specific_ptr->block1Size,
-                                                               specific_ptr->block2Size,
-                                                               specific_ptr->block3Size,
-                                                               specific_ptr->block4Size,
-                                                               specific_ptr->block5Size,
-                                                               specific_ptr->block6Size,
-                                                               specific_ptr->block7Size,
-                                                               specific_ptr->block8Size,
-                                                               specific_ptr->block9Size>(specific_ptr);
-                    break;
-                }
-                default:
-                    std::cout << "Unknown constraint type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
-
-                    return nullptr;
-            }
-        }
-
-        void print_name()
-        {
-            std::cout << name_;
-        }
-
-        void print_results()
-        {
-            print_name();
-            std::cout << " solved in " << time_solving_*1e3 << " ms | " << R_.nonZeros() << " nonzeros in R"<< std::endl;
-            std::cout << "x = " << x_incr_.transpose() << std::endl;
-        }
-
-        void print_problem()
-        {
-            print_name();
-            std::cout << std::endl << "A_nodes_: " << std::endl << MatrixXi::Identity(A_nodes_.rows(), A_nodes_.rows()) * A_nodes_  << std::endl << std::endl;
-            //std::cout << "A_: " << std::endl << MatrixXd::Identity(A_.rows(), A_.rows()) * A_  << std::endl << std::endl;
-            std::cout << "b_: " << std::endl << b_.transpose() << std::endl << std::endl;
-        }
-};
 
 //main
 int main(int argc, char *argv[])
 {
     // USER INPUT ============================================================================================
-    if (argc != 2 || atoi(argv[1]) < 1 || atoi(argv[1]) > 1100)
+    if (argc != 3 || atoi(argv[1]) < 1 || atoi(argv[1]) > 1100 || atoi(argv[2]) < 0 || atoi(argv[2]) > 2)
     {
-        std::cout << "Please call me with: [./test_ceres_manager NI], where:" << std::endl;
+        std::cout << "Please call me with: [./test_ceres_manager NI MODE], where:" << std::endl;
         std::cout << "     - NI is the number of iterations (0 < NI < 1100)" << std::endl;
+        std::cout << "     - MODE is the solver mode (0 batch (no ordering), 1 batch (ordering), 2 incremental" << std::endl;
         std::cout << "EXIT due to bad user input" << std::endl << std::endl;
         return -1;
     }
     bool complex_angle = false;
+    unsigned int solving_mode = (unsigned int) atoi(argv[2]); //solving mode
     unsigned int n_execution = (unsigned int) atoi(argv[1]); //number of iterations of the whole execution
 
     // INITIALIZATION ============================================================================================
     // Problems
-    SolverQR solver_ordered("FULL ORDERED");
-    SolverQR solver_unordered("UNORDERED");
-    SolverQR solver_ordered_partial("PARTIALLY ORDERED");
+    SolverQR solver_("QR SOLVER");
 
     //init random generators
     WolfScalar odom_std_factor = 0.1;
-    WolfScalar gps_std = 1;
+    WolfScalar gps_std = 10;
     std::default_random_engine generator(1);
-    std::normal_distribution<WolfScalar> distribution_odom(0.0, odom_std_factor); //odometry noise
-    std::normal_distribution<WolfScalar> distribution_gps(0.0, gps_std); //GPS noise
+    std::normal_distribution<WolfScalar> gaussian_distribution(0.0, 1);
 
     std::ofstream log_file, landmark_file;  //output file
 
@@ -834,9 +194,9 @@ int main(int argc, char *argv[])
         ground_truth.segment(step * 3, 3) << devicePose.pt(0), devicePose.pt(1), devicePose.rt.head();
 
         // compute odometry
-        odom_reading(0) += distribution_odom(generator) * (odom_reading(0) == 0 ? 1e-6 : odom_reading(0));
-        odom_reading(1) += distribution_odom(generator) * 1e-6;
-        odom_reading(2) += distribution_odom(generator) * (odom_reading(2) == 0 ? 1e-6 : odom_reading(2));
+        odom_reading(0) += gaussian_distribution(generator) * odom_std_factor * (odom_reading(0) == 0 ? 1e-6 : odom_reading(0));
+        odom_reading(1) += gaussian_distribution(generator) * odom_std_factor * 1e-6;
+        odom_reading(2) += gaussian_distribution(generator) * odom_std_factor * (odom_reading(2) == 0 ? 1e-6 : odom_reading(2));
 
         // odometry integration
         pose_odom(0) = pose_odom(0) + odom_reading(0) * cos(pose_odom(2)) - odom_reading(1) * sin(pose_odom(2));
@@ -846,8 +206,8 @@ int main(int argc, char *argv[])
 
         // compute GPS
         gps_fix_reading << devicePose.pt(0), devicePose.pt(1);
-        gps_fix_reading(0) += distribution_gps(generator);
-        gps_fix_reading(1) += distribution_gps(generator);
+        gps_fix_reading(0) += gaussian_distribution(generator) * gps_std;
+        gps_fix_reading(1) += gaussian_distribution(generator) * gps_std;
 
         //compute scans
         scan1.clear();
@@ -868,7 +228,7 @@ int main(int argc, char *argv[])
         //std::cout << "ADD CAPTURES..." << std::endl;
         // adding new sensor captures
         wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
-        wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+        wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * gps_std * Eigen::MatrixXs::Identity(3,3)));
         //wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
         //wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
         // updating problem
@@ -877,17 +237,17 @@ int main(int argc, char *argv[])
         // UPDATING SOLVER ---------------------------
         //std::cout << "UPDATING..." << std::endl;
         // update state units and constraints in ceres
-        solver_unordered.update(wolf_manager->getProblemPtr());
+        solver_.update(wolf_manager->getProblemPtr());
 
         // PRINT PROBLEM
-        solver_unordered.print_problem();
+        //solver_.printProblem();
 
         // SOLVE OPTIMIZATION ---------------------------
         //std::cout << "SOLVING..." << std::endl;
-        solver_unordered.solve(0);
+        solver_.solve(solving_mode);
 
         std::cout << "========================= RESULTS " << step << ":" << std::endl;
-        solver_unordered.print_results();
+        //solver_.printResults();
 
         // COMPUTE COVARIANCES ---------------------------
         //std::cout << "COMPUTING COVARIANCES..." << std::endl;
@@ -958,6 +318,7 @@ int main(int argc, char *argv[])
 //  wolf_manager->getProblemPtr()->print();
 
     // Draw Final result -------------------------
+    std::cout << "Drawing final results..." << std::endl;
     std::vector<double> landmark_vector;
     for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
     {
@@ -975,9 +336,11 @@ int main(int argc, char *argv[])
     myRender->render();
 
     // Print Final result in a file -------------------------
+    std::cout << "Printing results in a file..." << std::endl;
     // Vehicle poses
+    std::cout << "Vehicle poses..." << std::endl;
     int i = 0;
-    Eigen::VectorXs state_poses(n_execution * 3);
+    Eigen::VectorXs state_poses(wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->size() * 3);
     for (auto frame_it = wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_it != wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->end(); frame_it++)
     {
         if (complex_angle)
@@ -988,6 +351,7 @@ int main(int argc, char *argv[])
     }
 
     // Landmarks
+    std::cout << "Landmarks..." << std::endl;
     i = 0;
     Eigen::VectorXs landmarks(wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->size() * 2);
     for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)

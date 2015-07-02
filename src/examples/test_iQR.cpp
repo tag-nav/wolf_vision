@@ -51,7 +51,7 @@ class block_pruning
         }
 };
 
-void erase_sparse_block(SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col, const unsigned int& Nrows, const unsigned int& Ncols)
+void eraseSparseBlock(SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col, const unsigned int& Nrows, const unsigned int& Ncols)
 {
     // prune all non-zero elements that not satisfy the 'keep' operand
     // elements that are not in the block rows or are not in the block columns should be kept
@@ -67,7 +67,7 @@ void erase_sparse_block(SparseMatrix<double>& original, const unsigned int& row,
 //  original.prune(0);
 }
 
-void add_sparse_block(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
+void addSparseBlock(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
 {
   for (uint r=0; r<ins.rows(); ++r)
       for (uint c = 0; c < ins.cols(); c++)
@@ -197,8 +197,8 @@ int main(int argc, char *argv[])
         {
             int ordered_node = acc_permutation_nodes_matrix.indices()(measurement.at(j));
 
-            add_sparse_block(2*omega, A, A.rows()-dim, measurement.at(j) * dim);
-            add_sparse_block(2*omega, A_ordered, A_ordered.rows()-dim, ordered_node * dim);
+            addSparseBlock(2*omega, A, A.rows()-dim, measurement.at(j) * dim);
+            addSparseBlock(2*omega, A_ordered, A_ordered.rows()-dim, ordered_node * dim);
 
             A_nodes_ordered.coeffRef(A_nodes_ordered.rows()-1, ordered_node) = 1;
 
@@ -274,8 +274,8 @@ int main(int argc, char *argv[])
         x_ordered_partial.tail(ordered_nodes * dim) = solver_ordered_partial.solve(b.tail(ordered_nodes * dim));
         std::cout << "x_ordered_partial.tail(ordered_nodes * dim)" << std::endl << x_ordered_partial.tail(ordered_nodes * dim).transpose() << std::endl;
         // store new part of R (equivalent to R.bottomRightCorner(ordered_nodes * dim, ordered_nodes * dim) = solver3.matrixR();)
-        erase_sparse_block(R, unordered_nodes * dim, unordered_nodes * dim, ordered_nodes * dim, ordered_nodes * dim);
-        add_sparse_block(solver_ordered_partial.matrixR(), R, unordered_nodes * dim, unordered_nodes * dim);
+        eraseSparseBlock(R, unordered_nodes * dim, unordered_nodes * dim, ordered_nodes * dim, ordered_nodes * dim);
+        addSparseBlock(solver_ordered_partial.matrixR(), R, unordered_nodes * dim, unordered_nodes * dim);
         std::cout << "R" << std::endl << MatrixXd::Identity(R.rows(), R.rows()) * R << std::endl;
         R.makeCompressed();
 

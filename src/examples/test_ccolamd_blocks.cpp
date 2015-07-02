@@ -26,7 +26,7 @@
 
 using namespace Eigen;
 
-void erase_sparse_block(SparseMatrix<double>& original, const unsigned int& row, const unsigned int& Nrows, const unsigned int& col, const unsigned int& Ncols)
+void eraseSparseBlock(SparseMatrix<double>& original, const unsigned int& row, const unsigned int& Nrows, const unsigned int& col, const unsigned int& Ncols)
 {
   for (uint i = row; i < row + Nrows; i++)
     for (uint j = col; j < row + Ncols; j++)
@@ -35,7 +35,7 @@ void erase_sparse_block(SparseMatrix<double>& original, const unsigned int& row,
   original.makeCompressed();
 }
 
-void add_sparse_block(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
+void addSparseBlock(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
 {
   for (uint r=0; r<ins.rows(); ++r)
     for (uint c = 0; c < ins.cols(); c++)
@@ -84,19 +84,19 @@ int main(int argc, char *argv[])
     //Fill H & b
     for (unsigned int i = 0; i < size; i++)
     {
-        add_sparse_block(5*omega, H, i*dim, i*dim);
+        addSparseBlock(5*omega, H, i*dim, i*dim);
         FactorMatrix.insert(i,i) = 1;
         if (i > 0)
         {
-            add_sparse_block(omega, H, i*dim, (i-1)*dim);
-            add_sparse_block(omega, H, (i-1)*dim, i*dim);
+            addSparseBlock(omega, H, i*dim, (i-1)*dim);
+            addSparseBlock(omega, H, (i-1)*dim, i*dim);
             FactorMatrix.insert(i,i-1) = 1;
             FactorMatrix.insert(i-1,i) = 1;
         }
         b.segment(i*dim, dim) = VectorXd::Constant(dim, i+1);
     }
-    add_sparse_block(2*omega, H, 0, (size - 1)*dim);
-    add_sparse_block(2*omega, H, (size-1)*dim, 0);
+    addSparseBlock(2*omega, H, 0, (size - 1)*dim);
+    addSparseBlock(2*omega, H, (size-1)*dim, 0);
     FactorMatrix.insert(0,size-1) = 1;
     FactorMatrix.insert(size-1,0) = 1;
 

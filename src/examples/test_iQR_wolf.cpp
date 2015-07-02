@@ -45,7 +45,7 @@ class block_pruning
         }
 };
 
-void erase_sparse_block(SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col, const unsigned int& Nrows, const unsigned int& Ncols)
+void eraseSparseBlock(SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col, const unsigned int& Nrows, const unsigned int& Ncols)
 {
     // prune all non-zero elements that not satisfy the 'keep' operand
     // elements that are not in the block rows or are not in the block columns should be kept
@@ -61,7 +61,7 @@ void erase_sparse_block(SparseMatrix<double>& original, const unsigned int& row,
 //  original.prune(0);
 }
 
-void add_sparse_block(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
+void addSparseBlock(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
 {
   for (uint r=0; r<ins.rows(); ++r)
       for (uint c = 0; c < ins.cols(); c++)
@@ -134,10 +134,10 @@ class SolverQR
 
         // ordering
         SparseMatrix<int> A_nodes_;
-        PermutationMatrix<Dynamic, Dynamic, int> acc_permutation_nodes_;
+        PermutationMatrix<Dynamic, Dynamic, int> acc_node_permutation_;
 
-        CCOLAMDOrdering<int> ordering_;
-        VectorXi nodes_ordering_constraints_;
+        CCOLAMDOrdering<int> orderer_;
+        VectorXi node_ordering_restrictions_;
         int first_ordered_node_;
 
         // time
@@ -154,7 +154,7 @@ class SolverQR
             n_measurements(0),
             n_nodes_(0),
             A_nodes_(0,0),
-            acc_permutation_nodes_(0),
+            acc_node_permutation_(0),
 //            nodes_(0),
 //            measurements_(0),
             time_ordering_(0),
@@ -177,7 +177,7 @@ class SolverQR
             nodes_.push_back(node(node_idx, node_dim, x_incr_.size(), n_nodes_-1));
 
             // Resize accumulated permutations
-            augment_permutation(acc_permutation_nodes_, n_nodes_);
+            augment_permutation(acc_node_permutation_, n_nodes_);
 
             // Resize state
             x_incr_.conservativeResize(x_incr_.size() + node_dim);
@@ -210,11 +210,11 @@ class SolverQR
             first_ordered_node_ = n_nodes_;
             for (unsigned int j = 0; j < _meas.nodes_idx.size(); j++)
             {
-                assert(acc_permutation_nodes_.indices()(_meas.nodes_idx.at(j)) == nodes_.at(_meas.nodes_idx.at(j)).order);
+                assert(acc_node_permutation_.indices()(_meas.nodes_idx.at(j)) == nodes_.at(_meas.nodes_idx.at(j)).order);
 
                 int ordered_node = nodes_.at(_meas.nodes_idx.at(j)).order;//acc_permutation_nodes_.indices()(_nodes_idx.at(j));
 
-                add_sparse_block(_meas.jacobians.at(j), A_, A_.rows()-_meas.dim, nodes_.at(_meas.nodes_idx.at(j)).location);
+                addSparseBlock(_meas.jacobians.at(j), A_, A_.rows()-_meas.dim, nodes_.at(_meas.nodes_idx.at(j)).location);
 
                 A_nodes_.coeffRef(A_nodes_.rows()-1, ordered_node) = 1;
 
@@ -241,24 +241,24 @@ class SolverQR
             if (_first_ordered_node == 0)
             {
                 // ordering ordering constraints
-                nodes_ordering_constraints_.resize(n_nodes_);
-                nodes_ordering_constraints_ = A_nodes_.bottomRows(1).transpose();
+                node_ordering_restrictions_.resize(n_nodes_);
+                node_ordering_restrictions_ = A_nodes_.bottomRows(1).transpose();
 
                 // computing nodes partial ordering_
                 A_nodes_.makeCompressed();
                 PermutationMatrix<Dynamic, Dynamic, int> incr_permutation_nodes(n_nodes_);
-                ordering_(A_nodes_, incr_permutation_nodes, nodes_ordering_constraints_.data());
+                orderer_(A_nodes_, incr_permutation_nodes, node_ordering_restrictions_.data());
 
                 // node ordering to variable ordering
                 PermutationMatrix<Dynamic, Dynamic, int> incr_permutation(A_.cols());
-                permutation_2_block_permutation(incr_permutation_nodes, incr_permutation);
+                nodePermutation2VariablesPermutation(incr_permutation_nodes, incr_permutation);
 
                 // apply partial_ordering orderings
                 A_nodes_ = (A_nodes_ * incr_permutation_nodes.transpose()).sparseView();
                 A_ = (A_ * incr_permutation.transpose()).sparseView();
 
                 // ACCUMULATING PERMUTATIONS
-                accumulate_permutation(incr_permutation_nodes);
+                accumulatePermutation(incr_permutation_nodes);
             }
 
             // partial ordering
@@ -273,17 +273,17 @@ class SolverQR
                     SparseMatrix<int> sub_A_nodes_ = A_nodes_.rightCols(ordered_nodes);
 
                     // _partial_ordering ordering_ constraints
-                    nodes_ordering_constraints_.resize(ordered_nodes);
-                    nodes_ordering_constraints_ = sub_A_nodes_.bottomRows(1).transpose();
+                    node_ordering_restrictions_.resize(ordered_nodes);
+                    node_ordering_restrictions_ = sub_A_nodes_.bottomRows(1).transpose();
 
                     // computing nodes partial ordering_
                     sub_A_nodes_.makeCompressed();
                     PermutationMatrix<Dynamic, Dynamic, int> partial_permutation_nodes(ordered_nodes);
-                    ordering_(sub_A_nodes_, partial_permutation_nodes, nodes_ordering_constraints_.data());
+                    orderer_(sub_A_nodes_, partial_permutation_nodes, node_ordering_restrictions_.data());
 
                     // node ordering to variable ordering
                     PermutationMatrix<Dynamic, Dynamic, int> partial_permutation(A_.cols());
-                    permutation_2_block_permutation(partial_permutation_nodes, partial_permutation);
+                    nodePermutation2VariablesPermutation(partial_permutation_nodes, partial_permutation);
 
                     // apply partial_ordering orderings
                     int ordered_variables = A_.cols() - nodes_.at(_first_ordered_node).location;
@@ -292,7 +292,7 @@ class SolverQR
                     R_.rightCols(ordered_variables) = (R_.rightCols(ordered_variables) * partial_permutation.transpose()).sparseView();
 
                     // ACCUMULATING PERMUTATIONS
-                    accumulate_permutation(partial_permutation_nodes);
+                    accumulatePermutation(partial_permutation_nodes);
                 }
             }
             time_ordering_ += ((double) clock() - t_ordering_) / CLOCKS_PER_SEC;
@@ -358,9 +358,9 @@ class SolverQR
                 x_incr_.tail(ordered_variables) = solver_.solve(b_.tail(ordered_measurements));
 
                 // store new part of R
-                erase_sparse_block(R_, unordered_variables, unordered_variables, ordered_variables, ordered_variables);
+                eraseSparseBlock(R_, unordered_variables, unordered_variables, ordered_variables, ordered_variables);
                 //std::cout << "R" << std::endl << MatrixXd::Identity(R_.rows(), R_.rows()) * R_ << std::endl;
-                add_sparse_block(solver_.matrixR(), R_, unordered_variables, unordered_variables);
+                addSparseBlock(solver_.matrixR(), R_, unordered_variables, unordered_variables);
                 //std::cout << "R" << std::endl << MatrixXd::Identity(R_.rows(), R_.rows()) * R_ << std::endl;
                 R_.makeCompressed();
 
@@ -384,7 +384,7 @@ class SolverQR
             }
             // UNDO ORDERING FOR RESULT
             PermutationMatrix<Dynamic, Dynamic, int> acc_permutation(A_.cols());
-            permutation_2_block_permutation(acc_permutation_nodes_, acc_permutation); // TODO via pointers
+            nodePermutation2VariablesPermutation(acc_node_permutation_, acc_permutation); // TODO via pointers
             x_incr_ = acc_permutation.inverse() * x_incr_;
 
             time_solving_ += ((double) clock() - t_solving_) / CLOCKS_PER_SEC;
@@ -393,7 +393,7 @@ class SolverQR
         }
 
 
-        void permutation_2_block_permutation(const PermutationMatrix<Dynamic, Dynamic, int> &_perm_nodes, PermutationMatrix<Dynamic, Dynamic, int> &perm_variables)
+        void nodePermutation2VariablesPermutation(const PermutationMatrix<Dynamic, Dynamic, int> &_perm_nodes, PermutationMatrix<Dynamic, Dynamic, int> &perm_variables)
         {
             ArrayXi locations = perm_nodes_2_locations(_perm_nodes);
 
@@ -426,48 +426,48 @@ class SolverQR
             perm.indices() = new_indices;
         }
 
-        void accumulate_permutation(const PermutationMatrix<Dynamic, Dynamic, int> &perm)
+        void accumulatePermutation(const PermutationMatrix<Dynamic, Dynamic, int> &perm)
         {
-            print_name();
+            printName();
             //std::cout << std::endl << "old acc_permutation_nodes_ " << acc_permutation_nodes_.indices().transpose() << std::endl;
             //std::cout << "incr perm " << perm.indices().transpose() << std::endl;
 
             // acumulate permutation
-            if (perm.size() == acc_permutation_nodes_.size()) //full permutation
-                acc_permutation_nodes_ = perm * acc_permutation_nodes_;
+            if (perm.size() == acc_node_permutation_.size()) //full permutation
+                acc_node_permutation_ = perm * acc_node_permutation_;
             else //partial permutation
             {
                 PermutationMatrix<Dynamic, Dynamic, int> incr_permutation_nodes(VectorXi::LinSpaced(n_nodes_, 0, n_nodes_ - 1)); // identity permutation
                 incr_permutation_nodes.indices().tail(perm.size()) = perm.indices() + VectorXi::Constant(perm.size(), n_nodes_ - perm.size());
                 //std::cout << "incr perm " << incr_permutation_nodes.indices().transpose() << std::endl;
-                acc_permutation_nodes_ = incr_permutation_nodes * acc_permutation_nodes_;
+                acc_node_permutation_ = incr_permutation_nodes * acc_node_permutation_;
             }
             //std::cout << "new acc_permutation_nodes_ " << acc_permutation_nodes_.indices().transpose() << std::endl;
 
             // update nodes orders and locations
-            ArrayXi locations = perm_nodes_2_locations(acc_permutation_nodes_);
+            ArrayXi locations = perm_nodes_2_locations(acc_node_permutation_);
             for (int i = 0; i < nodes_.size(); i++)
             {
-                nodes_.at(i).order = acc_permutation_nodes_.indices()(i);
+                nodes_.at(i).order = acc_node_permutation_.indices()(i);
                 nodes_.at(i).location = locations(i);
             }
         }
 
-        void print_name()
+        void printName()
         {
             std::cout << name_;
         }
 
-        void print_results()
+        void printResults()
         {
-            print_name();
+            printName();
             std::cout << " solved in " << time_solving_*1e3 << " ms | " << R_.nonZeros() << " nonzeros in R"<< std::endl;
             std::cout << "x = " << x_incr_.transpose() << std::endl;
         }
 
-        void print_problem()
+        void printProblem()
         {
-            print_name();
+            printName();
             std::cout << std::endl << "A_nodes_: " << std::endl << MatrixXi::Identity(A_nodes_.rows(), A_nodes_.rows()) * A_nodes_  << std::endl << std::endl;
             std::cout << "A_: " << std::endl << MatrixXd::Identity(A_.rows(), A_.rows()) * A_  << std::endl << std::endl;
             std::cout << "b_: " << std::endl << b_.transpose() << std::endl << std::endl;
@@ -535,9 +535,9 @@ int main(int argc, char *argv[])
         solver_ordered_partial.addConstraint(measurements.at(i));
 
         // PRINT PROBLEM
-        solver_unordered.print_problem();
-        solver_ordered.print_problem();
-        solver_ordered_partial.print_problem();
+        solver_unordered.printProblem();
+        solver_ordered.printProblem();
+        solver_ordered_partial.printProblem();
 
         // SOLVING
         solver_unordered.solve(0);
@@ -546,9 +546,9 @@ int main(int argc, char *argv[])
 
         // RESULTS ------------------------------------
         std::cout << "========================= RESULTS " << i << ":" << std::endl;
-        solver_unordered.print_results();
-        solver_ordered.print_results();
-        solver_ordered_partial.print_results();
+        solver_unordered.printResults();
+        solver_ordered.printResults();
+        solver_ordered_partial.printResults();
 
 //        if ((x_ordered_partial-x_ordered).maxCoeff() < 1e-10)
 //            std::cout << "Both solutions are equals (tolerance " << (x_ordered_partial-x_ordered).maxCoeff() << ")" << std::endl;

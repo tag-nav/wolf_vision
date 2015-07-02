@@ -138,7 +138,7 @@ class WolfManager
             //std::cout << "last_frame_" << std::endl;
 
             // Fixing or removing old frames
-            manage_window();
+            manageWindow();
             std::cout << "new frame created" << std::endl;
         }
 
@@ -155,7 +155,7 @@ class WolfManager
             _capture->getTimeStamp().print();
             std::cout << std::endl;
         }
-        void manage_window()
+        void manageWindow()
         {
             std::cout << "managing window..." << std::endl;
             // WINDOW of FRAMES (remove or fix old frames)
@@ -169,7 +169,7 @@ class WolfManager
             std::cout << "window managed" << std::endl;
         }
 
-        bool check_new_frame(CaptureBase* new_capture)
+        bool checkNewFrame(CaptureBase* new_capture)
         {
             std::cout << "checking if new frame..." << std::endl;
             // TODO: not only time, depending on the sensor...
@@ -198,7 +198,7 @@ class WolfManager
                 {
                     std::cout << "adding odometry capture..." << new_capture->nodeId() << std::endl;
                     // NEW KEY FRAME ?
-                    if (check_new_frame(new_capture))
+                    if (checkNewFrame(new_capture))
                         createFrame(new_capture->getTimeStamp());
 
                     // ADD/INTEGRATE NEW ODOMETRY TO THE LAST FRAME
@@ -217,7 +217,7 @@ class WolfManager
                 {
                     std::cout << "adding not odometry capture..." << new_capture->nodeId() << std::endl;
                     // NEW KEY FRAME ?
-                    if (check_new_frame(new_capture))
+                    if (checkNewFrame(new_capture))
                         createFrame(new_capture->getTimeStamp());
 
                     // ADD CAPTURE TO THE CURRENT FRAME (or substitute the same sensor previous capture)
