@@ -32,6 +32,10 @@
 #include "faramotics/rangeScan2D.h"
 #include "btr-headers/pose3d.h"
 
+//Ceres includes
+#include "glog/logging.h"
+#include "ceres_wrapper/ceres_manager.h"
+
 //laser_scan_utils
 #include "iri-algorithms/laser_scan_utils/corner_detector.h"
 #include "iri-algorithms/laser_scan_utils/entities.h"
@@ -118,6 +122,18 @@ int main(int argc, char *argv[])
     std::default_random_engine generator(1);
     std::normal_distribution<WolfScalar> gaussian_distribution(0.0, 1);
 
+    // Ceres initialization
+    ceres::Solver::Options ceres_options;
+    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+    ceres_options.max_line_search_step_contraction = 1e-3;
+    //    ceres_options.minimizer_progress_to_stdout = false;
+    //    ceres_options.line_search_direction_type = ceres::LBFGS;
+    //    ceres_options.max_num_iterations = 100;
+    ceres::Problem::Options problem_options;
+    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.loss_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    CeresManager* ceres_manager = new CeresManager(problem_options);
     std::ofstream log_file, landmark_file;  //output file
 
     // Faramotics stuff
@@ -170,7 +186,8 @@ int main(int argc, char *argv[])
     ground_truth.head(3) = pose_odom;
     odom_trajectory.head(3) = pose_odom;
 
-    WolfManager<StatePoint2D, StateTheta>* wolf_manager = new WolfManager<StatePoint2D, StateTheta>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
+    WolfManager<StatePoint2D, StateTheta>* wolf_manager_QR = new WolfManager<StatePoint2D, StateTheta>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
+    WolfManager<StatePoint2D, StateTheta>* wolf_manager_ceres = new WolfManager<StatePoint2D, StateTheta>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
 
     std::cout << "STARTING INCREMENTAL QR TEST" << std::endl << std::endl;
     std::cout << "\n ========= 2D Robot with odometry and 2 LIDARs ===========\n";
@@ -227,27 +244,34 @@ int main(int argc, char *argv[])
         // ADD CAPTURES ---------------------------
         //std::cout << "ADD CAPTURES..." << std::endl;
         // adding new sensor captures
-        wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
-        wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * gps_std * Eigen::MatrixXs::Identity(3,3)));
+        wolf_manager_QR->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
+        wolf_manager_QR->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * gps_std * Eigen::MatrixXs::Identity(3,3)));
+        wolf_manager_ceres->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
+        wolf_manager_ceres->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * gps_std * Eigen::MatrixXs::Identity(3,3)));
         //wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
         //wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
         // updating problem
-        wolf_manager->update();
+        wolf_manager_QR->update();
+        wolf_manager_ceres->update();
 
         // UPDATING SOLVER ---------------------------
         //std::cout << "UPDATING..." << std::endl;
         // update state units and constraints in ceres
-        solver_.update(wolf_manager->getProblemPtr());
+        solver_.update(wolf_manager_QR->getProblemPtr());
+        ceres_manager->update(wolf_manager_ceres->getProblemPtr());
 
         // PRINT PROBLEM
         //solver_.printProblem();
 
         // SOLVE OPTIMIZATION ---------------------------
         //std::cout << "SOLVING..." << std::endl;
+        ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
         solver_.solve(solving_mode);
 
         std::cout << "========================= RESULTS " << step << ":" << std::endl;
         //solver_.printResults();
+        std::cout << "QR vehicle pose    " << wolf_manager_QR->getVehiclePose().transpose() << std::endl;
+        std::cout << "ceres vehicle pose " << wolf_manager_ceres->getVehiclePose().transpose() << std::endl;
 
         // COMPUTE COVARIANCES ---------------------------
         //std::cout << "COMPUTING COVARIANCES..." << std::endl;
@@ -268,7 +292,7 @@ int main(int argc, char *argv[])
 
         // draw landmarks
         std::vector<double> landmark_vector;
-        for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+        for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
         {
             WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
             landmark_vector.push_back(*position_ptr); //x
@@ -278,12 +302,15 @@ int main(int argc, char *argv[])
         myRender->drawLandmarks(landmark_vector);
 
         // draw localization and sensors
-        estimated_vehicle_pose.setPose(wolf_manager->getVehiclePose()(0), wolf_manager->getVehiclePose()(1), 0.2, wolf_manager->getVehiclePose()(2), 0, 0);
+        estimated_vehicle_pose.setPose(wolf_manager_QR->getVehiclePose()(0), wolf_manager_QR->getVehiclePose()(1), 0.2, wolf_manager_QR->getVehiclePose()(2), 0, 0);
         estimated_laser_1_pose.setPose(estimated_vehicle_pose);
         estimated_laser_1_pose.moveForward(laser_1_pose(0));
         estimated_laser_2_pose.setPose(estimated_vehicle_pose);
-        estimated_laser_2_pose.moveForward(laser_2_pose(0));
-        estimated_laser_2_pose.rt.setEuler(estimated_laser_2_pose.rt.head() + M_PI, estimated_laser_2_pose.rt.pitch(), estimated_laser_2_pose.rt.roll());
+        // instead of laser 2 we draw ceres solution
+        //estimated_laser_2_pose.moveForward(laser_2_pose(0));
+        //estimated_laser_2_pose.rt.setEuler(estimated_laser_2_pose.rt.head() + M_PI, estimated_laser_2_pose.rt.pitch(), estimated_laser_2_pose.rt.roll());
+        estimated_laser_2_pose.setPose(wolf_manager_ceres->getVehiclePose()(0), wolf_manager_ceres->getVehiclePose()(1), 0.2, wolf_manager_ceres->getVehiclePose()(2), 0, 0);
+
         myRender->drawPoseAxisVector( { estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose });
 
         //Set view point and render the scene
@@ -320,7 +347,7 @@ int main(int argc, char *argv[])
     // Draw Final result -------------------------
     std::cout << "Drawing final results..." << std::endl;
     std::vector<double> landmark_vector;
-    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+    for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
     {
         WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
         landmark_vector.push_back(*position_ptr); //x
@@ -340,8 +367,8 @@ int main(int argc, char *argv[])
     // Vehicle poses
     std::cout << "Vehicle poses..." << std::endl;
     int i = 0;
-    Eigen::VectorXs state_poses(wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->size() * 3);
-    for (auto frame_it = wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_it != wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->end(); frame_it++)
+    Eigen::VectorXs state_poses(wolf_manager_QR->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->size() * 3);
+    for (auto frame_it = wolf_manager_QR->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_it != wolf_manager_QR->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->end(); frame_it++)
     {
         if (complex_angle)
             state_poses.segment(i, 3) << *(*frame_it)->getPPtr()->getPtr(), *((*frame_it)->getPPtr()->getPtr() + 1), atan2(*(*frame_it)->getOPtr()->getPtr(), *((*frame_it)->getOPtr()->getPtr() + 1));
@@ -353,8 +380,8 @@ int main(int argc, char *argv[])
     // Landmarks
     std::cout << "Landmarks..." << std::endl;
     i = 0;
-    Eigen::VectorXs landmarks(wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->size() * 2);
-    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+    Eigen::VectorXs landmarks(wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->size() * 2);
+    for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
     {
         Eigen::Map<Eigen::Vector2s> landmark((*landmark_it)->getPPtr()->getPtr());
         landmarks.segment(i, 2) = landmark;
@@ -394,7 +421,8 @@ int main(int argc, char *argv[])
 
     delete myRender;
     delete myScanner;
-    delete wolf_manager;
+    delete wolf_manager_QR;
+    delete wolf_manager_ceres;
     std::cout << "wolf deleted" << std::endl;
 
     std::cout << " ========= END ===========" << std::endl << std::endl;

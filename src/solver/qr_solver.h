@@ -409,6 +409,8 @@ class SolverQR
                 Map<VectorXs> x_i(nodes_.at(i)->getPtr(), nodes_.at(i)->getStateSize());
                 x_i += x_incr_.segment(nodeLocation(i), nodes_.at(i)->getStateSize());
             }
+            // Zero the error
+            b_.setZero();
 
             time_solving_ += ((double) clock() - t_solving_) / CLOCKS_PER_SEC;
             n_new_constraints_ = 0;
