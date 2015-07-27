@@ -31,7 +31,6 @@ using namespace Eigen;
 class SolverQR
 {
     protected:
-        std::string name_;
         SparseQR < SparseMatrix<double>, NaturalOrdering<int>> solver_;
         SparseMatrix<double> A_, R_;
         VectorXd b_, x_incr_;
@@ -55,8 +54,7 @@ class SolverQR
 
 
     public:
-        SolverQR(const std::string &_name) :
-            name_(_name),
+        SolverQR() :
             A_(0,0),
             R_(0,0),
             A_nodes_(0,0),
@@ -463,7 +461,6 @@ class SolverQR
 
         void accumulatePermutation(const PermutationMatrix<Dynamic, Dynamic, int> &perm)
         {
-            printName();
             //std::cout << std::endl << "old acc_permutation_nodes_ " << acc_permutation_nodes_.indices().transpose() << std::endl;
             //std::cout << "incr perm " << perm.indices().transpose() << std::endl;
 
@@ -590,21 +587,14 @@ class SolverQR
             }
         }
 
-        void printName()
-        {
-            std::cout << name_;
-        }
-
         void printResults()
         {
-            printName();
             std::cout << " solved in " << time_solving_*1e3 << " ms | " << R_.nonZeros() << " nonzeros in R"<< std::endl;
             std::cout << "x = " << x_incr_.transpose() << std::endl;
         }
 
         void printProblem()
         {
-            printName();
             std::cout << std::endl << "A_nodes_: " << std::endl << MatrixXi::Identity(A_nodes_.rows(), A_nodes_.rows()) * A_nodes_  << std::endl << std::endl;
             //std::cout << "A_: " << std::endl << MatrixXd::Identity(A_.rows(), A_.rows()) * A_  << std::endl << std::endl;
             std::cout << "b_: " << std::endl << b_.transpose() << std::endl << std::endl;

@@ -160,6 +160,7 @@ typedef enum
 typedef enum
 {
     ODOM_2D,	    ///< Odometry measurement from encoders: displacement and rotation.
+    TWIST_2D,       ///< Twist measurement form encoders or motion command: lineal and angular velocities.
     IMU,		      ///< Inertial measurement unit with 3 acceleros, 3 gyros
     CAMERA,		    ///< Regular pinhole camera
     GPS_FIX,	    ///< GPS fix calculated from a GPS receiver
@@ -301,6 +302,9 @@ typedef StateBaseList::iterator StateBaseIter;
 typedef StatePoint<1> StatePoint1D;
 typedef StatePoint<2> StatePoint2D;
 typedef StatePoint<3> StatePoint3D;
+typedef StatePoint<2> StateVelocity2D;
+typedef StatePoint<1> StateOmega2D;
+typedef StatePoint<0> NoState;
 
 // - Pin hole
 

@@ -187,6 +187,8 @@ class ConstraintSparse: public ConstraintBase
                                                      state_ptr_vector_[9]->getPtr()});
                 }
             }
+
+            return std::vector<WolfScalar*>(0); //Not going to happen
         }
 
         /** \brief Returns a vector of pointers to the states

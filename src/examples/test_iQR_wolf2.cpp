@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 
     // INITIALIZATION ============================================================================================
     // Problems
-    SolverQR solver_("QR SOLVER");
+    SolverQR solver_;
 
     //init random generators
     WolfScalar odom_std_factor = 0.1;

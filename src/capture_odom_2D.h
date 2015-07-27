@@ -13,12 +13,16 @@
 //class CaptureGPSFix
 class CaptureOdom2D : public CaptureRelative
 {
+    protected:
+        TimeStamp initial_time_stamp_; ///< Initial Time stamp
+        TimeStamp final_time_stamp_; ///< Final Time stamp
+
     public:
-      CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr);
+      CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr);
 
-      CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data);
+      CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data);
 
-      CaptureOdom2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance);
+      CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance);
         
       virtual ~CaptureOdom2D();
 
@@ -29,6 +33,8 @@ class CaptureOdom2D : public CaptureRelative
       virtual void addConstraints();
 
       virtual void integrateCapture(CaptureRelative* _new_capture);
+
+      virtual CaptureOdom2D* interpolateCapture(const TimeStamp& _ts);
 
       //virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 };

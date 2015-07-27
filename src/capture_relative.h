@@ -22,5 +22,7 @@ class CaptureRelative : public CaptureBase
         virtual ~CaptureRelative();
 
         virtual void integrateCapture(CaptureRelative* _new_capture) = 0;
+
+        virtual CaptureRelative* interpolateCapture(const TimeStamp& _ts) = 0;
 };
 #endif
