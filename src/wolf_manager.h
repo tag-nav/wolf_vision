@@ -45,7 +45,7 @@ class WolfManager
 {
     protected:
         //sets the problem 
-        WolfProblem* problem_;
+        RadarOdom+* problem_;
 
         //pointer to a sensor providing predictions
         SensorBase* sensor_prior_;
@@ -86,7 +86,7 @@ class WolfManager
 
         Eigen::VectorXs getVehiclePose();
 
-        WolfProblem* getProblemPtr();
+        RadarOdom+* getProblemPtr();
 
         void setWindowSize(const unsigned int& _size);
 
@@ -105,7 +105,7 @@ WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::Wol
                                                                                          const unsigned int& _w_size,
                                                                                          const WolfScalar& _new_frame_elapsed_time) :
                     
-        problem_(new WolfProblem(_state_length)),
+        problem_(new RadarOdom+(_state_length)),
         sensor_prior_(_sensor_prior),
         current_frame_(nullptr),
         last_frame_(nullptr),
@@ -199,7 +199,7 @@ template <class StatePositionT, class StateOrientationT, class StateVelocityT, c
 void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::createFrame(const TimeStamp& _time_stamp)
 {
     std::cout << "creating new frame from prior..." << std::endl;
-    createFrame(last_capture_relative_->computePrior(), _time_stamp);
+    createFrame(last_capture_relative_->computePrior(_time_stamp), _time_stamp);
 }
 
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
@@ -269,7 +269,7 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
             }
             else
                 last_capture_relative_->integrateCapture((CaptureRelative*) (new_capture));
-            current_frame_->setState(last_capture_relative_->computePrior());
+            current_frame_->setState(last_capture_relative_->computePrior(new_capture->getTimeStamp()));
             current_frame_->setTimeStamp(new_capture->getTimeStamp());
         }
         else
@@ -302,13 +302,13 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
 }
 
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-Eigen::VectorXs WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::getVehiclePose()
+Eigen::VectorXs WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::getVehiclePose(const TimeStamp& _now)
 {
-    return last_capture_relative_->computePrior();
+    return last_capture_relative_->computePrior(_now);
 }
 
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-WolfProblem* WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::getProblemPtr()
+RadarOdom+* WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::getProblemPtr()
 {
     return problem_;
 }

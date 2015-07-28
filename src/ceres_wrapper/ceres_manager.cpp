@@ -36,7 +36,7 @@ ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_
 	return ceres_summary_;
 }
 
-void CeresManager::computeCovariances(WolfProblem* _problem_ptr)
+void CeresManager::computeCovariances(RadarOdom+* _problem_ptr)
 {
     //std::cout << "computing covariances..." << std::endl;
 
@@ -128,7 +128,7 @@ void CeresManager::computeCovariances(WolfProblem* _problem_ptr)
     }
 }
 
-void CeresManager::update(WolfProblem* _problem_ptr)
+void CeresManager::update(RadarOdom+* _problem_ptr)
 {
 	// IF REALLOCATION OF STATE, REMOVE EVERYTHING AND BUILD THE PROBLEM AGAIN
 	if (_problem_ptr->isReallocated())

@@ -332,7 +332,7 @@ void CaptureLaser2D::establishConstraintsMHTree()
     }  
 }
 
-Eigen::VectorXs CaptureLaser2D::computePrior() const
+Eigen::VectorXs CaptureLaser2D::computePrior(const TimeStamp& _now) const
 {
     return Eigen::Vector3s(1, 2, 3);
 }

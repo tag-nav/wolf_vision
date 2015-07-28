@@ -28,7 +28,7 @@ class CaptureOdom2D : public CaptureRelative
 
       virtual void processCapture();
 
-      virtual Eigen::VectorXs computePrior() const;
+      virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const;
 
       virtual void addConstraints();
 

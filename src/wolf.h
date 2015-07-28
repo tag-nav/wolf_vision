@@ -114,7 +114,8 @@ typedef enum
 {
     CTR_GPS_FIX_2D,				///< marks a 2D GPS Fix constraint.
     CTR_ODOM_2D_COMPLEX_ANGLE,	///< marks a 2D Odometry using complex angles.
-    CTR_ODOM_2D_THETA,			///< marks a 2D Odometry using theta angles.
+    CTR_ODOM_2D_THETA,          ///< marks a 2D Odometry using theta angles.
+    CTR_TWIST_2D_THETA,         ///< marks a 2D Twist using theta angles.
     CTR_CORNER_2D_THETA			///< marks a 2D Odometry using theta angles.
 
 } ConstraintType;
@@ -214,7 +215,7 @@ typedef enum
 //class VehicleBase;
 
 class NodeTerminus;
-class WolfProblem;
+class RadarOdom+;
 class MapBase;
 class LandmarkBase;
 class LandmarkCorner2D;
@@ -245,7 +246,7 @@ class PinHole;
 
 //Problem
 //typedef std::shared_ptr<WolfProblem> WolfProblemShPtr;
-typedef WolfProblem* WolfProblemPtr;
+typedef RadarOdom+* WolfProblemPtr;
 
 //Map
 typedef std::list<MapBase*> MapBaseList;

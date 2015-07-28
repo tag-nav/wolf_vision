@@ -2,7 +2,7 @@
 #ifndef MAP_BASE_H_
 #define MAP_BASE_H_
 
-class WolfProblem;
+class RadarOdom+;
 class LandmarkBase;
 
 //std includes
@@ -20,7 +20,7 @@ class LandmarkBase;
 #include "landmark_base.h"
 
 //class MapBase
-class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
+class MapBase : public NodeLinked<RadarOdom+,LandmarkBase>
 {
     public:
         /** \brief Constructor

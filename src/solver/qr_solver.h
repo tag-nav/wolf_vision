@@ -73,7 +73,7 @@ class SolverQR
 
         }
 
-        void update(WolfProblem* _problem_ptr)
+        void update(RadarOdom+* _problem_ptr)
         {
             // ADD/UPDATE STATE UNITS
             for(auto state_unit_it = _problem_ptr->getStateListPtr()->begin(); state_unit_it!=_problem_ptr->getStateListPtr()->end(); state_unit_it++)

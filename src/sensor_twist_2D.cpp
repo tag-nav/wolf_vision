@@ -1,4 +1,4 @@
-#include "sensor_odom_2D.h"
+#include "sensor_twist_2D.h"
 
 SensorTwist2D::SensorTwist2D(StatePoint3D* _p_ptr, StateOrientation* _o_ptr, const WolfScalar& _lineal_noise, const WolfScalar&  _angular_noise) :
         SensorBase(TWIST_2D, _p_ptr, _o_ptr, 2)

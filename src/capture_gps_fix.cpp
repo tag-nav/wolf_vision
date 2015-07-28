@@ -32,7 +32,7 @@ void CaptureGPSFix::processCapture()
 	getFeatureListPtr()->front()->addConstraint(new ConstraintGPS2D(getFeatureListPtr()->front(), getFramePtr()->getPPtr()));
 }
 
-Eigen::VectorXs CaptureGPSFix::computePrior() const
+Eigen::VectorXs CaptureGPSFix::computePrior(const TimeStamp& _now) const
 {
 	return data_;
 }

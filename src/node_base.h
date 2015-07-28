@@ -4,7 +4,7 @@
 #include <iostream>
 #include "wolf.h"
 
-class WolfProblem;
+class RadarOdom+;
 
 /** \brief Base class for Nodes
  *

@@ -19,7 +19,7 @@ void SolverManager::solve()
 //{
 //}
 
-void SolverManager::update(WolfProblem* _problem_ptr)
+void SolverManager::update(RadarOdom+* _problem_ptr)
 {
 	// IF REALLOCATION OF STATE, REMOVE EVERYTHING AND BUILD THE PROBLEM AGAIN
 	if (_problem_ptr->isReallocated())

@@ -111,7 +111,7 @@ class WolfManager
 {
     protected:
 		bool use_complex_angles_;
-		WolfProblem* problem_;
+		RadarOdom+* problem_;
         std::queue<CaptureBase*> new_captures_;
         SensorBase* sensor_prior_;
         unsigned int window_size_;
@@ -120,7 +120,7 @@ class WolfManager
     public:
         WolfManager(SensorBase* _sensor_prior, const bool _complex_angle, const unsigned int& _state_length, const unsigned int& _w_size=10) :
         	use_complex_angles_(_complex_angle),
-			problem_(new WolfProblem(_state_length)),
+			problem_(new RadarOdom+(_state_length)),
 			sensor_prior_(_sensor_prior),
 			window_size_(_w_size)
 		{
@@ -252,7 +252,7 @@ class WolfManager
         	problem_->getTrajectoryPtr()->getConstraintList(corr_list);
         }
 
-        WolfProblem* getProblemPtr()
+        RadarOdom+* getProblemPtr()
         {
         	return problem_;
         }

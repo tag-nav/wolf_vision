@@ -93,7 +93,7 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 
         virtual void processCapture(); // = 0;
 
-        virtual Eigen::VectorXs computePrior() const = 0;
+        virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const = 0;
 
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 };

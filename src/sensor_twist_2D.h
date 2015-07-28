@@ -1,6 +1,6 @@
 
-#ifndef SENSOR_ODOM_2D_H_
-#define SENSOR_ODOM_2D_H_
+#ifndef SENSOR_TWIST_2D_H_
+#define SENSOR_TWIST_2D_H_
 
 //wolf includes
 #include "sensor_base.h"

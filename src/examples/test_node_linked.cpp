@@ -13,10 +13,10 @@ using namespace std;
 class TrajectoryN;
 class FrameN;
 class MeasurementN;
-class WolfProblem;
+class RadarOdom+;
 
 //class TrajectoryN
-class TrajectoryN : public NodeLinked<WolfProblem,FrameN>
+class TrajectoryN : public NodeLinked<RadarOdom+,FrameN>
 {
     protected:
         unsigned int length_; //just something to play
@@ -99,7 +99,7 @@ int main()
     cout << "========================================================" << endl;
 
     cout << endl << "TEST 1. Constructors" << endl;
-    WolfProblem* problem_(new WolfProblem());
+    RadarOdom+* problem_(new RadarOdom+());
     TrajectoryN* trajectory_(new TrajectoryN(2));
     FrameN* frame_1_(new FrameN(1.011));
     FrameN* frame_2_(new FrameN(2.022));
@@ -136,7 +136,7 @@ int main()
     cout << "========================================================" << endl;    
     
     cout << endl << "TEST 5. getTop()" << endl;
-    WolfProblem* nb_ptr = sensor_data_radar_->getTop();
+    RadarOdom+* nb_ptr = sensor_data_radar_->getTop();
     //shared_ptr<TrajectoryN> nb_shptr((TrajectoryN*)nb_ptr);
     cout << "TOP node is: " << nb_ptr->nodeId() << endl;
     //cout << "nb_shptr.use_count(): " << nb_shptr.use_count() << "; value: " << nb_shptr.get() << endl;

@@ -17,7 +17,7 @@
  * - up_node_: A regular pointer to a derived node object, specified by the template parameter UpperType.
  *
  */
-class WolfProblem: public NodeBase
+class RadarOdom+: public NodeBase
 {
     protected:
         Eigen::VectorXs state_;
@@ -52,7 +52,7 @@ class WolfProblem: public NodeBase
          * Default destructor
 		 * 
          */		
-        virtual ~WolfProblem();
+        virtual ~RadarOdom+();
 
         /** \brief Adds a new state unit to the state
 		 *
@@ -200,7 +200,7 @@ class WolfProblem: public NodeBase
 		 * Returns a pointer to this
 		 *
 		 */
-        virtual WolfProblem* getTop();
+        virtual RadarOdom+* getTop();
 
         /** \brief Prints node information
          * 

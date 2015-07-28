@@ -1,6 +1,6 @@
 #include "wolf_problem.h"
 
-WolfProblem::WolfProblem(unsigned int _size) :
+RadarOdom+::WolfProblem(unsigned int _size) :
         NodeBase("WOLF_PROBLEM"), //
         state_(_size),
         covariance_(_size,_size),
@@ -16,7 +16,7 @@ WolfProblem::WolfProblem(unsigned int _size) :
 	trajectory_ptr_->linkToUpperNode( this );
 }
 
-WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, unsigned int _size) :
+RadarOdom+::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, unsigned int _size) :
         NodeBase("WOLF_PROBLEM"), //
 		state_(_size),
         covariance_(_size,_size),
@@ -30,13 +30,13 @@ WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, uns
 	trajectory_ptr_->linkToUpperNode( this );
 }
 
-WolfProblem::~WolfProblem()
+RadarOdom+::~RadarOdom+()
 {
 	delete trajectory_ptr_;
 	delete map_ptr_;
 }
 
-bool WolfProblem::addState(StateBase* _new_state_ptr, const Eigen::VectorXs& _new_state_values)
+bool RadarOdom+::addState(StateBase* _new_state_ptr, const Eigen::VectorXs& _new_state_values)
 {
 	// Check if resize should be done
 	if (state_idx_last_+_new_state_ptr->getStateSize() > state_.size())
@@ -73,7 +73,7 @@ bool WolfProblem::addState(StateBase* _new_state_ptr, const Eigen::VectorXs& _ne
 	return reallocated_;
 }
 
-void WolfProblem::addCovarianceBlock(StateBase* _state1, StateBase* _state2, const Eigen::MatrixXs& _cov)
+void RadarOdom+::addCovarianceBlock(StateBase* _state1, StateBase* _state2, const Eigen::MatrixXs& _cov)
 {
     assert(_state1 != nullptr);
     assert(_state1->getPtr() != nullptr);
@@ -101,7 +101,7 @@ void WolfProblem::addCovarianceBlock(StateBase* _state1, StateBase* _state2, con
            covariance_.coeffRef(i+row,j+col) = (flip ? _cov(j,i) : _cov(i,j));
 }
 
-void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov_block) const
+void RadarOdom+::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov_block) const
 {
     assert(_state1 != nullptr);
     assert(_state1->getPtr() != nullptr);
@@ -126,7 +126,7 @@ void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eig
     _cov_block = (flip ? Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)) : Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)).transpose() );
 }
 
-void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::Map<Eigen::MatrixXs>& _cov_block) const
+void RadarOdom+::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::Map<Eigen::MatrixXs>& _cov_block) const
 {
     assert(_state1 != nullptr);
     assert(_state1->getPtr() != nullptr);
@@ -151,7 +151,7 @@ void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eig
     _cov_block = (flip ? Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)).transpose() : Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)) );
 }
 
-void WolfProblem::removeState(StateBase* _state_ptr)
+void RadarOdom+::removeState(StateBase* _state_ptr)
 {
 	// TODO: Reordering? Mandatory for filtering...
 	state_list_.remove(_state_ptr);
@@ -159,93 +159,93 @@ void WolfProblem::removeState(StateBase* _state_ptr)
 	delete _state_ptr;
 }
 
-WolfScalar* WolfProblem::getStatePtr()
+WolfScalar* RadarOdom+::getStatePtr()
 {
 	return state_.data();
 }
 
-WolfScalar* WolfProblem::getNewStatePtr()
+WolfScalar* RadarOdom+::getNewStatePtr()
 {
 	return state_.data()+state_idx_last_;
 }
 
-const unsigned int WolfProblem::getStateSize() const
+const unsigned int RadarOdom+::getStateSize() const
 {
 	return state_idx_last_;
 }
 
-void WolfProblem::addMap(MapBase* _map_ptr)
+void RadarOdom+::addMap(MapBase* _map_ptr)
 {
 	map_ptr_ = _map_ptr;
 	map_ptr_->linkToUpperNode( this );
 }
 
-void WolfProblem::addTrajectory(TrajectoryBase* _trajectory_ptr)
+void RadarOdom+::addTrajectory(TrajectoryBase* _trajectory_ptr)
 {
 	trajectory_ptr_ = _trajectory_ptr;
 	trajectory_ptr_->linkToUpperNode( this );
 }
 
-MapBase* WolfProblem::getMapPtr()
+MapBase* RadarOdom+::getMapPtr()
 {
 	return map_ptr_;
 }
 
-TrajectoryBase* WolfProblem::getTrajectoryPtr()
+TrajectoryBase* RadarOdom+::getTrajectoryPtr()
 {
 	return trajectory_ptr_;
 }
 
-FrameBase* WolfProblem::getLastFramePtr()
+FrameBase* RadarOdom+::getLastFramePtr()
 {
     return trajectory_ptr_->getLastFramePtr();
 }
 
-StateBaseList* WolfProblem::getStateListPtr()
+StateBaseList* RadarOdom+::getStateListPtr()
 {
 	return &state_list_;
 }
 
-std::list<WolfScalar*>* WolfProblem::getRemovedStateListPtr()
+std::list<WolfScalar*>* RadarOdom+::getRemovedStateListPtr()
 {
 	return &removed_state_ptr_list_;
 }
 
-void WolfProblem::print(unsigned int _ntabs, std::ostream& _ost) const
+void RadarOdom+::print(unsigned int _ntabs, std::ostream& _ost) const
 {
     printSelf(_ntabs, _ost); //one line
     printLower(_ntabs, _ost);
 }
 
-void WolfProblem::printSelf(unsigned int _ntabs, std::ostream& _ost) const
+void RadarOdom+::printSelf(unsigned int _ntabs, std::ostream& _ost) const
 {
     printTabs(_ntabs);
     _ost << nodeLabel() << " " << nodeId() << " : ";
     _ost << "TOP" << std::endl;
 }
 
-const Eigen::VectorXs WolfProblem::getState() const
+const Eigen::VectorXs RadarOdom+::getState() const
 {
 	return state_;
 }
 
-bool WolfProblem::isReallocated() const
+bool RadarOdom+::isReallocated() const
 {
 	return reallocated_;
 }
 
 
-void WolfProblem::reallocationDone()
+void RadarOdom+::reallocationDone()
 {
 	reallocated_ = false;
 }
 
-WolfProblem* WolfProblem::getTop()
+RadarOdom+* RadarOdom+::getTop()
 {
 	return this;
 }
 
-void WolfProblem::printLower(unsigned int _ntabs, std::ostream& _ost) const
+void RadarOdom+::printLower(unsigned int _ntabs, std::ostream& _ost) const
 {
     printTabs(_ntabs);
     _ost << "\tLower Nodes  ==> [ ";

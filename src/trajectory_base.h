@@ -2,7 +2,7 @@
 #ifndef TRAJECTORY_BASE_H_
 #define TRAJECTORY_BASE_H_
 
-class WolfProblem;
+class RadarOdom+;
 class FrameBase;
 
 //std includes
@@ -21,7 +21,7 @@ class FrameBase;
 #include "state_base.h"
 
 //class TrajectoryBase
-class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
+class TrajectoryBase : public NodeLinked<RadarOdom+,FrameBase>
 {
     protected:
 		// TODO: JVN: No seria millor que això ho tingui el wolf_problem o el wolf_manager?

@@ -12,7 +12,7 @@
 #ifndef NODE_LINKED_H_
 #define NODE_LINKED_H_
 
-class WolfProblem;
+class RadarOdom+;
 
 //wolf includes
 #include "node_base.h"
@@ -172,7 +172,7 @@ class NodeLinked : public NodeBase
          * TODO: Review if it could return a pointer to a derived class instead of NodeBase JVN: I tried to do so...
          * 
          **/
-        virtual WolfProblem* getTop();
+        virtual RadarOdom+* getTop();
 
         /** \brief Prints node information
          * 
@@ -349,7 +349,7 @@ inline void NodeLinked<UpperType, LowerType>::removeDownNode(const LowerNodeIter
 
 //TODO: confirm this change by the others :)
 template<class UpperType, class LowerType>
-WolfProblem* NodeLinked<UpperType, LowerType>::getTop()
+RadarOdom+* NodeLinked<UpperType, LowerType>::getTop()
 {
 	return up_node_ptr_->getTop();
 }
