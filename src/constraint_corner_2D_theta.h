@@ -21,7 +21,7 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 //			//
 //		}
 
-		ConstraintCorner2DTheta(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr, StateBase* _robotPPtr, StateBase* _robotOPtr, StateBase* _landmarkPPtr, StateBase* _landmarkOPtr) :
+		ConstraintCorner2DTheta(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr, StateBase* _robotPPtr, StateOrientation* _robotOPtr, StateBase* _landmarkPPtr, StateOrientation* _landmarkOPtr) :
 			ConstraintSparse<3,2,1,2,1>(_ftr_ptr,CTR_CORNER_2D_THETA,  _robotPPtr, _robotOPtr,_landmarkPPtr, _landmarkOPtr),
 			lmk_ptr_(_lmk_ptr)
 		{

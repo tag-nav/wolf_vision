@@ -1,17 +1,13 @@
 #include "capture_odom_2D.h"
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr) :
-        CaptureRelative(_init_ts, _sensor_ptr),
-        initial_time_stamp_(_init_ts),
-        final_time_stamp_(_final_ts)
+        CaptureRelative(_init_ts, _final_ts, _sensor_ptr)
 {
     //
 }
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data) :
-        CaptureRelative(_init_ts, _sensor_ptr, _data),
-        initial_time_stamp_(_init_ts),
-        final_time_stamp_(_final_ts)
+        CaptureRelative(_init_ts, _final_ts, _sensor_ptr, _data)
 {
     data_covariance_ = Eigen::Matrix3s::Zero();
     data_covariance_(0, 0) = std::max(1e-10, _data(0) * _data(0) * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor() * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor());
@@ -21,16 +17,14 @@ CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_
 }
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance) :
-        CaptureRelative(_init_ts, _sensor_ptr, _data, _data_covariance),
-        initial_time_stamp_(_init_ts),
-        final_time_stamp_(_final_ts)
+        CaptureRelative(_init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
 {
     //
 }
 
 CaptureOdom2D::~CaptureOdom2D()
 {
-    //std::cout << "Destroying GPS fix capture...\n";
+    //std::cout << "Destroying CaptureOdom2D capture...\n";
 }
 
 inline void CaptureOdom2D::processCapture()
@@ -110,7 +104,7 @@ void CaptureOdom2D::integrateCapture(CaptureRelative* _new_capture)
     // TODO Jacobians!
     data_covariance_ += _new_capture->getDataCovariance();
 
-    final_time_stamp_ = _new_capture->final_time_stamp_;
+    this->final_time_stamp_ = _new_capture->getFinalTimeStamp();
 
     getFeatureListPtr()->front()->setMeasurement(data_);
     getFeatureListPtr()->front()->setMeasurementCovariance(data_covariance_);
@@ -119,7 +113,7 @@ void CaptureOdom2D::integrateCapture(CaptureRelative* _new_capture)
 
 CaptureOdom2D* CaptureOdom2D::interpolateCapture(const TimeStamp& _ts)
 {
-    WolfScalar ratio = (_ts.get() - initial_time_stamp_.get()) / (final_time_stamp_.get() - initial_time_stamp_.get());
+    WolfScalar ratio = (_ts.get() - this->time_stamp_.get()) / (this->final_time_stamp_.get() - this->time_stamp_.get());
 
     // Second part
     CaptureOdom2D* second_odom_ptr = new CaptureOdom2D(_ts, final_time_stamp_, sensor_ptr_, data_ * (1-ratio), data_covariance_ * (1-ratio));

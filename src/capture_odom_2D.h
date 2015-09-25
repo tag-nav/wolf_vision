@@ -13,9 +13,6 @@
 //class CaptureGPSFix
 class CaptureOdom2D : public CaptureRelative
 {
-    protected:
-        TimeStamp initial_time_stamp_; ///< Initial Time stamp
-        TimeStamp final_time_stamp_; ///< Final Time stamp
 
     public:
       CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr);
@@ -28,7 +25,7 @@ class CaptureOdom2D : public CaptureRelative
 
       virtual void processCapture();
 
-      virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const;
+      virtual Eigen::VectorXs computePrior(const TimeStamp& _now = 0) const;
 
       virtual void addConstraints();
 

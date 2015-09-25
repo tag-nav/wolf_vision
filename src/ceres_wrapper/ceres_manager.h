@@ -39,7 +39,7 @@ class CeresManager
 
 		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
 
-		void computeCovariances(RadarOdom+* _problem_ptr);
+		void computeCovariances(WolfProblem* _problem_ptr);
 
 		void update(const WolfProblemPtr _problem_ptr);
 

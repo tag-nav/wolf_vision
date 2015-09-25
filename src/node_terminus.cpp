@@ -12,7 +12,7 @@ NodeTerminus::~NodeTerminus()
   //
 }
 
-RadarOdom+* NodeTerminus::getTop()
+WolfProblem* NodeTerminus::getTop()
 {
 	return nullptr;
 }

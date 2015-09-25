@@ -2,7 +2,7 @@
 #ifndef MAP_BASE_H_
 #define MAP_BASE_H_
 
-class RadarOdom+;
+class WolfProblem;
 class LandmarkBase;
 
 //std includes
@@ -20,7 +20,7 @@ class LandmarkBase;
 #include "landmark_base.h"
 
 //class MapBase
-class MapBase : public NodeLinked<RadarOdom+,LandmarkBase>
+class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
 {
     public:
         /** \brief Constructor
@@ -42,7 +42,7 @@ class MapBase : public NodeLinked<RadarOdom+,LandmarkBase>
 		 * Adds a landmark
 		 *
 		 **/
-        void addLandmark(LandmarkBase* _landmark_ptr);
+        virtual void addLandmark(LandmarkBase* _landmark_ptr);
 
         /** \brief Removes a landmark
 		 *

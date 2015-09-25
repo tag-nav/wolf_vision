@@ -244,9 +244,9 @@ int main(int argc, char *argv[])
         // ADD CAPTURES ---------------------------
         //std::cout << "ADD CAPTURES..." << std::endl;
         // adding new sensor captures
-        wolf_manager_QR->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
+        wolf_manager_QR->addCapture(new CaptureOdom2D(TimeStamp(), TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
         wolf_manager_QR->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * gps_std * Eigen::MatrixXs::Identity(3,3)));
-        wolf_manager_ceres->addCapture(new CaptureOdom2D(TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
+        wolf_manager_ceres->addCapture(new CaptureOdom2D(TimeStamp(), TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
         wolf_manager_ceres->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * gps_std * Eigen::MatrixXs::Identity(3,3)));
         //wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
         //wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));

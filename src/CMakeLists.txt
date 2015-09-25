@@ -77,7 +77,9 @@ SET(HDRS
     frame_base.h
     landmark_base.h
     landmark_corner_2D.h
+    landmark_container.h
     map_base.h
+    map_containers.h
     node_base.h
     node_terminus.h
     node_linked.h
@@ -117,7 +119,9 @@ SET(SRCS
     frame_base.cpp
     landmark_base.cpp
     landmark_corner_2D.cpp
+    landmark_container.cpp
     map_base.cpp
+    map_containers.cpp
     node_base.cpp
     node_terminus.cpp
     sensor_base.cpp

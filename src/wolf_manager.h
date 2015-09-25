@@ -45,7 +45,7 @@ class WolfManager
 {
     protected:
         //sets the problem 
-        RadarOdom+* problem_;
+        WolfProblem* problem_;
 
         //pointer to a sensor providing predictions
         SensorBase* sensor_prior_;
@@ -84,9 +84,9 @@ class WolfManager
 
         void update();
 
-        Eigen::VectorXs getVehiclePose();
+        Eigen::VectorXs getVehiclePose(const TimeStamp& _now = 0);
 
-        RadarOdom+* getProblemPtr();
+        WolfProblem* getProblemPtr();
 
         void setWindowSize(const unsigned int& _size);
 
@@ -105,7 +105,7 @@ WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::Wol
                                                                                          const unsigned int& _w_size,
                                                                                          const WolfScalar& _new_frame_elapsed_time) :
                     
-        problem_(new RadarOdom+(_state_length)),
+        problem_(new WolfProblem(_state_length)),
         sensor_prior_(_sensor_prior),
         current_frame_(nullptr),
         last_frame_(nullptr),
@@ -129,7 +129,7 @@ WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::Wol
     first_window_frame_++;
 
     // Initial covariance (fake ODOM 2D capture from fake frame to initial frame)
-    CaptureRelative* initial_covariance = new CaptureOdom2D(TimeStamp(0), nullptr, Eigen::Vector3s::Zero(), _init_frame_cov);
+    CaptureRelative* initial_covariance = new CaptureOdom2D(TimeStamp(0), TimeStamp(0), nullptr, Eigen::Vector3s::Zero(), _init_frame_cov);
     last_frame_->addCapture(initial_covariance);
     initial_covariance->processCapture();
     last_capture_relative_ = initial_covariance;
@@ -149,9 +149,22 @@ WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::~Wo
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
 void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
 {
-    std::cout << "creating new frame..." << std::endl;
+    //std::cout << "creating new frame..." << std::endl;
 
     assert(_frame_state.size() == StatePositionT::BLOCK_SIZE + StateOrientationT::BLOCK_SIZE + StateVelocityT::BLOCK_SIZE + StateOmegaT::BLOCK_SIZE && "Wrong frame vector when creating a new frame");
+
+    // Process current frame non-odometry captures
+    if (current_frame_ != nullptr)
+    {
+        //std::cout << "Processing last frame non-odometry captures " << current_frame_->getCaptureListPtr()->size() << std::endl;
+        for (auto capture_it = current_frame_->getCaptureListPtr()->begin(); capture_it != current_frame_->getCaptureListPtr()->end(); capture_it++)
+            if ((*capture_it)->getSensorPtr() != sensor_prior_)
+            {
+                //std::cout << "processing capture " << (*capture_it)->nodeId() << std::endl;
+                (*capture_it)->processCapture();
+            }
+    }
+    //std::cout << "Last frame non-odometry captures processed" << std::endl;
 
     // Store last frame
     last_frame_ = current_frame_;
@@ -192,13 +205,13 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
 
     // Fixing or removing old frames
     manageWindow();
-    std::cout << "new frame created" << std::endl;
+    //std::cout << "new frame created" << std::endl;
 }
 
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
 void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::createFrame(const TimeStamp& _time_stamp)
 {
-    std::cout << "creating new frame from prior..." << std::endl;
+    //std::cout << "creating new frame from prior..." << std::endl;
     createFrame(last_capture_relative_->computePrior(_time_stamp), _time_stamp);
 }
 
@@ -206,15 +219,15 @@ template <class StatePositionT, class StateOrientationT, class StateVelocityT, c
 void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::addCapture(CaptureBase* _capture)
 {
     new_captures_.push(_capture);
-    std::cout << "added new capture: " << _capture->nodeId() << " stamp: ";
-    _capture->getTimeStamp().print();
-    std::cout << std::endl;
+    //std::cout << "added new capture: " << _capture->nodeId() << " stamp: ";
+    //_capture->getTimeStamp().print();
+    //std::cout << std::endl;
 }
 
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
 void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::manageWindow()
 {
-    std::cout << "managing window..." << std::endl;
+    //std::cout << "managing window..." << std::endl;
     // WINDOW of FRAMES (remove or fix old frames)
     if (problem_->getTrajectoryPtr()->getFrameListPtr()->size() > window_size_+1)
     {
@@ -223,22 +236,22 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
         (*first_window_frame_)->fix();
         first_window_frame_++;
     }
-    std::cout << "window managed" << std::endl;
+    //std::cout << "window managed" << std::endl;
 }
 
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
 bool WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::checkNewFrame(CaptureBase* new_capture)
 {
-    std::cout << "checking if new frame..." << std::endl;
+    //std::cout << "checking if new frame..." << std::endl;
     // TODO: not only time, depending on the sensor...
-    std::cout << new_capture->getTimeStamp().get() - last_frame_->getTimeStamp().get() << std::endl;
+    //std::cout << new_capture->getTimeStamp().get() - last_frame_->getTimeStamp().get() << std::endl;
     return new_capture->getTimeStamp().get() - last_frame_->getTimeStamp().get() > new_frame_elapsed_time_;
 }
 
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
 void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::update()
 {
-    std::cout << "updating..." << std::endl;
+    //std::cout << "updating..." << std::endl;
     while (!new_captures_.empty())
     {
         // EXTRACT NEW CAPTURE
@@ -255,7 +268,7 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
         // ODOMETRY SENSOR
         if (new_capture->getSensorPtr() == sensor_prior_)
         {
-            std::cout << "adding odometry capture..." << new_capture->nodeId() << std::endl;
+            //std::cout << "adding odometry capture..." << new_capture->nodeId() << std::endl;
             // NEW KEY FRAME ?
             if (checkNewFrame(new_capture))
                 createFrame(new_capture->getTimeStamp());
@@ -274,41 +287,42 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
         }
         else
         {
-            std::cout << "adding not odometry capture..." << new_capture->nodeId() << std::endl;
+            //std::cout << "adding not odometry capture..." << new_capture->nodeId() << std::endl;
             // NEW KEY FRAME ?
             if (checkNewFrame(new_capture))
                 createFrame(new_capture->getTimeStamp());
 
             // ADD CAPTURE TO THE CURRENT FRAME (or substitute the same sensor previous capture)
-            std::cout << "searching repeated capture..." << new_capture->nodeId() << std::endl;
+            //std::cout << "searching repeated capture..." << new_capture->nodeId() << std::endl;
             CaptureBaseIter repeated_capture_it = current_frame_->hasCaptureOf(new_capture->getSensorPtr());
 
             if (repeated_capture_it != current_frame_->getCaptureListPtr()->end()) // repeated capture
             {
-                std::cout << "repeated capture, keeping old capture" << new_capture->nodeId() << std::endl;
-                //current_frame_->removeCapture(repeated_capture_it);
+                //std::cout << "repeated capture, keeping new capture" << new_capture->nodeId() << std::endl;
+                current_frame_->removeCapture(repeated_capture_it);
+                current_frame_->addCapture(new_capture);
             }
             else
             {
-                std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
-                last_frame_->addCapture(new_capture);
-                std::cout << "processing capture..." << new_capture->nodeId() << std::endl;
-                new_capture->processCapture();
-                std::cout << "processed" << std::endl;
+                //std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
+                current_frame_->addCapture(new_capture);
             }
         }
     }
-    std::cout << "updated" << std::endl;
+    //std::cout << "updated" << std::endl;
 }
 
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
 Eigen::VectorXs WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::getVehiclePose(const TimeStamp& _now)
 {
-    return last_capture_relative_->computePrior(_now);
+    if (last_capture_relative_ == nullptr)
+        return Eigen::Map<Eigen::Vector3s>(current_frame_->getPPtr()->getPtr());
+    else
+        return last_capture_relative_->computePrior(_now);
 }
 
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-RadarOdom+* WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::getProblemPtr()
+WolfProblem* WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::getProblemPtr()
 {
     return problem_;
 }

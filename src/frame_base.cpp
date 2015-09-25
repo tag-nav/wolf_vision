@@ -1,7 +1,7 @@
 
 #include "frame_base.h"
 
-FrameBase::FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
+FrameBase::FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateOrientation* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
             //NodeLinked(MID, "FRAME", _traj_ptr),
             NodeLinked(MID, "FRAME"),
             type_(REGULAR_FRAME),
@@ -15,7 +15,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr,
 	//
 }
 
-FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
+FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBase* _p_ptr, StateOrientation* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
             //NodeLinked(MID, "FRAME", _traj_ptr),
             NodeLinked(MID, "FRAME"),
             type_(_tp),
@@ -203,7 +203,7 @@ StateBase* FrameBase::getPPtr() const
 	return p_ptr_;
 }
 
-StateBase* FrameBase::getOPtr() const
+StateOrientation* FrameBase::getOPtr() const
 {
 	return o_ptr_;
 }

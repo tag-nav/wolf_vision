@@ -23,6 +23,7 @@
 #include "sensor_laser_2D.h"
 #include "feature_corner_2D.h"
 #include "landmark_corner_2D.h"
+#include "landmark_container.h"
 #include "state_point.h"
 #include "state_orientation.h"
 #include "state_theta.h"
@@ -126,5 +127,7 @@ class CaptureLaser2D : public CaptureBase
         virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const;
 
         WolfScalar computeMahalanobisDistance(const FeatureBase* _feature, const LandmarkBase* _landmark);
+
+        void tryContainer(const LandmarkCorner2D* _corner_ptr);
 };
 #endif /* CAPTURE_LASER_2D_H_ */

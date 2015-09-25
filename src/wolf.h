@@ -182,7 +182,7 @@ typedef enum
 {
     LANDMARK_POINT,		  ///< A point landmark, either 3D or 2D
     LANDMARK_CORNER,	  ///< A corner landmark (2D)
-    LANDMARK_CONTAINER	///< A container landmark
+    LANDMARK_CONTAINER	///< A container landmark (2D)
 } LandmarkType;
 
 typedef enum
@@ -215,7 +215,7 @@ typedef enum
 //class VehicleBase;
 
 class NodeTerminus;
-class RadarOdom+;
+class WolfProblem;
 class MapBase;
 class LandmarkBase;
 class LandmarkCorner2D;
@@ -246,7 +246,7 @@ class PinHole;
 
 //Problem
 //typedef std::shared_ptr<WolfProblem> WolfProblemShPtr;
-typedef RadarOdom+* WolfProblemPtr;
+typedef WolfProblem* WolfProblemPtr;
 
 //Map
 typedef std::list<MapBase*> MapBaseList;

@@ -16,7 +16,7 @@ class ConstraintOdom2DTheta : public ConstraintSparse<3, 2, 1, 2, 1>
 //            //
 //        }
 
-        ConstraintOdom2DTheta(FeatureBase* _ftr_ptr, StateBase* _state0Ptr, StateBase* _state1Ptr, StateBase* _state2Ptr, StateBase* _state3Ptr) :
+        ConstraintOdom2DTheta(FeatureBase* _ftr_ptr, StateBase* _state0Ptr, StateOrientation* _state1Ptr, StateBase* _state2Ptr, StateOrientation* _state3Ptr) :
                 ConstraintSparse<3, 2, 1, 2, 1>(_ftr_ptr, CTR_ODOM_2D_THETA, _state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr)
         {
             //
