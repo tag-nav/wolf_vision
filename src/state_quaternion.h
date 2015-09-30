@@ -65,6 +65,13 @@ class StateQuaternion : public StateOrientation
         //virtual Eigen::Matrix3s getRotationMatrix() const;
         virtual void rotationMatrix(Eigen::Matrix3s& R) const;
 
+        /** \brief Returns the yaw angle
+         *
+         * Returns the yaw angle
+         *
+         **/
+        virtual WolfScalar getYaw() const;
+
         /** \brief Returns a (mapped) vector of the state unit
          *
          * Returns a (mapped) vector of the state unit

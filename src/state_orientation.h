@@ -47,6 +47,13 @@ class StateOrientation : public StateBase
         Eigen::Matrix3s getRotationMatrix() const;
         virtual void rotationMatrix(Eigen::Matrix3s& R) const = 0;
 
+        /** \brief Returns the yaw angle
+         *
+         * Returns the yaw angle
+         *
+         **/
+        virtual WolfScalar getYaw() const = 0;
+
         /** \brief Returns a (mapped) vector of the state unit
          *
          * Returns a (mapped) vector of the state unit

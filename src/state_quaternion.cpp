@@ -57,6 +57,17 @@ void StateQuaternion::rotationMatrix(Eigen::Matrix3s& R) const
     //std::cout << "StateQuaternion::getRotationMatrix()" << R << std::endl;
 }
 
+WolfScalar StateQuaternion::getYaw() const
+{
+    WolfScalar qi,qj,qk,qr;
+    qi = *state_ptr_;
+    qj = *(state_ptr_+1);
+    qk = *(state_ptr_+2);
+    qr = *(state_ptr_+3);
+    return atan2(2.0*(qj*qk + qr*qi), qr*qr - qi*qi - qj*qj + qk*qk);
+}
+
+
 Eigen::Map<const Eigen::VectorXs> StateQuaternion::getVector() const
 {
     return Eigen::Map<const Eigen::VectorXs>(state_ptr_, 4);

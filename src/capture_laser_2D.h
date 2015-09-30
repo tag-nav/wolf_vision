@@ -128,6 +128,8 @@ class CaptureLaser2D : public CaptureBase
 
         WolfScalar computeMahalanobisDistance(const FeatureBase* _feature, const LandmarkBase* _landmark);
 
-        void tryContainer(const LandmarkCorner2D* _corner_ptr);
+        void tryContainer(LandmarkCorner2D* _corner_ptr);
+
+        WolfScalar pi2pi(const WolfScalar& angle) const;
 };
 #endif /* CAPTURE_LASER_2D_H_ */

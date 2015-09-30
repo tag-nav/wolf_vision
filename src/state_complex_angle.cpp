@@ -44,6 +44,11 @@ Eigen::Map<const Eigen::VectorXs> StateComplexAngle::getVector() const
     return Eigen::Map<const Eigen::VectorXs>(state_ptr_, BLOCK_SIZE);
 }
 
+WolfScalar StateComplexAngle::getYaw() const
+{
+    return atan2(*(state_ptr_+1), *state_ptr_);
+}
+
 void StateComplexAngle::print(unsigned int _ntabs, std::ostream& _ost) const
 {
 	printTabs(_ntabs);

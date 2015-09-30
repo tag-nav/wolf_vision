@@ -438,43 +438,139 @@ WolfScalar CaptureLaser2D::computeMahalanobisDistance(const FeatureBase* _featur
     }
 }
 
-void CaptureLaser2D::tryContainer(const LandmarkCorner2D* _corner_ptr)
+void CaptureLaser2D::tryContainer(LandmarkCorner2D* _corner_ptr)
 {
+    //std::cout << "Trying container... aperture = " << _corner_ptr->getAperture() << std::endl;
     LandmarkContainer* container_ptr = nullptr;
-    Eigen::Matrix2s R_corner = (_corner_ptr->getOPtr())->getRotationMatrix().topLeftCorner<2,2>();
 
     // It has to be 90º corner
-    if (std::fabs(_corner_ptr->getAperture() - M_PI / 2) < MAX_ACCEPTED_APERTURE_DIFF)
+    if (std::fabs(_corner_ptr->getAperture() - 3 * M_PI / 2) < MAX_ACCEPTED_APERTURE_DIFF)
     {
+        //std::cout << "   90º OK..." << std::endl;
         // Check all existing corners searching a container
-        for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+        for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->rbegin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->rend(); landmark_it++)
         {
-            // should be a 90º corner
-            if ((*landmark_it)->getType() == LANDMARK_CORNER && std::fabs(((LandmarkCorner2D*)(*landmark_it))->getAperture() - M_PI / 2) < MAX_ACCEPTED_APERTURE_DIFF)
-            {
-                if (container_ptr == nullptr)
-                {
-                    Eigen::Vector2s difference = _corner_ptr->getPPtr()->getVector() - (*landmark_it)->getPPtr()->getVector();
+            if ((*landmark_it)->nodeId() == _corner_ptr->nodeId())
+                continue;
 
-                    // Short side
-                    if (std::fabs(difference.norm() - 2.44) < 0.15)
+            //std::cout << "   landmark " << (*landmark_it)->nodeId();
+            // should be a 90º corner
+            if ((*landmark_it)->getType() == LANDMARK_CORNER && std::fabs(((LandmarkCorner2D*)(*landmark_it))->getAperture() - 3 * M_PI / 2) < MAX_ACCEPTED_APERTURE_DIFF)
+            {
+                //std::cout << "   90º OK..." << std::endl;
+                WolfScalar MAX_ACCEPTED_DISTANCE_DIFF = 0.5;
+                WolfScalar angle_diff = (*landmark_it)->getOPtr()->getYaw() - _corner_ptr->getOPtr()->getYaw();
+                Eigen::Vector2s v_diff = (*landmark_it)->getPPtr()->getVector() - _corner_ptr->getPPtr()->getVector();
+                //std::cout << "  Angle difference = " << angle_diff << std::endl;
+                //std::cout << "  position difference = " << v_diff.transpose() << std::endl;
+
+                // Large side
+                if (abs(v_diff.norm() - 12.2) < MAX_ACCEPTED_DISTANCE_DIFF)
+                {
+                    // counterclockwise order
+                    if (abs(pi2pi(angle_diff - M_PI/2)) < MAX_ACCEPTED_APERTURE_DIFF &&
+                        abs(pi2pi(atan2(v_diff(1), v_diff(0)) - _corner_ptr->getOPtr()->getYaw())) < MAX_ACCEPTED_APERTURE_DIFF)
                     {
-                        std::cout << "Container detected by the short size!" << std::endl;
+                        std::cout << "   next counterclockwise large container side detected!" << std::endl;
+                        //create new landmark at global coordinates
+                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
+                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
+
+                        //add it to the slam map as a new landmark
+                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, _corner_ptr, (LandmarkCorner2D*)(*landmark_it), nullptr, nullptr);
+
+                        break;
                     }
-                    // Long side
-                    else if (std::fabs(difference.norm() - 12.2) < 0.15)
+
+                    // clockwise order
+                    else if (abs(pi2pi(angle_diff + M_PI/2)) < MAX_ACCEPTED_APERTURE_DIFF &&
+                             abs(pi2pi(atan2(-v_diff(1), -v_diff(0)) - (*landmark_it)->getOPtr()->getYaw())) < MAX_ACCEPTED_APERTURE_DIFF)
                     {
-                        std::cout << "Container detected by the long size!" << std::endl;
-                    }
-                    // Diagonal
-                    else if (std::fabs(difference.norm() - 12.44) < 0.15)
-                    {
-                        std::cout << "Container detected by the diagonal!" << std::endl;
+                        std::cout << "   prev counterclockwise large container side detected!" << std::endl;
+                        //create new landmark at global coordinates
+                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
+                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
+
+                        //add it to the slam map as a new landmark
+                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, (LandmarkCorner2D*)(*landmark_it), _corner_ptr, nullptr, nullptr);
+
+                        break;
                     }
                 }
-                else
+                // Short side
+                else if (abs(v_diff.norm() - 2.44) < MAX_ACCEPTED_DISTANCE_DIFF)
                 {
-                    container_ptr->tryCorner((LandmarkCorner2D*)(*landmark_it));
+                    // counterclockwise order
+                    if (abs(pi2pi(angle_diff - M_PI/2)) < MAX_ACCEPTED_APERTURE_DIFF &&
+                        abs(pi2pi(atan2(v_diff(1), v_diff(0)) - _corner_ptr->getOPtr()->getYaw())) < MAX_ACCEPTED_APERTURE_DIFF)
+                    {
+                        std::cout << "   next counterclockwise short container side detected!" << std::endl;
+                        //create new landmark at global coordinates
+                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
+                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
+
+                        //add it to the slam map as a new landmark
+                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, nullptr, _corner_ptr, (LandmarkCorner2D*)(*landmark_it), nullptr);
+
+                        break;
+                    }
+
+                    // clockwise order
+                    else if (abs(pi2pi(angle_diff + M_PI/2)) < MAX_ACCEPTED_APERTURE_DIFF &&
+                             abs(pi2pi(atan2(-v_diff(1), -v_diff(0)) - (*landmark_it)->getOPtr()->getYaw())) < MAX_ACCEPTED_APERTURE_DIFF)
+                    {
+                        std::cout << "   prev counterclockwise short container side detected!" << std::endl;
+                        //create new landmark at global coordinates
+                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
+                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
+
+                        //add it to the slam map as a new landmark
+                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, nullptr, (LandmarkCorner2D*)(*landmark_it), _corner_ptr, nullptr);
+
+                        break;
+                    }
+                }
+                // opposite corners
+                else if (abs(pi2pi(angle_diff - M_PI)) < MAX_ACCEPTED_APERTURE_DIFF &&
+                         abs(v_diff.norm() - 12.4416) < MAX_ACCEPTED_DISTANCE_DIFF)
+                {
+                    // large side aligned corners
+                    if (abs(pi2pi(atan2(v_diff(1), v_diff(0)) - _corner_ptr->getOPtr()->getYaw() - 0.1974)) < MAX_ACCEPTED_APERTURE_DIFF)
+                    {
+                        std::cout << "   opposite corners (aligned to large sides) detected!" << std::endl;
+                        //create new landmark at global coordinates
+                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
+                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
+
+                        //add it to the slam map as a new landmark
+                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, (LandmarkCorner2D*)(*landmark_it), nullptr, _corner_ptr, nullptr);
+
+                        break;
+                    }
+                    else if (abs(pi2pi(atan2(v_diff(1), v_diff(0)) - _corner_ptr->getOPtr()->getYaw() - 1.3734)) < MAX_ACCEPTED_APERTURE_DIFF)
+                    {
+                        std::cout << "   opposite corners (aligned to short sides) detected!" << std::endl;
+                        //create new landmark at global coordinates
+                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
+                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
+                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
+
+                        //add it to the slam map as a new landmark
+                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, nullptr, (LandmarkCorner2D*)(*landmark_it), nullptr, _corner_ptr);
+
+                        break;
+                    }
                 }
             }
         }
@@ -482,4 +578,9 @@ void CaptureLaser2D::tryContainer(const LandmarkCorner2D* _corner_ptr)
 
     if (container_ptr != nullptr)
         getTop()->getMapPtr()->addLandmark((LandmarkBase*)(container_ptr));
+}
+
+WolfScalar CaptureLaser2D::pi2pi(const WolfScalar& angle) const
+{
+    return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
 }

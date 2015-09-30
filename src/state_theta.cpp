@@ -44,6 +44,11 @@ void StateTheta::rotationMatrix(Eigen::Matrix3s& R) const
     //std::cout << "StateTheta::getRotationMatrix()" << R << std::endl;
 }
 
+WolfScalar StateTheta::getYaw() const
+{
+    return *state_ptr_;
+}
+
 Eigen::Map<const Eigen::VectorXs> StateTheta::getVector() const
 {
     return Eigen::Map<const Eigen::VectorXs>(state_ptr_, 1);
