@@ -62,7 +62,8 @@ void SensorLaser2D::setDefaultCornerAlgParams()
     corners_alg_params_.theta_min_ = 0.4;
     corners_alg_params_.max_distance_ = 1;
     corners_alg_params_.line_params_.jump_dist_ut_ = 1;
-    corners_alg_params_.line_params_.window_sz_ = 8;
+    corners_alg_params_.line_params_.window_sz_ = 0.5;
+    corners_alg_params_.line_params_.min_window_points_ = 5;
     corners_alg_params_.line_params_.k_sigmas_ut_ = 3; 
     corners_alg_params_.line_params_.concatenate_angle_ut_ = 0.1; 
     corners_alg_params_.line_params_.concatenate_ii_ut_ = 5;
