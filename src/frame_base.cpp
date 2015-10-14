@@ -194,7 +194,7 @@ FrameBase* FrameBase::getNextFrame() const
         }
     	f_it++;
     }
-    std::cout << "previous frame not found!" << std::endl;
+    std::cout << "next frame not found!" << std::endl;
     return nullptr;
 }
 

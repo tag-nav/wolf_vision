@@ -113,6 +113,7 @@ typedef enum
 typedef enum
 {
     CTR_GPS_FIX_2D,				///< marks a 2D GPS Fix constraint.
+    CTR_FIX,                ///< marks a Fix constraint (for priors).
     CTR_ODOM_2D_COMPLEX_ANGLE,	///< marks a 2D Odometry using complex angles.
     CTR_ODOM_2D_THETA,          ///< marks a 2D Odometry using theta angles.
     CTR_TWIST_2D_THETA,         ///< marks a 2D Twist using theta angles.
@@ -328,5 +329,10 @@ typedef StatePoint<0> NoState;
 //    LIDAR_SCAN, ///< Full 2D laser scan
 //    LIDAR_RAY   ///< A single laser ray
 //} FeatureType;
+
+WolfScalar pi2pi(const WolfScalar& angle)
+{
+    return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
+}
 
 #endif /* WOLF_H_ */

@@ -26,6 +26,7 @@
 #include "state_point.h"
 #include "state_complex_angle.h"
 #include "capture_base.h"
+#include "capture_fix.h"
 #include "capture_relative.h"
 #include "capture_odom_2D.h"
 #include "capture_gps_fix.h"
@@ -120,23 +121,21 @@ WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::Wol
 
     std::cout << "initializing wolfmanager" << std::endl;
 
-    // Fake frame for prior
-    createFrame(_init_frame, TimeStamp(0));
-    problem_->getLastFramePtr()->fix();
-    first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
     // Initial frame
     createFrame(_init_frame, TimeStamp(0));
-    first_window_frame_++;
+    first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
 
-    // Initial covariance (fake ODOM 2D capture from fake frame to initial frame)
-    CaptureRelative* initial_covariance = new CaptureOdom2D(TimeStamp(0), TimeStamp(0), nullptr, Eigen::Vector3s::Zero(), _init_frame_cov);
-    last_frame_->addCapture(initial_covariance);
-    initial_covariance->processCapture();
-    last_capture_relative_ = initial_covariance;
+    // Initial covariance
+    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), _init_frame, _init_frame_cov);
+    current_frame_->addCapture(initial_covariance);
 
+    CaptureRelative* empty_odom = new CaptureOdom2D(TimeStamp(0), TimeStamp(0), _sensor_prior, Eigen::Vector3s::Zero());
+    current_frame_->addCapture(empty_odom);
 
     // Current robot frame
-    createFrame(TimeStamp(0));
+    createFrame(_init_frame, TimeStamp(0));
+    empty_odom->processCapture();
+    last_capture_relative_ = empty_odom;
     std::cout << " wolfmanager initialized" << std::endl;
 }
 
@@ -192,6 +191,7 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
         problem_->addState(new_omega, _frame_state.segment<StateOmegaT::BLOCK_SIZE>(new_position->getStateSize()+new_orientation->getStateSize()+new_velocity->getStateSize()));
     }
 
+
     problem_->getTrajectoryPtr()->addFrame(new FrameBase(_time_stamp, new_position, new_orientation, new_velocity, new_omega));
     //std::cout << "frame created" << std::endl;
 
@@ -199,8 +199,14 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     current_frame_ = problem_->getLastFramePtr();
     //std::cout << "current_frame_" << std::endl;
 
-    // no last capture relative
-    last_capture_relative_ = nullptr;
+    // empty last capture relative
+    if (last_frame_ != nullptr)
+    {
+        CaptureRelative* empty_odom = new CaptureOdom2D(_time_stamp, _time_stamp, sensor_prior_, Eigen::Vector3s::Zero());
+        last_frame_->addCapture(empty_odom);
+        empty_odom->processCapture();
+        last_capture_relative_ = empty_odom;
+    }
     //std::cout << "last_frame_" << std::endl;
 
     // Fixing or removing old frames
@@ -274,7 +280,7 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
                 createFrame(new_capture->getTimeStamp());
 
             // ADD/INTEGRATE NEW ODOMETRY TO THE LAST FRAME
-            if (last_capture_relative_ == nullptr)
+            if (last_capture_relative_ == nullptr) //TODO NOT NECESSARY
             {
                 last_frame_->addCapture(new_capture);
                 new_capture->processCapture();

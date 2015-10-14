@@ -36,35 +36,35 @@ unsigned int StateQuaternion::getStateSize() const
 
 void StateQuaternion::rotationMatrix(Eigen::Matrix3s& R) const
 {
-    WolfScalar qi,qj,qk,qr; 
-    qi = *state_ptr_;
-    qj = *(state_ptr_+1);
-    qk = *(state_ptr_+2);
-    qr = *(state_ptr_+3);
+//    WolfScalar qi,qj,qk,qr;
+//    qi = *state_ptr_;
+//    qj = *(state_ptr_+1);
+//    qk = *(state_ptr_+2);
+//    qr = *(state_ptr_+3);
+//
+//    R(0,0) = 1 - 2*qj*qj - 2*qk*qk;
+//    R(1,0) = 2*(qi*qj + qk*qr);
+//    R(2,0) = 2*(qi*qk - qj*qr);
+//
+//    R(0,1) = 2*(qi*qj - qk*qr);
+//    R(1,1) = 1 - 2*qi*qi - 2*qk*qk;
+//    R(2,1) = 2*(qi*qr + qj*qk);
+//
+//    R(0,2) = 2*(qi*qk + qj*qr);
+//    R(1,2) = 2*(qj*qk - qi*qr);
+//    R(2,2) = 1 - 2*qi*qi - 2*qj*qj;
     
-    R(0,0) = 1 - 2*qj*qj - 2*qk*qk;
-    R(1,0) = 2*(qi*qj + qk*qr);
-    R(2,0) = 2*(qi*qk - qj*qr);
-    
-    R(0,1) = 2*(qi*qj - qk*qr);
-    R(1,1) = 1 - 2*qi*qi - 2*qk*qk;
-    R(2,1) = 2*(qi*qr + qj*qk);
-    
-    R(0,2) = 2*(qi*qk + qj*qr);
-    R(1,2) = 2*(qj*qk - qi*qr);
-    R(2,2) = 1 - 2*qi*qi - 2*qj*qj;
+    R = Eigen::Map<Eigen::Quaternions>(state_ptr_).toRotationMatrix();
 
     //std::cout << "StateQuaternion::getRotationMatrix()" << R << std::endl;
 }
 
 WolfScalar StateQuaternion::getYaw() const
 {
-    WolfScalar qi,qj,qk,qr;
-    qi = *state_ptr_;
-    qj = *(state_ptr_+1);
-    qk = *(state_ptr_+2);
-    qr = *(state_ptr_+3);
-    return atan2(2.0*(qj*qk + qr*qi), qr*qr - qi*qi - qj*qj + qk*qk);
+    //return atan2(2.0*(qj*qk + qr*qi), qr*qr - qi*qi - qj*qj + qk*qk);
+    //return atan2(2.0*(qi*qr + qj*qk), 1 - 2 * (qk*qk + qr*qr));
+    //return angles(2);
+    return Eigen::Map<Eigen::Quaternions>(state_ptr_).toRotationMatrix().eulerAngles(0, 1, 2)(2);
 }
 
 

@@ -17,6 +17,7 @@ class NodeTerminus;
 #include "node_linked.h"
 #include "map_base.h"
 #include "state_orientation.h"
+#include "constraint_base.h"
 
 // why v, w and a ?
 // add descriptor as a StateBase -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
@@ -30,7 +31,6 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
     protected:
         LandmarkType type_; //type of landmark. (types defined at wolf.h)
         LandmarkStatus status_; //status of the landmark. (types defined at wolf.h)
-        unsigned int hit_count_; //counts how many features has been associated to this landmark
         TimeStamp stamp_; // stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
         //StateBaseList st_list_; //List of pointers to the state corresponding to the landmark estimation
         StateBase* p_ptr_; // Position state unit pointer
@@ -39,6 +39,7 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
         StateBase* w_ptr_; // Angular velocity state unit pointer
         //TODO: accelerations?
         Eigen::VectorXs descriptor_;    //TODO: agree?
+        std::list<ConstraintBase*> constraints_list_;
 
     public:
         /** \brief Constructor with type, time stamp and the position state pointer
@@ -70,15 +71,17 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
 
         void setStatus(LandmarkStatus _st);
 
-        void hit();
+        void hit(ConstraintBase* _ctr_ptr);
 
-        void unhit();
+        void unhit(ConstraintBase* _ctr_ptr);
 
         void fix();
 
         void unfix();
 
         unsigned int getHits() const;
+
+        std::list<ConstraintBase*>* getConstraints();
 
         StateBase* getPPtr() const;
 
@@ -87,6 +90,14 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
         StateBase* getVPtr() const;
 
         StateBase* getWPtr() const;
+
+        void setPPtr(StateBase* _st_ptr);
+
+        void setOPtr(StateOrientation* _st_ptr);
+
+        void setVPtr(StateBase* _st_ptr);
+
+        void setWPtr(StateBase* _st_ptr);
 
         void setDescriptor(const Eigen::VectorXs& _descriptor);
         

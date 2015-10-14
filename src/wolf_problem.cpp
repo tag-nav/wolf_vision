@@ -126,7 +126,7 @@ void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eig
     _cov_block = (flip ? Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)) : Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)).transpose() );
 }
 
-void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::Map<Eigen::MatrixXs>& _cov_block) const
+void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col) const
 {
     assert(_state1 != nullptr);
     assert(_state1->getPtr() != nullptr);
@@ -146,9 +146,20 @@ void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eig
     unsigned int block_rows = stateA->getStateSize();
     unsigned int block_cols = stateB->getStateSize();
 
-    assert(_cov_block.rows() == (flip ? block_cols : block_rows) && _cov_block.cols() == (flip ? block_rows : block_cols) && "Bad _cov_block matrix sizes");
+//    std::cout << "flip " << flip << std::endl;
+//    std::cout << "_row " << _row << std::endl;
+//    std::cout << "_cov.rows() " << _cov.rows() << std::endl;
+//    std::cout << "block_rows " << block_rows << std::endl;
+//    std::cout << "_col " << _col << std::endl;
+//    std::cout << "_cov.cols() " << _cov.cols() << std::endl;
+//    std::cout << "block_cols " << block_cols << std::endl;
 
-    _cov_block = (flip ? Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)).transpose() : Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)) );
+    assert(_cov.rows() - _row >= (flip ? block_cols : block_rows) && _cov.cols() - _col >= (flip ? block_rows : block_cols) && "Bad _cov_block matrix sizes");
+
+    if (!flip)
+        _cov.block(_row,_col,block_rows,block_cols) = Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols));
+    else
+        _cov.block(_row,_col,block_cols,block_rows) = Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)).transpose();
 }
 
 void WolfProblem::removeState(StateBase* _state_ptr)

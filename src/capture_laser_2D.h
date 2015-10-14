@@ -19,6 +19,7 @@
 
 //wolf includes
 #include "constraint_corner_2D_theta.h"
+#include "constraint_container.h"
 #include "capture_base.h"
 #include "sensor_laser_2D.h"
 #include "feature_corner_2D.h"
@@ -33,7 +34,7 @@
 //#include "feature_corner_2D.h"
 
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level 
-const WolfScalar MAX_ACCEPTED_APERTURE_DIFF = 5.0*M_PI/180.; //5 degrees
+const WolfScalar MAX_ACCEPTED_APERTURE_DIFF = 10.0*M_PI/180.; //5 degrees
 
 class CaptureLaser2D : public CaptureBase
 {
@@ -128,8 +129,7 @@ class CaptureLaser2D : public CaptureBase
 
         WolfScalar computeMahalanobisDistance(const FeatureBase* _feature, const LandmarkBase* _landmark);
 
-        void tryContainer(LandmarkCorner2D* _corner_ptr);
+        bool tryContainer(FeatureCorner2D* _corner_ptr, LandmarkCorner2D* old_corner_landmark_ptr, int feature_idx, int corner_idx);
 
-        WolfScalar pi2pi(const WolfScalar& angle) const;
 };
 #endif /* CAPTURE_LASER_2D_H_ */

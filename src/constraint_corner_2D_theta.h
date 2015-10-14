@@ -25,7 +25,7 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 			ConstraintSparse<3,2,1,2,1>(_ftr_ptr,CTR_CORNER_2D_THETA,  _robotPPtr, _robotOPtr,_landmarkPPtr, _landmarkOPtr),
 			lmk_ptr_(_lmk_ptr)
 		{
-			//
+			lmk_ptr_->hit(this);
 		}
         
 		virtual ~ConstraintCorner2DTheta()
@@ -34,7 +34,7 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 			if (lmk_ptr_->getHits() == 1)
 				getTop()->getMapPtr()->removeLandmark(lmk_ptr_);
 			else
-				lmk_ptr_->unhit();
+				lmk_ptr_->unhit(this);
 		}
 
 		LandmarkCorner2D* getLandmarkPtr()
@@ -76,7 +76,14 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 			// Residuals
 			_residuals[0] = (expected_landmark_relative_position(0) - T(measurement_(0))) / T(sqrt(measurement_covariance_(0,0)));
 			_residuals[1] = (expected_landmark_relative_position(1) - T(measurement_(1))) / T(sqrt(measurement_covariance_(1,1)));
-			_residuals[2] = (expected_landmark_relative_orientation - T(measurement_(2))) / T(sqrt(measurement_covariance_(2,2)));
+			_residuals[2] = expected_landmark_relative_orientation - T(measurement_(2));
+
+			while (_residuals[2] > T(M_PI))
+                _residuals[2] = _residuals[2] - T(2*M_PI);
+            while (_residuals[2] <= T(-M_PI))
+                _residuals[2] = _residuals[2] + T(2*M_PI);
+
+            _residuals[2] = _residuals[2] / T(sqrt(measurement_covariance_(2,2)));
 
 //			std::cout << "\nCONSTRAINT: " << nodeId() << std::endl;
 //			std::cout << "Feature: " << getFeaturePtr()->nodeId() << std::endl;

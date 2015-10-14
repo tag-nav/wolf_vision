@@ -62,17 +62,21 @@ SET(HDRS_BASE
 SET(HDRS
     capture_base.h
     capture_relative.h
+    capture_fix.h
     capture_gps_fix.h
     capture_odom_2D.h
     constraint_base.h
     constraint_sparse.h
     constraint_gps_2D.h
+    constraint_fix.h
     constraint_odom_2D_theta.h
     constraint_odom_2D_complex_angle.h
     constraint_corner_2D_theta.h
+    constraint_container.h
     feature_base.h
     feature_corner_2D.h
     feature_gps_fix.h
+    feature_fix.h
     feature_odom_2D.h
     frame_base.h
     landmark_base.h
@@ -110,11 +114,13 @@ SET(SRCS
     capture_base.cpp
     capture_relative.cpp
     capture_gps_fix.cpp
+    capture_fix.cpp
     capture_odom_2D.cpp
     constraint_base.cpp
     feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
+    feature_fix.cpp
     feature_odom_2D.cpp
     frame_base.cpp
     landmark_base.cpp

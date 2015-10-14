@@ -64,7 +64,14 @@ class ConstraintOdom2DTheta : public ConstraintSparse<3, 2, 1, 2, 1>
             // Residuals
             _residuals[0] = (expected_longitudinal - T(measurement_(0))) / T(sqrt(std::max(measurement_covariance_(0, 0),1e-6)));
             _residuals[1] = (expected_lateral - T(measurement_(1))) / T(sqrt(std::max(measurement_covariance_(1, 1),1e-6)));
-            _residuals[2] = (expected_rotation - T(measurement_(2))) / T(sqrt(std::max(measurement_covariance_(2, 2),1e-6)));
+            _residuals[2] = expected_rotation - T(measurement_(2));
+
+            while (_residuals[2] > T(M_PI))
+                _residuals[2] = _residuals[2] - T(2*M_PI);
+            while (_residuals[2] <= T(-M_PI))
+                _residuals[2] = _residuals[2] + T(2*M_PI);
+
+            _residuals[2] = _residuals[2] / T(sqrt(std::max(measurement_covariance_(2, 2),1e-6)));
 
             // Expected measurement
 //			T expected_range = (_p2[0]-_p1[0])*(_p2[0]-_p1[0]) + (_p2[1]-_p1[1])*(_p2[1]-_p1[1]); //square of the range

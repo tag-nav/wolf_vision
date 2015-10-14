@@ -5,24 +5,14 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBase* _p_ptr, StateOri
             NodeLinked(MID, "LANDMARK"),
             type_(_tp),
             status_(LANDMARK_CANDIDATE),
-            hit_count_(1),
 			p_ptr_(_p_ptr),
 			o_ptr_(_o_ptr),
 			v_ptr_(_v_ptr),
-			w_ptr_(_w_ptr)
+			w_ptr_(_w_ptr),
+			constraints_list_({})
 {
     //
 }
-
-//LandmarkBase::LandmarkBase(const LandmarkType & _tp, const StateBaseList& _st_list) :
-//            NodeLinked(MID, "LANDMARK"),
-//            type_(_tp),
-//            status_(LANDMARK_CANDIDATE),
-//            hit_count_(1),
-//			st_list_(_st_list)
-//{
-//    //
-//}
                 
 LandmarkBase::~LandmarkBase()
 {
@@ -37,6 +27,9 @@ LandmarkBase::~LandmarkBase()
 		getTop()->removeState(v_ptr_);
 	if (w_ptr_ != nullptr)
 		getTop()->removeState(w_ptr_);
+
+	for (auto ctr_it = constraints_list_.begin(); ctr_it != constraints_list_.end(); ctr_it++)
+	    (*ctr_it)->getFeaturePtr()->removeDownNode((*ctr_it)->nodeId());
 }
 
 void LandmarkBase::setStatus(LandmarkStatus _st)
@@ -44,14 +37,14 @@ void LandmarkBase::setStatus(LandmarkStatus _st)
     status_ = _st;
 }
 
-void LandmarkBase::hit()
+void LandmarkBase::hit(ConstraintBase* _ctr_ptr)
 {
-    hit_count_ ++;
+    constraints_list_.push_back(_ctr_ptr);
 }
 
-void LandmarkBase::unhit()
+void LandmarkBase::unhit(ConstraintBase* _ctr_ptr)
 {
-    hit_count_ --;
+    constraints_list_.remove(_ctr_ptr);
 }
 
 void LandmarkBase::fix()
@@ -88,7 +81,12 @@ void LandmarkBase::unfix()
 
 unsigned int LandmarkBase::getHits() const
 {
-    return hit_count_;
+    return constraints_list_.size();
+}
+
+std::list<ConstraintBase*>* LandmarkBase::getConstraints()
+{
+    return &constraints_list_;
 }
 
 StateBase* LandmarkBase::getPPtr() const
@@ -109,6 +107,26 @@ StateBase* LandmarkBase::getVPtr() const
 StateBase* LandmarkBase::getWPtr() const
 {
 	return w_ptr_;
+}
+
+void LandmarkBase::setPPtr(StateBase* _st_ptr)
+{
+    p_ptr_ = _st_ptr;
+}
+
+void LandmarkBase::setOPtr(StateOrientation* _st_ptr)
+{
+    o_ptr_ = _st_ptr;
+}
+
+void LandmarkBase::setVPtr(StateBase* _st_ptr)
+{
+    v_ptr_ = _st_ptr;
+}
+
+void LandmarkBase::setWPtr(StateBase* _st_ptr)
+{
+    w_ptr_ = _st_ptr;
 }
 
 void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)

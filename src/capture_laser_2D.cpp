@@ -87,19 +87,42 @@ void CaptureLaser2D::createFeatures(std::list<laserscanutils::Corner> & _corner_
 {
     // TODO: Sensor model
     Eigen::Matrix4s cov_mat;
+    Eigen::Matrix3s R = Eigen::Matrix3s::Identity();
     Eigen::Vector4s meas;
-
-    //init constant cov
-    cov_mat << 0.01, 0, 0, 0, 0, 0.01, 0, 0, 0, 0, 0.01, 0, 0, 0, 0, 0.01;
 
     //for each corner in the list create a feature
     for (auto corner_it = _corner_list.begin(); corner_it != _corner_list.end(); corner_it++)
     {
-        meas.head(2) = (*corner_it).pt_.head(2);
-        meas(2) = (*corner_it).orientation_;
-        meas(3) = (*corner_it).aperture_;
+        meas.head(2) = corner_it->pt_.head(2);
+        meas(2) = corner_it->orientation_;
+        meas(3) = corner_it->aperture_;
+
+        // TODO: maybe in line object?
+        WolfScalar L1 = corner_it->line_1_.length();
+        WolfScalar L2 = corner_it->line_2_.length();
+        WolfScalar cov_angle_line1 = 12 * corner_it->line_1_.error_ / (pow(L1,2) * (pow(corner_it->line_1_.np_,3)-pow(corner_it->line_1_.np_,2)));
+        WolfScalar cov_angle_line2 = 12 * corner_it->line_2_.error_ / (pow(L2,2) * (pow(corner_it->line_2_.np_,3)-pow(corner_it->line_2_.np_,2)));
+
+
+        //init cov in corner coordinates
+        cov_mat << corner_it->line_1_.error_ + cov_angle_line1 * L1 * L1 / 4, 0, 0, 0,
+                   0, corner_it->line_2_.error_ + cov_angle_line2 * L2 * L2 / 4, 0, 0,
+                   0, 0, cov_angle_line1 + cov_angle_line2, 0,
+                   0, 0, 0, cov_angle_line1 + cov_angle_line2;
+
+        //std::cout << "New feature: " << meas.transpose() << std::endl;
+        //std::cout << cov_mat << std::endl;
+
+
+        // Rotate covariance
+        R.topLeftCorner<2,2>() = Eigen::Rotation2D<WolfScalar>(corner_it->orientation_).matrix();
+        cov_mat.topLeftCorner<3,3>() = R.transpose() * cov_mat.topLeftCorner<3,3>() * R;
+
+        //std::cout << "rotated covariance: " << std::endl;
+        //std::cout << cov_mat << std::endl;
+
         //TODO: add the rest of descriptors and struct atributes
-        this->addFeature((FeatureBase*) (new FeatureCorner2D(meas, cov_mat)));
+        this->addFeature((FeatureBase*) (new FeatureCorner2D(meas, 10*cov_mat)));
     }
 }
 
@@ -203,19 +226,16 @@ void CaptureLaser2D::establishConstraints()
 //                       "\t" << feature_aperture << std::endl;
 
         }
-        else
-        {
-            correspondent_landmark->hit();
-        }
 
         // std::cout << "Creating new constraint: Landmark " << getTop()->getMapPtr()->getLandmarkListPtr()->back()->nodeId() << " & feature "
         //        << (*feature_it)->nodeId() << std::endl;
 
         // Add constraint to the correspondent landmark
-        (*feature_it)->addConstraint(new ConstraintCorner2DTheta(*feature_it, (LandmarkCorner2D*)correspondent_landmark, getFramePtr()->getPPtr(),                 //_robotPPtr,
-                getFramePtr()->getOPtr(),                   //_robotOPtr,
-                correspondent_landmark->getPPtr(), //_landmarkPPtr,
-                correspondent_landmark->getOPtr())); //_landmarkOPtr,
+        (*feature_it)->addConstraint(new ConstraintCorner2DTheta(*feature_it, (LandmarkCorner2D*)correspondent_landmark,
+                                                                 getFramePtr()->getPPtr(),                 //_robotPPtr,
+                                                                 getFramePtr()->getOPtr(),                   //_robotOPtr,
+                                                                 correspondent_landmark->getPPtr(), //_landmarkPPtr,
+                                                                 correspondent_landmark->getOPtr())); //_landmarkOPtr,
     }
 }
 
@@ -228,13 +248,12 @@ void CaptureLaser2D::establishConstraintsMHTree()
     std::vector<std::pair<unsigned int, unsigned int> > ft_lk_pairs;
     std::vector<bool> associated_mask;
     Eigen::Vector2s feature_global_position;
-    WolfScalar feature_global_orientation; 
-    LandmarkBase* correspondent_landmark = nullptr;
+    WolfScalar feature_global_orientation;
     
     // Global transformation TODO: Change by a function
     Eigen::Vector2s t_robot = getFramePtr()->getPPtr()->getVector();
-    Eigen::Matrix2s R_robot = ((StateOrientation*) (getFramePtr()->getOPtr()))->getRotationMatrix().topLeftCorner<2,2>();
-    WolfScalar& robot_orientation = *(getFramePtr()->getOPtr()->getPtr());//TODO: it only works for orientation theta
+    Eigen::Matrix2s R_robot = getFramePtr()->getOPtr()->getRotationMatrix().topLeftCorner<2,2>();
+    WolfScalar robot_orientation = getFramePtr()->getOPtr()->getYaw();
 
     // Sensor transformation
     Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
@@ -252,35 +271,47 @@ void CaptureLaser2D::establishConstraintsMHTree()
         for (auto j_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); j_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); j_it++, jj++)
         {
             if ((*j_it)->getType() == LANDMARK_CORNER)
+                apert_diff = fabs( ((FeatureCorner2D*)(*i_it))->getAperture() - (*j_it)->getDescriptor(0) );
+            else if ((*j_it)->getType() == LANDMARK_CONTAINER)
+                apert_diff = fabs( ((FeatureCorner2D*)(*i_it))->getAperture() - 3 * M_PI / 2);
+
+            //If aperture difference is small enough, proceed with Mahalanobis distance. Otherwise Set prob to 0 to force unassociation
+            if (apert_diff < MAX_ACCEPTED_APERTURE_DIFF)
             {
-                //If aperture difference is small enough, proceed with Mahalanobis distance. Otherwise Set prob to 0 to force unassociation
-                apert_diff = fabs( (*i_it)->getMeasurement(3) - (*j_it)->getDescriptor(0) );
-                if (apert_diff < MAX_ACCEPTED_APERTURE_DIFF)
+                if ((*j_it)->getType() == LANDMARK_CORNER)
                 {
                     dm2 = computeMahalanobisDistance(*i_it, *j_it);//Mahalanobis squared
+
                     if (dm2 < 5*5)
-                        prob = erfc( sqrt(dm2)/1.4142136 );// sqrt(2) = 1.4142136
+                    {
+                        prob = erfc( sqrt(dm2/2) ); //prob = erfc( sqrt(dm2)/1.4142136 );// sqrt(2) = 1.4142136
+                        std::cout << "dm2: " << dm2 << std::endl << "prob: " << prob << std::endl << std::endl;
+                    }
                     else
+                    {
                         prob = 0;
+                        std::cout << "KO dm2 > 5: " << dm2 << std::endl << std::endl;
+                    }
                     tree.setScore(ii,jj,prob);
+
                 }
-                else
-                    tree.setScore(ii,jj,0.);//prob to 0
+                else if ((*j_it)->getType() == LANDMARK_CONTAINER)
+                    tree.setScore(ii,jj,0); //TODO
             }
-            else if ((*j_it)->getType() == LANDMARK_CONTAINER)
+            else
             {
-                //TODO
+                tree.setScore(ii,jj,0.);//prob to 0
+                std::cout << "KO apert_diff > MAX: " << apert_diff << std::endl << std::endl;
             }
         }
     }
-    
     // Grows tree and make association pairs
     tree.solve(ft_lk_pairs,associated_mask);
 
     //print tree & score table 
-//     std::cout << "-------------" << std::endl;
-//     tree.printTree();
-//     tree.printScoreTable();
+    std::cout << "-------------" << std::endl;
+    tree.printTree();
+    tree.printScoreTable();
 
     //loop over all features
     ii = 0; //runs over features
@@ -289,30 +320,111 @@ void CaptureLaser2D::establishConstraintsMHTree()
     {
         if ( associated_mask[ii] == false ) //unassociated feature case
         {
-            //get feature on sensor frame
-            const Eigen::Vector2s& feature_position = (*i_it)->getMeasurement().head(2);
-            const WolfScalar& feature_orientation = (*i_it)->getMeasurement()(2);
-            const WolfScalar& feature_aperture = (*i_it)->getMeasurement()(3);
-            
-            //translate feature position and orientation to world (global)
-            feature_global_position = R_robot * (R_sensor * feature_position + t_sensor) + t_robot;
-            feature_global_orientation = feature_orientation + robot_orientation + atan2(R_sensor(1, 0), R_sensor(0, 0));
-            feature_global_orientation = (feature_global_orientation > 0 ? // fit in (-pi, pi]
-                                            fmod(feature_global_orientation + M_PI, 2 * M_PI) - M_PI : 
-                                            fmod(feature_global_orientation - M_PI, 2 * M_PI) + M_PI);
-            
-            //create new landmark at global coordinates
-            StateBase* new_landmark_state_position = new StatePoint2D(getTop()->getNewStatePtr());
-            getTop()->addState(new_landmark_state_position, feature_global_position);
-            StateOrientation* new_landmark_state_orientation = new StateTheta(getTop()->getNewStatePtr());
-            getTop()->addState(new_landmark_state_orientation, Eigen::Map < Eigen::Vector1s > (&feature_global_orientation, 1));
-                        
-            //add it to the slam map as a new landmark
-            correspondent_landmark = new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation, feature_aperture);
-            getTop()->getMapPtr()->addLandmark(correspondent_landmark);
+            // TRY TO FIT A CONTAINER WITH ANY EXISTING LANDMARK CORNER
+            LandmarkCorner2D* old_corner_landmark_ptr = nullptr;
+            int feature_idx, corner_idx;
+            if (tryContainer((FeatureCorner2D*)(*i_it), old_corner_landmark_ptr, feature_idx, corner_idx))
+            {
+                assert(old_corner_landmark_ptr != nullptr && "fitting result !=0 but corner found is nullptr");
 
-            // Try to build a container
-            tryContainer((LandmarkCorner2D*)correspondent_landmark);
+                // CREATING LANDMARK CONTAINER
+                // create new landmark state units
+                StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
+                getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
+                StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
+                getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
+
+                // create new landmark
+                Eigen::Vector3s corner_pose;
+                corner_pose.head(2) = old_corner_landmark_ptr->getPPtr()->getVector();
+                corner_pose(2) = old_corner_landmark_ptr->getOPtr()->getYaw();
+                LandmarkContainer* new_landmark = new LandmarkContainer(new_container_position, new_container_orientation, (*i_it)->getMeasurement().head(3), corner_pose, feature_idx, corner_idx);
+
+                // add new landmark in the map
+                getTop()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
+
+                // initialize container covariance with landmark corner covariance
+                Eigen::MatrixXs Sigma_landmark = Eigen::MatrixXs::Zero(3,3);
+                getTop()->getCovarianceBlock(old_corner_landmark_ptr->getPPtr(), old_corner_landmark_ptr->getPPtr(), Sigma_landmark, 0,0);
+                getTop()->getCovarianceBlock(old_corner_landmark_ptr->getPPtr(), old_corner_landmark_ptr->getOPtr(), Sigma_landmark, 0,2);
+                getTop()->getCovarianceBlock(old_corner_landmark_ptr->getOPtr(), old_corner_landmark_ptr->getOPtr(), Sigma_landmark, 2,2);
+                Sigma_landmark.block<1,2>(2,0) = Sigma_landmark.block<2,1>(0,2).transpose();
+
+                getTop()->addCovarianceBlock(new_container_position, new_container_position, Sigma_landmark.topLeftCorner<2,2>());
+                getTop()->addCovarianceBlock(new_container_position, (StateBase*)new_container_orientation, Sigma_landmark.block<2,1>(0,2));
+                getTop()->addCovarianceBlock((StateBase*)new_container_orientation, (StateBase*)new_container_orientation, Sigma_landmark.block<1,1>(2,2));
+
+                // create new constraint (feature to container)
+                (*i_it)->addConstraint(new ConstraintContainer(*i_it,                     //feature pointer
+                                                               new_landmark,              //landmark pointer
+                                                               feature_idx,               //corner idx
+                                                               getFramePtr()->getPPtr(),  //_robotPPtr,
+                                                               getFramePtr()->getOPtr(),  //_robotOPtr,
+                                                               new_landmark->getPPtr(),   //_landmarkPPtr,
+                                                               new_landmark->getOPtr())); //_landmarkOPtr,
+
+
+                // ERASING LANDMARK CORNER
+                // change all constraints from corner landmark by new corner container
+                for (auto ctr_it = old_corner_landmark_ptr->getConstraints()->begin(); ctr_it != old_corner_landmark_ptr->getConstraints()->end(); ctr_it++)
+                {
+                    // create new constraint to landmark container
+                    (*ctr_it)->getFeaturePtr()->addConstraint(new ConstraintContainer((*ctr_it)->getFeaturePtr(),//feature pointer
+                                                                                      new_landmark,              //landmark pointer
+                                                                                      corner_idx,                //corner idx
+                                                                                      getFramePtr()->getPPtr(),  //_robotPPtr,
+                                                                                      getFramePtr()->getOPtr(),  //_robotOPtr,
+                                                                                      new_landmark->getPPtr(),   //_landmarkPPtr,
+                                                                                      new_landmark->getOPtr())); //_landmarkOPtr,
+                }
+                // Remove corner landmark (it will remove all old constraints)
+                getTop()->getMapPtr()->removeLandmark(old_corner_landmark_ptr);
+            }
+            // IF NOT POSSIBLE FITTING A CONTAINER, CREATE A NEW LANDMARK CORNER
+            else
+            {
+                //get feature on sensor frame
+                const Eigen::Vector2s& feature_position = (*i_it)->getMeasurement().head(2);
+                const WolfScalar& feature_orientation = (*i_it)->getMeasurement()(2);
+                const WolfScalar& feature_aperture = (*i_it)->getMeasurement()(3);
+
+                //translate feature position and orientation to world (global)
+                feature_global_position = R_robot * (R_sensor * feature_position + t_sensor) + t_robot;
+                feature_global_orientation = feature_orientation + robot_orientation + atan2(R_sensor(1, 0), R_sensor(0, 0));
+                feature_global_orientation = (feature_global_orientation > 0 ? // fit in (-pi, pi]
+                                                fmod(feature_global_orientation + M_PI, 2 * M_PI) - M_PI :
+                                                fmod(feature_global_orientation - M_PI, 2 * M_PI) + M_PI);
+
+                //create new landmark at global coordinates
+                StateBase* new_landmark_state_position = new StatePoint2D(getTop()->getNewStatePtr());
+                getTop()->addState(new_landmark_state_position, feature_global_position);
+                StateOrientation* new_landmark_state_orientation = new StateTheta(getTop()->getNewStatePtr());
+                getTop()->addState(new_landmark_state_orientation, Eigen::Map < Eigen::Vector1s > (&feature_global_orientation, 1));
+
+                // Initialize landmark covariance
+                Eigen::MatrixXs Sigma_robot = Eigen::MatrixXs::Zero(3,3);
+                getTop()->getCovarianceBlock(getFramePtr()->getPPtr(), getFramePtr()->getPPtr(), Sigma_robot, 0,0);
+                getTop()->getCovarianceBlock(getFramePtr()->getPPtr(), getFramePtr()->getOPtr(), Sigma_robot, 0,2);
+                getTop()->getCovarianceBlock(getFramePtr()->getOPtr(), getFramePtr()->getOPtr(), Sigma_robot, 2,2);
+                Sigma_robot.block<1,2>(2,0) = Sigma_robot.block<2,1>(0,2).transpose();
+
+                Eigen::Matrix3s R_robot = getFramePtr()->getOPtr()->getRotationMatrix().matrix();
+                Eigen::Matrix3s Sigma_landmark = Sigma_robot + R_robot.transpose() * (*i_it)->getMeasurementCovariance().topLeftCorner<3,3>() * R_robot;
+
+                getTop()->addCovarianceBlock(new_landmark_state_position, new_landmark_state_position, Sigma_landmark.topLeftCorner<2,2>());
+                getTop()->addCovarianceBlock(new_landmark_state_position, (StateBase*)new_landmark_state_orientation, Sigma_landmark.block<2,1>(0,2));
+                getTop()->addCovarianceBlock((StateBase*)new_landmark_state_orientation, (StateBase*)new_landmark_state_orientation, Sigma_landmark.block<1,1>(2,2));
+
+                //add it to the slam map as a new landmark
+                LandmarkCorner2D* new_landmark = new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation, feature_aperture);
+                (*i_it)->addConstraint(new ConstraintCorner2DTheta(*i_it,                      //feature pointer
+                                                                   new_landmark,               //landmark pointer
+                                                                   getFramePtr()->getPPtr(),   //_robotPPtr,
+                                                                   getFramePtr()->getOPtr(),   //_robotOPtr,
+                                                                   new_landmark->getPPtr(),    //_landmarkPPtr,
+                                                                   new_landmark->getOPtr()));  //_landmarkOPtr,
+                getTop()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
+            }
         }
         else //feature-landmark association case
         {
@@ -322,8 +434,12 @@ void CaptureLaser2D::establishConstraintsMHTree()
             {
                 if ( jj == ft_lk_pairs[kk].second ) 
                 {
-                    correspondent_landmark = (*j_it);
-                    correspondent_landmark->hit();
+                    (*i_it)->addConstraint(new ConstraintCorner2DTheta(*i_it,                      //feature pointer
+                                                                       (LandmarkCorner2D*)(*j_it), //landmark pointer
+                                                                       getFramePtr()->getPPtr(),   //_robotPPtr,
+                                                                       getFramePtr()->getOPtr(),   //_robotOPtr,
+                                                                       (*j_it)->getPPtr(),         //_landmarkPPtr,
+                                                                       (*j_it)->getOPtr()));       //_landmarkOPtr,
                     break; 
                 }
             }
@@ -331,16 +447,7 @@ void CaptureLaser2D::establishConstraintsMHTree()
             //increment pair index
             kk++;
         }
-        
-        // Add constraint to the correspondent landmark
-        (*i_it)->addConstraint(new ConstraintCorner2DTheta(
-                            *i_it,                      //feature pointer
-                            (LandmarkCorner2D*)correspondent_landmark,     //landmark pointer
-                            getFramePtr()->getPPtr(),       //_robotPPtr,
-                            getFramePtr()->getOPtr(),       //_robotOPtr,
-                            correspondent_landmark->getPPtr(),   //_landmarkPPtr,
-                            correspondent_landmark->getOPtr())); //_landmarkOPtr,
-    }  
+    }
 }
 
 Eigen::VectorXs CaptureLaser2D::computePrior(const TimeStamp& _now) const
@@ -350,237 +457,104 @@ Eigen::VectorXs CaptureLaser2D::computePrior(const TimeStamp& _now) const
 
 WolfScalar CaptureLaser2D::computeMahalanobisDistance(const FeatureBase* _feature_ptr, const LandmarkBase* _landmark_ptr)
 {
-    FrameBase* frame_ptr = _feature_ptr->getFramePtr();
-    unsigned int frame_p_size = frame_ptr->getPPtr()->getStateSize();
-    unsigned int frame_o_size = frame_ptr->getOPtr()->getStateSize();
-    unsigned int landmark_p_size = _landmark_ptr->getPPtr()->getStateSize();
-    unsigned int landmark_o_size = _landmark_ptr->getOPtr()->getStateSize();
+    assert(_landmark_ptr->getType() == LANDMARK_CORNER && "mahalanobis only available for corners for now");
 
-    Eigen::Vector2s p_robot = getFramePtr()->getPPtr()->getVector();
-    Eigen::Matrix2s R_robot = ((StateOrientation*) (getFramePtr()->getOPtr()))->getRotationMatrix().topLeftCorner<2,2>();
+    FrameBase* frame_ptr = getFramePtr();
+
+    Eigen::Vector2s p_robot = frame_ptr->getPPtr()->getVector();
+    WolfScalar      o_robot = frame_ptr->getOPtr()->getYaw();
+
     Eigen::Vector2s p_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
+    WolfScalar      o_sensor = getSensorPtr()->getOPtr()->getYaw();
     Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2, 2>();
+
     Eigen::Vector2s p_landmark = _landmark_ptr->getPPtr()->getVector();
+    WolfScalar      o_landmark = _landmark_ptr->getOPtr()->getYaw();
 
-    // Fill sigma matrix (upper diagonal only)
-    Eigen::MatrixXs Sigma(frame_p_size + frame_o_size + landmark_p_size + landmark_o_size, frame_p_size + frame_o_size + landmark_p_size + landmark_o_size);
+    const Eigen::Vector2s& p_feature = _feature_ptr->getMeasurement().head(2);
+    const WolfScalar&      o_feature = _feature_ptr->getMeasurement()(2);
 
-    Eigen::Map<Eigen::MatrixXs> frame_p_frame_p_cov(&Sigma(0,0),frame_p_size,frame_p_size);
-    Eigen::Map<Eigen::MatrixXs> frame_p_frame_o_cov(&Sigma(0,frame_p_size),frame_p_size,frame_o_size);
-    Eigen::Map<Eigen::MatrixXs> frame_p_landmark_p_cov(&Sigma(0,frame_p_size+frame_o_size),frame_p_size,landmark_p_size);
-    Eigen::Map<Eigen::MatrixXs> frame_p_landmark_o_cov(&Sigma(0,frame_p_size+frame_o_size+landmark_p_size),frame_p_size,landmark_o_size);
+    WolfScalar o_rs = getSensorPtr()->getOPtr()->getYaw() + frame_ptr->getOPtr()->getYaw(); // Sum of theta_sensor and theta_robot
+    Eigen::Matrix2s R_sr = Eigen::Rotation2D<WolfScalar>(o_rs).matrix(); // Sum of theta_sensor and theta_robot
+    Eigen::Vector2s p_robot_landmark = p_robot - p_landmark;
 
-    getTop()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getPPtr(), frame_p_frame_p_cov);
-    getTop()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getOPtr(), frame_p_frame_o_cov);
-    getTop()->getCovarianceBlock(frame_ptr->getPPtr(), _landmark_ptr->getPPtr(), frame_p_landmark_p_cov);
-    getTop()->getCovarianceBlock(frame_ptr->getPPtr(), _landmark_ptr->getOPtr(), frame_p_landmark_o_cov);
+    // ------------------------ error - e
+    Eigen::Vector3s e;
+    e.head(2) = p_feature + R_sr.transpose()*p_robot_landmark + R_sensor.transpose()*p_sensor;
+    e(2) = o_feature - o_landmark + o_robot + o_sensor;
+    e(2) = pi2pi(e(2)); // fit in (-pi, pi]
 
-    Eigen::Map<Eigen::MatrixXs> frame_o_frame_o_cov(&Sigma(frame_p_size,frame_p_size),frame_o_size,frame_o_size);
-    Eigen::Map<Eigen::MatrixXs> frame_o_landmark_p_cov(&Sigma(frame_p_size,frame_p_size+frame_o_size),frame_o_size,landmark_p_size);
-    Eigen::Map<Eigen::MatrixXs> frame_o_landmark_o_cov(&Sigma(frame_p_size,frame_p_size+frame_o_size+landmark_p_size),frame_o_size,landmark_o_size);
+    std::cout << "robot = " << p_robot.transpose() << o_robot << std::endl;
+    std::cout << "sensor = " << p_sensor.transpose() << o_sensor << std::endl;
+    std::cout << "landmark = " << p_landmark.transpose() << o_landmark << std::endl;
+    std::cout << "feature = " << p_feature.transpose() << o_feature << std::endl;
+    std::cout << "robot - landmark = " << p_robot_landmark.transpose() << std::endl;
+    std::cout << "e = " << e.transpose() << std::endl;
 
-    getTop()->getCovarianceBlock(frame_ptr->getOPtr(), frame_ptr->getOPtr(), frame_o_frame_o_cov);
-    getTop()->getCovarianceBlock(frame_ptr->getOPtr(), _landmark_ptr->getPPtr(), frame_o_landmark_p_cov);
-    getTop()->getCovarianceBlock(frame_ptr->getOPtr(), _landmark_ptr->getOPtr(), frame_o_landmark_o_cov);
+    // ------------------------ Sigma_e
+    // JACOBIAN
+    Eigen::Matrix<WolfScalar, 3, 6> Jlr = Eigen::Matrix<WolfScalar, 3, 6>::Zero();
+    Jlr.block<2,2>(0,0) = -R_sr.transpose();
+    Jlr(2,2) = -1;
+    Jlr.block<2,2>(0,3) = R_sr.transpose();
+    Jlr(0,2) = -p_robot_landmark(0)*sin(o_rs) + p_robot_landmark(1)*cos(o_rs);
+    Jlr(1,2) = -p_robot_landmark(0)*cos(o_rs) - p_robot_landmark(1)*sin(o_rs);
+    Jlr(2,2) = 1;
 
-    Eigen::Map<Eigen::MatrixXs> landmark_p_landmark_p_cov(&Sigma(frame_p_size+frame_o_size,frame_p_size+frame_o_size),landmark_p_size,landmark_p_size);
-    Eigen::Map<Eigen::MatrixXs> landmark_p_landmark_o_cov(&Sigma(frame_p_size+frame_o_size,frame_p_size+frame_o_size+landmark_p_size),landmark_p_size,landmark_o_size);
+    // SIGMA (filling upper diagonal only)
+    const Eigen::Matrix3s& Sigma_feature = _feature_ptr->getMeasurementCovariance().topLeftCorner<3,3>();
+    Eigen::MatrixXs Sigma = Eigen::MatrixXs::Zero(6,6);
+    // Sigma_ll
+    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), Sigma, 0,0);
+    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), Sigma, 0,2);
+    getTop()->getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), Sigma, 2,2);
+    // Sigma_lr
+    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), frame_ptr->getPPtr(), Sigma, 0,3);
+    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), frame_ptr->getOPtr(), Sigma, 0,5);
+    getTop()->getCovarianceBlock(_landmark_ptr->getOPtr(), frame_ptr->getPPtr(), Sigma, 2,3);
+    getTop()->getCovarianceBlock(_landmark_ptr->getOPtr(), frame_ptr->getOPtr(), Sigma, 2,5);
+    // Sigma_rr
+    getTop()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getPPtr(), Sigma, 3,3);
+    getTop()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getOPtr(), Sigma, 3,5);
+    getTop()->getCovarianceBlock(frame_ptr->getOPtr(), frame_ptr->getOPtr(), Sigma, 5,5);
 
-    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), landmark_p_landmark_p_cov);
-    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), landmark_p_landmark_o_cov);
+    // MAHALANOBIS DISTANCE
+    WolfScalar squared_mahalanobis_distance = e.transpose() * (Sigma_feature + Jlr * Sigma.selfadjointView<Eigen::Upper>() * Jlr.transpose()).inverse() * e;
 
-    Eigen::Map<Eigen::MatrixXs> landmark_o_landmark_o_cov(&Sigma(frame_p_size+frame_o_size+landmark_p_size,frame_p_size+frame_o_size+landmark_p_size),landmark_o_size,landmark_o_size);
-    getTop()->getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), landmark_o_landmark_o_cov);
-
-    // Jacobian
-    if (_landmark_ptr->getOPtr()->getStateType() == ST_THETA && frame_ptr->getOPtr()->getStateType() == ST_THETA)
+    //std::cout << "mahalanobis_distance = " << mahalanobis_distance << std::endl;
+    if (e.norm() < 2)
     {
-        Eigen::MatrixXs J = Eigen::MatrixXs::Zero(6,3);
-        WolfScalar theta_s_r = *getSensorPtr()->getOPtr()->getPtr() + *frame_ptr->getOPtr()->getPtr(); // Sum of theta_sensor and theta_robot
-
-        J(0,0) = -cos(theta_s_r);
-        J(0,1) =  sin(theta_s_r);
-        J(1,0) = -sin(theta_s_r);
-        J(1,1) = -cos(theta_s_r);
-        J(2,0) = -sin(theta_s_r) * (p_landmark(0) - p_robot(0)) - cos(theta_s_r) * (p_landmark(1) - p_robot(1));
-        J(2,1) =  cos(theta_s_r) * (p_landmark(0) - p_robot(0)) - sin(theta_s_r) * (p_landmark(1) - p_robot(1));
-        J(2,2) = -1;
-        J(3,0) =  cos(theta_s_r);
-        J(3,1) = -sin(theta_s_r);
-        J(4,0) =  sin(theta_s_r);
-        J(4,1) =  cos(theta_s_r);
-        J(5,2) =  1;
-
-        // Feature-Landmark (euclidean) distance
-        const Eigen::Vector2s& feature_position = _feature_ptr->getMeasurement().head(2);
-        const WolfScalar& feature_orientation = _feature_ptr->getMeasurement()(2);
-
-        Eigen::Vector2s landmark_local_position = R_sensor.transpose() * (R_robot.transpose() * (p_landmark - p_robot) - p_sensor);
-        WolfScalar landmark_local_orientation = *_landmark_ptr->getOPtr()->getPtr() - *frame_ptr->getOPtr()->getPtr() - *getSensorPtr()->getOPtr()->getPtr();
-
-        Eigen::Vector3s d_euclidean;
-        d_euclidean.head(2) = feature_position - landmark_local_position;
-        d_euclidean(2) = feature_orientation - landmark_local_orientation;
-        // fit in (-pi, pi]
-        d_euclidean(2) = (d_euclidean(2) > 0 ? fmod(d_euclidean(2) + M_PI, 2 * M_PI) - M_PI : fmod(d_euclidean(2) - M_PI, 2 * M_PI) + M_PI);
-
-        // Feature-Landmark Mahalanobis distance
-        // covariance: Eigen::Matrix3s S_m = J * Sigma.selfadjointView<Eigen::Upper>() * J.transpose() + _feature_ptr->getMeasurementCovariance().topLeftCorner<3,3>();
-        WolfScalar mahalanobis_distance = d_euclidean.transpose() * (J.transpose() * Sigma.selfadjointView<Eigen::Upper>() * J + _feature_ptr->getMeasurementCovariance().topLeftCorner<3,3>()).inverse() * d_euclidean;
-        //std::cout << "mahalanobis_distance = " << mahalanobis_distance << std::endl;
-        return mahalanobis_distance;
+        std::cout << "euclidean distance = " << e.transpose() << std::endl << "squared_mahalanobis_distance = " << squared_mahalanobis_distance << std::endl;
+        std::cout << "Sigma_feature = " << std::endl << Sigma_feature << std::endl;
+        std::cout << "Sigma_robot_landmark = " << std::endl << Sigma << std::endl << std::endl << std::endl;
     }
-    else
-    {
-        std::cout << "ERROR: Jacobian using complex angles not computed..." << std::endl; //TODO
-        assert(false);
-        return 0;
-    }
+
+    return squared_mahalanobis_distance;
 }
 
-void CaptureLaser2D::tryContainer(LandmarkCorner2D* _corner_ptr)
+bool CaptureLaser2D::tryContainer(FeatureCorner2D* _corner_ptr, LandmarkCorner2D* old_corner_landmark_ptr, int feature_idx, int corner_idx)
 {
-    //std::cout << "Trying container... aperture = " << _corner_ptr->getAperture() << std::endl;
-    LandmarkContainer* container_ptr = nullptr;
+    //std::cout << "Trying container... aperture = " << _corner_ptr->getMeasurement()(3) << std::endl;
 
     // It has to be 90º corner
-    if (std::fabs(_corner_ptr->getAperture() - 3 * M_PI / 2) < MAX_ACCEPTED_APERTURE_DIFF)
+    if (std::fabs(pi2pi(_corner_ptr->getMeasurement()(3) - 3 * M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF)
     {
         //std::cout << "   90º OK..." << std::endl;
         // Check all existing corners searching a container
         for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->rbegin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->rend(); landmark_it++)
         {
-            if ((*landmark_it)->nodeId() == _corner_ptr->nodeId())
-                continue;
-
             //std::cout << "   landmark " << (*landmark_it)->nodeId();
             // should be a 90º corner
-            if ((*landmark_it)->getType() == LANDMARK_CORNER && std::fabs(((LandmarkCorner2D*)(*landmark_it))->getAperture() - 3 * M_PI / 2) < MAX_ACCEPTED_APERTURE_DIFF)
+            if ((*landmark_it)->getType() == LANDMARK_CORNER && // should be a corner
+                std::fabs(pi2pi(((LandmarkCorner2D*)(*landmark_it))->getAperture() - 3 * M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF && // should be a corner
+                fitContainer(_corner_ptr->getMeasurement().head(2), _corner_ptr->getMeasurement(2), (*landmark_it)->getPPtr()->getVector(), (*landmark_it)->getOPtr()->getYaw(), feature_idx, corner_idx))
             {
-                //std::cout << "   90º OK..." << std::endl;
-                WolfScalar MAX_ACCEPTED_DISTANCE_DIFF = 0.5;
-                WolfScalar angle_diff = (*landmark_it)->getOPtr()->getYaw() - _corner_ptr->getOPtr()->getYaw();
-                Eigen::Vector2s v_diff = (*landmark_it)->getPPtr()->getVector() - _corner_ptr->getPPtr()->getVector();
-                //std::cout << "  Angle difference = " << angle_diff << std::endl;
-                //std::cout << "  position difference = " << v_diff.transpose() << std::endl;
-
-                // Large side
-                if (abs(v_diff.norm() - 12.2) < MAX_ACCEPTED_DISTANCE_DIFF)
-                {
-                    // counterclockwise order
-                    if (abs(pi2pi(angle_diff - M_PI/2)) < MAX_ACCEPTED_APERTURE_DIFF &&
-                        abs(pi2pi(atan2(v_diff(1), v_diff(0)) - _corner_ptr->getOPtr()->getYaw())) < MAX_ACCEPTED_APERTURE_DIFF)
-                    {
-                        std::cout << "   next counterclockwise large container side detected!" << std::endl;
-                        //create new landmark at global coordinates
-                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
-                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
-
-                        //add it to the slam map as a new landmark
-                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, _corner_ptr, (LandmarkCorner2D*)(*landmark_it), nullptr, nullptr);
-
-                        break;
-                    }
-
-                    // clockwise order
-                    else if (abs(pi2pi(angle_diff + M_PI/2)) < MAX_ACCEPTED_APERTURE_DIFF &&
-                             abs(pi2pi(atan2(-v_diff(1), -v_diff(0)) - (*landmark_it)->getOPtr()->getYaw())) < MAX_ACCEPTED_APERTURE_DIFF)
-                    {
-                        std::cout << "   prev counterclockwise large container side detected!" << std::endl;
-                        //create new landmark at global coordinates
-                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
-                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
-
-                        //add it to the slam map as a new landmark
-                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, (LandmarkCorner2D*)(*landmark_it), _corner_ptr, nullptr, nullptr);
-
-                        break;
-                    }
-                }
-                // Short side
-                else if (abs(v_diff.norm() - 2.44) < MAX_ACCEPTED_DISTANCE_DIFF)
-                {
-                    // counterclockwise order
-                    if (abs(pi2pi(angle_diff - M_PI/2)) < MAX_ACCEPTED_APERTURE_DIFF &&
-                        abs(pi2pi(atan2(v_diff(1), v_diff(0)) - _corner_ptr->getOPtr()->getYaw())) < MAX_ACCEPTED_APERTURE_DIFF)
-                    {
-                        std::cout << "   next counterclockwise short container side detected!" << std::endl;
-                        //create new landmark at global coordinates
-                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
-                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
-
-                        //add it to the slam map as a new landmark
-                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, nullptr, _corner_ptr, (LandmarkCorner2D*)(*landmark_it), nullptr);
-
-                        break;
-                    }
-
-                    // clockwise order
-                    else if (abs(pi2pi(angle_diff + M_PI/2)) < MAX_ACCEPTED_APERTURE_DIFF &&
-                             abs(pi2pi(atan2(-v_diff(1), -v_diff(0)) - (*landmark_it)->getOPtr()->getYaw())) < MAX_ACCEPTED_APERTURE_DIFF)
-                    {
-                        std::cout << "   prev counterclockwise short container side detected!" << std::endl;
-                        //create new landmark at global coordinates
-                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
-                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
-
-                        //add it to the slam map as a new landmark
-                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, nullptr, (LandmarkCorner2D*)(*landmark_it), _corner_ptr, nullptr);
-
-                        break;
-                    }
-                }
-                // opposite corners
-                else if (abs(pi2pi(angle_diff - M_PI)) < MAX_ACCEPTED_APERTURE_DIFF &&
-                         abs(v_diff.norm() - 12.4416) < MAX_ACCEPTED_DISTANCE_DIFF)
-                {
-                    // large side aligned corners
-                    if (abs(pi2pi(atan2(v_diff(1), v_diff(0)) - _corner_ptr->getOPtr()->getYaw() - 0.1974)) < MAX_ACCEPTED_APERTURE_DIFF)
-                    {
-                        std::cout << "   opposite corners (aligned to large sides) detected!" << std::endl;
-                        //create new landmark at global coordinates
-                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
-                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
-
-                        //add it to the slam map as a new landmark
-                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, (LandmarkCorner2D*)(*landmark_it), nullptr, _corner_ptr, nullptr);
-
-                        break;
-                    }
-                    else if (abs(pi2pi(atan2(v_diff(1), v_diff(0)) - _corner_ptr->getOPtr()->getYaw() - 1.3734)) < MAX_ACCEPTED_APERTURE_DIFF)
-                    {
-                        std::cout << "   opposite corners (aligned to short sides) detected!" << std::endl;
-                        //create new landmark at global coordinates
-                        StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
-                        StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
-                        getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
-
-                        //add it to the slam map as a new landmark
-                        container_ptr = new LandmarkContainer(new_container_position, new_container_orientation, nullptr, (LandmarkCorner2D*)(*landmark_it), nullptr, _corner_ptr);
-
-                        break;
-                    }
-                }
+                old_corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
+                return true;
             }
         }
     }
-
-    if (container_ptr != nullptr)
-        getTop()->getMapPtr()->addLandmark((LandmarkBase*)(container_ptr));
+    return false;
 }
 
-WolfScalar CaptureLaser2D::pi2pi(const WolfScalar& angle) const
-{
-    return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
-}
+

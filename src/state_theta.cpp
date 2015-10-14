@@ -37,10 +37,11 @@ unsigned int StateTheta::getStateSize() const
 void StateTheta::rotationMatrix(Eigen::Matrix3s& R) const
 {
     R = Eigen::Matrix3s::Identity();
-    R(0, 0) = cos(*state_ptr_);
-    R(1, 1) = cos(*state_ptr_);
-    R(0, 1) = -sin(*state_ptr_);
-    R(1, 0) = sin(*state_ptr_);
+    R.block<2,2>(0,0) = Eigen::Rotation2D<WolfScalar>(*state_ptr_).matrix();
+//    R(0, 0) = cos(*state_ptr_);
+//    R(1, 1) = cos(*state_ptr_);
+//    R(0, 1) = -sin(*state_ptr_);
+//    R(1, 0) = sin(*state_ptr_);
     //std::cout << "StateTheta::getRotationMatrix()" << R << std::endl;
 }
 

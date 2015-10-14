@@ -39,7 +39,14 @@ class ConstraintOdom2DComplexAngle : public ConstraintSparse<3, 2, 2, 2, 2>
             // Residuals
             _residuals[0] = (expected_longitudinal - T(measurement_(0))) / T(sqrt(measurement_covariance_(0, 0)));
             _residuals[1] = (expected_lateral - T(measurement_(1))) / T(sqrt(measurement_covariance_(1, 1)));
-            _residuals[2] = (expected_rotation - T(measurement_(2))) / T(sqrt(measurement_covariance_(2, 2)));
+            _residuals[2] = expected_rotation - T(measurement_(2));
+
+            while (_residuals[2] > T(M_PI))
+                _residuals[2] = _residuals[2] - T(2*M_PI);
+            while (_residuals[2] <= T(-M_PI))
+                _residuals[2] = _residuals[2] + T(2*M_PI);
+
+            _residuals[2] = _residuals[2]  / T(sqrt(measurement_covariance_(2, 2)));
 
 //          T expected_longitudinal = (_p2[0]-_p1[0])*(_p2[0]-_p1[0]) + (_p2[1]-_p1[1])*(_p2[1]-_p1[1]); //square of the range
 //			T expected_rotation = atan2(_o2[1]*_o1[0] - _o2[0]*_o1[1], _o1[0]*_o2[0] + _o1[1]*_o2[1]);

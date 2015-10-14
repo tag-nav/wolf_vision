@@ -74,7 +74,7 @@ class WolfProblem: public NodeBase
          *
          */
         void getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov_block) const;
-        void getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::Map<Eigen::MatrixXs>& _cov_block) const;
+        void getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col) const;
 
         /** \brief Removes a new state unit of the state
 		 *
