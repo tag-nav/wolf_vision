@@ -158,6 +158,14 @@ class NodeLinked : public NodeBase
          */
         void removeDownNode(const LowerNodeIter& _iter);
 
+        /** \brief Removes a down node from list, given a pointer
+         *
+         * Removes a down node from the list
+         * @param _ptr a pointer to the particular down node in the list that will be removed
+         *
+         */
+        void removeDownNode(const LowerNodePtr _ptr);
+
         /** \brief Removes a down node from the list, given a node id
          *
          * Removes a down node from the multimap
@@ -337,6 +345,13 @@ inline void NodeLinked<UpperType, LowerType>::removeDownNode(const unsigned int 
             break; //avoid comparison of iter and list.end(), otherwise Valgrind claimed
         }
     }
+}
+
+template<class UpperType, class LowerType>
+inline void NodeLinked<UpperType, LowerType>::removeDownNode(const LowerNodePtr _ptr)
+{
+    down_node_list_.remove(_ptr);
+    delete _ptr;
 }
 
 template<class UpperType, class LowerType>

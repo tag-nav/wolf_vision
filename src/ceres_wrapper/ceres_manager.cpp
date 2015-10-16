@@ -55,8 +55,6 @@ void CeresManager::computeCovariances(WolfProblem* _problem_ptr)
 	// Landmarks and cross-covariance with current frame
 	for(auto landmark_it = _problem_ptr->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it!=_problem_ptr->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
 	{
-	    if ((*landmark_it)->getType() == LANDMARK_CORNER)
-        {
             double* landmark_position_ptr = (*landmark_it)->getPPtr()->getPtr();
             double* landmark_orientation_ptr = (*landmark_it)->getOPtr()->getPtr();
 
@@ -67,7 +65,6 @@ void CeresManager::computeCovariances(WolfProblem* _problem_ptr)
             covariance_blocks.push_back(std::make_pair(landmark_position_ptr,current_orientation_ptr));
             covariance_blocks.push_back(std::make_pair(landmark_orientation_ptr,current_position_ptr));
             covariance_blocks.push_back(std::make_pair(landmark_orientation_ptr,current_orientation_ptr));
-        }
 	}
 
 	// COMPUTE DESIRED COVARIANCES
@@ -93,8 +90,6 @@ void CeresManager::computeCovariances(WolfProblem* _problem_ptr)
         // Landmarks and cross-covariance with current frame
         for(auto landmark_it = _problem_ptr->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it!=_problem_ptr->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
         {
-            if ((*landmark_it)->getType() == LANDMARK_CORNER)
-            {
                 StateBase* landmark_position = (*landmark_it)->getPPtr();
                 StateBase* landmark_orientation = (*landmark_it)->getOPtr();
                 double* landmark_position_ptr = landmark_position->getPtr();
@@ -130,7 +125,6 @@ void CeresManager::computeCovariances(WolfProblem* _problem_ptr)
                 _problem_ptr->addCovarianceBlock(landmark_position, current_orientation, m_landmark_p_frame_o);
                 _problem_ptr->addCovarianceBlock(landmark_orientation, current_position, m_landmark_o_frame_p);
                 _problem_ptr->addCovarianceBlock(landmark_orientation, current_orientation, m_landmark_o_frame_o);
-            }
         }
 	}
 	else
@@ -372,6 +366,23 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
 													specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
+        case CTR_CONTAINER:
+        {
+            ConstraintContainer* specific_ptr = (ConstraintContainer*)(_corrPtr);
+            return new ceres::AutoDiffCostFunction<ConstraintContainer,
+                                                    specific_ptr->measurementSize,
+                                                    specific_ptr->block0Size,
+                                                    specific_ptr->block1Size,
+                                                    specific_ptr->block2Size,
+                                                    specific_ptr->block3Size,
+                                                    specific_ptr->block4Size,
+                                                    specific_ptr->block5Size,
+                                                    specific_ptr->block6Size,
+                                                    specific_ptr->block7Size,
+                                                    specific_ptr->block8Size,
+                                                    specific_ptr->block9Size>(specific_ptr);
+            break;
+        }
 		default:
 			std::cout << "Unknown constraint type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
 

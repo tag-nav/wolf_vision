@@ -28,8 +28,17 @@ LandmarkBase::~LandmarkBase()
 	if (w_ptr_ != nullptr)
 		getTop()->removeState(w_ptr_);
 
-	for (auto ctr_it = constraints_list_.begin(); ctr_it != constraints_list_.end(); ctr_it++)
-	    (*ctr_it)->getFeaturePtr()->removeDownNode((*ctr_it)->nodeId());
+	//std::cout << "state deleted" << std::endl;
+
+    auto ctr_it = constraints_list_.begin();
+	while (ctr_it != constraints_list_.end())
+	{
+	    //std::cout << "deleting constraint " << (*ctr_it)->nodeId() << std::endl;
+	    (*ctr_it)->getFeaturePtr()->removeDownNode((*ctr_it));
+        //std::cout << "deleted " << std::endl;
+        ctr_it = constraints_list_.begin();
+	}
+	//std::cout << "constraints deleted" << std::endl;
 }
 
 void LandmarkBase::setStatus(LandmarkStatus _st)

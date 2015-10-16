@@ -34,7 +34,9 @@
 //#include "feature_corner_2D.h"
 
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level 
-const WolfScalar MAX_ACCEPTED_APERTURE_DIFF = 10.0*M_PI/180.; //5 degrees
+const WolfScalar MAX_ACCEPTED_APERTURE_DIFF = 20.0*M_PI/180.; //20 degrees
+const WolfScalar CONTAINER_WIDTH = 2.44;
+const WolfScalar CONTAINER_LENGTH = 12.20;
 
 class CaptureLaser2D : public CaptureBase
 {
@@ -127,9 +129,24 @@ class CaptureLaser2D : public CaptureBase
 
         virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const;
 
-        WolfScalar computeMahalanobisDistance(const FeatureBase* _feature, const LandmarkBase* _landmark);
+        Eigen::VectorXs computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr, const LandmarkBase* _landmark_ptr, const Eigen::MatrixXs& _mu);
 
-        bool tryContainer(FeatureCorner2D* _corner_ptr, LandmarkCorner2D* old_corner_landmark_ptr, int feature_idx, int corner_idx);
+        /** \brief Tries to fit a container given a feature and all existing landmarks
+         *
+         * Tries to fit a container given a feature and all existing landmarks. Returns false if not fitted and true otherwise.
+         * Returns via params feature_idx & corner_idx the index of the feature and the landmark respectively and in old_corner_landmark_ptr, the corresponding landmark:
+         *
+         *    1 ------------------------- 0
+         *    |                           |
+         *    |                           |
+         *    |                           |
+         *    2 ------------------------- 3
+         *
+         **/
+        bool fitNewContainer(FeatureCorner2D* _corner_ptr, LandmarkCorner2D*& old_corner_landmark_ptr, int& feature_idx, int& corner_idx);
 
+        void createCornerLandmark(FeatureCorner2D* _corner_ptr, const Eigen::Vector3s& _feature_global_pose);
+
+        void createContainerLandmark(FeatureCorner2D* _corner_ptr, const Eigen::Vector3s& _feature_global_pose, LandmarkCorner2D*& _old_corner_landmark_ptr, int& _feature_idx, int& _corner_idx);
 };
 #endif /* CAPTURE_LASER_2D_H_ */

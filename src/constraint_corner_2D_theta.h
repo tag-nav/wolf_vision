@@ -31,10 +31,7 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 		virtual ~ConstraintCorner2DTheta()
 		{
 			//std::cout << "deleting ConstraintCorner2DTheta " << nodeId() << std::endl;
-			if (lmk_ptr_->getHits() == 1)
-				getTop()->getMapPtr()->removeLandmark(lmk_ptr_);
-			else
-				lmk_ptr_->unhit(this);
+			lmk_ptr_->unhit(this);
 		}
 
 		LandmarkCorner2D* getLandmarkPtr()

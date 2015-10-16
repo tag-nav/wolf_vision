@@ -18,6 +18,7 @@
 #include "../constraint_odom_2D_theta.h"
 #include "../constraint_odom_2D_complex_angle.h"
 #include "../constraint_corner_2D_theta.h"
+#include "../constraint_container.h"
 
 // ceres wrapper includes
 #include "complex_angle_parametrization.h"
