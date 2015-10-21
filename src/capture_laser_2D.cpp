@@ -138,7 +138,7 @@ void CaptureLaser2D::establishConstraintsMHTree()
         corners << -CONTAINER_LENGTH / 2, -CONTAINER_WIDTH / 2,  -CONTAINER_LENGTH / 2, -CONTAINER_WIDTH / 2,
                    -CONTAINER_WIDTH / 2,  -CONTAINER_LENGTH / 2, -CONTAINER_WIDTH / 2,  -CONTAINER_LENGTH / 2,
                     0,                     M_PI / 2,              M_PI,                 -M_PI / 2;
-        Eigen::MatrixXs rotated_corners = corners(3,4);
+        Eigen::MatrixXs rotated_corners = corners;
         Eigen::VectorXs squared_mahalanobis_distances;
 
         // COMPUTING ALL EXPECTED FEATURES
