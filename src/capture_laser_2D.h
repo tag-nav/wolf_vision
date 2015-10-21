@@ -4,6 +4,7 @@
 
 //std includes
 #include <queue>
+#include <map>
 #include <random>
 #include <math.h>
 #include <algorithm> //find(), sort()
@@ -113,23 +114,18 @@ class CaptureLaser2D : public CaptureBase
 
         /** \brief Create constraints given current measured features and existing landmarks
          * 
-         * Create constraints given current measured features and existing landmarks.
-         * Uses a Brute force Nearest Neighbor linear search
-         * 
-         **/        
-        void establishConstraints();
-        
-        /** \brief Create constraints given current measured features and existing landmarks
-         * 
          * Create constraints given current measured features and existing landmarks
          * Uses a Multi-Hypothesis Tree 
          * 
          **/
         void establishConstraintsMHTree();
 
+        void computeExpectedFeature(LandmarkBase* _landmark_ptr, Eigen::Vector4s& expected_feature_, Eigen::Matrix3s& expected_feature_cov_);
+
         virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const;
 
         Eigen::VectorXs computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr, const LandmarkBase* _landmark_ptr, const Eigen::MatrixXs& _mu);
+        Eigen::VectorXs computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr, const Eigen::Vector4s& _expected_feature, const Eigen::Matrix3s& _expected_feature_cov, const Eigen::MatrixXs& _mu);
 
         /** \brief Tries to fit a container given a feature and all existing landmarks
          *
@@ -147,6 +143,6 @@ class CaptureLaser2D : public CaptureBase
 
         void createCornerLandmark(FeatureCorner2D* _corner_ptr, const Eigen::Vector3s& _feature_global_pose);
 
-        void createContainerLandmark(FeatureCorner2D* _corner_ptr, const Eigen::Vector3s& _feature_global_pose, LandmarkCorner2D*& _old_corner_landmark_ptr, int& _feature_idx, int& _corner_idx);
+        void createContainerLandmark(FeatureCorner2D* _corner_ptr, const Eigen::Vector3s& _feature_global_pose, LandmarkCorner2D* _old_corner_landmark_ptr, int& _feature_idx, int& _corner_idx);
 };
 #endif /* CAPTURE_LASER_2D_H_ */

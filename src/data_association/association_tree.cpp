@@ -68,8 +68,7 @@ void AssociationTree::chooseBestTerminus(std::list<AssociationNode*>::iterator &
     }   
 }
 
-//void AssociationTree::solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<unsigned int> &  _unassoc)
-void AssociationTree::solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<bool> & _associated_mask)
+void AssociationTree::solve(std::map<unsigned int, unsigned int> & _pairs, std::vector<bool> & _associated_mask)
 {
     std::list<AssociationNode*>::iterator best_node;
     bool rootReached = false;
@@ -109,10 +108,56 @@ void AssociationTree::solve(std::vector<std::pair<unsigned int, unsigned int> > 
         if ( anPtr->getTargetIndex() < nt_ ) //association pair
         {
             _associated_mask.at(anPtr->getDetectionIndex()) = true; 
-            _pairs.push_back( std::pair<unsigned int, unsigned int>(anPtr->getDetectionIndex(), anPtr->getTargetIndex()) );
+            _pairs[anPtr->getDetectionIndex()] = anPtr->getTargetIndex();
         }
         anPtr = anPtr->upNodePtr();
     }        
+}
+
+void AssociationTree::solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<bool> & _associated_mask)
+{
+    std::list<AssociationNode*>::iterator best_node;
+    bool rootReached = false;
+    AssociationNode *anPtr;
+
+    //grows tree exploring all likely hypothesis
+    growTree();
+
+    //computes tree probs
+    computeTree();
+
+    //normalizes tree probs
+    normalizeTree();
+
+    //if terminus_node_list_ is empty exit withou pairing
+    if ( terminus_node_list_.empty() ) return;
+
+    //choose best node based on best tree probability
+    chooseBestTerminus(best_node);
+
+    //resize _associated_mask and resets it to false
+    _associated_mask.resize(nd_,false);
+
+    //set pairs
+    anPtr = *best_node; //init pointer
+    int ii=0;
+    while( ! anPtr->isRoot() ) //set pairs
+    {
+//         if ( anPtr->getTargetIndex() == nt_) //detection with void target -> unassociated detection
+//         {
+//             _unassoc.push_back(anPtr->getDetectionIndex());
+//         }
+//         else
+//         {
+//             _pairs.push_back( std::pair<unsigned int, unsigned int>(anPtr->getDetectionIndex(), anPtr->getTargetIndex()) );
+//         }
+        if ( anPtr->getTargetIndex() < nt_ ) //association pair
+        {
+            _associated_mask.at(anPtr->getDetectionIndex()) = true;
+            _pairs.push_back( std::pair<unsigned int, unsigned int>(anPtr->getDetectionIndex(), anPtr->getTargetIndex()) );
+        }
+        anPtr = anPtr->upNodePtr();
+    }
 }
     
 void AssociationTree::printTree()

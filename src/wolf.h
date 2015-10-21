@@ -127,7 +127,7 @@ typedef enum
  * Enumeration of all possible state parametrizations.
  *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- *
+ *. TODO: Check othe attributes also (
  */
 typedef enum
 {

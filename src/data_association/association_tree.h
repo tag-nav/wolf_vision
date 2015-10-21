@@ -12,6 +12,7 @@
 #include "matrix.h"
 #include "association_solver.h"
 #include "association_node.h"
+#include <map>
 
 /** \brief The whole decision tree
  * 
@@ -95,9 +96,9 @@ class AssociationTree : public AssociationSolver
          * \param _associated_mask Resized to nd_. Marks true at i if detection d_i has been associated, otherwise marks false
          * 
          **/
-        //void solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<unsigned int> & _unassoc);
+        void solve(std::map<unsigned int, unsigned int> & _pairs, std::vector<bool> & _associated_mask);
         void solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<bool> & _associated_mask);
-        
+
         /** \brief Prints the tree
         * 
         * Prints the tree
