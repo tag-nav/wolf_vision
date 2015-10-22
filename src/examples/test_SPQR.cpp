@@ -6,7 +6,8 @@
  */
 
 #include <iostream>
-#include <Eigen/SPQRSupport>
+#include <eigen3/Eigen/SPQRSupport>
+#include <eigen3/Eigen/CholmodSupport>
 #include "SuiteSparseQR.hpp"
 
 using namespace Eigen;

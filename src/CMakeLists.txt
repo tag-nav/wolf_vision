@@ -52,7 +52,7 @@ IF(laser_scan_utils_FOUND)
 ENDIF(laser_scan_utils_FOUND)
 
 IF(Suitesparse_FOUND)
-    INCLUDE_DIRECTORIES(/usr/include/suitesparse)
+    INCLUDE_DIRECTORIES(${Suitesparse_INCLUDE_DIRS})
 ENDIF(Suitesparse_FOUND)
 
 #headers

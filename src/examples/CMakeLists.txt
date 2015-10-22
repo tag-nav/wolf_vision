@@ -57,8 +57,8 @@ IF(Suitesparse_FOUND)
     TARGET_LINK_LIBRARIES(test_iQR_wolf ${PROJECT_NAME})
     
     # Testing SPQR simple test
-    ADD_EXECUTABLE(test_SPQR test_SPQR.cpp)
-    TARGET_LINK_LIBRARIES(test_SPQR ${PROJECT_NAME})
+    #ADD_EXECUTABLE(test_SPQR test_SPQR.cpp)
+    #TARGET_LINK_LIBRARIES(test_SPQR ${PROJECT_NAME})
 ENDIF(Suitesparse_FOUND)
 
 # Building and populating the wolf tree 

@@ -8,8 +8,17 @@
 #ifndef TRUNK_SRC_WOLF_SOLVER_CCOLAMD_ORDERING_H_
 #define TRUNK_SRC_WOLF_SOLVER_CCOLAMD_ORDERING_H_
 
+
+typedef int IndexType;
+
 //std includes
 #include <iostream>
+
+// Eigen includes
+#define EIGEN_DEFAULT_DENSE_INDEX_TYPE IndexType
+#include <eigen3/Eigen/OrderingMethods>
+#include <eigen3/Eigen/CholmodSupport>
+#include <eigen3/Eigen/SparseLU>
 
 // ccolamd
 #include "ccolamd.h"

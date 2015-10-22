@@ -5,8 +5,6 @@
  *      Author: jvallve
  */
 
-typedef int IndexType;
-
 //std includes
 #include <cstdlib>
 #include <iostream>
@@ -17,14 +15,13 @@ typedef int IndexType;
 #include <ctime>
 #include <queue>
 
+// ccolamd
+#include "solver/ccolamd_ordering.h"
+
 // eigen includes
-#define EIGEN_DEFAULT_DENSE_INDEX_TYPE IndexType
 #include <eigen3/Eigen/OrderingMethods>
 #include <eigen3/Eigen/CholmodSupport>
 #include <eigen3/Eigen/SparseLU>
-
-// ccolamd
-#include "solver/ccolamd_ordering.h"
 
 using namespace Eigen;
 

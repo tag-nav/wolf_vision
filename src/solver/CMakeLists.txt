@@ -1,4 +1,12 @@
 SET(HDRS_SOLVER
-    ccolamd_ordering.h )
-SET(HDRS_SOLVER
+    ccolamd_ordering.h 
+    cost_function_base.h
+    cost_function_sparse_base.h
+    cost_function_sparse.h
+    qr_solver.h
+    solver_manager.h
+    solver_QR.h
+    sparse_utils.h)
+SET(SRCS_SOLVER
+    solver_manager.cpp
     )

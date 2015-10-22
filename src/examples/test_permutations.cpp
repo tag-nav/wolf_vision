@@ -18,8 +18,6 @@
 
 // eigen includes
 #include <eigen3/Eigen/OrderingMethods>
-#include <eigen3/Eigen/CholmodSupport>
-#include <eigen3/Eigen/SparseLU>
 
 
 using namespace Eigen;
