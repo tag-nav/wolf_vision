@@ -29,12 +29,20 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
             _residuals[1] = (T(measurement_(1)) - _p[1]) / T(sqrt(measurement_covariance_(1,1)));
             _residuals[2] = T(measurement_(2)) - _o[0];
 
-            while (_residuals[2] > T(M_PI))
-                _residuals[2] = _residuals[2] - T(2*M_PI);
-            while (_residuals[2] <= T(-M_PI))
-                _residuals[2] = _residuals[2] + T(2*M_PI);
+//            std::cout << "+++++++  fix constraint +++++++" << std::endl;
+//            std::cout << "orientation:   " << _o[0] << std::endl;
+//            std::cout << "measurement:   " << T(measurement_(2)) << std::endl;
+//            std::cout << "residual:      " << _residuals[2] << std::endl;
+//            std::cout << "is > PI        " << bool(_residuals[2] > T(2*M_PI)) << std::endl;
+//            std::cout << "is >= PI       " << bool(_residuals[2] <= T(-2*M_PI)) << std::endl;
 
-            _residuals[2] = _residuals[2] / T(sqrt(measurement_covariance_(2,2)));
+            while (_residuals[2] > T(M_PI))
+            	_residuals[2] = _residuals[2] - T(2*M_PI);
+            while (_residuals[2] <= T(-M_PI))
+            	_residuals[2] = _residuals[2] + T(2*M_PI);
+
+//            std::cout << "residual:      " << _residuals[2] << std::endl << std::endl;
+//			  _residuals[2] = _residuals[2] / T(sqrt(measurement_covariance_(2,2)));
 
 			return true;
 		}

@@ -54,7 +54,7 @@ class WolfManager
         //auxiliar/temporary iterators, frames and captures
         FrameBaseIter first_window_frame_;
         FrameBase* current_frame_;
-        FrameBase* last_frame_;
+        FrameBase* previous_frame_;
         CaptureRelative* last_capture_relative_;
         CaptureRelative* second_last_capture_relative_;
         std::queue<CaptureBase*> new_captures_;
@@ -109,7 +109,7 @@ WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::Wol
         problem_(new WolfProblem(_state_length)),
         sensor_prior_(_sensor_prior),
         current_frame_(nullptr),
-        last_frame_(nullptr),
+        previous_frame_(nullptr),
         last_capture_relative_(nullptr),
         window_size_(_w_size),
         new_frame_elapsed_time_(_new_frame_elapsed_time)
@@ -128,14 +128,11 @@ WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::Wol
     // Initial covariance
     CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), _init_frame, _init_frame_cov);
     current_frame_->addCapture(initial_covariance);
-
-    CaptureRelative* empty_odom = new CaptureOdom2D(TimeStamp(0), TimeStamp(0), _sensor_prior, Eigen::Vector3s::Zero());
-    current_frame_->addCapture(empty_odom);
+    initial_covariance->processCapture();
 
     // Current robot frame
     createFrame(_init_frame, TimeStamp(0));
-    empty_odom->processCapture();
-    last_capture_relative_ = empty_odom;
+
     std::cout << " wolfmanager initialized" << std::endl;
 }
 
@@ -166,7 +163,7 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     //std::cout << "Last frame non-odometry captures processed" << std::endl;
 
     // Store last frame
-    last_frame_ = current_frame_;
+    previous_frame_ = current_frame_;
 
     // Create frame and add it to the trajectory
     StatePositionT* new_position = new StatePositionT(problem_->getNewStatePtr());
@@ -191,7 +188,6 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
         problem_->addState(new_omega, _frame_state.segment<StateOmegaT::BLOCK_SIZE>(new_position->getStateSize()+new_orientation->getStateSize()+new_velocity->getStateSize()));
     }
 
-
     problem_->getTrajectoryPtr()->addFrame(new FrameBase(_time_stamp, new_position, new_orientation, new_velocity, new_omega));
     //std::cout << "frame created" << std::endl;
 
@@ -200,10 +196,10 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     //std::cout << "current_frame_" << std::endl;
 
     // empty last capture relative
-    if (last_frame_ != nullptr)
+    if (previous_frame_ != nullptr)
     {
         CaptureRelative* empty_odom = new CaptureOdom2D(_time_stamp, _time_stamp, sensor_prior_, Eigen::Vector3s::Zero());
-        last_frame_->addCapture(empty_odom);
+        previous_frame_->addCapture(empty_odom);
         empty_odom->processCapture();
         last_capture_relative_ = empty_odom;
     }
@@ -251,7 +247,7 @@ bool WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     //std::cout << "checking if new frame..." << std::endl;
     // TODO: not only time, depending on the sensor...
     //std::cout << new_capture->getTimeStamp().get() - last_frame_->getTimeStamp().get() << std::endl;
-    return new_capture->getTimeStamp().get() - last_frame_->getTimeStamp().get() > new_frame_elapsed_time_;
+    return new_capture->getTimeStamp().get() - previous_frame_->getTimeStamp().get() > new_frame_elapsed_time_;
 }
 
 template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
@@ -268,8 +264,8 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
         current_frame_->setTimeStamp(new_capture->getTimeStamp());
 
         // INITIALIZE FIRST FRAME STAMP
-        if (last_frame_->getTimeStamp().get() == 0)
-            last_frame_->setTimeStamp(new_capture->getTimeStamp());
+        if (previous_frame_->getTimeStamp().get() == 0)
+            previous_frame_->setTimeStamp(new_capture->getTimeStamp());
 
         // ODOMETRY SENSOR
         if (new_capture->getSensorPtr() == sensor_prior_)
@@ -280,14 +276,7 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
                 createFrame(new_capture->getTimeStamp());
 
             // ADD/INTEGRATE NEW ODOMETRY TO THE LAST FRAME
-            if (last_capture_relative_ == nullptr) //TODO NOT NECESSARY
-            {
-                last_frame_->addCapture(new_capture);
-                new_capture->processCapture();
-                last_capture_relative_ = (CaptureRelative*)new_capture;
-            }
-            else
-                last_capture_relative_->integrateCapture((CaptureRelative*) (new_capture));
+            last_capture_relative_->integrateCapture((CaptureRelative*) (new_capture));
             current_frame_->setState(last_capture_relative_->computePrior(new_capture->getTimeStamp()));
             current_frame_->setTimeStamp(new_capture->getTimeStamp());
         }
