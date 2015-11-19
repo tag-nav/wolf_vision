@@ -12,7 +12,7 @@
 #include "node_base.h"
 
 //class StateBase
-class StateBase //: public NodeBase
+class StateBase
 {
     protected:
 		StateType type_;
@@ -49,7 +49,7 @@ class StateBase //: public NodeBase
          * Returns a (mapped) vector of the state unit
          *
          **/
-        virtual Eigen::Map<const Eigen::VectorXs> getVector() const = 0;
+        Eigen::Map<const Eigen::VectorXs> getVector() const;
 
         /** \brief Set the pointer of the first element of the state
 		 *
@@ -63,7 +63,7 @@ class StateBase //: public NodeBase
 		 * Returns the parametrizationType (see wolf.h) of the state unit
 		 *
 		 **/
-		virtual StateType getStateType() const = 0;
+		virtual StateType getStateType() const;
 
         /** \brief Returns the status of the state unit
 		 *
@@ -84,7 +84,7 @@ class StateBase //: public NodeBase
 		 * Returns the parametrizationType (see wolf.h) of the state unit
 		 *
 		 **/
-		virtual unsigned int getStateSize() const = 0;
+		virtual unsigned int getStateSize() const;
 
         /** \brief Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
          *
@@ -106,6 +106,6 @@ class StateBase //: public NodeBase
 		 * Prints all the elements of the state unit
 		 *
 		 **/
-		virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const = 0;
+		virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 };
 #endif

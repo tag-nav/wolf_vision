@@ -43,8 +43,22 @@ PendingStatus StateBase::getPendingStatus() const
 	return pending_status_;
 }
 
+unsigned int StateBase::getStateSize() const {
+	return size_;
+}
+
 void StateBase::setPendingStatus(PendingStatus _pending)
 {
 	pending_status_ = _pending;
 }
 
+Eigen::Map<const Eigen::VectorXs> StateBase::getVector() const {
+	return Eigen::Map<const Eigen::VectorXs> (state_ptr_,size_);
+}
+
+StateType StateBase::getStateType() const {
+	return type_;
+}
+
+void StateBase::print(unsigned int _ntabs, std::ostream& _ost) const {
+}

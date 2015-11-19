@@ -275,13 +275,13 @@ void CaptureLaser2D::establishConstraintsMHTree()
 
         // Global transformation
         Eigen::Vector2s t_robot = getFramePtr()->getPPtr()->getVector().head(2);
-        Eigen::Matrix2s R_robot = getFramePtr()->getOPtr()->getRotationMatrix().topLeftCorner<2,2>();
-        WolfScalar robot_orientation = getFramePtr()->getOPtr()->getYaw();
+        Eigen::Matrix2s R_robot = Eigen::Rotation2D<WolfScalar>(*(getFramePtr()->getOPtr()->getPtr())).matrix();
+        WolfScalar robot_orientation = *(getFramePtr()->getOPtr()->getPtr());
 
         // Sensor transformation
         Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
-        Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2,2>();
-        WolfScalar sensor_orientation = getSensorPtr()->getOPtr()->getYaw();
+        Eigen::Matrix2s R_sensor = getSensorPtr()->getRotationMatrix2D();
+        WolfScalar sensor_orientation = *(getSensorPtr()->getOPtr()->getPtr());
 
         // NEW CORNERS
         for (auto it=new_corner_landmarks.begin(); it!=new_corner_landmarks.end();it++)
@@ -323,16 +323,16 @@ void CaptureLaser2D::computeExpectedFeature(LandmarkBase* _landmark_ptr, Eigen::
     FrameBase* frame_ptr = getFramePtr();
 
     Eigen::Vector2s p_robot = frame_ptr->getPPtr()->getVector();
-    WolfScalar      o_robot = frame_ptr->getOPtr()->getYaw();
+    WolfScalar      o_robot = *(frame_ptr->getOPtr()->getPtr());
 
     Eigen::Vector2s p_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
-    WolfScalar      o_sensor = getSensorPtr()->getOPtr()->getYaw();
-    Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2, 2>();
+    WolfScalar      o_sensor = *(getSensorPtr()->getOPtr()->getPtr());
+    Eigen::Matrix2s R_sensor = getSensorPtr()->getRotationMatrix2D();
 
     Eigen::Vector2s p_landmark = _landmark_ptr->getPPtr()->getVector();
-    WolfScalar      o_landmark = _landmark_ptr->getOPtr()->getYaw();
+    WolfScalar      o_landmark = *(_landmark_ptr->getOPtr()->getPtr());
 
-    WolfScalar o_rs = getSensorPtr()->getOPtr()->getYaw() + frame_ptr->getOPtr()->getYaw(); // Sum of theta_sensor and theta_robot
+    WolfScalar o_rs = o_robot + o_sensor; // Sum of theta_sensor and theta_robot
     Eigen::Matrix2s R_sr = Eigen::Rotation2D<WolfScalar>(o_rs).matrix(); // Sum of theta_sensor and theta_robot
 
     Eigen::Vector2s p_robot_landmark = p_robot - p_landmark;
@@ -382,19 +382,19 @@ Eigen::VectorXs CaptureLaser2D::computeSquaredMahalanobisDistances(const Feature
     FrameBase* frame_ptr = getFramePtr();
 
     Eigen::Vector2s p_robot = frame_ptr->getPPtr()->getVector();
-    WolfScalar      o_robot = frame_ptr->getOPtr()->getYaw();
+    WolfScalar      o_robot = *(frame_ptr->getOPtr()->getPtr());
 
     Eigen::Vector2s p_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
-    WolfScalar      o_sensor = getSensorPtr()->getOPtr()->getYaw();
-    Eigen::Matrix2s R_sensor = getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2, 2>();
+    WolfScalar      o_sensor = *(getSensorPtr()->getOPtr()->getPtr());
+    Eigen::Matrix2s R_sensor = getSensorPtr()->getRotationMatrix2D();
 
     Eigen::Vector2s p_landmark = _landmark_ptr->getPPtr()->getVector();
-    WolfScalar      o_landmark = _landmark_ptr->getOPtr()->getYaw();
+    WolfScalar      o_landmark = *(_landmark_ptr->getOPtr()->getPtr());
 
     const Eigen::Vector2s& p_feature = _feature_ptr->getMeasurement().head(2);
     const WolfScalar&      o_feature = _feature_ptr->getMeasurement()(2);
 
-    WolfScalar o_rs = getSensorPtr()->getOPtr()->getYaw() + frame_ptr->getOPtr()->getYaw(); // Sum of theta_sensor and theta_robot
+    WolfScalar o_rs = o_robot + o_sensor; // Sum of theta_sensor and theta_robot
     Eigen::Matrix2s R_sr = Eigen::Rotation2D<WolfScalar>(o_rs).matrix(); // Sum of theta_sensor and theta_robot
     Eigen::Vector2s p_robot_landmark = p_robot - p_landmark;
 
@@ -574,7 +574,8 @@ void CaptureLaser2D::createCornerLandmark(FeatureCorner2D* _corner_ptr, const Ei
     getTop()->getCovarianceBlock(getFramePtr()->getOPtr(), getFramePtr()->getOPtr(), Sigma_robot, 2,2);
     Sigma_robot.block<1,2>(2,0) = Sigma_robot.block<2,1>(0,2).transpose();
 
-    Eigen::Matrix3s R_robot3D = getFramePtr()->getOPtr()->getRotationMatrix().matrix();
+    Eigen::Matrix3s R_robot3D = Eigen::Matrix3s::Identity();
+    R_robot3D.block<2,2>(0,0) = Eigen::Rotation2D<WolfScalar>(*(getFramePtr()->getOPtr()->getPtr())).matrix();
     Eigen::Matrix3s Sigma_landmark = Sigma_robot + R_robot3D.transpose() * _corner_ptr->getMeasurementCovariance().topLeftCorner<3,3>() * R_robot3D;
 
     getTop()->addCovarianceBlock(new_landmark_state_position, new_landmark_state_position, Sigma_landmark.topLeftCorner<2,2>());
@@ -583,12 +584,7 @@ void CaptureLaser2D::createCornerLandmark(FeatureCorner2D* _corner_ptr, const Ei
 
     //add it to the slam map as a new landmark
     LandmarkCorner2D* new_landmark = new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation, _corner_ptr->getMeasurement()(3));
-    _corner_ptr->addConstraint(new ConstraintCorner2D(_corner_ptr,                //feature pointer
-                                                           new_landmark,               //landmark pointer
-                                                           getFramePtr()->getPPtr(),   //_robotPPtr,
-                                                           getFramePtr()->getOPtr(),   //_robotOPtr,
-                                                           new_landmark->getPPtr(),    //_landmarkPPtr,
-                                                           new_landmark->getOPtr()));  //_landmarkOPtr,
+    _corner_ptr->addConstraint(new ConstraintCorner2D(_corner_ptr, new_landmark));
     getTop()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
 }
 
@@ -598,15 +594,15 @@ void CaptureLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, const
 
     // CREATING LANDMARK CONTAINER
     // create new landmark state units
-    StateBase* new_container_position = new StateBase(getTop()->getNewStatePtr());
+    StateBase* new_container_position = new StateBase(getTop()->getNewStatePtr(), 2);
     getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
-    StateBase* new_container_orientation = new StateBase(getTop()->getNewStatePtr());
+    StateBase* new_container_orientation = new StateBase(getTop()->getNewStatePtr(), 1);
     getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
 
     // create new landmark
     Eigen::Vector3s corner_pose;
     corner_pose.head(2) = _old_corner_landmark_ptr->getPPtr()->getVector();
-    corner_pose(2) = _old_corner_landmark_ptr->getOPtr()->getYaw();
+    corner_pose(2) = *(_old_corner_landmark_ptr->getOPtr()->getPtr());
 
     LandmarkContainer* new_landmark = new LandmarkContainer(new_container_position, new_container_orientation, _feature_global_pose, corner_pose, _feature_idx, _corner_idx, CONTAINER_WIDTH, CONTAINER_LENGTH);
 
@@ -625,13 +621,7 @@ void CaptureLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, const
     getTop()->addCovarianceBlock((StateBase*)new_container_orientation, (StateBase*)new_container_orientation, Sigma_landmark.block<1,1>(2,2));
 
     // create new constraint (feature to container)
-    _corner_ptr->addConstraint(new ConstraintContainer(_corner_ptr,               //feature pointer
-                                                       new_landmark,              //landmark pointer
-                                                       _feature_idx,              //corner idx
-                                                       getFramePtr()->getPPtr(),  //_robotPPtr,
-                                                       getFramePtr()->getOPtr(),  //_robotOPtr,
-                                                       new_landmark->getPPtr(),   //_landmarkPPtr,
-                                                       new_landmark->getOPtr())); //_landmarkOPtr,
+    _corner_ptr->addConstraint(new ConstraintContainer(_corner_ptr, new_landmark,_feature_idx));
 
 
     // ERASING LANDMARK CORNER
@@ -639,13 +629,7 @@ void CaptureLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, const
     for (auto ctr_it = _old_corner_landmark_ptr->getConstraints()->begin(); ctr_it != _old_corner_landmark_ptr->getConstraints()->end(); ctr_it++)
     {
         // create new constraint to landmark container
-        (*ctr_it)->getFeaturePtr()->addConstraint(new ConstraintContainer((*ctr_it)->getFeaturePtr(),//feature pointer
-                                                                          new_landmark,              //landmark pointer
-                                                                          _corner_idx,                //corner idx
-                                                                          (*ctr_it)->getStatePtrVector().at(0),  //_robotPPtr,
-                                                                          (StateBase*)(*ctr_it)->getStatePtrVector().at(1),  //_robotOPtr,
-                                                                          new_landmark->getPPtr(),   //_landmarkPPtr,
-                                                                          new_landmark->getOPtr())); //_landmarkOPtr,
+        (*ctr_it)->getFeaturePtr()->addConstraint(new ConstraintContainer((*ctr_it)->getFeaturePtr(), new_landmark, _corner_idx));
     }
     // Remove corner landmark (it will remove all old constraints)
     getTop()->getMapPtr()->removeLandmark(_old_corner_landmark_ptr);
