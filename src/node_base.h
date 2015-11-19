@@ -51,20 +51,6 @@ class NodeBase
          */
         std::string nodeLabel() const;
 
-        /** \brief Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
-         *
-         * Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
-		 *
-         */
-        PendingStatus getPendingStatus() const;
-
-        /** \brief Sets the node pending status (pending or not to be added/updated in the filter or optimizer)
-         *
-         * Sets the node pending status (pending or not to be added/updated in the filter or optimizer)
-		 *
-         */
-        void setPendingStatus(PendingStatus _pending);
-
         /** \brief Print node information
          * 
 		 * Prints node information. Inine function.

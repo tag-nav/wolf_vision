@@ -27,16 +27,6 @@ std::string NodeBase::nodeLabel() const
 	return label_;
 }
 
-PendingStatus NodeBase::getPendingStatus() const
-{
-	return node_pending_;
-}
-
-void NodeBase::setPendingStatus(PendingStatus _pending)
-{
-	node_pending_ = _pending;
-}
-
 void NodeBase::print(unsigned int _ntabs, std::ostream& _ost) const
 {
 	_ost << label_ << " " << node_id_ << std::endl;

@@ -6,7 +6,7 @@
 #include "constraint_sparse.h"
 #include "landmark_corner_2D.h"
 
-class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
+class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 {
 	protected:
 		LandmarkCorner2D* lmk_ptr_;
@@ -14,23 +14,16 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 	public:
 		static const unsigned int N_BLOCKS = 4;
 
-//		ConstraintCorner2DTheta(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr,  WolfScalar* _robotPPtr, WolfScalar* _robotOPtr, WolfScalar* _landmarkPPtr, WolfScalar* _landmarkOPtr) :
-//			ConstraintSparse<3,2,1,2,1>(_ftr_ptr,CTR_CORNER_2D_THETA, _robotPPtr, _robotOPtr, _landmarkPPtr, _landmarkOPtr),
-//			lmk_ptr_(_lmk_ptr)
-//		{
-//			//
-//		}
-
-		ConstraintCorner2DTheta(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr, StateBase* _robotPPtr, StateOrientation* _robotOPtr, StateBase* _landmarkPPtr, StateOrientation* _landmarkOPtr) :
-			ConstraintSparse<3,2,1,2,1>(_ftr_ptr,CTR_CORNER_2D_THETA,  _robotPPtr, _robotOPtr,_landmarkPPtr, _landmarkOPtr),
+		ConstraintCorner2D(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr) :
+			ConstraintSparse<3,2,1,2,1>(_ftr_ptr,CTR_CORNER_2D,  _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr)
 		{
 			lmk_ptr_->hit(this);
 		}
         
-		virtual ~ConstraintCorner2DTheta()
+		virtual ~ConstraintCorner2D()
 		{
-			//std::cout << "deleting ConstraintCorner2DTheta " << nodeId() << std::endl;
+			//std::cout << "deleting ConstraintCorner2D " << nodeId() << std::endl;
 			lmk_ptr_->unhit(this);
 		}
 
@@ -55,7 +48,7 @@ class ConstraintCorner2DTheta: public ConstraintSparse<3,2,1,2,1>
 
 			// sensor transformation
 			Eigen::Matrix<T,2,1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getVector().head(2).cast<T>();
-			Eigen::Matrix<T,2,2> inverse_R_sensor = (getCapturePtr()->getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2,2>().transpose()).cast<T>();
+			Eigen::Matrix<T,2,2> inverse_R_sensor = (getCapturePtr()->getSensorPtr()->getRotationMatrix2D().transpose()).cast<T>();
 
 			Eigen::Matrix<T,2,2> inverse_R_robot;
 			inverse_R_robot << cos(*_robotO), sin(*_robotO),

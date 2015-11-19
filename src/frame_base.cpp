@@ -1,7 +1,7 @@
 
 #include "frame_base.h"
 
-FrameBase::FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateOrientation* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
+FrameBase::FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
             //NodeLinked(MID, "FRAME", _traj_ptr),
             NodeLinked(MID, "FRAME"),
             type_(REGULAR_FRAME),
@@ -15,7 +15,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateOrientation* 
 	//
 }
 
-FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBase* _p_ptr, StateOrientation* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
+FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
             //NodeLinked(MID, "FRAME", _traj_ptr),
             NodeLinked(MID, "FRAME"),
             type_(_tp),
@@ -180,7 +180,7 @@ FrameBase* FrameBase::getPreviousFrame() const
 
 FrameBase* FrameBase::getNextFrame() const
 {
-    //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
+    //std::cout << "finding next frame of " << this->node_id_ << std::endl;
 	auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin();
 	f_it++; //starting from second last frame
 
@@ -203,7 +203,7 @@ StateBase* FrameBase::getPPtr() const
 	return p_ptr_;
 }
 
-StateOrientation* FrameBase::getOPtr() const
+StateBase* FrameBase::getOPtr() const
 {
 	return o_ptr_;
 }

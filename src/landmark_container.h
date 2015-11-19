@@ -25,18 +25,18 @@ class LandmarkContainer : public LandmarkBase
          *
          * Constructor with type, and state pointer
          * \param _p_ptr StateBase pointer to the position
-         * \param _o_ptr StateOrientation pointer to the orientation
+         * \param _o_ptr StateBase pointer to the orientation
          * \param _witdh descriptor of the landmark: container width
          * \param _length descriptor of the landmark: container length
          *
          **/
-		LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr, const WolfScalar& _witdh=2.44, const WolfScalar& _length=12.2);
+		LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, const WolfScalar& _witdh=2.44, const WolfScalar& _length=12.2);
 
 		/** \brief Constructor with type, time stamp and the position state pointer
          *
          * Constructor with type, and state pointer
          * \param _p_ptr StateBase pointer to the position
-         * \param _o_ptr StateOrientation pointer to the orientation
+         * \param _o_ptr StateBase pointer to the orientation
          * \param _corner_1_pose pose of corner 1
          * \param _corner_2_pose pose of corner 2
          * \param _corner_1_idx index of corner 1 (A = 0, B = 1, C = 2, D = 3)
@@ -45,20 +45,20 @@ class LandmarkContainer : public LandmarkBase
          * \param _length descriptor of the landmark: container length
          *
          **/
-		LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const WolfScalar& _witdh=2.44, const WolfScalar& _length=12.2);
+		LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const WolfScalar& _witdh=2.44, const WolfScalar& _length=12.2);
 
         /** \brief Constructor with type, time stamp and the position state pointer
          *
          * Constructor with type, and state pointer
          * \param _p_ptr StateBase pointer to the position
-         * \param _o_ptr StateOrientation pointer to the orientation
+         * \param _o_ptr StateBase pointer to the orientation
          * \param _corner_1_ptr LandmarkCorner2D pointer to one of its corners
          * \param _corner_2_ptr LandmarkCorner2D pointer to one of its corners
          * \param _witdh descriptor of the landmark: container width
          * \param _length descriptor of the landmark: container length
          *
          **/
-		LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const WolfScalar& _witdh=2.44, const WolfScalar& _length=12.2);
+		LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const WolfScalar& _witdh=2.44, const WolfScalar& _length=12.2);
 
         /** \brief Destructor
          * 

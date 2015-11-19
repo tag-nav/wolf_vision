@@ -19,6 +19,7 @@
 #include "laser_scan_utils/corner_detector.h"
 
 //wolf includes
+#include "state_base.h"
 #include "constraint_corner_2D_theta.h"
 #include "constraint_container.h"
 #include "capture_base.h"
@@ -26,9 +27,6 @@
 #include "feature_corner_2D.h"
 #include "landmark_corner_2D.h"
 #include "landmark_container.h"
-#include "state_point.h"
-#include "state_orientation.h"
-#include "state_theta.h"
 #include "data_association/association_tree.h"
 
 //wolf forward declarations

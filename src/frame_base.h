@@ -28,7 +28,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         TimeStamp time_stamp_; //frame time stamp
         StateStatus status_; // status of the estimation of the frame state
 		StateBase* p_ptr_; // Position state unit pointer
-		StateOrientation* o_ptr_; // Orientation state unit pointer
+		StateBase* o_ptr_; // Orientation state unit pointer
 		StateBase* v_ptr_; // Velocity state unit pointer
 		StateBase* w_ptr_; // Angular velocity state unit pointer
 		//TODO: accelerations?
@@ -45,7 +45,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          * \param _w_ptr StateBase pointer to the angular velocity (default: nullptr)
          *
          **/
-        FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateOrientation* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr); //ACM: Either remove all pointer arguments from this header, or merge both constructors in a single one
+        FrameBase(const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr); //ACM: Either remove all pointer arguments from this header, or merge both constructors in a single one
         
         /** \brief Constructor with type, time stamp and state pointer
          * 
@@ -59,7 +59,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          * \param _w_ptr StateBase pointer to the angular velocity (default: nullptr)
          * 
          **/        
-        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBase* _p_ptr, StateOrientation* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
+        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBase* _p_ptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
         
         /** \brief Destructor
          * 
@@ -111,7 +111,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 
         StateBase* getPPtr() const;
 
-        StateOrientation* getOPtr() const;
+        StateBase* getOPtr() const;
 
         StateBase* getVPtr() const;
 

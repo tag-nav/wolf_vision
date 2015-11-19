@@ -5,8 +5,7 @@
 
 //Wolf includes
 #include "feature_base.h"
-#include "constraint_odom_2D_theta.h"
-#include "constraint_odom_2D_complex_angle.h"
+#include "constraint_odom_2D.h"
 
 //class FeatureOdom2D
 class FeatureOdom2D : public FeatureBase

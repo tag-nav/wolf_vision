@@ -25,11 +25,11 @@ class SensorLaser2D : public SensorBase
          * 
          * Constructor with arguments
          * \param _p_ptr StateBase pointer to the sensor position
-         * \param _o_ptr StateOrientation pointer to the sensor orientation
+         * \param _o_ptr StateBase pointer to the sensor orientation
          * \param _params struct with scan parameters. See laser_scan_utils library API for reference
          * 
          **/        
-        SensorLaser2D(StatePoint3D* _p_ptr, StateOrientation* _o_ptr);
+        SensorLaser2D(StateBase* _p_ptr, StateBase* _o_ptr);
         //SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params);
 
         /** \brief Destructor

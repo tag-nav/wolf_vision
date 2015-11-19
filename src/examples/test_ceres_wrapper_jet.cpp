@@ -20,8 +20,6 @@
 //Wolf includes
 #include "sensor_base.h"
 #include "frame_base.h"
-#include "state_point.h"
-#include "state_complex_angle.h"
 #include "capture_base.h"
 #include "state_base.h"
 #include "wolf.h"

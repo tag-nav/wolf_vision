@@ -115,9 +115,9 @@ typedef enum
     CTR_GPS_FIX_2D,				///< marks a 2D GPS Fix constraint.
     CTR_FIX,                    ///< marks a Fix constraint (for priors).
     CTR_ODOM_2D_COMPLEX_ANGLE,	///< marks a 2D Odometry constraint using complex angles.
-    CTR_ODOM_2D_THETA,          ///< marks a 2D Odometry constraint using theta angles.
+    CTR_ODOM_2D,          ///< marks a 2D Odometry constraint using theta angles.
     CTR_TWIST_2D_THETA,         ///< marks a 2D Twist constraint using theta angles.
-    CTR_CORNER_2D_THETA,		///< marks a 2D corner constraint using theta angles.
+    CTR_CORNER_2D,		///< marks a 2D corner constraint using theta angles.
     CTR_CONTAINER               ///< marks a 2D container constraint using theta angles.
 
 } ConstraintType;
@@ -131,11 +131,7 @@ typedef enum
  */
 typedef enum
 {
-    ST_POINT_1D,		  ///< A 1D point. No parametrization.
-    ST_POINT_2D,		  ///< A 2D point. No parametrization.
-    ST_POINT_3D,		  ///< A 3D point. No parametrization.
-    ST_THETA,			    ///< A 2D orientation represented by a single angle. No parametrization.
-    ST_COMPLEX_ANGLE,	///< A 2D orientation represented by a complex number.
+    ST_VECTOR,		  ///< A vector. No local parametrization.
     ST_QUATERNION		  ///< A 3D orientation represented by a quaternion.
 } StateType;
 
@@ -224,7 +220,7 @@ class LandmarkCorner2D;
 class TrajectoryBase;
 class FrameBase;
 class CaptureBase;
-class CaptureRelative;
+class CaptureMotion;
 class CaptureLaser2D;
 class FeatureBase;
 class FeatureCorner2D;
@@ -275,7 +271,7 @@ typedef std::list<CaptureBase*> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
 // - Capture Relative
-typedef std::list<CaptureRelative*> CaptureRelativeList;
+typedef std::list<CaptureMotion*> CaptureRelativeList;
 typedef CaptureRelativeList::iterator CaptureRelativeIter;
 
 // - Feature
@@ -301,13 +297,6 @@ typedef TransSensorMap::iterator TransSensorIter;
 // - State
 typedef std::list<StateBase*> StateBaseList;
 typedef StateBaseList::iterator StateBaseIter;
-
-typedef StatePoint<1> StatePoint1D;
-typedef StatePoint<2> StatePoint2D;
-typedef StatePoint<3> StatePoint3D;
-typedef StatePoint<2> StateVelocity2D;
-typedef StatePoint<1> StateOmega2D;
-typedef StatePoint<0> NoState;
 
 // - Pin hole
 

@@ -12,11 +12,14 @@
 #include "node_base.h"
 
 //class StateBase
-class StateBase : public NodeBase
+class StateBase //: public NodeBase
 {
     protected:
+		StateType type_;
 		WolfScalar* state_ptr_;
+		unsigned int size_;
 		StateStatus status_;
+		PendingStatus pending_status_;
         
     public:
         /** \brief Constructor with scalar pointer
@@ -25,16 +28,7 @@ class StateBase : public NodeBase
          * \param _st_ptr is the pointer of the first element of the state unit
          * 
          **/
-        StateBase(WolfScalar* _st_ptr);
-
-        /** \brief Constructor with whole state storage and index where starts the state unit
-         * 
-         * Constructor with whole state storage and index where starts the state unit
-         * \param _st_remote is the whole state vector
-         * \param _idx is the index of the first element of the state in the whole state vector
-         * 
-         **/
-        StateBase(Eigen::VectorXs& _st_remote, const unsigned int _idx);
+        StateBase(WolfScalar* _st_ptr, unsigned int _size, StateType _type = ST_VECTOR, StateStatus _status = ST_ESTIMATED);
         
         /** \brief Destructor
          * 
@@ -91,6 +85,21 @@ class StateBase : public NodeBase
 		 *
 		 **/
 		virtual unsigned int getStateSize() const = 0;
+
+        /** \brief Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
+         *
+         * Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
+		 *
+         */
+        PendingStatus getPendingStatus() const;
+
+        /** \brief Sets the node pending status (pending or not to be added/updated in the filter or optimizer)
+         *
+         * Sets the node pending status (pending or not to be added/updated in the filter or optimizer)
+		 *
+         */
+        void setPendingStatus(PendingStatus _pending);
+
         
         /** \brief Prints all the elements of the state unit
 		 *

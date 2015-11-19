@@ -6,12 +6,12 @@
 //
 
 //Wolf includes
-#include "capture_relative.h"
+#include "capture_motion.h"
 #include "feature_odom_2D.h"
 #include "sensor_odom_2D.h"
 
 //class CaptureGPSFix
-class CaptureOdom2D : public CaptureRelative
+class CaptureOdom2D : public CaptureMotion
 {
 
     public:
@@ -29,7 +29,7 @@ class CaptureOdom2D : public CaptureRelative
 
       virtual void addConstraints();
 
-      virtual void integrateCapture(CaptureRelative* _new_capture);
+      virtual void integrateCapture(CaptureMotion* _new_capture);
 
       virtual CaptureOdom2D* interpolateCapture(const TimeStamp& _ts);
 

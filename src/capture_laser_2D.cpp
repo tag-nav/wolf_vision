@@ -260,21 +260,13 @@ void CaptureLaser2D::establishConstraintsMHTree()
                 unsigned int associed_landmark_index = landmarks_index_map[ft_lk_pairs[ii]];
 
                 if (associed_landmark->getType() == LANDMARK_CORNER)
-                    associed_feature->addConstraint(new ConstraintCorner2DTheta(associed_feature,                      //feature pointer
-                                                                               (LandmarkCorner2D*)(associed_landmark), //landmark pointer
-                                                                               getFramePtr()->getPPtr(),               //_robotPPtr,
-                                                                               getFramePtr()->getOPtr(),               //_robotOPtr,
-                                                                               associed_landmark->getPPtr(),           //_landmarkPPtr,
-                                                                               associed_landmark->getOPtr()));         //_landmarkOPtr,
+                    associed_feature->addConstraint(new ConstraintCorner2D(associed_feature,                      		// feature pointer
+                                                                               (LandmarkCorner2D*)(associed_landmark))); 	// landmark pointer
 
                 else if (associed_landmark->getType() == LANDMARK_CONTAINER)
                     associed_feature->addConstraint(new ConstraintContainer(associed_feature,                       //feature pointer
                                                                            (LandmarkContainer*)(associed_landmark), //landmark pointer
-                                                                           associed_landmark_index,                 // corner index
-                                                                           getFramePtr()->getPPtr(),                //_robotPPtr,
-                                                                           getFramePtr()->getOPtr(),                //_robotOPtr,
-                                                                           associed_landmark->getPPtr(),            //_landmarkPPtr,
-                                                                           associed_landmark->getOPtr()));          //_landmarkOPtr,
+                                                                           associed_landmark_index ));                 // corner index
             }
         }
 
@@ -570,9 +562,9 @@ bool CaptureLaser2D::fitNewContainer(FeatureCorner2D* _corner_ptr, LandmarkCorne
 void CaptureLaser2D::createCornerLandmark(FeatureCorner2D* _corner_ptr, const Eigen::Vector3s& _feature_global_pose)
 {
     //create new landmark at global coordinates
-    StateBase* new_landmark_state_position = new StatePoint2D(getTop()->getNewStatePtr());
+    StateBase* new_landmark_state_position = new StateBase(getTop()->getNewStatePtr(), 2);
     getTop()->addState(new_landmark_state_position, _feature_global_pose.head(2));
-    StateOrientation* new_landmark_state_orientation = new StateTheta(getTop()->getNewStatePtr());
+    StateBase* new_landmark_state_orientation = new StateBase(getTop()->getNewStatePtr(), 1);
     getTop()->addState(new_landmark_state_orientation, _feature_global_pose.tail(1));
 
     // Initialize landmark covariance
@@ -591,7 +583,7 @@ void CaptureLaser2D::createCornerLandmark(FeatureCorner2D* _corner_ptr, const Ei
 
     //add it to the slam map as a new landmark
     LandmarkCorner2D* new_landmark = new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation, _corner_ptr->getMeasurement()(3));
-    _corner_ptr->addConstraint(new ConstraintCorner2DTheta(_corner_ptr,                //feature pointer
+    _corner_ptr->addConstraint(new ConstraintCorner2D(_corner_ptr,                //feature pointer
                                                            new_landmark,               //landmark pointer
                                                            getFramePtr()->getPPtr(),   //_robotPPtr,
                                                            getFramePtr()->getOPtr(),   //_robotOPtr,
@@ -606,9 +598,9 @@ void CaptureLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, const
 
     // CREATING LANDMARK CONTAINER
     // create new landmark state units
-    StateBase* new_container_position = new StatePoint2D(getTop()->getNewStatePtr());
+    StateBase* new_container_position = new StateBase(getTop()->getNewStatePtr());
     getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
-    StateOrientation* new_container_orientation = new StateTheta(getTop()->getNewStatePtr());
+    StateBase* new_container_orientation = new StateBase(getTop()->getNewStatePtr());
     getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
 
     // create new landmark
@@ -651,7 +643,7 @@ void CaptureLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, const
                                                                           new_landmark,              //landmark pointer
                                                                           _corner_idx,                //corner idx
                                                                           (*ctr_it)->getStatePtrVector().at(0),  //_robotPPtr,
-                                                                          (StateOrientation*)(*ctr_it)->getStatePtrVector().at(1),  //_robotOPtr,
+                                                                          (StateBase*)(*ctr_it)->getStatePtrVector().at(1),  //_robotOPtr,
                                                                           new_landmark->getPPtr(),   //_landmarkPPtr,
                                                                           new_landmark->getOPtr())); //_landmarkOPtr,
     }

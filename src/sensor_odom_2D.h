@@ -12,12 +12,12 @@ class SensorOdom2D : public SensorBase
          * 
          * Constructor with arguments
          * \param _p_ptr StateBase pointer to the sensor position wrt vehicle base
-         * \param _o_ptr StateOrientation pointer to the sensor orientation wrt vehicle base
+         * \param _o_ptr StateBase pointer to the sensor orientation wrt vehicle base
          * \param _disp_noise_factor displacement noise factor
          * \param _rot_noise_factor rotation noise factor
          * 
          **/
-		SensorOdom2D(StatePoint3D* _p_ptr, StateOrientation* _o_ptr, const WolfScalar& _disp_noise_factor, const WolfScalar&  _rot_noise_factor);
+		SensorOdom2D(StateBase* _p_ptr, StateBase* _o_ptr, const WolfScalar& _disp_noise_factor, const WolfScalar&  _rot_noise_factor);
         
         /** \brief Destructor
          * 

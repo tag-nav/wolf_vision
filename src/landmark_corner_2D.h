@@ -28,7 +28,7 @@ class LandmarkCorner2D : public LandmarkBase
          * \param _aperture descriptor of the landmark: aperture of the corner
          *
          **/
-		LandmarkCorner2D(StateBase* _p_ptr, StateOrientation* _o_ptr, const WolfScalar& _aperture=0);
+		LandmarkCorner2D(StateBase* _p_ptr, StateBase* _o_ptr, const WolfScalar& _aperture=0);
         
         /** \brief Destructor
          * 

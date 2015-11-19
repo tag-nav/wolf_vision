@@ -206,45 +206,20 @@ void CeresManager::addStateUnit(StateBase* _st_ptr)
 
 	switch (_st_ptr->getStateType())
 	{
-		case ST_COMPLEX_ANGLE:
-		{
-			//std::cout << "Adding Complex angle Local Parametrization to the List... " << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateComplexAngle*)_st_ptr)->BLOCK_SIZE, new ComplexAngleParameterization);
-			break;
-		}
-//				case PARAM_QUATERNION:
-//				{
-//					std::cout << "Adding Quaternion Local Parametrization to the List... " << std::endl;
-//					ceres_problem_->SetParameterization(_st_ptr->getPtr(), new EigenQuaternionParameterization);
-//					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateQuaternion*)_st_ptr.get())->BLOCK_SIZE, new QuaternionParameterization);
-//					break;
-//				}
-		case ST_THETA:
+		case ST_VECTOR:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateTheta*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getStateSize(), nullptr);
 			break;
 		}
-		case ST_POINT_1D:
+		case ST_QUATERNION:
 		{
-			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint1D*)_st_ptr)->BLOCK_SIZE, nullptr);
-			break;
-		}
-		case ST_POINT_2D:
-		{
-			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint2D*)_st_ptr)->BLOCK_SIZE, nullptr);
-			break;
-		}
-		case ST_POINT_3D:
-		{
-			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint3D*)_st_ptr)->BLOCK_SIZE, nullptr);
+			//TODO: change nullptr below by quaternion parametrization following method in complex_angle_parametrization.cpp
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getStateSize(), nullptr);
 			break;
 		}
 		default:
-			std::cout << "Unknown  Local Parametrization type!" << std::endl;
+			std::cout << "Unknown state type!" << std::endl;
 	}
 	if (_st_ptr->getStateStatus() != ST_ESTIMATED)
 		updateStateUnitStatus(_st_ptr);
@@ -315,10 +290,10 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
                                                     specific_ptr->block9Size>(specific_ptr);
             break;
         }
-		case CTR_ODOM_2D_COMPLEX_ANGLE:
+		case CTR_ODOM_2D:
 		{
-			ConstraintOdom2DComplexAngle* specific_ptr = (ConstraintOdom2DComplexAngle*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintOdom2DComplexAngle,
+			ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<ConstraintOdom2D,
 													specific_ptr->measurementSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
@@ -332,27 +307,10 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
 													specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
-		case CTR_ODOM_2D_THETA:
+		case CTR_CORNER_2D:
 		{
-			ConstraintOdom2DTheta* specific_ptr = (ConstraintOdom2DTheta*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintOdom2DTheta,
-													specific_ptr->measurementSize,
-													specific_ptr->block0Size,
-													specific_ptr->block1Size,
-													specific_ptr->block2Size,
-													specific_ptr->block3Size,
-													specific_ptr->block4Size,
-													specific_ptr->block5Size,
-													specific_ptr->block6Size,
-													specific_ptr->block7Size,
-													specific_ptr->block8Size,
-													specific_ptr->block9Size>(specific_ptr);
-			break;
-		}
-		case CTR_CORNER_2D_THETA:
-		{
-			ConstraintCorner2DTheta* specific_ptr = (ConstraintCorner2DTheta*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintCorner2DTheta,
+			ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<ConstraintCorner2D,
 													specific_ptr->measurementSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,

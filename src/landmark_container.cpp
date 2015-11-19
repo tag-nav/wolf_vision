@@ -1,7 +1,7 @@
 
 #include "landmark_container.h"
 
-LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr, const WolfScalar& _witdh, const WolfScalar& _length) :
+LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, const WolfScalar& _witdh, const WolfScalar& _length) :
 	LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
 	corners_(3,4)
 {
@@ -14,7 +14,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr
                  0,           M_PI/2,      M_PI,        -M_PI/2;
 }
 
-LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const WolfScalar& _witdh, const WolfScalar& _length) :
+LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const WolfScalar& _witdh, const WolfScalar& _length) :
     LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
     corners_(3,4)
 {
@@ -41,13 +41,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr
         Eigen::Vector2s perpendicularAB;
         perpendicularAB << -AB(1)/AB.norm(), AB(0)/AB.norm();
         container_position = (_corner_1_idx == 0 ? _corner_1_pose.head(2) : _corner_2_pose.head(2)) + AB / 2 + perpendicularAB * _witdh / 2;
-        if (_o_ptr->getStateType() == ST_THETA)
-            container_orientation(0) = atan2(AB(1),AB(0));
-        else
-        {
-            container_orientation(0) = AB(0)/AB.norm();
-            container_orientation(1) = AB(1)/AB.norm();
-        }
+        container_orientation(0) = atan2(AB(1),AB(0));
     }
 
     // Short side detected (B & C)
@@ -58,13 +52,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr
         Eigen::Vector2s perpendicularBC;
         perpendicularBC << -BC(1)/BC.norm(), BC(0)/BC.norm();
         container_position = (_corner_1_idx == 1 ? _corner_1_pose.head(2) : _corner_2_pose.head(2)) + BC / 2 + perpendicularBC * _length / 2;
-        if (_o_ptr->getStateType() == ST_THETA)
-            container_orientation(0) = atan2(BC(1),BC(0));
-        else
-        {
-            container_orientation(0) = BC(0)/BC.norm();
-            container_orientation(1) = BC(1)/BC.norm();
-        }
+        container_orientation(0) = atan2(BC(1),BC(0));
     }
 
     // Diagonal detected
@@ -74,13 +62,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr
         std::cout << "diagonal AC detected" << std::endl;
         Eigen::Vector2s AC = (_corner_1_idx == 0 ? _corner_2_pose.head(2) - _corner_1_pose.head(2) : _corner_1_pose.head(2) - _corner_2_pose.head(2));
         container_position = (_corner_1_idx == 0 ? _corner_1_pose.head(2) : _corner_2_pose.head(2)) + AC / 2;
-        if (_o_ptr->getStateType() == ST_THETA)
-            container_orientation(0) = atan2(AC(1),AC(0)) - atan2(_witdh,_length);
-        else
-        {
-            container_orientation(0) = AC(0)/AC.norm() -_length/descriptor.norm();
-            container_orientation(1) = AC(1)/AC.norm() -_witdh/descriptor.norm();
-        }
+        container_orientation(0) = atan2(AC(1),AC(0)) - atan2(_witdh,_length);
     }
     // B & D
     else if ( (_corner_1_idx == 1 && _corner_2_idx == 3) || (_corner_1_idx == 3 && _corner_2_idx == 1) )
@@ -88,18 +70,12 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr
         std::cout << "diagonal BD detected" << std::endl;
         Eigen::Vector2s BD = (_corner_1_idx == 1 ? _corner_2_pose.head(2) - _corner_1_pose.head(2) : _corner_1_pose.head(2) - _corner_2_pose.head(2));
         container_position = (_corner_1_idx == 1 ? _corner_1_pose.head(2) : _corner_2_pose.head(2)) + BD / 2;
-        if (_o_ptr->getStateType() == ST_THETA)
-            container_orientation(0) = atan2(BD(1),BD(0)) + atan2(_witdh,_length);
-        else
-        {
-            container_orientation(0) = BD(0)/BD.norm() +_length/descriptor.norm();
-            container_orientation(1) = BD(1)/BD.norm() +_witdh/descriptor.norm();
-        }
+        container_orientation(0) = atan2(BD(1),BD(0)) + atan2(_witdh,_length);
     }
     std::cout << "Container center pose... " << container_position.transpose() << " " << container_orientation.transpose() << std::endl;
 }
 
-LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const WolfScalar& _witdh, const WolfScalar& _length) :
+LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const WolfScalar& _witdh, const WolfScalar& _length) :
     LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
     corners_(3,4)
 {
@@ -128,13 +104,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr
         Eigen::Vector2s perpendicularAB;
         perpendicularAB << -AB(1)/AB.norm(), AB(0)/AB.norm();
         container_position = Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getPPtr()->getPtr()) + AB / 2 + perpendicularAB * _witdh / 2;
-        if (_o_ptr->getStateType() == ST_THETA)
-            container_orientation(0) = atan2(AB(1),AB(0));
-        else
-        {
-            container_orientation(0) = AB(0)/AB.norm();
-            container_orientation(1) = AB(1)/AB.norm();
-        }
+        container_orientation(0) = atan2(AB(1),AB(0));
     }
     // C & D
     else if  (_corner_C_ptr != nullptr && _corner_D_ptr != nullptr)
@@ -143,13 +113,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr
         Eigen::Vector2s perpendicularCD;
         perpendicularCD << -CD(1)/CD.norm(), CD(0)/CD.norm();
         container_position = Eigen::Map<Eigen::Vector2s>(_corner_C_ptr->getPPtr()->getPtr()) + CD / 2 + perpendicularCD * _witdh / 2;
-        if (_o_ptr->getStateType() == ST_THETA)
-            container_orientation(0) = atan2(-CD(1),-CD(0));
-        else
-        {
-            container_orientation(0) = -CD(0)/CD.norm();
-            container_orientation(1) = -CD(1)/CD.norm();
-        }
+        container_orientation(0) = atan2(-CD(1),-CD(0));
     }
     // Short side detected
     // B & C
@@ -159,13 +123,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr
         Eigen::Vector2s perpendicularBC;
         perpendicularBC << -BC(1)/BC.norm(), BC(0)/BC.norm();
         container_position = Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getPPtr()->getPtr()) + BC / 2 + perpendicularBC * _length / 2;
-        if (_o_ptr->getStateType() == ST_THETA)
-            container_orientation(0) = atan2(BC(1),BC(0));
-        else
-        {
-            container_orientation(0) = BC(0)/BC.norm();
-            container_orientation(1) = BC(1)/BC.norm();
-        }
+        container_orientation(0) = atan2(BC(1),BC(0));
     }
     // D & A
     else if  (_corner_D_ptr != nullptr && _corner_A_ptr != nullptr)
@@ -174,13 +132,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr
         Eigen::Vector2s perpendicularDA;
         perpendicularDA << -DA(1)/DA.norm(), DA(0)/DA.norm();
         container_position = Eigen::Map<Eigen::Vector2s>(_corner_D_ptr->getPPtr()->getPtr()) + DA / 2 + perpendicularDA * _length / 2;
-        if (_o_ptr->getStateType() == ST_THETA)
-            container_orientation(0) = atan2(-DA(1),-DA(0));
-        else
-        {
-            container_orientation(0) = -DA(0)/DA.norm();
-            container_orientation(1) = -DA(1)/DA.norm();
-        }
+        container_orientation(0) = atan2(-DA(1),-DA(0));
     }
     // Diagonal detected
     // A & C
@@ -188,26 +140,14 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateOrientation* _o_ptr
     {
         Eigen::Vector2s AC = Eigen::Map<Eigen::Vector2s>(_corner_C_ptr->getPPtr()->getPtr()) - Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getPPtr()->getPtr());
         container_position = Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getPPtr()->getPtr()) + AC / 2;
-        if (_o_ptr->getStateType() == ST_THETA)
-            container_orientation(0) = atan2(AC(1),AC(0)) - atan2(_witdh,_length);
-        else
-        {
-            container_orientation(0) = AC(0)/AC.norm() -_length/descriptor.norm();
-            container_orientation(1) = AC(1)/AC.norm() -_witdh/descriptor.norm();
-        }
+        container_orientation(0) = atan2(AC(1),AC(0)) - atan2(_witdh,_length);
     }
     // B & D
     else if (_corner_B_ptr != nullptr && _corner_D_ptr != nullptr)
     {
         Eigen::Vector2s BD = Eigen::Map<Eigen::Vector2s>(_corner_D_ptr->getPPtr()->getPtr()) - Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getPPtr()->getPtr());
         container_position = Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getPPtr()->getPtr()) + BD / 2;
-        if (_o_ptr->getStateType() == ST_THETA)
-            container_orientation(0) = atan2(BD(1),BD(0)) + atan2(_witdh,_length);
-        else
-        {
-            container_orientation(0) = BD(0)/BD.norm() +_length/descriptor.norm();
-            container_orientation(1) = BD(1)/BD.norm() +_witdh/descriptor.norm();
-        }
+        container_orientation(0) = atan2(BD(1),BD(0)) + atan2(_witdh,_length);
     }
 }
 

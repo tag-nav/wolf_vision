@@ -1,7 +1,7 @@
 
 #include "landmark_base.h"
 
-LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBase* _p_ptr, StateOrientation* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
+LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBase* _p_ptr, StateBase* _o_ptr, StateBase* _v_ptr, StateBase* _w_ptr) :
             NodeLinked(MID, "LANDMARK"),
             type_(_tp),
             status_(LANDMARK_CANDIDATE),
@@ -103,7 +103,7 @@ StateBase* LandmarkBase::getPPtr() const
 	return p_ptr_;
 }
 
-StateOrientation* LandmarkBase::getOPtr() const
+StateBase* LandmarkBase::getOPtr() const
 {
 	return o_ptr_;
 }
@@ -123,7 +123,7 @@ void LandmarkBase::setPPtr(StateBase* _st_ptr)
     p_ptr_ = _st_ptr;
 }
 
-void LandmarkBase::setOPtr(StateOrientation* _st_ptr)
+void LandmarkBase::setOPtr(StateBase* _st_ptr)
 {
     o_ptr_ = _st_ptr;
 }

@@ -176,18 +176,18 @@ int main(int argc, char *argv[])
     Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
-    SensorOdom2D odom_sensor(new StatePoint3D(odom_pose.data()), new StateTheta(&odom_pose(2)), odom_std_factor, odom_std_factor);
-    SensorGPSFix gps_sensor(new StatePoint3D(gps_pose.data()), new StateTheta(&gps_pose(2)), gps_std);
-    SensorLaser2D laser_1_sensor(new StatePoint3D(laser_1_pose.data()), new StateTheta(&laser_1_pose(3)));
-    SensorLaser2D laser_2_sensor(new StatePoint3D(laser_2_pose.data()), new StateTheta(&laser_2_pose(3)));
+    SensorOdom2D odom_sensor(new StateBase(odom_pose.data()), new StateBase(&odom_pose(2)), odom_std_factor, odom_std_factor);
+    SensorGPSFix gps_sensor(new StateBase(gps_pose.data()), new StateBase(&gps_pose(2)), gps_std);
+    SensorLaser2D laser_1_sensor(new StateBase(laser_1_pose.data()), new StateBase(&laser_1_pose(3)));
+    SensorLaser2D laser_2_sensor(new StateBase(laser_2_pose.data()), new StateBase(&laser_2_pose(3)));
 
     // Initial pose
     pose_odom << 2, 8, 0;
     ground_truth.head(3) = pose_odom;
     odom_trajectory.head(3) = pose_odom;
 
-    WolfManager<StatePoint2D, StateTheta>* wolf_manager_QR = new WolfManager<StatePoint2D, StateTheta>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
-    WolfManager<StatePoint2D, StateTheta>* wolf_manager_ceres = new WolfManager<StatePoint2D, StateTheta>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
+    WolfManager<StateBase, StateBase>* wolf_manager_QR = new WolfManager<StateBase, StateBase>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
+    WolfManager<StateBase, StateBase>* wolf_manager_ceres = new WolfManager<StateBase, StateBase>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
 
     std::cout << "STARTING INCREMENTAL QR TEST" << std::endl << std::endl;
     std::cout << "\n ========= 2D Robot with odometry and 2 LIDARs ===========\n";

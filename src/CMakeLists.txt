@@ -61,7 +61,7 @@ SET(HDRS_BASE
 
 SET(HDRS
     capture_base.h
-    capture_relative.h
+    capture_motion.h
     capture_fix.h
     capture_gps_fix.h
     capture_odom_2D.h
@@ -69,9 +69,8 @@ SET(HDRS
     constraint_sparse.h
     constraint_gps_2D.h
     constraint_fix.h
-    constraint_odom_2D_theta.h
-    constraint_odom_2D_complex_angle.h
-    constraint_corner_2D_theta.h
+    constraint_odom_2D.h
+    constraint_corner_2D.h
     constraint_container.h
     feature_base.h
     feature_corner_2D.h
@@ -91,11 +90,6 @@ SET(HDRS
     sensor_odom_2D.h
     sensor_gps_fix.h
     state_base.h
-    state_point.h
-    state_orientation.h
-    state_quaternion.h
-    state_theta.h
-    state_complex_angle.h
     time_stamp.h
     trajectory_base.h
     wolf_problem.h
@@ -111,7 +105,7 @@ SET(HDRS_DTASSC
 #sources
 SET(SRCS
     capture_base.cpp
-    capture_relative.cpp
+    capture_motion.cpp
     capture_gps_fix.cpp
     capture_fix.cpp
     capture_odom_2D.cpp
@@ -132,10 +126,6 @@ SET(SRCS
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
     state_base.cpp
-    state_orientation.cpp
-    state_quaternion.cpp
-    state_theta.cpp
-    state_complex_angle.cpp
     time_stamp.cpp
     trajectory_base.cpp
     wolf_problem.cpp

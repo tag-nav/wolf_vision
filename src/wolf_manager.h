@@ -41,7 +41,7 @@
 #include "wolf_problem.h"
 #include "state_quaternion.h"
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT=NoState, class StateOmegaT=NoState>
+template <class StatePositionT, class StateBaseT, class StateVelocityT=NoState, class StateOmegaT=NoState>
 class WolfManager
 {
     protected:
@@ -55,8 +55,8 @@ class WolfManager
         FrameBaseIter first_window_frame_;
         FrameBase* current_frame_;
         FrameBase* previous_frame_;
-        CaptureRelative* last_capture_relative_;
-        CaptureRelative* second_last_capture_relative_;
+        CaptureMotion* last_capture_relative_;
+        CaptureMotion* second_last_capture_relative_;
         std::queue<CaptureBase*> new_captures_;
 
         //Manager parameters
@@ -98,8 +98,8 @@ class WolfManager
 //////////////////////////////////////////
 //          IMPLEMENTATION
 //////////////////////////////////////////
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::WolfManager(const unsigned int& _state_length,
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::WolfManager(const unsigned int& _state_length,
                                                                                          SensorBase* _sensor_prior,
                                                                                          const Eigen::VectorXs& _init_frame,
                                                                                          const Eigen::MatrixXs& _init_frame_cov,
@@ -114,9 +114,9 @@ WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::Wol
         window_size_(_w_size),
         new_frame_elapsed_time_(_new_frame_elapsed_time)
 {
-    assert( _init_frame.size() == StatePositionT::BLOCK_SIZE + StateOrientationT::BLOCK_SIZE &&
-            _init_frame_cov.cols() == StatePositionT::BLOCK_SIZE + StateOrientationT::BLOCK_SIZE &&
-            _init_frame_cov.rows() == StatePositionT::BLOCK_SIZE + StateOrientationT::BLOCK_SIZE &&
+    assert( _init_frame.size() == StatePositionT::BLOCK_SIZE + StateBaseT::BLOCK_SIZE &&
+            _init_frame_cov.cols() == StatePositionT::BLOCK_SIZE + StateBaseT::BLOCK_SIZE &&
+            _init_frame_cov.rows() == StatePositionT::BLOCK_SIZE + StateBaseT::BLOCK_SIZE &&
             "Wrong init_frame state vector or covariance matrix size");
 
     std::cout << "initializing wolfmanager" << std::endl;
@@ -136,18 +136,18 @@ WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::Wol
     std::cout << " wolfmanager initialized" << std::endl;
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::~WolfManager()
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::~WolfManager()
 {
     delete problem_;
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+void WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
 {
     //std::cout << "creating new frame..." << std::endl;
 
-    assert(_frame_state.size() == StatePositionT::BLOCK_SIZE + StateOrientationT::BLOCK_SIZE + StateVelocityT::BLOCK_SIZE + StateOmegaT::BLOCK_SIZE && "Wrong frame vector when creating a new frame");
+    assert(_frame_state.size() == StatePositionT::BLOCK_SIZE + StateBaseT::BLOCK_SIZE + StateVelocityT::BLOCK_SIZE + StateOmegaT::BLOCK_SIZE && "Wrong frame vector when creating a new frame");
 
     // Process current frame non-odometry captures
     if (current_frame_ != nullptr)
@@ -170,9 +170,9 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     problem_->addState(new_position, _frame_state.head<StatePositionT::BLOCK_SIZE>());
     //std::cout << "StatePosition created" << std::endl;
 
-    StateOrientationT* new_orientation = new StateOrientationT(problem_->getNewStatePtr());
-    problem_->addState(new_orientation, _frame_state.segment<StateOrientationT::BLOCK_SIZE>(new_position->getStateSize()));
-    //std::cout << "StateOrientation created" << std::endl;
+    StateBaseT* new_orientation = new StateBaseT(problem_->getNewStatePtr());
+    problem_->addState(new_orientation, _frame_state.segment<StateBaseT::BLOCK_SIZE>(new_position->getStateSize()));
+    //std::cout << "StateBase created" << std::endl;
 
     StateVelocityT* new_velocity = nullptr;
     if (StateVelocityT::BLOCK_SIZE != 0)
@@ -198,7 +198,7 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     // empty last capture relative
     if (previous_frame_ != nullptr)
     {
-        CaptureRelative* empty_odom = new CaptureOdom2D(_time_stamp, _time_stamp, sensor_prior_, Eigen::Vector3s::Zero());
+        CaptureMotion* empty_odom = new CaptureOdom2D(_time_stamp, _time_stamp, sensor_prior_, Eigen::Vector3s::Zero());
         previous_frame_->addCapture(empty_odom);
         empty_odom->processCapture();
         last_capture_relative_ = empty_odom;
@@ -210,15 +210,15 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     //std::cout << "new frame created" << std::endl;
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::createFrame(const TimeStamp& _time_stamp)
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+void WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::createFrame(const TimeStamp& _time_stamp)
 {
     //std::cout << "creating new frame from prior..." << std::endl;
     createFrame(last_capture_relative_->computePrior(_time_stamp), _time_stamp);
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::addCapture(CaptureBase* _capture)
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+void WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::addCapture(CaptureBase* _capture)
 {
     new_captures_.push(_capture);
     //std::cout << "added new capture: " << _capture->nodeId() << " stamp: ";
@@ -226,8 +226,8 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     //std::cout << std::endl;
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::manageWindow()
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+void WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::manageWindow()
 {
     //std::cout << "managing window..." << std::endl;
     // WINDOW of FRAMES (remove or fix old frames)
@@ -241,8 +241,8 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     //std::cout << "window managed" << std::endl;
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-bool WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::checkNewFrame(CaptureBase* new_capture)
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+bool WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::checkNewFrame(CaptureBase* new_capture)
 {
     //std::cout << "checking if new frame..." << std::endl;
     // TODO: not only time, depending on the sensor...
@@ -250,8 +250,8 @@ bool WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     return new_capture->getTimeStamp().get() - previous_frame_->getTimeStamp().get() > new_frame_elapsed_time_;
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::update()
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+void WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::update()
 {
     //std::cout << "updating..." << std::endl;
     while (!new_captures_.empty())
@@ -276,7 +276,7 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
                 createFrame(new_capture->getTimeStamp());
 
             // ADD/INTEGRATE NEW ODOMETRY TO THE LAST FRAME
-            last_capture_relative_->integrateCapture((CaptureRelative*) (new_capture));
+            last_capture_relative_->integrateCapture((CaptureMotion*) (new_capture));
             current_frame_->setState(last_capture_relative_->computePrior(new_capture->getTimeStamp()));
             current_frame_->setTimeStamp(new_capture->getTimeStamp());
         }
@@ -307,8 +307,8 @@ void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>
     //std::cout << "updated" << std::endl;
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-Eigen::VectorXs WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::getVehiclePose(const TimeStamp& _now)
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+Eigen::VectorXs WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::getVehiclePose(const TimeStamp& _now)
 {
     if (last_capture_relative_ == nullptr)
         return Eigen::Map<Eigen::Vector3s>(current_frame_->getPPtr()->getPtr());
@@ -316,20 +316,20 @@ Eigen::VectorXs WolfManager<StatePositionT, StateOrientationT, StateVelocityT, S
         return last_capture_relative_->computePrior(_now);
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-WolfProblem* WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::getProblemPtr()
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+WolfProblem* WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::getProblemPtr()
 {
     return problem_;
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::setWindowSize(const unsigned int& _size)
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+void WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::setWindowSize(const unsigned int& _size)
 {
     window_size_ = _size;
 }
 
-template <class StatePositionT, class StateOrientationT, class StateVelocityT, class StateOmegaT>
-void WolfManager<StatePositionT, StateOrientationT, StateVelocityT, StateOmegaT>::setNewFrameElapsedTime(const WolfScalar& _dt)
+template <class StatePositionT, class StateBaseT, class StateVelocityT, class StateOmegaT>
+void WolfManager<StatePositionT, StateBaseT, StateVelocityT, StateOmegaT>::setNewFrameElapsedTime(const WolfScalar& _dt)
 {
     new_frame_elapsed_time_ = _dt;
 }

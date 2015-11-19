@@ -19,9 +19,11 @@ class NodeTerminus;
 class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 {
     protected:
-        ConstraintType type_; //type of constraint (types defined at wolf.h)
-        const Eigen::VectorXs& measurement_; // TODO:TBD: pointer, map or copy of the feature measurement?
-        const Eigen::MatrixXs& measurement_covariance_; // TODO:TBD: pointer, map or copy of the feature measurement covariance?
+        ConstraintType type_; ///< type of constraint (types defined at wolf.h)
+        const Eigen::VectorXs& measurement_; ///< Direct access to the measurement
+        const Eigen::MatrixXs& measurement_covariance_; ///< Direct access to the measurement's covariance
+		PendingStatus pending_status_; ///< Pending status
+
 
     public:
         /** \brief Constructor
@@ -86,6 +88,21 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          *
          **/
         virtual unsigned int getSize() const = 0;
+
+        /** \brief Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
+         *
+         * Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
+		 *
+         */
+        PendingStatus getPendingStatus() const;
+
+        /** \brief Sets the node pending status (pending or not to be added/updated in the filter or optimizer)
+         *
+         * Sets the node pending status (pending or not to be added/updated in the filter or optimizer)
+		 *
+         */
+        void setPendingStatus(PendingStatus _pending);
+
 
 };
 #endif

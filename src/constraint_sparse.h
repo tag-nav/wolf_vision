@@ -6,12 +6,6 @@
 #include "wolf.h"
 #include "constraint_base.h"
 
-//TODO: 
-// - public static const may be are not necessary, since sizes are already kept in ConstraintBase::state_block_sizes_vector_
-// 	 JVN: Yes, they are necessary for the ceres cost function constructor. Maybe, the state_block_sizes_vector_ is not necessary (it can be useful in filtering...)
-// - measurement_ptr can be set from FeatureBase::measurement_, once this constraint is up-linked to a feature.
-//   May be a simple get is enough to access this data.
-// - 
 
 //template class ConstraintBase
 template <const unsigned int MEASUREMENT_SIZE,

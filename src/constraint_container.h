@@ -15,12 +15,12 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 	public:
 		static const unsigned int N_BLOCKS = 4;
 
-		ConstraintContainer(FeatureBase* _ftr_ptr, LandmarkContainer* _lmk_ptr, const unsigned int _corner, StateBase* _robotPPtr, StateOrientation* _robotOPtr, StateBase* _landmarkPPtr, StateOrientation* _landmarkOPtr) :
-			ConstraintSparse<3,2,1,2,1>(_ftr_ptr,CTR_CONTAINER,  _robotPPtr, _robotOPtr,_landmarkPPtr, _landmarkOPtr),
+	    ConstraintContainer(FeatureBase* _ftr_ptr, LandmarkContainer* _lmk_ptr, const unsigned int _corner) :
+			ConstraintSparse<3,2,1,2,1>(_ftr_ptr,CTR_CONTAINER, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
 		{
-            assert(_corner >= 0 && _corner <= 4 && "wrong corner id in constraint container constructor");
+            assert(_corner >= 0 && _corner <= 3 && "Wrong corner id in constraint container constructor");
             lmk_ptr_->hit(this);
 		}
         
@@ -51,7 +51,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 
 			// sensor transformation
 			Eigen::Matrix<T,2,1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getVector().head(2).cast<T>();
-			Eigen::Matrix<T,2,2> inverse_R_sensor = (getCapturePtr()->getSensorPtr()->getOPtr()->getRotationMatrix().topLeftCorner<2,2>().transpose()).cast<T>();
+			Eigen::Matrix<T,2,2> inverse_R_sensor = (getCapturePtr()->getSensorPtr()->getRotationMatrix2D().transpose()).cast<T>();
 
 			Eigen::Matrix<T,2,2> inverse_R_robot;
 			inverse_R_robot << cos(*_robotO), sin(*_robotO),
@@ -64,7 +64,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 
 			// Expected measurement
 			Eigen::Matrix<T,2,1> expected_measurement_position = inverse_R_sensor * (inverse_R_robot * (landmark_position - robot_position + R_landmark * corner_position) - sensor_position);
-			T expected_measurement_orientation = (*_landmarkO) - (*_robotO) - T(getCapturePtr()->getSensorPtr()->getOPtr()->getYaw()) + T(lmk_ptr_->getCorner(corner_)(2));
+			T expected_measurement_orientation = (*_landmarkO) - (*_robotO) - T( *(getCapturePtr()->getSensorPtr()->getOPtr()->getPtr()) ) + T(lmk_ptr_->getCorner(corner_)(2));
 
 			// Residuals
 			_residuals[0] = (expected_measurement_position(0) - T(measurement_(0))) / T(sqrt(measurement_covariance_(0,0)));

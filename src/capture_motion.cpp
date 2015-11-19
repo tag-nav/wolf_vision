@@ -1,4 +1,4 @@
-#include "capture_relative.h"
+#include "capture_motion.h"
 
 CaptureMotion::CaptureMotion(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr) :
     CaptureBase(_init_ts, _sensor_ptr),

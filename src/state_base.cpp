@@ -1,20 +1,14 @@
 
 #include "state_base.h"
 
-StateBase::StateBase(WolfScalar* _st_ptr) :
-			NodeBase("STATE"),
+StateBase::StateBase(WolfScalar* _st_ptr, unsigned int _size, StateType _type, StateStatus _status) :
+			type_(_type),
 			state_ptr_(_st_ptr),
-			status_(ST_ESTIMATED)
+			size_(_size),
+			status_(_status),
+			pending_status_(ADD_PENDING)
 {
 	//
-}
-
-StateBase::StateBase(Eigen::VectorXs& _st_remote, const unsigned int _idx) :
-            NodeBase("STATE"),
-            state_ptr_(_st_remote.data() + _idx),
-            status_(ST_ESTIMATED)
-{
-    //
 }
 
 StateBase::~StateBase()
@@ -43,3 +37,14 @@ void StateBase::setStateStatus(const StateStatus& _status)
 	if (getPendingStatus() != ADD_PENDING)
 		setPendingStatus(UPDATE_PENDING);
 }
+
+PendingStatus StateBase::getPendingStatus() const
+{
+	return pending_status_;
+}
+
+void StateBase::setPendingStatus(PendingStatus _pending)
+{
+	pending_status_ = _pending;
+}
+

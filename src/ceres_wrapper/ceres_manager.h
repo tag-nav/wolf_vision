@@ -9,15 +9,11 @@
 //wof includes
 #include "../wolf.h"
 #include "../state_base.h"
-#include "../state_point.h"
-#include "../state_complex_angle.h"
-#include "../state_theta.h"
 #include "../constraint_sparse.h"
 #include "../constraint_fix.h"
 #include "../constraint_gps_2D.h"
-#include "../constraint_odom_2D_theta.h"
-#include "../constraint_odom_2D_complex_angle.h"
-#include "../constraint_corner_2D_theta.h"
+#include "../constraint_odom_2D.h"
+#include "../constraint_corner_2D.h"
 #include "../constraint_container.h"
 
 // ceres wrapper includes

@@ -12,11 +12,11 @@ class SensorGPSFix : public SensorBase
          * 
          * Constructor with arguments
          * \param _p_ptr StateBase pointer to the sensor position
-         * \param _o_ptr StateOrientation pointer to the sensor orientation
+         * \param _o_ptr StateBase pointer to the sensor orientation
          * \param _noise noise standard deviation
          * 
          **/
-		SensorGPSFix(StatePoint3D* _p_ptr, StateOrientation* _o_ptr, const double& _noise);
+		SensorGPSFix(StateBase* _p_ptr, StateBase* _o_ptr, const double& _noise);
         
         /** \brief Destructor
          * 

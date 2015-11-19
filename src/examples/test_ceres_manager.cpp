@@ -264,7 +264,7 @@ class Constraint2DOdometryTheta : public ConstraintSparse<2,2,1,2,1>
 
         virtual ConstraintType getType() const
         {
-        	return CTR_ODOM_2D_THETA;
+        	return CTR_ODOM_2D;
         }
 };
 
@@ -355,19 +355,19 @@ class WolfManager
         	// Create frame
         	if (use_complex_angles_)
 // 				frames_.push_back(FrameBaseShPtr(new FrameBase(nullptr, _time_stamp,
-// 															   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
+// 															   StateBaseShPtr(new StateBase(state_.data()+first_empty_state_)),
 // 															   StateBaseShPtr(new StateComplexAngle(state_.data()+first_empty_state_+2)))));
                 frames_.push_back(new FrameBase(_time_stamp,
-                                                new StatePoint2D(state_.data()+first_empty_state_),
+                                                new StateBase(state_.data()+first_empty_state_),
                                                 new StateComplexAngle(state_.data()+first_empty_state_+2)));
 
         	else
 // 				frames_.push_back(FrameBaseShPtr(new FrameBase(nullptr, _time_stamp,
-// 						   	   	   	   	   	   	   	   	   	   StateBaseShPtr(new StatePoint2D(state_.data()+first_empty_state_)),
-// 															   StateBaseShPtr(new StateTheta(state_.data()+first_empty_state_+2)))));
+// 						   	   	   	   	   	   	   	   	   	   StateBaseShPtr(new StateBase(state_.data()+first_empty_state_)),
+// 															   StateBaseShPtr(new StateBase(state_.data()+first_empty_state_+2)))));
                 frames_.push_back(new FrameBase(_time_stamp,
-                                                new StatePoint2D(state_.data()+first_empty_state_),
-                                                new StateTheta(state_.data()+first_empty_state_+2)));
+                                                new StateBase(state_.data()+first_empty_state_),
+                                                new StateBase(state_.data()+first_empty_state_+2)));
         	// Update first free state location index
         	first_empty_state_ += use_complex_angles_ ? 4 : 3;
         }
@@ -605,13 +605,13 @@ class CeresManager
 				case ST_POINT_2D:
 				{
 					//std::cout << "No Local Parametrization to be added" << std::endl;
-					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint2D*)_st_ptr)->BLOCK_SIZE, nullptr);
+					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBase*)_st_ptr)->BLOCK_SIZE, nullptr);
 					break;
 				}
 				case ST_POINT_3D:
 				{
 					//std::cout << "No Local Parametrization to be added" << std::endl;
-					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint3D*)_st_ptr)->BLOCK_SIZE, nullptr);
+					ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBase*)_st_ptr)->BLOCK_SIZE, nullptr);
 					break;
 				}
 				default:
@@ -657,7 +657,7 @@ class CeresManager
 															specific_ptr->block9Size>(specific_ptr);
 					break;
 				}
-				case CTR_ODOM_2D_THETA:
+				case CTR_ODOM_2D:
 				{
 					Constraint2DOdometryTheta* specific_ptr = (Constraint2DOdometryTheta*)(_corrPtr);
 					return new ceres::AutoDiffCostFunction<Constraint2DOdometryTheta,

@@ -140,14 +140,14 @@ class WolfManager
         void createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
         {
         	// Create frame and add it to the trajectory
-        	StateBase* new_position = new StatePoint2D(problem_->getNewStatePtr());
+        	StateBase* new_position = new StateBase(problem_->getNewStatePtr());
 			problem_->addState(new_position, _frame_state.head(2));
 
 			StateBase* new_orientation;
         	if (use_complex_angles_)
         		new_orientation = new StateComplexAngle(problem_->getNewStatePtr());
         	else
-        		new_orientation = new StateTheta(problem_->getNewStatePtr());
+        		new_orientation = new StateBase(problem_->getNewStatePtr());
 
 			problem_->addState(new_orientation, _frame_state.tail(new_orientation->getStateSize()));
 
@@ -178,20 +178,20 @@ class WolfManager
         		if (new_capture->getSensorPtr() == sensor_prior_)
         		{
         			// FIND PREVIOUS RELATIVE CAPTURE
-					CaptureRelative* previous_relative_capture = nullptr;
+					CaptureMotion* previous_relative_capture = nullptr;
 					for (auto capture_it = problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->begin(); capture_it != problem_->getTrajectoryPtr()->getFrameListPtr()->back()->getCaptureListPtr()->end(); capture_it++)
 					{
 						//std::cout << "capture: " << (*capture_it)->nodeId() << std::endl;
 						if ((*capture_it)->getSensorPtr() == sensor_prior_)
 						{
-							previous_relative_capture = (CaptureRelative*)(*capture_it);
+							previous_relative_capture = (CaptureMotion*)(*capture_it);
 							break;
 						}
 					}
 
 					// INTEGRATING ODOMETRY CAPTURE & COMPUTING PRIOR
 					std::cout << "integrating captures " << previous_relative_capture->nodeId() << " " << new_capture->nodeId() << std::endl;
-					previous_relative_capture->integrateCapture((CaptureRelative*)(new_capture));
+					previous_relative_capture->integrateCapture((CaptureMotion*)(new_capture));
 					Eigen::VectorXs prior = previous_relative_capture->computePrior();
 
         			// NEW KEY FRAME (if enough time from last frame)

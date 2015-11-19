@@ -546,10 +546,10 @@ class SolverQR
                                                                specific_ptr->block9Size>(specific_ptr);
                     break;
                 }
-                case CTR_ODOM_2D_THETA:
+                case CTR_ODOM_2D:
                 {
-                    ConstraintOdom2DTheta* specific_ptr = (ConstraintOdom2DTheta*)(_corrPtr);
-                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintOdom2DTheta,
+                    ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
+                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintOdom2D,
                                                                specific_ptr->measurementSize,
                                                                specific_ptr->block0Size,
                                                                specific_ptr->block1Size,
@@ -563,10 +563,10 @@ class SolverQR
                                                                specific_ptr->block9Size>(specific_ptr);
                     break;
                 }
-                case CTR_CORNER_2D_THETA:
+                case CTR_CORNER_2D:
                 {
-                    ConstraintCorner2DTheta* specific_ptr = (ConstraintCorner2DTheta*)(_corrPtr);
-                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintCorner2DTheta,
+                    ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
+                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintCorner2D,
                                                                specific_ptr->measurementSize,
                                                                specific_ptr->block0Size,
                                                                specific_ptr->block1Size,

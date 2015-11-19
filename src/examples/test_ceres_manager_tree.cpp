@@ -86,15 +86,15 @@ class WolfManager
         	if (use_complex_angles_)
         	{
                 FrameBase* new_frame = new FrameBase(_time_stamp,
-                                                     new StatePoint2D(state_.data()+first_empty_state_),
+                                                     new StateBase(state_.data()+first_empty_state_),
                                                      new StateComplexAngle(state_.data()+first_empty_state_+2));
         		trajectory_->addFrame(new_frame);
         	}
         	else
         	{
                 FrameBase* new_frame = new FrameBase(_time_stamp,
-                                                     new StatePoint2D(state_.data()+first_empty_state_),
-                                                     new StateTheta(state_.data()+first_empty_state_+2));
+                                                     new StateBase(state_.data()+first_empty_state_),
+                                                     new StateBase(state_.data()+first_empty_state_+2));
         		trajectory_->addFrame(new_frame);
         	}
 

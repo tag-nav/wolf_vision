@@ -7,7 +7,7 @@
 //     params_ << _angle_min, _angle_max, _angle_increment, _range_min, _range_max, _range_stdev, _time_increment, _scan_time;
 // }
 
-SensorLaser2D::SensorLaser2D(StatePoint3D* _p_ptr, StateOrientation* _o_ptr) :
+SensorLaser2D::SensorLaser2D(StateBase* _p_ptr, StateBase* _o_ptr) :
     SensorBase(LIDAR, _p_ptr, _o_ptr, 8)
 {
     setDefaultScanParams();

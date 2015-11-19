@@ -4,7 +4,8 @@ ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     type_(_tp),
 	measurement_(_ftr_ptr->getMeasurement()),
-	measurement_covariance_(_ftr_ptr->getMeasurementCovariance())
+	measurement_covariance_(_ftr_ptr->getMeasurementCovariance()),
+	pending_status_(ADD_PENDING)
 {
 	//
 }
@@ -32,4 +33,14 @@ FeatureBase* ConstraintBase::getFeaturePtr() const
 CaptureBase* ConstraintBase::getCapturePtr() const
 {
 	return upperNodePtr()->upperNodePtr();
+}
+
+PendingStatus ConstraintBase::getPendingStatus() const
+{
+	return pending_status_;
+}
+
+void ConstraintBase::setPendingStatus(PendingStatus _pending)
+{
+	pending_status_ = _pending;
 }

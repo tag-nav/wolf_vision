@@ -91,7 +91,7 @@ void SolverManager::addStateUnit(StateBase* _st_ptr)
 		case ST_THETA:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateTheta*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBase*)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		case ST_POINT_1D:
@@ -100,16 +100,16 @@ void SolverManager::addStateUnit(StateBase* _st_ptr)
 			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint1D*)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
-		case ST_POINT_2D:
+		case ST_VECTOR:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint2D*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBase*)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		case ST_POINT_3D:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint3D*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBase*)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		default:
@@ -186,10 +186,10 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBase* _corrPtr)
 													specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
-		case CTR_ODOM_2D_THETA:
+		case CTR_ODOM_2D:
 		{
-			ConstraintOdom2DTheta* specific_ptr = (ConstraintOdom2DTheta*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintOdom2DTheta,
+			ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<ConstraintOdom2D,
 													specific_ptr->measurementSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
@@ -203,10 +203,10 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBase* _corrPtr)
 													specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
-		case CTR_CORNER_2D_THETA:
+		case CTR_CORNER_2D:
 		{
-			ConstraintCorner2DTheta* specific_ptr = (ConstraintCorner2DTheta*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintCorner2DTheta,
+			ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<ConstraintCorner2D,
 													specific_ptr->measurementSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,

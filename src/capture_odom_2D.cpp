@@ -1,13 +1,13 @@
 #include "capture_odom_2D.h"
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr) :
-        CaptureRelative(_init_ts, _final_ts, _sensor_ptr)
+        CaptureMotion(_init_ts, _final_ts, _sensor_ptr)
 {
     //
 }
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data) :
-        CaptureRelative(_init_ts, _final_ts, _sensor_ptr, _data)
+        CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data)
 {
     data_covariance_ = Eigen::Matrix3s::Zero();
     data_covariance_(0, 0) = std::max(1e-10, _data(0) * _data(0) * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor() * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor());
@@ -17,7 +17,7 @@ CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_
 }
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance) :
-        CaptureRelative(_init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
+        CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
 {
     //
 }
@@ -40,33 +40,16 @@ Eigen::VectorXs CaptureOdom2D::computePrior(const TimeStamp& _now) const
 {
     assert(up_node_ptr_ != nullptr && "This Capture is not linked to any frame");
 
-    if (getFramePtr()->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
-    {
-        Eigen::Vector4s prior;
-        Eigen::Map<Eigen::Vector4s> initial_pose(getFramePtr()->getPPtr()->getPtr());
-        //std::cout << "initial_pose: " << initial_pose.transpose() << std::endl;
-        prior(0) = initial_pose(0) + data_(0) * initial_pose(2) - data_(1) * initial_pose(3);
-        prior(1) = initial_pose(1) + data_(0) * initial_pose(3) + data_(1) * initial_pose(2);
-        prior(2) = initial_pose(2) * cos(data_(2)) - initial_pose(3) * sin(data_(2));
-        prior(3) = initial_pose(2) * sin(data_(2)) + initial_pose(3) * cos(data_(2));
-        //std::cout << "data_: " << data_.transpose() << std::endl;
-        //std::cout << "prior: " << prior.transpose() << std::endl;
+    Eigen::Vector3s prior;
+    Eigen::Map<Eigen::Vector3s> initial_pose(getFramePtr()->getPPtr()->getPtr());
+    //std::cout << "initial_pose: " << initial_pose.transpose() << std::endl;
+    prior(0) = initial_pose(0) + data_(0) * cos(initial_pose(2)) - data_(1) * sin(initial_pose(2));
+    prior(1) = initial_pose(1) + data_(0) * sin(initial_pose(2)) + data_(1) * cos(initial_pose(2));
+    prior(2) = initial_pose(2) + data_(2);
+    //std::cout << "data_: " << data_.transpose() << std::endl;
+    //std::cout << "prior: " << prior.transpose() << std::endl;
 
-        return prior;
-    }
-    else
-    {
-        Eigen::Vector3s prior;
-        Eigen::Map<Eigen::Vector3s> initial_pose(getFramePtr()->getPPtr()->getPtr());
-        //std::cout << "initial_pose: " << initial_pose.transpose() << std::endl;
-        prior(0) = initial_pose(0) + data_(0) * cos(initial_pose(2)) - data_(1) * sin(initial_pose(2));
-        prior(1) = initial_pose(1) + data_(0) * sin(initial_pose(2)) + data_(1) * cos(initial_pose(2));
-        prior(2) = initial_pose(2) + data_(2);
-        //std::cout << "data_: " << data_.transpose() << std::endl;
-        //std::cout << "prior: " << prior.transpose() << std::endl;
-
-        return prior;
-    }
+    return prior;
 
 }
 
@@ -74,25 +57,11 @@ void CaptureOdom2D::addConstraints()
 {
     assert(getFramePtr()->getNextFrame() != nullptr && "Trying to add odometry constraint in the last frame (there is no next frame)");
 
-    if (getFramePtr()->getOPtr()->getStateType() == ST_COMPLEX_ANGLE)
-    {
-        getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2DComplexAngle(getFeatureListPtr()->front(),
-                                                                                     getFramePtr()->getPPtr(),
-                                                                                     getFramePtr()->getOPtr(),
-                                                                                     getFramePtr()->getNextFrame()->getPPtr(),
-                                                                                     getFramePtr()->getNextFrame()->getOPtr()));
-    }
-    else
-    {
-        getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2DTheta(getFeatureListPtr()->front(),
-                                                                              getFramePtr()->getPPtr(),
-                                                                              getFramePtr()->getOPtr(),
-                                                                              getFramePtr()->getNextFrame()->getPPtr(),
-                                                                              getFramePtr()->getNextFrame()->getOPtr()));
-    }
+    getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2D(getFeatureListPtr()->front(),
+			  	  	  	  	  	  	  	  	  	  	  	  	  	     getFramePtr()->getPreviousFrame()));
 }
 
-void CaptureOdom2D::integrateCapture(CaptureRelative* _new_capture)
+void CaptureOdom2D::integrateCapture(CaptureMotion* _new_capture)
 {
     assert(dynamic_cast<CaptureOdom2D*>(_new_capture) && "Trying to integrate with a CaptureOdom2D a CaptureRelativePtr which is not CaptureOdom2D");
 

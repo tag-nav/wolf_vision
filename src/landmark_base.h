@@ -16,7 +16,7 @@ class NodeTerminus;
 #include "time_stamp.h"
 #include "node_linked.h"
 #include "map_base.h"
-#include "state_orientation.h"
+#include "state_base.h"
 #include "constraint_base.h"
 
 // why v, w and a ?
@@ -34,7 +34,7 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
         TimeStamp stamp_; // stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
         //StateBaseList st_list_; //List of pointers to the state corresponding to the landmark estimation
         StateBase* p_ptr_; // Position state unit pointer
-        StateOrientation* o_ptr_; // Orientation state unit pointer
+        StateBase* o_ptr_; // Orientation state unit pointer
         StateBase* v_ptr_; // Velocity state unit pointer
         StateBase* w_ptr_; // Angular velocity state unit pointer
         //TODO: accelerations?
@@ -47,12 +47,12 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
          * Constructor with type, and state pointer
          * \param _tp indicates landmark type.(types defined at wolf.h)
          * \param _p_ptr StateBase pointer to the position
-         * \param _o_ptr StateOrientation pointer to the orientation (default: nullptr)
+         * \param _o_ptr StateBase pointer to the orientation (default: nullptr)
          * \param _v_ptr StateBase pointer to the velocity (default: nullptr)
          * \param _w_ptr StateBase pointer to the angular velocity (default: nullptr)
          *
          **/
-        LandmarkBase(const LandmarkType & _tp, StateBase* _p_ptr, StateOrientation* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
+        LandmarkBase(const LandmarkType & _tp, StateBase* _p_ptr, StateBase* _o_ptr = nullptr, StateBase* _v_ptr = nullptr, StateBase* _w_ptr = nullptr);
 
         /** \brief Constructor with type, time stamp and state list
          *
@@ -85,7 +85,7 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
 
         StateBase* getPPtr() const;
 
-        StateOrientation* getOPtr() const;
+        StateBase* getOPtr() const;
 
         StateBase* getVPtr() const;
 
@@ -93,7 +93,7 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
 
         void setPPtr(StateBase* _st_ptr);
 
-        void setOPtr(StateOrientation* _st_ptr);
+        void setOPtr(StateBase* _st_ptr);
 
         void setVPtr(StateBase* _st_ptr);
 
