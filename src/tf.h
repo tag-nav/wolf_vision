@@ -14,53 +14,101 @@
 
 class TF
 {
-private:
-	Eigen::Vector3s T_;
-	Eigen::Matrix3s R_;
-	Eigen::Matrix4s H_;
-	Eigen::Vector3s T_old_;
-	Eigen::Vector4s Q_old_;
+    private:
+        unsigned int epoch_; ///< epoch counter to control updates automatically
 
-	TF() : T_(Eigen::Vector3s::Zero()),
-		   R_(Eigen::Matrix3s::Identity()),
-		   H_(Eigen::Matrix4s::Identity()),
-		   T_old_(T_),
-		   Q_old_(Eigen::Vector4s::Zero())
-	{
-	}
+    protected:
+        Eigen::Vector3s t_; ///< Position vector
+        Eigen::Vector4s q_vector_; ///< Orientation quaternion in vector form
+        Eigen::Quaternions q_; ///< Orientation quaternion in quaternion form
+        Eigen::Matrix3s R_; ///< Rotation matrix
+        Eigen::Matrix4s H_; ///< Homogeneous matrix (aka. motion matrix)
 
-	TF(double* _t, double* _q) : T_(*_t), T_old_(*_t), Q_old_(*_q)
-	{
-		R_ = Eigen::Quaternion(_q[3],_q[0],_q[1],_q[2]).matrix();
-		H_.block<3,3>(0,0) = R_;
-		H_.block<3,1>(0,3) = T_;
-		H_.block<1,3>(3,0) = Eigen::RowVector3s::Zero();
-		H_(3,3) = 1.0;
-	}
+    public:
 
-public:
-	void update(double* _t, double* _q)
-	{
-		if (!equalQ(_t))
-		{
-			R_ = Eigen::Quaternion(_q[3],_q[0],_q[1],_q[2]).matrix();
-			H_.block<3,3>(0,0) = R_;
-			H_.block<3,1>(0,3) = T_;
-			H_.block<1,3>(3,0) = Eigen::RowVector3s::Zero();
-			H_(3,3) = 1.0;
-		}
-	}
+        /**
+         * Default constructor
+         */
+        TF() : epoch_(0),
+               t_(Eigen::Vector3s::Zero()),
+               q_vector_(0,0,0,0), // Impose a non-valid quaternion so that it will be updated for sure. This prevents a bad initialization due to different convention in the order of components.
+               q_(Eigen::Quaternions::Identity()),
+               R_(Eigen::Matrix3s::Identity()),
+               H_(Eigen::Matrix4s::Identity())
+    {
+    }
+
+        /**
+         *
+         */
+        TF(double* _t_ptr, double* _q_ptr) :
+            epoch_(0),
+            t_(_t_ptr[0], _t_ptr[1], _t_ptr[2]),
+            q_vector_(_q_ptr[0],_q_ptr[1],_q_ptr[2],_q_ptr[3]), //TODO: check components order!
+            q_(_q_ptr), //TODO: check components order!
+            R_(q_.matrix()),
+            H_(Eigen::Matrix4s::Identity())
+        {
+            H_.block<3,3>(0,0) = R_;
+            H_.block<3,1>(0,3) = t_;
+        }
+
+    public:
+        void update(double* _t, double* _q_vector)
+        {
+            if (!equalT(_t))
+            {
+                t_(0) = _t[0];
+                t_(1) = _t[1];
+                t_(2) = _t[2];
+                H_.block<3,1>(0,3) = t_;
+            }
+            if (!equalQ(_q_vector))
+            {
+                q_ = Eigen::Quaternion(_q_vector);
+                R_ = q_.matrix();
+                H_.block<3,3>(0,0) = R_;
+            }
+        }
+
+        void update(double* _t, double* _q_vector, unsigned int _epoch)
+        {
+            if(_epoch != epoch_)
+            {
+                epoch_ = _epoch;
+                t_(0) = _t[0];
+                t_(1) = _t[1];
+                t_(2) = _t[2];
+                q_ = Eigen::Quaternion(_q_vector);
+                R_ = q_.matrix();
+                H_.block<3,3>(0,0) = R_;
+                H_.block<3,1>(0,3) = t_;
+            }
+        }
 
 
-private:
-	bool equalT(double * _t)
-	{
-		return ((_t[0] == T_old_(0)) && (_t[1] == T_old_(1)) && (_t[2] == T_old_(2)));
-	}
-	bool equalQ(double * _q)
-	{
-		return ((_q[0] == Q_old_(0)) && (_q[1] == Q_old_(1)) && (_q[2] == Q_old_(2)) && (_q[3] == Q_old_(3)));
-	}
+    private:
+        bool equalT(double * _t)
+        {
+            return ((_t[0] == t_(0)) && (_t[1] == t_(1)) && (_t[2] == t_(2)));
+        }
+        bool equalQ(double * _q)
+        {
+            return ((_q[0] == q_vector_(0)) && (_q[1] == q_vector_(1)) && (_q[2] == q_vector_(2)) && (_q[3] == q_vector_(3)));
+        }
+        void updateT(double * _t)
+        {
+            t_(0) = _t[0];
+            t_(1) = _t[1];
+            t_(2) = _t[2];
+        }
+        void updateO(double * _q_vector)
+        {
+            q_ = Eigen::Quaternion(_q_vector);
+            R_ = q_.matrix();
+            H_.block<3,3>(0,0) = R_;
+            H_.block<3,1>(0,3) = t_;
+        }
 
 };
 
