@@ -19,7 +19,7 @@
 #include "laser_scan_utils/corner_detector.h"
 
 //wolf includes
-#include "state_base.h"
+#include "state_block.h"
 #include "constraint_corner_2D.h"
 #include "constraint_container.h"
 #include "capture_base.h"

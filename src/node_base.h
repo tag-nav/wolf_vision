@@ -18,7 +18,7 @@ class NodeBase
         std::string label_; ///< Text label identifying the node
         unsigned int node_id_; ///< Node id. It is unique over the whole Wolf Tree
         static unsigned int node_id_count_; ///< Object counter (acts as simple ID factory)
-        PendingStatus node_pending_; ///< Pending to be added/updated in the filter or optimizer
+        //PendingStatus node_pending_; ///< Pending to be added/updated in the filter or optimizer
         bool verbose_; 
 
     public: 

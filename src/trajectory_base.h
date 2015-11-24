@@ -18,7 +18,7 @@ class FrameBase;
 #include "node_linked.h"
 #include "node_terminus.h"
 #include "frame_base.h"
-#include "state_base.h"
+#include "state_block.h"
 
 //class TrajectoryBase
 class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>

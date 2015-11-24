@@ -16,9 +16,11 @@ void CaptureFix::processCapture()
 {
 	// EXTRACT AND ADD FEATURES
     addFeature(new FeatureFix(data_,data_covariance_));
+    std::cout << "FeatureFix extracted " << std::endl;
 
     // ADD CONSTRAINT
-	getFeatureListPtr()->front()->addConstraint(new ConstraintFix(getFeatureListPtr()->front(), getFramePtr()));
+	getFeatureListPtr()->front()->addConstraintFrom(new ConstraintFix(getFeatureListPtr()->front()));
+    std::cout << "ConstraintFix added " << std::endl;
 }
 
 Eigen::VectorXs CaptureFix::computePrior(const TimeStamp& _now) const

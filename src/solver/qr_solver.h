@@ -13,7 +13,7 @@
 #include <ctime>
 
 //Wolf includes
-#include "state_base.h"
+#include "state_block.h"
 #include "constraint_base.h"
 #include "sparse_utils.h"
 
@@ -31,17 +31,18 @@ using namespace Eigen;
 class SolverQR
 {
     protected:
+        WolfProblem* problem_ptr_;
         SparseQR < SparseMatrix<double>, NaturalOrdering<int>> solver_;
         SparseMatrix<double> A_, R_;
         VectorXd b_, x_incr_;
-        std::vector<StateBase*> nodes_;
+        std::vector<StateBlock*> nodes_;
         std::vector<ConstraintBase*> constraints_;
         std::vector<CostFunctionBase*> cost_functions_;
 
         // ordering
         SparseMatrix<int> A_nodes_;
         PermutationMatrix<Dynamic, Dynamic, int> acc_node_permutation_;
-        std::map<unsigned int, unsigned int> id_2_idx_;
+        std::map<double*, unsigned int> id_2_idx_;
         CCOLAMDOrdering<int> orderer_;
         VectorXi node_ordering_restrictions_;
         ArrayXi node_locations_;
@@ -54,7 +55,8 @@ class SolverQR
 
 
     public:
-        SolverQR() :
+        SolverQR(WolfProblem* problem_ptr_) :
+            problem_ptr_(problem_ptr_),
             A_(0,0),
             R_(0,0),
             A_nodes_(0,0),
@@ -73,66 +75,67 @@ class SolverQR
 
         }
 
-        void update(WolfProblem* _problem_ptr)
+        void update()
         {
-            // ADD/UPDATE STATE UNITS
-            for(auto state_unit_it = _problem_ptr->getStateListPtr()->begin(); state_unit_it!=_problem_ptr->getStateListPtr()->end(); state_unit_it++)
+            // REMOVE CONSTRAINTS
+            while (!problem_ptr_->getConstraintRemoveList()->empty())
             {
-                if ((*state_unit_it)->getPendingStatus() == ADD_PENDING)
-                    addStateUnit(*state_unit_it);
-
-                else if((*state_unit_it)->getPendingStatus() == UPDATE_PENDING)
-                    updateStateUnitStatus(*state_unit_it);
+                // TODO: removeConstraint(problem_ptr_->getConstraintRemoveList()->front());
+                problem_ptr_->getConstraintRemoveList()->pop_front();
             }
-            //std::cout << "state units updated!" << std::endl;
-
-            // REMOVE STATE UNITS
-            while (!_problem_ptr->getRemovedStateListPtr()->empty())
+            // REMOVE STATE BLOCKS
+            while (!problem_ptr_->getStateBlockRemoveList()->empty())
             {
-                // TODO
-                _problem_ptr->getRemovedStateListPtr()->pop_front();
+                // TODO removeStateBlock((double *)(problem_ptr_->getStateBlockRemoveList()->front()));
+                problem_ptr_->getStateBlockRemoveList()->pop_front();
             }
-            //std::cout << "state units removed!" << std::endl;
-
+            // ADD STATE BLOCKS
+            while (!problem_ptr_->getStateBlockAddList()->empty())
+            {
+                addStateBlock(problem_ptr_->getStateBlockAddList()->front());
+                problem_ptr_->getStateBlockAddList()->pop_front();
+            }
+            // UPDATE STATE BLOCKS
+            while (!problem_ptr_->getStateBlockUpdateList()->empty())
+            {
+                updateStateBlockStatus(problem_ptr_->getStateBlockUpdateList()->front());
+                problem_ptr_->getStateBlockUpdateList()->pop_front();
+            }
             // ADD CONSTRAINTS
-            ConstraintBaseList ctr_list;
-            _problem_ptr->getTrajectoryPtr()->getConstraintList(ctr_list);
-            //std::cout << "ctr_list.size() = " << ctr_list.size() << std::endl;
-            for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
-                if ((*ctr_it)->getPendingStatus() == ADD_PENDING)
-                    addConstraint(*ctr_it);
-
-            //std::cout << "constraints updated!" << std::endl;
+            while (!problem_ptr_->getConstraintAddList()->empty())
+            {
+                addConstraint(problem_ptr_->getConstraintAddList()->front());
+                problem_ptr_->getConstraintAddList()->pop_front();
+            }
         }
 
-        void addStateUnit(StateBase* _state_ptr)
+        void addStateBlock(StateBlock* _state_ptr)
         {
             t_managing_ = clock();
 
-            std::cout << "adding state unit " << _state_ptr->nodeId() << std::endl;
-            if (_state_ptr->getStateStatus() == ST_ESTIMATED)
+            std::cout << "adding state unit " << _state_ptr->getPtr() << std::endl;
+            if (!_state_ptr->isFixed() )
             {
                 nodes_.push_back(_state_ptr);
-                id_2_idx_[_state_ptr->nodeId()] = nodes_.size()-1;
+                id_2_idx_[_state_ptr->getPtr()] = nodes_.size()-1;
 
-                std::cout << "idx " << id_2_idx_[_state_ptr->nodeId()] << std::endl;
+                std::cout << "idx " << id_2_idx_[_state_ptr->getPtr()] << std::endl;
 
                 // Resize accumulated permutations
                 augmentPermutation(acc_node_permutation_, nNodes());
 
                 // Resize state
-                x_incr_.conservativeResize(x_incr_.size() + _state_ptr->getStateSize());
+                x_incr_.conservativeResize(x_incr_.size() + _state_ptr->getSize());
 
                 // Resize problem
-                A_.conservativeResize(A_.rows(), A_.cols() + _state_ptr->getStateSize());
-                R_.conservativeResize(R_.cols() + _state_ptr->getStateSize(), R_.cols() + _state_ptr->getStateSize());
+                A_.conservativeResize(A_.rows(), A_.cols() + _state_ptr->getSize());
+                R_.conservativeResize(R_.cols() + _state_ptr->getSize(), R_.cols() + _state_ptr->getSize());
 
             }
-            _state_ptr->setPendingStatus(NOT_PENDING);
             time_managing_ += ((double) clock() - t_managing_) / CLOCKS_PER_SEC;
         }
 
-        void updateStateUnitStatus(StateBase* _state_ptr)
+        void updateStateBlockStatus(StateBlock* _state_ptr)
         {
             //TODO
         }
@@ -156,8 +159,8 @@ class SolverQR
 
             std::vector<unsigned int> idxs;
             for (unsigned int i = 0; i < _constraint_ptr->getStatePtrVector().size(); i++)
-                if (_constraint_ptr->getStatePtrVector().at(i)->getStateStatus() == ST_ESTIMATED)
-                    idxs.push_back(id_2_idx_[_constraint_ptr->getStatePtrVector().at(i)->nodeId()]);
+                if (!_constraint_ptr->getStatePtrVector().at(i)->isFixed() )
+                    idxs.push_back(id_2_idx_[_constraint_ptr->getStatePtrVector().at(i)->getPtr()]);
 
             n_new_constraints_++;
             constraint_locations_.push_back(A_.rows());
@@ -181,8 +184,6 @@ class SolverQR
 
             // error
             b_.tail(meas_dim) = error;
-
-            _constraint_ptr->setPendingStatus(NOT_PENDING);
 
             time_managing_ += ((double) clock() - t_managing_) / CLOCKS_PER_SEC;
         }
@@ -268,9 +269,9 @@ class SolverQR
                 std::cout << "constraint: " << i << " id: " << constraints_.at(constraints_.size()-1-i)->nodeId() << std::endl;
                 for (unsigned int j = 0; j < ct_ptr->getStatePtrVector().size(); j++)
                 {
-                    if (ct_ptr->getStatePtrVector().at(j)->getStateStatus() == ST_ESTIMATED)
+                    if (!ct_ptr->getStatePtrVector().at(j)->isFixed())
                     {
-                        unsigned int idx = id_2_idx_[ct_ptr->getStatePtrVector().at(j)->nodeId()];
+                        unsigned int idx = id_2_idx_[ct_ptr->getStatePtrVector().at(j)->getPtr()];
                         //std::cout << "estimated idx " << idx << std::endl;
                         //std::cout << "node_order(idx) " << node_order(idx) << std::endl;
                         //std::cout << "first_ordered_node " << first_ordered_node << std::endl;
@@ -404,8 +405,8 @@ class SolverQR
             // UPDATE X VALUE
             for (unsigned int i = 0; i<nodes_.size(); i++)
             {
-                Map<VectorXs> x_i(nodes_.at(i)->getPtr(), nodes_.at(i)->getStateSize());
-                x_i += x_incr_.segment(nodeLocation(i), nodes_.at(i)->getStateSize());
+                Map<VectorXs> x_i(nodes_.at(i)->getPtr(), nodes_.at(i)->getSize());
+                x_i += x_incr_.segment(nodeLocation(i), nodes_.at(i)->getSize());
             }
             // Zero the error
             b_.setZero();
@@ -483,7 +484,7 @@ class SolverQR
         unsigned int nodeDim(const unsigned int _idx)
         {
             assert(_idx < nNodes());
-            return nodes_.at(_idx)->getStateSize();
+            return nodes_.at(_idx)->getSize();
         }
 
         unsigned int nodeOrder(const unsigned int _idx)
@@ -527,23 +528,6 @@ class SolverQR
                                                                specific_ptr->block7Size,
                                                                specific_ptr->block8Size,
                                                                specific_ptr->block9Size>(specific_ptr));
-                    break;
-                }
-                case CTR_ODOM_2D_COMPLEX_ANGLE:
-                {
-                    ConstraintOdom2DComplexAngle* specific_ptr = (ConstraintOdom2DComplexAngle*)(_corrPtr);
-                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintOdom2DComplexAngle,
-                                                               specific_ptr->measurementSize,
-                                                               specific_ptr->block0Size,
-                                                               specific_ptr->block1Size,
-                                                               specific_ptr->block2Size,
-                                                               specific_ptr->block3Size,
-                                                               specific_ptr->block4Size,
-                                                               specific_ptr->block5Size,
-                                                               specific_ptr->block6Size,
-                                                               specific_ptr->block7Size,
-                                                               specific_ptr->block8Size,
-                                                               specific_ptr->block9Size>(specific_ptr);
                     break;
                 }
                 case CTR_ODOM_2D:

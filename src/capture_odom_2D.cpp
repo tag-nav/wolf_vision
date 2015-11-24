@@ -55,10 +55,10 @@ Eigen::VectorXs CaptureOdom2D::computePrior(const TimeStamp& _now) const
 
 void CaptureOdom2D::addConstraints()
 {
-    assert(getFramePtr()->getNextFrame() != nullptr && "Trying to add odometry constraint in the last frame (there is no next frame)");
+    assert(getFramePtr()->getPreviousFrame() != nullptr && "Trying to add odometry constraint in the last frame (there is no next frame)");
 
-    getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2D(getFeatureListPtr()->front(),
-			  	  	  	  	  	  	  	  	  	  	  	  	  	     getFramePtr()->getPreviousFrame()));
+    getFeatureListPtr()->front()->addConstraintFrom(new ConstraintOdom2D(getFeatureListPtr()->front(),
+			  	  	  	  	  	  	  	  	  	  	  	  	  	         getFramePtr()->getPreviousFrame()));
 }
 
 void CaptureOdom2D::integrateCapture(CaptureMotion* _new_capture)
@@ -66,12 +66,25 @@ void CaptureOdom2D::integrateCapture(CaptureMotion* _new_capture)
     assert(dynamic_cast<CaptureOdom2D*>(_new_capture) && "Trying to integrate with a CaptureOdom2D a CaptureRelativePtr which is not CaptureOdom2D");
 
     //std::cout << "Integrate odoms: " << std::endl << data_.transpose() << std::endl << _new_capture->getData().transpose() << std::endl;
-    data_(0) += (_new_capture->getData()(0) * cos(data_(2)) - _new_capture->getData()(1) * sin(data_(2)));
-    data_(1) += (_new_capture->getData()(0) * sin(data_(2)) + _new_capture->getData()(1) * cos(data_(2)));
-    data_(2) += _new_capture->getData()(2);
+    // turn/2 + straight + turn/2
+    data_(2) += _new_capture->getData()(2)/2;
+    data_(0) += _new_capture->getData()(0) * cos(data_(2)) - _new_capture->getData()(1) * sin(data_(2));
+    data_(1) += _new_capture->getData()(0) * sin(data_(2)) + _new_capture->getData()(1) * cos(data_(2));
+    data_(2) += _new_capture->getData()(2)/2;
 
-    // TODO Jacobians!
-    data_covariance_ += _new_capture->getDataCovariance();
+    // Covariance propagation
+    Eigen::Matrix3s Jx = Eigen::Matrix3s::Identity();
+    Jx(0,2) = -_new_capture->getData()(0)*sin(data_(2)+_new_capture->getData()(2)/2);
+    Jx(1,2) = _new_capture->getData()(0)*cos(data_(2)+_new_capture->getData()(2)/2);
+
+    Eigen::Matrix3s Ju = Eigen::Matrix3s::Zero();
+    Ju(0,0) = cos(data_(2)+_new_capture->getData()(2)/2);
+    Ju(1,0) = sin(data_(2)+_new_capture->getData()(2)/2);
+    Ju(0,2) = -0.5*_new_capture->getData()(0)*cos(data_(2)+_new_capture->getData()(2)/2);
+    Ju(1,2) = 0.5*_new_capture->getData()(0)*cos(data_(2)+_new_capture->getData()(2)/2);
+    Ju(2,2) = 1;
+
+    data_covariance_ = Jx*data_covariance_*Jx.transpose() + Ju*_new_capture->getDataCovariance()*Ju.transpose();
 
     this->final_time_stamp_ = _new_capture->getFinalTimeStamp();
 

@@ -140,16 +140,16 @@ class WolfManager
         void createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
         {
         	// Create frame and add it to the trajectory
-        	StateBase* new_position = new StateBase(problem_->getNewStatePtr());
+        	StateBlock* new_position = new StateBlock(problem_->getNewStatePtr());
 			problem_->addState(new_position, _frame_state.head(2));
 
-			StateBase* new_orientation;
+			StateBlock* new_orientation;
         	if (use_complex_angles_)
         		new_orientation = new StateComplexAngle(problem_->getNewStatePtr());
         	else
-        		new_orientation = new StateBase(problem_->getNewStatePtr());
+        		new_orientation = new StateBlock(problem_->getNewStatePtr());
 
-			problem_->addState(new_orientation, _frame_state.tail(new_orientation->getStateSize()));
+			problem_->addState(new_orientation, _frame_state.tail(new_orientation->getSize()));
 
 			problem_->getTrajectoryPtr()->addFrame(new FrameBase(_time_stamp, new_position, new_orientation));
 
@@ -242,7 +242,7 @@ class WolfManager
         	return problem_->getState();
         }
 
-        StateBaseList* getStateListPtr()
+        StateBlockList* getStateListPtr()
 		{
         	return problem_->getStateListPtr();
 		}

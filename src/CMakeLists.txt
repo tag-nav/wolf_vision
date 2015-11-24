@@ -78,6 +78,7 @@ SET(HDRS
     feature_fix.h
     feature_odom_2D.h
     frame_base.h
+    hardware_base.h
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
@@ -89,7 +90,7 @@ SET(HDRS
     sensor_laser_2D.h
     sensor_odom_2D.h
     sensor_gps_fix.h
-    state_base.h
+    state_block.h
     time_stamp.h
     trajectory_base.h
     wolf_problem.h
@@ -116,6 +117,7 @@ SET(SRCS
     feature_fix.cpp
     feature_odom_2D.cpp
     frame_base.cpp
+    hardware_base.cpp
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
@@ -125,10 +127,11 @@ SET(SRCS
     sensor_base.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
-    state_base.cpp
+    state_block.cpp
     time_stamp.cpp
     trajectory_base.cpp
     wolf_problem.cpp
+    wolf_manager.cpp
     data_association/association_solver.cpp
     data_association/association_node.cpp
     data_association/association_tree.cpp

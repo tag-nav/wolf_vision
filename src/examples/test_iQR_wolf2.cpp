@@ -17,7 +17,7 @@
 #include <queue>
 
 //Wolf includes
-#include "state_base.h"
+#include "state_block.h"
 #include "constraint_base.h"
 #include "wolf_manager.h"
 
@@ -113,28 +113,13 @@ int main(int argc, char *argv[])
     unsigned int n_execution = (unsigned int) atoi(argv[1]); //number of iterations of the whole execution
 
     // INITIALIZATION ============================================================================================
-    // Problems
-    SolverQR solver_;
+
 
     //init random generators
     WolfScalar odom_std_factor = 0.1;
     WolfScalar gps_std = 10;
     std::default_random_engine generator(1);
     std::normal_distribution<WolfScalar> gaussian_distribution(0.0, 1);
-
-    // Ceres initialization
-    ceres::Solver::Options ceres_options;
-    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
-    ceres_options.max_line_search_step_contraction = 1e-3;
-    //    ceres_options.minimizer_progress_to_stdout = false;
-    //    ceres_options.line_search_direction_type = ceres::LBFGS;
-    //    ceres_options.max_num_iterations = 100;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager = new CeresManager(problem_options);
-    std::ofstream log_file, landmark_file;  //output file
 
     // Faramotics stuff
     Cpose3d viewPoint, devicePose, laser1Pose, laser2Pose, estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose;
@@ -176,18 +161,35 @@ int main(int argc, char *argv[])
     Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
-    SensorOdom2D odom_sensor(new StateBase(odom_pose.data()), new StateBase(&odom_pose(2)), odom_std_factor, odom_std_factor);
-    SensorGPSFix gps_sensor(new StateBase(gps_pose.data()), new StateBase(&gps_pose(2)), gps_std);
-    SensorLaser2D laser_1_sensor(new StateBase(laser_1_pose.data()), new StateBase(&laser_1_pose(3)));
-    SensorLaser2D laser_2_sensor(new StateBase(laser_2_pose.data()), new StateBase(&laser_2_pose(3)));
+    SensorOdom2D odom_sensor(new StateBlock(odom_pose.head(2)), new StateBlock(odom_pose.tail(1)), odom_std_factor, odom_std_factor);
+    SensorGPSFix gps_sensor(new StateBlock(gps_pose.head(2)), new StateBlock(gps_pose.tail(1)), gps_std);
+    SensorLaser2D laser_1_sensor(new StateBlock(laser_1_pose.head(2)), new StateBlock(laser_1_pose.tail(1)));
+    SensorLaser2D laser_2_sensor(new StateBlock(laser_2_pose.head(2)), new StateBlock(laser_2_pose.tail(1)));
 
     // Initial pose
     pose_odom << 2, 8, 0;
     ground_truth.head(3) = pose_odom;
     odom_trajectory.head(3) = pose_odom;
 
-    WolfManager<StateBase, StateBase>* wolf_manager_QR = new WolfManager<StateBase, StateBase>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
-    WolfManager<StateBase, StateBase>* wolf_manager_ceres = new WolfManager<StateBase, StateBase>(1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
+    WolfManager* wolf_manager_QR = new WolfManager(PO_2D, 1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
+    WolfManager* wolf_manager_ceres = new WolfManager(PO_2D, 1e3, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, n_execution*10, 0.01);
+
+    // Ceres initialization
+    ceres::Solver::Options ceres_options;
+    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+    ceres_options.max_line_search_step_contraction = 1e-3;
+    //    ceres_options.minimizer_progress_to_stdout = false;
+    //    ceres_options.line_search_direction_type = ceres::LBFGS;
+    //    ceres_options.max_num_iterations = 100;
+    ceres::Problem::Options problem_options;
+    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.loss_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    CeresManager* ceres_manager = new CeresManager(wolf_manager_ceres->getProblemPtr(), problem_options);
+    std::ofstream log_file, landmark_file;  //output file
+
+    // Own solver
+    SolverQR solver_(wolf_manager_QR->getProblemPtr());
 
     std::cout << "STARTING INCREMENTAL QR TEST" << std::endl << std::endl;
     std::cout << "\n ========= 2D Robot with odometry and 2 LIDARs ===========\n";
@@ -257,8 +259,8 @@ int main(int argc, char *argv[])
         // UPDATING SOLVER ---------------------------
         //std::cout << "UPDATING..." << std::endl;
         // update state units and constraints in ceres
-        solver_.update(wolf_manager_QR->getProblemPtr());
-        ceres_manager->update(wolf_manager_ceres->getProblemPtr());
+        solver_.update();
+        ceres_manager->update();
 
         // PRINT PROBLEM
         //solver_.printProblem();

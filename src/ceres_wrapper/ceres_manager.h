@@ -8,7 +8,7 @@
 
 //wof includes
 #include "../wolf.h"
-#include "../state_base.h"
+#include "../state_block.h"
 #include "../constraint_sparse.h"
 #include "../constraint_fix.h"
 #include "../constraint_gps_2D.h"
@@ -26,31 +26,33 @@
 class CeresManager
 {
 	protected:
-//		std::map<unsigned int, ceres::ResidualBlockId> constraint_map_;
+		std::map<unsigned int, ceres::ResidualBlockId> constraint_map_;
 		ceres::Problem* ceres_problem_;
 		ceres::Covariance* covariance_;
+		WolfProblem* wolf_problem_;
 
 	public:
-		CeresManager(ceres::Problem::Options _options);
+		CeresManager(WolfProblem* _wolf_problem, ceres::Problem::Options _options);
 
 		~CeresManager();
 
 		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
 
-		void computeCovariances(WolfProblem* _problem_ptr);
+		void computeCovariances();
 
-		void update(const WolfProblemPtr _problem_ptr);
+		void update();
 
-		void addConstraint(ConstraintBase* _corr_ptr);
+		void addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss);
 
-		// TODO: not necessary?
 		void removeConstraint(const unsigned int& _corr_idx);
 
-		void addStateUnit(StateBase* _st_ptr);
+		void addStateBlock(StateBlock* _st_ptr);
 
-		void removeAllStateUnits();
+		void removeStateBlock(double* _st_ptr);
 
-		void updateStateUnitStatus(StateBase* _st_ptr);
+		void removeAllStateBlocks();
+
+		void updateStateBlockStatus(StateBlock* _st_ptr);
 
 		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr);
 };

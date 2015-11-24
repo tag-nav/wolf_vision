@@ -7,7 +7,7 @@
 #include "constraint_base.h"
 
 
-//template class ConstraintBase
+//template class ConstraintSparse
 template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE = 0,
@@ -22,7 +22,7 @@ template <const unsigned int MEASUREMENT_SIZE,
 class ConstraintSparse: public ConstraintBase
 {
     protected:
-        std::vector<StateBase*> state_ptr_vector_;
+        std::vector<StateBlock*> state_ptr_vector_;
         std::vector<unsigned int> state_block_sizes_vector_;
 
     public:
@@ -38,184 +38,533 @@ class ConstraintSparse: public ConstraintBase
         static const unsigned int block8Size = BLOCK_8_SIZE;
         static const unsigned int block9Size = BLOCK_9_SIZE;
 
-        /** \brief Contructor with state pointer separated
+        /** \brief Constructor of category CTR_ABSOLUTE
          *
-         * Constructor with state pointers separated
+         * Constructor of category CTR_ABSOLUTE
          *
          **/
-        ConstraintSparse(FeatureBase* _ftr_ptr,
-                             ConstraintType _tp,
-                             StateBase* _state0Ptr,
-                             StateBase* _state1Ptr = nullptr,
-                             StateBase* _state2Ptr = nullptr,
-                             StateBase* _state3Ptr = nullptr,
-                             StateBase* _state4Ptr = nullptr,
-                             StateBase* _state5Ptr = nullptr,
-                             StateBase* _state6Ptr = nullptr,
-                             StateBase* _state7Ptr = nullptr,
-                             StateBase* _state8Ptr = nullptr,
-                             StateBase* _state9Ptr = nullptr ) :
-            ConstraintBase(_ftr_ptr,_tp),
-            state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
-            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
-        {
-            for (unsigned int ii = 1; ii<state_block_sizes_vector_.size(); ii++)
-            {
-                if (state_ptr_vector_.at(ii) != nullptr)
-                    assert(state_block_sizes_vector_.at(ii) != 0 && "Too many non-null state pointers in ConstraintSparse constructor");
+        ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, ConstraintStatus _status,
+                         StateBlock* _state0Ptr,
+                         StateBlock* _state1Ptr = nullptr,
+                         StateBlock* _state2Ptr = nullptr,
+                         StateBlock* _state3Ptr = nullptr,
+                         StateBlock* _state4Ptr = nullptr,
+                         StateBlock* _state5Ptr = nullptr,
+                         StateBlock* _state6Ptr = nullptr,
+                         StateBlock* _state7Ptr = nullptr,
+                         StateBlock* _state8Ptr = nullptr,
+                         StateBlock* _state9Ptr = nullptr ) ;
 
-                else
-                {
-                    assert(state_block_sizes_vector_.at(ii) == 0 && "No non-null state pointers enough in ConstraintSparse constructor");
-                    state_ptr_vector_.resize(ii);
-                    state_block_sizes_vector_.resize(ii);
-                    break;
-                }
-            }
-        }
+        /** \brief Constructor of category CTR_FRAME
+         *
+         * Constructor of category CTR_FRAME
+         *
+         **/
+        ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status,
+                         StateBlock* _state0Ptr,
+                         StateBlock* _state1Ptr = nullptr,
+                         StateBlock* _state2Ptr = nullptr,
+                         StateBlock* _state3Ptr = nullptr,
+                         StateBlock* _state4Ptr = nullptr,
+                         StateBlock* _state5Ptr = nullptr,
+                         StateBlock* _state6Ptr = nullptr,
+                         StateBlock* _state7Ptr = nullptr,
+                         StateBlock* _state8Ptr = nullptr,
+                         StateBlock* _state9Ptr = nullptr );
+
+        /** \brief Constructor of category CTR_FEATURE
+         *
+         * Constructor of category CTR_FEATURE
+         *
+         **/
+        ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status,
+                         StateBlock* _state0Ptr,
+                         StateBlock* _state1Ptr = nullptr,
+                         StateBlock* _state2Ptr = nullptr,
+                         StateBlock* _state3Ptr = nullptr,
+                         StateBlock* _state4Ptr = nullptr,
+                         StateBlock* _state5Ptr = nullptr,
+                         StateBlock* _state6Ptr = nullptr,
+                         StateBlock* _state7Ptr = nullptr,
+                         StateBlock* _state8Ptr = nullptr,
+                         StateBlock* _state9Ptr = nullptr ) ;
+
+        /** \brief Constructor of category CTR_LANDMARK
+         *
+         * Constructor of category CTR_LANDMARK
+         *
+         **/
+        ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status,
+                         StateBlock* _state0Ptr,
+                         StateBlock* _state1Ptr = nullptr,
+                         StateBlock* _state2Ptr = nullptr,
+                         StateBlock* _state3Ptr = nullptr,
+                         StateBlock* _state4Ptr = nullptr,
+                         StateBlock* _state5Ptr = nullptr,
+                         StateBlock* _state6Ptr = nullptr,
+                         StateBlock* _state7Ptr = nullptr,
+                         StateBlock* _state8Ptr = nullptr,
+                         StateBlock* _state9Ptr = nullptr ) ;
 
         /** \brief Destructor
          * 
          * Destructor
          * 
          **/        
-        virtual ~ConstraintSparse()
-        {
-            //
-        }
+        virtual ~ConstraintSparse();
 
         /** \brief Returns a vector of pointers to the state blocks
          * 
          * Returns a vector of pointers to the state blocks in which this constraint depends
          * 
          **/
-        virtual const std::vector<WolfScalar*> getStateBlockPtrVector()
-        {
-            assert(state_ptr_vector_.size() > 0 && state_ptr_vector_.size() <= 10 && "Wrong state vector size in constraint, it should be between 1 and 10");
-
-            switch (state_ptr_vector_.size())
-            {
-                case 1:
-                {
-                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr()});
-                }
-                case 2:
-                {
-                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                                     state_ptr_vector_[1]->getPtr()});
-                }
-                case 3:
-                {
-                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                                     state_ptr_vector_[1]->getPtr(),
-                                                     state_ptr_vector_[2]->getPtr()});
-                }
-                case 4:
-                {
-                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                                     state_ptr_vector_[1]->getPtr(),
-                                                     state_ptr_vector_[2]->getPtr(),
-                                                     state_ptr_vector_[3]->getPtr()});
-                }
-                case 5:
-                {
-                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                                     state_ptr_vector_[1]->getPtr(),
-                                                     state_ptr_vector_[2]->getPtr(),
-                                                     state_ptr_vector_[3]->getPtr(),
-                                                     state_ptr_vector_[4]->getPtr()});
-                }
-                case 6:
-                {
-                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                                     state_ptr_vector_[1]->getPtr(),
-                                                     state_ptr_vector_[2]->getPtr(),
-                                                     state_ptr_vector_[3]->getPtr(),
-                                                     state_ptr_vector_[4]->getPtr(),
-                                                     state_ptr_vector_[5]->getPtr()});
-                }
-                case 7:
-                {
-                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                                     state_ptr_vector_[1]->getPtr(),
-                                                     state_ptr_vector_[2]->getPtr(),
-                                                     state_ptr_vector_[3]->getPtr(),
-                                                     state_ptr_vector_[4]->getPtr(),
-                                                     state_ptr_vector_[5]->getPtr(),
-                                                     state_ptr_vector_[6]->getPtr()});
-                }
-                case 8:
-                {
-                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                                     state_ptr_vector_[1]->getPtr(),
-                                                     state_ptr_vector_[2]->getPtr(),
-                                                     state_ptr_vector_[3]->getPtr(),
-                                                     state_ptr_vector_[4]->getPtr(),
-                                                     state_ptr_vector_[5]->getPtr(),
-                                                     state_ptr_vector_[6]->getPtr(),
-                                                     state_ptr_vector_[7]->getPtr()});
-                }
-                case 9:
-                {
-                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                                     state_ptr_vector_[1]->getPtr(),
-                                                     state_ptr_vector_[2]->getPtr(),
-                                                     state_ptr_vector_[3]->getPtr(),
-                                                     state_ptr_vector_[4]->getPtr(),
-                                                     state_ptr_vector_[5]->getPtr(),
-                                                     state_ptr_vector_[6]->getPtr(),
-                                                     state_ptr_vector_[7]->getPtr(),
-                                                     state_ptr_vector_[8]->getPtr()});
-                }
-                case 10:
-                {
-                    return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                                     state_ptr_vector_[1]->getPtr(),
-                                                     state_ptr_vector_[2]->getPtr(),
-                                                     state_ptr_vector_[3]->getPtr(),
-                                                     state_ptr_vector_[4]->getPtr(),
-                                                     state_ptr_vector_[5]->getPtr(),
-                                                     state_ptr_vector_[6]->getPtr(),
-                                                     state_ptr_vector_[7]->getPtr(),
-                                                     state_ptr_vector_[8]->getPtr(),
-                                                     state_ptr_vector_[9]->getPtr()});
-                }
-            }
-
-            return std::vector<WolfScalar*>(0); //Not going to happen
-        }
+        virtual const std::vector<WolfScalar*> getStateBlockPtrVector();
 
         /** \brief Returns a vector of pointers to the states
          *
          * Returns a vector of pointers to the state in which this constraint depends
          *
          **/
-        virtual const std::vector<StateBase*> getStatePtrVector() const
-        {
-            return state_ptr_vector_;
-        }
+        virtual const std::vector<StateBlock*> getStatePtrVector() const;
 
         /** \brief Returns the constraint residual size
          *
          * Returns the constraint residual size
          *
          **/
-        virtual unsigned int getSize() const
+        virtual unsigned int getSize() const;
+
+        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+
+    private:
+        void resizeVectors();
+};
+
+
+//////////////////////////////////////////
+//          IMPLEMENTATION
+//////////////////////////////////////////
+template <const unsigned int MEASUREMENT_SIZE,
+                unsigned int BLOCK_0_SIZE,
+                unsigned int BLOCK_1_SIZE,
+                unsigned int BLOCK_2_SIZE,
+                unsigned int BLOCK_3_SIZE,
+                unsigned int BLOCK_4_SIZE,
+                unsigned int BLOCK_5_SIZE,
+                unsigned int BLOCK_6_SIZE,
+                unsigned int BLOCK_7_SIZE,
+                unsigned int BLOCK_8_SIZE,
+                unsigned int BLOCK_9_SIZE>
+ConstraintSparse<MEASUREMENT_SIZE,
+                 BLOCK_0_SIZE,
+                 BLOCK_1_SIZE,
+                 BLOCK_2_SIZE,
+                 BLOCK_3_SIZE,
+                 BLOCK_4_SIZE,
+                 BLOCK_5_SIZE,
+                 BLOCK_6_SIZE,
+                 BLOCK_7_SIZE,
+                 BLOCK_8_SIZE,
+                 BLOCK_9_SIZE>::ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, ConstraintStatus _status,
+                                                 StateBlock* _state0Ptr,
+                                                 StateBlock* _state1Ptr,
+                                                 StateBlock* _state2Ptr,
+                                                 StateBlock* _state3Ptr,
+                                                 StateBlock* _state4Ptr,
+                                                 StateBlock* _state5Ptr,
+                                                 StateBlock* _state6Ptr,
+                                                 StateBlock* _state7Ptr,
+                                                 StateBlock* _state8Ptr,
+                                                 StateBlock* _state9Ptr ) :
+            ConstraintBase(_ftr_ptr,_tp, _status),
+            state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
+            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
-            return MEASUREMENT_SIZE;
+            resizeVectors();
         }
 
-        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const
+template <const unsigned int MEASUREMENT_SIZE,
+                unsigned int BLOCK_0_SIZE,
+                unsigned int BLOCK_1_SIZE,
+                unsigned int BLOCK_2_SIZE,
+                unsigned int BLOCK_3_SIZE,
+                unsigned int BLOCK_4_SIZE,
+                unsigned int BLOCK_5_SIZE,
+                unsigned int BLOCK_6_SIZE,
+                unsigned int BLOCK_7_SIZE,
+                unsigned int BLOCK_8_SIZE,
+                unsigned int BLOCK_9_SIZE>
+ConstraintSparse<MEASUREMENT_SIZE,
+                 BLOCK_0_SIZE,
+                 BLOCK_1_SIZE,
+                 BLOCK_2_SIZE,
+                 BLOCK_3_SIZE,
+                 BLOCK_4_SIZE,
+                 BLOCK_5_SIZE,
+                 BLOCK_6_SIZE,
+                 BLOCK_7_SIZE,
+                 BLOCK_8_SIZE,
+                 BLOCK_9_SIZE>::ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status,
+                                                 StateBlock* _state0Ptr,
+                                                 StateBlock* _state1Ptr,
+                                                 StateBlock* _state2Ptr,
+                                                 StateBlock* _state3Ptr,
+                                                 StateBlock* _state4Ptr,
+                                                 StateBlock* _state5Ptr,
+                                                 StateBlock* _state6Ptr,
+                                                 StateBlock* _state7Ptr,
+                                                 StateBlock* _state8Ptr,
+                                                 StateBlock* _state9Ptr ) :
+            ConstraintBase(_ftr_ptr, _tp, _frame_ptr, _status),
+            state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
+            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
-        	NodeLinked::printSelf(_ntabs, _ost);
-        	for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
-        	{
-        		printTabs(_ntabs);
-        		_ost << "block " << ii << ": ";
-        		for (unsigned int jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
-        			_ost << *(state_ptr_vector_.at(ii)->getPtr()+jj) << " ";
-        		_ost << std::endl;
-        	}
+            resizeVectors();
         }
-};
+
+template <const unsigned int MEASUREMENT_SIZE,
+                unsigned int BLOCK_0_SIZE,
+                unsigned int BLOCK_1_SIZE,
+                unsigned int BLOCK_2_SIZE,
+                unsigned int BLOCK_3_SIZE,
+                unsigned int BLOCK_4_SIZE,
+                unsigned int BLOCK_5_SIZE,
+                unsigned int BLOCK_6_SIZE,
+                unsigned int BLOCK_7_SIZE,
+                unsigned int BLOCK_8_SIZE,
+                unsigned int BLOCK_9_SIZE>
+ConstraintSparse<MEASUREMENT_SIZE,
+                 BLOCK_0_SIZE,
+                 BLOCK_1_SIZE,
+                 BLOCK_2_SIZE,
+                 BLOCK_3_SIZE,
+                 BLOCK_4_SIZE,
+                 BLOCK_5_SIZE,
+                 BLOCK_6_SIZE,
+                 BLOCK_7_SIZE,
+                 BLOCK_8_SIZE,
+                 BLOCK_9_SIZE>::ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status,
+                                                 StateBlock* _state0Ptr,
+                                                 StateBlock* _state1Ptr,
+                                                 StateBlock* _state2Ptr,
+                                                 StateBlock* _state3Ptr,
+                                                 StateBlock* _state4Ptr,
+                                                 StateBlock* _state5Ptr,
+                                                 StateBlock* _state6Ptr,
+                                                 StateBlock* _state7Ptr,
+                                                 StateBlock* _state8Ptr,
+                                                 StateBlock* _state9Ptr ) :
+            ConstraintBase(_ftr_ptr, _tp, _feature_ptr, _status),
+            state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
+            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
+        {
+            resizeVectors();
+        }
+
+template <const unsigned int MEASUREMENT_SIZE,
+                unsigned int BLOCK_0_SIZE,
+                unsigned int BLOCK_1_SIZE,
+                unsigned int BLOCK_2_SIZE,
+                unsigned int BLOCK_3_SIZE,
+                unsigned int BLOCK_4_SIZE,
+                unsigned int BLOCK_5_SIZE,
+                unsigned int BLOCK_6_SIZE,
+                unsigned int BLOCK_7_SIZE,
+                unsigned int BLOCK_8_SIZE,
+                unsigned int BLOCK_9_SIZE>
+ConstraintSparse<MEASUREMENT_SIZE,
+                 BLOCK_0_SIZE,
+                 BLOCK_1_SIZE,
+                 BLOCK_2_SIZE,
+                 BLOCK_3_SIZE,
+                 BLOCK_4_SIZE,
+                 BLOCK_5_SIZE,
+                 BLOCK_6_SIZE,
+                 BLOCK_7_SIZE,
+                 BLOCK_8_SIZE,
+                 BLOCK_9_SIZE>::ConstraintSparse(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status,
+                                                 StateBlock* _state0Ptr,
+                                                 StateBlock* _state1Ptr,
+                                                 StateBlock* _state2Ptr,
+                                                 StateBlock* _state3Ptr,
+                                                 StateBlock* _state4Ptr,
+                                                 StateBlock* _state5Ptr,
+                                                 StateBlock* _state6Ptr,
+                                                 StateBlock* _state7Ptr,
+                                                 StateBlock* _state8Ptr,
+                                                 StateBlock* _state9Ptr ) :
+            ConstraintBase(_ftr_ptr, _tp, _landmark_ptr, _status),
+            state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
+            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
+        {
+            resizeVectors();
+        }
+
+template <const unsigned int MEASUREMENT_SIZE,
+                unsigned int BLOCK_0_SIZE,
+                unsigned int BLOCK_1_SIZE,
+                unsigned int BLOCK_2_SIZE,
+                unsigned int BLOCK_3_SIZE,
+                unsigned int BLOCK_4_SIZE,
+                unsigned int BLOCK_5_SIZE,
+                unsigned int BLOCK_6_SIZE,
+                unsigned int BLOCK_7_SIZE,
+                unsigned int BLOCK_8_SIZE,
+                unsigned int BLOCK_9_SIZE>
+ConstraintSparse<MEASUREMENT_SIZE,
+                 BLOCK_0_SIZE,
+                 BLOCK_1_SIZE,
+                 BLOCK_2_SIZE,
+                 BLOCK_3_SIZE,
+                 BLOCK_4_SIZE,
+                 BLOCK_5_SIZE,
+                 BLOCK_6_SIZE,
+                 BLOCK_7_SIZE,
+                 BLOCK_8_SIZE,
+                 BLOCK_9_SIZE>::~ConstraintSparse()
+{
+    //
+}
+
+template <const unsigned int MEASUREMENT_SIZE,
+                unsigned int BLOCK_0_SIZE,
+                unsigned int BLOCK_1_SIZE,
+                unsigned int BLOCK_2_SIZE,
+                unsigned int BLOCK_3_SIZE,
+                unsigned int BLOCK_4_SIZE,
+                unsigned int BLOCK_5_SIZE,
+                unsigned int BLOCK_6_SIZE,
+                unsigned int BLOCK_7_SIZE,
+                unsigned int BLOCK_8_SIZE,
+                unsigned int BLOCK_9_SIZE>
+const std::vector<WolfScalar*> ConstraintSparse<MEASUREMENT_SIZE,
+                                                BLOCK_0_SIZE,
+                                                BLOCK_1_SIZE,
+                                                BLOCK_2_SIZE,
+                                                BLOCK_3_SIZE,
+                                                BLOCK_4_SIZE,
+                                                BLOCK_5_SIZE,
+                                                BLOCK_6_SIZE,
+                                                BLOCK_7_SIZE,
+                                                BLOCK_8_SIZE,
+                                                BLOCK_9_SIZE>::getStateBlockPtrVector()
+{
+    assert(state_ptr_vector_.size() > 0 && state_ptr_vector_.size() <= 10 && "Wrong state vector size in constraint, it should be between 1 and 10");
+
+    switch (state_ptr_vector_.size())
+    {
+        case 1:
+        {
+            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr()});
+        }
+        case 2:
+        {
+            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                             state_ptr_vector_[1]->getPtr()});
+        }
+        case 3:
+        {
+            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                             state_ptr_vector_[1]->getPtr(),
+                                             state_ptr_vector_[2]->getPtr()});
+        }
+        case 4:
+        {
+            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                             state_ptr_vector_[1]->getPtr(),
+                                             state_ptr_vector_[2]->getPtr(),
+                                             state_ptr_vector_[3]->getPtr()});
+        }
+        case 5:
+        {
+            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                             state_ptr_vector_[1]->getPtr(),
+                                             state_ptr_vector_[2]->getPtr(),
+                                             state_ptr_vector_[3]->getPtr(),
+                                             state_ptr_vector_[4]->getPtr()});
+        }
+        case 6:
+        {
+            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                             state_ptr_vector_[1]->getPtr(),
+                                             state_ptr_vector_[2]->getPtr(),
+                                             state_ptr_vector_[3]->getPtr(),
+                                             state_ptr_vector_[4]->getPtr(),
+                                             state_ptr_vector_[5]->getPtr()});
+        }
+        case 7:
+        {
+            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                             state_ptr_vector_[1]->getPtr(),
+                                             state_ptr_vector_[2]->getPtr(),
+                                             state_ptr_vector_[3]->getPtr(),
+                                             state_ptr_vector_[4]->getPtr(),
+                                             state_ptr_vector_[5]->getPtr(),
+                                             state_ptr_vector_[6]->getPtr()});
+        }
+        case 8:
+        {
+            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                             state_ptr_vector_[1]->getPtr(),
+                                             state_ptr_vector_[2]->getPtr(),
+                                             state_ptr_vector_[3]->getPtr(),
+                                             state_ptr_vector_[4]->getPtr(),
+                                             state_ptr_vector_[5]->getPtr(),
+                                             state_ptr_vector_[6]->getPtr(),
+                                             state_ptr_vector_[7]->getPtr()});
+        }
+        case 9:
+        {
+            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                             state_ptr_vector_[1]->getPtr(),
+                                             state_ptr_vector_[2]->getPtr(),
+                                             state_ptr_vector_[3]->getPtr(),
+                                             state_ptr_vector_[4]->getPtr(),
+                                             state_ptr_vector_[5]->getPtr(),
+                                             state_ptr_vector_[6]->getPtr(),
+                                             state_ptr_vector_[7]->getPtr(),
+                                             state_ptr_vector_[8]->getPtr()});
+        }
+        case 10:
+        {
+            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+                                             state_ptr_vector_[1]->getPtr(),
+                                             state_ptr_vector_[2]->getPtr(),
+                                             state_ptr_vector_[3]->getPtr(),
+                                             state_ptr_vector_[4]->getPtr(),
+                                             state_ptr_vector_[5]->getPtr(),
+                                             state_ptr_vector_[6]->getPtr(),
+                                             state_ptr_vector_[7]->getPtr(),
+                                             state_ptr_vector_[8]->getPtr(),
+                                             state_ptr_vector_[9]->getPtr()});
+        }
+    }
+
+    return std::vector<WolfScalar*>(0); //Not going to happen
+}
+
+template <const unsigned int MEASUREMENT_SIZE,
+                unsigned int BLOCK_0_SIZE,
+                unsigned int BLOCK_1_SIZE,
+                unsigned int BLOCK_2_SIZE,
+                unsigned int BLOCK_3_SIZE,
+                unsigned int BLOCK_4_SIZE,
+                unsigned int BLOCK_5_SIZE,
+                unsigned int BLOCK_6_SIZE,
+                unsigned int BLOCK_7_SIZE,
+                unsigned int BLOCK_8_SIZE,
+                unsigned int BLOCK_9_SIZE>
+const std::vector<StateBlock*> ConstraintSparse<MEASUREMENT_SIZE,
+                                                BLOCK_0_SIZE,
+                                                BLOCK_1_SIZE,
+                                                BLOCK_2_SIZE,
+                                                BLOCK_3_SIZE,
+                                                BLOCK_4_SIZE,
+                                                BLOCK_5_SIZE,
+                                                BLOCK_6_SIZE,
+                                                BLOCK_7_SIZE,
+                                                BLOCK_8_SIZE,
+                                                BLOCK_9_SIZE>::getStatePtrVector() const
+{
+    return state_ptr_vector_;
+}
+
+template <const unsigned int MEASUREMENT_SIZE,
+                unsigned int BLOCK_0_SIZE,
+                unsigned int BLOCK_1_SIZE,
+                unsigned int BLOCK_2_SIZE,
+                unsigned int BLOCK_3_SIZE,
+                unsigned int BLOCK_4_SIZE,
+                unsigned int BLOCK_5_SIZE,
+                unsigned int BLOCK_6_SIZE,
+                unsigned int BLOCK_7_SIZE,
+                unsigned int BLOCK_8_SIZE,
+                unsigned int BLOCK_9_SIZE>
+unsigned int ConstraintSparse<MEASUREMENT_SIZE,
+                              BLOCK_0_SIZE,
+                              BLOCK_1_SIZE,
+                              BLOCK_2_SIZE,
+                              BLOCK_3_SIZE,
+                              BLOCK_4_SIZE,
+                              BLOCK_5_SIZE,
+                              BLOCK_6_SIZE,
+                              BLOCK_7_SIZE,
+                              BLOCK_8_SIZE,
+                              BLOCK_9_SIZE>::getSize() const
+{
+    return MEASUREMENT_SIZE;
+}
+
+template <const unsigned int MEASUREMENT_SIZE,
+                unsigned int BLOCK_0_SIZE,
+                unsigned int BLOCK_1_SIZE,
+                unsigned int BLOCK_2_SIZE,
+                unsigned int BLOCK_3_SIZE,
+                unsigned int BLOCK_4_SIZE,
+                unsigned int BLOCK_5_SIZE,
+                unsigned int BLOCK_6_SIZE,
+                unsigned int BLOCK_7_SIZE,
+                unsigned int BLOCK_8_SIZE,
+                unsigned int BLOCK_9_SIZE>
+void ConstraintSparse<MEASUREMENT_SIZE,
+                      BLOCK_0_SIZE,
+                      BLOCK_1_SIZE,
+                      BLOCK_2_SIZE,
+                      BLOCK_3_SIZE,
+                      BLOCK_4_SIZE,
+                      BLOCK_5_SIZE,
+                      BLOCK_6_SIZE,
+                      BLOCK_7_SIZE,
+                      BLOCK_8_SIZE,
+                      BLOCK_9_SIZE>::print(unsigned int _ntabs, std::ostream& _ost) const
+{
+    NodeLinked::printSelf(_ntabs, _ost);
+    for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
+    {
+        printTabs(_ntabs);
+        _ost << "block " << ii << ": ";
+        for (unsigned int jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
+            _ost << *(state_ptr_vector_.at(ii)->getPtr()+jj) << " ";
+        _ost << std::endl;
+    }
+}
+
+template <const unsigned int MEASUREMENT_SIZE,
+                unsigned int BLOCK_0_SIZE,
+                unsigned int BLOCK_1_SIZE,
+                unsigned int BLOCK_2_SIZE,
+                unsigned int BLOCK_3_SIZE,
+                unsigned int BLOCK_4_SIZE,
+                unsigned int BLOCK_5_SIZE,
+                unsigned int BLOCK_6_SIZE,
+                unsigned int BLOCK_7_SIZE,
+                unsigned int BLOCK_8_SIZE,
+                unsigned int BLOCK_9_SIZE>
+void ConstraintSparse<MEASUREMENT_SIZE,
+                      BLOCK_0_SIZE,
+                      BLOCK_1_SIZE,
+                      BLOCK_2_SIZE,
+                      BLOCK_3_SIZE,
+                      BLOCK_4_SIZE,
+                      BLOCK_5_SIZE,
+                      BLOCK_6_SIZE,
+                      BLOCK_7_SIZE,
+                      BLOCK_8_SIZE,
+                      BLOCK_9_SIZE>::resizeVectors()
+{
+    for (unsigned int ii = 1; ii<state_block_sizes_vector_.size(); ii++)
+    {
+        if (state_ptr_vector_.at(ii) != nullptr)
+            assert(state_block_sizes_vector_.at(ii) != 0 && "Too many non-null state pointers in ConstraintSparse constructor");
+
+        else
+        {
+            assert(state_block_sizes_vector_.at(ii) == 0 && "No non-null state pointers enough in ConstraintSparse constructor");
+            state_ptr_vector_.resize(ii);
+            state_block_sizes_vector_.resize(ii);
+            break;
+        }
+    }
+}
+
 #endif

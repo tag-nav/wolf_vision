@@ -17,8 +17,9 @@ class ConstraintBase;
 class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
 {
     protected:
-        Eigen::VectorXs measurement_;
-        Eigen::MatrixXs measurement_covariance_; ///< Noise of the measurement
+        Eigen::VectorXs measurement_;                   ///< Reference to the measurement
+        Eigen::MatrixXs measurement_covariance_;        ///< Reference to the measurement covariance
+        std::list<ConstraintBase*> constraint_to_list_;   ///< List of constraints linked TO this feature
         
     public:
         /** \brief Constructor from capture pointer and measure dim
@@ -36,21 +37,70 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
          */
         FeatureBase(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
+        /** \brief Destructor
+         *
+         * Destructor
+         *
+         */
         virtual ~FeatureBase();
-        
-        void addConstraint(ConstraintBase* _co_ptr);
 
+        /** \brief Adds a constraint from this feature (as a down node)
+         *
+         * Adds a constraint from this feature (as a down node)
+         *
+         */
+        void addConstraintFrom(ConstraintBase* _co_ptr);
+
+        /** \brief Adds a constraint to this feature (down node from other feature)
+         *
+         * Adds a constraint to this feature (down node from other feature)
+         *
+         */
+        void addConstraintTo(ConstraintBase* _co_ptr);
+
+        /** \brief Remove a constraint to this feature
+         *
+         * Remove a constraint to this feature
+         *
+         **/
+        void removeConstraintTo(ConstraintBase* _ctr_ptr);
+
+        /** \brief Gets the number of constraints linked with this frame
+         *
+         * Gets the number of constraints linked with this frame
+         *
+         **/
+        unsigned int getHits() const;
+
+        /** \brief Gets the list of constraints linked with this frame
+         *
+         * Gets the list of constraints linked with this frame
+         *
+         **/
+        std::list<ConstraintBase*>* getConstraintToListPtr();
+
+        /** \brief Gets the capture pointer
+         *
+         * Gets the capture pointer
+         *
+         */
         CaptureBase* getCapturePtr() const;
 
+        /** \brief Gets the frame pointer
+         *
+         * Gets the frame pointer
+         *
+         */
         FrameBase* getFramePtr() const;
-        
-        ConstraintBaseList* getConstraintListPtr();
-        
-        void getConstraintList(ConstraintBaseList & _ctr_list);
 
-//        Eigen::VectorXs * getMeasurementPtr();
-//
-//        Eigen::MatrixXs * getMeasurementCovariancePtr();
+        /** \brief Gets the constraint list (down nodes) pointer
+         *
+         * Gets the constraint list (down nodes) pointer
+         *
+         */
+        ConstraintBaseList* getConstraintFromListPtr();
+        
+        void getConstraintFromList(ConstraintBaseList & _ctr_list);
 
         const Eigen::VectorXs & getMeasurement() const;
         

@@ -103,6 +103,19 @@ typedef enum
     REGULAR_FRAME ///< marks a regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
 } FrameType;
 
+/** \brief Enumeration of all possible frames
+ *
+ * Enumeration of all possible frames.
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ *
+ */
+typedef enum
+{
+    PO_2D,  ///< marks a 2D frame containing position (x,y) and orientation angle.
+    PO_3D   ///< marks a 3D frame containing position (x,y,z) and orientation quaternion.
+} FrameStructure;
+
 /** \brief Enumeration of all possible constraints
  *
  * Enumeration of all possible constraints.
@@ -114,13 +127,41 @@ typedef enum
 {
     CTR_GPS_FIX_2D,				///< marks a 2D GPS Fix constraint.
     CTR_FIX,                    ///< marks a Fix constraint (for priors).
-    CTR_ODOM_2D_COMPLEX_ANGLE,	///< marks a 2D Odometry constraint using complex angles.
-    CTR_ODOM_2D,          ///< marks a 2D Odometry constraint using theta angles.
-    CTR_TWIST_2D_THETA,         ///< marks a 2D Twist constraint using theta angles.
-    CTR_CORNER_2D,		///< marks a 2D corner constraint using theta angles.
-    CTR_CONTAINER               ///< marks a 2D container constraint using theta angles.
+    CTR_ODOM_2D,                ///< marks a 2D Odometry constraint .
+    CTR_CORNER_2D,		        ///< marks a 2D corner constraint .
+    CTR_CONTAINER               ///< marks a 2D container constraint .
 
 } ConstraintType;
+
+/** \brief Enumeration of constraint categories
+ *
+ * Enumeration of constraint categories.
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ *
+ */
+typedef enum
+{
+    CTR_ABSOLUTE,   ///< Constraint established with absolute reference.
+    CTR_FRAME,      ///< Constraint established with a frame (odometry).
+    CTR_FEATURE,    ///< Constraint established with a feature (correspondence).
+    CTR_LANDMARK    ///< Constraint established with a landmark (correpondence).
+
+} ConstraintCategory;
+
+/** \brief Enumeration of constraint status
+ *
+ * Enumeration of constraint status.
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ *
+ */
+typedef enum
+{
+    CTR_ACTIVE,   ///< Constraint established with absolute reference.
+    CTR_INACTIVE  ///< Constraint established with a frame (odometry).
+
+} ConstraintStatus;
 
 /** \brief Enumeration of all possible state parametrizations
  *
@@ -146,7 +187,6 @@ typedef enum
 {
     ST_ESTIMATED,		///< State in estimation (default)
     ST_FIXED,			  ///< State fixed, estimated enough or fixed infrastructure.
-    ST_REMOVED			///< Removed state. TODO: is it useful?
 } StateStatus;
 
 /** \brief Enumeration of all possible sensor types
@@ -199,12 +239,12 @@ typedef enum
  * You may add items to this list as needed. Be concise with names, and document your entries.
  *
  */
-typedef enum
+/*typedef enum
 {
     NOT_PENDING,	  ///< A point landmark, either 3D or 2D
     ADD_PENDING,	  ///< A corner landmark (2D)
     UPDATE_PENDING	///< A container landmark
-} PendingStatus;
+} PendingStatus;*/
 
 /////////////////////////////////////////////////////////////////////////
 //      TYPEDEFS FOR POINTERS AND ITERATORS IN THE WOLF TREE
@@ -230,7 +270,7 @@ class RawLaser2D;
 class SensorBase;
 class SensorLaser2D;
 class TransSensor;
-class StateBase;
+class StateBlock;
 template<unsigned int SIZE> class StatePoint;
 class PinHole;
 
@@ -289,14 +329,16 @@ typedef ConstraintBaseList::iterator ConstraintBaseIter;
 // - Raw
 
 // - Sensors
+typedef std::list<SensorBase*> SensorBaseList;
+typedef SensorBaseList::iterator SensorBaseIter;
 
 // - transSensor
 typedef std::map<unsigned int, TransSensor*> TransSensorMap;
 typedef TransSensorMap::iterator TransSensorIter;
 
 // - State
-typedef std::list<StateBase*> StateBaseList;
-typedef StateBaseList::iterator StateBaseIter;
+typedef std::list<StateBlock*> StateBlockList;
+typedef StateBlockList::iterator StateBaseIter;
 
 // - Pin hole
 

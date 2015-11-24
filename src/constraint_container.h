@@ -15,19 +15,19 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 	public:
 		static const unsigned int N_BLOCKS = 4;
 
-	    ConstraintContainer(FeatureBase* _ftr_ptr, LandmarkContainer* _lmk_ptr, const unsigned int _corner) :
-			ConstraintSparse<3,2,1,2,1>(_ftr_ptr,CTR_CONTAINER, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
+	    ConstraintContainer(FeatureBase* _ftr_ptr, LandmarkContainer* _lmk_ptr, const unsigned int _corner, ConstraintStatus _status = CTR_ACTIVE) :
+			ConstraintSparse<3,2,1,2,1>(_ftr_ptr, CTR_CONTAINER, _lmk_ptr, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
 		{
             assert(_corner >= 0 && _corner <= 3 && "Wrong corner id in constraint container constructor");
-            lmk_ptr_->hit(this);
+            lmk_ptr_->addConstraintTo(this);
 		}
         
 		virtual ~ConstraintContainer()
 		{
 			//std::cout << "deleting ConstraintContainer " << nodeId() << std::endl;
-			lmk_ptr_->unhit(this);
+			lmk_ptr_->removeConstraintTo(this);
 		}
 
 		LandmarkContainer* getLandmarkPtr()

@@ -19,19 +19,43 @@ class NodeTerminus;
 class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 {
     protected:
-        ConstraintType type_; ///< type of constraint (types defined at wolf.h)
-        const Eigen::VectorXs& measurement_; ///< Direct access to the measurement
+        ConstraintType type_;                           ///< type of constraint (types defined at wolf.h)
+        ConstraintCategory category_;                   ///< category of constraint (types defined at wolf.h)
+        ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
+        const Eigen::VectorXs& measurement_;            ///< Direct access to the measurement
         const Eigen::MatrixXs& measurement_covariance_; ///< Direct access to the measurement's covariance
-		PendingStatus pending_status_; ///< Pending status
-
+        FrameBase* frame_ptr_;                          ///< FrameBase pointer (for category CTR_FRAME)
+        FeatureBase* feature_ptr_;                      ///< FeatureBase pointer (for category CTR_FEATURE)
+        LandmarkBase* landmark_ptr_;                    ///< LandmarkBase pointer (for category CTR_LANDMARK)
 
     public:
-        /** \brief Constructor
+        /** \brief Constructor of category CTR_ABSOLUTE
+         *
+         * Constructor of category CTR_ABSOLUTE
+         *
+         **/
+        ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, ConstraintStatus _status);
+
+        /** \brief Constructor of category CTR_FRAME
+         *
+         * Constructor of category CTR_FRAME
+         *
+         **/
+        ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status);
+
+        /** \brief Constructor of category CTR_FEATURE
+         *
+         * Constructor of category CTR_FEATURE
+         *
+         **/
+        ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status);
+
+        /** \brief Constructor of category CTR_LANDMARK
          * 
-         * Constructor
+         * Constructor of category CTR_LANDMARK
          * 
          **/
-        ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp);
+        ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status);
 
         /** \brief Destructor
          * 
@@ -39,6 +63,13 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          * 
          **/
         virtual ~ConstraintBase();
+
+        /** \brief Destructor call if is not already deleting
+         *
+         * Destructor call if is not already deleting
+         *
+         */
+        virtual void destruct();
 
         /** \brief Returns the constraint type
          * 
@@ -59,7 +90,7 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          * Returns a vector of pointers to the state in which this constraint depends
          *
          **/
-        virtual const std::vector<StateBase*> getStatePtrVector() const = 0;
+        virtual const std::vector<StateBlock*> getStatePtrVector() const = 0;
 
         /** \brief Returns a pointer to the feature measurement
          *
@@ -68,9 +99,9 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          **/
         const Eigen::VectorXs& getMeasurement();
 
-        /** \brief Returns a pointer to its capture
+        /** \brief Returns a pointer to the feature constrained from
          *
-         * Returns a pointer to its capture
+         * Returns a pointer to the feature constrained from
          *
          **/
         FeatureBase* getFeaturePtr() const;
@@ -89,20 +120,46 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          **/
         virtual unsigned int getSize() const = 0;
 
-        /** \brief Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
+        /** \brief Gets the category
          *
-         * Gets the node pending status (pending or not to be added/updated in the filter or optimizer)
+         * Gets the category
+         *
+         */
+        ConstraintCategory getCategory() const;
+
+        /** \brief Gets the status
+         *
+         * Gets the status
 		 *
          */
-        PendingStatus getPendingStatus() const;
+        ConstraintStatus getStatus() const;
 
-        /** \brief Sets the node pending status (pending or not to be added/updated in the filter or optimizer)
+        /** \brief Sets the status
          *
-         * Sets the node pending status (pending or not to be added/updated in the filter or optimizer)
+         * Sets the status
 		 *
          */
-        void setPendingStatus(PendingStatus _pending);
+        void setStatus(ConstraintStatus _status);
 
+        /** \brief Returns a pointer to the frame constrained to
+         *
+         * Returns a pointer to the frame constrained to
+         *
+         **/
+        FrameBase* getFrameToPtr();
 
+        /** \brief Returns a pointer to the feature constrained to
+         *
+         * Returns a pointer to the feature constrained to
+         *
+         **/
+        FeatureBase* getFeatureToPtr();
+
+        /** \brief Returns a pointer to the landmark constrained to
+         *
+         * Returns a pointer to the landmark constrained to
+         *
+         **/
+        LandmarkBase* getLandmarkToPtr();
 };
 #endif

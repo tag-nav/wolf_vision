@@ -1,10 +1,12 @@
 #ifndef WOLF_PROBLEM_H_
 #define WOLF_PROBLEM_H_
 
-//wof includes
+
+//wolf includes
 #include "node_base.h"
 #include "map_base.h"
 #include "trajectory_base.h"
+#include "hardware_base.h"
 #include "wolf.h"
 
 /** \brief Wolf problem node element in the Wolf Tree
@@ -20,16 +22,18 @@
 class WolfProblem: public NodeBase
 {
     protected:
-        Eigen::VectorXs state_;
         Eigen::SparseMatrix<WolfScalar> covariance_;
-		unsigned int state_idx_last_;
         NodeLocation location_;// TODO: should it be in node_base?
-        MapBase* map_ptr_;
         TrajectoryBase* trajectory_ptr_;
-        //TODO: SensorBaseList sensor_list_;
-        StateBaseList state_list_;
-        std::list<WolfScalar*> removed_state_ptr_list_;
-        bool reallocated_;
+        MapBase* map_ptr_;
+        HardwareBase* hardware_ptr_;
+        StateBlockList state_block_ptr_list_;
+        std::list<StateBlock*> state_block_add_list_;
+        std::list<StateBlock*> state_block_update_list_;
+        std::list<WolfScalar*> state_block_remove_list_;
+        std::list<ConstraintBase*> constraint_add_list_;
+        std::list<unsigned int> constraint_remove_list_;
+        std::map<StateBlock*,unsigned int> state_idx_map_;
 
     public:
 
@@ -45,7 +49,7 @@ class WolfProblem: public NodeBase
 		 * Constructor from map and trajectory shared pointers
 		 *
 		 */
-        WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr=nullptr, unsigned int _size=1e3);
+        WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr=nullptr, HardwareBase* _hardware_ptr=nullptr, unsigned int _size=1e3);
 
         /** \brief Default destructor
          *
@@ -54,48 +58,55 @@ class WolfProblem: public NodeBase
          */		
         virtual ~WolfProblem();
 
-        /** \brief Adds a new state unit to the state
+        /** \brief Adds a new state block to be added to solver manager
 		 *
-		 * Adds a new state unit to the state. Returns true if a remapping has been done.
+		 * Adds a new state block to be added to solver manager
 		 *
 		 */
-        bool addState(StateBase* _new_state, const Eigen::VectorXs& _new_state_values);
+        void addStateBlockPtr(StateBlock* _state_ptr);
+
+        /** \brief Adds a new state block to be updated to solver manager
+         *
+         * Adds a new state block to be updated to solver manager
+         *
+         */
+        void updateStateBlockPtr(StateBlock* _state_ptr);
+
+        /** \brief Adds a state block to be removed to solver manager
+         *
+         * Adds a state block to be removed to solver manager
+         *
+         */
+        void removeStateBlockPtr(StateBlock* _state_ptr);
+
+        /** \brief Adds a new constraint to be added to solver manager
+         *
+         * Adds a new constraint to be added to solver manager
+         *
+         */
+        void addConstraintPtr(ConstraintBase* _constraint_ptr);
+
+        /** \brief Adds a constraint to be removed to solver manager
+         *
+         * Adds a constraint to be removed to solver manager
+         *
+         */
+        void removeConstraintPtr(ConstraintBase* _constraint_ptr);
 
         /** \brief Adds a new covariance block
          *
          * Adds a new covariance block
          *
          */
-        void addCovarianceBlock(StateBase* _state1, StateBase* _state2, const Eigen::MatrixXs& _cov);
+        void addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov);
 
         /** \brief Gets a covariance block
          *
          * Gets a covariance block
          *
          */
-        void getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov_block) const;
-        void getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col) const;
-
-        /** \brief Removes a new state unit of the state
-		 *
-		 * Removes a new state unit of the state
-		 *
-		 */
-        void removeState(StateBase* _state);
-
-        /** \brief Gets a pointer to the state first position
-         *
-         * Gets a pointer to the state first position
-         *
-         */
-        WolfScalar* getStatePtr();
-
-        /** \brief Gets a pointer where a new state unit should be located
-         *
-         * Gets a pointer where a new state unit should be located
-         *
-         */
-        WolfScalar* getNewStatePtr();
+        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block) const;
+        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col) const;
 
         /** \brief Gets state size
 		 *
@@ -103,13 +114,6 @@ class WolfProblem: public NodeBase
 		 *
 		 */
         const unsigned int getStateSize() const;
-
-        /** \brief Sets the index of the last occupied position of the state
-		 *
-		 * Sets the index of the last occupied position of the state
-		 *
-		 */
-		//void setStateIdx(unsigned int _idx);
 
         /** \brief Adds a map
          *
@@ -123,21 +127,14 @@ class WolfProblem: public NodeBase
 		 * Adds a trajectory
 		 *
 		 */
-		void addTrajectory(TrajectoryBase* _Trajectory_ptr);
-		
-        /** \brief Gets a reference to map
-         *
-         * Gets a reference to map
-         *
-         */
-        //MapBase& getMap() const;
+		void addTrajectory(TrajectoryBase* _trajectory_ptr);
 
-        /** \brief Gets a reference to Trajectory
+        /** \brief Adds a hardware
          *
-         * Gets a reference to Trajectory
+         * Adds a hardware
          *
          */
-        //TrajectoryBase& getTrajectory() const;
+        void addHarware(HardwareBase* _hardware_ptr);
         
         /** \brief Gets a pointer to map
          *
@@ -146,12 +143,19 @@ class WolfProblem: public NodeBase
          */
         MapBase* getMapPtr();
 
-        /** \brief Gets a pointer to map
+        /** \brief Gets a pointer to trajectory
          *
-         * Gets a pointer to map
+         * Gets a pointer to trajectory
          *
          */
         TrajectoryBase* getTrajectoryPtr();
+
+        /** \brief Gets a pointer to Hardware
+         *
+         * Gets a pointer to Hardware
+         *
+         */
+        HardwareBase* getHardwarePtr();
 
         /** \brief Returns a pointer to last Frame
          *
@@ -165,35 +169,42 @@ class WolfProblem: public NodeBase
          * Gets a pointer to the state units list
          *
          */
-        StateBaseList* getStateListPtr();
+        StateBlockList* getStateListPtr();
 
-        /** \brief Gets a list of wolfscalar pointers contained by removed state units (in order to delete them in ceres)
+        /** \brief Gets a queue of state blocks to be added in the solver
 		 *
-		 * Gets a list of wolfscalar pointers contained by removed state units (in order to delete them in ceres)
+		 * Gets a queue of state blocks to be added in the solver
 		 *
 		 */
-        std::list<WolfScalar*>* getRemovedStateListPtr();
+        std::list<StateBlock*>* getStateBlockAddList();
 
-        /** \brief Gets the state vector
-		 *
-		 * Gets the state vector
-		 *
-		 */
-        const Eigen::VectorXs getState() const;
+        /** \brief Gets a queue of state blocks to be updated in the solver
+         *
+         * Gets a queue of state blocks to be updated in the solver
+         *
+         */
+        std::list<StateBlock*>* getStateBlockUpdateList();
 
-        /** \brief Gets if the state has been reallocated
-		 *
-		 * Gets if the state has been reallocated
-		 *
-		 */
-        bool isReallocated() const;
+        /** \brief Gets a queue of state blocks to be removed from the solver
+         *
+         * Gets a queue of state blocks to be removed from the solver
+         *
+         */
+        std::list<WolfScalar*>* getStateBlockRemoveList();
 
-        /** \brief Turn off the reallocation flag
-		 *
-		 * Turn off the reallocation flag
-		 *
-		 */
-		void reallocationDone();
+        /** \brief Gets a queue of constraint ids to be added in the solver
+         *
+         * Gets a queue of constraint ids to be added in the solver
+         *
+         */
+        std::list<ConstraintBase*>* getConstraintAddList();
+
+        /** \brief Gets a queue of constraint ids to be removed from the solver
+         *
+         * Gets a queue of constraint ids to be removed from the solver
+         *
+         */
+        std::list<unsigned int>* getConstraintRemoveList();
 
         /** \brief get top node
 		 *

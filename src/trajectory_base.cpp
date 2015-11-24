@@ -14,6 +14,11 @@ TrajectoryBase::~TrajectoryBase()
 void TrajectoryBase::addFrame(FrameBase* _frame_ptr)
 {
 	addDownNode(_frame_ptr);
+
+	if (_frame_ptr->getPPtr() != nullptr)
+        getTop()->addStateBlockPtr(_frame_ptr->getPPtr());
+    if (_frame_ptr->getOPtr() != nullptr)
+        getTop()->addStateBlockPtr(_frame_ptr->getOPtr());
 }
 
 void TrajectoryBase::removeFrame(const FrameBaseIter& _frame_iter)

@@ -3,7 +3,7 @@
 
 //wolf includes
 #include "../wolf.h"
-#include "../state_base.h"
+#include "../state_block.h"
 #include "../state_point.h"
 #include "../state_complex_angle.h"
 #include "../state_theta.h"
@@ -37,11 +37,11 @@ class SolverManager
 
 		void removeConstraint(const unsigned int& _corr_idx);
 
-		void addStateUnit(StateBase* _st_ptr);
+		void addStateUnit(StateBlock* _st_ptr);
 
 		void removeAllStateUnits();
 
-		void updateStateUnitStatus(StateBase* _st_ptr);
+		void updateStateUnitStatus(StateBlock* _st_ptr);
 
 		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr);
 };

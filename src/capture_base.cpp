@@ -57,7 +57,7 @@ FeatureBaseList* CaptureBase::getFeatureListPtr()
 void CaptureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
 	for(auto f_it = getFeatureListPtr()->begin(); f_it != getFeatureListPtr()->end(); ++f_it)
-		(*f_it)->getConstraintList(_ctr_list);
+		(*f_it)->getConstraintFromList(_ctr_list);
 }
 
 TimeStamp CaptureBase::getTimeStamp() const

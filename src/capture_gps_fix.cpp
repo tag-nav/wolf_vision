@@ -29,7 +29,7 @@ void CaptureGPSFix::processCapture()
     addFeature(new FeatureGPSFix(data_,data_covariance_));
 
     // ADD CONSTRAINT
-	getFeatureListPtr()->front()->addConstraint(new ConstraintGPS2D(getFeatureListPtr()->front(), getFramePtr()));
+	getFeatureListPtr()->front()->addConstraintFrom(new ConstraintGPS2D(getFeatureListPtr()->front(), getFramePtr()));
 }
 
 Eigen::VectorXs CaptureGPSFix::computePrior(const TimeStamp& _now) const

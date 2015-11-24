@@ -260,13 +260,13 @@ void CaptureLaser2D::establishConstraintsMHTree()
                 unsigned int associed_landmark_index = landmarks_index_map[ft_lk_pairs[ii]];
 
                 if (associed_landmark->getType() == LANDMARK_CORNER)
-                    associed_feature->addConstraint(new ConstraintCorner2D(associed_feature,                      		// feature pointer
-                                                                               (LandmarkCorner2D*)(associed_landmark))); 	// landmark pointer
+                    associed_feature->addConstraintFrom(new ConstraintCorner2D(associed_feature,                      		// feature pointer
+                                                                           (LandmarkCorner2D*)(associed_landmark))); 	// landmark pointer
 
                 else if (associed_landmark->getType() == LANDMARK_CONTAINER)
-                    associed_feature->addConstraint(new ConstraintContainer(associed_feature,                       //feature pointer
-                                                                           (LandmarkContainer*)(associed_landmark), //landmark pointer
-                                                                           associed_landmark_index ));                 // corner index
+                    associed_feature->addConstraintFrom(new ConstraintContainer(associed_feature,                       //feature pointer
+                                                                            (LandmarkContainer*)(associed_landmark), //landmark pointer
+                                                                            associed_landmark_index ));                 // corner index
             }
         }
 
@@ -561,13 +561,16 @@ bool CaptureLaser2D::fitNewContainer(FeatureCorner2D* _corner_ptr, LandmarkCorne
 
 void CaptureLaser2D::createCornerLandmark(FeatureCorner2D* _corner_ptr, const Eigen::Vector3s& _feature_global_pose)
 {
-    //create new landmark at global coordinates
-    StateBase* new_landmark_state_position = new StateBase(getTop()->getNewStatePtr(), 2);
-    getTop()->addState(new_landmark_state_position, _feature_global_pose.head(2));
-    StateBase* new_landmark_state_orientation = new StateBase(getTop()->getNewStatePtr(), 1);
-    getTop()->addState(new_landmark_state_orientation, _feature_global_pose.tail(1));
+    //Create new landmark
+    LandmarkCorner2D* new_landmark = new LandmarkCorner2D(new StateBlock(_feature_global_pose.head(2)),
+                                                          new StateBlock(_feature_global_pose.tail(1)),
+                                                          _corner_ptr->getMeasurement()(3));
+    //Constraint with the new landmark
+    _corner_ptr->addConstraintFrom(new ConstraintCorner2D(_corner_ptr, new_landmark));
+    //Add it to the map
+    getTop()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
 
-    // Initialize landmark covariance
+    // Initialize landmark covariance // TODO: has it sense???
     Eigen::MatrixXs Sigma_robot = Eigen::MatrixXs::Zero(3,3);
     getTop()->getCovarianceBlock(getFramePtr()->getPPtr(), getFramePtr()->getPPtr(), Sigma_robot, 0,0);
     getTop()->getCovarianceBlock(getFramePtr()->getPPtr(), getFramePtr()->getOPtr(), Sigma_robot, 0,2);
@@ -578,58 +581,55 @@ void CaptureLaser2D::createCornerLandmark(FeatureCorner2D* _corner_ptr, const Ei
     R_robot3D.block<2,2>(0,0) = Eigen::Rotation2D<WolfScalar>(*(getFramePtr()->getOPtr()->getPtr())).matrix();
     Eigen::Matrix3s Sigma_landmark = Sigma_robot + R_robot3D.transpose() * _corner_ptr->getMeasurementCovariance().topLeftCorner<3,3>() * R_robot3D;
 
-    getTop()->addCovarianceBlock(new_landmark_state_position, new_landmark_state_position, Sigma_landmark.topLeftCorner<2,2>());
-    getTop()->addCovarianceBlock(new_landmark_state_position, (StateBase*)new_landmark_state_orientation, Sigma_landmark.block<2,1>(0,2));
-    getTop()->addCovarianceBlock((StateBase*)new_landmark_state_orientation, (StateBase*)new_landmark_state_orientation, Sigma_landmark.block<1,1>(2,2));
-
-    //add it to the slam map as a new landmark
-    LandmarkCorner2D* new_landmark = new LandmarkCorner2D(new_landmark_state_position, new_landmark_state_orientation, _corner_ptr->getMeasurement()(3));
-    _corner_ptr->addConstraint(new ConstraintCorner2D(_corner_ptr, new_landmark));
-    getTop()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
+    getTop()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getPPtr(), Sigma_landmark.topLeftCorner<2,2>());
+    getTop()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getOPtr(), Sigma_landmark.block<2,1>(0,2));
+    getTop()->addCovarianceBlock(new_landmark->getOPtr(), new_landmark->getOPtr(), Sigma_landmark.block<1,1>(2,2));
 }
 
 void CaptureLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, const Eigen::Vector3s& _feature_global_pose, LandmarkCorner2D* _old_corner_landmark_ptr, int& _feature_idx, int& _corner_idx)
 {
     assert(_old_corner_landmark_ptr != nullptr && "fitting result = true but corner found is nullptr");
 
-    // CREATING LANDMARK CONTAINER
-    // create new landmark state units
-    StateBase* new_container_position = new StateBase(getTop()->getNewStatePtr(), 2);
-    getTop()->addState(new_container_position, Eigen::Vector2s::Zero());
-    StateBase* new_container_orientation = new StateBase(getTop()->getNewStatePtr(), 1);
-    getTop()->addState(new_container_orientation, Eigen::Vector1s::Zero());
-
     // create new landmark
     Eigen::Vector3s corner_pose;
     corner_pose.head(2) = _old_corner_landmark_ptr->getPPtr()->getVector();
     corner_pose(2) = *(_old_corner_landmark_ptr->getOPtr()->getPtr());
 
-    LandmarkContainer* new_landmark = new LandmarkContainer(new_container_position, new_container_orientation, _feature_global_pose, corner_pose, _feature_idx, _corner_idx, CONTAINER_WIDTH, CONTAINER_LENGTH);
+    LandmarkContainer* new_landmark = new LandmarkContainer(new StateBlock(Eigen::Vector2s::Zero()),
+                                                            new StateBlock(Eigen::Vector1s::Zero()),
+                                                            _feature_global_pose,
+                                                            corner_pose,
+                                                            _feature_idx,
+                                                            _corner_idx,
+                                                            CONTAINER_WIDTH,
+                                                            CONTAINER_LENGTH);
+    // create new constraint (feature to container)
+    _corner_ptr->addConstraintFrom(new ConstraintContainer(_corner_ptr, new_landmark,_feature_idx));
 
     // add new landmark in the map
     getTop()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
 
-    // initialize container covariance with landmark corner covariance
+    // initialize container covariance with landmark corner covariance // TODO: has it sense???
     Eigen::MatrixXs Sigma_landmark = Eigen::MatrixXs::Zero(3,3);
     getTop()->getCovarianceBlock(_old_corner_landmark_ptr->getPPtr(), _old_corner_landmark_ptr->getPPtr(), Sigma_landmark, 0,0);
     getTop()->getCovarianceBlock(_old_corner_landmark_ptr->getPPtr(), _old_corner_landmark_ptr->getOPtr(), Sigma_landmark, 0,2);
     getTop()->getCovarianceBlock(_old_corner_landmark_ptr->getOPtr(), _old_corner_landmark_ptr->getOPtr(), Sigma_landmark, 2,2);
     Sigma_landmark.block<1,2>(2,0) = Sigma_landmark.block<2,1>(0,2).transpose();
 
-    getTop()->addCovarianceBlock(new_container_position, new_container_position, Sigma_landmark.topLeftCorner<2,2>());
-    getTop()->addCovarianceBlock(new_container_position, (StateBase*)new_container_orientation, Sigma_landmark.block<2,1>(0,2));
-    getTop()->addCovarianceBlock((StateBase*)new_container_orientation, (StateBase*)new_container_orientation, Sigma_landmark.block<1,1>(2,2));
+    getTop()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getPPtr(), Sigma_landmark.topLeftCorner<2,2>());
+    getTop()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getOPtr(), Sigma_landmark.block<2,1>(0,2));
+    getTop()->addCovarianceBlock(new_landmark->getOPtr(), new_landmark->getOPtr(), Sigma_landmark.block<1,1>(2,2));
 
     // create new constraint (feature to container)
-    _corner_ptr->addConstraint(new ConstraintContainer(_corner_ptr, new_landmark,_feature_idx));
+    _corner_ptr->addConstraintFrom(new ConstraintContainer(_corner_ptr, new_landmark,_feature_idx));
 
 
     // ERASING LANDMARK CORNER
     // change all constraints from corner landmark by new corner container
-    for (auto ctr_it = _old_corner_landmark_ptr->getConstraints()->begin(); ctr_it != _old_corner_landmark_ptr->getConstraints()->end(); ctr_it++)
+    for (auto ctr_it = _old_corner_landmark_ptr->getConstraintToListPtr()->begin(); ctr_it != _old_corner_landmark_ptr->getConstraintToListPtr()->end(); ctr_it++)
     {
         // create new constraint to landmark container
-        (*ctr_it)->getFeaturePtr()->addConstraint(new ConstraintContainer((*ctr_it)->getFeaturePtr(), new_landmark, _corner_idx));
+        (*ctr_it)->getFeaturePtr()->addConstraintFrom(new ConstraintContainer((*ctr_it)->getFeaturePtr(), new_landmark, _corner_idx));
     }
     // Remove corner landmark (it will remove all old constraints)
     getTop()->getMapPtr()->removeLandmark(_old_corner_landmark_ptr);

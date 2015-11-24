@@ -1,7 +1,7 @@
 
 #include "landmark_container.h"
 
-LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, const WolfScalar& _witdh, const WolfScalar& _length) :
+LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, const WolfScalar& _witdh, const WolfScalar& _length) :
 	LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
 	corners_(3,4)
 {
@@ -14,7 +14,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, const
                  0,           M_PI/2,      M_PI,        -M_PI/2;
 }
 
-LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const WolfScalar& _witdh, const WolfScalar& _length) :
+LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const WolfScalar& _witdh, const WolfScalar& _length) :
     LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
     corners_(3,4)
 {
@@ -29,7 +29,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, const
     // Computing center
     std::cout << "Container constructor: Computing center pose... " << std::endl;
     Eigen::Map<Eigen::Vector2s> container_position(_p_ptr->getPtr());
-    Eigen::Map<Eigen::VectorXs> container_orientation(_o_ptr->getPtr(), _o_ptr->getStateSize());
+    Eigen::Map<Eigen::VectorXs> container_orientation(_o_ptr->getPtr(), _o_ptr->getSize());
 
     std::cout << "Container constructor: _corner_1_idx " << _corner_1_idx << "_corner_2_idx " << _corner_2_idx << std::endl;
 
@@ -75,7 +75,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, const
     std::cout << "Container center pose... " << container_position.transpose() << " " << container_orientation.transpose() << std::endl;
 }
 
-LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const WolfScalar& _witdh, const WolfScalar& _length) :
+LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const WolfScalar& _witdh, const WolfScalar& _length) :
     LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
     corners_(3,4)
 {
@@ -92,7 +92,7 @@ LandmarkContainer::LandmarkContainer(StateBase* _p_ptr, StateBase* _o_ptr, Landm
     // Computing center
     //std::cout << "Container constructor: Computing center position... " << std::endl;
     Eigen::Map<Eigen::Vector2s> container_position(_p_ptr->getPtr());
-    Eigen::Map<Eigen::VectorXs> container_orientation(_o_ptr->getPtr(), _o_ptr->getStateSize());
+    Eigen::Map<Eigen::VectorXs> container_orientation(_o_ptr->getPtr(), _o_ptr->getSize());
 
     container_position = Eigen::Vector2s::Zero();
 

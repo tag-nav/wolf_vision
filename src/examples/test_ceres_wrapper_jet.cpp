@@ -21,7 +21,7 @@
 #include "sensor_base.h"
 #include "frame_base.h"
 #include "capture_base.h"
-#include "state_base.h"
+#include "state_block.h"
 #include "wolf.h"
 
 // ceres wrapper includes

@@ -86,15 +86,15 @@ class WolfManager
         	if (use_complex_angles_)
         	{
                 FrameBase* new_frame = new FrameBase(_time_stamp,
-                                                     new StateBase(state_.data()+first_empty_state_),
+                                                     new StateBlock(state_.data()+first_empty_state_),
                                                      new StateComplexAngle(state_.data()+first_empty_state_+2));
         		trajectory_->addFrame(new_frame);
         	}
         	else
         	{
                 FrameBase* new_frame = new FrameBase(_time_stamp,
-                                                     new StateBase(state_.data()+first_empty_state_),
-                                                     new StateBase(state_.data()+first_empty_state_+2));
+                                                     new StateBlock(state_.data()+first_empty_state_),
+                                                     new StateBlock(state_.data()+first_empty_state_+2));
         		trajectory_->addFrame(new_frame);
         	}
 
@@ -107,7 +107,7 @@ class WolfManager
         	new_captures_.push(_capture);
         }
 
-        void update(std::list<StateBase*>& new_state_units, std::list<ConstraintBase*>& new_constraints)
+        void update(std::list<StateBlock*>& new_state_units, std::list<ConstraintBase*>& new_constraints)
         {
         	// TODO: management due to time stamps
         	while (!new_captures_.empty())
@@ -159,9 +159,9 @@ class WolfManager
         	return state_;
         }
 
-        std::list<StateBase*> getStateList()
+        std::list<StateBlock*> getStateList()
 		{
-        	std::list<StateBase*> st_list;
+        	std::list<StateBlock*> st_list;
 
         	for (FrameBaseIter frame_list_iter=trajectory_->getFrameListPtr()->begin(); frame_list_iter!=trajectory_->getFrameListPtr()->end(); frame_list_iter++)
 			{
@@ -250,7 +250,7 @@ int main(int argc, char** argv)
 	Eigen::VectorXs odom_trajectory(n_execution*3); //all true poses
 	Eigen::VectorXs odom_readings(n_execution*2); // all odometry readings
 	Eigen::VectorXs gps_fix_readings(n_execution*3); //all GPS fix readings
-	std::list<StateBase*> new_state_units; // new state units in wolf that must be added to ceres
+	std::list<StateBlock*> new_state_units; // new state units in wolf that must be added to ceres
 	std::list<ConstraintBase*> new_constraints; // new constraints in wolf that must be added to ceres
 
 	// Wolf manager initialization

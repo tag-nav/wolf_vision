@@ -47,6 +47,7 @@ class NodeLinked : public NodeBase
         NodeLocation location_;
         UpperNodePtr up_node_ptr_; //it is not a shared pointer because the ownership of upper node should not be shared by lower nodes
         LowerNodeList down_node_list_;
+        bool is_deleting_;
 
     public:
 
@@ -57,19 +58,19 @@ class NodeLinked : public NodeBase
          */
         NodeLinked(const NodeLocation _loc, const std::string& _label);
 
-        /** \brief Constructor specifying up node
-         *
-         * Constructor specifying up node
-		 * 
-         */		
-        //NodeLinked(const NodeLocation _loc, const std::string& _label, const UpperNodePtr& _up_node_ptr);
-
         /** \brief Default destructor
          *
          * Default destructor
 		 * 
          */		
         virtual ~NodeLinked();
+
+        /** \brief Checks if the destructor has been called already
+         *
+         * Checks if the destructor has been called already
+         *
+         */
+        virtual const bool isDeleting() const;
 
         /** \brief Checks if node is on the top of Wolf tree
          *
@@ -129,26 +130,12 @@ class NodeLinked : public NodeBase
          */
         LowerNodeList& downNodeList() const;
 
-        /** \brief Gets a constant reference to down node list
-         *
-         * Gets constant reference to down node list
-         *
-         */		
-//         const LowerNodeList& downNodeList() const;
-        
         /** \brief Gets a pointer to down node list
          *
          * Gets a pointer to down node list
          *
          */
         LowerNodeList* getDownNodeListPtr();
-
-        /** \brief Gets a const pointer to down node list
-         *
-         * Gets a const pointer to down node list
-         *
-         */     
-//         const LowerNodeList* downNodeListPtr() const;        
 
         /** \brief Removes a down node from list, given an iterator
          *
@@ -228,26 +215,25 @@ NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std:
         NodeBase(_label), //
         location_(_loc), //
         up_node_ptr_(nullptr),
-		down_node_list_()
+		down_node_list_(),
+		is_deleting_(false)
 {
 }
-
-// template<class UpperType, class LowerType>
-// NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label, const UpperNodePtr& _up_node_ptr) :
-//         NodeBase(_label), //
-//         location_(_loc),
-// 		down_node_list_()
-// {
-//     linkToUpperNode(_up_node_ptr);
-// }
 
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::~NodeLinked()
 {
 	//std::cout << "deleting Nodelinked " << node_id_ << " down_node_list_.size() " << down_node_list_.size() << std::endl;
+    is_deleting_ = true;
 
 	while (down_node_list_.begin()!= down_node_list_.end())
 		removeDownNode(down_node_list_.begin());
+}
+
+template<class UpperType, class LowerType>
+inline const bool NodeLinked<UpperType, LowerType>::isDeleting() const
+{
+    return is_deleting_;
 }
 
 template<class UpperType, class LowerType>
@@ -316,23 +302,11 @@ inline typename NodeLinked<UpperType, LowerType>::LowerNodeList& NodeLinked<Uppe
     return down_node_list_;
 }
 
-// template<class UpperType, class LowerType>
-// inline const typename NodeLinked<UpperType, LowerType>::LowerNodeList& NodeLinked<UpperType, LowerType>::downNodeList() const
-// {
-//     return down_node_list_;
-// }
-
 template<class UpperType, class LowerType>
 inline typename NodeLinked<UpperType, LowerType>::LowerNodeList* NodeLinked<UpperType, LowerType>::getDownNodeListPtr()
 {
     return &down_node_list_;
 }
-
-// template<class UpperType, class LowerType>
-// inline const typename NodeLinked<UpperType, LowerType>::LowerNodeList* NodeLinked<UpperType, LowerType>::downNodeListPtr() const 
-// {
-//     return &down_node_list_;
-// }
 
 template<class UpperType, class LowerType>
 inline void NodeLinked<UpperType, LowerType>::removeDownNode(const unsigned int _id)
@@ -362,24 +336,11 @@ inline void NodeLinked<UpperType, LowerType>::removeDownNode(const LowerNodeIter
     delete *_iter;
 }
 
-//TODO: confirm this change by the others :)
 template<class UpperType, class LowerType>
 WolfProblem* NodeLinked<UpperType, LowerType>::getTop()
 {
 	return up_node_ptr_->getTop();
 }
-
-//template<class UpperType, class LowerType>
-//WolfProblem* NodeLinked<UpperType, LowerType>::getTop() //TODO: confirm by the others :)
-//{
-//    return up_node_ptr_->getTop();
-//}
-//
-//template<class LowerType>
-//WolfProblem* NodeLinked<WolfProblem, LowerType>::getTop() //TODO: confirm by the others :)
-//{
-//    return up_node_ptr_;
-//}
 
 template<class UpperType, class LowerType>
 void NodeLinked<UpperType, LowerType>::print(unsigned int _ntabs, std::ostream& _ost) const

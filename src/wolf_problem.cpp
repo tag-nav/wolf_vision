@@ -2,96 +2,96 @@
 
 WolfProblem::WolfProblem(unsigned int _size) :
         NodeBase("WOLF_PROBLEM"), //
-        state_(_size),
         covariance_(_size,_size),
-		state_idx_last_(0),
-        location_(TOP),
+		location_(TOP),
+        trajectory_ptr_(new TrajectoryBase),
 		map_ptr_(new MapBase),
-		trajectory_ptr_(new TrajectoryBase),
-        reallocated_(false)
+		hardware_ptr_(new HardwareBase)
 {
-//	map_ptr_ = new MapBase;
-//	trajectory_ptr_ = new TrajectoryBase;
-    map_ptr_->linkToUpperNode( this );
-	trajectory_ptr_->linkToUpperNode( this );
+    trajectory_ptr_->linkToUpperNode( this );
+	map_ptr_->linkToUpperNode( this );
+	hardware_ptr_->linkToUpperNode( this );
 }
 
-WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, unsigned int _size) :
+WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, HardwareBase* _hardware_ptr, unsigned int _size) :
         NodeBase("WOLF_PROBLEM"), //
-		state_(_size),
-        covariance_(_size,_size),
-		state_idx_last_(0),
-        location_(TOP),
+		covariance_(_size,_size),
+		location_(TOP),
+        trajectory_ptr_(_trajectory_ptr==nullptr ? new TrajectoryBase : _trajectory_ptr),
 		map_ptr_(_map_ptr==nullptr ? new MapBase : _map_ptr),
-		trajectory_ptr_(_trajectory_ptr==nullptr ? new TrajectoryBase : _trajectory_ptr),
-        reallocated_(false)
+        hardware_ptr_(_hardware_ptr==nullptr ? new HardwareBase : _hardware_ptr)
 {
+    trajectory_ptr_->linkToUpperNode( this );
 	map_ptr_->linkToUpperNode( this );
-	trajectory_ptr_->linkToUpperNode( this );
+	hardware_ptr_->linkToUpperNode( this );
 }
 
 WolfProblem::~WolfProblem()
 {
 	delete trajectory_ptr_;
-	delete map_ptr_;
+    delete map_ptr_;
+    delete hardware_ptr_;
 }
 
-bool WolfProblem::addState(StateBase* _new_state_ptr, const Eigen::VectorXs& _new_state_values)
+void WolfProblem::addStateBlockPtr(StateBlock* _state_ptr)
 {
-	// Check if resize should be done
-	if (state_idx_last_+_new_state_ptr->getStateSize() > state_.size())
-	{
-		std::cout << "Resizing state and updating asl state units pointers..." << std::endl;
-		std::cout << "\nState size: " << state_.size() << " last idx: " << state_idx_last_ << " last idx + new state size: " << state_idx_last_+_new_state_ptr->getStateSize() << std::endl;
-        WolfScalar* old_first_pointer = state_.data();
-		state_.conservativeResize(state_.size()*2);
-		covariance_.conservativeResize(state_.size()*2,state_.size()*2);
-		for (auto state_units_it = state_list_.begin(); state_units_it != state_list_.end(); state_units_it++)
-		{
-	        //std::cout << "state unit: " << (*state_units_it)->nodeId() << std::endl;
-		    (*state_units_it)->setPtr(state_.data() + ( (*state_units_it)->getPtr() - old_first_pointer) );
-		}
-		std::cout << "----------------------------- difference of location: " << old_first_pointer - state_.data() << std::endl;
-		_new_state_ptr->setPtr(state_.data()+state_idx_last_);
-		std::cout << "New state size: " << state_.size() << " last idx: " << state_idx_last_ << std::endl;
-		reallocated_ = true;
-	}
-	//std::cout << "\nnew state unit: " << _new_state_values.transpose() << std::endl;
-	//std::cout << "\nPrev state: " << state_.segment(0,state_idx_last_).transpose() << std::endl;
-
-	// copy the values of the new state
-	assert(_new_state_values.size() == _new_state_ptr->getStateSize() && "Different state unit and vector sizes");
-	state_.segment(state_idx_last_,_new_state_ptr->getStateSize()) = _new_state_values;
-
 	// add the state unit to the list
-	state_list_.push_back(_new_state_ptr);
+	state_block_ptr_list_.push_back(_state_ptr);
+	state_idx_map_[_state_ptr] = covariance_.rows();
 
-	// update the last state index
-	state_idx_last_ += _new_state_ptr->getStateSize();
-
-	//std::cout << "\nPost state: " << state_.segment(0,state_idx_last_).transpose() << std::endl;
-	return reallocated_;
+	// Resize Covariance
+	covariance_.conservativeResize(covariance_.rows() + _state_ptr->getSize(), covariance_.cols() + _state_ptr->getSize());
+	// queue for solver manager
+	state_block_add_list_.push_back(_state_ptr);
 }
 
-void WolfProblem::addCovarianceBlock(StateBase* _state1, StateBase* _state2, const Eigen::MatrixXs& _cov)
+void WolfProblem::updateStateBlockPtr(StateBlock* _state_ptr)
+{
+    // queue for solver manager
+    state_block_update_list_.push_back(_state_ptr);
+}
+
+void WolfProblem::removeStateBlockPtr(StateBlock* _state_ptr)
+{
+    // add the state unit to the list
+    state_block_ptr_list_.remove(_state_ptr);
+    state_idx_map_.erase(_state_ptr);
+
+    // Resize Covariance
+    covariance_.conservativeResize(covariance_.rows() - _state_ptr->getSize(), covariance_.cols() - _state_ptr->getSize());
+    // queue for solver manager
+    state_block_remove_list_.push_back(_state_ptr->getPtr());
+}
+
+void WolfProblem::addConstraintPtr(ConstraintBase* _constraint_ptr)
+{
+    // queue for solver manager
+    constraint_add_list_.push_back(_constraint_ptr);
+}
+
+void WolfProblem::removeConstraintPtr(ConstraintBase* _constraint_ptr)
+{
+    // queue for solver manager
+    constraint_remove_list_.remove(_constraint_ptr->nodeId());
+}
+
+void WolfProblem::addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov)
 {
     assert(_state1 != nullptr);
-    assert(_state1->getPtr() != nullptr);
-    assert(_state1->getPtr() < state_.data() + state_idx_last_);
-    assert(_state1->getPtr() > state_.data());
+    assert(state_idx_map_.find(_state1) != state_idx_map_.end());
+    assert(state_idx_map_.at(_state1) + _state1->getSize() <= (unsigned int) covariance_.rows());
     assert(_state2 != nullptr);
-    assert(_state2->getPtr() != nullptr);
-    assert(_state2->getPtr() < state_.data() + state_idx_last_);
-    assert(_state2->getPtr() > state_.data());
+    assert(state_idx_map_.find(_state2) != state_idx_map_.end());
+    assert(state_idx_map_.at(_state2) + _state2->getSize() <= (unsigned int) covariance_.rows());
 
     // Guarantee that we are updating the top triangular matrix (in cross covariance case)
-    bool flip = _state1->getPtr() > _state2->getPtr();
-    StateBase* stateA = (flip ? _state2 : _state1);
-    StateBase* stateB = (flip ? _state1 : _state2);
-    unsigned int row = (stateA->getPtr() - state_.data());
-    unsigned int col = (stateB->getPtr() - state_.data());
-    unsigned int block_rows = stateA->getStateSize();
-    unsigned int block_cols = stateB->getStateSize();
+    bool flip = state_idx_map_.at(_state1) > state_idx_map_.at(_state2);
+    StateBlock* stateA = (flip ? _state2 : _state1);
+    StateBlock* stateB = (flip ? _state1 : _state2);
+    unsigned int row = state_idx_map_.at(stateA);
+    unsigned int col = state_idx_map_.at(stateB);
+    unsigned int block_rows = stateA->getSize();
+    unsigned int block_cols = stateB->getSize();
 
     assert( block_rows == (flip ? _cov.cols() : _cov.rows()) && block_cols == (flip ? _cov.rows() : _cov.cols()) && "Bad covariance size in WolfProblem::addCovarianceBlock");
 
@@ -101,50 +101,46 @@ void WolfProblem::addCovarianceBlock(StateBase* _state1, StateBase* _state2, con
            covariance_.coeffRef(i+row,j+col) = (flip ? _cov(j,i) : _cov(i,j));
 }
 
-void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov_block) const
+void WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block) const
 {
     assert(_state1 != nullptr);
-    assert(_state1->getPtr() != nullptr);
-    assert(_state1->getPtr() < state_.data() + state_idx_last_);
-    assert(_state1->getPtr() > state_.data());
+    assert(state_idx_map_.find(_state1) != state_idx_map_.end());
+    assert(state_idx_map_.at(_state1) + _state1->getSize() <= (unsigned int) covariance_.rows());
     assert(_state2 != nullptr);
-    assert(_state2->getPtr() != nullptr);
-    assert(_state2->getPtr() < state_.data() + state_idx_last_);
-    assert(_state2->getPtr() > state_.data());
+    assert(state_idx_map_.find(_state2) != state_idx_map_.end());
+    assert(state_idx_map_.at(_state2) + _state2->getSize() <= (unsigned int) covariance_.rows());
 
-    // Guarantee that we are getting the top triangular matrix (in cross covariance case)
-    bool flip = _state1->getPtr() > _state2->getPtr();
-    StateBase* stateA = (flip ? _state2 : _state1);
-    StateBase* stateB = (flip ? _state1 : _state2);
-    unsigned int row = (stateA->getPtr() - state_.data());
-    unsigned int col = (stateB->getPtr() - state_.data());
-    unsigned int block_rows = stateA->getStateSize();
-    unsigned int block_cols = stateB->getStateSize();
+    // Guarantee that we are updating the top triangular matrix (in cross covariance case)
+    bool flip = state_idx_map_.at(_state1) > state_idx_map_.at(_state2);
+    StateBlock* stateA = (flip ? _state2 : _state1);
+    StateBlock* stateB = (flip ? _state1 : _state2);
+    unsigned int row = state_idx_map_.at(stateA);
+    unsigned int col = state_idx_map_.at(stateB);
+    unsigned int block_rows = stateA->getSize();
+    unsigned int block_cols = stateB->getSize();
 
     assert(_cov_block.rows() == (flip ? block_cols : block_rows) && _cov_block.cols() == (flip ? block_rows : block_cols) && "Bad _cov_block matrix sizes");
 
     _cov_block = (flip ? Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)) : Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)).transpose() );
 }
 
-void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col) const
+void WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col) const
 {
     assert(_state1 != nullptr);
-    assert(_state1->getPtr() != nullptr);
-    assert(_state1->getPtr() < state_.data() + state_idx_last_);
-    assert(_state1->getPtr() > state_.data());
+    assert(state_idx_map_.find(_state1) != state_idx_map_.end());
+    assert(state_idx_map_.at(_state1) + _state1->getSize() <= (unsigned int) covariance_.rows());
     assert(_state2 != nullptr);
-    assert(_state2->getPtr() != nullptr);
-    assert(_state2->getPtr() < state_.data() + state_idx_last_);
-    assert(_state2->getPtr() > state_.data());
+    assert(state_idx_map_.find(_state2) != state_idx_map_.end());
+    assert(state_idx_map_.at(_state2) + _state2->getSize() <= (unsigned int) covariance_.rows());
 
-    // Guarantee that we are getting the top triangular matrix (in cross covariance case)
-    bool flip = _state1->getPtr() > _state2->getPtr();
-    StateBase* stateA = (flip ? _state2 : _state1);
-    StateBase* stateB = (flip ? _state1 : _state2);
-    unsigned int row = (stateA->getPtr() - state_.data());
-    unsigned int col = (stateB->getPtr() - state_.data());
-    unsigned int block_rows = stateA->getStateSize();
-    unsigned int block_cols = stateB->getStateSize();
+    // Guarantee that we are updating the top triangular matrix (in cross covariance case)
+    bool flip = state_idx_map_.at(_state1) > state_idx_map_.at(_state2);
+    StateBlock* stateA = (flip ? _state2 : _state1);
+    StateBlock* stateB = (flip ? _state1 : _state2);
+    unsigned int row = state_idx_map_.at(stateA);
+    unsigned int col = state_idx_map_.at(stateB);
+    unsigned int block_rows = stateA->getSize();
+    unsigned int block_cols = stateB->getSize();
 
 //    std::cout << "flip " << flip << std::endl;
 //    std::cout << "_row " << _row << std::endl;
@@ -162,31 +158,9 @@ void WolfProblem::getCovarianceBlock(StateBase* _state1, StateBase* _state2, Eig
         _cov.block(_row,_col,block_cols,block_rows) = Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)).transpose();
 }
 
-void WolfProblem::removeState(StateBase* _state_ptr)
-{
-	// TODO: Reordering? Mandatory for filtering...
-	state_list_.remove(_state_ptr);
-	removed_state_ptr_list_.push_back(_state_ptr->getPtr());
-	delete _state_ptr;
-}
-
-WolfScalar* WolfProblem::getStatePtr()
-{
-	return state_.data();
-}
-
-WolfScalar* WolfProblem::getNewStatePtr()
-{
-	return state_.data()+state_idx_last_;
-}
-
-const unsigned int WolfProblem::getStateSize() const
-{
-	return state_idx_last_;
-}
-
 void WolfProblem::addMap(MapBase* _map_ptr)
 {
+    // TODO: not necessary but update map maybe..
 	map_ptr_ = _map_ptr;
 	map_ptr_->linkToUpperNode( this );
 }
@@ -207,19 +181,19 @@ TrajectoryBase* WolfProblem::getTrajectoryPtr()
 	return trajectory_ptr_;
 }
 
+HardwareBase* WolfProblem::getHardwarePtr()
+{
+    return hardware_ptr_;
+}
+
 FrameBase* WolfProblem::getLastFramePtr()
 {
     return trajectory_ptr_->getLastFramePtr();
 }
 
-StateBaseList* WolfProblem::getStateListPtr()
+StateBlockList* WolfProblem::getStateListPtr()
 {
-	return &state_list_;
-}
-
-std::list<WolfScalar*>* WolfProblem::getRemovedStateListPtr()
-{
-	return &removed_state_ptr_list_;
+	return &state_block_ptr_list_;
 }
 
 void WolfProblem::print(unsigned int _ntabs, std::ostream& _ost) const
@@ -235,20 +209,29 @@ void WolfProblem::printSelf(unsigned int _ntabs, std::ostream& _ost) const
     _ost << "TOP" << std::endl;
 }
 
-const Eigen::VectorXs WolfProblem::getState() const
+std::list<StateBlock*>* WolfProblem::getStateBlockAddList()
 {
-	return state_;
+    return &state_block_add_list_;
 }
 
-bool WolfProblem::isReallocated() const
+std::list<StateBlock*>* WolfProblem::getStateBlockUpdateList()
 {
-	return reallocated_;
+    return &state_block_update_list_;
 }
 
-
-void WolfProblem::reallocationDone()
+std::list<WolfScalar*>* WolfProblem::getStateBlockRemoveList()
 {
-	reallocated_ = false;
+    return &state_block_remove_list_;
+}
+
+std::list<ConstraintBase*>* WolfProblem::getConstraintAddList()
+{
+    return &constraint_add_list_;
+}
+
+std::list<unsigned int>* WolfProblem::getConstraintRemoveList()
+{
+    return &constraint_remove_list_;
 }
 
 WolfProblem* WolfProblem::getTop()
