@@ -41,6 +41,9 @@ void CeresManager::computeCovariances()
 {
     //std::cout << "computing covariances..." << std::endl;
 
+    // CLEAR STORED COVARIANCE BLOCKS IN WOLF PROBLEM
+    wolf_problem_->clearCovariance();
+
     // CREATE DESIRED COVARIANCES LIST
 	std::vector<std::pair<const double*, const double*>> covariance_blocks;
 

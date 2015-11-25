@@ -28,25 +28,25 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
                 _init_frame_cov.rows() == 7 &&
                 "Wrong init_frame state vector or covariance matrix size");
 
-    std::cout << "initializing wolfmanager" << std::endl;
+    //std::cout << "initializing wolfmanager" << std::endl;
 
     // Initial frame
     createFrame(_init_frame, TimeStamp(0));
     first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
-    std::cout << " first_window_frame_" << std::endl;
+    //std::cout << " first_window_frame_" << std::endl;
 
     // Initial covariance
     CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), _init_frame, _init_frame_cov);
-    std::cout << " initial_covariance" << std::endl;
+    //std::cout << " initial_covariance" << std::endl;
     current_frame_->addCapture(initial_covariance);
-    std::cout << " addCapture" << std::endl;
+    //std::cout << " addCapture" << std::endl;
     initial_covariance->processCapture();
-    std::cout << " processCapture" << std::endl;
+    //std::cout << " processCapture" << std::endl;
 
     // Current robot frame
     createFrame(_init_frame, TimeStamp(0));
 
-    std::cout << " wolfmanager initialized" << std::endl;
+    //std::cout << " wolfmanager initialized" << std::endl;
 }
 
 WolfManager::~WolfManager()
@@ -56,11 +56,10 @@ WolfManager::~WolfManager()
 
 void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
 {
-    std::cout << "creating new frame..." << std::endl;
+    //std::cout << "creating new frame..." << std::endl;
 
     // current frame -> KEYFRAME
     last_key_frame_ = current_frame_;
-    std::cout << "creating new frame..." << std::endl;
 
     // ---------------------- CREATE NEW FRAME ---------------------
     // Create frame
@@ -89,7 +88,7 @@ void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeSta
             assert( "Unknown frame structure");
         }
     }
-    std::cout << "frame created" << std::endl;
+    //std::cout << "frame created" << std::endl;
 
     // Store new current frame
     current_frame_ = problem_->getLastFramePtr();
@@ -103,13 +102,13 @@ void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeSta
         empty_odom->processCapture();
         last_capture_relative_ = empty_odom;
     }
-    std::cout << "last_frame_" << std::endl;
+    //std::cout << "last_key_frame_" << std::endl;
 
     // ---------------------- KEY FRAME ---------------------
-    if (current_frame_ != nullptr)
+    if (last_key_frame_ != nullptr)
     {
         //std::cout << "Processing last frame non-odometry captures " << current_frame_->getCaptureListPtr()->size() << std::endl;
-        for (auto capture_it = current_frame_->getCaptureListPtr()->begin(); capture_it != current_frame_->getCaptureListPtr()->end(); capture_it++)
+        for (auto capture_it = last_key_frame_->getCaptureListPtr()->begin(); capture_it != last_key_frame_->getCaptureListPtr()->end(); capture_it++)
             if ((*capture_it)->getSensorPtr() != sensor_prior_)
             {
                 //std::cout << "processing capture " << (*capture_it)->nodeId() << std::endl;
@@ -118,11 +117,11 @@ void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeSta
 
 
     }
-    std::cout << "Last frame non-odometry captures processed" << std::endl;
+    //std::cout << "Last key frame non-odometry captures processed" << std::endl;
 
     // ---------------------- MANAGE WINDOW OF POSES ---------------------
     manageWindow();
-    std::cout << "new frame created" << std::endl;
+    //std::cout << "new frame created" << std::endl;
 }
 
 
@@ -134,9 +133,9 @@ void WolfManager::createFrame(const TimeStamp& _time_stamp)
 
 void WolfManager::addSensor(SensorBase* _sensor_ptr)
 {
-    std::cout << "adding sensor... to hardware " << problem_->getHardwarePtr()->nodeId() << std::endl;
+    //std::cout << "adding sensor... to hardware " << problem_->getHardwarePtr()->nodeId() << std::endl;
     problem_->getHardwarePtr()->addSensor(_sensor_ptr);
-    std::cout << "added!" << std::endl;
+    //std::cout << "added!" << std::endl;
 }
 
 void WolfManager::addCapture(CaptureBase* _capture)
@@ -174,7 +173,7 @@ bool WolfManager::checkNewFrame(CaptureBase* new_capture)
 
 void WolfManager::update()
 {
-    //std::cout << "updating..." << std::endl;
+    std::cout << "updating..." << std::endl;
     while (!new_captures_.empty())
     {
         // EXTRACT NEW CAPTURE
@@ -223,7 +222,7 @@ void WolfManager::update()
             }
         }
     }
-    //std::cout << "updated" << std::endl;
+    std::cout << "updated" << std::endl;
 }
 
 

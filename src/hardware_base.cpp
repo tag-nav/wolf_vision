@@ -13,9 +13,9 @@ HardwareBase::~HardwareBase()
 
 void HardwareBase::addSensor(SensorBase* _sensor_ptr)
 {
-    std::cout << "adding sensor..." << std::endl;
+    //std::cout << "adding sensor..." << std::endl;
 	addDownNode(_sensor_ptr);
-    std::cout << "added!" << std::endl;
+    //std::cout << "added!" << std::endl;
 }
 
 void HardwareBase::removeSensor(const SensorBaseIter& _sensor_iter)

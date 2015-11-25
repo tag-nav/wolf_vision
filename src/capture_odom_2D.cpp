@@ -40,12 +40,11 @@ Eigen::VectorXs CaptureOdom2D::computePrior(const TimeStamp& _now) const
 {
     assert(up_node_ptr_ != nullptr && "This Capture is not linked to any frame");
 
-    Eigen::Vector3s prior;
-    Eigen::Map<Eigen::Vector3s> initial_pose(getFramePtr()->getPPtr()->getPtr());
-    //std::cout << "initial_pose: " << initial_pose.transpose() << std::endl;
-    prior(0) = initial_pose(0) + data_(0) * cos(initial_pose(2)) - data_(1) * sin(initial_pose(2));
-    prior(1) = initial_pose(1) + data_(0) * sin(initial_pose(2)) + data_(1) * cos(initial_pose(2));
-    prior(2) = initial_pose(2) + data_(2);
+    Eigen::Vector3s prior = getFramePtr()->getPreviousFrame()->getState();
+    //std::cout << "previous pose: " << prior.transpose() << std::endl;
+    prior(0) += data_(0) * cos(prior(2)) - data_(1) * sin(prior(2));
+    prior(1) += data_(0) * sin(prior(2)) + data_(1) * cos(prior(2));
+    prior(2) += data_(2);
     //std::cout << "data_: " << data_.transpose() << std::endl;
     //std::cout << "prior: " << prior.transpose() << std::endl;
 

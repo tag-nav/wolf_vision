@@ -1,6 +1,8 @@
 #ifndef WOLF_PROBLEM_H_
 #define WOLF_PROBLEM_H_
 
+// std
+#include <utility> // pair
 
 //wolf includes
 #include "node_base.h"
@@ -22,6 +24,7 @@
 class WolfProblem: public NodeBase
 {
     protected:
+        std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
         Eigen::SparseMatrix<WolfScalar> covariance_;
         NodeLocation location_;// TODO: should it be in node_base?
         TrajectoryBase* trajectory_ptr_;
@@ -93,6 +96,13 @@ class WolfProblem: public NodeBase
          */
         void removeConstraintPtr(ConstraintBase* _constraint_ptr);
 
+        /** \brief Clear covariance
+         *
+         * Clear covariance
+         *
+         */
+        void clearCovariance();
+
         /** \brief Adds a new covariance block
          *
          * Adds a new covariance block
@@ -105,8 +115,8 @@ class WolfProblem: public NodeBase
          * Gets a covariance block
          *
          */
-        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block) const;
-        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col) const;
+        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block);
+        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col);
 
         /** \brief Gets state size
 		 *
