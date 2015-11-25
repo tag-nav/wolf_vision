@@ -1,4 +1,4 @@
-// Testing a full wolf tree avoiding template classes for NodeLinked derived classes
+// Testing create and delete full wolf tree with odometry captures
 
 //std includes
 #include <iostream>
@@ -7,59 +7,40 @@
 #include <cmath>
 #include <queue>
 
-//ceres
-#include "ceres/ceres.h"
-
 //Wolf includes
-#include "wolf.h"
-#include "time_stamp.h"
-#include "capture_base.h"
-#include "sensor_base.h"
+#include "wolf_manager.h"
 
 
 int main(int argc, char** argv) 
-{    
-    //wolf manager variables
-    std::queue<FrameBase> trajectory_; //this will be owned by the wolf manager
-    std::list<CaptureBaseShPtr> pending_captures_; //this will be owned by the wolf manager 
-    std::list<CaptureBaseShPtr>::iterator pending_it_; //this will be owned by the wolf manager 
-    Eigen::VectorXs sp(6);
-    sp << 0.1,0.1,0.1,0,0,0;
-    SensorBase sensor1(ABSOLUTE_POSE,sp); //just one sensor. This will be owned by the wolf manager
-    sp << 0.2,0.2,0.2,0,0,0;
-    SensorBase sensor2(ABSOLUTE_POSE,sp); //just another sensor. This will be owned by the wolf manager
-
-    //ROS callbacks varaibles (will be get from message)
-    TimeStamp ros_ts; //this plays the role of ros::Time, or msg->header.stamp
-    Eigen::VectorXs sensor_reading(4); //this plays the role of the ROS message content (sensor reading). Reading of dim=4 (example)
-    
+{
     //Welcome message
     std::cout << std::endl << " ========= WOLF TREE test ===========" << std::endl << std::endl;
 
+    SensorOdom2D* odom_sensor_ptr_ = new SensorOdom2D(new StateBlock(Eigen::Vector3s::Zero()),
+                                                      new StateBlock(Eigen::Vector1s::Zero()), 0.1, 0.1);
+
+    WolfManager* wolf_manager_ = new WolfManager(PO_2D,                             //frame structure
+                                                 odom_sensor_ptr_,                  //odom sensor
+                                                 Eigen::Vector3s::Zero(),           //prior
+                                                 Eigen::Matrix3s::Identity()*0.01,  //prior cov
+                                                 5,                                 //window size
+                                                 1);                                //time for new keyframe
+    wolf_manager_->addSensor(odom_sensor_ptr_);
+
     //main loop
-    for (unsigned int ii = 0; ii<10; ii++)
+    for (unsigned int ii = 0; ii<1000; ii++)
     {
-        //1. a new sensor data arrives (this part will be placed on ROS callbacks)
-        ros_ts.setToNow();
-        sensor_reading << 1,2,3,4;
-        std::shared_ptr<CaptureBase> capture( new CaptureBase(ros_ts.get(), &sensor1, sensor_reading) );
-        pending_captures_.push_back(capture);
-        
-        //2. Process pending_captures_, deciding for each new capture wheter a Frame has to be created or they have to be linked to the last one
-        for (pending_it_ = pending_captures_.begin(); pending_it_ != pending_captures_.end(); ++pending_it_)
-        {
-            capture->processCapture(); //This should create features    
-            
-        }
-        
-        //3. Stablish correspondences
-        
-        //4. Call ceres solver
-        
-        //5. publish results
-        
+        // Add sintetic odometry
+        wolf_manager_->addCapture(new CaptureOdom2D(TimeStamp(ii*0.1),
+                                                    TimeStamp(ii*0.1+0.01),
+                                                    odom_sensor_ptr_,
+                                                    Eigen::Vector3s(0.1, 0. ,0.05)));
+        // update wolf tree
+        wolf_manager_->update();
     }
-    
+
+    delete wolf_manager_; //not necessary to delete anything more, wolf will do it!
+
     //End message
     std::cout << " =========================== END ===============================" << std::endl << std::endl;
        
