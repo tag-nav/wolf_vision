@@ -28,7 +28,7 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
         Eigen::Vector3s inverse_sensor_pose_; ///< World pose in the sensor frame: inverse of the global_pose_. TODO: use state units
 
     public:
-        CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr); //TODO: to be removed ??
+        CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr);
 
         CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
 

@@ -61,7 +61,6 @@ class WolfManager
 
     public:
         WolfManager(const FrameStructure _frame_structure,
-                    const unsigned int& _state_length,
                     SensorBase* _sensor_prior_ptr,
                     const Eigen::VectorXs& _prior,
                     const Eigen::MatrixXs& _prior_cov,

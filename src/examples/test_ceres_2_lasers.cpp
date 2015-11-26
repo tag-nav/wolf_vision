@@ -34,51 +34,15 @@
 //function travel around
 void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
 {
-    if (ii <= 120)
-    {
-        displacement_ = 0.1;
-        rotation_ = 0;
-    }
-    else if ((ii > 120) && (ii <= 170))
-    {
-        displacement_ = 0.2;
-        rotation_ = 1.8 * M_PI / 180;
-    }
-    else if ((ii > 170) && (ii <= 220))
-    {
-        displacement_ = 0;
-        rotation_ = -1.8 * M_PI / 180;
-    }
-    else if ((ii > 220) && (ii <= 310))
-    {
-        displacement_ = 0.1;
-        rotation_ = 0;
-    }
-    else if ((ii > 310) && (ii <= 487))
-    {
-        displacement_ = 0.1;
-        rotation_ = -1. * M_PI / 180;
-    }
-    else if ((ii > 487) && (ii <= 600))
-    {
-        displacement_ = 0.2;
-        rotation_ = 0;
-    }
-    else if ((ii > 600) && (ii <= 700))
-    {
-        displacement_ = 0.1;
-        rotation_ = -1. * M_PI / 180;
-    }
-    else if ((ii > 700) && (ii <= 780))
-    {
-        displacement_ = 0;
-        rotation_ = -1. * M_PI / 180;
-    }
-    else
-    {
-        displacement_ = 0.3;
-        rotation_ = 0.0 * M_PI / 180;
-    }
+    if (ii <= 120){         displacement_ = 0.1;    rotation_ = 0; }
+    else if (ii <= 170) {   displacement_ = 0.2;    rotation_ = 1.8 * M_PI / 180; }
+    else if (ii <= 220) {   displacement_ = 0;      rotation_ =-1.8 * M_PI / 180; }
+    else if (ii <= 310) {   displacement_ = 0.1;    rotation_ = 0; }
+    else if (ii <= 487) {   displacement_ = 0.1;    rotation_ =-1.0 * M_PI / 180; }
+    else if (ii <= 600) {   displacement_ = 0.2;    rotation_ = 0; }
+    else if (ii <= 700) {   displacement_ = 0.1;    rotation_ =-1.0 * M_PI / 180; }
+    else if (ii <= 780) {   displacement_ = 0;      rotation_ =-1.0 * M_PI / 180; }
+    else {                  displacement_ = 0.3;    rotation_ = 0; }
 
     pose.moveForward(displacement_);
     pose.rt.setEuler(pose.rt.head() + rotation_, pose.rt.pitch(), pose.rt.roll());
@@ -89,19 +53,17 @@ int main(int argc, char** argv)
     std::cout << "\n ========= 2D Robot with odometry and 2 LIDARs ===========\n";
 
     // USER INPUT ============================================================================================
-    if (argc != 4 || atoi(argv[1]) < 1 || atoi(argv[1]) > 1100 || atoi(argv[2]) < 0 || atoi(argv[3]) < 0 || atoi(argv[3]) > 1)
+    if (argc != 3 || atoi(argv[1]) < 1 || atoi(argv[2]) < 1 )
     {
-        std::cout << "Please call me with: [./test_ceres_manager NI PRINT ORIENTATION_MODE], where:" << std::endl;
-        std::cout << "     - NI is the number of iterations (0 < NI < 1100)" << std::endl;
-        std::cout << "     - WS is the window size (0 < WS)" << std::endl;
-        std::cout << "     - ORIENTATION_MODE: 0 for theta, 1 for complex angle" << std::endl;
+        std::cout << "Please call me with: [./test_ceres_manager NI PRINT], where:" << std::endl;
+        std::cout << "     - NI is the number of iterations (NI > 0)" << std::endl;
+        std::cout << "     - WS is the window size (WS > 0)" << std::endl;
         std::cout << "EXIT due to bad user input" << std::endl << std::endl;
         return -1;
     }
 
     unsigned int n_execution = (unsigned int) atoi(argv[1]); //number of iterations of the whole execution
     unsigned int window_size = (unsigned int) atoi(argv[2]);
-    bool complex_angle = (bool) atoi(argv[3]);
 
     // INITIALIZATION ============================================================================================
     //init random generators
@@ -113,8 +75,6 @@ int main(int argc, char** argv)
 
     //init google log
     //google::InitGoogleLogging(argv[0]);
-
-
 
     // Faramotics stuff
     Cpose3d viewPoint, devicePose, laser1Pose, laser2Pose, estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose;
@@ -177,7 +137,7 @@ int main(int argc, char** argv)
     //    ceres_options.max_num_iterations = 100;
     ceres::Problem::Options problem_options;
     problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
     CeresManager* ceres_manager = new CeresManager(wolf_manager->getProblemPtr(), problem_options);
     std::ofstream log_file, landmark_file;  //output file
@@ -239,8 +199,8 @@ int main(int argc, char** argv)
         // adding new sensor captures
         wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(),TimeStamp(), &odom_sensor, odom_reading));		//, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
 		wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
-//        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
-//        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
+        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
+        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
         // updating problem
         wolf_manager->update();
         mean_times(1) += ((double) clock() - t1) / CLOCKS_PER_SEC;
@@ -357,10 +317,7 @@ int main(int argc, char** argv)
     Eigen::VectorXs state_poses(n_execution * 3);
     for (auto frame_it = wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_it != wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->end(); frame_it++)
     {
-        if (complex_angle)
-            state_poses.segment(i, 3) << *(*frame_it)->getPPtr()->getPtr(), *((*frame_it)->getPPtr()->getPtr() + 1), atan2(*(*frame_it)->getOPtr()->getPtr(), *((*frame_it)->getOPtr()->getPtr() + 1));
-        else
-            state_poses.segment(i, 3) << *(*frame_it)->getPPtr()->getPtr(), *((*frame_it)->getPPtr()->getPtr() + 1), *(*frame_it)->getOPtr()->getPtr();
+        state_poses.segment(i, 3) << *(*frame_it)->getPPtr()->getPtr(), *((*frame_it)->getPPtr()->getPtr() + 1), *(*frame_it)->getOPtr()->getPtr();
         i += 3;
     }
 
@@ -375,7 +332,7 @@ int main(int argc, char** argv)
     }
 
     // Print log files
-    std::string filepath = getenv("HOME") + (complex_angle ? std::string("/Desktop/log_file_3.txt") : std::string("/Desktop/log_file_2.txt"));
+    std::string filepath = getenv("HOME") + std::string("/Desktop/log_file_2.txt");
     log_file.open(filepath, std::ofstream::out); //open log file
 
     if (log_file.is_open())
@@ -389,7 +346,7 @@ int main(int argc, char** argv)
     else
         std::cout << std::endl << "Failed to write the log file " << filepath << std::endl;
 
-    std::string filepath2 = getenv("HOME") + (complex_angle ? std::string("/Desktop/landmarks_file_3.txt") : std::string("/Desktop/landmarks_file_2.txt"));
+    std::string filepath2 = getenv("HOME") + std::string("/Desktop/landmarks_file_2.txt");
     landmark_file.open(filepath2, std::ofstream::out); //open log file
 
     if (landmark_file.is_open())

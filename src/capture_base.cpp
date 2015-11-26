@@ -29,7 +29,7 @@ CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Ei
 
 CaptureBase::~CaptureBase()
 {
-	//std::cout << "deleting CaptureBase " << nodeId() << std::endl;
+	std::cout << "deleting CaptureBase " << nodeId() << std::endl;
 }
 
 void CaptureBase::linkToFrame(FrameBase* _frm_ptr)

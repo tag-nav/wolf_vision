@@ -19,6 +19,18 @@
 // ceres wrapper includes
 #include "complex_angle_parametrization.h"
 
+/** \brief Enumeration of covariance blocks to be computed
+ *
+ * Enumeration of covariance blocks to be computed
+ *
+ */
+typedef enum
+{
+    ALL, ///< All blocks and all cross-covariances
+    ALL_MARGINALS, ///< All marginals
+    ROBOT_LANDMARKS ///< marginals of landmarks and current robot pose plus cross covariances of current robot and all landmarks
+} CovarianceBlocksToBeComputed;
+
 /** \brief Ceres manager for WOLF
  *
  */
@@ -38,7 +50,7 @@ class CeresManager
 
 		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
 
-		void computeCovariances();
+		void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
 
 		void update();
 

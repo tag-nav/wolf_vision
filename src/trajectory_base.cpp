@@ -8,7 +8,7 @@ TrajectoryBase::TrajectoryBase() :
 
 TrajectoryBase::~TrajectoryBase()
 {
-	//std::cout << "deleting TrajectoryBase " << nodeId() << std::endl;
+	std::cout << "deleting TrajectoryBase " << nodeId() << std::endl;
 }
 
 void TrajectoryBase::addFrame(FrameBase* _frame_ptr)

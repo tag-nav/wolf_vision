@@ -65,6 +65,7 @@ SET(HDRS
     capture_fix.h
     capture_gps_fix.h
     capture_odom_2D.h
+    capture_void.h
     constraint_base.h
     constraint_sparse.h
     constraint_gps_2D.h
@@ -110,6 +111,7 @@ SET(SRCS
     capture_gps_fix.cpp
     capture_fix.cpp
     capture_odom_2D.cpp
+    capture_void.cpp
     constraint_base.cpp
     feature_base.cpp
     feature_corner_2D.cpp

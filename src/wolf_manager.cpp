@@ -1,14 +1,12 @@
 #include "wolf_manager.h"
 
 WolfManager::WolfManager(const FrameStructure _frame_structure,
-                         const unsigned int& _state_length,
                          SensorBase* _sensor_prior_ptr,
-                         const Eigen::VectorXs& _init_frame,
-                         const Eigen::MatrixXs& _init_frame_cov,
+                         const Eigen::VectorXs& _prior,
+                         const Eigen::MatrixXs& _prior_cov,
                          const unsigned int& _trajectory_size,
                          const WolfScalar& _new_frame_elapsed_time) :
-
-        problem_(new WolfProblem(_state_length)),
+        problem_(new WolfProblem()),
         frame_structure_(_frame_structure),
         sensor_prior_(_sensor_prior_ptr),
         current_frame_(nullptr),
@@ -18,25 +16,25 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
         new_frame_elapsed_time_(_new_frame_elapsed_time)
 {
     if (_frame_structure == PO_2D)
-        assert( _init_frame.size() == 3 &&
-                _init_frame_cov.cols() == 3 &&
-                _init_frame_cov.rows() == 3 &&
+        assert( _prior.size() == 3 &&
+                _prior_cov.cols() == 3 &&
+                _prior_cov.rows() == 3 &&
                 "Wrong init_frame state vector or covariance matrix size");
     else
-        assert( _init_frame.size() == 7 &&
-                _init_frame_cov.cols() == 7 &&
-                _init_frame_cov.rows() == 7 &&
+        assert( _prior.size() == 7 &&
+                _prior_cov.cols() == 7 &&
+                _prior_cov.rows() == 7 &&
                 "Wrong init_frame state vector or covariance matrix size");
 
     //std::cout << "initializing wolfmanager" << std::endl;
 
     // Initial frame
-    createFrame(_init_frame, TimeStamp(0));
+    createFrame(_prior, TimeStamp(0));
     first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
     //std::cout << " first_window_frame_" << std::endl;
 
     // Initial covariance
-    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), _init_frame, _init_frame_cov);
+    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), _prior, _prior_cov);
     //std::cout << " initial_covariance" << std::endl;
     current_frame_->addCapture(initial_covariance);
     //std::cout << " addCapture" << std::endl;
@@ -44,13 +42,14 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
     //std::cout << " processCapture" << std::endl;
 
     // Current robot frame
-    createFrame(_init_frame, TimeStamp(0));
+    createFrame(_prior, TimeStamp(0));
 
     //std::cout << " wolfmanager initialized" << std::endl;
 }
 
 WolfManager::~WolfManager()
 {
+    std::cout << "deleting wolf manager..." << std::endl;
     delete problem_;
 }
 
@@ -92,7 +91,7 @@ void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeSta
 
     // Store new current frame
     current_frame_ = problem_->getLastFramePtr();
-    std::cout << "current_frame_" << std::endl;
+    //std::cout << "current_frame_" << std::endl;
 
     // Zero odometry (to be integrated)
     if (last_key_frame_ != nullptr)
@@ -173,7 +172,7 @@ bool WolfManager::checkNewFrame(CaptureBase* new_capture)
 
 void WolfManager::update()
 {
-    std::cout << "updating..." << std::endl;
+    //std::cout << "updating..." << std::endl;
     while (!new_captures_.empty())
     {
         // EXTRACT NEW CAPTURE
@@ -200,6 +199,7 @@ void WolfManager::update()
             last_capture_relative_->integrateCapture((CaptureMotion*) (new_capture));
             current_frame_->setState(last_capture_relative_->computePrior(new_capture->getTimeStamp()));
             current_frame_->setTimeStamp(new_capture->getTimeStamp());
+            delete new_capture;
         }
         else
         {
@@ -222,7 +222,7 @@ void WolfManager::update()
             }
         }
     }
-    std::cout << "updated" << std::endl;
+    //std::cout << "updated" << std::endl;
 }
 
 

@@ -25,7 +25,7 @@ class WolfProblem: public NodeBase
 {
     protected:
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
-        Eigen::SparseMatrix<WolfScalar> covariance_;
+        //Eigen::SparseMatrix<WolfScalar> covariance_;
         NodeLocation location_;// TODO: should it be in node_base?
         TrajectoryBase* trajectory_ptr_;
         MapBase* map_ptr_;
@@ -36,7 +36,7 @@ class WolfProblem: public NodeBase
         std::list<WolfScalar*> state_block_remove_list_;
         std::list<ConstraintBase*> constraint_add_list_;
         std::list<unsigned int> constraint_remove_list_;
-        std::map<StateBlock*,unsigned int> state_idx_map_;
+        //std::map<StateBlock*,unsigned int> state_idx_map_;
 
     public:
 
@@ -45,14 +45,14 @@ class WolfProblem: public NodeBase
          * Constructor from state size
 		 * 
          */
-        WolfProblem(unsigned int _size=1e3);
+        WolfProblem();
 
         /** \brief Constructor from map and trajectory shared pointers
 		 *
 		 * Constructor from map and trajectory shared pointers
 		 *
 		 */
-        WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr=nullptr, HardwareBase* _hardware_ptr=nullptr, unsigned int _size=1e3);
+        WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr=nullptr, HardwareBase* _hardware_ptr=nullptr);
 
         /** \brief Default destructor
          *

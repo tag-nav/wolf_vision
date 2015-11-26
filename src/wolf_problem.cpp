@@ -1,8 +1,8 @@
 #include "wolf_problem.h"
 
-WolfProblem::WolfProblem(unsigned int _size) :
+WolfProblem::WolfProblem() :
         NodeBase("WOLF_PROBLEM"), //
-        covariance_(_size,_size),
+        //covariance_(_size,_size),
 		location_(TOP),
         trajectory_ptr_(new TrajectoryBase),
 		map_ptr_(new MapBase),
@@ -13,9 +13,9 @@ WolfProblem::WolfProblem(unsigned int _size) :
 	hardware_ptr_->linkToUpperNode( this );
 }
 
-WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, HardwareBase* _hardware_ptr, unsigned int _size) :
+WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, HardwareBase* _hardware_ptr) :
         NodeBase("WOLF_PROBLEM"), //
-		covariance_(_size,_size),
+		//covariance_(_size,_size),
 		location_(TOP),
         trajectory_ptr_(_trajectory_ptr==nullptr ? new TrajectoryBase : _trajectory_ptr),
 		map_ptr_(_map_ptr==nullptr ? new MapBase : _map_ptr),
@@ -28,6 +28,14 @@ WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, Har
 
 WolfProblem::~WolfProblem()
 {
+    std::cout << "deleting wolf problem " << nodeId() << std::endl;
+    state_block_add_list_.clear();
+    covariances_.clear();
+    state_block_update_list_.clear();
+    state_block_remove_list_.clear();
+    constraint_add_list_.clear();
+    constraint_remove_list_.clear();
+
 	delete trajectory_ptr_;
     delete map_ptr_;
     delete hardware_ptr_;
@@ -37,10 +45,10 @@ void WolfProblem::addStateBlockPtr(StateBlock* _state_ptr)
 {
 	// add the state unit to the list
 	state_block_ptr_list_.push_back(_state_ptr);
-	state_idx_map_[_state_ptr] = covariance_.rows();
+	//state_idx_map_[_state_ptr] = covariance_.rows();
 
 	// Resize Covariance
-	covariance_.conservativeResize(covariance_.rows() + _state_ptr->getSize(), covariance_.cols() + _state_ptr->getSize());
+	//covariance_.conservativeResize(covariance_.rows() + _state_ptr->getSize(), covariance_.cols() + _state_ptr->getSize());
 	// queue for solver manager
 	state_block_add_list_.push_back(_state_ptr);
 }
@@ -55,10 +63,10 @@ void WolfProblem::removeStateBlockPtr(StateBlock* _state_ptr)
 {
     // add the state unit to the list
     state_block_ptr_list_.remove(_state_ptr);
-    state_idx_map_.erase(_state_ptr);
+    //state_idx_map_.erase(_state_ptr);
 
     // Resize Covariance
-    covariance_.conservativeResize(covariance_.rows() - _state_ptr->getSize(), covariance_.cols() - _state_ptr->getSize());
+    //covariance_.conservativeResize(covariance_.rows() - _state_ptr->getSize(), covariance_.cols() - _state_ptr->getSize());
     // queue for solver manager
     state_block_remove_list_.push_back(_state_ptr->getPtr());
 }

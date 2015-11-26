@@ -8,7 +8,7 @@ MapBase::MapBase() :
 
 MapBase::~MapBase()
 {
-	//std::cout << "deleting MapBase " << nodeId() << std::endl;
+	std::cout << "deleting MapBase " << nodeId() << std::endl;
 }
 
 void MapBase::addLandmark(LandmarkBase* _landmark_ptr)
