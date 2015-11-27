@@ -173,7 +173,7 @@ typedef enum
 typedef enum
 {
     ST_VECTOR,		  ///< A vector. No local parametrization.
-    ST_QUATERNION		  ///< A 3D orientation represented by a quaternion.
+    ST_QUATERNION		  ///< A 3D orientation represented by a quaternion, with the real part at the last position (Eigen specification).
 } StateType;
 
 /** \brief Enumeration of all possible state status
