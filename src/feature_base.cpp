@@ -17,12 +17,12 @@ FeatureBase::FeatureBase(const Eigen::VectorXs& _measurement, const Eigen::Matri
 
 FeatureBase::~FeatureBase()
 {
-	std::cout << "deleting FeatureBase " << nodeId() << std::endl;
+	//std::cout << "deleting FeatureBase " << nodeId() << std::endl;
     is_deleting_ = true;
 
     while (!constraint_to_list_.empty())
     {
-        std::cout << "destruct() constraint " << (*constraint_to_list_.begin())->nodeId() << std::endl;
+        //std::cout << "destruct() constraint " << (*constraint_to_list_.begin())->nodeId() << std::endl;
         constraint_to_list_.front()->destruct();
         //std::cout << "deleted " << std::endl;
     }

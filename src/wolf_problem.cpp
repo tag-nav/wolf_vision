@@ -28,7 +28,7 @@ WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, Har
 
 WolfProblem::~WolfProblem()
 {
-    std::cout << "deleting wolf problem " << nodeId() << std::endl;
+    //std::cout << "deleting wolf problem " << nodeId() << std::endl;
     state_block_add_list_.clear();
     covariances_.clear();
     state_block_update_list_.clear();

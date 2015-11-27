@@ -9,7 +9,7 @@ ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, Constr
     measurement_(_ftr_ptr->getMeasurement()),
     measurement_covariance_(_ftr_ptr->getMeasurementCovariance())
 {
-    std::cout << "creating ConstraintBase " << std::endl;
+    //std::cout << "creating ConstraintBase " << std::endl;
 }
 
 
@@ -62,7 +62,7 @@ ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, Landma
 
 ConstraintBase::~ConstraintBase()
 {
-	std::cout << "deleting ConstraintBase " << nodeId() << std::endl;
+	//std::cout << "deleting ConstraintBase " << nodeId() << std::endl;
     is_deleting_ = true;
 
     // add constraint to be removed from solver

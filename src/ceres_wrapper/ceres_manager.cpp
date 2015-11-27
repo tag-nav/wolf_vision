@@ -13,13 +13,18 @@ CeresManager::CeresManager(WolfProblem*  _wolf_problem, ceres::Problem::Options 
 
 CeresManager::~CeresManager()
 {
-	removeAllStateBlocks();
+    while (!id_2_residual_idx_.empty())
+        removeConstraint(id_2_residual_idx_.begin()->first);
 
-	std::cout << "all state units removed! \n";
-	std::cout << "residual blocks: " << ceres_problem_->NumResidualBlocks() << "\n";
-	std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << "\n";
-	delete ceres_problem_;
+    removeAllStateBlocks();
+
+	//std::cout << "all state units removed! \n";
+	//std::cout << "residual blocks: " << ceres_problem_->NumResidualBlocks() << "\n";
+	//std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << "\n";
 	delete covariance_;
+    //std::cout << "covariance deleted! \n";
+    delete ceres_problem_;
+    //std::cout << "ceres problem deleted! \n";
 }
 
 ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_options)
@@ -280,17 +285,26 @@ void CeresManager::update()
 
 void CeresManager::addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss)
 {
+    id_2_costfunction_[_corr_ptr->nodeId()] = createCostFunction(_corr_ptr);
+
     if (_apply_loss)
-        constraint_map_[_corr_ptr->nodeId()] = ceres_problem_->AddResidualBlock(createCostFunction(_corr_ptr), new ceres::CauchyLoss(0.5), _corr_ptr->getStateBlockPtrVector());
+        id_2_residual_idx_[_corr_ptr->nodeId()] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_corr_ptr->nodeId()], new ceres::CauchyLoss(0.5), _corr_ptr->getStateBlockPtrVector());
     else
-        constraint_map_[_corr_ptr->nodeId()] = ceres_problem_->AddResidualBlock(createCostFunction(_corr_ptr), NULL, _corr_ptr->getStateBlockPtrVector());
+        id_2_residual_idx_[_corr_ptr->nodeId()] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_corr_ptr->nodeId()], NULL, _corr_ptr->getStateBlockPtrVector());
 }
 
-void CeresManager::removeConstraint(const unsigned int& _corr_idx)
+void CeresManager::removeConstraint(const unsigned int& _corr_id)
 {
-	// TODO: check if not already removed by removing blocks
-	ceres_problem_->RemoveResidualBlock(constraint_map_[_corr_idx]);
-	constraint_map_.erase(_corr_idx);
+    //std::cout << "removing constraint " << _corr_id << std::endl;
+    assert(id_2_residual_idx_.find(_corr_id) != id_2_residual_idx_.end());
+	ceres_problem_->RemoveResidualBlock(id_2_residual_idx_[_corr_id]);
+    //std::cout << "residual block removed!" << std::endl;
+	id_2_residual_idx_.erase(_corr_id);
+//    std::cout << "deleting cost function" << std::endl;
+//    assert(id_2_costfunction_.find(_corr_id) != id_2_costfunction_.end());
+//    delete id_2_costfunction_[_corr_id];
+//    std::cout << "cost function deleted!" << std::endl;
+	id_2_costfunction_.erase(_corr_id);
 }
 
 void CeresManager::addStateBlock(StateBlock* _st_ptr)

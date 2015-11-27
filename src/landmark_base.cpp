@@ -14,7 +14,7 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBl
                 
 LandmarkBase::~LandmarkBase()
 {
-	std::cout << "deleting LandmarkBase " << nodeId() << std::endl;
+	//std::cout << "deleting LandmarkBase " << nodeId() << std::endl;
     is_deleting_ = true;
 
     // Remove Frame State Blocks
@@ -32,7 +32,7 @@ LandmarkBase::~LandmarkBase()
 
 	while (!constraint_to_list_.empty())
 	{
-	    std::cout << "destruct() constraint " << (*constraint_to_list_.begin())->nodeId() << std::endl;
+	    //std::cout << "destruct() constraint " << (*constraint_to_list_.begin())->nodeId() << std::endl;
 	    constraint_to_list_.front()->destruct();
         //std::cout << "deleted " << std::endl;
 	}

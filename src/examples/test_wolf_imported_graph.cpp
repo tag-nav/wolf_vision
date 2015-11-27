@@ -50,10 +50,11 @@ int main(int argc, char** argv)
     if (offLineFile_.is_open())
     {
         std::string buffer;
+        unsigned int j = 0;
         // Line by line
-        while (std::getline(offLineFile_, buffer))
+        while (std::getline(offLineFile_, buffer) && j < 50)
         {
-            std::cout << "new line:" << buffer << std::endl;
+            //std::cout << "new line:" << buffer << std::endl;
             std::string bNum;
             unsigned int i = 0;
 
@@ -99,11 +100,12 @@ int main(int argc, char** argv)
                 wolf_problem_->getTrajectoryPtr()->addFrame(vertex_frame_prt);
                 // store
                 index_2_frame_ptr_[vertex_index] = vertex_frame_prt;
-                std::cout << "Added vertex! index :" << vertex_index << " pose: " << vertex_pose.transpose() << std::endl;
+                //std::cout << "Added vertex! index :" << vertex_index << " pose: " << vertex_pose.transpose() << std::endl;
             }
             // EDGE
             else if (buffer.at(0) == 'E')
             {
+                j++;
                 //skip rest of EDGE word
                 while (buffer.at(i) != ' ') i++;
                 //skip white spaces
@@ -113,7 +115,6 @@ int main(int argc, char** argv)
                 while (buffer.at(i) != ' ')
                     bNum.push_back(buffer.at(i++));
                 edge_from = atoi(bNum.c_str());
-                printf("edge from %i\n", edge_from);
                 assert(index_2_frame_ptr_.find(edge_from) != index_2_frame_ptr_.end() && "edge from vertex not added!");
                 frame_from_ptr = index_2_frame_ptr_[edge_from];
                 bNum.clear();
@@ -124,7 +125,6 @@ int main(int argc, char** argv)
                 while (buffer.at(i) != ' ')
                     bNum.push_back(buffer.at(i++));
                 edge_to = atoi(bNum.c_str());
-                printf("edge to %i\n", edge_to);
                 assert(index_2_frame_ptr_.find(edge_to) != index_2_frame_ptr_.end() && "edge to vertex not added!");
                 frame_to_ptr = index_2_frame_ptr_[edge_to];
                 bNum.clear();
@@ -199,17 +199,12 @@ int main(int argc, char** argv)
 
                 // add capture, feature and constraint to problem
                 feature_ptr = new FeatureBase(edge_vector, edge_covariance.inverse());
-                printf("feature_ptr!\n");
                 capture_ptr = new CaptureVoid(TimeStamp(0), nullptr);
-                printf("capture_ptr!\n");
                 frame_from_ptr->addCapture(capture_ptr);
-                printf("addCapture!\n");
                 capture_ptr->addFeature(feature_ptr);
-                printf("addFeature!\n");
                 constraint_ptr = new ConstraintOdom2D(feature_ptr, frame_to_ptr);
-                printf("constraint_ptr!\n");
                 feature_ptr->addConstraintFrom(constraint_ptr);
-                printf("addConstraintFrom!\n");
+                //printf("addConstraintFrom!\n");
             }
             else
                 assert("unknown line");
@@ -219,6 +214,12 @@ int main(int argc, char** argv)
     else
         printf("\nError opening file\n");
 
+    // PRIOR
+    FrameBase* first_frame = wolf_problem_->getTrajectoryPtr()->getFrameListPtr()->front();
+    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), first_frame->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    first_frame->addCapture(initial_covariance);
+    initial_covariance->processCapture();
+
     // SOLVING
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -226,21 +227,23 @@ int main(int argc, char** argv)
     ceres_options.max_line_search_step_contraction = 1e-3;
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
-    //    ceres_options.max_num_iterations = 100;
+    ceres_options.max_num_iterations = 100;
     ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
+    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
+    problem_options.local_parameterization_ownership = ceres::TAKE_OWNERSHIP;
     CeresManager* ceres_manager = new CeresManager(wolf_problem_, problem_options);
 
 
     ceres_manager->update();
-    ceres_manager->computeCovariances(ALL);
-    ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
-    std::cout << summary.FullReport() << std::endl;
+    //ceres_manager->computeCovariances();
+    //ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
+    //std::cout << summary.FullReport() << std::endl;
 
     delete wolf_problem_; //not necessary to delete anything more, wolf will do it!
+    std::cout << "wolf_problem_ deleted!" << std::endl;
     delete ceres_manager;
+    std::cout << "ceres_manager deleted!" << std::endl;
     //End message
     std::cout << " =========================== END ===============================" << std::endl << std::endl;
        

@@ -38,7 +38,8 @@ typedef enum
 class CeresManager
 {
 	protected:
-		std::map<unsigned int, ceres::ResidualBlockId> constraint_map_;
+		std::map<unsigned int, ceres::ResidualBlockId> id_2_residual_idx_;
+        std::map<unsigned int, ceres::CostFunction*> id_2_costfunction_;
 		ceres::Problem* ceres_problem_;
 		ceres::Covariance* covariance_;
 		WolfProblem* wolf_problem_;

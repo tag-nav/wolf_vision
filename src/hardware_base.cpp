@@ -8,7 +8,7 @@ HardwareBase::HardwareBase() :
 
 HardwareBase::~HardwareBase()
 {
-	std::cout << "deleting HardwareBase " << nodeId() << std::endl;
+	//std::cout << "deleting HardwareBase " << nodeId() << std::endl;
 }
 
 void HardwareBase::addSensor(SensorBase* _sensor_ptr)

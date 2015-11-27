@@ -14,7 +14,7 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
 		ConstraintFix(FeatureBase* _ftr_ptr, ConstraintStatus _status = CTR_ACTIVE):
 			ConstraintSparse<3,2,1>(_ftr_ptr, CTR_FIX, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
 		{
-		    std::cout << "creating ConstraintFix " << std::endl;
+		    //std::cout << "creating ConstraintFix " << std::endl;
 		}
         
 		virtual ~ConstraintFix()

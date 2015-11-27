@@ -25,7 +25,7 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p
                 
 FrameBase::~FrameBase()
 {
-	std::cout << "deleting FrameBase " << nodeId() << std::endl;
+	//std::cout << "deleting FrameBase " << nodeId() << std::endl;
     is_deleting_ = true;
 
 	// Remove Frame State Blocks
@@ -44,7 +44,7 @@ FrameBase::~FrameBase()
 
     while (!constraint_to_list_.empty())
     {
-        std::cout << "destruct() constraint " << (*constraint_to_list_.begin())->nodeId() << std::endl;
+        //std::cout << "destruct() constraint " << (*constraint_to_list_.begin())->nodeId() << std::endl;
         constraint_to_list_.front()->destruct();
         //std::cout << "deleted " << std::endl;
     }

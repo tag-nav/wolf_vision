@@ -27,7 +27,7 @@ class StateBlock
          * \param _type parametrization of the state
          * 
          **/
-        StateBlock(const Eigen::VectorXs _state, StateType _type = ST_VECTOR);
+        StateBlock(const Eigen::VectorXs _state, StateType _type = ST_VECTOR, bool _fixed = false);
         
         /** \brief Destructor
          * 

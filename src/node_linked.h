@@ -223,7 +223,7 @@ NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std:
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::~NodeLinked()
 {
-	std::cout << "deleting Nodelinked " << node_id_ << " down_node_list_.size() " << down_node_list_.size() << std::endl;
+	//std::cout << "deleting Nodelinked " << node_id_ << " down_node_list_.size() " << down_node_list_.size() << std::endl;
     is_deleting_ = true;
 
 	while (!down_node_list_.empty())

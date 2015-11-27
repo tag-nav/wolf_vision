@@ -1,9 +1,10 @@
 
 #include "state_block.h"
 
-StateBlock::StateBlock(const Eigen::VectorXs _state, StateType _type) :
+StateBlock::StateBlock(const Eigen::VectorXs _state, StateType _type, bool _fixed) :
 			type_(_type),
-			state_(_state)
+			state_(_state),
+			fixed_(_fixed)
 {
 	//
 }
