@@ -2,7 +2,6 @@
 
 WolfProblem::WolfProblem() :
         NodeBase("WOLF_PROBLEM"), //
-        //covariance_(_size,_size),
 		location_(TOP),
         trajectory_ptr_(new TrajectoryBase),
 		map_ptr_(new MapBase),
@@ -15,8 +14,7 @@ WolfProblem::WolfProblem() :
 
 WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, HardwareBase* _hardware_ptr) :
         NodeBase("WOLF_PROBLEM"), //
-		//covariance_(_size,_size),
-		location_(TOP),
+    location_(TOP),
         trajectory_ptr_(_trajectory_ptr==nullptr ? new TrajectoryBase : _trajectory_ptr),
 		map_ptr_(_map_ptr==nullptr ? new MapBase : _map_ptr),
         hardware_ptr_(_hardware_ptr==nullptr ? new HardwareBase : _hardware_ptr)
@@ -45,10 +43,7 @@ void WolfProblem::addStateBlockPtr(StateBlock* _state_ptr)
 {
 	// add the state unit to the list
 	state_block_ptr_list_.push_back(_state_ptr);
-	//state_idx_map_[_state_ptr] = covariance_.rows();
 
-	// Resize Covariance
-	//covariance_.conservativeResize(covariance_.rows() + _state_ptr->getSize(), covariance_.cols() + _state_ptr->getSize());
 	// queue for solver manager
 	state_block_add_list_.push_back(_state_ptr);
 }
@@ -63,10 +58,7 @@ void WolfProblem::removeStateBlockPtr(StateBlock* _state_ptr)
 {
     // add the state unit to the list
     state_block_ptr_list_.remove(_state_ptr);
-    //state_idx_map_.erase(_state_ptr);
 
-    // Resize Covariance
-    //covariance_.conservativeResize(covariance_.rows() - _state_ptr->getSize(), covariance_.cols() - _state_ptr->getSize());
     // queue for solver manager
     state_block_remove_list_.push_back(_state_ptr->getPtr());
 }
@@ -90,29 +82,6 @@ void WolfProblem::clearCovariance()
 
 void WolfProblem::addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov)
 {
-//    assert(_state1 != nullptr);
-//    assert(state_idx_map_.find(_state1) != state_idx_map_.end());
-//    assert(state_idx_map_.at(_state1) + _state1->getSize() <= (unsigned int) covariance_.rows());
-//    assert(_state2 != nullptr);
-//    assert(state_idx_map_.find(_state2) != state_idx_map_.end());
-//    assert(state_idx_map_.at(_state2) + _state2->getSize() <= (unsigned int) covariance_.rows());
-//
-//    // Guarantee that we are updating the top triangular matrix (in cross covariance case)
-//    bool flip = state_idx_map_.at(_state1) > state_idx_map_.at(_state2);
-//    StateBlock* stateA = (flip ? _state2 : _state1);
-//    StateBlock* stateB = (flip ? _state1 : _state2);
-//    unsigned int row = state_idx_map_.at(stateA);
-//    unsigned int col = state_idx_map_.at(stateB);
-//    unsigned int block_rows = stateA->getSize();
-//    unsigned int block_cols = stateB->getSize();
-//
-//    assert( block_rows == (flip ? _cov.cols() : _cov.rows()) && block_cols == (flip ? _cov.rows() : _cov.cols()) && "Bad covariance size in WolfProblem::addCovarianceBlock");
-//
-//    // STORE COVARIANCE
-//    for (unsigned int i = 0; i < block_rows; i++)
-//       for (unsigned int j = 0; j < block_cols; j++)
-//           covariance_.coeffRef(i+row,j+col) = (flip ? _cov(j,i) : _cov(i,j));
-
     assert(_state1->getSize() == (unsigned int) _cov.rows() && "wrong covariance block size");
     assert(_state2->getSize() == (unsigned int) _cov.cols() && "wrong covariance block size");
 
@@ -121,71 +90,28 @@ void WolfProblem::addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, c
 
 void WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block)
 {
-//    assert(_state1 != nullptr);
-//    assert(state_idx_map_.find(_state1) != state_idx_map_.end());
-//    assert(state_idx_map_.at(_state1) + _state1->getSize() <= (unsigned int) covariance_.rows());
-//    assert(_state2 != nullptr);
-//    assert(state_idx_map_.find(_state2) != state_idx_map_.end());
-//    assert(state_idx_map_.at(_state2) + _state2->getSize() <= (unsigned int) covariance_.rows());
-//
-//    // Guarantee that we are updating the top triangular matrix (in cross covariance case)
-//    bool flip = state_idx_map_.at(_state1) > state_idx_map_.at(_state2);
-//    StateBlock* stateA = (flip ? _state2 : _state1);
-//    StateBlock* stateB = (flip ? _state1 : _state2);
-//    unsigned int row = state_idx_map_.at(stateA);
-//    unsigned int col = state_idx_map_.at(stateB);
-//    unsigned int block_rows = stateA->getSize();
-//    unsigned int block_cols = stateB->getSize();
-//
-//    assert(_cov_block.rows() == (flip ? block_cols : block_rows) && _cov_block.cols() == (flip ? block_rows : block_cols) && "Bad _cov_block matrix sizes");
-//
-//    _cov_block = (flip ? Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)) : Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)).transpose() );
-
     if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
         _cov_block = covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)];
     else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
-        _cov_block = covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)].transpose();
+        _cov_block = covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose();
     else
         assert("asking for a covariance block not getted from the solver");
 }
 
 void WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col)
 {
-//    assert(_state1 != nullptr);
-//    assert(state_idx_map_.find(_state1) != state_idx_map_.end());
-//    assert(state_idx_map_.at(_state1) + _state1->getSize() <= (unsigned int) covariance_.rows());
-//    assert(_state2 != nullptr);
-//    assert(state_idx_map_.find(_state2) != state_idx_map_.end());
-//    assert(state_idx_map_.at(_state2) + _state2->getSize() <= (unsigned int) covariance_.rows());
-//
-//    // Guarantee that we are updating the top triangular matrix (in cross covariance case)
-//    bool flip = state_idx_map_.at(_state1) > state_idx_map_.at(_state2);
-//    StateBlock* stateA = (flip ? _state2 : _state1);
-//    StateBlock* stateB = (flip ? _state1 : _state2);
-//    unsigned int row = state_idx_map_.at(stateA);
-//    unsigned int col = state_idx_map_.at(stateB);
-//    unsigned int block_rows = stateA->getSize();
-//    unsigned int block_cols = stateB->getSize();
-//
-////    std::cout << "flip " << flip << std::endl;
-////    std::cout << "_row " << _row << std::endl;
-////    std::cout << "_cov.rows() " << _cov.rows() << std::endl;
-////    std::cout << "block_rows " << block_rows << std::endl;
-////    std::cout << "_col " << _col << std::endl;
-////    std::cout << "_cov.cols() " << _cov.cols() << std::endl;
-////    std::cout << "block_cols " << block_cols << std::endl;
-//
-//    assert(_cov.rows() - _row >= (flip ? block_cols : block_rows) && _cov.cols() - _col >= (flip ? block_rows : block_cols) && "Bad _cov_block matrix sizes");
-//
-//    if (!flip)
-//        _cov.block(_row,_col,block_rows,block_cols) = Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols));
-//    else
-//        _cov.block(_row,_col,block_cols,block_rows) = Eigen::MatrixXs(covariance_.block(row, col, block_rows, block_cols)).transpose();
+    //std::cout << "entire cov " << std::endl << _cov << std::endl;
+    //std::cout << "_row " << _row << std::endl;
+    //std::cout << "_col " << _col << std::endl;
+    //if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
+    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)] << std::endl;
+    //else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
+    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose() << std::endl;
 
     if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
         _cov.block(_row,_col,_state1->getSize(),_state2->getSize()) = covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)];
     else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
-        _cov.block(_row,_col,_state2->getSize(),_state1->getSize()) = covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)].transpose();
+        _cov.block(_row,_col,_state1->getSize(),_state2->getSize()) = covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose();
     else
         assert("asking for a covariance block not getted from the solver");
 }

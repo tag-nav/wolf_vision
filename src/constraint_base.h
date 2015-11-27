@@ -76,7 +76,7 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          * Returns the constraint type
          * 
          **/
-        ConstraintType getConstraintType() const;
+        ConstraintType getType() const;
 
         /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
          *
@@ -98,6 +98,13 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          *
          **/
         const Eigen::VectorXs& getMeasurement();
+
+        /** \brief Returns a pointer to the feature measurement covariance
+         *
+         * Returns a pointer to the feature measurement covariance
+         *
+         **/
+        const Eigen::MatrixXs& getMeasurementCovariance();
 
         /** \brief Returns a pointer to the feature constrained from
          *

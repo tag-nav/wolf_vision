@@ -95,7 +95,7 @@ void ConstraintBase::destruct()
         up_node_ptr_->removeDownNode(this);
 }
 
-ConstraintType ConstraintBase::getConstraintType() const
+ConstraintType ConstraintBase::getType() const
 {
     return type_;
 }
@@ -103,6 +103,11 @@ ConstraintType ConstraintBase::getConstraintType() const
 const Eigen::VectorXs& ConstraintBase::getMeasurement()
 {
 	return measurement_;
+}
+
+const Eigen::MatrixXs& ConstraintBase::getMeasurementCovariance()
+{
+    return measurement_covariance_;
 }
 
 FeatureBase* ConstraintBase::getFeaturePtr() const
