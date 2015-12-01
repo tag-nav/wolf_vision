@@ -66,27 +66,16 @@ ConstraintBase::~ConstraintBase()
     is_deleting_ = true;
 
     // add constraint to be removed from solver
-    getTop()->removeConstraintPtr(this);
+    if (getTop() != nullptr)
+        getTop()->removeConstraintPtr(this);
 
     // remove constraint to frame/landmark/feature
-    switch(category_)
-    {
-        case CTR_FRAME:
-        {
-            frame_ptr_->removeConstraintTo(this);
-            break;
-        }
-        case CTR_FEATURE:
-        {
-            feature_ptr_->removeConstraintTo(this);
-            break;
-        }
-        case CTR_LANDMARK:
-        {
-            landmark_ptr_->removeConstraintTo(this);
-            break;
-        }
-    }
+    if (frame_ptr_ != nullptr)
+        frame_ptr_->removeConstraintTo(this);
+    if (feature_ptr_ != nullptr)
+        feature_ptr_->removeConstraintTo(this);
+    if (landmark_ptr_ != nullptr)
+        landmark_ptr_->removeConstraintTo(this);
 }
 
 void ConstraintBase::destruct()
@@ -132,7 +121,12 @@ ConstraintStatus ConstraintBase::getStatus() const
 
 void ConstraintBase::setStatus(ConstraintStatus _status)
 {
-	status_ = _status;
+	if (getTop() != nullptr && _status == CTR_INACTIVE && status_ == CTR_ACTIVE)
+	    getTop()->addConstraintPtr(this);
+	else if (getTop() != nullptr && _status == CTR_ACTIVE && status_ == CTR_INACTIVE)
+        getTop()->removeConstraintPtr(this);
+
+    status_ = _status;
 }
 
 FrameBase* ConstraintBase::getFrameToPtr()

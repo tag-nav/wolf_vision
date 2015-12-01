@@ -15,6 +15,20 @@
 #include "capture_void.h"
 #include "ceres_wrapper/ceres_manager.h"
 
+// EIGEN
+//#include <Eigen/CholmodSupport>
+
+// inserts the sparse matrix 'ins' into the sparse matrix 'original' in the place given by 'row' and 'col' integers
+void insertSparseBlock(const Eigen::SparseMatrix<WolfScalar>& ins, Eigen::SparseMatrix<WolfScalar>& original, const unsigned int& row, const unsigned int& col)
+{
+  for (int k=0; k<ins.outerSize(); ++k)
+    for (Eigen::SparseMatrix<WolfScalar>::InnerIterator iti(ins,k); iti; ++iti)
+      original.coeffRef(iti.row() + row, iti.col() + col) = iti.value();
+
+  original.makeCompressed();
+}
+
+
 int main(int argc, char** argv) 
 {
     //Welcome message
@@ -24,7 +38,7 @@ int main(int argc, char** argv)
     {
         std::cout << "Please call me with: [./test_wolf_imported_graph FILE_PATH MAX_VERTICES], where:" << std::endl;
         std::cout << "    FILE_PATH is the .graph file path" << std::endl;
-        std::cout << "    MAX_VERTICES > 0 max edges to be loaded" << std::endl;
+        std::cout << "    MAX_VERTICES max edges to be loaded (0: ALL)" << std::endl;
         std::cout << "EXIT due to bad user input" << std::endl << std::endl;
         return -1;
     }
@@ -32,16 +46,22 @@ int main(int argc, char** argv)
     // auxiliar variables
     std::string file_path_ = argv[1];
     unsigned int MAX_VERTEX = atoi(argv[2]);
+    if (MAX_VERTEX == 0) MAX_VERTEX = 1e6;
     std::ifstream offLineFile_;
     clock_t t1, t2;
+    ceres::Solver::Summary summary_full, summary_prun;
+    Eigen::MatrixXs Sigma_ii(3,3), Sigma_ij(3,3), Sigma_jj(3,3), Sigma_z(3,3), Ji(3,3), Jj(3,3);
+    WolfScalar xi, yi, thi, si, ci, xj, yj;
 
     // loading variables
-    std::map<unsigned int, FrameBase*> index_2_frame_ptr_all;
-    std::map<unsigned int, FrameBase*> index_2_frame_ptr_prunned;
+    std::map<unsigned int, FrameBase*> index_2_frame_ptr_full;
+    std::map<unsigned int, FrameBase*> index_2_frame_ptr_prun;
+    std::map<FrameBase*, unsigned int> frame_ptr_2_index_prun;
 
     // Wolf problem
-    WolfProblem* wolf_problem_all = new WolfProblem();
-    WolfProblem* wolf_problem_prunned = new WolfProblem();
+    WolfProblem* wolf_problem_full = new WolfProblem();
+    WolfProblem* wolf_problem_prun = new WolfProblem();
+    Eigen::SparseMatrix<WolfScalar> Lambda(0,0);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -52,8 +72,10 @@ int main(int argc, char** argv)
     problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_all = new CeresManager(wolf_problem_all, problem_options);
-    CeresManager* ceres_manager_prunned = new CeresManager(wolf_problem_prunned, problem_options);
+    CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full, problem_options);
+    CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun, problem_options);
+
+
 
     // load graph from .txt
     offLineFile_.open(file_path_.c_str(), std::ifstream::in);
@@ -82,7 +104,7 @@ int main(int argc, char** argv)
                 unsigned int vertex_index = atoi(bNum.c_str());
                 bNum.clear();
 
-                if (vertex_index <= MAX_VERTEX)
+                if (vertex_index <= MAX_VERTEX+1)
                 {
                     //skip white spaces
                     while (buffer.at(i) == ' ') i++;
@@ -110,14 +132,18 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add frame to problem
-                    FrameBase* vertex_frame_ptr_all = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
-                    FrameBase* vertex_frame_ptr_prunned = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
-                    wolf_problem_all->getTrajectoryPtr()->addFrame(vertex_frame_ptr_all);
-                    wolf_problem_prunned->getTrajectoryPtr()->addFrame(vertex_frame_ptr_prunned);
+                    FrameBase* vertex_frame_ptr_full = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBase* vertex_frame_ptr_prun = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    wolf_problem_full->getTrajectoryPtr()->addFrame(vertex_frame_ptr_full);
+                    wolf_problem_prun->getTrajectoryPtr()->addFrame(vertex_frame_ptr_prun);
                     // store
-                    index_2_frame_ptr_all[vertex_index] = vertex_frame_ptr_all;
-                    index_2_frame_ptr_prunned[vertex_index] = vertex_frame_ptr_prunned;
-                    std::cout << "Added vertex! index: " << vertex_index << " nodeId: " << vertex_frame_ptr_prunned->nodeId() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
+                    index_2_frame_ptr_full[vertex_index] = vertex_frame_ptr_full;
+                    index_2_frame_ptr_prun[vertex_index] = vertex_frame_ptr_prun;
+                    frame_ptr_2_index_prun[vertex_frame_ptr_prun] = vertex_index;
+                    // Information matrix
+                    Lambda.conservativeResize(Lambda.rows()+3,Lambda.cols()+3);
+
+                    //std::cout << "Added vertex! index: " << vertex_index << " nodeId: " << vertex_frame_ptr_prun->nodeId() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
                 }
             }
             // EDGE
@@ -132,7 +158,7 @@ int main(int argc, char** argv)
                 //from
                 while (buffer.at(i) != ' ')
                     bNum.push_back(buffer.at(i++));
-                unsigned int edge_from = atoi(bNum.c_str());
+                unsigned int edge_old = atoi(bNum.c_str());
                 bNum.clear();
                 //skip white spaces
                 while (buffer.at(i) == ' ') i++;
@@ -140,10 +166,10 @@ int main(int argc, char** argv)
                 //to index
                 while (buffer.at(i) != ' ')
                     bNum.push_back(buffer.at(i++));
-                unsigned int edge_to = atoi(bNum.c_str());
+                unsigned int edge_new = atoi(bNum.c_str());
                 bNum.clear();
 
-                if (edge_to <= MAX_VERTEX && edge_from <= MAX_VERTEX )
+                if (edge_new <= MAX_VERTEX+1 && edge_old <= MAX_VERTEX+1 )
                 {
                     //skip white spaces
                     while (buffer.at(i) == ' ') i++;
@@ -219,30 +245,53 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add capture, feature and constraint to problem
-                    FeatureBase* feature_ptr_all = new FeatureBase(edge_vector, edge_information.inverse());
-                    FeatureBase* feature_ptr_prunned = new FeatureBase(edge_vector, edge_information.inverse());
-                    CaptureVoid* capture_ptr_all = new CaptureVoid(TimeStamp(0), nullptr);
-                    CaptureVoid* capture_ptr_prunned = new CaptureVoid(TimeStamp(0), nullptr);
-                    assert(index_2_frame_ptr_all.find(edge_from) != index_2_frame_ptr_all.end() && "edge from vertex not added!");
-                    assert(index_2_frame_ptr_prunned.find(edge_from) != index_2_frame_ptr_prunned.end() && "edge from vertex not added!");
-                    FrameBase* frame_from_ptr_all = index_2_frame_ptr_all[edge_from];
-                    FrameBase* frame_from_ptr_prunned = index_2_frame_ptr_prunned[edge_from];
-                    frame_from_ptr_all->addCapture(capture_ptr_all);
-                    frame_from_ptr_prunned->addCapture(capture_ptr_prunned);
-                    capture_ptr_all->addFeature(feature_ptr_all);
-                    capture_ptr_prunned->addFeature(feature_ptr_prunned);
-                    assert(index_2_frame_ptr_all.find(edge_to) != index_2_frame_ptr_all.end() && "edge to vertex not added!");
-                    assert(index_2_frame_ptr_prunned.find(edge_to) != index_2_frame_ptr_prunned.end() && "edge to vertex not added!");
-                    FrameBase* frame_to_ptr_all = index_2_frame_ptr_all[edge_to];
-                    FrameBase* frame_to_ptr_prunned = index_2_frame_ptr_prunned[edge_to];
-                    ConstraintOdom2D* constraint_ptr_all = new ConstraintOdom2D(feature_ptr_all, frame_to_ptr_all);
-                    ConstraintOdom2D* constraint_ptr_prunned = new ConstraintOdom2D(feature_ptr_prunned, frame_to_ptr_prunned);
-                    feature_ptr_all->addConstraintFrom(constraint_ptr_all);
-                    feature_ptr_prunned->addConstraintFrom(constraint_ptr_prunned);
-                    std::cout << "Added edge! " << constraint_ptr_prunned->nodeId() << " from vertex " << constraint_ptr_prunned->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_prunned->getFrameToPtr()->nodeId() << std::endl;
-                    //std::cout << "vector " << constraint_ptr_prunned->getMeasurement().transpose() << std::endl;
+                    FeatureBase* feature_ptr_full = new FeatureBase(edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_prun = new FeatureBase(edge_vector, edge_information.inverse());
+                    CaptureVoid* capture_ptr_full = new CaptureVoid(TimeStamp(0), nullptr);
+                    CaptureVoid* capture_ptr_prun = new CaptureVoid(TimeStamp(0), nullptr);
+                    assert(index_2_frame_ptr_full.find(edge_old) != index_2_frame_ptr_full.end() && "edge from vertex not added!");
+                    assert(index_2_frame_ptr_prun.find(edge_old) != index_2_frame_ptr_prun.end() && "edge from vertex not added!");
+                    FrameBase* frame_old_ptr_full = index_2_frame_ptr_full[edge_old];
+                    FrameBase* frame_old_ptr_prun = index_2_frame_ptr_prun[edge_old];
+                    assert(index_2_frame_ptr_full.find(edge_new) != index_2_frame_ptr_full.end() && "edge to vertex not added!");
+                    assert(index_2_frame_ptr_prun.find(edge_new) != index_2_frame_ptr_prun.end() && "edge to vertex not added!");
+                    FrameBase* frame_new_ptr_full = index_2_frame_ptr_full[edge_new];
+                    FrameBase* frame_new_ptr_prun = index_2_frame_ptr_prun[edge_new];
+                    frame_new_ptr_full->addCapture(capture_ptr_full);
+                    frame_new_ptr_prun->addCapture(capture_ptr_prun);
+                    capture_ptr_full->addFeature(feature_ptr_full);
+                    capture_ptr_prun->addFeature(feature_ptr_prun);
+                    ConstraintOdom2D* constraint_ptr_full = new ConstraintOdom2D(feature_ptr_full, frame_old_ptr_full);
+                    ConstraintOdom2D* constraint_ptr_prun = new ConstraintOdom2D(feature_ptr_prun, frame_old_ptr_prun);
+                    feature_ptr_full->addConstraintFrom(constraint_ptr_full);
+                    feature_ptr_prun->addConstraintFrom(constraint_ptr_prun);
+                    //std::cout << "Added edge! " << constraint_ptr_prun->nodeId() << " from vertex " << constraint_ptr_prun->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_prun->getFrameToPtr()->nodeId() << std::endl;
+                    //std::cout << "vector " << constraint_ptr_prun->getMeasurement().transpose() << std::endl;
                     //std::cout << "information " << std::endl << edge_information << std::endl;
-                    //std::cout << "covariance " << std::endl << constraint_ptr_prunned->getMeasurementCovariance() << std::endl;
+                    //std::cout << "covariance " << std::endl << constraint_ptr_prun->getMeasurementCovariance() << std::endl;
+
+                    WolfScalar xi = *(frame_old_ptr_prun->getPPtr()->getPtr());
+                    WolfScalar yi = *(frame_old_ptr_prun->getPPtr()->getPtr()+1);
+                    WolfScalar thi = *(frame_old_ptr_prun->getOPtr()->getPtr());
+                    WolfScalar si = sin(thi);
+                    WolfScalar ci = cos(thi);
+                    WolfScalar xj = *(frame_new_ptr_prun->getPPtr()->getPtr());
+                    WolfScalar yj = *(frame_new_ptr_prun->getPPtr()->getPtr()+1);
+                    Eigen::MatrixXs Ji(3,3), Jj(3,3);
+                    Ji << -ci,-si,-(xj-xi)*si+(yj-yi)*ci,
+                           si,-ci,-(xj-xi)*ci-(yj-yi)*si,
+                            0,  0,                    -1;
+                    Jj <<  ci, si, 0,
+                          -si, ci, 0,
+                            0,  0, 1;
+                    //std::cout << "Ji" << std::endl << Ji << std::endl;
+                    //std::cout << "Jj" << std::endl << Jj << std::endl;
+                    Eigen::SparseMatrix<WolfScalar> DeltaLambda(Lambda.rows(), Lambda.cols());
+                    insertSparseBlock((Ji.transpose() * edge_information * Ji).sparseView(), DeltaLambda, edge_old*3, edge_old*3);
+                    insertSparseBlock((Jj.transpose() * edge_information * Jj).sparseView(), DeltaLambda, edge_new*3, edge_new*3);
+                    insertSparseBlock((Ji.transpose() * edge_information * Jj).sparseView(), DeltaLambda, edge_old*3, edge_new*3);
+                    insertSparseBlock((Jj.transpose() * edge_information * Ji).sparseView(), DeltaLambda, edge_new*3, edge_old*3);
+                    Lambda = Lambda + DeltaLambda;
                 }
             }
             else
@@ -254,64 +303,82 @@ int main(int argc, char** argv)
         printf("\nError opening file\n");
 
     // PRIOR
-    FrameBase* first_frame_all = wolf_problem_all->getTrajectoryPtr()->getFrameListPtr()->front();
-    FrameBase* first_frame_prunned = wolf_problem_prunned->getTrajectoryPtr()->getFrameListPtr()->front();
-    CaptureFix* initial_covariance_all = new CaptureFix(TimeStamp(0), first_frame_all->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_prunned = new CaptureFix(TimeStamp(0), first_frame_prunned->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    first_frame_all->addCapture(initial_covariance_all);
-    first_frame_prunned->addCapture(initial_covariance_prunned);
-    initial_covariance_all->processCapture();
-    initial_covariance_prunned->processCapture();
+    FrameBase* first_frame_full = wolf_problem_full->getTrajectoryPtr()->getFrameListPtr()->front();
+    FrameBase* first_frame_prun = wolf_problem_prun->getTrajectoryPtr()->getFrameListPtr()->front();
+    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    first_frame_full->addCapture(initial_covariance_full);
+    first_frame_prun->addCapture(initial_covariance_prun);
+    initial_covariance_full->processCapture();
+    initial_covariance_prun->processCapture();
+    //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_prun->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
+    Eigen::SparseMatrix<WolfScalar> DeltaLambda(Lambda.rows(), Lambda.cols());
+    insertSparseBlock((Eigen::Matrix3s::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
+    Lambda = Lambda + DeltaLambda;
 
     // BUILD SOLVER PROBLEM
     std::cout << "updating ceres..." << std::endl;
-    ceres_manager_all->update();
-    ceres_manager_prunned->update();
+    ceres_manager_full->update();
+    ceres_manager_prun->update();
     std::cout << "updated!" << std::endl;
 
-    // PRUNNING
-    std::cout << "computing covariances..." << std::endl;
-    ceres_manager_prunned->computeCovariances(ALL);
-    std::cout << "computed!" << std::endl;
+    // COMPUTE COVARIANCES
     ConstraintBaseList constraints;
-    wolf_problem_prunned->getTrajectoryPtr()->getConstraintList(constraints);
+    wolf_problem_prun->getTrajectoryPtr()->getConstraintList(constraints);
+    // Manual covariance computation
+    t1 = clock();
+    Eigen::SimplicialLLT<Eigen::SparseMatrix<WolfScalar>> chol(Lambda);  // performs a Cholesky factorization of A
+    Eigen::MatrixXs Sigma = chol.solve(Eigen::MatrixXs::Identity(Lambda.rows(), Lambda.cols()));
+    double t_sigma_manual = ((double) clock() - t1) / CLOCKS_PER_SEC;
+    //std::cout << "Lambda" << std::endl << Lambda << std::endl;
+    //std::cout << "Sigma" << std::endl << Sigma << std::endl;
 
-    Eigen::MatrixXs Sigma_ii(3,3), Sigma_ij(3,3), Sigma_jj(3,3), Sigma_z(3,3), Ji(3,3), Jj(3,3);
-    WolfScalar xi, yi, thi, si, ci, xj, yj;
+    std::cout << " ceres is computing covariances..." << std::endl;
+    t1 = clock();
+    ceres_manager_prun->computeCovariances(ALL);//ALL_MARGINALS
+    double t_sigma_ceres = ((double) clock() - t1) / CLOCKS_PER_SEC;
+    std::cout << "computed!" << std::endl;
+
+    t1 = clock();
+
     for (auto c_it=constraints.begin(); c_it!=constraints.end(); c_it++)
     {
         if ((*c_it)->getCategory() != CTR_FRAME) continue;
 
-        // ii
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ii, 0, 0);
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ii, 0, 2);
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ii, 2, 0);
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ii, 2, 2);
-        //std::cout << "Sigma_ii" << std::endl << Sigma_ii << std::endl;
-        // jj
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getFrameToPtr()->getPPtr(), Sigma_jj, 0, 0);
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getFrameToPtr()->getOPtr(), Sigma_jj, 0, 2);
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getFrameToPtr()->getPPtr(), Sigma_jj, 2, 0);
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getFrameToPtr()->getOPtr(), Sigma_jj, 2, 2);
-        //std::cout << "Sigma_jj" << std::endl << Sigma_jj << std::endl;
-        // ij
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), (*c_it)->getFrameToPtr()->getPPtr(), Sigma_ij, 0, 0);
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), (*c_it)->getFrameToPtr()->getOPtr(), Sigma_ij, 0, 2);
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), (*c_it)->getFrameToPtr()->getPPtr(), Sigma_ij, 2, 0);
-        wolf_problem_prunned->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), (*c_it)->getFrameToPtr()->getOPtr(), Sigma_ij, 2, 2);
-        //std::cout << "Sigma_ij" << std::endl << Sigma_ij << std::endl;
+        // ii (old)
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getFrameToPtr()->getPPtr(), Sigma_ii, 0, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getFrameToPtr()->getOPtr(), Sigma_ii, 0, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getFrameToPtr()->getPPtr(), Sigma_ii, 2, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getFrameToPtr()->getOPtr(), Sigma_ii, 2, 2);
+//        std::cout << "Sigma_ii" << std::endl << Sigma_ii << std::endl;
+//        std::cout << "Sigma(i,i)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3, frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3) << std::endl;
+        // jj (new)
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_jj, 0, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_jj, 0, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_jj, 2, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_jj, 2, 2);
+//        std::cout << "Sigma_jj" << std::endl << Sigma_jj << std::endl;
+//        std::cout << "Sigma(j,j)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3, frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3) << std::endl;
+        // ij (old-new)
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ij, 0, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 0, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ij, 2, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 2, 2);
+//        std::cout << "Sigma_ij" << std::endl << Sigma_ij << std::endl;
+//        std::cout << "Sigma(i,j)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3, frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3) << std::endl;
+
 
         //jacobian
-        xi = *(*c_it)->getCapturePtr()->getFramePtr()->getPPtr()->getPtr();
-        yi = *((*c_it)->getCapturePtr()->getFramePtr()->getPPtr()->getPtr()+1);
-        thi = *(*c_it)->getCapturePtr()->getFramePtr()->getOPtr()->getPtr();
+        xi = *(*c_it)->getFrameToPtr()->getPPtr()->getPtr();
+        yi = *((*c_it)->getFrameToPtr()->getPPtr()->getPtr()+1);
+        thi = *(*c_it)->getFrameToPtr()->getOPtr()->getPtr();
         si = sin(thi);
         ci = cos(thi);
-        xj = *(*c_it)->getFrameToPtr()->getPPtr()->getPtr();
-        yj = *((*c_it)->getFrameToPtr()->getPPtr()->getPtr()+1);
+        xj = *(*c_it)->getCapturePtr()->getFramePtr()->getPPtr()->getPtr();
+        yj = *((*c_it)->getCapturePtr()->getFramePtr()->getPPtr()->getPtr()+1);
 
         Ji << -ci,-si,-(xj-xi)*si+(yj-yi)*ci,
-               si, ci,-(xj-xi)*ci-(yj-yi)*si,
+               si,-ci,-(xj-xi)*ci-(yj-yi)*si,
                 0,  0,                    -1;
         Jj <<  ci, si, 0,
               -si, ci, 0,
@@ -327,20 +394,28 @@ int main(int argc, char** argv)
         //std::cout << "denominador : " << std::endl << Sigma_z - (Ji * Sigma_ii * Ji.transpose() + Jj * Sigma_jj * Jj.transpose() + Ji * Sigma_ij * Jj.transpose() + Jj * Sigma_ij.transpose() * Ji.transpose()) << std::endl;
         // Information gain
         WolfScalar IG = 0.5 * log( Sigma_z.determinant() / (Sigma_z - (Ji * Sigma_ii * Ji.transpose() + Jj * Sigma_jj * Jj.transpose() + Ji * Sigma_ij * Jj.transpose() + Jj * Sigma_ij.transpose() * Ji.transpose())).determinant() );
-        std::cout << "IG = " << IG << std::endl;
+        //std::cout << "IG = " << IG << std::endl;
+
+        if (IG < 2)
+            (*c_it)->setStatus(CTR_INACTIVE);
     }
+    double t_ig = ((double) clock() - t1) / CLOCKS_PER_SEC;
+    std::cout << "manual sigma computation " << t_sigma_manual << "s" << std::endl;
+    std::cout << "ceres sigma computation " << t_sigma_ceres << "s" << std::endl;
+    std::cout << "information gain computation " << t_ig << "s" << std::endl;
 
     // SOLVING PROBLEMS
-//    std::cout << "solving..." << std::endl;
-//    ceres::Solver::Summary summary_all = ceres_manager_all->solve(ceres_options);
-//    std::cout << summary_all.FullReport() << std::endl;
-//    ceres::Solver::Summary summary_prunned = ceres_manager_prunned->solve(ceres_options);
-//    std::cout << summary_prunned.FullReport() << std::endl;
+    std::cout << "solving..." << std::endl;
+    summary_full = ceres_manager_full->solve(ceres_options);
+    std::cout << summary_full.FullReport() << std::endl;
+    ceres_manager_prun->update();
+    summary_prun = ceres_manager_prun->solve(ceres_options);
+    std::cout << summary_prun.FullReport() << std::endl;
 
-    delete wolf_problem_all; //not necessary to delete anything more, wolf will do it!
+    delete wolf_problem_full; //not necessary to delete anything more, wolf will do it!
     std::cout << "wolf_problem_ deleted!" << std::endl;
-    delete ceres_manager_all;
-    delete ceres_manager_prunned;
+    delete ceres_manager_full;
+    delete ceres_manager_prun;
     std::cout << "ceres_manager deleted!" << std::endl;
     //End message
     std::cout << " =========================== END ===============================" << std::endl << std::endl;

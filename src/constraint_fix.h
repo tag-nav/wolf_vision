@@ -42,7 +42,7 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
             	_residuals[2] = _residuals[2] + T(2*M_PI);
 
 //            std::cout << "residual:      " << _residuals[2] << std::endl << std::endl;
-//			  _residuals[2] = _residuals[2] / T(sqrt(measurement_covariance_(2,2)));
+            _residuals[2] = _residuals[2] / T(sqrt(measurement_covariance_(2,2)));
 
 			return true;
 		}

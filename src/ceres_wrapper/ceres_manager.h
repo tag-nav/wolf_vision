@@ -53,7 +53,7 @@ class CeresManager
 
 		void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
 
-		void update();
+		void update(bool _apply_loss_function = false);
 
 		void addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss);
 
