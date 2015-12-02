@@ -6,14 +6,14 @@ Overview
 
 Wolf is a front-end library to solve localization problems in mobile robotics, such as SLAM, map-based localization, or visual odometry. The approach contemplates the coexistence of multiple sensors, be them synchronized or not. It is thought to build state vectors formed by a set of key-frames (window), and compute error vectors given the available measurements in that window.
 
-#### Features
+### Features
 
 -   State and error mapped to a memory space.
 -   Multi-sensor
 -   Different state types
 -   Highly templatized library
 
-#### Some preliminary documentation
+### Some preliminary documentation
 
 -   You can visit this [Wolf inspiring document](https://docs.google.com/document/d/1_kBtvCIo33pdP59M3Ib4iEBleDDLcN6yCbmwJDBLtcA). Contact [Joan](mailto:jsola@iri.upc.edu) if you need permissions for the link.
 -   You can also have a look at the [Wolf tree](https://docs.google.com/drawings/d/1jj5VVjQThddswpTPMLG2xv87vtT3o1jiMJo3Mk1Utjg), showing the organization of the main elements in the Wolf project. Contact [Andreu](mailto:acorominas@iri.upc.edu) if you need permissions for the link.
@@ -22,30 +22,13 @@ Wolf is a front-end library to solve localization problems in mobile robotics, s
 Dependencies
 ------------
 
-#### Eigen
+### Eigen
 
 [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
 
 `$ sudo apt-get install libeigen3-dev`
 
-#### Laser Scan Utils
-
-**(1)** Download:
-
-`$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
-
-Or, in case you don't have permissions:
-
-`$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
-
-**(2)** Build and install:
-
-`$ cd laser_scan_utils/build`
-`$ cmake ..`
-`$ make`
-`$ sudo make install`
-
-#### Ceres (5 steps)
+### Ceres (5 steps)
 
 [Ceres](http://www.ceres-solver.org/) is an optimization library. Currently, this dependency is optional, so the build procedure of Wolf skips part of compilation in case this dependency is not found on the system. **Installation** is desctibed at [Ceres site](http://www.ceres-solver.org/building.html). However we report here an alternative step by step procedure to install Ceres.
 
@@ -68,7 +51,7 @@ Or, in case you don't have permissions:
 
 libgflags.a will be installed at **/usr/local/lib**
 
-'''(3) GLOG '''
+**(3) GLOG **
 
 -   Download a tar-gz-ball from [here](https://code.google.com/p/google-glog/), download section.
 -   Uncompress it with:
@@ -108,33 +91,42 @@ libglog.so will be installed at **/usr/local/lib**
 
 libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/include/ceres**
 
-Download and build
-------------------
+### Laser Scan Utils
 
-#### C++ Library
+**(1)** Download:
 
-**Download:**
-
-`$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/wolf/tags/v1/`](https://devel.iri.upc.edu/labrobotica/algorithms/wolf/tags/v1/)` wolf`
+`$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
 
 Or, in case you don't have permissions:
 
-`$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/wolf/tags/v1/`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/wolf/tags/v1/)` wolf`
+`$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
+
+**(2)** Build and install:
+
+`$ cd laser_scan_utils/build`
+`$ cmake ..`
+`$ make`
+`$ sudo make install`
+
+Download and build
+------------------
+
+### C++ Library
+
+**Download:**
+
+`$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf.git`](https://github.com/IRI-MobileRobotics/Wolf.git)` wolf`
 
 **Build:**
 
-`$ cd wolf/build`
+`$ cd Wolf/build`
 `$ cmake ..`
 `$ make`
 `$ sudo make install  //optional in case you want to install wolf library`
 
-#### ROS Node
+### ROS Node
 
-`$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/ros/tags/iri_wolf/v1/`](https://devel.iri.upc.edu/labrobotica/ros/tags/iri_wolf/v1/)
-
-Or, in case you don't have permissions:
-
-`$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/ros/tags/iri_wolf/v1/`](https://devel.iri.upc.edu/pub/labrobotica/ros/tags/iri_wolf/v1/)
+`$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
 
 Inspiring Links
 ---------------
