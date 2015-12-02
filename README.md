@@ -51,7 +51,7 @@ Dependencies
 
 libgflags.a will be installed at **/usr/local/lib**
 
-**(3) GLOG **
+**(3) GLOG**
 
 -   Download a tar-gz-ball from [here](https://code.google.com/p/google-glog/), download section.
 -   Uncompress it with:
