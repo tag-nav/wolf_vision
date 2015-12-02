@@ -1,0 +1,7 @@
+.cproject
+.project
+.settings/
+README.txt
+bin/
+build/
+lib/
