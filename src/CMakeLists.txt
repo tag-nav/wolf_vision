@@ -91,6 +91,7 @@ SET(HDRS
     sensor_laser_2D.h
     sensor_odom_2D.h
     sensor_gps_fix.h
+    sensor_gps.h
     state_block.h
     time_stamp.h
     trajectory_base.h
@@ -129,6 +130,7 @@ SET(SRCS
     sensor_base.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
+    sensor_gps.cpp
     state_block.cpp
     time_stamp.cpp
     trajectory_base.cpp

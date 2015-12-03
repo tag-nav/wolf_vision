@@ -64,3 +64,7 @@ IF(faramotics_FOUND)
 ENDIF(faramotics_FOUND)
 
 
+# Testing GPS stuff
+ADD_EXECUTABLE(test_gps test_gps.cpp)
+TARGET_LINK_LIBRARIES(test_gps ${PROJECT_NAME})
+
