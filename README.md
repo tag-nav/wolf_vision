@@ -39,7 +39,7 @@ Dependencies
 
 [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
 
-    `$ sudo apt-get install libeigen3-dev`
+`$ sudo apt-get install libeigen3-dev`
 
 ### Ceres (5 steps)
 
@@ -51,7 +51,7 @@ Dependencies
 
 -   Git clone the source
 
-    `$ git clone `[`https://github.com/gflags/gflags.git`](https://github.com/gflags/gflags.git)
+`$ git clone `[`https://github.com/gflags/gflags.git`](https://github.com/gflags/gflags.git)
 
 -   Build and install with:
 
@@ -108,11 +108,11 @@ libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/i
 
 **(1)** Download:
 
-    `$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
+`$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
 
 Or, in case you don't have permissions:
 
-    `$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
+`$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
 
 **(2)** Build and install:
 
@@ -128,7 +128,7 @@ Download and build
 
 **Download:**
 
-    `$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf.git`](https://github.com/IRI-MobileRobotics/Wolf.git)
+`$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf.git`](https://github.com/IRI-MobileRobotics/Wolf.git)
 
 **Build:**
 
@@ -139,7 +139,7 @@ Download and build
 
 ### Wolf ROS Node
 
-    `$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
+`$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
 
 Inspiring Links
 ---------------
