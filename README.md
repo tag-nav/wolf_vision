@@ -39,7 +39,7 @@ Dependencies
 
 [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
 
-`$ sudo apt-get install libeigen3-dev`
+    `$ sudo apt-get install libeigen3-dev`
 
 ### Ceres (5 steps)
 
@@ -51,16 +51,16 @@ Dependencies
 
 -   Git clone the source
 
-`$ git clone `[`https://github.com/gflags/gflags.git`](https://github.com/gflags/gflags.git)
+    `$ git clone `[`https://github.com/gflags/gflags.git`](https://github.com/gflags/gflags.git)
 
 -   Build and install with:
 
-`$ cd gflags`
-`$ mkdir build`
-`$ cd build`
-`$ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" -DGFLAGS_NAMESPACE="google" ..`
-`$ make`
-`$ sudo make install `
+    `$ cd gflags`
+    `$ mkdir build`
+    `$ cd build`
+    `$ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" -DGFLAGS_NAMESPACE="google" ..`
+    `$ make`
+    `$ sudo make install `
 
 libgflags.a will be installed at **/usr/local/lib**
 
@@ -69,14 +69,14 @@ libgflags.a will be installed at **/usr/local/lib**
 -   Download a tar-gz-ball from [here](https://code.google.com/p/google-glog/), download section.
 -   Uncompress it with:
 
-`$ tar -xvzf glog-0.3.3.tar.gz `
+    `$ tar -xvzf glog-0.3.3.tar.gz `
 
 -   Build and install with:
 
-`$ cd glog-0.3.3`
-`$ ./configure --with-gflags=/usr/local/`
-`$ make`
-`$ sudo make install`
+    `$ cd glog-0.3.3`
+    `$ ./configure --with-gflags=/usr/local/`
+    `$ make`
+    `$ sudo make install`
 
 libglog.so will be installed at **/usr/local/lib**
 
@@ -84,23 +84,23 @@ libglog.so will be installed at **/usr/local/lib**
 
 -   Easy way!:
 
-`$ sudo apt-get install libsuitesparse-dev`
+    `$ sudo apt-get install libsuitesparse-dev`
 
 **(5) CERES**
 
 -   Get the tar-gz-ball corresponding to the latest stable release from [here](http://www.ceres-solver.org/building.html).
 -   Uncompress it with:
 
-`$ tar -xvzf ceres-solver-1.10.0.tar.gz`
+    `$ tar -xvzf ceres-solver-1.10.0.tar.gz`
 
 -   Build and install with:
 
-`$ cd ceres-solver-1.10.0`
-`$ mkdir build`
-`$ cd build`
-`$ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..`
-`$ make`
-`$ sudo make install `
+    `$ cd ceres-solver-1.10.0`
+    `$ mkdir build`
+    `$ cd build`
+    `$ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..`
+    `$ make`
+    `$ sudo make install `
 
 libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/include/ceres**
 
@@ -108,18 +108,18 @@ libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/i
 
 **(1)** Download:
 
-`$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
+    `$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
 
 Or, in case you don't have permissions:
 
-`$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
+    `$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
 
 **(2)** Build and install:
 
-`$ cd laser_scan_utils/build`
-`$ cmake ..`
-`$ make`
-`$ sudo make install`
+    `$ cd laser_scan_utils/build`
+    `$ cmake ..`
+    `$ make`
+    `$ sudo make install`
 
 Download and build
 ------------------
@@ -128,18 +128,18 @@ Download and build
 
 **Download:**
 
-`$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf.git`](https://github.com/IRI-MobileRobotics/Wolf.git)
+    `$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf.git`](https://github.com/IRI-MobileRobotics/Wolf.git)
 
 **Build:**
 
-`$ cd Wolf/build`
-`$ cmake ..`
-`$ make`
-`$ sudo make install  //optional in case you want to install wolf library`
+    `$ cd Wolf/build`
+    `$ cmake ..`
+    `$ make`
+    `$ sudo make install  //optional in case you want to install wolf library`
 
 ### Wolf ROS Node
 
-`$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
+    `$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
 
 Inspiring Links
 ---------------
@@ -161,36 +161,36 @@ Kcachegrind is a graphical frontend for profiling your program and optimizing yo
 
 Get the programs with
 
-`   sudo apt-get install valgrind kcachegrind`
+    `   sudo apt-get install valgrind kcachegrind`
 
 #### Install in Mac OSX
 
 In Mac, you can use qcachegrind instead. To get it through Homebrew, type
 
-`   brew install valgrind qcachegrind`
+    `   brew install valgrind qcachegrind`
 
 I don't know if these packages are available through MacPorts. Try
 
-`   ports search --name valgrind`
-`   ports search --name qcachegrind`
+    `   ports search --name valgrind`
+    `   ports search --name qcachegrind`
 
 If they are available, just do
 
-`   sudo port install valgrind qcachegrind`
+    `   sudo port install valgrind qcachegrind`
 
 #### Do the profiling and watch the reports
 
 Type in your `wolf/bin/` directory:
 
-`   cd bin/`
-`   valgrind --tool=callgrind ./my_program `<my_prg_params>
+    `   cd bin/`
+    `   valgrind --tool=callgrind ./my_program `<my_prg_params>
 
 this produces a log report called `callgrind.out.XXXX`, where XXXX is a number. Then type (Ubuntu)
 
-`   kcachegrind callgrind.out.XXXX`
+    `   kcachegrind callgrind.out.XXXX`
 
 or (Mac)
 
-`   qcachegrind callgrind.out.XXXX`
+    `   qcachegrind callgrind.out.XXXX`
 
 and enjoy.
