@@ -27,14 +27,18 @@ SensorBase::~SensorBase()
     // Remove State Blocks
     if (p_ptr_ != nullptr)
     {
-        getTop()->removeStateBlockPtr(p_ptr_);
+        if (getTop() != nullptr)
+            getTop()->removeStateBlockPtr(p_ptr_);
         delete p_ptr_;
     }
+
     if (o_ptr_ != nullptr)
     {
-        getTop()->removeStateBlockPtr(o_ptr_);
+        if (getTop() != nullptr)
+            getTop()->removeStateBlockPtr(o_ptr_);
         delete o_ptr_;
     }
+
 }
 
 const SensorType SensorBase::getSensorType() const

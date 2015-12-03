@@ -45,7 +45,7 @@ class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
          **/
         SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, unsigned int _params_size);
 
-        ~SensorBase();
+        virtual ~SensorBase();
 
         const SensorType getSensorType() const;
 
