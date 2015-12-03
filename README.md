@@ -14,6 +14,8 @@ The task of interfacing Wolf with these solvers is relegated to wrappers, which 
 
 The basic Wolf structure is a tree of base classes reproducing the elements of the robotic problem. A robot, with sensors, with a trajectory formed by keyframes, and the map with its landmarks. These base classes can be derived to build the particularizations you want. You have the basic functionality in the base classes, and you add what you want on top. The tree connectivity is augmented with the constraints linking different parts of it, becoming a real network of relations. This network is equivalent to the factor graph that would be solved by graphical models and nonlinear optimization. Wrappers are the ones transferring the Wolf structure into a factor graph that can be provided to the solver. See the documentation for a proper rationale and all the details.
 
+Wolf can be used within ROS for an easy integration. We provide examples of ROS nodes using Wolf. Wolf can also be used in other robotics frameworks.
+
 ### Features
 
 -   Keyframe based
