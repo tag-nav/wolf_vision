@@ -116,10 +116,10 @@ Or, in case you don't have permissions:
 
 **(2)** Build and install:
 
-    `$ cd laser_scan_utils/build`
-    `$ cmake ..`
-    `$ make`
-    `$ sudo make install`
+    $ cd laser_scan_utils/build
+    $ cmake ..
+    $ make
+    $ sudo make install
 
 Download and build
 ------------------
@@ -132,10 +132,10 @@ Download and build
 
 **Build:**
 
-    `$ cd Wolf/build`
-    `$ cmake ..`
-    `$ make`
-    `$ sudo make install  //optional in case you want to install wolf library`
+`$ cd Wolf/build`
+`$ cmake ..`
+`$ make`
+`$ sudo make install  //optional in case you want to install wolf library`
 
 ### Wolf ROS Node
 
@@ -161,36 +161,36 @@ Kcachegrind is a graphical frontend for profiling your program and optimizing yo
 
 Get the programs with
 
-    `   sudo apt-get install valgrind kcachegrind`
+`$ sudo apt-get install valgrind kcachegrind`
 
 #### Install in Mac OSX
 
 In Mac, you can use qcachegrind instead. To get it through Homebrew, type
 
-    `   brew install valgrind qcachegrind`
+`$ brew install valgrind qcachegrind`
 
 I don't know if these packages are available through MacPorts. Try
 
-    `   ports search --name valgrind`
-    `   ports search --name qcachegrind`
+`$ ports search --name valgrind`
+`$ ports search --name qcachegrind`
 
 If they are available, just do
 
-    `   sudo port install valgrind qcachegrind`
+`$ sudo port install valgrind qcachegrind`
 
 #### Do the profiling and watch the reports
 
 Type in your `wolf/bin/` directory:
 
-    `   cd bin/`
-    `   valgrind --tool=callgrind ./my_program `<my_prg_params>
+`$ cd bin/`
+`$ valgrind --tool=callgrind ./my_program `<my_prg_params>
 
 this produces a log report called `callgrind.out.XXXX`, where XXXX is a number. Then type (Ubuntu)
 
-    `   kcachegrind callgrind.out.XXXX`
+`$ kcachegrind callgrind.out.XXXX`
 
 or (Mac)
 
-    `   qcachegrind callgrind.out.XXXX`
+`$ qcachegrind callgrind.out.XXXX`
 
 and enjoy.
