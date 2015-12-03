@@ -104,7 +104,7 @@ libglog.so will be installed at **/usr/local/lib**
 
 libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/include/ceres**
 
-### Laser Scan Utils
+### Laser Scan Utils (Optional. Install only if you want to use IRI's laser scan utils)
 
 **(1)** Download:
 
