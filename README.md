@@ -4,14 +4,20 @@ WOLF - Windowed Localization Frames
 Overview
 --------
 
-Wolf is a front-end library to solve localization problems in mobile robotics, such as SLAM, map-based localization, or visual odometry. The approach contemplates the coexistence of multiple sensors, be them synchronized or not. It is thought to build state vectors formed by a set of key-frames (window), and compute error vectors given the available measurements in that window.
+Wolf is a library to solve localization problems in mobile robotics, such as SLAM, map-based localization, or visual odometry. The approach contemplates the coexistence of multiple sensors, be them synchronized or not. It is thought to build state vectors formed by a set of key-frames (window), defining the robot trajectory, plus other states such as landmarks or sensor parameters for calibration, and compute error vectors given the available measurements in that window.
+
+Wolf is mainly a structure for having the data accessible and organized, plus some functionality for managing this data. It requires one one side several front-ends (one per sensor, or per sensor type), and a back-end constituted by the solver.
+
+Wolf accepts many kinds of solvers, including filters and nonlinear optimizers; it can be used with EKF, error-state KF, iterative EKF, and other kinds of filters such as information filters. It can also be used with nonlinear optimizers, most especially in their sparse flavours, and in particular the incremental ones such as iSAM or iSAM2.
+
+The task of interfacing Wolf with these solvers is relegated to wrappers, which are coded out of Wolf. We provide a wrapper to Google CERES, and an experimental, self-coded, wrapper-less solver for incremental, sparse, nonlinear optimization based on the QR decomposition (implementing the iSAM algorithm).
 
 ### Features
 
--   State and error mapped to a memory space.
 -   Multi-sensor
--   Different state types
--   Highly templatized library
+-   Different state types -- the state blocks
+-   Different measurement models -- the constraint blocks
+-   Polymorphic classes using virtual inheritance and templates.
 
 ### Some preliminary documentation
 
