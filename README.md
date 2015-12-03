@@ -124,7 +124,7 @@ Or, in case you don't have permissions:
 Download and build
 ------------------
 
-### C++ Library
+### Wolf C++ Library
 
 **Download:**
 
@@ -137,7 +137,7 @@ Download and build
 `$ make`
 `$ sudo make install  //optional in case you want to install wolf library`
 
-### ROS Node
+### Wolf ROS Node
 
 `$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
 
