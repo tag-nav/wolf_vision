@@ -39,7 +39,7 @@ Dependencies
 
 [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
 
-`$ sudo apt-get install libeigen3-dev`
+        $ sudo apt-get install libeigen3-dev
 
 ### Ceres (5 steps)
 
