@@ -48,9 +48,9 @@ class HardwareBase : public NodeLinked<WolfProblem,SensorBase>
 		 **/
         void removeSensor(SensorBase* _sensor_ptr);
 
-        /** \brief Returns Frame list
+        /** \brief Returns Sensor list
          * 
-         * Returns FrameBase list
+         * Returns SensorBase list
          * 
          **/
         SensorBaseList* getSensorListPtr();

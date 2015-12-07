@@ -58,9 +58,9 @@ class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
 		 **/
         void removeLandmark(LandmarkBase* _landmark_ptr);
 
-        /** \brief Returns Frame list
+        /** \brief Returns landmarks list
          * 
-         * Returns FrameBase list
+         * Returns LandmarkBase list
          * 
          **/
         LandmarkBaseList* getLandmarkListPtr();

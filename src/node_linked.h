@@ -44,10 +44,10 @@ class NodeLinked : public NodeBase
         typedef typename LowerNodeList::iterator LowerNodeIter;
 
     protected:
-        NodeLocation location_;
+        NodeLocation location_; ///< Indicates whether this node is a TOP, MIDDLE or BOOTOM node
         UpperNodePtr up_node_ptr_; //it is not a shared pointer because the ownership of upper node should not be shared by lower nodes
-        LowerNodeList down_node_list_;
-        bool is_deleting_;
+        LowerNodeList down_node_list_; ///< A list of pointers to lower nodes
+        bool is_deleting_; ///< This node is being deleted.
 
     public:
 
