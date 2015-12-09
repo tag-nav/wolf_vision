@@ -25,6 +25,7 @@ class StateBlock
          * Constructor with scalar pointer
          * \param _state is state vector
          * \param _type parametrization of the state
+         * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter
          * 
          **/
         StateBlock(const Eigen::VectorXs _state, StateType _type = ST_VECTOR, bool _fixed = false);

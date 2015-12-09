@@ -92,11 +92,19 @@ class AssociationTree : public AssociationSolver
          * Decides best hypothesis according tree computation made by computeTree()
          * Return values are: 
          * \param _pairs Returned pairs: vector of pairs (d_i, t_j)
-         * \param _unassoc Returned unassociated detections: vector of (d_i)
          * \param _associated_mask Resized to nd_. Marks true at i if detection d_i has been associated, otherwise marks false
          * 
          **/
         void solve(std::map<unsigned int, unsigned int> & _pairs, std::vector<bool> & _associated_mask);
+
+        /** \brief Gets tree decision
+         *
+         * Decides best hypothesis according tree computation made by computeTree()
+         * Return values are:
+         * \param _pairs Returned pairs: vector of pairs (d_i, t_j)
+         * \param _associated_mask Resized to nd_. Marks true at i if detection d_i has been associated, otherwise marks false
+         *
+         **/
         void solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<bool> & _associated_mask);
 
         /** \brief Prints the tree

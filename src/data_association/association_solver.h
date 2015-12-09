@@ -86,7 +86,6 @@ class AssociationSolver
          * Solves and sets decision pairs
          * Return values are: 
          * \param _pairs Returned pairs: vector of pairs (d_i, t_j)
-         * \param _unassoc Returned unassociated detections: vector of (d_i)
          * \param _associated_mask Resized to nd_. Marks true at i if detection d_i has been associated, otherwise marks false
          * 
          **/

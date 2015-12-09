@@ -16,10 +16,11 @@ class NodeTerminus;
 class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
 {
     protected:
-        SensorType type_;		//indicates sensor type. Enum defined at wolf.h
+        SensorType type_;		// indicates sensor type. Enum defined at wolf.h
         StateBlock* p_ptr_;		// sensor position state block pointer
         StateBlock* o_ptr_; 	// sensor orientation state block pointer
-        Eigen::VectorXs params_;//sensor intrinsic params: offsets, scale factors, sizes, ...
+        Eigen::VectorXs params_;// sensor intrinsic params: offsets, scale factors, sizes, ...
+        bool dynamic_extrinsic_;// extrinsic parameters vary with time. They will be taken from the Capture nodes.
 
     public:        
         
@@ -60,6 +61,21 @@ class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
         void fix();
 
         void unfix();
+
+        /**
+         * Make this sensor dynamic so that extrinsics vary with time.
+         */
+        void setDynamic(bool _dyn = true);
+
+        /**
+         * Make this sensor static so that extrinsics do not vary with time
+         */
+        void unsetDynamic();
+
+        /**
+         * Check if sensor is dynamic
+         */
+        bool isDynamic();
 
 };
 #endif
