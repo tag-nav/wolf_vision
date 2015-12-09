@@ -2,6 +2,9 @@
 // Created by ptirindelli on 3/12/15.
 //
 
+//TODO indentation: add a tab at everything inside the class: protected and public must have 1 tab
+
+
 #ifndef SENSOR_GPS_H_
 #define SENSOR_GPS_H_
 
@@ -15,15 +18,18 @@
  * e estriseci (roba che non ne fa parte (tipo posa iniziale))
  *
  *
+ * TODO qua dentro va il nav file, perche' e' fisso e non cambia con il tempo
  *
  */
 class SensorGPS : public SensorBase
 {
-    //sensor base contiene un puntatore al sensor position e orientation.
 
-    public:
-        SensorGPS(StateBlock* _p_ptr, StateBlock* _o_ptr);
-        virtual ~SensorGPS();
+public:
+    //pointer to sensor position and orientation.
+    SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr);
+
+    virtual ~SensorGPS();
+
 
 
 };

@@ -63,6 +63,7 @@ SET(HDRS
     capture_base.h
     capture_motion.h
     capture_fix.h
+    capture_gps.h
     capture_gps_fix.h
     capture_odom_2D.h
     capture_void.h
@@ -76,6 +77,7 @@ SET(HDRS
     feature_base.h
     feature_corner_2D.h
     feature_gps_fix.h
+    feature_gps_pseudorange.h
     feature_fix.h
     feature_odom_2D.h
     frame_base.h
@@ -88,7 +90,6 @@ SET(HDRS
     node_terminus.h
     node_linked.h
     sensor_base.h
-    sensor_laser_2D.h
     sensor_odom_2D.h
     sensor_gps_fix.h
     sensor_gps.h
@@ -109,6 +110,7 @@ SET(HDRS_DTASSC
 SET(SRCS
     capture_base.cpp
     capture_motion.cpp
+    capture_gps.cpp
     capture_gps_fix.cpp
     capture_fix.cpp
     capture_odom_2D.cpp
@@ -117,6 +119,7 @@ SET(SRCS
     feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
+    feature_gps_pseudorange.cpp
     feature_fix.cpp
     feature_odom_2D.cpp
     frame_base.cpp
