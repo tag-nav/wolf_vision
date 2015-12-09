@@ -88,7 +88,6 @@ SET(HDRS
     node_terminus.h
     node_linked.h
     sensor_base.h
-    sensor_laser_2D.h
     sensor_odom_2D.h
     sensor_gps_fix.h
     sensor_gps.h
