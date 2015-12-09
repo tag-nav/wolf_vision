@@ -5,7 +5,8 @@ SensorBase::SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _
         type_(_tp),
         p_ptr_(_p_ptr),
         o_ptr_(_o_ptr),
-        params_(_params.size())
+        params_(_params.size()),
+		dynamic_extrinsic_(false)
 {
     params_ = _params;
 }
@@ -15,7 +16,8 @@ SensorBase::SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _
         type_(_tp),
         p_ptr_(_p_ptr),
         o_ptr_(_o_ptr),
-        params_(_params_size)
+        params_(_params_size),
+		dynamic_extrinsic_(false)
 {
     //
 }
@@ -105,4 +107,16 @@ void SensorBase::unfix()
         o_ptr_->unfix();
         getTop()->updateStateBlockPtr(o_ptr_);
     }
+}
+
+void SensorBase::setDynamic(bool _dyn) {
+	dynamic_extrinsic_ = _dyn;
+}
+
+void SensorBase::unsetDynamic() {
+	dynamic_extrinsic_ = false;
+}
+
+bool SensorBase::isDynamic() {
+	return dynamic_extrinsic_;
 }
