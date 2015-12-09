@@ -4,11 +4,9 @@ CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
     NodeLinked(MID, "CAPTURE"),
     time_stamp_(_ts),
     sensor_ptr_(_sensor_ptr),
-	p_ptr_(sensor_ptr_->getPPtr()),
-	o_ptr_(sensor_ptr_->getOPtr())
+	sensor_p_ptr_(sensor_ptr_->getPPtr()),
+	sensor_o_ptr_(sensor_ptr_->getOPtr())
 {
-	//if (sensor_ptr_->isDynamic())
-		// p_ptr_ = new
     //
 }
 
@@ -17,8 +15,8 @@ CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Ei
 	time_stamp_(_ts),
 	sensor_ptr_(_sensor_ptr),
 	data_(_data),
-	p_ptr_(sensor_ptr_->getPPtr()),
-	o_ptr_(sensor_ptr_->getOPtr())
+	sensor_p_ptr_(sensor_ptr_->getPPtr()),
+	sensor_o_ptr_(sensor_ptr_->getOPtr())
 
 {
 	//
@@ -30,8 +28,8 @@ CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Ei
 	sensor_ptr_(_sensor_ptr),
 	data_(_data),
 	data_covariance_(_data_covariance),
-	p_ptr_(sensor_ptr_->getPPtr()),
-	o_ptr_(sensor_ptr_->getOPtr())
+	sensor_p_ptr_(sensor_ptr_->getPPtr()),
+	sensor_o_ptr_(sensor_ptr_->getOPtr())
 
 {
     //std::cout << "created CaptureBase " << nodeId() << std::endl << "covariance: " << std::endl << data_covariance_ << std::endl;

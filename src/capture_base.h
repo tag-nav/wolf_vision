@@ -22,14 +22,14 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
     protected:
         TimeStamp time_stamp_; ///< Time stamp
         SensorBase* sensor_ptr_; ///< Pointer to sensor
-        Eigen::VectorXs data_; ///< raw data
-        Eigen::MatrixXs data_covariance_; ///< Noise of the capture
-        Eigen::Vector3s sensor_pose_global_; ///< Sensor pose in world frame: composition of the frame pose and the sensor pose. TODO: use state units
-        Eigen::Vector3s inverse_sensor_pose_; ///< World pose in the sensor frame: inverse of the global_pose_. TODO: use state units
+        Eigen::VectorXs data_; ///< raw data. TODO: make a RawBase class and put this there.
+        Eigen::MatrixXs data_covariance_; ///< Noise of the capture. TODO: make a RawBase class and put this there.
+        //Eigen::Vector3s sensor_pose_global_; ///< Sensor pose in world frame: composition of the frame pose and the sensor pose. TODO: use state units
+        //Eigen::Vector3s inverse_sensor_pose_; ///< World pose in the sensor frame: inverse of the global_pose_. TODO: use state units
 
         // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
-        StateBlock* p_ptr_; //TODO: initialize this at construction time; delete it at destruction time
-        StateBlock* o_ptr_; //TODO: initialize this at construction time; delete it at destruction time
+        StateBlock* sensor_p_ptr_; //TODO: initialize this at construction time; delete it at destruction time
+        StateBlock* sensor_o_ptr_; //TODO: initialize this at construction time; delete it at destruction time
 
     public:
         CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr);
