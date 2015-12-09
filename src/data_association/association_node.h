@@ -108,6 +108,8 @@ class AssociationNode
         /** \brief Computes node probability
          * 
          * Computes probability that detection_i associates to target_j, given the scores table _stab.
+         * \param _nd TODO document this
+         * \param _nt TODO document this
          * \param _di detection index (not id)
          * \param _tj target index (not id)
          * \param _stab score table
@@ -139,9 +141,11 @@ class AssociationNode
         /** \brief Grows tree recursively
          * 
          * Grows tree recursively according the association probability table provided
+         * \param _nd
+         * \param _nt
          * \param _det_i: detection index
-         * \param _p_tab: table of association probabilities between detections and targets
-         * \param _ex_vec: vector of target index for which the tree should not continue growing 
+         * \param _stab: table of association probabilities between detections and targets
+         * \param _excluded: vector of target index for which the tree should not continue growing
          * 
          **/        
         //void growTree(const unsigned int _nd, const unsigned int _nt, const unsigned int _det_i, const std::vector< std::vector<double> > & _stab, std::vector<unsigned int> & _excluded);

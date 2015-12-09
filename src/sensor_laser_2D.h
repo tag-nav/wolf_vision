@@ -26,7 +26,6 @@ class SensorLaser2D : public SensorBase
          * Constructor with arguments
          * \param _p_ptr StateBase pointer to the sensor position
          * \param _o_ptr StateBase pointer to the sensor orientation
-         * \param _params struct with scan parameters. See laser_scan_utils library API for reference
          * 
          **/        
         SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr);
@@ -54,7 +53,7 @@ class SensorLaser2D : public SensorBase
         /** \brief Set corner detection algorithm parameters
          *
          * Set corner detection algorithm parameters
-         * \param _params struct with corner detection algorithm parameters. See laser_scan_utils library API for reference.
+         * \param _corner_alg_params struct with corner detection algorithm parameters. See laser_scan_utils library API for reference.
          *
          **/
         void setCornerAlgParams(const laserscanutils::ExtractCornerParams & _corner_alg_params);

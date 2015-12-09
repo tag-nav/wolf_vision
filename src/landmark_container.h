@@ -52,8 +52,10 @@ class LandmarkContainer : public LandmarkBase
          * Constructor with type, and state pointer
          * \param _p_ptr StateBase pointer to the position
          * \param _o_ptr StateBase pointer to the orientation
-         * \param _corner_1_ptr LandmarkCorner2D pointer to one of its corners
-         * \param _corner_2_ptr LandmarkCorner2D pointer to one of its corners
+         * \param _corner_A_ptr LandmarkCorner2D pointer to one of its corners
+         * \param _corner_B_ptr LandmarkCorner2D pointer to one of its corners
+         * \param _corner_C_ptr LandmarkCorner2D pointer to one of its corners
+         * \param _corner_D_ptr LandmarkCorner2D pointer to one of its corners
          * \param _witdh descriptor of the landmark: container width
          * \param _length descriptor of the landmark: container length
          *
