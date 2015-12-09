@@ -27,7 +27,7 @@ int main(int argc, char** argv)
                                                  1);                                //time for new keyframe
     wolf_manager_->addSensor(odom_sensor_ptr_);
 
-    FeatureBase* feature_base = new FeatureBase(0);
+    FeatureBase* feature_base = new FeatureBase(0); // FIXME unused variable ‘feature_base’
 
     //main loop
     for (unsigned int ii = 0; ii<1000; ii++)
