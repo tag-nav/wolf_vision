@@ -18,7 +18,8 @@
  * e estriseci (roba che non ne fa parte (tipo posa iniziale))
  *
  *
- * TODO qua dentro va il nav file, perche' e' fisso e non cambia con il tempo
+ * TODO qua dentro va la nav Data, perche' in teoria cambiano a slow rate
+ * ((previously)qua dentro va il nav file, perche' e' fisso e non cambia con il tempo)
  *
  */
 class SensorGPS : public SensorBase
