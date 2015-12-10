@@ -24,7 +24,7 @@ class NodeTerminus : public NodeBase
 
         virtual ~NodeTerminus();
 
-        WolfProblem* getTop();
+//        WolfProblem* getTop();
 
 };
 #endif /* NODE_TERMINUS_H_ */
