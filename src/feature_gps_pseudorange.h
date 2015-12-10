@@ -12,20 +12,38 @@
 //Wolf includes
 #include "feature_base.h"
 
+
+
+// TODO manage covariance
+
 class FeatureGPSPseudorange : public FeatureBase
 {
 protected:
-    std::string satId_;
     Eigen::Vector3s pose_;
-//TODO dove metto pseudorange?
+    std::string satId_;
+    //TODO dove metto pseudorange?
     // pseudoranges goes to feature_base's measurement_
-    // TODO manage covariance
+
+    //TODO cosa salvo nelle feature?
+    // in teoria qui potrei mettere solo timestamp, satId e pr
+    // poi la posizione del satellite al momento timestamp
+    // la calcola qualcun'altro, o nol constrAINT o qui con una funz
+
+
 
 public:
 
+    // TODO getter generato solo per prova,
+    // vedi se serve e in caso spostalo  nel cpp
+    // (prima controlla che normalmente si faccia cosi)
+    const std::string &getSatId_() const {
+        return satId_;
+    }
+
+
     FeatureGPSPseudorange(float _satellite_data);
 
-    //virtual ~FeatureGPSPseudorange();
+    virtual ~FeatureGPSPseudorange();
 
 
 

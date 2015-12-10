@@ -70,6 +70,7 @@ SET(HDRS
     constraint_base.h
     constraint_sparse.h
     constraint_gps_2D.h
+    constraint_gps_pseudorange.h
     constraint_fix.h
     constraint_odom_2D.h
     constraint_corner_2D.h

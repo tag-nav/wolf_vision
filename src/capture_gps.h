@@ -6,9 +6,10 @@
 #define CAPTURE_GPS_H_
 
 
-#include "capture_base.h"
 // Wolf includes
+#include "capture_base.h"
 #include "feature_gps_pseudorange.h"
+#include "constraint_gps_pseudorange.h"
 
 
 //TODO indentation: add a tab at everything inside the class: protected and public must have 1 tab

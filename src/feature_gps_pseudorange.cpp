@@ -9,7 +9,12 @@ using namespace std;
 FeatureGPSPseudorange::FeatureGPSPseudorange(float _satellite_data)
                                 : FeatureBase(1) // TODO cosi sto chiamando il costruttore con la dimensione = 1
 {
+    satId_ = "satId_n";//TODO metti nome vero
     cout << "#FEATURE#   Satellite: " << _satellite_data << endl;
 
 }
 
+FeatureGPSPseudorange::~FeatureGPSPseudorange()
+{
+
+}

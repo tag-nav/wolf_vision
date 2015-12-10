@@ -126,6 +126,7 @@ typedef enum
 typedef enum
 {
     CTR_GPS_FIX_2D,				///< marks a 2D GPS Fix constraint.
+    CTR_GPS_PR_3D,				///< marks a 3D GPS Pseudorange constraint.
     CTR_FIX,                    ///< marks a Fix constraint (for priors).
     CTR_ODOM_2D,                ///< marks a 2D Odometry constraint .
     CTR_CORNER_2D,		        ///< marks a 2D corner constraint .
