@@ -16,7 +16,7 @@ class NodeTerminus;
 class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
 {
     protected:
-        SensorType type_;		// indicates sensor type. Enum defined at wolf.h
+//        SensorType type_;		// indicates sensor type. Enum defined at wolf.h
         StateBlock* p_ptr_;		// sensor position state block pointer
         StateBlock* o_ptr_; 	// sensor orientation state block pointer
         Eigen::VectorXs params_;// sensor intrinsic params: biases, scale factors, gains, ...
@@ -48,7 +48,7 @@ class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
 
         virtual ~SensorBase();
 
-        const SensorType getSensorType() const;
+//        const SensorType getSensorType() const;
 
         StateBlock* getPPtr() const;
 

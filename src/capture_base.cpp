@@ -78,10 +78,10 @@ SensorBase* CaptureBase::getSensorPtr() const
     return sensor_ptr_;
 }
 
-SensorType CaptureBase::getSensorType() const
-{
-	return sensor_ptr_->getSensorType();
-}
+//SensorType CaptureBase::getSensorType() const
+//{
+//	return sensor_ptr_->getSensorType();
+//}
 
 void CaptureBase::setTimeStamp(const TimeStamp & _ts)
 {
