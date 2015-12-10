@@ -1,23 +1,23 @@
 #include "sensor_base.h"
 
-SensorBase::SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::VectorXs & _params) :
+SensorBase::SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::VectorXs & _params, const bool _extr_dyn) :
         NodeLinked(MID, "SENSOR"),
-        type_(_tp),
+//        type_(_tp),
         p_ptr_(_p_ptr),
         o_ptr_(_o_ptr),
-        params_(_params.size()),
-		dynamic_extrinsic_(false)
+        params_(_params),
+		extrinsic_dynamic_(_extr_dyn)
 {
-    params_ = _params;
+	//
 }
 
-SensorBase::SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, unsigned int _params_size) :
+SensorBase::SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, unsigned int _params_size, const bool _extr_dyn) :
         NodeLinked(MID, "SENSOR"),
-        type_(_tp),
+//        type_(_tp),
         p_ptr_(_p_ptr),
         o_ptr_(_o_ptr),
         params_(_params_size),
-		dynamic_extrinsic_(false)
+		extrinsic_dynamic_(_extr_dyn)
 {
     //
 }
@@ -43,10 +43,10 @@ SensorBase::~SensorBase()
 
 }
 
-const SensorType SensorBase::getSensorType() const
-{
-    return type_;
-}
+//const SensorType SensorBase::getSensorType() const
+//{
+//    return type_;
+//}
 
 StateBlock* SensorBase::getPPtr() const
 {
@@ -109,14 +109,7 @@ void SensorBase::unfix()
     }
 }
 
-void SensorBase::setDynamic(bool _dyn) {
-	dynamic_extrinsic_ = _dyn;
+bool SensorBase::isExtrinsicDynamic() {
+	return extrinsic_dynamic_;
 }
 
-void SensorBase::unsetDynamic() {
-	dynamic_extrinsic_ = false;
-}
-
-bool SensorBase::isDynamic() {
-	return dynamic_extrinsic_;
-}

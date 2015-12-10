@@ -84,7 +84,7 @@ class TF
 
 
     private:
-        /** Check if P has changed
+        /** Check if P has not changed
          *
          */
         bool equalP(double * _p_ptr)
@@ -92,7 +92,7 @@ class TF
             return ((_p_ptr[0] == p_(0)) && (_p_ptr[1] == p_(1)) && (_p_ptr[2] == p_(2)));
         }
 
-        /** Check if Q has changed
+        /** Check if Q has not changed
          *
          */
         bool equalQ(double * _q_vec_ptr)
