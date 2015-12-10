@@ -22,8 +22,6 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
         ConstraintType type_;                           ///< type of constraint (types defined at wolf.h)
         ConstraintCategory category_;                   ///< category of constraint (types defined at wolf.h)
         ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
-        const Eigen::VectorXs& measurement_;            ///< Direct access to the measurement
-        const Eigen::MatrixXs& measurement_covariance_; ///< Direct access to the measurement's covariance
         FrameBase* frame_ptr_;                          ///< FrameBase pointer (for category CTR_FRAME)
         FeatureBase* feature_ptr_;                      ///< FeatureBase pointer (for category CTR_FEATURE)
         LandmarkBase* landmark_ptr_;                    ///< LandmarkBase pointer (for category CTR_LANDMARK)
@@ -34,28 +32,28 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          * Constructor of category CTR_ABSOLUTE
          *
          **/
-        ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, ConstraintStatus _status);
 
         /** \brief Constructor of category CTR_FRAME
          *
          * Constructor of category CTR_FRAME
          *
          **/
-        ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status);
 
         /** \brief Constructor of category CTR_FEATURE
          *
          * Constructor of category CTR_FEATURE
          *
          **/
-        ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status);
 
         /** \brief Constructor of category CTR_LANDMARK
          * 
          * Constructor of category CTR_LANDMARK
          * 
          **/
-        ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status);
 
         /** \brief Destructor
          * 
@@ -97,14 +95,14 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          * Returns a pointer to the feature measurement
          *
          **/
-        const Eigen::VectorXs& getMeasurement();
+        const Eigen::VectorXs& getMeasurement() const;
 
         /** \brief Returns a pointer to the feature measurement covariance
          *
          * Returns a pointer to the feature measurement covariance
          *
          **/
-        const Eigen::MatrixXs& getMeasurementCovariance();
+        const Eigen::MatrixXs& getMeasurementCovariance() const;
 
         /** \brief Returns a pointer to the feature constrained from
          *
@@ -153,20 +151,20 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          * Returns a pointer to the frame constrained to
          *
          **/
-        FrameBase* getFrameToPtr();
+        FrameBase* getFrameOtherPtr();
 
         /** \brief Returns a pointer to the feature constrained to
          *
          * Returns a pointer to the feature constrained to
          *
          **/
-        FeatureBase* getFeatureToPtr();
+        FeatureBase* getFeatureOtherPtr();
 
         /** \brief Returns a pointer to the landmark constrained to
          *
          * Returns a pointer to the landmark constrained to
          *
          **/
-        LandmarkBase* getLandmarkToPtr();
+        LandmarkBase* getLandmarkOtherPtr();
 };
 #endif

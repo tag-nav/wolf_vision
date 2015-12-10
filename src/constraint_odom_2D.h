@@ -40,13 +40,13 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
 //            for (int i=0; i < 1; i++)
 //                std::cout << "\n\t" << _o2[i];
 //            std::cout << std::endl;
-//            std::cout << "measurement_: ";
+//            std::cout << "getMeasurement(): ";
 //            for (int i=0; i < 3; i++)
-//                std::cout << "\n\t" << measurement_(i);
+//                std::cout << "\n\t" << getMeasurement()(i);
 //            std::cout << std::endl;
-//            std::cout << "measurement_covariance_: ";
+//            std::cout << "getMeasurementCovariance(): ";
 //            for (int i=0; i < 3; i++)
-//                std::cout << "\n\t" << measurement_covariance_(i,i);
+//                std::cout << "\n\t" << getMeasurementCovariance()(i,i);
 //            std::cout << std::endl;
 
             // Expected measurement
@@ -56,16 +56,16 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
             T expected_rotation = _o2[0] - _o1[0];
 
             // Residuals
-            _residuals[0] = (expected_longitudinal - T(measurement_(0))) / T(sqrt(std::max(measurement_covariance_(0, 0),1e-6)));
-            _residuals[1] = (expected_lateral - T(measurement_(1))) / T(sqrt(std::max(measurement_covariance_(1, 1),1e-6)));
-            _residuals[2] = expected_rotation - T(measurement_(2));
+            _residuals[0] = (expected_longitudinal - T(getMeasurement()(0))) / T(sqrt(std::max(getMeasurementCovariance()(0, 0),1e-6)));
+            _residuals[1] = (expected_lateral - T(getMeasurement()(1))) / T(sqrt(std::max(getMeasurementCovariance()(1, 1),1e-6)));
+            _residuals[2] = expected_rotation - T(getMeasurement()(2));
 
             while (_residuals[2] > T(M_PI))
                 _residuals[2] = _residuals[2] - T(2*M_PI);
             while (_residuals[2] <= T(-M_PI))
                 _residuals[2] = _residuals[2] + T(2*M_PI);
 
-            _residuals[2] = _residuals[2] / T(sqrt(std::max(measurement_covariance_(2, 2),1e-6)));
+            _residuals[2] = _residuals[2] / T(sqrt(std::max(getMeasurementCovariance()(2, 2),1e-6)));
 
             return true;
         }

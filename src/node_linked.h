@@ -295,7 +295,7 @@ inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodePtr _ptr)
 {
 	assert(!isBottom() && "Trying to add a down node to a bottom node");
 	down_node_list_.push_back(_ptr);
-	down_node_list_.back()->linkToUpperNode( (typename LowerType::UpperNodePtr)(this) );
+	_ptr->linkToUpperNode( (typename LowerType::UpperNodePtr)(this) );
 	//std::cout << "node: " << _ptr->nodeId() << " linked to " <<_ptr->upperNodePtr()->nodeId() << std::endl;
 }
 

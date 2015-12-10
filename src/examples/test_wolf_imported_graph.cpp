@@ -346,10 +346,10 @@ int main(int argc, char** argv)
         if ((*c_it)->getCategory() != CTR_FRAME) continue;
 
         // ii (old)
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getFrameToPtr()->getPPtr(), Sigma_ii, 0, 0);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getFrameToPtr()->getOPtr(), Sigma_ii, 0, 2);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getFrameToPtr()->getPPtr(), Sigma_ii, 2, 0);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getFrameToPtr()->getOPtr(), Sigma_ii, 2, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getFrameOtherPtr()->getPPtr(), Sigma_ii, 0, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getFrameOtherPtr()->getOPtr(), Sigma_ii, 0, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getFrameOtherPtr()->getPPtr(), Sigma_ii, 2, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getFrameOtherPtr()->getOPtr(), Sigma_ii, 2, 2);
 //        std::cout << "Sigma_ii" << std::endl << Sigma_ii << std::endl;
 //        std::cout << "Sigma(i,i)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3, frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3) << std::endl;
         // jj (new)
@@ -360,18 +360,18 @@ int main(int argc, char** argv)
 //        std::cout << "Sigma_jj" << std::endl << Sigma_jj << std::endl;
 //        std::cout << "Sigma(j,j)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3, frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3) << std::endl;
         // ij (old-new)
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ij, 0, 0);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 0, 2);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ij, 2, 0);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 2, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ij, 0, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 0, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ij, 2, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 2, 2);
 //        std::cout << "Sigma_ij" << std::endl << Sigma_ij << std::endl;
 //        std::cout << "Sigma(i,j)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3, frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3) << std::endl;
 
 
         //jacobian
-        xi = *(*c_it)->getFrameToPtr()->getPPtr()->getPtr();
-        yi = *((*c_it)->getFrameToPtr()->getPPtr()->getPtr()+1);
-        thi = *(*c_it)->getFrameToPtr()->getOPtr()->getPtr();
+        xi = *(*c_it)->getFrameOtherPtr()->getPPtr()->getPtr();
+        yi = *((*c_it)->getFrameOtherPtr()->getPPtr()->getPtr()+1);
+        thi = *(*c_it)->getFrameOtherPtr()->getOPtr()->getPtr();
         si = sin(thi);
         ci = cos(thi);
         xj = *(*c_it)->getCapturePtr()->getFramePtr()->getPPtr()->getPtr();

@@ -67,21 +67,21 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 			T expected_measurement_orientation = (*_landmarkO) - (*_robotO) - T( *(getCapturePtr()->getSensorPtr()->getOPtr()->getPtr()) ) + T(lmk_ptr_->getCorner(corner_)(2));
 
 			// Residuals
-			_residuals[0] = (expected_measurement_position(0) - T(measurement_(0))) / T(sqrt(measurement_covariance_(0,0)));
-			_residuals[1] = (expected_measurement_position(1) - T(measurement_(1))) / T(sqrt(measurement_covariance_(1,1)));
-			_residuals[2] = expected_measurement_orientation - T(measurement_(2));
+			_residuals[0] = (expected_measurement_position(0) - T(getMeasurement()(0))) / T(sqrt(getMeasurementCovariance()(0,0)));
+			_residuals[1] = (expected_measurement_position(1) - T(getMeasurement()(1))) / T(sqrt(getMeasurementCovariance()(1,1)));
+			_residuals[2] = expected_measurement_orientation - T(getMeasurement()(2));
 
 			while (_residuals[2] > T(M_PI))
 			    _residuals[2] = _residuals[2] - T(2*M_PI);
             while (_residuals[2] <= T(-M_PI))
                 _residuals[2] = _residuals[2] + T(2*M_PI);
 
-            _residuals[2] = _residuals[2] / T(sqrt(measurement_covariance_(2,2)));
+            _residuals[2] = _residuals[2] / T(sqrt(getMeasurementCovariance()(2,2)));
 
             //std::cout << "\nCONSTRAINT: " << nodeId() << std::endl;
             //std::cout << "Feature: " << getFeaturePtr()->nodeId() << std::endl;
             //std::cout << "Landmark: " << lmk_ptr_->nodeId() << std::endl;
-            //std::cout << "measurement:\n\t" << measurement_.transpose() << std::endl;
+            //std::cout << "measurement:\n\t" << getMeasurement().transpose() << std::endl;
             //
             //std::cout << "robot pose:";
             //for (int i=0; i < 2; i++)

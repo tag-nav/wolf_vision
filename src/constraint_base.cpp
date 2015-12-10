@@ -1,25 +1,21 @@
 #include "constraint_base.h"
 
 
-ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     type_(_tp),
     category_(CTR_ABSOLUTE),
-    status_(_status),
-    measurement_(_ftr_ptr->getMeasurement()),
-    measurement_covariance_(_ftr_ptr->getMeasurementCovariance())
+    status_(_status)
 {
     //std::cout << "creating ConstraintBase " << std::endl;
 }
 
 
-ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     type_(_tp),
     category_(CTR_FRAME),
     status_(_status),
-    measurement_(_ftr_ptr->getMeasurement()),
-    measurement_covariance_(_ftr_ptr->getMeasurementCovariance()),
     frame_ptr_(_frame_ptr),
     feature_ptr_(nullptr),
     landmark_ptr_(nullptr)
@@ -29,13 +25,11 @@ ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameB
 }
 
 
-ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     type_(_tp),
     category_(CTR_FEATURE),
     status_(_status),
-    measurement_(_ftr_ptr->getMeasurement()),
-    measurement_covariance_(_ftr_ptr->getMeasurementCovariance()),
     frame_ptr_(nullptr),
     feature_ptr_(_feature_ptr),
     landmark_ptr_(nullptr)
@@ -45,13 +39,11 @@ ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, Featur
 }
 
 
-ConstraintBase::ConstraintBase(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     type_(_tp),
     category_(CTR_LANDMARK),
     status_(_status),
-    measurement_(_ftr_ptr->getMeasurement()),
-    measurement_covariance_(_ftr_ptr->getMeasurementCovariance()),
     frame_ptr_(nullptr),
     feature_ptr_(nullptr),
     landmark_ptr_(_landmark_ptr)
@@ -89,14 +81,14 @@ ConstraintType ConstraintBase::getType() const
     return type_;
 }
 
-const Eigen::VectorXs& ConstraintBase::getMeasurement()
+const Eigen::VectorXs& ConstraintBase::getMeasurement() const
 {
-	return measurement_;
+	return getFeaturePtr()->getMeasurement();
 }
 
-const Eigen::MatrixXs& ConstraintBase::getMeasurementCovariance()
+const Eigen::MatrixXs& ConstraintBase::getMeasurementCovariance() const
 {
-    return measurement_covariance_;
+    return getFeaturePtr()->getMeasurementCovariance();
 }
 
 FeatureBase* ConstraintBase::getFeaturePtr() const
@@ -129,17 +121,17 @@ void ConstraintBase::setStatus(ConstraintStatus _status)
     status_ = _status;
 }
 
-FrameBase* ConstraintBase::getFrameToPtr()
+FrameBase* ConstraintBase::getFrameOtherPtr()
 {
     return frame_ptr_;
 }
 
-FeatureBase* ConstraintBase::getFeatureToPtr()
+FeatureBase* ConstraintBase::getFeatureOtherPtr()
 {
     return feature_ptr_;
 }
 
-LandmarkBase* ConstraintBase::getLandmarkToPtr()
+LandmarkBase* ConstraintBase::getLandmarkOtherPtr()
 {
     return landmark_ptr_;
 }
