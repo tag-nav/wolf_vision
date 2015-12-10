@@ -13,11 +13,8 @@
 
 
 //TODO indentation: add a tab at everything inside the class: protected and public must have 1 tab
-class CaptureGPS : public CaptureBase {
-
-protected:
-    std::vector<float> raw_data_;
-
+class CaptureGPS : public CaptureBase
+{
 public:
     /* TODO rawData data type
      * i will not have a vector of float as raw data,
@@ -40,7 +37,11 @@ public:
      * they are reachable from this class, because private,
      * but they don't have getter/setter
      */
-    CaptureGPS(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _raw_data);
+    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr);
+
+    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
+
+    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
 
     virtual ~CaptureGPS();
 

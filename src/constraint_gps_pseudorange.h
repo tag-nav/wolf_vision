@@ -1,7 +1,3 @@
-//
-// Created by ptirindelli on 3/12/15.
-//
-
 #ifndef CONSTRAINT_GPS_PSEUDORANGE_H_
 #define CONSTRAINT_GPS_PSEUDORANGE_H_
 

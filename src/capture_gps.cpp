@@ -1,25 +1,23 @@
-//
-// Created by ptirindelli on 4/12/15.
-//
-
 #include "capture_gps.h"
 
 using namespace std;
 
-//CaptureGPS(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _raw_data);
-//
-CaptureGPS::CaptureGPS(const TimeStamp & _ts,
-                       SensorBase* _sensor_ptr,
-                       const std::vector<float>& _raw_data) :
-        CaptureBase(_ts, _sensor_ptr),
-        raw_data_(_raw_data)
+
+CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr) :
+        CaptureBase(_ts, _sensor_ptr)
 {
-    cout << "Data: ";
-    for (size_t i = 0; i<_raw_data.size(); ++i)
-    {
-        cout << _raw_data[i] << " ";
-    }
-    cout << endl;
+
+}
+
+CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, const Eigen::VectorXs &_data) :
+        CaptureBase(_ts, _sensor_ptr, _data)
+{
+
+}
+
+CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, const Eigen::VectorXs &_data, const Eigen::MatrixXs &_data_covariance) :
+        CaptureBase(_ts, _sensor_ptr, _data, _data_covariance)
+{
 
 }
 
@@ -36,14 +34,17 @@ void CaptureGPS::processCapture()
     //     e aggiungerli come feature separate
 
     // EXTRACT AND ADD FEATURES
-    for(size_t i = 0; i < raw_data_.size(); ++i)
+    for(unsigned int i = 0; i < data_.size(); ++i)
     {
-        addFeature(new FeatureGPSPseudorange(raw_data_[i]));
+        FeatureBase* new_feature = new FeatureGPSPseudorange(data_[i]);
+        addFeature(new_feature);
+        //new_feature->addConstraintFrom(new ConstraintGPSPseudorange(getFeatureListPtr()->front())); //TODO ffatta da joan
     }
+
 
     // ADD CONSTRAINT
     //TODO sarebbe cosi', usando i frame. ConstraintGPSPseudorange* constr = new ConstraintGPSPseudorange(getFeatureListPtr()->front(), getFramePtr());
-    ConstraintGPSPseudorange* constr = new ConstraintGPSPseudorange(getFeatureListPtr()->front());
+    //ConstraintGPSPseudorange* constr = new ConstraintGPSPseudorange(getFeatureListPtr()->front());
     //TODO devo aggiungere una constraint per ogni feature!!! vedi se farlo qui o altrove
 
     // TODO era cosi', ma fallisce un assert perche' non ho fatto partire wolf (credo)
@@ -59,3 +60,4 @@ Eigen::VectorXs CaptureGPS::computePrior(const TimeStamp &_now) const
 {
     return Eigen::Vector3s(1, 2, 3);
 }
+
