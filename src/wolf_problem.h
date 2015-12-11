@@ -24,7 +24,7 @@
 class WolfProblem: public NodeBase
 {
     public:
-        typedef NodeBase* LowerNodePtr;
+        typedef NodeBase* LowerNodePtr; // Necessatry for destruct() of node_linked
 
     protected:
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
@@ -240,10 +240,12 @@ class WolfProblem: public NodeBase
          */
         virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
-        void removeDownNode(const LowerNodePtr _ptr)
-        {
-            //
-        }
+        /** \brief Remove Down Node (empty
+         *
+         * This empty function is needed by destruct() node_linked function.
+         *
+         */
+        void removeDownNode(const LowerNodePtr _ptr);
 
 
     protected:

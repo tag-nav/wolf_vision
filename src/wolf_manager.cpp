@@ -26,25 +26,27 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
                 _prior_cov.rows() == 7 &&
                 "Wrong init_frame state vector or covariance matrix size");
 
-    std::cout << "initializing wolfmanager" << std::endl;
+    //std::cout << "initializing wolfmanager" << std::endl;
 
     // Initial frame
     createFrame(_prior, TimeStamp(0));
     first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
-    std::cout << " first_window_frame_" << std::endl;
+    //std::cout << " first_window_frame_" << std::endl;
 
     // Initial covariance
-    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), new SensorBase(FIX, nullptr, nullptr, 0),_prior, _prior_cov);
-    std::cout << " initial_covariance" << std::endl;
+    SensorBase* prior_sensor = new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0);
+    problem_->getHardwarePtr()->addSensor(prior_sensor);
+    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), prior_sensor, _prior, _prior_cov);
+    //std::cout << " initial_covariance" << std::endl;
     current_frame_->addCapture(initial_covariance);
-    std::cout << " addCapture" << std::endl;
+    //std::cout << " addCapture" << std::endl;
     initial_covariance->processCapture();
-    std::cout << " processCapture" << std::endl;
+    //std::cout << " processCapture" << std::endl;
 
     // Current robot frame
     createFrame(_prior, TimeStamp(0));
 
-    std::cout << " wolfmanager initialized" << std::endl;
+    //std::cout << " wolfmanager initialized" << std::endl;
 }
 
 WolfManager::~WolfManager()

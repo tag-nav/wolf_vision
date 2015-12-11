@@ -305,8 +305,8 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBase* first_frame_full = wolf_problem_full->getTrajectoryPtr()->getFrameListPtr()->front();
     FrameBase* first_frame_prun = wolf_problem_prun->getTrajectoryPtr()->getFrameListPtr()->front();
-    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_full->addCapture(initial_covariance_full);
     first_frame_prun->addCapture(initial_covariance_prun);
     initial_covariance_full->processCapture();
