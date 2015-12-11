@@ -1,0 +1,15 @@
+#include "raw_base.h"
+
+//////////////////////////////////////////
+//          IMPLEMENTATION
+//////////////////////////////////////////
+RawBase::RawBase() :
+        NodeBase("RAW")
+{
+    //
+}
+
+RawBase::~RawBase()
+{
+    //
+}
