@@ -55,12 +55,19 @@ class WolfProblem: public NodeBase
 		 */
         WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr=nullptr, HardwareBase* _hardware_ptr=nullptr);
 
-        /** \brief Default destructor
+        /** \brief Default destructor (not recommended)
          *
-         * Default destructor
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
 		 * 
          */		
         virtual ~WolfProblem();
+
+        /** \brief Wolf destructor
+         *
+         * Wolf destructor (please use it instead of delete for guaranteeing the wolf tree integrity)
+         *
+         */
+        virtual void destruct() final;
 
         /** \brief Adds a new state block to be added to solver manager
 		 *

@@ -19,10 +19,10 @@ class SensorOdom2D : public SensorBase
          * 
          **/
 		SensorOdom2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const WolfScalar& _disp_noise_factor, const WolfScalar&  _rot_noise_factor);
-        
-        /** \brief Destructor
-         * 
-         * Destructor
+
+        /** \brief Default destructor (not recommended)
+         *
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          * 
          **/
         virtual ~SensorOdom2D();

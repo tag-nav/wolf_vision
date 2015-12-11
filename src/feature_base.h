@@ -37,9 +37,9 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
          */
         FeatureBase(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
-        /** \brief Destructor
+        /** \brief Default destructor (not recommended)
          *
-         * Destructor
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          */
         virtual ~FeatureBase();

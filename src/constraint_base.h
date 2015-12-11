@@ -55,19 +55,12 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          **/
         ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status);
 
-        /** \brief Destructor
-         * 
-         * Destructor
+        /** \brief Default destructor (not recommended)
+         *
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          * 
          **/
         virtual ~ConstraintBase();
-
-        /** \brief Destructor call if is not already deleting
-         *
-         * Destructor call if is not already deleting
-         *
-         */
-        //virtual void destruct();
 
         /** \brief Returns the constraint type
          * 

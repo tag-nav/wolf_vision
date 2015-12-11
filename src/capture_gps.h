@@ -40,7 +40,11 @@ public:
 
     CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _raw_data);
 
-
+    /** \brief Default destructor (not recommended)
+     *
+     * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
+     *
+     **/
     virtual ~CaptureGPS();
 
     void processCapture();

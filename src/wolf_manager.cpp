@@ -51,7 +51,7 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
 
 WolfManager::~WolfManager()
 {
-    std::cout << "deleting wolf manager..." << std::endl;
+    //std::cout << "deleting wolf manager..." << std::endl;
     delete problem_;
 }
 

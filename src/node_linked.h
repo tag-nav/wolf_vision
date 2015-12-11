@@ -58,9 +58,9 @@ class NodeLinked : public NodeBase
          */
         NodeLinked(const NodeLocation _loc, const std::string& _label);
 
-        /** \brief Default destructor
+        /** \brief Default destructor (not recommended)
          *
-         * Default destructor
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
 		 * 
          */		
         virtual ~NodeLinked();

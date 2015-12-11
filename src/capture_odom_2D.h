@@ -20,7 +20,12 @@ class CaptureOdom2D : public CaptureMotion
       CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data);
 
       CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance);
-        
+
+      /** \brief Default destructor (not recommended)
+       *
+       * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
+       *
+       **/
       virtual ~CaptureOdom2D();
 
       virtual void processCapture();

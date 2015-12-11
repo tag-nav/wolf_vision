@@ -26,6 +26,11 @@ public:
         createConstraint((FeatureGPSPseudorange*) _ftr_ptr);
     }
 
+    /** \brief Default destructor (not recommended)
+     *
+     * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
+     *
+     **/
     virtual ~ConstraintGPSPseudorange()
     {
 

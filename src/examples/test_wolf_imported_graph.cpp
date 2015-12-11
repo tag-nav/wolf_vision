@@ -48,7 +48,7 @@ int main(int argc, char** argv)
     unsigned int MAX_VERTEX = atoi(argv[2]);
     if (MAX_VERTEX == 0) MAX_VERTEX = 1e6;
     std::ifstream offLineFile_;
-    clock_t t1, t2;
+    clock_t t1;
     ceres::Solver::Summary summary_full, summary_prun;
     Eigen::MatrixXs Sigma_ii(3,3), Sigma_ij(3,3), Sigma_jj(3,3), Sigma_z(3,3), Ji(3,3), Jj(3,3);
     WolfScalar xi, yi, thi, si, ci, xj, yj;
