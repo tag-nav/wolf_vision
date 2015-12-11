@@ -57,7 +57,7 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
          * Destructor call if is not already deleting
          *
          */
-        virtual void destruct();
+        //virtual void destruct();
 
         /** \brief Link with a constraint
          *

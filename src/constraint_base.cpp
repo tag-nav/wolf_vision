@@ -70,11 +70,11 @@ ConstraintBase::~ConstraintBase()
         landmark_ptr_->removeConstraintTo(this);
 }
 
-void ConstraintBase::destruct()
-{
-    if (!is_deleting_)
-        up_node_ptr_->removeDownNode(this);
-}
+//void ConstraintBase::destruct()
+//{
+//    if (!is_deleting_)
+//        up_node_ptr_->removeDownNode(this);
+//}
 
 ConstraintType ConstraintBase::getType() const
 {

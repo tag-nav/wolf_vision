@@ -51,11 +51,11 @@ FrameBase::~FrameBase()
     //std::cout << "constraints deleted" << std::endl;
 }
 
-void FrameBase::destruct()
-{
-    if (!is_deleting_)
-        up_node_ptr_->removeDownNode(this);
-}
+//void FrameBase::destruct()
+//{
+//    if (!is_deleting_)
+//        up_node_ptr_->removeDownNode(this);
+//}
 
 void FrameBase::addConstraintTo(ConstraintBase* _ctr_ptr)
 {

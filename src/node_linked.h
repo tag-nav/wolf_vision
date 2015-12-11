@@ -65,6 +65,13 @@ class NodeLinked : public NodeBase
          */		
         virtual ~NodeLinked();
 
+        /** \brief Wolf destructor
+         *
+         * Wolf destructor (please use it instead of delete for guaranteeing the wolf tree integrity)
+         *
+         */
+        virtual void destruct() final;
+
         /** \brief Checks if the destructor has been called already
          *
          * Checks if the destructor has been called already
@@ -231,6 +238,19 @@ NodeLinked<UpperType, LowerType>::~NodeLinked()
 	    delete down_node_list_.front();
 	    down_node_list_.pop_front();
 	}
+}
+
+template<class UpperType, class LowerType>
+void NodeLinked<UpperType, LowerType>::destruct()
+{
+    //std::cout << "deleting Nodelinked " << node_id_ << " down_node_list_.size() " << down_node_list_.size() << std::endl;
+    if (!is_deleting_)
+    {
+        if (up_node_ptr_ != nullptr && !up_node_ptr_->isTop())
+            up_node_ptr_->removeDownNode((typename UpperType::LowerNodePtr)(this));
+        else
+            delete this;
+    }
 }
 
 template<class UpperType, class LowerType>

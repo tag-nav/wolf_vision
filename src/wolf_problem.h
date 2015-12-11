@@ -23,6 +23,9 @@
  */
 class WolfProblem: public NodeBase
 {
+    public:
+        typedef NodeBase* LowerNodePtr;
+
     protected:
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
         NodeLocation location_;// TODO: should it be in node_base?
@@ -221,6 +224,13 @@ class WolfProblem: public NodeBase
 		 */
         virtual WolfProblem* getTop();
 
+        /** \brief Returns a true (is top)
+         *
+         * Returns a true (is top)
+         *
+         */
+        virtual bool isTop();
+
         /** \brief Prints node information
          * 
 		 * Prints node information.
@@ -229,6 +239,11 @@ class WolfProblem: public NodeBase
 		 * 
          */
         virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+
+        void removeDownNode(const LowerNodePtr _ptr)
+        {
+            //
+        }
 
 
     protected:

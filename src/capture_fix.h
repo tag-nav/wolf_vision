@@ -14,7 +14,7 @@ class CaptureFix : public CaptureBase
 {
     public:
 
-        CaptureFix(const TimeStamp& _ts, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
+        CaptureFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
 
         virtual ~CaptureFix();
 

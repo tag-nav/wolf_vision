@@ -67,7 +67,7 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          * Destructor call if is not already deleting
          *
          */
-        virtual void destruct();
+        //virtual void destruct();
 
         /** \brief Returns the constraint type
          * 

@@ -197,6 +197,11 @@ WolfProblem* WolfProblem::getTop()
 	return this;
 }
 
+bool WolfProblem::isTop()
+{
+    return true;
+}
+
 void WolfProblem::printLower(unsigned int _ntabs, std::ostream& _ost) const
 {
     printTabs(_ntabs);

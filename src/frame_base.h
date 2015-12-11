@@ -65,7 +65,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          * Destructor call if is not already deleting
          *
          */
-        virtual void destruct();
+        //virtual void destruct();
 
         /** \brief Link with a constraint
          *
