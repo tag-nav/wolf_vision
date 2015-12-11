@@ -12,8 +12,9 @@ class NodeTerminus;
 #include "node_linked.h"
 #include "state_block.h"
 #include "hardware_base.h"
+#include "processor_base.h"
 
-class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
+class SensorBase : public NodeLinked<HardwareBase,ProcessorBase>
 {
     protected:
 //        SensorType type_;		// indicates sensor type. Enum defined at wolf.h
@@ -97,4 +98,3 @@ class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
 
 };
 #endif
-

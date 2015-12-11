@@ -52,7 +52,7 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
 WolfManager::~WolfManager()
 {
     //std::cout << "deleting wolf manager..." << std::endl;
-    delete problem_;
+    problem_->destruct();
 }
 
 void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)

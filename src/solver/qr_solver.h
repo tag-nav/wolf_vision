@@ -173,7 +173,7 @@ class SolverQR
             // ADD MEASUREMENTS
             for (unsigned int j = 0; j < idxs.size(); j++)
             {
-                assert(acc_node_permutation_.indices()(idxs.at(j)) == nodeOrder(idxs.at(j)));
+                assert((unsigned int)(acc_node_permutation_.indices()(idxs.at(j))) == nodeOrder(idxs.at(j)));
                 assert(jacobians.at(j).cols() == nodeDim(idxs.at(j)));
                 assert(jacobians.at(j).rows() == meas_dim);
 
