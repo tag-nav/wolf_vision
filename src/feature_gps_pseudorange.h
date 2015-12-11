@@ -41,7 +41,7 @@ public:
     }
 
 
-    FeatureGPSPseudorange(float _satellite_data);
+    FeatureGPSPseudorange(const WolfScalar &_satellite_data);
 
     virtual ~FeatureGPSPseudorange();
 

@@ -79,6 +79,11 @@ StateBlock* SensorBase::getOPtr() const
     return o_ptr_;
 }
 
+StateBlock* SensorBase::getIntrinsicPtr() const
+{
+    return intrinsic_ptr_;
+}
+
 Eigen::Matrix2s SensorBase::getRotationMatrix2D()
 {
 	// TODO: move this code somewhere else and do a real get()

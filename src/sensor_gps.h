@@ -24,10 +24,10 @@
  */
 class SensorGPS : public SensorBase
 {
-
+//todo nav data
 public:
     //pointer to sensor position and orientation.
-    SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr);
+    SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr, StateBlock* _bias_ptr);
 
     virtual ~SensorGPS();
 
