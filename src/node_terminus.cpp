@@ -12,7 +12,7 @@ NodeTerminus::~NodeTerminus()
   //
 }
 
-WolfProblem* NodeTerminus::getTop()
-{
-	return nullptr;
-}
+//WolfProblem* NodeTerminus::getTop()
+//{
+//	return nullptr;
+//}
