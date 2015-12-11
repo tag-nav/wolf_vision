@@ -7,20 +7,17 @@
 //wolf
 #include "sensor_base.h"
 
-/*
- * e' la parte hardware dell'albero WOLF
- *
- * parametri intriseci (roba che fa parte del sensore)
- * e estriseci (roba che non ne fa parte (tipo posa iniziale))
- *
- *
- * TODO qua dentro va la nav Data, perche' in teoria cambiano a slow rate
- * ((previously)qua dentro va il nav file, perche' e' fisso e non cambia con il tempo)
- *
- */
+
 class SensorGPS : public SensorBase
 {
-//todo nav data
+protected:
+//    TODO parameters needed:
+//        * INTRINSIC PARAM:
+//                bias
+//        * EXTRINSIC PARAM:
+//                nav data
+//                gps mounting point
+
 public:
     //pointer to sensor position and orientation.
     SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr, StateBlock* _bias_ptr);
@@ -31,8 +28,6 @@ public:
      *
      **/
     virtual ~SensorGPS();
-
-
 
 };
 

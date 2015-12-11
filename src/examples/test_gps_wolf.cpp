@@ -47,12 +47,11 @@ int main(int argc, char** argv)
 
 
     wolf_manager_->addSensor(gps_sensor_ptr_);
-//    wolf_manager_->getProblemPtr()->print();
 
 
-    for(int i=0; i<2; ++i)
+    for(int i=0; i<20; ++i)
     {
-        cout << "############### NEW CAPTURE ###############" << endl;
+        cout << "%%%%%%%%%%%%%%%%%%%%%% CAPTURE #" << i << endl;
         TimeStamp time_stamp(i);
 
         Eigen::VectorXs raw_data(3);
@@ -65,28 +64,26 @@ int main(int argc, char** argv)
 
         // Add capture
         wolf_manager_->addCapture(cpt_ptr_);
+        //cout << "capture added" << endl;
 
         // update wolf tree
         wolf_manager_->update();
+        //cout << "wolf manager updated" << endl;
 
         ceres_manager->update();
+        //cout << "ceres manager updated" << endl;
 
         ceres::Solver::Summary summary;
 
         summary = ceres_manager->solve(ceres_options);
-        std::cout << summary.FullReport() << std::endl;
+        cout << summary.FullReport() << endl;
     }
-
-//
-//
-//    wolf_manager_->getProblemPtr()->print();
-
 
 
     delete wolf_manager_; //not necessary to delete anything more, wolf will do it!
 
     //End message
-    std::cout << " =========================== END ===============================" << std::endl << std::endl;
+    cout << " =========================== END ===============================" << std::endl << std::endl;
 
     //exit
     return 0;
