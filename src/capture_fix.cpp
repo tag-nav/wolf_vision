@@ -1,10 +1,10 @@
 #include "capture_fix.h"
 
 
-CaptureFix::CaptureFix(const TimeStamp& _ts, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
-	CaptureBase(_ts, nullptr, _data, _data_covariance)
+CaptureFix::CaptureFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
+	CaptureBase(_ts, _sensor_ptr, _data, _data_covariance)
 {
-	//
+    std::cout << "capture fix constructor " << std::endl;
 }
 
 CaptureFix::~CaptureFix()

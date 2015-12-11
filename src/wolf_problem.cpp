@@ -34,9 +34,14 @@ WolfProblem::~WolfProblem()
     constraint_add_list_.clear();
     constraint_remove_list_.clear();
 
-	delete trajectory_ptr_;
-    delete map_ptr_;
-    delete hardware_ptr_;
+	trajectory_ptr_->destruct();
+    map_ptr_->destruct();
+    hardware_ptr_->destruct();
+}
+
+void WolfProblem::destruct()
+{
+    delete this;
 }
 
 void WolfProblem::addStateBlockPtr(StateBlock* _state_ptr)
@@ -197,13 +202,25 @@ WolfProblem* WolfProblem::getTop()
 	return this;
 }
 
+bool WolfProblem::isTop()
+{
+    return true;
+}
+
+void WolfProblem::removeDownNode(const LowerNodePtr _ptr)
+{
+    //
+}
+
 void WolfProblem::printLower(unsigned int _ntabs, std::ostream& _ost) const
 {
     printTabs(_ntabs);
     _ost << "\tLower Nodes  ==> [ ";
     _ost << map_ptr_->nodeId() << " ";
-    _ost << trajectory_ptr_->nodeId() << " ]" << std::endl;
+    _ost << trajectory_ptr_->nodeId() << " ";
+    _ost << hardware_ptr_->nodeId() << " ]" << std::endl;
     _ntabs++;
 	map_ptr_->print(_ntabs, _ost);
 	trajectory_ptr_->print(_ntabs, _ost);
+    hardware_ptr_->print(_ntabs, _ost);
 }

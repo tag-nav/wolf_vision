@@ -62,9 +62,9 @@ class LandmarkContainer : public LandmarkBase
          **/
 		LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const WolfScalar& _witdh=2.44, const WolfScalar& _length=12.2);
 
-        /** \brief Destructor
-         * 
-         * Destructor
+        /** \brief Default destructor (not recommended)
+         *
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          * 
          **/
         virtual ~LandmarkContainer();

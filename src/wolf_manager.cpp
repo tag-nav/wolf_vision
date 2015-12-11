@@ -34,7 +34,9 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
     //std::cout << " first_window_frame_" << std::endl;
 
     // Initial covariance
-    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), _prior, _prior_cov);
+    SensorBase* prior_sensor = new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0);
+    problem_->getHardwarePtr()->addSensor(prior_sensor);
+    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), prior_sensor, _prior, _prior_cov);
     //std::cout << " initial_covariance" << std::endl;
     current_frame_->addCapture(initial_covariance);
     //std::cout << " addCapture" << std::endl;
@@ -49,7 +51,7 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
 
 WolfManager::~WolfManager()
 {
-    std::cout << "deleting wolf manager..." << std::endl;
+    //std::cout << "deleting wolf manager..." << std::endl;
     delete problem_;
 }
 

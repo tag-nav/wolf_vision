@@ -23,6 +23,9 @@
  */
 class WolfProblem: public NodeBase
 {
+    public:
+        typedef NodeBase* LowerNodePtr; // Necessatry for destruct() of node_linked
+
     protected:
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
         NodeLocation location_;// TODO: should it be in node_base?
@@ -52,12 +55,19 @@ class WolfProblem: public NodeBase
 		 */
         WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr=nullptr, HardwareBase* _hardware_ptr=nullptr);
 
-        /** \brief Default destructor
+        /** \brief Default destructor (not recommended)
          *
-         * Default destructor
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
 		 * 
          */		
         virtual ~WolfProblem();
+
+        /** \brief Wolf destructor
+         *
+         * Wolf destructor (please use it instead of delete for guaranteeing the wolf tree integrity)
+         *
+         */
+        virtual void destruct() final;
 
         /** \brief Adds a new state block to be added to solver manager
 		 *
@@ -221,6 +231,13 @@ class WolfProblem: public NodeBase
 		 */
         virtual WolfProblem* getTop();
 
+        /** \brief Returns a true (is top)
+         *
+         * Returns a true (is top)
+         *
+         */
+        virtual bool isTop();
+
         /** \brief Prints node information
          * 
 		 * Prints node information.
@@ -229,6 +246,13 @@ class WolfProblem: public NodeBase
 		 * 
          */
         virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+
+        /** \brief Remove Down Node (empty
+         *
+         * This empty function is needed by destruct() node_linked function.
+         *
+         */
+        void removeDownNode(const LowerNodePtr _ptr);
 
 
     protected:

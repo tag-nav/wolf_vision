@@ -16,7 +16,12 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
 		{
 		    //std::cout << "creating ConstraintFix " << std::endl;
 		}
-        
+
+        /** \brief Default destructor (not recommended)
+         *
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
+         *
+         **/
 		virtual ~ConstraintFix()
 		{
 			//
@@ -25,13 +30,13 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
 		template <typename T>
 		bool operator()(const T* const _p, const T* const _o, T* _residuals) const
 		{
-		    _residuals[0] = (T(measurement_(0)) - _p[0]) / T(sqrt(measurement_covariance_(0,0)));
-            _residuals[1] = (T(measurement_(1)) - _p[1]) / T(sqrt(measurement_covariance_(1,1)));
-            _residuals[2] = T(measurement_(2)) - _o[0];
+		    _residuals[0] = (T(getMeasurement()(0)) - _p[0]) / T(sqrt(getMeasurementCovariance()(0,0)));
+            _residuals[1] = (T(getMeasurement()(1)) - _p[1]) / T(sqrt(getMeasurementCovariance()(1,1)));
+            _residuals[2] = T(getMeasurement()(2)) - _o[0];
 
 //            std::cout << "+++++++  fix constraint +++++++" << std::endl;
 //            std::cout << "orientation:   " << _o[0] << std::endl;
-//            std::cout << "measurement:   " << T(measurement_(2)) << std::endl;
+//            std::cout << "measurement:   " << T(getMeasurement()(2)) << std::endl;
 //            std::cout << "residual:      " << _residuals[2] << std::endl;
 //            std::cout << "is > PI        " << bool(_residuals[2] > T(2*M_PI)) << std::endl;
 //            std::cout << "is >= PI       " << bool(_residuals[2] <= T(-2*M_PI)) << std::endl;
@@ -42,7 +47,7 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
             	_residuals[2] = _residuals[2] + T(2*M_PI);
 
 //            std::cout << "residual:      " << _residuals[2] << std::endl << std::endl;
-            _residuals[2] = _residuals[2] / T(sqrt(measurement_covariance_(2,2)));
+            _residuals[2] = _residuals[2] / T(sqrt(getMeasurementCovariance()(2,2)));
 
 			return true;
 		}

@@ -48,7 +48,7 @@ int main(int argc, char** argv)
     unsigned int MAX_VERTEX = atoi(argv[2]);
     if (MAX_VERTEX == 0) MAX_VERTEX = 1e6;
     std::ifstream offLineFile_;
-    clock_t t1, t2;
+    clock_t t1;
     ceres::Solver::Summary summary_full, summary_prun;
     Eigen::MatrixXs Sigma_ii(3,3), Sigma_ij(3,3), Sigma_jj(3,3), Sigma_z(3,3), Ji(3,3), Jj(3,3);
     WolfScalar xi, yi, thi, si, ci, xj, yj;
@@ -305,8 +305,8 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBase* first_frame_full = wolf_problem_full->getTrajectoryPtr()->getFrameListPtr()->front();
     FrameBase* first_frame_prun = wolf_problem_prun->getTrajectoryPtr()->getFrameListPtr()->front();
-    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_full->addCapture(initial_covariance_full);
     first_frame_prun->addCapture(initial_covariance_prun);
     initial_covariance_full->processCapture();
@@ -346,10 +346,10 @@ int main(int argc, char** argv)
         if ((*c_it)->getCategory() != CTR_FRAME) continue;
 
         // ii (old)
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getFrameToPtr()->getPPtr(), Sigma_ii, 0, 0);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getFrameToPtr()->getOPtr(), Sigma_ii, 0, 2);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getFrameToPtr()->getPPtr(), Sigma_ii, 2, 0);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getFrameToPtr()->getOPtr(), Sigma_ii, 2, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getFrameOtherPtr()->getPPtr(), Sigma_ii, 0, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getFrameOtherPtr()->getOPtr(), Sigma_ii, 0, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getFrameOtherPtr()->getPPtr(), Sigma_ii, 2, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getFrameOtherPtr()->getOPtr(), Sigma_ii, 2, 2);
 //        std::cout << "Sigma_ii" << std::endl << Sigma_ii << std::endl;
 //        std::cout << "Sigma(i,i)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3, frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3) << std::endl;
         // jj (new)
@@ -360,18 +360,18 @@ int main(int argc, char** argv)
 //        std::cout << "Sigma_jj" << std::endl << Sigma_jj << std::endl;
 //        std::cout << "Sigma(j,j)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3, frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3) << std::endl;
         // ij (old-new)
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ij, 0, 0);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 0, 2);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ij, 2, 0);
-        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameToPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 2, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ij, 0, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 0, 2);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_ij, 2, 0);
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 2, 2);
 //        std::cout << "Sigma_ij" << std::endl << Sigma_ij << std::endl;
 //        std::cout << "Sigma(i,j)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3, frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3) << std::endl;
 
 
         //jacobian
-        xi = *(*c_it)->getFrameToPtr()->getPPtr()->getPtr();
-        yi = *((*c_it)->getFrameToPtr()->getPPtr()->getPtr()+1);
-        thi = *(*c_it)->getFrameToPtr()->getOPtr()->getPtr();
+        xi = *(*c_it)->getFrameOtherPtr()->getPPtr()->getPtr();
+        yi = *((*c_it)->getFrameOtherPtr()->getPPtr()->getPtr()+1);
+        thi = *(*c_it)->getFrameOtherPtr()->getOPtr()->getPtr();
         si = sin(thi);
         ci = cos(thi);
         xj = *(*c_it)->getCapturePtr()->getFramePtr()->getPPtr()->getPtr();

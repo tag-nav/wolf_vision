@@ -45,19 +45,12 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
          **/
         LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
 
-        /** \brief Destructor
+        /** \brief Default destructor (not recommended)
          *
-         * Destructor
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          **/
         virtual ~LandmarkBase();
-
-        /** \brief Destructor call if is not already deleting
-         *
-         * Destructor call if is not already deleting
-         *
-         */
-        virtual void destruct();
 
         /** \brief Link with a constraint
          *

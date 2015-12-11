@@ -17,9 +17,9 @@ class FeatureCorner2D : public FeatureBase
          */
         FeatureCorner2D(const Eigen::Vector4s & _measurement, const Eigen::Matrix4s & _meas_covariance); //TODO: add const WolfScalar& aperture);
 
-        /** \brief Destructor 
-         * 
-         * destructor
+        /** \brief Default destructor (not recommended)
+         *
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          */        
         virtual ~FeatureCorner2D();

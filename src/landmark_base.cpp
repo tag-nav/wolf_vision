@@ -39,12 +39,6 @@ LandmarkBase::~LandmarkBase()
 	//std::cout << "constraints deleted" << std::endl;
 }
 
-void LandmarkBase::destruct()
-{
-    if (!is_deleting_)
-        up_node_ptr_->removeDownNode(this);
-}
-
 void LandmarkBase::addConstraintTo(ConstraintBase* _ctr_ptr)
 {
     constraint_to_list_.push_back(_ctr_ptr);

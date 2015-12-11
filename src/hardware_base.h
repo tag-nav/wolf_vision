@@ -20,9 +20,9 @@ class HardwareBase : public NodeLinked<WolfProblem,SensorBase>
          **/
 		HardwareBase();
 
-        /** \brief Destructor
+        /** \brief Default destructor (not recommended)
          *
-         * Destructor
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          **/        
         ~HardwareBase();

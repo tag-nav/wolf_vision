@@ -58,12 +58,19 @@ class NodeLinked : public NodeBase
          */
         NodeLinked(const NodeLocation _loc, const std::string& _label);
 
-        /** \brief Default destructor
+        /** \brief Default destructor (not recommended)
          *
-         * Default destructor
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
 		 * 
          */		
         virtual ~NodeLinked();
+
+        /** \brief Wolf destructor
+         *
+         * Wolf destructor (please use it instead of delete for guaranteeing the wolf tree integrity)
+         *
+         */
+        virtual void destruct() final;
 
         /** \brief Checks if the destructor has been called already
          *
@@ -234,6 +241,25 @@ NodeLinked<UpperType, LowerType>::~NodeLinked()
 }
 
 template<class UpperType, class LowerType>
+void NodeLinked<UpperType, LowerType>::destruct()
+{
+    //std::cout << "destruct() " << node_id_ << " down_node_list_.size() " << down_node_list_.size() << std::endl;
+    if (!is_deleting_)
+    {
+        if (up_node_ptr_ != nullptr && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            up_node_ptr_->removeDownNode((typename UpperType::LowerNodePtr)(this));
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
+}
+
+template<class UpperType, class LowerType>
 inline const bool NodeLinked<UpperType, LowerType>::isDeleting() const
 {
     return is_deleting_;
@@ -295,7 +321,7 @@ inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodePtr _ptr)
 {
 	assert(!isBottom() && "Trying to add a down node to a bottom node");
 	down_node_list_.push_back(_ptr);
-	down_node_list_.back()->linkToUpperNode( (typename LowerType::UpperNodePtr)(this) );
+	_ptr->linkToUpperNode( (typename LowerType::UpperNodePtr)(this) );
 	//std::cout << "node: " << _ptr->nodeId() << " linked to " <<_ptr->upperNodePtr()->nodeId() << std::endl;
 }
 

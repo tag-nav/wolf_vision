@@ -31,9 +31,9 @@ class SensorLaser2D : public SensorBase
         SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr);
         //SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params);
 
-        /** \brief Destructor
-         * 
-         * Destructor
+        /** \brief Default destructor (not recommended)
+         *
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          * 
          **/
         virtual ~SensorLaser2D();

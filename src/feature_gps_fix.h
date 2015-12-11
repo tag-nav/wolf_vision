@@ -26,6 +26,11 @@ class FeatureGPSFix : public FeatureBase
          */
         FeatureGPSFix(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
+        /** \brief Default destructor (not recommended)
+         *
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
+         *
+         **/
         virtual ~FeatureGPSFix();
 };
 #endif
