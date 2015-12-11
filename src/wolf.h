@@ -58,6 +58,7 @@ namespace Eigen  // Eigen namespace extension
 typedef Matrix<WolfScalar, 2, 2> Matrix2s;                ///< 2x2 matrix of real scalar_t type
 typedef Matrix<WolfScalar, 3, 3> Matrix3s;                ///< 3x3 matrix of real scalar_t type
 typedef Matrix<WolfScalar, 4, 4> Matrix4s;                ///< 4x4 matrix of real scalar_t type
+typedef Matrix<WolfScalar, 7, 7> Matrix7s;                ///< 7x7 matrix of real scalar_t type
 typedef Matrix<WolfScalar, Dynamic, Dynamic> MatrixXs;    ///< variable size matrix of real scalar_t type
 typedef Matrix<WolfScalar, 1, 1> Vector1s;                ///< 1-vector of real scalar_t type
 typedef Matrix<WolfScalar, 2, 1> Vector2s;                ///< 2-vector of real scalar_t type
@@ -69,6 +70,7 @@ typedef Matrix<WolfScalar, Dynamic, 1> VectorXs;          ///< variable size vec
 typedef Matrix<WolfScalar, 1, 2> RowVector2s;             ///< 2-row-vector of real scalar_t type
 typedef Matrix<WolfScalar, 1, 3> RowVector3s;             ///< 3-row-vector of real scalar_t type
 typedef Matrix<WolfScalar, 1, 4> RowVector4s;             ///< 4-row-vector of real scalar_t type
+typedef Matrix<WolfScalar, 1, 7> RowVector7s;             ///< 7-row-vector of real scalar_t type
 typedef Matrix<WolfScalar, 1, Dynamic> RowVectorXs;       ///< variable size row-vector of real scalar_t type
 
 // 2. Quaternions and other rotation things
@@ -113,7 +115,7 @@ typedef enum
 typedef enum
 {
     PO_2D,  ///< marks a 2D frame containing position (x,y) and orientation angle.
-    PO_3D   ///< marks a 3D frame containing position (x,y,z) and orientation quaternion.
+    PO_3D   ///< marks a 3D frame containing position (x,y,z) and orientation quaternion (x,y,z,w).
 } FrameStructure;
 
 /** \brief Enumeration of all possible constraints
