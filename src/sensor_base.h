@@ -24,6 +24,7 @@ class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
 
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
+        Eigen::VectorXs noise_factor_; // noise factor for simulation purposes -- multiplies the real sensor noise for the estimator
 
     public:        
         
@@ -82,6 +83,10 @@ class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
         bool isExtrinsicDynamic();
 
         void setNoise(const Eigen::VectorXs & _noise_std);
+
+        Eigen::VectorXs getNoiseStd();
+
+        Eigen::MatrixXs getNoiseCov();
 
 };
 #endif

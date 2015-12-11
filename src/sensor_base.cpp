@@ -9,7 +9,8 @@ SensorBase::SensorBase(const SensorType& _tp, StateBlock* _p_ptr,
         intrinsic_ptr_(_intr_ptr),
 		extrinsic_dynamic_(_extr_dyn),
 		noise_std_(_noise_size),
-		noise_cov_(_noise_size,_noise_size)
+		noise_cov_(_noise_size,_noise_size),
+		noise_factor_(Eigen::VectorXs::Constant(_noise_size,1.0))
 {
 	//
 }
@@ -22,11 +23,12 @@ SensorBase::SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _
 //        params_(_params),
 		extrinsic_dynamic_(_extr_dyn),
 		noise_std_(_noise_std),
-		noise_cov_(_noise_std.size(),_noise_std.size())
+		noise_cov_(_noise_std.size(),_noise_std.size()),
+		noise_factor_(Eigen::VectorXs::Constant(_noise_std.size(),1.0))
 {
 	noise_cov_.setZero();
 	for (unsigned int i=0; i<_noise_std.size(); i++)
-		noise_cov_(i,i) = _noise_std(i) * _noise_std(i);
+		noise_cov_(i,i) = noise_std_(i) * noise_std_(i);
 }
 
 
@@ -137,4 +139,12 @@ void SensorBase::setNoise(const Eigen::VectorXs& _noise_std) {
 	noise_cov_.setZero();
 	for (unsigned int i=0; i<_noise_std.size(); i++)
 		noise_cov_(i,i) = _noise_std(i) * _noise_std(i);
+}
+
+Eigen::VectorXs SensorBase::getNoiseStd() {
+	return noise_std_;
+}
+
+Eigen::MatrixXs SensorBase::getNoiseCov() {
+	return noise_cov_;
 }
