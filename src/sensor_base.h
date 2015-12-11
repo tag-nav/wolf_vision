@@ -69,6 +69,8 @@ class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
 
         StateBlock* getOPtr() const;
 
+        StateBlock* getIntrinsicPtr() const;
+
         Eigen::Matrix2s getRotationMatrix2D();
 
         Eigen::Matrix3s getRotationMatrix3D();

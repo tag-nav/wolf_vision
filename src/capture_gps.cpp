@@ -3,23 +3,14 @@
 using namespace std;
 
 
-CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr) :
-        CaptureBase(_ts, _sensor_ptr)
+
+CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, const Eigen::VectorXs &_raw_data) :
+        CaptureBase(_ts, _sensor_ptr),
+        raw_data_(_raw_data)
 {
 
 }
 
-CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, const Eigen::VectorXs &_data) :
-        CaptureBase(_ts, _sensor_ptr, _data)
-{
-
-}
-
-CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, const Eigen::VectorXs &_data, const Eigen::MatrixXs &_data_covariance) :
-        CaptureBase(_ts, _sensor_ptr, _data, _data_covariance)
-{
-
-}
 
 CaptureGPS::~CaptureGPS()
 {
@@ -34,11 +25,11 @@ void CaptureGPS::processCapture()
     //     e aggiungerli come feature separate
 
     // EXTRACT AND ADD FEATURES
-    for(unsigned int i = 0; i < data_.size(); ++i)
+    for(unsigned int i = 0; i < raw_data_.size(); ++i)
     {
-        FeatureBase* new_feature = new FeatureGPSPseudorange(data_[i]);
+        FeatureBase* new_feature = new FeatureGPSPseudorange(raw_data_[i]);
         addFeature(new_feature);
-        //new_feature->addConstraintFrom(new ConstraintGPSPseudorange(getFeatureListPtr()->front())); //TODO ffatta da joan
+        new_feature->addConstraintFrom(new ConstraintGPSPseudorange(getFeatureListPtr()->front()));
     }
 
 

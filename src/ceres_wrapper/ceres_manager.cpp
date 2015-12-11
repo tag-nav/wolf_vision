@@ -363,6 +363,23 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
                                                     specific_ptr->block9Size>(specific_ptr);
             break;
         }
+        case CTR_GPS_PR_3D:
+        {
+            ConstraintGPSPseudorange* specific_ptr = (ConstraintGPSPseudorange*)(_corrPtr);
+            return new ceres::AutoDiffCostFunction<ConstraintGPSPseudorange,
+                    specific_ptr->measurementSize,
+                    specific_ptr->block0Size,
+                    specific_ptr->block1Size,
+                    specific_ptr->block2Size,
+                    specific_ptr->block3Size,
+                    specific_ptr->block4Size,
+                    specific_ptr->block5Size,
+                    specific_ptr->block6Size,
+                    specific_ptr->block7Size,
+                    specific_ptr->block8Size,
+                    specific_ptr->block9Size>(specific_ptr);
+            break;
+        }
 		default:
 			std::cout << "Unknown constraint type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
 

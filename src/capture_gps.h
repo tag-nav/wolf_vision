@@ -37,17 +37,18 @@ public:
      * they are reachable from this class, because private,
      * but they don't have getter/setter
      */
-    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr);
 
-    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
+    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _raw_data);
 
-    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
 
     virtual ~CaptureGPS();
 
     void processCapture();
 
     virtual Eigen::VectorXs computePrior(const TimeStamp &_now) const;
+
+protected:
+    Eigen::VectorXs raw_data_;
 };
 
 
