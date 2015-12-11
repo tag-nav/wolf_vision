@@ -7,7 +7,8 @@
 
 class SensorOdom2D : public SensorBase
 {
-    public:
+
+	public:
         /** \brief Constructor with arguments
          * 
          * Constructor with arguments
