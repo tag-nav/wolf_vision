@@ -15,8 +15,6 @@ class ConstraintGPSPseudorange: public ConstraintSparse<1, 3, 4, 3, 4, 1>// TODO
 
 public:
 
-//    // TODO 1: tutti i parametri li ho copiati da gps2D, non so cosa mi servira' realmente
-//    // TODO 2: scopri come funziona wolf e i vari parametri.
     ConstraintGPSPseudorange(FeatureBase* _ftr_ptr, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 3, 4, 3, 4, 1>(_ftr_ptr,CTR_GPS_PR_3D, _status,
                                                _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(),

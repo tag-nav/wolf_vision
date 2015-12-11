@@ -4,8 +4,8 @@
 #define SENSOR_LASER_2D_H_
 
 //laser_scan_utils
-#include "laser_scan_utils/scan_basics.h"
-#include "laser_scan_utils/corner_detector.h"
+#include "iri-algorithms/laser_scan_utils/scan_basics.h"
+#include "iri-algorithms/laser_scan_utils/corner_detector.h"
 
 //wolf 
 #include "sensor_base.h"

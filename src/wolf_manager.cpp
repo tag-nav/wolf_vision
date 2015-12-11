@@ -31,22 +31,20 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
     // Initial frame
     createFrame(_prior, TimeStamp(0));
     first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
-    //std::cout << " first_window_frame_" << std::endl;
+    std::cout << " first_window_frame_" << std::endl;
 
     // Initial covariance
-    SensorBase* prior_sensor = new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0);
-    problem_->getHardwarePtr()->addSensor(prior_sensor);
-    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), prior_sensor, _prior, _prior_cov);
+    //CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), _prior, _prior_cov);
     //std::cout << " initial_covariance" << std::endl;
-    current_frame_->addCapture(initial_covariance);
+    //current_frame_->addCapture(initial_covariance);
     //std::cout << " addCapture" << std::endl;
-    initial_covariance->processCapture();
-    //std::cout << " processCapture" << std::endl;
+    //initial_covariance->processCapture();
+    std::cout << " processCapture" << std::endl;
 
     // Current robot frame
     createFrame(_prior, TimeStamp(0));
 
-    //std::cout << " wolfmanager initialized" << std::endl;
+    std::cout << " wolfmanager initialized" << std::endl;
 }
 
 WolfManager::~WolfManager()
@@ -57,7 +55,7 @@ WolfManager::~WolfManager()
 
 void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
 {
-    //std::cout << "creating new frame..." << std::endl;
+    std::cout << "creating new frame..." << std::endl;
 
     // current frame -> KEYFRAME
     last_key_frame_ = current_frame_;
@@ -89,11 +87,11 @@ void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeSta
             assert( "Unknown frame structure");
         }
     }
-    //std::cout << "frame created" << std::endl;
+    std::cout << "frame created" << std::endl;
 
     // Store new current frame
     current_frame_ = problem_->getLastFramePtr();
-    //std::cout << "current_frame_" << std::endl;
+    std::cout << "current_frame_" << std::endl;
 
     // Zero odometry (to be integrated)
     if (last_key_frame_ != nullptr)
@@ -103,7 +101,7 @@ void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeSta
         empty_odom->processCapture();
         last_capture_relative_ = empty_odom;
     }
-    //std::cout << "last_key_frame_" << std::endl;
+    std::cout << "last_key_frame_" << std::endl;
 
     // ---------------------- KEY FRAME ---------------------
     if (last_key_frame_ != nullptr)
