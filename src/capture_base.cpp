@@ -124,6 +124,20 @@ void CaptureBase::processCapture()
     std::cout << "CaptureBase::processCapture()... processing capture" << std::endl;
 }
 
+StateBlock* CaptureBase::getSensorPPtr() const {
+	if (getSensorPtr()->isExtrinsicDynamic())
+		return sensor_p_ptr_;
+	else
+		return getSensorPtr()->getPPtr();
+}
+
+StateBlock* CaptureBase::getSensorOPtr() const {
+	if (getSensorPtr()->isExtrinsicDynamic())
+		return sensor_o_ptr_;
+	else
+		return getSensorPtr()->getOPtr();
+}
+
 void CaptureBase::printSelf(unsigned int _ntabs, std::ostream & _ost) const
 {
     NodeLinked::printSelf(_ntabs, _ost);

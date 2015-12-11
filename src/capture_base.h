@@ -81,6 +81,10 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 
 //        SensorType getSensorType() const;
 
+        StateBlock* getSensorPPtr() const ;
+
+        StateBlock* getSensorOPtr() const;
+
         void setTimeStamp(const TimeStamp & _ts);
 
         void setTimeStampToNow();
