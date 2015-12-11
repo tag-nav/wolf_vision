@@ -90,7 +90,6 @@ SET(HDRS
     node_base.h
     node_terminus.h
     node_linked.h
-    raw_base.h
     sensor_base.h
     sensor_odom_2D.h
     sensor_gps_fix.h
@@ -133,7 +132,6 @@ SET(SRCS
     map_base.cpp
     node_base.cpp
     node_terminus.cpp
-    raw_base.cpp
     sensor_base.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
