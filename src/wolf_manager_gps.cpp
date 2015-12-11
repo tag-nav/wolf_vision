@@ -31,19 +31,19 @@ WolfManagerGPS::WolfManagerGPS(const FrameStructure _frame_structure,
     // Initial frame
     createFrame(_prior, TimeStamp(0));
     first_window_frame_ = problem_->getTrajectoryPtr()->getFrameListPtr()->begin();
-    std::cout << " first_window_frame_" << std::endl;
-    std::cout << " WolfManagerGPS initialized" << std::endl;
+    //std::cout << " first_window_frame_" << std::endl;
+    //std::cout << " WolfManagerGPS initialized" << std::endl;
 }
 
 WolfManagerGPS::~WolfManagerGPS()
 {
-    std::cout << "deleting wolf manager..." << std::endl;
+    //std::cout << "deleting wolf manager..." << std::endl;
     delete problem_;
 }
 
 void WolfManagerGPS::createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
 {
-    std::cout << "creating new frame..." << std::endl;
+    //std::cout << "creating new frame..." << std::endl;
 
     // current frame -> KEYFRAME
     last_key_frame_ = current_frame_;
@@ -75,11 +75,11 @@ void WolfManagerGPS::createFrame(const Eigen::VectorXs& _frame_state, const Time
             assert( "Unknown frame structure");
         }
     }
-    std::cout << "frame created" << std::endl;
+    //std::cout << "frame created" << std::endl;
 
     // Store new current frame
     current_frame_ = problem_->getLastFramePtr();
-    std::cout << "current_frame_" << std::endl;
+    //std::cout << "current_frame_" << std::endl;
 
     // ---------------------- KEY FRAME ---------------------
     if (last_key_frame_ != nullptr)
@@ -104,7 +104,7 @@ void WolfManagerGPS::createFrame(const Eigen::VectorXs& _frame_state, const Time
 
 void WolfManagerGPS::createFrame(const TimeStamp& _time_stamp)
 {
-    std::cout << "creating new frame from prior..." << std::endl;
+    //std::cout << "creating new frame from prior..." << std::endl;
     createFrame(Eigen::Vector7s::Zero(), _time_stamp);
 }
 
@@ -143,35 +143,31 @@ bool WolfManagerGPS::checkNewFrame(CaptureBase* new_capture)
 {
     //std::cout << "checking if new frame..." << std::endl;
     // TODO: not only time, depending on the sensor...
-    std::cout << new_capture->getTimeStamp().get() << std::endl;
+    //std::cout << new_capture->getTimeStamp().get() << std::endl;
     return new_capture->getTimeStamp().get() - (last_key_frame_ == nullptr ? 0 : last_key_frame_->getTimeStamp().get()) > new_frame_elapsed_time_;
 }
 
 
 void WolfManagerGPS::update()
 {
-    std::cout << "updating..." << std::endl;
+    //std::cout << "updating..." << std::endl;
     while (!new_captures_.empty())
     {
         // EXTRACT NEW CAPTURE
         CaptureBase* new_capture = new_captures_.front();
         new_captures_.pop();
-        std::cout << "up1" << new_capture->nodeId() << std::endl;
         // OVERWRITE CURRENT STAMP
         current_frame_->setTimeStamp(new_capture->getTimeStamp());
-        std::cout << "up2" << new_capture->nodeId() << std::endl;
         // INITIALIZE FIRST FRAME STAMP
         if (last_key_frame_ != nullptr && last_key_frame_->getTimeStamp().get() == 0)
             last_key_frame_->setTimeStamp(new_capture->getTimeStamp());
-        std::cout << "up3" << new_capture->nodeId() << std::endl;
         // NEW KEY FRAME ?
         if (checkNewFrame(new_capture))
             createFrame(new_capture->getTimeStamp());
-        std::cout << "up4" << new_capture->nodeId() << std::endl;
         // ODOMETRY SENSOR
         if (new_capture->getSensorPtr() == sensor_prior_)
         {
-            std::cout << "adding odometry capture..." << new_capture->nodeId() << std::endl;
+            //std::cout << "adding odometry capture..." << new_capture->nodeId() << std::endl;
 
             // ADD/INTEGRATE NEW ODOMETRY TO THE LAST FRAME
             last_capture_relative_->integrateCapture((CaptureMotion*) (new_capture));
@@ -181,26 +177,26 @@ void WolfManagerGPS::update()
         }
         else
         {
-            std::cout << "adding not odometry capture..." << new_capture->nodeId() << std::endl;
+            //std::cout << "adding not odometry capture..." << new_capture->nodeId() << std::endl;
 
             // ADD CAPTURE TO THE CURRENT FRAME (or substitute the same sensor previous capture)
-            std::cout << "searching repeated capture..." << new_capture->nodeId() << std::endl;
+            //std::cout << "searching repeated capture..." << new_capture->nodeId() << std::endl;
             CaptureBaseIter repeated_capture_it = current_frame_->hasCaptureOf(new_capture->getSensorPtr());
 
             if (repeated_capture_it != current_frame_->getCaptureListPtr()->end()) // repeated capture
             {
-                std::cout << "repeated capture, keeping new capture" << new_capture->nodeId() << std::endl;
+                //std::cout << "repeated capture, keeping new capture" << new_capture->nodeId() << std::endl;
                 current_frame_->removeCapture(repeated_capture_it);
                 current_frame_->addCapture(new_capture);
             }
             else
             {
-                std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
+                //std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
                 current_frame_->addCapture(new_capture);
             }
         }
     }
-    std::cout << "updated" << std::endl;
+    //std::cout << "updated" << std::endl;
 }
 
 

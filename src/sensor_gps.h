@@ -1,7 +1,3 @@
-//
-// Created by ptirindelli on 3/12/15.
-//
-
 //TODO indentation: add a tab at everything inside the class: protected and public must have 1 tab
 
 

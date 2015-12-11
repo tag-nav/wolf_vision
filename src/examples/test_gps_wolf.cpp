@@ -50,27 +50,24 @@ int main(int argc, char** argv)
 //    wolf_manager_->getProblemPtr()->print();
 
 
-    for(int i=0; i<20; ++i)
+    for(int i=0; i<2; ++i)
     {
+        cout << "############### NEW CAPTURE ###############" << endl;
         TimeStamp time_stamp(i);
 
         Eigen::VectorXs raw_data(3);
         raw_data << 42,43,44;
-        cout << "stamp" << endl;
 
 
 
-        // Create sintetic gps capture
+        // Create synthetic gps capture
         CaptureGPS* cpt_ptr_ = new CaptureGPS(time_stamp, gps_sensor_ptr_, raw_data);
-        cout << "capture" << endl;
 
         // Add capture
         wolf_manager_->addCapture(cpt_ptr_);
-        cout << "added capture" << endl;
 
         // update wolf tree
         wolf_manager_->update();
-        cout << "updated" << endl;
 
         ceres_manager->update();
 

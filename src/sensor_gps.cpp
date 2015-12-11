@@ -1,6 +1,3 @@
-//
-// Created by ptirindelli on 3/12/15.
-//
 
 #include "sensor_gps.h"
 
