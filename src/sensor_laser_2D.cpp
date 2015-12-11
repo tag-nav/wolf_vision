@@ -8,7 +8,7 @@
 // }
 
 SensorLaser2D::SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr) :
-    SensorBase(LIDAR, _p_ptr, _o_ptr, 8)
+    SensorBase(LIDAR, _p_ptr, _o_ptr, nullptr, 8)
 {
     setDefaultScanParams();
     setDefaultCornerAlgParams();  
@@ -38,10 +38,13 @@ void SensorLaser2D::setDefaultScanParams()
     scan_params_.range_max_ = 100;
     scan_params_.range_std_dev_ = 0.01;
     
-    params_ << scan_params_.angle_min_, scan_params_.angle_max_, scan_params_.angle_step_, 
-               scan_params_.range_min_, scan_params_.range_max_, 
-               scan_params_.range_std_dev_, 
-               0, scan_params_.scan_time_;     
+    setNoise(Eigen::VectorXs::Constant(1,scan_params_.range_std_dev_));
+
+
+//    params_ << scan_params_.angle_min_, scan_params_.angle_max_, scan_params_.angle_step_,
+//               scan_params_.range_min_, scan_params_.range_max_,
+//               scan_params_.range_std_dev_,
+//               0, scan_params_.scan_time_;
 }
 
 void SensorLaser2D::setScanParams(const laserscanutils::ScanParams & _params)
@@ -50,10 +53,10 @@ void SensorLaser2D::setScanParams(const laserscanutils::ScanParams & _params)
         
     scan_params_ = _params;
     
-    params_ << scan_params_.angle_min_, scan_params_.angle_max_, scan_params_.angle_step_, 
-               scan_params_.range_min_, scan_params_.range_max_, 
-               scan_params_.range_std_dev_, 
-               0, scan_params_.scan_time_;     
+//    params_ << scan_params_.angle_min_, scan_params_.angle_max_, scan_params_.angle_step_,
+//               scan_params_.range_min_, scan_params_.range_max_,
+//               scan_params_.range_std_dev_,
+//               0, scan_params_.scan_time_;
 }
 
 void SensorLaser2D::setDefaultCornerAlgParams()
