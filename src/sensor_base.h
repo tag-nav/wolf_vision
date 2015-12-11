@@ -19,12 +19,15 @@ class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
 //        SensorType type_;		// indicates sensor type. Enum defined at wolf.h
         StateBlock* p_ptr_;		// sensor position state block pointer
         StateBlock* o_ptr_; 	// sensor orientation state block pointer
-        Eigen::VectorXs params_;// sensor intrinsic params: biases, scale factors, gains, ...
+        StateBlock* intrinsic_ptr_; // intrinsic parameters
         bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes.
+
+        Eigen::VectorXs noise_std_; // std of sensor noise
+        Eigen::MatrixXs noise_cov_; // cov matrix of noise
 
     public:        
         
-        /** \brief Constructor with parameter vector
+        /** \brief Constructor with noise size
          *
          * Constructor with parameter vector
          * \param _tp Type of the sensor  (types defined at wolf.h)
@@ -33,18 +36,29 @@ class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
          * \param _params Vector containing the sensor parameters
          *
          **/
-        SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::VectorXs & _params, const bool _extr_dyn = false);
+        SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
 
-        /** \brief Constructor with parameter size
+        /** \brief Constructor with noise std vector
          *
          * Constructor with parameter vector
          * \param _tp Type of the sensor  (types defined at wolf.h)
          * \param _p_ptr StateBlock pointer to the sensor position
          * \param _o_ptr StateBlock pointer to the sensor orientation
-         * \param _params_size size of the vector containing the sensor parameters
+         * \param _params Vector containing the sensor parameters
          *
          **/
-        SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, unsigned int _params_size, const bool _extr_dyn = false);
+        SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
+
+//        /** \brief Constructor with parameter size
+//         *
+//         * Constructor with parameter vector
+//         * \param _tp Type of the sensor  (types defined at wolf.h)
+//         * \param _p_ptr StateBlock pointer to the sensor position
+//         * \param _o_ptr StateBlock pointer to the sensor orientation
+//         * \param _params_size size of the vector containing the sensor parameters
+//         *
+//         **/
+//        SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, unsigned int _params_size, const bool _extr_dyn = false);
 
         virtual ~SensorBase();
 
@@ -66,6 +80,8 @@ class SensorBase : public NodeLinked<HardwareBase,NodeTerminus>
          * Check if sensor is dynamic
          */
         bool isExtrinsicDynamic();
+
+        void setNoise(const Eigen::VectorXs & _noise_std);
 
 };
 #endif
