@@ -16,8 +16,9 @@ class NodeTerminus;
 #include "time_stamp.h"
 #include "node_linked.h"
 #include "map_base.h"
+#include "node_terminus.h"
 #include "state_block.h"
-#include "constraint_base.h"
+//#include "constraint_base.h"
 
 // TODO: add descriptor as a StateBase -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
