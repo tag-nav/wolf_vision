@@ -16,7 +16,6 @@ class FrameBase;
 #include "wolf.h"
 #include "wolf_problem.h"
 #include "node_linked.h"
-#include "node_terminus.h"
 #include "frame_base.h"
 #include "state_block.h"
 
@@ -40,7 +39,7 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          **/        
-        ~TrajectoryBase();
+        virtual ~TrajectoryBase();
         
         /** \brief Add a frame to the trajectory
          *
