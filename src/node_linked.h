@@ -12,7 +12,6 @@
 #ifndef NODE_LINKED_H_
 #define NODE_LINKED_H_
 
-class WolfProblem;
 
 //wolf includes
 #include "node_base.h"
@@ -216,6 +215,12 @@ class NodeLinked : public NodeBase
 //////////////////////////////////////////
 //          IMPLEMENTATION
 //////////////////////////////////////////
+
+// Include header files of forwarded classes derived from NodeLinked -- this avoids loop dependencies
+// See this evil ugly solution improved in note 8) of http://www.cplusplus.com/forum/articles/10627/
+#include "processor_base.h"
+
+
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label) :
         NodeBase(_label), //
@@ -413,6 +418,7 @@ void NodeLinked<UpperType, LowerType>::printUpper(unsigned int _ntabs, std::ostr
     printTabs(_ntabs);
     _ost << "\tUpper Node   --> " << up_node_ptr_->nodeId() << std::endl;
 }
+
 
 template<class UpperType, class LowerType>
 void NodeLinked<UpperType, LowerType>::printLower(unsigned int _ntabs, std::ostream& _ost) const

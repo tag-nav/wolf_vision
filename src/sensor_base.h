@@ -7,14 +7,16 @@ class NodeTerminus;
 //std includes
 #include <iostream>
 
+// Fwd refs
+class ProcessorBase;
+
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
 #include "state_block.h"
 #include "hardware_base.h"
-#include "processor_base.h"
 
-class SensorBase : public NodeLinked<HardwareBase,ProcessorBase>
+class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 {
     protected:
 //        SensorType type_;		// indicates sensor type. Enum defined at wolf.h

@@ -1,6 +1,8 @@
 #ifndef PROCESSOR_BASE_H_
 #define PROCESSOR_BASE_H_
 
+// Fwd refs
+
 //Wolf includes
 #include "wolf.h"
 #include "wolf_problem.h"
@@ -17,27 +19,27 @@ class ProcessorBase : public NodeLinked<SensorBase,NodeTerminus>
          * Constructor
          *
          **/
-		ProcessorBase();
+        ProcessorBase();
 
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          **/        
-        ~ProcessorBase();
+        virtual ~ProcessorBase();
 
         /** \brief Extract Features
 		 *
 		 * Extract Features from a given capture
 		 *
 		 **/
-        virtual void extractFeatures(CaptureBase* _capture_ptr) = 0;
+        virtual void extractFeatures(CaptureBase* _capture_ptr) {};
 
         /** \brief Establish Constraints
 		 *
 		 * Establish Constraints for all features of a given capture
 		 *
 		 **/
-        virtual void establishConstraints(CaptureBase* _capture_ptr) = 0;
+        virtual void establishConstraints(CaptureBase* _capture_ptr) {};
 };
 #endif
