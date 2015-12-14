@@ -37,7 +37,9 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
          * \param _tp Type of the sensor  (types defined at wolf.h)
          * \param _p_ptr StateBlock pointer to the sensor position
          * \param _o_ptr StateBlock pointer to the sensor orientation
-         * \param _params Vector containing the sensor parameters
+         * \param _intr_ptr TODO update documentation
+         * \param _noise_size TODO update documentation
+         * \param _extr_dyn TODO update documentation
          *
          **/
         SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
@@ -48,7 +50,9 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
          * \param _tp Type of the sensor  (types defined at wolf.h)
          * \param _p_ptr StateBlock pointer to the sensor position
          * \param _o_ptr StateBlock pointer to the sensor orientation
-         * \param _params Vector containing the sensor parameters
+         * \param _intr_ptr TODO update documentation
+         * \param _noise_std TODO update documentation
+         * \param _extr_dyn TODO update documentation
          *
          **/
         SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
