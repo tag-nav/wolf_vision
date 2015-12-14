@@ -10,6 +10,7 @@
 //Wolf includes
 #include "wolf_manager_gps.h"
 #include "ceres_wrapper/ceres_manager.h"
+#include "raw_data_satellite.h"
 
 
 using namespace std;
@@ -19,17 +20,20 @@ int main(int argc, char** argv)
     //Welcome message
     cout << endl << " ========= WOLF TREE test ===========" << endl << endl;
 
-    SensorGPS* gps_sensor_ptr_ = new SensorGPS(new StateBlock(Eigen::Vector3s::Zero()),
-                                               new StateBlock(Eigen::Vector4s::Zero()),
-                                               new StateBlock(Eigen::Vector1s::Zero()));
+    bool useCeres = false;
+
+    SensorGPS* gps_sensor_ptr_ = new SensorGPS(new StateBlock(Eigen::Vector3s::Zero()),   //gps sensor position
+                                               new StateBlock(Eigen::Vector4s::Zero()),   //gps sensor orientation
+                                               new StateBlock(Eigen::Vector1s::Zero()));  //gps sensor bias
 
 
-    WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_3D,                             //frame structure
-                                                         nullptr,                   //gps raw sensor
+    WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_3D,                               //frame structure
+                                                         nullptr,                           //gps raw sensor
                                                          Eigen::Vector7s::Zero(),           //prior
                                                          Eigen::Matrix7s::Identity()*0.01,  //prior cov
                                                          5,                                 //window size
                                                          1);                                //time for new keyframe
+
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -44,19 +48,22 @@ int main(int argc, char** argv)
 
 
 
-
-
     wolf_manager_->addSensor(gps_sensor_ptr_);
 
 
-    for(int i=0; i<20; ++i)
+    for(int i=0; i<1; ++i)
     {
         cout << "%%%%%%%%%%%%%%%%%%%%%% CAPTURE #" << i << endl;
         TimeStamp time_stamp(i);
 
-        Eigen::VectorXs raw_data(3);
-        raw_data << 42,43,44;
 
+        std::vector<ObsData> raw_data;
+
+        WolfScalar pr(666);
+
+        raw_data.push_back(ObsData("sat_1", TimeStamp(10, 3), pr)); pr++;
+        raw_data.push_back(ObsData("sat_2", TimeStamp(11, 3), pr)); pr++;
+        raw_data.push_back(ObsData("sat_3", TimeStamp(12, 3), pr));
 
 
         // Create synthetic gps capture
@@ -70,16 +77,20 @@ int main(int argc, char** argv)
         wolf_manager_->update();
         //cout << "wolf manager updated" << endl;
 
-        ceres_manager->update();
-        //cout << "ceres manager updated" << endl;
+        if(useCeres)
+        {
+            ceres_manager->update();
+            //cout << "ceres manager updated" << endl;
 
-        ceres::Solver::Summary summary;
+            ceres::Solver::Summary summary;
 
-        summary = ceres_manager->solve(ceres_options);
-        cout << summary.FullReport() << endl;
+            summary = ceres_manager->solve(ceres_options);
+            cout << summary.FullReport() << endl;
+        }
     }
 
 
+    cout << " ========= exit seg fault ============" << std::endl;
     delete wolf_manager_; //not necessary to delete anything more, wolf will do it!
 
     //End message

@@ -6,6 +6,8 @@
 #include "capture_base.h"
 #include "feature_gps_pseudorange.h"
 #include "constraint_gps_pseudorange.h"
+#include "raw_data_satellite.h"
+
 
 
 //TODO indentation: add a tab at everything inside the class: protected and public must have 1 tab
@@ -19,12 +21,13 @@ class CaptureGPS : public CaptureBase
 // a constructor in CaptureBase that work with this rawGPS
 
 protected:
-    Eigen::VectorXs raw_data_;
+    std::vector<ObsData> raw_data_;
+
 
     // TODO ¿position/orientation of antenna?
 public:
 
-    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _raw_data);
+    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, std::vector<ObsData>& _raw_data);
 
     /** \brief Default destructor (not recommended)
      *
@@ -35,10 +38,10 @@ public:
 
     void processCapture();
 
-    // TODO what does this function do? Do I really need it? (i have to implement it because is pure virtual, but now in my implementation it's meaningless)
     virtual Eigen::VectorXs computePrior(const TimeStamp &_now) const;
 
 };
+
 
 
 #endif //CAPTURE_GPS_H_

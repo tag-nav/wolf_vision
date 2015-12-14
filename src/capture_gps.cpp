@@ -1,6 +1,6 @@
 #include "capture_gps.h"
 
-CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, const Eigen::VectorXs &_raw_data) :
+CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, std::vector<ObsData>& _raw_data) :
         CaptureBase(_ts, _sensor_ptr),
         raw_data_(_raw_data)
 {
@@ -32,9 +32,11 @@ void CaptureGPS::processCapture()
     std::cout << "CaptureGPS::processCapture()... capture processed" << std::endl;
 }
 
-// TODO what does this function do? Do I really need it? (i have to implement it because is pure virtual, but now in my implementation it's meaningless)
+/*
+ * Dummy implementation of the method, only because it's pure virtual
+ */
 Eigen::VectorXs CaptureGPS::computePrior(const TimeStamp &_now) const
 {
-    return Eigen::Vector3s(1, 2, 3); //TODO implementata a caso, solo perche' e' virtual pura e altrimenti non compila
+    return Eigen::Vector3s(0, 0, 0);
 }
 

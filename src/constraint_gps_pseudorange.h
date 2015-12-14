@@ -7,6 +7,7 @@
 #include "wolf.h"
 #include "constraint_sparse.h"
 #include "feature_gps_pseudorange.h"
+#include "raw_data_satellite.h"
 
 //TODO indenta tutto di 1
 
@@ -28,11 +29,16 @@ public:
         sat_position_ = Eigen::Vector3s(11000, 12000, 13000); // TODO
         pseudorange_ = 1001; // TODO
 
-        std::cout << "Creating constraint from " << ((FeatureGPSPseudorange*) _ftr_ptr)->getSatId_()
-        << " with: pr=" << pseudorange_
-        << " and satPos=" << sat_position_
-        << std::endl;
+//        std::cout << "Creating constraint from " << ((FeatureGPSPseudorange*) _ftr_ptr)->getObs().toString();
         //TODO 0: crea il constraint
+
+        //TODO qui
+        //TODO qui
+        //TODO qui
+        //TODO qui      segnati sat_pos e pr dall'oggetto obs!
+        //TODO qui
+        //TODO qui
+        //TODO qui
 
 
     }
@@ -59,6 +65,11 @@ public:
 
         //     error = (expected measurement)       - (actual measurement)
         _residual[0] = (distance + _bias[0]*T(LIGHT_SPEED)) - (pseudorange_);
+
+
+        /* TODO importante
+         * credo che il residuo sia la differenza delle misure, NORMALIZZATA PER LA COVARIANZA
+         */
 
         return true;
     }
