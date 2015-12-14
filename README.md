@@ -108,15 +108,15 @@ libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/i
 
 **(1)** Download:
 
-`$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
+`$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/trunk`](https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/trunk)` laser_scan_utils`
 
 Or, in case you don't have permissions:
 
-`$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/tags/v1)` laser_scan_utils`
+`$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/trunk`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/trunk)` laser_scan_utils`
 
 **(2)** Build and install:
 
-    $ cd laser_scan_utils/build
+    $ cd laser_scan_utils/trunk/build
     $ cmake ..
     $ make
     $ sudo make install
