@@ -5,7 +5,6 @@
 #include "wolf.h"
 #include "wolf_problem.h"
 #include "node_linked.h"
-#include "node_terminus.h"
 #include "sensor_base.h"
 
 //class HardwareBase
@@ -24,7 +23,7 @@ class HardwareBase : public NodeLinked<WolfProblem, SensorBase>
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          **/
-        ~HardwareBase();
+        virtual ~HardwareBase();
 
         /** \brief Adds a sensor
          *
