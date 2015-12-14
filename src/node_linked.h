@@ -35,10 +35,10 @@ class WolfProblem;
 template<class UpperType, class LowerType>
 class NodeLinked : public NodeBase
 {
-    public: 
+    public:
         typedef UpperType* UpperNodePtr;
         typedef LowerType* LowerNodePtr;
-        
+
     protected:
         typedef std::list<LowerNodePtr> LowerNodeList;
         typedef typename LowerNodeList::iterator LowerNodeIter;
@@ -54,15 +54,15 @@ class NodeLinked : public NodeBase
         /** \brief Constructor without specify up node
          *
          * Constructor without specify up node
-		 * 
+         *
          */
         NodeLinked(const NodeLocation _loc, const std::string& _label);
 
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-		 * 
-         */		
+         *
+         */
         virtual ~NodeLinked();
 
         /** \brief Wolf destructor
@@ -82,15 +82,15 @@ class NodeLinked : public NodeBase
         /** \brief Checks if node is on the top of Wolf tree
          *
          * Check if node is on the top of Wolf tree
-		 * 
-         */		
+         *
+         */
         bool isTop() const;
 
         /** \brief Checks if node is at the bottom of Wolf tree
          *
          * Check if node is at the bottom of Wolf tree
-		 * 
-         */		
+         *
+         */
         bool isBottom() const;
 
         /** \brief Sets link to up node
@@ -127,9 +127,9 @@ class NodeLinked : public NodeBase
          *
          * Adds a down node 
          *
-         */		
+         */
         void addDownNode(LowerNodePtr _ptr);
-		
+
         /** \brief Gets a reference to down node list
          *
          * Gets a reference to down node list
@@ -167,7 +167,7 @@ class NodeLinked : public NodeBase
          *
          */
         void removeDownNode(const unsigned int _id);
-        
+
         /** \brief Gets a pointer to the tree top node
          * 
          * Gets a pointer to the tree top node
@@ -178,15 +178,14 @@ class NodeLinked : public NodeBase
 
         /** \brief Prints node information
          * 
-		 * Prints node information.
+         * Prints node information.
          * \param _ntabs number of tabulations to print at the left of the printed information
          * \param _ost output stream
          *
          * Overload this function in derived classes to adapt the printed output to each object's relevant info.
-		 * 
+         *
          */
         virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
-
 
     protected:
 
@@ -195,7 +194,7 @@ class NodeLinked : public NodeBase
          * Prints information about this node. It adds a number of tabs given by _ntabs.
          *\param _ntabs the number of tabs.
          *\param _ost the stream it prints to
-		 * 
+         *
          */
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
@@ -210,7 +209,7 @@ class NodeLinked : public NodeBase
          *
          * Prints recursively lower node info
          * 
-         **/        
+         **/
         void printLower(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 };
 
@@ -221,23 +220,21 @@ template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label) :
         NodeBase(_label), //
         location_(_loc), //
-        up_node_ptr_(nullptr),
-		down_node_list_(),
-		is_deleting_(false)
+        up_node_ptr_(nullptr), down_node_list_(), is_deleting_(false)
 {
 }
 
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::~NodeLinked()
 {
-	//std::cout << "deleting Nodelinked " << node_id_ << " down_node_list_.size() " << down_node_list_.size() << std::endl;
+    //std::cout << "deleting Nodelinked " << node_id_ << " down_node_list_.size() " << down_node_list_.size() << std::endl;
     is_deleting_ = true;
 
-	while (!down_node_list_.empty())
-	{
-	    delete down_node_list_.front();
-	    down_node_list_.pop_front();
-	}
+    while (!down_node_list_.empty())
+    {
+        delete down_node_list_.front();
+        down_node_list_.pop_front();
+    }
 }
 
 template<class UpperType, class LowerType>
@@ -319,10 +316,10 @@ inline const UpperType& NodeLinked<UpperType, LowerType>::upperNode() const
 template<class UpperType, class LowerType>
 inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodePtr _ptr)
 {
-	assert(!isBottom() && "Trying to add a down node to a bottom node");
-	down_node_list_.push_back(_ptr);
-	_ptr->linkToUpperNode( (typename LowerType::UpperNodePtr)(this) );
-	//std::cout << "node: " << _ptr->nodeId() << " linked to " <<_ptr->upperNodePtr()->nodeId() << std::endl;
+    assert(!isBottom() && "Trying to add a down node to a bottom node");
+    down_node_list_.push_back(_ptr);
+    _ptr->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
+    //std::cout << "node: " << _ptr->nodeId() << " linked to " <<_ptr->upperNodePtr()->nodeId() << std::endl;
 }
 
 template<class UpperType, class LowerType>
@@ -342,7 +339,7 @@ inline void NodeLinked<UpperType, LowerType>::removeDownNode(const unsigned int 
 {
     for (auto iter = down_node_list_.begin(); iter != down_node_list_.end(); ++iter)
     {
-        if ( (*iter)->nodeId() == _id)
+        if ((*iter)->nodeId() == _id)
         {
             removeDownNode(iter);
             break; //avoid comparison of iter and list.end(), otherwise Valgrind claimed
@@ -369,7 +366,7 @@ template<class UpperType, class LowerType>
 WolfProblem* NodeLinked<UpperType, LowerType>::getTop()
 {
     if (up_node_ptr_ != nullptr)
-	    return up_node_ptr_->getTop();
+        return up_node_ptr_->getTop();
     return nullptr;
 }
 
@@ -377,10 +374,10 @@ template<class UpperType, class LowerType>
 void NodeLinked<UpperType, LowerType>::print(unsigned int _ntabs, std::ostream& _ost) const
 {
     printSelf(_ntabs, _ost); //one line
-    
+
     if ((location_ != TOP) && (up_node_ptr_ != nullptr))
     {
-        printUpper(_ntabs, _ost); 
+        printUpper(_ntabs, _ost);
     }
     if (location_ != BOTTOM)
     {
