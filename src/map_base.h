@@ -16,7 +16,6 @@ class LandmarkBase;
 #include "wolf.h"
 #include "wolf_problem.h"
 #include "node_linked.h"
-#include "node_terminus.h"
 #include "landmark_base.h"
 
 //class MapBase
