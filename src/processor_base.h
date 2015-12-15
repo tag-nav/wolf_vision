@@ -28,6 +28,8 @@ class ProcessorBase : public NodeLinked<SensorBase,NodeTerminus>
          **/        
         virtual ~ProcessorBase();
 
+        void linkToSensor(SensorBase* _sen_ptr);
+
         SensorBase* getSensorPtr();
 
         /** \brief Extract Features

@@ -273,6 +273,7 @@ class RawLaser2D;
 class SensorBase;
 class SensorLaser2D;
 class TransSensor;
+class ProcessorBase;
 class StateBlock;
 template<unsigned int SIZE> class StatePoint;
 class PinHole;
@@ -338,6 +339,11 @@ typedef SensorBaseList::iterator SensorBaseIter;
 // - transSensor
 typedef std::map<unsigned int, TransSensor*> TransSensorMap;
 typedef TransSensorMap::iterator TransSensorIter;
+
+// - Processors
+typedef std::list<ProcessorBase*> ProcessorBaseList;
+typedef ProcessorBaseList::iterator ProcessorBaseIter;
+
 
 // - State
 typedef std::list<StateBlock*> StateBlockList;

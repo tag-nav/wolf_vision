@@ -75,6 +75,10 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
          **/
         virtual ~SensorBase();
 
+        void addProcessor(ProcessorBase* _proc_ptr);
+
+        ProcessorBaseList* getProcessorListPtr();
+
 //        const SensorType getSensorType() const;
 
         StateBlock* getPPtr() const;
