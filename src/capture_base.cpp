@@ -118,6 +118,16 @@ void CaptureBase::setDataCovariance(const Eigen::MatrixXs& _data_cov)
     data_covariance_ = _data_cov;
 }
 
+void CaptureBase::process()
+{
+    // Call all processors assigned to the sensor that captured this data
+    for (auto processor_iter = sensor_ptr_->getDownNodeListPtr()->begin(); processor_iter != sensor_ptr_->getDownNodeListPtr()->end(); ++processor_iter)
+    {
+        (*processor_iter)->extractFeatures(this);
+        (*processor_iter)->establishConstraints(this);
+    }
+}
+
 void CaptureBase::processCapture()
 {
     std::cout << "CaptureBase::processCapture()... processing capture" << std::endl;
