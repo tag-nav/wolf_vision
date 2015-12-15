@@ -22,8 +22,10 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
     protected:
         TimeStamp time_stamp_; ///< Time stamp
         SensorBase* sensor_ptr_; ///< Pointer to sensor
-        Eigen::VectorXs data_; ///< raw data. TODO: make a RawBase class and put this there.
-        Eigen::MatrixXs data_covariance_; ///< Noise of the capture. TODO: make a RawBase class and put this there.
+        Eigen::VectorXs data_; ///< raw data. Ignore this member if you need other data structures.
+        Eigen::MatrixXs data_covariance_; ///< Noise of the capture. // TODO Covariance should belong to Feature measurement, to Sensor, or to Processor.
+
+        // Allow precomputing global frames for accelerating code.
         //Eigen::Vector3s sensor_pose_global_; ///< Sensor pose in world frame: composition of the frame pose and the sensor pose. TODO: use state units
         //Eigen::Vector3s inverse_sensor_pose_; ///< World pose in the sensor frame: inverse of the global_pose_. TODO: use state units
 
@@ -107,7 +109,7 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 
 //        virtual void process();
 
-        virtual void processCapture(); // = 0; // TODO rename to process()
+        virtual void processCapture(); // TODO rename to process()
 
         virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const = 0;
 
