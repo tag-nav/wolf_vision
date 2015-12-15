@@ -54,8 +54,8 @@ void eraseSparseBlock(SparseMatrix<double>& original, const unsigned int& row, c
     block_pruning bp(row, col, Nrows, Ncols);
     original.prune(bp);
 
-//  for (uint i = row; i < row + Nrows; i++)
-//    for (uint j = col; j < row + Ncols; j++)
+//  for (unsigned int i = row; i < row + Nrows; i++)
+//    for (unsigned int j = col; j < row + Ncols; j++)
 //      original.coeffRef(i,j) = 0.0;
 //
 //  original.prune(0);
@@ -63,8 +63,8 @@ void eraseSparseBlock(SparseMatrix<double>& original, const unsigned int& row, c
 
 void addSparseBlock(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
 {
-  for (uint r=0; r<ins.rows(); ++r)
-      for (uint c = 0; c < ins.cols(); c++)
+  for (unsigned int r=0; r<ins.rows(); ++r)
+      for (unsigned int c = 0; c < ins.cols(); c++)
           if (ins(r,c) != 0)
               original.coeffRef(r + row, c + col) += ins(r,c);
 }
