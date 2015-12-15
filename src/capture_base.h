@@ -107,7 +107,7 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 
 //        virtual void process();
 
-        virtual void processCapture(); // = 0;
+        virtual void processCapture(); // = 0; // TODO rename to process()
 
         virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const = 0;
 
