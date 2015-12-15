@@ -105,7 +105,7 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 
         void setDataCovariance(const Eigen::MatrixXs& _data_cov);
 
-        virtual void process();
+//        virtual void process();
 
         virtual void processCapture(); // = 0;
 

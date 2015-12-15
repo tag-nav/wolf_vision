@@ -1,9 +1,9 @@
 #include "capture_base.h"
 
 CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
-    NodeLinked(MID, "CAPTURE"),
-    time_stamp_(_ts),
-    sensor_ptr_(_sensor_ptr),
+        NodeLinked(MID, "CAPTURE"),
+        time_stamp_(_ts),
+        sensor_ptr_(_sensor_ptr),
 	sensor_p_ptr_(sensor_ptr_->getPPtr()),
 	sensor_o_ptr_(sensor_ptr_->getOPtr())
 {
@@ -118,7 +118,7 @@ void CaptureBase::setDataCovariance(const Eigen::MatrixXs& _data_cov)
     data_covariance_ = _data_cov;
 }
 
-void CaptureBase::process()
+void CaptureBase::processCapture()
 {
     // Call all processors assigned to the sensor that captured this data
     for (auto processor_iter = sensor_ptr_->getDownNodeListPtr()->begin(); processor_iter != sensor_ptr_->getDownNodeListPtr()->end(); ++processor_iter)
@@ -128,10 +128,10 @@ void CaptureBase::process()
     }
 }
 
-void CaptureBase::processCapture()
-{
-    std::cout << "CaptureBase::processCapture()... processing capture" << std::endl;
-}
+//void CaptureBase::processCapture()
+//{
+//    std::cout << "CaptureBase::processCapture()... processing capture" << std::endl;
+//}
 
 StateBlock* CaptureBase::getSensorPPtr() const {
 	if (getSensorPtr()->isExtrinsicDynamic())
