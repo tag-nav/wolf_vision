@@ -10,6 +10,7 @@ CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_
         CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data)
 {
     data_covariance_ = Eigen::Matrix3s::Zero();
+    // FIXME The odometry noise variance is proportional to distance, not to squared distance. Change code and re-tune values.
     data_covariance_(0, 0) = std::max(1e-10, _data(0) * _data(0) * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor() * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor());
     data_covariance_(1, 1) = std::max(1e-10, _data(1) * _data(1) * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor() * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor());
     data_covariance_(2, 2) = std::max(1e-10, _data(2) * _data(2) * ((SensorOdom2D*) _sensor_ptr)->getRotationNoiseFactor() * ((SensorOdom2D*) _sensor_ptr)->getRotationNoiseFactor());
