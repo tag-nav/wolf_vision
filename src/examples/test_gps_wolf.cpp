@@ -17,10 +17,14 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+    bool useCeres = false;
+    unsigned int n_captures = 5;
+
+
+
+
     //Welcome message
     cout << endl << " ========= WOLF TREE test ===========" << endl << endl;
-
-    bool useCeres = false;
 
     SensorGPS* gps_sensor_ptr_ = new SensorGPS(new StateBlock(Eigen::Vector3s::Zero()),   //gps sensor position
                                                new StateBlock(Eigen::Vector4s::Zero()),   //gps sensor orientation
@@ -51,7 +55,7 @@ int main(int argc, char** argv)
     wolf_manager_->addSensor(gps_sensor_ptr_);
 
 
-    for(unsigned int  i=0; i<5; ++i)
+    for(unsigned int  i=0; i < n_captures; ++i)
     {
         cout << "%%%%%%%%%%%%%%%%%%%%%% CAPTURE #" << i << endl;
         TimeStamp time_stamp(i);
@@ -61,8 +65,8 @@ int main(int argc, char** argv)
 
         WolfScalar pr(666);
 
-        raw_data.push_back(ObsData("sat_1", TimeStamp(10, 3), pr)); pr++;
-        raw_data.push_back(ObsData("sat_2", TimeStamp(11, 3), pr)); pr++;
+        raw_data.push_back(ObsData("sat_1", TimeStamp(10, 3), pr)); pr+=111;
+        raw_data.push_back(ObsData("sat_2", TimeStamp(11, 3), pr)); pr+=111;
         raw_data.push_back(ObsData("sat_3", TimeStamp(12, 3), pr));
 
 

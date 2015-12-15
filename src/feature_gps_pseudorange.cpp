@@ -17,3 +17,8 @@ FeatureGPSPseudorange::~FeatureGPSPseudorange()
 {
 
 }
+
+const ObsData *FeatureGPSPseudorange::getObs() const
+{
+    return &obs_;
+}

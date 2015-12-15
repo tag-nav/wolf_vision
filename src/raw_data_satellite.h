@@ -38,7 +38,7 @@ public:
      */
     void calculateSatPosition()
     {
-        sat_position_ = Eigen::Vector3s(5000, 6000, 7000);
+        sat_position_ = Eigen::Vector3s(50000+pseudorange_, 60000+pseudorange_, 70000+pseudorange_);
     }
 
     std::string toString()

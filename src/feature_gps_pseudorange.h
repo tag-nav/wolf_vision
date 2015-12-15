@@ -30,9 +30,7 @@ public:
     virtual ~FeatureGPSPseudorange();
 
 
-    const ObsData getObs() const {
-        return obs_;
-    }
+    const ObsData* getObs() const;
 };
 
 

@@ -6,7 +6,6 @@
 // Wolf includes
 #include "capture_base.h"
 #include "feature_gps_pseudorange.h"
-#include "constraint_gps_pseudorange.h"
 #include "raw_data_satellite.h"
 
 
