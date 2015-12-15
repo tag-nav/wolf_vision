@@ -53,7 +53,39 @@ class CostFunctionSparse : CostFunctionSparseBase<ConstraintT,
 
         void callFunctor()
         {
-                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_, this->jets_8_ , this->jets_9_ ,this->residuals_jet_);
+//            if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
+//                BLOCK_5_SIZE > 0 && BLOCK_6_SIZE > 0 && BLOCK_7_SIZE > 0 && BLOCK_8_SIZE > 0 && BLOCK_9_SIZE > 0)
+                    (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_, this->jets_8_ , this->jets_9_ ,this->residuals_jet_);
+//            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
+//                     BLOCK_5_SIZE > 0 && BLOCK_6_SIZE > 0 && BLOCK_7_SIZE > 0 && BLOCK_8_SIZE > 0 && BLOCK_9_SIZE == 0)
+//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_, this->jets_8_ ,this->residuals_jet_);
+//            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
+//                     BLOCK_5_SIZE > 0 && BLOCK_6_SIZE > 0 && BLOCK_7_SIZE > 0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
+//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_,this->residuals_jet_);
+//            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
+//                     BLOCK_5_SIZE > 0 && BLOCK_6_SIZE > 0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
+//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_,this->residuals_jet_);
+//            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
+//                     BLOCK_5_SIZE > 0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
+//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_,this->residuals_jet_);
+//            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
+//                     BLOCK_5_SIZE ==0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
+//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->residuals_jet_);
+//            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE ==0 &&
+//                    BLOCK_5_SIZE ==0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
+//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->residuals_jet_);
+//            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE ==0 && BLOCK_4_SIZE ==0 &&
+//                    BLOCK_5_SIZE ==0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
+//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->residuals_jet_);
+//            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE ==0 && BLOCK_3_SIZE ==0 && BLOCK_4_SIZE ==0 &&
+//                    BLOCK_5_SIZE ==0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
+//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->residuals_jet_);
+//            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE ==0 && BLOCK_2_SIZE ==0 && BLOCK_3_SIZE ==0 && BLOCK_4_SIZE ==0 &&
+//                    BLOCK_5_SIZE ==0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
+//                (*this->constraint_ptr_)(this->jets_0_, this->residuals_jet_);
+//            else
+//                assert("Wrong combination of zero sized blocks");
+
         }
 
 };
@@ -70,28 +102,28 @@ template <class ConstraintT,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE>
 class CostFunctionSparse<ConstraintT,
-                                    MEASUREMENT_SIZE,
-                                    BLOCK_0_SIZE,
-                                    BLOCK_1_SIZE,
-                                    BLOCK_2_SIZE,
-                                    BLOCK_3_SIZE,
-                                    BLOCK_4_SIZE,
-                                    BLOCK_5_SIZE,
-                                    BLOCK_6_SIZE,
-                                    BLOCK_7_SIZE,
-                                    BLOCK_8_SIZE,
-                                    0> : CostFunctionSparseBase<ConstraintT,
-                                                        MEASUREMENT_SIZE,
-                                                        BLOCK_0_SIZE,
-                                                        BLOCK_1_SIZE,
-                                                        BLOCK_2_SIZE,
-                                                        BLOCK_3_SIZE,
-                                                        BLOCK_4_SIZE,
-                                                        BLOCK_5_SIZE,
-                                                        BLOCK_6_SIZE,
-                                                        BLOCK_7_SIZE,
-                                                        BLOCK_8_SIZE,
-                                                        0>
+                         MEASUREMENT_SIZE,
+                         BLOCK_0_SIZE,
+                         BLOCK_1_SIZE,
+                         BLOCK_2_SIZE,
+                         BLOCK_3_SIZE,
+                         BLOCK_4_SIZE,
+                         BLOCK_5_SIZE,
+                         BLOCK_6_SIZE,
+                         BLOCK_7_SIZE,
+                         BLOCK_8_SIZE,
+                         0> : CostFunctionSparseBase<ConstraintT,
+                                                     MEASUREMENT_SIZE,
+                                                     BLOCK_0_SIZE,
+                                                     BLOCK_1_SIZE,
+                                                     BLOCK_2_SIZE,
+                                                     BLOCK_3_SIZE,
+                                                     BLOCK_4_SIZE,
+                                                     BLOCK_5_SIZE,
+                                                     BLOCK_6_SIZE,
+                                                     BLOCK_7_SIZE,
+                                                     BLOCK_8_SIZE,
+                                                     0>
 {
     public:
         CostFunctionSparse(ConstraintT* _constraint_ptr) :

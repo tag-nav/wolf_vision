@@ -114,9 +114,9 @@ class ConstraintSparse: public ConstraintBase
         virtual ~ConstraintSparse();
 
         /** \brief Returns a vector of pointers to the state blocks
-         * 
+         *
          * Returns a vector of pointers to the state blocks in which this constraint depends
-         * 
+         *
          **/
         virtual const std::vector<WolfScalar*> getStateBlockPtrVector();
 
