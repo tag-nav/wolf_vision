@@ -30,37 +30,47 @@ public:
     ObsData(const std::string &_sat_id, const TimeStamp &_timestamp, WolfScalar &_pseudorange) :
             sat_id_(_sat_id), timestamp_(_timestamp), pseudorange_(_pseudorange)
     {
-        std::cout << "Received observation data for satellite " << sat_id_ << std::endl;
+        //std::cout << "ObsData constructor: " << toString();
+    }
+
+    /** TODO now it's a dummy function
+     * Function to calculate the sat position in the time timestamp_
+     */
+    void calculateSatPosition()
+    {
+        sat_position_ = Eigen::Vector3s(5000, 6000, 7000);
     }
 
     std::string toString()
     {
         std::ostringstream s;
-        s << "SatID: " << sat_id_ << " -- il resto TODO -- " << timestamp_.get() << " -- " << pseudorange_ << " --- " << sat_position_ << std::endl;
+        s << "SatID: " << sat_id_ << " -- " << timestamp_.get() << " -- " << pseudorange_ << " -- (" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2];
         return s.str();
     }
 
-    const std::string &getSatId() const {
+    const std::string &getSatId() const
+    {
         return sat_id_;
     }
 
-    const TimeStamp &getTimestamp() const {
+    const TimeStamp &getTimestamp() const
+    {
         return timestamp_;
     }
 
-    WolfScalar getPseudorange() const {
+    WolfScalar getPseudorange() const
+    {
         return pseudorange_;
     }
 
-    Eigen::Vector3s getSatPosition() const {
-
-        // TODO first calculate sat position!!!!
-        // TODO decide if keep sat position here or somewhere else
-
+    Eigen::Vector3s getSatPosition() const
+    {
         return sat_position_;
     }
 
-    void setSatPosition(const Eigen::Vector3s &sat_position_) {//TODO nel caso voglia calcolarla da fuori. anche se a sto punto devo valutare se tenerla qui o no
+    //TODO nel caso voglia calcolarla da fuori. anche se a sto punto devo valutare se tenerla qui o no
+    void setSatPosition(const Eigen::Vector3s &sat_position_)
+    {
         ObsData::sat_position_ = sat_position_;
     }
 

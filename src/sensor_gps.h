@@ -49,6 +49,8 @@ protected:
 };
 
 
+
+
 class SensorGPS : public SensorBase
 {
 //    TODO parameters needed:

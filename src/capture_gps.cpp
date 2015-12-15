@@ -4,7 +4,7 @@ CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, std::vecto
         CaptureBase(_ts, _sensor_ptr),
         raw_data_(_raw_data)
 {
-    std::cout << "CaptureGPS constructor.\t\tdata.size=" << raw_data_.size() << std::endl;
+    //std::cout << "CaptureGPS constructor.\t\tdata.size=" << raw_data_.size() << std::endl;
 }
 
 

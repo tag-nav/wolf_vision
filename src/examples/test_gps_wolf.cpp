@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     wolf_manager_->addSensor(gps_sensor_ptr_);
 
 
-    for(int i=0; i<1; ++i)
+    for(unsigned int  i=0; i<5; ++i)
     {
         cout << "%%%%%%%%%%%%%%%%%%%%%% CAPTURE #" << i << endl;
         TimeStamp time_stamp(i);
@@ -90,11 +90,11 @@ int main(int argc, char** argv)
     }
 
 
-    cout << " ========= exit seg fault ============" << std::endl;
+    cout << std::endl << std::endl << " ========= calling delete wolf_manager_ (¿seg fault?) ==========" << std::endl;
     delete wolf_manager_; //not necessary to delete anything more, wolf will do it!
 
     //End message
-    cout << " =========================== END ===============================" << std::endl << std::endl;
+    cout << " =========================== END ===============================" << std::endl;
 
     //exit
     return 0;

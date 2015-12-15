@@ -11,7 +11,7 @@
 
 //TODO indenta tutto di 1
 
-class ConstraintGPSPseudorange: public ConstraintSparse<1, 3, 4, 3, 4, 1>// TODO da rimettere quando lavorero' con ceres e wolf
+class ConstraintGPSPseudorange: public ConstraintSparse<1, 3, 4, 3, 4, 1>
 {
 
 public:
@@ -22,26 +22,9 @@ public:
                                                _ftr_ptr->getCapturePtr()->getSensorPPtr(), _ftr_ptr->getCapturePtr()->getSensorOPtr(), // position and orientation of the sensor (gps antenna)
                                                _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()) //intrinsic parameter  = receiver bias (for now)
     {
-        // createConstraint
-
-
-        //todo assegna un valore serio a sat_pos e pseudorange
-        sat_position_ = Eigen::Vector3s(11000, 12000, 13000); // TODO
-        pseudorange_ = 1001; // TODO
-
-//        std::cout << "Creating constraint from " << ((FeatureGPSPseudorange*) _ftr_ptr)->getObs().toString();
-        //TODO 0: crea il constraint
-
-        //TODO qui
-        //TODO qui
-        //TODO qui
-        //TODO qui      segnati sat_pos e pr dall'oggetto obs!
-        //TODO qui
-        //TODO qui
-        //TODO qui
-
-
+        //std::cout << "ConstraintGPSPseudorange() constructor" << std::endl;
     }
+
 
     /** \brief Default destructor (not recommended)
      *
@@ -57,27 +40,37 @@ public:
     template <typename T>
     bool operator()(const T* const _vehicle_p, const T* const _vehicle_q, const T* const _sensor_p,const T* const _sensor_q, const T* const _bias, T* _residual) const
     {
-        T square_sum = T(0);
-        for (int i = 0; i < 3; ++i) {
-            square_sum += pow(_vehicle_p[i] - T(sat_position_[i]) , 2);
-        }
-        T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0) ;
-
-        //     error = (expected measurement)       - (actual measurement)
-        _residual[0] = (distance + _bias[0]*T(LIGHT_SPEED)) - (pseudorange_);
-
-
-        /* TODO importante
-         * credo che il residuo sia la differenza delle misure, NORMALIZZATA PER LA COVARIANZA
+        /*
+         * TODO get sat_pos and pr from featureGPSPseudorange
+         * TODO get sat_pos and pr from featureGPSPseudorange
+         * TODO get sat_pos and pr from featureGPSPseudorange
          */
+//        FeatureGPSPseudorange* gps_ftr_ptr;// = (FeatureGPSPseudorange *) _ftr_ptr;
+
+
+
+//        Eigen::Vector3s sat_position_;
+//        WolfScalar pseudorange_;
+//
+//        //TODO calcolali
+//
+//
+//        T square_sum = T(0);
+//        for (int i = 0; i < 3; ++i) {
+//            square_sum += pow(_vehicle_p[i] - T(sat_position_[i]) , 2);
+//        }
+//        T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0) ;
+//
+//        //     error = (expected measurement)       - (actual measurement)
+//        _residual[0] = (distance + _bias[0]*T(LIGHT_SPEED)) - (pseudorange_);
+//
+//
+//        /* TODO importante
+//         * credo che il residuo sia la differenza delle misure, NORMALIZZATA PER LA COVARIANZA
+//         */
 
         return true;
     }
-
-
-protected:
-    Eigen::Vector3s sat_position_;
-    WolfScalar pseudorange_;
 
 };
 

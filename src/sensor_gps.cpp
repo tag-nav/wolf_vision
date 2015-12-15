@@ -6,7 +6,7 @@ SensorGPS::SensorGPS(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _bias_p
                 //gps sensor position, orientation and intrinsic param (only bias for now)
         SensorBase(GPS_RAW, _p_ptr, _o_ptr, _bias_ptr, 0)
 {
-    std::cout << "SensorGPS constructor... id: " << nodeId() << std::endl;
+    //std::cout << "SensorGPS constructor... id: " << nodeId() << std::endl;
 
 }
 
@@ -17,7 +17,7 @@ SensorGPS::SensorGPS(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _bias_p
 // TODO
 SensorGPS::~SensorGPS()
 {
-    std::cout << "deleting SensorGPS " << nodeId() << std::endl;
+    std::cout << "deleting SensorGPS NAV data " << nodeId() << std::endl;
     for (std::list<SatelliteNavData>::iterator it = nav_data_.begin(); it != nav_data_.end() ; ++it)
     {
         std::cout << "---deleting " << it->getSatId() << std::endl;
