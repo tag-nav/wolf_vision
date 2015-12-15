@@ -49,7 +49,7 @@ const WolfScalar CONTAINER_LENGTH = 12.20;
 class ProcessorLaser2D : public ProcessorBase
 {
     protected:
-        SensorLaser2D* laser_ptr_; //specific pointer to sensor laser 2D object
+        SensorLaser2D* sensor_laser_ptr_; //specific pointer to sensor laser 2D object
         CaptureLaser2D* capture_laser_ptr_;
 
     public:

@@ -2,7 +2,7 @@
 
 
 ProcessorLaser2D::ProcessorLaser2D() :
-        laser_ptr_((SensorLaser2D*)(upperNodePtr())), // Static cast to specific sensor at construction time
+        sensor_laser_ptr_((SensorLaser2D*)(upperNodePtr())), // Static cast to specific sensor at construction time
         capture_laser_ptr_(nullptr)
 {
 }
@@ -15,12 +15,31 @@ void ProcessorLaser2D::extractFeatures(CaptureBase* capture_ptr_)
 {
     capture_laser_ptr_ = (CaptureLaser2D*)(capture_ptr_);
     std::cout << "Extracting laser features..." << std::endl;
+
+    //variables
+    std::list <laserscanutils::Corner> corners;
+
+    //extract corners from range data
+    this->extractCorners(corners);
+    //std::cout << corners.size() << " corners extracted" << std::endl;
+
+    //generate a feature for each corner
+    this->createFeatures(corners);
+    //std::cout << getFeatureListPtr()->size() << " Features created" << std::endl;
+
 }
 
 void ProcessorLaser2D::establishConstraints(CaptureBase* capture_ptr_)
 {
     capture_laser_ptr_ = (CaptureLaser2D*)(capture_ptr_);
     std::cout << "Establishing constraints to laser features..." << std::endl;
+
+
+    //Establish constraints for each feature
+    //establishConstraints();
+    this->establishConstraintsMHTree();
+    //std::cout << "Constraints created" << std::endl;
+
 }
 
 unsigned int ProcessorLaser2D::extractCorners(std::list<laserscanutils::Corner> & _corner_list) const
@@ -29,12 +48,12 @@ unsigned int ProcessorLaser2D::extractCorners(std::list<laserscanutils::Corner> 
 //
 //     laserscanutils::extractLines(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), ranges_, line_list);
 //     return laserscanutils::extractCorners(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), line_list, _corner_list);
-    return laserscanutils::extractCorners(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams(), capture_laser_ptr_->ranges_, _corner_list);
+    return laserscanutils::extractCorners(sensor_laser_ptr_->getScanParams(), sensor_laser_ptr_->getCornerAlgParams(), capture_laser_ptr_->ranges_, _corner_list);
 }
 
 unsigned int ProcessorLaser2D::extractLines(std::list<laserscanutils::Line> & _line_list) const
 {
-    return laserscanutils::extractLines(laser_ptr_->getScanParams(), laser_ptr_->getCornerAlgParams().line_params_, capture_laser_ptr_->ranges_, _line_list);
+    return laserscanutils::extractLines(sensor_laser_ptr_->getScanParams(), sensor_laser_ptr_->getCornerAlgParams().line_params_, capture_laser_ptr_->ranges_, _line_list);
 }
 
 void ProcessorLaser2D::createFeatures(std::list<laserscanutils::Corner> & _corner_list) const
