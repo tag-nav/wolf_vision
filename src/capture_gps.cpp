@@ -31,22 +31,14 @@ void CaptureGPS::processCapture()
     // EXTRACT AND ADD FEATURES AND CONSTRAINTS
     for(unsigned int i = 0; i < raw_data_.size(); ++i)
     {
-        // TODO attention
-        // TODO attention
-        // TODO attention
-//        in the other examples is in this way (with getFeatureListPtr()->front()) but in this way it adds every time the same  constraint.
 //        addFeature(new FeatureGPSPseudorange(raw_data_[i]));
-//        getFeatureListPtr()->front()->addConstraintFrom(new ConstraintGPSPseudorange(getFeatureListPtr()->front()));
+//        getFeatureListPtr()->front()->addConstraintFrom(new ConstraintGPSPseudorange(getFeatureListPtr()->back()));
 
-        //in this way no, but i don't know if it's correct in wolf
         FeatureBase* ftr_ptr = new FeatureGPSPseudorange(raw_data_[i]);
 
         addFeature(ftr_ptr);
         getFeatureListPtr()->front()->addConstraintFrom(new ConstraintGPSPseudorange(ftr_ptr));
 
-        // TODO attention
-        // TODO attention
-        // TODO attention
     }
 
     std::cout << "CaptureGPS::processCapture()... capture processed" << std::endl;

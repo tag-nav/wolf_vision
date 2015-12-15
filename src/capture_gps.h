@@ -11,18 +11,11 @@
 
 class CaptureGPS : public CaptureBase
 {
-// TODO rawData data type
-// i will not have a vector of float as raw data, but i'll have
-// to create a virtual class rawBase and then a rawGPS that implement it
-//
-// then use this class as the type of the third argument, and add
-// a constructor in CaptureBase that work with this rawGPS
 
+// TODO ¿position/orientation of antenna?
 protected:
     std::vector<ObsData> raw_data_;
 
-
-    // TODO ¿position/orientation of antenna?
 public:
 
     CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, std::vector<ObsData>& _raw_data);
@@ -36,6 +29,9 @@ public:
 
     void processCapture();
 
+    /*
+     * Dummy implementation of the method, only because it's pure virtual
+     */
     virtual Eigen::VectorXs computePrior(const TimeStamp &_now) const;
 
 };

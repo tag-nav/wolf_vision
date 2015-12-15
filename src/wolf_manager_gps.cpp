@@ -38,12 +38,12 @@ WolfManagerGPS::WolfManagerGPS(const FrameStructure _frame_structure,
 WolfManagerGPS::~WolfManagerGPS()
 {
     //std::cout << "deleting wolf manager..." << std::endl;
-    delete problem_;
+    problem_->destruct();
 }
 
 void WolfManagerGPS::createFrame(const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
 {
-    //std::cout << "creating new frame..." << std::endl;
+    std::cout << "creating new frame..." << std::endl;
 
     // current frame -> KEYFRAME
     last_key_frame_ = current_frame_;
@@ -167,7 +167,7 @@ void WolfManagerGPS::update()
         // ODOMETRY SENSOR
         if (new_capture->getSensorPtr() == sensor_prior_)
         {
-            //std::cout << "adding odometry capture..." << new_capture->nodeId() << std::endl;
+            std::cout << "adding odometry capture..." << new_capture->nodeId() << std::endl;
 
             // ADD/INTEGRATE NEW ODOMETRY TO THE LAST FRAME
             last_capture_relative_->integrateCapture((CaptureMotion*) (new_capture));
@@ -177,7 +177,7 @@ void WolfManagerGPS::update()
         }
         else
         {
-            //std::cout << "adding not odometry capture..." << new_capture->nodeId() << std::endl;
+            std::cout << "adding not odometry capture..." << new_capture->nodeId() << std::endl;
 
             // ADD CAPTURE TO THE CURRENT FRAME (or substitute the same sensor previous capture)
             //std::cout << "searching repeated capture..." << new_capture->nodeId() << std::endl;
@@ -185,13 +185,13 @@ void WolfManagerGPS::update()
 
             if (repeated_capture_it != current_frame_->getCaptureListPtr()->end()) // repeated capture
             {
-                //std::cout << "repeated capture, keeping new capture" << new_capture->nodeId() << std::endl;
+                std::cout << "repeated capture, keeping new capture" << new_capture->nodeId() << std::endl;
                 current_frame_->removeCapture(repeated_capture_it);
                 current_frame_->addCapture(new_capture);
             }
             else
             {
-                //std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
+                std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
                 current_frame_->addCapture(new_capture);
             }
         }

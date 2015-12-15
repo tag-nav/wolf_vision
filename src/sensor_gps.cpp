@@ -10,21 +10,15 @@ SensorGPS::SensorGPS(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _bias_p
 
 }
 
-// TODO
-// TODO
-// TODO Check very carefully this destructor!
-// TODO
-// TODO
+// TODO Check carefully this destructor!
 SensorGPS::~SensorGPS()
 {
-    std::cout << "deleting SensorGPS NAV data " << nodeId() << std::endl;
+//    std::cout << "deleting SensorGPS NAV data " << nodeId() << std::endl;
     for (std::list<SatelliteNavData>::iterator it = nav_data_.begin(); it != nav_data_.end() ; ++it)
     {
-        std::cout << "---deleting " << it->getSatId() << std::endl;
+        std::cout << "---deleting NAV data " << it->getSatId() << std::endl;
         nav_data_.erase(it);
     }
-
-    //destruct(); // TODO right?
 }
 
 void SensorGPS::addNavData(const std::string &_sat_id, const TimeStamp &_timestamp, const WolfScalar &_pseudorange,
