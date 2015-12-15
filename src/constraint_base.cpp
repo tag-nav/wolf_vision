@@ -5,7 +5,10 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     type_(_tp),
     category_(CTR_ABSOLUTE),
-    status_(_status)
+    status_(_status),
+    frame_ptr_(nullptr),
+    feature_ptr_(nullptr),
+    landmark_ptr_(nullptr)
 {
     //std::cout << "creating ConstraintBase " << std::endl;
 }
@@ -61,6 +64,8 @@ ConstraintBase::~ConstraintBase()
     if (getTop() != nullptr)
         getTop()->removeConstraintPtr(this);
 
+    //std::cout << "removeConstraintPtr " << std::endl;
+
     // remove constraint to frame/landmark/feature
     if (frame_ptr_ != nullptr)
         frame_ptr_->removeConstraintTo(this);
@@ -68,6 +73,8 @@ ConstraintBase::~ConstraintBase()
         feature_ptr_->removeConstraintTo(this);
     if (landmark_ptr_ != nullptr)
         landmark_ptr_->removeConstraintTo(this);
+
+    //std::cout << "removed constraints to " << std::endl;
 }
 
 ConstraintType ConstraintBase::getType() const

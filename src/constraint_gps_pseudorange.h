@@ -39,7 +39,7 @@ public:
      **/
     virtual ~ConstraintGPSPseudorange()
     {
-        destruct();
+        //std::cout << "deleting ConstraintGPSPseudorange " << nodeId() << std::endl;
     }
 
 

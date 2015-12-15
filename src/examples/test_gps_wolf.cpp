@@ -4,20 +4,18 @@
 #include <iostream>
 #include <memory>
 #include <random>
-#include <cmath>
 #include <queue>
 
 //Wolf includes
 #include "wolf_manager_gps.h"
 #include "ceres_wrapper/ceres_manager.h"
-#include "raw_data_satellite.h"
 
 
 using namespace std;
 
 int main(int argc, char** argv)
 {
-    bool useCeres = false;
+    bool useCeres = true;
     unsigned int n_captures = 5;
 
 
@@ -94,8 +92,11 @@ int main(int argc, char** argv)
     }
 
 
-    cout << std::endl << std::endl << " ========= calling delete wolf_manager_ (¿seg fault?) ==========" << std::endl;
+    cout << std::endl << " ========= calling delete wolf_manager_ (should not crash) =============" << std::endl;
     delete wolf_manager_; //not necessary to delete anything more, wolf will do it!
+
+    cout << std::endl << " ========= calling delete ceres_manager (and now a seg fault) ==========" << std::endl;
+    delete ceres_manager; //not necessary to delete anything more, wolf will do it!
 
     //End message
     cout << " =========================== END ===============================" << std::endl;

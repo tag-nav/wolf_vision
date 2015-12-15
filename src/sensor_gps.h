@@ -7,7 +7,8 @@
 //wolf
 #include "sensor_base.h"
 
-/*
+/* TODO to be moved in an external library, like laser_scan_util
+ *
  * temporary! To store navigation data. For now is fake because I don't have real data from gps
  */
 class SatelliteNavData
