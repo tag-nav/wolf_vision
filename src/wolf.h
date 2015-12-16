@@ -40,6 +40,9 @@
 typedef double WolfScalar;        // Use this for double, 64 bit precision
 //typedef long double WolfScalar;   // Use this for long double, 128 bit precision
 
+//TODO: Check if it is correct, then use it in odometry covariances for instance. 
+//static const double WOLF_MIN_VARIANCE = 1e-6;
+
 ///////////////////////////////////////////
 // Construct types for any scalar defined in the typedef scalar_t above
 ////////////////////////////////////////////
@@ -273,6 +276,7 @@ class RawLaser2D;
 class SensorBase;
 class SensorLaser2D;
 class TransSensor;
+class ProcessorBase;
 class StateBlock;
 template<unsigned int SIZE> class StatePoint;
 class PinHole;
@@ -339,6 +343,11 @@ typedef SensorBaseList::iterator SensorBaseIter;
 typedef std::map<unsigned int, TransSensor*> TransSensorMap;
 typedef TransSensorMap::iterator TransSensorIter;
 
+// - Processors
+typedef std::list<ProcessorBase*> ProcessorBaseList;
+typedef ProcessorBaseList::iterator ProcessorBaseIter;
+
+
 // - State
 typedef std::list<StateBlock*> StateBlockList;
 typedef StateBlockList::iterator StateBaseIter;
@@ -364,6 +373,7 @@ typedef StateBlockList::iterator StateBaseIter;
 //    LIDAR_SCAN, ///< Full 2D laser scan
 //    LIDAR_RAY   ///< A single laser ray
 //} FeatureType;
+
 
 inline WolfScalar pi2pi(const WolfScalar& angle)
 {

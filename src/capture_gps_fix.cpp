@@ -1,19 +1,16 @@
 #include "capture_gps_fix.h"
 
-CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
-    CaptureBase(_ts, _sensor_ptr)
-{
-    //
-}
-
 CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
-	CaptureBase(_ts, _sensor_ptr, _data)
+	CaptureBase(_ts, _sensor_ptr),
+	data_(_data)
 {
 	//
 }
 
 CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
-	CaptureBase(_ts, _sensor_ptr, _data, _data_covariance)
+	CaptureBase(_ts, _sensor_ptr),
+	data_(_data),
+	data_covariance_(_data_covariance)
 {
 	//
 }

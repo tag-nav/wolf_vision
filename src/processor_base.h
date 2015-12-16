@@ -28,18 +28,23 @@ class ProcessorBase : public NodeLinked<SensorBase,NodeTerminus>
          **/        
         virtual ~ProcessorBase();
 
+		//TODO jsola: Remove it!
+        void linkToSensor(SensorBase* _sen_ptr);
+
+        SensorBase* getSensorPtr();
+
         /** \brief Extract Features
 		 *
 		 * Extract Features from a given capture
 		 *
 		 **/
-        virtual void extractFeatures(CaptureBase* _capture_ptr) {};
+        virtual void extractFeatures(CaptureBase* _capture_ptr) = 0;
 
         /** \brief Establish Constraints
 		 *
 		 * Establish Constraints for all features of a given capture
 		 *
 		 **/
-        virtual void establishConstraints(CaptureBase* _capture_ptr) {};
+        virtual void establishConstraints(CaptureBase* _capture_ptr) = 0;
 };
 #endif

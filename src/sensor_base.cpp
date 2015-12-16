@@ -64,6 +64,16 @@ SensorBase::~SensorBase()
 
 }
 
+void SensorBase::addProcessor(ProcessorBase* _proc_ptr)
+{
+    addDownNode(_proc_ptr);
+}
+
+ProcessorBaseList* SensorBase::getProcessorListPtr()
+{
+    return getDownNodeListPtr();
+}
+
 //const SensorType SensorBase::getSensorType() const
 //{
 //    return type_;

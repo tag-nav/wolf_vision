@@ -14,8 +14,12 @@
 class CaptureOdom2D : public CaptureMotion
 {
 
+    protected:
+        Eigen::VectorXs data_; ///< Raw data.
+        Eigen::MatrixXs data_covariance_; ///< Noise of the capture.
+
+
     public:
-      CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr);
 
       CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data);
 
