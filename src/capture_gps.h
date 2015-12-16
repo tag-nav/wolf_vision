@@ -18,6 +18,8 @@ protected:
 
 public:
 
+    std::vector<ObsData> getRawData(); //TODO vedi se va messo qualche const, &, ecc..
+
     CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, std::vector<ObsData>& _raw_data);
 
     /** \brief Default destructor (not recommended)
@@ -27,7 +29,7 @@ public:
      **/
     virtual ~CaptureGPS();
 
-    void process();
+//    void process();//TODO toglimi
 
     /*
      * Dummy implementation of the method, only because it's pure virtual

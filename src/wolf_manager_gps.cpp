@@ -185,13 +185,13 @@ void WolfManagerGPS::update()
 
             if (repeated_capture_it != current_frame_->getCaptureListPtr()->end()) // repeated capture
             {
-                std::cout << "repeated capture, keeping new capture" << new_capture->nodeId() << std::endl;
+                //std::cout << "repeated capture, keeping new capture" << new_capture->nodeId() << std::endl;
                 current_frame_->removeCapture(repeated_capture_it);
                 current_frame_->addCapture(new_capture);
             }
             else
             {
-                std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
+                //std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
                 current_frame_->addCapture(new_capture);
             }
         }

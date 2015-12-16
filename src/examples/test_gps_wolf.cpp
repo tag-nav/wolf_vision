@@ -15,7 +15,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    bool useCeres = true;
+    bool useCeres = false;
     unsigned int n_captures = 5;
 
 
@@ -25,9 +25,8 @@ int main(int argc, char** argv)
     cout << endl << " ========= WOLF TREE test ===========" << endl << endl;
 
     SensorGPS* gps_sensor_ptr_ = new SensorGPS(new StateBlock(Eigen::Vector3s::Zero()),   //gps sensor position
-                                               new StateBlock(Eigen::Vector4s::Zero()),   //gps sensor orientation
+                                               new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION),   //gps sensor orientation
                                                new StateBlock(Eigen::Vector1s::Zero()));  //gps sensor bias
-
 
     WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_3D,                               //frame structure
                                                          nullptr,                           //gps raw sensor

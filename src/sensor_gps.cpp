@@ -7,6 +7,7 @@ SensorGPS::SensorGPS(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _bias_p
         SensorBase(GPS_RAW, _p_ptr, _o_ptr, _bias_ptr, 0)
 {
     //std::cout << "SensorGPS constructor... id: " << nodeId() << std::endl;
+    //TODO add the 2 new extra extrinsic
 
 }
 

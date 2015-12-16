@@ -58,12 +58,14 @@ class SensorGPS : public SensorBase
 //        * INTRINSIC PARAM:
 //                bias                  [ ok ]
 //        * EXTRINSIC PARAM:
+//                GPS init              [  ]
 //                nav data              [TODO]
-//                gps mounting point    [ ok ]
+//                gps mounting point on board in  the vehicle   [ ok ]
 
 protected:
     std::list<SatelliteNavData> nav_data_;
-
+    StateBlock* init_ecef_position_ptr_;
+    StateBlock* init_ecef_orientation_ptr_; //da dove parte ll'esperimento
 public:
     //pointer to sensor position, orientation and bias
     SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr, StateBlock* _bias_ptr);

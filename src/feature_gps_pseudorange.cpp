@@ -7,7 +7,7 @@ FeatureGPSPseudorange::FeatureGPSPseudorange(ObsData& _satellite_data) : //TODO 
         obs_(_satellite_data)
 //TODO occhio, ora featureBase contiene il pseudorange
 {
-    //cout << "FeatureGPSPseudorange() constructor -- " << obs_.toString() << endl;
+    cout << "FeatureGPSPseudorange() constructor -- " << obs_.toString() << endl;
 
     //calculate the satellite position when the message was sent from satellite
     obs_.calculateSatPosition();
