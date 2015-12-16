@@ -45,11 +45,5 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
          **/
         virtual void establishConstraints(CaptureBase* _capture_ptr) = 0;
 
-        virtual Eigen::VectorXs provideFrameInitialGuess(const TimeStamp& _now) const
-        {
-            return Eigen::VectorXs(1);
-        }
-
-
 };
 #endif
