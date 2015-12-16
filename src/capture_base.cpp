@@ -10,38 +10,10 @@ CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
     //
 }
 
-CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
-	NodeLinked(MID, "CAPTURE"),
-	time_stamp_(_ts),
-	sensor_ptr_(_sensor_ptr),
-	data_(_data),
-	sensor_p_ptr_(sensor_ptr_->getPPtr()),
-	sensor_o_ptr_(sensor_ptr_->getOPtr())
-
-{
-	//
-}
-
-CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
-	NodeLinked(MID, "CAPTURE"),
-	time_stamp_(_ts),
-	sensor_ptr_(_sensor_ptr),
-	data_(_data),
-	data_covariance_(_data_covariance),
-	sensor_p_ptr_(sensor_ptr_->getPPtr()),
-	sensor_o_ptr_(sensor_ptr_->getOPtr())
-{
-    //std::cout << "created CaptureBase " << nodeId() << std::endl << "covariance: " << std::endl << data_covariance_ << std::endl;
-}
 
 CaptureBase::~CaptureBase()
 {
 	//std::cout << "deleting CaptureBase " << nodeId() << std::endl;
-}
-
-void CaptureBase::linkToFrame(FrameBase* _frm_ptr)
-{
-    linkToUpperNode(_frm_ptr);
 }
 
 // TODO: Why the linker throws an error when this function is inline...
@@ -77,10 +49,6 @@ SensorBase* CaptureBase::getSensorPtr() const
     return sensor_ptr_;
 }
 
-//SensorType CaptureBase::getSensorType() const
-//{
-//	return sensor_ptr_->getSensorType();
-//}
 
 void CaptureBase::setTimeStamp(const TimeStamp & _ts)
 {
@@ -90,32 +58,6 @@ void CaptureBase::setTimeStamp(const TimeStamp & _ts)
 void CaptureBase::setTimeStampToNow()
 {
     time_stamp_.setToNow();
-}
-
-Eigen::VectorXs CaptureBase::getData()
-{
-	return data_;
-}
-
-Eigen::MatrixXs CaptureBase::getDataCovariance()
-{
-	return data_covariance_;
-}
-
-void CaptureBase::setData(unsigned int _size, const WolfScalar *_data)
-{
-    data_.resize(_size);
-    for (unsigned int ii=0; ii<_size; ii++) data_(ii) = *(&_data[ii]);
-}
-
-void CaptureBase::setData(const Eigen::VectorXs& _data)
-{
-    data_=_data;
-}
-
-void CaptureBase::setDataCovariance(const Eigen::MatrixXs& _data_cov)
-{
-    data_covariance_ = _data_cov;
 }
 
 void CaptureBase::processCapture()
@@ -129,10 +71,6 @@ void CaptureBase::processCapture()
     }
 }
 
-//void CaptureBase::processCapture()
-//{
-//    std::cout << "CaptureBase::processCapture()... processing capture" << std::endl;
-//}
 
 StateBlock* CaptureBase::getSensorPPtr() const {
 	if (getSensorPtr()->isExtrinsicDynamic())

@@ -11,9 +11,11 @@
 //class CaptureGPSFix
 class CaptureGPSFix : public CaptureBase
 {
-    public:
-        CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr);
+    protected:
+        Eigen::VectorXs data_; ///< Raw data.
+        Eigen::MatrixXs data_covariance_; ///< Noise of the capture.
 
+    public:
         CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
 
         CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);

@@ -12,6 +12,10 @@
 //class CaptureFix
 class CaptureFix : public CaptureBase
 {
+    protected:
+        Eigen::VectorXs data_; ///< Raw data.
+        Eigen::MatrixXs data_covariance_; ///< Noise of the capture.
+
     public:
 
         CaptureFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
