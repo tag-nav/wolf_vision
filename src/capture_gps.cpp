@@ -24,7 +24,7 @@ CaptureGPS::~CaptureGPS()
  * Process a gps and create feature and constraint for each satellite
  *
  **/
-void CaptureGPS::processCapture()
+void CaptureGPS::process()
 {
     std::cout << "CaptureGPS::processCapture()... processing capture" << std::endl;
 

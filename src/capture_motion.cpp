@@ -1,22 +1,18 @@
 #include "capture_motion.h"
 
-CaptureMotion::CaptureMotion(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr) :
-    CaptureBase(_init_ts, _sensor_ptr),
-    final_time_stamp_(_final_ts)
-{
-    //
-}
-
 CaptureMotion::CaptureMotion(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
-	CaptureBase(_init_ts, _sensor_ptr, _data),
-    final_time_stamp_(_final_ts)
+	CaptureBase(_init_ts, _sensor_ptr),
+	data_(_data),
+	final_time_stamp_(_final_ts)
 {
 	//
 }
 
 CaptureMotion::CaptureMotion(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
-	CaptureBase(_init_ts, _sensor_ptr, _data, _data_covariance),
-    final_time_stamp_(_final_ts)
+	CaptureBase(_init_ts, _sensor_ptr),
+	data_(_data),
+	data_covariance_(_data_covariance),
+	final_time_stamp_(_final_ts)
 {
 	//
 }

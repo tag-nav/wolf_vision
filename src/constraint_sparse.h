@@ -6,7 +6,7 @@
 #include "wolf.h"
 #include "constraint_base.h"
 
-
+//TODO: change class name (and file name!->includes) to ConstraintNumericalAutoDiff 
 //template class ConstraintSparse
 template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
@@ -114,9 +114,9 @@ class ConstraintSparse: public ConstraintBase
         virtual ~ConstraintSparse();
 
         /** \brief Returns a vector of pointers to the state blocks
-         * 
+         *
          * Returns a vector of pointers to the state blocks in which this constraint depends
-         * 
+         *
          **/
         virtual const std::vector<WolfScalar*> getStateBlockPtrVector();
 

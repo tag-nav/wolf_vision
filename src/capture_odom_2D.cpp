@@ -1,22 +1,19 @@
 #include "capture_odom_2D.h"
 
-CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr) :
-        CaptureMotion(_init_ts, _final_ts, _sensor_ptr)
-{
-    //
-}
 
-CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data) :
+CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr,
+                             const Eigen::Vector3s& _data) :
         CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data)
 {
     data_covariance_ = Eigen::Matrix3s::Zero();
-    data_covariance_(0, 0) = std::max(1e-10, _data(0) * _data(0) * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor() * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor());
-    data_covariance_(1, 1) = std::max(1e-10, _data(1) * _data(1) * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor() * ((SensorOdom2D*) _sensor_ptr)->getDisplacementNoiseFactor());
-    data_covariance_(2, 2) = std::max(1e-10, _data(2) * _data(2) * ((SensorOdom2D*) _sensor_ptr)->getRotationNoiseFactor() * ((SensorOdom2D*) _sensor_ptr)->getRotationNoiseFactor());
+    data_covariance_(0, 0) = std::max(1e-10, _data(0) * ((SensorOdom2D*)_sensor_ptr)->getDisplacementNoiseFactor());
+    data_covariance_(1, 1) = std::max(1e-10, _data(1) * ((SensorOdom2D*)_sensor_ptr)->getDisplacementNoiseFactor());
+    data_covariance_(2, 2) = std::max(1e-10, _data(2) * ((SensorOdom2D*)_sensor_ptr)->getRotationNoiseFactor());
 //  std::cout << data_covariance_ << std::endl;
 }
 
-CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance) :
+CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr,
+                             const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance) :
         CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
 {
     //
@@ -27,7 +24,7 @@ CaptureOdom2D::~CaptureOdom2D()
     //std::cout << "Destroying CaptureOdom2D capture...\n";
 }
 
-inline void CaptureOdom2D::processCapture()
+inline void CaptureOdom2D::process()
 {
     // ADD FEATURE
     addFeature(new FeatureOdom2D(data_, data_covariance_));

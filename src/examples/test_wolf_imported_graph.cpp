@@ -309,8 +309,8 @@ int main(int argc, char** argv)
     CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_full->addCapture(initial_covariance_full);
     first_frame_prun->addCapture(initial_covariance_prun);
-    initial_covariance_full->processCapture();
-    initial_covariance_prun->processCapture();
+    initial_covariance_full->process();
+    initial_covariance_prun->process();
     //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_prun->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
     Eigen::SparseMatrix<WolfScalar> DeltaLambda(Lambda.rows(), Lambda.cols());
     insertSparseBlock((Eigen::Matrix3s::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
