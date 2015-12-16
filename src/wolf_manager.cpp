@@ -40,7 +40,7 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
     //std::cout << " initial_covariance" << std::endl;
     current_frame_->addCapture(initial_covariance);
     //std::cout << " addCapture" << std::endl;
-    initial_covariance->processCapture();
+    initial_covariance->process();
     //std::cout << " processCapture" << std::endl;
 
     // Current robot frame
@@ -100,7 +100,7 @@ void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeSta
     {
         CaptureMotion* empty_odom = new CaptureOdom2D(_time_stamp, _time_stamp, sensor_prior_, Eigen::Vector3s::Zero());
         current_frame_->addCapture(empty_odom);
-        empty_odom->processCapture();
+        empty_odom->process();
         last_capture_relative_ = empty_odom;
     }
     //std::cout << "last_key_frame_" << std::endl;
@@ -113,7 +113,7 @@ void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeSta
             if ((*capture_it)->getSensorPtr() != sensor_prior_)
             {
                 //std::cout << "processing capture " << (*capture_it)->nodeId() << std::endl;
-                (*capture_it)->processCapture();
+                (*capture_it)->process();
             }
 
 

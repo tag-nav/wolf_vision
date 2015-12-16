@@ -60,7 +60,7 @@ void CaptureBase::setTimeStampToNow()
     time_stamp_.setToNow();
 }
 
-void CaptureBase::processCapture()
+void CaptureBase::process()
 {
     // Call all processors assigned to the sensor that captured this data
 	//TODO jsola: derive SensorBase::getProcessorList

@@ -20,7 +20,7 @@ CaptureGPSFix::~CaptureGPSFix()
 	//std::cout << "Destroying GPS fix capture...\n";
 }
 
-void CaptureGPSFix::processCapture()
+void CaptureGPSFix::process()
 {
 	// EXTRACT AND ADD FEATURES
     addFeature(new FeatureGPSFix(data_,data_covariance_));

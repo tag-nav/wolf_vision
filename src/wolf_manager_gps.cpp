@@ -89,7 +89,7 @@ void WolfManagerGPS::createFrame(const Eigen::VectorXs& _frame_state, const Time
             if ((*capture_it)->getSensorPtr() != sensor_prior_)
             {
                 //std::cout << "processing capture " << (*capture_it)->nodeId() << std::endl;
-                (*capture_it)->processCapture();
+                (*capture_it)->process();
             }
 
 

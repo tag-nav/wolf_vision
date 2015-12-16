@@ -32,7 +32,7 @@ class CaptureOdom2D : public CaptureMotion
        **/
       virtual ~CaptureOdom2D();
 
-      virtual void processCapture();
+      virtual void process();
 
       virtual Eigen::VectorXs computePrior(const TimeStamp& _now = 0) const;
 

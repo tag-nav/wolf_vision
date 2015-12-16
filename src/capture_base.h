@@ -86,7 +86,7 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
         void setTimeStampToNow();
 
         // TODO rename to process()
-        virtual void processCapture(); 
+        virtual void process(); 
 
         // TODO Rename to computeFrameInitialGuess() ... for instance
         //      Another name could be provideFrameInitialGuess();

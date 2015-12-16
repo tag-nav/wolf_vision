@@ -24,7 +24,7 @@ CaptureOdom2D::~CaptureOdom2D()
     //std::cout << "Destroying CaptureOdom2D capture...\n";
 }
 
-inline void CaptureOdom2D::processCapture()
+inline void CaptureOdom2D::process()
 {
     // ADD FEATURE
     addFeature(new FeatureOdom2D(data_, data_covariance_));

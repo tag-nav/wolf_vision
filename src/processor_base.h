@@ -28,9 +28,6 @@ class ProcessorBase : public NodeLinked<SensorBase,NodeTerminus>
          **/        
         virtual ~ProcessorBase();
 
-		//TODO jsola: Remove it!
-        void linkToSensor(SensorBase* _sen_ptr);
-
         SensorBase* getSensorPtr();
 
         /** \brief Extract Features

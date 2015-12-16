@@ -14,7 +14,7 @@ CaptureFix::~CaptureFix()
 	//
 }
 
-void CaptureFix::processCapture()
+void CaptureFix::process()
 {
 	// EXTRACT AND ADD FEATURES
     addFeature(new FeatureFix(data_,data_covariance_));

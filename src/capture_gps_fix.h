@@ -27,7 +27,7 @@ class CaptureGPSFix : public CaptureBase
          **/
         virtual ~CaptureGPSFix();
 
-        virtual void processCapture();
+        virtual void process();
 
         virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const;
 

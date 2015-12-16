@@ -11,11 +11,6 @@ ProcessorBase::~ProcessorBase()
 	//std::cout << "deleting ProcessorBase " << nodeId() << std::endl;
 }
 
-void ProcessorBase::linkToSensor(SensorBase* _sen_ptr)
-{
-    linkToUpperNode(_sen_ptr);
-}
-
 SensorBase* ProcessorBase::getSensorPtr()
 {
     //            return (SensorBase*)(upperNodePtr());
