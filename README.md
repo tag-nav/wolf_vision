@@ -183,7 +183,7 @@ If they are available, just do
 Type in your `wolf/bin/` directory:
 
     $ cd bin/
-    $ valgrind --tool=callgrind ./my_program `<my_prg_params
+    $ valgrind --tool=callgrind ./my_program <my_prg_params>
 
 this produces a log report called `callgrind.out.XXXX`, where XXXX is a number. Then type (Ubuntu)
 
