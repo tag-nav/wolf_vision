@@ -15,6 +15,7 @@ class NodeTerminus;
 #include "feature_base.h"
 #include "node_terminus.h"
 
+//TODO: add a member to indicate how jacobian is computed, called "jacobian_method_"
 //class ConstraintBase
 class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 {

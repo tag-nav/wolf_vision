@@ -13,11 +13,12 @@
 class CaptureMotion : public CaptureBase
 {
     protected:
+        Eigen::VectorXs data_; ///< Raw data.
+        Eigen::MatrixXs data_covariance_; ///< Noise of the capture.
         TimeStamp final_time_stamp_; ///< Final Time stamp
 
+
     public:
-        CaptureMotion(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr);
-        
         CaptureMotion(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
 
         CaptureMotion(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
@@ -28,6 +29,16 @@ class CaptureMotion : public CaptureBase
          *
          **/
         virtual ~CaptureMotion();
+
+        Eigen::VectorXs getData()
+        {
+              return data_;
+        }
+
+        Eigen::MatrixXs getDataCovariance()
+        {
+              return data_covariance_;
+        }
 
         virtual void integrateCapture(CaptureMotion* _new_capture) = 0;
 

@@ -27,7 +27,7 @@ public:
      **/
     virtual ~CaptureGPS();
 
-    void processCapture();
+    void process();
 
     /*
      * Dummy implementation of the method, only because it's pure virtual

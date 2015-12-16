@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     raw_data << 42, 43, 44, 45;
 
     CaptureGPS capture(time_stamp, &device, raw_data);
-    capture.processCapture();
+    capture.process();
 
 
     return 0;
