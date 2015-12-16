@@ -85,14 +85,13 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 
         void setTimeStampToNow();
 
-        // TODO rename to process()
         virtual void process(); 
 
-        // TODO Rename to computeFrameInitialGuess() ... for instance
+        // TODO Move it to ProcessorX class()
+        //      Rename to computeFrameInitialGuess() ... for instance
         //      Another name could be provideFrameInitialGuess();
-        //      Move it to ProcessorX class()
-        //      Should be virtual in ProcessorBase with an empty/error message
-        virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const = 0;
+        //Should be virtual in ProcessorBase with an empty/error message
+        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const = 0;
 
 		
         virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;

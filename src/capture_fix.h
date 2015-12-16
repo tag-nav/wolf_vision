@@ -29,6 +29,6 @@ class CaptureFix : public CaptureBase
 
         virtual void process();
 
-        virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const;
+        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
 };
 #endif

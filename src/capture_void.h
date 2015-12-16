@@ -17,6 +17,6 @@ class CaptureVoid : public CaptureBase
          **/
         virtual ~CaptureVoid();
 
-        virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const;
+        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
 };
 #endif

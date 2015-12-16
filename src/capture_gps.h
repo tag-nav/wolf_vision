@@ -32,7 +32,7 @@ public:
     /*
      * Dummy implementation of the method, only because it's pure virtual
      */
-    virtual Eigen::VectorXs computePrior(const TimeStamp &_now) const;
+    virtual Eigen::VectorXs computeFramePose(const TimeStamp &_now) const;
 
 };
 

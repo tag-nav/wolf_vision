@@ -5,13 +5,14 @@
 
 //Wolf includes
 #include "wolf.h"
+#include "time_stamp.h"
 #include "wolf_problem.h"
 #include "node_linked.h"
 #include "node_terminus.h"
 #include "sensor_base.h"
 
 //class ProcessorBase
-class ProcessorBase : public NodeLinked<SensorBase,NodeTerminus>
+class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 {
     public:
         /** \brief Constructor
@@ -25,23 +26,30 @@ class ProcessorBase : public NodeLinked<SensorBase,NodeTerminus>
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
-         **/        
+         **/
         virtual ~ProcessorBase();
 
         SensorBase* getSensorPtr();
 
         /** \brief Extract Features
-		 *
-		 * Extract Features from a given capture
-		 *
-		 **/
+         *
+         * Extract Features from a given capture
+         *
+         **/
         virtual void extractFeatures(CaptureBase* _capture_ptr) = 0;
 
         /** \brief Establish Constraints
-		 *
-		 * Establish Constraints for all features of a given capture
-		 *
-		 **/
+         *
+         * Establish Constraints for all features of a given capture
+         *
+         **/
         virtual void establishConstraints(CaptureBase* _capture_ptr) = 0;
+
+        virtual Eigen::VectorXs provideFrameInitialGuess(const TimeStamp& _now) const
+        {
+            return Eigen::VectorXs(1);
+        }
+
+
 };
 #endif
