@@ -63,8 +63,7 @@ void CaptureBase::setTimeStampToNow()
 void CaptureBase::process()
 {
     // Call all processors assigned to the sensor that captured this data
-	//TODO jsola: derive SensorBase::getProcessorList
-    for (auto processor_iter = sensor_ptr_->getDownNodeListPtr()->begin(); processor_iter != sensor_ptr_->getDownNodeListPtr()->end(); ++processor_iter)
+    for (auto processor_iter = sensor_ptr_->getProcessorListPtr()->begin(); processor_iter != sensor_ptr_->getProcessorListPtr()->end(); ++processor_iter)
     {
         (*processor_iter)->extractFeatures(this);
         (*processor_iter)->establishConstraints(this);

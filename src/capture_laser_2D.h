@@ -100,7 +100,7 @@ class CaptureLaser2D : public CaptureBase
 //
 //        void computeExpectedFeature(LandmarkBase* _landmark_ptr, Eigen::Vector4s& expected_feature_, Eigen::Matrix3s& expected_feature_cov_);
 
-        virtual Eigen::VectorXs computePrior(const TimeStamp& _now) const;
+        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
 
 //        Eigen::VectorXs computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr, const LandmarkBase* _landmark_ptr, const Eigen::MatrixXs& _mu);
 //        Eigen::VectorXs computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr, const Eigen::Vector4s& _expected_feature, const Eigen::Matrix3s& _expected_feature_cov, const Eigen::MatrixXs& _mu);

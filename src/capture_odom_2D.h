@@ -34,7 +34,7 @@ class CaptureOdom2D : public CaptureMotion
 
       virtual void process();
 
-      virtual Eigen::VectorXs computePrior(const TimeStamp& _now = 0) const;
+      virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now = 0) const;
 
       virtual void addConstraints();
 

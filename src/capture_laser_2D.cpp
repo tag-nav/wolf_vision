@@ -51,7 +51,7 @@ CaptureLaser2D::~CaptureLaser2D()
 }
 
 
-Eigen::VectorXs CaptureLaser2D::computePrior(const TimeStamp& _now) const
+Eigen::VectorXs CaptureLaser2D::computeFramePose(const TimeStamp& _now) const
 {
     return Eigen::Vector3s(1, 2, 3);
 }
