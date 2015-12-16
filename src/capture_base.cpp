@@ -121,6 +121,7 @@ void CaptureBase::setDataCovariance(const Eigen::MatrixXs& _data_cov)
 void CaptureBase::processCapture()
 {
     // Call all processors assigned to the sensor that captured this data
+	//TODO jsola: derive SensorBase::getProcessorList
     for (auto processor_iter = sensor_ptr_->getDownNodeListPtr()->begin(); processor_iter != sensor_ptr_->getDownNodeListPtr()->end(); ++processor_iter)
     {
         (*processor_iter)->extractFeatures(this);

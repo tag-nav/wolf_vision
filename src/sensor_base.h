@@ -27,7 +27,7 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
-        Eigen::VectorXs noise_factor_; // noise factor for simulation purposes -- multiplies the real sensor noise for the estimator
+        Eigen::VectorXs noise_factor_; //TODO: rename and explain in a comment. Move to SensorOdom2D
 
     public:        
         

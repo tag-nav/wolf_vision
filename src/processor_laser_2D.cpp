@@ -13,7 +13,10 @@ ProcessorLaser2D::~ProcessorLaser2D()
 
 void ProcessorLaser2D::extractFeatures(CaptureBase* capture_ptr_)
 {
+	//check CaptureBase pointer is the appropriate one for this Processor
+	assert( capture_laser_ptr_ = dynamic_cast<CaptureLaser2D*>(capture_ptr_) && "Invalid Capture Type pointer" );
     capture_laser_ptr_ = (CaptureLaser2D*)(capture_ptr_);
+	
     std::cout << "Extracting laser features..." << std::endl;
 
     //variables
@@ -31,9 +34,11 @@ void ProcessorLaser2D::extractFeatures(CaptureBase* capture_ptr_)
 
 void ProcessorLaser2D::establishConstraints(CaptureBase* capture_ptr_)
 {
+	//check CaptureBase pointer is the appropriate one for this Processor
+	assert( capture_laser_ptr_ = dynamic_cast<CaptureLaser2D*>(capture_ptr_) && "Invalid Capture Type pointer" );
     capture_laser_ptr_ = (CaptureLaser2D*)(capture_ptr_);
+	
     std::cout << "Establishing constraints to laser features..." << std::endl;
-
 
     //Establish constraints for each feature
     //establishConstraints();

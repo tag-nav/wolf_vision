@@ -25,6 +25,7 @@ class CaptureLaser2D : public CaptureBase
 //         static double max_distance;//max distance between line ends to consider corner or concatenation
 
     public:
+		//TODO: These two vectors should be private
         //Eigen::Map<Eigen::VectorXs> ranges_; // a map to the ranges inside de data vector
         std::vector<float> ranges_; // ranges vector. Type float to match ROS LaserScan message
         //Eigen::Map<Eigen::VectorXs> intensities_; // a map to the intensities inside the data vector
