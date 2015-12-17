@@ -19,6 +19,7 @@
 //Wolf includes
 #include "state_block.h"
 #include "constraint_base.h"
+#include "sensor_laser_2D.h"
 #include "wolf_manager.h"
 
 // wolf solver
@@ -281,16 +282,16 @@ int main(int argc, char *argv[])
 
         // DRAWING STUFF ---------------------------
         // draw detected corners
-        std::list < laserscanutils::Corner > corner_list;
-        std::vector<double> corner_vector;
-        CaptureLaser2D last_scan(TimeStamp(), &laser_1_sensor, scan1);
-        last_scan.extractCorners(corner_list);
-        for (std::list<laserscanutils::Corner>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++)
-        {
-            corner_vector.push_back(corner_it->pt_(0));
-            corner_vector.push_back(corner_it->pt_(1));
-        }
-        myRender->drawCorners(laser1Pose, corner_vector);
+//        std::list < laserscanutils::Corner > corner_list;
+//        std::vector<double> corner_vector;
+//        CaptureLaser2D last_scan(TimeStamp(), &laser_1_sensor, scan1);
+//        last_scan.extractCorners(corner_list);
+//        for (std::list<laserscanutils::Corner>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++)
+//        {
+//            corner_vector.push_back(corner_it->pt_(0));
+//            corner_vector.push_back(corner_it->pt_(1));
+//        }
+//        myRender->drawCorners(laser1Pose, corner_vector);
 
         // draw landmarks
         std::vector<double> landmark_vector;

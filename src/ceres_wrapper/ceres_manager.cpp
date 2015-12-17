@@ -37,7 +37,6 @@ ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_
 
 	// run Ceres Solver
 	ceres::Solve(_ceres_options, ceres_problem_, &ceres_summary_);
-	//std::cout << "solved" << std::endl;
 
 	//return results
 	return ceres_summary_;
@@ -164,7 +163,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
-void CeresManager::update(bool _apply_loss_function)
+void CeresManager::update(const bool _self_auto_diff, const bool _apply_loss_function)
 {
 	// REMOVE CONSTRAINTS
     while (!wolf_problem_->getConstraintRemoveList()->empty())
@@ -193,14 +192,14 @@ void CeresManager::update(bool _apply_loss_function)
     // ADD CONSTRAINTS
     while (!wolf_problem_->getConstraintAddList()->empty())
     {
-        addConstraint(wolf_problem_->getConstraintAddList()->front(), _apply_loss_function);
+        addConstraint(wolf_problem_->getConstraintAddList()->front(), _self_auto_diff, _apply_loss_function);
         wolf_problem_->getConstraintAddList()->pop_front();
     }
 }
 
-void CeresManager::addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss)
+void CeresManager::addConstraint(ConstraintBase* _corr_ptr, const bool _self_auto_diff, const bool _apply_loss)
 {
-    id_2_costfunction_[_corr_ptr->nodeId()] = createCostFunction(_corr_ptr);
+    id_2_costfunction_[_corr_ptr->nodeId()] = createCostFunction(_corr_ptr, _self_auto_diff);
 
     if (_apply_loss)
         id_2_residual_idx_[_corr_ptr->nodeId()] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_corr_ptr->nodeId()], new ceres::CauchyLoss(0.5), _corr_ptr->getStateBlockPtrVector());
@@ -224,7 +223,7 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 
 void CeresManager::addStateBlock(StateBlock* _st_ptr)
 {
-	//std::cout << "Adding State Unit " << _st_ptr->nodeId() << std::endl;
+	//std::cout << "Adding State Unit with size: " <<  _st_ptr->getSize() << std::endl;
 	//_st_ptr->print();
 
 	switch (_st_ptr->getType())
@@ -271,7 +270,7 @@ void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
 }
 
-ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
+ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, const bool _self_auto_diff)
 {
 	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
 	//_corrPtr->print();
@@ -281,103 +280,187 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
 		case CTR_GPS_FIX_2D:
 		{
 			ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintGPS2D,
-													specific_ptr->measurementSize,
-													specific_ptr->block0Size,
-													specific_ptr->block1Size,
-													specific_ptr->block2Size,
-													specific_ptr->block3Size,
-													specific_ptr->block4Size,
-													specific_ptr->block5Size,
-													specific_ptr->block6Size,
-													specific_ptr->block7Size,
-													specific_ptr->block8Size,
-													specific_ptr->block9Size>(specific_ptr);
+			if (_self_auto_diff)
+                return new AutoDiffCostFunctionWrapper<ConstraintGPS2D,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
+			else
+                return new ceres::AutoDiffCostFunction<ConstraintGPS2D,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
         case CTR_FIX:
         {
             ConstraintFix* specific_ptr = (ConstraintFix*)(_corrPtr);
-            return new ceres::AutoDiffCostFunction<ConstraintFix,
-                                                    specific_ptr->measurementSize,
-                                                    specific_ptr->block0Size,
-                                                    specific_ptr->block1Size,
-                                                    specific_ptr->block2Size,
-                                                    specific_ptr->block3Size,
-                                                    specific_ptr->block4Size,
-                                                    specific_ptr->block5Size,
-                                                    specific_ptr->block6Size,
-                                                    specific_ptr->block7Size,
-                                                    specific_ptr->block8Size,
-                                                    specific_ptr->block9Size>(specific_ptr);
+            if (_self_auto_diff)
+                return new AutoDiffCostFunctionWrapper<ConstraintFix,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
+            else
+                return new ceres::AutoDiffCostFunction<ConstraintFix,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
             break;
         }
 		case CTR_ODOM_2D:
 		{
 			ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintOdom2D,
-													specific_ptr->measurementSize,
-													specific_ptr->block0Size,
-													specific_ptr->block1Size,
-													specific_ptr->block2Size,
-													specific_ptr->block3Size,
-													specific_ptr->block4Size,
-													specific_ptr->block5Size,
-													specific_ptr->block6Size,
-													specific_ptr->block7Size,
-													specific_ptr->block8Size,
-													specific_ptr->block9Size>(specific_ptr);
+            if (_self_auto_diff)
+                return new AutoDiffCostFunctionWrapper<ConstraintOdom2D,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
+            else
+                return new ceres::AutoDiffCostFunction<ConstraintOdom2D,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
 		case CTR_CORNER_2D:
 		{
 			ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintCorner2D,
-													specific_ptr->measurementSize,
-													specific_ptr->block0Size,
-													specific_ptr->block1Size,
-													specific_ptr->block2Size,
-													specific_ptr->block3Size,
-													specific_ptr->block4Size,
-													specific_ptr->block5Size,
-													specific_ptr->block6Size,
-													specific_ptr->block7Size,
-													specific_ptr->block8Size,
-													specific_ptr->block9Size>(specific_ptr);
+            if (_self_auto_diff)
+                return new AutoDiffCostFunctionWrapper<ConstraintCorner2D,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
+            else
+                return new ceres::AutoDiffCostFunction<ConstraintCorner2D,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
         case CTR_CONTAINER:
         {
             ConstraintContainer* specific_ptr = (ConstraintContainer*)(_corrPtr);
-            return new ceres::AutoDiffCostFunction<ConstraintContainer,
-                                                    specific_ptr->measurementSize,
-                                                    specific_ptr->block0Size,
-                                                    specific_ptr->block1Size,
-                                                    specific_ptr->block2Size,
-                                                    specific_ptr->block3Size,
-                                                    specific_ptr->block4Size,
-                                                    specific_ptr->block5Size,
-                                                    specific_ptr->block6Size,
-                                                    specific_ptr->block7Size,
-                                                    specific_ptr->block8Size,
-                                                    specific_ptr->block9Size>(specific_ptr);
+            if (_self_auto_diff)
+                return new AutoDiffCostFunctionWrapper<ConstraintContainer,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
+            else
+                return new ceres::AutoDiffCostFunction<ConstraintContainer,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
             break;
         }
         case CTR_GPS_PR_3D:
         {
             ConstraintGPSPseudorange* specific_ptr = (ConstraintGPSPseudorange*)(_corrPtr);
-            return new ceres::AutoDiffCostFunction<ConstraintGPSPseudorange,
-                    specific_ptr->measurementSize,
-                    specific_ptr->block0Size,
-                    specific_ptr->block1Size,
-                    specific_ptr->block2Size,
-                    specific_ptr->block3Size,
-                    specific_ptr->block4Size,
-                    specific_ptr->block5Size,
-                    specific_ptr->block6Size,
-                    specific_ptr->block7Size,
-                    specific_ptr->block8Size,
-                    specific_ptr->block9Size>(specific_ptr);
+            if (_self_auto_diff)
+                return new AutoDiffCostFunctionWrapper<ConstraintGPSPseudorange,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
+            else
+                return new ceres::AutoDiffCostFunction<ConstraintGPSPseudorange,
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
             break;
         }
 		default:

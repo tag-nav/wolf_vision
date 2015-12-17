@@ -21,7 +21,6 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 			corner_(_corner)
 		{
             assert(_corner >= 0 && _corner <= 3 && "Wrong corner id in constraint container constructor");
-            lmk_ptr_->addConstraintTo(this);
 		}
 
         /** \brief Default destructor (not recommended)
@@ -32,7 +31,6 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 		virtual ~ConstraintContainer()
 		{
 			//std::cout << "deleting ConstraintContainer " << nodeId() << std::endl;
-			lmk_ptr_->removeConstraintTo(this);
 		}
 
 		LandmarkContainer* getLandmarkPtr()

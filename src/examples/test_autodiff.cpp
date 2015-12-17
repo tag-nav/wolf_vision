@@ -18,6 +18,7 @@
 //Wolf includes
 #include "wolf_manager.h"
 #include "sensor_laser_2D.h"
+#include "processor_laser_2D.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 //C includes for sleep, time and main args
@@ -68,7 +69,7 @@ int main(int argc, char** argv)
 
     // INITIALIZATION ============================================================================================
     //init random generators
-    WolfScalar odom_std_factor = 0.1;
+    WolfScalar odom_std_factor = 0.5;
     WolfScalar gps_std = 1;
     std::default_random_engine generator(1);
     std::normal_distribution<WolfScalar> distribution_odom(0.0, odom_std_factor); //odometry noise
@@ -121,13 +122,16 @@ int main(int argc, char** argv)
     SensorGPSFix gps_sensor(new StateBlock(gps_pose.head(2)), new StateBlock(gps_pose.tail(1)), gps_std);
     SensorLaser2D laser_1_sensor(new StateBlock(laser_1_pose.head(2)), new StateBlock(laser_1_pose.tail(1)));
     SensorLaser2D laser_2_sensor(new StateBlock(laser_2_pose.head(2)), new StateBlock(laser_2_pose.tail(1)));
+    laser_1_sensor.addProcessor(new ProcessorLaser2D());
+    laser_2_sensor.addProcessor(new ProcessorLaser2D());
 
     // Initial pose
     pose_odom << 2, 8, 0;
     ground_truth.head(3) = pose_odom;
     odom_trajectory.head(3) = pose_odom;
 
-    WolfManager* wolf_manager = new WolfManager(PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
+    WolfManager* wolf_manager_ceres = new WolfManager(PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
+    WolfManager* wolf_manager_wolf = new WolfManager(PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
     
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -140,7 +144,8 @@ int main(int argc, char** argv)
     problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
     problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager = new CeresManager(wolf_manager->getProblemPtr(), problem_options);
+    CeresManager* ceres_manager_ceres = new CeresManager(wolf_manager_ceres->getProblemPtr(), problem_options);
+    CeresManager* ceres_manager_wolf = new CeresManager(wolf_manager_wolf->getProblemPtr(), problem_options);
     std::ofstream log_file, landmark_file;  //output file
 
     //std::cout << "START TRAJECTORY..." << std::endl;
@@ -198,32 +203,74 @@ int main(int argc, char** argv)
         std::cout << "ADD CAPTURES..." << std::endl;
         t1 = clock();
         // adding new sensor captures
-        wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(),TimeStamp(), &odom_sensor, odom_reading));		//, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
-		wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
-        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
-        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
+        wolf_manager_ceres->addCapture(new CaptureOdom2D(TimeStamp(),TimeStamp(), &odom_sensor, odom_reading));		//, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
+        wolf_manager_ceres->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+        wolf_manager_ceres->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
+        wolf_manager_ceres->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
+        wolf_manager_wolf->addCapture(new CaptureOdom2D(TimeStamp(),TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
+        wolf_manager_wolf->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+        wolf_manager_wolf->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
+        wolf_manager_wolf->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
+
         // updating problem
-        wolf_manager->update();
+        wolf_manager_ceres->update();
+        wolf_manager_wolf->update();
         mean_times(1) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // UPDATING CERES ---------------------------
         std::cout << "UPDATING CERES..." << std::endl;
         t1 = clock();
         // update state units and constraints in ceres
-        ceres_manager->update();
+        ceres_manager_ceres->update();
+        ceres_manager_wolf->update(true);
         mean_times(2) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // SOLVE OPTIMIZATION ---------------------------
         std::cout << "SOLVING..." << std::endl;
         t1 = clock();
-        ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
-        //std::cout << summary.FullReport() << std::endl;
+        ceres::Solver::Summary summary_ceres = ceres_manager_ceres->solve(ceres_options);
+        ceres::Solver::Summary summary_wolf = ceres_manager_wolf->solve(ceres_options);
+        std::cout << "CERES AUTO DIFF" << std::endl;
+        std::cout << "Jacobian evaluation: " << summary_ceres.jacobian_evaluation_time_in_seconds << std::endl;
+        std::cout << "Total time: " << summary_ceres.total_time_in_seconds << std::endl;
+        std::cout << "WOLF AUTO DIFF" << std::endl;
+        std::cout << "Jacobian evaluation: " << summary_wolf.jacobian_evaluation_time_in_seconds << std::endl;
+        std::cout << "Total time: " << summary_wolf.total_time_in_seconds << std::endl;
         mean_times(3) += ((double) clock() - t1) / CLOCKS_PER_SEC;
+
+        std::cout << "CERES AUTO DIFF solution:" << std::endl;
+        std::cout << wolf_manager_ceres->getVehiclePose().transpose() << std::endl;
+        std::cout << "WOLF AUTO DIFF solution:" << std::endl;
+        std::cout << wolf_manager_wolf->getVehiclePose().transpose() << std::endl;
 
         // COMPUTE COVARIANCES ---------------------------
         std::cout << "COMPUTING COVARIANCES..." << std::endl;
         t1 = clock();
-        ceres_manager->computeCovariances();
+        ceres_manager_ceres->computeCovariances(ALL_MARGINALS);
+        ceres_manager_wolf->computeCovariances(ALL_MARGINALS);
+        Eigen::MatrixXs marginal_ceres(3,3), marginal_wolf(3,3);
+        wolf_manager_ceres->getProblemPtr()->getCovarianceBlock(wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
+                                                                wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
+                                                                marginal_ceres, 0, 0);
+        wolf_manager_ceres->getProblemPtr()->getCovarianceBlock(wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
+                                                                wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
+                                                                marginal_ceres, 0, 2);
+        wolf_manager_ceres->getProblemPtr()->getCovarianceBlock(wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
+                                                                wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
+                                                                marginal_ceres, 2, 2);
+        wolf_manager_wolf->getProblemPtr()->getCovarianceBlock(wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
+                                                               wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
+                                                               marginal_wolf, 0, 0);
+        wolf_manager_wolf->getProblemPtr()->getCovarianceBlock(wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
+                                                               wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
+                                                               marginal_wolf, 0, 2);
+        wolf_manager_wolf->getProblemPtr()->getCovarianceBlock(wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
+                                                               wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
+                                                               marginal_wolf, 2, 2);
+        std::cout << "CERES AUTO DIFF covariance:" << std::endl;
+        std::cout << marginal_ceres << std::endl;
+        std::cout << "WOLF AUTO DIFF covariance:" << std::endl;
+        std::cout << marginal_wolf << std::endl;
         mean_times(4) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // DRAWING STUFF ---------------------------
@@ -240,36 +287,36 @@ int main(int argc, char** argv)
 //        }
 //        myRender->drawCorners(laser1Pose, corner_vector);
 
-        // draw landmarks
-        std::vector<double> landmark_vector;
-        for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
-        {
-            WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
-            landmark_vector.push_back(*position_ptr); //x
-            landmark_vector.push_back(*(position_ptr + 1)); //y
-            landmark_vector.push_back(0.2); //z
-        }
-        myRender->drawLandmarks(landmark_vector);
-
-        // draw localization and sensors
-        estimated_vehicle_pose.setPose(wolf_manager->getVehiclePose()(0), wolf_manager->getVehiclePose()(1), 0.2, wolf_manager->getVehiclePose()(2), 0, 0);
-        estimated_laser_1_pose.setPose(estimated_vehicle_pose);
-        estimated_laser_1_pose.moveForward(laser_1_pose(0));
-        estimated_laser_2_pose.setPose(estimated_vehicle_pose);
-        estimated_laser_2_pose.moveForward(laser_2_pose(0));
-        estimated_laser_2_pose.rt.setEuler(estimated_laser_2_pose.rt.head() + M_PI, estimated_laser_2_pose.rt.pitch(), estimated_laser_2_pose.rt.roll());
-        myRender->drawPoseAxisVector( { estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose });
-
-        //Set view point and render the scene
-        //locate visualization view point, somewhere behind the device
-//		viewPoint.setPose(devicePose);
-//		viewPoint.rt.setEuler( viewPoint.rt.head(), viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
-//		viewPoint.moveForward(-5);
-        myRender->setViewPoint(viewPoint);
-        myRender->drawPoseAxis(devicePose);
-        myRender->drawScan(laser1Pose, scan1, 180. * M_PI / 180., 90. * M_PI / 180.); //draw scan
-        myRender->render();
-        mean_times(5) += ((double) clock() - t1) / CLOCKS_PER_SEC;
+//        // draw landmarks
+//        std::vector<double> landmark_vector;
+//        for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+//        {
+//            WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
+//            landmark_vector.push_back(*position_ptr); //x
+//            landmark_vector.push_back(*(position_ptr + 1)); //y
+//            landmark_vector.push_back(0.2); //z
+//        }
+//        myRender->drawLandmarks(landmark_vector);
+//
+//        // draw localization and sensors
+//        estimated_vehicle_pose.setPose(wolf_manager->getVehiclePose()(0), wolf_manager->getVehiclePose()(1), 0.2, wolf_manager->getVehiclePose()(2), 0, 0);
+//        estimated_laser_1_pose.setPose(estimated_vehicle_pose);
+//        estimated_laser_1_pose.moveForward(laser_1_pose(0));
+//        estimated_laser_2_pose.setPose(estimated_vehicle_pose);
+//        estimated_laser_2_pose.moveForward(laser_2_pose(0));
+//        estimated_laser_2_pose.rt.setEuler(estimated_laser_2_pose.rt.head() + M_PI, estimated_laser_2_pose.rt.pitch(), estimated_laser_2_pose.rt.roll());
+//        myRender->drawPoseAxisVector( { estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose });
+//
+//        //Set view point and render the scene
+//        //locate visualization view point, somewhere behind the device
+////		viewPoint.setPose(devicePose);
+////		viewPoint.rt.setEuler( viewPoint.rt.head(), viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
+////		viewPoint.moveForward(-5);
+//        myRender->setViewPoint(viewPoint);
+//        myRender->drawPoseAxis(devicePose);
+//        myRender->drawScan(laser1Pose, scan1, 180. * M_PI / 180., 90. * M_PI / 180.); //draw scan
+//        myRender->render();
+//        mean_times(5) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // TIME MANAGEMENT ---------------------------
         double dt = ((double) clock() - t2) / CLOCKS_PER_SEC;
@@ -295,79 +342,81 @@ int main(int argc, char** argv)
 //	std::cout << "\nTree before deleting..." << std::endl;
 //	wolf_manager->getProblemPtr()->print();
 
-    // Draw Final result -------------------------
-    std::vector<double> landmark_vector;
-    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
-    {
-        WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
-        landmark_vector.push_back(*position_ptr); //x
-        landmark_vector.push_back(*(position_ptr + 1)); //y
-        landmark_vector.push_back(0.2); //z
-    }
-    myRender->drawLandmarks(landmark_vector);
-//	viewPoint.setPose(devicePoses.front());
-//	viewPoint.moveForward(10);
-//	viewPoint.rt.setEuler( viewPoint.rt.head()+M_PI/4, viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
-//	viewPoint.moveForward(-10);
-    myRender->setViewPoint(viewPoint);
-    myRender->render();
+//    // Draw Final result -------------------------
+//    std::vector<double> landmark_vector;
+//    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+//    {
+//        WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
+//        landmark_vector.push_back(*position_ptr); //x
+//        landmark_vector.push_back(*(position_ptr + 1)); //y
+//        landmark_vector.push_back(0.2); //z
+//    }
+//    myRender->drawLandmarks(landmark_vector);
+////	viewPoint.setPose(devicePoses.front());
+////	viewPoint.moveForward(10);
+////	viewPoint.rt.setEuler( viewPoint.rt.head()+M_PI/4, viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
+////	viewPoint.moveForward(-10);
+//    myRender->setViewPoint(viewPoint);
+//    myRender->render();
 
     // Print Final result in a file -------------------------
     // Vehicle poses
-    int i = 0;
-    Eigen::VectorXs state_poses(n_execution * 3);
-    for (auto frame_it = wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_it != wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->end(); frame_it++)
-    {
-        state_poses.segment(i, 3) << *(*frame_it)->getPPtr()->getPtr(), *((*frame_it)->getPPtr()->getPtr() + 1), *(*frame_it)->getOPtr()->getPtr();
-        i += 3;
-    }
-
-    // Landmarks
-    i = 0;
-    Eigen::VectorXs landmarks(wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->size() * 2);
-    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
-    {
-        Eigen::Map<Eigen::Vector2s> landmark((*landmark_it)->getPPtr()->getPtr());
-        landmarks.segment(i, 2) = landmark;
-        i += 2;
-    }
-
-    // Print log files
-    std::string filepath = getenv("HOME") + std::string("/Desktop/log_file_2.txt");
-    log_file.open(filepath, std::ofstream::out); //open log file
-
-    if (log_file.is_open())
-    {
-        log_file << 0 << std::endl;
-        for (unsigned int ii = 0; ii < n_execution; ii++)
-            log_file << state_poses.segment(ii * 3, 3).transpose() << "\t" << ground_truth.segment(ii * 3, 3).transpose() << "\t" << (state_poses.segment(ii * 3, 3) - ground_truth.segment(ii * 3, 3)).transpose() << "\t" << odom_trajectory.segment(ii * 3, 3).transpose() << std::endl;
-        log_file.close(); //close log file
-        std::cout << std::endl << "Result file " << filepath << std::endl;
-    }
-    else
-        std::cout << std::endl << "Failed to write the log file " << filepath << std::endl;
-
-    std::string filepath2 = getenv("HOME") + std::string("/Desktop/landmarks_file_2.txt");
-    landmark_file.open(filepath2, std::ofstream::out); //open log file
-
-    if (landmark_file.is_open())
-    {
-        for (unsigned int ii = 0; ii < landmarks.size(); ii += 2)
-            landmark_file << landmarks.segment(ii, 2).transpose() << std::endl;
-        landmark_file.close(); //close log file
-        std::cout << std::endl << "Landmark file " << filepath << std::endl;
-    }
-    else
-        std::cout << std::endl << "Failed to write the landmark file " << filepath << std::endl;
-
-    std::cout << "Press any key for ending... " << std::endl << std::endl;
-    std::getchar();
+//    int i = 0;
+//    Eigen::VectorXs state_poses(n_execution * 3);
+//    for (auto frame_it = wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_it != wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->end(); frame_it++)
+//    {
+//        state_poses.segment(i, 3) << *(*frame_it)->getPPtr()->getPtr(), *((*frame_it)->getPPtr()->getPtr() + 1), *(*frame_it)->getOPtr()->getPtr();
+//        i += 3;
+//    }
+//
+//    // Landmarks
+//    i = 0;
+//    Eigen::VectorXs landmarks(wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->size() * 2);
+//    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+//    {
+//        Eigen::Map<Eigen::Vector2s> landmark((*landmark_it)->getPPtr()->getPtr());
+//        landmarks.segment(i, 2) = landmark;
+//        i += 2;
+//    }
+//
+//    // Print log files
+//    std::string filepath = getenv("HOME") + std::string("/Desktop/log_file_2.txt");
+//    log_file.open(filepath, std::ofstream::out); //open log file
+//
+//    if (log_file.is_open())
+//    {
+//        log_file << 0 << std::endl;
+//        for (unsigned int ii = 0; ii < n_execution; ii++)
+//            log_file << state_poses.segment(ii * 3, 3).transpose() << "\t" << ground_truth.segment(ii * 3, 3).transpose() << "\t" << (state_poses.segment(ii * 3, 3) - ground_truth.segment(ii * 3, 3)).transpose() << "\t" << odom_trajectory.segment(ii * 3, 3).transpose() << std::endl;
+//        log_file.close(); //close log file
+//        std::cout << std::endl << "Result file " << filepath << std::endl;
+//    }
+//    else
+//        std::cout << std::endl << "Failed to write the log file " << filepath << std::endl;
+//
+//    std::string filepath2 = getenv("HOME") + std::string("/Desktop/landmarks_file_2.txt");
+//    landmark_file.open(filepath2, std::ofstream::out); //open log file
+//
+//    if (landmark_file.is_open())
+//    {
+//        for (unsigned int ii = 0; ii < landmarks.size(); ii += 2)
+//            landmark_file << landmarks.segment(ii, 2).transpose() << std::endl;
+//        landmark_file.close(); //close log file
+//        std::cout << std::endl << "Landmark file " << filepath << std::endl;
+//    }
+//    else
+//        std::cout << std::endl << "Failed to write the landmark file " << filepath << std::endl;
+//
+//    std::cout << "Press any key for ending... " << std::endl << std::endl;
+//    std::getchar();
 
     delete myRender;
     delete myScanner;
-    delete wolf_manager;
+    delete wolf_manager_ceres;
+    delete wolf_manager_wolf;
     std::cout << "wolf deleted" << std::endl;
-    delete ceres_manager;
+    delete ceres_manager_ceres;
+    delete ceres_manager_wolf;
     std::cout << "ceres_manager deleted" << std::endl;
 
     std::cout << " ========= END ===========" << std::endl << std::endl;
