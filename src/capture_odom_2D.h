@@ -15,9 +15,8 @@ class CaptureOdom2D : public CaptureMotion
 {
 
     protected:
-        Eigen::VectorXs data_; ///< Raw data.
-        Eigen::MatrixXs data_covariance_; ///< Noise of the capture.
-
+        //Eigen::VectorXs data_; ///< Raw data.
+        //Eigen::MatrixXs data_covariance_; ///< Noise of the capture.
 
     public:
 

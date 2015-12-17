@@ -8,6 +8,10 @@
 class SensorOdom2D : public SensorBase
 {
 
+    protected:
+        WolfScalar k_disp_to_disp_; ///< ratio of displacement variance to displacement, for odometry noise calculation
+        WolfScalar k_rot_to_rot_; ///< ratio of rotation variance to rotation, for odometry noise calculation
+
 	public:
         /** \brief Constructor with arguments
          * 
@@ -32,14 +36,14 @@ class SensorOdom2D : public SensorBase
          * Returns displacement noise factor
          * 
          **/        
-        double getDisplacementNoiseFactor() const;
+        double getDispVarToDispNoiseFactor() const;
 
         /** \brief Returns rotation noise factor
          * 
          * Returns rotation noise factor
          * 
          **/        
-        double getRotationNoiseFactor() const;
+        double getRotVarToRotNoiseFactor() const;
         
 };
 #endif

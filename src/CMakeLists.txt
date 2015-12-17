@@ -93,6 +93,7 @@ SET(HDRS
     processor_base.h
     processor_gps.h
     processor_laser_2D.h
+    raw_data_satellite.h
     sensor_base.h
     sensor_odom_2D.h
     sensor_gps_fix.h
@@ -157,7 +158,8 @@ SET(SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
         ceres_wrapper/complex_angle_parametrization.h 
-        ceres_wrapper/ceres_manager.h )
+        ceres_wrapper/ceres_manager.h 
+        ceres_wrapper/auto_diff_cost_function_wrapper.h )
     SET(SRCS_WRAPPER
         ceres_wrapper/complex_angle_parametrization.cpp 
         ceres_wrapper/ceres_manager.cpp)

@@ -14,7 +14,7 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 		ConstraintCorner2D(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr, ConstraintStatus _status = CTR_ACTIVE) :
 			ConstraintSparse<3,2,1,2,1>(_ftr_ptr, CTR_CORNER_2D, _lmk_ptr, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
 		{
-		    landmark_ptr_->addConstraintTo(this);
+		    //
 		}
 
         /** \brief Default destructor (not recommended)
@@ -25,7 +25,6 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 		virtual ~ConstraintCorner2D()
 		{
 			//std::cout << "deleting ConstraintCorner2D " << nodeId() << std::endl;
-		    landmark_ptr_->removeConstraintTo(this);
 		}
 
 		LandmarkCorner2D* getLandmarkPtr()

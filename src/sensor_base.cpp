@@ -9,8 +9,7 @@ SensorBase::SensorBase(const SensorType& _tp, StateBlock* _p_ptr,
         intrinsic_ptr_(_intr_ptr),
 		extrinsic_dynamic_(_extr_dyn),
 		noise_std_(_noise_size),
-		noise_cov_(_noise_size,_noise_size),
-		noise_factor_(Eigen::VectorXs::Constant(_noise_size,1.0))
+		noise_cov_(_noise_size,_noise_size)
 {
 	//
 }
@@ -23,8 +22,7 @@ SensorBase::SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _
 //        params_(_params),
 		extrinsic_dynamic_(_extr_dyn),
 		noise_std_(_noise_std),
-		noise_cov_(_noise_std.size(),_noise_std.size()),
-		noise_factor_(Eigen::VectorXs::Constant(_noise_std.size(),1.0))
+		noise_cov_(_noise_std.size(),_noise_std.size())
 {
 	noise_cov_.setZero();
 	for (unsigned int i=0; i<_noise_std.size(); i++)

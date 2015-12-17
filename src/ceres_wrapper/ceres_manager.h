@@ -6,7 +6,8 @@
 #include "ceres/ceres.h"
 #include "glog/logging.h"
 
-//wof includes
+//wolf includes
+#include "auto_diff_cost_function_wrapper.h"
 #include "../wolf.h"
 #include "../state_block.h"
 #include "../constraint_sparse.h"
@@ -54,9 +55,9 @@ class CeresManager
 
 		void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
 
-		void update(bool _apply_loss_function = false);
+		void update(const bool _self_auto_diff = false, const bool _apply_loss_function = false);
 
-		void addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss);
+		void addConstraint(ConstraintBase* _corr_ptr, const bool _self_auto_diff, const bool _apply_loss);
 
 		void removeConstraint(const unsigned int& _corr_idx);
 
@@ -68,7 +69,7 @@ class CeresManager
 
 		void updateStateBlockStatus(StateBlock* _st_ptr);
 
-		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr);
+		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr, const bool _self_auto_diff);
 };
 
 #endif
