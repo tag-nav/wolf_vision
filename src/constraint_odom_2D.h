@@ -29,6 +29,8 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
         template<typename T>
         bool operator()(const T* const _p1, const T* const _o1, const T* const _p2, const T* const _o2, T* _residuals) const
         {
+            //std::cout << "computing constraint odom ..." << std::endl;
+
 //            std::cout << "_p1: ";
 //            for (int i=0; i < 2; i++)
 //                std::cout << "\n\t" << _p1[i];
@@ -71,6 +73,8 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
                 _residuals[2] = _residuals[2] + T(2*M_PI);
 
             _residuals[2] = _residuals[2] / T(sqrt(std::max(getMeasurementCovariance()(2, 2),1e-6)));
+
+            //std::cout << "constraint odom computed!" << std::endl;
 
             return true;
         }

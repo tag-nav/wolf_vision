@@ -37,7 +37,6 @@ ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_
 
 	// run Ceres Solver
 	ceres::Solve(_ceres_options, ceres_problem_, &ceres_summary_);
-	//std::cout << "solved" << std::endl;
 
 	//return results
 	return ceres_summary_;
@@ -224,7 +223,7 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 
 void CeresManager::addStateBlock(StateBlock* _st_ptr)
 {
-	//std::cout << "Adding State Unit " << _st_ptr->nodeId() << std::endl;
+	//std::cout << "Adding State Unit with size: " <<  _st_ptr->getSize() << std::endl;
 	//_st_ptr->print();
 
 	switch (_st_ptr->getType())

@@ -92,6 +92,7 @@ SET(HDRS
     node_linked.h
     processor_base.h
     processor_laser_2D.h
+    raw_data_satellite.h
     sensor_base.h
     sensor_odom_2D.h
     sensor_gps_fix.h

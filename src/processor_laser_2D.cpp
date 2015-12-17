@@ -2,7 +2,7 @@
 
 
 ProcessorLaser2D::ProcessorLaser2D() :
-        sensor_laser_ptr_((SensorLaser2D*)(upperNodePtr())), // Static cast to specific sensor at construction time
+        //sensor_laser_ptr_((SensorLaser2D*)(upperNodePtr())), // Static cast to specific sensor at construction time TODO: in construction time upperNodePtr is nullptr, it crashes always, to be removed or changed to somewhere (JVN)
         capture_laser_ptr_(nullptr)
 {
 }
@@ -13,6 +13,9 @@ ProcessorLaser2D::~ProcessorLaser2D()
 
 void ProcessorLaser2D::extractFeatures(CaptureBase* capture_ptr_)
 {
+    // TODO: Or we always cast (so pointer is not needed) or we find the place to be casted once, but constructor is not the place.
+    sensor_laser_ptr_ = (SensorLaser2D*)(upperNodePtr());
+
 	//check CaptureBase pointer is the appropriate one for this Processor
 //	assert( capture_laser_ptr_ = dynamic_cast<CaptureLaser2D*>(capture_ptr_) && "Invalid Capture Type pointer" );
     capture_laser_ptr_ = (CaptureLaser2D*)(capture_ptr_);

@@ -14,7 +14,13 @@
 
 //Wolf includes
 #include "state_block.h"
-#include "constraint_base.h"
+#include "../constraint_sparse.h"
+#include "../constraint_fix.h"
+#include "../constraint_gps_2D.h"
+#include "../constraint_gps_pseudorange.h"
+#include "../constraint_odom_2D.h"
+#include "../constraint_corner_2D.h"
+#include "../constraint_container.h"
 #include "sparse_utils.h"
 
 // wolf solver

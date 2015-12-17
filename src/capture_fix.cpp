@@ -6,7 +6,7 @@ CaptureFix::CaptureFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eige
 	data_(_data),
 	data_covariance_(_data_covariance)
 {
-    std::cout << "capture fix constructor " << std::endl;
+    //std::cout << "capture fix constructor " << std::endl;
 }
 
 CaptureFix::~CaptureFix()

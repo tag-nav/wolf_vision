@@ -55,7 +55,7 @@ class AutoDiffCostFunctionWrapper : public ceres::SizedCostFunction<MEASUREMENT_
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
-            if (jacobians != nullptr)
+            if (jacobians == nullptr)
             {
                 (*this->constraint_ptr_)(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4],
                                          parameters[5], parameters[6], parameters[7], parameters[8], parameters[9], residuals);
@@ -107,13 +107,12 @@ class AutoDiffCostFunctionWrapper : public ceres::SizedCostFunction<MEASUREMENT_
                     residuals[i] = residuals_jets[i].a;
 
                 // fill the jacobian matrices
-                if (jacobians != nullptr)
-                    for (i = 0; i<this->n_blocks_; i++)
-                        if (jacobians[i] != nullptr)
-                            for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                                std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                          residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
-                                          jacobians[i] + row * block_sizes_.at(i));
+                for (i = 0; i<this->n_blocks_; i++)
+                    if (jacobians[i] != nullptr)
+                        for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
+                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
+                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                                      jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
         }
@@ -169,7 +168,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
-            if (jacobians != nullptr)
+            if (jacobians == nullptr)
                 (*this->constraint_ptr_)(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4],
                                          parameters[5], parameters[6], parameters[7], parameters[8], residuals);
 
@@ -217,13 +216,12 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                     residuals[i] = residuals_jets[i].a;
 
                 // fill the jacobian matrices
-                if (jacobians != nullptr)
-                    for (i = 0; i<n_blocks_; i++)
-                        if (jacobians[i] != nullptr)
-                            for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                                std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                          residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
-                                          jacobians[i] + row * block_sizes_.at(i));
+                for (i = 0; i<n_blocks_; i++)
+                    if (jacobians[i] != nullptr)
+                        for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
+                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
+                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                                      jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
         }
@@ -278,7 +276,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
-            if (jacobians != nullptr)
+            if (jacobians == nullptr)
                 (*this->constraint_ptr_)(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4],
                                          parameters[5], parameters[6], parameters[7], residuals);
 
@@ -323,13 +321,12 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                     residuals[i] = residuals_jets[i].a;
 
                 // fill the jacobian matrices
-                if (jacobians != nullptr)
-                    for (i = 0; i<n_blocks_; i++)
-                        if (jacobians[i] != nullptr)
-                            for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                                std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                          residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
-                                          jacobians[i] + row * block_sizes_.at(i));
+                for (i = 0; i<n_blocks_; i++)
+                    if (jacobians[i] != nullptr)
+                        for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
+                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
+                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                                      jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
         }
@@ -383,7 +380,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
-            if (jacobians != nullptr)
+            if (jacobians == nullptr)
                 (*this->constraint_ptr_)(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4],
                                          parameters[5], parameters[6], residuals);
 
@@ -425,13 +422,12 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                     residuals[i] = residuals_jets[i].a;
 
                 // fill the jacobian matrices
-                if (jacobians != nullptr)
-                    for (i = 0; i<n_blocks_; i++)
-                        if (jacobians[i] != nullptr)
-                            for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                                std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                          residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
-                                          jacobians[i] + row * block_sizes_.at(i));
+                for (i = 0; i<n_blocks_; i++)
+                    if (jacobians[i] != nullptr)
+                        for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
+                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
+                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                                      jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
         }
@@ -484,7 +480,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
-            if (jacobians != nullptr)
+            if (jacobians == nullptr)
                 (*this->constraint_ptr_)(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4],
                                          parameters[5], residuals);
 
@@ -523,13 +519,12 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                     residuals[i] = residuals_jets[i].a;
 
                 // fill the jacobian matrices
-                if (jacobians != nullptr)
-                    for (i = 0; i<n_blocks_; i++)
-                        if (jacobians[i] != nullptr)
-                            for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                                std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                          residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
-                                          jacobians[i] + row * block_sizes_.at(i));
+                for (i = 0; i<n_blocks_; i++)
+                    if (jacobians[i] != nullptr)
+                        for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
+                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
+                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                                      jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
         }
@@ -578,7 +573,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
-            if (jacobians != nullptr)
+            if (jacobians == nullptr)
                 (*this->constraint_ptr_)(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4],
                                          residuals);
 
@@ -614,13 +609,12 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                     residuals[i] = residuals_jets[i].a;
 
                 // fill the jacobian matrices
-                if (jacobians != nullptr)
-                    for (i = 0; i<n_blocks_; i++)
-                        if (jacobians[i] != nullptr)
-                            for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                                std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                          residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
-                                          jacobians[i] + row * block_sizes_.at(i));
+                for (i = 0; i<n_blocks_; i++)
+                    if (jacobians[i] != nullptr)
+                        for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
+                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
+                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                                      jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
         }
@@ -668,7 +662,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
-            if (jacobians != nullptr)
+            if (jacobians == nullptr)
                 (*this->constraint_ptr_)(parameters[0], parameters[1], parameters[2], parameters[3], residuals);
             // also compute jacobians
             else
@@ -699,13 +693,12 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                     residuals[i] = residuals_jets[i].a;
 
                 // fill the jacobian matrices
-                if (jacobians != nullptr)
-                    for (i = 0; i<n_blocks_; i++)
-                        if (jacobians[i] != nullptr)
-                            for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                                std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                          residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
-                                          jacobians[i] + row * block_sizes_.at(i));
+                for (i = 0; i<n_blocks_; i++)
+                    if (jacobians[i] != nullptr)
+                        for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
+                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
+                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                                      jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
         }
@@ -752,7 +745,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
-            if (jacobians != nullptr)
+            if (jacobians == nullptr)
                 (*this->constraint_ptr_)(parameters[0], parameters[1], parameters[2], residuals);
 
             // also compute jacobians
@@ -781,13 +774,12 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                     residuals[i] = residuals_jets[i].a;
 
                 // fill the jacobian matrices
-                if (jacobians != nullptr)
-                    for (i = 0; i<n_blocks_; i++)
-                        if (jacobians[i] != nullptr)
-                            for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                                std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                          residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
-                                          jacobians[i] + row * block_sizes_.at(i));
+                for (i = 0; i<n_blocks_; i++)
+                    if (jacobians[i] != nullptr)
+                        for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
+                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
+                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                                      jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
         }
@@ -833,7 +825,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
-            if (jacobians != nullptr)
+            if (jacobians == nullptr)
                 (*this->constraint_ptr_)(parameters[0], parameters[1], residuals);
 
             // also compute jacobians
@@ -859,13 +851,12 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                     residuals[i] = residuals_jets[i].a;
 
                 // fill the jacobian matrices
-                if (jacobians != nullptr)
-                    for (i = 0; i<n_blocks_; i++)
-                        if (jacobians[i] != nullptr)
-                            for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                                std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                          residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
-                                          jacobians[i] + row * block_sizes_.at(i));
+                for (i = 0; i<n_blocks_; i++)
+                    if (jacobians[i] != nullptr)
+                        for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
+                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
+                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                                      jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
         }
@@ -910,7 +901,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
-            if (jacobians != nullptr)
+            if (jacobians == nullptr)
                 (*this->constraint_ptr_)(parameters[0], residuals);
             // also compute jacobians
             else
@@ -932,13 +923,12 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                     residuals[i] = residuals_jets[i].a;
 
                 // fill the jacobian matrices
-                if (jacobians != nullptr)
-                    for (i = 0; i<n_blocks_; i++)
-                        if (jacobians[i] != nullptr)
-                            for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                                std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                          residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
-                                          jacobians[i] + row * block_sizes_.at(i));
+                for (i = 0; i<n_blocks_; i++)
+                    if (jacobians[i] != nullptr)
+                        for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
+                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
+                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                                      jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
         }

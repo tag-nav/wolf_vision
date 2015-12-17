@@ -30,6 +30,8 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
 		template <typename T>
 		bool operator()(const T* const _p, const T* const _o, T* _residuals) const
 		{
+            //std::cout << "computing constraint odom ..." << std::endl;
+
 		    _residuals[0] = (T(getMeasurement()(0)) - _p[0]) / T(sqrt(getMeasurementCovariance()(0,0)));
             _residuals[1] = (T(getMeasurement()(1)) - _p[1]) / T(sqrt(getMeasurementCovariance()(1,1)));
             _residuals[2] = T(getMeasurement()(2)) - _o[0];
@@ -48,6 +50,8 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
 
 //            std::cout << "residual:      " << _residuals[2] << std::endl << std::endl;
             _residuals[2] = _residuals[2] / T(sqrt(getMeasurementCovariance()(2,2)));
+
+            //std::cout << "constraint fix computed!" << std::endl;
 
 			return true;
 		}

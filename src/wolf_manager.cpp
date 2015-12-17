@@ -40,8 +40,6 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
     //std::cout << " initial_covariance" << std::endl;
     current_frame_->addCapture(initial_covariance);
     //std::cout << " addCapture" << std::endl;
-    initial_covariance->process();
-    //std::cout << " processCapture" << std::endl;
 
     // Current robot frame
     createFrame(_prior, TimeStamp(0));
