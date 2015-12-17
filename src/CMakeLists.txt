@@ -68,6 +68,7 @@ SET(HDRS
     capture_odom_2D.h
     capture_void.h
     constraint_base.h
+    constraint_analytic.h
     constraint_sparse.h
     constraint_gps_2D.h
     constraint_gps_pseudorange.h
