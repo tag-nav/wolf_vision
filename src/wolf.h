@@ -58,11 +58,11 @@ typedef double WolfScalar;        // Use this for double, 64 bit precision
 namespace Eigen  // Eigen namespace extension
 {
 // 1. Vectors and Matrices
-typedef Matrix<WolfScalar, 2, 2> Matrix2s;                ///< 2x2 matrix of real scalar_t type
-typedef Matrix<WolfScalar, 3, 3> Matrix3s;                ///< 3x3 matrix of real scalar_t type
-typedef Matrix<WolfScalar, 4, 4> Matrix4s;                ///< 4x4 matrix of real scalar_t type
-typedef Matrix<WolfScalar, 7, 7> Matrix7s;                ///< 7x7 matrix of real scalar_t type
-typedef Matrix<WolfScalar, Dynamic, Dynamic> MatrixXs;    ///< variable size matrix of real scalar_t type
+typedef Matrix<WolfScalar, 2, 2, Eigen::RowMajor> Matrix2s;                ///< 2x2 matrix of real scalar_t type
+typedef Matrix<WolfScalar, 3, 3, Eigen::RowMajor> Matrix3s;                ///< 3x3 matrix of real scalar_t type
+typedef Matrix<WolfScalar, 4, 4, Eigen::RowMajor> Matrix4s;                ///< 4x4 matrix of real scalar_t type
+typedef Matrix<WolfScalar, 7, 7, Eigen::RowMajor> Matrix7s;                ///< 7x7 matrix of real scalar_t type
+typedef Matrix<WolfScalar, Dynamic, Dynamic, Eigen::RowMajor> MatrixXs;    ///< variable size matrix of real scalar_t type
 typedef Matrix<WolfScalar, 1, 1> Vector1s;                ///< 1-vector of real scalar_t type
 typedef Matrix<WolfScalar, 2, 1> Vector2s;                ///< 2-vector of real scalar_t type
 typedef Matrix<WolfScalar, 3, 1> Vector3s;                ///< 3-vector of real scalar_t type
@@ -168,6 +168,21 @@ typedef enum
     CTR_INACTIVE  ///< Constraint established with a frame (odometry).
 
 } ConstraintStatus;
+
+/** \brief Enumeration of jacobian computation method
+ *
+ * Enumeration of jacobian computation method.
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ *
+ */
+typedef enum
+{
+    AUTO,    ///< Auto differentiation (AutoDiffCostFunctionWrapper or ceres::NumericDiffCostFunction).
+    NUMERIC, ///< Numeric differentiation (ceres::NumericDiffCostFunction).
+    ANALYTIC ///< Analytic jacobians.
+
+} JacobianMethod;
 
 /** \brief Enumeration of all possible state parametrizations
  *
