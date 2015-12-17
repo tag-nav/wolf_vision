@@ -5,11 +5,6 @@
 #include "processor_gps.h"
 
 
-//this include must stay in the .cpp to avoid circular dependencies of headers
-//http://stackoverflow.com/questions/4816698/avoiding-circular-dependencies-of-header-files
-// TODO da rivedere se posso toglierlo
-#include "constraint_gps_pseudorange.h"
-
 ProcessorGPS::ProcessorGPS() :
         sensor_gps_ptr_((SensorGPS*)(upperNodePtr())), // Static cast to specific sensor at construction time
         capture_gps_ptr_(nullptr)

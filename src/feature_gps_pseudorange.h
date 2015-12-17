@@ -7,9 +7,8 @@
 //std includes
 
 //Wolf includes
-#include "feature_base.h"
-#include "capture_gps.h"
 #include "raw_data_satellite.h"
+#include "feature_base.h"
 
 // TODO manage covariance
 

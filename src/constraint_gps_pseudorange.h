@@ -4,10 +4,8 @@
 #define LIGHT_SPEED 299792458
 
 //Wolf includes
-#include "wolf.h"
-#include "constraint_sparse.h"
 #include "feature_gps_pseudorange.h"
-#include "raw_data_satellite.h"
+#include "constraint_sparse.h"
 
 //TODO indenta tutto di 1
 

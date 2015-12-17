@@ -22,6 +22,9 @@
 #define RAW_DATA_SATELLITE_H
 
 
+#include "time_stamp.h"
+#include "wolf.h"
+#include <string>
 
 
 class ObsData

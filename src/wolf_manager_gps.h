@@ -1,3 +1,22 @@
+//Wolf includes
+#include "constraint_sparse.h"
+#include "constraint_odom_2D.h"
+#include "capture_motion.h"
+#include "capture_gps.h"
+#include "sensor_gps.h"
+#include "trajectory_base.h"
+#include "map_base.h"
+#include "wolf.h"
+#include "wolf_problem.h"
+
+//Ceres includes
+#include "ceres/ceres.h"
+#include "glog/logging.h"
+
+// Eigen includes
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Geometry>
+
 //std includes
 #include <cstdlib>
 #include <iostream>
@@ -8,36 +27,6 @@
 #include <ctime>
 #include <queue>
 
-// Eigen includes
-#include <eigen3/Eigen/Dense>
-#include <eigen3/Eigen/Geometry>
-
-//Ceres includes
-#include "ceres/ceres.h"
-#include "glog/logging.h"
-
-//Wolf includes
-#include "wolf.h"
-#include "sensor_base.h"
-#include "sensor_odom_2D.h"
-#include "sensor_gps_fix.h"
-#include "sensor_gps.h"
-#include "feature_base.h"
-#include "frame_base.h"
-#include "capture_base.h"
-#include "capture_fix.h"
-#include "capture_motion.h"
-#include "capture_odom_2D.h"
-#include "capture_gps_fix.h"
-#include "capture_gps.h"
-#include "capture_laser_2D.h"
-#include "state_block.h"
-#include "constraint_sparse.h"
-#include "constraint_gps_2D.h"
-#include "constraint_odom_2D.h"
-#include "trajectory_base.h"
-#include "map_base.h"
-#include "wolf_problem.h"
 
 class WolfManagerGPS
 {

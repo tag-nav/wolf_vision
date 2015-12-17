@@ -1,8 +1,5 @@
 #include "capture_gps.h"
 
-//this include must stay in the .cpp to avoid circular dependencies of headers
-//http://stackoverflow.com/questions/4816698/avoiding-circular-dependencies-of-header-files
-//#include "constraint_gps_pseudorange.h"
 
 CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, std::vector<ObsData>& _raw_data) :
         CaptureBase(_ts, _sensor_ptr),

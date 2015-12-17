@@ -1,15 +1,9 @@
 // Testing create and delete full wolf tree with GPS captures
 
-//std includes
-#include <iostream>
-#include <memory>
-#include <random>
-#include <queue>
 
 //Wolf includes
 #include "wolf_manager_gps.h"
 #include "ceres_wrapper/ceres_manager.h"
-
 
 using namespace std;
 
