@@ -13,33 +13,42 @@ int main(int argc, char** argv)
     bool useCeres = false;
     unsigned int n_captures = 5;
 
-
-
-
     //Welcome message
     cout << endl << " ========= WOLF TREE test ===========" << endl << endl;
 
-    SensorGPS* gps_sensor_ptr_ = new SensorGPS(new StateBlock(Eigen::Vector3s::Zero()),   //gps sensor position
-                                               new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION),   //gps sensor orientation
-                                               new StateBlock(Eigen::Vector1s::Zero()),    //gps sensor bias
-                                               new StateBlock(Eigen::Vector3s::Zero()),    //vehicle init position
-                                               new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION) // vehicle init orientation
-    );
+    /*
+     * Parameters, to be optimized
+     */
+    StateBlock* sensor_p = new StateBlock(Eigen::Vector3s::Zero()); //gps sensor position
+    sensor_p->fix(); // TODO only for now, to semplify things
+    StateBlock* sensor_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);   //gps sensor orientation
+    sensor_o->fix(); //orientation is fixed, because antenna omnidirectional, so is not going to be optimized
+    StateBlock* sensor_bias = new StateBlock(Eigen::Vector1s::Zero());    //gps sensor bias
+    // TODO Should this 2 supplementary blocks go in the sensor?
+    StateBlock* vehicle_init_p = new StateBlock(Eigen::Vector3s::Zero());    //vehicle init position
+    StateBlock* vehicle_init_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);// vehicle init orientation
 
-    // TODO the 2 supplementary blocks, vehicle init position,  must go in the sensor?
-
+    /*
+     * GPS Sensor
+     */
+    SensorGPS* gps_sensor_ptr_ = new SensorGPS(sensor_p, sensor_o, sensor_bias, vehicle_init_p, vehicle_init_o);
     gps_sensor_ptr_->addProcessor(new ProcessorGPS());
 
 
-    WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_3D,                               //frame structure
-                                                         nullptr,                           //gps raw sensor
-                                                         Eigen::Vector7s::Zero(),           //prior
-                                                         Eigen::Matrix7s::Identity()*0.01,  //prior cov
-                                                         5,                                 //window size
-                                                         1);                                //time for new keyframe
+    /*
+     * GPS WolfManager
+     */
+    WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_3D,                             //frame structure
+                                                       nullptr,                           //_sensor_prior_ptr
+                                                       Eigen::Vector7s::Zero(),           //prior
+                                                       Eigen::Matrix7s::Identity()*0.01,  //prior cov
+                                                       5,                                 //window size
+                                                       1);                                //time for new keyframe
 
 
-    // Ceres wrapper
+    /*
+     * Ceres wrapper
+     */
     ceres::Solver::Options ceres_options;
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
@@ -51,10 +60,12 @@ int main(int argc, char** argv)
     CeresManager* ceres_manager = new CeresManager(wolf_manager_->getProblemPtr(), problem_options);
 
 
-
     wolf_manager_->addSensor(gps_sensor_ptr_);
 
 
+    /*
+     * Data Captures
+     */
     for(unsigned int  i=0; i < n_captures; ++i)
     {
         cout << "%%%%%%%%%%%%%%%%%%%%%% CAPTURE #" << i << endl;

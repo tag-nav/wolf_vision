@@ -11,8 +11,6 @@
 class CaptureGPS : public CaptureBase
 {
 
-// TODO ¿position/orientation of antenna?
-
 protected:
     std::vector<ObsData> raw_data_;
 
@@ -27,8 +25,6 @@ public:
      *
      **/
     virtual ~CaptureGPS();
-
-//    void process();//TODO toglimi
 
     /*
      * Dummy implementation of the method, only because it's pure virtual

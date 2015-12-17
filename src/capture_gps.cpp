@@ -19,28 +19,6 @@ std::vector<ObsData> &CaptureGPS::getRawData()
     return raw_data_;
 }
 
-//TODO toglimi (spostato nel processor)
-///** \brief Process a gps capture
-// *
-// * Process a gps and create feature and constraint for each satellite
-// *
-// **/
-//void CaptureGPS::process()
-//{
-//    std::cout << "CaptureGPS::processCapture()... processing capture" << std::endl;
-//
-//
-//
-//    // EXTRACT AND ADD FEATURES AND CONSTRAINTS
-//    for(unsigned int i = 0; i < raw_data_.size(); ++i)
-//    {
-//        addFeature(new FeatureGPSPseudorange(raw_data_[i]));
-//        getFeatureListPtr()->front()->addConstraintFrom(new ConstraintGPSPseudorange(getFeatureListPtr()->back()));
-//
-//    }
-//
-//    std::cout << "CaptureGPS::processCapture()... capture processed" << std::endl;
-//}
 
 /*
  * Dummy implementation of the method, only because it's pure virtual

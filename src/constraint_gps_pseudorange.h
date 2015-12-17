@@ -25,14 +25,12 @@ public:
                             _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter  = receiver time bias
                             ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehiclePPtr(), // initial vehicle position
                             ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehicleOPtr()  // initial vehicle orientation
-            )
+            ) //TODO attention at the last 2 params and the casts
     {
-        //std::cout << "ConstraintGPSPseudorange() constructor" << std::endl;
-
         sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getObs()->getSatPosition();
         pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getObs()->getPseudorange();
 
-        std::cout << "##in costraint constructor:   pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
+        std::cout << "#ConstraintGPSPseudorange() constructor:   pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
     }
 
 
