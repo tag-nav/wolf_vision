@@ -6,7 +6,7 @@
 
 
 ProcessorGPS::ProcessorGPS() :
-        sensor_gps_ptr_((SensorGPS*)(upperNodePtr())), // Static cast to specific sensor at construction time
+        //sensor_gps_ptr_((SensorGPS*)(upperNodePtr())), //TODO here there's a crash. Look at what they'll do in processorLaser and modify as conseguence
         capture_gps_ptr_(nullptr)
 {
     std::cout << "ProcessorGPS constructor" << std::endl;
@@ -24,6 +24,7 @@ void ProcessorGPS::extractFeatures(CaptureBase *_capture_ptr)
 
     std::cout << "Extracting gps features..." << std::endl;
 
+    //TODO check that the cycle is good (it uses getRawData.size())
     for(unsigned int i = 0; i < capture_gps_ptr_->getRawData().size(); ++i)
     {
         capture_gps_ptr_->addFeature(new FeatureGPSPseudorange(capture_gps_ptr_->getRawData()[i]));
@@ -39,10 +40,11 @@ void ProcessorGPS::establishConstraints(CaptureBase *_capture_ptr)
 
     std::cout << "Establishing constraints to gps features..." << std::endl;
 
-    for(unsigned int i = 0; i < capture_gps_ptr_->getRawData().size(); ++i)
+    for(auto i_it = capture_gps_ptr_->getFeatureListPtr()->begin(); i_it != capture_gps_ptr_->getFeatureListPtr()->end(); i_it++)
     {
-        capture_gps_ptr_->getFeatureListPtr()->front()->addConstraintFrom(new ConstraintGPSPseudorange(capture_gps_ptr_->getFeatureListPtr()->back()));
+        capture_gps_ptr_->getFeatureListPtr()->front()->addConstraintFrom( new ConstraintGPSPseudorange((*i_it)) );
     }
+
 
     std::cout << "Constraints established" << std::endl;
 }

@@ -2,6 +2,7 @@
 #include "constraint_sparse.h"
 #include "constraint_odom_2D.h"
 #include "capture_motion.h"
+#include "processor_gps.h"
 #include "capture_gps.h"
 #include "sensor_gps.h"
 #include "trajectory_base.h"

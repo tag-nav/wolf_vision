@@ -64,11 +64,18 @@ class SensorGPS : public SensorBase
 
 protected:
     std::list<SatelliteNavData> nav_data_;
-    StateBlock* init_ecef_position_ptr_;
-    StateBlock* init_ecef_orientation_ptr_; //da dove parte ll'esperimento
+
+    StateBlock* init_vehicle_position_ptr_; //position of the vehicle where the experiment starts
+    StateBlock*init_vehicle_orientation_ptr_; //orientation of the vehicle where the experiment starts
+
 public:
-    //pointer to sensor position, orientation and bias
-    SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr, StateBlock* _bias_ptr);
+
+                //pointer to sensor position, orientation, bias, init vehicle position and orientation
+    SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr, StateBlock* _bias_ptr, StateBlock* _init_vehicle_position_ptr, StateBlock* _init_vehicle_orientation_ptr);
+
+    StateBlock *getInitVehiclePPtr() const;
+
+    StateBlock *getInitVehicleOPtr() const;
 
     /** \brief Default destructor (not recommended)
      *
@@ -76,6 +83,8 @@ public:
      *
      **/
     virtual ~SensorGPS();
+
+
 
     void addNavData(const std::string &_sat_id, const TimeStamp &_timestamp, const WolfScalar &_pseudorange, const WolfScalar &_param1, const WolfScalar &_param2);
 };

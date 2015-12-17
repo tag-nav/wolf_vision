@@ -6,23 +6,26 @@
 //Wolf includes
 #include "feature_gps_pseudorange.h"
 #include "constraint_sparse.h"
+#include "sensor_gps.h"
 
 //TODO indenta tutto di 1
 
 
-class ConstraintGPSPseudorange: public ConstraintSparse<1, 3, 4, 3, 4, 1>
+class ConstraintGPSPseudorange: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
 {
-    //TODO add initPosition and initOrientation of vehicle
-//    (sono in constraint)
 
 public:
 
-    //TODO togli dall'ottimizzazione orientation dell'antenna, che sara' fix sempre a 0 0 0 0
     ConstraintGPSPseudorange(FeatureBase* _ftr_ptr, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintSparse<1, 3, 4, 3, 4, 1>(_ftr_ptr,CTR_GPS_PR_3D, _status,
-                                               _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // position and orientation of the car's frame
-                                               _ftr_ptr->getCapturePtr()->getSensorPPtr(), _ftr_ptr->getCapturePtr()->getSensorOPtr(), // position and orientation of the sensor (gps antenna)
-                                               _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()) //intrinsic parameter  = receiver bias (for now)
+            ConstraintSparse<1, 3, 4, 3, 1, 3, 4>(_ftr_ptr, CTR_GPS_PR_3D, _status,
+                            _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), // position of the vehicle's frame (ecef)
+                            _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
+                            _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
+                                                                        // orientation of antenna is not needed, because omnidirectional
+                            _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter  = receiver time bias
+                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehiclePPtr(), // initial vehicle position
+                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehicleOPtr()  // initial vehicle orientation
+            )
     {
         //std::cout << "ConstraintGPSPseudorange() constructor" << std::endl;
 
@@ -45,8 +48,14 @@ public:
 
 
     template <typename T>
-    bool operator()(const T* const _vehicle_p, const T* const _vehicle_q, const T* const _sensor_p,  const T* const _sensor_o, const T* const _bias, T* _residual) const
+    bool operator()(const T* const _vehicle_p, const T* const _vehicle_q, const T* const _sensor_p, const T* const _bias, const T* const _init_vehicle_p, const T* const _init_vehicle_q, T* _residual) const
     {
+        /*
+         * TODO DO THE MATH
+         *
+         * fai i conti seriamente, usando tutte ste robe
+         */
+
 
         T square_sum = T(0);
         for (int i = 0; i < 3; ++i) {

@@ -1,7 +1,7 @@
 #include "processor_base.h"
 
 ProcessorBase::ProcessorBase() :
-NodeLinked(MID, "PROCESSOR")
+        NodeLinked(MID, "PROCESSOR")
 {
     //
 }

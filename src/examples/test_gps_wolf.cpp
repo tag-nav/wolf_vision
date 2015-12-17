@@ -2,6 +2,7 @@
 
 
 //Wolf includes
+#include <processor_gps.h>
 #include "wolf_manager_gps.h"
 #include "ceres_wrapper/ceres_manager.h"
 
@@ -20,7 +21,15 @@ int main(int argc, char** argv)
 
     SensorGPS* gps_sensor_ptr_ = new SensorGPS(new StateBlock(Eigen::Vector3s::Zero()),   //gps sensor position
                                                new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION),   //gps sensor orientation
-                                               new StateBlock(Eigen::Vector1s::Zero()));  //gps sensor bias
+                                               new StateBlock(Eigen::Vector1s::Zero()),    //gps sensor bias
+                                               new StateBlock(Eigen::Vector3s::Zero()),    //vehicle init position
+                                               new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION) // vehicle init orientation
+    );
+
+    // TODO the 2 supplementary blocks, vehicle init position,  must go in the sensor?
+
+    gps_sensor_ptr_->addProcessor(new ProcessorGPS());
+
 
     WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_3D,                               //frame structure
                                                          nullptr,                           //gps raw sensor
