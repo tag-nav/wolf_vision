@@ -12,8 +12,11 @@ CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, std::vecto
 CaptureGPS::~CaptureGPS()
 {
     //std::cout << "deleting CaptureGPS " << nodeId() << std::endl;
+}
 
-
+std::vector<ObsData> &CaptureGPS::getRawData()
+{
+    return raw_data_;
 }
 
 //TODO toglimi (spostato nel processor)
@@ -26,16 +29,13 @@ CaptureGPS::~CaptureGPS()
 //{
 //    std::cout << "CaptureGPS::processCapture()... processing capture" << std::endl;
 //
+//
+//
 //    // EXTRACT AND ADD FEATURES AND CONSTRAINTS
 //    for(unsigned int i = 0; i < raw_data_.size(); ++i)
 //    {
-////        addFeature(new FeatureGPSPseudorange(raw_data_[i]));
-////        getFeatureListPtr()->front()->addConstraintFrom(new ConstraintGPSPseudorange(getFeatureListPtr()->back()));
-//
-//        FeatureBase* ftr_ptr = new FeatureGPSPseudorange(raw_data_[i]);
-//
-//        addFeature(ftr_ptr);
-//        getFeatureListPtr()->front()->addConstraintFrom(new ConstraintGPSPseudorange(ftr_ptr));
+//        addFeature(new FeatureGPSPseudorange(raw_data_[i]));
+//        getFeatureListPtr()->front()->addConstraintFrom(new ConstraintGPSPseudorange(getFeatureListPtr()->back()));
 //
 //    }
 //
@@ -48,9 +48,4 @@ CaptureGPS::~CaptureGPS()
 Eigen::VectorXs CaptureGPS::computeFramePose(const TimeStamp &_now) const
 {
     return Eigen::Vector3s(0, 0, 0);
-}
-
-std::vector<ObsData> CaptureGPS::getRawData()
-{
-    return raw_data_;
 }

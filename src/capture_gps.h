@@ -12,12 +12,12 @@ class CaptureGPS : public CaptureBase
 {
 
 // TODO ¿position/orientation of antenna?
+
 protected:
     std::vector<ObsData> raw_data_;
 
 public:
-
-    std::vector<ObsData> getRawData(); //TODO vedi se va messo qualche const, &, ecc..
+    std::vector<ObsData> &getRawData();
 
     CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, std::vector<ObsData>& _raw_data);
 
