@@ -4,19 +4,20 @@
 #define LIGHT_SPEED 299792458
 
 //Wolf includes
-#include "wolf.h"
-#include "constraint_sparse.h"
 #include "feature_gps_pseudorange.h"
-#include "raw_data_satellite.h"
+#include "constraint_sparse.h"
 
 //TODO indenta tutto di 1
 
 
 class ConstraintGPSPseudorange: public ConstraintSparse<1, 3, 4, 3, 4, 1>
 {
+    //TODO add initPosition and initOrientation of vehicle
+//    (sono in constraint)
 
 public:
 
+    //TODO togli dall'ottimizzazione orientation dell'antenna, che sara' fix sempre a 0 0 0 0
     ConstraintGPSPseudorange(FeatureBase* _ftr_ptr, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 3, 4, 3, 4, 1>(_ftr_ptr,CTR_GPS_PR_3D, _status,
                                                _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // position and orientation of the car's frame
@@ -44,7 +45,7 @@ public:
 
 
     template <typename T>
-    bool operator()(const T* const _vehicle_p, const T* const _vehicle_q, const T* const _sensor_p,const T* const _sensor_q, const T* const _bias, T* _residual) const
+    bool operator()(const T* const _vehicle_p, const T* const _vehicle_q, const T* const _sensor_p,  const T* const _sensor_o, const T* const _bias, T* _residual) const
     {
 
         T square_sum = T(0);

@@ -127,7 +127,7 @@ void WolfManager::createFrame(const Eigen::VectorXs& _frame_state, const TimeSta
 void WolfManager::createFrame(const TimeStamp& _time_stamp)
 {
     //std::cout << "creating new frame from prior..." << std::endl;
-    createFrame(last_capture_relative_->computePrior(_time_stamp), _time_stamp);
+    createFrame(last_capture_relative_->computeFramePose(_time_stamp), _time_stamp);
 }
 
 void WolfManager::addSensor(SensorBase* _sensor_ptr)
@@ -197,7 +197,7 @@ void WolfManager::update()
 
             // ADD/INTEGRATE NEW ODOMETRY TO THE LAST FRAME
             last_capture_relative_->integrateCapture((CaptureMotion*) (new_capture));
-            current_frame_->setState(last_capture_relative_->computePrior(new_capture->getTimeStamp()));
+            current_frame_->setState(last_capture_relative_->computeFramePose(new_capture->getTimeStamp()));
             current_frame_->setTimeStamp(new_capture->getTimeStamp());
             delete new_capture;
         }
@@ -231,7 +231,7 @@ Eigen::VectorXs WolfManager::getVehiclePose(const TimeStamp& _now)
     if (last_capture_relative_ == nullptr)
         return Eigen::Map<Eigen::Vector3s>(current_frame_->getPPtr()->getPtr());
     else
-        return last_capture_relative_->computePrior(_now);
+        return last_capture_relative_->computeFramePose(_now);
 }
 
 

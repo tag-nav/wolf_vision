@@ -25,7 +25,7 @@ void CaptureFix::process()
     //std::cout << "ConstraintFix added " << std::endl;
 }
 
-Eigen::VectorXs CaptureFix::computePrior(const TimeStamp& _now) const
+Eigen::VectorXs CaptureFix::computeFramePose(const TimeStamp& _now) const
 {
 	return data_;
 }

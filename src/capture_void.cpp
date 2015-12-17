@@ -11,7 +11,7 @@ CaptureVoid::~CaptureVoid()
 	//std::cout << "deleting CaptureVoid " << nodeId() << std::endl;
 }
 
-Eigen::VectorXs CaptureVoid::computePrior(const TimeStamp& _now) const
+Eigen::VectorXs CaptureVoid::computeFramePose(const TimeStamp& _now) const
 {
     return Eigen::VectorXs::Zero(3);
 }

@@ -171,7 +171,7 @@ void WolfManagerGPS::update()
 
             // ADD/INTEGRATE NEW ODOMETRY TO THE LAST FRAME
             last_capture_relative_->integrateCapture((CaptureMotion*) (new_capture));
-            current_frame_->setState(last_capture_relative_->computePrior(new_capture->getTimeStamp()));
+            current_frame_->setState(last_capture_relative_->computeFramePose(new_capture->getTimeStamp()));
             current_frame_->setTimeStamp(new_capture->getTimeStamp());
             delete new_capture;
         }
@@ -185,13 +185,13 @@ void WolfManagerGPS::update()
 
             if (repeated_capture_it != current_frame_->getCaptureListPtr()->end()) // repeated capture
             {
-                std::cout << "repeated capture, keeping new capture" << new_capture->nodeId() << std::endl;
+                //std::cout << "repeated capture, keeping new capture" << new_capture->nodeId() << std::endl;
                 current_frame_->removeCapture(repeated_capture_it);
                 current_frame_->addCapture(new_capture);
             }
             else
             {
-                std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
+                //std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
                 current_frame_->addCapture(new_capture);
             }
         }
@@ -205,7 +205,7 @@ Eigen::VectorXs WolfManagerGPS::getVehiclePose(const TimeStamp& _now)
     if (last_capture_relative_ == nullptr)
         return Eigen::Map<Eigen::Vector3s>(current_frame_->getPPtr()->getPtr());
     else
-        return last_capture_relative_->computePrior(_now);
+        return last_capture_relative_->computeFramePose(_now);
 }
 
 

@@ -33,7 +33,7 @@ inline void CaptureOdom2D::process()
     addConstraints();
 }
 
-Eigen::VectorXs CaptureOdom2D::computePrior(const TimeStamp& _now) const
+Eigen::VectorXs CaptureOdom2D::computeFramePose(const TimeStamp& _now) const
 {
     assert(up_node_ptr_ != nullptr && "This Capture is not linked to any frame");
 
