@@ -93,7 +93,6 @@ SET(HDRS
     node_linked.h
     processor_base.h
     processor_gps.h
-    processor_laser_2D.h
     raw_data_satellite.h
     sensor_base.h
     sensor_odom_2D.h
@@ -139,7 +138,6 @@ SET(SRCS
     node_terminus.cpp
     processor_base.cpp
     processor_gps.cpp
-    processor_laser_2D.cpp
     sensor_base.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
@@ -171,11 +169,15 @@ ENDIF(Ceres_FOUND)
 
 IF (laser_scan_utils_FOUND)
     SET(HDRS ${HDRS}
+        sensor_laser_2D.h
+        processor_laser_2D.h
         capture_laser_2D.h
-        sensor_laser_2D.h)
+        )
     SET(SRCS ${SRCS} 
+        sensor_laser_2D.cpp
+        processor_laser_2D.cpp
         capture_laser_2D.cpp
-        sensor_laser_2D.cpp)
+        )
 ENDIF(laser_scan_utils_FOUND)
 
 IF (Suitesparse_FOUND)
