@@ -5,8 +5,6 @@
 class FrameBase;
 class FeatureBase;
 
-//std includes
-//
 
 //Wolf includes
 #include "wolf.h"
@@ -15,6 +13,10 @@ class FeatureBase;
 #include "frame_base.h"
 #include "feature_base.h"
 #include "sensor_base.h"
+
+//std includes
+//
+
 
 //class CaptureBase
 class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
