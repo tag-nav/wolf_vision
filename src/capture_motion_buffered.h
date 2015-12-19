@@ -1,5 +1,5 @@
 /*
- * \file captureMotionBuffered.h
+ * \file capture_motion_buffered.h
  *
  *  Created on: Dec 18, 2015
  *      author: jsola
