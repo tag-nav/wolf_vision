@@ -3,6 +3,7 @@
 
 ProcessorLaser2D::ProcessorLaser2D() :
         //sensor_laser_ptr_((SensorLaser2D*)(upperNodePtr())), // Static cast to specific sensor at construction time TODO: in construction time upperNodePtr is nullptr, it crashes always, to be removed or changed to somewhere (JVN)
+		sensor_laser_ptr_(nullptr),
         capture_laser_ptr_(nullptr)
 {
 }
@@ -488,7 +489,7 @@ bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_ptr, LandmarkCor
                 WolfScalar SMD_threshold = 8;
                 if (squared_mahalanobis_distances(0) < SMD_threshold ) //erfc( sqrt(squared_mahalanobis_distances(0)/2) ) > 0.8 )
                 {
-                    std::cout << "   large side! prob =  " << erfc( sqrt(squared_mahalanobis_distances(0)/2)) << std::endl;
+                    std::cout << "   large side! prob =  " << erfc( sqrt(squared_mahalanobis_distances(0)/2.0)) << std::endl;
                     feature_idx = 0;
                     corner_idx = 1;
                     old_corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
