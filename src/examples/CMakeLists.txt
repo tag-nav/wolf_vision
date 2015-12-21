@@ -70,6 +70,8 @@ ENDIF(faramotics_FOUND)
 
 
 # Testing GPS stuff
-ADD_EXECUTABLE(test_gps_wolf test_gps_wolf.cpp)
-TARGET_LINK_LIBRARIES(test_gps_wolf ${PROJECT_NAME})
+IF(raw_gps_utils_FOUND)
+    ADD_EXECUTABLE(test_gps_wolf test_gps_wolf.cpp)
+    TARGET_LINK_LIBRARIES(test_gps_wolf ${raw_gps_utils_LIBRARY} ${PROJECT_NAME})
+ENDIF(raw_gps_utils_FOUND)
 

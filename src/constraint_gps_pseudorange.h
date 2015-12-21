@@ -4,11 +4,17 @@
 #define LIGHT_SPEED 299792458
 
 //Wolf includes
+#include "sensor_gps.h"
 #include "feature_gps_pseudorange.h"
 #include "constraint_sparse.h"
-#include "sensor_gps.h"
+/*
+ * NB:
+ * FROM THIS CLASS AND ALL THE CLASS INCLUDED, THE LIBRARY RAW_GPS_UTILS
+ * MUST NOT BE REACHABLE!
+ * OTHERWISE WOLF WON'T COMPILE WITHOUT INSTALLING THIS LIBRARY.
+ *
+ */
 
-//TODO indenta tutto di 1
 
 
 class ConstraintGPSPseudorange: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
@@ -18,17 +24,17 @@ public:
 
     ConstraintGPSPseudorange(FeatureBase* _ftr_ptr, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 3, 4, 3, 1, 3, 4>(_ftr_ptr, CTR_GPS_PR_3D, _status,
-                            _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), // position of the vehicle's frame (ecef)
+                            _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame
                             _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
                             _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
                                                                         // orientation of antenna is not needed, because omnidirectional
                             _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter  = receiver time bias
-                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehiclePPtr(), // initial vehicle position
-                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehicleOPtr()  // initial vehicle orientation
+                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehiclePPtr(), // initial vehicle position (ecef)
+                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehicleOPtr()  // initial vehicle orientation (ecef)
             ) //TODO attention at the last 2 params and the casts
     {
-        sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getObs()->getSatPosition();
-        pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getObs()->getPseudorange();
+        sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
+        pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
 
         std::cout << "#ConstraintGPSPseudorange() constructor:   pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
     }

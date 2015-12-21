@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    bool useCeres = false;
+    bool useCeres = true;
     unsigned int n_captures = 5;
 
     //Welcome message
@@ -20,7 +20,7 @@ int main(int argc, char** argv)
      * Parameters, to be optimized
      */
     StateBlock* sensor_p = new StateBlock(Eigen::Vector3s::Zero()); //gps sensor position
-    sensor_p->fix(); // TODO only for now, to semplify things
+    sensor_p->fix(); // TODO only for now, to simplify things
     StateBlock* sensor_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);   //gps sensor orientation
     sensor_o->fix(); //orientation is fixed, because antenna omnidirectional, so is not going to be optimized
     StateBlock* sensor_bias = new StateBlock(Eigen::Vector1s::Zero());    //gps sensor bias
@@ -72,13 +72,13 @@ int main(int argc, char** argv)
         TimeStamp time_stamp(i);
 
 
-        std::vector<ObsData> raw_data;
+        std::vector<rawgpsutils::ObsData> raw_data;
 
         WolfScalar pr(666);
 
-        raw_data.push_back(ObsData("sat_1", TimeStamp(10, 3), pr)); pr+=111;
-        raw_data.push_back(ObsData("sat_2", TimeStamp(11, 3), pr)); pr+=111;
-        raw_data.push_back(ObsData("sat_3", TimeStamp(12, 3), pr));
+        raw_data.push_back(rawgpsutils::ObsData("sat_1", TimeStamp(10, 3), pr)); pr+=111;
+        raw_data.push_back(rawgpsutils::ObsData("sat_2", TimeStamp(11, 3), pr)); pr+=111;
+        raw_data.push_back(rawgpsutils::ObsData("sat_3", TimeStamp(12, 3), pr));
 
 
         // Create synthetic gps capture
@@ -108,11 +108,13 @@ int main(int argc, char** argv)
     cout << std::endl << " ========= calling delete wolf_manager_ (should not crash) =============" << std::endl;
     delete wolf_manager_; //not necessary to delete anything more, wolf will do it!
 
-    cout << std::endl << " ========= calling delete ceres_manager (and now a seg fault) ==========" << std::endl;
+    cout << " ========= calling delete ceres_manager "
+         << ((useCeres) ? "(and now a seg fault)" : "(should not crash)   ")
+         << " ==========" << std::endl;
     delete ceres_manager; //not necessary to delete anything more, wolf will do it!
 
     //End message
-    cout << " =========================== END ===============================" << std::endl;
+    cout << std::endl << " ================================= END =================================" << std::endl;
 
     //exit
     return 0;

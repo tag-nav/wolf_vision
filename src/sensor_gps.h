@@ -4,53 +4,14 @@
 #ifndef SENSOR_GPS_H_
 #define SENSOR_GPS_H_
 
+/*
+ *  NB qui non puoi includere la mia libreria sensor base!
+ *  perche in constaint vado a includere questo file, e cio fa in modo che wolf non sia
+ *  compilabile senza la mia libreria
+ */
+
 //wolf
 #include "sensor_base.h"
-
-/* TODO to be moved in an external library, like laser_scan_util
- *
- * temporary! To store navigation data. For now is fake because I don't have real data from gps
- */
-class SatelliteNavData
-{
-public:
-    SatelliteNavData(const std::string &_sat_id, const TimeStamp &_timestamp, const WolfScalar &_pseudorange, const WolfScalar &_param1, const WolfScalar &_param2) :
-            sat_id_(_sat_id), timestamp_(_timestamp), pseudorange_(_pseudorange), param1_(_param1), param2_(_param2)
-    {
-        std::cout << "Received navigation data for satellite " << sat_id_ << std::endl;
-    }
-
-    const std::string &getSatId() const {
-        return sat_id_;
-    }
-
-    const TimeStamp &getTimestamp() const {
-        return timestamp_;
-    }
-
-    WolfScalar getPseudorange() const {
-        return pseudorange_;
-    }
-
-    WolfScalar getParam1() const {
-        return param1_;
-    }
-
-    WolfScalar getParam2() const {
-        return param2_;
-    }
-
-protected:
-    std::string sat_id_;
-    TimeStamp timestamp_;
-    WolfScalar pseudorange_;
-    WolfScalar param1_;
-    WolfScalar param2_;
-
-};
-
-
-
 
 class SensorGPS : public SensorBase
 {
@@ -63,10 +24,13 @@ class SensorGPS : public SensorBase
 //                gps mounting point on board in  the vehicle   [ ok ]
 
 protected:
-    std::list<SatelliteNavData> nav_data_;
+    /*
+     * la nav data non va qui, ma magari come capture
+     */
+    //std::list<rawgpsutils::NavData> nav_data_;
 
-    StateBlock* init_vehicle_position_ptr_; //position of the vehicle where the experiment starts
-    StateBlock*init_vehicle_orientation_ptr_; //orientation of the vehicle where the experiment starts
+    StateBlock* init_vehicle_position_ptr_; //position of the vehicle where the experiment starts in ecef
+    StateBlock* init_vehicle_orientation_ptr_; //orientation of the vehicle where the experiment starts in ecef
 
 public:
 
@@ -86,7 +50,8 @@ public:
 
 
 
-    void addNavData(const std::string &_sat_id, const TimeStamp &_timestamp, const WolfScalar &_pseudorange, const WolfScalar &_param1, const WolfScalar &_param2);
+    // NO NAV DATA IN THIS CLASS!!!!!
+    //void addNavData(const std::string &_sat_id, const TimeStamp &_timestamp, const WolfScalar &_pseudorange, const WolfScalar &_param1, const WolfScalar &_param2);
 };
 
 

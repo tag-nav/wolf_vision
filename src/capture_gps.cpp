@@ -1,7 +1,7 @@
 #include "capture_gps.h"
 
 
-CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, std::vector<ObsData>& _raw_data) :
+CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, std::vector<rawgpsutils::ObsData>& _raw_data) :
         CaptureBase(_ts, _sensor_ptr),
         raw_data_(_raw_data)
 {
@@ -14,7 +14,7 @@ CaptureGPS::~CaptureGPS()
     //std::cout << "deleting CaptureGPS " << nodeId() << std::endl;
 }
 
-std::vector<ObsData> &CaptureGPS::getRawData()
+std::vector<rawgpsutils::ObsData> &CaptureGPS::getRawData()
 {
     return raw_data_;
 }
