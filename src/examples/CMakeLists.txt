@@ -2,6 +2,10 @@
 ADD_EXECUTABLE(test_node_linked test_node_linked.cpp)
 TARGET_LINK_LIBRARIES(test_node_linked ${PROJECT_NAME})
 
+# Testing virtual hierarchy -- solving diamond of death
+ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
+TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
+
 # Testing Eigen Permutations
 ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
 TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
@@ -30,6 +34,7 @@ IF(Suitesparse_FOUND)
     # Testing SPQR simple test
     #ADD_EXECUTABLE(test_SPQR solver/test_SPQR.cpp)
     #TARGET_LINK_LIBRARIES(test_SPQR ${PROJECT_NAME})
+    
 ENDIF(Suitesparse_FOUND)
 
 # Building and populating the wolf tree 
