@@ -7,6 +7,9 @@
 
 #include <list>
 
+
+// BASE CLASSES
+
 class N
 {
     private:
@@ -19,48 +22,51 @@ class N
         unsigned int id() { return id_; }
 };
 
-/*
+/**
  * Virtual inheritance solves the "diamond of death" problem.
  */
-template<class U>
-class Up : virtual public N
+template<class Parent>
+class ChildOf : virtual public N
 {
     private:
-        U* up_ptr_;
+        Parent* up_ptr_;
     protected:
-        Up(U* _up_ptr) : up_ptr_(_up_ptr) { }
-        virtual ~Up() { }
-        U* upPtr() { return up_ptr_; }
+        ChildOf(Parent* _up_ptr) : up_ptr_(_up_ptr) { }
+        virtual ~ChildOf() { }
+        Parent* upPtr() { return up_ptr_; }
 };
 
-/*
+/**
  * Virtual inheritance solves the "diamond of death" problem.
  */
-template<class D>
-class Down : virtual public N
+template<class Child>
+class ParentOf : virtual public N
 {
     private:
-        std::list<D*> down_list_;
+        std::list<Child*> down_list_;
     protected:
-        Down() { }
-        virtual ~Down() { }
+        ParentOf() { }
+        virtual ~ParentOf() { }
     public:
-        void addToList(D* _down_ptr) { down_list_.push_back(_down_ptr); }
-        std::list<D*> downList() { return down_list_; }
+        void addToList(Child* _down_ptr) { down_list_.push_back(_down_ptr); }
+        std::list<Child*> downList() { return down_list_; }
         virtual void print();
 };
 
-template<class S>
-class Side : virtual public N
+/**
+ * Virtual inheritance solves the "diamond of death" problem.
+ */
+template<class Sibling>
+class SiblingOf : virtual public N
 {
     private:
-        std::list<S*> side_list_;
+        std::list<Sibling*> side_list_;
     protected:
-        Side() { }
-        virtual ~Side() { }
+        SiblingOf() { }
+        virtual ~SiblingOf() { }
     public:
-        void addToList(S* _side_ptr) { side_list_.push_back(_side_ptr); }
-        std::list<S*> sideList() { return side_list_; }
+        void addToList(Sibling* _side_ptr) { side_list_.push_back(_side_ptr); }
+        std::list<Sibling*> sideList() { return side_list_; }
 };
 
 class Bot : virtual public N
@@ -71,12 +77,12 @@ class Bot : virtual public N
         virtual void print() { }
 };
 
-template<class D>
-class Explorer : public Down<D>
+template<class Child>
+class ExplorerOf : public ParentOf<Child>
 {
     protected:
-        Explorer() { }
-        virtual ~Explorer() { }
+        ExplorerOf() { }
+        virtual ~ExplorerOf() { }
     public:
         virtual void explore();
 };
@@ -88,6 +94,8 @@ class Explored : public Bot
     public:
         virtual void explore() { }
 };
+
+// DERIVED ISOLATED CLASSES
 
 // a bunch of fwd_decs
 class VehNode;
@@ -145,36 +153,37 @@ class Sen
 };
 
 // Derived classes for all levels of the tree
-class VehNode : public Veh, public Explorer<FrmNode>, public Down<SenNode>
+
+class VehNode : public Veh, public ExplorerOf<FrmNode>, public ParentOf<SenNode>
 {
     public:
         VehNode() { }
         virtual ~VehNode() { }
         void print(); // Overload because I am Top and have both Down and Explorer children.
 };
-class FrmNode : public Frm, public Up<VehNode>, public Explorer<CapNode>
+class FrmNode : public Frm, public ChildOf<VehNode>, public ExplorerOf<CapNode>
 {
     public:
-        FrmNode(VehNode* _veh_ptr) : Up<VehNode>(_veh_ptr) { }
+        FrmNode(VehNode* _veh_ptr) : ChildOf<VehNode>(_veh_ptr) { }
         virtual ~FrmNode() { }
 };
-class CapNode : public Cap, public Up<FrmNode>, public Explorer<FeaNode>, public Side<TrSNode>
+class CapNode : public Cap, public ChildOf<FrmNode>, public ExplorerOf<FeaNode>, public SiblingOf<TrSNode>
 {
     public:
-        CapNode(FrmNode* _frm_ptr) : Up<FrmNode>(_frm_ptr) { }
+        CapNode(FrmNode* _frm_ptr) : ChildOf<FrmNode>(_frm_ptr) { }
         virtual ~CapNode() { }
         void explore(); // Overload because I have both Explorer and Side children
 };
-class FeaNode : public Fea, public Up<CapNode>, public Explorer<CorNode>
+class FeaNode : public Fea, public ChildOf<CapNode>, public ExplorerOf<CorNode>
 {
     public:
-        FeaNode(CapNode* _cap_ptr) : Up<CapNode>(_cap_ptr) { }
+        FeaNode(CapNode* _cap_ptr) : ChildOf<CapNode>(_cap_ptr) { }
         virtual ~FeaNode() { }
 };
-class CorNode : public Up<FeaNode>, public Explored
+class CorNode : public ChildOf<FeaNode>, public Explored
 {
     public:
-        CorNode(FeaNode* _fea_ptr) : Up<FeaNode>(_fea_ptr) { }
+        CorNode(FeaNode* _fea_ptr) : ChildOf<FeaNode>(_fea_ptr) { }
         virtual ~CorNode() { }
 };
 class TrSNode : public virtual N
@@ -183,10 +192,10 @@ class TrSNode : public virtual N
         TrSNode() { }
         virtual ~TrSNode() { }
 };
-class SenNode : public Sen, public Up<VehNode>, public Bot
+class SenNode : public Sen, public ChildOf<VehNode>, public Bot
 {
     public:
-        SenNode(VehNode* _veh_ptr) : Up<VehNode>(_veh_ptr) { }
+        SenNode(VehNode* _veh_ptr) : ChildOf<VehNode>(_veh_ptr) { }
         virtual ~SenNode() { }
 };
 
@@ -197,8 +206,8 @@ class SenNode : public Sen, public Up<VehNode>, public Bot
 #include <iostream>
 using namespace std;
 
-template<class D>
-void Down<D>::print()
+template<class Child>
+void ParentOf<Child>::print()
 {
     cout << this->id() << ":( ";
     for (auto const & it_ptr : this->downList())
@@ -208,14 +217,14 @@ void Down<D>::print()
         it_ptr->print();
 }
 
-template<class D>
-void Explorer<D>::explore()
+template<class Child>
+void ExplorerOf<Child>::explore()
 {
     cout << this->id() << ":( "; // Yes I look sad but I'm OK.
-    for (auto const & it_ptr : Down<D>::downList())
+    for (auto const & it_ptr : ParentOf<Child>::downList())
         cout << it_ptr->id() << " ";
     cout << ")" << endl;
-    for (auto const & it_ptr : Down<D>::downList())
+    for (auto const & it_ptr : ParentOf<Child>::downList())
         it_ptr->explore();
 }
 
@@ -223,21 +232,21 @@ void VehNode::print()
 {
     cout << "Vehicle Own Field: v_ = " << v() << endl;
     cout << "Vehicle Hardware:" << endl;
-    Down < SenNode > ::print();
+    ParentOf < SenNode > ::print();
     cout << "Vehicle Data:" << endl;
-    Down < FrmNode > ::print();
+    ExplorerOf < FrmNode > ::print();
 
 }
 void CapNode::explore()
 {
     cout << this->id() << ":( "; // Yes I look sad but I'm OK.
-    for (auto const & it_ptr : Explorer<FeaNode>::downList())
+    for (auto const & it_ptr : ExplorerOf<FeaNode>::downList())
         cout << it_ptr->id() << " ";
     cout << "/ ";
-    for (auto const & it_ptr : Side<TrSNode>::sideList())
+    for (auto const & it_ptr : SiblingOf<TrSNode>::sideList())
         cout << it_ptr->id() << " ";
     cout << ")" << endl;
-    for (auto const & it_ptr : Explorer<FeaNode>::downList())
+    for (auto const & it_ptr : ExplorerOf<FeaNode>::downList())
         it_ptr->explore();
 }
 
@@ -258,36 +267,36 @@ int main()
     TrSNode T0001, T0010, T0011, T0110, T0111, T1011;
 
     // Add sensors to vehicle
-    V.Down < SenNode > ::addToList(&S0);
-    V.Down < SenNode > ::addToList(&S1);
+    V.ParentOf < SenNode > ::addToList(&S0);
+    V.ParentOf < SenNode > ::addToList(&S1);
 
     // Add frames to vehicle
-    V.Down < FrmNode > ::addToList(&F0);
-    V.Down < FrmNode > ::addToList(&F1);
+    V.ParentOf < FrmNode > ::addToList(&F0);
+    V.ParentOf < FrmNode > ::addToList(&F1);
 
     // Add captures to frames
-    F0.Down<CapNode>::addToList(&C00);
-    F0.Down<CapNode>::addToList(&C01);
-    F1.Down<CapNode>::addToList(&C10);
-    F1.Down<CapNode>::addToList(&C11);
+    F0.ParentOf<CapNode>::addToList(&C00);
+    F0.ParentOf<CapNode>::addToList(&C01);
+    F1.ParentOf<CapNode>::addToList(&C10);
+    F1.ParentOf<CapNode>::addToList(&C11);
 
     // Add features to captures
-    C00.Down<FeaNode>::addToList(&f000);
-    C00.Down<FeaNode>::addToList(&f001);
-    C01.Down<FeaNode>::addToList(&f010);
-    C01.Down<FeaNode>::addToList(&f011);
-    C10.Down<FeaNode>::addToList(&f100);
-    C10.Down<FeaNode>::addToList(&f101);
-    C11.Down<FeaNode>::addToList(&f110);
-    C11.Down<FeaNode>::addToList(&f111);
+    C00.ParentOf<FeaNode>::addToList(&f000);
+    C00.ParentOf<FeaNode>::addToList(&f001);
+    C01.ParentOf<FeaNode>::addToList(&f010);
+    C01.ParentOf<FeaNode>::addToList(&f011);
+    C10.ParentOf<FeaNode>::addToList(&f100);
+    C10.ParentOf<FeaNode>::addToList(&f101);
+    C11.ParentOf<FeaNode>::addToList(&f110);
+    C11.ParentOf<FeaNode>::addToList(&f111);
 
     // Add trans-sensors to captures
-    C00.Side<TrSNode>::addToList(&T0001);
-    C00.Side<TrSNode>::addToList(&T0010);
-    C00.Side<TrSNode>::addToList(&T0011);
-    C01.Side<TrSNode>::addToList(&T0110);
-    C01.Side<TrSNode>::addToList(&T0111);
-    C10.Side<TrSNode>::addToList(&T1011);
+    C00.SiblingOf<TrSNode>::addToList(&T0001);
+    C00.SiblingOf<TrSNode>::addToList(&T0010);
+    C00.SiblingOf<TrSNode>::addToList(&T0011);
+    C01.SiblingOf<TrSNode>::addToList(&T0110);
+    C01.SiblingOf<TrSNode>::addToList(&T0111);
+    C10.SiblingOf<TrSNode>::addToList(&T1011);
 
     // explore() : means we are calling advanced functionality from Explorer classes. Here, we just fake.
     // print()   : means we just print linkage info.
