@@ -53,47 +53,47 @@ class ParentOf : virtual public N
         virtual void print();
 };
 
-/**
- * Virtual inheritance solves the "diamond of death" problem.
- */
-template<class Sibling>
-class SiblingOf : virtual public N
-{
-    private:
-        std::list<Sibling*> side_list_;
-    protected:
-        SiblingOf() { }
-        virtual ~SiblingOf() { }
-    public:
-        void addToList(Sibling* _side_ptr) { side_list_.push_back(_side_ptr); }
-        std::list<Sibling*> sideList() { return side_list_; }
-};
+///**
+// * Virtual inheritance solves the "diamond of death" problem.
+// */
+//template<class Sibling>
+//class SiblingOf : virtual public N
+//{
+//    private:
+//        std::list<Sibling*> side_list_;
+//    protected:
+//        SiblingOf() { }
+//        virtual ~SiblingOf() { }
+//    public:
+//        void addToList(Sibling* _side_ptr) { side_list_.push_back(_side_ptr); }
+//        std::list<Sibling*> sideList() { return side_list_; }
+//};
 
 class Bot : virtual public N
 {
     protected:
         virtual ~Bot() { }
     public:
-        virtual void print() { }
+        virtual void print();
 };
 
-template<class Child>
-class ExplorerOf : public ParentOf<Child>
-{
-    protected:
-        ExplorerOf() { }
-        virtual ~ExplorerOf() { }
-    public:
-        virtual void explore();
-};
+//template<class Child>
+//class ExplorerOf : public ParentOf<Child>
+//{
+//    protected:
+//        ExplorerOf() { }
+//        virtual ~ExplorerOf() { }
+//    public:
+//        virtual void explore();
+//};
 
-class Explored : public Bot
-{
-    protected:
-        virtual ~Explored() { }
-    public:
-        virtual void explore() { }
-};
+//class Explored : public Bot
+//{
+//    protected:
+//        virtual ~Explored() { }
+//    public:
+//        virtual void explore() { }
+//};
 
 // DERIVED ISOLATED CLASSES
 
@@ -142,6 +142,15 @@ class Fea
     private:
         double ft_;
 };
+class Cor
+{
+public:
+	Cor() : co_(1){}
+	void duplicate(){co_ *= 2;}
+	double co(){return co_;}
+private:
+	double co_;
+};
 class Sen
 {
     public:
@@ -154,44 +163,45 @@ class Sen
 
 // Derived classes for all levels of the tree
 
-class VehNode : public Veh, public ExplorerOf<FrmNode>, public ParentOf<SenNode>
+class VehNode : public Veh, public ParentOf<FrmNode>, public ParentOf<SenNode>
 {
     public:
         VehNode() { }
         virtual ~VehNode() { }
         void print(); // Overload because I am Top and have both Down and Explorer children.
 };
-class FrmNode : public Frm, public ChildOf<VehNode>, public ExplorerOf<CapNode>
+class FrmNode : public Frm, public ChildOf<VehNode>, public ParentOf<CapNode>
 {
     public:
         FrmNode(VehNode* _veh_ptr) : ChildOf<VehNode>(_veh_ptr) { }
         virtual ~FrmNode() { }
 };
-class CapNode : public Cap, public ChildOf<FrmNode>, public ExplorerOf<FeaNode>, public SiblingOf<TrSNode>
+class CapNode : public Cap, public ChildOf<FrmNode>, public ParentOf<FeaNode>//, public SiblingOf<TrSNode>
 {
     public:
         CapNode(FrmNode* _frm_ptr) : ChildOf<FrmNode>(_frm_ptr) { }
         virtual ~CapNode() { }
         void explore(); // Overload because I have both Explorer and Side children
 };
-class FeaNode : public Fea, public ChildOf<CapNode>, public ExplorerOf<CorNode>
+class FeaNode : public Fea, public ChildOf<CapNode>, public ParentOf<CorNode>
 {
     public:
         FeaNode(CapNode* _cap_ptr) : ChildOf<CapNode>(_cap_ptr) { }
         virtual ~FeaNode() { }
 };
-class CorNode : public ChildOf<FeaNode>, public Explored
+class CorNode : public Cor, public ChildOf<FeaNode>, public Bot//, public Explored
 {
     public:
         CorNode(FeaNode* _fea_ptr) : ChildOf<FeaNode>(_fea_ptr) { }
         virtual ~CorNode() { }
+//        void print();
 };
-class TrSNode : public virtual N
-{
-    public:
-        TrSNode() { }
-        virtual ~TrSNode() { }
-};
+//class TrSNode : public virtual N
+//{
+//    public:
+//        TrSNode() { }
+//        virtual ~TrSNode() { }
+//};
 class SenNode : public Sen, public ChildOf<VehNode>, public Bot
 {
     public:
@@ -217,15 +227,19 @@ void ParentOf<Child>::print()
         it_ptr->print();
 }
 
-template<class Child>
-void ExplorerOf<Child>::explore()
-{
-    cout << this->id() << ":( "; // Yes I look sad but I'm OK.
-    for (auto const & it_ptr : ParentOf<Child>::downList())
-        cout << it_ptr->id() << " ";
-    cout << ")" << endl;
-    for (auto const & it_ptr : ParentOf<Child>::downList())
-        it_ptr->explore();
+//template<class Child>
+//void ExplorerOf<Child>::explore()
+//{
+//    cout << this->id() << ":( "; // Yes I look sad but I'm OK.
+//    for (auto const & it_ptr : ParentOf<Child>::downList())
+//        cout << it_ptr->id() << " ";
+//    cout << ")" << endl;
+//    for (auto const & it_ptr : ParentOf<Child>::downList())
+//        it_ptr->explore();
+//}
+
+void Bot::print(){
+	cout << this->id() << ":( Bottom )" << endl;
 }
 
 void VehNode::print()
@@ -234,21 +248,21 @@ void VehNode::print()
     cout << "Vehicle Hardware:" << endl;
     ParentOf < SenNode > ::print();
     cout << "Vehicle Data:" << endl;
-    ExplorerOf < FrmNode > ::print();
+    ParentOf < FrmNode > ::print();
+}
 
-}
-void CapNode::explore()
-{
-    cout << this->id() << ":( "; // Yes I look sad but I'm OK.
-    for (auto const & it_ptr : ExplorerOf<FeaNode>::downList())
-        cout << it_ptr->id() << " ";
-    cout << "/ ";
-    for (auto const & it_ptr : SiblingOf<TrSNode>::sideList())
-        cout << it_ptr->id() << " ";
-    cout << ")" << endl;
-    for (auto const & it_ptr : ExplorerOf<FeaNode>::downList())
-        it_ptr->explore();
-}
+//void CapNode::explore()
+//{
+//    cout << this->id() << ":( "; // Yes I look sad but I'm OK.
+//    for (auto const & it_ptr : ExplorerOf<FeaNode>::downList())
+//        cout << it_ptr->id() << " ";
+//    cout << "/ ";
+//    for (auto const & it_ptr : SiblingOf<TrSNode>::sideList())
+//        cout << it_ptr->id() << " ";
+//    cout << ")" << endl;
+//    for (auto const & it_ptr : ExplorerOf<FeaNode>::downList())
+//        it_ptr->explore();
+//}
 
 ///////////////////////
 // START APPLICATION
@@ -264,7 +278,7 @@ int main()
     FrmNode F0(&V), F1(&V);
     CapNode C00(&F0), C01(&F0), C10(&F1), C11(&F1);
     FeaNode f000(&C00), f001(&C00), f010(&C01), f011(&C01), f100(&C10), f101(&C10), f110(&C11), f111(&C11);
-    TrSNode T0001, T0010, T0011, T0110, T0111, T1011;
+//    TrSNode T0001, T0010, T0011, T0110, T0111, T1011;
 
     // Add sensors to vehicle
     V.ParentOf < SenNode > ::addToList(&S0);
@@ -290,18 +304,18 @@ int main()
     C11.ParentOf<FeaNode>::addToList(&f110);
     C11.ParentOf<FeaNode>::addToList(&f111);
 
-    // Add trans-sensors to captures
-    C00.SiblingOf<TrSNode>::addToList(&T0001);
-    C00.SiblingOf<TrSNode>::addToList(&T0010);
-    C00.SiblingOf<TrSNode>::addToList(&T0011);
-    C01.SiblingOf<TrSNode>::addToList(&T0110);
-    C01.SiblingOf<TrSNode>::addToList(&T0111);
-    C10.SiblingOf<TrSNode>::addToList(&T1011);
+//    // Add trans-sensors to captures
+//    C00.SiblingOf<TrSNode>::addToList(&T0001);
+//    C00.SiblingOf<TrSNode>::addToList(&T0010);
+//    C00.SiblingOf<TrSNode>::addToList(&T0011);
+//    C01.SiblingOf<TrSNode>::addToList(&T0110);
+//    C01.SiblingOf<TrSNode>::addToList(&T0111);
+//    C10.SiblingOf<TrSNode>::addToList(&T1011);
 
     // explore() : means we are calling advanced functionality from Explorer classes. Here, we just fake.
     // print()   : means we just print linkage info.
     cout << "V.explore():" << endl;
-    V.explore();
+//    V.explore();
     V.duplicate();
     cout << "V.print():" << endl;
     V.print();
