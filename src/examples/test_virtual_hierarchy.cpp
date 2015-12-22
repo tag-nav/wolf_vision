@@ -10,6 +10,11 @@
 
 // BASE CLASSES
 
+/**
+ * \brief Node class.
+ *
+ * The Node class has only an ID and an ID factory built in the constructor.
+ */
 class N
 {
     private:
@@ -23,7 +28,11 @@ class N
 };
 
 /**
- * Virtual inheritance solves the "diamond of death" problem.
+ * \brief Base class for children.
+ *
+ * It has a pointer to parent.
+ *
+ * NOTE: The virtual inheritance solves the "diamond of death" problem.
  */
 template<class Parent>
 class ChildOf : virtual public N
@@ -37,7 +46,11 @@ class ChildOf : virtual public N
 };
 
 /**
- * Virtual inheritance solves the "diamond of death" problem.
+ * \brief Base class for parents
+ *
+ * It has a list of pointers to children, and a dumy method 'print' that is recursive to all children.
+ *
+ * NOTE: The virtual inheritance solves the "diamond of death" problem.
  */
 template<class Child>
 class ParentOf : virtual public N
@@ -53,7 +66,7 @@ class ParentOf : virtual public N
         virtual void print();
 };
 
-///**
+///*
 // * Virtual inheritance solves the "diamond of death" problem.
 // */
 //template<class Sibling>
@@ -69,6 +82,15 @@ class ParentOf : virtual public N
 //        std::list<Sibling*> sideList() { return side_list_; }
 //};
 
+/**
+ * \brief Base class for bottom nodes.
+ *
+ * This class is for children that are no parents - they are bottom nodes
+ *
+ * It overloads the dummy 'print' function so that this is is not recursive any more.
+ *
+ * NOTE: The virtual inheritance solves the "diamond of death" problem.
+ */
 class Bot : virtual public N
 {
     protected:
