@@ -2,8 +2,6 @@
 #ifndef FEATURE_GPS_PSEUDORANGE_H_
 #define FEATURE_GPS_PSEUDORANGE_H_
 
-//TODO indent 1 tab more all the class content
-
 //std includes
 
 //Wolf includes

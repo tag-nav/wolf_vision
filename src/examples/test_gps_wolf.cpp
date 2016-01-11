@@ -8,8 +8,67 @@
 
 using namespace std;
 
+//TODO  TEMP!
+Eigen::Matrix4s createConvMatrix(Eigen::Vector3s p, Eigen::Quaternions q)
+{
+    //cout << "partenza: " << p << "---" /*<< q*/ << endl;
+
+    Eigen::Matrix4s ret = Eigen::Matrix4s::Zero();
+
+    Eigen::Matrix3s rot_matr = q.toRotationMatrix();
+
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            ret(i, j) = rot_matr(i, j);
+        }
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        ret(i, 3) = p(i);
+    }
+
+    ret(3, 3) = 1;
+
+    //cout << "res: " << endl << ret << endl;
+
+    return ret;
+}
+
+//TODO  TEMP!
+void testMathQuaternion()
+{
+    Eigen::Vector4s sensor_p_ecef; //sensor position with respect to ecef coordinate system
+    Eigen::Vector4s sensor_p_base(1, 1, 1 , 1); //sensor position with respect to the base (the vehicle)
+    //TODo è da paddare con 0 o 1? --> credo 1!!
+
+    Eigen::Vector3s vehicle_init_p(100, 100, 100);
+    Eigen::Quaternions vehicle_init_o(1, 0, 0, 0);
+
+    Eigen::Vector3s vehicle_p(10, 10, 10);
+    Eigen::Quaternions vehicle_o(1, 0, 0, 0);
+
+
+    Eigen::Matrix4s conv_origin_to_ecef = createConvMatrix(vehicle_init_p, vehicle_init_o);
+    Eigen::Matrix4s conv_base_to_origin = createConvMatrix(vehicle_p, vehicle_o);
+
+    sensor_p_ecef = conv_origin_to_ecef * conv_base_to_origin * sensor_p_base;
+
+    cout << "conv_origin_to_ecef:\n" << conv_origin_to_ecef << endl;
+    cout << "conv_base_to_origin:\n" << conv_base_to_origin << endl;
+
+    cout << "Sensore in ecef:\n" << sensor_p_ecef;
+
+}
+
 int main(int argc, char** argv)
 {
+    // TEMP!
+    testMathQuaternion();
+    return 0;
+
     bool useCeres = true;
     unsigned int n_captures = 5;
 

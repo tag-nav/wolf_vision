@@ -61,8 +61,37 @@ public:
          */
 
 
+
+        /*
+         * TODO improve naming for more coherence.
+         *
+         * origin = init_vehicle
+         * base = vehicle
+         */
+        Eigen::Vector4s sensor_p_ecef; //sensor position with respect to ecef coordinate system
+        Eigen::Vector4s sensor_p_base; //sensor position with respect to the base (the vehicle)
+                                    //((double)_sensor_p[0], (double)_sensor_p[1], (double)_sensor_p[2]);
+                                    //TODo è da paddare con 0 o 1?
+
+        Eigen::Matrix4s conv_origin_to_ecef;
+        Eigen::Matrix4s conv_base_to_origin;
+
+        //TODO riempi le matrici correttamente
+
+
+
+        // transformation from
+        sensor_p_ecef = conv_origin_to_ecef * conv_base_to_origin * sensor_p_base;
+
+        //sensor_p_ecef deve essere trasformato come template
+        //T* sensor_p_ecef_template; //TODO assegna le prime 3 componenti di sensor_p_ecef
+
+
+        //il codice qui sotto è quello vecchio, adattato in modo da usare la posizione del sensore rispetto a ecef, calcolata qui sopra
         T square_sum = T(0);
-        for (int i = 0; i < 3; ++i) {
+        for (int i = 0; i < 3; ++i)
+        { //TODO qui va usata la posizione del sensore rispetto a ecef e non vehicle_p
+            //TODO  ovvero sensor_p_ecef_template; ora c'è vehicle per  evitare sed fault, visto che sensor__p_ecef è vuoto
             square_sum += pow(_vehicle_p[i] - T(sat_position_[i]) , 2);
         }
         T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0) ;
