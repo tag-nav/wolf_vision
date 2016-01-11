@@ -50,49 +50,70 @@ public:
         //std::cout << "deleting ConstraintGPSPseudorange " << nodeId() << std::endl;
     }
 
-
+    /*
+     * TODO improve naming for more coherence.
+     *
+     * origin = init_vehicle
+     * base = vehicle
+     */
     template <typename T>
     bool operator()(const T* const _vehicle_p, const T* const _vehicle_q, const T* const _sensor_p, const T* const _bias, const T* const _init_vehicle_p, const T* const _init_vehicle_q, T* _residual) const
     {
-        /*
-         * TODO DO THE MATH
-         *
-         * fai i conti seriamente, usando tutte ste robe
-         */
+        //std::cout << "OPERATOR()\n";
 
-
+        Eigen::Matrix<T, 4, 1> sensor_p_ecef; //sensor position with respect to ecef coordinate system
+        Eigen::Matrix<T, 4, 1> sensor_p_base(_sensor_p[0], _sensor_p[1], _sensor_p[2], T(1)); //sensor position with respect to the base (the vehicle)
+                                    //TODO padding is with 1, check confirm -------------|
 
         /*
-         * TODO improve naming for more coherence.
-         *
-         * origin = init_vehicle
-         * base = vehicle
+         * Origin-to-ECEF conversion matrix
          */
-        Eigen::Vector4s sensor_p_ecef; //sensor position with respect to ecef coordinate system
-        Eigen::Vector4s sensor_p_base; //sensor position with respect to the base (the vehicle)
-                                    //((double)_sensor_p[0], (double)_sensor_p[1], (double)_sensor_p[2]);
-                                    //TODo è da paddare con 0 o 1?
+        Eigen::Matrix<T, 4, 4> conv_origin_to_ecef = Eigen::Matrix<T, 4, 4>::Zero(); //matrice da creare
 
-        Eigen::Matrix4s conv_origin_to_ecef;
-        Eigen::Matrix4s conv_base_to_origin;
+        Eigen::Quaternion<T> vehicle_init_q(_init_vehicle_q[0], _init_vehicle_q[1], _init_vehicle_q[2], _init_vehicle_q[3]);
+        Eigen::Matrix<T, 3, 3> rot_matr_init = vehicle_init_q.toRotationMatrix();
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                conv_origin_to_ecef(i, j) = rot_matr_init(i, j);
 
-        //TODO riempi le matrici correttamente
+        for (int i = 0; i < 3; ++i)
+            conv_origin_to_ecef(i, 3) = _init_vehicle_p[i];
+
+        conv_origin_to_ecef(3, 3) = T(1);
 
 
 
-        // transformation from
+        /*
+         * Base-to-origin conversion matrix
+         */
+        Eigen::Matrix<T, 4, 4> conv_base_to_origin = Eigen::Matrix<T, 4, 4>::Zero(); //matrice da creare
+
+        Eigen::Quaternion<T> vehicle_q(_vehicle_q[0], _vehicle_q[1], _vehicle_q[2], _vehicle_q[3]);
+        Eigen::Matrix<T, 3, 3> rot_matr_vehicle = vehicle_q.toRotationMatrix();
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                conv_base_to_origin(i, j) = rot_matr_vehicle(i, j);
+
+        for (int i = 0; i < 3; ++i)
+            conv_base_to_origin(i, 3) = _vehicle_p[i];
+
+        conv_base_to_origin(3, 3) = T(1);
+
+
+
+
+        /*
+         * transformation from base reference to ecef
+         */
         sensor_p_ecef = conv_origin_to_ecef * conv_base_to_origin * sensor_p_base;
 
-        //sensor_p_ecef deve essere trasformato come template
-        //T* sensor_p_ecef_template; //TODO assegna le prime 3 componenti di sensor_p_ecef
 
 
         //il codice qui sotto è quello vecchio, adattato in modo da usare la posizione del sensore rispetto a ecef, calcolata qui sopra
         T square_sum = T(0);
         for (int i = 0; i < 3; ++i)
-        { //TODO qui va usata la posizione del sensore rispetto a ecef e non vehicle_p
-            //TODO  ovvero sensor_p_ecef_template; ora c'è vehicle per  evitare sed fault, visto che sensor__p_ecef è vuoto
-            square_sum += pow(_vehicle_p[i] - T(sat_position_[i]) , 2);
+        {
+            square_sum += pow(sensor_p_ecef[i] - T(sat_position_[i]) , 2);
         }
         T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0) ;
 
