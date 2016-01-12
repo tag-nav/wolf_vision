@@ -31,7 +31,7 @@ public:
                             _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter  = receiver time bias
                             ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehiclePPtr(), // initial vehicle position (ecef)
                             ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehicleOPtr()  // initial vehicle orientation (ecef)
-            ) //TODO attention at the last 2 params and the casts
+            ) //TODO attention to the last 2 params and the casts
     {
         sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
         pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
@@ -68,7 +68,7 @@ public:
         /*
          * Origin-to-ECEF conversion matrix
          */
-        Eigen::Matrix<T, 4, 4> conv_origin_to_ecef = Eigen::Matrix<T, 4, 4>::Zero(); //matrice da creare
+        Eigen::Matrix<T, 4, 4> conv_origin_to_ecef;
 
         Eigen::Quaternion<T> vehicle_init_q(_init_vehicle_q[0], _init_vehicle_q[1], _init_vehicle_q[2], _init_vehicle_q[3]);
         Eigen::Matrix<T, 3, 3> rot_matr_init = vehicle_init_q.toRotationMatrix();
@@ -79,6 +79,7 @@ public:
         for (int i = 0; i < 3; ++i)
             conv_origin_to_ecef(i, 3) = _init_vehicle_p[i];
 
+        conv_origin_to_ecef(3, 0) = conv_origin_to_ecef(3, 1) = conv_origin_to_ecef(3, 2) = T(0);
         conv_origin_to_ecef(3, 3) = T(1);
 
 
@@ -86,7 +87,7 @@ public:
         /*
          * Base-to-origin conversion matrix
          */
-        Eigen::Matrix<T, 4, 4> conv_base_to_origin = Eigen::Matrix<T, 4, 4>::Zero(); //matrice da creare
+        Eigen::Matrix<T, 4, 4> conv_base_to_origin;
 
         Eigen::Quaternion<T> vehicle_q(_vehicle_q[0], _vehicle_q[1], _vehicle_q[2], _vehicle_q[3]);
         Eigen::Matrix<T, 3, 3> rot_matr_vehicle = vehicle_q.toRotationMatrix();
@@ -97,9 +98,9 @@ public:
         for (int i = 0; i < 3; ++i)
             conv_base_to_origin(i, 3) = _vehicle_p[i];
 
+
+        conv_base_to_origin(3, 0) = conv_base_to_origin(3, 1) = conv_base_to_origin(3, 2) = T(0);
         conv_base_to_origin(3, 3) = T(1);
-
-
 
 
         /*
