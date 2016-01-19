@@ -4,22 +4,20 @@
 //TODO indentation: add a tab at everything inside the class: protected and public must have 1 tab
 
 // Wolf includes
-#include "raw_data_satellite.h"
+#include "raw_gps_utils/obs_data.h"
 #include "capture_base.h"
 
 
 class CaptureGPS : public CaptureBase
 {
 
-// TODO ¿position/orientation of antenna?
-
 protected:
-    std::vector<ObsData> raw_data_;
+    std::vector<rawgpsutils::ObsData> raw_data_;
 
 public:
-    std::vector<ObsData> &getRawData();
+    std::vector<rawgpsutils::ObsData> &getRawData();
 
-    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, std::vector<ObsData>& _raw_data);
+    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, std::vector<rawgpsutils::ObsData>& _raw_data);
 
     /** \brief Default destructor (not recommended)
      *
@@ -27,8 +25,6 @@ public:
      *
      **/
     virtual ~CaptureGPS();
-
-//    void process();//TODO toglimi
 
     /*
      * Dummy implementation of the method, only because it's pure virtual

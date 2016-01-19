@@ -136,7 +136,7 @@ class AssociationNode
          * \param _tn_list: List of terminus nodes. Filled with terminus nodes, while recurisve computing tree
          * 
          **/
-        double computeTreeProb(const double & _up_prob, std::list<AssociationNode*> & _tn_list);
+        void computeTreeProb(const double & _up_prob, std::list<AssociationNode*> & _tn_list);
                 
         /** \brief Grows tree recursively
          * 

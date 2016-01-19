@@ -8,38 +8,106 @@
 
 using namespace std;
 
+////TODO  TEMP!
+//Eigen::Matrix4s createConvMatrix(Eigen::Vector3s p, Eigen::Quaternions q)
+//{
+//    //cout << "partenza: " << p << "---" /*<< q*/ << endl;
+//
+//    Eigen::Matrix4s ret = Eigen::Matrix4s::Zero();
+//
+//    Eigen::Matrix3s rot_matr = q.toRotationMatrix();
+//
+//    for (int i = 0; i < 3; ++i)
+//    {
+//        for (int j = 0; j < 3; ++j)
+//        {
+//            ret(i, j) = rot_matr(i, j);
+//        }
+//    }
+//
+//    for (int i = 0; i < 3; ++i)
+//    {
+//        ret(i, 3) = p(i);
+//    }
+//
+//    ret(3, 3) = 1;
+//
+//    //cout << "res: " << endl << ret << endl;
+//
+//    return ret;
+//}
+//
+////TODO  TEMP!
+//void testMathQuaternion()
+//{
+//    Eigen::Vector4s sensor_p_ecef; //sensor position with respect to ecef coordinate system
+//    Eigen::Vector4s sensor_p_base(1, 1, 1 , 1); //sensor position with respect to the base (the vehicle)
+//    //TODo è da paddare con 0 o 1? --> credo 1!!
+//
+//    Eigen::Vector3s vehicle_init_p(100, 100, 100);
+//    Eigen::Quaternions vehicle_init_o(1, 0, 0, 0);
+//
+//    Eigen::Vector3s vehicle_p(10, 10, 10);
+//    Eigen::Quaternions vehicle_o(1, 0, 0, 0);
+//
+//
+//    Eigen::Matrix4s conv_origin_to_ecef = createConvMatrix(vehicle_init_p, vehicle_init_o);
+//    Eigen::Matrix4s conv_base_to_origin = createConvMatrix(vehicle_p, vehicle_o);
+//
+//    sensor_p_ecef = conv_origin_to_ecef * conv_base_to_origin * sensor_p_base;
+//
+//    cout << "conv_origin_to_ecef:\n" << conv_origin_to_ecef << endl;
+//    cout << "conv_base_to_origin:\n" << conv_base_to_origin << endl;
+//
+//    cout << "Sensore in ecef:\n" << sensor_p_ecef;
+//
+//}
+
 int main(int argc, char** argv)
 {
-    bool useCeres = false;
+    // TEMP! just to try some math using eigen
+//    testMathQuaternion();
+//    return 0;
+
+    bool useCeres = true;
     unsigned int n_captures = 5;
-
-
-
 
     //Welcome message
     cout << endl << " ========= WOLF TREE test ===========" << endl << endl;
 
-    SensorGPS* gps_sensor_ptr_ = new SensorGPS(new StateBlock(Eigen::Vector3s::Zero()),   //gps sensor position
-                                               new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION),   //gps sensor orientation
-                                               new StateBlock(Eigen::Vector1s::Zero()),    //gps sensor bias
-                                               new StateBlock(Eigen::Vector3s::Zero()),    //vehicle init position
-                                               new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION) // vehicle init orientation
-    );
+    /*
+     * Parameters, to be optimized
+     */
+    StateBlock* sensor_p = new StateBlock(Eigen::Vector3s::Zero()); //gps sensor position
+    sensor_p->fix(); // TODO only for now, to simplify things
+    StateBlock* sensor_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);   //gps sensor orientation
+    sensor_o->fix(); //orientation is fixed, because antenna omnidirectional, so is not going to be optimized
+    StateBlock* sensor_bias = new StateBlock(Eigen::Vector1s::Zero());    //gps sensor bias
+    // TODO Should this 2 supplementary blocks go in the sensor?
+    StateBlock* vehicle_init_p = new StateBlock(Eigen::Vector3s::Zero());    //vehicle init position
+    StateBlock* vehicle_init_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);// vehicle init orientation
 
-    // TODO the 2 supplementary blocks, vehicle init position,  must go in the sensor?
-
+    /*
+     * GPS Sensor
+     */
+    SensorGPS* gps_sensor_ptr_ = new SensorGPS(sensor_p, sensor_o, sensor_bias, vehicle_init_p, vehicle_init_o);
     gps_sensor_ptr_->addProcessor(new ProcessorGPS());
 
 
-    WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_3D,                               //frame structure
-                                                         nullptr,                           //gps raw sensor
-                                                         Eigen::Vector7s::Zero(),           //prior
-                                                         Eigen::Matrix7s::Identity()*0.01,  //prior cov
-                                                         5,                                 //window size
-                                                         1);                                //time for new keyframe
+    /*
+     * GPS WolfManager
+     */
+    WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_3D,                             //frame structure
+                                                       nullptr,                           //_sensor_prior_ptr
+                                                       Eigen::Vector7s::Zero(),           //prior
+                                                       Eigen::Matrix7s::Identity()*0.01,  //prior cov
+                                                       5,                                 //window size
+                                                       1);                                //time for new keyframe
 
 
-    // Ceres wrapper
+    /*
+     * Ceres wrapper
+     */
     ceres::Solver::Options ceres_options;
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
@@ -51,23 +119,24 @@ int main(int argc, char** argv)
     CeresManager* ceres_manager = new CeresManager(wolf_manager_->getProblemPtr(), problem_options);
 
 
-
     wolf_manager_->addSensor(gps_sensor_ptr_);
 
 
+    /*
+     * Data Captures
+     */
     for(unsigned int  i=0; i < n_captures; ++i)
     {
         cout << "%%%%%%%%%%%%%%%%%%%%%% CAPTURE #" << i << endl;
         TimeStamp time_stamp(i);
 
-
-        std::vector<ObsData> raw_data;
+        std::vector<rawgpsutils::ObsData> raw_data;
 
         WolfScalar pr(666);
 
-        raw_data.push_back(ObsData("sat_1", TimeStamp(10, 3), pr)); pr+=111;
-        raw_data.push_back(ObsData("sat_2", TimeStamp(11, 3), pr)); pr+=111;
-        raw_data.push_back(ObsData("sat_3", TimeStamp(12, 3), pr));
+        raw_data.push_back(rawgpsutils::ObsData("sat_1", TimeStamp(10, 3), pr)); pr+=111;
+        raw_data.push_back(rawgpsutils::ObsData("sat_2", TimeStamp(11, 3), pr)); pr+=111;
+        raw_data.push_back(rawgpsutils::ObsData("sat_3", TimeStamp(12, 3), pr));
 
 
         // Create synthetic gps capture
@@ -97,11 +166,13 @@ int main(int argc, char** argv)
     cout << std::endl << " ========= calling delete wolf_manager_ (should not crash) =============" << std::endl;
     delete wolf_manager_; //not necessary to delete anything more, wolf will do it!
 
-    cout << std::endl << " ========= calling delete ceres_manager (and now a seg fault) ==========" << std::endl;
+    cout << " ========= calling delete ceres_manager "
+         << ((useCeres) ? "(and now a seg fault)" : "(should not crash)   ")
+         << " ==========" << std::endl;
     delete ceres_manager; //not necessary to delete anything more, wolf will do it!
 
     //End message
-    cout << " =========================== END ===============================" << std::endl;
+    cout << std::endl << " ================================= END =================================" << std::endl;
 
     //exit
     return 0;

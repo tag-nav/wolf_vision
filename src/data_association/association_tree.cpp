@@ -71,7 +71,7 @@ void AssociationTree::chooseBestTerminus(std::list<AssociationNode*>::iterator &
 void AssociationTree::solve(std::map<unsigned int, unsigned int> & _pairs, std::vector<bool> & _associated_mask)
 {
     std::list<AssociationNode*>::iterator best_node;
-    bool rootReached = false;
+//    bool rootReached = false;
     AssociationNode *anPtr;
     
     //grows tree exploring all likely hypothesis
@@ -94,7 +94,7 @@ void AssociationTree::solve(std::map<unsigned int, unsigned int> & _pairs, std::
 
     //set pairs
     anPtr = *best_node; //init pointer
-    int ii=0;
+//    int ii=0;
     while( ! anPtr->isRoot() ) //set pairs
     {
 //         if ( anPtr->getTargetIndex() == nt_) //detection with void target -> unassociated detection
@@ -117,7 +117,7 @@ void AssociationTree::solve(std::map<unsigned int, unsigned int> & _pairs, std::
 void AssociationTree::solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<bool> & _associated_mask)
 {
     std::list<AssociationNode*>::iterator best_node;
-    bool rootReached = false;
+//    bool rootReached = false;
     AssociationNode *anPtr;
 
     //grows tree exploring all likely hypothesis
@@ -140,7 +140,7 @@ void AssociationTree::solve(std::vector<std::pair<unsigned int, unsigned int> > 
 
     //set pairs
     anPtr = *best_node; //init pointer
-    int ii=0;
+//    int ii=0;
     while( ! anPtr->isRoot() ) //set pairs
     {
 //         if ( anPtr->getTargetIndex() == nt_) //detection with void target -> unassociated detection

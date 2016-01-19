@@ -21,6 +21,11 @@ IF(laser_scan_utils_FOUND)
     MESSAGE("laser_scan_utils Library FOUND: laser_scan_utils related sources will be built.")
 ENDIF(laser_scan_utils_FOUND)
 
+FIND_PACKAGE(raw_gps_utils QUIET) #raw_gps_utils is not required
+IF(raw_gps_utils_FOUND)
+    MESSAGE("raw_gps_utils Library FOUND: raw_gps_utils related sources will be built.")
+ENDIF(raw_gps_utils_FOUND)
+
 # SuiteSparse doesn't have find*.cmake:
 FIND_PATH(
     Suitesparse_INCLUDE_DIRS
@@ -51,6 +56,10 @@ IF(laser_scan_utils_FOUND)
     INCLUDE_DIRECTORIES(${laser_scan_utils_INCLUDE_DIRS})
 ENDIF(laser_scan_utils_FOUND)
 
+IF(raw_gps_utils_FOUND)
+    INCLUDE_DIRECTORIES(${raw_gps_utils_INCLUDE_DIRS})
+ENDIF(raw_gps_utils_FOUND)
+
 IF(Suitesparse_FOUND)
     INCLUDE_DIRECTORIES(${Suitesparse_INCLUDE_DIRS})
 ENDIF(Suitesparse_FOUND)
@@ -63,7 +72,6 @@ SET(HDRS
     capture_base.h
     capture_motion.h
     capture_fix.h
-    capture_gps.h
     capture_gps_fix.h
     capture_odom_2D.h
     capture_void.h
@@ -93,13 +101,10 @@ SET(HDRS
     node_terminus.h
     node_linked.h
     processor_base.h
-    processor_gps.h
-    processor_laser_2D.h
     raw_data_satellite.h
     sensor_base.h
     sensor_odom_2D.h
     sensor_gps_fix.h
-    sensor_gps.h
     state_block.h
     time_stamp.h
     trajectory_base.h
@@ -118,7 +123,6 @@ SET(HDRS_DTASSC
 SET(SRCS
     capture_base.cpp
     capture_motion.cpp
-    capture_gps.cpp
     capture_gps_fix.cpp
     capture_fix.cpp
     capture_odom_2D.cpp
@@ -140,12 +144,9 @@ SET(SRCS
     node_base.cpp
     node_terminus.cpp
     processor_base.cpp
-    processor_gps.cpp
-    processor_laser_2D.cpp
     sensor_base.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
-    sensor_gps.cpp
     state_block.cpp
     time_stamp.cpp
     trajectory_base.cpp
@@ -175,11 +176,30 @@ ENDIF(Ceres_FOUND)
 IF (laser_scan_utils_FOUND)
     SET(HDRS ${HDRS}
         capture_laser_2D.h
-        sensor_laser_2D.h)
-    SET(SRCS ${SRCS} 
+        sensor_laser_2D.h
+        processor_laser_2D.h
+        )
+    SET(SRCS ${SRCS}
         capture_laser_2D.cpp
-        sensor_laser_2D.cpp)
+        sensor_laser_2D.cpp
+        processor_laser_2D.cpp
+        )
 ENDIF(laser_scan_utils_FOUND)
+
+IF (raw_gps_utils_FOUND)
+    SET(HDRS ${HDRS}
+        capture_gps.h
+        feature_gps_pseudorange.h
+        processor_gps.h
+        sensor_gps.h
+        )
+    SET(SRCS ${SRCS}
+        capture_gps.cpp
+        feature_gps_pseudorange.cpp
+        processor_gps.cpp
+        sensor_gps.cpp
+        )
+ENDIF(raw_gps_utils_FOUND)
 
 IF (Suitesparse_FOUND)
     ADD_SUBDIRECTORY(solver)
@@ -196,6 +216,10 @@ ENDIF(Ceres_FOUND)
 IF (laser_scan_utils_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${laser_scan_utils_LIBRARY})
 ENDIF (laser_scan_utils_FOUND)
+
+IF (raw_gps_utils_FOUND)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${raw_gps_utils_LIBRARY})
+ENDIF (raw_gps_utils_FOUND)
 
 #install library
 INSTALL(TARGETS ${PROJECT_NAME}

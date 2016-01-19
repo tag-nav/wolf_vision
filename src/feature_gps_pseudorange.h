@@ -2,12 +2,9 @@
 #ifndef FEATURE_GPS_PSEUDORANGE_H_
 #define FEATURE_GPS_PSEUDORANGE_H_
 
-//TODO indent 1 tab more all the class content
-
 //std includes
 
 //Wolf includes
-#include "raw_data_satellite.h"
 #include "feature_base.h"
 
 // TODO manage covariance
@@ -15,11 +12,11 @@
 class FeatureGPSPseudorange : public FeatureBase
 {
 protected:
-    ObsData obs_;
+    Eigen::Vector3s sat_position_;
+    WolfScalar pseudorange_;
 
 public:
-
-    FeatureGPSPseudorange(ObsData& _satellite_data);
+    FeatureGPSPseudorange(Eigen::Vector3s& _sat_position, WolfScalar _pseudorange );
 
     /** \brief Default destructor (not recommended)
      *
@@ -28,8 +25,10 @@ public:
      **/
     virtual ~FeatureGPSPseudorange();
 
+    const Eigen::Vector3s & getSatPosition() const;
 
-    const ObsData* getObs() const;
+    WolfScalar getPseudorange() const;
+
 };
 
 

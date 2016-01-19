@@ -120,6 +120,19 @@ Or, in case you don't have permissions:
     $ cmake ..
     $ make
     $ sudo make install
+    
+### Raw GPS Utils (Optional. Install only if you want to use IRI's raw gps utils)
+
+**(1)** Download:
+
+`$ git clone `[`https://github.com/pt07/raw_gps_utils.git`](https://github.com/pt07/raw_gps_utils.git)` `
+
+**(2)** Build and install:
+
+    $ cd raw_gps_utils/build
+    $ cmake ..
+    $ make
+    $ sudo make install
 
 Download and build
 ------------------

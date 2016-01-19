@@ -8,27 +8,11 @@
 #ifndef SRC_PROCESSOR_LASER_2D_H_
 #define SRC_PROCESSOR_LASER_2D_H_
 
-#include "capture_laser_2D.h"
 #include "processor_base.h"
+#include "capture_laser_2D.h"
 
 
 // TODO Shouldn't a number of these includes below be moved to the .cpp file?
-
-//std includes
-#include <queue>
-#include <map>
-#include <random>
-#include <math.h>
-#include <algorithm> //find(), sort()
-
-// Eigen ingludes
-#include <eigen3/Eigen/Geometry>
-
-//laser_scan_utils
-#include "laser_scan_utils/entities.h"
-#include "laser_scan_utils/scan_basics.h"
-#include "laser_scan_utils/line_detector.h"
-#include "laser_scan_utils/corner_detector.h"
 
 //wolf includes
 #include "constraint_corner_2D.h"
@@ -36,6 +20,23 @@
 #include "sensor_laser_2D.h"
 #include "feature_corner_2D.h"
 #include "data_association/association_tree.h"
+
+//laser_scan_utils
+#include "laser_scan_utils/entities.h"
+#include "laser_scan_utils/scan_basics.h"
+#include "laser_scan_utils/line_detector.h"
+#include "laser_scan_utils/corner_detector.h"
+
+// Eigen includes
+#include <eigen3/Eigen/Geometry>
+
+//std includes
+#include <queue>
+#include <map>
+#include <list>
+#include <random>
+#include <math.h>
+#include <algorithm> //find(), sort()
 
 
 
@@ -50,7 +51,7 @@ class ProcessorLaser2D : public ProcessorBase
 {
     protected:
         SensorLaser2D* sensor_laser_ptr_; //specific pointer to sensor laser 2D object
-        CaptureLaser2D* capture_laser_ptr_;
+        CaptureLaser2D* capture_laser_ptr_; // specific pointer to capture laser 2D object
 
     public:
         ProcessorLaser2D();

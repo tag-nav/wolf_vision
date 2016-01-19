@@ -2,11 +2,10 @@
 #ifndef CAPTURE_LASER_2D_H_
 #define CAPTURE_LASER_2D_H_
 
+//wolf forward declarations
 
 //wolf includes
 #include "capture_base.h"
-
-//wolf forward declarations
 
 ////some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level
 //const WolfScalar MAX_ACCEPTED_APERTURE_DIFF = 20.0*M_PI/180.; //20 degrees

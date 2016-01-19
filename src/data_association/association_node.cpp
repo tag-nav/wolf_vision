@@ -122,7 +122,7 @@ void AssociationNode::normalizeNodeProbs()
     }
 }
 
-double AssociationNode::computeTreeProb(const double & _up_prob, std::list<AssociationNode*> & _tn_list)
+void AssociationNode::computeTreeProb(const double & _up_prob, std::list<AssociationNode*> & _tn_list)
 {
     std::list<AssociationNode>::iterator it;
     
