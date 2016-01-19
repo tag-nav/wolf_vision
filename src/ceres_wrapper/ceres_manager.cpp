@@ -275,6 +275,9 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
 	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
 	//_corrPtr->print();
 
+    if (_corrPtr->getJacobianMethod() == ANALYTIC)
+        return new CostFunctionWrapper((ConstraintAnalytic*)_corrPtr);
+
 	switch (_corrPtr->getType())
 	{
 		case CTR_GPS_FIX_2D:

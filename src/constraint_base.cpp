@@ -92,6 +92,11 @@ const Eigen::MatrixXs& ConstraintBase::getMeasurementCovariance() const
     return getFeaturePtr()->getMeasurementCovariance();
 }
 
+const Eigen::MatrixXs& ConstraintBase::getMeasurementSquareRootInformation() const
+{
+    return getFeaturePtr()->getMeasurementSquareRootInformation();
+}
+
 FeatureBase* ConstraintBase::getFeaturePtr() const
 {
 	return upperNodePtr();

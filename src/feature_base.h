@@ -17,8 +17,9 @@ class ConstraintBase;
 class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
 {
     protected:
-        Eigen::VectorXs measurement_;                   ///< Reference to the measurement
-        Eigen::MatrixXs measurement_covariance_;        ///< Reference to the measurement covariance
+        Eigen::VectorXs measurement_;                   ///<  the measurement vector
+        Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
+        Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
         std::list<ConstraintBase*> constraint_to_list_;   ///< List of constraints linked TO this feature
         
     public:
@@ -112,7 +113,19 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
          **/
         WolfScalar getMeasurement(unsigned int _ii) const;
 
+        /** \brief Returns a reference to the feature measurement covariance
+         *
+         * Returns a reference to the feature measurement covariance
+         *
+         **/
         const Eigen::MatrixXs & getMeasurementCovariance() const;
+
+        /** \brief Returns a reference to the feature measurement square root information
+         *
+         * Returns a reference to the feature measurement  square root information
+         *
+         **/
+        const Eigen::MatrixXs & getMeasurementSquareRootInformation() const;
 
         void setMeasurement(const Eigen::VectorXs & _meas);
         

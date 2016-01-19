@@ -74,6 +74,7 @@ SET(HDRS
     constraint_gps_pseudorange.h
     constraint_fix.h
     constraint_odom_2D.h
+    constraint_odom_2D_analytic.h
     constraint_corner_2D.h
     constraint_container.h
     feature_base.h
@@ -123,6 +124,7 @@ SET(SRCS
     capture_odom_2D.cpp
     capture_void.cpp
     constraint_base.cpp
+    constraint_analytic.cpp
     feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
@@ -160,7 +162,8 @@ IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
         ceres_wrapper/complex_angle_parametrization.h 
         ceres_wrapper/ceres_manager.h 
-        ceres_wrapper/auto_diff_cost_function_wrapper.h )
+        ceres_wrapper/auto_diff_cost_function_wrapper.h
+        ceres_wrapper/cost_function_wrapper.h )
     SET(SRCS_WRAPPER
         ceres_wrapper/complex_angle_parametrization.cpp 
         ceres_wrapper/ceres_manager.cpp)

@@ -12,7 +12,9 @@ FeatureBase::FeatureBase(const Eigen::VectorXs& _measurement, const Eigen::Matri
 	measurement_(_measurement),
 	measurement_covariance_(_meas_covariance)
 {
-	//
+    Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
+    Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
+    measurement_sqrt_information_ = measurement_sqrt_covariance.inverse(); // retrieve factor U  in the decomposition
 }
 
 FeatureBase::~FeatureBase()
@@ -102,6 +104,11 @@ const Eigen::MatrixXs& FeatureBase::getMeasurementCovariance() const
     return measurement_covariance_;
 }
 
+const Eigen::MatrixXs& FeatureBase::getMeasurementSquareRootInformation() const
+{
+    return measurement_sqrt_information_;
+}
+
 void FeatureBase::setMeasurement(const Eigen::VectorXs & _meas)
 {
     measurement_ = _meas;
@@ -110,6 +117,9 @@ void FeatureBase::setMeasurement(const Eigen::VectorXs & _meas)
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 {
 	measurement_covariance_ = _meas_cov;
+	Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
+    Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
+    measurement_sqrt_information_ = measurement_sqrt_covariance.inverse(); // retrieve factor U  in the decomposition
 }
 
 void FeatureBase::printSelf(unsigned int _ntabs, std::ostream & _ost) const

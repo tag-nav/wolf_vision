@@ -34,5 +34,15 @@ class ConstraintGPS2D: public ConstraintSparse<2,2>
 			_residuals[1] = (T(getMeasurement()(1)) - _x[1]) / T(sqrt(getMeasurementCovariance()(1,1)));
 			return true;
 		}
+
+        /** \brief Returns the jacobians computation method
+         *
+         * Returns the jacobians computation method
+         *
+         **/
+        virtual JacobianMethod getJacobianMethod() const
+        {
+            return AUTO;
+        }
 };
 #endif

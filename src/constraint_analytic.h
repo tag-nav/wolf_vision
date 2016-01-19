@@ -103,6 +103,13 @@ class ConstraintAnalytic: public ConstraintBase
          **/
         virtual const std::vector<StateBlock*> getStatePtrVector() const;
 
+        /** \brief Returns a vector of sizes of the state blocks
+         *
+         * Returns a vector of sizes of the state blocks
+         *
+         **/
+        virtual std::vector<unsigned int> getStateSizes() const;
+
         /** \brief Returns the constraint residual size
          *
          * Returns the constraint residual size
@@ -112,207 +119,34 @@ class ConstraintAnalytic: public ConstraintBase
 
         /** \brief Returns the residual evaluated in the states provided
          *
-         * Returns the residual evaluated in the states provided in std::vector of Eigen::VectorXs
+         * Returns the residual evaluated in the states provided in std::vector of mapped Eigen::VectorXs
          *
          **/
-        virtual void evaluateResiduals(const std::vector<Eigen::VectorXs>& _st_vector) const = 0;
+        virtual Eigen::VectorXs evaluateResiduals(const std::vector<Eigen::Map<const Eigen::VectorXs>>& _st_vector) const = 0;
 
         /** \brief Returns the jacobians evaluated in the states provided
          *
-         * Returns the jacobians evaluated in the states provided in std::vector of Eigen::VectorXs
+         * Returns the jacobians evaluated in the states provided in std::vector of mapped Eigen::VectorXs.
+         * IMPORTANT: only fill the jacobians of the state blocks specified in _compute_jacobian.
+         *
+         * \param _st_vector is a vector containing the mapped eigen vectors of all state blocks involved in the constraint
+         * \param jacobians is an output vector of mapped eigen matrices that sould contain the jacobians w.r.t each state block
+         * \param _compute_jacobian is a vector that specifies whether the ith jacobian sould be computed or not
          *
          **/
-        virtual void evaluateJacobians(const std::vector<Eigen::VectorXs>& _st_vector, std::vector<Eigen::MatrixXs>& jacobians) const = 0;
+        virtual void evaluateJacobians(const std::vector<Eigen::Map<const Eigen::VectorXs>>& _st_vector, std::vector<Eigen::Map<Eigen::MatrixXs>>& jacobians, const std::vector<bool>& _compute_jacobian) const = 0;
+
+        /** \brief Returns the jacobians computation method
+         *
+         * Returns the jacobians computation method
+         *
+         **/
+        virtual JacobianMethod getJacobianMethod() const;
 
         virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
     private:
         void resizeVectors();
 };
-
-
-//////////////////////////////////////////
-//          IMPLEMENTATION
-//////////////////////////////////////////
-ConstraintAnalytic::ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, ConstraintStatus _status,
-                                       StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
-                                       StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
-            ConstraintBase(_tp, _status),
-            state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
-                               _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
-        {
-            resizeVectors();
-        }
-
-ConstraintAnalytic::ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status,
-                                       StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
-                                       StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
-            ConstraintBase(_tp, _frame_ptr, _status),
-            state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
-                               _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
-        {
-            resizeVectors();
-        }
-
-ConstraintAnalytic::ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status,
-                                       StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
-                                       StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
-            ConstraintBase( _tp, _feature_ptr, _status),
-            state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
-                               _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
-        {
-            resizeVectors();
-        }
-
-
-ConstraintAnalytic::ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status,
-                                       StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
-                                       StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
-            ConstraintBase( _tp, _landmark_ptr, _status),
-            state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
-                               _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
-        {
-            resizeVectors();
-        }
-
-
-ConstraintAnalytic::~ConstraintAnalytic()
-{
-    //
-}
-
-
-const std::vector<WolfScalar*> ConstraintAnalytic::getStateBlockPtrVector()
-{
-    assert(state_ptr_vector_.size() > 0 && state_ptr_vector_.size() <= 10 && "Wrong state vector size in constraint, it should be between 1 and 10");
-
-    switch (state_ptr_vector_.size())
-    {
-        case 1:
-        {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr()});
-        }
-        case 2:
-        {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr()});
-        }
-        case 3:
-        {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr()});
-        }
-        case 4:
-        {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr()});
-        }
-        case 5:
-        {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr()});
-        }
-        case 6:
-        {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr(),
-                                             state_ptr_vector_[5]->getPtr()});
-        }
-        case 7:
-        {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr(),
-                                             state_ptr_vector_[5]->getPtr(),
-                                             state_ptr_vector_[6]->getPtr()});
-        }
-        case 8:
-        {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr(),
-                                             state_ptr_vector_[5]->getPtr(),
-                                             state_ptr_vector_[6]->getPtr(),
-                                             state_ptr_vector_[7]->getPtr()});
-        }
-        case 9:
-        {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr(),
-                                             state_ptr_vector_[5]->getPtr(),
-                                             state_ptr_vector_[6]->getPtr(),
-                                             state_ptr_vector_[7]->getPtr(),
-                                             state_ptr_vector_[8]->getPtr()});
-        }
-        case 10:
-        {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr(),
-                                             state_ptr_vector_[5]->getPtr(),
-                                             state_ptr_vector_[6]->getPtr(),
-                                             state_ptr_vector_[7]->getPtr(),
-                                             state_ptr_vector_[8]->getPtr(),
-                                             state_ptr_vector_[9]->getPtr()});
-        }
-    }
-
-    return std::vector<WolfScalar*>(0); //Not going to happen
-}
-
-const std::vector<StateBlock*> ConstraintAnalytic::getStatePtrVector() const
-{
-    return state_ptr_vector_;
-}
-
-void ConstraintAnalytic::print(unsigned int _ntabs, std::ostream& _ost) const
-{
-    NodeLinked::printSelf(_ntabs, _ost);
-    for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
-    {
-        printTabs(_ntabs);
-        _ost << "block " << ii << ": ";
-        for (unsigned int jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
-            _ost << *(state_ptr_vector_.at(ii)->getPtr()+jj) << " ";
-        _ost << std::endl;
-    }
-}
-
-void ConstraintAnalytic::resizeVectors()
-{
-    for (unsigned int ii = 1; ii<state_ptr_vector_.size(); ii++)
-    {
-        if (state_ptr_vector_.at(ii) != nullptr)
-        {
-            assert(state_block_sizes_vector_.at(ii) != 0 && "Too many non-null state pointers in ConstraintSparse constructor");
-            state_block_sizes_vector_.push_back(state_ptr_vector_.at(ii)->getSize());
-        }
-
-        else
-        {
-            assert(state_block_sizes_vector_.at(ii) == 0 && "No non-null state pointers enough in ConstraintSparse constructor");
-            state_ptr_vector_.resize(ii);
-            break;
-        }
-    }
-}
 
 #endif

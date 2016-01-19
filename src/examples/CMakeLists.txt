@@ -40,6 +40,10 @@ TARGET_LINK_LIBRARIES(test_wolf_tree ${PROJECT_NAME})
 ADD_EXECUTABLE(test_wolf_imported_graph test_wolf_imported_graph.cpp)
 TARGET_LINK_LIBRARIES(test_wolf_imported_graph ${PROJECT_NAME})
 
+# Comparing analytic and autodiff odometry constraints
+ADD_EXECUTABLE(test_analytic_odom_constraint test_analytic_odom_constraint.cpp)
+TARGET_LINK_LIBRARIES(test_analytic_odom_constraint ${PROJECT_NAME})
+
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
 #     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})

@@ -57,10 +57,10 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
 //            std::cout << std::endl;
 
             // Expected measurement
-            // rotar per menys l'angle de primer _o1
+            // rotar menys l'angle de primer (-_o1)
             T expected_longitudinal = cos(_o1[0]) * (_p2[0] - _p1[0]) + sin(_o1[0]) * (_p2[1] - _p1[1]); // cos(-o1)(x2-x1) - sin(-o1)(y2-y1)
-            T expected_lateral = -sin(_o1[0]) * (_p2[0] - _p1[0]) + cos(_o1[0]) * (_p2[1] - _p1[1]); // sin(-o1)(x2-x1) + cos(-o1)(y2-y1)
-            T expected_rotation = _o2[0] - _o1[0];
+            T expected_lateral      =-sin(_o1[0]) * (_p2[0] - _p1[0]) + cos(_o1[0]) * (_p2[1] - _p1[1]); // sin(-o1)(x2-x1) + cos(-o1)(y2-y1)
+            T expected_rotation     = _o2[0] - _o1[0];
 
             // Residuals
             _residuals[0] = (expected_longitudinal - T(getMeasurement()(0))) / T(sqrt(std::max(getMeasurementCovariance()(0, 0),1e-6)));
@@ -77,6 +77,16 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
             //std::cout << "constraint odom computed!" << std::endl;
 
             return true;
+        }
+
+        /** \brief Returns the jacobians computation method
+         *
+         * Returns the jacobians computation method
+         *
+         **/
+        virtual JacobianMethod getJacobianMethod() const
+        {
+            return AUTO;
         }
 };
 #endif

@@ -53,8 +53,8 @@ void CaptureOdom2D::addConstraints()
 {
     assert(getFramePtr()->getPreviousFrame() != nullptr && "Trying to add odometry constraint in the last frame (there is no next frame)");
 
-    getFeatureListPtr()->front()->addConstraintFrom(new ConstraintOdom2D(getFeatureListPtr()->front(),
-			  	  	  	  	  	  	  	  	  	  	  	  	  	         getFramePtr()->getPreviousFrame()));
+    getFeatureListPtr()->front()->addConstraintFrom(new ConstraintOdom2DAnalytic(getFeatureListPtr()->front(),
+			  	  	  	  	  	  	  	  	  	  	  	  	  	                 getFramePtr()->getPreviousFrame()));
 }
 
 void CaptureOdom2D::integrateCapture(CaptureMotion* _new_capture)

@@ -70,6 +70,13 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          **/
         ConstraintType getType() const;
 
+        /** \brief Returns the jacobians computation method
+         *
+         * Returns the jacobians computation method
+         *
+         **/
+        virtual JacobianMethod getJacobianMethod() const = 0;
+
         /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
          *
          * Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint.
@@ -84,19 +91,26 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          **/
         virtual const std::vector<StateBlock*> getStatePtrVector() const = 0;
 
-        /** \brief Returns a pointer to the feature measurement
+        /** \brief Returns a reference to the feature measurement
          *
-         * Returns a pointer to the feature measurement
+         * Returns a reference to the feature measurement
          *
          **/
         const Eigen::VectorXs& getMeasurement() const;
 
-        /** \brief Returns a pointer to the feature measurement covariance
+        /** \brief Returns a reference to the feature measurement covariance
          *
-         * Returns a pointer to the feature measurement covariance
+         * Returns a reference to the feature measurement covariance
          *
          **/
         const Eigen::MatrixXs& getMeasurementCovariance() const;
+
+        /** \brief Returns a reference to the feature measurement square root information
+         *
+         * Returns a reference to the feature measurement square root information
+         *
+         **/
+        const Eigen::MatrixXs& getMeasurementSquareRootInformation() const;
 
         /** \brief Returns a pointer to the feature constrained from
          *

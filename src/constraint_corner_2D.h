@@ -104,5 +104,15 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 
 			return true;
 		}
+
+        /** \brief Returns the jacobians computation method
+         *
+         * Returns the jacobians computation method
+         *
+         **/
+        virtual JacobianMethod getJacobianMethod() const
+        {
+            return AUTO;
+        }
 };
 #endif

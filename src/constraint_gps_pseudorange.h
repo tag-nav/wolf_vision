@@ -74,6 +74,16 @@ public:
         return true;
     }
 
+    /** \brief Returns the jacobians computation method
+     *
+     * Returns the jacobians computation method
+     *
+     **/
+    virtual JacobianMethod getJacobianMethod() const
+    {
+        return AUTO;
+    }
+
 protected:
     Eigen::Vector3s sat_position_;
     WolfScalar pseudorange_;
