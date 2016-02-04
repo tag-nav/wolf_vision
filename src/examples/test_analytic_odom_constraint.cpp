@@ -301,6 +301,17 @@ int main(int argc, char** argv)
     summary_autodiff = ceres_manager_autodiff->solve(ceres_options);
     std::cout << summary_autodiff.FullReport() << std::endl;
 
+    // COMPUTE COVARIANCES
+    std::cout << "computing covariances..." << std::endl;
+    std::cout << "ANALYTIC -----------------------------------" << std::endl;
+    clock_t t1 = clock();
+    ceres_manager_analytic->computeCovariances(ALL);//ALL_MARGINALS
+    std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+    std::cout << "AUTODIFF -----------------------------------" << std::endl;
+    t1 = clock();
+    ceres_manager_autodiff->computeCovariances(ALL);//ALL_MARGINALS
+    std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+
     delete wolf_problem_autodiff; //not necessary to delete anything more, wolf will do it!
     std::cout << "wolf_problem_ deleted!" << std::endl;
     delete ceres_manager_autodiff;

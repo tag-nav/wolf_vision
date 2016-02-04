@@ -85,6 +85,7 @@ SET(HDRS
     constraint_odom_2D_analytic.h
     constraint_corner_2D.h
     constraint_container.h
+    constraint_relative_2D_analytic.h
     feature_base.h
     feature_corner_2D.h
     feature_gps_fix.h
@@ -101,7 +102,6 @@ SET(HDRS
     node_terminus.h
     node_linked.h
     processor_base.h
-    raw_data_satellite.h
     sensor_base.h
     sensor_odom_2D.h
     sensor_gps_fix.h

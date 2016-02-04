@@ -51,7 +51,18 @@ int main(int argc, char** argv)
     clock_t t1;
     ceres::Solver::Summary summary_full, summary_prun;
     Eigen::MatrixXs Sigma_ii(3,3), Sigma_ij(3,3), Sigma_jj(3,3), Sigma_z(3,3), Ji(3,3), Jj(3,3);
+    Eigen::MatrixXs Sigma_11(2,2), Sigma_12(2,1), Sigma_13(2,2), Sigma_14(2,1),
+                    Sigma_22(1,1), Sigma_23(1,2), Sigma_24(1,1),
+                    Sigma_33(2,2), Sigma_34(2,1),
+                    Sigma_44(1,1);
+
+    std::vector<Eigen::MatrixXs> jacobians;
+    jacobians.push_back(Eigen::MatrixXs::Zero(3,2));
+    jacobians.push_back(Eigen::MatrixXs::Zero(3,1));
+    jacobians.push_back(Eigen::MatrixXs::Zero(3,2));
+    jacobians.push_back(Eigen::MatrixXs::Zero(3,1));
     WolfScalar xi, yi, thi, si, ci, xj, yj;
+    double t_sigma_manual = 0;
 
     // loading variables
     std::map<unsigned int, FrameBase*> index_2_frame_ptr_full;
@@ -65,6 +76,10 @@ int main(int argc, char** argv)
 
     Eigen::SparseMatrix<WolfScalar> Lambda(0,0);
 
+    // prunning
+    std::list<ConstraintBase*> ordered_ctr_ptr;
+    std::list<WolfScalar> ordered_ig;
+
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
@@ -76,8 +91,6 @@ int main(int argc, char** argv)
     problem_options.local_parameterization_ownership = ceres::TAKE_OWNERSHIP;
     CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full, problem_options);
     CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun, problem_options);
-
-
 
     // load graph from .txt
     offLineFile_.open(file_path_.c_str(), std::ifstream::in);
@@ -246,6 +259,7 @@ int main(int argc, char** argv)
                     edge_information(2,1) = atof(bNum.c_str());
                     bNum.clear();
 
+                    //std::cout << "Adding edge... " << std::endl;
                     // add capture, feature and constraint to problem
                     FeatureBase* feature_ptr_full = new FeatureBase(edge_vector, edge_information.inverse());
                     FeatureBase* feature_ptr_prun = new FeatureBase(edge_vector, edge_information.inverse());
@@ -263,15 +277,16 @@ int main(int argc, char** argv)
                     frame_new_ptr_prun->addCapture(capture_ptr_prun);
                     capture_ptr_full->addFeature(feature_ptr_full);
                     capture_ptr_prun->addFeature(feature_ptr_prun);
-                    ConstraintOdom2D* constraint_ptr_full = new ConstraintOdom2D(feature_ptr_full, frame_old_ptr_full);
-                    ConstraintOdom2D* constraint_ptr_prun = new ConstraintOdom2D(feature_ptr_prun, frame_old_ptr_prun);
+                    ConstraintOdom2DAnalytic* constraint_ptr_full = new ConstraintOdom2DAnalytic(feature_ptr_full, frame_old_ptr_full);
+                    ConstraintOdom2DAnalytic* constraint_ptr_prun = new ConstraintOdom2DAnalytic(feature_ptr_prun, frame_old_ptr_prun);
                     feature_ptr_full->addConstraintFrom(constraint_ptr_full);
                     feature_ptr_prun->addConstraintFrom(constraint_ptr_prun);
-                    //std::cout << "Added edge! " << constraint_ptr_prun->nodeId() << " from vertex " << constraint_ptr_prun->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_prun->getFrameToPtr()->nodeId() << std::endl;
+                    //std::cout << "Added edge! " << constraint_ptr_prun->nodeId() << " from vertex " << constraint_ptr_prun->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_prun->getFrameOtherPtr()->nodeId() << std::endl;
                     //std::cout << "vector " << constraint_ptr_prun->getMeasurement().transpose() << std::endl;
                     //std::cout << "information " << std::endl << edge_information << std::endl;
                     //std::cout << "covariance " << std::endl << constraint_ptr_prun->getMeasurementCovariance() << std::endl;
 
+                    t1 = clock();
                     WolfScalar xi = *(frame_old_ptr_prun->getPPtr()->getPtr());
                     WolfScalar yi = *(frame_old_ptr_prun->getPPtr()->getPtr()+1);
                     WolfScalar thi = *(frame_old_ptr_prun->getOPtr()->getPtr());
@@ -294,6 +309,7 @@ int main(int argc, char** argv)
                     insertSparseBlock((Ji.transpose() * edge_information * Jj).sparseView(), DeltaLambda, edge_old*3, edge_new*3);
                     insertSparseBlock((Jj.transpose() * edge_information * Ji).sparseView(), DeltaLambda, edge_new*3, edge_old*3);
                     Lambda = Lambda + DeltaLambda;
+                    t_sigma_manual += ((double) clock() - t1) / CLOCKS_PER_SEC;
                 }
             }
             else
@@ -314,9 +330,11 @@ int main(int argc, char** argv)
     initial_covariance_full->process();
     initial_covariance_prun->process();
     //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_prun->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
+    t1 = clock();
     Eigen::SparseMatrix<WolfScalar> DeltaLambda(Lambda.rows(), Lambda.cols());
     insertSparseBlock((Eigen::Matrix3s::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
     Lambda = Lambda + DeltaLambda;
+    t_sigma_manual += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
     // BUILD SOLVER PROBLEM
     std::cout << "updating ceres..." << std::endl;
@@ -331,7 +349,7 @@ int main(int argc, char** argv)
     t1 = clock();
     Eigen::SimplicialLLT<Eigen::SparseMatrix<WolfScalar>> chol(Lambda);  // performs a Cholesky factorization of A
     Eigen::MatrixXs Sigma = chol.solve(Eigen::MatrixXs::Identity(Lambda.rows(), Lambda.cols()));
-    double t_sigma_manual = ((double) clock() - t1) / CLOCKS_PER_SEC;
+    t_sigma_manual += ((double) clock() - t1) / CLOCKS_PER_SEC;
     //std::cout << "Lambda" << std::endl << Lambda << std::endl;
     //std::cout << "Sigma" << std::endl << Sigma << std::endl;
 
@@ -347,6 +365,99 @@ int main(int argc, char** argv)
     {
         if ((*c_it)->getCategory() != CTR_FRAME) continue;
 
+        // Measurement covariance
+        Sigma_z = (*c_it)->getFeaturePtr()->getMeasurementCovariance();
+        //std::cout << "Sigma_z" << std::endl << Sigma_z << std::endl;
+        //std::cout << "Sigma_z.determinant() = " << Sigma_z.determinant() << std::endl;
+
+        // NEW WAY
+        // State covariance
+        //11
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getFrameOtherPtr()->getPPtr(), Sigma_11);
+        //12
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getFrameOtherPtr()->getOPtr(), Sigma_12);
+        //13
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_13);
+        //14
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_14);
+
+        //22
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getFrameOtherPtr()->getOPtr(), Sigma_22);
+        //23
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_23);
+        //24
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_24);
+
+        //33
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), Sigma_33);
+        //34
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getPPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_34);
+
+        //44
+        wolf_problem_prun->getCovarianceBlock((*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_44);
+
+//        std::cout << "Sigma_11" << std::endl << Sigma_11 << std::endl;
+//        std::cout << "Sigma_12" << std::endl << Sigma_12 << std::endl;
+//        std::cout << "Sigma_13" << std::endl << Sigma_13 << std::endl;
+//        std::cout << "Sigma_14" << std::endl << Sigma_14 << std::endl;
+//        std::cout << "Sigma_22" << std::endl << Sigma_22 << std::endl;
+//        std::cout << "Sigma_23" << std::endl << Sigma_23 << std::endl;
+//        std::cout << "Sigma_24" << std::endl << Sigma_24 << std::endl;
+//        std::cout << "Sigma_33" << std::endl << Sigma_33 << std::endl;
+//        std::cout << "Sigma_34" << std::endl << Sigma_34 << std::endl;
+//        std::cout << "Sigma_44" << std::endl << Sigma_44 << std::endl;
+
+
+        // jacobians
+        ((ConstraintAnalytic*)(*c_it))->evaluatePureJacobians(jacobians);
+        Eigen::MatrixXs& J1 = jacobians[0];
+        Eigen::MatrixXs& J2 = jacobians[1];
+        Eigen::MatrixXs& J3 = jacobians[2];
+        Eigen::MatrixXs& J4 = jacobians[3];
+//        std::cout << "J1" << std::endl << J1 << std::endl;
+//        std::cout << "J2" << std::endl << J2 << std::endl;
+//        std::cout << "J3" << std::endl << J3 << std::endl;
+//        std::cout << "J4" << std::endl << J4 << std::endl;
+
+        // Information gain
+        WolfScalar IG_new = 0.5 * log( Sigma_z.determinant() /
+                                 ( Sigma_z - (J1 * Sigma_11 * J1.transpose() +
+                                              J1 * Sigma_12 * J2.transpose() +
+                                              J1 * Sigma_13 * J3.transpose() +
+                                              J1 * Sigma_14 * J4.transpose() +
+                                              J2 * Sigma_12.transpose() * J1.transpose() +
+                                              J2 * Sigma_22 * J2.transpose() +
+                                              J2 * Sigma_23 * J3.transpose() +
+                                              J2 * Sigma_24 * J4.transpose() +
+                                              J3 * Sigma_13.transpose() * J1.transpose() +
+                                              J3 * Sigma_23.transpose() * J2.transpose() +
+                                              J3 * Sigma_33 * J3.transpose() +
+                                              J3 * Sigma_34 * J4.transpose() +
+                                              J4 * Sigma_14.transpose() * J1.transpose() +
+                                              J4 * Sigma_24.transpose() * J2.transpose() +
+                                              J4 * Sigma_34.transpose() * J3.transpose() +
+                                              J4 * Sigma_44 * J4.transpose()) ).determinant() );
+
+
+//        std::cout << "part = " << std::endl << (J1 * Sigma_11 * J1.transpose() +
+//                                                  J1 * Sigma_12 * J2.transpose() +
+//                                                  J1 * Sigma_13 * J3.transpose() +
+//                                                  J1 * Sigma_14 * J4.transpose() +
+//                                                  J2 * Sigma_12.transpose() * J1.transpose() +
+//                                                  J2 * Sigma_22 * J2.transpose() +
+//                                                  J2 * Sigma_23 * J3.transpose() +
+//                                                  J2 * Sigma_24 * J4.transpose() +
+//                                                  J3 * Sigma_13.transpose() * J1.transpose() +
+//                                                  J3 * Sigma_23.transpose() * J2.transpose() +
+//                                                  J3 * Sigma_33 * J3.transpose() +
+//                                                  J3 * Sigma_34 * J4.transpose() +
+//                                                  J4 * Sigma_14.transpose() * J1.transpose() +
+//                                                  J4 * Sigma_24.transpose() * J2.transpose() +
+//                                                  J4 * Sigma_34.transpose() * J3.transpose() +
+//                                                  J4 * Sigma_44 * J4.transpose()) << std::endl;
+        std::cout << "IG_new = " << IG_new << std::endl;
+
+        // OLD WAY
         // ii (old)
         wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getFrameOtherPtr()->getPPtr(), Sigma_ii, 0, 0);
         wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getPPtr(), (*c_it)->getFrameOtherPtr()->getOPtr(), Sigma_ii, 0, 2);
@@ -369,7 +480,6 @@ int main(int argc, char** argv)
 //        std::cout << "Sigma_ij" << std::endl << Sigma_ij << std::endl;
 //        std::cout << "Sigma(i,j)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3, frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3) << std::endl;
 
-
         //jacobian
         xi = *(*c_it)->getFrameOtherPtr()->getPPtr()->getPtr();
         yi = *((*c_it)->getFrameOtherPtr()->getPPtr()->getPtr()+1);
@@ -385,32 +495,70 @@ int main(int argc, char** argv)
         Jj <<  ci, si, 0,
               -si, ci, 0,
                 0,  0, 1;
-        //std::cout << "Ji" << std::endl << Ji << std::endl;
-        //std::cout << "Jj" << std::endl << Jj << std::endl;
-
-        // Measurement covariance
-        Sigma_z = (*c_it)->getFeaturePtr()->getMeasurementCovariance();
-        //std::cout << "Sigma_z" << std::endl << Sigma_z << std::endl;
-        //std::cout << "Sigma_z.determinant() = " << Sigma_z.determinant() << std::endl;
+//        std::cout << "Ji" << std::endl << Ji << std::endl;
+//        std::cout << "Jj" << std::endl << Jj << std::endl;
 
         //std::cout << "denominador : " << std::endl << Sigma_z - (Ji * Sigma_ii * Ji.transpose() + Jj * Sigma_jj * Jj.transpose() + Ji * Sigma_ij * Jj.transpose() + Jj * Sigma_ij.transpose() * Ji.transpose()) << std::endl;
         // Information gain
         WolfScalar IG = 0.5 * log( Sigma_z.determinant() / (Sigma_z - (Ji * Sigma_ii * Ji.transpose() + Jj * Sigma_jj * Jj.transpose() + Ji * Sigma_ij * Jj.transpose() + Jj * Sigma_ij.transpose() * Ji.transpose())).determinant() );
-        //std::cout << "IG = " << IG << std::endl;
 
-        if (IG < 2)
-            (*c_it)->setStatus(CTR_INACTIVE);
+//        std::cout << "part = " << std::endl << (Ji * Sigma_ii * Ji.transpose() +
+//                                                Jj * Sigma_jj * Jj.transpose() +
+//                                                Ji * Sigma_ij * Jj.transpose() +
+//                                                Jj * Sigma_ij.transpose() * Ji.transpose()) << std::endl;
+        std::cout << "IG = " << IG << std::endl;
+
+        std::cout << "difference IG = " << std::abs(IG - IG_new) << std::endl;
+        assert((std::abs((IG - IG_new)/IG) < 0.1 || std::isnan(IG - IG_new)) && "not equals information gains");
+
+        if (IG < 2 && IG > 0 && !std::isnan(IG))
+        {
+            // Store as a candidate to be prunned, ordered by information gain
+            auto ordered_ctr_it = ordered_ctr_ptr.begin();
+            for (auto ordered_ig_it = ordered_ig.begin(); ordered_ig_it != ordered_ig.end(); ordered_ig_it++, ordered_ctr_it++ )
+                if (IG < (*ordered_ig_it))
+                {
+                    ordered_ig.insert(ordered_ig_it, IG);
+                    ordered_ctr_ptr.insert(ordered_ctr_it, (*c_it));
+                    break;
+                }
+            ordered_ig.insert(ordered_ig.end(), IG);
+            ordered_ctr_ptr.insert(ordered_ctr_ptr.end(), (*c_it));
+        }
     }
+
+    // PRUNNING
+    std::vector<bool> any_inactive_in_frame(wolf_problem_prun->getTrajectoryPtr()->getFrameListPtr()->size(), false);
+    for (auto c_it = ordered_ctr_ptr.begin(); c_it != ordered_ctr_ptr.end(); c_it++ )
+    {
+        // Check heuristic: constraint do not share node with any inactive constraint
+        unsigned int& index_frame = frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()];
+        unsigned int& index_frame_other = frame_ptr_2_index_prun[(*c_it)->getFrameOtherPtr()];
+
+        if (!any_inactive_in_frame[index_frame] && !any_inactive_in_frame[index_frame_other])
+        {
+            std::cout << "setting inactive" << (*c_it)->nodeId() << std::endl;
+            (*c_it)->setStatus(CTR_INACTIVE);
+            std::cout << "set!" << std::endl;
+            any_inactive_in_frame[index_frame] = true;
+            any_inactive_in_frame[index_frame_other] = true;
+        }
+    }
+
     double t_ig = ((double) clock() - t1) / CLOCKS_PER_SEC;
     std::cout << "manual sigma computation " << t_sigma_manual << "s" << std::endl;
     std::cout << "ceres sigma computation " << t_sigma_ceres << "s" << std::endl;
     std::cout << "information gain computation " << t_ig << "s" << std::endl;
 
     // SOLVING PROBLEMS
+    std::cout << "FULL PROBLEM" << std::endl;
     std::cout << "solving..." << std::endl;
     summary_full = ceres_manager_full->solve(ceres_options);
     std::cout << summary_full.FullReport() << std::endl;
+    std::cout << "PRUNNED PROBLEM" << std::endl;
+    std::cout << "updating..." << std::endl;
     ceres_manager_prun->update();
+    std::cout << "solving..." << std::endl;
     summary_prun = ceres_manager_prun->solve(ceres_options);
     std::cout << summary_prun.FullReport() << std::endl;
 

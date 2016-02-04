@@ -165,7 +165,9 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 
 void CeresManager::update(const bool _self_auto_diff, const bool _apply_loss_function)
 {
-	// REMOVE CONSTRAINTS
+    //std::cout << "CeresManager: updating... getConstraintRemoveList()->size()" << wolf_problem_->getConstraintRemoveList()->size() << std::endl;
+
+    // REMOVE CONSTRAINTS
     while (!wolf_problem_->getConstraintRemoveList()->empty())
     {
         removeConstraint(wolf_problem_->getConstraintRemoveList()->front());

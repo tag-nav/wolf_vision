@@ -119,11 +119,15 @@ ConstraintStatus ConstraintBase::getStatus() const
 
 void ConstraintBase::setStatus(ConstraintStatus _status)
 {
-	if (getTop() != nullptr && _status == CTR_INACTIVE && status_ == CTR_ACTIVE)
-	    getTop()->addConstraintPtr(this);
-	else if (getTop() != nullptr && _status == CTR_ACTIVE && status_ == CTR_INACTIVE)
-        getTop()->removeConstraintPtr(this);
-
+    if (getTop() == nullptr)
+        std::cout << "constraint not linked with 'top', only status changed" << std::endl;
+    else if (_status != status_)
+    {
+        if (_status == CTR_ACTIVE)
+            getTop()->addConstraintPtr(this);
+        else if (_status == CTR_INACTIVE)
+            getTop()->removeConstraintPtr(this);
+    }
     status_ = _status;
 }
 

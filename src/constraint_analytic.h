@@ -136,6 +136,16 @@ class ConstraintAnalytic: public ConstraintBase
          **/
         virtual void evaluateJacobians(const std::vector<Eigen::Map<const Eigen::VectorXs>>& _st_vector, std::vector<Eigen::Map<Eigen::MatrixXs>>& jacobians, const std::vector<bool>& _compute_jacobian) const = 0;
 
+        /** \brief Returns the pure jacobians (without measurement noise) evaluated in the state blocks values
+         *
+         * Returns the pure jacobians (without measurement noise) evaluated in the state blocks values
+         *
+         * \param _st_vector is a vector containing the mapped eigen vectors of all state blocks involved in the constraint
+         * \param jacobians is an output vector of mapped eigen matrices that sould contain the jacobians w.r.t each state block
+         *
+         **/
+        virtual void evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const = 0;
+
         /** \brief Returns the jacobians computation method
          *
          * Returns the jacobians computation method

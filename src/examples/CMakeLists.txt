@@ -45,6 +45,10 @@ TARGET_LINK_LIBRARIES(test_wolf_tree ${PROJECT_NAME})
 ADD_EXECUTABLE(test_wolf_imported_graph test_wolf_imported_graph.cpp)
 TARGET_LINK_LIBRARIES(test_wolf_imported_graph ${PROJECT_NAME})
 
+# Prunning wolf tree from .graph file (TORO)
+ADD_EXECUTABLE(test_wolf_prunning test_wolf_prunning.cpp)
+TARGET_LINK_LIBRARIES(test_wolf_prunning ${PROJECT_NAME})
+
 # Comparing analytic and autodiff odometry constraints
 ADD_EXECUTABLE(test_analytic_odom_constraint test_analytic_odom_constraint.cpp)
 TARGET_LINK_LIBRARIES(test_analytic_odom_constraint ${PROJECT_NAME})

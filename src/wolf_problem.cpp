@@ -77,7 +77,7 @@ void WolfProblem::addConstraintPtr(ConstraintBase* _constraint_ptr)
 void WolfProblem::removeConstraintPtr(ConstraintBase* _constraint_ptr)
 {
     // queue for solver manager
-    constraint_remove_list_.remove(_constraint_ptr->nodeId());
+    constraint_remove_list_.push_back(_constraint_ptr->nodeId());
 }
 
 void WolfProblem::clearCovariance()

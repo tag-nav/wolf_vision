@@ -51,7 +51,7 @@ Eigen::VectorXs CaptureOdom2D::computeFramePose(const TimeStamp& _now) const
 
 void CaptureOdom2D::addConstraints()
 {
-    assert(getFramePtr()->getPreviousFrame() != nullptr && "Trying to add odometry constraint in the last frame (there is no next frame)");
+    assert(getFramePtr()->getPreviousFrame() != nullptr && "Trying to add odometry constraint in the first frame (there is no previous frame)");
 
     getFeatureListPtr()->front()->addConstraintFrom(new ConstraintOdom2DAnalytic(getFeatureListPtr()->front(),
 			  	  	  	  	  	  	  	  	  	  	  	  	  	                 getFramePtr()->getPreviousFrame()));
