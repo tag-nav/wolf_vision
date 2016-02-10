@@ -130,17 +130,35 @@ int main(int argc, char** argv)
         cout << "%%%%%%%%%%%%%%%%%%%%%% CAPTURE #" << i << endl;
         TimeStamp time_stamp(i);
 
-        std::vector<rawgpsutils::ObsData> raw_data;
+        rawgpsutils::SatellitesObs obs;
 
-        WolfScalar pr(666);
+        obs.addPrMeasurement(
+                rawgpsutils::PrMeasurement(1,
+                                           rawgpsutils::ScalarT(666),
+                                           rawgpsutils::ScalarT(5000),
+                                           rawgpsutils::ScalarT(5000),
+                                           rawgpsutils::ScalarT(5000))
+        );
+        obs.addPrMeasurement(
+                rawgpsutils::PrMeasurement(2,
+                                           rawgpsutils::ScalarT(777),
+                                           rawgpsutils::ScalarT(4000),
+                                           rawgpsutils::ScalarT(4500),
+                                           rawgpsutils::ScalarT(6000))
+        );
+        obs.addPrMeasurement(
+                rawgpsutils::PrMeasurement(3,
+                                           rawgpsutils::ScalarT(888),
+                                           rawgpsutils::ScalarT(1000),
+                                           rawgpsutils::ScalarT(2000),
+                                           rawgpsutils::ScalarT(3000))
+        );
 
-        raw_data.push_back(rawgpsutils::ObsData("sat_1", TimeStamp(10, 3), pr)); pr+=111;
-        raw_data.push_back(rawgpsutils::ObsData("sat_2", TimeStamp(11, 3), pr)); pr+=111;
-        raw_data.push_back(rawgpsutils::ObsData("sat_3", TimeStamp(12, 3), pr));
+
 
 
         // Create synthetic gps capture
-        CaptureGPS* cpt_ptr_ = new CaptureGPS(time_stamp, gps_sensor_ptr_, raw_data);
+        CaptureGPS* cpt_ptr_ = new CaptureGPS(time_stamp, gps_sensor_ptr_, obs);
 
         // Add capture
         wolf_manager_->addCapture(cpt_ptr_);
