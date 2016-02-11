@@ -33,6 +33,16 @@ class LandmarkContainer : public LandmarkBase
 		LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, const WolfScalar& _witdh=2.44, const WolfScalar& _length=12.2);
 
 		/** \brief Constructor with type, time stamp and the position state pointer
+		 *
+		 *  The vertices are refered as A, B, C and D:
+		 *
+		 *          B ---------------------------- A
+         *          |                              |
+         *          |                              |
+         *          |           <---+              |
+         *          |               |              |
+         *          |               v              |
+         *          C ---------------------------- D
          *
          * Constructor with type, and state pointer
          * \param _p_ptr StateBase pointer to the position
@@ -60,7 +70,7 @@ class LandmarkContainer : public LandmarkBase
          * \param _length descriptor of the landmark: container length
          *
          **/
-		LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const WolfScalar& _witdh=2.44, const WolfScalar& _length=12.2);
+		//LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const WolfScalar& _witdh=2.44, const WolfScalar& _length=12.2);
 
         /** \brief Default destructor (not recommended)
          *
@@ -97,17 +107,7 @@ class LandmarkContainer : public LandmarkBase
          *
          **/
         Eigen::VectorXs getCorner(const unsigned int _id) const;
-
-        /** \brief Tries to add a corner of the container
-         *
-         * Tries to add a corner of the container. Return {0, 1, 2, 3} if it matches with any of its corners and -1 otherwise.
-         *
-         **/
-        int tryCorner(LandmarkCorner2D* _corner_ptr);
         
 };
-
-// NOT USEFUL -> capture_laser_2D
-//bool fitContainer(const Eigen::VectorXs& _corner_1_p, const WolfScalar& _corner_1_orientation, const Eigen::VectorXs& _corner_2_p, const WolfScalar& _corner_2_orientation, int& corner_1_idx, int& corner_2_idx);
 
 #endif

@@ -116,10 +116,16 @@ void ProcessorLaser2D::establishConstraintsMHTree()
         unsigned int ii, jj;
         std::map<unsigned int, unsigned int> ft_lk_pairs;
         std::vector<bool> associated_mask;
+        WolfScalar sq24 = sqrt(2) / 4;
         Eigen::MatrixXs corners(3,4);
-        corners << -CONTAINER_LENGTH / 2, -CONTAINER_WIDTH / 2,  -CONTAINER_LENGTH / 2, -CONTAINER_WIDTH / 2,
-                   -CONTAINER_WIDTH / 2,  -CONTAINER_LENGTH / 2, -CONTAINER_WIDTH / 2,  -CONTAINER_LENGTH / 2,
-                    0,                     M_PI / 2,              M_PI,                 -M_PI / 2;
+                    // Center seen from corners (see LandmarkContainer.h)
+                    // A                                         // B                                         // C                                         // D
+        corners <<  sq24 * (CONTAINER_LENGTH + CONTAINER_WIDTH), sq24 * (CONTAINER_LENGTH + CONTAINER_WIDTH), sq24 * (CONTAINER_LENGTH + CONTAINER_WIDTH), sq24 * (CONTAINER_LENGTH + CONTAINER_WIDTH),
+                   -sq24 * (CONTAINER_LENGTH - CONTAINER_WIDTH), sq24 * (CONTAINER_LENGTH - CONTAINER_WIDTH),-sq24 * (CONTAINER_LENGTH - CONTAINER_WIDTH), sq24 * (CONTAINER_LENGTH - CONTAINER_WIDTH),
+                   -M_PI / 4,                                   -3 * M_PI / 4,                                3 * M_PI / 4,                                M_PI / 4;
+//        corners << -CONTAINER_LENGTH / 2, CONTAINER_LENGTH / 2, CONTAINER_LENGTH / 2,-CONTAINER_LENGTH / 2,
+//                   -CONTAINER_WIDTH / 2, -CONTAINER_WIDTH / 2,  CONTAINER_WIDTH / 2,  CONTAINER_WIDTH / 2,
+//                    M_PI / 4,             3 * M_PI / 4,        -3 * M_PI / 4,        -M_PI / 4;
         Eigen::MatrixXs rotated_corners = corners;
         Eigen::VectorXs squared_mahalanobis_distances;
 
@@ -141,46 +147,46 @@ void ProcessorLaser2D::establishConstraintsMHTree()
 
         //set independent probabilities between feature-landmark pairs
         ii=0;
-        for (auto i_it = capture_laser_ptr_->getFeatureListPtr()->begin(); i_it != capture_laser_ptr_->getFeatureListPtr()->end(); i_it++, ii++) //ii runs over extracted feature
+        for (auto feature_it = capture_laser_ptr_->getFeatureListPtr()->begin(); feature_it != capture_laser_ptr_->getFeatureListPtr()->end(); feature_it++, ii++) //ii runs over extracted feature
         {
-            features_map[ii] = (FeatureCorner2D*)(*i_it);
+            features_map[ii] = (FeatureCorner2D*)(*feature_it);
             //std::cout << "Feature: " << (*i_it)->nodeId() << std::endl << (*i_it)->getMeasurement().head(3).transpose() << std::endl;
             jj = 0;
-            for (auto j_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); j_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); j_it++, jj++)
+            for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++, jj++)
             {
-                if ((*j_it)->getType() == LANDMARK_CORNER)
+                if ((*landmark_it)->getType() == LANDMARK_CORNER)
                 {
-                    landmarks_map[jj] = (*j_it);
+                    landmarks_map[jj] = (*landmark_it);
                     landmarks_index_map[jj] = 0;
                     //std::cout << "Landmark: " << (*j_it)->nodeId() << " - jj: " << jj << std::endl;
                     //If aperture difference is small enough, proceed with Mahalanobis distance. Otherwise Set prob to 0 to force unassociation
-                    if (fabs(pi2pi(((FeatureCorner2D*)(*i_it))->getAperture() - (*j_it)->getDescriptor(0))) < MAX_ACCEPTED_APERTURE_DIFF)
+                    if (fabs(pi2pi(((FeatureCorner2D*)(*feature_it))->getAperture() - (*landmark_it)->getDescriptor(0))) < MAX_ACCEPTED_APERTURE_DIFF)
                     {
-                        dm2 = computeSquaredMahalanobisDistances(*i_it, expected_features[*j_it], expected_features_covs[*j_it], Eigen::MatrixXs::Zero(3,1))(0);//Mahalanobis squared
+                        dm2 = computeSquaredMahalanobisDistances(*feature_it, expected_features[*landmark_it], expected_features_covs[*landmark_it], Eigen::MatrixXs::Zero(3,1))(0);//Mahalanobis squared
                         prob = (dm2 < 5*5 ? 5*erfc( sqrt(dm2/2) ) : 0); //prob = erfc( sqrt(dm2/2) ); //prob = erfc( sqrt(dm2)/1.4142136 );// sqrt(2) = 1.4142136
                         tree.setScore(ii,jj,prob);
                     }
                     else
                         tree.setScore(ii,jj,0.);//prob to 0
                 }
-                else if ((*j_it)->getType() == LANDMARK_CONTAINER)
+                else if ((*landmark_it)->getType() == LANDMARK_CONTAINER)
                 {
                     //std::cout << "Landmark: " << (*j_it)->nodeId() << " - jj: " << jj << " " << jj+1 << " " << jj+2 << " " << jj+3 << std::endl;
                     // Resize tree (expected 1 target for each landmark but containers have 4 targets)
-                    if (i_it == capture_laser_ptr_->getFeatureListPtr()->begin())
+                    if (feature_it == capture_laser_ptr_->getFeatureListPtr()->begin())
                         tree.resize( tree.numDetections() , tree.numTargets()+3 );
 
                     //If aperture difference is small enough, proceed with Mahalanobis distance. Otherwise Set prob to 0 to force unassociation
-                    if (fabs(pi2pi(((FeatureCorner2D*)(*i_it))->getAperture() - 3 * M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF)
+                    if (fabs(pi2pi(((FeatureCorner2D*)(*feature_it))->getAperture() - 3 * M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF)
                     {
                         // Rotate corners (seen from feature coordinates)
-                        rotated_corners.topRows(2) = Eigen::Rotation2D<WolfScalar>((*i_it)->getMeasurement()(2)).matrix() * corners.topRows(2);
-
-                        squared_mahalanobis_distances = computeSquaredMahalanobisDistances((*i_it), expected_features[*j_it], expected_features_covs[*j_it], rotated_corners);
+                        //rotated_corners.topRows(2) = Eigen::Rotation2D<WolfScalar>(expected_features[*landmark_it](2)).matrix() * corners.topRows(2);
+                        rotated_corners = corners;
+                        squared_mahalanobis_distances = computeSquaredMahalanobisDistances((*feature_it), expected_features[*landmark_it], expected_features_covs[*landmark_it], rotated_corners);
 
                         for (unsigned int c = 0; c < 4; c++, jj++)
                         {
-                            landmarks_map[jj] = (*j_it);
+                            landmarks_map[jj] = (*landmark_it);
                             landmarks_index_map[jj] = c;
                             prob = (squared_mahalanobis_distances(c) < 5.*5. ? 5*erfc( sqrt(squared_mahalanobis_distances(c)/2) ) : 0); //prob = erfc( sqrt(dm2/2) ); //prob = erfc( sqrt(dm2)/1.4142136 );// sqrt(2) = 1.4142136
                             tree.setScore(ii,jj,prob);
@@ -191,7 +197,7 @@ void ProcessorLaser2D::establishConstraintsMHTree()
                     {
                         for (unsigned int c = 0; c < 4; c++, jj++)
                         {
-                            landmarks_map[jj] = (*j_it);
+                            landmarks_map[jj] = (*landmark_it);
                             landmarks_index_map[jj] = c;
                             tree.setScore(ii,jj,0.);//prob to 0
                         }
@@ -247,8 +253,8 @@ void ProcessorLaser2D::establishConstraintsMHTree()
 
                 else if (associed_landmark->getType() == LANDMARK_CONTAINER)
                     associed_feature->addConstraintFrom(new ConstraintContainer(associed_feature,                       //feature pointer
-                                                                            (LandmarkContainer*)(associed_landmark), //landmark pointer
-                                                                            associed_landmark_index ));                 // corner index
+                                                                                (LandmarkContainer*)(associed_landmark), //landmark pointer
+                                                                                associed_landmark_index ));                 // corner index
             }
         }
 
@@ -324,9 +330,13 @@ void ProcessorLaser2D::computeExpectedFeature(LandmarkBase* _landmark_ptr, Eigen
     expected_feature_(2) = pi2pi(o_landmark - o_robot - o_sensor);
 
     if (_landmark_ptr->getType() == LANDMARK_CONTAINER)
+    {
         expected_feature_(3) = 3 * M_PI / 2;
+    }
     else if (_landmark_ptr->getType() == LANDMARK_CORNER)
+    {
         expected_feature_(3) = ((LandmarkCorner2D*)(_landmark_ptr))->getAperture();
+    }
 
     // ------------------------ Sigma
     // JACOBIAN
@@ -456,12 +466,12 @@ Eigen::VectorXs ProcessorLaser2D::computeSquaredMahalanobisDistances(const Featu
     return squared_mahalanobis_distances;
 }
 
-bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_ptr, LandmarkCorner2D*& old_corner_landmark_ptr, int& feature_idx, int& corner_idx)
+bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_feature_ptr, LandmarkCorner2D*& _corner_landmark_ptr, int& feature_corner_idx, int& landmark_corner_idx)
 {
     //std::cout << "Trying container... aperture = " << _corner_ptr->getMeasurement()(3) << std::endl;
 
     // It has to be 90º corner feature
-    if (std::fabs(pi2pi(_corner_ptr->getMeasurement()(3) + M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF)
+    if (std::fabs(pi2pi(_corner_feature_ptr->getMeasurement()(3) + M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF)
     {
         // Check all existing corners searching a container
         for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->rbegin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->rend(); landmark_it++)
@@ -470,16 +480,19 @@ bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_ptr, LandmarkCor
                     && std::fabs(pi2pi(((LandmarkCorner2D*)(*landmark_it))->getAperture() + M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF) // should be a corner
             {
                 //std::cout << "landmark " << (*landmark_it)->nodeId() << std::endl;
+                WolfScalar SQ2 = sqrt(2)/2;
                 Eigen::MatrixXs corners_relative_positions(3,6);
-                corners_relative_positions << CONTAINER_LENGTH, CONTAINER_LENGTH, 0,               CONTAINER_WIDTH, CONTAINER_WIDTH,  0,
-                                              0,                CONTAINER_WIDTH,  CONTAINER_WIDTH, 0,               CONTAINER_LENGTH, CONTAINER_LENGTH,
-                                              M_PI / 2,         M_PI,            -M_PI / 2,        M_PI / 2,        M_PI,            -M_PI / 2;
+                                              // FROM A (see LandmarkContainer.h)                                                        // FROM B
+                                              // Large side           // Short side          // Diagonal                                 // Large side           // Short side          // Diagonal
+                corners_relative_positions << SQ2 * CONTAINER_LENGTH, SQ2 * CONTAINER_WIDTH, SQ2 * (CONTAINER_LENGTH + CONTAINER_WIDTH), SQ2 * CONTAINER_LENGTH, SQ2 * CONTAINER_WIDTH, SQ2 * (CONTAINER_LENGTH + CONTAINER_WIDTH),
+                                             -SQ2 * CONTAINER_LENGTH, SQ2 * CONTAINER_WIDTH, SQ2 * (CONTAINER_WIDTH - CONTAINER_LENGTH), SQ2 * CONTAINER_LENGTH,-SQ2 * CONTAINER_WIDTH, SQ2 * (CONTAINER_LENGTH - CONTAINER_WIDTH),
+                                              M_PI / 2,              -M_PI / 2,              M_PI,                                      -M_PI / 2,               M_PI / 2,              M_PI;
 
-                Eigen::Matrix2s R_feature = Eigen::Rotation2D<WolfScalar>(_corner_ptr->getMeasurement()(2)).matrix();
+                Eigen::Matrix2s R_feature = Eigen::Rotation2D<WolfScalar>(_corner_feature_ptr->getMeasurement()(2)).matrix();
                 corners_relative_positions = - corners_relative_positions;
                 corners_relative_positions.topRows(2) = R_feature * corners_relative_positions.topRows(2);
 
-                Eigen::VectorXs squared_mahalanobis_distances = computeSquaredMahalanobisDistances(_corner_ptr, (*landmark_it), corners_relative_positions);
+                Eigen::VectorXs squared_mahalanobis_distances = computeSquaredMahalanobisDistances(_corner_feature_ptr, (*landmark_it), corners_relative_positions);
 
 //                std::cout << "squared_mahalanobis_distances " << std::endl << squared_mahalanobis_distances << std::endl;
 //                std::cout << "probabilities " << std::endl;
@@ -490,49 +503,49 @@ bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_ptr, LandmarkCor
                 if (squared_mahalanobis_distances(0) < SMD_threshold ) //erfc( sqrt(squared_mahalanobis_distances(0)/2) ) > 0.8 )
                 {
                     std::cout << "   large side! prob =  " << erfc( sqrt(squared_mahalanobis_distances(0)/2.0)) << std::endl;
-                    feature_idx = 0;
-                    corner_idx = 1;
-                    old_corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
+                    feature_corner_idx = 0;
+                    landmark_corner_idx = 1;
+                    _corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
                     return true;
                 }
                 if (squared_mahalanobis_distances(1) < SMD_threshold ) //erfc( sqrt(squared_mahalanobis_distances(1)/2) ) > 0.8 )
                 {
-                    std::cout << "   diagonal!  prob = " << erfc( sqrt(squared_mahalanobis_distances(1)/2)) << std::endl;
-                    feature_idx = 0;
-                    corner_idx = 2;
-                    old_corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
+                    std::cout << "   short side!  prob = " << erfc( sqrt(squared_mahalanobis_distances(1)/2)) << std::endl;
+                    feature_corner_idx = 2;
+                    landmark_corner_idx = 1;
+                    _corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
                     return true;
                 }
                 if (squared_mahalanobis_distances(2) < SMD_threshold ) //erfc( sqrt(squared_mahalanobis_distances(2)/2) ) > 0.8 )
                 {
-                    std::cout << "   short side!  prob = " << erfc( sqrt(squared_mahalanobis_distances(2)/2)) << std::endl;
-                    feature_idx = 2;
-                    corner_idx = 1;
-                    old_corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
+                    std::cout << "   diagonal!  prob = " << erfc( sqrt(squared_mahalanobis_distances(2)/2)) << std::endl;
+                    feature_corner_idx = 0;
+                    landmark_corner_idx = 2;
+                    _corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
                     return true;
                 }
                 if (squared_mahalanobis_distances(3) < SMD_threshold ) //erfc( sqrt(squared_mahalanobis_distances(3)/2) ) > 0.8 )
                 {
-                    std::cout << "   short side! prob = " << erfc( sqrt(squared_mahalanobis_distances(3)/2)) << std::endl;
-                    feature_idx = 1;
-                    corner_idx = 2;
-                    old_corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
+                    std::cout << "   large side! prob = " << erfc( sqrt(squared_mahalanobis_distances(3)/2)) << std::endl;
+                    feature_corner_idx = 1;
+                    landmark_corner_idx = 0;
+                    _corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
                     return true;
                 }
                 if (squared_mahalanobis_distances(4) < SMD_threshold ) //erfc( sqrt(squared_mahalanobis_distances(4)/2) ) > 0.8 )
                 {
-                    std::cout << "   diagonal!  prob = " << erfc( sqrt(squared_mahalanobis_distances(4)/2)) << std::endl;
-                    feature_idx = 1;
-                    corner_idx = 3;
-                    old_corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
+                    std::cout << "   short side!  prob = " << erfc( sqrt(squared_mahalanobis_distances(4)/2)) << std::endl;
+                    feature_corner_idx = 1;
+                    landmark_corner_idx = 2;
+                    _corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
                     return true;
                 }
                 if (squared_mahalanobis_distances(5) < SMD_threshold ) //erfc( sqrt(squared_mahalanobis_distances(5)/2) ) > 0.8 )
                 {
-                    std::cout << "   large side!  prob = " << erfc( sqrt(squared_mahalanobis_distances(5)/2)) << std::endl;
-                    feature_idx = 1;
-                    corner_idx = 0;
-                    old_corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
+                    std::cout << "   diagonal!  prob = " << erfc( sqrt(squared_mahalanobis_distances(5)/2)) << std::endl;
+                    feature_corner_idx = 1;
+                    landmark_corner_idx = 3;
+                    _corner_landmark_ptr = (LandmarkCorner2D*)(*landmark_it);
                     return true;
                 }
             }
@@ -601,9 +614,6 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
     getTop()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getPPtr(), Sigma_landmark.topLeftCorner<2,2>());
     getTop()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getOPtr(), Sigma_landmark.block<2,1>(0,2));
     getTop()->addCovarianceBlock(new_landmark->getOPtr(), new_landmark->getOPtr(), Sigma_landmark.block<1,1>(2,2));
-
-    // create new constraint (feature to container)
-    _corner_ptr->addConstraintFrom(new ConstraintContainer(_corner_ptr, new_landmark,_feature_idx));
 
 
     // ERASING LANDMARK CORNER
