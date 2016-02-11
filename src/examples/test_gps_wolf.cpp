@@ -131,7 +131,8 @@ int main(int argc, char** argv)
      */
     for(unsigned int  i=0; i < n_captures; ++i)
     {
-        cout << "%%%%%%%%%%%%%%%%%%%%%% CAPTURE #" << i << endl;
+        cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+        cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%  CAPTURE #" << i << "  %%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
         TimeStamp time_stamp(i);
 
         rawgpsutils::SatellitesObs obs;
@@ -163,8 +164,27 @@ int main(int argc, char** argv)
             ceres::Solver::Summary summary;
 
             summary = ceres_manager->solve(ceres_options);
-            cout << summary.FullReport() << endl;
+            //cout << summary.FullReport() << endl;
         }
+
+        //wolf_manager_->getProblemPtr()->print(2);
+
+        std::cout << setprecision(12);
+        std::cout << "\n~~~~ RESULTS ~~~~\n";
+        //std::cout << "Vehicle pose " << wolf_manager_->getVehiclePose().transpose() << std::endl;
+        //std::cout << "getInitVehicleP " << gps_sensor_ptr_->getInitVehiclePPtr()->getVector().transpose() << std::endl;
+
+        std::cout << "|\tgetPPtr " << gps_sensor_ptr_->getPPtr()->getVector().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
+        std::cout << "|\tgetOPtr " << gps_sensor_ptr_->getOPtr()->getVector().transpose() << std::endl;// orientation of the vehicle's frame
+        std::cout << "|\tgetIntrinsicPtr " << gps_sensor_ptr_->getIntrinsicPtr()->getVector().transpose() << std::endl;//intrinsic parameter  = receiver time bias
+        std::cout << "|\tgetInitVehiclePPtr " << gps_sensor_ptr_->getInitVehiclePPtr()->getVector().transpose() << std::endl;// initial vehicle position (ecef)
+        std::cout << "|\tgetInitVehicleOPtr " << gps_sensor_ptr_->getInitVehicleOPtr()->getVector().transpose() << std::endl;// initial vehicle orientation (ecef)
+                                            //                        getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
+                                            //                        orientation of antenna is not needed, because omnidirectional
+        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
+
+
+
     }
 
 

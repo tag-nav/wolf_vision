@@ -6,9 +6,10 @@ FeatureGPSPseudorange::FeatureGPSPseudorange(Eigen::Vector3s &_sat_position, Wol
         pseudorange_(_pseudorange)
 //TODO occhio, ora featureBase contiene il pseudorange (posso toglierlo?)
 {
-    std::cout << "FeatureGPSPseudorange() constructor --("
-              << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2]
-              << ") --pr = " << pseudorange_ << std::endl;
+//    std::cout << "FeatureGPSPseudorange() " << std::setprecision(12)
+//              << "   --pr=" << pseudorange_
+//              << "\t--pos("  << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")"
+//              << std::endl;
 }
 
 FeatureGPSPseudorange::~FeatureGPSPseudorange()

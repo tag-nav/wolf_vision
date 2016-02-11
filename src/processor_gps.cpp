@@ -39,7 +39,7 @@ void ProcessorGPS::extractFeatures(CaptureBase *_capture_ptr)
         capture_gps_ptr_->addFeature(new FeatureGPSPseudorange(sat_pos, pr));
     }
 
-    std::cout << "gps features extracted" << std::endl;
+    //std::cout << "gps features extracted" << std::endl;
 }
 
 void ProcessorGPS::establishConstraints(CaptureBase *_capture_ptr)
@@ -55,7 +55,7 @@ void ProcessorGPS::establishConstraints(CaptureBase *_capture_ptr)
     }
 
 
-    std::cout << "Constraints established" << std::endl;
+    //std::cout << "Constraints established" << std::endl;
 }
 
 
