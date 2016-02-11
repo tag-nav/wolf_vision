@@ -14,6 +14,11 @@ CaptureGPS::~CaptureGPS()
     //std::cout << "deleting CaptureGPS " << nodeId() << std::endl;
 }
 
+rawgpsutils::SatellitesObs &CaptureGPS::getData()
+{
+    return obs_;
+}
+
 
 /*
  * Dummy implementation of the method, only because it's pure virtual
@@ -21,9 +26,4 @@ CaptureGPS::~CaptureGPS()
 Eigen::VectorXs CaptureGPS::computeFramePose(const TimeStamp &_now) const
 {
     return Eigen::Vector3s(0, 0, 0);
-}
-
-rawgpsutils::SatellitesObs &CaptureGPS::getData()
-{
-    return obs_;
 }
