@@ -79,17 +79,27 @@ int main(int argc, char** argv)
     //Welcome message
     cout << endl << " ========= WOLF TREE test ===========" << endl << endl;
 
+
+    // Initial x, y, z, bias
+    // 4789360.65929 177175.418126 4194534.14743 0.000242545313354
+
+
     /*
      * Parameters, to be optimized
      */
+    // Initial ecef position of the experiment
+    StateBlock* vehicle_init_p = new StateBlock(Eigen::Vector3s(4789360.65929, 177175.418126, 4194534.14743));
+                                //= new StateBlock(Eigen::Vector3s::Zero());
+    StateBlock* vehicle_init_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);// vehicle init orientation
+
+    // Sensor position with respect to vehicle's frame
     StateBlock* sensor_p = new StateBlock(Eigen::Vector3s::Zero()); //gps sensor position
     sensor_p->fix(); // TODO only for now, to simplify things
     StateBlock* sensor_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);   //gps sensor orientation
     sensor_o->fix(); //orientation is fixed, because antenna omnidirectional, so is not going to be optimized
-    StateBlock* sensor_bias = new StateBlock(Eigen::Vector1s::Zero());    //gps sensor bias
-    // TODO Should this 2 supplementary blocks go in the sensor?
-    StateBlock* vehicle_init_p = new StateBlock(Eigen::Vector3s::Zero());    //vehicle init position
-    StateBlock* vehicle_init_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);// vehicle init orientation
+
+    //gps sensor bias
+    StateBlock* sensor_bias = new StateBlock(Eigen::Vector1s::Zero());
 
     /*
      * GPS Sensor
@@ -164,27 +174,23 @@ int main(int argc, char** argv)
             ceres::Solver::Summary summary;
 
             summary = ceres_manager->solve(ceres_options);
-            //cout << summary.FullReport() << endl;
+            cout << summary.FullReport() << endl;
         }
 
         //wolf_manager_->getProblemPtr()->print(2);
 
         std::cout << setprecision(12);
         std::cout << "\n~~~~ RESULTS ~~~~\n";
-        //std::cout << "Vehicle pose " << wolf_manager_->getVehiclePose().transpose() << std::endl;
-        //std::cout << "getInitVehicleP " << gps_sensor_ptr_->getInitVehiclePPtr()->getVector().transpose() << std::endl;
-
-        std::cout << "|\tgetPPtr " << gps_sensor_ptr_->getPPtr()->getVector().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
-        std::cout << "|\tgetOPtr " << gps_sensor_ptr_->getOPtr()->getVector().transpose() << std::endl;// orientation of the vehicle's frame
-        std::cout << "|\tgetIntrinsicPtr " << gps_sensor_ptr_->getIntrinsicPtr()->getVector().transpose() << std::endl;//intrinsic parameter  = receiver time bias
-        std::cout << "|\tgetInitVehiclePPtr " << gps_sensor_ptr_->getInitVehiclePPtr()->getVector().transpose() << std::endl;// initial vehicle position (ecef)
-        std::cout << "|\tgetInitVehicleOPtr " << gps_sensor_ptr_->getInitVehicleOPtr()->getVector().transpose() << std::endl;// initial vehicle orientation (ecef)
-                                            //                        getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
-                                            //                        orientation of antenna is not needed, because omnidirectional
+        std::cout << "|\tinitial P " << gps_sensor_ptr_->getInitVehiclePPtr()->getVector().transpose() << std::endl;// initial vehicle position (ecef)
+        std::cout << "|\tinitial O " << gps_sensor_ptr_->getInitVehicleOPtr()->getVector().transpose() << std::endl;// initial vehicle orientation (ecef)
+        std::cout << "|\tVehicle pose " << wolf_manager_->getVehiclePose().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
+        std::cout << "|\tsensor P " << gps_sensor_ptr_->getPPtr()->getVector().transpose() << std::endl;// position of the sensor with respect to the vehicle's frame
+        std::cout << "|\tsensor O (not needed)" << gps_sensor_ptr_->getOPtr()->getVector().transpose() << std::endl;// orientation of antenna is not needed, because omnidirectional
+        std::cout << "|\tbias " << gps_sensor_ptr_->getIntrinsicPtr()->getVector().transpose() << std::endl;//intrinsic parameter  = receiver time bias
         std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
 
 
-
+        std::cin.ignore();
     }
 
 
