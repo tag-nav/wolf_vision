@@ -21,6 +21,8 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 			corner_(_corner)
 		{
             assert(_corner >= 0 && _corner <= 3 && "Wrong corner id in constraint container constructor");
+
+            std::cout << "new constraint container: corner idx = " << corner_ << std::endl;
 		}
 
         /** \brief Default destructor (not recommended)
@@ -96,6 +98,13 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
             //for (int i=0; i < 2; i++)
             //   std::cout  << "\n\t" << _landmarkP[i];
             //std::cout  << "\n\t" << _landmarkO[0];
+            //std::cout << std::endl;
+            //
+            //std::cout << "landmark pose (w.r.t sensor):";
+            //Eigen::Matrix<T,2,1> relative_landmark_position = inverse_R_sensor * (inverse_R_robot * (landmark_position - robot_position) - sensor_position);
+            //for (int i=0; i < 2; i++)
+            //   std::cout  << "\n\t" << relative_landmark_position.data()[i];
+            //std::cout  << "\n\t" << _landmarkO[0] - _robotO[0] - T( *(getCapturePtr()->getSensorPtr()->getOPtr()->getPtr()) );
             //std::cout << std::endl;
             //
             //std::cout << "expected_measurement: ";

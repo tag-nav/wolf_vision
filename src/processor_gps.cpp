@@ -17,11 +17,8 @@ ProcessorGPS::~ProcessorGPS()
 
 }
 
-
-/* NOTA BENE NB
- * il processor lavora al livello della capture! dalla capture legge il vector di obs,
- * fa tutti i conti usando la mia libreria e poi crea le feature che sono semplicissime,
- * solo pr e sat pos
+/*
+ * Extract features from CaptureGPS and create FeatureGPS
  */
 void ProcessorGPS::extractFeatures(CaptureBase *_capture_ptr)
 {
@@ -30,22 +27,19 @@ void ProcessorGPS::extractFeatures(CaptureBase *_capture_ptr)
 
     std::cout << "Extracting gps features..." << std::endl;
 
+    rawgpsutils::SatellitesObs obs = capture_gps_ptr_->getData();
+
+
     //TODO check that the cycle is good (it uses getRawData.size())
-    for(unsigned int i = 0; i < capture_gps_ptr_->getRawData().size(); ++i)
+    for(unsigned int i = 0; i < obs.measurements_.size(); ++i)
     {
-        //TODO qui calcola pr e sat position, e crea feature con solo sti dati
-
-        //TODO fa i conti, usando la mia libreria esterna volendo
-        capture_gps_ptr_->getRawData()[i].calculateSatPosition();
-        Eigen::Vector3s sat_pos = capture_gps_ptr_->getRawData()[i].getSatPosition();
-        WolfScalar pr = capture_gps_ptr_->getRawData()[i].getPseudorange();
-
-
+        Eigen::Vector3s sat_pos = obs.measurements_[i].sat_position_;
+        WolfScalar pr = obs.measurements_[i].pseudorange_;
 
         capture_gps_ptr_->addFeature(new FeatureGPSPseudorange(sat_pos, pr));
     }
 
-    std::cout << "gps features extracted" << std::endl;
+    //std::cout << "gps features extracted" << std::endl;
 }
 
 void ProcessorGPS::establishConstraints(CaptureBase *_capture_ptr)
@@ -61,7 +55,7 @@ void ProcessorGPS::establishConstraints(CaptureBase *_capture_ptr)
     }
 
 
-    std::cout << "Constraints established" << std::endl;
+    //std::cout << "Constraints established" << std::endl;
 }
 
 

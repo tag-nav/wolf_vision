@@ -1,11 +1,13 @@
 #include "capture_gps.h"
 
 
-CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, std::vector<rawgpsutils::ObsData>& _raw_data) :
+CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, rawgpsutils::SatellitesObs &_obs) :
         CaptureBase(_ts, _sensor_ptr),
-        raw_data_(_raw_data)
+        obs_(_obs)
 {
-    std::cout << "CaptureGPS constructor.\t\tdata.size=" << raw_data_.size() << std::endl;
+    std::cout << "CaptureGPS constructor.\t\tReceived " << obs_.measurements_.size() << " meas" << std::endl;
+//    std::cout << obs_.toString() << std::endl;
+
 }
 
 
@@ -14,9 +16,9 @@ CaptureGPS::~CaptureGPS()
     //std::cout << "deleting CaptureGPS " << nodeId() << std::endl;
 }
 
-std::vector<rawgpsutils::ObsData> &CaptureGPS::getRawData()
+rawgpsutils::SatellitesObs &CaptureGPS::getData()
 {
-    return raw_data_;
+    return obs_;
 }
 
 

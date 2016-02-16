@@ -4,7 +4,7 @@
 //TODO indentation: add a tab at everything inside the class: protected and public must have 1 tab
 
 // Wolf includes
-#include "raw_gps_utils/obs_data.h"
+#include "raw_gps_utils/satellites_obs.h"
 #include "capture_base.h"
 
 
@@ -12,12 +12,13 @@ class CaptureGPS : public CaptureBase
 {
 
 protected:
-    std::vector<rawgpsutils::ObsData> raw_data_;
+    rawgpsutils::SatellitesObs obs_;
 
 public:
-    std::vector<rawgpsutils::ObsData> &getRawData();
 
-    CaptureGPS(const TimeStamp& _ts, SensorBase* _sensor_ptr, std::vector<rawgpsutils::ObsData>& _raw_data);
+    CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, rawgpsutils::SatellitesObs &_obs);
+
+    rawgpsutils::SatellitesObs &getData();
 
     /** \brief Default destructor (not recommended)
      *
