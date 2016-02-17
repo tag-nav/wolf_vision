@@ -70,6 +70,7 @@ SET(HDRS_BASE
 
 SET(HDRS
     capture_base.h
+    capture_image.h
     capture_motion.h
     capture_fix.h
     capture_gps_fix.h
@@ -90,6 +91,7 @@ SET(HDRS
     feature_corner_2D.h
     feature_gps_fix.h
     feature_gps_pseudorange.h
+    feature_point.h
     feature_fix.h
     feature_odom_2D.h
     frame_base.h
@@ -97,12 +99,14 @@ SET(HDRS
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
+    landmark_point.h
     map_base.h
     node_base.h
     node_terminus.h
     node_linked.h
     processor_base.h
     sensor_base.h
+    sensor_camera.h
     sensor_odom_2D.h
     sensor_gps_fix.h
     state_block.h
@@ -122,6 +126,7 @@ SET(HDRS_DTASSC
 #sources
 SET(SRCS
     capture_base.cpp
+    capture_image.cpp
     capture_motion.cpp
     capture_gps_fix.cpp
     capture_fix.cpp
@@ -133,6 +138,7 @@ SET(SRCS
     feature_corner_2D.cpp
     feature_gps_fix.cpp
     feature_gps_pseudorange.cpp
+    feature_point.cpp
     feature_fix.cpp
     feature_odom_2D.cpp
     frame_base.cpp
@@ -140,11 +146,13 @@ SET(SRCS
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
+    landmark_point.cpp
     map_base.cpp
     node_base.cpp
     node_terminus.cpp
     processor_base.cpp
     sensor_base.cpp
+    sensor_camera.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
     state_block.cpp

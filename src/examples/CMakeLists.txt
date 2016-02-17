@@ -53,6 +53,10 @@ TARGET_LINK_LIBRARIES(test_wolf_prunning ${PROJECT_NAME})
 ADD_EXECUTABLE(test_analytic_odom_constraint test_analytic_odom_constraint.cpp)
 TARGET_LINK_LIBRARIES(test_analytic_odom_constraint ${PROJECT_NAME})
 
+# Testing many things for the 3D image odometry
+ADD_EXECUTABLE(test_image test_image.cpp)
+TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
+
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
 #     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
