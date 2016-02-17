@@ -92,26 +92,26 @@ StateBlock* SensorBase::getIntrinsicPtr() const
     return intrinsic_ptr_;
 }
 
-Eigen::Matrix2s SensorBase::getRotationMatrix2D()
-{
-	// TODO: move this code somewhere else and do a real get()
-	assert ( o_ptr_->getType() != ST_QUATERNION && "2D rot matrix not defined for quaternions." );
-    return Eigen::Rotation2D<WolfScalar>(*(o_ptr_->getPtr())).matrix();
-}
-
-Eigen::Matrix3s SensorBase::getRotationMatrix3D()
-{
-	// TODO: move this code somewhere else and do a real get()
-    Eigen::Matrix3s R = Eigen::Matrix3s::Identity();
-
-    if ( o_ptr_->getType() == ST_VECTOR)
-		R.block<2,2>(0,0) = Eigen::Rotation2D<WolfScalar>(*(o_ptr_->getPtr())).matrix();
-
-    else
-		R = Eigen::Map<Eigen::Quaternions>(o_ptr_->getPtr()).toRotationMatrix();
-
-    return R;
-}
+//Eigen::Matrix2s SensorBase::getRotationMatrix2D()
+//{
+//	// TODO: move this code somewhere else and do a real get()
+//	assert ( o_ptr_->getType() != ST_QUATERNION && "2D rot matrix not defined for quaternions." );
+//    return Eigen::Rotation2D<WolfScalar>(*(o_ptr_->getPtr())).matrix();
+//}
+//
+//Eigen::Matrix3s SensorBase::getRotationMatrix3D()
+//{
+//	// TODO: move this code somewhere else and do a real get()
+//    Eigen::Matrix3s R = Eigen::Matrix3s::Identity();
+//
+//    if ( o_ptr_->getType() == ST_VECTOR)
+//		R.block<2,2>(0,0) = Eigen::Rotation2D<WolfScalar>(*(o_ptr_->getPtr())).matrix();
+//
+//    else
+//		R = Eigen::Map<Eigen::Quaternions>(o_ptr_->getPtr()).toRotationMatrix();
+//
+//    return R;
+//}
 
 void SensorBase::fix()
 {

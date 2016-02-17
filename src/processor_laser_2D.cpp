@@ -268,7 +268,8 @@ void ProcessorLaser2D::establishConstraintsMHTree()
 
         // Sensor transformation
         Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
-        Eigen::Matrix2s R_sensor = getSensorPtr()->getRotationMatrix2D();
+        Eigen::Rotation2D<WolfScalar> S_R( getSensorPtr()->getOPtr()->getVector()(0) );
+        Eigen::Matrix2s R_sensor = S_R.matrix();
         WolfScalar sensor_orientation = *(capture_laser_ptr_->getSensorPtr()->getOPtr()->getPtr());
 
         // NEW CORNERS
@@ -315,7 +316,8 @@ void ProcessorLaser2D::computeExpectedFeature(LandmarkBase* _landmark_ptr, Eigen
 
     Eigen::Vector2s p_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
     WolfScalar      o_sensor = *(getSensorPtr()->getOPtr()->getPtr());
-    Eigen::Matrix2s R_sensor = getSensorPtr()->getRotationMatrix2D();
+    Eigen::Rotation2D<WolfScalar> S_R( getSensorPtr()->getOPtr()->getVector()(0) );
+    Eigen::Matrix2s R_sensor = S_R.matrix();
 
     Eigen::Vector2s p_landmark = _landmark_ptr->getPPtr()->getVector();
     WolfScalar      o_landmark = *(_landmark_ptr->getOPtr()->getPtr());
@@ -378,7 +380,9 @@ Eigen::VectorXs ProcessorLaser2D::computeSquaredMahalanobisDistances(const Featu
 
     Eigen::Vector2s p_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
     WolfScalar      o_sensor = *(getSensorPtr()->getOPtr()->getPtr());
-    Eigen::Matrix2s R_sensor = getSensorPtr()->getRotationMatrix2D();
+//    Eigen::Matrix2s R_sensor = getSensorPtr()->getRotationMatrix2D();
+    Eigen::Rotation2D<WolfScalar> S_R( getSensorPtr()->getOPtr()->getVector()(0) );
+    Eigen::Matrix2s R_sensor = S_R.matrix();
 
     Eigen::Vector2s p_landmark = _landmark_ptr->getPPtr()->getVector();
     WolfScalar      o_landmark = *(_landmark_ptr->getOPtr()->getPtr());

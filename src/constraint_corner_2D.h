@@ -48,8 +48,11 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 
 			// sensor transformation
 			Eigen::Matrix<T,2,1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getVector().head(2).cast<T>();
-			Eigen::Matrix<T,2,2> inverse_R_sensor = (getCapturePtr()->getSensorPtr()->getRotationMatrix2D().transpose()).cast<T>();
+//                        Eigen::Matrix<T,2,2> inverse_R_sensor = (getCapturePtr()->getSensorPtr()->getRotationMatrix2D().transpose()).cast<T>();
+                        Eigen::Rotation2D<WolfScalar> S_R( getCapturePtr()->getSensorOPtr()->getVector()(0) );
+                        Eigen::Matrix<T,2,2> inverse_R_sensor = (S_R.matrix().transpose()).cast<T>();
 
+                        // robot information
 			Eigen::Matrix<T,2,2> inverse_R_robot;
 			inverse_R_robot << cos(*_robotO), sin(*_robotO),
 					 	 	  -sin(*_robotO), cos(*_robotO);

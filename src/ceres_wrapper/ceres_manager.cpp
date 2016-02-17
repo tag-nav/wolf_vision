@@ -225,28 +225,23 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 
 void CeresManager::addStateBlock(StateBlock* _st_ptr)
 {
-	//std::cout << "Adding State Unit with size: " <<  _st_ptr->getSize() << std::endl;
-	//_st_ptr->print();
+    //std::cout << "Adding State Unit with size: " <<  _st_ptr->getSize() << std::endl;
+    //_st_ptr->print();
 
-	switch (_st_ptr->getType())
-	{
-		case ST_VECTOR:
-		{
-			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), nullptr);
-			break;
-		}
-		case ST_QUATERNION:
-		{
-			//TODO: change nullptr below by quaternion parametrization following method in complex_angle_parametrization.cpp
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), nullptr);
-			break;
-		}
-		default:
-			std::cout << "Unknown state type!" << std::endl;
-	}
-	if (_st_ptr->isFixed())
-		updateStateBlockStatus(_st_ptr);
+    if (_st_ptr->hasLocalParametrization())
+    {
+        //TODO: change nullptr below by quaternion parametrization following method in complex_angle_parametrization.cpp
+        ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), nullptr);
+
+    }
+    else
+    {
+        //std::cout << "No Local Parametrization to be added" << std::endl;
+        ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), nullptr);
+
+    }
+    if (_st_ptr->isFixed())
+        updateStateBlockStatus(_st_ptr);
 }
 
 void CeresManager::removeStateBlock(double* _st_ptr)
