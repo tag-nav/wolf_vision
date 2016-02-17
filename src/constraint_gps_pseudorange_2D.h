@@ -64,14 +64,70 @@ public:
 //        std::cout << "OPERATOR()\n";
 //        std::cout << "_init_vehicle_p: " << _init_vehicle_p[0] << ", " << _init_vehicle_p[1] << ", " << _init_vehicle_p[2] << std::endl;
 //        std::cout << "_init_vehicle_o: " << _init_vehicle_o[0] << ", " << _init_vehicle_o[1] << ", " << _init_vehicle_o[2] << ", " << _init_vehicle_o[3] << std::endl;
-//        std::cout << "_vehicle_p: " << _vehicle_p[0] << ", " << _vehicle_p[1] << ", " << _vehicle_p[2] << std::endl;
-//        std::cout << "_vehicle_o: " << _vehicle_o[0] << ", " << _vehicle_o[1] << ", " << _vehicle_o[2] << ", " << _vehicle_o[3] << std::endl;
+//        std::cout << "_vehicle_p: " << _vehicle_p[0] << ", " << _vehicle_p[1] << std::endl;
+//        std::cout << "_vehicle_o: " << _vehicle_o[0] << std::endl;
 //        std::cout << "_sensor_p: " << _sensor_p[0] << ", " << _sensor_p[1] << ", " << _sensor_p[2] << std::endl;
 
-        //TODO
-        //TODO
-        //TODO
-        _residual[0] = T(3);//TODO
+        Eigen::Matrix<T, 3, 1> sensor_p_base(_sensor_p[0], _sensor_p[1], _sensor_p[2]); //sensor position with respect to the base (the vehicle)
+        std::cout << "sensor_p_base: " << sensor_p_base[0] << ", " << sensor_p_base[1] << ", " << sensor_p_base[2] << std::endl;
+
+        Eigen::Matrix<T, 3, 1> vehicle_p_origin(_vehicle_p[0], _vehicle_p[1], T(0));
+        std::cout << "vehicle_p_origin: " << vehicle_p_origin[0] << ", " << vehicle_p_origin[1] << ", " << vehicle_p_origin[2] << std::endl;
+        /*
+         * Base-to-origin transform matrix
+         */
+        Eigen::Matrix<T, 3, 3> transform_base_to_origin;
+        transform_base_to_origin(0, 0) = T(cos(_vehicle_o[0]));
+        transform_base_to_origin(0, 1) = T(-sin(_vehicle_o[0]));
+        transform_base_to_origin(0, 2) = T(0);
+        transform_base_to_origin(1, 0) = T(sin(_vehicle_o[0]));
+        transform_base_to_origin(1, 1) = T(cos(_vehicle_o[0]));
+        transform_base_to_origin(1, 2) = T(0);
+        transform_base_to_origin(2, 0) = T(0);
+        transform_base_to_origin(2, 1) = T(0);
+        transform_base_to_origin(2, 2) = T(1);
+
+        Eigen::Matrix<T, 3, 1> sensor_p_origin; // sensor position with respect to origin frame (initial frame of the experiment)
+        sensor_p_origin = transform_base_to_origin * sensor_p_base + vehicle_p_origin;
+
+        std::cout << "RESULT:  ";
+        std::cout << "sensor_p_origin: " << sensor_p_origin[0] << ", " << sensor_p_origin[1] << ", " << sensor_p_origin[2] << std::endl;
+
+
+        /*
+         * Origin-to-ECEF transform matrix
+         */
+        Eigen::Matrix<T, 4, 4> transform_origin_to_ecef;
+        //TODO by andreu
+
+
+        //result I want to find:
+        Eigen::Matrix<T, 3, 1> sensor_p_ecef; //sensor position with respect to ecef coordinate system
+        //TODO to be filled
+        sensor_p_ecef[0] = sensor_p_ecef[1] = sensor_p_ecef[2] = T(0);
+//        sensor_p_ecef = depends on transform_origin_to_ecef and sensor_p_origin
+
+
+
+        std::cout << "sensor_p_ecef: " << sensor_p_ecef[0] << ", " << sensor_p_ecef[1] << ", " << sensor_p_ecef[2] << std::endl;
+
+
+
+        //il codice qui sotto è quello vecchio, adattato in modo da usare la posizione del sensore rispetto a ecef, calcolata qui sopra
+        T square_sum = T(0);
+        for (int i = 0; i < 3; ++i)
+        {
+            square_sum += pow(sensor_p_ecef[i] - T(sat_position_[i]) , 2);
+        }
+        T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0) ;
+
+        //     error = (expected measurement)       - (actual measurement)
+        _residual[0] = (distance + _bias[0]*T(LIGHT_SPEED)) - (pseudorange_);
+
+
+        /* TODO importante
+         * credo che il residuo sia la differenza delle misure, NORMALIZZATA PER LA COVARIANZA
+         */
 
         return true;
     }

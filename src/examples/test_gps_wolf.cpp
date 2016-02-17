@@ -38,9 +38,9 @@ int main(int argc, char** argv)
 
     // Sensor position with respect to vehicle's frame
     StateBlock* sensor_p = new StateBlock(Eigen::Vector3s::Zero()); //gps sensor position
-    sensor_p->fix(); // TODO only for now, to simplify things
+    sensor_p->fix(); // only for now, to simplify things
     StateBlock* sensor_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);   //gps sensor orientation
-    sensor_o->fix(); //orientation is fixed, because antenna omnidirectional, so is not going to be optimized
+    sensor_o->fix(); // orientation is fixed, because antenna omnidirectional, so is not going to be optimized
 
     //gps sensor bias
     StateBlock* sensor_bias = new StateBlock(Eigen::Vector1s::Zero());
