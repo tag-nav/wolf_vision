@@ -8,62 +8,6 @@
 
 using namespace std;
 
-////TODO  TEMP!
-//Eigen::Matrix4s createConvMatrix(Eigen::Vector3s p, Eigen::Quaternions q)
-//{
-//    //cout << "partenza: " << p << "---" /*<< q*/ << endl;
-//
-//    Eigen::Matrix4s ret = Eigen::Matrix4s::Zero();
-//
-//    Eigen::Matrix3s rot_matr = q.toRotationMatrix();
-//
-//    for (int i = 0; i < 3; ++i)
-//    {
-//        for (int j = 0; j < 3; ++j)
-//        {
-//            ret(i, j) = rot_matr(i, j);
-//        }
-//    }
-//
-//    for (int i = 0; i < 3; ++i)
-//    {
-//        ret(i, 3) = p(i);
-//    }
-//
-//    ret(3, 3) = 1;
-//
-//    //cout << "res: " << endl << ret << endl;
-//
-//    return ret;
-//}
-//
-////TODO  TEMP!
-//void testMathQuaternion()
-//{
-//    Eigen::Vector4s sensor_p_ecef; //sensor position with respect to ecef coordinate system
-//    Eigen::Vector4s sensor_p_base(1, 1, 1 , 1); //sensor position with respect to the base (the vehicle)
-//    //TODo è da paddare con 0 o 1? --> credo 1!!
-//
-//    Eigen::Vector3s vehicle_init_p(100, 100, 100);
-//    Eigen::Quaternions vehicle_init_o(1, 0, 0, 0);
-//
-//    Eigen::Vector3s vehicle_p(10, 10, 10);
-//    Eigen::Quaternions vehicle_o(1, 0, 0, 0);
-//
-//
-//    Eigen::Matrix4s conv_origin_to_ecef = createConvMatrix(vehicle_init_p, vehicle_init_o);
-//    Eigen::Matrix4s conv_base_to_origin = createConvMatrix(vehicle_p, vehicle_o);
-//
-//    sensor_p_ecef = conv_origin_to_ecef * conv_base_to_origin * sensor_p_base;
-//
-//    cout << "conv_origin_to_ecef:\n" << conv_origin_to_ecef << endl;
-//    cout << "conv_base_to_origin:\n" << conv_base_to_origin << endl;
-//
-//    cout << "Sensore in ecef:\n" << sensor_p_ecef;
-//
-//}
-
-
 
 void addRealGPSMeasurements(rawgpsutils::SatellitesObs &obs, int i);
 
@@ -74,7 +18,8 @@ int main(int argc, char** argv)
 //    return 0;
 
     bool useCeres = true;
-    unsigned int n_captures = 5;
+    bool ceresVerbose = false;
+    unsigned int n_captures = 41;
 
     //Welcome message
     cout << endl << " ========= WOLF TREE test ===========" << endl << endl;
@@ -88,9 +33,8 @@ int main(int argc, char** argv)
      * Parameters, to be optimized
      */
     // Initial ecef position of the experiment
-    StateBlock* vehicle_init_p = new StateBlock(Eigen::Vector3s(4789360.65929, 177175.418126, 4194534.14743));
-                                //= new StateBlock(Eigen::Vector3s::Zero());
-    StateBlock* vehicle_init_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);// vehicle init orientation
+    StateBlock* vehicle_init_p = new StateBlock(Eigen::Vector3s::Zero());
+    StateBlock* vehicle_init_o = new StateBlock(Eigen::Vector1s::Zero());// vehicle init orientation
 
     // Sensor position with respect to vehicle's frame
     StateBlock* sensor_p = new StateBlock(Eigen::Vector3s::Zero()); //gps sensor position
@@ -107,14 +51,15 @@ int main(int argc, char** argv)
     SensorGPS* gps_sensor_ptr_ = new SensorGPS(sensor_p, sensor_o, sensor_bias, vehicle_init_p, vehicle_init_o);
     gps_sensor_ptr_->addProcessor(new ProcessorGPS());
 
-
+//    Eigen::Vector7s prior = Eigen::Vector7s::Zero();
+//    4789360.65929, 177175.418126, 4194534.14743
     /*
      * GPS WolfManager
      */
-    WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_3D,                             //frame structure
+    WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_2D,                             //frame structure
                                                        nullptr,                           //_sensor_prior_ptr
-                                                       Eigen::Vector7s::Zero(),           //prior
-                                                       Eigen::Matrix7s::Identity()*0.01,  //prior cov
+                                                       Eigen::Vector3s::Zero(),           //prior
+                                                       Eigen::Matrix3s::Identity()*0.01,  //prior cov
                                                        5,                                 //window size
                                                        1);                                //time for new keyframe
 
@@ -174,7 +119,8 @@ int main(int argc, char** argv)
             ceres::Solver::Summary summary;
 
             summary = ceres_manager->solve(ceres_options);
-            cout << summary.FullReport() << endl;
+            if(ceresVerbose)
+                cout << summary.FullReport() << endl;
         }
 
         //wolf_manager_->getProblemPtr()->print(2);

@@ -5,7 +5,7 @@
 #ifndef WOLF_PROCESSOR_GPS_H
 #define WOLF_PROCESSOR_GPS_H
 
-#include "constraint_gps_pseudorange.h"
+#include "constraint_gps_pseudorange_2D.h"
 #include "sensor_gps.h"
 #include "capture_gps.h"
 

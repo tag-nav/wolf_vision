@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_GPS_PSEUDORANGE_H_
-#define CONSTRAINT_GPS_PSEUDORANGE_H_
+#ifndef CONSTRAINT_GPS_PSEUDORANGE_3D_H_
+#define CONSTRAINT_GPS_PSEUDORANGE_3D_H_
 
 #define LIGHT_SPEED 299792458
 
@@ -17,12 +17,12 @@
 
 
 
-class ConstraintGPSPseudorange: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
+class ConstraintGPSPseudorange3D: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
 {
 
 public:
 
-    ConstraintGPSPseudorange(FeatureBase* _ftr_ptr, ConstraintStatus _status = CTR_ACTIVE) :
+    ConstraintGPSPseudorange3D(FeatureBase* _ftr_ptr, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 3, 4, 3, 1, 3, 4>(_ftr_ptr, CTR_GPS_PR_3D, _status,
                             _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame
                             _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
@@ -36,7 +36,7 @@ public:
         sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
         pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
 
-        //std::cout << "ConstraintGPSPseudorange()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
+        //std::cout << "ConstraintGPSPseudorange3D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
     }
 
 
@@ -45,9 +45,9 @@ public:
      * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
      *
      **/
-    virtual ~ConstraintGPSPseudorange()
+    virtual ~ConstraintGPSPseudorange3D()
     {
-        //std::cout << "deleting ConstraintGPSPseudorange " << nodeId() << std::endl;
+        //std::cout << "deleting ConstraintGPSPseudorange3D " << nodeId() << std::endl;
     }
 
 
@@ -59,54 +59,53 @@ public:
      * base = vehicle
      */
     template <typename T>
-    bool operator()(const T* const _vehicle_p, const T* const _vehicle_q, const T* const _sensor_p, const T* const _bias, const T* const _init_vehicle_p, const T* const _init_vehicle_q, T* _residual) const
+    bool operator()(const T* const _vehicle_p, const T* const _vehicle_o, const T* const _sensor_p, const T* const _bias, const T* const _init_vehicle_p, const T* const _init_vehicle_o, T* _residual) const
     {
 //        std::cout << "OPERATOR()\n";
 //        std::cout << "_init_vehicle_p: " << _init_vehicle_p[0] << ", " << _init_vehicle_p[1] << ", " << _init_vehicle_p[2] << std::endl;
-//        std::cout << "_init_vehicle_q: " << _init_vehicle_q[0] << ", " << _init_vehicle_q[1] << ", " << _init_vehicle_q[2] << ", " << _init_vehicle_q[3] << std::endl;
+//        std::cout << "_init_vehicle_o: " << _init_vehicle_o[0] << ", " << _init_vehicle_o[1] << ", " << _init_vehicle_o[2] << ", " << _init_vehicle_o[3] << std::endl;
 //        std::cout << "_vehicle_p: " << _vehicle_p[0] << ", " << _vehicle_p[1] << ", " << _vehicle_p[2] << std::endl;
-//        std::cout << "_vehicle_q: " << _vehicle_q[0] << ", " << _vehicle_q[1] << ", " << _vehicle_q[2] << ", " << _vehicle_q[3] << std::endl;
+//        std::cout << "_vehicle_o: " << _vehicle_o[0] << ", " << _vehicle_o[1] << ", " << _vehicle_o[2] << ", " << _vehicle_o[3] << std::endl;
 //        std::cout << "_sensor_p: " << _sensor_p[0] << ", " << _sensor_p[1] << ", " << _sensor_p[2] << std::endl;
 
         Eigen::Matrix<T, 4, 1> sensor_p_ecef; //sensor position with respect to ecef coordinate system
         Eigen::Matrix<T, 4, 1> sensor_p_base(_sensor_p[0], _sensor_p[1], _sensor_p[2], T(1)); //sensor position with respect to the base (the vehicle)
-        //TODO padding is with 1, check confirm -------------|
 
         /*
-         * Origin-to-ECEF conversion matrix
+         * Origin-to-ECEF transform matrix
          */
-        Eigen::Matrix<T, 4, 4> conv_origin_to_ecef;
+        Eigen::Matrix<T, 4, 4> transform_origin_to_ecef;
 
-        Eigen::Quaternion<T> vehicle_init_q(_init_vehicle_q[0], _init_vehicle_q[1], _init_vehicle_q[2], _init_vehicle_q[3]);
+        Eigen::Quaternion<T> vehicle_init_q(_init_vehicle_o[0], _init_vehicle_o[1], _init_vehicle_o[2], _init_vehicle_o[3]);
         Eigen::Matrix<T, 3, 3> rot_matr_init = vehicle_init_q.toRotationMatrix();
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
-                conv_origin_to_ecef(i, j) = rot_matr_init(i, j);
+                transform_origin_to_ecef(i, j) = rot_matr_init(i, j);
 
         for (int i = 0; i < 3; ++i)
-            conv_origin_to_ecef(i, 3) = _init_vehicle_p[i];
+            transform_origin_to_ecef(i, 3) = _init_vehicle_p[i];
 
-        conv_origin_to_ecef(3, 0) = conv_origin_to_ecef(3, 1) = conv_origin_to_ecef(3, 2) = T(0);
-        conv_origin_to_ecef(3, 3) = T(1);
+        transform_origin_to_ecef(3, 0) = transform_origin_to_ecef(3, 1) = transform_origin_to_ecef(3, 2) = T(0);
+        transform_origin_to_ecef(3, 3) = T(1);
 
 
 
         /*
-         * Base-to-origin conversion matrix
+         * Base-to-origin transform matrix
          */
-        Eigen::Matrix<T, 4, 4> conv_base_to_origin;
+        Eigen::Matrix<T, 4, 4> transform_base_to_origin;
 
-        Eigen::Quaternion<T> vehicle_q(_vehicle_q[0], _vehicle_q[1], _vehicle_q[2], _vehicle_q[3]);
-        Eigen::Matrix<T, 3, 3> rot_matr_vehicle = vehicle_q.toRotationMatrix();
+        Eigen::Quaternion<T> vehicle_o(_vehicle_o[0], _vehicle_o[1], _vehicle_o[2], _vehicle_o[3]);
+        Eigen::Matrix<T, 3, 3> rot_matr_vehicle = vehicle_o.toRotationMatrix();
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
-                conv_base_to_origin(i, j) = rot_matr_vehicle(i, j);
+                transform_base_to_origin(i, j) = rot_matr_vehicle(i, j);
 
         for (int i = 0; i < 3; ++i)
-            conv_base_to_origin(i, 3) = _vehicle_p[i];
+            transform_base_to_origin(i, 3) = _vehicle_p[i];
 
-        conv_base_to_origin(3, 0) = conv_base_to_origin(3, 1) = conv_base_to_origin(3, 2) = T(0);
-        conv_base_to_origin(3, 3) = T(1);
+        transform_base_to_origin(3, 0) = transform_base_to_origin(3, 1) = transform_base_to_origin(3, 2) = T(0);
+        transform_base_to_origin(3, 3) = T(1);
 
 
 
@@ -114,7 +113,7 @@ public:
         /*
          * Transform
          */
-        sensor_p_ecef =  conv_origin_to_ecef * conv_base_to_origin *  sensor_p_base;
+        sensor_p_ecef =  /*transform_origin_to_ecef * transform_base_to_origin * */ sensor_p_base;
 //        std::cout << "sensor_p_ecef: " << sensor_p_ecef[0] << ", " << sensor_p_ecef[1] << ", " << sensor_p_ecef[2] << std::endl;
 
 
@@ -155,4 +154,4 @@ protected:
 
 };
 
-#endif //CONSTRAINT_GPS_PSEUDORANGE_H_
+#endif //CONSTRAINT_GPS_PSEUDORANGE_3D_H_

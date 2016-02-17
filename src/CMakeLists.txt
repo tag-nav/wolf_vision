@@ -80,7 +80,8 @@ SET(HDRS
     constraint_analytic.h
     constraint_sparse.h
     constraint_gps_2D.h
-    constraint_gps_pseudorange.h
+    constraint_gps_pseudorange_3D.h
+    constraint_gps_pseudorange_2D.h
     constraint_fix.h
     constraint_odom_2D.h
     constraint_odom_2D_analytic.h

@@ -21,8 +21,8 @@ class SensorGPS : public SensorBase
 
 protected:
 
-    StateBlock* init_vehicle_position_ptr_; //position of the vehicle where the experiment starts in ecef
-    StateBlock* init_vehicle_orientation_ptr_; //orientation of the vehicle where the experiment starts in ecef
+    StateBlock* init_vehicle_p_ptr_; //position of the vehicle where the experiment starts in ecef
+    StateBlock* init_vehicle_o_ptr_; //orientation of the vehicle where the experiment starts in ecef
 
 public:
 
