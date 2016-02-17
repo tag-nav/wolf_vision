@@ -101,6 +101,7 @@ SET(HDRS
     landmark_corner_2D.h
     landmark_container.h
     landmark_point.h
+    local_parametrization_base.h
     map_base.h
     node_base.h
     node_terminus.h

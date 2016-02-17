@@ -10,9 +10,7 @@
 //Wolf includes
 #include "wolf.h"
 #include "node_base.h"
-
-// fwd TODO: create class LocalParametrizationBase
-class LocalParametrizationBase;
+#include "local_parametrization_base.h"
 
 //class StateBlock
 class StateBlock
