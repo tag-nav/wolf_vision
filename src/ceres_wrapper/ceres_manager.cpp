@@ -434,33 +434,64 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
         }
         case CTR_GPS_PR_3D:
         {
-            ConstraintGPSPseudorange* specific_ptr = (ConstraintGPSPseudorange*)(_corrPtr);
+            ConstraintGPSPseudorange3D* specific_ptr = (ConstraintGPSPseudorange3D*)(_corrPtr);
             if (_self_auto_diff)
-                return new AutoDiffCostFunctionWrapper<ConstraintGPSPseudorange,
-                                                        specific_ptr->measurementSize,
-                                                        specific_ptr->block0Size,
-                                                        specific_ptr->block1Size,
-                                                        specific_ptr->block2Size,
-                                                        specific_ptr->block3Size,
-                                                        specific_ptr->block4Size,
-                                                        specific_ptr->block5Size,
-                                                        specific_ptr->block6Size,
-                                                        specific_ptr->block7Size,
-                                                        specific_ptr->block8Size,
-                                                        specific_ptr->block9Size>(specific_ptr);
+                return new AutoDiffCostFunctionWrapper<ConstraintGPSPseudorange3D,
+                        specific_ptr->measurementSize,
+                        specific_ptr->block0Size,
+                        specific_ptr->block1Size,
+                        specific_ptr->block2Size,
+                        specific_ptr->block3Size,
+                        specific_ptr->block4Size,
+                        specific_ptr->block5Size,
+                        specific_ptr->block6Size,
+                        specific_ptr->block7Size,
+                        specific_ptr->block8Size,
+                        specific_ptr->block9Size>(specific_ptr);
             else
-                return new ceres::AutoDiffCostFunction<ConstraintGPSPseudorange,
-                                                        specific_ptr->measurementSize,
-                                                        specific_ptr->block0Size,
-                                                        specific_ptr->block1Size,
-                                                        specific_ptr->block2Size,
-                                                        specific_ptr->block3Size,
-                                                        specific_ptr->block4Size,
-                                                        specific_ptr->block5Size,
-                                                        specific_ptr->block6Size,
-                                                        specific_ptr->block7Size,
-                                                        specific_ptr->block8Size,
-                                                        specific_ptr->block9Size>(specific_ptr);
+                return new ceres::AutoDiffCostFunction<ConstraintGPSPseudorange3D,
+                        specific_ptr->measurementSize,
+                        specific_ptr->block0Size,
+                        specific_ptr->block1Size,
+                        specific_ptr->block2Size,
+                        specific_ptr->block3Size,
+                        specific_ptr->block4Size,
+                        specific_ptr->block5Size,
+                        specific_ptr->block6Size,
+                        specific_ptr->block7Size,
+                        specific_ptr->block8Size,
+                        specific_ptr->block9Size>(specific_ptr);
+            break;
+        }
+        case CTR_GPS_PR_2D:
+        {
+            ConstraintGPSPseudorange2D* specific_ptr = (ConstraintGPSPseudorange2D*)(_corrPtr);
+            if (_self_auto_diff)
+                return new AutoDiffCostFunctionWrapper<ConstraintGPSPseudorange2D,
+                        specific_ptr->measurementSize,
+                        specific_ptr->block0Size,
+                        specific_ptr->block1Size,
+                        specific_ptr->block2Size,
+                        specific_ptr->block3Size,
+                        specific_ptr->block4Size,
+                        specific_ptr->block5Size,
+                        specific_ptr->block6Size,
+                        specific_ptr->block7Size,
+                        specific_ptr->block8Size,
+                        specific_ptr->block9Size>(specific_ptr);
+            else
+                return new ceres::AutoDiffCostFunction<ConstraintGPSPseudorange2D,
+                        specific_ptr->measurementSize,
+                        specific_ptr->block0Size,
+                        specific_ptr->block1Size,
+                        specific_ptr->block2Size,
+                        specific_ptr->block3Size,
+                        specific_ptr->block4Size,
+                        specific_ptr->block5Size,
+                        specific_ptr->block6Size,
+                        specific_ptr->block7Size,
+                        specific_ptr->block8Size,
+                        specific_ptr->block9Size>(specific_ptr);
             break;
         }
 		default:

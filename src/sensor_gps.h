@@ -1,6 +1,3 @@
-//TODO indentation: add a tab at everything inside the class: protected and public must have 1 tab
-
-
 #ifndef SENSOR_GPS_H_
 #define SENSOR_GPS_H_
 
@@ -20,17 +17,12 @@ class SensorGPS : public SensorBase
 //                bias                  [ ok ]
 //        * EXTRINSIC PARAM:
 //                GPS init              [  ]
-//                nav data              [TODO]
 //                gps mounting point on board in  the vehicle   [ ok ]
 
 protected:
-    /*
-     * la nav data non va qui, ma magari come capture
-     */
-    //std::list<rawgpsutils::NavData> nav_data_;
 
-    StateBlock* init_vehicle_position_ptr_; //position of the vehicle where the experiment starts in ecef
-    StateBlock* init_vehicle_orientation_ptr_; //orientation of the vehicle where the experiment starts in ecef
+    StateBlock* init_vehicle_p_ptr_; //position of the vehicle where the experiment starts in ecef
+    StateBlock* init_vehicle_o_ptr_; //orientation of the vehicle where the experiment starts in ecef
 
 public:
 
@@ -48,10 +40,6 @@ public:
      **/
     virtual ~SensorGPS();
 
-
-
-    // NO NAV DATA IN THIS CLASS!!!!!
-    //void addNavData(const std::string &_sat_id, const TimeStamp &_timestamp, const WolfScalar &_pseudorange, const WolfScalar &_param1, const WolfScalar &_param2);
 };
 
 
