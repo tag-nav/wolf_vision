@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     StateBlock* vehicle_init_o = new StateBlock(Eigen::Vector1s::Zero());// vehicle init orientation
 
     // Sensor position with respect to vehicle's frame
-    StateBlock* sensor_p = new StateBlock(Eigen::Vector3s::Zero()); //gps sensor position
+    StateBlock* sensor_p = new StateBlock(Eigen::Vector3s(1, 0, 0));//::Zero()); //gps sensor position
     sensor_p->fix(); // only for now, to simplify things
     StateBlock* sensor_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);   //gps sensor orientation
     sensor_o->fix(); // orientation is fixed, because antenna omnidirectional, so is not going to be optimized
@@ -51,14 +51,14 @@ int main(int argc, char** argv)
     SensorGPS* gps_sensor_ptr_ = new SensorGPS(sensor_p, sensor_o, sensor_bias, vehicle_init_p, vehicle_init_o);
     gps_sensor_ptr_->addProcessor(new ProcessorGPS());
 
-//    Eigen::Vector7s prior = Eigen::Vector7s::Zero();
+    Eigen::Vector3s prior = Eigen::Vector3s(10, 10, 90*M_PI/180);
 //    4789360.65929, 177175.418126, 4194534.14743
     /*
      * GPS WolfManager
      */
     WolfManagerGPS* wolf_manager_ = new WolfManagerGPS(PO_2D,                             //frame structure
                                                        nullptr,                           //_sensor_prior_ptr
-                                                       Eigen::Vector3s::Zero(),           //prior
+                                                       prior,           //prior
                                                        Eigen::Matrix3s::Identity()*0.01,  //prior cov
                                                        5,                                 //window size
                                                        1);                                //time for new keyframe
@@ -84,8 +84,7 @@ int main(int argc, char** argv)
     /*
      * Data Captures
      */
-    for(unsigned int  i=0; i < n_captures; ++i)
-    {
+    for(unsigned int  i=0; i < n_captures; ++i) {
         cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
         cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%  CAPTURE #" << i << "  %%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
         TimeStamp time_stamp(i);
@@ -101,7 +100,7 @@ int main(int argc, char** argv)
 
 
         // Create synthetic gps capture
-        CaptureGPS* cpt_ptr_ = new CaptureGPS(time_stamp, gps_sensor_ptr_, obs);
+        CaptureGPS *cpt_ptr_ = new CaptureGPS(time_stamp, gps_sensor_ptr_, obs);
 
         // Add capture
         wolf_manager_->addCapture(cpt_ptr_);
@@ -111,7 +110,7 @@ int main(int argc, char** argv)
         wolf_manager_->update();
         //cout << "wolf manager updated" << endl;
 
-        if(useCeres)
+        if (useCeres)
         {
             ceres_manager->update();
             //cout << "ceres manager updated" << endl;
@@ -119,25 +118,27 @@ int main(int argc, char** argv)
             ceres::Solver::Summary summary;
 
             summary = ceres_manager->solve(ceres_options);
-            if(ceresVerbose)
+            if (ceresVerbose)
                 cout << summary.FullReport() << endl;
         }
-
+    }
         //wolf_manager_->getProblemPtr()->print(2);
-
+//
         std::cout << setprecision(12);
         std::cout << "\n~~~~ RESULTS ~~~~\n";
-        std::cout << "|\tinitial P " << gps_sensor_ptr_->getInitVehiclePPtr()->getVector().transpose() << std::endl;// initial vehicle position (ecef)
-        std::cout << "|\tinitial O " << gps_sensor_ptr_->getInitVehicleOPtr()->getVector().transpose() << std::endl;// initial vehicle orientation (ecef)
-        std::cout << "|\tVehicle pose " << wolf_manager_->getVehiclePose().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
-        std::cout << "|\tsensor P " << gps_sensor_ptr_->getPPtr()->getVector().transpose() << std::endl;// position of the sensor with respect to the vehicle's frame
-        std::cout << "|\tsensor O (not needed)" << gps_sensor_ptr_->getOPtr()->getVector().transpose() << std::endl;// orientation of antenna is not needed, because omnidirectional
-        std::cout << "|\tbias " << gps_sensor_ptr_->getIntrinsicPtr()->getVector().transpose() << std::endl;//intrinsic parameter  = receiver time bias
+        std::cout << "|\tinitial P: " << gps_sensor_ptr_->getInitVehiclePPtr()->getVector().transpose() << std::endl;// initial vehicle position (ecef)
+        std::cout << "|\tinitial O: " << gps_sensor_ptr_->getInitVehicleOPtr()->getVector().transpose() << std::endl;// initial vehicle orientation (ecef)
+        std::cout << "|\tVehicle Pose: " << wolf_manager_->getVehiclePose().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
+        std::cout << "|\tVehicle P (last frame): " << wolf_manager_->getProblemPtr()->getLastFramePtr()->getPPtr()->getVector().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
+        std::cout << "|\tVehicle O (last frame): " << wolf_manager_->getProblemPtr()->getLastFramePtr()->getOPtr()->getVector().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
+        std::cout << "|\tsensor P: " << gps_sensor_ptr_->getPPtr()->getVector().transpose() << std::endl;// position of the sensor with respect to the vehicle's frame
+//        std::cout << "|\tsensor O (not needed):" << gps_sensor_ptr_->getOPtr()->getVector().transpose() << std::endl;// orientation of antenna is not needed, because omnidirectional
+        std::cout << "|\tbias: " << gps_sensor_ptr_->getIntrinsicPtr()->getVector().transpose() << std::endl;//intrinsic parameter  = receiver time bias
         std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
 
-
-        std::cin.ignore();
-    }
+//
+//        std::cin.ignore();
+//    }
 
 
     cout << std::endl << " ========= calling delete wolf_manager_ (should not crash) =============" << std::endl;
