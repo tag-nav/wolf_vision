@@ -33,7 +33,7 @@ int main(int argc, char** argv)
      * Parameters, to be optimized
      */
     // Initial ecef position of the experiment
-    StateBlock* vehicle_init_p = new StateBlock(Eigen::Vector3s::Zero());
+    StateBlock* vehicle_init_p = new StateBlock(Eigen::Vector3s(4789360, 177175, 4194534));
     StateBlock* vehicle_init_o = new StateBlock(Eigen::Vector1s::Zero());// vehicle init orientation
 
     // Sensor position with respect to vehicle's frame
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
             if (ceresVerbose)
                 cout << summary.FullReport() << endl;
         }
-    }
+
         //wolf_manager_->getProblemPtr()->print(2);
 //
         std::cout << setprecision(12);
@@ -136,9 +136,9 @@ int main(int argc, char** argv)
         std::cout << "|\tbias: " << gps_sensor_ptr_->getIntrinsicPtr()->getVector().transpose() << std::endl;//intrinsic parameter  = receiver time bias
         std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
 
-//
-//        std::cin.ignore();
-//    }
+
+        std::cin.ignore();
+    }
 
 
     cout << std::endl << " ========= calling delete wolf_manager_ (should not crash) =============" << std::endl;
