@@ -134,7 +134,7 @@ class ConstraintSparse: public ConstraintBase
          **/
         virtual unsigned int getSize() const;
 
-        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+//        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
     private:
         void resizeVectors();
@@ -495,39 +495,39 @@ unsigned int ConstraintSparse<MEASUREMENT_SIZE,
     return MEASUREMENT_SIZE;
 }
 
-template <const unsigned int MEASUREMENT_SIZE,
-                unsigned int BLOCK_0_SIZE,
-                unsigned int BLOCK_1_SIZE,
-                unsigned int BLOCK_2_SIZE,
-                unsigned int BLOCK_3_SIZE,
-                unsigned int BLOCK_4_SIZE,
-                unsigned int BLOCK_5_SIZE,
-                unsigned int BLOCK_6_SIZE,
-                unsigned int BLOCK_7_SIZE,
-                unsigned int BLOCK_8_SIZE,
-                unsigned int BLOCK_9_SIZE>
-void ConstraintSparse<MEASUREMENT_SIZE,
-                      BLOCK_0_SIZE,
-                      BLOCK_1_SIZE,
-                      BLOCK_2_SIZE,
-                      BLOCK_3_SIZE,
-                      BLOCK_4_SIZE,
-                      BLOCK_5_SIZE,
-                      BLOCK_6_SIZE,
-                      BLOCK_7_SIZE,
-                      BLOCK_8_SIZE,
-                      BLOCK_9_SIZE>::print(unsigned int _ntabs, std::ostream& _ost) const
-{
-    NodeLinked::printSelf(_ntabs, _ost);
-    for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
-    {
-        printTabs(_ntabs);
-        _ost << "block " << ii << ": ";
-        for (unsigned int jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
-            _ost << *(state_ptr_vector_.at(ii)->getPtr()+jj) << " ";
-        _ost << std::endl;
-    }
-}
+//template <const unsigned int MEASUREMENT_SIZE,
+//                unsigned int BLOCK_0_SIZE,
+//                unsigned int BLOCK_1_SIZE,
+//                unsigned int BLOCK_2_SIZE,
+//                unsigned int BLOCK_3_SIZE,
+//                unsigned int BLOCK_4_SIZE,
+//                unsigned int BLOCK_5_SIZE,
+//                unsigned int BLOCK_6_SIZE,
+//                unsigned int BLOCK_7_SIZE,
+//                unsigned int BLOCK_8_SIZE,
+//                unsigned int BLOCK_9_SIZE>
+//void ConstraintSparse<MEASUREMENT_SIZE,
+//                      BLOCK_0_SIZE,
+//                      BLOCK_1_SIZE,
+//                      BLOCK_2_SIZE,
+//                      BLOCK_3_SIZE,
+//                      BLOCK_4_SIZE,
+//                      BLOCK_5_SIZE,
+//                      BLOCK_6_SIZE,
+//                      BLOCK_7_SIZE,
+//                      BLOCK_8_SIZE,
+//                      BLOCK_9_SIZE>::print(unsigned int _ntabs, std::ostream& _ost) const
+//{
+//    NodeLinked::printSelf(_ntabs, _ost);
+//    for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
+//    {
+//        printTabs(_ntabs);
+//        _ost << "block " << ii << ": ";
+//        for (unsigned int jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
+//            _ost << *(state_ptr_vector_.at(ii)->getPtr()+jj) << " ";
+//        _ost << std::endl;
+//    }
+//}
 
 template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,

@@ -131,12 +131,12 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
         
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         
-        /** \brief prints object's info
-         * 
-         * prints object's info
-         * 
-         **/
-        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+//        /** \brief prints object's info
+//         *
+//         * prints object's info
+//         *
+//         **/
+//        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
         
 };
 #endif

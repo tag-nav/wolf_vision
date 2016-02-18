@@ -238,14 +238,14 @@ class WolfProblem: public NodeBase
          */
         virtual bool isTop();
 
-        /** \brief Prints node information
-         * 
-		 * Prints node information.
-         * \param _ntabs number of tabulations to print at the left of the printed information
-         * \param _ost output stream
-		 * 
-         */
-        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+//        /** \brief Prints node information
+//         *
+//		 * Prints node information.
+//         * \param _ntabs number of tabulations to print at the left of the printed information
+//         * \param _ost output stream
+//		 *
+//         */
+//        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
         /** \brief Remove Down Node (empty
          *

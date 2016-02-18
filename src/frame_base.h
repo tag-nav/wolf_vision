@@ -158,7 +158,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 
         CaptureBaseIter hasCaptureOf(const SensorBase* _sensor_ptr);
 
-        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+//        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
         
 };
 #endif

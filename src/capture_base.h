@@ -96,6 +96,6 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
         virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const = 0;
 
 		
-        virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
+//        virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 };
 #endif
