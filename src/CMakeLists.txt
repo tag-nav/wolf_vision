@@ -149,6 +149,7 @@ SET(SRCS
     landmark_corner_2D.cpp
     landmark_container.cpp
     landmark_point.cpp
+    local_parametrization_base.cpp
     map_base.cpp
     node_base.cpp
     node_terminus.cpp
