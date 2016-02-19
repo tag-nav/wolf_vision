@@ -2,7 +2,7 @@
  * \file local_parametrization_quaternion.h
  *
  *  Created on: Feb 18, 2016
- *      author: jsola
+ *      \author: jsola
  */
 
 #ifndef LOCAL_PARAMETRIZATION_QUATERNION_H_
@@ -10,6 +10,16 @@
 
 #include "local_parametrization_base.h"
 
+/**
+ * \brief Local parametrization for quaternions
+ *
+ * This class implements two possible local parametrizations for quaternions:
+ *
+ *  - With a local delta,  so that q_new = q_old x q(delta_theta).
+ *  - With a global delta, so that q_new = q(delta_theta) x q_old.
+ *
+ * The choice is selected at construction time.
+ */
 class LocalParametrizationQuaternion : public LocalParametrizationBase
 {
     private:

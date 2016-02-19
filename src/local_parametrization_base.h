@@ -2,7 +2,7 @@
  * \file local_parametrization_base.h
  *
  *  Created on: Feb 17, 2016
- *      author: jsola
+ *      \author: jsola
  */
 
 #ifndef LOCAL_PARAMETRIZATION_BASE_H_
