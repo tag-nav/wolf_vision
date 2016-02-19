@@ -28,8 +28,8 @@ int main(){
     Map<VectorXs> q_out(&x(7),4);
     Map<MatrixXs> J(M.data(),4,3);
 
-    cout << "\nx=" << x.transpose() << endl;
-    cout << "\nq0=" << q.transpose() << "\nda= " << da.transpose() << endl;
+    cout << "\n x = " << x.transpose() << endl;
+    cout << "\nq0 = " << q.transpose() << "\nda = " << da.transpose() << endl;
 
     LocalParametrizationQuaternion Qpar;
 
@@ -37,7 +37,7 @@ int main(){
     cout << "\nq_out = " << q_out.transpose() << endl;
 
     Qpar.computeJacobian(q,J);
-    cout << "J=" << J << "\n" << endl;
+    cout << " J = " << J << "\n" << endl;
 
 
     return 0;
