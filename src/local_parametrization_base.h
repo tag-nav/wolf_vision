@@ -22,7 +22,7 @@ class LocalParametrizationBase{
         virtual bool plus(const Eigen::Map<Eigen::VectorXs>& _x,
                           const Eigen::Map<Eigen::VectorXs>& _delta,
                           Eigen::Map<Eigen::VectorXs>& _x_plus_delta) const = 0;
-        virtual bool computeJacobian(const Eigen::Map<Eigen::VectorXs>& _x, const Eigen::Map<Eigen::MatrixXs>& _jacobian) const = 0;
+        virtual bool computeJacobian(const Eigen::Map<Eigen::VectorXs>& _x, Eigen::Map<Eigen::MatrixXs>& _jacobian) const = 0;
 
         unsigned int getLocalSize();
         unsigned int getGlobalSize();
