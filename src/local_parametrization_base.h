@@ -12,7 +12,7 @@
 
 
 class LocalParametrizationBase{
-    private:
+    protected:
         unsigned int global_size_;
         unsigned int local_size_;
     public:
