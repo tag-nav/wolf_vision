@@ -52,12 +52,6 @@ public:
 
 
 
-    /*
-     * TODO improve naming for more coherence.
-     *
-     * origin = init_vehicle
-     * base = vehicle
-     */
     template <typename T>
     bool operator()(const T* const _vehicle_p, const T* const _vehicle_o, const T* const _sensor_p, const T* const _bias, const T* const _init_vehicle_p, const T* const _init_vehicle_o, T* _residual) const
     {
@@ -72,49 +66,91 @@ public:
         Eigen::Matrix<T, 3, 1> sensor_p_base(_sensor_p[0], _sensor_p[1], _sensor_p[2]); //sensor position with respect to the base (the vehicle)
 //        std::cout << "sensor_p_base: " << sensor_p_base[0] << ", " << sensor_p_base[1] << ", " << sensor_p_base[2] << std::endl;
 
-        Eigen::Matrix<T, 3, 1> vehicle_p_origin(_vehicle_p[0], _vehicle_p[1], T(0));
-//        std::cout << "vehicle_p_origin: " << vehicle_p_origin[0] << ", " << vehicle_p_origin[1] << ", " << vehicle_p_origin[2] << std::endl;
+        Eigen::Matrix<T, 3, 1> vehicle_p_odom(_vehicle_p[0], _vehicle_p[1], T(0));
+//        std::cout << "vehicle_p_odom: " << vehicle_p_odom[0] << ", " << vehicle_p_odom[1] << ", " << vehicle_p_odom[2] << std::endl;
         Eigen::Matrix<T, 3, 1> init_vehicle_p(_init_vehicle_p[0], _init_vehicle_p[1], _init_vehicle_p[2]);
 
         /*
-         * Base-to-origin transform matrix
+         * Base-to-odom transform matrix
          */
-        Eigen::Matrix<T, 3, 3> transform_base_to_origin;
-        transform_base_to_origin(0, 0) = T(cos(_vehicle_o[0]));
-        transform_base_to_origin(0, 1) = T(sin(_vehicle_o[0]));
-        transform_base_to_origin(0, 2) = T(0);
-        transform_base_to_origin(1, 0) = T(-sin(_vehicle_o[0]));
-        transform_base_to_origin(1, 1) = T(cos(_vehicle_o[0]));
-        transform_base_to_origin(1, 2) = T(0);
-        transform_base_to_origin(2, 0) = T(0);
-        transform_base_to_origin(2, 1) = T(0);
-        transform_base_to_origin(2, 2) = T(1);
+        Eigen::Matrix<T, 3, 3> T_base2odom = Eigen::Matrix<T, 3, 3>::Identity();
+        T_base2odom(0, 0) = T(cos(_vehicle_o[0]));
+        T_base2odom(0, 1) = T(sin(_vehicle_o[0]));
+        T_base2odom(1, 0) = T(-sin(_vehicle_o[0]));
+        T_base2odom(1, 1) = T(cos(_vehicle_o[0]));
 
-        Eigen::Matrix<T, 3, 1> sensor_p_origin; // sensor position with respect to origin frame (initial frame of the experiment)
-        sensor_p_origin = transform_base_to_origin * sensor_p_base + vehicle_p_origin;
+        Eigen::Matrix<T, 3, 1> sensor_p_odom; // sensor position with respect to odom frame (initial frame of the experiment)
+        sensor_p_odom = T_base2odom * sensor_p_base + vehicle_p_odom;
 
 //        std::cout << "1st trasform:  ";
-//        std::cout << "sensor_p_origin: " << sensor_p_origin[0] << ", " << sensor_p_origin[1] << ", " << sensor_p_origin[2] << std::endl;
+//        std::cout << "sensor_p_odom: " << sensor_p_odom[0] << ", " << sensor_p_odom[1] << ", " << sensor_p_odom[2] << std::endl;
+
+        /*
+         * _init_vehicle_p from ecef to lla
+         */
+        // WGS84 ellipsoid constants
+        T a = T(6378137); // earth's radius
+        T e = T(8.1819190842622e-2);  // eccentricity
+        T asq = a*a;
+        T esq = e*e;
+        T b = T(sqrt( asq * (T(1)-esq) ));
+        T bsq = T(b*b);
+        T ep = T(sqrt( (asq - bsq)/bsq));
+        T p = T(sqrt( _init_vehicle_p[0]*_init_vehicle_p[0] + _init_vehicle_p[1]*_init_vehicle_p[1] ));
+        T th = T(atan2(a*_init_vehicle_p[2], b*p));
+
+        T lon = T(atan2(_init_vehicle_p[1],_init_vehicle_p[0]));
+        T lat = T(atan2( (_init_vehicle_p[2] + ep*ep*b*pow(sin(th),3) ), (p - esq*a*pow(cos(th),3)) ));
+        T N = T(a/( sqrt(T(1)-esq*pow(sin(lat),2)) ));
+        T alt = T(p / cos(lat) - N);
+        // mod lat to 0-2pi
+        if(lon<T(0)) lon += T(2*M_PI);
+        if(lon>T(2*M_PI)) lon += T(2*M_PI);
+
+        // correction for altitude near poles left out.
+
+        //convert to degrees
+        lat = lat * T(180 / M_PI);
+        lon = lon * T(180 / M_PI);
+
+//        std::cout << "_init_vehicle_p: " << _init_vehicle_p[0] << ", " << _init_vehicle_p[1] << ", " << _init_vehicle_p[2] << std::endl;
+//        std::cout << "_init_vehicle_p LLA: " << lat << ", " << lon << ", " << alt << std::endl;
 
 
         /*
-         * Origin-to-ECEF transform matrix
+         * odom-to-ECEF transform matrix
          */
-        Eigen::Matrix<T, 3, 3> transform_origin_to_ecef = Eigen::Matrix<T, 3, 3>::Identity();
-        //TODO by andreu
+        Eigen::Matrix<T, 3, 3> R1 = Eigen::Matrix<T, 3, 3>::Identity();
+        R1(0, 0) = T(cos(lon));
+        R1(0, 1) = T(sin(lon));
+        R1(1, 0) = T(-sin(lon));
+        R1(1, 1) = T(cos(lon));
+
+        Eigen::Matrix<T, 3, 3> R2 = Eigen::Matrix<T, 3, 3>::Identity();
+        R2(0, 0) = T(cos(lat));
+        R2(0, 2) = T(sin(lat));
+        R2(2, 0) = T(-sin(lat));
+        R2(2, 2) = T(cos(lat));
+
+        Eigen::Matrix<T, 3, 3> R3 = Eigen::Matrix<T, 3, 3>::Zero();
+        R3(0, 1) = R3(1, 2) = R3(2, 0) = T(1);
+
+        Eigen::Matrix<T, 3, 3> R4 = Eigen::Matrix<T, 3, 3>::Identity();
+        R4(0, 0) = T(cos(_init_vehicle_o[0]));
+        R4(0, 1) = T(sin(_init_vehicle_o[0]));
+        R4(1, 0) = T(-sin(_init_vehicle_o[0]));
+        R4(1, 1) = T(cos(_init_vehicle_o[0]));
+
+        Eigen::Matrix<T, 3, 3> T_odom2ecef = (R4*R3*R2*R1).inverse();
 
 
+        /*
+         * result I want to find: sensor position with respect to ecef
+         */
+        Eigen::Matrix<T, 3, 1> sensor_p_ecef;//sensor position with respect to ecef coordinate system
 
-
-
-        //result I want to find:
-        Eigen::Matrix<T, 3, 1> sensor_p_ecef;// = Eigen::Matrix<T, 3, 1>::Zero(); //sensor position with respect to ecef coordinate system
-        //TODO to be filled
-
-        sensor_p_ecef = transform_origin_to_ecef * sensor_p_origin;// + init_vehicle_p; //TODO Something similar to that
-//        sensor_p_ecef = depends on transform_origin_to_ecef and sensor_p_origin
-
-//        std::cout << "OPERATOR() -- sensor_p_ecef: " << sensor_p_ecef[0] << ", " << sensor_p_ecef[1] << ", " << sensor_p_ecef[2] << std::endl;
+        sensor_p_ecef = T_odom2ecef * sensor_p_odom + init_vehicle_p;
+//        std::cout << "!!! sensor_p_ecef: " << sensor_p_ecef[0] << ", " << sensor_p_ecef[1] << ", " << sensor_p_ecef[2] << std::endl;
 
 
 
