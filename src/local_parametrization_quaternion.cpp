@@ -15,9 +15,9 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<Eigen::VectorXs>& _q,
                                           Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const
 {
 
-    assert(_q.size() == 4 && "Wrong size of input quaternion.");
-    assert(_delta_theta.size() == 3 && "Wrong size of input delta_theta.");
-    assert(_q_plus_delta_theta.size() == 4 && "Wrong size of output quaternion.");
+    assert(_q.size() == global_size_ && "Wrong size of input quaternion.");
+    assert(_delta_theta.size() == local_size_ && "Wrong size of input delta_theta.");
+    assert(_q_plus_delta_theta.size() == global_size_ && "Wrong size of output quaternion.");
 
     using namespace Eigen;
 
@@ -52,8 +52,8 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<Eigen::VectorXs>& _q,
 bool LocalParametrizationQuaternion::computeJacobian(const Eigen::Map<Eigen::VectorXs>& _q,
                                                      Eigen::Map<Eigen::MatrixXs>& _jacobian) const
 {
-    assert(_q.size() == 4 && "Wrong size of input quaternion.");
-    assert(_jacobian.rows() == 4 && _jacobian.cols() == 3 && "Wrong size of Jacobian matrix.");
+    assert(_q.size() == global_size_ && "Wrong size of input quaternion.");
+    assert(_jacobian.rows() == global_size_ && _jacobian.cols() == local_size_ && "Wrong size of Jacobian matrix.");
 
     using namespace Eigen;
     if (global_delta_) // See comments in method plus()
