@@ -20,24 +20,24 @@ int main(){
     VectorXs x(11);
     MatrixXs M(4,3);
 
-    Map<VectorXs> q0(&x(0),4);
-    q0.setRandom();
-    q0.normalize();
+    Map<VectorXs> q(&x(0),4);
+    q.setRandom();
+    q.normalize();
     Map<VectorXs> da(&x(4),3);
     da << .1,.2,.3;
-    Map<VectorXs> q1(&x(7),4);
+    Map<VectorXs> q_out(&x(7),4);
     Map<MatrixXs> J(M.data(),4,3);
 
-    cout << "x=" << x.transpose() << endl;
-    cout << "q0=" << q0.transpose() << "\nda= " << da.transpose() << "\nq1=" << q1.transpose() << endl;
+    cout << "\nx=" << x.transpose() << endl;
+    cout << "\nq0=" << q.transpose() << "\nda= " << da.transpose() << endl;
 
-    LocalParametrizationQuaternion Q_param;
+    LocalParametrizationQuaternion Qpar;
 
-    Q_param.plus(q0,da,q1);
-    cout << "q1 = " << q1.transpose() << endl;
+    Qpar.plus(q,da,q_out);
+    cout << "\nq_out = " << q_out.transpose() << endl;
 
-    Q_param.computeJacobian(q0,J);
-    cout << "J=" << J << endl;
+    Qpar.computeJacobian(q,J);
+    cout << "J=" << J << "\n" << endl;
 
 
     return 0;
