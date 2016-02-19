@@ -31,16 +31,13 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<Eigen::VectorXs>& _q,
         Quaternions dq(AngleAxis<WolfScalar>(angle, axis));
 
         // result as a quaternion
-        Quaternions qout;
         if (global_delta_)
             // the delta is in global reference
-            qout = dq * Map<const Quaternions>(&_q(0));
+            _q_plus_delta_theta = (dq * Map<const Quaternions>(&_q(0))).coeffs();
         else
             // the delta is in local reference
-            qout = Map<const Quaternions>(&_q(0)) * dq;
+            _q_plus_delta_theta = (Map<const Quaternions>(&_q(0)) * dq).coeffs();
 
-        // result as a vector map
-        _q_plus_delta_theta = qout.coeffs();
     }
     else
     {
