@@ -20,8 +20,9 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<Eigen::VectorXs>& _q,
     assert(_q_plus_delta_theta.size() == 4 && "Wrong size of output quaternion.");
 
     using namespace Eigen;
+
     double angle = _delta_theta.norm();
-    if (angle > WolfConstants::EPS) // TODO: put a EPSILON in wolf.h
+    if (angle > WolfConstants::EPS)
     {
         // compute rotation axis -- this guarantees unity norm
         Vector3s axis = _delta_theta / angle;
@@ -37,6 +38,7 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<Eigen::VectorXs>& _q,
         else
             // the delta is in local reference
             qout = Map<const Quaternions>(&_q(0)) * dq;
+
         // result as a vector map
         _q_plus_delta_theta = qout.coeffs();
     }
@@ -60,6 +62,7 @@ bool LocalParametrizationQuaternion::computeJacobian(const Eigen::Map<Eigen::Vec
                       _q(3),  _q(2), -_q(1),
                      -_q(2),  _q(3),  _q(0),
                       _q(1), -_q(0),  _q(3);
+        _jacobian /= 2;
     }
     else
     {
@@ -67,6 +70,7 @@ bool LocalParametrizationQuaternion::computeJacobian(const Eigen::Map<Eigen::Vec
                       _q(3), -_q(2),  _q(1),
                       _q(2),  _q(3), -_q(0),
                      -_q(1),  _q(0),  _q(3);
+        _jacobian /= 2;
     }
     return true;
 }
