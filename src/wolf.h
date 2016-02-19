@@ -40,8 +40,15 @@
 typedef double WolfScalar;        // Use this for double, 64 bit precision
 //typedef long double WolfScalar;   // Use this for long double, 128 bit precision
 
-//TODO: Check if it is correct, then use it in odometry covariances for instance. 
-//static const double WOLF_MIN_VARIANCE = 1e-6;
+namespace WolfConstants{
+// use it in odometry covariances for instance.
+const double MIN_VARIANCE = 1e-6;
+
+// Wolf standard tolerance
+const double EPS = 1e-8;
+// Wolf smmmmall tolerance
+const double EPS_SMALL = 1e-16;
+}
 
 ///////////////////////////////////////////
 // Construct types for any scalar defined in the typedef scalar_t above
