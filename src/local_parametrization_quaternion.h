@@ -5,8 +5,8 @@
  *      author: jsola
  */
 
-#ifndef SRC_LOCAL_PARAMETRIZATION_QUATERNION_H_
-#define SRC_LOCAL_PARAMETRIZATION_QUATERNION_H_
+#ifndef LOCAL_PARAMETRIZATION_QUATERNION_H_
+#define LOCAL_PARAMETRIZATION_QUATERNION_H_
 
 #include "local_parametrization_base.h"
 
@@ -23,4 +23,4 @@ class LocalParametrizationQuaternion : public LocalParametrizationBase
                           Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const;
         virtual bool computeJacobian(const Eigen::Map<Eigen::VectorXs>& _q, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
 };
-#endif /* SRC_LOCAL_PARAMETRIZATION_QUATERNION_H_ */
+#endif /* LOCAL_PARAMETRIZATION_QUATERNION_H_ */

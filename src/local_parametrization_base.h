@@ -5,8 +5,8 @@
  *      author: jsola
  */
 
-#ifndef SRC_LOCAL_PARAMETRIZATION_BASE_H_
-#define SRC_LOCAL_PARAMETRIZATION_BASE_H_
+#ifndef LOCAL_PARAMETRIZATION_BASE_H_
+#define LOCAL_PARAMETRIZATION_BASE_H_
 
 #include "wolf.h"
 
@@ -27,4 +27,4 @@ class LocalParametrizationBase{
         unsigned int getLocalSize();
         unsigned int getGlobalSize();
 };
-#endif /* SRC_LOCAL_PARAMETRIZATION_BASE_H_ */
+#endif /* LOCAL_PARAMETRIZATION_BASE_H_ */
