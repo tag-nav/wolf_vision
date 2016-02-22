@@ -1,3 +1,7 @@
+# Local quaternion parametrization class test
+ADD_EXECUTABLE(test_local_param_quat test_local_param_quat.cpp)
+TARGET_LINK_LIBRARIES(test_local_param_quat ${PROJECT_NAME})
+
 # NodeLinked class test
 ADD_EXECUTABLE(test_node_linked test_node_linked.cpp)
 TARGET_LINK_LIBRARIES(test_node_linked ${PROJECT_NAME})

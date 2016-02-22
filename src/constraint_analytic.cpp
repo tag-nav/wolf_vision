@@ -159,18 +159,18 @@ JacobianMethod ConstraintAnalytic::getJacobianMethod() const
     return ANALYTIC;
 }
 
-void ConstraintAnalytic::print(unsigned int _ntabs, std::ostream& _ost) const
-{
-    NodeLinked::printSelf(_ntabs, _ost);
-    for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
-    {
-        printTabs(_ntabs);
-        _ost << "block " << ii << ": ";
-        for (unsigned int jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
-            _ost << *(state_ptr_vector_.at(ii)->getPtr()+jj) << " ";
-        _ost << std::endl;
-    }
-}
+//void ConstraintAnalytic::print(unsigned int _ntabs, std::ostream& _ost) const
+//{
+//    NodeLinked::printSelf(_ntabs, _ost);
+//    for (unsigned int ii = 0; ii<state_block_sizes_vector_.size(); ii++)
+//    {
+//        printTabs(_ntabs);
+//        _ost << "block " << ii << ": ";
+//        for (unsigned int jj = 0; jj<state_block_sizes_vector_.at(ii); jj++)
+//            _ost << *(state_ptr_vector_.at(ii)->getPtr()+jj) << " ";
+//        _ost << std::endl;
+//    }
+//}
 
 void ConstraintAnalytic::resizeVectors()
 {

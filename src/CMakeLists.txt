@@ -91,7 +91,8 @@ SET(HDRS
     constraint_analytic.h
     constraint_sparse.h
     constraint_gps_2D.h
-    constraint_gps_pseudorange.h
+    constraint_gps_pseudorange_3D.h
+    constraint_gps_pseudorange_2D.h
     constraint_fix.h
     constraint_odom_2D.h
     constraint_odom_2D_analytic.h
@@ -111,6 +112,8 @@ SET(HDRS
     landmark_corner_2D.h
     landmark_container.h
     landmark_point.h
+    local_parametrization_base.h
+    local_parametrization_quaternion.h
     map_base.h
     node_base.h
     node_terminus.h
@@ -158,6 +161,8 @@ SET(SRCS
     landmark_corner_2D.cpp
     landmark_container.cpp
     landmark_point.cpp
+    local_parametrization_base.cpp
+    local_parametrization_quaternion.cpp
     map_base.cpp
     node_base.cpp
     node_terminus.cpp

@@ -85,14 +85,14 @@ StateBlock* CaptureBase::getSensorOPtr() const {
 		return getSensorPtr()->getOPtr();
 }
 
-void CaptureBase::printSelf(unsigned int _ntabs, std::ostream & _ost) const
-{
-    NodeLinked::printSelf(_ntabs, _ost);
-    //printTabs(_ntabs);
-    //_ost << "\tSensor pose : ( " << sensor_ptr_->pose().x().transpose() << " )" << std::endl;
-    //printNTabs(_ntabs);
-    //_ost << "\tSensor intrinsic : ( " << sensor_ptr_->intrinsic().transpose() << " )" << std::endl;
-}
+//void CaptureBase::printSelf(unsigned int _ntabs, std::ostream & _ost) const
+//{
+//    NodeLinked::printSelf(_ntabs, _ost);
+//    //printTabs(_ntabs);
+//    //_ost << "\tSensor pose : ( " << sensor_ptr_->pose().x().transpose() << " )" << std::endl;
+//    //printNTabs(_ntabs);
+//    //_ost << "\tSensor intrinsic : ( " << sensor_ptr_->intrinsic().transpose() << " )" << std::endl;
+//}
 
 
 

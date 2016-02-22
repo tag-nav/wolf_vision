@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 
     Eigen::Vector4s k = {320,240,320,320};
 
-    StateBlock* intr = new StateBlock(k,ST_VECTOR,false);
+    StateBlock* intr = new StateBlock(k,false);
 
     SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero()),
                                               intr,img_width,img_height);

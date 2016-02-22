@@ -255,21 +255,21 @@ CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
     return getCaptureListPtr()->end();
 }
 
-void FrameBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const
-{
-    NodeLinked::printSelf(_ntabs, _ost);
-    if (p_ptr_)
-    {
-    	printTabs(_ntabs);
-    	_ost << "\tPosition : \n";
-    	printTabs(_ntabs);
-    	p_ptr_->print(_ntabs,_ost);
-    }
-    if (o_ptr_)
-    {
-    	printTabs(_ntabs);
-		_ost << "\tOrientation : \n";
-    	printTabs(_ntabs);
-		o_ptr_->print(_ntabs,_ost);
-    }
-}
+//void FrameBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const
+//{
+//    NodeLinked::printSelf(_ntabs, _ost);
+//    if (p_ptr_)
+//    {
+//    	printTabs(_ntabs);
+//    	_ost << "\tPosition : \n";
+//    	printTabs(_ntabs);
+//    	p_ptr_->print(_ntabs,_ost);
+//    }
+//    if (o_ptr_)
+//    {
+//    	printTabs(_ntabs);
+//		_ost << "\tOrientation : \n";
+//    	printTabs(_ntabs);
+//		o_ptr_->print(_ntabs,_ost);
+//    }
+//}

@@ -51,27 +51,27 @@ class NodeBase
          */
         std::string nodeLabel() const;
 
-        /** \brief Print node information
-         * 
-		 * Prints node information. Inine function.
-         * \param _ntabs number of tabulations to print at the left of the printed information
-         * \param _ost output stream
-         *
-         * Overload this function in derived classes to adapt the printed output to each object's relevant info.
-		 * 
-         */
-        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+//        /** \brief Print node information
+//         *
+//		 * Prints node information. Inine function.
+//         * \param _ntabs number of tabulations to print at the left of the printed information
+//         * \param _ost output stream
+//         *
+//         * Overload this function in derived classes to adapt the printed output to each object's relevant info.
+//		 *
+//         */
+//        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
     protected:
 
-        /** \brief prints a number of tabulations.
-         *
-         * Prints a number of tabulations, i.e., "\t". Inline function.
-         * \param _ntabs number of tabulations to print
-         * \param _ost output stream
-		 * 
-         */
-        void printTabs(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+//        /** \brief prints a number of tabulations.
+//         *
+//         * Prints a number of tabulations, i.e., "\t". Inline function.
+//         * \param _ntabs number of tabulations to print
+//         * \param _ost output stream
+//		 *
+//         */
+//        void printTabs(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 };
 
 #endif /* NODE_BASE_H_ */

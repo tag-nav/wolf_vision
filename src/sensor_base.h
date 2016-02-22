@@ -76,9 +76,9 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 
         StateBlock* getIntrinsicPtr() const;
 
-        Eigen::Matrix2s getRotationMatrix2D();
-
-        Eigen::Matrix3s getRotationMatrix3D();
+//        Eigen::Matrix2s getRotationMatrix2D();
+//
+//        Eigen::Matrix3s getRotationMatrix3D();
 
         void fix();
 

@@ -40,8 +40,15 @@
 typedef double WolfScalar;        // Use this for double, 64 bit precision
 //typedef long double WolfScalar;   // Use this for long double, 128 bit precision
 
-//TODO: Check if it is correct, then use it in odometry covariances for instance. 
-//static const double WOLF_MIN_VARIANCE = 1e-6;
+namespace WolfConstants{
+// use it in odometry covariances for instance.
+const double MIN_VARIANCE = 1e-6;
+
+// Wolf standard tolerance
+const double EPS = 1e-8;
+// Wolf smmmmall tolerance
+const double EPS_SMALL = 1e-16;
+}
 
 ///////////////////////////////////////////
 // Construct types for any scalar defined in the typedef scalar_t above
@@ -131,6 +138,7 @@ typedef enum
 typedef enum
 {
     CTR_GPS_FIX_2D,				///< marks a 2D GPS Fix constraint.
+    CTR_GPS_PR_2D,				///< marks a 2D GPS Pseudorange constraint.
     CTR_GPS_PR_3D,				///< marks a 3D GPS Pseudorange constraint.
     CTR_FIX,                    ///< marks a Fix constraint (for priors).
     CTR_ODOM_2D,                ///< marks a 2D Odometry constraint .
@@ -246,9 +254,9 @@ typedef enum
 
 typedef enum
 {
-    LANDMARK_CANDIDATE,   ///< A landmark, just created. Association with it allowed, but not yet stablish an actual constraint for the solver
-    LANDMARK_ESTIMATED, ///< A landmark being estimated. Association with it allowed, stablishing actual constraints for the solver where both vehicle and landmark states are being estimated
-    LANDMARK_FIXED, ///< A landmark estimated. Association with it allowed, stablishing actual constraints for the solver, but its value remains static, no longer optimized
+    LANDMARK_CANDIDATE,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
+    LANDMARK_ESTIMATED, ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
+    LANDMARK_FIXED, ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
     LANDMARK_OUT_OF_VIEW, ///< A landmark out of the field of view. Association with it is not allowed, so does not pose constraints for the solver
     LANDMARK_OLD          ///< An old landmark. Association with it not allowed, but old constraints can still be taken into account by the solver.
 } LandmarkStatus;

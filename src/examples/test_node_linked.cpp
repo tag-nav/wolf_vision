@@ -107,7 +107,7 @@ int main()
     MeasurementN* sensor_data_laser_(new MeasurementN(180));
     MeasurementN* sensor_data_cam_2_(new MeasurementN(480));
     MeasurementN* sensor_data_radar_(new MeasurementN(90));
-    trajectory_->print();
+//    trajectory_->print();
     cout << "========================================================" << endl;    
 
     cout << endl << "TEST 2. Build tree dependencies" << endl;
@@ -117,12 +117,12 @@ int main()
     trajectory_->addDownNode(frame_1_);    
     trajectory_->addDownNode(frame_2_);
     trajectory_->linkToUpperNode(problem_);
-    trajectory_->print();
+//    trajectory_->print();
     cout << "========================================================" << endl;
     
     cout << endl << "TEST 3. Modify one of the nodes (add new node), once tree has been constructed" << endl;
     frame_2_->addDownNode(sensor_data_radar_);    
-    trajectory_->print();
+//    trajectory_->print();
     cout << "========================================================" << endl;    
     
     cout << endl << "TEST 4. Remove nodes" << endl;
@@ -132,7 +132,7 @@ int main()
     sensor_data_cam_1_ = nullptr;
     sensor_data_laser_ = nullptr;;
     trajectory_->removeDownNode(f1_id_);
-    trajectory_->print();
+//    trajectory_->print();
     cout << "========================================================" << endl;    
     
     cout << endl << "TEST 5. getTop()" << endl;

@@ -1,8 +1,7 @@
 
 #include "state_block.h"
 
-StateBlock::StateBlock(const Eigen::VectorXs _state, StateType _type, bool _fixed) :
-			type_(_type),
+StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed) :
 			state_(_state),
 			fixed_(_fixed)
 {
@@ -30,10 +29,10 @@ void StateBlock::setVector(const Eigen::VectorXs& _state)
     state_ = _state;
 }
 
-StateType StateBlock::getType() const
-{
-	return type_;
-}
+//StateType StateBlock::getType() const
+//{
+//	return type_;
+//}
 
 unsigned int StateBlock::getSize() const
 {
@@ -57,4 +56,14 @@ void StateBlock::unfix()
 
 void StateBlock::print(unsigned int _ntabs, std::ostream& _ost) const
 {
+}
+
+bool StateBlock::hasLocalParametrization()
+{
+    return (local_param_ptr_ != nullptr);
+}
+
+LocalParametrizationBase* StateBlock::getLocalParametrizationPtr()
+{
+    return local_param_ptr_;
 }

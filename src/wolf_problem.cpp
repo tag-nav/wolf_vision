@@ -159,18 +159,18 @@ StateBlockList* WolfProblem::getStateListPtr()
 	return &state_block_ptr_list_;
 }
 
-void WolfProblem::print(unsigned int _ntabs, std::ostream& _ost) const
-{
-    printSelf(_ntabs, _ost); //one line
-    printLower(_ntabs, _ost);
-}
-
-void WolfProblem::printSelf(unsigned int _ntabs, std::ostream& _ost) const
-{
-    printTabs(_ntabs);
-    _ost << nodeLabel() << " " << nodeId() << " : ";
-    _ost << "TOP" << std::endl;
-}
+//void WolfProblem::print(unsigned int _ntabs, std::ostream& _ost) const
+//{
+//    printSelf(_ntabs, _ost); //one line
+//    printLower(_ntabs, _ost);
+//}
+//
+//void WolfProblem::printSelf(unsigned int _ntabs, std::ostream& _ost) const
+//{
+//    printTabs(_ntabs);
+//    _ost << nodeLabel() << " " << nodeId() << " : ";
+//    _ost << "TOP" << std::endl;
+//}
 
 std::list<StateBlock*>* WolfProblem::getStateBlockAddList()
 {
@@ -212,15 +212,15 @@ void WolfProblem::removeDownNode(const LowerNodePtr _ptr)
     //
 }
 
-void WolfProblem::printLower(unsigned int _ntabs, std::ostream& _ost) const
-{
-    printTabs(_ntabs);
-    _ost << "\tLower Nodes  ==> [ ";
-    _ost << map_ptr_->nodeId() << " ";
-    _ost << trajectory_ptr_->nodeId() << " ";
-    _ost << hardware_ptr_->nodeId() << " ]" << std::endl;
-    _ntabs++;
-	map_ptr_->print(_ntabs, _ost);
-	trajectory_ptr_->print(_ntabs, _ost);
-    hardware_ptr_->print(_ntabs, _ost);
-}
+//void WolfProblem::printLower(unsigned int _ntabs, std::ostream& _ost) const
+//{
+//    printTabs(_ntabs);
+//    _ost << "\tLower Nodes  ==> [ ";
+//    _ost << map_ptr_->nodeId() << " ";
+//    _ost << trajectory_ptr_->nodeId() << " ";
+//    _ost << hardware_ptr_->nodeId() << " ]" << std::endl;
+//    _ntabs++;
+//	map_ptr_->print(_ntabs, _ost);
+//	trajectory_ptr_->print(_ntabs, _ost);
+//    hardware_ptr_->print(_ntabs, _ost);
+//}

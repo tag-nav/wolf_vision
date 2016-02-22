@@ -105,7 +105,23 @@ void WolfManagerGPS::createFrame(const Eigen::VectorXs& _frame_state, const Time
 void WolfManagerGPS::createFrame(const TimeStamp& _time_stamp)
 {
     //std::cout << "creating new frame from prior..." << std::endl;
-    createFrame(Eigen::Vector7s::Zero(), _time_stamp);
+    switch ( frame_structure_)
+    {
+        case PO_2D:
+        {
+            createFrame(Eigen::Vector3s::Zero(), _time_stamp);
+            break;
+        }
+        case PO_3D:
+        {
+            createFrame(Eigen::Vector7s::Zero(), _time_stamp);
+            break;
+        }
+        default:
+        {
+            assert( "Unknown frame structure");
+        }
+    }
 }
 
 void WolfManagerGPS::addSensor(SensorBase* _sensor_ptr)

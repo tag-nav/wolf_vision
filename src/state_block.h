@@ -10,14 +10,16 @@
 //Wolf includes
 #include "wolf.h"
 #include "node_base.h"
+#include "local_parametrization_base.h"
 
 //class StateBlock
 class StateBlock
 {
     protected:
-		StateType type_;
-		Eigen::VectorXs state_;
-		bool fixed_;
+        //StateType type_;
+        Eigen::VectorXs state_;
+        bool fixed_;
+        LocalParametrizationBase* local_param_ptr_;
         
     public:
         /** \brief Constructor with scalar pointer
@@ -28,7 +30,7 @@ class StateBlock
          * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter
          * 
          **/
-        StateBlock(const Eigen::VectorXs _state, StateType _type = ST_VECTOR, bool _fixed = false);
+        StateBlock(const Eigen::VectorXs _state, bool _fixed = false);
         
         /** \brief Destructor
          * 
@@ -36,12 +38,12 @@ class StateBlock
          * 
          **/
         virtual ~StateBlock();
-        
+
         /** \brief Returns the pointer to the first element of the state
-		 *
-		 * Returns the scalar pointer to the first element of the state
-		 *
-		 **/
+         *
+         * Returns the scalar pointer to the first element of the state
+         *
+         **/
         WolfScalar* getPtr();
         
         /** \brief Returns the state vector
@@ -58,19 +60,19 @@ class StateBlock
          **/
         void setVector(const Eigen::VectorXs& _state);
 
-        /** \brief Returns the parametrization of the state
-		 *
-		 * Returns the parametrizationType (see wolf.h) of the state
-		 *
-		 **/
-		virtual StateType getType() const;
+//        /** \brief Returns the parametrization of the state
+//         *
+//         * Returns the parametrizationType (see wolf.h) of the state
+//         *
+//         **/
+//        virtual StateType getType() const;
 
         /** \brief Returns the state size
-		 *
-		 * Returns the state size
-		 *
-		 **/
-		unsigned int getSize() const;
+         *
+         * Returns the state size
+         *
+         **/
+        unsigned int getSize() const;
 
         /** \brief Returns if the state is fixed (not estimated)
          *
@@ -93,11 +95,15 @@ class StateBlock
          **/
         void unfix();
 
+        bool hasLocalParametrization();
+
+        LocalParametrizationBase* getLocalParametrizationPtr();
+
         /** \brief Prints all the elements of the state unit
-		 *
-		 * Prints all the elements of the state unit
-		 *
-		 **/
-		virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+         *
+         * Prints all the elements of the state unit
+         *
+         **/
+        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 };
 #endif

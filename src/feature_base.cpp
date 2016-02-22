@@ -122,11 +122,11 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse(); // retrieve factor U  in the decomposition
 }
 
-void FeatureBase::printSelf(unsigned int _ntabs, std::ostream & _ost) const
-{
-    NodeLinked::printSelf(_ntabs, _ost);
-    printTabs(_ntabs);
-    _ost << "\tMeasurement: ( " << measurement_.transpose() << " )" << std::endl;
-    printTabs(_ntabs);
-    _ost << "\tMeasurement covariance: ( " << measurement_covariance_ << " )" << std::endl;
-}
+//void FeatureBase::printSelf(unsigned int _ntabs, std::ostream & _ost) const
+//{
+//    NodeLinked::printSelf(_ntabs, _ost);
+//    printTabs(_ntabs);
+//    _ost << "\tMeasurement: ( " << measurement_.transpose() << " )" << std::endl;
+//    printTabs(_ntabs);
+//    _ost << "\tMeasurement covariance: ( " << measurement_covariance_ << " )" << std::endl;
+//}

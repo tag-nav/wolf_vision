@@ -27,9 +27,9 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         FrameType type_;         ///< type of frame. Either REGULAR_FRAME or KEY_FRAME. (types defined at wolf.h)
         TimeStamp time_stamp_;   ///< frame time stamp
         StateStatus status_;     ///< status of the estimation of the frame state
-		StateBlock* p_ptr_;      ///< Position state block pointer
-		StateBlock* o_ptr_;      ///< Orientation state block pointer
-		std::list<ConstraintBase*> constraint_to_list_; ///> List of constraints TO this frame
+        StateBlock* p_ptr_;      ///< Position state block pointer
+        StateBlock* o_ptr_;      ///< Orientation state block pointer
+        std::list<ConstraintBase*> constraint_to_list_; ///> List of constraints TO this frame
         
     public:
         /** \brief Constructor with only time stamp
@@ -158,7 +158,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 
         CaptureBaseIter hasCaptureOf(const SensorBase* _sensor_ptr);
 
-        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
+//        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
         
 };
 #endif
