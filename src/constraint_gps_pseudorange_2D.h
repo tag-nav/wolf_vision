@@ -57,17 +57,14 @@ public:
     {
         std::cout << std::setprecision(12);
         std::cout << "\n++++++OPERATOR()++++++\n";
-//        std::cout << "_init_vehicle_p: " << _init_vehicle_p[0] << ", " << _init_vehicle_p[1] << ", " << _init_vehicle_p[2] << std::endl;
-//        std::cout << "_init_vehicle_o: " << _init_vehicle_o[0] << ", " << _init_vehicle_o[1] << ", " << _init_vehicle_o[2] << ", " << _init_vehicle_o[3] << std::endl;
-//        std::cout << "_vehicle_p: " << _vehicle_p[0] << ", " << _vehicle_p[1] << std::endl;
-//        std::cout << "_vehicle_o: " << _vehicle_o[0] << std::endl;
-//        std::cout << "_sensor_p: " << _sensor_p[0] << ", " << _sensor_p[1] << ", " << _sensor_p[2] << std::endl;
+        std::cout << "_init_vehicle_p: " << _init_vehicle_p[0] << ", " << _init_vehicle_p[1] << ", " << _init_vehicle_p[2] << std::endl;
+        std::cout << "_init_vehicle_o: " << _init_vehicle_o[0] << std::endl;
+        std::cout << "_vehicle_p(_map): " << _vehicle_p[0] << ", " << _vehicle_p[1] << std::endl;
+        std::cout << "_vehicle_o(_map): " << _vehicle_o[0] << std::endl;
+        std::cout << "_sensor_p(_base): " << _sensor_p[0] << ", " << _sensor_p[1] << ", " << _sensor_p[2] << std::endl;
 
         Eigen::Matrix<T, 3, 1> sensor_p_base(_sensor_p[0], _sensor_p[1], _sensor_p[2]); //sensor position with respect to the base (the vehicle)
-//        std::cout << "sensor_p_base: " << sensor_p_base[0] << ", " << sensor_p_base[1] << ", " << sensor_p_base[2] << std::endl;
-
         Eigen::Matrix<T, 3, 1> vehicle_p_map(_vehicle_p[0], _vehicle_p[1], T(0));
-//        std::cout << "vehicle_p_map: " << vehicle_p_map[0] << ", " << vehicle_p_map[1] << ", " << vehicle_p_map[2] << std::endl;
         Eigen::Matrix<T, 3, 1> init_vehicle_p(_init_vehicle_p[0], _init_vehicle_p[1], _init_vehicle_p[2]);
 
         /*
@@ -82,8 +79,8 @@ public:
         Eigen::Matrix<T, 3, 1> sensor_p_map; // sensor position with respect to map frame (initial frame of the experiment)
         sensor_p_map = T_base2map * sensor_p_base + vehicle_p_map;
 
-//        std::cout << "1st trasform:  ";
-//        std::cout << "sensor_p_map: " << sensor_p_map[0] << ", " << sensor_p_map[1] << ", " << sensor_p_map[2] << std::endl;
+        std::cout << "1st trasform:  ";
+        std::cout << "sensor_p_map: " << sensor_p_map[0] << ", " << sensor_p_map[1] << ", " << sensor_p_map[2] << std::endl;
 
         /*
          * _init_vehicle_p from ecef to lla
@@ -109,12 +106,10 @@ public:
 
         // correction for altitude near poles left out.
 
-        //convert to degrees
-        lat = lat * T(180 / M_PI);
-        lon = lon * T(180 / M_PI);
-
-//        std::cout << "_init_vehicle_p: " << _init_vehicle_p[0] << ", " << _init_vehicle_p[1] << ", " << _init_vehicle_p[2] << std::endl;
-//        std::cout << "_init_vehicle_p LLA: " << lat << ", " << lon << ", " << alt << std::endl;
+        //TODO in radiants, right?
+        std::cout << "_init_vehicle_p: " << _init_vehicle_p[0] << ", " << _init_vehicle_p[1] << ", " << _init_vehicle_p[2] << std::endl;
+        //        std::cout << "_init_vehicle_p LLA: " << lat << ", " << lon /*<< ", " << alt*/ << std::endl;
+        //        std::cout << "_init_vehicle_p LLA degrees: " << lat * T(180 / M_PI) << ", " << lon * T(180 / M_PI) /*<< ", " << alt*/ << std::endl;
 
 
         /*
@@ -165,7 +160,10 @@ public:
         //     error = (expected measurement)       - (actual measurement)
         _residual[0] = (distance + _bias[0]*T(LIGHT_SPEED)) - (pseudorange_);
 
-        std::cout << "Expected: " << (distance + _bias[0]*T(LIGHT_SPEED)) << "\nreceived = " << pseudorange_ << "\n";
+//        std::cout << "Expected: " << (distance + _bias[0]*T(LIGHT_SPEED)) << "\nreceived = " << pseudorange_ << "\n";
+        std::cout << "Residual " << _residual[0] << "\n";
+
+
 
         /* TODO importante
          * credo che il residuo sia la differenza delle misure, NORMALIZZATA PER LA COVARIANZA
