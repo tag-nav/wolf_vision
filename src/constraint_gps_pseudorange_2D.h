@@ -36,7 +36,7 @@ public:
         sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
         pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
 
-        //std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
+        std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
     }
 
 
@@ -56,7 +56,7 @@ public:
     bool operator()(const T* const _vehicle_p, const T* const _vehicle_o, const T* const _sensor_p, const T* const _bias, const T* const _init_vehicle_p, const T* const _init_vehicle_o, T* _residual) const
     {
         std::cout << std::setprecision(12);
-//        std::cout << "OPERATOR()\n";
+        std::cout << "\n++++++OPERATOR()++++++\n";
 //        std::cout << "_init_vehicle_p: " << _init_vehicle_p[0] << ", " << _init_vehicle_p[1] << ", " << _init_vehicle_p[2] << std::endl;
 //        std::cout << "_init_vehicle_o: " << _init_vehicle_o[0] << ", " << _init_vehicle_o[1] << ", " << _init_vehicle_o[2] << ", " << _init_vehicle_o[3] << std::endl;
 //        std::cout << "_vehicle_p: " << _vehicle_p[0] << ", " << _vehicle_p[1] << std::endl;
@@ -66,24 +66,24 @@ public:
         Eigen::Matrix<T, 3, 1> sensor_p_base(_sensor_p[0], _sensor_p[1], _sensor_p[2]); //sensor position with respect to the base (the vehicle)
 //        std::cout << "sensor_p_base: " << sensor_p_base[0] << ", " << sensor_p_base[1] << ", " << sensor_p_base[2] << std::endl;
 
-        Eigen::Matrix<T, 3, 1> vehicle_p_odom(_vehicle_p[0], _vehicle_p[1], T(0));
-//        std::cout << "vehicle_p_odom: " << vehicle_p_odom[0] << ", " << vehicle_p_odom[1] << ", " << vehicle_p_odom[2] << std::endl;
+        Eigen::Matrix<T, 3, 1> vehicle_p_map(_vehicle_p[0], _vehicle_p[1], T(0));
+//        std::cout << "vehicle_p_map: " << vehicle_p_map[0] << ", " << vehicle_p_map[1] << ", " << vehicle_p_map[2] << std::endl;
         Eigen::Matrix<T, 3, 1> init_vehicle_p(_init_vehicle_p[0], _init_vehicle_p[1], _init_vehicle_p[2]);
 
         /*
-         * Base-to-odom transform matrix
+         * Base-to-map transform matrix
          */
-        Eigen::Matrix<T, 3, 3> T_base2odom = Eigen::Matrix<T, 3, 3>::Identity();
-        T_base2odom(0, 0) = T(cos(_vehicle_o[0]));
-        T_base2odom(0, 1) = T(sin(_vehicle_o[0]));
-        T_base2odom(1, 0) = T(-sin(_vehicle_o[0]));
-        T_base2odom(1, 1) = T(cos(_vehicle_o[0]));
+        Eigen::Matrix<T, 3, 3> T_base2map = Eigen::Matrix<T, 3, 3>::Identity();
+        T_base2map(0, 0) = T(cos(_vehicle_o[0]));
+        T_base2map(0, 1) = T(sin(_vehicle_o[0]));
+        T_base2map(1, 0) = T(-sin(_vehicle_o[0]));
+        T_base2map(1, 1) = T(cos(_vehicle_o[0]));
 
-        Eigen::Matrix<T, 3, 1> sensor_p_odom; // sensor position with respect to odom frame (initial frame of the experiment)
-        sensor_p_odom = T_base2odom * sensor_p_base + vehicle_p_odom;
+        Eigen::Matrix<T, 3, 1> sensor_p_map; // sensor position with respect to map frame (initial frame of the experiment)
+        sensor_p_map = T_base2map * sensor_p_base + vehicle_p_map;
 
 //        std::cout << "1st trasform:  ";
-//        std::cout << "sensor_p_odom: " << sensor_p_odom[0] << ", " << sensor_p_odom[1] << ", " << sensor_p_odom[2] << std::endl;
+//        std::cout << "sensor_p_map: " << sensor_p_map[0] << ", " << sensor_p_map[1] << ", " << sensor_p_map[2] << std::endl;
 
         /*
          * _init_vehicle_p from ecef to lla
@@ -101,8 +101,8 @@ public:
 
         T lon = T(atan2(_init_vehicle_p[1],_init_vehicle_p[0]));
         T lat = T(atan2( (_init_vehicle_p[2] + ep*ep*b*pow(sin(th),3) ), (p - esq*a*pow(cos(th),3)) ));
-        T N = T(a/( sqrt(T(1)-esq*pow(sin(lat),2)) ));
-        T alt = T(p / cos(lat) - N);
+//        T N = T(a/( sqrt(T(1)-esq*pow(sin(lat),2)) ));
+//        T alt = T(p / cos(lat) - N);
         // mod lat to 0-2pi
         if(lon<T(0)) lon += T(2*M_PI);
         if(lon>T(2*M_PI)) lon += T(2*M_PI);
@@ -118,7 +118,7 @@ public:
 
 
         /*
-         * odom-to-ECEF transform matrix
+         * map-to-ECEF transform matrix
          */
         Eigen::Matrix<T, 3, 3> R1 = Eigen::Matrix<T, 3, 3>::Identity();
         R1(0, 0) = T(cos(lon));
@@ -141,7 +141,7 @@ public:
         R4(1, 0) = T(-sin(_init_vehicle_o[0]));
         R4(1, 1) = T(cos(_init_vehicle_o[0]));
 
-        Eigen::Matrix<T, 3, 3> T_odom2ecef = (R4*R3*R2*R1).inverse();
+        Eigen::Matrix<T, 3, 3> T_map2ecef = (R4*R3*R2*R1).inverse();
 
 
         /*
@@ -149,8 +149,8 @@ public:
          */
         Eigen::Matrix<T, 3, 1> sensor_p_ecef;//sensor position with respect to ecef coordinate system
 
-        sensor_p_ecef = T_odom2ecef * sensor_p_odom + init_vehicle_p;
-//        std::cout << "!!! sensor_p_ecef: " << sensor_p_ecef[0] << ", " << sensor_p_ecef[1] << ", " << sensor_p_ecef[2] << std::endl;
+        sensor_p_ecef = T_map2ecef * sensor_p_map + init_vehicle_p;
+        std::cout << "!!! sensor_p_ecef: " << sensor_p_ecef[0] << ", " << sensor_p_ecef[1] << ", " << sensor_p_ecef[2] << std::endl;
 
 
 
@@ -165,11 +165,13 @@ public:
         //     error = (expected measurement)       - (actual measurement)
         _residual[0] = (distance + _bias[0]*T(LIGHT_SPEED)) - (pseudorange_);
 
+        std::cout << "Expected: " << (distance + _bias[0]*T(LIGHT_SPEED)) << "\nreceived = " << pseudorange_ << "\n";
 
         /* TODO importante
          * credo che il residuo sia la differenza delle misure, NORMALIZZATA PER LA COVARIANZA
          */
 
+        std::cout << "------ END OPERATOR()------\n";
         return true;
     }
 
