@@ -16,6 +16,10 @@
 //class FeaturePoint
 class FeaturePoint : public FeatureBase
 {
+    protected:
+
+        Eigen::Vector2s measurement_;
+
     public:
         /** \brief Constructor
          *

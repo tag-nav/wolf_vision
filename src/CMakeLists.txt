@@ -26,6 +26,12 @@ IF(raw_gps_utils_FOUND)
     MESSAGE("raw_gps_utils Library FOUND: raw_gps_utils related sources will be built.")
 ENDIF(raw_gps_utils_FOUND)
 
+#Added OpenCV (may be wrong) <=====
+FIND_PACKAGE(OpenCV QUIET)
+IF(OpenCV_FOUND)
+    MESSAGE("OpenCV Library FOUND: OpenCV related sources will be built.")
+ENDIF(OpenCV_FOUND)
+
 # SuiteSparse doesn't have find*.cmake:
 FIND_PATH(
     Suitesparse_INCLUDE_DIRS
@@ -60,6 +66,11 @@ IF(raw_gps_utils_FOUND)
     INCLUDE_DIRECTORIES(${raw_gps_utils_INCLUDE_DIRS})
 ENDIF(raw_gps_utils_FOUND)
 
+#Added OpenCV (may be wrong) <=====
+IF(OpenCV_FOUND)
+    INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+ENDIF(OpenCV_FOUND)
+
 IF(Suitesparse_FOUND)
     INCLUDE_DIRECTORIES(${Suitesparse_INCLUDE_DIRS})
 ENDIF(Suitesparse_FOUND)
@@ -70,7 +81,7 @@ SET(HDRS_BASE
 
 SET(HDRS
     capture_base.h
-    capture_image.h
+    #capture_image.h
     capture_motion.h
     capture_fix.h
     capture_gps_fix.h
@@ -126,7 +137,7 @@ SET(HDRS_DTASSC
 #sources
 SET(SRCS
     capture_base.cpp
-    capture_image.cpp
+    #capture_image.cpp
     capture_motion.cpp
     capture_gps_fix.cpp
     capture_fix.cpp
@@ -209,6 +220,18 @@ IF (raw_gps_utils_FOUND)
         )
 ENDIF(raw_gps_utils_FOUND)
 
+#Added OpenCV (may be wrong) <=====
+IF (OpenCV_FOUND)
+    SET(HDRS ${HDRS}
+        capture_image.h
+        processor_image_point_brisk.h
+        )
+    SET(SRCS ${SRCS}
+        capture_image.cpp
+        processor_image_point_brisk.cpp
+        )
+ENDIF(OpenCV_FOUND)
+
 IF (Suitesparse_FOUND)
     ADD_SUBDIRECTORY(solver)
 ENDIF(Suitesparse_FOUND)
@@ -228,6 +251,11 @@ ENDIF (laser_scan_utils_FOUND)
 IF (raw_gps_utils_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${raw_gps_utils_LIBRARY})
 ENDIF (raw_gps_utils_FOUND)
+
+#Added OpenCV (may be wrong) <=====
+IF (OpenCV_FOUND)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
+ENDIF (OpenCV_FOUND)
 
 #install library
 INSTALL(TARGETS ${PROJECT_NAME}

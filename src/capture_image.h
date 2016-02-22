@@ -9,14 +9,16 @@
 #include "feature_point.h"
 #include "sensor_camera.h"
 
+#include <opencv2/core/core.hpp>
+
 //class CaptureImage
 class CaptureImage : public CaptureBase
 {
     protected:
-        Eigen::MatrixXs data_; ///< Raw data.
+        cv::Mat image_;
 
     public:
-        CaptureImage(const TimeStamp& _ts, SensorCamera* _camera_ptr, const Eigen::MatrixXs& _data, int _img_width, int _img_height);
+        CaptureImage(const TimeStamp& _ts, SensorCamera* _camera_ptr, cv::Mat _data_cv, int _img_width, int _img_height);
 
         /** \brief Default destructor (not recommended)
          *
@@ -29,7 +31,9 @@ class CaptureImage : public CaptureBase
 
         //virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 
-        //Eigen::MatrixXs data_; ///< Raw data.
+        //cv::Mat data_cv_; //this should be protected
+
+        virtual cv::Mat getImage();
 };
 
 #endif // CAPTURE_IMAGE_H
