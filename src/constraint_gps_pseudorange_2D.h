@@ -28,7 +28,7 @@ public:
                             _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
                             _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
                                                                         // orientation of antenna is not needed, because omnidirectional
-                            _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter  = receiver time bias
+                            _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter = receiver time bias
                             ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehiclePPtr(), // initial vehicle position (ecef)
                             ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehicleOPtr()  // initial vehicle orientation (ecef)
             )
@@ -36,7 +36,7 @@ public:
         sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
         pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
 
-        std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
+        //std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
     }
 
 
@@ -105,9 +105,10 @@ public:
         T lat = T(atan2( (_init_vehicle_p[2] + ep*ep*b*pow(sin(th),3) ), (p - esq*a*pow(cos(th),3)) ));
 //        T N = T(a/( sqrt(T(1)-esq*pow(sin(lat),2)) ));
 //        T alt = T(p / cos(lat) - N);
+
         // mod lat to 0-2pi
-        if(lon<T(0)) lon += T(2*M_PI);
-        if(lon>T(2*M_PI)) lon += T(2*M_PI);
+        while(lon < T(0))    lon += T(2*M_PI);
+        while(lon > 2*M_PI)  lon -= T(2*M_PI);
 
         // correction for altitude near poles left out.
 
@@ -154,7 +155,6 @@ public:
         sensor_p_ecef = T_map2ecef * sensor_p_map + init_vehicle_p;
         if(verbose)
             std::cout << "!!! sensor_p_ecef: " << sensor_p_ecef[0] << ", " << sensor_p_ecef[1] << ", " << sensor_p_ecef[2] << std::endl;
-
 
 
         //il codice qui sotto è quello vecchio, adattato in modo da usare la posizione del sensore rispetto a ecef, calcolata qui sopra
