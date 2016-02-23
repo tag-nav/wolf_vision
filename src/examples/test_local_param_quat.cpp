@@ -18,27 +18,31 @@ int main(){
     using namespace std;
 
     VectorXs x(11);
-    MatrixXs M(4,3);
+    MatrixXs M(1,12); // matrix dimensions do not matter, just storage size.
+
+    x.setRandom();
+    M.setZero();
 
     Map<VectorXs> q(&x(0),4);
-    q.setRandom();
-//    q.normalize();
+    q.normalize();
 
     Map<VectorXs> da(&x(4),3);
-    da << .1,.2,.3;
-    Map<VectorXs> q_out(&x(7),4);
-    Map<MatrixXs> J(M.data(),4,3);
+    Map<VectorXs> qo(&x(7),4);
+    Map<MatrixXs> J(&M(0,0),4,3);
 
-    cout << "\nq0 = " << q.transpose() << "\nda = " << da.transpose() << endl;
+    cout << "Initial values:" << endl;
+    cout << "q  = " << q.transpose() << "   with norm = " << q.norm() << "\nda = " << da.transpose() << endl;
+    cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
 
     LocalParametrizationQuaternion Qpar;
 
-    Qpar.plus(q,da,q_out);
-    cout << "\nq_out = " << q_out.transpose() << endl;
+    cout << endl << "Computed local plus(). Then," << endl;
+
+    Qpar.plus(q,da,qo);
+    cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
 
     Qpar.computeJacobian(q,J);
-    cout << "\n J = " << J << "\n" << endl;
-
+    cout << " J = " << J << endl;
 
     return 0;
 }

@@ -1,5 +1,7 @@
 #include "local_parametrization_quaternion.h"
 
+#include <iostream>
+
 LocalParametrizationQuaternion::LocalParametrizationQuaternion(bool _delta_theta_in_global_frame) :
         LocalParametrizationBase(4, 3),
         global_delta_(_delta_theta_in_global_frame)
@@ -19,7 +21,7 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<Eigen::VectorXs>& _q,
     assert(_delta_theta.size() == local_size_ && "Wrong size of input delta_theta.");
     assert(_q_plus_delta_theta.size() == global_size_ && "Wrong size of output quaternion.");
 
-    assert(abs(1.0 - _q.norm()) < WolfConstants::EPS && "Quaternion not normalized.");
+    assert(fabs(1.0 - _q.norm()) < WolfConstants::EPS && "Quaternion not normalized.");
 
     using namespace Eigen;
 
