@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 //    return 0;
 
     bool useCeres = true;
-    bool ceresVerbose = false;
+    bool ceresVerbose = true;
     unsigned int n_captures = 41;
 
     //Welcome message
@@ -129,6 +129,13 @@ int main(int argc, char** argv)
         std::cout << "|\tVehicle Pose: " << wolf_manager_->getVehiclePose().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
         std::cout << "|\tVehicle P (last frame): " << wolf_manager_->getProblemPtr()->getLastFramePtr()->getPPtr()->getVector().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
         std::cout << "|\tVehicle O (last frame): " << wolf_manager_->getProblemPtr()->getLastFramePtr()->getOPtr()->getVector().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
+
+//        //To print all the previous frames
+//        for (auto it : *(wolf_manager_->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()))
+//        {
+//            std::cout << "|\tVehicle P: " << it->getPPtr()->getVector().transpose() << std::endl;
+//            std::cout << "|\tVehicle O: " << it->getOPtr()->getVector().transpose() << std::endl;
+//        }
         std::cout << "|\tsensor P: " << gps_sensor_ptr_->getPPtr()->getVector().transpose() << std::endl;// position of the sensor with respect to the vehicle's frame
 //        std::cout << "|\tsensor O (not needed):" << gps_sensor_ptr_->getOPtr()->getVector().transpose() << std::endl;// orientation of antenna is not needed, because omnidirectional
         std::cout << "|\tbias: " << gps_sensor_ptr_->getIntrinsicPtr()->getVector().transpose() << std::endl;//intrinsic parameter  = receiver time bias

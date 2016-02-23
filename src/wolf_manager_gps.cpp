@@ -67,7 +67,7 @@ void WolfManagerGPS::createFrame(const Eigen::VectorXs& _frame_state, const Time
 
             problem_->getTrajectoryPtr()->addFrame(new FrameBase(_time_stamp,
                                                                  new StateBlock(_frame_state.head(3)),
-                                                                 new StateBlock(_frame_state.tail(4),ST_QUATERNION)));
+                                                                 new StateBlock(_frame_state.tail(4))));
             break;
         }
         default:
@@ -109,12 +109,12 @@ void WolfManagerGPS::createFrame(const TimeStamp& _time_stamp)
     {
         case PO_2D:
         {
-            createFrame(Eigen::Vector3s::Zero(), _time_stamp);
+            createFrame(last_key_frame_ != nullptr ? last_key_frame_->getState() : Eigen::Vector3s::Zero(), _time_stamp);
             break;
         }
         case PO_3D:
         {
-            createFrame(Eigen::Vector7s::Zero(), _time_stamp);
+            createFrame(last_key_frame_ != nullptr ? last_key_frame_->getState() : Eigen::Vector7s::Zero(), _time_stamp);
             break;
         }
         default:
@@ -185,11 +185,23 @@ void WolfManagerGPS::update()
         {
             std::cout << "adding odometry capture..." << new_capture->nodeId() << std::endl;
 
-            // ADD/INTEGRATE NEW ODOMETRY TO THE LAST FRAME
-            last_capture_relative_->integrateCapture((CaptureMotion*) (new_capture));
-            current_frame_->setState(last_capture_relative_->computeFramePose(new_capture->getTimeStamp()));
-            current_frame_->setTimeStamp(new_capture->getTimeStamp());
-            delete new_capture;
+            // ADD ODOM CAPTURE TO THE CURRENT FRAME (or integrate to the previous capture)
+            //std::cout << "searching repeated capture..." << new_capture->nodeId() << std::endl;
+            CaptureBaseIter repeated_capture_it = current_frame_->hasCaptureOf(sensor_prior_);
+
+            if (repeated_capture_it != current_frame_->getCaptureListPtr()->end()) // repeated capture
+            {
+                //std::cout << "existing odom capture, integrating new capture" << new_capture->nodeId() << std::endl;
+                last_capture_relative_->integrateCapture((CaptureMotion*) (new_capture));
+                current_frame_->setState(last_capture_relative_->computeFramePose(new_capture->getTimeStamp()));
+                current_frame_->setTimeStamp(new_capture->getTimeStamp());
+                delete new_capture;
+            }
+            else
+            {
+                //std::cout << "not repeated, adding capture..." << new_capture->nodeId() << std::endl;
+                current_frame_->addCapture(new_capture);
+            }
         }
         else
         {
