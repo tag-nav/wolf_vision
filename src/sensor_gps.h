@@ -2,7 +2,7 @@
 #define SENSOR_GPS_H_
 
 /*
- *  NB qui non puoi includere la mia libreria sensor base!
+ *  NB qui non puoi includere la mia libreria gps_scan_utils!
  *  perche in constaint vado a includere questo file, e cio fa in modo che wolf non sia
  *  compilabile senza la mia libreria
  */

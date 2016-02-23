@@ -16,6 +16,14 @@ void HardwareBase::addSensor(SensorBase* _sensor_ptr)
     //std::cout << "adding sensor..." << std::endl;
 	addDownNode(_sensor_ptr);
     //std::cout << "added!" << std::endl;
+
+    // Remove Frame State Blocks
+    if (_sensor_ptr->getPPtr() != nullptr && getTop() != nullptr)
+        getTop()->addStateBlockPtr(_sensor_ptr->getPPtr());
+
+    if (_sensor_ptr->getOPtr() != nullptr && getTop() != nullptr)
+        getTop()->addStateBlockPtr(_sensor_ptr->getOPtr());
+
 }
 
 void HardwareBase::removeSensor(const SensorBaseIter& _sensor_iter)

@@ -33,14 +33,12 @@ int main(int argc, char** argv)
      * Parameters, to be optimized
      */
     // Initial ecef position of the experiment
-    StateBlock* vehicle_init_p = new StateBlock(Eigen::Vector3s(4789360, 177175, 4194534));
+    StateBlock* vehicle_init_p = new StateBlock(Eigen::Vector3s(4789000, 177000, 4194000));
     StateBlock* vehicle_init_o = new StateBlock(Eigen::Vector1s::Zero());// vehicle init orientation
 
     // Sensor position with respect to vehicle's frame
-    StateBlock* sensor_p = new StateBlock(Eigen::Vector3s(1, 0, 0));//::Zero()); //gps sensor position
-    sensor_p->fix(); // only for now, to simplify things
-    StateBlock* sensor_o = new StateBlock(Eigen::Vector4s::Zero(), ST_QUATERNION);   //gps sensor orientation
-    sensor_o->fix(); // orientation is fixed, because antenna omnidirectional, so is not going to be optimized
+    StateBlock* sensor_p = new StateBlock(Eigen::Vector3s(1, 0, 0), true);//::Zero()); //gps sensor position
+    StateBlock* sensor_o = new StateBlock(Eigen::Vector4s::Zero(), true);   //gps sensor orientation
 
     //gps sensor bias
     StateBlock* sensor_bias = new StateBlock(Eigen::Vector1s::Zero());
