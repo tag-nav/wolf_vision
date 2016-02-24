@@ -1,21 +1,21 @@
 /*
- * LocalParametrizationHomogeneous.cpp
+ * \file local_parametrization_homogeneous.cpp
  *
  *  Created on: 24/02/2016
  *      Author: jsola
  */
 
-#include "LocalParametrizationHomogeneous.h"
+#include "local_parametrization_homogeneous.h"
 
-LocalParametrizationHomogeneous::LocalParametrizationHomogeneous()
+LocalParametrizationHomogeneous::LocalParametrizationHomogeneous() :
+        LocalParametrizationBase(4, 3)
 {
-    // TODO Auto-generated constructor stub
-
+    //
 }
 
 LocalParametrizationHomogeneous::~LocalParametrizationHomogeneous()
 {
-    // TODO Auto-generated destructor stub
+    //
 }
 
 bool LocalParametrizationHomogeneous::plus(const Eigen::Map<Eigen::VectorXs>& _h,
@@ -50,4 +50,14 @@ bool LocalParametrizationHomogeneous::plus(const Eigen::Map<Eigen::VectorXs>& _h
 bool LocalParametrizationHomogeneous::computeJacobian(const Eigen::Map<Eigen::VectorXs>& _h,
                                                       Eigen::Map<Eigen::MatrixXs>& _jacobian) const
 {
+    assert(_h.size() == global_size_ && "Wrong size of input quaternion.");
+    assert(_jacobian.rows() == global_size_ && _jacobian.cols() == local_size_ && "Wrong size of Jacobian matrix.");
+
+    using namespace Eigen;
+    _jacobian << -_h(0), -_h(1), -_h(2),
+                  _h(3),  _h(2), -_h(1),
+                 -_h(2),  _h(3),  _h(0),
+                  _h(1), -_h(0),  _h(3);
+    _jacobian /= 2;
+    return true;
 }
