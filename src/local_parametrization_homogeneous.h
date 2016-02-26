@@ -13,15 +13,23 @@
 /**
  * \brief Local parametrization for homogeneous vectors.
  *
- * The update plus(x,dx) is done orthogonally to x, so that it remains in the sphere defined by the norm of x.
- * Quaternion algebra is used to achieve this effect, with
+ * Local parametrization for homogeneous vectors.
  *
- *   x_plus_dx = dx ** x
+ * The composition plus(x,dx) is done orthogonally to x,
+ * so that the result remains in the 4-sphere defined by the norm of x.
+ * Because this is exactly what we do with quaternions,
+ * we use quaternion algebra to achieve this effect, with
  *
- * where ** is the quaternion product.
+ *   x_plus_dx = q(dx) ** x
  *
- * Contrary to the case of quaternions, it is not required that x is a unit homogeneous vector.
- * The updated x_plus_dx has the same norm as x.
+ * where ** is the quaternion product, and q(.) is a unit quaternion
+ * equivalent to a rotation dx, obtained with
+ *
+ *   q(dx) = [ dx/|dx|*sin(|dx|) ; cos(|dx|) ]
+ *
+ * Contrary to the case of quaternions, it is not required that x be a unit homogeneous vector.
+ * In this case, the updated x_plus_dx has the same norm as x.
+ *
  */
 class LocalParametrizationHomogeneous : public LocalParametrizationBase
 {
