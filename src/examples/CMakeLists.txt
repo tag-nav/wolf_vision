@@ -1,10 +1,7 @@
-# Local quaternion parametrization class test
-ADD_EXECUTABLE(test_homogeneous_param test_homogeneous_param.cpp)
-TARGET_LINK_LIBRARIES(test_homogeneous_param ${PROJECT_NAME})
 
 # Local quaternion parametrization class test
-ADD_EXECUTABLE(test_local_param_quat test_local_param_quat.cpp)
-TARGET_LINK_LIBRARIES(test_local_param_quat ${PROJECT_NAME})
+ADD_EXECUTABLE(test_local_param test_local_param.cpp)
+TARGET_LINK_LIBRARIES(test_local_param ${PROJECT_NAME})
 
 # NodeLinked class test
 ADD_EXECUTABLE(test_node_linked test_node_linked.cpp)
