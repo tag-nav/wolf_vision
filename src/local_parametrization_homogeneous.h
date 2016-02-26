@@ -15,20 +15,23 @@
  *
  * Local parametrization for homogeneous vectors.
  *
- * The composition plus(x,dx) is done orthogonally to x,
- * so that the result remains in the 4-sphere defined by the norm of x.
+ * The composition x_plus_dx = plus(x,dx), written in math mode as \f${\bf x}^+={\bf x}\oplus d {\bf x}\f$,
+ * is done orthogonally to \f${\bf x}\f$,
+ * so that the result remains in the 4-sphere defined by the norm of \f${\bf x}\f$.
  * Because this is exactly what we do with quaternions,
  * we use quaternion algebra to achieve this effect, with
  *
- *   x_plus_dx = q(dx) ** x
+ *     \f[{\bf x}^+ = {\bf q}( d {\bf x}) \otimes {\bf x}\f]
  *
- * where ** is the quaternion product, and q(.) is a unit quaternion
- * equivalent to a rotation dx, obtained with
+ * where \f$\otimes\f$ is the quaternion product, and \f${\bf q}(\cdot)\f$ is a unit quaternion
+ * equivalent to a rotation \f$ d {\bf x}\f$, obtained with
  *
- *   q(dx) = [ dx/|dx|*sin(|dx|) ; cos(|dx|) ]
+ *   \f[{\bf q}(d{\bf x}) = \left[\begin{array}  d {\bf x} \sin(|d{\bf x}|) / |d{\bf x}| \\ \cos(|d{\bf x}|) \end{array}\right]\f]
  *
- * Contrary to the case of quaternions, it is not required that x be a unit homogeneous vector.
- * In this case, the updated x_plus_dx has the same norm as x.
+ * Contrary to the case of quaternions, it is not required that \f${\bf x}\f$ be a unit homogeneous vector.
+ * In this case, the updated \f${\bf x}^+={\bf x}\oplus d {\bf x}\f$ has the same norm as \f${\bf x}\f$.
+ * It is however a good practice to have unit or close-to-unit
+ * homogeneous vectors for the sake of numerical stability.
  *
  */
 class LocalParametrizationHomogeneous : public LocalParametrizationBase
