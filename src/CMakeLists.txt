@@ -114,6 +114,7 @@ SET(HDRS
     landmark_point.h
     local_parametrization_base.h
     local_parametrization_quaternion.h
+    local_parametrization_homogeneous.h
     map_base.h
     node_base.h
     node_terminus.h
@@ -163,6 +164,7 @@ SET(SRCS
     landmark_point.cpp
     local_parametrization_base.cpp
     local_parametrization_quaternion.cpp
+    local_parametrization_homogeneous.cpp
     map_base.cpp
     node_base.cpp
     node_terminus.cpp
