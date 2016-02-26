@@ -24,7 +24,7 @@
  *     \f[{\bf x}^+ = {\bf q}( d {\bf x}) \otimes {\bf x}\f]
  *
  * where \f$\otimes\f$ is the quaternion product, and \f$d{\bf q} = {\bf q}(d {\bf x})\f$ is a unit delta_quaternion
- * equivalent to a rotation \f$ d {\bf x}\f$, obtained with
+ * equivalent to a rotation \f$d{\bf x}\f$, obtained with
  *
  *   \f[{\bf q}(d{\bf x}) = \left[\begin{array}{c} \frac{ d {\bf x}}{ |d{\bf x}|} \sin(|d{\bf x}|)  \\ \cos(|d{\bf x}|) \end{array}\right]\f]
  *
