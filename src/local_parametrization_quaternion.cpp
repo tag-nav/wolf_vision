@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-LocalParametrizationQuaternion::LocalParametrizationQuaternion(bool _delta_theta_in_global_frame) :
+LocalParametrizationQuaternion::LocalParametrizationQuaternion(QuaternionDeltaReference _delta_ref) :
         LocalParametrizationBase(4, 3),
-        global_delta_(_delta_theta_in_global_frame)
+        delta_reference_(_delta_ref)
 {
 }
 
@@ -35,7 +35,7 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<Eigen::VectorXs>& _q,
         Quaternions dq(AngleAxis<WolfScalar>(angle, axis));
 
         // result as a quaternion
-        if (global_delta_)
+        if (delta_reference_ == DQ_GLOBAL)
             // the delta is in global reference: dq * q
             _q_plus_delta_theta = (dq * Map<const Quaternions>(&_q(0))).coeffs();
         else
@@ -57,7 +57,7 @@ bool LocalParametrizationQuaternion::computeJacobian(const Eigen::Map<Eigen::Vec
     assert(_jacobian.rows() == global_size_ && _jacobian.cols() == local_size_ && "Wrong size of Jacobian matrix.");
 
     using namespace Eigen;
-    if (global_delta_) // See comments in method plus()
+    if (delta_reference_ == DQ_GLOBAL) // See comments in method plus()
     {
         _jacobian << -_q(0), -_q(1), -_q(2),
                       _q(3),  _q(2), -_q(1),

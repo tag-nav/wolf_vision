@@ -11,21 +11,46 @@
 #include "local_parametrization_base.h"
 
 /**
+  * \brief Local or global orientation error
+  *
+  * Local or global orientation error.
+  *
+  * This enum controls whether the orientation error is composed locally or globally to an orientation specification.
+  *
+  * See LocalParametrizationQuaternion for more information.
+  */
+typedef enum {
+    DQ_LOCAL,
+    DQ_GLOBAL
+} QuaternionDeltaReference;
+
+/**
  * \brief Local parametrization for quaternions
  *
  * This class implements two possible local parametrizations for quaternions:
  *
- *  - With a local delta,  so that q_new = q_old x q(delta_theta).
- *  - With a global delta, so that q_new = q(delta_theta) x q_old.
+ *  - With a local delta,  so that \f${\bf q}^+ = {\bf q} \otimes {\bf q}(d\theta)\f$.
+ *  - With a global delta, so that \f${\bf q}^+ = {\bf q}(d\theta) \otimes {\bf q}\f$.
  *
- * The choice is selected at construction time.
+ * The choice is selected at construction time, through an enum QuaternionDeltaReference.
+ *
+ * In either case, the incremental quaternion \f${\bf q}(d\theta)\f$ is computed from the delta_theta
+ * variable, here named \f$d\theta\f$, using
+ *
+ *   \f[{\bf q}(d\theta) =
+ *      \left[\begin{array}{c}
+ *          \frac{d\theta}{|d\theta|} \sin(|d\theta|) \\
+ *          \cos(|d\theta|)
+ *      \end{array}\right]
+ *   \f]
+ *
  */
 class LocalParametrizationQuaternion : public LocalParametrizationBase
 {
     private:
-        bool global_delta_;
+        QuaternionDeltaReference delta_reference_;
     public:
-        LocalParametrizationQuaternion(bool _delta_theta_in_global_frame = true);
+        LocalParametrizationQuaternion(QuaternionDeltaReference _delta_ref = DQ_GLOBAL);
         virtual ~LocalParametrizationQuaternion();
 
         virtual bool plus(const Eigen::Map<Eigen::VectorXs>& _q,

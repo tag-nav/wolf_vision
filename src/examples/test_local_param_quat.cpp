@@ -27,6 +27,7 @@ int main(){
     q.normalize();
 
     Map<VectorXs> da(&x(4),3);
+    da /= 10.0;
     Map<VectorXs> qo(&x(7),4);
     Map<MatrixXs> J(&M(0,0),4,3);
 
@@ -35,13 +36,20 @@ int main(){
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
 
     LocalParametrizationQuaternion Qpar;
+    LocalParametrizationQuaternion Qpar_loc(DQ_LOCAL);
 
-    cout << endl << "Computed local plus(). Then," << endl;
-
+    cout << "GLOBAL plus()\n" << endl;
     Qpar.plus(q,da,qo);
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
 
     Qpar.computeJacobian(q,J);
+    cout << " J = " << J << endl << endl;
+
+    cout << "LOCAL plus()\n" << endl;
+    Qpar_loc.plus(q,da,qo);
+    cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
+
+    Qpar_loc.computeJacobian(q,J);
     cout << " J = " << J << endl;
 
     return 0;
