@@ -1,11 +1,7 @@
 //Wolf includes
 #include "wolf.h"
-#include "sensor_base.h"
 #include "sensor_odom_2D.h"
 #include "sensor_gps_fix.h"
-#include "feature_base.h"
-#include "frame_base.h"
-#include "capture_base.h"
 #include "capture_fix.h"
 #include "capture_motion.h"
 #include "capture_odom_2D.h"
