@@ -2,8 +2,15 @@
 #ifndef FRAME_BASE_H_
 #define FRAME_BASE_H_
 
+// Fwd refs
 class TrajectoryBase;
 class CaptureBase;
+
+//Wolf includes
+#include "wolf.h"
+#include "time_stamp.h"
+#include "node_linked.h"
+#include "state_block.h"
 
 //std includes
 #include <iostream>
@@ -11,14 +18,6 @@ class CaptureBase;
 #include <list>
 #include <random>
 #include <cmath>
-
-//Wolf includes
-#include "wolf.h"
-#include "time_stamp.h"
-#include "node_linked.h"
-#include "trajectory_base.h"
-#include "capture_base.h"
-#include "state_block.h"
 
 //class FrameBase
 class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>

@@ -218,8 +218,17 @@ class NodeLinked : public NodeBase
 
 // Include header files of forwarded classes derived from NodeLinked -- this avoids loop dependencies
 // See this evil ugly solution improved in note 8) of http://www.cplusplus.com/forum/articles/10627/
+#include "hardware_base.h"
+#include "sensor_base.h"
 #include "processor_base.h"
-
+#include "trajectory_base.h"
+#include "frame_base.h"
+#include "capture_base.h"
+#include "feature_base.h"
+#include "constraint_base.h"
+#include "map_base.h"
+#include "landmark_base.h"
+#include "node_terminus.h"
 
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label) :

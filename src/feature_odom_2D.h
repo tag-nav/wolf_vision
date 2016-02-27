@@ -1,12 +1,12 @@
 #ifndef FEATURE_ODOM_2D_H_
 #define FEATURE_ODOM_2D_H_
 
-//std includes
-
 //Wolf includes
 #include "feature_base.h"
 #include "constraint_odom_2D.h"
 #include "constraint_odom_2D_analytic.h"
+
+//std includes
 
 //class FeatureOdom2D
 class FeatureOdom2D : public FeatureBase

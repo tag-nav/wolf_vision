@@ -1,10 +1,12 @@
 #ifndef FEATURE_FIX_H_
 #define FEATURE_FIX_H_
 
-//std includes
 
 //Wolf includes
 #include "feature_base.h"
+
+//std includes
+//
 
 //class FeatureFix
 class FeatureFix : public FeatureBase

@@ -1,8 +1,11 @@
 #ifndef PROCESSOR_IMAGE_POINT_BRISK_H
 #define PROCESSOR_IMAGE_POINT_BRISK_H
 
+// Wolf includes
 #include "sensor_camera.h"
 #include "capture_image.h"
+
+// OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>

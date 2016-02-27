@@ -5,6 +5,8 @@
 //wolf includes
 #include "sensor_base.h"
 
+// std includes
+
 class SensorGPSFix : public SensorBase
 {
     public:

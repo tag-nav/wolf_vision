@@ -1,11 +1,11 @@
 #ifndef FEATURE_GPS_FIX_H_
 #define FEATURE_GPS_FIX_H_
 
-//std includes
-
 //Wolf includes
 #include "feature_base.h"
 #include "constraint_gps_2D.h"
+
+//std includes
 
 //class FeatureGPSFix
 class FeatureGPSFix : public FeatureBase

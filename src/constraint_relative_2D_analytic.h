@@ -4,6 +4,7 @@
 //Wolf includes
 #include "wolf.h"
 #include "constraint_analytic.h"
+#include "landmark_base.h"
 
 class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 {

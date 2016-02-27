@@ -2,14 +2,14 @@
 #ifndef TIME_STAMP_H_
 #define TIME_STAMP_H_
 
+//wolf includes
+#include "wolf.h"
+
 //C, std
 #include <time.h>
 #include <sys/time.h>
 #include <math.h>
 #include <iostream>
-
-//wolf
-#include "wolf.h"
 
 
 /**

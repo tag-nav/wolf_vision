@@ -1,5 +1,6 @@
 
 #include "landmark_base.h"
+#include "constraint_base.h"
 
 LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr) :
             NodeLinked(MID, "LANDMARK"),

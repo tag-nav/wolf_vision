@@ -1,20 +1,17 @@
 #ifndef SENSOR_BASE_H_
 #define SENSOR_BASE_H_
 
-class HardwareBase;
-class NodeTerminus;
-
-//std includes
-#include <iostream>
-
 // Fwd refs
+class HardwareBase;
 class ProcessorBase;
 
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
 #include "state_block.h"
-#include "hardware_base.h"
+
+//std includes
+#include <iostream>
 
 class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 {

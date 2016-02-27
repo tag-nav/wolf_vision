@@ -1,11 +1,13 @@
 #ifndef HARDWARE_BASE_H_
 #define HARDWARE_BASE_H_
 
+// Fwd dependencies
+class SensorBase;
+class WolfProblem;
+
 //Wolf includes
 #include "wolf.h"
-#include "wolf_problem.h"
 #include "node_linked.h"
-#include "sensor_base.h"
 
 //class HardwareBase
 class HardwareBase : public NodeLinked<WolfProblem, SensorBase>

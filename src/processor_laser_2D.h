@@ -8,9 +8,9 @@
 #ifndef SRC_PROCESSOR_LASER_2D_H_
 #define SRC_PROCESSOR_LASER_2D_H_
 
+// Wolf includes
 #include "processor_base.h"
 #include "capture_laser_2D.h"
-
 
 // TODO Shouldn't a number of these includes below be moved to the .cpp file?
 

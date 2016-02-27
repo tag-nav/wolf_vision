@@ -4,7 +4,12 @@
 #include <iostream>
 #include "wolf.h"
 
+// Fwd references
 class WolfProblem;
+
+// Wolf includes
+
+// std includes
 
 /** \brief Base class for Nodes
  *

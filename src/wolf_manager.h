@@ -1,21 +1,3 @@
-//std includes
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
-#include <memory>
-#include <random>
-#include <typeinfo>
-#include <ctime>
-#include <queue>
-
-// Eigen includes
-#include <eigen3/Eigen/Dense>
-#include <eigen3/Eigen/Geometry>
-
-//Ceres includes
-#include "ceres/ceres.h"
-#include "glog/logging.h"
-
 //Wolf includes
 #include "wolf.h"
 #include "sensor_base.h"
@@ -36,6 +18,24 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 #include "wolf_problem.h"
+
+//std includes
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <memory>
+#include <random>
+#include <typeinfo>
+#include <ctime>
+#include <queue>
+
+// Eigen includes
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Geometry>
+
+//Ceres includes
+#include "ceres/ceres.h"
+#include "glog/logging.h"
 
 class WolfManager
 {

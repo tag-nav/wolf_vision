@@ -1,4 +1,6 @@
 #include "capture_base.h"
+#include "sensor_base.h"
+#include "feature_base.h"
 
 CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
         NodeLinked(MID, "CAPTURE"),

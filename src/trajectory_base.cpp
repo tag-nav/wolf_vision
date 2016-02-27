@@ -1,4 +1,5 @@
 #include "trajectory_base.h"
+#include "frame_base.h"
 
 TrajectoryBase::TrajectoryBase() : 
     NodeLinked(MID, "TRAJECTORY")
