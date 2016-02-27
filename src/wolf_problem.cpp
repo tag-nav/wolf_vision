@@ -1,5 +1,6 @@
 #include "wolf_problem.h"
 #include "constraint_base.h"
+#include "state_block.h"
 
 WolfProblem::WolfProblem() :
         NodeBase("WOLF_PROBLEM"), //

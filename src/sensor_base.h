@@ -4,14 +4,13 @@
 // Fwd refs
 class HardwareBase;
 class ProcessorBase;
+class StateBlock;
 
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
-#include "state_block.h"
 
 //std includes
-#include <iostream>
 
 class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 {

@@ -11,6 +11,7 @@ class MapBase;
 #include "wolf.h"
 
 // std includes
+#include <iostream>
 #include <utility> // pair
 
 /** \brief Wolf problem node element in the Wolf Tree

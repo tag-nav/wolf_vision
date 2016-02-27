@@ -1,4 +1,5 @@
 #include "sensor_base.h"
+#include "state_block.h"
 
 SensorBase::SensorBase(const SensorType& _tp, StateBlock* _p_ptr,
 		StateBlock* _o_ptr, StateBlock* _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn) :

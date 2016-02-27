@@ -11,11 +11,6 @@ class LandmarkBase;
 #include "node_linked.h"
 
 //std includes
-#include <iostream>
-#include <vector>
-#include <list>
-#include <random>
-#include <cmath>
 
 //class MapBase
 class MapBase : public NodeLinked<WolfProblem,LandmarkBase>

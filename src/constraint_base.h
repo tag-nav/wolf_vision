@@ -7,7 +7,6 @@ class NodeTerminus;
 
 //Wolf includes
 #include "wolf.h"
-#include "time_stamp.h"
 #include "node_linked.h"
 
 //std includes

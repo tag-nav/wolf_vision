@@ -5,19 +5,14 @@
 // Fwd refs
 class TrajectoryBase;
 class CaptureBase;
+class StateBlock;
 
 //Wolf includes
 #include "wolf.h"
 #include "time_stamp.h"
 #include "node_linked.h"
-#include "state_block.h"
 
 //std includes
-#include <iostream>
-#include <vector>
-#include <list>
-#include <random>
-#include <cmath>
 
 //class FrameBase
 class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>

@@ -6,18 +6,13 @@
 #include "wolf.h"
 
 //C, std
-#include <time.h>
-#include <sys/time.h>
-#include <math.h>
 #include <iostream>
 
 
 /**
- *
  * \brief TimeStamp implements basic functionalities for time stamps
  * 
  * TimeStamp implements basic functionalities for time stamps
- *
  */
 class TimeStamp
 {
