@@ -4,9 +4,6 @@
 class HardwareBase;
 class NodeTerminus;
 
-//std includes
-#include <iostream>
-
 // Fwd refs
 class ProcessorBase;
 
@@ -14,12 +11,12 @@ class ProcessorBase;
 #include "wolf.h"
 #include "node_linked.h"
 #include "state_block.h"
-#include "hardware_base.h"
+
+//std includes
 
 class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 {
     protected:
-//        SensorType type_;		// indicates sensor type. Enum defined at wolf.h
         StateBlock* p_ptr_;		// sensor position state block pointer
         StateBlock* o_ptr_; 	// sensor orientation state block pointer
         StateBlock* intrinsic_ptr_; // intrinsic parameters
@@ -68,17 +65,11 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 
         ProcessorBaseList* getProcessorListPtr();
 
-//        const SensorType getSensorType() const;
-
         StateBlock* getPPtr() const;
 
         StateBlock* getOPtr() const;
 
         StateBlock* getIntrinsicPtr() const;
-
-//        Eigen::Matrix2s getRotationMatrix2D();
-//
-//        Eigen::Matrix3s getRotationMatrix3D();
 
         void fix();
 
