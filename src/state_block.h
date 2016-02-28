@@ -15,16 +15,18 @@
 /** \brief class StateBlock
  *
  * This class implements a state block for general nonlinear optimization. It offers the following functionality:
- *  - A state vector storing the state
- *  - A key to fix the state so that the estimator treats it as fixed parameters. Non-fixed state blocks are estimated.
+ *  - A state vector storing the state values.
+ *  - A key to indicate whether the state is fixed or not.
+ *     - Fixed state blocks are not estimated and treated by the estimator as fixed parameters.
+ *     - Non-fixed state blocks are estimated.
  *  - A local parametrization useful for optimizing in the tangent space to the manifold.
  */
 class StateBlock
 {
     protected:
-        Eigen::VectorXs state_;
-        bool fixed_;
-        LocalParametrizationBase* local_param_ptr_;
+        Eigen::VectorXs state_; ///< State vector storing the state values
+        bool fixed_; ///< Key to indicate whether the state is fixed or not
+        LocalParametrizationBase* local_param_ptr_; ///< Local parametrization useful for optimizing in the tangent space to the manifold
         
     public:
         /** \brief Constructor with scalar pointer
