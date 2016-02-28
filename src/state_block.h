@@ -12,11 +12,16 @@
 #include "node_base.h"
 #include "local_parametrization_base.h"
 
-//class StateBlock
+/** \brief class StateBlock
+ *
+ * This class implements a state block for general nonlinear optimization. It offers the following functionality:
+ *  - A state vector storing the state
+ *  - A key to fix the state so that the estimator treats it as fixed parameters. Non-fixed state blocks are estimated.
+ *  - A local parametrization useful for optimizing in the tangent space to the manifold.
+ */
 class StateBlock
 {
     protected:
-        //StateType type_;
         Eigen::VectorXs state_;
         bool fixed_;
         LocalParametrizationBase* local_param_ptr_;
