@@ -3,15 +3,11 @@
 #define LANDMARK_CORNER_H_
 
 //Wolf includes
-#include "wolf.h"
 #include "landmark_base.h"
+#include "wolf.h"
 
-//std includes
-#include <iostream>
-#include <vector>
-#include <list>
-#include <random>
-#include <cmath>
+// Std includes
+
 
 //class LandmarkCorner2D
 class LandmarkCorner2D : public LandmarkBase

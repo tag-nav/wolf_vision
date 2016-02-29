@@ -6,10 +6,11 @@
 #include "feature_point.h"
 #include "sensor_camera.h"
 
+// opencv includes
+#include <opencv2/core/core.hpp>
+
 //std includes
 //
-
-#include <opencv2/core/core.hpp>
 
 //class CaptureImage
 class CaptureImage : public CaptureBase

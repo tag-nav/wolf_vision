@@ -6,11 +6,6 @@
 #include "landmark_base.h"
 
 //std includes
-#include <iostream>
-#include <vector>
-#include <list>
-#include <random>
-#include <cmath>
 
 //class LandmarkPoint
 class LandmarkPoint : public LandmarkBase
