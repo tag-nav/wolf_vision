@@ -1,0 +1,24 @@
+/*
+ * \processor_tracker.cpp
+ *
+ *  Created on: 27/02/2016
+ *      \author: jsola
+ */
+
+#include "processor_tracker.h"
+
+ProcessorTracker::ProcessorTracker(unsigned int _min_nbr_of_tracks_for_keyframe) :
+        ProcessorBase(),
+        origin_ptr_(nullptr),
+        last_ptr_(nullptr),
+        incoming_ptr_(nullptr),
+        min_tracks_th_(_min_nbr_of_tracks_for_keyframe)
+{
+}
+
+ProcessorTracker::~ProcessorTracker()
+{
+    delete origin_ptr_;
+    delete last_ptr_;
+    delete incoming_ptr_;
+}
