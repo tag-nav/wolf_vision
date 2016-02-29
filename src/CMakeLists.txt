@@ -124,6 +124,7 @@ SET(HDRS
     sensor_base.h
     sensor_camera.h
     sensor_odom_2D.h
+    sensor_gps.h
     sensor_gps_fix.h
     state_block.h
     time_stamp.h
