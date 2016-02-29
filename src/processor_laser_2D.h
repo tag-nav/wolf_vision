@@ -11,6 +11,14 @@
 
 #include "processor_base.h"
 
+//TODO try this, and remove includes below
+//class SensorLaser2D;
+//class CaptureLaser2D;
+//class LandmarkBase;
+//class FeatureCorner2D;
+//class ConstraintCorner2D;
+//class ConstraintContainer;
+
 
 // TODO Shouldn't a number of these includes below be moved to the .cpp file?
 
@@ -22,12 +30,6 @@
 #include "constraint_container.h"
 
 #include "data_association/association_tree.h"
-
-//laser_scan_utils
-//#include "laser_scan_utils/entities.h"
-//#include "laser_scan_utils/scan_basics.h"
-//#include "laser_scan_utils/line_detector.h"
-//#include "laser_scan_utils/corner_detector.h"
 
 //std includes
 #include <list>
