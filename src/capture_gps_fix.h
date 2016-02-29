@@ -1,12 +1,12 @@
 #ifndef CAPTURE_GPS_FIX_H_
 #define CAPTURE_GPS_FIX_H_
 
-//std includes
-//
-
 //Wolf includes
 #include "capture_base.h"
 #include "feature_gps_fix.h"
+
+//std includes
+//
 
 //class CaptureGPSFix
 class CaptureGPSFix : public CaptureBase

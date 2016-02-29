@@ -8,35 +8,31 @@
 #ifndef SRC_PROCESSOR_LASER_2D_H_
 #define SRC_PROCESSOR_LASER_2D_H_
 
+
 #include "processor_base.h"
-#include "capture_laser_2D.h"
 
 
 // TODO Shouldn't a number of these includes below be moved to the .cpp file?
 
 //wolf includes
+#include "sensor_laser_2D.h"
+#include "capture_laser_2D.h"
+#include "feature_corner_2D.h"
 #include "constraint_corner_2D.h"
 #include "constraint_container.h"
-#include "sensor_laser_2D.h"
-#include "feature_corner_2D.h"
+
 #include "data_association/association_tree.h"
 
 //laser_scan_utils
-#include "laser_scan_utils/entities.h"
-#include "laser_scan_utils/scan_basics.h"
-#include "laser_scan_utils/line_detector.h"
-#include "laser_scan_utils/corner_detector.h"
-
-// Eigen includes
-#include <eigen3/Eigen/Geometry>
+//#include "laser_scan_utils/entities.h"
+//#include "laser_scan_utils/scan_basics.h"
+//#include "laser_scan_utils/line_detector.h"
+//#include "laser_scan_utils/corner_detector.h"
 
 //std includes
-#include <queue>
-#include <map>
 #include <list>
-#include <random>
-#include <math.h>
-#include <algorithm> //find(), sort()
+
+
 
 
 
@@ -60,7 +56,7 @@ class ProcessorLaser2D : public ProcessorBase
         void extractFeatures(CaptureBase* capture_ptr_);
         void establishConstraints(CaptureBase* capture_ptr_);
 
-        // JOAN IS TAKING RISKS HERE. DELETE ALL FROM HERE DOWNWARDS IF YOU WANT TO MIGRATE FROM CAPTURE_LASER_2D TO HERE
+        // JOAN_S IS TAKING RISKS HERE. DELETE ALL FROM HERE DOWNWARDS IF YOU WANT TO MIGRATE FROM CAPTURE_LASER_2D TO HERE
 
     private:
         unsigned int extractCorners(std::list<laserscanutils::Corner> & _corner_list) const;

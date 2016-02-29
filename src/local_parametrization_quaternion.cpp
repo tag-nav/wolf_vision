@@ -1,7 +1,5 @@
 #include "local_parametrization_quaternion.h"
 
-#include <iostream>
-
 LocalParametrizationQuaternion::LocalParametrizationQuaternion(QuaternionDeltaReference _delta_ref) :
         LocalParametrizationBase(4, 3),
         delta_reference_(_delta_ref)

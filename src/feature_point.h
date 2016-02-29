@@ -2,10 +2,11 @@
 #define FEATURE_IMAGE_H
 
 
-//std includes
-
 //Wolf includes
 #include "feature_base.h"
+
+//std includes
+//
 
 /**
  *

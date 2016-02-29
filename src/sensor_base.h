@@ -1,11 +1,10 @@
 #ifndef SENSOR_BASE_H_
 #define SENSOR_BASE_H_
 
-class HardwareBase;
-class NodeTerminus;
-
 // Fwd refs
+class HardwareBase;
 class ProcessorBase;
+class StateBlock;
 
 //Wolf includes
 #include "wolf.h"

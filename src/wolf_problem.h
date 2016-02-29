@@ -1,15 +1,18 @@
 #ifndef WOLF_PROBLEM_H_
 #define WOLF_PROBLEM_H_
 
-// std
-#include <utility> // pair
+// Fwd refs
+class HardwareBase;
+class TrajectoryBase;
+class MapBase;
 
 //wolf includes
 #include "node_base.h"
-#include "map_base.h"
-#include "trajectory_base.h"
-#include "hardware_base.h"
 #include "wolf.h"
+
+// std includes
+#include <iostream>
+#include <utility> // pair
 
 /** \brief Wolf problem node element in the Wolf Tree
  * 

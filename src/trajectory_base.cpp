@@ -1,4 +1,6 @@
 #include "trajectory_base.h"
+#include "frame_base.h"
+#include "wolf_problem.h"
 
 TrajectoryBase::TrajectoryBase() : 
     NodeLinked(MID, "TRAJECTORY")

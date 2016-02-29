@@ -1,6 +1,12 @@
 
 #include "time_stamp.h"
 
+//C, std
+#include <time.h>
+#include <sys/time.h>
+#include <math.h>
+
+
 TimeStamp::TimeStamp() :
         time_stamp_(0)
 {

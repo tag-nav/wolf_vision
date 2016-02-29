@@ -1,13 +1,13 @@
 #ifndef CAPTURE_FIX_H_
 #define CAPTURE_FIX_H_
 
-//std includes
-//
-
 //Wolf includes
 #include "capture_base.h"
 #include "feature_fix.h"
 #include "constraint_fix.h"
+
+//std includes
+//
 
 //class CaptureFix
 class CaptureFix : public CaptureBase

@@ -1,4 +1,7 @@
 #include "constraint_base.h"
+#include "frame_base.h"
+#include "node_terminus.h"
+#include "landmark_base.h"
 
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, ConstraintStatus _status) :

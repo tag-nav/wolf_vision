@@ -2,21 +2,15 @@
 #ifndef MAP_BASE_H_
 #define MAP_BASE_H_
 
+// Fwd refs
 class WolfProblem;
 class LandmarkBase;
 
-//std includes
-#include <iostream>
-#include <vector>
-#include <list>
-#include <random>
-#include <cmath>
-
 //Wolf includes
 #include "wolf.h"
-#include "wolf_problem.h"
 #include "node_linked.h"
-#include "landmark_base.h"
+
+//std includes
 
 //class MapBase
 class MapBase : public NodeLinked<WolfProblem,LandmarkBase>

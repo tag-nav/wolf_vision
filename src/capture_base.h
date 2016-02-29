@@ -4,15 +4,12 @@
 // Forward declarations for node templates
 class FrameBase;
 class FeatureBase;
-
+class SensorBase;
 
 //Wolf includes
 #include "wolf.h"
 #include "time_stamp.h"
 #include "node_linked.h"
-#include "frame_base.h"
-#include "feature_base.h"
-#include "sensor_base.h"
 
 //std includes
 //

@@ -1,5 +1,9 @@
 
 #include "frame_base.h"
+#include "constraint_base.h"
+#include "trajectory_base.h"
+#include "capture_base.h"
+#include "state_block.h"
 
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr) :
             NodeLinked(MID, "FRAME"),

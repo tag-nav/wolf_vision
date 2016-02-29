@@ -2,15 +2,14 @@
 #ifndef STATE_BLOCK_H_
 #define STATE_BLOCK_H_
 
-//std includes
-#include <iostream>
-#include <vector>
-#include <cmath>
+// Fwd references
+class LocalParametrizationBase;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_base.h"
-#include "local_parametrization_base.h"
+
+//std includes
+#include <iostream>
 
 /** \brief class StateBlock
  *

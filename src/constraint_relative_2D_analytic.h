@@ -4,6 +4,7 @@
 //Wolf includes
 #include "wolf.h"
 #include "constraint_analytic.h"
+#include "landmark_base.h"
 
 class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 {
@@ -67,26 +68,8 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
          * Returns the residual evaluated in the states provided in std::vector of mapped Eigen::VectorXs
          *
          **/
-        virtual Eigen::VectorXs evaluateResiduals(const std::vector<Eigen::Map<const Eigen::VectorXs>>& _st_vector) const
-        {
-            Eigen::VectorXs residual(3);
-            Eigen::VectorXs expected_measurement(3);
-
-            // Expected measurement
-            Eigen::Matrix2s R = Eigen::Rotation2D<WolfScalar>(-_st_vector[1](0)).matrix();
-            expected_measurement.head(2) = R * (_st_vector[2]-_st_vector[0]); // rotar menys l'angle de primer (-_o1)
-            expected_measurement(2) = _st_vector[3](0) - _st_vector[1](0);
-
-            // Residual
-            residual = expected_measurement - getMeasurement();
-            while (residual(2) > M_PI)
-                residual(2) = residual(2) - 2*M_PI;
-            while (residual(2) <= -M_PI)
-                residual(2) = residual(2) + 2*M_PI;
-            residual = getMeasurementSquareRootInformation() * residual;
-
-            return residual;
-        }
+        virtual Eigen::VectorXs evaluateResiduals(
+                const std::vector<Eigen::Map<const Eigen::VectorXs> >& _st_vector) const;
 
         /** \brief Returns the jacobians evaluated in the states provided
          *
@@ -98,26 +81,9 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
          * \param _compute_jacobian is a vector that specifies whether the ith jacobian sould be computed or not
          *
          **/
-        virtual void evaluateJacobians(const std::vector<Eigen::Map<const Eigen::VectorXs>>& _st_vector, std::vector<Eigen::Map<Eigen::MatrixXs>>& jacobians, const std::vector<bool>& _compute_jacobian) const
-        {
-            jacobians[0] << -cos(_st_vector[1](0)), -sin(_st_vector[1](0)),
-                             sin(_st_vector[1](0)), -cos(_st_vector[1](0)),
-                             0,                     0;
-            jacobians[0] = getMeasurementSquareRootInformation() * jacobians[0];
-
-            jacobians[1] << -(_st_vector[2](0) - _st_vector[0](0)) * sin(_st_vector[1](0)) + (_st_vector[2](1) - _st_vector[0](1)) * cos(_st_vector[1](0)),
-                            -(_st_vector[2](0) - _st_vector[0](0)) * cos(_st_vector[1](0)) - (_st_vector[2](1) - _st_vector[0](1)) * sin(_st_vector[1](0)),
-                            -1;
-            jacobians[1] = getMeasurementSquareRootInformation() * jacobians[0];
-
-            jacobians[2] << cos(_st_vector[1](0)), sin(_st_vector[1](0)),
-                            -sin(_st_vector[1](0)),cos(_st_vector[1](0)),
-                            0,                     0;
-            jacobians[2] = getMeasurementSquareRootInformation() * jacobians[0];
-
-            jacobians[3] << 0, 0, 1;
-            jacobians[3] = getMeasurementSquareRootInformation() * jacobians[0];
-        }
+        virtual void evaluateJacobians(const std::vector<Eigen::Map<const Eigen::VectorXs> >& _st_vector,
+                                       std::vector<Eigen::Map<Eigen::MatrixXs> >& jacobians,
+                                       const std::vector<bool>& _compute_jacobian) const;
 
         /** \brief Returns the pure jacobians (without measurement noise) evaluated in the state blocks values
          *
@@ -127,22 +93,7 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
          * \param jacobians is an output vector of mapped eigen matrices that sould contain the jacobians w.r.t each state block
          *
          **/
-        virtual void evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const
-        {
-            jacobians[0] << -cos(getStatePtrVector()[1]->getVector()(0)), -sin(getStatePtrVector()[1]->getVector()(0)),
-                             sin(getStatePtrVector()[1]->getVector()(0)), -cos(getStatePtrVector()[1]->getVector()(0)),
-                             0,                     0;
-
-            jacobians[1] << -(getStatePtrVector()[2]->getVector()(0) - getStatePtrVector()[0]->getVector()(0)) * sin(getStatePtrVector()[1]->getVector()(0)) + (getStatePtrVector()[2]->getVector()(1) - getStatePtrVector()[0]->getVector()(1)) * cos(getStatePtrVector()[1]->getVector()(0)),
-                            -(getStatePtrVector()[2]->getVector()(0) - getStatePtrVector()[0]->getVector()(0)) * cos(getStatePtrVector()[1]->getVector()(0)) - (getStatePtrVector()[2]->getVector()(1) - getStatePtrVector()[0]->getVector()(1)) * sin(getStatePtrVector()[1]->getVector()(0)),
-                            -1;
-
-            jacobians[2] << cos(getStatePtrVector()[1]->getVector()(0)), sin(getStatePtrVector()[1]->getVector()(0)),
-                            -sin(getStatePtrVector()[1]->getVector()(0)),cos(getStatePtrVector()[1]->getVector()(0)),
-                            0,                     0;
-
-            jacobians[3] << 0, 0, 1;
-        }
+        virtual void evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const;
 
         /** \brief Returns the jacobians computation method
          *
@@ -154,4 +105,61 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
             return AUTO;
         }
 };
+
+
+/// IMPLEMENTATION ///
+
+inline Eigen::VectorXs ConstraintRelative2DAnalytic::evaluateResiduals(
+        const std::vector<Eigen::Map<const Eigen::VectorXs> >& _st_vector) const
+{
+    Eigen::VectorXs residual(3);
+    Eigen::VectorXs expected_measurement(3);
+    // Expected measurement
+    Eigen::Matrix2s R = Eigen::Rotation2D<WolfScalar>(-_st_vector[1](0)).matrix();
+    expected_measurement.head(2) = R * (_st_vector[2] - _st_vector[0]); // rotar menys l'angle de primer (-_o1)
+    expected_measurement(2) = _st_vector[3](0) - _st_vector[1](0);
+    // Residual
+    residual = expected_measurement - getMeasurement();
+    while (residual(2) > M_PI)
+        residual(2) = residual(2) - 2 * M_PI;
+    while (residual(2) <= -M_PI)
+        residual(2) = residual(2) + 2 * M_PI;
+    residual = getMeasurementSquareRootInformation() * residual;
+    return residual;
+}
+
+inline void ConstraintRelative2DAnalytic::evaluateJacobians(
+        const std::vector<Eigen::Map<const Eigen::VectorXs> >& _st_vector,
+        std::vector<Eigen::Map<Eigen::MatrixXs> >& jacobians, const std::vector<bool>& _compute_jacobian) const
+{
+    jacobians[0] << -cos(_st_vector[1](0)), -sin(_st_vector[1](0)), sin(_st_vector[1](0)), -cos(_st_vector[1](0)), 0, 0;
+    jacobians[0] = getMeasurementSquareRootInformation() * jacobians[0];
+    jacobians[1]
+            << -(_st_vector[2](0) - _st_vector[0](0)) * sin(_st_vector[1](0))
+                    + (_st_vector[2](1) - _st_vector[0](1)) * cos(_st_vector[1](0)), -(_st_vector[2](0)
+            - _st_vector[0](0)) * cos(_st_vector[1](0)) - (_st_vector[2](1) - _st_vector[0](1)) * sin(_st_vector[1](0)), -1;
+    jacobians[1] = getMeasurementSquareRootInformation() * jacobians[0];
+    jacobians[2] << cos(_st_vector[1](0)), sin(_st_vector[1](0)), -sin(_st_vector[1](0)), cos(_st_vector[1](0)), 0, 0;
+    jacobians[2] = getMeasurementSquareRootInformation() * jacobians[0];
+    jacobians[3] << 0, 0, 1;
+    jacobians[3] = getMeasurementSquareRootInformation() * jacobians[0];
+}
+
+inline void ConstraintRelative2DAnalytic::evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const
+{
+    jacobians[0] << -cos(getStatePtrVector()[1]->getVector()(0)), -sin(getStatePtrVector()[1]->getVector()(0)), sin(
+            getStatePtrVector()[1]->getVector()(0)), -cos(getStatePtrVector()[1]->getVector()(0)), 0, 0;
+    jacobians[1]
+            << -(getStatePtrVector()[2]->getVector()(0) - getStatePtrVector()[0]->getVector()(0))
+                    * sin(getStatePtrVector()[1]->getVector()(0))
+                    + (getStatePtrVector()[2]->getVector()(1) - getStatePtrVector()[0]->getVector()(1))
+                            * cos(getStatePtrVector()[1]->getVector()(0)), -(getStatePtrVector()[2]->getVector()(0)
+            - getStatePtrVector()[0]->getVector()(0)) * cos(getStatePtrVector()[1]->getVector()(0))
+            - (getStatePtrVector()[2]->getVector()(1) - getStatePtrVector()[0]->getVector()(1))
+                    * sin(getStatePtrVector()[1]->getVector()(0)), -1;
+    jacobians[2] << cos(getStatePtrVector()[1]->getVector()(0)), sin(getStatePtrVector()[1]->getVector()(0)), -sin(
+            getStatePtrVector()[1]->getVector()(0)), cos(getStatePtrVector()[1]->getVector()(0)), 0, 0;
+    jacobians[3] << 0, 0, 1;
+}
+
 #endif
