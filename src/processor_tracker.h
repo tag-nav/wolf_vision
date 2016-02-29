@@ -13,12 +13,12 @@
 
 /** \brief General tracker processor
  *
- * This class implements the incremental tracker. It contains three pointers to three Captures of type CaptureBase:
- *   - #origin_ptr_: the origin of the tracks: this points to a Capture where all Feature tracks start.
- *   - #last_ptr_: the last Capture in the tracker. A subset of the Features in origin_ptr_ is still alive.
+ * This class implements the incremental tracker. It contains three pointers to three Captures of type CaptureBase, named \b origin, \b last and \b incoming:
+ *   - #origin_ptr_: this points to a Capture where all Feature tracks start.
+ *   - #last_ptr_: the last Capture tracked by the tracker. A sufficient subset of the Features in \b origin is still alive in \b last.
  *   - #incoming_ptr_: the capture being received. The tracker operates on this Capture,
- *   establishing correspondences between the features here and the features in origin. Each successful correspondence
- *   results in an extension of the track of the Feature up to the incoming Capture.
+ *   establishing correspondences between the features here and the features in \b origin. Each successful correspondence
+ *   results in an extension of the track of the Feature up to the \b incoming Capture.
  */
 class ProcessorTracker : public ProcessorBase
 {
@@ -97,9 +97,6 @@ class ProcessorTracker : public ProcessorBase
          */
         void reset();
 
-
-
-    private:
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
