@@ -1,4 +1,6 @@
 #include "map_base.h"
+#include "wolf_problem.h"
+#include "landmark_base.h"
 
 MapBase::MapBase() :
     NodeLinked(MID, "MAP")

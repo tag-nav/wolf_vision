@@ -1,4 +1,5 @@
 #include "capture_base.h"
+#include "frame_base.h"
 #include "sensor_base.h"
 #include "feature_base.h"
 

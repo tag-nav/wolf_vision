@@ -1,6 +1,8 @@
 
 #include "landmark_base.h"
 #include "constraint_base.h"
+#include "map_base.h"
+#include "node_terminus.h"
 #include "state_block.h"
 
 LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr) :

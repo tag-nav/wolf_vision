@@ -216,8 +216,9 @@ class NodeLinked : public NodeBase
 //          IMPLEMENTATION
 //////////////////////////////////////////
 
-// Include header files of forwarded classes derived from NodeLinked -- this avoids loop dependencies
+// Include header files of forward-declared classes derived from NodeLinked -- this avoids loop dependencies
 // See this evil ugly solution improved in note 8) of http://www.cplusplus.com/forum/articles/10627/
+// This implies including here ALL the base classes in the Wolf tree!
 #include "wolf_problem.h"
 #include "hardware_base.h"
 #include "sensor_base.h"

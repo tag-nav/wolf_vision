@@ -1,5 +1,6 @@
 #include "feature_base.h"
 #include "constraint_base.h"
+#include "capture_base.h"
 
 FeatureBase::FeatureBase(unsigned int _dim_measurement) :
     NodeLinked(MID, "FEATURE"),

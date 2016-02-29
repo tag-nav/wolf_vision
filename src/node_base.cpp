@@ -1,4 +1,5 @@
 #include "node_base.h"
+#include "wolf_problem.h"
 
 #include <iostream>
 
