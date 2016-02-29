@@ -1,19 +1,18 @@
 // Testing things for the 3D image odometry
 
-#include "unistd.h"
-
-//std includes
-#include <iostream>
-#include <memory>
-#include <random>
-#include <cmath>
-#include <queue>
-
 //Wolf includes
 #include "sensor_camera.h"
 #include "capture_image.h"
 #include "feature_point.h"
 #include "processor_image_point_brisk.h"
+#include "state_block.h"
+
+// general includes
+#include "unistd.h"
+
+//std includes
+#include <iostream>
+
 
 int main(int argc, char** argv)
 {

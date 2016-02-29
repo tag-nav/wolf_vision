@@ -8,36 +8,30 @@
 #ifndef SRC_PROCESSOR_LASER_2D_H_
 #define SRC_PROCESSOR_LASER_2D_H_
 
-// TODO: JS: Many of these includes might be needed by the .cpp file. Put them there if needed.
 
-// Wolf includes
 #include "processor_base.h"
-#include "wolf.h"
-//#include "sensor_laser_2D.h"
-//#include "laser_scan_utils/corner_detector.h"
-//#include "laser_scan_utils/line_detector.h"
+
+
+// TODO Shouldn't a number of these includes below be moved to the .cpp file?
+
+//wolf includes
+#include "sensor_laser_2D.h"
+#include "capture_laser_2D.h"
+#include "feature_corner_2D.h"
+#include "constraint_corner_2D.h"
+#include "constraint_container.h"
+
+#include "data_association/association_tree.h"
+
+//laser_scan_utils
+//#include "laser_scan_utils/entities.h"
 //#include "laser_scan_utils/scan_basics.h"
-//#include "capture_laser_2D.h"
-//#include "constraint_container.h"
-//#include "constraint_corner_2D.h"
-//#include "data_association/association_tree.h"
-//#include "feature_corner_2D.h"
+//#include "laser_scan_utils/line_detector.h"
+//#include "laser_scan_utils/corner_detector.h"
 
-// IRI includes
-#include <laser_scan_utils/entities.h>
-
-// Eigen includes
-//#include <eigen3/Eigen/Geometry>
-
-// STD includes
+//std includes
 #include <list>
-//#include <map>
-//#include <queue>
-//#include <random>
-//#include <math.h>
-//#include <algorithm> //find(), sort()
 
-#include <architecture/i386/math.h>
 
 
 
