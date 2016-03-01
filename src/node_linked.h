@@ -51,58 +51,38 @@ class NodeLinked : public NodeBase
     public:
 
         /** \brief Constructor without specify up node
-         *
-         * Constructor without specify up node
-         *
          */
         NodeLinked(const NodeLocation _loc, const std::string& _label);
 
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
          */
         virtual ~NodeLinked();
 
         /** \brief Wolf destructor
          *
          * Wolf destructor (please use it instead of delete for guaranteeing the wolf tree integrity)
-         *
          */
         virtual void destruct() final;
 
         /** \brief Checks if the destructor has been called already
-         *
-         * Checks if the destructor has been called already
-         *
          */
         virtual const bool isDeleting() const;
 
         /** \brief Checks if node is on the top of Wolf tree
-         *
-         * Check if node is on the top of Wolf tree
-         *
          */
         bool isTop() const;
 
         /** \brief Checks if node is at the bottom of Wolf tree
-         *
-         * Check if node is at the bottom of Wolf tree
-         *
          */
         bool isBottom() const;
 
         /** \brief Sets link to up node
-         *
-         * Sets link to up node
-         *
          */
         void linkToUpperNode(UpperNodePtr _pptr);
 
         /** \brief Clears link to up node
-         *
-         * Sets link to up node
-         *
          */
         void unlinkFromUpperNode();
 
@@ -110,68 +90,48 @@ class NodeLinked : public NodeBase
          *
          * Access the pointer to parent.
          * Throw if parent nullptr.
-         *
          */
         const UpperNodePtr upperNodePtr() const;
 
         /** \brief Gets a reference to parent.
          *
-         * Get a reference to parent.
          * Throw if parent is nullptr.
-         *
          */
         const UpperType& upperNode() const;
 
         /** \brief Adds a down node 
-         *
-         * Adds a down node 
-         *
          */
         void addDownNode(LowerNodePtr _ptr);
 
         /** \brief Gets a reference to down node list
-         *
-         * Gets a reference to down node list
-         *
          */
         LowerNodeList& downNodeList() const;
 
         /** \brief Gets a pointer to down node list
-         *
-         * Gets a pointer to down node list
-         *
          */
         LowerNodeList* getDownNodeListPtr();
 
         /** \brief Removes a down node from list, given an iterator
          *
-         * Removes a down node from the list
          * @param _iter an iterator to the particular down node in the list that will be removed
-         *
          */
         void removeDownNode(const LowerNodeIter& _iter);
 
         /** \brief Removes a down node from list, given a pointer
          *
-         * Removes a down node from the list
          * @param _ptr a pointer to the particular down node in the list that will be removed
-         *
          */
         void removeDownNode(const LowerNodePtr _ptr);
 
         /** \brief Removes a down node from the list, given a node id
          *
-         * Removes a down node from the multimap
-         * @param _id node id of the node that will nbe removed
-         *
+         * @param _id node id of the node that will be removed
          */
         void removeDownNode(const unsigned int _id);
 
         /** \brief Gets a pointer to the tree top node
          * 
-         * Gets a pointer to the tree top node
          * TODO: Review if it could return a pointer to a derived class instead of NodeBase JVN: I tried to do so...
-         * 
          **/
         virtual WolfProblem* getTop();
 
