@@ -3,7 +3,8 @@
 //
 
 #include "processor_gps.h"
-
+#include "feature_gps_pseudorange.h"
+#include "constraint_gps_pseudorange_2D.h"
 
 ProcessorGPS::ProcessorGPS() :
         //sensor_gps_ptr_((SensorGPS*)(upperNodePtr())), //TODO here there's a crash. Look at what they'll do in processorLaser and modify as conseguence
