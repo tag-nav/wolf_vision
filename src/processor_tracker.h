@@ -14,9 +14,9 @@
 /** \brief General tracker processor
  *
  * This class implements the incremental tracker. It contains three pointers to three Captures of type CaptureBase, named \b origin, \b last and \b incoming:
- *   - #origin_ptr_: this points to a Capture where all Feature tracks start.
- *   - #last_ptr_: the last Capture tracked by the tracker. A sufficient subset of the Features in \b origin is still alive in \b last.
- *   - #incoming_ptr_: the capture being received. The tracker operates on this Capture,
+ *   - \b origin: this points to a Capture where all Feature tracks start.
+ *   - \b last: the last Capture tracked by the tracker. A sufficient subset of the Features in \b origin is still alive in \b last.
+ *   - \b incoming: the capture being received. The tracker operates on this Capture,
  *   establishing correspondences between the features here and the features in \b origin. Each successful correspondence
  *   results in an extension of the track of the Feature up to the \b incoming Capture.
  */
@@ -25,6 +25,10 @@ class ProcessorTracker : public ProcessorBase
     public:
         ProcessorTracker(unsigned int _min_nbr_of_tracks_for_keyframe);
         virtual ~ProcessorTracker();
+
+        /** \brief Reset the tracker to a new origin Capture
+         */
+        void reset(CaptureBase* _origin_ptr);
 
         /** \brief Tracker function
          *
@@ -37,7 +41,7 @@ class ProcessorTracker : public ProcessorBase
          * It should also generate the necessary Features in the incoming Capture, of a type derived from FeatureBase,
          * and the constraints, of a type derived from ConstraintBase.
          */
-        virtual void track(CaptureBase* _capture_ptr) = 0;
+        virtual void track(CaptureBase* _incoming_ptr) = 0;
 
         /**\brief Vote for KeyFrame generation
          *
@@ -58,45 +62,35 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual bool voteForKeyFrame();
 
-        /**\brief Mark a new keyframe, associated with the last Capture.
+        /**\brief Mark the frame of the last Capture as KeyFrame.
          *
+         * This function only marks the KeyFrame property of the Frame.
+         * It does not do anything else with the frame or with the Tracker.
          */
         virtual void markKeyFrame();
 
-        /** \brief Reset the tracker to a new origin Capture
+        /** \brief Advance the incoming Capture to become the last.
+         *
+         * Call this when the tracking and keyframe policy work is done and
+         * we need to get ready to accept a new incoming Capture.
          */
-        void reset(CaptureBase* _origin_ptr);
+        void advance();
 
-        void setOriginPtr(CaptureBase* _capture_ptr);
-        void setLastPtr(CaptureBase* _capture_ptr);
-        void setIncomingPtr(CaptureBase* _capture_ptr);
+
+        // TODO see what to do with this prototype from ProcessBase
+        virtual void extractFeatures(CaptureBase* _capture_ptr);
+        // TODO see what to do with this prototype from ProcessBase
+        virtual void establishConstraints(CaptureBase* _capture_ptr);
+
+
+        void setOriginPtr(CaptureBase* _origin_ptr);
+        void setLastPtr(CaptureBase* _last_ptr);
+        void setIncomingPtr(CaptureBase* _incoming_ptr);
         CaptureBase* getOriginPtr() const;
         CaptureBase* getLastPtr() const;
         CaptureBase* getIncomingPtr() const;
 
-        /** \brief Advance the incoming Capture to become the last.
-         *
-         * Call this when the tracking work is done and we need to get ready to accept a new incoming Capture.
-         */
-        void advance();
-
-        // TODO see what to do with this prototype from ProcessBase
-        virtual void extractFeatures(CaptureBase* _capture_ptr)
-        {
-        }
-
-        // TODO see what to do with this prototype from ProcessBase
-        virtual void establishConstraints(CaptureBase* _capture_ptr)
-        {
-            track(_capture_ptr);
-        }
-
-    protected:
-
-        /** \brief Reset the tracker so that only the origin Capture is active.
-         */
-        void reset();
-
+    private:
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
@@ -118,7 +112,7 @@ inline void ProcessorTracker::markKeyFrame()
 {
     getLastPtr()->getFramePtr()->setType(KEY_FRAME);
     //TODO Check all that needs to be done: To the Frame, to the Capture, to the Constraints
-    reset(getLastPtr());
+    reset(getLastPtr()); // last Capture becomes origin Capture.
 }
 
 inline CaptureBase* ProcessorTracker::getIncomingPtr() const
@@ -131,6 +125,11 @@ inline CaptureBase* ProcessorTracker::getLastPtr() const
     return last_ptr_;
 }
 
+inline void ProcessorTracker::setIncomingPtr(CaptureBase* _incoming_ptr)
+{
+    incoming_ptr_ = _incoming_ptr;
+}
+
 inline CaptureBase* ProcessorTracker::getOriginPtr() const
 {
     return origin_ptr_;
@@ -138,35 +137,37 @@ inline CaptureBase* ProcessorTracker::getOriginPtr() const
 
 inline void ProcessorTracker::advance()
 {
-    incoming_ptr_ = last_ptr_;
-    last_ptr_ = nullptr;
+    // TODO: check for memory leaks if last does not get deleted.
+    // TODO: check for destruction policy.
+    last_ptr_->getFramePtr()->destruct();
+    last_ptr_ = incoming_ptr_; // incoming Capture becomes last Capture
+    incoming_ptr_ = nullptr;
 }
 
-inline void ProcessorTracker::setIncomingPtr(CaptureBase* _capture_ptr)
+inline void ProcessorTracker::setLastPtr(CaptureBase* _last_ptr)
 {
-    incoming_ptr_ = _capture_ptr;
+    last_ptr_ = _last_ptr;
 }
 
 inline void ProcessorTracker::reset(CaptureBase* _origin_ptr)
 {
     origin_ptr_ = _origin_ptr;
-    reset();
-}
-
-inline void ProcessorTracker::setOriginPtr(CaptureBase* _capture_ptr)
-{
-    origin_ptr_ = _capture_ptr;
-}
-
-inline void ProcessorTracker::setLastPtr(CaptureBase* _capture_ptr)
-{
-    last_ptr_ = _capture_ptr;
-}
-
-inline void ProcessorTracker::reset()
-{
     last_ptr_ = origin_ptr_;
-    advance();
+    incoming_ptr_ = nullptr;
+}
+
+inline void ProcessorTracker::extractFeatures(CaptureBase* _capture_ptr)
+{
+}
+
+inline void ProcessorTracker::establishConstraints(CaptureBase* _capture_ptr)
+{
+    track(_capture_ptr);
+}
+
+inline void ProcessorTracker::setOriginPtr(CaptureBase* _origin_ptr)
+{
+    origin_ptr_ = _origin_ptr;
 }
 
 #endif /* PROCESSOR_TRACKER_H_ */
