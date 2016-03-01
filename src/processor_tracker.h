@@ -21,10 +21,10 @@
  *   results in an extension of the track of the Feature up to the \b incoming Capture.
  *
  * The pipeline of actions for a tracker like this can be resumed as follows:
- *   - Reset the tracker with an \b origin Capture: reset(CaptureBase* origin_ptr);
+ *   - Init the tracker with an \b origin Capture: init(CaptureBase* origin_ptr);
  *   - On each incoming Capture,
- *     - Track features in an \b incoming Capture: track(CaptureBase* incoming_ptr);
- *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low: voteForKeyFrame();
+ *     - Track features in a \b incoming Capture: track(CaptureBase* incoming_ptr);
+ *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
  *     - if voteForKeyFrame()
  *       - Mark the Frame owning the \b last Capture as KeyFrame: markKeyFrame();
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
@@ -36,19 +36,19 @@
 class ProcessorTracker : public ProcessorBase
 {
     public:
+
         ProcessorTracker(unsigned int _min_nbr_of_tracks_for_keyframe);
         virtual ~ProcessorTracker();
 
-
-        /** \brief Initialize tracker
+        /** \brief Initialize tracker.
          */
         void init(CaptureBase* _origin_ptr);
 
-        /** \brief Reset the tracker to a new origin Capture
+        /** \brief Reset the tracker to a new \b origin and \b last Captures
          */
         void reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr);
 
-        /** \brief Reset the tracker using the \b last Capture
+        /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
         void reset();
 
@@ -165,10 +165,10 @@ inline void ProcessorTracker::markKeyFrame()
 
 inline void ProcessorTracker::advance()
 {
-    last_ptr_->getFramePtr()->addCapture(incoming_ptr_);
-    last_ptr_->destruct();
+    last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add new Capture to the tracker's Frame
+    last_ptr_->destruct();     // Destruct obsolete last before reassigning a new pointer
     last_ptr_ = incoming_ptr_; // incoming Capture takes the place of last Capture
-    incoming_ptr_ = nullptr;
+    incoming_ptr_ = nullptr;   // this is not really needed, but it make things clear.
 }
 
 inline CaptureBase* ProcessorTracker::getOriginPtr() const
