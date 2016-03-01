@@ -20,6 +20,19 @@ ProcessorTracker::~ProcessorTracker()
     delete incoming_ptr_;
 }
 
+void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
+{
+    // TODO: check how do we create new landmarks, etc.
+    track(_incoming_ptr);
+    if (voteForKeyFrame())
+    {
+        markKeyFrame();
+        reset();
+    }
+    else
+        advance();
+}
+
 void ProcessorTracker::extractFeatures(CaptureBase* _capture_ptr)
 {
 }

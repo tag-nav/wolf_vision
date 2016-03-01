@@ -91,6 +91,10 @@ class ProcessorTracker : public ProcessorBase
          */
         void advance();
 
+        /** \brief Full processing of an incoming Capture
+         */
+        void process(CaptureBase* const _incoming_ptr);
+
 
         // TODO see what to do with this prototype from ProcessBase
         virtual void extractFeatures(CaptureBase* _capture_ptr);
