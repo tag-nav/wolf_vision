@@ -30,6 +30,8 @@
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
  *     - else
  *       - Advance the tracker one Capture ahead: advance()
+ *
+ * This functionality exists by default in the virtual method process(). You can overload it at your convenience.
  */
 class ProcessorTracker : public ProcessorBase
 {
@@ -91,9 +93,11 @@ class ProcessorTracker : public ProcessorBase
          */
         void advance();
 
-        /** \brief Full processing of an incoming Capture
+        /** \brief Full processing of an incoming Capture.
+         *
+         * Overload this function in derived trackers if desired.
          */
-        void process(CaptureBase* const _incoming_ptr);
+        virtual void process(CaptureBase* const _incoming_ptr);
 
 
         // TODO see what to do with this prototype from ProcessBase
@@ -153,7 +157,7 @@ inline void ProcessorTracker::advance()
     // TODO: check for memory leaks if last does not get deleted.
     // TODO: check for destruction policy.
     last_ptr_->getFramePtr()->destruct();
-    last_ptr_ = incoming_ptr_; // incoming Capture becomes last Capture
+    last_ptr_ = incoming_ptr_; // incoming Capture takes the place of last Capture
     incoming_ptr_ = nullptr;
 }
 
