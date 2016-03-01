@@ -39,9 +39,14 @@ class ProcessorTracker : public ProcessorBase
         ProcessorTracker(unsigned int _min_nbr_of_tracks_for_keyframe);
         virtual ~ProcessorTracker();
 
+
+        /** \brief Initialize tracker
+         */
+        void init(CaptureBase* _origin_ptr);
+
         /** \brief Reset the tracker to a new origin Capture
          */
-        void reset(CaptureBase* _origin_ptr);
+        void reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr);
 
         /** \brief Reset the tracker using the \b last Capture
          */
@@ -126,16 +131,22 @@ class ProcessorTracker : public ProcessorBase
 
 // IMPLEMENTATION //
 
-inline void ProcessorTracker::reset(CaptureBase* _origin_ptr)
+inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
 {
     origin_ptr_ = _origin_ptr;
-    last_ptr_ = origin_ptr_;
+    last_ptr_ = _origin_ptr;
+}
+
+inline void ProcessorTracker::reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr)
+{
+    origin_ptr_ = _origin_ptr;
+    last_ptr_ = _last_ptr;
     incoming_ptr_ = nullptr;
 }
 
 inline void ProcessorTracker::reset()
 {
-    reset(last_ptr_);
+    reset(last_ptr_, incoming_ptr_);
 }
 
 inline bool ProcessorTracker::voteForKeyFrame()
@@ -149,14 +160,13 @@ inline void ProcessorTracker::markKeyFrame()
 {
     getLastPtr()->getFramePtr()->setType(KEY_FRAME);
     //TODO Check all that needs to be done: To the Frame, to the Capture, to the Constraints
-    reset(last_ptr_); // last Capture becomes origin Capture.
+    reset(); // last Capture becomes origin Capture.
 }
 
 inline void ProcessorTracker::advance()
 {
-    // TODO: check for memory leaks if last does not get deleted.
-    // TODO: check for destruction policy.
-    last_ptr_->getFramePtr()->destruct();
+    last_ptr_->getFramePtr()->addCapture(incoming_ptr_);
+    last_ptr_->destruct();
     last_ptr_ = incoming_ptr_; // incoming Capture takes the place of last Capture
     incoming_ptr_ = nullptr;
 }

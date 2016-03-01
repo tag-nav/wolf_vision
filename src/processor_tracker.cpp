@@ -8,8 +8,11 @@
 #include "processor_tracker.h"
 
 ProcessorTracker::ProcessorTracker(unsigned int _min_nbr_of_tracks_for_keyframe) :
-        ProcessorBase(), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), min_tracks_th_(
-                _min_nbr_of_tracks_for_keyframe)
+        ProcessorBase(),
+        origin_ptr_(nullptr),
+        last_ptr_(nullptr),
+        incoming_ptr_(nullptr),
+        min_tracks_th_( _min_nbr_of_tracks_for_keyframe)
 {
 }
 
@@ -22,12 +25,11 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    // TODO: check how do we create new landmarks, etc.
     track(_incoming_ptr);
     if (voteForKeyFrame())
     {
+        // TODO: check how do we create new landmarks, etc.
         markKeyFrame();
-        reset();
     }
     else
         advance();
