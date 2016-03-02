@@ -143,7 +143,8 @@ typedef enum
     CTR_FIX,                    ///< marks a Fix constraint (for priors).
     CTR_ODOM_2D,                ///< marks a 2D Odometry constraint .
     CTR_CORNER_2D,		        ///< marks a 2D corner constraint .
-    CTR_CONTAINER               ///< marks a 2D container constraint .
+    CTR_CONTAINER,              ///< marks a 2D container constraint .
+    CTR_IMG_PNT_TO_EP           ///< marks a constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
 
 } ConstraintType;
 
@@ -247,7 +248,7 @@ typedef enum
  */
 typedef enum
 {
-    LANDMARK_POINT,		  ///< A point landmark, either 3D or 2D
+    LANDMARK_POINT,		  ///< A Euclidean point landmark, either 3D or 2D
     LANDMARK_CORNER,	  ///< A corner landmark (2D)
     LANDMARK_CONTAINER	///< A container landmark (2D)
 } LandmarkType;
