@@ -12,7 +12,7 @@ ProcessorTracker::ProcessorTracker(unsigned int _min_nbr_of_tracks_for_keyframe)
         origin_ptr_(nullptr),
         last_ptr_(nullptr),
         incoming_ptr_(nullptr),
-        min_tracks_th_( _min_nbr_of_tracks_for_keyframe)
+        min_features_th_( _min_nbr_of_tracks_for_keyframe)
 {
 }
 

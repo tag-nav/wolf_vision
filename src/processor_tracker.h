@@ -82,7 +82,7 @@ class ProcessorTracker : public ProcessorBase
          * An external agent decides then if the keyframe is effectively created.
          * New keyframe generation should be notified to the tracker via markNewKeyFrame().
          */
-        bool voteForKeyFrame();
+        virtual bool voteForKeyFrame();
 
         /**\brief Mark the frame of the last Capture as KeyFrame.
          *
@@ -125,7 +125,7 @@ class ProcessorTracker : public ProcessorBase
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
-        unsigned int min_tracks_th_; ///< Threshold on the number of active tracks to vote for keyframe generation.
+        unsigned int min_features_th_; ///< Threshold on the number of active tracks to vote for keyframe generation.
 
 };
 
@@ -152,23 +152,26 @@ inline void ProcessorTracker::reset()
 inline bool ProcessorTracker::voteForKeyFrame()
 {
     unsigned int n = getIncomingPtr()->getFeatureListPtr()->size(); // Number of features in Incoming Capture
-    return (n < min_tracks_th_);
-    return false;
+    return (n < min_features_th_);
 }
 
 inline void ProcessorTracker::markKeyFrame()
 {
+    //TODO Check all that needs to be done: To the Frame, to the Capture, to the Constraints.
+    // Here we opt for marking the owner frame of the last Capture as KEY_FRAME.
+    // Someone has to take care of creating a new Frame for the new incoming Captures that will start to arrive...
+    // Maybe here we could already create a new Frame to store this KeyFrame, and keep the Tracker's Frame always alive...
     getLastPtr()->getFramePtr()->setType(KEY_FRAME);
-    //TODO Check all that needs to be done: To the Frame, to the Capture, to the Constraints
     reset(); // last Capture becomes origin Capture.
 }
 
 inline void ProcessorTracker::advance()
 {
-    last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add new Capture to the tracker's Frame
+    // Here we opt for keeping the owner frame, adding to it the incoming Capture and destructing the last.
+    last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
     last_ptr_->destruct();     // Destruct obsolete last before reassigning a new pointer
-    last_ptr_ = incoming_ptr_; // incoming Capture takes the place of last Capture
-    incoming_ptr_ = nullptr;   // this is not really needed, but it make things clear.
+    last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
+    incoming_ptr_ = nullptr;   // This line is not really needed, but it make things clearer.
 }
 
 inline CaptureBase* ProcessorTracker::getOriginPtr() const
