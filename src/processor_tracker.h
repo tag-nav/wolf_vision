@@ -157,7 +157,8 @@ inline bool ProcessorTracker::voteForKeyFrame()
 
 inline void ProcessorTracker::markKeyFrame()
 {
-    //TODO Check all that needs to be done: To the Frame, to the Capture, to the Constraints.
+    // TODO: check how Frames are managed from Tracker, and where are they kept (in Trajectory, or in Tracker, or nowhere)
+    // TODO Check all that needs to be done: To the Frame, to the Capture, to the Constraints.
     // Here we opt for marking the owner frame of the last Capture as KEY_FRAME.
     // Someone has to take care of creating a new Frame for the new incoming Captures that will start to arrive...
     // Maybe here we could already create a new Frame to store this KeyFrame, and keep the Tracker's Frame always alive...
@@ -167,6 +168,7 @@ inline void ProcessorTracker::markKeyFrame()
 
 inline void ProcessorTracker::advance()
 {
+    // TODO: check how Frames are managed from Tracker, and where are they kept (in Trajectory, or in Tracker, or nowhere)
     // Here we opt for keeping the owner frame, adding to it the incoming Capture and destructing the last.
     last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
     last_ptr_->destruct();     // Destruct obsolete last before reassigning a new pointer
