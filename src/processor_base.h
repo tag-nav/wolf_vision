@@ -2,14 +2,14 @@
 #define PROCESSOR_BASE_H_
 
 // Fwd refs
+class SensorBase;
+class NodeTerminus;
 
 //Wolf includes
 #include "wolf.h"
-#include "time_stamp.h"
-#include "wolf_problem.h"
 #include "node_linked.h"
-#include "node_terminus.h"
-#include "sensor_base.h"
+
+// Std includes
 
 //class ProcessorBase
 class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>

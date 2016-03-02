@@ -2,28 +2,21 @@
 #ifndef TRAJECTORY_BASE_H_
 #define TRAJECTORY_BASE_H_
 
+// Fwd refs
 class WolfProblem;
 class FrameBase;
 
-//std includes
-#include <iostream>
-#include <vector>
-#include <list>
-#include <random>
-#include <cmath>
-
 //Wolf includes
 #include "wolf.h"
-#include "wolf_problem.h"
 #include "node_linked.h"
-#include "frame_base.h"
-#include "state_block.h"
+
+//std includes
 
 //class TrajectoryBase
 class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
 {
     protected:
-		// TODO: JVN: No seria millor que això ho tingui el wolf_problem o el wolf_manager?
+		// TODO: JVN: No seria millor que aixo ho tingui el wolf_problem o el wolf_manager?
         unsigned int fixed_size_; // Limits the number of frames forming the trajectory
         
     public:

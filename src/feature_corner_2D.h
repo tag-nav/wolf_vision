@@ -1,11 +1,11 @@
 #ifndef FEATURE_CORNER_2D_H_
 #define FEATURE_CORNER_2D_H_
 
-//std includes
-
 //Wolf includes
 #include "feature_base.h"
-//#include "constraint_corner_2D.h"
+
+//std includes
+//
 
 //class FeatureCorner2D
 class FeatureCorner2D : public FeatureBase

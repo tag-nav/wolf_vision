@@ -5,13 +5,11 @@
 class CaptureBase;
 class ConstraintBase;
 
-//std includes
-
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
-#include "capture_base.h"
-#include "constraint_base.h"
+
+//std includes
 
 //class FeatureBase
 class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>

@@ -8,9 +8,11 @@
 #ifndef SRC_TF_H_
 #define SRC_TF_H_
 
-#include <eigen3/Eigen/Dense>
-
+// Wolf includes
 #include "wolf.h"
+
+// Std includes
+#include <eigen3/Eigen/Dense>
 
 /**
  * Class for 3D frame transforms.

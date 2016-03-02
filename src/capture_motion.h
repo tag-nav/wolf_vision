@@ -2,12 +2,12 @@
 #ifndef CAPTURE_RELATIVE_H_
 #define CAPTURE_RELATIVE_H_
 
-//std includes
-//
-
 //Wolf includes
 #include "wolf.h"
 #include "capture_base.h"
+
+//std includes
+//
 
 //class CaptureBase
 class CaptureMotion : public CaptureBase

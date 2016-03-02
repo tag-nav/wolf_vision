@@ -5,10 +5,14 @@
 #ifndef WOLF_PROCESSOR_GPS_H
 #define WOLF_PROCESSOR_GPS_H
 
-#include "constraint_gps_pseudorange_2D.h"
-#include "sensor_gps.h"
+// Fwd references
+class SensorGPS;
+
+// Wolf includes
+#include "processor_base.h"
 #include "capture_gps.h"
 
+// Std includes
 
 class ProcessorGPS : public ProcessorBase
 {

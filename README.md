@@ -12,7 +12,7 @@ Wolf may be interfaced with many kinds of solvers, including filters and nonline
 
 The task of interfacing Wolf with these solvers is relegated to wrappers, which are coded out of Wolf. We provide a wrapper to Google CERES. We also provide an experimental wrapper-less solver for incremental, sparse, nonlinear optimization based on the QR decomposition (implementing the iSAM algorithm).
 
-The basic Wolf structure is a tree of base classes reproducing the elements of the robotic problem. A robot, with sensors, with a trajectory formed by keyframes, and the map with its landmarks. These base classes can be derived to build the particularizations you want. You have the basic functionality in the base classes, and you add what you want on top. The tree connectivity is augmented with the constraints linking different parts of it, becoming a real network of relations. This network is equivalent to the factor graph that would be solved by graphical models and nonlinear optimization. Wrappers are the ones transferring the Wolf structure into a factor graph that can be provided to the solver. See the documentation for a proper rationale and all the details.
+The basic Wolf structure is a tree of base classes reproducing the elements of the robotic problem. This is called the Wolf Tree. It has a robot, with sensors, with a trajectory formed by keyframes, and the map with its landmarks. These base classes can be derived to build the particularizations you want. You have the basic functionality in the base classes, and you add what you want on top. The Wolf Tree connectivity is augmented with the constraints linking different parts of it, becoming a real network of relations. This network is equivalent to the factor graph that would be solved by graphical models and nonlinear optimization. Wrappers are the ones transferring the Wolf structure into a factor graph that can be provided to the solver. See the documentation for a proper rationale and all the details.
 
 Wolf can be used within ROS for an easy integration. We provide examples of ROS nodes using Wolf. Wolf can also be used in other robotics frameworks.
 
@@ -20,11 +20,11 @@ Wolf can be used within ROS for an easy integration. We provide examples of ROS 
 
 -   Keyframe based
 -   Multi-sensor
--   SLAM or visual odometry
--   With or without landmarks
+-   Pose-SLAM, landmark-based SLAM, or visual odometry
 -   Different state types -- the state blocks
 -   Different measurement models -- the constraint blocks
--   Polymorphic classes using virtual inheritance and templates.
+-   Built with polymorphic classes using virtual inheritance and templates.
+-   Solver agnostic: choose your solver and build your wrapper to Wolf.
 
 ### Some preliminary documentation
 

@@ -2,13 +2,13 @@
 #ifndef CAPTURE_ODOM_2D_H_
 #define CAPTURE_ODOM_2D_H_
 
-//std includes
-//
-
 //Wolf includes
 #include "capture_motion.h"
 #include "feature_odom_2D.h"
 #include "sensor_odom_2D.h"
+
+//std includes
+//
 
 //class CaptureGPSFix
 class CaptureOdom2D : public CaptureMotion

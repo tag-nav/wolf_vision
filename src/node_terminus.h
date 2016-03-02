@@ -20,11 +20,8 @@
 class NodeTerminus : public NodeBase
 {
     public:
-		NodeTerminus();
-
+        NodeTerminus();
         virtual ~NodeTerminus();
-
-//        WolfProblem* getTop();
-
 };
+
 #endif /* NODE_TERMINUS_H_ */

@@ -5,15 +5,12 @@
 class FeatureBase;
 class NodeTerminus;
 
-//std includes
-//
-
 //Wolf includes
 #include "wolf.h"
-#include "time_stamp.h"
 #include "node_linked.h"
-#include "feature_base.h"
-#include "node_terminus.h"
+
+//std includes
+//
 
 //TODO: add a member to indicate how jacobian is computed, called "jacobian_method_"
 //class ConstraintBase

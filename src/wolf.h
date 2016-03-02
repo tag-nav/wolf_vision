@@ -305,11 +305,6 @@ class StateBlock;
 template<unsigned int SIZE> class StatePoint;
 class PinHole;
 
-// - Vehicle
-// typedef std::shared_ptr<VehicleBase> VehicleShPtr;
-// typedef VehicleBase* VehiclePtr;
-// typedef std::list<VehicleShPtr> VehicleList;
-// typedef VehicleList::iterator VehicleIter;
 
 // TODO: No seria millor que cada classe es defineixi aquests typedefs?
 

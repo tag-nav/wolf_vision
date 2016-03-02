@@ -5,6 +5,7 @@
 //Wolf includes
 #include "wolf.h"
 #include "constraint_base.h"
+#include "state_block.h"
 
 //TODO: change class name (and file name!->includes) to ConstraintNumericalAutoDiff 
 //template class ConstraintSparse

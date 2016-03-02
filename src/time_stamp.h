@@ -2,22 +2,17 @@
 #ifndef TIME_STAMP_H_
 #define TIME_STAMP_H_
 
-//C, std
-#include <time.h>
-#include <sys/time.h>
-#include <math.h>
-#include <iostream>
-
-//wolf
+//wolf includes
 #include "wolf.h"
+
+//C, std
+#include <iostream>
 
 
 /**
- *
  * \brief TimeStamp implements basic functionalities for time stamps
  * 
  * TimeStamp implements basic functionalities for time stamps
- *
  */
 class TimeStamp
 {

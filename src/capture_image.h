@@ -1,15 +1,16 @@
 #ifndef CAPTURE_IMAGE_H
 #define CAPTURE_IMAGE_H
 
-//std includes
-//
-
 //Wolf includes
 #include "capture_base.h"
 #include "feature_point.h"
 #include "sensor_camera.h"
 
+// opencv includes
 #include <opencv2/core/core.hpp>
+
+//std includes
+//
 
 //class CaptureImage
 class CaptureImage : public CaptureBase

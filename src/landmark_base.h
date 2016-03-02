@@ -1,24 +1,16 @@
 #ifndef LANDMARK_BASE_H_
 #define LANDMARK_BASE_H_
 
+// Fwd references
 class MapBase;
 class NodeTerminus;
-
-//std includes
-#include <iostream>
-#include <vector>
-#include <list>
-#include <random>
-#include <cmath>
+class StateBlock;
 
 //Wolf includes
 #include "wolf.h"
-#include "time_stamp.h"
 #include "node_linked.h"
-#include "map_base.h"
-#include "node_terminus.h"
-#include "state_block.h"
-//#include "constraint_base.h"
+
+//std includes
 
 // TODO: add descriptor as a StateBase -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
@@ -33,7 +25,8 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
         StateBlock* p_ptr_;     ///< Position state unit pointer
         StateBlock* o_ptr_;     ///< Orientation state unit pointer
         Eigen::VectorXs descriptor_;    //TODO: agree?
-        std::list<ConstraintBase*> constraint_to_list_; ///< List of constraints linked to this landmark
+        ConstraintBaseList constraint_to_list_; ///< List of constraints linked to this landmark
+
 
     public:
         /** \brief Constructor with type, time stamp and the position state pointer

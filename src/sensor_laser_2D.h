@@ -3,27 +3,22 @@
 #ifndef SENSOR_LASER_2D_H_
 #define SENSOR_LASER_2D_H_
 
+//wolf
+#include "sensor_base.h"
+
 //laser_scan_utils
 #include "laser_scan_utils/scan_basics.h"
 #include "laser_scan_utils/corner_detector.h"
 
-//wolf 
-#include "sensor_base.h"
-
 class SensorLaser2D : public SensorBase
 {
     protected:
-//         unsigned int n_rays_; ///numper of rays per scan [#]
-//         double aperture_; ///scan aperture in [rad]
-//         double range_min_; ///minimum range [m]
-//         double range_max_; ///maximum range [m]
-        laserscanutils::ScanParams scan_params_;//TODO: Decide who holds intrinsic parameters, either SensorBase::params_ or scan_params_, but NOTH BOTH!!
+        laserscanutils::ScanParams scan_params_;
         laserscanutils::ExtractCornerParams corners_alg_params_; //parameters for corner extraction algorithm.
 
     public:
         /** \brief Constructor with arguments
          * 
-         * Constructor with arguments
          * \param _p_ptr StateBase pointer to the sensor position
          * \param _o_ptr StateBase pointer to the sensor orientation
          * 
@@ -42,7 +37,6 @@ class SensorLaser2D : public SensorBase
         
         /** \brief Set scanner intrinsic parameters
          * 
-         * Set scanner intrinsic parameters
          * \param _params struct with scanner intrinsic parameters. See laser_scan_utils library API for reference.
          * 
          **/                
@@ -129,9 +123,6 @@ class SensorLaser2D : public SensorBase
 //         WolfScalar getScanTime() const;
 
         /** \brief Prints parameters
-         * 
-         * Prints parameters
-         * 
          **/                
         void printSensorParameters() const;
 };

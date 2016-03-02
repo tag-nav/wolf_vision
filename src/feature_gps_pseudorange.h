@@ -2,11 +2,12 @@
 #ifndef FEATURE_GPS_PSEUDORANGE_H_
 #define FEATURE_GPS_PSEUDORANGE_H_
 
-//std includes
-
 //Wolf includes
 #include "feature_base.h"
 #include <iomanip>
+
+//std includes
+//
 
 // TODO manage covariance
 

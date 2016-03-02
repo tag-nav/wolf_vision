@@ -1,10 +1,13 @@
 #ifndef NODE_BASE_H_
 #define NODE_BASE_H_
 
-#include <iostream>
+// Fwd references
+class WolfProblem;
+
+// Wolf includes
 #include "wolf.h"
 
-class WolfProblem;
+// std includes
 
 /** \brief Base class for Nodes
  *
