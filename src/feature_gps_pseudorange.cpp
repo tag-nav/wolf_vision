@@ -4,7 +4,7 @@ FeatureGPSPseudorange::FeatureGPSPseudorange(Eigen::Vector3s &_sat_position, Wol
         FeatureBase(Eigen::VectorXs::Constant(1,_pseudorange), Eigen::MatrixXs::Identity(1,1)*0.1),
         sat_position_(_sat_position),
         pseudorange_(_pseudorange)
-//TODO occhio, ora featureBase contiene il pseudorange (posso toglierlo?)
+//TODO featureBase contains pseudorange, but i don't think is needed
 {
 //    std::cout << "FeatureGPSPseudorange() " << std::setprecision(12)
 //              << "   --pr=" << pseudorange_
