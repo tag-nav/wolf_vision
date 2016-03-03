@@ -1,7 +1,5 @@
 // Wolf includes
-#include "processor_image_point_brisk.h"
-
-// OpenCV includes
+#include "processor_ORB.h"
 
 #include "unistd.h"
 
