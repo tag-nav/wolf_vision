@@ -23,10 +23,11 @@
  * The pipeline of actions for a tracker like this can be resumed as follows:
  *   - Init the tracker with an \b origin Capture: init(CaptureBase* origin_ptr);
  *   - On each incoming Capture,
- *     - Track features in a \b incoming Capture: track(CaptureBase* incoming_ptr);
+ *     - Track known features in the \b incoming Capture: track(CaptureBase* incoming_ptr);
  *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
  *     - if voteForKeyFrame()
  *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
+ *       - Look for new Features and make Landmarks with them,
  *       - if detectNewFeatures(last)
  *         - initNewLandmarks(last)
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
@@ -39,20 +40,12 @@ class ProcessorTracker : public ProcessorBase
 {
     public:
 
-        ProcessorTracker(unsigned int _min_nbr_of_tracks_for_keyframe);
+        ProcessorTracker(bool _autonomous = true);
         virtual ~ProcessorTracker();
 
         /** \brief Initialize tracker.
          */
         void init(CaptureBase* _origin_ptr);
-
-        /** \brief Reset the tracker to a new \b origin and \b last Captures
-         */
-        void reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr);
-
-        /** \brief Reset the tracker using the \b last Capture as the new \b origin.
-         */
-        void reset();
 
         /** \brief Tracker function
          *
@@ -72,19 +65,9 @@ class ProcessorTracker : public ProcessorBase
          * If a KeyFrame criterion is validated, this function returns true,
          * meaning that it wants to create a KeyFrame at the \b last Capture.
          *
-         * The criterion is evaluated on the \b incoming Capture, if the number of active tracks
-         * falls below the #min_tracks_th_ threshold.
-         * The Keyframe will be generated using the \b last Capture.
-         * This is so because usually the \b incoming Capture is a bad KeyFrame, and this is detectable.
-         * Then, the \b last Capture was still a good KeyFrame, and so it is used for KeyFrame generation.
-         *
-         * You can create other voting policies by overloading this function in derived classes.
-         *
-         * WARNING! This function only votes!
-         * An external agent decides then if the keyframe is effectively created.
-         * New keyframe generation should be notified to the tracker via markNewKeyFrame().
+         * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame();
+        virtual bool voteForKeyFrame() = 0;
 
         /**\brief Mark the frame of the last Capture as KeyFrame.
          *
@@ -92,6 +75,14 @@ class ProcessorTracker : public ProcessorBase
          * It does not do anything else with the frame or with the Tracker.
          */
         virtual void markKeyFrame();
+
+        /** \brief Reset the tracker to a new \b origin and \b last Captures
+         */
+        void reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr);
+
+        /** \brief Reset the tracker using the \b last Capture as the new \b origin.
+         */
+        void reset();
 
         /** \brief Advance the incoming Capture to become the last.
          *
@@ -107,13 +98,19 @@ class ProcessorTracker : public ProcessorBase
         virtual void process(CaptureBase* const _incoming_ptr);
 
 
-        // TODO see what to do with this prototype from ProcessBase
-        virtual void extractFeatures(CaptureBase* _capture_ptr);
-        // TODO see what to do with this prototype from ProcessBase
-        virtual void establishConstraints(CaptureBase* _capture_ptr);
+//        // TODO see what to do with this prototype from ProcessBase
+//        virtual void extractFeatures(CaptureBase* _capture_ptr)
+//        {
+//        }
+//        // TODO see what to do with this prototype from ProcessBase
+//        virtual void establishConstraints(CaptureBase* _capture_ptr)
+//        {
+//            track(_capture_ptr);
+//        }
 
 
         // getters and setters // TODO hide some of these in protected or private
+        bool isAutonomous() const;
         CaptureBase* getOriginPtr() const;
         CaptureBase* getLastPtr() const;
         CaptureBase* getIncomingPtr() const;
@@ -124,11 +121,10 @@ class ProcessorTracker : public ProcessorBase
     protected:
 
     private:
+        bool autonomous_;    ///< Sets whether the tracker is autonomous to make decisions that affect the WolfProblem, like creating new KeyFrames and/or Landmarks.
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
-        unsigned int min_features_th_; ///< Threshold on the number of active tracks to vote for keyframe generation.
-
 };
 
 // IMPLEMENTATION //
@@ -137,6 +133,17 @@ inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
 {
     origin_ptr_ = _origin_ptr;
     last_ptr_ = _origin_ptr;
+}
+
+inline void ProcessorTracker::markKeyFrame()
+{
+    // TODO: check how Frames are managed from Tracker, and where are they kept (in Trajectory, or in Tracker, or nowhere)
+    // TODO Check all that needs to be done: To the Frame, to the Capture, to the Constraints.
+    // Here we opt for marking the owner frame of the last Capture as KEY_FRAME.
+    // Someone has to take care of creating a new Frame for the new incoming Captures that will start to arrive...
+    // Maybe here we could already create a new Frame to store this KeyFrame, and keep the Tracker's Frame always alive...
+    getLastPtr()->getFramePtr()->setType(KEY_FRAME);
+    reset(); // last Capture becomes origin Capture.
 }
 
 inline void ProcessorTracker::reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr)
@@ -151,23 +158,6 @@ inline void ProcessorTracker::reset()
     reset(last_ptr_, incoming_ptr_);
 }
 
-inline bool ProcessorTracker::voteForKeyFrame()
-{
-    unsigned int n = getIncomingPtr()->getFeatureListPtr()->size(); // Number of features in Incoming Capture
-    return (n < min_features_th_);
-}
-
-inline void ProcessorTracker::markKeyFrame()
-{
-    // TODO: check how Frames are managed from Tracker, and where are they kept (in Trajectory, or in Tracker, or nowhere)
-    // TODO Check all that needs to be done: To the Frame, to the Capture, to the Constraints.
-    // Here we opt for marking the owner frame of the last Capture as KEY_FRAME.
-    // Someone has to take care of creating a new Frame for the new incoming Captures that will start to arrive...
-    // Maybe here we could already create a new Frame to store this KeyFrame, and keep the Tracker's Frame always alive...
-    getLastPtr()->getFramePtr()->setType(KEY_FRAME);
-    reset(); // last Capture becomes origin Capture.
-}
-
 inline void ProcessorTracker::advance()
 {
     // TODO: check how Frames are managed from Tracker, and where are they kept (in Trajectory, or in Tracker, or nowhere)
@@ -176,6 +166,11 @@ inline void ProcessorTracker::advance()
     last_ptr_->destruct();     // Destruct obsolete last before reassigning a new pointer
     last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
     incoming_ptr_ = nullptr;   // This line is not really needed, but it make things clearer.
+}
+
+inline bool ProcessorTracker::isAutonomous() const
+{
+    return autonomous_;
 }
 
 inline CaptureBase* ProcessorTracker::getOriginPtr() const

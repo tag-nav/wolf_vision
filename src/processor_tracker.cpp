@@ -7,12 +7,12 @@
 
 #include "processor_tracker.h"
 
-ProcessorTracker::ProcessorTracker(unsigned int _min_nbr_of_tracks_for_keyframe) :
+ProcessorTracker::ProcessorTracker(bool _autonomous) :
         ProcessorBase(),
+        autonomous_(_autonomous),
         origin_ptr_(nullptr),
         last_ptr_(nullptr),
-        incoming_ptr_(nullptr),
-        min_features_th_( _min_nbr_of_tracks_for_keyframe)
+        incoming_ptr_(nullptr)
 {
 }
 
@@ -33,13 +33,4 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     }
     else
         advance();
-}
-
-void ProcessorTracker::extractFeatures(CaptureBase* _capture_ptr)
-{
-}
-
-void ProcessorTracker::establishConstraints(CaptureBase* _capture_ptr)
-{
-    track(_capture_ptr);
 }
