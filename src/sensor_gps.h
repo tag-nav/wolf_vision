@@ -1,10 +1,11 @@
 #ifndef SENSOR_GPS_H_
 #define SENSOR_GPS_H_
 
-/*
- *  NB qui non puoi includere la mia libreria gps_scan_utils!
- *  perche in constaint vado a includere questo file, e cio fa in modo che wolf non sia
- *  compilabile senza la mia libreria
+/* WARNING: from here you cannot include gps_scan_utils
+ * because is included in constraintGPS, and constraintGPS is included in wolf.h (or some other wolf file)
+ * Otherwise wolf will not build without my library installed
+ *
+ * --- MAYBE IS NO MORE TRUE, AFTER THE INCLUDES FIX!! ---
  */
 
 //wolf
@@ -14,20 +15,12 @@
 
 class SensorGPS : public SensorBase
 {
-//    TODO parameters needed:
-//        * INTRINSIC PARAM:
-//                bias                  [ ok ]
-//        * EXTRINSIC PARAM:
-//                GPS init              [  ]
-//                gps mounting point on board in  the vehicle   [ ok ]
-
 protected:
 
     StateBlock* init_vehicle_p_ptr_; //position of the vehicle where the experiment starts in ecef
     StateBlock* init_vehicle_o_ptr_; //orientation of the vehicle where the experiment starts in ecef
 
 public:
-
                 //pointer to sensor position, orientation, bias, init vehicle position and orientation
     SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr, StateBlock* _bias_ptr, StateBlock* _init_vehicle_position_ptr, StateBlock* _init_vehicle_orientation_ptr);
 

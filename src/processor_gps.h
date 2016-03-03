@@ -28,11 +28,6 @@ public:
     virtual void extractFeatures(CaptureBase *_capture_ptr);
     virtual void establishConstraints(CaptureBase *_capture_ptr);
 
-private:
-    //se ho bisogno di altre funzioni le metto qui
-
-
-
 };
 
 
