@@ -39,5 +39,4 @@ void ProcessorTracker::extractFeatures(CaptureBase* _capture_ptr)
 
 void ProcessorTracker::establishConstraints(CaptureBase* _capture_ptr)
 {
-    track(_capture_ptr);
 }
