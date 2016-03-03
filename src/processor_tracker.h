@@ -20,14 +20,20 @@
  *   establishing correspondences between the features here and the features in \b origin. Each successful correspondence
  *   results in an extension of the track of the Feature up to the \b incoming Capture.
  *
- * The pipeline of actions for a tracker like this can be resumed as follows:
+ * A tracker can be declared autonomous. In such case, it is allowed to create new KeyFrames and new Landmarks
+ * as the result of the data processing.
+ *
+ * A non-autonomous Tracker, on the contrary, limits itself to detect and match Features,
+ * but cannot alter the size of the Wolf Problem by adding new elements (Frames and/or Landmarks)
+ *
+ * The pipeline of actions for an autonomous tracker can be resumed as follows:
  *   - Init the tracker with an \b origin Capture: init(CaptureBase* origin_ptr);
  *   - On each incoming Capture,
- *     - Track known features in the \b incoming Capture: track(CaptureBase* incoming_ptr);
+ *     - Track known features in the \b incoming Capture: trackKnownFeatures(CaptureBase* incoming_ptr);
  *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
  *     - if voteForKeyFrame()
  *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
- *       - Look for new Features and make Landmarks with them,
+ *       - Look for new Features and make Landmarks with them:
  *       - if detectNewFeatures(last)
  *         - initNewLandmarks(last)
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
@@ -81,19 +87,7 @@ class ProcessorTracker : public ProcessorBase
 
         /**\brief Make a KeyFrame using the last Capture.
          */
-        virtual void makeKeyFrame()
-        {
-            if (!autonomous_)
-            {
-                // TODO: Add non-key Frame to Trajectory
-                // Make the old Frame a KeyFrame
-                getLastPtr()->getFramePtr()->setType(KEY_FRAME);
-                // TODO: Point incoming_ptr_ (?) to the new non-key Frame
-            }else
-            {
-                // TODO: what to do here?
-            }
-        }
+        virtual void makeKeyFrame();
 
         /** \brief Reset the tracker to a new \b origin and \b last Captures
          */

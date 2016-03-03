@@ -23,13 +23,31 @@ ProcessorTracker::~ProcessorTracker()
     delete incoming_ptr_;
 }
 
+void ProcessorTracker::makeKeyFrame()
+{
+    if (!autonomous_)
+    {
+        // TODO: Add non-key Frame to Trajectory
+        // Make the old Frame a KeyFrame
+        getLastPtr()->getFramePtr()->setType(KEY_FRAME);
+        // TODO: Point incoming_ptr_ (?) to the new non-key Frame
+    }
+    else
+    {
+        // TODO: what to do here?
+    }
+}
+
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
     trackKnownFeatures(_incoming_ptr);
     if (autonomous_ && voteForKeyFrame())
     {
         makeKeyFrame();
-        detectNewFeatures(origin_ptr_);
+        if (detectNewFeatures(origin_ptr_) > 0)
+        {
+            // TODO: See how to create new Landmarks
+        }
     }
     else
         advance();
