@@ -5,6 +5,7 @@
 class HardwareBase;
 class TrajectoryBase;
 class MapBase;
+class TimeStamp;
 
 //wolf includes
 #include "node_base.h"
@@ -44,19 +45,12 @@ class WolfProblem: public NodeBase
 
     public:
 
-        /** \brief Constructor from state size
-         *
-         * Constructor from state size
-		 * 
-         */
-        WolfProblem();
+        // TODO: make addLandmark() calling map_->addLandmark()
 
-        /** \brief Constructor from map and trajectory shared pointers
-		 *
-		 * Constructor from map and trajectory shared pointers
-		 *
-		 */
-        WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr=nullptr, HardwareBase* _hardware_ptr=nullptr);
+        /** \brief Constructor from frame structure
+         *
+         */
+        WolfProblem(FrameStructure _frame_structure);
 
         /** \brief Default destructor (not recommended)
          *
@@ -71,6 +65,9 @@ class WolfProblem: public NodeBase
          *
          */
         virtual void destruct() final;
+
+        void createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp);
+
 
         /** \brief Adds a new state block to be added to solver manager
 		 *

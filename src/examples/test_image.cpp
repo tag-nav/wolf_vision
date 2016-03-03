@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     float PatternScales=1.0f;
 
 
-    WolfProblem* wolf_problem_ = new WolfProblem();
+    WolfProblem* wolf_problem_ = new WolfProblem(PO_2D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
     ProcessorImagePointBrisk* processor_brisk = new ProcessorImagePointBrisk(Threshl,Octaves,PatternScales);
     sen_cam_->addProcessor(processor_brisk);

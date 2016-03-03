@@ -16,8 +16,9 @@ class FrameBase;
 class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
 {
     protected:
-		// TODO: JVN: No seria millor que aixo ho tingui el wolf_problem o el wolf_manager?
-        unsigned int fixed_size_; // Limits the number of frames forming the trajectory
+        FrameStructure frame_structure_; // Defines the structure of the Frames in the Trajectory.
+        // TODO: JVN: No seria millor que aixo ho tingui el wolf_problem o el wolf_manager?
+        unsigned int fixed_size_; // Limits the number of Frames forming the Trajectory
         
     public:
         /** \brief Constructor
@@ -25,7 +26,7 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          * Constructor
          *
          **/
-        TrajectoryBase();
+        TrajectoryBase(FrameStructure _frame_sturcture);
 
         /** \brief Default destructor (not recommended)
          *
@@ -70,5 +71,6 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          **/
         void getConstraintList(ConstraintBaseList & _ctr_list);
         
+        FrameStructure getFrameStructure() const;
 };
 #endif

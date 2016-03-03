@@ -43,7 +43,8 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     processKnownFeatures(_incoming_ptr);
     if (autonomous_ && voteForKeyFrame())
     {
-        makeKeyFrame();
+        // TODO See how to make keyframes
+//        makeKeyFrame();
         if (detectNewFeatures(origin_ptr_) > 0)
         {
             // TODO: See how to create new Landmarks

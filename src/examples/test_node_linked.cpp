@@ -99,7 +99,7 @@ int main()
     cout << "========================================================" << endl;
 
     cout << endl << "TEST 1. Constructors" << endl;
-    WolfProblem* problem_(new WolfProblem());
+    WolfProblem* problem_(new WolfProblem(PO_2D));
     TrajectoryN* trajectory_(new TrajectoryN(2));
     FrameN* frame_1_(new FrameN(1.011));
     FrameN* frame_2_(new FrameN(2.022));

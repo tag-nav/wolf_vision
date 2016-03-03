@@ -18,15 +18,16 @@ class StateBlock;
 class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 {
     protected:
-        FrameType type_;         ///< type of frame. Either REGULAR_FRAME or KEY_FRAME. (types defined at wolf.h)
+        FrameType type_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
         TimeStamp time_stamp_;   ///< frame time stamp
         StateStatus status_;     ///< status of the estimation of the frame state
         StateBlock* p_ptr_;      ///< Position state block pointer
         StateBlock* o_ptr_;      ///< Orientation state block pointer
+        StateBlock* v_ptr_;      ///< Linear velocity state block pointer
         std::list<ConstraintBase*> constraint_to_list_; ///> List of constraints TO this frame
         
     public:
-        /** \brief Constructor with only time stamp
+        /** \brief Constructor of non-key Frame with only time stamp
          *
          * Constructor with only time stamp
          * \param _ts is the time stamp associated to this frame, provided in seconds
@@ -34,18 +35,18 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          *
          **/
-        FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
+        FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
         
         /** \brief Constructor with type, time stamp and state pointer
          * 
          * Constructor with type, time stamp and state pointer
-         * \param _tp indicates frame type. Generally either REGULAR_FRAME or KEY_FRAME. (types defined at wolf.h)
+         * \param _tp indicates frame type. Generally either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
          * \param _ts is the time stamp associated to this frame, provided in seconds
          * \param _p_ptr StateBlock pointer to the position (default: nullptr)
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          * 
          **/        
-        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
+        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
 
         /** \brief Default destructor (not recommended)
          *
@@ -103,19 +104,10 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          **/
         void unfix();
         
-        /** \brief Checks if this frame is KEY_FRAME 
-         * 
-         * Returns true if type_ is KEY_FRAME. Oterwise returns false.
-         * 
-         **/
         bool isKey() const;
 
-        /** \brief Sets the Frame type
-         *
-         * Sets the frame type (see wolf.h)
-         *
-         **/
-        
+        void makeKey();
+
         void setType(FrameType _ft);
 
         void setTimeStamp(const TimeStamp& _ts); //ACM: if all constructors require a timestamp, do we need a set? Should we allow to change TS?
@@ -135,18 +127,15 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         void removeCapture(CaptureBaseIter& _capt_ptr);
         
         TrajectoryBase* getTrajectoryPtr() const;
-        
         CaptureBaseList* getCaptureListPtr();
-        
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
         FrameBase* getPreviousFrame() const;
-
         FrameBase* getNextFrame() const;
 
         StateBlock* getPPtr() const;
-
         StateBlock* getOPtr() const;
+        StateBlock* getVPtr() const;
 
         const Eigen::Matrix4s * getTransformationMatrix() const; //ACM: Who owns this return matrix ?
 

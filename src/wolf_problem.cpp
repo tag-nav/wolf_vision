@@ -5,24 +5,12 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 
-WolfProblem::WolfProblem() :
+WolfProblem::WolfProblem(FrameStructure _frame_structure) :
         NodeBase("WOLF_PROBLEM"), //
 		location_(TOP),
-        trajectory_ptr_(new TrajectoryBase),
+        trajectory_ptr_(new TrajectoryBase(_frame_structure)),
 		map_ptr_(new MapBase),
 		hardware_ptr_(new HardwareBase)
-{
-    trajectory_ptr_->linkToUpperNode( this );
-	map_ptr_->linkToUpperNode( this );
-	hardware_ptr_->linkToUpperNode( this );
-}
-
-WolfProblem::WolfProblem(TrajectoryBase* _trajectory_ptr, MapBase* _map_ptr, HardwareBase* _hardware_ptr) :
-        NodeBase("WOLF_PROBLEM"), //
-    location_(TOP),
-        trajectory_ptr_(_trajectory_ptr==nullptr ? new TrajectoryBase : _trajectory_ptr),
-		map_ptr_(_map_ptr==nullptr ? new MapBase : _map_ptr),
-        hardware_ptr_(_hardware_ptr==nullptr ? new HardwareBase : _hardware_ptr)
 {
     trajectory_ptr_->linkToUpperNode( this );
 	map_ptr_->linkToUpperNode( this );
@@ -49,13 +37,60 @@ void WolfProblem::destruct()
     delete this;
 }
 
+void WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
+{
+    //std::cout << "creating new frame..." << std::endl;
+
+    // ---------------------- CREATE NEW FRAME ---------------------
+    // Create frame
+    switch ( trajectory_ptr_->getFrameStructure() )
+    {
+        case PO_2D:
+            {
+                assert( _frame_state.size() == 3 && "Wrong init_frame state vector or covariance matrix size");
+
+                trajectory_ptr_->addFrame(new FrameBase(_frame_type,
+                                                        _time_stamp,
+                                                        new StateBlock(_frame_state.head(2)),
+                                                        new StateBlock(_frame_state.tail(1))));
+                break;
+            }
+        case PO_3D:
+            {
+                assert( _frame_state.size() == 7 && "Wrong init_frame state vector or covariance matrix size");
+
+                trajectory_ptr_->addFrame(new FrameBase(_frame_type,
+                                                        _time_stamp,
+                                                        new StateBlock(_frame_state.head(3)),
+                                                        new StateBlock(_frame_state.tail(4))));
+                break;
+            }
+        case POV_3D:
+            {
+                assert( _frame_state.size() == 10 && "Wrong init_frame state vector or covariance matrix size");
+
+                trajectory_ptr_->addFrame(new FrameBase(_frame_type,
+                                                        _time_stamp,
+                                                        new StateBlock(_frame_state.head(3)),
+                                                        new StateBlock(_frame_state.segment<3>(4)),
+                                                        new StateBlock(_frame_state.tail(3))));
+                break;
+            }
+        default:
+            {
+                assert( "Unknown frame structure. Add appropriate frame structure to the switch statement.");
+            }
+    }
+    //std::cout << "new frame created" << std::endl;
+}
+
 void WolfProblem::addStateBlockPtr(StateBlock* _state_ptr)
 {
-	// add the state unit to the list
-	state_block_ptr_list_.push_back(_state_ptr);
+    // add the state unit to the list
+    state_block_ptr_list_.push_back(_state_ptr);
 
-	// queue for solver manager
-	state_block_add_list_.push_back(_state_ptr);
+    // queue for solver manager
+    state_block_add_list_.push_back(_state_ptr);
 }
 
 void WolfProblem::updateStateBlockPtr(StateBlock* _state_ptr)
@@ -129,24 +164,24 @@ void WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, E
 void WolfProblem::addMap(MapBase* _map_ptr)
 {
     // TODO: not necessary but update map maybe..
-	map_ptr_ = _map_ptr;
-	map_ptr_->linkToUpperNode( this );
+    map_ptr_ = _map_ptr;
+    map_ptr_->linkToUpperNode( this );
 }
 
 void WolfProblem::addTrajectory(TrajectoryBase* _trajectory_ptr)
 {
-	trajectory_ptr_ = _trajectory_ptr;
-	trajectory_ptr_->linkToUpperNode( this );
+    trajectory_ptr_ = _trajectory_ptr;
+    trajectory_ptr_->linkToUpperNode( this );
 }
 
 MapBase* WolfProblem::getMapPtr()
 {
-	return map_ptr_;
+    return map_ptr_;
 }
 
 TrajectoryBase* WolfProblem::getTrajectoryPtr()
 {
-	return trajectory_ptr_;
+    return trajectory_ptr_;
 }
 
 HardwareBase* WolfProblem::getHardwarePtr()
@@ -161,7 +196,7 @@ FrameBase* WolfProblem::getLastFramePtr()
 
 StateBlockList* WolfProblem::getStateListPtr()
 {
-	return &state_block_ptr_list_;
+    return &state_block_ptr_list_;
 }
 
 //void WolfProblem::print(unsigned int _ntabs, std::ostream& _ost) const

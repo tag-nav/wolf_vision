@@ -5,24 +5,26 @@
 #include "capture_base.h"
 #include "state_block.h"
 
-FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr) :
+FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeLinked(MID, "FRAME"),
-            type_(REGULAR_FRAME),
+            type_(NON_KEY_FRAME),
             time_stamp_(_ts),
 			status_(ST_ESTIMATED),
 			p_ptr_(_p_ptr),
-			o_ptr_(_o_ptr)
+            o_ptr_(_o_ptr),
+            v_ptr_(_v_ptr)
 {
     //
 }
 
-FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr) :
+FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeLinked(MID, "FRAME"),
             type_(_tp),
             time_stamp_(_ts),
 			status_(ST_ESTIMATED),
 			p_ptr_(_p_ptr),
-			o_ptr_(_o_ptr)
+            o_ptr_(_o_ptr),
+            v_ptr_(_v_ptr)
 {
     //
 }
@@ -38,11 +40,16 @@ FrameBase::~FrameBase()
 	    getTop()->removeStateBlockPtr(p_ptr_);
 	    delete p_ptr_;
 	}
-	if (o_ptr_ != nullptr)
-	{
-	    getTop()->removeStateBlockPtr(o_ptr_);
+    if (o_ptr_ != nullptr)
+    {
+        getTop()->removeStateBlockPtr(o_ptr_);
         delete o_ptr_;
-	}
+    }
+    if (v_ptr_ != nullptr)
+    {
+        getTop()->removeStateBlockPtr(v_ptr_);
+        delete v_ptr_;
+    }
     //std::cout << "states deleted" << std::endl;
 
 
@@ -80,6 +87,7 @@ std::list<ConstraintBase*>* FrameBase::getConstraintToListPtr()
 
 void FrameBase::setStatus(StateStatus _st)
 {
+    // TODO: Separate the three fixes and unfixes to the wolfproblem lists
     status_ = _st;
 
     // State Blocks
@@ -95,6 +103,11 @@ void FrameBase::setStatus(StateStatus _st)
             o_ptr_->fix();
             getTop()->updateStateBlockPtr(o_ptr_);
         }
+        if (v_ptr_!=nullptr)
+        {
+            v_ptr_->fix();
+            getTop()->updateStateBlockPtr(v_ptr_);
+        }
     }
     else if(status_ == ST_ESTIMATED)
     {
@@ -107,6 +120,11 @@ void FrameBase::setStatus(StateStatus _st)
         {
             o_ptr_->unfix();
             getTop()->updateStateBlockPtr(o_ptr_);
+        }
+        if (v_ptr_!=nullptr)
+        {
+            v_ptr_->unfix();
+            getTop()->updateStateBlockPtr(v_ptr_);
         }
     }
 }
@@ -126,7 +144,20 @@ void FrameBase::unfix()
 bool FrameBase::isKey() const
 {
     if ( type_ == KEY_FRAME ) return true;
-    else return false; 
+    else return false;
+}
+
+void FrameBase::makeKey()
+{
+    setType(KEY_FRAME);
+    if (getTop() != nullptr){
+        if (p_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(p_ptr_);
+        if (o_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(o_ptr_);
+        if (v_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(v_ptr_);
+    }
 }
 
 void FrameBase::setType(FrameType _ft)
@@ -157,22 +188,35 @@ StateStatus FrameBase::getStatus() const
 void FrameBase::setState(const Eigen::VectorXs& _st)
 {
 
-	assert(_st.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize())  +
-                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize())) &&
+    assert(_st.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize())  +
+                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
+                          (v_ptr_==nullptr ? 0 : v_ptr_->getSize())) &&
                           "In FrameBase::setState wrong state size");
 
-	if (p_ptr_!=nullptr)
+    unsigned int index = 0;
+    if (p_ptr_!=nullptr)
+    {
         p_ptr_->setVector(_st.head(p_ptr_->getSize()));
+        index += p_ptr_->getSize();
+    }
     if (o_ptr_!=nullptr)
-        o_ptr_->setVector(_st.segment((p_ptr_==nullptr ? 0 : p_ptr_->getSize()),
-                                       o_ptr_->getSize()));
+    {
+        o_ptr_->setVector(_st.segment(index, o_ptr_->getSize()));
+        index += p_ptr_->getSize();
+    }
+    if (v_ptr_!=nullptr)
+    {
+        v_ptr_->setVector(_st.segment(index, v_ptr_->getSize()));
+        //   index += v_ptr_->getSize();
+    }
 }
 
 Eigen::VectorXs FrameBase::getState() const
 {
     Eigen::VectorXs state((p_ptr_==nullptr ? 0 : p_ptr_->getSize()) +
-                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize()));
-    state << p_ptr_->getVector(), o_ptr_->getVector();
+                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
+                          (v_ptr_==nullptr ? 0 : v_ptr_->getSize()));
+    state << p_ptr_->getVector(), o_ptr_->getVector(), v_ptr_->getVector();
     return state;
 }
 
@@ -247,7 +291,12 @@ StateBlock* FrameBase::getPPtr() const
 
 StateBlock* FrameBase::getOPtr() const
 {
-	return o_ptr_;
+    return o_ptr_;
+}
+
+StateBlock* FrameBase::getVPtr() const
+{
+    return v_ptr_;
 }
 
 CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
@@ -259,21 +308,3 @@ CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
     return getCaptureListPtr()->end();
 }
 
-//void FrameBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//    NodeLinked::printSelf(_ntabs, _ost);
-//    if (p_ptr_)
-//    {
-//    	printTabs(_ntabs);
-//    	_ost << "\tPosition : \n";
-//    	printTabs(_ntabs);
-//    	p_ptr_->print(_ntabs,_ost);
-//    }
-//    if (o_ptr_)
-//    {
-//    	printTabs(_ntabs);
-//		_ost << "\tOrientation : \n";
-//    	printTabs(_ntabs);
-//		o_ptr_->print(_ntabs,_ost);
-//    }
-//}

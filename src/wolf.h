@@ -112,7 +112,7 @@ typedef enum
 typedef enum
 {
     KEY_FRAME,    ///< marks a key frame. It will stay in the frames window and play at optimizations.
-    REGULAR_FRAME ///< marks a regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
+    NON_KEY_FRAME ///< marks a regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
 } FrameType;
 
 /** \brief Enumeration of all possible frames
@@ -125,7 +125,8 @@ typedef enum
 typedef enum
 {
     PO_2D,  ///< marks a 2D frame containing position (x,y) and orientation angle.
-    PO_3D   ///< marks a 3D frame containing position (x,y,z) and orientation quaternion (x,y,z,w).
+    PO_3D,  ///< marks a 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
+    POV_3D  ///< marks a 3D frame with position, orientation quaternion, and linear velocity (vx, vy, vz)
 } FrameStructure;
 
 /** \brief Enumeration of all possible constraints
