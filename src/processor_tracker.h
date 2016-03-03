@@ -26,7 +26,9 @@
  *     - Track features in a \b incoming Capture: track(CaptureBase* incoming_ptr);
  *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
  *     - if voteForKeyFrame()
- *       - Mark the Frame owning the \b last Capture as KeyFrame: markKeyFrame();
+ *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
+ *       - if detectNewFeatures(last)
+ *         - initNewLandmarks(last)
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
  *     - else
  *       - Advance the tracker one Capture ahead: advance()
