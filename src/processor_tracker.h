@@ -87,10 +87,6 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual bool voteForKeyFrame() = 0;
 
-        /** \brief Make a KeyFrame using the last Capture.
-         */
-        virtual void makeKeyFrame();
-
         /** \brief Make a new landmarks using the last Capture
          */
         virtual void initializeNewLandmarks() = 0;
@@ -124,13 +120,26 @@ class ProcessorTracker : public ProcessorBase
         void setLastPtr(CaptureBase* const _last_ptr);
         void setIncomingPtr(CaptureBase* const _incoming_ptr);
 
-    protected:
+    public:
+        /** \brief Make landmarks from new Features
+         *
+         * Derive this method to build the type of landmark you need for this tracker.
+         */
+        virtual LandmarkBaseList makeLandmarks() = 0;
+
+    private:
+        /**\brief Make a KeyFrame using the last Capture.
+         */
+        virtual void makeKeyFrame();
+
 
     private:
         bool autonomous_;    ///< Sets whether the tracker is autonomous to make decisions that affect the WolfProblem, like creating new KeyFrames and/or Landmarks.
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
+
+
 };
 
 // IMPLEMENTATION //

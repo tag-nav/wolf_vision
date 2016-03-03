@@ -37,6 +37,42 @@ void WolfProblem::destruct()
     delete this;
 }
 
+void WolfProblem::createFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
+{
+    switch ( trajectory_ptr_->getFrameStructure() )
+    {
+        case PO_2D:
+            {
+                trajectory_ptr_->addFrame(new FrameBase(_frame_type,
+                                                        _time_stamp,
+                                                        new StateBlock(2),
+                                                        new StateBlock(1)));
+                break;
+            }
+        case PO_3D:
+            {
+                trajectory_ptr_->addFrame(new FrameBase(_frame_type,
+                                                        _time_stamp,
+                                                        new StateBlock(3),
+                                                        new StateBlock(4)));
+                break;
+            }
+        case POV_3D:
+            {
+                trajectory_ptr_->addFrame(new FrameBase(_frame_type,
+                                                        _time_stamp,
+                                                        new StateBlock(3),
+                                                        new StateBlock(4),
+                                                        new StateBlock(3)));
+                break;
+            }
+        default:
+            {
+                assert( "Unknown frame structure. Add appropriate frame structure to the switch statement.");
+            }
+    }
+}
+
 void WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
 {
     //std::cout << "creating new frame..." << std::endl;
@@ -252,15 +288,3 @@ void WolfProblem::removeDownNode(const LowerNodePtr _ptr)
     //
 }
 
-//void WolfProblem::printLower(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//    printTabs(_ntabs);
-//    _ost << "\tLower Nodes  ==> [ ";
-//    _ost << map_ptr_->nodeId() << " ";
-//    _ost << trajectory_ptr_->nodeId() << " ";
-//    _ost << hardware_ptr_->nodeId() << " ]" << std::endl;
-//    _ntabs++;
-//	map_ptr_->print(_ntabs, _ost);
-//	trajectory_ptr_->print(_ntabs, _ost);
-//    hardware_ptr_->print(_ntabs, _ost);
-//}

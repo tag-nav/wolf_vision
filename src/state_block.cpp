@@ -1,16 +1,25 @@
 
 #include "state_block.h"
 
+StateBlock::StateBlock(const unsigned int _size, bool _fixed) :
+        state_(_size),
+        fixed_(_fixed),
+        local_param_ptr_(nullptr)
+{
+    //
+}
+
 StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed) :
-			state_(_state),
-			fixed_(_fixed)
+        state_(_state),
+        fixed_(_fixed),
+        local_param_ptr_(nullptr)
 {
 	//
 }
 
 StateBlock::~StateBlock()
 {
-	//std::cout << "deleting StateBase " << nodeId() << std::endl;
+    //
 }
 
 WolfScalar* StateBlock::getPtr()
@@ -28,11 +37,6 @@ void StateBlock::setVector(const Eigen::VectorXs& _state)
     assert(_state.size() == state_.size());
     state_ = _state;
 }
-
-//StateType StateBlock::getType() const
-//{
-//	return type_;
-//}
 
 unsigned int StateBlock::getSize() const
 {
@@ -67,3 +71,4 @@ LocalParametrizationBase* StateBlock::getLocalParametrizationPtr()
 {
     return local_param_ptr_;
 }
+

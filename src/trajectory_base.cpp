@@ -5,7 +5,7 @@
 
 TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
     NodeLinked(MID, "TRAJECTORY"),
-    frame_structure_(_frame_structure)
+    frame_structure_(_frame_structure), fixed_size_(0)
 {
     //
 }

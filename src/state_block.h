@@ -28,7 +28,14 @@ class StateBlock
         LocalParametrizationBase* local_param_ptr_; ///< Local parametrization useful for optimizing in the tangent space to the manifold
         
     public:
-        /** \brief Constructor with scalar pointer
+        /** \brief Constructor from size
+         *
+         * \param _size is state size
+         * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter
+         */
+        StateBlock(const unsigned int _size, bool _fixed = false);
+
+        /** \brief Constructor from vector
          * 
          * \param _state is state vector
          * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter

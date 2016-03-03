@@ -55,7 +55,7 @@ class WolfProblem: public NodeBase
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-		 * 
+         *
          */		
         virtual ~WolfProblem();
 
@@ -66,212 +66,121 @@ class WolfProblem: public NodeBase
          */
         virtual void destruct() final;
 
+        /** \brief Create Frame of the correct size
+         */
+        void createFrame(FrameType _frameType, const TimeStamp& _time_stamp);
+
+        /** \brief Create Frame from vector
+         */
         void createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp);
 
 
         /** \brief Adds a new state block to be added to solver manager
-		 *
-		 * Adds a new state block to be added to solver manager
-		 *
-		 */
+         */
         void addStateBlockPtr(StateBlock* _state_ptr);
 
         /** \brief Adds a new state block to be updated to solver manager
-         *
-         * Adds a new state block to be updated to solver manager
-         *
          */
         void updateStateBlockPtr(StateBlock* _state_ptr);
 
         /** \brief Adds a state block to be removed to solver manager
-         *
-         * Adds a state block to be removed to solver manager
-         *
          */
         void removeStateBlockPtr(StateBlock* _state_ptr);
 
         /** \brief Adds a new constraint to be added to solver manager
-         *
-         * Adds a new constraint to be added to solver manager
-         *
          */
         void addConstraintPtr(ConstraintBase* _constraint_ptr);
 
         /** \brief Adds a constraint to be removed to solver manager
-         *
-         * Adds a constraint to be removed to solver manager
-         *
          */
         void removeConstraintPtr(ConstraintBase* _constraint_ptr);
 
         /** \brief Clear covariance
-         *
-         * Clear covariance
-         *
          */
         void clearCovariance();
 
         /** \brief Adds a new covariance block
-         *
-         * Adds a new covariance block
-         *
          */
         void addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov);
 
         /** \brief Gets a covariance block
-         *
-         * Gets a covariance block
-         *
          */
         void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block);
+        /** \brief Gets a covariance block
+         */
         void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col);
 
         /** \brief Gets state size
-		 *
-		 * Gets state size
-		 *
-		 */
+         */
         const unsigned int getStateSize() const;
 
         /** \brief Adds a map
-         *
-         * Adds a map
-         *
          */		
         void addMap(MapBase* _map_ptr);
 
         /** \brief Adds a trajectory
-		 *
-		 * Adds a trajectory
-		 *
-		 */
-		void addTrajectory(TrajectoryBase* _trajectory_ptr);
+         */
+        void addTrajectory(TrajectoryBase* _trajectory_ptr);
 
         /** \brief Adds a hardware
-         *
-         * Adds a hardware
-         *
          */
         void addHarware(HardwareBase* _hardware_ptr);
         
         /** \brief Gets a pointer to map
-         *
-         * Gets a pointer to map
-         *
          */
         MapBase* getMapPtr();
 
         /** \brief Gets a pointer to trajectory
-         *
-         * Gets a pointer to trajectory
-         *
          */
         TrajectoryBase* getTrajectoryPtr();
 
         /** \brief Gets a pointer to Hardware
-         *
-         * Gets a pointer to Hardware
-         *
          */
         HardwareBase* getHardwarePtr();
 
         /** \brief Returns a pointer to last Frame
-         *
-         * Returns a pointer to last Frame
-         *
          **/
         FrameBase* getLastFramePtr();
 
         /** \brief Gets a pointer to the state units list
-         *
-         * Gets a pointer to the state units list
-         *
          */
         StateBlockList* getStateListPtr();
 
         /** \brief Gets a queue of state blocks to be added in the solver
-		 *
-		 * Gets a queue of state blocks to be added in the solver
-		 *
-		 */
+         */
         std::list<StateBlock*>* getStateBlockAddList();
 
         /** \brief Gets a queue of state blocks to be updated in the solver
-         *
-         * Gets a queue of state blocks to be updated in the solver
-         *
          */
         std::list<StateBlock*>* getStateBlockUpdateList();
 
         /** \brief Gets a queue of state blocks to be removed from the solver
-         *
-         * Gets a queue of state blocks to be removed from the solver
-         *
          */
         std::list<WolfScalar*>* getStateBlockRemoveList();
 
         /** \brief Gets a queue of constraint ids to be added in the solver
-         *
-         * Gets a queue of constraint ids to be added in the solver
-         *
          */
         std::list<ConstraintBase*>* getConstraintAddList();
 
         /** \brief Gets a queue of constraint ids to be removed from the solver
-         *
-         * Gets a queue of constraint ids to be removed from the solver
-         *
          */
         std::list<unsigned int>* getConstraintRemoveList();
 
         /** \brief get top node
-		 *
-		 * Returns a pointer to this
-		 *
-		 */
+         */
         virtual WolfProblem* getTop();
 
         /** \brief Returns a true (is top)
-         *
-         * Returns a true (is top)
-         *
          */
         virtual bool isTop();
 
-//        /** \brief Prints node information
-//         *
-//		 * Prints node information.
-//         * \param _ntabs number of tabulations to print at the left of the printed information
-//         * \param _ost output stream
-//		 *
-//         */
-//        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
-
-        /** \brief Remove Down Node (empty
+        /** \brief Remove Down Node
          *
          * This empty function is needed by destruct() node_linked function.
          *
          */
         void removeDownNode(const LowerNodePtr _ptr);
 
-
-    protected:
-
-        /** \brief Prints tabulated information about this node.
-         *
-         * Prints information about this node. It adds a number of tabs given by _ntabs.
-         *\param _ntabs the number of tabs.
-         *\param _ost the stream it prints to
-		 * 
-         */
-        void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
-
-        /** \brief Prints recursively lower nodes info
-         *
-         * Prints recursively lower nodes info
-         * 
-         **/        
-        void printLower(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 };
 
 #endif
