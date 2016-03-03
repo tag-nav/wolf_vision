@@ -25,11 +25,11 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    track(_incoming_ptr);
-    if (voteForKeyFrame())
+    trackKnownFeatures(_incoming_ptr);
+    if (autonomous_ && voteForKeyFrame())
     {
-        // TODO: check how do we create new landmarks, etc.
-        markKeyFrame();
+        makeKeyFrame();
+        detectNewFeatures(origin_ptr_);
     }
     else
         advance();

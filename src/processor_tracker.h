@@ -57,8 +57,18 @@ class ProcessorTracker : public ProcessorBase
          *
          * It should also generate the necessary Features in the incoming Capture, of a type derived from FeatureBase,
          * and the constraints, of a type derived from ConstraintBase.
+         *
+         * \return The number of successful tracks.
          */
-        virtual void track(CaptureBase* _incoming_ptr) = 0;
+        virtual unsigned int trackKnownFeatures(CaptureBase* _incoming_ptr) = 0;
+
+        /** Detect new Features
+         *
+         * This is intended to create Features that are not among the Features already known in the Map.
+         *
+         * \return The number of detected Features.
+         */
+        virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr) = 0;
 
         /**\brief Vote for KeyFrame generation
          *
@@ -69,12 +79,21 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual bool voteForKeyFrame() = 0;
 
-        /**\brief Mark the frame of the last Capture as KeyFrame.
-         *
-         * This function only marks the KeyFrame property of the Frame.
-         * It does not do anything else with the frame or with the Tracker.
+        /**\brief Make a KeyFrame using the last Capture.
          */
-        virtual void markKeyFrame();
+        virtual void makeKeyFrame()
+        {
+            if (!autonomous_)
+            {
+                // TODO: Add non-key Frame to Trajectory
+                // Make the old Frame a KeyFrame
+                getLastPtr()->getFramePtr()->setType(KEY_FRAME);
+                // TODO: Point incoming_ptr_ (?) to the new non-key Frame
+            }else
+            {
+                // TODO: what to do here?
+            }
+        }
 
         /** \brief Reset the tracker to a new \b origin and \b last Captures
          */
@@ -97,19 +116,7 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void process(CaptureBase* const _incoming_ptr);
 
-
-//        // TODO see what to do with this prototype from ProcessBase
-//        virtual void extractFeatures(CaptureBase* _capture_ptr)
-//        {
-//        }
-//        // TODO see what to do with this prototype from ProcessBase
-//        virtual void establishConstraints(CaptureBase* _capture_ptr)
-//        {
-//            track(_capture_ptr);
-//        }
-
-
-        // getters and setters // TODO hide some of these in protected or private
+        // getters and setters
         bool isAutonomous() const;
         CaptureBase* getOriginPtr() const;
         CaptureBase* getLastPtr() const;
@@ -135,17 +142,6 @@ inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
     last_ptr_ = _origin_ptr;
 }
 
-inline void ProcessorTracker::markKeyFrame()
-{
-    // TODO: check how Frames are managed from Tracker, and where are they kept (in Trajectory, or in Tracker, or nowhere)
-    // TODO Check all that needs to be done: To the Frame, to the Capture, to the Constraints.
-    // Here we opt for marking the owner frame of the last Capture as KEY_FRAME.
-    // Someone has to take care of creating a new Frame for the new incoming Captures that will start to arrive...
-    // Maybe here we could already create a new Frame to store this KeyFrame, and keep the Tracker's Frame always alive...
-    getLastPtr()->getFramePtr()->setType(KEY_FRAME);
-    reset(); // last Capture becomes origin Capture.
-}
-
 inline void ProcessorTracker::reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr)
 {
     origin_ptr_ = _origin_ptr;
@@ -160,10 +156,8 @@ inline void ProcessorTracker::reset()
 
 inline void ProcessorTracker::advance()
 {
-    // TODO: check how Frames are managed from Tracker, and where are they kept (in Trajectory, or in Tracker, or nowhere)
-    // Here we opt for keeping the owner frame, adding to it the incoming Capture and destructing the last.
     last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-    last_ptr_->destruct();     // Destruct obsolete last before reassigning a new pointer
+    last_ptr_->destruct();     // Destruct now the obsolete last before reassigning a new pointer
     last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
     incoming_ptr_ = nullptr;   // This line is not really needed, but it make things clearer.
 }
