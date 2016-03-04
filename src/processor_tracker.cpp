@@ -18,7 +18,8 @@ ProcessorTracker::ProcessorTracker(bool _autonomous) :
 
 ProcessorTracker::~ProcessorTracker()
 {
-    delete incoming_ptr_;
+    if (incoming_ptr_ != nullptr)
+        delete incoming_ptr_;
 }
 
 void ProcessorTracker::makeKeyFrame()
