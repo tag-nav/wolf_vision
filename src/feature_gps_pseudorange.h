@@ -4,10 +4,9 @@
 
 //Wolf includes
 #include "feature_base.h"
-#include <iomanip>
 
 //std includes
-//
+#include <iomanip>
 
 // TODO manage covariance
 
