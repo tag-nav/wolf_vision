@@ -7,12 +7,12 @@
 
 #include "processor_tracker.h"
 
-ProcessorTracker::ProcessorTracker(unsigned int _min_nbr_of_tracks_for_keyframe) :
+ProcessorTracker::ProcessorTracker(bool _autonomous) :
         ProcessorBase(),
+        autonomous_(_autonomous),
         origin_ptr_(nullptr),
         last_ptr_(nullptr),
-        incoming_ptr_(nullptr),
-        min_features_th_( _min_nbr_of_tracks_for_keyframe)
+        incoming_ptr_(nullptr)
 {
 }
 
@@ -23,23 +23,32 @@ ProcessorTracker::~ProcessorTracker()
     delete incoming_ptr_;
 }
 
+void ProcessorTracker::makeKeyFrame()
+{
+    if (!autonomous_)
+    {
+        // TODO: Add non-key Frame to Trajectory
+        // Make the old Frame a KeyFrame
+        getLastPtr()->getFramePtr()->setType(KEY_FRAME);
+        // TODO: Point incoming_ptr_ (?) to the new non-key Frame
+    }
+    else
+    {
+        // TODO: what to do here?
+    }
+}
+
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    track(_incoming_ptr);
-    if (voteForKeyFrame())
+    trackKnownFeatures(_incoming_ptr);
+    if (autonomous_ && voteForKeyFrame())
     {
-        // TODO: check how do we create new landmarks, etc.
-        markKeyFrame();
+        makeKeyFrame();
+        if (detectNewFeatures(origin_ptr_) > 0)
+        {
+            // TODO: See how to create new Landmarks
+        }
     }
     else
         advance();
-}
-
-void ProcessorTracker::extractFeatures(CaptureBase* _capture_ptr)
-{
-}
-
-void ProcessorTracker::establishConstraints(CaptureBase* _capture_ptr)
-{
-    track(_capture_ptr);
 }
