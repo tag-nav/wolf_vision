@@ -62,11 +62,6 @@ FrameBase::~FrameBase()
     //std::cout << "constraints deleted" << std::endl;
 }
 
-void FrameBase::addConstraintTo(ConstraintBase* _ctr_ptr)
-{
-    constraint_to_list_.push_back(_ctr_ptr);
-}
-
 void FrameBase::removeConstraintTo(ConstraintBase* _ctr_ptr)
 {
     constraint_to_list_.remove(_ctr_ptr);
@@ -75,114 +70,20 @@ void FrameBase::removeConstraintTo(ConstraintBase* _ctr_ptr)
         this->destruct();
 }
 
-unsigned int FrameBase::getHits() const
+void FrameBase::setKey()
 {
-    return constraint_to_list_.size();
-}
-
-std::list<ConstraintBase*>* FrameBase::getConstraintToListPtr()
-{
-    return &constraint_to_list_;
-}
-
-void FrameBase::setStatus(StateStatus _st)
-{
-    // TODO: Separate the three fixes and unfixes to the wolfproblem lists
-    status_ = _st;
-
-    // State Blocks
-    if (status_ == ST_FIXED)
+    type_ = KEY_FRAME;
+    if (getTop() != nullptr)
     {
-        if (p_ptr_!=nullptr)
-        {
-            p_ptr_->fix();
-            getTop()->updateStateBlockPtr(p_ptr_);
-        }
-        if (o_ptr_!=nullptr)
-        {
-            o_ptr_->fix();
-            getTop()->updateStateBlockPtr(o_ptr_);
-        }
-        if (v_ptr_!=nullptr)
-        {
-            v_ptr_->fix();
-            getTop()->updateStateBlockPtr(v_ptr_);
-        }
-    }
-    else if(status_ == ST_ESTIMATED)
-    {
-        if (p_ptr_!=nullptr)
-        {
-            p_ptr_->unfix();
-            getTop()->updateStateBlockPtr(p_ptr_);
-        }
-        if (o_ptr_!=nullptr)
-        {
-            o_ptr_->unfix();
-            getTop()->updateStateBlockPtr(o_ptr_);
-        }
-        if (v_ptr_!=nullptr)
-        {
-            v_ptr_->unfix();
-            getTop()->updateStateBlockPtr(v_ptr_);
-        }
-    }
-}
-
-void FrameBase::fix()
-{
-    //std::cout << "Fixing frame " << nodeId() << std::endl;
-    this->setStatus(ST_FIXED);
-}
-
-void FrameBase::unfix()
-{
-    //std::cout << "Unfixing frame " << nodeId() << std::endl;
-    this->setStatus(ST_ESTIMATED);
-}
-
-bool FrameBase::isKey() const
-{
-    if ( type_ == KEY_FRAME ) return true;
-    else return false;
-}
-
-void FrameBase::makeKey()
-{
-    setType(KEY_FRAME);
-    if (getTop() != nullptr){
         if (p_ptr_ != nullptr)
             getTop()->addStateBlockPtr(p_ptr_);
+
         if (o_ptr_ != nullptr)
             getTop()->addStateBlockPtr(o_ptr_);
+
         if (v_ptr_ != nullptr)
             getTop()->addStateBlockPtr(v_ptr_);
     }
-}
-
-void FrameBase::setType(FrameType _ft)
-{
-    type_ = _ft;
-}
-
-void FrameBase::setTimeStamp(const TimeStamp & _ts)
-{
-    time_stamp_ = _ts;
-}
-
-TimeStamp FrameBase::getTimeStamp() const
-{
-    return time_stamp_.get();
-}
-        
-void FrameBase::getTimeStamp(TimeStamp & _ts) const
-{
-    _ts = time_stamp_.get();
-}
-
-StateStatus FrameBase::getStatus() const
-{
-    return status_;
 }
 
 void FrameBase::setState(const Eigen::VectorXs& _st)
@@ -220,25 +121,12 @@ Eigen::VectorXs FrameBase::getState() const
     return state;
 }
 
-void FrameBase::addCapture(CaptureBase* _capt_ptr)
+CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
 {
-    addDownNode(_capt_ptr);
-}
-
-void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
-{
-	//std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
-	removeDownNode(_capt_iter);
-}
-
-TrajectoryBase* FrameBase::getTrajectoryPtr() const
-{
-    return upperNodePtr();
-}
-
-CaptureBaseList* FrameBase::getCaptureListPtr()
-{
-    return getDownNodeListPtr();
+    for (auto capture_it = getCaptureListPtr()->begin(); capture_it != getCaptureListPtr()->end(); capture_it++)
+        if ((*capture_it)->getSensorPtr() == _sensor_ptr)
+            return capture_it;
+    return getCaptureListPtr()->end();
 }
 
 void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)
@@ -284,27 +172,45 @@ FrameBase* FrameBase::getNextFrame() const
     return nullptr;
 }
 
-StateBlock* FrameBase::getPPtr() const
+void FrameBase::setStatus(StateStatus _st)
 {
-	return p_ptr_;
+    // TODO: Separate the three fixes and unfixes to the wolfproblem lists
+    status_ = _st;
+    // State Blocks
+    if (status_ == ST_FIXED)
+    {
+        if (p_ptr_ != nullptr)
+        {
+            p_ptr_->fix();
+            getTop()->updateStateBlockPtr(p_ptr_);
+        }
+        if (o_ptr_ != nullptr)
+        {
+            o_ptr_->fix();
+            getTop()->updateStateBlockPtr(o_ptr_);
+        }
+        if (v_ptr_ != nullptr)
+        {
+            v_ptr_->fix();
+            getTop()->updateStateBlockPtr(v_ptr_);
+        }
+    }
+    else if (status_ == ST_ESTIMATED)
+    {
+        if (p_ptr_ != nullptr)
+        {
+            p_ptr_->unfix();
+            getTop()->updateStateBlockPtr(p_ptr_);
+        }
+        if (o_ptr_ != nullptr)
+        {
+            o_ptr_->unfix();
+            getTop()->updateStateBlockPtr(o_ptr_);
+        }
+        if (v_ptr_ != nullptr)
+        {
+            v_ptr_->unfix();
+            getTop()->updateStateBlockPtr(v_ptr_);
+        }
+    }
 }
-
-StateBlock* FrameBase::getOPtr() const
-{
-    return o_ptr_;
-}
-
-StateBlock* FrameBase::getVPtr() const
-{
-    return v_ptr_;
-}
-
-CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
-{
-    for (auto capture_it = getCaptureListPtr()->begin(); capture_it != getCaptureListPtr()->end(); capture_it++)
-        if ((*capture_it)->getSensorPtr() == _sensor_ptr)
-            return capture_it;
-
-    return getCaptureListPtr()->end();
-}
-

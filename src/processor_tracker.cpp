@@ -30,7 +30,7 @@ void ProcessorTracker::makeKeyFrame()
         // TODO: how to access the newly created Frame? -> do FrameBase* createFrame()
         getTop()->createFrame(NON_KEY_FRAME, last_ptr_->getTimeStamp());
         // Make the old Frame a KeyFrame so that it gets into the solver
-        last_ptr_->getFramePtr()->makeKey();
+        last_ptr_->getFramePtr()->setKey();
     }
     else
     {
