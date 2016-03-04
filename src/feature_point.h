@@ -20,6 +20,7 @@ class FeaturePoint : public FeatureBase
     protected:
 
         Eigen::Vector2s measurement_;
+        std::vector<float> descriptor_;
 
     public:
         /** \brief Constructor
@@ -27,6 +28,12 @@ class FeaturePoint : public FeatureBase
          * constructor
          */
         FeaturePoint(const Eigen::Vector2s & _measurement);
+
+        /** \brief Constructor
+         *
+         * constructor
+         */
+        FeaturePoint(const Eigen::Vector2s & _measurement, const std::vector<float> & _descriptor);
 
         /** \brief Constructor
          *
@@ -40,6 +47,10 @@ class FeaturePoint : public FeatureBase
          *
          */
         virtual ~FeaturePoint();
+
+        virtual Eigen::Vector2s getMeasurement();
+
+        virtual std::vector<float> getDescriptor();
 
 };
 

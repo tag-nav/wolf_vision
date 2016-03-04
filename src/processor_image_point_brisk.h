@@ -22,7 +22,7 @@ public:
     virtual ~ProcessorImagePointBrisk();
 
     virtual void extractFeatures(CaptureBase *_capture_ptr);
-    virtual void establishConstraints(CaptureBase *_capture_ptr);
+    virtual void establishConstraints(CaptureBase *_other_capture_ptr);
 
 };
 #endif // PROCESSOR_IMAGE_POINT_BRISK_H
