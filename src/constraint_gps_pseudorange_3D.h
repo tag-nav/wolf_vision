@@ -7,15 +7,20 @@
 #include "sensor_gps.h"
 #include "feature_gps_pseudorange.h"
 #include "constraint_sparse.h"
+
+/*
+ * class no more used
+ */
+
+
 /*
  * NB:
  * FROM THIS CLASS AND ALL THE CLASS INCLUDED, THE LIBRARY RAW_GPS_UTILS
  * MUST NOT BE REACHABLE!
  * OTHERWISE WOLF WON'T COMPILE WITHOUT INSTALLING THIS LIBRARY.
  *
+ * TODO maybe is no more true
  */
-
-
 
 class ConstraintGPSPseudorange3D: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
 {

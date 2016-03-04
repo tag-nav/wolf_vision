@@ -96,6 +96,10 @@ int main(int argc, char** argv)
     ProcessorImagePointBrisk* processor_brisk = new ProcessorImagePointBrisk(Threshl,Octaves,PatternScales);
     sen_cam_->addProcessor(processor_brisk);
 
+
+    CaptureImage* cap_vid_brisk_ptr;
+    CaptureImage* other_cap_vid_brisk_ptr;
+
     if(!image_or_video)
     {
         wolf_problem_->getTrajectoryPtr()->addFrame(new FrameBase(TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero())));
@@ -118,16 +122,27 @@ int main(int argc, char** argv)
         //cv::namedWindow("video");
         capture.set(CV_CAP_PROP_POS_MSEC, 3000);
 
+        capture >> frame;
+        cap_vid_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+
         while(f<100)
         {
             capture >> frame;
             //cv::imshow("video",frame);
             wolf_problem_->getTrajectoryPtr()->addFrame(new FrameBase(TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero())));
-            CaptureImage* cap_vid_brisk = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
-            wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->addCapture(cap_vid_brisk);
+
+
+            delete other_cap_vid_brisk_ptr; // TODO ojo aqui
+            other_cap_vid_brisk_ptr = cap_vid_brisk_ptr;
+            //CaptureImage* other_cap_vid_brisk = wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->getCaptureListPtr()->back();
+
+
+            cap_vid_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+            wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->addCapture(cap_vid_brisk_ptr);
             clock_t t1 = clock();
-            //processor_brisk->extractFeatures(cap_vid_brisk);
-            cap_vid_brisk->process();
+            processor_brisk->extractFeatures(cap_vid_brisk_ptr);
+            processor_brisk->establishConstraints(other_cap_vid_brisk_ptr); //
+            //cap_vid_brisk->process();
             std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
             cv::waitKey(200);
             f++;
