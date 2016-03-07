@@ -13,8 +13,8 @@ FeaturePoint::FeaturePoint(const Eigen::Vector2s & _measurement) :
     //
 }
 
-FeaturePoint::FeaturePoint(const Eigen::Vector2s & _measurement, const std::vector<float> & _descriptor):
-    FeatureBase(_measurement,Eigen::MatrixXs::Zero(0,0)), measurement_(_measurement), descriptor_(_descriptor)
+FeaturePoint::FeaturePoint(const Eigen::Vector2s & _measurement, const cv::KeyPoint _keypoint ,const std::vector<float> & _descriptor):
+    FeatureBase(_measurement,Eigen::MatrixXs::Zero(0,0)), measurement_(_measurement), keypoint_(_keypoint),descriptor_(_descriptor)
 {
 
 }

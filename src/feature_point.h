@@ -5,8 +5,8 @@
 //Wolf includes
 #include "feature_base.h"
 
-//std includes
-//
+//OpenCV includes
+#include "opencv2/features2d/features2d.hpp"
 
 /**
  *
@@ -21,6 +21,7 @@ class FeaturePoint : public FeatureBase
 
         Eigen::Vector2s measurement_;
         std::vector<float> descriptor_;
+        cv::KeyPoint keypoint_;
 
     public:
         /** \brief Constructor
@@ -33,7 +34,7 @@ class FeaturePoint : public FeatureBase
          *
          * constructor
          */
-        FeaturePoint(const Eigen::Vector2s & _measurement, const std::vector<float> & _descriptor);
+        FeaturePoint(const Eigen::Vector2s & _measurement, const cv::KeyPoint _keypoint,const std::vector<float> & _descriptor);
 
         /** \brief Constructor
          *
