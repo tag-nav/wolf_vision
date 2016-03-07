@@ -140,9 +140,7 @@ int main(int argc, char** argv)
             cap_vid_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
             wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->addCapture(cap_vid_brisk_ptr);
             clock_t t1 = clock();
-            processor_brisk->extractFeatures(cap_vid_brisk_ptr);
-            processor_brisk->establishConstraints(other_cap_vid_brisk_ptr); //
-            //cap_vid_brisk->process();
+            processor_brisk->process(cap_vid_brisk_ptr);
             std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
             cv::waitKey(200);
             f++;

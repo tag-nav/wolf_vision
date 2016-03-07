@@ -20,6 +20,14 @@ ProcessorImagePointBrisk::~ProcessorImagePointBrisk()
 
 }
 
+void ProcessorImagePointBrisk::process(CaptureBase* _capture_ptr)
+{
+    extractFeatures(_capture_ptr);
+    establishConstraints(_capture_ptr);
+}
+
+
+
 void ProcessorImagePointBrisk::extractFeatures(CaptureBase *_capture_ptr)
 {
     /** The features are obtained and introduced in the capture object */
@@ -146,7 +154,7 @@ void ProcessorImagePointBrisk::establishConstraints(CaptureBase *_other_capture_
 
         std::vector<float> descript_v;
         descript_v = ((FeaturePoint *)(*it))->getDescriptor();
-        for(int i = 0; i <= descript_v.size()-1;i++)
+        for(unsigned int i = 0; i <= descript_v.size()-1;i++)
         {
             first_descriptor_matrix(cv::Range(t,t+1),cv::Range(i,i+1)) = descript_v[i];
             //std::cout << "COPIED VALUE: " << descript_v[i] << std::endl;
@@ -183,7 +191,7 @@ void ProcessorImagePointBrisk::establishConstraints(CaptureBase *_other_capture_
 
         std::vector<float> descript_v2;
         descript_v2 = ((FeaturePoint *)(*it2))->getDescriptor();
-        for(int i = 0; i <= descript_v2.size()-1;i++)
+        for(unsigned int i = 0; i <= descript_v2.size()-1;i++)
         {
             second_descriptor_matrix(cv::Range(g,g+1),cv::Range(i,i+1)) = descript_v2[i];
             //std::cout << "COPIED VALUE: " << descript_v2[i] << std::endl;
