@@ -17,4 +17,5 @@ class StateQuaternion : public StateBlock
         StateQuaternion(const Eigen::VectorXs _state, bool _fixed = false);
         virtual ~StateQuaternion();
 };
+
 #endif /* SRC_STATE_QUATERNION_H_ */

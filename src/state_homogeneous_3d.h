@@ -17,4 +17,5 @@ class StateHomogeneous3d : public StateBlock
         StateHomogeneous3d(const Eigen::VectorXs _state, bool _fixed = false);
         virtual ~StateHomogeneous3d();
 };
+
 #endif /* SRC_STATE_HOMOGENEOUS_3D_H_ */
