@@ -210,77 +210,9 @@ void WolfProblem::addTrajectory(TrajectoryBase* _trajectory_ptr)
     trajectory_ptr_->linkToUpperNode( this );
 }
 
-MapBase* WolfProblem::getMapPtr()
-{
-    return map_ptr_;
-}
-
-TrajectoryBase* WolfProblem::getTrajectoryPtr()
-{
-    return trajectory_ptr_;
-}
-
-HardwareBase* WolfProblem::getHardwarePtr()
-{
-    return hardware_ptr_;
-}
-
 FrameBase* WolfProblem::getLastFramePtr()
 {
     return trajectory_ptr_->getLastFramePtr();
-}
-
-StateBlockList* WolfProblem::getStateListPtr()
-{
-    return &state_block_ptr_list_;
-}
-
-//void WolfProblem::print(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//    printSelf(_ntabs, _ost); //one line
-//    printLower(_ntabs, _ost);
-//}
-//
-//void WolfProblem::printSelf(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//    printTabs(_ntabs);
-//    _ost << nodeLabel() << " " << nodeId() << " : ";
-//    _ost << "TOP" << std::endl;
-//}
-
-std::list<StateBlock*>* WolfProblem::getStateBlockAddList()
-{
-    return &state_block_add_list_;
-}
-
-std::list<StateBlock*>* WolfProblem::getStateBlockUpdateList()
-{
-    return &state_block_update_list_;
-}
-
-std::list<WolfScalar*>* WolfProblem::getStateBlockRemoveList()
-{
-    return &state_block_remove_list_;
-}
-
-std::list<ConstraintBase*>* WolfProblem::getConstraintAddList()
-{
-    return &constraint_add_list_;
-}
-
-std::list<unsigned int>* WolfProblem::getConstraintRemoveList()
-{
-    return &constraint_remove_list_;
-}
-
-WolfProblem* WolfProblem::getTop()
-{
-	return this;
-}
-
-bool WolfProblem::isTop()
-{
-    return true;
 }
 
 void WolfProblem::removeDownNode(const LowerNodePtr _ptr)

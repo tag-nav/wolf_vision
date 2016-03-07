@@ -29,26 +29,6 @@ void TrajectoryBase::addFrame(FrameBase* _frame_ptr)
     }
 }
 
-void TrajectoryBase::removeFrame(const FrameBaseIter& _frame_iter)
-{
-	removeDownNode(_frame_iter);
-}
-
-FrameStructure TrajectoryBase::getFrameStructure() const
-{
-    return frame_structure_;
-}
-
-FrameBaseList* TrajectoryBase::getFrameListPtr()
-{
-    return getDownNodeListPtr();
-}
-
-FrameBase* TrajectoryBase::getLastFramePtr()
-{
-    return getDownNodeListPtr()->back();
-}
-
 void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
 	for(auto fr_it = getFrameListPtr()->begin(); fr_it != getFrameListPtr()->end(); ++fr_it)

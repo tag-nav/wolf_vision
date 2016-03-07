@@ -47,21 +47,30 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          * Remove a frame to the trajectory
          *
          **/
-        void removeFrame(const FrameBaseIter& _frame_ptr);
+        void removeFrame(const FrameBaseIter& _frame_iter)
+        {
+            removeDownNode(_frame_iter);
+        }
 
         /** \brief Returns a pointer to Frame list
          * 
          * Returns a pointer to Frame list
          * 
          **/
-        FrameBaseList* getFrameListPtr();
+        FrameBaseList* getFrameListPtr()
+        {
+            return getDownNodeListPtr();
+        }
 
         /** \brief Returns a pointer to last Frame
          *
          * Returns a pointer to last Frame
          *
          **/
-        FrameBase* getLastFramePtr();
+        FrameBase* getLastFramePtr()
+        {
+            return getDownNodeListPtr()->back();
+        }
 
 
         /** \brief Returns a list of all constraints in the trajectory thru reference
@@ -71,6 +80,9 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          **/
         void getConstraintList(ConstraintBaseList & _ctr_list);
         
-        FrameStructure getFrameStructure() const;
+        FrameStructure getFrameStructure() const
+        {
+            return frame_structure_;
+        }
 };
 #endif

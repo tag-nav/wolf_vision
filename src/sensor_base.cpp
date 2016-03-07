@@ -50,31 +50,6 @@ SensorBase::~SensorBase()
 
 }
 
-void SensorBase::addProcessor(ProcessorBase* _proc_ptr)
-{
-    addDownNode(_proc_ptr);
-}
-
-ProcessorBaseList* SensorBase::getProcessorListPtr()
-{
-    return getDownNodeListPtr();
-}
-
-StateBlock* SensorBase::getPPtr() const
-{
-    return p_ptr_;
-}
-
-StateBlock* SensorBase::getOPtr() const
-{
-    return o_ptr_;
-}
-
-StateBlock* SensorBase::getIntrinsicPtr() const
-{
-    return intrinsic_ptr_;
-}
-
 void SensorBase::fix()
 {
     // State Blocks
@@ -109,22 +84,9 @@ void SensorBase::unfix()
     }
 }
 
-bool SensorBase::isExtrinsicDynamic() {
-	return extrinsic_dynamic_;
-}
-
-
 void SensorBase::setNoise(const Eigen::VectorXs& _noise_std) {
 	noise_std_ = _noise_std;
 	noise_cov_.setZero();
 	for (unsigned int i=0; i<_noise_std.size(); i++)
 		noise_cov_(i,i) = _noise_std(i) * _noise_std(i);
-}
-
-Eigen::VectorXs SensorBase::getNoiseStd() {
-	return noise_std_;
-}
-
-Eigen::MatrixXs SensorBase::getNoiseCov() {
-	return noise_cov_;
 }

@@ -183,4 +183,59 @@ class WolfProblem: public NodeBase
 
 };
 
+inline MapBase* WolfProblem::getMapPtr()
+{
+    return map_ptr_;
+}
+
+inline TrajectoryBase* WolfProblem::getTrajectoryPtr()
+{
+    return trajectory_ptr_;
+}
+
+inline HardwareBase* WolfProblem::getHardwarePtr()
+{
+    return hardware_ptr_;
+}
+
+inline StateBlockList* WolfProblem::getStateListPtr()
+{
+    return &state_block_ptr_list_;
+}
+
+inline std::list<StateBlock*>* WolfProblem::getStateBlockAddList()
+{
+    return &state_block_add_list_;
+}
+
+inline std::list<StateBlock*>* WolfProblem::getStateBlockUpdateList()
+{
+    return &state_block_update_list_;
+}
+
+inline std::list<WolfScalar*>* WolfProblem::getStateBlockRemoveList()
+{
+    return &state_block_remove_list_;
+}
+
+inline std::list<ConstraintBase*>* WolfProblem::getConstraintAddList()
+{
+    return &constraint_add_list_;
+}
+
+inline std::list<unsigned int>* WolfProblem::getConstraintRemoveList()
+{
+    return &constraint_remove_list_;
+}
+
+inline WolfProblem* WolfProblem::getTop()
+{
+    return this;
+}
+
+inline bool WolfProblem::isTop()
+{
+    return true;
+}
+
 #endif
