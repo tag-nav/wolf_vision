@@ -27,9 +27,9 @@ int main (void)
     std::cout << "Q local param: " << pqv.getOPtr()->getLocalParametrizationPtr() << std::endl;
     std::cout << "V local param: " << pqv.getVPtr()->getLocalParametrizationPtr() << std::endl;
 
-    delete pp;
-    delete op;
-    delete vp;
+//    delete pp;
+//    delete op;
+//    delete vp;
 
     std::cout << "Done" << std::endl;
 
