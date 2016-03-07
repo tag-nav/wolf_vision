@@ -70,7 +70,7 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual unsigned int processKnownFeatures(CaptureBase* _incoming_ptr) = 0;
 
-        /** Detect new Features
+        /** \brief Detect new Features
          *
          * This is intended to create Features that are not among the Features already known in the Map.
          *
@@ -78,7 +78,7 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr) = 0;
 
-        /**\brief Vote for KeyFrame generation
+        /** \brief Vote for KeyFrame generation
          *
          * If a KeyFrame criterion is validated, this function returns true,
          * meaning that it wants to create a KeyFrame at the \b last Capture.
@@ -87,9 +87,13 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual bool voteForKeyFrame() = 0;
 
-        /**\brief Make a KeyFrame using the last Capture.
+        /** \brief Make a KeyFrame using the last Capture.
          */
         virtual void makeKeyFrame();
+
+        /** \brief Make a new landmarks using the last Capture
+         */
+        virtual void initializeNewLandmarks();
 
         /** \brief Reset the tracker to a new \b origin and \b last Captures
          */
