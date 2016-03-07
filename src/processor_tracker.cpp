@@ -42,12 +42,12 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     {
         // If we want a new keyframe, we first need to populate the Capture with new Features to create new Landmarks
         // Detect new Features and create new landmarks
-        FeatureBaseList feat_list;
-        detectNewFeatures(last_ptr_, feat_list);
-        if (feat_list.size() > 0)
+        FeatureBaseList new_features_list;
+        detectNewFeatures(last_ptr_, new_features_list);
+        if (new_features_list.size() > 0)
         {
-            LandmarkBaseList lmk_list(makeLandmarks(feat_list));
-            for (auto lmk_ptr : lmk_list)
+            LandmarkBaseList new_landmarks_list(makeLandmarks(new_features_list));
+            for (auto lmk_ptr : new_landmarks_list)
                 getTop()->getMapPtr()->addLandmark(lmk_ptr);
         }
 
