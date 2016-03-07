@@ -13,7 +13,7 @@
 class StateHomogeneous3d : public StateBlock
 {
     public:
-        StateHomogeneous3d(const unsigned int _size, bool _fixed = false);
+        StateHomogeneous3d(bool _fixed = false);
         StateHomogeneous3d(const Eigen::VectorXs _state, bool _fixed = false);
         virtual ~StateHomogeneous3d();
 };

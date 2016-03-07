@@ -11,11 +11,12 @@
 StateHomogeneous3d::StateHomogeneous3d(const Eigen::VectorXs _state, bool _fixed) :
         StateBlock(_state, _fixed)
 {
+    assert(_state.size() == 4 && "Homogeneous 3d must be size 4.");
     local_param_ptr_ = new LocalParametrizationHomogeneous;
 }
 
-StateHomogeneous3d::StateHomogeneous3d(const unsigned int _size, bool _fixed) :
-        StateBlock(_size, _fixed)
+StateHomogeneous3d::StateHomogeneous3d(bool _fixed) :
+        StateBlock(4, _fixed)
 {
     local_param_ptr_ = new LocalParametrizationHomogeneous;
 }

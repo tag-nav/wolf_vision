@@ -11,11 +11,12 @@
 StateQuaternion::StateQuaternion(const Eigen::VectorXs _state, bool _fixed) :
         StateBlock(_state, _fixed)
 {
+    assert(_state.size() == 4 && "Quaternion must be size 4.");
     local_param_ptr_ = new LocalParametrizationQuaternion;
 }
 
-StateQuaternion::StateQuaternion(const unsigned int _size, bool _fixed) :
-        StateBlock(_size, _fixed)
+StateQuaternion::StateQuaternion(bool _fixed) :
+        StateBlock(4, _fixed)
 {
     local_param_ptr_ = new LocalParametrizationQuaternion;
 

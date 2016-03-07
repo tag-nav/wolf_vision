@@ -13,7 +13,7 @@
 class StateQuaternion : public StateBlock
 {
     public:
-        StateQuaternion(const unsigned int _size, bool _fixed = false);
+        StateQuaternion(bool _fixed = false);
         StateQuaternion(const Eigen::VectorXs _state, bool _fixed = false);
         virtual ~StateQuaternion();
 };
