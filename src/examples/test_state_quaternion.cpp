@@ -27,11 +27,13 @@ int main (void)
     std::cout << "Q local param: " << pqv.getOPtr()->getLocalParametrizationPtr() << std::endl;
     std::cout << "V local param: " << pqv.getVPtr()->getLocalParametrizationPtr() << std::endl;
 
-//    delete pp;
-//    delete op;
-//    delete vp;
+    //    delete pp;
+    //    delete op;
+    //    delete vp;
+    // Note: Deleting the StateBlock pointers will be done at the destruction of FrameBase.
 
     std::cout << "Done" << std::endl;
+
 
     return 1;
 }
