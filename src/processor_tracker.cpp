@@ -22,36 +22,34 @@ ProcessorTracker::~ProcessorTracker()
         delete incoming_ptr_;
 }
 
-void ProcessorTracker::makeKeyFrame()
+void ProcessorTracker::makeKeyFrame(CaptureBase* _capture_ptr)
 {
-    if (!autonomous_)
-    {
-        // Create a new non-key Frame in the Trajectory
-        // TODO: how to access the newly created Frame? -> do FrameBase* createFrame()
-        getTop()->createFrame(NON_KEY_FRAME, last_ptr_->getTimeStamp());
-        // Make the old Frame a KeyFrame so that it gets into the solver
-        last_ptr_->getFramePtr()->setKey();
-    }
-    else
-    {
-        // TODO: what to do here?
-    }
+    assert (autonomous_ && "Requested makeKeyFrame() to a non-autonomous processor.");
+
+    // Create a new non-key Frame in the Trajectory
+    // TODO: how to access the newly created Frame? -> do FrameBase* createFrame()
+    getTop()->createFrame(NON_KEY_FRAME, last_ptr_->getTimeStamp());
+    // Make the old Frame a KeyFrame so that it gets into the solver
+    _capture_ptr->getFramePtr()->setKey();
 }
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
+    assert ( autonomous_ && "Requested process() to a non-autonomous processor.");
+
     processKnownFeatures(_incoming_ptr);
-    if (autonomous_ && voteForKeyFrame())
+    if (voteForKeyFrame())
     {
-        // Make a KeyFrame from last and reset the tracker
-        this->makeKeyFrame();
-        reset();
-        if (detectNewFeatures(origin_ptr_) > 0) // New landmarks on the recently created KayFrame: origin
+        // Detect new Features and create new landmarks
+        if (detectNewFeatures(last_ptr_) > 0)
         {
             LandmarkBaseList lmk_list(makeLandmarks());
             for (auto lmk_ptr : lmk_list)
                 getTop()->getMapPtr()->addLandmark(lmk_ptr);
         }
+        // Make a KeyFrame from last and reset the tracker
+        this->makeKeyFrame(last_ptr_);
+        reset();
     }
     else
         advance();
