@@ -12,14 +12,20 @@ ProcessorLaser2D::~ProcessorLaser2D()
 {
 }
 
-void ProcessorLaser2D::extractFeatures(CaptureBase* capture_ptr_)
+void ProcessorLaser2D::process(CaptureBase* _capture_ptr)
+{
+    extractFeatures(_capture_ptr);
+    establishConstraints(_capture_ptr);
+}
+
+void ProcessorLaser2D::extractFeatures(CaptureBase* _capture_ptr)
 {
     // TODO: Or we always cast (so pointer is not needed) or we find the place to be casted once, but constructor is not the place.
     sensor_laser_ptr_ = (SensorLaser2D*)(upperNodePtr());
 
 	//check CaptureBase pointer is the appropriate one for this Processor
 //	assert( capture_laser_ptr_ = dynamic_cast<CaptureLaser2D*>(capture_ptr_) && "Invalid Capture Type pointer" );
-    capture_laser_ptr_ = (CaptureLaser2D*)(capture_ptr_);
+    capture_laser_ptr_ = (CaptureLaser2D*)(_capture_ptr);
 	
     std::cout << "Extracting laser features..." << std::endl;
 
@@ -36,11 +42,11 @@ void ProcessorLaser2D::extractFeatures(CaptureBase* capture_ptr_)
 
 }
 
-void ProcessorLaser2D::establishConstraints(CaptureBase* capture_ptr_)
+void ProcessorLaser2D::establishConstraints(CaptureBase* _capture_ptr_)
 {
 	//check CaptureBase pointer is the appropriate one for this Processor
 //	assert( capture_laser_ptr_ = dynamic_cast<CaptureLaser2D*>(capture_ptr_) && "Invalid Capture Type pointer" );
-    capture_laser_ptr_ = (CaptureLaser2D*)(capture_ptr_);
+    capture_laser_ptr_ = (CaptureLaser2D*)(_capture_ptr_);
 	
     std::cout << "Establishing constraints to laser features..." << std::endl;
 

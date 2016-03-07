@@ -40,7 +40,7 @@ void ProcessorTracker::makeKeyFrame()
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    trackKnownFeatures(_incoming_ptr);
+    processKnownFeatures(_incoming_ptr);
     if (autonomous_ && voteForKeyFrame())
     {
         makeKeyFrame();

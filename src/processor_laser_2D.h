@@ -55,8 +55,12 @@ class ProcessorLaser2D : public ProcessorBase
         ProcessorLaser2D();
         virtual ~ProcessorLaser2D();
 
-        void extractFeatures(CaptureBase* capture_ptr_);
-        void establishConstraints(CaptureBase* capture_ptr_);
+        void process(CaptureBase *_capture_ptr);
+
+        // JS: These two fcns can be removed and substituted by process() above.
+    private:
+        void extractFeatures(CaptureBase* _capture_ptr);
+        void establishConstraints(CaptureBase* _capture_ptr_);
 
         // JOAN_S IS TAKING RISKS HERE. DELETE ALL FROM HERE DOWNWARDS IF YOU WANT TO MIGRATE FROM CAPTURE_LASER_2D TO HERE
 

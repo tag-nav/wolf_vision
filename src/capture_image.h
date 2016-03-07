@@ -17,6 +17,8 @@ class CaptureImage : public CaptureBase
 {
     protected:
         cv::Mat image_;
+        cv::Mat descriptors_;
+        std::vector<cv::KeyPoint> keypoints_;
 
     public:
         CaptureImage(const TimeStamp& _ts, SensorCamera* _camera_ptr, cv::Mat _data_cv, int _img_width, int _img_height);
@@ -35,6 +37,14 @@ class CaptureImage : public CaptureBase
         //cv::Mat data_cv_; //this should be protected
 
         virtual cv::Mat getImage();
+
+        virtual void setDescriptors(cv::Mat _descriptors);
+
+        virtual void setKeypoints(std::vector<cv::KeyPoint> _keypoints);
+
+        virtual cv::Mat getDescriptors();
+
+        virtual std::vector<cv::KeyPoint> getKeypoints();
 };
 
 #endif // CAPTURE_IMAGE_H

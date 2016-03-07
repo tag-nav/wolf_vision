@@ -49,6 +49,8 @@ class ProcessorTracker : public ProcessorBase
         ProcessorTracker(bool _autonomous = true);
         virtual ~ProcessorTracker();
 
+        bool isAutonomous() const;
+
         /** \brief Initialize tracker.
          */
         void init(CaptureBase* _origin_ptr);
@@ -66,7 +68,7 @@ class ProcessorTracker : public ProcessorBase
          *
          * \return The number of successful tracks.
          */
-        virtual unsigned int trackKnownFeatures(CaptureBase* _incoming_ptr) = 0;
+        virtual unsigned int processKnownFeatures(CaptureBase* _incoming_ptr) = 0;
 
         /** Detect new Features
          *
@@ -111,7 +113,6 @@ class ProcessorTracker : public ProcessorBase
         virtual void process(CaptureBase* const _incoming_ptr);
 
         // getters and setters
-        bool isAutonomous() const;
         CaptureBase* getOriginPtr() const;
         CaptureBase* getLastPtr() const;
         CaptureBase* getIncomingPtr() const;
@@ -140,7 +141,7 @@ inline void ProcessorTracker::reset(CaptureBase* _origin_ptr, CaptureBase* _last
 {
     origin_ptr_ = _origin_ptr;
     last_ptr_ = _last_ptr;
-    incoming_ptr_ = nullptr;
+    incoming_ptr_ = nullptr;   // This line is not really needed, but it makes things clearer.
 }
 
 inline void ProcessorTracker::reset()
@@ -153,7 +154,7 @@ inline void ProcessorTracker::advance()
     last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
     last_ptr_->destruct();     // Destruct now the obsolete last before reassigning a new pointer
     last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
-    incoming_ptr_ = nullptr;   // This line is not really needed, but it make things clearer.
+    incoming_ptr_ = nullptr;   // This line is not really needed, but it makes things clearer.
 }
 
 inline bool ProcessorTracker::isAutonomous() const

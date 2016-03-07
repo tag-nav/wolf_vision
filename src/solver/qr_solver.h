@@ -26,7 +26,6 @@
 // wolf solver
 #include "solver/ccolamd_ordering.h"
 #include "solver/cost_function_sparse.h"
-#include "solver/qr_solver.h"
 
 // eigen includes
 #include <eigen3/Eigen/OrderingMethods>
