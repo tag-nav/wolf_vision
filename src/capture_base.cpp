@@ -19,48 +19,10 @@ CaptureBase::~CaptureBase()
 	//std::cout << "deleting CaptureBase " << nodeId() << std::endl;
 }
 
-// TODO: Why the linker throws an error when this function is inline...
-void CaptureBase::addFeature(FeatureBase* _ft_ptr)
-{
-	//std::cout << "Adding feature" << std::endl;
-	addDownNode(_ft_ptr);
-}
-
-FrameBase* CaptureBase::getFramePtr() const
-{
-    return upperNodePtr();
-}
-
-FeatureBaseList* CaptureBase::getFeatureListPtr()
-{
-    return getDownNodeListPtr();
-}
-
 void CaptureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
 	for(auto f_it = getFeatureListPtr()->begin(); f_it != getFeatureListPtr()->end(); ++f_it)
 		(*f_it)->getConstraintFromList(_ctr_list);
-}
-
-TimeStamp CaptureBase::getTimeStamp() const
-{
-    return time_stamp_;
-}
-
-SensorBase* CaptureBase::getSensorPtr() const
-{
-    return sensor_ptr_;
-}
-
-
-void CaptureBase::setTimeStamp(const TimeStamp & _ts)
-{
-    time_stamp_ = _ts;
-}
-
-void CaptureBase::setTimeStampToNow()
-{
-    time_stamp_.setToNow();
 }
 
 void CaptureBase::process()
@@ -86,15 +48,4 @@ StateBlock* CaptureBase::getSensorOPtr() const {
 	else
 		return getSensorPtr()->getOPtr();
 }
-
-//void CaptureBase::printSelf(unsigned int _ntabs, std::ostream & _ost) const
-//{
-//    NodeLinked::printSelf(_ntabs, _ost);
-//    //printTabs(_ntabs);
-//    //_ost << "\tSensor pose : ( " << sensor_ptr_->pose().x().transpose() << " )" << std::endl;
-//    //printNTabs(_ntabs);
-//    //_ost << "\tSensor intrinsic : ( " << sensor_ptr_->intrinsic().transpose() << " )" << std::endl;
-//}
-
-
 

@@ -48,21 +48,32 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
          * Adds a Feature to the down node list
          *
          **/
-        void addFeature(FeatureBase* _ft_ptr);
+        // TODO: Why the linker throws an error when this function is inline...
+        void addFeature(FeatureBase* _ft_ptr)
+        {
+            //std::cout << "Adding feature" << std::endl;
+            addDownNode(_ft_ptr);
+        }
 
         /** \brief Gets up_node_ptr_
          *
          * Gets up_node_ptr_, which is a pointer to the Frame owning of this Capture
          *
          **/
-        FrameBase* getFramePtr() const;
+        FrameBase* getFramePtr() const
+        {
+            return upperNodePtr();
+        }
 
         /** \brief Gets a pointer to feature list
          *
          * Gets a pointer to feature list
          *
          **/
-        FeatureBaseList* getFeatureListPtr();
+        FeatureBaseList* getFeatureListPtr()
+        {
+            return getDownNodeListPtr();
+        }
 
         /** \brief Fills the provided list with all constraints related to this capture
          *
@@ -72,17 +83,29 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
         //TODO: Check if it could be removed. THen remove it also at every wolf tree level.
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
-        TimeStamp getTimeStamp() const;
+        TimeStamp getTimeStamp() const
+        {
+            return time_stamp_;
+        }
 
-        SensorBase* getSensorPtr() const;
+        SensorBase* getSensorPtr() const
+        {
+            return sensor_ptr_;
+        }
 
         StateBlock* getSensorPPtr() const;
 
         StateBlock* getSensorOPtr() const;
 
-        void setTimeStamp(const TimeStamp & _ts);
+        void setTimeStamp(const TimeStamp& _ts)
+        {
+            time_stamp_ = _ts;
+        }
 
-        void setTimeStampToNow();
+        void setTimeStampToNow()
+        {
+            time_stamp_.setToNow();
+        }
 
         /** \brief Call all the processors for this Capture
          */
