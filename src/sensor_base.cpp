@@ -81,12 +81,14 @@ void SensorBase::fix()
     if (p_ptr_!=nullptr)
     {
         p_ptr_->fix();
-        getTop()->updateStateBlockPtr(p_ptr_);
+        if (getTop() != nullptr)
+            getTop()->updateStateBlockPtr(p_ptr_);
     }
     if (o_ptr_!=nullptr)
     {
         o_ptr_->fix();
-        getTop()->updateStateBlockPtr(o_ptr_);
+        if (getTop() != nullptr)
+            getTop()->updateStateBlockPtr(o_ptr_);
     }
 }
 
@@ -96,12 +98,14 @@ void SensorBase::unfix()
     if (p_ptr_!=nullptr)
     {
         p_ptr_->unfix();
-        getTop()->updateStateBlockPtr(p_ptr_);
+        if (getTop() != nullptr)
+            getTop()->updateStateBlockPtr(p_ptr_);
     }
     if (o_ptr_!=nullptr)
     {
         o_ptr_->unfix();
-        getTop()->updateStateBlockPtr(o_ptr_);
+        if (getTop() != nullptr)
+            getTop()->updateStateBlockPtr(o_ptr_);
     }
 }
 

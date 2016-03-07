@@ -37,17 +37,20 @@ FrameBase::~FrameBase()
 	// Remove Frame State Blocks
 	if (p_ptr_ != nullptr)
 	{
-	    getTop()->removeStateBlockPtr(p_ptr_);
+        if (getTop() != nullptr)
+            getTop()->removeStateBlockPtr(p_ptr_);
 	    delete p_ptr_;
 	}
     if (o_ptr_ != nullptr)
     {
-        getTop()->removeStateBlockPtr(o_ptr_);
+        if (getTop() != nullptr)
+            getTop()->removeStateBlockPtr(o_ptr_);
         delete o_ptr_;
     }
     if (v_ptr_ != nullptr)
     {
-        getTop()->removeStateBlockPtr(v_ptr_);
+        if (getTop() != nullptr)
+            getTop()->removeStateBlockPtr(v_ptr_);
         delete v_ptr_;
     }
     //std::cout << "states deleted" << std::endl;
@@ -117,7 +120,24 @@ Eigen::VectorXs FrameBase::getState() const
     Eigen::VectorXs state((p_ptr_==nullptr ? 0 : p_ptr_->getSize()) +
                           (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
                           (v_ptr_==nullptr ? 0 : v_ptr_->getSize()));
-    state << p_ptr_->getVector(), o_ptr_->getVector(), v_ptr_->getVector();
+
+    unsigned int index = 0;
+    if (p_ptr_!=nullptr)
+    {
+        state.head(p_ptr_->getSize());
+        index += p_ptr_->getSize();
+    }
+    if (o_ptr_!=nullptr)
+    {
+        state.segment(index, o_ptr_->getSize());
+        index += p_ptr_->getSize();
+    }
+    if (v_ptr_!=nullptr)
+    {
+        state.segment(index, v_ptr_->getSize());
+        //   index += v_ptr_->getSize();
+    }
+
     return state;
 }
 
@@ -137,7 +157,11 @@ void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 FrameBase* FrameBase::getPreviousFrame() const
 {
-    //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
+    std::cout << "finding previous frame of " << this->node_id_ << std::endl;
+    if (getTrajectoryPtr() == nullptr)
+        std::cout << "This Frame is not linked to any trajectory" << std::endl;
+
+    assert(getTrajectoryPtr() != nullptr && "This Frame is not linked to any trajectory");
 
     //look for the position of this node in the upper list (frame list of trajectory)
     for (auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin(); f_it != getTrajectoryPtr()->getFrameListPtr()->rend(); f_it++ )
@@ -145,7 +169,16 @@ FrameBase* FrameBase::getPreviousFrame() const
         if ( this->node_id_ == (*f_it)->nodeId() )
         {
         	f_it++;
-			return *f_it;
+        	if (f_it != getTrajectoryPtr()->getFrameListPtr()->rend())
+            {
+                std::cout << "previous frame found!" << std::endl;
+                return *f_it;
+            }
+        	else
+        	{
+        	    std::cout << "previous frame not found!" << std::endl;
+        	    return nullptr;
+        	}
         }
     }
     std::cout << "previous frame not found!" << std::endl;
@@ -182,17 +215,20 @@ void FrameBase::setStatus(StateStatus _st)
         if (p_ptr_ != nullptr)
         {
             p_ptr_->fix();
-            getTop()->updateStateBlockPtr(p_ptr_);
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(p_ptr_);
         }
         if (o_ptr_ != nullptr)
         {
             o_ptr_->fix();
-            getTop()->updateStateBlockPtr(o_ptr_);
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(o_ptr_);
         }
         if (v_ptr_ != nullptr)
         {
             v_ptr_->fix();
-            getTop()->updateStateBlockPtr(v_ptr_);
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(v_ptr_);
         }
     }
     else if (status_ == ST_ESTIMATED)
@@ -200,17 +236,20 @@ void FrameBase::setStatus(StateStatus _st)
         if (p_ptr_ != nullptr)
         {
             p_ptr_->unfix();
-            getTop()->updateStateBlockPtr(p_ptr_);
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(p_ptr_);
         }
         if (o_ptr_ != nullptr)
         {
             o_ptr_->unfix();
-            getTop()->updateStateBlockPtr(o_ptr_);
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(o_ptr_);
         }
         if (v_ptr_ != nullptr)
         {
             v_ptr_->unfix();
-            getTop()->updateStateBlockPtr(v_ptr_);
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(v_ptr_);
         }
     }
 }
