@@ -32,7 +32,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          * Constructor with only time stamp
          * \param _ts is the time stamp associated to this frame, provided in seconds
          * \param _p_ptr StateBlock pointer to the position (default: nullptr)
-         * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
+         * \param _o_ptr StateBlock pointer to the orientation (default: nullptr). Pass a StateQuaternion if needed.
          **/
         FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
         
