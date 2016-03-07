@@ -93,7 +93,7 @@ class ProcessorTracker : public ProcessorBase
 
         /** \brief Make a new landmarks using the last Capture
          */
-        virtual void initializeNewLandmarks();
+        virtual void initializeNewLandmarks() = 0;
 
         /** \brief Reset the tracker to a new \b origin and \b last Captures
          */
