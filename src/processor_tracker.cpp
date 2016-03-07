@@ -46,7 +46,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         if (new_features_list_.size() > 0)
         {
             // Create the landmarks with the landmark factory in this class
-            initLandmarks();
+            createLandmarks();
             // append the landmarks to the Map
             for (auto lmk_ptr : new_landmarks_list_)
                 getTop()->getMapPtr()->addLandmark(lmk_ptr);
@@ -66,7 +66,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         advance();
 }
 
-void ProcessorTracker::initLandmarks()
+void ProcessorTracker::createLandmarks()
 {
     clearLandmarksList();
     for (FeatureBase* feature_ptr : new_features_list_)

@@ -131,7 +131,7 @@ class ProcessorTracker : public ProcessorBase
 
         /** \brief Make landmarks from new Features
          */
-        virtual void initLandmarks();
+        virtual void createLandmarks();
 
         /** \brief Initialize one landmark
          *
