@@ -25,10 +25,18 @@ public:
     ProcessorGPS();
     virtual ~ProcessorGPS();
 
+        virtual void process(CaptureBase* _capture_ptr);
+
+private:
     virtual void extractFeatures(CaptureBase *_capture_ptr);
     virtual void establishConstraints(CaptureBase *_capture_ptr);
 
 };
 
+inline void ProcessorGPS::process(CaptureBase* _capture_ptr)
+{
+    extractFeatures(_capture_ptr);
+    establishConstraints(_capture_ptr);
+}
 
 #endif //WOLF_PROCESSOR_GPS_H
