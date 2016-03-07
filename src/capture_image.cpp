@@ -23,13 +23,22 @@ cv::Mat CaptureImage::getImage()
     return image_;
 }
 
-//void CaptureGPSFix::printSelf(unsigned int _ntabs, std::ostream & _ost) const
-//{
-//    NodeLinked::printSelf(_ntabs, _ost);
-//    //printTabs(_ntabs);
-//    //_ost << "\tSensor pose : ( " << sensor_ptr_->pose().x().transpose() << " )" << std::endl;
-//    //printNTabs(_ntabs);
-//    //_ost << "\tSensor intrinsic : ( " << sensor_ptr_->intrinsic().transpose() << " )" << std::endl;
-//}
+void CaptureImage::setDescriptors(cv::Mat _descriptors)
+{
+    descriptors_ = _descriptors;
+}
 
+void CaptureImage::setKeypoints(std::vector<cv::KeyPoint> _keypoints)
+{
+    keypoints_ = _keypoints;
+}
 
+cv::Mat CaptureImage::getDescriptors()
+{
+    return descriptors_;
+}
+
+std::vector<cv::KeyPoint> CaptureImage::getKeypoints()
+{
+    return keypoints_;
+}

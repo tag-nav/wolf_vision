@@ -21,7 +21,7 @@ class LandmarkPoint : public LandmarkBase
          * \param _aperture descriptor of the landmark: aperture of the corner
          *
          **/
-        LandmarkPoint(StateBlock* _p_ptr);
+        LandmarkPoint(StateBlock* _p_ptr, const std::vector<float> & _descriptor);
 
         /** \brief Default destructor (not recommended)
          *
