@@ -78,8 +78,69 @@ class StateBlock
 
         LocalParametrizationBase* getLocalParametrizationPtr();
 
-        /** \brief Prints all the elements of the state unit
-         **/
-        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 };
+
+inline StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed) :
+        state_(_state), fixed_(_fixed), local_param_ptr_(nullptr)
+{
+    //
+}
+
+inline StateBlock::StateBlock(const unsigned int _size, bool _fixed) :
+        state_(_size), fixed_(_fixed), local_param_ptr_(nullptr)
+{
+    //
+}
+
+inline StateBlock::~StateBlock()
+{
+    //
+}
+
+inline WolfScalar* StateBlock::getPtr()
+{
+    return state_.data();
+}
+
+inline Eigen::VectorXs StateBlock::getVector()
+{
+    return state_;
+}
+
+inline void StateBlock::setVector(const Eigen::VectorXs& _state)
+{
+    assert(_state.size() == state_.size());
+    state_ = _state;
+}
+
+inline unsigned int StateBlock::getSize() const
+{
+    return state_.size();
+}
+
+inline bool StateBlock::isFixed() const
+{
+    return fixed_;
+}
+
+inline void StateBlock::fix()
+{
+    fixed_ = true;
+}
+
+inline void StateBlock::unfix()
+{
+    fixed_ = false;
+}
+
+inline bool StateBlock::hasLocalParametrization()
+{
+    return (local_param_ptr_ != nullptr);
+}
+
+inline LocalParametrizationBase* StateBlock::getLocalParametrizationPtr()
+{
+    return local_param_ptr_;
+}
+
 #endif

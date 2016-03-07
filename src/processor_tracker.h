@@ -73,10 +73,12 @@ class ProcessorTracker : public ProcessorBase
         /** \brief Detect new Features
          *
          * This is intended to create Features that are not among the Features already known in the Map.
+         * \param _capture_ptr Capture for feature detection
+         * \param _new_feat_list the list of newly detected features
          *
          * \return The number of detected Features.
          */
-        virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr) = 0;
+        virtual void detectNewFeatures(CaptureBase* _capture_ptr, FeatureBaseList& _new_feat_list) = 0;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -86,10 +88,6 @@ class ProcessorTracker : public ProcessorBase
          * WARNING! This function only votes! It does not create KeyFrames!
          */
         virtual bool voteForKeyFrame() = 0;
-
-        /** \brief Make a new landmarks using the last Capture
-         */
-        virtual void initializeNewLandmarks() = 0;
 
         /** \brief Reset the tracker to a new \b origin and \b last Captures
          */
@@ -129,7 +127,7 @@ class ProcessorTracker : public ProcessorBase
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
          */
-        virtual LandmarkBaseList makeLandmarks() = 0;
+        virtual LandmarkBaseList makeLandmarks(FeatureBaseList& _features_list) = 0;
 
     private:
         bool autonomous_;    ///< Sets whether the tracker is autonomous to make decisions that affect the WolfProblem, like creating new KeyFrames and/or Landmarks.
