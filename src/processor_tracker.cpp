@@ -42,14 +42,21 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     {
         // If we want a new keyframe, we first need to populate the Capture with new Features to create new Landmarks
         // Detect new Features and create new landmarks
-        FeatureBaseList new_features_list;
-        detectNewFeatures(last_ptr_, new_features_list);
-        if (new_features_list.size() > 0)
+        detectNewFeatures(last_ptr_);
+        if (new_features_list_.size() > 0)
         {
-            LandmarkBaseList new_landmarks_list(makeLandmarks(new_features_list));
-            for (auto lmk_ptr : new_landmarks_list)
+            // Create the landmarks with the landmark factory in this class
+            makeLandmarks();
+            // append the landmarks to the Map
+            for (auto lmk_ptr : new_landmarks_list_)
                 getTop()->getMapPtr()->addLandmark(lmk_ptr);
+            clearLandmarksList();
         }
+
+        // Add all new Features to the Capture
+        for (FeatureBase* feat_ptr : new_features_list_)
+            last_ptr_->addFeature(feat_ptr);
+        clearFeaturesList();
 
         // Make a KeyFrame from last and reset the tracker
         this->makeKeyFrame(last_ptr_);
@@ -57,4 +64,14 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     }
     else
         advance();
+}
+
+void ProcessorTracker::makeLandmarks()
+{
+    clearLandmarksList();
+    for (FeatureBase* feature_ptr : new_features_list_)
+    {
+        new_landmarks_list_.push_back(makeOneLandmark(feature_ptr));
+        // TODO: Create constraint between Feature and Landmark
+    }
 }
