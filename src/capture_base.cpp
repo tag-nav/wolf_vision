@@ -68,8 +68,7 @@ void CaptureBase::process()
     // Call all processors assigned to the sensor that captured this data
     for (auto processor_iter = sensor_ptr_->getProcessorListPtr()->begin(); processor_iter != sensor_ptr_->getProcessorListPtr()->end(); ++processor_iter)
     {
-        (*processor_iter)->extractFeatures(this);
-        (*processor_iter)->establishConstraints(this);
+        (*processor_iter)->process(this);
     }
 }
 

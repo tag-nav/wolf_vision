@@ -17,7 +17,7 @@
 #include "../constraint_sparse.h"
 #include "../constraint_fix.h"
 #include "../constraint_gps_2D.h"
-#include "../constraint_gps_pseudorange.h"
+#include "../constraint_gps_pseudorange_2D.h"
 #include "../constraint_odom_2D.h"
 #include "../constraint_corner_2D.h"
 #include "../constraint_container.h"
@@ -26,7 +26,6 @@
 // wolf solver
 #include "solver/ccolamd_ordering.h"
 #include "solver/cost_function_sparse.h"
-#include "solver/qr_solver.h"
 
 // eigen includes
 #include <eigen3/Eigen/OrderingMethods>

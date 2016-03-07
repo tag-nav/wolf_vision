@@ -84,6 +84,8 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 
         void setTimeStampToNow();
 
+        /** \brief Call all the processors for this Capture
+         */
         virtual void process(); 
 
         // TODO Move it to ProcessorX class()

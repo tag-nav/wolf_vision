@@ -21,6 +21,9 @@ public:
     ProcessorImagePointBrisk(int _threshold = 30, int _octaves = 0, float _pattern_scales = 1.0f);
     virtual ~ProcessorImagePointBrisk();
 
+    void process(CaptureBase *_capture_ptr);
+
+private:
     virtual void extractFeatures(CaptureBase *_capture_ptr);
     virtual void establishConstraints(CaptureBase *_other_capture_ptr);
 

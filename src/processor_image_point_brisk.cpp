@@ -20,6 +20,14 @@ ProcessorImagePointBrisk::~ProcessorImagePointBrisk()
 
 }
 
+void ProcessorImagePointBrisk::process(CaptureBase* _capture_ptr)
+{
+    extractFeatures(_capture_ptr);
+    establishConstraints(_capture_ptr);
+}
+
+
+
 void ProcessorImagePointBrisk::extractFeatures(CaptureBase *_capture_ptr)
 {
     clock_t t1 = clock();
