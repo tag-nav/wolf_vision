@@ -80,14 +80,9 @@ ConstraintBase::~ConstraintBase()
     //std::cout << "removed constraints to " << std::endl;
 }
 
-ConstraintType ConstraintBase::getType() const
-{
-    return type_;
-}
-
 const Eigen::VectorXs& ConstraintBase::getMeasurement() const
 {
-	return getFeaturePtr()->getMeasurement();
+    return getFeaturePtr()->getMeasurement();
 }
 
 const Eigen::MatrixXs& ConstraintBase::getMeasurementCovariance() const
@@ -100,24 +95,9 @@ const Eigen::MatrixXs& ConstraintBase::getMeasurementSquareRootInformation() con
     return getFeaturePtr()->getMeasurementSquareRootInformation();
 }
 
-FeatureBase* ConstraintBase::getFeaturePtr() const
-{
-	return upperNodePtr();
-}
-
 CaptureBase* ConstraintBase::getCapturePtr() const
 {
 	return upperNodePtr()->upperNodePtr();
-}
-
-ConstraintCategory ConstraintBase::getCategory() const
-{
-    return category_;
-}
-
-ConstraintStatus ConstraintBase::getStatus() const
-{
-	return status_;
 }
 
 void ConstraintBase::setStatus(ConstraintStatus _status)
@@ -132,19 +112,4 @@ void ConstraintBase::setStatus(ConstraintStatus _status)
             getTop()->removeConstraintPtr(this);
     }
     status_ = _status;
-}
-
-FrameBase* ConstraintBase::getFrameOtherPtr()
-{
-    return frame_ptr_;
-}
-
-FeatureBase* ConstraintBase::getFeatureOtherPtr()
-{
-    return feature_ptr_;
-}
-
-LandmarkBase* ConstraintBase::getLandmarkOtherPtr()
-{
-    return landmark_ptr_;
 }
