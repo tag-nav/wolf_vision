@@ -59,8 +59,8 @@ int main(int argc, char** argv)
     std::map<FrameBase*, unsigned int> frame_ptr_2_index_prun;
 
     // Wolf problem
-    WolfProblem* wolf_problem_full = new WolfProblem();
-    WolfProblem* wolf_problem_prun = new WolfProblem();
+    WolfProblem* wolf_problem_full = new WolfProblem(PO_2D);
+    WolfProblem* wolf_problem_prun = new WolfProblem(PO_2D);
     SensorBase* sensor = new SensorBase(ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
     Eigen::SparseMatrix<WolfScalar> Lambda(0,0);

@@ -55,8 +55,8 @@ int main(int argc, char** argv)
     std::map<unsigned int, FrameBase*> index_2_frame_ptr_analytic;
 
     // Wolf problem
-    WolfProblem* wolf_problem_autodiff = new WolfProblem();
-    WolfProblem* wolf_problem_analytic = new WolfProblem();
+    WolfProblem* wolf_problem_autodiff = new WolfProblem(PO_2D);
+    WolfProblem* wolf_problem_analytic = new WolfProblem(PO_2D);
     SensorBase* sensor = new SensorBase(ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
     // Ceres wrapper

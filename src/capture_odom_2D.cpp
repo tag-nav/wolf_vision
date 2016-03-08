@@ -35,7 +35,12 @@ inline void CaptureOdom2D::process()
 
 Eigen::VectorXs CaptureOdom2D::computeFramePose(const TimeStamp& _now) const
 {
-    assert(up_node_ptr_ != nullptr && "This Capture is not linked to any frame");
+    //std::cout << "compute frame pose in stamp" << _now.getNanoSeconds() << std::endl;
+
+    assert(getFramePtr() != nullptr && "This Capture is not linked to any frame");
+    assert(getFramePtr()->getPreviousFrame() != nullptr && "There is not previous frame");
+
+    //std::cout << "previous frame: " << getFramePtr()->getPreviousFrame()->nodeId() << std::endl;
 
     Eigen::Vector3s prior = getFramePtr()->getPreviousFrame()->getState();
     //std::cout << "previous pose: " << prior.transpose() << std::endl;

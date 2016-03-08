@@ -21,23 +21,3 @@ NodeBase::~NodeBase()
 	//std::cout << "deleting NodeBase " << nodeId() << std::endl;
 }
 
-unsigned int NodeBase::nodeId() const
-{
-	return node_id_;
-}
-
-std::string NodeBase::nodeLabel() const
-{
-	return label_;
-}
-
-//void NodeBase::print(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//	_ost << label_ << " " << node_id_ << std::endl;
-//}
-
-//void NodeBase::printTabs(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//		for (unsigned int i = 0; i < _ntabs; i++) _ost << "\t";
-//}
-

@@ -47,109 +47,133 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
         virtual ~LandmarkBase();
 
         /** \brief Link with a constraint
-         *
-         * Link with a constraint
-         *
          **/
         void addConstraintTo(ConstraintBase* _ctr_ptr);
 
         /** \brief Remove a constraint to this landmark
-         *
-         * Remove a constraint to this landmark
-         *
          **/
         void removeConstraintTo(ConstraintBase* _ctr_ptr);
 
         /** \brief Gets the number of constraints linked with this landmark
-         *
-         * Gets the number of constraints linked with this landmark
-         *
          **/
         unsigned int getHits() const;
 
         /** \brief Gets the list of constraints linked with this landmark
-         *
-         * Gets the list of constraints linked with this landmark
-         *
          **/
         std::list<ConstraintBase*>* getConstraintToListPtr();
 
         /** \brief Sets the Landmark status
-         *
-         * Sets the Landmark status (see wolf.h)
-         *
          **/
         void setStatus(LandmarkStatus _st);
 
         /** \brief Sets the Landmark status to fixed
-         *
-         * Sets the Landmark status to fixed
-         *
          **/
         void fix();
 
         /** \brief Sets the Landmark status to estimated
-         *
-         * Sets the Landmark status to estimated
-         *
          **/
         void unfix();
 
         /** \brief Gets the position state block pointer
-         *
-         * Gets the position state block pointer
-         *
          **/
         StateBlock* getPPtr() const;
 
         /** \brief Gets the orientation state block pointer
-         *
-         * Gets the orientation state block pointer
-         *
          **/
         StateBlock* getOPtr() const;
 
         /** \brief Sets the position state block pointer
-         *
-         * Sets the position state block pointer
-         *
          **/
         void setPPtr(StateBlock* _st_ptr);
 
         /** \brief Sets the orientation state block pointer
-         *
-         * Sets the orientation state block pointer
-         *
          **/
         void setOPtr(StateBlock* _st_ptr);
 
         /** \brief Sets the descriptor
-         *
-         * Sets the descriptor
-         *
          **/
         void setDescriptor(const Eigen::VectorXs& _descriptor);
 
         /** \brief Gets the descriptor
-         *
-         * Gets the descriptor
-         *
          **/
         const Eigen::VectorXs& getDescriptor() const;        
         
         /** \brief Returns _ii component of descriptor vector
          * 
-         * Returns _ii component of descriptor_ vector
          * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
-         * 
          **/
         WolfScalar getDescriptor(unsigned int _ii) const;
 
         /** \brief Return the type of the landmark
-         *
-         * Return the type of the landmark (see wolf.h)
-         *
          **/
         const LandmarkType getType() const;
 };
+
+inline void LandmarkBase::addConstraintTo(ConstraintBase* _ctr_ptr)
+{
+    constraint_to_list_.push_back(_ctr_ptr);
+}
+
+inline unsigned int LandmarkBase::getHits() const
+{
+    return constraint_to_list_.size();
+}
+
+inline std::list<ConstraintBase*>* LandmarkBase::getConstraintToListPtr()
+{
+    return &constraint_to_list_;
+}
+
+inline void LandmarkBase::fix()
+{
+    //std::cout << "Fixing frame " << nodeId() << std::endl;
+    this->setStatus(LANDMARK_FIXED);
+}
+
+inline void LandmarkBase::unfix()
+{
+    //std::cout << "Unfixing frame " << nodeId() << std::endl;
+    this->setStatus(LANDMARK_ESTIMATED);
+}
+
+inline StateBlock* LandmarkBase::getPPtr() const
+{
+    return p_ptr_;
+}
+
+inline StateBlock* LandmarkBase::getOPtr() const
+{
+    return o_ptr_;
+}
+
+inline void LandmarkBase::setPPtr(StateBlock* _st_ptr)
+{
+    p_ptr_ = _st_ptr;
+}
+
+inline void LandmarkBase::setOPtr(StateBlock* _st_ptr)
+{
+    o_ptr_ = _st_ptr;
+}
+
+inline void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)
+{
+    descriptor_ = _descriptor;
+}
+
+inline WolfScalar LandmarkBase::getDescriptor(unsigned int _ii) const
+{
+    return descriptor_(_ii);
+}
+
+inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
+{
+    return descriptor_;
+}
+
+inline const LandmarkType LandmarkBase::getType() const
+{
+    return type_;
+}
+
 #endif

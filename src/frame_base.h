@@ -18,34 +18,33 @@ class StateBlock;
 class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 {
     protected:
-        FrameType type_;         ///< type of frame. Either REGULAR_FRAME or KEY_FRAME. (types defined at wolf.h)
+        FrameType type_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
         TimeStamp time_stamp_;   ///< frame time stamp
         StateStatus status_;     ///< status of the estimation of the frame state
         StateBlock* p_ptr_;      ///< Position state block pointer
         StateBlock* o_ptr_;      ///< Orientation state block pointer
+        StateBlock* v_ptr_;      ///< Linear velocity state block pointer
         std::list<ConstraintBase*> constraint_to_list_; ///> List of constraints TO this frame
         
     public:
-        /** \brief Constructor with only time stamp
+        /** \brief Constructor of non-key Frame with only time stamp
          *
          * Constructor with only time stamp
          * \param _ts is the time stamp associated to this frame, provided in seconds
          * \param _p_ptr StateBlock pointer to the position (default: nullptr)
-         * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
-         *
+         * \param _o_ptr StateBlock pointer to the orientation (default: nullptr). Pass a StateQuaternion if needed.
          **/
-        FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
+        FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
         
         /** \brief Constructor with type, time stamp and state pointer
          * 
          * Constructor with type, time stamp and state pointer
-         * \param _tp indicates frame type. Generally either REGULAR_FRAME or KEY_FRAME. (types defined at wolf.h)
+         * \param _tp indicates frame type. Generally either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
          * \param _ts is the time stamp associated to this frame, provided in seconds
          * \param _p_ptr StateBlock pointer to the position (default: nullptr)
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
-         * 
          **/        
-        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
+        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
 
         /** \brief Default destructor (not recommended)
          *
@@ -54,105 +53,179 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
          **/
         virtual ~FrameBase();
 
+
+
+        // Frame properties -----------------------------------------------
+
+        // KeyFrame / NonKeyFrame
+        bool isKey() const;
+        void setKey();
+
+        // Fixed / Estimated
+        void fix();
+        void unfix();
+        bool isFixed();
+
+
+
+        // Frame values ------------------------------------------------
+
+        void setTimeStamp(const TimeStamp& _ts);
+        TimeStamp getTimeStamp() const;
+        void getTimeStamp(TimeStamp& _ts) const;
+
+        StateBlock* getPPtr() const;
+        StateBlock* getOPtr() const;
+        StateBlock* getVPtr() const;
+
+        void setState(const Eigen::VectorXs& _st);
+        Eigen::VectorXs getState() const;
+
+
+
+        // Wolf tree access ---------------------------------------------------
+
+        TrajectoryBase* getTrajectoryPtr() const;
+
+        FrameBase* getPreviousFrame() const;
+        FrameBase* getNextFrame() const;
+
+        CaptureBaseList* getCaptureListPtr();
+        void addCapture(CaptureBase* _capt_ptr);
+        void removeCapture(CaptureBaseIter& _capt_iter);
+        CaptureBaseIter hasCaptureOf(const SensorBase* _sensor_ptr);
+
+        void getConstraintList(ConstraintBaseList & _ctr_list);
+
+
+
+
+        // Other constraints pointing to this frame ------------------------------------------
+
+        /** \brief Gets the list of constraints linked with this frame
+         **/
+        std::list<ConstraintBase*>* getConstraintToListPtr();
+
         /** \brief Link with a constraint
-         *
-         * Link with a constraint
-         *
          **/
         void addConstraintTo(ConstraintBase* _ctr_ptr);
 
         /** \brief Remove a constraint to this frame
-         *
-         * Remove a constraint to this frame
-         *
          **/
         void removeConstraintTo(ConstraintBase* _ctr_ptr);
 
         /** \brief Gets the number of constraints linked with this frame
-         *
-         * Gets the number of constraints linked with this frame
-         *
          **/
         unsigned int getHits() const;
 
-        /** \brief Gets the list of constraints linked with this frame
-         *
-         * Gets the list of constraints linked with this frame
-         *
-         **/
-        std::list<ConstraintBase*>* getConstraintToListPtr();
 
-        /** \brief Sets the Frame status
-         *
-         * Sets the Frame status (see wolf.h)
-         *
+
+    private:
+        /** \brief Gets the Frame status (see wolf.h for Frame status)
+         **/
+        StateStatus getStatus() const;
+        /** \brief Sets the Frame status (see wolf.h for Frame status)
          **/
         void setStatus(StateStatus _st);
 
-        /** \brief Sets all the states status to fixed
-         *
-         * Sets all the states status to fixed
-         *
-         **/
-        void fix();
 
-        /** \brief Sets all the states status to estimated
-         *
-         * Sets all the states status to estimated
-         *
-         **/
-        void unfix();
-        
-        /** \brief Checks if this frame is KEY_FRAME 
-         * 
-         * Returns true if type_ is KEY_FRAME. Oterwise returns false.
-         * 
-         **/
-        bool isKey() const;
-
-        /** \brief Sets the Frame type
-         *
-         * Sets the frame type (see wolf.h)
-         *
-         **/
-        
-        void setType(FrameType _ft);
-
-        void setTimeStamp(const TimeStamp& _ts); //ACM: if all constructors require a timestamp, do we need a set? Should we allow to change TS?
-        
-        TimeStamp getTimeStamp() const;
-        
-        void getTimeStamp(TimeStamp & _ts) const;
-
-        StateStatus getStatus() const;
-
-        void setState(const Eigen::VectorXs& _st);
-
-        Eigen::VectorXs getState() const;
-
-        void addCapture(CaptureBase* _capt_ptr);
-
-        void removeCapture(CaptureBaseIter& _capt_ptr);
-        
-        TrajectoryBase* getTrajectoryPtr() const;
-        
-        CaptureBaseList* getCaptureListPtr();
-        
-        void getConstraintList(ConstraintBaseList & _ctr_list);
-
-        FrameBase* getPreviousFrame() const;
-
-        FrameBase* getNextFrame() const;
-
-        StateBlock* getPPtr() const;
-
-        StateBlock* getOPtr() const;
-
-        const Eigen::Matrix4s * getTransformationMatrix() const; //ACM: Who owns this return matrix ?
-
-        CaptureBaseIter hasCaptureOf(const SensorBase* _sensor_ptr);
-
-//        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
-        
 };
+
+// IMPLEMENTATION //
+
+inline bool FrameBase::isKey() const
+{
+    if (type_ == KEY_FRAME)
+        return true;
+    else
+        return false;
+}
+
+inline void FrameBase::fix()
+{
+    this->setStatus(ST_FIXED);
+}
+
+inline void FrameBase::unfix()
+{
+    //std::cout << "Unfixing frame " << nodeId() << std::endl;
+    this->setStatus(ST_ESTIMATED);
+}
+
+inline bool FrameBase::isFixed()
+{
+    return status_ == ST_FIXED;
+}
+
+inline void FrameBase::setTimeStamp(const TimeStamp& _ts)
+{
+    time_stamp_ = _ts;
+}
+
+inline void FrameBase::getTimeStamp(TimeStamp& _ts) const
+{
+    _ts = time_stamp_.get();
+}
+
+inline TimeStamp FrameBase::getTimeStamp() const
+{
+    return time_stamp_.get();
+}
+
+inline StateBlock* FrameBase::getPPtr() const
+{
+    return p_ptr_;
+}
+
+inline StateBlock* FrameBase::getOPtr() const
+{
+    return o_ptr_;
+}
+
+inline StateBlock* FrameBase::getVPtr() const
+{
+    return v_ptr_;
+}
+
+inline TrajectoryBase* FrameBase::getTrajectoryPtr() const
+{
+    return upperNodePtr();
+}
+
+inline CaptureBaseList* FrameBase::getCaptureListPtr()
+{
+    return getDownNodeListPtr();
+}
+
+inline void FrameBase::addCapture(CaptureBase* _capt_ptr)
+{
+    addDownNode(_capt_ptr);
+}
+
+inline void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
+{
+    //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
+    removeDownNode(_capt_iter);
+}
+
+inline std::list<ConstraintBase*>* FrameBase::getConstraintToListPtr()
+{
+    return &constraint_to_list_;
+}
+
+inline void FrameBase::addConstraintTo(ConstraintBase* _ctr_ptr)
+{
+    constraint_to_list_.push_back(_ctr_ptr);
+}
+
+inline unsigned int FrameBase::getHits() const
+{
+    return constraint_to_list_.size();
+}
+
+inline StateStatus FrameBase::getStatus() const
+{
+    return status_;
+}
+
 #endif

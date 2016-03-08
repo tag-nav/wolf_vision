@@ -6,8 +6,7 @@ WolfManagerGPS::WolfManagerGPS(const FrameStructure _frame_structure,
                          const Eigen::MatrixXs& _prior_cov,
                          const unsigned int& _trajectory_size,
                          const WolfScalar& _new_frame_elapsed_time) :
-        problem_(new WolfProblem()),
-        frame_structure_(_frame_structure),
+        problem_(new WolfProblem(_frame_structure)),
         sensor_prior_(_sensor_prior_ptr),
         current_frame_(nullptr),
         last_key_frame_(nullptr),
@@ -50,31 +49,7 @@ void WolfManagerGPS::createFrame(const Eigen::VectorXs& _frame_state, const Time
 
     // ---------------------- CREATE NEW FRAME ---------------------
     // Create frame
-    switch ( frame_structure_)
-    {
-        case PO_2D:
-        {
-            assert( _frame_state.size() == 3 && "Wrong init_frame state vector or covariance matrix size");
-
-            problem_->getTrajectoryPtr()->addFrame(new FrameBase(_time_stamp,
-                                                                 new StateBlock(_frame_state.head(2)),
-                                                                 new StateBlock(_frame_state.tail(1))));
-            break;
-        }
-        case PO_3D:
-        {
-            assert( _frame_state.size() == 7 && "Wrong init_frame state vector or covariance matrix size");
-
-            problem_->getTrajectoryPtr()->addFrame(new FrameBase(_time_stamp,
-                                                                 new StateBlock(_frame_state.head(3)),
-                                                                 new StateBlock(_frame_state.tail(4))));
-            break;
-        }
-        default:
-        {
-            assert( "Unknown frame structure");
-        }
-    }
+    problem_->createFrame(KEY_FRAME, _frame_state, _time_stamp);
     //std::cout << "frame created" << std::endl;
 
     // Store new current frame
@@ -105,16 +80,16 @@ void WolfManagerGPS::createFrame(const Eigen::VectorXs& _frame_state, const Time
 void WolfManagerGPS::createFrame(const TimeStamp& _time_stamp)
 {
     //std::cout << "creating new frame from prior..." << std::endl;
-    switch ( frame_structure_)
+    switch ( problem_->getTrajectoryPtr()->getFrameStructure())
     {
         case PO_2D:
         {
-            createFrame(last_key_frame_ != nullptr ? last_key_frame_->getState() : Eigen::Vector3s::Zero(), _time_stamp);
+            problem_->createFrame(KEY_FRAME, last_key_frame_ != nullptr ? last_key_frame_->getState() : Eigen::Vector3s::Zero(), _time_stamp);
             break;
         }
         case PO_3D:
         {
-            createFrame(last_key_frame_ != nullptr ? last_key_frame_->getState() : Eigen::Vector7s::Zero(), _time_stamp);
+            problem_->createFrame(KEY_FRAME, last_key_frame_ != nullptr ? last_key_frame_->getState() : Eigen::Vector7s::Zero(), _time_stamp);
             break;
         }
         default:

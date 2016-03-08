@@ -12,9 +12,3 @@ ProcessorBase::~ProcessorBase()
 {
     //
 }
-
-SensorBase* ProcessorBase::getSensorPtr()
-{
-    return upperNodePtr();
-}
-

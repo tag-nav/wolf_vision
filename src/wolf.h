@@ -1,15 +1,10 @@
-/*
- * wolf.h
- *
- *  Created on: 28/05/2014
- *      \author: jsola
- */
-
 /**
  * \file wolf.h
  * \brief General typedefs for the Wolf project
  * \author Joan Sola
+ *  Created on: 28/05/2014
  */
+
 #ifndef WOLF_H_
 #define WOLF_H_
 
@@ -90,10 +85,7 @@ typedef AngleAxis<WolfScalar> AngleAxiss;                 ///< Angle-Axis of rea
 
 /** \brief Enumeration of node locations at Wolf Tree
  *
- * Enumeration of node locations at Wolf Tree.
- *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- * 
  */
 typedef enum
 {
@@ -104,56 +96,44 @@ typedef enum
 
 /** \brief Enumeration of all possible frames
  *
- * Enumeration of all possible frames.
- *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- * 
  */
 typedef enum
 {
     KEY_FRAME,    ///< marks a key frame. It will stay in the frames window and play at optimizations.
-    REGULAR_FRAME ///< marks a regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
+    NON_KEY_FRAME ///< marks a regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
 } FrameType;
 
 /** \brief Enumeration of all possible frames
  *
- * Enumeration of all possible frames.
- *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- *
  */
 typedef enum
 {
     PO_2D,  ///< marks a 2D frame containing position (x,y) and orientation angle.
-    PO_3D   ///< marks a 3D frame containing position (x,y,z) and orientation quaternion (x,y,z,w).
+    PO_3D,  ///< marks a 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
+    POV_3D  ///< marks a 3D frame with position, orientation quaternion, and linear velocity (vx, vy, vz)
 } FrameStructure;
 
 /** \brief Enumeration of all possible constraints
  *
- * Enumeration of all possible constraints.
- *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- * 
  */
 typedef enum
 {
-    CTR_GPS_FIX_2D,				///< marks a 2D GPS Fix constraint.
-    CTR_GPS_PR_2D,				///< marks a 2D GPS Pseudorange constraint.
-    CTR_GPS_PR_3D,				///< marks a 3D GPS Pseudorange constraint.
+    CTR_GPS_FIX_2D,             ///< marks a 2D GPS Fix constraint.
+    CTR_GPS_PR_2D,              ///< marks a 2D GPS Pseudorange constraint.
+    CTR_GPS_PR_3D,              ///< marks a 3D GPS Pseudorange constraint.
     CTR_FIX,                    ///< marks a Fix constraint (for priors).
     CTR_ODOM_2D,                ///< marks a 2D Odometry constraint .
-    CTR_CORNER_2D,		        ///< marks a 2D corner constraint .
+    CTR_CORNER_2D,              ///< marks a 2D corner constraint .
     CTR_CONTAINER,              ///< marks a 2D container constraint .
     CTR_IMG_PNT_TO_EP           ///< marks a constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
-
 } ConstraintType;
 
 /** \brief Enumeration of constraint categories
  *
- * Enumeration of constraint categories.
- *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- *
  */
 typedef enum
 {
@@ -161,57 +141,33 @@ typedef enum
     CTR_FRAME,      ///< Constraint established with a frame (odometry).
     CTR_FEATURE,    ///< Constraint established with a feature (correspondence).
     CTR_LANDMARK    ///< Constraint established with a landmark (correpondence).
-
 } ConstraintCategory;
 
 /** \brief Enumeration of constraint status
  *
- * Enumeration of constraint status.
- *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- *
  */
 typedef enum
 {
     CTR_ACTIVE,   ///< Constraint established with absolute reference.
     CTR_INACTIVE  ///< Constraint established with a frame (odometry).
-
 } ConstraintStatus;
 
 /** \brief Enumeration of jacobian computation method
  *
- * Enumeration of jacobian computation method.
- *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- *
  */
 typedef enum
 {
     AUTO,    ///< Auto differentiation (AutoDiffCostFunctionWrapper or ceres::NumericDiffCostFunction).
     NUMERIC, ///< Numeric differentiation (ceres::NumericDiffCostFunction).
     ANALYTIC ///< Analytic jacobians.
-
 } JacobianMethod;
 
-/** \brief Enumeration of all possible state parametrizations
- *
- * Enumeration of all possible state parametrizations.
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- *. TODO: Check othe attributes also (
- */
-typedef enum
-{
-    ST_VECTOR,		  ///< A vector. No local parametrization.
-    ST_QUATERNION		  ///< A 3D orientation represented by a quaternion, with the real part at the last position (Eigen specification).
-} StateType;
 
 /** \brief Enumeration of all possible state status
  *
- * Enumeration of all possible state status.
- *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- *
  */
 typedef enum
 {
@@ -221,10 +177,7 @@ typedef enum
 
 /** \brief Enumeration of all possible sensor types
  *
- * Enumeration of all possible sensor types.
- *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- *
  */
 typedef enum
 {
@@ -241,46 +194,29 @@ typedef enum
 
 /** \brief Enumeration of all possible landmark types
  *
- * Enumeration of all possible landmark types.
- *
  * You may add items to this list as needed. Be concise with names, and document your entries.
- *
  */
 typedef enum
 {
-    LANDMARK_POINT,		  ///< A Euclidean point landmark, either 3D or 2D
-    LANDMARK_CORNER,	  ///< A corner landmark (2D)
-    LANDMARK_CONTAINER	///< A container landmark (2D)
+    LANDMARK_POINT,     ///< A Euclidean point landmark, either 3D or 2D
+    LANDMARK_CORNER,    ///< A corner landmark (2D)
+    LANDMARK_CONTAINER  ///< A container landmark (2D)
 } LandmarkType;
 
 typedef enum
 {
     LANDMARK_CANDIDATE,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
-    LANDMARK_ESTIMATED, ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
-    LANDMARK_FIXED, ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
+    LANDMARK_ESTIMATED,   ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
+    LANDMARK_FIXED,       ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
     LANDMARK_OUT_OF_VIEW, ///< A landmark out of the field of view. Association with it is not allowed, so does not pose constraints for the solver
     LANDMARK_OLD          ///< An old landmark. Association with it not allowed, but old constraints can still be taken into account by the solver.
 } LandmarkStatus;
 
-/** \brief Pending status of a node
- *
- * Enumeration of all possible pending status of a node.
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- *
- */
-/*typedef enum
-{
-    NOT_PENDING,	  ///< A point landmark, either 3D or 2D
-    ADD_PENDING,	  ///< A corner landmark (2D)
-    UPDATE_PENDING	///< A container landmark
-} PendingStatus;*/
 
 /////////////////////////////////////////////////////////////////////////
 //      TYPEDEFS FOR POINTERS AND ITERATORS IN THE WOLF TREE
 /////////////////////////////////////////////////////////////////////////
 // - forwards for pointers
-//class VehicleBase;
 
 class NodeTerminus;
 class WolfProblem;
@@ -295,21 +231,16 @@ class CaptureLaser2D;
 class FeatureBase;
 class FeatureCorner2D;
 class ConstraintBase;
-class RawBase;
-class RawLaser2D;
 class SensorBase;
 class SensorLaser2D;
 class TransSensor;
 class ProcessorBase;
 class StateBlock;
-template<unsigned int SIZE> class StatePoint;
-class PinHole;
 
 
 // TODO: No seria millor que cada classe es defineixi aquests typedefs?
 
 //Problem
-//typedef std::shared_ptr<WolfProblem> WolfProblemShPtr;
 typedef WolfProblem* WolfProblemPtr;
 
 //Map
@@ -323,10 +254,6 @@ typedef LandmarkBaseList::iterator LandmarkBaseIter;
 //Landmark corner 2D
 typedef std::list<LandmarkCorner2D*> LandmarkCorner2DList;
 typedef LandmarkCorner2DList::iterator LandmarkCorner2DIter;
-
-//Trajectory
-// typedef std::list<TrajectoryBaseShPtr> TrajectoryBaseList;
-// typedef TrajectoryBaseList::iterator TrajectoryBaseIter;
 
 // - Frame
 typedef std::list<FrameBase*> FrameBaseList;
@@ -352,8 +279,6 @@ typedef FeatureCorner2DList::iterator FeatureCorner2DIter;
 typedef std::list<ConstraintBase*> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
-// - Raw
-
 // - Sensors
 typedef std::list<SensorBase*> SensorBaseList;
 typedef SensorBaseList::iterator SensorBaseIter;
@@ -366,12 +291,10 @@ typedef TransSensorMap::iterator TransSensorIter;
 typedef std::list<ProcessorBase*> ProcessorBaseList;
 typedef ProcessorBaseList::iterator ProcessorBaseIter;
 
-
 // - State
 typedef std::list<StateBlock*> StateBlockList;
 typedef StateBlockList::iterator StateBaseIter;
 
-// - Pin hole
 
 ///** \brief Enumeration of all possible feature types
 // *

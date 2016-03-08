@@ -34,4 +34,10 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
         virtual void process(CaptureBase* _capture_ptr) = 0;
 
 };
+
+inline SensorBase* ProcessorBase::getSensorPtr()
+{
+    return upperNodePtr();
+}
+
 #endif

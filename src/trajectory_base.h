@@ -16,8 +16,9 @@ class FrameBase;
 class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
 {
     protected:
-		// TODO: JVN: No seria millor que aixo ho tingui el wolf_problem o el wolf_manager?
-        unsigned int fixed_size_; // Limits the number of frames forming the trajectory
+        FrameStructure frame_structure_; // Defines the structure of the Frames in the Trajectory.
+        // TODO: JVN: No seria millor que aixo ho tingui el wolf_problem o el wolf_manager?
+        unsigned int fixed_size_; // Limits the number of Frames forming the Trajectory
         
     public:
         /** \brief Constructor
@@ -25,7 +26,7 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          * Constructor
          *
          **/
-        TrajectoryBase();
+        TrajectoryBase(FrameStructure _frame_sturcture);
 
         /** \brief Default destructor (not recommended)
          *
@@ -46,21 +47,30 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          * Remove a frame to the trajectory
          *
          **/
-        void removeFrame(const FrameBaseIter& _frame_ptr);
+        void removeFrame(const FrameBaseIter& _frame_iter)
+        {
+            removeDownNode(_frame_iter);
+        }
 
         /** \brief Returns a pointer to Frame list
          * 
          * Returns a pointer to Frame list
          * 
          **/
-        FrameBaseList* getFrameListPtr();
+        FrameBaseList* getFrameListPtr()
+        {
+            return getDownNodeListPtr();
+        }
 
         /** \brief Returns a pointer to last Frame
          *
          * Returns a pointer to last Frame
          *
          **/
-        FrameBase* getLastFramePtr();
+        FrameBase* getLastFramePtr()
+        {
+            return getDownNodeListPtr()->back();
+        }
 
 
         /** \brief Returns a list of all constraints in the trajectory thru reference
@@ -70,5 +80,9 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
          **/
         void getConstraintList(ConstraintBaseList & _ctr_list);
         
+        FrameStructure getFrameStructure() const
+        {
+            return frame_structure_;
+        }
 };
 #endif

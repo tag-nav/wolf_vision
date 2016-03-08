@@ -86,4 +86,45 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
         Eigen::MatrixXs getNoiseCov();
 
 };
+
+inline void SensorBase::addProcessor(ProcessorBase* _proc_ptr)
+{
+    addDownNode(_proc_ptr);
+}
+
+inline ProcessorBaseList* SensorBase::getProcessorListPtr()
+{
+    return getDownNodeListPtr();
+}
+
+inline StateBlock* SensorBase::getPPtr() const
+{
+    return p_ptr_;
+}
+
+inline StateBlock* SensorBase::getOPtr() const
+{
+    return o_ptr_;
+}
+
+inline StateBlock* SensorBase::getIntrinsicPtr() const
+{
+    return intrinsic_ptr_;
+}
+
+inline bool SensorBase::isExtrinsicDynamic()
+{
+    return extrinsic_dynamic_;
+}
+
+inline Eigen::VectorXs SensorBase::getNoiseStd()
+{
+    return noise_std_;
+}
+
+inline Eigen::MatrixXs SensorBase::getNoiseCov()
+{
+    return noise_cov_;
+}
+
 #endif

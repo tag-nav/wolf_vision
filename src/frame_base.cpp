@@ -5,24 +5,26 @@
 #include "capture_base.h"
 #include "state_block.h"
 
-FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr) :
+FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeLinked(MID, "FRAME"),
-            type_(REGULAR_FRAME),
+            type_(NON_KEY_FRAME),
             time_stamp_(_ts),
 			status_(ST_ESTIMATED),
 			p_ptr_(_p_ptr),
-			o_ptr_(_o_ptr)
+            o_ptr_(_o_ptr),
+            v_ptr_(_v_ptr)
 {
     //
 }
 
-FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr) :
+FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeLinked(MID, "FRAME"),
             type_(_tp),
             time_stamp_(_ts),
 			status_(ST_ESTIMATED),
 			p_ptr_(_p_ptr),
-			o_ptr_(_o_ptr)
+            o_ptr_(_o_ptr),
+            v_ptr_(_v_ptr)
 {
     //
 }
@@ -35,14 +37,22 @@ FrameBase::~FrameBase()
 	// Remove Frame State Blocks
 	if (p_ptr_ != nullptr)
 	{
-	    getTop()->removeStateBlockPtr(p_ptr_);
+        if (getTop() != nullptr)
+            getTop()->removeStateBlockPtr(p_ptr_);
 	    delete p_ptr_;
 	}
-	if (o_ptr_ != nullptr)
-	{
-	    getTop()->removeStateBlockPtr(o_ptr_);
+    if (o_ptr_ != nullptr)
+    {
+        if (getTop() != nullptr)
+            getTop()->removeStateBlockPtr(o_ptr_);
         delete o_ptr_;
-	}
+    }
+    if (v_ptr_ != nullptr)
+    {
+        if (getTop() != nullptr)
+            getTop()->removeStateBlockPtr(v_ptr_);
+        delete v_ptr_;
+    }
     //std::cout << "states deleted" << std::endl;
 
 
@@ -55,11 +65,6 @@ FrameBase::~FrameBase()
     //std::cout << "constraints deleted" << std::endl;
 }
 
-void FrameBase::addConstraintTo(ConstraintBase* _ctr_ptr)
-{
-    constraint_to_list_.push_back(_ctr_ptr);
-}
-
 void FrameBase::removeConstraintTo(ConstraintBase* _ctr_ptr)
 {
     constraint_to_list_.remove(_ctr_ptr);
@@ -68,133 +73,80 @@ void FrameBase::removeConstraintTo(ConstraintBase* _ctr_ptr)
         this->destruct();
 }
 
-unsigned int FrameBase::getHits() const
+void FrameBase::setKey()
 {
-    return constraint_to_list_.size();
-}
-
-std::list<ConstraintBase*>* FrameBase::getConstraintToListPtr()
-{
-    return &constraint_to_list_;
-}
-
-void FrameBase::setStatus(StateStatus _st)
-{
-    status_ = _st;
-
-    // State Blocks
-    if (status_ == ST_FIXED)
+    type_ = KEY_FRAME;
+    if (getTop() != nullptr)
     {
-        if (p_ptr_!=nullptr)
-        {
-            p_ptr_->fix();
-            getTop()->updateStateBlockPtr(p_ptr_);
-        }
-        if (o_ptr_!=nullptr)
-        {
-            o_ptr_->fix();
-            getTop()->updateStateBlockPtr(o_ptr_);
-        }
+        if (p_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(p_ptr_);
+
+        if (o_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(o_ptr_);
+
+        if (v_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(v_ptr_);
     }
-    else if(status_ == ST_ESTIMATED)
-    {
-        if (p_ptr_!=nullptr)
-        {
-            p_ptr_->unfix();
-            getTop()->updateStateBlockPtr(p_ptr_);
-        }
-        if (o_ptr_!=nullptr)
-        {
-            o_ptr_->unfix();
-            getTop()->updateStateBlockPtr(o_ptr_);
-        }
-    }
-}
-
-void FrameBase::fix()
-{
-    //std::cout << "Fixing frame " << nodeId() << std::endl;
-    this->setStatus(ST_FIXED);
-}
-
-void FrameBase::unfix()
-{
-    //std::cout << "Unfixing frame " << nodeId() << std::endl;
-    this->setStatus(ST_ESTIMATED);
-}
-
-bool FrameBase::isKey() const
-{
-    if ( type_ == KEY_FRAME ) return true;
-    else return false; 
-}
-
-void FrameBase::setType(FrameType _ft)
-{
-    type_ = _ft;
-}
-
-void FrameBase::setTimeStamp(const TimeStamp & _ts)
-{
-    time_stamp_ = _ts;
-}
-
-TimeStamp FrameBase::getTimeStamp() const
-{
-    return time_stamp_.get();
-}
-        
-void FrameBase::getTimeStamp(TimeStamp & _ts) const
-{
-    _ts = time_stamp_.get();
-}
-
-StateStatus FrameBase::getStatus() const
-{
-    return status_;
 }
 
 void FrameBase::setState(const Eigen::VectorXs& _st)
 {
 
-	assert(_st.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize())  +
-                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize())) &&
+    assert(_st.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize())  +
+                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
+                          (v_ptr_==nullptr ? 0 : v_ptr_->getSize())) &&
                           "In FrameBase::setState wrong state size");
 
-	if (p_ptr_!=nullptr)
+    unsigned int index = 0;
+    if (p_ptr_!=nullptr)
+    {
         p_ptr_->setVector(_st.head(p_ptr_->getSize()));
+        index += p_ptr_->getSize();
+    }
     if (o_ptr_!=nullptr)
-        o_ptr_->setVector(_st.segment((p_ptr_==nullptr ? 0 : p_ptr_->getSize()),
-                                       o_ptr_->getSize()));
+    {
+        o_ptr_->setVector(_st.segment(index, o_ptr_->getSize()));
+        index += p_ptr_->getSize();
+    }
+    if (v_ptr_!=nullptr)
+    {
+        v_ptr_->setVector(_st.segment(index, v_ptr_->getSize()));
+        //   index += v_ptr_->getSize();
+    }
 }
 
 Eigen::VectorXs FrameBase::getState() const
 {
     Eigen::VectorXs state((p_ptr_==nullptr ? 0 : p_ptr_->getSize()) +
-                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize()));
-    state << p_ptr_->getVector(), o_ptr_->getVector();
+                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
+                          (v_ptr_==nullptr ? 0 : v_ptr_->getSize()));
+
+    unsigned int index = 0;
+    if (p_ptr_!=nullptr)
+    {
+        state.head(p_ptr_->getSize());
+        index += p_ptr_->getSize();
+    }
+    if (o_ptr_!=nullptr)
+    {
+        state.segment(index, o_ptr_->getSize());
+        index += p_ptr_->getSize();
+    }
+    if (v_ptr_!=nullptr)
+    {
+        state.segment(index, v_ptr_->getSize());
+        //   index += v_ptr_->getSize();
+    }
+
     return state;
 }
 
-void FrameBase::addCapture(CaptureBase* _capt_ptr)
+CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
 {
-    addDownNode(_capt_ptr);
-}
-
-void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
-{
-	//std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
-	removeDownNode(_capt_iter);
-}
-
-TrajectoryBase* FrameBase::getTrajectoryPtr() const
-{
-    return upperNodePtr();
-}
-
-CaptureBaseList* FrameBase::getCaptureListPtr()
-{
-    return getDownNodeListPtr();
+    for (auto capture_it = getCaptureListPtr()->begin(); capture_it != getCaptureListPtr()->end(); capture_it++)
+        if ((*capture_it)->getSensorPtr() == _sensor_ptr)
+            return capture_it;
+    return getCaptureListPtr()->end();
 }
 
 void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)
@@ -205,7 +157,11 @@ void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 FrameBase* FrameBase::getPreviousFrame() const
 {
-    //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
+    std::cout << "finding previous frame of " << this->node_id_ << std::endl;
+    if (getTrajectoryPtr() == nullptr)
+        std::cout << "This Frame is not linked to any trajectory" << std::endl;
+
+    assert(getTrajectoryPtr() != nullptr && "This Frame is not linked to any trajectory");
 
     //look for the position of this node in the upper list (frame list of trajectory)
     for (auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin(); f_it != getTrajectoryPtr()->getFrameListPtr()->rend(); f_it++ )
@@ -213,7 +169,16 @@ FrameBase* FrameBase::getPreviousFrame() const
         if ( this->node_id_ == (*f_it)->nodeId() )
         {
         	f_it++;
-			return *f_it;
+        	if (f_it != getTrajectoryPtr()->getFrameListPtr()->rend())
+            {
+                std::cout << "previous frame found!" << std::endl;
+                return *f_it;
+            }
+        	else
+        	{
+        	    std::cout << "previous frame not found!" << std::endl;
+        	    return nullptr;
+        	}
         }
     }
     std::cout << "previous frame not found!" << std::endl;
@@ -240,40 +205,51 @@ FrameBase* FrameBase::getNextFrame() const
     return nullptr;
 }
 
-StateBlock* FrameBase::getPPtr() const
+void FrameBase::setStatus(StateStatus _st)
 {
-	return p_ptr_;
+    // TODO: Separate the three fixes and unfixes to the wolfproblem lists
+    status_ = _st;
+    // State Blocks
+    if (status_ == ST_FIXED)
+    {
+        if (p_ptr_ != nullptr)
+        {
+            p_ptr_->fix();
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(p_ptr_);
+        }
+        if (o_ptr_ != nullptr)
+        {
+            o_ptr_->fix();
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(o_ptr_);
+        }
+        if (v_ptr_ != nullptr)
+        {
+            v_ptr_->fix();
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(v_ptr_);
+        }
+    }
+    else if (status_ == ST_ESTIMATED)
+    {
+        if (p_ptr_ != nullptr)
+        {
+            p_ptr_->unfix();
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(p_ptr_);
+        }
+        if (o_ptr_ != nullptr)
+        {
+            o_ptr_->unfix();
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(o_ptr_);
+        }
+        if (v_ptr_ != nullptr)
+        {
+            v_ptr_->unfix();
+            if (getTop() != nullptr)
+                getTop()->updateStateBlockPtr(v_ptr_);
+        }
+    }
 }
-
-StateBlock* FrameBase::getOPtr() const
-{
-	return o_ptr_;
-}
-
-CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
-{
-    for (auto capture_it = getCaptureListPtr()->begin(); capture_it != getCaptureListPtr()->end(); capture_it++)
-        if ((*capture_it)->getSensorPtr() == _sensor_ptr)
-            return capture_it;
-
-    return getCaptureListPtr()->end();
-}
-
-//void FrameBase::printSelf(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//    NodeLinked::printSelf(_ntabs, _ost);
-//    if (p_ptr_)
-//    {
-//    	printTabs(_ntabs);
-//    	_ost << "\tPosition : \n";
-//    	printTabs(_ntabs);
-//    	p_ptr_->print(_ntabs,_ost);
-//    }
-//    if (o_ptr_)
-//    {
-//    	printTabs(_ntabs);
-//		_ost << "\tOrientation : \n";
-//    	printTabs(_ntabs);
-//		o_ptr_->print(_ntabs,_ost);
-//    }
-//}

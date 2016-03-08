@@ -38,7 +38,6 @@ class WolfManager
     protected:
         //sets the problem 
         WolfProblem* problem_;
-        FrameStructure frame_structure_;
 
         //pointer to a sensor providing predictions
         SensorBase* sensor_prior_;

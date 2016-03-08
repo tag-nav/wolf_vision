@@ -27,15 +27,15 @@
  * but cannot alter the size of the Wolf Problem by adding new elements (Frames and/or Landmarks)
  *
  * The pipeline of actions for an autonomous tracker can be resumed as follows:
- *   - Init the tracker with an \b origin Capture: init(CaptureBase* origin_ptr);
+ *   - Init the tracker with an \b origin Capture: init();
  *   - On each incoming Capture,
- *     - Track known features in the \b incoming Capture: trackKnownFeatures(CaptureBase* incoming_ptr);
+ *     - Track known features in the \b incoming Capture: processKnownFeatures();
  *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
  *     - if voteForKeyFrame()
- *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
  *       - Look for new Features and make Landmarks with them:
- *       - if detectNewFeatures(last)
- *         - initNewLandmarks(last)
+ *       - if detectNewFeatures()
+ *         - initNewLandmarks()
+ *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
  *     - else
  *       - Advance the tracker one Capture ahead: advance()
@@ -70,15 +70,18 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual unsigned int processKnownFeatures(CaptureBase* _incoming_ptr) = 0;
 
-        /** Detect new Features
+        /** \brief Detect new Features
          *
          * This is intended to create Features that are not among the Features already known in the Map.
+         * \param _capture_ptr Capture for feature detection
+         *
+         * This function sets new_features_list_, the list of newly detected features, to be used for landmark initialization.
          *
          * \return The number of detected Features.
          */
         virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr) = 0;
 
-        /**\brief Vote for KeyFrame generation
+        /** \brief Vote for KeyFrame generation
          *
          * If a KeyFrame criterion is validated, this function returns true,
          * meaning that it wants to create a KeyFrame at the \b last Capture.
@@ -86,10 +89,6 @@ class ProcessorTracker : public ProcessorBase
          * WARNING! This function only votes! It does not create KeyFrames!
          */
         virtual bool voteForKeyFrame() = 0;
-
-        /**\brief Make a KeyFrame using the last Capture.
-         */
-        virtual void makeKeyFrame();
 
         /** \brief Reset the tracker to a new \b origin and \b last Captures
          */
@@ -120,13 +119,33 @@ class ProcessorTracker : public ProcessorBase
         void setLastPtr(CaptureBase* const _last_ptr);
         void setIncomingPtr(CaptureBase* const _incoming_ptr);
 
+        void clearNewFeaturesList();
+        void clearNewLandmarksList();
+        const FeatureBaseList& getNewFeaturesList() const;
+        const LandmarkBaseList& getNewLandmarksList() const;
+
     protected:
+        /**\brief Make a KeyFrame using the privided Capture.
+         */
+        virtual void makeKeyFrame(CaptureBase* _capture_ptr);
+
+        /** \brief Make landmarks from new Features
+         */
+        virtual void createLandmarks();
+
+        /** \brief Initialize one landmark
+         *
+         * Implement in derived classes to build the type of landmark you need for this tracker.
+         */
+        virtual LandmarkBase* makeOneLandmark(FeatureBase* _feature_ptr) = 0;
 
     private:
         bool autonomous_;    ///< Sets whether the tracker is autonomous to make decisions that affect the WolfProblem, like creating new KeyFrames and/or Landmarks.
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
+        FeatureBaseList new_features_list_; ///< List of new features for landmark initialization and tracker reset.
+        LandmarkBaseList new_landmarks_list_; ///< List of new landmarks
 };
 
 // IMPLEMENTATION //
@@ -190,6 +209,26 @@ inline void ProcessorTracker::setLastPtr(CaptureBase* const _last_ptr)
 inline void ProcessorTracker::setIncomingPtr(CaptureBase* const _incoming_ptr)
 {
     incoming_ptr_ = _incoming_ptr;
+}
+
+inline void ProcessorTracker::clearNewLandmarksList()
+{
+    new_landmarks_list_.clear();
+}
+
+inline const FeatureBaseList& ProcessorTracker::getNewFeaturesList() const
+{
+    return new_features_list_;
+}
+
+inline void ProcessorTracker::clearNewFeaturesList()
+{
+    new_features_list_.clear();
+}
+
+inline const LandmarkBaseList& ProcessorTracker::getNewLandmarksList() const
+{
+    return new_landmarks_list_;
 }
 
 #endif /* PROCESSOR_TRACKER_H_ */

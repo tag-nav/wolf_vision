@@ -127,6 +127,8 @@ SET(HDRS
     sensor_gps.h
     sensor_gps_fix.h
     state_block.h
+    state_homogeneous_3d.h
+    state_quaternion.h
     time_stamp.h
     trajectory_base.h
     wolf_problem.h
@@ -177,6 +179,8 @@ SET(SRCS
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
     state_block.cpp
+    state_homogeneous_3d.cpp
+    state_quaternion.cpp
     time_stamp.cpp
     trajectory_base.cpp
     wolf_problem.cpp
