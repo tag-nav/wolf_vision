@@ -1,6 +1,7 @@
 #include "wolf_problem.h"
 #include "constraint_base.h"
 #include "state_block.h"
+#include "state_quaternion.h"
 #include "hardware_base.h"
 #include "trajectory_base.h"
 #include "map_base.h"
@@ -54,7 +55,7 @@ void WolfProblem::createFrame(FrameType _frame_type, const TimeStamp& _time_stam
                 trajectory_ptr_->addFrame(new FrameBase(_frame_type,
                                                         _time_stamp,
                                                         new StateBlock(3),
-                                                        new StateBlock(4)));
+                                                        new StateQuaternion));
                 break;
             }
         case POV_3D:
@@ -62,7 +63,7 @@ void WolfProblem::createFrame(FrameType _frame_type, const TimeStamp& _time_stam
                 trajectory_ptr_->addFrame(new FrameBase(_frame_type,
                                                         _time_stamp,
                                                         new StateBlock(3),
-                                                        new StateBlock(4),
+                                                        new StateQuaternion,
                                                         new StateBlock(3)));
                 break;
             }
@@ -83,7 +84,7 @@ void WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _fra
     {
         case PO_2D:
             {
-                assert( _frame_state.size() == 3 && "Wrong init_frame state vector or covariance matrix size");
+                assert( _frame_state.size() == 3 && "Wrong state vector size");
 
                 trajectory_ptr_->addFrame(new FrameBase(_frame_type,
                                                         _time_stamp,
@@ -93,22 +94,22 @@ void WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _fra
             }
         case PO_3D:
             {
-                assert( _frame_state.size() == 7 && "Wrong init_frame state vector or covariance matrix size");
+                assert( _frame_state.size() == 7 && "Wrong state vector size");
 
                 trajectory_ptr_->addFrame(new FrameBase(_frame_type,
                                                         _time_stamp,
                                                         new StateBlock(_frame_state.head(3)),
-                                                        new StateBlock(_frame_state.tail(4))));
+                                                        new StateQuaternion(_frame_state.tail(4))));
                 break;
             }
         case POV_3D:
             {
-                assert( _frame_state.size() == 10 && "Wrong init_frame state vector or covariance matrix size");
+                assert( _frame_state.size() == 10 && "Wrong state vector size");
 
                 trajectory_ptr_->addFrame(new FrameBase(_frame_type,
                                                         _time_stamp,
                                                         new StateBlock(_frame_state.head(3)),
-                                                        new StateBlock(_frame_state.segment<3>(4)),
+                                                        new StateQuaternion(_frame_state.segment<3>(4)),
                                                         new StateBlock(_frame_state.tail(3))));
                 break;
             }

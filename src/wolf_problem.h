@@ -67,10 +67,14 @@ class WolfProblem: public NodeBase
         virtual void destruct() final;
 
         /** \brief Create Frame of the correct size
+         *
+         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
         void createFrame(FrameType _frameType, const TimeStamp& _time_stamp);
 
         /** \brief Create Frame from vector
+         *
+         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
         void createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp);
 
@@ -176,8 +180,7 @@ class WolfProblem: public NodeBase
 
         /** \brief Remove Down Node
          *
-         * This empty function is needed by destruct() node_linked function.
-         *
+         * This empty function is needed by the destruct() node_linked function.
          */
         void removeDownNode(const LowerNodePtr _ptr);
 
