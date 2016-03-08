@@ -11,7 +11,7 @@
 #include "rtslam/sensorAbstract.hpp"
 */
 
-using namespace Eigen
+using namespace Eigen;
 using namespace std;
 
 ///////////////////////////////////////////
