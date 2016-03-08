@@ -102,7 +102,7 @@ veci2 ActiveSearchGrid::cellOrigin(const veci2 & cell) {
 /*
          * Get cell center (can be decimal if size of cell is an odd number of pixels)
          */
-vec2 ActiveSearchGrid::cellCenter(const veci2 & cell) {
+vec2 ActiveSearchGrid::cellCenter(const Eigen::Vector2i & cell) {
     return cellOrigin(cell) + cellSize / 2;
 }
 

@@ -194,7 +194,7 @@ class ActiveSearchGrid {
         /**
                  * Get cell center (can be decimal if size of cell is an odd number of pixels)
                  */
-        vec2 cellCenter(const veci2 & cell);
+        vec2 cellCenter(const Eigen::Vector2i & cell);
 
         /**
                  * Get one random empty cell
