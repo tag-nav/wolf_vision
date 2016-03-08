@@ -15,11 +15,6 @@ class NodeTerminus;
 class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 {
     public:
-        /** \brief Constructor
-         *
-         * Constructor
-         *
-         **/
         ProcessorBase();
 
         /** \brief Default destructor (not recommended)

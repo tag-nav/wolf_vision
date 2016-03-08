@@ -31,9 +31,6 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
         StateBlock* sensor_o_ptr_; //TODO: initialize this at construction time; delete it at destruction time
 
     public:
-        /**
-         * Constructor
-         */
         CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr);
 
         /** \brief Default destructor (not recommended)
@@ -44,68 +41,33 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
         virtual ~CaptureBase();
 
         /** \brief Adds a Feature to the down node list
-         *
-         * Adds a Feature to the down node list
-         *
          **/
-        // TODO: Why the linker throws an error when this function is inline...
-        void addFeature(FeatureBase* _ft_ptr)
-        {
-            //std::cout << "Adding feature" << std::endl;
-            addDownNode(_ft_ptr);
-        }
+        void addFeature(FeatureBase* _ft_ptr);
 
-        /** \brief Gets up_node_ptr_
-         *
-         * Gets up_node_ptr_, which is a pointer to the Frame owning of this Capture
-         *
+        /** \brief Gets Frame pointer
          **/
-        FrameBase* getFramePtr() const
-        {
-            return upperNodePtr();
-        }
+        FrameBase* getFramePtr() const;
 
         /** \brief Gets a pointer to feature list
-         *
-         * Gets a pointer to feature list
-         *
          **/
-        FeatureBaseList* getFeatureListPtr()
-        {
-            return getDownNodeListPtr();
-        }
+        FeatureBaseList* getFeatureListPtr();
 
         /** \brief Fills the provided list with all constraints related to this capture
-         *
-         * Fills the provided list with all constraints related to this capture
-         *
          **/
         //TODO: Check if it could be removed. THen remove it also at every wolf tree level.
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
-        TimeStamp getTimeStamp() const
-        {
-            return time_stamp_;
-        }
+        TimeStamp getTimeStamp() const;
 
-        SensorBase* getSensorPtr() const
-        {
-            return sensor_ptr_;
-        }
+        SensorBase* getSensorPtr() const;
 
         StateBlock* getSensorPPtr() const;
 
         StateBlock* getSensorOPtr() const;
 
-        void setTimeStamp(const TimeStamp& _ts)
-        {
-            time_stamp_ = _ts;
-        }
+        void setTimeStamp(const TimeStamp& _ts);
 
-        void setTimeStampToNow()
-        {
-            time_stamp_.setToNow();
-        }
+        void setTimeStampToNow();
 
         /** \brief Call all the processors for this Capture
          */
@@ -120,4 +82,41 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 		
 //        virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 };
+
+inline void CaptureBase::addFeature(FeatureBase* _ft_ptr)
+{
+    //std::cout << "Adding feature" << std::endl;
+    addDownNode(_ft_ptr);
+}
+
+inline FrameBase* CaptureBase::getFramePtr() const
+{
+    return upperNodePtr();
+}
+
+inline FeatureBaseList* CaptureBase::getFeatureListPtr()
+{
+    return getDownNodeListPtr();
+}
+
+inline TimeStamp CaptureBase::getTimeStamp() const
+{
+    return time_stamp_;
+}
+
+inline SensorBase* CaptureBase::getSensorPtr() const
+{
+    return sensor_ptr_;
+}
+
+inline void CaptureBase::setTimeStamp(const TimeStamp& _ts)
+{
+    time_stamp_ = _ts;
+}
+
+inline void CaptureBase::setTimeStampToNow()
+{
+    time_stamp_.setToNow();
+}
+
 #endif

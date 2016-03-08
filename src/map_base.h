@@ -35,5 +35,12 @@ class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
 
         LandmarkBaseList* getLandmarkListPtr();
         
+
 };
+
+inline LandmarkBaseList* MapBase::getLandmarkListPtr()
+{
+    return getDownNodeListPtr();
+}
+
 #endif
