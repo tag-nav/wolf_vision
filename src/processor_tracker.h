@@ -119,9 +119,9 @@ class ProcessorTracker : public ProcessorBase
         void setLastPtr(CaptureBase* const _last_ptr);
         void setIncomingPtr(CaptureBase* const _incoming_ptr);
 
-        void clearFeaturesList();
-        void clearLandmarksList();
-        const FeatureBaseList& clearFeaturesList() const;
+        void clearNewFeaturesList();
+        void clearNewLandmarksList();
+        const FeatureBaseList& getNewFeaturesList() const;
         const LandmarkBaseList& getNewLandmarksList() const;
 
     protected:
@@ -211,17 +211,17 @@ inline void ProcessorTracker::setIncomingPtr(CaptureBase* const _incoming_ptr)
     incoming_ptr_ = _incoming_ptr;
 }
 
-inline void ProcessorTracker::clearLandmarksList()
+inline void ProcessorTracker::clearNewLandmarksList()
 {
     new_landmarks_list_.clear();
 }
 
-inline const FeatureBaseList& ProcessorTracker::clearFeaturesList() const
+inline const FeatureBaseList& ProcessorTracker::getNewFeaturesList() const
 {
     return new_features_list_;
 }
 
-inline void ProcessorTracker::clearFeaturesList()
+inline void ProcessorTracker::clearNewFeaturesList()
 {
     new_features_list_.clear();
 }

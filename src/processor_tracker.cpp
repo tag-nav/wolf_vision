@@ -50,13 +50,13 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             // append the landmarks to the Map
             for (auto lmk_ptr : new_landmarks_list_)
                 getTop()->getMapPtr()->addLandmark(lmk_ptr);
-            clearLandmarksList();
+            clearNewLandmarksList();
         }
 
         // Add all new Features to the Capture
         for (FeatureBase* feat_ptr : new_features_list_)
             last_ptr_->addFeature(feat_ptr);
-        clearFeaturesList();
+        clearNewFeaturesList();
 
         // Make a KeyFrame from last and reset the tracker
         this->makeKeyFrame(last_ptr_);
@@ -68,7 +68,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 
 void ProcessorTracker::createLandmarks()
 {
-    clearLandmarksList();
+    clearNewLandmarksList();
     for (FeatureBase* feature_ptr : new_features_list_)
     {
         new_landmarks_list_.push_back(makeOneLandmark(feature_ptr));
