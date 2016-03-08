@@ -108,7 +108,7 @@ void WolfManager::createFrame(const TimeStamp& _time_stamp)
 void WolfManager::addSensor(SensorBase* _sensor_ptr)
 {
     //std::cout << "adding sensor... to hardware " << problem_->getHardwarePtr()->nodeId() << std::endl;
-    problem_->getHardwarePtr()->addSensor(_sensor_ptr);
+    problem_->addSensor(_sensor_ptr);
     //std::cout << "added!" << std::endl;
 }
 
