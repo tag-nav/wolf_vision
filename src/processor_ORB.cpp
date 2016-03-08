@@ -15,7 +15,6 @@ ProcessorORB::~ProcessorORB()
 
 void ProcessorORB::extractFeatures(CaptureBase *_capture_ptr)
 {
-
     //uses a capture
     //call to image extractor, extract features in the image
 }
