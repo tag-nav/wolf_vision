@@ -26,16 +26,6 @@ ProcessorTracker::~ProcessorTracker()
         delete incoming_ptr_;
 }
 
-void ProcessorTracker::makeKeyFrame(CaptureBase* _capture_ptr)
-{
-    assert (autonomous_ && "Requested makeKeyFrame() to a non-autonomous processor.");
-
-    // Create a new non-key Frame in the Trajectory with the incoming Capture
-    getTop()->createFrame(NON_KEY_FRAME, _capture_ptr->getTimeStamp());
-    // Make the last Frame a KeyFrame so that it gets into the solver
-    _capture_ptr->getFramePtr()->setKey();
-}
-
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
     assert ( autonomous_ && "Requested process() to a non-autonomous processor.");
@@ -83,3 +73,14 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         advance();
     }
 }
+
+void ProcessorTracker::makeKeyFrame(CaptureBase* _capture_ptr)
+{
+    assert (autonomous_ && "Requested makeKeyFrame() to a non-autonomous processor.");
+
+    // Create a new non-key Frame in the Trajectory with the incoming Capture
+    getTop()->createFrame(NON_KEY_FRAME, _capture_ptr->getTimeStamp());
+    // Make the last Frame a KeyFrame so that it gets into the solver
+    _capture_ptr->getFramePtr()->setKey();
+}
+

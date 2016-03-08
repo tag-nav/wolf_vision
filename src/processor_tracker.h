@@ -68,6 +68,13 @@ class ProcessorTracker : public ProcessorBase
         ProcessorTracker(bool _autonomous = true, bool _uses_landmarks = true);
         virtual ~ProcessorTracker();
 
+        /** \brief Full processing of an incoming Capture.
+         *
+         * Usually you do not need to overload this method in derived classes.
+         * Overload it only if you want to alter this algorithm.
+         */
+        virtual void process(CaptureBase* const _incoming_ptr);
+
         bool isAutonomous() const;
 
         /** \brief Initialize tracker.
@@ -126,13 +133,6 @@ class ProcessorTracker : public ProcessorBase
          * we need to get ready to accept a new incoming Capture.
          */
         void advance();
-
-        /** \brief Full processing of an incoming Capture.
-         *
-         * Usually you do not need to overload this method in derived classes.
-         * Overload it only if you want to alter this algorithm.
-         */
-        virtual void process(CaptureBase* const _incoming_ptr);
 
         // getters and setters
         CaptureBase* getOriginPtr() const;
