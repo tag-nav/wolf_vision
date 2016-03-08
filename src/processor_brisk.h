@@ -22,7 +22,7 @@ protected:
      *
      * Implement in derived classes to build the type of landmark you need for this tracker.
      */
-    virtual LandmarkBase* createOneLandmark(FeatureBase* _feature_ptr);
+    virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr);
 
     /** \brief Create a new constraint
      *

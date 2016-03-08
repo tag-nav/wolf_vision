@@ -20,11 +20,21 @@
  *   establishing correspondences between the features here and the features in \b origin. Each successful correspondence
  *   results in an extension of the track of the Feature up to the \b incoming Capture.
  *
- * A tracker can be declared autonomous. In such case, it is allowed to create new KeyFrames and new Landmarks
- * as the result of the data processing.
+ * A tracker can be declared autonomous or non-autonomous.
+ *   - An autonomous Tracker is allowed to create new KeyFrames and new Landmarks
+ *     as the result of the data processing. A single call to process() accomplishes
+ *     all the work needed.
+ *   - A non-autonomous Tracker, on the contrary, limits itself to detect and match Features,
+ *     but cannot alter the size of the Wolf Problem by adding new elements (Frames and/or Landmarks).
+ *     Calling process() is an error, and an outside manager is required to control the tracker
+ *     algorithm (by implementing an algorithm similar to process() outside the Tracker).
  *
- * A non-autonomous Tracker, on the contrary, limits itself to detect and match Features,
- * but cannot alter the size of the Wolf Problem by adding new elements (Frames and/or Landmarks)
+ * A tracker can be designed to track either Features or Landmarks.
+ *   - If tracking Features, it establishes constraints against other Features;
+ *     it does not use Landmarks, nor it creates Landmarks.
+ *   - If tracking Landmarks, it establishes constraints Feature-Landmark;
+ *     it uses Landmarks for tracking, in an active-search approach,
+ *     and it creates Landmarks with each new Feature detected.
  *
  * The pipeline of actions for an autonomous tracker can be resumed as follows:
  *   - Init the tracker with an \b origin Capture: init();
@@ -33,14 +43,23 @@
  *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
  *     - if voteForKeyFrame()
  *       - Look for new Features and make Landmarks with them:
- *       - if detectNewFeatures()
- *         - initNewLandmarks()
+ *       - detectNewFeatures()
+ *       - if we use landmarks, do for each detected Feature:
+ *         - create landmarks: createOneLandmark()
+ *         - create constraints Feature-Landmark: createConstraint()
  *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
  *     - else
  *       - Advance the tracker one Capture ahead: advance()
  *
  * This functionality exists by default in the virtual method process(). You can overload it at your convenience.
+ *
+ * This is an abstract class. The following pure virtual methods have to be implemented in derived classes:
+ *  - processKnownFeatures()
+ *  - voteForKeyFrame()
+ *  - detectNewFeatures()
+ *  - createLandmark()
+ *  - createConstraint()
  */
 class ProcessorTracker : public ProcessorBase
 {
@@ -57,13 +76,15 @@ class ProcessorTracker : public ProcessorBase
 
         /** \brief Tracker function
          *
-         * This is the tracker function to be implemented in derived classes. It operates on the incoming capture.
+         * This is the tracker function to be implemented in derived classes.
+         * It operates on the incoming capture.
          *
          * This should do one of the following, depending on the design of the tracker:
          *   - Track Features against other Features in another Capture.
          *   - Track Features against Landmarks in the Map.
          *
-         * It should also generate the necessary Features in the incoming Capture, of a type derived from FeatureBase,
+         * It should also generate the necessary Features in the incoming Capture,
+         * of a type derived from FeatureBase,
          * and the constraints, of a type derived from ConstraintBase.
          *
          * \return The number of successful tracks.
@@ -75,7 +96,8 @@ class ProcessorTracker : public ProcessorBase
          * This is intended to create Features that are not among the Features already known in the Map.
          * \param _capture_ptr Capture for feature detection
          *
-         * This function sets new_features_list_, the list of newly detected features, to be used for landmark initialization.
+         * This function sets new_features_list_, the list of newly detected features,
+         * to be used for landmark initialization.
          *
          * \return The number of detected Features.
          */
@@ -121,15 +143,15 @@ class ProcessorTracker : public ProcessorBase
 
     protected:
 
-        /**\brief Make a KeyFrame using the privided Capture.
+        /**\brief Make a KeyFrame using the provided Capture.
          */
         virtual void makeKeyFrame(CaptureBase* _capture_ptr);
 
-        /** \brief Initialize one landmark
+        /** \brief Create one landmark
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
          */
-        virtual LandmarkBase* createOneLandmark(FeatureBase* _feature_ptr) = 0;
+        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr) = 0;
 
         /** \brief Create a new constraint
          *
@@ -139,7 +161,7 @@ class ProcessorTracker : public ProcessorBase
 
     protected:
         bool autonomous_;    ///< Sets whether the tracker is autonomous to make decisions that affect the WolfProblem, like creating new KeyFrames and/or Landmarks.
-        bool uses_landmarks_; ///< Set if the tracker uses and creates landmarks. Clear if only tracks features.
+        bool use_landmarks_; ///< Set if the tracker uses and creates landmarks. Clear if only uses features.
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.

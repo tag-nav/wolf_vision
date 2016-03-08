@@ -10,7 +10,7 @@
 ProcessorTracker::ProcessorTracker(bool _autonomous, bool _uses_landmarks) :
         ProcessorBase(),
         autonomous_(_autonomous),
-        uses_landmarks_(_uses_landmarks),
+        use_landmarks_(_uses_landmarks),
         origin_ptr_(nullptr),
         last_ptr_(nullptr),
         incoming_ptr_(nullptr)
@@ -57,13 +57,13 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         detectNewFeatures(last_ptr_);
 
         // Then eventually create new landmarks, with the respective feature-landmark constraints ...
-        if (uses_landmarks_ && new_features_list_.size() > 0)
+        if (use_landmarks_ && new_features_list_.size() > 0)
         {
             // We'll create one Landmark for each new Feature ...
             for (FeatureBase* feature_ptr : new_features_list_)
             {
                 // Create one Landmark for this Feature with the Landmark factory in this class
-                LandmarkBase* lmk_ptr = createOneLandmark(feature_ptr);
+                LandmarkBase* lmk_ptr = createLandmark(feature_ptr);
                 // Create and add one constraint between the Feature and the Landmark
                 ConstraintBase* constr_ptr = createConstraint(feature_ptr, lmk_ptr);
                 feature_ptr->addConstraint(constr_ptr);
