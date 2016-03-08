@@ -22,6 +22,12 @@
 #include "rtslam/gaussian.hpp"
 #include "rtslam/rtSlam.hpp"
 */
+
+//OpenCV includes
+#include<opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
+
+//standard includes
 #include <iostream>
 
 
