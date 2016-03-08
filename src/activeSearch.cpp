@@ -121,14 +121,13 @@ void ActiveSearchGrid::cell2roi(const veci2 & cell, cv::Mat & roi) {
          * Get ROI of one random empty cell
          */
 bool ActiveSearchGrid::getRoi(cv::Mat & roi) {
-    /*veci2 cell;
+    Eigen::Vector2i cell;
             if (pickEmptyCell(cell)) {
                 cell2roi(cell, roi);
                 return true;
             }
             else
-                return false;*/
-    return false
+                return false;
 }
 
 void ActiveSearchGrid::setFailed(const cv::Mat & roi)
