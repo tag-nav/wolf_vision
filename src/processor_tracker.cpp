@@ -40,7 +40,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     processKnownFeatures(_incoming_ptr);
     if (voteForKeyFrame())
     {
-        // If we want a new keyframe, we first need to populate the Capture with new Features to create new Landmarks
+        // We first need to populate the Capture with new Features to create new Landmarks
         // Detect new Features and create new landmarks
         detectNewFeatures(last_ptr_);
         if (new_features_list_.size() > 0)
