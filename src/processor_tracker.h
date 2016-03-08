@@ -129,7 +129,8 @@ class ProcessorTracker : public ProcessorBase
 
         /** \brief Full processing of an incoming Capture.
          *
-         * Overload this function in derived trackers if desired.
+         * Usually you do not need to overload this method in derived classes.
+         * Overload it only if you want to alter this algorithm.
          */
         virtual void process(CaptureBase* const _incoming_ptr);
 
