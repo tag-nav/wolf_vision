@@ -254,11 +254,11 @@ void ProcessorLaser2D::establishConstraintsMHTree()
                 unsigned int associed_landmark_index = landmarks_index_map[ft_lk_pairs[ii]];
 
                 if (associed_landmark->getType() == LANDMARK_CORNER)
-                    associed_feature->addConstraintFrom(new ConstraintCorner2D(associed_feature,                                // feature pointer
+                    associed_feature->addConstraint(new ConstraintCorner2D(associed_feature,                                // feature pointer
                                                                            (LandmarkCorner2D*)(associed_landmark)));    // landmark pointer
 
                 else if (associed_landmark->getType() == LANDMARK_CONTAINER)
-                    associed_feature->addConstraintFrom(new ConstraintContainer(associed_feature,                       //feature pointer
+                    associed_feature->addConstraint(new ConstraintContainer(associed_feature,                       //feature pointer
                                                                                 (LandmarkContainer*)(associed_landmark), //landmark pointer
                                                                                 associed_landmark_index ));                 // corner index
             }
@@ -571,7 +571,7 @@ void ProcessorLaser2D::createCornerLandmark(FeatureCorner2D* _corner_ptr, const 
                                                           new StateBlock(_feature_global_pose.tail(1)),
                                                           _corner_ptr->getMeasurement()(3));
     //Constraint with the new landmark
-    _corner_ptr->addConstraintFrom(new ConstraintCorner2D(_corner_ptr, new_landmark));
+    _corner_ptr->addConstraint(new ConstraintCorner2D(_corner_ptr, new_landmark));
     //Add it to the map
     getTop()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
 
@@ -609,7 +609,7 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
                                                             CONTAINER_WIDTH,
                                                             CONTAINER_LENGTH);
     // create new constraint (feature to container)
-    _corner_ptr->addConstraintFrom(new ConstraintContainer(_corner_ptr, new_landmark,_feature_idx));
+    _corner_ptr->addConstraint(new ConstraintContainer(_corner_ptr, new_landmark,_feature_idx));
 
     // add new landmark in the map
     getTop()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
@@ -631,7 +631,7 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
     for (auto ctr_it = _old_corner_landmark_ptr->getConstraintToListPtr()->begin(); ctr_it != _old_corner_landmark_ptr->getConstraintToListPtr()->end(); ctr_it++)
     {
         // create new constraint to landmark container
-        (*ctr_it)->getFeaturePtr()->addConstraintFrom(new ConstraintContainer((*ctr_it)->getFeaturePtr(), new_landmark, _corner_idx));
+        (*ctr_it)->getFeaturePtr()->addConstraint(new ConstraintContainer((*ctr_it)->getFeaturePtr(), new_landmark, _corner_idx));
     }
     // Remove corner landmark (it will remove all old constraints)
     getTop()->getMapPtr()->removeLandmark(_old_corner_landmark_ptr);

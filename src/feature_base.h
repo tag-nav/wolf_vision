@@ -18,7 +18,7 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
-        std::list<ConstraintBase*> constraint_to_list_;   ///< List of constraints linked TO this feature
+        std::list<ConstraintBase*> constrained_by_list_;   ///< List of constraints linked TO this feature
         
     public:
         /** \brief Constructor from capture pointer and measure dim
@@ -42,15 +42,15 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
 
         /** \brief Adds a constraint from this feature (as a down node)
          */
-        void addConstraintFrom(ConstraintBase* _co_ptr);
+        void addConstraint(ConstraintBase* _co_ptr);
 
         /** \brief Adds a constraint to this feature (down node from other feature)
          */
-        void addConstraintTo(ConstraintBase* _co_ptr);
+        void addConstrainedBy(ConstraintBase* _co_ptr);
 
         /** \brief Remove a constraint to this feature
          **/
-        void removeConstraintTo(ConstraintBase* _ctr_ptr);
+        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
 
         /** \brief Gets the number of constraints linked with this frame
          **/
@@ -70,9 +70,9 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
 
         /** \brief Gets the constraint list (down nodes) pointer
          */
-        ConstraintBaseList* getConstraintFromListPtr();
+        ConstraintBaseList* getConstraintListPtr();
         
-        void getConstraintFromList(ConstraintBaseList & _ctr_list);
+        void getConstraintList(ConstraintBaseList & _ctr_list);
 
         const Eigen::VectorXs& getMeasurement() const;
         
@@ -98,7 +98,7 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
 
 inline std::list<ConstraintBase*>* FeatureBase::getConstraintToListPtr()
 {
-    return &constraint_to_list_;
+    return &constrained_by_list_;
 }
 
 inline CaptureBase* FeatureBase::getCapturePtr() const

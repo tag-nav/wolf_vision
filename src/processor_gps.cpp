@@ -52,7 +52,7 @@ void ProcessorGPS::establishConstraints(CaptureBase *_capture_ptr)
 
     for(auto i_it = capture_gps_ptr_->getFeatureListPtr()->begin(); i_it != capture_gps_ptr_->getFeatureListPtr()->end(); i_it++)
     {
-        capture_gps_ptr_->getFeatureListPtr()->front()->addConstraintFrom( new ConstraintGPSPseudorange2D((*i_it)) );
+        capture_gps_ptr_->getFeatureListPtr()->front()->addConstraint( new ConstraintGPSPseudorange2D((*i_it)) );
     }
 
 
