@@ -3,7 +3,7 @@
 //Wolf includes
 #include "sensor_camera.h"
 #include "capture_image.h"
-#include "feature_point.h"
+#include "feature_point_image.h"
 #include "processor_image_point_brisk.h"
 #include "state_block.h"
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
     m_cov(1,0)=3;
     m_cov(1,1)=4;
 
-    FeaturePoint* feat_point = new FeaturePoint(m_pos,m_cov);
+    FeaturePointImage* feat_point = new FeaturePointImage(m_pos,m_cov);
     std::cout << "measurement position: " << m_pos(0) << " " << m_pos(1) << std::endl;
     std::cout << "measurement covariance:\n" << m_cov(0,0) << " " << m_cov(0,1) << "\n" << m_cov(1,0) << " " << m_cov(1,1) << std::endl;
     std::cout << "feature position:\n" << feat_point->getMeasurement() << "\nfeature covariance:\n" << feat_point->getMeasurementCovariance()<< std::endl;

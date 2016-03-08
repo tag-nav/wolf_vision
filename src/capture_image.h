@@ -3,7 +3,7 @@
 
 //Wolf includes
 #include "capture_base.h"
-#include "feature_point.h"
+#include "feature_point_image.h"
 #include "sensor_camera.h"
 
 // opencv includes

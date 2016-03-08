@@ -234,12 +234,12 @@ ENDIF(raw_gps_utils_FOUND)
 IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
-        feature_point.h
+        feature_point_image.h
         processor_image_point_brisk.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
-        feature_point.cpp
+        feature_point_image.cpp
         processor_image_point_brisk.cpp
         )
 ENDIF(OpenCV_FOUND)
