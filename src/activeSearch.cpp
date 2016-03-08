@@ -29,13 +29,13 @@ ActiveSearchGrid::ActiveSearchGrid(const int & imgSize_h, const int & imgSize_v,
                                    const int & nCells_v, const int & margin, const int & separation) :
     projectionsCount(nCells_h + 1, nCells_v + 1), emptyCellsTile_tmp((nCells_h + 1) * (nCells_v + 1), 2), separation(
                                                                                                               separation), margin(margin) {
-    /*imgSize(0) = imgSize_h;
-            imgSize(1) = imgSize_v;
-            gridSize(0) = projectionsCount.size1();
-            gridSize(1) = projectionsCount.size2(), cellSize(0) = imgSize_h / nCells_h;
-            cellSize(1) = imgSize_v / nCells_v;
-            offset = -cellSize / 2;
-            renew();*/
+    imgSize(0) = imgSize_h;
+    imgSize(1) = imgSize_v;
+    gridSize(0) = projectionsCount.size1();
+    gridSize(1) = projectionsCount.size2(), cellSize(0) = imgSize_h / nCells_h;
+    cellSize(1) = imgSize_v / nCells_v;
+    offset = -cellSize / 2;
+    renew();
 }
 
 

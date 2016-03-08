@@ -120,12 +120,12 @@ class ActiveSearchGrid {
         friend std::ostream& operator <<(std::ostream & s, ActiveSearchGrid const & grid);
 
     private:
-        veci2 imgSize;
-        veci2 gridSize;
-        veci2 cellSize;
-        veci2 offset;
-        mati projectionsCount;
-        mati emptyCellsTile_tmp;
+        Eigen::Vector2i imgSize;
+        Eigen::Vector2i gridSize;
+        Eigen::Vector2i cellSize;
+        Eigen::Vector2i offset;
+        Eigen::MatrixXi projectionsCount;
+        Eigen::MatrixXi emptyCellsTile_tmp;
         int separation;
         int margin;
 
