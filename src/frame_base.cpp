@@ -65,17 +65,8 @@ FrameBase::~FrameBase()
     //std::cout << "constraints deleted" << std::endl;
 }
 
-void FrameBase::removeConstraintTo(ConstraintBase* _ctr_ptr)
+void FrameBase::registerNewStateBlocks()
 {
-    constraint_to_list_.remove(_ctr_ptr);
-
-    if (constraint_to_list_.empty())
-        this->destruct();
-}
-
-void FrameBase::setKey()
-{
-    type_ = KEY_FRAME;
     if (getTop() != nullptr)
     {
         if (p_ptr_ != nullptr)
@@ -86,6 +77,23 @@ void FrameBase::setKey()
 
         if (v_ptr_ != nullptr)
             getTop()->addStateBlockPtr(v_ptr_);
+    }
+}
+
+void FrameBase::removeConstraintTo(ConstraintBase* _ctr_ptr)
+{
+    constraint_to_list_.remove(_ctr_ptr);
+
+    if (constraint_to_list_.empty())
+        this->destruct();
+}
+
+void FrameBase::setKey()
+{
+    if (type_ != KEY_FRAME)
+    {
+        type_ = KEY_FRAME;
+        registerNewStateBlocks();
     }
 }
 

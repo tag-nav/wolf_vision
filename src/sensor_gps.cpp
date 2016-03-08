@@ -30,3 +30,24 @@ StateBlock *SensorGPS::getInitVehicleOPtr() const
 {
     return init_vehicle_o_ptr_;
 }
+
+void SensorGPS::registerNewStateBlocks()
+{
+    if (getTop() != nullptr)
+    {
+        if (p_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(p_ptr_);
+
+        if (o_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(o_ptr_);
+
+        if (intrinsic_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(intrinsic_ptr_);
+
+        if (init_vehicle_p_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(init_vehicle_p_ptr_);
+
+        if (init_vehicle_o_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(init_vehicle_o_ptr_);
+    }
+}

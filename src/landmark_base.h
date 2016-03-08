@@ -74,6 +74,10 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
          **/
         void unfix();
 
+        /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
+         **/
+        virtual void registerNewStateBlocks();
+
         /** \brief Gets the position state block pointer
          **/
         StateBlock* getPPtr() const;

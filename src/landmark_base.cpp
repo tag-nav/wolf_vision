@@ -89,3 +89,15 @@ void LandmarkBase::setStatus(LandmarkStatus _st)
         }
     }
 }
+
+void LandmarkBase::registerNewStateBlocks()
+{
+    if (getTop() != nullptr)
+    {
+        if (p_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(p_ptr_);
+
+        if (o_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(o_ptr_);
+    }
+}
