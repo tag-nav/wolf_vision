@@ -35,6 +35,11 @@ Eigen::Vector2s FeaturePointImage::getMeasurement()
     return measurement_;
 }
 
+cv::KeyPoint FeaturePointImage::getKeypoint()
+{
+    return keypoint_;
+}
+
 std::vector<float> FeaturePointImage::getDescriptor()
 {
     return descriptor_;

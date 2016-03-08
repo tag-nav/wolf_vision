@@ -51,6 +51,8 @@ class FeaturePointImage : public FeatureBase
 
         virtual Eigen::Vector2s getMeasurement();
 
+        virtual cv::KeyPoint getKeypoint();
+
         virtual std::vector<float> getDescriptor();
 
 };
