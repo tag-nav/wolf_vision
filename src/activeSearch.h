@@ -27,9 +27,14 @@
 #include<opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
 
+//Eigen includes
+#include <Eigen/Dense>
+
 //standard includes
 #include <iostream>
 
+using namespace Eigen;
+using namespace std;
 
 /**
          * Active search tesselation grid.
