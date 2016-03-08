@@ -17,10 +17,10 @@
  *   - \b origin: this points to a Capture where all Feature tracks start.
  *   - \b last: the last Capture tracked by the tracker. A sufficient subset of the Features in \b origin is still alive in \b last.
  *   - \b incoming: the capture being received. The tracker operates on this Capture,
- *   establishing correspondences between the features here and the features in \b origin. Each successful correspondence
- *   results in an extension of the track of the Feature up to the \b incoming Capture.
+ *     establishing correspondences between the features here and the features in \b origin. Each successful correspondence
+ *     results in an extension of the track of the Feature up to the \b incoming Capture.
  *
- * A tracker can be declared autonomous or non-autonomous.
+ * A tracker can be declared autonomous or non-autonomous. This property must be set at construction time.
  *   - An autonomous Tracker is allowed to create new KeyFrames and new Landmarks
  *     as the result of the data processing. A single call to process() accomplishes
  *     all the work needed.
@@ -29,7 +29,7 @@
  *     Calling process() is an error, and an outside manager is required to control the tracker
  *     algorithm (by implementing an algorithm similar to process() outside the Tracker).
  *
- * A tracker can be designed to track either Features or Landmarks.
+ * A tracker can be designed to track either Features or Landmarks. This property must be set at construction time.
  *   - If tracking Features, it establishes constraints against other Features;
  *     it does not use Landmarks, nor it creates Landmarks.
  *   - If tracking Landmarks, it establishes constraints Feature-Landmark;
@@ -55,11 +55,11 @@
  * This functionality exists by default in the virtual method process(). You can overload it at your convenience.
  *
  * This is an abstract class. The following pure virtual methods have to be implemented in derived classes:
- *  - processKnownFeatures()
- *  - voteForKeyFrame()
- *  - detectNewFeatures()
- *  - createLandmark()
- *  - createConstraint()
+ *   - processKnownFeatures()
+ *   - voteForKeyFrame()
+ *   - detectNewFeatures()
+ *   - createLandmark()
+ *   - createConstraint()
  */
 class ProcessorTracker : public ProcessorBase
 {
