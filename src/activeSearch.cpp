@@ -104,7 +104,7 @@ vec2 ActiveSearchGrid::cellCenter(const veci2 & cell) {
     return cellOrigin(cell) + cellSize / 2;
 }
 
-void ActiveSearchGrid::cell2roi(const veci2 & cell, image::ConvexRoi & roi) {
+void ActiveSearchGrid::cell2roi(const veci2 & cell, cv::Mat & roi) {
     /*veci2 ul = cellOrigin(cell);
             ul(0) += separation;
             ul(1) += separation;
@@ -118,7 +118,7 @@ void ActiveSearchGrid::cell2roi(const veci2 & cell, image::ConvexRoi & roi) {
 /**
          * Get ROI of one random empty cell
          */
-bool ActiveSearchGrid::getRoi(image::ConvexRoi & roi) {
+bool ActiveSearchGrid::getRoi(cv::Mat & roi) {
     /*veci2 cell;
             if (pickEmptyCell(cell)) {
                 cell2roi(cell, roi);
@@ -129,7 +129,7 @@ bool ActiveSearchGrid::getRoi(image::ConvexRoi & roi) {
     return false
 }
 
-void ActiveSearchGrid::setFailed(const image::ConvexRoi & roi)
+void ActiveSearchGrid::setFailed(const cv::Mat & roi)
 {
     /*vec2 p; p(0) = roi.x()+roi.w()/2; p(1) = roi.y()+roi.h()/2;
             veci2 cell = pix2cell(p);

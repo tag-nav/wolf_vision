@@ -159,14 +159,14 @@ class ActiveSearchGrid {
                  * \param roi the resulting ROI
                  * \return true if ROI exists.
                  */
-        bool getRoi(image::ConvexRoi & roi);
+        bool getRoi(cv::Mat & roi);
 
         /**
                  * Call this after getRoi if no point was found in the roi
                  * in order to avoid searching again in it.
                  * \param roi the ROI where nothing was found
                  */
-        void setFailed(const image::ConvexRoi & roi);
+        void setFailed(const cv::Mat & roi);
 
 
     private:
@@ -199,7 +199,7 @@ class ActiveSearchGrid {
         /**
                  * Get the region of interest, reduced by a margin.
                  */
-        void cell2roi(const veci2 & cell, image::ConvexRoi & roi);
+        void cell2roi(const veci2 & cell, cv::Mat & roi);
 
 };
 
