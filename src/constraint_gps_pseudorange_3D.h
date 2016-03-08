@@ -147,9 +147,11 @@ inline bool ConstraintGPSPseudorange3D::operator ()(const T* const _vehicle_p, c
     T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0);
     //     error = (expected measurement)       - (actual measurement)
     _residual[0] = (distance + _bias[0] * T(LIGHT_SPEED)) - (pseudorange_);
-    /* TODO importante
-     * credo che il residuo sia la differenza delle misure, NORMALIZZATA PER LA COVARIANZA
-     */
+
+    //TODO add: normalizing by the covariance
+    //_residual[0] = _residual[0] / T(sqrt(getMeasurementCovariance()(0, 0)));
+
+
     return true;
 }
 

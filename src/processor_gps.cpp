@@ -7,10 +7,12 @@
 #include "constraint_gps_pseudorange_2D.h"
 
 ProcessorGPS::ProcessorGPS() :
-        //sensor_gps_ptr_((SensorGPS*)(upperNodePtr())), //TODO here there's a crash. Look at what they'll do in processorLaser and modify as conseguence
+        //sensor_gps_ptr_((SensorGPS*)(upperNodePtr())), //TODO here there's a crash. Look at what they'll do in processorLaser and modify as consequence
         capture_gps_ptr_(nullptr)
 {
     std::cout << "ProcessorGPS constructor" << std::endl;
+
+    gps_covariance_ = 0.01;
 }
 
 ProcessorGPS::~ProcessorGPS()
@@ -19,43 +21,34 @@ ProcessorGPS::~ProcessorGPS()
 }
 
 /*
- * Extract features from CaptureGPS and create FeatureGPS
+ * Extract feature from the capture and create constraint
  */
-void ProcessorGPS::extractFeatures(CaptureBase *_capture_ptr)
+void ProcessorGPS::process(CaptureBase* _capture_ptr)
 {
+    std::cout << "ProcessorGPS::process(GPScapture)" << std::endl;
+
     //TODO add assert with dynamic_cast when it will be ready
     capture_gps_ptr_ = (CaptureGPS*)(_capture_ptr);
 
-    std::cout << "Extracting gps features..." << std::endl;
-
+    //std::cout << "Extracting gps features..." << std::endl;
     rawgpsutils::SatellitesObs obs = capture_gps_ptr_->getData();
 
-
-    //TODO check that the cycle is good (it uses getRawData.size())
+    //TODO use a unique cycle(check if possible)
     for(unsigned int i = 0; i < obs.measurements_.size(); ++i)
     {
         Eigen::Vector3s sat_pos = obs.measurements_[i].sat_position_;
         WolfScalar pr = obs.measurements_[i].pseudorange_;
 
-        capture_gps_ptr_->addFeature(new FeatureGPSPseudorange(sat_pos, pr));
+        capture_gps_ptr_->addFeature(new FeatureGPSPseudorange(sat_pos, pr, gps_covariance_));
     }
-
     //std::cout << "gps features extracted" << std::endl;
-}
 
-void ProcessorGPS::establishConstraints(CaptureBase *_capture_ptr)
-{
-    //TODO add assert with dynamic_cast when it will be ready
-    capture_gps_ptr_ = (CaptureGPS*)(_capture_ptr);
 
-    std::cout << "Establishing constraints to gps features..." << std::endl;
-
+    //std::cout << "Establishing constraints to gps features..." << std::endl;
     for(auto i_it = capture_gps_ptr_->getFeatureListPtr()->begin(); i_it != capture_gps_ptr_->getFeatureListPtr()->end(); i_it++)
     {
         capture_gps_ptr_->getFeatureListPtr()->front()->addConstraint( new ConstraintGPSPseudorange2D((*i_it)) );
     }
-
-
     //std::cout << "Constraints established" << std::endl;
 }
 
