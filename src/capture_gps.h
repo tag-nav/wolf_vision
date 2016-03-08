@@ -1,7 +1,6 @@
 #ifndef CAPTURE_GPS_H_
 #define CAPTURE_GPS_H_
 
-//TODO indentation: add a tab at everything inside the class: protected and public must have 1 tab
 
 // Wolf includes
 #include "raw_gps_utils/satellites_obs.h"

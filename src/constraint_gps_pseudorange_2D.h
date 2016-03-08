@@ -21,20 +21,20 @@
 class ConstraintGPSPseudorange2D : public ConstraintSparse<1, 2, 1, 3, 1, 3, 1>
 {
     public:
-        bool verbose = false; // TODO only for debug purpose
+        bool verbose = false; // only for debug purpose
 
         ConstraintGPSPseudorange2D(FeatureBase* _ftr_ptr, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<1, 2, 1, 3, 1, 3, 1>(_ftr_ptr,
                                                       CTR_GPS_PR_2D,
                                                       _status,
                                                       _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame
-                        _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
-                        _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
-                                                                    // orientation of antenna is not needed, because omnidirectional
-                        _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter = receiver time bias
-                        ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehiclePPtr(), // initial vehicle position (ecef)
-                        ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehicleOPtr() // initial vehicle orientation (ecef)
-                        )
+                                                      _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
+                                                      _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
+                                                                                                  // orientation of antenna is not needed, because omnidirectional
+                                                      _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter = receiver time bias
+                                                      ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehiclePPtr(), // initial vehicle position (ecef)
+                                                      ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehicleOPtr() // initial vehicle orientation (ecef)
+                                                      )
         {
             sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
             pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
@@ -129,7 +129,7 @@ inline bool ConstraintGPSPseudorange2D::operator ()(const T* const _vehicle_p, c
     // mod lat to 0-2pi
     while (lon < T(0))
         lon += T(2 * M_PI);
-    while (lon > 2 * M_PI)
+    while (lon >= 2 * M_PI)
         lon -= T(2 * M_PI);
     // correction for altitude near poles left out.
     if (verbose)
@@ -176,18 +176,26 @@ inline bool ConstraintGPSPseudorange2D::operator ()(const T* const _vehicle_p, c
         square_sum += pow(sensor_p_ecef[i] - T(sat_position_[i]), 2);
     }
     T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0);
+
     //     error = (expected measurement)       - (actual measurement)
     _residual[0] = (distance + _bias[0] * T(LIGHT_SPEED)) - (pseudorange_);
+
+    if (verbose)
+    {
+        std::cout << "Residual: " << _residual[0] << "\n";
+    }
+    // normalizing by the covariance
+    _residual[0] = _residual[0] / T(getMeasurementCovariance()(0, 0));//T(sqrt(getMeasurementCovariance()(0, 0)));
+
+
+
     if (verbose)
     {
         //        std::cout << "Expected: " << (distance + _bias[0]*T(LIGHT_SPEED)) << "\nreceived = " << pseudorange_ << "\n";
-        std::cout << "Residual " << _residual[0] << "\n";
-    }
-    /* TODO importante
-     * credo che il residuo sia la differenza delle misure, NORMALIZZATA PER LA COVARIANZA
-     */
-    if (verbose)
+        std::cout << "Residual norm: " << _residual[0] << "\n";
+
         std::cout << "------ END OPERATOR()------\n";
+    }
 
     return true;
 }
