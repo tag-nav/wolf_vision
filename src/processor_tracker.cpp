@@ -52,7 +52,6 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             {
                 getTop()->addLandmark(lmk_ptr);
             }
-            clearNewLandmarksList();
         }
 
         // Add all new Features to the Capture
