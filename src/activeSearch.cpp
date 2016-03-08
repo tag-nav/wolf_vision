@@ -52,10 +52,11 @@ void ActiveSearchGrid::addObs(const vec2 & p) {
 void ActiveSearchGrid::clear() {
     projectionsCount.setZero();
 }
+
 void ActiveSearchGrid::renew() {
-    /*offset(0) = - (margin + rtslam::rand() % (cellSize(0) - 2*margin)); // from -margin to -(cellSize(0)-margin)
-            offset(1) = - (margin + rtslam::rand() % (cellSize(1) - 2*margin)); // from -margin to -(cellSize(0)-margin)
-            clear();*/
+    offset(0) = - (margin + rand() % (cellSize(0) - 2*margin)); // from -margin to -(cellSize(0)-margin)
+            offset(1) = - (margin + rand() % (cellSize(1) - 2*margin)); // from -margin to -(cellSize(0)-margin)
+            clear();
 }
 
 
