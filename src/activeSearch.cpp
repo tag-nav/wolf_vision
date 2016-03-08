@@ -5,7 +5,7 @@
  * \ingroup rtslam
  */
 
-#include "rtslam/activeSearch.hpp"
+#include "activeSearch.h"
 
 #include "rtslam/observationAbstract.hpp"
 #include "rtslam/sensorAbstract.hpp"
