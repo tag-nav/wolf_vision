@@ -119,12 +119,8 @@ class ProcessorTracker : public ProcessorBase
         void setLastPtr(CaptureBase* const _last_ptr);
         void setIncomingPtr(CaptureBase* const _incoming_ptr);
 
-        void clearNewFeaturesList();
-        void clearNewLandmarksList();
-        const FeatureBaseList& getNewFeaturesList() const;
-        const LandmarkBaseList& getNewLandmarksList() const;
-
     protected:
+
         /**\brief Make a KeyFrame using the privided Capture.
          */
         virtual void makeKeyFrame(CaptureBase* _capture_ptr);
@@ -139,7 +135,16 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual LandmarkBase* createOneLandmark(FeatureBase* _feature_ptr) = 0;
 
+        /** \brief Create a new constraint
+         *
+         * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
+         */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr) = 0;
+
+        const FeatureBaseList& getNewFeaturesList() const;
+        const LandmarkBaseList& getNewLandmarksList() const;
+        void clearNewFeaturesList();
+        void clearNewLandmarksList();
 
     private:
         bool autonomous_;    ///< Sets whether the tracker is autonomous to make decisions that affect the WolfProblem, like creating new KeyFrames and/or Landmarks.
@@ -213,16 +218,6 @@ inline void ProcessorTracker::setIncomingPtr(CaptureBase* const _incoming_ptr)
     incoming_ptr_ = _incoming_ptr;
 }
 
-inline void ProcessorTracker::clearNewLandmarksList()
-{
-    new_landmarks_list_.clear();
-}
-
-inline const FeatureBaseList& ProcessorTracker::getNewFeaturesList() const
-{
-    return new_features_list_;
-}
-
 inline void ProcessorTracker::clearNewFeaturesList()
 {
     new_features_list_.clear();
@@ -231,6 +226,16 @@ inline void ProcessorTracker::clearNewFeaturesList()
 inline const LandmarkBaseList& ProcessorTracker::getNewLandmarksList() const
 {
     return new_landmarks_list_;
+}
+
+inline const FeatureBaseList& ProcessorTracker::getNewFeaturesList() const
+{
+    return new_features_list_;
+}
+
+inline void ProcessorTracker::clearNewLandmarksList()
+{
+    new_landmarks_list_.clear();
 }
 
 #endif /* PROCESSOR_TRACKER_H_ */
