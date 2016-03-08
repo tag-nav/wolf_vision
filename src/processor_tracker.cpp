@@ -49,7 +49,9 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             createLandmarks();
             // append the landmarks to the Map
             for (auto lmk_ptr : new_landmarks_list_)
-                getTop()->getMapPtr()->addLandmark(lmk_ptr);
+            {
+                getTop()->addLandmark(lmk_ptr);
+            }
             clearNewLandmarksList();
         }
 
@@ -72,8 +74,8 @@ void ProcessorTracker::createLandmarks()
     for (FeatureBase* feature_ptr : new_features_list_)
     {
         new_landmarks_list_.push_back(makeOneLandmark(feature_ptr));
-        // TODO: Create constraint between Feature and Landmark
-        //  -> the last lmk is: LandmarkBase* lmk_ptr = new_landmarks_list_.back();
-        //  -> the feature is:  FeatureBase*  feature_ptr;
+        // Create constraint between Feature and Landmark
+        ConstraintBase* constr_ptr = createConstraint(feature_ptr, new_landmarks_list_.back());
+        feature_ptr->addConstraintFrom(constr_ptr);
     }
 }

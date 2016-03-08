@@ -139,6 +139,8 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual LandmarkBase* makeOneLandmark(FeatureBase* _feature_ptr) = 0;
 
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr) = 0;
+
     private:
         bool autonomous_;    ///< Sets whether the tracker is autonomous to make decisions that affect the WolfProblem, like creating new KeyFrames and/or Landmarks.
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
