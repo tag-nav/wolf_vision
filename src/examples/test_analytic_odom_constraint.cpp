@@ -247,7 +247,7 @@ int main(int argc, char** argv)
                     frame_new_ptr_autodiff->addCapture(capture_ptr_autodiff);
                     capture_ptr_autodiff->addFeature(feature_ptr_autodiff);
                     ConstraintOdom2D* constraint_ptr_autodiff = new ConstraintOdom2D(feature_ptr_autodiff, frame_old_ptr_autodiff);
-                    feature_ptr_autodiff->addConstraintFrom(constraint_ptr_autodiff);
+                    feature_ptr_autodiff->addConstraint(constraint_ptr_autodiff);
                     //std::cout << "Added autodiff edge! " << constraint_ptr_autodiff->nodeId() << " from vertex " << constraint_ptr_autodiff->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_autodiff->getFrameOtherPtr()->nodeId() << std::endl;
 
                     // add capture, feature and constraint to problem
@@ -260,7 +260,7 @@ int main(int argc, char** argv)
                     frame_new_ptr_analytic->addCapture(capture_ptr_analytic);
                     capture_ptr_analytic->addFeature(feature_ptr_analytic);
                     ConstraintOdom2DAnalytic* constraint_ptr_analytic = new ConstraintOdom2DAnalytic(feature_ptr_analytic, frame_old_ptr_analytic);
-                    feature_ptr_analytic->addConstraintFrom(constraint_ptr_analytic);
+                    feature_ptr_analytic->addConstraint(constraint_ptr_analytic);
                     //std::cout << "Added analytic edge! " << constraint_ptr_analytic->nodeId() << " from vertex " << constraint_ptr_analytic->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_analytic->getFrameOtherPtr()->nodeId() << std::endl;
                     //std::cout << "vector " << constraint_ptr_analytic->getMeasurement().transpose() << std::endl;
                     //std::cout << "information " << std::endl << edge_information << std::endl;

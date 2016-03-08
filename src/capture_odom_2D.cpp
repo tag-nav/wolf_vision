@@ -58,7 +58,7 @@ void CaptureOdom2D::addConstraints()
 {
     assert(getFramePtr()->getPreviousFrame() != nullptr && "Trying to add odometry constraint in the first frame (there is no previous frame)");
 
-    getFeatureListPtr()->front()->addConstraintFrom(new ConstraintOdom2DAnalytic(getFeatureListPtr()->front(),
+    getFeatureListPtr()->front()->addConstraint(new ConstraintOdom2DAnalytic(getFeatureListPtr()->front(),
 			  	  	  	  	  	  	  	  	  	  	  	  	  	                 getFramePtr()->getPreviousFrame()));
 }
 

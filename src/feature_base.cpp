@@ -24,35 +24,35 @@ FeatureBase::~FeatureBase()
 	//std::cout << "deleting FeatureBase " << nodeId() << std::endl;
     is_deleting_ = true;
 
-    while (!constraint_to_list_.empty())
+    while (!constrained_by_list_.empty())
     {
         //std::cout << "destruct() constraint " << (*constraint_to_list_.begin())->nodeId() << std::endl;
-        constraint_to_list_.front()->destruct();
+        constrained_by_list_.front()->destruct();
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
 }
 
-void FeatureBase::addConstraintFrom(ConstraintBase* _co_ptr)
+void FeatureBase::addConstraint(ConstraintBase* _co_ptr)
 {
     addDownNode(_co_ptr);
     // add constraint to be added in solver
     getTop()->addConstraintPtr(_co_ptr);
 }
 
-void FeatureBase::addConstraintTo(ConstraintBase* _ctr_ptr)
+void FeatureBase::addConstrainedBy(ConstraintBase* _ctr_ptr)
 {
-    constraint_to_list_.push_back(_ctr_ptr);
+    constrained_by_list_.push_back(_ctr_ptr);
 }
 
-void FeatureBase::removeConstraintTo(ConstraintBase* _ctr_ptr)
+void FeatureBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
 {
-    constraint_to_list_.remove(_ctr_ptr);
+    constrained_by_list_.remove(_ctr_ptr);
 }
 
 unsigned int FeatureBase::getHits() const
 {
-    return constraint_to_list_.size();
+    return constrained_by_list_.size();
 }
 
 FrameBase* FeatureBase::getFramePtr() const
@@ -60,14 +60,14 @@ FrameBase* FeatureBase::getFramePtr() const
     return upperNodePtr()->upperNodePtr();
 }
 
-ConstraintBaseList* FeatureBase::getConstraintFromListPtr()
+ConstraintBaseList* FeatureBase::getConstraintListPtr()
 {
     return getDownNodeListPtr();
 }
 
-void FeatureBase::getConstraintFromList(ConstraintBaseList & _ctr_list)
+void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
-	for(auto c_it = getConstraintFromListPtr()->begin(); c_it != getConstraintFromListPtr()->end(); ++c_it)
+	for(auto c_it = getConstraintListPtr()->begin(); c_it != getConstraintListPtr()->end(); ++c_it)
 		_ctr_list.push_back((*c_it));
 }
 

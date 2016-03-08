@@ -22,7 +22,7 @@ CaptureBase::~CaptureBase()
 void CaptureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
 	for(auto f_it = getFeatureListPtr()->begin(); f_it != getFeatureListPtr()->end(); ++f_it)
-		(*f_it)->getConstraintFromList(_ctr_list);
+		(*f_it)->getConstraintList(_ctr_list);
 }
 
 void CaptureBase::process()

@@ -265,8 +265,8 @@ int main(int argc, char** argv)
                     capture_ptr_prun->addFeature(feature_ptr_prun);
                     ConstraintOdom2D* constraint_ptr_full = new ConstraintOdom2D(feature_ptr_full, frame_old_ptr_full);
                     ConstraintOdom2D* constraint_ptr_prun = new ConstraintOdom2D(feature_ptr_prun, frame_old_ptr_prun);
-                    feature_ptr_full->addConstraintFrom(constraint_ptr_full);
-                    feature_ptr_prun->addConstraintFrom(constraint_ptr_prun);
+                    feature_ptr_full->addConstraint(constraint_ptr_full);
+                    feature_ptr_prun->addConstraint(constraint_ptr_prun);
                     //std::cout << "Added edge! " << constraint_ptr_prun->nodeId() << " from vertex " << constraint_ptr_prun->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_prun->getFrameToPtr()->nodeId() << std::endl;
                     //std::cout << "vector " << constraint_ptr_prun->getMeasurement().transpose() << std::endl;
                     //std::cout << "information " << std::endl << edge_information << std::endl;

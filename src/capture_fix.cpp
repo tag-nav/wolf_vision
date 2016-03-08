@@ -21,7 +21,7 @@ void CaptureFix::process()
     //std::cout << "FeatureFix extracted " << std::endl;
 
     // ADD CONSTRAINT
-	getFeatureListPtr()->front()->addConstraintFrom(new ConstraintFix(getFeatureListPtr()->front()));
+	getFeatureListPtr()->front()->addConstraint(new ConstraintFix(getFeatureListPtr()->front()));
     //std::cout << "ConstraintFix added " << std::endl;
 }
 

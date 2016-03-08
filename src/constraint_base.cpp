@@ -41,7 +41,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, Co
     landmark_ptr_(nullptr)
 {
     // add constraint to feature
-    feature_ptr_->addConstraintTo(this);
+    feature_ptr_->addConstrainedBy(this);
 }
 
 
@@ -73,7 +73,7 @@ ConstraintBase::~ConstraintBase()
     if (frame_ptr_ != nullptr)
         frame_ptr_->removeConstraintTo(this);
     if (feature_ptr_ != nullptr)
-        feature_ptr_->removeConstraintTo(this);
+        feature_ptr_->removeConstrainedBy(this);
     if (landmark_ptr_ != nullptr)
         landmark_ptr_->removeConstraintTo(this);
 
