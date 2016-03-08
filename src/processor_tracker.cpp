@@ -73,7 +73,7 @@ void ProcessorTracker::createLandmarks()
     clearNewLandmarksList();
     for (FeatureBase* feature_ptr : new_features_list_)
     {
-        new_landmarks_list_.push_back(makeOneLandmark(feature_ptr));
+        new_landmarks_list_.push_back(createOneLandmark(feature_ptr));
         // Create constraint between Feature and Landmark
         ConstraintBase* constr_ptr = createConstraint(feature_ptr, new_landmarks_list_.back());
         feature_ptr->addConstraint(constr_ptr);

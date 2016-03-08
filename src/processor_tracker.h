@@ -137,7 +137,7 @@ class ProcessorTracker : public ProcessorBase
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
          */
-        virtual LandmarkBase* makeOneLandmark(FeatureBase* _feature_ptr) = 0;
+        virtual LandmarkBase* createOneLandmark(FeatureBase* _feature_ptr) = 0;
 
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr) = 0;
 
