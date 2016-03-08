@@ -46,7 +46,7 @@ class ProcessorTracker : public ProcessorBase
 {
     public:
 
-        ProcessorTracker(bool _autonomous = true);
+        ProcessorTracker(bool _autonomous = true, bool _uses_landmarks = true);
         virtual ~ProcessorTracker();
 
         bool isAutonomous() const;
@@ -125,10 +125,6 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void makeKeyFrame(CaptureBase* _capture_ptr);
 
-        /** \brief Make landmarks from new Features
-         */
-        virtual void createLandmarks();
-
         /** \brief Initialize one landmark
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
@@ -141,18 +137,13 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr) = 0;
 
-        const FeatureBaseList& getNewFeaturesList() const;
-        const LandmarkBaseList& getNewLandmarksList() const;
-        void clearNewFeaturesList();
-        void clearNewLandmarksList();
-
-    private:
+    protected:
         bool autonomous_;    ///< Sets whether the tracker is autonomous to make decisions that affect the WolfProblem, like creating new KeyFrames and/or Landmarks.
+        bool uses_landmarks_; ///< Set if the tracker uses and creates landmarks. Clear if only tracks features.
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
         FeatureBaseList new_features_list_; ///< List of new features for landmark initialization and tracker reset.
-        LandmarkBaseList new_landmarks_list_; ///< List of new landmarks
 };
 
 // IMPLEMENTATION //
@@ -216,26 +207,6 @@ inline void ProcessorTracker::setLastPtr(CaptureBase* const _last_ptr)
 inline void ProcessorTracker::setIncomingPtr(CaptureBase* const _incoming_ptr)
 {
     incoming_ptr_ = _incoming_ptr;
-}
-
-inline void ProcessorTracker::clearNewFeaturesList()
-{
-    new_features_list_.clear();
-}
-
-inline const LandmarkBaseList& ProcessorTracker::getNewLandmarksList() const
-{
-    return new_landmarks_list_;
-}
-
-inline const FeatureBaseList& ProcessorTracker::getNewFeaturesList() const
-{
-    return new_features_list_;
-}
-
-inline void ProcessorTracker::clearNewLandmarksList()
-{
-    new_landmarks_list_.clear();
 }
 
 #endif /* PROCESSOR_TRACKER_H_ */
