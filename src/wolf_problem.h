@@ -45,8 +45,6 @@ class WolfProblem: public NodeBase
 
     public:
 
-        // TODO: make addLandmark() calling map_->addLandmark()
-
         /** \brief Constructor from frame structure
          *
          */
@@ -66,6 +64,8 @@ class WolfProblem: public NodeBase
          */
         virtual void destruct() final;
 
+        void addSensor(SensorBase* _sen_ptr);
+
         /** \brief Create Frame of the correct size
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
@@ -78,6 +78,7 @@ class WolfProblem: public NodeBase
          */
         void createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp);
 
+        void addLandmark(LandmarkBase* _lmk_ptr);
 
         /** \brief Adds a new state block to be added to solver manager
          */

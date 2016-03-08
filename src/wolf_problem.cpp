@@ -38,6 +38,11 @@ void WolfProblem::destruct()
     delete this;
 }
 
+void WolfProblem::addSensor(SensorBase* _sen_ptr)
+{
+    getHardwarePtr()->addSensor(_sen_ptr);
+}
+
 void WolfProblem::createFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
 {
     switch ( trajectory_ptr_->getFrameStructure() )
@@ -119,6 +124,11 @@ void WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _fra
             }
     }
     //std::cout << "new frame created" << std::endl;
+}
+
+void WolfProblem::addLandmark(LandmarkBase* _lmk_ptr)
+{
+    getMapPtr()->addLandmark(_lmk_ptr);
 }
 
 void WolfProblem::addStateBlockPtr(StateBlock* _state_ptr)
