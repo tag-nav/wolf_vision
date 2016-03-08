@@ -199,7 +199,7 @@ class ActiveSearchGrid {
         /**
                  * Get one random empty cell
                  */
-        bool pickEmptyCell(veci2 & cell);
+        bool pickEmptyCell(Eigen::Vector2i & cell);
 
         /**
                  * Get the region of interest, reduced by a margin.

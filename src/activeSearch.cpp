@@ -63,29 +63,29 @@ void ActiveSearchGrid::renew() {
 /*
          * Get one empty cell
          */
-bool ActiveSearchGrid::pickEmptyCell(veci2 & cell) {
-    /*int k = 0;
-            veci2 cell0;
-            for (int i = 1; i < gridSize(0) - 1; i++) {
-                for (int j = 1; j < gridSize(1) - 1; j++) {
-                    cell0(0) = i;
-                    cell0(1) = j;
-                    if (projectionsCount(cell0(0), cell0(1)) == 0) {
-                        ublas::row(emptyCellsTile_tmp, k) = cell0;
-                        k++;
-                    }
-                }
+bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
+    int k = 0;
+    veci2 cell0;
+    for (int i = 1; i < gridSize(0) - 1; i++) {
+        for (int j = 1; j < gridSize(1) - 1; j++) {
+            cell0(0) = i;
+            cell0(1) = j;
+            if (projectionsCount(cell0(0), cell0(1)) == 0) {
+                emptyCellsTile_tmp(k,0) = cell0(0); //may be done in a better way
+                emptyCellsTile_tmp(k,1) = cell0(1);
+                k++;
             }
-            if (k > 0) { // number of empty inner cells
-                //				int idx = (double) rtslam::rand() / RAND_MAX * k;
-                int idx = rtslam::rand() % k; // between 0 and k-1
-                cell(0) = emptyCellsTile_tmp(idx, 0);
-                cell(1) = emptyCellsTile_tmp(idx, 1);
-                return true;
-            }
-            else
-                return false;*/
-    return false
+        }
+    }
+    if (k > 0) { // number of empty inner cells
+        //				int idx = (double) rtslam::rand() / RAND_MAX * k;
+        int idx = rand() % k; // between 0 and k-1
+        cell(0) = emptyCellsTile_tmp(idx, 0);
+        cell(1) = emptyCellsTile_tmp(idx, 1);
+        return true;
+    }
+    else
+        return false;
 }
 
 /*
