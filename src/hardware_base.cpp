@@ -19,15 +19,7 @@ void HardwareBase::addSensor(SensorBase* _sensor_ptr)
 	addDownNode(_sensor_ptr);
     //std::cout << "added!" << std::endl;
 
-    // Remove Frame State Blocks
-    if (getTop() != nullptr)
-    {
-        if (_sensor_ptr->getPPtr() != nullptr)
-            getTop()->addStateBlockPtr(_sensor_ptr->getPPtr());
-
-        if (_sensor_ptr->getOPtr() != nullptr)
-            getTop()->addStateBlockPtr(_sensor_ptr->getOPtr());
-    }
+    _sensor_ptr->registerNewStateBlocks();
 
 }
 

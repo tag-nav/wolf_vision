@@ -16,14 +16,7 @@ MapBase::~MapBase()
 void MapBase::addLandmark(LandmarkBase* _landmark_ptr)
 {
     addDownNode(_landmark_ptr);
-
-    if (getTop()!= nullptr)
-    {
-        if (_landmark_ptr->getPPtr() != nullptr)
-            getTop()->addStateBlockPtr(_landmark_ptr->getPPtr());
-        if (_landmark_ptr->getOPtr() != nullptr)
-            getTop()->addStateBlockPtr(_landmark_ptr->getOPtr());
-    }
+    _landmark_ptr->registerNewStateBlocks();
 }
 
 void MapBase::removeLandmark(const LandmarkBaseIter& _landmark_iter)
