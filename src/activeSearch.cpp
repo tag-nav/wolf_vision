@@ -91,8 +91,8 @@ bool ActiveSearchGrid::pickEmptyCell(veci2 & cell) {
 /*
          * Get cell origin (exact pixel)
          */
-veci2 ActiveSearchGrid::cellOrigin(const veci2 & cell) {
-    veci2 cell0;
+Eigen::Vector2i ActiveSearchGrid::cellOrigin(const Eigen::Vector2i & cell) {
+    Eigen::Vector2i cell0;
     cell0(0) = offset(0) + cellSize(0) * cell(0);
     cell0(1) = offset(1) + cellSize(1) * cell(1);
     return cell0;

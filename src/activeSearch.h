@@ -189,7 +189,7 @@ class ActiveSearchGrid {
         /**
                  * Get cell origin (exact pixel)
                  */
-        veci2 cellOrigin(const veci2 & cell);
+        Eigen::Vector2i cellOrigin(const Eigen::Vector2i & cell);
 
         /**
                  * Get cell center (can be decimal if size of cell is an odd number of pixels)
