@@ -182,7 +182,7 @@ class ActiveSearchGrid {
         /**
                  * Get cell corresponding to pixel
                  */
-        template<class Vector2i>
+        //template<typename Eigen::Vector2i>
         Eigen::Vector2i pix2cell(const Eigen::Vector2i & pix) {
             Eigen::Vector2i cell;
             cell(0) = (pix(0) - offset_(0)) / cell_size_(0);
