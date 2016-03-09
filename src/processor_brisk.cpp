@@ -6,6 +6,8 @@
 
 /** Public */
 
+/** The "main" class of this processor is "process" */
+
 //Constructor
 ProcessorBrisk::ProcessorBrisk(int _threshold, int _octaves, float _pattern_scales) :
     sensor_cam_ptr_(nullptr), capture_img_ptr_(nullptr), brisk_(_threshold, _octaves, _pattern_scales) //initializes the algoritm
@@ -47,7 +49,6 @@ unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::
     Eigen::Vector2s keypoint_coordinates;   // TODO: When "measurement" is erased, this variable should be erased to, all over the code
     std::vector<float> descript_vector;     // Vector to store the descriptor for each keypoint
 
-
     //Brisk Algorithm
     brisk_.create("Feature2D.BRISK");
     brisk_.detect(treated_image, keypoints);
@@ -55,8 +56,8 @@ unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::
 
     // Set the vector of keypoints and the matrix of descriptors in its capture
     /** Not sure if I can do this with the ROI */
-    //((CaptureImage*)getIncomingPtr())->setKeypoints(keypoints);
-    //((CaptureImage*)getIncomingPtr())->setDescriptors(descriptors);
+    ((CaptureImage*)getIncomingPtr())->setKeypoints(keypoints);
+    ((CaptureImage*)getIncomingPtr())->setDescriptors(descriptors);
 
 
     // Add the features in the capture
@@ -79,7 +80,7 @@ unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::
 unsigned int ProcessorBrisk::detectNewFeatures(CaptureBase* _capture_ptr)
 {
 
-    //setIncomingPtr(_capture_ptr);                                      // Set the capture as incoming_ptr_
+    //setIncomingPtr(_capture_ptr);                                    // Set the capture as incoming_ptr_
     cv::Mat cv_image = ((CaptureImage*)getIncomingPtr())->getImage();  // Get the image from the capture
     unsigned int h = briskImplementation(_capture_ptr, cv_image);
     return h;
@@ -97,6 +98,20 @@ bool ProcessorBrisk::voteForKeyFrame()
 void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
 {
     setIncomingPtr(_incoming_ptr);
+    /** TODO
+     * method: processKnownFeatures
+        - Do the landmark projection and select the ROI to be used to do the matching
+        - Use brisk in that ROIs to get features and do the matching
+        - Create constraints
+     * Analyze the number of matches. Decide if the method detectNewFeatures should be applied or not depending on that
+     * method: detectNewFeatures
+        - Use brisk in ROIs that do not detect features (that can be without features or just not enough of them)
+        - Analyze if the detected features are good enough (and, if not, decide if the detection should be done again elsewhere)
+        - Do the landmark creation
+     * method: voteForKeyFrame (at present I don't know how to implement this, but it should go at the end anyway) (it does not create keyframes)
+     */
+
+
     int n_features = detectNewFeatures(_incoming_ptr);
     std::cout << "n_features: " << n_features << std::endl;
 }
