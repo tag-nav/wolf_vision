@@ -73,15 +73,9 @@ public:
     virtual bool voteForKeyFrame();
 
 
-    /** \brief Full processing of an incoming Capture.
-     *
-     * Overload this function in derived trackers if desired.
-     */
-    virtual void process(CaptureBase* const _incoming_ptr);
+    virtual void drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp, cv::Rect _roi);
 
-    virtual void drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp);
-
-    virtual unsigned int briskImplementation(CaptureBase* _capture_ptr, cv::Mat _image);
+    virtual unsigned int briskImplementation(CaptureBase* _capture_ptr, cv::Mat _image, cv::Rect _roi);
 };
 
 #endif // PROCESSOR_BRISK_H

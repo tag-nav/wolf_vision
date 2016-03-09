@@ -7,6 +7,7 @@
 #include "processor_image_point_brisk.h"
 #include "processor_brisk.h"
 #include "state_block.h"
+#include "state_quaternion.h"
 
 // general includes
 #include "unistd.h"
@@ -85,36 +86,41 @@ int main(int argc, char** argv)
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
 
-    WolfProblem* wolf_problem_ = new WolfProblem(PO_2D);
+    WolfProblem* wolf_problem_ = new WolfProblem(PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
     ProcessorBrisk* p_brisk = new ProcessorBrisk(30,0,1.0f);
     sen_cam_->addProcessor(p_brisk);
 
-    wolf_problem_->getTrajectoryPtr()->addFrame(new FrameBase(TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero())));
-
-
-    int f = 0;
+    unsigned int f = 0;
     const char * filename = "/home/jtarraso/Vídeos/House interior.mp4";
     cv::VideoCapture capture(filename);
     cv::Mat frame;
 
-    CaptureImage* capture_brisk_ptr;
+    // CaptureImage* capture_brisk_ptr;
     capture.set(CV_CAP_PROP_POS_MSEC, 3000);
 
     capture >> frame;
 
+
+    FrameBase* frm_ptr;
+    CaptureImage* capture_brisk_ptr;
+
+    frm_ptr = new FrameBase(KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
+    wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
+
     capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
-    wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->addCapture(capture_brisk_ptr);
+    frm_ptr->addCapture(capture_brisk_ptr);
+
     p_brisk->init(capture_brisk_ptr);
 
 
-    //p_brisk->process(capture_brisk_ptr);
-
-    while(f<100)
+    while(f<400)
     {
         capture >> frame;
         capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
-        wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->addCapture(capture_brisk_ptr);
+        frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
+        wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
+        frm_ptr->addCapture(capture_brisk_ptr);
 
         p_brisk->process(capture_brisk_ptr);
         f++;

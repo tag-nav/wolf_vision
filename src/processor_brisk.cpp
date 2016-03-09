@@ -10,9 +10,10 @@
 
 //Constructor
 ProcessorBrisk::ProcessorBrisk(int _threshold, int _octaves, float _pattern_scales) :
+    ProcessorTracker(true, false),
     sensor_cam_ptr_(nullptr), capture_img_ptr_(nullptr), brisk_(_threshold, _octaves, _pattern_scales) //initializes the algoritm
 {
-
+    //TODO: remove sensor_cam_ptr_, capture_img_ptr_
 }
 
 //Destructor
@@ -25,23 +26,36 @@ ProcessorBrisk::~ProcessorBrisk()
 // Tracker function. Returns the number of successful tracks.
 unsigned int ProcessorBrisk::processKnownFeatures(CaptureBase* _incoming_ptr)
 {
-    return 1;
+    incoming_ptr_ = _incoming_ptr;
+    return 0;
 }
 
 
-void ProcessorBrisk::drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp)
+void ProcessorBrisk::drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp, cv::Rect _roi)
 {
     cv::namedWindow("Keypoint drawing");    // Creates a window for display.
-    for(unsigned int i = 0; i <= (_kp.size()-1);i++)
-    {
-        cv::circle(_image,_kp[i].pt,2,cv::Scalar(88.0,250.0,154.0),-1,8,0);
-    }
-    cv::imshow("Keypoint drawing",_image);
-    cv::waitKey(20);
+    //if(_kp.size!=0)
+    //{
+        for(unsigned int i = 0; i <= (_kp.size()-1);i++)
+        {
+            cv::Point point;
+            point.x = _kp[i].pt.x + _roi.x;
+            point.y = _kp[i].pt.y + _roi.y;
+            cv::circle(_image,point,2,cv::Scalar(88.0,250.0,154.0),-1,8,0); //_kp[i].pt
+            cv::rectangle(_image,_roi,cv::Scalar(88.0,250.0,154.0),1,8,0);
+        }
+        cv::imshow("Keypoint drawing",_image);
+        cv::waitKey(20);
+    //}
+    //else
+    //{
 
+      //  cv::imshow("Keypoint drawing",_image);
+       // cv::waitKey(20);
+    //}
 }
 
-unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::Mat _image)
+unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::Mat _image, cv::Rect _roi)
 {
     cv::Mat treated_image = _image;         // Set the image to analyze
     std::vector<cv::KeyPoint> keypoints;    // Vector of keypoints
@@ -55,25 +69,32 @@ unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::
     brisk_.compute(treated_image, keypoints,descriptors);
 
     // Set the vector of keypoints and the matrix of descriptors in its capture
-    /** Not sure if I can do this with the ROI */
-    ((CaptureImage*)getIncomingPtr())->setKeypoints(keypoints);
-    ((CaptureImage*)getIncomingPtr())->setDescriptors(descriptors);
+    /** Not sure if I can do this (the way the "set" is done, as it overwrittes) with the ROIs */
+    ((CaptureImage*)_capture_ptr)->setKeypoints(keypoints);
+    ((CaptureImage*)_capture_ptr)->setDescriptors(descriptors);
 
+//    if(keypoints.size()!=0)
+//    {
+        // Add the features in the capture
+        assert(!keypoints.size()==0 && "Keypoints size is 0");
+        for(unsigned int i = 0; i <= (keypoints.size()-1);i++)
+        {
+            keypoint_coordinates(0) = keypoints[i].pt.x;    //TODO: This two lines should be erased when "measurement" is gone
+            keypoint_coordinates(1) = keypoints[i].pt.y;
 
-    // Add the features in the capture
-    assert(!keypoints.size()==0 && "Keypoints size is 0");
-    for(unsigned int i = 0; i <= (keypoints.size()-1);i++)
-    {
-        keypoint_coordinates(0) = keypoints[i].pt.x;    //TODO: This two lines should be erased when "measurement" is gone
-        keypoint_coordinates(1) = keypoints[i].pt.y;
+            descript_vector=descriptors(cv::Range(i,i+1),cv::Range(0,descriptors.cols));
+            ((CaptureImage*)_capture_ptr)->addFeature(new FeaturePointImage(keypoint_coordinates,keypoints[i],descript_vector));
+        }
 
-        descript_vector=descriptors(cv::Range(i,i+1),cv::Range(0,descriptors.cols));
-        ((CaptureImage*)getIncomingPtr())->addFeature(new FeaturePointImage(keypoint_coordinates,keypoints[i],descript_vector));
-    }
+        drawFeatures(((CaptureImage*)_capture_ptr)->getImage(), keypoints, _roi); // A method to draw the keypoints. Optional
 
-    drawFeatures(treated_image, keypoints); // A method to draw the keypoints. Optional
-
-    return descriptors.rows;  //number of features
+        return descriptors.rows;  //number of features
+    //}
+    //else
+    //{
+      //  drawFeatures(((CaptureImage*)_capture_ptr)->getImage(), keypoints, _roi); // A method to draw the keypoints. Optional
+       // return 0;
+    //}
 }
 
 // This is intended to create Features that are not among the Features already known in the Map. Returns the number of detected Features.
@@ -81,8 +102,13 @@ unsigned int ProcessorBrisk::detectNewFeatures(CaptureBase* _capture_ptr)
 {
 
     //setIncomingPtr(_capture_ptr);                                    // Set the capture as incoming_ptr_
-    cv::Mat cv_image = ((CaptureImage*)getIncomingPtr())->getImage();  // Get the image from the capture
-    unsigned int h = briskImplementation(_capture_ptr, cv_image);
+    cv::Mat cv_image = ((CaptureImage*)_capture_ptr)->getImage();  // Get the image from the capture
+
+    std::cout << "Mat rows: " << cv_image.rows << "Mat cols: " << cv_image.cols << std::endl;
+
+    cv::Rect myROI(100, 100, 100, 100); //x,y,width,height
+    cv::Mat croppedImage = cv_image(myROI);
+    unsigned int h = briskImplementation(_capture_ptr,croppedImage,myROI);//cv_image);
     return h;
 }
 
@@ -90,31 +116,9 @@ unsigned int ProcessorBrisk::detectNewFeatures(CaptureBase* _capture_ptr)
 //Vote for KeyFrame generation. If a KeyFrame criterion is validated, this function returns true
 bool ProcessorBrisk::voteForKeyFrame()
 {
-    return true;
+    return false;
 }
 
-
-//Full processing of an incoming Capture
-void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
-{
-    setIncomingPtr(_incoming_ptr);
-    /** TODO
-     * method: processKnownFeatures
-        - Do the landmark projection and select the ROI to be used to do the matching
-        - Use brisk in that ROIs to get features and do the matching
-        - Create constraints
-     * Analyze the number of matches. Decide if the method detectNewFeatures should be applied or not depending on that
-     * method: detectNewFeatures
-        - Use brisk in ROIs that do not detect features (that can be without features or just not enough of them)
-        - Analyze if the detected features are good enough (and, if not, decide if the detection should be done again elsewhere)
-        - Do the landmark creation
-     * method: voteForKeyFrame (at present I don't know how to implement this, but it should go at the end anyway) (it does not create keyframes)
-     */
-
-
-    int n_features = detectNewFeatures(_incoming_ptr);
-    std::cout << "n_features: " << n_features << std::endl;
-}
 
 /** Protected */
 
