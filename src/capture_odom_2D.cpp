@@ -44,6 +44,7 @@ Eigen::VectorXs CaptureOdom2D::computeFramePose(const TimeStamp& _now) const
 
     Eigen::Vector3s prior = getFramePtr()->getPreviousFrame()->getState();
     //std::cout << "previous pose: " << prior.transpose() << std::endl;
+    //std::cout << "previous pose: " << getFramePtr()->getPreviousFrame()->getPPtr()->getVector().transpose() << " " << getFramePtr()->getPreviousFrame()->getOPtr()->getVector().transpose() << std::endl;
     prior(0) += data_(0) * cos(prior(2)) - data_(1) * sin(prior(2));
     prior(1) += data_(0) * sin(prior(2)) + data_(1) * cos(prior(2));
     prior(2) += data_(2);
