@@ -97,7 +97,9 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
-
+        /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
+         **/
+        virtual void registerNewStateBlocks();
 
 
         // Other constraints pointing to this frame ------------------------------------------
@@ -135,10 +137,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 
 inline bool FrameBase::isKey() const
 {
-    if (type_ == KEY_FRAME)
-        return true;
-    else
-        return false;
+    return (type_ == KEY_FRAME);
 }
 
 inline void FrameBase::fix()

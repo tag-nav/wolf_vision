@@ -84,6 +84,21 @@ void SensorBase::unfix()
     }
 }
 
+void SensorBase::registerNewStateBlocks()
+{
+    if (getTop() != nullptr)
+    {
+        if (p_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(p_ptr_);
+
+        if (o_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(o_ptr_);
+
+        if (intrinsic_ptr_ != nullptr)
+            getTop()->addStateBlockPtr(intrinsic_ptr_);
+    }
+}
+
 void SensorBase::setNoise(const Eigen::VectorXs& _noise_std) {
 	noise_std_ = _noise_std;
 	noise_cov_.setZero();

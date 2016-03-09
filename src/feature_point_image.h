@@ -14,8 +14,8 @@
  *
  **/
 
-//class FeaturePoint
-class FeaturePoint : public FeatureBase
+//class FeaturePointImage
+class FeaturePointImage : public FeatureBase
 {
     protected:
 
@@ -28,28 +28,30 @@ class FeaturePoint : public FeatureBase
          *
          * constructor
          */
-        FeaturePoint(const Eigen::Vector2s & _measurement);
+        FeaturePointImage(const Eigen::Vector2s & _measurement);
 
         /** \brief Constructor
          *
          * constructor
          */
-        FeaturePoint(const Eigen::Vector2s & _measurement, const cv::KeyPoint _keypoint,const std::vector<float> & _descriptor);
+        FeaturePointImage(const Eigen::Vector2s & _measurement, const cv::KeyPoint _keypoint,const std::vector<float> & _descriptor);
 
         /** \brief Constructor
          *
          * constructor
          */
-        FeaturePoint(const Eigen::Vector2s & _measurement, const Eigen::Matrix2s & _meas_covariance);
+        FeaturePointImage(const Eigen::Vector2s & _measurement, const Eigen::Matrix2s & _meas_covariance);
 
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          */
-        virtual ~FeaturePoint();
+        virtual ~FeaturePointImage();
 
         virtual Eigen::Vector2s getMeasurement();
+
+        virtual cv::KeyPoint getKeypoint();
 
         virtual std::vector<float> getDescriptor();
 

@@ -18,15 +18,8 @@ TrajectoryBase::~TrajectoryBase()
 void TrajectoryBase::addFrame(FrameBase* _frame_ptr)
 {
 	addDownNode(_frame_ptr);
-    if (getTop() != nullptr)
-    {
-        if (_frame_ptr->getPPtr() != nullptr)
-            getTop()->addStateBlockPtr(_frame_ptr->getPPtr());
-        if (_frame_ptr->getOPtr() != nullptr)
-            getTop()->addStateBlockPtr(_frame_ptr->getOPtr());
-        if (_frame_ptr->getVPtr() != nullptr)
-            getTop()->addStateBlockPtr(_frame_ptr->getVPtr());
-    }
+    if (_frame_ptr->isKey())
+        _frame_ptr->registerNewStateBlocks();
 }
 
 void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)

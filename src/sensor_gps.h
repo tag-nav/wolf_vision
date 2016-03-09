@@ -35,7 +35,9 @@ public:
      **/
     virtual ~SensorGPS();
 
+    /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
+     **/
+    virtual void registerNewStateBlocks();
+
 };
-
-
 #endif //SENSOR_GPS_H_

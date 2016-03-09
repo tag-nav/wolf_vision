@@ -17,7 +17,7 @@ protected:
     WolfScalar pseudorange_;
 
 public:
-    FeatureGPSPseudorange(Eigen::Vector3s& _sat_position, WolfScalar _pseudorange );
+    FeatureGPSPseudorange(Eigen::Vector3s& _sat_position, WolfScalar _pseudorange, WolfScalar _covariance);
 
     /** \brief Default destructor (not recommended)
      *

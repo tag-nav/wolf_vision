@@ -9,7 +9,6 @@ class StateBlock;
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
-#include "state_block.h"
 
 //std includes
 
@@ -74,6 +73,10 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 
         void unfix();
 
+        /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
+         **/
+        virtual void registerNewStateBlocks();
+
         /**
          * Check if sensor is dynamic
          */
@@ -86,6 +89,7 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
         Eigen::MatrixXs getNoiseCov();
 
 };
+
 
 inline void SensorBase::addProcessor(ProcessorBase* _proc_ptr)
 {

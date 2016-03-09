@@ -81,7 +81,6 @@ SET(HDRS_BASE
 
 SET(HDRS
     capture_base.h
-    #capture_image.h
     capture_motion.h
     capture_fix.h
     capture_gps_fix.h
@@ -103,7 +102,6 @@ SET(HDRS
     feature_corner_2D.h
     feature_gps_fix.h
     feature_gps_pseudorange.h
-    feature_point.h
     feature_fix.h
     feature_odom_2D.h
     frame_base.h
@@ -145,7 +143,6 @@ SET(HDRS_DTASSC
 #sources
 SET(SRCS
     capture_base.cpp
-    #capture_image.cpp
     capture_motion.cpp
     capture_gps_fix.cpp
     capture_fix.cpp
@@ -157,7 +154,6 @@ SET(SRCS
     feature_corner_2D.cpp
     feature_gps_fix.cpp
     feature_gps_pseudorange.cpp
-    feature_point.cpp
     feature_fix.cpp
     feature_odom_2D.cpp
     frame_base.cpp
@@ -238,11 +234,15 @@ ENDIF(raw_gps_utils_FOUND)
 IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
+        feature_point_image.h
         processor_image_point_brisk.h
+        processor_brisk.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
+        feature_point_image.cpp
         processor_image_point_brisk.cpp
+        processor_brisk.cpp
         )
 ENDIF(OpenCV_FOUND)
 

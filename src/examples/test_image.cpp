@@ -3,8 +3,9 @@
 //Wolf includes
 #include "sensor_camera.h"
 #include "capture_image.h"
-#include "feature_point.h"
+#include "feature_point_image.h"
 #include "processor_image_point_brisk.h"
+#include "processor_brisk.h"
 #include "state_block.h"
 
 // general includes
@@ -74,13 +75,52 @@ int main(int argc, char** argv)
     m_cov(1,0)=3;
     m_cov(1,1)=4;
 
-    FeaturePoint* feat_point = new FeaturePoint(m_pos,m_cov);
+    FeaturePointImage* feat_point = new FeaturePointImage(m_pos,m_cov);
     std::cout << "measurement position: " << m_pos(0) << " " << m_pos(1) << std::endl;
     std::cout << "measurement covariance:\n" << m_cov(0,0) << " " << m_cov(0,1) << "\n" << m_cov(1,0) << " " << m_cov(1,1) << std::endl;
     std::cout << "feature position:\n" << feat_point->getMeasurement() << "\nfeature covariance:\n" << feat_point->getMeasurementCovariance()<< std::endl;
 
     delete feat_point;
 
+    //ProcessorBrisk test
+    std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
+
+    WolfProblem* wolf_problem_ = new WolfProblem(PO_2D);
+    wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(30,0,1.0f);
+    sen_cam_->addProcessor(p_brisk);
+
+    wolf_problem_->getTrajectoryPtr()->addFrame(new FrameBase(TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero())));
+
+
+    int f = 0;
+    const char * filename = "/home/jtarraso/Vídeos/House interior.mp4";
+    cv::VideoCapture capture(filename);
+    cv::Mat frame;
+
+    CaptureImage* capture_brisk_ptr;
+    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
+
+    capture >> frame;
+
+    capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+    wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->addCapture(capture_brisk_ptr);
+    p_brisk->init(capture_brisk_ptr);
+
+
+    //p_brisk->process(capture_brisk_ptr);
+
+    while(f<100)
+    {
+        capture >> frame;
+        capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+        wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->addCapture(capture_brisk_ptr);
+
+        p_brisk->process(capture_brisk_ptr);
+        f++;
+        std::cout << "f: " << f << std::endl;
+    }
+/**
     //Brisk test
     std::cout << std::endl << " ========= Brisk test ===========" << std::endl << std::endl;
 
@@ -150,7 +190,7 @@ int main(int argc, char** argv)
         //cv::waitKey(0);
 
     }
-
+*/
     wolf_problem_->destruct();
 
 
