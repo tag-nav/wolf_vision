@@ -74,17 +74,20 @@ using namespace std;
          * - The grid is offset by a fraction of a cell size.
          * 		- use renew() at each frame to clear the grid and set a new offset.
          * - Projected landmarks are represented by red dots.
-         * 		- After projection, use addObs() to add a new dot to the grid.
+         * 		- After projection, use hiCell() to add a new dot to the grid.
          * - Cells with projected landmarks inside are 'occupied'.
          * - Only the inner cells (thick blue rectangle) are considered for Region of Interest (ROI) extraction.
          * - One cell is chosen randomly among those that are empty.
          * - The ROI is smaller than the cell to guarantee a minimum feature separation.
          * 		- Use the optional 'separation' parameter at construction time to control this separation.
-         * 		- Use getRoi() to obtain an empty ROI for initialization.
+         * 		- Use pickRoi() to obtain an empty ROI for initialization.
          * - A new feature is to be be searched inside this ROI.
+         * - If there is no feature found in this ROI, call blockCell() function not to search in this area again.
          * - If you need to search more than one feature per frame, proceed like this:
-         * 		- At successful detection, add the detected pixel with addObs().
-         * 		- Call getRoi() again.
+         * 		- If successful detection
+         *          - add the detected pixel with hiCell().
+         *      - Else block the cell zith blockCell().
+         * 		- Call pickRoi() again.
          * 		- Repeat these two steps for each feature to be searched.
          *
          * We include here a schematic active-search pseudo-code algorithm to illustrate its operation:
@@ -98,7 +101,7 @@ using namespace std;
          * {
          *   obs->project();
          *   if (obs->isVisible())
-         *     grid.addObs(obs->expectation.x());   // add only visible landmarks
+         *     grid.hiCell(obs->expectation.x());   // add only visible landmarks
          * }
          *
          * // Then we process the selected observations
@@ -107,12 +110,11 @@ using namespace std;
          *   obs.process();                           // process observation
          *
          * // Now we go to initialization
-         * grid.getRoi(roi);                          // roi is now region of interest
+         * grid.pickRoi(roi);                          // roi is now region of interest
          * if (detectFeature(roi))                    // detect inside ROI
          *   initLandmark();                          // initialize only if successful detection
          * \endcode
          *
-         * \ingroup rtslam
          */
 
 class ActiveSearchGrid {
@@ -167,7 +169,7 @@ class ActiveSearchGrid {
         bool pickRoi(cv::Mat & roi);
 
         /**
-                 * Call this after getRoi if no point was found in the roi
+                 * Call this after pickRoi if no point was found in the roi
                  * in order to avoid searching again in it.
                  * \param roi the ROI where nothing was found
                  */
