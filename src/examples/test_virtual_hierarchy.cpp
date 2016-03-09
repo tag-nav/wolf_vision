@@ -216,7 +216,6 @@ class CorNode : public Cor, public ChildOf<FeaNode>, public Bot//, public Explor
     public:
         CorNode(FeaNode* _fea_ptr) : ChildOf<FeaNode>(_fea_ptr) { }
         virtual ~CorNode() { }
-//        void print();
 };
 //class TrSNode : public virtual N
 //{

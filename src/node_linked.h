@@ -135,41 +135,9 @@ class NodeLinked : public NodeBase
          **/
         virtual WolfProblem* getTop();
 
-//        /** \brief Prints node information
-//         *
-//         * Prints node information.
-//         * \param _ntabs number of tabulations to print at the left of the printed information
-//         * \param _ost output stream
-//         *
-//         * Overload this function in derived classes to adapt the printed output to each object's relevant info.
-//         *
-//         */
-//        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 
     protected:
 
-//        /** \brief Prints tabulated information about this node.
-//         *
-//         * Prints information about this node. It adds a number of tabs given by _ntabs.
-//         *\param _ntabs the number of tabs.
-//         *\param _ost the stream it prints to
-//         *
-//         */
-//        virtual void printSelf(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
-
-//        /** \brief Prints upper node info
-//         *
-//         * Prints upper node info
-//         *
-//         **/
-//        void printUpper(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
-
-//        /** \brief Prints recursively lower node info
-//         *
-//         * Prints recursively lower node info
-//         *
-//         **/
-//        void printLower(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
 };
 
 //////////////////////////////////////////
@@ -346,66 +314,6 @@ WolfProblem* NodeLinked<UpperType, LowerType>::getTop()
     return nullptr;
 }
 
-//template<class UpperType, class LowerType>
-//void NodeLinked<UpperType, LowerType>::print(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//    printSelf(_ntabs, _ost); //one line
-//
-//    if ((location_ != TOP) && (up_node_ptr_ != nullptr))
-//    {
-//        printUpper(_ntabs, _ost);
-//    }
-//    if (location_ != BOTTOM)
-//    {
-//        printLower(_ntabs, _ost);
-//    }
-//}
 
-//template<class UpperType, class LowerType>
-//void NodeLinked<UpperType, LowerType>::printSelf(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//    printTabs(_ntabs);
-//    _ost << nodeLabel() << " " << nodeId() << " : ";
-//    switch (location_)
-//    {
-//        case TOP:
-//            _ost << "TOP" << std::endl;
-//            break;
-//        case MID:
-//            _ost << "MID" << std::endl;
-//            break;
-//        case BOTTOM:
-//            _ost << "BOT" << std::endl;
-//            break;
-//        default:
-//            _ost << "*" << std::endl;
-//            break;
-//    }
-//}
-
-//template<class UpperType, class LowerType>
-//void NodeLinked<UpperType, LowerType>::printUpper(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//    printTabs(_ntabs);
-//    _ost << "\tUpper Node   --> " << up_node_ptr_->nodeId() << std::endl;
-//}
-
-
-//template<class UpperType, class LowerType>
-//void NodeLinked<UpperType, LowerType>::printLower(unsigned int _ntabs, std::ostream& _ost) const
-//{
-//    printTabs(_ntabs);
-//    _ost << "\tLower Nodes  ==> [ ";
-//    for (auto const & down_node_sh_ptr : down_node_list_)
-//    {
-//        _ost << down_node_sh_ptr->nodeId() << " ";
-//    }
-//    _ost << "]" << std::endl;
-//    _ntabs++;
-//    for (auto const & down_node_ptr : down_node_list_)
-//    {
-//        down_node_ptr->print(_ntabs, _ost);
-//    }
-//}
 
 #endif /* NODE_LINKED_H_ */

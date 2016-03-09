@@ -110,7 +110,6 @@ void WolfManagerGPS::addCapture(CaptureBase* _capture)
 {
     new_captures_.push(_capture);
     //std::cout << "added new capture: " << _capture->nodeId() << " stamp: ";
-    //_capture->getTimeStamp().print();
     //std::cout << std::endl;
 }
 

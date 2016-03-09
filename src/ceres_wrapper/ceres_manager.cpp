@@ -226,7 +226,6 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 void CeresManager::addStateBlock(StateBlock* _st_ptr)
 {
     //std::cout << "Adding State Unit with size: " <<  _st_ptr->getSize() << std::endl;
-    //_st_ptr->print();
 
     if (_st_ptr->hasLocalParametrization())
     {
@@ -270,7 +269,6 @@ void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, const bool _self_auto_diff)
 {
 	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
-	//_corrPtr->print();
 
     if (_corrPtr->getJacobianMethod() == ANALYTIC)
         return new CostFunctionWrapper((ConstraintAnalytic*)_corrPtr);
