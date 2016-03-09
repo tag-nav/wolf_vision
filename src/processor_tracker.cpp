@@ -54,8 +54,9 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             {
                 // Create one Landmark for this Feature with the Landmark factory in this class
                 LandmarkBase* lmk_ptr = createLandmark(feature_ptr);
-                // Create and add one constraint between the Feature and the Landmark
+                // Create one Constraint between the Feature and the Landmark
                 ConstraintBase* constr_ptr = createConstraint(feature_ptr, lmk_ptr);
+                // Add the Constraint to the Feature's constraints list
                 feature_ptr->addConstraint(constr_ptr);
             }
         } // Done with Landmark creation
