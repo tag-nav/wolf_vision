@@ -19,24 +19,24 @@ using namespace std;
 ///////////////////////////////////////////
 
 ostream& operator <<(ostream & s, ActiveSearchGrid const & grid) {
-    s << "feature count: " << grid.projectionsCount;
+    s << "feature count: " << grid.projections_count_;
     return s;
 }
 
 
 // CLASS ActiveSearchGrid
-ActiveSearchGrid::ActiveSearchGrid(const int & imgSize_h, const int & imgSize_v, const int & nCells_h,
-                                   const int & nCells_v, const int & margin, const int & separation) :
-    separation(separation), margin(margin) {
+ActiveSearchGrid::ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v, const int & _n_cells_h,
+                                   const int & _n_cells_v, const int & _margin, const int & _separation) :
+    separation_(_separation), margin_(_margin) {
 
-    projectionsCount.resize(nCells_v + 1, nCells_h +1);
-    emptyCellsTile_tmp.resize(2, (nCells_h + 1) * (nCells_v + 1));
-    imgSize(0) = imgSize_h;
-    imgSize(1) = imgSize_v;
-    gridSize(0) = projectionsCount.rows();
-    gridSize(1) = projectionsCount.cols(), cellSize(0) = imgSize_v / nCells_v;
-    cellSize(1) = imgSize_h / nCells_h;
-    offset = -cellSize / 2;
+    projections_count_.resize(_n_cells_v + 1, _n_cells_h +1);
+    empty_cells_tile_tmp_.resize(2, (_n_cells_h + 1) * (_n_cells_v + 1));
+    img_size_(0) = _img_size_h;
+    img_size_(1) = _img_size_v;
+    grid_size_(0) = projections_count_.rows();
+    grid_size_(1) = projections_count_.cols(), cell_size_(0) = _img_size_v / _n_cells_v;
+    cell_size_(1) = _img_size_h / _n_cells_h;
+    offset = -cell_size_ / 2;
     renew();
 }
 
@@ -44,20 +44,20 @@ ActiveSearchGrid::ActiveSearchGrid(const int & imgSize_h, const int & imgSize_v,
 // Functions to fill in cells
 void ActiveSearchGrid::hitCell(const Eigen::Vector2i & p) {
     Eigen::Vector2i cell = pix2cell(p);
-    if (cell(0) < 0 || cell(1) < 0 || cell(0) >= gridSize(0) || cell(1) >= gridSize(1))
+    if (cell(0) < 0 || cell(1) < 0 || cell(0) >= grid_size_(0) || cell(1) >= grid_size_(1))
         return;
-    if (projectionsCount(cell(0), cell(1)) == -1)
-        projectionsCount(cell(0), cell(1)) = 0;
-    projectionsCount(cell(0), cell(1))++;
+    if (projections_count_(cell(0), cell(1)) == -1)
+        projections_count_(cell(0), cell(1)) = 0;
+    projections_count_(cell(0), cell(1))++;
 }
 
 void ActiveSearchGrid::clear() {
-    projectionsCount.setZero();
+    projections_count_.setZero();
 }
 
 void ActiveSearchGrid::renew() {
-    offset(0) = - (margin + rand() % (cellSize(0) - 2*margin)); // from -margin to -(cellSize(0)-margin)
-    offset(1) = - (margin + rand() % (cellSize(1) - 2*margin)); // from -margin to -(cellSize(0)-margin)
+    offset(0) = - (margin_ + rand() % (cell_size_(0) - 2*margin_)); // from -margin to -(cellSize(0)-margin)
+    offset(1) = - (margin_ + rand() % (cell_size_(1) - 2*margin_)); // from -margin to -(cellSize(0)-margin)
     clear();
 }
 
@@ -68,13 +68,13 @@ void ActiveSearchGrid::renew() {
 bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
     int k = 0;
     Eigen::Vector2i cell0;
-    for (int i = 1; i < gridSize(0) - 1; i++) {
-        for (int j = 1; j < gridSize(1) - 1; j++) {
+    for (int i = 1; i < grid_size_(0) - 1; i++) {
+        for (int j = 1; j < grid_size_(1) - 1; j++) {
             cell0(0) = i;
             cell0(1) = j;
-            if (projectionsCount(cell0(0), cell0(1)) == 0) {
-                emptyCellsTile_tmp(0,k) = cell0(0); //may be done in a better way
-                emptyCellsTile_tmp(1,k) = cell0(1);
+            if (projections_count_(cell0(0), cell0(1)) == 0) {
+                empty_cells_tile_tmp_(0,k) = cell0(0); //may be done in a better way
+                empty_cells_tile_tmp_(1,k) = cell0(1);
                 k++;
             }
         }
@@ -82,8 +82,8 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
     if (k > 0) { // number of empty inner cells
         //				int idx = (double) rtslam::rand() / RAND_MAX * k;
         int idx = rand() % k; // between 0 and k-1
-        cell(0) = emptyCellsTile_tmp(0, idx);
-        cell(1) = emptyCellsTile_tmp(1, idx);
+        cell(0) = empty_cells_tile_tmp_(0, idx);
+        cell(1) = empty_cells_tile_tmp_(1, idx);
         return true;
     }
     else
@@ -95,8 +95,8 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
          */
 Eigen::Vector2i ActiveSearchGrid::cellOrigin(const Eigen::Vector2i & cell) {
     Eigen::Vector2i cell0;
-    cell0(0) = offset(0) + cellSize(0) * cell(0);
-    cell0(1) = offset(1) + cellSize(1) * cell(1);
+    cell0(0) = offset(0) + cell_size_(0) * cell(0);
+    cell0(1) = offset(1) + cell_size_(1) * cell(1);
     return cell0;
 }
 
@@ -105,16 +105,16 @@ Eigen::Vector2i ActiveSearchGrid::cellOrigin(const Eigen::Vector2i & cell) {
          * Get cell center (can be decimal if size of cell is an odd number of pixels)
          */
 Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i & cell) {
-    return cellOrigin(cell) + cellSize / 2;
+    return cellOrigin(cell) + cell_size_ / 2;
 }
 
 void ActiveSearchGrid::cell2roi(const veci2 & cell, cv::Mat & roi) {
     Eigen::Vector2i ul = cellOrigin(cell);
-    ul(0) += separation;
-    ul(1) += separation;
-    Eigen::Vector2i s = cellSize;
-    s(0) -= 2 * separation;
-    s(1) -= 2 * separation;
+    ul(0) += separation_;
+    ul(1) += separation_;
+    Eigen::Vector2i s = cell_size_;
+    s(0) -= 2 * separation_;
+    s(1) -= 2 * separation_;
     roi.init(cv::Rect(ul(0),ul(1),s(0),s(1)));
 }
 
@@ -136,7 +136,7 @@ void ActiveSearchGrid::blockCell(const cv::Mat & roi)
 {
     Eigen::Vector2i p; p(1) = roi.x()+roi.w()/2; p(2) = roi.y()+roi.h()/2;
     Eigen::Vector2i cell = pix2cell(p);
-    projectionsCount(cell(0), cell(1)) = -1;
+    projections_count_(cell(0), cell(1)) = -1;
 }
 /*
 #if 0

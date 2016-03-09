@@ -120,26 +120,26 @@ class ActiveSearchGrid {
         friend std::ostream& operator <<(std::ostream & s, ActiveSearchGrid const & grid);
 
     private:
-        Eigen::Vector2i imgSize;
-        Eigen::Vector2i gridSize;
-        Eigen::Vector2i cellSize;
-        Eigen::Vector2i offset;
-        Eigen::MatrixXi projectionsCount;
-        Eigen::MatrixXi emptyCellsTile_tmp;
-        int separation;
-        int margin;
+        Eigen::Vector2i img_size_;
+        Eigen::Vector2i grid_size_;
+        Eigen::Vector2i cell_size_;
+        Eigen::Vector2i offset_;
+        Eigen::MatrixXi projections_count_;
+        Eigen::MatrixXi empty_cells_tile_tmp_;
+        int separation_;
+        int margin_;
 
     public:
         /**
                  * Constructor.
-                 * \param imgSize_h horizontal image size, in pixels.
-                 * \param imgSize_v vertical image size.
-                 * \param nCells_h horizontal number of cells per image width.
-                 * \param nCells_v vertical number of cells per image height.
+                 * \param _img_size_h horizontal image size, in pixels.
+                 * \param _img_size_v vertical image size.
+                 * \param _n_cells_h horizontal number of cells per image width.
+                 * \param _n_cells_v vertical number of cells per image height.
                  * \param separation minimum separation between existing and new points.
                  */
-        ActiveSearchGrid(const int & imgSize_h, const int & imgSize_v, const int & nCells_h, const int & nCells_v, const int & margin = 0,
-                         const int & separation = 0);
+        ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v, const int & _n_cells_h, const int & _n_cells_v, const int & _margin = 0,
+                         const int & _separation = 0);
 
         /**
                  * Clear grid.
@@ -181,8 +181,8 @@ class ActiveSearchGrid {
         template<class Vector2i>
         Eigen::Vector2i pix2cell(const Eigen::Vector2i & pix) {
             Eigen::Vector2i cell;
-            cell(0) = (pix(0) - offset(0)) / cellSize(0);
-            cell(1) = (pix(1) - offset(1)) / cellSize(1);
+            cell(0) = (pix(0) - offset(0)) / cell_size_(0);
+            cell(1) = (pix(1) - offset(1)) / cell_size_(1);
             return cell;
         }
 
