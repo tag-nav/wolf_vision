@@ -67,7 +67,7 @@ void ActiveSearchGrid::renew() {
          */
 bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
     int k = 0;
-    veci2 cell0;
+    Eigen::Vector2i cell0;
     for (int i = 1; i < gridSize(0) - 1; i++) {
         for (int j = 1; j < gridSize(1) - 1; j++) {
             cell0(0) = i;
