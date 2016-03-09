@@ -6,3 +6,9 @@ bin/
 build/
 lib/
 .idea/
+./Wolf.user
+./Wolf.config
+./Wolf.creator
+./Wolf.files
+./Wolf.includes
+./Wolf/
