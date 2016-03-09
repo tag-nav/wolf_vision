@@ -134,9 +134,9 @@ bool ActiveSearchGrid::getRoi(cv::Mat & roi) {
 
 void ActiveSearchGrid::setFailed(const cv::Mat & roi)
 {
-    /*vec2 p; p(0) = roi.x()+roi.w()/2; p(1) = roi.y()+roi.h()/2;
-            veci2 cell = pix2cell(p);
-            projectionsCount(cell(0), cell(1)) = -1;*/
+    Eigen::Vector2i p; p(1) = roi.x()+roi.w()/2; p(2) = roi.y()+roi.h()/2;
+    Eigen::Vector2i cell = pix2cell(p);
+    projectionsCount(cell(0), cell(1)) = -1;
 }
 /*
 #if 0
