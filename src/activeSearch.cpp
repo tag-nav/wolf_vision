@@ -44,11 +44,11 @@ ActiveSearchGrid::ActiveSearchGrid(const int & imgSize_h, const int & imgSize_v,
 // Functions to fill in cells
 void ActiveSearchGrid::addObs(const Eigen::Vector2i & p) {
     Eigen::Vector2i cell = pix2cell(p);
-            if (cell(0) < 0 || cell(1) < 0 || cell(0) >= gridSize(0) || cell(1) >= gridSize(1))
-                return;
-            if (projectionsCount(cell(0), cell(1)) == -1)
-                projectionsCount(cell(0), cell(1)) = 0;
-            projectionsCount(cell(0), cell(1))++;
+    if (cell(0) < 0 || cell(1) < 0 || cell(0) >= gridSize(0) || cell(1) >= gridSize(1))
+        return;
+    if (projectionsCount(cell(0), cell(1)) == -1)
+        projectionsCount(cell(0), cell(1)) = 0;
+    projectionsCount(cell(0), cell(1))++;
 }
 
 void ActiveSearchGrid::clear() {
@@ -57,8 +57,8 @@ void ActiveSearchGrid::clear() {
 
 void ActiveSearchGrid::renew() {
     offset(0) = - (margin + rand() % (cellSize(0) - 2*margin)); // from -margin to -(cellSize(0)-margin)
-            offset(1) = - (margin + rand() % (cellSize(1) - 2*margin)); // from -margin to -(cellSize(0)-margin)
-            clear();
+    offset(1) = - (margin + rand() % (cellSize(1) - 2*margin)); // from -margin to -(cellSize(0)-margin)
+    clear();
 }
 
 
@@ -124,12 +124,12 @@ void ActiveSearchGrid::cell2roi(const veci2 & cell, cv::Mat & roi) {
          */
 bool ActiveSearchGrid::getRoi(cv::Mat & roi) {
     Eigen::Vector2i cell;
-            if (pickEmptyCell(cell)) {
-                cell2roi(cell, roi);
-                return true;
-            }
-            else
-                return false;
+    if (pickEmptyCell(cell)) {
+        cell2roi(cell, roi);
+        return true;
+    }
+    else
+        return false;
 }
 
 void ActiveSearchGrid::setFailed(const cv::Mat & roi)
