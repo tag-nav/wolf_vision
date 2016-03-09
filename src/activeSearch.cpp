@@ -34,8 +34,8 @@ ActiveSearchGrid::ActiveSearchGrid(const int & imgSize_h, const int & imgSize_v,
     imgSize(0) = imgSize_h;
     imgSize(1) = imgSize_v;
     gridSize(0) = projectionsCount.rows();
-    gridSize(1) = projectionsCount.cols(), cellSize(0) = imgSize_h / nCells_h;
-    cellSize(1) = imgSize_v / nCells_v;
+    gridSize(1) = projectionsCount.cols(), cellSize(0) = imgSize_v / nCells_v;
+    cellSize(1) = imgSize_h / nCells_h;
     offset = -cellSize / 2;
     renew();
 }
