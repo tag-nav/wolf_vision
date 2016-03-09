@@ -6,6 +6,7 @@
  */
 
 #include "activeSearch.h"
+// OLD HEADERS
 /*
 #include "rtslam/observationAbstract.hpp"
 #include "rtslam/sensorAbstract.hpp"
@@ -36,7 +37,7 @@ ActiveSearchGrid::ActiveSearchGrid(const int & _img_size_h, const int & _img_siz
     grid_size_(0) = projections_count_.rows();
     grid_size_(1) = projections_count_.cols(), cell_size_(0) = _img_size_v / _n_cells_v;
     cell_size_(1) = _img_size_h / _n_cells_h;
-    offset = -cell_size_ / 2;
+    offset_ = -cell_size_ / 2;
     renew();
 }
 
@@ -56,8 +57,8 @@ void ActiveSearchGrid::clear() {
 }
 
 void ActiveSearchGrid::renew() {
-    offset(0) = - (margin_ + rand() % (cell_size_(0) - 2*margin_)); // from -margin to -(cellSize(0)-margin)
-    offset(1) = - (margin_ + rand() % (cell_size_(1) - 2*margin_)); // from -margin to -(cellSize(0)-margin)
+    offset_(0) = - (margin_ + rand() % (cell_size_(0) - 2*margin_)); // from -margin to -(cellSize(0)-margin)
+    offset_(1) = - (margin_ + rand() % (cell_size_(1) - 2*margin_)); // from -margin to -(cellSize(0)-margin)
     clear();
 }
 
@@ -95,8 +96,8 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
          */
 Eigen::Vector2i ActiveSearchGrid::cellOrigin(const Eigen::Vector2i & cell) {
     Eigen::Vector2i cell0;
-    cell0(0) = offset(0) + cell_size_(0) * cell(0);
-    cell0(1) = offset(1) + cell_size_(1) * cell(1);
+    cell0(0) = offset_(0) + cell_size_(0) * cell(0);
+    cell0(1) = offset_(1) + cell_size_(1) * cell(1);
     return cell0;
 }
 
