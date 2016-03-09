@@ -157,21 +157,21 @@ class ActiveSearchGrid {
                  * Add a projected pixel to the grid.
                  * \param pix the pixel to add.
                  */
-        void addObs(const Eigen::Vector2i & pix);
+        void hitCell(const Eigen::Vector2i & pix);
 
         /**
                  * Get ROI of a random empty cell.
                  * \param roi the resulting ROI
                  * \return true if ROI exists.
                  */
-        bool getRoi(cv::Mat & roi);
+        bool pickRoi(cv::Mat & roi);
 
         /**
                  * Call this after getRoi if no point was found in the roi
                  * in order to avoid searching again in it.
                  * \param roi the ROI where nothing was found
                  */
-        void setFailed(const cv::Mat & roi);
+        void blockCell(const cv::Mat & roi);
 
 
     private:

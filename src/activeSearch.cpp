@@ -42,7 +42,7 @@ ActiveSearchGrid::ActiveSearchGrid(const int & imgSize_h, const int & imgSize_v,
 
 
 // Functions to fill in cells
-void ActiveSearchGrid::addObs(const Eigen::Vector2i & p) {
+void ActiveSearchGrid::hitCell(const Eigen::Vector2i & p) {
     Eigen::Vector2i cell = pix2cell(p);
     if (cell(0) < 0 || cell(1) < 0 || cell(0) >= gridSize(0) || cell(1) >= gridSize(1))
         return;
@@ -122,7 +122,7 @@ void ActiveSearchGrid::cell2roi(const veci2 & cell, cv::Mat & roi) {
 /**
          * Get ROI of one random empty cell
          */
-bool ActiveSearchGrid::getRoi(cv::Mat & roi) {
+bool ActiveSearchGrid::pickRoi(cv::Mat & roi) {
     Eigen::Vector2i cell;
     if (pickEmptyCell(cell)) {
         cell2roi(cell, roi);
@@ -132,7 +132,7 @@ bool ActiveSearchGrid::getRoi(cv::Mat & roi) {
         return false;
 }
 
-void ActiveSearchGrid::setFailed(const cv::Mat & roi)
+void ActiveSearchGrid::blockCell(const cv::Mat & roi)
 {
     Eigen::Vector2i p; p(1) = roi.x()+roi.w()/2; p(2) = roi.y()+roi.h()/2;
     Eigen::Vector2i cell = pix2cell(p);
