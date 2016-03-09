@@ -108,7 +108,7 @@ Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i & cell) {
     return cellOrigin(cell) + cell_size_ / 2;
 }
 
-void ActiveSearchGrid::cell2roi(const veci2 & cell, cv::Mat & roi) {
+void ActiveSearchGrid::cell2roi(const Eigen::Vector2i & cell, cv::Mat & roi) {
     Eigen::Vector2i ul = cellOrigin(cell);
     ul(0) += separation_;
     ul(1) += separation_;
