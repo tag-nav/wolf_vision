@@ -73,8 +73,8 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
             cell0(0) = i;
             cell0(1) = j;
             if (projectionsCount(cell0(0), cell0(1)) == 0) {
-                emptyCellsTile_tmp(k,0) = cell0(0); //may be done in a better way
-                emptyCellsTile_tmp(k,1) = cell0(1);
+                emptyCellsTile_tmp(0,k) = cell0(0); //may be done in a better way
+                emptyCellsTile_tmp(1,k) = cell0(1);
                 k++;
             }
         }
@@ -82,8 +82,8 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
     if (k > 0) { // number of empty inner cells
         //				int idx = (double) rtslam::rand() / RAND_MAX * k;
         int idx = rand() % k; // between 0 and k-1
-        cell(0) = emptyCellsTile_tmp(idx, 0);
-        cell(1) = emptyCellsTile_tmp(idx, 1);
+        cell(0) = emptyCellsTile_tmp(0, idx);
+        cell(1) = emptyCellsTile_tmp(1, idx);
         return true;
     }
     else
