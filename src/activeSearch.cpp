@@ -27,8 +27,9 @@ ostream& operator <<(ostream & s, ActiveSearchGrid const & grid) {
 // CLASS ActiveSearchGrid
 ActiveSearchGrid::ActiveSearchGrid(const int & imgSize_h, const int & imgSize_v, const int & nCells_h,
                                    const int & nCells_v, const int & margin, const int & separation) :
-    projectionsCount(nCells_h + 1, nCells_v + 1), emptyCellsTile_tmp((nCells_h + 1) * (nCells_v + 1), 2), separation(
-                                                                                                              separation), margin(margin) {
+    emptyCellsTile_tmp((nCells_h + 1) * (nCells_v + 1), 2), separation(separation), margin(margin) {
+
+    projectionsCount.resize(nCells_v + 1, nCells_h +1);
     imgSize(0) = imgSize_h;
     imgSize(1) = imgSize_v;
     gridSize(0) = projectionsCount.rows();
