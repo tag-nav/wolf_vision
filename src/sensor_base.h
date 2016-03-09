@@ -9,7 +9,6 @@ class StateBlock;
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
-#include "state_block.h"
 
 //std includes
 
@@ -90,6 +89,7 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
         Eigen::MatrixXs getNoiseCov();
 
 };
+
 
 inline void SensorBase::addProcessor(ProcessorBase* _proc_ptr)
 {
