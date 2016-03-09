@@ -127,6 +127,7 @@ class ActiveSearchGrid {
         Eigen::Vector2i grid_size_;
         Eigen::Vector2i cell_size_;
         Eigen::Vector2i offset_;
+        Eigen::Vector2i roi_coordinates_;
         Eigen::MatrixXi projections_count_;
         Eigen::MatrixXi empty_cells_tile_tmp_;
         int separation_;

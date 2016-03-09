@@ -110,13 +110,13 @@ Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i & cell) {
 }
 
 void ActiveSearchGrid::cell2roi(const Eigen::Vector2i & cell, cv::Mat & roi) {
-    Eigen::Vector2i ul = cellOrigin(cell);
-    ul(0) += separation_;
-    ul(1) += separation_;
+    roi_coordinates_ = cellOrigin(cell);
+    roi_coordinates_(0) += separation_;
+    roi_coordinates_(1) += separation_;
     Eigen::Vector2i s = cell_size_;
     s(0) -= 2 * separation_;
     s(1) -= 2 * separation_;
-    roi(cv::Rect(ul(0),ul(1),s(0),s(1)));
+    roi(cv::Rect(roi_coordinates_(0),roi_coordinates_(1),s(0),s(1)));
 }
 
 
@@ -135,7 +135,7 @@ bool ActiveSearchGrid::pickRoi(cv::Mat & roi) {
 
 void ActiveSearchGrid::blockCell(const cv::Mat & roi)
 {
-    Eigen::Vector2i p; p(1) = roi.x()+roi.w()/2; p(2) = roi.y()+roi.h()/2;
+    Eigen::Vector2i p; p(1) = roi_coordinates_(1)+roi.cols/2; p(2) = roi_coordinates_(0)+roi.rows/2;
     Eigen::Vector2i cell = pix2cell(p);
     projections_count_(cell(0), cell(1)) = -1;
 }
