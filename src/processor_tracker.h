@@ -46,7 +46,7 @@
  *       - detectNewFeatures()
  *       - if we use landmarks, do for each detected Feature:
  *         - create landmarks: createOneLandmark()
- *         - create constraints Feature-Landmark: createConstraint()
+ *       - create constraints Feature-Landmark or Feature-Feature: createConstraint()
  *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
  *     - else
