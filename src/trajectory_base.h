@@ -21,11 +21,6 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
         unsigned int fixed_size_; // Limits the number of Frames forming the Trajectory
         
     public:
-        /** \brief Constructor
-         *
-         * Constructor
-         *
-         **/
         TrajectoryBase(FrameStructure _frame_sturcture);
 
         /** \brief Default destructor (not recommended)
@@ -36,53 +31,47 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
         virtual ~TrajectoryBase();
         
         /** \brief Add a frame to the trajectory
-         *
-         * Add a frame to the trajectory
-         *
          **/
         void addFrame(FrameBase* _frame_ptr);
 
         /** \brief Remove a frame to the trajectory
-         *
-         * Remove a frame to the trajectory
-         *
          **/
-        void removeFrame(const FrameBaseIter& _frame_iter)
-        {
-            removeDownNode(_frame_iter);
-        }
+        void removeFrame(const FrameBaseIter& _frame_iter);
 
         /** \brief Returns a pointer to Frame list
-         * 
-         * Returns a pointer to Frame list
-         * 
          **/
-        FrameBaseList* getFrameListPtr()
-        {
-            return getDownNodeListPtr();
-        }
+        FrameBaseList* getFrameListPtr();
 
         /** \brief Returns a pointer to last Frame
-         *
-         * Returns a pointer to last Frame
-         *
          **/
-        FrameBase* getLastFramePtr()
-        {
-            return getDownNodeListPtr()->back();
-        }
+        FrameBase* getLastFramePtr();
 
 
         /** \brief Returns a list of all constraints in the trajectory thru reference
-         *
-         * Returns a list of all constraints in the trajectory thru reference
-         *
          **/
         void getConstraintList(ConstraintBaseList & _ctr_list);
         
-        FrameStructure getFrameStructure() const
-        {
-            return frame_structure_;
-        }
+        FrameStructure getFrameStructure() const;
 };
+
+inline void TrajectoryBase::removeFrame(const FrameBaseIter& _frame_iter)
+{
+    removeDownNode(_frame_iter);
+}
+
+inline FrameBaseList* TrajectoryBase::getFrameListPtr()
+{
+    return getDownNodeListPtr();
+}
+
+inline FrameBase* TrajectoryBase::getLastFramePtr()
+{
+    return getDownNodeListPtr()->back();
+}
+
+inline FrameStructure TrajectoryBase::getFrameStructure() const
+{
+    return frame_structure_;
+}
+
 #endif

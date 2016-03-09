@@ -38,7 +38,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     {
         /* Rationale: A keyFrame will be created using the last Capture. First, we work on this
          * last Capture to detect new Features, eventually create Landmarks with them,
-         * and in such case create the new constraints feature-landmark. Only when done, the KeyFrame
+         * and in such case create the new Constraints feature-landmark. Only when done, the KeyFrame
          * is effectively created, and the tracker is reset so that its origin points
          * to the brand new KeyFrame.
          */

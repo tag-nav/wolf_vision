@@ -13,11 +13,6 @@ class WolfProblem;
 class HardwareBase : public NodeLinked<WolfProblem, SensorBase>
 {
     public:
-        /** \brief Constructor
-         *
-         * Constructor
-         *
-         **/
         HardwareBase();
 
         /** \brief Default destructor (not recommended)
@@ -27,20 +22,12 @@ class HardwareBase : public NodeLinked<WolfProblem, SensorBase>
          **/
         virtual ~HardwareBase();
 
-        /** \brief Adds a sensor
-         **/
         virtual void addSensor(SensorBase* _sensor_ptr);
 
-        /** \brief Removes a sensor
-         **/
         void removeSensor(const SensorBaseIter& _sensor_iter);
 
-        /** \brief Removes a sensor
-         **/
         void removeSensor(SensorBase* _sensor_ptr);
 
-        /** \brief Returns Sensor list
-         **/
         SensorBaseList* getSensorListPtr();
 
 };
