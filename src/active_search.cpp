@@ -5,7 +5,7 @@
  * \ingroup rtslam
  */
 
-#include "activeSearch.h"
+#include "active_search.h"
 // OLD HEADERS
 /*
 #include "rtslam/observationAbstract.hpp"
