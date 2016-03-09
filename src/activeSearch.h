@@ -157,7 +157,7 @@ class ActiveSearchGrid {
                  * Add a projected pixel to the grid.
                  * \param pix the pixel to add.
                  */
-        void addObs(const vec2 & pix);
+        void addObs(const Eigen::Vector2i & pix);
 
         /**
                  * Get ROI of a random empty cell.
