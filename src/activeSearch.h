@@ -204,7 +204,7 @@ class ActiveSearchGrid {
         /**
                  * Get the region of interest, reduced by a margin.
                  */
-        void cell2roi(const veci2 & cell, cv::Mat & roi);
+        void cell2roi(const Eigen::Vector2i & cell, cv::Mat & roi);
 
 };
 

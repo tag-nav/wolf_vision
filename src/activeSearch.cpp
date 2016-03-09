@@ -109,13 +109,13 @@ vec2 ActiveSearchGrid::cellCenter(const Eigen::Vector2i & cell) {
 }
 
 void ActiveSearchGrid::cell2roi(const veci2 & cell, cv::Mat & roi) {
-    /*veci2 ul = cellOrigin(cell);
-            ul(0) += separation;
-            ul(1) += separation;
-            veci2 s = cellSize;
-            s(0) -= 2 * separation;
-            s(1) -= 2 * separation;
-            roi.init(cv::Rect(ul(0),ul(1),s(0),s(1)));*/
+    Eigen::Vector2i ul = cellOrigin(cell);
+    ul(0) += separation;
+    ul(1) += separation;
+    Eigen::Vector2i s = cellSize;
+    s(0) -= 2 * separation;
+    s(1) -= 2 * separation;
+    roi.init(cv::Rect(ul(0),ul(1),s(0),s(1)));
 }
 
 
