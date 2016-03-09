@@ -119,7 +119,7 @@ void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
 /** Protected */
 
 //Initialize one landmark
-LandmarkBase* ProcessorBrisk::createOneLandmark(FeatureBase* _feature_ptr)
+LandmarkBase* ProcessorBrisk::createLandmark(FeatureBase* _feature_ptr)
 {
 
 }
