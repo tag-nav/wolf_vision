@@ -116,7 +116,7 @@ void ActiveSearchGrid::cell2roi(const Eigen::Vector2i & cell, cv::Mat & roi) {
     Eigen::Vector2i s = cell_size_;
     s(0) -= 2 * separation_;
     s(1) -= 2 * separation_;
-    roi.init(cv::Rect(ul(0),ul(1),s(0),s(1)));
+    roi(cv::Rect(ul(0),ul(1),s(0),s(1)));
 }
 
 

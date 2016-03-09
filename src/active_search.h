@@ -184,8 +184,8 @@ class ActiveSearchGrid {
         template<class Vector2i>
         Eigen::Vector2i pix2cell(const Eigen::Vector2i & pix) {
             Eigen::Vector2i cell;
-            cell(0) = (pix(0) - offset(0)) / cell_size_(0);
-            cell(1) = (pix(1) - offset(1)) / cell_size_(1);
+            cell(0) = (pix(0) - offset_(0)) / cell_size_(0);
+            cell(1) = (pix(1) - offset_(1)) / cell_size_(1);
             return cell;
         }
 
