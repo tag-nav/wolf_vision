@@ -75,21 +75,22 @@ using namespace std;
          * - The grid is offset by a fraction of a cell size.
          * 		- use renew() at each frame to clear the grid and set a new offset.
          * - Projected landmarks are represented by red dots.
-         * 		- After projection, use hiCell() to add a new dot to the grid.
+         * 		- After projection, use hitCell() to add a new dot to the grid.
          * - Cells with projected landmarks inside are 'occupied'.
          * - Only the inner cells (thick blue rectangle) are considered for Region of Interest (ROI) extraction.
          * - One cell is chosen randomly among those that are empty.
+         *              - Use pickRoi() to obtain an empty ROI for initialization.
          * - The ROI is smaller than the cell to guarantee a minimum feature separation.
          * 		- Use the optional 'separation' parameter at construction time to control this separation.
-         * 		- Use pickRoi() to obtain an empty ROI for initialization.
          * - A new feature is to be be searched inside this ROI.
-         * - If there is no feature found in this ROI, call blockCell() function not to search in this area again.
+         * - If there is no feature found in this ROI, call blockCell() function to avoid searching in this area again.
          * - If you need to search more than one feature per frame, proceed like this:
-         * 		- If successful detection
-         *          - add the detected pixel with hiCell().
-         *      - Else block the cell zith blockCell().
-         * 		- Call pickRoi() again.
-         * 		- Repeat these two steps for each feature to be searched.
+         *     - If successful detection
+         *         - add the detected pixel with hitCell().
+         *     - Else
+         *         - block the cell with blockCell().
+         *     - Call pickRoi() again.
+         *     - Repeat these two steps for each feature to be searched.
          *
          * We include here a schematic active-search pseudo-code algorithm to illustrate its operation:
          * \code
@@ -140,48 +141,49 @@ class ActiveSearchGrid {
                  * \param _img_size_v vertical image size.
                  * \param _n_cells_h horizontal number of cells per image width.
                  * \param _n_cells_v vertical number of cells per image height.
-                 * \param separation minimum separation between existing and new points.
+                 * \param _separation minimum separation between existing and new points.
+                 * \param _margin minimum separation to the edge of the image
                  */
         ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v, const int & _n_cells_h, const int & _n_cells_v, const int & _margin = 0,
                          const int & _separation = 0);
 
         /**
-                 * Clear grid.
-                 * Sets all cell counters to zero.
-                 */
+         * Clear grid.
+         * Sets all cell counters to zero.
+         */
         void clear();
 
         /**
-                 * Clear grid and position it at a new random location.
-                 * Sets all cell counters to zero and sets a new random grid position.
-                 */
+         * Clear grid and position it at a new random location.
+         * Sets all cell counters to zero and sets a new random grid position.
+         */
         void renew();
 
         /**
-                 * Add a projected pixel to the grid.
-                 * \param pix the pixel to add.
-                 */
+         * Add a projected pixel to the grid.
+         * \param pix the pixel to add.
+         */
         void hitCell(const Eigen::Vector2i & pix);
 
         /**
-                 * Get ROI of a random empty cell.
-                 * \param roi the resulting ROI
-                 * \return true if ROI exists.
-                 */
+         * Get ROI of a random empty cell.
+         * \param roi the resulting ROI
+         * \return true if ROI exists.
+         */
         bool pickRoi(cv::Mat & roi);
 
         /**
-                 * Call this after pickRoi if no point was found in the roi
-                 * in order to avoid searching again in it.
-                 * \param roi the ROI where nothing was found
-                 */
+         * Call this after pickRoi if no point was found in the roi
+         * in order to avoid searching again in it.
+         * \param roi the ROI where nothing was found
+         */
         void blockCell(const cv::Mat & roi);
 
 
     private:
         /**
-                 * Get cell corresponding to pixel
-                 */
+         * Get cell corresponding to pixel
+         */
         //template<typename Eigen::Vector2i>
         Eigen::Vector2i pix2cell(const Eigen::Vector2i & pix) {
             Eigen::Vector2i cell;
@@ -191,23 +193,23 @@ class ActiveSearchGrid {
         }
 
         /**
-                 * Get cell origin (exact pixel)
-                 */
+         * Get cell origin (exact pixel)
+         */
         Eigen::Vector2i cellOrigin(const Eigen::Vector2i & cell);
 
         /**
-                 * Get cell center (can be decimal if size of cell is an odd number of pixels)
-                 */
+         * Get cell center (can be decimal if size of cell is an odd number of pixels)
+         */
         Eigen::Vector2i cellCenter(const Eigen::Vector2i & cell);
 
         /**
-                 * Get one random empty cell
-                 */
+         * Get one random empty cell
+         */
         bool pickEmptyCell(Eigen::Vector2i & cell);
 
         /**
-                 * Get the region of interest, reduced by a margin.
-                 */
+         * Get the region of interest, reduced by a margin.
+         */
         void cell2roi(const Eigen::Vector2i & cell, cv::Mat & roi);
 
 };

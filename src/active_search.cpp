@@ -6,24 +6,6 @@
  */
 
 #include "active_search.h"
-// OLD HEADERS
-/*
-#include "rtslam/observationAbstract.hpp"
-#include "rtslam/sensorAbstract.hpp"
-*/
-
-using namespace Eigen;
-using namespace std;
-
-///////////////////////////////////////////
-// ACTIVE SEARCH TESSELATION GRID
-///////////////////////////////////////////
-
-ostream& operator <<(ostream & s, ActiveSearchGrid const & grid) {
-    s << "feature count: " << grid.projections_count_;
-    return s;
-}
-
 
 // CLASS ActiveSearchGrid
 ActiveSearchGrid::ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v, const int & _n_cells_h,
@@ -63,9 +45,6 @@ void ActiveSearchGrid::renew() {
 }
 
 
-/*
-         * Get one empty cell
-         */
 bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
     int k = 0;
     Eigen::Vector2i cell0;
@@ -81,7 +60,6 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
         }
     }
     if (k > 0) { // number of empty inner cells
-        //				int idx = (double) rtslam::rand() / RAND_MAX * k;
         int idx = rand() % k; // between 0 and k-1
         cell(0) = empty_cells_tile_tmp_(0, idx);
         cell(1) = empty_cells_tile_tmp_(1, idx);
@@ -92,8 +70,8 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
 }
 
 /*
-         * Get cell origin (exact pixel)
-         */
+ * Get cell origin (exact pixel)
+ */
 Eigen::Vector2i ActiveSearchGrid::cellOrigin(const Eigen::Vector2i & cell) {
     Eigen::Vector2i cell0;
     cell0(0) = offset_(0) + cell_size_(0) * cell(0);
@@ -103,8 +81,8 @@ Eigen::Vector2i ActiveSearchGrid::cellOrigin(const Eigen::Vector2i & cell) {
 
 
 /*
-         * Get cell center (can be decimal if size of cell is an odd number of pixels)
-         */
+ * Get cell center (can be decimal if size of cell is an odd number of pixels)
+ */
 Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i & cell) {
     return cellOrigin(cell) + cell_size_ / 2;
 }
@@ -120,9 +98,6 @@ void ActiveSearchGrid::cell2roi(const Eigen::Vector2i & cell, cv::Mat & roi) {
 }
 
 
-/**
-         * Get ROI of one random empty cell
-         */
 bool ActiveSearchGrid::pickRoi(cv::Mat & roi) {
     Eigen::Vector2i cell;
     if (pickEmptyCell(cell)) {
@@ -139,6 +114,7 @@ void ActiveSearchGrid::blockCell(const cv::Mat & roi)
     Eigen::Vector2i cell = pix2cell(p);
     projections_count_(cell(0), cell(1)) = -1;
 }
+
 /*
 #if 0
         ////////////////////////////////////////////////////////
