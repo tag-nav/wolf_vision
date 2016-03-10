@@ -325,7 +325,6 @@ int main(int argc, char** argv)
             usleep(100000 - 1e6 * dt);
 
 //		std::cout << "\nTree after step..." << std::endl;
-//		wolf_manager->getProblemPtr()->print();
     }
 
     // DISPLAY RESULTS ============================================================================================
@@ -340,7 +339,6 @@ int main(int argc, char** argv)
     std::cout << "  loop time:          " << mean_times(6) << std::endl;
 
 //	std::cout << "\nTree before deleting..." << std::endl;
-//	wolf_manager->getProblemPtr()->print();
 
 //    // Draw Final result -------------------------
 //    std::vector<double> landmark_vector;

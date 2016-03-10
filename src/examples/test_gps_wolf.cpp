@@ -120,7 +120,6 @@ int main(int argc, char** argv)
                 cout << summary.FullReport() << endl;
         }
 
-        //wolf_manager_->getProblemPtr()->print(2);
 //
         std::cout << setprecision(12);
         std::cout << "\n~~~~ RESULTS ~~~~\n";

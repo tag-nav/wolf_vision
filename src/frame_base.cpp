@@ -132,17 +132,17 @@ Eigen::VectorXs FrameBase::getState() const
     unsigned int index = 0;
     if (p_ptr_!=nullptr)
     {
-        state.head(p_ptr_->getSize());
+        state.head(p_ptr_->getSize()) = p_ptr_->getVector();
         index += p_ptr_->getSize();
     }
     if (o_ptr_!=nullptr)
     {
-        state.segment(index, o_ptr_->getSize());
+        state.segment(index, o_ptr_->getSize()) = o_ptr_->getVector();
         index += p_ptr_->getSize();
     }
     if (v_ptr_!=nullptr)
     {
-        state.segment(index, v_ptr_->getSize());
+        state.segment(index, v_ptr_->getSize()) = v_ptr_->getVector();
         //   index += v_ptr_->getSize();
     }
 
@@ -165,9 +165,9 @@ void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 FrameBase* FrameBase::getPreviousFrame() const
 {
-    std::cout << "finding previous frame of " << this->node_id_ << std::endl;
+    //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
     if (getTrajectoryPtr() == nullptr)
-        std::cout << "This Frame is not linked to any trajectory" << std::endl;
+        //std::cout << "This Frame is not linked to any trajectory" << std::endl;
 
     assert(getTrajectoryPtr() != nullptr && "This Frame is not linked to any trajectory");
 
@@ -179,17 +179,17 @@ FrameBase* FrameBase::getPreviousFrame() const
         	f_it++;
         	if (f_it != getTrajectoryPtr()->getFrameListPtr()->rend())
             {
-                std::cout << "previous frame found!" << std::endl;
+                //std::cout << "previous frame found!" << std::endl;
                 return *f_it;
             }
         	else
         	{
-        	    std::cout << "previous frame not found!" << std::endl;
+        	    //std::cout << "previous frame not found!" << std::endl;
         	    return nullptr;
         	}
         }
     }
-    std::cout << "previous frame not found!" << std::endl;
+    //std::cout << "previous frame not found!" << std::endl;
     return nullptr;
 }
 

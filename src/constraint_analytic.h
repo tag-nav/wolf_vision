@@ -153,8 +153,6 @@ class ConstraintAnalytic: public ConstraintBase
          **/
         virtual JacobianMethod getJacobianMethod() const;
 
-//        virtual void print(unsigned int _ntabs = 0, std::ostream& _ost = std::cout) const;
-
     private:
         void resizeVectors();
 };
