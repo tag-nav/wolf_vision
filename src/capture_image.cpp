@@ -12,33 +12,36 @@ CaptureImage::~CaptureImage()
     //
 }
 
-Eigen::VectorXs CaptureImage::computeFramePose(const TimeStamp& _now) const
-{
-
-    return Eigen::VectorXs::Zero(7);
-}
-
-cv::Mat CaptureImage::getImage()
+const cv::Mat & CaptureImage::getImage() const
 {
     return image_;
 }
 
-void CaptureImage::setDescriptors(cv::Mat _descriptors)
+void CaptureImage::setDescriptors(const cv::Mat& _descriptors)
 {
     descriptors_ = _descriptors;
 }
 
-void CaptureImage::setKeypoints(std::vector<cv::KeyPoint> _keypoints)
+void CaptureImage::setKeypoints(const std::vector<cv::KeyPoint> &_keypoints)
 {
     keypoints_ = _keypoints;
 }
 
-cv::Mat CaptureImage::getDescriptors()
+cv::Mat CaptureImage::getDescriptors() const
 {
     return descriptors_;
 }
 
-std::vector<cv::KeyPoint> CaptureImage::getKeypoints()
+std::vector<cv::KeyPoint> CaptureImage::getKeypoints() const
 {
     return keypoints_;
 }
+
+
+
+// TODO: This needs to go out some day
+Eigen::VectorXs CaptureImage::computeFramePose(const TimeStamp& _now) const
+{
+    return Eigen::VectorXs::Zero(7);
+}
+

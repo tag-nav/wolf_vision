@@ -30,21 +30,27 @@ class CaptureImage : public CaptureBase
          **/
         virtual ~CaptureImage();
 
-        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
-
         //virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 
         //cv::Mat data_cv_; //this should be protected
 
-        virtual cv::Mat getImage();
+        virtual const cv::Mat& getImage() const;
 
-        virtual void setDescriptors(cv::Mat _descriptors);
+        virtual void setDescriptors(const cv::Mat &_descriptors);
 
-        virtual void setKeypoints(std::vector<cv::KeyPoint> _keypoints);
+        virtual void setKeypoints(const std::vector<cv::KeyPoint>& _keypoints);
 
-        virtual cv::Mat getDescriptors();
+        virtual cv::Mat getDescriptors() const;
 
-        virtual std::vector<cv::KeyPoint> getKeypoints();
+        virtual std::vector<cv::KeyPoint> getKeypoints() const;
+
+
+
+
+        // TODO: This needs to go out some day
+        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
+
+
 };
 
 #endif // CAPTURE_IMAGE_H

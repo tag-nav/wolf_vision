@@ -102,7 +102,7 @@ unsigned int ProcessorBrisk::detectNewFeatures(CaptureBase* _capture_ptr)
 {
 
     //setIncomingPtr(_capture_ptr);                                    // Set the capture as incoming_ptr_
-    cv::Mat cv_image = ((CaptureImage*)_capture_ptr)->getImage();  // Get the image from the capture
+    const cv::Mat& cv_image = ((CaptureImage*)_capture_ptr)->getImage();  // Get the image from the capture
 
     std::cout << "Mat rows: " << cv_image.rows << "Mat cols: " << cv_image.cols << std::endl;
 
@@ -116,7 +116,7 @@ unsigned int ProcessorBrisk::detectNewFeatures(CaptureBase* _capture_ptr)
 //Vote for KeyFrame generation. If a KeyFrame criterion is validated, this function returns true
 bool ProcessorBrisk::voteForKeyFrame()
 {
-    return false;
+    return true;
 }
 
 
