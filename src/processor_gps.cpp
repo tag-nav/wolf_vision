@@ -12,7 +12,7 @@ ProcessorGPS::ProcessorGPS() :
 {
     std::cout << "ProcessorGPS constructor" << std::endl;
 
-    gps_covariance_ = 0.01;
+    gps_covariance_ = 50;
 }
 
 ProcessorGPS::~ProcessorGPS()

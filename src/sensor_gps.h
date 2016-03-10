@@ -17,16 +17,16 @@ class SensorGPS : public SensorBase
 {
 protected:
 
-    StateBlock* init_vehicle_p_ptr_; //position of the vehicle where the experiment starts in ecef
-    StateBlock* init_vehicle_o_ptr_; //orientation of the vehicle where the experiment starts in ecef
+    StateBlock* map_p_ptr_; //position of the vehicle where the experiment starts in ecef
+    StateBlock* map_o_ptr_; //orientation of the vehicle where the experiment starts in ecef
 
 public:
                 //pointer to sensor position, orientation, bias, init vehicle position and orientation
-    SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr, StateBlock* _bias_ptr, StateBlock* _init_vehicle_position_ptr, StateBlock* _init_vehicle_orientation_ptr);
+    SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr, StateBlock* _bias_ptr, StateBlock* _map_position_ptr, StateBlock* _map_orientation_ptr);
 
-    StateBlock *getInitVehiclePPtr() const;
+    StateBlock *getMapPPtr() const;
 
-    StateBlock *getInitVehicleOPtr() const;
+    StateBlock *getMapOPtr() const;
 
     /** \brief Default destructor (not recommended)
      *

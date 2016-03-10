@@ -34,8 +34,8 @@ public:
                             _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
                                                                         // orientation of antenna is not needed, because omnidirectional
                             _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter  = receiver time bias
-                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehiclePPtr(), // initial vehicle position (ecef)
-                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getInitVehicleOPtr()  // initial vehicle orientation (ecef)
+                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr(), // initial vehicle position (ecef)
+                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr()  // initial vehicle orientation (ecef)
             )
     {
         sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
@@ -57,12 +57,6 @@ public:
 
 
 
-        /*
-         * TODO improve naming for more coherence.
-         *
-         * origin = init_vehicle
-         * base = vehicle
-         */
         template<typename T>
         bool operator ()(const T* const _vehicle_p, const T* const _vehicle_o, const T* const _sensor_p,
                          const T* const _bias, const T* const _init_vehicle_p, const T* const _init_vehicle_o,
@@ -85,21 +79,16 @@ protected:
 
 };
 
-/*
- * TODO improve naming for more coherence.
- *
- * origin = init_vehicle
- * base = vehicle
- */
+
 template<typename T>
 inline bool ConstraintGPSPseudorange3D::operator ()(const T* const _vehicle_p, const T* const _vehicle_o,
                                                     const T* const _sensor_p, const T* const _bias,
-                                                    const T* const _init_vehicle_p, const T* const _init_vehicle_o,
+                                                    const T* const _map_p, const T* const _map_o,
                                                     T* _residual) const
 {
     //        std::cout << "OPERATOR()\n";
-    //        std::cout << "_init_vehicle_p: " << _init_vehicle_p[0] << ", " << _init_vehicle_p[1] << ", " << _init_vehicle_p[2] << std::endl;
-    //        std::cout << "_init_vehicle_o: " << _init_vehicle_o[0] << ", " << _init_vehicle_o[1] << ", " << _init_vehicle_o[2] << ", " << _init_vehicle_o[3] << std::endl;
+    //        std::cout << "_map_p: " << _map_p[0] << ", " << _map_p[1] << ", " << _map_p[2] << std::endl;
+    //        std::cout << "_map_o: " << _map_o[0] << ", " << _map_o[1] << ", " << _map_o[2] << ", " << _map_o[3] << std::endl;
     //        std::cout << "_vehicle_p: " << _vehicle_p[0] << ", " << _vehicle_p[1] << ", " << _vehicle_p[2] << std::endl;
     //        std::cout << "_vehicle_o: " << _vehicle_o[0] << ", " << _vehicle_o[1] << ", " << _vehicle_o[2] << ", " << _vehicle_o[3] << std::endl;
     //        std::cout << "_sensor_p: " << _sensor_p[0] << ", " << _sensor_p[1] << ", " << _sensor_p[2] << std::endl;
@@ -109,13 +98,13 @@ inline bool ConstraintGPSPseudorange3D::operator ()(const T* const _vehicle_p, c
      * Origin-to-ECEF transform matrix
      */
     Eigen::Matrix<T, 4, 4> transform_origin_to_ecef;
-    Eigen::Quaternion<T> vehicle_init_q(_init_vehicle_o[0], _init_vehicle_o[1], _init_vehicle_o[2], _init_vehicle_o[3]);
+    Eigen::Quaternion<T> vehicle_init_q(_map_o[0], _map_o[1], _map_o[2], _map_o[3]);
     Eigen::Matrix<T, 3, 3> rot_matr_init = vehicle_init_q.toRotationMatrix();
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
             transform_origin_to_ecef(i, j) = rot_matr_init(i, j);
     for (int i = 0; i < 3; ++i)
-        transform_origin_to_ecef(i, 3) = _init_vehicle_p[i];
+        transform_origin_to_ecef(i, 3) = _map_p[i];
     transform_origin_to_ecef(3, 0) = transform_origin_to_ecef(3, 1) = transform_origin_to_ecef(3, 2) = T(0);
     transform_origin_to_ecef(3, 3) = T(1);
     /*
@@ -135,8 +124,7 @@ inline bool ConstraintGPSPseudorange3D::operator ()(const T* const _vehicle_p, c
     /*
      * Transform
      */
-    sensor_p_ecef = /*transform_origin_to_ecef * transform_base_to_origin * */
-    sensor_p_base;
+    sensor_p_ecef = /*transform_origin_to_ecef * transform_base_to_origin * */ sensor_p_base;
     //        std::cout << "sensor_p_ecef: " << sensor_p_ecef[0] << ", " << sensor_p_ecef[1] << ", " << sensor_p_ecef[2] << std::endl;
     //il codice qui sotto è quello vecchio, adattato in modo da usare la posizione del sensore rispetto a ecef, calcolata qui sopra
     T square_sum = T(0);
