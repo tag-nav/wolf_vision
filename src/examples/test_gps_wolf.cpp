@@ -123,8 +123,8 @@ int main(int argc, char** argv)
 //
         std::cout << setprecision(12);
         std::cout << "\n~~~~ RESULTS ~~~~\n";
-        std::cout << "|\tinitial P: " << gps_sensor_ptr_->getInitVehiclePPtr()->getVector().transpose() << std::endl;// initial vehicle position (ecef)
-        std::cout << "|\tinitial O: " << gps_sensor_ptr_->getInitVehicleOPtr()->getVector().transpose() << std::endl;// initial vehicle orientation (ecef)
+        std::cout << "|\tinitial P: " << gps_sensor_ptr_->getMapPPtr()->getVector().transpose() << std::endl;// initial vehicle position (ecef)
+        std::cout << "|\tinitial O: " << gps_sensor_ptr_->getMapOPtr()->getVector().transpose() << std::endl;// initial vehicle orientation (ecef)
         std::cout << "|\tVehicle Pose: " << wolf_manager_->getVehiclePose().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
         std::cout << "|\tVehicle P (last frame): " << wolf_manager_->getProblemPtr()->getLastFramePtr()->getPPtr()->getVector().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
         std::cout << "|\tVehicle O (last frame): " << wolf_manager_->getProblemPtr()->getLastFramePtr()->getOPtr()->getVector().transpose() << std::endl;// position of the vehicle's frame with respect to the initial pos frame
