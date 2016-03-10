@@ -1,8 +1,7 @@
 /**
  * \file activeSearch.cpp
  * \date 10/04/2010
- * \author jsola
- * \ingroup rtslam
+ * \author jsola, dinesh
  */
 
 #include "active_search.h"

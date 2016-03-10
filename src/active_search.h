@@ -1,5 +1,5 @@
 /**
- * \file activeSearch.hpp
+ * \file active_search.h
  *
  *  Active search detection and matching for points.
  *
@@ -8,39 +8,22 @@
  *
  * ## Add detailed description here ##
  *
- * \ingroup rtslam
  */
 
 #ifndef ACTIVESEARCH_HPP_
 #define ACTIVESEARCH_HPP_
 
-// OLD HEADERS
-/*
-#include "jmath/random.hpp"
-#include "jmath/jblas.hpp"
-#include "image/roi.hpp"
-
-#include "rtslam/gaussian.hpp"
-#include "rtslam/rtSlam.hpp"
-*/
+// Wolf includes
+#include "wolf.h"
 
 //OpenCV includes
-#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
 
-//Eigen includes
-#include <Eigen/Dense>
-
-//standard includes
-#include <iostream>
-
-using namespace Eigen;
-using namespace std;
 
 /**
          * Active search tesselation grid.
          *
-         * \author jsola
+         * \author jsola, dinesh
          *
          * This class implements a tesselation grid for achieving active search
          * behavior in landmark initialization.
@@ -65,32 +48,33 @@ using namespace std;
          * The blue and green grids in the figure below represent the grid
          * at two different offsets, corresponding to two different frames.
          *
-         * 	\image html tesselationGrid.png "The tesselation grid used for active feature detection and initialization"
+         *   \image html tesselationGrid.png "The tesselation grid used for active feature detection and initialization"
          *
          * This second figure shows a typical situation that we use to explain the basic mechanism.
          *
-         * \image html tesselationExample.png "A typical configuration of the tesselation grid"
+         *   \image html tesselationExample.png "A typical configuration of the tesselation grid"
          *
          * Observe the figure and use the following facts as an operation guide:
          * - The grid is offset by a fraction of a cell size.
-         * 		- use renew() at each frame to clear the grid and set a new offset.
+         *     - use renew() at each frame to clear the grid and set a new offset.
          * - Projected landmarks are represented by red dots.
-         * 		- After projection, use hitCell() to add a new dot to the grid.
+         *     - After projection, use hitCell() to add a new dot to the grid.
          * - Cells with projected landmarks inside are 'occupied'.
          * - Only the inner cells (thick blue rectangle) are considered for Region of Interest (ROI) extraction.
          * - One cell is chosen randomly among those that are empty.
-         *              - Use pickRoi() to obtain an empty ROI for initialization.
+         *     - Use pickRoi() to obtain an empty ROI for initialization.
          * - The ROI is smaller than the cell to guarantee a minimum feature separation.
-         * 		- Use the optional 'separation' parameter at construction time to control this separation.
+         *     - Use the optional 'separation' parameter at construction time to control this separation.
          * - A new feature is to be be searched inside this ROI.
          * - If there is no feature found in this ROI, call blockCell() function to avoid searching in this area again.
          * - If you need to search more than one feature per frame, proceed like this:
+         *     - Call pickRoi().
+         *     - Try to detect a Feature in ROI.
          *     - If successful detection
          *         - add the detected pixel with hitCell().
          *     - Else
          *         - block the cell with blockCell().
-         *     - Call pickRoi() again.
-         *     - Repeat these two steps for each feature to be searched.
+         *     - Repeat these steps for each feature to be searched.
          *
          * We include here a schematic active-search pseudo-code algorithm to illustrate its operation:
          * \code
