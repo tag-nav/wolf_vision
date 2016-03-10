@@ -5,6 +5,8 @@
 #include "processor_tracker.h"
 #include "sensor_camera.h"
 #include "capture_image.h"
+#include "feature_point_image.h"
+#include "state_block.h"
 
 // OpenCV includes
 #include "opencv2/features2d/features2d.hpp"

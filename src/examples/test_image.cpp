@@ -18,6 +18,7 @@
 
 int main(int argc, char** argv)
 {
+    /**
     if (argc != 2 || atoi(argv[1]) < 0 || atoi(argv[1]) > 1)
     {
         std::cout << "Please call me with: [./test_image IS_VIDEO], where:" << std::endl;
@@ -28,6 +29,7 @@ int main(int argc, char** argv)
 
     // auxiliar variables
     bool image_or_video = (atoi(argv[1]) == 1);
+    */
 
     //Welcome message
     std::cout << std::endl << " ========= WOLF IMAGE test ===========" << std::endl << std::endl;
@@ -113,7 +115,7 @@ int main(int argc, char** argv)
 
     p_brisk->init(capture_brisk_ptr);
 
-
+    std::cout << "type: " << capture_brisk_ptr->getImage().type() << " channels: " << capture_brisk_ptr->getImage().channels()<< std::endl;
     while(f<400)
     {
         capture >> frame;

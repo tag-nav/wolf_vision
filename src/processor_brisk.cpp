@@ -1,5 +1,6 @@
 // Wolf includes
 #include "processor_brisk.h"
+#include "active_search.h"
 
 // OpenCV includes
 
@@ -27,6 +28,24 @@ ProcessorBrisk::~ProcessorBrisk()
 unsigned int ProcessorBrisk::processKnownFeatures(CaptureBase* _incoming_ptr)
 {
     incoming_ptr_ = _incoming_ptr;
+    cv::Mat image = ((CaptureImage*)incoming_ptr_)->getImage();
+
+    ActiveSearchGrid act_search_grid(image.rows,image.cols,20,20);
+    act_search_grid.clear();
+    Eigen::Vector2i point = {35,35};
+    act_search_grid.hitCell(point);
+    bool roi_exists = act_search_grid.pickRoi(image);
+    std::cout << "roi exists: " << roi_exists << std::endl;
+
+    //x,y,width,height
+    cv::Size size;
+    cv::Point p;
+    image.locateROI(size,p);
+    cv::Rect myROI(size,p); //x,y,width,height
+    std::cout << "size: " << image.rows << "point: " << p << std::endl;
+    unsigned int n_features = briskImplementation(incoming_ptr_,image,myROI);//cv_image);
+
+
     return 0;
 }
 
@@ -42,7 +61,7 @@ void ProcessorBrisk::drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp,
             point.x = _kp[i].pt.x + _roi.x;
             point.y = _kp[i].pt.y + _roi.y;
             cv::circle(_image,point,2,cv::Scalar(88.0,250.0,154.0),-1,8,0); //_kp[i].pt
-            cv::rectangle(_image,_roi,cv::Scalar(88.0,250.0,154.0),1,8,0);
+            //cv::rectangle(_image,_roi,cv::Scalar(88.0,250.0,154.0),1,8,0);
         }
         cv::imshow("Keypoint drawing",_image);
         cv::waitKey(20);
@@ -63,6 +82,10 @@ unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::
     Eigen::Vector2s keypoint_coordinates;   // TODO: When "measurement" is erased, this variable should be erased to, all over the code
     std::vector<float> descript_vector;     // Vector to store the descriptor for each keypoint
 
+
+    std::cout << "type: " << treated_image.type() <<
+                 " depth: " << treated_image.depth() <<
+                 " channels: " << treated_image.channels()<< std::endl;
     //Brisk Algorithm
     brisk_.create("Feature2D.BRISK");
     brisk_.detect(treated_image, keypoints);
@@ -125,11 +148,15 @@ bool ProcessorBrisk::voteForKeyFrame()
 //Initialize one landmark
 LandmarkBase* ProcessorBrisk::createLandmark(FeatureBase* _feature_ptr)
 {
-
+    return new LandmarkBase(LANDMARK_POINT,new StateBlock(Eigen::Vector3s::Zero()),new StateBlock(Eigen::Vector3s::Zero()));
 }
 
 //Create a new constraint
 ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr)
 {
-
+    //FeatureBase f_b = new FeatureBase(Eigen::Vector2s::Zero(),Eigen::Matrix2s::Zero());
+    //FrameBase frame_b = frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
+    //LandmarkBase* lndmrk = new LandmarkBase(LANDMARK_POINT,new StateBlock(Eigen::Vector3s::Zero()),new StateBlock(Eigen::Vector3s::Zero()));
+    //return new ConstraintPoint2D(f_b,frame_b,CTR_ACTIVE);
+    //return new ConstraintBase(CTR_IMG_PNT_TO_IMG_PNT,_feature_ptr,CTR_ACTIVE);
 }

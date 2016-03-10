@@ -128,7 +128,8 @@ typedef enum
     CTR_ODOM_2D,                ///< marks a 2D Odometry constraint .
     CTR_CORNER_2D,              ///< marks a 2D corner constraint .
     CTR_CONTAINER,              ///< marks a 2D container constraint .
-    CTR_IMG_PNT_TO_EP           ///< marks a constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
+    CTR_IMG_PNT_TO_EP,          ///< marks a constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
+    CTR_IMG_PNT_TO_IMG_PNT      ///< marks a constraint between two image point features
 } ConstraintType;
 
 /** \brief Enumeration of constraint categories
