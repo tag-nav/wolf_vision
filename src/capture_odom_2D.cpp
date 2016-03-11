@@ -110,11 +110,3 @@ CaptureOdom2D* CaptureOdom2D::interpolateCapture(const TimeStamp& _ts)
     return second_odom_ptr;
 }
 
-//void CaptureOdom2D::printSelf(unsigned int _ntabs, std::ostream & _ost) const
-//{
-//    NodeLinked::printSelf(_ntabs, _ost);
-//    //printTabs(_ntabs);
-//    //_ost << "\tSensor pose : ( " << sensor_ptr_->pose().x().transpose() << " )" << std::endl;
-//    //printNTabs(_ntabs);
-//    //_ost << "\tSensor intrinsic : ( " << sensor_ptr_->intrinsic().transpose() << " )" << std::endl;
-//}

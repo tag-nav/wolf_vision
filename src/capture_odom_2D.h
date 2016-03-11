@@ -10,13 +10,8 @@
 //std includes
 //
 
-//class CaptureGPSFix
 class CaptureOdom2D : public CaptureMotion
 {
-
-    protected:
-        //Eigen::VectorXs data_; ///< Raw data.
-        //Eigen::MatrixXs data_covariance_; ///< Noise of the capture.
 
     public:
 
@@ -41,6 +36,5 @@ class CaptureOdom2D : public CaptureMotion
 
       virtual CaptureOdom2D* interpolateCapture(const TimeStamp& _ts);
 
-      //virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 };
 #endif
