@@ -109,7 +109,7 @@ bool ActiveSearchGrid::pickRoi(cv::Mat & roi) {
 
 void ActiveSearchGrid::blockCell(const cv::Mat & roi)
 {
-    Eigen::Vector2i p; p(1) = roi_coordinates_(1)+roi.cols/2; p(2) = roi_coordinates_(0)+roi.rows/2;
+    Eigen::Vector2i p; p(1) = roi_coordinates_(1)+roi.cols/2; p(0) = roi_coordinates_(0)+roi.rows/2;
     Eigen::Vector2i cell = pix2cell(p);
     projections_count_(cell(0), cell(1)) = -1;
 }

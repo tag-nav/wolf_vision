@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 
     WolfProblem* wolf_problem_ = new WolfProblem(PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(30,0,1.0f);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(30,0,0.5f);
     sen_cam_->addProcessor(p_brisk);
 
     unsigned int f = 0;
