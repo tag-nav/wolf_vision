@@ -96,10 +96,3 @@ IF(faramotics_FOUND)
     ENDIF (laser_scan_utils_FOUND)
 ENDIF(faramotics_FOUND)
 
-
-# Testing GPS stuff
-IF(raw_gps_utils_FOUND)
-    ADD_EXECUTABLE(test_gps_wolf test_gps_wolf.cpp)
-    TARGET_LINK_LIBRARIES(test_gps_wolf ${raw_gps_utils_LIBRARY} ${PROJECT_NAME})
-ENDIF(raw_gps_utils_FOUND)
-

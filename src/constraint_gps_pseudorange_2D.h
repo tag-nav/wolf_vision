@@ -214,18 +214,15 @@ inline bool ConstraintGPSPseudorange2D::operator ()(const T* const _vehicle_p, c
      */
     T square_sum = T(0);
     for (int i = 0; i < 3; ++i)
-    {
         square_sum += (sensor_p_ecef[i] - T(sat_position_[i]))*(sensor_p_ecef[i] - T(sat_position_[i]));
-    }
+
     T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0);
 
     //     error = (expected measurement)       - (actual measurement)
     _residual[0] = (distance + _bias[0] * T(LIGHT_SPEED)) - (pseudorange_);
 
     if (verbose_level_ >= 2)
-    {
         std::cout << "!!! Residual: " << _residual[0] << "\n";
-    }
 
     // normalizing by the covariance
     _residual[0] = _residual[0] / T(getMeasurementCovariance()(0, 0));//T(sqrt(getMeasurementCovariance()(0, 0)));
