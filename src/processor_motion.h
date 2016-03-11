@@ -15,7 +15,7 @@ class ProcessorMotion : public ProcessorBase{
         ProcessorMotion();
         virtual ~ProcessorMotion();
         void integrate(TimeStamp& _time_stamp);
-        void computeRelativeState(TimeStamp& _t_start, TimeStamp& _t_end);
-        void computeAbsoluteState(TimeStamp& _time_stamp);
+        void getDeltaState(TimeStamp& _t_start, TimeStamp& _t_end);
+        void getState(TimeStamp& _time_stamp);
 };
 #endif /* SRC_PROCESSOR_MOTION_H_ */
