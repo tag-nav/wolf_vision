@@ -34,42 +34,81 @@ unsigned int ProcessorBrisk::processKnownFeatures(CaptureBase* _incoming_ptr)
     ActiveSearchGrid act_search_grid(image.rows,image.cols,8,8); //20, 20
     act_search_grid.clear();
 
-    unsigned int n_features = 0;
+    ///PROJECTION OF LANDMARKS (features in this case)
 
+    unsigned int n_last_capture_feat = 0;
+    for(std::list<FeatureBase*>::iterator feat_list=last_ptr_->getFeatureListPtr()->begin();feat_list != last_ptr_->getFeatureListPtr()->end(); ++feat_list)
+    {
+        std::cout << "inside iterator" << std::endl;
+        //FeatureBase* last_feature = *feat_list;
+        FeaturePointImage* last_feature = (FeaturePointImage*)*feat_list;
+        Eigen::Vector2i feature_point = {last_feature->getKeypoint().pt.x,last_feature->getKeypoint().pt.y}; //TODO: Look if this is the right order
+        act_search_grid.hitCell(feature_point);
+        std::cout << "Last feature keypoint: " << last_feature->getKeypoint().pt << std::endl;
+        n_last_capture_feat++;
+    }
+    std::cout << "n_last_capture_feat: " << n_last_capture_feat << std::endl;
+
+    // 640/8 = 80; 360/8 = 45; These are the roi maximum values. You should search in the last capture features spaces with these roi.
+
+
+    //TODO: Add the ActiveSearchGrid in the constructor of the processor, just like the Brisk.
+
+    //TODO:
+    //You need to block the cell the features of the las capture are in.
+    //You need to find the roi (as in the grid (or less)) to search in the area around the last capture feaures
+    //Do the matching
+
+
+
+
+
+
+
+    //(should this be here?)
     ///START OF THE SEARCH
-    //for(unsigned int search = 0; search <=2; search++)
+    unsigned int n_features = 0;
     while(n_features < 1)
     {
-        Eigen::Vector2i point = {35,35};
-        act_search_grid.hitCell(point);
         std::cout << "image rows: " << image.rows << ", image cols: " << image.cols << std::endl;
         bool roi_exists = act_search_grid.pickRoi(image);
         std::cout << "roi exists: " << roi_exists << std::endl;
+
+        if(roi_exists==false)
+        {
+            break;
+        }
+
         //x,y,width,height
-        cv::Size unused_size;
-        cv::Point p;
-        image.locateROI(unused_size,p); //TODO: See if there is a way of just getting the point
-        cv::Size size_roi(image.cols,image.rows);
-        cv::Rect myROI(p,size_roi);
-        std::cout << "ROI size: " << unused_size << ", ROI point: " << p << std::endl;
+        cv::Size image_size;    //locateROI will give the complete heigth and width of the image, not of the roi
+        cv::Point ini_point_roi;
+        image.locateROI(image_size,ini_point_roi); //TODO: See if there is a way of just getting the point
+        cv::Size size_roi(image.cols,image.rows);   //this variable HAS the right heigth and width of the roi
+        cv::Rect myROI(ini_point_roi,size_roi);
         std::cout << "image rows: " << image.rows << ", image cols: " << image.cols << std::endl;
         n_features = briskImplementation(incoming_ptr_,image,myROI);//cv_image);
 
-
-        std::cout << "n_features: " << n_features << std::endl;
         if (n_features == 0)
         {
             act_search_grid.blockCell(image);
         }
 
+        // A method to draw the keypoints. Optional (false for drawing features)
+        drawFeatures(((CaptureImage*)incoming_ptr_)->getImage(),((CaptureImage*)incoming_ptr_)->getKeypoints(), myROI);
+
         //use this to return the image to the original size before computing again the new roi
-        image.adjustROI(p.y,(unused_size.height-(p.y+image.rows)),p.x,(unused_size.width-(p.x+image.cols))); //TODO: Look for a clever way to do this
-        std::cout << "u_s height: " << unused_size.height << "u_s width: " << unused_size.width <<std::endl;
-        std::cout << "image rows: " << image.rows << ", image cols: " << image.cols << std::endl;
-        cv::Size unused_size2;
+        image.adjustROI(ini_point_roi.y,(image_size.height-(ini_point_roi.y+image.rows)),ini_point_roi.x,(image_size.width-(ini_point_roi.x+image.cols))); //TODO: Look for a clever way to do this
+        //std::cout << "u_s height: " << unused_size.height << "u_s width: " << unused_size.width <<std::endl;
+        //std::cout << "image rows: " << image.rows << ", image cols: " << image.cols << std::endl;
 
     }
-    //std::cout << "n_features: " << n_features << std::endl;
+    std::cout << "n_features: " << n_features << std::endl;
+
+
+
+
+
+    cv::waitKey(30);
     return n_features;
 }
 
@@ -78,7 +117,6 @@ void ProcessorBrisk::drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp,
 {
     std::cout << "<---- drawFeatures ---->" << std::endl << std::endl;
 
-    cv::namedWindow("Keypoint drawing");    // Creates a window for display.
     if(_kp.size()!=0)
     {
         for(unsigned int i = 0; i <= (_kp.size()-1);i++)
@@ -86,17 +124,16 @@ void ProcessorBrisk::drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp,
             cv::Point point;
             point.x = _kp[i].pt.x + _roi.x;
             point.y = _kp[i].pt.y + _roi.y;
-            cv::circle(_image,point,2,cv::Scalar(88.0,250.0,154.0),-1,8,0); //_kp[i].pt
+            cv::circle(_image,point,2,cv::Scalar(88.0,250.0,154.0),-1,8,0);
             cv::rectangle(_image,_roi,cv::Scalar(88.0,250.0,154.0),1,8,0);
+
         }
         cv::imshow("Keypoint drawing",_image);
-        cv::waitKey(20);
     }
     else
     {
         cv::rectangle(_image,_roi,cv::Scalar(88.0,250.0,154.0),1,8,0);
         cv::imshow("Keypoint drawing",_image);
-        cv::waitKey(20);
     }
 }
 
@@ -135,15 +172,15 @@ unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::
 
             descript_vector=descriptors(cv::Range(i,i+1),cv::Range(0,descriptors.cols));
             ((CaptureImage*)_capture_ptr)->addFeature(new FeaturePointImage(keypoint_coordinates,keypoints[i],descript_vector));
+            std::cout << "Current feature keypoint: " << keypoints[i].pt << std::endl;
         }
 
-        drawFeatures(((CaptureImage*)_capture_ptr)->getImage(), keypoints, _roi); // A method to draw the keypoints. Optional
-
+//      drawFeatures(((CaptureImage*)_capture_ptr)->getImage(), keypoints, _roi); // A method to draw the keypoints. Optional
         return descriptors.rows;  //number of features
     }
     else
     {
-        drawFeatures(((CaptureImage*)_capture_ptr)->getImage(), keypoints, _roi); // A method to draw the keypoints. Optional
+//      drawFeatures(((CaptureImage*)_capture_ptr)->getImage(), keypoints, _roi); // A method to draw the keypoints. Optional
         return 0;
     }
 }

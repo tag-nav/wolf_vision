@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 
     p_brisk->init(capture_brisk_ptr);
 
-    std::cout << "type: " << capture_brisk_ptr->getImage().type() << " channels: " << capture_brisk_ptr->getImage().channels()<< std::endl;
+    cv::namedWindow("Keypoint drawing");    // Creates a window for display.
     while(f<400)
     {
         capture >> frame;
@@ -128,6 +128,11 @@ int main(int argc, char** argv)
         f++;
         std::cout << "f: " << f << std::endl;
     }
+
+
+
+
+
 /**
     //Brisk test
     std::cout << std::endl << " ========= Brisk test ===========" << std::endl << std::endl;

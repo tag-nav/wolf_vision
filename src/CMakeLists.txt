@@ -109,7 +109,7 @@ SET(HDRS
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
-    landmark_point.h
+    landmark_point_2D.h
     local_parametrization_base.h
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
@@ -161,7 +161,7 @@ SET(SRCS
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
-    landmark_point.cpp
+    landmark_point_2D.cpp
     local_parametrization_base.cpp
     local_parametrization_quaternion.cpp
     local_parametrization_homogeneous.cpp
