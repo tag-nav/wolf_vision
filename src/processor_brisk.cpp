@@ -27,55 +27,83 @@ ProcessorBrisk::~ProcessorBrisk()
 // Tracker function. Returns the number of successful tracks.
 unsigned int ProcessorBrisk::processKnownFeatures(CaptureBase* _incoming_ptr)
 {
+    std::cout << "<---- processKnownFeatures ---->" << std::endl << std::endl;
     incoming_ptr_ = _incoming_ptr;
     cv::Mat image = ((CaptureImage*)incoming_ptr_)->getImage();
 
-    ActiveSearchGrid act_search_grid(image.rows,image.cols,20,20);
+    ActiveSearchGrid act_search_grid(image.rows,image.cols,8,8); //20, 20
     act_search_grid.clear();
-    Eigen::Vector2i point = {35,35};
-    act_search_grid.hitCell(point);
-    bool roi_exists = act_search_grid.pickRoi(image);
-    std::cout << "roi exists: " << roi_exists << std::endl;
 
-    //x,y,width,height
-    cv::Size size;
-    cv::Point p;
-    image.locateROI(size,p);
-    cv::Rect myROI(size,p); //x,y,width,height
-    std::cout << "size: " << image.rows << "point: " << p << std::endl;
-    unsigned int n_features = briskImplementation(incoming_ptr_,image,myROI);//cv_image);
+    unsigned int n_features = 0;
+
+    ///START OF THE SEARCH
+    //for(unsigned int search = 0; search <=2; search++)
+    while(n_features < 1)
+    {
+        Eigen::Vector2i point = {35,35};
+        act_search_grid.hitCell(point);
+        std::cout << "image rows: " << image.rows << ", image cols: " << image.cols << std::endl;
+        bool roi_exists = act_search_grid.pickRoi(image);
+        std::cout << "roi exists: " << roi_exists << std::endl;
+        //x,y,width,height
+        cv::Size unused_size;
+        cv::Point p;
+        image.locateROI(unused_size,p); //TODO: See if there is a way of just getting the point
+        cv::Size size_roi(image.cols,image.rows);
+        cv::Rect myROI(p,size_roi);
+        std::cout << "ROI size: " << unused_size << ", ROI point: " << p << std::endl;
+        std::cout << "image rows: " << image.rows << ", image cols: " << image.cols << std::endl;
+        n_features = briskImplementation(incoming_ptr_,image,myROI);//cv_image);
 
 
-    return 0;
+        std::cout << "n_features: " << n_features << std::endl;
+        if (n_features == 0)
+        {
+            act_search_grid.blockCell(image);
+        }
+
+        //use this to return the image to the original size before computing again the new roi
+        image.adjustROI(p.y,(unused_size.height-(p.y+image.rows)),p.x,(unused_size.width-(p.x+image.cols))); //TODO: Look for a clever way to do this
+        std::cout << "u_s height: " << unused_size.height << "u_s width: " << unused_size.width <<std::endl;
+        std::cout << "image rows: " << image.rows << ", image cols: " << image.cols << std::endl;
+        cv::Size unused_size2;
+
+    }
+    //std::cout << "n_features: " << n_features << std::endl;
+    return n_features;
 }
 
 
 void ProcessorBrisk::drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp, cv::Rect _roi)
 {
+    std::cout << "<---- drawFeatures ---->" << std::endl << std::endl;
+
     cv::namedWindow("Keypoint drawing");    // Creates a window for display.
-    //if(_kp.size!=0)
-    //{
+    if(_kp.size()!=0)
+    {
         for(unsigned int i = 0; i <= (_kp.size()-1);i++)
         {
             cv::Point point;
             point.x = _kp[i].pt.x + _roi.x;
             point.y = _kp[i].pt.y + _roi.y;
             cv::circle(_image,point,2,cv::Scalar(88.0,250.0,154.0),-1,8,0); //_kp[i].pt
-            //cv::rectangle(_image,_roi,cv::Scalar(88.0,250.0,154.0),1,8,0);
+            cv::rectangle(_image,_roi,cv::Scalar(88.0,250.0,154.0),1,8,0);
         }
         cv::imshow("Keypoint drawing",_image);
         cv::waitKey(20);
-    //}
-    //else
-    //{
-
-      //  cv::imshow("Keypoint drawing",_image);
-       // cv::waitKey(20);
-    //}
+    }
+    else
+    {
+        cv::rectangle(_image,_roi,cv::Scalar(88.0,250.0,154.0),1,8,0);
+        cv::imshow("Keypoint drawing",_image);
+        cv::waitKey(20);
+    }
 }
 
 unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::Mat _image, cv::Rect _roi)
 {
+    std::cout << "<---- briskImplementation ---->" << std::endl << std::endl;
+
     cv::Mat treated_image = _image;         // Set the image to analyze
     std::vector<cv::KeyPoint> keypoints;    // Vector of keypoints
     cv::Mat descriptors;                    // Matrix of descriptors
@@ -96,8 +124,8 @@ unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::
     ((CaptureImage*)_capture_ptr)->setKeypoints(keypoints);
     ((CaptureImage*)_capture_ptr)->setDescriptors(descriptors);
 
-//    if(keypoints.size()!=0)
-//    {
+    if(keypoints.size()!=0)
+    {
         // Add the features in the capture
         assert(!keypoints.size()==0 && "Keypoints size is 0");
         for(unsigned int i = 0; i <= (keypoints.size()-1);i++)
@@ -112,33 +140,32 @@ unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::
         drawFeatures(((CaptureImage*)_capture_ptr)->getImage(), keypoints, _roi); // A method to draw the keypoints. Optional
 
         return descriptors.rows;  //number of features
-    //}
-    //else
-    //{
-      //  drawFeatures(((CaptureImage*)_capture_ptr)->getImage(), keypoints, _roi); // A method to draw the keypoints. Optional
-       // return 0;
-    //}
+    }
+    else
+    {
+        drawFeatures(((CaptureImage*)_capture_ptr)->getImage(), keypoints, _roi); // A method to draw the keypoints. Optional
+        return 0;
+    }
 }
 
 // This is intended to create Features that are not among the Features already known in the Map. Returns the number of detected Features.
 unsigned int ProcessorBrisk::detectNewFeatures(CaptureBase* _capture_ptr)
 {
-
+    std::cout << "<---- detectNewFeatures ---->" << std::endl << std::endl;
     //setIncomingPtr(_capture_ptr);                                    // Set the capture as incoming_ptr_
-    const cv::Mat& cv_image = ((CaptureImage*)_capture_ptr)->getImage();  // Get the image from the capture
+    //const cv::Mat& cv_image = ((CaptureImage*)_capture_ptr)->getImage();  // Get the image from the capture
 
-    std::cout << "Mat rows: " << cv_image.rows << "Mat cols: " << cv_image.cols << std::endl;
-
-    cv::Rect myROI(100, 100, 100, 100); //x,y,width,height
-    cv::Mat croppedImage = cv_image(myROI);
-    unsigned int h = briskImplementation(_capture_ptr,croppedImage,myROI);//cv_image);
-    return h;
+    //cv::Rect myROI(100, 100, 100, 100); //x,y,width,height
+    //cv::Mat croppedImage = cv_image(myROI);
+    //unsigned int h = briskImplementation(_capture_ptr,croppedImage,myROI);//cv_image);
+    return 0;
 }
 
 
 //Vote for KeyFrame generation. If a KeyFrame criterion is validated, this function returns true
 bool ProcessorBrisk::voteForKeyFrame()
 {
+    std::cout << "<---- voteForKeyFrame ---->" << std::endl << std::endl;
     return true;
 }
 
