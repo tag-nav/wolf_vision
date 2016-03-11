@@ -1,5 +1,9 @@
 
 # Local parametrizations classes test
+ADD_EXECUTABLE(example_template_factory example_template_factory.cpp)
+TARGET_LINK_LIBRARIES(example_template_factory ${PROJECT_NAME})
+
+# Local parametrizations classes test
 ADD_EXECUTABLE(test_local_param test_local_param.cpp)
 TARGET_LINK_LIBRARIES(test_local_param ${PROJECT_NAME})
 
