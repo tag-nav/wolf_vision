@@ -141,6 +141,7 @@ class ProcessorTracker : public ProcessorBase
         void setOriginPtr(CaptureBase* const _origin_ptr);
         void setLastPtr(CaptureBase* const _last_ptr);
         void setIncomingPtr(CaptureBase* const _incoming_ptr);
+        bool usesLandmarks() const;
 
     protected:
 
@@ -161,12 +162,15 @@ class ProcessorTracker : public ProcessorBase
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr) = 0;
 
     protected:
-        bool autonomous_;    ///< Sets whether the tracker is autonomous to make decisions that affect the WolfProblem, like creating new KeyFrames and/or Landmarks.
+        bool autonomous_;    ///< Sets whether the tracker is autonomous to create new KeyFrames and/or Landmarks.
         bool use_landmarks_; ///< Set if the tracker uses and creates landmarks. Clear if only uses features.
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
         FeatureBaseList new_features_list_; ///< List of new features for landmark initialization and tracker reset.
+
+    private:
+        void processNewFeatures(CaptureBase* _capture_ptr);
 };
 
 // IMPLEMENTATION //
