@@ -172,7 +172,7 @@ typedef enum
  */
 typedef enum
 {
-    ST_ESTIMATED,		///< State in estimation (default)
+    ST_ESTIMATED = 0,		///< State in estimation (default)
     ST_FIXED,			  ///< State fixed, estimated enough or fixed infrastructure.
 } StateStatus;
 
@@ -294,7 +294,7 @@ typedef ProcessorBaseList::iterator ProcessorBaseIter;
 
 // - State
 typedef std::list<StateBlock*> StateBlockList;
-typedef StateBlockList::iterator StateBaseIter;
+typedef StateBlockList::iterator StateBlockIter;
 
 
 ///** \brief Enumeration of all possible feature types

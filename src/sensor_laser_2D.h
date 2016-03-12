@@ -19,8 +19,8 @@ class SensorLaser2D : public SensorBase
     public:
         /** \brief Constructor with arguments
          * 
-         * \param _p_ptr StateBase pointer to the sensor position
-         * \param _o_ptr StateBase pointer to the sensor orientation
+         * \param _p_ptr StateBlock pointer to the sensor position
+         * \param _o_ptr StateBlock pointer to the sensor orientation
          * 
          **/        
         SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr);

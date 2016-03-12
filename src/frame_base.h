@@ -64,7 +64,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         // Fixed / Estimated
         void fix();
         void unfix();
-        bool isFixed();
+        bool isFixed() const;
 
 
 
@@ -151,7 +151,7 @@ inline void FrameBase::unfix()
     this->setStatus(ST_ESTIMATED);
 }
 
-inline bool FrameBase::isFixed()
+inline bool FrameBase::isFixed() const
 {
     return status_ == ST_FIXED;
 }

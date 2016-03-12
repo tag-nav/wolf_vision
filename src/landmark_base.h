@@ -12,7 +12,7 @@ class StateBlock;
 
 //std includes
 
-// TODO: add descriptor as a StateBase -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
+// TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
 
 //class LandmarkBase
@@ -33,8 +33,8 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
          *
          * Constructor with type, and state pointer
          * \param _tp indicates landmark type.(types defined at wolf.h)
-         * \param _p_ptr StateBase pointer to the position
-         * \param _o_ptr StateBase pointer to the orientation (default: nullptr)
+         * \param _p_ptr StateBlock pointer to the position
+         * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          *
          **/
         LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
