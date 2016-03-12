@@ -79,8 +79,6 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void process(CaptureBase* const _incoming_ptr);
 
-        bool isAutonomous() const;
-
         /** \brief Initialize tracker.
          */
         void init(CaptureBase* _origin_ptr);
@@ -103,6 +101,12 @@ class ProcessorTracker : public ProcessorBase
          * It must also generate the constraints, of a type derived from ConstraintBase.
          */
         virtual unsigned int processKnownFeatures() = 0;
+
+        /**\brief Process new Features
+         *
+         */
+        virtual unsigned int processNewFeatures();
+
 
         /** \brief Detect new Features
          * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
@@ -141,13 +145,15 @@ class ProcessorTracker : public ProcessorBase
         void advance();
 
         // getters and setters
+        bool isAutonomous() const;
+        bool usesLandmarks() const;
         CaptureBase* getOriginPtr() const;
         CaptureBase* getLastPtr() const;
         CaptureBase* getIncomingPtr() const;
         void setOriginPtr(CaptureBase* const _origin_ptr);
         void setLastPtr(CaptureBase* const _last_ptr);
         void setIncomingPtr(CaptureBase* const _incoming_ptr);
-        bool usesLandmarks() const;
+        FeatureBaseList& getNewFeaturesList();
 
     protected:
 
@@ -173,12 +179,8 @@ class ProcessorTracker : public ProcessorBase
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
-
-    protected:
         FeatureBaseList new_features_list_; ///< List of new features for landmark initialization and tracker reset.
 
-    private:
-        void processNewFeatures(CaptureBase* _capture_ptr);
 };
 
 // IMPLEMENTATION //
@@ -198,7 +200,7 @@ inline void ProcessorTracker::reset(CaptureBase* _origin_ptr, CaptureBase* _last
 
 inline void ProcessorTracker::reset()
 {
-    reset(last_ptr_, incoming_ptr_);
+    reset(incoming_ptr_, incoming_ptr_);
 }
 
 inline void ProcessorTracker::advance()
@@ -212,6 +214,11 @@ inline void ProcessorTracker::advance()
 inline bool ProcessorTracker::isAutonomous() const
 {
     return autonomous_;
+}
+
+inline bool ProcessorTracker::usesLandmarks() const
+{
+    return use_landmarks_;
 }
 
 inline CaptureBase* ProcessorTracker::getOriginPtr() const
@@ -242,6 +249,11 @@ inline void ProcessorTracker::setLastPtr(CaptureBase* const _last_ptr)
 inline void ProcessorTracker::setIncomingPtr(CaptureBase* const _incoming_ptr)
 {
     incoming_ptr_ = _incoming_ptr;
+}
+
+inline FeatureBaseList& ProcessorTracker::getNewFeaturesList()
+{
+    return new_features_list_;
 }
 
 #endif /* PROCESSOR_TRACKER_H_ */
