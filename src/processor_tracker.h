@@ -65,6 +65,10 @@ class ProcessorTracker : public ProcessorBase
 {
     public:
 
+        /** \brief Constructor with options
+         * \param _autonomous Set to make the tracker autonomous to create KeyFrames and/or Landmarks.
+         * \param _uses_landmarks Set to make the tracker work with Landmarks. Un-set to work only with Features.
+         */
         ProcessorTracker(bool _autonomous = true, bool _uses_landmarks = true);
         virtual ~ProcessorTracker();
 
@@ -82,33 +86,34 @@ class ProcessorTracker : public ProcessorBase
         void init(CaptureBase* _origin_ptr);
 
         /** \brief Tracker function
+         * \param _incoming_ptr a pointer to the incoming Capture.
+         * \return The number of successful tracks.
          *
          * This is the tracker function to be implemented in derived classes.
          * It operates on the incoming capture.
          *
          * This should do one of the following, depending on the design of the tracker:
-         *   - Track Features against other Features in another Capture.
+         *   - Track Features against other Features in the \b origin Capture.
          *   - Track Features against Landmarks in the Map.
          *
-         * It should also generate the necessary Features in the incoming Capture,
-         * of a type derived from FeatureBase,
-         * and the constraints, of a type derived from ConstraintBase.
+         * It should also generate the necessary Features in the \b incoming Capture,
+         * of the correct type, derived from FeatureBase.
          *
-         * \return The number of successful tracks.
+         * It should also generate the constraints, of a type derived from ConstraintBase.
          */
         virtual unsigned int processKnownFeatures(CaptureBase* _incoming_ptr) = 0;
 
         /** \brief Detect new Features
-         *
-         * This is intended to create Features that are not among the Features already known in the Map.
          * \param _capture_ptr Capture for feature detection
-         *
-         * This function sets new_features_list_, the list of newly detected features,
-         * to be used for landmark initialization.
-         *
+         * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
          * \return The number of detected Features.
+         *
+         * This function detects Features that do not correspond to known Features/Landmarks in the system.
+         *
+         * The function sets the member new_features_list_, the list of newly detected features,
+         * to be used for landmark initialization. The list is passed to the function as reference parameter.
          */
-        virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr) = 0;
+        virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr, FeatureBaseList& _new_features_list = new_features_list_) = 0;
 
         /** \brief Vote for KeyFrame generation
          *
