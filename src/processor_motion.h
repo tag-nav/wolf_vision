@@ -16,10 +16,12 @@
 // STL
 #include <deque>
 
+
 class ProcessorMotion : public ProcessorBase{
     public:
         ProcessorMotion(ProcessorType _tp);
         virtual ~ProcessorMotion();
+
 
         virtual void process(CaptureBase* _capture_ptr)
         {
