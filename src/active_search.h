@@ -105,8 +105,6 @@
 
 class ActiveSearchGrid {
 
-        friend std::ostream& operator <<(std::ostream & s, ActiveSearchGrid const & grid);
-
     private:
         Eigen::Vector2i img_size_;
         Eigen::Vector2i grid_size_;
@@ -120,31 +118,40 @@ class ActiveSearchGrid {
 
     public:
         /**
-                 * Constructor.
-                 * \param _img_size_h horizontal image size, in pixels.
-                 * \param _img_size_v vertical image size.
-                 * \param _n_cells_h horizontal number of cells per image width.
-                 * \param _n_cells_v vertical number of cells per image height.
-                 * \param _separation minimum separation between existing and new points.
-                 * \param _margin minimum separation to the edge of the image
-                 */
+         * Constructor.
+         * \param _img_size_h horizontal image size, in pixels.
+         * \param _img_size_v vertical image size.
+         * \param _n_cells_h horizontal number of cells per image width.
+         * \param _n_cells_v vertical number of cells per image height.
+         * \param _separation minimum separation between existing and new points.
+         * \param _margin minimum separation to the edge of the image
+         */
         ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v, const int & _n_cells_h, const int & _n_cells_v, const int & _margin = 0,
                          const int & _separation = 0);
 
-        /**
-         * Clear grid.
+        /** \brief Clear grid.
+         *
          * Sets all cell counters to zero.
          */
-        void clear();
+        void clear()
+        {
+            projections_count_.setZero();
+        }
 
         /**
-         * Clear grid and position it at a new random location.
+         * \brief Clear grid and position it at a new random location.
+         *
          * Sets all cell counters to zero and sets a new random grid position.
          */
-        void renew();
+        void renew()
+        {
+            offset_(0) = -(margin_ + rand() % (cell_size_(0) - 2 * margin_)); // from -margin to -(cellSize(0)-margin)
+            offset_(1) = -(margin_ + rand() % (cell_size_(1) - 2 * margin_)); // from -margin to -(cellSize(0)-margin)
+            clear();
+        }
 
         /**
-         * Add a projected pixel to the grid.
+         * \brief Add a projected pixel to the grid.
          * \param pix the pixel to add.
          */
         void hitCell(const Eigen::Vector2i & pix);
@@ -184,7 +191,10 @@ class ActiveSearchGrid {
         /**
          * Get cell center (can be decimal if size of cell is an odd number of pixels)
          */
-        Eigen::Vector2i cellCenter(const Eigen::Vector2i & cell);
+        Eigen::Vector2i cellCenter(const Eigen::Vector2i& cell)
+        {
+            return cellOrigin(cell) + cell_size_ / 2;
+        }
 
         /**
          * Get one random empty cell

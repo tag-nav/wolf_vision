@@ -33,17 +33,6 @@ void ActiveSearchGrid::hitCell(const Eigen::Vector2i & p) {
     projections_count_(cell(0), cell(1))++;
 }
 
-void ActiveSearchGrid::clear() {
-    projections_count_.setZero();
-}
-
-void ActiveSearchGrid::renew() {
-    offset_(0) = - (margin_ + rand() % (cell_size_(0) - 2*margin_)); // from -margin to -(cellSize(0)-margin)
-    offset_(1) = - (margin_ + rand() % (cell_size_(1) - 2*margin_)); // from -margin to -(cellSize(0)-margin)
-    clear();
-}
-
-
 bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
     int k = 0;
     Eigen::Vector2i cell0;
@@ -76,14 +65,6 @@ Eigen::Vector2i ActiveSearchGrid::cellOrigin(const Eigen::Vector2i & cell) {
     cell0(0) = offset_(0) + cell_size_(0) * cell(0);
     cell0(1) = offset_(1) + cell_size_(1) * cell(1);
     return cell0;
-}
-
-
-/*
- * Get cell center (can be decimal if size of cell is an odd number of pixels)
- */
-Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i & cell) {
-    return cellOrigin(cell) + cell_size_ / 2;
 }
 
 void ActiveSearchGrid::cell2roi(const Eigen::Vector2i & cell, cv::Mat & roi) {
