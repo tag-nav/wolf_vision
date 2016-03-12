@@ -25,10 +25,9 @@ ProcessorBrisk::~ProcessorBrisk()
 
 
 // Tracker function. Returns the number of successful tracks.
-unsigned int ProcessorBrisk::processKnownFeatures(CaptureBase* _incoming_ptr)
+unsigned int ProcessorBrisk::processKnownFeatures()
 {
     std::cout << "<---- processKnownFeatures ---->" << std::endl << std::endl;
-    incoming_ptr_ = _incoming_ptr;
     cv::Mat image = ((CaptureImage*)incoming_ptr_)->getImage();
 
     ActiveSearchGrid act_search_grid(image.rows,image.cols,8,8); //20, 20

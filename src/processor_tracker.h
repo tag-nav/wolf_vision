@@ -86,34 +86,35 @@ class ProcessorTracker : public ProcessorBase
         void init(CaptureBase* _origin_ptr);
 
         /** \brief Tracker function
-         * \param _incoming_ptr a pointer to the incoming Capture.
          * \return The number of successful tracks.
          *
          * This is the tracker function to be implemented in derived classes.
-         * It operates on the incoming capture.
+         * It operates on the \b incoming capture pointed by incoming_ptr_.
          *
-         * This should do one of the following, depending on the design of the tracker:
+         * This should do one of the following, depending on the design of the tracker -- see use_landmarks_:
          *   - Track Features against other Features in the \b origin Capture.
+         *     An intermediary step of matching against Features in the \b last Capture makes tracking easier.
+         *     Once tracked against last, then the link to \b origin is provided by the Features in \b last.
          *   - Track Features against Landmarks in the Map.
          *
-         * It should also generate the necessary Features in the \b incoming Capture,
+         * The function must generate the necessary Features in the \b incoming Capture,
          * of the correct type, derived from FeatureBase.
          *
-         * It should also generate the constraints, of a type derived from ConstraintBase.
+         * It must also generate the constraints, of a type derived from ConstraintBase.
          */
-        virtual unsigned int processKnownFeatures(CaptureBase* _incoming_ptr) = 0;
+        virtual unsigned int processKnownFeatures() = 0;
 
         /** \brief Detect new Features
-         * \param _capture_ptr Capture for feature detection
+         * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
          * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
          * The function sets the member new_features_list_, the list of newly detected features,
-         * to be used for landmark initialization. The list is passed to the function as reference parameter.
+         * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr, FeatureBaseList& _new_features_list = new_features_list_) = 0;
+        virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr = incoming_ptr_, FeatureBaseList& _new_features_list = new_features_list_) = 0;
 
         /** \brief Vote for KeyFrame generation
          *
