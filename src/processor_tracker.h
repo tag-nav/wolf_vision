@@ -114,7 +114,7 @@ class ProcessorTracker : public ProcessorBase
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr = incoming_ptr_, FeatureBaseList& _new_features_list = new_features_list_) = 0;
+        virtual unsigned int detectNewFeatures() = 0;
 
         /** \brief Vote for KeyFrame generation
          *

@@ -31,7 +31,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     assert ( autonomous_ && "Requested process() to a non-autonomous processor.");
 
     // 1. First we track the known Features and create new constraints as needed
-    processKnownFeatures(_incoming_ptr);
+    processKnownFeatures();
 
     // 2. Then we see if we want to create a KeyFrame
     if (voteForKeyFrame())
@@ -69,7 +69,7 @@ void ProcessorTracker::processNewFeatures(CaptureBase* _capture_ptr)
      */
 
     // We first need to populate the Capture with new Features
-    detectNewFeatures(_capture_ptr);
+    detectNewFeatures();
     if ( usesLandmarks() )
     {
         for (FeatureBase* feature_ptr : new_features_list_)

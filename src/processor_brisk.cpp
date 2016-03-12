@@ -185,7 +185,7 @@ unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::
 }
 
 // This is intended to create Features that are not among the Features already known in the Map. Returns the number of detected Features.
-unsigned int ProcessorBrisk::detectNewFeatures(CaptureBase* _capture_ptr)
+unsigned int ProcessorBrisk::detectNewFeatures()
 {
     std::cout << "<---- detectNewFeatures ---->" << std::endl << std::endl;
     //setIncomingPtr(_capture_ptr);                                    // Set the capture as incoming_ptr_

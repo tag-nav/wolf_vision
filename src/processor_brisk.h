@@ -50,7 +50,7 @@ public:
      *
      * \return The number of successful tracks.
      */
-    virtual unsigned int processKnownFeatures(CaptureBase* _incoming_ptr);
+    virtual unsigned int processKnownFeatures();
 
 
     /** \brief Detect new Features
@@ -62,7 +62,7 @@ public:
      *
      * \return The number of detected Features.
      */
-    virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr);
+    virtual unsigned int detectNewFeatures();
 
 
     /** \brief Vote for KeyFrame generation
