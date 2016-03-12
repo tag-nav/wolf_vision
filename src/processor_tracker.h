@@ -30,7 +30,7 @@
  *     algorithm (by implementing an algorithm similar to process() outside the Tracker).
  *
  * A tracker can be designed to track either Features or Landmarks. This property must be set at construction time.
- *   - If tracking Features, it establishes constraints against other Features;
+ *   - If tracking Features, it establishes constraints Feature-Feature;
  *     it does not use Landmarks, nor it creates Landmarks.
  *   - If tracking Landmarks, it establishes constraints Feature-Landmark;
  *     it uses Landmarks for tracking, in an active-search approach,
