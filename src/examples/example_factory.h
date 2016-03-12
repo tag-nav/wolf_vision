@@ -18,6 +18,7 @@ class Shape
             POINT, LINE, CIRCLE
         } Type;
     public:
+        Shape(int _id) : id_(_id){}
         virtual ~Shape();
         virtual void draw() const = 0;
     protected:
@@ -32,7 +33,6 @@ class Point : public Shape
         virtual void draw() const;
         Shape* createPoint();
     private:
-        int id_;
         static int id_count_;
 };
 
@@ -43,7 +43,6 @@ class Line : public Shape
         virtual ~Line();
         virtual void draw() const;
     private:
-        int id_;
         static int id_count_;
 };
 
@@ -87,7 +86,7 @@ class ShapeFactory
 int Point::id_count_ = 0;
 
 inline Point::Point() :
-        id_(++id_count_)
+        Shape(++id_count_)
 {
 }
 
@@ -123,7 +122,7 @@ const bool registered = ShapeFactory::instance()->registerShape(Shape::POINT, Cr
 int Line::id_count_ = 0;
 
 inline Line::Line() :
-        id_(++id_count_)
+        Shape(++id_count_)
 {
 }
 
