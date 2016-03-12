@@ -161,12 +161,14 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr) = 0;
 
-    protected:
+    private:
         bool autonomous_;    ///< Sets whether the tracker is autonomous to create new KeyFrames and/or Landmarks.
         bool use_landmarks_; ///< Set if the tracker uses and creates landmarks. Clear if only uses features.
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
+
+    protected:
         FeatureBaseList new_features_list_; ///< List of new features for landmark initialization and tracker reset.
 
     private:
