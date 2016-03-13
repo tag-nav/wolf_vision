@@ -27,7 +27,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, Constr
     landmark_ptr_(nullptr)
 {
     // add constraint to frame
-    frame_ptr_->addConstraintTo(this);
+    frame_ptr_->addConstrainedBy(this);
 }
 
 
@@ -55,7 +55,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, 
     landmark_ptr_(_landmark_ptr)
 {
     // add constraint to landmark
-    landmark_ptr_->addConstraintTo(this);
+    landmark_ptr_->addConstrainedBy(this);
 }
 
 ConstraintBase::~ConstraintBase()
@@ -71,11 +71,11 @@ ConstraintBase::~ConstraintBase()
 
     // remove constraint to frame/landmark/feature
     if (frame_ptr_ != nullptr)
-        frame_ptr_->removeConstraintTo(this);
+        frame_ptr_->removeConstrainedBy(this);
     if (feature_ptr_ != nullptr)
         feature_ptr_->removeConstrainedBy(this);
     if (landmark_ptr_ != nullptr)
-        landmark_ptr_->removeConstraintTo(this);
+        landmark_ptr_->removeConstrainedBy(this);
 
     //std::cout << "removed constraints to " << std::endl;
 }

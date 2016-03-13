@@ -24,7 +24,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         StateBlock* p_ptr_;      ///< Position state block pointer
         StateBlock* o_ptr_;      ///< Orientation state block pointer
         StateBlock* v_ptr_;      ///< Linear velocity state block pointer
-        std::list<ConstraintBase*> constraint_to_list_; ///> List of constraints TO this frame
+        std::list<ConstraintBase*> constrained_by_list_; ///> List of constraints TO this frame
         
     public:
         /** \brief Constructor of non-key Frame with only time stamp
@@ -106,15 +106,15 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
 
         /** \brief Gets the list of constraints linked with this frame
          **/
-        std::list<ConstraintBase*>* getConstraintToListPtr();
+        std::list<ConstraintBase*>* getConstrainedByListPtr();
 
         /** \brief Link with a constraint
          **/
-        void addConstraintTo(ConstraintBase* _ctr_ptr);
+        void addConstrainedBy(ConstraintBase* _ctr_ptr);
 
         /** \brief Remove a constraint to this frame
          **/
-        void removeConstraintTo(ConstraintBase* _ctr_ptr);
+        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
 
         /** \brief Gets the number of constraints linked with this frame
          **/
@@ -207,19 +207,19 @@ inline void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
     removeDownNode(_capt_iter);
 }
 
-inline std::list<ConstraintBase*>* FrameBase::getConstraintToListPtr()
+inline std::list<ConstraintBase*>* FrameBase::getConstrainedByListPtr()
 {
-    return &constraint_to_list_;
+    return &constrained_by_list_;
 }
 
-inline void FrameBase::addConstraintTo(ConstraintBase* _ctr_ptr)
+inline void FrameBase::addConstrainedBy(ConstraintBase* _ctr_ptr)
 {
-    constraint_to_list_.push_back(_ctr_ptr);
+    constrained_by_list_.push_back(_ctr_ptr);
 }
 
 inline unsigned int FrameBase::getHits() const
 {
-    return constraint_to_list_.size();
+    return constrained_by_list_.size();
 }
 
 inline StateStatus FrameBase::getStatus() const

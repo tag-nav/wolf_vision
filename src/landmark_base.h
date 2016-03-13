@@ -25,7 +25,7 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
         StateBlock* p_ptr_;     ///< Position state unit pointer
         StateBlock* o_ptr_;     ///< Orientation state unit pointer
         Eigen::VectorXs descriptor_;    //TODO: agree?
-        ConstraintBaseList constraint_to_list_; ///< List of constraints linked to this landmark
+        ConstraintBaseList constrained_by_list_; ///< List of constraints linked to this landmark
 
 
     public:
@@ -48,11 +48,11 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
 
         /** \brief Link with a constraint
          **/
-        void addConstraintTo(ConstraintBase* _ctr_ptr);
+        void addConstrainedBy(ConstraintBase* _ctr_ptr);
 
         /** \brief Remove a constraint to this landmark
          **/
-        void removeConstraintTo(ConstraintBase* _ctr_ptr);
+        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
 
         /** \brief Gets the number of constraints linked with this landmark
          **/
@@ -60,7 +60,7 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
 
         /** \brief Gets the list of constraints linked with this landmark
          **/
-        std::list<ConstraintBase*>* getConstraintToListPtr();
+        std::list<ConstraintBase*>* getConstrainedByListPtr();
 
         /** \brief Sets the Landmark status
          **/
@@ -113,19 +113,19 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
         const LandmarkType getType() const;
 };
 
-inline void LandmarkBase::addConstraintTo(ConstraintBase* _ctr_ptr)
+inline void LandmarkBase::addConstrainedBy(ConstraintBase* _ctr_ptr)
 {
-    constraint_to_list_.push_back(_ctr_ptr);
+    constrained_by_list_.push_back(_ctr_ptr);
 }
 
 inline unsigned int LandmarkBase::getHits() const
 {
-    return constraint_to_list_.size();
+    return constrained_by_list_.size();
 }
 
-inline std::list<ConstraintBase*>* LandmarkBase::getConstraintToListPtr()
+inline std::list<ConstraintBase*>* LandmarkBase::getConstrainedByListPtr()
 {
-    return &constraint_to_list_;
+    return &constrained_by_list_;
 }
 
 inline void LandmarkBase::fix()

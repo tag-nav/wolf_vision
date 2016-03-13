@@ -26,7 +26,7 @@ FeatureBase::~FeatureBase()
 
     while (!constrained_by_list_.empty())
     {
-        //std::cout << "destruct() constraint " << (*constraint_to_list_.begin())->nodeId() << std::endl;
+        //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
         constrained_by_list_.front()->destruct();
         //std::cout << "deleted " << std::endl;
     }

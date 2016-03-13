@@ -628,7 +628,7 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
 
     // ERASING LANDMARK CORNER
     // change all constraints from corner landmark by new corner container
-    for (auto ctr_it = _old_corner_landmark_ptr->getConstraintToListPtr()->begin(); ctr_it != _old_corner_landmark_ptr->getConstraintToListPtr()->end(); ctr_it++)
+    for (auto ctr_it = _old_corner_landmark_ptr->getConstrainedByListPtr()->begin(); ctr_it != _old_corner_landmark_ptr->getConstrainedByListPtr()->end(); ctr_it++)
     {
         // create new constraint to landmark container
         (*ctr_it)->getFeaturePtr()->addConstraint(new ConstraintContainer((*ctr_it)->getFeaturePtr(), new_landmark, _corner_idx));
