@@ -15,7 +15,7 @@ class NodeTerminus;
 class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 {
     public:
-        ProcessorBase();
+        ProcessorBase(ProcessorType _tp);
 
         /** \brief Default destructor (not recommended)
          *
@@ -27,6 +27,9 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
         SensorBase* getSensorPtr();
 
         virtual void process(CaptureBase* _capture_ptr) = 0;
+
+    private:
+        ProcessorType type_;
 
 };
 

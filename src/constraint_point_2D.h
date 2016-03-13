@@ -23,7 +23,7 @@ class ConstraintPoint2D : public ConstraintSparse<3, 2, 1, 2, 1>
         {
             //
         }
-}
+};
 
 
 

@@ -193,9 +193,34 @@ typedef enum
     ABSOLUTE_POSE ///< Full absolute pose (XYZ+quaternion)
 } SensorType;
 
-/** \brief Enumeration of all possible landmark types
+/** \brief Enumeration of all possible Processor types
  *
  * You may add items to this list as needed. Be concise with names, and document your entries.
+ */
+typedef enum
+{
+    PRC_TRACKER_BRISK,
+    PRC_TRACKER_ORB,
+    PRC_GPS_RAW,
+    PRC_LIDAR
+} ProcessorType;
+
+/** \brief enumeration of all possible Feature types
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ */
+typedef enum
+{
+    FEAT_CORNER,
+    FEAT_FIX,
+    FEAT_GPS_FIX,
+    FEAT_GPS_PR,
+    FEAT_ODOM_2D,
+    FEAT_POINT_IMAGE
+}FeatureType;
+
+/** \brief Enumeration of all possible landmark types
+ *
  */
 typedef enum
 {

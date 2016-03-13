@@ -261,8 +261,8 @@ int main(int argc, char** argv)
 
                     //std::cout << "Adding edge... " << std::endl;
                     // add capture, feature and constraint to problem
-                    FeatureBase* feature_ptr_full = new FeatureBase(edge_vector, edge_information.inverse());
-                    FeatureBase* feature_ptr_prun = new FeatureBase(edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_full = new FeatureBase(FEAT_FIX, edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_prun = new FeatureBase(FEAT_FIX, edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_full = new CaptureVoid(TimeStamp(0), sensor);
                     CaptureVoid* capture_ptr_prun = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_full.find(edge_old) != index_2_frame_ptr_full.end() && "edge from vertex not added!");

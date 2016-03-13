@@ -15,6 +15,7 @@ class ConstraintBase;
 class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
 {
     protected:
+        FeatureType type_;          ///< Feature type. See wolf.h for a list of all possible features.
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
@@ -25,14 +26,14 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
          * 
          * \param _dim_measurement the dimension of the measurement space
          */
-        FeatureBase(unsigned int _dim_measurement);
+        FeatureBase(FeatureType _tp, unsigned int _dim_measurement);
 
         /** \brief Constructor from capture pointer and measure
          *
          * \param _measurement the measurement
          * \param _meas_covariance the noise of the measurement
          */
-        FeatureBase(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
+        FeatureBase(FeatureType _tp, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
         /** \brief Default destructor (not recommended)
          *
