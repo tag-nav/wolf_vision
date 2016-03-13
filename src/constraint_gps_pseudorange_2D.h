@@ -224,7 +224,7 @@ inline bool ConstraintGPSPseudorange2D::operator ()(const T* const _vehicle_p, c
     T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0);
 
     //     error = (expected measurement)       - (actual measurement)
-    _residual[0] = (distance + _bias[0] * T(LIGHT_SPEED)) - (pseudorange_);
+    _residual[0] = (distance + _bias[0] * T(LIGHT_SPEED)) - T(pseudorange_);
 
     if (verbose_level_ >= 2)
         std::cout << "!!! Residual: " << _residual[0] << "\n";
