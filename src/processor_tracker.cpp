@@ -7,8 +7,8 @@
 
 #include "processor_tracker.h"
 
-ProcessorTracker::ProcessorTracker(bool _autonomous, bool _uses_landmarks) :
-        ProcessorBase(),
+ProcessorTracker::ProcessorTracker(ProcessorType _tp, bool _autonomous, bool _uses_landmarks) :
+        ProcessorBase(_tp),
         autonomous_(_autonomous),
         use_landmarks_(_uses_landmarks),
         origin_ptr_(nullptr),
@@ -36,7 +36,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // 2. Then we see if we want to create a KeyFrame
     if (voteForKeyFrame())
     {
-        // 2.a. Detect new Features, initialize Landmarks, create Contraints
+        // 2.a. Detect new Features, initialize Landmarks, create Constraints
         processNewFeatures();
         // Make KeyFrame
         makeKeyFrame(incoming_ptr_);

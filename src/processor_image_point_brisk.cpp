@@ -10,7 +10,7 @@
 
 
 ProcessorImagePointBrisk::ProcessorImagePointBrisk(int _threshold, int _octaves, float _pattern_scales) :
-        sensor_cam_ptr_(nullptr), capture_img_ptr_(nullptr), brisk_(_threshold, _octaves, _pattern_scales) //initializes the algoritm
+        ProcessorTracker(PRC_TRACKER_BRISK), sensor_cam_ptr_(nullptr), capture_img_ptr_(nullptr), brisk_(_threshold, _octaves, _pattern_scales) //initializes the algoritm
 {
     std::cout << "ProcessorImagePointBrisk constructor" << std::endl;
 }

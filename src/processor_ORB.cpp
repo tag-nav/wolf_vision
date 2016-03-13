@@ -3,7 +3,7 @@
 
 #include "unistd.h"
 
-ProcessorORB::ProcessorORB()
+ProcessorORB::ProcessorORB() : ProcessorTracker(PRC_TRACKER_ORB)
 {
     std::cout << "ProcessorORB constructor" << std::endl;
 }

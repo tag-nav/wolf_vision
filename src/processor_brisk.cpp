@@ -11,7 +11,7 @@
 
 //Constructor
 ProcessorBrisk::ProcessorBrisk(int _threshold, int _octaves, float _pattern_scales) :
-    ProcessorTracker(true, false),
+    ProcessorTracker(PRC_TRACKER_BRISK, true, false),
     sensor_cam_ptr_(nullptr), capture_img_ptr_(nullptr), brisk_(_threshold, _octaves, _pattern_scales) //initializes the algoritm
 {
     //TODO: remove sensor_cam_ptr_, capture_img_ptr_

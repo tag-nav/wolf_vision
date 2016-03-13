@@ -2,15 +2,17 @@
 #include "constraint_base.h"
 #include "capture_base.h"
 
-FeatureBase::FeatureBase(unsigned int _dim_measurement) :
+FeatureBase::FeatureBase(FeatureType _tp, unsigned int _dim_measurement) :
     NodeLinked(MID, "FEATURE"),
+    type_(_tp),
     measurement_(_dim_measurement)
 {
     //
 }
 
-FeatureBase::FeatureBase(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
+FeatureBase::FeatureBase(FeatureType _tp, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
 	NodeLinked(MID, "FEATURE"),
+    type_(_tp),
 	measurement_(_measurement),
 	measurement_covariance_(_meas_covariance)
 {

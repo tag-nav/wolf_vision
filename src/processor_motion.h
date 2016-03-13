@@ -12,7 +12,7 @@
 
 class ProcessorMotion : public ProcessorBase{
     public:
-        ProcessorMotion();
+        ProcessorMotion(ProcessorType _tp);
         virtual ~ProcessorMotion();
         void integrate(TimeStamp& _time_stamp);
         void getDeltaState(TimeStamp& _t_start, TimeStamp& _t_end);
