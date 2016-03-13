@@ -123,10 +123,20 @@ class ProcessorTracker : public ProcessorBase
         virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr) = 0;
 
         /** \brief Create a new constraint
+         * \param _feature_ptr pointer to the Feature to constrain
+         * \param _node_ptr NodeBase pointer to the other entity constrained. It can only be of the types FeatureBase and LandmarkBase.
          *
-         * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
+         * This function will be called with one of these options (and hence the second parameter NodeBase *):
+         *  - createConstraint(FeatureBase *, FeatureBase *)
+         *  - createConstraint(FeatureBase *, LandmarkBase *)
+         *
+         * Implement this method in derived classes to build the type of constraint
+         * appropriate for the pair feature-feature or feature-landmark used by this tracker.
+         *
+         * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
+         * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr) = 0;
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, NodeBase* _node_ptr) = 0;
 
 
         // From now on, all functions are already implemented.
