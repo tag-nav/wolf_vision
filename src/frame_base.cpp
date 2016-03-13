@@ -56,10 +56,10 @@ FrameBase::~FrameBase()
     //std::cout << "states deleted" << std::endl;
 
 
-    while (!constraint_to_list_.empty())
+    while (!constrained_by_list_.empty())
     {
-        //std::cout << "destruct() constraint " << (*constraint_to_list_.begin())->nodeId() << std::endl;
-        constraint_to_list_.front()->destruct();
+        //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
+        constrained_by_list_.front()->destruct();
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
@@ -80,11 +80,11 @@ void FrameBase::registerNewStateBlocks()
     }
 }
 
-void FrameBase::removeConstraintTo(ConstraintBase* _ctr_ptr)
+void FrameBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
 {
-    constraint_to_list_.remove(_ctr_ptr);
+    constrained_by_list_.remove(_ctr_ptr);
 
-    if (constraint_to_list_.empty())
+    if (constrained_by_list_.empty())
         this->destruct();
 }
 

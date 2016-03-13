@@ -58,7 +58,7 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
 
         /** \brief Gets the list of constraints linked with this frame
          **/
-        std::list<ConstraintBase*>* getConstraintToListPtr();
+        std::list<ConstraintBase*>* getConstrainedByListPtr();
 
         /** \brief Gets the capture pointer
          */
@@ -96,7 +96,7 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
         
 };
 
-inline std::list<ConstraintBase*>* FeatureBase::getConstraintToListPtr()
+inline std::list<ConstraintBase*>* FeatureBase::getConstrainedByListPtr()
 {
     return &constrained_by_list_;
 }
