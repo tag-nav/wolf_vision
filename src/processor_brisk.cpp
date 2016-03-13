@@ -28,7 +28,7 @@ ProcessorBrisk::~ProcessorBrisk()
 unsigned int ProcessorBrisk::processKnownFeatures()
 {
     std::cout << "<---- processKnownFeatures ---->" << std::endl << std::endl;
-    cv::Mat image = ((CaptureImage*)incoming_ptr_)->getImage();
+    cv::Mat image = ((CaptureImage*)getIncomingPtr())->getImage();
 
     ActiveSearchGrid act_search_grid(image.rows,image.cols,8,8); //20, 20
     act_search_grid.clear();
@@ -36,7 +36,7 @@ unsigned int ProcessorBrisk::processKnownFeatures()
     ///PROJECTION OF LANDMARKS (features in this case)
 
     unsigned int n_last_capture_feat = 0;
-    for(std::list<FeatureBase*>::iterator feat_list=last_ptr_->getFeatureListPtr()->begin();feat_list != last_ptr_->getFeatureListPtr()->end(); ++feat_list)
+    for(std::list<FeatureBase*>::iterator feat_list=getLastPtr()->getFeatureListPtr()->begin();feat_list != getLastPtr()->getFeatureListPtr()->end(); ++feat_list)
     {
         std::cout << "inside iterator" << std::endl;
         //FeatureBase* last_feature = *feat_list;
@@ -85,7 +85,7 @@ unsigned int ProcessorBrisk::processKnownFeatures()
         cv::Size size_roi(image.cols,image.rows);   //this variable HAS the right heigth and width of the roi
         cv::Rect myROI(ini_point_roi,size_roi);
         std::cout << "image rows: " << image.rows << ", image cols: " << image.cols << std::endl;
-        n_features = briskImplementation(incoming_ptr_,image,myROI);//cv_image);
+        n_features = briskImplementation(getIncomingPtr(),image,myROI);//cv_image);
 
         if (n_features == 0)
         {
@@ -93,7 +93,7 @@ unsigned int ProcessorBrisk::processKnownFeatures()
         }
 
         // A method to draw the keypoints. Optional (false for drawing features)
-        drawFeatures(((CaptureImage*)incoming_ptr_)->getImage(),((CaptureImage*)incoming_ptr_)->getKeypoints(), myROI);
+        drawFeatures(((CaptureImage*)getIncomingPtr())->getImage(),((CaptureImage*)getIncomingPtr())->getKeypoints(), myROI);
 
         //use this to return the image to the original size before computing again the new roi
         image.adjustROI(ini_point_roi.y,(image_size.height-(ini_point_roi.y+image.rows)),ini_point_roi.x,(image_size.width-(ini_point_roi.x+image.cols))); //TODO: Look for a clever way to do this
