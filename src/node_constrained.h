@@ -10,6 +10,14 @@
 
 #include "node_linked.h"
 
+/** \brief Base class for nodes receiving Constraints from Features
+ * \author jsola
+ *
+ * Inherit from this class to build Wolf nodes able to receive constraints.
+ *
+ * Typically, Frames, Features and Landmarks are the only nodes requiring this,
+ * so FrameBase, FeatureBase and LandmarkBase are NodeConstrained.
+ */
 template<class UpperType, class LowerType>
 class NodeConstrained : public NodeLinked<UpperType, LowerType>
 {
