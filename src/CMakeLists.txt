@@ -164,7 +164,6 @@ SET(SRCS
     local_parametrization_homogeneous.cpp
     map_base.cpp
     node_base.cpp
-    node_terminus.cpp
     processor_base.cpp
     processor_tracker.cpp
     sensor_base.cpp
