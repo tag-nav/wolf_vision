@@ -1,6 +1,6 @@
 #include "processor_motion.h"
 
-ProcessorMotion::ProcessorMotion()
+ProcessorMotion::ProcessorMotion(ProcessorType _tp) : ProcessorBase(_tp)
 {
 }
 

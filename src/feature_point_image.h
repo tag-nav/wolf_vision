@@ -19,42 +19,57 @@ class FeaturePointImage : public FeatureBase
 {
     protected:
 
-        Eigen::Vector2s measurement_;
-        std::vector<float> descriptor_;
+//        Eigen::Vector2s measurement_;
         cv::KeyPoint keypoint_;
+        std::vector<float> descriptor_;
 
     public:
-        /** \brief Constructor
-         *
-         * constructor
-         */
         FeaturePointImage(const Eigen::Vector2s & _measurement);
 
-        /** \brief Constructor
-         *
-         * constructor
-         */
-        FeaturePointImage(const Eigen::Vector2s & _measurement, const cv::KeyPoint _keypoint,const std::vector<float> & _descriptor);
+        FeaturePointImage(const Eigen::Vector2s & _measurement, const Eigen::Matrix2s& _meas_covariance) :
+                FeatureBase(FEAT_POINT_IMAGE, _measurement, _meas_covariance)
+        {
+            keypoint_.pt.x = measurement_(0);
+            keypoint_.pt.y = measurement_(1);
+        }
 
-        /** \brief Constructor
-         *
-         * constructor
-         */
-        FeaturePointImage(const Eigen::Vector2s & _measurement, const Eigen::Matrix2s & _meas_covariance);
+        FeaturePointImage(const cv::KeyPoint& _keypoint,
+                          const std::vector<float>& _descriptor) :
+                FeatureBase(FEAT_POINT_IMAGE, Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
+                keypoint_(_keypoint),
+                descriptor_(_descriptor)
+        {
+            measurement_(0) = _keypoint.pt.x;
+            measurement_(1) = _keypoint.pt.y;
+        }
+
 
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
          */
         virtual ~FeaturePointImage();
 
-        virtual Eigen::Vector2s getMeasurement();
+        virtual cv::KeyPoint& getKeypoint();
 
-        virtual cv::KeyPoint getKeypoint();
+        virtual std::vector<float>& getDescriptor();
 
-        virtual std::vector<float> getDescriptor();
+        virtual Eigen::VectorXs & getMeasurement(){
+            measurement_(0) = WolfScalar(keypoint_.pt.x);
+            measurement_(1) = WolfScalar(keypoint_.pt.y);
+            return measurement_;
+        }
 
 };
+
+inline cv::KeyPoint& FeaturePointImage::getKeypoint()
+{
+    return keypoint_;
+}
+
+inline std::vector<float>& FeaturePointImage::getDescriptor()
+{
+    return descriptor_;
+}
 
 #endif // FEATURE_IMAGE_H

@@ -109,7 +109,6 @@ SET(HDRS
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
-    landmark_point.h
     local_parametrization_base.h
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
@@ -130,8 +129,7 @@ SET(HDRS
     time_stamp.h
     trajectory_base.h
     wolf_problem.h
-    wolf_manager.h
-    wolf_manager_gps.h)
+    wolf_manager.h)
    
 SET(HDRS_DTASSC
     data_association/matrix.h
@@ -161,13 +159,11 @@ SET(SRCS
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
-    landmark_point.cpp
     local_parametrization_base.cpp
     local_parametrization_quaternion.cpp
     local_parametrization_homogeneous.cpp
     map_base.cpp
     node_base.cpp
-    node_terminus.cpp
     processor_base.cpp
     processor_tracker.cpp
     sensor_base.cpp
@@ -181,7 +177,6 @@ SET(SRCS
     trajectory_base.cpp
     wolf_problem.cpp
     wolf_manager.cpp
-    wolf_manager_gps.cpp
     data_association/association_solver.cpp
     data_association/association_node.cpp
     data_association/association_tree.cpp
@@ -235,14 +230,12 @@ IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
         feature_point_image.h
-        processor_image_point_brisk.h
         processor_brisk.h
         active_search.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
         feature_point_image.cpp
-        processor_image_point_brisk.cpp
         processor_brisk.cpp
         active_search.cpp
         )

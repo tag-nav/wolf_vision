@@ -15,6 +15,7 @@ class StateBlock;
 class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 {
     protected:
+        SensorType type_;       // the type of sensor. See wolf.h for a list of all sensor types.
         StateBlock* p_ptr_;		// sensor position state block pointer
         StateBlock* o_ptr_; 	// sensor orientation state block pointer
         StateBlock* intrinsic_ptr_; // intrinsic parameters

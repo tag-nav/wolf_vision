@@ -7,6 +7,7 @@
 #include "capture_image.h"
 #include "feature_point_image.h"
 #include "state_block.h"
+#include "active_search.h"
 
 // OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
@@ -19,6 +20,8 @@ protected:
     SensorCamera* sensor_cam_ptr_; //specific pointer to sensor camera object
     CaptureImage* capture_img_ptr_; //specific pointer to capture image object
     cv::BRISK brisk_;               //brisk object
+    ActiveSearchGrid act_search_grid_;
+    unsigned int min_features_th_;
 
     /** \brief Initialize one landmark
      *
@@ -30,10 +33,12 @@ protected:
      *
      * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
      */
-    virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr);
+    virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, NodeBase* _feat_or_lmk_ptr);
+
 
 public:
-    ProcessorBrisk(int _threshold = 30, int _octaves = 0, float _pattern_scales = 1.0f);
+    ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, int _threshold = 30, int _octaves = 0, float _pattern_scales = 1.0f,
+                   unsigned int _grid_width = 8, unsigned int _grid_height = 8, unsigned int _min_features_th = 10);
     virtual ~ProcessorBrisk();
 
 
@@ -50,7 +55,7 @@ public:
      *
      * \return The number of successful tracks.
      */
-    virtual unsigned int processKnownFeatures(CaptureBase* _incoming_ptr);
+    virtual unsigned int processKnownFeatures();
 
 
     /** \brief Detect new Features
@@ -62,7 +67,7 @@ public:
      *
      * \return The number of detected Features.
      */
-    virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr);
+    virtual unsigned int detectNewFeatures();
 
 
     /** \brief Vote for KeyFrame generation
@@ -77,7 +82,9 @@ public:
 
     virtual void drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp, cv::Rect _roi);
 
-    virtual unsigned int briskImplementation(CaptureBase* _capture_ptr, cv::Mat _image, cv::Rect _roi);
+    virtual void drawFeaturesLastFrame(cv::Mat _image, Eigen::Vector2i _feature_point_last);
+
+    virtual unsigned int briskDetect(CaptureBase* _capture_ptr, cv::Mat _image, cv::Point _point_roi, bool _known_features);
 };
 
 #endif // PROCESSOR_BRISK_H

@@ -13,7 +13,7 @@
 
 class ProcessorMotion : public ProcessorBase{
     public:
-        ProcessorMotion();
+        ProcessorMotion(ProcessorType _tp);
         virtual ~ProcessorMotion();
 
         // TODO: Implement the pure virtual from base

@@ -129,6 +129,7 @@ typedef enum
     CTR_CORNER_2D,              ///< marks a 2D corner constraint .
     CTR_CONTAINER,              ///< marks a 2D container constraint .
     CTR_IMG_PNT_TO_EP,          ///< marks a constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
+    CTR_IMG_PNT_TO_HP,          ///< marks a constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_IMG_PNT_TO_IMG_PNT      ///< marks a constraint between two image point features
 } ConstraintType;
 
@@ -172,7 +173,7 @@ typedef enum
  */
 typedef enum
 {
-    ST_ESTIMATED,		///< State in estimation (default)
+    ST_ESTIMATED = 0,		///< State in estimation (default)
     ST_FIXED,			  ///< State fixed, estimated enough or fixed infrastructure.
 } StateStatus;
 
@@ -193,9 +194,34 @@ typedef enum
     ABSOLUTE_POSE ///< Full absolute pose (XYZ+quaternion)
 } SensorType;
 
-/** \brief Enumeration of all possible landmark types
+/** \brief Enumeration of all possible Processor types
  *
  * You may add items to this list as needed. Be concise with names, and document your entries.
+ */
+typedef enum
+{
+    PRC_TRACKER_BRISK,
+    PRC_TRACKER_ORB,
+    PRC_GPS_RAW,
+    PRC_LIDAR
+} ProcessorType;
+
+/** \brief enumeration of all possible Feature types
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ */
+typedef enum
+{
+    FEAT_CORNER,
+    FEAT_FIX,
+    FEAT_GPS_FIX,
+    FEAT_GPS_PR,
+    FEAT_ODOM_2D,
+    FEAT_POINT_IMAGE
+}FeatureType;
+
+/** \brief Enumeration of all possible landmark types
+ *
  */
 typedef enum
 {
@@ -294,7 +320,7 @@ typedef ProcessorBaseList::iterator ProcessorBaseIter;
 
 // - State
 typedef std::list<StateBlock*> StateBlockList;
-typedef StateBlockList::iterator StateBaseIter;
+typedef StateBlockList::iterator StateBlockIter;
 
 
 ///** \brief Enumeration of all possible feature types

@@ -12,7 +12,7 @@ class StateBlock;
 
 //std includes
 
-// TODO: add descriptor as a StateBase -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
+// TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
 
 //class LandmarkBase
@@ -24,8 +24,8 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
         StateBlock* p_ptr_;     ///< Position state unit pointer
         StateBlock* o_ptr_;     ///< Orientation state unit pointer
-        Eigen::VectorXs descriptor_;    //TODO: agree?
-        ConstraintBaseList constraint_to_list_; ///< List of constraints linked to this landmark
+        Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
+        ConstraintBaseList constrained_by_list_; ///< List of constraints linked to this landmark
 
 
     public:
@@ -33,8 +33,8 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
          *
          * Constructor with type, and state pointer
          * \param _tp indicates landmark type.(types defined at wolf.h)
-         * \param _p_ptr StateBase pointer to the position
-         * \param _o_ptr StateBase pointer to the orientation (default: nullptr)
+         * \param _p_ptr StateBlock pointer to the position
+         * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          *
          **/
         LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
@@ -48,11 +48,11 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
 
         /** \brief Link with a constraint
          **/
-        void addConstraintTo(ConstraintBase* _ctr_ptr);
+        void addConstrainedBy(ConstraintBase* _ctr_ptr);
 
         /** \brief Remove a constraint to this landmark
          **/
-        void removeConstraintTo(ConstraintBase* _ctr_ptr);
+        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
 
         /** \brief Gets the number of constraints linked with this landmark
          **/
@@ -60,7 +60,7 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
 
         /** \brief Gets the list of constraints linked with this landmark
          **/
-        std::list<ConstraintBase*>* getConstraintToListPtr();
+        std::list<ConstraintBase*>* getConstrainedByListPtr();
 
         /** \brief Sets the Landmark status
          **/
@@ -113,19 +113,19 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
         const LandmarkType getType() const;
 };
 
-inline void LandmarkBase::addConstraintTo(ConstraintBase* _ctr_ptr)
+inline void LandmarkBase::addConstrainedBy(ConstraintBase* _ctr_ptr)
 {
-    constraint_to_list_.push_back(_ctr_ptr);
+    constrained_by_list_.push_back(_ctr_ptr);
 }
 
 inline unsigned int LandmarkBase::getHits() const
 {
-    return constraint_to_list_.size();
+    return constrained_by_list_.size();
 }
 
-inline std::list<ConstraintBase*>* LandmarkBase::getConstraintToListPtr()
+inline std::list<ConstraintBase*>* LandmarkBase::getConstrainedByListPtr()
 {
-    return &constraint_to_list_;
+    return &constrained_by_list_;
 }
 
 inline void LandmarkBase::fix()

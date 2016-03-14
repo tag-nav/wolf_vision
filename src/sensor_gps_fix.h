@@ -13,8 +13,8 @@ class SensorGPSFix : public SensorBase
         /** \brief Constructor with arguments
          * 
          * Constructor with arguments
-         * \param _p_ptr StateBase pointer to the sensor position
-         * \param _o_ptr StateBase pointer to the sensor orientation
+         * \param _p_ptr StateBlock pointer to the sensor position
+         * \param _o_ptr StateBlock pointer to the sensor orientation
          * \param _noise noise standard deviation
          * 
          **/

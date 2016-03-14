@@ -1,7 +1,7 @@
 #include "feature_gps_pseudorange.h"
 
 FeatureGPSPseudorange::FeatureGPSPseudorange(Eigen::Vector3s &_sat_position, WolfScalar _pseudorange, WolfScalar _covariance) :
-        FeatureBase(Eigen::VectorXs::Constant(1,_pseudorange), Eigen::MatrixXs::Identity(1,1)*_covariance),
+        FeatureBase(FEAT_GPS_PR, Eigen::VectorXs::Constant(1,_pseudorange), Eigen::MatrixXs::Identity(1,1)*_covariance),
         sat_position_(_sat_position),
         pseudorange_(_pseudorange)
 {
