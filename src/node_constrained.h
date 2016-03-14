@@ -15,6 +15,9 @@
  *
  * Inherit from this class to build Wolf nodes able to receive constraints.
  *
+ * This class keeps a lists of constraints received and defines associated functions
+ * for accessing and updating it.
+ *
  * Typically, Frames, Features and Landmarks are the only nodes requiring this,
  * so FrameBase, FeatureBase and LandmarkBase are NodeConstrained.
  */
