@@ -154,21 +154,21 @@ class ActiveSearchGrid {
          * \brief Add a projected pixel to the grid.
          * \param pix the pixel to add.
          */
-        void hitCell(const Eigen::Vector2i & pix);
+        void hitCell(const Eigen::Vector2i & _pix);
 
         /**
          * Get ROI of a random empty cell.
          * \param roi the resulting ROI
          * \return true if ROI exists.
          */
-        bool pickRoi(cv::Rect & roi);
+        bool pickRoi(cv::Rect & _roi);
 
         /**
          * Call this after pickRoi if no point was found in the roi
          * in order to avoid searching again in it.
          * \param roi the ROI where nothing was found
          */
-        void blockCell(const cv::Rect & roi);
+        void blockCell(const cv::Rect & _roi);
 
 
     private:
@@ -176,38 +176,42 @@ class ActiveSearchGrid {
          * Get cell corresponding to pixel
          */
         //template<typename Eigen::Vector2i>
-        Eigen::Vector2i pix2cell(const Eigen::Vector2i & pix) {
-            Eigen::Vector2i cell;
-            cell(0) = (pix(0) - offset_(0)) / cell_size_(0);
-            cell(1) = (pix(1) - offset_(1)) / cell_size_(1);
-            return cell;
-        }
+        Eigen::Vector2i pix2cell(const Eigen::Vector2i& _pix);
 
         /**
          * Get cell origin (exact pixel)
          */
-        Eigen::Vector2i cellOrigin(const Eigen::Vector2i & cell);
+        Eigen::Vector2i cellOrigin(const Eigen::Vector2i & _cell);
 
         /**
          * Get cell center (can be decimal if size of cell is an odd number of pixels)
          */
-        Eigen::Vector2i cellCenter(const Eigen::Vector2i& cell)
-        {
-            return cellOrigin(cell) + cell_size_ / 2;
-        }
+        Eigen::Vector2i cellCenter(const Eigen::Vector2i& _cell);
 
         /**
          * Get one random empty cell
          */
-        bool pickEmptyCell(Eigen::Vector2i & cell);
+        bool pickEmptyCell(Eigen::Vector2i & _cell);
 
         /**
          * Get the region of interest, reduced by a margin.
          */
-        void cell2roi(const Eigen::Vector2i & cell, cv::Rect& roi);
+        void cell2roi(const Eigen::Vector2i & _cell, cv::Rect& _roi);
 
 };
 
+inline Eigen::Vector2i ActiveSearchGrid::pix2cell(const Eigen::Vector2i& _pix)
+{
+    Eigen::Vector2i cell;
+    cell(0) = (_pix(0) - offset_(0)) / cell_size_(0);
+    cell(1) = (_pix(1) - offset_(1)) / cell_size_(1);
+    return cell;
+}
+
+inline Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i& _cell)
+{
+    return cellOrigin(_cell) + cell_size_ / 2;
+}
 
 //#if 0
 //		/**

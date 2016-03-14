@@ -24,8 +24,8 @@ ActiveSearchGrid::ActiveSearchGrid(const int & _img_size_h, const int & _img_siz
 
 
 // Functions to fill in cells
-void ActiveSearchGrid::hitCell(const Eigen::Vector2i & p) {
-    Eigen::Vector2i cell = pix2cell(p);
+void ActiveSearchGrid::hitCell(const Eigen::Vector2i & _pix) {
+    Eigen::Vector2i cell = pix2cell(_pix);
     if (cell(0) < 0 || cell(1) < 0 || cell(0) >= grid_size_(0) || cell(1) >= grid_size_(1))
         return;
     if (projections_count_(cell(0), cell(1)) == -1)
@@ -33,7 +33,7 @@ void ActiveSearchGrid::hitCell(const Eigen::Vector2i & p) {
     projections_count_(cell(0), cell(1))++;
 }
 
-bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
+bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & _cell) {
     int k = 0;
     Eigen::Vector2i cell0;
     for (int i = 1; i < grid_size_(0) - 1; i++) {
@@ -49,8 +49,8 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
     }
     if (k > 0) { // number of empty inner cells
         int idx = rand() % k; // between 0 and k-1
-        cell(0) = empty_cells_tile_tmp_(0, idx);
-        cell(1) = empty_cells_tile_tmp_(1, idx);
+        _cell(0) = empty_cells_tile_tmp_(0, idx);
+        _cell(1) = empty_cells_tile_tmp_(1, idx);
         return true;
     }
     else
@@ -60,43 +60,43 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & cell) {
 /*
  * Get cell origin (exact pixel)
  */
-Eigen::Vector2i ActiveSearchGrid::cellOrigin(const Eigen::Vector2i & cell) {
+Eigen::Vector2i ActiveSearchGrid::cellOrigin(const Eigen::Vector2i & _cell) {
     Eigen::Vector2i cell0;
-    cell0(0) = offset_(0) + cell_size_(0) * cell(0);
-    cell0(1) = offset_(1) + cell_size_(1) * cell(1);
+    cell0(0) = offset_(0) + cell_size_(0) * _cell(0);
+    cell0(1) = offset_(1) + cell_size_(1) * _cell(1);
     return cell0;
 }
 
-void ActiveSearchGrid::cell2roi(const Eigen::Vector2i & cell, cv::Rect & roi) {
-    roi_coordinates_ = cellOrigin(cell);
+void ActiveSearchGrid::cell2roi(const Eigen::Vector2i & _cell, cv::Rect & _roi) {
+    roi_coordinates_ = cellOrigin(_cell);
     roi_coordinates_(0) += separation_;
     roi_coordinates_(1) += separation_;
     Eigen::Vector2i roi_size = cell_size_;
     roi_size(0) -= 2 * separation_;
     roi_size(1) -= 2 * separation_;
-    roi.x = roi_coordinates_(0);
-    roi.y = roi_coordinates_(1);
-    roi.width = roi_size(0);
-    roi.height = roi_size(1);
+    _roi.x = roi_coordinates_(0);
+    _roi.y = roi_coordinates_(1);
+    _roi.width = roi_size(0);
+    _roi.height = roi_size(1);
 //    roi = cv::Rect(roi_coordinates_(0),roi_coordinates_(1),s(0),s(1));
 }
 
 
-bool ActiveSearchGrid::pickRoi(cv::Rect & roi) {
+bool ActiveSearchGrid::pickRoi(cv::Rect & _roi) {
     Eigen::Vector2i cell;
     if (pickEmptyCell(cell)) {
-        cell2roi(cell, roi);
+        cell2roi(cell, _roi);
         return true;
     }
     else
         return false;
 }
 
-void ActiveSearchGrid::blockCell(const cv::Rect & roi)
+void ActiveSearchGrid::blockCell(const cv::Rect & _roi)
 {
     Eigen::Vector2i pix;
-    pix(0) = roi.x+roi.height/2;
-    pix(1) = roi.y+roi.width/2;
+    pix(0) = _roi.x+_roi.height/2;
+    pix(1) = _roi.y+_roi.width/2;
     Eigen::Vector2i cell = pix2cell(pix);
     projections_count_(cell(0), cell(1)) = -1;
 }
