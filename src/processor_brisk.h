@@ -21,6 +21,7 @@ protected:
     CaptureImage* capture_img_ptr_; //specific pointer to capture image object
     cv::BRISK brisk_;               //brisk object
     ActiveSearchGrid act_search_grid_;
+    unsigned int min_features_th_;
 
     /** \brief Initialize one landmark
      *
@@ -36,8 +37,8 @@ protected:
 
 
 public:
-    ProcessorBrisk(int _threshold = 30, int _octaves = 0, float _pattern_scales = 1.0f,
-                   unsigned int _image_rows = 360, unsigned int _image_cols = 640, unsigned int _grid_width = 8, unsigned int _grid_height = 8);
+    ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, int _threshold = 30, int _octaves = 0, float _pattern_scales = 1.0f,
+                   unsigned int _grid_width = 8, unsigned int _grid_height = 8, unsigned int _min_features_th = 10);
     virtual ~ProcessorBrisk();
 
 

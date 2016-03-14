@@ -9,12 +9,13 @@
 /** The "main" class of this processor is "process" */
 
 //Constructor
-ProcessorBrisk::ProcessorBrisk(int _threshold, int _octaves, float _pattern_scales, unsigned int _image_rows, unsigned int _image_cols,
-                               unsigned int _grid_width, unsigned int _grid_height) :
+ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, int _threshold, int _octaves, float _pattern_scales,
+                               unsigned int _grid_width, unsigned int _grid_height, unsigned int _min_features_th) :
     ProcessorTracker(PRC_TRACKER_BRISK, true, false),
     sensor_cam_ptr_(nullptr), capture_img_ptr_(nullptr),
     brisk_(_threshold, _octaves, _pattern_scales),
-    act_search_grid_(_image_rows,_image_cols,_grid_width, _grid_height)
+    act_search_grid_(_image_rows,_image_cols,_grid_width, _grid_height),
+    min_features_th_(_min_features_th)
 {
     //TODO: remove sensor_cam_ptr_, capture_img_ptr_
 }
@@ -219,7 +220,8 @@ unsigned int ProcessorBrisk::detectNewFeatures()
 bool ProcessorBrisk::voteForKeyFrame()
 {
     std::cout << "<---- voteForKeyFrame ---->" << std::endl << std::endl;
-    return true;
+    std::cout << "threshold: " << (((CaptureImage*)getIncomingPtr())->getFeatureListPtr()->size() < min_features_th_) << std::endl;
+    return (((CaptureImage*)getIncomingPtr())->getFeatureListPtr()->size() < min_features_th_);
 }
 
 
