@@ -4,7 +4,6 @@
 #include "sensor_camera.h"
 #include "capture_image.h"
 #include "feature_point_image.h"
-#include "processor_image_point_brisk.h"
 #include "processor_brisk.h"
 #include "state_block.h"
 #include "state_quaternion.h"
