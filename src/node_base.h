@@ -18,10 +18,10 @@ class WolfProblem;
 class NodeBase
 {
     protected:
+        static unsigned int node_id_count_; ///< Object counter (acts as simple ID factory)
+
         std::string label_; ///< Text label identifying the node
         unsigned int node_id_; ///< Node id. It is unique over the whole Wolf Tree
-        static unsigned int node_id_count_; ///< Object counter (acts as simple ID factory)
-        //PendingStatus node_pending_; ///< Pending to be added/updated in the filter or optimizer
         bool verbose_; 
 
     public: 
@@ -55,6 +55,20 @@ class NodeBase
         std::string nodeLabel() const;
 
 };
+
+#include <iostream>
+
+inline NodeBase::NodeBase(std::string _label, bool _verbose) :
+        label_(_label), node_id_(++node_id_count_), verbose_(_verbose)
+{
+    if (verbose_)
+        std::cout << "NodeBase::NodeBase(). Id: " << node_id_ << " Label: " << label_ << std::endl;
+}
+
+inline NodeBase::~NodeBase()
+{
+    //
+}
 
 inline unsigned int NodeBase::nodeId() const
 {
