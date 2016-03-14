@@ -130,8 +130,7 @@ SET(HDRS
     time_stamp.h
     trajectory_base.h
     wolf_problem.h
-    wolf_manager.h
-    wolf_manager_gps.h)
+    wolf_manager.h)
    
 SET(HDRS_DTASSC
     data_association/matrix.h
@@ -181,7 +180,6 @@ SET(SRCS
     trajectory_base.cpp
     wolf_problem.cpp
     wolf_manager.cpp
-    wolf_manager_gps.cpp
     data_association/association_solver.cpp
     data_association/association_node.cpp
     data_association/association_tree.cpp

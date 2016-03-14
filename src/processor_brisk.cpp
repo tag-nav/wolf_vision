@@ -132,13 +132,11 @@ unsigned int ProcessorBrisk::briskDetect(CaptureBase* _capture_ptr, cv::Mat _ima
             // Add the features in the capture
             for(unsigned int i = 0; i <= (keypoints.size()-1);i++)
             {
-                keypoint_coordinates(0) = keypoints[i].pt.x + _point_roi.x;    //TODO: This four lines should be modified/erased when "measurement" is gone
-                keypoint_coordinates(1) = keypoints[i].pt.y + _point_roi.y;
-                keypoints[i].pt.x = keypoint_coordinates(0);
-                keypoints[i].pt.y = keypoint_coordinates(1);
+                keypoints[i].pt.x = keypoints[i].pt.x + _point_roi.x;
+                keypoints[i].pt.y = keypoints[i].pt.y + _point_roi.y;
 
                 descript_vector=descriptors(cv::Range(i,i+1),cv::Range(0,descriptors.cols));
-                ((CaptureImage*)_capture_ptr)->addFeature(new FeaturePointImage(keypoint_coordinates,keypoints[i],descript_vector));
+                ((CaptureImage*)_capture_ptr)->addFeature(new FeaturePointImage(keypoints[i],descript_vector));
                 std::cout << "Current feature keypoint: " << keypoints[i].pt << std::endl;
             }
 
@@ -234,11 +232,12 @@ LandmarkBase* ProcessorBrisk::createLandmark(FeatureBase* _feature_ptr)
 }
 
 //Create a new constraint
-ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, NodeBase* _node_ptr) //LandmarkBase* _lmk_ptr)
+ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, NodeBase* _feat_or_lmk_ptr)
 {
     //FeatureBase f_b = new FeatureBase(Eigen::Vector2s::Zero(),Eigen::Matrix2s::Zero());
     //FrameBase frame_b = frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
     //LandmarkBase* lndmrk = new LandmarkBase(LANDMARK_POINT,new StateBlock(Eigen::Vector3s::Zero()),new StateBlock(Eigen::Vector3s::Zero()));
     //return new ConstraintPoint2D(f_b,frame_b,CTR_ACTIVE);
     //return new ConstraintBase(CTR_IMG_PNT_TO_IMG_PNT,_feature_ptr,CTR_ACTIVE);
+    return nullptr;
 }

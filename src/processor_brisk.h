@@ -32,8 +32,8 @@ protected:
      *
      * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
      */
-    //virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr);
-    virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, NodeBase* _node_ptr);
+    virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, NodeBase* _feat_or_lmk_ptr);
+
 
 public:
     ProcessorBrisk(int _threshold = 30, int _octaves = 0, float _pattern_scales = 1.0f,
