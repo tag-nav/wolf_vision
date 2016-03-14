@@ -47,19 +47,31 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
 
         /** \brief Adds a constraint to this feature (down node from other feature)
          */
-        void addConstrainedBy(ConstraintBase* _co_ptr);
+        void addConstrainedBy(ConstraintBase* _ctr_ptr)
+        {
+            constrained_by_list_.push_back(_ctr_ptr);
+        }
 
         /** \brief Remove a constraint to this feature
          **/
-        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
+        void removeConstrainedBy(ConstraintBase* _ctr_ptr)
+        {
+            constrained_by_list_.remove(_ctr_ptr);
+        }
 
         /** \brief Gets the number of constraints linked with this frame
          **/
-        unsigned int getHits() const;
+        unsigned int getHits() const
+        {
+            return constrained_by_list_.size();
+        }
 
         /** \brief Gets the list of constraints linked with this frame
          **/
-        std::list<ConstraintBase*>* getConstrainedByListPtr();
+        std::list<ConstraintBase*>* getConstrainedByListPtr()
+        {
+            return &constrained_by_list_;
+        }
 
         /** \brief Gets the capture pointer
          */
@@ -96,11 +108,6 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         
 };
-
-inline std::list<ConstraintBase*>* FeatureBase::getConstrainedByListPtr()
-{
-    return &constrained_by_list_;
-}
 
 inline CaptureBase* FeatureBase::getCapturePtr() const
 {

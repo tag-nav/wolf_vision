@@ -42,21 +42,6 @@ void FeatureBase::addConstraint(ConstraintBase* _co_ptr)
     getTop()->addConstraintPtr(_co_ptr);
 }
 
-void FeatureBase::addConstrainedBy(ConstraintBase* _ctr_ptr)
-{
-    constrained_by_list_.push_back(_ctr_ptr);
-}
-
-void FeatureBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
-{
-    constrained_by_list_.remove(_ctr_ptr);
-}
-
-unsigned int FeatureBase::getHits() const
-{
-    return constrained_by_list_.size();
-}
-
 FrameBase* FeatureBase::getFramePtr() const
 {
     return upperNodePtr()->upperNodePtr();
