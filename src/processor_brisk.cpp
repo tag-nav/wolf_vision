@@ -215,11 +215,12 @@ LandmarkBase* ProcessorBrisk::createLandmark(FeatureBase* _feature_ptr)
 }
 
 //Create a new constraint
-ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr)
+ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, NodeBase* _feat_or_lmk_ptr)
 {
     //FeatureBase f_b = new FeatureBase(Eigen::Vector2s::Zero(),Eigen::Matrix2s::Zero());
     //FrameBase frame_b = frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
     //LandmarkBase* lndmrk = new LandmarkBase(LANDMARK_POINT,new StateBlock(Eigen::Vector3s::Zero()),new StateBlock(Eigen::Vector3s::Zero()));
     //return new ConstraintPoint2D(f_b,frame_b,CTR_ACTIVE);
     //return new ConstraintBase(CTR_IMG_PNT_TO_IMG_PNT,_feature_ptr,CTR_ACTIVE);
+    return nullptr;
 }
