@@ -206,7 +206,7 @@ Eigen::VectorXs WolfManager::getVehiclePose(const TimeStamp& _now)
     //std::cout << "getting vehicle pose... " << std::endl;
 
     if (last_capture_relative_ == nullptr)
-        return Eigen::Map<Eigen::Vector3s>(current_frame_->getPPtr()->getPtr());
+        return current_frame_->getState();
     else
     {
         //std::cout << "last capture relative... " << std::endl;
