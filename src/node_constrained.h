@@ -1,21 +1,28 @@
 /**
- * \file constrained_by.h
+ * \file node_constrained.h
  *
  *  Created on: 14/03/2016
  *      \author: jsola
  */
 
-#ifndef CONSTRAINED_BY_H_
-#define CONSTRAINED_BY_H_
+#ifndef NODE_CONSTRAINED_H_
+#define NODE_CONSTRAINED_H_
 
-// Wolf includes
-#include "wolf.h"
+#include "node_linked.h"
 
-class ConstrainedBy
+template<class UpperType, class LowerType>
+class NodeConstrained : public NodeLinked<UpperType, LowerType>
 {
     public:
-        ConstrainedBy(){};
-        virtual ~ConstrainedBy(){};
+        NodeConstrained(const NodeLocation _loc, const std::string& _label) :
+                NodeLinked<UpperType, LowerType>(_loc, _label),
+                constrained_by_list_({})
+        {
+        }
+
+        virtual ~NodeConstrained()
+        {
+        }
 
         void addConstrainedBy(ConstraintBase* _ctr_ptr)
         {
@@ -34,9 +41,9 @@ class ConstrainedBy
             return &constrained_by_list_;
         }
 
-
     private:
         ConstraintBaseList constrained_by_list_;
+
 };
 
-#endif /* CONSTRAINED_BY_H_ */
+#endif /* NODE_CONSTRAINED_H_ */

@@ -8,18 +8,18 @@ class ConstraintBase;
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
+#include "node_constrained.h"
 
 //std includes
 
 //class FeatureBase
-class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
+class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
 {
     protected:
         FeatureType type_;          ///< Feature type. See wolf.h for a list of all possible features.
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
-        std::list<ConstraintBase*> constrained_by_list_;   ///< List of constraints linked TO this feature
         
     public:
         /** \brief Constructor from capture pointer and measure dim
@@ -44,34 +44,6 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
         /** \brief Adds a constraint from this feature (as a down node)
          */
         void addConstraint(ConstraintBase* _co_ptr);
-
-        /** \brief Adds a constraint to this feature (down node from other feature)
-         */
-        void addConstrainedBy(ConstraintBase* _ctr_ptr)
-        {
-            constrained_by_list_.push_back(_ctr_ptr);
-        }
-
-        /** \brief Remove a constraint to this feature
-         **/
-        void removeConstrainedBy(ConstraintBase* _ctr_ptr)
-        {
-            constrained_by_list_.remove(_ctr_ptr);
-        }
-
-        /** \brief Gets the number of constraints linked with this frame
-         **/
-        unsigned int getHits() const
-        {
-            return constrained_by_list_.size();
-        }
-
-        /** \brief Gets the list of constraints linked with this frame
-         **/
-        std::list<ConstraintBase*>* getConstrainedByListPtr()
-        {
-            return &constrained_by_list_;
-        }
 
         /** \brief Gets the capture pointer
          */

@@ -6,12 +6,12 @@
 #include "state_block.h"
 
 LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr) :
-            NodeLinked(MID, "LANDMARK"),
+            NodeConstrained(MID, "LANDMARK"),
             type_(_tp),
             status_(LANDMARK_CANDIDATE),
 			p_ptr_(_p_ptr),
-			o_ptr_(_o_ptr),
-			constrained_by_list_({})
+			o_ptr_(_o_ptr)
+//			constrained_by_list_({})
 {
     //
 }
@@ -36,21 +36,13 @@ LandmarkBase::~LandmarkBase()
     }
 	//std::cout << "states deleted" << std::endl;
 
-	while (!constrained_by_list_.empty())
+	while (!getConstrainedByListPtr()->empty())
 	{
 	    //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-	    constrained_by_list_.front()->destruct();
+	    getConstrainedByListPtr()->front()->destruct();
         //std::cout << "deleted " << std::endl;
 	}
 	//std::cout << "constraints deleted" << std::endl;
-}
-
-void LandmarkBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
-{
-    constrained_by_list_.remove(_ctr_ptr);
-
-    if (constrained_by_list_.empty())
-        this->destruct();
 }
 
 void LandmarkBase::setStatus(LandmarkStatus _st)

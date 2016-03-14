@@ -6,7 +6,7 @@
 #include "state_block.h"
 
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
-            NodeLinked(MID, "FRAME"),
+            NodeConstrained(MID, "FRAME"),
             type_(NON_KEY_FRAME),
             time_stamp_(_ts),
 			status_(ST_ESTIMATED),
@@ -18,7 +18,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
 }
 
 FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
-            NodeLinked(MID, "FRAME"),
+            NodeConstrained(MID, "FRAME"),
             type_(_tp),
             time_stamp_(_ts),
 			status_(ST_ESTIMATED),
@@ -56,10 +56,10 @@ FrameBase::~FrameBase()
     //std::cout << "states deleted" << std::endl;
 
 
-    while (!constrained_by_list_.empty())
+    while (!getConstrainedByListPtr()->empty())
     {
         //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-        constrained_by_list_.front()->destruct();
+        getConstrainedByListPtr()->front()->destruct();
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
@@ -78,14 +78,6 @@ void FrameBase::registerNewStateBlocks()
         if (v_ptr_ != nullptr)
             getTop()->addStateBlockPtr(v_ptr_);
     }
-}
-
-void FrameBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
-{
-    constrained_by_list_.remove(_ctr_ptr);
-
-    if (constrained_by_list_.empty())
-        this->destruct();
 }
 
 void FrameBase::setKey()
