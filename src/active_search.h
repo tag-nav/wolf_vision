@@ -161,14 +161,14 @@ class ActiveSearchGrid {
          * \param roi the resulting ROI
          * \return true if ROI exists.
          */
-        bool pickRoi(cv::Mat & roi);
+        bool pickRoi(cv::Rect & roi);
 
         /**
          * Call this after pickRoi if no point was found in the roi
          * in order to avoid searching again in it.
          * \param roi the ROI where nothing was found
          */
-        void blockCell(const cv::Mat & roi);
+        void blockCell(const cv::Rect & roi);
 
 
     private:
@@ -204,7 +204,7 @@ class ActiveSearchGrid {
         /**
          * Get the region of interest, reduced by a margin.
          */
-        void cell2roi(const Eigen::Vector2i & cell, cv::Mat & roi);
+        void cell2roi(const Eigen::Vector2i & cell, cv::Rect& roi);
 
 };
 
