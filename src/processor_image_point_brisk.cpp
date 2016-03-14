@@ -106,7 +106,7 @@ void ProcessorImagePointBrisk::extractFeatures(CaptureBase *_capture_ptr)
 
         descript_vector=descriptors(cv::Range(i,i+1),cv::Range(0,descriptors.cols));
 
-        capture_img_ptr_->addFeature(new FeaturePointImage(keypoint_coordinates,keypoints[i],descript_vector));
+        capture_img_ptr_->addFeature(new FeaturePointImage(keypoints[i],descript_vector));
     }
 
     std::cout << "Time10: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;

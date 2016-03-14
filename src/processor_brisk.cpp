@@ -166,11 +166,11 @@ unsigned int ProcessorBrisk::briskImplementation(CaptureBase* _capture_ptr, cv::
         assert(!keypoints.size()==0 && "Keypoints size is 0");
         for(unsigned int i = 0; i <= (keypoints.size()-1);i++)
         {
-            keypoint_coordinates(0) = keypoints[i].pt.x;    //TODO: This two lines should be erased when "measurement" is gone
-            keypoint_coordinates(1) = keypoints[i].pt.y;
+//            keypoint_coordinates(0) = keypoints[i].pt.x;    //TODO: This two lines should be erased when "measurement" is gone
+//            keypoint_coordinates(1) = keypoints[i].pt.y;
 
             descript_vector=descriptors(cv::Range(i,i+1),cv::Range(0,descriptors.cols));
-            ((CaptureImage*)_capture_ptr)->addFeature(new FeaturePointImage(keypoint_coordinates,keypoints[i],descript_vector));
+            ((CaptureImage*)_capture_ptr)->addFeature(new FeaturePointImage(keypoints[i],descript_vector));
             std::cout << "Current feature keypoint: " << keypoints[i].pt << std::endl;
         }
 
