@@ -46,7 +46,7 @@ void permutation_2_block_permutation(const PermutationMatrix<Dynamic, Dynamic, i
 {
     ArrayXXi idx(dim, size);
     idx.row(0) = dim * perm.indices().transpose();
-    for (unsigned int i = 1; i<dim; i++)
+    for (int i = 1; i<dim; i++)
         idx.row(i) = idx.row(i-1) + 1;
     Map<ArrayXi> idx_blocks(idx.data(), dim*size, 1);
     perm_blocks.indices() = idx_blocks;
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 
     // BUILD THE PROBLEM ----------------------------
     //Fill H & b
-    for (unsigned int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         addSparseBlock(5*omega, H, i*dim, i*dim);
         FactorMatrix.insert(i,i) = 1;
