@@ -38,3 +38,4 @@ void ProcessorMotion::eraseFront(TimeStamp& _ts)
     buffer_dx_.erase(buffer_dx_.begin(), buffer_dx_.begin() + i_end_ - 1);
     buffer_Dx_.erase(buffer_Dx_.begin(), buffer_Dx_.begin() + i_end_ - 1);
 }
+

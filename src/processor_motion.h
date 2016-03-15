@@ -64,6 +64,7 @@ class ProcessorMotion : public ProcessorBase{
         WolfScalar Dt_start_, Dt_end_;
         unsigned int i_start_, i_end_;
         Eigen::VectorXs Dx_start_, Dx_end_;
+
 };
 
 inline void ProcessorMotion::reset(TimeStamp& _ts)
