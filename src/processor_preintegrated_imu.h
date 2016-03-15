@@ -19,13 +19,34 @@ class ProcessorPreintegratedIMU : public ProcessorMotion{
 
     protected:
         // Helper functions
+
+        /**
+         * @brief integrate Add a single IMU data measurement to the preintegration process
+         * @param _data Data to be added (measured acceleration + measured angular velocity)
+         * @param _dt Time interval between this last measurement and the last measured data
+         */
         void integrate(Eigen::VectorXs& _data, WolfScalar _dt);
-        virtual void extractData(CaptureBase* _capture_ptr, TimeStamp& _ts, Eigen::VectorXs& _data) = 0;
+
+        /**
+         * @brief extractData Extract data from the capture_imu object and store them
+         * @param _capture_ptr pointer to the capture to be used for data extraction
+         * @param _ts
+         * @param _data
+         */
+        virtual void extractData(CaptureBase* _capture_ptr, TimeStamp& _ts, Eigen::VectorXs& _data);
+
+        /**
+         * @brief data2dx Convert data to increment vector
+         * @param _data data to be converted
+         * @param _dt
+         * @param _dx
+         */
         virtual void data2dx(const Eigen::VectorXs& _data, WolfScalar _dt, Eigen::VectorXs& _dx);
+
         void pushBack(TimeStamp& _ts, Eigen::VectorXs& _dx, Eigen::VectorXs& _Dx_integral);
         void eraseFront(TimeStamp& _ts);
-        virtual void plus(const Eigen::VectorXs& _x, const Eigen::VectorXs& _dx, Eigen::VectorXs& _x_plus_dx) = 0;
-        virtual void minus(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x0, Eigen::VectorXs& _x1_minus_x0) = 0;
+        virtual void plus(const Eigen::VectorXs& _x, const Eigen::VectorXs& _dx, Eigen::VectorXs& _x_plus_dx);
+        virtual void minus(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x0, Eigen::VectorXs& _x1_minus_x0);
 
         WolfScalar computeAverageDt();
         WolfScalar getDt();
