@@ -117,6 +117,7 @@ SET(HDRS
     node_terminus.h
     node_linked.h
     processor_base.h
+    processor_motion.h
     processor_tracker.h
     sensor_base.h
     sensor_camera.h
@@ -165,6 +166,7 @@ SET(SRCS
     map_base.cpp
     node_base.cpp
     processor_base.cpp
+    processor_motion.cpp
     processor_tracker.cpp
     sensor_base.cpp
     sensor_camera.cpp
