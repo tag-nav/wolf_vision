@@ -28,6 +28,19 @@ class ProcessorPreintegratedIMU : public ProcessorMotion{
         WolfScalar computeAverageDt();
         WolfScalar getDt();
 
+    protected:
+        //ProcessorSensorIMU* sensor_imu_ptr_; //will contain IMU parameters
+        //CaptureIMU* capture_imu_ptr_; //specific pointer to capture imu data object
+
+    private:
+        ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
+        ///< (first-order propagation from *measurementCovariance*).
+        Eigen::Matrix<WolfScalar,9,9> preint_meas_cov_;
+
+        ///Jacobians
+        Eigen::Matrix<WolfScalar,9,3> preintegrated_H_biasAcc_;
+        Eigen::Matrix<WolfScalar,9,3> preintegrated_H_biasOmega_;
+
 };
 
 #endif // PROCESSOR_PREINTEGRATED_IMU_H
