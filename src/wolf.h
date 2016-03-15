@@ -203,7 +203,8 @@ typedef enum
     PRC_TRACKER_BRISK,
     PRC_TRACKER_ORB,
     PRC_GPS_RAW,
-    PRC_LIDAR
+    PRC_LIDAR,
+    PRC_ODOM_3D
 } ProcessorType;
 
 /** \brief enumeration of all possible Feature types
