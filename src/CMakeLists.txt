@@ -187,12 +187,10 @@ SET(SRCS
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
-        ceres_wrapper/complex_angle_parametrization.h 
         ceres_wrapper/ceres_manager.h 
         ceres_wrapper/auto_diff_cost_function_wrapper.h
         ceres_wrapper/cost_function_wrapper.h )
     SET(SRCS_WRAPPER
-        ceres_wrapper/complex_angle_parametrization.cpp 
         ceres_wrapper/ceres_manager.cpp)
 ELSE(Ceres_FOUND)
     SET(HDRS_WRAPPER)
