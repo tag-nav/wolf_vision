@@ -3,6 +3,8 @@
 
 // Wolf
 #include "processor_motion.h"
+#include "capture_imu.h"
+#include "sensor_imu.h"
 #include "wolf.h"
 
 // STL
@@ -29,8 +31,8 @@ class ProcessorPreintegratedIMU : public ProcessorMotion{
         WolfScalar getDt();
 
     protected:
-        //ProcessorSensorIMU* sensor_imu_ptr_; //will contain IMU parameters
-        //CaptureIMU* capture_imu_ptr_; //specific pointer to capture imu data object
+        SensorIMU* sensor_imu_ptr_; //will contain IMU parameters
+        CaptureIMU* capture_imu_ptr_; //specific pointer to capture imu data object
 
     private:
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]

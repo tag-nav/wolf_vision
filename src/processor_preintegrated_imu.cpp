@@ -1,4 +1,4 @@
-#include "processor_preintegrated_IMU.h"
+#include "processor_preintegrated_imu.h"
 
 ProcessorPreintegratedIMU::ProcessorPreintegratedIMU(ProcessorType _tp) : ProcessorMotion(_tp)
 {
