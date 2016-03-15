@@ -16,10 +16,12 @@
 // STL
 #include <deque>
 
+
 class ProcessorMotion : public ProcessorBase{
     public:
         ProcessorMotion(ProcessorType _tp);
         virtual ~ProcessorMotion();
+
 
         virtual void process(CaptureBase* _capture_ptr)
         {
@@ -66,6 +68,7 @@ class ProcessorMotion : public ProcessorBase{
         WolfScalar Dt_start_, Dt_end_;
         unsigned int i_start_, i_end_;
         Eigen::VectorXs Dx_start_, Dx_end_;
+
 };
 
 inline void ProcessorMotion::init(CaptureBase* _origin_ptr)
