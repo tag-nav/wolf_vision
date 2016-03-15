@@ -33,6 +33,7 @@ class ProcessorMotion : public ProcessorBase{
         // Main operations
         void composeDeltaState(const TimeStamp& _t_start, TimeStamp& _t_end, Eigen::VectorXs&);
         void composeState(const TimeStamp& _time_stamp, Eigen::VectorXs&);
+        void init(CaptureBase* _origin_ptr);
         void reset(TimeStamp& _ts);
 
     protected:
@@ -49,6 +50,7 @@ class ProcessorMotion : public ProcessorBase{
         WolfScalar getDt();
 
     protected:
+        CaptureBase* origin_ptr_;
         std::deque<TimeStamp> buffer_ts_;
         std::deque<Eigen::VectorXs> buffer_dx_;
         std::deque<Eigen::VectorXs> buffer_Dx_;
@@ -68,6 +70,13 @@ class ProcessorMotion : public ProcessorBase{
         Eigen::VectorXs Dx_start_, Dx_end_;
 
 };
+
+inline void ProcessorMotion::init(CaptureBase* _origin_ptr)
+{
+    origin_ptr_=_origin_ptr;
+    ts_origin_ = _origin_ptr->getTimeStamp();
+    x_origin_ = _origin_ptr->getFramePtr()->getState();
+}
 
 inline void ProcessorMotion::reset(TimeStamp& _ts)
 {
