@@ -1,6 +1,14 @@
 #include "processor_motion.h"
 
-ProcessorMotion::ProcessorMotion(ProcessorType _tp) : ProcessorBase(_tp)
+ProcessorMotion::ProcessorMotion(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size) :
+        ProcessorBase(_tp),
+        origin_ptr_(nullptr),
+        data_(_data_size),
+        dx_(_delta_size), Dx_integral_(_delta_size),
+        x_origin_(_state_size), x_other_(_state_size),
+        dt_(0), Dt_start_(0), Dt_end_(0),
+        i_start_(0), i_end_(0),
+        state_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size)
 {
 }
 
