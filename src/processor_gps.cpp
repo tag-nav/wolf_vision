@@ -12,7 +12,7 @@ ProcessorGPS::ProcessorGPS() : ProcessorBase(PRC_GPS_RAW),
 {
     std::cout << "ProcessorGPS constructor" << std::endl;
 
-    gps_covariance_ = 50;
+    gps_covariance_ = 10;
 }
 
 ProcessorGPS::~ProcessorGPS()
@@ -33,7 +33,7 @@ void ProcessorGPS::process(CaptureBase* _capture_ptr)
     //std::cout << "Extracting gps features..." << std::endl;
     rawgpsutils::SatellitesObs obs = capture_gps_ptr_->getData();
 
-    //TODO use a unique cycle(check if possible)
+
     for(unsigned int i = 0; i < obs.measurements_.size(); ++i)
     {
         Eigen::Vector3s sat_pos = obs.measurements_[i].sat_position_;
