@@ -2,7 +2,7 @@
 #define PROCESSOR_PREINTEGRATED_IMU_H
 
 // Wolf
-#include "processor_motion.h"
+#include "processor_motion2.h"
 #include "capture_imu.h"
 #include "sensor_imu.h"
 #include "wolf.h"
@@ -10,7 +10,7 @@
 // STL
 #include <deque>
 
-class ProcessorPreintegratedIMU : public ProcessorMotion{
+class ProcessorPreintegratedIMU : public ProcessorMotion2{
     public:
         ProcessorPreintegratedIMU(ProcessorType _tp);
         virtual ~ProcessorPreintegratedIMU();
@@ -45,11 +45,34 @@ class ProcessorPreintegratedIMU : public ProcessorMotion{
 
         void pushBack(TimeStamp& _ts, Eigen::VectorXs& _dx, Eigen::VectorXs& _Dx_integral);
         void eraseFront(TimeStamp& _ts);
-        virtual void plus(const Eigen::VectorXs& _x, const Eigen::VectorXs& _dx, Eigen::VectorXs& _x_plus_dx);
-        virtual void minus(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x0, Eigen::VectorXs& _x1_minus_x0);
 
-        WolfScalar computeAverageDt();
-        WolfScalar getDt();
+        /** \brief composes a delta-state on top of a state
+         * \param _x the initial state
+         * \param _delta the delta-state
+         * \param _x_plus_delta the updated state. It has the same format as the initial state.
+         *
+         * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
+         */
+        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
+
+        /** \brief composes a delta-state on top of another delta-state
+         * \param _delta1 the first delta-state
+         * \param _delta2 the second delta-state
+         * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
+         *
+         * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2
+         */
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2);
+
+        /** \brief Computes the delta-state the goes from one state to another
+         * \param _x1 the initial state
+         * \param _x2 the final state
+         * \param _delta the delta-state. It has the format of a delta-state.
+         *
+         * This function computes _delta = _x2 (-) _x1, so that _x2 satisfies by plus(_x1, _delta, _x2).
+         * The operator (-) is the composition 'minus'.
+         */
+        virtual void xMinusX(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x2_minus_x1);
 
     protected:
         SensorIMU* sensor_imu_ptr_; //will contain IMU parameters
