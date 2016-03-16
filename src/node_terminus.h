@@ -20,8 +20,15 @@
 class NodeTerminus : public NodeBase
 {
     public:
-        NodeTerminus();
-        virtual ~NodeTerminus();
+        NodeTerminus() :
+                NodeBase("TERMINUS")
+        {
+            //
+        }
+        virtual ~NodeTerminus()
+        {
+            //
+        }
 };
 
 #endif /* NODE_TERMINUS_H_ */

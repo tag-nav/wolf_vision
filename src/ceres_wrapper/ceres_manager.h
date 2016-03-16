@@ -20,9 +20,6 @@
 #include "../constraint_corner_2D.h"
 #include "../constraint_container.h"
 
-// ceres wrapper includes
-#include "complex_angle_parametrization.h"
-
 /** \brief Enumeration of covariance blocks to be computed
  *
  * Enumeration of covariance blocks to be computed

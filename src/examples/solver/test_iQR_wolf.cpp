@@ -157,6 +157,10 @@ class SolverQR
             acc_node_permutation_(0),
 //            nodes_(0),
 //            measurements_(0),
+            first_ordered_node_(0),
+            t_ordering_(0),
+            t_solving_(0),
+            t_managing_(0),
             time_ordering_(0),
             time_solving_(0),
             time_managing_(0)
@@ -446,7 +450,7 @@ class SolverQR
 
             // update nodes orders and locations
             ArrayXi locations = perm_nodes_2_locations(acc_node_permutation_);
-            for (int i = 0; i < nodes_.size(); i++)
+            for (unsigned int i = 0; i < nodes_.size(); i++)
             {
                 nodes_.at(i).order = acc_node_permutation_.indices()(i);
                 nodes_.at(i).location = locations(i);
@@ -503,7 +507,7 @@ int main(int argc, char *argv[])
 
     // GENERATING MEASUREMENTS
     std::vector<measurement> measurements;
-    for (unsigned int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         std::vector<int> meas(0);
         if (i == 0) //prior

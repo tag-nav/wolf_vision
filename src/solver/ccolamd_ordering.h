@@ -15,7 +15,9 @@
 
 // Eigen includes
 typedef int IndexType;
+#ifndef EIGEN_DEFAULT_DENSE_INDEX_TYPE
 #define EIGEN_DEFAULT_DENSE_INDEX_TYPE IndexType
+#endif
 #include <eigen3/Eigen/OrderingMethods>
 #include <eigen3/Eigen/CholmodSupport>
 #include <eigen3/Eigen/SparseLU>

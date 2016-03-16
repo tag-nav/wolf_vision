@@ -109,7 +109,6 @@ SET(HDRS
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
-    landmark_point_2D.h
     local_parametrization_base.h
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
@@ -118,6 +117,7 @@ SET(HDRS
     node_terminus.h
     node_linked.h
     processor_base.h
+    processor_motion.h
     processor_tracker.h
     sensor_base.h
     sensor_camera.h
@@ -160,14 +160,13 @@ SET(SRCS
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
-    landmark_point_2D.cpp
     local_parametrization_base.cpp
     local_parametrization_quaternion.cpp
     local_parametrization_homogeneous.cpp
     map_base.cpp
     node_base.cpp
-    node_terminus.cpp
     processor_base.cpp
+    processor_motion.cpp
     processor_tracker.cpp
     sensor_base.cpp
     sensor_camera.cpp
@@ -188,12 +187,10 @@ SET(SRCS
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
-        ceres_wrapper/complex_angle_parametrization.h 
         ceres_wrapper/ceres_manager.h 
         ceres_wrapper/auto_diff_cost_function_wrapper.h
         ceres_wrapper/cost_function_wrapper.h )
     SET(SRCS_WRAPPER
-        ceres_wrapper/complex_angle_parametrization.cpp 
         ceres_wrapper/ceres_manager.cpp)
 ELSE(Ceres_FOUND)
     SET(HDRS_WRAPPER)
@@ -233,14 +230,12 @@ IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
         feature_point_image.h
-        processor_image_point_brisk.h
         processor_brisk.h
         active_search.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
         feature_point_image.cpp
-        processor_image_point_brisk.cpp
         processor_brisk.cpp
         active_search.cpp
         )

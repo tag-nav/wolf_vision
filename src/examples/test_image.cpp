@@ -4,7 +4,6 @@
 #include "sensor_camera.h"
 #include "capture_image.h"
 #include "feature_point_image.h"
-#include "processor_image_point_brisk.h"
 #include "processor_brisk.h"
 #include "state_block.h"
 #include "state_quaternion.h"
@@ -90,7 +89,7 @@ int main(int argc, char** argv)
 
     WolfProblem* wolf_problem_ = new WolfProblem(PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(30,0,0.5f);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(360,640,30,0,0.5f,7,7,10);
     sen_cam_->addProcessor(p_brisk);
 
     unsigned int f = 0;
@@ -124,6 +123,7 @@ int main(int argc, char** argv)
         wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
         frm_ptr->addCapture(capture_brisk_ptr);
 
+        p_brisk->setIncomingPtr(capture_brisk_ptr);
         p_brisk->process(capture_brisk_ptr);
         f++;
         std::cout << "f: " << f << std::endl;

@@ -26,16 +26,16 @@ class FeaturePointImage : public FeatureBase
     public:
         FeaturePointImage(const Eigen::Vector2s & _measurement);
 
-        FeaturePointImage(const Eigen::Vector2s& _measurement, const Eigen::Matrix2s& _meas_covariance) :
+        FeaturePointImage(const Eigen::Vector2s & _measurement, const Eigen::Matrix2s& _meas_covariance) :
                 FeatureBase(FEAT_POINT_IMAGE, _measurement, _meas_covariance)
         {
             keypoint_.pt.x = measurement_(0);
             keypoint_.pt.y = measurement_(1);
         }
 
-        FeaturePointImage(const cv::KeyPoint _keypoint,
+        FeaturePointImage(const cv::KeyPoint& _keypoint,
                           const std::vector<float>& _descriptor) :
-                FeatureBase(FEAT_POINT_IMAGE, Eigen::MatrixXs::Zero(0, 0), Eigen::MatrixXs::Zero(0, 0)),
+                FeatureBase(FEAT_POINT_IMAGE, Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
                 keypoint_(_keypoint),
                 descriptor_(_descriptor)
         {
