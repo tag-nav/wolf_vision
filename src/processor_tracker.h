@@ -20,15 +20,6 @@
  *     establishing correspondences between the features here and the features in \b origin. Each successful correspondence
  *     results in an extension of the track of the Feature up to the \b incoming Capture.
  *
- * A tracker can be declared autonomous or non-autonomous. This property must be set at construction time.
- *   - An autonomous Tracker is allowed to create new KeyFrames and new Landmarks
- *     as the result of the data processing. A single call to process() accomplishes
- *     all the work needed.
- *   - A non-autonomous Tracker, on the contrary, limits itself to detect and match Features,
- *     but cannot alter the size of the Wolf Problem by adding new elements (Frames and/or Landmarks).
- *     Calling process() is an error, and an outside manager is required to control the tracker
- *     algorithm (by implementing an algorithm similar to process() outside the Tracker).
- *
  * A tracker can be designed to track either Features or Landmarks. This property must be set at construction time.
  *   - If tracking Features, it establishes constraints Feature-Feature;
  *     it does not use Landmarks, nor it creates Landmarks.
@@ -93,14 +84,6 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual unsigned int processKnownFeatures() = 0;
 
-        /** \brief Vote for KeyFrame generation
-         *
-         * If a KeyFrame criterion is validated, this function returns true,
-         * meaning that it wants to create a KeyFrame at the \b last Capture.
-         *
-         * WARNING! This function only votes! It does not create KeyFrames!
-         */
-        virtual bool voteForKeyFrame() = 0;
 
     protected:
 
@@ -154,8 +137,11 @@ class ProcessorTracker : public ProcessorBase
          */
         void init(CaptureBase* _origin_ptr);
 
+        /** \brief Reset the tracker using the \b last Capture as the new \b origin.
+         */
+        void reset();
+
         // getters and setters
-        bool isAutonomous() const;
         bool usesLandmarks() const;
         CaptureBase* getOriginPtr() const;
         CaptureBase* getLastPtr() const;
@@ -176,10 +162,6 @@ class ProcessorTracker : public ProcessorBase
          */
         void reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr);
 
-        /** \brief Reset the tracker using the \b last Capture as the new \b origin.
-         */
-        void reset();
-
         /** \brief Advance the incoming Capture to become the last.
          *
          * Call this when the tracking and keyframe policy work is done and
@@ -193,7 +175,6 @@ class ProcessorTracker : public ProcessorBase
 
 
     private:
-        bool autonomous_;    ///< Sets whether the tracker is autonomous to create new KeyFrames and/or Landmarks.
         bool use_landmarks_; ///< Set if the tracker uses and creates landmarks. Clear if only uses features.
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
@@ -223,11 +204,6 @@ inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
 {
     origin_ptr_ = _origin_ptr;
     last_ptr_ = _origin_ptr;
-}
-
-inline bool ProcessorTracker::isAutonomous() const
-{
-    return autonomous_;
 }
 
 inline bool ProcessorTracker::usesLandmarks() const

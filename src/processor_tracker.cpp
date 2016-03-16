@@ -9,7 +9,6 @@
 
 ProcessorTracker::ProcessorTracker(ProcessorType _tp, bool _autonomous, bool _uses_landmarks) :
         ProcessorBase(_tp),
-        autonomous_(_autonomous),
         use_landmarks_(_uses_landmarks),
         origin_ptr_(nullptr),
         last_ptr_(nullptr),
@@ -28,13 +27,11 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    assert ( autonomous_ && "Requested process() to a non-autonomous processor.");
-
     // 1. First we track the known Features and create new constraints as needed
     processKnownFeatures();
 
-    // 2. Then we see if we want to create a KeyFrame
-    if (voteForKeyFrame())
+    // 2. Then we see if we want and we are allowed to create a KeyFrame
+    if (voteForKeyFrame() && permittedKeyFrame())
     {
         // 2.a. Detect new Features, initialize Landmarks, create Constraints
         processNewFeatures();
@@ -81,8 +78,6 @@ unsigned int ProcessorTracker::processNewFeatures()
 
 void ProcessorTracker::makeKeyFrame(CaptureBase* _capture_ptr)
 {
-    assert (autonomous_ && "Requested makeKeyFrame() to a non-autonomous processor.");
-
     // Create a new non-key Frame in the Trajectory with the incoming Capture
     getTop()->createFrame(NON_KEY_FRAME, _capture_ptr->getTimeStamp());
     // Make the Frame a KeyFrame so that it gets into the solver

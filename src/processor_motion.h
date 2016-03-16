@@ -23,12 +23,7 @@ class ProcessorMotion : public ProcessorBase{
         virtual ~ProcessorMotion();
 
 
-        virtual void process(CaptureBase* _capture_ptr)
-        {
-            extractData(_capture_ptr, ts_, data_);
-            integrate(data_, dt_);
-            pushBack(ts_, dx_, Dx_integral_);
-        }
+        virtual void process(CaptureBase* _capture_ptr);
 
         // Main operations
         void composeDeltaState(const TimeStamp& _t_start, TimeStamp& _t_end, Eigen::VectorXs&);
@@ -110,6 +105,13 @@ inline void ProcessorMotion::integrate(Eigen::VectorXs& _data, WolfScalar _dt)
     data2dx(_data, _dt, dx_);
     // integrate on top of Dx_
     plus(buffer_Dx_.back(), dx_, Dx_integral_);
+}
+
+inline void ProcessorMotion::process(CaptureBase* _capture_ptr)
+{
+    extractData(_capture_ptr, ts_, data_);
+    integrate(data_, dt_);
+    pushBack(ts_, dx_, Dx_integral_);
 }
 
 inline void ProcessorMotion::composeState(const TimeStamp& _time_stamp, Eigen::VectorXs& _x_ts)
