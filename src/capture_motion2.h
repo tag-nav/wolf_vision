@@ -18,7 +18,6 @@ class CaptureMotion2 : public CaptureBase
         typedef struct {
             public:
                 TimeStamp ts_;       ///< Time stamp
-                Eigen::VectorXs dx_; ///< the individual delta
                 Eigen::VectorXs Dx_; ///< the integrated delta
         } Motion; ///< One instance of the buffered data, corresponding to a particular time stamp.
         typedef std::deque<Motion> MotionBuffer;
@@ -26,6 +25,10 @@ class CaptureMotion2 : public CaptureBase
     public:
         CaptureMotion2();
         virtual ~CaptureMotion2();
+
+        MotionBuffer* getMotionBufferPtr() {
+            return & buffer_;
+        }
 
     protected:
         Eigen::VectorXs data_; ///< Motion data in form of vector mandatory
