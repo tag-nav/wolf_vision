@@ -164,6 +164,7 @@ class ProcessorTracker : public ProcessorBase
         void setLastPtr(CaptureBase* const _last_ptr);
         void setIncomingPtr(CaptureBase* const _incoming_ptr);
         FeatureBaseList& getNewFeaturesList();
+        void addNewFeature(FeatureBase* _feature_ptr);
 
     protected:
 
@@ -205,6 +206,11 @@ class ProcessorTracker : public ProcessorBase
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesList()
 {
     return new_features_list_;
+}
+
+inline void ProcessorTracker::addNewFeature(FeatureBase* _feature_ptr)
+{
+    new_features_list_.push_back(_feature_ptr);
 }
 
 inline void ProcessorTracker::reset()
