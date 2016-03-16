@@ -32,7 +32,18 @@ class ProcessorMotion2 : public ProcessorBase
                          size_t _noise_size, WolfScalar _dt);
         virtual ~ProcessorMotion2();
 
-        virtual void process(CaptureBase* _incoming_ptr);
+        virtual void process(CaptureBase* _incoming_ptr)
+        {
+            // First get data and push it into buffer
+            extractData(_incoming_ptr);
+            Dx1_ = buffer_.back().Dx_;
+            instance_.ts_ = ts_;
+            instance_.dx_ = dx_;
+            deltaPlusDelta(Dx1_, dx_, instance_.Dx_);
+            buffer_.push_back(instance_);
+
+            // Then deal with other stuff... but what stuff? I don't know.
+        }
 
         void init(const CaptureBase* _origin_ptr); ///< To be called once
         void makeKeyFrame(const TimeStamp& _t); ///< To be called when a key-frame is created
@@ -57,8 +68,20 @@ class ProcessorMotion2 : public ProcessorBase
         TimeStamp ts_origin_; ///< Time step at the origin
         Eigen::Map<Eigen::VectorXs> x_origin_; ///< state at the origin
         std::deque<Instance> buffer_; ///< Buffer starts empty
+        Instance instance_;
 
     protected: // These are the pure virtual functions doing the mathematics
+        /** \brief Extract data from a derived capture.
+         * \param _capture_ptr A pointer to the Capture we want to extract data from.
+         * This function needs to:
+         *  - access the incoming Capture
+         *  - cast it to DerivedCapture to be able to access its derived members.
+         *  - Fill in the data_ field
+         *  - Fill in the dx_ field
+         *  - Fill in the ts_ field
+         *  - Eventually compute the new dt_ field as the time lapse between the old ts_ and the new one.
+         */
+        virtual void extractData(CaptureBase* _capture_ptr) = 0;
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
          * \param _delta the delta-state
@@ -87,11 +110,11 @@ class ProcessorMotion2 : public ProcessorBase
 
     protected:
         unsigned int index(const TimeStamp& _t); ///< Get index in buffer corresponding to time-stamp
-        void dx(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _dx);
-        void Dx(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _Dx);
+        void pickDx(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _Dx);
 
     protected:
-        Eigen::Map<Eigen::VectorXs> x1_, x2_, x_, dx_, Dx1_, Dx2_;
+        WolfScalar ts_;
+        Eigen::VectorXs x1_, x2_, x_, dx_, Dx1_, Dx2_;
 };
 
 inline ProcessorMotion2::ProcessorMotion2(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size,
