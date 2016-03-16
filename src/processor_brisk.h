@@ -17,8 +17,6 @@
 class ProcessorBrisk : public ProcessorTracker
 {
 protected:
-    SensorCamera* sensor_cam_ptr_; //specific pointer to sensor camera object
-    CaptureImage* capture_img_ptr_; //specific pointer to capture image object
     cv::BRISK brisk_;               //brisk object
     ActiveSearchGrid act_search_grid_;
     unsigned int min_features_th_;
@@ -84,7 +82,7 @@ public:
 
     virtual void drawFeaturesLastFrame(cv::Mat _image, Eigen::Vector2i _feature_point_last);
 
-    virtual unsigned int briskDetect(CaptureBase* _capture_ptr, cv::Mat _image, cv::Point _point_roi, bool _known_features);
+    virtual unsigned int briskDetect(cv::Mat _image, cv::Rect &_roi,std::vector<cv::KeyPoint> &_new_keypoints);
 };
 
 #endif // PROCESSOR_BRISK_H

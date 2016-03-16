@@ -73,9 +73,11 @@ unsigned int ProcessorTracker::processNewFeatures()
             // Add the Constraint to the Feature's constraints list
             feature_ptr->addConstraint(constr_ptr);
         }
-        // Done with Landmark creation// Append all new Features to the Capture's list of Features
-        last_ptr_->getFeatureListPtr()->splice(last_ptr_->getFeatureListPtr()->end(), new_features_list_);
-    }
+    } // Done with Landmark creation
+
+    // Append all new Features to the Capture's list of Features
+    last_ptr_->getFeatureListPtr()->splice(last_ptr_->getFeatureListPtr()->end(), new_features_list_);
+
     return n;
 }
 
