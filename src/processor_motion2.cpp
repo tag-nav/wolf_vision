@@ -44,27 +44,17 @@ void ProcessorMotion2::init(CaptureMotion2* _origin_ptr)
     last_ptr_ = _origin_ptr;
     x_origin_ = _origin_ptr->getFramePtr()->getState();
     extractData(_origin_ptr);
-    lastBufferPtr()->clear();
+    bufferPtr()->clear();
     motion_.ts_ = ts_origin_;
     motion_.Dx_.setZero();
-    lastBufferPtr()->push_back(motion_);
-}
-
-void ProcessorMotion2::makeKeyFrame(const TimeStamp& _t)
-{
+    bufferPtr()->push_back(motion_);
 }
 
 void ProcessorMotion2::deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta)
 {
     unsigned int i1 = index(_t1);
     if (i1 == 0)
-        _Delta = lastBufferPtr()->at(index(_t2)).Dx_;
+        _Delta = bufferPtr()->at(index(_t2)).Dx_;
     else
-        deltaMinusDelta(lastBufferPtr()->at(index(_t2)).Dx_, lastBufferPtr()->at(i1).Dx_, _Delta);
-}
-
-void ProcessorMotion2::sumDeltas(const CaptureMotion2* _cap1_ptr, const CaptureMotion2* _cap2_ptr,
-                                 Eigen::VectorXs& _delta_1_2) const
-{
-    // TODO: implement with external data from given captures. This data should be in the form of buffers of the same type.
+        deltaMinusDelta(bufferPtr()->at(index(_t2)).Dx_, bufferPtr()->at(i1).Dx_, _Delta);
 }

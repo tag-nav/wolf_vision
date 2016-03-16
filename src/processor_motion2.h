@@ -34,7 +34,9 @@ class ProcessorMotion2 : public ProcessorBase
         void reset(const TimeStamp& _t);
         void advance();
 
-        void makeKeyFrame(const TimeStamp& _t); ///< To be called when a key-frame is created
+        void makeKeyFrame(const TimeStamp& _t)
+        {
+        }
 
         /** \brief Gets the state corresponding to provided time-stamp
          * \param _t the time stamp
@@ -52,11 +54,10 @@ class ProcessorMotion2 : public ProcessorBase
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
          * \param _delta_1_2 the concatenation of the deltas of Captures 1 and 2.
          */
-        virtual void sumDeltas(const CaptureMotion2* _cap1_ptr, const CaptureMotion2* _cap2_ptr,
-                               Eigen::VectorXs& _delta_1_2) const;
+        virtual void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr, Eigen::VectorXs& _delta1_plus_delta2);
 
     protected:
-        CaptureMotion2::MotionBuffer* lastBufferPtr();
+        CaptureMotion2::Buffer* bufferPtr();
         unsigned int index(const TimeStamp& _t);
         void pickDx(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _Dx);
         void integrate(CaptureMotion2* _incoming_ptr);
@@ -143,18 +144,26 @@ inline void ProcessorMotion2::advance()
 inline void ProcessorMotion2::state(const TimeStamp& _t, Eigen::VectorXs& _x)
 {
     update();
-    xPlusDelta(x_origin_, lastBufferPtr()->at(index(_t)).Dx_, _x);
+    xPlusDelta(x_origin_, bufferPtr()->at(index(_t)).Dx_, _x);
 }
 
-inline CaptureMotion2::MotionBuffer* ProcessorMotion2::lastBufferPtr()
+inline void ProcessorMotion2::sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr,
+                                        Eigen::VectorXs& _delta1_plus_delta2)
 {
-    return last_ptr_->getMotionBufferPtr();
+    deltaPlusDelta(_cap1_ptr->getDelta(),
+                   _cap2_ptr->getDelta(),
+                   _delta1_plus_delta2);
+}
+
+inline CaptureMotion2::Buffer* ProcessorMotion2::bufferPtr()
+{
+    return last_ptr_->getBufferPtr();
 }
 
 inline unsigned int ProcessorMotion2::index(const TimeStamp& _t)
 {
     // Assume dt is constant and known, and exists in dt_
-    return (lastBufferPtr()->back().ts_ - lastBufferPtr()->front().ts_) / dt_ + 0.5; // we rounded to the nearest entry in the buffer
+    return (bufferPtr()->back().ts_ - bufferPtr()->front().ts_) / dt_ + 0.5; // we rounded to the nearest entry in the buffer
 }
 
 inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
@@ -162,8 +171,8 @@ inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
     // First get data and push it into buffer
     extractData(_incoming_ptr);
     motion_.ts_ = ts_;
-    deltaPlusDelta(lastBufferPtr()->back().Dx_, dx_, motion_.Dx_);
-    lastBufferPtr()->push_back(motion_);
+    deltaPlusDelta(bufferPtr()->back().Dx_, dx_, motion_.Dx_);
+    bufferPtr()->push_back(motion_);
 }
 
 #endif /* PROCESSOR_MOTION2_H_ */
