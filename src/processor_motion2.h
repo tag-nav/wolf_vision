@@ -32,18 +32,7 @@ class ProcessorMotion2 : public ProcessorBase
                          size_t _noise_size, WolfScalar _dt);
         virtual ~ProcessorMotion2();
 
-        virtual void process(CaptureBase* _incoming_ptr)
-        {
-            // First get data and push it into buffer
-            extractData(_incoming_ptr);
-            Dx1_ = buffer_.back().Dx_;
-            instance_.ts_ = ts_;
-            instance_.dx_ = dx_;
-            deltaPlusDelta(Dx1_, dx_, instance_.Dx_);
-            buffer_.push_back(instance_);
-
-            // Then deal with other stuff... but what stuff? I don't know.
-        }
+        virtual void process(CaptureBase* _incoming_ptr);
 
         void init(const CaptureBase* _origin_ptr); ///< To be called once
         void makeKeyFrame(const TimeStamp& _t); ///< To be called when a key-frame is created
@@ -67,7 +56,7 @@ class ProcessorMotion2 : public ProcessorBase
         WolfScalar dt_; ///< Time step --- assumed constant
         TimeStamp ts_origin_; ///< Time step at the origin
         Eigen::Map<Eigen::VectorXs> x_origin_; ///< state at the origin
-        std::deque<Instance> buffer_; ///< Buffer starts empty
+        std::deque<Instance> buffer_; ///< Buffer starts with the origin data (ts_origin_, x_origin_).
         Instance instance_;
 
     protected: // These are the pure virtual functions doing the mathematics
@@ -81,7 +70,7 @@ class ProcessorMotion2 : public ProcessorBase
          *  - Fill in the ts_ field
          *  - Eventually compute the new dt_ field as the time lapse between the old ts_ and the new one.
          */
-        virtual void extractData(CaptureBase* _capture_ptr) = 0;
+        virtual void extractData(const CaptureBase* _capture_ptr) = 0;
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
          * \param _delta the delta-state
@@ -120,7 +109,7 @@ class ProcessorMotion2 : public ProcessorBase
 inline ProcessorMotion2::ProcessorMotion2(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size,
                                           size_t _noise_size, WolfScalar _dt) :
         ProcessorBase(_tp), x_size_(_state_size), dx_size_(_delta_size), data_size_(_data_size), noise_size_(
-                _noise_size), origin_ptr_(nullptr), dt_(_dt)
+                _noise_size), origin_ptr_(nullptr), dt_(_dt), ts_(0)
 {
     buffer_.clear(); // just to be explicit; probably not needed.
 }
@@ -132,14 +121,30 @@ inline ProcessorMotion2::~ProcessorMotion2()
 
 inline void ProcessorMotion2::process(CaptureBase* _incoming_ptr)
 {
+    // First get data and push it into buffer
+    extractData(_incoming_ptr);
+    Dx1_ = buffer_.back().Dx_;
+    instance_.ts_ = ts_;
+    instance_.dx_ = dx_;
+    deltaPlusDelta(Dx1_, dx_, instance_.Dx_);
+    buffer_.push_back(instance_);
+    // Then deal with other stuff... but what stuff? I don't know.
 }
 
 inline void ProcessorMotion2::init(const CaptureBase* _origin_ptr)
 {
+    x_origin_ = _origin_ptr->getFramePtr()->getState();
+    extractData(_origin_ptr);
+    buffer_.clear();
+    instance_.ts_ = ts_origin_;
+    instance_.dx_ = dx_;
+    instance_.Dx_.setZero();
+    buffer_.push_back(instance_);
 }
 
 inline void ProcessorMotion2::makeKeyFrame(const TimeStamp& _t)
 {
+    unsigned int i = index(_t);
 }
 
 inline void ProcessorMotion2::update()
@@ -169,14 +174,9 @@ inline void ProcessorMotion2::sumDeltas(const CaptureMotion* _cap1_ptr, const Ca
 
 inline unsigned int ProcessorMotion2::index(const TimeStamp& _t)
 {
-}
-
-inline void ProcessorMotion2::dx(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _dx)
-{
-}
-
-inline void ProcessorMotion2::Dx(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _Dx)
-{
+    assert (!buffer_.empty() && "Empty buffer. This should have never happened.");
+    // Assume dt is constant and known, and exists in dt_
+    return (buffer_.back().ts_ - buffer_.front().ts_) / dt_ + 0.5; // we rounded to the nearest entry in the buffer
 }
 
 #endif /* PROCESSOR_MOTION2_H_ */
