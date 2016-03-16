@@ -104,42 +104,31 @@ void ProcessorBrisk::drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp,
     }
 }
 
-unsigned int ProcessorBrisk::briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints)
+unsigned int ProcessorBrisk::briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints, std::vector<float> & new_descriptors)
 {
     //std::cout << "<---- briskImplementation ---->" << std::endl << std::endl;
 
     cv::Mat _image_roi = _image(_roi);
     cv::Mat descriptors;                    // Matrix of descriptors
-    std::vector<float> descript_vector;     // Vector to store the descriptor for each keypoint
 
     //Brisk Algorithm
-    brisk_.create("Feature2D.BRISK");
+    brisk_.create("Feature2D.BRISK");  //TODO: look if this can be done in the constructor
     brisk_.detect(_image_roi, _new_keypoints);
     brisk_.compute(_image_roi, _new_keypoints,descriptors);
 
     if(_new_keypoints.size()!=0)
     {
-
-            // Add the features in the capture
             for(unsigned int i = 0; i <= (_new_keypoints.size()-1);i++)
             {
                 _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
                 _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
 
-                descript_vector=descriptors(cv::Range(i,i+1),cv::Range(0,descriptors.cols));
-                ((CaptureImage*)getIncomingPtr())->addFeature(new FeaturePointImage(_new_keypoints[i],descript_vector));
-                //std::cout << "Current feature keypoint: " << _new_keypoints[i].pt << std::endl;
+                new_descriptors=descriptors(cv::Range(i,i+1),cv::Range(0,descriptors.cols));
+                ((CaptureImage*)getIncomingPtr())->addFeature(new FeaturePointImage(_new_keypoints[i],new_descriptors,false));
+                std::cout << "Current feature keypoint: " << _new_keypoints[i].pt << std::endl;
             }
 
-            // Set the vector of keypoints and the matrix of descriptors in its capture
-            /** Not sure if I can do this (the way the "set" is done, as it overwrittes) with the ROIs */
-            //The keypoints are referenced to the position of the ROI, not the "absolute" position in the whole image
-
-            //((CaptureImage*)_capture_ptr)->setKeypoints(keypoints);
-            //((CaptureImage*)_capture_ptr)->setDescriptors(descriptors);
-
             return descriptors.rows;  //number of features
-
     }
     else
     {
@@ -175,14 +164,22 @@ unsigned int ProcessorBrisk::detectNewFeatures()
         }
 
         std::vector<cv::KeyPoint> new_keypoints;
+        std::vector<float> new_descriptors;
 
-        n_features = briskDetect(image,roi, new_keypoints);
+        n_features = briskDetect(image,roi, new_keypoints, new_descriptors);
 
         if (n_features == 0)
         {
             act_search_grid_.blockCell(roi);
         }
 
+        std::cout << "NFL size: " << getNewFeaturesList().size() << std::endl;
+        for (FeatureBase* feature_ptr : getNewFeaturesList())
+        {
+            std::cout << "newFeaturesList Feature, keypoint: " << ((FeaturePointImage*)feature_ptr)->getKeypoint().pt << std::endl;
+
+
+        }
         // A method to draw the keypoints. Optional (false for drawing features)
         //drawFeatures(((CaptureImage*)getIncomingPtr())->getImage(),((CaptureImage*)getIncomingPtr())->getKeypoints(), myROI);
 

@@ -22,6 +22,7 @@ class FeaturePointImage : public FeatureBase
 //        Eigen::Vector2s measurement_;
         cv::KeyPoint keypoint_;
         std::vector<float> descriptor_;
+        bool known_or_new_;
 
     public:
         FeaturePointImage(const Eigen::Vector2s & _measurement);
@@ -33,14 +34,16 @@ class FeaturePointImage : public FeatureBase
             keypoint_.pt.y = measurement_(1);
         }
 
+        //_known_or_new: known = true; new = false;
         FeaturePointImage(const cv::KeyPoint& _keypoint,
-                          const std::vector<float>& _descriptor) :
+                          const std::vector<float>& _descriptor, bool _known_or_new) :
                 FeatureBase(FEAT_POINT_IMAGE, Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
                 keypoint_(_keypoint),
                 descriptor_(_descriptor)
         {
             measurement_(0) = _keypoint.pt.x;
             measurement_(1) = _keypoint.pt.y;
+            known_or_new_=_known_or_new;
         }
 
 

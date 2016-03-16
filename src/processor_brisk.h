@@ -82,7 +82,7 @@ public:
 
     virtual void drawFeaturesLastFrame(cv::Mat _image, Eigen::Vector2i _feature_point_last);
 
-    virtual unsigned int briskDetect(cv::Mat _image, cv::Rect &_roi,std::vector<cv::KeyPoint> &_new_keypoints);
+    virtual unsigned int briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints, std::vector<float>& new_descriptors);
 };
 
 #endif // PROCESSOR_BRISK_H
