@@ -45,41 +45,44 @@ unsigned int ProcessorBrisk::processKnownFeatures()
 
     act_search_grid_.renew();
 
-    ///PROJECTION OF LANDMARKS (features in this case)
+    unsigned int n_tracks = 0;
 
-    unsigned int n_last_capture_feat = 0;
-    for(std::list<FeatureBase*>::iterator feat_list_it=getLastPtr()->getFeatureListPtr()->begin();feat_list_it != getLastPtr()->getFeatureListPtr()->end(); ++feat_list_it)
+    FeatureBaseList* feature_list_in = getLastPtr()->getFeatureListPtr();
+    FeatureBaseList feature_list_out;
+    FeatureBaseList feature_list_in2;
+
+
+    if(voteForKeyFrame())
     {
-        //std::cout << "inside iterator" << std::endl;
-        FeaturePointImage* last_feature = (FeaturePointImage*)*feat_list_it;
-        Eigen::Vector2i feature_point = {last_feature->getKeypoint().pt.x,last_feature->getKeypoint().pt.y}; //TODO: Look if this is the right order
-        act_search_grid_.hitCell(feature_point);
-        std::cout << "Last feature keypoint: " << last_feature->getKeypoint().pt << std::endl;
-
-        drawFeaturesLastFrame(image,feature_point);
-
-        n_last_capture_feat++;
+        feature_list_in2 = getNewFeaturesList(); //TODO: Check if this really works
+        feature_list_in=&feature_list_in2;
+        std::cout << "NewFeatureLists treatment" << std::endl;
     }
-    std::cout << "n_last_capture_feat: " << n_last_capture_feat << std::endl;
-
-    //cv::Size last_capture_roi_size(10,10); //cols,rows
-    //cv::Point last_capture_roi_point(,last_feature->getKeypoint().pt.y);
-    //cv::Rect last_capture_roi(last_capture_roi_point,last_capture_roi_size);
-
-    // 640/8 = 80; 360/8 = 45; These are the roi maximum values. You should search in the last capture features spaces with these roi.
 
 
-    //TODO:
-    //You need to block the cell the features of the last capture are in.
-    //You need to find the roi (as in the grid (or less)) to search in the area around the last capture feaures
-    //Do the matching
+    n_tracks = processFeaturesForMatching(image,feature_list_in, feature_list_out);
+    std::cout << "feature list out size: " << feature_list_out.size() << std::endl;
 
+    //en la primera iteración has de meterlas en incoming_ptr y en la segunda en una lista general
+    if(voteForKeyFrame()==false)
+    {
+        for(FeatureBase* it : feature_list_out)
+        {
+            //FeaturePointImage
+            ((CaptureImage*)getIncomingPtr())->addFeature((FeaturePointImage*)it);
+        }
+    }
+    else
+    {
+        for(FeatureBase* it : feature_list_out)
+        {
+            FeaturePointImage* point_ptr = new FeaturePointImage(((FeaturePointImage*)it)->getKeypoint(),
+                                                                ((FeaturePointImage*)it)->getDescriptor(),false);
+            addNewFeatureMatched(point_ptr);
+        }
+    }
 
-
-
-
-//    cv::waitKey(30);
-    return 0;
+    return n_tracks;
 }
 
 void ProcessorBrisk::drawFeaturesLastFrame(cv::Mat _image, Eigen::Vector2i _feature_point_last)
@@ -180,7 +183,7 @@ void ProcessorBrisk::addNewFeaturesInCapture(std::vector<cv::KeyPoint> _new_keyp
 // This is intended to create Features that are not among the Features already known in the Map. Returns the number of detected Features.
 unsigned int ProcessorBrisk::detectNewFeatures()
 {
-    //std::cout << "<---- detectNewFeatures ---->" << std::endl << std::endl;
+    std::cout << "<---- detectNewFeatures ---->" << std::endl << std::endl;
 
     cv::Mat image = ((CaptureImage*)getLastPtr())->getImage();
     cv::Rect roi;
@@ -243,7 +246,7 @@ unsigned int ProcessorBrisk::detectNewFeatures()
     std::cout << "n_features: " << n_features << std::endl;
 
 
-    cv::waitKey(30);
+    cv::waitKey(0);
     return n_features;
 }
 
@@ -259,9 +262,9 @@ bool ProcessorBrisk::voteForKeyFrame()
 
 void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
 {
-    std::cout << "size0: " << getLastPtr()->getFeatureListPtr()->size() << std::endl;
+    std::cout << "<---- process ---->" << std::endl << std::endl;
     ProcessorTracker::process(getIncomingPtr());
-    std::cout << "size1: " << getLastPtr()->getFeatureListPtr()->size() << std::endl;
+    std::cout << "<---- end process ---->" << std::endl << std::endl;
     drawFeatures(getLastPtr());
     std::cout << "size2: " << getLastPtr()->getFeatureListPtr()->size() << std::endl;
 }
@@ -284,4 +287,55 @@ ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, Node
     //return new ConstraintPoint2D(f_b,frame_b,CTR_ACTIVE);
     //return new ConstraintBase(CTR_IMG_PNT_TO_IMG_PNT,_feature_ptr,CTR_ACTIVE);
     return nullptr;
+}
+
+
+/** Private */
+
+unsigned int ProcessorBrisk::processFeaturesForMatching(cv::Mat _image,FeatureBaseList* _feature_list_in, FeatureBaseList& _feature_list_out)
+{
+    ///PROJECTION OF LANDMARKS (features in this case)
+
+    unsigned int feature_roi_width = 6;
+    unsigned int feature_roi_heigth = 6;
+
+    unsigned int feature_roi_x = 0;
+    unsigned int feature_roi_y = 0;
+
+
+    unsigned int n_last_capture_feat = 0;
+    for(std::list<FeatureBase*>::iterator feat_list_it=_feature_list_in->begin();feat_list_it != _feature_list_in->end(); ++feat_list_it)
+    {
+        //std::cout << "inside iterator" << std::endl;
+        FeaturePointImage* last_feature = (FeaturePointImage*)*feat_list_it;
+        Eigen::Vector2i feature_point = {last_feature->getKeypoint().pt.x,last_feature->getKeypoint().pt.y}; //TODO: Look if this is the right order
+        act_search_grid_.hitCell(feature_point);
+        std::cout << "Last feature keypoint: " << last_feature->getKeypoint().pt << std::endl;
+
+        feature_roi_x = (last_feature->getKeypoint().pt.x)-(feature_roi_heigth/2);
+        feature_roi_y = (last_feature->getKeypoint().pt.y)-(feature_roi_width/2);
+
+
+
+
+        Eigen::Vector2i feature_roi_point = {feature_roi_x,feature_roi_y};
+
+        drawFeaturesLastFrame(_image,feature_point);
+        drawFeaturesLastFrame(_image,feature_roi_point);
+
+        _feature_list_out.push_back(last_feature);
+
+        n_last_capture_feat++;
+    }
+    std::cout << "n_last_capture_feat: " << n_last_capture_feat << std::endl;
+
+
+
+
+
+
+
+
+
+    return 0;
 }

@@ -165,6 +165,9 @@ class ProcessorTracker : public ProcessorBase
         void setIncomingPtr(CaptureBase* const _incoming_ptr);
         FeatureBaseList& getNewFeaturesList();
         void addNewFeature(FeatureBase* _feature_ptr);
+        //
+        FeatureBaseList& getNewFeaturesListMatched();
+        void addNewFeatureMatched(FeatureBase* _feature_ptr);
 
     protected:
 
@@ -200,7 +203,7 @@ class ProcessorTracker : public ProcessorBase
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
         FeatureBaseList new_features_list_; ///< List of new features for landmark initialization and tracker reset.
-
+        FeatureBaseList new_features_list_incoming_;
 };
 
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesList()
@@ -211,6 +214,16 @@ inline FeatureBaseList& ProcessorTracker::getNewFeaturesList()
 inline void ProcessorTracker::addNewFeature(FeatureBase* _feature_ptr)
 {
     new_features_list_.push_back(_feature_ptr);
+}
+
+inline FeatureBaseList& ProcessorTracker::getNewFeaturesListMatched()
+{
+    return new_features_list_incoming_;
+}
+
+inline void ProcessorTracker::addNewFeatureMatched(FeatureBase* _feature_ptr)
+{
+    new_features_list_incoming_.push_back(_feature_ptr);
 }
 
 inline void ProcessorTracker::reset()

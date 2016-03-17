@@ -87,6 +87,10 @@ public:
     virtual unsigned int briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints, cv::Mat & new_descriptors);
 
     virtual void process(CaptureBase* const _incoming_ptr);
+
+private:
+
+    virtual unsigned int processFeaturesForMatching(cv::Mat _image, FeatureBaseList* _feature_list_in, FeatureBaseList & _feature_list_out);
 };
 
 #endif // PROCESSOR_BRISK_H
