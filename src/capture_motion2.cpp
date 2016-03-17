@@ -17,4 +17,3 @@ CaptureMotion2::~CaptureMotion2()
 {
     // TODO Auto-generated destructor stub
 }
-

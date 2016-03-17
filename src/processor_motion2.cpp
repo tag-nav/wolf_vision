@@ -22,39 +22,30 @@ ProcessorMotion2::~ProcessorMotion2()
 
 void ProcessorMotion2::process(CaptureMotion2* _incoming_ptr)
 {
+    _incoming_ptr->getBufferPtr()->setDt(dt_);
     integrate(_incoming_ptr);
-
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         // Make KeyFrame
-//        makeKeyFrame(incoming_ptr_);
+        //        makeKeyFrame(incoming_ptr_);
         // Reset the Tracker
-//        reset();
-    }
-    else
-    {   // We did not create a KeyFrame:
-        // 2.b. Update the tracker's last and incoming pointers one step ahead
-        advance();
+        //        reset();
     }
 }
 
 void ProcessorMotion2::init(CaptureMotion2* _origin_ptr)
 {
-    origin_ptr_ = _origin_ptr;
-    last_ptr_ = _origin_ptr;
-    x_origin_ = _origin_ptr->getFramePtr()->getState();
-    extractData(_origin_ptr);
-    bufferPtr()->clear();
-    motion_.ts_ = ts_origin_;
-    motion_.Dx_.setZero();
-    bufferPtr()->push_back(motion_);
-}
+    //TODO: This fcn needs to change:
+    // input: framebase: this is a Keyframe
+    // create a new non-key Frame and make it last_
+    // first delta in buffer must be zero
+    // we do not need to extract data from any Capture
 
-void ProcessorMotion2::deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta)
-{
-    unsigned int i1 = index(_t1);
-    if (i1 == 0)
-        _Delta = bufferPtr()->at(index(_t2)).Dx_;
-    else
-        deltaMinusDelta(bufferPtr()->at(index(_t2)).Dx_, bufferPtr()->at(i1).Dx_, _Delta);
+//    origin_ptr_ = _origin_ptr;
+//    last_ptr_ = _origin_ptr;
+//    x_origin_ = _origin_ptr->getFramePtr()->getState();
+//    extractData(_origin_ptr);
+//    data2delta();
+//    getBufferPtr()->clear();
+//    getBufferPtr()->addMotion(ts_origin_, delta_integrated_);
 }

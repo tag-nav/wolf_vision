@@ -12,6 +12,8 @@
 
 #include <deque>
 
+
+
 /** \brief Base class for motion Captures.
  *
  * This class implements Captures for sensors integrating motion.
@@ -32,24 +34,57 @@
 class CaptureMotion2 : public CaptureBase
 {
     public:
-        typedef struct {
+        typedef struct Motion
+        {
             public:
                 TimeStamp ts_;       ///< Time stamp
                 Eigen::VectorXs Dx_; ///< the integrated delta
         } Motion; ///< One instance of the buffered data, corresponding to a particular time stamp.
-        typedef std::deque<Motion> Buffer;
+
+        class MotionBuffer{
+            public:
+                MotionBuffer(WolfScalar _dt) :
+                        dt_(_dt)
+                {
+                }
+                void setDt(const WolfScalar _dt){dt_=_dt;}
+                WolfScalar getDt(){return dt_;}
+                Eigen::VectorXs& getDelta()
+                {
+                    return container_.back().Dx_;
+                }
+                Eigen::VectorXs& getDelta(const TimeStamp& _ts)
+                {
+                    return container_.at(idx(_ts)).Dx_;
+                }
+                void addMotion(TimeStamp _ts, Eigen::VectorXs& _delta)
+                {
+                    container_.push_back(Motion( {_ts, _delta}));
+                }
+                void clear(){container_.clear();}
+            private:
+                unsigned int idx(const TimeStamp& _ts)
+                {
+                    // Assume dt is constant and known, and exists in dt_
+                    // then, constant time access to the buffer can be achieved by computing the index directly from the time stamp:
+                    //    index = (ts - ts_origin) / dt
+                    return (unsigned int)((_ts - container_.front().ts_) / dt_ + 0.5); // we rounded to the nearest entry in the buffer
+                }
+                WolfScalar dt_;
+                std::deque<Motion> container_;
+        };
 
     public:
         CaptureMotion2();
         virtual ~CaptureMotion2();
 
         const Eigen::VectorXs& getData() const;
-        Buffer* getBufferPtr();
-        const Eigen::VectorXs& getDelta() const;
+        MotionBuffer* getBufferPtr();
+        Eigen::VectorXs& getDelta();
 
     protected:
         Eigen::VectorXs data_; ///< Motion data in form of vector mandatory
-        Buffer buffer_; ///< Buffer of motions between this Capture and the next one.
+        MotionBuffer buffer_; ///< Buffer of motions between this Capture and the next one.
 };
 
 inline const Eigen::VectorXs& CaptureMotion2::getData() const
@@ -57,14 +92,14 @@ inline const Eigen::VectorXs& CaptureMotion2::getData() const
     return data_;
 }
 
-inline CaptureMotion2::Buffer* CaptureMotion2::getBufferPtr()
+inline CaptureMotion2::MotionBuffer* CaptureMotion2::getBufferPtr()
 {
     return &buffer_;
 }
 
-inline const Eigen::VectorXs& CaptureMotion2::getDelta() const
+inline Eigen::VectorXs& CaptureMotion2::getDelta()
 {
-    return buffer_.back().Dx_;
+    return buffer_.getDelta();
 }
 
 #endif /* SRC_CAPTURE_MOTION2_H_ */

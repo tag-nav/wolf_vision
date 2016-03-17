@@ -26,17 +26,19 @@ class ProcessorMotion2 : public ProcessorBase
                          size_t _noise_size, WolfScalar _dt);
         virtual ~ProcessorMotion2();
 
+        // Instructions to the processor:
+
         virtual void process(CaptureMotion2* _incoming_ptr);
 
-        void init(CaptureMotion2* _origin_ptr); ///< To be called once
+        void init(CaptureMotion2* _origin_ptr);
 
         void update();
-        void reset(const TimeStamp& _t);
-        void advance();
 
-        void makeKeyFrame(const TimeStamp& _t)
-        {
-        }
+        void reset(const TimeStamp& _t);
+
+        void makeKeyFrame(const TimeStamp& _t);
+
+        // Queries to the processor:
 
         /** \brief Gets the state corresponding to provided time-stamp
          * \param _t the time stamp
@@ -56,12 +58,15 @@ class ProcessorMotion2 : public ProcessorBase
          */
         virtual void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr, Eigen::VectorXs& _delta1_plus_delta2);
 
+        // Helper functions:
     protected:
-        CaptureMotion2::Buffer* bufferPtr(); ///< Get a pointer to the motion buffer
-        unsigned int index(const TimeStamp& _ts); ///< Get buffer index from time-stamp
-        void pickDelta(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _Dx); ///< Pick up the integrated Delta at the given index
+
         void integrate(CaptureMotion2* _incoming_ptr); ///< Integrate the last received IMU data
 
+        CaptureMotion2::MotionBuffer* getBufferPtr()
+        {
+            return last_ptr_->getBufferPtr();
+        }
 
         /** \brief Extract data from a derived capture.
          * \param _capture_ptr pointer to the Capture we want to extract data from.
@@ -145,12 +150,11 @@ class ProcessorMotion2 : public ProcessorBase
         WolfScalar dt_; ///< Time step --- assumed constant
         TimeStamp ts_origin_; ///< Time step at the origin
         Eigen::VectorXs x_origin_; ///< state at the origin
-        CaptureMotion2::Motion motion_;
 
     private:
         WolfScalar ts_;
         Eigen::VectorXs data_;
-        Eigen::VectorXs delta_;
+        Eigen::VectorXs delta_, delta_integrated_;
 };
 
 inline void ProcessorMotion2::update()
@@ -163,15 +167,19 @@ inline void ProcessorMotion2::reset(const TimeStamp& _t)
     // what to do?
 }
 
-inline void ProcessorMotion2::advance()
+inline void ProcessorMotion2::makeKeyFrame(const TimeStamp& _t)
 {
-    // What to do?
 }
 
 inline void ProcessorMotion2::state(const TimeStamp& _t, Eigen::VectorXs& _x)
 {
     update();
-    xPlusDelta(x_origin_, bufferPtr()->at(index(_t)).Dx_, _x);
+    xPlusDelta(x_origin_, getBufferPtr()->getDelta(_t), _x);
+}
+
+inline void ProcessorMotion2::deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta)
+{
+    deltaMinusDelta(getBufferPtr()->getDelta(_t2), getBufferPtr()->getDelta(_t2), _Delta);
 }
 
 inline void ProcessorMotion2::sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr,
@@ -182,26 +190,12 @@ inline void ProcessorMotion2::sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion
                    _delta1_plus_delta2);
 }
 
-inline CaptureMotion2::Buffer* ProcessorMotion2::bufferPtr()
-{
-    return last_ptr_->getBufferPtr();
-}
-
-inline unsigned int ProcessorMotion2::index(const TimeStamp& _ts)
-{
-    // Assume dt is constant and known, and exists in dt_
-    // then, constant time access to the buffer can be achieved by computing the index directly from the time stamp:
-    //    index = (ts - ts_origin) / dt
-    return (_ts - bufferPtr()->front().ts_) / dt_ + 0.5; // we rounded to the nearest entry in the buffer
-}
-
 inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
 {
     // First get data and push it into buffer
     extractData(_incoming_ptr);
-    motion_.ts_ = ts_;
-    deltaPlusDelta(bufferPtr()->back().Dx_, delta_, motion_.Dx_);
-    bufferPtr()->push_back(motion_);
+    deltaPlusDelta(getBufferPtr()->getDelta(), delta_, delta_integrated_);
+    getBufferPtr()->addMotion(ts_,delta_integrated_);
 }
 
 inline void ProcessorMotion2::extractData(const CaptureMotion2* _capture_ptr)
