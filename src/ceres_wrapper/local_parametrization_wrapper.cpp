@@ -1,6 +1,6 @@
 #include "local_parametrization_wrapper.h"
 
-bool LocalParameterizationWrapper::Plus(const double* x_raw, const double* delta_raw, double* x_plus_delta_raw) const
+bool LocalParametrizationWrapper::Plus(const double* x_raw, const double* delta_raw, double* x_plus_delta_raw) const
 {
     Eigen::Map<const Eigen::VectorXs> x_raw_map(x_raw, GlobalSize());
     Eigen::Map<const Eigen::VectorXs> delta_raw_map(delta_raw, LocalSize());
@@ -8,7 +8,7 @@ bool LocalParameterizationWrapper::Plus(const double* x_raw, const double* delta
     return local_parametrization_ptr_->plus(x_raw_map, delta_raw_map, x_plus_map);
 };
 
-bool LocalParameterizationWrapper::ComputeJacobian(const double* x, double* jacobian) const
+bool LocalParametrizationWrapper::ComputeJacobian(const double* x, double* jacobian) const
 {
     Eigen::Map<const Eigen::VectorXs> x_map(x, GlobalSize());
     Eigen::Map<Eigen::MatrixXs> jacobian_map(jacobian, GlobalSize(), LocalSize());

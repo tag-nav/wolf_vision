@@ -7,16 +7,16 @@ class LocalParametrizationBase;
 //Ceres includes
 #include "ceres/ceres.h"
 
-class LocalParameterizationWrapper : public ceres::LocalParameterization
+class LocalParametrizationWrapper : public ceres::LocalParameterization
 {
     private:
         LocalParametrizationBase* local_parametrization_ptr_;
 
     public:
 
-        LocalParameterizationWrapper(LocalParametrizationBase* _local_parametrization_ptr);
+        LocalParametrizationWrapper(LocalParametrizationBase* _local_parametrization_ptr);
 
-        virtual ~LocalParameterizationWrapper();
+        virtual ~LocalParametrizationWrapper();
 
         virtual bool Plus(const double* x_raw, const double* delta_raw, double* x_plus_delta_raw) const;
 
@@ -29,21 +29,21 @@ class LocalParameterizationWrapper : public ceres::LocalParameterization
 
 #include "local_parametrization_base.h"
 
-inline LocalParameterizationWrapper::LocalParameterizationWrapper(LocalParametrizationBase* _local_parametrization_ptr) :
+inline LocalParametrizationWrapper::LocalParametrizationWrapper(LocalParametrizationBase* _local_parametrization_ptr) :
         local_parametrization_ptr_(_local_parametrization_ptr)
 {
 }
 
-inline LocalParameterizationWrapper::~LocalParameterizationWrapper()
+inline LocalParametrizationWrapper::~LocalParametrizationWrapper()
 {
 }
 
-inline int LocalParameterizationWrapper::GlobalSize() const
+inline int LocalParametrizationWrapper::GlobalSize() const
 {
     return local_parametrization_ptr_->getGlobalSize();
 }
 
-inline int LocalParameterizationWrapper::LocalSize() const
+inline int LocalParametrizationWrapper::LocalSize() const
 {
     return local_parametrization_ptr_->getLocalSize();
 }
