@@ -164,11 +164,12 @@ inline void ProcessorMotion2::update()
 
 inline void ProcessorMotion2::reset(const TimeStamp& _t)
 {
-    // what to do?
+    // TODO what to do?
 }
 
 inline void ProcessorMotion2::makeKeyFrame(const TimeStamp& _t)
 {
+    //TODO
 }
 
 inline void ProcessorMotion2::state(const TimeStamp& _t, Eigen::VectorXs& _x)

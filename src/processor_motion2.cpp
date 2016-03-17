@@ -17,7 +17,7 @@ ProcessorMotion2::ProcessorMotion2(ProcessorType _tp, size_t _state_size, size_t
 
 ProcessorMotion2::~ProcessorMotion2()
 {
-    // TODO Auto-generated destructor stub
+    //
 }
 
 void ProcessorMotion2::process(CaptureMotion2* _incoming_ptr)
@@ -26,6 +26,7 @@ void ProcessorMotion2::process(CaptureMotion2* _incoming_ptr)
     integrate(_incoming_ptr);
     if (voteForKeyFrame() && permittedKeyFrame())
     {
+        // TODO:
         // Make KeyFrame
         //        makeKeyFrame(incoming_ptr_);
         // Reset the Tracker
