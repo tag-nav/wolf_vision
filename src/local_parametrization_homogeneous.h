@@ -13,8 +13,6 @@
 /**
  * \brief Local parametrization for homogeneous vectors.
  *
- * Local parametrization for homogeneous vectors.
- *
  * The composition x_plus_dx = plus(x,dx), written in math mode as \f${\bf x}^+={\bf x}\oplus d {\bf x}\f$,
  * is done orthogonally to \f${\bf x}\f$,
  * so that the result remains in the 4-sphere defined by the norm of \f${\bf x}\f$.
