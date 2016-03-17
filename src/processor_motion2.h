@@ -96,8 +96,8 @@ class ProcessorMotion2 : public ProcessorBase
           * the data over the period dt.
           *
           * Two trivial implementations would establish:
-          *  - If data is an increment: delta_ = data_;
-          *  - If data is a velocity: delta_ = data_* dt_.
+          *  - If data_ is an increment: delta_ = data_;
+          *  - If data_ is a velocity: delta_ = data_* dt_.
           *
           *  However, other more complicated relations are possible.
           */
