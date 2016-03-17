@@ -9,7 +9,7 @@
 
 ProcessorMotion2::ProcessorMotion2(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size,
                                    size_t _noise_size, WolfScalar _dt) :
-        ProcessorBase(_tp), x_size_(_state_size), dx_size_(_delta_size), data_size_(_data_size),
+        ProcessorBase(_tp), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size),
         noise_size_(_noise_size), origin_ptr_(nullptr), last_ptr_(nullptr), dt_(_dt), ts_(0)
 {
     //

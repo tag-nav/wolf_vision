@@ -57,25 +57,50 @@ class ProcessorMotion2 : public ProcessorBase
         virtual void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr, Eigen::VectorXs& _delta1_plus_delta2);
 
     protected:
-        CaptureMotion2::Buffer* bufferPtr();
-        unsigned int index(const TimeStamp& _t);
-        void pickDx(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _Dx);
-        void integrate(CaptureMotion2* _incoming_ptr);
+        CaptureMotion2::Buffer* bufferPtr(); ///< Get a pointer to the motion buffer
+        unsigned int index(const TimeStamp& _ts); ///< Get buffer index from time-stamp
+        void pickDx(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _Dx); ///< Pick up the Delta at the given index
+        void integrate(CaptureMotion2* _incoming_ptr); ///< Integrate the last received IMU data
 
 
-        // These are the pure virtual functions doing the mathematics
-    protected:
         /** \brief Extract data from a derived capture.
          * \param _capture_ptr pointer to the Capture we want to extract data from.
          * This function needs to:
          *  - access the incoming Capture
-         *  - cast it to DerivedCapture to be able to access its derived members.
-         *  - Fill in the data_ field
-         *  - Fill in the dx_ field
+         *  // - cast it to DerivedCapture to be able to access its derived members.
          *  - Fill in the ts_ field
+         *  - Fill in the data_ field
+         *  - Fill in the delta_ field by converting it from the data_ field
          *  - Eventually compute the new dt_ field as the time lapse between the old ts_ and the new one.
          */
-        virtual void extractData(const CaptureMotion2* _capture_ptr) = 0;
+        virtual void extractData(const CaptureMotion2* _capture_ptr){
+            ts_ = _capture_ptr->getTimeStamp();
+            data_ = _capture_ptr->data_;
+        }
+
+        // These are the pure virtual functions doing the mathematics
+    protected:
+
+        /** \brief convert raw CaptureMotion data to the delta-state format
+         *
+         * This function accesses the members data_ (as produced by extractData()) and dt_,
+         * and computes the value of the delta-state delta_.
+         *
+         * Rationale:
+         *
+         * The delta-state format must be compatible for integration using
+         * the composition functions doing the math in this class.
+         *
+         * The data format is not necessarily the same, as it is the
+         * format provided by the Capture,
+         * which is unaware of the needs of this processor.
+         *
+         * Additionally, sometimes the data format is in the form of a
+         * velocity, while the delta is in the form of an increment.
+         * In such cases, converting from data to delta-state needs integrating
+         * the data over the period dt.
+         */
+        void data2delta() = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -110,7 +135,7 @@ class ProcessorMotion2 : public ProcessorBase
     protected:
         // Attributes
         size_t x_size_;    ///< The size of the state vector
-        size_t dx_size_;   ///< the size of the delta integrator
+        size_t delta_size_;   ///< the size of the delta integrator
         size_t data_size_; ///< the size of the incoming data
         size_t noise_size_; ///< the size of the noise vector
 
@@ -123,7 +148,8 @@ class ProcessorMotion2 : public ProcessorBase
 
     private:
         WolfScalar ts_;
-        Eigen::VectorXs dx_;
+        Eigen::VectorXs data_;
+        Eigen::VectorXs delta_;
 };
 
 inline void ProcessorMotion2::update()
@@ -160,10 +186,12 @@ inline CaptureMotion2::Buffer* ProcessorMotion2::bufferPtr()
     return last_ptr_->getBufferPtr();
 }
 
-inline unsigned int ProcessorMotion2::index(const TimeStamp& _t)
+inline unsigned int ProcessorMotion2::index(const TimeStamp& _ts)
 {
     // Assume dt is constant and known, and exists in dt_
-    return (bufferPtr()->back().ts_ - bufferPtr()->front().ts_) / dt_ + 0.5; // we rounded to the nearest entry in the buffer
+    // then, constant time access to the buffer can be achieved by computing the index directly from the time stamp:
+    //    index = (ts - ts_origin) / dt
+    return (_ts - bufferPtr()->front().ts_) / dt_ + 0.5; // we rounded to the nearest entry in the buffer
 }
 
 inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
@@ -171,7 +199,7 @@ inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
     // First get data and push it into buffer
     extractData(_incoming_ptr);
     motion_.ts_ = ts_;
-    deltaPlusDelta(bufferPtr()->back().Dx_, dx_, motion_.Dx_);
+    deltaPlusDelta(bufferPtr()->back().Dx_, delta_, motion_.Dx_);
     bufferPtr()->push_back(motion_);
 }
 
