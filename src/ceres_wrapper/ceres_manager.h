@@ -9,6 +9,7 @@
 //wolf includes
 #include "auto_diff_cost_function_wrapper.h"
 #include "cost_function_wrapper.h"
+#include "local_parametrization_wrapper.h"
 #include "../wolf.h"
 #include "../state_block.h"
 #include "../constraint_sparse.h"

@@ -18,8 +18,8 @@ LocalParametrizationHomogeneous::~LocalParametrizationHomogeneous()
     //
 }
 
-bool LocalParametrizationHomogeneous::plus(const Eigen::Map<Eigen::VectorXs>& _h,
-                                           const Eigen::Map<Eigen::VectorXs>& _delta,
+bool LocalParametrizationHomogeneous::plus(const Eigen::Map<const Eigen::VectorXs>& _h,
+                                           const Eigen::Map<const Eigen::VectorXs>& _delta,
                                            Eigen::Map<Eigen::VectorXs>& _h_plus_delta) const
 {
     assert(_h.size() == global_size_ && "Wrong size of input homogeneous point.");
@@ -38,7 +38,7 @@ bool LocalParametrizationHomogeneous::plus(const Eigen::Map<Eigen::VectorXs>& _h
         Quaternions dq(AngleAxis<WolfScalar>(norm_delta, axis));
 
         // result as a homogeneous point -- we use the quaternion product for keeping in the 4-sphere
-        _h_plus_delta = (dq * Map<const Quaternions>(&_h(0))).coeffs();
+        _h_plus_delta = (dq * Map<const Quaternions>(_h.data())).coeffs();
     }
     else
     {
@@ -47,7 +47,7 @@ bool LocalParametrizationHomogeneous::plus(const Eigen::Map<Eigen::VectorXs>& _h
     return true;
 }
 
-bool LocalParametrizationHomogeneous::computeJacobian(const Eigen::Map<Eigen::VectorXs>& _h,
+bool LocalParametrizationHomogeneous::computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _h,
                                                       Eigen::Map<Eigen::MatrixXs>& _jacobian) const
 {
     assert(_h.size() == global_size_ && "Wrong size of input quaternion.");
