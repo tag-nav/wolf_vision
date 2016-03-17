@@ -10,8 +10,8 @@ LocalParametrizationQuaternion::~LocalParametrizationQuaternion()
 {
 }
 
-bool LocalParametrizationQuaternion::plus(const Eigen::Map<Eigen::VectorXs>& _q,
-                                          const Eigen::Map<Eigen::VectorXs>& _delta_theta,
+bool LocalParametrizationQuaternion::plus(const Eigen::Map<const Eigen::VectorXs>& _q,
+                                          const Eigen::Map<const Eigen::VectorXs>& _delta_theta,
                                           Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const
 {
 
@@ -35,10 +35,10 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<Eigen::VectorXs>& _q,
         // result as a quaternion
         if (delta_reference_ == DQ_GLOBAL)
             // the delta is in global reference: dq * q
-            _q_plus_delta_theta = (dq * Map<const Quaternions>(&_q(0))).coeffs();
+            _q_plus_delta_theta = (dq * Map<const Quaternions>(_q.data())).coeffs();
         else
             // the delta is in local reference: q * dq
-            _q_plus_delta_theta = (Map<const Quaternions>(&_q(0)) * dq).coeffs();
+            _q_plus_delta_theta = (Map<const Quaternions>(_q.data()) * dq).coeffs();
 
     }
     else // Consider null rotation
@@ -48,7 +48,7 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<Eigen::VectorXs>& _q,
     return true;
 }
 
-bool LocalParametrizationQuaternion::computeJacobian(const Eigen::Map<Eigen::VectorXs>& _q,
+bool LocalParametrizationQuaternion::computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _q,
                                                      Eigen::Map<Eigen::MatrixXs>& _jacobian) const
 {
     assert(_q.size() == global_size_ && "Wrong size of input quaternion.");

@@ -189,9 +189,11 @@ IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
         ceres_wrapper/ceres_manager.h 
         ceres_wrapper/auto_diff_cost_function_wrapper.h
-        ceres_wrapper/cost_function_wrapper.h )
+        ceres_wrapper/cost_function_wrapper.h 
+        ceres_wrapper/local_parametrization_wrapper.h )
     SET(SRCS_WRAPPER
-        ceres_wrapper/ceres_manager.cpp)
+        ceres_wrapper/ceres_manager.cpp
+        ceres_wrapper/local_parametrization_wrapper.cpp )
 ELSE(Ceres_FOUND)
     SET(HDRS_WRAPPER)
     SET(SRCS_WRAPPER)

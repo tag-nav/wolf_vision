@@ -40,10 +40,10 @@ class LocalParametrizationHomogeneous : public LocalParametrizationBase
         LocalParametrizationHomogeneous();
         virtual ~LocalParametrizationHomogeneous();
 
-        virtual bool plus(const Eigen::Map<Eigen::VectorXs>& _h,
-                          const Eigen::Map<Eigen::VectorXs>& _delta,
+        virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _h,
+                          const Eigen::Map<const Eigen::VectorXs>& _delta,
                           Eigen::Map<Eigen::VectorXs>& _h_plus_delta) const;
-        virtual bool computeJacobian(const Eigen::Map<Eigen::VectorXs>& _h, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
+        virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _h, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
 };
 
 #endif /* LOCALPARAMETRIZATIONHOMOGENEOUS_H_ */
