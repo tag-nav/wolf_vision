@@ -40,67 +40,68 @@ class ProcessorMotion2 : public ProcessorBase
 
         /** \brief Gets the state corresponding to provided time-stamp
          * \param _t the time stamp
-         * \_x the returned state
+         * \param _x the returned state
          */
         virtual void state(const TimeStamp& _t, Eigen::VectorXs& _x);
         /** \brief Provides the delta-state between two time-stamps
          * \param _t1 initial time
          * \param _t2 final time
-         * \param _Delta the delta-state between _t1 and _t2
+         * \param _Delta the integrated delta-state between _t1 and _t2
          */
         virtual void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta);
         /** Composes the deltas in two pre-integrated Captures
          * \param _cap1_ptr pointer to the first Capture
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
-         * \param _delta_1_2 the concatenation of the deltas of Captures 1 and 2.
+         * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
          */
         virtual void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr, Eigen::VectorXs& _delta1_plus_delta2);
 
     protected:
         CaptureMotion2::Buffer* bufferPtr(); ///< Get a pointer to the motion buffer
         unsigned int index(const TimeStamp& _ts); ///< Get buffer index from time-stamp
-        void pickDx(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _Dx); ///< Pick up the Delta at the given index
+        void pickDelta(unsigned int _index, Eigen::Map<Eigen::VectorXs>& _Dx); ///< Pick up the integrated Delta at the given index
         void integrate(CaptureMotion2* _incoming_ptr); ///< Integrate the last received IMU data
 
 
         /** \brief Extract data from a derived capture.
          * \param _capture_ptr pointer to the Capture we want to extract data from.
-         * This function needs to:
-         *  - access the incoming Capture
-         *  // - cast it to DerivedCapture to be able to access its derived members.
-         *  - Fill in the ts_ field
-         *  - Fill in the data_ field
-         *  - Fill in the delta_ field by converting it from the data_ field
-         *  - Eventually compute the new dt_ field as the time lapse between the old ts_ and the new one.
+         * This function:
+         *  - accesses the incoming Capture
+         *  - Fills in the ts_ field
+         *  - Fills in the data_ field
+         *  - Fills in the delta_ field by converting it from the data_ field, using data2delta().
          */
-        virtual void extractData(const CaptureMotion2* _capture_ptr){
-            ts_ = _capture_ptr->getTimeStamp();
-            data_ = _capture_ptr->data_;
-        }
+         void extractData(const CaptureMotion2* _capture_ptr);
 
         // These are the pure virtual functions doing the mathematics
     protected:
 
-        /** \brief convert raw CaptureMotion data to the delta-state format
-         *
-         * This function accesses the members data_ (as produced by extractData()) and dt_,
-         * and computes the value of the delta-state delta_.
-         *
-         * Rationale:
-         *
-         * The delta-state format must be compatible for integration using
-         * the composition functions doing the math in this class.
-         *
-         * The data format is not necessarily the same, as it is the
-         * format provided by the Capture,
-         * which is unaware of the needs of this processor.
-         *
-         * Additionally, sometimes the data format is in the form of a
-         * velocity, while the delta is in the form of an increment.
-         * In such cases, converting from data to delta-state needs integrating
-         * the data over the period dt.
-         */
-        void data2delta() = 0;
+         /** \brief convert raw CaptureMotion data to the delta-state format
+          *
+          * This function accesses the members data_ (as produced by extractData()) and dt_,
+          * and computes the value of the delta-state delta_.
+          *
+          * Rationale:
+          *
+          * The delta-state format must be compatible for integration using
+          * the composition functions doing the math in this class: xPlusDelta(), deltaPlusDelta() and deltaMinusDelta().
+          *
+          * The data format is not necessarily the same, as it is the
+          * format of the raw data provided by the Capture,
+          * which is unaware of the needs of this processor.
+          *
+          * Additionally, sometimes the data format is in the form of a
+          * velocity, while the delta is in the form of an increment.
+          * In such cases, converting from data to delta-state needs integrating
+          * the data over the period dt.
+          *
+          * Two trivial implementations would establish:
+          *  - If data is an increment: delta_ = data_;
+          *  - If data is a velocity: delta_ = data_* dt_.
+          *
+          *  However, other more complicated relations are possible.
+          */
+         void data2delta() = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -159,12 +160,12 @@ inline void ProcessorMotion2::update()
 
 inline void ProcessorMotion2::reset(const TimeStamp& _t)
 {
-    // This is the index of the new key-frame
+    // what to do?
 }
 
 inline void ProcessorMotion2::advance()
 {
-    // Nothing to do?
+    // What to do?
 }
 
 inline void ProcessorMotion2::state(const TimeStamp& _t, Eigen::VectorXs& _x)
@@ -202,5 +203,13 @@ inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
     deltaPlusDelta(bufferPtr()->back().Dx_, delta_, motion_.Dx_);
     bufferPtr()->push_back(motion_);
 }
+
+inline void ProcessorMotion2::extractData(const CaptureMotion2* _capture_ptr)
+{
+    ts_ = _capture_ptr->getTimeStamp().get();
+    data_ = _capture_ptr->getData();
+    data2delta();
+}
+
 
 #endif /* PROCESSOR_MOTION2_H_ */
