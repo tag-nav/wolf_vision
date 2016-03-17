@@ -12,6 +12,23 @@
 
 #include <deque>
 
+/** \brief Base class for motion Captures.
+ *
+ * This class implements Captures for sensors integrating motion.
+ *
+ * The raw data of this type of captures is required to be in the form of a vector --> see attribute data_.
+ *
+ * It contains a buffer of pre-integrated motions that is being filled
+ * by the motion processors (deriving from ProcessorMotion).
+ *
+ * This buffer contains the integrated motion:
+ *  - since the last key-Frame
+ *  - until the frame of this capture.
+ *
+ * Once a keyframe is generated and this Capture becomes part of the Wolf tree being solved,
+ * this buffer is freezed.
+ * It is then used to compute the factor that links the Frame of this capture to the previous key-frame in the Trajectory.
+ */
 class CaptureMotion2 : public CaptureBase
 {
     public:
@@ -26,20 +43,26 @@ class CaptureMotion2 : public CaptureBase
         CaptureMotion2();
         virtual ~CaptureMotion2();
 
+        const Eigen::VectorXs& getData() const;
         Buffer* getBufferPtr();
-        Eigen::VectorXs& getDelta();
+        const Eigen::VectorXs& getDelta() const;
 
     protected:
         Eigen::VectorXs data_; ///< Motion data in form of vector mandatory
         Buffer buffer_; ///< Buffer of motions between this Capture and the next one.
 };
 
+inline const Eigen::VectorXs& CaptureMotion2::getData() const
+{
+    return data_;
+}
+
 inline CaptureMotion2::Buffer* CaptureMotion2::getBufferPtr()
 {
     return &buffer_;
 }
 
-inline Eigen::VectorXs& CaptureMotion2::getDelta()
+inline const Eigen::VectorXs& CaptureMotion2::getDelta() const
 {
     return buffer_.back().Dx_;
 }
