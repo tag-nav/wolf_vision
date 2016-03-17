@@ -75,6 +75,8 @@ unsigned int ProcessorTracker::processNewFeatures()
         }
     } // Done with Landmark creation
 
+    //processKnownFeatures();
+
     // Append all new Features to the Capture's list of Features
     last_ptr_->getFeatureListPtr()->splice(last_ptr_->getFeatureListPtr()->end(), new_features_list_);
 

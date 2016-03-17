@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
     p_brisk->init(capture_brisk_ptr);
 
-    //cv::namedWindow("Keypoint drawing");    // Creates a window for display.
+    cv::namedWindow("Keypoint drawing");    // Creates a window for display.
     while(f<400)
     {
         capture >> frame;

@@ -78,11 +78,15 @@ public:
     virtual bool voteForKeyFrame();
 
 
-    virtual void drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp, cv::Rect _roi);
+    virtual void drawFeatures(CaptureBase* const _last_ptr);
 
     virtual void drawFeaturesLastFrame(cv::Mat _image, Eigen::Vector2i _feature_point_last);
 
-    virtual unsigned int briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints, std::vector<float>& new_descriptors);
+    virtual void addNewFeaturesInCapture(std::vector<cv::KeyPoint> _new_keypoints, cv::Mat new_descriptors);
+
+    virtual unsigned int briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints, cv::Mat & new_descriptors);
+
+    virtual void process(CaptureBase* const _incoming_ptr);
 };
 
 #endif // PROCESSOR_BRISK_H

@@ -215,7 +215,7 @@ inline void ProcessorTracker::addNewFeature(FeatureBase* _feature_ptr)
 
 inline void ProcessorTracker::reset()
 {
-    reset(incoming_ptr_, incoming_ptr_);
+    reset(last_ptr_, incoming_ptr_);
 }
 
 inline void ProcessorTracker::reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr)
