@@ -101,7 +101,7 @@ class ProcessorMotion2 : public ProcessorBase
           *
           *  However, other more complicated relations are possible.
           */
-         void data2delta() = 0;
+         virtual void data2delta() = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
