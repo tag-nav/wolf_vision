@@ -22,13 +22,18 @@ class ProcessorMotion2 : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion2(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size,
-                         size_t _noise_size, WolfScalar _dt);
+        ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size,
+                         size_t _noise_size) :
+                ProcessorBase(_tp), dt_(_dt), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), noise_size_(
+                        _noise_size), origin_ptr_(nullptr), last_ptr_(nullptr), ts_(0)
+        {
+            //
+        }
         virtual ~ProcessorMotion2();
 
         // Instructions to the processor:
 
-        virtual void process(CaptureMotion2* _incoming_ptr);
+        virtual void process(CaptureBase* _incoming_ptr);
 
         void init(CaptureMotion2* _origin_ptr);
 
@@ -40,33 +45,39 @@ class ProcessorMotion2 : public ProcessorBase
 
         // Queries to the processor:
 
-        /** \brief Gets the state corresponding to provided time-stamp
+        /** \brief Fills the state corresponding to the provided time-stamp
          * \param _t the time stamp
          * \param _x the returned state
          */
-        virtual void state(const TimeStamp& _t, Eigen::VectorXs& _x);
+        void state(const TimeStamp& _t, Eigen::VectorXs& _x);
+        /** \brief Gets the state corresponding to the provided time-stamp
+         * \param _t the time stamp
+         * \return the state vector
+         */
+        Eigen::VectorXs state(const TimeStamp& _t);
+        /** \brief Gets a constant reference to the state integrated so far
+         * \return the state vector
+         */
+        const Eigen::VectorXs& state();
         /** \brief Provides the delta-state between two time-stamps
          * \param _t1 initial time
          * \param _t2 final time
          * \param _Delta the integrated delta-state between _t1 and _t2
          */
-        virtual void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta);
+        void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta);
         /** Composes the deltas in two pre-integrated Captures
          * \param _cap1_ptr pointer to the first Capture
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
          * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
          */
-        virtual void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr, Eigen::VectorXs& _delta1_plus_delta2);
+        void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr, Eigen::VectorXs& _delta1_plus_delta2);
 
         // Helper functions:
     protected:
 
         void integrate(CaptureMotion2* _incoming_ptr); ///< Integrate the last received IMU data
 
-        CaptureMotion2::MotionBuffer* getBufferPtr()
-        {
-            return last_ptr_->getBufferPtr();
-        }
+        CaptureMotion2::MotionBuffer* getBufferPtr();
 
         /** \brief Extract data from a derived capture.
          * \param _capture_ptr pointer to the Capture we want to extract data from.
@@ -140,6 +151,7 @@ class ProcessorMotion2 : public ProcessorBase
 
     protected:
         // Attributes
+        WolfScalar dt_; ///< Time step --- assumed constant
         size_t x_size_;    ///< The size of the state vector
         size_t delta_size_;   ///< the size of the delta integrator
         size_t data_size_; ///< the size of the incoming data
@@ -147,11 +159,12 @@ class ProcessorMotion2 : public ProcessorBase
 
         CaptureMotion2* origin_ptr_;
         CaptureMotion2* last_ptr_;
-        WolfScalar dt_; ///< Time step --- assumed constant
         TimeStamp ts_origin_; ///< Time step at the origin
         Eigen::VectorXs x_origin_; ///< state at the origin
+        Eigen::VectorXs x_last_; ///< the last available state
 
-    private:
+
+//    private:
         WolfScalar ts_;
         Eigen::VectorXs data_;
         Eigen::VectorXs delta_, delta_integrated_;
@@ -160,6 +173,7 @@ class ProcessorMotion2 : public ProcessorBase
 inline void ProcessorMotion2::update()
 {
     x_origin_ = origin_ptr_->getFramePtr()->getState();
+    xPlusDelta(x_origin_, getBufferPtr()->getDelta(),x_last_);
 }
 
 inline void ProcessorMotion2::reset(const TimeStamp& _t)
@@ -170,6 +184,19 @@ inline void ProcessorMotion2::reset(const TimeStamp& _t)
 inline void ProcessorMotion2::makeKeyFrame(const TimeStamp& _t)
 {
     //TODO
+}
+
+inline const Eigen::VectorXs& ProcessorMotion2::state()
+{
+    update();
+    return x_last_;
+}
+
+inline Eigen::VectorXs ProcessorMotion2::state(const TimeStamp& _t)
+{
+    Eigen::VectorXs x;
+    state(_t, x);
+    return x;
 }
 
 inline void ProcessorMotion2::state(const TimeStamp& _t, Eigen::VectorXs& _x)
@@ -186,9 +213,7 @@ inline void ProcessorMotion2::deltaState(const TimeStamp& _t1, const TimeStamp& 
 inline void ProcessorMotion2::sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr,
                                         Eigen::VectorXs& _delta1_plus_delta2)
 {
-    deltaPlusDelta(_cap1_ptr->getDelta(),
-                   _cap2_ptr->getDelta(),
-                   _delta1_plus_delta2);
+    deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
 }
 
 inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
@@ -197,6 +222,11 @@ inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
     extractData(_incoming_ptr);
     deltaPlusDelta(getBufferPtr()->getDelta(), delta_, delta_integrated_);
     getBufferPtr()->addMotion(ts_,delta_integrated_);
+}
+
+inline CaptureMotion2::MotionBuffer* ProcessorMotion2::getBufferPtr()
+{
+    return last_ptr_->getBufferPtr();
 }
 
 inline void ProcessorMotion2::extractData(const CaptureMotion2* _capture_ptr)

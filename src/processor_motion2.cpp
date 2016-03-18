@@ -7,23 +7,16 @@
 
 #include "processor_motion2.h"
 
-ProcessorMotion2::ProcessorMotion2(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size,
-                                   size_t _noise_size, WolfScalar _dt) :
-        ProcessorBase(_tp), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size),
-        noise_size_(_noise_size), origin_ptr_(nullptr), last_ptr_(nullptr), dt_(_dt), ts_(0)
-{
-    //
-}
-
 ProcessorMotion2::~ProcessorMotion2()
 {
     //
 }
 
-void ProcessorMotion2::process(CaptureMotion2* _incoming_ptr)
+void ProcessorMotion2::process(CaptureBase* _incoming_ptr)
 {
-    _incoming_ptr->getBufferPtr()->setDt(dt_);
-    integrate(_incoming_ptr);
+    CaptureMotion2* incoming_ptr = (CaptureMotion2*)(_incoming_ptr);
+    incoming_ptr->getBufferPtr()->setDt(dt_);
+    integrate(incoming_ptr);
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         // TODO:

@@ -43,7 +43,7 @@ class CaptureMotion2 : public CaptureBase
 
         class MotionBuffer{
             public:
-                MotionBuffer(WolfScalar _dt) : dt_(_dt), dt_inv_(1.0/_dt) { }
+                MotionBuffer(const WolfScalar _dt) : dt_(_dt), dt_inv_(1.0/_dt) { }
                 void setDt(const WolfScalar _dt) { dt_ = _dt; }
                 WolfScalar getDt() { return dt_; }
                 void addMotion(TimeStamp _ts, Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
@@ -59,7 +59,7 @@ class CaptureMotion2 : public CaptureBase
         };
 
     public:
-        CaptureMotion2();
+        CaptureMotion2(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data);
         virtual ~CaptureMotion2();
 
         const Eigen::VectorXs& getData() const;
@@ -70,6 +70,17 @@ class CaptureMotion2 : public CaptureBase
         Eigen::VectorXs data_; ///< Motion data in form of vector mandatory
         MotionBuffer buffer_; ///< Buffer of motions between this Capture and the next one.
 };
+
+inline CaptureMotion2::CaptureMotion2(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data) :
+        CaptureBase(_ts, _sensor_ptr), data_(_data), buffer_(1.0)
+{
+    //
+}
+
+inline CaptureMotion2::~CaptureMotion2()
+{
+    //
+}
 
 inline const Eigen::VectorXs& CaptureMotion2::getData() const
 {

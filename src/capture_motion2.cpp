@@ -6,13 +6,3 @@
  */
 
 #include "capture_motion2.h"
-
-CaptureMotion2::CaptureMotion2()
-{
-    //TODO:
-}
-
-CaptureMotion2::~CaptureMotion2()
-{
-    //
-}
