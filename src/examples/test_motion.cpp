@@ -41,6 +41,7 @@ int main()
     // time
     TimeStamp t;
     t.setToNow();
+    WolfScalar dt = 0.1;
 
     // robot state blocks: origin
     StateBlock sb_pos(Eigen::Vector3s::Zero());
@@ -55,6 +56,7 @@ int main()
     // motion data
     Eigen::VectorXs data(6);
     data << 1, 2, 3, 4, 5, 6;
+    data.tail(3) /= 10;
 
 
     std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
@@ -65,17 +67,23 @@ int main()
     frm_ptr->addCapture(cap_ptr);
 
     // Make a ProcessorOdom3d
-    ProcessorOdom3d odom3d(0.1);
+    ProcessorOdom3d odom3d(dt);
     odom3d.init(cap_ptr);
 //    std::cout << "Initial pose : " << odom3d.x_origin_.transpose() << " " << sb_ori.getVector().transpose() << std::endl;
 //    std::cout << "Motion data  : " << odom3d.data_.transpose() << std::endl;
 //    std::cout << "Motion delta : " << odom3d.dx_.transpose() << std::endl;
-    std::cout << "State : " << odom3d.state(t).transpose() << std::endl;
+    std::cout << "State 0 : " << odom3d.state().transpose() << std::endl;
 
     // Add a capture to process
-    odom3d.process(cap_ptr);
-    std::cout << "State : " << odom3d.state().transpose() << std::endl;
 
+
+    for (int i = 1; i <= 9; i++)
+    {
+        t.set(t.get()+dt);
+        cap_ptr->setTimeStamp(t);
+        odom3d.process(cap_ptr);
+//        std::cout << "State " << i << " : " << odom3d.state().transpose() << std::endl;
+    }
 //    std::cout << "Initial pose : " << odom3d.x_origin_.transpose() << " " << sb_ori.getVector().transpose() << std::endl;
 //    std::cout << "Motion data  : " << odom3d.data_.transpose() << std::endl;
 //    std::cout << "Motion delta : " << odom3d.dx_.transpose() << std::endl;

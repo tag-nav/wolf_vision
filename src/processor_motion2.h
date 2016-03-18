@@ -25,7 +25,11 @@ class ProcessorMotion2 : public ProcessorBase
         ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size,
                          size_t _noise_size) :
                 ProcessorBase(_tp), dt_(_dt), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), noise_size_(
-                        _noise_size), origin_ptr_(nullptr), last_ptr_(nullptr), ts_(0)
+                        _noise_size), origin_ptr_(nullptr), last_ptr_(nullptr),
+                        x_origin_(_state_size), x_(_state_size),
+                        ts_(0),
+                        delta_(_delta_size), delta_integrated_(_delta_size),
+                        data_(_data_size)
         {
             //
         }
@@ -159,21 +163,21 @@ class ProcessorMotion2 : public ProcessorBase
 
         CaptureMotion2* origin_ptr_;
         CaptureMotion2* last_ptr_;
-        TimeStamp ts_origin_; ///< Time step at the origin
+        TimeStamp ts_origin_; ///< Time stamp at the origin
         Eigen::VectorXs x_origin_; ///< state at the origin
-        Eigen::VectorXs x_last_; ///< the last available state
 
-
-//    private:
-        WolfScalar ts_;
-        Eigen::VectorXs data_;
-        Eigen::VectorXs delta_, delta_integrated_;
+    protected:
+        // helpers to avoid allocation
+        Eigen::VectorXs x_; ///< current state
+        TimeStamp ts_; ///< current time stamp
+        Eigen::VectorXs delta_, delta_integrated_; ///< current delta and integrated delta
+        Eigen::VectorXs data_; ///< current data
 };
 
 inline void ProcessorMotion2::update()
 {
     x_origin_ = origin_ptr_->getFramePtr()->getState();
-    xPlusDelta(x_origin_, getBufferPtr()->getDelta(),x_last_);
+    xPlusDelta(x_origin_, getBufferPtr()->getDelta(),x_);
 }
 
 inline void ProcessorMotion2::reset(const TimeStamp& _t)
@@ -189,12 +193,12 @@ inline void ProcessorMotion2::makeKeyFrame(const TimeStamp& _t)
 inline const Eigen::VectorXs& ProcessorMotion2::state()
 {
     update();
-    return x_last_;
+    return x_;
 }
 
 inline Eigen::VectorXs ProcessorMotion2::state(const TimeStamp& _t)
 {
-    Eigen::VectorXs x;
+    Eigen::VectorXs x(x_size_);
     state(_t, x);
     return x;
 }
@@ -218,10 +222,12 @@ inline void ProcessorMotion2::sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion
 
 inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
 {
+    std::cout << "integrate(): pre-size: " << getBufferPtr()->size() << "; delta_pre_: " << delta_integrated_.transpose();
     // First get data and push it into buffer
     extractData(_incoming_ptr);
     deltaPlusDelta(getBufferPtr()->getDelta(), delta_, delta_integrated_);
     getBufferPtr()->addMotion(ts_,delta_integrated_);
+    std::cout << "||| pos-size: " << getBufferPtr()->size() << "; delta_: " << delta_.transpose() << "; delta_pos_: " << delta_integrated_.transpose() << std::endl;
 }
 
 inline CaptureMotion2::MotionBuffer* ProcessorMotion2::getBufferPtr()
@@ -234,6 +240,7 @@ inline void ProcessorMotion2::extractData(const CaptureMotion2* _capture_ptr)
     ts_ = _capture_ptr->getTimeStamp().get();
     data_ = _capture_ptr->getData();
     data2delta();
+//    std::cout << "extractData(): ts: " << ts_.get() << "; data_: " << data_.transpose() << "; delta_: " << delta_.transpose() << std::endl;
 }
 
 

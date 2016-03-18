@@ -48,6 +48,7 @@ class CaptureMotion2 : public CaptureBase
                 WolfScalar getDt() { return dt_; }
                 void addMotion(TimeStamp _ts, Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
                 void clear(){container_.clear();}
+                unsigned int size() const {return container_.size();}
                 Eigen::VectorXs& getDelta() { return container_.back().Dx_; }
                 const Eigen::VectorXs& getDelta() const { return container_.back().Dx_; }
                 Eigen::VectorXs& getDelta(const TimeStamp& _ts) { return container_.at(idx(_ts)).Dx_; }

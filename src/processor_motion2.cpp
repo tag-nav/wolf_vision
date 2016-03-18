@@ -35,11 +35,11 @@ void ProcessorMotion2::init(CaptureMotion2* _origin_ptr)
     // first delta in buffer must be zero
     // we do not need to extract data from any Capture
 
-//    origin_ptr_ = _origin_ptr;
-//    last_ptr_ = _origin_ptr;
-//    x_origin_ = _origin_ptr->getFramePtr()->getState();
-//    extractData(_origin_ptr);
-//    data2delta();
-//    getBufferPtr()->clear();
-//    getBufferPtr()->addMotion(ts_origin_, delta_integrated_);
+    origin_ptr_ = _origin_ptr;
+    last_ptr_ = _origin_ptr;
+    x_origin_ = _origin_ptr->getFramePtr()->getState();
+    delta_integrated_ = Eigen::VectorXs::Zero(delta_size_);
+    extractData(_origin_ptr);
+    getBufferPtr()->clear();
+    getBufferPtr()->addMotion(ts_origin_, delta_integrated_);
 }

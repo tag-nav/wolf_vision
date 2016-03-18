@@ -32,9 +32,9 @@ class ProcessorOdom3d : public ProcessorMotion2
 
 inline void ProcessorOdom3d::data2delta()
 {
+    // Trivial implementation
     delta_ = data_;
 }
-
 
 
 void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
@@ -48,9 +48,6 @@ void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
 }
 void q2v(const Eigen::Quaternions& _q, Eigen::VectorXs& _v){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
-    //    if (aa.angle() < WolfConstants::EPS)
-    //        _v.setZero();
-    //    else
     _v = aa.axis() * aa.angle();
 }
 
@@ -62,12 +59,17 @@ inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
     assert(_delta.size() == 6 && "Wrong _delta vector size");
     assert(_x_plus_delta.size() == 7 && "Wrong _x_plus_delta vector size");
 
+//    std::cout << "PRE : x: " << _x.transpose() << "; dx: " << _delta.transpose() << "; x+: " << _x_plus_delta.transpose() << std::endl;
+
     pos1_ = _x.head(3);
     quat1_ = Eigen::Map<const Eigen::Quaternions>(&_x(3));
     delta_pos_ = _delta.head(3);
     v2q(_delta.tail(3),delta_quat_);
     _x_plus_delta.head(3) = pos1_ + quat1_*delta_pos_;
     _x_plus_delta.tail(4) = (quat1_*delta_quat_).coeffs();
+
+//    std::cout << "POST: x: " << _x.transpose() << "; dx: " << _delta.transpose() << "; x+: " << _x_plus_delta.transpose() << std::endl;
+
 }
 
 // Compose two delta-frames and give a delta-frame (all of size 6)
