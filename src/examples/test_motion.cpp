@@ -83,7 +83,7 @@ int main()
         cap_ptr->setTimeStamp(t);
         odom3d.process(cap_ptr);
         std::cout << "State " << i << " : " << odom3d.state().transpose() << std::endl;
-        std::cout << "Delta " << i << " : " << odom3d.getBufferPtr()->getDt().transpose() << std::endl;
+        std::cout << "Delta " << i << " : " << odom3d.delta().transpose() << std::endl;
     }
 
     return 0;

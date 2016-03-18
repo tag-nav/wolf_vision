@@ -68,6 +68,7 @@ class ProcessorMotion2 : public ProcessorBase
          * \param _t2 final time
          * \param _Delta the integrated delta-state between _t1 and _t2
          */
+        Eigen::VectorXs delta(){return getBufferPtr()->getDelta();}
         void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta);
         /** Composes the deltas in two pre-integrated Captures
          * \param _cap1_ptr pointer to the first Capture
