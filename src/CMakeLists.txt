@@ -152,7 +152,6 @@ SET(SRCS
     feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
-    feature_gps_pseudorange.cpp
     feature_fix.cpp
     feature_odom_2D.cpp
     frame_base.cpp
