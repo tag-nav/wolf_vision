@@ -229,15 +229,13 @@ void CeresManager::addStateBlock(StateBlock* _st_ptr)
 
     if (_st_ptr->hasLocalParametrization())
     {
-        //TODO: change nullptr below by quaternion parametrization following method in complex_angle_parametrization.cpp
-        ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), nullptr);
-
+        //std::cout << "Local Parametrization to be added" << std::endl;
+        ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), new LocalParametrizationWrapper(_st_ptr->getLocalParametrizationPtr()));
     }
     else
     {
         //std::cout << "No Local Parametrization to be added" << std::endl;
         ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), nullptr);
-
     }
     if (_st_ptr->isFixed())
         updateStateBlockStatus(_st_ptr);

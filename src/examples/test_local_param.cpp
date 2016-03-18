@@ -40,17 +40,19 @@ int main(){
     LocalParametrizationQuaternion Qpar_loc(DQ_LOCAL);
 
     cout << "\nGLOBAL D_QUAT plus()" << endl;
-    Qpar.plus(q,da,qo);
+    Map<const VectorXs> q_const(q.data(),4);
+    Map<const VectorXs> da_const(da.data(),3);
+    Qpar.plus(q_const,da_const,qo);
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
 
-    Qpar.computeJacobian(q,J);
+    Qpar.computeJacobian(q_const,J);
     cout << " J = " << J << endl << endl;
 
     cout << "\nLOCAL D_QUAT plus()" << endl;
-    Qpar_loc.plus(q,da,qo);
+    Qpar_loc.plus(q_const,da_const,qo);
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
 
-    Qpar_loc.computeJacobian(q,J);
+    Qpar_loc.computeJacobian(q_const,J);
     cout << " J = " << J << endl;
 
     cout << "\nHOMOGENEOUS plus()" << endl;
@@ -65,11 +67,13 @@ int main(){
     cout << "d  = " << d.transpose() << endl;
 
     LocalParametrizationHomogeneous Hpar;
+    Map<const VectorXs> h_const(h.data(),4);
+    Map<const VectorXs> d_const(d.data(),3);
 
-    Hpar.plus(h,d,h_out);
+    Hpar.plus(h_const,d_const,h_out);
     cout << "\nh_out = " << h_out.transpose() << "   with norm: " << h_out.norm() << endl;
 
-    Hpar.computeJacobian(h,J);
+    Hpar.computeJacobian(h_const,J);
     cout << " J = " << J << "\n" << endl;
 
 

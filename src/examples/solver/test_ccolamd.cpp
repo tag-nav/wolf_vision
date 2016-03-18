@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     //Fill A & b
     A.insert(0, 0) = 5;
     b(0) = 1;
-    for (unsigned int i = 1; i < size; i++)
+    for (int i = 1; i < size; i++)
     {
         A.insert(i, i) = 5;
         A.insert(i, i - 1) = 1;

@@ -9,6 +9,7 @@
 //wolf includes
 #include "auto_diff_cost_function_wrapper.h"
 #include "cost_function_wrapper.h"
+#include "local_parametrization_wrapper.h"
 #include "../wolf.h"
 #include "../state_block.h"
 #include "../constraint_sparse.h"
@@ -19,9 +20,6 @@
 #include "../constraint_odom_2D.h"
 #include "../constraint_corner_2D.h"
 #include "../constraint_container.h"
-
-// ceres wrapper includes
-#include "complex_angle_parametrization.h"
 
 /** \brief Enumeration of covariance blocks to be computed
  *

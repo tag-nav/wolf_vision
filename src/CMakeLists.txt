@@ -117,6 +117,7 @@ SET(HDRS
     node_terminus.h
     node_linked.h
     processor_base.h
+    processor_motion.h
     processor_tracker.h
     sensor_base.h
     sensor_camera.h
@@ -164,8 +165,8 @@ SET(SRCS
     local_parametrization_homogeneous.cpp
     map_base.cpp
     node_base.cpp
-    node_terminus.cpp
     processor_base.cpp
+    processor_motion.cpp
     processor_tracker.cpp
     sensor_base.cpp
     sensor_camera.cpp
@@ -186,13 +187,13 @@ SET(SRCS
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
-        ceres_wrapper/complex_angle_parametrization.h 
         ceres_wrapper/ceres_manager.h 
         ceres_wrapper/auto_diff_cost_function_wrapper.h
-        ceres_wrapper/cost_function_wrapper.h )
+        ceres_wrapper/cost_function_wrapper.h 
+        ceres_wrapper/local_parametrization_wrapper.h )
     SET(SRCS_WRAPPER
-        ceres_wrapper/complex_angle_parametrization.cpp 
-        ceres_wrapper/ceres_manager.cpp)
+        ceres_wrapper/ceres_manager.cpp
+        ceres_wrapper/local_parametrization_wrapper.cpp )
 ELSE(Ceres_FOUND)
     SET(HDRS_WRAPPER)
     SET(SRCS_WRAPPER)

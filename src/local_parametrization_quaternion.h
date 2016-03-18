@@ -53,9 +53,9 @@ class LocalParametrizationQuaternion : public LocalParametrizationBase
         LocalParametrizationQuaternion(QuaternionDeltaReference _delta_ref = DQ_GLOBAL);
         virtual ~LocalParametrizationQuaternion();
 
-        virtual bool plus(const Eigen::Map<Eigen::VectorXs>& _q,
-                          const Eigen::Map<Eigen::VectorXs>& _delta_theta,
+        virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _q,
+                          const Eigen::Map<const Eigen::VectorXs>& _delta_theta,
                           Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const;
-        virtual bool computeJacobian(const Eigen::Map<Eigen::VectorXs>& _q, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
+        virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _q, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
 };
 #endif /* LOCAL_PARAMETRIZATION_QUATERNION_H_ */
