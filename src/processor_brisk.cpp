@@ -94,6 +94,12 @@ void ProcessorBrisk::drawFeaturesLastFrame(cv::Mat _image, Eigen::Vector2i _feat
     cv::imshow("Keypoint drawing",_image);
 }
 
+void ProcessorBrisk::drawRoiLastFrame(cv::Mat _image,cv::Rect _roi)
+{
+    cv::rectangle(_image,_roi,cv::Scalar(88.0,70.0,254.0),1,8,0);
+    cv::imshow("Keypoint drawing",_image);
+}
+
 
 void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
 {
@@ -116,29 +122,6 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
     cv::waitKey(30);
 }
 
-/**void ProcessorBrisk::drawFeatures(cv::Mat _image, std::vector<cv::KeyPoint> _kp, cv::Rect _roi)
-{
-    //std::cout << "<---- drawFeatures ---->" << std::endl << std::endl;
-
-    if(_kp.size()!=0)
-    {
-        for(unsigned int i = 0; i <= (_kp.size()-1);i++)
-        {
-            cv::Point point;
-            point.x = _kp[i].pt.x;// + _roi.x;
-            point.y = _kp[i].pt.y;// + _roi.y;
-            cv::circle(_image,point,2,cv::Scalar(88.0,250.0,154.0),-1,8,0);
-            cv::rectangle(_image,_roi,cv::Scalar(88.0,250.0,154.0),1,8,0);
-
-        }
-        cv::imshow("Keypoint drawing",_image);
-    }
-    else
-    {
-        cv::rectangle(_image,_roi,cv::Scalar(88.0,250.0,154.0),1,8,0);
-        cv::imshow("Keypoint drawing",_image);
-    }
-}*/
 
 unsigned int ProcessorBrisk::briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints, cv::Mat & new_descriptors)
 {
@@ -296,11 +279,16 @@ unsigned int ProcessorBrisk::processFeaturesForMatching(cv::Mat _image,FeatureBa
 {
     ///PROJECTION OF LANDMARKS (features in this case)
 
-    unsigned int feature_roi_width = 6;
-    unsigned int feature_roi_heigth = 6;
+    unsigned int feature_roi_width = 30;
+    unsigned int feature_roi_heigth = 30;
 
     unsigned int feature_roi_x = 0;
     unsigned int feature_roi_y = 0;
+
+    unsigned int n_features = 0;
+
+    std::vector<cv::KeyPoint> new_keypoints;
+    cv::Mat new_descriptors;
 
 
     unsigned int n_last_capture_feat = 0;
@@ -319,18 +307,69 @@ unsigned int ProcessorBrisk::processFeaturesForMatching(cv::Mat _image,FeatureBa
 
 
         Eigen::Vector2i feature_roi_point = {feature_roi_x,feature_roi_y};
+        cv::Rect roi_for_matching(feature_roi_x,feature_roi_y,feature_roi_width,feature_roi_heigth);
 
         drawFeaturesLastFrame(_image,feature_point);
-        drawFeaturesLastFrame(_image,feature_roi_point);
+        //drawFeaturesLastFrame(_image,feature_roi_point);
+        drawRoiLastFrame(_image,roi_for_matching);
+
+
+        n_features = briskDetect(_image,roi_for_matching, new_keypoints, new_descriptors);
+        std::cout << "n_features: " << n_features << std::endl;
+
+        float euclidean_distance = 0;
+        float euclidean_distance_min_value = 1000;
+        unsigned int row = 0;
+
+        // Comparison of position
+
+        if(n_features != 0)
+        {
+            //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
+            for(unsigned int i = 0; i <= (new_keypoints.size()-1);i++)
+            {
+
+                        euclidean_distance = sqrt(pow((last_feature->getKeypoint().pt.x-new_keypoints[i].pt.x),2)+
+                                                  pow((last_feature->getKeypoint().pt.y-new_keypoints[i].pt.y),2));
+                        std::cout << "euclidean distance [" << i << "]: " << euclidean_distance << std::endl;
+                        if(euclidean_distance < euclidean_distance_min_value)
+                        {
+                            euclidean_distance_min_value = euclidean_distance;
+                            row = i;
+                        }
+                        std::cout << "euclidean distance min_value: " << euclidean_distance_min_value << std::endl;
+                //new FeaturePointImage(_new_keypoints[i],(new_descriptors(cv::Range(i,i+1),cv::Range(0,new_descriptors.cols))),false);
+            }
+        }
+
+        std::cout << "euclidean distance min_value2: " << euclidean_distance_min_value << std::endl;
+        std::cout << "row: " << row << std::endl;
+
+
+
+
+        // Comparison of descriptors
+
+        std::vector<float> feature_descriptor = last_feature->getDescriptor();
+        const unsigned char* mat_row = new_descriptors.ptr<unsigned char>(row);
+
+        float cross_correlation = 0;
+        for(unsigned int j = 0; j <= (last_feature->getDescriptor().size());j++)
+        {
+            //Perform here the ZNCC
+            //CC
+            cross_correlation = (feature_descriptor[j]*mat_row[j]);
+        }
+
+        cross_correlation = cross_correlation * (1/(last_feature->getDescriptor().size()));
+
+        std::cout << "cross_correlation value: " << cross_correlation << std::endl;
 
         _feature_list_out.push_back(last_feature);
 
         n_last_capture_feat++;
     }
     std::cout << "n_last_capture_feat: " << n_last_capture_feat << std::endl;
-
-
-
 
 
 

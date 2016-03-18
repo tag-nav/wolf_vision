@@ -14,6 +14,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
 
+// General includes
+#include <math.h>
+
 class ProcessorBrisk : public ProcessorTracker
 {
 protected:
@@ -81,6 +84,8 @@ public:
     virtual void drawFeatures(CaptureBase* const _last_ptr);
 
     virtual void drawFeaturesLastFrame(cv::Mat _image, Eigen::Vector2i _feature_point_last);
+
+    virtual void drawRoiLastFrame(cv::Mat _image, cv::Rect _roi);
 
     virtual void addNewFeaturesInCapture(std::vector<cv::KeyPoint> _new_keypoints, cv::Mat new_descriptors);
 
