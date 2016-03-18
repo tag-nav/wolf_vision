@@ -41,5 +41,5 @@ void ProcessorMotion2::init(CaptureMotion2* _origin_ptr)
     delta_integrated_ = Eigen::VectorXs::Zero(delta_size_);
     extractData(_origin_ptr);
     getBufferPtr()->clear();
-    getBufferPtr()->addMotion(ts_origin_, delta_integrated_);
+    getBufferPtr()->pushBack(ts_origin_, delta_integrated_);
 }

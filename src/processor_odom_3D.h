@@ -59,16 +59,17 @@ inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
     assert(_delta.size() == 6 && "Wrong _delta vector size");
     assert(_x_plus_delta.size() == 7 && "Wrong _x_plus_delta vector size");
 
-//    std::cout << "PRE : x: " << _x.transpose() << "; dx: " << _delta.transpose() << "; x+: " << _x_plus_delta.transpose() << std::endl;
+//    std::cout << "xPlusDelta() PRE: x: " << _x.transpose() << "; dx: " << _delta.transpose() << "; x+: " << _x_plus_delta.transpose() << std::endl;
 
     pos1_ = _x.head(3);
     quat1_ = Eigen::Map<const Eigen::Quaternions>(&_x(3));
     delta_pos_ = _delta.head(3);
+//    std::cout << "xPlusDelta: _delta: " << _delta.transpose() << "|| tail(3): " << _delta.tail(3).transpose() << std::endl;
     v2q(_delta.tail(3),delta_quat_);
     _x_plus_delta.head(3) = pos1_ + quat1_*delta_pos_;
     _x_plus_delta.tail(4) = (quat1_*delta_quat_).coeffs();
 
-//    std::cout << "POST: x: " << _x.transpose() << "; dx: " << _delta.transpose() << "; x+: " << _x_plus_delta.transpose() << std::endl;
+//    std::cout << "xPlusDelta() POS: x: " << _x.transpose() << "; dx: " << _delta.transpose() << "; x+: " << _x_plus_delta.transpose() << std::endl;
 
 }
 
@@ -79,8 +80,10 @@ inline void ProcessorOdom3d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     assert(_delta2.size() == 6 && "Wrong _delta2 vector size");
     assert(_delta1_plus_delta2.size() == 6 && "Wrong _delta1_plus_delta2 vector size");
 
+//    std::cout << "deltaPlusDelta() PRE: d1: " << _delta1.transpose() << "; d2: " << _delta2.transpose() << "; d1+d2: " << _delta1_plus_delta2.transpose() << std::endl;
+
     pos1_ = _delta1.head(3);
-    quat1_ = Eigen::Map<const Eigen::Quaternions>(&_delta1(3));
+    v2q(_delta1.tail(3), quat1_);
     delta_pos_ = _delta2.head(3);
     v2q(_delta2.tail(3),delta_quat_);
 
@@ -88,6 +91,9 @@ inline void ProcessorOdom3d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     q2v(quat1_*delta_quat_,v);
     _delta1_plus_delta2.head(3) = pos1_ + quat1_*delta_pos_;
     _delta1_plus_delta2.tail(3) = v;
+
+//    std::cout << "deltaPlusDelta() Q: q1: " << quat1_.coeffs().transpose() << " | dq: " << delta_quat_.coeffs().transpose() << " | q2: " << (quat1_*delta_quat_).coeffs().transpose() << " | v: " << v.transpose() << std::endl;
+//    std::cout << "deltaPlusDelta() POS: d1: " << _delta1.transpose() << "; d2: " << _delta2.transpose() << "; d1+d2: " << _delta1_plus_delta2.transpose() << std::endl;
 }
 
 inline void ProcessorOdom3d::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,

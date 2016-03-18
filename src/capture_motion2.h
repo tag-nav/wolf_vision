@@ -45,10 +45,12 @@ class CaptureMotion2 : public CaptureBase
             public:
                 MotionBuffer(const WolfScalar _dt) : dt_(_dt), dt_inv_(1.0/_dt) { }
                 void setDt(const WolfScalar _dt) { dt_ = _dt; }
-                WolfScalar getDt() { return dt_; }
-                void addMotion(TimeStamp _ts, Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
+                WolfScalar getDt() const { return dt_; }
+                void pushBack(const Motion _motion){container_.push_back(_motion);}
+                void pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
                 void clear(){container_.clear();}
                 unsigned int size() const {return container_.size();}
+                bool empty(){return container_.empty();}
                 Eigen::VectorXs& getDelta() { return container_.back().Dx_; }
                 const Eigen::VectorXs& getDelta() const { return container_.back().Dx_; }
                 Eigen::VectorXs& getDelta(const TimeStamp& _ts) { return container_.at(idx(_ts)).Dx_; }

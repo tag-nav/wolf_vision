@@ -177,7 +177,9 @@ class ProcessorMotion2 : public ProcessorBase
 inline void ProcessorMotion2::update()
 {
     x_origin_ = origin_ptr_->getFramePtr()->getState();
-    xPlusDelta(x_origin_, getBufferPtr()->getDelta(),x_);
+    xPlusDelta(x_origin_, getBufferPtr()->getDelta(), x_);
+
+//    std::cout << "update(): x_origin: " << x_origin_.transpose() << " | delta: " << getBufferPtr()->getDelta().transpose() << " | update: " << x_.transpose() << std::endl;
 }
 
 inline void ProcessorMotion2::reset(const TimeStamp& _t)
@@ -222,12 +224,12 @@ inline void ProcessorMotion2::sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion
 
 inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
 {
-    std::cout << "integrate(): pre-size: " << getBufferPtr()->size() << "; delta_pre_: " << delta_integrated_.transpose();
+//    std::cout << "integrate() PRE: Delta: " << getBufferPtr()->getDelta().transpose() << std::endl;
     // First get data and push it into buffer
     extractData(_incoming_ptr);
     deltaPlusDelta(getBufferPtr()->getDelta(), delta_, delta_integrated_);
-    getBufferPtr()->addMotion(ts_,delta_integrated_);
-    std::cout << "||| pos-size: " << getBufferPtr()->size() << "; delta_: " << delta_.transpose() << "; delta_pos_: " << delta_integrated_.transpose() << std::endl;
+    getBufferPtr()->pushBack(ts_,delta_integrated_);
+//    std::cout << "integrate() POS: delta: " << delta_.transpose() << " | Delta: " << getBufferPtr()->getDelta().transpose() << std::endl;
 }
 
 inline CaptureMotion2::MotionBuffer* ProcessorMotion2::getBufferPtr()

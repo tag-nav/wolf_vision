@@ -55,8 +55,8 @@ int main()
 
     // motion data
     Eigen::VectorXs data(6);
-    data << 1, 2, 3, 4, 5, 6;
-    data.tail(3) /= 10;
+    data << 1, 0, 0,
+            0, 0, 0.05;
 
 
     std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
@@ -77,18 +77,14 @@ int main()
     // Add a capture to process
 
 
-    for (int i = 1; i <= 9; i++)
+    for (int i = 1; i <= 20; i++)
     {
         t.set(t.get()+dt);
         cap_ptr->setTimeStamp(t);
         odom3d.process(cap_ptr);
-//        std::cout << "State " << i << " : " << odom3d.state().transpose() << std::endl;
+        std::cout << "State " << i << " : " << odom3d.state().transpose() << std::endl;
+        std::cout << "Delta " << i << " : " << odom3d.getBufferPtr()->getDt().transpose() << std::endl;
     }
-//    std::cout << "Initial pose : " << odom3d.x_origin_.transpose() << " " << sb_ori.getVector().transpose() << std::endl;
-//    std::cout << "Motion data  : " << odom3d.data_.transpose() << std::endl;
-//    std::cout << "Motion delta : " << odom3d.dx_.transpose() << std::endl;
-//    std::cout << "Delta integr : " << odom3d.Dx_integral_.transpose() << std::endl;
-
 
     return 0;
 }
