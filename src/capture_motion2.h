@@ -34,7 +34,7 @@
 class CaptureMotion2 : public CaptureBase
 {
     public:
-        typedef struct Motion
+        typedef struct
         {
             public:
                 TimeStamp ts_;       ///< Time stamp
@@ -43,33 +43,17 @@ class CaptureMotion2 : public CaptureBase
 
         class MotionBuffer{
             public:
-                MotionBuffer(WolfScalar _dt) :
-                        dt_(_dt)
-                {
-                }
-                void setDt(const WolfScalar _dt){dt_=_dt;}
-                WolfScalar getDt(){return dt_;}
-                Eigen::VectorXs& getDelta()
-                {
-                    return container_.back().Dx_;
-                }
-                Eigen::VectorXs& getDelta(const TimeStamp& _ts)
-                {
-                    return container_.at(idx(_ts)).Dx_;
-                }
-                void addMotion(TimeStamp _ts, Eigen::VectorXs& _delta)
-                {
-                    container_.push_back(Motion( {_ts, _delta}));
-                }
+                MotionBuffer(WolfScalar _dt) : dt_(_dt) { }
+                void setDt(const WolfScalar _dt) { dt_ = _dt; }
+                WolfScalar getDt() { return dt_; }
+                void addMotion(TimeStamp _ts, Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
                 void clear(){container_.clear();}
+                Eigen::VectorXs& getDelta() { return container_.back().Dx_; }
+                const Eigen::VectorXs& getDelta() const { return container_.back().Dx_; }
+                Eigen::VectorXs& getDelta(const TimeStamp& _ts) { return container_.at(idx(_ts)).Dx_; }
+                const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const { return container_.at(idx(_ts)).Dx_; }
             private:
-                unsigned int idx(const TimeStamp& _ts)
-                {
-                    // Assume dt is constant and known, and exists in dt_
-                    // then, constant time access to the buffer can be achieved by computing the index directly from the time stamp:
-                    //    index = (ts - ts_origin) / dt
-                    return (unsigned int)((_ts - container_.front().ts_) / dt_ + 0.5); // we rounded to the nearest entry in the buffer
-                }
+                unsigned int idx(const TimeStamp& _ts) const { return (unsigned int)((_ts - container_.front().ts_) / dt_ + 0.5); } // we rounded to the nearest entry in the buffer
                 WolfScalar dt_;
                 std::deque<Motion> container_;
         };
@@ -80,7 +64,7 @@ class CaptureMotion2 : public CaptureBase
 
         const Eigen::VectorXs& getData() const;
         MotionBuffer* getBufferPtr();
-        Eigen::VectorXs& getDelta();
+        const Eigen::VectorXs& getDelta() const;
 
     protected:
         Eigen::VectorXs data_; ///< Motion data in form of vector mandatory
@@ -97,7 +81,7 @@ inline CaptureMotion2::MotionBuffer* CaptureMotion2::getBufferPtr()
     return &buffer_;
 }
 
-inline Eigen::VectorXs& CaptureMotion2::getDelta()
+inline const Eigen::VectorXs& CaptureMotion2::getDelta() const
 {
     return buffer_.getDelta();
 }

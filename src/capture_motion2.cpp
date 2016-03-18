@@ -9,11 +9,10 @@
 
 CaptureMotion2::CaptureMotion2()
 {
-    // TODO Auto-generated constructor stub
-
+    //TODO:
 }
 
 CaptureMotion2::~CaptureMotion2()
 {
-    // TODO Auto-generated destructor stub
+    //
 }
