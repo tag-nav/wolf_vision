@@ -43,7 +43,7 @@ class CaptureMotion2 : public CaptureBase
 
         class MotionBuffer{
             public:
-                MotionBuffer(WolfScalar _dt) : dt_(_dt) { }
+                MotionBuffer(WolfScalar _dt) : dt_(_dt), dt_inv_(1.0/_dt) { }
                 void setDt(const WolfScalar _dt) { dt_ = _dt; }
                 WolfScalar getDt() { return dt_; }
                 void addMotion(TimeStamp _ts, Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
@@ -53,8 +53,8 @@ class CaptureMotion2 : public CaptureBase
                 Eigen::VectorXs& getDelta(const TimeStamp& _ts) { return container_.at(idx(_ts)).Dx_; }
                 const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const { return container_.at(idx(_ts)).Dx_; }
             private:
-                unsigned int idx(const TimeStamp& _ts) const { return (unsigned int)((_ts - container_.front().ts_) / dt_ + 0.5); } // we rounded to the nearest entry in the buffer
-                WolfScalar dt_;
+                unsigned int idx(const TimeStamp& _ts) const { return (unsigned int)((_ts - container_.front().ts_) * dt_inv_ + 0.5); } // we rounded to the nearest entry in the buffer
+                WolfScalar dt_, dt_inv_;
                 std::deque<Motion> container_;
         };
 
