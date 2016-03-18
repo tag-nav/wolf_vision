@@ -306,7 +306,7 @@ unsigned int ProcessorBrisk::processFeaturesForMatching(cv::Mat _image,FeatureBa
 
 
 
-        Eigen::Vector2i feature_roi_point = {feature_roi_x,feature_roi_y};
+//        Eigen::Vector2i feature_roi_point = {feature_roi_x,feature_roi_y};
         cv::Rect roi_for_matching(feature_roi_x,feature_roi_y,feature_roi_width,feature_roi_heigth);
 
         drawFeaturesLastFrame(_image,feature_point);
