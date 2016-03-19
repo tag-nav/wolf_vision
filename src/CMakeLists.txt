@@ -86,6 +86,7 @@ SET(HDRS
     capture_motion.h
     capture_motion2.h
     capture_odom_2D.h
+    capture_odom_3D.h
     capture_void.h
     constraint_base.h
     constraint_analytic.h
@@ -150,6 +151,7 @@ SET(SRCS
     capture_motion.cpp
     capture_motion2.cpp
     capture_odom_2D.cpp
+    capture_odom_3D.cpp
     capture_void.cpp
     constraint_base.cpp
     constraint_analytic.cpp
