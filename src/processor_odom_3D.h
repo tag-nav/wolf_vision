@@ -14,7 +14,7 @@
 class ProcessorOdom3d : public ProcessorMotion2
 {
     public:
-        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, dt_, 7, 6, 6, 6) {}
+        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6, 6, 6) {}
         virtual ~ProcessorOdom3d(){}
         virtual void data2delta();
 

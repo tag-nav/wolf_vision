@@ -15,7 +15,7 @@ ProcessorMotion2::~ProcessorMotion2()
 void ProcessorMotion2::process(CaptureBase* _incoming_ptr)
 {
     CaptureMotion2* incoming_ptr = (CaptureMotion2*)(_incoming_ptr);
-    incoming_ptr->getBufferPtr()->setDt(dt_);
+//    incoming_ptr->getBufferPtr()->setDt(dt_);
     integrate(incoming_ptr);
     if (voteForKeyFrame() && permittedKeyFrame())
     {
@@ -41,5 +41,6 @@ void ProcessorMotion2::init(CaptureMotion2* _origin_ptr)
     delta_integrated_ = Eigen::VectorXs::Zero(delta_size_);
     extractData(_origin_ptr);
     getBufferPtr()->clear();
-    getBufferPtr()->pushBack(ts_origin_, delta_integrated_);
+    getBufferPtr()->setDt(dt_);
+    getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
 }
