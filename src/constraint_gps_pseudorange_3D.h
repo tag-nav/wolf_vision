@@ -64,7 +64,7 @@ public:
      **/
     virtual JacobianMethod getJacobianMethod() const
     {
-        return AUTO;
+        return JAC_AUTO;
     }
 
 protected:

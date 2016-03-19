@@ -20,7 +20,7 @@ int main(int argc, char** argv)
                                                       new StateBlock(Eigen::Vector1s::Zero()), 0.1, 0.1);
     //std::cout << " odom sensor created!" << std::endl;
 
-    WolfManager* wolf_manager_ = new WolfManager(PO_2D,                             //frame structure
+    WolfManager* wolf_manager_ = new WolfManager(FRM_PO_2D,                             //frame structure
                                                  odom_sensor_ptr_,                  //odom sensor
                                                  Eigen::Vector3s::Zero(),           //prior
                                                  Eigen::Matrix3s::Identity()*0.01,  //prior cov
