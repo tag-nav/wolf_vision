@@ -55,9 +55,9 @@ int main(int argc, char** argv)
     std::map<unsigned int, FrameBase*> index_2_frame_ptr_analytic;
 
     // Wolf problem
-    WolfProblem* wolf_problem_autodiff = new WolfProblem(PO_2D);
-    WolfProblem* wolf_problem_analytic = new WolfProblem(PO_2D);
-    SensorBase* sensor = new SensorBase(ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
+    WolfProblem* wolf_problem_autodiff = new WolfProblem(FRM_PO_2D);
+    WolfProblem* wolf_problem_analytic = new WolfProblem(FRM_PO_2D);
+    SensorBase* sensor = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -278,8 +278,8 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBase* first_frame_autodiff = wolf_problem_autodiff->getTrajectoryPtr()->getFrameListPtr()->front();
     FrameBase* first_frame_analytic = wolf_problem_analytic->getTrajectoryPtr()->getFrameListPtr()->front();
-    CaptureFix* initial_covariance_autodiff = new CaptureFix(TimeStamp(0), new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_autodiff->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_analytic = new CaptureFix(TimeStamp(0), new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_analytic->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_autodiff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_autodiff->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_analytic = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_analytic->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_autodiff->addCapture(initial_covariance_autodiff);
     first_frame_analytic->addCapture(initial_covariance_analytic);
     initial_covariance_autodiff->process();

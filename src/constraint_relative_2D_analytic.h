@@ -102,7 +102,7 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
          **/
         virtual JacobianMethod getJacobianMethod() const
         {
-            return AUTO;
+            return JAC_AUTO;
         }
 };
 
