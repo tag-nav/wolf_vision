@@ -31,7 +31,7 @@ int main()
     StateBlock sb_intr(Eigen::VectorXs::Zero(0));
 
     // create sensor
-    SensorBase* sensor_ptr = new SensorBase(ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
+    SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
 
     // motion data
     Eigen::VectorXs data(6);
