@@ -16,21 +16,19 @@
 // STL
 #include <deque>
 
+
 class ProcessorMotion : public ProcessorBase{
     public:
-        ProcessorMotion(ProcessorType _tp);
+        ProcessorMotion(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size);
         virtual ~ProcessorMotion();
 
-        virtual void process(CaptureBase* _capture_ptr)
-        {
-            extractData(_capture_ptr, ts_, data_);
-            integrate(data_, dt_);
-            pushBack(ts_, dx_, Dx_integral_);
-        }
+
+        virtual void process(CaptureBase* _capture_ptr);
 
         // Main operations
         void composeDeltaState(const TimeStamp& _t_start, TimeStamp& _t_end, Eigen::VectorXs&);
         void composeState(const TimeStamp& _time_stamp, Eigen::VectorXs&);
+        void init(CaptureBase* _origin_ptr);
         void reset(TimeStamp& _ts);
 
     protected:
@@ -46,12 +44,15 @@ class ProcessorMotion : public ProcessorBase{
         WolfScalar computeAverageDt();
         WolfScalar getDt();
 
+        void clearAll();
+
     protected:
+        CaptureBase* origin_ptr_;
         std::deque<TimeStamp> buffer_ts_;
         std::deque<Eigen::VectorXs> buffer_dx_;
         std::deque<Eigen::VectorXs> buffer_Dx_;
 
-    protected:
+    public:
         // Helper variables: use them to avoid creating temporaries
         TimeStamp ts_; // Time stamp of the data being processed
         TimeStamp ts_origin_; // Time stamp at the origin of buffers
@@ -64,7 +65,26 @@ class ProcessorMotion : public ProcessorBase{
         WolfScalar Dt_start_, Dt_end_;
         unsigned int i_start_, i_end_;
         Eigen::VectorXs Dx_start_, Dx_end_;
+
+private:
+        size_t state_size_;
+        size_t delta_size_;
+        size_t data_size_;
 };
+
+inline void ProcessorMotion::init(CaptureBase* _origin_ptr)
+{
+    origin_ptr_=_origin_ptr;
+    ts_origin_ = _origin_ptr->getTimeStamp();
+    x_origin_ = _origin_ptr->getFramePtr()->getState();
+    clearAll();
+    buffer_ts_.clear();
+    buffer_ts_.push_back(ts_origin_);
+    buffer_dx_.clear();
+    buffer_dx_.push_back(dx_);
+    buffer_Dx_.clear();
+    buffer_Dx_.push_back(Dx_integral_);
+}
 
 inline void ProcessorMotion::reset(TimeStamp& _ts)
 {
@@ -76,7 +96,7 @@ inline void ProcessorMotion::reset(TimeStamp& _ts)
     ts_origin_ = _ts;
     composeState(_ts, x_other_);
     x_origin_ = x_other_;
-    Dx_integral_.setZero();
+    clearAll();
 }
 
 inline void ProcessorMotion::integrate(Eigen::VectorXs& _data, WolfScalar _dt)
@@ -85,6 +105,13 @@ inline void ProcessorMotion::integrate(Eigen::VectorXs& _data, WolfScalar _dt)
     data2dx(_data, _dt, dx_);
     // integrate on top of Dx_
     plus(buffer_Dx_.back(), dx_, Dx_integral_);
+}
+
+inline void ProcessorMotion::process(CaptureBase* _capture_ptr)
+{
+    extractData(_capture_ptr, ts_, data_);
+    integrate(data_, dt_);
+    pushBack(ts_, dx_, Dx_integral_);
 }
 
 inline void ProcessorMotion::composeState(const TimeStamp& _time_stamp, Eigen::VectorXs& _x_ts)
@@ -118,6 +145,12 @@ inline WolfScalar ProcessorMotion::computeAverageDt()
 inline WolfScalar ProcessorMotion::getDt()
 {
     return dt_;
+}
+
+inline void ProcessorMotion::clearAll()
+{
+    dx_.setZero();
+    Dx_integral_.setZero();
 }
 
 #endif /* SRC_PROCESSOR_MOTION_H_ */

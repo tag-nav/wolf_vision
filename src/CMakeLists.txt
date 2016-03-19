@@ -81,10 +81,12 @@ SET(HDRS_BASE
 
 SET(HDRS
     capture_base.h
-    capture_motion.h
     capture_fix.h
     capture_gps_fix.h
+    capture_motion.h
+    capture_motion2.h
     capture_odom_2D.h
+    capture_odom_3D.h
     capture_void.h
     constraint_base.h
     constraint_analytic.h
@@ -118,6 +120,8 @@ SET(HDRS
     node_linked.h
     processor_base.h
     processor_motion.h
+    processor_motion2.h
+    processor_odom_3D.h
     processor_tracker.h
     sensor_base.h
     sensor_camera.h
@@ -142,10 +146,12 @@ SET(HDRS_DTASSC
 #sources
 SET(SRCS
     capture_base.cpp
-    capture_motion.cpp
     capture_gps_fix.cpp
     capture_fix.cpp
+    capture_motion.cpp
+    capture_motion2.cpp
     capture_odom_2D.cpp
+    capture_odom_3D.cpp
     capture_void.cpp
     constraint_base.cpp
     constraint_analytic.cpp
@@ -166,6 +172,7 @@ SET(SRCS
     node_base.cpp
     processor_base.cpp
     processor_motion.cpp
+    processor_motion2.cpp
     processor_tracker.cpp
     sensor_base.cpp
     sensor_camera.cpp

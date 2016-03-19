@@ -28,6 +28,20 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
         virtual void process(CaptureBase* _capture_ptr) = 0;
 
+        /** \brief Vote for KeyFrame generation
+         *
+         * If a KeyFrame criterion is validated, this function returns true,
+         * meaning that it wants to create a KeyFrame at the \b last Capture.
+         *
+         * WARNING! This function only votes! It does not create KeyFrames!
+         */
+        virtual bool voteForKeyFrame(){return false;}
+
+        virtual bool permittedKeyFrame() final
+        {
+            return getTop()->permitKeyFrame(this);
+        }
+
     private:
         ProcessorType type_;
 
