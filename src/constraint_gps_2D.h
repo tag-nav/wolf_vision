@@ -37,7 +37,7 @@ class ConstraintGPS2D : public ConstraintSparse<2, 2>
          **/
         virtual JacobianMethod getJacobianMethod() const
         {
-            return AUTO;
+            return JAC_AUTO;
         }
 };
 

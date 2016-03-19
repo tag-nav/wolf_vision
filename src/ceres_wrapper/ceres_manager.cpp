@@ -268,7 +268,7 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
 {
 	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
 
-    if (_corrPtr->getJacobianMethod() == ANALYTIC)
+    if (_corrPtr->getJacobianMethod() == JAC_ANALYTIC)
         return new CostFunctionWrapper((ConstraintAnalytic*)_corrPtr);
 
 	switch (_corrPtr->getType())

@@ -47,7 +47,7 @@ void WolfProblem::createFrame(FrameType _frame_type, const TimeStamp& _time_stam
 {
     switch ( trajectory_ptr_->getFrameStructure() )
     {
-        case PO_2D:
+        case FRM_PO_2D:
             {
                 trajectory_ptr_->addFrame(new FrameBase(_frame_type,
                                                         _time_stamp,
@@ -55,7 +55,7 @@ void WolfProblem::createFrame(FrameType _frame_type, const TimeStamp& _time_stam
                                                         new StateBlock(1)));
                 break;
             }
-        case PO_3D:
+        case FRM_PO_3D:
             {
                 trajectory_ptr_->addFrame(new FrameBase(_frame_type,
                                                         _time_stamp,
@@ -63,7 +63,7 @@ void WolfProblem::createFrame(FrameType _frame_type, const TimeStamp& _time_stam
                                                         new StateQuaternion));
                 break;
             }
-        case POV_3D:
+        case FRM_POV_3D:
             {
                 trajectory_ptr_->addFrame(new FrameBase(_frame_type,
                                                         _time_stamp,
@@ -87,7 +87,7 @@ void WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _fra
     // Create frame
     switch ( trajectory_ptr_->getFrameStructure() )
     {
-        case PO_2D:
+        case FRM_PO_2D:
             {
                 assert( _frame_state.size() == 3 && "Wrong state vector size");
 
@@ -97,7 +97,7 @@ void WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _fra
                                                         new StateBlock(_frame_state.tail(1))));
                 break;
             }
-        case PO_3D:
+        case FRM_PO_3D:
             {
                 assert( _frame_state.size() == 7 && "Wrong state vector size");
 
@@ -107,7 +107,7 @@ void WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _fra
                                                         new StateQuaternion(_frame_state.tail(4))));
                 break;
             }
-        case POV_3D:
+        case FRM_POV_3D:
             {
                 assert( _frame_state.size() == 10 && "Wrong state vector size");
 
