@@ -9,8 +9,8 @@
 #define PROCESSOR_MOTION2_H_
 
 // Wolf
-#include "capture_motion2.h"
 #include "processor_base.h"
+#include "capture_motion2.h"
 #include "time_stamp.h"
 #include "wolf.h"
 
@@ -23,16 +23,7 @@ class ProcessorMotion2 : public ProcessorBase
         // This is the main public interface
     public:
         ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size,
-                         size_t _noise_size) :
-                ProcessorBase(_tp), dt_(_dt), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), noise_size_(
-                        _noise_size), origin_ptr_(nullptr), last_ptr_(nullptr),
-                        x_origin_(_state_size), x_(_state_size), x_t_(_state_size),
-                        ts_(0),
-                        delta_(_delta_size), delta_integrated_(_delta_size),
-                        data_(_data_size)
-        {
-            //
-        }
+                         size_t _noise_size);
         virtual ~ProcessorMotion2();
 
         // Instructions to the processor:
@@ -63,12 +54,15 @@ class ProcessorMotion2 : public ProcessorBase
          * \return the state vector
          */
         Eigen::VectorXs state(const TimeStamp& _t);
+        /** \brief Provides the delta-state integrated so far
+         * \return a reference to the integrated delta state
+         */
+        Eigen::VectorXs& deltaState(){return getBufferPtr()->getDelta();}
         /** \brief Provides the delta-state between two time-stamps
          * \param _t1 initial time
          * \param _t2 final time
          * \param _Delta the integrated delta-state between _t1 and _t2
          */
-        Eigen::VectorXs deltaState(){return getBufferPtr()->getDelta();}
         void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta);
         /** Composes the deltas in two pre-integrated Captures
          * \param _cap1_ptr pointer to the first Capture

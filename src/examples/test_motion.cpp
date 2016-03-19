@@ -58,8 +58,8 @@ int main()
 
     // motion data
     Eigen::VectorXs data(6);
-    data << 1, 0, 0,
-            0, 0, 0.05;
+    data << 1, 0, 0,   // advance 1m
+            0, 0, 0.1; // turn 0.1 rad (aprox 6 deg)
 
 
     std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;

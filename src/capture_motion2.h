@@ -50,7 +50,7 @@ class CaptureMotion2 : public CaptureBase
                 void pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
                 void clear(){container_.clear();}
                 unsigned int size() const {return container_.size();}
-                bool empty(){return container_.empty();}
+                bool empty() const {return container_.empty();}
                 Eigen::VectorXs& getDelta() { return container_.back().Dx_; }
                 const Eigen::VectorXs& getDelta() const { return container_.back().Dx_; }
                 Eigen::VectorXs& getDelta(const TimeStamp& _ts) { return container_.at(idx(_ts)).Dx_; }

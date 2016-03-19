@@ -7,6 +7,15 @@
 
 #include "processor_motion2.h"
 
+ProcessorMotion2::ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size,
+                                   size_t _data_size, size_t _noise_size) :
+        ProcessorBase(_tp), dt_(_dt), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), noise_size_(
+                _noise_size), origin_ptr_(nullptr), last_ptr_(nullptr), x_origin_(_state_size), x_(_state_size), x_t_(
+                _state_size), ts_(0), delta_(_delta_size), delta_integrated_(_delta_size), data_(_data_size)
+{
+    //
+}
+
 ProcessorMotion2::~ProcessorMotion2()
 {
     //
