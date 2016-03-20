@@ -37,10 +37,7 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
          */
         virtual bool voteForKeyFrame(){return false;}
 
-        virtual bool permittedKeyFrame() final
-        {
-            return getTop()->permitKeyFrame(this);
-        }
+        virtual bool permittedKeyFrame() final;
 
     private:
         ProcessorType type_;
@@ -50,6 +47,12 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 inline SensorBase* ProcessorBase::getSensorPtr()
 {
     return upperNodePtr();
+}
+
+inline bool ProcessorBase::permittedKeyFrame()
+final
+{
+    return getTop()->permitKeyFrame(this);
 }
 
 #endif
