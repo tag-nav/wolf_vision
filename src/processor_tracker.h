@@ -152,8 +152,8 @@ class ProcessorTracker : public ProcessorBase
         FeatureBaseList& getNewFeaturesList();
         void addNewFeature(FeatureBase* _feature_ptr);
         //
-        FeatureBaseList& getNewFeaturesListMatched();
-        void addNewFeatureMatched(FeatureBase* _feature_ptr);
+        FeatureBaseList& getNewFeaturesListIncoming();
+        void addNewFeatureIncoming(FeatureBase* _feature_ptr);
 
     protected:
 
@@ -175,8 +175,7 @@ class ProcessorTracker : public ProcessorBase
 
         /**\brief Make a KeyFrame using the provided Capture.
          */
-        virtual void makeKeyFrame(CaptureBase* _capture_ptr);
-
+        virtual void makeKeyFrame();
 
     private:
         bool use_landmarks_; ///< Set if the tracker uses and creates landmarks. Clear if only uses features.
@@ -197,12 +196,12 @@ inline void ProcessorTracker::addNewFeature(FeatureBase* _feature_ptr)
     new_features_list_.push_back(_feature_ptr);
 }
 
-inline FeatureBaseList& ProcessorTracker::getNewFeaturesListMatched()
+inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
 {
     return new_features_list_incoming_;
 }
 
-inline void ProcessorTracker::addNewFeatureMatched(FeatureBase* _feature_ptr)
+inline void ProcessorTracker::addNewFeatureIncoming(FeatureBase* _feature_ptr)
 {
     new_features_list_incoming_.push_back(_feature_ptr);
 }

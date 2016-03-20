@@ -78,7 +78,7 @@ unsigned int ProcessorBrisk::processKnownFeatures()
         {
             FeaturePointImage* point_ptr = new FeaturePointImage(((FeaturePointImage*)it)->getKeypoint(),
                                                                 ((FeaturePointImage*)it)->getDescriptor(),false);
-            addNewFeatureMatched(point_ptr);
+            addNewFeatureIncoming(point_ptr);
         }
     }
 
