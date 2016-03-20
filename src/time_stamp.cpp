@@ -20,7 +20,7 @@ TimeStamp::TimeStamp(const WolfScalar _ts) :
 }
 
 TimeStamp::TimeStamp(const unsigned long int _sec, const unsigned long int _nsec) :
-        time_stamp_((WolfScalar)_sec + (WolfScalar)_nsec / 1e9)
+        time_stamp_((WolfScalar)_sec + (WolfScalar)_nsec/(WolfScalar)1e9)
 {
     //
 }
@@ -44,7 +44,7 @@ void TimeStamp::set(const timeval & ts)
 
 void TimeStamp::set(const unsigned long int sec, const unsigned long int nanosec)
 {
-    time_stamp_ = (WolfScalar)(sec + nanosec / 1e9);
+    time_stamp_ =  (WolfScalar)sec + (WolfScalar)nanosec/(WolfScalar)1e9;
 }
 
 void TimeStamp::set(const WolfScalar ts)
@@ -67,7 +67,7 @@ unsigned long int TimeStamp::getSeconds() const
 unsigned long int TimeStamp::getNanoSeconds() const
 {
     WolfScalar ts;
-    ts = floor(time_stamp_);
+    ts = (WolfScalar)floor(time_stamp_);
     return (unsigned long int)((time_stamp_ - ts) * 1e9);
 }
 
