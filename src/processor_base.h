@@ -50,7 +50,6 @@ inline SensorBase* ProcessorBase::getSensorPtr()
 }
 
 inline bool ProcessorBase::permittedKeyFrame()
-final
 {
     return getTop()->permitKeyFrame(this);
 }
