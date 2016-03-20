@@ -8,7 +8,7 @@ SensorGPS::SensorGPS(StateBlock* _p_ptr, //GPS sensor position with respect to t
                      StateBlock* _map_p_ptr, //initial position of vehicle's frame with respect to starting point frame
                      StateBlock* _map_o_ptr) //initial orientation of vehicle's frame with respect to the starting point frame
         :
-        SensorBase(GPS_RAW, _p_ptr, _o_ptr, _bias_ptr, 0),
+        SensorBase(SEN_GPS_RAW, _p_ptr, _o_ptr, _bias_ptr, 0),
         map_p_ptr_(_map_p_ptr),
         map_o_ptr_(_map_o_ptr)
 {
