@@ -70,9 +70,9 @@ int main(int argc, char** argv)
     std::map<FrameBase*, unsigned int> frame_ptr_2_index_prun;
 
     // Wolf problem
-    WolfProblem* wolf_problem_full = new WolfProblem(PO_2D);
-    WolfProblem* wolf_problem_prun = new WolfProblem(PO_2D);
-    SensorBase* sensor = new SensorBase(ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
+    WolfProblem* wolf_problem_full = new WolfProblem(FRM_PO_2D);
+    WolfProblem* wolf_problem_prun = new WolfProblem(FRM_PO_2D);
+    SensorBase* sensor = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
     Eigen::SparseMatrix<WolfScalar> Lambda(0,0);
 
@@ -323,8 +323,8 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBase* first_frame_full = wolf_problem_full->getTrajectoryPtr()->getFrameListPtr()->front();
     FrameBase* first_frame_prun = wolf_problem_prun->getTrajectoryPtr()->getFrameListPtr()->front();
-    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_full->addCapture(initial_covariance_full);
     first_frame_prun->addCapture(initial_covariance_prun);
     initial_covariance_full->process();

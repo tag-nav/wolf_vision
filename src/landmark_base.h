@@ -25,7 +25,8 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
         StateBlock* p_ptr_;     ///< Position state unit pointer
         StateBlock* o_ptr_;     ///< Orientation state unit pointer
-        Eigen::VectorXs descriptor_;    //TODO: agree?
+        Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
+        ConstraintBaseList constrained_by_list_; ///< List of constraints linked to this landmark
 
 
     public:

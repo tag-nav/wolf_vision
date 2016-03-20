@@ -9,12 +9,12 @@ LocalParametrizationBase::~LocalParametrizationBase()
 {
 }
 
-unsigned int LocalParametrizationBase::getLocalSize()
+unsigned int LocalParametrizationBase::getLocalSize() const
 {
     return local_size_;
 }
 
-unsigned int LocalParametrizationBase::getGlobalSize()
+unsigned int LocalParametrizationBase::getGlobalSize() const
 {
     return global_size_;
 }

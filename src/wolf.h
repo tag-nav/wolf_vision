@@ -36,13 +36,15 @@ typedef double WolfScalar;        // Use this for double, 64 bit precision
 //typedef long double WolfScalar;   // Use this for long double, 128 bit precision
 
 namespace WolfConstants{
-// use it in odometry covariances for instance.
-const double MIN_VARIANCE = 1e-6;
 
 // Wolf standard tolerance
 const double EPS = 1e-8;
 // Wolf smmmmall tolerance
 const double EPS_SMALL = 1e-16;
+
+// use it in odometry covariances for instance.
+const double MIN_VARIANCE = 1e-6;
+
 }
 
 ///////////////////////////////////////////
@@ -110,9 +112,9 @@ typedef enum
  */
 typedef enum
 {
-    PO_2D,  ///< marks a 2D frame containing position (x,y) and orientation angle.
-    PO_3D,  ///< marks a 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
-    POV_3D  ///< marks a 3D frame with position, orientation quaternion, and linear velocity (vx, vy, vz)
+    FRM_PO_2D,  ///< marks a 2D frame containing position (x,y) and orientation angle.
+    FRM_PO_3D,  ///< marks a 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
+    FRM_POV_3D  ///< marks a 3D frame with position, orientation quaternion, and linear velocity (vx, vy, vz)
 } FrameStructure;
 
 /** \brief Enumeration of all possible constraints
@@ -129,6 +131,7 @@ typedef enum
     CTR_CORNER_2D,              ///< marks a 2D corner constraint .
     CTR_CONTAINER,              ///< marks a 2D container constraint .
     CTR_IMG_PNT_TO_EP,          ///< marks a constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
+    CTR_IMG_PNT_TO_HP,          ///< marks a constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_IMG_PNT_TO_IMG_PNT      ///< marks a constraint between two image point features
 } ConstraintType;
 
@@ -160,9 +163,9 @@ typedef enum
  */
 typedef enum
 {
-    AUTO,    ///< Auto differentiation (AutoDiffCostFunctionWrapper or ceres::NumericDiffCostFunction).
-    NUMERIC, ///< Numeric differentiation (ceres::NumericDiffCostFunction).
-    ANALYTIC ///< Analytic jacobians.
+    JAC_AUTO,    ///< Auto differentiation (AutoDiffCostFunctionWrapper or ceres::NumericDiffCostFunction).
+    JAC_NUMERIC, ///< Numeric differentiation (ceres::NumericDiffCostFunction).
+    JAC_ANALYTIC ///< Analytic jacobians.
 } JacobianMethod;
 
 
@@ -182,15 +185,15 @@ typedef enum
  */
 typedef enum
 {
-    ODOM_2D,	    ///< Odometry measurement from encoders: displacement and rotation.
-    TWIST_2D,       ///< Twist measurement form encoders or motion command: lineal and angular velocities.
-    IMU,		      ///< Inertial measurement unit with 3 acceleros, 3 gyros
-    CAMERA,		    ///< Regular pinhole camera
-    GPS_FIX,	    ///< GPS fix calculated from a GPS receiver
-    GPS_RAW,      ///< GPS pseudo ranges, doppler and satellite ephemerides
-    LIDAR,		    ///< Laser Range Finder, 2D
-    RADAR,		    ///< Radar
-    ABSOLUTE_POSE ///< Full absolute pose (XYZ+quaternion)
+    SEN_ODOM_2D,	    ///< Odometry measurement from encoders: displacement and rotation.
+    SEN_TWIST_2D,       ///< Twist measurement form encoders or motion command: lineal and angular velocities.
+    SEN_IMU,		      ///< Inertial measurement unit with 3 acceleros, 3 gyros
+    SEN_CAMERA,		    ///< Regular pinhole camera
+    SEN_GPS_FIX,	    ///< GPS fix calculated from a GPS receiver
+    SEN_GPS_RAW,      ///< GPS pseudo ranges, doppler and satellite ephemerides
+    SEN_LIDAR,		    ///< Laser Range Finder, 2D
+    SEN_RADAR,		    ///< Radar
+    SEN_ABSOLUTE_POSE ///< Full absolute pose (XYZ+quaternion)
 } SensorType;
 
 /** \brief Enumeration of all possible Processor types
@@ -202,7 +205,8 @@ typedef enum
     PRC_TRACKER_BRISK,
     PRC_TRACKER_ORB,
     PRC_GPS_RAW,
-    PRC_LIDAR
+    PRC_LIDAR,
+    PRC_ODOM_3D
 } ProcessorType;
 
 /** \brief enumeration of all possible Feature types
@@ -320,27 +324,6 @@ typedef ProcessorBaseList::iterator ProcessorBaseIter;
 // - State
 typedef std::list<StateBlock*> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
-
-
-///** \brief Enumeration of all possible feature types
-// *
-// * Enumeration of all possible feature types.
-// *
-// * You may add items to this list as needed. Be concise with names, and document your entries.
-// *
-// */
-//typedef enum
-//{
-//    BASE,       ///< A feature of FeatureBase -- just for completeness
-//    POINT,      ///< A point feature, either 3D or 2D
-//    LINE,       ///< a line feature, 2D or 3D
-//    CORNER2D,   ///< a corner feature 2D
-//    P_RANGE,    ///< A pseudo-range measurement from GPS satellite
-//    V_DOPPLER,  ///< Doppler velocity measurement from GPS satellite
-//    GPS_FIX,    ///< A GPS fix
-//    LIDAR_SCAN, ///< Full 2D laser scan
-//    LIDAR_RAY   ///< A single laser ray
-//} FeatureType;
 
 
 inline WolfScalar pi2pi(const WolfScalar& angle)

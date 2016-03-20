@@ -80,7 +80,7 @@ void permutation_2_block_permutation(const PermutationMatrix<Dynamic, Dynamic, i
     ArrayXXi idx(dim, perm_nodes.indices().rows());
     idx.row(0) = dim * perm_nodes.indices().transpose();
 
-    for (unsigned int i = 1; i<dim; i++)
+    for (int i = 1; i<dim; i++)
         idx.row(i) = idx.row(i-1) + 1;
     Map<ArrayXi> idx_blocks(idx.data(), dim*perm_nodes.indices().rows(), 1);
     perm_variables.indices() = idx_blocks;
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 
     // GENERATING MEASUREMENTS
     std::vector<std::vector<int>> measurements;
-    for (unsigned int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         std::vector<int> meas(0);
         if (i == 0) //prior

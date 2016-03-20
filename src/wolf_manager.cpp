@@ -14,7 +14,7 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
         trajectory_size_(_trajectory_size),
         new_frame_elapsed_time_(_new_frame_elapsed_time)
 {
-    if (_frame_structure == PO_2D)
+    if (_frame_structure == FRM_PO_2D)
         assert( _prior.size() == 3 &&
                 _prior_cov.cols() == 3 &&
                 _prior_cov.rows() == 3 &&
@@ -33,7 +33,7 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
     //std::cout << " first_window_frame_" << std::endl;
 
     // Initial covariance
-    SensorBase* prior_sensor = new SensorBase(ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0);
+    SensorBase* prior_sensor = new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0);
     problem_->getHardwarePtr()->addSensor(prior_sensor);
     CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), prior_sensor, _prior, _prior_cov);
     //std::cout << " initial_covariance" << std::endl;
@@ -206,7 +206,7 @@ Eigen::VectorXs WolfManager::getVehiclePose(const TimeStamp& _now)
     //std::cout << "getting vehicle pose... " << std::endl;
 
     if (last_capture_relative_ == nullptr)
-        return Eigen::Map<Eigen::Vector3s>(current_frame_->getPPtr()->getPtr());
+        return current_frame_->getState();
     else
     {
         //std::cout << "last capture relative... " << std::endl;

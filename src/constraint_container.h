@@ -130,7 +130,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
          **/
         virtual JacobianMethod getJacobianMethod() const
         {
-            return AUTO;
+            return JAC_AUTO;
         }
 };
 #endif
