@@ -11,7 +11,7 @@
 //Constructor
 ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, int _threshold, int _octaves, float _pattern_scales,
                                unsigned int _grid_width, unsigned int _grid_height, unsigned int _min_features_th) :
-    ProcessorTracker(PRC_TRACKER_BRISK, true, false),
+    ProcessorTracker(PRC_TRACKER_BRISK, false),
     brisk_(_threshold, _octaves, _pattern_scales),
     act_search_grid_(_image_rows,_image_cols,_grid_width, _grid_height),
     min_features_th_(_min_features_th)

@@ -60,7 +60,7 @@ class ProcessorTracker : public ProcessorBase
          * \param _autonomous Set to make the tracker autonomous to create KeyFrames and/or Landmarks.
          * \param _uses_landmarks Set to make the tracker work with Landmarks. Un-set to work only with Features.
          */
-        ProcessorTracker(ProcessorType _tp, bool _autonomous = true, bool _uses_landmarks = true);
+        ProcessorTracker(ProcessorType _tp, bool _uses_landmarks = true);
         virtual ~ProcessorTracker();
 
         // We start with all the pure-virtual functions

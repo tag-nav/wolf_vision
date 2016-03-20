@@ -7,7 +7,7 @@
 
 #include "processor_tracker.h"
 
-ProcessorTracker::ProcessorTracker(ProcessorType _tp, bool _autonomous, bool _uses_landmarks) :
+ProcessorTracker::ProcessorTracker(ProcessorType _tp, bool _uses_landmarks) :
         ProcessorBase(_tp),
         use_landmarks_(_uses_landmarks),
         origin_ptr_(nullptr),
