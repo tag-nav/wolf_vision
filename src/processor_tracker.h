@@ -72,15 +72,20 @@ class ProcessorTracker : public ProcessorBase
          * It operates on the \b incoming capture pointed by incoming_ptr_.
          *
          * This should do one of the following, depending on the design of the tracker -- see use_landmarks_:
-         *   - Track Features against other Features in the \b origin Capture.
-         *     An intermediary step of matching against Features in the \b last Capture makes tracking easier.
-         *     Once tracked against last, then the link to \b origin is provided by the Features in \b last.
-         *   - Track Features against Landmarks in the Map.
+         *   - Track Features against other Features in the \b origin Capture. Tips:
+         *     - An intermediary step of matching against Features in the \b last Capture makes tracking easier.
+         *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Constraints in \b last.
+         *     - If required, correct the drift by re-comparing against the Features in origin.
+         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
+         *   - Track Features against Landmarks in the Map. Tips:
+         *     - The links to the Landmarks are in the Features' Constraints in last.
+         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
          *
          * The function must generate the necessary Features in the \b incoming Capture,
          * of the correct type, derived from FeatureBase.
          *
-         * It must also generate the constraints, of a type derived from ConstraintBase.
+         * It must also generate the constraints, of the correct type, derived from ConstraintBase
+         * (through ConstraintAnalytic or ConstraintSparse).
          */
         virtual unsigned int processKnownFeatures() = 0;
 
