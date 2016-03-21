@@ -31,8 +31,8 @@ class ProcessorMotion2 : public ProcessorBase
         virtual void process(CaptureBase* _incoming_ptr);
         void init(CaptureMotion2* _origin_ptr);
         void update();
-        void reset(const TimeStamp& _t);
-        void makeKeyFrame(const TimeStamp& _t);
+        void reset(const TimeStamp& _ts);
+        void makeKeyFrame(const TimeStamp& _ts);
 
         // Queries to the processor:
 
@@ -48,12 +48,12 @@ class ProcessorMotion2 : public ProcessorBase
          * \param _t the time stamp
          * \param _x the returned state
          */
-        void state(const TimeStamp& _t, Eigen::VectorXs& _x);
+        void state(const TimeStamp& _ts, Eigen::VectorXs& _x);
         /** \brief Gets the state corresponding to the provided time-stamp
          * \param _t the time stamp
          * \return the state vector
          */
-        Eigen::VectorXs state(const TimeStamp& _t);
+        Eigen::VectorXs state(const TimeStamp& _ts);
         /** \brief Provides the delta-state integrated so far
          * \return a reference to the integrated delta state
          */
@@ -78,15 +78,15 @@ class ProcessorMotion2 : public ProcessorBase
 
         CaptureMotion2::MotionBuffer* getBufferPtr();
 
-        /** \brief Extract data from a derived capture.
-         * \param _capture_ptr pointer to the Capture we want to extract data from.
-         * This function:
-         *  - accesses the incoming Capture
-         *  - Fills in the ts_ field
-         *  - Fills in the data_ field
-         *  - Fills in the delta_ field by converting it from the data_ field, using data2delta().
-         */
-         void extractData(const CaptureMotion2* _capture_ptr);
+//        /** \brief Extract data from a derived capture.
+//         * \param _capture_ptr pointer to the Capture we want to extract data from.
+//         * This function:
+//         *  - accesses the incoming Capture
+//         *  - Fills in the ts_ field
+//         *  - Fills in the data_ field
+//         *  - Fills in the delta_ field by converting it from the data_ field, using data2delta().
+//         */
+//         void extractData(const CaptureMotion2* _capture_ptr);
 
         // These are the pure virtual functions doing the mathematics
     protected:
@@ -116,7 +116,7 @@ class ProcessorMotion2 : public ProcessorBase
           *
           *  However, other more complicated relations are possible.
           */
-         virtual void data2delta() = 0;
+         virtual void data2delta(const Eigen::VectorXs& _data, Eigen::VectorXs& _delta) = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -159,49 +159,103 @@ class ProcessorMotion2 : public ProcessorBase
         CaptureMotion2* origin_ptr_;
         CaptureMotion2* last_ptr_;
         Eigen::VectorXs x_origin_; ///< state at the origin
+        Eigen::VectorXs x_last_; ///< state at the origin
 
     protected:
         // helpers to avoid allocation
-        Eigen::VectorXs x_, x_t_; ///< current state; state at time t
-        TimeStamp ts_; ///< current time stamp
+        Eigen::VectorXs x_t_; ///< current state; state at time t
         Eigen::VectorXs delta_, delta_integrated_; ///< current delta and integrated delta
         Eigen::VectorXs data_; ///< current data
 
-    private:
-        void updateOriginState();
 };
+
+inline ProcessorMotion2::ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size,
+                                          size_t _data_size, size_t _noise_size) :
+        ProcessorBase(_tp), dt_(_dt), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), noise_size_(
+                _noise_size), origin_ptr_(nullptr), last_ptr_(nullptr),
+                x_origin_(_state_size), x_last_(_state_size), x_t_(_state_size),
+                delta_(_delta_size), delta_integrated_(_delta_size),
+                data_(_data_size)
+{
+    //
+}
+
+inline ProcessorMotion2::~ProcessorMotion2()
+{
+    //
+}
+
+inline void ProcessorMotion2::process(CaptureBase* _incoming_ptr)
+{
+    CaptureMotion2* incoming_ptr = (CaptureMotion2*)(((_incoming_ptr)));
+    //    incoming_ptr->getBufferPtr()->setDt(dt_);
+    integrate(incoming_ptr);
+    if (voteForKeyFrame() && permittedKeyFrame())
+    {
+        // TODO:
+        // Make KeyFrame
+        //        makeKeyFrame(incoming_ptr_);
+        // Reset the Tracker
+        //        reset();
+    }
+}
+
+inline void ProcessorMotion2::init(CaptureMotion2* _origin_ptr)
+{
+    //TODO: This fcn needs to change:
+    // input: framebase: this is a Keyframe
+    // create a new non-key Frame and make it last_
+    // first delta in buffer must be zero
+    // we do not need to extract data from any Capture
+    origin_ptr_ = _origin_ptr;
+    last_ptr_ = _origin_ptr;
+    x_origin_ = x_last_ = _origin_ptr->getFramePtr()->getState();
+    delta_ = delta_integrated_ = Eigen::VectorXs::Zero(delta_size_);
+
+    getBufferPtr()->clear();
+    getBufferPtr()->setDt(dt_);
+    getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
+}
 
 inline void ProcessorMotion2::update()
 {
-    updateOriginState();
-    state(x_);
+    x_origin_ = origin_ptr_->getFramePtr()->getState();
+    state(x_last_);
 }
 
-inline void ProcessorMotion2::reset(const TimeStamp& _t)
+inline void ProcessorMotion2::reset(const TimeStamp& _ts)
 {
     // TODO what to do?
+    //cut the buffer in 2 parts at _ts
+    // create a new Capture for the future
+    // Create a
 }
 
-inline void ProcessorMotion2::makeKeyFrame(const TimeStamp& _t)
+inline void ProcessorMotion2::makeKeyFrame(const TimeStamp& _ts)
 {
-    //TODO
+    //TODO: see how to adapt this code from ProcessorTracker::makeKeyFrame(void)
+//    // Create a new non-key Frame in the Trajectory with the incoming Capture
+//    getTop()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+//    getTop()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+//    // Make the last Capture's Frame a KeyFrame so that it gets into the solver
+//    last_ptr_->getFramePtr()->setKey();
 }
 
-inline Eigen::VectorXs ProcessorMotion2::state(const TimeStamp& _t)
+inline Eigen::VectorXs ProcessorMotion2::state(const TimeStamp& _ts)
 {
-    state(_t, x_t_);
+    state(_ts, x_t_);
     return x_t_;
 }
 
-inline void ProcessorMotion2::state(const TimeStamp& _t, Eigen::VectorXs& _x)
+inline void ProcessorMotion2::state(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
-    xPlusDelta(x_origin_, getBufferPtr()->getDelta(_t), _x);
+    xPlusDelta(x_origin_, getBufferPtr()->getDelta(_ts), _x);
 }
 
 inline const Eigen::VectorXs& ProcessorMotion2::state()
 {
-    state(x_);
-    return x_;
+    state(x_last_);
+    return x_last_;
 }
 
 inline const void ProcessorMotion2::state(Eigen::VectorXs& _x)
@@ -222,10 +276,12 @@ inline void ProcessorMotion2::sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion
 
 inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
 {
-    // First get data and push it into buffer
-    extractData(_incoming_ptr);
+    // First get data and convert it to delta
+    data2delta(_incoming_ptr->getData(), delta_);
+    // then integrate
     deltaPlusDelta(getBufferPtr()->getDelta(), delta_, delta_integrated_);
-    getBufferPtr()->pushBack(ts_,delta_integrated_);
+    // then push it into buffer
+    getBufferPtr()->pushBack(_incoming_ptr->getTimeStamp(),delta_integrated_);
 }
 
 inline CaptureMotion2::MotionBuffer* ProcessorMotion2::getBufferPtr()
@@ -233,17 +289,6 @@ inline CaptureMotion2::MotionBuffer* ProcessorMotion2::getBufferPtr()
     return last_ptr_->getBufferPtr();
 }
 
-inline void ProcessorMotion2::extractData(const CaptureMotion2* _capture_ptr)
-{
-    ts_ = _capture_ptr->getTimeStamp();
-    data_ = _capture_ptr->getData();
-    data2delta();
-}
-
-inline void ProcessorMotion2::updateOriginState()
-{
-    x_origin_ = origin_ptr_->getFramePtr()->getState();
-}
 
 
 #endif /* PROCESSOR_MOTION2_H_ */

@@ -16,7 +16,7 @@ class ProcessorOdom3d : public ProcessorMotion2
     public:
         ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6, 6, 6) {}
         virtual ~ProcessorOdom3d(){}
-        virtual void data2delta();
+        virtual void data2delta(const Eigen::VectorXs& _data, Eigen::VectorXs& _delta);
 
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
@@ -30,10 +30,10 @@ class ProcessorOdom3d : public ProcessorMotion2
 };
 
 
-inline void ProcessorOdom3d::data2delta()
+inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, Eigen::VectorXs& _delta)
 {
     // Trivial implementation
-    delta_ = data_;
+    _delta = _data;
 }
 
 

@@ -15,6 +15,8 @@
 
 #include <iostream>
 
+#include <map>
+
 int main()
 {
     // time
@@ -69,6 +71,27 @@ int main()
     {
         std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t).transpose() << std::endl;
         t.set(t.get()+dt);
+    }
+
+
+    std::cout << "\n\nTrying a map as the buffer container" << std::endl;
+
+    WolfScalar x;
+
+    std::map<TimeStamp, WolfScalar> buffer;
+    t.set(0);
+    x = 0;
+    for (double i = 1; i<=10; i++)
+    {
+        t.set(i/5);
+        x++;
+        buffer.insert(std::pair<TimeStamp,WolfScalar>(t,x));
+        std::cout << "insert (ts,x) = (" << t.get() << "," << x << ")" << std::endl;
+    }
+    for (double i = 1; i<=8; i++)
+    {
+        t.set(i/4);
+        std::cout << "query (" << t.get() << "," << buffer[t] << ")" << std::endl;
     }
 
     return 0;
