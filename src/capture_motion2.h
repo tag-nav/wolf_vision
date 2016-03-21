@@ -12,8 +12,6 @@
 
 #include <deque>
 
-
-
 /** \brief Base class for motion Captures.
  *
  * This class implements Captures for sensors integrating motion.
