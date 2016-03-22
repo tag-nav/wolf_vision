@@ -16,6 +16,8 @@
 #include <iostream>
 
 #include <map>
+#include <list>
+#include <algorithm>
 
 int main()
 {
@@ -74,7 +76,7 @@ int main()
     }
 
 
-    std::cout << "\n\nTrying a map as the buffer container" << std::endl;
+    std::cout << "\n\nTrying a std::map as the buffer container <-- NOT WORKING: need exact key" << std::endl;
 
     WolfScalar x;
 
@@ -92,6 +94,64 @@ int main()
     {
         t.set(i/4);
         std::cout << "query (" << t.get() << "," << buffer[t] << ")" << std::endl;
+    }
+
+    std::cout << "\n\nTrying a std::list and std::find_if as the buffer container <-- WORKING: can use comparator '<' for evaluating key" << std::endl;
+
+    typedef std::pair<TimeStamp, WolfScalar> Pair;
+    typedef std::list<Pair> PairsList;
+
+    PairsList buffer_list;
+    t.set(0);
+    x = 0;
+    for (double i = 1; i<=8; i++)
+    {
+        t.set(i/4);
+        x++;
+        buffer_list.push_back(Pair(t,x));
+        std::cout << "insert (ts,x) = (" << t.get() << "," << x << ")" << std::endl;
+    }
+
+    PairsList::iterator it_next;
+    PairsList::iterator it_previous = buffer_list.begin();
+    for (double i = 1; i<=11; i++)
+    {
+        t.set(i/5);
+        it_next = std::find_if (buffer_list.begin(), buffer_list.end(), [&](const Pair& p){return t<=p.first;});
+        it_previous = it_next;
+        it_previous--;
+
+        std::cout << "query " << t.get() << "-> previous: (" << it_previous->first.get() << "," << it_previous->second << "); next: (" << it_next->first.get() << "," << it_next->second << ")" << std::endl;
+    }
+
+    std::cout << "\n\nTrying a std::list and std::find_if as the buffer container in CaptureMotion2 <-- WORKING: can use comparator '<' for evaluating key" << std::endl;
+    std::cout << "The key line is: \n\tstd::list<Motion>::iterator next = std::find_if (motion_buffer.begin(), motion_buffer.end(), [&](const Motion& m){return t<=m.ts_;});" << std::endl << std::endl;
+
+    typedef CaptureMotion2::Motion Motion;
+    typedef std::list<Motion> MotionBuffer;
+
+    MotionBuffer motion_buffer;
+    t.set(0);
+    Eigen::VectorXs v;
+    v.setZero(6);
+    for (double i = 1; i<=8; i++)
+    {
+        t.set(i/4);
+        v += Eigen::VectorXs::Ones(6);
+        motion_buffer.push_back(Motion({t,v}));
+        std::cout << "insert (ts,x) = (" << t.get() << ", " << v.transpose() << ")" << std::endl;
+    }
+
+    MotionBuffer::iterator next;
+    MotionBuffer::iterator previous = motion_buffer.begin();
+    for (double i = 1; i<=11; i++)
+    {
+        t.set(i/5);
+        next = std::find_if (motion_buffer.begin(), motion_buffer.end(), [&](const Motion& m){return t<=m.ts_;});
+        previous = next;
+        previous--;
+
+        std::cout << "query " << t.get() << "-> previous: (" << previous->ts_.get() << ", " << previous->Dx_.transpose() << "); next: (" << next->ts_.get() << ", " << next->Dx_.transpose() << ")" << std::endl;
     }
 
     return 0;
