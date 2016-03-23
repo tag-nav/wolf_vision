@@ -96,26 +96,6 @@ int main()
         std::cout << "query (" << t.get() << "," << buffer_map[t] << ")" << std::endl;
     }
 
-    std::cout << "\n\nTrying a list and algorithm find_if as the buffer container" << std::endl;
-
-    typedef std::pair<TimeStamp,WolfScalar> Pair;
-    typedef std::list<Pair> PairsList;
-    PairsList buffer_list;
-    t.set(0);
-    x = 0;
-    for (double i = 1; i<=10; i++)
-    {
-        t.set(i/5);
-        x++;
-        buffer_list.push_back(std::pair<TimeStamp,WolfScalar>(t,x));
-        std::cout << "insert (ts,x) = (" << t.get() << "," << x << ")" << std::endl;
-    }
-    for (double i = 1; i<=8; i++)
-    {
-        t.set(i/4);
-        PairsList::iterator it= std::find_if(std::begin(buffer_list),std::end(buffer_list),[&](const std::pair<TimeStamp,WolfScalar> v){return v.first.get() > t.get();});
-        std::cout << "query (" << t.get() << "," << it->second << ")" << std::endl;
-    }
 
     std::cout << "\n\nTrying a std::list and std::find_if as the buffer container <-- WORKING: can use comparator '<' for evaluating key" << std::endl;
 
