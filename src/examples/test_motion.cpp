@@ -16,6 +16,7 @@
 #include <map>
 #include <list>
 #include <algorithm>
+#include <iterator>
 
 #include <iostream>
 
@@ -149,8 +150,7 @@ int main()
     {
         t.set(i/5);
         next = std::find_if (motion_buffer.begin(), motion_buffer.end(), [&](const Motion& m){return t<=m.ts_;});
-        previous = next;
-        previous--;
+        previous = std::prev(next);
 
         std::cout << "query " << t.get() << "-> previous: (" << previous->ts_.get() << ", " << previous->Dx_.transpose() << "); next: (" << next->ts_.get() << ", " << next->Dx_.transpose() << ")" << std::endl;
     }
