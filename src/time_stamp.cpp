@@ -115,8 +115,17 @@ bool TimeStamp::operator<=(const TimeStamp & ts) const
         return false;
 }
 
-WolfScalar TimeStamp::operator-(const TimeStamp & ts) const
+WolfScalar TimeStamp::operator -(const TimeStamp& ts) const
 {
     return (time_stamp_ - ts.get());
 }
 
+void TimeStamp::operator +=(const TimeStamp& ts)
+{
+    time_stamp_ += ts.get();
+}
+
+void TimeStamp::operator +=(const WolfScalar& t)
+{
+    time_stamp_ += t;
+}

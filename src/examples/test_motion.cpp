@@ -63,7 +63,7 @@ int main()
         cap_ptr->setTimeStamp(t);
         odom3d_ptr->process(cap_ptr);
         std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->state().transpose() << std::endl;
-        t.set(t.get()+dt);
+        t += dt;
     }
 
     std::cout << "\nQuery states at asynchronous time values..." << std::endl;
@@ -73,7 +73,7 @@ int main()
     for (int i = 1; i <= 20; i++)
     {
         std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t).transpose() << std::endl;
-        t.set(t.get()+dt);
+        t += dt;
     }
 
 
