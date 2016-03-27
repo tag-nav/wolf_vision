@@ -29,8 +29,7 @@
  *  - since the last key-Frame
  *  - until the frame of this capture.
  *
- * Once a keyframe is generated and this Capture becomes part of the Wolf tree being solved,
- * this buffer is freezed.
+ * Once a keyframe is generated, this buffer is frozen and kept in the Capture for eventual later uses.
  * It is then used to compute the factor that links the Frame of this capture to the previous key-frame in the Trajectory.
  */
 class CaptureMotion2 : public CaptureBase
