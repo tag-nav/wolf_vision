@@ -120,12 +120,7 @@ WolfScalar TimeStamp::operator -(const TimeStamp& ts) const
     return (time_stamp_ - ts.get());
 }
 
-void TimeStamp::operator +=(const TimeStamp& ts)
+void TimeStamp::operator +=(const WolfScalar& dt)
 {
-    time_stamp_ += ts.get();
-}
-
-void TimeStamp::operator +=(const WolfScalar& t)
-{
-    time_stamp_ += t;
+    time_stamp_ += dt;
 }

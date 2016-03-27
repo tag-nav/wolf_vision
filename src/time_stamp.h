@@ -140,12 +140,9 @@ class TimeStamp
          */
         WolfScalar operator -(const TimeStamp& ts) const;
 
-        /** \brief Sum operator
+        /** \brief Add-assign operator
          */
-        void operator +=(const TimeStamp& ts) ;
-        /** \brief Sum operator
-         */
-        void operator +=(const WolfScalar& t) ;
+        void operator +=(const WolfScalar& dt) ;
 
 };
 #endif
