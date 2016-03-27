@@ -8,9 +8,13 @@
 #ifndef SRC_CAPTURE_MOTION2_H_
 #define SRC_CAPTURE_MOTION2_H_
 
+// Wolf includes
 #include "capture_base.h"
 
-#include <deque>
+// STL includes
+#include <list>
+#include <algorithm>
+#include <iterator>
 
 /** \brief Base class for motion Captures.
  *
@@ -51,12 +55,23 @@ class CaptureMotion2 : public CaptureBase
                 bool empty() const {return container_.empty();}
                 Eigen::VectorXs& getDelta() { return container_.back().Dx_; }
                 const Eigen::VectorXs& getDelta() const { return container_.back().Dx_; }
-                Eigen::VectorXs& getDelta(const TimeStamp& _ts) { return container_.at(idx(_ts)).Dx_; }
-                const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const { return container_.at(idx(_ts)).Dx_; }
+                Eigen::VectorXs& getDelta(const TimeStamp& _ts) {
+                    std::list<Motion>::iterator next = std::find_if (container_.begin(), container_.end(), [&](const Motion& m){return _ts<=m.ts_;});
+                    if (next == container_.end())
+                        next--;
+                    return next->Dx_;
+                }
+                const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const {
+                    std::list<Motion>::const_iterator next = std::find_if (container_.begin(), container_.end(), [&](const Motion& m){return _ts<=m.ts_;});
+                    if (next == container_.end())
+                        next--;
+                    return next->Dx_;
+                }
+
             private:
                 unsigned int idx(const TimeStamp& _ts) const {return std::lround((_ts - container_.front().ts_) * dt_inv_); } // we rounded to the nearest entry in the buffer
                 WolfScalar dt_, dt_inv_;
-                std::deque<Motion> container_;
+                std::list<Motion> container_;
         };
 
     public:
