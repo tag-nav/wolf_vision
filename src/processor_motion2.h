@@ -77,16 +77,6 @@ class ProcessorMotion2 : public ProcessorBase
 
         CaptureMotion2::MotionBuffer* getBufferPtr();
 
-//        /** \brief Extract data from a derived capture.
-//         * \param _capture_ptr pointer to the Capture we want to extract data from.
-//         * This function:
-//         *  - accesses the incoming Capture
-//         *  - Fills in the ts_ field
-//         *  - Fills in the data_ field
-//         *  - Fills in the delta_ field by converting it from the data_ field, using data2delta().
-//         */
-//         void extractData(const CaptureMotion2* _capture_ptr);
-
         // These are the pure virtual functions doing the mathematics
     protected:
 
@@ -137,7 +127,7 @@ class ProcessorMotion2 : public ProcessorBase
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                     Eigen::VectorXs& _delta1_plus_delta2) = 0;
 
-        /** \brief Computes the delta-state the goes from one delta-state to another
+        /** \brief Computes the delta-state that goes from one delta-state to another
          * \param _delta1 the initial delta
          * \param _delta2 the final delta
          * \param _delta2_minus_delta1 the delta-state. It has the format of a delta-state.
@@ -149,15 +139,15 @@ class ProcessorMotion2 : public ProcessorBase
 
     protected:
         // Attributes
-        WolfScalar dt_; ///< Time step --- assumed constant
+        WolfScalar dt_; ///< Time step
         size_t x_size_;    ///< The size of the state vector
-        size_t delta_size_;   ///< the size of the delta integrator
+        size_t delta_size_;   ///< the size of the integrated delta
         size_t data_size_; ///< the size of the incoming data
 
         CaptureMotion2* origin_ptr_;
         CaptureMotion2* last_ptr_;
-        Eigen::VectorXs x_origin_; ///< state at the origin
-        Eigen::VectorXs x_last_; ///< state at the origin
+        Eigen::VectorXs x_origin_; ///< state at the origin Capture
+        Eigen::VectorXs x_last_; ///< state at the last Capture
 
     protected:
         // helpers to avoid allocation
@@ -211,7 +201,6 @@ inline void ProcessorMotion2::init(CaptureMotion2* _origin_ptr)
     delta_ = delta_integrated_ = Eigen::VectorXs::Zero(delta_size_);
 
     getBufferPtr()->clear();
-    getBufferPtr()->setDt(dt_);
     getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
 }
 
