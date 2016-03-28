@@ -50,7 +50,9 @@ class CaptureMotion2 : public CaptureBase
                 void clear(){container_.clear();}
                 unsigned int size() const {return container_.size();}
                 bool empty() const {return container_.empty();}
-                Eigen::VectorXs& getDelta() { return container_.back().Dx_; }
+                //                TimeStamp& getTimeStamp() {return container_.back().ts_;}
+                const TimeStamp& getTimeStamp() const {return container_.back().ts_;}
+//                Eigen::VectorXs& getDelta() { return container_.back().Dx_; }
                 const Eigen::VectorXs& getDelta() const { return container_.back().Dx_; }
                 Eigen::VectorXs& getDelta(const TimeStamp& _ts) {
                     std::list<Motion>::iterator next = std::find_if (container_.begin(), container_.end(), [&](const Motion& m){return _ts<=m.ts_;});
@@ -74,7 +76,8 @@ class CaptureMotion2 : public CaptureBase
         virtual ~CaptureMotion2();
 
         const Eigen::VectorXs& getData() const;
-        MotionBuffer* getBufferPtr();
+        CaptureMotion2::MotionBuffer* getBufferPtr();
+        const CaptureMotion2::MotionBuffer* getBufferPtr() const;
         const Eigen::VectorXs& getDelta() const;
 
     protected:
@@ -96,6 +99,11 @@ inline CaptureMotion2::~CaptureMotion2()
 inline const Eigen::VectorXs& CaptureMotion2::getData() const
 {
     return data_;
+}
+
+inline const CaptureMotion2::MotionBuffer* CaptureMotion2::getBufferPtr() const
+{
+    return &buffer_;
 }
 
 inline CaptureMotion2::MotionBuffer* CaptureMotion2::getBufferPtr()

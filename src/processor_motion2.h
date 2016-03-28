@@ -56,7 +56,7 @@ class ProcessorMotion2 : public ProcessorBase
         /** \brief Provides the delta-state integrated so far
          * \return a reference to the integrated delta state
          */
-        Eigen::VectorXs& deltaState(){return getBufferPtr()->getDelta();}
+        const Eigen::VectorXs& deltaState() const;
         /** \brief Provides the delta-state between two time-stamps
          * \param _t1 initial time
          * \param _t2 final time
@@ -76,6 +76,8 @@ class ProcessorMotion2 : public ProcessorBase
         void integrate(CaptureMotion2* _incoming_ptr); ///< Integrate the last received IMU data
 
         CaptureMotion2::MotionBuffer* getBufferPtr();
+
+        const CaptureMotion2::MotionBuffer* getBufferPtr() const;
 
         // These are the pure virtual functions doing the mathematics
     protected:
@@ -250,6 +252,11 @@ inline const void ProcessorMotion2::state(Eigen::VectorXs& _x)
     xPlusDelta(x_origin_, getBufferPtr()->getDelta(), _x);
 }
 
+inline const Eigen::VectorXs& ProcessorMotion2::deltaState() const
+{
+    return getBufferPtr()->getDelta();
+}
+
 inline void ProcessorMotion2::deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta)
 {
     deltaMinusDelta(getBufferPtr()->getDelta(_t2), getBufferPtr()->getDelta(_t2), _Delta);
@@ -271,11 +278,14 @@ inline void ProcessorMotion2::integrate(CaptureMotion2* _incoming_ptr)
     getBufferPtr()->pushBack(_incoming_ptr->getTimeStamp(),delta_integrated_);
 }
 
-inline CaptureMotion2::MotionBuffer* ProcessorMotion2::getBufferPtr()
+inline const CaptureMotion2::MotionBuffer* ProcessorMotion2::getBufferPtr() const
 {
     return last_ptr_->getBufferPtr();
 }
 
-
+inline CaptureMotion2::MotionBuffer* ProcessorMotion2::getBufferPtr()
+{
+    return last_ptr_->getBufferPtr();
+}
 
 #endif /* PROCESSOR_MOTION2_H_ */
