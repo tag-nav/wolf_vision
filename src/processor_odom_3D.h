@@ -10,11 +10,10 @@
 
 #include "processor_motion2.h"
 
-// This is the class under test!
 class ProcessorOdom3d : public ProcessorMotion2
 {
     public:
-        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6, 6, 6) {}
+        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6, 6) {}
         virtual ~ProcessorOdom3d(){}
         virtual void data2delta(const Eigen::VectorXs& _data, Eigen::VectorXs& _delta);
 
@@ -36,20 +35,6 @@ inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, Eigen::Vec
     _delta = _data;
 }
 
-
-void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
-    WolfScalar angle = _v.norm();
-    if (angle < WolfConstants::EPS)
-        _q = Eigen::Quaternions::Identity();
-    else
-    {
-        _q = Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
-    }
-}
-void q2v(const Eigen::Quaternions& _q, Eigen::VectorXs& _v){
-    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
-    _v = aa.axis() * aa.angle();
-}
 
 
 // Compose a frame with a delta frame and give a frame (sizes 7, 6, 7 respectively)
@@ -76,9 +61,9 @@ inline void ProcessorOdom3d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     assert(_delta1_plus_delta2.size() == 6 && "Wrong _delta1_plus_delta2 vector size");
 
     pos1_ = _delta1.head(3);
-    v2q(_delta1.tail(3), quat1_);
+    Eigen::v2q(_delta1.tail(3), quat1_);
     delta_pos_ = _delta2.head(3);
-    v2q(_delta2.tail(3),delta_quat_);
+    Eigen::v2q(_delta2.tail(3), delta_quat_);
 
     Eigen::VectorXs v(3);
     q2v(quat1_*delta_quat_,v);

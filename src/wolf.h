@@ -331,4 +331,25 @@ inline WolfScalar pi2pi(const WolfScalar& angle)
     return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
 }
 
+// Quaternion things
+namespace Eigen{
+inline void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
+    WolfScalar angle = _v.norm();
+    if (angle < WolfConstants::EPS)
+        _q = Eigen::Quaternions::Identity();
+    else
+    {
+        _q = Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
+    }
+}
+
+
+inline void q2v(const Eigen::Quaternions& _q, Eigen::VectorXs& _v){
+    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
+    _v = aa.axis() * aa.angle();
+}
+}
+
+
+
 #endif /* WOLF_H_ */

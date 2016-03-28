@@ -22,8 +22,7 @@ class ProcessorMotion2 : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size,
-                         size_t _noise_size);
+        ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size);
         virtual ~ProcessorMotion2();
 
         // Instructions to the processor:
@@ -154,7 +153,6 @@ class ProcessorMotion2 : public ProcessorBase
         size_t x_size_;    ///< The size of the state vector
         size_t delta_size_;   ///< the size of the delta integrator
         size_t data_size_; ///< the size of the incoming data
-        size_t noise_size_; ///< the size of the noise vector
 
         CaptureMotion2* origin_ptr_;
         CaptureMotion2* last_ptr_;
@@ -170,12 +168,12 @@ class ProcessorMotion2 : public ProcessorBase
 };
 
 inline ProcessorMotion2::ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size,
-                                          size_t _data_size, size_t _noise_size) :
-        ProcessorBase(_tp), dt_(_dt), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), noise_size_(
-                _noise_size), origin_ptr_(nullptr), last_ptr_(nullptr),
-                x_origin_(_state_size), x_last_(_state_size), x_t_(_state_size),
-                delta_(_delta_size), delta_integrated_(_delta_size),
-                data_(_data_size)
+                                          size_t _data_size) :
+        ProcessorBase(_tp), dt_(_dt), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size),
+        origin_ptr_(nullptr), last_ptr_(nullptr),
+        x_origin_(_state_size), x_last_(_state_size), x_t_(_state_size),
+        delta_(_delta_size), delta_integrated_(_delta_size),
+        data_(_data_size)
 {
     //
 }
