@@ -104,6 +104,12 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual unsigned int detectNewFeatures() = 0;
 
+        /** \brief Track provided features from \b last to \b incoming
+         * \param _feature_list_in input list of features in \b last to track
+         * \param _feature_list_out returned list of features found in \b incoming
+         */
+        virtual unsigned int track(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out) = 0;
+
         /** \brief Create one landmark
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
@@ -125,12 +131,6 @@ class ProcessorTracker : public ProcessorBase
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, NodeBase* _node_ptr) = 0;
-
-        /** \brief Track provided features from \b last to \b incoming
-         * \param _feature_list_in list of features in \b last to track
-         * \param _feature_list_out list of features found in \b incoming
-         */
-        virtual unsigned int track(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out) = 0;
 
 
 
