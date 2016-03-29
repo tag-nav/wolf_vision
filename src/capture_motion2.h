@@ -62,7 +62,7 @@ class CaptureMotion2 : public CaptureBase
         {
             public:
                 TimeStamp ts_;       ///< Time stamp
-                MotionDeltaType Dx_; ///< the integrated delta
+                MotionDeltaType delta_integrated_; ///< the integrated delta
         } Motion; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
         class MotionBuffer{
@@ -90,18 +90,18 @@ class CaptureMotion2 : public CaptureBase
                 unsigned int size() const {return container_.size();}
                 bool empty() const {return container_.empty();}
                 const TimeStamp& getTimeStamp() const {return container_.back().ts_;}
-                const MotionDeltaType& getDelta() const { return container_.back().Dx_; }
+                const MotionDeltaType& getDelta() const { return container_.back().delta_integrated_; }
                 MotionDeltaType& getDelta(const TimeStamp& _ts) {
                     typename std::list<Motion>::iterator next = std::find_if (container_.begin(), container_.end(), [&](const Motion& m){return _ts<=m.ts_;});
                     if (next == container_.end())
                         next--;
-                    return next->Dx_;
+                    return next->delta_integrated_;
                 }
                 const MotionDeltaType& getDelta(const TimeStamp& _ts) const {
                     typename std::list<Motion>::const_iterator next = std::find_if (container_.begin(), container_.end(), [&](const Motion& m){return _ts<=m.ts_;});
                     if (next == container_.end())
                         next--;
-                    return next->Dx_;
+                    return next->delta_integrated_;
                 }
 
             private:
