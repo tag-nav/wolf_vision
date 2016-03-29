@@ -10,7 +10,7 @@
 
 #include "processor_motion2.h"
 
-class ProcessorOdom3d : public ProcessorMotion2
+class ProcessorOdom3d : public ProcessorMotion2<Eigen::VectorXs>
 {
     public:
         ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6, 6) {}
