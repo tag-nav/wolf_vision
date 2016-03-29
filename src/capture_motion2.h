@@ -102,9 +102,10 @@ class CaptureMotion2 : public CaptureBase
                  *  - since the last key-Frame
                  *  - until the frame of this capture.
                  *
-                 * The buffer can be queried for delta-integrals corresponding to a provided time stamp:
-                 *   - The returned delta-integral is the one immediately after to the query time stamp.
-                 *   - It is an error if the query time stamp is out of the bounds of the buffer.
+                 * The buffer can be queried for delta-integrals corresponding to a provided time stamp, with the following rules:
+                 *   - The returned delta-integral is the one immediately after the query time stamp.
+                 *   - If the query time stamp is later than the last one in the buffer, the last delta-integral is returned.
+                 *   - It is an error if the query time stamp is earlier than the beginning of the buffer.
                  */
                 MotionBuffer(){}
                 void pushBack(const Motion _motion){container_.push_back(_motion);}
@@ -115,8 +116,10 @@ class CaptureMotion2 : public CaptureBase
                 const TimeStamp& getTimeStamp() const {return container_.back().ts_;}
                 const MotionDeltaType& getDelta() const { return container_.back().delta_integrated_; }
                 const MotionDeltaType& getDelta(const TimeStamp& _ts) const {
-                    assert((container_.front().ts_ <= _ts) && (_ts <= container_.back().ts_) && "Query time stamp out of buffer bounds");
+                    assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
                     typename std::list<Motion>::const_iterator next = std::find_if (container_.begin(), container_.end(), [&](const Motion& m){return _ts<=m.ts_;});
+                    if (next == container_.end())
+                        next--;
                     return next->delta_integrated_;
                 }
 

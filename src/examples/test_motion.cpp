@@ -70,7 +70,7 @@ int main()
 
     t = t0;
     dt = 0.0027;
-    for (int i = 1; i <= 15; i++)
+    for (int i = 1; i <= 20; i++)
     {
         std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t).transpose() << std::endl;
         t += dt;
