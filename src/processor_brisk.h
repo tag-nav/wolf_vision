@@ -24,7 +24,7 @@ protected:
     ActiveSearchGrid act_search_grid_;
     unsigned int min_features_th_;
     bool known_or_new_features_ = false;
-    cv::Mat image_;
+    cv::Mat image_last_, image_incoming_;
 
     /** \brief Initialize one landmark
      *

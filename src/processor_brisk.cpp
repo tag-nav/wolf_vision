@@ -132,7 +132,7 @@ unsigned int ProcessorBrisk::detectNewFeatures()
 {
     std::cout << std::endl << "<---- detectNewFeatures ---->" << std::endl << std::endl;
 
-    cv::Mat image = ((CaptureImage*)getLastPtr())->getImage();
+//    cv::Mat image = ((CaptureImage*)getLastPtr())->getImage();
     cv::Rect roi;
 
     ///START OF THE SEARCH
@@ -157,7 +157,7 @@ unsigned int ProcessorBrisk::detectNewFeatures()
         std::vector<cv::KeyPoint> new_keypoints;
         cv::Mat new_descriptors;
 
-        n_features = briskDetect(image, roi, new_keypoints, new_descriptors);
+        n_features = briskDetect(image_last_, roi, new_keypoints, new_descriptors);
 
         if (n_features == 0)
         {
@@ -212,7 +212,8 @@ void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
 {
     std::cout << std::endl << "<---- process ---->" << std::endl << std::endl;
     //known_or_new_features_ = false;
-    image_ = ((CaptureImage*)_incoming_ptr)->getImage();
+    image_incoming_ = ((CaptureImage*)_incoming_ptr)->getImage();
+    image_last_ = ((CaptureImage*)getLastPtr())->getImage();
     ProcessorTracker::process(_incoming_ptr);
     std::cout << std::endl << "<---- end process ---->" << std::endl << std::endl;
     //drawFeatures(getLastPtr());
@@ -285,7 +286,7 @@ unsigned int ProcessorBrisk::processFeaturesForMatching(const FeatureBaseList& _
 //        drawRoiLastFrame(_image,roi_for_matching);
 
 
-        n_features = briskDetect(image_, roi_for_matching, new_keypoints, new_descriptors);
+        n_features = briskDetect(image_incoming_, roi_for_matching, new_keypoints, new_descriptors);
         std::cout << "n_features: " << n_features << std::endl;
 
         float euclidean_distance = 0;
