@@ -106,7 +106,7 @@ int main()
     PairsList buffer_list;
     t.set(0);
     x = 0;
-    for (double i = 1; i<=8; i++)
+    for (double i = 0; i<=8; i++)
     {
         t.set(i/4);
         x++;
@@ -114,19 +114,36 @@ int main()
         std::cout << "insert (ts,x) = (" << t.get() << "," << x << ")" << std::endl;
     }
 
+    std::cout << "\nFinding in direct order..." << std::endl;
+
     PairsList::iterator it_next;
-    PairsList::iterator it_previous = buffer_list.begin();
-    for (double i = 1; i<=11; i++)
+    for (double i = 1; i<=10; i++)
     {
         t.set(i/5);
-        it_next = std::find_if (buffer_list.begin(), buffer_list.end(), [&](const Pair& p){return t <= p.first;});
+        int n = 0;
+        it_next = std::find_if (buffer_list.begin(), buffer_list.end(), [&](const Pair& p){n++;return t <= p.first;});
 
         assert(it_next != buffer_list.end() && "Buffer data not found for the provided time stamp.");
 
-        it_previous = std::prev(it_next);
-
-        std::cout << "query " << t.get() << "-> previous: (" << it_previous->first.get() << "," << it_previous->second << "); next: (" << it_next->first.get() << "," << it_next->second << ")" << std::endl;
+        std::cout << n << " query " << t.get() << "-> previous: (" << std::prev(it_next)->first.get() << "," << std::prev(it_next)->second << "); NEXT: (" << it_next->first.get() << "," << it_next->second << ")" << std::endl;
     }
+
+    std::cout << "\nFinding in reverse order..." << std::endl;
+
+    PairsList::reverse_iterator it_previous;
+    for (double i = 1; i<=10; i++)
+    {
+        t.set(i/5);
+        int n = 0;
+        it_previous = std::find_if (buffer_list.rbegin(), buffer_list.rend(), [&](const Pair& p){
+            n++;
+            return p.first <= t;});
+
+        assert(it_previous != buffer_list.rend() && "Buffer data not found for the provided time stamp.");
+
+        std::cout << n << " query " << t.get() << "-> PREVIOUS: (" << it_previous->first.get() << "," << it_previous->second << "); next: (" << std::prev(it_previous)->first.get() << "," << std::prev(it_previous)->second << ")" << std::endl;
+    }
+
 
     return 0;
 }
