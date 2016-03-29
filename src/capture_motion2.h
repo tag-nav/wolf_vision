@@ -18,17 +18,33 @@
 
 /** \brief Base class for motion Captures.
  * \param MotionDeltaType The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
- *        Generalized Delta types allow for optimized algorithms. For example, in an IMU, the Delta type might be defined as:
+ *        Generalized Delta types allow for optimized algorithms.
+ *        For example, for 3D odometry, a Eigen::VectorXs(6) is sufficient, and is provided as the default template type,
+ * \code
+ *   typedef Eigen::VectorXs odo3dDeltaType; // 6-vector with position increment and orientation increment
+ * \endcode
+ *        If desired, this delta can also be defined as a position delta and an orientation delta,
+ * \code
+ *   typedef struct {
+ *     Eigen::Vector3s     dp;  // Position delta
+ *     Eigen::Vector3s dtheta;  // Orientation delta
+ *   } odo3dDeltaType;
+ * \endcode
+ *        It can also be defined as a position delta and a quaternion delta,
+ * \code
+ *   typedef struct {
+ *     Eigen::Vector3s    dp;  // Position delta
+ *     Eigen::Quaternions dq;  // Quaternion delta
+ *   } odo3dDeltaType;
+ * \endcode
+ *        or even as a position delta and a rotation matrix delta,
  * \code
  *   typedef struct {
  *     Eigen::Vector3s dp;     // Position delta
  *     Eigen::Matrix3s dR;     // Rotation matrix delta
- *     Eigen::Vector3s dv;     // Velocity delta
- *     Eigen::Vector3s dab;    // Acc. bias delta
- *     Eigen::Vector3s dwb;    // Gyro bias delta
- *   } ImuDeltaType;
+ *   } odo3dDeltaType;
  * \endcode
- *     Also, using quaternions instead of rotation matrices
+ *        As a more challenging example, in an IMU, the Delta type might be defined as:
  * \code
  *   typedef struct {
  *     Eigen::Vector3s    dp;  // Position delta
@@ -36,6 +52,16 @@
  *     Eigen::Vector3s    dv;  // Velocity delta
  *     Eigen::Vector3s    dab; // Acc. bias delta
  *     Eigen::Vector3s    dwb; // Gyro bias delta
+ *   } ImuDeltaType;
+ * \endcode
+ *     or using a rotation matrix instead of the quaternion,
+ * \code
+ *   typedef struct {
+ *     Eigen::Vector3s dp;     // Position delta
+ *     Eigen::Matrix3s dR;     // Rotation matrix delta
+ *     Eigen::Vector3s dv;     // Velocity delta
+ *     Eigen::Vector3s dab;    // Acc. bias delta
+ *     Eigen::Vector3s dwb;    // Gyro bias delta
  *   } ImuDeltaType;
  * \endcode
  *
@@ -62,26 +88,23 @@ class CaptureMotion2 : public CaptureBase
         {
             public:
                 TimeStamp ts_;       ///< Time stamp
-                MotionDeltaType delta_integrated_; ///< the integrated delta
+                MotionDeltaType delta_integrated_; ///< the integrated motion or delta-integral
         } Motion; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
         class MotionBuffer{
             public:
-                /** \brief Base class for motion Captures.
+                /** \brief class for motion buffers.
                  *
-                 * This class implements Captures for sensors integrating motion.
+                 * It consists of a buffer of pre-integrated motions (aka. delta-integrals) that is being filled
+                 * by the motion processors (deriving from ProcessorMotion). Eadh delta-integral is accompained by a time stamp.
                  *
-                 * The raw data of this type of captures is required to be in the form of a vector --> see attribute data_.
-                 *
-                 * It contains a buffer of pre-integrated motions that is being filled
-                 * by the motion processors (deriving from ProcessorMotion).
-                 *
-                 * This buffer contains the integrated motion:
+                 * This buffer contains the time stapme and delta-integrals:
                  *  - since the last key-Frame
                  *  - until the frame of this capture.
                  *
-                 * Once a keyframe is generated, this buffer is frozen and kept in the Capture for eventual later uses.
-                 * It is then used to compute the factor that links the Frame of this capture to the previous key-frame in the Trajectory.
+                 * The buffer can be queried for delta-integrals corresponding to a provided time stamp:
+                 *   - The returned delta-integral is the one immediately after to the query time stamp.
+                 *   - It is an error if the query time stamp is out of the bounds of the buffer.
                  */
                 MotionBuffer(){}
                 void pushBack(const Motion _motion){container_.push_back(_motion);}
@@ -91,16 +114,9 @@ class CaptureMotion2 : public CaptureBase
                 bool empty() const {return container_.empty();}
                 const TimeStamp& getTimeStamp() const {return container_.back().ts_;}
                 const MotionDeltaType& getDelta() const { return container_.back().delta_integrated_; }
-                MotionDeltaType& getDelta(const TimeStamp& _ts) {
-                    typename std::list<Motion>::iterator next = std::find_if (container_.begin(), container_.end(), [&](const Motion& m){return _ts<=m.ts_;});
-                    if (next == container_.end())
-                        next--;
-                    return next->delta_integrated_;
-                }
                 const MotionDeltaType& getDelta(const TimeStamp& _ts) const {
+                    assert((container_.front().ts_ <= _ts) && (_ts <= container_.back().ts_) && "Query time stamp out of buffer bounds");
                     typename std::list<Motion>::const_iterator next = std::find_if (container_.begin(), container_.end(), [&](const Motion& m){return _ts<=m.ts_;});
-                    if (next == container_.end())
-                        next--;
                     return next->delta_integrated_;
                 }
 

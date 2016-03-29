@@ -37,6 +37,7 @@
  *     Eigen::Vector3s    dwb; // Gyro bias delta
  *   } ImuDeltaType;
  * \endcode
+ *       See more examples in the documentation of CaptureMotion2.
  */
 template <class MotionDeltaType = Eigen::VectorXs>
 class ProcessorMotion2 : public ProcessorBase

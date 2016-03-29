@@ -70,7 +70,7 @@ int main()
 
     t = t0;
     dt = 0.0027;
-    for (int i = 1; i <= 20; i++)
+    for (int i = 1; i <= 15; i++)
     {
         std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t).transpose() << std::endl;
         t += dt;
@@ -120,14 +120,11 @@ int main()
     {
         t.set(i/5);
         it_next = std::find_if (buffer_list.begin(), buffer_list.end(), [&](const Pair& p){return t <= p.first;});
-        if (it_next == buffer_list.end())
-        {
-            it_previous = std::prev(it_next);
-        }
-        else
-        {
-            it_previous = std::prev(it_next);
-        }
+
+        assert(it_next != buffer_list.end() && "Buffer data not found for the provided time stamp.");
+
+        it_previous = std::prev(it_next);
+
         std::cout << "query " << t.get() << "-> previous: (" << it_previous->first.get() << "," << it_previous->second << "); next: (" << it_next->first.get() << "," << it_next->second << ")" << std::endl;
     }
 
