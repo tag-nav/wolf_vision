@@ -50,9 +50,7 @@ class CaptureMotion2 : public CaptureBase
                 void clear(){container_.clear();}
                 unsigned int size() const {return container_.size();}
                 bool empty() const {return container_.empty();}
-                //                TimeStamp& getTimeStamp() {return container_.back().ts_;}
                 const TimeStamp& getTimeStamp() const {return container_.back().ts_;}
-//                Eigen::VectorXs& getDelta() { return container_.back().Dx_; }
                 const Eigen::VectorXs& getDelta() const { return container_.back().Dx_; }
                 Eigen::VectorXs& getDelta(const TimeStamp& _ts) {
                     std::list<Motion>::iterator next = std::find_if (container_.begin(), container_.end(), [&](const Motion& m){return _ts<=m.ts_;});
