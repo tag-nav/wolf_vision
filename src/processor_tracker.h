@@ -130,7 +130,7 @@ class ProcessorTracker : public ProcessorBase
          * \param _feature_list_in list of features in \b last to track
          * \param _feature_list_out list of features found in \b incoming
          */
-        virtual unsigned int processFeaturesForMatching(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out) = 0;
+        virtual unsigned int track(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out) = 0;
 
 
 

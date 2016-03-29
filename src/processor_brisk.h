@@ -97,7 +97,7 @@ public:
 
 private:
 
-    virtual unsigned int processFeaturesForMatching(const FeatureBaseList& _feature_list_in, FeatureBaseList & _feature_list_out);
+    virtual unsigned int track(const FeatureBaseList& _feature_list_in, FeatureBaseList & _feature_list_out);
 };
 
 #endif // PROCESSOR_BRISK_H

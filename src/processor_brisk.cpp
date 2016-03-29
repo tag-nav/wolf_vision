@@ -43,7 +43,7 @@ unsigned int ProcessorBrisk::processKnownFeatures()
 
     unsigned int n_tracks = 0;
     std::cout << "Nbr of features in incoming: " << getIncomingPtr()->getFeatureListPtr()->size() << std::endl;
-    n_tracks = processFeaturesForMatching(*(getLastPtr()->getFeatureListPtr()), *(getIncomingPtr()->getFeatureListPtr()));
+    n_tracks = track(*(getLastPtr()->getFeatureListPtr()), *(getIncomingPtr()->getFeatureListPtr()));
     std::cout << "Nbr of features in incoming: " << getIncomingPtr()->getFeatureListPtr()->size() << std::endl;
 
     return n_tracks;
@@ -244,7 +244,7 @@ ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, Node
 
 /** Private */
 
-unsigned int ProcessorBrisk::processFeaturesForMatching(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out)
+unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out)
 {
     std::cout << std::endl << "<---- processFeaturesForMatching ---->" << std::endl << std::endl;
 
