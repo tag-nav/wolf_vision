@@ -10,7 +10,7 @@
 
 #include "capture_motion2.h"
 
-class CaptureOdom3D : public CaptureMotion2
+class CaptureOdom3D : public CaptureMotion2<>
 {
     public:
         CaptureOdom3D(const TimeStamp& _ts, SensorBase* _sensor_ptr,
