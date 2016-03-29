@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
     p_brisk->init(capture_brisk_ptr);
 
-    cv::namedWindow("Keypoint drawing");    // Creates a window for display.
+    //cv::namedWindow("Keypoint drawing");    // Creates a window for display.
     while(f<400)
     {
         capture >> frame;
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
         wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
         frm_ptr->addCapture(capture_brisk_ptr);
 
-        p_brisk->setIncomingPtr(capture_brisk_ptr);
+        //p_brisk->setIncomingPtr(capture_brisk_ptr);
 
         clock_t t1 = clock();
         p_brisk->process(capture_brisk_ptr);

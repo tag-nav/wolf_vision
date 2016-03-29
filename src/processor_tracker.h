@@ -126,6 +126,13 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, NodeBase* _node_ptr) = 0;
 
+        /** \brief Track provided features from \b last to \b incoming
+         * \param _feature_list_in list of features in \b last to track
+         * \param _feature_list_out list of features found in \b incoming
+         */
+        virtual unsigned int processFeaturesForMatching(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out) = 0;
+
+
 
         // From now on, all functions are already implemented.
 
@@ -267,7 +274,7 @@ inline void ProcessorTracker::setIncomingPtr(CaptureBase* const _incoming_ptr)
 inline void ProcessorTracker::advance()
 {
     last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-    last_ptr_->destruct(); // Destruct now the obsolete last before reassigning a new pointer
+    //last_ptr_->destruct(); // TODO: JS->JV why this does not work?? Destruct now the obsolete last before reassigning a new pointer
     last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
     incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }

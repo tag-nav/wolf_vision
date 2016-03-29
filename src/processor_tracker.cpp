@@ -28,6 +28,7 @@ ProcessorTracker::~ProcessorTracker()
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
     // 1. First we track the known Features and create new constraints as needed
+    setIncomingPtr(_incoming_ptr);
     processKnownFeatures();
 
     // 2. Then we see if we want and we are allowed to create a KeyFrame
@@ -70,7 +71,7 @@ unsigned int ProcessorTracker::processNewFeatures()
         }
     } // Done with Landmark creation
 
-    processKnownFeatures();
+    processFeaturesForMatching(new_features_list_, new_features_list_incoming_);
 
     // Append all new Features to the Capture's list of Features
     last_ptr_->getFeatureListPtr()->splice(last_ptr_->getFeatureListPtr()->end(), new_features_list_);
