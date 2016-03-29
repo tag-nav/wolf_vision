@@ -14,8 +14,6 @@
 #include "time_stamp.h"
 #include "wolf.h"
 
-// STL
-#include <deque>
 
 /** \brief class for Motion processors
  *  * \param MotionDeltaType The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
