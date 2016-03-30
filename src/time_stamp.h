@@ -136,6 +136,10 @@ class TimeStamp
          */
         void operator +=(const WolfScalar& dt);
 
+        /** \brief Add-assign operator
+         */
+        TimeStamp operator +(const WolfScalar& dt);
+
         /** \brief Prints time stamp to a given ostream
          *
          * Prints time stamp to a given ostream
@@ -220,6 +224,11 @@ inline WolfScalar TimeStamp::operator -(const TimeStamp& ts) const
 inline void TimeStamp::operator +=(const WolfScalar& dt)
 {
     time_stamp_ += dt;
+}
+
+inline TimeStamp TimeStamp::operator +(const WolfScalar& dt)
+{
+    return TimeStamp(time_stamp_ + dt);
 }
 
 #endif
