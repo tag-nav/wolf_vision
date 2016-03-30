@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 
     WolfProblem* wolf_problem_ = new WolfProblem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(360,640,30,0,0.5f,7,7,5);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(360,640,30,0,0.5f,7,7,10);
     sen_cam_->addProcessor(p_brisk);
 
 
@@ -83,8 +83,6 @@ int main(int argc, char** argv)
         frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
         wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
         frm_ptr->addCapture(capture_brisk_ptr);
-
-        //p_brisk->setIncomingPtr(capture_brisk_ptr);
 
         clock_t t1 = clock();
         p_brisk->process(capture_brisk_ptr);

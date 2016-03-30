@@ -68,7 +68,7 @@ void ProcessorBrisk::drawRoiLastFrame(cv::Mat _image,cv::Rect _roi)
 void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
 {
     cv::KeyPoint _kp;
-    cv::Mat image = ((CaptureImage*)_last_ptr)->getImage();
+    cv::Mat image = image_last_;
 
     //TODO: Why is it 0?
     std::cout << "size: " << getLastPtr()->getFeatureListPtr()->size() << std::endl;
@@ -83,7 +83,6 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
         std::cout << "keypoint: " << _kp.pt << std::endl;
     }
     cv::imshow("Keypoint drawing",image);
-    //cv::waitKey(30);
 }
 
 
@@ -120,8 +119,6 @@ void ProcessorBrisk::addNewFeaturesInCapture(std::vector<cv::KeyPoint> _new_keyp
     {
         FeaturePointImage* point_ptr = new FeaturePointImage(_new_keypoints[i],(new_descriptors(cv::Range(i,i+1),cv::Range(0,new_descriptors.cols))),false);
         addNewFeature(point_ptr);
-        //std::cout << "Current feature keypoint: " << _new_keypoints[i].pt << std::endl;
-        //std::cout << "Current descriptor: " << new_descriptors(cv::Range(i,i+1),cv::Range(0,new_descriptors.cols)) << std::endl;
     }
     std::cout << "size of new list: " << getNewFeaturesList().size() << std::endl;
 }
@@ -132,7 +129,6 @@ unsigned int ProcessorBrisk::detectNewFeatures()
 {
     std::cout << std::endl << "<---- detectNewFeatures ---->" << std::endl << std::endl;
 
-//    cv::Mat image = ((CaptureImage*)getLastPtr())->getImage();
     cv::Rect roi;
 
     ///START OF THE SEARCH
@@ -141,13 +137,6 @@ unsigned int ProcessorBrisk::detectNewFeatures()
     while((n_features < 1) && (n_iterations <5))
     {
         bool roi_exists = act_search_grid_.pickRoi(roi);
-
-//        if (act_search_grid_.pickRoi((roi)))
-//        {
-//            // do things;
-//            else
-//            break;
-//        }
 
         if(roi_exists==false)
         {
@@ -185,15 +174,11 @@ unsigned int ProcessorBrisk::detectNewFeatures()
             std::cout << "]" << std::endl;
         }
         */
-        // A method to draw the keypoints. Optional (false for drawing features)
-        //drawFeatures(((CaptureImage*)getIncomingPtr())->getImage(),((CaptureImage*)getIncomingPtr())->getKeypoints(), myROI);
 
         n_iterations++;
     }
     std::cout << "n_features: " << n_features << std::endl;
 
-
-    //cv::waitKey(0);
     return n_features;
 }
 
@@ -211,14 +196,12 @@ bool ProcessorBrisk::voteForKeyFrame()
 void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
 {
     std::cout << std::endl << "<---- process ---->" << std::endl << std::endl;
-    //known_or_new_features_ = false;
     image_incoming_ = ((CaptureImage*)_incoming_ptr)->getImage();
     image_last_ = ((CaptureImage*)getLastPtr())->getImage();
     ProcessorTracker::process(_incoming_ptr);
     std::cout << std::endl << "<---- end process ---->" << std::endl << std::endl;
-    //drawFeatures(getLastPtr());
-    //cv::waitKey(0);
-    //std::cout << "size2: " << getLastPtr()->getFeatureListPtr()->size() << std::endl;
+    drawFeatures(getLastPtr());
+    cv::waitKey(0);
 }
 
 
@@ -233,11 +216,6 @@ LandmarkBase* ProcessorBrisk::createLandmark(FeatureBase* _feature_ptr)
 //Create a new constraint
 ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, NodeBase* _feat_or_lmk_ptr)
 {
-    //FeatureBase f_b = new FeatureBase(Eigen::Vector2s::Zero(),Eigen::Matrix2s::Zero());
-    //FrameBase frame_b = frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
-    //LandmarkBase* lndmrk = new LandmarkBase(LANDMARK_POINT,new StateBlock(Eigen::Vector3s::Zero()),new StateBlock(Eigen::Vector3s::Zero()));
-    //return new ConstraintPoint2D(f_b,frame_b,CTR_ACTIVE);
-    //return new ConstraintBase(CTR_IMG_PNT_TO_IMG_PNT,_feature_ptr,CTR_ACTIVE);
     return nullptr;
 }
 
@@ -257,16 +235,15 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
     unsigned int feature_roi_y = 0;
 
     unsigned int n_features = 0;
+    int tolerance = 20;
 
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
 
     std::cout << "feature_list_in (FFM): " << _feature_list_in.size() << std::endl;
     unsigned int n_last_capture_feat = 0;
-//    for(std::list<FeatureBase*>::iterator feat_list_it=_feature_list_in.begin();feat_list_it != _feature_list_in.end(); ++feat_list_it)
     for(auto feature_base_ptr : _feature_list_in)
     {
-        //std::cout << "inside iterator" << std::endl;
         FeaturePointImage* feature_ptr = (FeaturePointImage*)feature_base_ptr;
         Eigen::Vector2i feature_point = {feature_ptr->getKeypoint().pt.x,feature_ptr->getKeypoint().pt.y}; //TODO: Look if this is the right order
         act_search_grid_.hitCell(feature_point);
@@ -281,9 +258,9 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
 //        Eigen::Vector2i feature_roi_point = {feature_roi_x,feature_roi_y};
         cv::Rect roi_for_matching(feature_roi_x,feature_roi_y,feature_roi_width,feature_roi_heigth);
 
-//        drawFeaturesLastFrame(_image,feature_point);
+        drawFeaturesLastFrame(image_incoming_,feature_point);
 //        //drawFeaturesLastFrame(_image,feature_roi_point);
-//        drawRoiLastFrame(_image,roi_for_matching);
+        drawRoiLastFrame(image_incoming_,roi_for_matching);
 
 
         n_features = briskDetect(image_incoming_, roi_for_matching, new_keypoints, new_descriptors);
@@ -324,21 +301,25 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
             std::vector<float> feature_descriptor = feature_ptr->getDescriptor();
             const unsigned char* mat_row = new_descriptors.ptr<unsigned char>(row);
 
-            float cross_correlation = 0;
-            for(unsigned int j = 0; j <= (feature_ptr->getDescriptor().size());j++)
+            std::cout << "size: " << (feature_ptr->getDescriptor().size()) << std::endl;
+            int hamming_distance = 0;
+            for(unsigned int j = 0; j <= (feature_ptr->getDescriptor().size())-1;j++)
             {
-                //Perform here the ZNCC
-                //CC
-                cross_correlation += (feature_descriptor[j]*mat_row[j]);
+                //Performing the Hamming Distance (with a tolerance)
+
+                if(((feature_descriptor[j]+tolerance) < (float)mat_row[j])||((feature_descriptor[j]-tolerance) > (float)mat_row[j]))
+                {
+                    hamming_distance += 1;
+                }
+                //std::cout << "feat_desc: " << feature_descriptor[j] << ", mat_row: " << (float)mat_row[j] << std::endl;
             }
-            std::cout << "cross_correlation value: " << cross_correlation << std::endl;
-            cross_correlation = cross_correlation * (1/(feature_ptr->getDescriptor().size()));
+            std::cout << "hamming distance: " << hamming_distance << std::endl;
 
-            std::cout << "final cross_correlation value: " << cross_correlation << std::endl;
-
-            _feature_list_out.push_back(feature_ptr);
-
-            n_last_capture_feat++;
+            if(hamming_distance < 45)
+            {
+                _feature_list_out.push_back(feature_ptr);
+                n_last_capture_feat++;
+            }
         }
     }
     std::cout << "n_last_capture_feat: " << n_last_capture_feat << std::endl;
