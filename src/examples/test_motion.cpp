@@ -69,10 +69,11 @@ int main()
     std::cout << "\nQuery states at asynchronous time values..." << std::endl;
 
     t = t0;
-    dt = 0.0027;
+    WolfScalar dt_2 = dt/2;
+    dt = 0.0027; // new dt
     for (int i = 1; i <= 20; i++)
     {
-        std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t).transpose() << std::endl;
+        std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t+dt_2).transpose() << std::endl;
         t += dt;
     }
 
