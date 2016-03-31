@@ -10,10 +10,13 @@
 
 #include "processor_motion2.h"
 
-// Declare the Motion Delta type as a composite struct
+/**\brief The Motion Delta type
+ *
+ * The motion delta, as a composite struct containing position increment and orientation quaternion increment.
+ */
 typedef struct{
-        Eigen::Vector3s dp;
-        Eigen::Quaternions dq;
+        Eigen::Vector3s dp;    ///< Position increment
+        Eigen::Quaternions dq; ///< Orientation increment as a quaternion
 }Odo3dDeltaType;
 
 
