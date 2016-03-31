@@ -6,7 +6,6 @@
  */
 
 #include "capture_odom_3D.h"
-
 // ATENTION
 // ATENTION
 // ATENTION: This cpp file should remain empty to allow this class to be fully inlined.

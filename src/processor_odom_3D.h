@@ -9,19 +9,20 @@
 #define SRC_PROCESSOR_ODOM_3D_H_
 
 #include "processor_motion2.h"
+#include "capture_odom_3D.h"
 
-class ProcessorOdom3d : public ProcessorMotion2<Eigen::VectorXs>
+class ProcessorOdom3d : public ProcessorMotion2<odo3dDeltaType>
 {
     public:
         ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6, 6) {}
         virtual ~ProcessorOdom3d(){}
-        virtual void data2delta(const Eigen::VectorXs& _data, Eigen::VectorXs& _delta);
+        virtual void data2delta(const Eigen::VectorXs& _data, odo3dDeltaType& _delta);
 
     private:
-        void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
-        void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2);
-        virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                     Eigen::VectorXs& _delta2_minus_delta1);
+        void xPlusDelta(const Eigen::VectorXs& _x, const odo3dDeltaType& _delta, odo3dDeltaType& _x_plus_delta);
+        void deltaPlusDelta(const odo3dDeltaType& _delta1, const odo3dDeltaType& _delta2, odo3dDeltaType& _delta1_plus_delta2);
+        virtual void deltaMinusDelta(const odo3dDeltaType& _delta1, const odo3dDeltaType& _delta2,
+                                     odo3dDeltaType& _delta2_minus_delta1);
 
     private:
         Eigen::Vector3s pos1_, delta_pos_;
@@ -29,7 +30,7 @@ class ProcessorOdom3d : public ProcessorMotion2<Eigen::VectorXs>
 };
 
 
-inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, Eigen::VectorXs& _delta)
+inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, odo3dDeltaType& _delta)
 {
     // Trivial implementation
     _delta = _data;
@@ -38,7 +39,7 @@ inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, Eigen::Vec
 
 
 // Compose a frame with a delta frame and give a frame (sizes 7, 6, 7 respectively)
-inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
+inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const odo3dDeltaType& _delta, odo3dDeltaType& _x_plus_delta)
 {
     assert(_x.size() == 7 && "Wrong _x vector size");
     assert(_delta.size() == 6 && "Wrong _delta vector size");
@@ -54,7 +55,7 @@ inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
 }
 
 // Compose two delta-frames and give a delta-frame (all of size 6)
-inline void ProcessorOdom3d::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
+inline void ProcessorOdom3d::deltaPlusDelta(const odo3dDeltaType& _delta1, const odo3dDeltaType& _delta2, odo3dDeltaType& _delta1_plus_delta2)
 {
     assert(_delta1.size() == 6 && "Wrong _delta1 vector size");
     assert(_delta2.size() == 6 && "Wrong _delta2 vector size");
@@ -72,8 +73,8 @@ inline void ProcessorOdom3d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     _delta1_plus_delta2.tail(3) = v;
 }
 
-inline void ProcessorOdom3d::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                             Eigen::VectorXs& _delta2_minus_delta1)
+inline void ProcessorOdom3d::deltaMinusDelta(const odo3dDeltaType& _delta1, const odo3dDeltaType& _delta2,
+                                             odo3dDeltaType& _delta2_minus_delta1)
 {
     assert(_delta1.size() == 6 && "Wrong _delta1 vector size");
     assert(_delta2.size() == 6 && "Wrong _delta2 vector size");
