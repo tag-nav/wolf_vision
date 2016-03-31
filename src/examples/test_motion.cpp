@@ -51,7 +51,7 @@ int main()
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     FrameBase* frm_ptr = new FrameBase(t, &sb_pos, &sb_ori);
-    CaptureMotion2<>* cap_ptr = new CaptureOdom3D(t, sensor_ptr, data);
+    CaptureMotion2<Odo3dDeltaType>* cap_ptr = new CaptureOdom3D(t, sensor_ptr, data);
     frm_ptr->addCapture(cap_ptr);
 
     // Make a ProcessorOdom3d

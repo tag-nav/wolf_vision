@@ -176,7 +176,7 @@ class ProcessorMotion2 : public ProcessorBase
          * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
          */
         virtual void xPlusDelta(const Eigen::VectorXs& _x, const MotionDeltaType& _delta,
-                                MotionDeltaType& _x_plus_delta) = 0;
+                                Eigen::VectorXs& _x_plus_delta) = 0;
 
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
@@ -249,7 +249,7 @@ inline ProcessorMotion2<MotionDeltaType>::~ProcessorMotion2()
 template<class MotionDeltaType>
 inline void ProcessorMotion2<MotionDeltaType>::process(CaptureBase* _incoming_ptr)
 {
-    CaptureMotion2<MotionDeltaType>* incoming_ptr = (CaptureMotion2<MotionDeltaType>*)((((((((_incoming_ptr))))))));
+    CaptureMotion2<MotionDeltaType>* incoming_ptr = (CaptureMotion2<MotionDeltaType>*)(_incoming_ptr);
     //    incoming_ptr->getBufferPtr()->setDt(dt_);
     integrate(incoming_ptr);
     if (voteForKeyFrame() && permittedKeyFrame())
