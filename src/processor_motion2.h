@@ -16,18 +16,34 @@
 
 
 /** \brief class for Motion processors
- *  * \param MotionDeltaType The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
- *        Generalized Delta types allow for optimized algorithms. For example, in an IMU, the Delta type might be defined as:
+ * \param MotionDeltaType The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
+ *        Generalized Delta types allow for optimized algorithms.
+ *        For example, for 3D odometry, a Eigen::VectorXs(6) is sufficient, and is provided as the default template type,
+ * \code
+ *   typedef Eigen::VectorXs odo3dDeltaType; // 6-vector with position increment and orientation increment
+ * \endcode
+ *        If desired, this delta can also be defined as a position delta and an orientation delta,
+ * \code
+ *   typedef struct {
+ *     Eigen::Vector3s     dp;  // Position delta
+ *     Eigen::Vector3s dtheta;  // Orientation delta
+ *   } odo3dDeltaType;
+ * \endcode
+ *        It can also be defined as a position delta and a quaternion delta,
+ * \code
+ *   typedef struct {
+ *     Eigen::Vector3s    dp;  // Position delta
+ *     Eigen::Quaternions dq;  // Quaternion delta
+ *   } odo3dDeltaType;
+ * \endcode
+ *        or even as a position delta and a rotation matrix delta,
  * \code
  *   typedef struct {
  *     Eigen::Vector3s dp;     // Position delta
  *     Eigen::Matrix3s dR;     // Rotation matrix delta
- *     Eigen::Vector3s dv;     // Velocity delta
- *     Eigen::Vector3s dab;    // Acc. bias delta
- *     Eigen::Vector3s dwb;    // Gyro bias delta
- *   } ImuDeltaType;
+ *   } odo3dDeltaType;
  * \endcode
- *     Also, using quaternions instead of rotation matrices
+ *        As a more challenging example, in an IMU, the Delta type might be defined as:
  * \code
  *   typedef struct {
  *     Eigen::Vector3s    dp;  // Position delta
@@ -35,6 +51,16 @@
  *     Eigen::Vector3s    dv;  // Velocity delta
  *     Eigen::Vector3s    dab; // Acc. bias delta
  *     Eigen::Vector3s    dwb; // Gyro bias delta
+ *   } ImuDeltaType;
+ * \endcode
+ *     or using a rotation matrix instead of the quaternion,
+ * \code
+ *   typedef struct {
+ *     Eigen::Vector3s dp;     // Position delta
+ *     Eigen::Matrix3s dR;     // Rotation matrix delta
+ *     Eigen::Vector3s dv;     // Velocity delta
+ *     Eigen::Vector3s dab;    // Acc. bias delta
+ *     Eigen::Vector3s dwb;    // Gyro bias delta
  *   } ImuDeltaType;
  * \endcode
  *       See more examples in the documentation of CaptureMotion2.
@@ -45,7 +71,7 @@ class ProcessorMotion2 : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size);
+        ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _data_size);
         virtual ~ProcessorMotion2();
 
         // Instructions to the processor:
@@ -172,11 +198,23 @@ class ProcessorMotion2 : public ProcessorBase
         virtual void deltaMinusDelta(const MotionDeltaType& _delta1, const MotionDeltaType& _delta2,
                                      MotionDeltaType& _delta2_minus_delta1) = 0;
 
+        /** \brief Delta zero
+         * \return a delta state equivalent to the null motion.
+         *
+         * Examples (see documentation of the MotionDeltaType):
+         *   - 2D odometry: a 3-vector with all zeros, e.g. Vector3s::Zero()
+         *   - 3D odometry: different examples:
+         *     - delta type is a PQ vector: 7-vector with [0,0,0,0,0,0,1]
+         *     - delta type is a {P,Q} struct: {[0,0,0],[0,0,0,1]}
+         *     - delta type is a {P,R} struct: {[0,0,0],Matrix3s::Identity()}
+         *   - IMU with {P,Q,V,Ab,Wb} struct: {[0,0,0],[0,0,0,1],[0,0,0],[0,0,0],[0,0,0]}
+         */
+        virtual MotionDeltaType deltaZero() = 0;
+
     protected:
         // Attributes
         WolfScalar dt_; ///< Time step
         size_t x_size_;    ///< The size of the state vector
-        size_t delta_size_;   ///< the size of the integrated delta
         size_t data_size_; ///< the size of the incoming data
 
         CaptureMotion2<MotionDeltaType>* origin_ptr_;
@@ -187,17 +225,17 @@ class ProcessorMotion2 : public ProcessorBase
     protected:
         // helpers to avoid allocation
         Eigen::VectorXs x_t_; ///< current state; state at time t
-        Eigen::VectorXs delta_, delta_integrated_; ///< current delta and integrated delta
+        MotionDeltaType delta_, delta_integrated_; ///< current delta and integrated delta
         Eigen::VectorXs data_; ///< current data
 
 };
 
 template<class MotionDeltaType>
 inline ProcessorMotion2<MotionDeltaType>::ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size,
-                                                           size_t _delta_size, size_t _data_size) :
-        ProcessorBase(_tp), dt_(_dt), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), origin_ptr_(
-                nullptr), last_ptr_(nullptr), x_origin_(_state_size), x_last_(_state_size), x_t_(_state_size), delta_(
-                _delta_size), delta_integrated_(_delta_size), data_(_data_size)
+                                                           size_t _data_size) :
+        ProcessorBase(_tp), dt_(_dt), x_size_(_state_size), data_size_(_data_size), origin_ptr_(
+                nullptr), last_ptr_(nullptr), x_origin_(_state_size), x_last_(_state_size), x_t_(_state_size),
+                data_(_data_size)
 {
     //
 }
@@ -235,7 +273,7 @@ inline void ProcessorMotion2<MotionDeltaType>::init(CaptureMotion2<MotionDeltaTy
     origin_ptr_ = _origin_ptr;
     last_ptr_ = _origin_ptr;
     x_origin_ = x_last_ = _origin_ptr->getFramePtr()->getState();
-    delta_ = delta_integrated_ = Eigen::VectorXs::Zero(delta_size_);
+    delta_ = delta_integrated_ = deltaZero();
     getBufferPtr()->clear();
     getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
 }

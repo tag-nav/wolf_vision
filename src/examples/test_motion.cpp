@@ -5,19 +5,22 @@
  *      \author: jsola
  */
 
-
+// Classes under test
 #include "processor_odom_3D.h"
+#include "capture_odom_3D.h"
 
+// Wolf includes
 #include "state_block.h"
 #include "state_quaternion.h"
-#include "capture_odom_3D.h"
 #include "wolf.h"
 
+// STL includes
 #include <map>
 #include <list>
 #include <algorithm>
 #include <iterator>
 
+// General includes
 #include <iostream>
 
 int main()

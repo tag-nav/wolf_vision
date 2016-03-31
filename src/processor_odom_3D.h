@@ -9,12 +9,16 @@
 #define SRC_PROCESSOR_ODOM_3D_H_
 
 #include "processor_motion2.h"
-#include "capture_odom_3D.h"
+
+// Declare the Delta type
+typedef Eigen::VectorXs odo3dDeltaType;
+
+
 
 class ProcessorOdom3d : public ProcessorMotion2<odo3dDeltaType>
 {
     public:
-        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6, 6) {}
+        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6) {}
         virtual ~ProcessorOdom3d(){}
         virtual void data2delta(const Eigen::VectorXs& _data, odo3dDeltaType& _delta);
 
@@ -23,6 +27,10 @@ class ProcessorOdom3d : public ProcessorMotion2<odo3dDeltaType>
         void deltaPlusDelta(const odo3dDeltaType& _delta1, const odo3dDeltaType& _delta2, odo3dDeltaType& _delta1_plus_delta2);
         virtual void deltaMinusDelta(const odo3dDeltaType& _delta1, const odo3dDeltaType& _delta2,
                                      odo3dDeltaType& _delta2_minus_delta1);
+        odo3dDeltaType deltaZero()
+        {
+            return odo3dDeltaType::Zero(6);
+        }
 
     private:
         Eigen::Vector3s pos1_, delta_pos_;

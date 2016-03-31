@@ -10,8 +10,7 @@
 
 #include "capture_motion2.h"
 
-// Declare the Delta type
-typedef Eigen::VectorXs odo3dDeltaType;
+#include "processor_odom_3D.h"
 
 // Declare the class
 class CaptureOdom3D : public CaptureMotion2<odo3dDeltaType>
