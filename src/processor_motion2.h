@@ -20,28 +20,28 @@
  *        Generalized Delta types allow for optimized algorithms.
  *        For example, for 3D odometry, a Eigen::VectorXs(6) is sufficient, and is provided as the default template type,
  * \code
- *   typedef Eigen::VectorXs odo3dDeltaType; // 6-vector with position increment and orientation increment
+ *   typedef Eigen::VectorXs Odo3dDeltaType; // 6-vector with position increment and orientation increment
  * \endcode
  *        If desired, this delta can also be defined as a position delta and an orientation delta,
  * \code
  *   typedef struct {
  *     Eigen::Vector3s     dp;  // Position delta
  *     Eigen::Vector3s dtheta;  // Orientation delta
- *   } odo3dDeltaType;
+ *   } Odo3dDeltaType;
  * \endcode
  *        It can also be defined as a position delta and a quaternion delta,
  * \code
  *   typedef struct {
  *     Eigen::Vector3s    dp;  // Position delta
  *     Eigen::Quaternions dq;  // Quaternion delta
- *   } odo3dDeltaType;
+ *   } Odo3dDeltaType;
  * \endcode
  *        or even as a position delta and a rotation matrix delta,
  * \code
  *   typedef struct {
  *     Eigen::Vector3s dp;     // Position delta
  *     Eigen::Matrix3s dR;     // Rotation matrix delta
- *   } odo3dDeltaType;
+ *   } Odo3dDeltaType;
  * \endcode
  *        As a more challenging example, in an IMU, the Delta type might be defined as:
  * \code
