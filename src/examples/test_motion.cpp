@@ -61,19 +61,20 @@ int main()
 
     std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
 
+    std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->state().transpose() << std::endl;
     for (int i = 1; i <= 5; i++)
     {
+        t += dt;
         cap_ptr->setTimeStamp(t);
         odom3d_ptr->process(cap_ptr);
         std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->state().transpose() << std::endl;
-        t += dt;
     }
 
     std::cout << "\nQuery states at asynchronous time values..." << std::endl;
 
     t = t0;
     WolfScalar dt_2 = dt/2;
-    dt = 0.0027; // new dt
+    dt = 0.0037; // new dt
     for (int i = 1; i <= 20; i++)
     {
         std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t+dt_2).transpose() << std::endl;
