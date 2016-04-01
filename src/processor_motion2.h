@@ -150,9 +150,10 @@ class ProcessorMotion2 : public ProcessorBase
           *
           * The delta-state format must be compatible for integration using
           * the composition functions doing the math in this class: xPlusDelta(), deltaPlusDelta() and deltaMinusDelta().
+          * See the class documentation for some MotionDeltaType suggestions.
           *
-          * The data format is not necessarily the same, as it is the
-          * format of the raw data provided by the Capture,
+          * The data format is generally necessarily the same as the delta format,
+          * as it is the format of the raw data provided by the Capture,
           * which is unaware of the needs of this processor.
           *
           * Additionally, sometimes the data format is in the form of a
@@ -201,7 +202,7 @@ class ProcessorMotion2 : public ProcessorBase
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
          *
-         * Examples (see documentation of the MotionDeltaType):
+         * Examples (see documentation of the the class for info on MotionDeltaType):
          *   - 2D odometry: a 3-vector with all zeros, e.g. Vector3s::Zero()
          *   - 3D odometry: different examples:
          *     - delta type is a PQ vector: 7-vector with [0,0,0,0,0,0,1]
@@ -224,8 +225,8 @@ class ProcessorMotion2 : public ProcessorBase
 
     protected:
         // helpers to avoid allocation
-        Eigen::VectorXs x_t_; ///< current state; state at time t
-        MotionDeltaType delta_, delta_integrated_; ///< current delta and integrated delta
+        Eigen::VectorXs x_t_; ///< state vector at time t
+        MotionDeltaType delta_, delta_integrated_; ///< current delta and integrated deltas
         Eigen::VectorXs data_; ///< current data
 
 };
