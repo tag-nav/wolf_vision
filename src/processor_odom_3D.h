@@ -14,7 +14,7 @@
  *
  * The motion delta, as a composite struct containing position increment and orientation quaternion increment.
  */
-typedef struct Odo3dDeltaType{
+struct Odo3dDeltaType{
         Eigen::Vector3s dp;    ///< Position increment
         Eigen::Quaternions dq; ///< Orientation increment as a quaternion
         Odo3dDeltaType() : dp(0,0,0), dq(1,0,0,0) {};

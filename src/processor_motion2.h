@@ -24,44 +24,44 @@
  * \endcode
  *        If desired, this delta can also be defined as a position delta and an orientation delta,
  * \code
- *   typedef struct {
+ *   struct Odo3dDeltaType {
  *     Eigen::Vector3s     dp;  // Position delta
  *     Eigen::Vector3s dtheta;  // Orientation delta
- *   } Odo3dDeltaType;
+ *   } ;
  * \endcode
  *        It can also be defined as a position delta and a quaternion delta,
  * \code
- *   typedef struct {
+ *   struct Odo3dDeltaType {
  *     Eigen::Vector3s    dp;  // Position delta
  *     Eigen::Quaternions dq;  // Quaternion delta
- *   } Odo3dDeltaType;
+ *   } ;
  * \endcode
  *        or even as a position delta and a rotation matrix delta,
  * \code
- *   typedef struct {
+ *   struct Odo3dDeltaType {
  *     Eigen::Vector3s dp;     // Position delta
  *     Eigen::Matrix3s dR;     // Rotation matrix delta
- *   } Odo3dDeltaType;
+ *   } ;
  * \endcode
  *        As a more challenging example, in an IMU, the Delta type might be defined as:
  * \code
- *   typedef struct {
+ *   struct ImuDeltaType {
  *     Eigen::Vector3s    dp;  // Position delta
  *     Eigen::Quaternions dq;  // Quaternion delta
  *     Eigen::Vector3s    dv;  // Velocity delta
  *     Eigen::Vector3s    dab; // Acc. bias delta
  *     Eigen::Vector3s    dwb; // Gyro bias delta
- *   } ImuDeltaType;
+ *   } ;
  * \endcode
  *     or using a rotation matrix instead of the quaternion,
  * \code
- *   typedef struct {
+ *   struct ImuDeltaType {
  *     Eigen::Vector3s dp;     // Position delta
  *     Eigen::Matrix3s dR;     // Rotation matrix delta
  *     Eigen::Vector3s dv;     // Velocity delta
  *     Eigen::Vector3s dab;    // Acc. bias delta
  *     Eigen::Vector3s dwb;    // Gyro bias delta
- *   } ImuDeltaType;
+ *   } ;
  * \endcode
  *       See more examples in the documentation of CaptureMotion2.
  */
