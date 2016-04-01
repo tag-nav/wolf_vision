@@ -27,7 +27,7 @@ typedef struct Odo3dDeltaType{
 class ProcessorOdom3d : public ProcessorMotion2<Odo3dDeltaType>
 {
     public:
-        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6) {}
+        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6), quat1_(nullptr) {}
         virtual ~ProcessorOdom3d(){}
         virtual void data2delta(const Eigen::VectorXs& _data, Odo3dDeltaType& _delta);
 
@@ -39,7 +39,7 @@ class ProcessorOdom3d : public ProcessorMotion2<Odo3dDeltaType>
         Odo3dDeltaType deltaZero() const;
 
     private:
-        Eigen::Quaternions quat1_;
+        Eigen::Map<const Eigen::Quaternions> quat1_;
 };
 
 
@@ -58,7 +58,8 @@ inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Odo3dDe
     assert(_x.size() == 7 && "Wrong _x vector size");
     assert(_x_plus_delta.size() == 7 && "Wrong _x_plus_delta vector size");
 
-    quat1_ = Eigen::Map<const Eigen::Quaternions>(&_x(3));
+    // Re-map member quaternion on input vector
+    new (&quat1_) Eigen::Map<const Eigen::Quaternions>(_x.data()+3);
 
     _x_plus_delta.head(3) = _x.head(3) + quat1_*_delta.dp;
     _x_plus_delta.tail(4) = (quat1_*_delta.dq).coeffs();
