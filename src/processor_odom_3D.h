@@ -14,9 +14,10 @@
  *
  * The motion delta, as a composite struct containing position increment and orientation quaternion increment.
  */
-typedef struct{
+typedef struct Odo3dDeltaType{
         Eigen::Vector3s dp;    ///< Position increment
         Eigen::Quaternions dq; ///< Orientation increment as a quaternion
+        Odo3dDeltaType() : dp(0,0,0), dq(1,0,0,0) {};
 }Odo3dDeltaType;
 
 
@@ -49,7 +50,7 @@ inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, Odo3dDelta
 
 
 
-// Compose a frame with a delta frame and give a frame (sizes 7, 6, 7 respectively)
+// Compose a frame with a delta frame and give a frame
 inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Odo3dDeltaType& _delta, Eigen::VectorXs& _x_plus_delta)
 {
     assert(_x.size() == 7 && "Wrong _x vector size");
@@ -61,7 +62,7 @@ inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Odo3dDe
     _x_plus_delta.tail(4) = (quat1_*_delta.dq).coeffs();
 }
 
-// Compose two delta-frames and give a delta-frame (all of size 6)
+// Compose two delta-frames and give a delta-frame
 inline void ProcessorOdom3d::deltaPlusDelta(const Odo3dDeltaType& _delta1, const Odo3dDeltaType& _delta2, Odo3dDeltaType& _delta1_plus_delta2)
 {
     _delta1_plus_delta2.dp = _delta1.dp + _delta1.dq*_delta2.dp;
