@@ -78,7 +78,8 @@ inline void ProcessorOdom3d::deltaMinusDelta(const Odo3dDeltaType& _delta1, cons
 
 inline Odo3dDeltaType ProcessorOdom3d::deltaZero()
 {
-    return Odo3dDeltaType {Eigen::Vector3s::Zero(), Eigen::Quaternions::Identity()};
+    //return Odo3dDeltaType {Eigen::Vector3s::Zero(), Eigen::Quaternions::Identity()}; // old explicit version
+    return Odo3dDeltaType(); // Uses default constructor with null motion
 }
 
 #endif /* SRC_PROCESSOR_ODOM_3D_H_ */
