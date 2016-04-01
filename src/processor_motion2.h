@@ -196,11 +196,11 @@ class ProcessorMotion2 : public ProcessorBase
          *   - 2D odometry: a 3-vector with all zeros, e.g. Vector3s::Zero()
          *   - 3D odometry: different examples:
          *     - delta type is a PQ vector: 7-vector with [0,0,0,0,0,0,1]
-         *     - delta type is a {P,Q} struct: {[0,0,0],[0,0,0,1]}
-         *     - delta type is a {P,R} struct: {[0,0,0],Matrix3s::Identity()}
+         *     - delta type is a {P,Q} struct with {[0,0,0],[0,0,0,1]}
+         *     - delta type is a {P,R} struct with {[0,0,0],Matrix3s::Identity()}
          *   - IMU: examples:
-         *     - delta type is a {P,Q,V} struct: {[0,0,0],[0,0,0,1],[0,0,0]}
-         *     - delta type is a {P,Q,V,Ab,Wb} struct: {[0,0,0],[0,0,0,1],[0,0,0],[0,0,0],[0,0,0]}
+         *     - delta type is a {P,Q,V} struct with {[0,0,0],[0,0,0,1],[0,0,0]}
+         *     - delta type is a {P,Q,V,Ab,Wb} struct with {[0,0,0],[0,0,0,1],[0,0,0],[0,0,0],[0,0,0]}
          */
         virtual MotionDeltaType deltaZero() const = 0;
 
@@ -209,7 +209,6 @@ class ProcessorMotion2 : public ProcessorBase
         WolfScalar dt_; ///< Time step
         size_t x_size_;    ///< The size of the state vector
         size_t data_size_; ///< the size of the incoming data
-
         CaptureMotion2<MotionDeltaType>* origin_ptr_;
         CaptureMotion2<MotionDeltaType>* last_ptr_;
 
