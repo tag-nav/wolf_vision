@@ -104,29 +104,20 @@ class ProcessorMotion2 : public ProcessorBase
         /** \brief Provides the delta-state integrated so far
          * \return a reference to the integrated delta state
          */
-        const MotionDeltaType& deltaState() const
-        {
-            return getBufferPtr()->getDelta();
-        }
+        const MotionDeltaType& deltaState() const;
         /** \brief Provides the delta-state between two time-stamps
          * \param _t1 initial time
          * \param _t2 final time
          * \param _Delta the integrated delta-state between _t1 and _t2
          */
-        void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, MotionDeltaType& _Delta)
-        {
-            deltaMinusDelta(getBufferPtr()->getDelta(_t2), getBufferPtr()->getDelta(_t2), _Delta);
-        }
+        void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, MotionDeltaType& _Delta);
         /** Composes the deltas in two pre-integrated Captures
          * \param _cap1_ptr pointer to the first Capture
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
          * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
          */
         void sumDeltas(CaptureMotion2<MotionDeltaType>* _cap1_ptr, CaptureMotion2<MotionDeltaType>* _cap2_ptr,
-                       MotionDeltaType& _delta1_plus_delta2)
-        {
-            deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
-        }
+                       MotionDeltaType& _delta1_plus_delta2);
 
         // Helper functions:
     protected:
@@ -313,7 +304,28 @@ inline const Eigen::VectorXs ProcessorMotion2<MotionDeltaType>::state()
 template<class MotionDeltaType>
 inline const void ProcessorMotion2<MotionDeltaType>::state(Eigen::VectorXs& _x)
 {
-    xPlusDelta(x_origin_, getBufferPtr()->getDelta(), _x);
+    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(), _x);
+}
+
+template<class MotionDeltaType = Eigen::VectorXs>
+inline void ProcessorMotion2<MotionDeltaType>::deltaState(const TimeStamp& _t1, const TimeStamp& _t2,
+                                                          MotionDeltaType& _Delta)
+{
+    deltaMinusDelta(getBufferPtr()->getDelta(_t2), getBufferPtr()->getDelta(_t2), _Delta);
+}
+
+template<class MotionDeltaType = Eigen::VectorXs>
+inline const MotionDeltaType& ProcessorMotion2<MotionDeltaType>::deltaState() const
+{
+    return getBufferPtr()->getDelta();
+}
+
+template<class MotionDeltaType = Eigen::VectorXs>
+inline void ProcessorMotion2<MotionDeltaType>::sumDeltas(CaptureMotion2<MotionDeltaType>* _cap1_ptr,
+                                                         CaptureMotion2<MotionDeltaType>* _cap2_ptr,
+                                                         MotionDeltaType& _delta1_plus_delta2)
+{
+    deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
 }
 
 template<class MotionDeltaType>
