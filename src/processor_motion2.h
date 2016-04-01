@@ -210,6 +210,7 @@ class ProcessorMotion2 : public ProcessorBase
         size_t data_size_; ///< the size of the incoming data
         CaptureMotion2<MotionDeltaType>* origin_ptr_;
         CaptureMotion2<MotionDeltaType>* last_ptr_;
+        CaptureMotion2<MotionDeltaType>* incoming_ptr_;
 
     protected:
         // helpers to avoid allocation
@@ -223,7 +224,8 @@ class ProcessorMotion2 : public ProcessorBase
 template<class MotionDeltaType>
 inline ProcessorMotion2<MotionDeltaType>::ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size,
                                                            size_t _data_size) :
-        ProcessorBase(_tp), x_size_(_state_size), data_size_(_data_size), origin_ptr_(nullptr), last_ptr_(nullptr),
+        ProcessorBase(_tp), x_size_(_state_size), data_size_(_data_size),
+        origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
         dt_(_dt), x_(_state_size), data_(_data_size)
 {
     //
@@ -238,8 +240,8 @@ inline ProcessorMotion2<MotionDeltaType>::~ProcessorMotion2()
 template<class MotionDeltaType>
 inline void ProcessorMotion2<MotionDeltaType>::process(CaptureBase* _incoming_ptr)
 {
-    CaptureMotion2<MotionDeltaType>* incoming_ptr = (CaptureMotion2<MotionDeltaType>*)(_incoming_ptr);
-    integrate(incoming_ptr);
+    incoming_ptr_ = (CaptureMotion2<MotionDeltaType>*)(_incoming_ptr);
+    integrate(incoming_ptr_);
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         // TODO:
@@ -255,6 +257,7 @@ inline void ProcessorMotion2<MotionDeltaType>::init(CaptureMotion2<MotionDeltaTy
 {
     origin_ptr_ = _origin_ptr;
     last_ptr_ = _origin_ptr;
+    incoming_ptr_ = nullptr;
     delta_integrated_ = deltaZero();
     getBufferPtr()->clear();
     getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
