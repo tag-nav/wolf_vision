@@ -208,9 +208,11 @@ class ProcessorMotion2 : public ProcessorBase
          *     - delta type is a PQ vector: 7-vector with [0,0,0,0,0,0,1]
          *     - delta type is a {P,Q} struct: {[0,0,0],[0,0,0,1]}
          *     - delta type is a {P,R} struct: {[0,0,0],Matrix3s::Identity()}
-         *   - IMU with {P,Q,V,Ab,Wb} struct: {[0,0,0],[0,0,0,1],[0,0,0],[0,0,0],[0,0,0]}
+         *   - IMU: examples:
+         *     - delta type is a {P,Q,V} struct: {[0,0,0],[0,0,0,1],[0,0,0]}
+         *     - delta type is a {P,Q,V,Ab,Wb} struct: {[0,0,0],[0,0,0,1],[0,0,0],[0,0,0],[0,0,0]}
          */
-        virtual MotionDeltaType deltaZero() = 0;
+        virtual MotionDeltaType deltaZero() const = 0;
 
     protected:
         // Attributes
@@ -266,15 +268,10 @@ inline void ProcessorMotion2<MotionDeltaType>::process(CaptureBase* _incoming_pt
 template<class MotionDeltaType>
 inline void ProcessorMotion2<MotionDeltaType>::init(CaptureMotion2<MotionDeltaType>* _origin_ptr)
 {
-    //TODO: This fcn needs to change:
-    // input: framebase: this is a Keyframe
-    // create a new non-key Frame and make it last_
-    // first delta in buffer must be zero
-    // we do not need to extract data from any Capture
     origin_ptr_ = _origin_ptr;
     last_ptr_ = _origin_ptr;
     x_origin_ = x_last_ = _origin_ptr->getFramePtr()->getState();
-    delta_ = delta_integrated_ = deltaZero();
+    delta_integrated_ = deltaZero();
     getBufferPtr()->clear();
     getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
 }

@@ -18,7 +18,9 @@ typedef struct Odo3dDeltaType{
         Eigen::Vector3s dp;    ///< Position increment
         Eigen::Quaternions dq; ///< Orientation increment as a quaternion
         Odo3dDeltaType() : dp(0,0,0), dq(1,0,0,0) {};
-}Odo3dDeltaType;
+        void setZero() {dp.setZero(); dq.setIdentity();}
+        static Odo3dDeltaType Zero() {return Odo3dDeltaType();}
+};
 
 
 
@@ -34,7 +36,7 @@ class ProcessorOdom3d : public ProcessorMotion2<Odo3dDeltaType>
         void deltaPlusDelta(const Odo3dDeltaType& _delta1, const Odo3dDeltaType& _delta2, Odo3dDeltaType& _delta1_plus_delta2);
         virtual void deltaMinusDelta(const Odo3dDeltaType& _delta1, const Odo3dDeltaType& _delta2,
                                      Odo3dDeltaType& _delta2_minus_delta1);
-        Odo3dDeltaType deltaZero();
+        Odo3dDeltaType deltaZero() const;
 
     private:
         Eigen::Quaternions quat1_;
@@ -76,10 +78,11 @@ inline void ProcessorOdom3d::deltaMinusDelta(const Odo3dDeltaType& _delta1, cons
     _delta2_minus_delta1.dq = _delta1.dq.conjugate() * _delta2.dq;
 }
 
-inline Odo3dDeltaType ProcessorOdom3d::deltaZero()
+inline Odo3dDeltaType ProcessorOdom3d::deltaZero() const
 {
-    //return Odo3dDeltaType {Eigen::Vector3s::Zero(), Eigen::Quaternions::Identity()}; // old explicit version
-    return Odo3dDeltaType(); // Uses default constructor with null motion
+    //    return Odo3dDeltaType {Eigen::Vector3s::Zero(), Eigen::Quaternions::Identity()}; // explicit version
+    //    return Odo3dDeltaType(); // Uses default constructor with null motion
+    return Odo3dDeltaType::Zero(); //  Uses static member function
 }
 
 #endif /* SRC_PROCESSOR_ODOM_3D_H_ */
