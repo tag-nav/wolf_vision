@@ -33,10 +33,7 @@ class ProcessorOdom3d : public ProcessorMotion2<Odo3dDeltaType>
         void deltaPlusDelta(const Odo3dDeltaType& _delta1, const Odo3dDeltaType& _delta2, Odo3dDeltaType& _delta1_plus_delta2);
         virtual void deltaMinusDelta(const Odo3dDeltaType& _delta1, const Odo3dDeltaType& _delta2,
                                      Odo3dDeltaType& _delta2_minus_delta1);
-        Odo3dDeltaType deltaZero()
-        {
-            return Odo3dDeltaType{Eigen::Vector3s::Zero(),Eigen::Quaternions::Identity()};
-        }
+        Odo3dDeltaType deltaZero();
 
     private:
         Eigen::Quaternions quat1_;
@@ -76,6 +73,11 @@ inline void ProcessorOdom3d::deltaMinusDelta(const Odo3dDeltaType& _delta1, cons
 {
     _delta2_minus_delta1.dp = _delta1.dq.conjugate() * (_delta2.dp - _delta1.dp);
     _delta2_minus_delta1.dq = _delta1.dq.conjugate() * _delta2.dq;
+}
+
+inline Odo3dDeltaType ProcessorOdom3d::deltaZero()
+{
+    return Odo3dDeltaType {Eigen::Vector3s::Zero(), Eigen::Quaternions::Identity()};
 }
 
 #endif /* SRC_PROCESSOR_ODOM_3D_H_ */
