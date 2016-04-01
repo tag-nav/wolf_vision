@@ -152,8 +152,8 @@ class ProcessorMotion2 : public ProcessorBase
           * the composition functions doing the math in this class: xPlusDelta(), deltaPlusDelta() and deltaMinusDelta().
           * See the class documentation for some MotionDeltaType suggestions.
           *
-          * The data format is generally necessarily the same as the delta format,
-          * as it is the format of the raw data provided by the Capture,
+          * The data format is generally not the same as the delta format,
+          * because it is the format of the raw data provided by the Capture,
           * which is unaware of the needs of this processor.
           *
           * Additionally, sometimes the data format is in the form of a
@@ -253,7 +253,6 @@ template<class MotionDeltaType>
 inline void ProcessorMotion2<MotionDeltaType>::process(CaptureBase* _incoming_ptr)
 {
     CaptureMotion2<MotionDeltaType>* incoming_ptr = (CaptureMotion2<MotionDeltaType>*)(_incoming_ptr);
-    //    incoming_ptr->getBufferPtr()->setDt(dt_);
     integrate(incoming_ptr);
     if (voteForKeyFrame() && permittedKeyFrame())
     {
