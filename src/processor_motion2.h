@@ -246,7 +246,7 @@ inline void ProcessorMotion2<MotionDeltaType>::process(CaptureBase* _incoming_pt
     {
         // TODO:
         // Make KeyFrame
-        //        makeKeyFrame(incoming_ptr_);
+        //        makeKeyFrame();
         // Reset the Tracker
         //        reset();
     }
@@ -276,11 +276,11 @@ template<class MotionDeltaType>
 inline void ProcessorMotion2<MotionDeltaType>::makeKeyFrame(const TimeStamp& _ts)
 {
     //TODO: see how to adapt this code from ProcessorTracker::makeKeyFrame(void)
-    //    // Create a new non-key Frame in the Trajectory with the incoming Capture
-    //    getTop()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
-    //    getTop()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
-    //    // Make the last Capture's Frame a KeyFrame so that it gets into the solver
-    //    last_ptr_->getFramePtr()->setKey();
+    // Create a new non-key Frame in the Trajectory with the incoming Capture
+    getTop()->createFrame(NON_KEY_FRAME, state(_ts), _ts);
+    getTop()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+    // Make the last Capture's Frame a KeyFrame so that it gets into the solver
+    last_ptr_->getFramePtr()->setKey();
 }
 
 template<class MotionDeltaType>
