@@ -306,20 +306,20 @@ inline const void ProcessorMotion2<MotionDeltaType>::state(Eigen::VectorXs& _x)
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(), _x);
 }
 
-template<class MotionDeltaType = Eigen::VectorXs>
+template<class MotionDeltaType>
 inline void ProcessorMotion2<MotionDeltaType>::deltaState(const TimeStamp& _t1, const TimeStamp& _t2,
                                                           MotionDeltaType& _Delta)
 {
     deltaMinusDelta(getBufferPtr()->getDelta(_t2), getBufferPtr()->getDelta(_t2), _Delta);
 }
 
-template<class MotionDeltaType = Eigen::VectorXs>
+template<class MotionDeltaType>
 inline const MotionDeltaType& ProcessorMotion2<MotionDeltaType>::deltaState() const
 {
     return getBufferPtr()->getDelta();
 }
 
-template<class MotionDeltaType = Eigen::VectorXs>
+template<class MotionDeltaType>
 inline void ProcessorMotion2<MotionDeltaType>::sumDeltas(CaptureMotion2<MotionDeltaType>* _cap1_ptr,
                                                          CaptureMotion2<MotionDeltaType>* _cap2_ptr,
                                                          MotionDeltaType& _delta1_plus_delta2)
