@@ -74,18 +74,22 @@ int main()
 
     t = t0;
     WolfScalar dt_2 = dt/2;
-    dt = 0.0037; // new dt
+    dt = 0.0045; // new dt
     for (int i = 1; i <= 20; i++)
     {
         std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t+dt_2).transpose() << std::endl;
         t += dt;
     }
+    std::cout << "       ^^^^^^^   After the last time-stamp the buffer keeps returning the last member." << std::endl;
+
+
+
+
 
 
     std::cout << "\n\nTrying a std::map as the buffer container <-- NOT WORKING: need exact key" << std::endl;
 
     WolfScalar x;
-
     std::map<TimeStamp, WolfScalar> buffer_map;
     t.set(0);
     x = 0;
@@ -101,6 +105,9 @@ int main()
         t.set(i/4);
         std::cout << "query (" << t.get() << "," << buffer_map[t] << ")" << std::endl;
     }
+
+
+
 
 
     std::cout << "\n\nTrying a std::list and std::find_if as the buffer container <-- WORKING: can use comparator '<' for evaluating key" << std::endl;
