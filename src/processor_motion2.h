@@ -206,7 +206,6 @@ class ProcessorMotion2 : public ProcessorBase
 
     protected:
         // Attributes
-        WolfScalar dt_; ///< Time step
         size_t x_size_;    ///< The size of the state vector
         size_t data_size_; ///< the size of the incoming data
         CaptureMotion2<MotionDeltaType>* origin_ptr_;
@@ -214,6 +213,7 @@ class ProcessorMotion2 : public ProcessorBase
 
     protected:
         // helpers to avoid allocation
+        WolfScalar dt_; ///< Time step
         Eigen::VectorXs x_; ///< state temporary
         MotionDeltaType delta_, delta_integrated_; ///< current delta and integrated deltas
         Eigen::VectorXs data_; ///< current data
