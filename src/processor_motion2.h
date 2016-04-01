@@ -78,7 +78,6 @@ class ProcessorMotion2 : public ProcessorBase
 
         virtual void process(CaptureBase* _incoming_ptr);
         void init(CaptureMotion2<MotionDeltaType>* _origin_ptr);
-        void update();
         void reset(const TimeStamp& _ts);
         void makeKeyFrame(const TimeStamp& _ts);
 
@@ -91,7 +90,7 @@ class ProcessorMotion2 : public ProcessorBase
         /** \brief Gets a constant reference to the state integrated so far
          * \return the state vector
          */
-        const Eigen::VectorXs& state();
+        const Eigen::VectorXs state();
         /** \brief Fills the state corresponding to the provided time-stamp
          * \param _t the time stamp
          * \param _x the returned state
@@ -222,12 +221,10 @@ class ProcessorMotion2 : public ProcessorBase
 
         CaptureMotion2<MotionDeltaType>* origin_ptr_;
         CaptureMotion2<MotionDeltaType>* last_ptr_;
-        Eigen::VectorXs x_origin_; ///< state at the origin Capture
-        Eigen::VectorXs x_last_; ///< state at the last Capture
 
     protected:
         // helpers to avoid allocation
-        Eigen::VectorXs x_t_; ///< state vector at time t
+        Eigen::VectorXs x_; ///< state temporary
         MotionDeltaType delta_, delta_integrated_; ///< current delta and integrated deltas
         Eigen::VectorXs data_; ///< current data
 
@@ -236,9 +233,8 @@ class ProcessorMotion2 : public ProcessorBase
 template<class MotionDeltaType>
 inline ProcessorMotion2<MotionDeltaType>::ProcessorMotion2(ProcessorType _tp, WolfScalar _dt, size_t _state_size,
                                                            size_t _data_size) :
-        ProcessorBase(_tp), dt_(_dt), x_size_(_state_size), data_size_(_data_size), origin_ptr_(
-                nullptr), last_ptr_(nullptr), x_origin_(_state_size), x_last_(_state_size), x_t_(_state_size),
-                data_(_data_size)
+        ProcessorBase(_tp), x_size_(_state_size), data_size_(_data_size), origin_ptr_(nullptr), last_ptr_(nullptr),
+        dt_(_dt), x_(_state_size), data_(_data_size)
 {
     //
 }
@@ -269,17 +265,9 @@ inline void ProcessorMotion2<MotionDeltaType>::init(CaptureMotion2<MotionDeltaTy
 {
     origin_ptr_ = _origin_ptr;
     last_ptr_ = _origin_ptr;
-    x_origin_ = x_last_ = _origin_ptr->getFramePtr()->getState();
     delta_integrated_ = deltaZero();
     getBufferPtr()->clear();
     getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
-}
-
-template<class MotionDeltaType>
-inline void ProcessorMotion2<MotionDeltaType>::update()
-{
-    x_origin_ = origin_ptr_->getFramePtr()->getState();
-    state(x_last_);
 }
 
 template<class MotionDeltaType>
@@ -305,21 +293,21 @@ inline void ProcessorMotion2<MotionDeltaType>::makeKeyFrame(const TimeStamp& _ts
 template<class MotionDeltaType>
 inline Eigen::VectorXs ProcessorMotion2<MotionDeltaType>::state(const TimeStamp& _ts)
 {
-    state(_ts, x_t_);
-    return x_t_;
+    state(_ts, x_);
+    return x_;
 }
 
 template<class MotionDeltaType>
 inline void ProcessorMotion2<MotionDeltaType>::state(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
-    xPlusDelta(x_origin_, getBufferPtr()->getDelta(_ts), _x);
+    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(_ts), _x);
 }
 
 template<class MotionDeltaType>
-inline const Eigen::VectorXs& ProcessorMotion2<MotionDeltaType>::state()
+inline const Eigen::VectorXs ProcessorMotion2<MotionDeltaType>::state()
 {
-    state(x_last_);
-    return x_last_;
+    state(x_);
+    return x_;
 }
 
 template<class MotionDeltaType>
