@@ -153,7 +153,7 @@ inline void TimeStamp::setToNow()
 {
     timeval ts;
     gettimeofday(&ts, NULL);
-    time_stamp_ = (WolfScalar)(ts.tv_sec + ts.tv_usec / 1e6);
+    time_stamp_ = (WolfScalar)(ts.tv_sec) + (WolfScalar)(ts.tv_usec) / 1e6;
 }
 
 inline void TimeStamp::set(const WolfScalar ts)
@@ -163,12 +163,12 @@ inline void TimeStamp::set(const WolfScalar ts)
 
 inline void TimeStamp::set(const unsigned long int sec, const unsigned long int nanosec)
 {
-    time_stamp_ = (WolfScalar)((sec)) + (WolfScalar)((nanosec)) / (WolfScalar)((1e9));
+    time_stamp_ = (WolfScalar)(sec) + (WolfScalar)(nanosec) / (WolfScalar)(1e9);
 }
 
 inline void TimeStamp::set(const timeval& ts)
 {
-    time_stamp_ = (WolfScalar)(ts.tv_sec + ts.tv_usec / 1e6);
+    time_stamp_ = (WolfScalar)(ts.tv_sec) + (WolfScalar)(ts.tv_usec) / 1e6;
 }
 
 inline WolfScalar TimeStamp::get() const
