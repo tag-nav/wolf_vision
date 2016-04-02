@@ -174,7 +174,7 @@ class WolfProblem: public NodeBase
 
         /** \brief get top node
          */
-        virtual WolfProblem* getTop();
+        virtual WolfProblem* getWolfProblem();
 
         /** \brief Returns a true (is top)
          */
@@ -238,7 +238,7 @@ inline std::list<unsigned int>* WolfProblem::getConstraintRemoveList()
     return &constraint_remove_list_;
 }
 
-inline WolfProblem* WolfProblem::getTop()
+inline WolfProblem* WolfProblem::getWolfProblem()
 {
     return this;
 }
