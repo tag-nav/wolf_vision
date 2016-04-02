@@ -5,6 +5,9 @@
 //wolf includes
 #include "wolf.h"
 
+#include <sys/time.h>
+
+
 //C, std
 #include <iostream>
 
@@ -47,21 +50,17 @@ class TimeStamp
          * Destructor
          *
          */
-        virtual ~TimeStamp();
+        ~TimeStamp();
 
         /** \brief Time stamp to now
-         *
-         * Sets time stamp to now
-         *
          */
         void setToNow();
 
         /** \brief Set time stamp
          *
          * Sets time stamp to a given value passed as a timeval struct
-         *
          */
-        void set(const timeval & ts);
+        void set(const timeval& ts);
 
         /** \brief Set time stamp
          *
@@ -98,47 +97,138 @@ class TimeStamp
          */
         unsigned long int getNanoSeconds() const;
 
-        /** \brief Prints time stamp to a given ostream 
+        /** \brief Assignement operator
          * 
-         * Prints time stamp to a given ostream 
+         * Assignement operator
          * 
          */
-        void print(std::ostream & ost = std::cout) const;
+        void operator =(const WolfScalar& ts);
 
         /** \brief Assignement operator
          * 
          * Assignement operator
          * 
          */
-        void operator=(const WolfScalar & ts);
-
-        /** \brief Assignement operator
-         * 
-         * Assignement operator
-         * 
-         */
-        void operator=(const TimeStamp & ts);
+        void operator =(const TimeStamp& ts);
 
         /** \brief comparison operator
          * 
          * Comparison operator
          * 
          */
-        bool operator<(const TimeStamp & ts) const;
+        bool operator <(const TimeStamp& ts) const;
 
         /** \brief comparison operator
          * 
          * Comparison operator
          * 
          */
-        bool operator<=(const TimeStamp & ts) const;
+        bool operator <=(const TimeStamp& ts) const;
 
         /** \brief difference operator
          * 
          * difference operator
          * 
          */
-        WolfScalar operator-(const TimeStamp & ts) const;
+        WolfScalar operator -(const TimeStamp& ts) const;
+
+        /** \brief Add-assign operator
+         */
+        void operator +=(const WolfScalar& dt);
+
+        /** \brief Add-assign operator
+         */
+        TimeStamp operator +(const WolfScalar& dt);
+
+        /** \brief Prints time stamp to a given ostream
+         *
+         * Prints time stamp to a given ostream
+         *
+         */
+        void print(std::ostream & ost = std::cout) const;
 
 };
+
+inline void TimeStamp::setToNow()
+{
+    timeval ts;
+    gettimeofday(&ts, NULL);
+    time_stamp_ = (WolfScalar)(((ts.tv_sec + ts.tv_usec / 1e6)));
+}
+
+inline void TimeStamp::set(const WolfScalar ts)
+{
+    time_stamp_ = ts;
+}
+
+inline void TimeStamp::set(const unsigned long int sec, const unsigned long int nanosec)
+{
+    time_stamp_ = (WolfScalar)((sec)) + (WolfScalar)((nanosec)) / (WolfScalar)((1e9));
+}
+
+inline void TimeStamp::set(const timeval& ts)
+{
+    time_stamp_ = (WolfScalar)(((ts.tv_sec + ts.tv_usec / 1e6)));
+}
+
+inline WolfScalar TimeStamp::get() const
+{
+    return time_stamp_;
+}
+
+inline unsigned long int TimeStamp::getSeconds() const
+{
+    unsigned long int ts;
+    ts = (unsigned long int)((floor(time_stamp_)));
+    return ts;
+}
+
+inline unsigned long int TimeStamp::getNanoSeconds() const
+{
+    WolfScalar ts;
+    ts = (WolfScalar)((floor(time_stamp_)));
+    return (unsigned long int)((((time_stamp_ - ts) * 1e9)));
+}
+
+inline void TimeStamp::operator =(const TimeStamp& ts)
+{
+    time_stamp_ = ts.get();
+}
+
+inline void TimeStamp::operator =(const WolfScalar& ts)
+{
+    time_stamp_ = ts;
+}
+
+inline bool TimeStamp::operator <(const TimeStamp& ts) const
+{
+    if (time_stamp_ < ts.get())
+        return true;
+    else
+        return false;
+}
+
+inline bool TimeStamp::operator <=(const TimeStamp& ts) const
+{
+    if (time_stamp_ <= ts.get())
+        return true;
+    else
+        return false;
+}
+
+inline WolfScalar TimeStamp::operator -(const TimeStamp& ts) const
+{
+    return (time_stamp_ - ts.get());
+}
+
+inline void TimeStamp::operator +=(const WolfScalar& dt)
+{
+    time_stamp_ += dt;
+}
+
+inline TimeStamp TimeStamp::operator +(const WolfScalar& dt)
+{
+    return TimeStamp(time_stamp_ + dt);
+}
+
 #endif

@@ -133,7 +133,7 @@ class NodeLinked : public NodeBase
          * 
          * TODO: Review if it could return a pointer to a derived class instead of NodeBase JVN: I tried to do so...
          **/
-        virtual WolfProblem* getTop();
+        virtual WolfProblem* getWolfProblem();
 
 
     protected:
@@ -307,10 +307,10 @@ inline void NodeLinked<UpperType, LowerType>::removeDownNode(const LowerNodeIter
 }
 
 template<class UpperType, class LowerType>
-WolfProblem* NodeLinked<UpperType, LowerType>::getTop()
+WolfProblem* NodeLinked<UpperType, LowerType>::getWolfProblem()
 {
     if (up_node_ptr_ != nullptr)
-        return up_node_ptr_->getTop();
+        return up_node_ptr_->getWolfProblem();
     return nullptr;
 }
 

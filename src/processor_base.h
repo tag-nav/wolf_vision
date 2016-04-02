@@ -51,7 +51,7 @@ inline SensorBase* ProcessorBase::getSensorPtr()
 
 inline bool ProcessorBase::permittedKeyFrame()
 {
-    return getTop()->permitKeyFrame(this);
+    return getWolfProblem()->permitKeyFrame(this);
 }
 
 #endif

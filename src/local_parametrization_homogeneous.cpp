@@ -53,7 +53,6 @@ bool LocalParametrizationHomogeneous::computeJacobian(const Eigen::Map<const Eig
     assert(_h.size() == global_size_ && "Wrong size of input quaternion.");
     assert(_jacobian.rows() == global_size_ && _jacobian.cols() == local_size_ && "Wrong size of Jacobian matrix.");
 
-    using namespace Eigen;
     _jacobian << -_h(0), -_h(1), -_h(2),
                   _h(3),  _h(2), -_h(1),
                  -_h(2),  _h(3),  _h(0),

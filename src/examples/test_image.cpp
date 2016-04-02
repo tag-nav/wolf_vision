@@ -46,9 +46,9 @@ int main(int argc, char** argv)
     SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero()), intr,img_width,img_height);
 
 
-    WolfProblem* wolf_problem_ = new WolfProblem(PO_3D);
+    WolfProblem* wolf_problem_ = new WolfProblem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(360,640,30,0,0.5f,7,7,5);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(360,640,30,0,0.5f,7,7,10);
     sen_cam_->addProcessor(p_brisk);
 
 
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
     p_brisk->init(capture_brisk_ptr);
 
-    cv::namedWindow("Keypoint drawing");    // Creates a window for display.
+    //cv::namedWindow("Keypoint drawing");    // Creates a window for display.
     while(f<400)
     {
         capture >> frame;
@@ -83,8 +83,6 @@ int main(int argc, char** argv)
         frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
         wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
         frm_ptr->addCapture(capture_brisk_ptr);
-
-        p_brisk->setIncomingPtr(capture_brisk_ptr);
 
         clock_t t1 = clock();
         p_brisk->process(capture_brisk_ptr);

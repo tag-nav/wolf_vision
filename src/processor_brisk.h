@@ -23,6 +23,8 @@ protected:
     cv::BRISK brisk_;               //brisk object
     ActiveSearchGrid act_search_grid_;
     unsigned int min_features_th_;
+    bool known_or_new_features_ = false;
+    cv::Mat image_last_, image_incoming_;
 
     /** \brief Initialize one landmark
      *
@@ -95,7 +97,7 @@ public:
 
 private:
 
-    virtual unsigned int processFeaturesForMatching(cv::Mat _image, FeatureBaseList* _feature_list_in, FeatureBaseList & _feature_list_out);
+    virtual unsigned int track(const FeatureBaseList& _feature_list_in, FeatureBaseList & _feature_list_out);
 };
 
 #endif // PROCESSOR_BRISK_H

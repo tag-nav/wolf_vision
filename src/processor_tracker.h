@@ -104,6 +104,12 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual unsigned int detectNewFeatures() = 0;
 
+        /** \brief Track provided features from \b last to \b incoming
+         * \param _feature_list_in input list of features in \b last to track
+         * \param _feature_list_out returned list of features found in \b incoming
+         */
+        virtual unsigned int track(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out) = 0;
+
         /** \brief Create one landmark
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
@@ -125,6 +131,7 @@ class ProcessorTracker : public ProcessorBase
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, NodeBase* _node_ptr) = 0;
+
 
 
         // From now on, all functions are already implemented.
@@ -187,18 +194,18 @@ class ProcessorTracker : public ProcessorBase
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
-        FeatureBaseList new_features_list_; ///< List of new features for landmark initialization and tracker reset.
-        FeatureBaseList new_features_list_incoming_;
+        FeatureBaseList new_features_list_last_; ///< List of new features in \b last for landmark initialization and new key-frame creation.
+        FeatureBaseList new_features_list_incoming_; ///< list of the new features of \b last tracked in \b incoming
 };
 
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesList()
 {
-    return new_features_list_;
+    return new_features_list_last_;
 }
 
 inline void ProcessorTracker::addNewFeature(FeatureBase* _feature_ptr)
 {
-    new_features_list_.push_back(_feature_ptr);
+    new_features_list_last_.push_back(_feature_ptr);
 }
 
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
@@ -267,7 +274,7 @@ inline void ProcessorTracker::setIncomingPtr(CaptureBase* const _incoming_ptr)
 inline void ProcessorTracker::advance()
 {
     last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-    last_ptr_->destruct(); // Destruct now the obsolete last before reassigning a new pointer
+    //last_ptr_->destruct(); // TODO: JS->JV why this does not work?? Destruct now the obsolete last before reassigning a new pointer
     last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
     incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
