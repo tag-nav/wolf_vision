@@ -91,8 +91,8 @@ typedef AngleAxis<WolfScalar> AngleAxiss;                 ///< Angle-Axis of rea
  */
 typedef enum
 {
-    TOP, ///< root node location. This is the one that commands jobs down the tree.
-    MID, ///< middle nodes. These delegate jobs to lower nodes.
+    TOP,   ///< root node location. This is the one that commands jobs down the tree.
+    MID,   ///< middle nodes. These delegate jobs to lower nodes.
     BOTTOM ///< lowest level nodes. These are the ones that do not delegate any longer and have to do the job.
 } NodeLocation;
 
