@@ -7,19 +7,11 @@
 #include "glog/logging.h"
 
 //wolf includes
-#include "auto_diff_cost_function_wrapper.h"
+#include "derived_constraint_auto_diff_cost_function.h"
 #include "cost_function_wrapper.h"
 #include "local_parametrization_wrapper.h"
 #include "../wolf.h"
 #include "../state_block.h"
-#include "../constraint_sparse.h"
-#include "../constraint_fix.h"
-#include "../constraint_gps_2D.h"
-#include "../constraint_gps_pseudorange_3D.h"
-#include "../constraint_gps_pseudorange_2D.h"
-#include "../constraint_odom_2D.h"
-#include "../constraint_corner_2D.h"
-#include "../constraint_container.h"
 
 /** \brief Enumeration of covariance blocks to be computed
  *
@@ -55,7 +47,7 @@ class CeresManager
 
 		void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
 
-		void update(const bool _self_auto_diff = false, const bool _apply_loss_function = false);
+		void update(const bool _self_auto_diff = true, const bool _apply_loss_function = false);
 
 		void addConstraint(ConstraintBase* _corr_ptr, const bool _self_auto_diff, const bool _apply_loss);
 
