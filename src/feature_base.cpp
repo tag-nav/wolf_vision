@@ -3,7 +3,7 @@
 #include "capture_base.h"
 
 FeatureBase::FeatureBase(FeatureType _tp, unsigned int _dim_measurement) :
-    NodeLinked(MID, "FEATURE"),
+    NodeConstrained(MID, "FEATURE"),
     type_(_tp),
     measurement_(_dim_measurement)
 {
@@ -11,7 +11,7 @@ FeatureBase::FeatureBase(FeatureType _tp, unsigned int _dim_measurement) :
 }
 
 FeatureBase::FeatureBase(FeatureType _tp, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
-	NodeLinked(MID, "FEATURE"),
+	NodeConstrained(MID, "FEATURE"),
     type_(_tp),
 	measurement_(_measurement),
 	measurement_covariance_(_meas_covariance)
@@ -26,10 +26,10 @@ FeatureBase::~FeatureBase()
 	//std::cout << "deleting FeatureBase " << nodeId() << std::endl;
     is_deleting_ = true;
 
-    while (!constrained_by_list_.empty())
+    while (!getConstrainedByListPtr()->empty())
     {
         //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-        constrained_by_list_.front()->destruct();
+        getConstrainedByListPtr()->front()->destruct();
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
@@ -39,22 +39,7 @@ void FeatureBase::addConstraint(ConstraintBase* _co_ptr)
 {
     addDownNode(_co_ptr);
     // add constraint to be added in solver
-    getTop()->addConstraintPtr(_co_ptr);
-}
-
-void FeatureBase::addConstrainedBy(ConstraintBase* _ctr_ptr)
-{
-    constrained_by_list_.push_back(_ctr_ptr);
-}
-
-void FeatureBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
-{
-    constrained_by_list_.remove(_ctr_ptr);
-}
-
-unsigned int FeatureBase::getHits() const
-{
-    return constrained_by_list_.size();
+    getWolfProblem()->addConstraintPtr(_co_ptr);
 }
 
 FrameBase* FeatureBase::getFramePtr() const

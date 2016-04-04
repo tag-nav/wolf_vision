@@ -194,18 +194,18 @@ class ProcessorTracker : public ProcessorBase
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
-        FeatureBaseList new_features_list_; ///< List of new features for landmark initialization and tracker reset.
-        FeatureBaseList new_features_list_incoming_;
+        FeatureBaseList new_features_list_last_; ///< List of new features in \b last for landmark initialization and new key-frame creation.
+        FeatureBaseList new_features_list_incoming_; ///< list of the new features of \b last tracked in \b incoming
 };
 
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesList()
 {
-    return new_features_list_;
+    return new_features_list_last_;
 }
 
 inline void ProcessorTracker::addNewFeature(FeatureBase* _feature_ptr)
 {
-    new_features_list_.push_back(_feature_ptr);
+    new_features_list_last_.push_back(_feature_ptr);
 }
 
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()

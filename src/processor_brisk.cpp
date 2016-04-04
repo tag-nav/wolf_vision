@@ -83,6 +83,7 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
         std::cout << "keypoint: " << _kp.pt << std::endl;
     }
     cv::imshow("Keypoint drawing",image);
+
 }
 
 
@@ -201,7 +202,7 @@ void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
     ProcessorTracker::process(_incoming_ptr);
     std::cout << std::endl << "<---- end process ---->" << std::endl << std::endl;
     drawFeatures(getLastPtr());
-    cv::waitKey(0);
+    cv::waitKey(30);
 }
 
 

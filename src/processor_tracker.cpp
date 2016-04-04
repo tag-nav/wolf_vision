@@ -58,32 +58,34 @@ unsigned int ProcessorTracker::processNewFeatures()
      * At the end, all new Features are appended to the lists of known Features in
      * the last and incoming Captures.
      */
-    // We first need to populate the Capture with new Features
+    // We first need to populate the \b last Capture with new Features
     unsigned int n = detectNewFeatures();
     if (usesLandmarks())
     {
-        for (FeatureBase* feature_ptr : new_features_list_)
+        for (FeatureBase* feature_ptr : new_features_list_last_)
         {
             LandmarkBase* lmk_ptr = createLandmark(feature_ptr);
             ConstraintBase* constr_ptr = createConstraint(feature_ptr, lmk_ptr);
-            getTop()->addLandmark(lmk_ptr);
+            getWolfProblem()->addLandmark(lmk_ptr);
             feature_ptr->addConstraint(constr_ptr);
         }
     } // Done with Landmark creation
 
-    track(new_features_list_, new_features_list_incoming_);
+    track(new_features_list_last_, new_features_list_incoming_);
 
     // Append all new Features to the Capture's list of Features
-    last_ptr_->getFeatureListPtr()->splice(last_ptr_->getFeatureListPtr()->end(), new_features_list_);
+    last_ptr_->getFeatureListPtr()->splice(last_ptr_->getFeatureListPtr()->end(), new_features_list_last_);
     incoming_ptr_->getFeatureListPtr()->splice(incoming_ptr_->getFeatureListPtr()->end(), new_features_list_incoming_);
+
+    // return the number of new features detected in \b last
     return n;
 }
 
 void ProcessorTracker::makeKeyFrame()
 {
     // Create a new non-key Frame in the Trajectory with the incoming Capture
-    getTop()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
-    getTop()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+    getWolfProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+    getWolfProblem()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
     // Make the last Capture's Frame a KeyFrame so that it gets into the solver
     last_ptr_->getFramePtr()->setKey();
 }

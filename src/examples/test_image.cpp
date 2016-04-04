@@ -48,14 +48,14 @@ int main(int argc, char** argv)
 
     WolfProblem* wolf_problem_ = new WolfProblem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(360,640,30,0,0.5f,7,7,10);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,30,0,0.5f,7,7,10);
     sen_cam_->addProcessor(p_brisk);
 
 
     unsigned int f = 0;
     const char * filename = "/home/jtarraso/Vídeos/House interior.mp4";
     //const char * filename = "/home/jtarraso/Descargas/gray.mp4";
-    cv::VideoCapture capture(filename);
+    cv::VideoCapture capture(0);
     cv::Mat frame;
 
     // CaptureImage* capture_brisk_ptr;
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
     p_brisk->init(capture_brisk_ptr);
 
-    //cv::namedWindow("Keypoint drawing");    // Creates a window for display.
+    cv::namedWindow("Keypoint drawing");    // Creates a window for display.
     while(f<400)
     {
         capture >> frame;
