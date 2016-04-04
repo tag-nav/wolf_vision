@@ -77,6 +77,7 @@ class ProcessorMotion2 : public ProcessorBase
         // Instructions to the processor:
 
         virtual void process(CaptureBase* _incoming_ptr);
+        virtual bool voteForKeyFrame(){return false;}
         void init(CaptureMotion2<MotionDeltaType>* _origin_ptr);
         void reset(const TimeStamp& _ts);
         void makeKeyFrame(const TimeStamp& _ts);
