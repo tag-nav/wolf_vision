@@ -35,7 +35,7 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
          *
          * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame(){return false;}
+        virtual bool voteForKeyFrame() = 0;
 
         virtual bool permittedKeyFrame() final;
 

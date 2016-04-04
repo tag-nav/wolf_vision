@@ -145,6 +145,8 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void process(CaptureBase* const _incoming_ptr);
 
+        virtual bool voteForKeyFrame(){return false;}
+
         /** \brief Initialize tracker.
          */
         void init(CaptureBase* _origin_ptr);
