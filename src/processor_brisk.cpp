@@ -190,7 +190,7 @@ bool ProcessorBrisk::voteForKeyFrame()
     std::cout << "Thereshold: " << min_features_th_ << std::endl;
     std::cout << "Feature_list size: " << ((CaptureImage*)getIncomingPtr())->getFeatureListPtr()->size() << std::endl;
     std::cout << "<--------------------------------> voteForKeyFrame?: " << (((CaptureImage*)getIncomingPtr())->getFeatureListPtr()->size() < min_features_th_) << std::endl;
-    return (((CaptureImage*)getIncomingPtr())->getFeatureListPtr()->size() < min_features_th_);
+    return (getIncomingPtr()->getFeatureListPtr()->size() < min_features_th_);
     //return 0;
 }
 
