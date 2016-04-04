@@ -1,5 +1,5 @@
-#ifndef TRUNK_SRC_AUTODIFF_COST_FUNCTION_WRAPPER_H_
-#define TRUNK_SRC_AUTODIFF_COST_FUNCTION_WRAPPER_H_
+#ifndef TRUNK_SRC_AUTODIFF_COST_FUNCTION_WRAPPER_BASE_H_
+#define TRUNK_SRC_AUTODIFF_COST_FUNCTION_WRAPPER_BASE_H_
 
 // WOLF
 #include "../wolf.h"
@@ -11,7 +11,7 @@
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE, unsigned int BLOCK_1_SIZE, unsigned int BLOCK_2_SIZE, unsigned int BLOCK_3_SIZE, unsigned int BLOCK_4_SIZE,
           unsigned int BLOCK_5_SIZE, unsigned int BLOCK_6_SIZE, unsigned int BLOCK_7_SIZE, unsigned int BLOCK_8_SIZE, unsigned int BLOCK_9_SIZE>
-class AutoDiffCostFunctionWrapper : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
+class AutoDiffCostFunctionWrapperBase : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                                              BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                                              BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE>
 {
@@ -22,10 +22,21 @@ class AutoDiffCostFunctionWrapper : public ceres::SizedCostFunction<MEASUREMENT_
         ConstraintType* constraint_ptr_;
         unsigned int n_blocks_;
         std::vector<unsigned int> block_sizes_, jacobian_locations_;
+        std::array<WolfJet, BLOCK_0_SIZE>* jets_0_;
+        std::array<WolfJet, BLOCK_1_SIZE>* jets_1_;
+        std::array<WolfJet, BLOCK_2_SIZE>* jets_2_;
+        std::array<WolfJet, BLOCK_3_SIZE>* jets_3_;
+        std::array<WolfJet, BLOCK_4_SIZE>* jets_4_;
+        std::array<WolfJet, BLOCK_5_SIZE>* jets_5_;
+        std::array<WolfJet, BLOCK_6_SIZE>* jets_6_;
+        std::array<WolfJet, BLOCK_7_SIZE>* jets_7_;
+        std::array<WolfJet, BLOCK_8_SIZE>* jets_8_;
+        std::array<WolfJet, BLOCK_9_SIZE>* jets_9_;
+        std::array<WolfJet, MEASUREMENT_SIZE>* residuals_jets_;
 
     public:
 
-        AutoDiffCostFunctionWrapper(ConstraintType* _constraint_ptr) :
+        AutoDiffCostFunctionWrapperBase(ConstraintType* _constraint_ptr) :
             ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                      BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                      BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE>(),
@@ -42,12 +53,45 @@ class AutoDiffCostFunctionWrapper : public ceres::SizedCostFunction<MEASUREMENT_
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE+BLOCK_6_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE+BLOCK_6_SIZE+BLOCK_7_SIZE,
-                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE+BLOCK_6_SIZE+BLOCK_7_SIZE+BLOCK_8_SIZE})
+                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE+BLOCK_6_SIZE+BLOCK_7_SIZE+BLOCK_8_SIZE}),
+            jets_0_(new std::array<WolfJet, BLOCK_0_SIZE>),
+            jets_1_(new std::array<WolfJet, BLOCK_1_SIZE>),
+            jets_2_(new std::array<WolfJet, BLOCK_2_SIZE>),
+            jets_3_(new std::array<WolfJet, BLOCK_3_SIZE>),
+            jets_4_(new std::array<WolfJet, BLOCK_4_SIZE>),
+            jets_5_(new std::array<WolfJet, BLOCK_5_SIZE>),
+            jets_6_(new std::array<WolfJet, BLOCK_6_SIZE>),
+            jets_7_(new std::array<WolfJet, BLOCK_7_SIZE>),
+            jets_8_(new std::array<WolfJet, BLOCK_8_SIZE>),
+            jets_9_(new std::array<WolfJet, BLOCK_9_SIZE>),
+            residuals_jets_(new std::array<WolfJet, MEASUREMENT_SIZE>)
         {
+            // initialize jets
+            unsigned int i, last_jet_idx = 0;
+            for (i = 0; i < BLOCK_0_SIZE; i++)
+                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_1_SIZE; i++)
+                (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_2_SIZE; i++)
+                (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_3_SIZE; i++)
+                (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_4_SIZE; i++)
+                (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_5_SIZE; i++)
+                (*jets_5_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_6_SIZE; i++)
+                (*jets_6_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_7_SIZE; i++)
+                (*jets_7_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_8_SIZE; i++)
+                (*jets_8_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_9_SIZE; i++)
+                (*jets_9_)[i] = WolfJet(0, last_jet_idx++);
 
         };
 
-        virtual ~AutoDiffCostFunctionWrapper()
+        virtual ~AutoDiffCostFunctionWrapperBase()
         {
 
         };
@@ -63,55 +107,44 @@ class AutoDiffCostFunctionWrapper : public ceres::SizedCostFunction<MEASUREMENT_
             // also compute jacobians
             else
             {
-                // create jets
-                WolfJet jets_0[BLOCK_0_SIZE];
-                WolfJet jets_1[BLOCK_1_SIZE];
-                WolfJet jets_2[BLOCK_2_SIZE];
-                WolfJet jets_3[BLOCK_3_SIZE];
-                WolfJet jets_4[BLOCK_4_SIZE];
-                WolfJet jets_5[BLOCK_5_SIZE];
-                WolfJet jets_6[BLOCK_6_SIZE];
-                WolfJet jets_7[BLOCK_7_SIZE];
-                WolfJet jets_8[BLOCK_8_SIZE];
-                WolfJet jets_9[BLOCK_9_SIZE];
-                WolfJet residuals_jets[MEASUREMENT_SIZE];
-
-                // initialize jets
-                unsigned int i, last_jet_idx = 0;
+                // update jets real part
+                unsigned int i;
                 for (i = 0; i < BLOCK_0_SIZE; i++)
-                    jets_0[i] = WolfJet(parameters[0][i], last_jet_idx++);
+                    (*jets_0_)[i].a = parameters[0][i];
                 for (i = 0; i < BLOCK_1_SIZE; i++)
-                    jets_1[i] = WolfJet(parameters[1][i], last_jet_idx++);
+                    (*jets_1_)[i].a = parameters[1][i];
                 for (i = 0; i < BLOCK_2_SIZE; i++)
-                    jets_2[i] = WolfJet(parameters[2][i], last_jet_idx++);
+                    (*jets_2_)[i].a = parameters[2][i];
                 for (i = 0; i < BLOCK_3_SIZE; i++)
-                    jets_3[i] = WolfJet(parameters[3][i], last_jet_idx++);
+                    (*jets_3_)[i].a = parameters[3][i];
                 for (i = 0; i < BLOCK_4_SIZE; i++)
-                    jets_4[i] = WolfJet(parameters[4][i], last_jet_idx++);
+                    (*jets_4_)[i].a = parameters[4][i];
                 for (i = 0; i < BLOCK_5_SIZE; i++)
-                    jets_5[i] = WolfJet(parameters[5][i], last_jet_idx++);
+                    (*jets_5_)[i].a = parameters[5][i];
                 for (i = 0; i < BLOCK_6_SIZE; i++)
-                    jets_6[i] = WolfJet(parameters[6][i], last_jet_idx++);
+                    (*jets_6_)[i].a = parameters[6][i];
                 for (i = 0; i < BLOCK_7_SIZE; i++)
-                    jets_7[i] = WolfJet(parameters[7][i], last_jet_idx++);
+                    (*jets_7_)[i].a = parameters[7][i];
                 for (i = 0; i < BLOCK_8_SIZE; i++)
-                    jets_8[i] = WolfJet(parameters[8][i], last_jet_idx++);
+                    (*jets_8_)[i].a = parameters[8][i];
                 for (i = 0; i < BLOCK_9_SIZE; i++)
-                    jets_9[i] = WolfJet(parameters[9][i], last_jet_idx++);
+                    (*jets_9_)[i].a = parameters[9][i];
 
                 // call functor
-                (*this->constraint_ptr_)(jets_0, jets_1, jets_2, jets_3, jets_4, jets_5, jets_6, jets_7, jets_8, jets_9, residuals_jets);
+                (*this->constraint_ptr_)(jets_0_->data(), jets_1_->data(), jets_2_->data(), jets_3_->data(), jets_4_->data(),
+                                         jets_5_->data(), jets_6_->data(), jets_7_->data(), jets_8_->data(), jets_9_->data(),
+                                         residuals_jets_->data());
 
                 // fill the residual array
                 for (i = 0; i < MEASUREMENT_SIZE; i++)
-                    residuals[i] = residuals_jets[i].a;
+                    residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
                 for (i = 0; i<this->n_blocks_; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                      (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
                                       jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
@@ -122,7 +155,7 @@ class AutoDiffCostFunctionWrapper : public ceres::SizedCostFunction<MEASUREMENT_
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE, unsigned int BLOCK_1_SIZE, unsigned int BLOCK_2_SIZE, unsigned int BLOCK_3_SIZE, unsigned int BLOCK_4_SIZE,
           unsigned int BLOCK_5_SIZE, unsigned int BLOCK_6_SIZE, unsigned int BLOCK_7_SIZE, unsigned int BLOCK_8_SIZE>
-class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
+class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                   BLOCK_0_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE, BLOCK_3_SIZE, BLOCK_4_SIZE,
                                   BLOCK_5_SIZE, BLOCK_6_SIZE, BLOCK_7_SIZE, BLOCK_8_SIZE, 0>
     : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
@@ -136,10 +169,20 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         ConstraintType* constraint_ptr_;
         unsigned int n_blocks_;
         std::vector<unsigned int> block_sizes_, jacobian_locations_;
+        std::array<WolfJet, BLOCK_0_SIZE>* jets_0_;
+        std::array<WolfJet, BLOCK_1_SIZE>* jets_1_;
+        std::array<WolfJet, BLOCK_2_SIZE>* jets_2_;
+        std::array<WolfJet, BLOCK_3_SIZE>* jets_3_;
+        std::array<WolfJet, BLOCK_4_SIZE>* jets_4_;
+        std::array<WolfJet, BLOCK_5_SIZE>* jets_5_;
+        std::array<WolfJet, BLOCK_6_SIZE>* jets_6_;
+        std::array<WolfJet, BLOCK_7_SIZE>* jets_7_;
+        std::array<WolfJet, BLOCK_8_SIZE>* jets_8_;
+        std::array<WolfJet, MEASUREMENT_SIZE>* residuals_jets_;
 
     public:
 
-        AutoDiffCostFunctionWrapper(ConstraintType* _constraint_ptr) :
+        AutoDiffCostFunctionWrapperBase(ConstraintType* _constraint_ptr) :
             ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                      BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                      BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,0>(),
@@ -155,12 +198,41 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE+BLOCK_6_SIZE,
-                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE+BLOCK_6_SIZE+BLOCK_7_SIZE})
+                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE+BLOCK_6_SIZE+BLOCK_7_SIZE}),
+            jets_0_(new std::array<WolfJet, BLOCK_0_SIZE>),
+            jets_1_(new std::array<WolfJet, BLOCK_1_SIZE>),
+            jets_2_(new std::array<WolfJet, BLOCK_2_SIZE>),
+            jets_3_(new std::array<WolfJet, BLOCK_3_SIZE>),
+            jets_4_(new std::array<WolfJet, BLOCK_4_SIZE>),
+            jets_5_(new std::array<WolfJet, BLOCK_5_SIZE>),
+            jets_6_(new std::array<WolfJet, BLOCK_6_SIZE>),
+            jets_7_(new std::array<WolfJet, BLOCK_7_SIZE>),
+            jets_8_(new std::array<WolfJet, BLOCK_8_SIZE>),
+            residuals_jets_(new std::array<WolfJet, MEASUREMENT_SIZE>)
         {
-
+            // initialize jets
+            unsigned int i, last_jet_idx = 0;
+            for (i = 0; i < BLOCK_0_SIZE; i++)
+                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_1_SIZE; i++)
+                (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_2_SIZE; i++)
+                (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_3_SIZE; i++)
+                (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_4_SIZE; i++)
+                (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_5_SIZE; i++)
+                (*jets_5_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_6_SIZE; i++)
+                (*jets_6_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_7_SIZE; i++)
+                (*jets_7_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_8_SIZE; i++)
+                (*jets_8_)[i] = WolfJet(0, last_jet_idx++);
         };
 
-        virtual ~AutoDiffCostFunctionWrapper()
+        virtual ~AutoDiffCostFunctionWrapperBase()
         {
 
         };
@@ -175,52 +247,42 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             // also compute jacobians
             else
             {
-                // create jets
-                WolfJet jets_0[BLOCK_0_SIZE];
-                WolfJet jets_1[BLOCK_1_SIZE];
-                WolfJet jets_2[BLOCK_2_SIZE];
-                WolfJet jets_3[BLOCK_3_SIZE];
-                WolfJet jets_4[BLOCK_4_SIZE];
-                WolfJet jets_5[BLOCK_5_SIZE];
-                WolfJet jets_6[BLOCK_6_SIZE];
-                WolfJet jets_7[BLOCK_7_SIZE];
-                WolfJet jets_8[BLOCK_8_SIZE];
-                WolfJet residuals_jets[MEASUREMENT_SIZE];
-
-                // initialize jets
-                unsigned int i, last_jet_idx = 0;
+                // update jets real part
+                unsigned int i;
                 for (i = 0; i < BLOCK_0_SIZE; i++)
-                    jets_0[i] = WolfJet(parameters[0][i], last_jet_idx++);
+                    (*jets_0_)[i].a = parameters[0][i];
                 for (i = 0; i < BLOCK_1_SIZE; i++)
-                    jets_1[i] = WolfJet(parameters[1][i], last_jet_idx++);
+                    (*jets_1_)[i].a = parameters[1][i];
                 for (i = 0; i < BLOCK_2_SIZE; i++)
-                    jets_2[i] = WolfJet(parameters[2][i], last_jet_idx++);
+                    (*jets_2_)[i].a = parameters[2][i];
                 for (i = 0; i < BLOCK_3_SIZE; i++)
-                    jets_3[i] = WolfJet(parameters[3][i], last_jet_idx++);
+                    (*jets_3_)[i].a = parameters[3][i];
                 for (i = 0; i < BLOCK_4_SIZE; i++)
-                    jets_4[i] = WolfJet(parameters[4][i], last_jet_idx++);
+                    (*jets_4_)[i].a = parameters[4][i];
                 for (i = 0; i < BLOCK_5_SIZE; i++)
-                    jets_5[i] = WolfJet(parameters[5][i], last_jet_idx++);
+                    (*jets_5_)[i].a = parameters[5][i];
                 for (i = 0; i < BLOCK_6_SIZE; i++)
-                    jets_6[i] = WolfJet(parameters[6][i], last_jet_idx++);
+                    (*jets_6_)[i].a = parameters[6][i];
                 for (i = 0; i < BLOCK_7_SIZE; i++)
-                    jets_7[i] = WolfJet(parameters[7][i], last_jet_idx++);
+                    (*jets_7_)[i].a = parameters[7][i];
                 for (i = 0; i < BLOCK_8_SIZE; i++)
-                    jets_8[i] = WolfJet(parameters[8][i], last_jet_idx++);
+                    (*jets_8_)[i].a = parameters[8][i];
 
                 // call functor
-                (*this->constraint_ptr_)(jets_0, jets_1, jets_2, jets_3, jets_4, jets_5, jets_6, jets_7, jets_8, residuals_jets);
+                (*this->constraint_ptr_)(jets_0_->data(), jets_1_->data(), jets_2_->data(), jets_3_->data(), jets_4_->data(),
+                                         jets_5_->data(), jets_6_->data(), jets_7_->data(), jets_8_->data(),
+                                         residuals_jets_->data());
 
                 // fill the residual array
                 for (i = 0; i < MEASUREMENT_SIZE; i++)
-                    residuals[i] = residuals_jets[i].a;
+                    residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
-                for (i = 0; i<n_blocks_; i++)
+                for (i = 0; i<this->n_blocks_; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                      (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
                                       jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
@@ -231,7 +293,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE, unsigned int BLOCK_1_SIZE, unsigned int BLOCK_2_SIZE, unsigned int BLOCK_3_SIZE, unsigned int BLOCK_4_SIZE,
           unsigned int BLOCK_5_SIZE, unsigned int BLOCK_6_SIZE, unsigned int BLOCK_7_SIZE>
-class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
+class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                   BLOCK_0_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE, BLOCK_3_SIZE, BLOCK_4_SIZE,
                                   BLOCK_5_SIZE, BLOCK_6_SIZE, BLOCK_7_SIZE, 0, 0>
     : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
@@ -245,10 +307,19 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         ConstraintType* constraint_ptr_;
         unsigned int n_blocks_;
         std::vector<unsigned int> block_sizes_, jacobian_locations_;
+        std::array<WolfJet, BLOCK_0_SIZE>* jets_0_;
+        std::array<WolfJet, BLOCK_1_SIZE>* jets_1_;
+        std::array<WolfJet, BLOCK_2_SIZE>* jets_2_;
+        std::array<WolfJet, BLOCK_3_SIZE>* jets_3_;
+        std::array<WolfJet, BLOCK_4_SIZE>* jets_4_;
+        std::array<WolfJet, BLOCK_5_SIZE>* jets_5_;
+        std::array<WolfJet, BLOCK_6_SIZE>* jets_6_;
+        std::array<WolfJet, BLOCK_7_SIZE>* jets_7_;
+        std::array<WolfJet, MEASUREMENT_SIZE>* residuals_jets_;
 
     public:
 
-        AutoDiffCostFunctionWrapper(ConstraintType* _constraint_ptr) :
+        AutoDiffCostFunctionWrapperBase(ConstraintType* _constraint_ptr) :
             ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                      BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                      BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,0,0>(),
@@ -263,12 +334,38 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE,
-                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE+BLOCK_6_SIZE})
+                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE+BLOCK_6_SIZE}),
+            jets_0_(new std::array<WolfJet, BLOCK_0_SIZE>),
+            jets_1_(new std::array<WolfJet, BLOCK_1_SIZE>),
+            jets_2_(new std::array<WolfJet, BLOCK_2_SIZE>),
+            jets_3_(new std::array<WolfJet, BLOCK_3_SIZE>),
+            jets_4_(new std::array<WolfJet, BLOCK_4_SIZE>),
+            jets_5_(new std::array<WolfJet, BLOCK_5_SIZE>),
+            jets_6_(new std::array<WolfJet, BLOCK_6_SIZE>),
+            jets_7_(new std::array<WolfJet, BLOCK_7_SIZE>),
+            residuals_jets_(new std::array<WolfJet, MEASUREMENT_SIZE>)
         {
-
+            // initialize jets
+            unsigned int i, last_jet_idx = 0;
+            for (i = 0; i < BLOCK_0_SIZE; i++)
+                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_1_SIZE; i++)
+                (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_2_SIZE; i++)
+                (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_3_SIZE; i++)
+                (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_4_SIZE; i++)
+                (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_5_SIZE; i++)
+                (*jets_5_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_6_SIZE; i++)
+                (*jets_6_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_7_SIZE; i++)
+                (*jets_7_)[i] = WolfJet(0, last_jet_idx++);
         };
 
-        virtual ~AutoDiffCostFunctionWrapper()
+        virtual ~AutoDiffCostFunctionWrapperBase()
         {
 
         };
@@ -283,49 +380,40 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             // also compute jacobians
             else
             {
-                // create jets
-                WolfJet jets_0[BLOCK_0_SIZE];
-                WolfJet jets_1[BLOCK_1_SIZE];
-                WolfJet jets_2[BLOCK_2_SIZE];
-                WolfJet jets_3[BLOCK_3_SIZE];
-                WolfJet jets_4[BLOCK_4_SIZE];
-                WolfJet jets_5[BLOCK_5_SIZE];
-                WolfJet jets_6[BLOCK_6_SIZE];
-                WolfJet jets_7[BLOCK_7_SIZE];
-                WolfJet residuals_jets[MEASUREMENT_SIZE];
-
-                // initialize jets
-                unsigned int i, last_jet_idx = 0;
+                // update jets real part
+                unsigned int i;
                 for (i = 0; i < BLOCK_0_SIZE; i++)
-                    jets_0[i] = WolfJet(parameters[0][i], last_jet_idx++);
+                    (*jets_0_)[i].a = parameters[0][i];
                 for (i = 0; i < BLOCK_1_SIZE; i++)
-                    jets_1[i] = WolfJet(parameters[1][i], last_jet_idx++);
+                    (*jets_1_)[i].a = parameters[1][i];
                 for (i = 0; i < BLOCK_2_SIZE; i++)
-                    jets_2[i] = WolfJet(parameters[2][i], last_jet_idx++);
+                    (*jets_2_)[i].a = parameters[2][i];
                 for (i = 0; i < BLOCK_3_SIZE; i++)
-                    jets_3[i] = WolfJet(parameters[3][i], last_jet_idx++);
+                    (*jets_3_)[i].a = parameters[3][i];
                 for (i = 0; i < BLOCK_4_SIZE; i++)
-                    jets_4[i] = WolfJet(parameters[4][i], last_jet_idx++);
+                    (*jets_4_)[i].a = parameters[4][i];
                 for (i = 0; i < BLOCK_5_SIZE; i++)
-                    jets_5[i] = WolfJet(parameters[5][i], last_jet_idx++);
+                    (*jets_5_)[i].a = parameters[5][i];
                 for (i = 0; i < BLOCK_6_SIZE; i++)
-                    jets_6[i] = WolfJet(parameters[6][i], last_jet_idx++);
+                    (*jets_6_)[i].a = parameters[6][i];
                 for (i = 0; i < BLOCK_7_SIZE; i++)
-                    jets_7[i] = WolfJet(parameters[7][i], last_jet_idx++);
+                    (*jets_7_)[i].a = parameters[7][i];
 
                 // call functor
-                (*this->constraint_ptr_)(jets_0, jets_1, jets_2, jets_3, jets_4, jets_5, jets_6, jets_7, residuals_jets);
+                (*this->constraint_ptr_)(jets_0_->data(), jets_1_->data(), jets_2_->data(), jets_3_->data(), jets_4_->data(),
+                                         jets_5_->data(), jets_6_->data(), jets_7_->data(),
+                                         residuals_jets_->data());
 
                 // fill the residual array
                 for (i = 0; i < MEASUREMENT_SIZE; i++)
-                    residuals[i] = residuals_jets[i].a;
+                    residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
                 for (i = 0; i<n_blocks_; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                      (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
                                       jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
@@ -336,7 +424,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE, unsigned int BLOCK_1_SIZE, unsigned int BLOCK_2_SIZE, unsigned int BLOCK_3_SIZE, unsigned int BLOCK_4_SIZE,
           unsigned int BLOCK_5_SIZE, unsigned int BLOCK_6_SIZE>
-class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
+class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                   BLOCK_0_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE, BLOCK_3_SIZE, BLOCK_4_SIZE,
                                   BLOCK_5_SIZE, BLOCK_6_SIZE, 0, 0, 0>
     : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
@@ -350,10 +438,18 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         ConstraintType* constraint_ptr_;
         unsigned int n_blocks_;
         std::vector<unsigned int> block_sizes_, jacobian_locations_;
+        std::array<WolfJet, BLOCK_0_SIZE>* jets_0_;
+        std::array<WolfJet, BLOCK_1_SIZE>* jets_1_;
+        std::array<WolfJet, BLOCK_2_SIZE>* jets_2_;
+        std::array<WolfJet, BLOCK_3_SIZE>* jets_3_;
+        std::array<WolfJet, BLOCK_4_SIZE>* jets_4_;
+        std::array<WolfJet, BLOCK_5_SIZE>* jets_5_;
+        std::array<WolfJet, BLOCK_6_SIZE>* jets_6_;
+        std::array<WolfJet, MEASUREMENT_SIZE>* residuals_jets_;
 
     public:
 
-        AutoDiffCostFunctionWrapper(ConstraintType* _constraint_ptr) :
+        AutoDiffCostFunctionWrapperBase(ConstraintType* _constraint_ptr) :
             ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                      BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                      BLOCK_5_SIZE,BLOCK_6_SIZE,0,0,0>(),
@@ -367,12 +463,35 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE,
-                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE})
+                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE+BLOCK_5_SIZE}),
+            jets_0_(new std::array<WolfJet, BLOCK_0_SIZE>),
+            jets_1_(new std::array<WolfJet, BLOCK_1_SIZE>),
+            jets_2_(new std::array<WolfJet, BLOCK_2_SIZE>),
+            jets_3_(new std::array<WolfJet, BLOCK_3_SIZE>),
+            jets_4_(new std::array<WolfJet, BLOCK_4_SIZE>),
+            jets_5_(new std::array<WolfJet, BLOCK_5_SIZE>),
+            jets_6_(new std::array<WolfJet, BLOCK_6_SIZE>),
+            residuals_jets_(new std::array<WolfJet, MEASUREMENT_SIZE>)
         {
-
+            // initialize jets
+            unsigned int i, last_jet_idx = 0;
+            for (i = 0; i < BLOCK_0_SIZE; i++)
+                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_1_SIZE; i++)
+                (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_2_SIZE; i++)
+                (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_3_SIZE; i++)
+                (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_4_SIZE; i++)
+                (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_5_SIZE; i++)
+                (*jets_5_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_6_SIZE; i++)
+                (*jets_6_)[i] = WolfJet(0, last_jet_idx++);
         };
 
-        virtual ~AutoDiffCostFunctionWrapper()
+        virtual ~AutoDiffCostFunctionWrapperBase()
         {
 
         };
@@ -387,46 +506,38 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             // also compute jacobians
             else
             {
-                // create jets
-                WolfJet jets_0[BLOCK_0_SIZE];
-                WolfJet jets_1[BLOCK_1_SIZE];
-                WolfJet jets_2[BLOCK_2_SIZE];
-                WolfJet jets_3[BLOCK_3_SIZE];
-                WolfJet jets_4[BLOCK_4_SIZE];
-                WolfJet jets_5[BLOCK_5_SIZE];
-                WolfJet jets_6[BLOCK_6_SIZE];
-                WolfJet residuals_jets[MEASUREMENT_SIZE];
-
-                // initialize jets
-                unsigned int i, last_jet_idx = 0;
+                // update jets real part
+                unsigned int i;
                 for (i = 0; i < BLOCK_0_SIZE; i++)
-                    jets_0[i] = WolfJet(parameters[0][i], last_jet_idx++);
+                    (*jets_0_)[i].a = parameters[0][i];
                 for (i = 0; i < BLOCK_1_SIZE; i++)
-                    jets_1[i] = WolfJet(parameters[1][i], last_jet_idx++);
+                    (*jets_1_)[i].a = parameters[1][i];
                 for (i = 0; i < BLOCK_2_SIZE; i++)
-                    jets_2[i] = WolfJet(parameters[2][i], last_jet_idx++);
+                    (*jets_2_)[i].a = parameters[2][i];
                 for (i = 0; i < BLOCK_3_SIZE; i++)
-                    jets_3[i] = WolfJet(parameters[3][i], last_jet_idx++);
+                    (*jets_3_)[i].a = parameters[3][i];
                 for (i = 0; i < BLOCK_4_SIZE; i++)
-                    jets_4[i] = WolfJet(parameters[4][i], last_jet_idx++);
+                    (*jets_4_)[i].a = parameters[4][i];
                 for (i = 0; i < BLOCK_5_SIZE; i++)
-                    jets_5[i] = WolfJet(parameters[5][i], last_jet_idx++);
+                    (*jets_5_)[i].a = parameters[5][i];
                 for (i = 0; i < BLOCK_6_SIZE; i++)
-                    jets_6[i] = WolfJet(parameters[6][i], last_jet_idx++);
+                    (*jets_6_)[i].a = parameters[6][i];
 
                 // call functor
-                (*this->constraint_ptr_)(jets_0, jets_1, jets_2, jets_3, jets_4, jets_5, jets_6, residuals_jets);
+                (*this->constraint_ptr_)(jets_0_->data(), jets_1_->data(), jets_2_->data(), jets_3_->data(), jets_4_->data(),
+                                         jets_5_->data(), jets_6_->data(),
+                                         residuals_jets_->data());
 
                 // fill the residual array
                 for (i = 0; i < MEASUREMENT_SIZE; i++)
-                    residuals[i] = residuals_jets[i].a;
+                    residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
                 for (i = 0; i<n_blocks_; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                      (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
                                       jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
@@ -437,7 +548,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE, unsigned int BLOCK_1_SIZE, unsigned int BLOCK_2_SIZE, unsigned int BLOCK_3_SIZE, unsigned int BLOCK_4_SIZE,
           unsigned int BLOCK_5_SIZE>
-class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
+class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                   BLOCK_0_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE, BLOCK_3_SIZE, BLOCK_4_SIZE,
                                   BLOCK_5_SIZE, 0, 0, 0, 0>
     : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
@@ -451,10 +562,17 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         ConstraintType* constraint_ptr_;
         unsigned int n_blocks_;
         std::vector<unsigned int> block_sizes_, jacobian_locations_;
+        std::array<WolfJet, BLOCK_0_SIZE>* jets_0_;
+        std::array<WolfJet, BLOCK_1_SIZE>* jets_1_;
+        std::array<WolfJet, BLOCK_2_SIZE>* jets_2_;
+        std::array<WolfJet, BLOCK_3_SIZE>* jets_3_;
+        std::array<WolfJet, BLOCK_4_SIZE>* jets_4_;
+        std::array<WolfJet, BLOCK_5_SIZE>* jets_5_;
+        std::array<WolfJet, MEASUREMENT_SIZE>* residuals_jets_;
 
     public:
 
-        AutoDiffCostFunctionWrapper(ConstraintType* _constraint_ptr) :
+        AutoDiffCostFunctionWrapperBase(ConstraintType* _constraint_ptr) :
             ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                      BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                      BLOCK_5_SIZE,0,0,0,0>(),
@@ -467,12 +585,32 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE,
-                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE})
+                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE+BLOCK_4_SIZE}),
+            jets_0_(new std::array<WolfJet, BLOCK_0_SIZE>),
+            jets_1_(new std::array<WolfJet, BLOCK_1_SIZE>),
+            jets_2_(new std::array<WolfJet, BLOCK_2_SIZE>),
+            jets_3_(new std::array<WolfJet, BLOCK_3_SIZE>),
+            jets_4_(new std::array<WolfJet, BLOCK_4_SIZE>),
+            jets_5_(new std::array<WolfJet, BLOCK_5_SIZE>),
+            residuals_jets_(new std::array<WolfJet, MEASUREMENT_SIZE>)
         {
-
+            // initialize jets
+            unsigned int i, last_jet_idx = 0;
+            for (i = 0; i < BLOCK_0_SIZE; i++)
+                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_1_SIZE; i++)
+                (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_2_SIZE; i++)
+                (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_3_SIZE; i++)
+                (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_4_SIZE; i++)
+                (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_5_SIZE; i++)
+                (*jets_5_)[i] = WolfJet(0, last_jet_idx++);
         };
 
-        virtual ~AutoDiffCostFunctionWrapper()
+        virtual ~AutoDiffCostFunctionWrapperBase()
         {
 
         };
@@ -487,43 +625,35 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             // also compute jacobians
             else
             {
-                // create jets
-                WolfJet jets_0[BLOCK_0_SIZE];
-                WolfJet jets_1[BLOCK_1_SIZE];
-                WolfJet jets_2[BLOCK_2_SIZE];
-                WolfJet jets_3[BLOCK_3_SIZE];
-                WolfJet jets_4[BLOCK_4_SIZE];
-                WolfJet jets_5[BLOCK_5_SIZE];
-                WolfJet residuals_jets[MEASUREMENT_SIZE];
-
-                // initialize jets
-                unsigned int i, last_jet_idx = 0;
+                // update jets real part
+                unsigned int i;
                 for (i = 0; i < BLOCK_0_SIZE; i++)
-                    jets_0[i] = WolfJet(parameters[0][i], last_jet_idx++);
+                    (*jets_0_)[i].a = parameters[0][i];
                 for (i = 0; i < BLOCK_1_SIZE; i++)
-                    jets_1[i] = WolfJet(parameters[1][i], last_jet_idx++);
+                    (*jets_1_)[i].a = parameters[1][i];
                 for (i = 0; i < BLOCK_2_SIZE; i++)
-                    jets_2[i] = WolfJet(parameters[2][i], last_jet_idx++);
+                    (*jets_2_)[i].a = parameters[2][i];
                 for (i = 0; i < BLOCK_3_SIZE; i++)
-                    jets_3[i] = WolfJet(parameters[3][i], last_jet_idx++);
+                    (*jets_3_)[i].a = parameters[3][i];
                 for (i = 0; i < BLOCK_4_SIZE; i++)
-                    jets_4[i] = WolfJet(parameters[4][i], last_jet_idx++);
+                    (*jets_4_)[i].a = parameters[4][i];
                 for (i = 0; i < BLOCK_5_SIZE; i++)
-                    jets_5[i] = WolfJet(parameters[5][i], last_jet_idx++);
+                    (*jets_5_)[i].a = parameters[5][i];
 
                 // call functor
-                (*this->constraint_ptr_)(jets_0, jets_1, jets_2, jets_3, jets_4, jets_5, residuals_jets);
+                (*this->constraint_ptr_)(jets_0_->data(), jets_1_->data(), jets_2_->data(), jets_3_->data(), jets_4_->data(),
+                                         jets_5_->data(), residuals_jets_->data());
 
                 // fill the residual array
                 for (i = 0; i < MEASUREMENT_SIZE; i++)
-                    residuals[i] = residuals_jets[i].a;
+                    residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
                 for (i = 0; i<n_blocks_; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                      (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
                                       jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
@@ -533,7 +663,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
 // SPECIALIZATION 5 BLOCKS
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE, unsigned int BLOCK_1_SIZE, unsigned int BLOCK_2_SIZE, unsigned int BLOCK_3_SIZE, unsigned int BLOCK_4_SIZE>
-class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
+class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                   BLOCK_0_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE, BLOCK_3_SIZE, BLOCK_4_SIZE,
                                   0, 0, 0, 0, 0>
     : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
@@ -546,10 +676,16 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         ConstraintType* constraint_ptr_;
         unsigned int n_blocks_;
         std::vector<unsigned int> block_sizes_, jacobian_locations_;
+        std::array<WolfJet, BLOCK_0_SIZE>* jets_0_;
+        std::array<WolfJet, BLOCK_1_SIZE>* jets_1_;
+        std::array<WolfJet, BLOCK_2_SIZE>* jets_2_;
+        std::array<WolfJet, BLOCK_3_SIZE>* jets_3_;
+        std::array<WolfJet, BLOCK_4_SIZE>* jets_4_;
+        std::array<WolfJet, MEASUREMENT_SIZE>* residuals_jets_;
 
     public:
 
-        AutoDiffCostFunctionWrapper(ConstraintType* _constraint_ptr) :
+        AutoDiffCostFunctionWrapperBase(ConstraintType* _constraint_ptr) :
             ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                      BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                      0,0,0,0,0>(),
@@ -560,12 +696,29 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
                                  BLOCK_0_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE,
-                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE})
+                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE+BLOCK_3_SIZE}),
+            jets_0_(new std::array<WolfJet, BLOCK_0_SIZE>),
+            jets_1_(new std::array<WolfJet, BLOCK_1_SIZE>),
+            jets_2_(new std::array<WolfJet, BLOCK_2_SIZE>),
+            jets_3_(new std::array<WolfJet, BLOCK_3_SIZE>),
+            jets_4_(new std::array<WolfJet, BLOCK_4_SIZE>),
+            residuals_jets_(new std::array<WolfJet, MEASUREMENT_SIZE>)
         {
-
+            // initialize jets
+            unsigned int i, last_jet_idx = 0;
+            for (i = 0; i < BLOCK_0_SIZE; i++)
+                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_1_SIZE; i++)
+                (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_2_SIZE; i++)
+                (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_3_SIZE; i++)
+                (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_4_SIZE; i++)
+                (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
         };
 
-        virtual ~AutoDiffCostFunctionWrapper()
+        virtual ~AutoDiffCostFunctionWrapperBase()
         {
 
         };
@@ -580,40 +733,33 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             // also compute jacobians
             else
             {
-                // create jets
-                WolfJet jets_0[BLOCK_0_SIZE];
-                WolfJet jets_1[BLOCK_1_SIZE];
-                WolfJet jets_2[BLOCK_2_SIZE];
-                WolfJet jets_3[BLOCK_3_SIZE];
-                WolfJet jets_4[BLOCK_4_SIZE];
-                WolfJet residuals_jets[MEASUREMENT_SIZE];
-
-                // initialize jets
-                unsigned int i, last_jet_idx = 0;
+                // update jets real part
+                unsigned int i;
                 for (i = 0; i < BLOCK_0_SIZE; i++)
-                    jets_0[i] = WolfJet(parameters[0][i], last_jet_idx++);
+                    (*jets_0_)[i].a = parameters[0][i];
                 for (i = 0; i < BLOCK_1_SIZE; i++)
-                    jets_1[i] = WolfJet(parameters[1][i], last_jet_idx++);
+                    (*jets_1_)[i].a = parameters[1][i];
                 for (i = 0; i < BLOCK_2_SIZE; i++)
-                    jets_2[i] = WolfJet(parameters[2][i], last_jet_idx++);
+                    (*jets_2_)[i].a = parameters[2][i];
                 for (i = 0; i < BLOCK_3_SIZE; i++)
-                    jets_3[i] = WolfJet(parameters[3][i], last_jet_idx++);
+                    (*jets_3_)[i].a = parameters[3][i];
                 for (i = 0; i < BLOCK_4_SIZE; i++)
-                    jets_4[i] = WolfJet(parameters[4][i], last_jet_idx++);
+                    (*jets_4_)[i].a = parameters[4][i];
 
                 // call functor
-                (*this->constraint_ptr_)(jets_0, jets_1, jets_2, jets_3, jets_4, residuals_jets);
+                (*this->constraint_ptr_)(jets_0_->data(), jets_1_->data(), jets_2_->data(), jets_3_->data(), jets_4_->data(),
+                                         residuals_jets_->data());
 
                 // fill the residual array
                 for (i = 0; i < MEASUREMENT_SIZE; i++)
-                    residuals[i] = residuals_jets[i].a;
+                    residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
                 for (i = 0; i<n_blocks_; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                      (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
                                       jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
@@ -623,7 +769,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
 // SPECIALIZATION 4 BLOCKS
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE, unsigned int BLOCK_1_SIZE, unsigned int BLOCK_2_SIZE, unsigned int BLOCK_3_SIZE>
-class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
+class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                   BLOCK_0_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE, BLOCK_3_SIZE, 0,
                                   0, 0, 0, 0, 0>
     : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
@@ -636,10 +782,15 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         ConstraintType* constraint_ptr_;
         unsigned int n_blocks_;
         std::vector<unsigned int> block_sizes_, jacobian_locations_;
+        std::array<WolfJet, BLOCK_0_SIZE>* jets_0_;
+        std::array<WolfJet, BLOCK_1_SIZE>* jets_1_;
+        std::array<WolfJet, BLOCK_2_SIZE>* jets_2_;
+        std::array<WolfJet, BLOCK_3_SIZE>* jets_3_;
+        std::array<WolfJet, MEASUREMENT_SIZE>* residuals_jets_;
 
     public:
 
-        AutoDiffCostFunctionWrapper(ConstraintType* _constraint_ptr) :
+        AutoDiffCostFunctionWrapperBase(ConstraintType* _constraint_ptr) :
             ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                      BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,0,
                                      0,0,0,0,0>(),
@@ -649,12 +800,26 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             jacobian_locations_({0,
                                  BLOCK_0_SIZE,
                                  BLOCK_0_SIZE+BLOCK_1_SIZE,
-                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE})
+                                 BLOCK_0_SIZE+BLOCK_1_SIZE+BLOCK_2_SIZE}),
+            jets_0_(new std::array<WolfJet, BLOCK_0_SIZE>),
+            jets_1_(new std::array<WolfJet, BLOCK_1_SIZE>),
+            jets_2_(new std::array<WolfJet, BLOCK_2_SIZE>),
+            jets_3_(new std::array<WolfJet, BLOCK_3_SIZE>),
+            residuals_jets_(new std::array<WolfJet, MEASUREMENT_SIZE>)
         {
-
+            // initialize jets
+            unsigned int i, last_jet_idx = 0;
+            for (i = 0; i < BLOCK_0_SIZE; i++)
+                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_1_SIZE; i++)
+                (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_2_SIZE; i++)
+                (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_3_SIZE; i++)
+                (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
         };
 
-        virtual ~AutoDiffCostFunctionWrapper()
+        virtual ~AutoDiffCostFunctionWrapperBase()
         {
 
         };
@@ -667,37 +832,30 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             // also compute jacobians
             else
             {
-                // create jets
-                WolfJet jets_0[BLOCK_0_SIZE];
-                WolfJet jets_1[BLOCK_1_SIZE];
-                WolfJet jets_2[BLOCK_2_SIZE];
-                WolfJet jets_3[BLOCK_3_SIZE];
-                WolfJet residuals_jets[MEASUREMENT_SIZE];
-
-                // initialize jets
-                unsigned int i, last_jet_idx = 0;
+                // update jets real part
+                unsigned int i;
                 for (i = 0; i < BLOCK_0_SIZE; i++)
-                    jets_0[i] = WolfJet(parameters[0][i], last_jet_idx++);
+                    (*jets_0_)[i].a = parameters[0][i];
                 for (i = 0; i < BLOCK_1_SIZE; i++)
-                    jets_1[i] = WolfJet(parameters[1][i], last_jet_idx++);
+                    (*jets_1_)[i].a = parameters[1][i];
                 for (i = 0; i < BLOCK_2_SIZE; i++)
-                    jets_2[i] = WolfJet(parameters[2][i], last_jet_idx++);
+                    (*jets_2_)[i].a = parameters[2][i];
                 for (i = 0; i < BLOCK_3_SIZE; i++)
-                    jets_3[i] = WolfJet(parameters[3][i], last_jet_idx++);
+                    (*jets_3_)[i].a = parameters[3][i];
 
                 // call functor
-                (*this->constraint_ptr_)(jets_0, jets_1, jets_2, jets_3, residuals_jets);
+                (*this->constraint_ptr_)(jets_0_->data(), jets_1_->data(), jets_2_->data(), jets_3_->data(), residuals_jets_->data());
 
                 // fill the residual array
                 for (i = 0; i < MEASUREMENT_SIZE; i++)
-                    residuals[i] = residuals_jets[i].a;
+                    residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
                 for (i = 0; i<n_blocks_; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                      (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
                                       jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
@@ -707,7 +865,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
 // SPECIALIZATION 3 BLOCKS
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE, unsigned int BLOCK_1_SIZE, unsigned int BLOCK_2_SIZE>
-class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
+class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                   BLOCK_0_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE, 0, 0,
                                   0, 0, 0, 0, 0>
     : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
@@ -720,10 +878,14 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         ConstraintType* constraint_ptr_;
         unsigned int n_blocks_;
         std::vector<unsigned int> block_sizes_, jacobian_locations_;
+        std::array<WolfJet, BLOCK_0_SIZE>* jets_0_;
+        std::array<WolfJet, BLOCK_1_SIZE>* jets_1_;
+        std::array<WolfJet, BLOCK_2_SIZE>* jets_2_;
+        std::array<WolfJet, MEASUREMENT_SIZE>* residuals_jets_;
 
     public:
 
-        AutoDiffCostFunctionWrapper(ConstraintType* _constraint_ptr) :
+        AutoDiffCostFunctionWrapperBase(ConstraintType* _constraint_ptr) :
             ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                      BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,0,0,
                                      0,0,0,0,0>(),
@@ -732,12 +894,24 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             block_sizes_({BLOCK_0_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE}),
             jacobian_locations_({0,
                                  BLOCK_0_SIZE,
-                                 BLOCK_0_SIZE+BLOCK_1_SIZE})
+                                 BLOCK_0_SIZE+BLOCK_1_SIZE}),
+            jets_0_(new std::array<WolfJet, BLOCK_0_SIZE>),
+            jets_1_(new std::array<WolfJet, BLOCK_1_SIZE>),
+            jets_2_(new std::array<WolfJet, BLOCK_2_SIZE>),
+            residuals_jets_(new std::array<WolfJet, MEASUREMENT_SIZE>)
         {
+            // initialize jets
+            unsigned int i, last_jet_idx = 0;
+            for (i = 0; i < BLOCK_0_SIZE; i++)
+                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_1_SIZE; i++)
+                (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_2_SIZE; i++)
+                (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
 
         };
 
-        virtual ~AutoDiffCostFunctionWrapper()
+        virtual ~AutoDiffCostFunctionWrapperBase()
         {
 
         };
@@ -751,34 +925,28 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             // also compute jacobians
             else
             {
-                // create jets
-                WolfJet jets_0[BLOCK_0_SIZE];
-                WolfJet jets_1[BLOCK_1_SIZE];
-                WolfJet jets_2[BLOCK_2_SIZE];
-                WolfJet residuals_jets[MEASUREMENT_SIZE];
-
-                // initialize jets
-                unsigned int i, last_jet_idx = 0;
+                // update jets real part
+                unsigned int i;
                 for (i = 0; i < BLOCK_0_SIZE; i++)
-                    jets_0[i] = WolfJet(parameters[0][i], last_jet_idx++);
+                    (*jets_0_)[i].a = parameters[0][i];
                 for (i = 0; i < BLOCK_1_SIZE; i++)
-                    jets_1[i] = WolfJet(parameters[1][i], last_jet_idx++);
+                    (*jets_1_)[i].a = parameters[1][i];
                 for (i = 0; i < BLOCK_2_SIZE; i++)
-                    jets_2[i] = WolfJet(parameters[2][i], last_jet_idx++);
+                    (*jets_2_)[i].a = parameters[2][i];
 
                 // call functor
-                (*this->constraint_ptr_)(jets_0, jets_1, jets_2, residuals_jets);
+                (*this->constraint_ptr_)(jets_0_->data(), jets_1_->data(), jets_2_->data(), residuals_jets_->data());
 
                 // fill the residual array
                 for (i = 0; i < MEASUREMENT_SIZE; i++)
-                    residuals[i] = residuals_jets[i].a;
+                    residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
                 for (i = 0; i<n_blocks_; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                      (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
                                       jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
@@ -788,7 +956,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
 // SPECIALIZATION 2 BLOCKS
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE, unsigned int BLOCK_1_SIZE>
-class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
+class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                   BLOCK_0_SIZE, BLOCK_1_SIZE, 0, 0, 0,
                                   0, 0, 0, 0, 0>
     : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
@@ -801,10 +969,13 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         ConstraintType* constraint_ptr_;
         unsigned int n_blocks_;
         std::vector<unsigned int> block_sizes_, jacobian_locations_;
+        std::array<WolfJet, BLOCK_0_SIZE>* jets_0_;
+        std::array<WolfJet, BLOCK_1_SIZE>* jets_1_;
+        std::array<WolfJet, MEASUREMENT_SIZE>* residuals_jets_;
 
     public:
 
-        AutoDiffCostFunctionWrapper(ConstraintType* _constraint_ptr) :
+        AutoDiffCostFunctionWrapperBase(ConstraintType* _constraint_ptr) :
             ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                      BLOCK_0_SIZE,BLOCK_1_SIZE,0,0,0,
                                      0,0,0,0,0>(),
@@ -812,12 +983,20 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             n_blocks_(2),
             block_sizes_({BLOCK_0_SIZE, BLOCK_1_SIZE}),
             jacobian_locations_({0,
-                                 BLOCK_0_SIZE})
+                                 BLOCK_0_SIZE}),
+            jets_0_(new std::array<WolfJet, BLOCK_0_SIZE>),
+            jets_1_(new std::array<WolfJet, BLOCK_1_SIZE>),
+            residuals_jets_(new std::array<WolfJet, MEASUREMENT_SIZE>)
         {
-
+            // initialize jets
+            unsigned int i, last_jet_idx = 0;
+            for (i = 0; i < BLOCK_0_SIZE; i++)
+                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
+            for (i = 0; i < BLOCK_1_SIZE; i++)
+                (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
         };
 
-        virtual ~AutoDiffCostFunctionWrapper()
+        virtual ~AutoDiffCostFunctionWrapperBase()
         {
 
         };
@@ -831,31 +1010,26 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             // also compute jacobians
             else
             {
-                // create jets
-                WolfJet jets_0[BLOCK_0_SIZE];
-                WolfJet jets_1[BLOCK_1_SIZE];
-                WolfJet residuals_jets[MEASUREMENT_SIZE];
-
-                // initialize jets
-                unsigned int i, last_jet_idx = 0;
+                // update jets real part
+                unsigned int i;
                 for (i = 0; i < BLOCK_0_SIZE; i++)
-                    jets_0[i] = WolfJet(parameters[0][i], last_jet_idx++);
+                    (*jets_0_)[i].a = parameters[0][i];
                 for (i = 0; i < BLOCK_1_SIZE; i++)
-                    jets_1[i] = WolfJet(parameters[1][i], last_jet_idx++);
+                    (*jets_1_)[i].a = parameters[1][i];
 
                 // call functor
-                (*this->constraint_ptr_)(jets_0, jets_1, residuals_jets);
+                (*this->constraint_ptr_)(jets_0_->data(), jets_1_->data(), residuals_jets_->data());
 
                 // fill the residual array
                 for (i = 0; i < MEASUREMENT_SIZE; i++)
-                    residuals[i] = residuals_jets[i].a;
+                    residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
                 for (i = 0; i<n_blocks_; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                      (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
                                       jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
@@ -865,7 +1039,7 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
 // SPECIALIZATION 1 BLOCK
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE>
-class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
+class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                   BLOCK_0_SIZE, 0, 0, 0, 0,
                                   0, 0, 0, 0, 0>
     : public ceres::SizedCostFunction<MEASUREMENT_SIZE,
@@ -878,22 +1052,29 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
         ConstraintType* constraint_ptr_;
         unsigned int n_blocks_;
         std::vector<unsigned int> block_sizes_, jacobian_locations_;
+        std::array<WolfJet, BLOCK_0_SIZE>* jets_0_;
+        std::array<WolfJet, MEASUREMENT_SIZE>* residuals_jets_;
 
     public:
 
-        AutoDiffCostFunctionWrapper(ConstraintType* _constraint_ptr) :
+        AutoDiffCostFunctionWrapperBase(ConstraintType* _constraint_ptr) :
             ceres::SizedCostFunction<MEASUREMENT_SIZE,
                                      BLOCK_0_SIZE,0,0,0,0,
                                      0,0,0,0,0>(),
             constraint_ptr_(_constraint_ptr),
             n_blocks_(1),
             block_sizes_({BLOCK_0_SIZE}),
-            jacobian_locations_({0})
+            jacobian_locations_({0}),
+            jets_0_(new std::array<WolfJet, BLOCK_0_SIZE>),
+            residuals_jets_(new std::array<WolfJet, MEASUREMENT_SIZE>)
         {
-
+            // initialize jets
+            unsigned int i, last_jet_idx = 0;
+            for (i = 0; i < BLOCK_0_SIZE; i++)
+                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
         };
 
-        virtual ~AutoDiffCostFunctionWrapper()
+        virtual ~AutoDiffCostFunctionWrapperBase()
         {
 
         };
@@ -906,28 +1087,24 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
             // also compute jacobians
             else
             {
-                // create jets
-                WolfJet jets_0[BLOCK_0_SIZE];
-                WolfJet residuals_jets[MEASUREMENT_SIZE];
-
-                // initialize jets
-                unsigned int i, last_jet_idx = 0;
+                // update jets real part
+                unsigned int i;
                 for (i = 0; i < BLOCK_0_SIZE; i++)
-                    jets_0[i] = WolfJet(parameters[0][i], last_jet_idx++);
+                    (*jets_0_)[i].a = parameters[0][i];
 
                 // call functor
-                (*this->constraint_ptr_)(jets_0, residuals_jets);
+                (*this->constraint_ptr_)(jets_0_->data(), residuals_jets_->data());
 
                 // fill the residual array
                 for (i = 0; i < MEASUREMENT_SIZE; i++)
-                    residuals[i] = residuals_jets[i].a;
+                    residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
                 for (i = 0; i<n_blocks_; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < MEASUREMENT_SIZE; row++)
-                            std::copy(residuals_jets[row].v.data() + jacobian_locations_.at(i),
-                                      residuals_jets[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
+                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                      (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + block_sizes_.at(i),
                                       jacobians[i] + row * block_sizes_.at(i));
             }
             return true;
@@ -935,4 +1112,4 @@ class AutoDiffCostFunctionWrapper<ConstraintType, MEASUREMENT_SIZE,
 };
 
 
-#endif /* TRUNK_SRC_AUTODIFF_COST_FUNCTION_WRAPPER_H_ */
+#endif /* TRUNK_SRC_AUTODIFF_COST_FUNCTION_WRAPPER_BASE_H_ */
