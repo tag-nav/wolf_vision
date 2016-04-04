@@ -72,10 +72,10 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
 
     //TODO: Why is it 0?
     std::cout << "size: " << getLastPtr()->getFeatureListPtr()->size() << std::endl;
-    for (std::list<FeatureBase*>::iterator feature_ptr=getLastPtr()->getFeatureListPtr()->begin();feature_ptr != getLastPtr()->getFeatureListPtr()->end(); ++feature_ptr)
+    for (std::list<FeatureBase*>::iterator feature_iter=getLastPtr()->getFeatureListPtr()->begin();feature_iter != getLastPtr()->getFeatureListPtr()->end(); ++feature_iter)
     {
 
-        _kp = ((FeaturePointImage*)*feature_ptr)->getKeypoint();
+        _kp = ((FeaturePointImage*)*feature_iter)->getKeypoint();
         cv::Point point;
         point.x = _kp.pt.x;
         point.y = _kp.pt.y;
@@ -318,7 +318,8 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
 
             if(hamming_distance < 45)
             {
-                _feature_list_out.push_back(feature_ptr);
+                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[row],(new_descriptors(cv::Range(row,row+1),cv::Range(0,new_descriptors.cols))),false);
+                _feature_list_out.push_back(point_ptr);
                 n_last_capture_feat++;
             }
         }

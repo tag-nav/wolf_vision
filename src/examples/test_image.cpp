@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     unsigned int f = 0;
     const char * filename = "/home/jtarraso/Vídeos/House interior.mp4";
     //const char * filename = "/home/jtarraso/Descargas/gray.mp4";
-    cv::VideoCapture capture(0);
+    cv::VideoCapture capture(filename);
     cv::Mat frame;
 
     // CaptureImage* capture_brisk_ptr;
