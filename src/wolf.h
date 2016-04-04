@@ -205,6 +205,7 @@ typedef enum
 {
     PRC_TRACKER_BRISK,
     PRC_TRACKER_ORB,
+    PRC_TRACKER_LIDAR,
     PRC_GPS_RAW,
     PRC_LIDAR,
     PRC_ODOM_3D

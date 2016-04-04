@@ -5,7 +5,7 @@ ProcessorLaserCorners::ProcessorLaserCorners::~ProcessorLaserCorners()
 }
 
 ProcessorLaserCorners::ProcessorLaserCorners::ProcessorLaserCorners() :
-        ProcessorTracker(PRC_TRACKER_BRISK, false)
+        ProcessorTracker(PRC_TRACKER_LIDAR, true)
 {
 }
 
