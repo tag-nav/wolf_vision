@@ -76,13 +76,14 @@ class ProcessorMotion2 : public ProcessorBase
 
         // Instructions to the processor:
 
-        virtual void process(CaptureBase* _incoming_ptr);
-        virtual bool voteForKeyFrame(){return false;}
         void init(CaptureMotion2<MotionDeltaType>* _origin_ptr);
+        virtual void process(CaptureBase* _incoming_ptr);
         void reset(const TimeStamp& _ts);
         void makeKeyFrame(const TimeStamp& _ts);
 
         // Queries to the processor:
+
+        virtual bool voteForKeyFrame();
 
         /** \brief Fills a reference to the state integrated so far
          * \param the returned state vector
@@ -290,6 +291,12 @@ inline void ProcessorMotion2<MotionDeltaType>::makeKeyFrame(const TimeStamp& _ts
     getWolfProblem()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
     // Make the last Capture's Frame a KeyFrame so that it gets into the solver
     last_ptr_->getFramePtr()->setKey();
+}
+
+template<class MotionDeltaType>
+inline bool ProcessorMotion2<MotionDeltaType>::voteForKeyFrame()
+{
+    return false;
 }
 
 template<class MotionDeltaType>
