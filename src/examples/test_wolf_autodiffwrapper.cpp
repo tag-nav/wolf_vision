@@ -275,7 +275,7 @@ int main(int argc, char** argv)
     // BUILD SOLVER PROBLEM
     std::cout << "updating ceres..." << std::endl;
     t1 = clock();
-    ceres_manager_ceres_diff->update();
+    ceres_manager_ceres_diff->update(false);
     double t_update_ceres = ((double) clock() - t1) / CLOCKS_PER_SEC;
     t1 = clock();
     ceres_manager_wolf_diff->update(true);
