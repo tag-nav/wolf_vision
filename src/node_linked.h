@@ -44,7 +44,7 @@ class NodeLinked : public NodeBase
 
     protected:
         NodeLocation location_; ///< Indicates whether this node is a TOP, MIDDLE or BOOTOM node
-        UpperNodePtr up_node_ptr_; //it is not a shared pointer because the ownership of upper node should not be shared by lower nodes
+        UpperNodePtr up_node_ptr_; ///< Pointer to upper node
         LowerNodeList down_node_list_; ///< A list of pointers to lower nodes
         bool is_deleting_; ///< This node is being deleted.
 
