@@ -116,8 +116,9 @@ SET(HDRS
     local_parametrization_homogeneous.h
     map_base.h
     node_base.h
-    node_terminus.h
+    node_constrained.h
     node_linked.h
+    node_terminus.h
     processor_base.h
     processor_motion.h
     processor_motion2.h

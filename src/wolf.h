@@ -102,8 +102,8 @@ typedef enum
  */
 typedef enum
 {
-    KEY_FRAME,    ///< marks a key frame. It will stay in the frames window and play at optimizations.
-    NON_KEY_FRAME ///< marks a regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
+    KEY_FRAME,    ///< key frame. It will stay in the frames window and play at optimizations.
+    NON_KEY_FRAME ///< regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
 } FrameType;
 
 /** \brief Enumeration of all possible frames
@@ -112,9 +112,10 @@ typedef enum
  */
 typedef enum
 {
-    FRM_PO_2D,  ///< marks a 2D frame containing position (x,y) and orientation angle.
-    FRM_PO_3D,  ///< marks a 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
-    FRM_POV_3D  ///< marks a 3D frame with position, orientation quaternion, and linear velocity (vx, vy, vz)
+    FRM_PO_2D,  ///< 2D frame containing position (x,y) and orientation angle.
+    FRM_PO_3D,  ///< 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
+    FRM_POV_3D,  ///< 3D frame with position, orientation quaternion, and linear velocity (vx,vy,vz)
+    FRM_PQVBB_3D ///< 3D frame with pos, orient quat, velocity, acc bias (abx,aby,abz), and gyro bias (wbx,wby,wbz).
 } FrameStructure;
 
 /** \brief Enumeration of all possible constraints
@@ -123,16 +124,16 @@ typedef enum
  */
 typedef enum
 {
-    CTR_GPS_FIX_2D,             ///< marks a 2D GPS Fix constraint.
-    CTR_GPS_PR_2D,              ///< marks a 2D GPS Pseudorange constraint.
-    CTR_GPS_PR_3D,              ///< marks a 3D GPS Pseudorange constraint.
-    CTR_FIX,                    ///< marks a Fix constraint (for priors).
-    CTR_ODOM_2D,                ///< marks a 2D Odometry constraint .
-    CTR_CORNER_2D,              ///< marks a 2D corner constraint .
-    CTR_CONTAINER,              ///< marks a 2D container constraint .
-    CTR_IMG_PNT_TO_EP,          ///< marks a constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
-    CTR_IMG_PNT_TO_HP,          ///< marks a constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
-    CTR_IMG_PNT_TO_IMG_PNT      ///< marks a constraint between two image point features
+    CTR_GPS_FIX_2D,             ///< 2D GPS Fix constraint.
+    CTR_GPS_PR_2D,              ///< 2D GPS Pseudorange constraint.
+    CTR_GPS_PR_3D,              ///< 3D GPS Pseudorange constraint.
+    CTR_FIX,                    ///< Fix constraint (for priors).
+    CTR_ODOM_2D,                ///< 2D Odometry constraint .
+    CTR_CORNER_2D,              ///< 2D corner constraint .
+    CTR_CONTAINER,              ///< 2D container constraint .
+    CTR_IMG_PNT_TO_EP,          ///< constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
+    CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
+    CTR_IMG_PNT_TO_IMG_PNT      ///< constraint between two image point features
 } ConstraintType;
 
 /** \brief Enumeration of constraint categories

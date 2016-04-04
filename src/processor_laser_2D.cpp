@@ -139,7 +139,7 @@ void ProcessorLaser2D::establishConstraintsMHTree()
         std::map<LandmarkBase*, Eigen::Vector4s> expected_features;
         std::map<LandmarkBase*, Eigen::Matrix3s> expected_features_covs;
         unsigned int i = 0;
-        for (auto j_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); j_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); j_it++, i++)
+        for (auto j_it = getWolfProblem()->getMapPtr()->getLandmarkListPtr()->begin(); j_it != getWolfProblem()->getMapPtr()->getLandmarkListPtr()->end(); j_it++, i++)
             computeExpectedFeature(*j_it, expected_features[*j_it], expected_features_covs[*j_it]);
 
         // SETTING ASSOCIATION TREE
@@ -149,7 +149,7 @@ void ProcessorLaser2D::establishConstraintsMHTree()
 
         //tree object allocation and sizing
         AssociationTree tree;
-        tree.resize( capture_laser_ptr_->getFeatureListPtr()->size() , getTop()->getMapPtr()->getLandmarkListPtr()->size() );
+        tree.resize( capture_laser_ptr_->getFeatureListPtr()->size() , getWolfProblem()->getMapPtr()->getLandmarkListPtr()->size() );
 
         //set independent probabilities between feature-landmark pairs
         ii=0;
@@ -158,7 +158,7 @@ void ProcessorLaser2D::establishConstraintsMHTree()
             features_map[ii] = (FeatureCorner2D*)(*feature_it);
             //std::cout << "Feature: " << (*i_it)->nodeId() << std::endl << (*i_it)->getMeasurement().head(3).transpose() << std::endl;
             jj = 0;
-            for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++, jj++)
+            for (auto landmark_it = getWolfProblem()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getWolfProblem()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++, jj++)
             {
                 if ((*landmark_it)->getType() == LANDMARK_CORNER)
                 {
@@ -359,18 +359,18 @@ void ProcessorLaser2D::computeExpectedFeature(LandmarkBase* _landmark_ptr, Eigen
     // SIGMA (filling upper diagonal only)
     Eigen::MatrixXs Sigma = Eigen::MatrixXs::Zero(6,6);
     // Sigma_ll
-    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), Sigma, 0,0);
-    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), Sigma, 0,2);
-    getTop()->getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), Sigma, 2,2);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), Sigma, 0,0);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), Sigma, 0,2);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), Sigma, 2,2);
     // Sigma_lr
-    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), frame_ptr->getPPtr(), Sigma, 0,3);
-    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), frame_ptr->getOPtr(), Sigma, 0,5);
-    getTop()->getCovarianceBlock(_landmark_ptr->getOPtr(), frame_ptr->getPPtr(), Sigma, 2,3);
-    getTop()->getCovarianceBlock(_landmark_ptr->getOPtr(), frame_ptr->getOPtr(), Sigma, 2,5);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), frame_ptr->getPPtr(), Sigma, 0,3);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), frame_ptr->getOPtr(), Sigma, 0,5);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), frame_ptr->getPPtr(), Sigma, 2,3);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), frame_ptr->getOPtr(), Sigma, 2,5);
     // Sigma_rr
-    getTop()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getPPtr(), Sigma, 3,3);
-    getTop()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getOPtr(), Sigma, 3,5);
-    getTop()->getCovarianceBlock(frame_ptr->getOPtr(), frame_ptr->getOPtr(), Sigma, 5,5);
+    getWolfProblem()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getPPtr(), Sigma, 3,3);
+    getWolfProblem()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getOPtr(), Sigma, 3,5);
+    getWolfProblem()->getCovarianceBlock(frame_ptr->getOPtr(), frame_ptr->getOPtr(), Sigma, 5,5);
 
     expected_feature_cov_ = Jlr * Sigma.selfadjointView<Eigen::Upper>() * Jlr.transpose();
 }
@@ -426,18 +426,18 @@ Eigen::VectorXs ProcessorLaser2D::computeSquaredMahalanobisDistances(const Featu
     const Eigen::Matrix3s& Sigma_feature = _feature_ptr->getMeasurementCovariance().topLeftCorner<3,3>();
     Eigen::MatrixXs Sigma = Eigen::MatrixXs::Zero(6,6);
     // Sigma_ll
-    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), Sigma, 0,0);
-    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), Sigma, 0,2);
-    getTop()->getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), Sigma, 2,2);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), Sigma, 0,0);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), Sigma, 0,2);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), Sigma, 2,2);
     // Sigma_lr
-    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), frame_ptr->getPPtr(), Sigma, 0,3);
-    getTop()->getCovarianceBlock(_landmark_ptr->getPPtr(), frame_ptr->getOPtr(), Sigma, 0,5);
-    getTop()->getCovarianceBlock(_landmark_ptr->getOPtr(), frame_ptr->getPPtr(), Sigma, 2,3);
-    getTop()->getCovarianceBlock(_landmark_ptr->getOPtr(), frame_ptr->getOPtr(), Sigma, 2,5);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), frame_ptr->getPPtr(), Sigma, 0,3);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), frame_ptr->getOPtr(), Sigma, 0,5);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), frame_ptr->getPPtr(), Sigma, 2,3);
+    getWolfProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), frame_ptr->getOPtr(), Sigma, 2,5);
     // Sigma_rr
-    getTop()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getPPtr(), Sigma, 3,3);
-    getTop()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getOPtr(), Sigma, 3,5);
-    getTop()->getCovarianceBlock(frame_ptr->getOPtr(), frame_ptr->getOPtr(), Sigma, 5,5);
+    getWolfProblem()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getPPtr(), Sigma, 3,3);
+    getWolfProblem()->getCovarianceBlock(frame_ptr->getPPtr(), frame_ptr->getOPtr(), Sigma, 3,5);
+    getWolfProblem()->getCovarianceBlock(frame_ptr->getOPtr(), frame_ptr->getOPtr(), Sigma, 5,5);
 
     // MAHALANOBIS DISTANCES
     Eigen::Matrix3s iSigma_d = (Sigma_feature + Jlr * Sigma.selfadjointView<Eigen::Upper>() * Jlr.transpose()).inverse();
@@ -484,7 +484,7 @@ bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_feature_ptr, Lan
     if (std::fabs(pi2pi(_corner_feature_ptr->getMeasurement()(3) + M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF)
     {
         // Check all existing corners searching a container
-        for (auto landmark_it = getTop()->getMapPtr()->getLandmarkListPtr()->rbegin(); landmark_it != getTop()->getMapPtr()->getLandmarkListPtr()->rend(); landmark_it++)
+        for (auto landmark_it = getWolfProblem()->getMapPtr()->getLandmarkListPtr()->rbegin(); landmark_it != getWolfProblem()->getMapPtr()->getLandmarkListPtr()->rend(); landmark_it++)
         {
             if ((*landmark_it)->getType() == LANDMARK_CORNER // should be a corner
                     && std::fabs(pi2pi(((LandmarkCorner2D*)(*landmark_it))->getAperture() + M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF) // should be a corner
@@ -573,22 +573,22 @@ void ProcessorLaser2D::createCornerLandmark(FeatureCorner2D* _corner_ptr, const 
     //Constraint with the new landmark
     _corner_ptr->addConstraint(new ConstraintCorner2D(_corner_ptr, new_landmark));
     //Add it to the map
-    getTop()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
+    getWolfProblem()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
 
     // Initialize landmark covariance // TODO: has it sense???
     Eigen::MatrixXs Sigma_robot = Eigen::MatrixXs::Zero(3,3);
-    getTop()->getCovarianceBlock(capture_laser_ptr_->getFramePtr()->getPPtr(), capture_laser_ptr_->getFramePtr()->getPPtr(), Sigma_robot, 0,0);
-    getTop()->getCovarianceBlock(capture_laser_ptr_->getFramePtr()->getPPtr(), capture_laser_ptr_->getFramePtr()->getOPtr(), Sigma_robot, 0,2);
-    getTop()->getCovarianceBlock(capture_laser_ptr_->getFramePtr()->getOPtr(), capture_laser_ptr_->getFramePtr()->getOPtr(), Sigma_robot, 2,2);
+    getWolfProblem()->getCovarianceBlock(capture_laser_ptr_->getFramePtr()->getPPtr(), capture_laser_ptr_->getFramePtr()->getPPtr(), Sigma_robot, 0,0);
+    getWolfProblem()->getCovarianceBlock(capture_laser_ptr_->getFramePtr()->getPPtr(), capture_laser_ptr_->getFramePtr()->getOPtr(), Sigma_robot, 0,2);
+    getWolfProblem()->getCovarianceBlock(capture_laser_ptr_->getFramePtr()->getOPtr(), capture_laser_ptr_->getFramePtr()->getOPtr(), Sigma_robot, 2,2);
     Sigma_robot.block<1,2>(2,0) = Sigma_robot.block<2,1>(0,2).transpose();
 
     Eigen::Matrix3s R_robot3D = Eigen::Matrix3s::Identity();
     R_robot3D.block<2,2>(0,0) = Eigen::Rotation2D<WolfScalar>(*(capture_laser_ptr_->getFramePtr()->getOPtr()->getPtr())).matrix();
     Eigen::Matrix3s Sigma_landmark = Sigma_robot + R_robot3D.transpose() * _corner_ptr->getMeasurementCovariance().topLeftCorner<3,3>() * R_robot3D;
 
-    getTop()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getPPtr(), Sigma_landmark.topLeftCorner<2,2>());
-    getTop()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getOPtr(), Sigma_landmark.block<2,1>(0,2));
-    getTop()->addCovarianceBlock(new_landmark->getOPtr(), new_landmark->getOPtr(), Sigma_landmark.block<1,1>(2,2));
+    getWolfProblem()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getPPtr(), Sigma_landmark.topLeftCorner<2,2>());
+    getWolfProblem()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getOPtr(), Sigma_landmark.block<2,1>(0,2));
+    getWolfProblem()->addCovarianceBlock(new_landmark->getOPtr(), new_landmark->getOPtr(), Sigma_landmark.block<1,1>(2,2));
 }
 
 void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, const Eigen::Vector3s& _feature_global_pose, LandmarkCorner2D* _old_corner_landmark_ptr, int& _feature_idx, int& _corner_idx)
@@ -612,18 +612,18 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
     _corner_ptr->addConstraint(new ConstraintContainer(_corner_ptr, new_landmark,_feature_idx));
 
     // add new landmark in the map
-    getTop()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
+    getWolfProblem()->getMapPtr()->addLandmark((LandmarkBase*)new_landmark);
 
     // initialize container covariance with landmark corner covariance // TODO: has it sense???
     Eigen::MatrixXs Sigma_landmark = Eigen::MatrixXs::Zero(3,3);
-    getTop()->getCovarianceBlock(_old_corner_landmark_ptr->getPPtr(), _old_corner_landmark_ptr->getPPtr(), Sigma_landmark, 0,0);
-    getTop()->getCovarianceBlock(_old_corner_landmark_ptr->getPPtr(), _old_corner_landmark_ptr->getOPtr(), Sigma_landmark, 0,2);
-    getTop()->getCovarianceBlock(_old_corner_landmark_ptr->getOPtr(), _old_corner_landmark_ptr->getOPtr(), Sigma_landmark, 2,2);
+    getWolfProblem()->getCovarianceBlock(_old_corner_landmark_ptr->getPPtr(), _old_corner_landmark_ptr->getPPtr(), Sigma_landmark, 0,0);
+    getWolfProblem()->getCovarianceBlock(_old_corner_landmark_ptr->getPPtr(), _old_corner_landmark_ptr->getOPtr(), Sigma_landmark, 0,2);
+    getWolfProblem()->getCovarianceBlock(_old_corner_landmark_ptr->getOPtr(), _old_corner_landmark_ptr->getOPtr(), Sigma_landmark, 2,2);
     Sigma_landmark.block<1,2>(2,0) = Sigma_landmark.block<2,1>(0,2).transpose();
 
-    getTop()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getPPtr(), Sigma_landmark.topLeftCorner<2,2>());
-    getTop()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getOPtr(), Sigma_landmark.block<2,1>(0,2));
-    getTop()->addCovarianceBlock(new_landmark->getOPtr(), new_landmark->getOPtr(), Sigma_landmark.block<1,1>(2,2));
+    getWolfProblem()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getPPtr(), Sigma_landmark.topLeftCorner<2,2>());
+    getWolfProblem()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getOPtr(), Sigma_landmark.block<2,1>(0,2));
+    getWolfProblem()->addCovarianceBlock(new_landmark->getOPtr(), new_landmark->getOPtr(), Sigma_landmark.block<1,1>(2,2));
 
 
     // ERASING LANDMARK CORNER
@@ -634,5 +634,5 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
         (*ctr_it)->getFeaturePtr()->addConstraint(new ConstraintContainer((*ctr_it)->getFeaturePtr(), new_landmark, _corner_idx));
     }
     // Remove corner landmark (it will remove all old constraints)
-    getTop()->getMapPtr()->removeLandmark(_old_corner_landmark_ptr);
+    getWolfProblem()->getMapPtr()->removeLandmark(_old_corner_landmark_ptr);
 }

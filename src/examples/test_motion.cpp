@@ -5,19 +5,22 @@
  *      \author: jsola
  */
 
-
+// Classes under test
 #include "processor_odom_3D.h"
+#include "capture_odom_3D.h"
 
+// Wolf includes
 #include "state_block.h"
 #include "state_quaternion.h"
-#include "capture_odom_3D.h"
 #include "wolf.h"
 
+// STL includes
 #include <map>
 #include <list>
 #include <algorithm>
 #include <iterator>
 
+// General includes
 #include <iostream>
 
 int main()
@@ -48,7 +51,7 @@ int main()
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     FrameBase* frm_ptr = new FrameBase(t, &sb_pos, &sb_ori);
-    CaptureMotion2<>* cap_ptr = new CaptureOdom3D(t, sensor_ptr, data);
+    CaptureMotion2<Odo3dDeltaType>* cap_ptr = new CaptureOdom3D(t, sensor_ptr, data);
     frm_ptr->addCapture(cap_ptr);
 
     // Make a ProcessorOdom3d
@@ -58,30 +61,35 @@ int main()
 
     std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
 
+    std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->state().transpose() << std::endl;
     for (int i = 1; i <= 5; i++)
     {
+        t += dt;
         cap_ptr->setTimeStamp(t);
         odom3d_ptr->process(cap_ptr);
         std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->state().transpose() << std::endl;
-        t += dt;
     }
 
     std::cout << "\nQuery states at asynchronous time values..." << std::endl;
 
     t = t0;
     WolfScalar dt_2 = dt/2;
-    dt = 0.0027; // new dt
+    dt = 0.0045; // new dt
     for (int i = 1; i <= 20; i++)
     {
         std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t+dt_2).transpose() << std::endl;
         t += dt;
     }
+    std::cout << "       ^^^^^^^   After the last time-stamp the buffer keeps returning the last member." << std::endl;
+
+
+
+
 
 
     std::cout << "\n\nTrying a std::map as the buffer container <-- NOT WORKING: need exact key" << std::endl;
 
     WolfScalar x;
-
     std::map<TimeStamp, WolfScalar> buffer_map;
     t.set(0);
     x = 0;
@@ -97,6 +105,9 @@ int main()
         t.set(i/4);
         std::cout << "query (" << t.get() << "," << buffer_map[t] << ")" << std::endl;
     }
+
+
+
 
 
     std::cout << "\n\nTrying a std::list and std::find_if as the buffer container <-- WORKING: can use comparator '<' for evaluating key" << std::endl;

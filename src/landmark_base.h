@@ -9,6 +9,7 @@ class StateBlock;
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
+#include "node_constrained.h"
 
 //std includes
 
@@ -16,7 +17,7 @@ class StateBlock;
 // TODO: init and end Time stamps
 
 //class LandmarkBase
-class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
+class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
 {
     protected:
         LandmarkType type_;     ///< type of landmark. (types defined at wolf.h)
@@ -46,21 +47,6 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
          **/
         virtual ~LandmarkBase();
 
-        /** \brief Link with a constraint
-         **/
-        void addConstrainedBy(ConstraintBase* _ctr_ptr);
-
-        /** \brief Remove a constraint to this landmark
-         **/
-        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
-
-        /** \brief Gets the number of constraints linked with this landmark
-         **/
-        unsigned int getHits() const;
-
-        /** \brief Gets the list of constraints linked with this landmark
-         **/
-        std::list<ConstraintBase*>* getConstrainedByListPtr();
 
         /** \brief Sets the Landmark status
          **/
@@ -112,21 +98,6 @@ class LandmarkBase : public NodeLinked<MapBase, NodeTerminus>
          **/
         const LandmarkType getType() const;
 };
-
-inline void LandmarkBase::addConstrainedBy(ConstraintBase* _ctr_ptr)
-{
-    constrained_by_list_.push_back(_ctr_ptr);
-}
-
-inline unsigned int LandmarkBase::getHits() const
-{
-    return constrained_by_list_.size();
-}
-
-inline std::list<ConstraintBase*>* LandmarkBase::getConstrainedByListPtr()
-{
-    return &constrained_by_list_;
-}
 
 inline void LandmarkBase::fix()
 {

@@ -118,9 +118,10 @@ class CaptureMotion2 : public CaptureBase
                 const MotionDeltaType& getDelta(const TimeStamp& _ts) const {
                     assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
                     auto previous = std::find_if (container_.rbegin(), container_.rend(), [&](const Motion& m){return m.ts_ <= _ts;});
-                    if (previous == container_.rend()){
-                        assert(0 && "error");
-                        previous--;}
+                    if (previous == container_.rend())
+                        // The time stamp is more recent than the buffer's most recent data.
+                        // We could do something here, but by now we'll return the last valid data
+                        previous--;
                     return previous->delta_integrated_;
                 }
 

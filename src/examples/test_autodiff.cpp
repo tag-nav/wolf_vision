@@ -130,8 +130,8 @@ int main(int argc, char** argv)
     ground_truth.head(3) = pose_odom;
     odom_trajectory.head(3) = pose_odom;
 
-    WolfManager* wolf_manager_ceres = new WolfManager(PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
-    WolfManager* wolf_manager_wolf = new WolfManager(PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
+    WolfManager* wolf_manager_ceres = new WolfManager(FRM_PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
+    WolfManager* wolf_manager_wolf = new WolfManager(FRM_PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
     
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
