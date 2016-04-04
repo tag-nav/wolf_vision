@@ -271,13 +271,13 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
     if (_corrPtr->getJacobianMethod() == JAC_ANALYTIC)
         return new CostFunctionWrapper((ConstraintAnalytic*)_corrPtr);
 
-	switch (_corrPtr->getType())
-	{
-		case CTR_GPS_FIX_2D:
-		{
-            if (_self_auto_diff)
-                return new AutoDiffCostFunctionWrapper<ConstraintGPS2D>(_corrPtr);
-            else
+    if (_self_auto_diff)
+        return derivedConstraintAutoDiffCostFunction(_corrPtr);
+    else
+    {
+        switch (_corrPtr->getType())
+        {
+            case CTR_GPS_FIX_2D:
             {
                 ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
                 return new ceres::AutoDiffCostFunction<ConstraintGPS2D,
@@ -293,13 +293,7 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
                                                         specific_ptr->block8Size,
                                                         specific_ptr->block9Size>(specific_ptr);
             }
-			break;
-		}
-        case CTR_FIX:
-        {
-            if (_self_auto_diff)
-                return new AutoDiffCostFunctionWrapper<ConstraintFix>(_corrPtr);
-            else
+            case CTR_FIX:
             {
                 ConstraintFix* specific_ptr = (ConstraintFix*)(_corrPtr);
                 return new ceres::AutoDiffCostFunction<ConstraintFix,
@@ -315,13 +309,7 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
                                                         specific_ptr->block8Size,
                                                         specific_ptr->block9Size>(specific_ptr);
             }
-            break;
-        }
-		case CTR_ODOM_2D:
-		{
-            if (_self_auto_diff)
-                return new AutoDiffCostFunctionWrapper<ConstraintOdom2D>(_corrPtr);
-            else
+            case CTR_ODOM_2D:
             {
                 ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
                 return new ceres::AutoDiffCostFunction<ConstraintOdom2D,
@@ -337,13 +325,7 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
                                                         specific_ptr->block8Size,
                                                         specific_ptr->block9Size>(specific_ptr);
             }
-			break;
-		}
-		case CTR_CORNER_2D:
-		{
-            if (_self_auto_diff)
-                return new AutoDiffCostFunctionWrapper<ConstraintCorner2D>(_corrPtr);
-            else
+            case CTR_CORNER_2D:
             {
                 ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
                 return new ceres::AutoDiffCostFunction<ConstraintCorner2D,
@@ -359,13 +341,7 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
                                                         specific_ptr->block8Size,
                                                         specific_ptr->block9Size>(specific_ptr);
             }
-			break;
-		}
-        case CTR_CONTAINER:
-        {
-            if (_self_auto_diff)
-                return new AutoDiffCostFunctionWrapper<ConstraintContainer>(_corrPtr);
-            else
+            case CTR_CONTAINER:
             {
                 ConstraintContainer* specific_ptr = (ConstraintContainer*)(_corrPtr);
                 return new ceres::AutoDiffCostFunction<ConstraintContainer,
@@ -381,55 +357,42 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
                                                         specific_ptr->block8Size,
                                                         specific_ptr->block9Size>(specific_ptr);
             }
-            break;
-        }
-        case CTR_GPS_PR_3D:
-        {
-            if (_self_auto_diff)
-                return new AutoDiffCostFunctionWrapper<ConstraintGPSPseudorange3D>(_corrPtr);
-            else
+            case CTR_GPS_PR_3D:
             {
                 ConstraintGPSPseudorange3D* specific_ptr = (ConstraintGPSPseudorange3D*)(_corrPtr);
                 return new ceres::AutoDiffCostFunction<ConstraintGPSPseudorange3D,
-                        specific_ptr->measurementSize,
-                        specific_ptr->block0Size,
-                        specific_ptr->block1Size,
-                        specific_ptr->block2Size,
-                        specific_ptr->block3Size,
-                        specific_ptr->block4Size,
-                        specific_ptr->block5Size,
-                        specific_ptr->block6Size,
-                        specific_ptr->block7Size,
-                        specific_ptr->block8Size,
-                        specific_ptr->block9Size>(specific_ptr);
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
             }
-            break;
-        }
-        case CTR_GPS_PR_2D:
-        {
-            if (_self_auto_diff)
-                return new AutoDiffCostFunctionWrapper<ConstraintGPSPseudorange2D>(_corrPtr);
-            else
+            case CTR_GPS_PR_2D:
             {
                 ConstraintGPSPseudorange2D* specific_ptr = (ConstraintGPSPseudorange2D*)(_corrPtr);
                 return new ceres::AutoDiffCostFunction<ConstraintGPSPseudorange2D,
-                        specific_ptr->measurementSize,
-                        specific_ptr->block0Size,
-                        specific_ptr->block1Size,
-                        specific_ptr->block2Size,
-                        specific_ptr->block3Size,
-                        specific_ptr->block4Size,
-                        specific_ptr->block5Size,
-                        specific_ptr->block6Size,
-                        specific_ptr->block7Size,
-                        specific_ptr->block8Size,
-                        specific_ptr->block9Size>(specific_ptr);
+                                                        specific_ptr->measurementSize,
+                                                        specific_ptr->block0Size,
+                                                        specific_ptr->block1Size,
+                                                        specific_ptr->block2Size,
+                                                        specific_ptr->block3Size,
+                                                        specific_ptr->block4Size,
+                                                        specific_ptr->block5Size,
+                                                        specific_ptr->block6Size,
+                                                        specific_ptr->block7Size,
+                                                        specific_ptr->block8Size,
+                                                        specific_ptr->block9Size>(specific_ptr);
             }
-            break;
-        }
-		default:
-			std::cout << "Unknown constraint type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
+            default:
+                std::cout << "Unknown constraint type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
 
-			return nullptr;
+                return nullptr;
+        }
 	}
 }

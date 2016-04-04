@@ -278,7 +278,7 @@ int main(int argc, char** argv)
     ceres_manager_ceres_diff->update();
     double t_update_ceres = ((double) clock() - t1) / CLOCKS_PER_SEC;
     t1 = clock();
-    ceres_manager_wolf_diff->update();
+    ceres_manager_wolf_diff->update(true);
     double t_update_wolf = ((double) clock() - t1) / CLOCKS_PER_SEC;
     std::cout << "updated!" << std::endl;
 

@@ -7,19 +7,11 @@
 #include "glog/logging.h"
 
 //wolf includes
-#include "auto_diff_cost_function_wrapper.h"
+#include "derived_constraint_auto_diff_cost_function.h"
 #include "cost_function_wrapper.h"
 #include "local_parametrization_wrapper.h"
 #include "../wolf.h"
 #include "../state_block.h"
-#include "../constraint_sparse.h"
-#include "../constraint_fix.h"
-#include "../constraint_gps_2D.h"
-#include "../constraint_gps_pseudorange_3D.h"
-#include "../constraint_gps_pseudorange_2D.h"
-#include "../constraint_odom_2D.h"
-#include "../constraint_corner_2D.h"
-#include "../constraint_container.h"
 
 /** \brief Enumeration of covariance blocks to be computed
  *
