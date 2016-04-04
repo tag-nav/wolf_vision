@@ -20,17 +20,8 @@
  *     establishing correspondences between the features here and the features in \b origin. Each successful correspondence
  *     results in an extension of the track of the Feature up to the \b incoming Capture.
  *
- * A tracker can be declared autonomous or non-autonomous. This property must be set at construction time.
- *   - An autonomous Tracker is allowed to create new KeyFrames and new Landmarks
- *     as the result of the data processing. A single call to process() accomplishes
- *     all the work needed.
- *   - A non-autonomous Tracker, on the contrary, limits itself to detect and match Features,
- *     but cannot alter the size of the Wolf Problem by adding new elements (Frames and/or Landmarks).
- *     Calling process() is an error, and an outside manager is required to control the tracker
- *     algorithm (by implementing an algorithm similar to process() outside the Tracker).
- *
  * A tracker can be designed to track either Features or Landmarks. This property must be set at construction time.
- *   - If tracking Features, it establishes constraints against other Features;
+ *   - If tracking Features, it establishes constraints Feature-Feature;
  *     it does not use Landmarks, nor it creates Landmarks.
  *   - If tracking Landmarks, it establishes constraints Feature-Landmark;
  *     it uses Landmarks for tracking, in an active-search approach,
@@ -65,88 +56,59 @@ class ProcessorTracker : public ProcessorBase
 {
     public:
 
-        ProcessorTracker(bool _autonomous = true, bool _uses_landmarks = true);
+        /** \brief Constructor with options
+         * \param _autonomous Set to make the tracker autonomous to create KeyFrames and/or Landmarks.
+         * \param _uses_landmarks Set to make the tracker work with Landmarks. Un-set to work only with Features.
+         */
+        ProcessorTracker(ProcessorType _tp, bool _uses_landmarks = true);
         virtual ~ProcessorTracker();
 
-        /** \brief Full processing of an incoming Capture.
-         *
-         * Usually you do not need to overload this method in derived classes.
-         * Overload it only if you want to alter this algorithm.
-         */
-        virtual void process(CaptureBase* const _incoming_ptr);
-
-        bool isAutonomous() const;
-
-        /** \brief Initialize tracker.
-         */
-        void init(CaptureBase* _origin_ptr);
+        // We start with all the pure-virtual functions
 
         /** \brief Tracker function
+         * \return The number of successful tracks.
          *
          * This is the tracker function to be implemented in derived classes.
-         * It operates on the incoming capture.
+         * It operates on the \b incoming capture pointed by incoming_ptr_.
          *
-         * This should do one of the following, depending on the design of the tracker:
-         *   - Track Features against other Features in another Capture.
-         *   - Track Features against Landmarks in the Map.
+         * This should do one of the following, depending on the design of the tracker -- see use_landmarks_:
+         *   - Track Features against other Features in the \b origin Capture. Tips:
+         *     - An intermediary step of matching against Features in the \b last Capture makes tracking easier.
+         *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Constraints in \b last.
+         *     - If required, correct the drift by re-comparing against the Features in origin.
+         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
+         *   - Track Features against Landmarks in the Map. Tips:
+         *     - The links to the Landmarks are in the Features' Constraints in last.
+         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
          *
-         * It should also generate the necessary Features in the incoming Capture,
-         * of a type derived from FeatureBase,
-         * and the constraints, of a type derived from ConstraintBase.
+         * The function must generate the necessary Features in the \b incoming Capture,
+         * of the correct type, derived from FeatureBase.
          *
-         * \return The number of successful tracks.
+         * It must also generate the constraints, of the correct type, derived from ConstraintBase
+         * (through ConstraintAnalytic or ConstraintSparse).
          */
-        virtual unsigned int processKnownFeatures(CaptureBase* _incoming_ptr) = 0;
+        virtual unsigned int processKnownFeatures() = 0;
 
-        /** \brief Detect new Features
-         *
-         * This is intended to create Features that are not among the Features already known in the Map.
-         * \param _capture_ptr Capture for feature detection
-         *
-         * This function sets new_features_list_, the list of newly detected features,
-         * to be used for landmark initialization.
-         *
-         * \return The number of detected Features.
-         */
-        virtual unsigned int detectNewFeatures(CaptureBase* _capture_ptr) = 0;
-
-        /** \brief Vote for KeyFrame generation
-         *
-         * If a KeyFrame criterion is validated, this function returns true,
-         * meaning that it wants to create a KeyFrame at the \b last Capture.
-         *
-         * WARNING! This function only votes! It does not create KeyFrames!
-         */
-        virtual bool voteForKeyFrame() = 0;
-
-        /** \brief Reset the tracker to a new \b origin and \b last Captures
-         */
-        void reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr);
-
-        /** \brief Reset the tracker using the \b last Capture as the new \b origin.
-         */
-        void reset();
-
-        /** \brief Advance the incoming Capture to become the last.
-         *
-         * Call this when the tracking and keyframe policy work is done and
-         * we need to get ready to accept a new incoming Capture.
-         */
-        void advance();
-
-        // getters and setters
-        CaptureBase* getOriginPtr() const;
-        CaptureBase* getLastPtr() const;
-        CaptureBase* getIncomingPtr() const;
-        void setOriginPtr(CaptureBase* const _origin_ptr);
-        void setLastPtr(CaptureBase* const _last_ptr);
-        void setIncomingPtr(CaptureBase* const _incoming_ptr);
 
     protected:
 
-        /**\brief Make a KeyFrame using the provided Capture.
+        /** \brief Detect new Features
+         * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
+         * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
+         * \return The number of detected Features.
+         *
+         * This function detects Features that do not correspond to known Features/Landmarks in the system.
+         *
+         * The function sets the member new_features_list_, the list of newly detected features,
+         * to be used for landmark initialization.
          */
-        virtual void makeKeyFrame(CaptureBase* _capture_ptr);
+        virtual unsigned int detectNewFeatures() = 0;
+
+        /** \brief Track provided features from \b last to \b incoming
+         * \param _feature_list_in input list of features in \b last to track
+         * \param _feature_list_out returned list of features found in \b incoming
+         */
+        virtual unsigned int track(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out) = 0;
 
         /** \brief Create one landmark
          *
@@ -155,33 +117,107 @@ class ProcessorTracker : public ProcessorBase
         virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr) = 0;
 
         /** \brief Create a new constraint
+         * \param _feature_ptr pointer to the Feature to constrain
+         * \param _node_ptr NodeBase pointer to the other entity constrained. It can only be of the types FeatureBase and LandmarkBase.
          *
-         * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
+         * This function will be called with one of these options (and hence the second parameter NodeBase *):
+         *  - createConstraint(FeatureBase *, FeatureBase *)
+         *  - createConstraint(FeatureBase *, LandmarkBase *)
+         *
+         * Implement this method in derived classes to build the type of constraint
+         * appropriate for the pair feature-feature or feature-landmark used by this tracker.
+         *
+         * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
+         * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _lmk_ptr) = 0;
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, NodeBase* _node_ptr) = 0;
+
+
+
+        // From now on, all functions are already implemented.
+
+    public:
+
+        /** \brief Full processing of an incoming Capture.
+         *
+         * Usually you do not need to overload this method in derived classes.
+         * Overload it only if you want to alter this algorithm.
+         */
+        virtual void process(CaptureBase* const _incoming_ptr);
+
+        /** \brief Initialize tracker.
+         */
+        void init(CaptureBase* _origin_ptr);
+
+        /** \brief Reset the tracker using the \b last Capture as the new \b origin.
+         */
+        void reset();
+
+        virtual bool voteForKeyFrame();
+
+        // getters and setters
+        bool usesLandmarks() const;
+        CaptureBase* getOriginPtr() const;
+        CaptureBase* getLastPtr() const;
+        CaptureBase* getIncomingPtr() const;
+        void setOriginPtr(CaptureBase* const _origin_ptr);
+        void setLastPtr(CaptureBase* const _last_ptr);
+        void setIncomingPtr(CaptureBase* const _incoming_ptr);
+        FeatureBaseList& getNewFeaturesList();
+        void addNewFeature(FeatureBase* _feature_ptr);
+        //
+        FeatureBaseList& getNewFeaturesListIncoming();
+        void addNewFeatureIncoming(FeatureBase* _feature_ptr);
 
     protected:
-        bool autonomous_;    ///< Sets whether the tracker is autonomous to make decisions that affect the WolfProblem, like creating new KeyFrames and/or Landmarks.
+
+        /**\brief Process new Features
+         *
+         */
+        virtual unsigned int processNewFeatures();
+
+        /** \brief Reset the tracker to a new \b origin and \b last Captures
+         */
+        void reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr);
+
+        /** \brief Advance the incoming Capture to become the last.
+         *
+         * Call this when the tracking and keyframe policy work is done and
+         * we need to get ready to accept a new incoming Capture.
+         */
+        void advance();
+
+        /**\brief Make a KeyFrame using the provided Capture.
+         */
+        virtual void makeKeyFrame();
+
+    private:
         bool use_landmarks_; ///< Set if the tracker uses and creates landmarks. Clear if only uses features.
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
-        FeatureBaseList new_features_list_; ///< List of new features for landmark initialization and tracker reset.
+        FeatureBaseList new_features_list_last_; ///< List of new features in \b last for landmark initialization and new key-frame creation.
+        FeatureBaseList new_features_list_incoming_; ///< list of the new features of \b last tracked in \b incoming
 };
 
-// IMPLEMENTATION //
-
-inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
+inline FeatureBaseList& ProcessorTracker::getNewFeaturesList()
 {
-    origin_ptr_ = _origin_ptr;
-    last_ptr_ = _origin_ptr;
+    return new_features_list_last_;
 }
 
-inline void ProcessorTracker::reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr)
+inline void ProcessorTracker::addNewFeature(FeatureBase* _feature_ptr)
 {
-    origin_ptr_ = _origin_ptr;
-    last_ptr_ = _last_ptr;
-    incoming_ptr_ = nullptr;   // This line is not really needed, but it makes things clearer.
+    new_features_list_last_.push_back(_feature_ptr);
+}
+
+inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
+{
+    return new_features_list_incoming_;
+}
+
+inline void ProcessorTracker::addNewFeatureIncoming(FeatureBase* _feature_ptr)
+{
+    new_features_list_incoming_.push_back(_feature_ptr);
 }
 
 inline void ProcessorTracker::reset()
@@ -189,17 +225,27 @@ inline void ProcessorTracker::reset()
     reset(last_ptr_, incoming_ptr_);
 }
 
-inline void ProcessorTracker::advance()
+inline void ProcessorTracker::reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr)
 {
-    last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-    last_ptr_->destruct();     // Destruct now the obsolete last before reassigning a new pointer
-    last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
-    incoming_ptr_ = nullptr;   // This line is not really needed, but it makes things clearer.
+    origin_ptr_ = _origin_ptr;
+    last_ptr_ = _last_ptr;
+    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
 
-inline bool ProcessorTracker::isAutonomous() const
+inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
 {
-    return autonomous_;
+    origin_ptr_ = _origin_ptr;
+    last_ptr_ = _origin_ptr;
+}
+
+inline bool ProcessorTracker::voteForKeyFrame()
+{
+    return false;
+}
+
+inline bool ProcessorTracker::usesLandmarks() const
+{
+    return use_landmarks_;
 }
 
 inline CaptureBase* ProcessorTracker::getOriginPtr() const
@@ -230,6 +276,14 @@ inline void ProcessorTracker::setLastPtr(CaptureBase* const _last_ptr)
 inline void ProcessorTracker::setIncomingPtr(CaptureBase* const _incoming_ptr)
 {
     incoming_ptr_ = _incoming_ptr;
+}
+
+inline void ProcessorTracker::advance()
+{
+    last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
+//    last_ptr_->destruct(); // TODO: JS->JV why this does not work?? Destruct now the obsolete last before reassigning a new pointer
+    last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
+    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
 
 #endif /* PROCESSOR_TRACKER_H_ */

@@ -7,9 +7,8 @@
 
 #include "processor_tracker.h"
 
-ProcessorTracker::ProcessorTracker(bool _autonomous, bool _uses_landmarks) :
-        ProcessorBase(),
-        autonomous_(_autonomous),
+ProcessorTracker::ProcessorTracker(ProcessorType _tp, bool _uses_landmarks) :
+        ProcessorBase(_tp),
         use_landmarks_(_uses_landmarks),
         origin_ptr_(nullptr),
         last_ptr_(nullptr),
@@ -19,7 +18,7 @@ ProcessorTracker::ProcessorTracker(bool _autonomous, bool _uses_landmarks) :
 
 ProcessorTracker::~ProcessorTracker()
 {
-    // WARNING: This test is not fail safe. Only class design can make it safe, by ensuring
+    // FIXME: This test with nullptr is not fail safe. Only the class design can make it safe, by ensuring
     // at all times that whenever incoming_ptr_ is not used, it points to nullptr.
     // See both flavors of reset(), and advance().
     if (incoming_ptr_ != nullptr)
@@ -28,60 +27,65 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    assert ( autonomous_ && "Requested process() to a non-autonomous processor.");
-
     // 1. First we track the known Features and create new constraints as needed
-    processKnownFeatures(_incoming_ptr);
+    setIncomingPtr(_incoming_ptr);
+    processKnownFeatures();
 
-    // 2. Then we see if we want to create a KeyFrame
-    if (voteForKeyFrame())
+    // 2. Then we see if we want and we are allowed to create a KeyFrame
+    if (voteForKeyFrame() && permittedKeyFrame())
     {
-        /* Rationale: A keyFrame will be created using the last Capture. First, we work on this
-         * last Capture to detect new Features, eventually create Landmarks with them,
-         * and in such case create the new Constraints feature-landmark. Only when done, the KeyFrame
-         * is effectively created, and the tracker is reset so that its origin points
-         * to the brand new KeyFrame.
-         */
-
-        // We first need to populate the Capture with new Features to create new Landmarks
-        detectNewFeatures(last_ptr_);
-
-        // Then eventually create new landmarks, with the respective feature-landmark constraints ...
-        if (use_landmarks_ && new_features_list_.size() > 0)
-        {
-            // We'll create one Landmark for each new Feature ...
-            for (FeatureBase* feature_ptr : new_features_list_)
-            {
-                // Create one Landmark for this Feature with the Landmark factory in this class
-                LandmarkBase* lmk_ptr = createLandmark(feature_ptr);
-                // Create one Constraint between the Feature and the Landmark
-                ConstraintBase* constr_ptr = createConstraint(feature_ptr, lmk_ptr);
-                // Add the Constraint to the Feature's constraints list
-                feature_ptr->addConstraint(constr_ptr);
-            }
-        } // Done with Landmark creation
-
-        // Append all new Features to the Capture's list of Features
-        last_ptr_->getFeatureListPtr()->splice(last_ptr_->getFeatureListPtr()->end(), new_features_list_);
-
-        // Make a KeyFrame from last, and reset the tracker
-        this->makeKeyFrame(last_ptr_);
-        this->reset();
+        // 2.a. Detect new Features, initialize Landmarks, create Constraints
+        processNewFeatures();
+        // Make KeyFrame
+        makeKeyFrame();
+        // Reset the Tracker
+        reset();
     }
     else
     {   // We did not create a KeyFrame:
-        // Update the tracker's last and incoming pointers one step ahead
+        // 2.b. Update the tracker's last and incoming pointers one step ahead
         advance();
     }
 }
 
-void ProcessorTracker::makeKeyFrame(CaptureBase* _capture_ptr)
+unsigned int ProcessorTracker::processNewFeatures()
 {
-    assert (autonomous_ && "Requested makeKeyFrame() to a non-autonomous processor.");
+    /* Rationale: A keyFrame will be created using the last Capture.
+     * First, we work on this Capture to detect new Features,
+     * eventually create Landmarks with them,
+     * and in such case create the new Constraints feature-landmark.
+     * When done, we need to track these new Features to the incoming Capture.
+     * At the end, all new Features are appended to the lists of known Features in
+     * the last and incoming Captures.
+     */
+    // We first need to populate the \b last Capture with new Features
+    unsigned int n = detectNewFeatures();
+    if (usesLandmarks())
+    {
+        for (FeatureBase* feature_ptr : new_features_list_last_)
+        {
+            LandmarkBase* lmk_ptr = createLandmark(feature_ptr);
+            ConstraintBase* constr_ptr = createConstraint(feature_ptr, lmk_ptr);
+            getWolfProblem()->addLandmark(lmk_ptr);
+            feature_ptr->addConstraint(constr_ptr);
+        }
+    } // Done with Landmark creation
 
-    // Create a new non-key Frame in the Trajectory with the incoming Capture
-    getTop()->createFrame(NON_KEY_FRAME, _capture_ptr->getTimeStamp());
-    // Make the last Frame a KeyFrame so that it gets into the solver
-    _capture_ptr->getFramePtr()->setKey();
+    track(new_features_list_last_, new_features_list_incoming_);
+
+    // Append all new Features to the Capture's list of Features
+    last_ptr_->getFeatureListPtr()->splice(last_ptr_->getFeatureListPtr()->end(), new_features_list_last_);
+    incoming_ptr_->getFeatureListPtr()->splice(incoming_ptr_->getFeatureListPtr()->end(), new_features_list_incoming_);
+
+    // return the number of new features detected in \b last
+    return n;
 }
 
+void ProcessorTracker::makeKeyFrame()
+{
+    // Create a new non-key Frame in the Trajectory with the incoming Capture
+    getWolfProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+    getWolfProblem()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+    // Make the last Capture's Frame a KeyFrame so that it gets into the solver
+    last_ptr_->getFramePtr()->setKey();
+}

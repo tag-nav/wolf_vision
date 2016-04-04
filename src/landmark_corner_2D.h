@@ -18,8 +18,8 @@ class LandmarkCorner2D : public LandmarkBase
         /** \brief Constructor with type, time stamp and the position state pointer
          *
          * Constructor with type, and state pointer
-         * \param _p_ptr StateBase shared pointer to the position
-         * \param _o_ptr StateBase shared pointer to the orientation
+         * \param _p_ptr StateBlock shared pointer to the position
+         * \param _o_ptr StateBlock shared pointer to the orientation
          * \param _aperture descriptor of the landmark: aperture of the corner
          *
          **/

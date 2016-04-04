@@ -81,10 +81,12 @@ SET(HDRS_BASE
 
 SET(HDRS
     capture_base.h
-    capture_motion.h
     capture_fix.h
     capture_gps_fix.h
+    capture_motion.h
+    capture_motion2.h
     capture_odom_2D.h
+    capture_odom_3D.h
     capture_void.h
     constraint_base.h
     constraint_analytic.h
@@ -109,15 +111,18 @@ SET(HDRS
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
-    landmark_point_2D.h
     local_parametrization_base.h
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
     map_base.h
     node_base.h
-    node_terminus.h
+    node_constrained.h
     node_linked.h
+    node_terminus.h
     processor_base.h
+    processor_motion.h
+    processor_motion2.h
+    processor_odom_3D.h
     processor_tracker.h
     sensor_base.h
     sensor_camera.h
@@ -130,8 +135,7 @@ SET(HDRS
     time_stamp.h
     trajectory_base.h
     wolf_problem.h
-    wolf_manager.h
-    wolf_manager_gps.h)
+    wolf_manager.h)
    
 SET(HDRS_DTASSC
     data_association/matrix.h
@@ -143,17 +147,18 @@ SET(HDRS_DTASSC
 #sources
 SET(SRCS
     capture_base.cpp
-    capture_motion.cpp
     capture_gps_fix.cpp
     capture_fix.cpp
+    capture_motion.cpp
+    capture_motion2.cpp
     capture_odom_2D.cpp
+    capture_odom_3D.cpp
     capture_void.cpp
     constraint_base.cpp
     constraint_analytic.cpp
     feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
-    feature_gps_pseudorange.cpp
     feature_fix.cpp
     feature_odom_2D.cpp
     frame_base.cpp
@@ -161,14 +166,14 @@ SET(SRCS
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
-    landmark_point_2D.cpp
     local_parametrization_base.cpp
     local_parametrization_quaternion.cpp
     local_parametrization_homogeneous.cpp
     map_base.cpp
     node_base.cpp
-    node_terminus.cpp
     processor_base.cpp
+    processor_motion.cpp
+    processor_motion2.cpp
     processor_tracker.cpp
     sensor_base.cpp
     sensor_camera.cpp
@@ -181,7 +186,6 @@ SET(SRCS
     trajectory_base.cpp
     wolf_problem.cpp
     wolf_manager.cpp
-    wolf_manager_gps.cpp
     data_association/association_solver.cpp
     data_association/association_node.cpp
     data_association/association_tree.cpp
@@ -190,13 +194,15 @@ SET(SRCS
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
-        ceres_wrapper/complex_angle_parametrization.h 
         ceres_wrapper/ceres_manager.h 
         ceres_wrapper/auto_diff_cost_function_wrapper.h
-        ceres_wrapper/cost_function_wrapper.h )
+        ceres_wrapper/auto_diff_cost_function_wrapper_base.h
+        ceres_wrapper/derived_constraint_auto_diff_cost_function.h
+        ceres_wrapper/cost_function_wrapper.h 
+        ceres_wrapper/local_parametrization_wrapper.h )
     SET(SRCS_WRAPPER
-        ceres_wrapper/complex_angle_parametrization.cpp 
-        ceres_wrapper/ceres_manager.cpp)
+        ceres_wrapper/ceres_manager.cpp
+        ceres_wrapper/local_parametrization_wrapper.cpp )
 ELSE(Ceres_FOUND)
     SET(HDRS_WRAPPER)
     SET(SRCS_WRAPPER)
@@ -235,14 +241,12 @@ IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
         feature_point_image.h
-        processor_image_point_brisk.h
         processor_brisk.h
         active_search.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
         feature_point_image.cpp
-        processor_image_point_brisk.cpp
         processor_brisk.cpp
         active_search.cpp
         )

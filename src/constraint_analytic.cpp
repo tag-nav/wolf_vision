@@ -157,7 +157,7 @@ std::vector<unsigned int> ConstraintAnalytic::getStateSizes() const
 
 JacobianMethod ConstraintAnalytic::getJacobianMethod() const
 {
-    return ANALYTIC;
+    return JAC_ANALYTIC;
 }
 
 void ConstraintAnalytic::resizeVectors()

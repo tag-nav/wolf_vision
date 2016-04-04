@@ -74,7 +74,7 @@ void SolverManager::removeConstraint(const unsigned int& _corr_idx)
     // TODO
 }
 
-void SolverManager::addStateUnit(StateBase* _st_ptr)
+void SolverManager::addStateUnit(StateBlock* _st_ptr)
 {
 	//std::cout << "Adding State Unit " << _st_ptr->nodeId() << std::endl;
 	//_st_ptr->print();
@@ -91,7 +91,7 @@ void SolverManager::addStateUnit(StateBase* _st_ptr)
 		case ST_THETA:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBase*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlock*)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		case ST_POINT_1D:
@@ -103,19 +103,19 @@ void SolverManager::addStateUnit(StateBase* _st_ptr)
 		case ST_VECTOR:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBase*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlock*)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		case ST_POINT_3D:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBase*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlock*)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		default:
 			std::cout << "Unknown  Local Parametrization type!" << std::endl;
 	}
-	if (_st_ptr->getStateStatus() != ST_ESTIMATED)
+	if (_st_ptr->isFixed())
 		updateStateUnitStatus(_st_ptr);
 
 	_st_ptr->setPendingStatus(NOT_PENDING);
@@ -131,13 +131,13 @@ void SolverManager::removeAllStateUnits()
 		ceres_problem_->RemoveParameterBlock(parameter_blocks[i]);
 }
 
-void SolverManager::updateStateUnitStatus(StateBase* _st_ptr)
+void SolverManager::updateStateUnitStatus(StateBlock* _st_ptr)
 {
     // TODO
 
-//	if (_st_ptr->getStateStatus() == ST_ESTIMATED)
+//	if (!_st_ptr->isFixed())
 //		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
-//	else if (_st_ptr->getStateStatus() == ST_FIXED)
+//	else if (_st_ptr->isFixed())
 //		ceres_problem_->SetParameterBlockConstant(_st_ptr->getPtr());
 //	else
 //		printf("\nERROR: Update state unit status with unknown status");

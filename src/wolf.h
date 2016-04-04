@@ -36,13 +36,15 @@ typedef double WolfScalar;        // Use this for double, 64 bit precision
 //typedef long double WolfScalar;   // Use this for long double, 128 bit precision
 
 namespace WolfConstants{
-// use it in odometry covariances for instance.
-const double MIN_VARIANCE = 1e-6;
 
 // Wolf standard tolerance
 const double EPS = 1e-8;
 // Wolf smmmmall tolerance
 const double EPS_SMALL = 1e-16;
+
+// use it in odometry covariances for instance.
+const double MIN_VARIANCE = 1e-6;
+
 }
 
 ///////////////////////////////////////////
@@ -100,8 +102,8 @@ typedef enum
  */
 typedef enum
 {
-    KEY_FRAME,    ///< marks a key frame. It will stay in the frames window and play at optimizations.
-    NON_KEY_FRAME ///< marks a regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
+    KEY_FRAME,    ///< key frame. It will stay in the frames window and play at optimizations.
+    NON_KEY_FRAME ///< regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
 } FrameType;
 
 /** \brief Enumeration of all possible frames
@@ -110,9 +112,10 @@ typedef enum
  */
 typedef enum
 {
-    PO_2D,  ///< marks a 2D frame containing position (x,y) and orientation angle.
-    PO_3D,  ///< marks a 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
-    POV_3D  ///< marks a 3D frame with position, orientation quaternion, and linear velocity (vx, vy, vz)
+    FRM_PO_2D,  ///< 2D frame containing position (x,y) and orientation angle.
+    FRM_PO_3D,  ///< 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
+    FRM_POV_3D,  ///< 3D frame with position, orientation quaternion, and linear velocity (vx,vy,vz)
+    FRM_PQVBB_3D ///< 3D frame with pos, orient quat, velocity, acc bias (abx,aby,abz), and gyro bias (wbx,wby,wbz).
 } FrameStructure;
 
 /** \brief Enumeration of all possible constraints
@@ -121,15 +124,16 @@ typedef enum
  */
 typedef enum
 {
-    CTR_GPS_FIX_2D,             ///< marks a 2D GPS Fix constraint.
-    CTR_GPS_PR_2D,              ///< marks a 2D GPS Pseudorange constraint.
-    CTR_GPS_PR_3D,              ///< marks a 3D GPS Pseudorange constraint.
-    CTR_FIX,                    ///< marks a Fix constraint (for priors).
-    CTR_ODOM_2D,                ///< marks a 2D Odometry constraint .
-    CTR_CORNER_2D,              ///< marks a 2D corner constraint .
-    CTR_CONTAINER,              ///< marks a 2D container constraint .
-    CTR_IMG_PNT_TO_EP,          ///< marks a constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
-    CTR_IMG_PNT_TO_IMG_PNT      ///< marks a constraint between two image point features
+    CTR_GPS_FIX_2D,             ///< 2D GPS Fix constraint.
+    CTR_GPS_PR_2D,              ///< 2D GPS Pseudorange constraint.
+    CTR_GPS_PR_3D,              ///< 3D GPS Pseudorange constraint.
+    CTR_FIX,                    ///< Fix constraint (for priors).
+    CTR_ODOM_2D,                ///< 2D Odometry constraint .
+    CTR_CORNER_2D,              ///< 2D corner constraint .
+    CTR_CONTAINER,              ///< 2D container constraint .
+    CTR_IMG_PNT_TO_EP,          ///< constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
+    CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
+    CTR_IMG_PNT_TO_IMG_PNT      ///< constraint between two image point features
 } ConstraintType;
 
 /** \brief Enumeration of constraint categories
@@ -160,9 +164,9 @@ typedef enum
  */
 typedef enum
 {
-    AUTO,    ///< Auto differentiation (AutoDiffCostFunctionWrapper or ceres::NumericDiffCostFunction).
-    NUMERIC, ///< Numeric differentiation (ceres::NumericDiffCostFunction).
-    ANALYTIC ///< Analytic jacobians.
+    JAC_AUTO,    ///< Auto differentiation (AutoDiffCostFunctionWrapper or ceres::NumericDiffCostFunction).
+    JAC_NUMERIC, ///< Numeric differentiation (ceres::NumericDiffCostFunction).
+    JAC_ANALYTIC ///< Analytic jacobians.
 } JacobianMethod;
 
 
@@ -172,7 +176,7 @@ typedef enum
  */
 typedef enum
 {
-    ST_ESTIMATED,		///< State in estimation (default)
+    ST_ESTIMATED = 0,		///< State in estimation (default)
     ST_FIXED,			  ///< State fixed, estimated enough or fixed infrastructure.
 } StateStatus;
 
@@ -182,20 +186,46 @@ typedef enum
  */
 typedef enum
 {
-    ODOM_2D,	    ///< Odometry measurement from encoders: displacement and rotation.
-    TWIST_2D,       ///< Twist measurement form encoders or motion command: lineal and angular velocities.
-    IMU,		      ///< Inertial measurement unit with 3 acceleros, 3 gyros
-    CAMERA,		    ///< Regular pinhole camera
-    GPS_FIX,	    ///< GPS fix calculated from a GPS receiver
-    GPS_RAW,      ///< GPS pseudo ranges, doppler and satellite ephemerides
-    LIDAR,		    ///< Laser Range Finder, 2D
-    RADAR,		    ///< Radar
-    ABSOLUTE_POSE ///< Full absolute pose (XYZ+quaternion)
+    SEN_ODOM_2D,	    ///< Odometry measurement from encoders: displacement and rotation.
+    SEN_TWIST_2D,       ///< Twist measurement form encoders or motion command: lineal and angular velocities.
+    SEN_IMU,		      ///< Inertial measurement unit with 3 acceleros, 3 gyros
+    SEN_CAMERA,		    ///< Regular pinhole camera
+    SEN_GPS_FIX,	    ///< GPS fix calculated from a GPS receiver
+    SEN_GPS_RAW,      ///< GPS pseudo ranges, doppler and satellite ephemerides
+    SEN_LIDAR,		    ///< Laser Range Finder, 2D
+    SEN_RADAR,		    ///< Radar
+    SEN_ABSOLUTE_POSE ///< Full absolute pose (XYZ+quaternion)
 } SensorType;
+
+/** \brief Enumeration of all possible Processor types
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ */
+typedef enum
+{
+    PRC_TRACKER_BRISK,
+    PRC_TRACKER_ORB,
+    PRC_GPS_RAW,
+    PRC_LIDAR,
+    PRC_ODOM_3D
+} ProcessorType;
+
+/** \brief enumeration of all possible Feature types
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ */
+typedef enum
+{
+    FEAT_CORNER,
+    FEAT_FIX,
+    FEAT_GPS_FIX,
+    FEAT_GPS_PR,
+    FEAT_ODOM_2D,
+    FEAT_POINT_IMAGE
+}FeatureType;
 
 /** \brief Enumeration of all possible landmark types
  *
- * You may add items to this list as needed. Be concise with names, and document your entries.
  */
 typedef enum
 {
@@ -294,33 +324,33 @@ typedef ProcessorBaseList::iterator ProcessorBaseIter;
 
 // - State
 typedef std::list<StateBlock*> StateBlockList;
-typedef StateBlockList::iterator StateBaseIter;
-
-
-///** \brief Enumeration of all possible feature types
-// *
-// * Enumeration of all possible feature types.
-// *
-// * You may add items to this list as needed. Be concise with names, and document your entries.
-// *
-// */
-//typedef enum
-//{
-//    BASE,       ///< A feature of FeatureBase -- just for completeness
-//    POINT,      ///< A point feature, either 3D or 2D
-//    LINE,       ///< a line feature, 2D or 3D
-//    CORNER2D,   ///< a corner feature 2D
-//    P_RANGE,    ///< A pseudo-range measurement from GPS satellite
-//    V_DOPPLER,  ///< Doppler velocity measurement from GPS satellite
-//    GPS_FIX,    ///< A GPS fix
-//    LIDAR_SCAN, ///< Full 2D laser scan
-//    LIDAR_RAY   ///< A single laser ray
-//} FeatureType;
+typedef StateBlockList::iterator StateBlockIter;
 
 
 inline WolfScalar pi2pi(const WolfScalar& angle)
 {
     return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
 }
+
+// Quaternion things
+namespace Eigen{
+inline void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
+    WolfScalar angle = _v.norm();
+    if (angle < WolfConstants::EPS)
+        _q = Eigen::Quaternions::Identity();
+    else
+    {
+        _q = Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
+    }
+}
+
+
+inline void q2v(const Eigen::Quaternions& _q, Eigen::VectorXs& _v){
+    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
+    _v = aa.axis() * aa.angle();
+}
+}
+
+
 
 #endif /* WOLF_H_ */

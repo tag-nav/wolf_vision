@@ -8,31 +8,32 @@ class ConstraintBase;
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
+#include "node_constrained.h"
 
 //std includes
 
 //class FeatureBase
-class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
+class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
 {
     protected:
+        FeatureType type_;          ///< Feature type. See wolf.h for a list of all possible features.
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
-        std::list<ConstraintBase*> constrained_by_list_;   ///< List of constraints linked TO this feature
         
     public:
         /** \brief Constructor from capture pointer and measure dim
          * 
          * \param _dim_measurement the dimension of the measurement space
          */
-        FeatureBase(unsigned int _dim_measurement);
+        FeatureBase(FeatureType _tp, unsigned int _dim_measurement);
 
         /** \brief Constructor from capture pointer and measure
          *
          * \param _measurement the measurement
          * \param _meas_covariance the noise of the measurement
          */
-        FeatureBase(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
+        FeatureBase(FeatureType _tp, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
         /** \brief Default destructor (not recommended)
          *
@@ -43,22 +44,6 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
         /** \brief Adds a constraint from this feature (as a down node)
          */
         void addConstraint(ConstraintBase* _co_ptr);
-
-        /** \brief Adds a constraint to this feature (down node from other feature)
-         */
-        void addConstrainedBy(ConstraintBase* _co_ptr);
-
-        /** \brief Remove a constraint to this feature
-         **/
-        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
-
-        /** \brief Gets the number of constraints linked with this frame
-         **/
-        unsigned int getHits() const;
-
-        /** \brief Gets the list of constraints linked with this frame
-         **/
-        std::list<ConstraintBase*>* getConstraintToListPtr();
 
         /** \brief Gets the capture pointer
          */
@@ -95,11 +80,6 @@ class FeatureBase : public NodeLinked<CaptureBase,ConstraintBase>
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         
 };
-
-inline std::list<ConstraintBase*>* FeatureBase::getConstraintToListPtr()
-{
-    return &constrained_by_list_;
-}
 
 inline CaptureBase* FeatureBase::getCapturePtr() const
 {

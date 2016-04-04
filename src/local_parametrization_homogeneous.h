@@ -13,8 +13,6 @@
 /**
  * \brief Local parametrization for homogeneous vectors.
  *
- * Local parametrization for homogeneous vectors.
- *
  * The composition x_plus_dx = plus(x,dx), written in math mode as \f${\bf x}^+={\bf x}\oplus d {\bf x}\f$,
  * is done orthogonally to \f${\bf x}\f$,
  * so that the result remains in the 4-sphere defined by the norm of \f${\bf x}\f$.
@@ -40,10 +38,10 @@ class LocalParametrizationHomogeneous : public LocalParametrizationBase
         LocalParametrizationHomogeneous();
         virtual ~LocalParametrizationHomogeneous();
 
-        virtual bool plus(const Eigen::Map<Eigen::VectorXs>& _h,
-                          const Eigen::Map<Eigen::VectorXs>& _delta,
+        virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _h,
+                          const Eigen::Map<const Eigen::VectorXs>& _delta,
                           Eigen::Map<Eigen::VectorXs>& _h_plus_delta) const;
-        virtual bool computeJacobian(const Eigen::Map<Eigen::VectorXs>& _h, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
+        virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _h, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
 };
 
 #endif /* LOCALPARAMETRIZATIONHOMOGENEOUS_H_ */

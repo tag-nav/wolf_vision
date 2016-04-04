@@ -99,7 +99,7 @@ int main()
     cout << "========================================================" << endl;
 
     cout << endl << "TEST 1. Constructors" << endl;
-    WolfProblem* problem_(new WolfProblem(PO_2D));
+    WolfProblem* problem_(new WolfProblem(FRM_PO_2D));
     TrajectoryN* trajectory_(new TrajectoryN(2));
     FrameN* frame_1_(new FrameN(1.011));
     FrameN* frame_2_(new FrameN(2.022));
@@ -131,8 +131,8 @@ int main()
     trajectory_->removeDownNode(f1_id_);
     cout << "========================================================" << endl;    
     
-    cout << endl << "TEST 5. getTop()" << endl;
-    WolfProblem* nb_ptr = sensor_data_radar_->getTop();
+    cout << endl << "TEST 5. getWolfProblem()" << endl;
+    WolfProblem* nb_ptr = sensor_data_radar_->getWolfProblem();
     //shared_ptr<TrajectoryN> nb_shptr((TrajectoryN*)nb_ptr);
     cout << "TOP node is: " << nb_ptr->nodeId() << endl;
     //cout << "nb_shptr.use_count(): " << nb_shptr.use_count() << "; value: " << nb_shptr.get() << endl;

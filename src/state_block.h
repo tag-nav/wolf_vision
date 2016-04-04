@@ -33,14 +33,14 @@ class StateBlock
          * \param _size is state size
          * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter
          */
-        StateBlock(const unsigned int _size, bool _fixed = false);
+        StateBlock(const unsigned int _size, bool _fixed = false, LocalParametrizationBase* _local_param_ptr = nullptr);
 
         /** \brief Constructor from vector
          * 
          * \param _state is state vector
          * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter
          **/
-        StateBlock(const Eigen::VectorXs _state, bool _fixed = false);
+        StateBlock(const Eigen::VectorXs _state, bool _fixed = false, LocalParametrizationBase* _local_param_ptr = nullptr);
         
         /** \brief Destructor
          **/
@@ -80,14 +80,14 @@ class StateBlock
 
 };
 
-inline StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed) :
-        state_(_state), fixed_(_fixed), local_param_ptr_(nullptr)
+inline StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed, LocalParametrizationBase* _local_param_ptr) :
+        state_(_state), fixed_(_fixed), local_param_ptr_(_local_param_ptr)
 {
     //
 }
 
-inline StateBlock::StateBlock(const unsigned int _size, bool _fixed) :
-        state_(_size), fixed_(_fixed), local_param_ptr_(nullptr)
+inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParametrizationBase* _local_param_ptr) :
+        state_(_size), fixed_(_fixed), local_param_ptr_(_local_param_ptr)
 {
     //
 }

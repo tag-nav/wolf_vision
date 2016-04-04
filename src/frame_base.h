@@ -11,11 +11,12 @@ class StateBlock;
 #include "wolf.h"
 #include "time_stamp.h"
 #include "node_linked.h"
+#include "node_constrained.h"
 
 //std includes
 
 //class FrameBase
-class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
+class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
 {
     protected:
         FrameType type_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
@@ -24,7 +25,6 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         StateBlock* p_ptr_;      ///< Position state block pointer
         StateBlock* o_ptr_;      ///< Orientation state block pointer
         StateBlock* v_ptr_;      ///< Linear velocity state block pointer
-        std::list<ConstraintBase*> constraint_to_list_; ///> List of constraints TO this frame
         
     public:
         /** \brief Constructor of non-key Frame with only time stamp
@@ -64,7 +64,7 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         // Fixed / Estimated
         void fix();
         void unfix();
-        bool isFixed();
+        bool isFixed() const;
 
 
 
@@ -102,26 +102,6 @@ class FrameBase : public NodeLinked<TrajectoryBase,CaptureBase>
         virtual void registerNewStateBlocks();
 
 
-        // Other constraints pointing to this frame ------------------------------------------
-
-        /** \brief Gets the list of constraints linked with this frame
-         **/
-        std::list<ConstraintBase*>* getConstraintToListPtr();
-
-        /** \brief Link with a constraint
-         **/
-        void addConstraintTo(ConstraintBase* _ctr_ptr);
-
-        /** \brief Remove a constraint to this frame
-         **/
-        void removeConstraintTo(ConstraintBase* _ctr_ptr);
-
-        /** \brief Gets the number of constraints linked with this frame
-         **/
-        unsigned int getHits() const;
-
-
-
     private:
         /** \brief Gets the Frame status (see wolf.h for Frame status)
          **/
@@ -151,7 +131,7 @@ inline void FrameBase::unfix()
     this->setStatus(ST_ESTIMATED);
 }
 
-inline bool FrameBase::isFixed()
+inline bool FrameBase::isFixed() const
 {
     return status_ == ST_FIXED;
 }
@@ -205,21 +185,6 @@ inline void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
 {
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
     removeDownNode(_capt_iter);
-}
-
-inline std::list<ConstraintBase*>* FrameBase::getConstraintToListPtr()
-{
-    return &constraint_to_list_;
-}
-
-inline void FrameBase::addConstraintTo(ConstraintBase* _ctr_ptr)
-{
-    constraint_to_list_.push_back(_ctr_ptr);
-}
-
-inline unsigned int FrameBase::getHits() const
-{
-    return constraint_to_list_.size();
 }
 
 inline StateStatus FrameBase::getStatus() const

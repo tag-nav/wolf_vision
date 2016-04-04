@@ -4,13 +4,13 @@
 #include "sensor_camera.h"
 #include "capture_image.h"
 #include "feature_point_image.h"
-#include "processor_image_point_brisk.h"
 #include "processor_brisk.h"
 #include "state_block.h"
 #include "state_quaternion.h"
 
 // general includes
 #include "unistd.h"
+#include <time.h>
 
 //std includes
 #include <iostream>
@@ -34,67 +34,27 @@ int main(int argc, char** argv)
     //Welcome message
     std::cout << std::endl << " ========= WOLF IMAGE test ===========" << std::endl << std::endl;
 
-    int img_width = 640;
-    int img_height = 480;
-
-    //SensorCamera test
-    std::cout << std::endl << " ========= SensorCamera test ===========" << std::endl << std::endl;
-
-    Eigen::Vector4s k = {320,240,320,320};
-
-    StateBlock* intr = new StateBlock(k,false);
-
-    SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero()),
-                                              intr,img_width,img_height);
-    std::cout << "image sensor created!" << std::endl;
-    std::cout << "intr_test" << std::endl << intr->getVector() << std::endl;
-    std::cout << "sen_cam intr_ptr" << std::endl << sen_cam_->getIntrinsicPtr()->getVector() << std::endl;
-
-
-
-    //CaptureImage test
-    std::cout << std::endl << " ========= CaptureImage test ===========" << std::endl << std::endl;
-
-    //const char * path="/home/jtarraso/Imágenes/box.jpg";
-    const char * path="/home/jtarraso/Imágenes/house.jpg";
-    cv::Mat image_cv =cv::imread(path);
-    TimeStamp t = 1;
-
-    CaptureImage* cap_image = new CaptureImage(t,sen_cam_,image_cv,img_width,img_height);
-
-    std::cout << "timestamp: " << t.get() << std::endl;
-    std::cout << "captureimage test: " << cap_image->getSensorPtr()->getIntrinsicPtr()->getVector() << std::endl;
-
-    delete cap_image;
-
-
-    //FeaturePoint test
-    std::cout << std::endl << " ========= FeaturePoint test ===========" << std::endl << std::endl;
-
-    Eigen::Vector2s m_pos = {5,6};
-    Eigen::Matrix2s m_cov(2,2);
-    m_cov(0,0)=1;
-    m_cov(0,1)=2;
-    m_cov(1,0)=3;
-    m_cov(1,1)=4;
-
-    FeaturePointImage* feat_point = new FeaturePointImage(m_pos,m_cov);
-    std::cout << "measurement position: " << m_pos(0) << " " << m_pos(1) << std::endl;
-    std::cout << "measurement covariance:\n" << m_cov(0,0) << " " << m_cov(0,1) << "\n" << m_cov(1,0) << " " << m_cov(1,1) << std::endl;
-    std::cout << "feature position:\n" << feat_point->getMeasurement() << "\nfeature covariance:\n" << feat_point->getMeasurementCovariance()<< std::endl;
-
-    delete feat_point;
-
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
 
-    WolfProblem* wolf_problem_ = new WolfProblem(PO_3D);
+    TimeStamp t = 1;
+    int img_width = 640;
+    int img_height = 360;
+
+    Eigen::Vector4s k = {320,240,320,320};
+    StateBlock* intr = new StateBlock(k,false);
+    SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero()), intr,img_width,img_height);
+
+
+    WolfProblem* wolf_problem_ = new WolfProblem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(30,0,0.5f);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,30,0,0.5f,7,7,10);
     sen_cam_->addProcessor(p_brisk);
+
 
     unsigned int f = 0;
     const char * filename = "/home/jtarraso/Vídeos/House interior.mp4";
+    //const char * filename = "/home/jtarraso/Descargas/gray.mp4";
     cv::VideoCapture capture(filename);
     cv::Mat frame;
 
@@ -124,89 +84,13 @@ int main(int argc, char** argv)
         wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
         frm_ptr->addCapture(capture_brisk_ptr);
 
+        clock_t t1 = clock();
         p_brisk->process(capture_brisk_ptr);
+        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+
         f++;
         std::cout << "f: " << f << std::endl;
     }
 
-
-
-
-
-/**
-    //Brisk test
-    std::cout << std::endl << " ========= Brisk test ===========" << std::endl << std::endl;
-
-    int f = 0;
-
-    int Threshl=30;
-    int Octaves=0; //(pyramid layer) from which the keypoint has been extracted
-    float PatternScales=1.0f;
-
-
-    WolfProblem* wolf_problem_ = new WolfProblem(PO_2D);
-    wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-    ProcessorImagePointBrisk* processor_brisk = new ProcessorImagePointBrisk(Threshl,Octaves,PatternScales);
-    sen_cam_->addProcessor(processor_brisk);
-
-
-    CaptureImage* current_capture_video_brisk_ptr;
-    CaptureImage* previous_capture_video_brisk_ptr;
-
-    if(!image_or_video)
-    {
-        wolf_problem_->getTrajectoryPtr()->addFrame(new FrameBase(TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero())));
-        wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->addCapture(new CaptureImage(t,sen_cam_,image_cv,img_width,img_height));
-        wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->getCaptureListPtr()->back()->process();
-    }
-    else
-    {
-        const char * filename = "/home/jtarraso/Vídeos/House interior.mp4";
-        cv::VideoCapture capture(filename);
-        cv::Mat frame;
-
-        std::cout << "file opened: " << capture.isOpened() << std::endl;
-        if( !capture.isOpened() )
-        {
-            throw "Error when reading steam_avi";
-        }
-
-
-        //cv::namedWindow("video");
-        capture.set(CV_CAP_PROP_POS_MSEC, 3000);
-
-        capture >> frame;
-        current_capture_video_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
-
-        while(f<100)
-        {
-            capture >> frame;
-            //cv::imshow("video",frame);
-            wolf_problem_->getTrajectoryPtr()->addFrame(new FrameBase(TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero())));
-
-
-            delete previous_capture_video_brisk_ptr; // TODO ojo aqui
-            previous_capture_video_brisk_ptr = current_capture_video_brisk_ptr;
-            //CaptureImage* other_cap_vid_brisk = wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->getCaptureListPtr()->back();
-
-
-            current_capture_video_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
-            wolf_problem_->getTrajectoryPtr()->getLastFramePtr()->addCapture(current_capture_video_brisk_ptr);
-            clock_t t1 = clock();
-
-            processor_brisk->process(current_capture_video_brisk_ptr);
-
-            std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-            cv::waitKey(50);
-            f++;
-        }
-        //cv::waitKey(0);
-
-    }
-*/
     wolf_problem_->destruct();
-
-
-
-
 }

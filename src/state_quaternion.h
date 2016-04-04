@@ -15,6 +15,10 @@ class StateQuaternion : public StateBlock
     public:
         StateQuaternion(bool _fixed = false);
         StateQuaternion(const Eigen::VectorXs _state, bool _fixed = false);
+        StateQuaternion(const Eigen::Quaternions _quaternion, bool _fixed = false) :
+            StateBlock(_quaternion.coeffs())
+        {
+        }
         virtual ~StateQuaternion();
 };
 

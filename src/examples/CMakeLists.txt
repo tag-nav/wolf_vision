@@ -4,6 +4,10 @@ ADD_EXECUTABLE(example_factory example_factory.cpp)
 ADD_EXECUTABLE(example_template_factory example_template_factory.cpp)
 TARGET_LINK_LIBRARIES(example_template_factory ${PROJECT_NAME})
 
+# ProcessorMotion classes test
+ADD_EXECUTABLE(test_motion test_motion.cpp)
+TARGET_LINK_LIBRARIES(test_motion ${PROJECT_NAME})
+
 # Local parametrizations classes test
 ADD_EXECUTABLE(test_local_param test_local_param.cpp)
 TARGET_LINK_LIBRARIES(test_local_param ${PROJECT_NAME})
@@ -58,6 +62,10 @@ TARGET_LINK_LIBRARIES(test_wolf_tree ${PROJECT_NAME})
 # Building and populating the wolf tree from .graph file (TORO)
 ADD_EXECUTABLE(test_wolf_imported_graph test_wolf_imported_graph.cpp)
 TARGET_LINK_LIBRARIES(test_wolf_imported_graph ${PROJECT_NAME})
+
+# Comparing performance of wolf auto_diff and ceres auto_diff
+ADD_EXECUTABLE(test_wolf_autodiffwrapper test_wolf_autodiffwrapper.cpp)
+TARGET_LINK_LIBRARIES(test_wolf_autodiffwrapper ${PROJECT_NAME})
 
 # Prunning wolf tree from .graph file (TORO)
 ADD_EXECUTABLE(test_wolf_prunning test_wolf_prunning.cpp)

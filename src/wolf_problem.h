@@ -77,6 +77,8 @@ class WolfProblem: public NodeBase
          */
         void createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp);
 
+        bool permitKeyFrame(ProcessorBase* _processor_ptr);
+
         void addLandmark(LandmarkBase* _lmk_ptr);
 
         /** \brief Adds a new state block to be added to solver manager
@@ -172,7 +174,7 @@ class WolfProblem: public NodeBase
 
         /** \brief get top node
          */
-        virtual WolfProblem* getTop();
+        virtual WolfProblem* getWolfProblem();
 
         /** \brief Returns a true (is top)
          */
@@ -185,6 +187,11 @@ class WolfProblem: public NodeBase
         void removeDownNode(const LowerNodePtr _ptr);
 
 };
+
+inline bool WolfProblem::permitKeyFrame(ProcessorBase* _processor_ptr)
+{
+    return true;
+}
 
 inline MapBase* WolfProblem::getMapPtr()
 {
@@ -231,7 +238,7 @@ inline std::list<unsigned int>* WolfProblem::getConstraintRemoveList()
     return &constraint_remove_list_;
 }
 
-inline WolfProblem* WolfProblem::getTop()
+inline WolfProblem* WolfProblem::getWolfProblem()
 {
     return this;
 }

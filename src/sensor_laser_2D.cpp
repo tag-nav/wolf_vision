@@ -8,14 +8,14 @@
 // }
 
 SensorLaser2D::SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr) :
-    SensorBase(LIDAR, _p_ptr, _o_ptr, nullptr, 8)
+    SensorBase(SEN_LIDAR, _p_ptr, _o_ptr, nullptr, 8)
 {
     setDefaultScanParams();
     setDefaultCornerAlgParams();  
 }
 
 // SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params) :
-//     SensorBase(LIDAR, _sp, 8)
+//     SensorBase(SEN_LIDAR, _sp, 8)
 // {
 //     setScanParams(_params);
 //     setDefaultCornerAlgParams();  

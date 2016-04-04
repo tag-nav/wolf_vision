@@ -27,7 +27,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, Constr
     landmark_ptr_(nullptr)
 {
     // add constraint to frame
-    frame_ptr_->addConstraintTo(this);
+    frame_ptr_->addConstrainedBy(this);
 }
 
 
@@ -55,7 +55,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, 
     landmark_ptr_(_landmark_ptr)
 {
     // add constraint to landmark
-    landmark_ptr_->addConstraintTo(this);
+    landmark_ptr_->addConstrainedBy(this);
 }
 
 ConstraintBase::~ConstraintBase()
@@ -64,18 +64,18 @@ ConstraintBase::~ConstraintBase()
     is_deleting_ = true;
 
     // add constraint to be removed from solver
-    if (getTop() != nullptr)
-        getTop()->removeConstraintPtr(this);
+    if (getWolfProblem() != nullptr)
+        getWolfProblem()->removeConstraintPtr(this);
 
     //std::cout << "removeConstraintPtr " << std::endl;
 
     // remove constraint to frame/landmark/feature
     if (frame_ptr_ != nullptr)
-        frame_ptr_->removeConstraintTo(this);
+        frame_ptr_->removeConstrainedBy(this);
     if (feature_ptr_ != nullptr)
         feature_ptr_->removeConstrainedBy(this);
     if (landmark_ptr_ != nullptr)
-        landmark_ptr_->removeConstraintTo(this);
+        landmark_ptr_->removeConstrainedBy(this);
 
     //std::cout << "removed constraints to " << std::endl;
 }
@@ -102,14 +102,14 @@ CaptureBase* ConstraintBase::getCapturePtr() const
 
 void ConstraintBase::setStatus(ConstraintStatus _status)
 {
-    if (getTop() == nullptr)
+    if (getWolfProblem() == nullptr)
         std::cout << "constraint not linked with 'top', only status changed" << std::endl;
     else if (_status != status_)
     {
         if (_status == CTR_ACTIVE)
-            getTop()->addConstraintPtr(this);
+            getWolfProblem()->addConstraintPtr(this);
         else if (_status == CTR_INACTIVE)
-            getTop()->removeConstraintPtr(this);
+            getWolfProblem()->removeConstraintPtr(this);
     }
     status_ = _status;
 }
