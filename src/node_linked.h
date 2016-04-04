@@ -209,32 +209,22 @@ inline const bool NodeLinked<UpperType, LowerType>::isDeleting() const
 template<class UpperType, class LowerType>
 inline bool NodeLinked<UpperType, LowerType>::isTop() const
 {
-    if (location_ == TOP)
-        return true;
-    else
-        return false;
+    return (location_ == TOP);
 }
 
 template<class UpperType, class LowerType>
 inline bool NodeLinked<UpperType, LowerType>::isBottom() const
 {
-    if (location_ == BOTTOM)
-        return true;
-    else
-        return false;
+    return (location_ == BOTTOM);
 }
 
 template<class UpperType, class LowerType>
 inline void NodeLinked<UpperType, LowerType>::linkToUpperNode(UpperNodePtr _pptr)
 {
     if (isTop())
-    {
         up_node_ptr_ = nullptr;
-    }
     else
-    {
         up_node_ptr_ = _pptr;
-    }
 }
 
 template<class UpperType, class LowerType>
