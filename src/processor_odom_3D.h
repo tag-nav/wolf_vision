@@ -14,36 +14,36 @@
  *
  * The motion delta, as a composite struct containing position increment and orientation quaternion increment.
  */
-struct Odo3dDeltaType{
+struct Odom3dDelta{
         Eigen::Vector3s dp;    ///< Position increment
         Eigen::Quaternions dq; ///< Orientation increment as a quaternion
-        Odo3dDeltaType() : dp(0,0,0), dq(1,0,0,0) {};
+        Odom3dDelta() : dp(0,0,0), dq(1,0,0,0) {};
         void setZero() {dp.setZero(); dq.setIdentity();}
-        static Odo3dDeltaType Zero() {return Odo3dDeltaType();}
+        static Odom3dDelta Zero() {return Odom3dDelta();}
 };
 
 
 
-class ProcessorOdom3d : public ProcessorMotion2<Odo3dDeltaType>
+class ProcessorOdom3d : public ProcessorMotion2<Odom3dDelta>
 {
     public:
         ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6), quat1_(nullptr) {}
         virtual ~ProcessorOdom3d(){}
-        virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Odo3dDeltaType& _delta);
+        virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Odom3dDelta& _delta);
 
     private:
-        void xPlusDelta(const Eigen::VectorXs& _x, const Odo3dDeltaType& _delta, Eigen::VectorXs& _x_plus_delta);
-        void deltaPlusDelta(const Odo3dDeltaType& _delta1, const Odo3dDeltaType& _delta2, Odo3dDeltaType& _delta1_plus_delta2);
-        virtual void deltaMinusDelta(const Odo3dDeltaType& _delta1, const Odo3dDeltaType& _delta2,
-                                     Odo3dDeltaType& _delta2_minus_delta1);
-        Odo3dDeltaType deltaZero() const;
+        void xPlusDelta(const Eigen::VectorXs& _x, const Odom3dDelta& _delta, Eigen::VectorXs& _x_plus_delta);
+        void deltaPlusDelta(const Odom3dDelta& _delta1, const Odom3dDelta& _delta2, Odom3dDelta& _delta1_plus_delta2);
+        virtual void deltaMinusDelta(const Odom3dDelta& _delta1, const Odom3dDelta& _delta2,
+                                     Odom3dDelta& _delta2_minus_delta1);
+        Odom3dDelta deltaZero() const;
 
     private:
         Eigen::Map<const Eigen::Quaternions> quat1_;
 };
 
 
-inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Odo3dDeltaType& _delta)
+inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Odom3dDelta& _delta)
 {
     // Trivial implementation
     _delta.dp = _data.head(3);
@@ -53,7 +53,7 @@ inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const Wolf
 
 
 // Compose a frame with a delta frame and give a frame
-inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Odo3dDeltaType& _delta, Eigen::VectorXs& _x_plus_delta)
+inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Odom3dDelta& _delta, Eigen::VectorXs& _x_plus_delta)
 {
     assert(_x.size() == 7 && "Wrong _x vector size");
     assert(_x_plus_delta.size() == 7 && "Wrong _x_plus_delta vector size");
@@ -66,24 +66,24 @@ inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Odo3dDe
 }
 
 // Compose two delta-frames and give a delta-frame
-inline void ProcessorOdom3d::deltaPlusDelta(const Odo3dDeltaType& _delta1, const Odo3dDeltaType& _delta2, Odo3dDeltaType& _delta1_plus_delta2)
+inline void ProcessorOdom3d::deltaPlusDelta(const Odom3dDelta& _delta1, const Odom3dDelta& _delta2, Odom3dDelta& _delta1_plus_delta2)
 {
     _delta1_plus_delta2.dp = _delta1.dp + _delta1.dq*_delta2.dp;
     _delta1_plus_delta2.dq = _delta1.dq * _delta2.dq;
 }
 
-inline void ProcessorOdom3d::deltaMinusDelta(const Odo3dDeltaType& _delta1, const Odo3dDeltaType& _delta2,
-                                             Odo3dDeltaType& _delta2_minus_delta1)
+inline void ProcessorOdom3d::deltaMinusDelta(const Odom3dDelta& _delta1, const Odom3dDelta& _delta2,
+                                             Odom3dDelta& _delta2_minus_delta1)
 {
     _delta2_minus_delta1.dp = _delta1.dq.conjugate() * (_delta2.dp - _delta1.dp);
     _delta2_minus_delta1.dq = _delta1.dq.conjugate() * _delta2.dq;
 }
 
-inline Odo3dDeltaType ProcessorOdom3d::deltaZero() const
+inline Odom3dDelta ProcessorOdom3d::deltaZero() const
 {
     //    return Odo3dDeltaType {Eigen::Vector3s::Zero(), Eigen::Quaternions::Identity()}; // explicit version
     //    return Odo3dDeltaType(); // Uses default constructor with null motion
-    return Odo3dDeltaType::Zero(); //  Uses static member function
+    return Odom3dDelta::Zero(); //  Uses static member function
 }
 
 #endif /* SRC_PROCESSOR_ODOM_3D_H_ */
