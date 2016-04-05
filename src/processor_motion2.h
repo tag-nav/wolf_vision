@@ -76,12 +76,14 @@ class ProcessorMotion2 : public ProcessorBase
 
         // Instructions to the processor:
 
-        virtual void process(CaptureBase* _incoming_ptr);
         void init(CaptureMotion2<MotionDeltaType>* _origin_ptr);
+        virtual void process(CaptureBase* _incoming_ptr);
         void reset(const TimeStamp& _ts);
         void makeKeyFrame(const TimeStamp& _ts);
 
         // Queries to the processor:
+
+        virtual bool voteForKeyFrame();
 
         /** \brief Fills a reference to the state integrated so far
          * \param the returned state vector
@@ -122,7 +124,9 @@ class ProcessorMotion2 : public ProcessorBase
         // Helper functions:
     protected:
 
-        void integrate(CaptureMotion2<MotionDeltaType>* _incoming_ptr);
+        void integrate();
+
+        void updateDt();
 
         typename CaptureMotion2<MotionDeltaType>::MotionBuffer* getBufferPtr();
 
@@ -135,6 +139,10 @@ class ProcessorMotion2 : public ProcessorBase
           *
           * This function accesses the members data_ (as produced by extractData()) and dt_,
           * and computes the value of the delta-state delta_.
+          *
+          * \param _data the raw motion data
+          * \param _dt the time step (not always needed)
+          * \param _delta the returned motion delta
           *
           * Rationale:
           *
@@ -157,7 +165,7 @@ class ProcessorMotion2 : public ProcessorBase
           *
           *  However, other more complicated relations are possible.
           */
-         virtual void data2delta(const Eigen::VectorXs& _data, MotionDeltaType& _delta) = 0;
+         virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, MotionDeltaType& _delta) = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -241,7 +249,9 @@ template<class MotionDeltaType>
 inline void ProcessorMotion2<MotionDeltaType>::process(CaptureBase* _incoming_ptr)
 {
     incoming_ptr_ = (CaptureMotion2<MotionDeltaType>*)(_incoming_ptr);
-    integrate(incoming_ptr_);
+
+    integrate();
+
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         // TODO:
@@ -281,6 +291,12 @@ inline void ProcessorMotion2<MotionDeltaType>::makeKeyFrame(const TimeStamp& _ts
     getWolfProblem()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
     // Make the last Capture's Frame a KeyFrame so that it gets into the solver
     last_ptr_->getFramePtr()->setKey();
+}
+
+template<class MotionDeltaType>
+inline bool ProcessorMotion2<MotionDeltaType>::voteForKeyFrame()
+{
+    return false;
 }
 
 template<class MotionDeltaType>
@@ -331,14 +347,22 @@ inline void ProcessorMotion2<MotionDeltaType>::sumDeltas(CaptureMotion2<MotionDe
 }
 
 template<class MotionDeltaType>
-inline void ProcessorMotion2<MotionDeltaType>::integrate(CaptureMotion2<MotionDeltaType>* _incoming_ptr)
+inline void ProcessorMotion2<MotionDeltaType>::integrate()
 {
-    // First get data and convert it to delta
-    data2delta(_incoming_ptr->getData(), delta_);
+    // Set dt
+    updateDt();
+    // get data and convert it to delta
+    data2delta(incoming_ptr_->getData(), dt_, delta_);
     // then integrate
     deltaPlusDelta(getBufferPtr()->getDelta(), delta_, delta_integrated_);
     // then push it into buffer
-    getBufferPtr()->pushBack(_incoming_ptr->getTimeStamp(), delta_integrated_);
+    getBufferPtr()->pushBack(incoming_ptr_->getTimeStamp(), delta_integrated_);
+}
+
+template<class MotionDeltaType>
+inline void ProcessorMotion2<MotionDeltaType>::updateDt()
+{
+    dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->getTimeStamp();
 }
 
 template<class MotionDeltaType>

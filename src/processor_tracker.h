@@ -153,6 +153,8 @@ class ProcessorTracker : public ProcessorBase
          */
         void reset();
 
+        virtual bool voteForKeyFrame();
+
         // getters and setters
         bool usesLandmarks() const;
         CaptureBase* getOriginPtr() const;
@@ -234,6 +236,11 @@ inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
 {
     origin_ptr_ = _origin_ptr;
     last_ptr_ = _origin_ptr;
+}
+
+inline bool ProcessorTracker::voteForKeyFrame()
+{
+    return false;
 }
 
 inline bool ProcessorTracker::usesLandmarks() const
