@@ -5,19 +5,28 @@
  *      Author: jvallve
  */
 
-#ifndef SRC_PROCESSOR_LASER_CORNERS_H_
-#define SRC_PROCESSOR_LASER_CORNERS_H_
+#ifndef SRC_PROCESSOR_TRACKER_LASER_H_
+#define SRC_PROCESSOR_TRACKER_LASER_H_
 
 // Wolf includes
 #include "processor_tracker.h"
 
-class ProcessorLaserCorners : public ProcessorTracker
+//laser_scan_utils
+#include "laser_scan_utils/scan_basics.h"
+#include "laser_scan_utils/corner_detector.h"
+
+class ProcessorTrackerLaser : public ProcessorTracker
 {
+    private:
+        laserscanutils::ScanParams scan_params_;
+        laserscanutils::ExtractCornerParams corner_alg_params_;
+        CaptureLaser2D* scan_last_, scan_incoming_
+
     public:
-        ProcessorLaserCorners();
+        ProcessorTrackerLaser();
 
         //Destructor
-        virtual ~ProcessorLaserCorners();
+        virtual ~ProcessorTrackerLaser();
 
     protected:
 
@@ -70,4 +79,4 @@ class ProcessorLaserCorners : public ProcessorTracker
          */
         virtual bool voteForKeyFrame();
 };
-#endif /* SRC_PROCESSOR_LASER_CORNERS_H_ */
+#endif /* SRC_PROCESSOR_TRACKER_LASER_H_ */
