@@ -7,11 +7,11 @@
 #include "glog/logging.h"
 
 //wolf includes
-#include "derived_constraint_auto_diff_cost_function.h"
 #include "cost_function_wrapper.h"
 #include "local_parametrization_wrapper.h"
 #include "../wolf.h"
 #include "../state_block.h"
+#include "create_auto_diff_cost_function.h"
 
 /** \brief Enumeration of covariance blocks to be computed
  *

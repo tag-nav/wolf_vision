@@ -57,6 +57,8 @@ class ProcessorLaser2D : public ProcessorBase
 
         void process(CaptureBase *_capture_ptr);
 
+        virtual bool voteForKeyFrame();
+
         // JS: These two fcns can be removed and substituted by process() above.
     private:
         void extractFeatures(CaptureBase* _capture_ptr);
@@ -85,4 +87,10 @@ class ProcessorLaser2D : public ProcessorBase
                                      LandmarkCorner2D* _old_corner_landmark_ptr, int& _feature_idx, int& _corner_idx);
 
 };
+
+inline bool ProcessorLaser2D::voteForKeyFrame()
+{
+    return false;
+}
+
 #endif /* SRC_PROCESSOR_LASER_2D_H_ */
