@@ -8,7 +8,7 @@
 #ifndef SRC_CERES_WRAPPER_CREATE_AUTO_DIFF_COST_FUNCTION_H_
 #define SRC_CERES_WRAPPER_CREATE_AUTO_DIFF_COST_FUNCTION_H_
 
-#include "auto_diff_cost_function_wrapper.h"
+// Constraints
 #include "../constraint_sparse.h"
 #include "../constraint_fix.h"
 #include "../constraint_gps_2D.h"
@@ -18,6 +18,7 @@
 #include "../constraint_corner_2D.h"
 #include "../constraint_container.h"
 
+// Wolf and ceres auto_diff creators
 #include "create_auto_diff_cost_function_wrapper.h"
 #include "create_auto_diff_cost_function_ceres.h"
 
