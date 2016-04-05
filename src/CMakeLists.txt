@@ -213,11 +213,13 @@ IF (laser_scan_utils_FOUND)
         capture_laser_2D.h
         sensor_laser_2D.h
         processor_laser_2D.h
+        processor_laser_corners.h
         )
     SET(SRCS ${SRCS}
         capture_laser_2D.cpp
         sensor_laser_2D.cpp
         processor_laser_2D.cpp
+        processor_laser_corners.cpp
         )
 ENDIF(laser_scan_utils_FOUND)
 
