@@ -10,6 +10,9 @@
 
 // Wolf includes
 #include "processor_tracker.h"
+#include "sensor_laser_2D.h"
+#include "capture_laser_2D.h"
+#include "feature_corner_2D.h"
 
 //laser_scan_utils
 #include "laser_scan_utils/scan_basics.h"
@@ -20,7 +23,8 @@ class ProcessorTrackerLaser : public ProcessorTracker
     private:
         laserscanutils::ScanParams scan_params_;
         laserscanutils::ExtractCornerParams corner_alg_params_;
-        CaptureLaser2D* scan_last_, scan_incoming_
+        CaptureLaser2D* scan_last_;
+        CaptureLaser2D* scan_incoming_;
 
     public:
         ProcessorTrackerLaser();
