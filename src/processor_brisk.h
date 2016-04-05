@@ -16,6 +16,7 @@
 
 // General includes
 #include <math.h>
+#include <complex>      // std::complex, std::norm
 
 class ProcessorBrisk : public ProcessorTracker
 {

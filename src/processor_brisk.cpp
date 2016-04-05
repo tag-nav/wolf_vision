@@ -99,6 +99,8 @@ unsigned int ProcessorBrisk::briskDetect(cv::Mat _image, cv::Rect &_roi, std::ve
     brisk_.detect(_image_roi, _new_keypoints);
     brisk_.compute(_image_roi, _new_keypoints,new_descriptors);
 
+    //double dist_ham = cv::norm(new_descriptors,new_descriptors,'NORM_HAMMING');
+
     if(_new_keypoints.size()!=0)
     {
             for(unsigned int i = 0; i <= (_new_keypoints.size()-1);i++)
@@ -270,13 +272,14 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
 
         float euclidean_distance = 0;
         float euclidean_distance_min_value = 1000;
+        double f_min = 100;
         unsigned int row = 0;
 
         // Comparison of position
 
         if(n_features != 0)
         {
-            //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
+            /* //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
             for(unsigned int i = 0; i <= (new_keypoints.size()-1);i++)
             {
 
@@ -290,41 +293,61 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
                         }
                         std::cout << "euclidean distance min_value: " << euclidean_distance_min_value << std::endl;
                 //new FeaturePointImage(_new_keypoints[i],(new_descriptors(cv::Range(i,i+1),cv::Range(0,new_descriptors.cols))),false);
-            }
+            } */
 
-            std::cout << "euclidean distance min_value2: " << euclidean_distance_min_value << std::endl;
-            std::cout << "row: " << row << std::endl;
-
-
-            // Comparison of descriptors
 
             std::vector<float> feature_descriptor = feature_ptr->getDescriptor();
-            const unsigned char* mat_row = new_descriptors.ptr<unsigned char>(row);
 
-            std::cout << "size: " << (feature_ptr->getDescriptor().size()) << std::endl;
-            int hamming_distance = 0;
-
-
-
-
-            // cv::Hamming(a,b)
-
-            for(unsigned int j = 0; j <= (feature_ptr->getDescriptor().size())-1;j++)
+            //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
+            for(unsigned int i = 0; i <= (new_keypoints.size()-1);i++)
             {
-                //Performing the Hamming Distance (with a tolerance)
 
-                if(((feature_descriptor[j]+tolerance) < (float)mat_row[j])||((feature_descriptor[j]-tolerance) > (float)mat_row[j]))
+                // Comparison of descriptors
+
+                const unsigned char* mat_row = new_descriptors.ptr<unsigned char>(i);
+
+                std::cout << "size: " << (feature_ptr->getDescriptor().size()) << std::endl;
+
+
+
+                const unsigned char* feat_desc[64];
+
+                for(unsigned int j = 0; j<= feature_descriptor.size()-1;j++)
                 {
-                    hamming_distance += 1;
+                    float n = feature_descriptor[j];
+                    char buf[8];
+                    sprintf(buf,"%d", (int)n);
+                    //std::cout << "buf: " << buf << std::endl;
+                    const unsigned char* b = (unsigned char*)buf;
+                    //std::cout << "b: " << b << std::endl;
+                    feat_desc[j] = b;
+                    //std::cout << "feat_desc: " << feat_desc << std::endl;
                 }
-                //std::cout << "feat_desc: " << feature_descriptor[j] << ", mat_row: " << (float)mat_row[j] << std::endl;
+
+                const uchar* k = (uchar*)feat_desc;
+                //std::cout << "k: " << k << std::endl;
+                //cv::Mat d = feature_ptr->getDescriptor();
+                const uchar* a = (uchar*)mat_row;
+                //std::cout << "a: " << a << std::endl;
+                //const unsigned char ff = (unsigned char)feature_descriptor;
+                //const uchar* b = (uchar*)feature_ptr->getDescriptor();
+                double f = cv::normHamming(k,a,8);
+                //double dist_ham = cv::normHamming(b,b,4);
+                std::cout << "========================================================================= dist_ham: " << f << std::endl;
+
+                if(f < f_min)
+                {
+                    f_min = f;
+                    row = i;
+                }
+
+
             }
-            std::cout << "hamming distance: " << hamming_distance << std::endl;
 
 
 
 
-            if(hamming_distance < 40)
+            if(f_min < 30)
             {
                 FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[row],(new_descriptors(cv::Range(row,row+1),cv::Range(0,new_descriptors.cols))),false);
                 _feature_list_out.push_back(point_ptr);
