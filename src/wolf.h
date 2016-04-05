@@ -48,7 +48,7 @@ const double MIN_VARIANCE = 1e-6;
 }
 
 ///////////////////////////////////////////
-// Construct types for any scalar defined in the typedef scalar_t above
+// Construct types for any scalar defined in the typedef WolfScalar above
 ////////////////////////////////////////////
 /** \brief Namespace extending Eigen definitions
  *
@@ -56,33 +56,33 @@ const double MIN_VARIANCE = 1e-6;
  * The appended letter indicating this is 's', so that we have, e.g.,
  * - VectorXf   Vector of floats - defined by Eigen
  * - VectorXd   Vector of doubles - defined by Eigen
- * - VectorXs   Vector of either double of float, depending on the type \b scalar_t, defined by Wolf.
+ * - VectorXs   Vector of either double of float, depending on the type \b WolfScalar, defined by Wolf.
  * 
  */
 namespace Eigen  // Eigen namespace extension
 {
 // 1. Vectors and Matrices
-typedef Matrix<WolfScalar, 2, 2, Eigen::RowMajor> Matrix2s;                ///< 2x2 matrix of real scalar_t type
-typedef Matrix<WolfScalar, 3, 3, Eigen::RowMajor> Matrix3s;                ///< 3x3 matrix of real scalar_t type
-typedef Matrix<WolfScalar, 4, 4, Eigen::RowMajor> Matrix4s;                ///< 4x4 matrix of real scalar_t type
-typedef Matrix<WolfScalar, 7, 7, Eigen::RowMajor> Matrix7s;                ///< 7x7 matrix of real scalar_t type
-typedef Matrix<WolfScalar, Dynamic, Dynamic, Eigen::RowMajor> MatrixXs;    ///< variable size matrix of real scalar_t type
-typedef Matrix<WolfScalar, 1, 1> Vector1s;                ///< 1-vector of real scalar_t type
-typedef Matrix<WolfScalar, 2, 1> Vector2s;                ///< 2-vector of real scalar_t type
-typedef Matrix<WolfScalar, 3, 1> Vector3s;                ///< 3-vector of real scalar_t type
-typedef Matrix<WolfScalar, 4, 1> Vector4s;                ///< 4-vector of real scalar_t type
-typedef Matrix<WolfScalar, 6, 1> Vector6s;                ///< 6-vector of real scalar_t type
-typedef Matrix<WolfScalar, 7, 1> Vector7s;                ///< 7-vector of real scalar_t type
-typedef Matrix<WolfScalar, Dynamic, 1> VectorXs;          ///< variable size vector of real scalar_t type
-typedef Matrix<WolfScalar, 1, 2> RowVector2s;             ///< 2-row-vector of real scalar_t type
-typedef Matrix<WolfScalar, 1, 3> RowVector3s;             ///< 3-row-vector of real scalar_t type
-typedef Matrix<WolfScalar, 1, 4> RowVector4s;             ///< 4-row-vector of real scalar_t type
-typedef Matrix<WolfScalar, 1, 7> RowVector7s;             ///< 7-row-vector of real scalar_t type
-typedef Matrix<WolfScalar, 1, Dynamic> RowVectorXs;       ///< variable size row-vector of real scalar_t type
+typedef Matrix<WolfScalar, 2, 2, Eigen::RowMajor> Matrix2s;                ///< 2x2 matrix of real WolfScalar type
+typedef Matrix<WolfScalar, 3, 3, Eigen::RowMajor> Matrix3s;                ///< 3x3 matrix of real WolfScalar type
+typedef Matrix<WolfScalar, 4, 4, Eigen::RowMajor> Matrix4s;                ///< 4x4 matrix of real WolfScalar type
+typedef Matrix<WolfScalar, 7, 7, Eigen::RowMajor> Matrix7s;                ///< 7x7 matrix of real WolfScalar type
+typedef Matrix<WolfScalar, Dynamic, Dynamic, Eigen::RowMajor> MatrixXs;    ///< variable size matrix of real WolfScalar type
+typedef Matrix<WolfScalar, 1, 1> Vector1s;                ///< 1-vector of real WolfScalar type
+typedef Matrix<WolfScalar, 2, 1> Vector2s;                ///< 2-vector of real WolfScalar type
+typedef Matrix<WolfScalar, 3, 1> Vector3s;                ///< 3-vector of real WolfScalar type
+typedef Matrix<WolfScalar, 4, 1> Vector4s;                ///< 4-vector of real WolfScalar type
+typedef Matrix<WolfScalar, 6, 1> Vector6s;                ///< 6-vector of real WolfScalar type
+typedef Matrix<WolfScalar, 7, 1> Vector7s;                ///< 7-vector of real WolfScalar type
+typedef Matrix<WolfScalar, Dynamic, 1> VectorXs;          ///< variable size vector of real WolfScalar type
+typedef Matrix<WolfScalar, 1, 2> RowVector2s;             ///< 2-row-vector of real WolfScalar type
+typedef Matrix<WolfScalar, 1, 3> RowVector3s;             ///< 3-row-vector of real WolfScalar type
+typedef Matrix<WolfScalar, 1, 4> RowVector4s;             ///< 4-row-vector of real WolfScalar type
+typedef Matrix<WolfScalar, 1, 7> RowVector7s;             ///< 7-row-vector of real WolfScalar type
+typedef Matrix<WolfScalar, 1, Dynamic> RowVectorXs;       ///< variable size row-vector of real WolfScalar type
 
 // 2. Quaternions and other rotation things
-typedef Quaternion<WolfScalar> Quaternions;               ///< Quaternion of real scalar_t type
-typedef AngleAxis<WolfScalar> AngleAxiss;                 ///< Angle-Axis of real scalar_t type
+typedef Quaternion<WolfScalar> Quaternions;               ///< Quaternion of real WolfScalar type
+typedef AngleAxis<WolfScalar> AngleAxiss;                 ///< Angle-Axis of real WolfScalar type
 }
 
 /** \brief Enumeration of node locations at Wolf Tree
