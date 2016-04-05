@@ -84,7 +84,7 @@ int main()
 
 
 
-
+#if 0  // Skip this part, it's only preliminary tests
 
 
     std::cout << "\n\nTrying a std::map as the buffer container <-- NOT WORKING: need exact key" << std::endl;
@@ -155,6 +155,8 @@ int main()
 
         std::cout << n << " query " << t.get() << "-> PREVIOUS: (" << it_previous->first.get() << "," << it_previous->second << "); next: (" << std::prev(it_previous)->first.get() << "," << std::prev(it_previous)->second << ")" << std::endl;
     }
+
+#endif
 
 
     return 0;
