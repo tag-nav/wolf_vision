@@ -16,6 +16,7 @@ ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_col
     act_search_grid_(_image_rows,_image_cols,_grid_width, _grid_height),
     min_features_th_(_min_features_th)
 {
+    brisk_.create("Feature2D.BRISK");
 }
 
 //Destructor
@@ -94,7 +95,7 @@ unsigned int ProcessorBrisk::briskDetect(cv::Mat _image, cv::Rect &_roi, std::ve
     cv::Mat _image_roi = _image(_roi);
 
     //Brisk Algorithm
-    brisk_.create("Feature2D.BRISK");  //TODO: look if this can be done in the constructor
+    //brisk_.create("Feature2D.BRISK");  //TODO: look if this can be done in the constructor
     brisk_.detect(_image_roi, _new_keypoints);
     brisk_.compute(_image_roi, _new_keypoints,new_descriptors);
 
@@ -295,8 +296,6 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
             std::cout << "row: " << row << std::endl;
 
 
-
-
             // Comparison of descriptors
 
             std::vector<float> feature_descriptor = feature_ptr->getDescriptor();
@@ -304,6 +303,12 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
 
             std::cout << "size: " << (feature_ptr->getDescriptor().size()) << std::endl;
             int hamming_distance = 0;
+
+
+
+
+            // cv::Hamming(a,b)
+
             for(unsigned int j = 0; j <= (feature_ptr->getDescriptor().size())-1;j++)
             {
                 //Performing the Hamming Distance (with a tolerance)
@@ -316,7 +321,10 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
             }
             std::cout << "hamming distance: " << hamming_distance << std::endl;
 
-            if(hamming_distance < 45)
+
+
+
+            if(hamming_distance < 40)
             {
                 FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[row],(new_descriptors(cv::Range(row,row+1),cv::Range(0,new_descriptors.cols))),false);
                 _feature_list_out.push_back(point_ptr);
