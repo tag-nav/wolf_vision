@@ -200,6 +200,8 @@ class ProcessorMotion2 : public ProcessorBase
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
          *
+         * Hint: you can use a method setZero() in the MotionDeltaType class. See ProcessorOdom3d::Odom3dDelta for reference.
+         *
          * Examples (see documentation of the the class for info on MotionDeltaType):
          *   - 2D odometry: a 3-vector with all zeros, e.g. Vector3s::Zero()
          *   - 3D odometry: different examples:
