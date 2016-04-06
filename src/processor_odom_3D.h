@@ -29,8 +29,8 @@ struct Odom3dDelta{
 class ProcessorOdom3d : public ProcessorMotion<Odom3dDelta>
 {
     public:
-        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion(PRC_ODOM_3D, _delta_t, 7, 6), quat1_(nullptr) {}
-        virtual ~ProcessorOdom3d(){}
+        ProcessorOdom3d(WolfScalar _delta_t = 0);
+        virtual ~ProcessorOdom3d();
         virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Odom3dDelta& _delta);
 
     private:
@@ -45,16 +45,21 @@ class ProcessorOdom3d : public ProcessorMotion<Odom3dDelta>
 };
 
 
+inline ProcessorOdom3d::ProcessorOdom3d(WolfScalar _delta_t) :
+        ProcessorMotion(PRC_ODOM_3D, _delta_t, 7, 6), quat1_(nullptr)
+{
+}
+
+inline ProcessorOdom3d::~ProcessorOdom3d()
+{
+}
+
 inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Odom3dDelta& _delta)
 {
-    // Trivial implementation
     _delta.dp = _data.head(3);
     Eigen::v2q(_data.tail(3), _delta.dq);
 }
 
-
-
-// Compose a frame with a delta frame and give a frame
 inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Odom3dDelta& _delta, Eigen::VectorXs& _x_plus_delta)
 {
     assert(_x.size() == 7 && "Wrong _x vector size");
@@ -67,7 +72,6 @@ inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Odom3dD
     _x_plus_delta.tail(4) = (quat1_*_delta.dq).coeffs();
 }
 
-// Compose two delta-frames and give a delta-frame
 inline void ProcessorOdom3d::deltaPlusDelta(const Odom3dDelta& _delta1, const Odom3dDelta& _delta2, Odom3dDelta& _delta1_plus_delta2)
 {
     _delta1_plus_delta2.dp = _delta1.dp + _delta1.dq*_delta2.dp;
