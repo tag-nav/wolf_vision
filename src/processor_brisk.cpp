@@ -3,6 +3,8 @@
 
 // OpenCV includes
 
+// other includes
+#include <bitset>
 
 /** Public */
 
@@ -239,7 +241,7 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
     unsigned int feature_roi_y = 0;
 
     unsigned int n_features = 0;
-    int tolerance = 20;
+    //int tolerance = 20;
 
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
@@ -270,8 +272,8 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
         n_features = briskDetect(image_incoming_, roi_for_matching, new_keypoints, new_descriptors);
         std::cout << "n_features: " << n_features << std::endl;
 
-        float euclidean_distance = 0;
-        float euclidean_distance_min_value = 1000;
+        //float euclidean_distance = 0;
+        //float euclidean_distance_min_value = 1000;
         double f_min = 100;
         unsigned int row = 0;
 
@@ -311,27 +313,55 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
 
 
                 const unsigned char* feat_desc[64];
+                unsigned char gh[64];
 
                 for(unsigned int j = 0; j<= feature_descriptor.size()-1;j++)
                 {
                     float n = feature_descriptor[j];
                     char buf[8];
                     sprintf(buf,"%d", (int)n);
-                    //std::cout << "buf: " << buf << std::endl;
+                    std::cout << "====buf[" << j << "]: " << buf << std::endl;
                     const unsigned char* b = (unsigned char*)buf;
-                    //std::cout << "b: " << b << std::endl;
+                    std::cout << "b: " << b << std::endl;
                     feat_desc[j] = b;
-                    //std::cout << "feat_desc: " << feat_desc << std::endl;
+                    std::cout << "feat_desc: " << feat_desc << std::endl;
+
+                    gh[j] = (unsigned char)feature_descriptor[j];
+                    std::cout << "gh[" << j << "]: " << gh << std::endl;
+
+                    int h = mat_row[j];
+                    std::cout << "h[" << j << "]: " << h << std::endl;
                 }
 
                 const uchar* k = (uchar*)feat_desc;
+                const uchar* test = (uchar*)gh;
                 //std::cout << "k: " << k << std::endl;
                 //cv::Mat d = feature_ptr->getDescriptor();
                 const uchar* a = (uchar*)mat_row;
-                //std::cout << "a: " << a << std::endl;
-                //const unsigned char ff = (unsigned char)feature_descriptor;
-                //const uchar* b = (uchar*)feature_ptr->getDescriptor();
-                double f = cv::normHamming(k,a,8);
+
+                //=========================
+
+                char prueba1[64] = {248,191,231,113,112,0,0,67,195,199,255,255,255,255,254,251,255,255,252,49,143,243,56,15,0,224,115,231,25,101,252,225,
+                                   255,255,255,255,255,253,243,156,231,220,243,57,8,225,63,58,217,100,242,247,255,255,255,247,249,108,118,190,159,207,25,9};
+                char prueba2[64] = {252,191,227,112,104,64,0,1,193,194,13,127,248,243,199,23,158,120,228,49,255,227,48,14,0,160,51,231,8,100,28,227,
+                                   252,255,239,63,230,252,251,255,255,156,147,49,1,225,188,187,17,239,255,255,255,255,249,179,249,254,255,62,27,141,136,187};
+
+                const unsigned char* p1 = (unsigned char*)prueba1;
+                const unsigned char* p2 = (unsigned char*)prueba2;
+
+                const uchar* pr1 = (uchar*)p1;
+                const uchar* pr2 = (uchar*)p2;
+
+
+                //std::cout << "p1: " << std::hex << k << std::endl;
+
+                double f_pr = cv::normHamming(pr1,pr2,64);
+                std::cout << "========================================================================= f_pr: " << f_pr << std::endl;
+
+
+                //==========================
+
+                double f = cv::normHamming(test,a,64);
                 //double dist_ham = cv::normHamming(b,b,4);
                 std::cout << "========================================================================= dist_ham: " << f << std::endl;
 
@@ -347,9 +377,9 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
 
 
 
-            if(f_min < 30)
+            if(f_min < 230)
             {
-                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[row],(new_descriptors(cv::Range(row,row+1),cv::Range(0,new_descriptors.cols))),false);
+                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[row],(new_descriptors(cv::Range(row,row+1),cv::Range(0,new_descriptors.cols))),true);
                 _feature_list_out.push_back(point_ptr);
                 n_last_capture_feat++;
             }
