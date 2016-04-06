@@ -1,156 +1,382 @@
-/*
- * \file processor_motion.h
+/**
+ * \file processor_motion2.h
  *
- *  Created on: Dec 17, 2015
- *      author: jsola
+ *  Created on: 15/03/2016
+ *      \author: jsola
  */
 
-#ifndef SRC_PROCESSOR_MOTION_H_
-#define SRC_PROCESSOR_MOTION_H_
+#ifndef PROCESSOR_MOTION2_H_
+#define PROCESSOR_MOTION2_H_
 
 // Wolf
 #include "processor_base.h"
+#include "capture_motion2.h"
 #include "time_stamp.h"
 #include "wolf.h"
 
-// STL
-#include <deque>
 
+/** \brief class for Motion processors
+ * \param MotionDeltaType The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
+ *        Generalized Delta types allow for optimized algorithms.
+ *        For example, for 3D odometry, a Eigen::VectorXs(6) is sufficient, and is provided as the default template type,
+ * \code
+ *   typedef Eigen::VectorXs Odo3dDeltaType; // 6-vector with position increment and orientation increment
+ * \endcode
+ *        If desired, this delta can also be defined as a position delta and an orientation delta,
+ * \code
+ *   struct Odo3dDeltaType {
+ *     Eigen::Vector3s     dp;  // Position delta
+ *     Eigen::Vector3s dtheta;  // Orientation delta
+ *   } ;
+ * \endcode
+ *        It can also be defined as a position delta and a quaternion delta,
+ * \code
+ *   struct Odo3dDeltaType {
+ *     Eigen::Vector3s    dp;  // Position delta
+ *     Eigen::Quaternions dq;  // Quaternion delta
+ *   } ;
+ * \endcode
+ *        or even as a position delta and a rotation matrix delta,
+ * \code
+ *   struct Odo3dDeltaType {
+ *     Eigen::Vector3s dp;     // Position delta
+ *     Eigen::Matrix3s dR;     // Rotation matrix delta
+ *   } ;
+ * \endcode
+ *        As a more challenging example, in an IMU, the Delta type might be defined as:
+ * \code
+ *   struct ImuDeltaType {
+ *     Eigen::Vector3s    dp;  // Position delta
+ *     Eigen::Quaternions dq;  // Quaternion delta
+ *     Eigen::Vector3s    dv;  // Velocity delta
+ *     Eigen::Vector3s    dab; // Acc. bias delta
+ *     Eigen::Vector3s    dwb; // Gyro bias delta
+ *   } ;
+ * \endcode
+ *     or using a rotation matrix instead of the quaternion,
+ * \code
+ *   struct ImuDeltaType {
+ *     Eigen::Vector3s dp;     // Position delta
+ *     Eigen::Matrix3s dR;     // Rotation matrix delta
+ *     Eigen::Vector3s dv;     // Velocity delta
+ *     Eigen::Vector3s dab;    // Acc. bias delta
+ *     Eigen::Vector3s dwb;    // Gyro bias delta
+ *   } ;
+ * \endcode
+ *       See more examples in the documentation of CaptureMotion2.
+ */
+template <class MotionDeltaType = Eigen::VectorXs>
+class ProcessorMotion : public ProcessorBase
+{
 
-class ProcessorMotion : public ProcessorBase{
+        // This is the main public interface
     public:
-        ProcessorMotion(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size);
+        ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _data_size);
         virtual ~ProcessorMotion();
 
+        // Instructions to the processor:
 
-        virtual void process(CaptureBase* _capture_ptr);
+        void init(CaptureMotion2<MotionDeltaType>* _origin_ptr);
+        virtual void process(CaptureBase* _incoming_ptr);
+        void reset(const TimeStamp& _ts);
+        void makeKeyFrame(const TimeStamp& _ts);
 
-        // Main operations
-        void composeDeltaState(const TimeStamp& _t_start, TimeStamp& _t_end, Eigen::VectorXs&);
-        void composeState(const TimeStamp& _time_stamp, Eigen::VectorXs&);
-        void init(CaptureBase* _origin_ptr);
-        void reset(TimeStamp& _ts);
+        // Queries to the processor:
+
+        virtual bool voteForKeyFrame();
+
+        /** \brief Fills a reference to the state integrated so far
+         * \param the returned state vector
+         */
+        const void state(Eigen::VectorXs& _x);
+        /** \brief Gets a constant reference to the state integrated so far
+         * \return the state vector
+         */
+        const Eigen::VectorXs state();
+        /** \brief Fills the state corresponding to the provided time-stamp
+         * \param _t the time stamp
+         * \param _x the returned state
+         */
+        void state(const TimeStamp& _ts, Eigen::VectorXs& _x);
+        /** \brief Gets the state corresponding to the provided time-stamp
+         * \param _t the time stamp
+         * \return the state vector
+         */
+        Eigen::VectorXs state(const TimeStamp& _ts);
+        /** \brief Provides the delta-state integrated so far
+         * \return a reference to the integrated delta state
+         */
+        const MotionDeltaType& deltaState() const;
+        /** \brief Provides the delta-state between two time-stamps
+         * \param _t1 initial time
+         * \param _t2 final time
+         * \param _Delta the integrated delta-state between _t1 and _t2
+         */
+        void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, MotionDeltaType& _Delta);
+        /** Composes the deltas in two pre-integrated Captures
+         * \param _cap1_ptr pointer to the first Capture
+         * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
+         * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
+         */
+        void sumDeltas(CaptureMotion2<MotionDeltaType>* _cap1_ptr, CaptureMotion2<MotionDeltaType>* _cap2_ptr,
+                       MotionDeltaType& _delta1_plus_delta2);
+
+        // Helper functions:
+    protected:
+
+        void integrate();
+
+        void updateDt();
+
+        typename CaptureMotion2<MotionDeltaType>::MotionBuffer* getBufferPtr();
+
+        const typename CaptureMotion2<MotionDeltaType>::MotionBuffer* getBufferPtr() const;
+
+        // These are the pure virtual functions doing the mathematics
+    protected:
+
+         /** \brief convert raw CaptureMotion data to the delta-state format
+          *
+          * This function accesses the members data_ (as produced by extractData()) and dt_,
+          * and computes the value of the delta-state delta_.
+          *
+          * \param _data the raw motion data
+          * \param _dt the time step (not always needed)
+          * \param _delta the returned motion delta
+          *
+          * Rationale:
+          *
+          * The delta-state format must be compatible for integration using
+          * the composition functions doing the math in this class: xPlusDelta(), deltaPlusDelta() and deltaMinusDelta().
+          * See the class documentation for some MotionDeltaType suggestions.
+          *
+          * The data format is generally not the same as the delta format,
+          * because it is the format of the raw data provided by the Capture,
+          * which is unaware of the needs of this processor.
+          *
+          * Additionally, sometimes the data format is in the form of a
+          * velocity, while the delta is in the form of an increment.
+          * In such cases, converting from data to delta-state needs integrating
+          * the data over the period dt.
+          *
+          * Two trivial implementations would establish:
+          *  - If data_ is an increment: delta_ = data_;
+          *  - If data_ is a velocity: delta_ = data_* dt_.
+          *
+          *  However, other more complicated relations are possible.
+          */
+         virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, MotionDeltaType& _delta) = 0;
+
+        /** \brief composes a delta-state on top of a state
+         * \param _x the initial state
+         * \param _delta the delta-state
+         * \param _x_plus_delta the updated state. It has the same format as the initial state.
+         *
+         * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
+         */
+        virtual void xPlusDelta(const Eigen::VectorXs& _x, const MotionDeltaType& _delta,
+                                Eigen::VectorXs& _x_plus_delta) = 0;
+
+        /** \brief composes a delta-state on top of another delta-state
+         * \param _delta1 the first delta-state
+         * \param _delta2 the second delta-state
+         * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
+         *
+         * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2
+         */
+        virtual void deltaPlusDelta(const MotionDeltaType& _delta1, const MotionDeltaType& _delta2,
+                                    MotionDeltaType& _delta1_plus_delta2) = 0;
+
+        /** \brief Computes the delta-state that goes from one delta-state to another
+         * \param _delta1 the initial delta
+         * \param _delta2 the final delta
+         * \param _delta2_minus_delta1 the delta-state. It has the format of a delta-state.
+         *
+         * This function implements the composition (-) so that _delta2_minus_delta1 = _delta2 (-) _delta1.
+         */
+        virtual void deltaMinusDelta(const MotionDeltaType& _delta1, const MotionDeltaType& _delta2,
+                                     MotionDeltaType& _delta2_minus_delta1) = 0;
+
+        /** \brief Delta zero
+         * \return a delta state equivalent to the null motion.
+         *
+         * Hint: you can use a method setZero() in the MotionDeltaType class. See ProcessorOdom3d::Odom3dDelta for reference.
+         *
+         * Examples (see documentation of the the class for info on MotionDeltaType):
+         *   - 2D odometry: a 3-vector with all zeros, e.g. Vector3s::Zero()
+         *   - 3D odometry: different examples:
+         *     - delta type is a PQ vector: 7-vector with [0,0,0,0,0,0,1]
+         *     - delta type is a {P,Q} struct with {[0,0,0],[0,0,0,1]}
+         *     - delta type is a {P,R} struct with {[0,0,0],Matrix3s::Identity()}
+         *   - IMU: examples:
+         *     - delta type is a {P,Q,V} struct with {[0,0,0],[0,0,0,1],[0,0,0]}
+         *     - delta type is a {P,Q,V,Ab,Wb} struct with {[0,0,0],[0,0,0,1],[0,0,0],[0,0,0],[0,0,0]}
+         */
+        virtual MotionDeltaType deltaZero() const = 0;
 
     protected:
-        // Helper functions
-        void integrate(Eigen::VectorXs& _data, WolfScalar _dt);
-        virtual void extractData(CaptureBase* _capture_ptr, TimeStamp& _ts, Eigen::VectorXs& _data) = 0;
-        virtual void data2dx(const Eigen::VectorXs& _data, WolfScalar _dt, Eigen::VectorXs& _dx);
-        void pushBack(TimeStamp& _ts, Eigen::VectorXs& _dx, Eigen::VectorXs& _Dx_integral);
-        void eraseFront(TimeStamp& _ts);
-        virtual void plus(const Eigen::VectorXs& _x, const Eigen::VectorXs& _dx, Eigen::VectorXs& _x_plus_dx) = 0;
-        virtual void minus(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x0, Eigen::VectorXs& _x1_minus_x0) = 0;
-
-        WolfScalar computeAverageDt();
-        WolfScalar getDt();
-
-        void clearAll();
+        // Attributes
+        size_t x_size_;    ///< The size of the state vector
+        size_t data_size_; ///< the size of the incoming data
+        CaptureMotion2<MotionDeltaType>* origin_ptr_;
+        CaptureMotion2<MotionDeltaType>* last_ptr_;
+        CaptureMotion2<MotionDeltaType>* incoming_ptr_;
 
     protected:
-        CaptureBase* origin_ptr_;
-        std::deque<TimeStamp> buffer_ts_;
-        std::deque<Eigen::VectorXs> buffer_dx_;
-        std::deque<Eigen::VectorXs> buffer_Dx_;
+        // helpers to avoid allocation
+        WolfScalar dt_; ///< Time step
+        Eigen::VectorXs x_; ///< state temporary
+        MotionDeltaType delta_, delta_integrated_; ///< current delta and integrated deltas
+        Eigen::VectorXs data_; ///< current data
 
-    public:
-        // Helper variables: use them to avoid creating temporaries
-        TimeStamp ts_; // Time stamp of the data being processed
-        TimeStamp ts_origin_; // Time stamp at the origin of buffers
-        Eigen::VectorXs data_; // Last received data
-        Eigen::VectorXs dx_; // A dx value directly resulting from data
-        Eigen::VectorXs Dx_integral_; // The integrated dx's between distant time stamps
-        Eigen::VectorXs x_origin_; // The origin state
-        Eigen::VectorXs x_other_; // Another state, e.g. x_other_ = plus(x_origin_, Dx_)
-        WolfScalar dt_;
-        WolfScalar Dt_start_, Dt_end_;
-        unsigned int i_start_, i_end_;
-        Eigen::VectorXs Dx_start_, Dx_end_;
-
-private:
-        size_t state_size_;
-        size_t delta_size_;
-        size_t data_size_;
 };
 
-inline void ProcessorMotion::init(CaptureBase* _origin_ptr)
+template<class MotionDeltaType>
+inline ProcessorMotion<MotionDeltaType>::ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size,
+                                                           size_t _data_size) :
+        ProcessorBase(_tp), x_size_(_state_size), data_size_(_data_size),
+        origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
+        dt_(_dt), x_(_state_size), data_(_data_size)
 {
-    origin_ptr_=_origin_ptr;
-    ts_origin_ = _origin_ptr->getTimeStamp();
-    x_origin_ = _origin_ptr->getFramePtr()->getState();
-    clearAll();
-    buffer_ts_.clear();
-    buffer_ts_.push_back(ts_origin_);
-    buffer_dx_.clear();
-    buffer_dx_.push_back(dx_);
-    buffer_Dx_.clear();
-    buffer_Dx_.push_back(Dx_integral_);
+    //
 }
 
-inline void ProcessorMotion::reset(TimeStamp& _ts)
+template<class MotionDeltaType>
+inline ProcessorMotion<MotionDeltaType>::~ProcessorMotion()
 {
-    // Pop data from the front of the buffers before _ts
-    // TODO: see if we want to save the popped data somewhere else
-    eraseFront(_ts);
-
-    // Reset origin: time-stamp, state and delta_integral
-    ts_origin_ = _ts;
-    composeState(_ts, x_other_);
-    x_origin_ = x_other_;
-    clearAll();
+    //
 }
 
-inline void ProcessorMotion::integrate(Eigen::VectorXs& _data, WolfScalar _dt)
+template<class MotionDeltaType>
+inline void ProcessorMotion<MotionDeltaType>::process(CaptureBase* _incoming_ptr)
 {
-    // Make appropriate delta value from data
-    data2dx(_data, _dt, dx_);
-    // integrate on top of Dx_
-    plus(buffer_Dx_.back(), dx_, Dx_integral_);
+    incoming_ptr_ = (CaptureMotion2<MotionDeltaType>*)(_incoming_ptr);
+
+    integrate();
+
+    if (voteForKeyFrame() && permittedKeyFrame())
+    {
+        // TODO:
+        // Make KeyFrame
+        //        makeKeyFrame();
+        // Reset the Tracker
+        //        reset();
+    }
 }
 
-inline void ProcessorMotion::process(CaptureBase* _capture_ptr)
+template<class MotionDeltaType>
+inline void ProcessorMotion<MotionDeltaType>::init(CaptureMotion2<MotionDeltaType>* _origin_ptr)
 {
-    extractData(_capture_ptr, ts_, data_);
-    integrate(data_, dt_);
-    pushBack(ts_, dx_, Dx_integral_);
+    origin_ptr_ = _origin_ptr;
+    last_ptr_ = _origin_ptr;
+    incoming_ptr_ = nullptr;
+    delta_integrated_ = deltaZero();
+    getBufferPtr()->clear();
+    getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
 }
 
-inline void ProcessorMotion::composeState(const TimeStamp& _time_stamp, Eigen::VectorXs& _x_ts)
+template<class MotionDeltaType>
+inline void ProcessorMotion<MotionDeltaType>::reset(const TimeStamp& _ts)
 {
-    // Get time index
-    i_end_ = (_time_stamp - ts_origin_) / dt_;
-
-    Dx_end_   = buffer_Dx_[i_end_];
-    plus(x_origin_, Dx_end_, _x_ts);
+    // TODO what to do?
+    //cut the buffer in 2 parts at _ts
+    // create a new Capture for the future
+    // Create a
 }
 
-/** \brief Convert data to increment vector
- *
- * Overload this method for non-trivial conversions
- */
-inline void ProcessorMotion::data2dx(const Eigen::VectorXs& _data, WolfScalar _dt, Eigen::VectorXs& _dx)
+template<class MotionDeltaType>
+inline void ProcessorMotion<MotionDeltaType>::makeKeyFrame(const TimeStamp& _ts)
 {
-    assert(_data.size() == _dx.size() && "Sizes do not match");
-
-    // Implement the trivial identity converter.
-    _dx = _data * _dt;
+    //TODO: see how to adapt this code from ProcessorTracker::makeKeyFrame(void)
+    // Create a new non-key Frame in the Trajectory with the incoming Capture
+    getWolfProblem()->createFrame(NON_KEY_FRAME, state(_ts), _ts);
+    getWolfProblem()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+    // Make the last Capture's Frame a KeyFrame so that it gets into the solver
+    last_ptr_->getFramePtr()->setKey();
 }
 
-inline WolfScalar ProcessorMotion::computeAverageDt()
+template<class MotionDeltaType>
+inline bool ProcessorMotion<MotionDeltaType>::voteForKeyFrame()
 {
-    if (buffer_ts_.size() > 0)
-        dt_ = (buffer_ts_.back() - buffer_ts_.front()) / (buffer_ts_.size() - 1);
-    return dt_;
+    return false;
 }
 
-inline WolfScalar ProcessorMotion::getDt()
+template<class MotionDeltaType>
+inline Eigen::VectorXs ProcessorMotion<MotionDeltaType>::state(const TimeStamp& _ts)
 {
-    return dt_;
+    state(_ts, x_);
+    return x_;
 }
 
-inline void ProcessorMotion::clearAll()
+template<class MotionDeltaType>
+inline void ProcessorMotion<MotionDeltaType>::state(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
-    dx_.setZero();
-    Dx_integral_.setZero();
+    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(_ts), _x);
 }
 
-#endif /* SRC_PROCESSOR_MOTION_H_ */
+template<class MotionDeltaType>
+inline const Eigen::VectorXs ProcessorMotion<MotionDeltaType>::state()
+{
+    state(x_);
+    return x_;
+}
+
+template<class MotionDeltaType>
+inline const void ProcessorMotion<MotionDeltaType>::state(Eigen::VectorXs& _x)
+{
+    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(), _x);
+}
+
+template<class MotionDeltaType>
+inline void ProcessorMotion<MotionDeltaType>::deltaState(const TimeStamp& _t1, const TimeStamp& _t2,
+                                                          MotionDeltaType& _Delta)
+{
+    deltaMinusDelta(getBufferPtr()->getDelta(_t2), getBufferPtr()->getDelta(_t2), _Delta);
+}
+
+template<class MotionDeltaType>
+inline const MotionDeltaType& ProcessorMotion<MotionDeltaType>::deltaState() const
+{
+    return getBufferPtr()->getDelta();
+}
+
+template<class MotionDeltaType>
+inline void ProcessorMotion<MotionDeltaType>::sumDeltas(CaptureMotion2<MotionDeltaType>* _cap1_ptr,
+                                                         CaptureMotion2<MotionDeltaType>* _cap2_ptr,
+                                                         MotionDeltaType& _delta1_plus_delta2)
+{
+    deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
+}
+
+template<class MotionDeltaType>
+inline void ProcessorMotion<MotionDeltaType>::integrate()
+{
+    // Set dt
+    updateDt();
+    // get data and convert it to delta
+    data2delta(incoming_ptr_->getData(), dt_, delta_);
+    // then integrate
+    deltaPlusDelta(getBufferPtr()->getDelta(), delta_, delta_integrated_);
+    // then push it into buffer
+    getBufferPtr()->pushBack(incoming_ptr_->getTimeStamp(), delta_integrated_);
+}
+
+template<class MotionDeltaType>
+inline void ProcessorMotion<MotionDeltaType>::updateDt()
+{
+    dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->getTimeStamp();
+}
+
+template<class MotionDeltaType>
+inline const typename CaptureMotion2<MotionDeltaType>::MotionBuffer* ProcessorMotion<MotionDeltaType>::getBufferPtr() const
+{
+    return last_ptr_->getBufferPtr();
+}
+
+template<class MotionDeltaType>
+inline typename CaptureMotion2<MotionDeltaType>::MotionBuffer* ProcessorMotion<MotionDeltaType>::getBufferPtr()
+{
+    return last_ptr_->getBufferPtr();
+}
+
+#endif /* PROCESSOR_MOTION2_H_ */

@@ -8,7 +8,7 @@
 #ifndef SRC_PROCESSOR_ODOM_3D_H_
 #define SRC_PROCESSOR_ODOM_3D_H_
 
-#include "processor_motion2.h"
+#include "processor_motion.h"
 
 /**\brief The Motion Delta type
  *
@@ -26,10 +26,10 @@ struct Odom3dDelta{
 
 
 
-class ProcessorOdom3d : public ProcessorMotion2<Odom3dDelta>
+class ProcessorOdom3d : public ProcessorMotion<Odom3dDelta>
 {
     public:
-        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion2(PRC_ODOM_3D, _delta_t, 7, 6), quat1_(nullptr) {}
+        ProcessorOdom3d(WolfScalar _delta_t) : ProcessorMotion(PRC_ODOM_3D, _delta_t, 7, 6), quat1_(nullptr) {}
         virtual ~ProcessorOdom3d(){}
         virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Odom3dDelta& _delta);
 
