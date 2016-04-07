@@ -11,6 +11,8 @@
 
 #include "processor_base.h"
 
+namespace wolf {
+
 //TODO try this, and remove includes below
 //class SensorLaser2D;
 //class CaptureLaser2D;
@@ -98,5 +100,7 @@ inline bool ProcessorLaser2D::voteForKeyFrame()
 inline void ProcessorLaser2D::init(CaptureBase* _origin_ptr)
 {
 }
+
+} // namespace wolf
 
 #endif /* SRC_PROCESSOR_LASER_2D_H_ */

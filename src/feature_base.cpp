@@ -2,6 +2,8 @@
 #include "constraint_base.h"
 #include "capture_base.h"
 
+namespace wolf {
+
 FeatureBase::FeatureBase(FeatureType _tp, unsigned int _dim_measurement) :
     NodeConstrained(MID, "FEATURE"),
     type_(_tp),
@@ -66,3 +68,5 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse(); // retrieve factor U  in the decomposition
 }
 
+
+} // namespace wolf

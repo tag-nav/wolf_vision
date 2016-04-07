@@ -5,6 +5,8 @@
 //wolf includes
 #include "sensor_base.h"
 
+namespace wolf {
+
 class SensorOdom2D : public SensorBase
 {
 
@@ -46,4 +48,7 @@ class SensorOdom2D : public SensorBase
         double getRotVarToRotNoiseFactor() const;
         
 };
+
+} // namespace wolf
+
 #endif

@@ -4,6 +4,9 @@
 //Wolf includes
 #include "capture_base.h"
 
+
+namespace wolf {
+
 //class CaptureVoid
 class CaptureVoid : public CaptureBase
 {
@@ -19,4 +22,7 @@ class CaptureVoid : public CaptureBase
 
         virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
 };
+
+} // namespace wolf
+
 #endif

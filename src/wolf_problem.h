@@ -14,6 +14,9 @@ class TimeStamp;
 // std includes
 #include <utility> // pair
 
+
+namespace wolf {
+
 /** \brief Wolf problem node element in the Wolf Tree
  * 
  * A node has five main data members:
@@ -247,5 +250,8 @@ inline bool WolfProblem::isTop()
 {
     return true;
 }
+
+} // namespace wolf
+
 
 #endif

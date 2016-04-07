@@ -12,6 +12,9 @@ class FrameBase;
 
 //std includes
 
+
+namespace wolf {
+
 //class TrajectoryBase
 class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
 {
@@ -73,5 +76,8 @@ inline FrameStructure TrajectoryBase::getFrameStructure() const
 {
     return frame_structure_;
 }
+
+
+} // namespace wolf
 
 #endif

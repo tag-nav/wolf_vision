@@ -2,6 +2,9 @@
 #include "sensor_base.h"
 #include "wolf_problem.h"
 
+
+namespace wolf {
+
 HardwareBase::HardwareBase() :
     NodeLinked(MID, "HARDWARE")
 {
@@ -27,3 +30,5 @@ void HardwareBase::removeSensor(SensorBase* _sensor_ptr)
 {
     removeDownNode(_sensor_ptr->nodeId());
 }
+
+} // namespace wolf

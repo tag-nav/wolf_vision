@@ -9,6 +9,9 @@ class WolfProblem;
 
 // std includes
 
+
+namespace wolf {
+
 /** \brief Base class for Nodes
  *
  * Base class for all Nodes in the Wolf tree.
@@ -79,5 +82,7 @@ inline std::string NodeBase::nodeLabel() const
 {
     return label_;
 }
+
+} // namespace wolf
 
 #endif /* NODE_BASE_H_ */

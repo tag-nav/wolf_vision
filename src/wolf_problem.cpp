@@ -6,6 +6,9 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 
+
+namespace wolf {
+
 WolfProblem::WolfProblem(FrameStructure _frame_structure) :
         NodeBase("WOLF_PROBLEM"), //
 		location_(TOP),
@@ -231,3 +234,4 @@ void WolfProblem::removeDownNode(const LowerNodePtr _ptr)
     //
 }
 
+} // namespace wolf

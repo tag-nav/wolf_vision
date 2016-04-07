@@ -8,6 +8,10 @@
 //std includes
 #include <iomanip>
 
+
+namespace wolf {
+
+
 // TODO manage covariance
 
 class FeatureGPSPseudorange : public FeatureBase
@@ -32,5 +36,6 @@ public:
 
 };
 
+} // namespace wolf
 
 #endif //FEATURE_GPS_PSEUDORANGE_H_

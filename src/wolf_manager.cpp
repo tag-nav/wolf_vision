@@ -1,5 +1,8 @@
 #include "wolf_manager.h"
 
+
+namespace wolf {
+
 WolfManager::WolfManager(const FrameStructure _frame_structure,
                          SensorBase* _sensor_prior_ptr,
                          const Eigen::VectorXs& _prior,
@@ -233,3 +236,4 @@ void WolfManager::setNewFrameElapsedTime(const WolfScalar& _dt)
 }
 
 
+} // namespace wolf

@@ -8,6 +8,9 @@
 //OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
 
+
+namespace wolf {
+
 /**
  *
  * Test for the feature point
@@ -75,5 +78,8 @@ inline cv::Mat& FeaturePointImage::getDescriptor()
 {
     return descriptor_;
 }
+
+
+} // namespace wolf
 
 #endif // FEATURE_IMAGE_H

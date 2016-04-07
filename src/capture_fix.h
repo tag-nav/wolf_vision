@@ -9,6 +9,9 @@
 //std includes
 //
 
+namespace wolf {
+
+
 //class CaptureFix
 class CaptureFix : public CaptureBase
 {
@@ -31,4 +34,6 @@ class CaptureFix : public CaptureBase
 
         virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
 };
+
+} //namespace wolf
 #endif

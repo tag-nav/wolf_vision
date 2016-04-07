@@ -7,6 +7,8 @@
 
 #include "processor_tracker_feature.h"
 
+namespace wolf {
+
 ProcessorTrackerFeature::ProcessorTrackerFeature(ProcessorType _tp) :
         ProcessorTracker(_tp)
 {
@@ -53,3 +55,5 @@ unsigned int ProcessorTrackerFeature::processNew()
     // return the number of new features detected in \b last
     return n;
 }
+
+} // namespace wolf

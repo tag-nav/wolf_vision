@@ -12,6 +12,8 @@ class NodeTerminus;
 //std includes
 //
 
+namespace wolf {
+
 //TODO: add a member to indicate how jacobian is computed, called "jacobian_method_"
 //class ConstraintBase
 class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
@@ -150,4 +152,5 @@ inline LandmarkBase* ConstraintBase::getLandmarkOtherPtr()
     return landmark_ptr_;
 }
 
+} // namespace wolf
 #endif

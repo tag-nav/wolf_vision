@@ -13,6 +13,8 @@ class StateBlock;
 
 //std includes
 
+namespace wolf {
+
 // TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
 
@@ -151,4 +153,5 @@ inline const LandmarkType LandmarkBase::getType() const
     return type_;
 }
 
+} // namespace wolf
 #endif

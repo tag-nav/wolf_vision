@@ -7,6 +7,8 @@
 
 #include "processor_tracker.h"
 
+namespace wolf {
+
 ProcessorTracker::ProcessorTracker(ProcessorType _tp) :
     ProcessorBase(_tp),
     origin_ptr_(nullptr),
@@ -22,5 +24,5 @@ ProcessorTracker::~ProcessorTracker()
     // TODO Auto-generated destructor stub
 }
 
-
+} // namespace wolf
 

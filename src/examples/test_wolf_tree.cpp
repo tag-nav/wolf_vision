@@ -10,6 +10,7 @@
 //Wolf includes
 #include "wolf_manager.h"
 
+namespace wolf {
 
 int main(int argc, char** argv) 
 {
@@ -55,3 +56,5 @@ int main(int argc, char** argv)
     //exit
     return 0;
 }
+
+} // namespace wolf

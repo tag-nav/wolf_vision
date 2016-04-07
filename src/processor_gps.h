@@ -14,6 +14,9 @@
 
 // Std includes
 
+
+namespace wolf {
+
 class ProcessorGPS : public ProcessorBase
 {
     protected:
@@ -36,5 +39,7 @@ class ProcessorGPS : public ProcessorBase
 inline void ProcessorGPS::init(CaptureBase* _capture_ptr)
 {
 }
+
+} // namespace wolf
 
 #endif //WOLF_PROCESSOR_GPS_H

@@ -1,5 +1,7 @@
 #include "capture_motion.h"
 
+namespace wolf {
+
 CaptureMotion::CaptureMotion(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
 	CaptureBase(_init_ts, _sensor_ptr),
 	data_(_data),
@@ -40,3 +42,5 @@ void CaptureMotion::setFinalTimeStamp(const TimeStamp & _ts)
 {
     final_time_stamp_ = _ts;
 }
+
+} // namespace wolf

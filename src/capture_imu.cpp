@@ -1,5 +1,7 @@
 #include "capture_imu.h"
 
+namespace wolf {
+
 
 CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr,
                              const Eigen::Vector6s& _data) :
@@ -45,4 +47,6 @@ CaptureIMU* CaptureIMU::interpolateCapture(const TimeStamp& _ts)
 {
 
 }
+
+} //namespace wolf
 

@@ -10,6 +10,9 @@
 
 #include "node_linked.h"
 
+
+namespace wolf {
+
 /** \brief Base class for nodes receiving Constraints from Features
  * \author jsola
  *
@@ -56,5 +59,7 @@ class NodeConstrained : public NodeLinked<UpperType, LowerType>
         ConstraintBaseList constrained_by_list_;
 
 };
+
+} // namespace wolf
 
 #endif /* NODE_CONSTRAINED_H_ */

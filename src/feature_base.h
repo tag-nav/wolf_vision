@@ -12,6 +12,9 @@ class ConstraintBase;
 
 //std includes
 
+
+namespace wolf {
+
 //class FeatureBase
 class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
 {
@@ -110,5 +113,7 @@ inline void FeatureBase::setMeasurement(const Eigen::VectorXs& _meas)
 {
     measurement_ = _meas;
 }
+
+} // namespace wolf
 
 #endif

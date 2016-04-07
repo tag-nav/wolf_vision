@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <iterator>
 
+namespace wolf {
+
 /** \brief Base class for motion Captures.
  * \param MotionDeltaType The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
  *        Generalized Delta types allow for optimized algorithms.
@@ -161,5 +163,6 @@ class CaptureMotion2 : public CaptureBase
         MotionBuffer buffer_; ///< Buffer of motions between this Capture and the next one.
 };
 
+} // namespace wolf
 
 #endif /* SRC_CAPTURE_MOTION2_H_ */

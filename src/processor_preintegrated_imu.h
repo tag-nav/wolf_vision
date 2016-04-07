@@ -10,6 +10,8 @@
 // STL
 #include <deque>
 
+namespace wolf {
+
 class ProcessorPreintegratedIMU : public ProcessorMotion2{
     public:
         ProcessorPreintegratedIMU(ProcessorType _tp);
@@ -71,5 +73,7 @@ class ProcessorPreintegratedIMU : public ProcessorMotion2{
         Eigen::Matrix<WolfScalar,9,3> preintegrated_H_biasOmega_;
 
 };
+
+} // namespace wolf
 
 #endif // PROCESSOR_PREINTEGRATED_IMU_H

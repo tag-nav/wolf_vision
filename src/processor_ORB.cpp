@@ -3,6 +3,8 @@
 
 #include "unistd.h"
 
+namespace wolf {
+
 ProcessorORB::ProcessorORB() : ProcessorTracker(PRC_TRACKER_ORB)
 {
     std::cout << "ProcessorORB constructor" << std::endl;
@@ -23,3 +25,5 @@ void ProcessorORB::establishConstraints(CaptureBase *_capture_ptr)
 {
     //not used yet
 }
+
+} // namespace wolf

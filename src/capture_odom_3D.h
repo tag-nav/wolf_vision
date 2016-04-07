@@ -12,6 +12,8 @@
 
 #include "processor_odom_3D.h"
 
+namespace wolf {
+
 // Declare the class
 class CaptureOdom3D : public CaptureMotion2<Odom3dDelta>
 {
@@ -31,5 +33,7 @@ inline CaptureOdom3D::CaptureOdom3D(const TimeStamp& _ts, SensorBase* _sensor_pt
 {
     //
 }
+
+} // namespace wolf
 
 #endif /* CAPTURE_ODOM_3D_H_ */

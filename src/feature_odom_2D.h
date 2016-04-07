@@ -8,6 +8,9 @@
 
 //std includes
 
+
+namespace wolf {
+
 //class FeatureOdom2D
 class FeatureOdom2D : public FeatureBase
 {
@@ -43,4 +46,7 @@ class FeatureOdom2D : public FeatureBase
         virtual void findConstraints();
         
 };
+
+} // namespace wolf
+
 #endif

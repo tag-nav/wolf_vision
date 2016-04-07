@@ -12,6 +12,8 @@ class LandmarkBase;
 
 //std includes
 
+namespace wolf {
+
 //class MapBase
 class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
 {
@@ -42,5 +44,7 @@ inline LandmarkBaseList* MapBase::getLandmarkListPtr()
 {
     return getDownNodeListPtr();
 }
+
+} // namespace wolf
 
 #endif

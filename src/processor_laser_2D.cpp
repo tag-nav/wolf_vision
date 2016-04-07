@@ -1,5 +1,6 @@
 #include "processor_laser_2D.h"
 
+namespace wolf {
 
 ProcessorLaser2D::ProcessorLaser2D() : ProcessorBase(PRC_LIDAR),
         //sensor_laser_ptr_((SensorLaser2D*)(upperNodePtr())), // Static cast to specific sensor at construction time TODO: in construction time upperNodePtr is nullptr, it crashes always, to be removed or changed to somewhere (JVN)
@@ -636,3 +637,5 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
     // Remove corner landmark (it will remove all old constraints)
     getWolfProblem()->getMapPtr()->removeLandmark(_old_corner_landmark_ptr);
 }
+
+} // namespace wolf

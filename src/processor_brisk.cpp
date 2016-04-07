@@ -6,6 +6,8 @@
 // other includes
 #include <bitset>
 
+namespace wolf {
+
 /** Public */
 
 /** The "main" class of this processor is "process" */
@@ -361,3 +363,5 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
 
     return n_last_capture_feat;
 }
+
+} // namespace wolf

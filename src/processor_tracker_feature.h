@@ -11,6 +11,8 @@
 #include "processor_tracker.h"
 #include "capture_base.h"
 
+namespace wolf {
+
 /** \brief General tracker processor
  *
  * This class implements the incremental tracker. It contains three pointers to three Captures of type CaptureBase, named \b origin, \b last and \b incoming:
@@ -112,5 +114,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual unsigned int processNew();
 };
+
+} // namespace wolf
 
 #endif /* PROCESSOR_TRACKER_FEATURE_H_ */

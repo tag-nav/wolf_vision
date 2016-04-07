@@ -2,6 +2,8 @@
 #include "landmark_container.h"
 #include "state_block.h"
 
+namespace wolf {
+
 LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, const WolfScalar& _witdh, const WolfScalar& _length) :
 	LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
 	corners_(3,4)
@@ -182,3 +184,5 @@ Eigen::VectorXs LandmarkContainer::getCorner(const unsigned int _id) const
     assert(_id >= 0 && _id <= 4 && "wrong corner id parameter in getCorner(id)");
     return corners_.col(_id);
 }
+
+} // namespace wolf

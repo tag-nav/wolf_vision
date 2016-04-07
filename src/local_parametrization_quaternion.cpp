@@ -1,5 +1,7 @@
 #include "local_parametrization_quaternion.h"
 
+namespace wolf {
+
 LocalParametrizationQuaternion::LocalParametrizationQuaternion(QuaternionDeltaReference _delta_ref) :
         LocalParametrizationBase(4, 3),
         delta_reference_(_delta_ref)
@@ -73,3 +75,5 @@ bool LocalParametrizationQuaternion::computeJacobian(const Eigen::Map<const Eige
     }
     return true;
 }
+
+} // namespace wolf

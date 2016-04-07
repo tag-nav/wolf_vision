@@ -1,6 +1,7 @@
 
 #include "time_stamp.h"
 
+namespace wolf {
 
 TimeStamp::TimeStamp() :
         time_stamp_(0)
@@ -42,3 +43,5 @@ void TimeStamp::print(std::ostream & ost) const
     ost.flags(fmtfl);
     ost.precision(nn);
 }
+
+} // namespace wolf

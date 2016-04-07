@@ -19,6 +19,9 @@
 #include <complex>      // std::complex, std::norm
 
 
+
+namespace wolf {
+
 class ProcessorBrisk : public ProcessorTrackerFeature
 {
 protected:
@@ -101,5 +104,7 @@ private:
 
     virtual unsigned int track(const FeatureBaseList& _feature_list_in, FeatureBaseList & _feature_list_out);
 };
+
+} // namespace wolf
 
 #endif // PROCESSOR_BRISK_H

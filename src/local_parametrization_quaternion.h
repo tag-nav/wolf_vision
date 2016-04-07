@@ -10,6 +10,9 @@
 
 #include "local_parametrization_base.h"
 
+
+namespace wolf {
+
 /**
   * \brief Local or global orientation error
   *
@@ -58,4 +61,7 @@ class LocalParametrizationQuaternion : public LocalParametrizationBase
                           Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const;
         virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _q, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
 };
+
+} // namespace wolf
+
 #endif /* LOCAL_PARAMETRIZATION_QUATERNION_H_ */

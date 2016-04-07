@@ -10,6 +10,9 @@
 #include "laser_scan_utils/scan_basics.h"
 #include "laser_scan_utils/corner_detector.h"
 
+
+namespace wolf {
+
 class SensorLaser2D : public SensorBase
 {
     protected:
@@ -126,4 +129,8 @@ class SensorLaser2D : public SensorBase
          **/                
         void printSensorParameters() const;
 };
+
+} // namespace wolf
+
+
 #endif /*SENSOR_LASER_2D_H_*/

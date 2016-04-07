@@ -11,6 +11,8 @@
 #include "processor_base.h"
 #include "capture_base.h"
 
+namespace wolf {
+
 class ProcessorTracker : public ProcessorBase
 {
     protected:
@@ -166,5 +168,7 @@ class ProcessorTracker : public ProcessorBase
         }
 
 };
+
+} // namespace wolf
 
 #endif /* SRC_PROCESSOR_TRACKER_H_ */

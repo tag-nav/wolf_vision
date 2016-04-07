@@ -15,6 +15,8 @@ class StateBlock;
 
 //std includes
 
+namespace wolf {
+
 //class FrameBase
 class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
 {
@@ -191,5 +193,7 @@ inline StateStatus FrameBase::getStatus() const
 {
     return status_;
 }
+
+} // namespace wolf
 
 #endif

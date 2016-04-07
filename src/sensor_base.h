@@ -12,6 +12,8 @@ class StateBlock;
 
 //std includes
 
+namespace wolf {
+
 class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 {
     protected:
@@ -131,5 +133,7 @@ inline Eigen::MatrixXs SensorBase::getNoiseCov()
 {
     return noise_cov_;
 }
+
+} // namespace wolf
 
 #endif

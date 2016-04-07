@@ -11,6 +11,9 @@ class LocalParametrizationBase;
 //std includes
 #include <iostream>
 
+
+namespace wolf {
+
 /** \brief class StateBlock
  *
  * This class implements a state block for general nonlinear optimization. It offers the following functionality:
@@ -142,5 +145,7 @@ inline LocalParametrizationBase* StateBlock::getLocalParametrizationPtr()
 {
     return local_param_ptr_;
 }
+
+} // namespace wolf
 
 #endif

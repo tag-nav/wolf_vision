@@ -17,6 +17,8 @@
 #include "node_base.h"
 #include "wolf.h"
 
+namespace wolf {
+
 /** \brief Linked node element in the Wolf Tree
  * 
  * \param UpperType the type of node one level up in the Wolf tree.
@@ -139,6 +141,7 @@ class NodeLinked : public NodeBase
     protected:
 
 };
+
 
 //////////////////////////////////////////
 //          IMPLEMENTATION
@@ -304,6 +307,6 @@ WolfProblem* NodeLinked<UpperType, LowerType>::getWolfProblem()
     return nullptr;
 }
 
-
+} // namespace wolf
 
 #endif /* NODE_LINKED_H_ */

@@ -14,6 +14,8 @@ class SensorBase;
 //std includes
 //
 
+namespace wolf{
+
 
 //class CaptureBase
 class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
@@ -118,5 +120,7 @@ inline void CaptureBase::setTimeStampToNow()
 {
     time_stamp_.setToNow();
 }
+
+} // namespace wolf
 
 #endif

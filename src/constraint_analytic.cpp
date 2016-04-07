@@ -1,6 +1,8 @@
 #include "constraint_analytic.h"
 #include "state_block.h"
 
+namespace wolf {
+
 ConstraintAnalytic::ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, ConstraintStatus _status,
                                        StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
                                        StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
@@ -174,3 +176,5 @@ void ConstraintAnalytic::resizeVectors()
         }
     }
 }
+
+} // namespace wolf

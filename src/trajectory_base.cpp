@@ -2,6 +2,7 @@
 #include "frame_base.h"
 #include "wolf_problem.h"
 
+namespace wolf {
 
 TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
     NodeLinked(MID, "TRAJECTORY"),
@@ -27,3 +28,5 @@ void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 	for(auto fr_it = getFrameListPtr()->begin(); fr_it != getFrameListPtr()->end(); ++fr_it)
 		(*fr_it)->getConstraintList(_ctr_list);
 }
+
+} // namespace wolf

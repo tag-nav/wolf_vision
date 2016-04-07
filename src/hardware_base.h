@@ -9,6 +9,8 @@ class WolfProblem;
 #include "wolf.h"
 #include "node_linked.h"
 
+namespace wolf {
+
 //class HardwareBase
 class HardwareBase : public NodeLinked<WolfProblem, SensorBase>
 {
@@ -41,5 +43,7 @@ inline SensorBaseList* HardwareBase::getSensorListPtr()
 {
     return getDownNodeListPtr();
 }
+
+} // namespace wolf
 
 #endif

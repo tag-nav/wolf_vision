@@ -11,6 +11,9 @@ class NodeTerminus;
 
 // Std includes
 
+
+namespace wolf {
+
 //class ProcessorBase
 class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 {
@@ -55,5 +58,7 @@ inline bool ProcessorBase::permittedKeyFrame()
 {
     return getWolfProblem()->permitKeyFrame(this);
 }
+
+} // namespace wolf
 
 #endif
