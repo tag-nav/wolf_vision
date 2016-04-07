@@ -2,10 +2,12 @@
 #define WOLF_PROBLEM_H_
 
 // Fwd refs
+namespace wolf{
 class HardwareBase;
 class TrajectoryBase;
 class MapBase;
 class TimeStamp;
+}
 
 //wolf includes
 #include "node_base.h"

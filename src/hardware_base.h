@@ -2,8 +2,10 @@
 #define HARDWARE_BASE_H_
 
 // Fwd dependencies
+namespace wolf{
 class SensorBase;
 class WolfProblem;
+}
 
 //Wolf includes
 #include "wolf.h"

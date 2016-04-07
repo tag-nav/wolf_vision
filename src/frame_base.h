@@ -3,9 +3,11 @@
 #define FRAME_BASE_H_
 
 // Fwd refs
+namespace wolf{
 class TrajectoryBase;
 class CaptureBase;
 class StateBlock;
+}
 
 //Wolf includes
 #include "wolf.h"

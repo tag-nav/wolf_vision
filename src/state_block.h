@@ -3,7 +3,9 @@
 #define STATE_BLOCK_H_
 
 // Fwd references
+namespace wolf{
 class LocalParametrizationBase;
+}
 
 //Wolf includes
 #include "wolf.h"

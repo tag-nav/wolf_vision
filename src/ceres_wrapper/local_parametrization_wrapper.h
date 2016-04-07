@@ -2,7 +2,9 @@
 #define LOCAL_PARAMETRIZATION_WRAPPER_H_
 
 // Fwd refs
+namespace wolf{
 class LocalParametrizationBase;
+}
 
 //Ceres includes
 #include "ceres/ceres.h"

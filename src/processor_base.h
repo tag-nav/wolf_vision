@@ -2,8 +2,10 @@
 #define PROCESSOR_BASE_H_
 
 // Fwd refs
+namespace wolf{
 class SensorBase;
 class NodeTerminus;
+}
 
 //Wolf includes
 #include "wolf.h"

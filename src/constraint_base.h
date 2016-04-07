@@ -2,8 +2,10 @@
 #define CONSTRAINT_BASE_H_
 
 // Forward declarations for node templates
+namespace wolf{
 class FeatureBase;
 class NodeTerminus;
+}
 
 //Wolf includes
 #include "wolf.h"

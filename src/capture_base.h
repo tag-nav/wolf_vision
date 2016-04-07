@@ -2,9 +2,11 @@
 #define CAPTURE_BASE_H_
 
 // Forward declarations for node templates
+namespace wolf{
 class FrameBase;
 class FeatureBase;
 class SensorBase;
+}
 
 //Wolf includes
 #include "wolf.h"

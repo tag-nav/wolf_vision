@@ -3,8 +3,10 @@
 #define TRAJECTORY_BASE_H_
 
 // Fwd refs
+namespace wolf{
 class WolfProblem;
 class FrameBase;
+}
 
 //Wolf includes
 #include "wolf.h"

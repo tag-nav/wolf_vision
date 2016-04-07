@@ -5,9 +5,6 @@
 #ifndef WOLF_PROCESSOR_GPS_H
 #define WOLF_PROCESSOR_GPS_H
 
-// Fwd references
-//class SensorGPS;
-
 // Wolf includes
 #include "processor_base.h"
 #include "capture_gps.h"

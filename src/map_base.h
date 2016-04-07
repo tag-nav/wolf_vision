@@ -3,8 +3,10 @@
 #define MAP_BASE_H_
 
 // Fwd refs
+namespace wolf{
 class WolfProblem;
 class LandmarkBase;
+}
 
 //Wolf includes
 #include "wolf.h"

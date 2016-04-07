@@ -2,7 +2,9 @@
 #define NODE_BASE_H_
 
 // Fwd references
+namespace wolf{
 class WolfProblem;
+}
 
 // Wolf includes
 #include "wolf.h"

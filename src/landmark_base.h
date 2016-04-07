@@ -2,9 +2,11 @@
 #define LANDMARK_BASE_H_
 
 // Fwd references
+namespace wolf{
 class MapBase;
 class NodeTerminus;
 class StateBlock;
+}
 
 //Wolf includes
 #include "wolf.h"
