@@ -21,7 +21,8 @@ class FeaturePointImage : public FeatureBase
 
 //        Eigen::Vector2s measurement_;
         cv::KeyPoint keypoint_;
-        std::vector<float> descriptor_;
+        cv::Mat descriptor_;
+//        std::vector<float> descriptor_;
         bool is_known_;
 
     public:
@@ -36,7 +37,7 @@ class FeaturePointImage : public FeatureBase
 
         //_known_or_new: known = true; new = false;
         FeaturePointImage(const cv::KeyPoint& _keypoint,
-                          const std::vector<float>& _descriptor, bool _known_or_new) :
+                          const cv::Mat& _descriptor, bool _known_or_new) :
                 FeatureBase(FEAT_POINT_IMAGE, Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
                 keypoint_(_keypoint),
                 descriptor_(_descriptor)
@@ -55,7 +56,7 @@ class FeaturePointImage : public FeatureBase
 
         virtual cv::KeyPoint& getKeypoint();
 
-        virtual std::vector<float>& getDescriptor();
+        virtual cv::Mat& getDescriptor();
 
         virtual Eigen::VectorXs & getMeasurement(){
             measurement_(0) = WolfScalar(keypoint_.pt.x);
@@ -70,7 +71,7 @@ inline cv::KeyPoint& FeaturePointImage::getKeypoint()
     return keypoint_;
 }
 
-inline std::vector<float>& FeaturePointImage::getDescriptor()
+inline cv::Mat& FeaturePointImage::getDescriptor()
 {
     return descriptor_;
 }
