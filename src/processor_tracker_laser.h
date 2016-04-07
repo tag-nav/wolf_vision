@@ -9,7 +9,6 @@
 #define SRC_PROCESSOR_TRACKER_LASER_H_
 
 // Wolf includes
-#include "processor_tracker.h"
 #include "sensor_laser_2D.h"
 #include "capture_laser_2D.h"
 #include "feature_corner_2D.h"
@@ -19,6 +18,7 @@
 //laser_scan_utils
 #include "laser_scan_utils/scan_basics.h"
 #include "laser_scan_utils/corner_detector.h"
+#include "processor_tracker_feature.h"
 
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level
 const WolfScalar aperture_error_th_ = 20.0*M_PI/180.; //20 degrees
@@ -29,7 +29,7 @@ const WolfScalar min_features_ratio_th_ = 0.5;
 const WolfScalar CONTAINER_WIDTH = 2.44;
 const WolfScalar CONTAINER_LENGTH = 12.20;
 
-class ProcessorTrackerLaser : public ProcessorTracker
+class ProcessorTrackerLaser : public ProcessorTrackerFeature
 {
     private:
         laserscanutils::ScanParams scan_params_;
@@ -47,7 +47,7 @@ class ProcessorTrackerLaser : public ProcessorTracker
         /** \brief Tracker function
          * \return The number of successful tracks.
          */
-        virtual unsigned int processKnownFeatures();
+        virtual unsigned int processKnown();
 
     protected:
 

@@ -2,7 +2,6 @@
 #define PROCESSOR_BRISK_H
 
 // Wolf includes
-#include "processor_tracker.h"
 #include "sensor_camera.h"
 #include "capture_image.h"
 #include "feature_point_image.h"
@@ -16,8 +15,9 @@
 
 // General includes
 #include <math.h>
+#include "processor_tracker_feature.h"
 
-class ProcessorBrisk : public ProcessorTracker
+class ProcessorBrisk : public ProcessorTrackerFeature
 {
 protected:
     cv::BRISK brisk_;               //brisk object
@@ -58,7 +58,7 @@ public:
      *
      * \return The number of successful tracks.
      */
-    virtual unsigned int processKnownFeatures();
+    virtual unsigned int processKnown();
 
 
     /** \brief Detect new Features

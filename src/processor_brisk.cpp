@@ -11,7 +11,7 @@
 //Constructor
 ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, int _threshold, int _octaves, float _pattern_scales,
                                unsigned int _grid_width, unsigned int _grid_height, unsigned int _min_features_th) :
-    ProcessorTracker(PRC_TRACKER_BRISK, false),
+    ProcessorTrackerFeature(PRC_TRACKER_BRISK),
     brisk_(_threshold, _octaves, _pattern_scales),
     act_search_grid_(_image_rows,_image_cols,_grid_width, _grid_height),
     min_features_th_(_min_features_th)
@@ -26,11 +26,11 @@ ProcessorBrisk::~ProcessorBrisk()
 
 
 // Tracker function. Returns the number of successful tracks.
-unsigned int ProcessorBrisk::processKnownFeatures()
+unsigned int ProcessorBrisk::processKnown()
 {
 
     // Cambiar esta funcion y añadir otra que se la llame por medio de dos listas, una de entrada y otra de salida. Para el caso normal, pasar
-    // "getLastPtr()->getFeatureListPtr()" y otra lista con los resultados del matching. Luego, después de encontrar new features, se volverá
+    // "last_ptr_->getFeatureListPtr()" y otra lista con los resultados del matching. Luego, después de encontrar new features, se volverá
     // a llamar a processKnownFeatures con las nuevas features en una lista, para que se haga el matching con el incoming, que también ha de
     // devolver una lista con los resultados del matching. Al acabar, hacer un splice de la captura last con las nuevas features de last Y de
     // incoming con las utilizadas en el matching, para que cuando se haga el reset, el last pase entero (con las new features) a origin y
@@ -42,9 +42,9 @@ unsigned int ProcessorBrisk::processKnownFeatures()
     act_search_grid_.renew();
 
     unsigned int n_tracks = 0;
-    std::cout << "Nbr of features in incoming: " << getIncomingPtr()->getFeatureListPtr()->size() << std::endl;
-    n_tracks = track(*(getLastPtr()->getFeatureListPtr()), *(getIncomingPtr()->getFeatureListPtr()));
-    std::cout << "Nbr of features in incoming: " << getIncomingPtr()->getFeatureListPtr()->size() << std::endl;
+    std::cout << "Nbr of features in incoming: " << incoming_ptr_->getFeatureListPtr()->size() << std::endl;
+    n_tracks = track(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
+    std::cout << "Nbr of features in incoming: " << incoming_ptr_->getFeatureListPtr()->size() << std::endl;
 
     return n_tracks;
 }
@@ -71,8 +71,8 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
     cv::Mat image = image_last_;
 
     //TODO: Why is it 0?
-    std::cout << "size: " << getLastPtr()->getFeatureListPtr()->size() << std::endl;
-    for (std::list<FeatureBase*>::iterator feature_iter=getLastPtr()->getFeatureListPtr()->begin();feature_iter != getLastPtr()->getFeatureListPtr()->end(); ++feature_iter)
+    std::cout << "size: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+    for (std::list<FeatureBase*>::iterator feature_iter=last_ptr_->getFeatureListPtr()->begin();feature_iter != last_ptr_->getFeatureListPtr()->end(); ++feature_iter)
     {
 
         _kp = ((FeaturePointImage*)*feature_iter)->getKeypoint();
@@ -188,9 +188,9 @@ unsigned int ProcessorBrisk::detectNewFeatures()
 bool ProcessorBrisk::voteForKeyFrame()
 {
     std::cout << "Thereshold: " << min_features_th_ << std::endl;
-    std::cout << "Feature_list size: " << ((CaptureImage*)getIncomingPtr())->getFeatureListPtr()->size() << std::endl;
-    std::cout << "<--------------------------------> voteForKeyFrame?: " << (((CaptureImage*)getIncomingPtr())->getFeatureListPtr()->size() < min_features_th_) << std::endl;
-    return (getIncomingPtr()->getFeatureListPtr()->size() < min_features_th_);
+    std::cout << "Feature_list size: " << ((CaptureImage*)incoming_ptr_)->getFeatureListPtr()->size() << std::endl;
+    std::cout << "<--------------------------------> voteForKeyFrame?: " << (((CaptureImage*)incoming_ptr_)->getFeatureListPtr()->size() < min_features_th_) << std::endl;
+    return (incoming_ptr_->getFeatureListPtr()->size() < min_features_th_);
     //return 0;
 }
 
@@ -198,10 +198,10 @@ void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
 {
     std::cout << std::endl << "<---- process ---->" << std::endl << std::endl;
     image_incoming_ = ((CaptureImage*)_incoming_ptr)->getImage();
-    image_last_ = ((CaptureImage*)getLastPtr())->getImage();
-    ProcessorTracker::process(_incoming_ptr);
+    image_last_ = ((CaptureImage*)last_ptr_)->getImage();
+    ProcessorTrackerFeature::process(_incoming_ptr);
     std::cout << std::endl << "<---- end process ---->" << std::endl << std::endl;
-    drawFeatures(getLastPtr());
+    drawFeatures(last_ptr_);
     cv::waitKey(30);
 }
 

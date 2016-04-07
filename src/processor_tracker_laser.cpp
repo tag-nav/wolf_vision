@@ -2,7 +2,7 @@
 
 
 ProcessorTrackerLaser::ProcessorTrackerLaser::ProcessorTrackerLaser() :
-        ProcessorTracker(PRC_TRACKER_LIDAR, true),
+        ProcessorTrackerFeature(PRC_TRACKER_LIDAR),
         scan_params_(((SensorLaser2D*)(upperNodePtr()))->getScanParams()),
         corner_alg_params_(((SensorLaser2D*)(upperNodePtr()))->getCornerAlgParams())
 {
@@ -13,7 +13,7 @@ ProcessorTrackerLaser::ProcessorTrackerLaser::~ProcessorTrackerLaser()
 
 }
 
-unsigned int ProcessorTrackerLaser::processKnownFeatures()
+unsigned int ProcessorTrackerLaser::processKnown()
 {
     /** \return The number of successful tracks.
      *
@@ -78,7 +78,7 @@ unsigned int ProcessorTrackerLaser::processKnownFeatures()
     }
 
     // TRACK CORNERS
-    unsigned int n_tracks = track(*(getLastPtr()->getFeatureListPtr()), *(getIncomingPtr()->getFeatureListPtr()));
+    unsigned int n_tracks = track(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
     std::cout << "N of features tracked in incoming: " << n_tracks << std::endl;
     std::cout << "N of new features in incoming: " << getNewFeaturesListIncoming().size() << std::endl;
 
@@ -113,7 +113,7 @@ unsigned int ProcessorTrackerLaser::track(const FeatureBaseList& _feature_list_i
             else
             {
                 // NO MATCH -> ADD NEW FEATURE
-                addNewFeature((*corner_it));
+                addNewFeatureIncoming((*corner_it));
                 corner_it = all_corners_incoming_.erase(corner_it);
                 corner_it--;
             }
@@ -137,12 +137,12 @@ ConstraintBase* ProcessorTrackerLaser::createConstraint(FeatureBase* _feature_pt
 bool ProcessorTrackerLaser::voteForKeyFrame()
 {
     std::cout << "Ration origin/incomming thereshold: " << min_features_ratio_th_ << std::endl;
-    std::cout << "origin features:   " << getOriginPtr()->getFeatureListPtr()->size() << std::endl;
-    std::cout << "incoming features: " << getIncomingPtr()->getFeatureListPtr()->size() << std::endl;
-    std::cout << "ratio:             " << (getIncomingPtr()->getFeatureListPtr()->size() / getOriginPtr()->getFeatureListPtr()->size())  << std::endl;
-    if (getIncomingPtr()->getFeatureListPtr()->size() / getOriginPtr()->getFeatureListPtr()->size() < min_features_ratio_th_)
+    std::cout << "origin features:   " << origin_ptr_->getFeatureListPtr()->size() << std::endl;
+    std::cout << "incoming features: " << incoming_ptr_->getFeatureListPtr()->size() << std::endl;
+    std::cout << "ratio:             " << (incoming_ptr_->getFeatureListPtr()->size() / origin_ptr_->getFeatureListPtr()->size())  << std::endl;
+    if (incoming_ptr_->getFeatureListPtr()->size() / origin_ptr_->getFeatureListPtr()->size() < min_features_ratio_th_)
         std::cout << "VOTE for a new key frame " << std::endl;
     else
         std::cout << "DON'T VOTE for a new key frame " << std::endl;
-    return (getIncomingPtr()->getFeatureListPtr()->size() / getOriginPtr()->getFeatureListPtr()->size() < min_features_ratio_th_);
+    return (incoming_ptr_->getFeatureListPtr()->size() / origin_ptr_->getFeatureListPtr()->size() < min_features_ratio_th_);
 }
