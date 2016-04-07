@@ -44,7 +44,7 @@ class NodeLinked : public NodeBase
 
     protected:
         NodeLocation location_; ///< Indicates whether this node is a TOP, MIDDLE or BOOTOM node
-        UpperNodePtr up_node_ptr_; //it is not a shared pointer because the ownership of upper node should not be shared by lower nodes
+        UpperNodePtr up_node_ptr_; ///< Pointer to upper node
         LowerNodeList down_node_list_; ///< A list of pointers to lower nodes
         bool is_deleting_; ///< This node is being deleted.
 
@@ -209,32 +209,22 @@ inline const bool NodeLinked<UpperType, LowerType>::isDeleting() const
 template<class UpperType, class LowerType>
 inline bool NodeLinked<UpperType, LowerType>::isTop() const
 {
-    if (location_ == TOP)
-        return true;
-    else
-        return false;
+    return (location_ == TOP);
 }
 
 template<class UpperType, class LowerType>
 inline bool NodeLinked<UpperType, LowerType>::isBottom() const
 {
-    if (location_ == BOTTOM)
-        return true;
-    else
-        return false;
+    return (location_ == BOTTOM);
 }
 
 template<class UpperType, class LowerType>
 inline void NodeLinked<UpperType, LowerType>::linkToUpperNode(UpperNodePtr _pptr)
 {
     if (isTop())
-    {
         up_node_ptr_ = nullptr;
-    }
     else
-    {
         up_node_ptr_ = _pptr;
-    }
 }
 
 template<class UpperType, class LowerType>

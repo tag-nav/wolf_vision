@@ -121,9 +121,9 @@ SET(HDRS
     node_terminus.h
     processor_base.h
     processor_motion.h
-    processor_motion2.h
     processor_odom_3D.h
     processor_tracker.h
+    processor_tracker_feature.h
     sensor_base.h
     sensor_camera.h
     sensor_odom_2D.h
@@ -173,8 +173,8 @@ SET(SRCS
     node_base.cpp
     processor_base.cpp
     processor_motion.cpp
-    processor_motion2.cpp
     processor_tracker.cpp
+    processor_tracker_feature.cpp
     sensor_base.cpp
     sensor_camera.cpp
     sensor_odom_2D.cpp
@@ -213,11 +213,13 @@ IF (laser_scan_utils_FOUND)
         capture_laser_2D.h
         sensor_laser_2D.h
         processor_laser_2D.h
+        processor_tracker_laser.h
         )
     SET(SRCS ${SRCS}
         capture_laser_2D.cpp
         sensor_laser_2D.cpp
         processor_laser_2D.cpp
+        processor_tracker_laser.cpp
         )
 ENDIF(laser_scan_utils_FOUND)
 

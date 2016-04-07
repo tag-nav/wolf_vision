@@ -16,20 +16,25 @@
 
 class ProcessorGPS : public ProcessorBase
 {
-protected:
-    // unused
-    //SensorGPS* sensor_gps_ptr_; //specific pointer to sensor gps object
-    CaptureGPS* capture_gps_ptr_;
+    protected:
+        // unused
+        //SensorGPS* sensor_gps_ptr_; //specific pointer to sensor gps object
+        CaptureGPS* capture_gps_ptr_;
 
-    WolfScalar gps_covariance_;
+        WolfScalar gps_covariance_;
 
 
-public:
-    ProcessorGPS();
-    virtual ~ProcessorGPS();
+    public:
+        ProcessorGPS();
+        virtual ~ProcessorGPS();
 
-    virtual void process(CaptureBase* _capture_ptr);
+        virtual void init(CaptureBase* _capture_ptr);
 
+        virtual void process(CaptureBase* _capture_ptr);
 };
+
+inline void ProcessorGPS::init(CaptureBase* _capture_ptr)
+{
+}
 
 #endif //WOLF_PROCESSOR_GPS_H
