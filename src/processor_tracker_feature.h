@@ -63,33 +63,6 @@ class ProcessorTrackerFeature : public ProcessorTracker
         ProcessorTrackerFeature(ProcessorType _tp);
         virtual ~ProcessorTrackerFeature();
 
-        // We start with all the pure-virtual functions
-
-        /** \brief Tracker function
-         * \return The number of successful tracks.
-         *
-         * This is the tracker function to be implemented in derived classes.
-         * It operates on the \b incoming capture pointed by incoming_ptr_.
-         *
-         * This should do one of the following, depending on the design of the tracker -- see use_landmarks_:
-         *   - Track Features against other Features in the \b origin Capture. Tips:
-         *     - An intermediary step of matching against Features in the \b last Capture makes tracking easier.
-         *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Constraints in \b last.
-         *     - If required, correct the drift by re-comparing against the Features in origin.
-         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
-         *   - Track Features against Landmarks in the Map. Tips:
-         *     - The links to the Landmarks are in the Features' Constraints in last.
-         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
-         *
-         * The function must generate the necessary Features in the \b incoming Capture,
-         * of the correct type, derived from FeatureBase.
-         *
-         * It must also generate the constraints, of the correct type, derived from ConstraintBase
-         * (through ConstraintAnalytic or ConstraintSparse).
-         */
-        virtual unsigned int processKnown() = 0;
-
-
     protected:
 
         /** \brief Detect new Features
@@ -110,11 +83,11 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual unsigned int track(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out) = 0;
 
-        /** \brief Create one landmark
-         *
-         * Implement in derived classes to build the type of landmark you need for this tracker.
-         */
-        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr) = 0;
+//        /** \brief Create one landmark
+//         *
+//         * Implement in derived classes to build the type of landmark you need for this tracker.
+//         */
+//        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr) = 0;
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
@@ -130,39 +103,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, NodeBase* _node_ptr) = 0;
-
-
-
-        // From now on, all functions are already implemented.
-
-    public:
-
-        /** \brief Full processing of an incoming Capture.
-         *
-         * Usually you do not need to overload this method in derived classes.
-         * Overload it only if you want to alter this algorithm.
-         */
-        virtual void process(CaptureBase* const _incoming_ptr);
-
-        /** \brief Initialize tracker.
-         */
-        void init(CaptureBase* _origin_ptr);
-
-        virtual bool voteForKeyFrame();
-
-//        // getters and setters
-//        CaptureBase* getOriginPtr() const;
-//        CaptureBase* getLastPtr() const;
-//        CaptureBase* getIncomingPtr() const;
-//        void setOriginPtr(CaptureBase* const _origin_ptr);
-//        void setLastPtr(CaptureBase* const _last_ptr);
-//        void setIncomingPtr(CaptureBase* const _incoming_ptr);
-        FeatureBaseList& getNewFeaturesList();
-        void addNewFeature(FeatureBase* _feature_ptr);
-        //
-        FeatureBaseList& getNewFeaturesListIncoming();
-        void addNewFeatureIncoming(FeatureBase* _feature_ptr);
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _node_ptr) = 0;
 
     protected:
 
@@ -170,73 +111,6 @@ class ProcessorTrackerFeature : public ProcessorTracker
          *
          */
         virtual unsigned int processNew();
-
-        /**\brief Make a KeyFrame using the provided Capture.
-         */
-        virtual void makeKeyFrame();
-
-
 };
-
-inline FeatureBaseList& ProcessorTrackerFeature::getNewFeaturesList()
-{
-    return new_features_list_last_;
-}
-
-inline void ProcessorTrackerFeature::addNewFeature(FeatureBase* _feature_ptr)
-{
-    new_features_list_last_.push_back(_feature_ptr);
-}
-
-inline FeatureBaseList& ProcessorTrackerFeature::getNewFeaturesListIncoming()
-{
-    return new_features_list_incoming_;
-}
-
-inline void ProcessorTrackerFeature::addNewFeatureIncoming(FeatureBase* _feature_ptr)
-{
-    new_features_list_incoming_.push_back(_feature_ptr);
-}
-
-inline void ProcessorTrackerFeature::init(CaptureBase* _origin_ptr)
-{
-    origin_ptr_ = _origin_ptr;
-    last_ptr_ = _origin_ptr;
-}
-
-inline bool ProcessorTrackerFeature::voteForKeyFrame()
-{
-    return false;
-}
-
-//inline CaptureBase* ProcessorTrackerFeature::getOriginPtr() const
-//{
-//    return origin_ptr_;
-//}
-//
-//inline CaptureBase* ProcessorTrackerFeature::getLastPtr() const
-//{
-//    return last_ptr_;
-//}
-//
-//inline CaptureBase* ProcessorTrackerFeature::getIncomingPtr() const
-//{
-//    return incoming_ptr_;
-//}
-//
-//inline void ProcessorTrackerFeature::setOriginPtr(CaptureBase* const _origin_ptr)
-//{
-//    origin_ptr_ = _origin_ptr;
-//}
-//
-//inline void ProcessorTrackerFeature::setLastPtr(CaptureBase* const _last_ptr)
-//{
-//    last_ptr_ = _last_ptr;
-//}
-//
-//inline void ProcessorTrackerFeature::setIncomingPtr(CaptureBase* const _incoming_ptr)
-//{
-//    incoming_ptr_ = _incoming_ptr;
-//}
 
 #endif /* PROCESSOR_TRACKER_FEATURE_H_ */

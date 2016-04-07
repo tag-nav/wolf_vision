@@ -217,7 +217,7 @@ LandmarkBase* ProcessorBrisk::createLandmark(FeatureBase* _feature_ptr)
 }
 
 //Create a new constraint
-ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, NodeBase* _feat_or_lmk_ptr)
+ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feat_or_lmk_ptr)
 {
     return nullptr;
 }
