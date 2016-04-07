@@ -5,7 +5,8 @@ namespace wolf {
 ProcessorTrackerLaser::ProcessorTrackerLaser::ProcessorTrackerLaser() :
         ProcessorTrackerFeature(PRC_TRACKER_LIDAR),
         scan_params_(((SensorLaser2D*)(upperNodePtr()))->getScanParams()),
-        corner_alg_params_(((SensorLaser2D*)(upperNodePtr()))->getCornerAlgParams())
+        corner_alg_params_(((SensorLaser2D*)(upperNodePtr()))->getCornerAlgParams()),
+        scan_incoming_(nullptr), scan_last_(nullptr)
 {
 }
 
