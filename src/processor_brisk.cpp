@@ -31,18 +31,11 @@ ProcessorBrisk::~ProcessorBrisk()
 // Tracker function. Returns the number of successful tracks.
 unsigned int ProcessorBrisk::processKnownFeatures()
 {
-
-    // Cambiar esta funcion y añadir otra que se la llame por medio de dos listas, una de entrada y otra de salida. Para el caso normal, pasar
-    // "getLastPtr()->getFeatureListPtr()" y otra lista con los resultados del matching. Luego, después de encontrar new features, se volverá
-    // a llamar a processKnownFeatures con las nuevas features en una lista, para que se haga el matching con el incoming, que también ha de
-    // devolver una lista con los resultados del matching. Al acabar, hacer un splice de la captura last con las nuevas features de last Y de
-    // incoming con las utilizadas en el matching, para que cuando se haga el reset, el last pase entero (con las new features) a origin y
-    // incoming pase a ser last (con las features del matching)
-
-
     std::cout << std::endl << "<---- processKnownFeatures ---->" << std::endl << std::endl;
 
     act_search_grid_.renew();
+
+    //////// Poner aquí lo de que se asignen los features de last en la lista para dibujar en ROS
 
     unsigned int n_tracks = 0;
     std::cout << "Nbr of features in incoming: " << getIncomingPtr()->getFeatureListPtr()->size() << std::endl;
@@ -140,7 +133,7 @@ unsigned int ProcessorBrisk::detectNewFeatures()
     ///START OF THE SEARCH
     unsigned int n_features = 0;
     unsigned int n_iterations = 0;
-    while((n_features < 1) && (n_iterations <5))
+    while((n_features < 1) && (n_iterations <10))
     {
         bool roi_exists = act_search_grid_.pickRoi(roi);
 
@@ -185,6 +178,9 @@ unsigned int ProcessorBrisk::detectNewFeatures()
     }
     std::cout << "n_features: " << n_features << std::endl;
 
+    //////// Poner aquí lo de que se asignen los features obtenidos (y guardados en la lista "new_features_list_last_"
+    ///  en una lista para dibujar en ROS
+
     return n_features;
 }
 
@@ -207,7 +203,7 @@ void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
     ProcessorTracker::process(_incoming_ptr);
     std::cout << std::endl << "<---- end process ---->" << std::endl << std::endl;
     drawFeatures(getLastPtr());
-    cv::waitKey(30);
+    cv::waitKey(1);
 }
 
 
@@ -272,32 +268,30 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
         n_features = briskDetect(image_incoming_, roi_for_matching, new_keypoints, new_descriptors);
         std::cout << "n_features: " << n_features << std::endl;
 
-        //float euclidean_distance = 0;
-        //float euclidean_distance_min_value = 1000;
-        double f_min = 100;
+
+        cv::BFMatcher matcher('NORM_HAMMING');
+        std::vector<cv::DMatch> matches;
+
+        std::vector<float> f_descriptor = feature_ptr->getDescriptor();
+        cv::Mat g;
+        for(int i=0;i<=f_descriptor.size()-1;i++)
+        {
+            //g(cv::Range(1,2),cv::Range(i,i+1))= f_descriptor[i];
+        }
+        std::cout << "/////////////////////////////////////" << std::endl;
+        //std::cout << "g: " << g(cv::Range(1,2),cv::Range(1,g.cols-1)) << std::endl;
+
+        //matcher.match(descriptorsA, new_descriptors, matches);
+
+
+
+        double f_min = 1000;
         unsigned int row = 0;
 
         // Comparison of position
 
         if(n_features != 0)
         {
-            /* //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
-            for(unsigned int i = 0; i <= (new_keypoints.size()-1);i++)
-            {
-
-                        euclidean_distance = sqrt(pow((feature_ptr->getKeypoint().pt.x-new_keypoints[i].pt.x),2)+
-                                                  pow((feature_ptr->getKeypoint().pt.y-new_keypoints[i].pt.y),2));
-                        std::cout << "euclidean distance [" << i << "]: " << euclidean_distance << std::endl;
-                        if(euclidean_distance < euclidean_distance_min_value)
-                        {
-                            euclidean_distance_min_value = euclidean_distance;
-                            row = i;
-                        }
-                        std::cout << "euclidean distance min_value: " << euclidean_distance_min_value << std::endl;
-                //new FeaturePointImage(_new_keypoints[i],(new_descriptors(cv::Range(i,i+1),cv::Range(0,new_descriptors.cols))),false);
-            } */
-
-
             std::vector<float> feature_descriptor = feature_ptr->getDescriptor();
 
             //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
@@ -312,56 +306,27 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
 
 
 
-                const unsigned char* feat_desc[64];
-                unsigned char gh[64];
+                unsigned char feature_desc_char[64];
 
                 for(unsigned int j = 0; j<= feature_descriptor.size()-1;j++)
                 {
-                    float n = feature_descriptor[j];
-                    char buf[8];
-                    sprintf(buf,"%d", (int)n);
-                    std::cout << "====buf[" << j << "]: " << buf << std::endl;
-                    const unsigned char* b = (unsigned char*)buf;
-                    std::cout << "b: " << b << std::endl;
-                    feat_desc[j] = b;
-                    std::cout << "feat_desc: " << feat_desc << std::endl;
+                    /** If you need to visualize */
+//                    float n = feature_descriptor[j];
+//                    char buf[8];
+//                    sprintf(buf,"%d", (int)n);
+//                    std::cout << "====buf[" << j << "]: " << buf << std::endl;
 
-                    gh[j] = (unsigned char)feature_descriptor[j];
-                    std::cout << "gh[" << j << "]: " << gh << std::endl;
+                    feature_desc_char[j] = (unsigned char)feature_descriptor[j];
 
-                    int h = mat_row[j];
-                    std::cout << "h[" << j << "]: " << h << std::endl;
+                    /** if you need to visualize */
+//                    int h = mat_row[j];
+//                    std::cout << "h[" << j << "]: " << h << std::endl;
                 }
 
-                const uchar* k = (uchar*)feat_desc;
-                const uchar* test = (uchar*)gh;
-                //std::cout << "k: " << k << std::endl;
-                //cv::Mat d = feature_ptr->getDescriptor();
-                const uchar* a = (uchar*)mat_row;
+                const uchar* feature_match_descriptor = (uchar*)feature_desc_char;
+                const uchar* candidate_descriptor = (uchar*)mat_row;
 
-                //=========================
-
-                char prueba1[64] = {248,191,231,113,112,0,0,67,195,199,255,255,255,255,254,251,255,255,252,49,143,243,56,15,0,224,115,231,25,101,252,225,
-                                   255,255,255,255,255,253,243,156,231,220,243,57,8,225,63,58,217,100,242,247,255,255,255,247,249,108,118,190,159,207,25,9};
-                char prueba2[64] = {252,191,227,112,104,64,0,1,193,194,13,127,248,243,199,23,158,120,228,49,255,227,48,14,0,160,51,231,8,100,28,227,
-                                   252,255,239,63,230,252,251,255,255,156,147,49,1,225,188,187,17,239,255,255,255,255,249,179,249,254,255,62,27,141,136,187};
-
-                const unsigned char* p1 = (unsigned char*)prueba1;
-                const unsigned char* p2 = (unsigned char*)prueba2;
-
-                const uchar* pr1 = (uchar*)p1;
-                const uchar* pr2 = (uchar*)p2;
-
-
-                //std::cout << "p1: " << std::hex << k << std::endl;
-
-                double f_pr = cv::normHamming(pr1,pr2,64);
-                std::cout << "========================================================================= f_pr: " << f_pr << std::endl;
-
-
-                //==========================
-
-                double f = cv::normHamming(test,a,64);
+                double f = cv::normHamming(feature_match_descriptor,candidate_descriptor,64);
                 //double dist_ham = cv::normHamming(b,b,4);
                 std::cout << "========================================================================= dist_ham: " << f << std::endl;
 
@@ -377,7 +342,7 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
 
 
 
-            if(f_min < 230)
+            if(f_min < 100)
             {
                 FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[row],(new_descriptors(cv::Range(row,row+1),cv::Range(0,new_descriptors.cols))),true);
                 _feature_list_out.push_back(point_ptr);
