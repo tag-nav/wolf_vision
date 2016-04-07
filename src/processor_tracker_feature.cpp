@@ -1,5 +1,5 @@
 /*
- * \processor_tracker.cpp
+ * \processor_tracker_feature.cpp
  *
  *  Created on: 27/02/2016
  *      \author: jsola
@@ -19,29 +19,6 @@ ProcessorTrackerFeature::~ProcessorTrackerFeature()
     // See both flavors of reset(), and advance().
     if (incoming_ptr_ != nullptr)
         delete incoming_ptr_;
-}
-
-void ProcessorTrackerFeature::process(CaptureBase* const _incoming_ptr)
-{
-    // 1. First we track the known Features and create new constraints as needed
-    incoming_ptr_ = _incoming_ptr;
-    processKnown();
-
-    // 2. Then we see if we want and we are allowed to create a KeyFrame
-    if (voteForKeyFrame() && permittedKeyFrame())
-    {
-        // 2.a. Detect new Features, initialize Landmarks, create Constraints
-        processNew();
-        // Make KeyFrame
-        makeKeyFrame();
-        // Reset the Tracker
-        reset();
-    }
-    else
-    {   // We did not create a KeyFrame:
-        // 2.b. Update the tracker's last and incoming pointers one step ahead
-        advance();
-    }
 }
 
 unsigned int ProcessorTrackerFeature::processNew()
@@ -75,13 +52,4 @@ unsigned int ProcessorTrackerFeature::processNew()
 
     // return the number of new features detected in \b last
     return n;
-}
-
-void ProcessorTrackerFeature::makeKeyFrame()
-{
-    // Create a new non-key Frame in the Trajectory with the incoming Capture
-    getWolfProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
-    getWolfProblem()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
-    // Make the last Capture's Frame a KeyFrame so that it gets into the solver
-    last_ptr_->getFramePtr()->setKey();
 }
