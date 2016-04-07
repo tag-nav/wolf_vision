@@ -11,8 +11,9 @@
 /** The "main" class of this processor is "process" */
 
 //Constructor
-ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, int _threshold, int _octaves, float _pattern_scales,
-                               unsigned int _grid_width, unsigned int _grid_height, unsigned int _min_features_th) :
+ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols,
+                               unsigned int _grid_width, unsigned int _grid_height, unsigned int _min_features_th,
+                               int _threshold, int _octaves, float _pattern_scales) :
     ProcessorTrackerFeature(PRC_TRACKER_BRISK),
     brisk_(_threshold, _octaves, _pattern_scales),
     act_search_grid_(_image_rows,_image_cols,_grid_width, _grid_height),
@@ -117,7 +118,7 @@ void ProcessorBrisk::addNewFeaturesInCapture(std::vector<cv::KeyPoint> _new_keyp
 {
     for(unsigned int i = 0; i <= (_new_keypoints.size()-1);i++)
     {
-        FeaturePointImage* point_ptr = new FeaturePointImage(_new_keypoints[i],(new_descriptors(cv::Range(i,i+1),cv::Range(0,new_descriptors.cols))),false);
+        FeaturePointImage* point_ptr = new FeaturePointImage(_new_keypoints[i],new_descriptors.row(i),false);
         addNewFeature(point_ptr);
     }
     std::cout << "size of new list: " << getNewFeaturesList().size() << std::endl;
@@ -134,7 +135,7 @@ unsigned int ProcessorBrisk::detectNewFeatures()
     ///START OF THE SEARCH
     unsigned int n_features = 0;
     unsigned int n_iterations = 0;
-    while((n_features < 1) && (n_iterations <10))
+    while((n_features < 1) && (n_iterations <50))
     {
         bool roi_exists = act_search_grid_.pickRoi(roi);
 
@@ -154,7 +155,9 @@ unsigned int ProcessorBrisk::detectNewFeatures()
         }
         else
         {
+            //Escoger uno de los features encontrados
             addNewFeaturesInCapture(new_keypoints,new_descriptors);
+            act_search_grid_.blockCell(roi); //hace hitCell (con el punto seleccionado)
         }
 
 
@@ -204,7 +207,7 @@ void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
     ProcessorTrackerFeature::process(_incoming_ptr);
     std::cout << std::endl << "<---- end process ---->" << std::endl << std::endl;
     drawFeatures(last_ptr_);
-    cv::waitKey(30);
+    cv::waitKey(1000);
 }
 
 
@@ -237,117 +240,59 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
     unsigned int feature_roi_x = 0;
     unsigned int feature_roi_y = 0;
 
-    unsigned int n_features = 0;
+    unsigned int n_candidates = 0;
     //int tolerance = 20;
 
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
 
-    std::cout << "feature_list_in (FFM): " << _feature_list_in.size() << std::endl;
+    std::cout << "---------------------Number of features to match: " << _feature_list_in.size() << std::endl;
     unsigned int n_last_capture_feat = 0;
     for(auto feature_base_ptr : _feature_list_in)
     {
         FeaturePointImage* feature_ptr = (FeaturePointImage*)feature_base_ptr;
         Eigen::Vector2i feature_point = {feature_ptr->getKeypoint().pt.x,feature_ptr->getKeypoint().pt.y}; //TODO: Look if this is the right order
         act_search_grid_.hitCell(feature_point);
-        std::cout << std::endl << "Last feature keypoint: " << feature_ptr->getKeypoint().pt << std::endl;
+//        std::cout << std::endl << "Last feature keypoint: " << feature_ptr->getKeypoint().pt << std::endl;
+        std::cout << "------------------- Searching for feature : " << feature_ptr->nodeId() << std::endl;
 
         feature_roi_x = (feature_ptr->getKeypoint().pt.x)-(feature_roi_heigth/2);
         feature_roi_y = (feature_ptr->getKeypoint().pt.y)-(feature_roi_width/2);
-
-
-
-
-//        Eigen::Vector2i feature_roi_point = {feature_roi_x,feature_roi_y};
         cv::Rect roi_for_matching(feature_roi_x,feature_roi_y,feature_roi_width,feature_roi_heigth);
 
         drawFeaturesLastFrame(image_incoming_,feature_point);
-//        //drawFeaturesLastFrame(_image,feature_roi_point);
         drawRoiLastFrame(image_incoming_,roi_for_matching);
 
 
-        n_features = briskDetect(image_incoming_, roi_for_matching, new_keypoints, new_descriptors);
-        std::cout << "n_features: " << n_features << std::endl;
+        n_candidates = briskDetect(image_incoming_, roi_for_matching, new_keypoints, new_descriptors);
+        std::cout << "------------------ Number of detected candidates: " << n_candidates << std::endl;
 
-
-        cv::BFMatcher matcher('NORM_HAMMING');
-        std::vector<cv::DMatch> matches;
-
-        std::vector<float> f_descriptor = feature_ptr->getDescriptor();
-        cv::Mat g;
-        for(int i=0;i<=f_descriptor.size()-1;i++)
-        {
-            //g(cv::Range(1,2),cv::Range(i,i+1))= f_descriptor[i];
-        }
-        std::cout << "/////////////////////////////////////" << std::endl;
-        //std::cout << "g: " << g(cv::Range(1,2),cv::Range(1,g.cols-1)) << std::endl;
-
-        //matcher.match(descriptorsA, new_descriptors, matches);
-
-
-
-        double f_min = 1000;
-        unsigned int row = 0;
 
         // Comparison of position
 
-        if(n_features != 0)
+        if(n_candidates != 0)
         {
             std::vector<float> feature_descriptor = feature_ptr->getDescriptor();
 
             //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
-            for(unsigned int i = 0; i <= (new_keypoints.size()-1);i++)
+
+                cv::BFMatcher matcher(cv::NORM_HAMMING);
+                std::vector<cv::DMatch> matches;
+                cv::Mat f_descriptor = feature_ptr->getDescriptor();
+
+                matcher.match(f_descriptor, new_descriptors, matches);
+
+                std::cout << "------------------ Number of matches: " << matches.size() << std::endl;
+                std::cout << "------------------ Hamiing distance: " << matches[0].distance << std::endl;
+
+            if(matches.size() >= 1)
             {
-
-                // Comparison of descriptors
-
-                const unsigned char* mat_row = new_descriptors.ptr<unsigned char>(i);
-
-                std::cout << "size: " << (feature_ptr->getDescriptor().size()) << std::endl;
-
-
-
-                unsigned char feature_desc_char[64];
-
-                for(unsigned int j = 0; j<= feature_descriptor.size()-1;j++)
+                if(matches[0].distance < 200)
                 {
-                    /** If you need to visualize */
-//                    float n = feature_descriptor[j];
-//                    char buf[8];
-//                    sprintf(buf,"%d", (int)n);
-//                    std::cout << "====buf[" << j << "]: " << buf << std::endl;
-
-                    feature_desc_char[j] = (unsigned char)feature_descriptor[j];
-
-                    /** if you need to visualize */
-//                    int h = mat_row[j];
-//                    std::cout << "h[" << j << "]: " << h << std::endl;
+                    FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[matches[0].trainIdx],(new_descriptors.row(matches[0].trainIdx)),true);
+                    _feature_list_out.push_back(point_ptr);
+                    n_last_capture_feat++;
                 }
-
-                const uchar* feature_match_descriptor = (uchar*)feature_desc_char;
-                const uchar* candidate_descriptor = (uchar*)mat_row;
-
-                double f = cv::normHamming(feature_match_descriptor,candidate_descriptor,64);
-                //double dist_ham = cv::normHamming(b,b,4);
-                std::cout << "========================================================================= dist_ham: " << f << std::endl;
-
-                if(f < f_min)
-                {
-                    f_min = f;
-                    row = i;
-                }
-
-
-            }
-
-
-
-
-            if(f_min < 100)
-            {
-                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[row],(new_descriptors(cv::Range(row,row+1),cv::Range(0,new_descriptors.cols))),true);
-                _feature_list_out.push_back(point_ptr);
-                n_last_capture_feat++;
             }
         }
     }

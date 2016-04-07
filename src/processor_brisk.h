@@ -42,8 +42,9 @@ protected:
 
 
 public:
-    ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, int _threshold = 30, int _octaves = 0, float _pattern_scales = 1.0f,
-                   unsigned int _grid_width = 8, unsigned int _grid_height = 8, unsigned int _min_features_th = 10);
+    ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols,
+                   unsigned int _grid_width = 8, unsigned int _grid_height = 8, unsigned int _min_features_th = 10,
+                   int _threshold = 30, int _octaves = 0, float _pattern_scales = 1.0f);
     virtual ~ProcessorBrisk();
 
 
