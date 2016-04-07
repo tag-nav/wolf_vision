@@ -59,6 +59,8 @@ class ProcessorLaser2D : public ProcessorBase
 
         virtual bool voteForKeyFrame();
 
+        virtual void init(CaptureBase* _origin_ptr);
+
         // JS: These two fcns can be removed and substituted by process() above.
     private:
         void extractFeatures(CaptureBase* _capture_ptr);
@@ -91,6 +93,10 @@ class ProcessorLaser2D : public ProcessorBase
 inline bool ProcessorLaser2D::voteForKeyFrame()
 {
     return false;
+}
+
+inline void ProcessorLaser2D::init(CaptureBase* _origin_ptr)
+{
 }
 
 #endif /* SRC_PROCESSOR_LASER_2D_H_ */

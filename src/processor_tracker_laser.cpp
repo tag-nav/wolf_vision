@@ -13,27 +13,48 @@ ProcessorTrackerLaser::ProcessorTrackerLaser::~ProcessorTrackerLaser()
 
 }
 
-unsigned int ProcessorTrackerLaser::detectNewFeatures()
+unsigned int ProcessorTrackerLaser::processKnownFeatures()
 {
-    // TO UNCOMMENT WHEN track() DOESN'T PROCESS THE WHOLE SCAN
+    /** \return The number of successful tracks.
+     *
+     * It operates on the \b incoming capture pointed by incoming_ptr_.
+     *
+     * This should do one of the following, depending on the design of the tracker -- see use_landmarks_:
+     *   - Track Features against other Features in the \b origin Capture. Tips:
+     *     - An intermediary step of matching against Features in the \b last Capture makes tracking easier.
+     *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Constraints in \b last.
+     *     - If required, correct the drift by re-comparing against the Features in origin.
+     *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
+     *   - Track Features against Landmarks in the Map. Tips:
+     *     - The links to the Landmarks are in the Features' Constraints in last.
+     *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
+     *
+     * The function must generate the necessary Features in the \b incoming Capture,
+     * of the correct type, derived from FeatureBase.
+     *
+     * It must also generate the constraints, of the correct type, derived from ConstraintBase
+     * (through ConstraintAnalytic or ConstraintSparse).
+     */
 
-    /*
-    std::list <laserscanutils::Corner> corners(0);
+    // EXTRACT ALL CORNERS
+    std::list <laserscanutils::Corner> corners;
 
     laserscanutils::extractCorners(scan_params_, corner_alg_params_, scan_last_->getRanges(), corners);
 
     // TODO: Change to laserscanutils
     Eigen::Matrix4s cov_mat;
-    Eigen::Matrix3s R = Eigen::Matrix3s::Identity();
-    Eigen::Vector4s meas;
+    Eigen::Matrix2s R = Eigen::Matrix2s::Identity();
+    Eigen::Vector4s corner_measurement;
 
-    //for each corner in the list create a feature
+    // STORE CORNERS AS FEATURES
     for (auto corner_it = corners.begin(); corner_it != corners.end(); corner_it++)
     {
-        meas.head(2) = corner_it->pt_.head(2);
-        meas(2) = corner_it->orientation_;
-        meas(3) = corner_it->aperture_;
+        // CORNER POSE (in sensor frame)
+        corner_measurement.head(2) = corner_it->pt_.head(2);
+        corner_measurement(2) = corner_it->orientation_;
+        corner_measurement(3) = corner_it->aperture_;
 
+        // CORNER POSE COVARIANCE (in sensor frame)
         // TODO: maybe in line object?
         WolfScalar L1 = corner_it->line_1_.length();
         WolfScalar L2 = corner_it->line_2_.length();
@@ -46,77 +67,66 @@ unsigned int ProcessorTrackerLaser::detectNewFeatures()
                    0, corner_it->line_2_.error_ + cov_angle_line2 * L2 * L2 / 4, 0, 0,
                    0, 0, cov_angle_line1 + cov_angle_line2, 0,
                    0, 0, 0, cov_angle_line1 + cov_angle_line2;
-
-        //std::cout << "New feature: " << meas.transpose() << std::endl;
-        //std::cout << cov_mat << std::endl;
+        cov_mat = 10*cov_mat;
 
         // Rotate covariance
-        R.topLeftCorner<2,2>() = Eigen::Rotation2D<WolfScalar>(corner_it->orientation_).matrix();
-        cov_mat.topLeftCorner<3,3>() = R.transpose() * cov_mat.topLeftCorner<3,3>() * R;
+        R = Eigen::Rotation2D<WolfScalar>(corner_it->orientation_).matrix();
+        cov_mat.topLeftCorner<2,2>() = R.transpose() * cov_mat.topLeftCorner<2,2>() * R;
 
-        //std::cout << "rotated covariance: " << std::endl;
-        //std::cout << cov_mat << std::endl;
-
-        // TODO: discard repeated features!!
-
-        addNewFeature(new FeatureCorner2D(meas, 10*cov_mat));
+        // FEATURE CORNER 2D
+        all_corners_incoming_.push_back(new FeatureCorner2D(corner_measurement, cov_mat));
     }
-    */
-    return 0;
+
+    // TRACK CORNERS
+    unsigned int n_tracks = track(*(getLastPtr()->getFeatureListPtr()), *(getIncomingPtr()->getFeatureListPtr()));
+    std::cout << "N of features tracked in incoming: " << n_tracks << std::endl;
+    std::cout << "N of new features in incoming: " << getNewFeaturesListIncoming().size() << std::endl;
+
+    return n_tracks;
+}
+
+unsigned int ProcessorTrackerLaser::detectNewFeatures()
+{
+    // TODO WHEN processKnownFeatures() DOESN'T PROCESS THE WHOLE SCAN
+    return getNewFeaturesListIncoming().size();
 }
 
 unsigned int ProcessorTrackerLaser::track(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out)
 {
-    std::list <laserscanutils::Corner> corners(0);
-
-        laserscanutils::extractCorners(scan_params_, corner_alg_params_, scan_last_->getRanges(), corners);
-
-        // TODO: Change to laserscanutils
-        Eigen::Matrix4s cov_mat;
-        Eigen::Matrix3s R = Eigen::Matrix3s::Identity();
-        Eigen::Vector4s meas;
-
-        //for each corner in the list create a feature
-        for (auto corner_it = corners.begin(); corner_it != corners.end(); corner_it++)
+    // ITERATE OVER ALL DETECTED CORNERS
+    auto corner_it = all_corners_incoming_.begin();
+    while (corner_it != all_corners_incoming_.end())
+    {
+        // MATCHING WITH last FEATURES
+        for (auto feature_last : _feature_list_in)
         {
-            meas.head(2) = corner_it->pt_.head(2);
-            meas(2) = corner_it->orientation_;
-            meas(3) = corner_it->aperture_;
-
-            // TODO: maybe in line object?
-            WolfScalar L1 = corner_it->line_1_.length();
-            WolfScalar L2 = corner_it->line_2_.length();
-            WolfScalar cov_angle_line1 = 12 * corner_it->line_1_.error_ / (pow(L1,2) * (pow(corner_it->line_1_.np_,3)-pow(corner_it->line_1_.np_,2)));
-            WolfScalar cov_angle_line2 = 12 * corner_it->line_2_.error_ / (pow(L2,2) * (pow(corner_it->line_2_.np_,3)-pow(corner_it->line_2_.np_,2)));
-
-
-            //init cov in corner coordinates
-            cov_mat << corner_it->line_1_.error_ + cov_angle_line1 * L1 * L1 / 4, 0, 0, 0,
-                       0, corner_it->line_2_.error_ + cov_angle_line2 * L2 * L2 / 4, 0, 0,
-                       0, 0, cov_angle_line1 + cov_angle_line2, 0,
-                       0, 0, 0, cov_angle_line1 + cov_angle_line2;
-
-            //std::cout << "New feature: " << meas.transpose() << std::endl;
-            //std::cout << cov_mat << std::endl;
-
-            // Rotate covariance
-            R.topLeftCorner<2,2>() = Eigen::Rotation2D<WolfScalar>(corner_it->orientation_).matrix();
-            cov_mat.topLeftCorner<3,3>() = R.transpose() * cov_mat.topLeftCorner<3,3>() * R;
-
-            //std::cout << "rotated covariance: " << std::endl;
-            //std::cout << cov_mat << std::endl;
-
-            // TODO: discard repeated features!!
-
-            addNewFeature(new FeatureCorner2D(meas, 10*cov_mat));
+            // CHECK MATCHING
+            if (abs(feature_last->getMeasurement()(3) - (*corner_it)->getMeasurement(3)) < aperture_error_th_ &&                     // CHECK APERTURE
+                (feature_last->getMeasurement().head(2) - (*corner_it)->getMeasurement().head(2)).squaredNorm() < position_error_th_ && // CHECK POSITION
+                abs(feature_last->getMeasurement()(2) - (*corner_it)->getMeasurement(2)) < angular_error_th_)                        // CHECK ORIENTATION
+            {
+                // MATCH -> TRACKED
+                _feature_list_out.push_back((*corner_it));
+                corner_it = all_corners_incoming_.erase(corner_it);
+                corner_it--;
+            }
+            else
+            {
+                // NO MATCH -> ADD NEW FEATURE
+                addNewFeature((*corner_it));
+                corner_it = all_corners_incoming_.erase(corner_it);
+                corner_it--;
+            }
         }
+    }
 
-    return 0;
+    return _feature_list_out.size();
 }
 
 LandmarkBase* ProcessorTrackerLaser::createLandmark(FeatureBase* _feature_ptr)
 {
-    return nullptr;
+    //TODO: get the current pose of vehicle and
+    return new LandmarkCorner2D(new StateBlock(Eigen::Vector3s::Zero()),new StateBlock(Eigen::Vector3s::Zero()));
 }
 
 ConstraintBase* ProcessorTrackerLaser::createConstraint(FeatureBase* _feature_ptr, NodeBase* _node_ptr)
@@ -126,5 +136,13 @@ ConstraintBase* ProcessorTrackerLaser::createConstraint(FeatureBase* _feature_pt
 
 bool ProcessorTrackerLaser::voteForKeyFrame()
 {
-    return false;
+    std::cout << "Ration origin/incomming thereshold: " << min_features_ratio_th_ << std::endl;
+    std::cout << "origin features:   " << getOriginPtr()->getFeatureListPtr()->size() << std::endl;
+    std::cout << "incoming features: " << getIncomingPtr()->getFeatureListPtr()->size() << std::endl;
+    std::cout << "ratio:             " << (getIncomingPtr()->getFeatureListPtr()->size() / getOriginPtr()->getFeatureListPtr()->size())  << std::endl;
+    if (getIncomingPtr()->getFeatureListPtr()->size() / getOriginPtr()->getFeatureListPtr()->size() < min_features_ratio_th_)
+        std::cout << "VOTE for a new key frame " << std::endl;
+    else
+        std::cout << "DON'T VOTE for a new key frame " << std::endl;
+    return (getIncomingPtr()->getFeatureListPtr()->size() / getOriginPtr()->getFeatureListPtr()->size() < min_features_ratio_th_);
 }

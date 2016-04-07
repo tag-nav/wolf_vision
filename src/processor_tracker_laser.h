@@ -13,10 +13,21 @@
 #include "sensor_laser_2D.h"
 #include "capture_laser_2D.h"
 #include "feature_corner_2D.h"
+#include "landmark_corner_2D.h"
+#include "state_block.h"
 
 //laser_scan_utils
 #include "laser_scan_utils/scan_basics.h"
 #include "laser_scan_utils/corner_detector.h"
+
+//some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level
+const WolfScalar aperture_error_th_ = 20.0*M_PI/180.; //20 degrees
+const WolfScalar angular_error_th_ = 10.0*M_PI/180.; //10 degrees;
+const WolfScalar position_error_th_ = 1;
+const WolfScalar min_features_ratio_th_ = 0.5;
+// TODO: replace this consts
+const WolfScalar CONTAINER_WIDTH = 2.44;
+const WolfScalar CONTAINER_LENGTH = 12.20;
 
 class ProcessorTrackerLaser : public ProcessorTracker
 {
@@ -25,12 +36,18 @@ class ProcessorTrackerLaser : public ProcessorTracker
         laserscanutils::ExtractCornerParams corner_alg_params_;
         CaptureLaser2D* scan_last_;
         CaptureLaser2D* scan_incoming_;
+        std::list<FeatureCorner2D*> all_corners_incoming_;
 
     public:
         ProcessorTrackerLaser();
 
         //Destructor
         virtual ~ProcessorTrackerLaser();
+
+        /** \brief Tracker function
+         * \return The number of successful tracks.
+         */
+        virtual unsigned int processKnownFeatures();
 
     protected:
 

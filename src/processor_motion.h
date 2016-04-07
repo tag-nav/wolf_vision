@@ -76,7 +76,7 @@ class ProcessorMotion : public ProcessorBase
 
         // Instructions to the processor:
 
-        void init(CaptureMotion2<MotionDeltaType>* _origin_ptr);
+        virtual void init(CaptureBase* _origin_ptr);
         virtual void process(CaptureBase* _incoming_ptr);
         void reset(const TimeStamp& _ts);
         void makeKeyFrame(const TimeStamp& _ts);
@@ -265,10 +265,10 @@ inline void ProcessorMotion<MotionDeltaType>::process(CaptureBase* _incoming_ptr
 }
 
 template<class MotionDeltaType>
-inline void ProcessorMotion<MotionDeltaType>::init(CaptureMotion2<MotionDeltaType>* _origin_ptr)
+inline void ProcessorMotion<MotionDeltaType>::init(CaptureBase* _origin_ptr)
 {
-    origin_ptr_ = _origin_ptr;
-    last_ptr_ = _origin_ptr;
+    origin_ptr_ = (CaptureMotion2<MotionDeltaType>*)_origin_ptr;
+    last_ptr_ = (CaptureMotion2<MotionDeltaType>*)_origin_ptr;
     incoming_ptr_ = nullptr;
     delta_integrated_ = deltaZero();
     getBufferPtr()->clear();
