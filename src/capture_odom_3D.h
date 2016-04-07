@@ -13,7 +13,7 @@
 #include "processor_odom_3D.h"
 
 // Declare the class
-class CaptureOdom3D : public CaptureMotion2<Odo3dDeltaType>
+class CaptureOdom3D : public CaptureMotion2<Odom3dDelta>
 {
     public:
         CaptureOdom3D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data);

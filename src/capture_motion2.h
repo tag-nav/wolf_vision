@@ -88,7 +88,7 @@ class CaptureMotion2 : public CaptureBase
         {
             public:
                 TimeStamp ts_;       ///< Time stamp
-                MotionDeltaType delta_integrated_; ///< the integrated motion or delta-integral
+                MotionDeltaType delta_; ///< the integrated motion or delta-integral
         } Motion; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
         class MotionBuffer{
@@ -114,7 +114,7 @@ class CaptureMotion2 : public CaptureBase
                 unsigned int size() const {return container_.size();}
                 bool empty() const {return container_.empty();}
                 const TimeStamp& getTimeStamp() const {return container_.back().ts_;}
-                const MotionDeltaType& getDelta() const { return container_.back().delta_integrated_; }
+                const MotionDeltaType& getDelta() const { return container_.back().delta_; }
                 const MotionDeltaType& getDelta(const TimeStamp& _ts) const {
                     assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
                     auto previous = std::find_if (container_.rbegin(), container_.rend(), [&](const Motion& m){return m.ts_ <= _ts;});
@@ -122,7 +122,7 @@ class CaptureMotion2 : public CaptureBase
                         // The time stamp is more recent than the buffer's most recent data.
                         // We could do something here, but by now we'll return the last valid data
                         previous--;
-                    return previous->delta_integrated_;
+                    return previous->delta_;
                 }
 
             private:

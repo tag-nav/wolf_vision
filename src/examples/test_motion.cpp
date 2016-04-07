@@ -51,7 +51,7 @@ int main()
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     FrameBase* frm_ptr = new FrameBase(t, &sb_pos, &sb_ori);
-    CaptureMotion2<Odo3dDeltaType>* cap_ptr = new CaptureOdom3D(t, sensor_ptr, data);
+    CaptureMotion2<Odom3dDelta>* cap_ptr = new CaptureOdom3D(t, sensor_ptr, data);
     frm_ptr->addCapture(cap_ptr);
 
     // Make a ProcessorOdom3d
@@ -84,7 +84,7 @@ int main()
 
 
 
-
+#if 0  // Skip this part, it's only preliminary tests
 
 
     std::cout << "\n\nTrying a std::map as the buffer container <-- NOT WORKING: need exact key" << std::endl;
@@ -155,6 +155,8 @@ int main()
 
         std::cout << n << " query " << t.get() << "-> PREVIOUS: (" << it_previous->first.get() << "," << it_previous->second << "); next: (" << std::prev(it_previous)->first.get() << "," << std::prev(it_previous)->second << ")" << std::endl;
     }
+
+#endif
 
 
     return 0;
