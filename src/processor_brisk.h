@@ -88,11 +88,13 @@ public:
 
     virtual void drawFeatures(CaptureBase* const _last_ptr);
 
-    virtual void drawFeaturesLastFrame(cv::Mat _image, Eigen::Vector2i _feature_point_last);
+    virtual void drawTrackingFeatures(cv::Mat _image, Eigen::Vector2i _feature_point, bool _is_candidate);
 
     virtual void drawRoiLastFrame(cv::Mat _image, cv::Rect _roi);
 
-    virtual void addNewFeaturesInCapture(std::vector<cv::KeyPoint> _new_keypoints, cv::Mat new_descriptors);
+    virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last,FeatureBaseList& _feature_list_incoming);
+
+    virtual void addNewFeaturesInCapture(cv::KeyPoint _new_keypoints, cv::Mat _new_descriptors); //std::vector<cv::KeyPoint>
 
     virtual unsigned int briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints, cv::Mat & new_descriptors);
 

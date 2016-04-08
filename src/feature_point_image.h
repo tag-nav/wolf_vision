@@ -37,14 +37,14 @@ class FeaturePointImage : public FeatureBase
 
         //_known_or_new: known = true; new = false;
         FeaturePointImage(const cv::KeyPoint& _keypoint,
-                          const cv::Mat& _descriptor, bool _known_or_new) :
+                          const cv::Mat& _descriptor, bool _is_known) :
                 FeatureBase(FEAT_POINT_IMAGE, Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
                 keypoint_(_keypoint),
                 descriptor_(_descriptor)
         {
             measurement_(0) = _keypoint.pt.x;
             measurement_(1) = _keypoint.pt.y;
-            is_known_=_known_or_new;
+            is_known_=_is_known;
         }
 
 
@@ -57,6 +57,9 @@ class FeaturePointImage : public FeatureBase
         virtual cv::KeyPoint& getKeypoint();
 
         virtual cv::Mat& getDescriptor();
+
+        virtual bool getIsKnown();
+        virtual void setIsKnown(bool _is_known);
 
         virtual Eigen::VectorXs & getMeasurement(){
             measurement_(0) = WolfScalar(keypoint_.pt.x);
@@ -74,6 +77,16 @@ inline cv::KeyPoint& FeaturePointImage::getKeypoint()
 inline cv::Mat& FeaturePointImage::getDescriptor()
 {
     return descriptor_;
+}
+
+inline bool FeaturePointImage::getIsKnown()
+{
+    return is_known_;
+}
+
+inline void FeaturePointImage::setIsKnown(bool _is_known)
+{
+    is_known_ = _is_known;
 }
 
 #endif // FEATURE_IMAGE_H

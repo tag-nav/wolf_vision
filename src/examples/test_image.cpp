@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 
     TimeStamp t = 1;
     int img_width = 640;
-    int img_height = 360;
+    int img_height = 480;
 
     Eigen::Vector4s k = {320,240,320,320};
     StateBlock* intr = new StateBlock(k,false);
@@ -56,6 +56,7 @@ int main(int argc, char** argv)
     const char * filename = "/home/jtarraso/Vídeos/House interior.mp4";
     //const char * filename = "/home/jtarraso/Descargas/gray.mp4";
     cv::VideoCapture capture(filename);
+    //cv::VideoCapture capture(0);
     cv::Mat frame;
 
     // CaptureImage* capture_brisk_ptr;
