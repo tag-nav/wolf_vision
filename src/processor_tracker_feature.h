@@ -12,24 +12,24 @@
 #include "capture_base.h"
 
 // Correspondence Feature last - Feature incoming
-struct FeatureMatch
+struct FeatureCorrespondence
 {
-        FeatureBase* last_feature_ptr_;
+        FeatureBase* feature_ptr_;
         WolfScalar normalized_score_;
 
-        FeatureMatch() :
-                last_feature_ptr_(nullptr), normalized_score_(0.0)
+        FeatureCorrespondence() :
+                feature_ptr_(nullptr), normalized_score_(0.0)
         {
 
         }
-        FeatureMatch(FeatureBase* _last_feature_ptr, const WolfScalar& _normalized_score) :
-                last_feature_ptr_(_last_feature_ptr), normalized_score_(_normalized_score)
+        FeatureCorrespondence(FeatureBase* _last_feature_ptr, const WolfScalar& _normalized_score) :
+                feature_ptr_(_last_feature_ptr), normalized_score_(_normalized_score)
         {
 
         }
 };
 
-typedef std::map<FeatureBase*, FeatureMatch> FeatureCorrespondenceMap;
+typedef std::map<FeatureBase*, FeatureCorrespondence> FeatureCorrespondenceMap;
 
 /** \brief Feature tracker processor
  *
@@ -79,6 +79,16 @@ class ProcessorTrackerFeature : public ProcessorTracker
         virtual ~ProcessorTrackerFeature();
 
     protected:
+
+        FeatureCorrespondenceMap incoming_2_last_;
+        FeatureCorrespondenceMap last_2_origin_;
+
+        /** \brief Advance the incoming Capture to become the last.
+         *
+         * Call this when the tracking and keyframe policy work is done and
+         * we need to get ready to accept a new incoming Capture.
+         */
+        virtual void advance();
 
         /** \brief Tracker function
          * \return The number of successful tracks.
@@ -149,6 +159,8 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) = 0;
 
+        virtual void establishConstraints();
+
     protected:
 
         /**\brief Process new Features
@@ -156,4 +168,11 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual unsigned int processNew();
 };
+
+inline void ProcessorTrackerFeature::establishConstraints()
+{
+    for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
+        last_feature->addConstraint(createConstraint(last_feature, last_2_origin_[last_feature].feature_ptr_));
+}
+
 #endif /* PROCESSOR_TRACKER_FEATURE_H_ */

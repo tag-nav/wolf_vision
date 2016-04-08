@@ -98,12 +98,17 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual unsigned int processNew() = 0;
 
+        /**\brief Creates and adds constraints from last_ to origin_
+         *
+         */
+        virtual void establishConstraints()=0;
+
         /** \brief Advance the incoming Capture to become the last.
          *
          * Call this when the tracking and keyframe policy work is done and
          * we need to get ready to accept a new incoming Capture.
          */
-        void advance();
+        virtual void advance();
 
         /** \brief Full processing of an incoming Capture.
          *
@@ -176,6 +181,9 @@ inline void ProcessorTracker::makeKeyFrame()
     new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
     // Make the last Capture's Frame a KeyFrame so that it gets into the solver
     last_ptr_->getFramePtr()->setKey();
+
+    // Create constraints from last to origin
+    establishConstraints();
 }
 
 #endif /* SRC_PROCESSOR_TRACKER_H_ */

@@ -309,7 +309,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                     FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[matches[0].trainIdx],
                             (new_descriptors.row(matches[0].trainIdx)),feature_ptr->getIsKnown());
                     _feature_list_out.push_back(point_ptr);
-                    _feature_correspondences[point_ptr] = FeatureMatch(feature_base_ptr, (WolfScalar) matches[0].distance);
+                    _feature_correspondences[point_ptr] = FeatureCorrespondence(feature_base_ptr, (WolfScalar) matches[0].distance);
                     n_last_capture_feat++;
                 }
             }
