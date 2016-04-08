@@ -41,7 +41,8 @@ unsigned int ProcessorBrisk::processKnown()
 
     unsigned int n_tracks = 0;
     std::cout << "Nbr of features in incoming: " << incoming_ptr_->getFeatureListPtr()->size() << std::endl;
-    n_tracks = track(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
+    FeatureCorrespondenceMap new_incoming_2_new_last;
+    n_tracks = trackFeatures(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()), new_incoming_2_new_last);
     std::cout << "Nbr of features in incoming: " << incoming_ptr_->getFeatureListPtr()->size() << std::endl;
 
     return n_tracks;
@@ -247,7 +248,7 @@ ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, Feat
 
 /** Private */
 
-unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out)
+unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureCorrespondenceMap& _feature_correspondences)
 {
     std::cout << std::endl << "<---- processFeaturesForMatching ---->" << std::endl << std::endl;
 
@@ -308,6 +309,7 @@ unsigned int ProcessorBrisk::track(const FeatureBaseList& _feature_list_in, Feat
                     FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[matches[0].trainIdx],
                             (new_descriptors.row(matches[0].trainIdx)),feature_ptr->getIsKnown());
                     _feature_list_out.push_back(point_ptr);
+                    _feature_correspondences[point_ptr] = FeatureMatch(feature_base_ptr, (WolfScalar) matches[0].distance);
                     n_last_capture_feat++;
                 }
             }

@@ -41,6 +41,8 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
         virtual bool permittedKeyFrame() final;
 
+        //virtual void newKeyFrameCallback(FrameBase* _new_key_frame_ptr, const WolfScalar& _time_tolerance) = 0;
+
     private:
         ProcessorType type_;
 

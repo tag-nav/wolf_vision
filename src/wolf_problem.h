@@ -24,14 +24,14 @@ class TimeStamp;
  * - up_node_: A regular pointer to a derived node object, specified by the template parameter UpperType.
  *
  */
-class WolfProblem: public NodeBase
+class WolfProblem : public NodeBase
 {
     public:
         typedef NodeBase* LowerNodePtr; // Necessatry for destruct() of node_linked
 
     protected:
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
-        NodeLocation location_;// TODO: should it be in node_base?
+        NodeLocation location_; // TODO: should it be in node_base?
         TrajectoryBase* trajectory_ptr_;
         MapBase* map_ptr_;
         HardwareBase* hardware_ptr_;
@@ -53,7 +53,7 @@ class WolfProblem: public NodeBase
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
-         */		
+         */
         virtual ~WolfProblem();
 
         /** \brief Wolf destructor
@@ -69,13 +69,14 @@ class WolfProblem: public NodeBase
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        void createFrame(FrameType _frameType, const TimeStamp& _time_stamp);
+        FrameBase* createFrame(FrameType _frameType, const TimeStamp& _time_stamp);
 
         /** \brief Create Frame from vector
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        void createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp);
+        FrameBase* createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
+                               const TimeStamp& _time_stamp);
 
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
 
@@ -114,14 +115,15 @@ class WolfProblem: public NodeBase
         void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block);
         /** \brief Gets a covariance block
          */
-        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col);
+        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
+                                const int _col);
 
         /** \brief Gets state size
          */
         const unsigned int getStateSize() const;
 
         /** \brief Adds a map
-         */		
+         */
         void addMap(MapBase* _map_ptr);
 
         /** \brief Adds a trajectory
@@ -131,7 +133,7 @@ class WolfProblem: public NodeBase
         /** \brief Adds a hardware
          */
         void addHarware(HardwareBase* _hardware_ptr);
-        
+
         /** \brief Gets a pointer to map
          */
         MapBase* getMapPtr();

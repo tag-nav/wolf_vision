@@ -13,14 +13,37 @@ ProcessorTracker::ProcessorTracker(ProcessorType _tp) :
     last_ptr_(nullptr),
     incoming_ptr_(nullptr)
 {
-    // TODO Auto-generated constructor stub
-
+    //
 }
 
 ProcessorTracker::~ProcessorTracker()
 {
-    // TODO Auto-generated destructor stub
+    // FIXME: This test with nullptr is not fail safe. Only the class design can make it safe, by ensuring
+    // at all times that whenever incoming_ptr_ is not used, it points to nullptr.
+    // See both flavors of reset(), and advance().
+    if (incoming_ptr_ != nullptr)
+        delete incoming_ptr_;
 }
 
-
-
+void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
+{
+    // 1. First we track the known Features and create new constraints as needed
+    incoming_ptr_ = _incoming_ptr;
+    processKnown();
+    // 2. Then we see if we want and we are allowed to create a KeyFrame
+    if (voteForKeyFrame() && permittedKeyFrame())
+    {
+        // 2.a. Detect new Features, initialize Landmarks, create Constraints
+        processNew();
+        // Make KeyFrame
+        makeKeyFrame();
+        // Reset the Tracker
+        reset();
+    }
+    else
+    {
+        // We did not create a KeyFrame:
+        // 2.b. Update the tracker's last and incoming pointers one step ahead
+        advance();
+    }
+}

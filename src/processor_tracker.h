@@ -1,5 +1,5 @@
 /*
- * ProcessorTracker.h
+ * processor_tracker.h
  *
  *  Created on: Apr 7, 2016
  *      Author: jvallve
@@ -26,49 +26,36 @@ class ProcessorTracker : public ProcessorBase
 
         /** \brief Initialize tracker.
          */
-        void init(CaptureBase* _origin_ptr)
-        {
-            origin_ptr_ = _origin_ptr;
-            last_ptr_ = _origin_ptr;
-        }
+        void init(CaptureBase* _origin_ptr);
 
         /** \brief Reset the tracker to a new \b origin and \b last Captures
          */
-        void reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr)
-        {
-            origin_ptr_ = _origin_ptr;
-            last_ptr_ = _last_ptr;
-            incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
-        }
+        void reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr);
 
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
-        void reset()
-        {
-            reset(last_ptr_, incoming_ptr_);
-        }
+        void reset();
 
-        FeatureBaseList& getNewFeaturesList()
-        {
-            return new_features_list_last_;
-        }
+        FeatureBaseList& getNewFeaturesList();
 
-        void addNewFeature(FeatureBase* _feature_ptr)
-        {
-            new_features_list_last_.push_back(_feature_ptr);
-        }
+        void addNewFeature(FeatureBase* _feature_ptr);
 
-        FeatureBaseList& getNewFeaturesListIncoming()
-        {
-            return new_features_list_incoming_;
-        }
+        FeatureBaseList& getNewFeaturesListIncoming();
 
-        void addNewFeatureIncoming(FeatureBase* _feature_ptr)
-        {
-            new_features_list_incoming_.push_back(_feature_ptr);
-        }
+        void addNewFeatureIncoming(FeatureBase* _feature_ptr);
+
+        CaptureBase* getLastPtr();
 
     protected:
+
+        /** \brief Vote for KeyFrame generation
+         *
+         * If a KeyFrame criterion is validated, this function returns true,
+         * meaning that it wants to create a KeyFrame at the \b last Capture.
+         *
+         * WARNING! This function only votes! It does not create KeyFrames!
+         */
+        virtual bool voteForKeyFrame() = 0;
 
         /** \brief Tracker function
          * \return The number of successful tracks.
@@ -94,11 +81,6 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual unsigned int processKnown() = 0;
 
-        /**\brief Process new Features or Landmarks
-         *
-         */
-        virtual unsigned int processNew() = 0;
-
         /** \brief Detect new Features
          * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
          * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
@@ -111,60 +93,89 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual unsigned int detectNewFeatures() = 0;
 
+        /**\brief Process new Features or Landmarks
+         *
+         */
+        virtual unsigned int processNew() = 0;
+
         /** \brief Advance the incoming Capture to become the last.
          *
          * Call this when the tracking and keyframe policy work is done and
          * we need to get ready to accept a new incoming Capture.
          */
-        void advance()
-        {
-            last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-            //    last_ptr_->destruct(); // TODO: JS->JV why this does not work?? Destruct now the obsolete last before reassigning a new pointer
-            last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
-            incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
-        }
-
-        CaptureBase* getLastPtr(){return last_ptr_;}
+        void advance();
 
         /** \brief Full processing of an incoming Capture.
          *
          * Usually you do not need to overload this method in derived classes.
          * Overload it only if you want to alter this algorithm.
          */
-        virtual void process(CaptureBase* const _incoming_ptr)
-        {
-            // 1. First we track the known Features and create new constraints as needed
-            incoming_ptr_ = _incoming_ptr;
-            processKnown();
-            // 2. Then we see if we want and we are allowed to create a KeyFrame
-            if (voteForKeyFrame() && permittedKeyFrame())
-            {
-                // 2.a. Detect new Features, initialize Landmarks, create Constraints
-                processNew();
-                // Make KeyFrame
-                makeKeyFrame();
-                // Reset the Tracker
-                reset();
-            }
-            else
-            {
-                // We did not create a KeyFrame:
-                // 2.b. Update the tracker's last and incoming pointers one step ahead
-                advance();
-            }
-        }
+        virtual void process(CaptureBase* const _incoming_ptr);
 
         /**\brief Make a KeyFrame using the provided Capture.
          */
-        virtual void makeKeyFrame()
-        {
-            // Create a new non-key Frame in the Trajectory with the incoming Capture
-            getWolfProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
-            getWolfProblem()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
-            // Make the last Capture's Frame a KeyFrame so that it gets into the solver
-            last_ptr_->getFramePtr()->setKey();
-        }
+        virtual void makeKeyFrame();
 
 };
+
+inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
+{
+    origin_ptr_ = _origin_ptr;
+    last_ptr_ = _origin_ptr;
+}
+
+inline void ProcessorTracker::reset()
+{
+    reset(last_ptr_, incoming_ptr_);
+}
+
+inline void ProcessorTracker::reset(CaptureBase* _origin_ptr, CaptureBase* _last_ptr)
+{
+    origin_ptr_ = _origin_ptr;
+    last_ptr_ = _last_ptr;
+    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+}
+
+inline FeatureBaseList& ProcessorTracker::getNewFeaturesList()
+{
+    return new_features_list_last_;
+}
+
+inline void ProcessorTracker::addNewFeature(FeatureBase* _feature_ptr)
+{
+    new_features_list_last_.push_back(_feature_ptr);
+}
+
+inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
+{
+    return new_features_list_incoming_;
+}
+
+inline void ProcessorTracker::addNewFeatureIncoming(FeatureBase* _feature_ptr)
+{
+    new_features_list_incoming_.push_back(_feature_ptr);
+}
+
+inline void ProcessorTracker::advance()
+{
+    last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
+    last_ptr_->destruct(); // TODO: JS->JV why this does not work?? Destruct now the obsolete last before reassigning a new pointer
+    last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
+    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+}
+
+inline CaptureBase* ProcessorTracker::getLastPtr()
+{
+    return last_ptr_;
+}
+
+inline void ProcessorTracker::makeKeyFrame()
+{
+    // Create a new non-key Frame in the Trajectory with the incoming Capture
+    FrameBase* new_frame_ptr = getWolfProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+    new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+    // Make the last Capture's Frame a KeyFrame so that it gets into the solver
+    last_ptr_->getFramePtr()->setKey();
+}
 
 #endif /* SRC_PROCESSOR_TRACKER_H_ */

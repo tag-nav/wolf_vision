@@ -11,7 +11,27 @@
 #include "processor_tracker.h"
 #include "capture_base.h"
 
-/** \brief General tracker processor
+// Correspondence Feature last - Feature incoming
+struct FeatureMatch
+{
+        FeatureBase* last_feature_ptr_;
+        WolfScalar normalized_score_;
+
+        FeatureMatch() :
+                last_feature_ptr_(nullptr), normalized_score_(0.0)
+        {
+
+        }
+        FeatureMatch(FeatureBase* _last_feature_ptr, const WolfScalar& _normalized_score) :
+                last_feature_ptr_(_last_feature_ptr), normalized_score_(_normalized_score)
+        {
+
+        }
+};
+
+typedef std::map<FeatureBase*, FeatureMatch> FeatureCorrespondenceMap;
+
+/** \brief Feature tracker processor
  *
  * This class implements the incremental tracker. It contains three pointers to three Captures of type CaptureBase, named \b origin, \b last and \b incoming:
  *   - \b origin: this points to a Capture where all Feature tracks start.
@@ -20,10 +40,7 @@
  *     establishing correspondences between the features here and the features in \b origin. Each successful correspondence
  *     results in an extension of the track of the Feature up to the \b incoming Capture.
  *
- * A tracker can be designed to track either Features or Landmarks. This property must be set at construction time.
- *   - If tracking Features, it establishes constraints Feature-Feature;
- *     it does not use Landmarks, nor it creates Landmarks.
- *   - If tracking Landmarks, it establishes constraints Feature-Landmark;
+ * It establishes constraints Feature-Landmark;
  *     it uses Landmarks for tracking, in an active-search approach,
  *     and it creates Landmarks with each new Feature detected.
  *
@@ -35,9 +52,9 @@
  *     - if voteForKeyFrame()
  *       - Look for new Features and make Landmarks with them:
  *       - detectNewFeatures()
- *       - if we use landmarks, do for each detected Feature:
- *         - create landmarks: createOneLandmark()
- *       - create constraints Feature-Landmark or Feature-Feature: createConstraint()
+ *       - For each detected Feature:
+ *          - create landmarks: createOneLandmark()
+ *          - create constraints Feature-Landmark: createConstraint()
  *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
  *     - else
@@ -56,14 +73,48 @@ class ProcessorTrackerFeature : public ProcessorTracker
 {
     public:
 
-        /** \brief Constructor with options
-         * \param _autonomous Set to make the tracker autonomous to create KeyFrames and/or Landmarks.
-         * \param _uses_landmarks Set to make the tracker work with Landmarks. Un-set to work only with Features.
+        /** \brief Constructor with type
          */
         ProcessorTrackerFeature(ProcessorType _tp);
         virtual ~ProcessorTrackerFeature();
 
     protected:
+
+        /** \brief Tracker function
+         * \return The number of successful tracks.
+         *
+         * This is the tracker function to be implemented in derived classes.
+         * It operates on the \b incoming capture pointed by incoming_ptr_.
+         *
+         * This should do one of the following, depending on the design of the tracker:
+         *   - Track Features against other Features in the \b origin Capture. Tips:
+         *     - An intermediary step of matching against Features in the \b last Capture makes tracking easier.
+         *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Constraints in \b last.
+         *     - If required, correct the drift by re-comparing against the Features in origin.
+         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
+         *
+         * The function must generate the necessary Features in the \b incoming Capture,
+         * of the correct type, derived from FeatureBase.
+         *
+         * It must also generate the constraints, of the correct type, derived from ConstraintBase
+         * (through ConstraintAnalytic or ConstraintSparse).
+         */
+        virtual unsigned int processKnown();
+
+        /** \brief Track provided features from \b last to \b incoming
+         * \param _feature_list_in input list of features in \b last to track
+         * \param _feature_list_out returned list of features found in \b incoming
+         * \param _feature_correspondences returned map of correspondences: _feature_correspondences[feature_out_ptr] = feature_in_ptr
+         */
+        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
+                                           FeatureCorrespondenceMap& _feature_correspondences) = 0;
+
+        /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
+         * \param _last_feature input feature in last capture tracked
+         * \param _incoming_feature input/output feature in incoming capture to be corrected
+         * \return false if the the process discards the correspondence with origin's feature
+         */
+        virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature) = 0;
 
         /** \brief Detect new Features
          * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
@@ -77,33 +128,26 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual unsigned int detectNewFeatures() = 0;
 
-        /** \brief Track provided features from \b last to \b incoming
-         * \param _feature_list_in input list of features in \b last to track
-         * \param _feature_list_out returned list of features found in \b incoming
+        /** \brief Vote for KeyFrame generation
+         *
+         * If a KeyFrame criterion is validated, this function returns true,
+         * meaning that it wants to create a KeyFrame at the \b last Capture.
+         *
+         * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual unsigned int track(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out) = 0;
-
-//        /** \brief Create one landmark
-//         *
-//         * Implement in derived classes to build the type of landmark you need for this tracker.
-//         */
-//        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr) = 0;
+        virtual bool voteForKeyFrame() = 0;
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
-         * \param _node_ptr NodeBase pointer to the other entity constrained. It can only be of the types FeatureBase and LandmarkBase.
+         * \param _feature_other_ptr FeatureBase pointer to the feature constrained.
          *
-         * This function will be called with one of these options (and hence the second parameter NodeBase *):
-         *  - createConstraint(FeatureBase *, FeatureBase *)
-         *  - createConstraint(FeatureBase *, LandmarkBase *)
-         *
-         * Implement this method in derived classes to build the type of constraint
-         * appropriate for the pair feature-feature or feature-landmark used by this tracker.
+         * Implement this method in derived classes.
+         * This function only creates the constraint, it doesn't add it to any feature.
          *
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _node_ptr) = 0;
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) = 0;
 
     protected:
 
@@ -112,5 +156,4 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual unsigned int processNew();
 };
-
 #endif /* PROCESSOR_TRACKER_FEATURE_H_ */

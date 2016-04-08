@@ -197,10 +197,11 @@ IF (Ceres_FOUND)
         ceres_wrapper/auto_diff_cost_function_wrapper.h
         ceres_wrapper/ceres_manager.h 
         ceres_wrapper/cost_function_wrapper.h
+        ceres_wrapper/create_auto_diff_cost_function.h
         ceres_wrapper/create_auto_diff_cost_function_ceres.h
         ceres_wrapper/create_auto_diff_cost_function_wrapper.h
+        ceres_wrapper/create_numeric_diff_cost_function.h
         ceres_wrapper/create_numeric_diff_cost_function_ceres.h
-        ceres_wrapper/create_numeric_diff_cost_function_wrapper.h
         ceres_wrapper/local_parametrization_wrapper.h )
     SET(SRCS_WRAPPER
         ceres_wrapper/ceres_manager.cpp
