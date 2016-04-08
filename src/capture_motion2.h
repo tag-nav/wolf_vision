@@ -85,22 +85,23 @@ namespace wolf {
 template <class MotionDeltaType = Eigen::VectorXs>
 class CaptureMotion2 : public CaptureBase
 {
+        // member types: Motion and MotionBuffer
     public:
-        typedef struct
+        struct Motion
         {
             public:
                 TimeStamp ts_;       ///< Time stamp
                 MotionDeltaType delta_; ///< the integrated motion or delta-integral
-        } Motion; ///< One instance of the buffered data, corresponding to a particular time stamp.
+        }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
         class MotionBuffer{
             public:
                 /** \brief class for motion buffers.
                  *
                  * It consists of a buffer of pre-integrated motions (aka. delta-integrals) that is being filled
-                 * by the motion processors (deriving from ProcessorMotion). Eadh delta-integral is accompained by a time stamp.
+                 * by the motion processors (deriving from ProcessorMotion). Each delta-integral is accompanied by a time stamp.
                  *
-                 * This buffer contains the time stapme and delta-integrals:
+                 * This buffer contains the time stamp and delta-integrals:
                  *  - since the last key-Frame
                  *  - until the frame of this capture.
                  *
@@ -131,6 +132,7 @@ class CaptureMotion2 : public CaptureBase
                 std::list<Motion> container_;
         };
 
+        // public interface:
     public:
         CaptureMotion2(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
                 CaptureBase(_ts, _sensor_ptr), data_(_data), buffer_()
@@ -141,7 +143,6 @@ class CaptureMotion2 : public CaptureBase
         {
             //
         }
-
         const Eigen::VectorXs& getData() const
         {
             return data_;
@@ -158,6 +159,7 @@ class CaptureMotion2 : public CaptureBase
             return buffer_.getDelta();
         }
 
+        // member data:
     protected:
         Eigen::VectorXs data_; ///< Motion data in form of vector mandatory
         MotionBuffer buffer_; ///< Buffer of motions between this Capture and the next one.
