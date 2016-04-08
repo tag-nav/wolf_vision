@@ -82,6 +82,8 @@ class WolfProblem : public NodeBase
 
         void addLandmark(LandmarkBase* _lmk_ptr);
 
+        void addLandmarkList(LandmarkBaseList _lmk_list);
+
         /** \brief Adds a new state block to be added to solver manager
          */
         void addStateBlockPtr(StateBlock* _state_ptr);
@@ -186,44 +188,9 @@ class WolfProblem : public NodeBase
          *
          * This empty function is needed by the destruct() node_linked function.
          */
-        void removeDownNode(const LowerNodePtr _ptr);
+        void removeDownNode(const LowerNodePtr _ptr){};
 
 };
-
-inline bool WolfProblem::permitKeyFrame(ProcessorBase* _processor_ptr)
-{
-    return true;
-}
-
-inline MapBase* WolfProblem::getMapPtr()
-{
-    return map_ptr_;
-}
-
-inline TrajectoryBase* WolfProblem::getTrajectoryPtr()
-{
-    return trajectory_ptr_;
-}
-
-inline HardwareBase* WolfProblem::getHardwarePtr()
-{
-    return hardware_ptr_;
-}
-
-inline StateBlockList* WolfProblem::getStateListPtr()
-{
-    return &state_block_ptr_list_;
-}
-
-inline std::list<StateBlock*>* WolfProblem::getStateBlockAddList()
-{
-    return &state_block_add_list_;
-}
-
-inline std::list<StateBlock*>* WolfProblem::getStateBlockUpdateList()
-{
-    return &state_block_update_list_;
-}
 
 inline std::list<WolfScalar*>* WolfProblem::getStateBlockRemoveList()
 {

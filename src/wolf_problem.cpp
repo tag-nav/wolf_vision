@@ -8,8 +8,7 @@
 
 WolfProblem::WolfProblem(FrameStructure _frame_structure) :
         NodeBase("WOLF_PROBLEM"), //
-        location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(
-                new HardwareBase)
+        location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(new HardwareBase)
 {
     trajectory_ptr_->linkToUpperNode(this);
     map_ptr_->linkToUpperNode(this);
@@ -115,16 +114,25 @@ FrameBase* WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs
     return trajectory_ptr_->getLastFramePtr();
 }
 
+bool WolfProblem::permitKeyFrame(ProcessorBase* _processor_ptr)
+{
+    return true;
+}
+
 void WolfProblem::addLandmark(LandmarkBase* _lmk_ptr)
 {
     getMapPtr()->addLandmark(_lmk_ptr);
+}
+
+void WolfProblem::addLandmarkList(LandmarkBaseList _lmk_list)
+{
+    getMapPtr()->addLandmarkList(_lmk_list);
 }
 
 void WolfProblem::addStateBlockPtr(StateBlock* _state_ptr)
 {
     // add the state unit to the list
     state_block_ptr_list_.push_back(_state_ptr);
-
     // queue for solver manager
     state_block_add_list_.push_back(_state_ptr);
 }
@@ -139,7 +147,6 @@ void WolfProblem::removeStateBlockPtr(StateBlock* _state_ptr)
 {
     // add the state unit to the list
     state_block_ptr_list_.remove(_state_ptr);
-
     // queue for solver manager
     state_block_remove_list_.push_back(_state_ptr->getPtr());
 }
@@ -213,13 +220,37 @@ void WolfProblem::addTrajectory(TrajectoryBase* _trajectory_ptr)
     trajectory_ptr_->linkToUpperNode(this);
 }
 
+MapBase* WolfProblem::getMapPtr()
+{
+    return map_ptr_;
+}
+
+TrajectoryBase* WolfProblem::getTrajectoryPtr()
+{
+    return trajectory_ptr_;
+}
+
+HardwareBase* WolfProblem::getHardwarePtr()
+{
+    return hardware_ptr_;
+}
+
 FrameBase* WolfProblem::getLastFramePtr()
 {
     return trajectory_ptr_->getLastFramePtr();
 }
 
-void WolfProblem::removeDownNode(const LowerNodePtr _ptr)
+StateBlockList* WolfProblem::getStateListPtr()
 {
-    //
+    return &state_block_ptr_list_;
 }
 
+std::list<StateBlock*>* WolfProblem::getStateBlockAddList()
+{
+    return &state_block_add_list_;
+}
+
+std::list<StateBlock*>* WolfProblem::getStateBlockUpdateList()
+{
+    return &state_block_update_list_;
+}

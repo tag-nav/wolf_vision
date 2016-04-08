@@ -22,8 +22,8 @@ struct LandmarkMatch
         {
 
         }
-        LandmarkMatch(FeatureBase* _incoming_feature_ptr, const WolfScalar& _normalized_score) :
-                landmark_ptr_(_incoming_feature_ptr), normalized_score_(_normalized_score)
+        LandmarkMatch(LandmarkBase* _landmark_ptr, const WolfScalar& _normalized_score) :
+                landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
         {
 
         }
@@ -62,24 +62,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          * It must also generate the constraints, of the correct type, derived from ConstraintBase
          * (through ConstraintAnalytic or ConstraintSparse).
          */
-        virtual unsigned int processKnown()
-        {
-            // Find landmarks in incoming_ptr_
-            FeatureBaseList feature_incoming_known;
-            unsigned int found_landmarks = findLandmarks(*(getWolfProblem()->getMapPtr()->getLandmarkListPtr()),
-                                                         feature_incoming_known, incoming_2_landmark);
-
-            // Check/correct incoming-origin correspondences
-            for (auto incoming_feature : feature_incoming_known)
-            {
-                // 1. Add tracked feature to incoming capture
-                incoming_ptr_->addFeature(incoming_feature);
-
-                // 2. create and add constraint
-                incoming_feature->addConstraint(createConstraint(incoming_feature, incoming_2_landmark[incoming_feature].landmark_ptr_));
-            }
-            return found_landmarks;
-        }
+        virtual unsigned int processKnown();
 
         /** \brief Find provided landmarks in the incoming capture
          * \param _landmark_list_in input list of landmarks to be found in incoming
@@ -106,52 +89,6 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr) = 0;
 
-        unsigned int processNew()
-        {
-            /* Rationale: A keyFrame will be created using the last Capture.
-             * First, we work on this Capture to detect new Features,
-             * eventually create Landmarks with them,
-             * and in such case create the new Constraints feature-landmark.
-             * When done, we need to track these new Features to the incoming Capture.
-             * At the end, all new Features are appended to the lists of known Features in
-             * the last and incoming Captures.
-             */
-            // We first need to populate the \b last Capture with new Features
-            unsigned int n = detectNewFeatures();
-            // TODO: class member?
-            LandmarkBaseList new_landmarks;
-            for (auto feature_ptr : new_features_list_last_)
-            {
-                // create new landmark
-                LandmarkBase* new_lmk_ptr = createLandmark(feature_ptr);
-                new_landmarks.push_back(new_lmk_ptr);
-                // create and add constraint
-                feature_ptr->addConstraint(createConstraint(feature_ptr, new_lmk_ptr));
-            }
-
-            // Find new landmarks in incoming_ptr_
-            FeatureLandmarkMap incoming_2_landmark;
-            findLandmarks(*(getWolfProblem()->getMapPtr()->getLandmarkListPtr()), new_features_list_incoming_, incoming_2_landmark);
-            for (auto new_incoming_feature : new_features_list_incoming_)
-            {
-                // 1. Add tracked feature to incoming capture
-                incoming_ptr_->addFeature(new_incoming_feature);
-
-                // 2. create and add constraint
-                new_incoming_feature->addConstraint(createConstraint(new_incoming_feature, incoming_2_landmark[new_incoming_feature].landmark_ptr_));
-            }
-
-            // Append all new Features to the Capture's list of Features
-            last_ptr_->getFeatureListPtr()->splice(last_ptr_->getFeatureListPtr()->end(), new_features_list_last_);
-            incoming_ptr_->getFeatureListPtr()->splice(incoming_ptr_->getFeatureListPtr()->end(),
-                                                       new_features_list_incoming_);
-
-            // TODO: append new landmarks
-            //getWolfProblem()->addLandmark();
-
-            // return the number of new features detected in \b last
-            return n;
-        }
+        unsigned int processNew();
 };
-
 #endif /* PROCESSOR_TRACKER_LANDMARK_H_ */

@@ -1,5 +1,5 @@
 #include "map_base.h"
-#include "wolf_problem.h"
+//#include "wolf_problem.h"
 #include "landmark_base.h"
 
 MapBase::MapBase() :
@@ -17,6 +17,13 @@ void MapBase::addLandmark(LandmarkBase* _landmark_ptr)
 {
     addDownNode(_landmark_ptr);
     _landmark_ptr->registerNewStateBlocks();
+}
+
+void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)
+{
+    addDownNodeList(_landmark_list);
+    for (auto landmark_ptr : _landmark_list)
+        landmark_ptr->registerNewStateBlocks();
 }
 
 void MapBase::removeLandmark(LandmarkBase* _landmark_ptr)
