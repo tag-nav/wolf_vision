@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 
     TimeStamp t = 1;
     int img_width = 640;
-    int img_height = 480;
+    int img_height = 360;
 
     Eigen::Vector4s k = {320,240,320,320};
     StateBlock* intr = new StateBlock(k,false);

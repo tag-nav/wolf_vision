@@ -26,6 +26,7 @@ unsigned int ProcessorTrackerFeature::processKnown()
     // Check/correct incoming-origin correspondences
     for (auto known_incoming_feature : known_features_list_incoming)
     {
+        std::cout << known_incoming_2_known_last[known_incoming_feature].last_feature_ptr_->getConstraintListPtr()->size() << std::endl;
         assert(known_incoming_2_known_last[known_incoming_feature].last_feature_ptr_->getConstraintListPtr()->size() == 1
                 && "More than 1 constraint in a feature after tracking!");
 

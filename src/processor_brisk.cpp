@@ -32,22 +32,15 @@ ProcessorBrisk::~ProcessorBrisk()
 // Tracker function. Returns the number of successful tracks.
 unsigned int ProcessorBrisk::processKnown()
 {
-    std::cout << std::endl << "<---- processKnownFeatures ---->" << std::endl << std::endl;
+    std::cout << std::endl << "\n=================== processKnownFeatures =============" << std::endl << std::endl;
 
     image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
     image_last_ = ((CaptureImage*)last_ptr_)->getImage();
 
     act_search_grid_.renew();
 
-    //////// Poner aquí lo de que se asignen los features de last en la lista para dibujar en ROS
+    return ProcessorTrackerFeature::processKnown();
 
-    unsigned int n_tracks = 0;
-    std::cout << "Nbr of features in incoming: " << incoming_ptr_->getFeatureListPtr()->size() << std::endl;
-    FeatureCorrespondenceMap new_incoming_2_new_last;
-    n_tracks = trackFeatures(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()), new_incoming_2_new_last);
-    std::cout << "Nbr of features in incoming: " << incoming_ptr_->getFeatureListPtr()->size() << std::endl;
-
-    return n_tracks;
 }
 
 void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, Eigen::Vector2i _feature_point, bool _is_candidate)
@@ -80,12 +73,10 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
     cv::KeyPoint _kp;
     cv::Mat image = image_last_;
 
-    std::cout << "size: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
     for (std::list<FeatureBase*>::iterator feature_iter=last_ptr_->getFeatureListPtr()->begin();feature_iter != last_ptr_->getFeatureListPtr()->end(); ++feature_iter)
     {
 
         FeaturePointImage* feature_ptr = (FeaturePointImage*)*feature_iter;
-        //_kp = ((FeaturePointImage*)*feature_iter)->getKeypoint();
         cv::Point point;
         point.x = feature_ptr->getKeypoint().pt.x;
         point.y = feature_ptr->getKeypoint().pt.y;
@@ -97,7 +88,7 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
         {
             cv::circle(image,point,2,cv::Scalar(250.0,80.0,254.0),-1,3,0);
         }
-        std::cout << "keypoint: " << feature_ptr->getKeypoint().pt << std::endl;
+//        std::cout << "keypoint: " << feature_ptr->getKeypoint().pt << std::endl;
     }
     cv::imshow("Keypoint drawing",image);
 
@@ -106,17 +97,13 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
 
 unsigned int ProcessorBrisk::briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints, cv::Mat & new_descriptors)
 {
-    std::cout << std::endl << "<---- briskImplementation ---->" << std::endl << std::endl;
-    std::cout << "0" << std::endl;
-    cv::Mat _image_roi = _image(_roi);
+    std::cout << std::endl << "------------- briskDetect -------------" << std::endl << std::endl;
 
-    std::cout << "1" << std::endl;
+    cv::Mat _image_roi = _image(_roi);
 
     //Brisk Algorithm
     brisk_.detect(_image_roi, _new_keypoints);
-    std::cout << "2" << std::endl;
     brisk_.compute(_image_roi, _new_keypoints,new_descriptors);
-    std::cout << "3" << std::endl;
 
     if(_new_keypoints.size()!=0)
     {
@@ -169,7 +156,7 @@ void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last,
 // This is intended to create Features that are not among the Features already known in the Map. Returns the number of detected Features.
 unsigned int ProcessorBrisk::detectNewFeatures()
 {
-    std::cout << std::endl << "<---- detectNewFeatures ---->" << std::endl << std::endl;
+    std::cout << std::endl << "\n================= detectNewFeatures =============" << std::endl << std::endl;
 
     resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()),*(incoming_ptr_->getFeatureListPtr()));
 
@@ -198,7 +185,7 @@ unsigned int ProcessorBrisk::detectNewFeatures()
         }
         else
         {
-            std::cout << "================================= NEW features dected: " << n_features << std::endl;
+            std::cout << "# of NEW features dected: " << n_features << std::endl;
             //Escoger uno de los features encontrados
             addNewFeaturesInCapture(new_keypoints[0],new_descriptors.row(0));
             Eigen::Vector2i feature_point = {new_keypoints[0].pt.x,new_keypoints[0].pt.y};
@@ -214,20 +201,15 @@ unsigned int ProcessorBrisk::detectNewFeatures()
 //Vote for KeyFrame generation. If a KeyFrame criterion is validated, this function returns true
 bool ProcessorBrisk::voteForKeyFrame()
 {
-    //std::cout << "Thereshold: " << min_features_th_ << std::endl;
-    //std::cout << "Feature_list size: " << ((CaptureImage*)incoming_ptr_)->getFeatureListPtr()->size() << std::endl;
-    std::cout << "<--------------------------------> voteForKeyFrame?: " << (((CaptureImage*)incoming_ptr_)->getFeatureListPtr()->size() < min_features_th_) << std::endl;
+    std::cout << "voteForKeyFrame?: " << (((CaptureImage*)incoming_ptr_)->getFeatureListPtr()->size() < min_features_th_) << std::endl;
     return (incoming_ptr_->getFeatureListPtr()->size() < min_features_th_);
-    //return 0;
 }
 
 void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
 {
-    std::cout << std::endl << "<---- process ---->" << std::endl << std::endl;
-//    image_incoming_ = ((CaptureImage*)_incoming_ptr)->getImage();
-//    image_last_ = ((CaptureImage*)last_ptr_)->getImage();
+    std::cout << std::endl << "\n\n################## process ##################\n" << std::endl << std::endl;
+
     ProcessorTrackerFeature::process(_incoming_ptr);
-    std::cout << std::endl << "<---- end process ---->" << std::endl << std::endl;
     drawFeatures(last_ptr_);
     cv::waitKey(1000);
 }
@@ -244,7 +226,8 @@ LandmarkBase* ProcessorBrisk::createLandmark(FeatureBase* _feature_ptr)
 //Create a new constraint
 ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feat_or_lmk_ptr)
 {
-    return nullptr;
+    ConstraintEpipolar* const_epipolar_ptr = new ConstraintEpipolar();
+    return const_epipolar_ptr; // TODO Crear constraint
 }
 
 
@@ -252,7 +235,7 @@ ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, Feat
 
 unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureCorrespondenceMap& _feature_correspondences)
 {
-    std::cout << std::endl << "<---- processFeaturesForMatching ---->" << std::endl << std::endl;
+    std::cout << std::endl << "-------------- trackFeatures ----------------" << std::endl << std::endl;
 
     ///PROJECTION OF LANDMARKS (features in this case)
 
@@ -267,7 +250,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
 
-    std::cout << "---------------------Number of features to match: " << _feature_list_in.size() << std::endl;
+    std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl << std::endl;
     unsigned int n_last_capture_feat = 0;
     for(auto feature_base_ptr : _feature_list_in)
     {
@@ -276,7 +259,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
         FeaturePointImage* feature_ptr = (FeaturePointImage*)feature_base_ptr;
         Eigen::Vector2i feature_point = {feature_ptr->getKeypoint().pt.x,feature_ptr->getKeypoint().pt.y};
         act_search_grid_.hitCell(feature_point);
-        std::cout << "------------------- Searching for feature : " << feature_ptr->nodeId() << std::endl;
+        std::cout << "Searching for feature ID: " << feature_ptr->nodeId() << std::endl;
 
         feature_roi_x = (feature_ptr->getKeypoint().pt.x)-(feature_roi_heigth/2);
         feature_roi_y = (feature_ptr->getKeypoint().pt.y)-(feature_roi_width/2);
@@ -287,36 +270,32 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
 
         n_candidates = briskDetect(image_incoming_, roi_for_matching, new_keypoints, new_descriptors);
-        std::cout << "------------------ Number of detected candidates: " << n_candidates << std::endl;
+        std::cout << "Number of detected candidates: " << n_candidates << std::endl;
 
         if(n_candidates != 0)
         {
-            //std::vector<float> feature_descriptor = feature_ptr->getDescriptor();
-
             //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
 
-                cv::BFMatcher matcher(cv::NORM_HAMMING);
+                cv::BFMatcher matcher(cv::NORM_HAMMING); // TODO Mover al constructor
                 std::vector<cv::DMatch> matches;
                 cv::Mat f_descriptor = feature_ptr->getDescriptor();
 
                 matcher.match(f_descriptor, new_descriptors, matches);
 
-                std::cout << "------------------ Number of matches: " << matches.size() << std::endl;
-                std::cout << "------------------ Hamiing distance: " << matches[0].distance << std::endl;
+                std::cout << "Number of matches:      " << matches.size() << std::endl;
+                std::cout << "First Hamming distance: " << matches[0].distance << std::endl;
 
-            if(matches.size() >= 1)
-            {
+
                 if(matches[0].distance < 200)
                 {
-                    FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[matches[0].trainIdx],
+                    FeaturePointImage* incoming_point_ptr = new FeaturePointImage(new_keypoints[matches[0].trainIdx],
                             (new_descriptors.row(matches[0].trainIdx)),feature_ptr->getIsKnown());
-                    _feature_list_out.push_back(point_ptr);
-                    _feature_correspondences[point_ptr] = FeatureMatch(feature_base_ptr, (WolfScalar) matches[0].distance);
-                    n_last_capture_feat++;
+                    _feature_list_out.push_back(incoming_point_ptr);
+                    _feature_correspondences[incoming_point_ptr] = FeatureMatch(feature_base_ptr, (WolfScalar) matches[0].distance);
                 }
-            }
 
-            for(int i = 0; i <= new_keypoints.size()-1; i++)
+
+            for(unsigned int i = 0; i < new_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
             {
                 if(i != matches[0].trainIdx)
                 {
@@ -330,12 +309,12 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
 
     }
-    std::cout << "n_last_capture_feat: " << n_last_capture_feat << std::endl;
+    std::cout << "\nNumber of Features found: " << _feature_list_out.size() << std::endl;
 
 
 
 
 
 
-    return n_last_capture_feat;
+    return _feature_list_out.size();
 }

@@ -8,6 +8,7 @@
 #include "state_block.h"
 #include "active_search.h"
 #include "processor_tracker_feature.h"
+#include "constraint_epipolar.h"
 
 // OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
