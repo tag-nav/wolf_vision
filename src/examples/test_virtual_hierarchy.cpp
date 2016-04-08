@@ -7,7 +7,9 @@
 
 #include <list>
 
+namespace wolf{
 
+}
 // BASE CLASSES
 
 /**
@@ -230,11 +232,15 @@ class SenNode : public Sen, public ChildOf<VehNode>, public Bot
         virtual ~SenNode() { }
 };
 
+} // namespace wolf
+
 /////////////////////
 // IMPLEMENTATIONS, here to avoid incomplete types and unwanted #includes
 /////////////////////
 
 #include <iostream>
+
+namespace wolf {
 using namespace std;
 
 template<class Child>
@@ -291,8 +297,12 @@ void VehNode::print()
 
 unsigned int N::id_count_ = 0;
 
+} // namespace wolf
+
 int main()
 {
+    using namespace wolf;
+
     // Create all nodes with up-pointers already set up
     VehNode V;
     SenNode S0(&V), S1(&V);
