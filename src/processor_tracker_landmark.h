@@ -20,7 +20,6 @@ struct LandmarkMatch
         LandmarkMatch() :
                 landmark_ptr_(nullptr), normalized_score_(0.0)
         {
-
         }
         LandmarkMatch(LandmarkBase* _landmark_ptr, const WolfScalar& _normalized_score) :
                 landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
@@ -90,5 +89,15 @@ class ProcessorTrackerLandmark : public ProcessorTracker
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr) = 0;
 
         unsigned int processNew();
+
+        virtual void establishConstraints();
+
 };
+
+inline void ProcessorTrackerLandmark::establishConstraints()
+{
+    for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
+        last_feature->addConstraint(createConstraint(last_feature, last_2_landmark_[last_feature].landmark_ptr_));
+}
+
 #endif /* PROCESSOR_TRACKER_LANDMARK_H_ */
