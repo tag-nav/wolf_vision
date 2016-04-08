@@ -18,6 +18,14 @@ ProcessorTrackerFeature::~ProcessorTrackerFeature()
 
 unsigned int ProcessorTrackerFeature::processKnown()
 {
+    // Compose correspondences to get incoming_2_origin
+    for (auto incoming_feature : *(incoming_ptr_->getFeatureListPtr()))
+        incoming_2_last_[incoming_feature].feature_ptr_ = last_2_origin_[incoming_2_last_[incoming_feature].feature_ptr_].feature_ptr_;
+    // previously known as incoming_ is now last_
+    last_2_origin_ = incoming_2_last_;
+    // new incoming doesn't have correspondences yet
+    incoming_2_last_.clear();
+
     assert(incoming_2_last_.size() == 0 && "In ProcessorTrackerFeature::processKnown(): incoming_2_last_ must be empty before processKnown()");
     assert(incoming_ptr_->getFeatureListPtr()->size() == 0 && "In ProcessorTrackerFeature::processKnown(): incoming_ptr_ feature list must be empty before processKnown()");
 
@@ -64,18 +72,4 @@ unsigned int ProcessorTrackerFeature::processNew()
 
     // return the number of new features detected in \b last
     return n;
-}
-
-void ProcessorTrackerFeature::advance()
-{
-    // Compose correspondences to get incoming_2_origin
-    for (auto incoming_feature : *(incoming_ptr_->getFeatureListPtr()))
-        incoming_2_last_[incoming_feature].feature_ptr_ =
-                last_2_origin_[incoming_2_last_[incoming_feature].feature_ptr_].feature_ptr_;
-    // incoming_ is going to be last_
-    last_2_origin_ = incoming_2_last_;
-    // new incoming doesn't have correspondences yet
-    incoming_2_last_.clear();
-    // advance tracker
-    ProcessorTracker::advance();
 }

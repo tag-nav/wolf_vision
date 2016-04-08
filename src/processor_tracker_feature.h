@@ -83,13 +83,6 @@ class ProcessorTrackerFeature : public ProcessorTracker
         FeatureCorrespondenceMap incoming_2_last_;
         FeatureCorrespondenceMap last_2_origin_;
 
-        /** \brief Advance the incoming Capture to become the last.
-         *
-         * Call this when the tracking and keyframe policy work is done and
-         * we need to get ready to accept a new incoming Capture.
-         */
-        virtual void advance();
-
         /** \brief Tracker function
          * \return The number of successful tracks.
          *

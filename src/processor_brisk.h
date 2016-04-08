@@ -28,12 +28,6 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         bool known_or_new_features_ = false;
         cv::Mat image_last_, image_incoming_;
 
-        /** \brief Initialize one landmark
-         *
-         * Implement in derived classes to build the type of landmark you need for this tracker.
-         */
-        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr);
-
         /** \brief Create a new constraint
          *
          * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
@@ -90,7 +84,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last,
                                             FeatureBaseList& _feature_list_incoming);
 
-        virtual void addNewFeaturesInCapture(cv::KeyPoint _new_keypoints, cv::Mat _new_descriptors); //std::vector<cv::KeyPoint>
+        //virtual void addNewFeaturesInCapture(cv::KeyPoint _new_keypoints, cv::Mat _new_descriptors); //std::vector<cv::KeyPoint>
 
         virtual unsigned int briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints,
                                          cv::Mat & new_descriptors);
