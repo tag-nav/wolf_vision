@@ -32,8 +32,10 @@ ProcessorBrisk::~ProcessorBrisk()
 // Tracker function. Returns the number of successful tracks.
 unsigned int ProcessorBrisk::processKnown()
 {
-
     std::cout << std::endl << "<---- processKnownFeatures ---->" << std::endl << std::endl;
+
+    image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
+    image_last_ = ((CaptureImage*)last_ptr_)->getImage();
 
     act_search_grid_.renew();
 
@@ -222,8 +224,8 @@ bool ProcessorBrisk::voteForKeyFrame()
 void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
 {
     std::cout << std::endl << "<---- process ---->" << std::endl << std::endl;
-    image_incoming_ = ((CaptureImage*)_incoming_ptr)->getImage();
-    image_last_ = ((CaptureImage*)last_ptr_)->getImage();
+//    image_incoming_ = ((CaptureImage*)_incoming_ptr)->getImage();
+//    image_last_ = ((CaptureImage*)last_ptr_)->getImage();
     ProcessorTrackerFeature::process(_incoming_ptr);
     std::cout << std::endl << "<---- end process ---->" << std::endl << std::endl;
     drawFeatures(last_ptr_);
