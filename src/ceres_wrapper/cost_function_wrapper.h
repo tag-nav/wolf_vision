@@ -8,6 +8,8 @@
 // CERES
 #include "ceres/cost_function.h"
 
+namespace wolf {
+
 class CostFunctionWrapper : public ceres::CostFunction
 {
     protected:
@@ -64,5 +66,9 @@ class CostFunctionWrapper : public ceres::CostFunction
             return true;
         }
 };
+
+} // namespace wolf
+
+
 
 #endif /* TRUNK_SRC_COST_FUNCTION_WRAPPER_H_ */

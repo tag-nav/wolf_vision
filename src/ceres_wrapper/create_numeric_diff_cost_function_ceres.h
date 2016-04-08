@@ -10,6 +10,8 @@
 
 #include "ceres/numeric_diff_cost_function.h"
 
+namespace wolf {
+
 template <class CtrType>
 ceres::NumericDiffCostFunction<CtrType, ceres::CENTRAL,
                                 CtrType::measurementSize,
@@ -39,5 +41,7 @@ ceres::NumericDiffCostFunction<CtrType, ceres::CENTRAL,
 
 
 
+
+} // namespace wolf
 
 #endif /* SRC_CERES_WRAPPER_CREATE_NUMERIC_DIFF_COST_FUNCTION_CERES_H_ */

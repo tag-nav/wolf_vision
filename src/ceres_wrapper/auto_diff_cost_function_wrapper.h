@@ -8,7 +8,7 @@
 #include "ceres/jet.h"
 #include "ceres/sized_cost_function.h"
 
-
+namespace wolf {
 
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,
           unsigned int BLOCK_0_SIZE, unsigned int BLOCK_1_SIZE, unsigned int BLOCK_2_SIZE, unsigned int BLOCK_3_SIZE, unsigned int BLOCK_4_SIZE,
@@ -1112,5 +1112,7 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
             return true;
         }
 };
+
+} // namespace wolf
 
 #endif /* TRUNK_SRC_AUTODIFF_COST_FUNCTION_WRAPPER_BASE_H_ */

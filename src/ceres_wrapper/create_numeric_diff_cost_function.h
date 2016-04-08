@@ -14,6 +14,8 @@
 // Wolf and ceres auto_diff creators
 #include "create_numeric_diff_cost_function_ceres.h"
 
+namespace wolf {
+
 ceres::CostFunction* createNumericDiffCostFunction(ConstraintBase* _ctr_ptr, bool _use_wolf_numericdiff)
 {
     if (_use_wolf_numericdiff)
@@ -34,5 +36,7 @@ ceres::CostFunction* createNumericDiffCostFunction(ConstraintBase* _ctr_ptr, boo
             throw std::invalid_argument( "Unknown constraint type! Please add it in the file: ceres_wrapper/create_Numeric_diff_cost_function.h" );
     }
 }
+
+} // namespace wolf
 
 #endif /* SRC_CERES_WRAPPER_CREATE_NUMERIC_DIFF_COST_FUNCTION_H_ */

@@ -10,6 +10,8 @@
 
 #include "auto_diff_cost_function_wrapper.h"
 
+namespace wolf {
+
 template <class CtrType>
 AutoDiffCostFunctionWrapperBase<CtrType,
                                 CtrType::measurementSize,
@@ -36,5 +38,7 @@ AutoDiffCostFunctionWrapperBase<CtrType,
                                                CtrType::block0Size,CtrType::block1Size,CtrType::block2Size,CtrType::block3Size,CtrType::block4Size,
                                                CtrType::block5Size,CtrType::block6Size,CtrType::block7Size,CtrType::block8Size,CtrType::block9Size>((CtrType*)_constraint_ptr);
 };
+
+} // namespace wolf
 
 #endif /* SRC_CERES_WRAPPER_CREATE_AUTO_DIFF_COST_FUNCTION_WRAPPER_H_ */

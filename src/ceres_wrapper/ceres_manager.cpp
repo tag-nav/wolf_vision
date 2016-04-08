@@ -1,5 +1,7 @@
 #include "ceres_manager.h"
 
+namespace wolf {
+
 CeresManager::CeresManager(WolfProblem*  _wolf_problem, ceres::Problem::Options _options) :
     ceres_problem_(new ceres::Problem(_options)),
     wolf_problem_(_wolf_problem)
@@ -283,3 +285,6 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
     else
         throw std::invalid_argument( "Bad Jacobian Method!" );
 }
+
+} // namespace wolf
+

@@ -9,6 +9,8 @@ class LocalParametrizationBase;
 //Ceres includes
 #include "ceres/ceres.h"
 
+namespace wolf {
+
 class LocalParametrizationWrapper : public ceres::LocalParameterization
 {
     private:
@@ -29,7 +31,11 @@ class LocalParametrizationWrapper : public ceres::LocalParameterization
         virtual int LocalSize() const;
 };
 
+} // namespace wolf
+
 #include "local_parametrization_base.h"
+
+namespace wolf {
 
 inline LocalParametrizationWrapper::LocalParametrizationWrapper(LocalParametrizationBase* _local_parametrization_ptr) :
         local_parametrization_ptr_(_local_parametrization_ptr)
@@ -49,5 +55,7 @@ inline int LocalParametrizationWrapper::LocalSize() const
 {
     return local_parametrization_ptr_->getLocalSize();
 }
+
+} // namespace wolf
 
 #endif
