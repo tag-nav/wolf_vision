@@ -36,9 +36,9 @@ class ProcessorTracker : public ProcessorBase
          */
         void reset();
 
-        FeatureBaseList& getNewFeaturesList();
+        FeatureBaseList& getNewFeaturesListLast();
 
-        void addNewFeature(FeatureBase* _feature_ptr);
+        void addNewFeatureLast(FeatureBase* _feature_ptr);
 
         FeatureBaseList& getNewFeaturesListIncoming();
 
@@ -141,12 +141,12 @@ inline void ProcessorTracker::reset(CaptureBase* _origin_ptr, CaptureBase* _last
     incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
 
-inline FeatureBaseList& ProcessorTracker::getNewFeaturesList()
+inline FeatureBaseList& ProcessorTracker::getNewFeaturesListLast()
 {
     return new_features_list_last_;
 }
 
-inline void ProcessorTracker::addNewFeature(FeatureBase* _feature_ptr)
+inline void ProcessorTracker::addNewFeatureLast(FeatureBase* _feature_ptr)
 {
     new_features_list_last_.push_back(_feature_ptr);
 }
