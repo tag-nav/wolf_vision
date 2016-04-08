@@ -291,7 +291,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                     FeaturePointImage* incoming_point_ptr = new FeaturePointImage(new_keypoints[matches[0].trainIdx],
                             (new_descriptors.row(matches[0].trainIdx)),feature_ptr->getIsKnown());
                     _feature_list_out.push_back(incoming_point_ptr);
-                    _feature_correspondences[incoming_point_ptr] = FeatureMatch(feature_base_ptr, (WolfScalar) matches[0].distance);
+                    _feature_correspondences[incoming_point_ptr] = FeatureCorrespondence(feature_base_ptr, (WolfScalar) matches[0].distance);
                 }
 
 
