@@ -11,7 +11,6 @@
 
 #include "processor_base.h"
 
-namespace wolf {
 
 //TODO try this, and remove includes below
 //class SensorLaser2D;
@@ -38,6 +37,7 @@ namespace wolf {
 
 
 
+namespace wolf {
 
 
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level
