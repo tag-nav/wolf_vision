@@ -20,7 +20,7 @@
 
 namespace wolf{
 // inserts the sparse matrix 'ins' into the sparse matrix 'original' in the place given by 'row' and 'col' integers
-}
+
 void insertSparseBlock(const Eigen::SparseMatrix<WolfScalar>& ins, Eigen::SparseMatrix<WolfScalar>& original, const unsigned int& row, const unsigned int& col)
 {
   for (int k=0; k<ins.outerSize(); ++k)

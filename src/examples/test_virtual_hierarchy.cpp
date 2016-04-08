@@ -9,7 +9,6 @@
 
 namespace wolf{
 
-}
 // BASE CLASSES
 
 /**
