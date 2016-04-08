@@ -142,6 +142,8 @@ class NodeLinked : public NodeBase
 
 };
 
+} // namespace wolf
+
 
 //////////////////////////////////////////
 //          IMPLEMENTATION
@@ -162,6 +164,8 @@ class NodeLinked : public NodeBase
 #include "map_base.h"
 #include "landmark_base.h"
 #include "node_terminus.h"
+
+namespace wolf {
 
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label) :

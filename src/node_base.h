@@ -61,7 +61,11 @@ class NodeBase
 
 };
 
+} // namespace wolf
+
 #include <iostream>
+
+namespace wolf{
 
 inline NodeBase::NodeBase(std::string _label, bool _verbose) :
         label_(_label), node_id_(++node_id_count_), verbose_(_verbose)
