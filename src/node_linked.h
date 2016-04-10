@@ -103,8 +103,9 @@ class NodeLinked : public NodeBase
         void addDownNode(LowerNodePtr _ptr);
 
         /** \brief Append a list of new down nodes
+         * The provided list is emptied after this operation
          */
-        void addDownNodeList(LowerNodeList _new_down_node_list);
+        void addDownNodeList(LowerNodeList& _new_down_node_list);
 
         /** \brief Gets a reference to down node list
          */
@@ -276,7 +277,7 @@ inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodePtr _ptr)
     //std::cout << "node: " << _ptr->nodeId() << " linked to " <<_ptr->upperNodePtr()->nodeId() << std::endl;
 }
 template<class UpperType, class LowerType>
-void NodeLinked<UpperType, LowerType>::addDownNodeList(LowerNodeList _new_down_node_list)
+void NodeLinked<UpperType, LowerType>::addDownNodeList(LowerNodeList& _new_down_node_list)
 {
     assert(!isBottom() && "Trying to add a down node to a bottom node");
     down_node_list_.splice(down_node_list_.end(), _new_down_node_list);
