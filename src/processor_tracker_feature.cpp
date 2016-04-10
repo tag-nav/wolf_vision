@@ -59,6 +59,7 @@ unsigned int ProcessorTrackerFeature::processNew()
      * At the end, all new Features are appended to the lists of known Features in
      * the last and incoming Captures.
      */
+
     // We first need to populate the \b last Capture with new Features
     unsigned int n = detectNewFeatures();
 

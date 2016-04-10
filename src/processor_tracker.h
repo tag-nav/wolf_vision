@@ -11,6 +11,44 @@
 #include "processor_base.h"
 #include "capture_base.h"
 
+/** \brief Feature tracker processor
+ *
+ * This is an abstract class.
+ *
+ * This class implements the incremental feature tracker.
+ *
+ * The incremental tracker contains three pointers to three Captures of type CaptureBase,
+ * named \b origin, \b last and \b incoming:
+ *   - \b origin: this points to a Capture where all Feature tracks start.
+ *   - \b last: the last Capture tracked by the tracker.
+ *     A sufficient subset of the Features in \b origin is still alive in \b last.
+ *   - \b incoming: the capture being received. The tracker operates on this Capture,
+ *     establishing correspondences between the features here and the features in \b origin.
+ *     Each successful correspondence
+ *     results in an extension of the track of the Feature up to the \b incoming Capture.
+ *
+ * It establishes constraints Feature-Feature or Feature-Landmark;
+ * Implement these options in two separate derived classes:
+ *   - ProcessorTrackerFeature : for Feature-Feature correspondences (no landmarks)
+ *   - ProcessorTrackerLandmark : for Feature-Landmark correspondences (with landmarks)
+ *
+ * The pipeline of actions for an autonomous tracker can be resumed as follows:
+ *   - Init the tracker with an \b origin Capture: init();
+ *   - On each incoming Capture,
+ *     - Track known features in the \b incoming Capture: processKnownFeatures();
+ *       - For each tracked Feature:
+ *          - create constraints: createConstraint()
+ *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
+ *     - if voteForKeyFrame()
+ *       - Populate the tracker with new Features : processNew()
+ *       - detectNewFeatures()
+ *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
+ *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
+ *     - else
+ *       - Advance the tracker one Capture ahead: advance()
+ *
+ * This functionality exists by default in the virtual method process(). You can overload it at your convenience.
+ */
 class ProcessorTracker : public ProcessorBase
 {
     protected:
@@ -141,7 +179,7 @@ inline void ProcessorTracker::advance()
 {
     if (last_ptr_ == origin_ptr_) // The first time last_ptr = origin_ptr (see init() )
     {
-        // We need to create the new free Frame to hold what will become the \b last Capture
+        // We need to create the new non-key Frame to hold what will become the \b last Capture
         makeFrame(incoming_ptr_);
     }
     else

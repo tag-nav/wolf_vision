@@ -30,6 +30,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // 1. First we track the known Features and create new constraints as needed
     incoming_ptr_ = _incoming_ptr;
     processKnown();
+
     // 2. Then we see if we want and we are allowed to create a KeyFrame
     if (!(voteForKeyFrame() && permittedKeyFrame()))
     {

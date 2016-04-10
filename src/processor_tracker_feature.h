@@ -11,7 +11,7 @@
 #include "processor_tracker.h"
 #include "capture_base.h"
 
-// Correspondence Feature last - Feature incoming
+// Feature-Feature correspondence
 struct FeatureCorrespondence
 {
         FeatureBase* feature_ptr_;
@@ -33,7 +33,8 @@ typedef std::map<FeatureBase*, FeatureCorrespondence> FeatureCorrespondenceMap;
 
 /** \brief Feature tracker processor
  *
- * This class implements the incremental tracker. It contains three pointers to three Captures of type CaptureBase, named \b origin, \b last and \b incoming:
+ * This class implements the incremental feature tracker.
+ * It contains three pointers to three Captures of type CaptureBase, named \b origin, \b last and \b incoming:
  *   - \b origin: this points to a Capture where all Feature tracks start.
  *   - \b last: the last Capture tracked by the tracker. A sufficient subset of the Features in \b origin is still alive in \b last.
  *   - \b incoming: the capture being received. The tracker operates on this Capture,
@@ -48,13 +49,12 @@ typedef std::map<FeatureBase*, FeatureCorrespondence> FeatureCorrespondenceMap;
  *   - Init the tracker with an \b origin Capture: init();
  *   - On each incoming Capture,
  *     - Track known features in the \b incoming Capture: processKnownFeatures();
+ *       - For each detected Feature:
+ *          - create constraints Feature-Feature: createConstraint()
  *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
  *     - if voteForKeyFrame()
  *       - Look for new Features and make Landmarks with them:
  *       - detectNewFeatures()
- *       - For each detected Feature:
- *          - create landmarks: createOneLandmark()
- *          - create constraints Feature-Landmark: createConstraint()
  *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
  *     - else
@@ -83,24 +83,21 @@ class ProcessorTrackerFeature : public ProcessorTracker
         FeatureCorrespondenceMap incoming_2_last_;
         FeatureCorrespondenceMap last_2_origin_;
 
-        /** \brief Tracker function
-         * \return The number of successful tracks.
+        /** \brief Process known Features
+         * \return The number of successful matches.
          *
-         * This is the tracker function to be implemented in derived classes.
-         * It operates on the \b incoming capture pointed by incoming_ptr_.
+         * This function operates on the \b incoming capture pointed by incoming_ptr_.
          *
-         * This should do one of the following, depending on the design of the tracker:
+         * This function does:
          *   - Track Features against other Features in the \b origin Capture. Tips:
          *     - An intermediary step of matching against Features in the \b last Capture makes tracking easier.
          *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Constraints in \b last.
          *     - If required, correct the drift by re-comparing against the Features in origin.
          *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
-         *
-         * The function must generate the necessary Features in the \b incoming Capture,
-         * of the correct type, derived from FeatureBase.
-         *
-         * It must also generate the constraints, of the correct type, derived from ConstraintBase
-         * (through ConstraintAnalytic or ConstraintSparse).
+         *   - Create the necessary Features in the \b incoming Capture,
+         *     of the correct type, derived from FeatureBase.
+         *   - Create the constraints, of the correct type, derived from ConstraintBase
+         *     (through ConstraintAnalytic or ConstraintSparse).
          */
         virtual unsigned int processKnown();
 
@@ -157,6 +154,8 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) = 0;
 
+        /** \brief Establish constraints between features in Captures \b last and \b origin
+         */
         virtual void establishConstraints();
 
 };
