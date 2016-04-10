@@ -77,8 +77,6 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void process(CaptureBase* const _incoming_ptr);
 
-        CaptureBase* getLastPtr();
-
     protected:
 
         /** \brief Tracker function
@@ -215,11 +213,6 @@ inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
 inline void ProcessorTracker::addNewFeatureIncoming(FeatureBase* _feature_ptr)
 {
     new_features_incoming_.push_back(_feature_ptr);
-}
-
-inline CaptureBase* ProcessorTracker::getLastPtr()
-{
-    return last_ptr_;
 }
 
 } // namespace wolf
