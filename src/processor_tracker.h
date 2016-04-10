@@ -55,8 +55,8 @@ class ProcessorTracker : public ProcessorBase
         CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
         CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
         CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
-        FeatureBaseList new_features_list_last_; ///< List of new features in \b last for landmark initialization and new key-frame creation.
-        FeatureBaseList new_features_list_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
+        FeatureBaseList new_features_last_; ///< List of new features in \b last for landmark initialization and new key-frame creation.
+        FeatureBaseList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
 
     public:
         ProcessorTracker(ProcessorType _tp);
@@ -172,7 +172,7 @@ inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
     origin_ptr_ = _origin_ptr;
     last_ptr_ = _origin_ptr;
     detectNewFeatures(); // This operates on last but it's equal to origin.
-    last_ptr_->addDownNodeList(new_features_list_last_);
+    last_ptr_->addDownNodeList(new_features_last_);
 }
 
 inline void ProcessorTracker::advance()
@@ -211,29 +211,29 @@ inline void ProcessorTracker::reset()
     incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
 
-inline CaptureBase* ProcessorTracker::getLastPtr()
-{
-    return last_ptr_;
-}
-
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesListLast()
 {
-    return new_features_list_last_;
+    return new_features_last_;
 }
 
 inline void ProcessorTracker::addNewFeatureLast(FeatureBase* _feature_ptr)
 {
-    new_features_list_last_.push_back(_feature_ptr);
+    new_features_last_.push_back(_feature_ptr);
 }
 
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
 {
-    return new_features_list_incoming_;
+    return new_features_incoming_;
 }
 
 inline void ProcessorTracker::addNewFeatureIncoming(FeatureBase* _feature_ptr)
 {
-    new_features_list_incoming_.push_back(_feature_ptr);
+    new_features_incoming_.push_back(_feature_ptr);
+}
+
+inline CaptureBase* ProcessorTracker::getLastPtr()
+{
+    return last_ptr_;
 }
 
 #endif /* SRC_PROCESSOR_TRACKER_H_ */

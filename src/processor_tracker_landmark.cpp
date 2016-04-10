@@ -32,7 +32,7 @@ unsigned int ProcessorTrackerLandmark::processNew()
     // We first need to populate the \b last Capture with new Features
     unsigned int n = detectNewFeatures();
     LandmarkBaseList new_landmarks;
-    for (auto new_feature_ptr : new_features_list_last_)
+    for (auto new_feature_ptr : new_features_last_)
     {
         // create new landmark
         LandmarkBase* new_lmk_ptr = createLandmark(new_feature_ptr);
@@ -41,11 +41,11 @@ unsigned int ProcessorTrackerLandmark::processNew()
         incoming_2_landmark_[new_feature_ptr] = LandmarkMatch(new_lmk_ptr, 1); // max score
     }
     // Find the new landmarks in incoming_ptr_
-    findLandmarks(new_landmarks, new_features_list_incoming_, incoming_2_landmark_);
+    findLandmarks(new_landmarks, new_features_incoming_, incoming_2_landmark_);
 
     // Append all new Features to the Capture's list of Features
-    last_ptr_->addDownNodeList(new_features_list_last_);
-    incoming_ptr_->addDownNodeList(new_features_list_incoming_);
+    last_ptr_->addDownNodeList(new_features_last_);
+    incoming_ptr_->addDownNodeList(new_features_incoming_);
 
     // Append new landmarks to the map
     getWolfProblem()->addLandmarkList(new_landmarks);

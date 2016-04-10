@@ -18,35 +18,26 @@ ProcessorTrackerFeature::~ProcessorTrackerFeature()
 
 unsigned int ProcessorTrackerFeature::processKnown()
 {
-    // Compose correspondences to get incoming_2_origin
-    for (auto incoming_feature : *(incoming_ptr_->getFeatureListPtr()))
-        incoming_2_last_[incoming_feature].feature_ptr_ = last_2_origin_[incoming_2_last_[incoming_feature].feature_ptr_].feature_ptr_;
-
-    // the previous incoming_ is now last_
-    last_2_origin_ = incoming_2_last_;
-    // new incoming doesn't have correspondences yet
-    incoming_2_last_.clear();
-
     assert(incoming_ptr_->getFeatureListPtr()->size() == 0 && "In ProcessorTrackerFeature::processKnown(): incoming_ptr_ feature list must be empty before processKnown()");
+    assert(matches_last_incoming_.size() == 0 && "In ProcessorTrackerFeature::processKnown(): match list from last to incoming must be empty before processKnown()");
 
     // Track features from last_ptr_ to incoming_ptr_
-    FeatureBaseList known_features_list_incoming;
-    trackFeatures(*(last_ptr_->getFeatureListPtr()), known_features_list_incoming, incoming_2_last_);
+    trackFeatures(*(last_ptr_->getFeatureListPtr()), known_features_incoming_, matches_last_incoming_);
 
     // Check/correct incoming-origin correspondences
-    for (auto known_incoming_feature : known_features_list_incoming)
+    for (auto known_incoming_feature_ptr : known_features_incoming_)
         // Check and correct the correspondence
-        if (!correctFeatureDrift(known_incoming_feature, incoming_2_last_[known_incoming_feature].feature_ptr_))
+        if (!correctFeatureDrift(known_incoming_feature_ptr, matches_last_incoming_[known_incoming_feature_ptr].feature_ptr_))
         {
             // Correspondence not confirmed -> Remove correspondence and destruct incoming feature
-            incoming_2_last_.erase(known_incoming_feature);
-            known_incoming_feature->destruct();
+            matches_last_incoming_.erase(known_incoming_feature_ptr);
+            known_incoming_feature_ptr->destruct();
         }
 
-    // Append not destructed incoming features
-    incoming_ptr_->addDownNodeList(known_features_list_incoming);
+    // Append not destructed incoming features -> this empties known_features_incoming_
+    incoming_ptr_->addDownNodeList(known_features_incoming_);
 
-    return known_features_list_incoming.size();
+    return matches_last_incoming_.size();
 }
 
 unsigned int ProcessorTrackerFeature::processNew()
@@ -63,12 +54,12 @@ unsigned int ProcessorTrackerFeature::processNew()
     // We first need to populate the \b last Capture with new Features
     unsigned int n = detectNewFeatures();
 
-    // Track new features from last to incoming
-    trackFeatures(new_features_list_last_, new_features_list_incoming_, incoming_2_last_);
+    // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
+    trackFeatures(new_features_last_, new_features_incoming_, matches_last_incoming_);
 
     // Append all new Features to the Capture's list of Features
-    last_ptr_->addDownNodeList(new_features_list_last_); //TODO JV: is it really necessary to add all new features instead of only the tracked ones? It's easier and probably faster.
-    incoming_ptr_->addDownNodeList(new_features_list_incoming_);
+    last_ptr_->addDownNodeList(new_features_last_); //TODO JV: is it really necessary to add all new features instead of only the tracked ones? It's easier and probably faster.
+    incoming_ptr_->addDownNodeList(new_features_incoming_);
 
     // return the number of new features detected in \b last
     return n;

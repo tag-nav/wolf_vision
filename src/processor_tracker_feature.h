@@ -80,8 +80,9 @@ class ProcessorTrackerFeature : public ProcessorTracker
 
     protected:
 
-        FeatureCorrespondenceMap incoming_2_last_;
-        FeatureCorrespondenceMap last_2_origin_;
+        FeatureBaseList known_features_incoming_;
+        FeatureCorrespondenceMap matches_last_incoming_;
+        FeatureCorrespondenceMap matches_origin_last_;
 
         /** \brief Process known Features
          * \return The number of successful matches.
@@ -142,6 +143,10 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual unsigned int detectNewFeatures() = 0;
 
+        // We overload the advance and reset functions for completing it with the matches
+        void advance();
+        void reset();
+
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _feature_other_ptr FeatureBase pointer to the feature constrained.
@@ -163,7 +168,26 @@ class ProcessorTrackerFeature : public ProcessorTracker
 inline void ProcessorTrackerFeature::establishConstraints()
 {
     for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
-        last_feature->addConstraint(createConstraint(last_feature, last_2_origin_[last_feature].feature_ptr_));
+        last_feature->addConstraint(createConstraint(last_feature, matches_origin_last_[last_feature].feature_ptr_));
+}
+
+inline void ProcessorTrackerFeature::reset()
+{
+    ProcessorTracker::reset();
+
+    // We also reset here the list of correspondences, which passes from last--incoming to origin--last.
+    matches_origin_last_ = matches_last_incoming_;
+    matches_last_incoming_.clear();
+}
+
+inline void ProcessorTrackerFeature::advance()
+{
+    ProcessorTracker::advance();
+    for (auto match : matches_last_incoming_)
+    {
+        matches_origin_last_[match.first] = matches_origin_last_[matches_last_incoming_[match.first].feature_ptr_];
+    }
+    matches_last_incoming_.clear();
 }
 
 #endif /* PROCESSOR_TRACKER_FEATURE_H_ */
