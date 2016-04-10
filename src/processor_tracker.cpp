@@ -31,19 +31,19 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     incoming_ptr_ = _incoming_ptr;
     processKnown();
     // 2. Then we see if we want and we are allowed to create a KeyFrame
-    if (voteForKeyFrame() && permittedKeyFrame())
+    if (!(voteForKeyFrame() && permittedKeyFrame()))
     {
-        // 2.a. Detect new Features, initialize Landmarks, create Constraints
+        // We did not create a KeyFrame:
+        // 2.a. Update the tracker's last and incoming pointers one step ahead
+        advance();
+    }
+    else
+    {
+        // 2.b. Detect new Features, initialize Landmarks, create Constraints, ...
         processNew();
         // Make KeyFrame
         makeKeyFrame();
         // Reset the Tracker
         reset();
-    }
-    else
-    {
-        // We did not create a KeyFrame:
-        // 2.b. Update the tracker's last and incoming pointers one step ahead
-        advance();
     }
 }

@@ -119,6 +119,20 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature) = 0;
 
+        /** \brief Vote for KeyFrame generation
+         *
+         * If a KeyFrame criterion is validated, this function returns true,
+         * meaning that it wants to create a KeyFrame at the \b last Capture.
+         *
+         * WARNING! This function only votes! It does not create KeyFrames!
+         */
+        virtual bool voteForKeyFrame() = 0;
+
+        /**\brief Process new Features
+         *
+         */
+        virtual unsigned int processNew();
+
         /** \brief Detect new Features
          * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
          * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
@@ -130,15 +144,6 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * to be used for landmark initialization.
          */
         virtual unsigned int detectNewFeatures() = 0;
-
-        /** \brief Vote for KeyFrame generation
-         *
-         * If a KeyFrame criterion is validated, this function returns true,
-         * meaning that it wants to create a KeyFrame at the \b last Capture.
-         *
-         * WARNING! This function only votes! It does not create KeyFrames!
-         */
-        virtual bool voteForKeyFrame() = 0;
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
@@ -154,12 +159,6 @@ class ProcessorTrackerFeature : public ProcessorTracker
 
         virtual void establishConstraints();
 
-    protected:
-
-        /**\brief Process new Features
-         *
-         */
-        virtual unsigned int processNew();
 };
 
 inline void ProcessorTrackerFeature::establishConstraints()
