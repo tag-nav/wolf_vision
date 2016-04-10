@@ -6,6 +6,8 @@
 #include "constraint_sparse.h"
 #include "landmark_corner_2D.h"
 
+namespace wolf {
+
 class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 {
 	public:
@@ -116,5 +118,7 @@ inline bool ConstraintCorner2D::operator ()(const T* const _robotP, const T* con
     //			std::cout << std::endl;
     return true;
 }
+
+} // namespace wolf
 
 #endif

@@ -6,6 +6,9 @@
 #include "wolf.h"
 #include "constraint_sparse.h"
 
+
+namespace wolf {
+
 class ConstraintFix: public ConstraintSparse<3,2,1>
 {
     public:
@@ -64,5 +67,7 @@ inline bool ConstraintFix::operator ()(const T* const _p, const T* const _o, T* 
     //std::cout << "constraint fix computed!" << std::endl;
     return true;
 }
+
+} // namespace wolf
 
 #endif

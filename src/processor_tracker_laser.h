@@ -20,6 +20,9 @@
 #include "laser_scan_utils/corner_detector.h"
 #include "processor_tracker_feature.h"
 
+
+namespace wolf {
+
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level
 const WolfScalar aperture_error_th_ = 20.0*M_PI/180.; //20 degrees
 const WolfScalar angular_error_th_ = 10.0*M_PI/180.; //10 degrees;
@@ -100,4 +103,7 @@ class ProcessorTrackerLaser : public ProcessorTrackerFeature
          */
         virtual bool voteForKeyFrame();
 };
+
+} // namespace wolf
+
 #endif /* SRC_PROCESSOR_TRACKER_LASER_H_ */

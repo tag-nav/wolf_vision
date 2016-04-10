@@ -32,6 +32,7 @@
 #include "iri-algorithms/laser_scan_utils/corner_detector.h"
 #include "iri-algorithms/laser_scan_utils/entities.h"
 
+namespace wolf {
 //function travel around
 void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
 {
@@ -48,9 +49,12 @@ void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double
     pose.moveForward(displacement_);
     pose.rt.setEuler(pose.rt.head() + rotation_, pose.rt.pitch(), pose.rt.roll());
 }
+}
 
 int main(int argc, char** argv)
 {
+    using namespace wolf;
+
     std::cout << "\n ========= 2D Robot with odometry and 2 LIDARs ===========\n";
 
     // USER INPUT ============================================================================================

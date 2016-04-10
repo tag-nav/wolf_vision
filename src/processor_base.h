@@ -2,14 +2,19 @@
 #define PROCESSOR_BASE_H_
 
 // Fwd refs
+namespace wolf{
 class SensorBase;
 class NodeTerminus;
+}
 
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
 
 // Std includes
+
+
+namespace wolf {
 
 //class ProcessorBase
 class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
@@ -57,5 +62,7 @@ inline SensorBase* ProcessorBase::getSensorPtr()
 {
     return upperNodePtr();
 }
+
+} // namespace wolf
 
 #endif

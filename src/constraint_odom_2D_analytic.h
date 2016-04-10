@@ -5,6 +5,8 @@
 #include "wolf.h"
 #include "constraint_relative_2D_analytic.h"
 
+namespace wolf {
+
 class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 {
     public:
@@ -101,4 +103,7 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 //            return AUTO;
 //        }
 };
+
+} // namespace wolf
+
 #endif

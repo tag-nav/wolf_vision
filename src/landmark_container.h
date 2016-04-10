@@ -8,6 +8,7 @@
 
 // Std includes
 
+namespace wolf {
 
 //class LandmarkContainer
 class LandmarkContainer : public LandmarkBase
@@ -104,5 +105,8 @@ class LandmarkContainer : public LandmarkBase
         Eigen::VectorXs getCorner(const unsigned int _id) const;
         
 };
+
+
+} // namespace wolf
 
 #endif

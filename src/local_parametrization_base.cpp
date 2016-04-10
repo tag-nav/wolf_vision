@@ -1,5 +1,8 @@
 #include "local_parametrization_base.h"
 
+
+namespace wolf {
+
 LocalParametrizationBase::LocalParametrizationBase(unsigned int _global_size, unsigned int _local_size) :
         global_size_(_global_size), local_size_(_local_size)
 {
@@ -18,3 +21,5 @@ unsigned int LocalParametrizationBase::getGlobalSize() const
 {
     return global_size_;
 }
+
+} // namespace wolf

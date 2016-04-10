@@ -12,6 +12,8 @@
 #include <string>
 #include <sstream>
 
+namespace wolf {
+
 /*
  * NB:
  * FROM THIS CLASS AND ALL THE CLASS INCLUDED, THE LIBRARY RAW_GPS_UTILS
@@ -247,6 +249,6 @@ inline bool ConstraintGPSPseudorange2D::operator ()(const T* const _vehicle_p, c
     return true;
 }
 
-
+} // namespace wolf
 
 #endif //CONSTRAINT_GPS_PSEUDORANGE_2D_H_

@@ -17,6 +17,7 @@ int main(){
 
     using namespace Eigen;
     using namespace std;
+    using namespace wolf;
 
     VectorXs x(22);
     MatrixXs M(1,12); // matrix dimensions do not matter, just storage size.

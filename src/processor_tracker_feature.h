@@ -11,6 +11,9 @@
 #include "processor_tracker.h"
 #include "capture_base.h"
 
+namespace wolf {
+
+
 // Feature-Feature correspondence
 struct FeatureCorrespondence
 {
@@ -31,7 +34,7 @@ struct FeatureCorrespondence
 
 typedef std::map<FeatureBase*, FeatureCorrespondence> FeatureCorrespondenceMap;
 
-/** \brief Feature tracker processor
+/** \brief General tracker processor
  *
  * This class implements the incremental feature tracker.
  * It contains three pointers to three Captures of type CaptureBase, named \b origin, \b last and \b incoming:
@@ -190,5 +193,7 @@ inline void ProcessorTrackerFeature::reset()
     matches_origin_last_ = matches_last_incoming_;
     matches_last_incoming_.clear();
 }
+
+} // namespace wolf
 
 #endif /* PROCESSOR_TRACKER_FEATURE_H_ */

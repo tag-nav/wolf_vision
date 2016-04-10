@@ -6,6 +6,8 @@
 // other includes
 #include <bitset>
 
+namespace wolf {
+
 /** Public */
 
 /** The "main" class of this processor is "process" */
@@ -301,4 +303,6 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
 
 }
 
+
+} // namespace wolf
 

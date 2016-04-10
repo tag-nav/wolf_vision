@@ -7,6 +7,8 @@
 #include "constraint_base.h"
 #include "state_block.h"
 
+namespace wolf {
+
 //TODO: change class name (and file name!->includes) to ConstraintNumericalAutoDiff 
 //template class ConstraintSparse
 template <const unsigned int MEASUREMENT_SIZE,
@@ -532,5 +534,7 @@ void ConstraintSparse<MEASUREMENT_SIZE,
         }
     }
 }
+
+} // namespace wolf
 
 #endif

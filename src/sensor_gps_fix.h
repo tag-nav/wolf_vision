@@ -7,6 +7,9 @@
 
 // std includes
 
+
+namespace wolf {
+
 class SensorGPSFix : public SensorBase
 {
     public:
@@ -35,4 +38,7 @@ class SensorGPSFix : public SensorBase
         double getNoise() const;
         
 };
+
+} // namespace wolf
+
 #endif

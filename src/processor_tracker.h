@@ -11,6 +11,8 @@
 #include "processor_base.h"
 #include "capture_base.h"
 
+namespace wolf {
+
 /** \brief Feature tracker processor
  *
  * This is an abstract class.
@@ -219,5 +221,7 @@ inline CaptureBase* ProcessorTracker::getLastPtr()
 {
     return last_ptr_;
 }
+
+} // namespace wolf
 
 #endif /* SRC_PROCESSOR_TRACKER_H_ */

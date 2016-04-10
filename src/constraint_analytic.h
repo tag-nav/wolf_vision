@@ -6,6 +6,8 @@
 #include "wolf.h"
 #include "constraint_base.h"
 
+namespace wolf {
+
 class ConstraintAnalytic: public ConstraintBase
 {
     protected:
@@ -156,5 +158,7 @@ class ConstraintAnalytic: public ConstraintBase
     private:
         void resizeVectors();
 };
+
+} // namespace wolf
 
 #endif

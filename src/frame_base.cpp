@@ -5,6 +5,8 @@
 #include "capture_base.h"
 #include "state_block.h"
 
+namespace wolf {
+
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeConstrained(MID, "FRAME"),
             type_(NON_KEY_FRAME),
@@ -253,3 +255,5 @@ void FrameBase::setStatus(StateStatus _st)
         }
     }
 }
+
+} // namespace wolf

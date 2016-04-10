@@ -2,9 +2,11 @@
 #define LANDMARK_BASE_H_
 
 // Fwd references
+namespace wolf{
 class MapBase;
 class NodeTerminus;
 class StateBlock;
+}
 
 //Wolf includes
 #include "wolf.h"
@@ -12,6 +14,8 @@ class StateBlock;
 #include "node_constrained.h"
 
 //std includes
+
+namespace wolf {
 
 // TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
@@ -151,4 +155,5 @@ inline const LandmarkType LandmarkBase::getType() const
     return type_;
 }
 
+} // namespace wolf
 #endif

@@ -11,6 +11,7 @@
 
 #include "processor_base.h"
 
+
 //TODO try this, and remove includes below
 //class SensorLaser2D;
 //class CaptureLaser2D;
@@ -36,6 +37,7 @@
 
 
 
+namespace wolf {
 
 
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level
@@ -98,5 +100,7 @@ inline bool ProcessorLaser2D::voteForKeyFrame()
 inline void ProcessorLaser2D::init(CaptureBase* _origin_ptr)
 {
 }
+
+} // namespace wolf
 
 #endif /* SRC_PROCESSOR_LASER_2D_H_ */

@@ -4,6 +4,7 @@
 #include "wolf_problem.h"
 
 //namespaces
+namespace wolf {
 using namespace std;
 
 //id count init
@@ -92,9 +93,12 @@ class MeasurementN : public NodeLinked<FrameN,NodeTerminus>
         
 };
 
+} // namespace wolf
 
 int main()
 {
+    using namespace wolf;
+
     cout << endl << "Node class test" << endl;
     cout << "========================================================" << endl;
 

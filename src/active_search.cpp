@@ -6,6 +6,8 @@
 
 #include "active_search.h"
 
+namespace wolf{
+
 // CLASS ActiveSearchGrid
 ActiveSearchGrid::ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v, const int & _n_cells_h,
                                    const int & _n_cells_v, const int & _margin, const int & _separation) :
@@ -139,3 +141,5 @@ void ActiveSearchGrid::blockCell(const cv::Rect & _roi)
         }
 #endif
 */
+
+}

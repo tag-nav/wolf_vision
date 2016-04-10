@@ -2,12 +2,16 @@
 #define HARDWARE_BASE_H_
 
 // Fwd dependencies
+namespace wolf{
 class SensorBase;
 class WolfProblem;
+}
 
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
+
+namespace wolf {
 
 //class HardwareBase
 class HardwareBase : public NodeLinked<WolfProblem, SensorBase>
@@ -45,5 +49,7 @@ inline SensorBaseList* HardwareBase::getSensorListPtr()
 {
     return getDownNodeListPtr();
 }
+
+} // namespace wolf
 
 #endif

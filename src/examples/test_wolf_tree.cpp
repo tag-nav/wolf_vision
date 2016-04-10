@@ -10,9 +10,10 @@
 //Wolf includes
 #include "wolf_manager.h"
 
-
 int main(int argc, char** argv) 
 {
+    using namespace wolf;
+
     //Welcome message
     std::cout << std::endl << " ========= WOLF TREE test ===========" << std::endl << std::endl;
 
@@ -55,3 +56,4 @@ int main(int argc, char** argv)
     //exit
     return 0;
 }
+

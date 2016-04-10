@@ -3,6 +3,9 @@
 #include "sensor_base.h"
 #include "feature_base.h"
 
+namespace wolf{
+
+
 CaptureBase::CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
         NodeLinked(MID, "CAPTURE"),
         time_stamp_(_ts),
@@ -47,5 +50,7 @@ StateBlock* CaptureBase::getSensorOPtr() const {
 		return sensor_o_ptr_;
 	else
 		return getSensorPtr()->getOPtr();
+}
+
 }
 

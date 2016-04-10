@@ -18,6 +18,8 @@
 
 int main(int argc, char** argv)
 {
+    using namespace wolf;
+
     /**
     if (argc != 2 || atoi(argv[1]) < 0 || atoi(argv[1]) > 1)
     {

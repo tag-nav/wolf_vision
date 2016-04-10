@@ -16,6 +16,8 @@
 #include "node_base.h"
 #include "wolf.h"
 
+namespace wolf {
+
 /** \brief Linked node element in the Wolf Tree
  * 
  * \param UpperType the type of node one level up in the Wolf tree.
@@ -161,6 +163,9 @@ class NodeLinked : public NodeBase
 
 };
 
+} // namespace wolf
+
+
 //////////////////////////////////////////
 //          IMPLEMENTATION
 //////////////////////////////////////////
@@ -180,6 +185,8 @@ class NodeLinked : public NodeBase
 #include "map_base.h"
 #include "landmark_base.h"
 #include "node_terminus.h"
+
+namespace wolf {
 
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label) :
@@ -359,5 +366,7 @@ WolfProblem* NodeLinked<UpperType, LowerType>::getWolfProblem()
         return up_node_ptr_->getWolfProblem();
     return nullptr;
 }
+
+} // namespace wolf
 
 #endif /* NODE_LINKED_H_ */

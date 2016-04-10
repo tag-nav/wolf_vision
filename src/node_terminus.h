@@ -4,6 +4,8 @@
 //wolf includes
 #include "node_base.h"
 
+namespace wolf {
+
 /**
  * \brief Dummy node to terminate the tree in both the Top and Bottom levels.
  *
@@ -30,5 +32,7 @@ class NodeTerminus : public NodeBase
             //
         }
 };
+
+} // namespace wolf
 
 #endif /* NODE_TERMINUS_H_ */

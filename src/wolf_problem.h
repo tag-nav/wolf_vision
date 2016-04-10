@@ -2,10 +2,12 @@
 #define WOLF_PROBLEM_H_
 
 // Fwd refs
+namespace wolf{
 class HardwareBase;
 class TrajectoryBase;
 class MapBase;
 class TimeStamp;
+}
 
 //wolf includes
 #include "node_base.h"
@@ -13,6 +15,9 @@ class TimeStamp;
 
 // std includes
 #include <utility> // pair
+
+
+namespace wolf {
 
 /** \brief Wolf problem node element in the Wolf Tree
  * 
@@ -216,5 +221,8 @@ inline bool WolfProblem::isTop()
 {
     return true;
 }
+
+} // namespace wolf
+
 
 #endif

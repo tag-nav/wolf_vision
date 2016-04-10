@@ -3,14 +3,19 @@
 #define TRAJECTORY_BASE_H_
 
 // Fwd refs
+namespace wolf{
 class WolfProblem;
 class FrameBase;
+}
 
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
 
 //std includes
+
+
+namespace wolf {
 
 //class TrajectoryBase
 class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
@@ -73,5 +78,8 @@ inline FrameStructure TrajectoryBase::getFrameStructure() const
 {
     return frame_structure_;
 }
+
+
+} // namespace wolf
 
 #endif

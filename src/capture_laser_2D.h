@@ -7,6 +7,8 @@
 //wolf includes
 #include "capture_base.h"
 
+namespace wolf {
+
 class CaptureLaser2D : public CaptureBase
 {
     public:
@@ -51,5 +53,7 @@ inline const std::vector<float>& CaptureLaser2D::getRanges() const
 {
     return ranges_;
 }
+
+} // namespace wolf
 
 #endif /* CAPTURE_LASER_2D_H_ */

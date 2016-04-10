@@ -1,5 +1,6 @@
 #include "processor_tracker_laser.h"
 
+namespace wolf {
 
 ProcessorTrackerLaser::ProcessorTrackerLaser::ProcessorTrackerLaser() :
         ProcessorTrackerFeature(PRC_TRACKER_LIDAR),
@@ -146,3 +147,5 @@ bool ProcessorTrackerLaser::voteForKeyFrame()
         std::cout << "DON'T VOTE for a new key frame " << std::endl;
     return (incoming_ptr_->getFeatureListPtr()->size() / origin_ptr_->getFeatureListPtr()->size() < min_features_ratio_th_);
 }
+
+} // namespace wolf

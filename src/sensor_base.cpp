@@ -3,6 +3,9 @@
 #include "hardware_base.h"
 #include "processor_base.h"
 
+
+namespace wolf {
+
 SensorBase::SensorBase(const SensorType& _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr,
                        const unsigned int _noise_size, const bool _extr_dyn) :
         NodeLinked(MID, "SENSOR"),
@@ -107,3 +110,5 @@ void SensorBase::setNoise(const Eigen::VectorXs& _noise_std) {
 	for (unsigned int i=0; i<_noise_std.size(); i++)
 		noise_cov_(i,i) = _noise_std(i) * _noise_std(i);
 }
+
+} // namespace wolf

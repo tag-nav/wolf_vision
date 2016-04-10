@@ -2,9 +2,11 @@
 #define CAPTURE_BASE_H_
 
 // Forward declarations for node templates
+namespace wolf{
 class FrameBase;
 class FeatureBase;
 class SensorBase;
+}
 
 //Wolf includes
 #include "wolf.h"
@@ -13,6 +15,8 @@ class SensorBase;
 
 //std includes
 //
+
+namespace wolf{
 
 
 //class CaptureBase
@@ -118,5 +122,7 @@ inline void CaptureBase::setTimeStampToNow()
 {
     time_stamp_.setToNow();
 }
+
+} // namespace wolf
 
 #endif

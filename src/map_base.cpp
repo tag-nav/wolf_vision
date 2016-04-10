@@ -2,6 +2,9 @@
 //#include "wolf_problem.h"
 #include "landmark_base.h"
 
+
+namespace wolf {
+
 MapBase::MapBase() :
     NodeLinked(MID, "MAP")
 {
@@ -35,3 +38,5 @@ void MapBase::removeLandmark(const LandmarkBaseIter& _landmark_iter)
 {
     removeDownNode(_landmark_iter);
 }
+
+} // namespace wolf

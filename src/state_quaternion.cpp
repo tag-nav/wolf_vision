@@ -8,6 +8,8 @@
 #include "state_quaternion.h"
 #include "local_parametrization_quaternion.h"
 
+namespace wolf {
+
 StateQuaternion::StateQuaternion(const Eigen::VectorXs _state, bool _fixed) :
         StateBlock(_state, _fixed, new LocalParametrizationQuaternion)
 {
@@ -25,3 +27,4 @@ StateQuaternion::~StateQuaternion()
     delete local_param_ptr_;
 }
 
+} // namespace wolf

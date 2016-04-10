@@ -18,6 +18,7 @@
 // EIGEN
 //#include <Eigen/CholmodSupport>
 
+namespace wolf{
 // inserts the sparse matrix 'ins' into the sparse matrix 'original' in the place given by 'row' and 'col' integers
 void insertSparseBlock(const Eigen::SparseMatrix<WolfScalar>& ins, Eigen::SparseMatrix<WolfScalar>& original, const unsigned int& row, const unsigned int& col)
 {
@@ -27,10 +28,12 @@ void insertSparseBlock(const Eigen::SparseMatrix<WolfScalar>& ins, Eigen::Sparse
 
   original.makeCompressed();
 }
-
+}
 
 int main(int argc, char** argv) 
 {
+    using namespace wolf;
+
     //Welcome message
     std::cout << std::endl << " ========= WOLF IMPORTED .graph TEST ===========" << std::endl << std::endl;
 

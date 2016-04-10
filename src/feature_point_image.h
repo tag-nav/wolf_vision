@@ -8,6 +8,9 @@
 //OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
 
+
+namespace wolf {
+
 /**
  *
  * Test for the feature point
@@ -77,6 +80,7 @@ inline cv::Mat& FeaturePointImage::getDescriptor()
     return descriptor_;
 }
 
+<<<<<<< HEAD
 inline bool FeaturePointImage::isKnown()
 {
     return is_known_;
@@ -86,5 +90,9 @@ inline void FeaturePointImage::setIsKnown(bool _is_known)
 {
     is_known_ = _is_known;
 }
+=======
+
+} // namespace wolf
+>>>>>>> master
 
 #endif // FEATURE_IMAGE_H

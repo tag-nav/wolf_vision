@@ -6,6 +6,9 @@
 #include "feature_gps_pseudorange.h"
 #include "constraint_gps_pseudorange_2D.h"
 
+
+namespace wolf {
+
 ProcessorGPS::ProcessorGPS() : ProcessorBase(PRC_GPS_RAW),
         //sensor_gps_ptr_((SensorGPS*)(upperNodePtr())), //TODO here there's a crash. Look at what they'll do in processorLaser and modify as consequence
         capture_gps_ptr_(nullptr)
@@ -53,3 +56,4 @@ void ProcessorGPS::process(CaptureBase* _capture_ptr)
 }
 
 
+} // namespace wolf

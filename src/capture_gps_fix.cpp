@@ -1,5 +1,8 @@
 #include "capture_gps_fix.h"
 
+
+namespace wolf {
+
 CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
 	CaptureBase(_ts, _sensor_ptr),
 	data_(_data)
@@ -44,4 +47,4 @@ Eigen::VectorXs CaptureGPSFix::computeFramePose(const TimeStamp& _now) const
 //}
 
 
-
+} //namespace wolf

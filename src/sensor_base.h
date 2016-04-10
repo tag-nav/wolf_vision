@@ -2,15 +2,19 @@
 #define SENSOR_BASE_H_
 
 // Fwd refs
+namespace wolf{
 class HardwareBase;
 class ProcessorBase;
 class StateBlock;
+}
 
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
 
 //std includes
+
+namespace wolf {
 
 class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 {
@@ -131,5 +135,7 @@ inline Eigen::MatrixXs SensorBase::getNoiseCov()
 {
     return noise_cov_;
 }
+
+} // namespace wolf
 
 #endif

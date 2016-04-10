@@ -8,6 +8,8 @@
 //main
 int main(int argc, char *argv[])
 {
+    using namespace wolf;
+
     std::cout << std::endl << "CaptureLaser2D class test" << std::endl;
     std::cout << "========================================================" << std::endl;
     

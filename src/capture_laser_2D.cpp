@@ -1,5 +1,7 @@
 #include "capture_laser_2D.h"
 
+namespace wolf {
+
 // unsigned int CaptureLaser2D::segment_window_size = 8;//window size to extract segments
 // double CaptureLaser2D::theta_min = 0.4; //minimum theta between consecutive segments to detect corner. PI/8=0.39
 // double CaptureLaser2D::theta_max_parallel = 0.1; //maximum theta between consecutive segments to fuse them in a single line.
@@ -42,3 +44,4 @@ Eigen::VectorXs CaptureLaser2D::computeFramePose(const TimeStamp& _now) const
     return Eigen::Vector3s(1, 2, 3);
 }
 
+} // namespace wolf

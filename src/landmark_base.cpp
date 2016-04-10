@@ -5,6 +5,8 @@
 #include "node_terminus.h"
 #include "state_block.h"
 
+namespace wolf {
+
 LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr) :
             NodeConstrained(MID, "LANDMARK"),
             type_(_tp),
@@ -93,3 +95,5 @@ void LandmarkBase::registerNewStateBlocks()
             getWolfProblem()->addStateBlockPtr(o_ptr_);
     }
 }
+
+} // namespace wolf

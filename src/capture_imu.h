@@ -6,6 +6,8 @@
 #include "feature_base.h" //must be replaced by feature_imu if needed
 #include "sensor_base.h" //must be replaced by sensor_imu
 
+namespace wolf {
+
 class CaptureIMU : public CaptureMotion
 {
     public:
@@ -31,5 +33,7 @@ class CaptureIMU : public CaptureMotion
 
         virtual CaptureIMU* interpolateCapture(const TimeStamp& _ts);
 };
+
+} // namespace wolf
 
 #endif // CAPTURE_IMU_H

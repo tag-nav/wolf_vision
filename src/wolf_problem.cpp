@@ -6,6 +6,9 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 
+
+namespace wolf {
+
 WolfProblem::WolfProblem(FrameStructure _frame_structure) :
         NodeBase("WOLF_PROBLEM"), //
         location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(new HardwareBase)
@@ -254,3 +257,5 @@ std::list<StateBlock*>* WolfProblem::getStateBlockUpdateList()
 {
     return &state_block_update_list_;
 }
+
+} // namespace wolf

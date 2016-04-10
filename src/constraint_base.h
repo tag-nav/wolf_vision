@@ -2,8 +2,10 @@
 #define CONSTRAINT_BASE_H_
 
 // Forward declarations for node templates
+namespace wolf{
 class FeatureBase;
 class NodeTerminus;
+}
 
 //Wolf includes
 #include "wolf.h"
@@ -11,6 +13,8 @@ class NodeTerminus;
 
 //std includes
 //
+
+namespace wolf {
 
 //TODO: add a member to indicate how jacobian is computed, called "jacobian_method_"
 //class ConstraintBase
@@ -150,4 +154,5 @@ inline LandmarkBase* ConstraintBase::getLandmarkOtherPtr()
     return landmark_ptr_;
 }
 
+} // namespace wolf
 #endif

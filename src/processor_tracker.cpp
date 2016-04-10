@@ -7,6 +7,8 @@
 
 #include "processor_tracker.h"
 
+namespace wolf {
+
 ProcessorTracker::ProcessorTracker(ProcessorType _tp) :
     ProcessorBase(_tp),
     origin_ptr_(nullptr),
@@ -66,3 +68,6 @@ void ProcessorTracker::advance()
     last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
     incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
+
+} // namespace wolf
+

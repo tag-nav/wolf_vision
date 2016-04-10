@@ -1,5 +1,7 @@
 #include "feature_gps_fix.h"
 
+namespace wolf {
+
 FeatureGPSFix::FeatureGPSFix(unsigned int _dim_measurement) :
     FeatureBase(FEAT_GPS_FIX, _dim_measurement)
 {
@@ -16,3 +18,5 @@ FeatureGPSFix::~FeatureGPSFix()
 {
     //
 }
+
+} // namespace wolf

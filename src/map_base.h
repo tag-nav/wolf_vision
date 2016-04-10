@@ -3,14 +3,18 @@
 #define MAP_BASE_H_
 
 // Fwd refs
+namespace wolf{
 class WolfProblem;
 class LandmarkBase;
+}
 
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
 
 //std includes
+
+namespace wolf {
 
 //class MapBase
 class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
@@ -48,5 +52,7 @@ inline LandmarkBaseList* MapBase::getLandmarkListPtr()
 {
     return getDownNodeListPtr();
 }
+
+} // namespace wolf
 
 #endif
