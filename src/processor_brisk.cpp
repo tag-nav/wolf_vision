@@ -127,10 +127,11 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
     cv::Mat new_descriptors;
 
     std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl << std::endl;
+
     unsigned int n_last_capture_feat = 0;
     for(auto feature_base_ptr : _feature_list_in)
     {
-        n_candidates = 0;
+//        n_candidates = 0;
 
         FeaturePointImage* feature_ptr = (FeaturePointImage*)feature_base_ptr;
         Eigen::Vector2i feature_point = {feature_ptr->getKeypoint().pt.x,feature_ptr->getKeypoint().pt.y};
@@ -165,7 +166,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                 if(matches[0].distance < 200)
                 {
                     FeaturePointImage* incoming_point_ptr = new FeaturePointImage(new_keypoints[matches[0].trainIdx],
-                            (new_descriptors.row(matches[0].trainIdx)),feature_ptr->getIsKnown());
+                            (new_descriptors.row(matches[0].trainIdx)),feature_ptr->isKnown());
                     _feature_list_out.push_back(incoming_point_ptr);
                     _feature_correspondences[incoming_point_ptr] = FeatureCorrespondence(feature_base_ptr, (WolfScalar) matches[0].distance);
                 }
@@ -286,7 +287,7 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
     for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()) )
     {
         FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
-        if(point_ptr->getIsKnown())
+        if(point_ptr->isKnown())
         {
             cv::circle(image,point_ptr->getKeypoint().pt,2,cv::Scalar(50.0,250.0,54.0),-1,3,0);
         }
