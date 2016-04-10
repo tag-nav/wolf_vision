@@ -45,21 +45,24 @@ unsigned int ProcessorTrackerFeature::processKnown()
 unsigned int ProcessorTrackerFeature::processNew()
 {
     /* Rationale: A keyFrame will be created using the last Capture.
-     * First, we work on this Capture to detect new Features,
-     * eventually create Landmarks with them,
-     * and in such case create the new Constraints feature-landmark.
+     * First, we create the constraints from the existing Features in last,
+     * because the ones that we want to detect later on will not be constrained by anyone yet.
+     * Then, we work on this last Capture to detect new Features,
      * When done, we need to track these new Features to the incoming Capture.
      * At the end, all new Features are appended to the lists of known Features in
      * the last and incoming Captures.
      */
 
-    // We first need to populate the \b last Capture with new Features
+    // Establish constraints between last and origin
+    establishConstraints();
+
+    // Populate the last Capture with new Features
     unsigned int n = detectNewFeatures();
 
     // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
     trackFeatures(new_features_last_, new_features_incoming_, matches_last_incoming_);
 
-    // Append all new Features to the Capture's list of Features
+    // Append all new Features to the Captures' list of Features
     last_ptr_->addDownNodeList(new_features_last_); //TODO JV: is it really necessary to add all new features instead of only the tracked ones? It's easier and probably faster.
     incoming_ptr_->addDownNodeList(new_features_incoming_);
 

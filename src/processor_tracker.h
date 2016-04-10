@@ -165,8 +165,8 @@ inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
 {
     origin_ptr_ = _origin_ptr;
     last_ptr_ = _origin_ptr;
-    detectNewFeatures(); // This operates on last but it's equal to origin.
-    last_ptr_->addDownNodeList(new_features_last_);
+    detectNewFeatures(); // This detector operates on last but it's equal to origin.
+    origin_ptr_->addDownNodeList(new_features_last_); // that's why we add them to origin, where they should stay.
 }
 
 inline void ProcessorTracker::makeFrame(CaptureBase* _capture_ptr)
