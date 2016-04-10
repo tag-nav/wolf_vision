@@ -126,6 +126,10 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual bool voteForKeyFrame() = 0;
 
+        // We overload the advance and reset functions to update the lists of matches
+        void advance();
+        void reset();
+
         /**\brief Process new Features
          *
          */
@@ -142,10 +146,6 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * to be used for landmark initialization.
          */
         virtual unsigned int detectNewFeatures() = 0;
-
-        // We overload the advance and reset functions for completing it with the matches
-        void advance();
-        void reset();
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
@@ -171,22 +171,23 @@ inline void ProcessorTrackerFeature::establishConstraints()
         last_feature->addConstraint(createConstraint(last_feature, matches_origin_last_[last_feature].feature_ptr_));
 }
 
+inline void ProcessorTrackerFeature::advance()
+{
+    ProcessorTracker::advance();
+
+    for (auto match : matches_last_incoming_)
+    {
+        matches_origin_last_[match.first] = matches_origin_last_[matches_last_incoming_[match.first].feature_ptr_];
+    }
+    matches_last_incoming_.clear();
+}
+
 inline void ProcessorTrackerFeature::reset()
 {
     ProcessorTracker::reset();
 
     // We also reset here the list of correspondences, which passes from last--incoming to origin--last.
     matches_origin_last_ = matches_last_incoming_;
-    matches_last_incoming_.clear();
-}
-
-inline void ProcessorTrackerFeature::advance()
-{
-    ProcessorTracker::advance();
-    for (auto match : matches_last_incoming_)
-    {
-        matches_origin_last_[match.first] = matches_origin_last_[matches_last_incoming_[match.first].feature_ptr_];
-    }
     matches_last_incoming_.clear();
 }
 

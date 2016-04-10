@@ -140,13 +140,7 @@ class ProcessorTracker : public ProcessorBase
 
         /**\brief make a non-key Frame with the provided Capture
          */
-        void makeFrame(CaptureBase* _capture_ptr)
-        {
-            // We need to create the new free Frame to hold what will become the last Capture
-            FrameBase* new_frame_ptr = getWolfProblem()->createFrame(NON_KEY_FRAME, _capture_ptr->getTimeStamp());
-            new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
-            new_frame_ptr->setTimeStamp(_capture_ptr->getTimeStamp());
-        }
+        void makeFrame(CaptureBase* _capture_ptr);
 
         /**\brief Make a non-key frame at \b incoming and set KeyFrame at \b last
          */
@@ -175,22 +169,12 @@ inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
     last_ptr_->addDownNodeList(new_features_last_);
 }
 
-inline void ProcessorTracker::advance()
+inline void ProcessorTracker::makeFrame(CaptureBase* _capture_ptr)
 {
-    if (last_ptr_ == origin_ptr_) // The first time last_ptr = origin_ptr (see init() )
-    {
-        // We need to create the new non-key Frame to hold what will become the \b last Capture
-        makeFrame(incoming_ptr_);
-    }
-    else
-    {
-        // We need to add \b incoming to the frame and remove \b last.
-        last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-        last_ptr_->destruct(); // TODO: JS->JV why this does not work?? Destruct now the obsolete last before reassigning a new pointer
-        incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
-    }
-    last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
-    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+    // We need to create the new free Frame to hold what will become the last Capture
+    FrameBase* new_frame_ptr = getWolfProblem()->createFrame(NON_KEY_FRAME, _capture_ptr->getTimeStamp());
+    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
+    new_frame_ptr->setTimeStamp(_capture_ptr->getTimeStamp());
 }
 
 inline void ProcessorTracker::makeKeyFrame()
