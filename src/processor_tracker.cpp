@@ -57,7 +57,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         // Clear incoming ptr. origin and last are OK.
         incoming_ptr_ = nullptr;
 
-        std::cout << "Features in origin (should be 3): " << origin_ptr_->getFeatureListPtr()->size() << "; in last (should be 3): " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+        std::cout << "Features in origin (should be 5): " << origin_ptr_->getFeatureListPtr()->size() << "; in last (should be 3): " << last_ptr_->getFeatureListPtr()->size() << std::endl;
     }
     // SECOND TIME
     else if (origin_ptr_ == last_ptr_)
