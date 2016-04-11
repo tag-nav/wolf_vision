@@ -38,6 +38,4 @@ inline ConstraintEpipolar::~ConstraintEpipolar(){}
 
 } // namespace wolf
 
-} // namespace wolf
-
 #endif // CONSTRAINT_EPIPOLAR_H
