@@ -39,18 +39,25 @@ SensorBase::SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _
 SensorBase::~SensorBase()
 {
     // Remove State Blocks
-    if (p_ptr_ != nullptr)
+    if (p_ptr_ != nullptr && !extrinsic_dynamic_)
     {
         if (getWolfProblem() != nullptr)
             getWolfProblem()->removeStateBlockPtr(p_ptr_);
         delete p_ptr_;
     }
 
-    if (o_ptr_ != nullptr)
+    if (o_ptr_ != nullptr && !extrinsic_dynamic_)
     {
         if (getWolfProblem() != nullptr)
             getWolfProblem()->removeStateBlockPtr(o_ptr_);
         delete o_ptr_;
+    }
+
+    if (intrinsic_ptr_ != nullptr)
+    {
+        if (getWolfProblem() != nullptr)
+            getWolfProblem()->removeStateBlockPtr(intrinsic_ptr_);
+        delete intrinsic_ptr_;
     }
 
 }

@@ -32,7 +32,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // FIRST TIME
     if (origin_ptr_ == nullptr)
     {
-        std::cout << "Tracker initialization..." << std::endl;
+        std::cout << "FIRST TIME" << std::endl;
 
         incoming_ptr_ = _incoming_ptr;
         last_ptr_ = _incoming_ptr;
@@ -56,17 +56,15 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // SECOND TIME
     else if (origin_ptr_ == last_ptr_)
     {
-        std::cout << "no init..." << std::endl;
+        std::cout << "SECOND TIME" << std::endl;
         // 1. First we track the known Features and create new constraints as needed
         incoming_ptr_ = _incoming_ptr;
 
         processKnown();
 
-        std::cout << "voting..." << std::endl;
         // Do we want more features in last_?
         if (voteForKeyFrame() )
         {
-            std::cout << "More features in last needed..." << std::endl;
             // 2.b. Detect new Features, initialize Landmarks, create Constraints, ...
             processNew();
 
@@ -86,17 +84,15 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // OTHER TIMES
     else
     {
-        std::cout << "no init..." << std::endl;
+        std::cout << "OTHER TIMES" << std::endl;
         // 1. First we track the known Features and create new constraints as needed
         incoming_ptr_ = _incoming_ptr;
 
         processKnown();
 
-        std::cout << "voting..." << std::endl;
         // 2. Then we see if we want and we are allowed to create a KeyFrame
         if (!(voteForKeyFrame() && permittedKeyFrame()))
         {
-            std::cout << "NO key frame, advance..." << std::endl;
             // We did not create a KeyFrame:
 
             // advance the derived tracker
@@ -111,7 +107,6 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         }
         else
         {
-            std::cout << "Key frame! processing new..." << std::endl;
             // 2.b. Detect new Features, initialize Landmarks, create Constraints, ...
             processNew();
 
@@ -132,7 +127,6 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
         }
     }
-    std::cout << "processed!" << std::endl;
 }
 
 } // namespace wolf

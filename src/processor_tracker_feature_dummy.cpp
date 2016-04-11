@@ -20,7 +20,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
     auto features_lost = 0;
     for (auto feat_in_ptr : _feature_list_in)
     {
-        if (features_lost < 3)
+        if (features_lost < 1)
             features_lost++;
         else
         {
@@ -43,7 +43,7 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures()
     std::cout << "detecting new features..." << std::endl;
 
     // detecting 10 new features
-    for (unsigned int i = 1; i <= 10; i++)
+    for (unsigned int i = 1; i <= 5; i++)
     {
         n_feature_++;
         new_features_last_.push_back(
