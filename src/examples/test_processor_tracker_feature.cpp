@@ -35,27 +35,10 @@ int main()
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
-//    wolf_problem_ptr_->createFrame(KEY_FRAME, Eigen::Vector3s::Zero(), TimeStamp(0));
-//
-//    std::cout << "first frame created" << std::endl;
-//
-//    CaptureVoid* new_capture = new CaptureVoid(TimeStamp(0), sensor_ptr_);
-//    wolf_problem_ptr_->getLastFramePtr()->addCapture(new_capture);
-//
-//    std::cout << "first capture created and added to first frame" << std::endl;
-//
-//    processor_ptr_->process(new_capture);
-//
-//    std::cout << "processor initialized" << std::endl;
+    for (auto i = 0; i < 10; i++)
+        processor_ptr_->process(new CaptureVoid(TimeStamp(0), sensor_ptr_));
 
-    for (auto i = 0; i < 20; i++)
-    {
-        CaptureVoid* new_capture = new CaptureVoid(TimeStamp(0), sensor_ptr_);
-
-        processor_ptr_->process(new_capture);
-    }
-
-    wolf_problem_ptr_->destruct();
+    delete wolf_problem_ptr_;
 
     return 0;
 }
