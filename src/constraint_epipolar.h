@@ -36,6 +36,7 @@ inline ConstraintEpipolar::ConstraintEpipolar(FeatureBase* _feature_ptr, Feature
 
 inline ConstraintEpipolar::~ConstraintEpipolar(){}
 
+} // namespace wolf
 
 } // namespace wolf
 
