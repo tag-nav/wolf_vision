@@ -64,12 +64,6 @@ class ProcessorTracker : public ProcessorBase
         ProcessorTracker(ProcessorType _tp);
         virtual ~ProcessorTracker();
 
-        /** \brief Initialize tracker.
-         * This function accepts a Capture to be used as the origin.
-         * This Capture is required to be already attached to a KeyFrame in WolfProblem.
-         */
-        void init(CaptureBase* _origin_ptr);
-
         /** \brief Full processing of an incoming Capture.
          *
          * Usually you do not need to overload this method in derived classes.
@@ -117,21 +111,12 @@ class ProcessorTracker : public ProcessorBase
          * Call this when the tracking and keyframe policy work is done and
          * we need to get ready to accept a new incoming Capture.
          */
-        virtual void advance();
+        virtual void advance() = 0;
 
         /**\brief Process new Features or Landmarks
          *
          */
         virtual unsigned int processNew() = 0;
-
-        /** \brief Detect new Features in the \b last Capture
-         * \return The number of detected Features.
-         *
-         * This function detects Features that do not correspond to known Features/Landmarks in the system.
-         *
-         * The function sets the member new_features_list_last_, the list of newly detected features.
-         */
-        virtual unsigned int detectNewFeatures() = 0;
 
         /**\brief Creates and adds constraints from last_ to origin_
          *
@@ -142,13 +127,9 @@ class ProcessorTracker : public ProcessorBase
          */
         void makeFrame(CaptureBase* _capture_ptr);
 
-        /**\brief Make a non-key frame at \b incoming and set KeyFrame at \b last
-         */
-        virtual void makeKeyFrame();
-
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
-        void reset();
+        virtual void reset() = 0;
 
     protected:
 
@@ -161,38 +142,11 @@ class ProcessorTracker : public ProcessorBase
         void addNewFeatureIncoming(FeatureBase* _feature_ptr);
 };
 
-inline void ProcessorTracker::init(CaptureBase* _origin_ptr)
-{
-    origin_ptr_ = _origin_ptr;
-    last_ptr_ = _origin_ptr;
-    detectNewFeatures(); // This detector operates on last but it's equal to origin.
-    origin_ptr_->addDownNodeList(new_features_last_); // that's why we add them to origin, where they should stay.
-}
-
 inline void ProcessorTracker::makeFrame(CaptureBase* _capture_ptr)
 {
     // We need to create the new free Frame to hold what will become the last Capture
     FrameBase* new_frame_ptr = getWolfProblem()->createFrame(NON_KEY_FRAME, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
-    new_frame_ptr->setTimeStamp(_capture_ptr->getTimeStamp());
-}
-
-inline void ProcessorTracker::makeKeyFrame()
-{
-    // Create a new non-key Frame in the Trajectory with the incoming Capture
-    makeFrame(incoming_ptr_);
-    // Make the last Capture's Frame a KeyFrame so that it gets into the solver
-    last_ptr_->getFramePtr()->setKey();
-
-    // Create constraints from last to origin
-    establishConstraints();
-}
-
-inline void ProcessorTracker::reset()
-{
-    origin_ptr_ = last_ptr_;
-    last_ptr_ = incoming_ptr_;
-    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
 
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesListLast()

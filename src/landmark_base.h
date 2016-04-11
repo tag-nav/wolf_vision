@@ -64,6 +64,8 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          **/
         void unfix();
 
+        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
+
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
@@ -113,6 +115,13 @@ inline void LandmarkBase::unfix()
 {
     //std::cout << "Unfixing frame " << nodeId() << std::endl;
     this->setStatus(LANDMARK_ESTIMATED);
+}
+
+inline void LandmarkBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
+{
+    NodeConstrained::removeConstrainedBy(_ctr_ptr);
+    if (constrained_by_list_.empty())
+        this->destruct();
 }
 
 inline StateBlock* LandmarkBase::getPPtr() const

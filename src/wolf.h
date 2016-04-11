@@ -210,6 +210,7 @@ typedef enum
  */
 typedef enum
 {
+    PRC_TRACKER_DUMMY,
     PRC_TRACKER_BRISK,
     PRC_TRACKER_ORB,
     PRC_TRACKER_LIDAR,

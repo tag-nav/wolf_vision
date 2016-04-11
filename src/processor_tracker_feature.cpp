@@ -7,7 +7,8 @@
 
 #include "processor_tracker_feature.h"
 
-namespace wolf {
+namespace wolf
+{
 
 ProcessorTrackerFeature::ProcessorTrackerFeature(ProcessorType _tp) :
         ProcessorTracker(_tp)
@@ -20,26 +21,33 @@ ProcessorTrackerFeature::~ProcessorTrackerFeature()
 
 unsigned int ProcessorTrackerFeature::processKnown()
 {
-    assert(incoming_ptr_->getFeatureListPtr()->size() == 0 && "In ProcessorTrackerFeature::processKnown(): incoming_ptr_ feature list must be empty before processKnown()");
-    assert(matches_last_incoming_.size() == 0 && "In ProcessorTrackerFeature::processKnown(): match list from last to incoming must be empty before processKnown()");
+    for (auto match : matches_origin_from_last_)
+            std::cout << "\tlast 2 origin: " << match.first->getMeasurement() << " to " << match.second.feature_ptr_->getMeasurement() << std::endl;
+
+
+    assert(incoming_ptr_->getFeatureListPtr()->size() == 0
+            && "In ProcessorTrackerFeature::processKnown(): incoming_ptr_ feature list must be empty before processKnown()");
+    assert(matches_last_from_incoming_.size() == 0
+            && "In ProcessorTrackerFeature::processKnown(): match list from last to incoming must be empty before processKnown()");
 
     // Track features from last_ptr_ to incoming_ptr_
-    trackFeatures(*(last_ptr_->getFeatureListPtr()), known_features_incoming_, matches_last_incoming_);
+    trackFeatures(*(last_ptr_->getFeatureListPtr()), known_features_incoming_, matches_last_from_incoming_);
 
     // Check/correct incoming-origin correspondences
     for (auto known_incoming_feature_ptr : known_features_incoming_)
         // Check and correct the correspondence
-        if (!correctFeatureDrift(known_incoming_feature_ptr, matches_last_incoming_[known_incoming_feature_ptr].feature_ptr_))
+        if (!correctFeatureDrift(known_incoming_feature_ptr,
+                                 matches_last_from_incoming_[known_incoming_feature_ptr].feature_ptr_))
         {
             // Correspondence not confirmed -> Remove correspondence and destruct incoming feature
-            matches_last_incoming_.erase(known_incoming_feature_ptr);
+            matches_last_from_incoming_.erase(known_incoming_feature_ptr);
             known_incoming_feature_ptr->destruct();
         }
 
     // Append not destructed incoming features -> this empties known_features_incoming_
     incoming_ptr_->addDownNodeList(known_features_incoming_);
 
-    return matches_last_incoming_.size();
+    return matches_last_from_incoming_.size();
 }
 
 unsigned int ProcessorTrackerFeature::processNew()
@@ -52,19 +60,24 @@ unsigned int ProcessorTrackerFeature::processNew()
      * At the end, all new Features are appended to the lists of known Features in
      * the last and incoming Captures.
      */
-
-    // Establish constraints between last and origin
-    establishConstraints();
+    for (auto match : matches_origin_from_last_)
+            std::cout << "\tlast 2 origin: " << match.first->getMeasurement() << " to " << match.second.feature_ptr_->getMeasurement() << std::endl;
 
     // Populate the last Capture with new Features
     unsigned int n = detectNewFeatures();
+    last_ptr_->addDownNodeList(new_features_last_);
 
     // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
-    trackFeatures(new_features_last_, new_features_incoming_, matches_last_incoming_);
+    if (incoming_ptr_ != nullptr)
+    {
+        trackFeatures(new_features_last_, new_features_incoming_, matches_last_from_incoming_);
 
-    // Append all new Features to the Captures' list of Features
-    last_ptr_->addDownNodeList(new_features_last_); //TODO JV: is it really necessary to add all new features instead of only the tracked ones? It's easier and probably faster.
-    incoming_ptr_->addDownNodeList(new_features_incoming_);
+        // Append all new Features to the Captures' list of Features
+        incoming_ptr_->addDownNodeList(new_features_incoming_);
+    }
+
+    for (auto match : matches_origin_from_last_)
+            std::cout << "\tlast 2 origin: " << match.first->getMeasurement() << " to " << match.second.feature_ptr_->getMeasurement() << std::endl;
 
     // return the number of new features detected in \b last
     return n;

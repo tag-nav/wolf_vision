@@ -3,13 +3,14 @@
 
 #include "constraint_base.h"
 
+namespace wolf {
+
 class ConstraintEpipolar : public ConstraintBase
 {
     public:
-        ConstraintEpipolar();
+        ConstraintEpipolar(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr);
 
         virtual ~ConstraintEpipolar();
-
 
         /** \brief Returns the jacobians computation method
          **/
@@ -28,11 +29,14 @@ class ConstraintEpipolar : public ConstraintBase
         virtual unsigned int getSize() const{return 0;}
 };
 
-inline ConstraintEpipolar::ConstraintEpipolar():ConstraintBase(CTR_EPIPOLAR,CTR_INACTIVE)
+inline ConstraintEpipolar::ConstraintEpipolar(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) :
+        ConstraintBase(CTR_EPIPOLAR, _feature_other_ptr, CTR_INACTIVE)
 {
 }
 
 inline ConstraintEpipolar::~ConstraintEpipolar(){}
 
+
+} // namespace wolf
 
 #endif // CONSTRAINT_EPIPOLAR_H

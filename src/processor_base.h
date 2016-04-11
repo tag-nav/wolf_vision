@@ -29,8 +29,6 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
          **/
         virtual ~ProcessorBase();
 
-        virtual void init(CaptureBase* _capture_ptr) = 0;
-
         virtual void process(CaptureBase* _capture_ptr) = 0;
 
         /** \brief Vote for KeyFrame generation

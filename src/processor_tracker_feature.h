@@ -11,8 +11,8 @@
 #include "processor_tracker.h"
 #include "capture_base.h"
 
-namespace wolf {
-
+namespace wolf
+{
 
 // Feature-Feature correspondence
 struct FeatureCorrespondence
@@ -84,8 +84,8 @@ class ProcessorTrackerFeature : public ProcessorTracker
     protected:
 
         FeatureBaseList known_features_incoming_;
-        FeatureCorrespondenceMap matches_last_incoming_;
-        FeatureCorrespondenceMap matches_origin_last_;
+        FeatureCorrespondenceMap matches_last_from_incoming_;
+        FeatureCorrespondenceMap matches_origin_from_last_;
 
         /** \brief Process known Features
          * \return The number of successful matches.
@@ -170,28 +170,49 @@ class ProcessorTrackerFeature : public ProcessorTracker
 
 inline void ProcessorTrackerFeature::establishConstraints()
 {
-    for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
-        last_feature->addConstraint(createConstraint(last_feature, matches_origin_last_[last_feature].feature_ptr_));
+    std::cout << "establishing " << matches_origin_from_last_.size() << " constraints..." << std::endl;
+    for (auto match : matches_origin_from_last_)
+    {
+
+        match.first->addConstraint(createConstraint(match.first, match.second.feature_ptr_));
+    }
 }
 
 inline void ProcessorTrackerFeature::advance()
 {
-    ProcessorTracker::advance();
+    std::cout << "advancing correspondences... " << std::endl;
+    std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
+    std::cout << "\tlast 2 origin: " << matches_origin_from_last_.size() << std::endl;
 
-    for (auto match : matches_last_incoming_)
+    std::cout << "composing... " << std::endl;
+    // Compose correspondences to get origin_from_incoming
+    for (auto match : matches_last_from_incoming_)
     {
-        matches_origin_last_[match.first] = matches_origin_last_[matches_last_incoming_[match.first].feature_ptr_];
+//            std::cout << "\tmatches_last_from_incoming_: incoming " << match.first->getMeasurement() << std::endl;
+//            std::cout << "\tmatches_last_from_incoming_: last " << match.second.feature_ptr_->getMeasurement() << std::endl;
+//            std::cout << "\matches_origin_from_last_: origin " << matches_origin_from_last_[match.first] << std::endl;
+        matches_last_from_incoming_[match.first] =
+                matches_origin_from_last_[matches_last_from_incoming_[match.first].feature_ptr_];
     }
-    matches_last_incoming_.clear();
+    matches_origin_from_last_ = matches_last_from_incoming_;
+    matches_last_from_incoming_.clear();
+
+    std::cout << "advanced correspondences: " << std::endl;
+    std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
+    std::cout << "\tlast 2 origin: " << matches_origin_from_last_.size() << std::endl;
+
+    for (auto match : matches_origin_from_last_)
+        std::cout << "\tlast 2 origin: " << match.first->getMeasurement() << " to "
+                << match.second.feature_ptr_->getMeasurement() << std::endl;
+
 }
 
 inline void ProcessorTrackerFeature::reset()
 {
-    ProcessorTracker::reset();
-
+    std::cout << "resetting... " << std::endl;
     // We also reset here the list of correspondences, which passes from last--incoming to origin--last.
-    matches_origin_last_ = matches_last_incoming_;
-    matches_last_incoming_.clear();
+    matches_origin_from_last_ = matches_last_from_incoming_;
+    matches_last_from_incoming_.clear();
 }
 
 } // namespace wolf

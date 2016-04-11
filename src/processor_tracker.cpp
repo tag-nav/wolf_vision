@@ -7,13 +7,11 @@
 
 #include "processor_tracker.h"
 
-namespace wolf {
+namespace wolf
+{
 
 ProcessorTracker::ProcessorTracker(ProcessorType _tp) :
-    ProcessorBase(_tp),
-    origin_ptr_(nullptr),
-    last_ptr_(nullptr),
-    incoming_ptr_(nullptr)
+        ProcessorBase(_tp), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr)
 {
     //
 }
@@ -29,44 +27,108 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    // 1. First we track the known Features and create new constraints as needed
-    incoming_ptr_ = _incoming_ptr;
-    processKnown();
+    std::cout << "process..." << std::endl;
 
-    // 2. Then we see if we want and we are allowed to create a KeyFrame
-    if (!(voteForKeyFrame() && permittedKeyFrame()))
+    // FIRST TIME
+    if (origin_ptr_ == nullptr)
     {
-        // We did not create a KeyFrame:
-        // 2.a. Update the tracker's last and incoming pointers one step ahead
-        advance();
-    }
-    else
-    {
-        // 2.b. Detect new Features, initialize Landmarks, create Constraints, ...
+        std::cout << "Tracker initialization..." << std::endl;
+
+        last_ptr_ = _incoming_ptr;
+        origin_ptr_ = _incoming_ptr;
+
+        if (last_ptr_->getFramePtr() == nullptr)
+            makeFrame(last_ptr_);
+
+        // Detect new Features, initialize Landmarks, create Constraints, ...
         processNew();
-        // Make KeyFrame
-        makeKeyFrame();
-        // Reset the Tracker
-        reset();
-    }
-}
 
-void ProcessorTracker::advance()
-{
-    if (last_ptr_ == origin_ptr_)        // The first time last_ptr = origin_ptr (see init() )
-    {
-        // We need to create the new non-key Frame to hold what will become the \b last Capture
-        makeFrame(incoming_ptr_);
+        // Make the last Capture's Frame a KeyFrame so that it gets into the solver
+        last_ptr_->getFramePtr()->setKey();
+
+        // Establish constraints from last
+        establishConstraints();
     }
+    // SECOND TIME
+    else if (origin_ptr_ == last_ptr_)
+    {
+        std::cout << "no init..." << std::endl;
+        // 1. First we track the known Features and create new constraints as needed
+        incoming_ptr_ = _incoming_ptr;
+
+        processKnown();
+
+        std::cout << "voting..." << std::endl;
+        // Do we want more features in last_?
+        if (voteForKeyFrame() )
+        {
+            std::cout << "More features in last needed..." << std::endl;
+            // 2.b. Detect new Features, initialize Landmarks, create Constraints, ...
+            processNew();
+
+            // Establish constraints between last and origin
+            establishConstraints();
+        }
+
+        // advance the derived tracker
+        reset();
+
+        // Update the tracker's last and incoming pointers one step ahead
+        makeFrame(incoming_ptr_);
+        last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
+        incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+
+    }
+    // OTHER TIMES
     else
     {
-        // We need to add \b incoming to the frame and remove and destruct \b last.
-        last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-        last_ptr_->destruct(); // TODO: JS->JV why this does not work?? Destruct now the obsolete last before reassigning a new pointer
-        incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
+        std::cout << "no init..." << std::endl;
+        // 1. First we track the known Features and create new constraints as needed
+        incoming_ptr_ = _incoming_ptr;
+
+        processKnown();
+
+        std::cout << "voting..." << std::endl;
+        // 2. Then we see if we want and we are allowed to create a KeyFrame
+        if (!(voteForKeyFrame() && permittedKeyFrame()))
+        {
+            std::cout << "NO key frame, advance..." << std::endl;
+            // We did not create a KeyFrame:
+
+            // advance the derived tracker
+            advance();
+
+            // Advance this
+            last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
+            last_ptr_->destruct(); // TODO: JS->JV why this does not work?? Destruct now the obsolete last before reassigning a new pointer
+            incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
+            last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
+            incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+        }
+        else
+        {
+            std::cout << "Key frame! processing new..." << std::endl;
+            // 2.b. Detect new Features, initialize Landmarks, create Constraints, ...
+            processNew();
+
+            // Create a new non-key Frame in the Trajectory with the incoming Capture
+            makeFrame(incoming_ptr_);
+
+            // Make the last Capture's Frame a KeyFrame so that it gets into the solver
+            last_ptr_->getFramePtr()->setKey();
+
+            // Establish constraints between last and origin
+            establishConstraints();
+
+            // Reset the derived Tracker
+            reset();
+            // Reset this
+            origin_ptr_ = last_ptr_;
+            last_ptr_ = incoming_ptr_;
+            incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+        }
     }
-    last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
-    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+    std::cout << "processed!" << std::endl;
 }
 
 } // namespace wolf

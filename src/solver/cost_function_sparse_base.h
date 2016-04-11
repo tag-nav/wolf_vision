@@ -15,6 +15,9 @@
 // CERES JET
 #include "ceres/jet.h"
 
+namespace wolf
+{
+
 template <class ConstraintT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
@@ -316,5 +319,7 @@ const unsigned int MEASUREMENT_SIZE,
     for (int i = 0; i < BLOCK_9_SIZE; i++)
         jets_9_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(9)+i);
 }
+
+} // wolf namespace
 
 #endif /* TRUNK_SRC_SOLVER_COST_FUNCTION_SPARSE_BASE_H_ */

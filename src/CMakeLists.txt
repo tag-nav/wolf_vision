@@ -125,6 +125,7 @@ SET(HDRS
     processor_odom_3D.h
     processor_tracker.h
     processor_tracker_feature.h
+    processor_tracker_feature_dummy.h
     sensor_base.h
     sensor_camera.h
     sensor_odom_2D.h
@@ -176,6 +177,7 @@ SET(SRCS
     processor_motion.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
+    processor_tracker_feature_dummy.cpp
     sensor_base.cpp
     sensor_camera.cpp
     sensor_odom_2D.cpp

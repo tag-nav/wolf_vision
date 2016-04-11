@@ -191,9 +191,9 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
 
 //Create a new constraint
-ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feat_or_lmk_ptr)
+ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr)
 {
-    ConstraintEpipolar* const_epipolar_ptr = new ConstraintEpipolar();
+    ConstraintEpipolar* const_epipolar_ptr = new ConstraintEpipolar(_feature_ptr, _feature_other_ptr);
     return const_epipolar_ptr; // TODO Crear constraint
 }
 

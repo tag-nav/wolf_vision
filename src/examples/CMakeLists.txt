@@ -76,6 +76,10 @@ IF(OpenCV_FOUND)
     TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
 
+# Processor Tracker Feature test
+ADD_EXECUTABLE(test_processor_tracker_feature test_processor_tracker_feature.cpp)
+TARGET_LINK_LIBRARIES(test_processor_tracker_feature ${PROJECT_NAME})
+
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
 #     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})

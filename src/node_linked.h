@@ -264,7 +264,6 @@ inline void NodeLinked<UpperType, LowerType>::unlinkFromUpperNode()
 template<class UpperType, class LowerType>
 inline const typename NodeLinked<UpperType, LowerType>::UpperNodePtr NodeLinked<UpperType, LowerType>::upperNodePtr() const
 {
-    assert(up_node_ptr_ != nullptr);
     return up_node_ptr_;
 }
 

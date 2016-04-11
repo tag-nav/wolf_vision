@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
     frm_ptr->addCapture(capture_brisk_ptr);
 
-    p_brisk->init(capture_brisk_ptr);
+    p_brisk->process(capture_brisk_ptr);
 
     cv::namedWindow("Keypoint drawing");    // Creates a window for display.
     while(f<400)
