@@ -80,7 +80,6 @@ inline cv::Mat& FeaturePointImage::getDescriptor()
     return descriptor_;
 }
 
-<<<<<<< HEAD
 inline bool FeaturePointImage::isKnown()
 {
     return is_known_;
@@ -90,9 +89,7 @@ inline void FeaturePointImage::setIsKnown(bool _is_known)
 {
     is_known_ = _is_known;
 }
-=======
 
 } // namespace wolf
->>>>>>> master
 
 #endif // FEATURE_IMAGE_H

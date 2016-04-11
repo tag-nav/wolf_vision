@@ -3,6 +3,8 @@
 
 #include "constraint_base.h"
 
+namespace wolf {
+
 class ConstraintEpipolar : public ConstraintBase
 {
     public:
@@ -34,5 +36,6 @@ inline ConstraintEpipolar::ConstraintEpipolar():ConstraintBase(CTR_EPIPOLAR,CTR_
 
 inline ConstraintEpipolar::~ConstraintEpipolar(){}
 
+} // namespace wolf
 
 #endif // CONSTRAINT_EPIPOLAR_H
