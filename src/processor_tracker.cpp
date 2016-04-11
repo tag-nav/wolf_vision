@@ -33,6 +33,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     if (origin_ptr_ == nullptr)
     {
         std::cout << "FIRST TIME" << std::endl;
+        std::cout << "Features in origin: " << 0 << "; in last: " << 0 << std::endl;
 
         incoming_ptr_ = _incoming_ptr;
         last_ptr_ = _incoming_ptr;
@@ -50,13 +51,21 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         // Establish constraints from last
         establishConstraints();
 
+        // advance the derived tracker
+        reset();
+
         // Clear incoming ptr. origin and last are OK.
         incoming_ptr_ = nullptr;
+
+        std::cout << "Features in origin (should be 3): " << origin_ptr_->getFeatureListPtr()->size() << "; in last (should be 3): " << last_ptr_->getFeatureListPtr()->size() << std::endl;
     }
     // SECOND TIME
     else if (origin_ptr_ == last_ptr_)
     {
         std::cout << "SECOND TIME" << std::endl;
+        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+
+
         // 1. First we track the known Features and create new constraints as needed
         incoming_ptr_ = _incoming_ptr;
 
@@ -72,19 +81,25 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             establishConstraints();
         }
 
-        // advance the derived tracker
+        makeFrame(incoming_ptr_);
+
+        // reset the derived tracker
         reset();
 
         // Update the tracker's last and incoming pointers one step ahead
-        makeFrame(incoming_ptr_);
         last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
         incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+
+        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
     }
     // OTHER TIMES
     else
     {
         std::cout << "OTHER TIMES" << std::endl;
+
+        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+
         // 1. First we track the known Features and create new constraints as needed
         incoming_ptr_ = _incoming_ptr;
 
@@ -126,6 +141,9 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             last_ptr_ = incoming_ptr_;
             incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
         }
+
+        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+
     }
 }
 

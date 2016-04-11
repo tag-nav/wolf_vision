@@ -14,14 +14,17 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
                                                          FeatureBaseList& _feature_list_out,
                                                          FeatureCorrespondenceMap& _feature_correspondences)
 {
-    std::cout << "tracking features..." << std::endl;
+    std::cout << "tracking " << _feature_list_in.size() << " features..." << std::endl;
 
     // loosing the track of the first 2 features
     auto features_lost = 0;
     for (auto feat_in_ptr : _feature_list_in)
     {
-        if (features_lost < 1)
+        if (features_lost < 2)
+        {
             features_lost++;
+            std::cout << "feature " << feat_in_ptr->getMeasurement() << " lost!" << std::endl;
+        }
         else
         {
             _feature_list_out.push_back(new FeatureBase(FEAT_POINT_IMAGE, feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));

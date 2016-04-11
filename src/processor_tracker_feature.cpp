@@ -43,7 +43,10 @@ unsigned int ProcessorTrackerFeature::processKnown()
         }
 
     // Append not destructed incoming features -> this empties known_features_incoming_
+    std::cout << "ProcessorTrackerFeature::processKnown() known_features_incoming_.size() = " << known_features_incoming_.size() << std::endl;
     incoming_ptr_->addDownNodeList(known_features_incoming_);
+
+    assert(known_features_incoming_.size() == 0 && "ProcessorTrackerFeature::processKnown() end: known_features_incoming_ should be empty!");
 
     return matches_last_from_incoming_.size();
 }
