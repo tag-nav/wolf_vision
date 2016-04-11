@@ -34,6 +34,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     {
         std::cout << "Tracker initialization..." << std::endl;
 
+        incoming_ptr_ = _incoming_ptr;
         last_ptr_ = _incoming_ptr;
         origin_ptr_ = _incoming_ptr;
 
@@ -48,6 +49,9 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 
         // Establish constraints from last
         establishConstraints();
+
+        // Clear incoming ptr. origin and last are OK.
+        incoming_ptr_ = nullptr;
     }
     // SECOND TIME
     else if (origin_ptr_ == last_ptr_)
