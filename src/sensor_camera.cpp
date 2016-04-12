@@ -1,5 +1,8 @@
 #include "sensor_camera.h"
 
+
+namespace wolf {
+
 /**
  *
  * Test for the camera sensor
@@ -16,3 +19,5 @@ SensorCamera::~SensorCamera()
 {
     //
 }
+
+} // namespace wolf

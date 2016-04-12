@@ -10,6 +10,9 @@
 
 #include "local_parametrization_base.h"
 
+
+namespace wolf {
+
 /**
  * \brief Local parametrization for homogeneous vectors.
  *
@@ -43,5 +46,7 @@ class LocalParametrizationHomogeneous : public LocalParametrizationBase
                           Eigen::Map<Eigen::VectorXs>& _h_plus_delta) const;
         virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _h, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
 };
+
+} // namespace wolf
 
 #endif /* LOCALPARAMETRIZATIONHOMOGENEOUS_H_ */

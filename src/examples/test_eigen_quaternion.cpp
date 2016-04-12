@@ -10,6 +10,8 @@
 
 int main()
 {
+    using namespace wolf;
+
     std::cout << std::endl << "Eigen Quatenrnion test" << std::endl;
     
     WolfScalar q1[4]; 

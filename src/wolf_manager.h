@@ -33,6 +33,9 @@
 #include "ceres/ceres.h"
 #include "glog/logging.h"
 
+
+namespace wolf {
+
 class WolfManager
 {
     protected:
@@ -86,3 +89,5 @@ class WolfManager
 
         void setNewFrameElapsedTime(const WolfScalar& _dt);
 };
+
+} // namespace wolf

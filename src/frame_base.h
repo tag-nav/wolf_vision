@@ -3,9 +3,11 @@
 #define FRAME_BASE_H_
 
 // Fwd refs
+namespace wolf{
 class TrajectoryBase;
 class CaptureBase;
 class StateBlock;
+}
 
 //Wolf includes
 #include "wolf.h"
@@ -14,6 +16,8 @@ class StateBlock;
 #include "node_constrained.h"
 
 //std includes
+
+namespace wolf {
 
 //class FrameBase
 class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
@@ -191,5 +195,7 @@ inline StateStatus FrameBase::getStatus() const
 {
     return status_;
 }
+
+} // namespace wolf
 
 #endif

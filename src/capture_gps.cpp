@@ -1,5 +1,6 @@
 #include "capture_gps.h"
 
+namespace wolf {
 
 CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, rawgpsutils::SatellitesObs &_obs) :
         CaptureBase(_ts, _sensor_ptr),
@@ -29,3 +30,5 @@ Eigen::VectorXs CaptureGPS::computeFramePose(const TimeStamp &_now) const
 {
     return Eigen::Vector3s(0, 0, 0);
 }
+
+} //namespace wolf

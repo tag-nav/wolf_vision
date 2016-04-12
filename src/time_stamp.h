@@ -12,6 +12,8 @@
 #include <iostream>
 
 
+namespace wolf {
+
 /**
  * \brief TimeStamp implements basic functionalities for time stamps
  * 
@@ -230,5 +232,7 @@ inline TimeStamp TimeStamp::operator +(const WolfScalar& dt)
 {
     return TimeStamp(time_stamp_ + dt);
 }
+
+} // namespace wolf
 
 #endif

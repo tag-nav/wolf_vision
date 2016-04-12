@@ -25,6 +25,8 @@
 
 int main()
 {
+    using namespace wolf;
+
     // time
     TimeStamp t0, t;
     t0.setToNow();

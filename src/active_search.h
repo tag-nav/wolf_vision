@@ -19,6 +19,7 @@
 //OpenCV includes
 #include <opencv2/core/core.hpp>
 
+namespace wolf{
 
 /**
          * Active search tesselation grid.
@@ -251,5 +252,7 @@ inline Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i& _cell
 //				void scanObs(const observation_ptr_t & obsPtr, const image::ConvexRoi & roi);
 //		};
 //#endif
+
+}
 
 #endif /* ACTIVESEARCH_HPP_ */

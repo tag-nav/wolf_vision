@@ -41,7 +41,7 @@
 #include "iri-algorithms/laser_scan_utils/corner_detector.h"
 #include "iri-algorithms/laser_scan_utils/entities.h"
 
-using namespace Eigen;
+
 
 //function travel around
 void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
@@ -100,6 +100,9 @@ void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double
 //main
 int main(int argc, char *argv[])
 {
+    using namespace Eigen;
+    using namespace wolf;
+
     // USER INPUT ============================================================================================
     if (argc != 3 || atoi(argv[1]) < 1 || atoi(argv[1]) > 1100 || atoi(argv[2]) < 0 || atoi(argv[2]) > 2)
     {

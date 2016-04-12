@@ -14,6 +14,8 @@
 
 int main (void)
 {
+    using namespace wolf;
+
     // 3D
     StateBlock* pp = new StateBlock(3);
     StateQuaternion* op = new StateQuaternion;

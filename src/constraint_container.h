@@ -6,6 +6,8 @@
 #include "constraint_sparse.h"
 #include "landmark_container.h"
 
+namespace wolf {
+
 class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 {
 	protected:
@@ -133,4 +135,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
             return JAC_AUTO;
         }
 };
+
+} // namespace wolf
+
 #endif

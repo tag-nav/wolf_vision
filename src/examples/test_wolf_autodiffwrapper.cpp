@@ -17,6 +17,8 @@
 
 int main(int argc, char** argv) 
 {
+    using namespace wolf;
+
     //Welcome message
     std::cout << std::endl << " ========= WOLF IMPORTED .graph TEST ===========" << std::endl << std::endl;
 

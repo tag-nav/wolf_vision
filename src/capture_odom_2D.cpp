@@ -1,5 +1,6 @@
 #include "capture_odom_2D.h"
 
+namespace wolf {
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr,
                              const Eigen::Vector3s& _data) :
@@ -110,3 +111,4 @@ CaptureOdom2D* CaptureOdom2D::interpolateCapture(const TimeStamp& _ts)
     return second_odom_ptr;
 }
 
+} // namespace wolf

@@ -1,10 +1,12 @@
 #include "processor_tracker_laser.h"
 
+namespace wolf {
 
 ProcessorTrackerLaser::ProcessorTrackerLaser::ProcessorTrackerLaser() :
         ProcessorTrackerFeature(PRC_TRACKER_LIDAR),
         scan_params_(((SensorLaser2D*)(upperNodePtr()))->getScanParams()),
-        corner_alg_params_(((SensorLaser2D*)(upperNodePtr()))->getCornerAlgParams())
+        corner_alg_params_(((SensorLaser2D*)(upperNodePtr()))->getCornerAlgParams()),
+        scan_incoming_(nullptr), scan_last_(nullptr)
 {
 }
 
@@ -146,3 +148,5 @@ bool ProcessorTrackerLaser::voteForKeyFrame()
         std::cout << "DON'T VOTE for a new key frame " << std::endl;
     return (incoming_ptr_->getFeatureListPtr()->size() / origin_ptr_->getFeatureListPtr()->size() < min_features_ratio_th_);
 }
+
+} // namespace wolf

@@ -7,6 +7,9 @@
 //std includes
 //
 
+
+namespace wolf {
+
 //class FeatureCorner2D
 class FeatureCorner2D : public FeatureBase
 {
@@ -32,4 +35,7 @@ class FeatureCorner2D : public FeatureBase
         WolfScalar getAperture() const; 
         
 };
+
+} // namespace wolf
+
 #endif

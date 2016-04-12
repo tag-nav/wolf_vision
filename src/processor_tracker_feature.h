@@ -11,7 +11,10 @@
 #include "processor_tracker.h"
 #include "capture_base.h"
 
-// Correspondence Feature last - Feature incoming
+namespace wolf
+{
+
+// Feature-Feature correspondence
 struct FeatureCorrespondence
 {
         FeatureBase* feature_ptr_;
@@ -31,9 +34,10 @@ struct FeatureCorrespondence
 
 typedef std::map<FeatureBase*, FeatureCorrespondence> FeatureCorrespondenceMap;
 
-/** \brief Feature tracker processor
+/** \brief General tracker processor
  *
- * This class implements the incremental tracker. It contains three pointers to three Captures of type CaptureBase, named \b origin, \b last and \b incoming:
+ * This class implements the incremental feature tracker.
+ * It contains three pointers to three Captures of type CaptureBase, named \b origin, \b last and \b incoming:
  *   - \b origin: this points to a Capture where all Feature tracks start.
  *   - \b last: the last Capture tracked by the tracker. A sufficient subset of the Features in \b origin is still alive in \b last.
  *   - \b incoming: the capture being received. The tracker operates on this Capture,
@@ -48,13 +52,12 @@ typedef std::map<FeatureBase*, FeatureCorrespondence> FeatureCorrespondenceMap;
  *   - Init the tracker with an \b origin Capture: init();
  *   - On each incoming Capture,
  *     - Track known features in the \b incoming Capture: processKnownFeatures();
+ *       - For each detected Feature:
+ *          - create constraints Feature-Feature: createConstraint()
  *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
  *     - if voteForKeyFrame()
  *       - Look for new Features and make Landmarks with them:
  *       - detectNewFeatures()
- *       - For each detected Feature:
- *          - create landmarks: createOneLandmark()
- *          - create constraints Feature-Landmark: createConstraint()
  *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
  *     - else
@@ -80,27 +83,25 @@ class ProcessorTrackerFeature : public ProcessorTracker
 
     protected:
 
-        FeatureCorrespondenceMap incoming_2_last_;
-        FeatureCorrespondenceMap last_2_origin_;
+        FeatureBaseList known_features_incoming_;
+        FeatureCorrespondenceMap matches_last_from_incoming_;
+        FeatureCorrespondenceMap matches_origin_from_last_;
 
-        /** \brief Tracker function
-         * \return The number of successful tracks.
+        /** \brief Process known Features
+         * \return The number of successful matches.
          *
-         * This is the tracker function to be implemented in derived classes.
-         * It operates on the \b incoming capture pointed by incoming_ptr_.
+         * This function operates on the \b incoming capture pointed by incoming_ptr_.
          *
-         * This should do one of the following, depending on the design of the tracker:
+         * This function does:
          *   - Track Features against other Features in the \b origin Capture. Tips:
          *     - An intermediary step of matching against Features in the \b last Capture makes tracking easier.
          *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Constraints in \b last.
          *     - If required, correct the drift by re-comparing against the Features in origin.
          *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
-         *
-         * The function must generate the necessary Features in the \b incoming Capture,
-         * of the correct type, derived from FeatureBase.
-         *
-         * It must also generate the constraints, of the correct type, derived from ConstraintBase
-         * (through ConstraintAnalytic or ConstraintSparse).
+         *   - Create the necessary Features in the \b incoming Capture,
+         *     of the correct type, derived from FeatureBase.
+         *   - Create the constraints, of the correct type, derived from ConstraintBase
+         *     (through ConstraintAnalytic or ConstraintSparse).
          */
         virtual unsigned int processKnown();
 
@@ -119,6 +120,24 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature) = 0;
 
+        /** \brief Vote for KeyFrame generation
+         *
+         * If a KeyFrame criterion is validated, this function returns true,
+         * meaning that it wants to create a KeyFrame at the \b last Capture.
+         *
+         * WARNING! This function only votes! It does not create KeyFrames!
+         */
+        virtual bool voteForKeyFrame() = 0;
+
+        // We overload the advance and reset functions to update the lists of matches
+        void advance();
+        void reset();
+
+        /**\brief Process new Features
+         *
+         */
+        virtual unsigned int processNew();
+
         /** \brief Detect new Features
          * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
          * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
@@ -130,15 +149,6 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * to be used for landmark initialization.
          */
         virtual unsigned int detectNewFeatures() = 0;
-
-        /** \brief Vote for KeyFrame generation
-         *
-         * If a KeyFrame criterion is validated, this function returns true,
-         * meaning that it wants to create a KeyFrame at the \b last Capture.
-         *
-         * WARNING! This function only votes! It does not create KeyFrames!
-         */
-        virtual bool voteForKeyFrame() = 0;
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
@@ -152,20 +162,53 @@ class ProcessorTrackerFeature : public ProcessorTracker
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) = 0;
 
+        /** \brief Establish constraints between features in Captures \b last and \b origin
+         */
         virtual void establishConstraints();
 
-    protected:
-
-        /**\brief Process new Features
-         *
-         */
-        virtual unsigned int processNew();
 };
+
+} // namespace wolf
+
+#include <utility>
+
+namespace wolf {
 
 inline void ProcessorTrackerFeature::establishConstraints()
 {
-    for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
-        last_feature->addConstraint(createConstraint(last_feature, last_2_origin_[last_feature].feature_ptr_));
+    std::cout << "ProcessorTrackerFeature::establishConstraints() " << std::endl;
+    for (auto match : matches_origin_from_last_)
+        match.first->addConstraint(createConstraint(match.first, match.second.feature_ptr_));
 }
+
+inline void ProcessorTrackerFeature::advance()
+{
+    std::cout << "ProcessorTrackerFeature::advance()" << std::endl;
+
+    // Compose correspondences to get origin_from_incoming
+    for (auto match : matches_last_from_incoming_)
+    {
+        matches_last_from_incoming_[match.first] =
+                matches_origin_from_last_[matches_last_from_incoming_[match.first].feature_ptr_];
+    }
+    matches_origin_from_last_ = std::move(matches_last_from_incoming_);
+
+    std::cout << "advanced correspondences: " << std::endl;
+    std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
+    std::cout << "\tlast 2 origin: " << std::endl;
+    for (auto match : matches_origin_from_last_)
+        std::cout << "\t\t" << match.first->getMeasurement() << " to " << match.second.feature_ptr_->getMeasurement() << std::endl;
+
+}
+
+inline void ProcessorTrackerFeature::reset()
+{
+    std::cout << "ProcessorTrackerFeature::reset()" << std::endl;
+
+    // We also reset here the list of correspondences, which passes from last--incoming to origin--last.
+    matches_origin_from_last_ = std::move(matches_last_from_incoming_);
+}
+
+} // namespace wolf
 
 #endif /* PROCESSOR_TRACKER_FEATURE_H_ */

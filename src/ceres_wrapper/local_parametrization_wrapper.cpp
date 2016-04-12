@@ -1,5 +1,7 @@
 #include "local_parametrization_wrapper.h"
 
+namespace wolf {
+
 bool LocalParametrizationWrapper::Plus(const double* x_raw, const double* delta_raw, double* x_plus_delta_raw) const
 {
     Eigen::Map<const Eigen::VectorXs> x_raw_map(x_raw, GlobalSize());
@@ -14,3 +16,6 @@ bool LocalParametrizationWrapper::ComputeJacobian(const double* x, double* jacob
     Eigen::Map<Eigen::MatrixXs> jacobian_map(jacobian, GlobalSize(), LocalSize());
     return local_parametrization_ptr_->computeJacobian(x_map, jacobian_map);
 };
+
+} // namespace wolf
+

@@ -1,5 +1,7 @@
 #include "sensor_laser_2D.h"
 
+namespace wolf {
+
 // SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp, WolfScalar _angle_min, WolfScalar _angle_max, WolfScalar _angle_increment, WolfScalar _range_min, WolfScalar _range_max, WolfScalar _range_stdev, WolfScalar _time_increment, WolfScalar _scan_time) :
 //         SensorBase(LIDAR, _sp, 8)
 // //        SensorBase(LIDAR, _sp,{(WolfScalar)(_nrays), _apert, _rmin, _rmax, _range_stdev})
@@ -141,3 +143,5 @@ void SensorLaser2D::printSensorParameters() const
 //     std::cout << "   time increment: " << getTimeIncrement() << std::endl;
 //     std::cout << "   scan time: " << getScanTime() << std::endl;
 }
+
+} // namespace wolf

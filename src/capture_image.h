@@ -12,6 +12,8 @@
 //std includes
 //
 
+namespace wolf {
+
 //class CaptureImage
 class CaptureImage : public CaptureBase
 {
@@ -52,5 +54,7 @@ class CaptureImage : public CaptureBase
 
 
 };
+
+} // namespace wolf
 
 #endif // CAPTURE_IMAGE_H

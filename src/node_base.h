@@ -2,12 +2,17 @@
 #define NODE_BASE_H_
 
 // Fwd references
+namespace wolf{
 class WolfProblem;
+}
 
 // Wolf includes
 #include "wolf.h"
 
 // std includes
+
+
+namespace wolf {
 
 /** \brief Base class for Nodes
  *
@@ -56,7 +61,11 @@ class NodeBase
 
 };
 
+} // namespace wolf
+
 #include <iostream>
+
+namespace wolf{
 
 inline NodeBase::NodeBase(std::string _label, bool _verbose) :
         label_(_label), node_id_(++node_id_count_), verbose_(_verbose)
@@ -79,5 +88,7 @@ inline std::string NodeBase::nodeLabel() const
 {
     return label_;
 }
+
+} // namespace wolf
 
 #endif /* NODE_BASE_H_ */

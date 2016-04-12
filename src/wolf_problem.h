@@ -2,10 +2,12 @@
 #define WOLF_PROBLEM_H_
 
 // Fwd refs
+namespace wolf{
 class HardwareBase;
 class TrajectoryBase;
 class MapBase;
 class TimeStamp;
+}
 
 //wolf includes
 #include "node_base.h"
@@ -13,6 +15,9 @@ class TimeStamp;
 
 // std includes
 #include <utility> // pair
+
+
+namespace wolf {
 
 /** \brief Wolf problem node element in the Wolf Tree
  * 
@@ -81,6 +86,8 @@ class WolfProblem : public NodeBase
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
 
         void addLandmark(LandmarkBase* _lmk_ptr);
+
+        void addLandmarkList(LandmarkBaseList _lmk_list);
 
         /** \brief Adds a new state block to be added to solver manager
          */
@@ -186,44 +193,9 @@ class WolfProblem : public NodeBase
          *
          * This empty function is needed by the destruct() node_linked function.
          */
-        void removeDownNode(const LowerNodePtr _ptr);
+        void removeDownNode(const LowerNodePtr _ptr){};
 
 };
-
-inline bool WolfProblem::permitKeyFrame(ProcessorBase* _processor_ptr)
-{
-    return true;
-}
-
-inline MapBase* WolfProblem::getMapPtr()
-{
-    return map_ptr_;
-}
-
-inline TrajectoryBase* WolfProblem::getTrajectoryPtr()
-{
-    return trajectory_ptr_;
-}
-
-inline HardwareBase* WolfProblem::getHardwarePtr()
-{
-    return hardware_ptr_;
-}
-
-inline StateBlockList* WolfProblem::getStateListPtr()
-{
-    return &state_block_ptr_list_;
-}
-
-inline std::list<StateBlock*>* WolfProblem::getStateBlockAddList()
-{
-    return &state_block_add_list_;
-}
-
-inline std::list<StateBlock*>* WolfProblem::getStateBlockUpdateList()
-{
-    return &state_block_update_list_;
-}
 
 inline std::list<WolfScalar*>* WolfProblem::getStateBlockRemoveList()
 {
@@ -249,5 +221,8 @@ inline bool WolfProblem::isTop()
 {
     return true;
 }
+
+} // namespace wolf
+
 
 #endif

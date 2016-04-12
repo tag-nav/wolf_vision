@@ -3,13 +3,18 @@
 #define STATE_BLOCK_H_
 
 // Fwd references
+namespace wolf{
 class LocalParametrizationBase;
+}
 
 //Wolf includes
 #include "wolf.h"
 
 //std includes
 #include <iostream>
+
+
+namespace wolf {
 
 /** \brief class StateBlock
  *
@@ -142,5 +147,7 @@ inline LocalParametrizationBase* StateBlock::getLocalParametrizationPtr()
 {
     return local_param_ptr_;
 }
+
+} // namespace wolf
 
 #endif

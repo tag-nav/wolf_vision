@@ -10,6 +10,8 @@
 
 #include "state_block.h"
 
+namespace wolf {
+
 class StateQuaternion : public StateBlock
 {
     public:
@@ -21,5 +23,7 @@ class StateQuaternion : public StateBlock
         }
         virtual ~StateQuaternion();
 };
+
+} // namespace wolf
 
 #endif /* SRC_STATE_QUATERNION_H_ */

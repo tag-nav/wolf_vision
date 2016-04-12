@@ -2,9 +2,11 @@
 #define LANDMARK_BASE_H_
 
 // Fwd references
+namespace wolf{
 class MapBase;
 class NodeTerminus;
 class StateBlock;
+}
 
 //Wolf includes
 #include "wolf.h"
@@ -12,6 +14,8 @@ class StateBlock;
 #include "node_constrained.h"
 
 //std includes
+
+namespace wolf {
 
 // TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
@@ -59,6 +63,8 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         /** \brief Sets the Landmark status to estimated
          **/
         void unfix();
+
+        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
@@ -111,6 +117,13 @@ inline void LandmarkBase::unfix()
     this->setStatus(LANDMARK_ESTIMATED);
 }
 
+inline void LandmarkBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
+{
+    NodeConstrained::removeConstrainedBy(_ctr_ptr);
+    if (constrained_by_list_.empty())
+        this->destruct();
+}
+
 inline StateBlock* LandmarkBase::getPPtr() const
 {
     return p_ptr_;
@@ -151,4 +164,5 @@ inline const LandmarkType LandmarkBase::getType() const
     return type_;
 }
 
+} // namespace wolf
 #endif

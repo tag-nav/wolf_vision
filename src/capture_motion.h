@@ -9,6 +9,9 @@
 //std includes
 //
 
+
+namespace wolf {
+
 //class CaptureBase
 class CaptureMotion : public CaptureBase
 {
@@ -59,4 +62,7 @@ class CaptureMotion : public CaptureBase
         virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const = 0;
 
 };
+
+} // namespace wolf
+
 #endif

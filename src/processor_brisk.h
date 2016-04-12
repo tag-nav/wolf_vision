@@ -19,6 +19,10 @@
 #include <math.h>
 #include <complex>      // std::complex, std::norm
 
+
+
+namespace wolf {
+
 class ProcessorBrisk : public ProcessorTrackerFeature
 {
     protected:
@@ -108,5 +112,8 @@ inline bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature
 {
     return true;
 }
+
+} // namespace wolf
+
 
 #endif // PROCESSOR_BRISK_H

@@ -5,14 +5,14 @@
 #ifndef WOLF_PROCESSOR_GPS_H
 #define WOLF_PROCESSOR_GPS_H
 
-// Fwd references
-//class SensorGPS;
-
 // Wolf includes
 #include "processor_base.h"
 #include "capture_gps.h"
 
 // Std includes
+
+
+namespace wolf {
 
 class ProcessorGPS : public ProcessorBase
 {
@@ -36,5 +36,7 @@ class ProcessorGPS : public ProcessorBase
 inline void ProcessorGPS::init(CaptureBase* _capture_ptr)
 {
 }
+
+} // namespace wolf
 
 #endif //WOLF_PROCESSOR_GPS_H

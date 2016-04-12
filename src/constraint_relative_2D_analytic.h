@@ -6,6 +6,8 @@
 #include "constraint_analytic.h"
 #include "landmark_base.h"
 
+namespace wolf {
+
 class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 {
     public:
@@ -161,5 +163,7 @@ inline void ConstraintRelative2DAnalytic::evaluatePureJacobians(std::vector<Eige
             getStatePtrVector()[1]->getVector()(0)), cos(getStatePtrVector()[1]->getVector()(0)), 0, 0;
     jacobians[3] << 0, 0, 1;
 }
+
+} // namespace wolf
 
 #endif

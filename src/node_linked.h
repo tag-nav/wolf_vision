@@ -16,6 +16,9 @@
 #include "node_base.h"
 #include "wolf.h"
 
+namespace wolf
+{
+
 /** \brief Linked node element in the Wolf Tree
  * 
  * \param UpperType the type of node one level up in the Wolf tree.
@@ -103,8 +106,9 @@ class NodeLinked : public NodeBase
         void addDownNode(LowerNodePtr _ptr);
 
         /** \brief Append a list of new down nodes
+         * The provided list is emptied after this operation
          */
-        void appendDownNodeList(LowerNodeList _new_down_node_list);
+        void addDownNodeList(LowerNodeList& _new_down_node_list);
 
         /** \brief Gets a reference to down node list
          */
@@ -160,6 +164,8 @@ class NodeLinked : public NodeBase
 
 };
 
+} // namespace wolf
+
 //////////////////////////////////////////
 //          IMPLEMENTATION
 //////////////////////////////////////////
@@ -179,6 +185,9 @@ class NodeLinked : public NodeBase
 #include "map_base.h"
 #include "landmark_base.h"
 #include "node_terminus.h"
+
+namespace wolf
+{
 
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label) :
@@ -256,7 +265,6 @@ inline void NodeLinked<UpperType, LowerType>::unlinkFromUpperNode()
 template<class UpperType, class LowerType>
 inline const typename NodeLinked<UpperType, LowerType>::UpperNodePtr NodeLinked<UpperType, LowerType>::upperNodePtr() const
 {
-    assert(up_node_ptr_ != nullptr);
     return up_node_ptr_;
 }
 
@@ -276,12 +284,12 @@ inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodePtr _ptr)
     //std::cout << "node: " << _ptr->nodeId() << " linked to " <<_ptr->upperNodePtr()->nodeId() << std::endl;
 }
 template<class UpperType, class LowerType>
-void NodeLinked<UpperType, LowerType>::appendDownNodeList(LowerNodeList _new_down_node_list)
+void NodeLinked<UpperType, LowerType>::addDownNodeList(LowerNodeList& _new_down_node_list)
 {
     assert(!isBottom() && "Trying to add a down node to a bottom node");
-    down_node_list_.splice(down_node_list_.end(), _new_down_node_list);
     for (auto new_down_node : _new_down_node_list)
         new_down_node->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
+    down_node_list_.splice(down_node_list_.end(), _new_down_node_list);
 }
 
 template<class UpperType, class LowerType>
@@ -358,5 +366,7 @@ WolfProblem* NodeLinked<UpperType, LowerType>::getWolfProblem()
         return up_node_ptr_->getWolfProblem();
     return nullptr;
 }
+
+} // namespace wolf
 
 #endif /* NODE_LINKED_H_ */

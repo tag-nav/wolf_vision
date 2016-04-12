@@ -10,6 +10,8 @@
 
 #include "ceres/autodiff_cost_function.h"
 
+namespace wolf {
+
 template <class CtrType>
 ceres::AutoDiffCostFunction<CtrType,
                             CtrType::measurementSize,
@@ -37,5 +39,6 @@ ceres::AutoDiffCostFunction<CtrType,
                                            CtrType::block5Size,CtrType::block6Size,CtrType::block7Size,CtrType::block8Size,CtrType::block9Size>((CtrType*)_constraint_ptr);
 };
 
+} // namespace wolf
 
 #endif /* SRC_CERES_WRAPPER_CREATE_AUTO_DIFF_COST_FUNCTION_CERES_H_ */

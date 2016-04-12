@@ -4,6 +4,9 @@
 //wolf includes
 #include "sensor_base.h"
 
+
+namespace wolf {
+
 class SensorIMU : public SensorBase
 {
 
@@ -28,5 +31,7 @@ class SensorIMU : public SensorBase
         virtual ~SensorIMU();
 
 };
+
+} // namespace wolf
 
 #endif // SENSOR_IMU_H

@@ -9,6 +9,8 @@
 // Std includes
 
 
+namespace wolf {
+
 //class LandmarkCorner2D
 class LandmarkCorner2D : public LandmarkBase
 {
@@ -40,4 +42,7 @@ class LandmarkCorner2D : public LandmarkBase
         WolfScalar getAperture() const;         
         
 };
+
+} // namespace wolf
+
 #endif

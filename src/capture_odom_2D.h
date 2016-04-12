@@ -10,6 +10,8 @@
 //std includes
 //
 
+namespace wolf {
+
 class CaptureOdom2D : public CaptureMotion
 {
 
@@ -37,4 +39,6 @@ class CaptureOdom2D : public CaptureMotion
       virtual CaptureOdom2D* interpolateCapture(const TimeStamp& _ts);
 
 };
+
+} // namespace wolf
 #endif

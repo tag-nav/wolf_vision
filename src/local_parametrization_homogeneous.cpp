@@ -7,6 +7,8 @@
 
 #include "local_parametrization_homogeneous.h"
 
+namespace wolf {
+
 LocalParametrizationHomogeneous::LocalParametrizationHomogeneous() :
         LocalParametrizationBase(4, 3)
 {
@@ -60,3 +62,5 @@ bool LocalParametrizationHomogeneous::computeJacobian(const Eigen::Map<const Eig
     _jacobian /= 2;
     return true;
 }
+
+} // namespace wolf

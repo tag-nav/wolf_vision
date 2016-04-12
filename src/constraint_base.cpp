@@ -3,6 +3,7 @@
 #include "node_terminus.h"
 #include "landmark_base.h"
 
+namespace wolf {
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
@@ -113,3 +114,5 @@ void ConstraintBase::setStatus(ConstraintStatus _status)
     }
     status_ = _status;
 }
+
+} // namespace wolf

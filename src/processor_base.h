@@ -2,14 +2,19 @@
 #define PROCESSOR_BASE_H_
 
 // Fwd refs
+namespace wolf{
 class SensorBase;
 class NodeTerminus;
+}
 
 //Wolf includes
 #include "wolf.h"
 #include "node_linked.h"
 
 // Std includes
+
+
+namespace wolf {
 
 //class ProcessorBase
 class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
@@ -24,10 +29,6 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
          **/
         virtual ~ProcessorBase();
 
-        SensorBase* getSensorPtr();
-
-        virtual void init(CaptureBase* _capture_ptr) = 0;
-
         virtual void process(CaptureBase* _capture_ptr) = 0;
 
         /** \brief Vote for KeyFrame generation
@@ -41,6 +42,8 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
         virtual bool permittedKeyFrame() final;
 
+        SensorBase* getSensorPtr();
+
         //virtual void newKeyFrameCallback(FrameBase* _new_key_frame_ptr, const WolfScalar& _time_tolerance) = 0;
 
     private:
@@ -48,14 +51,16 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
 };
 
+inline bool ProcessorBase::permittedKeyFrame()
+{
+    return getWolfProblem()->permitKeyFrame(this);
+}
+
 inline SensorBase* ProcessorBase::getSensorPtr()
 {
     return upperNodePtr();
 }
 
-inline bool ProcessorBase::permittedKeyFrame()
-{
-    return getWolfProblem()->permitKeyFrame(this);
-}
+} // namespace wolf
 
 #endif

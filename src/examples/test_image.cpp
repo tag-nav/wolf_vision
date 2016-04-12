@@ -19,6 +19,8 @@
 
 int main(int argc, char** argv)
 {
+    using namespace wolf;
+
     /**
     if (argc != 2 || atoi(argv[1]) < 0 || atoi(argv[1]) > 1)
     {
@@ -92,7 +94,14 @@ int main(int argc, char** argv)
 
 
     unsigned int f = 0;
-    const char * filename = "/home/jtarraso/Vídeos/House interior.mp4";
+    const char * filename;
+    if (argc == 0)
+        filename = "/home/jtarraso/Vídeos/House interior.mp4";
+    else
+        filename = argv[1];
+
+    std::cout << "Input video file: " << filename << std::endl;
+
     //const char * filename = "/home/jtarraso/Descargas/gray.mp4";
     cv::VideoCapture capture(filename);
     //cv::VideoCapture capture(0);
@@ -113,7 +122,7 @@ int main(int argc, char** argv)
     capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
     frm_ptr->addCapture(capture_brisk_ptr);
 
-    p_brisk->init(capture_brisk_ptr);
+    p_brisk->process(capture_brisk_ptr);
 
     cv::namedWindow("Keypoint drawing");    // Creates a window for display.
     while(f<400)

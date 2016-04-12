@@ -10,6 +10,9 @@
 
 #include "wolf.h"
 
+
+namespace wolf {
+
 class LocalParametrizationBase{
     protected:
         unsigned int global_size_;
@@ -26,4 +29,7 @@ class LocalParametrizationBase{
         unsigned int getLocalSize() const;
         unsigned int getGlobalSize() const;
 };
+
+} // namespace wolf
+
 #endif /* LOCAL_PARAMETRIZATION_BASE_H_ */

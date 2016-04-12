@@ -10,6 +10,9 @@
 
 #include "processor_motion.h"
 
+
+namespace wolf {
+
 /**\brief The Motion Delta type
  *
  * The motion delta, as a composite struct containing position increment and orientation quaternion increment.
@@ -91,5 +94,7 @@ inline Odom3dDelta ProcessorOdom3d::deltaZero() const
     //    return Odo3dDeltaType(); // Uses default constructor with null motion
     return Odom3dDelta::Zero(); //  Uses static member function
 }
+
+} // namespace wolf
 
 #endif /* SRC_PROCESSOR_ODOM_3D_H_ */

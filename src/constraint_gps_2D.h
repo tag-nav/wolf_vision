@@ -6,6 +6,8 @@
 #include "wolf.h"
 #include "constraint_sparse.h"
 
+namespace wolf {
+
 class ConstraintGPS2D : public ConstraintSparse<2, 2>
 {
     public:
@@ -48,5 +50,7 @@ inline bool ConstraintGPS2D::operator ()(const T* const _x, T* _residuals) const
     _residuals[1] = (T(getMeasurement()(1)) - _x[1]) / T(sqrt(getMeasurementCovariance()(1, 1)));
     return true;
 }
+
+} // namespace wolf
 
 #endif

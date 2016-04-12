@@ -22,6 +22,8 @@
 #include "create_auto_diff_cost_function_wrapper.h"
 #include "create_auto_diff_cost_function_ceres.h"
 
+namespace wolf {
+
 ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _use_wolf_autodiff)
 {
     switch (_ctr_ptr->getType())
@@ -80,5 +82,7 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _
             throw std::invalid_argument( "Unknown constraint type! Please add it in the file: ceres_wrapper/create_auto_diff_cost_function.h" );
     }
 }
+
+} // namespace wolf
 
 #endif /* SRC_CERES_WRAPPER_CREATE_AUTO_DIFF_COST_FUNCTION_H_ */

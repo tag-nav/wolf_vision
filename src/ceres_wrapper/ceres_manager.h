@@ -14,6 +14,10 @@
 #include "create_auto_diff_cost_function.h"
 #include "create_numeric_diff_cost_function.h"
 
+namespace wolf {
+
+
+
 /** \brief Enumeration of covariance blocks to be computed
  *
  * Enumeration of covariance blocks to be computed
@@ -64,5 +68,7 @@ class CeresManager
 
 		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr, const bool _self_auto_diff);
 };
+
+} // namespace wolf
 
 #endif
