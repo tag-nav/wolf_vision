@@ -22,7 +22,7 @@ ProcessorTrackerLandmark::~ProcessorTrackerLandmark()
     // TODO Auto-generated destructor stub
 }
 
-unsigned int ProcessorTrackerLandmark::processNew()
+unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
 {
     /* Rationale: A keyFrame will be created using the last Capture.
      * First, we work on this Capture to detect new Features,
@@ -33,7 +33,7 @@ unsigned int ProcessorTrackerLandmark::processNew()
      * the last and incoming Captures.
      */
     // We first need to populate the \b last Capture with new Features
-    unsigned int n = detectNewFeatures();
+    unsigned int n = detectNewFeatures(_max_features);
     LandmarkBaseList new_landmarks;
     for (auto new_feature_ptr : new_features_last_)
     {

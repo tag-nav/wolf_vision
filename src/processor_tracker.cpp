@@ -32,6 +32,8 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 
     incoming_ptr_ = _incoming_ptr;
 
+    preProcess();
+
     // FIRST TIME
     if (origin_ptr_ == nullptr)
     {
@@ -45,7 +47,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             makeFrame(last_ptr_);
 
         // Detect new Features, initialize Landmarks, create Constraints, ...
-        processNew();
+        processNew(max_new_features_);
 
         // Make the last Capture's Frame a KeyFrame so that it gets into the solver
         last_ptr_->getFramePtr()->setKey();
@@ -112,7 +114,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         else
         {
             // 2.b. Detect new Features, initialize Landmarks, create Constraints, ...
-            processNew();
+            processNew(max_new_features_);
 
             // Create a new non-key Frame in the Trajectory with the incoming Capture
             makeFrame(incoming_ptr_);
@@ -134,6 +136,8 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
     }
+
+    postProcess();
 }
 
 } // namespace wolf

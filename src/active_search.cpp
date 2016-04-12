@@ -24,17 +24,7 @@ ActiveSearchGrid::ActiveSearchGrid(const int & _img_size_h, const int & _img_siz
     renew();
 }
 
-
 // Functions to fill in cells
-void ActiveSearchGrid::hitCell(const Eigen::Vector2i & _pix) {
-    Eigen::Vector2i cell = pix2cell(_pix);
-    if (cell(0) < 0 || cell(1) < 0 || cell(0) >= grid_size_(0) || cell(1) >= grid_size_(1))
-        return;
-    if (projections_count_(cell(0), cell(1)) == -1)
-        projections_count_(cell(0), cell(1)) = 0;
-    projections_count_(cell(0), cell(1))++;
-}
-
 bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & _cell) {
     int k = 0;
     Eigen::Vector2i cell0;
@@ -99,7 +89,7 @@ void ActiveSearchGrid::blockCell(const cv::Rect & _roi)
     Eigen::Vector2i pix;
     pix(0) = _roi.x+_roi.height/2;
     pix(1) = _roi.y+_roi.width/2;
-    Eigen::Vector2i cell = pix2cell(pix);
+    Eigen::Vector2i cell = coords2cell(pix(0), pix(1));
     projections_count_(cell(0), cell(1)) = -1;
 }
 

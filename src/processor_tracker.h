@@ -72,7 +72,44 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void process(CaptureBase* const _incoming_ptr);
 
+        void setMaxNewFeatures(const unsigned int& _max_new_features);
+        const unsigned int getMaxNewFeatures();
+
     protected:
+        /** Pre-process incoming Capture
+         *
+         * This is called by process() just after assigning incoming_ptr_ to a valid Capture.
+         *
+         * Overload this function to prepare stuff on derived classes.
+         * Define it empty if no pre-processing is needed:
+         *
+         * <code>
+         *      virtual void preProcess(){}
+         * </code>
+         *
+         * Typical uses of prePrecess() are:
+         *   - casting base types to derived types
+         *   - initializing counters, flags, or any derived variables
+         *   - initializing algorithms needed for processing the derived data
+         */
+        virtual void preProcess() = 0;
+
+        /** Post-process
+         *
+         * This is called by process() after finishing the processing algorithm.
+         *
+         * Overload this function to post-process stuff on derived classes.
+         * Define it empty if no post-processing is needed:
+         *
+         * <code>
+         *      virtual void postProcess(){}
+         * </code>
+         *
+         * Typical uses of postPrecess() are:
+         *   - resetting and/or clearing variables and/or algorithms at the end of processing
+         *   - drawing / printing / logging the results of the processing
+         */
+        virtual void postProcess() = 0;
 
         /** \brief Tracker function
          * \return The number of successful tracks.
@@ -117,7 +154,7 @@ class ProcessorTracker : public ProcessorBase
         /**\brief Process new Features or Landmarks
          *
          */
-        virtual unsigned int processNew() = 0;
+        virtual unsigned int processNew(const unsigned int& _max_features) = 0;
 
         /**\brief Creates and adds constraints from last_ to origin_
          *
@@ -142,6 +179,16 @@ class ProcessorTracker : public ProcessorBase
 
         void addNewFeatureIncoming(FeatureBase* _feature_ptr);
 };
+
+inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_features)
+{
+    max_new_features_ = _max_new_features;
+}
+
+inline const unsigned int ProcessorTracker::getMaxNewFeatures()
+{
+    return max_new_features_;
+}
 
 inline void ProcessorTracker::makeFrame(CaptureBase* _capture_ptr)
 {

@@ -26,6 +26,9 @@ class ProcessorTrackerFeatureDummy : public wolf::ProcessorTrackerFeature
 
         unsigned int n_feature_;
 
+        virtual void preProcess();
+        virtual void postProcess();
+
         /** \brief Track provided features from \b last to \b incoming
          * \param _feature_list_in input list of features in \b last to track
          * \param _feature_list_out returned list of features found in \b incoming
@@ -60,7 +63,7 @@ class ProcessorTrackerFeatureDummy : public wolf::ProcessorTrackerFeature
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures();
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features);
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
@@ -86,6 +89,14 @@ inline ProcessorTrackerFeatureDummy::ProcessorTrackerFeatureDummy() :
 inline ProcessorTrackerFeatureDummy::~ProcessorTrackerFeatureDummy()
 {
     // TODO Auto-generated destructor stub
+}
+
+inline void ProcessorTrackerFeatureDummy::preProcess()
+{
+}
+
+inline void ProcessorTrackerFeatureDummy::postProcess()
+{
 }
 
 inline bool ProcessorTrackerFeatureDummy::correctFeatureDrift(const FeatureBase* _last_feature,

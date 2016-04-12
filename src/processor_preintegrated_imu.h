@@ -20,6 +20,10 @@ class ProcessorPreintegratedIMU : public ProcessorMotion2{
         // not redefining main operations (they should be the same for all derived classes)
 
     protected:
+
+        virtual void preProcess(){}
+        virtual void postProcess(){}
+
         // Helper functions
 
 
