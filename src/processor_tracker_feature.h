@@ -192,7 +192,6 @@ inline void ProcessorTrackerFeature::advance()
                 matches_origin_from_last_[matches_last_from_incoming_[match.first].feature_ptr_];
     }
     matches_origin_from_last_ = std::move(matches_last_from_incoming_);
-//    matches_last_from_incoming_.clear();
 
     std::cout << "advanced correspondences: " << std::endl;
     std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
@@ -207,8 +206,7 @@ inline void ProcessorTrackerFeature::reset()
     std::cout << "ProcessorTrackerFeature::reset()" << std::endl;
 
     // We also reset here the list of correspondences, which passes from last--incoming to origin--last.
-    matches_origin_from_last_ = matches_last_from_incoming_;
-    matches_last_from_incoming_.clear();
+    matches_origin_from_last_ = std::move(matches_last_from_incoming_);
 }
 
 } // namespace wolf
