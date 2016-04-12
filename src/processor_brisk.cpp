@@ -6,22 +6,22 @@
 // other includes
 #include <bitset>
 
-namespace wolf {
+namespace wolf
+{
 
 /** Public */
 
 /** The "main" class of this processor is "process" */
 
 //Constructor
-ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols,
-                               unsigned int _grid_width, unsigned int _grid_height, unsigned int _min_features_th,
+ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, unsigned int _grid_width,
+                               unsigned int _grid_height, unsigned int _max_new_features, unsigned int _min_features_th,
                                int _threshold, int _octaves, float _pattern_scales) :
-    ProcessorTrackerFeature(PRC_TRACKER_BRISK),
-    detector_(_threshold, _octaves, _pattern_scales),
-    matcher_(cv::NORM_HAMMING),
-    act_search_grid_(_image_rows,_image_cols,_grid_width, _grid_height),
-    min_features_th_(_min_features_th)
+        ProcessorTrackerFeature(PRC_TRACKER_BRISK), detector_(_threshold, _octaves, _pattern_scales), matcher_(
+                cv::NORM_HAMMING), act_search_grid_(_image_rows, _image_cols, _grid_width, _grid_height), min_features_th_(
+                _min_features_th)
 {
+    ProcessorTrackerFeature::setMaxNewFeatures(_max_new_features);
     detector_.create("Feature2D.BRISK");
 }
 
@@ -55,7 +55,7 @@ bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature, Featu
 }
 
 unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
-                                         cv::Mat& new_descriptors)
+                                    cv::Mat& new_descriptors)
 {
     cv::Mat _image_roi = _image(_roi);
     //Brisk Algorithm
@@ -69,7 +69,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
     return _new_keypoints.size();
 }
 
-unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_features)
+unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_features)
 {
     std::cout << std::endl << "\n================= detectNewFeatures =============" << std::endl << std::endl;
     resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
@@ -78,36 +78,35 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_features
 
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
-    unsigned int n_detections = 0;
+    unsigned int n_new_features = 0;
 
-    for (unsigned int n_iterations = 0; n_iterations < 20; n_iterations++)
+    for (unsigned int n_iterations = 0; n_iterations < _max_new_features * 1.25; n_iterations++)
     {
         if (act_search_grid_.pickRoi(roi))
         {
-            unsigned int n_features = detect(image_last_, roi, new_keypoints, new_descriptors);
-            if (n_features == 0)
+            if (detect(image_last_, roi, new_keypoints, new_descriptors))
             {
-                act_search_grid_.blockCell(roi);
+                std::cout << "# of NEW features detected: " << new_keypoints.size() << std::endl;
+                //Escoger uno de los features encontrados -> el 0 o primero.
+                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
+                std::cout << "Adding point " << point_ptr->nodeId() << " at " << new_keypoints[0].pt << std::endl;
+                addNewFeatureLast(point_ptr);
+                act_search_grid_.hitCell(new_keypoints[0]);
+                n_new_features++;
+                if (n_new_features >= _max_new_features)
+                    break;
             }
             else
             {
-                std::cout << "# of NEW features detected: " << n_features << std::endl;
-                //Escoger uno de los features encontrados -> el 0 o primero.
-                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
-                std::cout << "Adding point ID " << point_ptr->nodeId() << "; coords " << new_keypoints[0].pt << std::endl;
-                addNewFeatureLast(point_ptr);
-                act_search_grid_.hitCell(new_keypoints[0]);
-                n_detections++;
-                if (n_detections >= 10)
-                    break;
+                act_search_grid_.blockCell(roi);
             }
+
         }
         else
         {
             break;
         }
     }
-
 
 //    while ((n_features < 1) && (n_iterations < 20))
 //    {
@@ -134,18 +133,19 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_features
 //        }
 //        n_iterations++;
 //    }
-    return n_detections;
+    return n_new_features;
 }
 
-void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last, FeatureBaseList& _feature_list_incoming)
+void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last,
+                                            FeatureBaseList& _feature_list_incoming)
 {
-    for(auto feature_base_last_ptr : _feature_list_last)
+    for (auto feature_base_last_ptr : _feature_list_last)
     {
         FeaturePointImage* feature_last_ptr = (FeaturePointImage*)feature_base_last_ptr;
         feature_last_ptr->setIsKnown(true);
     }
 
-    for(auto feature_base_incoming_ptr : _feature_list_incoming)
+    for (auto feature_base_incoming_ptr : _feature_list_incoming)
     {
         FeaturePointImage* feature_incoming_ptr = (FeaturePointImage*)feature_base_incoming_ptr;
         feature_incoming_ptr->setIsKnown(true);
@@ -214,8 +214,6 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
 // draw functions ===================================================================
 
-
-
 void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, Eigen::Vector2i _feature_point, bool _is_candidate)
 {
     // These "tracking features" are the feature to be used in tracking as well as its candidates
@@ -223,23 +221,22 @@ void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, Eigen::Vector2i _featu
     cv::Point point;
     point.x = _feature_point[0];
     point.y = _feature_point[1];
-    if(_is_candidate)
+    if (_is_candidate)
     {
-        cv::circle(_image,point,2,cv::Scalar(250.0,250.0,250.0),-1,8,0);
+        cv::circle(_image, point, 2, cv::Scalar(250.0, 250.0, 250.0), -1, 8, 0);
     }
     else
     {
-        cv::circle(_image,point,2,cv::Scalar(250.0,180.0,70.0),-1,8,0);
+        cv::circle(_image, point, 2, cv::Scalar(250.0, 180.0, 70.0), -1, 8, 0);
     }
-    cv::imshow("Keypoint drawing",_image);
+    cv::imshow("Keypoint drawing", _image);
 }
 
-void ProcessorBrisk::drawRoiLastFrame(cv::Mat _image,cv::Rect _roi)
+void ProcessorBrisk::drawRoiLastFrame(cv::Mat _image, cv::Rect _roi)
 {
-    cv::rectangle(_image,_roi,cv::Scalar(88.0,70.0,254.0),1,8,0);
-    cv::imshow("Keypoint drawing",_image);
+    cv::rectangle(_image, _roi, cv::Scalar(88.0, 70.0, 254.0), 1, 8, 0);
+    cv::imshow("Keypoint drawing", _image);
 }
-
 
 void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
 {
@@ -247,20 +244,20 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
     cv::Mat image = image_last_;
 
 //    for (std::list<FeatureBase*>::iterator feature_iter=last_ptr_->getFeatureListPtr()->begin();feature_iter != last_ptr_->getFeatureListPtr()->end(); ++feature_iter)
-    for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()) )
+    for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
     {
         FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
-        if(point_ptr->isKnown())
+        if (point_ptr->isKnown())
         {
-            cv::circle(image,point_ptr->getKeypoint().pt,2,cv::Scalar(50.0,250.0,54.0),-1,3,0);
+            cv::circle(image, point_ptr->getKeypoint().pt, 2, cv::Scalar(50.0, 250.0, 54.0), -1, 3, 0);
         }
         else
         {
-            cv::circle(image,point_ptr->getKeypoint().pt,2,cv::Scalar(250.0,80.0,254.0),-1,3,0);
+            cv::circle(image, point_ptr->getKeypoint().pt, 2, cv::Scalar(250.0, 80.0, 254.0), -1, 3, 0);
         }
 //        std::cout << "keypoint: " << feature_ptr->getKeypoint().pt << std::endl;
     }
-    cv::imshow("Keypoint drawing",image);
+    cv::imshow("Keypoint drawing", image);
 
 }
 
