@@ -43,11 +43,24 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         void preProcess();
         void postProcess();
 
-        /** \brief Create a new constraint
+        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
+                                           FeatureMatchMap& _feature_correspondences);
+
+        /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
+        * \param _last_feature input feature in last capture tracked
+        * \param _incoming_feature input/output feature in incoming capture to be corrected
+        * \return false if the the process discards the correspondence with origin's feature
+        */
+        virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
+
+        /** \brief Vote for KeyFrame generation
          *
-         * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
+         * If a KeyFrame criterion is validated, this function returns true,
+         * meaning that it wants to create a KeyFrame at the \b last Capture.
+         *
+         * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feat_or_lmk_ptr);
+        virtual bool voteForKeyFrame();
 
         /** \brief Detect new Features
          *
@@ -60,29 +73,17 @@ class ProcessorBrisk : public ProcessorTrackerFeature
          */
         virtual unsigned int detectNewFeatures();
 
-        /** \brief Vote for KeyFrame generation
+        /** \brief Create a new constraint
          *
-         * If a KeyFrame criterion is validated, this function returns true,
-         * meaning that it wants to create a KeyFrame at the \b last Capture.
-         *
-         * WARNING! This function only votes! It does not create KeyFrames!
+         * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
          */
-        virtual bool voteForKeyFrame();
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr);
 
-        virtual unsigned int briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints,
-                                         cv::Mat & new_descriptors);
+    private:
+        virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
+                                         cv::Mat& new_descriptors);
 
-        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList & _feature_list_out,
-                                           FeatureMatchMap& _feature_correspondences);
-
-        /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
-        * \param _last_feature input feature in last capture tracked
-        * \param _incoming_feature input/output feature in incoming capture to be corrected
-        * \return false if the the process discards the correspondence with origin's feature
-        */
-        virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
-
-public:
+    public:
         virtual void drawFeatures(CaptureBase* const _last_ptr);
 
         virtual void drawTrackingFeatures(cv::Mat _image, Eigen::Vector2i _feature_point, bool _is_candidate);
@@ -94,6 +95,19 @@ public:
 
 
 };
+
+inline bool ProcessorBrisk::voteForKeyFrame()
+{
+    std::cout << "voteForKeyFrame?: "
+            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < min_features_th_) << std::endl;
+    return (incoming_ptr_->getFeatureListPtr()->size() < min_features_th_);
+}
+
+inline ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr)
+{
+    ConstraintEpipolar* const_epipolar_ptr = new ConstraintEpipolar(_feature_ptr, _feature_other_ptr);
+    return const_epipolar_ptr; // TODO Crear constraint
+}
 
 } // namespace wolf
 
