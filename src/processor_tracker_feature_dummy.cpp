@@ -45,7 +45,7 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures()
 {
     std::cout << "detecting new features..." << std::endl;
 
-    // detecting 10 new features
+    // detecting 5 new features
     for (unsigned int i = 1; i <= 5; i++)
     {
         n_feature_++;

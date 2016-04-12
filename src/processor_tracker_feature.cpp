@@ -64,7 +64,7 @@ unsigned int ProcessorTrackerFeature::processNew()
      * the last and incoming Captures.
      */
 
-    // Populate the last Capture with new Features
+    // Populate the last Capture with new Features. The result is in new_features_last_.
     unsigned int n = detectNewFeatures();
 
     // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
@@ -73,7 +73,8 @@ unsigned int ProcessorTrackerFeature::processNew()
         trackFeatures(new_features_last_, new_features_incoming_, matches_last_from_incoming_);
 
         // Append all new Features to the incoming Captures' list of Features
-        incoming_ptr_->addDownNodeList(new_features_incoming_);
+        if (incoming_ptr_ != last_ptr_)
+            incoming_ptr_->addDownNodeList(new_features_incoming_);
     }
     // Append all new Features to the last Captures' list of Features
     last_ptr_->addDownNodeList(new_features_last_);
