@@ -56,7 +56,7 @@ unsigned int ProcessorBrisk::processKnown()
 }
 
 // This is intended to create Features that are not among the Features already known in the Map. Returns the number of detected Features.
-unsigned int ProcessorBrisk::detectNewFeatures()
+unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_features)
 {
     std::cout << std::endl << "\n================= detectNewFeatures =============" << std::endl << std::endl;
 

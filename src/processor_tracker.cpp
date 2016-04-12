@@ -44,7 +44,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             makeFrame(last_ptr_);
 
         // Detect new Features, initialize Landmarks, create Constraints, ...
-        processNew();
+        processNew(max_new_features_);
 
         // Make the last Capture's Frame a KeyFrame so that it gets into the solver
         last_ptr_->getFramePtr()->setKey();
