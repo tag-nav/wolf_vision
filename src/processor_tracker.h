@@ -13,11 +13,14 @@
 
 namespace wolf {
 
-/** \brief Feature tracker processor
+/** \brief General tracker processor
  *
  * This is an abstract class.
  *
- * This class implements the incremental feature tracker.
+ * This class implements the incremental tracker, that can be used to track either Features in
+ * other Captures, or Landmarks in a Map, through two derived classes,
+ *   - ProcessorTrackerFeature,
+ *   - ProcessorTrackerLandmark.
  *
  * The incremental tracker contains three pointers to three Captures of type CaptureBase,
  * named \b origin, \b last and \b incoming:
@@ -34,22 +37,26 @@ namespace wolf {
  *   - ProcessorTrackerFeature : for Feature-Feature correspondences (no landmarks)
  *   - ProcessorTrackerLandmark : for Feature-Landmark correspondences (with landmarks)
  *
- * The pipeline of actions for an autonomous tracker can be resumed as follows:
- *   - Init the tracker with an \b origin Capture: init();
+ * The pipeline of actions for an autonomous tracker can be resumed as follows (see process() for full detail).
+ * We highlight the functions to be implemented by derived classes with the sign '<=== IMPLEMENT'
  *   - On each incoming Capture,
- *     - Track known features in the \b incoming Capture: processKnownFeatures();
- *       - For each tracked Feature:
- *          - create constraints: createConstraint()
+ *     - Track known features in the \b incoming Capture: processKnown()            <=== IMPLEMENT
  *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
- *     - if voteForKeyFrame()
- *       - Populate the tracker with new Features : processNew()
- *       - detectNewFeatures()
- *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
- *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
+ *     - if voteForKeyFrame()                                                       <=== IMPLEMENT
+ *       - Populate the tracker with new Features : processNew()                    <=== IMPLEMENT
+ *       - Make a KeyFrame with the \b last Capture: makeFrame(), setKey()
+ *       - Establish constraints of the new Features: establishConstraints()        <=== IMPLEMENT
+ *       - Reset the tracker with the \b last Capture as the new \b origin: reset() <=== IMPLEMENT
  *     - else
- *       - Advance the tracker one Capture ahead: advance()
+ *       - Advance the tracker one Capture ahead: advance()                         <=== IMPLEMENT
  *
- * This functionality exists by default in the virtual method process(). You can overload it at your convenience.
+ * This functionality exists by default in the virtual method process().
+ * Should you need extra functionality for your derived types, you can use the two pure virtuals,
+ *
+ *   -  preProcess()
+ *   -  postProcess()
+ *
+ * which are called at the beginning and at the end of process(). See the doc of these functions for more info.
  */
 class ProcessorTracker : public ProcessorBase
 {
@@ -81,7 +88,7 @@ class ProcessorTracker : public ProcessorBase
          * This is called by process() just after assigning incoming_ptr_ to a valid Capture.
          *
          * Overload this function to prepare stuff on derived classes.
-         * Define it empty if no pre-processing is needed:
+         * Define it empty if no pre-processing is needed, as follows:
          *
          * <code>
          *      virtual void preProcess(){}
@@ -99,7 +106,7 @@ class ProcessorTracker : public ProcessorBase
          * This is called by process() after finishing the processing algorithm.
          *
          * Overload this function to post-process stuff on derived classes.
-         * Define it empty if no post-processing is needed:
+         * Define it empty if no post-processing is needed, as follows:
          *
          * <code>
          *      virtual void postProcess(){}

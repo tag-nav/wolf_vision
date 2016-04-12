@@ -34,43 +34,56 @@ struct FeatureMatch
 
 typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
 
-/** \brief General tracker processor
+/** \brief Feature tracker processor
+ *
+ * This is an abstract class.
  *
  * This class implements the incremental feature tracker.
- * It contains three pointers to three Captures of type CaptureBase, named \b origin, \b last and \b incoming:
+ *
+ * The incremental tracker contains three pointers to three Captures of type CaptureBase,
+ * named \b origin, \b last and \b incoming:
  *   - \b origin: this points to a Capture where all Feature tracks start.
- *   - \b last: the last Capture tracked by the tracker. A sufficient subset of the Features in \b origin is still alive in \b last.
+ *   - \b last: the last Capture tracked by the tracker.
+ *     A sufficient subset of the Features in \b origin is still alive in \b last.
  *   - \b incoming: the capture being received. The tracker operates on this Capture,
- *     establishing correspondences between the features here and the features in \b origin. Each successful correspondence
+ *     establishing correspondences between the features here and the features in \b origin.
+ *     Each successful correspondence
  *     results in an extension of the track of the Feature up to the \b incoming Capture.
  *
- * It establishes constraints Feature-Landmark;
- *     it uses Landmarks for tracking, in an active-search approach,
- *     and it creates Landmarks with each new Feature detected.
+ * It establishes constraints Feature-Feature or Feature-Landmark.
  *
- * The pipeline of actions for an autonomous tracker can be resumed as follows:
- *   - Init the tracker with an \b origin Capture: init();
+ * This tracker builds on top of the ProcessorTracker by implementing some of its pure virtual functions.
+ * As a reminder, we sketch here the pipeline of the parent ProcessorTracker process() function.
+ * We highlight the functions implemented here with a sign  '<--- IMPLEMENTED', and the ones to be implemented by derived classes with '<=== IMPLEMENT'
+ *
  *   - On each incoming Capture,
- *     - Track known features in the \b incoming Capture: processKnownFeatures();
- *       - For each detected Feature:
- *          - create constraints Feature-Feature: createConstraint()
+ *     - Track known features in the \b incoming Capture: processKnown()            <--- IMPLEMENTED
  *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
- *     - if voteForKeyFrame()
- *       - Look for new Features and make Landmarks with them:
- *       - detectNewFeatures()
- *       - Make a KeyFrame with the \b last Capture: makeKeyFrame();
- *       - Reset the tracker with the \b last Capture as the new \b origin: reset();
+ *     - if voteForKeyFrame()                                                       <=== IMPLEMENT
+ *       - Populate the tracker with new Features : processNew()                    <--- IMPLEMENTED
+ *       - Make a KeyFrame with the \b last Capture: makeFrame(), setKey()
+ *       - Establish constraints of the new Features: establishConstraints()        <--- IMPLEMENTED
+ *       - Reset the tracker with the \b last Capture as the new \b origin: reset() <--- IMPLEMENTED
  *     - else
- *       - Advance the tracker one Capture ahead: advance()
+ *       - Advance the tracker one Capture ahead: advance()                         <--- IMPLEMENTED
  *
- * This functionality exists by default in the virtual method process(). You can overload it at your convenience.
+ * The most important implemented methods are:
+ *   - processKnown() : which calls the pure virtuals, to be implemented in derived classes:
+ *     - trackFeatures() : track Features from \b last to \b incoming               <=== IMPLEMENT
+ *     - correctFeatureDrift() : correct the drift by re-matching from \b origin to \b incoming
+ *   - processNew() : which calls the pure virtuals:
+ *     - detectNewFeatures() : detects new Features in \b last                      <=== IMPLEMENT
+ *     - trackFeatures() : track these new Features again in \b incoming            <=== IMPLEMENT
+ *   - establishConstraints() : which calls the pure virtual:
+ *     - createConstraint() : create constraint of the correct derived type         <=== IMPLEMENT
  *
- * This is an abstract class. The following pure virtual methods have to be implemented in derived classes:
- *   - processKnownFeatures()
- *   - voteForKeyFrame()
- *   - detectNewFeatures()
- *   - createLandmark()
- *   - createConstraint()
+ * Should you need extra functionality for your derived types, you can implement the two pure virtuals,
+ *
+ *   -  preProcess()
+ *   -  postProcess()
+ *
+ * which are called at the beginning and at the end of process() respectively.
+ * See the doc of these functions for more info.
  */
 class ProcessorTrackerFeature : public ProcessorTracker
 {
