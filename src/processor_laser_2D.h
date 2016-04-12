@@ -63,6 +63,10 @@ class ProcessorLaser2D : public ProcessorBase
 
         virtual void init(CaptureBase* _origin_ptr);
 
+    protected:
+        virtual void preProcess(){}
+        virtual void postProcess(){}
+
         // JS: These two fcns can be removed and substituted by process() above.
     private:
         void extractFeatures(CaptureBase* _capture_ptr);

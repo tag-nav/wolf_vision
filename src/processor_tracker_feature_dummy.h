@@ -26,6 +26,9 @@ class ProcessorTrackerFeatureDummy : public wolf::ProcessorTrackerFeature
 
         unsigned int n_feature_;
 
+        virtual void preProcess(){}
+        virtual void postProcess(){}
+
         /** \brief Track provided features from \b last to \b incoming
          * \param _feature_list_in input list of features in \b last to track
          * \param _feature_list_out returned list of features found in \b incoming

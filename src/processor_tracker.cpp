@@ -30,13 +30,16 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
     std::cout << "\nProcess..." << std::endl;
 
+    incoming_ptr_ = _incoming_ptr;
+
+    preProcess();
+
     // FIRST TIME
     if (origin_ptr_ == nullptr)
     {
         std::cout << "FIRST TIME" << std::endl;
         std::cout << "Features in origin: " << 0 << "; in last: " << 0 << std::endl;
 
-        incoming_ptr_ = _incoming_ptr;
         last_ptr_ = _incoming_ptr;
         origin_ptr_ = _incoming_ptr;
 
@@ -68,8 +71,6 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 
 
         // 1. First we track the known Features and create new constraints as needed
-        incoming_ptr_ = _incoming_ptr;
-
         processKnown();
 
         // Make frame in incoming
@@ -92,7 +93,6 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
         // 1. First we track the known Features and create new constraints as needed
-        incoming_ptr_ = _incoming_ptr;
 
         processKnown();
 
@@ -136,6 +136,8 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
     }
+
+    postProcess();
 }
 
 } // namespace wolf

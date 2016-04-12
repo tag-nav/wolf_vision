@@ -76,6 +76,40 @@ class ProcessorTracker : public ProcessorBase
         const unsigned int getMaxNewFeatures();
 
     protected:
+        /** Pre-process incoming Capture
+         *
+         * This is called by process() just after assigning incoming_ptr_ to a valid Capture.
+         *
+         * Overload this function to prepare stuff on derived classes.
+         * Define it empty if no pre-processing is needed:
+         *
+         * <code>
+         *      virtual void preProcess(){}
+         * </code>
+         *
+         * Typical uses of prePrecess() are:
+         *   - casting base types to derived types
+         *   - initializing counters, flags, or any derived variables
+         *   - initializing algorithms needed for processing the derived data
+         */
+        virtual void preProcess() = 0;
+
+        /** Post-process
+         *
+         * This is called by process() after finishing the processing algorithm.
+         *
+         * Overload this function to post-process stuff on derived classes.
+         * Define it empty if no post-processing is needed:
+         *
+         * <code>
+         *      virtual void postProcess(){}
+         * </code>
+         *
+         * Typical uses of postPrecess() are:
+         *   - resetting and/or clearing variables and/or algorithms at the end of processing
+         *   - drawing / printing / logging the results of the processing
+         */
+        virtual void postProcess() = 0;
 
         /** \brief Tracker function
          * \return The number of successful tracks.

@@ -31,6 +31,7 @@ class ProcessorGPS : public ProcessorBase
         virtual void init(CaptureBase* _capture_ptr);
 
         virtual void process(CaptureBase* _capture_ptr);
+
 };
 
 inline void ProcessorGPS::init(CaptureBase* _capture_ptr)

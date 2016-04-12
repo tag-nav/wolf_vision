@@ -18,6 +18,7 @@
 
 //OpenCV includes
 #include <opencv2/core/core.hpp>
+#include "opencv2/features2d/features2d.hpp"
 
 namespace wolf{
 
@@ -134,28 +135,35 @@ class ActiveSearchGrid {
          *
          * Sets all cell counters to zero.
          */
-        void clear()
-        {
-            projections_count_.setZero();
-        }
+        void clear();
 
         /**
          * \brief Clear grid and position it at a new random location.
          *
          * Sets all cell counters to zero and sets a new random grid position.
          */
-        void renew()
-        {
-            offset_(0) = -(margin_ + rand() % (cell_size_(0) - 2 * margin_)); // from -margin to -(cellSize(0)-margin)
-            offset_(1) = -(margin_ + rand() % (cell_size_(1) - 2 * margin_)); // from -margin to -(cellSize(0)-margin)
-            clear();
-        }
+        void renew();
 
         /**
          * \brief Add a projected pixel to the grid.
-         * \param pix the pixel to add.
+         * \param _x the x-coordinate of the pixel to add.
+         * \param _y the y-coordinate of the pixel to add.
          */
-        void hitCell(const Eigen::Vector2i & _pix);
+        template<typename Scalar>
+        void hitCell(const Scalar _x, const Scalar _y);
+
+        /**
+         * \brief Add a projected pixel to the grid.
+         * \param _pix the pixel to add as an Eigen 2-vector with any Scalar type.
+         */
+        template<typename Scalar>
+        void hitCell(const Eigen::Matrix<Scalar, 2, 1>& _pix);
+
+        /**
+         * \brief Add a projected pixel to the grid.
+         * \param _pix the pixel to add as a cv::KeyPoint.
+         */
+        void hitCell(const cv::KeyPoint& _pix);
 
         /**
          * Get ROI of a random empty cell.
@@ -176,8 +184,8 @@ class ActiveSearchGrid {
         /**
          * Get cell corresponding to pixel
          */
-        //template<typename Eigen::Vector2i>
-        Eigen::Vector2i pix2cell(const Eigen::Vector2i& _pix);
+        template<typename Scalar>
+        Eigen::Vector2i coords2cell(const Scalar _x, const Scalar _y);
 
         /**
          * Get cell origin (exact pixel)
@@ -201,11 +209,60 @@ class ActiveSearchGrid {
 
 };
 
-inline Eigen::Vector2i ActiveSearchGrid::pix2cell(const Eigen::Vector2i& _pix)
+inline void ActiveSearchGrid::clear()
+{
+    projections_count_.setZero();
+}
+
+inline void ActiveSearchGrid::renew()
+{
+    offset_(0) = -(margin_ + rand() % (cell_size_(0) - 2 * margin_)); // from -margin to -(cellSize(0)-margin)
+    offset_(1) = -(margin_ + rand() % (cell_size_(1) - 2 * margin_)); // from -margin to -(cellSize(0)-margin)
+    clear();
+}
+
+inline void ActiveSearchGrid::hitCell(const cv::KeyPoint& _pix)
+{
+    hitCell(_pix.pt.x, _pix.pt.y);
+}
+
+/**
+ * \brief Add a projected pixel to the grid.
+ * \param _pix the pixel to add as an Eigen 2-vector.
+ */
+template<typename Scalar>
+inline void ActiveSearchGrid::hitCell(const Eigen::Matrix<Scalar, 2, 1>& _pix)
+{
+    hitCell(_pix(0), _pix(1));
+}
+
+/**
+ * \brief Add a projected pixel to the grid.
+ * \param _x the x-coordinate of the pixel to add.
+ * \param _y the y-coordinate of the pixel to add.
+ */
+template<typename Scalar>
+inline void ActiveSearchGrid::hitCell(const Scalar _x, const Scalar _y)
+{
+    Eigen::Vector2i cell = coords2cell(_x, _y);
+    if (cell(0) < 0 || cell(1) < 0 || cell(0) >= grid_size_(0) || cell(1) >= grid_size_(1))
+        return;
+
+    if (projections_count_(cell(0), cell(1)) == -1)
+        projections_count_(cell(0), cell(1)) = 0;
+
+    projections_count_(cell(0), cell(1))++;
+}
+
+/**
+ * Get cell corresponding to pixel
+ */
+template<typename Scalar>
+inline Eigen::Vector2i ActiveSearchGrid::coords2cell(const Scalar _x, const Scalar _y)
 {
     Eigen::Vector2i cell;
-    cell(0) = (_pix(0) - offset_(0)) / cell_size_(0);
-    cell(1) = (_pix(1) - offset_(1)) / cell_size_(1);
+    cell(0) = (_x - offset_(0)) / cell_size_(0);
+    cell(1) = (_y - offset_(1)) / cell_size_(1);
     return cell;
 }
 
