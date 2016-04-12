@@ -97,7 +97,7 @@ inline bool ProcessorTrackerFeatureDummy::correctFeatureDrift(const FeatureBase*
 inline ConstraintBase* ProcessorTrackerFeatureDummy::createConstraint(FeatureBase* _feature_ptr,
                                                                       FeatureBase* _feature_other_ptr)
 {
-    std::cout << "establishing constraint: last feature " << _feature_ptr->getMeasurement()
+    std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
               << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl;
     return new ConstraintEpipolar(_feature_ptr, _feature_other_ptr);
 }

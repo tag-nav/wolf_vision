@@ -27,7 +27,7 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    std::cout << "process..." << std::endl;
+    std::cout << "\nProcess..." << std::endl;
 
     // FIRST TIME
     if (origin_ptr_ == nullptr)

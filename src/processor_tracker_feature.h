@@ -168,6 +168,12 @@ class ProcessorTrackerFeature : public ProcessorTracker
 
 };
 
+} // namespace wolf
+
+#include <utility>
+
+namespace wolf {
+
 inline void ProcessorTrackerFeature::establishConstraints()
 {
     std::cout << "ProcessorTrackerFeature::establishConstraints() " << std::endl;
@@ -185,8 +191,8 @@ inline void ProcessorTrackerFeature::advance()
         matches_last_from_incoming_[match.first] =
                 matches_origin_from_last_[matches_last_from_incoming_[match.first].feature_ptr_];
     }
-    matches_origin_from_last_ = matches_last_from_incoming_;
-    matches_last_from_incoming_.clear();
+    matches_origin_from_last_ = std::move(matches_last_from_incoming_);
+//    matches_last_from_incoming_.clear();
 
     std::cout << "advanced correspondences: " << std::endl;
     std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
