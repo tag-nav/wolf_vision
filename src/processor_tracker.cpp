@@ -19,11 +19,8 @@ ProcessorTracker::ProcessorTracker(ProcessorType _tp, const unsigned int _max_ne
 
 ProcessorTracker::~ProcessorTracker()
 {
-    // FIXME: This test with nullptr is not fail safe. Only the class design can make it safe, by ensuring
-    // at all times that whenever incoming_ptr_ is not used, it points to nullptr.
-    // See both flavors of reset(), and advance().
-    if (incoming_ptr_ != nullptr)
-        delete incoming_ptr_;
+    if (incoming_ptr_ != nullptr && incoming_ptr_->upperNodePtr() != nullptr)
+        incoming_ptr_->destruct();
 }
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
