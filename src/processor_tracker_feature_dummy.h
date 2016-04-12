@@ -32,7 +32,7 @@ class ProcessorTrackerFeatureDummy : public wolf::ProcessorTrackerFeature
          * \param _feature_correspondences returned map of correspondences: _feature_correspondences[feature_out_ptr] = feature_in_ptr
          */
         virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
-                                           FeatureCorrespondenceMap& _feature_correspondences);
+                                           FeatureMatchMap& _feature_correspondences);
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _last_feature input feature in last capture tracked

@@ -12,7 +12,7 @@ namespace wolf
 
 unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& _feature_list_in,
                                                          FeatureBaseList& _feature_list_out,
-                                                         FeatureCorrespondenceMap& _feature_correspondences)
+                                                         FeatureMatchMap& _feature_correspondences)
 {
     std::cout << "tracking " << _feature_list_in.size() << " features..." << std::endl;
 
@@ -28,7 +28,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
         else
         {
             _feature_list_out.push_back(new FeatureBase(FEAT_POINT_IMAGE, feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
-            _feature_correspondences[_feature_list_out.back()] = FeatureCorrespondence(feat_in_ptr,0);
+            _feature_correspondences[_feature_list_out.back()] = FeatureMatch(feat_in_ptr,0);
             std::cout << "feature " << feat_in_ptr->getMeasurement() << " tracked!" << std::endl;
         }
     }

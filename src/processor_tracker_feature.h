@@ -15,24 +15,24 @@ namespace wolf
 {
 
 // Feature-Feature correspondence
-struct FeatureCorrespondence
+struct FeatureMatch
 {
         FeatureBase* feature_ptr_;
         WolfScalar normalized_score_;
 
-        FeatureCorrespondence() :
+        FeatureMatch() :
                 feature_ptr_(nullptr), normalized_score_(0.0)
         {
 
         }
-        FeatureCorrespondence(FeatureBase* _last_feature_ptr, const WolfScalar& _normalized_score) :
+        FeatureMatch(FeatureBase* _last_feature_ptr, const WolfScalar& _normalized_score) :
                 feature_ptr_(_last_feature_ptr), normalized_score_(_normalized_score)
         {
 
         }
 };
 
-typedef std::map<FeatureBase*, FeatureCorrespondence> FeatureCorrespondenceMap;
+typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
 
 /** \brief General tracker processor
  *
@@ -84,8 +84,8 @@ class ProcessorTrackerFeature : public ProcessorTracker
     protected:
 
         FeatureBaseList known_features_incoming_;
-        FeatureCorrespondenceMap matches_last_from_incoming_;
-        FeatureCorrespondenceMap matches_origin_from_last_;
+        FeatureMatchMap matches_last_from_incoming_;
+        FeatureMatchMap matches_origin_from_last_;
 
         /** \brief Process known Features
          * \return The number of successful matches.
@@ -111,7 +111,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * \param _feature_correspondences returned map of correspondences: _feature_correspondences[feature_out_ptr] = feature_in_ptr
          */
         virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
-                                           FeatureCorrespondenceMap& _feature_correspondences) = 0;
+                                           FeatureMatchMap& _feature_correspondences) = 0;
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _last_feature input feature in last capture tracked

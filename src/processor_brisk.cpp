@@ -111,7 +111,7 @@ bool ProcessorBrisk::voteForKeyFrame()
     return (incoming_ptr_->getFeatureListPtr()->size() < min_features_th_);
 }
 
-unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureCorrespondenceMap& _feature_correspondences)
+unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureMatchMap& _feature_correspondences)
 {
     std::cout << std::endl << "-------------- trackFeatures ----------------" << std::endl << std::endl;
 
@@ -170,7 +170,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                     FeaturePointImage* incoming_point_ptr = new FeaturePointImage(new_keypoints[matches[0].trainIdx],
                             (new_descriptors.row(matches[0].trainIdx)),feature_ptr->isKnown());
                     _feature_list_out.push_back(incoming_point_ptr);
-                    _feature_correspondences[incoming_point_ptr] = FeatureCorrespondence(feature_base_ptr, (WolfScalar) matches[0].distance);
+                    _feature_correspondences[incoming_point_ptr] = FeatureMatch(feature_base_ptr, (WolfScalar) matches[0].distance);
                 }
 
 
