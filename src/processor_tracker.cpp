@@ -10,8 +10,9 @@
 namespace wolf
 {
 
-ProcessorTracker::ProcessorTracker(ProcessorType _tp) :
-        ProcessorBase(_tp), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr)
+ProcessorTracker::ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features) :
+        ProcessorBase(_tp), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
+        max_new_features_(_max_new_features)
 {
     //
 }
@@ -70,16 +71,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         // 1. First we track the known Features and create new constraints as needed
         processKnown();
 
-        // Do we want more features in last_?
-        if (voteForKeyFrame() )
-        {
-            // 2.b. Detect new Features, initialize Landmarks, create Constraints, ...
-            processNew();
-
-            // Establish constraints between last and origin
-            establishConstraints();
-        }
-
+        // Make frame in incoming
         makeFrame(incoming_ptr_);
 
         // reset the derived tracker
@@ -90,7 +82,6 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 
         std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
-
     }
     // OTHER TIMES
     else

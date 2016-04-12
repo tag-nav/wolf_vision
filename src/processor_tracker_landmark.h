@@ -11,6 +11,9 @@
 #include "processor_tracker.h"
 #include "capture_base.h"
 
+namespace wolf
+{
+
 // Correspondence Feature incoming - Landmark
 struct LandmarkMatch
 {
@@ -29,7 +32,7 @@ struct LandmarkMatch
 };
 
 // Correspondence Landmark - Feature
-typedef std::map<FeatureBase*, LandmarkMatch> FeatureLandmarkMap;
+typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
 
 class ProcessorTrackerLandmark : public ProcessorTracker
 {
@@ -39,8 +42,8 @@ class ProcessorTrackerLandmark : public ProcessorTracker
 
     protected:
 
-        FeatureLandmarkMap incoming_2_landmark_;
-        FeatureLandmarkMap last_2_landmark_;
+        LandmarkMatchMap matches_landmark_from_incoming_;
+        LandmarkMatchMap matches_landmark_from_last_;
 
         /** \brief Tracker function
          * \return The number of successful tracks.
@@ -69,7 +72,37 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          */
         virtual unsigned int findLandmarks(LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
-                                           FeatureLandmarkMap _feature_landmark_correspondences) = 0;
+                                           LandmarkMatchMap _feature_landmark_correspondences) = 0;
+
+        /** \brief Vote for KeyFrame generation
+         *
+         * If a KeyFrame criterion is validated, this function returns true,
+         * meaning that it wants to create a KeyFrame at the \b last Capture.
+         *
+         * WARNING! This function only votes! It does not create KeyFrames!
+         */
+        virtual bool voteForKeyFrame() = 0;
+
+        // We overload the advance and reset functions to update the lists of matches
+        void advance();
+        void reset();
+
+        /**\brief Process new Features
+         *
+         */
+        unsigned int processNew();
+
+        /** \brief Detect new Features
+         * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
+         * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
+         * \return The number of detected Features.
+         *
+         * This function detects Features that do not correspond to known Features/Landmarks in the system.
+         *
+         * The function sets the member new_features_list_, the list of newly detected features,
+         * to be used for landmark initialization.
+         */
+        virtual unsigned int detectNewFeatures() = 0;
 
         /** \brief Create one landmark
          *
@@ -88,16 +121,18 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr) = 0;
 
-        unsigned int processNew();
-
+        /** \brief Establish constraints between features in Captures \b last and \b origin
+         */
         virtual void establishConstraints();
 
 };
 
+} // namespace wolf
+
 inline void ProcessorTrackerLandmark::establishConstraints()
 {
     for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
-        last_feature->addConstraint(createConstraint(last_feature, last_2_landmark_[last_feature].landmark_ptr_));
+        last_feature->addConstraint(createConstraint(last_feature, matches_landmark_from_last_[last_feature].landmark_ptr_));
 }
 
 #endif /* PROCESSOR_TRACKER_LANDMARK_H_ */
