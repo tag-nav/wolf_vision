@@ -20,7 +20,7 @@ int main()
 {
     using namespace wolf;
 
-    std::cout << std::endl << "==================== processor tracker feature test ======================" << std::endl;
+    std::cout << std::endl << "==================== processor tracker landmark test ======================" << std::endl;
 
     // Wolf problem
     WolfProblem* wolf_problem_ptr_ = new WolfProblem(FRM_PO_2D);
