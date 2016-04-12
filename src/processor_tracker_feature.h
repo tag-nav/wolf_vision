@@ -136,7 +136,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
         /**\brief Process new Features
          *
          */
-        virtual unsigned int processNew(const unsigned int& _max_features = 0);
+        virtual unsigned int processNew(const unsigned int& _max_features);
 
         /** \brief Detect new Features
          * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.

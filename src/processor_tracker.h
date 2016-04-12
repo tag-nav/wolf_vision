@@ -154,7 +154,7 @@ class ProcessorTracker : public ProcessorBase
         /**\brief Process new Features or Landmarks
          *
          */
-        virtual unsigned int processNew(const unsigned int& _max_features = 0) = 0;
+        virtual unsigned int processNew(const unsigned int& _max_features) = 0;
 
         /**\brief Creates and adds constraints from last_ to origin_
          *

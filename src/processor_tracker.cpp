@@ -114,7 +114,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         else
         {
             // 2.b. Detect new Features, initialize Landmarks, create Constraints, ...
-            processNew();
+            processNew(max_new_features_);
 
             // Create a new non-key Frame in the Trajectory with the incoming Capture
             makeFrame(incoming_ptr_);
