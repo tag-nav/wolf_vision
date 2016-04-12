@@ -34,11 +34,11 @@ struct LandmarkMatch
 // Correspondence Landmark - Feature
 typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
 
-/** \brief Feature tracker processor
+/** \brief Landmark tracker processor
  *
  * This is an abstract class.
  *
- * This class implements the incremental feature tracker.
+ * This class implements the incremental landmark tracker.
  *
  * The incremental tracker contains three pointers to three Captures of type CaptureBase,
  * named \b origin, \b last and \b incoming:
