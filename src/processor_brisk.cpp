@@ -75,34 +75,66 @@ unsigned int ProcessorBrisk::detectNewFeatures()
     resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
     cv::Rect roi;
     ///START OF THE SEARCH
-    unsigned int n_features = 0;
-    unsigned int n_iterations = 0;
-    while ((n_features < 1) && (n_iterations < 20))
+
+    std::vector<cv::KeyPoint> new_keypoints;
+    cv::Mat new_descriptors;
+    unsigned int n_detections = 0;
+
+    for (unsigned int n_iterations = 0; n_iterations < 20; n_iterations++)
     {
-        bool roi_exists = act_search_grid_.pickRoi(roi);
-        if (roi_exists == false)
+        if (act_search_grid_.pickRoi(roi))
         {
-            break;
-        }
-        std::vector<cv::KeyPoint> new_keypoints;
-        cv::Mat new_descriptors;
-        n_features = detect(image_last_, roi, new_keypoints, new_descriptors);
-        if (n_features == 0)
-        {
-            act_search_grid_.blockCell(roi);
+            unsigned int n_features = detect(image_last_, roi, new_keypoints, new_descriptors);
+            if (n_features == 0)
+            {
+                act_search_grid_.blockCell(roi);
+            }
+            else
+            {
+                std::cout << "# of NEW features detected: " << n_features << std::endl;
+                //Escoger uno de los features encontrados -> el 0 o primero.
+                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
+                std::cout << "Adding point ID " << point_ptr->nodeId() << "; coords " << new_keypoints[0].pt << std::endl;
+                addNewFeatureLast(point_ptr);
+                act_search_grid_.hitCell(new_keypoints[0]);
+                n_detections++;
+                if (n_detections >= 10)
+                    break;
+            }
         }
         else
         {
-            std::cout << "# of NEW features detected: " << n_features << std::endl;
-            //Escoger uno de los features encontrados -> el 0 o primero.
-            FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
-            std::cout << "Adding point ID " << point_ptr->nodeId() << "; coords " << new_keypoints[0].pt << std::endl;
-            addNewFeatureLast(point_ptr);
-            act_search_grid_.hitCell(new_keypoints[0]);
+            break;
         }
-        n_iterations++;
     }
-    return n_features;
+
+
+//    while ((n_features < 1) && (n_iterations < 20))
+//    {
+//        bool roi_exists = act_search_grid_.pickRoi(roi);
+//        if (roi_exists == false)
+//        {
+//            break;
+//        }
+//        std::vector<cv::KeyPoint> new_keypoints;
+//        cv::Mat new_descriptors;
+//        n_features = detect(image_last_, roi, new_keypoints, new_descriptors);
+//        if (n_features == 0)
+//        {
+//            act_search_grid_.blockCell(roi);
+//        }
+//        else
+//        {
+//            std::cout << "# of NEW features detected: " << n_features << std::endl;
+//            //Escoger uno de los features encontrados -> el 0 o primero.
+//            FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
+//            std::cout << "Adding point ID " << point_ptr->nodeId() << "; coords " << new_keypoints[0].pt << std::endl;
+//            addNewFeatureLast(point_ptr);
+//            act_search_grid_.hitCell(new_keypoints[0]);
+//        }
+//        n_iterations++;
+//    }
+    return n_detections;
 }
 
 void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last, FeatureBaseList& _feature_list_incoming)
