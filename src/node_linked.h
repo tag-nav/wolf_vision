@@ -16,7 +16,8 @@
 #include "node_base.h"
 #include "wolf.h"
 
-namespace wolf {
+namespace wolf
+{
 
 /** \brief Linked node element in the Wolf Tree
  * 
@@ -165,7 +166,6 @@ class NodeLinked : public NodeBase
 
 } // namespace wolf
 
-
 //////////////////////////////////////////
 //          IMPLEMENTATION
 //////////////////////////////////////////
@@ -186,7 +186,8 @@ class NodeLinked : public NodeBase
 #include "landmark_base.h"
 #include "node_terminus.h"
 
-namespace wolf {
+namespace wolf
+{
 
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label) :
@@ -286,9 +287,9 @@ template<class UpperType, class LowerType>
 void NodeLinked<UpperType, LowerType>::addDownNodeList(LowerNodeList& _new_down_node_list)
 {
     assert(!isBottom() && "Trying to add a down node to a bottom node");
-    down_node_list_.splice(down_node_list_.end(), _new_down_node_list);
     for (auto new_down_node : _new_down_node_list)
         new_down_node->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
+    down_node_list_.splice(down_node_list_.end(), _new_down_node_list);
 }
 
 template<class UpperType, class LowerType>
