@@ -15,11 +15,13 @@ namespace wolf
 
 //Constructor
 ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, unsigned int _grid_width,
-                               unsigned int _grid_height, unsigned int _max_new_features, unsigned int _min_features_th,
-                               int _threshold, int _octaves, float _pattern_scales) :
-        ProcessorTrackerFeature(PRC_TRACKER_BRISK), detector_(_threshold, _octaves, _pattern_scales), matcher_(
-                cv::NORM_HAMMING), act_search_grid_(_image_rows, _image_cols, _grid_width, _grid_height), min_features_th_(
-                _min_features_th)
+                               unsigned int _grid_height, unsigned int _separation, unsigned int _max_new_features, unsigned int _min_features_th,
+                               int _threshold, int _octaves, float _pattern_scales, unsigned int _adjust) :
+        ProcessorTrackerFeature(PRC_TRACKER_BRISK),
+        detector_(_threshold, _octaves, _pattern_scales),
+        matcher_(cv::NORM_HAMMING),
+        act_search_grid_(_image_rows, _image_cols, _grid_width, _grid_height, _adjust-_separation+1, _separation),
+        min_features_th_(_min_features_th)
 {
     ProcessorTrackerFeature::setMaxNewFeatures(_max_new_features);
     detector_.create("Feature2D.BRISK");
@@ -178,7 +180,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
         feature_roi_y = (feature_ptr->getKeypoint().pt.y) - (feature_roi_width / 2);
         cv::Rect roi_for_matching(feature_roi_x, feature_roi_y, feature_roi_width, feature_roi_heigth);
         //drawTrackingFeatures(image_incoming_,feature_point,false);
-        drawRoiLastFrame(image_incoming_, roi_for_matching);
+        //drawRoiLastFrame(image_incoming_, roi_for_matching);
         n_candidates = detect(image_incoming_, roi_for_matching, new_keypoints, new_descriptors);
         std::cout << "Number of detected candidates: " << n_candidates << std::endl;
         if (n_candidates != 0)
