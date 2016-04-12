@@ -30,29 +30,35 @@ ProcessorBrisk::~ProcessorBrisk()
 
 }
 
+void ProcessorBrisk::preProcess()
+{
+    image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
+
+    if (last_ptr_ == nullptr)
+        image_last_ = ((CaptureImage*)incoming_ptr_)->getImage();
+    else
+        image_last_ = ((CaptureImage*)last_ptr_)->getImage();
+
+    act_search_grid_.renew();
+}
+
+void ProcessorBrisk::postProcess()
+{
+    drawFeatures(last_ptr_);
+    cv::waitKey(200);
+}
+
 void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
 {
     std::cout << std::endl << "\n\n################## process ##################\n" << std::endl << std::endl;
 
+    incoming_ptr_ = _incoming_ptr;
+
+    preProcess();
+
     ProcessorTrackerFeature::process(_incoming_ptr);
-    drawFeatures(last_ptr_);
-    cv::waitKey(1000);
-}
 
-
-
-// Tracker function. Returns the number of successful tracks.
-unsigned int ProcessorBrisk::processKnown()
-{
-    std::cout << std::endl << "\n=================== processKnownFeatures =============" << std::endl << std::endl;
-
-    image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
-    image_last_ = ((CaptureImage*)last_ptr_)->getImage();
-
-    act_search_grid_.renew();
-
-    return ProcessorTrackerFeature::processKnown();
-
+    postProcess();
 }
 
 // This is intended to create Features that are not among the Features already known in the Map. Returns the number of detected Features.

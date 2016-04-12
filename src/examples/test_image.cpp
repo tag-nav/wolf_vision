@@ -95,7 +95,7 @@ int main(int argc, char** argv)
 
     unsigned int f = 0;
     const char * filename;
-    if (argc == 0)
+    if (argc == 1)
         filename = "/home/jtarraso/Vídeos/House interior.mp4";
     else
         filename = argv[1];

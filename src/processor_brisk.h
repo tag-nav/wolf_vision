@@ -44,21 +44,6 @@ class ProcessorBrisk : public ProcessorTrackerFeature
                        int _octaves = 0, float _pattern_scales = 1.0f);
         virtual ~ProcessorBrisk();
 
-        /** \brief Tracker function
-         *
-         * This is the tracker function to be implemented in derived classes. It operates on the incoming capture.
-         *
-         * This should do one of the following, depending on the design of the tracker:
-         *   - Track Features against other Features in another Capture.
-         *   - Track Features against Landmarks in the Map.
-         *
-         * It should also generate the necessary Features in the incoming Capture, of a type derived from FeatureBase,
-         * and the constraints, of a type derived from ConstraintBase.
-         *
-         * \return The number of successful tracks.
-         */
-        virtual unsigned int processKnown();
-
         /** \brief Detect new Features
          *
          * This is intended to create Features that are not among the Features already known in the Map.
@@ -95,6 +80,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 
         virtual void process(CaptureBase* const _incoming_ptr);
 
+        void preProcess();
+        void postProcess();
     protected:
 
         virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList & _feature_list_out,
