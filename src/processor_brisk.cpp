@@ -17,11 +17,12 @@ ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_col
                                unsigned int _grid_width, unsigned int _grid_height, unsigned int _min_features_th,
                                int _threshold, int _octaves, float _pattern_scales) :
     ProcessorTrackerFeature(PRC_TRACKER_BRISK),
-    brisk_(_threshold, _octaves, _pattern_scales),
+    detector_(_threshold, _octaves, _pattern_scales),
+    matcher_(cv::NORM_HAMMING),
     act_search_grid_(_image_rows,_image_cols,_grid_width, _grid_height),
     min_features_th_(_min_features_th)
 {
-    brisk_.create("Feature2D.BRISK");
+    detector_.create("Feature2D.BRISK");
 }
 
 //Destructor
@@ -46,19 +47,6 @@ void ProcessorBrisk::postProcess()
 {
     drawFeatures(last_ptr_);
     cv::waitKey(200);
-}
-
-void ProcessorBrisk::process(CaptureBase* const _incoming_ptr)
-{
-    std::cout << std::endl << "\n\n################## process ##################\n" << std::endl << std::endl;
-
-    incoming_ptr_ = _incoming_ptr;
-
-    preProcess();
-
-    ProcessorTrackerFeature::process(_incoming_ptr);
-
-    postProcess();
 }
 
 // This is intended to create Features that are not among the Features already known in the Map. Returns the number of detected Features.
@@ -161,11 +149,10 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
         {
             //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
 
-                cv::BFMatcher matcher(cv::NORM_HAMMING); // TODO Mover al constructor
                 std::vector<cv::DMatch> matches;
-                cv::Mat f_descriptor = feature_ptr->getDescriptor();
+                cv::Mat descriptor = feature_ptr->getDescriptor();
 
-                matcher.match(f_descriptor, new_descriptors, matches);
+                matcher_.match(descriptor, new_descriptors, matches);
 
                 std::cout << "Number of matches:      " << matches.size() << std::endl;
                 std::cout << "First Hamming distance: " << matches[0].distance << std::endl;
@@ -211,22 +198,15 @@ unsigned int ProcessorBrisk::briskDetect(cv::Mat _image, cv::Rect &_roi, std::ve
     cv::Mat _image_roi = _image(_roi);
 
     //Brisk Algorithm
-    brisk_.detect(_image_roi, _new_keypoints);
-    brisk_.compute(_image_roi, _new_keypoints,new_descriptors);
+    detector_.detect(_image_roi, _new_keypoints);
+    detector_.compute(_image_roi, _new_keypoints, new_descriptors);
 
-    if(_new_keypoints.size()!=0)
+    for (unsigned int i = 0; i < _new_keypoints.size(); i++)
     {
-            for(unsigned int i = 0; i <= (_new_keypoints.size()-1);i++)
-            {
-                _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
-                _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
-            }
-            return new_descriptors.rows;  //number of features
+        _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
+        _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
     }
-    else
-    {
-        return 0;
-    }
+    return _new_keypoints.size();
 }
 
 void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last, FeatureBaseList& _feature_list_incoming)
@@ -245,6 +225,11 @@ void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last,
 
 }
 
+
+bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
+{
+    return true;
+}
 
 
 
@@ -308,7 +293,6 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
     cv::imshow("Keypoint drawing",image);
 
 }
-
 
 } // namespace wolf
 

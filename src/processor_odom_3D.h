@@ -36,6 +36,10 @@ class ProcessorOdom3d : public ProcessorMotion<Odom3dDelta>
         virtual ~ProcessorOdom3d();
         virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Odom3dDelta& _delta);
 
+    protected:
+        virtual void preProcess(){}
+        virtual void postProcess(){}
+
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Odom3dDelta& _delta, Eigen::VectorXs& _x_plus_delta);
         void deltaPlusDelta(const Odom3dDelta& _delta1, const Odom3dDelta& _delta2, Odom3dDelta& _delta1_plus_delta2);

@@ -32,6 +32,8 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 
     incoming_ptr_ = _incoming_ptr;
 
+    preProcess();
+
     // FIRST TIME
     if (origin_ptr_ == nullptr)
     {
@@ -134,6 +136,8 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
     }
+
+    postProcess();
 }
 
 } // namespace wolf

@@ -54,6 +54,9 @@ class ProcessorTrackerLaser : public ProcessorTrackerFeature
 
     protected:
 
+        virtual void preProcess(){}
+        virtual void postProcess(){}
+
         /** \brief Detect new Features
          * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
          * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.

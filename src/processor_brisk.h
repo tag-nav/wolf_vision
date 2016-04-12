@@ -26,23 +26,28 @@ namespace wolf {
 class ProcessorBrisk : public ProcessorTrackerFeature
 {
     protected:
-        cv::BRISK brisk_;               //brisk object
+        cv::BRISK detector_;    //brisk detector
+        cv::BFMatcher matcher_; // Brute force matcher
         ActiveSearchGrid act_search_grid_;
         unsigned int min_features_th_;
-        bool known_or_new_features_ = false;
+//        bool known_or_new_features_ = false;
         cv::Mat image_last_, image_incoming_;
-
-        /** \brief Create a new constraint
-         *
-         * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
-         */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feat_or_lmk_ptr);
 
     public:
         ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, unsigned int _grid_width = 8,
                        unsigned int _grid_height = 8, unsigned int _min_features_th = 10, int _threshold = 30,
                        int _octaves = 0, float _pattern_scales = 1.0f);
         virtual ~ProcessorBrisk();
+
+    protected:
+        void preProcess();
+        void postProcess();
+
+        /** \brief Create a new constraint
+         *
+         * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
+         */
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feat_or_lmk_ptr);
 
         /** \brief Detect new Features
          *
@@ -64,25 +69,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
          */
         virtual bool voteForKeyFrame();
 
-        virtual void drawFeatures(CaptureBase* const _last_ptr);
-
-        virtual void drawTrackingFeatures(cv::Mat _image, Eigen::Vector2i _feature_point, bool _is_candidate);
-
-        virtual void drawRoiLastFrame(cv::Mat _image, cv::Rect _roi);
-
-        virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last,
-                                            FeatureBaseList& _feature_list_incoming);
-
-        //virtual void addNewFeaturesInCapture(cv::KeyPoint _new_keypoints, cv::Mat _new_descriptors); //std::vector<cv::KeyPoint>
-
         virtual unsigned int briskDetect(cv::Mat _image, cv::Rect &_roi, std::vector<cv::KeyPoint> &_new_keypoints,
                                          cv::Mat & new_descriptors);
-
-        virtual void process(CaptureBase* const _incoming_ptr);
-
-        void preProcess();
-        void postProcess();
-    protected:
 
         virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList & _feature_list_out,
                                            FeatureMatchMap& _feature_correspondences);
@@ -93,12 +81,19 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         * \return false if the the process discards the correspondence with origin's feature
         */
         virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
-};
 
-inline bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
-{
-    return true;
-}
+public:
+        virtual void drawFeatures(CaptureBase* const _last_ptr);
+
+        virtual void drawTrackingFeatures(cv::Mat _image, Eigen::Vector2i _feature_point, bool _is_candidate);
+
+        virtual void drawRoiLastFrame(cv::Mat _image, cv::Rect _roi);
+
+        virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last,
+                                            FeatureBaseList& _feature_list_incoming);
+
+
+};
 
 } // namespace wolf
 
