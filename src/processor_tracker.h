@@ -72,6 +72,9 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void process(CaptureBase* const _incoming_ptr);
 
+        void setMaxNewFeatures(const unsigned int& _max_new_features);
+        const unsigned int getMaxNewFeatures();
+
     protected:
         /** Pre-process incoming Capture
          *
@@ -151,7 +154,7 @@ class ProcessorTracker : public ProcessorBase
         /**\brief Process new Features or Landmarks
          *
          */
-        virtual unsigned int processNew() = 0;
+        virtual unsigned int processNew(const unsigned int& _max_features = 0) = 0;
 
         /**\brief Creates and adds constraints from last_ to origin_
          *
@@ -176,6 +179,16 @@ class ProcessorTracker : public ProcessorBase
 
         void addNewFeatureIncoming(FeatureBase* _feature_ptr);
 };
+
+inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_features)
+{
+    max_new_features_ = _max_new_features;
+}
+
+inline const unsigned int ProcessorTracker::getMaxNewFeatures()
+{
+    return max_new_features_;
+}
 
 inline void ProcessorTracker::makeFrame(CaptureBase* _capture_ptr)
 {

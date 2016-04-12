@@ -63,7 +63,7 @@ class ProcessorTrackerFeatureDummy : public wolf::ProcessorTrackerFeature
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures();
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features);
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain

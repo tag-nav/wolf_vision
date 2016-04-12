@@ -71,7 +71,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
          *
          * \return The number of detected Features.
          */
-        virtual unsigned int detectNewFeatures();
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features);
 
         /** \brief Create a new constraint
          *

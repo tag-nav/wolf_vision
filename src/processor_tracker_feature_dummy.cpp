@@ -41,7 +41,7 @@ bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
     return incoming_ptr_->getFeatureListPtr()->size() < 5;
 }
 
-unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures()
+unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features)
 {
     std::cout << "detecting new features..." << std::endl;
 

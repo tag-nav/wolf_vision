@@ -69,7 +69,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
     return _new_keypoints.size();
 }
 
-unsigned int ProcessorBrisk::detectNewFeatures()
+unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_features)
 {
     std::cout << std::endl << "\n================= detectNewFeatures =============" << std::endl << std::endl;
     resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));

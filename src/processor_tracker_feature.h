@@ -136,7 +136,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
         /**\brief Process new Features
          *
          */
-        virtual unsigned int processNew();
+        virtual unsigned int processNew(const unsigned int& _max_features = 0);
 
         /** \brief Detect new Features
          * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
@@ -148,7 +148,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures() = 0;
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features) = 0;
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
