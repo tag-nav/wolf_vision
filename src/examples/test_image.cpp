@@ -46,6 +46,10 @@ int main(int argc, char** argv)
     points3D.z = 6.0;
     std::vector<cv::Point3f> point_in_3D;
     point_in_3D.push_back(points3D);
+    points3D.x = 4.0;
+    points3D.y = 2.0;
+    points3D.z = 1.0;
+    point_in_3D.push_back(points3D);
 
     std::cout << "1" << std::endl;
     std::vector<float> rot_mat = {0,0,0};
@@ -74,6 +78,10 @@ int main(int argc, char** argv)
     cv::projectPoints(point_in_3D,rot_mat,trans_mat,cam_mat,dist_coef,points2D);
     std::cout << "5" << std::endl;
 
+    for (auto it : points2D)
+    {
+        std::cout << "points2D- X: " << it.x << "; Y: " << it.y << std::endl;
+    }
 
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
