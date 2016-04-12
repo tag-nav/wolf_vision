@@ -11,6 +11,7 @@
 // general includes
 #include "unistd.h"
 #include <time.h>
+#include "opencv2/calib3d/calib3d.hpp"
 
 //std includes
 #include <iostream>
@@ -33,6 +34,44 @@ int main(int argc, char** argv)
 
     //Welcome message
     std::cout << std::endl << " ========= WOLF IMAGE test ===========" << std::endl << std::endl;
+
+
+    std::cout << "0" << std::endl;
+    //std::vector<float> points3D = {2,3,5};
+    cv::Point3f points3D;
+    points3D.x = 2.0;
+    points3D.y = 5.0;
+    points3D.z = 6.0;
+    std::vector<cv::Point3f> point_in_3D;
+    point_in_3D.push_back(points3D);
+
+    std::cout << "1" << std::endl;
+    std::vector<float> rot_mat = {0,0,0};
+    std::vector<float> trans_mat = {1,1,1};
+
+    std::cout << "2" << std::endl;
+    cv::Mat cam_mat(3,3,CV_32F);
+    cam_mat.row(0).col(0).setTo(1);
+    cam_mat.row(0).col(1).setTo(0);
+    cam_mat.row(0).col(2).setTo(2);
+    cam_mat.row(1).col(0).setTo(0);
+    cam_mat.row(1).col(1).setTo(1);
+    cam_mat.row(1).col(2).setTo(2);
+    cam_mat.row(2).col(0).setTo(0);
+    cam_mat.row(2).col(1).setTo(0);
+    cam_mat.row(2).col(2).setTo(1);
+
+    std::cout << "cam_mat[1,2]: " << cam_mat.row(1).col(0) << std::endl;
+
+    std::cout << "3" << std::endl;
+    std::vector<float> dist_coef = {0,0,0,0,0};
+    //std::vector<float> points2D;
+    std::vector<cv::Point2f> points2D;
+
+    std::cout << "4" << std::endl;
+    cv::projectPoints(point_in_3D,rot_mat,trans_mat,cam_mat,dist_coef,points2D);
+    std::cout << "5" << std::endl;
+
 
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
