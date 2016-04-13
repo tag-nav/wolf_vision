@@ -179,9 +179,6 @@ SET(SRCS
     sensor_camera.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
-    state_block.cpp
-    state_homogeneous_3d.cpp
-    state_quaternion.cpp
     time_stamp.cpp
     trajectory_base.cpp
     wolf_problem.cpp
