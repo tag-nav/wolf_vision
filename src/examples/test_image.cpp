@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 
     WolfProblem* wolf_problem_ = new WolfProblem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,7,7,5,20,30,30,0,0.5f,10);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,7,7,5,20,30,70,0,0.5f,10);
     sen_cam_->addProcessor(p_brisk);
 
 
