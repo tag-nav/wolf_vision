@@ -9,6 +9,9 @@
 //matrix class
 #include "matrix.h"
 
+namespace wolf
+{
+
 /** \brief A pure virtual solver for the association problem
  * 
  * A pure virtual solver for the association problem
@@ -58,6 +61,13 @@ class AssociationSolver
          **/
         void setScore(const unsigned int _det_i, const unsigned int _tar_j, const double _m_ij);
         
+        /** \brief Gets a score
+         *
+         * Gets score of cell ij, corresponding to detection_i and target_j
+         *
+         **/
+        double getScore(const unsigned int _det_i, const unsigned int _tar_j);
+
         /** \brief Prints the score table
         * 
         * Prints the score table
@@ -93,4 +103,6 @@ class AssociationSolver
         virtual void solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<bool> & _associated_mask) = 0;
         
 };
+
+} //namespace wolf
 #endif            

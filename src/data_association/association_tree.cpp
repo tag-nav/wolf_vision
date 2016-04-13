@@ -1,6 +1,9 @@
 
 #include "association_tree.h"
 
+namespace wolf
+{
+
 AssociationTree::AssociationTree() :
     AssociationSolver(),
     root_(0,0,1, NULL, true)
@@ -179,3 +182,5 @@ void AssociationTree::printTerminusNodes()
         (*it)->printNode();
     }
 }
+
+} // namespace wolf
