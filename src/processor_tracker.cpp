@@ -52,10 +52,10 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         // Establish constraints from last
         establishConstraints();
 
-        // advance the derived tracker
+        // reset the derived tracker
         reset();
 
-        // Clear incoming ptr. origin and last are OK.
+        // reset this: Clear incoming ptr. Origin and last are already OK.
         incoming_ptr_ = nullptr;
 
         std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
@@ -76,7 +76,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         // reset the derived tracker
         reset();
 
-        // Update the tracker's last and incoming pointers one step ahead
+        // reset this: Update the tracker's last and incoming pointers one step ahead
         last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
         incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 
