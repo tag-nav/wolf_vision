@@ -8,9 +8,13 @@
 #ifndef PROCESSOR_MOTION_BASE_H_
 #define PROCESSOR_MOTION_BASE_H_
 
+// forward declarations
+namespace wolf {
+    class TimeStamp;
+}
+
 // Wolf
 #include "processor_base.h"
-#include "time_stamp.h"
 #include "wolf.h"
 
 namespace wolf {
@@ -52,6 +56,15 @@ class ProcessorMotionBase : public ProcessorBase
         virtual Eigen::VectorXs state(const TimeStamp& _ts) = 0;
 
 };
+
+} // namespace wolf
+
+// IMPLEMENTATION
+
+#include "time_stamp.h"
+
+namespace wolf
+{
 
 inline ProcessorMotionBase::ProcessorMotionBase(ProcessorType _tp) :
         ProcessorBase(_tp)

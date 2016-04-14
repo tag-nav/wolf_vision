@@ -11,9 +11,6 @@ class NodeTerminus;
 #include "wolf.h"
 #include "node_linked.h"
 
-// Std includes
-
-
 namespace wolf {
 
 //class ProcessorBase

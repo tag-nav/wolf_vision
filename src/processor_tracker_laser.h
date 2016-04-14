@@ -66,7 +66,7 @@ class ProcessorTrackerLaser : public ProcessorTrackerLandmark
             // get the pose of the vehicle in incoming timestamp
 
             // compute transformations
-            t_world_robot_ = getWolfProblem()->getVehiclePose(incoming_ptr_->getTimeStamp());
+            t_world_robot_ = getWolfProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
 
             // world_robot
             Eigen::Matrix3s R_world_robot = Eigen::Matrix3s::Identity();

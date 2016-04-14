@@ -1,12 +1,12 @@
 /**
- * \file processor_motion2.h
+ * \file processor_motion.h
  *
  *  Created on: 15/03/2016
  *      \author: jsola
  */
 
-#ifndef PROCESSOR_MOTION2_H_
-#define PROCESSOR_MOTION2_H_
+#ifndef PROCESSOR_MOTION_H_
+#define PROCESSOR_MOTION_H_
 
 // Wolf
 #include "processor_motion_base.h"

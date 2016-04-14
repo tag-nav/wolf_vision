@@ -6,6 +6,7 @@ namespace wolf{
 class HardwareBase;
 class TrajectoryBase;
 class MapBase;
+class ProcessorMotionBase;
 class TimeStamp;
 }
 
@@ -40,6 +41,7 @@ class WolfProblem : public NodeBase
         TrajectoryBase* trajectory_ptr_;
         MapBase* map_ptr_;
         HardwareBase* hardware_ptr_;
+        ProcessorMotionBase* processor_motion_ptr_;
         StateBlockList state_block_ptr_list_;
         std::list<StateBlock*> state_block_add_list_;
         std::list<StateBlock*> state_block_update_list_;
@@ -68,7 +70,21 @@ class WolfProblem : public NodeBase
          */
         virtual void destruct() final;
 
+
+        /** \brief add sensor to hardware
+         *
+         * add sensor to hardware
+         *
+         */
         void addSensor(SensorBase* _sen_ptr);
+
+
+        /** \brief Set the processor motion
+         *
+         * Set the processor motion. It will provide the state.
+         *
+         */
+        void setProcessorMotion(ProcessorMotionBase* _processor_motion_ptr);
 
         /** \brief Create Frame of the correct size
          *
@@ -83,11 +99,19 @@ class WolfProblem : public NodeBase
         FrameBase* createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
-        /** \brief Get the pose of the vehicle in a given timestamp
+        /** \brief Get the state at last timestamp
          *
-         * Get the pose of the vehicle in a given timestamp
+         * Get the state at last timestamp
          */
-        Eigen::VectorXs getVehiclePose(const TimeStamp& _ts);
+        Eigen::VectorXs getCurrentState();
+        void getCurrentState(Eigen::VectorXs& state);
+
+        /** \brief Get the state at a given timestamp
+         *
+         * Get the state at a given timestamp
+         */
+        Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
+        void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
 
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
 
@@ -203,11 +227,12 @@ class WolfProblem : public NodeBase
 
 };
 
-inline Eigen::VectorXs WolfProblem::getVehiclePose(const TimeStamp& _ts)
+} // namespace wolf
+
+// IMPLEMENTATION
+
+namespace wolf
 {
-    //TODO
-    return Eigen::Vector3s::Zero();
-}
 
 inline std::list<WolfScalar*>* WolfProblem::getStateBlockRemoveList()
 {
