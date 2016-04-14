@@ -44,12 +44,21 @@ void ProcessorBrisk::preProcess()
         image_last_ = ((CaptureImage*)last_ptr_)->getImage();
 
     act_search_grid_.renew();
+
+
+    tracker_roi_.clear();
+    tracker_features_.clear();
 }
 
 void ProcessorBrisk::postProcess()
 {
-    drawFeatures(last_ptr_);
+    //drawFeatures(last_ptr_);
+    drawRoiLastFrame(image_incoming_, tracker_roi_);
+    //tracker_roi_.clear();
+    drawTrackingFeatures(image_incoming_,tracker_features_);
+    //tracker_features_.clear();
     cv::waitKey(200);
+    //cv::waitKey(0);
 }
 
 bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
@@ -178,8 +187,13 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
 
-        //drawTrackingFeatures(image_incoming_,feature_point,false);
-        drawRoiLastFrame(image_incoming_, roi);
+        //IT SHOULD NOT BE LIKE THIS, JUST STORE THE KEYPOINT, BUT I WANT TO SEE THE DESCRIPTOR FOR TESTING
+        FeaturePointImage* target_feature_ptr = new FeaturePointImage(
+                feature_ptr->getKeypoint(), feature_ptr->getDescriptor(),false);
+        tracker_features_.push_back(target_feature_ptr);
+
+
+        tracker_roi_.push_back(roi);
 
         if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
         {
@@ -198,8 +212,23 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
                 _feature_list_out.push_back(incoming_point_ptr);
+
                 _feature_matches[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
                                                                             1 - (WolfScalar)(cv_matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
+
+//                _feature_correspondences[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
+//                                                        1 - (WolfScalar)(matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
+//            }
+//            for (unsigned int i = 0; i < candidate_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
+//            {
+//                if (i != matches[0].trainIdx)
+//                {
+//                    //IT SHOULD NOT BE LIKE THIS, JUST STORE THE KEYPOINT, BUT I WANT TO SEE THE DESCRIPTOR FOR TESTING
+//                    FeaturePointImage* candidate_feature_ptr = new FeaturePointImage(
+//                            candidate_keypoints[i], candidate_descriptors.row(i),true);
+//                    tracker_features_.push_back(candidate_feature_ptr);
+//                }
+//
             }
         }
         else
@@ -211,27 +240,31 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
 // draw functions ===================================================================
 
-void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, Eigen::Vector2i _feature_point, bool _is_candidate)
+void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, std::list<FeaturePointImage*> _features_list)
 {
     // These "tracking features" are the feature to be used in tracking as well as its candidates
-
-    cv::Point point;
-    point.x = _feature_point[0];
-    point.y = _feature_point[1];
-    if (_is_candidate)
+    for(auto tracker_feat : _features_list)
     {
-        cv::circle(_image, point, 4, cv::Scalar(250.0, 250.0, 250.0), 1, 8, 0);
-    }
-    else
-    {
-        cv::circle(_image, point, 4, cv::Scalar(250.0, 180.0, 70.0), 1, 8, 0);
+        if (tracker_feat->isKnown())
+        {
+            //candidate
+            cv::circle(_image, tracker_feat->getKeypoint().pt, 2, cv::Scalar(250.0, 250.0, 250.0), -1, 8, 0);
+        }
+        else
+        {
+            //target
+            cv::circle(_image, tracker_feat->getKeypoint().pt, 2, cv::Scalar(250.0, 180.0, 70.0), -1, 8, 0);
+        }
     }
     cv::imshow("Keypoint drawing", _image);
 }
 
-void ProcessorBrisk::drawRoiLastFrame(cv::Mat _image, cv::Rect _roi)
+void ProcessorBrisk::drawRoiLastFrame(cv::Mat _image, std::list<cv::Rect> _roi_list)
 {
-    cv::rectangle(_image, _roi, cv::Scalar(88.0, 70.0, 254.0), 1, 8, 0);
+    for (auto roi : _roi_list)
+    {
+        cv::rectangle(_image, roi, cv::Scalar(88.0, 70.0, 254.0), 1, 8, 0);
+    }
     cv::imshow("Keypoint drawing", _image);
 }
 
