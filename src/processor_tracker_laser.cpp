@@ -3,8 +3,8 @@
 namespace wolf
 {
 
-void ProcessorTrackerLaser::extractCorners(CaptureLaser2D* _capture_laser_ptr,
-                                                  std::list<FeatureCorner2D*> _corner_list)
+void ProcessorTrackerLaser::extractCorners(const CaptureLaser2D* _capture_laser_ptr,
+                                                  FeatureBaseList& _corner_list)
 {
     std::cout << "Extracting corners..." << std::endl;
     //variables

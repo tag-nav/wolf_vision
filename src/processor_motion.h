@@ -9,7 +9,7 @@
 #define PROCESSOR_MOTION2_H_
 
 // Wolf
-#include "processor_base.h"
+#include "processor_motion_base.h"
 #include "capture_motion2.h"
 #include "time_stamp.h"
 #include "wolf.h"
@@ -66,8 +66,8 @@ namespace wolf {
  * \endcode
  *       See more examples in the documentation of CaptureMotion2.
  */
-template <class MotionDeltaType = Eigen::VectorXs>
-class ProcessorMotion : public ProcessorBase
+template <class MotionDeltaType>
+class ProcessorMotion : public ProcessorMotionBase
 {
 
         // This is the main public interface
@@ -235,7 +235,7 @@ class ProcessorMotion : public ProcessorBase
 template<class MotionDeltaType>
 inline ProcessorMotion<MotionDeltaType>::ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size,
                                                            size_t _data_size) :
-        ProcessorBase(_tp), x_size_(_state_size), data_size_(_data_size),
+        ProcessorMotionBase(_tp), x_size_(_state_size), data_size_(_data_size),
         origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
         dt_(_dt), x_(_state_size), data_(_data_size)
 {

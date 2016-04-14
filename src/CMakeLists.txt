@@ -122,6 +122,7 @@ SET(HDRS
     node_terminus.h
     processor_base.h
     processor_motion.h
+    processor_motion_base.h
     processor_odom_3D.h
     processor_tracker.h
     processor_tracker_feature.h
