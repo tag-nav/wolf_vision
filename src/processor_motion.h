@@ -11,6 +11,7 @@
 // Wolf
 #include "processor_motion_base.h"
 #include "capture_motion2.h"
+#include "motion_buffer.h"
 #include "time_stamp.h"
 #include "wolf.h"
 
@@ -129,9 +130,9 @@ class ProcessorMotion : public ProcessorMotionBase
 
         void updateDt();
 
-        typename CaptureMotion2<MotionDeltaType>::MotionBuffer* getBufferPtr();
+        MotionBuffer<MotionDeltaType>* getBufferPtr();
 
-        const typename CaptureMotion2<MotionDeltaType>::MotionBuffer* getBufferPtr() const;
+        const MotionBuffer<MotionDeltaType>* getBufferPtr() const;
 
         // These are the pure virtual functions doing the mathematics
     protected:
@@ -369,13 +370,13 @@ inline void ProcessorMotion<MotionDeltaType>::updateDt()
 }
 
 template<class MotionDeltaType>
-inline const typename CaptureMotion2<MotionDeltaType>::MotionBuffer* ProcessorMotion<MotionDeltaType>::getBufferPtr() const
+inline const MotionBuffer<MotionDeltaType>* ProcessorMotion<MotionDeltaType>::getBufferPtr() const
 {
     return last_ptr_->getBufferPtr();
 }
 
 template<class MotionDeltaType>
-inline typename CaptureMotion2<MotionDeltaType>::MotionBuffer* ProcessorMotion<MotionDeltaType>::getBufferPtr()
+inline MotionBuffer<MotionDeltaType>* ProcessorMotion<MotionDeltaType>::getBufferPtr()
 {
     return last_ptr_->getBufferPtr();
 }
