@@ -7,12 +7,8 @@
 
 namespace wolf {
 
-/**
- *
- * Test for the camera sensor
- *
- **/
-
+/**Pin hole camera sensor
+ */
 class SensorCamera : public SensorBase
 {
     public:

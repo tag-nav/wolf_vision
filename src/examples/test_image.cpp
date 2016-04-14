@@ -87,8 +87,8 @@ int main(int argc, char** argv)
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
 
     TimeStamp t = 1;
-    int img_width = 640;
-    int img_height = 360;
+    unsigned int img_width = 640;
+    unsigned int img_height = 360;
 
     Eigen::Vector4s k = {320,240,320,320};
     StateBlock* intr = new StateBlock(k,false);
@@ -97,7 +97,17 @@ int main(int argc, char** argv)
 
     WolfProblem* wolf_problem_ = new WolfProblem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,7,7,5,20,30,30,0,0.5f,10);
+
+    ImageTrackerParameters tracker_params;
+    tracker_params.image = {img_width,  img_height};
+    tracker_params.detector = {30, 0, 1.0f, 5};
+    tracker_params.descriptor = {512, 5};
+    tracker_params.matcher.max_similarity_distance = 0.3;
+    tracker_params.active_search = {8, 8};
+    tracker_params.algorithm.max_new_features = 20;
+    tracker_params.algorithm.min_features_th = 40;
+
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,9,9,4,20,30,30,0,0.5f,10);
     sen_cam_->addProcessor(p_brisk);
 
 
