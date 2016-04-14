@@ -83,6 +83,12 @@ class WolfProblem : public NodeBase
         FrameBase* createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
+        /** \brief Get the pose of the vehicle in a given timestamp
+         *
+         * Get the pose of the vehicle in a given timestamp
+         */
+        Eigen::VectorXs getVehiclePose(const TimeStamp& _ts);
+
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
 
         void addLandmark(LandmarkBase* _lmk_ptr);
@@ -119,10 +125,10 @@ class WolfProblem : public NodeBase
 
         /** \brief Gets a covariance block
          */
-        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block);
+        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block);
         /** \brief Gets a covariance block
          */
-        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
+        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
                                 const int _col);
 
         /** \brief Gets state size
@@ -196,6 +202,12 @@ class WolfProblem : public NodeBase
         void removeDownNode(const LowerNodePtr _ptr){};
 
 };
+
+inline Eigen::VectorXs WolfProblem::getVehiclePose(const TimeStamp& _ts)
+{
+    //TODO
+    return Eigen::Vector3s::Zero();
+}
 
 inline std::list<WolfScalar*>* WolfProblem::getStateBlockRemoveList()
 {

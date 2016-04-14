@@ -1,5 +1,8 @@
 #include "association_nnls.h"
 
+namespace wolf
+{
+
 AssociationNNLS::AssociationNNLS() :
     max_dist_(MAX_DIST_DEFAULT)
 {
@@ -89,3 +92,5 @@ void AssociationNNLS::solve(std::vector<std::pair<unsigned int, unsigned int> > 
 //     }
     
 }
+
+} // namespace wolf
