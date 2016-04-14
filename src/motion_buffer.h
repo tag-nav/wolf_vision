@@ -45,21 +45,17 @@ class MotionBuffer{
         unsigned int size() const {return container_.size();}
         bool empty() const {return container_.empty();}
         const TimeStamp& getTimeStamp() const {return container_.back().ts_;}
-        const MotionDeltaType& getDelta() const;
-        const MotionDeltaType& getDelta(const TimeStamp& _ts) const;
+        const MotionDeltaType& getDelta() const {return container_.back().delta_;}
+        const MotionDeltaType& getDelta(const TimeStamp& _ts) const {return getMotion(_ts).delta_;}
+        const Motion<MotionDeltaType> getMotion() const {return container_.back();}
+        const Motion<MotionDeltaType> getMotion(const TimeStamp& _ts) const;
 
     private:
         std::list<Motion<MotionDeltaType>> container_;
 };
 
 template<class MotionDeltaType>
-inline const MotionDeltaType& MotionBuffer<MotionDeltaType>::getDelta() const
-{
-    return container_.back().delta_;
-}
-
-template<class MotionDeltaType>
-inline const MotionDeltaType& MotionBuffer<MotionDeltaType>::getDelta(const TimeStamp& _ts) const
+inline const Motion<MotionDeltaType> MotionBuffer<MotionDeltaType>::getMotion(const TimeStamp& _ts) const
 {
     assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
     auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion<MotionDeltaType>& m)
@@ -71,7 +67,7 @@ inline const MotionDeltaType& MotionBuffer<MotionDeltaType>::getDelta(const Time
         // We could do something here, but by now we'll return the last valid data
         previous--;
 
-    return previous->delta_;
+    return *previous;
 }
 
 } // namespace wolf
