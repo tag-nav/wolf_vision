@@ -52,7 +52,7 @@ void ProcessorBrisk::preProcess()
 
 void ProcessorBrisk::postProcess()
 {
-    //drawFeatures(last_ptr_);
+    drawFeatures(last_ptr_);
     drawRoiLastFrame(image_incoming_, tracker_roi_);
     //tracker_roi_.clear();
     drawTrackingFeatures(image_incoming_,tracker_features_);
@@ -246,7 +246,7 @@ void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, std::list<FeaturePoint
             cv::circle(_image, tracker_feat->getKeypoint().pt, 2, cv::Scalar(250.0, 180.0, 70.0), -1, 8, 0);
         }
     }
-    cv::imshow("Keypoint drawing", _image);
+    cv::imshow("Tracking drawing", _image);
 }
 
 void ProcessorBrisk::drawRoiLastFrame(cv::Mat _image, std::list<cv::Rect> _roi_list)
@@ -255,7 +255,7 @@ void ProcessorBrisk::drawRoiLastFrame(cv::Mat _image, std::list<cv::Rect> _roi_l
     {
         cv::rectangle(_image, roi, cv::Scalar(88.0, 70.0, 254.0), 1, 8, 0);
     }
-    cv::imshow("Keypoint drawing", _image);
+    cv::imshow("Tracking drawing", _image);
 }
 
 void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
@@ -265,11 +265,11 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
         FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
         if (point_ptr->isKnown())
         {
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(50.0, 250.0, 54.0), 1, 3, 0);
+            cv::circle(image_last_, point_ptr->getKeypoint().pt, 7, cv::Scalar(50.0, 250.0, 54.0), 1, 3, 0);
         }
         else
         {
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(80.0, 80.0, 254.0), -1, 3, 0);
+            cv::circle(image_last_, point_ptr->getKeypoint().pt, 3, cv::Scalar(80.0, 80.0, 254.0), -1, 3, 0);
         }
     }
     cv::imshow("Keypoint drawing", image_last_);
