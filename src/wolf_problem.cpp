@@ -179,17 +179,19 @@ void WolfProblem::addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, c
     covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)] = _cov;
 }
 
-void WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block)
+bool WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block)
 {
     if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
         _cov_block = covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)];
     else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
         _cov_block = covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose();
     else
-        assert("asking for a covariance block not getted from the solver");
+        return false;
+
+    return true;
 }
 
-void WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
+bool WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
                                      const int _col)
 {
     //std::cout << "entire cov " << std::endl << _cov << std::endl;
@@ -207,7 +209,9 @@ void WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, E
         _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
                 covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose();
     else
-        assert("asking for a covariance block not getted from the solver");
+        return false;
+
+    return true;
 }
 
 void WolfProblem::addMap(MapBase* _map_ptr)

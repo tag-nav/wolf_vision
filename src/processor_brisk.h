@@ -23,6 +23,41 @@
 
 namespace wolf {
 
+struct ImageTrackerParameters
+{
+        struct Image
+        {
+                unsigned int width;
+                unsigned int height;
+        }image;
+        struct Detector
+        {
+                unsigned int threshold; ///< on the keypoint strength to declare it key-point
+                unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
+                float pattern_scales; ///< Scale of the base pattern wrt the nominal one
+                unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at scale = 1.0
+        }detector;
+        struct Descriptor
+        {
+                unsigned int size; ///< size of the descriptor vector (length of the vector)
+                unsigned int pattern_radius; ///< radius of the pattern used to compute the descriptor at the nominal scale
+        }descriptor;
+        struct Matcher
+        {
+                WolfScalar max_similarity_distance; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
+        }matcher;
+        struct Adtive_search
+        {
+                unsigned int grid_width; ///< cells per horizontal dimension of image
+                unsigned int grid_height; ///< cells per vertical dimension of image
+        }active_search;
+        struct Algorithm
+        {
+                unsigned int max_new_features; ///< Max nbr. of features to detect in one frame
+                unsigned int min_features_th; ///< minimum nbr. of features to vote for keyframe
+        }algorithm;
+};
+
 class ProcessorBrisk : public ProcessorTrackerFeature
 {
     protected:

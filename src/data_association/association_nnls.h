@@ -9,6 +9,10 @@
 //pipol tracker
 #include "association_solver.h"
 
+
+namespace wolf
+{
+
 //consts 
 const double MAX_DIST_DEFAULT = 0.5; //units (meters in pt case)
 
@@ -74,4 +78,7 @@ class AssociationNNLS : public AssociationSolver
         void solve(std::vector<std::pair<unsigned int, unsigned int> > & _pairs, std::vector<bool> & _associated_mask);
         
 };
+
+} // namespace wolf
+
 #endif            

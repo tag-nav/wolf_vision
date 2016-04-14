@@ -87,6 +87,7 @@ typedef Matrix<wolf::WolfScalar, 1, Dynamic> RowVectorXs;       ///< variable si
 // 2. Quaternions and other rotation things
 typedef Quaternion<wolf::WolfScalar> Quaternions;               ///< Quaternion of real WolfScalar type
 typedef AngleAxis<wolf::WolfScalar> AngleAxiss;                 ///< Angle-Axis of real WolfScalar type
+typedef Rotation2D<wolf::WolfScalar> Rotation2Ds;               ///< Rotation2D of real WolfScalar type
 }
 
 namespace wolf {
