@@ -142,21 +142,29 @@ int main(int argc, char** argv)
 
     p_brisk->process(capture_brisk_ptr);
 
+    cv::Mat last_frame = frame.clone();
+
     cv::namedWindow("Keypoint drawing");    // Creates a window for display.
     while(f<400)
     {
-        capture >> frame;
-        capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
-        frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
-        wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
-        frm_ptr->addCapture(capture_brisk_ptr);
-
-        clock_t t1 = clock();
-        p_brisk->process(capture_brisk_ptr);
-        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-
         f++;
-        std::cout << "f: " << f << std::endl;
+        std::cout << "Frame #: " << f << std::endl;
+
+        capture >> frame;
+
+        WolfScalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
+        std::cout << "Distance between last and incoming images: " << diff << std::endl;
+
+        capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+//        frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
+//        wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
+//        frm_ptr->addCapture(capture_brisk_ptr);
+
+//        clock_t t1 = clock();
+        p_brisk->process(capture_brisk_ptr);
+//        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+
+        last_frame = frame.clone();
     }
 
     wolf_problem_->destruct();
