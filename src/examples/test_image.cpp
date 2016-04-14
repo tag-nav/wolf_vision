@@ -128,21 +128,21 @@ int main(int argc, char** argv)
     // CaptureImage* capture_brisk_ptr;
     capture.set(CV_CAP_PROP_POS_MSEC, 3000);
 
-    capture >> frame;
+//    capture >> frame;
 
 
-    FrameBase* frm_ptr;
+//    FrameBase* frm_ptr;
     CaptureImage* capture_brisk_ptr;
 
-    frm_ptr = new FrameBase(KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
-    wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
+//    frm_ptr = new FrameBase(KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
+//    wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
 
-    capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
-    frm_ptr->addCapture(capture_brisk_ptr);
+//    capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+//    frm_ptr->addCapture(capture_brisk_ptr);
 
-    p_brisk->process(capture_brisk_ptr);
+//    p_brisk->process(capture_brisk_ptr);
 
-    cv::Mat last_frame = frame.clone();
+    cv::Mat last_frame;
 
     cv::namedWindow("Keypoint drawing");    // Creates a window for display.
     while(f<400)
@@ -152,8 +152,11 @@ int main(int argc, char** argv)
 
         capture >> frame;
 
-        WolfScalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
-        std::cout << "Distance between last and incoming images: " << diff << std::endl;
+        if (f>1){
+            WolfScalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
+            std::cout << "test_image: Image increment: " << diff << std::endl;
+        }
+
 
         capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
 //        frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);

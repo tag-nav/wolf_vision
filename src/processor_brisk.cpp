@@ -169,10 +169,6 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
     std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl << std::endl;
     std::cout << "last*: " << last_ptr_ << " -- incoming*: " << incoming_ptr_ << std::endl;
 
-//    cv::Mat img_diff;
-//    cv::absdiff(image_incoming_, image_last_, img_diff);
-//    int nonEquals = cv::countNonZero(img_diff);
-//    cv::Scalar nonEquals = cv::sum(img_diff);
     WolfScalar diff = cv::norm(image_incoming_, image_last_, cv::NORM_L1);
     std::cout << "Distance between last and incoming images: " << diff << std::endl;
 
@@ -192,18 +188,14 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                 feature_ptr->getKeypoint(), feature_ptr->getDescriptor(),false);
         tracker_features_.push_back(target_feature_ptr);
 
-
         tracker_roi_.push_back(roi);
 
         if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
         {
-//            std::cout << "\tCandidates:        " << candidate_keypoints.size() << std::endl;
-
             //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
 
             matcher_.match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
 
-//            std::cout << "\tNumber of matches: " << cv_matches.size() << std::endl;
             std::cout << "\tFound at: " << candidate_keypoints[cv_matches[0].trainIdx].pt << " --Hamming: " << cv_matches[0].distance << std::endl;
 
             if (cv_matches[0].distance < 200)
@@ -216,19 +208,17 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                 _feature_matches[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
                                                                             1 - (WolfScalar)(cv_matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
 
-//                _feature_correspondences[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
-//                                                        1 - (WolfScalar)(matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
-//            }
-//            for (unsigned int i = 0; i < candidate_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
-//            {
-//                if (i != matches[0].trainIdx)
-//                {
-//                    //IT SHOULD NOT BE LIKE THIS, JUST STORE THE KEYPOINT, BUT I WANT TO SEE THE DESCRIPTOR FOR TESTING
-//                    FeaturePointImage* candidate_feature_ptr = new FeaturePointImage(
-//                            candidate_keypoints[i], candidate_descriptors.row(i),true);
-//                    tracker_features_.push_back(candidate_feature_ptr);
-//                }
-//
+            }
+            for (unsigned int i = 0; i < candidate_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
+            {
+                if (i != cv_matches[0].trainIdx)
+                {
+                    //IT SHOULD NOT BE LIKE THIS, JUST STORE THE KEYPOINT, BUT I WANT TO SEE THE DESCRIPTOR FOR TESTING
+                    FeaturePointImage* candidate_feature_ptr = new FeaturePointImage(
+                            candidate_keypoints[i], candidate_descriptors.row(i),true);
+                    tracker_features_.push_back(candidate_feature_ptr);
+                }
+
             }
         }
         else
