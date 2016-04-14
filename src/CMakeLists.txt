@@ -116,18 +116,21 @@ SET(HDRS
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
     map_base.h
+    motion_buffer.h
     node_base.h
     node_constrained.h
     node_linked.h
     node_terminus.h
     processor_base.h
     processor_motion.h
+    processor_motion_base.h
     processor_odom_3D.h
     processor_tracker.h
     processor_tracker_feature.h
     processor_tracker_feature_dummy.h
     processor_tracker_landmark.h
     processor_tracker_landmark_dummy.h
+    processor_tracker_laser.h
     sensor_base.h
     sensor_camera.h
     sensor_odom_2D.h
@@ -182,6 +185,7 @@ SET(SRCS
     processor_tracker_feature_dummy.cpp
     processor_tracker_landmark.cpp
     processor_tracker_landmark_dummy.cpp
+    processor_tracker_laser.cpp
     sensor_base.cpp
     sensor_camera.cpp
     sensor_odom_2D.cpp

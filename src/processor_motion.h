@@ -1,16 +1,17 @@
 /**
- * \file processor_motion2.h
+ * \file processor_motion.h
  *
  *  Created on: 15/03/2016
  *      \author: jsola
  */
 
-#ifndef PROCESSOR_MOTION2_H_
-#define PROCESSOR_MOTION2_H_
+#ifndef PROCESSOR_MOTION_H_
+#define PROCESSOR_MOTION_H_
 
 // Wolf
-#include "processor_base.h"
+#include "processor_motion_base.h"
 #include "capture_motion2.h"
+#include "motion_buffer.h"
 #include "time_stamp.h"
 #include "wolf.h"
 
@@ -66,8 +67,8 @@ namespace wolf {
  * \endcode
  *       See more examples in the documentation of CaptureMotion2.
  */
-template <class MotionDeltaType = Eigen::VectorXs>
-class ProcessorMotion : public ProcessorBase
+template <class MotionDeltaType>
+class ProcessorMotion : public ProcessorMotionBase
 {
 
         // This is the main public interface
@@ -129,9 +130,9 @@ class ProcessorMotion : public ProcessorBase
 
         void updateDt();
 
-        typename CaptureMotion2<MotionDeltaType>::MotionBuffer* getBufferPtr();
+        MotionBuffer<MotionDeltaType>* getBufferPtr();
 
-        const typename CaptureMotion2<MotionDeltaType>::MotionBuffer* getBufferPtr() const;
+        const MotionBuffer<MotionDeltaType>* getBufferPtr() const;
 
         // These are the pure virtual functions doing the mathematics
     protected:
@@ -235,7 +236,7 @@ class ProcessorMotion : public ProcessorBase
 template<class MotionDeltaType>
 inline ProcessorMotion<MotionDeltaType>::ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size,
                                                            size_t _data_size) :
-        ProcessorBase(_tp), x_size_(_state_size), data_size_(_data_size),
+        ProcessorMotionBase(_tp), x_size_(_state_size), data_size_(_data_size),
         origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
         dt_(_dt), x_(_state_size), data_(_data_size)
 {
@@ -369,13 +370,13 @@ inline void ProcessorMotion<MotionDeltaType>::updateDt()
 }
 
 template<class MotionDeltaType>
-inline const typename CaptureMotion2<MotionDeltaType>::MotionBuffer* ProcessorMotion<MotionDeltaType>::getBufferPtr() const
+inline const MotionBuffer<MotionDeltaType>* ProcessorMotion<MotionDeltaType>::getBufferPtr() const
 {
     return last_ptr_->getBufferPtr();
 }
 
 template<class MotionDeltaType>
-inline typename CaptureMotion2<MotionDeltaType>::MotionBuffer* ProcessorMotion<MotionDeltaType>::getBufferPtr()
+inline MotionBuffer<MotionDeltaType>* ProcessorMotion<MotionDeltaType>::getBufferPtr()
 {
     return last_ptr_->getBufferPtr();
 }

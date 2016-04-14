@@ -19,6 +19,7 @@ ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_col
                                int _threshold, int _octaves, float _pattern_scales, unsigned int _adjust) :
         ProcessorTrackerFeature(PRC_TRACKER_BRISK),
         detector_(_threshold, _octaves, _pattern_scales),
+        descriptor_(_threshold, _octaves, _pattern_scales),
         matcher_(cv::NORM_HAMMING),
         act_search_grid_(_image_rows, _image_cols, _grid_width, _grid_height, _adjust-_separation+1, _separation),
         min_features_th_(_min_features_th)
@@ -74,7 +75,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
     inflateRoi(_image_roi, _image, _roi);
 
     detector_.detect(_image_roi, _new_keypoints);
-    detector_.compute(_image_roi, _new_keypoints, new_descriptors);
+    descriptor_.compute(_image_roi, _new_keypoints, new_descriptors);
     for (unsigned int i = 0; i < _new_keypoints.size(); i++)
     {
         _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
@@ -157,7 +158,7 @@ void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last,
 }
 
 unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
-                                           FeatureMatchMap& _feature_correspondences)
+                                           FeatureMatchMap& _feature_matches)
 {
     std::cout << std::endl << "-------------- trackFeatures ----------------" << std::endl << std::endl;
 
@@ -167,8 +168,13 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
     unsigned int roi_y;
     std::vector<cv::KeyPoint> candidate_keypoints;
     cv::Mat candidate_descriptors;
+    std::vector<cv::DMatch> cv_matches;
 
     std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl << std::endl;
+    std::cout << "last*: " << last_ptr_ << " -- incoming*: " << incoming_ptr_ << std::endl;
+
+    WolfScalar diff = cv::norm(image_incoming_, image_last_, cv::NORM_L1);
+    std::cout << "Distance between last and incoming images: " << diff << std::endl;
 
     for (auto feature_base_ptr : _feature_list_in)
     {
@@ -193,43 +199,41 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                 feature_ptr->getKeypoint(), feature_ptr->getDescriptor(),false);
         tracker_features_.push_back(target_feature_ptr);
 
-
         tracker_roi_.push_back(roi);
 
         if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
         {
-            std::cout << "Number of candidates: " << candidate_keypoints.size() << std::endl;
-
             //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
 
-            std::vector<cv::DMatch> matches;
-            matcher_.match(feature_ptr->getDescriptor(), candidate_descriptors, matches);
+            matcher_.match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
 
-            std::cout << "Number of matches:    " << matches.size() << std::endl;
-            std::cout << "Hamming distance:     " << matches[0].distance << "  --score: " << 1 - WolfScalar(matches[0].distance)/512 << std::endl;
+            std::cout << "\tFound at: " << candidate_keypoints[cv_matches[0].trainIdx].pt << " --Hamming: " << cv_matches[0].distance << std::endl;
 
-            if (matches[0].distance < 150)
+            if (cv_matches[0].distance < 200)
             {
                 FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
-                        candidate_keypoints[matches[0].trainIdx], (candidate_descriptors.row(matches[0].trainIdx)),
+                        candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
                 _feature_list_out.push_back(incoming_point_ptr);
-                _feature_correspondences[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
-                                                        1 - (WolfScalar)(matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
+
+                _feature_matches[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
+                                                                            1 - (WolfScalar)(cv_matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
+
             }
             for (unsigned int i = 0; i < candidate_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
             {
-                if (i != matches[0].trainIdx)
+                if (i != cv_matches[0].trainIdx)
                 {
                     //IT SHOULD NOT BE LIKE THIS, JUST STORE THE KEYPOINT, BUT I WANT TO SEE THE DESCRIPTOR FOR TESTING
                     FeaturePointImage* candidate_feature_ptr = new FeaturePointImage(
                             candidate_keypoints[i], candidate_descriptors.row(i),true);
                     tracker_features_.push_back(candidate_feature_ptr);
                 }
+
             }
         }
         else
-            std::cout << "Number of candidates: " << 0 << std::endl;
+            std::cout << "\tNot found" << std::endl;
     }
     std::cout << "\nNumber of Features found: " << _feature_list_out.size() << std::endl << std::endl;
     return _feature_list_out.size();
@@ -329,13 +333,11 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
         FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
         if (point_ptr->isKnown())
         {
-            //fuchsia
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 3, cv::Scalar(255.0, 0.0, 255.0), -1, 3, 0);
+            cv::circle(image_last_, point_ptr->getKeypoint().pt, 7, cv::Scalar(50.0, 250.0, 54.0), 1, 3, 0);
         }
         else
         {
-            //lime
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 3, cv::Scalar(0.0, 255.0, 0.0), -1, 3, 0);
+            cv::circle(image_last_, point_ptr->getKeypoint().pt, 3, cv::Scalar(80.0, 80.0, 254.0), -1, 3, 0);
         }
     }
     cv::imshow("Last", image_last_);

@@ -187,33 +187,36 @@ namespace wolf
 {
 inline void ProcessorTrackerLandmark::advance()
 {
-    std::cout << "advancing" << std::endl;
+    std::cout << "ProcessorTrackerLandmark::advance" << std::endl;
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
 
+    new_features_last_ = std::move(new_features_incoming_);
+
     for (auto match : matches_landmark_from_last_)
-            std::cout << "\t\t" << match.first->getMeasurement() << " to " << match.second.landmark_ptr_->getDescriptor() << std::endl;
+            std::cout << "\t" << match.first->getMeasurement() << " to " << match.second.landmark_ptr_->getDescriptor() << std::endl;
 }
 
 inline void ProcessorTrackerLandmark::reset()
 {
-    std::cout << "resetting" << std::endl;
+    std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
 
+    new_features_last_ = std::move(new_features_incoming_);
+
     for (auto match : matches_landmark_from_last_)
-            std::cout << "\t\t" << match.first->getMeasurement() << " to " << match.second.landmark_ptr_->getDescriptor() << std::endl;
+            std::cout << "\t" << match.first->getMeasurement() << " to " << match.second.landmark_ptr_->getDescriptor() << std::endl;
 }
 
 inline void ProcessorTrackerLandmark::establishConstraints()
 {
-    std::cout << " ProcessorTrackerLandmark::establishConstraints(): " << last_ptr_->getFeatureListPtr()->size() << std::endl;
-    std::cout << " correspondences: " << matches_landmark_from_last_.size() << std::endl;
+    std::cout << "ProcessorTrackerLandmark::establishConstraints" << std::endl;
+    std::cout << "\tfeatures:" << last_ptr_->getFeatureListPtr()->size() << std::endl;
+    std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
 
     for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
         last_feature->addConstraint(createConstraint(last_feature, matches_landmark_from_last_[last_feature].landmark_ptr_));
-
-
-    std::cout << "established" << std::endl;
 }
+
 }// namespace wolf
 
 #endif /* PROCESSOR_TRACKER_LANDMARK_H_ */

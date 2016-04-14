@@ -65,6 +65,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 {
     protected:
         cv::BRISK detector_;    //brisk detector
+        cv::BRISK descriptor_;    //brisk descriptor
         cv::BFMatcher matcher_; // Brute force matcher
         ActiveSearchGrid act_search_grid_;
         unsigned int min_features_th_;

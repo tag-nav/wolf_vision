@@ -5,13 +5,15 @@
 #include "hardware_base.h"
 #include "trajectory_base.h"
 #include "map_base.h"
+#include "processor_motion_base.h"
 
-
-namespace wolf {
+namespace wolf
+{
 
 WolfProblem::WolfProblem(FrameStructure _frame_structure) :
         NodeBase("WOLF_PROBLEM"), //
-        location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(new HardwareBase)
+        location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(
+                new HardwareBase), processor_motion_ptr_(nullptr)
 {
     trajectory_ptr_->linkToUpperNode(this);
     map_ptr_->linkToUpperNode(this);
@@ -41,6 +43,11 @@ void WolfProblem::destruct()
 void WolfProblem::addSensor(SensorBase* _sen_ptr)
 {
     getHardwarePtr()->addSensor(_sen_ptr);
+}
+
+void WolfProblem::setProcessorMotion(ProcessorMotionBase* _processor_motion_ptr)
+{
+    processor_motion_ptr_ = _processor_motion_ptr;
 }
 
 FrameBase* WolfProblem::createFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
@@ -115,6 +122,38 @@ FrameBase* WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs
     }
     //std::cout << "new frame created" << std::endl;
     return trajectory_ptr_->getLastFramePtr();
+}
+
+void WolfProblem::getCurrentState(Eigen::VectorXs& state)
+{
+    if (processor_motion_ptr_ != nullptr)
+        processor_motion_ptr_->state(state);
+    else
+        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+}
+
+Eigen::VectorXs WolfProblem::getCurrentState()
+{
+    if (processor_motion_ptr_ != nullptr)
+        return processor_motion_ptr_->state();
+    else
+        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+}
+
+void WolfProblem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
+{
+    if (processor_motion_ptr_ != nullptr)
+        processor_motion_ptr_->state(_ts, state);
+    else
+        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+}
+
+Eigen::VectorXs WolfProblem::getStateAtTimeStamp(const TimeStamp& _ts)
+{
+    if (processor_motion_ptr_ != nullptr)
+        return processor_motion_ptr_->state(_ts);
+    else
+        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
 }
 
 bool WolfProblem::permitKeyFrame(ProcessorBase* _processor_ptr)

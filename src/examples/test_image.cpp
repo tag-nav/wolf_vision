@@ -125,39 +125,33 @@ int main(int argc, char** argv)
     //cv::VideoCapture capture(0);
     cv::Mat frame;
 
-    // CaptureImage* capture_brisk_ptr;
     capture.set(CV_CAP_PROP_POS_MSEC, 3000);
 
-    capture >> frame;
-
-
-    FrameBase* frm_ptr;
     CaptureImage* capture_brisk_ptr;
 
-    frm_ptr = new FrameBase(KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
-    wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
-
-    capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
-    frm_ptr->addCapture(capture_brisk_ptr);
-
-    p_brisk->process(capture_brisk_ptr);
+    cv::Mat last_frame;
 
     cv::namedWindow("Last");    // Creates a window for display.
     cv::namedWindow("Incoming");    // Creates a window for display.
     while(f<800)
     {
-        capture >> frame;
-        capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
-        frm_ptr = new FrameBase(NON_KEY_FRAME, TimeStamp(),new StateBlock(Eigen::Vector3s::Zero()), new StateQuaternion);
-        wolf_problem_->getTrajectoryPtr()->addFrame(frm_ptr);
-        frm_ptr->addCapture(capture_brisk_ptr);
-
-        clock_t t1 = clock();
-        p_brisk->process(capture_brisk_ptr);
-        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-
         f++;
-        std::cout << "f: " << f << std::endl;
+        std::cout << "Frame #: " << f << std::endl;
+
+        capture >> frame;
+
+        if (f>1){ // check if consecutive images are different
+            WolfScalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
+            std::cout << "test_image: Image increment: " << diff << std::endl;
+        }
+
+        capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+
+//        clock_t t1 = clock();
+        p_brisk->process(capture_brisk_ptr);
+//        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+
+        last_frame = frame.clone();
     }
 
     wolf_problem_->destruct();
