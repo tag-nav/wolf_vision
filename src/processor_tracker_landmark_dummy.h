@@ -87,6 +87,8 @@ inline void ProcessorTrackerLandmarkDummy::preProcess()
 
 inline void ProcessorTrackerLandmarkDummy::postProcess()
 {
+    landmark_idx_non_visible_++;
+    std::cout << "------- Landmarks until " << landmark_idx_non_visible_ << " are now out of scope" << std::endl << std::endl;
 }
 
 } // namespace wolf
