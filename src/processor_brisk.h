@@ -40,6 +40,8 @@ struct ImageTrackerParameters
         struct Descriptor
         {
                 unsigned int size; ///< size of the descriptor vector (length of the vector)
+                unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
+                float pattern_scales; ///< Scale of the base pattern wrt the nominal one
                 unsigned int pattern_radius; ///< radius of the pattern used to compute the descriptor at the nominal scale
         }descriptor;
         struct Matcher
@@ -50,6 +52,7 @@ struct ImageTrackerParameters
         {
                 unsigned int grid_width; ///< cells per horizontal dimension of image
                 unsigned int grid_height; ///< cells per vertical dimension of image
+                unsigned int separation;
         }active_search;
         struct Algorithm
         {
@@ -70,7 +73,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         cv::Mat image_last_, image_incoming_;
         std::list<cv::Rect> tracker_roi_;
         std::list<FeaturePointImage*> tracker_features_;
-
+        unsigned int img_width_;
+        unsigned int img_height_;
     public:
         ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols,
                        unsigned int _grid_width = 8, unsigned int _grid_height = 8, unsigned int _separation = 5,
@@ -131,6 +135,10 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last,
                                             FeatureBaseList& _feature_list_incoming);
+
+        virtual void assureRoi(cv::Rect& _roi);
+
+        virtual void inflateRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
 
 };
