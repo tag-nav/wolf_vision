@@ -17,8 +17,8 @@ namespace wolf {
  *
  * This processor integrates motion data in the form of 3D odometry.
  *
- * As it is programmed, this odometry data is extracted from Captures of the type CaptureOdometry3d,
- * which comes in the form of a 6-vector, containing the following components:
+ * The odometry data is extracted from Captures of the type CaptureOdometry3d.
+ * This data comes in the form of a 6-vector, containing the following components:
  *   - a 3d position increment in the local frame of the robot (dx, dy, dz)
  *   - a 3d orientation increment in the local frame of the robot (roll, pitch, yaw)
  *
@@ -26,11 +26,11 @@ namespace wolf {
  *   - a 3d position increment in the local frame of the robot (dx, dy, dz)
  *   - a quaternion orientation increment in the local frame of the robot (qx, qy, qz, qw)
  *
- * The produced integrated states are in the form of 7-vectors with the following components:
+ * The produced states are in the form of 7-vectors with the following components:
  *   - a 3d position increment in the local frame of the robot (dx, dy, dz)
  *   - a quaternion orientation increment in the local frame of the robot (qx, qy, qz, qw)
  *
- * The processor integrates data by ignoring the time increment
+ * The processor integrates data by ignoring the time increment dt_
  * (as it integrates motion directly, not velocities).
  *
  * All frames are assumed FLU (front, left, up).
