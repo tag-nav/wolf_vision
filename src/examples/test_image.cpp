@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     }
     else
     {
-        if (argv[0] == "0")
+        if (std::string(argv[1]) == "0")
         {
             // camera
             img_width = 640;
