@@ -17,8 +17,11 @@ template<class MotionDeltaType>
 struct Motion
 {
     public:
-        TimeStamp ts_;       ///< Time stamp
-        MotionDeltaType delta_; ///< the integrated motion or delta-integral
+        TimeStamp ts_;                  ///< Time stamp
+        MotionDeltaType delta_;         ///< the integrated motion or delta-integral
+        Eigen::MatrixXs jacobian_0;     ///< Jacobian of the integrated delta wrt the initial delta
+        Eigen::MatrixXs jacobian_ts;    ///< Jacobian of the integrated delta wrt the current delta
+        Eigen::MatrixXs covariance_;    ///< covariance of the integrated delta
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
 template<class MotionDeltaType>
@@ -27,7 +30,8 @@ class MotionBuffer{
         /** \brief class for motion buffers.
          *
          * It consists of a buffer of pre-integrated motions (aka. delta-integrals) that is being filled
-         * by the motion processors (deriving from ProcessorMotion). Each delta-integral is accompanied by a time stamp.
+         * by the motion processors (deriving from ProcessorMotion).
+         * Each delta-integral is accompanied by a time stamp, a Jacobian and a covariances matrix.
          *
          * This buffer contains the time stamp and delta-integrals:
          *  - since the last key-Frame
