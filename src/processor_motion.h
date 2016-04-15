@@ -18,56 +18,8 @@
 namespace wolf {
 
 /** \brief class for Motion processors
- * \param Eigen::VectorXs The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
- *        Generalized Delta types allow for optimized algorithms.
- *        For example, for 3D odometry, a Eigen::VectorXs(6) is sufficient, and is provided as the default template type,
- * \code
- *   typedef Eigen::VectorXs Odo3dDeltaType; // 6-vector with position increment and orientation increment
- * \endcode
- *        If desired, this delta can also be defined as a position delta and an orientation delta,
- * \code
- *   struct Odo3dDeltaType {
- *     Eigen::Vector3s     dp;  // Position delta
- *     Eigen::Vector3s dtheta;  // Orientation delta
- *   } ;
- * \endcode
- *        It can also be defined as a position delta and a quaternion delta,
- * \code
- *   struct Odo3dDeltaType {
- *     Eigen::Vector3s    dp;  // Position delta
- *     Eigen::Quaternions dq;  // Quaternion delta
- *   } ;
- * \endcode
- *        or even as a position delta and a rotation matrix delta,
- * \code
- *   struct Odo3dDeltaType {
- *     Eigen::Vector3s dp;     // Position delta
- *     Eigen::Matrix3s dR;     // Rotation matrix delta
- *   } ;
- * \endcode
- *        As a more challenging example, in an IMU, the Delta type might be defined as:
- * \code
- *   struct ImuDeltaType {
- *     Eigen::Vector3s    dp;  // Position delta
- *     Eigen::Quaternions dq;  // Quaternion delta
- *     Eigen::Vector3s    dv;  // Velocity delta
- *     Eigen::Vector3s    dab; // Acc. bias delta
- *     Eigen::Vector3s    dwb; // Gyro bias delta
- *   } ;
- * \endcode
- *     or using a rotation matrix instead of the quaternion,
- * \code
- *   struct ImuDeltaType {
- *     Eigen::Vector3s dp;     // Position delta
- *     Eigen::Matrix3s dR;     // Rotation matrix delta
- *     Eigen::Vector3s dv;     // Velocity delta
- *     Eigen::Vector3s dab;    // Acc. bias delta
- *     Eigen::Vector3s dwb;    // Gyro bias delta
- *   } ;
- * \endcode
- *       See more examples in the documentation of CaptureMotion2.
  */
-class ProcessorMotion : public ProcessorMotionBase
+class ProcessorMotion : public ProcessorBase
 {
 
         // This is the main public interface
@@ -204,14 +156,9 @@ class ProcessorMotion : public ProcessorMotionBase
          * Hint: you can use a method setZero() in the Eigen::VectorXs class. See ProcessorOdom3d::Odom3dDelta for reference.
          *
          * Examples (see documentation of the the class for info on Eigen::VectorXs):
-         *   - 2D odometry: a 3-vector with all zeros, e.g. Vector3s::Zero()
-         *   - 3D odometry: different examples:
-         *     - delta type is a PQ vector: 7-vector with [0,0,0,0,0,0,1]
-         *     - delta type is a {P,Q} struct with {[0,0,0],[0,0,0,1]}
-         *     - delta type is a {P,R} struct with {[0,0,0],Matrix3s::Identity()}
-         *   - IMU: examples:
-         *     - delta type is a {P,Q,V} struct with {[0,0,0],[0,0,0,1],[0,0,0]}
-         *     - delta type is a {P,Q,V,Ab,Wb} struct with {[0,0,0],[0,0,0,1],[0,0,0],[0,0,0],[0,0,0]}
+         *   - 2D odometry: a 3-vector with all zeros, e.g. VectorXs::Zero(3)
+         *   - 3D odometry: delta type is a PQ vector: 7-vector with [0,0,0, 0,0,0,1]
+         *   - IMU: PQVBB 16-vector with [0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0]
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
@@ -235,7 +182,7 @@ class ProcessorMotion : public ProcessorMotionBase
 
 
 inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size) :
-        ProcessorMotionBase(_tp), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size),
+        ProcessorBase(_tp), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size),
         origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
         dt_(_dt), x_(_state_size),
         delta_(_delta_size), delta_integrated_(_delta_size),

@@ -25,23 +25,24 @@ struct Motion
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
 
+/** \brief class for motion buffers.
+ *
+ * It consists of a buffer of pre-integrated motions (aka. delta-integrals) that is being filled
+ * by the motion processors (deriving from ProcessorMotion).
+ * Each delta-integral is accompanied by a time stamp, a Jacobian and a covariances matrix.
+ *
+ * This buffer contains the time stamp and delta-integrals:
+ *  - since the last key-Frame
+ *  - until the frame of this capture.
+ *
+ * The buffer can be queried for motion-integrals and delta-integrals corresponding to a provided time stamp,
+ * with the following rules:
+ *   - The returned motion-integral or delta-integral is the one immediately before the query time stamp.
+ *   - If the query time stamp is later than the last one in the buffer, the last motion-integral or delta-integral is returned.
+ *   - It is an error if the query time stamp is earlier than the beginning of the buffer.
+ */
 class MotionBuffer{
     public:
-        /** \brief class for motion buffers.
-         *
-         * It consists of a buffer of pre-integrated motions (aka. delta-integrals) that is being filled
-         * by the motion processors (deriving from ProcessorMotion).
-         * Each delta-integral is accompanied by a time stamp, a Jacobian and a covariances matrix.
-         *
-         * This buffer contains the time stamp and delta-integrals:
-         *  - since the last key-Frame
-         *  - until the frame of this capture.
-         *
-         * The buffer can be queried for delta-integrals corresponding to a provided time stamp, with the following rules:
-         *   - The returned delta-integral is the one immediately before the query time stamp.
-         *   - If the query time stamp is later than the last one in the buffer, the last delta-integral is returned.
-         *   - It is an error if the query time stamp is earlier than the beginning of the buffer.
-         */
         MotionBuffer(){}
         void pushBack(const Motion _motion){container_.push_back(_motion);}
         void pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
