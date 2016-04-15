@@ -56,7 +56,6 @@ void ProcessorBrisk::postProcess()
     drawRoiLastFrame(image_incoming_, tracker_roi_);
     drawTrackingFeatures(image_incoming_,tracker_features_);
     cv::waitKey(0);
-    //cv::waitKey(0);
 }
 
 bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature)

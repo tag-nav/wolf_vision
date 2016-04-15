@@ -147,12 +147,12 @@ int main(int argc, char** argv)
     }
 
     cv::Mat frame;
+    cv::Mat last_frame;
 
     capture.set(CV_CAP_PROP_POS_MSEC, 3000);
 
     CaptureImage* capture_brisk_ptr;
 
-    cv::Mat last_frame;
 
     cv::namedWindow("Last");    // Creates a window for display.
     cv::moveWindow("Last", 0, 0);
@@ -169,18 +169,19 @@ int main(int argc, char** argv)
         if(!frame.empty())
         {
 
-        if (f>1){ // check if consecutive images are different
-            WolfScalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
-            std::cout << "test_image: Image increment: " << diff << std::endl;
-        }
+            if (f>1){ // check if consecutive images are different
+                WolfScalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
+                std::cout << "frame ptr: " << (unsigned int)*(frame.ptr(0)) << " last ptr: " << (unsigned int)*(last_frame.ptr(0)) << std::endl;
+                std::cout << "test_image: Image increment: " << diff << std::endl;
+            }
 
-        capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+            capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
 
-//        clock_t t1 = clock();
-        p_brisk->process(capture_brisk_ptr);
-//        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+            //        clock_t t1 = clock();
+            p_brisk->process(capture_brisk_ptr);
+            //        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
-        last_frame = frame.clone();
+            last_frame = frame;
         }
         else
         {
