@@ -356,11 +356,26 @@ inline void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
     }
 }
 
+inline void v2q(const Eigen::VectorXs& _v, Eigen::Map<Eigen::Quaternions>& _q){
+    wolf::WolfScalar angle = _v.norm();
+    if (angle < wolf::WolfConstants::EPS)
+        _q = Eigen::Quaternions::Identity();
+    else
+    {
+        _q = Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
+    }
+}
 
 inline void q2v(const Eigen::Quaternions& _q, Eigen::VectorXs& _v){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
     _v = aa.axis() * aa.angle();
 }
+
+inline void q2v(const Eigen::Map<const Eigen::Quaternions>& _q, Eigen::VectorXs& _v){
+    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
+    _v = aa.axis() * aa.angle();
+}
+
 }
 
 

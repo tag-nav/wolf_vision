@@ -74,9 +74,9 @@ inline ProcessorOdom3d::~ProcessorOdom3d()
 inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Eigen::VectorXs& _delta)
 {
     _delta.head(3) = _data.head(3);
-    Eigen::Quaternions q;
-    Eigen::v2q(_data.tail(3), q); // Better use q_out_, but it is a Map. Overload v2q() with Maps.
-    _delta.tail(4) = q.coeffs();
+    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data() + 3);
+
+    Eigen::v2q(_data.tail(3), q_out_); // Better use q_out_, but it is a Map. Overload v2q() with Maps.
 }
 
 inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
