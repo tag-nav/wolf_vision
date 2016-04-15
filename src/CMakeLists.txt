@@ -130,7 +130,6 @@ SET(HDRS
     processor_tracker_feature_dummy.h
     processor_tracker_landmark.h
     processor_tracker_landmark_dummy.h
-    processor_tracker_laser.h
     sensor_base.h
     sensor_camera.h
     sensor_odom_2D.h
@@ -185,7 +184,6 @@ SET(SRCS
     processor_tracker_feature_dummy.cpp
     processor_tracker_landmark.cpp
     processor_tracker_landmark_dummy.cpp
-    processor_tracker_laser.cpp
     sensor_base.cpp
     sensor_camera.cpp
     sensor_odom_2D.cpp
