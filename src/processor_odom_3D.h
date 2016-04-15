@@ -13,19 +13,19 @@
 
 namespace wolf {
 
-/**\brief The Motion Delta type
- *
- * The motion delta, as a composite struct containing position increment and orientation quaternion increment.
- */
-struct Odom3dDelta{
-        Eigen::Vector3s dp;    ///< Position increment
-        Eigen::Quaternions dq; ///< Orientation increment as a quaternion
-        Odom3dDelta() : dp(0,0,0), dq(1,0,0,0) {};
-        Odom3dDelta(const Eigen::Vector3s& _dp, const Eigen::Quaternions& _dq) : dp(_dp), dq(_dq) {};
-        void set(Eigen::Vector3s _dp, Eigen::Quaternions _dq){dp = _dp; dq = _dq;};
-        void setZero() {dp.setZero(); dq.setIdentity();}
-        static Odom3dDelta Zero() {return Odom3dDelta();}
-};
+///**\brief The Motion Delta type
+// *
+// * The motion delta, as a composite struct containing position increment and orientation quaternion increment.
+// */
+//struct Odom3dDelta{
+//        Eigen::Vector3s dp;    ///< Position increment
+//        Eigen::Quaternions dq; ///< Orientation increment as a quaternion
+//        Odom3dDelta() : dp(0,0,0), dq(1,0,0,0) {};
+//        Odom3dDelta(const Eigen::Vector3s& _dp, const Eigen::Quaternions& _dq) : dp(_dp), dq(_dq) {};
+//        void set(Eigen::Vector3s _dp, Eigen::Quaternions _dq){dp = _dp; dq = _dq;};
+//        void setZero() {dp.setZero(); dq.setIdentity();}
+//        static Odom3dDelta Zero() {return Odom3dDelta();}
+//};
 
 
 
