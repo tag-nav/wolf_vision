@@ -24,6 +24,8 @@ ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_col
     //    detector_.create("BRISK");    // These do not seem to be necessary
     //    descriptor_.create("BRISK");  // These do not seem to be necessary
     //    matcher_.train();  // These do not seem to be necessary
+    img_width_ = _image_cols;
+    img_height_ = _image_rows;
 }
 
 //Destructor
