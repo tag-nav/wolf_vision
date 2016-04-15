@@ -21,7 +21,7 @@ ProcessorTrackerFeature::~ProcessorTrackerFeature()
 
 unsigned int ProcessorTrackerFeature::processKnown()
 {
-    std::cout << "ProcessorTrackerFeature::processKnown()" << std::endl;
+    //    std::cout << "ProcessorTrackerFeature::processKnown()" << std::endl;
 
     assert(incoming_ptr_->getFeatureListPtr()->size() == 0
             && "In ProcessorTrackerFeature::processKnown(): incoming_ptr_ feature list must be empty before processKnown()");
@@ -50,7 +50,7 @@ unsigned int ProcessorTrackerFeature::processKnown()
 
 unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_features)
 {
-    std::cout << "ProcessorTrackerFeature::processNew()" << std::endl;
+    //    std::cout << "ProcessorTrackerFeature::processNew()" << std::endl;
 
     /* Rationale: A keyFrame will be created using the last Capture.
      * First, we create the constraints from the existing Features in last,
@@ -64,7 +64,7 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
     // Populate the last Capture with new Features. The result is in new_features_last_.
     unsigned int n = detectNewFeatures(_max_new_features);
 
-    std::cout << "detected " << n << " new features!" << std::endl;
+    //    std::cout << "detected " << n << " new features!" << std::endl;
 
     // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
     if (incoming_ptr_ != last_ptr_) // we do not do it the first time.
