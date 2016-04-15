@@ -13,22 +13,28 @@
 
 namespace wolf {
 
-/**\brief The Motion Delta type
+/** \brief Processor for 3d odometry integration.
  *
- * The motion delta, as a composite struct containing position increment and orientation quaternion increment.
+ * This processor integrates motion data in the form of 3D odometry.
+ *
+ * As it is programmed, this odometry data is extracted from Captures of the type CaptureOdometry3d,
+ * which comes in the form of a 6-vector, containing the following components:
+ *   - a 3d position increment in the local frame of the robot (dx, dy, dz)
+ *   - a 3d orientation increment in the local frame of the robot (roll, pitch, yaw)
+ *
+ * The produced integrated deltas are in the form of 7-vectors with the following components:
+ *   - a 3d position increment in the local frame of the robot (dx, dy, dz)
+ *   - a quaternion orientation increment in the local frame of the robot (qx, qy, qz, qw)
+ *
+ * The produced integrated states are in the form of 7-vectors with the following components:
+ *   - a 3d position increment in the local frame of the robot (dx, dy, dz)
+ *   - a quaternion orientation increment in the local frame of the robot (qx, qy, qz, qw)
+ *
+ * The processor integrates data by ignoring the time increment
+ * (as it integrates motion directly, not velocities).
+ *
+ * All frames are assumed FLU (front, left, up).
  */
-struct Odom3dDelta{
-        Eigen::Vector3s dp;    ///< Position increment
-        Eigen::Quaternions dq; ///< Orientation increment as a quaternion
-        Odom3dDelta() : dp(0,0,0), dq(1,0,0,0) {};
-        Odom3dDelta(const Eigen::Vector3s& _dp, const Eigen::Quaternions& _dq) : dp(_dp), dq(_dq) {};
-        void set(Eigen::Vector3s _dp, Eigen::Quaternions _dq){dp = _dp; dq = _dq;};
-        void setZero() {dp.setZero(); dq.setIdentity();}
-        static Odom3dDelta Zero() {return Odom3dDelta();}
-};
-
-
-
 class ProcessorOdom3d : public ProcessorMotion
 {
     public:
