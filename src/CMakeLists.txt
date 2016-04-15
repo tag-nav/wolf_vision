@@ -157,7 +157,6 @@ SET(SRCS
     capture_fix.cpp
     capture_motion.cpp
     capture_odom_2D.cpp
-    capture_odom_3D.cpp
     capture_void.cpp
     constraint_base.cpp
     constraint_analytic.cpp
