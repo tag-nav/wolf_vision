@@ -5,13 +5,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 if(COMMAND cmake_policy)
   cmake_policy(SET CMP0005 NEW) 
   cmake_policy(SET CMP0003 NEW)
-   
 endif(COMMAND cmake_policy)
+
+# MAC OSX RPATH
+SET(CMAKE_MACOSX_RPATH 1)
+
 
 # The project name and the type of project
 PROJECT(wolf)
-
-set(CMAKE_MACOSX_RPATH 1)
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
