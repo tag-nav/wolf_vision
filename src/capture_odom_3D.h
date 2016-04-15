@@ -15,7 +15,7 @@
 namespace wolf {
 
 // Declare the class
-class CaptureOdom3D : public CaptureMotion2<Odom3dDelta>
+class CaptureOdom3D : public CaptureMotion2
 {
     public:
         CaptureOdom3D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data);
