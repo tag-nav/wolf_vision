@@ -5,7 +5,7 @@
 #include "hardware_base.h"
 #include "trajectory_base.h"
 #include "map_base.h"
-#include "processor_motion_base.h"
+#include "processor_motion.h"
 
 namespace wolf
 {
@@ -45,7 +45,7 @@ void WolfProblem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-void WolfProblem::setProcessorMotion(ProcessorMotionBase* _processor_motion_ptr)
+void WolfProblem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
 {
     processor_motion_ptr_ = _processor_motion_ptr;
 }

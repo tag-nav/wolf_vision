@@ -156,7 +156,6 @@ SET(SRCS
     capture_gps_fix.cpp
     capture_fix.cpp
     capture_motion.cpp
-    capture_motion2.cpp
     capture_odom_2D.cpp
     capture_odom_3D.cpp
     capture_void.cpp
@@ -178,7 +177,6 @@ SET(SRCS
     map_base.cpp
     node_base.cpp
     processor_base.cpp
-    processor_motion.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
     processor_tracker_feature_dummy.cpp
@@ -188,9 +186,6 @@ SET(SRCS
     sensor_camera.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
-    state_block.cpp
-    state_homogeneous_3d.cpp
-    state_quaternion.cpp
     time_stamp.cpp
     trajectory_base.cpp
     wolf_problem.cpp

@@ -6,7 +6,7 @@ namespace wolf{
 class HardwareBase;
 class TrajectoryBase;
 class MapBase;
-class ProcessorMotionBase;
+class ProcessorMotion;
 class TimeStamp;
 }
 
@@ -41,7 +41,7 @@ class WolfProblem : public NodeBase
         TrajectoryBase* trajectory_ptr_;
         MapBase* map_ptr_;
         HardwareBase* hardware_ptr_;
-        ProcessorMotionBase* processor_motion_ptr_;
+        ProcessorMotion* processor_motion_ptr_;
         StateBlockList state_block_ptr_list_;
         std::list<StateBlock*> state_block_add_list_;
         std::list<StateBlock*> state_block_update_list_;
@@ -84,7 +84,7 @@ class WolfProblem : public NodeBase
          * Set the processor motion. It will provide the state.
          *
          */
-        void setProcessorMotion(ProcessorMotionBase* _processor_motion_ptr);
+        void setProcessorMotion(ProcessorMotion* _processor_motion_ptr);
 
         /** \brief Create Frame of the correct size
          *
