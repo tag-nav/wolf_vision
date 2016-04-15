@@ -9,10 +9,6 @@
 namespace wolf
 {
 
-/** Public */
-
-/** The "main" class of this processor is "process" */
-
 //Constructor
 ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, unsigned int _grid_width,
                                unsigned int _grid_height, unsigned int _separation, unsigned int _max_new_features, unsigned int _min_features_th,
@@ -25,7 +21,9 @@ ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_col
         min_features_th_(_min_features_th)
 {
     ProcessorTrackerFeature::setMaxNewFeatures(_max_new_features);
-    detector_.create("Feature2D.BRISK");
+    //    detector_.create("BRISK");    // These do not seem to be necessary
+    //    descriptor_.create("BRISK");  // These do not seem to be necessary
+    //    matcher_.train();  // These do not seem to be necessary
 }
 
 //Destructor
@@ -77,18 +75,6 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
         _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
         _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
     }
-
-    // These are only tests for ROI operations:
-    // locateROI: returns the size of the underlying image, and the position (offset) where the ROI is. Not so useful here.
-    // adjustROI: 'inflates' the ROI at each edge by the specified amount. The ROI changes size and position (offset).
-//    cv::Point offset;
-//    cv::Size img_size;
-//    _image_roi.locateROI(img_size, offset); // size of original img; offset or position of upper-left corner.
-//    std::cout << "size: " << img_size << " offset: " << offset << " ROI: " << _roi << std::endl;
-//    _image_roi.adjustROI(2,2,2,2); // dtop, dbot, dleft, dright
-//    _image_roi.locateROI(img_size, offset);
-//    std::cout << "size: " << img_size << " offset: " << offset << std::endl;
-
     return _new_keypoints.size();
 }
 
