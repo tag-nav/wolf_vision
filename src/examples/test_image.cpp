@@ -155,7 +155,10 @@ int main(int argc, char** argv)
     cv::Mat last_frame;
 
     cv::namedWindow("Last");    // Creates a window for display.
+    cv::moveWindow("Last", 0, 0);
     cv::namedWindow("Incoming");    // Creates a window for display.
+    cv::moveWindow("Incoming", 0, 500);
+
     while(f<800)
     {
         f++;
