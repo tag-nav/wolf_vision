@@ -11,6 +11,8 @@ endif(COMMAND cmake_policy)
 # The project name and the type of project
 PROJECT(wolf)
 
+set(CMAKE_MACOSX_RPATH 1)
+
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 SET(CMAKE_INSTALL_PREFIX /usr/local)
