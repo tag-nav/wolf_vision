@@ -13,18 +13,18 @@
 
 namespace wolf {
 
-template<class MotionDeltaType>
+
 struct Motion
 {
     public:
         TimeStamp ts_;                  ///< Time stamp
-        MotionDeltaType delta_;         ///< the integrated motion or delta-integral
+        Eigen::VectorXs delta_;         ///< the integrated motion or delta-integral
         Eigen::MatrixXs jacobian_0;     ///< Jacobian of the integrated delta wrt the initial delta
         Eigen::MatrixXs jacobian_ts;    ///< Jacobian of the integrated delta wrt the current delta
         Eigen::MatrixXs covariance_;    ///< covariance of the integrated delta
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
-template<class MotionDeltaType>
+
 class MotionBuffer{
     public:
         /** \brief class for motion buffers.
@@ -43,26 +43,28 @@ class MotionBuffer{
          *   - It is an error if the query time stamp is earlier than the beginning of the buffer.
          */
         MotionBuffer(){}
-        void pushBack(const Motion<MotionDeltaType> _motion){container_.push_back(_motion);}
-        void pushBack(const TimeStamp _ts, const MotionDeltaType& _delta) { container_.push_back(Motion<MotionDeltaType>( {_ts, _delta})); }
+        void pushBack(const Motion _motion){container_.push_back(_motion);}
+        void pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
         void clear(){container_.clear();}
         unsigned int size() const {return container_.size();}
         bool empty() const {return container_.empty();}
         const TimeStamp& getTimeStamp() const {return container_.back().ts_;}
-        const MotionDeltaType& getDelta() const {return container_.back().delta_;}
-        const MotionDeltaType& getDelta(const TimeStamp& _ts) const {return getMotion(_ts).delta_;}
-        const Motion<MotionDeltaType> getMotion() const {return container_.back();}
-        const Motion<MotionDeltaType> getMotion(const TimeStamp& _ts) const;
+        const Eigen::VectorXs& getDelta() const {return container_.back().delta_;}
+        const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const {
+            return getMotion(_ts).delta_;
+        }
+        const Motion& getMotion() const {return container_.back();}
+        const Motion& getMotion(const TimeStamp& _ts) const;
 
     private:
-        std::list<Motion<MotionDeltaType>> container_;
+        std::list<Motion> container_;
 };
 
-template<class MotionDeltaType>
-inline const Motion<MotionDeltaType> MotionBuffer<MotionDeltaType>::getMotion(const TimeStamp& _ts) const
+
+inline const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const
 {
     assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
-    auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion<MotionDeltaType>& m)
+    auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion& m)
     {
         return m.ts_ <= _ts;
     });
@@ -72,6 +74,10 @@ inline const Motion<MotionDeltaType> MotionBuffer<MotionDeltaType>::getMotion(co
         previous--;
 
     return *previous;
+
+//    Motion copy = *previous;
+//
+//    return copy;
 }
 
 } // namespace wolf

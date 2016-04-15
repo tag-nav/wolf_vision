@@ -20,7 +20,7 @@
 namespace wolf {
 
 /** \brief Base class for motion Captures.
- * \param MotionDeltaType The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
+ * \param Eigen::VectorXs The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
  *        Generalized Delta types allow for optimized algorithms.
  *        For example, for 3D odometry, a Eigen::VectorXs(6) is sufficient, and is provided as the default template type,
  * \code
@@ -83,7 +83,7 @@ namespace wolf {
  * Once a keyframe is generated, this buffer is frozen and kept in the Capture for eventual later uses.
  * It is then used to compute the factor that links the Frame of this capture to the previous key-frame in the Trajectory.
  */
-template <class MotionDeltaType = Eigen::VectorXs>
+
 class CaptureMotion2 : public CaptureBase
 {
         // member types: Motion and MotionBuffer
@@ -92,7 +92,7 @@ class CaptureMotion2 : public CaptureBase
 //        {
 //            public:
 //                TimeStamp ts_;       ///< Time stamp
-//                MotionDeltaType delta_; ///< the integrated motion or delta-integral
+//                Eigen::VectorXs delta_; ///< the integrated motion or delta-integral
 //        }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 //
 //        class MotionBuffer{
@@ -113,13 +113,13 @@ class CaptureMotion2 : public CaptureBase
 //                 */
 //                MotionBuffer(){}
 //                void pushBack(const Motion _motion){container_.push_back(_motion);}
-//                void pushBack(const TimeStamp _ts, const MotionDeltaType& _delta) { container_.push_back(Motion( {_ts, _delta})); }
+//                void pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
 //                void clear(){container_.clear();}
 //                unsigned int size() const {return container_.size();}
 //                bool empty() const {return container_.empty();}
 //                const TimeStamp& getTimeStamp() const {return container_.back().ts_;}
-//                const MotionDeltaType& getDelta() const { return container_.back().delta_; }
-//                const MotionDeltaType& getDelta(const TimeStamp& _ts) const {
+//                const Eigen::VectorXs& getDelta() const { return container_.back().delta_; }
+//                const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const {
 //                    assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
 //                    auto previous = std::find_if (container_.rbegin(), container_.rend(), [&](const Motion& m){return m.ts_ <= _ts;});
 //                    if (previous == container_.rend())
@@ -148,22 +148,22 @@ class CaptureMotion2 : public CaptureBase
         {
             return data_;
         }
-        MotionBuffer<MotionDeltaType>* getBufferPtr()
+        MotionBuffer* getBufferPtr()
         {
             return &buffer_;
         }
-        const MotionBuffer<MotionDeltaType>* getBufferPtr() const
+        const MotionBuffer* getBufferPtr() const
         {
             return &buffer_;
         }
-        const MotionDeltaType& getDelta() const{
+        const Eigen::VectorXs& getDelta() const{
             return buffer_.getDelta();
         }
 
         // member data:
     protected:
         Eigen::VectorXs data_; ///< Motion data in form of vector mandatory
-        MotionBuffer<MotionDeltaType> buffer_; ///< Buffer of motions between this Capture and the next one.
+        MotionBuffer buffer_; ///< Buffer of motions between this Capture and the next one.
 };
 
 } // namespace wolf

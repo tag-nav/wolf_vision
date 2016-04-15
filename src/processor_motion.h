@@ -18,7 +18,7 @@
 namespace wolf {
 
 /** \brief class for Motion processors
- * \param MotionDeltaType The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
+ * \param Eigen::VectorXs The type of the motion delta and the motion integrated delta. It can be an Eigen::VectorXs (default) or any other construction, most likely a struct.
  *        Generalized Delta types allow for optimized algorithms.
  *        For example, for 3D odometry, a Eigen::VectorXs(6) is sufficient, and is provided as the default template type,
  * \code
@@ -67,13 +67,12 @@ namespace wolf {
  * \endcode
  *       See more examples in the documentation of CaptureMotion2.
  */
-template <class MotionDeltaType>
 class ProcessorMotion : public ProcessorMotionBase
 {
 
         // This is the main public interface
     public:
-        ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _data_size);
+        ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -108,20 +107,20 @@ class ProcessorMotion : public ProcessorMotionBase
         /** \brief Provides the delta-state integrated so far
          * \return a reference to the integrated delta state
          */
-        const MotionDeltaType& deltaState() const;
+        const Eigen::VectorXs& deltaState() const;
         /** \brief Provides the delta-state between two time-stamps
          * \param _t1 initial time
          * \param _t2 final time
          * \param _Delta the integrated delta-state between _t1 and _t2
          */
-        void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, MotionDeltaType& _Delta);
+        void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta);
         /** Composes the deltas in two pre-integrated Captures
          * \param _cap1_ptr pointer to the first Capture
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
          * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
          */
-        void sumDeltas(CaptureMotion2<MotionDeltaType>* _cap1_ptr, CaptureMotion2<MotionDeltaType>* _cap2_ptr,
-                       MotionDeltaType& _delta1_plus_delta2);
+        void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr,
+                       Eigen::VectorXs& _delta1_plus_delta2);
 
         // Helper functions:
     protected:
@@ -130,9 +129,9 @@ class ProcessorMotion : public ProcessorMotionBase
 
         void updateDt();
 
-        MotionBuffer<MotionDeltaType>* getBufferPtr();
+        MotionBuffer* getBufferPtr();
 
-        const MotionBuffer<MotionDeltaType>* getBufferPtr() const;
+        const MotionBuffer* getBufferPtr() const;
 
         // These are the pure virtual functions doing the mathematics
     protected:
@@ -150,7 +149,7 @@ class ProcessorMotion : public ProcessorMotionBase
           *
           * The delta-state format must be compatible for integration using
           * the composition functions doing the math in this class: xPlusDelta(), deltaPlusDelta() and deltaMinusDelta().
-          * See the class documentation for some MotionDeltaType suggestions.
+          * See the class documentation for some Eigen::VectorXs suggestions.
           *
           * The data format is generally not the same as the delta format,
           * because it is the format of the raw data provided by the Capture,
@@ -167,7 +166,7 @@ class ProcessorMotion : public ProcessorMotionBase
           *
           *  However, other more complicated relations are possible.
           */
-         virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, MotionDeltaType& _delta) = 0;
+         virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Eigen::VectorXs& _delta) = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -176,7 +175,7 @@ class ProcessorMotion : public ProcessorMotionBase
          *
          * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
          */
-        virtual void xPlusDelta(const Eigen::VectorXs& _x, const MotionDeltaType& _delta,
+        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta,
                                 Eigen::VectorXs& _x_plus_delta) = 0;
 
         /** \brief composes a delta-state on top of another delta-state
@@ -186,8 +185,8 @@ class ProcessorMotion : public ProcessorMotionBase
          *
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2
          */
-        virtual void deltaPlusDelta(const MotionDeltaType& _delta1, const MotionDeltaType& _delta2,
-                                    MotionDeltaType& _delta1_plus_delta2) = 0;
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+                                    Eigen::VectorXs& _delta1_plus_delta2) = 0;
 
         /** \brief Computes the delta-state that goes from one delta-state to another
          * \param _delta1 the initial delta
@@ -196,15 +195,15 @@ class ProcessorMotion : public ProcessorMotionBase
          *
          * This function implements the composition (-) so that _delta2_minus_delta1 = _delta2 (-) _delta1.
          */
-        virtual void deltaMinusDelta(const MotionDeltaType& _delta1, const MotionDeltaType& _delta2,
-                                     MotionDeltaType& _delta2_minus_delta1) = 0;
+        virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+                                     Eigen::VectorXs& _delta2_minus_delta1) = 0;
 
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
          *
-         * Hint: you can use a method setZero() in the MotionDeltaType class. See ProcessorOdom3d::Odom3dDelta for reference.
+         * Hint: you can use a method setZero() in the Eigen::VectorXs class. See ProcessorOdom3d::Odom3dDelta for reference.
          *
-         * Examples (see documentation of the the class for info on MotionDeltaType):
+         * Examples (see documentation of the the class for info on Eigen::VectorXs):
          *   - 2D odometry: a 3-vector with all zeros, e.g. Vector3s::Zero()
          *   - 3D odometry: different examples:
          *     - delta type is a PQ vector: 7-vector with [0,0,0,0,0,0,1]
@@ -214,45 +213,47 @@ class ProcessorMotion : public ProcessorMotionBase
          *     - delta type is a {P,Q,V} struct with {[0,0,0],[0,0,0,1],[0,0,0]}
          *     - delta type is a {P,Q,V,Ab,Wb} struct with {[0,0,0],[0,0,0,1],[0,0,0],[0,0,0],[0,0,0]}
          */
-        virtual MotionDeltaType deltaZero() const = 0;
+        virtual Eigen::VectorXs deltaZero() const = 0;
 
     protected:
         // Attributes
         size_t x_size_;    ///< The size of the state vector
+        size_t delta_size_;
         size_t data_size_; ///< the size of the incoming data
-        CaptureMotion2<MotionDeltaType>* origin_ptr_;
-        CaptureMotion2<MotionDeltaType>* last_ptr_;
-        CaptureMotion2<MotionDeltaType>* incoming_ptr_;
+        CaptureMotion2* origin_ptr_;
+        CaptureMotion2* last_ptr_;
+        CaptureMotion2* incoming_ptr_;
 
     protected:
         // helpers to avoid allocation
         WolfScalar dt_; ///< Time step
         Eigen::VectorXs x_; ///< state temporary
-        MotionDeltaType delta_, delta_integrated_; ///< current delta and integrated deltas
+        Eigen::VectorXs delta_, delta_integrated_; ///< current delta and integrated deltas
         Eigen::VectorXs data_; ///< current data
 
 };
 
-template<class MotionDeltaType>
-inline ProcessorMotion<MotionDeltaType>::ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size,
-                                                           size_t _data_size) :
-        ProcessorMotionBase(_tp), x_size_(_state_size), data_size_(_data_size),
+
+inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size) :
+        ProcessorMotionBase(_tp), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size),
         origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
-        dt_(_dt), x_(_state_size), data_(_data_size)
+        dt_(_dt), x_(_state_size),
+        delta_(_delta_size), delta_integrated_(_delta_size),
+        data_(_data_size)
 {
     //
 }
 
-template<class MotionDeltaType>
-inline ProcessorMotion<MotionDeltaType>::~ProcessorMotion()
+
+inline ProcessorMotion::~ProcessorMotion()
 {
     //
 }
 
-template<class MotionDeltaType>
-inline void ProcessorMotion<MotionDeltaType>::process(CaptureBase* _incoming_ptr)
+
+inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
-    incoming_ptr_ = (CaptureMotion2<MotionDeltaType>*)(_incoming_ptr);
+    incoming_ptr_ = (CaptureMotion2*)(_incoming_ptr);
 
     integrate();
 
@@ -266,19 +267,19 @@ inline void ProcessorMotion<MotionDeltaType>::process(CaptureBase* _incoming_ptr
     }
 }
 
-template<class MotionDeltaType>
-inline void ProcessorMotion<MotionDeltaType>::init(CaptureBase* _origin_ptr)
+
+inline void ProcessorMotion::init(CaptureBase* _origin_ptr)
 {
-    origin_ptr_ = (CaptureMotion2<MotionDeltaType>*)_origin_ptr;
-    last_ptr_ = (CaptureMotion2<MotionDeltaType>*)_origin_ptr;
+    origin_ptr_ = (CaptureMotion2*)_origin_ptr;
+    last_ptr_ = (CaptureMotion2*)_origin_ptr;
     incoming_ptr_ = nullptr;
     delta_integrated_ = deltaZero();
     getBufferPtr()->clear();
     getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
 }
 
-template<class MotionDeltaType>
-inline void ProcessorMotion<MotionDeltaType>::reset(const TimeStamp& _ts)
+
+inline void ProcessorMotion::reset(const TimeStamp& _ts)
 {
     // TODO what to do?
     //cut the buffer in 2 parts at _ts
@@ -286,8 +287,8 @@ inline void ProcessorMotion<MotionDeltaType>::reset(const TimeStamp& _ts)
     // Create a
 }
 
-template<class MotionDeltaType>
-inline void ProcessorMotion<MotionDeltaType>::makeKeyFrame(const TimeStamp& _ts)
+
+inline void ProcessorMotion::makeKeyFrame(const TimeStamp& _ts)
 {
     //TODO: see how to adapt this code from ProcessorTracker::makeKeyFrame(void)
     // Create a new non-key Frame in the Trajectory with the incoming Capture
@@ -297,61 +298,61 @@ inline void ProcessorMotion<MotionDeltaType>::makeKeyFrame(const TimeStamp& _ts)
     last_ptr_->getFramePtr()->setKey();
 }
 
-template<class MotionDeltaType>
-inline bool ProcessorMotion<MotionDeltaType>::voteForKeyFrame()
+
+inline bool ProcessorMotion::voteForKeyFrame()
 {
     return false;
 }
 
-template<class MotionDeltaType>
-inline Eigen::VectorXs ProcessorMotion<MotionDeltaType>::state(const TimeStamp& _ts)
+
+inline Eigen::VectorXs ProcessorMotion::state(const TimeStamp& _ts)
 {
     state(_ts, x_);
     return x_;
 }
 
-template<class MotionDeltaType>
-inline void ProcessorMotion<MotionDeltaType>::state(const TimeStamp& _ts, Eigen::VectorXs& _x)
+
+inline void ProcessorMotion::state(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(_ts), _x);
 }
 
-template<class MotionDeltaType>
-inline const Eigen::VectorXs ProcessorMotion<MotionDeltaType>::state()
+
+inline const Eigen::VectorXs ProcessorMotion::state()
 {
     state(x_);
     return x_;
 }
 
-template<class MotionDeltaType>
-inline const void ProcessorMotion<MotionDeltaType>::state(Eigen::VectorXs& _x)
+
+inline const void ProcessorMotion::state(Eigen::VectorXs& _x)
 {
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(), _x);
 }
 
-template<class MotionDeltaType>
-inline void ProcessorMotion<MotionDeltaType>::deltaState(const TimeStamp& _t1, const TimeStamp& _t2,
-                                                          MotionDeltaType& _Delta)
+
+inline void ProcessorMotion::deltaState(const TimeStamp& _t1, const TimeStamp& _t2,
+                                                          Eigen::VectorXs& _Delta)
 {
     deltaMinusDelta(getBufferPtr()->getDelta(_t2), getBufferPtr()->getDelta(_t2), _Delta);
 }
 
-template<class MotionDeltaType>
-inline const MotionDeltaType& ProcessorMotion<MotionDeltaType>::deltaState() const
+
+inline const Eigen::VectorXs& ProcessorMotion::deltaState() const
 {
     return getBufferPtr()->getDelta();
 }
 
-template<class MotionDeltaType>
-inline void ProcessorMotion<MotionDeltaType>::sumDeltas(CaptureMotion2<MotionDeltaType>* _cap1_ptr,
-                                                         CaptureMotion2<MotionDeltaType>* _cap2_ptr,
-                                                         MotionDeltaType& _delta1_plus_delta2)
+
+inline void ProcessorMotion::sumDeltas(CaptureMotion2* _cap1_ptr,
+                                                         CaptureMotion2* _cap2_ptr,
+                                                         Eigen::VectorXs& _delta1_plus_delta2)
 {
     deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
 }
 
-template<class MotionDeltaType>
-inline void ProcessorMotion<MotionDeltaType>::integrate()
+
+inline void ProcessorMotion::integrate()
 {
     // Set dt
     updateDt();
@@ -363,20 +364,20 @@ inline void ProcessorMotion<MotionDeltaType>::integrate()
     getBufferPtr()->pushBack(incoming_ptr_->getTimeStamp(), delta_integrated_);
 }
 
-template<class MotionDeltaType>
-inline void ProcessorMotion<MotionDeltaType>::updateDt()
+
+inline void ProcessorMotion::updateDt()
 {
     dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->getTimeStamp();
 }
 
-template<class MotionDeltaType>
-inline const MotionBuffer<MotionDeltaType>* ProcessorMotion<MotionDeltaType>::getBufferPtr() const
+
+inline const MotionBuffer* ProcessorMotion::getBufferPtr() const
 {
     return last_ptr_->getBufferPtr();
 }
 
-template<class MotionDeltaType>
-inline MotionBuffer<MotionDeltaType>* ProcessorMotion<MotionDeltaType>::getBufferPtr()
+
+inline MotionBuffer* ProcessorMotion::getBufferPtr()
 {
     return last_ptr_->getBufferPtr();
 }
