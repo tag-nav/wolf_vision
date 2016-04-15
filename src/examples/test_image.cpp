@@ -86,9 +86,35 @@ int main(int argc, char** argv)
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
 
+    unsigned int img_width;
+    unsigned int img_height;
+
+    unsigned int f = 0;
+    const char * filename;
+    if (argc == 1)
+    {
+        filename = "/home/jtarraso/Vídeos/House interior.mp4";
+        img_width = 640;
+        img_height = 360;
+    }
+    else
+    {
+        if (argv[0] == "0")
+        {
+            // camera
+            img_width = 640;
+            img_height = 480;
+        }
+        else
+        {
+            filename = argv[1];
+            img_width = 640;
+            img_height = 360;
+        }
+    }
+    std::cout << "Input video file: " << filename << std::endl;
+
     TimeStamp t = 1;
-    unsigned int img_width = 640;
-    unsigned int img_height = 360;
 
     Eigen::Vector4s k = {320,240,320,320};
     StateBlock* intr = new StateBlock(k,false);
@@ -110,19 +136,16 @@ int main(int argc, char** argv)
     ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,9,9,4,20,30,40,0,0.2f,10);
     sen_cam_->addProcessor(p_brisk);
 
-
-    unsigned int f = 0;
-    const char * filename;
-    if (argc == 1)
-        filename = "/home/jtarraso/Vídeos/House interior.mp4";
-    else
-        filename = argv[1];
-
-    std::cout << "Input video file: " << filename << std::endl;
-
-    //const char * filename = "/home/jtarraso/Descargas/gray.mp4";
     cv::VideoCapture capture(filename);
-    //cv::VideoCapture capture(0);
+    if(!capture.isOpened())  // check if we succeeded
+    {
+        std::cout << "failed" << std::endl;
+    }
+    else
+    {
+        std::cout << "succeded" << std::endl;
+    }
+
     cv::Mat frame;
 
     capture.set(CV_CAP_PROP_POS_MSEC, 3000);
@@ -140,6 +163,9 @@ int main(int argc, char** argv)
 
         capture >> frame;
 
+        if(!frame.empty())
+        {
+
         if (f>1){ // check if consecutive images are different
             WolfScalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
             std::cout << "test_image: Image increment: " << diff << std::endl;
@@ -152,6 +178,11 @@ int main(int argc, char** argv)
 //        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
         last_frame = frame.clone();
+        }
+        else
+        {
+            cv::waitKey(2000);
+        }
     }
 
     wolf_problem_->destruct();

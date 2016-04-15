@@ -187,7 +187,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
 
-        assureRoi(roi);
+        //assureRoi(roi);
 
         std::cout << "roi - X: " << roi.x << std::endl;
         std::cout << "roi - Y: " << roi.y << std::endl;
@@ -265,7 +265,6 @@ void ProcessorBrisk::assureRoi(cv::Rect& _roi)
 
 void ProcessorBrisk::inflateRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
 {
-    //unsigned int min_dist = 2;
     int inflation_rate = 5;
 
     //cv::Rect _inflated_roi;
@@ -282,7 +281,6 @@ void ProcessorBrisk::inflateRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _
     assureRoi(_roi);
 
     _image_roi = _image(_roi);
-    //_image_roi.adjustROI();
 }
 
 // draw functions ===================================================================
