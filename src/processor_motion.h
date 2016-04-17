@@ -256,9 +256,8 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 inline void ProcessorMotion::reset(const TimeStamp& _ts)
 {
     // TODO what to do?
-    //cut the buffer in 2 parts at _ts
-    // create a new Capture for the future
-    // Create a
+    // change API to: void reset(CaptureMotion*)
+    // cut the buffer in 2 parts at _ts: use MotionBuffer::split()
 }
 
 
