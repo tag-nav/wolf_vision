@@ -94,6 +94,7 @@ inline StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed, LocalPa
 inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParametrizationBase* _local_param_ptr) :
         state_(_size), fixed_(_fixed), local_param_ptr_(_local_param_ptr)
 {
+    state_.setZero();
     //
 }
 
