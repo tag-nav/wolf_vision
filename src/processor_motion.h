@@ -29,10 +29,15 @@ class ProcessorMotion : public ProcessorBase
 
         // Instructions to the processor:
 
-        virtual void init(CaptureBase* _origin_ptr);
         virtual void process(CaptureBase* _incoming_ptr);
         void reset(const TimeStamp& _ts);
-        void makeKeyFrame(const TimeStamp& _ts);
+
+        void makeFrame(CaptureBase* _capture_ptr)
+        {
+            // We need to create the new free Frame to hold what will become the last Capture
+            FrameBase* new_frame_ptr = getWolfProblem()->createFrame(NON_KEY_FRAME, _capture_ptr->getTimeStamp());
+            new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
+        }
 
         // Queries to the processor:
 
@@ -73,6 +78,15 @@ class ProcessorMotion : public ProcessorBase
          */
         void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr,
                        Eigen::VectorXs& _delta1_plus_delta2);
+
+        void setOrigin(const Eigen::VectorXs& _x_origin, CaptureMotion2* _origin_ptr)
+        {
+            origin_ptr_ = _origin_ptr;
+            if (origin_ptr_->getFramePtr() == nullptr)
+                makeFrame(origin_ptr_);
+            origin_ptr_->getFramePtr()->setKey();
+            origin_ptr_->getFramePtr()->setState(_x_origin);
+        }
 
         // Helper functions:
     protected:
@@ -178,6 +192,9 @@ class ProcessorMotion : public ProcessorBase
         Eigen::VectorXs delta_, delta_integrated_; ///< current delta and integrated deltas
         Eigen::VectorXs data_; ///< current data
 
+    private:
+        unsigned int count_;
+
 };
 
 
@@ -202,27 +219,37 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
     incoming_ptr_ = (CaptureMotion2*)(_incoming_ptr);
 
-    integrate();
-
-    if (voteForKeyFrame() && permittedKeyFrame())
+    if (last_ptr_ == nullptr)
     {
-        // TODO:
-        // Make KeyFrame
-        //        makeKeyFrame();
-        // Reset the Tracker
-        //        reset();
+        // first time
+        count_ = 1;
+        last_ptr_ = incoming_ptr_;
+
+        // Make keyframe
+        if (last_ptr_->getFramePtr() == nullptr)
+            makeFrame(last_ptr_);
+        last_ptr_->getFramePtr()->setKey();
+
+        delta_integrated_ = deltaZero();
+        getBufferPtr()->clear();
+        getBufferPtr()->pushBack(_incoming_ptr->getTimeStamp(), delta_integrated_);
+        integrate();
+        count_++;
     }
+    else
+    {
+        if(count_ == 2)
+        {
+            // second time only
+            last_ptr_ = incoming_ptr_;
+
+            // make non-key frame
+            makeFrame(last_ptr_);
+        }
+        // second and other times
+        integrate();
+        count_ ++;
 }
-
-
-inline void ProcessorMotion::init(CaptureBase* _origin_ptr)
-{
-    origin_ptr_ = (CaptureMotion2*)_origin_ptr;
-    last_ptr_ = (CaptureMotion2*)_origin_ptr;
-    incoming_ptr_ = nullptr;
-    delta_integrated_ = deltaZero();
-    getBufferPtr()->clear();
-    getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
 }
 
 
@@ -232,17 +259,6 @@ inline void ProcessorMotion::reset(const TimeStamp& _ts)
     //cut the buffer in 2 parts at _ts
     // create a new Capture for the future
     // Create a
-}
-
-
-inline void ProcessorMotion::makeKeyFrame(const TimeStamp& _ts)
-{
-    //TODO: see how to adapt this code from ProcessorTracker::makeKeyFrame(void)
-    // Create a new non-key Frame in the Trajectory with the incoming Capture
-    getWolfProblem()->createFrame(NON_KEY_FRAME, state(_ts), _ts);
-    getWolfProblem()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
-    // Make the last Capture's Frame a KeyFrame so that it gets into the solver
-    last_ptr_->getFramePtr()->setKey();
 }
 
 
