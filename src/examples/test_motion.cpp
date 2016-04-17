@@ -55,7 +55,7 @@ int main()
 
 
     // Build Wolf tree
-    WolfProblem problem_(FRM_PO_3D);
+    WolfProblem* problem_ = new WolfProblem(FRM_PO_3D);
 
     // create sensor
     SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
@@ -63,13 +63,13 @@ int main()
     // Make a ProcessorOdom3d
     ProcessorOdom3d* odom3d_ptr = new ProcessorOdom3d(dt);
     sensor_ptr->addProcessor(odom3d_ptr);
-    problem_.addSensor(sensor_ptr);
+
+    problem_->addSensor(sensor_ptr);
 
     odom3d_ptr->setOrigin(x0, new CaptureOdom3D(dt, sensor_ptr, Eigen::VectorXs::Zero(6)));
 
     std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
-
 
     // New Capture
     CaptureMotion2* cap_ptr = new CaptureOdom3D(t, sensor_ptr, data);

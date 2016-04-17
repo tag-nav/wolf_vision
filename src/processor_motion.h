@@ -221,6 +221,16 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 
     if (last_ptr_ == nullptr)
     {
+
+        // old init()
+        //        origin_ptr_ = (CaptureMotion2*)_origin_ptr;
+        //        last_ptr_ = (CaptureMotion2*)_origin_ptr;
+        //        incoming_ptr_ = nullptr;
+        //        delta_integrated_ = deltaZero();
+        //        getBufferPtr()->clear();
+        //        getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
+
+
         // first time
         count_ = 1;
         last_ptr_ = incoming_ptr_;
