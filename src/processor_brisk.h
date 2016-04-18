@@ -75,8 +75,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         std::list<FeaturePointImage*> tracker_features_;
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
-        unsigned int img_width_;
-        unsigned int img_height_;
+        int img_width_;
+        int img_height_;
         unsigned int detector_separation_;
     public:
         ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols,

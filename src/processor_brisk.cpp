@@ -191,15 +191,15 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
             }
 
             unsigned int lowestHD = 600;
-            unsigned int row = 0;
-            for(unsigned int i = 0; i < candidate_descriptors.rows; i++)
+            //unsigned int row = 0;
+            for(int i = 0; i < candidate_descriptors.rows; i++)
             {
                 double dist = cv::norm( feature_ptr->getDescriptor(), candidate_descriptors.row(i), cv::NORM_HAMMING);
                 std::cout << "====================================================dist[" << i << "]: " << dist << std::endl;
                 if(dist < lowestHD)
                 {
                     lowestHD = dist;
-                    row = i;
+                    //row = i;
                 }
             }
 
@@ -306,7 +306,7 @@ void ProcessorBrisk::drawRoiLastFrame(cv::Mat _image, std::list<cv::Rect> _roi_l
 {
     for (auto roi : _roi_list)
     {
-        cv::Rect s = roi;
+        //cv::Rect s = roi;
         //std::cout << "roi furthest position: " << s.y + s.width << std::endl;
         cv::rectangle(_image, roi, cv::Scalar(88.0, 70.0, 254.0), 1, 8, 0);
     }
