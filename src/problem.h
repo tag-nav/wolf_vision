@@ -1,4 +1,4 @@
-#ifndef WOLF_PROBLEM_H_
+#ifndef PROBLEM_H_
 #define PROBLEM_H_
 
 // Fwd refs
@@ -30,7 +30,7 @@ namespace wolf {
  * - up_node_: A regular pointer to a derived node object, specified by the template parameter UpperType.
  *
  */
-class WolfProblem : public NodeBase
+class Problem : public NodeBase
 {
     public:
         typedef NodeBase* LowerNodePtr; // Necessatry for destruct() of node_linked
@@ -54,14 +54,14 @@ class WolfProblem : public NodeBase
         /** \brief Constructor from frame structure
          *
          */
-        WolfProblem(FrameStructure _frame_structure);
+        Problem(FrameStructure _frame_structure);
 
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          */
-        virtual ~WolfProblem();
+        virtual ~Problem();
 
         /** \brief Wolf destructor
          *
@@ -209,7 +209,7 @@ class WolfProblem : public NodeBase
 
         /** \brief get top node
          */
-        virtual WolfProblem* getWolfProblem();
+        virtual Problem* getWolfProblem();
 
         /** \brief Returns a true (is top)
          */
@@ -230,27 +230,27 @@ class WolfProblem : public NodeBase
 namespace wolf
 {
 
-inline std::list<Scalar*>* WolfProblem::getStateBlockRemoveList()
+inline std::list<Scalar*>* Problem::getStateBlockRemoveList()
 {
     return &state_block_remove_list_;
 }
 
-inline std::list<ConstraintBase*>* WolfProblem::getConstraintAddList()
+inline std::list<ConstraintBase*>* Problem::getConstraintAddList()
 {
     return &constraint_add_list_;
 }
 
-inline std::list<unsigned int>* WolfProblem::getConstraintRemoveList()
+inline std::list<unsigned int>* Problem::getConstraintRemoveList()
 {
     return &constraint_remove_list_;
 }
 
-inline WolfProblem* WolfProblem::getWolfProblem()
+inline Problem* Problem::getWolfProblem()
 {
     return this;
 }
 
-inline bool WolfProblem::isTop()
+inline bool Problem::isTop()
 {
     return true;
 }

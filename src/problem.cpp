@@ -10,7 +10,7 @@
 namespace wolf
 {
 
-WolfProblem::WolfProblem(FrameStructure _frame_structure) :
+Problem::Problem(FrameStructure _frame_structure) :
         NodeBase("WOLF_PROBLEM"), //
         location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(
                 new HardwareBase), processor_motion_ptr_(nullptr)
@@ -20,7 +20,7 @@ WolfProblem::WolfProblem(FrameStructure _frame_structure) :
     hardware_ptr_->linkToUpperNode(this);
 }
 
-WolfProblem::~WolfProblem()
+Problem::~Problem()
 {
     //std::cout << "deleting wolf problem " << nodeId() << std::endl;
     state_block_add_list_.clear();
@@ -35,22 +35,22 @@ WolfProblem::~WolfProblem()
     hardware_ptr_->destruct();
 }
 
-void WolfProblem::destruct()
+void Problem::destruct()
 {
     delete this;
 }
 
-void WolfProblem::addSensor(SensorBase* _sen_ptr)
+void Problem::addSensor(SensorBase* _sen_ptr)
 {
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-void WolfProblem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
+void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
 {
     processor_motion_ptr_ = _processor_motion_ptr;
 }
 
-FrameBase* WolfProblem::createFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
+FrameBase* Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
 {
     switch (trajectory_ptr_->getFrameStructure())
     {
@@ -78,7 +78,7 @@ FrameBase* WolfProblem::createFrame(FrameType _frame_type, const TimeStamp& _tim
     return trajectory_ptr_->getLastFramePtr();
 }
 
-FrameBase* WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
+FrameBase* Problem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
                                     const TimeStamp& _time_stamp)
 {
     //std::cout << "creating new frame..." << std::endl;
@@ -124,7 +124,7 @@ FrameBase* WolfProblem::createFrame(FrameType _frame_type, const Eigen::VectorXs
     return trajectory_ptr_->getLastFramePtr();
 }
 
-void WolfProblem::getCurrentState(Eigen::VectorXs& state)
+void Problem::getCurrentState(Eigen::VectorXs& state)
 {
     if (processor_motion_ptr_ != nullptr)
         processor_motion_ptr_->state(state);
@@ -132,7 +132,7 @@ void WolfProblem::getCurrentState(Eigen::VectorXs& state)
         throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
 }
 
-Eigen::VectorXs WolfProblem::getCurrentState()
+Eigen::VectorXs Problem::getCurrentState()
 {
     if (processor_motion_ptr_ != nullptr)
         return processor_motion_ptr_->state();
@@ -140,7 +140,7 @@ Eigen::VectorXs WolfProblem::getCurrentState()
         throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
 }
 
-void WolfProblem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
+void Problem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
 {
     if (processor_motion_ptr_ != nullptr)
         processor_motion_ptr_->state(_ts, state);
@@ -148,7 +148,7 @@ void WolfProblem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& sta
         throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
 }
 
-Eigen::VectorXs WolfProblem::getStateAtTimeStamp(const TimeStamp& _ts)
+Eigen::VectorXs Problem::getStateAtTimeStamp(const TimeStamp& _ts)
 {
     if (processor_motion_ptr_ != nullptr)
         return processor_motion_ptr_->state(_ts);
@@ -156,22 +156,22 @@ Eigen::VectorXs WolfProblem::getStateAtTimeStamp(const TimeStamp& _ts)
         throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
 }
 
-bool WolfProblem::permitKeyFrame(ProcessorBase* _processor_ptr)
+bool Problem::permitKeyFrame(ProcessorBase* _processor_ptr)
 {
     return true;
 }
 
-void WolfProblem::addLandmark(LandmarkBase* _lmk_ptr)
+void Problem::addLandmark(LandmarkBase* _lmk_ptr)
 {
     getMapPtr()->addLandmark(_lmk_ptr);
 }
 
-void WolfProblem::addLandmarkList(LandmarkBaseList _lmk_list)
+void Problem::addLandmarkList(LandmarkBaseList _lmk_list)
 {
     getMapPtr()->addLandmarkList(_lmk_list);
 }
 
-void WolfProblem::addStateBlockPtr(StateBlock* _state_ptr)
+void Problem::addStateBlockPtr(StateBlock* _state_ptr)
 {
     // add the state unit to the list
     state_block_ptr_list_.push_back(_state_ptr);
@@ -179,13 +179,13 @@ void WolfProblem::addStateBlockPtr(StateBlock* _state_ptr)
     state_block_add_list_.push_back(_state_ptr);
 }
 
-void WolfProblem::updateStateBlockPtr(StateBlock* _state_ptr)
+void Problem::updateStateBlockPtr(StateBlock* _state_ptr)
 {
     // queue for solver manager
     state_block_update_list_.push_back(_state_ptr);
 }
 
-void WolfProblem::removeStateBlockPtr(StateBlock* _state_ptr)
+void Problem::removeStateBlockPtr(StateBlock* _state_ptr)
 {
     // add the state unit to the list
     state_block_ptr_list_.remove(_state_ptr);
@@ -193,24 +193,24 @@ void WolfProblem::removeStateBlockPtr(StateBlock* _state_ptr)
     state_block_remove_list_.push_back(_state_ptr->getPtr());
 }
 
-void WolfProblem::addConstraintPtr(ConstraintBase* _constraint_ptr)
+void Problem::addConstraintPtr(ConstraintBase* _constraint_ptr)
 {
     // queue for solver manager
     constraint_add_list_.push_back(_constraint_ptr);
 }
 
-void WolfProblem::removeConstraintPtr(ConstraintBase* _constraint_ptr)
+void Problem::removeConstraintPtr(ConstraintBase* _constraint_ptr)
 {
     // queue for solver manager
     constraint_remove_list_.push_back(_constraint_ptr->nodeId());
 }
 
-void WolfProblem::clearCovariance()
+void Problem::clearCovariance()
 {
     covariances_.clear();
 }
 
-void WolfProblem::addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov)
+void Problem::addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov)
 {
     assert(_state1->getSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
     assert(_state2->getSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
@@ -218,7 +218,7 @@ void WolfProblem::addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, c
     covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)] = _cov;
 }
 
-bool WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block)
+bool Problem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block)
 {
     if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
         _cov_block = covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)];
@@ -230,7 +230,7 @@ bool WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, E
     return true;
 }
 
-bool WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
+bool Problem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
                                      const int _col)
 {
     //std::cout << "entire cov " << std::endl << _cov << std::endl;
@@ -253,50 +253,50 @@ bool WolfProblem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, E
     return true;
 }
 
-void WolfProblem::addMap(MapBase* _map_ptr)
+void Problem::addMap(MapBase* _map_ptr)
 {
     // TODO: not necessary but update map maybe..
     map_ptr_ = _map_ptr;
     map_ptr_->linkToUpperNode(this);
 }
 
-void WolfProblem::addTrajectory(TrajectoryBase* _trajectory_ptr)
+void Problem::addTrajectory(TrajectoryBase* _trajectory_ptr)
 {
     trajectory_ptr_ = _trajectory_ptr;
     trajectory_ptr_->linkToUpperNode(this);
 }
 
-MapBase* WolfProblem::getMapPtr()
+MapBase* Problem::getMapPtr()
 {
     return map_ptr_;
 }
 
-TrajectoryBase* WolfProblem::getTrajectoryPtr()
+TrajectoryBase* Problem::getTrajectoryPtr()
 {
     return trajectory_ptr_;
 }
 
-HardwareBase* WolfProblem::getHardwarePtr()
+HardwareBase* Problem::getHardwarePtr()
 {
     return hardware_ptr_;
 }
 
-FrameBase* WolfProblem::getLastFramePtr()
+FrameBase* Problem::getLastFramePtr()
 {
     return trajectory_ptr_->getLastFramePtr();
 }
 
-StateBlockList* WolfProblem::getStateListPtr()
+StateBlockList* Problem::getStateListPtr()
 {
     return &state_block_ptr_list_;
 }
 
-std::list<StateBlock*>* WolfProblem::getStateBlockAddList()
+std::list<StateBlock*>* Problem::getStateBlockAddList()
 {
     return &state_block_add_list_;
 }
 
-std::list<StateBlock*>* WolfProblem::getStateBlockUpdateList()
+std::list<StateBlock*>* Problem::getStateBlockUpdateList()
 {
     return &state_block_update_list_;
 }

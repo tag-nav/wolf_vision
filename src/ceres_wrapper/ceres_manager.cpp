@@ -2,7 +2,7 @@
 
 namespace wolf {
 
-CeresManager::CeresManager(WolfProblem*  _wolf_problem, ceres::Problem::Options _options) :
+CeresManager::CeresManager(Problem*  _wolf_problem, ceres::Problem::Options _options) :
     ceres_problem_(new ceres::Problem(_options)),
     wolf_problem_(_wolf_problem)
 {

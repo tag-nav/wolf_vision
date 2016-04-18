@@ -40,7 +40,7 @@ class WolfManager
 {
     protected:
         //sets the problem 
-        WolfProblem* problem_;
+        Problem* problem_;
 
         //pointer to a sensor providing predictions
         SensorBase* sensor_prior_;
@@ -83,7 +83,7 @@ class WolfManager
 
         Eigen::VectorXs getVehiclePose(const TimeStamp& _now = 0);
 
-        WolfProblem* getProblemPtr();
+        Problem* getProblemPtr();
 
         void setWindowSize(const unsigned int& _size);
 

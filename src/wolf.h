@@ -260,7 +260,7 @@ typedef enum
 // - forwards for pointers
 
 class NodeTerminus;
-class WolfProblem;
+class Problem;
 class MapBase;
 class LandmarkBase;
 class LandmarkCorner2D;
@@ -282,7 +282,7 @@ class StateBlock;
 // TODO: No seria millor que cada classe es defineixi aquests typedefs?
 
 //Problem
-typedef WolfProblem* WolfProblemPtr;
+typedef Problem* WolfProblemPtr;
 
 //Map
 typedef std::list<MapBase*> MapBaseList;

@@ -3,7 +3,7 @@
 
 // Fwd references
 namespace wolf{
-class WolfProblem;
+class Problem;
 }
 
 // Wolf includes

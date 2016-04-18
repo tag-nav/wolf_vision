@@ -9,7 +9,7 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
                          const Eigen::MatrixXs& _prior_cov,
                          const unsigned int& _trajectory_size,
                          const Scalar& _new_frame_elapsed_time) :
-        problem_(new WolfProblem(_frame_structure)),
+        problem_(new Problem(_frame_structure)),
         sensor_prior_(_sensor_prior_ptr),
         current_frame_(nullptr),
         last_key_frame_(nullptr),
@@ -218,7 +218,7 @@ Eigen::VectorXs WolfManager::getVehiclePose(const TimeStamp& _now)
 }
 
 
-WolfProblem* WolfManager::getProblemPtr()
+Problem* WolfManager::getProblemPtr()
 {
     return problem_;
 }
