@@ -79,12 +79,7 @@ class ProcessorMotion : public ProcessorBase
         virtual void process(CaptureBase* _incoming_ptr);
         void reset(const TimeStamp& _ts);
 
-        void makeFrame(CaptureBase* _capture_ptr)
-        {
-            // We need to create the new free Frame to hold what will become the last Capture
-            FrameBase* new_frame_ptr = getWolfProblem()->createFrame(NON_KEY_FRAME, _capture_ptr->getTimeStamp());
-            new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
-        }
+        void makeFrame(CaptureBase* _capture_ptr, FrameType _type = NON_KEY_FRAME);
 
         // Queries to the processor:
 
@@ -126,14 +121,12 @@ class ProcessorMotion : public ProcessorBase
         void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr,
                        Eigen::VectorXs& _delta1_plus_delta2);
 
-        void setOrigin(const Eigen::VectorXs& _x_origin, CaptureMotion2* _origin_ptr)
-        {
-            origin_ptr_ = _origin_ptr;
-            if (origin_ptr_->getFramePtr() == nullptr)
-                makeFrame(origin_ptr_);
-            origin_ptr_->getFramePtr()->setKey();
-            origin_ptr_->getFramePtr()->setState(_x_origin);
-        }
+        /** Set the origin of all motion for this processor
+         * \param _x_origin the state at the origin
+         * \param _origin_ptr pointer to a Capture in the origin.
+         *        This can be any type of Capture, derived from CaptureBase.
+         */
+        void setOrigin(const Eigen::VectorXs& _x_origin, CaptureBase* _origin_ptr);
 
         // Helper functions:
     protected:
@@ -268,16 +261,6 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 
     if (last_ptr_ == nullptr)
     {
-
-        // old init()
-        //        origin_ptr_ = (CaptureMotion2*)_origin_ptr;
-        //        last_ptr_ = (CaptureMotion2*)_origin_ptr;
-        //        incoming_ptr_ = nullptr;
-        //        delta_integrated_ = deltaZero();
-        //        getBufferPtr()->clear();
-        //        getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
-
-
         // first time
         count_ = 1;
         last_ptr_ = incoming_ptr_;
@@ -285,7 +268,6 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
         // Make keyframe
         if (last_ptr_->getFramePtr() == nullptr)
             makeFrame(last_ptr_);
-        last_ptr_->getFramePtr()->setKey();
 
         delta_integrated_ = deltaZero();
         getBufferPtr()->clear();
@@ -317,6 +299,12 @@ inline void ProcessorMotion::reset(const TimeStamp& _ts)
     // cut the buffer in 2 parts at _ts: use MotionBuffer::split()
 }
 
+inline void ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
+{
+    // We need to create the new free Frame to hold what will become the last Capture
+    FrameBase* new_frame_ptr = getWolfProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
+    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
+}
 
 inline bool ProcessorMotion::voteForKeyFrame()
 {
@@ -370,6 +358,15 @@ inline void ProcessorMotion::sumDeltas(CaptureMotion2* _cap1_ptr,
     deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
 }
 
+inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, CaptureBase* _origin_ptr)
+{
+    origin_ptr_ = _origin_ptr;
+    if (origin_ptr_->getFramePtr() == nullptr)
+        makeFrame(origin_ptr_, KEY_FRAME);
+    else
+        origin_ptr_->getFramePtr()->setKey();
+    origin_ptr_->getFramePtr()->setState(_x_origin);
+}
 
 inline void ProcessorMotion::integrate()
 {
