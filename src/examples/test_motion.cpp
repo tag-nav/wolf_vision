@@ -8,6 +8,7 @@
 // Classes under test
 #include "processor_odom_3D.h"
 #include "capture_odom_3D.h"
+#include "wolf_problem.h"
 
 // Wolf includes
 #include "state_block.h"
@@ -33,43 +34,55 @@ int main()
     t = t0;
     WolfScalar dt = .01;
 
+    // Origin frame:
+    Eigen::Vector3s pos(2,2,0);
+    Eigen::Quaternions quat(Eigen::AngleAxiss(3.1416/4, Eigen::Vector3s(0,0,1)));
+    Eigen::Vector7s x0;
+    x0 << pos, quat.coeffs();
+
+
     // robot state blocks: origin
-    StateBlock sb_pos(Eigen::Vector3s::Zero());
-    StateQuaternion sb_ori(Eigen::Quaternions::Identity().coeffs());
+    StateBlock sb_pos(pos);
+    StateQuaternion sb_ori(quat);
 
-    // sensor state blocks: the same as robot
+    // sensor state blocks: the same as robot, plus intrinsic:
     StateBlock sb_intr(Eigen::VectorXs::Zero(0));
-
-    // create sensor
-    SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
 
     // motion data
     Eigen::VectorXs data(6);
     data << 1, 0, 0,   // advance 1m
-            0, 0, 0.1; // turn 0.1 rad (aprox 6 deg)
+            0, 0, 3.1416/4; // 45 deg
 
 
-    std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
-    std::cout << "Motion data  : " << data.transpose() << std::endl;
+    // Build Wolf tree
+    WolfProblem* problem_ = new WolfProblem(FRM_PO_3D);
 
-    FrameBase* frm_ptr = new FrameBase(t, &sb_pos, &sb_ori);
-    CaptureMotion2* cap_ptr = new CaptureOdom3D(t, sensor_ptr, data);
-    frm_ptr->addCapture(cap_ptr);
+    // create sensor
+    SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
 
     // Make a ProcessorOdom3d
     ProcessorOdom3d* odom3d_ptr = new ProcessorOdom3d(dt);
     sensor_ptr->addProcessor(odom3d_ptr);
-    odom3d_ptr->init(cap_ptr);
+
+    problem_->addSensor(sensor_ptr);
+
+    odom3d_ptr->setOrigin(x0, new CaptureOdom3D(dt, sensor_ptr, Eigen::VectorXs::Zero(6)));
+
+    std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
+    std::cout << "Motion data  : " << data.transpose() << std::endl;
+
+    // New Capture
+    CaptureMotion2* cap_ptr = new CaptureOdom3D(t, sensor_ptr, data);
 
     std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
 
-    std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->state().transpose() << std::endl;
-    for (int i = 1; i <= 5; i++)
+    for (int i = 0; i <= 8; i++)
     {
-        t += dt;
-        cap_ptr->setTimeStamp(t);
         odom3d_ptr->process(cap_ptr);
         std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->state().transpose() << std::endl;
+
+        t += dt;
+        cap_ptr->setTimeStamp(t);
     }
 
     std::cout << "\nQuery states at asynchronous time values..." << std::endl;
@@ -77,12 +90,16 @@ int main()
     t = t0;
     WolfScalar dt_2 = dt/2;
     dt = 0.0045; // new dt
-    for (int i = 1; i <= 20; i++)
+    for (int i = 1; i <= 25; i++)
     {
         std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t+dt_2).transpose() << std::endl;
         t += dt;
     }
     std::cout << "       ^^^^^^^   After the last time-stamp the buffer keeps returning the last member." << std::endl;
+
+
+
+
 
 
 

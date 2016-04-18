@@ -36,6 +36,7 @@ inline StateQuaternion::StateQuaternion(const Eigen::VectorXs _state, bool _fixe
 inline StateQuaternion::StateQuaternion(bool _fixed) :
         StateBlock(4, _fixed, new LocalParametrizationQuaternion)
 {
+    state_ = Eigen::Quaternions::Identity().coeffs();
     //
 }
 

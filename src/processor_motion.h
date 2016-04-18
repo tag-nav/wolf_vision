@@ -18,6 +18,53 @@
 namespace wolf {
 
 /** \brief class for Motion processors
+ *
+ * This processor integrates motion data into vehicle states.
+ *
+ * The motion data is provided by the sensor owning this processor.
+ * This data is, in the general case, in the reference frame of the sensor, while the integrated motion refers to the robot frame.
+ *
+ * The reference frame convention used are specified as follows.
+ *   - The robot state R is expressed in a global or 'Map' reference frame, named M.
+ *   - The sensor frame S is expressed wrt the robot frame R.
+ *
+ * This processor, therefore, needs to convert the motion data in two ways:
+ *   - First, convert the format of this data into a delta-state.
+ *     A delta-state is an expression of a state increment that can be treated
+ *     algebraically together with states (operations sum (+) for an additive composition,
+ *     and substract (-) for the reverse).
+ *   - Second, it needs to be converted from the Sensor frame to the Robot frame: R <-- S:
+ *
+ *       delta_R = fromSensorFrame(delta_S) : this transforms delta_S from frame S to frame R.
+ *   - The two operations are performed by the pure virtual method data2delta(). A possible implementation
+ *     of data2delta() could be (we use the data member delta_ as the return value):
+ *
+ * \code
+ *     void data2delta(const VectorXs _data)
+ *     {
+ *          delta_S = format(_data);
+ *          delta_R = fromSensorFrame(delta_S);
+ *          delta_  = delta_R;
+ *     }
+ * \endcode
+ *
+ *     where format() is any code you need to format the data into a delta form,
+ *     and fromSensorFrame() is explained below.
+ *
+ * Only when the motion delta is expressed in the robot frame R, we can integrate it
+ * on top of the current Robot frame: R <-- R (+) delta_R
+ *
+ *     <code>    xPlusDelta(R_old, delta_R, R_new) </code>
+ *
+ * Defining (or not) fromSensorFrame():
+ *
+ * In most cases, one will be interested in avoiding the fromSensorFrame() issue.
+ * This can be trivially done by defining the Robot frame precisely at the Sensor frame,
+ * so that S is the identity. In this case, fromSensorFrame() does nothing and delta_R = delta_S.
+ * This class does not declare any prototype for fromSensorFrame().
+ * In cases where this identification is not possible, or not desired,
+ * classes deriving from this class will have to implement fromSensorFrame(),
+ * and call it within data2delta(), or write the frame transformation code directly in data2delta().
  */
 class ProcessorMotion : public ProcessorBase
 {
@@ -29,10 +76,10 @@ class ProcessorMotion : public ProcessorBase
 
         // Instructions to the processor:
 
-        virtual void init(CaptureBase* _origin_ptr);
         virtual void process(CaptureBase* _incoming_ptr);
         void reset(const TimeStamp& _ts);
-        void makeKeyFrame(const TimeStamp& _ts);
+
+        void makeFrame(CaptureBase* _capture_ptr, FrameType _type = NON_KEY_FRAME);
 
         // Queries to the processor:
 
@@ -73,6 +120,13 @@ class ProcessorMotion : public ProcessorBase
          */
         void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr,
                        Eigen::VectorXs& _delta1_plus_delta2);
+
+        /** Set the origin of all motion for this processor
+         * \param _x_origin the state at the origin
+         * \param _origin_ptr pointer to a Capture in the origin.
+         *        This can be any type of Capture, derived from CaptureBase.
+         */
+        void setOrigin(const Eigen::VectorXs& _x_origin, CaptureBase* _origin_ptr = nullptr);
 
         // Helper functions:
     protected:
@@ -167,7 +221,7 @@ class ProcessorMotion : public ProcessorBase
         size_t x_size_;    ///< The size of the state vector
         size_t delta_size_;
         size_t data_size_; ///< the size of the incoming data
-        CaptureMotion2* origin_ptr_;
+        CaptureBase* origin_ptr_;
         CaptureMotion2* last_ptr_;
         CaptureMotion2* incoming_ptr_;
 
@@ -177,6 +231,9 @@ class ProcessorMotion : public ProcessorBase
         Eigen::VectorXs x_; ///< state temporary
         Eigen::VectorXs delta_, delta_integrated_; ///< current delta and integrated deltas
         Eigen::VectorXs data_; ///< current data
+
+    private:
+        unsigned int count_;
 
 };
 
@@ -202,49 +259,52 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
     incoming_ptr_ = (CaptureMotion2*)(_incoming_ptr);
 
-    integrate();
-
-    if (voteForKeyFrame() && permittedKeyFrame())
+    if (last_ptr_ == nullptr)
     {
-        // TODO:
-        // Make KeyFrame
-        //        makeKeyFrame();
-        // Reset the Tracker
-        //        reset();
+        // first time
+        count_ = 1;
+        last_ptr_ = incoming_ptr_;
+
+        // Make keyframe
+        if (last_ptr_->getFramePtr() == nullptr)
+            makeFrame(last_ptr_);
+
+        delta_integrated_ = deltaZero();
+        getBufferPtr()->clear();
+        getBufferPtr()->pushBack(_incoming_ptr->getTimeStamp(), delta_integrated_);
+        integrate();
+        count_++;
     }
+    else
+    {
+        if(count_ == 2)
+        {
+            // second time only
+            last_ptr_ = incoming_ptr_;
+
+            // make non-key frame
+            makeFrame(last_ptr_);
+        }
+        // second and other times
+        integrate();
+        count_ ++;
 }
-
-
-inline void ProcessorMotion::init(CaptureBase* _origin_ptr)
-{
-    origin_ptr_ = (CaptureMotion2*)_origin_ptr;
-    last_ptr_ = (CaptureMotion2*)_origin_ptr;
-    incoming_ptr_ = nullptr;
-    delta_integrated_ = deltaZero();
-    getBufferPtr()->clear();
-    getBufferPtr()->pushBack(_origin_ptr->getTimeStamp(), delta_integrated_);
 }
 
 
 inline void ProcessorMotion::reset(const TimeStamp& _ts)
 {
     // TODO what to do?
-    //cut the buffer in 2 parts at _ts
-    // create a new Capture for the future
-    // Create a
+    // change API to: void reset(CaptureMotion*)
+    // cut the buffer in 2 parts at _ts: use MotionBuffer::split()
 }
 
-
-inline void ProcessorMotion::makeKeyFrame(const TimeStamp& _ts)
+inline void ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
 {
-    //TODO: see how to adapt this code from ProcessorTracker::makeKeyFrame(void)
-    // Create a new non-key Frame in the Trajectory with the incoming Capture
-    getWolfProblem()->createFrame(NON_KEY_FRAME, state(_ts), _ts);
-    getWolfProblem()->getLastFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
-    // Make the last Capture's Frame a KeyFrame so that it gets into the solver
-    last_ptr_->getFramePtr()->setKey();
+    // We need to create the new free Frame to hold what will become the last Capture
+    FrameBase* new_frame_ptr = getWolfProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
+    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
 }
-
 
 inline bool ProcessorMotion::voteForKeyFrame()
 {
@@ -298,6 +358,15 @@ inline void ProcessorMotion::sumDeltas(CaptureMotion2* _cap1_ptr,
     deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
 }
 
+inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, CaptureBase* _origin_ptr)
+{
+    origin_ptr_ = _origin_ptr;
+    if (origin_ptr_->getFramePtr() == nullptr)
+        makeFrame(origin_ptr_, KEY_FRAME);
+    else
+        origin_ptr_->getFramePtr()->setKey();
+    origin_ptr_->getFramePtr()->setState(_x_origin);
+}
 
 inline void ProcessorMotion::integrate()
 {
