@@ -101,25 +101,31 @@ int main()
 
 
     // Split the buffer
-    MotionBuffer other_buffer;
+    MotionBuffer oldest_buffer;
 
     std::cout << "\nSplitting the buffer!\n---------------------" << std::endl;
-    std::cout << "Original buffer:         ";
+    std::cout << "Original buffer:         < ";
     for (const auto &s : cap_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
-    std::cout << std::endl;
+    std::cout << ">" << std::endl;
 
     TimeStamp t_split = t0 + 0.033;
-    std::cout << "Split time:              " << t_split - t0 << std::endl;
+    std::cout << "Split time:                " << t_split - t0 << std::endl;
 
-    cap_ptr->getBufferPtr()->split(t_split, other_buffer);
+    cap_ptr->getBufferPtr()->split(t_split, oldest_buffer);
 
-    std::cout << "New buffer: oldest part: ";
-    for (const auto &s : other_buffer.getContainer() ) std::cout << s.ts_ - t0 << ' ';
-    std::cout << std::endl;
+    std::cout << "New buffer: oldest part: < ";
+    for (const auto &s : oldest_buffer.getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    std::cout << ">" << std::endl;
 
-    std::cout << "Original split buffer:   ";
+    std::cout << "Original split buffer:   < ";
     for (const auto &s : cap_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
-    std::cout << std::endl;
+    std::cout << ">" << std::endl;
+
+    std::cout << "All in one row:          < ";
+    for (const auto &s : oldest_buffer.getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    std::cout << "> " << t_split - t0 << " < ";
+    for (const auto &s : cap_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    std::cout << ">" << std::endl;
 
 
 
