@@ -13,7 +13,7 @@ SensorGPSFix::~SensorGPSFix()
     //
 }
 
-WolfScalar SensorGPSFix::getNoise() const
+Scalar SensorGPSFix::getNoise() const
 {
     return noise_std_(0);
 }

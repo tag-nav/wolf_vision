@@ -96,7 +96,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Returns a vector of pointers to the state blocks in which this constraint depends
          *
          **/
-        virtual const std::vector<WolfScalar*> getStateBlockPtrVector();
+        virtual const std::vector<Scalar*> getStateBlockPtrVector();
 
         /** \brief Returns a vector of pointers to the states
          *

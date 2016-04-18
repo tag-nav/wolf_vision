@@ -8,8 +8,8 @@ WolfManager::WolfManager(const FrameStructure _frame_structure,
                          const Eigen::VectorXs& _prior,
                          const Eigen::MatrixXs& _prior_cov,
                          const unsigned int& _trajectory_size,
-                         const WolfScalar& _new_frame_elapsed_time) :
-        problem_(new WolfProblem(_frame_structure)),
+                         const Scalar& _new_frame_elapsed_time) :
+        problem_(new Problem(_frame_structure)),
         sensor_prior_(_sensor_prior_ptr),
         current_frame_(nullptr),
         last_key_frame_(nullptr),
@@ -218,7 +218,7 @@ Eigen::VectorXs WolfManager::getVehiclePose(const TimeStamp& _now)
 }
 
 
-WolfProblem* WolfManager::getProblemPtr()
+Problem* WolfManager::getProblemPtr()
 {
     return problem_;
 }
@@ -230,7 +230,7 @@ void WolfManager::setWindowSize(const unsigned int& _size)
 }
 
 
-void WolfManager::setNewFrameElapsedTime(const WolfScalar& _dt)
+void WolfManager::setNewFrameElapsedTime(const Scalar& _dt)
 {
     new_frame_elapsed_time_ = _dt;
 }

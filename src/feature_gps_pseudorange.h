@@ -18,10 +18,10 @@ class FeatureGPSPseudorange : public FeatureBase
 {
 protected:
     Eigen::Vector3s sat_position_;
-    WolfScalar pseudorange_;
+    Scalar pseudorange_;
 
 public:
-    FeatureGPSPseudorange(Eigen::Vector3s& _sat_position, WolfScalar _pseudorange, WolfScalar _covariance);
+    FeatureGPSPseudorange(Eigen::Vector3s& _sat_position, Scalar _pseudorange, Scalar _covariance);
 
     /** \brief Default destructor (not recommended)
      *
@@ -32,7 +32,7 @@ public:
 
     const Eigen::Vector3s & getSatPosition() const;
 
-    WolfScalar getPseudorange() const;
+    Scalar getPseudorange() const;
 
 };
 

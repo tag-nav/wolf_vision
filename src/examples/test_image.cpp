@@ -121,7 +121,7 @@ int main(int argc, char** argv)
     SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero()), intr,img_width,img_height);
 
 
-    WolfProblem* wolf_problem_ = new WolfProblem(FRM_PO_3D);
+    Problem* wolf_problem_ = new Problem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
 
 //    ImageTrackerParameters tracker_params;

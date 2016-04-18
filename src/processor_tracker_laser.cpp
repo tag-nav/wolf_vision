@@ -38,7 +38,7 @@ unsigned int ProcessorTrackerLaser::findLandmarks(LandmarkBaseList& _landmark_li
     if (!new_features_incoming_.empty())
     {
         //local declarations
-        WolfScalar prob, dm2;
+        Scalar prob, dm2;
         unsigned int ii, jj;
         // COMPUTING ALL EXPECTED FEATURES
         std::map<LandmarkBase*, Eigen::Vector4s> expected_features;
@@ -140,11 +140,11 @@ void ProcessorTrackerLaser::extractCorners(const CaptureLaser2D* _capture_laser_
         measurement(2) = corner.orientation_;
         measurement(3) = corner.aperture_;
         // TODO: maybe in line object?
-        WolfScalar L1 = corner.line_1_.length();
-        WolfScalar L2 = corner.line_2_.length();
-        WolfScalar cov_angle_line1 = 12 * corner.line_1_.error_
+        Scalar L1 = corner.line_1_.length();
+        Scalar L2 = corner.line_2_.length();
+        Scalar cov_angle_line1 = 12 * corner.line_1_.error_
                 / (pow(L1, 2) * (pow(corner.line_1_.np_, 3) - pow(corner.line_1_.np_, 2)));
-        WolfScalar cov_angle_line2 = 12 * corner.line_2_.error_
+        Scalar cov_angle_line2 = 12 * corner.line_2_.error_
                 / (pow(L2, 2) * (pow(corner.line_2_.np_, 3) - pow(corner.line_2_.np_, 2)));
         //init cov in corner coordinates
         measurement_cov << corner.line_1_.error_ + cov_angle_line1 * L1 * L1 / 4, 0, 0, 0, 0, corner.line_2_.error_
@@ -190,7 +190,7 @@ void ProcessorTrackerLaser::expectedFeature(LandmarkBase* _landmark_ptr, Eigen::
     {
         // Jacobian
         Eigen::Vector2s p_robot_landmark = t_world_robot_.head(2) - _landmark_ptr->getPPtr()->getVector();
-        Eigen::Matrix<WolfScalar, 3, 6> Jlr = Eigen::Matrix<WolfScalar, 3, 6>::Zero();
+        Eigen::Matrix<Scalar, 3, 6> Jlr = Eigen::Matrix<Scalar, 3, 6>::Zero();
         Jlr.block<3, 3>(0, 3) = -R_world_sensor_.transpose();
         Jlr.block<3, 3>(0, 3) = R_world_sensor_.transpose();
         Jlr(0, 2) = -p_robot_landmark(0) * sin(t_world_sensor_(2)) + p_robot_landmark(1) * cos(t_world_sensor_(2));
@@ -210,7 +210,7 @@ Eigen::VectorXs ProcessorTrackerLaser::computeSquaredMahalanobisDistances(const 
 {
 
     const Eigen::Vector2s& p_feature = _feature_ptr->getMeasurement().head(2);
-    const WolfScalar& o_feature = _feature_ptr->getMeasurement()(2);
+    const Scalar& o_feature = _feature_ptr->getMeasurement()(2);
     // ------------------------ d
     Eigen::Vector3s d;
     d.head(2) = p_feature - _expected_feature.head(2);

@@ -158,7 +158,7 @@ class NodeLinked : public NodeBase
          * 
          * TODO: Review if it could return a pointer to a derived class instead of NodeBase JVN: I tried to do so...
          **/
-        virtual WolfProblem* getWolfProblem();
+        virtual Problem* getWolfProblem();
 
     protected:
 
@@ -173,7 +173,7 @@ class NodeLinked : public NodeBase
 // Include header files of forward-declared classes derived from NodeLinked -- this avoids loop dependencies
 // See this evil ugly solution improved in note 8) of http://www.cplusplus.com/forum/articles/10627/
 // This implies including here ALL the base classes in the Wolf tree!
-#include "wolf_problem.h"
+#include "problem.h"
 #include "hardware_base.h"
 #include "sensor_base.h"
 #include "processor_base.h"
@@ -360,7 +360,7 @@ inline void NodeLinked<UpperType, LowerType>::unlinkDownNode(const LowerNodeIter
 }
 
 template<class UpperType, class LowerType>
-WolfProblem* NodeLinked<UpperType, LowerType>::getWolfProblem()
+Problem* NodeLinked<UpperType, LowerType>::getWolfProblem()
 {
     if (up_node_ptr_ != nullptr)
         return up_node_ptr_->getWolfProblem();
