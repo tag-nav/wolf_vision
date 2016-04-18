@@ -70,11 +70,11 @@ class ProcessorPreintegratedIMU : public ProcessorMotion2{
     private:
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
         ///< (first-order propagation from *measurementCovariance*).
-        Eigen::Matrix<WolfScalar,9,9> preint_meas_cov_;
+        Eigen::Matrix<Scalar,9,9> preint_meas_cov_;
 
         ///Jacobians
-        Eigen::Matrix<WolfScalar,9,3> preintegrated_H_biasAcc_;
-        Eigen::Matrix<WolfScalar,9,3> preintegrated_H_biasOmega_;
+        Eigen::Matrix<Scalar,9,3> preintegrated_H_biasAcc_;
+        Eigen::Matrix<Scalar,9,3> preintegrated_H_biasOmega_;
 
 };
 

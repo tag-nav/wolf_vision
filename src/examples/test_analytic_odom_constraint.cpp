@@ -20,10 +20,10 @@
 
 namespace wolf {
 // inserts the sparse matrix 'ins' into the sparse matrix 'original' in the place given by 'row' and 'col' integers
-void insertSparseBlock(const Eigen::SparseMatrix<WolfScalar>& ins, Eigen::SparseMatrix<WolfScalar>& original, const unsigned int& row, const unsigned int& col)
+void insertSparseBlock(const Eigen::SparseMatrix<Scalar>& ins, Eigen::SparseMatrix<Scalar>& original, const unsigned int& row, const unsigned int& col)
 {
   for (int k=0; k<ins.outerSize(); ++k)
-    for (Eigen::SparseMatrix<WolfScalar>::InnerIterator iti(ins,k); iti; ++iti)
+    for (Eigen::SparseMatrix<Scalar>::InnerIterator iti(ins,k); iti; ++iti)
       original.coeffRef(iti.row() + row, iti.col() + col) = iti.value();
 
   original.makeCompressed();
@@ -59,8 +59,8 @@ int main(int argc, char** argv)
     std::map<unsigned int, FrameBase*> index_2_frame_ptr_analytic;
 
     // Wolf problem
-    WolfProblem* wolf_problem_autodiff = new WolfProblem(FRM_PO_2D);
-    WolfProblem* wolf_problem_analytic = new WolfProblem(FRM_PO_2D);
+    Problem* wolf_problem_autodiff = new Problem(FRM_PO_2D);
+    Problem* wolf_problem_analytic = new Problem(FRM_PO_2D);
     SensorBase* sensor = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
     // Ceres wrapper

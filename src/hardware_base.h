@@ -4,7 +4,7 @@
 // Fwd dependencies
 namespace wolf{
 class SensorBase;
-class WolfProblem;
+class Problem;
 }
 
 //Wolf includes
@@ -14,7 +14,7 @@ class WolfProblem;
 namespace wolf {
 
 //class HardwareBase
-class HardwareBase : public NodeLinked<WolfProblem, SensorBase>
+class HardwareBase : public NodeLinked<Problem, SensorBase>
 {
     public:
         HardwareBase();

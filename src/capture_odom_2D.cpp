@@ -98,7 +98,7 @@ void CaptureOdom2D::integrateCapture(CaptureMotion* _new_capture)
 
 CaptureOdom2D* CaptureOdom2D::interpolateCapture(const TimeStamp& _ts)
 {
-    WolfScalar ratio = (_ts.get() - this->time_stamp_.get()) / (this->final_time_stamp_.get() - this->time_stamp_.get());
+    Scalar ratio = (_ts.get() - this->time_stamp_.get()) / (this->final_time_stamp_.get() - this->time_stamp_.get());
 
     // Second part
     CaptureOdom2D* second_odom_ptr = new CaptureOdom2D(_ts, final_time_stamp_, sensor_ptr_, data_ * (1-ratio), data_covariance_ * (1-ratio));

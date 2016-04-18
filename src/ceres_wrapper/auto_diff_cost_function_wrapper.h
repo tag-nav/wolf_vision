@@ -17,7 +17,7 @@ class AutoDiffCostFunctionWrapperBase : public ceres::SizedCostFunction<MEASUREM
                                                              BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                                              BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE>
 {
-    typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE +
+    typedef ceres::Jet<Scalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE +
                                    BLOCK_5_SIZE + BLOCK_6_SIZE + BLOCK_7_SIZE + BLOCK_8_SIZE + BLOCK_9_SIZE> WolfJet;
 
     protected:
@@ -164,7 +164,7 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,0>
 {
-    typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE +
+    typedef ceres::Jet<Scalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE +
                                    BLOCK_5_SIZE + BLOCK_6_SIZE + BLOCK_7_SIZE + BLOCK_8_SIZE> WolfJet;
 
     protected:
@@ -302,7 +302,7 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,0,0>
 {
-    typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE +
+    typedef ceres::Jet<Scalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE +
                                    BLOCK_5_SIZE + BLOCK_6_SIZE + BLOCK_7_SIZE> WolfJet;
 
     protected:
@@ -433,7 +433,7 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                BLOCK_5_SIZE,BLOCK_6_SIZE,0,0,0>
 {
-    typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE +
+    typedef ceres::Jet<Scalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE +
                                    BLOCK_5_SIZE + BLOCK_6_SIZE> WolfJet;
 
     protected:
@@ -557,7 +557,7 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                BLOCK_5_SIZE,0,0,0,0>
 {
-    typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE +
+    typedef ceres::Jet<Scalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE +
                                    BLOCK_5_SIZE> WolfJet;
 
     protected:
@@ -672,7 +672,7 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,
                                0,0,0,0,0>
 {
-    typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE> WolfJet;
+    typedef ceres::Jet<Scalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE + BLOCK_4_SIZE> WolfJet;
 
     protected:
         ConstraintType* constraint_ptr_;
@@ -778,7 +778,7 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,0,
                                0,0,0,0,0>
 {
-    typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE> WolfJet;
+    typedef ceres::Jet<Scalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE + BLOCK_3_SIZE> WolfJet;
 
     protected:
         ConstraintType* constraint_ptr_;
@@ -874,7 +874,7 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,0,0,
                                0,0,0,0,0>
 {
-    typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE> WolfJet;
+    typedef ceres::Jet<Scalar, BLOCK_0_SIZE + BLOCK_1_SIZE + BLOCK_2_SIZE> WolfJet;
 
     protected:
         ConstraintType* constraint_ptr_;
@@ -965,7 +965,7 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                BLOCK_0_SIZE,BLOCK_1_SIZE,0,0,0,
                                0,0,0,0,0>
 {
-    typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE + BLOCK_1_SIZE> WolfJet;
+    typedef ceres::Jet<Scalar, BLOCK_0_SIZE + BLOCK_1_SIZE> WolfJet;
 
     protected:
         ConstraintType* constraint_ptr_;
@@ -1048,7 +1048,7 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
                                BLOCK_0_SIZE,0,0,0,0,
                                0,0,0,0,0>
 {
-    typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE> WolfJet;
+    typedef ceres::Jet<Scalar, BLOCK_0_SIZE> WolfJet;
 
     protected:
         ConstraintType* constraint_ptr_;

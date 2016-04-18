@@ -41,9 +41,9 @@ namespace wolf {
 
 
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level
-const WolfScalar MAX_ACCEPTED_APERTURE_DIFF = 20.0*M_PI/180.; //20 degrees
-const WolfScalar CONTAINER_WIDTH = 2.44;
-const WolfScalar CONTAINER_LENGTH = 12.20;
+const Scalar MAX_ACCEPTED_APERTURE_DIFF = 20.0*M_PI/180.; //20 degrees
+const Scalar CONTAINER_WIDTH = 2.44;
+const Scalar CONTAINER_LENGTH = 12.20;
 
 
 

@@ -41,7 +41,7 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
         SensorBase* getSensorPtr();
 
-        //virtual void newKeyFrameCallback(FrameBase* _new_key_frame_ptr, const WolfScalar& _time_tolerance) = 0;
+        //virtual void newKeyFrameCallback(FrameBase* _new_key_frame_ptr, const Scalar& _time_tolerance) = 0;
 
     private:
         ProcessorType type_;

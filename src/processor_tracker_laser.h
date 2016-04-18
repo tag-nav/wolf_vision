@@ -26,10 +26,10 @@ namespace wolf
 {
 
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level
-const WolfScalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
-const WolfScalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
-const WolfScalar position_error_th_ = 1;
-const WolfScalar min_features_ratio_th_ = 0.5;
+const Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
+const Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
+const Scalar position_error_th_ = 1;
+const Scalar min_features_ratio_th_ = 0.5;
 
 class ProcessorTrackerLaser : public ProcessorTrackerLandmark
 {

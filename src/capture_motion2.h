@@ -16,6 +16,7 @@
 #include <list>
 #include <algorithm>
 #include <iterator>
+#include <utility>
 
 namespace wolf {
 
@@ -38,9 +39,6 @@ namespace wolf {
 
 class CaptureMotion2 : public CaptureBase
 {
-        // member types: Motion and MotionBuffer
-    public:
-
         // public interface:
     public:
         CaptureMotion2(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :

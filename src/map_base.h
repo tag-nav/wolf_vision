@@ -4,7 +4,7 @@
 
 // Fwd refs
 namespace wolf{
-class WolfProblem;
+class Problem;
 class LandmarkBase;
 }
 
@@ -17,7 +17,7 @@ class LandmarkBase;
 namespace wolf {
 
 //class MapBase
-class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
+class MapBase : public NodeLinked<Problem,LandmarkBase>
 {
     public:
         MapBase();

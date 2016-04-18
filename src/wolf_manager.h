@@ -13,7 +13,7 @@
 #include "constraint_odom_2D.h"
 #include "trajectory_base.h"
 #include "map_base.h"
-#include "wolf_problem.h"
+#include "problem.h"
 
 //std includes
 #include <cstdlib>
@@ -40,7 +40,7 @@ class WolfManager
 {
     protected:
         //sets the problem 
-        WolfProblem* problem_;
+        Problem* problem_;
 
         //pointer to a sensor providing predictions
         SensorBase* sensor_prior_;
@@ -55,7 +55,7 @@ class WolfManager
 
         //Manager parameters
         unsigned int trajectory_size_;
-        WolfScalar new_frame_elapsed_time_;
+        Scalar new_frame_elapsed_time_;
 
     public:
         WolfManager(const FrameStructure _frame_structure,
@@ -63,7 +63,7 @@ class WolfManager
                     const Eigen::VectorXs& _prior,
                     const Eigen::MatrixXs& _prior_cov,
                     const unsigned int& _trajectory_size = 10,
-                    const WolfScalar& _new_frame_elapsed_time = 0.1);
+                    const Scalar& _new_frame_elapsed_time = 0.1);
 
         virtual ~WolfManager();
 
@@ -83,11 +83,11 @@ class WolfManager
 
         Eigen::VectorXs getVehiclePose(const TimeStamp& _now = 0);
 
-        WolfProblem* getProblemPtr();
+        Problem* getProblemPtr();
 
         void setWindowSize(const unsigned int& _size);
 
-        void setNewFrameElapsedTime(const WolfScalar& _dt);
+        void setNewFrameElapsedTime(const Scalar& _dt);
 };
 
 } // namespace wolf

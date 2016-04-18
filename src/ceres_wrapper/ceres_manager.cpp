@@ -2,7 +2,7 @@
 
 namespace wolf {
 
-CeresManager::CeresManager(WolfProblem*  _wolf_problem, ceres::Problem::Options _options) :
+CeresManager::CeresManager(Problem*  _wolf_problem, ceres::Problem::Options _options) :
     ceres_problem_(new ceres::Problem(_options)),
     wolf_problem_(_wolf_problem)
 {
@@ -155,7 +155,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         // STORE DESIRED COVARIANCES
         for (unsigned int i = 0; i < double_pairs.size(); i++)
         {
-            Eigen::Matrix<WolfScalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> cov(state_block_pairs[i].first->getSize(),state_block_pairs[i].second->getSize());
+            Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> cov(state_block_pairs[i].first->getSize(),state_block_pairs[i].second->getSize());
             covariance_->GetCovarianceBlock(double_pairs[i].first, double_pairs[i].second, cov.data());
             //std::cout << "getted covariance " << std::endl << cov << std::endl;
             wolf_problem_->addCovarianceBlock(state_block_pairs[i].first, state_block_pairs[i].second, cov);
