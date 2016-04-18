@@ -298,11 +298,12 @@ inline void ProcessorMotion::reset(const TimeStamp& _ts)
     // cut the buffer in 2 parts at _ts: use MotionBuffer::split()
 }
 
-inline void ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
+inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
     FrameBase* new_frame_ptr = getWolfProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
+    return new_frame_ptr;
 }
 
 inline bool ProcessorMotion::voteForKeyFrame()
