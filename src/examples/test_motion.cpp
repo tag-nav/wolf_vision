@@ -8,7 +8,7 @@
 // Classes under test
 #include "processor_odom_3D.h"
 #include "capture_odom_3D.h"
-#include "wolf_problem.h"
+#include "problem.h"
 
 // Wolf includes
 #include "state_block.h"
@@ -55,7 +55,7 @@ int main()
 
 
     // Build Wolf tree
-    WolfProblem* problem_ = new WolfProblem(FRM_PO_3D);
+    Problem* problem_ = new Problem(FRM_PO_3D);
 
     // create sensor
     SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
