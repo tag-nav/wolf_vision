@@ -73,11 +73,11 @@ int main(int argc, char** argv)
 
     // INITIALIZATION ============================================================================================
     //init random generators
-    WolfScalar odom_std_factor = 0.5;
-    WolfScalar gps_std = 1;
+    Scalar odom_std_factor = 0.5;
+    Scalar gps_std = 1;
     std::default_random_engine generator(1);
-    std::normal_distribution<WolfScalar> distribution_odom(0.0, odom_std_factor); //odometry noise
-    std::normal_distribution<WolfScalar> distribution_gps(0.0, gps_std); //GPS noise
+    std::normal_distribution<Scalar> distribution_odom(0.0, odom_std_factor); //odometry noise
+    std::normal_distribution<Scalar> distribution_gps(0.0, gps_std); //GPS noise
 
     //init google log
     //google::InitGoogleLogging(argv[0]);
@@ -295,7 +295,7 @@ int main(int argc, char** argv)
 //        std::vector<double> landmark_vector;
 //        for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
 //        {
-//            WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
+//            Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
 //            landmark_vector.push_back(*position_ptr); //x
 //            landmark_vector.push_back(*(position_ptr + 1)); //y
 //            landmark_vector.push_back(0.2); //z
@@ -348,7 +348,7 @@ int main(int argc, char** argv)
 //    std::vector<double> landmark_vector;
 //    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
 //    {
-//        WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
+//        Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
 //        landmark_vector.push_back(*position_ptr); //x
 //        landmark_vector.push_back(*(position_ptr + 1)); //y
 //        landmark_vector.push_back(0.2); //z

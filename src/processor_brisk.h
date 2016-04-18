@@ -46,7 +46,7 @@ struct ImageTrackerParameters
         }descriptor;
         struct Matcher
         {
-                WolfScalar max_similarity_distance; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
+                Scalar max_similarity_distance; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
         }matcher;
         struct Adtive_search
         {

@@ -98,7 +98,7 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          * 
          * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
          **/
-        WolfScalar getDescriptor(unsigned int _ii) const;
+        Scalar getDescriptor(unsigned int _ii) const;
 
         /** \brief Return the type of the landmark
          **/
@@ -149,7 +149,7 @@ inline void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)
     descriptor_ = _descriptor;
 }
 
-inline WolfScalar LandmarkBase::getDescriptor(unsigned int _ii) const
+inline Scalar LandmarkBase::getDescriptor(unsigned int _ii) const
 {
     return descriptor_(_ii);
 }

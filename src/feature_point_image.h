@@ -63,8 +63,8 @@ class FeaturePointImage : public FeatureBase
         void setIsKnown(bool _is_known);
 
         Eigen::VectorXs & getMeasurement(){
-            measurement_(0) = WolfScalar(keypoint_.pt.x);
-            measurement_(1) = WolfScalar(keypoint_.pt.y);
+            measurement_(0) = Scalar(keypoint_.pt.x);
+            measurement_(1) = Scalar(keypoint_.pt.y);
             return measurement_;
         }
 

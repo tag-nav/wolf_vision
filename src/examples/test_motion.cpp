@@ -8,7 +8,7 @@
 // Classes under test
 #include "processor_odom_3D.h"
 #include "capture_odom_3D.h"
-#include "wolf_problem.h"
+#include "problem.h"
 
 // Wolf includes
 #include "state_block.h"
@@ -32,7 +32,7 @@ int main()
     TimeStamp t0, t;
     t0.setToNow();
     t = t0;
-    WolfScalar dt = .01;
+    Scalar dt = .01;
 
     // Origin frame:
     Eigen::Vector3s pos(2,2,0);
@@ -54,19 +54,20 @@ int main()
             0, 0, 3.1416/4; // 45 deg
 
 
-    // Build Wolf tree
-    WolfProblem* problem_ = new WolfProblem(FRM_PO_3D);
+    // Create Wolf tree nodes
+    Problem* problem_ = new Problem(FRM_PO_3D);
 
-    // create sensor
     SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
 
-    // Make a ProcessorOdom3d
     ProcessorOdom3d* odom3d_ptr = new ProcessorOdom3d(dt);
+
+    // Assemble Wolf tree by linking the nodes
     sensor_ptr->addProcessor(odom3d_ptr);
 
     problem_->addSensor(sensor_ptr);
 
-    odom3d_ptr->setOrigin(x0, new CaptureOdom3D(dt, sensor_ptr, Eigen::VectorXs::Zero(6)));
+    // Initialize
+    odom3d_ptr->setOrigin(x0, new CaptureOdom3D(dt, sensor_ptr));
 
     std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
@@ -88,7 +89,7 @@ int main()
     std::cout << "\nQuery states at asynchronous time values..." << std::endl;
 
     t = t0;
-    WolfScalar dt_2 = dt/2;
+    Scalar dt_2 = dt/2;
     dt = 0.0045; // new dt
     for (int i = 1; i <= 25; i++)
     {
@@ -108,15 +109,15 @@ int main()
 
     std::cout << "\n\nTrying a std::map as the buffer container <-- NOT WORKING: need exact key" << std::endl;
 
-    WolfScalar x;
-    std::map<TimeStamp, WolfScalar> buffer_map;
+    Scalar x;
+    std::map<TimeStamp, Scalar> buffer_map;
     t.set(0);
     x = 0;
     for (double i = 1; i<=10; i++)
     {
         t.set(i/5);
         x++;
-        buffer_map.insert(std::pair<TimeStamp,WolfScalar>(t,x));
+        buffer_map.insert(std::pair<TimeStamp,Scalar>(t,x));
         std::cout << "insert (ts,x) = (" << t.get() << "," << x << ")" << std::endl;
     }
     for (double i = 1; i<=8; i++)
@@ -131,7 +132,7 @@ int main()
 
     std::cout << "\n\nTrying a std::list and std::find_if as the buffer container <-- WORKING: can use comparator '<' for evaluating key" << std::endl;
 
-    typedef std::pair<TimeStamp, WolfScalar> Pair;
+    typedef std::pair<TimeStamp, Scalar> Pair;
     typedef std::list<Pair> PairsList;
 
     PairsList buffer_list;

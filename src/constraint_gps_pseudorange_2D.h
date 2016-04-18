@@ -72,7 +72,7 @@ public:
 
 protected:
     Eigen::Vector3s sat_position_;
-    WolfScalar pseudorange_;
+    Scalar pseudorange_;
 
 };
 

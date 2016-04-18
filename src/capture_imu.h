@@ -14,7 +14,7 @@ class CaptureIMU : public CaptureMotion
 
         CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data);
 
-        CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<WolfScalar,6,3>& _data_covariance);
+        CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance);
 
         /** \brief Default destructor (not recommended)
          *

@@ -4,7 +4,7 @@
 
 // Fwd refs
 namespace wolf{
-class WolfProblem;
+class Problem;
 class FrameBase;
 }
 
@@ -18,11 +18,11 @@ class FrameBase;
 namespace wolf {
 
 //class TrajectoryBase
-class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
+class TrajectoryBase : public NodeLinked<Problem,FrameBase>
 {
     protected:
         FrameStructure frame_structure_; // Defines the structure of the Frames in the Trajectory.
-        // TODO: JVN: No seria millor que aixo ho tingui el wolf_problem o el wolf_manager?
+        // TODO: JVN: No seria millor que aixo ho tingui el problem o el wolf_manager? JS: segurament. Pero fixed_size_ seria una de les opcions de moltes...
         unsigned int fixed_size_; // Limits the number of Frames forming the Trajectory
         
     public:

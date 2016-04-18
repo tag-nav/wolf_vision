@@ -70,7 +70,7 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
          * 
          * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
          **/
-        WolfScalar getMeasurement(unsigned int _ii) const;
+        Scalar getMeasurement(unsigned int _ii) const;
 
         /** \brief Returns a reference to the feature measurement covariance
          **/
@@ -91,7 +91,7 @@ inline CaptureBase* FeatureBase::getCapturePtr() const
     return upperNodePtr();
 }
 
-inline WolfScalar FeatureBase::getMeasurement(unsigned int _ii) const
+inline Scalar FeatureBase::getMeasurement(unsigned int _ii) const
 {
     return measurement_(_ii);
 }
