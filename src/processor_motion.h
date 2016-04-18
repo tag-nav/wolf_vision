@@ -18,6 +18,53 @@
 namespace wolf {
 
 /** \brief class for Motion processors
+ *
+ * This processor integrates motion data into vehicle states.
+ *
+ * The motion data is provided by the sensor owning this processor.
+ * This data is, in the general case, in the reference frame of the sensor, while the integrated motion refers to the robot frame.
+ *
+ * The reference frame convention used are specified as follows.
+ *   - The robot state R is expressed in a global or 'Map' reference frame, named M.
+ *   - The sensor frame S is expressed wrt the robot frame R.
+ *
+ * This processor, therefore, needs to convert the motion data in two ways:
+ *   - First, convert the format of this data into a delta-state.
+ *     A delta-state is an expression of a state increment that can be treated
+ *     algebraically together with states (operations sum (+) for an additive composition,
+ *     and substract (-) for the reverse).
+ *   - Second, it needs to be converted from the Sensor frame to the Robot frame: R <-- S:
+ *
+ *       delta_R = fromSensorFrame(delta_S) : this transforms delta_S from frame S to frame R.
+ *   - The two operations are performed by the pure virtual method data2delta(). A possible implementation
+ *     of data2delta() could be (we use the data member delta_ as the return value):
+ *
+ * \code
+ *     void data2delta(const VectorXs _data)
+ *     {
+ *          delta_S = format(_data);
+ *          delta_R = fromSensorFrame(delta_S);
+ *          delta_  = delta_R;
+ *     }
+ * \endcode
+ *
+ *     where format() is any code you need to format the data into a delta form,
+ *     and fromSensorFrame() is explained below.
+ *
+ * Only when the motion delta is expressed in the robot frame R, we can integrate it
+ * on top of the current Robot frame: R <-- R (+) delta_R
+ *
+ *     <code>    xPlusDelta(R_old, delta_R, R_new) </code>
+ *
+ * Defining (or not) fromSensorFrame():
+ *
+ * In most cases, one will be interested in avoiding the fromSensorFrame() issue.
+ * This can be trivially done by defining the Robot frame precisely at the Sensor frame,
+ * so that S is the identity. In this case, fromSensorFrame() does nothing and delta_R = delta_S.
+ * This class does not declare any prototype for fromSensorFrame().
+ * In cases where this identification is not possible, or not desired,
+ * classes deriving from this class will have to implement fromSensorFrame(),
+ * and call it within data2delta(), or write the frame transformation code directly in data2delta().
  */
 class ProcessorMotion : public ProcessorBase
 {
