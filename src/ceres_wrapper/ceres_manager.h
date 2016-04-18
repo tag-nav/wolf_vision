@@ -41,10 +41,10 @@ class CeresManager
         std::map<unsigned int, ceres::CostFunction*> id_2_costfunction_;
 		ceres::Problem* ceres_problem_;
 		ceres::Covariance* covariance_;
-		WolfProblem* wolf_problem_;
+		Problem* wolf_problem_;
 
 	public:
-		CeresManager(WolfProblem* _wolf_problem, ceres::Problem::Options _options);
+		CeresManager(Problem* _wolf_problem, ceres::Problem::Options _options);
 
 		~CeresManager();
 

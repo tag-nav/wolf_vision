@@ -71,7 +71,7 @@ class ProcessorMotion : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size);
+        ProcessorMotion(ProcessorType _tp, Scalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -172,7 +172,7 @@ class ProcessorMotion : public ProcessorBase
           *
           *  However, other more complicated relations are possible.
           */
-         virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Eigen::VectorXs& _delta) = 0;
+         virtual void data2delta(const Eigen::VectorXs& _data, const Scalar _dt, Eigen::VectorXs& _delta) = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -227,7 +227,7 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         // helpers to avoid allocation
-        WolfScalar dt_; ///< Time step
+        Scalar dt_; ///< Time step
         Eigen::VectorXs x_; ///< state temporary
         Eigen::VectorXs delta_, delta_integrated_; ///< current delta and integrated deltas
         Eigen::VectorXs data_; ///< current data
@@ -238,7 +238,7 @@ class ProcessorMotion : public ProcessorBase
 };
 
 
-inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, WolfScalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size) :
+inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, Scalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size) :
         ProcessorBase(_tp), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size),
         origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
         dt_(_dt), x_(_state_size),

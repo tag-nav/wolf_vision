@@ -32,7 +32,7 @@ template <class ConstraintT,
                 unsigned int BLOCK_9_SIZE = 0>
 class CostFunctionSparseBase : CostFunctionBase
 {
-        typedef ceres::Jet<WolfScalar, BLOCK_0_SIZE +
+        typedef ceres::Jet<Scalar, BLOCK_0_SIZE +
                                        BLOCK_1_SIZE +
                                        BLOCK_2_SIZE +
                                        BLOCK_3_SIZE +

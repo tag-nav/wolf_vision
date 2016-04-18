@@ -14,7 +14,7 @@ FeatureCorner2D::~FeatureCorner2D()
     //
 }
 
-WolfScalar FeatureCorner2D::getAperture() const
+Scalar FeatureCorner2D::getAperture() const
 {
     return measurement_(3);
 }

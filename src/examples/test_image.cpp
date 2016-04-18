@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero()), intr,img_width,img_height);
 
 
-    WolfProblem* wolf_problem_ = new WolfProblem(FRM_PO_3D);
+    Problem* wolf_problem_ = new Problem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
 
 //    ImageTrackerParameters tracker_params;
@@ -141,7 +141,7 @@ int main(int argc, char** argv)
         capture >> frame;
 
         if (f>1){ // check if consecutive images are different
-            WolfScalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
+            Scalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
             std::cout << "test_image: Image increment: " << diff << std::endl;
         }
 

@@ -32,7 +32,7 @@ int main()
     TimeStamp t0, t;
     t0.setToNow();
     t = t0;
-    WolfScalar dt = .01;
+    Scalar dt = .01;
 
     // Origin frame:
     Eigen::Vector3s pos(2,2,0);
@@ -88,7 +88,7 @@ int main()
     std::cout << "\nQuery states at asynchronous time values..." << std::endl;
 
     t = t0;
-    WolfScalar dt_2 = dt/2;
+    Scalar dt_2 = dt/2;
     dt = 0.0045; // new dt
     for (int i = 1; i <= 25; i++)
     {
@@ -108,15 +108,15 @@ int main()
 
     std::cout << "\n\nTrying a std::map as the buffer container <-- NOT WORKING: need exact key" << std::endl;
 
-    WolfScalar x;
-    std::map<TimeStamp, WolfScalar> buffer_map;
+    Scalar x;
+    std::map<TimeStamp, Scalar> buffer_map;
     t.set(0);
     x = 0;
     for (double i = 1; i<=10; i++)
     {
         t.set(i/5);
         x++;
-        buffer_map.insert(std::pair<TimeStamp,WolfScalar>(t,x));
+        buffer_map.insert(std::pair<TimeStamp,Scalar>(t,x));
         std::cout << "insert (ts,x) = (" << t.get() << "," << x << ")" << std::endl;
     }
     for (double i = 1; i<=8; i++)
@@ -131,7 +131,7 @@ int main()
 
     std::cout << "\n\nTrying a std::list and std::find_if as the buffer container <-- WORKING: can use comparator '<' for evaluating key" << std::endl;
 
-    typedef std::pair<TimeStamp, WolfScalar> Pair;
+    typedef std::pair<TimeStamp, Scalar> Pair;
     typedef std::list<Pair> PairsList;
 
     PairsList buffer_list;

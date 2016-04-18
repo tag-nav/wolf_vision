@@ -14,7 +14,7 @@ int main()
 
     std::cout << std::endl << "Eigen Quatenrnion test" << std::endl;
     
-    WolfScalar q1[4]; 
+    Scalar q1[4]; 
     Eigen::Map<Eigen::Quaternions> q1_map(q1);
     
     //try to find out how eigen sorts storage (real part tail or head ? )

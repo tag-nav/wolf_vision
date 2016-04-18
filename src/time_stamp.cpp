@@ -9,14 +9,14 @@ TimeStamp::TimeStamp() :
     setToNow();
 }
 
-TimeStamp::TimeStamp(const WolfScalar _ts) :
+TimeStamp::TimeStamp(const Scalar _ts) :
         time_stamp_(_ts)
 {
     //
 }
 
 TimeStamp::TimeStamp(const unsigned long int _sec, const unsigned long int _nsec) :
-        time_stamp_((WolfScalar)_sec + (WolfScalar)_nsec/(WolfScalar)1e9)
+        time_stamp_((Scalar)_sec + (Scalar)_nsec/(Scalar)1e9)
 {
     //
 }

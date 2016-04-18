@@ -1,5 +1,5 @@
-#ifndef WOLF_PROBLEM_H_
-#define WOLF_PROBLEM_H_
+#ifndef PROBLEM_H_
+#define PROBLEM_H_
 
 // Fwd refs
 namespace wolf{
@@ -30,7 +30,7 @@ namespace wolf {
  * - up_node_: A regular pointer to a derived node object, specified by the template parameter UpperType.
  *
  */
-class WolfProblem : public NodeBase
+class Problem : public NodeBase
 {
     public:
         typedef NodeBase* LowerNodePtr; // Necessatry for destruct() of node_linked
@@ -45,7 +45,7 @@ class WolfProblem : public NodeBase
         StateBlockList state_block_ptr_list_;
         std::list<StateBlock*> state_block_add_list_;
         std::list<StateBlock*> state_block_update_list_;
-        std::list<WolfScalar*> state_block_remove_list_;
+        std::list<Scalar*> state_block_remove_list_;
         std::list<ConstraintBase*> constraint_add_list_;
         std::list<unsigned int> constraint_remove_list_;
 
@@ -54,14 +54,14 @@ class WolfProblem : public NodeBase
         /** \brief Constructor from frame structure
          *
          */
-        WolfProblem(FrameStructure _frame_structure);
+        Problem(FrameStructure _frame_structure);
 
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          */
-        virtual ~WolfProblem();
+        virtual ~Problem();
 
         /** \brief Wolf destructor
          *
@@ -155,10 +155,6 @@ class WolfProblem : public NodeBase
         bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
                                 const int _col);
 
-        /** \brief Gets state size
-         */
-        const unsigned int getStateSize() const;
-
         /** \brief Adds a map
          */
         void addMap(MapBase* _map_ptr);
@@ -201,7 +197,7 @@ class WolfProblem : public NodeBase
 
         /** \brief Gets a queue of state blocks to be removed from the solver
          */
-        std::list<WolfScalar*>* getStateBlockRemoveList();
+        std::list<Scalar*>* getStateBlockRemoveList();
 
         /** \brief Gets a queue of constraint ids to be added in the solver
          */
@@ -213,7 +209,7 @@ class WolfProblem : public NodeBase
 
         /** \brief get top node
          */
-        virtual WolfProblem* getWolfProblem();
+        virtual Problem* getWolfProblem();
 
         /** \brief Returns a true (is top)
          */
@@ -234,27 +230,27 @@ class WolfProblem : public NodeBase
 namespace wolf
 {
 
-inline std::list<WolfScalar*>* WolfProblem::getStateBlockRemoveList()
+inline std::list<Scalar*>* Problem::getStateBlockRemoveList()
 {
     return &state_block_remove_list_;
 }
 
-inline std::list<ConstraintBase*>* WolfProblem::getConstraintAddList()
+inline std::list<ConstraintBase*>* Problem::getConstraintAddList()
 {
     return &constraint_add_list_;
 }
 
-inline std::list<unsigned int>* WolfProblem::getConstraintRemoveList()
+inline std::list<unsigned int>* Problem::getConstraintRemoveList()
 {
     return &constraint_remove_list_;
 }
 
-inline WolfProblem* WolfProblem::getWolfProblem()
+inline Problem* Problem::getWolfProblem()
 {
     return this;
 }
 
-inline bool WolfProblem::isTop()
+inline bool Problem::isTop()
 {
     return true;
 }
@@ -262,4 +258,4 @@ inline bool WolfProblem::isTop()
 } // namespace wolf
 
 
-#endif
+#endif // PROBLEM_H

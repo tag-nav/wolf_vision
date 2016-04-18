@@ -10,7 +10,7 @@
 
 //Wolf
 #include "wolf.h"
-#include "wolf_problem.h"
+#include "problem.h"
 #include "sensor_base.h"
 #include "state_block.h"
 #include "processor_tracker_feature_dummy.h"
@@ -23,7 +23,7 @@ int main()
     std::cout << std::endl << "==================== processor tracker feature test ======================" << std::endl;
 
     // Wolf problem
-    WolfProblem* wolf_problem_ptr_ = new WolfProblem(FRM_PO_2D);
+    Problem* wolf_problem_ptr_ = new Problem(FRM_PO_2D);
     SensorBase* sensor_ptr_ = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)),
                                              new StateBlock(Eigen::VectorXs::Zero(1)),
                                              new StateBlock(Eigen::VectorXs::Zero(2)), 2);

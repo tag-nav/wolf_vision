@@ -33,11 +33,11 @@ namespace wolf {
  *
  * The ONLY exception to this rule is when you need special precision. The ONLY example by now is the time stamp which uses double.
  */
-//typedef float WolfScalar;         // Use this for float, 32 bit precision
-typedef double WolfScalar;        // Use this for double, 64 bit precision
-//typedef long double WolfScalar;   // Use this for long double, 128 bit precision
+//typedef float Scalar;         // Use this for float, 32 bit precision
+typedef double Scalar;        // Use this for double, 64 bit precision
+//typedef long double Scalar;   // Use this for long double, 128 bit precision
 
-namespace WolfConstants{
+namespace Constants{
 
 // Wolf standard tolerance
 const double EPS = 1e-8;
@@ -52,7 +52,7 @@ const double MIN_VARIANCE = 1e-6;
 } // namespace wolf
 
 ///////////////////////////////////////////
-// Construct types for any scalar defined in the typedef WolfScalar above
+// Construct types for any scalar defined in the typedef Scalar above
 ////////////////////////////////////////////
 /** \brief Namespace extending Eigen definitions
  *
@@ -60,34 +60,34 @@ const double MIN_VARIANCE = 1e-6;
  * The appended letter indicating this is 's', so that we have, e.g.,
  * - VectorXf   Vector of floats - defined by Eigen
  * - VectorXd   Vector of doubles - defined by Eigen
- * - VectorXs   Vector of either double of float, depending on the type \b WolfScalar, defined by Wolf.
+ * - VectorXs   Vector of either double of float, depending on the type \b Scalar, defined by Wolf.
  * 
  */
 namespace Eigen  // Eigen namespace extension
 {
 // 1. Vectors and Matrices
-typedef Matrix<wolf::WolfScalar, 2, 2, Eigen::RowMajor> Matrix2s;                ///< 2x2 matrix of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 3, 3, Eigen::RowMajor> Matrix3s;                ///< 3x3 matrix of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 4, 4, Eigen::RowMajor> Matrix4s;                ///< 4x4 matrix of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 7, 7, Eigen::RowMajor> Matrix7s;                ///< 7x7 matrix of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, Dynamic, Dynamic, Eigen::RowMajor> MatrixXs;    ///< variable size matrix of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 1, 1> Vector1s;                ///< 1-vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 2, 1> Vector2s;                ///< 2-vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 3, 1> Vector3s;                ///< 3-vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 4, 1> Vector4s;                ///< 4-vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 6, 1> Vector6s;                ///< 6-vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 7, 1> Vector7s;                ///< 7-vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, Dynamic, 1> VectorXs;          ///< variable size vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 1, 2> RowVector2s;             ///< 2-row-vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 1, 3> RowVector3s;             ///< 3-row-vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 1, 4> RowVector4s;             ///< 4-row-vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 1, 7> RowVector7s;             ///< 7-row-vector of real WolfScalar type
-typedef Matrix<wolf::WolfScalar, 1, Dynamic> RowVectorXs;       ///< variable size row-vector of real WolfScalar type
+typedef Matrix<wolf::Scalar, 2, 2, Eigen::RowMajor> Matrix2s;                ///< 2x2 matrix of real Scalar type
+typedef Matrix<wolf::Scalar, 3, 3, Eigen::RowMajor> Matrix3s;                ///< 3x3 matrix of real Scalar type
+typedef Matrix<wolf::Scalar, 4, 4, Eigen::RowMajor> Matrix4s;                ///< 4x4 matrix of real Scalar type
+typedef Matrix<wolf::Scalar, 7, 7, Eigen::RowMajor> Matrix7s;                ///< 7x7 matrix of real Scalar type
+typedef Matrix<wolf::Scalar, Dynamic, Dynamic, Eigen::RowMajor> MatrixXs;    ///< variable size matrix of real Scalar type
+typedef Matrix<wolf::Scalar, 1, 1> Vector1s;                ///< 1-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 2, 1> Vector2s;                ///< 2-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 3, 1> Vector3s;                ///< 3-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 4, 1> Vector4s;                ///< 4-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 6, 1> Vector6s;                ///< 6-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 7, 1> Vector7s;                ///< 7-vector of real Scalar type
+typedef Matrix<wolf::Scalar, Dynamic, 1> VectorXs;          ///< variable size vector of real Scalar type
+typedef Matrix<wolf::Scalar, 1, 2> RowVector2s;             ///< 2-row-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 1, 3> RowVector3s;             ///< 3-row-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 1, 4> RowVector4s;             ///< 4-row-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 1, 7> RowVector7s;             ///< 7-row-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 1, Dynamic> RowVectorXs;       ///< variable size row-vector of real Scalar type
 
 // 2. Quaternions and other rotation things
-typedef Quaternion<wolf::WolfScalar> Quaternions;               ///< Quaternion of real WolfScalar type
-typedef AngleAxis<wolf::WolfScalar> AngleAxiss;                 ///< Angle-Axis of real WolfScalar type
-typedef Rotation2D<wolf::WolfScalar> Rotation2Ds;               ///< Rotation2D of real WolfScalar type
+typedef Quaternion<wolf::Scalar> Quaternions;               ///< Quaternion of real Scalar type
+typedef AngleAxis<wolf::Scalar> AngleAxiss;                 ///< Angle-Axis of real Scalar type
+typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of real Scalar type
 }
 
 namespace wolf {
@@ -260,7 +260,7 @@ typedef enum
 // - forwards for pointers
 
 class NodeTerminus;
-class WolfProblem;
+class Problem;
 class MapBase;
 class LandmarkBase;
 class LandmarkCorner2D;
@@ -282,7 +282,7 @@ class StateBlock;
 // TODO: No seria millor que cada classe es defineixi aquests typedefs?
 
 //Problem
-typedef WolfProblem* WolfProblemPtr;
+typedef Problem* WolfProblemPtr;
 
 //Map
 typedef std::list<MapBase*> MapBaseList;
@@ -337,7 +337,7 @@ typedef std::list<StateBlock*> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
 
 
-inline WolfScalar pi2pi(const WolfScalar& angle)
+inline Scalar pi2pi(const Scalar& angle)
 {
     return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
 }
@@ -347,8 +347,8 @@ inline WolfScalar pi2pi(const WolfScalar& angle)
 // Quaternion things
 namespace Eigen{
 inline void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
-    wolf::WolfScalar angle = _v.norm();
-    if (angle < wolf::WolfConstants::EPS)
+    wolf::Scalar angle = _v.norm();
+    if (angle < wolf::Constants::EPS)
         _q = Eigen::Quaternions::Identity();
     else
     {
@@ -357,8 +357,8 @@ inline void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
 }
 
 inline void v2q(const Eigen::VectorXs& _v, Eigen::Map<Eigen::Quaternions>& _q){
-    wolf::WolfScalar angle = _v.norm();
-    if (angle < wolf::WolfConstants::EPS)
+    wolf::Scalar angle = _v.norm();
+    if (angle < wolf::Constants::EPS)
         _q = Eigen::Quaternions::Identity();
     else
     {

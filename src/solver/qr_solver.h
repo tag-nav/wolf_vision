@@ -37,7 +37,7 @@ namespace wolf
 class SolverQR
 {
     protected:
-        WolfProblem* problem_ptr_;
+        Problem* problem_ptr_;
         Eigen::SparseQR<Eigen::SparseMatrix<double>, Eigen::NaturalOrdering<int>> solver_;
         Eigen::SparseMatrix<double> A_, R_;
         Eigen::VectorXd b_, x_incr_;
@@ -60,7 +60,7 @@ class SolverQR
         double time_ordering_, time_solving_, time_managing_;
 
     public:
-        SolverQR(WolfProblem* problem_ptr_) :
+        SolverQR(Problem* problem_ptr_) :
                 problem_ptr_(problem_ptr_), A_(0, 0), R_(0, 0), A_nodes_(0, 0), acc_node_permutation_(0), n_new_constraints_(
                         0), time_ordering_(0), time_solving_(0), time_managing_(0)
         {

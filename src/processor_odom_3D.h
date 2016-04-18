@@ -38,9 +38,9 @@ namespace wolf {
 class ProcessorOdom3d : public ProcessorMotion
 {
     public:
-        ProcessorOdom3d(WolfScalar _delta_t = 0);
+        ProcessorOdom3d(Scalar _delta_t = 0);
         virtual ~ProcessorOdom3d();
-        virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Eigen::VectorXs& _delta);
+        virtual void data2delta(const Eigen::VectorXs& _data, const Scalar _dt, Eigen::VectorXs& _delta);
 
     protected:
         virtual void preProcess(){}
@@ -62,7 +62,7 @@ class ProcessorOdom3d : public ProcessorMotion
 };
 
 
-inline ProcessorOdom3d::ProcessorOdom3d(WolfScalar _delta_t) :
+inline ProcessorOdom3d::ProcessorOdom3d(Scalar _delta_t) :
         ProcessorMotion(PRC_ODOM_3D, _delta_t, 7, 7, 6),
         p1_(nullptr), //, q1_(nullptr)
         p2_(nullptr), //, q1_(nullptr)
@@ -77,7 +77,7 @@ inline ProcessorOdom3d::~ProcessorOdom3d()
 {
 }
 
-inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Eigen::VectorXs& _delta)
+inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const Scalar _dt, Eigen::VectorXs& _delta)
 {
     _delta.head(3) = _data.head(3);
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data() + 3);

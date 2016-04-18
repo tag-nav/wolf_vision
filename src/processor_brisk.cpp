@@ -157,7 +157,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
     std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl << std::endl;
     std::cout << "last*: " << last_ptr_ << " -- incoming*: " << incoming_ptr_ << std::endl;
 
-    WolfScalar diff = cv::norm(image_incoming_, image_last_, cv::NORM_L1);
+    Scalar diff = cv::norm(image_incoming_, image_last_, cv::NORM_L1);
     std::cout << "Distance between last and incoming images: " << diff << std::endl;
 
     for (auto feature_base_ptr : _feature_list_in)
@@ -201,7 +201,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                 _feature_list_out.push_back(incoming_point_ptr);
 
                 _feature_matches[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
-                                                                            1 - (WolfScalar)(cv_matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
+                                                                            1 - (Scalar)(cv_matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
 
             }
             for (unsigned int i = 0; i < candidate_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
