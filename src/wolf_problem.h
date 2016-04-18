@@ -155,10 +155,6 @@ class WolfProblem : public NodeBase
         bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
                                 const int _col);
 
-        /** \brief Gets state size
-         */
-        const unsigned int getStateSize() const;
-
         /** \brief Adds a map
          */
         void addMap(MapBase* _map_ptr);
