@@ -45,7 +45,7 @@ class WolfProblem : public NodeBase
         StateBlockList state_block_ptr_list_;
         std::list<StateBlock*> state_block_add_list_;
         std::list<StateBlock*> state_block_update_list_;
-        std::list<WolfScalar*> state_block_remove_list_;
+        std::list<Scalar*> state_block_remove_list_;
         std::list<ConstraintBase*> constraint_add_list_;
         std::list<unsigned int> constraint_remove_list_;
 
@@ -197,7 +197,7 @@ class WolfProblem : public NodeBase
 
         /** \brief Gets a queue of state blocks to be removed from the solver
          */
-        std::list<WolfScalar*>* getStateBlockRemoveList();
+        std::list<Scalar*>* getStateBlockRemoveList();
 
         /** \brief Gets a queue of constraint ids to be added in the solver
          */
@@ -230,7 +230,7 @@ class WolfProblem : public NodeBase
 namespace wolf
 {
 
-inline std::list<WolfScalar*>* WolfProblem::getStateBlockRemoveList()
+inline std::list<Scalar*>* WolfProblem::getStateBlockRemoveList()
 {
     return &state_block_remove_list_;
 }

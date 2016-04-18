@@ -20,10 +20,10 @@
 
 namespace wolf {
 // inserts the sparse matrix 'ins' into the sparse matrix 'original' in the place given by 'row' and 'col' integers
-void insertSparseBlock(const Eigen::SparseMatrix<WolfScalar>& ins, Eigen::SparseMatrix<WolfScalar>& original, const unsigned int& row, const unsigned int& col)
+void insertSparseBlock(const Eigen::SparseMatrix<Scalar>& ins, Eigen::SparseMatrix<Scalar>& original, const unsigned int& row, const unsigned int& col)
 {
   for (int k=0; k<ins.outerSize(); ++k)
-    for (Eigen::SparseMatrix<WolfScalar>::InnerIterator iti(ins,k); iti; ++iti)
+    for (Eigen::SparseMatrix<Scalar>::InnerIterator iti(ins,k); iti; ++iti)
       original.coeffRef(iti.row() + row, iti.col() + col) = iti.value();
 
   original.makeCompressed();

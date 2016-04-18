@@ -32,7 +32,7 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<const Eigen::VectorXs
         Vector3s axis = _delta_theta / angle;
 
         // express delta_theta as a quaternion using the angle-axis helper
-        Quaternions dq(AngleAxis<WolfScalar>(angle, axis));
+        Quaternions dq(AngleAxis<Scalar>(angle, axis));
 
         // result as a quaternion
         if (delta_reference_ == DQ_GLOBAL)

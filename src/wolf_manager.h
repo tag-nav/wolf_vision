@@ -55,7 +55,7 @@ class WolfManager
 
         //Manager parameters
         unsigned int trajectory_size_;
-        WolfScalar new_frame_elapsed_time_;
+        Scalar new_frame_elapsed_time_;
 
     public:
         WolfManager(const FrameStructure _frame_structure,
@@ -63,7 +63,7 @@ class WolfManager
                     const Eigen::VectorXs& _prior,
                     const Eigen::MatrixXs& _prior_cov,
                     const unsigned int& _trajectory_size = 10,
-                    const WolfScalar& _new_frame_elapsed_time = 0.1);
+                    const Scalar& _new_frame_elapsed_time = 0.1);
 
         virtual ~WolfManager();
 
@@ -87,7 +87,7 @@ class WolfManager
 
         void setWindowSize(const unsigned int& _size);
 
-        void setNewFrameElapsedTime(const WolfScalar& _dt);
+        void setNewFrameElapsedTime(const Scalar& _dt);
 };
 
 } // namespace wolf

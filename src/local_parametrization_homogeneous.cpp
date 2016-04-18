@@ -37,7 +37,7 @@ bool LocalParametrizationHomogeneous::plus(const Eigen::Map<const Eigen::VectorX
         Vector3s axis = _delta / norm_delta;
 
         // express delta as a quaternion
-        Quaternions dq(AngleAxis<WolfScalar>(norm_delta, axis));
+        Quaternions dq(AngleAxis<Scalar>(norm_delta, axis));
 
         // result as a homogeneous point -- we use the quaternion product for keeping in the 4-sphere
         _h_plus_delta = (dq * Map<const Quaternions>(_h.data())).coeffs();

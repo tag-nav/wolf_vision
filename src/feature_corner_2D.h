@@ -18,7 +18,7 @@ class FeatureCorner2D : public FeatureBase
          * 
          * constructor
          */
-        FeatureCorner2D(const Eigen::Vector4s & _measurement, const Eigen::Matrix4s & _meas_covariance); //TODO: add const WolfScalar& aperture);
+        FeatureCorner2D(const Eigen::Vector4s & _measurement, const Eigen::Matrix4s & _meas_covariance); //TODO: add const Scalar& aperture);
 
         /** \brief Default destructor (not recommended)
          *
@@ -32,7 +32,7 @@ class FeatureCorner2D : public FeatureBase
          * Returns aperture
          * 
          **/
-        WolfScalar getAperture() const; 
+        Scalar getAperture() const; 
         
 };
 

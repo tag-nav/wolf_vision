@@ -53,7 +53,7 @@ class StateBlock
 
         /** \brief Returns the pointer to the first element of the state
          **/
-        WolfScalar* getPtr();
+        Scalar* getPtr();
         
         /** \brief Returns the state vector
          **/
@@ -102,7 +102,7 @@ inline StateBlock::~StateBlock()
     //
 }
 
-inline WolfScalar* StateBlock::getPtr()
+inline Scalar* StateBlock::getPtr()
 {
     return state_.data();
 }

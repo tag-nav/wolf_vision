@@ -18,13 +18,13 @@ namespace wolf
 struct LandmarkMatch
 {
         LandmarkBase* landmark_ptr_;
-        WolfScalar normalized_score_;
+        Scalar normalized_score_;
 
         LandmarkMatch() :
                 landmark_ptr_(nullptr), normalized_score_(0.0)
         {
         }
-        LandmarkMatch(LandmarkBase* _landmark_ptr, const WolfScalar& _normalized_score) :
+        LandmarkMatch(LandmarkBase* _landmark_ptr, const Scalar& _normalized_score) :
                 landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
         {
 

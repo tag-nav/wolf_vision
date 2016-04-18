@@ -20,10 +20,10 @@
 
 namespace wolf{
 // inserts the sparse matrix 'ins' into the sparse matrix 'original' in the place given by 'row' and 'col' integers
-void insertSparseBlock(const Eigen::SparseMatrix<WolfScalar>& ins, Eigen::SparseMatrix<WolfScalar>& original, const unsigned int& row, const unsigned int& col)
+void insertSparseBlock(const Eigen::SparseMatrix<Scalar>& ins, Eigen::SparseMatrix<Scalar>& original, const unsigned int& row, const unsigned int& col)
 {
   for (int k=0; k<ins.outerSize(); ++k)
-    for (Eigen::SparseMatrix<WolfScalar>::InnerIterator iti(ins,k); iti; ++iti)
+    for (Eigen::SparseMatrix<Scalar>::InnerIterator iti(ins,k); iti; ++iti)
       original.coeffRef(iti.row() + row, iti.col() + col) = iti.value();
 
   original.makeCompressed();
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
     clock_t t1;
     ceres::Solver::Summary summary_full, summary_prun;
     Eigen::MatrixXs Sigma_ii(3,3), Sigma_ij(3,3), Sigma_jj(3,3), Sigma_z(3,3), Ji(3,3), Jj(3,3);
-    WolfScalar xi, yi, thi, si, ci, xj, yj;
+    Scalar xi, yi, thi, si, ci, xj, yj;
 
     // loading variables
     std::map<unsigned int, FrameBase*> index_2_frame_ptr_full;
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
     WolfProblem* wolf_problem_prun = new WolfProblem(FRM_PO_2D);
     SensorBase* sensor = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
-    Eigen::SparseMatrix<WolfScalar> Lambda(0,0);
+    Eigen::SparseMatrix<Scalar> Lambda(0,0);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -275,13 +275,13 @@ int main(int argc, char** argv)
                     //std::cout << "information " << std::endl << edge_information << std::endl;
                     //std::cout << "covariance " << std::endl << constraint_ptr_prun->getMeasurementCovariance() << std::endl;
 
-                    WolfScalar xi = *(frame_old_ptr_prun->getPPtr()->getPtr());
-                    WolfScalar yi = *(frame_old_ptr_prun->getPPtr()->getPtr()+1);
-                    WolfScalar thi = *(frame_old_ptr_prun->getOPtr()->getPtr());
-                    WolfScalar si = sin(thi);
-                    WolfScalar ci = cos(thi);
-                    WolfScalar xj = *(frame_new_ptr_prun->getPPtr()->getPtr());
-                    WolfScalar yj = *(frame_new_ptr_prun->getPPtr()->getPtr()+1);
+                    Scalar xi = *(frame_old_ptr_prun->getPPtr()->getPtr());
+                    Scalar yi = *(frame_old_ptr_prun->getPPtr()->getPtr()+1);
+                    Scalar thi = *(frame_old_ptr_prun->getOPtr()->getPtr());
+                    Scalar si = sin(thi);
+                    Scalar ci = cos(thi);
+                    Scalar xj = *(frame_new_ptr_prun->getPPtr()->getPtr());
+                    Scalar yj = *(frame_new_ptr_prun->getPPtr()->getPtr()+1);
                     Eigen::MatrixXs Ji(3,3), Jj(3,3);
                     Ji << -ci,-si,-(xj-xi)*si+(yj-yi)*ci,
                            si,-ci,-(xj-xi)*ci-(yj-yi)*si,
@@ -291,7 +291,7 @@ int main(int argc, char** argv)
                             0,  0, 1;
                     //std::cout << "Ji" << std::endl << Ji << std::endl;
                     //std::cout << "Jj" << std::endl << Jj << std::endl;
-                    Eigen::SparseMatrix<WolfScalar> DeltaLambda(Lambda.rows(), Lambda.cols());
+                    Eigen::SparseMatrix<Scalar> DeltaLambda(Lambda.rows(), Lambda.cols());
                     insertSparseBlock((Ji.transpose() * edge_information * Ji).sparseView(), DeltaLambda, edge_old*3, edge_old*3);
                     insertSparseBlock((Jj.transpose() * edge_information * Jj).sparseView(), DeltaLambda, edge_new*3, edge_new*3);
                     insertSparseBlock((Ji.transpose() * edge_information * Jj).sparseView(), DeltaLambda, edge_old*3, edge_new*3);
@@ -317,7 +317,7 @@ int main(int argc, char** argv)
     initial_covariance_full->process();
     initial_covariance_prun->process();
     //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_prun->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
-    Eigen::SparseMatrix<WolfScalar> DeltaLambda(Lambda.rows(), Lambda.cols());
+    Eigen::SparseMatrix<Scalar> DeltaLambda(Lambda.rows(), Lambda.cols());
     insertSparseBlock((Eigen::Matrix3s::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
     Lambda = Lambda + DeltaLambda;
 
@@ -332,7 +332,7 @@ int main(int argc, char** argv)
     wolf_problem_prun->getTrajectoryPtr()->getConstraintList(constraints);
     // Manual covariance computation
     t1 = clock();
-    Eigen::SimplicialLLT<Eigen::SparseMatrix<WolfScalar>> chol(Lambda);  // performs a Cholesky factorization of A
+    Eigen::SimplicialLLT<Eigen::SparseMatrix<Scalar>> chol(Lambda);  // performs a Cholesky factorization of A
     Eigen::MatrixXs Sigma = chol.solve(Eigen::MatrixXs::Identity(Lambda.rows(), Lambda.cols()));
     double t_sigma_manual = ((double) clock() - t1) / CLOCKS_PER_SEC;
     //std::cout << "Lambda" << std::endl << Lambda << std::endl;
@@ -398,7 +398,7 @@ int main(int argc, char** argv)
 
         //std::cout << "denominador : " << std::endl << Sigma_z - (Ji * Sigma_ii * Ji.transpose() + Jj * Sigma_jj * Jj.transpose() + Ji * Sigma_ij * Jj.transpose() + Jj * Sigma_ij.transpose() * Ji.transpose()) << std::endl;
         // Information gain
-        WolfScalar IG = 0.5 * log( Sigma_z.determinant() / (Sigma_z - (Ji * Sigma_ii * Ji.transpose() + Jj * Sigma_jj * Jj.transpose() + Ji * Sigma_ij * Jj.transpose() + Jj * Sigma_ij.transpose() * Ji.transpose())).determinant() );
+        Scalar IG = 0.5 * log( Sigma_z.determinant() / (Sigma_z - (Ji * Sigma_ii * Ji.transpose() + Jj * Sigma_jj * Jj.transpose() + Ji * Sigma_ij * Jj.transpose() + Jj * Sigma_ij.transpose() * Ji.transpose())).determinant() );
         //std::cout << "IG = " << IG << std::endl;
 
         if (IG < 2)

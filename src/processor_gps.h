@@ -21,7 +21,7 @@ class ProcessorGPS : public ProcessorBase
         //SensorGPS* sensor_gps_ptr_; //specific pointer to sensor gps object
         CaptureGPS* capture_gps_ptr_;
 
-        WolfScalar gps_covariance_;
+        Scalar gps_covariance_;
 
 
     public:

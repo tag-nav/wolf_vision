@@ -121,7 +121,7 @@ class ConstraintSparse: public ConstraintBase
          * Returns a vector of pointers to the state blocks in which this constraint depends
          *
          **/
-        virtual const std::vector<WolfScalar*> getStateBlockPtrVector();
+        virtual const std::vector<Scalar*> getStateBlockPtrVector();
 
         /** \brief Returns a vector of pointers to the states
          *
@@ -338,7 +338,7 @@ template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-const std::vector<WolfScalar*> ConstraintSparse<MEASUREMENT_SIZE,
+const std::vector<Scalar*> ConstraintSparse<MEASUREMENT_SIZE,
                                                 BLOCK_0_SIZE,
                                                 BLOCK_1_SIZE,
                                                 BLOCK_2_SIZE,
@@ -356,29 +356,29 @@ const std::vector<WolfScalar*> ConstraintSparse<MEASUREMENT_SIZE,
     {
         case 1:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr()});
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr()});
         }
         case 2:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr()});
         }
         case 3:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr()});
         }
         case 4:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr()});
         }
         case 5:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -386,7 +386,7 @@ const std::vector<WolfScalar*> ConstraintSparse<MEASUREMENT_SIZE,
         }
         case 6:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -395,7 +395,7 @@ const std::vector<WolfScalar*> ConstraintSparse<MEASUREMENT_SIZE,
         }
         case 7:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -405,7 +405,7 @@ const std::vector<WolfScalar*> ConstraintSparse<MEASUREMENT_SIZE,
         }
         case 8:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -416,7 +416,7 @@ const std::vector<WolfScalar*> ConstraintSparse<MEASUREMENT_SIZE,
         }
         case 9:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -428,7 +428,7 @@ const std::vector<WolfScalar*> ConstraintSparse<MEASUREMENT_SIZE,
         }
         case 10:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -441,7 +441,7 @@ const std::vector<WolfScalar*> ConstraintSparse<MEASUREMENT_SIZE,
         }
     }
 
-    return std::vector<WolfScalar*>(0); //Not going to happen
+    return std::vector<Scalar*>(0); //Not going to happen
 }
 
 template <const unsigned int MEASUREMENT_SIZE,

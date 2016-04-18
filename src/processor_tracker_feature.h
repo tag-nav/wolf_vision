@@ -18,14 +18,14 @@ namespace wolf
 struct FeatureMatch
 {
         FeatureBase* feature_ptr_;
-        WolfScalar normalized_score_;
+        Scalar normalized_score_;
 
         FeatureMatch() :
                 feature_ptr_(nullptr), normalized_score_(0.0)
         {
 
         }
-        FeatureMatch(FeatureBase* _last_feature_ptr, const WolfScalar& _normalized_score) :
+        FeatureMatch(FeatureBase* _last_feature_ptr, const Scalar& _normalized_score) :
                 feature_ptr_(_last_feature_ptr), normalized_score_(_normalized_score)
         {
 
