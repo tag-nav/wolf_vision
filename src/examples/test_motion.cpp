@@ -54,19 +54,20 @@ int main()
             0, 0, 3.1416/4; // 45 deg
 
 
-    // Build Wolf tree
+    // Create Wolf tree nodes
     Problem* problem_ = new Problem(FRM_PO_3D);
 
-    // create sensor
     SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
 
-    // Make a ProcessorOdom3d
     ProcessorOdom3d* odom3d_ptr = new ProcessorOdom3d(dt);
+
+    // Assemble Wolf tree by linking the nodes
     sensor_ptr->addProcessor(odom3d_ptr);
 
     problem_->addSensor(sensor_ptr);
 
-    odom3d_ptr->setOrigin(x0, new CaptureOdom3D(dt, sensor_ptr, Eigen::VectorXs::Zero(6)));
+    // Initialize
+    odom3d_ptr->setOrigin(x0, new CaptureOdom3D(dt, sensor_ptr));
 
     std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
