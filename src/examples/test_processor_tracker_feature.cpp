@@ -10,7 +10,7 @@
 
 //Wolf
 #include "wolf.h"
-#include "wolf_problem.h"
+#include "problem.h"
 #include "sensor_base.h"
 #include "state_block.h"
 #include "processor_tracker_feature_dummy.h"

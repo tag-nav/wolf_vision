@@ -1,5 +1,5 @@
 #ifndef WOLF_PROBLEM_H_
-#define WOLF_PROBLEM_H_
+#define PROBLEM_H_
 
 // Fwd refs
 namespace wolf{
@@ -258,4 +258,4 @@ inline bool WolfProblem::isTop()
 } // namespace wolf
 
 
-#endif
+#endif // PROBLEM_H

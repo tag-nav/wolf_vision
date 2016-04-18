@@ -121,6 +121,7 @@ SET(HDRS
     node_constrained.h
     node_linked.h
     node_terminus.h
+    problem.h
     processor_base.h
     processor_motion.h
     processor_motion_base.h
@@ -140,7 +141,6 @@ SET(HDRS
     state_quaternion.h
     time_stamp.h
     trajectory_base.h
-    wolf_problem.h
     wolf_manager.h)
    
 SET(HDRS_DTASSC
@@ -175,6 +175,7 @@ SET(SRCS
     local_parametrization_homogeneous.cpp
     map_base.cpp
     node_base.cpp
+    problem.cpp
     processor_base.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
@@ -187,7 +188,6 @@ SET(SRCS
     sensor_gps_fix.cpp
     time_stamp.cpp
     trajectory_base.cpp
-    wolf_problem.cpp
     wolf_manager.cpp
     data_association/association_solver.cpp
     data_association/association_node.cpp

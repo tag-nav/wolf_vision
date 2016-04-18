@@ -13,7 +13,7 @@
 #include "constraint_odom_2D.h"
 #include "trajectory_base.h"
 #include "map_base.h"
-#include "wolf_problem.h"
+#include "problem.h"
 
 //std includes
 #include <cstdlib>

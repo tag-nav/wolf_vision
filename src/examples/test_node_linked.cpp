@@ -1,7 +1,7 @@
 //wolf
 #include "node_terminus.h"
 #include "node_linked.h"
-#include "wolf_problem.h"
+#include "problem.h"
 
 //namespaces
 namespace wolf {

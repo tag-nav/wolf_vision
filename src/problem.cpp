@@ -1,4 +1,4 @@
-#include "wolf_problem.h"
+#include "problem.h"
 #include "constraint_base.h"
 #include "state_block.h"
 #include "state_quaternion.h"
