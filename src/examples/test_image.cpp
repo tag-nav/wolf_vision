@@ -170,7 +170,7 @@ int main(int argc, char** argv)
         {
 
             if (f>1){ // check if consecutive images are different
-                WolfScalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
+                Scalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
                 std::cout << "frame ptr: " << (unsigned int)*(frame.ptr(0)) << " last ptr: " << (unsigned int)*(last_frame.ptr(0)) << std::endl;
                 std::cout << "test_image: Image increment: " << diff << std::endl;
             }
