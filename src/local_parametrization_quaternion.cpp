@@ -21,12 +21,12 @@ bool LocalParametrizationQuaternion::plus(const Eigen::Map<const Eigen::VectorXs
     assert(_delta_theta.size() == local_size_ && "Wrong size of input delta_theta.");
     assert(_q_plus_delta_theta.size() == global_size_ && "Wrong size of output quaternion.");
 
-    assert(fabs(1.0 - _q.norm()) < WolfConstants::EPS && "Quaternion not normalized.");
+    assert(fabs(1.0 - _q.norm()) < Constants::EPS && "Quaternion not normalized.");
 
     using namespace Eigen;
 
     double angle = _delta_theta.norm();
-    if (angle > WolfConstants::EPS)
+    if (angle > Constants::EPS)
     {
         // compute rotation axis -- this guarantees unity norm
         Vector3s axis = _delta_theta / angle;

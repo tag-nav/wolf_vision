@@ -37,7 +37,7 @@ namespace wolf {
 typedef double WolfScalar;        // Use this for double, 64 bit precision
 //typedef long double WolfScalar;   // Use this for long double, 128 bit precision
 
-namespace WolfConstants{
+namespace Constants{
 
 // Wolf standard tolerance
 const double EPS = 1e-8;
@@ -348,7 +348,7 @@ inline WolfScalar pi2pi(const WolfScalar& angle)
 namespace Eigen{
 inline void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
     wolf::WolfScalar angle = _v.norm();
-    if (angle < wolf::WolfConstants::EPS)
+    if (angle < wolf::Constants::EPS)
         _q = Eigen::Quaternions::Identity();
     else
     {
@@ -358,7 +358,7 @@ inline void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
 
 inline void v2q(const Eigen::VectorXs& _v, Eigen::Map<Eigen::Quaternions>& _q){
     wolf::WolfScalar angle = _v.norm();
-    if (angle < wolf::WolfConstants::EPS)
+    if (angle < wolf::Constants::EPS)
         _q = Eigen::Quaternions::Identity();
     else
     {
