@@ -80,7 +80,7 @@ int main()
     for (int i = 0; i <= 8; i++)
     {
         odom3d_ptr->process(cap_ptr);
-        std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->state().transpose() << std::endl;
+        std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->getState().transpose() << std::endl;
 
         t += dt;
         cap_ptr->setTimeStamp(t);
@@ -93,7 +93,7 @@ int main()
     dt = 0.0045; // new dt
     for (int i = 1; i <= 25; i++)
     {
-        std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->state(t+dt_2).transpose() << std::endl;
+        std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->getState(t+dt_2).transpose() << std::endl;
         t += dt;
     }
     std::cout << "       ^^^^^^^   After the last time-stamp the buffer keeps returning the last member." << std::endl;

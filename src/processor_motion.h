@@ -90,31 +90,31 @@ class ProcessorMotion : public ProcessorBase
         /** \brief Fills a reference to the state integrated so far
          * \param the returned state vector
          */
-        const void state(Eigen::VectorXs& _x);
+        const void getState(Eigen::VectorXs& _x);
         /** \brief Gets a constant reference to the state integrated so far
          * \return the state vector
          */
-        const Eigen::VectorXs state();
+        const Eigen::VectorXs getState();
         /** \brief Fills the state corresponding to the provided time-stamp
          * \param _t the time stamp
          * \param _x the returned state
          */
-        void state(const TimeStamp& _ts, Eigen::VectorXs& _x);
+        void getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
         /** \brief Gets the state corresponding to the provided time-stamp
          * \param _t the time stamp
          * \return the state vector
          */
-        Eigen::VectorXs state(const TimeStamp& _ts);
+        Eigen::VectorXs getState(const TimeStamp& _ts);
         /** \brief Provides the delta-state integrated so far
          * \return a reference to the integrated delta state
          */
-        const Eigen::VectorXs& deltaState() const;
-        /** \brief Provides the delta-state between two time-stamps
-         * \param _t1 initial time
-         * \param _t2 final time
-         * \param _Delta the integrated delta-state between _t1 and _t2
+        const Motion& getMotion() const;
+        void getMotion(Motion& _motion) const;
+        /** \brief Provides the delta-state integrated until a given timestamp
+         * \return a reference to the integrated delta state
          */
-        void deltaState(const TimeStamp& _t1, const TimeStamp& _t2, Eigen::VectorXs& _Delta);
+        const Motion& getMotion(const TimeStamp& _ts) const;
+        void getMotion(const TimeStamp& _ts, Motion& _motion) const;
         /** Composes the deltas in two pre-integrated Captures
          * \param _cap1_ptr pointer to the first Capture
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
@@ -196,16 +196,6 @@ class ProcessorMotion : public ProcessorBase
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                     Eigen::VectorXs& _delta1_plus_delta2) = 0;
 
-        /** \brief Computes the delta-state that goes from one delta-state to another
-         * \param _delta1 the initial delta
-         * \param _delta2 the final delta
-         * \param _delta2_minus_delta1 the delta-state. It has the format of a delta-state.
-         *
-         * This function implements the composition (-) so that _delta2_minus_delta1 = _delta2 (-) _delta1.
-         */
-        virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                     Eigen::VectorXs& _delta2_minus_delta1) = 0;
-
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
          *
@@ -220,7 +210,7 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         // Attributes
-        size_t x_size_;    ///< The size of the state vector
+        size_t x_size_;    ///< The size of the getState vector
         size_t delta_size_;
         size_t data_size_; ///< the size of the incoming data
         CaptureBase* origin_ptr_;
@@ -314,44 +304,50 @@ inline bool ProcessorMotion::voteForKeyFrame()
 }
 
 
-inline Eigen::VectorXs ProcessorMotion::state(const TimeStamp& _ts)
+inline Eigen::VectorXs ProcessorMotion::getState(const TimeStamp& _ts)
 {
-    state(_ts, x_);
+    getState(_ts, x_);
     return x_;
 }
 
 
-inline void ProcessorMotion::state(const TimeStamp& _ts, Eigen::VectorXs& _x)
+inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(_ts), _x);
 }
 
 
-inline const Eigen::VectorXs ProcessorMotion::state()
+inline const Eigen::VectorXs ProcessorMotion::getState()
 {
-    state(x_);
+    getState(x_);
     return x_;
 }
 
 
-inline const void ProcessorMotion::state(Eigen::VectorXs& _x)
+inline const void ProcessorMotion::getState(Eigen::VectorXs& _x)
 {
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(), _x);
 }
 
-
-inline void ProcessorMotion::deltaState(const TimeStamp& _t1, const TimeStamp& _t2,
-                                                          Eigen::VectorXs& _Delta)
+inline const Motion& ProcessorMotion::getMotion() const
 {
-    deltaMinusDelta(getBufferPtr()->getDelta(_t2), getBufferPtr()->getDelta(_t2), _Delta);
+    return getBufferPtr()->getMotion();
 }
 
-
-inline const Eigen::VectorXs& ProcessorMotion::deltaState() const
+inline void ProcessorMotion::getMotion(Motion& _motion) const
 {
-    return getBufferPtr()->getDelta();
+    getBufferPtr()->getMotion(_motion);
 }
 
+inline const Motion& ProcessorMotion::getMotion(const TimeStamp& _ts) const
+{
+    return getBufferPtr()->getMotion(_ts);
+}
+
+inline void ProcessorMotion::getMotion(const TimeStamp& _ts, Motion& _motion) const
+{
+    getBufferPtr()->getMotion(_ts, _motion);
+}
 
 inline void ProcessorMotion::sumDeltas(CaptureMotion2* _cap1_ptr,
                                                          CaptureMotion2* _cap2_ptr,

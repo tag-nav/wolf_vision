@@ -52,7 +52,9 @@ class MotionBuffer{
         const Eigen::VectorXs& getDelta() const;
         const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const;
         const Motion& getMotion() const;
+        void getMotion(Motion& _motion) const;
         const Motion& getMotion(const TimeStamp& _ts) const;
+        void getMotion(const TimeStamp& _ts, Motion& _motion) const;
         void split(TimeStamp& _ts, MotionBuffer& _oldest_part);
 
     private:
@@ -105,6 +107,11 @@ inline const Motion& MotionBuffer::getMotion() const
     return container_.back();
 }
 
+inline void MotionBuffer::getMotion(Motion& _motion) const
+{
+    _motion = container_.back();
+}
+
 inline const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const
 {
     assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
@@ -119,6 +126,22 @@ inline const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const
 
     return *previous;
 }
+
+inline void MotionBuffer::getMotion(const TimeStamp& _ts, Motion& _motion) const
+{
+    assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
+    auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion& m)
+    {
+        return m.ts_ <= _ts;
+    });
+    if (previous == container_.rend())
+        // The time stamp is more recent than the buffer's most recent data.
+        // We could do something here, but by now we'll return the last valid data
+        previous--;
+
+    _motion = *previous;
+}
+
 
 inline void MotionBuffer::split(TimeStamp& _ts, MotionBuffer& _oldest_part)
 {
