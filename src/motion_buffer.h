@@ -55,7 +55,8 @@ class MotionBuffer{
         void getMotion(Motion& _motion) const;
         const Motion& getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
-        void split(TimeStamp& _ts, MotionBuffer& _oldest_part);
+        void split(const TimeStamp& _ts, MotionBuffer& _oldest_part);
+        const std::list<Motion>& getContainer() const;
 
     private:
         std::list<Motion> container_;
@@ -143,29 +144,29 @@ inline void MotionBuffer::getMotion(const TimeStamp& _ts, Motion& _motion) const
 }
 
 
-inline void MotionBuffer::split(TimeStamp& _ts, MotionBuffer& _oldest_part)
+inline void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _oldest_part)
 {
-    // TODO: Do the split. Look at this code:
-    //
-    //    std::list<std::string> lst1 = { "1", "2", "3", "4" };
-    //
-    //    for (const auto &s : lst1 ) std::cout << s << ' ';
-    //    std::cout << std::endl;
-    //
-    //    std::cout << std::endl;
-    //
-    //    std::list<std::string> lst2;
-    //    lst2.splice( lst2.begin(),
-    //                 lst1,
-    //                 lst1.begin(),
-    //                 std::next( lst1.begin(), lst1.size() / 2 ) );
-    //
-    //    for (const auto &s : lst2 ) std::cout << s << ' ';
-    //    std::cout << std::endl;
-    //
-    //    for (const auto &s : lst1 ) std::cout << s << ' ';
-    //    std::cout << std::endl;
+    assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
+    auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion& m)
+    {
+        return m.ts_ <= _ts;
+    });
+    if (previous == container_.rend())
+    {
+        // The time stamp is more recent than the buffer's most recent data:
+        // Transfer all the buffer
+        _oldest_part.container_ = std::move(container_);
+    }
+    else
+    {
+        // Transfer part of the buffer
+        _oldest_part.container_.splice(_oldest_part.container_.begin(), container_, container_.begin(), (previous--).base());
+    }
+}
 
+inline const std::list<Motion>& MotionBuffer::getContainer() const
+{
+    return container_;
 }
 
 } // namespace wolf
