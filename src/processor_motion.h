@@ -79,9 +79,6 @@ class ProcessorMotion : public ProcessorBase
         // Instructions to the processor:
 
         virtual void process(CaptureBase* _incoming_ptr);
-        void reset(const TimeStamp& _ts);
-
-        void makeFrame(CaptureBase* _capture_ptr, FrameType _type = NON_KEY_FRAME);
 
         // Queries to the processor:
 
@@ -91,30 +88,36 @@ class ProcessorMotion : public ProcessorBase
          * \param the returned state vector
          */
         const void getState(Eigen::VectorXs& _x);
+
         /** \brief Gets a constant reference to the state integrated so far
          * \return the state vector
          */
-        const Eigen::VectorXs getState();
+        const Eigen::VectorXs& getState();
+
         /** \brief Fills the state corresponding to the provided time-stamp
          * \param _t the time stamp
          * \param _x the returned state
          */
         void getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
+
         /** \brief Gets the state corresponding to the provided time-stamp
          * \param _t the time stamp
          * \return the state vector
          */
-        Eigen::VectorXs getState(const TimeStamp& _ts);
-        /** \brief Provides the delta-state integrated so far
-         * \return a reference to the integrated delta state
+        Eigen::VectorXs& getState(const TimeStamp& _ts);
+
+        /** \brief Provides the motion integrated so far
+         * \return a const reference to the integrated delta state
          */
         const Motion& getMotion() const;
         void getMotion(Motion& _motion) const;
-        /** \brief Provides the delta-state integrated until a given timestamp
+
+        /** \brief Provides the motion integrated until a given timestamp
          * \return a reference to the integrated delta state
          */
         const Motion& getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
+
         /** Composes the deltas in two pre-integrated Captures
          * \param _cap1_ptr pointer to the first Capture
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
@@ -132,6 +135,10 @@ class ProcessorMotion : public ProcessorBase
 
         // Helper functions:
     protected:
+
+        void reset(const TimeStamp& _ts);
+
+        FrameBase* makeFrame(CaptureBase* _capture_ptr, FrameType _type = NON_KEY_FRAME);
 
         void integrate();
 
@@ -304,7 +311,7 @@ inline bool ProcessorMotion::voteForKeyFrame()
 }
 
 
-inline Eigen::VectorXs ProcessorMotion::getState(const TimeStamp& _ts)
+inline Eigen::VectorXs& ProcessorMotion::getState(const TimeStamp& _ts)
 {
     getState(_ts, x_);
     return x_;
@@ -317,7 +324,7 @@ inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 }
 
 
-inline const Eigen::VectorXs ProcessorMotion::getState()
+inline const Eigen::VectorXs& ProcessorMotion::getState()
 {
     getState(x_);
     return x_;
