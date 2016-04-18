@@ -38,7 +38,6 @@ namespace wolf {
  *       delta_R = fromSensorFrame(delta_S) : this transforms delta_S from frame S to frame R.
  *   - The two operations are performed by the pure virtual method data2delta(). A possible implementation
  *     of data2delta() could be (we use the data member delta_ as the return value):
- *
  * \code
  *     void data2delta(const VectorXs _data)
  *     {
@@ -47,22 +46,25 @@ namespace wolf {
  *          delta_  = delta_R;
  *     }
  * \endcode
- *
  *     where format() is any code you need to format the data into a delta form,
  *     and fromSensorFrame() is explained below.
  *
  * Only when the motion delta is expressed in the robot frame R, we can integrate it
  * on top of the current Robot frame: R <-- R (+) delta_R
  *
- *     <code>    xPlusDelta(R_old, delta_R, R_new) </code>
+ *     \code    xPlusDelta(R_old, delta_R, R_new) \endcode
  *
- * Defining (or not) fromSensorFrame():
  *
- * In most cases, one will be interested in avoiding the fromSensorFrame() issue.
+ *
+ * ### Defining (or not) the fromSensorFrame():
+ *
+ * In most cases, one will be interested in avoiding the \b fromSensorFrame() issue.
  * This can be trivially done by defining the Robot frame precisely at the Sensor frame,
- * so that S is the identity. In this case, fromSensorFrame() does nothing and delta_R = delta_S.
- * This class does not declare any prototype for fromSensorFrame().
- * In cases where this identification is not possible, or not desired,
+ * so that S is the identity. In this case, \b fromSensorFrame() does nothing and delta_R = delta_S.
+ *
+ * Notes:
+ *   - This class does not declare any prototype for \b fromSensorFrame().
+ *   - In cases where this identification is not possible, or not desired,
  * classes deriving from this class will have to implement fromSensorFrame(),
  * and call it within data2delta(), or write the frame transformation code directly in data2delta().
  */
