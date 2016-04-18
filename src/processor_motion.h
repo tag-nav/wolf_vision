@@ -221,7 +221,7 @@ class ProcessorMotion : public ProcessorBase
         size_t x_size_;    ///< The size of the state vector
         size_t delta_size_;
         size_t data_size_; ///< the size of the incoming data
-        CaptureMotion2* origin_ptr_;
+        CaptureBase* origin_ptr_;
         CaptureMotion2* last_ptr_;
         CaptureMotion2* incoming_ptr_;
 
