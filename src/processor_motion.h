@@ -126,7 +126,7 @@ class ProcessorMotion : public ProcessorBase
          * \param _origin_ptr pointer to a Capture in the origin.
          *        This can be any type of Capture, derived from CaptureBase.
          */
-        void setOrigin(const Eigen::VectorXs& _x_origin, CaptureBase* _origin_ptr);
+        void setOrigin(const Eigen::VectorXs& _x_origin, CaptureBase* _origin_ptr = nullptr);
 
         // Helper functions:
     protected:
