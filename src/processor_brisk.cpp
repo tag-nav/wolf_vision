@@ -26,6 +26,7 @@ ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_col
     //    matcher_.train();  // These do not seem to be necessary
     img_width_ = _image_cols;
     img_height_ = _image_rows;
+    detector_separation_ = 21*_pattern_scales;
 }
 
 //Destructor
@@ -218,10 +219,10 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
             }
             for (unsigned int i = 0; i < candidate_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
             {
-                if (i != cv_matches[0].trainIdx)
-                {
+                //if (i != cv_matches[0].trainIdx)
+                //{
                     tracker_candidates_.push_back(candidate_keypoints[i].pt);
-                }
+                //}
 
             }
         }
@@ -257,7 +258,9 @@ void ProcessorBrisk::trimRoi(cv::Rect& _roi)
 
 void ProcessorBrisk::inflateRoi(cv::Rect& _roi)
 {
-    int inflation_rate = 5;
+    int inflation_rate = detector_separation_;
+
+    std::cout << "detector separation: " << detector_separation_ << std::endl;
 
     _roi.x = _roi.x - inflation_rate;
     _roi.y = _roi.y - inflation_rate;
@@ -288,12 +291,12 @@ void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _
     for(auto target_point : _target_list)
     {
         //target
-        cv::circle(_image, target_point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
+        cv::circle(_image, target_point, 2, cv::Scalar(0.0, 255.0, 255.0), -1, 8, 0);
     }
     for(auto candidate_point : _candidates_list)
     {
         //candidate - cyan
-        cv::circle(_image, candidate_point, 2, cv::Scalar(0.0, 0.0, 255.0), -1, 8, 0);
+        cv::circle(_image, candidate_point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
     }
 
     cv::imshow("Incoming", _image);
@@ -322,7 +325,7 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
         }
         else
         {
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 3, cv::Scalar(80.0, 80.0, 254.0), -1, 3, 0);
+            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(80.0, 80.0, 254.0), -1, 3, 0);
         }
     }
     cv::imshow("Last", image_last_);

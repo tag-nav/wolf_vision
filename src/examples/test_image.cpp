@@ -102,8 +102,11 @@ int main(int argc, char** argv)
         if (std::string(argv[1]) == "0")
         {
             // camera
+            //img_width = 640;
+            //img_height = 480;
+            filename = "/home/jtarraso/Escritorio/Test Brisk 1 - 40 40 - 1 punto.jpg";
             img_width = 640;
-            img_height = 480;
+            img_height = 360;
         }
         else
         {
@@ -133,7 +136,7 @@ int main(int argc, char** argv)
 //    tracker_params.algorithm.max_new_features = 20;
 //    tracker_params.algorithm.min_features_th = 40;
 
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,9,9,4,20,30,40,0,0.2f,10);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,9,9,4,20,30,30,0,1.0f,10);
     sen_cam_->addProcessor(p_brisk);
 
     cv::VideoCapture capture(filename);

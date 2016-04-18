@@ -74,6 +74,10 @@ IF(OpenCV_FOUND)
     # Testing many things for the 3D image odometry
     ADD_EXECUTABLE(test_image test_image.cpp)
     TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
+
+    # Testing OpenCV functions for projection of points
+    ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
+    TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
 
 # Processor Tracker Feature test
