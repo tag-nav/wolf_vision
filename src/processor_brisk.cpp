@@ -26,7 +26,7 @@ ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_col
     //    matcher_.train();  // These do not seem to be necessary
     img_width_ = _image_cols;
     img_height_ = _image_rows;
-    detector_separation_ = 21*_pattern_scales;
+    detector_separation_ = 20*_pattern_scales;
 }
 
 //Destructor
@@ -48,6 +48,7 @@ void ProcessorBrisk::preProcess()
 
 
     tracker_roi_.clear();
+    tracker_roi_inflated_.clear();
     tracker_target_.clear();
     tracker_candidates_.clear();
 }
@@ -55,7 +56,8 @@ void ProcessorBrisk::preProcess()
 void ProcessorBrisk::postProcess()
 {
     drawFeatures(last_ptr_);
-    drawRoiLastFrame(image_incoming_, tracker_roi_);
+    drawRoi(image_incoming_,tracker_roi_,cv::Scalar(88.0, 70.0, 254.0)); //normal roi
+    drawRoi(image_incoming_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0)); //inflated roi (now only shown when it collides with the the image)
     drawTrackingFeatures(image_incoming_,tracker_target_,tracker_candidates_);
     cv::waitKey(0);
 }
@@ -213,7 +215,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                 _feature_list_out.push_back(incoming_point_ptr);
 
                 _feature_matches[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
-                                                                            1 - (Scalar)(cv_matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
+                                                            1 - (Scalar)(cv_matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
 
             }
             for (unsigned int i = 0; i < candidate_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
@@ -237,21 +239,63 @@ void ProcessorBrisk::trimRoi(cv::Rect& _roi)
 {
     if(_roi.x < 0)
     {
+        std::cout << "roi - X: " << _roi.x << std::endl;
+        std::cout << "roi - Y: " << _roi.y << std::endl;
+        std::cout << "roi - W: " << _roi.width << std::endl;
+        std::cout << "roi - H: " << _roi.height << std::endl;
+        int diff_x = -_roi.x;
+        std::cout << "diff_x: " << diff_x << std::endl;
         _roi.x = 0;
+        _roi.width = _roi.width - diff_x;
+        tracker_roi_inflated_.push_back(_roi);
+        std::cout << "TRIM roi - X: " << _roi.x << std::endl;
+        std::cout << "TRIM roi - Y: " << _roi.y << std::endl;
+        std::cout << "TRIM roi - W: " << _roi.width << std::endl;
+        std::cout << "TRIM roi - H: " << _roi.height << std::endl;
     }
     if(_roi.y < 0)
     {
+        std::cout << "roi - X: " << _roi.x << std::endl;
+        std::cout << "roi - Y: " << _roi.y << std::endl;
+        std::cout << "roi - W: " << _roi.width << std::endl;
+        std::cout << "roi - H: " << _roi.height << std::endl;
+        int diff_y = -_roi.y;
+        std::cout << "diff_y: " << diff_y << std::endl;
         _roi.y = 0;
+        _roi.height = _roi.height - diff_y;
+        tracker_roi_inflated_.push_back(_roi);
+        std::cout << "TRIM roi - X: " << _roi.x << std::endl;
+        std::cout << "TRIM roi - Y: " << _roi.y << std::endl;
+        std::cout << "TRIM roi - W: " << _roi.width << std::endl;
+        std::cout << "TRIM roi - H: " << _roi.height << std::endl;
     }
     if((_roi.x + _roi.width) > img_width_)
     {
+        std::cout << "roi - X: " << _roi.x << std::endl;
+        std::cout << "roi - Y: " << _roi.y << std::endl;
+        std::cout << "roi - W: " << _roi.width << std::endl;
+        std::cout << "roi - H: " << _roi.height << std::endl;
         int diff_width = img_width_ - (_roi.x + _roi.width);
         _roi.width = _roi.width+diff_width;
+        tracker_roi_inflated_.push_back(_roi);
+        std::cout << "TRIM roi - X: " << _roi.x << std::endl;
+        std::cout << "TRIM roi - Y: " << _roi.y << std::endl;
+        std::cout << "TRIM roi - W: " << _roi.width << std::endl;
+        std::cout << "TRIM roi - H: " << _roi.height << std::endl;
     }
     if((_roi.y + _roi.height) > img_height_)
     {
+        std::cout << "roi - X: " << _roi.x << std::endl;
+        std::cout << "roi - Y: " << _roi.y << std::endl;
+        std::cout << "roi - W: " << _roi.width << std::endl;
+        std::cout << "roi - H: " << _roi.height << std::endl;
         int diff_height = img_height_ - (_roi.y + _roi.height);
         _roi.height = _roi.height+diff_height;
+        tracker_roi_inflated_.push_back(_roi);
+        std::cout << "TRIM roi - X: " << _roi.x << std::endl;
+        std::cout << "TRIM roi - Y: " << _roi.y << std::endl;
+        std::cout << "TRIM roi - W: " << _roi.width << std::endl;
+        std::cout << "TRIM roi - H: " << _roi.height << std::endl;
     }
 }
 
@@ -263,20 +307,16 @@ void ProcessorBrisk::inflateRoi(cv::Rect& _roi)
 
     _roi.x = _roi.x - inflation_rate;
     _roi.y = _roi.y - inflation_rate;
-    _roi.width = _roi.width + 2*inflation_rate;
-    _roi.height = _roi.height + 2*inflation_rate;
+    _roi.width = _roi.width + 2*inflation_rate -1;
+    _roi.height = _roi.height + 2*inflation_rate -1;
 }
 
 void ProcessorBrisk::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
 {
     inflateRoi(_roi);
-
-    std::cout << "INFL roi - X: " << _roi.x << std::endl;
-    std::cout << "INFL roi - Y: " << _roi.y << std::endl;
-    std::cout << "INFL roi - W: " << _roi.width << std::endl;
-    std::cout << "INFL roi - H: " << _roi.height << std::endl;
-
     trimRoi(_roi);
+
+    //tracker_roi_inflated_.push_back(_roi);
 
     _image_roi = _image(_roi);
 }
@@ -302,13 +342,11 @@ void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _
 
 }
 
-void ProcessorBrisk::drawRoiLastFrame(cv::Mat _image, std::list<cv::Rect> _roi_list)
+void ProcessorBrisk::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
 {
     for (auto roi : _roi_list)
     {
-        //cv::Rect s = roi;
-        //std::cout << "roi furthest position: " << s.y + s.width << std::endl;
-        cv::rectangle(_image, roi, cv::Scalar(88.0, 70.0, 254.0), 1, 8, 0);
+        cv::rectangle(_image, roi, _color, 1, 8, 0);
     }
     cv::imshow("Incoming", _image);
 }

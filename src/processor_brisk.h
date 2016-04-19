@@ -72,6 +72,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 //        bool known_or_new_features_ = false;
         cv::Mat image_last_, image_incoming_;
         std::list<cv::Rect> tracker_roi_;
+        std::list<cv::Rect> tracker_roi_inflated_;
         std::list<FeaturePointImage*> tracker_features_;
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
@@ -134,7 +135,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 
         virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
 
-        virtual void drawRoiLastFrame(cv::Mat _image, std::list<cv::Rect> _roi_list);
+        virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
 
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last,
                                             FeatureBaseList& _feature_list_incoming);
