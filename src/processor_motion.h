@@ -133,20 +133,25 @@ class ProcessorMotion : public ProcessorBase
          */
         void setOrigin(const Eigen::VectorXs& _x_origin, CaptureBase* _origin_ptr = nullptr);
 
-        // Helper functions:
-    protected:
 
-        void reset(const TimeStamp& _ts);
+
+        // Helper functions:
+    public: // TODO change to protected
+
+        void splitBuffer(const TimeStamp& _t_split, MotionBuffer& _newest_part);
+
+        void reset(CaptureMotion2* _capture_ptr);
 
         FrameBase* makeFrame(CaptureBase* _capture_ptr, FrameType _type = NON_KEY_FRAME);
-
-        void integrate();
-
-        void updateDt();
 
         MotionBuffer* getBufferPtr();
 
         const MotionBuffer* getBufferPtr() const;
+
+    protected:
+        void integrate();
+
+        void updateDt();
 
         // These are the pure virtual functions doing the mathematics
     protected:
@@ -290,12 +295,24 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 }
 }
 
-
-inline void ProcessorMotion::reset(const TimeStamp& _ts)
+inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer& _newest_part)
 {
-    // TODO what to do?
-    // change API to: void reset(CaptureMotion*)
-    // cut the buffer in 2 parts at _ts: use MotionBuffer::split()
+    last_ptr_->getBufferPtr()->splice(_t_split, _newest_part);
+}
+
+inline void ProcessorMotion::reset(CaptureMotion2* _capture_ptr)
+{
+    // Make a frame with the provided capture, if it did not have one:
+    if (_capture_ptr->getFramePtr() == nullptr)
+        // make keyframe
+        makeFrame(_capture_ptr, KEY_FRAME);
+    else
+    {
+        // set keyframe (maybe it was keyframe already, who cares)
+        _capture_ptr->getFramePtr()->setKey();
+    }
+    // Transfer the old half of the buffer to the new keyframe's Capture
+    splitBuffer(_capture_ptr->getTimeStamp(), *(_capture_ptr->getBufferPtr()));
 }
 
 inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
