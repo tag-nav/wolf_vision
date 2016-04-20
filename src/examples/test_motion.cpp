@@ -32,7 +32,7 @@ int main()
     TimeStamp t0, t;
     t0.setToNow();
     t = t0;
-    Scalar dt = .01;
+    Scalar dt = .01; // 100 Hz
 
     // Origin frame:
     Eigen::Vector3s pos(2,2,0);
@@ -55,7 +55,7 @@ int main()
 
 
     // Create Wolf tree nodes
-    Problem* problem_ = new Problem(FRM_PO_3D);
+    Problem* problem_ptr = new Problem(FRM_PO_3D);
 
     SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
 
@@ -64,7 +64,7 @@ int main()
     // Assemble Wolf tree by linking the nodes
     sensor_ptr->addProcessor(odom3d_ptr);
 
-    problem_->addSensor(sensor_ptr);
+    problem_ptr->addSensor(sensor_ptr);
 
     // Initialize
     odom3d_ptr->setOrigin(x0, t0);
