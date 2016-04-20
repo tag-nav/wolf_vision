@@ -215,8 +215,6 @@ class ProcessorMotion : public ProcessorBase
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
          *
-         * Hint: you can use a method setZero() in the Eigen::VectorXs class. See ProcessorOdom3d::Odom3dDelta for reference.
-         *
          * Examples (see documentation of the the class for info on Eigen::VectorXs):
          *   - 2D odometry: a 3-vector with all zeros, e.g. VectorXs::Zero(3)
          *   - 3D odometry: delta type is a PQ vector: 7-vector with [0,0,0, 0,0,0,1]
