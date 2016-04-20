@@ -341,7 +341,7 @@ typedef StateBlockList::iterator StateBlockIter;
 
 inline Scalar pi2pi(const Scalar& angle)
 {
-    return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
+    return (angle > 0 ? fmod(angle + Constants::PI, 2 * Constants::PI) - Constants::PI : fmod(angle - Constants::PI, 2 * Constants::PI) + Constants::PI);
 }
 
 } // namespace wolf

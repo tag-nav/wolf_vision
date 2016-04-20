@@ -52,6 +52,12 @@ class ProcessorOdom3d : public ProcessorMotion
         virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                      Eigen::VectorXs& _delta2_minus_delta1);
         Eigen::VectorXs deltaZero() const;
+        Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts){
+            Motion tmp(_motion_ref);
+            tmp.ts_ = _ts;
+            tmp.delta_ = deltaZero();
+            return tmp;
+        }
 
     private:
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;

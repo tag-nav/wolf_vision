@@ -94,11 +94,10 @@ int main()
     std::cout << "\nQuery states at asynchronous time values..." << std::endl;
 
     t = t0;
-    Scalar dt_2 = dt/2;
     dt = 0.0045; // new dt
     for (int i = 1; i <= 25; i++)
     {
-        std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->getState(t+dt_2).transpose() << std::endl;
+        std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->getState(t/*+dt/2*/).transpose() << std::endl;
         t += dt;
     }
     std::cout << "       ^^^^^^^   After the last time-stamp the buffer keeps returning the last member." << std::endl;
@@ -106,43 +105,54 @@ int main()
 
 
     // Split the buffer
-    MotionBuffer oldest_buffer;
 
     std::cout << "\nSplitting the buffer!\n---------------------" << std::endl;
     std::cout << "Original buffer:           < ";
-    for (const auto &s : cap_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
     // first split at non-exact timestamp
     TimeStamp t_split = t0 + 0.033;
     std::cout << "Split time:                  " << t_split - t0 << std::endl;
 
-    odom3d_ptr->splitBuffer(t_split, oldest_buffer);
+    FrameBase* new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME,odom3d_ptr->getState(t_split), t_split);
+
+    odom3d_ptr->keyFrameCallback(new_keyframe_ptr);
 
 
     std::cout << "New buffer: oldest part:   < ";
-    for (const auto &s : oldest_buffer.getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->getContainer() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
     std::cout << "Original keeps the newest: < ";
-    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
     std::cout << "All in one row:            < ";
-    for (const auto &s : oldest_buffer.getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->getContainer() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << "> " << t_split - t0 <<   " < ";
-    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
     // second split as exact timestamp
-    oldest_buffer.clear();
+
     t_split = t0 + 0.07;
     std::cout << "New split time:              " << t_split - t0 << std::endl;
-    odom3d_ptr->splitBuffer(t_split, oldest_buffer);
+
+    new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME,odom3d_ptr->getState(t_split), t_split);
+    odom3d_ptr->keyFrameCallback(new_keyframe_ptr);
+
     std::cout << "All in one row:            < ";
-    for (const auto &s : oldest_buffer.getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->getContainer() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << "> " << t_split - t0 <<   " < ";
-    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
 

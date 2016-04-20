@@ -44,7 +44,8 @@ struct Motion
  */
 class MotionBuffer{
     public:
-        void pushBack(const Motion _motion);
+        void pushFront(const Motion& _motion);
+        void pushBack(const Motion& _motion);
         void pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta, const Eigen::VectorXs& _delta_integr, const Eigen::MatrixXs& _cov = Eigen::MatrixXs(0,0), const Eigen::MatrixXs& _J_0 = Eigen::MatrixXs(0,0), const Eigen::MatrixXs& _J_t = Eigen::MatrixXs(0,0));
         void clear();
         unsigned int size() const;
@@ -57,14 +58,19 @@ class MotionBuffer{
         const Motion& getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
         void splice(const TimeStamp& _ts, MotionBuffer& _oldest_part);
-        const std::list<Motion>& getContainer() const;
+        std::list<Motion>& getContainer();
 
     private:
         std::list<Motion> container_;
 };
 
 
-inline void MotionBuffer::pushBack(const Motion _motion)
+inline void MotionBuffer::pushFront(const Motion& _motion)
+{
+    container_.push_front(_motion);
+}
+
+inline void MotionBuffer::pushBack(const Motion& _motion)
 {
     container_.push_back(_motion);
 }
@@ -165,7 +171,7 @@ inline void MotionBuffer::splice(const TimeStamp& _ts, MotionBuffer& _oldest_par
     }
 }
 
-inline const std::list<Motion>& MotionBuffer::getContainer() const
+inline std::list<Motion>& MotionBuffer::getContainer()
 {
     return container_;
 }

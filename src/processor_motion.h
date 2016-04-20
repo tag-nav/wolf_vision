@@ -223,6 +223,10 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
+        Motion motionZero(TimeStamp& _ts);
+
+        virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts) = 0;
+
     protected:
         // Attributes
         size_t x_size_;    ///< The size of the getState vector
@@ -281,7 +285,9 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeSta
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
     incoming_ptr_ = (CaptureMotion2*)(_incoming_ptr);
+    //    preProcess();
     integrate();
+    //    postProcess();
 }
 
 inline void ProcessorMotion::integrate()
@@ -298,20 +304,23 @@ inline void ProcessorMotion::integrate()
 
 inline void ProcessorMotion::reintegrate()
 {
-    Motion* prev_motion_ptr = nullptr;
-    for (auto motion : this->getBufferPtr()->getContainer())
+    Motion zero_motion; // call constructor with params
+    zero_motion.ts_ = origin_ptr_->getTimeStamp();
+    zero_motion.delta_ = deltaZero();
+    zero_motion.delta_integr_ = deltaZero();
+    zero_motion.jacobian_0.setIdentity();
+    zero_motion.covariance_.setZero();
+    this->getBufferPtr()->pushFront(zero_motion);
+
+
+    auto motion_it = getBufferPtr()->getContainer().begin();
+    auto prev_motion_it = motion_it;
+    motion_it++;
+
+    while (motion_it != getBufferPtr()->getContainer().end())
     {
-        if (prev_motion_ptr == nullptr){
-            // Set initial conditions
-            motion.delta_integr_.setZero();
-            motion.jacobian_0.setIdentity();
-            motion.covariance_.setZero();
-            prev_motion_ptr = &motion;
-        }
-        else
-        {
-            deltaPlusDelta(prev_motion_ptr->delta_integr_, motion.delta_, motion.delta_integr_);
-        }
+        deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, motion_it->delta_integr_);
+        motion_it++;
     }
 }
 
@@ -320,12 +329,21 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
     // get time stamp
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
     // create motion capture
-    CaptureMotion2* cap_ptr = new CaptureMotion2(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_));
+    CaptureMotion2* key_capture_ptr = new CaptureMotion2(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_));
     // add motion capture to keyframe
-    _keyframe_ptr->addCapture(cap_ptr);
+    _keyframe_ptr->addCapture(key_capture_ptr);
     // split the buffer
     // and give old buffer to capture
-    splitBuffer(ts, *(cap_ptr->getBufferPtr()));
+    splitBuffer(ts, *(key_capture_ptr->getBufferPtr()));
+    // interpolate individual delta
+    Motion mot = interpolate(
+            key_capture_ptr->getBufferPtr()->getContainer().back(), // last Motion of old buffer
+            getBufferPtr()->getContainer().front(), // first motion of new buffer
+            ts);
+    // add to old buffer
+    key_capture_ptr->getBufferPtr()->pushBack(mot);
+    // reset processor origin
+    origin_ptr_ = key_capture_ptr;
     // reintegrate own buffer
     reintegrate();
     return true;
@@ -418,6 +436,14 @@ inline const MotionBuffer* ProcessorMotion::getBufferPtr() const
 inline MotionBuffer* ProcessorMotion::getBufferPtr()
 {
     return last_ptr_->getBufferPtr();
+}
+
+inline Motion ProcessorMotion::motionZero(TimeStamp& _ts)
+{
+    return Motion(
+            {_ts, deltaZero(), deltaZero(), Eigen::MatrixXs::Zero(delta_size_, delta_size_), Eigen::MatrixXs::Identity(
+                    delta_size_, delta_size_),
+             Eigen::MatrixXs::Identity(delta_size_, delta_size_)});
 }
 
 } // namespace wolf
