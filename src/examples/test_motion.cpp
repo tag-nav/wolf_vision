@@ -8,18 +8,17 @@
 // Classes under test
 #include "processor_odom_3D.h"
 #include "capture_motion2.h"
-#include "problem.h"
 
 // Wolf includes
 #include "state_block.h"
 #include "state_quaternion.h"
+#include "problem.h"
 #include "wolf.h"
 
 // STL includes
-#include <map>
-#include <list>
-#include <algorithm>
-#include <iterator>
+//#include <list>
+//#include <algorithm>
+//#include <iterator>
 
 // General includes
 #include <iostream>
@@ -39,7 +38,7 @@ int main()
     Scalar dt = .01; // 100 Hz
 
     // Origin frame:
-    Eigen::Vector3s pos(2,2,0);
+    Eigen::Vector3s pos(0.5, -0.5-sqrt(0.5), 0);
     Eigen::Quaternions quat(Eigen::AngleAxiss(Constants::PI/4, Eigen::Vector3s(0,0,1)));
     Eigen::Vector7s x0;
     x0 << pos, quat.coeffs();
@@ -55,7 +54,7 @@ int main()
     // motion data
     Eigen::VectorXs data(6);
     data << 1, 0, 0,   // advance 1m
-            0, 0, 3.1416/4; // 45 deg
+            0, 0, Constants::PI/4; // 45 deg
 
 
     // Create Wolf tree nodes
@@ -76,11 +75,12 @@ int main()
     std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
+    std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
+    std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->getState().transpose() << std::endl;
+
     // Capture to use as container for all incoming data
     t += dt;
     CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_ptr, data);
-
-    std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
 
     for (int i = 0; i <= 8; i++)
     {
