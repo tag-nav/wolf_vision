@@ -38,7 +38,7 @@ class CaptureOdom3D : public CaptureMotion2
         }
 };
 
-inline CaptureOdom3D::CaptureOdom3D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data) :
+inline CaptureOdom3D::CaptureOdom3D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data = Eigen::Vector6s::Zero()) :
         CaptureMotion2(_ts, _sensor_ptr, _data)
 {
     //

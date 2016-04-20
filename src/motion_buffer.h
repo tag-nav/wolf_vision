@@ -19,9 +19,9 @@ struct Motion
     public:
         TimeStamp ts_;                  ///< Time stamp
         Eigen::VectorXs delta_;         ///< the integrated motion or delta-integral
+        Eigen::MatrixXs covariance_;    ///< covariance of the integrated delta
         Eigen::MatrixXs jacobian_0;     ///< Jacobian of the integrated delta wrt the initial delta
         Eigen::MatrixXs jacobian_ts;    ///< Jacobian of the integrated delta wrt the current delta
-        Eigen::MatrixXs covariance_;    ///< covariance of the integrated delta
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
 
@@ -43,24 +43,67 @@ struct Motion
  */
 class MotionBuffer{
     public:
-        MotionBuffer(){}
-        void pushBack(const Motion _motion){container_.push_back(_motion);}
-        void pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta) { container_.push_back(Motion( {_ts, _delta})); }
-        void clear(){container_.clear();}
-        unsigned int size() const {return container_.size();}
-        bool empty() const {return container_.empty();}
-        const TimeStamp& getTimeStamp() const {return container_.back().ts_;}
-        const Eigen::VectorXs& getDelta() const {return container_.back().delta_;}
-        const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const {
-            return getMotion(_ts).delta_;
-        }
-        const Motion& getMotion() const {return container_.back();}
+        void pushBack(const Motion _motion);
+        void pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta, const Eigen::MatrixXs& _cov = Eigen::MatrixXs(0,0), const Eigen::MatrixXs& _J_0 = Eigen::MatrixXs(0,0), const Eigen::MatrixXs& _J_t = Eigen::MatrixXs(0,0));
+        void clear();
+        unsigned int size() const;
+        bool empty() const;
+        const TimeStamp& getTimeStamp() const;
+        const Eigen::VectorXs& getDelta() const;
+        const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const;
+        const Motion& getMotion() const;
         const Motion& getMotion(const TimeStamp& _ts) const;
+        void split(TimeStamp& _ts, MotionBuffer& _oldest_part);
 
     private:
         std::list<Motion> container_;
 };
 
+
+inline void MotionBuffer::pushBack(const Motion _motion)
+{
+    container_.push_back(_motion);
+}
+
+inline void MotionBuffer::pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta, const Eigen::MatrixXs& _cov, const Eigen::MatrixXs& _J_0, const Eigen::MatrixXs& _J_t)
+{
+    container_.push_back(Motion({_ts, _delta, _cov, _J_0, _J_t}));
+}
+
+inline void MotionBuffer::clear()
+{
+    container_.clear();
+}
+
+inline unsigned int MotionBuffer::size() const
+{
+    return container_.size();
+}
+
+inline bool MotionBuffer::empty() const
+{
+    return container_.empty();
+}
+
+inline const TimeStamp& MotionBuffer::getTimeStamp() const
+{
+    return container_.back().ts_;
+}
+
+inline const Eigen::VectorXs& MotionBuffer::getDelta() const
+{
+    return container_.back().delta_;
+}
+
+inline const Eigen::VectorXs& MotionBuffer::getDelta(const TimeStamp& _ts) const
+{
+    return getMotion(_ts).delta_;
+}
+
+inline const Motion& MotionBuffer::getMotion() const
+{
+    return container_.back();
+}
 
 inline const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const
 {
@@ -75,10 +118,31 @@ inline const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const
         previous--;
 
     return *previous;
+}
 
-//    Motion copy = *previous;
-//
-//    return copy;
+inline void MotionBuffer::split(TimeStamp& _ts, MotionBuffer& _oldest_part)
+{
+    // TODO: Do the split. Look at this code:
+    //
+    //    std::list<std::string> lst1 = { "1", "2", "3", "4" };
+    //
+    //    for (const auto &s : lst1 ) std::cout << s << ' ';
+    //    std::cout << std::endl;
+    //
+    //    std::cout << std::endl;
+    //
+    //    std::list<std::string> lst2;
+    //    lst2.splice( lst2.begin(),
+    //                 lst1,
+    //                 lst1.begin(),
+    //                 std::next( lst1.begin(), lst1.size() / 2 ) );
+    //
+    //    for (const auto &s : lst2 ) std::cout << s << ' ';
+    //    std::cout << std::endl;
+    //
+    //    for (const auto &s : lst1 ) std::cout << s << ' ';
+    //    std::cout << std::endl;
+
 }
 
 } // namespace wolf
