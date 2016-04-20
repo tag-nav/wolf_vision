@@ -18,7 +18,8 @@ struct Motion
 {
     public:
         TimeStamp ts_;                  ///< Time stamp
-        Eigen::VectorXs delta_;         ///< the integrated motion or delta-integral
+        Eigen::VectorXs delta_;         ///< instantaneous motion delta
+        Eigen::VectorXs delta_integr_;  ///< the integrated motion or delta-integral
         Eigen::MatrixXs covariance_;    ///< covariance of the integrated delta
         Eigen::MatrixXs jacobian_0;     ///< Jacobian of the integrated delta wrt the initial delta
         Eigen::MatrixXs jacobian_ts;    ///< Jacobian of the integrated delta wrt the current delta
@@ -44,7 +45,7 @@ struct Motion
 class MotionBuffer{
     public:
         void pushBack(const Motion _motion);
-        void pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta, const Eigen::MatrixXs& _cov = Eigen::MatrixXs(0,0), const Eigen::MatrixXs& _J_0 = Eigen::MatrixXs(0,0), const Eigen::MatrixXs& _J_t = Eigen::MatrixXs(0,0));
+        void pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta, const Eigen::VectorXs& _delta_integr, const Eigen::MatrixXs& _cov = Eigen::MatrixXs(0,0), const Eigen::MatrixXs& _J_0 = Eigen::MatrixXs(0,0), const Eigen::MatrixXs& _J_t = Eigen::MatrixXs(0,0));
         void clear();
         unsigned int size() const;
         bool empty() const;
@@ -68,9 +69,9 @@ inline void MotionBuffer::pushBack(const Motion _motion)
     container_.push_back(_motion);
 }
 
-inline void MotionBuffer::pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta, const Eigen::MatrixXs& _cov, const Eigen::MatrixXs& _J_0, const Eigen::MatrixXs& _J_t)
+inline void MotionBuffer::pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta, const Eigen::VectorXs& _delta_integr, const Eigen::MatrixXs& _cov, const Eigen::MatrixXs& _J_0, const Eigen::MatrixXs& _J_t)
 {
-    container_.push_back(Motion({_ts, _delta, _cov, _J_0, _J_t}));
+    container_.push_back(Motion({_ts, _delta, _delta_integr, _cov, _J_0, _J_t}));
 }
 
 inline void MotionBuffer::clear()
@@ -95,12 +96,12 @@ inline const TimeStamp& MotionBuffer::getTimeStamp() const
 
 inline const Eigen::VectorXs& MotionBuffer::getDelta() const
 {
-    return container_.back().delta_;
+    return container_.back().delta_integr_;
 }
 
 inline const Eigen::VectorXs& MotionBuffer::getDelta(const TimeStamp& _ts) const
 {
-    return getMotion(_ts).delta_;
+    return getMotion(_ts).delta_integr_;
 }
 
 inline const Motion& MotionBuffer::getMotion() const

@@ -131,16 +131,18 @@ class ProcessorMotion : public ProcessorBase
          * \param _origin_ptr pointer to a Capture in the origin.
          *        This can be any type of Capture, derived from CaptureBase.
          */
-        void setOrigin(const Eigen::VectorXs& _x_origin, CaptureBase* _origin_ptr = nullptr);
+        void setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin);
+
+        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr);
 
 
 
         // Helper functions:
     public: // TODO change to protected
 
-        void splitBuffer(const TimeStamp& _t_split, MotionBuffer& _newest_part);
+        void splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part);
 
-        void reset(CaptureMotion2* _capture_ptr);
+        //        void reset(CaptureMotion2* _capture_ptr);
 
         FrameBase* makeFrame(CaptureBase* _capture_ptr, FrameType _type = NON_KEY_FRAME);
 
@@ -150,6 +152,7 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         void integrate();
+        void reintegrate();
 
         void updateDt();
 
@@ -236,9 +239,6 @@ class ProcessorMotion : public ProcessorBase
         Eigen::VectorXs delta_, delta_integrated_; ///< current delta and integrated deltas
         Eigen::VectorXs data_; ///< current data
 
-    private:
-        unsigned int count_;
-
 };
 
 
@@ -258,61 +258,81 @@ inline ProcessorMotion::~ProcessorMotion()
     //
 }
 
+inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin)
+{
+    // make origin Capture
+    origin_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_));
+    // Make a keyframe if not already there
+    makeFrame(origin_ptr_, KEY_FRAME);
+    // set the state of the origin keyframe
+    origin_ptr_->getFramePtr()->setState(_x_origin);
+
+    // make last Capture
+    last_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_));
+
+    // Make frame at last Capture
+    makeFrame(last_ptr_);
+
+    getBufferPtr()->clear();
+    getBufferPtr()->pushBack(_ts_origin, deltaZero(), deltaZero());
+}
 
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
     incoming_ptr_ = (CaptureMotion2*)(_incoming_ptr);
+    integrate();
+}
 
-    if (last_ptr_ == nullptr)
+inline void ProcessorMotion::integrate()
+{
+    // Set dt
+    updateDt();
+    // get data and convert it to delta
+    data2delta(incoming_ptr_->getData(), dt_, delta_);
+    // then integrate
+    deltaPlusDelta(getBufferPtr()->getDelta(), delta_, delta_integrated_);
+    // then push it into buffer
+    getBufferPtr()->pushBack(incoming_ptr_->getTimeStamp(), delta_, delta_integrated_);
+}
+
+inline void ProcessorMotion::reintegrate()
+{
+    Motion* prev_motion_ptr = nullptr;
+    for (auto motion : this->getBufferPtr()->getContainer())
     {
-        // first time
-        count_ = 1;
-        last_ptr_ = incoming_ptr_;
-
-        // Make keyframe
-        if (last_ptr_->getFramePtr() == nullptr)
-            makeFrame(last_ptr_);
-
-        delta_integrated_ = deltaZero();
-        getBufferPtr()->clear();
-        getBufferPtr()->pushBack(_incoming_ptr->getTimeStamp(), delta_integrated_);
-        integrate();
-        count_++;
-    }
-    else
-    {
-        if(count_ == 2)
-        {
-            // second time only
-            last_ptr_ = incoming_ptr_;
-
-            // make non-key frame
-            makeFrame(last_ptr_);
+        if (prev_motion_ptr == nullptr){
+            // Set initial conditions
+            motion.delta_integr_.setZero();
+            motion.jacobian_0.setIdentity();
+            motion.covariance_.setZero();
+            prev_motion_ptr = &motion;
         }
-        // second and other times
-        integrate();
-        count_ ++;
-}
-}
-
-inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer& _newest_part)
-{
-    last_ptr_->getBufferPtr()->splice(_t_split, _newest_part);
-}
-
-inline void ProcessorMotion::reset(CaptureMotion2* _capture_ptr)
-{
-    // Make a frame with the provided capture, if it did not have one:
-    if (_capture_ptr->getFramePtr() == nullptr)
-        // make keyframe
-        makeFrame(_capture_ptr, KEY_FRAME);
-    else
-    {
-        // set keyframe (maybe it was keyframe already, who cares)
-        _capture_ptr->getFramePtr()->setKey();
+        else
+        {
+            deltaPlusDelta(prev_motion_ptr->delta_integr_, motion.delta_, motion.delta_integr_);
+        }
     }
-    // Transfer the old half of the buffer to the new keyframe's Capture
-    splitBuffer(_capture_ptr->getTimeStamp(), *(_capture_ptr->getBufferPtr()));
+}
+
+inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
+{
+    // get time stamp
+    TimeStamp ts = _keyframe_ptr->getTimeStamp();
+    // create motion capture
+    CaptureMotion2* cap_ptr = new CaptureMotion2(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_));
+    // add motion capture to keyframe
+    _keyframe_ptr->addCapture(cap_ptr);
+    // split the buffer
+    // and give old buffer to capture
+    splitBuffer(ts, *(cap_ptr->getBufferPtr()));
+    // reintegrate own buffer
+    reintegrate();
+    return true;
+}
+
+inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part)
+{
+    last_ptr_->getBufferPtr()->splice(_t_split, _oldest_part);
 }
 
 inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
@@ -379,28 +399,6 @@ inline void ProcessorMotion::sumDeltas(CaptureMotion2* _cap1_ptr,
                                                          Eigen::VectorXs& _delta1_plus_delta2)
 {
     deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
-}
-
-inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, CaptureBase* _origin_ptr)
-{
-    origin_ptr_ = _origin_ptr;
-    if (origin_ptr_->getFramePtr() == nullptr)
-        makeFrame(origin_ptr_, KEY_FRAME);
-    else
-        origin_ptr_->getFramePtr()->setKey();
-    origin_ptr_->getFramePtr()->setState(_x_origin);
-}
-
-inline void ProcessorMotion::integrate()
-{
-    // Set dt
-    updateDt();
-    // get data and convert it to delta
-    data2delta(incoming_ptr_->getData(), dt_, delta_);
-    // then integrate
-    deltaPlusDelta(getBufferPtr()->getDelta(), delta_, delta_integrated_);
-    // then push it into buffer
-    getBufferPtr()->pushBack(incoming_ptr_->getTimeStamp(), delta_integrated_);
 }
 
 

@@ -67,12 +67,13 @@ int main()
     problem_->addSensor(sensor_ptr);
 
     // Initialize
-    odom3d_ptr->setOrigin(x0, new CaptureOdom3D(dt, sensor_ptr));
+    odom3d_ptr->setOrigin(x0, t0);
 
     std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     // New Capture
+    t += dt;
     CaptureMotion2* cap_ptr = new CaptureOdom3D(t, sensor_ptr, data);
 
     std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
