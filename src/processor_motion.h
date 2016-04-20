@@ -236,7 +236,8 @@ class ProcessorMotion : public ProcessorBase
         // helpers to avoid allocation
         Scalar dt_; ///< Time step
         Eigen::VectorXs x_; ///< state temporary
-        Eigen::VectorXs delta_, delta_integrated_; ///< current delta and integrated deltas
+        Eigen::VectorXs delta_; ///< current instantaneous delta
+        Eigen::VectorXs delta_integrated_; ///< integrated delta
         Eigen::VectorXs data_; ///< current data
 
 };
