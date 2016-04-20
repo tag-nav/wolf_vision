@@ -37,52 +37,6 @@ int main(int argc, char** argv)
     //Welcome message
     std::cout << std::endl << " ========= WOLF IMAGE test ===========" << std::endl << std::endl;
 
-
-    std::cout << "0" << std::endl;
-    //std::vector<float> points3D = {2,3,5};
-    cv::Point3f points3D;
-    points3D.x = 2.0;
-    points3D.y = 5.0;
-    points3D.z = 6.0;
-    std::vector<cv::Point3f> point_in_3D;
-    point_in_3D.push_back(points3D);
-    points3D.x = 4.0;
-    points3D.y = 2.0;
-    points3D.z = 1.0;
-    point_in_3D.push_back(points3D);
-
-    std::cout << "1" << std::endl;
-    std::vector<float> rot_mat = {0,0,0};
-    std::vector<float> trans_mat = {1,1,1};
-
-    std::cout << "2" << std::endl;
-    cv::Mat cam_mat(3,3,CV_32F);
-    cam_mat.row(0).col(0).setTo(1);
-    cam_mat.row(0).col(1).setTo(0);
-    cam_mat.row(0).col(2).setTo(2);
-    cam_mat.row(1).col(0).setTo(0);
-    cam_mat.row(1).col(1).setTo(1);
-    cam_mat.row(1).col(2).setTo(2);
-    cam_mat.row(2).col(0).setTo(0);
-    cam_mat.row(2).col(1).setTo(0);
-    cam_mat.row(2).col(2).setTo(1);
-
-    std::cout << "cam_mat[1,2]: " << cam_mat.row(1).col(0) << std::endl;
-
-    std::cout << "3" << std::endl;
-    std::vector<float> dist_coef = {0,0,0,0,0};
-    //std::vector<float> points2D;
-    std::vector<cv::Point2f> points2D;
-
-    std::cout << "4" << std::endl;
-    cv::projectPoints(point_in_3D,rot_mat,trans_mat,cam_mat,dist_coef,points2D);
-    std::cout << "5" << std::endl;
-
-    for (auto it : points2D)
-    {
-        std::cout << "points2D- X: " << it.x << "; Y: " << it.y << std::endl;
-    }
-
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
 
@@ -101,12 +55,10 @@ int main(int argc, char** argv)
     {
         if (std::string(argv[1]) == "0")
         {
-            // camera
-            //img_width = 640;
-            //img_height = 480;
-            filename = "/home/jtarraso/Escritorio/Test Brisk 1 - 40 40 - 1 punto.jpg";
+            //camera
+            filename = "0";
             img_width = 640;
-            img_height = 360;
+            img_height = 480;
         }
         else
         {
@@ -136,7 +88,7 @@ int main(int argc, char** argv)
 //    tracker_params.algorithm.max_new_features = 20;
 //    tracker_params.algorithm.min_features_th = 40;
 
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,9,9,4,20,30,30,0,1.0f,10);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,9,9,4,20,10,30,0,0.5f,10);
     sen_cam_->addProcessor(p_brisk);
 
     cv::VideoCapture capture(filename);

@@ -26,7 +26,7 @@ ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_col
     //    matcher_.train();  // These do not seem to be necessary
     img_width_ = _image_cols;
     img_height_ = _image_rows;
-    detector_separation_ = 20*_pattern_scales;
+    descriptor_radius_ = 21*_pattern_scales;
 }
 
 //Destructor
@@ -51,13 +51,18 @@ void ProcessorBrisk::preProcess()
     tracker_roi_inflated_.clear();
     tracker_target_.clear();
     tracker_candidates_.clear();
+
+    if(image_last_.data == image_incoming_.data)
+        std::cout << "--------------------------------------------------------------------------SON IGUALES (pre)" << std::endl;
 }
 
 void ProcessorBrisk::postProcess()
 {
     drawFeatures(last_ptr_);
+    if(image_last_.data == image_incoming_.data)
+        std::cout << "--------------------------------------------------------------------------SON IGUALES (post)" << std::endl;
     drawRoi(image_incoming_,tracker_roi_,cv::Scalar(88.0, 70.0, 254.0)); //normal roi
-    drawRoi(image_incoming_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0)); //inflated roi (now only shown when it collides with the the image)
+//    drawRoi(image_incoming_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
     drawTrackingFeatures(image_incoming_,tracker_target_,tracker_candidates_);
     cv::waitKey(0);
 }
@@ -70,7 +75,6 @@ bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature, Featu
 unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
                                     cv::Mat& new_descriptors)
 {
-    //cv::Mat _image_roi = _image(_roi);
     cv::Mat _image_roi;
 
     adaptRoi(_image_roi, _image, _roi);
@@ -151,8 +155,8 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 {
     std::cout << std::endl << "-------------- trackFeatures ----------------" << std::endl << std::endl;
 
-    unsigned int roi_width = 30;
-    unsigned int roi_heigth = 30;
+    unsigned int roi_width = 21;
+    unsigned int roi_heigth = 21;
     unsigned int roi_x;
     unsigned int roi_y;
     std::vector<cv::KeyPoint> candidate_keypoints;
@@ -192,23 +196,24 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                 std::cout << "distance: " << match.distance << std::endl;
             }
 
-            unsigned int lowestHD = 600;
+            unsigned int lowestHammDist = 600;
             //unsigned int row = 0;
             for(int i = 0; i < candidate_descriptors.rows; i++)
             {
                 double dist = cv::norm( feature_ptr->getDescriptor(), candidate_descriptors.row(i), cv::NORM_HAMMING);
                 std::cout << "====================================================dist[" << i << "]: " << dist << std::endl;
-                if(dist < lowestHD)
+                if(dist < lowestHammDist)
                 {
-                    lowestHD = dist;
+                    lowestHammDist = dist;
                     //row = i;
                 }
             }
 
             std::cout << "\tFound at: " << candidate_keypoints[cv_matches[0].trainIdx].pt << " --Hamming: " << cv_matches[0].distance << std::endl;
 
-            if (cv_matches[0].distance < 200)
+            if (cv_matches[0].distance < 120)
             {
+                std::cout << "tracked" << std::endl;
                 FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
@@ -218,12 +223,13 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                                                             1 - (Scalar)(cv_matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
 
             }
+            else
+            {
+                std::cout << "NOT tracked" << std::endl;
+            }
             for (unsigned int i = 0; i < candidate_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
             {
-                //if (i != cv_matches[0].trainIdx)
-                //{
-                    tracker_candidates_.push_back(candidate_keypoints[i].pt);
-                //}
+                tracker_candidates_.push_back(candidate_keypoints[i].pt);
 
             }
         }
@@ -239,76 +245,36 @@ void ProcessorBrisk::trimRoi(cv::Rect& _roi)
 {
     if(_roi.x < 0)
     {
-        std::cout << "roi - X: " << _roi.x << std::endl;
-        std::cout << "roi - Y: " << _roi.y << std::endl;
-        std::cout << "roi - W: " << _roi.width << std::endl;
-        std::cout << "roi - H: " << _roi.height << std::endl;
         int diff_x = -_roi.x;
-        std::cout << "diff_x: " << diff_x << std::endl;
         _roi.x = 0;
         _roi.width = _roi.width - diff_x;
-        tracker_roi_inflated_.push_back(_roi);
-        std::cout << "TRIM roi - X: " << _roi.x << std::endl;
-        std::cout << "TRIM roi - Y: " << _roi.y << std::endl;
-        std::cout << "TRIM roi - W: " << _roi.width << std::endl;
-        std::cout << "TRIM roi - H: " << _roi.height << std::endl;
     }
     if(_roi.y < 0)
     {
-        std::cout << "roi - X: " << _roi.x << std::endl;
-        std::cout << "roi - Y: " << _roi.y << std::endl;
-        std::cout << "roi - W: " << _roi.width << std::endl;
-        std::cout << "roi - H: " << _roi.height << std::endl;
         int diff_y = -_roi.y;
-        std::cout << "diff_y: " << diff_y << std::endl;
         _roi.y = 0;
         _roi.height = _roi.height - diff_y;
-        tracker_roi_inflated_.push_back(_roi);
-        std::cout << "TRIM roi - X: " << _roi.x << std::endl;
-        std::cout << "TRIM roi - Y: " << _roi.y << std::endl;
-        std::cout << "TRIM roi - W: " << _roi.width << std::endl;
-        std::cout << "TRIM roi - H: " << _roi.height << std::endl;
     }
     if((_roi.x + _roi.width) > img_width_)
     {
-        std::cout << "roi - X: " << _roi.x << std::endl;
-        std::cout << "roi - Y: " << _roi.y << std::endl;
-        std::cout << "roi - W: " << _roi.width << std::endl;
-        std::cout << "roi - H: " << _roi.height << std::endl;
         int diff_width = img_width_ - (_roi.x + _roi.width);
         _roi.width = _roi.width+diff_width;
-        tracker_roi_inflated_.push_back(_roi);
-        std::cout << "TRIM roi - X: " << _roi.x << std::endl;
-        std::cout << "TRIM roi - Y: " << _roi.y << std::endl;
-        std::cout << "TRIM roi - W: " << _roi.width << std::endl;
-        std::cout << "TRIM roi - H: " << _roi.height << std::endl;
     }
     if((_roi.y + _roi.height) > img_height_)
     {
-        std::cout << "roi - X: " << _roi.x << std::endl;
-        std::cout << "roi - Y: " << _roi.y << std::endl;
-        std::cout << "roi - W: " << _roi.width << std::endl;
-        std::cout << "roi - H: " << _roi.height << std::endl;
         int diff_height = img_height_ - (_roi.y + _roi.height);
         _roi.height = _roi.height+diff_height;
-        tracker_roi_inflated_.push_back(_roi);
-        std::cout << "TRIM roi - X: " << _roi.x << std::endl;
-        std::cout << "TRIM roi - Y: " << _roi.y << std::endl;
-        std::cout << "TRIM roi - W: " << _roi.width << std::endl;
-        std::cout << "TRIM roi - H: " << _roi.height << std::endl;
     }
 }
 
 void ProcessorBrisk::inflateRoi(cv::Rect& _roi)
 {
-    int inflation_rate = detector_separation_;
-
-    std::cout << "detector separation: " << detector_separation_ << std::endl;
+    int inflation_rate = descriptor_radius_;
 
     _roi.x = _roi.x - inflation_rate;
     _roi.y = _roi.y - inflation_rate;
-    _roi.width = _roi.width + 2*inflation_rate -1;
-    _roi.height = _roi.height + 2*inflation_rate -1;
+    _roi.width = _roi.width + 2*inflation_rate;
+    _roi.height = _roi.height + 2*inflation_rate;
 }
 
 void ProcessorBrisk::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
@@ -316,7 +282,7 @@ void ProcessorBrisk::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _ro
     inflateRoi(_roi);
     trimRoi(_roi);
 
-    //tracker_roi_inflated_.push_back(_roi);
+    tracker_roi_inflated_.push_back(_roi);
 
     _image_roi = _image(_roi);
 }

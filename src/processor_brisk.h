@@ -23,7 +23,7 @@
 
 namespace wolf {
 
-struct ImageTrackerParameters
+struct ProcessorImageParameters
 {
         struct Image
         {
@@ -33,6 +33,7 @@ struct ImageTrackerParameters
         struct Detector
         {
                 unsigned int threshold; ///< on the keypoint strength to declare it key-point
+                //threshold new features
                 unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
                 float pattern_scales; ///< Scale of the base pattern wrt the nominal one
                 unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at scale = 1.0
@@ -47,6 +48,7 @@ struct ImageTrackerParameters
         struct Matcher
         {
                 Scalar max_similarity_distance; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
+                //medida del roi para el matcher
         }matcher;
         struct Adtive_search
         {
@@ -73,12 +75,13 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         cv::Mat image_last_, image_incoming_;
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
-        std::list<FeaturePointImage*> tracker_features_;
+        //std::list<FeaturePointImage*> tracker_features_;
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
         int img_width_;
         int img_height_;
-        unsigned int detector_separation_;
+        unsigned int descriptor_radius_;
+        ProcessorImageParameters params_;
     public:
         ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols,
                        unsigned int _grid_width = 8, unsigned int _grid_height = 8, unsigned int _separation = 5,
