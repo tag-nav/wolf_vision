@@ -26,7 +26,8 @@ namespace wolf {
  *
  * The reference frame convention used are specified as follows.
  *   - The robot state R is expressed in a global or 'Map' reference frame, named M.
- *   - The sensor frame S is expressed wrt the robot frame R.
+ *   - The sensor frame S is expressed in the robot frame R.
+ *   - The motion data data_ is expressed in the sensor frame S.
  *
  * This processor, therefore, needs to convert the motion data in two ways:
  *   - First, convert the format of this data into a delta-state.
@@ -73,7 +74,7 @@ class ProcessorMotion : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion(ProcessorType _tp, Scalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size);
+        ProcessorMotion(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -247,10 +248,10 @@ class ProcessorMotion : public ProcessorBase
 };
 
 
-inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, Scalar _dt, size_t _state_size, size_t _delta_size, size_t _data_size) :
+inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size) :
         ProcessorBase(_tp), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size),
         origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
-        dt_(_dt), x_(_state_size),
+        dt_(0.0), x_(_state_size),
         delta_(_delta_size), delta_integrated_(_delta_size),
         data_(_data_size)
 {

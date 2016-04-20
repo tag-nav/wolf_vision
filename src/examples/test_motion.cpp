@@ -62,7 +62,7 @@ int main()
 
     SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
 
-    ProcessorOdom3d* odom3d_ptr = new ProcessorOdom3d(dt);
+    ProcessorOdom3d* odom3d_ptr = new ProcessorOdom3d();
 
     // Assemble Wolf tree by linking the nodes
     sensor_ptr->addProcessor(odom3d_ptr);

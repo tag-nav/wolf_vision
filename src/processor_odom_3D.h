@@ -38,7 +38,7 @@ namespace wolf {
 class ProcessorOdom3d : public ProcessorMotion
 {
     public:
-        ProcessorOdom3d(Scalar _delta_t = 0);
+        ProcessorOdom3d();
         virtual ~ProcessorOdom3d();
         virtual void data2delta(const Eigen::VectorXs& _data, const Scalar _dt, Eigen::VectorXs& _delta);
 
@@ -68,8 +68,8 @@ class ProcessorOdom3d : public ProcessorMotion
 };
 
 
-inline ProcessorOdom3d::ProcessorOdom3d(Scalar _delta_t) :
-        ProcessorMotion(PRC_ODOM_3D, _delta_t, 7, 7, 6),
+inline ProcessorOdom3d::ProcessorOdom3d() :
+        ProcessorMotion(PRC_ODOM_3D, 7, 7, 6),
         p1_(nullptr), //, q1_(nullptr)
         p2_(nullptr), //, q1_(nullptr)
         p_out_(nullptr), //, q1_(nullptr)
