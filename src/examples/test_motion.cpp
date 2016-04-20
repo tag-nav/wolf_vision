@@ -23,9 +23,13 @@
 
 // General includes
 #include <iostream>
+#include <iomanip>      // std::setprecision
 
 int main()
 {
+
+    std::cout << std::setprecision(3);
+
     using namespace wolf;
 
     // time
@@ -36,7 +40,7 @@ int main()
 
     // Origin frame:
     Eigen::Vector3s pos(2,2,0);
-    Eigen::Quaternions quat(Eigen::AngleAxiss(3.1416/4, Eigen::Vector3s(0,0,1)));
+    Eigen::Quaternions quat(Eigen::AngleAxiss(Constants::PI/4, Eigen::Vector3s(0,0,1)));
     Eigen::Vector7s x0;
     x0 << pos, quat.coeffs();
 
@@ -109,6 +113,7 @@ int main()
     for (const auto &s : cap_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
+    // first split at non-exact timestamp
     TimeStamp t_split = t0 + 0.033;
     std::cout << "Split time:                  " << t_split - t0 << std::endl;
 
@@ -123,6 +128,17 @@ int main()
     for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
+    std::cout << "All in one row:            < ";
+    for (const auto &s : oldest_buffer.getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    std::cout << "> " << t_split - t0 <<   " < ";
+    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    std::cout << ">" << std::endl;
+
+    // second split as exact timestamp
+    oldest_buffer.clear();
+    t_split = t0 + 0.07;
+    std::cout << "New split time:              " << t_split - t0 << std::endl;
+    odom3d_ptr->splitBuffer(t_split, oldest_buffer);
     std::cout << "All in one row:            < ";
     for (const auto &s : oldest_buffer.getContainer() ) std::cout << s.ts_ - t0 << ' ';
     std::cout << "> " << t_split - t0 <<   " < ";
