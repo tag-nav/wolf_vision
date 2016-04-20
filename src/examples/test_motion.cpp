@@ -108,7 +108,7 @@ int main()
 
     std::cout << "\nSplitting the buffer!\n---------------------" << std::endl;
     std::cout << "Original buffer:           < ";
-    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() )
+    for (const auto &s : odom3d_ptr->getBufferPtr()->get() )
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
@@ -122,20 +122,20 @@ int main()
 
 
     std::cout << "New buffer: oldest part:   < ";
-    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->getContainer() )
+    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->get() )
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
     std::cout << "Original keeps the newest: < ";
-    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() )
+    for (const auto &s : odom3d_ptr->getBufferPtr()->get() )
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
     std::cout << "All in one row:            < ";
-    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->getContainer() )
+    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->get() )
         std::cout << s.ts_ - t0 << ' ';
     std::cout << "> " << t_split - t0 <<   " < ";
-    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() )
+    for (const auto &s : odom3d_ptr->getBufferPtr()->get() )
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
@@ -148,10 +148,10 @@ int main()
     odom3d_ptr->keyFrameCallback(new_keyframe_ptr);
 
     std::cout << "All in one row:            < ";
-    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->getContainer() )
+    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->get() )
         std::cout << s.ts_ - t0 << ' ';
     std::cout << "> " << t_split - t0 <<   " < ";
-    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() )
+    for (const auto &s : odom3d_ptr->getBufferPtr()->get() )
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 

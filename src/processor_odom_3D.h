@@ -135,25 +135,12 @@ inline Eigen::VectorXs ProcessorOdom3d::deltaZero() const
 
 inline void ProcessorOdom3d::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
 {
-    //            std::cout << "Remap -----------------------------------------" << std::endl;
-    //            std::cout << "_x1:    " << _x1.transpose() << std::endl;
-    //            std::cout << "_x2:    " << _x2.transpose() << std::endl;
-    //            std::cout << "_x_out: " << _x_out.transpose() << std::endl;
-    //            _x_out << 1, 2, 3, 4, 5, 6, 7; // put some values to ckech the outputs below
-    //            std::cout << "_x_out: " << _x_out.transpose() << std::endl;
     new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x1.data());
     new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x1.data() + 3);
     new (&p2_) Eigen::Map<const Eigen::Vector3s>(_x2.data());
     new (&q2_) Eigen::Map<const Eigen::Quaternions>(_x2.data() + 3);
     new (&p_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data());
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_x_out.data() + 3);
-    //            std::cout << "p1_: " << p1_.transpose() << std::endl;
-    //            std::cout << "q1_: " << q1_.coeffs().transpose() << std::endl;
-    //            std::cout << "p2_: " << p2_.transpose() << std::endl;
-    //            std::cout << "q2_: " << q2_.coeffs().transpose() << std::endl;
-    //            std::cout << "p_out_: " << p_out_.transpose() << std::endl;
-    //            std::cout << "q_out_: " << q_out_.coeffs().transpose() << std::endl;
-    //            std::cout << "-----------------------------------------------" << std::endl;
 }
 
 } // namespace wolf

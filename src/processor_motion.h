@@ -229,8 +229,8 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         // Attributes
-        size_t x_size_;    ///< The size of the getState vector
-        size_t delta_size_;
+        size_t x_size_;    ///< The size of the state vector
+        size_t delta_size_;///< the size of the deltas
         size_t data_size_; ///< the size of the incoming data
         CaptureBase* origin_ptr_;
         CaptureMotion2* last_ptr_;
@@ -238,11 +238,11 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         // helpers to avoid allocation
-        Scalar dt_; ///< Time step
-        Eigen::VectorXs x_; ///< state temporary
-        Eigen::VectorXs delta_; ///< current instantaneous delta
-        Eigen::VectorXs delta_integrated_; ///< integrated delta
-        Eigen::VectorXs data_; ///< current data
+        Scalar dt_;                         ///< Time step
+        Eigen::VectorXs x_;                 ///< current state
+        Eigen::VectorXs delta_;             ///< current delta
+        Eigen::VectorXs delta_integrated_;  ///< integrated delta
+        Eigen::VectorXs data_;              ///< current data
 
 };
 
@@ -278,7 +278,7 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeSta
     // Make frame at last Capture
     makeFrame(last_ptr_);
 
-    getBufferPtr()->clear();
+    getBufferPtr()->get().clear();
     getBufferPtr()->pushBack(_ts_origin, deltaZero(), deltaZero());
 }
 
@@ -310,14 +310,14 @@ inline void ProcessorMotion::reintegrate()
     zero_motion.delta_integr_ = deltaZero();
     zero_motion.jacobian_0.setIdentity();
     zero_motion.covariance_.setZero();
-    this->getBufferPtr()->pushFront(zero_motion);
+    this->getBufferPtr()->get().push_front(zero_motion);
 
 
-    auto motion_it = getBufferPtr()->getContainer().begin();
+    auto motion_it = getBufferPtr()->get().begin();
     auto prev_motion_it = motion_it;
     motion_it++;
 
-    while (motion_it != getBufferPtr()->getContainer().end())
+    while (motion_it != getBufferPtr()->get().end())
     {
         deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, motion_it->delta_integr_);
         motion_it++;
@@ -337,11 +337,11 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
     splitBuffer(ts, *(key_capture_ptr->getBufferPtr()));
     // interpolate individual delta
     Motion mot = interpolate(
-            key_capture_ptr->getBufferPtr()->getContainer().back(), // last Motion of old buffer
-            getBufferPtr()->getContainer().front(), // first motion of new buffer
+            key_capture_ptr->getBufferPtr()->get().back(), // last Motion of old buffer
+            getBufferPtr()->get().front(), // first motion of new buffer
             ts);
     // add to old buffer
-    key_capture_ptr->getBufferPtr()->pushBack(mot);
+    key_capture_ptr->getBufferPtr()->get().push_back(mot);
     // reset processor origin
     origin_ptr_ = key_capture_ptr;
     // reintegrate own buffer
@@ -351,7 +351,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
 
 inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part)
 {
-    last_ptr_->getBufferPtr()->splice(_t_split, _oldest_part);
+    last_ptr_->getBufferPtr()->split(_t_split, _oldest_part);
 }
 
 inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
