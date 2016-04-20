@@ -67,7 +67,7 @@ class CaptureMotion2 : public CaptureBase
         }
 
         // member data:
-    protected:
+    private:
         Eigen::VectorXs data_; ///< Motion data in form of vector mandatory
         MotionBuffer buffer_; ///< Buffer of motions between this Capture and the next one.
 };
