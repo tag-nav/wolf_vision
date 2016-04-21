@@ -33,7 +33,7 @@ struct ProcessorImageParameters
         struct Detector
         {
                 unsigned int threshold; ///< on the keypoint strength to declare it key-point
-                //threshold new features
+                unsigned int threshold_new_features; ///< on the keypoint strength to declare it key-point
                 unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
                 float pattern_scales; ///< Scale of the base pattern wrt the nominal one
                 unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at scale = 1.0
@@ -41,6 +41,7 @@ struct ProcessorImageParameters
         struct Descriptor
         {
                 unsigned int size; ///< size of the descriptor vector (length of the vector)
+                unsigned int threshold; ///< on the keypoint strength to declare it key-point
                 unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
                 float pattern_scales; ///< Scale of the base pattern wrt the nominal one
                 unsigned int pattern_radius; ///< radius of the pattern used to compute the descriptor at the nominal scale
@@ -48,13 +49,16 @@ struct ProcessorImageParameters
         struct Matcher
         {
                 Scalar max_similarity_distance; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
-                //medida del roi para el matcher
+                int similarity_norm;
+                unsigned int roi_width;
+                unsigned int roi_height;
         }matcher;
         struct Adtive_search
         {
                 unsigned int grid_width; ///< cells per horizontal dimension of image
                 unsigned int grid_height; ///< cells per vertical dimension of image
                 unsigned int separation;
+                unsigned int adjust;
         }active_search;
         struct Algorithm
         {
@@ -66,27 +70,21 @@ struct ProcessorImageParameters
 class ProcessorBrisk : public ProcessorTrackerFeature
 {
     protected:
-        cv::BRISK detector_;    //brisk detector
-        cv::BRISK descriptor_;    //brisk descriptor
-        cv::BFMatcher matcher_; // Brute force matcher
-        ActiveSearchGrid act_search_grid_;
-        unsigned int min_features_th_;
-//        bool known_or_new_features_ = false;
-        cv::Mat image_last_, image_incoming_;
+        cv::BRISK detector_;                    // Brisk detector
+        cv::BRISK descriptor_;                  // Brisk descriptor
+        cv::BFMatcher matcher_;                 // Brute force matcher
+        ActiveSearchGrid act_search_grid_;      // Active Search
+        cv::Mat image_last_, image_incoming_;   // Images from the "last" and "incoming" Captures
+        ProcessorImageParameters params_;       // Struct with parameters of the processors
+
+        // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
-        //std::list<FeaturePointImage*> tracker_features_;
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
-        int img_width_;
-        int img_height_;
-        unsigned int descriptor_radius_;
-        ProcessorImageParameters params_;
+
     public:
-        ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols,
-                       unsigned int _grid_width = 8, unsigned int _grid_height = 8, unsigned int _separation = 5,
-                       unsigned int _max_new_features = 20, unsigned int _min_features_th = 10,
-                       int _threshold = 30, int _octaves = 0, float _pattern_scales = 1.0f, unsigned int _adjust = 10);
+        ProcessorBrisk(ProcessorImageParameters _params);
         virtual ~ProcessorBrisk();
 
     protected:
@@ -153,8 +151,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 inline bool ProcessorBrisk::voteForKeyFrame()
 {
     std::cout << "voteForKeyFrame?: "
-            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < min_features_th_) << std::endl;
-    return (incoming_ptr_->getFeatureListPtr()->size() < min_features_th_);
+            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_th) << std::endl;
+    return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_th);
 }
 
 inline ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr)

@@ -10,23 +10,22 @@ namespace wolf
 {
 
 //Constructor
-ProcessorBrisk::ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols, unsigned int _grid_width,
-                               unsigned int _grid_height, unsigned int _separation, unsigned int _max_new_features, unsigned int _min_features_th,
-                               int _threshold, int _octaves, float _pattern_scales, unsigned int _adjust) :
+ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params) :
         ProcessorTrackerFeature(PRC_TRACKER_BRISK),
-        detector_(_threshold, _octaves, _pattern_scales),
-        descriptor_(_threshold, _octaves, _pattern_scales),
-        matcher_(cv::NORM_HAMMING),
-        act_search_grid_(_image_rows, _image_cols, _grid_width, _grid_height, _adjust-_separation+1, _separation),
-        min_features_th_(_min_features_th)
+        detector_(_params.detector.threshold, _params.detector.octaves, _params.detector.pattern_scales),
+        descriptor_(_params.descriptor.threshold, _params.descriptor.octaves, _params.descriptor.pattern_scales),
+        matcher_(_params.matcher.similarity_norm),
+        act_search_grid_(_params.image.height, _params.image.width, _params.active_search.grid_width,
+                         _params.active_search.grid_height, _params.active_search.adjust-_params.active_search.separation+1,
+                         _params.active_search.separation)
 {
-    ProcessorTrackerFeature::setMaxNewFeatures(_max_new_features);
+    ProcessorTrackerFeature::setMaxNewFeatures(_params.algorithm.max_new_features);
     //    detector_.create("BRISK");    // These do not seem to be necessary
     //    descriptor_.create("BRISK");  // These do not seem to be necessary
     //    matcher_.train();  // These do not seem to be necessary
-    img_width_ = _image_cols;
-    img_height_ = _image_rows;
-    descriptor_radius_ = 21*_pattern_scales;
+    params_ = _params;
+    params_.detector.pattern_radius = 21*params_.detector.pattern_scales;
+    params_.descriptor.pattern_radius = 21*params_.descriptor.pattern_scales;
 }
 
 //Destructor
@@ -46,7 +45,7 @@ void ProcessorBrisk::preProcess()
 
     act_search_grid_.renew();
 
-
+    // Clear of the lists used to debug
     tracker_roi_.clear();
     tracker_roi_inflated_.clear();
     tracker_target_.clear();
@@ -62,7 +61,7 @@ void ProcessorBrisk::postProcess()
     if(image_last_.data == image_incoming_.data)
         std::cout << "--------------------------------------------------------------------------SON IGUALES (post)" << std::endl;
     drawRoi(image_incoming_,tracker_roi_,cv::Scalar(88.0, 70.0, 254.0)); //normal roi
-//    drawRoi(image_incoming_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
+    //drawRoi(image_incoming_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
     drawTrackingFeatures(image_incoming_,tracker_target_,tracker_candidates_);
     cv::waitKey(0);
 }
@@ -155,8 +154,8 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 {
     std::cout << std::endl << "-------------- trackFeatures ----------------" << std::endl << std::endl;
 
-    unsigned int roi_width = 21;
-    unsigned int roi_heigth = 21;
+    unsigned int roi_width = params_.matcher.roi_width;
+    unsigned int roi_heigth = params_.matcher.roi_height;
     unsigned int roi_x;
     unsigned int roi_y;
     std::vector<cv::KeyPoint> candidate_keypoints;
@@ -180,6 +179,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
 
+        //lists used to debug
         tracker_target_.push_back(feature_ptr->getKeypoint().pt);
         tracker_roi_.push_back(roi);
 
@@ -189,43 +189,34 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
             matcher_.match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
 
-            for(auto iterat : cv_matches)
-            {
-                cv::DMatch match = iterat;
-                std::cout << "index of the candidate selected (trainIdx): " << match.trainIdx << std::endl;
-                std::cout << "distance: " << match.distance << std::endl;
-            }
+            std::cout << "Index of the candidate selected (trainIdx): " << cv_matches[0].trainIdx << std::endl;
 
-            unsigned int lowestHammDist = 600;
-            //unsigned int row = 0;
             for(int i = 0; i < candidate_descriptors.rows; i++)
             {
                 double dist = cv::norm( feature_ptr->getDescriptor(), candidate_descriptors.row(i), cv::NORM_HAMMING);
-                std::cout << "====================================================dist[" << i << "]: " << dist << std::endl;
-                if(dist < lowestHammDist)
-                {
-                    lowestHammDist = dist;
-                    //row = i;
-                }
+                std::cout << "============================= dist[" << i << "]: " << dist << std::endl;
             }
 
             std::cout << "\tFound at: " << candidate_keypoints[cv_matches[0].trainIdx].pt << " --Hamming: " << cv_matches[0].distance << std::endl;
 
-            if (cv_matches[0].distance < 120)
+            Scalar normalized_hamming_distance = 1 - (Scalar)(cv_matches[0].distance)/params_.descriptor.size;
+            std::cout << "normalized hamming distance: " << normalized_hamming_distance << std::endl;
+
+            if (normalized_hamming_distance > params_.matcher.max_similarity_distance)
             {
-                std::cout << "tracked" << std::endl;
+                std::cout << "tracked" << std::endl << std::endl;
                 FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
                 _feature_list_out.push_back(incoming_point_ptr);
 
                 _feature_matches[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
-                                                            1 - (Scalar)(cv_matches[0].distance)/512); //FIXME: 512 is the maximum HAMMING distance
+                                                            normalized_hamming_distance); //FIXME: 512 is the maximum HAMMING distance
 
             }
             else
             {
-                std::cout << "NOT tracked" << std::endl;
+                std::cout << "NOT tracked" << std::endl << std::endl;
             }
             for (unsigned int i = 0; i < candidate_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
             {
@@ -255,21 +246,22 @@ void ProcessorBrisk::trimRoi(cv::Rect& _roi)
         _roi.y = 0;
         _roi.height = _roi.height - diff_y;
     }
-    if((_roi.x + _roi.width) > img_width_)
+    if((unsigned int)(_roi.x + _roi.width) > params_.image.width)
     {
-        int diff_width = img_width_ - (_roi.x + _roi.width);
+        int diff_width = params_.image.width - (_roi.x + _roi.width);
         _roi.width = _roi.width+diff_width;
     }
-    if((_roi.y + _roi.height) > img_height_)
+    if((unsigned int)(_roi.y + _roi.height) > params_.image.height)
     {
-        int diff_height = img_height_ - (_roi.y + _roi.height);
+        int diff_height = params_.image.height - (_roi.y + _roi.height);
         _roi.height = _roi.height+diff_height;
     }
 }
 
 void ProcessorBrisk::inflateRoi(cv::Rect& _roi)
 {
-    int inflation_rate = descriptor_radius_;
+    // now both the detector and descriptor patter_radius is the same, but when not, shouldn't the method have that as input parameter?
+    int inflation_rate = params_.descriptor.pattern_radius;
 
     _roi.x = _roi.x - inflation_rate;
     _roi.y = _roi.y - inflation_rate;

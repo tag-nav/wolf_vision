@@ -79,16 +79,19 @@ int main(int argc, char** argv)
     Problem* wolf_problem_ = new Problem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
 
-//    ImageTrackerParameters tracker_params;
-//    tracker_params.image = {img_width,  img_height};
-//    tracker_params.detector = {30, 0, 1.0f, 5};
-//    tracker_params.descriptor = {512, 5};
-//    tracker_params.matcher.max_similarity_distance = 0.3;
-//    tracker_params.active_search = {8, 8};
-//    tracker_params.algorithm.max_new_features = 20;
-//    tracker_params.algorithm.min_features_th = 40;
+    ProcessorImageParameters tracker_params;
+    tracker_params.image = {img_width,  img_height};
+    tracker_params.detector = {30, 70, 0, 0.5f};
+    tracker_params.descriptor = {512, 30, 0, 0.5f};
+    tracker_params.matcher.max_similarity_distance = 0.80;
+    tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
+    tracker_params.matcher.roi_width = 21;
+    tracker_params.matcher.roi_height = 21;
+    tracker_params.active_search = {9, 9, 4, 10};
+    tracker_params.algorithm.max_new_features = 20;
+    tracker_params.algorithm.min_features_th = 10;
 
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,9,9,4,20,10,30,0,0.5f,10);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params);
     sen_cam_->addProcessor(p_brisk);
 
     cv::VideoCapture capture(filename);
