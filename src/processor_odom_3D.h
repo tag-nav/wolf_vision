@@ -70,12 +70,12 @@ class ProcessorOdom3d : public ProcessorMotion
 
 inline ProcessorOdom3d::ProcessorOdom3d() :
         ProcessorMotion(PRC_ODOM_3D, 7, 7, 6),
-        p1_(nullptr), //, q1_(nullptr)
-        p2_(nullptr), //, q1_(nullptr)
-        p_out_(nullptr), //, q1_(nullptr)
-        q1_(nullptr), //, q1_(nullptr)
-        q2_(nullptr), //, q1_(nullptr)
-        q_out_(nullptr) //, q1_(nullptr)
+        p1_(nullptr),
+        p2_(nullptr),
+        p_out_(nullptr),
+        q1_(nullptr),
+        q2_(nullptr),
+        q_out_(nullptr)
 {
 }
 
@@ -88,7 +88,7 @@ inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const Scal
     _delta.head(3) = _data.head(3);
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data() + 3);
 
-    Eigen::v2q(_data.tail(3), q_out_); // Better use q_out_, but it is a Map. Overload v2q() with Maps.
+    Eigen::v2q(_data.tail(3), q_out_);
 }
 
 inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)

@@ -63,7 +63,7 @@ class CaptureMotion2 : public CaptureBase
             return &buffer_;
         }
         const Eigen::VectorXs& getDelta() const{
-            return buffer_.getDelta();
+            return buffer_.get().back().delta_integr_;
         }
 
         // member data:

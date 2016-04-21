@@ -278,7 +278,7 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeSta
     makeFrame(last_ptr_);
 
     getBufferPtr()->get().clear();
-    getBufferPtr()->pushBack(_ts_origin, deltaZero(), deltaZero());
+    getBufferPtr()->get().push_back(Motion({_ts_origin, deltaZero(), deltaZero()}));
 }
 
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
@@ -296,9 +296,9 @@ inline void ProcessorMotion::integrate()
     // get data and convert it to delta
     data2delta(incoming_ptr_->getData(), dt_, delta_);
     // then integrate
-    deltaPlusDelta(getBufferPtr()->getDelta(), delta_, delta_integrated_);
+    deltaPlusDelta(getBufferPtr()->get().back().delta_integr_, delta_, delta_integrated_);
     // then push it into buffer
-    getBufferPtr()->pushBack(incoming_ptr_->getTimeStamp(), delta_, delta_integrated_);
+    getBufferPtr()->get().push_back(Motion({incoming_ptr_->getTimeStamp(), delta_, delta_integrated_}));
 }
 
 inline void ProcessorMotion::reintegrate()
@@ -389,17 +389,17 @@ inline const Eigen::VectorXs& ProcessorMotion::getState()
 
 inline const void ProcessorMotion::getState(Eigen::VectorXs& _x)
 {
-    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(), _x);
+    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, _x);
 }
 
 inline const Motion& ProcessorMotion::getMotion() const
 {
-    return getBufferPtr()->getMotion();
+    return getBufferPtr()->get().back();
 }
 
 inline void ProcessorMotion::getMotion(Motion& _motion) const
 {
-    getBufferPtr()->getMotion(_motion);
+    _motion = getBufferPtr()->get().back();
 }
 
 inline const Motion& ProcessorMotion::getMotion(const TimeStamp& _ts) const
@@ -422,7 +422,7 @@ inline void ProcessorMotion::sumDeltas(CaptureMotion2* _cap1_ptr,
 
 inline void ProcessorMotion::updateDt()
 {
-    dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->getTimeStamp();
+    dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->get().back().ts_;
 }
 
 
