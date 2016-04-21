@@ -9,6 +9,7 @@
 #define SRC_PROCESSOR_ODOM_2D_H_
 
 #include "processor_motion.h"
+#include "constraint_odom_2D.h"
 
 
 namespace wolf {
@@ -54,8 +55,11 @@ class ProcessorOdom2d : public ProcessorMotion
             Motion tmp(_motion_ref);
             tmp.ts_ = _ts;
             tmp.delta_ = deltaZero();
+            tmp.delta_cov_ = Eigen::MatrixXs::Zero(tmp.delta_.size(), tmp.delta_.size());
             return tmp;
         }
+
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin);
 };
 
 
@@ -154,6 +158,11 @@ inline void ProcessorOdom2d::deltaMinusDelta(const Eigen::VectorXs& _delta1, con
 inline Eigen::VectorXs ProcessorOdom2d::deltaZero() const
 {
     return Eigen::VectorXs::Zero(3);
+}
+
+inline ConstraintBase* ProcessorOdom2d::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
+{
+    return new ConstraintOdom2D(_feature_motion, _frame_origin);
 }
 
 } // namespace wolf

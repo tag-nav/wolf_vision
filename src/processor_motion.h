@@ -136,11 +136,7 @@ class ProcessorMotion : public ProcessorBase
          */
         void deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1, const Eigen::MatrixXs& _delta_cov2,
                                   const Eigen::MatrixXs& _jacobian1, const Eigen::MatrixXs& _jacobian2,
-                                  Eigen::MatrixXs& _delta_cov1_plus_delta_cov2)
-        {
-            _delta_cov1_plus_delta_cov2 = _jacobian1 * _delta_cov1 * _jacobian1.transpose()
-                    + _jacobian2 * _delta_cov2 * _jacobian2.transpose();
-        }
+                                  Eigen::MatrixXs& _delta_cov1_plus_delta_cov2);
 
         /** Set the origin of all motion for this processor
          * \param _x_origin the state at the origin
@@ -260,6 +256,8 @@ class ProcessorMotion : public ProcessorBase
 
         virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts) = 0;
 
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin) = 0;
+
     protected:
         // Attributes
         size_t x_size_;    ///< The size of the state vector
@@ -296,6 +294,26 @@ inline ProcessorMotion::~ProcessorMotion()
     //
 }
 
+inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1,
+                                                  const Eigen::MatrixXs& _delta_cov2, const Eigen::MatrixXs& _jacobian1,
+                                                  const Eigen::MatrixXs& _jacobian2,
+                                                  Eigen::MatrixXs& _delta_cov1_plus_delta_cov2)
+{
+    //    std::cout << "delta_1_cov" << std::endl;
+    //    std::cout << _delta_cov1 << std::endl;
+    //    std::cout << "delta_2_cov" << std::endl;
+    //    std::cout << _delta_cov2 << std::endl;
+    //    std::cout << "_jacobian1" << std::endl;
+    //    std::cout << _jacobian1 << std::endl;
+    //    std::cout << "_jacobian2" << std::endl;
+    //    std::cout << _jacobian2 << std::endl;
+
+    _delta_cov1_plus_delta_cov2 = _jacobian1 * _delta_cov1 * _jacobian1.transpose()
+            + _jacobian2 * _delta_cov2 * _jacobian2.transpose();
+    //    std::cout << "_delta_cov1_plus_delta_cov2" << std::endl;
+    //    std::cout << _delta_cov1_plus_delta_cov2 << std::endl;
+}
+
 inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin)
 {
     // make origin Capture
@@ -314,7 +332,9 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeSta
     makeFrame(last_ptr_);
 
     getBufferPtr()->get().clear();
-    getBufferPtr()->get().push_back(Motion( {_ts_origin, deltaZero(), deltaZero()}));
+    getBufferPtr()->get().push_back(
+            Motion( {_ts_origin, deltaZero(), deltaZero(), Eigen::MatrixXs::Zero(delta_size_, delta_size_),
+                     Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
 }
 
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
@@ -331,15 +351,16 @@ inline void ProcessorMotion::integrate()
     updateDt();
     // get data and convert it to delta
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_, delta_, delta_cov_);
-    // then integrate
+    // then integrate delta
     deltaPlusDelta(getBufferPtr()->get().back().delta_integr_, delta_, delta_integrated_, jacobian_prev_,
                    jacobian_curr_);
-    deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_ingr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,
+    // and covariance
+    deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,
                          delta_integrated_cov_);
     // then push it into buffer
     getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_,
-                                             delta_integrated_cov_, Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                             Eigen::MatrixXs::Zero(data_size_, data_size_)}));
+                                             delta_integrated_cov_, Eigen::MatrixXs::Zero(delta_size_, delta_size_),
+                                             Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
 }
 
 inline void ProcessorMotion::reintegrate()
@@ -347,18 +368,23 @@ inline void ProcessorMotion::reintegrate()
     Motion zero_motion; // call constructor with params
     zero_motion.ts_ = origin_ptr_->getTimeStamp();
     zero_motion.delta_ = deltaZero();
+    zero_motion.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
     zero_motion.delta_integr_ = deltaZero();
     zero_motion.jacobian_0.setIdentity();
-    zero_motion.delta_ingr_cov_.setZero();
+    zero_motion.delta_integr_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);;
     this->getBufferPtr()->get().push_front(zero_motion);
 
     auto motion_it = getBufferPtr()->get().begin();
     auto prev_motion_it = motion_it;
     motion_it++;
 
+    Eigen::MatrixXs jacobian_prev, jacobian_curr;
     while (motion_it != getBufferPtr()->get().end())
     {
-        //deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, motion_it->delta_integr_);
+        deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, motion_it->delta_integr_, jacobian_prev, jacobian_curr);
+        std::cout << "delta reintegrated" << std::endl;
+        deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_, motion_it->delta_cov_, jacobian_prev, jacobian_curr, motion_it->delta_integr_cov_);
+        std::cout << "delta_cov reintegrated" << std::endl;
         motion_it++;
         prev_motion_it++;
     }
@@ -371,21 +397,33 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
     // create motion capture
     CaptureMotion2* key_capture_ptr = new CaptureMotion2(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                                          Eigen::MatrixXs::Zero(data_size_, data_size_));
+
     // add motion capture to keyframe
     _keyframe_ptr->addCapture(key_capture_ptr);
+
     // split the buffer
     // and give old buffer to capture
     splitBuffer(ts, *(key_capture_ptr->getBufferPtr()));
+
     // interpolate individual delta
     Motion mot = interpolate(key_capture_ptr->getBufferPtr()->get().back(), // last Motion of old buffer
             getBufferPtr()->get().front(), // first motion of new buffer
             ts);
+
     // add to old buffer
     key_capture_ptr->getBufferPtr()->get().push_back(mot);
+
+    // create motion constraint and add it to the new keyframe
+    FeatureBase* key_feature_ptr = new FeatureBase(FEAT_MOTION, key_capture_ptr->getBufferPtr()->get().back().delta_integr_, key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_);
+    key_capture_ptr->addFeature(key_feature_ptr);
+    key_feature_ptr->addConstraint(createConstraint(key_feature_ptr, origin_ptr_->getFramePtr()));
+
     // reset processor origin
     origin_ptr_ = key_capture_ptr;
+
     // reintegrate own buffer
     reintegrate();
+
     return true;
 }
 
@@ -474,9 +512,9 @@ inline MotionBuffer* ProcessorMotion::getBufferPtr()
 inline Motion ProcessorMotion::motionZero(TimeStamp& _ts)
 {
     return Motion(
-            {   _ts, deltaZero(), deltaZero(), Eigen::MatrixXs::Zero(delta_size_, delta_size_), Eigen::MatrixXs::Zero(delta_size_, delta_size_),
-                Eigen::MatrixXs::Identity(delta_size_, delta_size_), Eigen::MatrixXs::Identity(delta_size_,
-                        delta_size_)});
+            {_ts, deltaZero(), deltaZero(), Eigen::MatrixXs::Zero(delta_size_, delta_size_), Eigen::MatrixXs::Zero(
+                    delta_size_, delta_size_),
+             Eigen::MatrixXs::Identity(delta_size_, delta_size_), Eigen::MatrixXs::Identity(delta_size_, delta_size_)});
 }
 
 } // namespace wolf

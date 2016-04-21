@@ -9,6 +9,7 @@
 #define SRC_PROCESSOR_ODOM_3D_H_
 
 #include "processor_motion.h"
+#include "constraint_odom_2D.h"
 
 
 namespace wolf {
@@ -60,8 +61,11 @@ class ProcessorOdom3d : public ProcessorMotion
             Motion tmp(_motion_ref);
             tmp.ts_ = _ts;
             tmp.delta_ = deltaZero();
+            tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
             return tmp;
         }
+
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin);
 
     private:
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
@@ -95,7 +99,7 @@ inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const Eige
 
     Eigen::v2q(_data.tail(3), q_out_);
     // TODO: fill delta covariance
-    _delta_cov = Eigen::MatrixXs::Identity(_delta.size(), _delta.size()) * 0.01;
+    _delta_cov = Eigen::MatrixXs::Identity(delta_size_, delta_size_) * 0.01;
 }
 
 inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
@@ -135,7 +139,8 @@ inline void ProcessorOdom3d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     q_out_ = q1_ * q2_;
 
     // TODO: fill the jacobians
-
+    _jacobian1 = Eigen::MatrixXs::Identity(delta_size_,delta_size_);
+    _jacobian2 = Eigen::MatrixXs::Identity(delta_size_,delta_size_);
 }
 
 inline void ProcessorOdom3d::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -155,6 +160,11 @@ inline Eigen::VectorXs ProcessorOdom3d::deltaZero() const
     Eigen::VectorXs delta_zero(7);
     delta_zero << 0, 0, 0, 0, 0, 0, 1;;
     return delta_zero;
+}
+
+inline ConstraintBase* ProcessorOdom3d::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
+{
+    return new ConstraintOdom2D(_feature_motion, _frame_origin);
 }
 
 inline void ProcessorOdom3d::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)

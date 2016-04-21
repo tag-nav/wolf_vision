@@ -234,6 +234,7 @@ typedef enum
     FEAT_GPS_FIX,
     FEAT_GPS_PR,
     FEAT_ODOM_2D,
+    FEAT_MOTION,
     FEAT_POINT_IMAGE
 }FeatureType;
 
