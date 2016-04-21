@@ -17,15 +17,15 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params) :
         matcher_(_params.matcher.similarity_norm),
         act_search_grid_(_params.image.height, _params.image.width, _params.active_search.grid_width,
                          _params.active_search.grid_height, _params.active_search.adjust-_params.active_search.separation+1,
-                         _params.active_search.separation)
+                         _params.active_search.separation),
+        params_(_params)
 {
     ProcessorTrackerFeature::setMaxNewFeatures(_params.algorithm.max_new_features);
     //    detector_.create("BRISK");    // These do not seem to be necessary
     //    descriptor_.create("BRISK");  // These do not seem to be necessary
     //    matcher_.train();  // These do not seem to be necessary
-    params_ = _params;
-    params_.detector.pattern_radius = 21*params_.detector.pattern_scales;
-    params_.descriptor.pattern_radius = 21*params_.descriptor.pattern_scales;
+    params_.detector.pattern_radius = params_.detector.default_pattern_radius*params_.detector.pattern_scales;
+    params_.descriptor.pattern_radius = params_.descriptor.default_pattern_radius*params_.descriptor.pattern_scales;
 }
 
 //Destructor
@@ -60,10 +60,10 @@ void ProcessorBrisk::postProcess()
     drawFeatures(last_ptr_);
     if(image_last_.data == image_incoming_.data)
         std::cout << "--------------------------------------------------------------------------SON IGUALES (post)" << std::endl;
-    drawRoi(image_incoming_,tracker_roi_,cv::Scalar(88.0, 70.0, 254.0)); //normal roi
+    drawRoi(image_last_,tracker_roi_,cv::Scalar(88.0, 70.0, 254.0)); //normal roi
     //drawRoi(image_incoming_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
-    drawTrackingFeatures(image_incoming_,tracker_target_,tracker_candidates_);
-    cv::waitKey(0);
+    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
+    cv::waitKey(200);
 }
 
 bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
@@ -93,8 +93,6 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_feat
     std::cout << std::endl << "\n================= detectNewFeatures =============" << std::endl << std::endl;
     resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
     cv::Rect roi;
-    ///START OF THE SEARCH
-
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
     unsigned int n_new_features = 0;
@@ -199,10 +197,10 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
             std::cout << "\tFound at: " << candidate_keypoints[cv_matches[0].trainIdx].pt << " --Hamming: " << cv_matches[0].distance << std::endl;
 
-            Scalar normalized_hamming_distance = 1 - (Scalar)(cv_matches[0].distance)/params_.descriptor.size;
-            std::cout << "normalized hamming distance: " << normalized_hamming_distance << std::endl;
+            Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/params_.descriptor.size;
+            std::cout << "normalized hamming distance: " << normalized_score << std::endl;
 
-            if (normalized_hamming_distance > params_.matcher.max_similarity_distance)
+            if (normalized_score > params_.matcher.min_normalized_score)
             {
                 std::cout << "tracked" << std::endl << std::endl;
                 FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
@@ -211,7 +209,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                 _feature_list_out.push_back(incoming_point_ptr);
 
                 _feature_matches[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
-                                                            normalized_hamming_distance); //FIXME: 512 is the maximum HAMMING distance
+                                                            normalized_score); //FIXME: 512 is the maximum HAMMING distance
 
             }
             else
@@ -296,7 +294,7 @@ void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _
         cv::circle(_image, candidate_point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
     }
 
-    cv::imshow("Incoming", _image);
+    cv::imshow("Last", _image);
 
 }
 
@@ -306,7 +304,7 @@ void ProcessorBrisk::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::
     {
         cv::rectangle(_image, roi, _color, 1, 8, 0);
     }
-    cv::imshow("Incoming", _image);
+    cv::imshow("Last", _image);
 }
 
 void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)

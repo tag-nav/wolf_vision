@@ -86,7 +86,6 @@ SET(HDRS
     capture_motion.h
     capture_motion2.h
     capture_odom_2D.h
-    capture_odom_3D.h
     capture_void.h
     constraint_base.h
     constraint_analytic.h
@@ -124,7 +123,6 @@ SET(HDRS
     problem.h
     processor_base.h
     processor_motion.h
-    processor_motion_base.h
     processor_odom_3D.h
     processor_tracker.h
     processor_tracker_feature.h

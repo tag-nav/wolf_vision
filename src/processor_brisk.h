@@ -36,6 +36,7 @@ struct ProcessorImageParameters
                 unsigned int threshold_new_features; ///< on the keypoint strength to declare it key-point
                 unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
                 float pattern_scales; ///< Scale of the base pattern wrt the nominal one
+                unsigned int default_pattern_radius; ///< Radius of the detector pattern before scaling
                 unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at scale = 1.0
         }detector;
         struct Descriptor
@@ -44,20 +45,21 @@ struct ProcessorImageParameters
                 unsigned int threshold; ///< on the keypoint strength to declare it key-point
                 unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
                 float pattern_scales; ///< Scale of the base pattern wrt the nominal one
+                unsigned int default_pattern_radius; ///< Radius of the descriptor pattern before scaling
                 unsigned int pattern_radius; ///< radius of the pattern used to compute the descriptor at the nominal scale
         }descriptor;
         struct Matcher
         {
-                Scalar max_similarity_distance; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
-                int similarity_norm;
-                unsigned int roi_width;
-                unsigned int roi_height;
+                Scalar min_normalized_score; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
+                int similarity_norm; ///< Norm used to measure the distance between two descriptors
+                unsigned int roi_width; ///< Width of the roi used in the tracking
+                unsigned int roi_height; ///< Height of the roi used in the tracking
         }matcher;
         struct Adtive_search
         {
                 unsigned int grid_width; ///< cells per horizontal dimension of image
                 unsigned int grid_height; ///< cells per vertical dimension of image
-                unsigned int separation;
+                unsigned int separation; ///<
                 unsigned int adjust;
         }active_search;
         struct Algorithm

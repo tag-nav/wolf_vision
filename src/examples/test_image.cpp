@@ -81,9 +81,9 @@ int main(int argc, char** argv)
 
     ProcessorImageParameters tracker_params;
     tracker_params.image = {img_width,  img_height};
-    tracker_params.detector = {30, 70, 0, 0.5f};
-    tracker_params.descriptor = {512, 30, 0, 0.5f};
-    tracker_params.matcher.max_similarity_distance = 0.80;
+    tracker_params.detector = {30, 70, 0, 0.5f, 21};
+    tracker_params.descriptor = {512, 30, 0, 0.5f, 21};
+    tracker_params.matcher.min_normalized_score = 0.80;
     tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
     tracker_params.matcher.roi_width = 21;
     tracker_params.matcher.roi_height = 21;
@@ -104,7 +104,8 @@ int main(int argc, char** argv)
         std::cout << "succeded" << std::endl;
     }
 
-    cv::Mat frame;
+    unsigned int buffer_size = 4;
+    cv::Mat frame[buffer_size];
     cv::Mat last_frame;
 
     capture.set(CV_CAP_PROP_POS_MSEC, 3000);
@@ -120,26 +121,26 @@ int main(int argc, char** argv)
     while(f<800)
     {
         f++;
-        std::cout << "Frame #: " << f << std::endl;
+        std::cout << "Frame #: " << f << " in buffer: " << f%buffer_size << std::endl;
 
-        capture >> frame;
+        capture >> frame[f % buffer_size];
 
-        if(!frame.empty())
+        if(!frame[f % buffer_size].empty())
         {
 
             if (f>1){ // check if consecutive images are different
-                Scalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
-                std::cout << "frame ptr: " << (unsigned int)*(frame.ptr(0)) << " last ptr: " << (unsigned int)*(last_frame.ptr(0)) << std::endl;
+                Scalar diff = cv::norm(frame[f % buffer_size], last_frame, cv::NORM_L1);
+                std::cout << "frame ptr: " << (unsigned long int)(frame[f % buffer_size].data) << " last ptr: " << (unsigned long int)(last_frame.data) << std::endl;
                 std::cout << "test_image: Image increment: " << diff << std::endl;
             }
 
-            capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+            capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame[f % buffer_size],img_width,img_height);
 
             //        clock_t t1 = clock();
             p_brisk->process(capture_brisk_ptr);
             //        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
-            last_frame = frame;
+            last_frame = frame[f % buffer_size];
         }
         else
         {
