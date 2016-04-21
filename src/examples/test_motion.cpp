@@ -8,24 +8,27 @@
 // Classes under test
 #include "processor_odom_3D.h"
 #include "capture_motion2.h"
-#include "problem.h"
 
 // Wolf includes
 #include "state_block.h"
 #include "state_quaternion.h"
+#include "problem.h"
 #include "wolf.h"
 
 // STL includes
-#include <map>
-#include <list>
-#include <algorithm>
-#include <iterator>
+//#include <list>
+//#include <algorithm>
+//#include <iterator>
 
 // General includes
 #include <iostream>
+#include <iomanip>      // std::setprecision
 
 int main()
 {
+
+    std::cout << std::setprecision(3);
+
     using namespace wolf;
 
     // time
@@ -35,8 +38,8 @@ int main()
     Scalar dt = .01; // 100 Hz
 
     // Origin frame:
-    Eigen::Vector3s pos(2,2,0);
-    Eigen::Quaternions quat(Eigen::AngleAxiss(3.1416/4, Eigen::Vector3s(0,0,1)));
+    Eigen::Vector3s pos(0.5, -0.5-sqrt(0.5), 0);
+    Eigen::Quaternions quat(Eigen::AngleAxiss(Constants::PI/4, Eigen::Vector3s(0,0,1)));
     Eigen::Vector7s x0;
     x0 << pos, quat.coeffs();
 
@@ -51,7 +54,7 @@ int main()
     // motion data
     Eigen::VectorXs data(6);
     data << 1, 0, 0,   // advance 1m
-            0, 0, 3.1416/4; // 45 deg
+            0, 0, Constants::PI/4; // 45 deg
 
 
     // Create Wolf tree nodes
@@ -59,7 +62,7 @@ int main()
 
     SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
 
-    ProcessorOdom3d* odom3d_ptr = new ProcessorOdom3d(dt);
+    ProcessorOdom3d* odom3d_ptr = new ProcessorOdom3d();
 
     // Assemble Wolf tree by linking the nodes
     sensor_ptr->addProcessor(odom3d_ptr);
@@ -72,11 +75,12 @@ int main()
     std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
+    std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
+    std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->getState().transpose() << std::endl;
+
     // Capture to use as container for all incoming data
     t += dt;
     CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_ptr, data);
-
-    std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
 
     for (int i = 0; i <= 8; i++)
     {
@@ -90,11 +94,10 @@ int main()
     std::cout << "\nQuery states at asynchronous time values..." << std::endl;
 
     t = t0;
-    Scalar dt_2 = dt/2;
     dt = 0.0045; // new dt
     for (int i = 1; i <= 25; i++)
     {
-        std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->getState(t+dt_2).transpose() << std::endl;
+        std::cout << "State(" << (t-t0) << ") = " << odom3d_ptr->getState(t/*+dt/2*/).transpose() << std::endl;
         t += dt;
     }
     std::cout << "       ^^^^^^^   After the last time-stamp the buffer keeps returning the last member." << std::endl;
@@ -102,31 +105,54 @@ int main()
 
 
     // Split the buffer
-    MotionBuffer oldest_buffer;
 
     std::cout << "\nSplitting the buffer!\n---------------------" << std::endl;
     std::cout << "Original buffer:           < ";
-    for (const auto &s : cap_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : odom3d_ptr->getBufferPtr()->get() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
+    // first split at non-exact timestamp
     TimeStamp t_split = t0 + 0.033;
     std::cout << "Split time:                  " << t_split - t0 << std::endl;
 
-    odom3d_ptr->splitBuffer(t_split, oldest_buffer);
+    FrameBase* new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME,odom3d_ptr->getState(t_split), t_split);
+
+    odom3d_ptr->keyFrameCallback(new_keyframe_ptr);
 
 
     std::cout << "New buffer: oldest part:   < ";
-    for (const auto &s : oldest_buffer.getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->get() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
     std::cout << "Original keeps the newest: < ";
-    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : odom3d_ptr->getBufferPtr()->get() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
     std::cout << "All in one row:            < ";
-    for (const auto &s : oldest_buffer.getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->get() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << "> " << t_split - t0 <<   " < ";
-    for (const auto &s : odom3d_ptr->getBufferPtr()->getContainer() ) std::cout << s.ts_ - t0 << ' ';
+    for (const auto &s : odom3d_ptr->getBufferPtr()->get() )
+        std::cout << s.ts_ - t0 << ' ';
+    std::cout << ">" << std::endl;
+
+    // second split as exact timestamp
+
+    t_split = t0 + 0.07;
+    std::cout << "New split time:              " << t_split - t0 << std::endl;
+
+    new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME,odom3d_ptr->getState(t_split), t_split);
+    odom3d_ptr->keyFrameCallback(new_keyframe_ptr);
+
+    std::cout << "All in one row:            < ";
+    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front() ))->getBufferPtr()->get() )
+        std::cout << s.ts_ - t0 << ' ';
+    std::cout << "> " << t_split - t0 <<   " < ";
+    for (const auto &s : odom3d_ptr->getBufferPtr()->get() )
+        std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
 

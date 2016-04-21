@@ -60,7 +60,7 @@ class ProcessorLaser2D : public ProcessorBase
         void process(CaptureBase *_capture_ptr);
 
         virtual bool voteForKeyFrame();
-
+        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr){return false;};
         virtual void init(CaptureBase* _origin_ptr);
 
     protected:

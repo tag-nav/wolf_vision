@@ -38,7 +38,7 @@ namespace wolf {
 class ProcessorOdom3d : public ProcessorMotion
 {
     public:
-        ProcessorOdom3d(Scalar _delta_t = 0);
+        ProcessorOdom3d();
         virtual ~ProcessorOdom3d();
         virtual void data2delta(const Eigen::VectorXs& _data, const Scalar _dt, Eigen::VectorXs& _delta);
 
@@ -52,6 +52,12 @@ class ProcessorOdom3d : public ProcessorMotion
         virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                      Eigen::VectorXs& _delta2_minus_delta1);
         Eigen::VectorXs deltaZero() const;
+        Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts){
+            Motion tmp(_motion_ref);
+            tmp.ts_ = _ts;
+            tmp.delta_ = deltaZero();
+            return tmp;
+        }
 
     private:
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
@@ -62,14 +68,14 @@ class ProcessorOdom3d : public ProcessorMotion
 };
 
 
-inline ProcessorOdom3d::ProcessorOdom3d(Scalar _delta_t) :
-        ProcessorMotion(PRC_ODOM_3D, _delta_t, 7, 7, 6),
-        p1_(nullptr), //, q1_(nullptr)
-        p2_(nullptr), //, q1_(nullptr)
-        p_out_(nullptr), //, q1_(nullptr)
-        q1_(nullptr), //, q1_(nullptr)
-        q2_(nullptr), //, q1_(nullptr)
-        q_out_(nullptr) //, q1_(nullptr)
+inline ProcessorOdom3d::ProcessorOdom3d() :
+        ProcessorMotion(PRC_ODOM_3D, 7, 7, 6),
+        p1_(nullptr),
+        p2_(nullptr),
+        p_out_(nullptr),
+        q1_(nullptr),
+        q2_(nullptr),
+        q_out_(nullptr)
 {
 }
 
@@ -82,7 +88,7 @@ inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const Scal
     _delta.head(3) = _data.head(3);
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data() + 3);
 
-    Eigen::v2q(_data.tail(3), q_out_); // Better use q_out_, but it is a Map. Overload v2q() with Maps.
+    Eigen::v2q(_data.tail(3), q_out_);
 }
 
 inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
@@ -129,25 +135,12 @@ inline Eigen::VectorXs ProcessorOdom3d::deltaZero() const
 
 inline void ProcessorOdom3d::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
 {
-    //            std::cout << "Remap -----------------------------------------" << std::endl;
-    //            std::cout << "_x1:    " << _x1.transpose() << std::endl;
-    //            std::cout << "_x2:    " << _x2.transpose() << std::endl;
-    //            std::cout << "_x_out: " << _x_out.transpose() << std::endl;
-    //            _x_out << 1, 2, 3, 4, 5, 6, 7; // put some values to ckech the outputs below
-    //            std::cout << "_x_out: " << _x_out.transpose() << std::endl;
     new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x1.data());
     new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x1.data() + 3);
     new (&p2_) Eigen::Map<const Eigen::Vector3s>(_x2.data());
     new (&q2_) Eigen::Map<const Eigen::Quaternions>(_x2.data() + 3);
     new (&p_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data());
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_x_out.data() + 3);
-    //            std::cout << "p1_: " << p1_.transpose() << std::endl;
-    //            std::cout << "q1_: " << q1_.coeffs().transpose() << std::endl;
-    //            std::cout << "p2_: " << p2_.transpose() << std::endl;
-    //            std::cout << "q2_: " << q2_.coeffs().transpose() << std::endl;
-    //            std::cout << "p_out_: " << p_out_.transpose() << std::endl;
-    //            std::cout << "q_out_: " << q_out_.coeffs().transpose() << std::endl;
-    //            std::cout << "-----------------------------------------------" << std::endl;
 }
 
 } // namespace wolf

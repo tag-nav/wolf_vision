@@ -20,7 +20,10 @@ namespace wolf {
 //class FeatureBase
 class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
 {
+    private:
+        static unsigned int feature_id_count_;
     protected:
+        unsigned int feature_id_;
         FeatureType type_;          ///< Feature type. See wolf.h for a list of all possible features.
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
@@ -45,6 +48,8 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          */
         virtual ~FeatureBase();
+
+        unsigned int id();
 
         /** \brief Adds a constraint from this feature (as a down node)
          */
@@ -85,6 +90,11 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         
 };
+
+inline unsigned int FeatureBase::id()
+{
+    return feature_id_;
+}
 
 inline CaptureBase* FeatureBase::getCapturePtr() const
 {
