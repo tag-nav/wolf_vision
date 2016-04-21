@@ -280,7 +280,7 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
         // second and other times
         integrate();
         count_ ++;
-}
+    }
 }
 
 
