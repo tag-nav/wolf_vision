@@ -5,8 +5,11 @@
 
 namespace wolf {
 
+unsigned int ConstraintBase::constraint_id_count_ = 0;
+
 ConstraintBase::ConstraintBase(ConstraintType _tp, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
+    constraint_id_(++constraint_id_count_),
     type_(_tp),
     category_(CTR_ABSOLUTE),
     status_(_status),
@@ -20,6 +23,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, ConstraintStatus _status) :
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
+    constraint_id_(++constraint_id_count_),
     type_(_tp),
     category_(CTR_FRAME),
     status_(_status),
@@ -34,6 +38,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, Constr
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
+    constraint_id_(++constraint_id_count_),
     type_(_tp),
     category_(CTR_FEATURE),
     status_(_status),
@@ -48,6 +53,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, Co
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
+    constraint_id_(++constraint_id_count_),
     type_(_tp),
     category_(CTR_LANDMARK),
     status_(_status),

@@ -22,7 +22,10 @@ namespace wolf {
 //class FrameBase
 class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
 {
+    private:
+        static unsigned int frame_id_count_;
     protected:
+        unsigned int frame_id_;
         FrameType type_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
         TimeStamp time_stamp_;   ///< frame time stamp
         StateStatus status_;     ///< status of the estimation of the frame state
@@ -31,6 +34,7 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
         StateBlock* v_ptr_;      ///< Linear velocity state block pointer
         
     public:
+
         /** \brief Constructor of non-key Frame with only time stamp
          *
          * Constructor with only time stamp
@@ -56,6 +60,8 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
          * 
          **/
         virtual ~FrameBase();
+
+        unsigned int id();
 
 
 
@@ -116,6 +122,11 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
 
 
 };
+
+inline unsigned int FrameBase::id()
+{
+    return frame_id_;
+}
 
 // IMPLEMENTATION //
 
