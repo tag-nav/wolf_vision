@@ -86,9 +86,38 @@ int main(int argc, char** argv)
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
 
+    unsigned int img_width;
+    unsigned int img_height;
+
+    unsigned int f = 0;
+    const char * filename;
+    if (argc == 1)
+    {
+        filename = "/home/jtarraso/Vídeos/House interior.mp4";
+        img_width = 640;
+        img_height = 360;
+    }
+    else
+    {
+        if (std::string(argv[1]) == "0")
+        {
+            // camera
+            //img_width = 640;
+            //img_height = 480;
+            filename = "/home/jtarraso/Escritorio/Test Brisk 1 - 40 40 - 1 punto.jpg";
+            img_width = 640;
+            img_height = 360;
+        }
+        else
+        {
+            filename = argv[1];
+            img_width = 640;
+            img_height = 360;
+        }
+    }
+    std::cout << "Input video file: " << filename << std::endl;
+
     TimeStamp t = 1;
-    unsigned int img_width = 640;
-    unsigned int img_height = 360;
 
     Eigen::Vector4s k = {320,240,320,320};
     StateBlock* intr = new StateBlock(k,false);
@@ -107,32 +136,32 @@ int main(int argc, char** argv)
 //    tracker_params.algorithm.max_new_features = 20;
 //    tracker_params.algorithm.min_features_th = 40;
 
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,9,9,4,20,30,40,0,0.2f,10);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,9,9,4,20,30,30,0,1.0f,10);
     sen_cam_->addProcessor(p_brisk);
 
-
-    unsigned int f = 0;
-    const char * filename;
-    if (argc == 1)
-        filename = "/home/jtarraso/Vídeos/House interior.mp4";
-    else
-        filename = argv[1];
-
-    std::cout << "Input video file: " << filename << std::endl;
-
-    //const char * filename = "/home/jtarraso/Descargas/gray.mp4";
     cv::VideoCapture capture(filename);
-    //cv::VideoCapture capture(0);
+    if(!capture.isOpened())  // check if we succeeded
+    {
+        std::cout << "failed" << std::endl;
+    }
+    else
+    {
+        std::cout << "succeded" << std::endl;
+    }
+
     cv::Mat frame;
+    cv::Mat last_frame;
 
     capture.set(CV_CAP_PROP_POS_MSEC, 3000);
 
     CaptureImage* capture_brisk_ptr;
 
-    cv::Mat last_frame;
 
     cv::namedWindow("Last");    // Creates a window for display.
+    cv::moveWindow("Last", 0, 0);
     cv::namedWindow("Incoming");    // Creates a window for display.
+    cv::moveWindow("Incoming", 0, 500);
+
     while(f<800)
     {
         f++;
@@ -140,18 +169,27 @@ int main(int argc, char** argv)
 
         capture >> frame;
 
-        if (f>1){ // check if consecutive images are different
-            Scalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
-            std::cout << "test_image: Image increment: " << diff << std::endl;
+        if(!frame.empty())
+        {
+
+            if (f>1){ // check if consecutive images are different
+                Scalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
+                std::cout << "frame ptr: " << (unsigned int)*(frame.ptr(0)) << " last ptr: " << (unsigned int)*(last_frame.ptr(0)) << std::endl;
+                std::cout << "test_image: Image increment: " << diff << std::endl;
+            }
+
+            capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+
+            //        clock_t t1 = clock();
+            p_brisk->process(capture_brisk_ptr);
+            //        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+
+            last_frame = frame;
         }
-
-        capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
-
-//        clock_t t1 = clock();
-        p_brisk->process(capture_brisk_ptr);
-//        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-
-        last_frame = frame.clone();
+        else
+        {
+            cv::waitKey(2000);
+        }
     }
 
     wolf_problem_->destruct();

@@ -40,12 +40,14 @@ typedef double Scalar;        // Use this for double, 64 bit precision
 namespace Constants{
 
 // Wolf standard tolerance
-const double EPS = 1e-8;
+const Scalar EPS = 1e-8;
 // Wolf smmmmall tolerance
-const double EPS_SMALL = 1e-16;
+const Scalar EPS_SMALL = 1e-16;
 
 // use it in odometry covariances for instance.
-const double MIN_VARIANCE = 1e-6;
+const Scalar MIN_VARIANCE = 1e-6;
+
+const Scalar PI = 3.14159265358979323846264338328;
 
 }
 
@@ -339,7 +341,7 @@ typedef StateBlockList::iterator StateBlockIter;
 
 inline Scalar pi2pi(const Scalar& angle)
 {
-    return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
+    return (angle > 0 ? fmod(angle + Constants::PI, 2 * Constants::PI) - Constants::PI : fmod(angle - Constants::PI, 2 * Constants::PI) + Constants::PI);
 }
 
 } // namespace wolf
