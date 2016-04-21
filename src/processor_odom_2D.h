@@ -19,10 +19,10 @@ namespace wolf {
  */
 struct Odom2dDelta{
         Eigen::Vector2s dp;    ///< Position increment
-        WolfScalar dq; ///< Orientation increment as a quaternion
+        Scalar dq; ///< Orientation increment as a quaternion
         Odom2dDelta() : dp(0,0), dq(0){};
-        Odom2dDelta(const Eigen::Vector2s& _dp, const WolfScalar& _dq) : dp(_dp), dq(_dq) {};
-        void set(Eigen::Vector2s _dp, WolfScalar _dq){dp = _dp; dq = _dq;};
+        Odom2dDelta(const Eigen::Vector2s& _dp, const Scalar& _dq) : dp(_dp), dq(_dq) {};
+        void set(Eigen::Vector2s _dp, Scalar _dq){dp = _dp; dq = _dq;};
         void setZero() {dp.setZero(); dq=0;}
         static Odom2dDelta Zero() {return Odom2dDelta();}
 };
@@ -32,9 +32,10 @@ struct Odom2dDelta{
 class ProcessorOdom2d : public ProcessorMotion
 {
     public:
-        ProcessorOdom2d(WolfScalar _delta_t = 0);
+        ProcessorOdom2d();
         virtual ~ProcessorOdom2d();
-        virtual void data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Eigen::VectorXs& _delta);
+        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
+                                Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
 
     protected:
         virtual void preProcess(){}
@@ -43,14 +44,23 @@ class ProcessorOdom2d : public ProcessorMotion
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2);
+        void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+                            Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
+                            Eigen::MatrixXs& _jacobian2);
         virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                      Eigen::VectorXs& _delta2_minus_delta1);
         Eigen::VectorXs deltaZero() const;
+        Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts){
+            Motion tmp(_motion_ref);
+            tmp.ts_ = _ts;
+            tmp.delta_ = deltaZero();
+            return tmp;
+        }
 };
 
 
-inline ProcessorOdom2d::ProcessorOdom2d(WolfScalar _delta_t) :
-        ProcessorMotion(PRC_ODOM_2D, _delta_t, 3, 3, 2)
+inline ProcessorOdom2d::ProcessorOdom2d() :
+        ProcessorMotion(PRC_ODOM_2D, 3, 3, 2)
 {
 }
 
@@ -58,7 +68,8 @@ inline ProcessorOdom2d::~ProcessorOdom2d()
 {
 }
 
-inline void ProcessorOdom2d::data2delta(const Eigen::VectorXs& _data, const WolfScalar _dt, Eigen::VectorXs& _delta)
+inline void ProcessorOdom2d::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
+                                        Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
 {
     assert(_delta.size() == 3 && "Wrong _delta vector size");
     assert(_data.size() == 2 && "Wrong _data vector size");
@@ -87,6 +98,25 @@ inline void ProcessorOdom2d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
 }
 
 inline void ProcessorOdom2d::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
+{
+    assert(_delta1.size() == 3 && "Wrong _delta1 vector size");
+    assert(_delta2.size() == 3 && "Wrong _delta2 vector size");
+
+//    std::cout << "deltaPlusDelta ------------------------------------" << std::endl;
+//    std::cout << "_delta1: " << _delta1.transpose() << std::endl;
+//    std::cout << "_delta2: " << _delta2.transpose() << std::endl;
+//    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
+
+    _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
+    _delta1_plus_delta2(2) = _delta1(2) + _delta2(2);
+
+//    std::cout << "-----------------------------------------------" << std::endl;
+//    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
+}
+
+inline void ProcessorOdom2d::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+                                            Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
+                                            Eigen::MatrixXs& _jacobian2)
 {
     assert(_delta1.size() == 3 && "Wrong _delta1 vector size");
     assert(_delta2.size() == 3 && "Wrong _delta2 vector size");

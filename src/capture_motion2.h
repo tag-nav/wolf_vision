@@ -67,13 +67,13 @@ class CaptureMotion2 : public CaptureBase
             return &buffer_;
         }
         const Eigen::VectorXs& getDelta() const{
-            return buffer_.getDelta();
+            return buffer_.get().back().delta_integr_;
         }
 
         // member data:
     private:
         Eigen::VectorXs data_;     ///< Motion data in form of vector mandatory
-        Eigen::VectorXs data_cov_; ///< Motion data in form of vector mandatory
+        Eigen::MatrixXs data_cov_; ///< Motion data in form of vector mandatory
         MotionBuffer buffer_;      ///< Buffer of motions between this Capture and the next one.
 };
 

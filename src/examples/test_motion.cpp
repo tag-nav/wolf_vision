@@ -55,18 +55,15 @@ int main()
     Eigen::VectorXs data(6);
     data << 1, 0, 0,   // advance 1m
             0, 0, Constants::PI/4; // 45 deg
-
+    Eigen::MatrixXs data_cov = 0.1 * Eigen::MatrixXs::Identity(6,6);
 
     // Create Wolf tree nodes
     Problem* problem_ptr = new Problem(FRM_PO_3D);
-
     SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
-
     ProcessorOdom3d* odom3d_ptr = new ProcessorOdom3d();
 
     // Assemble Wolf tree by linking the nodes
     sensor_ptr->addProcessor(odom3d_ptr);
-
     problem_ptr->addSensor(sensor_ptr);
 
     // Initialize
@@ -80,7 +77,7 @@ int main()
 
     // Capture to use as container for all incoming data
     t += dt;
-    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_ptr, data);
+    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_ptr, data, data_cov);
 
     for (int i = 0; i <= 8; i++)
     {
