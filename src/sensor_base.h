@@ -18,7 +18,10 @@ namespace wolf {
 
 class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 {
+    private:
+        static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
     protected:
+        unsigned int sensor_id_;   // sensor ID
         SensorType type_;       // the type of sensor. See wolf.h for a list of all sensor types.
         StateBlock* p_ptr_;		// sensor position state block pointer
         StateBlock* o_ptr_; 	// sensor orientation state block pointer
@@ -28,8 +31,8 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
 
-    public:        
-        
+    public:
+
         /** \brief Constructor with noise size
          *
          * Constructor with parameter vector
@@ -64,6 +67,8 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
          **/
         virtual ~SensorBase();
 
+        unsigned int id();
+
         void addProcessor(ProcessorBase* _proc_ptr);
 
         ProcessorBaseList* getProcessorListPtr();
@@ -95,6 +100,10 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 
 };
 
+inline unsigned int SensorBase::id()
+{
+    return sensor_id_;
+}
 
 inline void SensorBase::addProcessor(ProcessorBase* _proc_ptr)
 {

@@ -26,6 +26,8 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
          **/
         virtual ~ProcessorBase();
 
+        unsigned int id();
+
         virtual void process(CaptureBase* _capture_ptr) = 0;
 
         /** \brief Vote for KeyFrame generation
@@ -46,9 +48,16 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
         //virtual void newKeyFrameCallback(FrameBase* _new_key_frame_ptr, const Scalar& _time_tolerance) = 0;
 
     private:
+        static unsigned int processor_id_count_;
+    protected:
+        unsigned int processor_id_;
         ProcessorType type_;
-
 };
+
+inline unsigned int ProcessorBase::id()
+{
+    return processor_id_;
+}
 
 inline bool ProcessorBase::permittedKeyFrame()
 {

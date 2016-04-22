@@ -22,11 +22,12 @@ namespace wolf {
  **/
 class NodeBase
 {
-    protected:
+    private:
         static unsigned int node_id_count_; ///< Object counter (acts as simple ID factory)
 
-        std::string label_; ///< Text label identifying the node
+    protected:
         unsigned int node_id_; ///< Node id. It is unique over the whole Wolf Tree
+        std::string label_; ///< Text label identifying the node
         bool verbose_; 
 
     public: 
@@ -68,7 +69,7 @@ class NodeBase
 namespace wolf{
 
 inline NodeBase::NodeBase(std::string _label, bool _verbose) :
-        label_(_label), node_id_(++node_id_count_), verbose_(_verbose)
+        node_id_(++node_id_count_), label_(_label), verbose_(_verbose)
 {
     if (verbose_)
         std::cout << "NodeBase::NodeBase(). Id: " << node_id_ << " Label: " << label_ << std::endl;

@@ -22,7 +22,10 @@ namespace wolf{
 //class CaptureBase
 class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 {
+    private:
+        static unsigned int capture_id_count_;
     protected:
+        unsigned int capture_id_;
         TimeStamp time_stamp_; ///< Time stamp
         SensorBase* sensor_ptr_; ///< Pointer to sensor
 
@@ -35,6 +38,7 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
         StateBlock* sensor_o_ptr_; //TODO: initialize this at construction time; delete it at destruction time
 
     public:
+
         CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr);
 
         /** \brief Default destructor (not recommended)
@@ -43,6 +47,8 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
          *
          **/
         virtual ~CaptureBase();
+
+        unsigned int id();
 
         /** \brief Adds a Feature to the down node list
          **/
@@ -86,6 +92,11 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 		
 //        virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 };
+
+inline unsigned int CaptureBase::id()
+{
+    return capture_id_;
+}
 
 inline void CaptureBase::addFeature(FeatureBase* _ft_ptr)
 {
