@@ -65,7 +65,7 @@ struct ProcessorImageParameters
         struct Algorithm
         {
                 unsigned int max_new_features; ///< Max nbr. of features to detect in one frame
-                unsigned int min_features_th; ///< minimum nbr. of features to vote for keyframe
+                unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
         }algorithm;
 };
 
@@ -188,8 +188,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 inline bool ProcessorBrisk::voteForKeyFrame()
 {
     std::cout << "voteForKeyFrame?: "
-            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_th) << std::endl;
-    return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_th);
+            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
+    return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
 }
 
 inline ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr)

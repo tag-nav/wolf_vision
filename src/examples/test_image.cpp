@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     tracker_params.matcher.roi_height = 21;
     tracker_params.active_search = {9, 9, 4, 10};
     tracker_params.algorithm.max_new_features = 20;
-    tracker_params.algorithm.min_features_th = 10;
+    tracker_params.algorithm.min_features_for_keyframe = 80;
 
     ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params);
     sen_cam_->addProcessor(p_brisk);
