@@ -60,7 +60,7 @@ void ProcessorBrisk::postProcess()
     drawRoi(image_last_,tracker_roi_,cv::Scalar(88.0, 70.0, 254.0)); //normal roi
     //drawRoi(image_incoming_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
     drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
-    cv::waitKey(200);
+    cv::waitKey(1);
 }
 
 bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature)

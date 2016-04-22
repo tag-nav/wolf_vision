@@ -40,16 +40,11 @@ int main(int argc, char** argv)
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
 
-    unsigned int img_width;
-    unsigned int img_height;
-
     unsigned int f = 0;
     const char * filename;
     if (argc == 1)
     {
         filename = "/home/jtarraso/Vídeos/House interior.mp4";
-        img_width = 640;
-        img_height = 360;
     }
     else
     {
@@ -57,17 +52,32 @@ int main(int argc, char** argv)
         {
             //camera
             filename = "0";
-            img_width = 640;
-            img_height = 480;
         }
         else
         {
             filename = argv[1];
-            img_width = 640;
-            img_height = 360;
         }
     }
     std::cout << "Input video file: " << filename << std::endl;
+    cv::VideoCapture capture(filename);
+    if(!capture.isOpened())  // check if we succeeded
+    {
+        std::cout << "failed" << std::endl;
+    }
+    else
+    {
+        std::cout << "succeded" << std::endl;
+    }
+    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
+    unsigned int img_width = (unsigned int)capture.get(CV_CAP_PROP_FRAME_WIDTH);
+    unsigned int img_height = (unsigned int)capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+    std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
+
+    unsigned int buffer_size = 4;
+    std::vector<cv::Mat> frame(buffer_size);
+    cv::Mat last_frame;
+
+
 
     TimeStamp t = 1;
 
@@ -94,29 +104,13 @@ int main(int argc, char** argv)
     ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params);
     sen_cam_->addProcessor(p_brisk);
 
-    cv::VideoCapture capture(filename);
-    if(!capture.isOpened())  // check if we succeeded
-    {
-        std::cout << "failed" << std::endl;
-    }
-    else
-    {
-        std::cout << "succeded" << std::endl;
-    }
-
-    unsigned int buffer_size = 4;
-    cv::Mat frame[buffer_size];
-    cv::Mat last_frame;
-
-    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
-
     CaptureImage* capture_brisk_ptr;
 
 
     cv::namedWindow("Last");    // Creates a window for display.
     cv::moveWindow("Last", 0, 0);
     cv::namedWindow("Incoming");    // Creates a window for display.
-    cv::moveWindow("Incoming", 0, 500);
+    cv::moveWindow("Incoming", 0, 400);
 
     while(f<800)
     {
