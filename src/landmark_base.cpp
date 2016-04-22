@@ -7,8 +7,11 @@
 
 namespace wolf {
 
+unsigned int LandmarkBase::landmark_id_count_ = 0;
+
 LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr) :
             NodeConstrained(MID, "LANDMARK"),
+            landmark_id_(++landmark_id_count_),
             type_(_tp),
             status_(LANDMARK_CANDIDATE),
 			p_ptr_(_p_ptr),
