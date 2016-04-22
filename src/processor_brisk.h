@@ -71,6 +71,11 @@ struct ProcessorImageParameters
 
 class ProcessorBrisk : public ProcessorTrackerFeature
 {
+
+//    protected:
+//        cv::FeatureDetector* detector_ptr_;
+//        cv::DescriptorExtractor* descriptor_ptr_;
+//        cv::DescriptorMatcher* matcher_ptr_;
     protected:
         cv::BRISK detector_;                    // Brisk detector
         cv::BRISK descriptor_;                  // Brisk descriptor
@@ -87,7 +92,28 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 
     public:
         ProcessorBrisk(ProcessorImageParameters _params);
+
+//        ProcessorBrisk(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr, cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters_params) :
+//            detector_ptr_(_det_ptr)
+//        {}
+
+//        ProcessorBrisk(std::string _detector, std::string _descriptor, std::string matcher, std::string distance, ProcessorImageParameters _params) :
+//            detector_ptr_(nullptr), params_(_params)
+//        {
+//            switch _detector{
+//                case "BRISK":
+//                    detector_ptr_ = new cv::BRISK();
+//                    break;
+//                default:
+//                    throw runtime_error
+//            }
+//            }
+
         virtual ~ProcessorBrisk();
+
+//        virtual ~ProcessorBrisk(){
+//            delete detector_ptr_; delete descriptor_ptr_; //etc
+//        };
 
     protected:
         void preProcess();
@@ -115,9 +141,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         /** \brief Detect new Features
          *
          * This is intended to create Features that are not among the Features already known in the Map.
-         * \param _capture_ptr Capture for feature detection
          *
-         * This function sets new_features_list_, the list of newly detected features, to be used for landmark initialization.
+         * This function sets new_features_last_, the list of newly detected features, to be used for landmark initialization.
          *
          * \return The number of detected Features.
          */
@@ -133,6 +158,19 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
                                          cv::Mat& new_descriptors);
 
+    private:
+        virtual void trimRoi(cv::Rect& _roi);
+        virtual void inflateRoi(cv::Rect& _roi);
+        virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
+
+
+
+
+
+
+
+
+        // These only to debug, will disappear one day soon
     public:
         virtual void drawFeatures(CaptureBase* const _last_ptr);
 
@@ -143,9 +181,6 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last,
                                             FeatureBaseList& _feature_list_incoming);
 
-        virtual void trimRoi(cv::Rect& _roi);
-        virtual void inflateRoi(cv::Rect& _roi);
-        virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
 
 };

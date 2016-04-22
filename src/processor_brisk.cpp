@@ -21,9 +21,6 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params) :
         params_(_params)
 {
     ProcessorTrackerFeature::setMaxNewFeatures(_params.algorithm.max_new_features);
-    //    detector_.create("BRISK");    // These do not seem to be necessary
-    //    descriptor_.create("BRISK");  // These do not seem to be necessary
-    //    matcher_.train();  // These do not seem to be necessary
     params_.detector.pattern_radius = params_.detector.default_pattern_radius*params_.detector.pattern_scales;
     params_.descriptor.pattern_radius = params_.descriptor.default_pattern_radius*params_.descriptor.pattern_scales;
 }

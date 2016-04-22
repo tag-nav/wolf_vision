@@ -94,7 +94,8 @@ int main(int argc, char** argv)
     ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params);
     sen_cam_->addProcessor(p_brisk);
 
-    cv::VideoCapture capture(filename);
+    //cv::VideoCapture capture(filename);
+    cv::VideoCapture capture(0);
     if(!capture.isOpened())  // check if we succeeded
     {
         std::cout << "failed" << std::endl;
