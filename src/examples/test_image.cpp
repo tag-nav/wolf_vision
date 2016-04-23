@@ -112,7 +112,8 @@ int main(int argc, char** argv)
     while(f<800)
     {
         f++;
-        std::cout << "Frame #: " << f << " in buffer: " << f%buffer_size << std::endl;
+        std::cout << "\n===============================================================" << std::endl;
+        std::cout << "\nFrame #: " << f << " in buffer: " << f%buffer_size << std::endl;
 
         capture >> frame[f % buffer_size];
 
@@ -121,7 +122,7 @@ int main(int argc, char** argv)
 
             if (f>1){ // check if consecutive images are different
                 Scalar diff = cv::norm(frame[f % buffer_size], last_frame, cv::NORM_L1);
-                std::cout << "frame ptr: " << (unsigned long int)(frame[f % buffer_size].data) << " last ptr: " << (unsigned long int)(last_frame.data) << std::endl;
+                std::cout << "incoming data: " << (unsigned long int)(frame[f % buffer_size].data) << " last data: " << (unsigned long int)(last_frame.data) << std::endl;
                 std::cout << "test_image: Image increment: " << diff << std::endl;
             }
 

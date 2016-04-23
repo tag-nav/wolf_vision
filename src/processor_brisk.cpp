@@ -87,7 +87,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
 unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_features)
 {
-    std::cout << std::endl << "\n================= detectNewFeatures =============" << std::endl << std::endl;
+    std::cout << std::endl << "\n---------------- detectNewFeatures -------------" << std::endl << std::endl;
     resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
     cv::Rect roi;
     std::vector<cv::KeyPoint> new_keypoints;
@@ -124,6 +124,8 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_feat
         }
     }
 
+    std::cout << "\nNumber of new features detected: " << n_new_features << std::endl;
+
     return n_new_features;
 }
 
@@ -157,18 +159,14 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
     cv::Mat candidate_descriptors;
     std::vector<cv::DMatch> cv_matches;
 
-    std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl << std::endl;
-    std::cout << "last*: " << last_ptr_ << " -- incoming*: " << incoming_ptr_ << std::endl;
-
-    Scalar diff = cv::norm(image_incoming_, image_last_, cv::NORM_L1);
-    std::cout << "Distance between last and incoming images: " << diff << std::endl;
+    std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl;
 
     for (auto feature_base_ptr : _feature_list_in)
     {
         FeaturePointImage* feature_ptr = (FeaturePointImage*)(((feature_base_ptr)));
         act_search_grid_.hitCell(feature_ptr->getKeypoint());
 
-        std::cout << "Searching for feature ID: " << feature_ptr->nodeId() << " at: " << feature_ptr->getKeypoint().pt << std::endl;
+        std::cout << "\nSearching for feature ID: " << feature_ptr->nodeId() << " at XY: " << feature_ptr->getKeypoint().pt << std::endl;
 
         roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
@@ -184,22 +182,25 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
             matcher_.match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
 
-            std::cout << "Index of the candidate selected (trainIdx): " << cv_matches[0].trainIdx << std::endl;
-
+        	std::cout << "\t [trainIdx]:distance: ";
             for(int i = 0; i < candidate_descriptors.rows; i++)
             {
                 double dist = cv::norm( feature_ptr->getDescriptor(), candidate_descriptors.row(i), cv::NORM_HAMMING);
-                std::cout << "============================= dist[" << i << "]: " << dist << std::endl;
+                std::cout << "[" << i << "]: " << dist << " | ";
             }
+            std::cout  << std::endl;
 
-            std::cout << "\tFound at: " << candidate_keypoints[cv_matches[0].trainIdx].pt << " --Hamming: " << cv_matches[0].distance << std::endl;
+            std::cout << "\tBest is: [" << cv_matches[0].trainIdx << "]: " << cv_matches[0].distance;
+
+            std::cout << " | at XY: " << candidate_keypoints[cv_matches[0].trainIdx].pt << std::endl;
 
             Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/params_.descriptor.size;
-            std::cout << "normalized hamming distance: " << normalized_score << std::endl;
+
+            std::cout << "\tnormalized score: " << normalized_score << std::endl;
 
             if (normalized_score > params_.matcher.min_normalized_score)
             {
-                std::cout << "tracked" << std::endl << std::endl;
+                std::cout << "\ttracked" << std::endl;
                 FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
@@ -211,9 +212,9 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
             }
             else
             {
-                std::cout << "NOT tracked" << std::endl << std::endl;
+                std::cout << "\tNOT tracked" << std::endl;
             }
-            for (unsigned int i = 0; i < candidate_keypoints.size(); i++) // TODO Arreglar todos los <= y -1 por < y nada.
+            for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
             {
                 tracker_candidates_.push_back(candidate_keypoints[i].pt);
 
@@ -222,7 +223,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
         else
             std::cout << "\tNot found" << std::endl;
     }
-    std::cout << "\nNumber of Features found: " << _feature_list_out.size() << std::endl << std::endl;
+    std::cout << "\nNumber of Features tracked: " << _feature_list_out.size() << std::endl << std::endl;
     return _feature_list_out.size();
 }
 
