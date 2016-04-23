@@ -34,9 +34,6 @@ int main(int argc, char** argv)
     bool image_or_video = (atoi(argv[1]) == 1);
     */
 
-    //Welcome message
-    std::cout << std::endl << " ========= WOLF IMAGE test ===========" << std::endl << std::endl;
-
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
 
