@@ -88,32 +88,35 @@ int main(int argc, char** argv)
 
     ProcessorImageParameters tracker_params;
     tracker_params.image = {img_width,  img_height};
-    tracker_params.detector = {30, 70, 0, 0.5f, 21};
-    tracker_params.descriptor = {512, 30, 0, 0.5f, 21};
+    tracker_params.detector.threshold = 30;
+    tracker_params.detector.threshold_new_features = 70;
+    tracker_params.detector.octaves = 0;
+    tracker_params.detector.nominal_pattern_radius = 4;
+    tracker_params.descriptor.size = 512;
+    tracker_params.descriptor.pattern_scale = 1.0f;
+    tracker_params.descriptor.nominal_pattern_radius = 20;
     tracker_params.matcher.min_normalized_score = 0.80;
     tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
-    tracker_params.matcher.roi_width = 21;
-    tracker_params.matcher.roi_height = 21;
-    tracker_params.active_search = {9, 9, 4, 10};
-    tracker_params.algorithm.max_new_features = 20;
-    tracker_params.algorithm.min_features_for_keyframe = 80;
+    tracker_params.matcher.roi_width = 16;
+    tracker_params.matcher.roi_height = 16;
+    tracker_params.active_search.grid_width = 12;
+    tracker_params.active_search.grid_height = 8;
+    tracker_params.active_search.separation = 4;
+    tracker_params.algorithm.max_new_features = 5;
+    tracker_params.algorithm.min_features_for_keyframe = 20;
 
     ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params);
     sen_cam_->addProcessor(p_brisk);
 
     CaptureImage* capture_brisk_ptr;
 
-
     cv::namedWindow("Last");    // Creates a window for display.
     cv::moveWindow("Last", 0, 0);
-//    cv::namedWindow("Incoming");    // Creates a window for display.
-//    cv::moveWindow("Incoming", 0, 400);
 
     while(f<800)
     {
         f++;
-        std::cout << "\n===============================================================" << std::endl;
-        std::cout << "\nFrame #: " << f << " in buffer: " << f%buffer_size << std::endl;
+        std::cout << "\n=============== Frame #: " << f << " in buffer: " << f%buffer_size << " ===============" << std::endl;
 
         capture >> frame[f % buffer_size];
 
@@ -122,8 +125,8 @@ int main(int argc, char** argv)
 
             if (f>1){ // check if consecutive images are different
                 Scalar diff = cv::norm(frame[f % buffer_size], last_frame, cv::NORM_L1);
-                std::cout << "incoming data: " << (unsigned long int)(frame[f % buffer_size].data) << " last data: " << (unsigned long int)(last_frame.data) << std::endl;
-                std::cout << "test_image: Image increment: " << diff << std::endl;
+                std::cout << "\nincoming data: " << (unsigned long int)(frame[f % buffer_size].data) << " last data: " << (unsigned long int)(last_frame.data) << std::endl;
+                std::cout << "Image difference: " << diff << std::endl;
             }
 
             capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame[f % buffer_size],img_width,img_height);
