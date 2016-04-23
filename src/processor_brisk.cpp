@@ -49,21 +49,23 @@ void ProcessorBrisk::preProcess()
     // Clear of the lists used to debug
     tracker_roi_.clear();
     tracker_roi_inflated_.clear();
+    detector_roi_.clear();
     tracker_target_.clear();
     tracker_candidates_.clear();
 
-    if(image_last_.data == image_incoming_.data)
-        std::cout << "--------------------------------------------------------------------------SON IGUALES (pre)" << std::endl;
+//    if(image_last_.data == image_incoming_.data)
+//        std::cout << "--------------------------------------------------------------------------SON IGUALES (pre)" << std::endl;
 }
 
 void ProcessorBrisk::postProcess()
 {
     drawFeatures(last_ptr_);
-    if(image_last_.data == image_incoming_.data)
-        std::cout << "--------------------------------------------------------------------------SON IGUALES (post)" << std::endl;
-//    drawRoi(image_last_,tracker_roi_,cv::Scalar(88.0, 70.0, 254.0)); //normal roi
-    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
-    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
+//    if(image_last_.data == image_incoming_.data)
+//        std::cout << "--------------------------------------------------------------------------SON IGUALES (post)" << std::endl;
+//    drawRoi(image_last_,detector_roi_,cv::Scalar(88.0, 70.0, 255.0));//detector roi(now only shown when it collides with the the image)
+//    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0)); //tracker roi
+//    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
+//    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
     cv::waitKey(1);
 }
 
@@ -79,7 +81,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
     adaptRoi(_image_roi, _image, _roi);
 
-    std::cout << "roi: " << _roi << std::endl;
+//    std::cout << "roi: " << _roi << std::endl;
 
     detector_.detect(_image_roi, _new_keypoints);
     descriptor_.compute(_image_roi, _new_keypoints, new_descriptors);
@@ -93,7 +95,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
 unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_features)
 {
-    std::cout << std::endl << "\n---------------- detectNewFeatures -------------" << std::endl << std::endl;
+    std::cout << std::endl << "\n---------------- detectNewFeatures -------------" << std::endl;
     resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
     cv::Rect roi;
     std::vector<cv::KeyPoint> new_keypoints;
@@ -104,17 +106,18 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_feat
     {
         if (act_search_grid_.pickRoi(roi))
         {
-        	std::cout << "roi: " << roi << std::endl;
+        	detector_roi_.push_back(roi);
+//        	std::cout << "roi: " << roi << std::endl;
             if (detect(image_last_, roi, new_keypoints, new_descriptors))
             {
                 //Escoger uno de los features encontrados -> el 0 o primero.
-                std::cout << new_keypoints.size() << " new features detected in active search roi. Picking only the first one." << std::endl;
+//                std::cout << new_keypoints.size() << " new features detected in active search roi. Picking only the first one." << std::endl;
 
                 FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
                 addNewFeatureLast(point_ptr);
                 act_search_grid_.hitCell(new_keypoints[0]);
 
-                std::cout << "Added point " << point_ptr->id() << " at XY: " << new_keypoints[0].pt << std::endl;
+                std::cout << "Added point " << point_ptr->id() << " at: " << new_keypoints[0].pt << std::endl;
 
                 n_new_features++;
                 if (n_new_features >= _max_new_features)
@@ -131,7 +134,7 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_feat
         }
     }
 
-    std::cout << "\nNumber of new features detected: " << n_new_features << std::endl;
+    std::cout << "Number of new features detected: " << n_new_features << std::endl;
 
     return n_new_features;
 }
@@ -156,7 +159,7 @@ void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last,
 unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
-    std::cout << std::endl << "-------------- trackFeatures ----------------" << std::endl << std::endl;
+    std::cout << "\n-------------- trackFeatures ----------------" << std::endl;
 
     unsigned int roi_width = params_.matcher.roi_width;
     unsigned int roi_heigth = params_.matcher.roi_height;
@@ -173,13 +176,13 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
         FeaturePointImage* feature_ptr = (FeaturePointImage*)(((feature_base_ptr)));
         act_search_grid_.hitCell(feature_ptr->getKeypoint());
 
-        std::cout << "\nSearching for feature ID: " << feature_ptr->id() << " at XY: " << feature_ptr->getKeypoint().pt << std::endl;
+        std::cout << "Search feature: " << feature_ptr->id() << " at: " << feature_ptr->getKeypoint().pt;
 
         roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
 
-        std::cout << "roi: " << roi << std::endl;
+//        std::cout << "roi: " << roi << std::endl;
 
         //lists used to debug
         tracker_target_.push_back(feature_ptr->getKeypoint().pt);
@@ -191,25 +194,25 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
             matcher_.match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
 
-        	std::cout << "\t [trainIdx]:distance: ";
-            for(int i = 0; i < candidate_descriptors.rows; i++)
-            {
-                double dist = cv::norm( feature_ptr->getDescriptor(), candidate_descriptors.row(i), cv::NORM_HAMMING);
-                std::cout << "[" << i << "]:" << dist << " | ";
-            }
-            std::cout  << std::endl;
+//        	std::cout << "\t [trainIdx]:distance: ";
+//            for(int i = 0; i < candidate_descriptors.rows; i++)
+//            {
+//                double dist = cv::norm( feature_ptr->getDescriptor(), candidate_descriptors.row(i), cv::NORM_HAMMING);
+//                std::cout << "[" << i << "]:" << dist << " | ";
+//            }
+//            std::cout  << std::endl;
 
-            std::cout << "\tBest is: [" << cv_matches[0].trainIdx << "]:" << cv_matches[0].distance;
+            std::cout << "\n\tBest is: [" << cv_matches[0].trainIdx << "]:" << cv_matches[0].distance;
 
-            std::cout << " | at XY: " << candidate_keypoints[cv_matches[0].trainIdx].pt;
+            std::cout << " | at: " << candidate_keypoints[cv_matches[0].trainIdx].pt;
 
             Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/params_.descriptor.size;
 
-            std::cout << " | normalized score: " << normalized_score << std::endl;
+            std::cout << " | score: " << normalized_score;
 
             if (normalized_score > params_.matcher.min_normalized_score)
             {
-                std::cout << "\ttracked" << std::endl;
+                std::cout << "\t <--TRACKED" << std::endl;
                 FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
@@ -221,7 +224,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
             }
             else
             {
-                std::cout << "\tNOT tracked" << std::endl;
+                std::cout << "\t <--NOT TRACKED" << std::endl;
             }
             for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
             {
@@ -230,9 +233,9 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
             }
         }
         else
-            std::cout << "\tNot found" << std::endl;
+            std::cout << "\t <--NOT FOUND" << std::endl;
     }
-    std::cout << "\nNumber of Features tracked: " << _feature_list_out.size() << std::endl << std::endl;
+    std::cout << "Number of Features tracked: " << _feature_list_out.size() << std::endl;
     return _feature_list_out.size();
 }
 
@@ -268,8 +271,6 @@ void ProcessorBrisk::inflateRoi(cv::Rect& _roi)
     // now both the detector and descriptor patter_radius is the same, but when not, shouldn't the method have that as input parameter?
     int inflation_rate = params_.descriptor.pattern_radius;
 
-    std::cout << "inflate: " << params_.descriptor.pattern_radius << std::endl;
-
     _roi.x = _roi.x - inflation_rate;
     _roi.y = _roi.y - inflation_rate;
     _roi.width = _roi.width + 2*inflation_rate;
@@ -278,10 +279,11 @@ void ProcessorBrisk::inflateRoi(cv::Rect& _roi)
 
 void ProcessorBrisk::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
 {
-    tracker_roi_inflated_.push_back(_roi);
 
     inflateRoi(_roi);
     trimRoi(_roi);
+
+    tracker_roi_inflated_.push_back(_roi);
 
     _image_roi = _image(_roi);
 }

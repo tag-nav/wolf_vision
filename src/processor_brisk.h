@@ -83,6 +83,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
+        std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
 
@@ -183,8 +184,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 
 inline bool ProcessorBrisk::voteForKeyFrame()
 {
-    std::cout << "voteForKeyFrame?: "
-            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
+//    std::cout << "voteForKeyFrame?: "
+//            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
     return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
 }
 

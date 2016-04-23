@@ -94,15 +94,15 @@ int main(int argc, char** argv)
     tracker_params.detector.nominal_pattern_radius = 4;
     tracker_params.descriptor.size = 512;
     tracker_params.descriptor.pattern_scale = 1.0f;
-    tracker_params.descriptor.nominal_pattern_radius = 20;
+    tracker_params.descriptor.nominal_pattern_radius = 18;
     tracker_params.matcher.min_normalized_score = 0.80;
     tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
-    tracker_params.matcher.roi_width = 16;
-    tracker_params.matcher.roi_height = 16;
-    tracker_params.active_search.grid_width = 12;
-    tracker_params.active_search.grid_height = 8;
-    tracker_params.active_search.separation = 4;
-    tracker_params.algorithm.max_new_features = 5;
+    tracker_params.matcher.roi_width = 30;
+    tracker_params.matcher.roi_height = 30;
+    tracker_params.active_search.grid_width = 15;
+    tracker_params.active_search.grid_height = 10;
+    tracker_params.active_search.separation = 1;
+    tracker_params.algorithm.max_new_features = 25;
     tracker_params.algorithm.min_features_for_keyframe = 20;
 
     ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params);
