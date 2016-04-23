@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     {
         std::cout << "succeded" << std::endl;
     }
-    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
+    capture.set(CV_CAP_PROP_POS_MSEC, 0000);
     unsigned int img_width = (unsigned int)capture.get(CV_CAP_PROP_FRAME_WIDTH);
     unsigned int img_height = (unsigned int)capture.get(CV_CAP_PROP_FRAME_HEIGHT);
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
@@ -109,8 +109,8 @@ int main(int argc, char** argv)
 
     cv::namedWindow("Last");    // Creates a window for display.
     cv::moveWindow("Last", 0, 0);
-    cv::namedWindow("Incoming");    // Creates a window for display.
-    cv::moveWindow("Incoming", 0, 400);
+//    cv::namedWindow("Incoming");    // Creates a window for display.
+//    cv::moveWindow("Incoming", 0, 400);
 
     while(f<800)
     {
