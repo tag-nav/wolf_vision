@@ -305,7 +305,7 @@ void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _
         cv::circle(_image, candidate_point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
     }
 
-    cv::imshow("Last", _image);
+    cv::imshow("Feature tracker", _image);
 
 }
 
@@ -315,7 +315,7 @@ void ProcessorBrisk::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::
     {
         cv::rectangle(_image, roi, _color, 1, 8, 0);
     }
-    cv::imshow("Last", _image);
+    cv::imshow("Feature tracker", _image);
 }
 
 void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
@@ -332,7 +332,7 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
             cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(80.0, 80.0, 254.0), -1, 3, 0);
         }
     }
-    cv::imshow("Last", image_last_);
+    cv::imshow("Feature tracker", image_last_);
 }
 
 } // namespace wolf

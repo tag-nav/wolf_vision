@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     tracker_params.descriptor.size = 512;
     tracker_params.descriptor.pattern_scale = 1.0f;
     tracker_params.descriptor.nominal_pattern_radius = 18;
-    tracker_params.matcher.min_normalized_score = 0.80;
+    tracker_params.matcher.min_normalized_score = 0.75;
     tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
     tracker_params.matcher.roi_width = 30;
     tracker_params.matcher.roi_height = 30;
@@ -110,8 +110,8 @@ int main(int argc, char** argv)
 
     CaptureImage* capture_brisk_ptr;
 
-    cv::namedWindow("Last");    // Creates a window for display.
-    cv::moveWindow("Last", 0, 0);
+    cv::namedWindow("Feature tracker");    // Creates a window for display.
+    cv::moveWindow("Feature tracker", 0, 0);
 
     while(f<800)
     {
