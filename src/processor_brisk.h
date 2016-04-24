@@ -40,10 +40,10 @@ struct ProcessorImageParameters
         }detector;
         struct Descriptor
         {
-                unsigned int size; ///< length of the descriptor vector
-                float pattern_scale; ///< Scale of the base pattern wrt the nominal one
                 unsigned int nominal_pattern_radius; ///< Radius of the descriptor pattern before scaling
+                float pattern_scale; ///< Scale of the base pattern wrt the nominal one
                 unsigned int pattern_radius; ///< radius of the pattern used to describe a key-point at pattern_scale = 1.0 and octaves = 0
+                unsigned int size_bits; ///< length of the descriptor vector in bits
         }descriptor;
         struct Matcher
         {

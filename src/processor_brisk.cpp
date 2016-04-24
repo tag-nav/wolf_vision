@@ -24,9 +24,11 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params) :
     ProcessorTrackerFeature::setMaxNewFeatures(_params.algorithm.max_new_features);
     params_.detector.pattern_radius = (float)(_params.detector.nominal_pattern_radius)*pow(2,_params.detector.octaves);
     params_.descriptor.pattern_radius = (float)(_params.descriptor.nominal_pattern_radius)*_params.descriptor.pattern_scale;
+    params_.descriptor.size_bits = descriptor_.descriptorSize() * 8;
 
     std::cout << "detector   pattern radius: " << params_.detector.pattern_radius << std::endl;
     std::cout << "descriptor pattern radius: " << params_.descriptor.pattern_radius << std::endl;
+    std::cout << "descriptor size          : " << params_.descriptor.size_bits << std::endl;
 }
 
 //Destructor
@@ -209,7 +211,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
             std::cout << " | at: " << candidate_keypoints[cv_matches[0].trainIdx].pt;
 
-            Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/params_.descriptor.size;
+            Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/params_.descriptor.size_bits;
 
             std::cout << " | score: " << normalized_score;
 

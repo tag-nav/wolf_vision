@@ -92,7 +92,7 @@ int main(int argc, char** argv)
     tracker_params.detector.threshold_new_features = 70;
     tracker_params.detector.octaves = 2;
     tracker_params.detector.nominal_pattern_radius = 4;
-    tracker_params.descriptor.size = 512;
+//    tracker_params.descriptor.size = 512;
     tracker_params.descriptor.pattern_scale = 1.0;
     tracker_params.descriptor.nominal_pattern_radius = 18;
     tracker_params.matcher.min_normalized_score = 0.75;
