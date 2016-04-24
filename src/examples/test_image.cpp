@@ -93,14 +93,14 @@ int main(int argc, char** argv)
     tracker_params.detector.octaves = 0;
     tracker_params.detector.nominal_pattern_radius = 4;
     tracker_params.descriptor.size = 512;
-    tracker_params.descriptor.pattern_scale = 1.0f;
+    tracker_params.descriptor.pattern_scale = 1.0;
     tracker_params.descriptor.nominal_pattern_radius = 18;
     tracker_params.matcher.min_normalized_score = 0.75;
     tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
     tracker_params.matcher.roi_width = 30;
     tracker_params.matcher.roi_height = 30;
-    tracker_params.active_search.grid_width = 15;
-    tracker_params.active_search.grid_height = 10;
+    tracker_params.active_search.grid_width = 12;
+    tracker_params.active_search.grid_height = 8;
     tracker_params.active_search.separation = 1;
     tracker_params.algorithm.max_new_features = 25;
     tracker_params.algorithm.min_features_for_keyframe = 20;
@@ -123,11 +123,11 @@ int main(int argc, char** argv)
         if(!frame[f % buffer_size].empty())
         {
 
-            if (f>1){ // check if consecutive images are different
-                Scalar diff = cv::norm(frame[f % buffer_size], last_frame, cv::NORM_L1);
-                std::cout << "\nincoming data: " << (unsigned long int)(frame[f % buffer_size].data) << " last data: " << (unsigned long int)(last_frame.data) << std::endl;
-                std::cout << "Image difference: " << diff << std::endl;
-            }
+//            if (f>1){ // check if consecutive images are different
+//                Scalar diff = cv::norm(frame[f % buffer_size], last_frame, cv::NORM_L1);
+//                std::cout << "\nincoming data: " << (unsigned long int)(frame[f % buffer_size].data) << " last data: " << (unsigned long int)(last_frame.data) << std::endl;
+//                std::cout << "Image difference: " << diff << std::endl;
+//            }
 
             capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame[f % buffer_size],img_width,img_height);
 

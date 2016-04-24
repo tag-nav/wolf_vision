@@ -22,11 +22,11 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params) :
         params_(_params)
 {
     ProcessorTrackerFeature::setMaxNewFeatures(_params.algorithm.max_new_features);
-    params_.detector.pattern_radius = (float)(_params.detector.nominal_pattern_radius)*_params.descriptor.pattern_scale;
+    params_.detector.pattern_radius = (float)(_params.detector.nominal_pattern_radius)*pow(2,_params.detector.octaves);
     params_.descriptor.pattern_radius = (float)(_params.descriptor.nominal_pattern_radius)*_params.descriptor.pattern_scale;
 
-    std::cout << "det.  pattern radius: " << params_.detector.pattern_radius << std::endl;
-    std::cout << "desc. pattern radius: " << params_.descriptor.pattern_radius << std::endl;
+    std::cout << "detector   pattern radius: " << params_.detector.pattern_radius << std::endl;
+    std::cout << "descriptor pattern radius: " << params_.descriptor.pattern_radius << std::endl;
 }
 
 //Destructor
@@ -95,7 +95,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
 unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_features)
 {
-    std::cout << std::endl << "\n---------------- detectNewFeatures -------------" << std::endl;
+    std::cout << "\n---------------- detectNewFeatures -------------" << std::endl;
     resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
     cv::Rect roi;
     std::vector<cv::KeyPoint> new_keypoints;
@@ -114,10 +114,11 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_feat
 //                std::cout << new_keypoints.size() << " new features detected in active search roi. Picking only the first one." << std::endl;
 
                 FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
+                point_ptr->setTrackId(point_ptr->id());
                 addNewFeatureLast(point_ptr);
                 act_search_grid_.hitCell(new_keypoints[0]);
 
-                std::cout << "Added point " << point_ptr->id() << " at: " << new_keypoints[0].pt << std::endl;
+                std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 
                 n_new_features++;
                 if (n_new_features >= _max_new_features)
@@ -159,7 +160,7 @@ void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last,
 unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
-    std::cout << "\n-------------- trackFeatures ----------------" << std::endl;
+    std::cout << "\n---------------- trackFeatures ----------------" << std::endl;
 
     unsigned int roi_width = params_.matcher.roi_width;
     unsigned int roi_heigth = params_.matcher.roi_height;
@@ -176,7 +177,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
         FeaturePointImage* feature_ptr = (FeaturePointImage*)(((feature_base_ptr)));
         act_search_grid_.hitCell(feature_ptr->getKeypoint());
 
-        std::cout << "Search feature: " << feature_ptr->id() << " at: " << feature_ptr->getKeypoint().pt;
+        std::cout << "Search feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
 
         roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
@@ -219,6 +220,8 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
                 _feature_list_out.push_back(incoming_point_ptr);
+
+                incoming_point_ptr->setTrackId(feature_ptr->trackId());
 
                 _feature_matches[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
                                                             normalized_score); //FIXME: 512 is the maximum HAMMING distance
