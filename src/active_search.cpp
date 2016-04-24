@@ -1,6 +1,6 @@
 /**
- * \file activeSearch.cpp
- * \date 10/04/2010
+ * \file active_search.cpp
+ * \date 10/04/2016
  * \author jsola, dinesh
  */
 

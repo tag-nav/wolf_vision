@@ -3,15 +3,12 @@
  *
  *  Active search detection and matching for points.
  *
- * \date 10/04/2010
- * \author jsola
- *
- * ## Add detailed description here ##
- *
+ * \date 10/04/2016
+ * \author jsola, dinesh
  */
 
-#ifndef ACTIVESEARCH_HPP_
-#define ACTIVESEARCH_HPP_
+#ifndef ACTIVESEARCH_H_
+#define ACTIVESEARCH_H_
 
 // Wolf includes
 #include "wolf.h"
@@ -314,4 +311,4 @@ inline Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i& _cell
 
 }
 
-#endif /* ACTIVESEARCH_HPP_ */
+#endif /* ACTIVESEARCH_H_ */
