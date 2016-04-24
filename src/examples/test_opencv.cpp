@@ -17,6 +17,7 @@
 #include "opencv2/features2d/features2d.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
+#include "opencv2/imgproc/imgproc.hpp"
 
 // General includes
 #include <math.h>
@@ -32,78 +33,73 @@ int main(int argc, char** argv)
 
     const char * filename;
     if (argc == 1)
-    {
         filename = "/home/jtarraso/Vídeos/House interior.mp4";
-    }
     else
-    {
         if (std::string(argv[1]) == "0")
-        {
-            //camera
-            filename = "0";
-        }
+            filename = "0"; // camera
         else
-        {
-            filename = argv[1];
-        }
-    }
+            filename = argv[1]; // provided through argument
+
     std::cout << "Input video file: " << filename << std::endl;
     cv::VideoCapture capture(filename);
     if(!capture.isOpened())  // check if we succeeded
-    {
         std::cout << "failed" << std::endl;
-    }
     else
-    {
         std::cout << "succeded" << std::endl;
-    }
-    capture.set(CV_CAP_PROP_POS_MSEC, 0000);
+
     unsigned int img_width = (unsigned int)capture.get(CV_CAP_PROP_FRAME_WIDTH);
     unsigned int img_height = (unsigned int)capture.get(CV_CAP_PROP_FRAME_HEIGHT);
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
-    unsigned int buffer_size = 4;
-    std::vector<cv::Mat> frame(buffer_size);
+    unsigned int window_size = 5;
+    std::vector<cv::Mat> frame(window_size);
     cv::Mat img_1, img_2;
 
-    unsigned int margin = 0;
-    cv::Rect roi(margin,margin,img_width-2*margin, img_height-2*margin);
-
-    cv::namedWindow("Feature tracker");    // Creates a window for display.
+    cv::namedWindow("Feature tracker", cv::WINDOW_AUTOSIZE);    // Creates a window for display.
     cv::moveWindow("Feature tracker", 0, 0);
 
-    cv::BRISK detector;
-    cv::BRISK descriptor;
+    cv::BRISK detector(30, 0, 1.0);
+    cv::BRISK descriptor(30, 0, 1.0);
 //    cv::FlannBasedMatcher matcher;
     cv::BFMatcher matcher(cv::NORM_HAMMING);
-    std::vector<cv::KeyPoint> keypoints_1, keypoints_2, matched_1, matched_2;
+    std::vector<cv::KeyPoint> keypoints_1, keypoints_2;
     cv::Mat descriptors_1, descriptors_2;
     std::vector< cv::DMatch > matches;
+    std::vector< cv::DMatch > good_matches, inlier_matches;
+    std::vector<cv::Point2f> matched_1, matched_2;
+	cv::Mat inliers_bool;
+	std::vector<cv::Point2f> inliers_1, inliers_2;
+	cv::Mat img_matches;
+	cv::Mat img_scaled;
+	double scale = 0.875;
 
     unsigned int f = 0;
     while(f<800)
     {
         f++;
-        std::cout << "\n=============== Frame #: " << f << " in buffer: " << f%buffer_size << " ===============" << std::endl;
+        std::cout << "\n=============== Frame #: " << f << " in buffer: " << f % window_size << " ===============" << std::endl;
 
-        capture >> frame[f % buffer_size];
+        capture >> frame[f % window_size];
 
-        if(!frame[f % buffer_size].empty())
+        matched_1.clear();
+        matched_2.clear();
+        good_matches.clear();
+        inlier_matches.clear();
+        inliers_1.clear();
+        inliers_2.clear();
+
+        if(!frame[f % window_size].empty())
         {
-            cv::imshow("Feature tracker", frame[f % buffer_size]);
-            cv::waitKey(1);
-
-
-            if (f > 1)
+            if (f > window_size)
             {
-                img_1 = frame[f % buffer_size];
-                img_2 = frame[(f-1) % buffer_size];
+                img_1 = frame[f % window_size];
+                img_2 = frame[(f-window_size+1) % window_size];
 
                 // detect and describe in both images
-                detector.detect(img_1(roi), keypoints_1);
-                detector.detect(img_2(roi), keypoints_2);
-                descriptor.compute(img_1(roi), keypoints_1, descriptors_1);
-                descriptor.compute(img_2(roi), keypoints_2, descriptors_2);
+                detector.detect(img_1, keypoints_1);
+                detector.detect(img_2, keypoints_2);
+                descriptor.compute(img_1, keypoints_1, descriptors_1);
+                descriptor.compute(img_2, keypoints_2, descriptors_2);
 
                 // match (try flann later)
                 //-- Step 3: Matching descriptor vectors using FLANN matcher
@@ -112,39 +108,56 @@ int main(int argc, char** argv)
                 double max_dist = 0; double min_dist = 512;
 
                 //-- Quick calculation of max and min distances between keypoints
-                for( int i = 0; i < descriptors_1.rows; i++ )
-                { double dist = matches[i].distance;
-                  if( dist < min_dist ) min_dist = dist;
-                  if( dist > max_dist ) max_dist = dist;
-                }
+				for (int i = 0; i < descriptors_1.rows; i++) {
+					double dist = matches[i].distance;
+					if (dist < min_dist)
+						min_dist = dist;
+					if (dist > max_dist)
+						max_dist = dist;
+				}
 
                 printf("-- Max dist : %f \n", max_dist );
                 printf("-- Min dist : %f \n", min_dist );
 
-                //-- Draw only "good" matches (i.e. whose distance is less than 2*min_dist,
-                //-- or a small arbitary value ( 0.02 ) in the event that min_dist is very
-                //-- small)
-                //-- PS.- radiusMatch can also be used here.
-                std::vector< cv::DMatch > good_matches;
+                //-- Select only "good" matches (i.e. those at a distance which is small)
+                for( int i = 0; i < matches.size(); i++ )
+                {
+					if (matches[i].distance <= 100) //std::max(2*min_dist, 0.02) )
+					{
+						good_matches.push_back(matches[i]);
+						matched_1.push_back(keypoints_1[matches[i].trainIdx].pt);
+						matched_2.push_back(keypoints_1[matches[i].queryIdx].pt);
+					}
+				}
 
-                for( int i = 0; i < descriptors_1.rows; i++ )
-                { if( matches[i].distance <= 50)//std::max(2*min_dist, 0.02) )
-                  { good_matches.push_back( matches[i]); }
+                // Compute the Fundamental matrix F and discard outliers in one go
+                if (good_matches.size() > 8)
+                {
+                	// find fundamental matrix using RANSAC, return set of inliers as bool vector
+                	cv::Mat F = findFundamentalMat(matched_1, matched_2, cv::FM_RANSAC, 3.0, 0.99, inliers_bool);
+
+                	std::cout << "F = " << F << std::endl;
+
+                	// Recover the inlier matches
+                	for (int i = 0; i < inliers_bool.rows; i++)
+						if (inliers_bool.at<char>(i) == 1)
+							inlier_matches.push_back(good_matches[i]);
                 }
 
-                //-- Draw only "good" matches
-                cv::Mat img_matches;
-                cv::drawMatches( img_1(roi), keypoints_1, img_2(roi), keypoints_2,
-                             good_matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
-                             std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+            	std::cout << "Initial matches: " << matches.size() << " good: " << good_matches.size() << " inliers: " << inlier_matches.size() << std::endl;
 
+            	// Draw inliers after RANSAC
+                cv::drawMatches( img_1, keypoints_1, img_2, keypoints_2,
+                             inlier_matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
+                             std::vector<char>(), 0);//cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
                 //-- Show detected matches
-                imshow( "Good Matches", img_matches );
+                resize(img_matches, img_scaled, cv::Size(), scale, scale);
+                imshow( "Feature tracker", img_scaled );
 
-//                // find fundamental matrix using RANSAC
-//                cv::Mat F = findFundamentalMat(keypoints_1, keypoints_2, cv::FM_RANSAC);
-//
-//                std::cout << F << std::endl;
+                if (f % 100)
+                	cv::waitKey(1);
+                else
+                	cv::waitKey(0);
             }
 
         }
