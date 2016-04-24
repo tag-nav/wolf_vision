@@ -330,12 +330,13 @@ void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
         FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
         if (point_ptr->isKnown())
         {
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 7, cv::Scalar(50.0, 250.0, 54.0), 1, 3, 0);
+            cv::circle(image_last_, point_ptr->getKeypoint().pt, 7, cv::Scalar(51.0, 255.0, 51.0), 1, 3, 0);
         }
         else
         {
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(80.0, 80.0, 254.0), -1, 3, 0);
+            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
         }
+        cv::putText(image_last_, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
     }
     cv::imshow("Feature tracker", image_last_);
 }
