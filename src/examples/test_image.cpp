@@ -90,7 +90,7 @@ int main(int argc, char** argv)
     tracker_params.image = {img_width,  img_height};
     tracker_params.detector.threshold = 30;
     tracker_params.detector.threshold_new_features = 70;
-    tracker_params.detector.octaves = 0;
+    tracker_params.detector.octaves = 2;
     tracker_params.detector.nominal_pattern_radius = 4;
     tracker_params.descriptor.size = 512;
     tracker_params.descriptor.pattern_scale = 1.0;

@@ -75,6 +75,10 @@ IF(OpenCV_FOUND)
     ADD_EXECUTABLE(test_image test_image.cpp)
     TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
 
+    # Testing opencv matching and fundamental matrix with ransac
+    ADD_EXECUTABLE(test_opencv test_opencv.cpp)
+    TARGET_LINK_LIBRARIES(test_opencv ${PROJECT_NAME})
+
     # Testing OpenCV functions for projection of points
     ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
     TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
