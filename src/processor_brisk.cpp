@@ -192,6 +192,8 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
         {
             //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
 
+        	std::cout << " --> " << candidate_keypoints.size() << " candidates";
+
             matcher_.match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
 
 //        	std::cout << "\t [trainIdx]:distance: ";
