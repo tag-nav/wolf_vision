@@ -88,7 +88,8 @@ int main(int argc, char** argv)
     double scale = 0.875;
 
     unsigned int f = 0;
-    while (f < 800)
+    capture >> image_buffer[f % buffer_size];
+    while (!(image_buffer[f % buffer_size].empty()))
     {
         f++;
         std::cout << "\n=============== Frame #: " << f << " in buffer: " << f % buffer_size << " ==============="
@@ -184,6 +185,7 @@ int main(int argc, char** argv)
         {
             cv::waitKey(2000);
         }
+        capture >> image_buffer[f % buffer_size];
     }
 }
 
