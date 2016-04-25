@@ -10,7 +10,7 @@
 
 #include <map>
 
-class Shape
+class Shape // SensorBase
 {
     public:
         typedef enum
@@ -25,7 +25,7 @@ class Shape
         int id_;
 };
 
-class Point : public Shape
+class Point : public Shape // SensorCamera
 {
     public:
         Point();
@@ -36,7 +36,7 @@ class Point : public Shape
         static int id_count_;
 };
 
-class Line : public Shape
+class Line : public Shape // SensorIMU
 {
     public:
         Line();
@@ -46,7 +46,7 @@ class Line : public Shape
         static int id_count_;
 };
 
-class ShapeFactory
+class ShapeFactory // SensorFactory
 {
     public:
         typedef Shape* (*CreateShapeCallback)();
@@ -114,6 +114,7 @@ Shape* CreatePoint()
 {
     return new Point;
 }
+//const bool registered = ShapeFactory::instance()->registerShape(Shape::POINT, CreatePoint);
 const bool registered = ShapeFactory::instance()->registerShape(Shape::POINT, CreatePoint);
 }
 
