@@ -35,18 +35,15 @@ struct ProcessorImageParameters
                 unsigned int threshold; ///< on the keypoint strength to declare it key-point
                 unsigned int threshold_new_features; ///< on the keypoint strength to declare it key-point
                 unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
-                float pattern_scales; ///< Scale of the base pattern wrt the nominal one
-                unsigned int default_pattern_radius; ///< Radius of the detector pattern before scaling
-                unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at scale = 1.0
+                unsigned int nominal_pattern_radius; ///< Radius of the detector pattern before scaling
+                unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
         }detector;
         struct Descriptor
         {
-                unsigned int size; ///< size of the descriptor vector (length of the vector)
-                unsigned int threshold; ///< on the keypoint strength to declare it key-point
-                unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
-                float pattern_scales; ///< Scale of the base pattern wrt the nominal one
-                unsigned int default_pattern_radius; ///< Radius of the descriptor pattern before scaling
-                unsigned int pattern_radius; ///< radius of the pattern used to compute the descriptor at the nominal scale
+                unsigned int nominal_pattern_radius; ///< Radius of the descriptor pattern before scaling
+                float pattern_scale; ///< Scale of the base pattern wrt the nominal one
+                unsigned int pattern_radius; ///< radius of the pattern used to describe a key-point at pattern_scale = 1.0 and octaves = 0
+                unsigned int size_bits; ///< length of the descriptor vector in bits
         }descriptor;
         struct Matcher
         {
@@ -60,7 +57,6 @@ struct ProcessorImageParameters
                 unsigned int grid_width; ///< cells per horizontal dimension of image
                 unsigned int grid_height; ///< cells per vertical dimension of image
                 unsigned int separation; ///<
-                unsigned int adjust;
         }active_search;
         struct Algorithm
         {
@@ -87,6 +83,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
+        std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
 
@@ -187,8 +184,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 
 inline bool ProcessorBrisk::voteForKeyFrame()
 {
-    std::cout << "voteForKeyFrame?: "
-            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
+//    std::cout << "voteForKeyFrame?: "
+//            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
     return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
 }
 
