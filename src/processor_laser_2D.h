@@ -11,6 +11,7 @@
 
 #include "processor_base.h"
 
+
 //TODO try this, and remove includes below
 //class SensorLaser2D;
 //class CaptureLaser2D;
@@ -36,12 +37,13 @@
 
 
 
+namespace wolf {
 
 
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level
-const WolfScalar MAX_ACCEPTED_APERTURE_DIFF = 20.0*M_PI/180.; //20 degrees
-const WolfScalar CONTAINER_WIDTH = 2.44;
-const WolfScalar CONTAINER_LENGTH = 12.20;
+const Scalar MAX_ACCEPTED_APERTURE_DIFF = 20.0*M_PI/180.; //20 degrees
+const Scalar CONTAINER_WIDTH = 2.44;
+const Scalar CONTAINER_LENGTH = 12.20;
 
 
 
@@ -56,6 +58,14 @@ class ProcessorLaser2D : public ProcessorBase
         virtual ~ProcessorLaser2D();
 
         void process(CaptureBase *_capture_ptr);
+
+        virtual bool voteForKeyFrame();
+        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr){return false;};
+        virtual void init(CaptureBase* _origin_ptr);
+
+    protected:
+        virtual void preProcess(){}
+        virtual void postProcess(){}
 
         // JS: These two fcns can be removed and substituted by process() above.
     private:
@@ -85,4 +95,16 @@ class ProcessorLaser2D : public ProcessorBase
                                      LandmarkCorner2D* _old_corner_landmark_ptr, int& _feature_idx, int& _corner_idx);
 
 };
+
+inline bool ProcessorLaser2D::voteForKeyFrame()
+{
+    return false;
+}
+
+inline void ProcessorLaser2D::init(CaptureBase* _origin_ptr)
+{
+}
+
+} // namespace wolf
+
 #endif /* SRC_PROCESSOR_LASER_2D_H_ */

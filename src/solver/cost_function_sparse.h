@@ -8,6 +8,9 @@
 // CERES JET
 #include "ceres/jet.h"
 
+namespace wolf
+{
+
 template <class ConstraintT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
@@ -584,5 +587,7 @@ class CostFunctionSparse<ConstraintT,
                 (*this->constraint_ptr_)(this->jets_0_,this->residuals_jet_);
         }
 };
+
+} //namespace wolf
 
 #endif /* TRUNK_SRC_SOLVER_COST_FUNCTION_SPARSE_H_ */

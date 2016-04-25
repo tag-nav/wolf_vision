@@ -9,6 +9,8 @@
 // Std includes
 
 
+namespace wolf {
+
 //class LandmarkCorner2D
 class LandmarkCorner2D : public LandmarkBase
 {
@@ -23,7 +25,7 @@ class LandmarkCorner2D : public LandmarkBase
          * \param _aperture descriptor of the landmark: aperture of the corner
          *
          **/
-		LandmarkCorner2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const WolfScalar& _aperture=0);
+		LandmarkCorner2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Scalar& _aperture=0);
 
         /** \brief Default destructor (not recommended)
          *
@@ -37,7 +39,10 @@ class LandmarkCorner2D : public LandmarkBase
          * Returns aperture
          * 
          **/
-        WolfScalar getAperture() const;         
+        Scalar getAperture() const;         
         
 };
+
+} // namespace wolf
+
 #endif

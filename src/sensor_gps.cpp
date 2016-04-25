@@ -1,6 +1,7 @@
 
 #include "sensor_gps.h"
 
+namespace wolf {
 
 SensorGPS::SensorGPS(StateBlock* _p_ptr, //GPS sensor position with respect to the car frame (base frame)
                      StateBlock* _o_ptr, //GPS sensor orientation with respect to the car frame (base frame)
@@ -51,3 +52,5 @@ void SensorGPS::registerNewStateBlocks()
             getWolfProblem()->addStateBlockPtr(map_o_ptr_);
     }
 }
+
+} // namespace wolf

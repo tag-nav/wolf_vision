@@ -5,6 +5,8 @@
 #include "wolf.h"
 #include "constraint_sparse.h"
 
+namespace wolf {
+
 class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
 {
     public:
@@ -89,5 +91,8 @@ inline bool ConstraintOdom2D::operator ()(const T* const _p1, const T* const _o1
     //std::cout << "constraint odom computed!" << std::endl;
     return true;
 }
+
+
+} // namespace wolf
 
 #endif

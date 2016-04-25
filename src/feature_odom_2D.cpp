@@ -1,5 +1,7 @@
 #include "feature_odom_2D.h"
 
+namespace wolf {
+
 FeatureOdom2D::FeatureOdom2D(unsigned int _dim_measurement) :
     FeatureBase(FEAT_ODOM_2D, _dim_measurement)
 {
@@ -21,3 +23,5 @@ void FeatureOdom2D::findConstraints()
 {
 
 }
+
+} // namespace wolf

@@ -6,13 +6,15 @@
 #include "feature_base.h" //must be replaced by feature_imu if needed
 #include "sensor_base.h" //must be replaced by sensor_imu
 
+namespace wolf {
+
 class CaptureIMU : public CaptureMotion
 {
     public:
 
         CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data);
 
-        CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<WolfScalar,6,3>& _data_covariance);
+        CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance);
 
         /** \brief Default destructor (not recommended)
          *
@@ -31,5 +33,7 @@ class CaptureIMU : public CaptureMotion
 
         virtual CaptureIMU* interpolateCapture(const TimeStamp& _ts);
 };
+
+} // namespace wolf
 
 #endif // CAPTURE_IMU_H

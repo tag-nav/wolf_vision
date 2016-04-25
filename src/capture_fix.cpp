@@ -1,5 +1,6 @@
 #include "capture_fix.h"
 
+namespace wolf{
 
 CaptureFix::CaptureFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
 	CaptureBase(_ts, _sensor_ptr),
@@ -29,3 +30,5 @@ Eigen::VectorXs CaptureFix::computeFramePose(const TimeStamp& _now) const
 {
 	return data_;
 }
+
+} // namespace wolf

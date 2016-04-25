@@ -5,12 +5,14 @@
 //wolf includes
 #include "sensor_base.h"
 
+namespace wolf {
+
 class SensorOdom2D : public SensorBase
 {
 
     protected:
-        WolfScalar k_disp_to_disp_; ///< ratio of displacement variance to displacement, for odometry noise calculation
-        WolfScalar k_rot_to_rot_; ///< ratio of rotation variance to rotation, for odometry noise calculation
+        Scalar k_disp_to_disp_; ///< ratio of displacement variance to displacement, for odometry noise calculation
+        Scalar k_rot_to_rot_; ///< ratio of rotation variance to rotation, for odometry noise calculation
 
 	public:
         /** \brief Constructor with arguments
@@ -22,7 +24,7 @@ class SensorOdom2D : public SensorBase
          * \param _rot_noise_factor rotation noise factor
          * 
          **/
-		SensorOdom2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const WolfScalar& _disp_noise_factor, const WolfScalar&  _rot_noise_factor);
+		SensorOdom2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Scalar& _disp_noise_factor, const Scalar&  _rot_noise_factor);
 
         /** \brief Default destructor (not recommended)
          *
@@ -46,4 +48,7 @@ class SensorOdom2D : public SensorBase
         double getRotVarToRotNoiseFactor() const;
         
 };
+
+} // namespace wolf
+
 #endif

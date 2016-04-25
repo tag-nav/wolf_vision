@@ -6,6 +6,7 @@
 #include "raw_gps_utils/satellites_obs.h"
 #include "capture_base.h"
 
+namespace wolf {
 
 class CaptureGPS : public CaptureBase
 {
@@ -33,6 +34,6 @@ public:
 
 };
 
-
+} // namespace wolf
 
 #endif //CAPTURE_GPS_H_

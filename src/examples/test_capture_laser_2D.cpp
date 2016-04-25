@@ -8,6 +8,8 @@
 //main
 int main(int argc, char *argv[])
 {
+    using namespace wolf;
+
     std::cout << std::endl << "CaptureLaser2D class test" << std::endl;
     std::cout << "========================================================" << std::endl;
     
@@ -99,7 +101,7 @@ int main(int argc, char *argv[])
     
     //init a noise generator
     std::default_random_engine generator(1);
-    std::normal_distribution<WolfScalar> distribution_range(0.,device.getRangeStdDev()); //odometry noise
+    std::normal_distribution<Scalar> distribution_range(0.,device.getRangeStdDev()); //odometry noise
     
     //Create a Capture object
     CaptureLaser2D capture(time_stamp, &device, ranges);

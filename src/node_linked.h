@@ -12,10 +12,12 @@
 #ifndef NODE_LINKED_H_
 #define NODE_LINKED_H_
 
-
 //wolf includes
 #include "node_base.h"
 #include "wolf.h"
+
+namespace wolf
+{
 
 /** \brief Linked node element in the Wolf Tree
  * 
@@ -103,6 +105,11 @@ class NodeLinked : public NodeBase
          */
         void addDownNode(LowerNodePtr _ptr);
 
+        /** \brief Append a list of new down nodes
+         * The provided list is emptied after this operation
+         */
+        void addDownNodeList(LowerNodeList& _new_down_node_list);
+
         /** \brief Gets a reference to down node list
          */
         LowerNodeList& downNodeList() const;
@@ -129,16 +136,35 @@ class NodeLinked : public NodeBase
          */
         void removeDownNode(const unsigned int _id);
 
+        /** \brief Removes a down node from list, given an iterator
+         *
+         * @param _iter an iterator to the particular down node in the list that will be removed
+         */
+        void unlinkDownNode(const LowerNodeIter& _iter);
+
+        /** \brief Removes a down node from list, given a pointer
+         *
+         * @param _ptr a pointer to the particular down node in the list that will be removed
+         */
+        void unlinkDownNode(const LowerNodePtr _ptr);
+
+        /** \brief Removes a down node from the list, given a node id
+         *
+         * @param _id node id of the node that will be removed
+         */
+        void unlinkDownNode(const unsigned int _id);
+
         /** \brief Gets a pointer to the tree top node
          * 
          * TODO: Review if it could return a pointer to a derived class instead of NodeBase JVN: I tried to do so...
          **/
-        virtual WolfProblem* getWolfProblem();
-
+        virtual Problem* getWolfProblem();
 
     protected:
 
 };
+
+} // namespace wolf
 
 //////////////////////////////////////////
 //          IMPLEMENTATION
@@ -147,7 +173,7 @@ class NodeLinked : public NodeBase
 // Include header files of forward-declared classes derived from NodeLinked -- this avoids loop dependencies
 // See this evil ugly solution improved in note 8) of http://www.cplusplus.com/forum/articles/10627/
 // This implies including here ALL the base classes in the Wolf tree!
-#include "wolf_problem.h"
+#include "problem.h"
 #include "hardware_base.h"
 #include "sensor_base.h"
 #include "processor_base.h"
@@ -159,6 +185,9 @@ class NodeLinked : public NodeBase
 #include "map_base.h"
 #include "landmark_base.h"
 #include "node_terminus.h"
+
+namespace wolf
+{
 
 template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label) :
@@ -209,32 +238,22 @@ inline const bool NodeLinked<UpperType, LowerType>::isDeleting() const
 template<class UpperType, class LowerType>
 inline bool NodeLinked<UpperType, LowerType>::isTop() const
 {
-    if (location_ == TOP)
-        return true;
-    else
-        return false;
+    return (location_ == TOP);
 }
 
 template<class UpperType, class LowerType>
 inline bool NodeLinked<UpperType, LowerType>::isBottom() const
 {
-    if (location_ == BOTTOM)
-        return true;
-    else
-        return false;
+    return (location_ == BOTTOM);
 }
 
 template<class UpperType, class LowerType>
 inline void NodeLinked<UpperType, LowerType>::linkToUpperNode(UpperNodePtr _pptr)
 {
     if (isTop())
-    {
         up_node_ptr_ = nullptr;
-    }
     else
-    {
         up_node_ptr_ = _pptr;
-    }
 }
 
 template<class UpperType, class LowerType>
@@ -246,7 +265,6 @@ inline void NodeLinked<UpperType, LowerType>::unlinkFromUpperNode()
 template<class UpperType, class LowerType>
 inline const typename NodeLinked<UpperType, LowerType>::UpperNodePtr NodeLinked<UpperType, LowerType>::upperNodePtr() const
 {
-    assert(up_node_ptr_ != nullptr);
     return up_node_ptr_;
 }
 
@@ -264,6 +282,14 @@ inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodePtr _ptr)
     down_node_list_.push_back(_ptr);
     _ptr->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
     //std::cout << "node: " << _ptr->nodeId() << " linked to " <<_ptr->upperNodePtr()->nodeId() << std::endl;
+}
+template<class UpperType, class LowerType>
+void NodeLinked<UpperType, LowerType>::addDownNodeList(LowerNodeList& _new_down_node_list)
+{
+    assert(!isBottom() && "Trying to add a down node to a bottom node");
+    for (auto new_down_node : _new_down_node_list)
+        new_down_node->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
+    down_node_list_.splice(down_node_list_.end(), _new_down_node_list);
 }
 
 template<class UpperType, class LowerType>
@@ -307,13 +333,40 @@ inline void NodeLinked<UpperType, LowerType>::removeDownNode(const LowerNodeIter
 }
 
 template<class UpperType, class LowerType>
-WolfProblem* NodeLinked<UpperType, LowerType>::getWolfProblem()
+inline void NodeLinked<UpperType, LowerType>::unlinkDownNode(const unsigned int _id)
+{
+    for (auto iter = down_node_list_.begin(); iter != down_node_list_.end(); ++iter)
+    {
+        if ((*iter)->nodeId() == _id)
+        {
+            unlinkDownNode(iter);
+            break; //avoid comparison of iter and list.end(), otherwise Valgrind claimed
+        }
+    }
+}
+
+template<class UpperType, class LowerType>
+inline void NodeLinked<UpperType, LowerType>::unlinkDownNode(const LowerNodePtr _ptr)
+{
+    _ptr->unlinkFromUpperNode();
+    down_node_list_.remove(_ptr);
+}
+
+template<class UpperType, class LowerType>
+inline void NodeLinked<UpperType, LowerType>::unlinkDownNode(const LowerNodeIter& _iter)
+{
+    (*_iter)->unlinkFromUpperNode();
+    down_node_list_.erase(_iter);
+}
+
+template<class UpperType, class LowerType>
+Problem* NodeLinked<UpperType, LowerType>::getWolfProblem()
 {
     if (up_node_ptr_ != nullptr)
         return up_node_ptr_->getWolfProblem();
     return nullptr;
 }
 
-
+} // namespace wolf
 
 #endif /* NODE_LINKED_H_ */

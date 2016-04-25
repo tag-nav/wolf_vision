@@ -4,12 +4,11 @@
 //wolf includes
 #include "sensor_base.h"
 
-/**
- *
- * Test for the camera sensor
- *
- **/
 
+namespace wolf {
+
+/**Pin hole camera sensor
+ */
 class SensorCamera : public SensorBase
 {
     public:
@@ -36,5 +35,7 @@ class SensorCamera : public SensorBase
     int img_height_;
 
 };
+
+} // namespace wolf
 
 #endif // SENSOR_CAMERA_H

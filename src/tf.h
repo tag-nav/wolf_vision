@@ -14,6 +14,8 @@
 // Std includes
 #include <eigen3/Eigen/Dense>
 
+namespace wolf {
+
 /**
  * Class for 3D frame transforms.
  *
@@ -128,5 +130,7 @@ class TF
         }
 
 };
+
+} // namespace wolf
 
 #endif /* SRC_TF_H_ */

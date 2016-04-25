@@ -5,6 +5,8 @@
 #include "wolf.h"
 #include "constraint_relative_2D_analytic.h"
 
+namespace wolf {
+
 class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 {
     public:
@@ -45,7 +47,7 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 //            Eigen::VectorXs expected_measurement(3);
 //
 //            // Expected measurement
-//            Eigen::Matrix2s R = Eigen::Rotation2D<WolfScalar>(-_st_vector[1](0)).matrix();
+//            Eigen::Matrix2s R = Eigen::Rotation2D<Scalar>(-_st_vector[1](0)).matrix();
 //            expected_measurement.head(2) = R * (_st_vector[2]-_st_vector[0]); // rotar menys l'angle de primer (-_o1)
 //            expected_measurement(2) = _st_vector[3](0) - _st_vector[1](0);
 //
@@ -101,4 +103,7 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 //            return AUTO;
 //        }
 };
+
+} // namespace wolf
+
 #endif

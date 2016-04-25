@@ -13,6 +13,8 @@
 
 // std
 
+namespace wolf {
+
 class SensorGPS : public SensorBase
 {
 protected:
@@ -40,4 +42,7 @@ public:
     virtual void registerNewStateBlocks();
 
 };
+
+} // namespace wolf
+
 #endif //SENSOR_GPS_H_

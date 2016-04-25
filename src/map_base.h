@@ -3,8 +3,10 @@
 #define MAP_BASE_H_
 
 // Fwd refs
-class WolfProblem;
+namespace wolf{
+class Problem;
 class LandmarkBase;
+}
 
 //Wolf includes
 #include "wolf.h"
@@ -12,8 +14,10 @@ class LandmarkBase;
 
 //std includes
 
+namespace wolf {
+
 //class MapBase
-class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
+class MapBase : public NodeLinked<Problem,LandmarkBase>
 {
     public:
         MapBase();
@@ -28,7 +32,13 @@ class MapBase : public NodeLinked<WolfProblem,LandmarkBase>
          *
          * Adds a landmark to the Map. It also updates the lists of StateBlocks that are used by the solver.
          **/
-        virtual void addLandmark(LandmarkBase* _landmark_ptr);
+        virtual LandmarkBase* addLandmark(LandmarkBase* _landmark_ptr);
+
+        /** \brief Adds a landmark
+         *
+         * Adds a landmark to the Map. It also updates the lists of StateBlocks that are used by the solver.
+         **/
+        virtual void addLandmarkList(LandmarkBaseList _landmark_list);
 
         void removeLandmark(const LandmarkBaseIter& _landmark_iter);
         void removeLandmark(LandmarkBase* _landmark_ptr);
@@ -42,5 +52,7 @@ inline LandmarkBaseList* MapBase::getLandmarkListPtr()
 {
     return getDownNodeListPtr();
 }
+
+} // namespace wolf
 
 #endif

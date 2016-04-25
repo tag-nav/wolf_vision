@@ -1,6 +1,8 @@
 #include "constraint_analytic.h"
 #include "state_block.h"
 
+namespace wolf {
+
 ConstraintAnalytic::ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, ConstraintStatus _status,
                                        StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
                                        StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
@@ -49,7 +51,7 @@ ConstraintAnalytic::~ConstraintAnalytic()
 }
 
 
-const std::vector<WolfScalar*> ConstraintAnalytic::getStateBlockPtrVector()
+const std::vector<Scalar*> ConstraintAnalytic::getStateBlockPtrVector()
 {
     assert(state_ptr_vector_.size() > 0 && state_ptr_vector_.size() <= 10 && "Wrong state vector size in constraint, it should be between 1 and 10");
 
@@ -57,29 +59,29 @@ const std::vector<WolfScalar*> ConstraintAnalytic::getStateBlockPtrVector()
     {
         case 1:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr()});
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr()});
         }
         case 2:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr()});
         }
         case 3:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr()});
         }
         case 4:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr()});
         }
         case 5:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -87,7 +89,7 @@ const std::vector<WolfScalar*> ConstraintAnalytic::getStateBlockPtrVector()
         }
         case 6:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -96,7 +98,7 @@ const std::vector<WolfScalar*> ConstraintAnalytic::getStateBlockPtrVector()
         }
         case 7:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -106,7 +108,7 @@ const std::vector<WolfScalar*> ConstraintAnalytic::getStateBlockPtrVector()
         }
         case 8:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -117,7 +119,7 @@ const std::vector<WolfScalar*> ConstraintAnalytic::getStateBlockPtrVector()
         }
         case 9:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -129,7 +131,7 @@ const std::vector<WolfScalar*> ConstraintAnalytic::getStateBlockPtrVector()
         }
         case 10:
         {
-            return std::vector<WolfScalar*>({state_ptr_vector_[0]->getPtr(),
+            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
                                              state_ptr_vector_[1]->getPtr(),
                                              state_ptr_vector_[2]->getPtr(),
                                              state_ptr_vector_[3]->getPtr(),
@@ -142,7 +144,7 @@ const std::vector<WolfScalar*> ConstraintAnalytic::getStateBlockPtrVector()
         }
     }
 
-    return std::vector<WolfScalar*>(0); //Not going to happen
+    return std::vector<Scalar*>(0); //Not going to happen
 }
 
 const std::vector<StateBlock*> ConstraintAnalytic::getStatePtrVector() const
@@ -174,3 +176,5 @@ void ConstraintAnalytic::resizeVectors()
         }
     }
 }
+
+} // namespace wolf

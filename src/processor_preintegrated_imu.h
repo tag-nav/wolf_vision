@@ -10,6 +10,8 @@
 // STL
 #include <deque>
 
+namespace wolf {
+
 class ProcessorPreintegratedIMU : public ProcessorMotion2{
     public:
         ProcessorPreintegratedIMU(ProcessorType _tp);
@@ -18,6 +20,10 @@ class ProcessorPreintegratedIMU : public ProcessorMotion2{
         // not redefining main operations (they should be the same for all derived classes)
 
     protected:
+
+        virtual void preProcess(){}
+        virtual void postProcess(){}
+
         // Helper functions
 
 
@@ -64,12 +70,14 @@ class ProcessorPreintegratedIMU : public ProcessorMotion2{
     private:
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
         ///< (first-order propagation from *measurementCovariance*).
-        Eigen::Matrix<WolfScalar,9,9> preint_meas_cov_;
+        Eigen::Matrix<Scalar,9,9> preint_meas_cov_;
 
         ///Jacobians
-        Eigen::Matrix<WolfScalar,9,3> preintegrated_H_biasAcc_;
-        Eigen::Matrix<WolfScalar,9,3> preintegrated_H_biasOmega_;
+        Eigen::Matrix<Scalar,9,3> preintegrated_H_biasAcc_;
+        Eigen::Matrix<Scalar,9,3> preintegrated_H_biasOmega_;
 
 };
+
+} // namespace wolf
 
 #endif // PROCESSOR_PREINTEGRATED_IMU_H

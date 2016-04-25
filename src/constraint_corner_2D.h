@@ -6,6 +6,8 @@
 #include "constraint_sparse.h"
 #include "landmark_corner_2D.h"
 
+namespace wolf {
+
 class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 {
 	public:
@@ -63,7 +65,7 @@ inline bool ConstraintCorner2D::operator ()(const T* const _robotP, const T* con
     // sensor transformation
     Eigen::Matrix<T, 2, 1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getVector().head(2).cast<T>();
     //                        Eigen::Matrix<T,2,2> inverse_R_sensor = (getCapturePtr()->getSensorPtr()->getRotationMatrix2D().transpose()).cast<T>();
-    Eigen::Rotation2D<WolfScalar> S_R(getCapturePtr()->getSensorOPtr()->getVector()(0));
+    Eigen::Rotation2D<Scalar> S_R(getCapturePtr()->getSensorOPtr()->getVector()(0));
     Eigen::Matrix<T, 2, 2> inverse_R_sensor = (S_R.matrix().transpose()).cast<T>();
     // robot information
     Eigen::Matrix<T, 2, 2> inverse_R_robot;
@@ -116,5 +118,7 @@ inline bool ConstraintCorner2D::operator ()(const T* const _robotP, const T* con
     //			std::cout << std::endl;
     return true;
 }
+
+} // namespace wolf
 
 #endif

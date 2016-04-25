@@ -8,6 +8,8 @@
 #include "feature_gps_pseudorange.h"
 #include "constraint_sparse.h"
 
+namespace wolf {
+
 /*
  * NB:
  * FROM THIS CLASS AND ALL THE CLASS INCLUDED, THE LIBRARY RAW_GPS_UTILS
@@ -69,7 +71,7 @@ public:
 
 protected:
     Eigen::Vector3s sat_position_;
-    WolfScalar pseudorange_;
+    Scalar pseudorange_;
 
 };
 
@@ -142,5 +144,7 @@ inline bool ConstraintGPSPseudorange3D::operator ()(const T* const _vehicle_p, c
 
     return true;
 }
+
+} // namespace wolf
 
 #endif //CONSTRAINT_GPS_PSEUDORANGE_3D_H_

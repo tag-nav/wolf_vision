@@ -1,6 +1,7 @@
 #include "hardware_base.h"
-#include "sensor_base.h"
-#include "wolf_problem.h"
+
+
+namespace wolf {
 
 HardwareBase::HardwareBase() :
     NodeLinked(MID, "HARDWARE")
@@ -13,7 +14,7 @@ HardwareBase::~HardwareBase()
 	//std::cout << "deleting HardwareBase " << nodeId() << std::endl;
 }
 
-void HardwareBase::addSensor(SensorBase* _sensor_ptr)
+SensorBase* HardwareBase::addSensor(SensorBase* _sensor_ptr)
 {
     //std::cout << "adding sensor..." << std::endl;
 	addDownNode(_sensor_ptr);
@@ -21,9 +22,13 @@ void HardwareBase::addSensor(SensorBase* _sensor_ptr)
 
     _sensor_ptr->registerNewStateBlocks();
 
+    return _sensor_ptr;
+
 }
 
 void HardwareBase::removeSensor(SensorBase* _sensor_ptr)
 {
     removeDownNode(_sensor_ptr->nodeId());
 }
+
+} // namespace wolf

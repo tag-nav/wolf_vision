@@ -2,9 +2,11 @@
 #define LANDMARK_BASE_H_
 
 // Fwd references
+namespace wolf{
 class MapBase;
 class NodeTerminus;
 class StateBlock;
+}
 
 //Wolf includes
 #include "wolf.h"
@@ -13,13 +15,18 @@ class StateBlock;
 
 //std includes
 
+namespace wolf {
+
 // TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
 
 //class LandmarkBase
 class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
 {
+    private:
+        static unsigned int landmark_id_count_;
     protected:
+        unsigned int landmark_id_;
         LandmarkType type_;     ///< type of landmark. (types defined at wolf.h)
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
@@ -30,6 +37,7 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
 
 
     public:
+
         /** \brief Constructor with type, time stamp and the position state pointer
          *
          * Constructor with type, and state pointer
@@ -48,6 +56,8 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         virtual ~LandmarkBase();
 
 
+        unsigned int id();
+
         /** \brief Sets the Landmark status
          **/
         void setStatus(LandmarkStatus _st);
@@ -59,6 +69,8 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         /** \brief Sets the Landmark status to estimated
          **/
         void unfix();
+
+        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
@@ -92,12 +104,17 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          * 
          * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
          **/
-        WolfScalar getDescriptor(unsigned int _ii) const;
+        Scalar getDescriptor(unsigned int _ii) const;
 
         /** \brief Return the type of the landmark
          **/
         const LandmarkType getType() const;
 };
+
+inline unsigned int LandmarkBase::id()
+{
+    return landmark_id_;
+}
 
 inline void LandmarkBase::fix()
 {
@@ -109,6 +126,13 @@ inline void LandmarkBase::unfix()
 {
     //std::cout << "Unfixing frame " << nodeId() << std::endl;
     this->setStatus(LANDMARK_ESTIMATED);
+}
+
+inline void LandmarkBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
+{
+    NodeConstrained::removeConstrainedBy(_ctr_ptr);
+    if (constrained_by_list_.empty())
+        this->destruct();
 }
 
 inline StateBlock* LandmarkBase::getPPtr() const
@@ -136,7 +160,7 @@ inline void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)
     descriptor_ = _descriptor;
 }
 
-inline WolfScalar LandmarkBase::getDescriptor(unsigned int _ii) const
+inline Scalar LandmarkBase::getDescriptor(unsigned int _ii) const
 {
     return descriptor_(_ii);
 }
@@ -151,4 +175,5 @@ inline const LandmarkType LandmarkBase::getType() const
     return type_;
 }
 
+} // namespace wolf
 #endif

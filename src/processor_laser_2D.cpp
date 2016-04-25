@@ -1,5 +1,6 @@
 #include "processor_laser_2D.h"
 
+namespace wolf {
 
 ProcessorLaser2D::ProcessorLaser2D() : ProcessorBase(PRC_LIDAR),
         //sensor_laser_ptr_((SensorLaser2D*)(upperNodePtr())), // Static cast to specific sensor at construction time TODO: in construction time upperNodePtr is nullptr, it crashes always, to be removed or changed to somewhere (JVN)
@@ -86,10 +87,10 @@ void ProcessorLaser2D::createFeatures(std::list<laserscanutils::Corner> & _corne
         meas(3) = corner_it->aperture_;
 
         // TODO: maybe in line object?
-        WolfScalar L1 = corner_it->line_1_.length();
-        WolfScalar L2 = corner_it->line_2_.length();
-        WolfScalar cov_angle_line1 = 12 * corner_it->line_1_.error_ / (pow(L1,2) * (pow(corner_it->line_1_.np_,3)-pow(corner_it->line_1_.np_,2)));
-        WolfScalar cov_angle_line2 = 12 * corner_it->line_2_.error_ / (pow(L2,2) * (pow(corner_it->line_2_.np_,3)-pow(corner_it->line_2_.np_,2)));
+        Scalar L1 = corner_it->line_1_.length();
+        Scalar L2 = corner_it->line_2_.length();
+        Scalar cov_angle_line1 = 12 * corner_it->line_1_.error_ / (pow(L1,2) * (pow(corner_it->line_1_.np_,3)-pow(corner_it->line_1_.np_,2)));
+        Scalar cov_angle_line2 = 12 * corner_it->line_2_.error_ / (pow(L2,2) * (pow(corner_it->line_2_.np_,3)-pow(corner_it->line_2_.np_,2)));
 
 
         //init cov in corner coordinates
@@ -102,7 +103,7 @@ void ProcessorLaser2D::createFeatures(std::list<laserscanutils::Corner> & _corne
         //std::cout << cov_mat << std::endl;
 
         // Rotate covariance
-        R.topLeftCorner<2,2>() = Eigen::Rotation2D<WolfScalar>(corner_it->orientation_).matrix();
+        R.topLeftCorner<2,2>() = Eigen::Rotation2D<Scalar>(corner_it->orientation_).matrix();
         cov_mat.topLeftCorner<3,3>() = R.transpose() * cov_mat.topLeftCorner<3,3>() * R;
 
         //std::cout << "rotated covariance: " << std::endl;
@@ -118,11 +119,11 @@ void ProcessorLaser2D::establishConstraintsMHTree()
     if (capture_laser_ptr_->getFeatureListPtr()->size() != 0)
     {
         //local declarations
-        WolfScalar prob, dm2;
+        Scalar prob, dm2;
         unsigned int ii, jj;
         std::map<unsigned int, unsigned int> ft_lk_pairs;
         std::vector<bool> associated_mask;
-        WolfScalar sq24 = sqrt(2) / 4;
+        Scalar sq24 = sqrt(2) / 4;
         Eigen::MatrixXs corners(3,4);
                     // Center seen from corners (see LandmarkContainer.h)
                     // A                                         // B                                         // C                                         // D
@@ -186,7 +187,7 @@ void ProcessorLaser2D::establishConstraintsMHTree()
                     if (fabs(pi2pi(((FeatureCorner2D*)(*feature_it))->getAperture() - 3 * M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF)
                     {
                         // Rotate corners (seen from feature coordinates)
-                        //rotated_corners.topRows(2) = Eigen::Rotation2D<WolfScalar>(expected_features[*landmark_it](2)).matrix() * corners.topRows(2);
+                        //rotated_corners.topRows(2) = Eigen::Rotation2D<Scalar>(expected_features[*landmark_it](2)).matrix() * corners.topRows(2);
                         rotated_corners = corners;
                         squared_mahalanobis_distances = computeSquaredMahalanobisDistances((*feature_it), expected_features[*landmark_it], expected_features_covs[*landmark_it], rotated_corners);
 
@@ -269,21 +270,21 @@ void ProcessorLaser2D::establishConstraintsMHTree()
 
         // Global transformation
         Eigen::Vector2s t_robot = capture_laser_ptr_->getFramePtr()->getPPtr()->getVector().head(2);
-        Eigen::Matrix2s R_robot = Eigen::Rotation2D<WolfScalar>(*(capture_laser_ptr_->getFramePtr()->getOPtr()->getPtr())).matrix();
-        WolfScalar robot_orientation = *(capture_laser_ptr_->getFramePtr()->getOPtr()->getPtr());
+        Eigen::Matrix2s R_robot = Eigen::Rotation2D<Scalar>(*(capture_laser_ptr_->getFramePtr()->getOPtr()->getPtr())).matrix();
+        Scalar robot_orientation = *(capture_laser_ptr_->getFramePtr()->getOPtr()->getPtr());
 
         // Sensor transformation
         Eigen::Vector2s t_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
-        Eigen::Rotation2D<WolfScalar> S_R( getSensorPtr()->getOPtr()->getVector()(0) );
+        Eigen::Rotation2D<Scalar> S_R( getSensorPtr()->getOPtr()->getVector()(0) );
         Eigen::Matrix2s R_sensor = S_R.matrix();
-        WolfScalar sensor_orientation = *(capture_laser_ptr_->getSensorPtr()->getOPtr()->getPtr());
+        Scalar sensor_orientation = *(capture_laser_ptr_->getSensorPtr()->getOPtr()->getPtr());
 
         // NEW CORNERS
         for (auto it=new_corner_landmarks.begin(); it!=new_corner_landmarks.end();it++)
         {
             //get feature on sensor frame
             const Eigen::Vector2s& feature_position = (*it)->getMeasurement().head(2);
-            const WolfScalar& feature_orientation = (*it)->getMeasurement()(2);
+            const Scalar& feature_orientation = (*it)->getMeasurement()(2);
 
             //translate feature position and orientation to world (global)
             feature_global_pose.head(2) = R_robot * (R_sensor * feature_position + t_sensor) + t_robot;
@@ -297,7 +298,7 @@ void ProcessorLaser2D::establishConstraintsMHTree()
         {
             //get feature on sensor frame
             const Eigen::Vector2s& feature_position = new_container_landmarks.at(i).first->getMeasurement().head(2);
-            const WolfScalar& feature_orientation = new_container_landmarks.at(i).first->getMeasurement()(2);
+            const Scalar& feature_orientation = new_container_landmarks.at(i).first->getMeasurement()(2);
 
             //translate feature position and orientation to world (global)
             feature_global_pose.head(2) = R_robot * (R_sensor * feature_position + t_sensor) + t_robot;
@@ -318,18 +319,18 @@ void ProcessorLaser2D::computeExpectedFeature(LandmarkBase* _landmark_ptr, Eigen
     FrameBase* frame_ptr = capture_laser_ptr_->getFramePtr();
 
     Eigen::Vector2s p_robot = frame_ptr->getPPtr()->getVector();
-    WolfScalar      o_robot = *(frame_ptr->getOPtr()->getPtr());
+    Scalar      o_robot = *(frame_ptr->getOPtr()->getPtr());
 
     Eigen::Vector2s p_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
-    WolfScalar      o_sensor = *(getSensorPtr()->getOPtr()->getPtr());
-    Eigen::Rotation2D<WolfScalar> S_R( getSensorPtr()->getOPtr()->getVector()(0) );
+    Scalar      o_sensor = *(getSensorPtr()->getOPtr()->getPtr());
+    Eigen::Rotation2D<Scalar> S_R( getSensorPtr()->getOPtr()->getVector()(0) );
     Eigen::Matrix2s R_sensor = S_R.matrix();
 
     Eigen::Vector2s p_landmark = _landmark_ptr->getPPtr()->getVector();
-    WolfScalar      o_landmark = *(_landmark_ptr->getOPtr()->getPtr());
+    Scalar      o_landmark = *(_landmark_ptr->getOPtr()->getPtr());
 
-    WolfScalar o_rs = o_robot + o_sensor; // Sum of theta_sensor and theta_robot
-    Eigen::Matrix2s R_sr = Eigen::Rotation2D<WolfScalar>(o_rs).matrix(); // Sum of theta_sensor and theta_robot
+    Scalar o_rs = o_robot + o_sensor; // Sum of theta_sensor and theta_robot
+    Eigen::Matrix2s R_sr = Eigen::Rotation2D<Scalar>(o_rs).matrix(); // Sum of theta_sensor and theta_robot
 
     Eigen::Vector2s p_robot_landmark = p_robot - p_landmark;
 
@@ -348,7 +349,7 @@ void ProcessorLaser2D::computeExpectedFeature(LandmarkBase* _landmark_ptr, Eigen
 
     // ------------------------ Sigma
     // JACOBIAN
-    Eigen::Matrix<WolfScalar, 3, 6> Jlr = Eigen::Matrix<WolfScalar, 3, 6>::Zero();
+    Eigen::Matrix<Scalar, 3, 6> Jlr = Eigen::Matrix<Scalar, 3, 6>::Zero();
     Jlr.block<2,2>(0,0) = -R_sr.transpose();
     Jlr(2,2) = -1;
     Jlr.block<2,2>(0,3) = R_sr.transpose();
@@ -382,22 +383,22 @@ Eigen::VectorXs ProcessorLaser2D::computeSquaredMahalanobisDistances(const Featu
     FrameBase* frame_ptr = capture_laser_ptr_->getFramePtr();
 
     Eigen::Vector2s p_robot = frame_ptr->getPPtr()->getVector();
-    WolfScalar      o_robot = *(frame_ptr->getOPtr()->getPtr());
+    Scalar      o_robot = *(frame_ptr->getOPtr()->getPtr());
 
     Eigen::Vector2s p_sensor = getSensorPtr()->getPPtr()->getVector().head(2);
-    WolfScalar      o_sensor = *(getSensorPtr()->getOPtr()->getPtr());
+    Scalar      o_sensor = *(getSensorPtr()->getOPtr()->getPtr());
 //    Eigen::Matrix2s R_sensor = getSensorPtr()->getRotationMatrix2D();
-    Eigen::Rotation2D<WolfScalar> S_R( getSensorPtr()->getOPtr()->getVector()(0) );
+    Eigen::Rotation2D<Scalar> S_R( getSensorPtr()->getOPtr()->getVector()(0) );
     Eigen::Matrix2s R_sensor = S_R.matrix();
 
     Eigen::Vector2s p_landmark = _landmark_ptr->getPPtr()->getVector();
-    WolfScalar      o_landmark = *(_landmark_ptr->getOPtr()->getPtr());
+    Scalar      o_landmark = *(_landmark_ptr->getOPtr()->getPtr());
 
     const Eigen::Vector2s& p_feature = _feature_ptr->getMeasurement().head(2);
-    const WolfScalar&      o_feature = _feature_ptr->getMeasurement()(2);
+    const Scalar&      o_feature = _feature_ptr->getMeasurement()(2);
 
-    WolfScalar o_rs = o_robot + o_sensor; // Sum of theta_sensor and theta_robot
-    Eigen::Matrix2s R_sr = Eigen::Rotation2D<WolfScalar>(o_rs).matrix(); // Sum of theta_sensor and theta_robot
+    Scalar o_rs = o_robot + o_sensor; // Sum of theta_sensor and theta_robot
+    Eigen::Matrix2s R_sr = Eigen::Rotation2D<Scalar>(o_rs).matrix(); // Sum of theta_sensor and theta_robot
     Eigen::Vector2s p_robot_landmark = p_robot - p_landmark;
 
     // ------------------------ d
@@ -414,7 +415,7 @@ Eigen::VectorXs ProcessorLaser2D::computeSquaredMahalanobisDistances(const Featu
 
     // ------------------------ Sigma_d
     // JACOBIAN
-    Eigen::Matrix<WolfScalar, 3, 6> Jlr = Eigen::Matrix<WolfScalar, 3, 6>::Zero();
+    Eigen::Matrix<Scalar, 3, 6> Jlr = Eigen::Matrix<Scalar, 3, 6>::Zero();
     Jlr.block<2,2>(0,0) = -R_sr.transpose();
     Jlr(2,2) = -1;
     Jlr.block<2,2>(0,3) = R_sr.transpose();
@@ -455,7 +456,7 @@ Eigen::VectorXs ProcessorLaser2D::computeSquaredMahalanobisDistances(const Featu
     assert(_mu.rows() == 3 && "mahalanobis distance with bad number of mu components");
 
     const Eigen::Vector2s& p_feature = _feature_ptr->getMeasurement().head(2);
-    const WolfScalar&      o_feature = _feature_ptr->getMeasurement()(2);
+    const Scalar&      o_feature = _feature_ptr->getMeasurement()(2);
 
     // ------------------------ d
     Eigen::Vector3s d;
@@ -490,7 +491,7 @@ bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_feature_ptr, Lan
                     && std::fabs(pi2pi(((LandmarkCorner2D*)(*landmark_it))->getAperture() + M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF) // should be a corner
             {
                 //std::cout << "landmark " << (*landmark_it)->nodeId() << std::endl;
-                WolfScalar SQ2 = sqrt(2)/2;
+                Scalar SQ2 = sqrt(2)/2;
                 Eigen::MatrixXs corners_relative_positions(3,6);
                                               // FROM A (see LandmarkContainer.h)                                                        // FROM B
                                               // Large side           // Short side          // Diagonal                                 // Large side           // Short side          // Diagonal
@@ -498,7 +499,7 @@ bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_feature_ptr, Lan
                                              -SQ2 * CONTAINER_LENGTH, SQ2 * CONTAINER_WIDTH, SQ2 * (CONTAINER_WIDTH - CONTAINER_LENGTH), SQ2 * CONTAINER_LENGTH,-SQ2 * CONTAINER_WIDTH, SQ2 * (CONTAINER_LENGTH - CONTAINER_WIDTH),
                                               M_PI / 2,              -M_PI / 2,              M_PI,                                      -M_PI / 2,               M_PI / 2,              M_PI;
 
-                Eigen::Matrix2s R_feature = Eigen::Rotation2D<WolfScalar>(_corner_feature_ptr->getMeasurement()(2)).matrix();
+                Eigen::Matrix2s R_feature = Eigen::Rotation2D<Scalar>(_corner_feature_ptr->getMeasurement()(2)).matrix();
                 corners_relative_positions = - corners_relative_positions;
                 corners_relative_positions.topRows(2) = R_feature * corners_relative_positions.topRows(2);
 
@@ -509,7 +510,7 @@ bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_feature_ptr, Lan
 //                for (unsigned int i = 0; i < 6; i++)
 //                    std::cout << erfc( sqrt(squared_mahalanobis_distances(i)/2) ) << std::endl;
 
-                WolfScalar SMD_threshold = 8;
+                Scalar SMD_threshold = 8;
                 if (squared_mahalanobis_distances(0) < SMD_threshold ) //erfc( sqrt(squared_mahalanobis_distances(0)/2) ) > 0.8 )
                 {
                     std::cout << "   large side! prob =  " << erfc( sqrt(squared_mahalanobis_distances(0)/2.0)) << std::endl;
@@ -583,7 +584,7 @@ void ProcessorLaser2D::createCornerLandmark(FeatureCorner2D* _corner_ptr, const 
     Sigma_robot.block<1,2>(2,0) = Sigma_robot.block<2,1>(0,2).transpose();
 
     Eigen::Matrix3s R_robot3D = Eigen::Matrix3s::Identity();
-    R_robot3D.block<2,2>(0,0) = Eigen::Rotation2D<WolfScalar>(*(capture_laser_ptr_->getFramePtr()->getOPtr()->getPtr())).matrix();
+    R_robot3D.block<2,2>(0,0) = Eigen::Rotation2D<Scalar>(*(capture_laser_ptr_->getFramePtr()->getOPtr()->getPtr())).matrix();
     Eigen::Matrix3s Sigma_landmark = Sigma_robot + R_robot3D.transpose() * _corner_ptr->getMeasurementCovariance().topLeftCorner<3,3>() * R_robot3D;
 
     getWolfProblem()->addCovarianceBlock(new_landmark->getPPtr(), new_landmark->getPPtr(), Sigma_landmark.topLeftCorner<2,2>());
@@ -636,3 +637,5 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
     // Remove corner landmark (it will remove all old constraints)
     getWolfProblem()->getMapPtr()->removeLandmark(_old_corner_landmark_ptr);
 }
+
+} // namespace wolf

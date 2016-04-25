@@ -7,6 +7,8 @@
 
 //#include ORBextractor.h
 
+namespace wolf {
+
 class ProcessorORB : public ProcessorBase
 {
     protected:
@@ -20,6 +22,14 @@ class ProcessorORB : public ProcessorBase
 
         virtual void extractFeatures(CaptureBase *_capture_ptr);
         virtual void establishConstraints(CaptureBase *_capture_ptr);
+
+    protected:
+        virtual void preProcess(){}
+        virtual void postProcess(){}
+
+
 };
+
+} // namespace wolf
 
 #endif // PROCESSORORB_H

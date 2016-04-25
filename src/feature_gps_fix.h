@@ -7,6 +7,8 @@
 
 //std includes
 
+namespace wolf {
+
 //class FeatureGPSFix
 class FeatureGPSFix : public FeatureBase
 {
@@ -33,4 +35,7 @@ class FeatureGPSFix : public FeatureBase
          **/
         virtual ~FeatureGPSFix();
 };
+
+} // namespace wolf
+
 #endif

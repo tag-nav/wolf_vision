@@ -2,8 +2,10 @@
 #define CONSTRAINT_BASE_H_
 
 // Forward declarations for node templates
+namespace wolf{
 class FeatureBase;
 class NodeTerminus;
+}
 
 //Wolf includes
 #include "wolf.h"
@@ -12,11 +14,16 @@ class NodeTerminus;
 //std includes
 //
 
+namespace wolf {
+
 //TODO: add a member to indicate how jacobian is computed, called "jacobian_method_"
 //class ConstraintBase
 class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 {
+    private:
+        static unsigned int constraint_id_count_;
     protected:
+        unsigned int constraint_id_;
         ConstraintType type_;                           ///< type of constraint (types defined at wolf.h)
         ConstraintCategory category_;                   ///< category of constraint (types defined at wolf.h)
         ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
@@ -25,6 +32,7 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
         LandmarkBase* landmark_ptr_;                    ///< LandmarkBase pointer (for category CTR_LANDMARK)
 
     public:
+
         /** \brief Constructor of category CTR_ABSOLUTE
          **/
         ConstraintBase(ConstraintType _tp, ConstraintStatus _status);
@@ -48,6 +56,8 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          **/
         virtual ~ConstraintBase();
 
+        unsigned int id();
+
         /** \brief Returns the constraint type
          **/
         ConstraintType getType() const;
@@ -58,7 +68,7 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 
         /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
          **/
-        virtual const std::vector<WolfScalar*> getStateBlockPtrVector() = 0;
+        virtual const std::vector<Scalar*> getStateBlockPtrVector() = 0;
 
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
@@ -113,6 +123,11 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
         LandmarkBase* getLandmarkOtherPtr();
 };
 
+inline unsigned int ConstraintBase::id()
+{
+    return constraint_id_;
+}
+
 // IMPLEMENTATION //
 
 inline ConstraintType ConstraintBase::getType() const
@@ -150,4 +165,5 @@ inline LandmarkBase* ConstraintBase::getLandmarkOtherPtr()
     return landmark_ptr_;
 }
 
+} // namespace wolf
 #endif

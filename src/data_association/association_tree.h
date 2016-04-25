@@ -19,6 +19,10 @@
  * The whole decision tree
  * 
 */
+
+namespace wolf
+{
+
 class AssociationTree : public AssociationSolver
 {
     protected:
@@ -122,4 +126,6 @@ class AssociationTree : public AssociationSolver
         */                        
         void printTerminusNodes();       
 };
+
+} // namespace wolf
 #endif            

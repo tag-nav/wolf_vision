@@ -2,8 +2,13 @@
 #include "constraint_base.h"
 #include "capture_base.h"
 
+namespace wolf {
+
+unsigned int FeatureBase::feature_id_count_ = 0;
+
 FeatureBase::FeatureBase(FeatureType _tp, unsigned int _dim_measurement) :
     NodeConstrained(MID, "FEATURE"),
+    feature_id_(++feature_id_count_),
     type_(_tp),
     measurement_(_dim_measurement)
 {
@@ -12,6 +17,7 @@ FeatureBase::FeatureBase(FeatureType _tp, unsigned int _dim_measurement) :
 
 FeatureBase::FeatureBase(FeatureType _tp, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
 	NodeConstrained(MID, "FEATURE"),
+    feature_id_(++feature_id_count_),
     type_(_tp),
 	measurement_(_measurement),
 	measurement_covariance_(_meas_covariance)
@@ -35,11 +41,14 @@ FeatureBase::~FeatureBase()
     //std::cout << "constraints deleted" << std::endl;
 }
 
-void FeatureBase::addConstraint(ConstraintBase* _co_ptr)
+ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
 {
     addDownNode(_co_ptr);
     // add constraint to be added in solver
-    getWolfProblem()->addConstraintPtr(_co_ptr);
+    if (getWolfProblem() != nullptr)
+        getWolfProblem()->addConstraintPtr(_co_ptr);
+
+    return _co_ptr;
 }
 
 FrameBase* FeatureBase::getFramePtr() const
@@ -66,3 +75,5 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse(); // retrieve factor U  in the decomposition
 }
 
+
+} // namespace wolf

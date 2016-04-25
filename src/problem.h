@@ -1,11 +1,14 @@
-#ifndef WOLF_PROBLEM_H_
-#define WOLF_PROBLEM_H_
+#ifndef PROBLEM_H_
+#define PROBLEM_H_
 
 // Fwd refs
+namespace wolf{
 class HardwareBase;
 class TrajectoryBase;
 class MapBase;
+class ProcessorMotion;
 class TimeStamp;
+}
 
 //wolf includes
 #include "node_base.h"
@@ -13,6 +16,9 @@ class TimeStamp;
 
 // std includes
 #include <utility> // pair
+
+
+namespace wolf {
 
 /** \brief Wolf problem node element in the Wolf Tree
  * 
@@ -24,21 +30,22 @@ class TimeStamp;
  * - up_node_: A regular pointer to a derived node object, specified by the template parameter UpperType.
  *
  */
-class WolfProblem: public NodeBase
+class Problem : public NodeBase
 {
     public:
         typedef NodeBase* LowerNodePtr; // Necessatry for destruct() of node_linked
 
     protected:
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
-        NodeLocation location_;// TODO: should it be in node_base?
+        NodeLocation location_; // TODO: should it be in node_base?
         TrajectoryBase* trajectory_ptr_;
         MapBase* map_ptr_;
         HardwareBase* hardware_ptr_;
+        ProcessorMotion* processor_motion_ptr_;
         StateBlockList state_block_ptr_list_;
         std::list<StateBlock*> state_block_add_list_;
         std::list<StateBlock*> state_block_update_list_;
-        std::list<WolfScalar*> state_block_remove_list_;
+        std::list<Scalar*> state_block_remove_list_;
         std::list<ConstraintBase*> constraint_add_list_;
         std::list<unsigned int> constraint_remove_list_;
 
@@ -47,14 +54,14 @@ class WolfProblem: public NodeBase
         /** \brief Constructor from frame structure
          *
          */
-        WolfProblem(FrameStructure _frame_structure);
+        Problem(FrameStructure _frame_structure);
 
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
-         */		
-        virtual ~WolfProblem();
+         */
+        virtual ~Problem();
 
         /** \brief Wolf destructor
          *
@@ -63,27 +70,58 @@ class WolfProblem: public NodeBase
          */
         virtual void destruct() final;
 
+
+        /** \brief add sensor to hardware
+         *
+         * add sensor to hardware
+         *
+         */
         void addSensor(SensorBase* _sen_ptr);
+
+
+        /** \brief Set the processor motion
+         *
+         * Set the processor motion. It will provide the state.
+         *
+         */
+        void setProcessorMotion(ProcessorMotion* _processor_motion_ptr);
 
         /** \brief Create Frame of the correct size
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        void createFrame(FrameType _frameType, const TimeStamp& _time_stamp);
+        FrameBase* createFrame(FrameType _frameType, const TimeStamp& _time_stamp);
 
         /** \brief Create Frame from vector
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        void createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp);
+        FrameBase* createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
+                               const TimeStamp& _time_stamp);
+
+        /** \brief Get the state at last timestamp
+         *
+         * Get the state at last timestamp
+         */
+        Eigen::VectorXs getCurrentState();
+        void getCurrentState(Eigen::VectorXs& state);
+
+        /** \brief Get the state at a given timestamp
+         *
+         * Get the state at a given timestamp
+         */
+        Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
+        void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
 
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
 
-        void addLandmark(LandmarkBase* _lmk_ptr);
+        LandmarkBase* addLandmark(LandmarkBase* _lmk_ptr);
+
+        void addLandmarkList(LandmarkBaseList _lmk_list);
 
         /** \brief Adds a new state block to be added to solver manager
          */
-        void addStateBlockPtr(StateBlock* _state_ptr);
+        StateBlock* addStateBlockPtr(StateBlock* _state_ptr);
 
         /** \brief Adds a new state block to be updated to solver manager
          */
@@ -95,7 +133,7 @@ class WolfProblem: public NodeBase
 
         /** \brief Adds a new constraint to be added to solver manager
          */
-        void addConstraintPtr(ConstraintBase* _constraint_ptr);
+        ConstraintBase* addConstraintPtr(ConstraintBase* _constraint_ptr);
 
         /** \brief Adds a constraint to be removed to solver manager
          */
@@ -111,27 +149,24 @@ class WolfProblem: public NodeBase
 
         /** \brief Gets a covariance block
          */
-        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block);
+        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block);
         /** \brief Gets a covariance block
          */
-        void getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row, const int _col);
-
-        /** \brief Gets state size
-         */
-        const unsigned int getStateSize() const;
+        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
+                                const int _col);
 
         /** \brief Adds a map
-         */		
-        void addMap(MapBase* _map_ptr);
+         */
+        MapBase* addMap(MapBase* _map_ptr);
 
         /** \brief Adds a trajectory
          */
-        void addTrajectory(TrajectoryBase* _trajectory_ptr);
+        TrajectoryBase* addTrajectory(TrajectoryBase* _trajectory_ptr);
 
         /** \brief Adds a hardware
          */
-        void addHarware(HardwareBase* _hardware_ptr);
-        
+        HardwareBase* addHarware(HardwareBase* _hardware_ptr);
+
         /** \brief Gets a pointer to map
          */
         MapBase* getMapPtr();
@@ -162,7 +197,7 @@ class WolfProblem: public NodeBase
 
         /** \brief Gets a queue of state blocks to be removed from the solver
          */
-        std::list<WolfScalar*>* getStateBlockRemoveList();
+        std::list<Scalar*>* getStateBlockRemoveList();
 
         /** \brief Gets a queue of constraint ids to be added in the solver
          */
@@ -174,7 +209,7 @@ class WolfProblem: public NodeBase
 
         /** \brief get top node
          */
-        virtual WolfProblem* getWolfProblem();
+        virtual Problem* getWolfProblem();
 
         /** \brief Returns a true (is top)
          */
@@ -184,68 +219,43 @@ class WolfProblem: public NodeBase
          *
          * This empty function is needed by the destruct() node_linked function.
          */
-        void removeDownNode(const LowerNodePtr _ptr);
+        void removeDownNode(const LowerNodePtr _ptr){};
 
 };
 
-inline bool WolfProblem::permitKeyFrame(ProcessorBase* _processor_ptr)
-{
-    return true;
-}
+} // namespace wolf
 
-inline MapBase* WolfProblem::getMapPtr()
-{
-    return map_ptr_;
-}
+// IMPLEMENTATION
 
-inline TrajectoryBase* WolfProblem::getTrajectoryPtr()
+namespace wolf
 {
-    return trajectory_ptr_;
-}
 
-inline HardwareBase* WolfProblem::getHardwarePtr()
-{
-    return hardware_ptr_;
-}
-
-inline StateBlockList* WolfProblem::getStateListPtr()
-{
-    return &state_block_ptr_list_;
-}
-
-inline std::list<StateBlock*>* WolfProblem::getStateBlockAddList()
-{
-    return &state_block_add_list_;
-}
-
-inline std::list<StateBlock*>* WolfProblem::getStateBlockUpdateList()
-{
-    return &state_block_update_list_;
-}
-
-inline std::list<WolfScalar*>* WolfProblem::getStateBlockRemoveList()
+inline std::list<Scalar*>* Problem::getStateBlockRemoveList()
 {
     return &state_block_remove_list_;
 }
 
-inline std::list<ConstraintBase*>* WolfProblem::getConstraintAddList()
+inline std::list<ConstraintBase*>* Problem::getConstraintAddList()
 {
     return &constraint_add_list_;
 }
 
-inline std::list<unsigned int>* WolfProblem::getConstraintRemoveList()
+inline std::list<unsigned int>* Problem::getConstraintRemoveList()
 {
     return &constraint_remove_list_;
 }
 
-inline WolfProblem* WolfProblem::getWolfProblem()
+inline Problem* Problem::getWolfProblem()
 {
     return this;
 }
 
-inline bool WolfProblem::isTop()
+inline bool Problem::isTop()
 {
     return true;
 }
 
-#endif
+} // namespace wolf
+
+
+#endif // PROBLEM_H

@@ -3,8 +3,10 @@
 #define TRAJECTORY_BASE_H_
 
 // Fwd refs
-class WolfProblem;
+namespace wolf{
+class Problem;
 class FrameBase;
+}
 
 //Wolf includes
 #include "wolf.h"
@@ -12,12 +14,15 @@ class FrameBase;
 
 //std includes
 
+
+namespace wolf {
+
 //class TrajectoryBase
-class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
+class TrajectoryBase : public NodeLinked<Problem,FrameBase>
 {
     protected:
         FrameStructure frame_structure_; // Defines the structure of the Frames in the Trajectory.
-        // TODO: JVN: No seria millor que aixo ho tingui el wolf_problem o el wolf_manager?
+        // TODO: JVN: No seria millor que aixo ho tingui el problem o el wolf_manager? JS: segurament. Pero fixed_size_ seria una de les opcions de moltes...
         unsigned int fixed_size_; // Limits the number of Frames forming the Trajectory
         
     public:
@@ -32,7 +37,7 @@ class TrajectoryBase : public NodeLinked<WolfProblem,FrameBase>
         
         /** \brief Add a frame to the trajectory
          **/
-        void addFrame(FrameBase* _frame_ptr);
+        FrameBase* addFrame(FrameBase* _frame_ptr);
 
         /** \brief Remove a frame to the trajectory
          **/
@@ -73,5 +78,8 @@ inline FrameStructure TrajectoryBase::getFrameStructure() const
 {
     return frame_structure_;
 }
+
+
+} // namespace wolf
 
 #endif

@@ -86,10 +86,10 @@ SET(HDRS
     capture_motion.h
     capture_motion2.h
     capture_odom_2D.h
-    capture_odom_3D.h
     capture_void.h
     constraint_base.h
     constraint_analytic.h
+    constraint_epipolar.h
     constraint_sparse.h
     constraint_gps_2D.h
     constraint_gps_pseudorange_3D.h
@@ -115,15 +115,21 @@ SET(HDRS
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
     map_base.h
+    motion_buffer.h
     node_base.h
     node_constrained.h
     node_linked.h
     node_terminus.h
+    problem.h
     processor_base.h
     processor_motion.h
-    processor_motion2.h
+    processor_odom_2D.h
     processor_odom_3D.h
     processor_tracker.h
+    processor_tracker_feature.h
+    processor_tracker_feature_dummy.h
+    processor_tracker_landmark.h
+    processor_tracker_landmark_dummy.h
     sensor_base.h
     sensor_camera.h
     sensor_odom_2D.h
@@ -134,7 +140,6 @@ SET(HDRS
     state_quaternion.h
     time_stamp.h
     trajectory_base.h
-    wolf_problem.h
     wolf_manager.h)
    
 SET(HDRS_DTASSC
@@ -150,9 +155,7 @@ SET(SRCS
     capture_gps_fix.cpp
     capture_fix.cpp
     capture_motion.cpp
-    capture_motion2.cpp
     capture_odom_2D.cpp
-    capture_odom_3D.cpp
     capture_void.cpp
     constraint_base.cpp
     constraint_analytic.cpp
@@ -171,20 +174,19 @@ SET(SRCS
     local_parametrization_homogeneous.cpp
     map_base.cpp
     node_base.cpp
+    problem.cpp
     processor_base.cpp
-    processor_motion.cpp
-    processor_motion2.cpp
     processor_tracker.cpp
+    processor_tracker_feature.cpp
+    processor_tracker_feature_dummy.cpp
+    processor_tracker_landmark.cpp
+    processor_tracker_landmark_dummy.cpp
     sensor_base.cpp
     sensor_camera.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
-    state_block.cpp
-    state_homogeneous_3d.cpp
-    state_quaternion.cpp
     time_stamp.cpp
     trajectory_base.cpp
-    wolf_problem.cpp
     wolf_manager.cpp
     data_association/association_solver.cpp
     data_association/association_node.cpp
@@ -194,11 +196,14 @@ SET(SRCS
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
-        ceres_wrapper/ceres_manager.h 
         ceres_wrapper/auto_diff_cost_function_wrapper.h
-        ceres_wrapper/auto_diff_cost_function_wrapper_base.h
-        ceres_wrapper/derived_constraint_auto_diff_cost_function.h
-        ceres_wrapper/cost_function_wrapper.h 
+        ceres_wrapper/ceres_manager.h 
+        ceres_wrapper/cost_function_wrapper.h
+        ceres_wrapper/create_auto_diff_cost_function.h
+        ceres_wrapper/create_auto_diff_cost_function_ceres.h
+        ceres_wrapper/create_auto_diff_cost_function_wrapper.h
+        ceres_wrapper/create_numeric_diff_cost_function.h
+        ceres_wrapper/create_numeric_diff_cost_function_ceres.h
         ceres_wrapper/local_parametrization_wrapper.h )
     SET(SRCS_WRAPPER
         ceres_wrapper/ceres_manager.cpp
@@ -213,11 +218,13 @@ IF (laser_scan_utils_FOUND)
         capture_laser_2D.h
         sensor_laser_2D.h
         processor_laser_2D.h
+        processor_tracker_laser.h
         )
     SET(SRCS ${SRCS}
         capture_laser_2D.cpp
         sensor_laser_2D.cpp
         processor_laser_2D.cpp
+        processor_tracker_laser.cpp
         )
 ENDIF(laser_scan_utils_FOUND)
 

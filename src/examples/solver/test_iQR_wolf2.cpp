@@ -41,7 +41,7 @@
 #include "iri-algorithms/laser_scan_utils/corner_detector.h"
 #include "iri-algorithms/laser_scan_utils/entities.h"
 
-using namespace Eigen;
+
 
 //function travel around
 void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
@@ -100,6 +100,9 @@ void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double
 //main
 int main(int argc, char *argv[])
 {
+    using namespace Eigen;
+    using namespace wolf;
+
     // USER INPUT ============================================================================================
     if (argc != 3 || atoi(argv[1]) < 1 || atoi(argv[1]) > 1100 || atoi(argv[2]) < 0 || atoi(argv[2]) > 2)
     {
@@ -117,10 +120,10 @@ int main(int argc, char *argv[])
 
 
     //init random generators
-    WolfScalar odom_std_factor = 0.1;
-    WolfScalar gps_std = 10;
+    Scalar odom_std_factor = 0.1;
+    Scalar gps_std = 10;
     std::default_random_engine generator(1);
-    std::normal_distribution<WolfScalar> gaussian_distribution(0.0, 1);
+    std::normal_distribution<Scalar> gaussian_distribution(0.0, 1);
 
     // Faramotics stuff
     Cpose3d viewPoint, devicePose, laser1Pose, laser2Pose, estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose;
@@ -297,7 +300,7 @@ int main(int argc, char *argv[])
         std::vector<double> landmark_vector;
         for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
         {
-            WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
+            Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
             landmark_vector.push_back(*position_ptr); //x
             landmark_vector.push_back(*(position_ptr + 1)); //y
             landmark_vector.push_back(0.2); //z
@@ -352,7 +355,7 @@ int main(int argc, char *argv[])
     std::vector<double> landmark_vector;
     for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
     {
-        WolfScalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
+        Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
         landmark_vector.push_back(*position_ptr); //x
         landmark_vector.push_back(*(position_ptr + 1)); //y
         landmark_vector.push_back(0.2); //z

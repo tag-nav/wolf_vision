@@ -10,6 +10,9 @@
 #include "laser_scan_utils/scan_basics.h"
 #include "laser_scan_utils/corner_detector.h"
 
+
+namespace wolf {
+
 class SensorLaser2D : public SensorBase
 {
     protected:
@@ -71,59 +74,63 @@ class SensorLaser2D : public SensorBase
          * Returns angle_min
          *
          **/
-//         WolfScalar getAngleMin() const;
+//         Scalar getAngleMin() const;
 
         /** \brief Returns angle_max
          *
          * Returns angle_max
          *
          **/
-//         WolfScalar getAngleMax() const;
+//         Scalar getAngleMax() const;
 
         /** \brief Returns angle_increment
          *
          * Returns angle_increment
          *
          **/
-//         WolfScalar getAngleIncrement() const;
+//         Scalar getAngleIncrement() const;
 
         /** \brief Returns range_min
          *
          * Returns range_min
          *
          **/
-//         WolfScalar getRangeMin() const;
+//         Scalar getRangeMin() const;
 
         /** \brief Returns range_max
          *
          * Returns range_max
          *
          **/
-//         WolfScalar getRangeMax() const;
+//         Scalar getRangeMax() const;
         
         /** \brief Returns _range_stdev
          * 
          * Returns _range_stdev
          * 
          **/        
-//         WolfScalar getRangeStdDev() const;
+//         Scalar getRangeStdDev() const;
 
         /** \brief Returns time_increment
          *
          * Returns time_increment
          *
          **/
-//         WolfScalar getTimeIncrement() const;
+//         Scalar getTimeIncrement() const;
 
         /** \brief Returns scan_time
          *
          * Returns scan_time
          *
          **/
-//         WolfScalar getScanTime() const;
+//         Scalar getScanTime() const;
 
         /** \brief Prints parameters
          **/                
         void printSensorParameters() const;
 };
+
+} // namespace wolf
+
+
 #endif /*SENSOR_LASER_2D_H_*/

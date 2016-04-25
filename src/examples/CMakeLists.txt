@@ -8,6 +8,9 @@ TARGET_LINK_LIBRARIES(example_template_factory ${PROJECT_NAME})
 ADD_EXECUTABLE(test_motion test_motion.cpp)
 TARGET_LINK_LIBRARIES(test_motion ${PROJECT_NAME})
 
+ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
+TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
+
 # Local parametrizations classes test
 ADD_EXECUTABLE(test_local_param test_local_param.cpp)
 TARGET_LINK_LIBRARIES(test_local_param ${PROJECT_NAME})
@@ -79,7 +82,23 @@ IF(OpenCV_FOUND)
     # Testing many things for the 3D image odometry
     ADD_EXECUTABLE(test_image test_image.cpp)
     TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
+
+    # Testing opencv matching and fundamental matrix with ransac
+    ADD_EXECUTABLE(test_opencv test_opencv.cpp)
+    TARGET_LINK_LIBRARIES(test_opencv ${PROJECT_NAME})
+
+    # Testing OpenCV functions for projection of points
+    ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
+    TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
+
+# Processor Tracker Feature test
+ADD_EXECUTABLE(test_processor_tracker_feature test_processor_tracker_feature.cpp)
+TARGET_LINK_LIBRARIES(test_processor_tracker_feature ${PROJECT_NAME})
+
+# Processor Tracker Landmark test
+ADD_EXECUTABLE(test_processor_tracker_landmark test_processor_tracker_landmark.cpp)
+TARGET_LINK_LIBRARIES(test_processor_tracker_landmark ${PROJECT_NAME})
 
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)

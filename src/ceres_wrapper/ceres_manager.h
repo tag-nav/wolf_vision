@@ -7,11 +7,16 @@
 #include "glog/logging.h"
 
 //wolf includes
-#include "derived_constraint_auto_diff_cost_function.h"
 #include "cost_function_wrapper.h"
 #include "local_parametrization_wrapper.h"
 #include "../wolf.h"
 #include "../state_block.h"
+#include "create_auto_diff_cost_function.h"
+#include "create_numeric_diff_cost_function.h"
+
+namespace wolf {
+
+
 
 /** \brief Enumeration of covariance blocks to be computed
  *
@@ -36,10 +41,10 @@ class CeresManager
         std::map<unsigned int, ceres::CostFunction*> id_2_costfunction_;
 		ceres::Problem* ceres_problem_;
 		ceres::Covariance* covariance_;
-		WolfProblem* wolf_problem_;
+		Problem* wolf_problem_;
 
 	public:
-		CeresManager(WolfProblem* _wolf_problem, ceres::Problem::Options _options);
+		CeresManager(Problem* _wolf_problem, ceres::Problem::Options _options);
 
 		~CeresManager();
 
@@ -63,5 +68,7 @@ class CeresManager
 
 		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr, const bool _self_auto_diff);
 };
+
+} // namespace wolf
 
 #endif

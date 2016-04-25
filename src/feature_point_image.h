@@ -8,6 +8,9 @@
 //OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
 
+
+namespace wolf {
+
 /**
  *
  * Test for the feature point
@@ -19,10 +22,9 @@ class FeaturePointImage : public FeatureBase
 {
     protected:
 
-//        Eigen::Vector2s measurement_;
         cv::KeyPoint keypoint_;
-        std::vector<float> descriptor_;
-        bool known_or_new_;
+        cv::Mat descriptor_;
+        bool is_known_;
 
     public:
         FeaturePointImage(const Eigen::Vector2s & _measurement);
@@ -36,14 +38,14 @@ class FeaturePointImage : public FeatureBase
 
         //_known_or_new: known = true; new = false;
         FeaturePointImage(const cv::KeyPoint& _keypoint,
-                          const std::vector<float>& _descriptor, bool _known_or_new) :
+                          const cv::Mat& _descriptor, bool _is_known) :
                 FeatureBase(FEAT_POINT_IMAGE, Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
                 keypoint_(_keypoint),
                 descriptor_(_descriptor)
         {
             measurement_(0) = _keypoint.pt.x;
             measurement_(1) = _keypoint.pt.y;
-            known_or_new_=_known_or_new;
+            is_known_=_is_known;
         }
 
 
@@ -53,13 +55,16 @@ class FeaturePointImage : public FeatureBase
          */
         virtual ~FeaturePointImage();
 
-        virtual cv::KeyPoint& getKeypoint();
+        cv::KeyPoint& getKeypoint();
 
-        virtual std::vector<float>& getDescriptor();
+        cv::Mat& getDescriptor();
 
-        virtual Eigen::VectorXs & getMeasurement(){
-            measurement_(0) = WolfScalar(keypoint_.pt.x);
-            measurement_(1) = WolfScalar(keypoint_.pt.y);
+        bool isKnown();
+        void setIsKnown(bool _is_known);
+
+        Eigen::VectorXs & getMeasurement(){
+            measurement_(0) = Scalar(keypoint_.pt.x);
+            measurement_(1) = Scalar(keypoint_.pt.y);
             return measurement_;
         }
 
@@ -70,9 +75,21 @@ inline cv::KeyPoint& FeaturePointImage::getKeypoint()
     return keypoint_;
 }
 
-inline std::vector<float>& FeaturePointImage::getDescriptor()
+inline cv::Mat& FeaturePointImage::getDescriptor()
 {
     return descriptor_;
 }
+
+inline bool FeaturePointImage::isKnown()
+{
+    return is_known_;
+}
+
+inline void FeaturePointImage::setIsKnown(bool _is_known)
+{
+    is_known_ = _is_known;
+}
+
+} // namespace wolf
 
 #endif // FEATURE_IMAGE_H

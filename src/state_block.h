@@ -3,13 +3,18 @@
 #define STATE_BLOCK_H_
 
 // Fwd references
+namespace wolf{
 class LocalParametrizationBase;
+}
 
 //Wolf includes
 #include "wolf.h"
 
 //std includes
 #include <iostream>
+
+
+namespace wolf {
 
 /** \brief class StateBlock
  *
@@ -48,7 +53,7 @@ class StateBlock
 
         /** \brief Returns the pointer to the first element of the state
          **/
-        WolfScalar* getPtr();
+        Scalar* getPtr();
         
         /** \brief Returns the state vector
          **/
@@ -89,6 +94,7 @@ inline StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed, LocalPa
 inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParametrizationBase* _local_param_ptr) :
         state_(_size), fixed_(_fixed), local_param_ptr_(_local_param_ptr)
 {
+    state_.setZero();
     //
 }
 
@@ -97,7 +103,7 @@ inline StateBlock::~StateBlock()
     //
 }
 
-inline WolfScalar* StateBlock::getPtr()
+inline Scalar* StateBlock::getPtr()
 {
     return state_.data();
 }
@@ -142,5 +148,7 @@ inline LocalParametrizationBase* StateBlock::getLocalParametrizationPtr()
 {
     return local_param_ptr_;
 }
+
+} // namespace wolf
 
 #endif

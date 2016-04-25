@@ -12,6 +12,8 @@
 #include <iostream>
 
 
+namespace wolf {
+
 /**
  * \brief TimeStamp implements basic functionalities for time stamps
  * 
@@ -20,7 +22,7 @@
 class TimeStamp
 {
     private:
-        WolfScalar time_stamp_; ///< Time stamp. Expressed in seconds from 1th jan 1970.
+        Scalar time_stamp_; ///< Time stamp. Expressed in seconds from 1th jan 1970.
         static const unsigned int TIME_STAMP_DIGITS_ = 10; ///< Number of digits to print time stamp values        
 
     public:
@@ -36,7 +38,7 @@ class TimeStamp
          * Constructor with arguments
          *
          */
-        TimeStamp(const WolfScalar _ts);
+        TimeStamp(const Scalar _ts);
 
         /** \brief Constructor from sec and nsec
          *
@@ -74,14 +76,14 @@ class TimeStamp
          * Sets time stamp to a given value passed as a scalar_t (seconds)
          *
          */
-        void set(const WolfScalar ts);
+        void set(const Scalar ts);
 
         /** \brief Get time stamp
          *
          * Returns time stamp
          *
          */
-        WolfScalar get() const;
+        Scalar get() const;
 
         /** \brief Get time stamp (only seconds)
          *
@@ -102,7 +104,7 @@ class TimeStamp
          * Assignement operator
          * 
          */
-        void operator =(const WolfScalar& ts);
+        void operator =(const Scalar& ts);
 
         /** \brief Assignement operator
          * 
@@ -130,15 +132,15 @@ class TimeStamp
          * difference operator
          * 
          */
-        WolfScalar operator -(const TimeStamp& ts) const;
+        Scalar operator -(const TimeStamp& ts) const;
 
         /** \brief Add-assign operator
          */
-        void operator +=(const WolfScalar& dt);
+        void operator +=(const Scalar& dt);
 
         /** \brief Add-assign operator
          */
-        TimeStamp operator +(const WolfScalar& dt);
+        TimeStamp operator +(const Scalar& dt);
 
         /** \brief Prints time stamp to a given ostream
          *
@@ -153,25 +155,25 @@ inline void TimeStamp::setToNow()
 {
     timeval ts;
     gettimeofday(&ts, NULL);
-    time_stamp_ = (WolfScalar)(ts.tv_sec) + (WolfScalar)(ts.tv_usec) / 1e6;
+    time_stamp_ = (Scalar)(ts.tv_sec) + (Scalar)(ts.tv_usec) / 1e6;
 }
 
-inline void TimeStamp::set(const WolfScalar ts)
+inline void TimeStamp::set(const Scalar ts)
 {
     time_stamp_ = ts;
 }
 
 inline void TimeStamp::set(const unsigned long int sec, const unsigned long int nanosec)
 {
-    time_stamp_ = (WolfScalar)(sec) + (WolfScalar)(nanosec) / (WolfScalar)(1e9);
+    time_stamp_ = (Scalar)(sec) + (Scalar)(nanosec) / (Scalar)(1e9);
 }
 
 inline void TimeStamp::set(const timeval& ts)
 {
-    time_stamp_ = (WolfScalar)(ts.tv_sec) + (WolfScalar)(ts.tv_usec) / 1e6;
+    time_stamp_ = (Scalar)(ts.tv_sec) + (Scalar)(ts.tv_usec) / 1e6;
 }
 
-inline WolfScalar TimeStamp::get() const
+inline Scalar TimeStamp::get() const
 {
     return time_stamp_;
 }
@@ -185,8 +187,8 @@ inline unsigned long int TimeStamp::getSeconds() const
 
 inline unsigned long int TimeStamp::getNanoSeconds() const
 {
-    WolfScalar ts;
-    ts = (WolfScalar)((floor(time_stamp_)));
+    Scalar ts;
+    ts = (Scalar)((floor(time_stamp_)));
     return (unsigned long int)((time_stamp_ - ts) * 1e9);
 }
 
@@ -195,7 +197,7 @@ inline void TimeStamp::operator =(const TimeStamp& ts)
     time_stamp_ = ts.get();
 }
 
-inline void TimeStamp::operator =(const WolfScalar& ts)
+inline void TimeStamp::operator =(const Scalar& ts)
 {
     time_stamp_ = ts;
 }
@@ -216,19 +218,21 @@ inline bool TimeStamp::operator <=(const TimeStamp& ts) const
         return false;
 }
 
-inline WolfScalar TimeStamp::operator -(const TimeStamp& ts) const
+inline Scalar TimeStamp::operator -(const TimeStamp& ts) const
 {
     return (time_stamp_ - ts.get());
 }
 
-inline void TimeStamp::operator +=(const WolfScalar& dt)
+inline void TimeStamp::operator +=(const Scalar& dt)
 {
     time_stamp_ += dt;
 }
 
-inline TimeStamp TimeStamp::operator +(const WolfScalar& dt)
+inline TimeStamp TimeStamp::operator +(const Scalar& dt)
 {
     return TimeStamp(time_stamp_ + dt);
 }
+
+} // namespace wolf
 
 #endif
