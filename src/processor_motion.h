@@ -284,8 +284,10 @@ class ProcessorMotion : public ProcessorBase
 
 inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size) :
         ProcessorBase(_tp), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), origin_ptr_(
-                nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_integrated_(
-                _delta_size), data_(_data_size)
+                nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_cov_(
+                delta_size_, delta_size_), delta_integrated_(_delta_size), delta_integrated_cov_(delta_size_,
+                                                                                                 delta_size_), data_(
+                _data_size), jacobian_prev_(delta_size_, delta_size_), jacobian_curr_(delta_size_, delta_size_)
 {
     //
 }
@@ -374,19 +376,22 @@ inline void ProcessorMotion::reintegrate()
     zero_motion.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
     zero_motion.delta_integr_ = deltaZero();
     zero_motion.jacobian_0.setIdentity();
-    zero_motion.delta_integr_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);;
+    zero_motion.delta_integr_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
+    ;
     this->getBufferPtr()->get().push_front(zero_motion);
 
     auto motion_it = getBufferPtr()->get().begin();
     auto prev_motion_it = motion_it;
     motion_it++;
 
-    Eigen::MatrixXs jacobian_prev, jacobian_curr;
+    Eigen::MatrixXs jacobian_prev(delta_size_, delta_size_), jacobian_curr(delta_size_, delta_size_);
     while (motion_it != getBufferPtr()->get().end())
     {
-        deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, motion_it->delta_integr_, jacobian_prev, jacobian_curr);
+        deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, motion_it->delta_integr_, jacobian_prev,
+                       jacobian_curr);
         std::cout << "delta reintegrated" << std::endl;
-        deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_, motion_it->delta_cov_, jacobian_prev, jacobian_curr, motion_it->delta_integr_cov_);
+        deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_, motion_it->delta_cov_, jacobian_prev, jacobian_curr,
+                             motion_it->delta_integr_cov_);
         std::cout << "delta_cov reintegrated" << std::endl;
         motion_it++;
         prev_motion_it++;
@@ -417,7 +422,9 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
     key_capture_ptr->getBufferPtr()->get().push_back(mot);
 
     // create motion constraint and add it to the new keyframe
-    FeatureBase* key_feature_ptr = new FeatureBase(FEAT_MOTION, key_capture_ptr->getBufferPtr()->get().back().delta_integr_, key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_);
+    FeatureBase* key_feature_ptr = new FeatureBase(FEAT_MOTION,
+                                                   key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
+                                                   key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_);
     key_capture_ptr->addFeature(key_feature_ptr);
     key_feature_ptr->addConstraint(createConstraint(key_feature_ptr, origin_ptr_->getFramePtr()));
 
