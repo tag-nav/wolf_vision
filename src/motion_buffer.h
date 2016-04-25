@@ -57,22 +57,6 @@ class MotionBuffer{
         std::list<Motion> container_;
 };
 
-
-//inline void MotionBuffer::pushBack(const TimeStamp _ts, const Eigen::VectorXs& _delta, const Eigen::VectorXs& _delta_integr, const Eigen::MatrixXs& _cov, const Eigen::MatrixXs& _J_0, const Eigen::MatrixXs& _J_t)
-//{
-//    container_.push_back(Motion({_ts, _delta, _delta_integr, _cov, _J_0, _J_t}));
-//}
-//
-//inline const TimeStamp& MotionBuffer::getTimeStamp() const
-//{
-//    return container_.back().ts_;
-//}
-//
-//inline const Eigen::VectorXs& MotionBuffer::getDelta() const
-//{
-//    return container_.back().delta_integr_;
-//}
-
 inline const Eigen::VectorXs& MotionBuffer::getDelta(const TimeStamp& _ts) const
 {
     return getMotion(_ts).delta_integr_;
@@ -82,16 +66,6 @@ inline void MotionBuffer::getDelta(const TimeStamp& _ts, Eigen::VectorXs& _delta
 {
     _delta_integr = getMotion(_ts).delta_integr_;
 }
-
-//inline const Motion& MotionBuffer::getMotion() const
-//{
-//    return container_.back();
-//}
-//
-//inline void MotionBuffer::getMotion(Motion& _motion) const
-//{
-//    _motion = container_.back();
-//}
 
 inline const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const
 {

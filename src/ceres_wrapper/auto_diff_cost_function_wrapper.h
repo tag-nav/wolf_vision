@@ -8,6 +8,9 @@
 #include "ceres/jet.h"
 #include "ceres/sized_cost_function.h"
 
+// GENERAL
+#include <array>
+
 namespace wolf {
 
 template <class ConstraintType, const unsigned int MEASUREMENT_SIZE,

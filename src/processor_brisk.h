@@ -23,7 +23,7 @@
 
 namespace wolf {
 
-struct ImageTrackerParameters
+struct ProcessorImageParameters
 {
         struct Image
         {
@@ -33,58 +33,87 @@ struct ImageTrackerParameters
         struct Detector
         {
                 unsigned int threshold; ///< on the keypoint strength to declare it key-point
+                unsigned int threshold_new_features; ///< on the keypoint strength to declare it key-point
                 unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
                 float pattern_scales; ///< Scale of the base pattern wrt the nominal one
+                unsigned int default_pattern_radius; ///< Radius of the detector pattern before scaling
                 unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at scale = 1.0
         }detector;
         struct Descriptor
         {
                 unsigned int size; ///< size of the descriptor vector (length of the vector)
+                unsigned int threshold; ///< on the keypoint strength to declare it key-point
                 unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
                 float pattern_scales; ///< Scale of the base pattern wrt the nominal one
+                unsigned int default_pattern_radius; ///< Radius of the descriptor pattern before scaling
                 unsigned int pattern_radius; ///< radius of the pattern used to compute the descriptor at the nominal scale
         }descriptor;
         struct Matcher
         {
-                Scalar max_similarity_distance; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
+                Scalar min_normalized_score; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
+                int similarity_norm; ///< Norm used to measure the distance between two descriptors
+                unsigned int roi_width; ///< Width of the roi used in the tracking
+                unsigned int roi_height; ///< Height of the roi used in the tracking
         }matcher;
         struct Adtive_search
         {
                 unsigned int grid_width; ///< cells per horizontal dimension of image
                 unsigned int grid_height; ///< cells per vertical dimension of image
-                unsigned int separation;
+                unsigned int separation; ///<
+                unsigned int adjust;
         }active_search;
         struct Algorithm
         {
                 unsigned int max_new_features; ///< Max nbr. of features to detect in one frame
-                unsigned int min_features_th; ///< minimum nbr. of features to vote for keyframe
+                unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
         }algorithm;
 };
 
 class ProcessorBrisk : public ProcessorTrackerFeature
 {
+
+//    protected:
+//        cv::FeatureDetector* detector_ptr_;
+//        cv::DescriptorExtractor* descriptor_ptr_;
+//        cv::DescriptorMatcher* matcher_ptr_;
     protected:
-        cv::BRISK detector_;    //brisk detector
-        cv::BRISK descriptor_;    //brisk descriptor
-        cv::BFMatcher matcher_; // Brute force matcher
-        ActiveSearchGrid act_search_grid_;
-        unsigned int min_features_th_;
-//        bool known_or_new_features_ = false;
-        cv::Mat image_last_, image_incoming_;
+        cv::BRISK detector_;                    // Brisk detector
+        cv::BRISK descriptor_;                  // Brisk descriptor
+        cv::BFMatcher matcher_;                 // Brute force matcher
+        ActiveSearchGrid act_search_grid_;      // Active Search
+        cv::Mat image_last_, image_incoming_;   // Images from the "last" and "incoming" Captures
+        ProcessorImageParameters params_;       // Struct with parameters of the processors
+
+        // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
-        std::list<FeaturePointImage*> tracker_features_;
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
-        int img_width_;
-        int img_height_;
-        unsigned int detector_separation_;
+
     public:
-        ProcessorBrisk(unsigned int _image_rows, unsigned int _image_cols,
-                       unsigned int _grid_width = 8, unsigned int _grid_height = 8, unsigned int _separation = 5,
-                       unsigned int _max_new_features = 20, unsigned int _min_features_th = 10,
-                       int _threshold = 30, int _octaves = 0, float _pattern_scales = 1.0f, unsigned int _adjust = 10);
+        ProcessorBrisk(ProcessorImageParameters _params);
+
+//        ProcessorBrisk(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr, cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters_params) :
+//            detector_ptr_(_det_ptr)
+//        {}
+
+//        ProcessorBrisk(std::string _detector, std::string _descriptor, std::string matcher, std::string distance, ProcessorImageParameters _params) :
+//            detector_ptr_(nullptr), params_(_params)
+//        {
+//            switch _detector{
+//                case "BRISK":
+//                    detector_ptr_ = new cv::BRISK();
+//                    break;
+//                default:
+//                    throw runtime_error
+//            }
+//            }
+
         virtual ~ProcessorBrisk();
+
+//        virtual ~ProcessorBrisk(){
+//            delete detector_ptr_; delete descriptor_ptr_; //etc
+//        };
 
     protected:
         void preProcess();
@@ -112,9 +141,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         /** \brief Detect new Features
          *
          * This is intended to create Features that are not among the Features already known in the Map.
-         * \param _capture_ptr Capture for feature detection
          *
-         * This function sets new_features_list_, the list of newly detected features, to be used for landmark initialization.
+         * This function sets new_features_last_, the list of newly detected features, to be used for landmark initialization.
          *
          * \return The number of detected Features.
          */
@@ -130,6 +158,19 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
                                          cv::Mat& new_descriptors);
 
+    private:
+        virtual void trimRoi(cv::Rect& _roi);
+        virtual void inflateRoi(cv::Rect& _roi);
+        virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
+
+
+
+
+
+
+
+
+        // These only to debug, will disappear one day soon
     public:
         virtual void drawFeatures(CaptureBase* const _last_ptr);
 
@@ -140,9 +181,6 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last,
                                             FeatureBaseList& _feature_list_incoming);
 
-        virtual void trimRoi(cv::Rect& _roi);
-        virtual void inflateRoi(cv::Rect& _roi);
-        virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
 
 };
@@ -150,8 +188,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 inline bool ProcessorBrisk::voteForKeyFrame()
 {
     std::cout << "voteForKeyFrame?: "
-            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < min_features_th_) << std::endl;
-    return (incoming_ptr_->getFeatureListPtr()->size() < min_features_th_);
+            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
+    return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
 }
 
 inline ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr)

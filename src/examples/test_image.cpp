@@ -34,88 +34,47 @@ int main(int argc, char** argv)
     bool image_or_video = (atoi(argv[1]) == 1);
     */
 
-    //Welcome message
-    std::cout << std::endl << " ========= WOLF IMAGE test ===========" << std::endl << std::endl;
-
-
-    std::cout << "0" << std::endl;
-    //std::vector<float> points3D = {2,3,5};
-    cv::Point3f points3D;
-    points3D.x = 2.0;
-    points3D.y = 5.0;
-    points3D.z = 6.0;
-    std::vector<cv::Point3f> point_in_3D;
-    point_in_3D.push_back(points3D);
-    points3D.x = 4.0;
-    points3D.y = 2.0;
-    points3D.z = 1.0;
-    point_in_3D.push_back(points3D);
-
-    std::cout << "1" << std::endl;
-    std::vector<float> rot_mat = {0,0,0};
-    std::vector<float> trans_mat = {1,1,1};
-
-    std::cout << "2" << std::endl;
-    cv::Mat cam_mat(3,3,CV_32F);
-    cam_mat.row(0).col(0).setTo(1);
-    cam_mat.row(0).col(1).setTo(0);
-    cam_mat.row(0).col(2).setTo(2);
-    cam_mat.row(1).col(0).setTo(0);
-    cam_mat.row(1).col(1).setTo(1);
-    cam_mat.row(1).col(2).setTo(2);
-    cam_mat.row(2).col(0).setTo(0);
-    cam_mat.row(2).col(1).setTo(0);
-    cam_mat.row(2).col(2).setTo(1);
-
-    std::cout << "cam_mat[1,2]: " << cam_mat.row(1).col(0) << std::endl;
-
-    std::cout << "3" << std::endl;
-    std::vector<float> dist_coef = {0,0,0,0,0};
-    //std::vector<float> points2D;
-    std::vector<cv::Point2f> points2D;
-
-    std::cout << "4" << std::endl;
-    cv::projectPoints(point_in_3D,rot_mat,trans_mat,cam_mat,dist_coef,points2D);
-    std::cout << "5" << std::endl;
-
-    for (auto it : points2D)
-    {
-        std::cout << "points2D- X: " << it.x << "; Y: " << it.y << std::endl;
-    }
-
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
-
-    unsigned int img_width;
-    unsigned int img_height;
 
     unsigned int f = 0;
     const char * filename;
     if (argc == 1)
     {
         filename = "/home/jtarraso/Vídeos/House interior.mp4";
-        img_width = 640;
-        img_height = 360;
     }
     else
     {
         if (std::string(argv[1]) == "0")
         {
-            // camera
-            //img_width = 640;
-            //img_height = 480;
-            filename = "/home/jtarraso/Escritorio/Test Brisk 1 - 40 40 - 1 punto.jpg";
-            img_width = 640;
-            img_height = 360;
+            //camera
+            filename = "0";
         }
         else
         {
             filename = argv[1];
-            img_width = 640;
-            img_height = 360;
         }
     }
     std::cout << "Input video file: " << filename << std::endl;
+    cv::VideoCapture capture(filename);
+    if(!capture.isOpened())  // check if we succeeded
+    {
+        std::cout << "failed" << std::endl;
+    }
+    else
+    {
+        std::cout << "succeded" << std::endl;
+    }
+    capture.set(CV_CAP_PROP_POS_MSEC, 0000);
+    unsigned int img_width = (unsigned int)capture.get(CV_CAP_PROP_FRAME_WIDTH);
+    unsigned int img_height = (unsigned int)capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+    std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
+
+    unsigned int buffer_size = 4;
+    std::vector<cv::Mat> frame(buffer_size);
+    cv::Mat last_frame;
+
+
 
     TimeStamp t = 1;
 
@@ -127,64 +86,53 @@ int main(int argc, char** argv)
     Problem* wolf_problem_ = new Problem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
 
-//    ImageTrackerParameters tracker_params;
-//    tracker_params.image = {img_width,  img_height};
-//    tracker_params.detector = {30, 0, 1.0f, 5};
-//    tracker_params.descriptor = {512, 5};
-//    tracker_params.matcher.max_similarity_distance = 0.3;
-//    tracker_params.active_search = {8, 8};
-//    tracker_params.algorithm.max_new_features = 20;
-//    tracker_params.algorithm.min_features_th = 40;
+    ProcessorImageParameters tracker_params;
+    tracker_params.image = {img_width,  img_height};
+    tracker_params.detector = {30, 70, 0, 0.5f, 21};
+    tracker_params.descriptor = {512, 30, 0, 0.5f, 21};
+    tracker_params.matcher.min_normalized_score = 0.80;
+    tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
+    tracker_params.matcher.roi_width = 21;
+    tracker_params.matcher.roi_height = 21;
+    tracker_params.active_search = {9, 9, 4, 10};
+    tracker_params.algorithm.max_new_features = 20;
+    tracker_params.algorithm.min_features_for_keyframe = 80;
 
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(img_height,img_width,9,9,4,20,30,30,0,1.0f,10);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params);
     sen_cam_->addProcessor(p_brisk);
-
-    cv::VideoCapture capture(filename);
-    if(!capture.isOpened())  // check if we succeeded
-    {
-        std::cout << "failed" << std::endl;
-    }
-    else
-    {
-        std::cout << "succeded" << std::endl;
-    }
-
-    cv::Mat frame;
-    cv::Mat last_frame;
-
-    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
 
     CaptureImage* capture_brisk_ptr;
 
 
     cv::namedWindow("Last");    // Creates a window for display.
     cv::moveWindow("Last", 0, 0);
-    cv::namedWindow("Incoming");    // Creates a window for display.
-    cv::moveWindow("Incoming", 0, 500);
+//    cv::namedWindow("Incoming");    // Creates a window for display.
+//    cv::moveWindow("Incoming", 0, 400);
 
     while(f<800)
     {
         f++;
-        std::cout << "Frame #: " << f << std::endl;
+        std::cout << "\n===============================================================" << std::endl;
+        std::cout << "\nFrame #: " << f << " in buffer: " << f%buffer_size << std::endl;
 
-        capture >> frame;
+        capture >> frame[f % buffer_size];
 
-        if(!frame.empty())
+        if(!frame[f % buffer_size].empty())
         {
 
             if (f>1){ // check if consecutive images are different
-                Scalar diff = cv::norm(frame, last_frame, cv::NORM_L1);
-                std::cout << "frame ptr: " << (unsigned int)*(frame.ptr(0)) << " last ptr: " << (unsigned int)*(last_frame.ptr(0)) << std::endl;
+                Scalar diff = cv::norm(frame[f % buffer_size], last_frame, cv::NORM_L1);
+                std::cout << "incoming data: " << (unsigned long int)(frame[f % buffer_size].data) << " last data: " << (unsigned long int)(last_frame.data) << std::endl;
                 std::cout << "test_image: Image increment: " << diff << std::endl;
             }
 
-            capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame,img_width,img_height);
+            capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame[f % buffer_size],img_width,img_height);
 
             //        clock_t t1 = clock();
             p_brisk->process(capture_brisk_ptr);
             //        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
-            last_frame = frame;
+            last_frame = frame[f % buffer_size];
         }
         else
         {
