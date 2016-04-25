@@ -12,22 +12,21 @@ void ProcessorTrackerLaser::preProcess()
     t_world_robot_ = getWolfProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
     // world_robot
     Eigen::Matrix3s R_world_robot = Eigen::Matrix3s::Identity();
-    R_world_robot.topLeftCorner(2, 2) = Eigen::Rotation2Ds(t_world_robot_(2)).matrix();
+    R_world_robot.topLeftCorner<2, 2>() = Eigen::Rotation2Ds(t_world_robot_(2)).matrix();
     // robot_sensor (to be computed once if extrinsics are fixed and not dynamic)
     if (getSensorPtr()->isExtrinsicDynamic() || !getSensorPtr()->getPPtr()->isFixed()
             || !getSensorPtr()->getOPtr()->isFixed() || !extrinsics_transformation_computed_)
     {
-        t_robot_sensor_.head(2) = getSensorPtr()->getPPtr()->getVector();
+        t_robot_sensor_.head<2>() = getSensorPtr()->getPPtr()->getVector();
         t_robot_sensor_(2) = getSensorPtr()->getOPtr()->getVector()(0);
-        R_robot_sensor_ = Eigen::Matrix3s::Identity();
-        R_robot_sensor_.topLeftCorner(2, 2) = Eigen::Rotation2Ds(t_robot_sensor_(2)).matrix();
+        R_robot_sensor_.topLeftCorner<2, 2>() = Eigen::Rotation2Ds(t_robot_sensor_(2)).matrix();
         extrinsics_transformation_computed_ = true;
     }
     // global_sensor
-    R_world_sensor_ = R_world_robot * R_robot_sensor_;
+    R_world_sensor_.topLeftCorner<2, 2>() = R_world_robot.topLeftCorner<2, 2>() * R_robot_sensor_.topLeftCorner<2, 2>();
     t_world_sensor_ = t_world_robot_ + R_robot_sensor_ * t_robot_sensor_;
     // sensor_global
-    R_sensor_world_ = R_robot_sensor_.transpose() * R_world_robot.transpose();
+    R_sensor_world_.topLeftCorner<2, 2>() = R_robot_sensor_.topLeftCorner<2, 2>().transpose() * R_world_robot.topLeftCorner<2, 2>().transpose();
     t_sensor_world_ = -R_sensor_world_ * t_world_robot_ - R_robot_sensor_.transpose() * t_robot_sensor_;
 }
 
@@ -40,11 +39,13 @@ unsigned int ProcessorTrackerLaser::findLandmarks(LandmarkBaseList& _landmark_li
         //local declarations
         Scalar prob, dm2;
         unsigned int ii, jj;
+
         // COMPUTING ALL EXPECTED FEATURES
         std::map<LandmarkBase*, Eigen::Vector4s> expected_features;
         std::map<LandmarkBase*, Eigen::Matrix3s> expected_features_covs;
         for (auto landmark : _landmark_list_in)
             expectedFeature(landmark, expected_features[landmark], expected_features_covs[landmark]);
+
         // SETTING ASSOCIATION TREE
         std::map<unsigned int, FeatureBaseIter> features_map;
         std::map<unsigned int, LandmarkBaseIter> landmarks_map;
@@ -101,6 +102,7 @@ unsigned int ProcessorTrackerLaser::findLandmarks(LandmarkBaseList& _landmark_li
         //tree.printScoreTable();
         // Vector of new landmarks to be created
         std::vector<FeatureCorner2D*> new_corner_landmarks(0);
+
         // ESTABLISH CORRESPONDENCES
         for (auto pair : ft_lk_pairs)
         {
