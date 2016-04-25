@@ -156,6 +156,7 @@ class ProcessorMotion : public ProcessorBase
         //        void reset(CaptureMotion2* _capture_ptr);
 
         FrameBase* makeFrame(CaptureBase* _capture_ptr, FrameType _type = NON_KEY_FRAME);
+        FrameBase* makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameType _type);
 
         MotionBuffer* getBufferPtr();
 
@@ -320,9 +321,11 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeSta
     origin_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                      Eigen::MatrixXs::Zero(data_size_, data_size_));
     // Make a keyframe if not already there
-    makeFrame(origin_ptr_, KEY_FRAME);
-    // set the state of the origin keyframe
-    origin_ptr_->getFramePtr()->setState(_x_origin);
+    if (origin_ptr_->getFramePtr() == nullptr)
+        makeFrame(origin_ptr_, _x_origin, KEY_FRAME);
+    // If there is a frame, set its state with the providen
+    else
+        origin_ptr_->getFramePtr()->setState(_x_origin);
 
     // make last Capture
     last_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
@@ -430,6 +433,14 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
 inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part)
 {
     last_ptr_->getBufferPtr()->split(_t_split, _oldest_part);
+}
+
+inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameType _type)
+{
+    // We need to create the new free Frame to hold what will become the last Capture
+    FrameBase* new_frame_ptr = getWolfProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
+    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
+    return new_frame_ptr;
 }
 
 inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
