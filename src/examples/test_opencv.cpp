@@ -150,7 +150,7 @@ int main(int argc, char** argv)
                 }
 
                 // Compute the Fundamental matrix F and discard outliers through ransac in one go
-                if (good_matches.size() > 8)
+                if (good_matches.size() > 20) // Minimum is 8 points, but we need more for robustness
                 {
                     // find fundamental matrix using RANSAC, return set of inliers as bool vector
                     cv::Mat F = findFundamentalMat(matched_1, matched_2, cv::FM_RANSAC, 3.0, 0.99, inliers_bool);
@@ -163,14 +163,14 @@ int main(int argc, char** argv)
                             inlier_matches.push_back(good_matches[i]);
                 }
 
-                std::cout << "Initial matches: " << matches.size() << " good: " << good_matches.size() << " inliers: "
+                std::cout << "Matches: initial " << matches.size() << " | good " << good_matches.size() << " | inliers "
                         << inlier_matches.size() << std::endl;
 
                 // Draw RANSAC inliers
                 cv::drawMatches(img_1, keypoints_1, img_2, keypoints_2, inlier_matches, img_matches,
                                 cv::Scalar::all(-1), cv::Scalar::all(-1), std::vector<char>(), 0); //cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
                 //-- Show detected matches
-                resize(img_matches, img_scaled, cv::Size(), scale, scale);
+                resize(img_matches, img_scaled, cv::Size(), scale, scale, cv::INTER_NEAREST);
                 imshow("Feature tracker", img_scaled);
 
                 // pause every X images and wait for key
