@@ -264,7 +264,7 @@ class ProcessorMotion : public ProcessorBase
         size_t x_size_;    ///< The size of the state vector
         size_t delta_size_;    ///< the size of the deltas
         size_t data_size_; ///< the size of the incoming data
-        CaptureBase* origin_ptr_;
+        CaptureBase* origin_ptr_; //TODO: JV: change by FrameBase* origin_frame_ptr_
         CaptureMotion2* last_ptr_;
         CaptureMotion2* incoming_ptr_;
 
@@ -302,19 +302,20 @@ inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_
                                                   const Eigen::MatrixXs& _jacobian2,
                                                   Eigen::MatrixXs& _delta_cov1_plus_delta_cov2)
 {
-    //    std::cout << "delta_1_cov" << std::endl;
-    //    std::cout << _delta_cov1 << std::endl;
-    //    std::cout << "delta_2_cov" << std::endl;
-    //    std::cout << _delta_cov2 << std::endl;
-    //    std::cout << "_jacobian1" << std::endl;
-    //    std::cout << _jacobian1 << std::endl;
-    //    std::cout << "_jacobian2" << std::endl;
-    //    std::cout << _jacobian2 << std::endl;
+    //std::cout << "delta_1_cov" << std::endl;
+    //std::cout << _delta_cov1 << std::endl;
+    //std::cout << "delta_2_cov" << std::endl;
+    //std::cout << _delta_cov2 << std::endl;
+    //std::cout << "_jacobian1" << std::endl;
+    //std::cout << _jacobian1 << std::endl;
+    //std::cout << "_jacobian2" << std::endl;
+    //std::cout << _jacobian2 << std::endl;
 
     _delta_cov1_plus_delta_cov2 = _jacobian1 * _delta_cov1 * _jacobian1.transpose()
             + _jacobian2 * _delta_cov2 * _jacobian2.transpose();
-    //    std::cout << "_delta_cov1_plus_delta_cov2" << std::endl;
-    //    std::cout << _delta_cov1_plus_delta_cov2 << std::endl;
+
+    //std::cout << "_delta_cov1_plus_delta_cov2" << std::endl;
+    //std::cout << _delta_cov1_plus_delta_cov2 << std::endl;
 }
 
 inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin)
@@ -354,18 +355,26 @@ inline void ProcessorMotion::integrate()
 {
     // Set dt
     updateDt();
+
     // get data and convert it to delta
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_, delta_, delta_cov_);
+
     // then integrate delta
     deltaPlusDelta(getBufferPtr()->get().back().delta_integr_, delta_, delta_integrated_, jacobian_prev_,
                    jacobian_curr_);
+
     // and covariance
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,
                          delta_integrated_cov_);
-    // then push it into buffer
-    getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_,
+    //std::cout << "delta_integrated_cov_" << std::endl;
+    //std::cout << delta_integrated_cov_ << std::endl;
+
+        // then push it into buffer
+    getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_, delta_cov_,
                                              delta_integrated_cov_, Eigen::MatrixXs::Zero(delta_size_, delta_size_),
                                              Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
+    //std::cout << "getBufferPtr()->get().back().delta_integrated_cov_" << std::endl;
+    //std::cout << getBufferPtr()->get().back().delta_integr_cov_ << std::endl;
 }
 
 inline void ProcessorMotion::reintegrate()
@@ -389,10 +398,10 @@ inline void ProcessorMotion::reintegrate()
     {
         deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, motion_it->delta_integr_, jacobian_prev,
                        jacobian_curr);
-        std::cout << "delta reintegrated" << std::endl;
+        //std::cout << "delta reintegrated" << std::endl;
         deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_, motion_it->delta_cov_, jacobian_prev, jacobian_curr,
                              motion_it->delta_integr_cov_);
-        std::cout << "delta_cov reintegrated" << std::endl;
+        //std::cout << "delta_cov reintegrated" << std::endl;
         motion_it++;
         prev_motion_it++;
     }
@@ -508,7 +517,7 @@ inline void ProcessorMotion::getMotion(const TimeStamp& _ts, Motion& _motion) co
 inline void ProcessorMotion::sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr,
                                        Eigen::VectorXs& _delta1_plus_delta2)
 {
-    // TODO: what should it return, now? also covariance? jacobians?
+    // TODO: what should it return, now? also covariance? jacobians? a new CaptureMotion..?
     //deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
 }
 

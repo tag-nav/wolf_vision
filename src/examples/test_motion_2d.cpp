@@ -75,6 +75,7 @@ int main()
     {
         odom2d_ptr->process(cap_ptr);
         std::cout << "State(" << (t-t0) << ") : " << odom2d_ptr->getState().transpose() << std::endl;
+        std::cout << "Covariance(" << (t-t0) << ") : " << std::endl << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ << std::endl;
 
         t += dt;
         cap_ptr->setTimeStamp(t);
@@ -87,6 +88,7 @@ int main()
     for (int i = 1; i <= 25; i++)
     {
         std::cout << "State(" << (t-t0) << ") = " << odom2d_ptr->getState(t/*+dt/2*/).transpose() << std::endl;
+        std::cout << "Covariance(" << (t-t0) << ") : " << std::endl << odom2d_ptr->getBufferPtr()->getMotion(t/*+dt/2*/).delta_integr_cov_ << std::endl;
         t += dt;
     }
     std::cout << "       ^^^^^^^   After the last time-stamp the buffer keeps returning the last member." << std::endl;

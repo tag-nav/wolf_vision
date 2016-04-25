@@ -70,7 +70,7 @@ FrameBase* Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_st
                     new FrameBase(_frame_type, _time_stamp, new StateBlock(3), new StateQuaternion, new StateBlock(3)));
 
         default:
-            throw std::invalid_argument(
+            throw std::runtime_error(
                     "Unknown frame structure. Add appropriate frame structure to the switch statement.");
     }
 }
@@ -107,7 +107,7 @@ FrameBase* Problem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _f
                                   new StateBlock(_frame_state.tail(3))));
         }
         default:
-            throw std::invalid_argument(
+            throw std::runtime_error(
                     "Unknown frame structure. Add appropriate frame structure to the switch statement.");
     }
     //std::cout << "new frame created" << std::endl;
