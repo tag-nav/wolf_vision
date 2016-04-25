@@ -75,19 +75,28 @@ inline ProcessorOdom2d::~ProcessorOdom2d()
 inline void ProcessorOdom2d::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                         Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
 {
-    assert(_delta.size() == 3 && "Wrong _delta vector size");
-    assert(_data.size() == 2 && "Wrong _data vector size");
+    std::cout << "ProcessorOdom2d::data2delta" << std::endl;
+
+    assert(_delta.size() == delta_size_ && "Wrong _delta vector size");
+    assert(_data.size() == data_size_ && "Wrong _data vector size");
 
     // 1/2 turn + straight + 1/2 turn
     _delta(0) = cos(_data(1)/2) * _data(0);
     _delta(1) = sin(_data(1)/2) * _data(0);
     _delta(2) = _data(1);
+
+    // TODO: fill delta covariance
+    _delta_cov = Eigen::MatrixXs::Identity(delta_size_, delta_size_) * 0.01;
+
+    std::cout << "ProcessorOdom2d::data2delta ended" << std::endl;
 }
 
 inline void ProcessorOdom2d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
 {
-    assert(_x.size() == 3 && "Wrong _x vector size");
-    assert(_x_plus_delta.size() == 3 && "Wrong _x_plus_delta vector size");
+    std::cout << "ProcessorOdom2d::xPlusDelta" << std::endl;
+
+    assert(_x.size() == x_size_ && "Wrong _x vector size");
+    assert(_x_plus_delta.size() == delta_size_ && "Wrong _x_plus_delta vector size");
 
 //    std::cout << "xPlusDelta ------------------------------------" << std::endl;
 //    std::cout << "_x:     " << _x.transpose() << std::endl;
@@ -103,8 +112,9 @@ inline void ProcessorOdom2d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
 
 inline void ProcessorOdom2d::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
 {
-    assert(_delta1.size() == 3 && "Wrong _delta1 vector size");
-    assert(_delta2.size() == 3 && "Wrong _delta2 vector size");
+    std::cout << "ProcessorOdom2d::deltaPlusDelta" << std::endl;
+    assert(_delta1.size() == delta_size_ && "Wrong _delta1 vector size");
+    assert(_delta2.size() == delta_size_ && "Wrong _delta2 vector size");
 
 //    std::cout << "deltaPlusDelta ------------------------------------" << std::endl;
 //    std::cout << "_delta1: " << _delta1.transpose() << std::endl;
@@ -122,8 +132,9 @@ inline void ProcessorOdom2d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
                                             Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                             Eigen::MatrixXs& _jacobian2)
 {
-    assert(_delta1.size() == 3 && "Wrong _delta1 vector size");
-    assert(_delta2.size() == 3 && "Wrong _delta2 vector size");
+    std::cout << "ProcessorOdom2d::deltaPlusDelta jacobians" << std::endl;
+    assert(_delta1.size() == delta_size_ && "Wrong _delta1 vector size");
+    assert(_delta2.size() == delta_size_ && "Wrong _delta2 vector size");
 
 //    std::cout << "deltaPlusDelta ------------------------------------" << std::endl;
 //    std::cout << "_delta1: " << _delta1.transpose() << std::endl;
@@ -133,13 +144,18 @@ inline void ProcessorOdom2d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
     _delta1_plus_delta2(2) = _delta1(2) + _delta2(2);
 
-//    std::cout << "-----------------------------------------------" << std::endl;
-//    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
+    // TODO: fill the jacobians
+    _jacobian1 = Eigen::MatrixXs::Identity(delta_size_,delta_size_);
+    _jacobian2 = Eigen::MatrixXs::Identity(delta_size_,delta_size_);
+
+    std::cout << "-----------------------------------------------" << std::endl;
+    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 }
 
 inline void ProcessorOdom2d::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                              Eigen::VectorXs& _delta2_minus_delta1)
 {
+    std::cout << "ProcessorOdom2d::deltaMinusDelta" << std::endl;
     assert(_delta1.size() == 3 && "Wrong _delta1 vector size");
     assert(_delta2.size() == 3 && "Wrong _delta2 vector size");
 

@@ -35,7 +35,8 @@ int main()
     Scalar dt = .01;
 
     // Origin frame:
-    Eigen::Vector2s p0(0.5, -0.5-sqrt(0.5));
+    Eigen::Vector2s p0;
+    p0 << 0.5, -0.5-sqrt(0.5);
     Eigen::Vector1s o0(Eigen::Vector1s::Constant(Constants::PI/4));
     Eigen::Vector3s x0;
     x0 << p0, o0;
@@ -50,7 +51,7 @@ int main()
     Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2,2) * 0.01;
 
     // Create Wolf tree nodes
-    Problem* problem_ptr = new Problem(FRM_PO_3D);
+    Problem* problem_ptr = new Problem(FRM_PO_2D);
     SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::Vector2s::Zero()), new StateBlock(Eigen::Vector1s::Zero()), new StateBlock(Eigen::VectorXs::Zero(0)), 0);
     ProcessorOdom2d* odom2d_ptr = new ProcessorOdom2d();
     // Assemble Wolf tree by linking the nodes
