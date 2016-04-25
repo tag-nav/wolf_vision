@@ -41,12 +41,14 @@ FeatureBase::~FeatureBase()
     //std::cout << "constraints deleted" << std::endl;
 }
 
-void FeatureBase::addConstraint(ConstraintBase* _co_ptr)
+ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
 {
     addDownNode(_co_ptr);
     // add constraint to be added in solver
     if (getWolfProblem() != nullptr)
         getWolfProblem()->addConstraintPtr(_co_ptr);
+
+    return _co_ptr;
 }
 
 FrameBase* FeatureBase::getFramePtr() const

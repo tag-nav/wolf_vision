@@ -37,7 +37,7 @@ class TrajectoryBase : public NodeLinked<Problem,FrameBase>
         
         /** \brief Add a frame to the trajectory
          **/
-        void addFrame(FrameBase* _frame_ptr);
+        FrameBase* addFrame(FrameBase* _frame_ptr);
 
         /** \brief Remove a frame to the trajectory
          **/

@@ -32,7 +32,7 @@ class MapBase : public NodeLinked<Problem,LandmarkBase>
          *
          * Adds a landmark to the Map. It also updates the lists of StateBlocks that are used by the solver.
          **/
-        virtual void addLandmark(LandmarkBase* _landmark_ptr);
+        virtual LandmarkBase* addLandmark(LandmarkBase* _landmark_ptr);
 
         /** \brief Adds a landmark
          *

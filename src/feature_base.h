@@ -53,7 +53,7 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
 
         /** \brief Adds a constraint from this feature (as a down node)
          */
-        void addConstraint(ConstraintBase* _co_ptr);
+        ConstraintBase* addConstraint(ConstraintBase* _co_ptr);
 
         /** \brief Gets the capture pointer
          */

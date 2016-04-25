@@ -16,11 +16,13 @@ TrajectoryBase::~TrajectoryBase()
     //std::cout << "deleting TrajectoryBase " << nodeId() << std::endl;
 }
 
-void TrajectoryBase::addFrame(FrameBase* _frame_ptr)
+FrameBase* TrajectoryBase::addFrame(FrameBase* _frame_ptr)
 {
 	addDownNode(_frame_ptr);
     if (_frame_ptr->isKey())
         _frame_ptr->registerNewStateBlocks();
+
+    return _frame_ptr;
 }
 
 void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
