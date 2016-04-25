@@ -57,13 +57,7 @@ class ProcessorOdom3d : public ProcessorMotion
         virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                      Eigen::VectorXs& _delta2_minus_delta1);
         Eigen::VectorXs deltaZero() const;
-        Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts){
-            Motion tmp(_motion_ref);
-            tmp.ts_ = _ts;
-            tmp.delta_ = deltaZero();
-            tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-            return tmp;
-        }
+        Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts);
 
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin);
 
@@ -160,6 +154,15 @@ inline Eigen::VectorXs ProcessorOdom3d::deltaZero() const
     Eigen::VectorXs delta_zero(7);
     delta_zero << 0, 0, 0, 0, 0, 0, 1;;
     return delta_zero;
+}
+
+inline Motion ProcessorOdom3d::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
+{
+    Motion tmp(_motion_ref);
+    tmp.ts_ = _ts;
+    tmp.delta_ = deltaZero();
+    tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
+    return tmp;
 }
 
 inline ConstraintBase* ProcessorOdom3d::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
