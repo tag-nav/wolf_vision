@@ -113,34 +113,21 @@ int main(int argc, char** argv)
     cv::namedWindow("Feature tracker");    // Creates a window for display.
     cv::moveWindow("Feature tracker", 0, 0);
 
-    while(f<800)
+    f  = 1;
+    capture >> frame[f % buffer_size];
+    while(!(frame[f % buffer_size].empty()))
     {
-        f++;
         std::cout << "\n=============== Frame #: " << f << " in buffer: " << f%buffer_size << " ===============" << std::endl;
 
+        capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame[f % buffer_size],img_width,img_height);
+
+        //        clock_t t1 = clock();
+        p_brisk->process(capture_brisk_ptr);
+        //        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+
+        last_frame = frame[f % buffer_size];
+        f++;
         capture >> frame[f % buffer_size];
-
-        if(!frame[f % buffer_size].empty())
-        {
-
-//            if (f>1){ // check if consecutive images are different
-//                Scalar diff = cv::norm(frame[f % buffer_size], last_frame, cv::NORM_L1);
-//                std::cout << "\nincoming data: " << (unsigned long int)(frame[f % buffer_size].data) << " last data: " << (unsigned long int)(last_frame.data) << std::endl;
-//                std::cout << "Image difference: " << diff << std::endl;
-//            }
-
-            capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame[f % buffer_size],img_width,img_height);
-
-            //        clock_t t1 = clock();
-            p_brisk->process(capture_brisk_ptr);
-            //        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-
-            last_frame = frame[f % buffer_size];
-        }
-        else
-        {
-            cv::waitKey(2000);
-        }
     }
 
     wolf_problem_->destruct();
