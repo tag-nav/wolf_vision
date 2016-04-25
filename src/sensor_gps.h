@@ -10,6 +10,7 @@
 
 //wolf
 #include "sensor_base.h"
+#include "sensor_factory.h"
 
 // std
 
@@ -33,7 +34,6 @@ public:
     /** \brief Default destructor (not recommended)
      *
      * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-     *
      **/
     virtual ~SensorGPS();
 
@@ -42,6 +42,17 @@ public:
     virtual void registerNewStateBlocks();
 
 };
+
+//namespace
+//{
+//SensorBase* createGPS()
+//{
+//    return new SensorGPS(nullptr, nullptr, nullptr, nullptr, nullptr);
+//}
+//const bool registered_camera = SensorFactory::get()->registerSensor(SEN_CAMERA, createGPS);
+//}
+
+
 
 } // namespace wolf
 

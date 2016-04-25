@@ -130,6 +130,17 @@ class SensorLaser2D : public SensorBase
         void printSensorParameters() const;
 };
 
+namespace
+{
+SensorBase* createLaser2D()
+{
+    return new SensorLaser2D(nullptr, nullptr);
+}
+const bool registered_laser_2d = SensorFactory::get()->registerSensor(SEN_LIDAR, createLaser2D);
+}
+
+
+
 } // namespace wolf
 
 

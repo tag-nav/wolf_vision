@@ -18,7 +18,7 @@ namespace wolf
 class SensorFactory
 {
     public:
-        typedef SensorBase* (*CreateSensorCallback)();
+        typedef SensorBase* (*CreateSensorCallback)(std::string & _name);
     private:
         typedef std::map<SensorType, CreateSensorCallback> CallbackMap;
     public:
@@ -26,7 +26,7 @@ class SensorFactory
         bool registerSensor(SensorType _sensor_type, CreateSensorCallback createFn);
         // Returns 'true' if the _sensor_type was registered before
         bool unregisterSensor(SensorType _sensor_type);
-        SensorBase* createSensor(SensorType _sensor_type);
+        SensorBase* createSensor(SensorType _sensor_type, std::string _name);
     private:
         CallbackMap callbacks_;
 

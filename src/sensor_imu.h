@@ -3,6 +3,7 @@
 
 //wolf includes
 #include "sensor_base.h"
+#include "sensor_factory.h"
 
 
 namespace wolf {
@@ -31,6 +32,17 @@ class SensorIMU : public SensorBase
         virtual ~SensorIMU();
 
 };
+
+namespace
+{
+SensorBase* createIMU()
+{
+    return new SensorIMU(nullptr, nullptr);
+}
+const bool registered_IMU = SensorFactory::get()->registerSensor(SEN_IMU, createIMU);
+}
+
+
 
 } // namespace wolf
 

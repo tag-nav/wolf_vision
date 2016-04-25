@@ -4,6 +4,7 @@
 
 //wolf includes
 #include "sensor_base.h"
+#include "sensor_factory.h"
 
 namespace wolf {
 
@@ -48,6 +49,18 @@ class SensorOdom2D : public SensorBase
         double getRotVarToRotNoiseFactor() const;
         
 };
+
+namespace
+{
+SensorBase* createOdom2D(std::string& _name)
+{
+    SensorBase* odo = new SensorOdom2D(nullptr, nullptr,0,0);
+    odo->setName(_name);
+    return odo;
+}
+const bool registered_odom_2d = SensorFactory::get()->registerSensor(SEN_ODOM_2D, createOdom2D);
+}
+
 
 } // namespace wolf
 

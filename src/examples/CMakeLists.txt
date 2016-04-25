@@ -4,6 +4,10 @@ ADD_EXECUTABLE(example_factory example_factory.cpp)
 ADD_EXECUTABLE(example_template_factory example_template_factory.cpp)
 TARGET_LINK_LIBRARIES(example_template_factory ${PROJECT_NAME})
 
+# SensorFactory classes test
+ADD_EXECUTABLE(test_sensor_factory test_sensor_factory.cpp)
+TARGET_LINK_LIBRARIES(test_sensor_factory ${PROJECT_NAME})
+
 # ProcessorMotion classes test
 ADD_EXECUTABLE(test_motion test_motion.cpp)
 TARGET_LINK_LIBRARIES(test_motion ${PROJECT_NAME})

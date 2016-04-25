@@ -65,13 +65,9 @@ class ShapeFactory // SensorFactory
     public:
         static ShapeFactory* instance(); // Unique point of access;
     private:
-        ShapeFactory()
-        {
-        }
+        ShapeFactory();
         // Prevent clients from creating a new Singleton
-        ShapeFactory(const ShapeFactory&)
-        {
-        }
+        ShapeFactory(const ShapeFactory&);
         // Prevent clients from creating a copy of the Singleton
         static ShapeFactory* pInstance_;
 };
@@ -103,19 +99,13 @@ inline void Point::draw() const
     std::cout << "point " << id_ << std::endl;
 }
 
-inline Shape* Point::createPoint()
-{
-    return new Point;
-}
-
 namespace
 {
-Shape* CreatePoint()
+Shape* createPoint()
 {
     return new Point;
 }
-//const bool registered = ShapeFactory::instance()->registerShape(Shape::POINT, CreatePoint);
-const bool registered = ShapeFactory::instance()->registerShape(Shape::POINT, CreatePoint);
+const bool registered = ShapeFactory::instance()->registerShape(Shape::POINT, createPoint);
 }
 
 // Line -----------------------------------------------------------------------
@@ -138,14 +128,22 @@ inline void Line::draw() const
 
 namespace
 {
-Shape* CreateLine()
+Shape* createLine()
 {
     return new Line;
 }
-bool registered2 = ShapeFactory::instance()->registerShape(Shape::LINE, CreateLine);
+bool registered2 = ShapeFactory::instance()->registerShape(Shape::LINE, createLine);
 }
 
 // ShapeFactory ---------------------------------------------------------------
+
+inline ShapeFactory::ShapeFactory()
+{
+}
+
+inline ShapeFactory::ShapeFactory(const ShapeFactory&)
+{
+}
 
 ShapeFactory* ShapeFactory::pInstance_ = nullptr;
 
