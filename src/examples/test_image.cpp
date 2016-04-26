@@ -56,7 +56,9 @@ int main(int argc, char** argv)
         }
     }
     std::cout << "Input video file: " << filename << std::endl;
-    cv::VideoCapture capture(filename);
+    //cv::VideoCapture capture(filename);
+    cv::VideoCapture capture;//(2);
+    capture.open(0);
     if(!capture.isOpened())  // check if we succeeded
     {
         std::cout << "failed" << std::endl;
