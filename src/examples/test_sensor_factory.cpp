@@ -20,13 +20,13 @@ int main(void)
 
     sensors.push_back(SensorFactory::get()->createSensor(SEN_CAMERA, "left camera"));
     sensors.push_back(SensorFactory::get()->createSensor(SEN_CAMERA, "right camera"));
-    sensors.push_back(SensorFactory::get()->createSensor(SEN_CAMERA, "rear camera"));
 //    sensors.push_back(SensorFactory::get()->createSensor(SEN_IMU)); // this class not finished
     sensors.push_back(SensorFactory::get()->createSensor(SEN_ODOM_2D, "main odometer"));
+    sensors.push_back(SensorFactory::get()->createSensor(SEN_CAMERA, "rear camera"));
     sensors.push_back(SensorFactory::get()->createSensor(SEN_ODOM_2D, "aux odometer"));
 
     for (auto sen : sensors){
-        std::cout << "Sensor: " << sen->id() << " | name: " << sen->getName() << std::endl;
+        std::cout << "Sensor: " << sen->id() << " | type: " << sen->type() << " | name: " << sen->getName() << std::endl;
     }
     (*(sensors.rbegin()))->getName();
 

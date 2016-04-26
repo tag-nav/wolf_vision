@@ -28,7 +28,6 @@ class NodeBase
     protected:
         unsigned int node_id_; ///< Node id. It is unique over the whole Wolf Tree
         std::string class_; ///< Text label identifying the class of node ("SENSOR", "FEATURE", etc)
-        std::string type_; ///< Text label identifying the type within the class of node ("CAMERA", "POINT", etc)
         std::string name_; ///< Text label identifying each specific object ("left camera", "LIDAR 1", "PointGrey", "Andrew", etc)
         bool verbose_; 
 
