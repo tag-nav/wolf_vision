@@ -5,6 +5,7 @@
 
 //wolf
 #include "sensor_base.h"
+#include "sensor_factory.h"
 
 //laser_scan_utils
 #include "laser_scan_utils/scan_basics.h"
