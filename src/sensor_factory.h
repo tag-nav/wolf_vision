@@ -20,13 +20,13 @@ class SensorFactory
     public:
         typedef SensorBase* (*CreateSensorCallback)(std::string & _name);
     private:
-        typedef std::map<SensorType, CreateSensorCallback> CallbackMap;
+        typedef std::map<std::string, CreateSensorCallback> CallbackMap;
     public:
         // Returns 'true' if registration was successful
-        bool registerSensor(SensorType _sensor_type, CreateSensorCallback createFn);
+        bool registerSensor(std::string _sensor_type, CreateSensorCallback createFn);
         // Returns 'true' if the _sensor_type was registered before
-        bool unregisterSensor(SensorType _sensor_type);
-        SensorBase* createSensor(SensorType _sensor_type, std::string _name);
+        bool unregisterSensor(std::string _sensor_type);
+        SensorBase* createSensor(std::string _sensor_type, std::string _name);
     private:
         CallbackMap callbacks_;
 

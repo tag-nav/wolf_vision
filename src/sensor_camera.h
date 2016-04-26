@@ -46,7 +46,7 @@ SensorBase* createCamera(std::string& _name)
     sen->setName(_name);
     return sen;
 }
-const bool registered_camera = SensorFactory::get()->registerSensor(SEN_CAMERA, createCamera);
+const bool registered_camera = SensorFactory::get()->registerSensor("CAMERA", createCamera);
 }
 
 

@@ -10,17 +10,17 @@
 namespace wolf
 {
 
-bool SensorFactory::registerSensor(SensorType _sensor_type, CreateSensorCallback createFn)
+bool SensorFactory::registerSensor(std::string _sensor_type, CreateSensorCallback createFn)
 {
     return callbacks_.insert(CallbackMap::value_type(_sensor_type, createFn)).second;
 }
 
-bool SensorFactory::unregisterSensor(SensorType _sensor_type)
+bool SensorFactory::unregisterSensor(std::string _sensor_type)
 {
     return callbacks_.erase(_sensor_type) == 1;
 }
 
-wolf::SensorBase* SensorFactory::createSensor(SensorType _sensor_type, std::string _name)
+wolf::SensorBase* SensorFactory::createSensor(std::string _sensor_type, std::string _name)
 {
     CallbackMap::const_iterator i = callbacks_.find(_sensor_type);
     if (i == callbacks_.end())

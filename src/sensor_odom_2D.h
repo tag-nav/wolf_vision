@@ -59,7 +59,7 @@ SensorBase* createOdom2D(std::string& _name)
     odo->setName(_name);
     return odo;
 }
-const bool registered_odom_2d = SensorFactory::get()->registerSensor(SEN_ODOM_2D, createOdom2D);
+const bool registered_odom_2d = SensorFactory::get()->registerSensor("ODOM_2D", createOdom2D);
 }
 
 

@@ -49,7 +49,7 @@ SensorBase* createGPSFix(std::string& _name)
     sen->setName(_name);
     return sen;
 }
-const bool registered_gps_fix = SensorFactory::get()->registerSensor(SEN_GPS_FIX, createGPSFix);
+const bool registered_gps_fix = SensorFactory::get()->registerSensor("GPS_FIX", createGPSFix);
 }
 } // namespace wolf
 

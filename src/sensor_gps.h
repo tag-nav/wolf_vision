@@ -52,7 +52,7 @@ public:
 //    sen->setName(_name);
 //    return sen;
 //}
-//const bool registered_gps = SensorFactory::get()->registerSensor(SEN_GPS_RAW, createGPS);
+//const bool registered_gps = SensorFactory::get()->registerSensor("GPS_RAW", createGPS);
 //}
 
 

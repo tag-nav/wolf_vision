@@ -140,7 +140,7 @@ SensorBase* createLaser2D(std::string& _name)
     sen->setName(_name);
     return sen;
 }
-const bool registered_laser = SensorFactory::get()->registerSensor(SEN_LIDAR, createLaser2D);
+const bool registered_laser = SensorFactory::get()->registerSensor("LIDAR", createLaser2D);
 }
 
 

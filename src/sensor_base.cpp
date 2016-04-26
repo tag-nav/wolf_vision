@@ -11,7 +11,7 @@ unsigned int SensorBase::sensor_id_count_ = 0;
 SensorBase::SensorBase(const SensorType& _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr,
                        const unsigned int _noise_size, const bool _extr_dyn) :
         NodeLinked(MID, "SENSOR"),
-        sensor_id_(++sensor_id_count_),
+        sensor_id_(++sensor_id_count_), // simple ID factory
         type_(_tp),
         p_ptr_(_p_ptr),
         o_ptr_(_o_ptr),
@@ -26,7 +26,7 @@ SensorBase::SensorBase(const SensorType& _tp, StateBlock* _p_ptr, StateBlock* _o
 SensorBase::SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr,
                        const Eigen::VectorXs & _noise_std, const bool _extr_dyn) :
         NodeLinked(MID, "SENSOR"),
-        sensor_id_(++sensor_id_count_),
+        sensor_id_(++sensor_id_count_), // simple ID factory
         type_(_tp),
         p_ptr_(_p_ptr),
         o_ptr_(_o_ptr),

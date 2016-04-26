@@ -42,7 +42,7 @@ SensorBase* createIMU(std::string& _name)
     sen->setName(_name);
     return sen;
 }
-const bool registered_imu = SensorFactory::get()->registerSensor(SEN_IMU, createIMU);
+const bool registered_imu = SensorFactory::get()->registerSensor("IMU", createIMU);
 }
 
 
