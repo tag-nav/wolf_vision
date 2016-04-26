@@ -119,14 +119,15 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             // Make the last Capture's Frame a KeyFrame so that it gets into the solver
             last_ptr_->getFramePtr()->setKey();
 
-            // Call the new keyframe callback
-            getWolfProblem()->keyFrameCallback(last_ptr_->getFramePtr(), (ProcessorBase*)this);
-
             // Establish constraints between last and origin
             establishConstraints();
 
+            // Call the new keyframe callback in order to let the other processors to establish their constraints
+            getWolfProblem()->keyFrameCallback(last_ptr_->getFramePtr(), (ProcessorBase*)this);
+
             // Reset the derived Tracker
             reset();
+
             // Reset this
             origin_ptr_ = last_ptr_;
             last_ptr_ = incoming_ptr_;
@@ -138,6 +139,39 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     }
 
     postProcess();
+}
+
+bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr)
+{
+    Scalar _dt_max = 0.1; // hardcoded for now
+
+    // Nothing to do if:
+    //   - there is no last
+    //   - last hasn't frame (just a check)
+    //   - last frame is already a key frame
+    //   - last frame is too far in time from keyframe
+    if (last_ptr_ == nullptr || last_ptr_->getFramePtr() == nullptr || last_ptr_->getFramePtr()->isKey() || std::abs(last_ptr_->getFramePtr()->getTimeStamp() - last_ptr_->getFramePtr()->getTimeStamp()) > _dt_max)
+        return false;
+
+    // Capture last_ is going to be added to the new keyframe
+    // Detect new Features, initialize Landmarks, create Constraints, ...
+    processNew(max_new_features_);
+
+    // Create a new non-key Frame in the Trajectory with the incoming Capture
+    makeFrame(incoming_ptr_);
+
+    // Establish constraints between last and origin
+    establishConstraints();
+
+    // Reset the derived Tracker
+    reset();
+
+    // Reset this
+    origin_ptr_ = last_ptr_;
+    last_ptr_ = incoming_ptr_;
+    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+
+    return true;
 }
 
 } // namespace wolf

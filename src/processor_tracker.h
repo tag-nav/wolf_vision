@@ -82,7 +82,7 @@ class ProcessorTracker : public ProcessorBase
         void setMaxNewFeatures(const unsigned int& _max_new_features);
         const unsigned int getMaxNewFeatures();
 
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr){return false;};
+        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr);
 
         virtual CaptureBase* getLastPtr();
 
