@@ -79,17 +79,17 @@ inline void ProcessorOdom2d::data2delta(const Eigen::VectorXs& _data, const Eige
     assert(_data_cov.cols() == data_size_ && "Wrong _data_cov size");
 
     // 1/2 turn + straight + 1/2 turn
-    _delta(0) = cos(_data(1)*_dt/2) * _data(0)*_dt;
-    _delta(1) = sin(_data(1)*_dt/2) * _data(0)*_dt;
-    _delta(2) = _data(1)*_dt;
+    _delta(0) = cos(_data(1)/2) * _data(0);
+    _delta(1) = sin(_data(1)/2) * _data(0);
+    _delta(2) = _data(1);
 
     // Fill delta covariance
     Eigen::MatrixXs J(3,2);
-    J(0,0) = cos(_data(1)*_dt / 2);
-    J(1,0) = sin(_data(1)*_dt / 2);
+    J(0,0) = cos(_data(1) / 2);
+    J(1,0) = sin(_data(1) / 2);
     J(2,0) = 0;
-    J(0,1) =-_data(0)*_dt / 2 * sin(_data(1)*_dt / 2);
-    J(1,1) = _data(0)*_dt / 2 * cos(_data(1)*_dt / 2);
+    J(0,1) =-_data(0) / 2 * sin(_data(1) / 2);
+    J(1,1) = _data(0) / 2 * cos(_data(1) / 2);
     J(2,1) = 1;
 
     _delta_cov = J * _data_cov * J.transpose();
