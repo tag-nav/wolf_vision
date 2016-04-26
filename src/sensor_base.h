@@ -69,7 +69,7 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 
         unsigned int id();
 
-        void addProcessor(ProcessorBase* _proc_ptr);
+        ProcessorBase* addProcessor(ProcessorBase* _proc_ptr);
 
         ProcessorBaseList* getProcessorListPtr();
 
@@ -105,9 +105,10 @@ inline unsigned int SensorBase::id()
     return sensor_id_;
 }
 
-inline void SensorBase::addProcessor(ProcessorBase* _proc_ptr)
+inline ProcessorBase* SensorBase::addProcessor(ProcessorBase* _proc_ptr)
 {
     addDownNode(_proc_ptr);
+    return _proc_ptr;
 }
 
 inline ProcessorBaseList* SensorBase::getProcessorListPtr()

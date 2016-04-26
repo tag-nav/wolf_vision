@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     std::vector<cv::Point2f> inliers_1, inliers_2;
     cv::Mat img_matches;
     cv::Mat img_scaled;
-    double scale = 0.875;
+    double scale = 1;//0.875;
 
     unsigned int f = 0;
     capture >> image_buffer[f % buffer_size];

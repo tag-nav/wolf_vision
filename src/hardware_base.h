@@ -26,7 +26,7 @@ class HardwareBase : public NodeLinked<Problem, SensorBase>
          **/
         virtual ~HardwareBase();
 
-        virtual void addSensor(SensorBase* _sensor_ptr);
+        virtual SensorBase* addSensor(SensorBase* _sensor_ptr);
 
         void removeSensor(const SensorBaseIter& _sensor_iter);
 

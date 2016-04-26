@@ -20,7 +20,8 @@ struct Motion
         TimeStamp ts_;                  ///< Time stamp
         Eigen::VectorXs delta_;         ///< instantaneous motion delta
         Eigen::VectorXs delta_integr_;  ///< the integrated motion or delta-integral
-        Eigen::MatrixXs covariance_;    ///< covariance of the integrated delta
+        Eigen::MatrixXs delta_cov_;     ///< covariance of the integrated delta
+        Eigen::MatrixXs delta_integr_cov_;///< covariance of the integrated delta
         Eigen::MatrixXs jacobian_0;     ///< Jacobian of the integrated delta wrt the initial delta
         Eigen::MatrixXs jacobian_ts;    ///< Jacobian of the integrated delta wrt the current delta
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.

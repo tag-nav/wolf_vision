@@ -14,13 +14,15 @@ HardwareBase::~HardwareBase()
 	//std::cout << "deleting HardwareBase " << nodeId() << std::endl;
 }
 
-void HardwareBase::addSensor(SensorBase* _sensor_ptr)
+SensorBase* HardwareBase::addSensor(SensorBase* _sensor_ptr)
 {
     //std::cout << "adding sensor..." << std::endl;
 	addDownNode(_sensor_ptr);
     //std::cout << "added!" << std::endl;
 
     _sensor_ptr->registerNewStateBlocks();
+
+    return _sensor_ptr;
 
 }
 

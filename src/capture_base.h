@@ -52,7 +52,7 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 
         /** \brief Adds a Feature to the down node list
          **/
-        void addFeature(FeatureBase* _ft_ptr);
+        FeatureBase* addFeature(FeatureBase* _ft_ptr);
 
         /** \brief Gets Frame pointer
          **/
@@ -98,10 +98,11 @@ inline unsigned int CaptureBase::id()
     return capture_id_;
 }
 
-inline void CaptureBase::addFeature(FeatureBase* _ft_ptr)
+inline FeatureBase* CaptureBase::addFeature(FeatureBase* _ft_ptr)
 {
     //std::cout << "Adding feature" << std::endl;
     addDownNode(_ft_ptr);
+    return _ft_ptr;
 }
 
 inline FrameBase* CaptureBase::getFramePtr() const

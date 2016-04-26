@@ -115,13 +115,13 @@ class Problem : public NodeBase
 
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
 
-        void addLandmark(LandmarkBase* _lmk_ptr);
+        LandmarkBase* addLandmark(LandmarkBase* _lmk_ptr);
 
         void addLandmarkList(LandmarkBaseList _lmk_list);
 
         /** \brief Adds a new state block to be added to solver manager
          */
-        void addStateBlockPtr(StateBlock* _state_ptr);
+        StateBlock* addStateBlockPtr(StateBlock* _state_ptr);
 
         /** \brief Adds a new state block to be updated to solver manager
          */
@@ -133,7 +133,7 @@ class Problem : public NodeBase
 
         /** \brief Adds a new constraint to be added to solver manager
          */
-        void addConstraintPtr(ConstraintBase* _constraint_ptr);
+        ConstraintBase* addConstraintPtr(ConstraintBase* _constraint_ptr);
 
         /** \brief Adds a constraint to be removed to solver manager
          */
@@ -157,15 +157,15 @@ class Problem : public NodeBase
 
         /** \brief Adds a map
          */
-        void addMap(MapBase* _map_ptr);
+        MapBase* addMap(MapBase* _map_ptr);
 
         /** \brief Adds a trajectory
          */
-        void addTrajectory(TrajectoryBase* _trajectory_ptr);
+        TrajectoryBase* addTrajectory(TrajectoryBase* _trajectory_ptr);
 
         /** \brief Adds a hardware
          */
-        void addHarware(HardwareBase* _hardware_ptr);
+        HardwareBase* addHarware(HardwareBase* _hardware_ptr);
 
         /** \brief Gets a pointer to map
          */

@@ -16,10 +16,11 @@ MapBase::~MapBase()
 	//std::cout << "deleting MapBase " << nodeId() << std::endl;
 }
 
-void MapBase::addLandmark(LandmarkBase* _landmark_ptr)
+LandmarkBase* MapBase::addLandmark(LandmarkBase* _landmark_ptr)
 {
     addDownNode(_landmark_ptr);
     _landmark_ptr->registerNewStateBlocks();
+    return _landmark_ptr;
 }
 
 void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)

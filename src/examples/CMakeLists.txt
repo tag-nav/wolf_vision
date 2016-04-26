@@ -2,6 +2,8 @@
 ADD_EXECUTABLE(test_motion test_motion.cpp)
 TARGET_LINK_LIBRARIES(test_motion ${PROJECT_NAME})
 
+ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
+TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
 
 # Local parametrizations classes test
 ADD_EXECUTABLE(test_local_param test_local_param.cpp)

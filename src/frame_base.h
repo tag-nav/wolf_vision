@@ -101,7 +101,7 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
         FrameBase* getNextFrame() const;
 
         CaptureBaseList* getCaptureListPtr();
-        void addCapture(CaptureBase* _capt_ptr);
+        CaptureBase* addCapture(CaptureBase* _capt_ptr);
         void removeCapture(CaptureBaseIter& _capt_iter);
         CaptureBaseIter hasCaptureOf(const SensorBase* _sensor_ptr);
 
@@ -191,9 +191,10 @@ inline CaptureBaseList* FrameBase::getCaptureListPtr()
     return getDownNodeListPtr();
 }
 
-inline void FrameBase::addCapture(CaptureBase* _capt_ptr)
+inline CaptureBase* FrameBase::addCapture(CaptureBase* _capt_ptr)
 {
     addDownNode(_capt_ptr);
+    return _capt_ptr;
 }
 
 inline void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
