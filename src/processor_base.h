@@ -60,7 +60,7 @@ inline unsigned int ProcessorBase::id()
 
 inline bool ProcessorBase::permittedKeyFrame()
 {
-    return getWolfProblem()->permitKeyFrame(this);
+    return getProblem()->permitKeyFrame(this);
 }
 
 inline SensorBase* ProcessorBase::getSensorPtr()

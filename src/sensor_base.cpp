@@ -44,22 +44,22 @@ SensorBase::~SensorBase()
     // Remove State Blocks
     if (p_ptr_ != nullptr && !extrinsic_dynamic_)
     {
-        if (getWolfProblem() != nullptr)
-            getWolfProblem()->removeStateBlockPtr(p_ptr_);
+        if (getProblem() != nullptr)
+            getProblem()->removeStateBlockPtr(p_ptr_);
         delete p_ptr_;
     }
 
     if (o_ptr_ != nullptr && !extrinsic_dynamic_)
     {
-        if (getWolfProblem() != nullptr)
-            getWolfProblem()->removeStateBlockPtr(o_ptr_);
+        if (getProblem() != nullptr)
+            getProblem()->removeStateBlockPtr(o_ptr_);
         delete o_ptr_;
     }
 
     if (intrinsic_ptr_ != nullptr)
     {
-        if (getWolfProblem() != nullptr)
-            getWolfProblem()->removeStateBlockPtr(intrinsic_ptr_);
+        if (getProblem() != nullptr)
+            getProblem()->removeStateBlockPtr(intrinsic_ptr_);
         delete intrinsic_ptr_;
     }
 
@@ -71,14 +71,14 @@ void SensorBase::fix()
     if (p_ptr_!=nullptr)
     {
         p_ptr_->fix();
-        if (getWolfProblem() != nullptr)
-            getWolfProblem()->updateStateBlockPtr(p_ptr_);
+        if (getProblem() != nullptr)
+            getProblem()->updateStateBlockPtr(p_ptr_);
     }
     if (o_ptr_!=nullptr)
     {
         o_ptr_->fix();
-        if (getWolfProblem() != nullptr)
-            getWolfProblem()->updateStateBlockPtr(o_ptr_);
+        if (getProblem() != nullptr)
+            getProblem()->updateStateBlockPtr(o_ptr_);
     }
 }
 
@@ -88,29 +88,29 @@ void SensorBase::unfix()
     if (p_ptr_!=nullptr)
     {
         p_ptr_->unfix();
-        if (getWolfProblem() != nullptr)
-            getWolfProblem()->updateStateBlockPtr(p_ptr_);
+        if (getProblem() != nullptr)
+            getProblem()->updateStateBlockPtr(p_ptr_);
     }
     if (o_ptr_!=nullptr)
     {
         o_ptr_->unfix();
-        if (getWolfProblem() != nullptr)
-            getWolfProblem()->updateStateBlockPtr(o_ptr_);
+        if (getProblem() != nullptr)
+            getProblem()->updateStateBlockPtr(o_ptr_);
     }
 }
 
 void SensorBase::registerNewStateBlocks()
 {
-    if (getWolfProblem() != nullptr)
+    if (getProblem() != nullptr)
     {
         if (p_ptr_ != nullptr)
-            getWolfProblem()->addStateBlockPtr(p_ptr_);
+            getProblem()->addStateBlockPtr(p_ptr_);
 
         if (o_ptr_ != nullptr)
-            getWolfProblem()->addStateBlockPtr(o_ptr_);
+            getProblem()->addStateBlockPtr(o_ptr_);
 
         if (intrinsic_ptr_ != nullptr)
-            getWolfProblem()->addStateBlockPtr(intrinsic_ptr_);
+            getProblem()->addStateBlockPtr(intrinsic_ptr_);
     }
 }
 

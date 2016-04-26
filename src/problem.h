@@ -219,7 +219,7 @@ class Problem : public NodeBase
 
         /** \brief get top node
          */
-        virtual Problem* getWolfProblem();
+        virtual Problem* getProblem();
 
         /** \brief Returns a true (is top)
          */
@@ -255,7 +255,7 @@ inline std::list<unsigned int>* Problem::getConstraintRemoveList()
     return &constraint_remove_list_;
 }
 
-inline Problem* Problem::getWolfProblem()
+inline Problem* Problem::getProblem()
 {
     return this;
 }

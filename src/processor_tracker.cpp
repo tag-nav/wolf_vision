@@ -123,7 +123,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             establishConstraints();
 
             // Call the new keyframe callback in order to let the other processors to establish their constraints
-            getWolfProblem()->keyFrameCallback(last_ptr_->getFramePtr(), (ProcessorBase*)this);
+            getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), (ProcessorBase*)this);
 
             // Reset the derived Tracker
             reset();

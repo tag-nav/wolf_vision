@@ -454,7 +454,7 @@ inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer
 inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
-    FrameBase* new_frame_ptr = getWolfProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
+    FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
     return new_frame_ptr;
 }
@@ -462,7 +462,7 @@ inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Ei
 inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
-    FrameBase* new_frame_ptr = getWolfProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
+    FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
     return new_frame_ptr;
 }

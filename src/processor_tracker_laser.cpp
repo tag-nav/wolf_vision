@@ -9,7 +9,7 @@ void ProcessorTrackerLaser::preProcess()
     extractCorners((CaptureLaser2D*)((incoming_ptr_)), new_features_incoming_);
     // get the pose of the vehicle in incoming timestamp
     // compute transformations
-    t_world_robot_ = getWolfProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
+    t_world_robot_ = getProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
     // world_robot
     Eigen::Matrix3s R_world_robot = Eigen::Matrix3s::Identity();
     R_world_robot.topLeftCorner<2, 2>() = Eigen::Rotation2Ds(t_world_robot_(2)).matrix();
@@ -177,18 +177,18 @@ void ProcessorTrackerLaser::expectedFeature(LandmarkBase* _landmark_ptr, Eigen::
     Eigen::MatrixXs Sigma = Eigen::MatrixXs::Zero(6, 6);
     // If all covariance blocks are stored wolfproblem (filling upper diagonal only)
     if (// Sigma_ll
-            getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), Sigma, 0, 0) &&
-            getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), Sigma, 0, 2) &&
-            getWolfProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), Sigma, 2, 2) &&
+            getProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), Sigma, 0, 0) &&
+            getProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), Sigma, 0, 2) &&
+            getProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), Sigma, 2, 2) &&
             // Sigma_lr
-            getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), key_frame_ptr->getPPtr(), Sigma, 0, 3) &&
-            getWolfProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), key_frame_ptr->getOPtr(), Sigma, 0, 5) &&
-            getWolfProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), key_frame_ptr->getPPtr(), Sigma, 2, 3) &&
-            getWolfProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), key_frame_ptr->getOPtr(), Sigma, 2, 5) &&
+            getProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), key_frame_ptr->getPPtr(), Sigma, 0, 3) &&
+            getProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), key_frame_ptr->getOPtr(), Sigma, 0, 5) &&
+            getProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), key_frame_ptr->getPPtr(), Sigma, 2, 3) &&
+            getProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), key_frame_ptr->getOPtr(), Sigma, 2, 5) &&
             // Sigma_rr
-            getWolfProblem()->getCovarianceBlock(key_frame_ptr->getPPtr(), key_frame_ptr->getPPtr(), Sigma, 3, 3) &&
-            getWolfProblem()->getCovarianceBlock(key_frame_ptr->getPPtr(), key_frame_ptr->getOPtr(), Sigma, 3, 5) &&
-            getWolfProblem()->getCovarianceBlock(key_frame_ptr->getOPtr(), key_frame_ptr->getOPtr(), Sigma, 5, 5))
+            getProblem()->getCovarianceBlock(key_frame_ptr->getPPtr(), key_frame_ptr->getPPtr(), Sigma, 3, 3) &&
+            getProblem()->getCovarianceBlock(key_frame_ptr->getPPtr(), key_frame_ptr->getOPtr(), Sigma, 3, 5) &&
+            getProblem()->getCovarianceBlock(key_frame_ptr->getOPtr(), key_frame_ptr->getOPtr(), Sigma, 5, 5))
     {
         // Jacobian
         Eigen::Vector2s p_robot_landmark = t_world_robot_.head(2) - _landmark_ptr->getPPtr()->getVector();

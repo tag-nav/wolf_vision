@@ -204,7 +204,7 @@ inline const unsigned int ProcessorTracker::getMaxNewFeatures()
 inline void ProcessorTracker::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
-    FrameBase* new_frame_ptr = getWolfProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
+    FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
 }
 
