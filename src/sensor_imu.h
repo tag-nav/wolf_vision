@@ -33,13 +33,16 @@ class SensorIMU : public SensorBase
 
 };
 
+// Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createIMU()
+SensorBase* createIMU(std::string& _name)
 {
-    return new SensorIMU(nullptr, nullptr);
+    SensorBase* sen = new SensorIMU(nullptr, nullptr);
+    sen->setName(_name);
+    return sen;
 }
-const bool registered_IMU = SensorFactory::get()->registerSensor(SEN_IMU, createIMU);
+const bool registered_imu = SensorFactory::get()->registerSensor(SEN_IMU, createIMU);
 }
 
 

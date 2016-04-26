@@ -130,13 +130,16 @@ class SensorLaser2D : public SensorBase
         void printSensorParameters() const;
 };
 
+// Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createLaser2D()
+SensorBase* createLaser2D(std::string& _name)
 {
-    return new SensorLaser2D(nullptr, nullptr);
+    SensorBase* sen = new SensorLaser2D(nullptr, nullptr);
+    sen->setName(_name);
+    return sen;
 }
-const bool registered_laser_2d = SensorFactory::get()->registerSensor(SEN_LIDAR, createLaser2D);
+const bool registered_laser = SensorFactory::get()->registerSensor(SEN_LIDAR, createLaser2D);
 }
 
 

@@ -43,13 +43,16 @@ public:
 
 };
 
+//// Define the factory method and register it in the SensorFactory
 //namespace
 //{
-//SensorBase* createGPS()
+//SensorBase* createGPS(std::string& _name)
 //{
-//    return new SensorGPS(nullptr, nullptr, nullptr, nullptr, nullptr);
+//    SensorBase* sen = new SensorGPS(nullptr, nullptr, nullptr, nullptr, nullptr);
+//    sen->setName(_name);
+//    return sen;
 //}
-//const bool registered_camera = SensorFactory::get()->registerSensor(SEN_CAMERA, createGPS);
+//const bool registered_gps = SensorFactory::get()->registerSensor(SEN_GPS_RAW, createGPS);
 //}
 
 

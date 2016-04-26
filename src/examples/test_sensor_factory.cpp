@@ -20,7 +20,9 @@ int main(void)
 
     sensors.push_back(SensorFactory::get()->createSensor(SEN_CAMERA, "left camera"));
     sensors.push_back(SensorFactory::get()->createSensor(SEN_CAMERA, "right camera"));
-//    sensors.push_back(SensorFactory::get()->createSensor(SEN_IMU)); // this class not finished
+    sensors.push_back(SensorFactory::get()->createSensor(SEN_IMU, "IMU")); // this class not finished
+    sensors.push_back(SensorFactory::get()->createSensor(SEN_ODOM_2D, "main odometer"));
+    sensors.push_back(SensorFactory::get()->createSensor(SEN_LIDAR, "front laser"));
     sensors.push_back(SensorFactory::get()->createSensor(SEN_ODOM_2D, "main odometer"));
     sensors.push_back(SensorFactory::get()->createSensor(SEN_CAMERA, "rear camera"));
     sensors.push_back(SensorFactory::get()->createSensor(SEN_ODOM_2D, "aux odometer"));
