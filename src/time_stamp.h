@@ -108,7 +108,7 @@ class TimeStamp
 
         /** \brief Assignement operator
          * 
-         * Assignement operator
+         * Assignement operator given a scalar_t (seconds)
          * 
          */
         void operator =(const TimeStamp& ts);
@@ -129,18 +129,22 @@ class TimeStamp
 
         /** \brief difference operator
          * 
-         * difference operator
+         * difference operator that returns a scalar_t (seconds)
          * 
          */
         Scalar operator -(const TimeStamp& ts) const;
 
-        /** \brief Add-assign operator
+        /** \brief Add-assign operator given a scalar_t (seconds)
          */
         void operator +=(const Scalar& dt);
 
-        /** \brief Add-assign operator
+        /** \brief Add-assign operator given a scalar_t (seconds)
          */
         TimeStamp operator +(const Scalar& dt);
+
+        /** \brief Add-assign operator given a Timestamp
+         */
+        TimeStamp operator +(const TimeStamp& dt);
 
         /** \brief Prints time stamp to a given ostream
          *
