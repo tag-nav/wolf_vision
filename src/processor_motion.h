@@ -335,7 +335,7 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeSta
                                    Eigen::MatrixXs::Zero(data_size_, data_size_));
 
     // Make frame at last Capture
-    makeFrame(last_ptr_);
+    makeFrame(last_ptr_, _x_origin, NON_KEY_FRAME);
 
     getBufferPtr()->get().clear();
     getBufferPtr()->get().push_back(
