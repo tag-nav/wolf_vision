@@ -113,7 +113,17 @@ class Problem : public NodeBase
         Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
         void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
 
+        /** \brief Give the permission to a processor to create a new keyFrame
+         *
+         * Give the permission to a processor to create a new keyFrame
+         */
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
+
+        /** \brief New key frame callback
+         *
+         * New key frame callback: It should be called by any processor that creates a new keyframe. It calls the keyFrameCallback of the rest of processors.
+         */
+        void keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr);
 
         LandmarkBase* addLandmark(LandmarkBase* _lmk_ptr);
 

@@ -119,6 +119,9 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             // Make the last Capture's Frame a KeyFrame so that it gets into the solver
             last_ptr_->getFramePtr()->setKey();
 
+            // Call the new keyframe callback
+            getWolfProblem()->keyFrameCallback(last_ptr_->getFramePtr(), (ProcessorBase*)this);
+
             // Establish constraints between last and origin
             establishConstraints();
 

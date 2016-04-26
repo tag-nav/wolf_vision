@@ -151,6 +151,14 @@ bool Problem::permitKeyFrame(ProcessorBase* _processor_ptr)
     return true;
 }
 
+void Problem::keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr)
+{
+    for (auto sensor : (*hardware_ptr_->getSensorListPtr()))
+        for (auto processor : (*sensor->getProcessorListPtr()))
+            if (processor != _processor_ptr)
+                processor->keyFrameCallback(_keyframe_ptr);
+}
+
 LandmarkBase* Problem::addLandmark(LandmarkBase* _lmk_ptr)
 {
     getMapPtr()->addLandmark(_lmk_ptr);
