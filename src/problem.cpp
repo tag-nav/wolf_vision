@@ -172,7 +172,6 @@ void Problem::addLandmarkList(LandmarkBaseList _lmk_list)
 
 StateBlock* Problem::addStateBlockPtr(StateBlock* _state_ptr)
 {
-    std::cout << "addStateBlock" << std::endl;
     // add the state unit to the list
     state_block_ptr_list_.push_back(_state_ptr);
     // queue for solver manager
