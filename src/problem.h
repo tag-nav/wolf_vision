@@ -159,11 +159,18 @@ class Problem : public NodeBase
 
         /** \brief Gets a covariance block
          */
-        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block);
-        /** \brief Gets a covariance block
+        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row = 0,
+                                const int _col=0);
+
+        /** \brief Gets the covariance of a frame
          */
-        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
-                                const int _col);
+        bool getFrameCovariance(FrameBase* _frame_ptr, Eigen::MatrixXs& _covariance);
+        Eigen::MatrixXs getFrameCovariance(FrameBase* _frame_ptr);
+
+        /** \brief Gets the covariance of a frame
+         */
+        bool getLandmarkCovariance(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& _covariance);
+        Eigen::MatrixXs getFrameCovariance(LandmarkBase* _landmark_ptr);
 
         /** \brief Adds a map
          */

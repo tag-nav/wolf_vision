@@ -172,6 +172,7 @@ void Problem::addLandmarkList(LandmarkBaseList _lmk_list)
 
 StateBlock* Problem::addStateBlockPtr(StateBlock* _state_ptr)
 {
+    std::cout << "addStateBlock" << std::endl;
     // add the state unit to the list
     state_block_ptr_list_.push_back(_state_ptr);
     // queue for solver manager
@@ -221,39 +222,62 @@ void Problem::addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const
     covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)] = _cov;
 }
 
-bool Problem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block)
+bool Problem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
+                                 const int _col)
 {
+    //std::cout << "entire cov to be filled:" << std::endl << _cov << std::endl;
+    //std::cout << "_row " << _row << std::endl;
+    //std::cout << "_col " << _col << std::endl;
+    //std::cout << "_state1 size: " << _state1->getSize() << std::endl;
+    //std::cout << "_state2 size: " << _state2->getSize() << std::endl;
+    //std::cout << "part of cov to be filled:" << std::endl <<  _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) << std::endl;
+    //if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
+    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)] << std::endl;
+    //else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
+    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose() << std::endl;
+
+    assert(_row + _state1->getSize() <= _cov.rows() && _col + _state2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+
     if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
-        _cov_block = covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)];
+        _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
+                covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)];
     else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
-        _cov_block = covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose();
+       _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
+                covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose();
     else
         return false;
 
     return true;
 }
 
-bool Problem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
-                                 const int _col)
+bool Problem::getFrameCovariance(FrameBase* _frame_ptr, Eigen::MatrixXs& _covariance)
 {
-    //std::cout << "entire cov " << std::endl << _cov << std::endl;
-    //std::cout << "_row " << _row << std::endl;
-    //std::cout << "_col " << _col << std::endl;
-    //if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
-    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)] << std::endl;
-    //else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
-    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose() << std::endl;
+    return getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getPPtr(), _covariance, 0, 0) &&
+    getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _covariance, 0,_frame_ptr->getPPtr()->getSize()) &&
+    getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getPPtr(), _covariance, _frame_ptr->getPPtr()->getSize(), 0) &&
+    getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getOPtr(), _covariance, _frame_ptr->getPPtr()->getSize() ,_frame_ptr->getPPtr()->getSize());
+}
 
-    if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
-        _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
-                covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)];
-    else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
-        _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
-                covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose();
-    else
-        return false;
+Eigen::MatrixXs Problem::getFrameCovariance(FrameBase* _frame_ptr)
+{
+    Eigen::MatrixXs covariance = Eigen::MatrixXs::Zero(_frame_ptr->getPPtr()->getSize()+_frame_ptr->getOPtr()->getSize(), _frame_ptr->getPPtr()->getSize()+_frame_ptr->getOPtr()->getSize());
+    getFrameCovariance(_frame_ptr, covariance);
+    return covariance;
+}
 
-    return true;
+bool Problem::getLandmarkCovariance(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& _covariance)
+{
+    return getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), _covariance, 0, 0) &&
+    getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), _covariance, 0,_landmark_ptr->getPPtr()->getSize()) &&
+    getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getPPtr(), _covariance, _landmark_ptr->getPPtr()->getSize(), 0) &&
+    getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), _covariance, _landmark_ptr->getPPtr()->getSize() ,_landmark_ptr->getPPtr()->getSize());
+}
+
+Eigen::MatrixXs Problem::getFrameCovariance(LandmarkBase* _landmark_ptr)
+{
+    Eigen::MatrixXs covariance = Eigen::MatrixXs::Zero(_landmark_ptr->getPPtr()->getSize()+_landmark_ptr->getOPtr()->getSize(), _landmark_ptr->getPPtr()->getSize()+_landmark_ptr->getOPtr()->getSize());
+    getLandmarkCovariance(_landmark_ptr, covariance);
+    return covariance;
 }
 
 MapBase* Problem::addMap(MapBase* _map_ptr)
