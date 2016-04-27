@@ -98,7 +98,17 @@ class AutoDiffCostFunctionWrapperBase : public ceres::SizedCostFunction<MEASUREM
 
         virtual ~AutoDiffCostFunctionWrapperBase()
         {
-
+            delete jets_0_;
+            delete jets_1_;
+            delete jets_2_;
+            delete jets_3_;
+            delete jets_4_;
+            delete jets_5_;
+            delete jets_6_;
+            delete jets_7_;
+            delete jets_8_;
+            delete jets_9_;
+            delete residuals_jets_;
         };
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
@@ -239,7 +249,16 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
 
         virtual ~AutoDiffCostFunctionWrapperBase()
         {
-
+            delete jets_0_;
+            delete jets_1_;
+            delete jets_2_;
+            delete jets_3_;
+            delete jets_4_;
+            delete jets_5_;
+            delete jets_6_;
+            delete jets_7_;
+            delete jets_8_;
+            delete residuals_jets_;
         };
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
@@ -372,7 +391,15 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
 
         virtual ~AutoDiffCostFunctionWrapperBase()
         {
-
+            delete jets_0_;
+            delete jets_1_;
+            delete jets_2_;
+            delete jets_3_;
+            delete jets_4_;
+            delete jets_5_;
+            delete jets_6_;
+            delete jets_7_;
+            delete residuals_jets_;
         };
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
@@ -498,7 +525,14 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
 
         virtual ~AutoDiffCostFunctionWrapperBase()
         {
-
+            delete jets_0_;
+            delete jets_1_;
+            delete jets_2_;
+            delete jets_3_;
+            delete jets_4_;
+            delete jets_5_;
+            delete jets_6_;
+            delete residuals_jets_;
         };
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
@@ -617,7 +651,13 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
 
         virtual ~AutoDiffCostFunctionWrapperBase()
         {
-
+            delete jets_0_;
+            delete jets_1_;
+            delete jets_2_;
+            delete jets_3_;
+            delete jets_4_;
+            delete jets_5_;
+            delete residuals_jets_;
         };
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
@@ -725,7 +765,12 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
 
         virtual ~AutoDiffCostFunctionWrapperBase()
         {
-
+            delete jets_0_;
+            delete jets_1_;
+            delete jets_2_;
+            delete jets_3_;
+            delete jets_4_;
+            delete residuals_jets_;
         };
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
@@ -826,7 +871,11 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
 
         virtual ~AutoDiffCostFunctionWrapperBase()
         {
-
+            delete jets_0_;
+            delete jets_1_;
+            delete jets_2_;
+            delete jets_3_;
+            delete residuals_jets_;
         };
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
@@ -918,7 +967,10 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
 
         virtual ~AutoDiffCostFunctionWrapperBase()
         {
-
+            delete jets_0_;
+            delete jets_1_;
+            delete jets_2_;
+            delete residuals_jets_;
         };
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
@@ -1003,7 +1055,9 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
 
         virtual ~AutoDiffCostFunctionWrapperBase()
         {
-
+            delete jets_0_;
+            delete jets_1_;
+            delete residuals_jets_;
         };
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
@@ -1081,7 +1135,8 @@ class AutoDiffCostFunctionWrapperBase<ConstraintType, MEASUREMENT_SIZE,
 
         virtual ~AutoDiffCostFunctionWrapperBase()
         {
-
+            delete jets_0_;
+            delete residuals_jets_;
         };
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
