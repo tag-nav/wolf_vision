@@ -136,7 +136,7 @@ int main()
     cout << "========================================================" << endl;    
     
     cout << endl << "TEST 5. getWolfProblem()" << endl;
-    Problem* nb_ptr = sensor_data_radar_->getWolfProblem();
+    Problem* nb_ptr = sensor_data_radar_->getProblem();
     //shared_ptr<TrajectoryN> nb_shptr((TrajectoryN*)nb_ptr);
     cout << "TOP node is: " << nb_ptr->nodeId() << endl;
     //cout << "nb_shptr.use_count(): " << nb_shptr.use_count() << "; value: " << nb_shptr.get() << endl;

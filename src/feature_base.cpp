@@ -24,7 +24,7 @@ FeatureBase::FeatureBase(FeatureType _tp, const Eigen::VectorXs& _measurement, c
 {
     Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
-    measurement_sqrt_information_ = measurement_sqrt_covariance.inverse(); // retrieve factor U  in the decomposition
+    measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
 }
 
 FeatureBase::~FeatureBase()
@@ -45,8 +45,8 @@ ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
 {
     addDownNode(_co_ptr);
     // add constraint to be added in solver
-    if (getWolfProblem() != nullptr)
-        getWolfProblem()->addConstraintPtr(_co_ptr);
+    if (getProblem() != nullptr)
+        getProblem()->addConstraintPtr(_co_ptr);
 
     return _co_ptr;
 }

@@ -120,7 +120,7 @@ inline ProcessorTrackerLaser::ProcessorTrackerLaser(const laserscanutils::ScanPa
                                                     const laserscanutils::ExtractCornerParams& _corner_alg_params,
                                                     const unsigned int& _n_corners_th) :
         ProcessorTrackerLandmark(PRC_TRACKER_LIDAR, 0), scan_params_(_scan_params), corner_alg_params_(
-                _corner_alg_params), n_corners_th_(_n_corners_th), extrinsics_transformation_computed_(false)
+                _corner_alg_params), n_corners_th_(_n_corners_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
 {
 }
 

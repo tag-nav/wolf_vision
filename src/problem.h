@@ -113,7 +113,17 @@ class Problem : public NodeBase
         Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
         void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
 
+        /** \brief Give the permission to a processor to create a new keyFrame
+         *
+         * Give the permission to a processor to create a new keyFrame
+         */
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
+
+        /** \brief New key frame callback
+         *
+         * New key frame callback: It should be called by any processor that creates a new keyframe. It calls the keyFrameCallback of the rest of processors.
+         */
+        void keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr);
 
         LandmarkBase* addLandmark(LandmarkBase* _lmk_ptr);
 
@@ -149,11 +159,18 @@ class Problem : public NodeBase
 
         /** \brief Gets a covariance block
          */
-        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov_block);
-        /** \brief Gets a covariance block
+        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row = 0,
+                                const int _col=0);
+
+        /** \brief Gets the covariance of a frame
          */
-        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
-                                const int _col);
+        bool getFrameCovariance(FrameBase* _frame_ptr, Eigen::MatrixXs& _covariance);
+        Eigen::MatrixXs getFrameCovariance(FrameBase* _frame_ptr);
+
+        /** \brief Gets the covariance of a frame
+         */
+        bool getLandmarkCovariance(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& _covariance);
+        Eigen::MatrixXs getFrameCovariance(LandmarkBase* _landmark_ptr);
 
         /** \brief Adds a map
          */
@@ -209,7 +226,7 @@ class Problem : public NodeBase
 
         /** \brief get top node
          */
-        virtual Problem* getWolfProblem();
+        virtual Problem* getProblem();
 
         /** \brief Returns a true (is top)
          */
@@ -245,7 +262,7 @@ inline std::list<unsigned int>* Problem::getConstraintRemoveList()
     return &constraint_remove_list_;
 }
 
-inline Problem* Problem::getWolfProblem()
+inline Problem* Problem::getProblem()
 {
     return this;
 }

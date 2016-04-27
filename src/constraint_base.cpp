@@ -71,8 +71,8 @@ ConstraintBase::~ConstraintBase()
     is_deleting_ = true;
 
     // add constraint to be removed from solver
-    if (getWolfProblem() != nullptr)
-        getWolfProblem()->removeConstraintPtr(this);
+    if (getProblem() != nullptr)
+        getProblem()->removeConstraintPtr(this);
 
     //std::cout << "removeConstraintPtr " << std::endl;
 
@@ -109,14 +109,14 @@ CaptureBase* ConstraintBase::getCapturePtr() const
 
 void ConstraintBase::setStatus(ConstraintStatus _status)
 {
-    if (getWolfProblem() == nullptr)
+    if (getProblem() == nullptr)
         std::cout << "constraint not linked with 'top', only status changed" << std::endl;
     else if (_status != status_)
     {
         if (_status == CTR_ACTIVE)
-            getWolfProblem()->addConstraintPtr(this);
+            getProblem()->addConstraintPtr(this);
         else if (_status == CTR_INACTIVE)
-            getWolfProblem()->removeConstraintPtr(this);
+            getProblem()->removeConstraintPtr(this);
     }
     status_ = _status;
 }

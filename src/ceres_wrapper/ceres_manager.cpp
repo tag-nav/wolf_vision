@@ -2,9 +2,10 @@
 
 namespace wolf {
 
-CeresManager::CeresManager(Problem*  _wolf_problem, ceres::Problem::Options _options) :
+CeresManager::CeresManager(Problem*  _wolf_problem, ceres::Problem::Options _options, const bool _use_wolf_cost_functions) :
     ceres_problem_(new ceres::Problem(_options)),
-    wolf_problem_(_wolf_problem)
+    wolf_problem_(_wolf_problem),
+    use_wolf_auto_diff_(_use_wolf_cost_functions)
 {
 	ceres::Covariance::Options covariance_options;
     covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
@@ -62,16 +63,19 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             // first create a vector containing all state blocks
             std::vector<StateBlock*> all_state_blocks;
             //frame state blocks
-            for(auto f_it = wolf_problem_->getTrajectoryPtr()->getFrameListPtr()->begin(); f_it!=wolf_problem_->getTrajectoryPtr()->getFrameListPtr()->end(); f_it++)
+            for(auto fr_ptr : *(wolf_problem_->getTrajectoryPtr()->getFrameListPtr()))
             {
-                all_state_blocks.push_back((*f_it)->getPPtr());
-                all_state_blocks.push_back((*f_it)->getOPtr());
+                if (fr_ptr->isKey())
+                {
+                    all_state_blocks.push_back(fr_ptr->getPPtr());
+                    all_state_blocks.push_back(fr_ptr->getOPtr());
+                }
             }
             // landmark state blocks
-            for(auto l_it = wolf_problem_->getMapPtr()->getLandmarkListPtr()->begin(); l_it!=wolf_problem_->getMapPtr()->getLandmarkListPtr()->end(); l_it++)
+            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
             {
-                all_state_blocks.push_back((*l_it)->getPPtr());
-                all_state_blocks.push_back((*l_it)->getOPtr());
+                all_state_blocks.push_back(l_ptr->getPPtr());
+                all_state_blocks.push_back(l_ptr->getOPtr());
             }
             // double loop all against all (without repetitions)
             for (unsigned int i = 0; i < all_state_blocks.size(); i++)
@@ -89,17 +93,19 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             // first create a vector containing all state blocks
             std::vector<StateBlock*> all_state_blocks;
             //frame state blocks
-            for(auto f_it = wolf_problem_->getTrajectoryPtr()->getFrameListPtr()->begin(); f_it!=wolf_problem_->getTrajectoryPtr()->getFrameListPtr()->end(); f_it++)
+            for(auto fr_ptr : *(wolf_problem_->getTrajectoryPtr()->getFrameListPtr()))
             {
-                all_state_blocks.push_back((*f_it)->getPPtr());
-                all_state_blocks.push_back((*f_it)->getOPtr());
-
+                if (fr_ptr->isKey())
+                {
+                    all_state_blocks.push_back(fr_ptr->getPPtr());
+                    all_state_blocks.push_back(fr_ptr->getOPtr());
+                }
             }
             // landmark state blocks
-            for(auto l_it = wolf_problem_->getMapPtr()->getLandmarkListPtr()->begin(); l_it!=wolf_problem_->getMapPtr()->getLandmarkListPtr()->end(); l_it++)
+            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
             {
-                all_state_blocks.push_back((*l_it)->getPPtr());
-                all_state_blocks.push_back((*l_it)->getOPtr());
+                all_state_blocks.push_back(l_ptr->getPPtr());
+                all_state_blocks.push_back(l_ptr->getOPtr());
             }
             // loop all marginals (PO marginals)
             for (unsigned int i = 0; 2*i+1 < all_state_blocks.size(); i++)
@@ -127,23 +133,23 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), last_frame->getOPtr()->getPtr()));
             double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), last_frame->getOPtr()->getPtr()));
 
-            for(auto l_it = wolf_problem_->getMapPtr()->getLandmarkListPtr()->begin(); l_it!=wolf_problem_->getMapPtr()->getLandmarkListPtr()->end(); l_it++)
+            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
             {
-                state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), (*l_it)->getPPtr()));
-                state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), (*l_it)->getOPtr()));
-                state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), (*l_it)->getPPtr()));
-                state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), (*l_it)->getOPtr()));
-                state_block_pairs.push_back(std::make_pair((*l_it)->getPPtr(), (*l_it)->getPPtr()));
-                state_block_pairs.push_back(std::make_pair((*l_it)->getPPtr(), (*l_it)->getOPtr()));
-                state_block_pairs.push_back(std::make_pair((*l_it)->getOPtr(), (*l_it)->getOPtr()));
+                state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), l_ptr->getPPtr()));
+                state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), l_ptr->getOPtr()));
+                state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), l_ptr->getPPtr()));
+                state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), l_ptr->getOPtr()));
+                state_block_pairs.push_back(std::make_pair(l_ptr->getPPtr(), l_ptr->getPPtr()));
+                state_block_pairs.push_back(std::make_pair(l_ptr->getPPtr(), l_ptr->getOPtr()));
+                state_block_pairs.push_back(std::make_pair(l_ptr->getOPtr(), l_ptr->getOPtr()));
 
-                double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), (*l_it)->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), (*l_it)->getOPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), (*l_it)->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), (*l_it)->getOPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair((*l_it)->getPPtr()->getPtr(), (*l_it)->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair((*l_it)->getPPtr()->getPtr(), (*l_it)->getOPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair((*l_it)->getOPtr()->getPtr(), (*l_it)->getOPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(l_ptr->getPPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(l_ptr->getPPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(l_ptr->getOPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
             }
             break;
         }
@@ -165,7 +171,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
-void CeresManager::update(const bool _self_auto_diff, const bool _apply_loss_function)
+void CeresManager::update(const bool _apply_loss_function)
 {
     //std::cout << "CeresManager: updating... getConstraintRemoveList()->size()" << wolf_problem_->getConstraintRemoveList()->size() << std::endl;
 
@@ -196,14 +202,14 @@ void CeresManager::update(const bool _self_auto_diff, const bool _apply_loss_fun
     // ADD CONSTRAINTS
     while (!wolf_problem_->getConstraintAddList()->empty())
     {
-        addConstraint(wolf_problem_->getConstraintAddList()->front(), _self_auto_diff, _apply_loss_function);
+        addConstraint(wolf_problem_->getConstraintAddList()->front(), _apply_loss_function);
         wolf_problem_->getConstraintAddList()->pop_front();
     }
 }
 
-void CeresManager::addConstraint(ConstraintBase* _corr_ptr, const bool _self_auto_diff, const bool _apply_loss)
+void CeresManager::addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss)
 {
-    id_2_costfunction_[_corr_ptr->nodeId()] = createCostFunction(_corr_ptr, _self_auto_diff);
+    id_2_costfunction_[_corr_ptr->nodeId()] = createCostFunction(_corr_ptr);
 
     if (_apply_loss)
         id_2_residual_idx_[_corr_ptr->nodeId()] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_corr_ptr->nodeId()], new ceres::CauchyLoss(0.5), _corr_ptr->getStateBlockPtrVector());
@@ -218,11 +224,7 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 	ceres_problem_->RemoveResidualBlock(id_2_residual_idx_[_corr_id]);
     //std::cout << "residual block removed!" << std::endl;
 	id_2_residual_idx_.erase(_corr_id);
-//    std::cout << "deleting cost function" << std::endl;
-//    assert(id_2_costfunction_.find(_corr_id) != id_2_costfunction_.end());
-//    delete id_2_costfunction_[_corr_id];
-//    std::cout << "cost function deleted!" << std::endl;
-	id_2_costfunction_.erase(_corr_id);
+	// The cost functions will be deleted by ceres_problem destructor (IT MUST HAVE THE OWNERSHIP)
 }
 
 void CeresManager::addStateBlock(StateBlock* _st_ptr)
@@ -266,7 +268,7 @@ void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
 }
 
-ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, const bool _use_wolf_auto_diff)
+ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
 {
 	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
 
@@ -276,11 +278,11 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
 
     // auto jacobian
     else if (_corrPtr->getJacobianMethod() == JAC_AUTO)
-        return createAutoDiffCostFunction(_corrPtr, _use_wolf_auto_diff);
+        return createAutoDiffCostFunction(_corrPtr, use_wolf_auto_diff_);
 
     // numeric jacobian
     else if (_corrPtr->getJacobianMethod() == JAC_NUMERIC)
-        return createNumericDiffCostFunction(_corrPtr, _use_wolf_auto_diff);
+        return createNumericDiffCostFunction(_corrPtr, use_wolf_auto_diff_);
 
     else
         throw std::invalid_argument( "Bad Jacobian Method!" );

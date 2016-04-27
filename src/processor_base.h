@@ -45,10 +45,9 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
         SensorBase* getSensorPtr();
 
-        //virtual void newKeyFrameCallback(FrameBase* _new_key_frame_ptr, const Scalar& _time_tolerance) = 0;
-
     private:
         static unsigned int processor_id_count_;
+
     protected:
         unsigned int processor_id_;
         ProcessorType type_;
@@ -61,7 +60,7 @@ inline unsigned int ProcessorBase::id()
 
 inline bool ProcessorBase::permittedKeyFrame()
 {
-    return getWolfProblem()->permitKeyFrame(this);
+    return getProblem()->permitKeyFrame(this);
 }
 
 inline SensorBase* ProcessorBase::getSensorPtr()
