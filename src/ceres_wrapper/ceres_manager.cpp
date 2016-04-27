@@ -62,16 +62,19 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             // first create a vector containing all state blocks
             std::vector<StateBlock*> all_state_blocks;
             //frame state blocks
-            for(auto f_it = wolf_problem_->getTrajectoryPtr()->getFrameListPtr()->begin(); f_it!=wolf_problem_->getTrajectoryPtr()->getFrameListPtr()->end(); f_it++)
+            for(auto fr_ptr : *(wolf_problem_->getTrajectoryPtr()->getFrameListPtr()))
             {
-                all_state_blocks.push_back((*f_it)->getPPtr());
-                all_state_blocks.push_back((*f_it)->getOPtr());
+                if (fr_ptr->isKey())
+                {
+                    all_state_blocks.push_back(fr_ptr->getPPtr());
+                    all_state_blocks.push_back(fr_ptr->getOPtr());
+                }
             }
             // landmark state blocks
-            for(auto l_it = wolf_problem_->getMapPtr()->getLandmarkListPtr()->begin(); l_it!=wolf_problem_->getMapPtr()->getLandmarkListPtr()->end(); l_it++)
+            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
             {
-                all_state_blocks.push_back((*l_it)->getPPtr());
-                all_state_blocks.push_back((*l_it)->getOPtr());
+                all_state_blocks.push_back(l_ptr->getPPtr());
+                all_state_blocks.push_back(l_ptr->getOPtr());
             }
             // double loop all against all (without repetitions)
             for (unsigned int i = 0; i < all_state_blocks.size(); i++)
@@ -89,17 +92,19 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             // first create a vector containing all state blocks
             std::vector<StateBlock*> all_state_blocks;
             //frame state blocks
-            for(auto f_it = wolf_problem_->getTrajectoryPtr()->getFrameListPtr()->begin(); f_it!=wolf_problem_->getTrajectoryPtr()->getFrameListPtr()->end(); f_it++)
+            for(auto fr_ptr : *(wolf_problem_->getTrajectoryPtr()->getFrameListPtr()))
             {
-                all_state_blocks.push_back((*f_it)->getPPtr());
-                all_state_blocks.push_back((*f_it)->getOPtr());
-
+                if (fr_ptr->isKey())
+                {
+                    all_state_blocks.push_back(fr_ptr->getPPtr());
+                    all_state_blocks.push_back(fr_ptr->getOPtr());
+                }
             }
             // landmark state blocks
-            for(auto l_it = wolf_problem_->getMapPtr()->getLandmarkListPtr()->begin(); l_it!=wolf_problem_->getMapPtr()->getLandmarkListPtr()->end(); l_it++)
+            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
             {
-                all_state_blocks.push_back((*l_it)->getPPtr());
-                all_state_blocks.push_back((*l_it)->getOPtr());
+                all_state_blocks.push_back(l_ptr->getPPtr());
+                all_state_blocks.push_back(l_ptr->getOPtr());
             }
             // loop all marginals (PO marginals)
             for (unsigned int i = 0; 2*i+1 < all_state_blocks.size(); i++)
@@ -127,23 +132,23 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), last_frame->getOPtr()->getPtr()));
             double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), last_frame->getOPtr()->getPtr()));
 
-            for(auto l_it = wolf_problem_->getMapPtr()->getLandmarkListPtr()->begin(); l_it!=wolf_problem_->getMapPtr()->getLandmarkListPtr()->end(); l_it++)
+            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
             {
-                state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), (*l_it)->getPPtr()));
-                state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), (*l_it)->getOPtr()));
-                state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), (*l_it)->getPPtr()));
-                state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), (*l_it)->getOPtr()));
-                state_block_pairs.push_back(std::make_pair((*l_it)->getPPtr(), (*l_it)->getPPtr()));
-                state_block_pairs.push_back(std::make_pair((*l_it)->getPPtr(), (*l_it)->getOPtr()));
-                state_block_pairs.push_back(std::make_pair((*l_it)->getOPtr(), (*l_it)->getOPtr()));
+                state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), l_ptr->getPPtr()));
+                state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), l_ptr->getOPtr()));
+                state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), l_ptr->getPPtr()));
+                state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), l_ptr->getOPtr()));
+                state_block_pairs.push_back(std::make_pair(l_ptr->getPPtr(), l_ptr->getPPtr()));
+                state_block_pairs.push_back(std::make_pair(l_ptr->getPPtr(), l_ptr->getOPtr()));
+                state_block_pairs.push_back(std::make_pair(l_ptr->getOPtr(), l_ptr->getOPtr()));
 
-                double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), (*l_it)->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), (*l_it)->getOPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), (*l_it)->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), (*l_it)->getOPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair((*l_it)->getPPtr()->getPtr(), (*l_it)->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair((*l_it)->getPPtr()->getPtr(), (*l_it)->getOPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair((*l_it)->getOPtr()->getPtr(), (*l_it)->getOPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(l_ptr->getPPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(l_ptr->getPPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(l_ptr->getOPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
             }
             break;
         }
