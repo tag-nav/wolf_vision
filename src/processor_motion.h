@@ -294,7 +294,8 @@ inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, size_t _state_size, s
 
 inline ProcessorMotion::~ProcessorMotion()
 {
-    //
+    if (incoming_ptr_!= nullptr)
+        incoming_ptr_->destruct();
 }
 
 inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1,
