@@ -24,6 +24,8 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
         static unsigned int feature_id_count_;
     protected:
         unsigned int feature_id_;
+        unsigned int track_id_; // ID of the feature track
+        unsigned int landmark_id_; // ID of the landmark
         FeatureType type_;          ///< Feature type. See wolf.h for a list of all possible features.
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
@@ -50,6 +52,10 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
         virtual ~FeatureBase();
 
         unsigned int id();
+        unsigned int trackId(){return track_id_;}
+        void setTrackId(unsigned int _tr_id){track_id_ = _tr_id;}
+        unsigned int landmarkId(){return landmark_id_;}
+        void setLandmarkId(unsigned int _lmk_id){landmark_id_ = _lmk_id;}
 
         /** \brief Adds a constraint from this feature (as a down node)
          */

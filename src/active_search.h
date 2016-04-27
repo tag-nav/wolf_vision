@@ -3,15 +3,12 @@
  *
  *  Active search detection and matching for points.
  *
- * \date 10/04/2010
- * \author jsola
- *
- * ## Add detailed description here ##
- *
+ * \date 10/04/2016
+ * \author jsola, dinesh
  */
 
-#ifndef ACTIVESEARCH_HPP_
-#define ACTIVESEARCH_HPP_
+#ifndef ACTIVESEARCH_H_
+#define ACTIVESEARCH_H_
 
 // Wolf includes
 #include "wolf.h"
@@ -44,8 +41,9 @@ namespace wolf{
          * This class implements a few interesting features:
          * - The grid can be randomly re-positioned at each frame to avoid dead zones at the cell edges.
          * - Only the inner cells are activated for feature detection to avoid reaching the image edges.
-         * - The region of interest (ROI) associated with a particular cell is shrinked with a parametrizable margin
-         *   to guarantee a minimum separation between existing and new features.
+         * - The region of interest (ROI) associated with a particular cell is shrinked with a parametrizable amount
+         *   to guarantee a minimum 'separation' between existing and new features.
+         * - The region of interest is ensured to lie at a distance from the image boundaries, defined by the parameter 'margin'.
          *
          * The blue and green grids in the figure below represent the grid
          * at two different offsets, corresponding to two different frames.
@@ -128,8 +126,9 @@ class ActiveSearchGrid {
          * \param _separation minimum separation between existing and new points.
          * \param _margin minimum separation to the edge of the image
          */
-        ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v, const int & _n_cells_h, const int & _n_cells_v, const int & _margin = 0,
-                         const int & _separation = 0);
+        ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v,
+        		const int & _n_cells_h, const int & _n_cells_v,
+				const int & _margin = 0, const int & _separation = 0);
 
         /** \brief Clear grid.
          *
@@ -312,4 +311,4 @@ inline Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i& _cell
 
 }
 
-#endif /* ACTIVESEARCH_HPP_ */
+#endif /* ACTIVESEARCH_H_ */
