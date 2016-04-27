@@ -224,12 +224,7 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 	ceres_problem_->RemoveResidualBlock(id_2_residual_idx_[_corr_id]);
     //std::cout << "residual block removed!" << std::endl;
 	id_2_residual_idx_.erase(_corr_id);
-//    std::cout << "deleting cost function" << std::endl;
-    assert(id_2_costfunction_.find(_corr_id) != id_2_costfunction_.end());
-	if (use_wolf_auto_diff_)
-	    delete id_2_costfunction_[_corr_id];
-//    std::cout << "cost function deleted!" << std::endl;
-	id_2_costfunction_.erase(_corr_id);
+	// The cost functions will be deleted by ceres_problem destructor (IT MUST HAVE THE OWNERSHIP)
 }
 
 void CeresManager::addStateBlock(StateBlock* _st_ptr)
