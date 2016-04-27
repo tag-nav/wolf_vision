@@ -2,9 +2,10 @@
 
 namespace wolf {
 
-CeresManager::CeresManager(Problem*  _wolf_problem, ceres::Problem::Options _options) :
+CeresManager::CeresManager(Problem*  _wolf_problem, ceres::Problem::Options _options, const bool _use_wolf_cost_functions) :
     ceres_problem_(new ceres::Problem(_options)),
-    wolf_problem_(_wolf_problem)
+    wolf_problem_(_wolf_problem),
+    use_wolf_auto_diff_(_use_wolf_cost_functions)
 {
 	ceres::Covariance::Options covariance_options;
     covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
@@ -170,7 +171,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
-void CeresManager::update(const bool _self_auto_diff, const bool _apply_loss_function)
+void CeresManager::update(const bool _apply_loss_function)
 {
     //std::cout << "CeresManager: updating... getConstraintRemoveList()->size()" << wolf_problem_->getConstraintRemoveList()->size() << std::endl;
 
@@ -201,14 +202,14 @@ void CeresManager::update(const bool _self_auto_diff, const bool _apply_loss_fun
     // ADD CONSTRAINTS
     while (!wolf_problem_->getConstraintAddList()->empty())
     {
-        addConstraint(wolf_problem_->getConstraintAddList()->front(), _self_auto_diff, _apply_loss_function);
+        addConstraint(wolf_problem_->getConstraintAddList()->front(), _apply_loss_function);
         wolf_problem_->getConstraintAddList()->pop_front();
     }
 }
 
-void CeresManager::addConstraint(ConstraintBase* _corr_ptr, const bool _self_auto_diff, const bool _apply_loss)
+void CeresManager::addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss)
 {
-    id_2_costfunction_[_corr_ptr->nodeId()] = createCostFunction(_corr_ptr, _self_auto_diff);
+    id_2_costfunction_[_corr_ptr->nodeId()] = createCostFunction(_corr_ptr);
 
     if (_apply_loss)
         id_2_residual_idx_[_corr_ptr->nodeId()] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_corr_ptr->nodeId()], new ceres::CauchyLoss(0.5), _corr_ptr->getStateBlockPtrVector());
@@ -224,8 +225,9 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
     //std::cout << "residual block removed!" << std::endl;
 	id_2_residual_idx_.erase(_corr_id);
 //    std::cout << "deleting cost function" << std::endl;
-//    assert(id_2_costfunction_.find(_corr_id) != id_2_costfunction_.end());
-//    delete id_2_costfunction_[_corr_id];
+    assert(id_2_costfunction_.find(_corr_id) != id_2_costfunction_.end());
+	if (use_wolf_auto_diff_)
+	    delete id_2_costfunction_[_corr_id];
 //    std::cout << "cost function deleted!" << std::endl;
 	id_2_costfunction_.erase(_corr_id);
 }
@@ -271,7 +273,7 @@ void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
 }
 
-ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, const bool _use_wolf_auto_diff)
+ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
 {
 	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
 
@@ -281,11 +283,11 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr, 
 
     // auto jacobian
     else if (_corrPtr->getJacobianMethod() == JAC_AUTO)
-        return createAutoDiffCostFunction(_corrPtr, _use_wolf_auto_diff);
+        return createAutoDiffCostFunction(_corrPtr, use_wolf_auto_diff_);
 
     // numeric jacobian
     else if (_corrPtr->getJacobianMethod() == JAC_NUMERIC)
-        return createNumericDiffCostFunction(_corrPtr, _use_wolf_auto_diff);
+        return createNumericDiffCostFunction(_corrPtr, use_wolf_auto_diff_);
 
     else
         throw std::invalid_argument( "Bad Jacobian Method!" );

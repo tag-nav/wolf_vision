@@ -148,8 +148,8 @@ int main(int argc, char** argv)
     problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
     problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_ceres = new CeresManager(wolf_manager_ceres->getProblemPtr(), problem_options);
-    CeresManager* ceres_manager_wolf = new CeresManager(wolf_manager_wolf->getProblemPtr(), problem_options);
+    CeresManager* ceres_manager_ceres = new CeresManager(wolf_manager_ceres->getProblemPtr(), problem_options, false);
+    CeresManager* ceres_manager_wolf = new CeresManager(wolf_manager_wolf->getProblemPtr(), problem_options, true);
     std::ofstream log_file, landmark_file;  //output file
 
     //std::cout << "START TRAJECTORY..." << std::endl;
@@ -225,8 +225,8 @@ int main(int argc, char** argv)
         std::cout << "UPDATING CERES..." << std::endl;
         t1 = clock();
         // update state units and constraints in ceres
-        ceres_manager_ceres->update(false);
-        ceres_manager_wolf->update(true);
+        ceres_manager_ceres->update();
+        ceres_manager_wolf->update();
         mean_times(2) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // SOLVE OPTIMIZATION ---------------------------
