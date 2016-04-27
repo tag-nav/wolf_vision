@@ -54,7 +54,6 @@ FrameBase* Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_st
 {
     if (processor_motion_ptr_ != nullptr)
         return createFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
-
     switch (trajectory_ptr_->getFrameStructure())
     {
         case FRM_PO_2D:

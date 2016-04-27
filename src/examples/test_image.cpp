@@ -56,9 +56,7 @@ int main(int argc, char** argv)
         }
     }
     std::cout << "Input video file: " << filename << std::endl;
-    //cv::VideoCapture capture(filename);
-    cv::VideoCapture capture;//(2);
-    capture.open(0);
+    cv::VideoCapture capture(filename);
     if(!capture.isOpened())  // check if we succeeded
     {
         std::cout << "failed" << std::endl;
@@ -126,7 +124,7 @@ int main(int argc, char** argv)
         //        clock_t t1 = clock();
         p_brisk->process(capture_brisk_ptr);
         //        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-
+        //capture_brisk_ptr->getTimeStamp().getSeconds()
         last_frame = frame[f % buffer_size];
         f++;
         capture >> frame[f % buffer_size];
