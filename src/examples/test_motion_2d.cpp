@@ -51,13 +51,15 @@ int main()
 
     // Create Wolf tree nodes
     Problem* problem_ptr = new Problem(FRM_PO_2D);
-    SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::Vector2s::Zero(), true),
+    SensorBase* sensor_odom_ptr = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::Vector2s::Zero(), true),
                                             new StateBlock(Eigen::Vector1s::Zero(), true),
                                             new StateBlock(Eigen::VectorXs::Zero(0), true), 0);
+    SensorBase* sensor_fix_ptr = new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0);
     ProcessorOdom2d* odom2d_ptr = new ProcessorOdom2d();
     // Assemble Wolf tree by linking the nodes
-    sensor_ptr->addProcessor(odom2d_ptr);
-    problem_ptr->addSensor(sensor_ptr);
+    sensor_odom_ptr->addProcessor(odom2d_ptr);
+    problem_ptr->addSensor(sensor_odom_ptr);
+    problem_ptr->addSensor(sensor_fix_ptr);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -74,7 +76,7 @@ int main()
     odom2d_ptr->setOrigin(x0, t0);
 
     // Prior covariance
-    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), x0, init_cov);
+    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), sensor_fix_ptr, x0, init_cov);
     problem_ptr->getTrajectoryPtr()->getFrameListPtr()->front()->addCapture(initial_covariance);
     initial_covariance->process();
 
@@ -86,7 +88,7 @@ int main()
     std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getState().transpose() << std::endl;
     // Capture to use as container for all incoming data
     t += dt;
-    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_ptr, data, data_cov);
+    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_odom_ptr, data, data_cov);
 
     // Check covariance values
     Eigen::Vector3s integrated_x = x0;
@@ -177,9 +179,9 @@ int main()
     dt = 0.0045; // new dt
     for (int i = 1; i <= 25; i++)
     {
-        std::cout << "State(" << (t - t0) << ") = " << odom2d_ptr->getState(t/*+dt/2*/).transpose() << std::endl;
+        std::cout << "State(" << (t - t0) << ") = " << odom2d_ptr->getState(t).transpose() << std::endl;
         //std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
-        //        << odom2d_ptr->getBufferPtr()->getMotion(t/*+dt/2*/).delta_integr_cov_ << std::endl;
+        //        << odom2d_ptr->getBufferPtr()->getMotion(t).delta_integr_cov_ << std::endl;
         t += dt;
     }
     std::cout << "       ^^^^^^^   After the last time-stamp the buffer keeps returning the last member." << std::endl;
@@ -217,7 +219,7 @@ int main()
     // Solve
     ceres_manager_ptr->update();
     ceres::Solver::Summary summary = ceres_manager_ptr->solve(ceres_options);
-    std::cout << summary.FullReport() << std::endl;
+    //std::cout << summary.FullReport() << std::endl;
     ceres_manager_ptr->computeCovariances(ALL_MARGINALS);
 
     std::cout << "After solving the problem, covariance of new keyframe:" << std::endl;
@@ -243,7 +245,6 @@ int main()
     for (const auto &s : odom2d_ptr->getBufferPtr()->get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
-
 
     // Free allocated memory
     delete ceres_manager_ptr;
