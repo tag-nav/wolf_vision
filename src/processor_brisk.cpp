@@ -48,6 +48,9 @@ void ProcessorBrisk::preProcess()
 
     act_search_grid_.renew();
 
+    if(last_ptr_ != nullptr)
+        resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()));
+
     // Clear of the lists used to debug
     tracker_roi_.clear();
     tracker_roi_inflated_.clear();
@@ -98,7 +101,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_features)
 {
     std::cout << "\n---------------- detectNewFeatures -------------" << std::endl;
-    resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
+//    resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
     cv::Rect roi;
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
@@ -142,21 +145,13 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_feat
     return n_new_features;
 }
 
-void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last,
-                                            FeatureBaseList& _feature_list_incoming)
+void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
 {
     for (auto feature_base_last_ptr : _feature_list_last)
     {
         FeaturePointImage* feature_last_ptr = (FeaturePointImage*)feature_base_last_ptr;
         feature_last_ptr->setIsKnown(true);
     }
-
-    for (auto feature_base_incoming_ptr : _feature_list_incoming)
-    {
-        FeaturePointImage* feature_incoming_ptr = (FeaturePointImage*)feature_base_incoming_ptr;
-        feature_incoming_ptr->setIsKnown(true);
-    }
-
 }
 
 unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
