@@ -69,16 +69,20 @@ int main()
     ceres::Problem::Options problem_options;
     problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::TAKE_OWNERSHIP;
+    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
     CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr, problem_options);
 
-    // Initialize processor motion
-    odom2d_ptr->setOrigin(x0, t0);
+
+    // Origin Key Frame
+    FrameBase* origin_frame = problem_ptr->createFrame(KEY_FRAME, x0, t0);
 
     // Prior covariance
     CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), sensor_fix_ptr, x0, init_cov);
-    problem_ptr->getTrajectoryPtr()->getFrameListPtr()->front()->addCapture(initial_covariance);
+    origin_frame->addCapture(initial_covariance);
     initial_covariance->process();
+
+    // Initialize processor motion
+    odom2d_ptr->setOrigin(origin_frame, t0);
 
     std::cout << "Initial pose : " << problem_ptr->getLastFramePtr()->getState().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
