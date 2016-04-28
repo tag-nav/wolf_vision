@@ -34,22 +34,22 @@ StateBlock *SensorGPS::getMapOPtr() const
 
 void SensorGPS::registerNewStateBlocks()
 {
-    if (getWolfProblem() != nullptr)
+    if (getProblem() != nullptr)
     {
         if (p_ptr_ != nullptr)
-            getWolfProblem()->addStateBlockPtr(p_ptr_);
+            getProblem()->addStateBlockPtr(p_ptr_);
 
         if (o_ptr_ != nullptr)
-            getWolfProblem()->addStateBlockPtr(o_ptr_);
+            getProblem()->addStateBlockPtr(o_ptr_);
 
         if (intrinsic_ptr_ != nullptr)
-            getWolfProblem()->addStateBlockPtr(intrinsic_ptr_);
+            getProblem()->addStateBlockPtr(intrinsic_ptr_);
 
         if (map_p_ptr_ != nullptr)
-            getWolfProblem()->addStateBlockPtr(map_p_ptr_);
+            getProblem()->addStateBlockPtr(map_p_ptr_);
 
         if (map_o_ptr_ != nullptr)
-            getWolfProblem()->addStateBlockPtr(map_o_ptr_);
+            getProblem()->addStateBlockPtr(map_o_ptr_);
     }
 }
 

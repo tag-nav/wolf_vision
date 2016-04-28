@@ -58,8 +58,8 @@ int main(int argc, char** argv)
     problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
     problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_ceres_diff = new CeresManager(wolf_problem_ceres_diff, problem_options);
-    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_wolf_diff, problem_options);
+    CeresManager* ceres_manager_ceres_diff = new CeresManager(wolf_problem_ceres_diff, problem_options, false);
+    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_wolf_diff, problem_options, true);
 
 
 
@@ -277,10 +277,10 @@ int main(int argc, char** argv)
     // BUILD SOLVER PROBLEM
     std::cout << "updating ceres..." << std::endl;
     t1 = clock();
-    ceres_manager_ceres_diff->update(false);
+    ceres_manager_ceres_diff->update();
     double t_update_ceres = ((double) clock() - t1) / CLOCKS_PER_SEC;
     t1 = clock();
-    ceres_manager_wolf_diff->update(true);
+    ceres_manager_wolf_diff->update();
     double t_update_wolf = ((double) clock() - t1) / CLOCKS_PER_SEC;
     std::cout << "updated!" << std::endl;
 

@@ -294,7 +294,8 @@ inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, size_t _state_size, s
 
 inline ProcessorMotion::~ProcessorMotion()
 {
-    //
+    if (incoming_ptr_!= nullptr)
+        incoming_ptr_->destruct();
 }
 
 inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1,
@@ -335,7 +336,7 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeSta
                                    Eigen::MatrixXs::Zero(data_size_, data_size_));
 
     // Make frame at last Capture
-    makeFrame(last_ptr_);
+    makeFrame(last_ptr_, _x_origin, NON_KEY_FRAME);
 
     getBufferPtr()->get().clear();
     getBufferPtr()->get().push_back(
@@ -454,7 +455,7 @@ inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer
 inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
-    FrameBase* new_frame_ptr = getWolfProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
+    FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
     return new_frame_ptr;
 }
@@ -462,7 +463,7 @@ inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Ei
 inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
-    FrameBase* new_frame_ptr = getWolfProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
+    FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
     return new_frame_ptr;
 }

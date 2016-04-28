@@ -57,7 +57,7 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
     last_ptr_->addDownNodeList(new_features_last_);
 
     // Append new landmarks to the map
-    getWolfProblem()->addLandmarkList(new_landmarks);
+    getProblem()->addLandmarkList(new_landmarks);
 
     // return the number of new features detected in \b last
     return n;
@@ -71,7 +71,7 @@ unsigned int ProcessorTrackerLandmark::processKnown()
 
     // Find landmarks in incoming_ptr_
     FeatureBaseList known_features_list_incoming;
-    unsigned int found_landmarks = findLandmarks(*(getWolfProblem()->getMapPtr()->getLandmarkListPtr()),
+    unsigned int found_landmarks = findLandmarks(*(getProblem()->getMapPtr()->getLandmarkListPtr()),
                                                  known_features_list_incoming, matches_landmark_from_incoming_);
     // Append found incoming features
     incoming_ptr_->addDownNodeList(known_features_list_incoming);

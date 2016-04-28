@@ -42,9 +42,10 @@ class CeresManager
 		ceres::Problem* ceres_problem_;
 		ceres::Covariance* covariance_;
 		Problem* wolf_problem_;
+		bool use_wolf_auto_diff_;
 
 	public:
-		CeresManager(Problem* _wolf_problem, ceres::Problem::Options _options);
+		CeresManager(Problem* _wolf_problem, ceres::Problem::Options _options, const bool _use_wolf_cost_functions = true);
 
 		~CeresManager();
 
@@ -52,9 +53,9 @@ class CeresManager
 
 		void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
 
-		void update(const bool _self_auto_diff = true, const bool _apply_loss_function = false);
+		void update(const bool _apply_loss_function = false);
 
-		void addConstraint(ConstraintBase* _corr_ptr, const bool _self_auto_diff, const bool _apply_loss);
+		void addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss);
 
 		void removeConstraint(const unsigned int& _corr_idx);
 
@@ -66,7 +67,7 @@ class CeresManager
 
 		void updateStateBlockStatus(StateBlock* _st_ptr);
 
-		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr, const bool _self_auto_diff);
+		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr);
 };
 
 } // namespace wolf
