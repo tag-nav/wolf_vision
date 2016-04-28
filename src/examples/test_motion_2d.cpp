@@ -46,7 +46,7 @@ int main()
 
     // motion data
     Eigen::VectorXs data(2);
-    data << 1, Constants::PI / 4;  // advance 1m turn 0.1 rad (aprox 6 deg)
+    data << 1, Constants::PI / 4;  // advance 1m turn pi/4 rad (45 deg). Need 8 steps for a complete turn
     Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2, 2) * 0.01;
 
     // Create Wolf tree nodes
