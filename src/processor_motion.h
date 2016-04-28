@@ -137,11 +137,15 @@ class ProcessorMotion : public ProcessorBase
         void deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1, const Eigen::MatrixXs& _delta_cov2,
                                   const Eigen::MatrixXs& _jacobian1, const Eigen::MatrixXs& _jacobian2,
                                   Eigen::MatrixXs& _delta_cov1_plus_delta_cov2);
+        /** Set the origin of all motion for this processor
+         * \param _origin_frame the key frame to be the origin
+         * \param _ts_origin origin timestamp.
+         */
+        void setOrigin(FrameBase* _origin_frame, TimeStamp& _ts_origin);
 
         /** Set the origin of all motion for this processor
          * \param _x_origin the state at the origin
-         * \param _origin_ptr pointer to a Capture in the origin.
-         *        This can be any type of Capture, derived from CaptureBase.
+         * \param _ts_origin origin timestamp.
          */
         void setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin);
 
@@ -321,22 +325,29 @@ inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_
 
 inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin)
 {
-    // make origin Capture
+    // make a new key frame
+    FrameBase* key_frame_ptr = getProblem()->createFrame(KEY_FRAME, _x_origin, _ts_origin);
+    // set the key frame as origin
+    setOrigin(key_frame_ptr, _ts_origin);
+}
+
+inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame, TimeStamp& _ts_origin)
+{
+    // make (empty) origin Capture
     origin_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                      Eigen::MatrixXs::Zero(data_size_, data_size_));
-    // Make a keyframe if not already there
-    if (origin_ptr_->getFramePtr() == nullptr)
-        makeFrame(origin_ptr_, _x_origin, KEY_FRAME);
-    // If there is a frame, set its state with the providen
-    else
-        origin_ptr_->getFramePtr()->setState(_x_origin);
+    // Add origin capture to origin frame
+    _origin_frame->addCapture(origin_ptr_);
 
-    // make last Capture
+    // Set timestamp to origin frame
+    _origin_frame->setTimeStamp(_ts_origin);
+
+    // make (emtpy) last Capture
     last_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                    Eigen::MatrixXs::Zero(data_size_, data_size_));
 
     // Make frame at last Capture
-    makeFrame(last_ptr_, _x_origin, NON_KEY_FRAME);
+    makeFrame(last_ptr_, _origin_frame->getState(), NON_KEY_FRAME);
 
     getBufferPtr()->get().clear();
     getBufferPtr()->get().push_back(
