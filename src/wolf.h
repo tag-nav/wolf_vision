@@ -37,6 +37,14 @@ namespace wolf {
 typedef double Scalar;        // Use this for double, 64 bit precision
 //typedef long double Scalar;   // Use this for long double, 128 bit precision
 
+/**
+ * \brief Vector and Matrices size type for the Wolf project
+ *
+ * We use the default defined in Eigen (int)
+ *
+ */
+typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE Size;
+
 namespace Constants{
 
 // Wolf standard tolerance

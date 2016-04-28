@@ -76,7 +76,7 @@ inline const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const
     });
     if (previous == container_.rend())
         // The time stamp is more recent than the buffer's most recent data.
-        // We could do something here, but by now we'll return the last valid data
+        // We could do something here, and throw an error or something, but by now we'll return the first valid data
         previous--;
 
     return *previous;

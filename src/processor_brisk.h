@@ -68,10 +68,10 @@ struct ProcessorImageParameters
 class ProcessorBrisk : public ProcessorTrackerFeature
 {
 
-//    protected:
-//        cv::FeatureDetector* detector_ptr_;
-//        cv::DescriptorExtractor* descriptor_ptr_;
-//        cv::DescriptorMatcher* matcher_ptr_;
+    protected:
+        cv::FeatureDetector* detector_ptr_;
+        cv::DescriptorExtractor* descriptor_ptr_;
+        cv::DescriptorMatcher* matcher_ptr_;
     protected:
         cv::BRISK detector_;                    // Brisk detector
         cv::BRISK descriptor_;                  // Brisk descriptor
@@ -120,10 +120,10 @@ class ProcessorBrisk : public ProcessorTrackerFeature
                                            FeatureMatchMap& _feature_correspondences);
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
-        * \param _last_feature input feature in last capture tracked
-        * \param _incoming_feature input/output feature in incoming capture to be corrected
-        * \return false if the the process discards the correspondence with origin's feature
-        */
+         * \param _last_feature input feature in last capture tracked
+         * \param _incoming_feature input/output feature in incoming capture to be corrected
+         * \return false if the the process discards the correspondence with origin's feature
+         */
         virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
 
         /** \brief Vote for KeyFrame generation
@@ -139,7 +139,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
          *
          * This is intended to create Features that are not among the Features already known in the Map.
          *
-         * This function sets new_features_last_, the list of newly detected features, to be used for landmark initialization.
+         * This function sets new_features_last_, the list of newly detected features.
          *
          * \return The number of detected Features.
          */
@@ -147,17 +147,42 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 
         /** \brief Create a new constraint
          *
-         * Implement in derived classes to build the type of constraint appropriate for the pair feature-landmark used by this tracker.
+         * Creates a constraint from feature to feature
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr);
 
     private:
+
+        /**
+         * \brief Detects keypoints its descriptors in a specific roi of the image
+         * \param _image input image in which the algorithm will search
+         * \param _roi input roi used to define the area of search within the image
+         * \param _new_keypoints output keypoints obtained in the function
+         * \param new_descriptors output descriptors obtained in the function
+         * \return the number of detected features
+         */
         virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
                                          cv::Mat& new_descriptors);
 
     private:
+        /**
+         * \brief Trims the roi of a matrix which exceeds the boundaries of the image
+         * \param _roi input/output roi to be trimmed if necessary
+         */
         virtual void trimRoi(cv::Rect& _roi);
+
+        /**
+         * \brief Augments the designed roi so that the detector and descriptor analize the whole region of interest
+         * \param _roi input/output roi to be inflated the necessary amount
+         */
         virtual void inflateRoi(cv::Rect& _roi);
+
+        /**
+         * \brief Adapts a certain roi to maximize its performance and asign it to the image. It's composed by inflateRoi and trimRoi.
+         * \param _image_roi output image to be applied the adapted roi
+         * \param _image input image (incoming or last) in which the roi will be applied to obtain \b _image_roi
+         * \param _roi input roi to be adapted
+         */
         virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
 
@@ -175,8 +200,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
 
-        virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last,
-                                            FeatureBaseList& _feature_list_incoming);
+        virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
 
 
 

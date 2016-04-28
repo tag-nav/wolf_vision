@@ -43,14 +43,6 @@ int main()
     Eigen::Vector7s x0;
     x0 << pos, quat.coeffs();
 
-
-    // robot state blocks: origin
-    StateBlock sb_pos(pos);
-    StateQuaternion sb_ori(quat);
-
-    // sensor state blocks: the same as robot, plus intrinsic:
-    StateBlock sb_intr(Eigen::VectorXs::Zero(0));
-
     // motion data
     Eigen::VectorXs data(6);
     data << 1, 0, 0,   // advance 1m
@@ -59,7 +51,8 @@ int main()
 
     // Create Wolf tree nodes
     Problem* problem_ptr = new Problem(FRM_PO_3D);
-    SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, &sb_pos, &sb_ori, &sb_intr, 0);
+    SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, new StateBlock(pos, true), new StateQuaternion(quat, true),
+                                            new StateBlock(Eigen::VectorXs::Zero(0), true), 0);
     ProcessorOdom3d* odom3d_ptr = new ProcessorOdom3d();
 
     // Assemble Wolf tree by linking the nodes
@@ -69,7 +62,7 @@ int main()
     // Initialize
     odom3d_ptr->setOrigin(x0, t0);
 
-    std::cout << "Initial pose : " << sb_pos.getVector().transpose() << " " << sb_ori.getVector().transpose() << std::endl;
+    std::cout << "Initial pose : " << pos.transpose() << " " << quat.coeffs().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
@@ -154,7 +147,7 @@ int main()
 
 
     // Free allocated memory
-    cap_ptr->destruct();
+    problem_ptr->destruct();
 
     return 0;
 }
