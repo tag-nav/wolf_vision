@@ -45,7 +45,7 @@ class block_pruning
         }
 };
 
-void eraseSparseBlock(SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col, const unsigned int& Nrows, const unsigned int& Ncols)
+void eraseSparseBlock(SparseMatrix<double, ColMajor>& original, const unsigned int& row, const unsigned int& col, const unsigned int& Nrows, const unsigned int& Ncols)
 {
     // prune all non-zero elements that not satisfy the 'keep' operand
     // elements that are not in the block rows or are not in the block columns should be kept
@@ -61,7 +61,7 @@ void eraseSparseBlock(SparseMatrix<double>& original, const unsigned int& row, c
 //  original.prune(0);
 }
 
-void addSparseBlock(const MatrixXd& ins, SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
+void addSparseBlock(const MatrixXd& ins, SparseMatrix<double, ColMajor>& original, const unsigned int& row, const unsigned int& col)
 {
   for (unsigned int r=0; r<ins.rows(); ++r)
       for (unsigned int c = 0; c < ins.cols(); c++)
@@ -124,8 +124,8 @@ class SolverQR
 {
     protected:
         std::string name_;
-        SparseQR < SparseMatrix<double>, NaturalOrdering<int>> solver_;
-        SparseMatrix<double> A_, R_;
+        SparseQR < SparseMatrix<double, ColMajor>, NaturalOrdering<int>> solver_;
+        SparseMatrix<double, ColMajor> A_, R_;
         VectorXd b_, x_incr_;
         int n_measurements;
         int n_nodes_;
@@ -133,7 +133,7 @@ class SolverQR
         std::vector<measurement> measurements_;
 
         // ordering
-        SparseMatrix<int> A_nodes_;
+        SparseMatrix<int, ColMajor> A_nodes_;
         PermutationMatrix<Dynamic, Dynamic, int> acc_node_permutation_;
 
         CCOLAMDOrdering<int> orderer_;
@@ -351,7 +351,7 @@ class SolverQR
                 int ordered_variables = A_.cols() - nodes_.at(first_ordered_node_).location;
                 int unordered_variables = nodes_.at(first_ordered_node_).location;
 
-                SparseMatrix<double> A_partial = A_.bottomRightCorner(ordered_measurements, ordered_variables);
+                SparseMatrix<double, ColMajor> A_partial = A_.bottomRightCorner(ordered_measurements, ordered_variables);
                 solver_.compute(A_partial);
                 if (solver_.info() != Success)
                 {
@@ -372,9 +372,9 @@ class SolverQR
                 if (unordered_variables > 0)
                 {
                     //std::cout << "--------------------- solving unordered part" << std::endl;
-                    SparseMatrix<double> R1 = R_.topLeftCorner(unordered_variables, unordered_variables);
+                    SparseMatrix<double, ColMajor> R1 = R_.topLeftCorner(unordered_variables, unordered_variables);
                     //std::cout << "R1" << std::endl << MatrixXd::Identity(R1.rows(), R1.rows()) * R1 << std::endl;
-                    SparseMatrix<double> R2 = R_.topRightCorner(unordered_variables, ordered_variables);
+                    SparseMatrix<double, ColMajor> R2 = R_.topRightCorner(unordered_variables, ordered_variables);
                     //std::cout << "R2" << std::endl << MatrixXd::Identity(R2.rows(), R2.rows()) * R2 << std::endl;
                     solver_.compute(R1);
                     if (solver_.info() != Success)
