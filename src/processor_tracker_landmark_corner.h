@@ -1,12 +1,12 @@
 /*
- * processor_laser_corners.h
+ * processor_tracker_landmark_corner.h
  *
  *  Created on: Apr 4, 2016
  *      Author: jvallve
  */
 
-#ifndef SRC_PROCESSOR_TRACKER_LASER_H_
-#define SRC_PROCESSOR_TRACKER_LASER_H_
+#ifndef SRC_PROCESSOR_TRACKER_LANDMARK_CORNER_H_
+#define SRC_PROCESSOR_TRACKER_LANDMARK_CORNER_H_
 
 // Wolf includes
 #include "sensor_laser_2D.h"
@@ -31,7 +31,7 @@ const Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
 const Scalar position_error_th_ = 1;
 const Scalar min_features_ratio_th_ = 0.5;
 
-class ProcessorTrackerLaser : public ProcessorTrackerLandmark
+class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 {
     private:
         laserscanutils::ScanParams scan_params_;
@@ -46,11 +46,11 @@ class ProcessorTrackerLaser : public ProcessorTrackerLandmark
         bool extrinsics_transformation_computed_;
 
     public:
-        ProcessorTrackerLaser(const laserscanutils::ScanParams& _scan_params,
+        ProcessorTrackerLandmarkCorner(const laserscanutils::ScanParams& _scan_params,
                               const laserscanutils::ExtractCornerParams& _corner_alg_params,
                               const unsigned int& _n_corners_th);
 
-        virtual ~ProcessorTrackerLaser();
+        virtual ~ProcessorTrackerLandmarkCorner();
 
     protected:
 
@@ -116,7 +116,7 @@ class ProcessorTrackerLaser : public ProcessorTrackerLandmark
                                                            const Eigen::MatrixXs& _mu);
 };
 
-inline ProcessorTrackerLaser::ProcessorTrackerLaser(const laserscanutils::ScanParams& _scan_params,
+inline ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(const laserscanutils::ScanParams& _scan_params,
                                                     const laserscanutils::ExtractCornerParams& _corner_alg_params,
                                                     const unsigned int& _n_corners_th) :
         ProcessorTrackerLandmark(PRC_TRACKER_LIDAR, 0), scan_params_(_scan_params), corner_alg_params_(
@@ -124,17 +124,17 @@ inline ProcessorTrackerLaser::ProcessorTrackerLaser(const laserscanutils::ScanPa
 {
 }
 
-inline ProcessorTrackerLaser::~ProcessorTrackerLaser()
+inline ProcessorTrackerLandmarkCorner::~ProcessorTrackerLandmarkCorner()
 {
 }
 
-inline unsigned int ProcessorTrackerLaser::detectNewFeatures(const unsigned int& _max_features)
+inline unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const unsigned int& _max_features)
 {
     // already computed since each scan is computed in preprocess(), new corners are classified in findLandmarks()
     return new_features_last_.size();
 }
 
-inline LandmarkBase* ProcessorTrackerLaser::createLandmark(FeatureBase* _feature_ptr)
+inline LandmarkBase* ProcessorTrackerLandmarkCorner::createLandmark(FeatureBase* _feature_ptr)
 {
     // compute feature global pose
     Eigen::Vector3s feature_global_pose = R_world_sensor_ * _feature_ptr->getMeasurement() + t_world_sensor_;
@@ -143,7 +143,7 @@ inline LandmarkBase* ProcessorTrackerLaser::createLandmark(FeatureBase* _feature
                                 new StateBlock(feature_global_pose.tail(1)), _feature_ptr->getMeasurement()(3));
 }
 
-inline ConstraintBase* ProcessorTrackerLaser::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
+inline ConstraintBase* ProcessorTrackerLandmarkCorner::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
     return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*)((_landmark_ptr)));
 }

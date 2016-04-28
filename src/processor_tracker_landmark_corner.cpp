@@ -1,9 +1,9 @@
-#include "processor_tracker_laser.h"
+#include "processor_tracker_landmark_corner.h"
 
 namespace wolf
 {
 
-void ProcessorTrackerLaser::preProcess()
+void ProcessorTrackerLandmarkCorner::preProcess()
 {
     // extract corners of incoming
     extractCorners((CaptureLaser2D*)((incoming_ptr_)), new_features_incoming_);
@@ -30,7 +30,7 @@ void ProcessorTrackerLaser::preProcess()
     t_sensor_world_ = -R_sensor_world_ * t_world_robot_ - R_robot_sensor_.transpose() * t_robot_sensor_;
 }
 
-unsigned int ProcessorTrackerLaser::findLandmarks(LandmarkBaseList& _landmark_list_in,
+unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(LandmarkBaseList& _landmark_list_in,
                                                   FeatureBaseList& _feature_list_out,
                                                   LandmarkMatchMap& _feature_landmark_correspondences)
 {
@@ -119,12 +119,12 @@ unsigned int ProcessorTrackerLaser::findLandmarks(LandmarkBaseList& _landmark_li
     return matches_landmark_from_incoming_.size();
 }
 
-bool ProcessorTrackerLaser::voteForKeyFrame()
+bool ProcessorTrackerLandmarkCorner::voteForKeyFrame()
 {
     return matches_landmark_from_incoming_.size() < n_corners_th_ && matches_landmark_from_last_.size() > matches_landmark_from_incoming_.size();
 }
 
-void ProcessorTrackerLaser::extractCorners(const CaptureLaser2D* _capture_laser_ptr,
+void ProcessorTrackerLandmarkCorner::extractCorners(const CaptureLaser2D* _capture_laser_ptr,
                                                   FeatureBaseList& _corner_list)
 {
     std::cout << "Extracting corners..." << std::endl;
@@ -164,7 +164,7 @@ void ProcessorTrackerLaser::extractCorners(const CaptureLaser2D* _capture_laser_
     }
 }
 
-void ProcessorTrackerLaser::expectedFeature(LandmarkBase* _landmark_ptr, Eigen::Vector4s& expected_feature_,
+void ProcessorTrackerLandmarkCorner::expectedFeature(LandmarkBase* _landmark_ptr, Eigen::Vector4s& expected_feature_,
                                                    Eigen::Matrix3s& expected_feature_cov_)
 {
     // closer keyframe with computed covariance
@@ -205,7 +205,7 @@ void ProcessorTrackerLaser::expectedFeature(LandmarkBase* _landmark_ptr, Eigen::
         expected_feature_cov_ = Eigen::Matrix3s::Identity();
 }
 
-Eigen::VectorXs ProcessorTrackerLaser::computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr,
+Eigen::VectorXs ProcessorTrackerLandmarkCorner::computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr,
                                                                           const Eigen::Vector4s& _expected_feature,
                                                                           const Eigen::Matrix3s& _expected_feature_cov,
                                                                           const Eigen::MatrixXs& _mu)
