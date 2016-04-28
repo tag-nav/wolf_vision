@@ -85,6 +85,12 @@ class StateBlock
 
 };
 
+} // namespace wolf
+
+// IMPLEMENTATION
+#include "local_parametrization_base.h"
+namespace wolf {
+
 inline StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed, LocalParametrizationBase* _local_param_ptr) :
         state_(_state), fixed_(_fixed), local_param_ptr_(_local_param_ptr)
 {
@@ -100,7 +106,8 @@ inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParame
 
 inline StateBlock::~StateBlock()
 {
-    //
+    if (local_param_ptr_ != nullptr)
+        delete local_param_ptr_;
 }
 
 inline Scalar* StateBlock::getPtr()
