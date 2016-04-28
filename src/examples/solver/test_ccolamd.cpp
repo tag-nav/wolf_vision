@@ -5,6 +5,9 @@
  *      Author: jvallve
  */
 
+// Wolf includes
+#include "wolf.h"
+
 //std includes
 #include <cstdlib>
 #include <iostream>
@@ -24,6 +27,7 @@
 #include <eigen3/Eigen/SparseLU>
 
 using namespace Eigen;
+using namespace wolf;
 
 //main
 int main(int argc, char *argv[])
@@ -35,13 +39,13 @@ int main(int argc, char *argv[])
         std::cout << "EXIT due to bad user input" << std::endl << std::endl;
         return -1;
     }
-    IndexType size = atoi(argv[1]);
+    Size size = atoi(argv[1]);
 
-    SparseMatrix<double, ColMajor, IndexType> A(size, size), Aordered(size, size);
-    CholmodSupernodalLLT < SparseMatrix<double, ColMajor, IndexType> > solver;
-    PermutationMatrix<Dynamic, Dynamic, IndexType> perm(size);
-    CCOLAMDOrdering<IndexType> ordering;
-    Matrix<IndexType, Dynamic, 1> ordering_constraints = Matrix<IndexType, Dynamic, 1>::Ones(size);
+    SparseMatrix<double, ColMajor, Size> A(size, size), Aordered(size, size);
+    CholmodSupernodalLLT < SparseMatrix<double, ColMajor, Size> > solver;
+    PermutationMatrix<Dynamic, Dynamic, Size> perm(size);
+    CCOLAMDOrdering<Size> ordering;
+    Matrix<Size, Dynamic, 1> ordering_constraints = Matrix<Size, Dynamic, 1>::Ones(size);
     VectorXd b(size), bordered(size), xordered(size), x(size);
     clock_t t1, t2, t3;
     double time1, time2, time3;
@@ -111,7 +115,7 @@ int main(int argc, char *argv[])
 
     // SOLVING AND REORDERING ------------------------------------
     t3 = clock();
-    SparseLU<SparseMatrix<double, ColMajor, IndexType>, CCOLAMDOrdering<IndexType> > solver2;
+    SparseLU<SparseMatrix<double, ColMajor, Size>, CCOLAMDOrdering<Size> > solver2;
     solver2.compute(A);
     if (solver2.info() != Success)
     {

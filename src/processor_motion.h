@@ -265,9 +265,9 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         // Attributes
-        size_t x_size_;    ///< The size of the state vector
-        size_t delta_size_;    ///< the size of the deltas
-        size_t data_size_; ///< the size of the incoming data
+        Size x_size_;    ///< The size of the state vector
+        Size delta_size_;    ///< the size of the deltas
+        Size data_size_; ///< the size of the incoming data
         CaptureBase* origin_ptr_; //TODO: JV: change by FrameBase* origin_frame_ptr_
         CaptureMotion2* last_ptr_;
         CaptureMotion2* incoming_ptr_;
