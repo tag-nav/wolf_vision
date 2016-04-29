@@ -6,7 +6,7 @@
  */
 
 #include "../sensor_camera.h"
-#include "../sensor_odom_2d.h"
+#include "../sensor_odom_2D.h"
 #include "../sensor_factory.h"
 //#include "../sensor_imu.h" // this class not finished
 
