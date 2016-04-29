@@ -14,7 +14,7 @@
 namespace wolf
 {
 
-// Correspondence Feature incoming - Landmark
+// Match Feature - Landmark
 struct LandmarkMatch
 {
         LandmarkBase* landmark_ptr_;
@@ -31,7 +31,7 @@ struct LandmarkMatch
         }
 };
 
-// Correspondence Landmark - Feature
+// Match map Feature - Landmark
 typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
 
 /** \brief Landmark tracker processor
