@@ -90,27 +90,16 @@ class ProcessorBrisk : public ProcessorTrackerFeature
     public:
         ProcessorBrisk(ProcessorImageParameters _params);
 
-//        ProcessorBrisk(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr, cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters_params) :
-//            detector_ptr_(_det_ptr)
-//        {}
+        ProcessorBrisk(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr,
+                       cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters _params);
 
-//        ProcessorBrisk(std::string _detector, std::string _descriptor, std::string matcher, std::string distance, ProcessorImageParameters _params) :
-//            detector_ptr_(nullptr), params_(_params)
-//        {
-//            switch _detector{
-//                case "BRISK":
-//                    detector_ptr_ = new cv::BRISK();
-//                    break;
-//                default:
-//                    throw runtime_error
-//            }
-//            }
+   //     ProcessorBrisk(std::string _detector, std::string _descriptor, std::string matcher, std::string _distance, ProcessorImageParameters _params);
 
         virtual ~ProcessorBrisk();
 
 //        virtual ~ProcessorBrisk(){
-//            delete detector_ptr_; delete descriptor_ptr_; //etc
-//        };
+//            delete detector_ptr_; delete descriptor_ptr_; delete matcher_ptr_;
+//        }
 
     protected:
         void preProcess();
