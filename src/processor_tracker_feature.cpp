@@ -10,8 +10,8 @@
 namespace wolf
 {
 
-ProcessorTrackerFeature::ProcessorTrackerFeature(ProcessorType _tp) :
-        ProcessorTracker(_tp)
+ProcessorTrackerFeature::ProcessorTrackerFeature(ProcessorType _tp, const unsigned int _max_new_features) :
+        ProcessorTracker(_tp, _max_new_features)
 {
 }
 
