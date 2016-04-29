@@ -19,8 +19,11 @@
 #include "processor_tracker_landmark.h"
 
 //laser_scan_utils
-#include "laser_scan_utils/scan_basics.h"
-#include "laser_scan_utils/corner_detector.h"
+//#include "laser_scan_utils/scan_basics.h"
+//#include "laser_scan_utils/corner_detector.h"
+#include "laser_scan_utils/laser_scan.h"
+#include "laser_scan_utils/line_finder_iterative.h"
+#include "laser_scan_utils/corner_finder.h"
 
 namespace wolf
 {
@@ -34,8 +37,14 @@ const Scalar min_features_ratio_th_ = 0.5;
 class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 {
     private:
-        laserscanutils::ScanParams scan_params_;
-        laserscanutils::ExtractCornerParams corner_alg_params_;
+        //laserscanutils::ScanParams scan_params_;
+        //laserscanutils::ExtractCornerParams corner_alg_params_;
+        laserscanutils::LaserScan laser_data_;
+        laserscanutils::LineFinderIterative line_finder_;
+        laserscanutils::CornerFinder corner_finder_;
+        //TODO: add corner_finder_params
+
+
         FeatureBaseList corners_incoming_;
         FeatureBaseList corners_last_;
         unsigned int n_corners_th_;
@@ -50,9 +59,8 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
         bool extrinsics_transformation_computed_;
 
     public:
-        ProcessorTrackerLandmarkCorner(const laserscanutils::ScanParams& _scan_params,
-                              const laserscanutils::ExtractCornerParams& _corner_alg_params,
-                              const unsigned int& _n_corners_th);
+        ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
+                                       const unsigned int& _n_corners_th);
 
         virtual ~ProcessorTrackerLandmarkCorner();
 
@@ -115,7 +123,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 
     private:
 
-        void extractCorners(const CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _corner_list);
+        void extractCorners(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _corner_list);
 
         void expectedFeature(LandmarkBase* _landmark_ptr, Eigen::Vector4s& expected_feature_,
                              Eigen::Matrix3s& expected_feature_cov_);
@@ -126,11 +134,9 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
                                                            const Eigen::MatrixXs& _mu);
 };
 
-inline ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(const laserscanutils::ScanParams& _scan_params,
-                                                    const laserscanutils::ExtractCornerParams& _corner_alg_params,
-                                                    const unsigned int& _n_corners_th) :
-        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0), scan_params_(_scan_params), corner_alg_params_(
-                _corner_alg_params), n_corners_th_(_n_corners_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
+inline ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
+                                                                      const unsigned int& _n_corners_th) :
+        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0), line_finder_(_line_finder_params), n_corners_th_(_n_corners_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
 {
 }
 

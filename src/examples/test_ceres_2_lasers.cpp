@@ -103,7 +103,7 @@ int main(int argc, char** argv)
     CdynamicSceneRender* myRender = new CdynamicSceneRender(1200, 700, 90 * M_PI / 180, 90 * 700.0 * M_PI / (1200.0 * 180.0), 0.2, 100);
     myRender->loadAssimpModel(modelFileName, true); //with wireframe
     //create scanner and load 3D model
-    CrangeScan2D* myScanner = new CrangeScan2D(HOKUYO_UTM30LX_180DEG);	//HOKUYO_UTM30LX_180DEG or LEUZE_RS4
+    CrangeScan2D* myScanner = new CrangeScan2D(HOKUYO_UTM30LX_180DEG);
     myScanner->loadAssimpModel(modelFileName);
 
     //variables
@@ -204,7 +204,15 @@ int main(int argc, char** argv)
         // adding new sensor captures
         wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(),TimeStamp(), &odom_sensor, odom_reading));		//, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
 		wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
-        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
+		scan_params_.angle_min_ = M_PI/2;
+		    scan_params_.angle_max_ = -M_PI/2;
+		    scan_params_.angle_step_ = -M_PI/720;
+		    scan_params_.scan_time_ = 0.01;//not relevant
+		    scan_params_.range_min_ = 0.2;
+		    scan_params_.range_max_ = 100;
+		    scan_params_.range_std_dev_ = 0.01;
+
+		wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
         wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
         // updating problem
         wolf_manager->update();

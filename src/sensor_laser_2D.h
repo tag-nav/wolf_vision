@@ -7,27 +7,34 @@
 #include "sensor_base.h"
 
 //laser_scan_utils
-#include "laser_scan_utils/scan_basics.h"
-#include "laser_scan_utils/corner_detector.h"
-
+//#include "laser_scan_utils/scan_basics.h"
+//#include "laser_scan_utils/corner_detector.h"
+#include "laser_scan_utils/laser_scan.h"
 
 namespace wolf {
 
 class SensorLaser2D : public SensorBase
 {
     protected:
-        laserscanutils::ScanParams scan_params_;
-        laserscanutils::ExtractCornerParams corners_alg_params_; //parameters for corner extraction algorithm.
+        laserscanutils::LaserScanParams scan_params_;
 
     public:
-        /** \brief Constructor with arguments
+        /** \brief Constructor with extrinsics
          * 
          * \param _p_ptr StateBlock pointer to the sensor position
          * \param _o_ptr StateBlock pointer to the sensor orientation
          * 
          **/        
         SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr);
-        //SensorLaser2D(const Eigen::VectorXs & _sp, const laserscanutils::ScanParams & _params);
+
+        /** \brief Constructor with extrinsics and scan parameters
+         *
+         * \param _p_ptr StateBlock pointer to the sensor position
+         * \param _o_ptr StateBlock pointer to the sensor orientation
+         * \param _params Scan parameters
+         *
+         **/
+        SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const double& _angle_min, const double& _angle_max, const double& _angle_step, const double& _scan_time, const double& _range_min, const double& _range_max, const double& _range_std_dev, const double& _angle_std_dev);
 
         /** \brief Default destructor (not recommended)
          *
@@ -43,91 +50,14 @@ class SensorLaser2D : public SensorBase
          * \param _params struct with scanner intrinsic parameters. See laser_scan_utils library API for reference.
          * 
          **/                
-        void setScanParams(const laserscanutils::ScanParams & _params);
-        
-        void setDefaultCornerAlgParams();
-
-        /** \brief Set corner detection algorithm parameters
-         *
-         * Set corner detection algorithm parameters
-         * \param _corner_alg_params struct with corner detection algorithm parameters. See laser_scan_utils library API for reference.
-         *
-         **/
-        void setCornerAlgParams(const laserscanutils::ExtractCornerParams & _corner_alg_params);
+        void setScanParams(const laserscanutils::LaserScanParams & _params);
 
         /** \brief Get scanner intrinsic parameters
          * 
          * Get scanner intrinsic parameters
          * 
          **/                        
-        const laserscanutils::ScanParams & getScanParams() const;
-
-        /** \brief Get parameters for corner detection algorithm
-         * 
-         * Get parameters for corner detection algorithm
-         * 
-         **/                                
-        const laserscanutils::ExtractCornerParams & getCornerAlgParams() const;
-
-        /** \brief Returns angle_min
-         *
-         * Returns angle_min
-         *
-         **/
-//         Scalar getAngleMin() const;
-
-        /** \brief Returns angle_max
-         *
-         * Returns angle_max
-         *
-         **/
-//         Scalar getAngleMax() const;
-
-        /** \brief Returns angle_increment
-         *
-         * Returns angle_increment
-         *
-         **/
-//         Scalar getAngleIncrement() const;
-
-        /** \brief Returns range_min
-         *
-         * Returns range_min
-         *
-         **/
-//         Scalar getRangeMin() const;
-
-        /** \brief Returns range_max
-         *
-         * Returns range_max
-         *
-         **/
-//         Scalar getRangeMax() const;
-        
-        /** \brief Returns _range_stdev
-         * 
-         * Returns _range_stdev
-         * 
-         **/        
-//         Scalar getRangeStdDev() const;
-
-        /** \brief Returns time_increment
-         *
-         * Returns time_increment
-         *
-         **/
-//         Scalar getTimeIncrement() const;
-
-        /** \brief Returns scan_time
-         *
-         * Returns scan_time
-         *
-         **/
-//         Scalar getScanTime() const;
-
-        /** \brief Prints parameters
-         **/                
-        void printSensorParameters() const;
+        const laserscanutils::LaserScanParams & getScanParams() const;
 };
 
 } // namespace wolf

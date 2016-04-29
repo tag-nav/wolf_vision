@@ -117,11 +117,26 @@ ConstraintBase* ProcessorTrackerFeatureCorner::createConstraint(FeatureBase* _fe
     return new ConstraintCorner2D(_feature_ptr, landmark_ptr);
 }
 
-void ProcessorTrackerFeatureCorner::extractCorners(const CaptureLaser2D* _capture_laser_ptr,
+void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2D* _capture_laser_ptr,
                                                   FeatureBaseList& _corner_list)
 {
+    // TODO: sort corners by bearing
+    std::list<laserscanutils::CornerPoint> corners;
+
     std::cout << "Extracting corners..." << std::endl;
-    //variables
+    corner_finder_.findCorners(_capture_laser_ptr->getScan(), ((SensorLaser2D*)getSensorPtr())->getScanParams(), line_finder_, corners);
+
+    Eigen::Vector4s measurement;
+    for (auto corner : corners)
+    {
+        measurement.head<2>() = corner.point_.head<2>();
+        measurement(2)=corner.orientation_;
+        measurement(3)=corner.aperture_;
+
+        _corner_list.push_back(new FeatureCorner2D(measurement, corner.covariance_));
+    }
+
+/*    //variables
     std::list<laserscanutils::Corner> corners;
     //extract corners from range data
     laserscanutils::extractCorners(scan_params_, corner_alg_params_, _capture_laser_ptr->getRanges(), corners);
@@ -154,7 +169,7 @@ void ProcessorTrackerFeatureCorner::extractCorners(const CaptureLaser2D* _captur
         //std::cout << "rotated covariance: " << std::endl;
         //std::cout << measurement_cov << std::endl;
         _corner_list.push_back(new FeatureCorner2D(measurement, measurement_cov));
-    }
+    }*/
 }
 
 } // namespace wolf

@@ -19,8 +19,11 @@
 #include "processor_tracker_feature.h"
 
 //laser_scan_utils
-#include "laser_scan_utils/scan_basics.h"
-#include "laser_scan_utils/corner_detector.h"
+//#include "laser_scan_utils/scan_basics.h"
+//#include "laser_scan_utils/corner_detector.h"
+#include "laser_scan_utils/laser_scan.h"
+#include "laser_scan_utils/line_finder_iterative.h"
+#include "laser_scan_utils/corner_finder.h"
 
 
 namespace wolf
@@ -35,8 +38,13 @@ const Scalar min_features_ratio_th_ = 0.5;
 class ProcessorTrackerFeatureCorner : public wolf::ProcessorTrackerFeature
 {
     private:
-        laserscanutils::ScanParams scan_params_;
-        laserscanutils::ExtractCornerParams corner_alg_params_;
+        //laserscanutils::ScanParams scan_params_;
+        //laserscanutils::ExtractCornerParams corner_alg_params_;
+        //laserscanutils::LaserScan laser_data_;
+        laserscanutils::LineFinderIterative line_finder_;
+        laserscanutils::CornerFinder corner_finder_;
+        //TODO: add corner_finder_params
+
         FeatureBaseList corners_incoming_;
         FeatureBaseList corners_last_;
         unsigned int n_tracks_th_;
@@ -51,8 +59,7 @@ class ProcessorTrackerFeatureCorner : public wolf::ProcessorTrackerFeature
         bool extrinsics_transformation_computed_;
 
     public:
-        ProcessorTrackerFeatureCorner(const laserscanutils::ScanParams& _scan_params,
-                                      const laserscanutils::ExtractCornerParams& _corner_alg_params,
+        ProcessorTrackerFeatureCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
                                       const unsigned int& _n_corners_th);
         virtual ~ProcessorTrackerFeatureCorner();
 
@@ -117,15 +124,13 @@ class ProcessorTrackerFeatureCorner : public wolf::ProcessorTrackerFeature
 
     private:
 
-        void extractCorners(const CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _corner_list);
+        void extractCorners(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _corner_list);
 
 };
 
-inline ProcessorTrackerFeatureCorner::ProcessorTrackerFeatureCorner(const laserscanutils::ScanParams& _scan_params,
-                                                                    const laserscanutils::ExtractCornerParams& _corner_alg_params,
+inline ProcessorTrackerFeatureCorner::ProcessorTrackerFeatureCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
                                                                     const unsigned int& _n_corners_th) :
-        ProcessorTrackerFeature(PRC_TRACKER_FEATURE_CORNER, 0), scan_params_(_scan_params), corner_alg_params_(
-                                _corner_alg_params), n_tracks_th_(_n_corners_th), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
+        ProcessorTrackerFeature(PRC_TRACKER_FEATURE_CORNER, 0), line_finder_(_line_finder_params), n_tracks_th_(_n_corners_th), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
 {
     // TODO Auto-generated constructor stub
 }
