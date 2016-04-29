@@ -3,6 +3,7 @@
 
 //wolf includes
 #include "sensor_base.h"
+#include "sensor_factory.h"
 
 
 namespace wolf {
@@ -35,6 +36,19 @@ class SensorCamera : public SensorBase
     int img_height_;
 
 };
+
+// Define the factory method and register it in the SensorFactory
+namespace
+{
+SensorBase* createCamera(std::string& _name)
+{
+    SensorBase* sen = new SensorCamera(nullptr, nullptr, nullptr,0,0);
+    sen->setName(_name);
+    return sen;
+}
+const bool registered_camera = SensorFactory::get()->registerSensor("CAMERA", createCamera);
+}
+
 
 } // namespace wolf
 

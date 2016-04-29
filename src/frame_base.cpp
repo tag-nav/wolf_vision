@@ -37,7 +37,7 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p
                 
 FrameBase::~FrameBase()
 {
-	//std::cout << "deleting FrameBase " << nodeId() << std::endl;
+	//std::cout << "deleting FrameBase " << id() << std::endl;
     is_deleting_ = true;
 
 	// Remove Frame State Blocks

@@ -10,6 +10,7 @@
 
 //wolf
 #include "sensor_base.h"
+#include "sensor_factory.h"
 
 // std
 
@@ -33,7 +34,6 @@ public:
     /** \brief Default destructor (not recommended)
      *
      * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-     *
      **/
     virtual ~SensorGPS();
 
@@ -42,6 +42,20 @@ public:
     virtual void registerNewStateBlocks();
 
 };
+
+//// Define the factory method and register it in the SensorFactory
+//namespace
+//{
+//SensorBase* createGPS(std::string& _name)
+//{
+//    SensorBase* sen = new SensorGPS(nullptr, nullptr, nullptr, nullptr, nullptr);
+//    sen->setName(_name);
+//    return sen;
+//}
+//const bool registered_gps = SensorFactory::get()->registerSensor("GPS_RAW", createGPS);
+//}
+
+
 
 } // namespace wolf
 

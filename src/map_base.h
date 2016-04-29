@@ -45,7 +45,6 @@ class MapBase : public NodeLinked<Problem,LandmarkBase>
 
         LandmarkBaseList* getLandmarkListPtr();
         
-
 };
 
 inline LandmarkBaseList* MapBase::getLandmarkListPtr()
