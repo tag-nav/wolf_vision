@@ -5,6 +5,7 @@
 
 //wolf
 #include "sensor_base.h"
+#include "sensor_factory.h"
 
 //laser_scan_utils
 #include "laser_scan_utils/scan_basics.h"
@@ -129,6 +130,20 @@ class SensorLaser2D : public SensorBase
          **/                
         void printSensorParameters() const;
 };
+
+// Define the factory method and register it in the SensorFactory
+namespace
+{
+SensorBase* createLaser2D(std::string& _name)
+{
+    SensorBase* sen = new SensorLaser2D(nullptr, nullptr);
+    sen->setName(_name);
+    return sen;
+}
+const bool registered_laser = SensorFactory::get()->registerSensor("LIDAR", createLaser2D);
+}
+
+
 
 } // namespace wolf
 

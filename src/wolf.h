@@ -204,7 +204,8 @@ typedef enum
  */
 typedef enum
 {
-    SEN_ODOM_2D,	    ///< Odometry measurement from encoders: displacement and rotation.
+    SEN_ODOM_2D,        ///< 2D Odometry measurement from encoders: displacement and rotation.
+    SEN_ODOM_3D,        ///< 3D Odometry measurement from encoders: displacement and rotation.
     SEN_TWIST_2D,       ///< Twist measurement form encoders or motion command: lineal and angular velocities.
     SEN_IMU,		      ///< Inertial measurement unit with 3 acceleros, 3 gyros
     SEN_CAMERA,		    ///< Regular pinhole camera

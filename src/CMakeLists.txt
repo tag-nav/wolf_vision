@@ -132,6 +132,7 @@ SET(HDRS
     processor_tracker_landmark_dummy.h
     sensor_base.h
     sensor_camera.h
+    sensor_factory.h
     sensor_odom_2D.h
     sensor_gps.h
     sensor_gps_fix.h
@@ -183,6 +184,7 @@ SET(SRCS
     processor_tracker_landmark_dummy.cpp
     sensor_base.cpp
     sensor_camera.cpp
+    sensor_factory.cpp
     sensor_odom_2D.cpp
     sensor_gps_fix.cpp
     time_stamp.cpp

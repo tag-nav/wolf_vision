@@ -1,3 +1,7 @@
+# SensorFactory classes test
+ADD_EXECUTABLE(test_sensor_factory test_sensor_factory.cpp)
+TARGET_LINK_LIBRARIES(test_sensor_factory ${PROJECT_NAME})
+
 # ProcessorMotion classes test
 ADD_EXECUTABLE(test_motion test_motion.cpp)
 TARGET_LINK_LIBRARIES(test_motion ${PROJECT_NAME})
