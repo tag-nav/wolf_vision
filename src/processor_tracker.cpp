@@ -28,9 +28,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     //    std::cout << "\nProcess..." << std::endl;
 
     incoming_ptr_ = _incoming_ptr;
-
     preProcess();
-
     // FIRST TIME
     if (origin_ptr_ == nullptr)
     {
