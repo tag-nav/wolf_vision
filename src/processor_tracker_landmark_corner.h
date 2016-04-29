@@ -36,12 +36,16 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
     private:
         laserscanutils::ScanParams scan_params_;
         laserscanutils::ExtractCornerParams corner_alg_params_;
+        FeatureBaseList corners_incoming_;
+        FeatureBaseList corners_last_;
         unsigned int n_corners_th_;
 
-        Eigen::Matrix3s R_sensor_world_, R_world_sensor_;
+        Eigen::Matrix3s R_sensor_world_, R_world_sensor_, R_world_sensor_prev_, R_sensor_world_prev_;
         Eigen::Matrix3s R_robot_sensor_;
-        Eigen::Vector3s t_sensor_world_, t_world_sensor_;
+        Eigen::Matrix3s R_current_prev_;
+        Eigen::Vector3s t_sensor_world_, t_world_sensor_, t_world_sensor_prev_, t_sensor_world_prev_;
         Eigen::Vector3s t_robot_sensor_;
+        Eigen::Vector3s t_current_prev_;
         Eigen::Vector3s t_world_robot_;
         bool extrinsics_transformation_computed_;
 
@@ -56,6 +60,12 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 
         virtual void preProcess();
         virtual void postProcess(){}
+
+        void advance()
+        {
+            ProcessorTrackerLandmark::advance();
+            corners_last_ = std::move(corners_incoming_);
+        }
 
         /** \brief Find provided landmarks in the incoming capture
          * \param _landmark_list_in input list of landmarks to be found in incoming
@@ -119,7 +129,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 inline ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(const laserscanutils::ScanParams& _scan_params,
                                                     const laserscanutils::ExtractCornerParams& _corner_alg_params,
                                                     const unsigned int& _n_corners_th) :
-        ProcessorTrackerLandmark(PRC_TRACKER_LIDAR, 0), scan_params_(_scan_params), corner_alg_params_(
+        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0), scan_params_(_scan_params), corner_alg_params_(
                 _corner_alg_params), n_corners_th_(_n_corners_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
 {
 }
@@ -130,7 +140,8 @@ inline ProcessorTrackerLandmarkCorner::~ProcessorTrackerLandmarkCorner()
 
 inline unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const unsigned int& _max_features)
 {
-    // already computed since each scan is computed in preprocess(), new corners are classified in findLandmarks()
+    // already computed since each scan is computed in preprocess()
+    new_features_last_ = std::move(corners_last_);
     return new_features_last_.size();
 }
 
