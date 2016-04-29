@@ -30,6 +30,7 @@ ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
 TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
 
 IF(Suitesparse_FOUND)
+IF (0) # These cannot compile on MacOSX -- we'll fix it some day.
     # Testing a ccolamd test
     ADD_EXECUTABLE(test_ccolamd solver/test_ccolamd.cpp)
     TARGET_LINK_LIBRARIES(test_ccolamd ${PROJECT_NAME})
@@ -42,7 +43,6 @@ IF(Suitesparse_FOUND)
     ADD_EXECUTABLE(test_incremental_ccolamd_blocks solver/test_incremental_ccolamd_blocks.cpp)
     TARGET_LINK_LIBRARIES(test_incremental_ccolamd_blocks ${PROJECT_NAME})
     
-IF (0) # These cannot compile on MacOSX -- we'll fix it some day.
     # Testing an incremental QR with block ccolamd test
     ADD_EXECUTABLE(test_iQR solver/test_iQR.cpp)
     TARGET_LINK_LIBRARIES(test_iQR ${PROJECT_NAME})
