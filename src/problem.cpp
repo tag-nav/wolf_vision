@@ -45,6 +45,14 @@ void Problem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
+SensorBase* Problem::addSensor(std::string _sen_type, std::string _sen_name, std::string _sen_params_filename)
+{
+    SensorBase* sen_ptr = SensorFactory::get()->createSensor(_sen_type, _sen_name, _sen_params_filename);
+    addSensor(sen_ptr);
+    return sen_ptr;
+}
+
+
 void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
 {
     processor_motion_ptr_ = _processor_motion_ptr;
