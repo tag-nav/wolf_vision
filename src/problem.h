@@ -12,6 +12,7 @@ class TimeStamp;
 
 //wolf includes
 #include "node_base.h"
+#include "sensor_factory.h"
 #include "wolf.h"
 
 // std includes
@@ -72,11 +73,16 @@ class Problem : public NodeBase
 
 
         /** \brief add sensor to hardware
-         *
-         * add sensor to hardware
-         *
          */
         void addSensor(SensorBase* _sen_ptr);
+
+        /** \brief Factory method to add sensor only from its properties
+         */
+        SensorBase* addSensor(std::string _sen_type, std::string _sen_name, std::string _sen_params_filename){
+            SensorBase* sen_ptr = SensorFactory::get()->createSensor(_sen_type, _sen_name, _sen_params_filename);
+            addSensor(sen_ptr);
+            return sen_ptr;
+        }
 
 
         /** \brief Set the processor motion
