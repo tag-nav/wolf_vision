@@ -43,7 +43,7 @@ class SensorGPSFix : public SensorBase
 // Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createGPSFix(std::string& _name)
+SensorBase* createGPSFix(std::string& _name, std::string _params_filename = "")
 {
     SensorBase* sen = new SensorGPSFix(nullptr, nullptr, 0);
     sen->setName(_name);

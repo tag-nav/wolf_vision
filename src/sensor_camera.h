@@ -40,7 +40,7 @@ class SensorCamera : public SensorBase
 // Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createCamera(std::string& _name)
+SensorBase* createCamera(std::string& _name, std::string _params_filename = "")
 {
     SensorBase* sen = new SensorCamera(nullptr, nullptr, nullptr,0,0);
     sen->setName(_name);

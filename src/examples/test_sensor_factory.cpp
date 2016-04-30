@@ -5,6 +5,7 @@
  *      \author: jsola
  */
 
+#include "../sensor_gps_fix.h"
 #include "../sensor_camera.h"
 #include "../sensor_odom_2D.h"
 #include "../sensor_factory.h"

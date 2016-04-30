@@ -46,7 +46,7 @@ public:
 //// Define the factory method and register it in the SensorFactory
 //namespace
 //{
-//SensorBase* createGPS(std::string& _name)
+//SensorBase* createGPS(std::string& _name, std::string _params_filename = "")
 //{
 //    SensorBase* sen = new SensorGPS(nullptr, nullptr, nullptr, nullptr, nullptr);
 //    sen->setName(_name);

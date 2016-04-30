@@ -134,7 +134,7 @@ class SensorLaser2D : public SensorBase
 // Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createLaser2D(std::string& _name)
+SensorBase* createLaser2D(std::string& _name, std::string _params_filename = "")
 {
     SensorBase* sen = new SensorLaser2D(nullptr, nullptr);
     sen->setName(_name);
