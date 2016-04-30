@@ -11,7 +11,7 @@ namespace wolf
 {
 
 Problem::Problem(FrameStructure _frame_structure) :
-        NodeBase("WOLF_PROBLEM"), //
+        NodeBase("PROBLEM"), //
         location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(
                 new HardwareBase), processor_motion_ptr_(nullptr)
 {

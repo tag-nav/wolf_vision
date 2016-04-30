@@ -31,7 +31,7 @@ int main(void)
     sensors.push_back(SensorFactory::get()->createSensor("ODOM_2D", "aux odometer"));
 
     for (auto sen : sensors){
-        std::cout << "Sensor: " << sen->id() << " | type: " << sen->type() << " | name: " << sen->getName() << std::endl;
+        std::cout << "Sensor: " << sen->id() << " | type " << sen->typeId() << ": " << sen->getType() << " | name: " << sen->getName() << std::endl;
     }
     (*(sensors.rbegin()))->getName();
 
