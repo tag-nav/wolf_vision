@@ -9,7 +9,7 @@ unsigned int ProcessorBase::processor_id_count_ = 0;
 ProcessorBase::ProcessorBase(ProcessorType _tp) :
         NodeLinked(MID, "PROCESSOR"),
         processor_id_(++processor_id_count_),
-        type_(_tp)
+        type_id_(_tp)
 {
     //
 }
