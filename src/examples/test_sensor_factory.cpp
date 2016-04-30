@@ -26,10 +26,10 @@ int main(void)
 
     problem.addSensor("CAMERA", "left camera", "");
     problem.addSensor("CAMERA", "right camera", "");
-    problem.addSensor("ODOM_2D", "main odometer", "");
-    problem.addSensor("GPS_FIX", "GPS fix", "");
+    problem.addSensor("ODOM 2D", "main odometer", "");
+    problem.addSensor("GPS FIX", "GPS fix", "");
     problem.addSensor("CAMERA", "rear camera", "");
-    SensorBase* sen_ptr = problem.addSensor("ODOM_2D", "aux odometer", "");
+    SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", "");
 
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
         std::cout << "Sensor: " << sen->id() << " | type " << sen->typeId() << ": " << sen->getType() << "\t| name: " << sen->getName() << std::endl;
