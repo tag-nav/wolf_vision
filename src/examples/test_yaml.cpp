@@ -23,7 +23,8 @@ int main(){
 
         YAML::Node params = camera_config["parameters"];
 
-        std::vector<double> p = params["position"].as<std::vector<double>>();
+        std::vector<double> p = camera_config["parameters"]["position"].as<std::vector<double>>(); // in one go: it works!
+//        std::vector<double> p = params["position"].as<std::vector<double>>(); // through sub-structure 'params'
         std::vector<double> o = params["orientation"].as<std::vector<double>>();
         std::vector<double> s = params["image size"].as<std::vector<double>>();
         std::vector<double> k = params["intrinsic"].as<std::vector<double>>();
