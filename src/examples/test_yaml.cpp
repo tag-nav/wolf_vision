@@ -23,9 +23,9 @@ int main(){
 
         YAML::Node params = camera_config["parameters"];
 
-        std::vector<double> s = params["image size"].as<std::vector<double>>();
         std::vector<double> p = params["position"].as<std::vector<double>>();
         std::vector<double> o = params["orientation"].as<std::vector<double>>();
+        std::vector<double> s = params["image size"].as<std::vector<double>>();
         std::vector<double> k = params["intrinsic"].as<std::vector<double>>();
         std::vector<double> d = params["distortion"].as<std::vector<double>>();
         std::vector<double> c = params["correction"].as<std::vector<double>>();
@@ -33,10 +33,10 @@ int main(){
         using namespace Eigen;
 
         // Using Eigen vector constructors from data pionters. Mind the vector sizes!
-        Vector2d size(s.data());
         Vector3d pos(p.data());
         Vector3d ori(o.data());
         ori *= 3.1415926536/180;
+        Vector2d size(s.data());
         Vector4d intrinsic(k.data());
         Map<VectorXd> distortion(d.data(), d.size());
         Map<VectorXd> correction(c.data(), c.size());
@@ -46,8 +46,10 @@ int main(){
         std::cout << "sensor parameters: " << std::endl;
         std::cout << "\tposition    : " << pos.transpose() << std::endl;
         std::cout << "\torientation : " << ori.transpose() << std::endl;
-        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
         std::cout << "\timage size  : " << size.transpose() << std::endl;
+        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
+        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
+        std::cout << "\tcorrection  : " << correction.transpose() << std::endl;
     }
     else
         std::cout << "Bad configuration file. No sensor type found." << std::endl;
