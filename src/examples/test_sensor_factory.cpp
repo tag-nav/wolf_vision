@@ -12,7 +12,6 @@
 #include "../problem.h"
 //#include "../sensor_imu.h" // this class not finished
 
-#include <list>
 
 int main(void)
 {
