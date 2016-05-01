@@ -29,6 +29,11 @@ TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
 ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
 TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
 
+# Enable Yaml config files
+IF(YAMLCPP_FOUND)
+    ADD_EXECUTABLE(test_yaml test_yaml.cpp)
+ENDIF(YAMLCPP_FOUND)
+
 IF(Suitesparse_FOUND)
 IF (0) # These cannot compile on MacOSX -- we'll fix it some day.
     # Testing a ccolamd test

@@ -37,6 +37,12 @@ class SensorCamera : public SensorBase
 
 };
 
+} // namespace wolf
+
+//#include "yaml-cpp/yaml.h"
+
+namespace wolf{
+
 // Define the factory method and register it in the SensorFactory
 namespace
 {
@@ -48,7 +54,6 @@ SensorBase* createCamera(std::string& _name, std::string _params_filename = "")
 }
 const bool registered_camera = SensorFactory::get()->registerSensor("CAMERA", createCamera);
 }
-
 
 } // namespace wolf
 

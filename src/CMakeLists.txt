@@ -32,6 +32,15 @@ IF(OpenCV_FOUND)
     MESSAGE("OpenCV Library FOUND: OpenCV related sources will be built.")
 ENDIF(OpenCV_FOUND)
 
+# YAML with yaml-cpp
+SET(YAMLCPP_STATIC_LIBRARY TRUE)
+FIND_PACKAGE(YamlCpp)
+IF(YamlCpp_FOUND)
+    MESSAGE("yaml-cpp Library FOUND: yaml-cpp related sources will be built.")
+ELSEIF(YamlCpp_FOUND)
+    MESSAGE("yaml-cpp Library NOT FOUND!")
+ENDIF(YamlCpp_FOUND)
+    
 # SuiteSparse doesn't have find*.cmake:
 FIND_PATH(
     Suitesparse_INCLUDE_DIRS
