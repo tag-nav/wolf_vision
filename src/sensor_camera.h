@@ -8,7 +8,18 @@
 
 namespace wolf {
 
-/**Pin hole camera sensor
+/** Struct of all intrinsic camera parameters
+ */
+struct IntrinsicsCamera : public IntrinsicsBase
+{
+        unsigned int width;                 // Image width in pixels
+        unsigned int height;                // Image height in pixels
+        Eigen::Vector4s intrinsic_vector;   // k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole-model intrinsic parameters
+        Eigen::VectorXs distortion;         // d = [d_1, d_2, d_3, ...] radial distortion coefficients
+        Eigen::VectorXs correction;         // c = [c_1, c_2, c_3, ...] radial distortion correction coefficients
+};
+
+/**Pin-hole camera sensor
  */
 class SensorCamera : public SensorBase
 {

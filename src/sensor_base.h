@@ -16,6 +16,15 @@ class StateBlock;
 
 namespace wolf {
 
+/** \brief base struct for intrinsic sensor parameters
+ *
+ * Derive from this struct to create structs for sensor intrinsic parameters.
+ */
+struct IntrinsicsBase
+{
+        // This struct empty. Derive from it to create classes for sensor intrinsic parameters.
+};
+
 class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 {
     private:
