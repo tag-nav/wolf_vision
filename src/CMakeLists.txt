@@ -33,13 +33,15 @@ IF(OpenCV_FOUND)
 ENDIF(OpenCV_FOUND)
 
 # YAML with yaml-cpp
-SET(YAMLCPP_STATIC_LIBRARY TRUE)
+SET(YAMLCPP_USE_STATIC_LIBS TRUE) #Use static library : not working: TO BE REVISED
 FIND_PACKAGE(YamlCpp)
-IF(YamlCpp_FOUND)
+IF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library FOUND: yaml-cpp related sources will be built.")
-ELSEIF(YamlCpp_FOUND)
+    MESSAGE("YamlCpp includes: " ${YAMLCPP_INCLUDE_DIR})
+    MESSAGE("YamlCpp library: " ${YAMLCPP_LIBRARY})
+ELSEIF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library NOT FOUND!")
-ENDIF(YamlCpp_FOUND)
+ENDIF(YAMLCPP_FOUND)
     
 # SuiteSparse doesn't have find*.cmake:
 FIND_PATH(
@@ -294,6 +296,11 @@ ENDIF (raw_gps_utils_FOUND)
 IF (OpenCV_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
 ENDIF (OpenCV_FOUND)
+
+IF (YAMLCPP_FOUND)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${YAMLCPP_LIBRARY})
+ENDIF (YAMLCPP_FOUND)
+
 
 #install library
 INSTALL(TARGETS ${PROJECT_NAME}

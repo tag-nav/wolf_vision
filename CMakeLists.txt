@@ -10,10 +10,6 @@ endif(COMMAND cmake_policy)
 # MAC OSX RPATH
 SET(CMAKE_MACOSX_RPATH 1)
 
-#CMAKE modules
-SET(CMAKE_MODULE_PATH /usr/local/share/cmake/Modules)
-
-
 # The project name and the type of project
 PROJECT(wolf)
 
