@@ -93,8 +93,8 @@ int main(int argc, char** argv)
     problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full, problem_options);
-    CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun, problem_options);
+    CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full);
+    CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun);
 
     // load graph from .txt
     offLineFile_.open(file_path_.c_str(), std::ifstream::in);

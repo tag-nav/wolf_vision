@@ -66,11 +66,7 @@ int main()
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr, problem_options);
+    CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr);
 
 
     // Origin Key Frame
