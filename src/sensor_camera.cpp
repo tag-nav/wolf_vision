@@ -15,6 +15,7 @@ SensorCamera::SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _
         img_width_(_img_width),
         img_height_(_img_height)
 {
+    setType("CAMERA");
     //
 }
 

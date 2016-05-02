@@ -26,7 +26,7 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
         static unsigned int frame_id_count_;
     protected:
         unsigned int frame_id_;
-        FrameType type_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
+        FrameType type_id_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
         TimeStamp time_stamp_;   ///< frame time stamp
         StateStatus status_;     ///< status of the estimation of the frame state
         StateBlock* p_ptr_;      ///< Position state block pointer
@@ -132,7 +132,7 @@ inline unsigned int FrameBase::id()
 
 inline bool FrameBase::isKey() const
 {
-    return (type_ == KEY_FRAME);
+    return (type_id_ == KEY_FRAME);
 }
 
 inline void FrameBase::fix()

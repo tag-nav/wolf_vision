@@ -53,13 +53,13 @@ class SensorOdom2D : public SensorBase
 // Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createOdom2D(std::string& _name)
+SensorBase* createOdom2D(std::string& _name, std::string _params_filename = "")
 {
     SensorBase* odo = new SensorOdom2D(nullptr, nullptr,0,0);
     odo->setName(_name);
     return odo;
 }
-const bool registered_odom_2d = SensorFactory::get()->registerSensor("ODOM_2D", createOdom2D);
+const bool registered_odom_2d = SensorFactory::get()->registerSensor("ODOM 2D", createOdom2D);
 }
 
 

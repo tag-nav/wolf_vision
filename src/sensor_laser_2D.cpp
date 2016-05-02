@@ -12,6 +12,7 @@ namespace wolf {
 SensorLaser2D::SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr) :
     SensorBase(SEN_LIDAR, _p_ptr, _o_ptr, nullptr, 8)
 {
+    setType("LASER 2D");
     setDefaultScanParams();
     setDefaultCornerAlgParams();  
 }

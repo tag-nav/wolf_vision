@@ -11,7 +11,7 @@ namespace wolf
 {
 
 Problem::Problem(FrameStructure _frame_structure) :
-        NodeBase("WOLF_PROBLEM"), //
+        NodeBase("PROBLEM"), //
         location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(
                 new HardwareBase), processor_motion_ptr_(nullptr)
 {
@@ -44,6 +44,14 @@ void Problem::addSensor(SensorBase* _sen_ptr)
 {
     getHardwarePtr()->addSensor(_sen_ptr);
 }
+
+SensorBase* Problem::addSensor(std::string _sen_type, std::string _sen_name, std::string _sen_params_filename)
+{
+    SensorBase* sen_ptr = SensorFactory::get()->createSensor(_sen_type, _sen_name, _sen_params_filename);
+    addSensor(sen_ptr);
+    return sen_ptr;
+}
+
 
 void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
 {

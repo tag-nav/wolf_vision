@@ -20,7 +20,7 @@ bool SensorFactory::unregisterSensor(std::string _sensor_type)
     return callbacks_.erase(_sensor_type) == 1;
 }
 
-wolf::SensorBase* SensorFactory::createSensor(std::string _sensor_type, std::string _name)
+wolf::SensorBase* SensorFactory::createSensor(std::string _sensor_type, std::string _name, std::string _params_filename)
 {
     CallbackMap::const_iterator i = callbacks_.find(_sensor_type);
     if (i == callbacks_.end())
@@ -29,7 +29,7 @@ wolf::SensorBase* SensorFactory::createSensor(std::string _sensor_type, std::str
         throw std::runtime_error("Unknown Sensor type");
     }
     // Invoke the creation function
-    return (i->second)(_name);
+    return (i->second)(_name, _params_filename);
 }
 
 // Singleton ---------------------------------------------------

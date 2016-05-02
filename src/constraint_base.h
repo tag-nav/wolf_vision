@@ -24,7 +24,7 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
         static unsigned int constraint_id_count_;
     protected:
         unsigned int constraint_id_;
-        ConstraintType type_;                           ///< type of constraint (types defined at wolf.h)
+        ConstraintType type_id_;                           ///< type of constraint (types defined at wolf.h)
         ConstraintCategory category_;                   ///< category of constraint (types defined at wolf.h)
         ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
         FrameBase* frame_ptr_;                          ///< FrameBase pointer (for category CTR_FRAME)
@@ -132,7 +132,7 @@ inline unsigned int ConstraintBase::id()
 
 inline ConstraintType ConstraintBase::getType() const
 {
-    return type_;
+    return type_id_;
 }
 
 inline FeatureBase* ConstraintBase::getFeaturePtr() const

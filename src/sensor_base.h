@@ -22,7 +22,7 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
         static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
     protected:
         unsigned int sensor_id_;   // sensor ID
-        SensorType type_;       // the type of sensor. See wolf.h for a list of all sensor types.
+        SensorType type_id_;       // the type of sensor. See wolf.h for a list of all sensor types.
         StateBlock* p_ptr_;		// sensor position state block pointer
         StateBlock* o_ptr_; 	// sensor orientation state block pointer
         StateBlock* intrinsic_ptr_; // intrinsic parameters
@@ -69,7 +69,7 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 
         unsigned int id();
 
-        SensorType type();
+        SensorType typeId();
 
         ProcessorBase* addProcessor(ProcessorBase* _proc_ptr);
 
@@ -107,9 +107,9 @@ inline unsigned int SensorBase::id()
     return sensor_id_;
 }
 
-inline wolf::SensorType SensorBase::type()
+inline wolf::SensorType SensorBase::typeId()
 {
-    return type_;
+    return type_id_;
 }
 
 inline ProcessorBase* SensorBase::addProcessor(ProcessorBase* _proc_ptr)

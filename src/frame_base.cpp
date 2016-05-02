@@ -12,7 +12,7 @@ unsigned int FrameBase::frame_id_count_ = 0;
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeConstrained(MID, "FRAME"),
             frame_id_(++frame_id_count_),
-            type_(NON_KEY_FRAME),
+            type_id_(NON_KEY_FRAME),
             time_stamp_(_ts),
 			status_(ST_ESTIMATED),
 			p_ptr_(_p_ptr),
@@ -25,7 +25,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
 FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeConstrained(MID, "FRAME"),
             frame_id_(++frame_id_count_),
-            type_(_tp),
+            type_id_(_tp),
             time_stamp_(_ts),
 			status_(ST_ESTIMATED),
 			p_ptr_(_p_ptr),
@@ -88,9 +88,9 @@ void FrameBase::registerNewStateBlocks()
 
 void FrameBase::setKey()
 {
-    if (type_ != KEY_FRAME)
+    if (type_id_ != KEY_FRAME)
     {
-        type_ = KEY_FRAME;
+        type_id_ = KEY_FRAME;
         registerNewStateBlocks();
     }
 }

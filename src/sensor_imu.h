@@ -36,7 +36,7 @@ class SensorIMU : public SensorBase
 // Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createIMU(std::string& _name)
+SensorBase* createIMU(std::string& _name, std::string _params_filename = "")
 {
     SensorBase* sen = new SensorIMU(nullptr, nullptr);
     sen->setName(_name);
