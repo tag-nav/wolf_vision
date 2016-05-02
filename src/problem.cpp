@@ -154,7 +154,7 @@ void Problem::keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _process
 {
     for (auto sensor : (*hardware_ptr_->getSensorListPtr()))
         for (auto processor : (*sensor->getProcessorListPtr()))
-            if (processor != _processor_ptr)
+            if (processor->id() != _processor_ptr->id())
                 processor->keyFrameCallback(_keyframe_ptr);
 }
 
