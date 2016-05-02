@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     tracker_params.detector.octaves = 2;
     tracker_params.detector.nominal_pattern_radius = 4;
 //    tracker_params.descriptor.size = 512;
-    tracker_params.descriptor.pattern_scale = 1.0;
+    tracker_params.descriptor.pattern_scale = 0.5;
     tracker_params.descriptor.nominal_pattern_radius = 18;
     tracker_params.matcher.min_normalized_score = 0.75;
     tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
@@ -121,13 +121,13 @@ int main(int argc, char** argv)
 //    cv::BRISK* det_ptr = new cv::BRISK(tracker_params.detector.threshold,
 //                                       tracker_params.detector.octaves,
 //                                       tracker_params.descriptor.pattern_scale);
-    cv::ORB* det_ptr = new cv::ORB(500, 1.0f, 1, 4);
+    cv::ORB* det_ptr = new cv::ORB(500,1.2f, 1, 4);//(500, 1.0f, 1, 4);
 
     /* descriptor */
-//    cv::BRISK* desc_ext_ptr = new cv::BRISK(tracker_params.detector.threshold,
-//                                                          tracker_params.detector.octaves,
-//                                                          tracker_params.descriptor.pattern_scale);
-    cv::ORB* desc_ext_ptr = new cv::ORB(500, 1.0f, 1, 4);
+    cv::BRISK* desc_ext_ptr = new cv::BRISK(tracker_params.detector.threshold,
+                                                          tracker_params.detector.octaves,
+                                                          tracker_params.descriptor.pattern_scale);
+    //cv::ORB* desc_ext_ptr = new cv::ORB(500,0.4f, 1, 4);//(500, 1.0f, 1, 4);
 
     /* matcher */
     cv::BFMatcher* match_ptr = new cv::BFMatcher(cv::NORM_HAMMING);

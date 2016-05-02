@@ -119,8 +119,8 @@ void ProcessorBrisk::postProcess()
 //    if(image_last_.data == image_incoming_.data)
 //        std::cout << "--------------------------------------------------------------------------SON IGUALES (post)" << std::endl;
 //    drawRoi(image_last_,detector_roi_,cv::Scalar(88.0, 70.0, 255.0));//detector roi(now only shown when it collides with the the image)
-//    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0)); //tracker roi
-//    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
+    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0)); //tracker roi
+    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
 //    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
     cv::waitKey(30);
 }
@@ -142,12 +142,17 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 //    detector_.detect(_image_roi, _new_keypoints);
 //    descriptor_.compute(_image_roi, _new_keypoints, new_descriptors);
     detector_ptr_->detect(_image_roi, _new_keypoints);
+    for (unsigned int i = 0; i < _new_keypoints.size(); i++)
+    {
+        std::cout << "keypoints: " << _new_keypoints[i].pt << std::endl;
+    }
     descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
 
-    std::cout << "detect roi2: " << _roi << std::endl;
+    //std::cout << "detect roi2: " << _roi << std::endl;
 
     for (unsigned int i = 0; i < _new_keypoints.size(); i++)
     {
+        std::cout << "keypoints 2: " << _new_keypoints[i].pt << std::endl;
         _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
         _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
     }
@@ -168,7 +173,7 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_feat
         if (act_search_grid_.pickRoi(roi))
         {
         	detector_roi_.push_back(roi);
-            std::cout << "roi: " << roi << std::endl;
+//            std::cout << "roi: " << roi << std::endl;
             if (detect(image_last_, roi, new_keypoints, new_descriptors))
             {
                 //Escoger uno de los features encontrados -> el 0 o primero.
