@@ -122,7 +122,7 @@ void ProcessorBrisk::postProcess()
 //    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0)); //tracker roi
 //    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
 //    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
-    cv::waitKey(1);
+    cv::waitKey(30);
 }
 
 bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
@@ -137,12 +137,14 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
     adaptRoi(_image_roi, _image, _roi);
 
-//    std::cout << "roi: " << _roi << std::endl;
+    std::cout << "detect roi: " << _roi << std::endl;
 
 //    detector_.detect(_image_roi, _new_keypoints);
 //    descriptor_.compute(_image_roi, _new_keypoints, new_descriptors);
     detector_ptr_->detect(_image_roi, _new_keypoints);
     descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
+
+    std::cout << "detect roi2: " << _roi << std::endl;
 
     for (unsigned int i = 0; i < _new_keypoints.size(); i++)
     {
@@ -166,7 +168,7 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_feat
         if (act_search_grid_.pickRoi(roi))
         {
         	detector_roi_.push_back(roi);
-//        	std::cout << "roi: " << roi << std::endl;
+            std::cout << "roi: " << roi << std::endl;
             if (detect(image_last_, roi, new_keypoints, new_descriptors))
             {
                 //Escoger uno de los features encontrados -> el 0 o primero.

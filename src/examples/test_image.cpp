@@ -130,7 +130,7 @@ int main(int argc, char** argv)
     cv::ORB* desc_ext_ptr = new cv::ORB(500, 1.0f, 1, 4);
 
     /* matcher */
-    cv::BFMatcher* match_ptr = new cv::BFMatcher(tracker_params.matcher.similarity_norm);
+    cv::BFMatcher* match_ptr = new cv::BFMatcher(cv::NORM_HAMMING);
 
 
     ProcessorBrisk* test_p_brisk = new ProcessorBrisk(det_ptr,desc_ext_ptr,match_ptr,tracker_params);
