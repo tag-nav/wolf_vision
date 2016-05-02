@@ -153,8 +153,10 @@ inline unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const unsi
 
 inline LandmarkBase* ProcessorTrackerLandmarkCorner::createLandmark(FeatureBase* _feature_ptr)
 {
+    //std::cout << "ProcessorTrackerLandmarkCorner::createLandmark" << std::endl;
+
     // compute feature global pose
-    Eigen::Vector3s feature_global_pose = R_world_sensor_ * _feature_ptr->getMeasurement() + t_world_sensor_;
+    Eigen::Vector3s feature_global_pose = R_world_sensor_ * _feature_ptr->getMeasurement().head<3>() + t_world_sensor_;
     // Create new landmark
     return new LandmarkCorner2D(new StateBlock(feature_global_pose.head(2)),
                                 new StateBlock(feature_global_pose.tail(1)), _feature_ptr->getMeasurement()(3));

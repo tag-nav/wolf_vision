@@ -32,12 +32,17 @@ void ProcessorTrackerLandmarkCorner::preProcess()
     // sensor_global
     R_sensor_world_.topLeftCorner<2, 2>() = R_robot_sensor_.topLeftCorner<2, 2>().transpose() * R_world_robot.topLeftCorner<2, 2>().transpose();
     t_sensor_world_ = -R_sensor_world_ * t_world_robot_ - R_robot_sensor_.transpose() * t_robot_sensor_;
+
+
+    std::cout << "PreProcess: incoming new features: " << corners_incoming_.size() << std::endl;
 }
 
 unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(LandmarkBaseList& _landmarks_corner_searched,
                                                            FeatureBaseList& _features_corner_found,
                                                            LandmarkMatchMap& _feature_landmark_correspondences)
 {
+    std::cout << "ProcessorTrackerLandmarkCorner::findLandmarks: " << corners_incoming_.size() << std::endl;
+
     // MATCHING FROM MAP
     if (!corners_incoming_.empty())
     {
@@ -50,6 +55,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(LandmarkBaseList& _la
         std::map<LandmarkBase*, Eigen::Matrix3s> expected_features_covs;
         for (auto landmark : _landmarks_corner_searched)
             expectedFeature(landmark, expected_features[landmark], expected_features_covs[landmark]);
+        std::cout << "expected features!" << std::endl;
 
         // SETTING ASSOCIATION TREE
         std::map<unsigned int, FeatureBaseIter> features_map;
@@ -97,9 +103,9 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(LandmarkBaseList& _la
         tree.solve(ft_lk_pairs, associated_mask);
         //print tree & score table
         std::cout << "------------- TREE SOLVED ---------" << std::endl;
-        std::cout << corners_incoming_.size() << " new corners:" << std::endl;
+        std::cout << corners_incoming_.size() << " new corners in incoming:" << std::endl;
         for (auto new_feature : corners_incoming_)
-            std::cout << "\tnew feature " << new_feature->nodeId() << std::endl;
+            std::cout << "\tcorner " << new_feature->id() << std::endl;
         std::cout << ft_lk_pairs.size() << " pairs:" << std::endl;
         for (auto pair : ft_lk_pairs)
             std::cout << "\tfeature " << pair.first << " & landmark " << pair.second << std::endl;
@@ -117,16 +123,17 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(LandmarkBaseList& _la
             // move matched feature to list
             _features_corner_found.splice(_features_corner_found.end(), corners_incoming_, features_map[pair.first]);
         }
-        std::cout << corners_incoming_.size() << " new incoming corners:" << std::endl;
+        std::cout << corners_incoming_.size() << " remaining new corners in incoming:" << std::endl;
         for (auto new_feature : corners_incoming_)
-            std::cout << "\tnew feature " << new_feature->id() << std::endl;
+            std::cout << "\tcorner " << new_feature->id() << std::endl;
     }
     return matches_landmark_from_incoming_.size();
 }
 
 bool ProcessorTrackerLandmarkCorner::voteForKeyFrame()
 {
-    return matches_landmark_from_incoming_.size() < n_corners_th_ && matches_landmark_from_last_.size() > matches_landmark_from_incoming_.size();
+    return true;
+    //return matches_landmark_from_incoming_.size() < n_corners_th_ && matches_landmark_from_last_.size() > matches_landmark_from_incoming_.size();
 }
 
 void ProcessorTrackerLandmarkCorner::extractCorners(CaptureLaser2D* _capture_laser_ptr,
@@ -135,7 +142,7 @@ void ProcessorTrackerLandmarkCorner::extractCorners(CaptureLaser2D* _capture_las
     // TODO: sort corners by bearing
     std::list<laserscanutils::CornerPoint> corners;
 
-    std::cout << "Extracting corners..." << std::endl;
+    //std::cout << "Extracting corners..." << _capture_laser_ptr->getScan().ranges_raw_.size() << std::endl;
     corner_finder_.findCorners(_capture_laser_ptr->getScan(), ((SensorLaser2D*)getSensorPtr())->getScanParams(), line_finder_, corners);
 
     Eigen::Vector4s measurement;
@@ -187,16 +194,19 @@ void ProcessorTrackerLandmarkCorner::extractCorners(CaptureLaser2D* _capture_las
 void ProcessorTrackerLandmarkCorner::expectedFeature(LandmarkBase* _landmark_ptr, Eigen::Vector4s& expected_feature_,
                                                    Eigen::Matrix3s& expected_feature_cov_)
 {
-    // closer keyframe with computed covariance
-    FrameBase* key_frame_ptr = origin_ptr_->getFramePtr();
+    //std::cout << "ProcessorTrackerLandmarkCorner::expectedFeature: " << std::endl;
+
     // ------------ expected feature measurement
-    expected_feature_.head(3) = R_sensor_world_ * (_landmark_ptr->getPPtr()->getVector() - t_world_sensor_);
+    expected_feature_.head<2>() = R_sensor_world_.topLeftCorner<2,2>() * (_landmark_ptr->getPPtr()->getVector() - t_world_sensor_.head<2>());
+    expected_feature_(2) = _landmark_ptr->getOPtr()->getVector()(0) - t_world_sensor_(2);
     expected_feature_(3) = ((LandmarkCorner2D*)((_landmark_ptr)))->getAperture();
     // ------------ expected feature covariance
-    // Sigma
     Eigen::MatrixXs Sigma = Eigen::MatrixXs::Zero(6, 6);
+    // closer keyframe with computed covariance
+    FrameBase* key_frame_ptr = (origin_ptr_ != nullptr ? origin_ptr_->getFramePtr() : nullptr);
     // If all covariance blocks are stored wolfproblem (filling upper diagonal only)
-    if (// Sigma_ll
+    if (key_frame_ptr != nullptr &&
+        // Sigma_ll
         getProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), Sigma, 0, 0) &&
         getProblem()->getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), Sigma, 0, 2) &&
         getProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), Sigma, 2, 2) &&
