@@ -106,11 +106,11 @@ IF(faramotics_FOUND)
                                 ${pose_state_time_LIBRARIES} 
                                 ${faramotics_LIBRARIES}
                                 ${PROJECT_NAME})
-        ADD_EXECUTABLE(test_autodiff test_autodiff.cpp)
-        TARGET_LINK_LIBRARIES(test_autodiff 
-                                ${pose_state_time_LIBRARIES} 
-                                ${faramotics_LIBRARIES}
-                                ${PROJECT_NAME})
+#        ADD_EXECUTABLE(test_autodiff test_autodiff.cpp)
+#        TARGET_LINK_LIBRARIES(test_autodiff 
+#                                ${pose_state_time_LIBRARIES} 
+#                                ${faramotics_LIBRARIES}
+#                                ${PROJECT_NAME})
                                 
         IF(Suitesparse_FOUND)
             ADD_EXECUTABLE(test_iQR_wolf2 solver/test_iQR_wolf2.cpp)

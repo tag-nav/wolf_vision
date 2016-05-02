@@ -18,7 +18,6 @@
 //Wolf includes
 #include "wolf_manager.h"
 #include "sensor_laser_2D.h"
-#include "processor_laser_2D.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 //C includes for sleep, time and main args
@@ -144,12 +143,8 @@ int main(int argc, char** argv)
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
     //    ceres_options.max_num_iterations = 100;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_ceres = new CeresManager(wolf_manager_ceres->getProblemPtr(), problem_options, false);
-    CeresManager* ceres_manager_wolf = new CeresManager(wolf_manager_wolf->getProblemPtr(), problem_options, true);
+    CeresManager* ceres_manager_ceres = new CeresManager(wolf_manager_ceres->getProblemPtr(), false);
+    CeresManager* ceres_manager_wolf = new CeresManager(wolf_manager_wolf->getProblemPtr(), true);
     std::ofstream log_file, landmark_file;  //output file
 
     //std::cout << "START TRAJECTORY..." << std::endl;
