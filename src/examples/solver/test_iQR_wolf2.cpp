@@ -185,11 +185,7 @@ int main(int argc, char *argv[])
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
     //    ceres_options.max_num_iterations = 100;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager = new CeresManager(wolf_manager_ceres->getProblemPtr(), problem_options);
+    CeresManager* ceres_manager = new CeresManager(wolf_manager_ceres->getProblemPtr());
     std::ofstream log_file, landmark_file;  //output file
 
     // Own solver
