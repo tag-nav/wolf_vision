@@ -45,7 +45,7 @@ class CeresManager
 		bool use_wolf_auto_diff_;
 
 	public:
-		CeresManager(Problem* _wolf_problem, ceres::Problem::Options _options, const bool _use_wolf_cost_functions = true);
+		CeresManager(Problem* _wolf_problem, const bool _use_wolf_auto_diff = true);
 
 		~CeresManager();
 

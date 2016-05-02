@@ -2,10 +2,9 @@
 
 namespace wolf {
 
-CeresManager::CeresManager(Problem*  _wolf_problem, ceres::Problem::Options _options, const bool _use_wolf_cost_functions) :
-    ceres_problem_(new ceres::Problem(_options)),
+CeresManager::CeresManager(Problem* _wolf_problem, const bool _use_wolf_auto_diff) :
     wolf_problem_(_wolf_problem),
-    use_wolf_auto_diff_(_use_wolf_cost_functions)
+    use_wolf_auto_diff_(_use_wolf_auto_diff)
 {
 	ceres::Covariance::Options covariance_options;
     covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
@@ -13,6 +12,12 @@ CeresManager::CeresManager(Problem*  _wolf_problem, ceres::Problem::Options _opt
     covariance_options.apply_loss_function = false;
 	//covariance_options.null_space_rank = -1;
 	covariance_ = new ceres::Covariance(covariance_options);
+
+	ceres::Problem::Options problem_options;
+    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
+    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    ceres_problem_ = new ceres::Problem(problem_options);
 }
 
 CeresManager::~CeresManager()
