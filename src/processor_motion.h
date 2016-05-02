@@ -141,13 +141,13 @@ class ProcessorMotion : public ProcessorBase
          * \param _origin_frame the key frame to be the origin
          * \param _ts_origin origin timestamp.
          */
-        void setOrigin(FrameBase* _origin_frame, TimeStamp& _ts_origin);
+        void setOrigin(FrameBase* _origin_frame, const TimeStamp& _ts_origin);
 
         /** Set the origin of all motion for this processor
          * \param _x_origin the state at the origin
          * \param _ts_origin origin timestamp.
          */
-        void setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin);
+        void setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin);
 
         virtual bool keyFrameCallback(FrameBase* _keyframe_ptr);
 
@@ -323,7 +323,7 @@ inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_
     //std::cout << _delta_cov1_plus_delta_cov2 << std::endl;
 }
 
-inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin)
+inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
     // make a new key frame
     FrameBase* key_frame_ptr = getProblem()->createFrame(KEY_FRAME, _x_origin, _ts_origin);
@@ -331,7 +331,7 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeSta
     setOrigin(key_frame_ptr, _ts_origin);
 }
 
-inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame, TimeStamp& _ts_origin)
+inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame, const TimeStamp& _ts_origin)
 {
     // make (empty) origin Capture
     origin_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
