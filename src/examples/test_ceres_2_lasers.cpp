@@ -128,20 +128,19 @@ class FaramoticsRobot
 
         void render(const FeatureBaseList& feature_list, const LandmarkBaseList& landmark_list, const Eigen::Vector3s& estimated_pose)
         {
-            std::cout << "render" << std::endl;
             // detected corners
+            std::cout << "   drawCorners: " << feature_list.size() << std::endl;
             std::vector<double> corner_vector;
-            std::cout << "drawCorners:" << feature_list.size() << std::endl;
             for (auto corner : feature_list)
             {
-                std::cout << "corner" << std::endl;
-                std::cout << "corner" << corner->id() << std::endl;
+                std::cout << "       corner " << corner->id() << std::endl;
                 corner_vector.push_back(corner->getMeasurement(0));
                 corner_vector.push_back(corner->getMeasurement(1));
             }
             myRender->drawCorners(laser1Pose, corner_vector);
 
             // landmarks
+            std::cout << "   drawLandmarks: " << landmark_list.size() << std::endl;
             std::vector<double> landmark_vector;
             for (auto landmark : landmark_list)
             {
@@ -151,7 +150,6 @@ class FaramoticsRobot
                 landmark_vector.push_back(0.2); //z
             }
             myRender->drawLandmarks(landmark_vector);
-            std::cout << "drawLandmarks" << std::endl;
 
             // draw localization and sensors
             estimated_vehicle_pose.setPose(estimated_pose(0), estimated_pose(1), 0.2, estimated_pose(2), 0, 0);
@@ -161,7 +159,6 @@ class FaramoticsRobot
             estimated_laser_2_pose.moveForward(laser_2_pose_(0));
             estimated_laser_2_pose.rt.setEuler(estimated_laser_2_pose.rt.head() + laser_2_pose_(3), estimated_laser_2_pose.rt.pitch(), estimated_laser_2_pose.rt.roll());
             myRender->drawPoseAxisVector( { estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose });
-            std::cout << "drawPoseAxisVector" << std::endl;
 
             //Set view point and render the scene
             //locate visualization view point, somewhere behind the device
@@ -169,11 +166,8 @@ class FaramoticsRobot
     //      viewPoint.rt.setEuler( viewPoint.rt.head(), viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
     //      viewPoint.moveForward(-5);
             myRender->setViewPoint(viewPoint);
-            std::cout << "setViewPoint" << std::endl;
             myRender->drawPoseAxis(devicePose);
-            std::cout << "drawPoseAxis" << std::endl;
             myRender->drawScan(laser1Pose, scan1, 180. * M_PI / 180., 90. * M_PI / 180.); //draw scan
-            std::cout << "drawScan" << std::endl;
             myRender->render();
         }
 };
@@ -183,7 +177,8 @@ int main(int argc, char** argv)
 {
     using namespace wolf;
 
-    std::cout << "\n ========= 2D Robot with odometry and 2 LIDARs ===========\n";
+    std::cout << "\n============================================================\n";
+    std::cout << "========== 2D Robot with odometry and 2 LIDARs =============\n";
 
     // USER INPUT ============================================================================================
     if (argc != 2 || atoi(argv[1]) < 1 )
@@ -303,8 +298,9 @@ int main(int argc, char** argv)
         // LIDAR DATA ---------------------------
         if (step % 3 == 0)
         {
-            std::cout << "LIDAR DATA..." << std::endl;
+            std::cout << "--PROCESS LIDAR 1 DATA..." << laser_1_sensor->id() << std::endl;
             laser_1_processor->process(new CaptureLaser2D(ts, laser_1_sensor, robot.computeScan(1)));
+            std::cout << "--PROCESS LIDAR 2 DATA..." << laser_2_sensor->id() << std::endl;
             laser_2_processor->process(new CaptureLaser2D(ts, laser_2_sensor, robot.computeScan(2)));
         }
 
