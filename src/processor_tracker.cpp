@@ -64,7 +64,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         //        std::cout << "SECOND TIME" << std::endl;
         //        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
-
+        std::cout << "second time" << std::endl;
         // 1. First we track the known Features and create new constraints as needed
         processKnown();
 

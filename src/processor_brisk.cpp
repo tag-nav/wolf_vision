@@ -119,8 +119,8 @@ void ProcessorBrisk::postProcess()
 //    if(image_last_.data == image_incoming_.data)
 //        std::cout << "--------------------------------------------------------------------------SON IGUALES (post)" << std::endl;
 //    drawRoi(image_last_,detector_roi_,cv::Scalar(88.0, 70.0, 255.0));//detector roi(now only shown when it collides with the the image)
-    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0)); //tracker roi
-    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
+//    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0)); //tracker roi
+//    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
 //    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
     cv::waitKey(30);
 }

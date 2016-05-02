@@ -124,10 +124,10 @@ int main(int argc, char** argv)
     cv::ORB* det_ptr = new cv::ORB(500,1.2f, 1, 4);//(500, 1.0f, 1, 4);
 
     /* descriptor */
-    cv::BRISK* desc_ext_ptr = new cv::BRISK(tracker_params.detector.threshold,
-                                                          tracker_params.detector.octaves,
-                                                          tracker_params.descriptor.pattern_scale);
-    //cv::ORB* desc_ext_ptr = new cv::ORB(500,0.4f, 1, 4);//(500, 1.0f, 1, 4);
+//    cv::BRISK* desc_ext_ptr = new cv::BRISK(tracker_params.detector.threshold,
+//                                                          tracker_params.detector.octaves,
+//                                                          tracker_params.descriptor.pattern_scale);
+    cv::ORB* desc_ext_ptr = new cv::ORB(500,0.4f, 1, 4);//(500, 1.0f, 1, 4);
 
     /* matcher */
     cv::BFMatcher* match_ptr = new cv::BFMatcher(cv::NORM_HAMMING);

@@ -64,7 +64,7 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
     // Populate the last Capture with new Features. The result is in new_features_last_.
     unsigned int n = detectNewFeatures(_max_new_features);
 
-    //    std::cout << "detected " << n << " new features!" << std::endl;
+    //  std::cout << "detected " << n << " new features!" << std::endl;
 
     // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
     if (incoming_ptr_ != last_ptr_) // we do not do it the first time.
