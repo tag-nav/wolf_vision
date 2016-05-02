@@ -3,6 +3,9 @@
 MESSAGE("Starting WOLF CMakeLists ...")
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+#CMAKE modules
+SET(CMAKE_MODULE_PATH ../cmake_modules)
+
 #find dependencies. 
 FIND_PACKAGE(Ceres QUIET) #Ceres is not required
 IF(Ceres_FOUND)

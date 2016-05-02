@@ -88,7 +88,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         std::list<cv::Point> tracker_candidates_;
 
     public:
-        ProcessorBrisk(ProcessorImageParameters _params);
+        ProcessorBrisk(ProcessorImageParameters& _params);
 
 //        ProcessorBrisk(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr, cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters_params) :
 //            detector_ptr_(_det_ptr)
