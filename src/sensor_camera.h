@@ -30,8 +30,8 @@ class SensorCamera : public SensorBase
      * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
      * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
      * \param _intr_ptr contains intrinsic values for the camera
-     * \param _disp_noise_factor displacement noise factor
-     * \param _rot_noise_factor rotation noise factor
+     * \param _img_width image height in pixels
+     * \param _img_height image width in pixels
      *
      **/
     SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, int _img_width, int _img_height);
