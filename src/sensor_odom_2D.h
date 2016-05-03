@@ -7,7 +7,11 @@
 
 namespace wolf {
 
-struct IntrinsicsOdom2D : public IntrinsicsBase{};
+struct IntrinsicsOdom2D : public IntrinsicsBase
+{
+        Scalar k_disp_to_disp; ///< ratio of displacement variance to displacement, for odometry noise calculation
+        Scalar k_rot_to_rot; ///< ratio of rotation variance to rotation, for odometry noise calculation
+};
 
 class SensorOdom2D : public SensorBase
 {
@@ -49,28 +53,43 @@ class SensorOdom2D : public SensorBase
          **/        
         double getRotVarToRotNoiseFactor() const;
         
+
+	public:
+        static SensorBase* create(const std::string& _name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);
+
+
 };
 
 } // namespace wolf
 
-#include "sensor_factory.h"
+#include "state_block.h"
 
 namespace wolf {
 
-// Define the factory method and register it in the SensorFactory
-namespace
+// Define the factory method
+inline SensorBase* SensorOdom2D::create(const std::string& _name, const Eigen::VectorXs& _extrinsics_po, const IntrinsicsBase* _intrinsics)
 {
-SensorBase* createOdom2D(std::string& _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
-{
-//    IntrinsicsOdom2D* intrinsics = (IntrinsicsOdom2D*)_intrinsics;
-    SensorBase* odo = new SensorOdom2D(nullptr, nullptr,0,0);
+    // decode extrinsics vector
+    assert(_extrinsics_po.size() == 3 && "Bad extrinsics vector length. Should be 3 for 2D.");
+    StateBlock* pos_ptr = new StateBlock(_extrinsics_po.head(2), true);
+    StateBlock* ori_ptr = new StateBlock(_extrinsics_po.tail(1), true);
+    // cast intrinsics into derived type
+    IntrinsicsOdom2D* params = (IntrinsicsOdom2D*)_intrinsics;
+    SensorBase* odo = new SensorOdom2D(pos_ptr, ori_ptr, params->k_disp_to_disp, params->k_rot_to_rot);
     odo->setName(_name);
     return odo;
 }
-const bool registered_odom_2d = SensorFactory::get()->registerCreator("ODOM 2D", createOdom2D);
+
+} // namespace wolf
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_odom_2d = SensorFactory::get()->registerCreator("ODOM 2D", SensorOdom2D::create);
 }
-
-
 } // namespace wolf
 
 #endif

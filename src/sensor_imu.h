@@ -6,6 +6,12 @@
 
 namespace wolf {
 
+struct IntrinsicsIMU : public IntrinsicsBase
+{
+        // add IMU parameters here
+};
+
+
 class SensorIMU : public SensorBase
 {
 
@@ -29,29 +35,36 @@ class SensorIMU : public SensorBase
          **/
         virtual ~SensorIMU();
 
+    public:
+        static SensorBase* create(const std::string& _name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);
+
+
 };
 
 } // namespace wolf
 
-#include "sensor_factory.h"
+#include "state_block.h"
 
 namespace wolf {
 
 
-// Define the factory method and register it in the SensorFactory
-namespace
-{
-SensorBase* createIMU(std::string& _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
+// Define the factory method
+inline SensorBase* SensorIMU::create(const std::string& _name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics)
 {
     SensorBase* sen = new SensorIMU(nullptr, nullptr);
     sen->setName(_name);
     return sen;
 }
-const bool registered_imu = SensorFactory::get()->registerCreator("IMU", createIMU);
+
+} // namespace wolf
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_imu = SensorFactory::get()->registerCreator("IMU", SensorIMU::create);
 }
-
-
-
 } // namespace wolf
 
 #endif // SENSOR_IMU_H

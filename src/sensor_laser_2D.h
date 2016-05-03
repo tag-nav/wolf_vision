@@ -13,6 +13,13 @@
 
 namespace wolf {
 
+struct IntrinsicsLaser2D : public IntrinsicsBase
+{
+        laserscanutils::ScanParams scan_params;
+        laserscanutils::ExtractCornerParams corners_alg_params; //parameters for corner extraction algorithm.
+};
+
+
 class SensorLaser2D : public SensorBase
 {
     protected:
@@ -128,28 +135,45 @@ class SensorLaser2D : public SensorBase
         /** \brief Prints parameters
          **/                
         void printSensorParameters() const;
+
+    public:
+        static SensorBase* create(const std::string& _name, const Eigen::VectorXs& _extrinsics_po, const IntrinsicsBase* _intrinsics);
+
 };
 
 } // namespace wolf
 
-#include "sensor_factory.h"
+#include "state_block.h"
 
 namespace wolf {
 
-// Define the factory method and register it in the SensorFactory
-namespace
+// Define the factory method
+inline SensorBase* SensorLaser2D::create(const std::string& _name, const Eigen::VectorXs& _extrinsics_po, const IntrinsicsBase* _intrinsics)
 {
-SensorBase* createLaser2D(std::string& _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
-{
-    SensorBase* sen = new SensorLaser2D(nullptr, nullptr);
+    // decode extrinsics vector
+    assert(_extrinsics_po.size() == 3 && "Bad extrinsics vector length. Should be 3 for 2D.");
+    StateBlock* pos_ptr = new StateBlock(_extrinsics_po.head(2), true);
+    StateBlock* ori_ptr = new StateBlock(_extrinsics_po.tail(1), true);
+    // cast intrinsics into derived type
+    IntrinsicsLaser2D* params = (IntrinsicsLaser2D*)_intrinsics;
+    SensorLaser2D* sen = new SensorLaser2D(pos_ptr, ori_ptr);
     sen->setName(_name);
+    sen->setScanParams(params->scan_params);
+    sen->setCornerAlgParams(params->corners_alg_params);
     return sen;
 }
-const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", createLaser2D);
+
+} // namespace wolf
+
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", SensorLaser2D::create);
 }
-
-
-
 } // namespace wolf
 
 
