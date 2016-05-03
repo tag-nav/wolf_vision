@@ -23,6 +23,17 @@ struct IntrinsicsBase;
 
 namespace wolf {
 
+namespace
+{
+    std::string uppercase(const std::string& s)
+    {
+        std::string u(s);
+        std::transform(u.begin(), u.end(), u.begin(), ::toupper);
+
+        return u;
+    }
+}
+
 /** \brief Wolf problem node element in the Wolf Tree
  * 
  * A node has five main data members:

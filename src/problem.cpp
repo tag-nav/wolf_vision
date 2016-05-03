@@ -49,7 +49,7 @@ void Problem::addSensor(SensorBase* _sen_ptr)
 
 SensorBase* Problem::addSensor(std::string _sen_type, std::string _sen_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
-    SensorBase* sen_ptr = SensorFactory::get()->create(_sen_type, _sen_name, _extrinsics, _intrinsics);
+    SensorBase* sen_ptr = SensorFactory::get()->create(uppercase(_sen_type), _sen_name, _extrinsics, _intrinsics);
     addSensor(sen_ptr);
     return sen_ptr;
 }
