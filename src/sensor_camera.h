@@ -51,7 +51,6 @@ class SensorCamera : public SensorBase
 #include "sensor_factory.h"
 #include "state_block.h"
 #include "state_quaternion.h"
-#include <stdexcept>
 
 namespace wolf {
 
@@ -60,20 +59,19 @@ namespace
 {
 SensorBase* createCamera(std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
 {
+    // decode extrinsics vector
+    assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
+    StateBlock* pos_ptr = new StateBlock(_extrinsics_pq.head(3));
+    StateBlock* ori_ptr = new StateQuaternion(_extrinsics_pq.tail(4));
+
     // cast instrinsics to good type and extract intrinsic vector
     IntrinsicsCamera* intrinsics = (IntrinsicsCamera*)_intrinsics;
     StateBlock* intr_ptr = new StateBlock(intrinsics->intrinsic_vector);
 
-    // decode extrinsics vector
-    StateBlock* pos_ptr;
-    StateBlock* ori_ptr;
-    assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 3 for 2D, or 7 for 3D.");
-    pos_ptr = new StateBlock(_extrinsics_pq.head(3));
-    ori_ptr = new StateQuaternion(_extrinsics_pq.tail(4));
-
-    SensorBase* sen = new SensorCamera(pos_ptr, ori_ptr, intr_ptr, intrinsics->width, intrinsics->height);
-    sen->setName(_name);
-    return sen;
+    // Construct camera and give it a name
+    SensorBase* sen_ptr = new SensorCamera(pos_ptr, ori_ptr, intr_ptr, intrinsics->width, intrinsics->height);
+    sen_ptr->setName(_name);
+    return sen_ptr;
 }
 const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", createCamera);
 }

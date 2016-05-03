@@ -47,6 +47,5 @@ wolf::SensorFactory* SensorFactory::get() // Unique point of access;
 // singleton: constructor and destructor are private
 SensorFactory::SensorFactory(const SensorFactory&){}
 SensorFactory::SensorFactory(){}
-//SensorFactory::~SensorFactory(){}
 
 } /* namespace wolf */
