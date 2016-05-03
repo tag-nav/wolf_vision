@@ -10,7 +10,7 @@
 #include "sensor_factory.h"
 
 
-#include "processor_tracker_landmark_dummy.h"
+#include "processor_tracker_landmark_dummy.h"  // TODO: DUMMY  to be removed
 
 namespace wolf
 {
@@ -75,7 +75,7 @@ ProcessorBase* Problem::addProcessor(std::string _prc_type, std::string _unique_
         throw std::runtime_error("Sensor not found");
 
     //    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(_prc_type, _unique_processor_name, _prc_params);
-    ProcessorBase* prc_ptr = new ProcessorTrackerLandmarkDummy(10); // DUMMY  to be removed
+    ProcessorBase* prc_ptr = new ProcessorTrackerLandmarkDummy(10); // TODO: DUMMY  to be removed
     (*sen_it)->addProcessor(prc_ptr);
     return prc_ptr;
 }
