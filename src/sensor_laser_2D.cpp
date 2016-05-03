@@ -147,7 +147,7 @@ void SensorLaser2D::printSensorParameters() const
 }
 
 // Define the factory method
-SensorBase* SensorLaser2D::create(const std::string& _name, const Eigen::VectorXs& _extrinsics_po,
+SensorBase* SensorLaser2D::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po,
                                   const IntrinsicsBase* _intrinsics)
 {
     // decode extrinsics vector
@@ -157,7 +157,7 @@ SensorBase* SensorLaser2D::create(const std::string& _name, const Eigen::VectorX
     // cast intrinsics into derived type
     IntrinsicsLaser2D* params = (IntrinsicsLaser2D*)(_intrinsics);
     SensorLaser2D* sen = new SensorLaser2D(pos_ptr, ori_ptr);
-    sen->setName(_name);
+    sen->setName(_unique_name);
     sen->setScanParams(params->scan_params);
     sen->setCornerAlgParams(params->corners_alg_params);
     return sen;

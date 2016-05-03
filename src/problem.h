@@ -81,7 +81,7 @@ class Problem : public NodeBase
 
         /** \brief Factory method to add sensor only from its properties
          */
-        SensorBase* addSensor(std::string _sen_type, std::string _sen_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
+        SensorBase* addSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
 
 
         /** \brief Set the processor motion

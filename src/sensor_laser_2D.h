@@ -137,7 +137,7 @@ class SensorLaser2D : public SensorBase
         void printSensorParameters() const;
 
     public:
-        static SensorBase* create(const std::string& _name, const Eigen::VectorXs& _extrinsics_po, const IntrinsicsBase* _intrinsics);
+        static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po, const IntrinsicsBase* _intrinsics);
 
 };
 

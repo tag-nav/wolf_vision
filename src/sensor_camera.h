@@ -45,7 +45,7 @@ class SensorCamera : public SensorBase
     int img_height_;
 
     public:
-        static SensorBase* create(const std::string & _name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
+        static SensorBase* create(const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
 
 };
 

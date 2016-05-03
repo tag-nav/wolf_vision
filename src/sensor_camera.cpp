@@ -26,7 +26,7 @@ SensorCamera::~SensorCamera()
 }
 
 // Define the factory method
-SensorBase* SensorCamera::create(const std::string& _name, const Eigen::VectorXs& _extrinsics_pq,
+SensorBase* SensorCamera::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq,
                                  const IntrinsicsBase* _intrinsics)
 {
     // decode extrinsics vector
@@ -38,7 +38,7 @@ SensorBase* SensorCamera::create(const std::string& _name, const Eigen::VectorXs
     StateBlock* intr_ptr = new StateBlock(intrinsics->intrinsic_vector);
     // Construct camera and give it a name
     SensorCamera* sen_ptr = new SensorCamera(pos_ptr, ori_ptr, intr_ptr, intrinsics->width, intrinsics->height);
-    sen_ptr->setName(_name);
+    sen_ptr->setName(_unique_name);
     return sen_ptr;
 }
 

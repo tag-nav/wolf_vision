@@ -109,13 +109,13 @@ namespace wolf
 class SensorFactory
 {
     public:
-        typedef SensorBase* (*CreateSensorCallback)(const std::string & _name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
+        typedef SensorBase* (*CreateSensorCallback)(const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
     private:
         typedef std::map<std::string, CreateSensorCallback> CallbackMap;
     public:
         bool registerCreator(const std::string& _sensor_type, CreateSensorCallback createFn);
         bool unregisterCreator(const std::string& _sensor_type);
-        SensorBase* create(const std::string& _sensor_type, const std::string& _name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
+        SensorBase* create(const std::string& _sensor_type, const std::string& _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
     private:
         CallbackMap callbacks_;
 

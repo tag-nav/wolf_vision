@@ -16,7 +16,7 @@ SensorIMU::~SensorIMU()
 }
 
 // Define the factory method
-SensorBase* SensorIMU::create(const std::string& _name, const Eigen::VectorXs& _extrinsics_pq,
+SensorBase* SensorIMU::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq,
                               const IntrinsicsBase* _intrinsics)
 {
     // decode extrinsics vector
@@ -27,7 +27,7 @@ SensorBase* SensorIMU::create(const std::string& _name, const Eigen::VectorXs& _
     IntrinsicsIMU* intrinsics = (IntrinsicsIMU*)((_intrinsics));
     StateBlock* bias_ptr = new StateBlock(6, false); // We'll have the IMU biases here
     SensorBase* sen = new SensorIMU(pos_ptr, ori_ptr, bias_ptr);
-    sen->setName(_name);
+    sen->setName(_unique_name);
     return sen;
 }
 
