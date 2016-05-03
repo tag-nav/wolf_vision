@@ -25,12 +25,10 @@ namespace wolf {
 
 namespace
 {
-    std::string uppercase(const std::string& s)
+    std::string uppercase(std::string& s)
     {
-        std::string u(s);
-        std::transform(u.begin(), u.end(), u.begin(), ::toupper);
-
-        return u;
+        for (auto & c: s) c = std::toupper(c);
+        return s;
     }
 }
 
