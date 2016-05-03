@@ -24,9 +24,10 @@ class SensorIMU : public SensorBase
          * Constructor with arguments
          * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
          * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
+         * \param _a_w_biases_ptr StateBlock pointer to the vector of acc and gyro biases
          *
          **/
-        SensorIMU(StateBlock* _p_ptr, StateBlock* _o_ptr);
+        SensorIMU(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _a_w_biases_ptr = nullptr);
 
         /** \brief Default destructor (not recommended)
          *
@@ -43,20 +44,6 @@ class SensorIMU : public SensorBase
 
 } // namespace wolf
 
-#include "state_block.h"
-
-namespace wolf {
-
-
-// Define the factory method
-inline SensorBase* SensorIMU::create(const std::string& _name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics)
-{
-    SensorBase* sen = new SensorIMU(nullptr, nullptr);
-    sen->setName(_name);
-    return sen;
-}
-
-} // namespace wolf
 
 // Register in the SensorFactory
 #include "sensor_factory.h"

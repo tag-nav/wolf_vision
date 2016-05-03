@@ -51,22 +51,6 @@ class SensorGPSFix : public SensorBase
 
 } // namespace wolf
 
-#include "state_block.h"
-
-namespace wolf {
-
-// Define the factory method
-inline SensorBase* SensorGPSFix::create(const std::string& _name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics)
-{
-    assert((_extrinsics.size() == 2 || _extrinsics.size() == 3) && "Bad extrinsic vector size. Should be 2 for 2D, 3 for 3D.");
-    StateBlock* pos_ptr = new StateBlock(_extrinsics, true);
-    SensorGPSFix* sen = new SensorGPSFix(pos_ptr, nullptr, 0);
-    sen->setName(_name);
-    return sen;
-}
-
-} // namespace wolf
-
 
 
 // Register in the SensorFactory

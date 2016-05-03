@@ -54,23 +54,6 @@ public:
 
 } // namespace wolf
 
-#include "state_block.h"
-
-namespace wolf {
-
-// Define the factory method
-inline SensorBase* SensorGPS::create(const std::string& _name, const Eigen::VectorXs& _extrinsics_p, const IntrinsicsBase* _intrinsics)
-{
-    // decode extrinsics vector
-    assert(_extrinsics_p.size() == 3 && "Bad extrinsics vector length. Should be 3 for 3D.");
-    StateBlock* pos_ptr = new StateBlock(_extrinsics_p, true);
-    StateBlock* ori_ptr = nullptr;
-    SensorBase* sen = new SensorGPS(pos_ptr, ori_ptr, nullptr, nullptr, nullptr); // TODO: how to init these last three pointers?
-    sen->setName(_name);
-    return sen;
-}
-
-} // namespace wolf
 
 // Register in the SensorFactory
 #include "sensor_factory.h"

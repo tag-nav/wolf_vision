@@ -1,4 +1,5 @@
 #include "sensor_odom_2D.h"
+#include "state_block.h"
 
 namespace wolf {
 
@@ -21,6 +22,21 @@ Scalar SensorOdom2D::getDispVarToDispNoiseFactor() const
 Scalar SensorOdom2D::getRotVarToRotNoiseFactor() const
 {
     return k_rot_to_rot_;
+}
+
+// Define the factory method
+SensorBase* SensorOdom2D::create(const std::string& _name, const Eigen::VectorXs& _extrinsics_po,
+                                 const IntrinsicsBase* _intrinsics)
+{
+    // decode extrinsics vector
+    assert(_extrinsics_po.size() == 3 && "Bad extrinsics vector length. Should be 3 for 2D.");
+    StateBlock* pos_ptr = new StateBlock(_extrinsics_po.head(2), true);
+    StateBlock* ori_ptr = new StateBlock(_extrinsics_po.tail(1), true);
+    // cast intrinsics into derived type
+    IntrinsicsOdom2D* params = (IntrinsicsOdom2D*)(_intrinsics);
+    SensorBase* odo = new SensorOdom2D(pos_ptr, ori_ptr, params->k_disp_to_disp, params->k_rot_to_rot);
+    odo->setName(_name);
+    return odo;
 }
 
 } // namespace wolf
