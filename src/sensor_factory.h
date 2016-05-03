@@ -88,7 +88,7 @@ namespace wolf
  * We finally provide the necessary steps to create a sensor of class SensorCamera in our application:
  *
  *      #include "sensor_factory.h"
- *      #include "sensor_camera.h" // provides SensorCamera and registers the pair <"CAMERA", createCamera>
+ *      #include "sensor_camera.h" // provides SensorCamera and registers the pair <"CAMERA", SensorCamera::create>
  *
  *      // Note: SensorCamera::create() is already registered. To invoke it, use the std::string "CAMERA" as in the lines below.
  *
@@ -99,7 +99,7 @@ namespace wolf
  *      IntrinsicsCamera intrinsics({...}); // also fill in the derived struct (here we suggested the struct initializer with '{}')...
  *
  *      // To create a camera, we provide "TYPE", "Name", extrinsics vector, and a pointer to the intrinsics struct:
- *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, intrinsics_ptr);
+ *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, &intrinsics);
  *
  *      // Second camera... with a different name!
  *      extrinsics = ...; // give it some other values...
