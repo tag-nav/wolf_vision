@@ -43,22 +43,23 @@ FrameBase::~FrameBase()
 	// Remove Frame State Blocks
 	if (p_ptr_ != nullptr)
 	{
-        if (getProblem() != nullptr)
+        if (getProblem() != nullptr && type_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(p_ptr_);
 	    delete p_ptr_;
 	}
     if (o_ptr_ != nullptr)
     {
-        if (getProblem() != nullptr)
+        if (getProblem() != nullptr && type_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(o_ptr_);
         delete o_ptr_;
     }
     if (v_ptr_ != nullptr)
     {
-        if (getProblem() != nullptr)
+        if (getProblem() != nullptr && type_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(v_ptr_);
         delete v_ptr_;
     }
+
     //std::cout << "states deleted" << std::endl;
 
 
