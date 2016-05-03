@@ -180,46 +180,61 @@ void CeresManager::update(const bool _apply_loss_function)
 {
     //std::cout << "CeresManager: updating... getConstraintRemoveList()->size()" << wolf_problem_->getConstraintRemoveList()->size() << std::endl;
 
-    // REMOVE CONSTRAINTS
-    while (!wolf_problem_->getConstraintRemoveList()->empty())
-    {
-        removeConstraint(wolf_problem_->getConstraintRemoveList()->front());
-        wolf_problem_->getConstraintRemoveList()->pop_front();
-    }
-    // REMOVE STATE BLOCKS
-    while (!wolf_problem_->getStateBlockRemoveList()->empty())
-    {
-        removeStateBlock((double *)(wolf_problem_->getStateBlockRemoveList()->front()));
-        wolf_problem_->getStateBlockRemoveList()->pop_front();
-    }
-    // ADD STATE BLOCKS
-    while (!wolf_problem_->getStateBlockAddList()->empty())
-    {
-        addStateBlock(wolf_problem_->getStateBlockAddList()->front());
-        wolf_problem_->getStateBlockAddList()->pop_front();
-    }
     // UPDATE STATE BLOCKS
-    while (!wolf_problem_->getStateBlockUpdateList()->empty())
+    while (!wolf_problem_->getStateBlockNotificationList().empty())
     {
-        updateStateBlockStatus(wolf_problem_->getStateBlockUpdateList()->front());
-        wolf_problem_->getStateBlockUpdateList()->pop_front();
+        switch (wolf_problem_->getStateBlockNotificationList().front().notification_)
+        {
+            case ADD:
+            {
+                addStateBlock(wolf_problem_->getStateBlockNotificationList().front().state_block_ptr_);
+                break;
+            }
+            case UPDATE:
+            {
+                updateStateBlockStatus(wolf_problem_->getStateBlockNotificationList().front().state_block_ptr_);
+                break;
+            }
+            case REMOVE:
+            {
+                removeStateBlock((double *)(wolf_problem_->getStateBlockNotificationList().front().scalar_ptr_));
+                break;
+            }
+            default:
+                throw std::runtime_error("CeresManager::update: State Block notification must be ADD, UPATE or REMOVE.");
+        }
+        wolf_problem_->getStateBlockNotificationList().pop_front();
     }
-    // ADD CONSTRAINTS
-    while (!wolf_problem_->getConstraintAddList()->empty())
+    // UPDATE CONSTRAINTS
+    while (!wolf_problem_->getConstraintNotificationList().empty())
     {
-        addConstraint(wolf_problem_->getConstraintAddList()->front(), _apply_loss_function);
-        wolf_problem_->getConstraintAddList()->pop_front();
+        switch (wolf_problem_->getConstraintNotificationList().front().notification_)
+        {
+            case ADD:
+            {
+                addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_,wolf_problem_->getConstraintNotificationList().front().id_, _apply_loss_function);
+                break;
+            }
+            case REMOVE:
+            {
+                removeConstraint(wolf_problem_->getConstraintNotificationList().front().id_);
+                break;
+            }
+            default:
+                throw std::runtime_error("CeresManager::update: Constraint notification must be ADD or REMOVE.");
+        }
+        wolf_problem_->getConstraintNotificationList().pop_front();
     }
 }
 
-void CeresManager::addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss)
+void CeresManager::addConstraint(ConstraintBase* _corr_ptr, unsigned int _id, const bool _apply_loss)
 {
-    id_2_costfunction_[_corr_ptr->nodeId()] = createCostFunction(_corr_ptr);
+    id_2_costfunction_[_id] = createCostFunction(_corr_ptr);
 
     if (_apply_loss)
-        id_2_residual_idx_[_corr_ptr->nodeId()] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_corr_ptr->nodeId()], new ceres::CauchyLoss(0.5), _corr_ptr->getStateBlockPtrVector());
+        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _corr_ptr->getStateBlockPtrVector());
     else
-        id_2_residual_idx_[_corr_ptr->nodeId()] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_corr_ptr->nodeId()], NULL, _corr_ptr->getStateBlockPtrVector());
+        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], NULL, _corr_ptr->getStateBlockPtrVector());
 }
 
 void CeresManager::removeConstraint(const unsigned int& _corr_id)

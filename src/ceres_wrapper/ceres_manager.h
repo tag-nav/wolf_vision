@@ -55,7 +55,7 @@ class CeresManager
 
 		void update(const bool _apply_loss_function = false);
 
-		void addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss);
+		void addConstraint(ConstraintBase* _corr_ptr, unsigned int _id, const bool _apply_loss);
 
 		void removeConstraint(const unsigned int& _corr_idx);
 

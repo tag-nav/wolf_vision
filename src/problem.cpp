@@ -23,13 +23,6 @@ Problem::Problem(FrameStructure _frame_structure) :
 Problem::~Problem()
 {
     //std::cout << "deleting wolf problem " << nodeId() << std::endl;
-    state_block_add_list_.clear();
-    covariances_.clear();
-    state_block_update_list_.clear();
-    state_block_remove_list_.clear();
-    constraint_add_list_.clear();
-    constraint_remove_list_.clear();
-
     trajectory_ptr_->destruct();
     map_ptr_->destruct();
     hardware_ptr_->destruct();
@@ -174,7 +167,8 @@ StateBlock* Problem::addStateBlockPtr(StateBlock* _state_ptr)
     // add the state unit to the list
     state_block_ptr_list_.push_back(_state_ptr);
     // queue for solver manager
-    state_block_add_list_.push_back(_state_ptr);
+    //state_block_add_list_.push_back(_state_ptr);
+    state_block_notification_list_.push_back(StateBlockNotification({ADD,_state_ptr}));
 
     return _state_ptr;
 }
@@ -182,7 +176,8 @@ StateBlock* Problem::addStateBlockPtr(StateBlock* _state_ptr)
 void Problem::updateStateBlockPtr(StateBlock* _state_ptr)
 {
     // queue for solver manager
-    state_block_update_list_.push_back(_state_ptr);
+    //state_block_update_list_.push_back(_state_ptr);
+    state_block_notification_list_.push_back(StateBlockNotification({UPDATE,_state_ptr}));
 }
 
 void Problem::removeStateBlockPtr(StateBlock* _state_ptr)
@@ -190,13 +185,15 @@ void Problem::removeStateBlockPtr(StateBlock* _state_ptr)
     // add the state unit to the list
     state_block_ptr_list_.remove(_state_ptr);
     // queue for solver manager
-    state_block_remove_list_.push_back(_state_ptr->getPtr());
+    //state_block_remove_list_.push_back(_state_ptr->getPtr());
+    state_block_notification_list_.push_back(StateBlockNotification({REMOVE, nullptr, _state_ptr->getPtr()}));
 }
 
 ConstraintBase* Problem::addConstraintPtr(ConstraintBase* _constraint_ptr)
 {
     // queue for solver manager
-    constraint_add_list_.push_back(_constraint_ptr);
+    //constraint_add_list_.push_back(_constraint_ptr);
+    constraint_notification_list_.push_back(ConstraintNotification({ADD, _constraint_ptr, _constraint_ptr->id()}));
 
     return _constraint_ptr;
 }
@@ -204,7 +201,8 @@ ConstraintBase* Problem::addConstraintPtr(ConstraintBase* _constraint_ptr)
 void Problem::removeConstraintPtr(ConstraintBase* _constraint_ptr)
 {
     // queue for solver manager
-    constraint_remove_list_.push_back(_constraint_ptr->nodeId());
+    //constraint_remove_list_.push_back(_constraint_ptr->nodeId());
+    constraint_notification_list_.push_back(ConstraintNotification({REMOVE, nullptr, _constraint_ptr->id()}));
 }
 
 void Problem::clearCovariance()
@@ -318,16 +316,6 @@ FrameBase* Problem::getLastFramePtr()
 StateBlockList* Problem::getStateListPtr()
 {
     return &state_block_ptr_list_;
-}
-
-std::list<StateBlock*>* Problem::getStateBlockAddList()
-{
-    return &state_block_add_list_;
-}
-
-std::list<StateBlock*>* Problem::getStateBlockUpdateList()
-{
-    return &state_block_update_list_;
 }
 
 } // namespace wolf

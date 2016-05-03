@@ -75,35 +75,50 @@ class SolverQR
 
         void update()
         {
-            // REMOVE CONSTRAINTS
-            while (!problem_ptr_->getConstraintRemoveList()->empty())
-            {
-                // TODO: removeConstraint(problem_ptr_->getConstraintRemoveList()->front());
-                problem_ptr_->getConstraintRemoveList()->pop_front();
-            }
-            // REMOVE STATE BLOCKS
-            while (!problem_ptr_->getStateBlockRemoveList()->empty())
-            {
-                // TODO removeStateBlock((double *)(problem_ptr_->getStateBlockRemoveList()->front()));
-                problem_ptr_->getStateBlockRemoveList()->pop_front();
-            }
-            // ADD STATE BLOCKS
-            while (!problem_ptr_->getStateBlockAddList()->empty())
-            {
-                addStateBlock(problem_ptr_->getStateBlockAddList()->front());
-                problem_ptr_->getStateBlockAddList()->pop_front();
-            }
             // UPDATE STATE BLOCKS
-            while (!problem_ptr_->getStateBlockUpdateList()->empty())
+            while (!problem_ptr_->getStateBlockNotificationList().empty())
             {
-                updateStateBlockStatus(problem_ptr_->getStateBlockUpdateList()->front());
-                problem_ptr_->getStateBlockUpdateList()->pop_front();
+                switch (problem_ptr_->getStateBlockNotificationList().front().notification_)
+                {
+                    case ADD:
+                    {
+                        addStateBlock(problem_ptr_->getStateBlockNotificationList().front().state_block_ptr_);
+                        break;
+                    }
+                    case UPDATE:
+                    {
+                        updateStateBlockStatus(problem_ptr_->getStateBlockNotificationList().front().state_block_ptr_);
+                        break;
+                    }
+                    case REMOVE:
+                    {
+                        // TODO removeStateBlock((double *)(problem_ptr_->getStateBlockNotificationList().front().scalar_ptr_));
+                        break;
+                    }
+                    default:
+                        throw std::runtime_error("SolverQR::update: State Block notification must be ADD, UPATE or REMOVE.");
+                }
+                problem_ptr_->getStateBlockNotificationList().pop_front();
             }
-            // ADD CONSTRAINTS
-            while (!problem_ptr_->getConstraintAddList()->empty())
+            // UPDATE CONSTRAINTS
+            while (!problem_ptr_->getConstraintNotificationList().empty())
             {
-                addConstraint(problem_ptr_->getConstraintAddList()->front());
-                problem_ptr_->getConstraintAddList()->pop_front();
+                switch (problem_ptr_->getConstraintNotificationList().front().notification_)
+                {
+                    case ADD:
+                    {
+                        addConstraint(problem_ptr_->getConstraintNotificationList().front().constraint_ptr_);
+                        break;
+                    }
+                    case REMOVE:
+                    {
+                        // TODO: removeConstraint(problem_ptr_->getConstraintNotificationList().front().id_);
+                        break;
+                    }
+                    default:
+                        throw std::runtime_error("SolverQR::update: Constraint notification must be ADD or REMOVE.");
+                }
+                problem_ptr_->getConstraintNotificationList().pop_front();
             }
         }
 
