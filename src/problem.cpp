@@ -68,7 +68,7 @@ ProcessorBase* Problem::addProcessor(std::string _prc_type, std::string _unique_
 {
     auto sen_it = std::find_if(getHardwarePtr()->getSensorListPtr()->begin(),
                                getHardwarePtr()->getSensorListPtr()->end(),
-                               [&](SensorBase*& sb) { return sb->getName() == _corresponding_sensor_name; }); // lambda function for the find_if
+                               [&](SensorBase* sb) { return sb->getName() == _corresponding_sensor_name; }); // lambda function for the find_if
     if (sen_it == getHardwarePtr()->getSensorListPtr()->end())
         throw std::runtime_error("Sensor not found");
 
