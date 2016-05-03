@@ -24,7 +24,7 @@ protected:
     StateBlock* map_o_ptr_; //orientation of the vehicle where the experiment starts in ecef
 
 public:
-                //pointer to sensor position, orientation, bias, init vehicle position and orientation
+    //pointer to sensor position, orientation, bias, init vehicle position and orientation
     SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr, StateBlock* _bias_ptr, StateBlock* _map_position_ptr, StateBlock* _map_orientation_ptr);
 
     StateBlock *getMapPPtr() const;
@@ -49,7 +49,7 @@ public:
 
 namespace wolf {
 
-//// Define the factory method and register it in the SensorFactory
+// Define the factory method and register it in the SensorFactory
 //namespace
 //{
 //SensorBase* createGPS(std::string& _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
@@ -58,7 +58,7 @@ namespace wolf {
 //    sen->setName(_name);
 //    return sen;
 //}
-//const bool registered_gps = SensorFactory::get()->registerSensor("GPS RAW", createGPS);
+//const bool registered_gps = SensorFactory::get()->registerCreator("GPS RAW", createGPS);
 //}
 
 

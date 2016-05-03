@@ -8,7 +8,14 @@
 // std includes
 
 
+
+
 namespace wolf {
+
+struct IntrinsicsGPSFix : public IntrinsicsBase
+{
+        // TODO: Fill in the necessary fields here
+};
 
 class SensorGPSFix : public SensorBase
 {
@@ -42,6 +49,7 @@ class SensorGPSFix : public SensorBase
 } // namespace wolf
 
 #include "sensor_factory.h"
+#include "state_block.h"
 
 namespace wolf {
 
@@ -50,7 +58,9 @@ namespace
 {
 SensorBase* createGPSFix(std::string& _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
-    SensorBase* sen = new SensorGPSFix(nullptr, nullptr, 0);
+    assert((_extrinsics.size() == 2 || _extrinsics.size() == 3) && "Bad extrinsic vector size. Should be 2 for 2D, 3 for 3D.");
+    StateBlock* pos_ptr = new StateBlock(_extrinsics, true);
+    SensorBase* sen = new SensorGPSFix(pos_ptr, nullptr, 0);
     sen->setName(_name);
     return sen;
 }

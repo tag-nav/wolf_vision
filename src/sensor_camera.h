@@ -61,8 +61,8 @@ SensorBase* createCamera(std::string& _name, Eigen::VectorXs& _extrinsics_pq, In
 {
     // decode extrinsics vector
     assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
-    StateBlock* pos_ptr = new StateBlock(_extrinsics_pq.head(3));
-    StateBlock* ori_ptr = new StateQuaternion(_extrinsics_pq.tail(4));
+    StateBlock* pos_ptr = new StateBlock(_extrinsics_pq.head(3), true);
+    StateBlock* ori_ptr = new StateQuaternion(_extrinsics_pq.tail(4), true);
 
     // cast instrinsics to good type and extract intrinsic vector
     IntrinsicsCamera* intrinsics = (IntrinsicsCamera*)_intrinsics;
