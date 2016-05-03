@@ -74,7 +74,7 @@ namespace wolf
  *
  *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, intrinsics_ptr);
  *
- * where ABSOLUTELY ALL members are important. In particular, the sensor name "Front-left camera" will be used to identify this camera
+ * where ABSOLUTELY ALL input parameters are important. In particular, the sensor name "Front-left camera" will be used to identify this camera
  * and to assign it the appropriate processors. DO NOT USE IT WITH DUMMY PARAMETERS!
  *
  * Currently, registering is performed in each specific SensorXxxx header file, sensor_xxxx.h.
