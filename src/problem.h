@@ -23,14 +23,6 @@ struct IntrinsicsBase;
 
 namespace wolf {
 
-namespace
-{
-    std::string uppercase(std::string& s)
-    {
-        for (auto & c: s) c = std::toupper(c);
-        return s;
-    }
-}
 
 /** \brief Wolf problem node element in the Wolf Tree
  * 

@@ -12,6 +12,12 @@
 namespace wolf
 {
 
+// unnamed namespace used for helper functions local to this file.
+namespace {
+std::string uppercase(std::string& s) {for (auto & c: s) c = std::toupper(c); return s;}
+}
+
+
 Problem::Problem(FrameStructure _frame_structure) :
         NodeBase("PROBLEM"), //
         location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(
@@ -123,18 +129,19 @@ FrameBase* Problem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _f
     return trajectory_ptr_->getLastFramePtr();
 }
 
-void Problem::getCurrentState(Eigen::VectorXs& state)
-{
-    if (processor_motion_ptr_ != nullptr)
-        processor_motion_ptr_->getState(state);
-    else
-        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
-}
-
 Eigen::VectorXs Problem::getCurrentState()
 {
     if (processor_motion_ptr_ != nullptr)
         return processor_motion_ptr_->getState();
+    else
+        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+}
+
+
+void Problem::getCurrentState(Eigen::VectorXs& state)
+{
+    if (processor_motion_ptr_ != nullptr)
+        processor_motion_ptr_->getState(state);
     else
         throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
 }
