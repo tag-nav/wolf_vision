@@ -26,8 +26,10 @@ int main(void)
     IntrinsicsOdom2D intr_odom2d;
     IntrinsicsGPSFix intr_gps_fix;
 
-    problem.addSensor("CAMERA",     "left camera",      pq_3d,  &intr_cam);
-    problem.addSensor("CAMERA",     "right camera",     pq_3d,  &intr_cam);
+    problem.addSensor("CAMERA",     "front left camera",      pq_3d,  &intr_cam);
+    problem.addSensor("Camera",     "front right camera",     pq_3d,  &intr_cam);
+    problem.addSensor("CaMeRa",     "back right camera",      pq_3d,  &intr_cam);
+    problem.addSensor("camera",     "back left camera",       pq_3d,  &intr_cam);
     problem.addSensor("ODOM 2D",    "main odometer",    po_2d,  &intr_odom2d);
     problem.addSensor("GPS FIX",    "GPS fix",          p_3d,   &intr_gps_fix);
     problem.addSensor("CAMERA",     "rear camera",      pq_3d,  &intr_cam);
