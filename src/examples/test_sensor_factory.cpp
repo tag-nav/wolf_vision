@@ -17,8 +17,6 @@ int main(void)
 {
     using namespace wolf;
 
-    std::list<SensorBase*> sensors;
-
     std::cout << "================ Sensor Factory ================" << std::endl;
 
     Problem problem(FRM_PO_3D);
@@ -28,11 +26,11 @@ int main(void)
     IntrinsicsOdom2D intr_odom2d;
     IntrinsicsBase intr;
 
-    problem.addSensor("CAMERA", "left camera", extr, &intr_cam);
-    problem.addSensor("CAMERA", "right camera", extr, &intr_cam);
-    problem.addSensor("ODOM 2D", "main odometer", extr, &intr_odom2d);
-    problem.addSensor("GPS FIX", "GPS fix", extr, &intr);
-    problem.addSensor("CAMERA", "rear camera", extr, &intr_cam);
+    problem.addSensor("CAMERA",     "left camera",      extr, &intr_cam);
+    problem.addSensor("CAMERA",     "right camera",     extr, &intr_cam);
+    problem.addSensor("ODOM 2D",    "main odometer",    extr, &intr_odom2d);
+    problem.addSensor("GPS FIX",    "GPS fix",          extr, &intr);
+    problem.addSensor("CAMERA",     "rear camera",      extr, &intr_cam);
     SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", extr, &intr_odom2d);
 
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
