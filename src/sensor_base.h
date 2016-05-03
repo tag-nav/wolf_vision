@@ -34,8 +34,17 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
         SensorType type_id_;       // the type of sensor. See wolf.h for a list of all sensor types.
         StateBlock* p_ptr_;		// sensor position state block pointer
         StateBlock* o_ptr_; 	// sensor orientation state block pointer
-        StateBlock* intrinsic_ptr_; // intrinsic parameters
-        bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes.
+
+        /** \brief intrinsic parameters.
+         * Use it if desired. By using this StateBlock, WOLF will be able to auto-calibrate these parameters.
+         * To do so, just unfix() it. After the calibration process, you can fix() it again if desired.
+         *
+         * (Note: Many other intrinsic parameters can be stored as members of the classes derived from this.
+         * We recommend you use a struct for this purpose if the number of intrinsic parameters is large.)
+         */
+        StateBlock* intrinsic_ptr_;
+
+        bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
 
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
