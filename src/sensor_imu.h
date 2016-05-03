@@ -3,8 +3,6 @@
 
 //wolf includes
 #include "sensor_base.h"
-#include "sensor_factory.h"
-
 
 namespace wolf {
 
@@ -33,16 +31,23 @@ class SensorIMU : public SensorBase
 
 };
 
+} // namespace wolf
+
+#include "sensor_factory.h"
+
+namespace wolf {
+
+
 // Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createIMU(std::string& _name, std::string _params_filename = "")
+SensorBase* createIMU(std::string& _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
     SensorBase* sen = new SensorIMU(nullptr, nullptr);
     sen->setName(_name);
     return sen;
 }
-const bool registered_imu = SensorFactory::get()->registerSensor("IMU", createIMU);
+const bool registered_imu = SensorFactory::get()->registerCreator("IMU", createIMU);
 }
 
 

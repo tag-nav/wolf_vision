@@ -53,14 +53,15 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
         ProcessorType type_id_;
 };
 
+}
+
+#include "problem.h"
+
+namespace wolf {
+
 inline unsigned int ProcessorBase::id()
 {
     return processor_id_;
-}
-
-inline bool ProcessorBase::permittedKeyFrame()
-{
-    return getProblem()->permitKeyFrame(this);
 }
 
 inline SensorBase* ProcessorBase::getSensorPtr()

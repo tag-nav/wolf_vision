@@ -6,6 +6,8 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 #include "processor_motion.h"
+#include "sensor_base.h"
+#include "sensor_factory.h"
 
 namespace wolf
 {
@@ -45,9 +47,9 @@ void Problem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-SensorBase* Problem::addSensor(std::string _sen_type, std::string _sen_name, std::string _sen_params_filename)
+SensorBase* Problem::addSensor(std::string _sen_type, std::string _sen_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
-    SensorBase* sen_ptr = SensorFactory::get()->createSensor(_sen_type, _sen_name, _sen_params_filename);
+    SensorBase* sen_ptr = SensorFactory::get()->create(_sen_type, _sen_name, _extrinsics, _intrinsics);
     addSensor(sen_ptr);
     return sen_ptr;
 }

@@ -8,8 +8,15 @@
 #ifndef SENSOR_FACTORY_H_
 #define SENSOR_FACTORY_H_
 
+namespace wolf {
+struct IntrinsicsBase;
+}
+
+// wolf
+//#include "sensor_base.h"
 #include "wolf.h"
 
+// std
 #include <map>
 
 namespace wolf
@@ -18,15 +25,15 @@ namespace wolf
 class SensorFactory
 {
     public:
-        typedef SensorBase* (*CreateSensorCallback)(std::string & _name, std::string _params_filename);
+        typedef SensorBase* (*CreateSensorCallback)(std::string & _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
     private:
         typedef std::map<std::string, CreateSensorCallback> CallbackMap;
     public:
         // Returns 'true' if registration was successful
-        bool registerSensor(std::string _sensor_type, CreateSensorCallback createFn);
+        bool registerCreator(std::string _sensor_type, CreateSensorCallback createFn);
         // Returns 'true' if the _sensor_type was registered before
-        bool unregisterSensor(std::string _sensor_type);
-        SensorBase* createSensor(std::string _sensor_type, std::string _name, std::string _params_filename = "");
+        bool unregisterCreator(std::string _sensor_type);
+        SensorBase* create(std::string _sensor_type, std::string _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
     private:
         CallbackMap callbacks_;
 

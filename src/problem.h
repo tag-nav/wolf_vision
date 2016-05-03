@@ -8,11 +8,13 @@ class TrajectoryBase;
 class MapBase;
 class ProcessorMotion;
 class TimeStamp;
+struct IntrinsicsBase;
 }
 
 //wolf includes
 #include "node_base.h"
-#include "sensor_factory.h"
+#include "sensor_base.h"
+//#include "sensor_factory.h"
 #include "wolf.h"
 
 // std includes
@@ -78,7 +80,7 @@ class Problem : public NodeBase
 
         /** \brief Factory method to add sensor only from its properties
          */
-        SensorBase* addSensor(std::string _sen_type, std::string _sen_name, std::string _sen_params_filename);
+        SensorBase* addSensor(std::string _sen_type, std::string _sen_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
 
 
         /** \brief Set the processor motion

@@ -3,8 +3,6 @@
 
 //wolf includes
 #include "sensor_base.h"
-#include "sensor_factory.h"
-
 
 namespace wolf {
 
@@ -50,20 +48,34 @@ class SensorCamera : public SensorBase
 
 } // namespace wolf
 
-//#include "yaml-cpp/yaml.h"
+#include "sensor_factory.h"
+#include "state_block.h"
+#include "state_quaternion.h"
+#include <stdexcept>
 
-namespace wolf{
+namespace wolf {
 
 // Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createCamera(std::string& _name, std::string _params_filename = "")
+SensorBase* createCamera(std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
 {
-    SensorBase* sen = new SensorCamera(nullptr, nullptr, nullptr,0,0);
+    // cast instrinsics to good type and extract intrinsic vector
+    IntrinsicsCamera* intrinsics = (IntrinsicsCamera*)_intrinsics;
+    StateBlock* intr_ptr = new StateBlock(intrinsics->intrinsic_vector);
+
+    // decode extrinsics vector
+    StateBlock* pos_ptr;
+    StateBlock* ori_ptr;
+    assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 3 for 2D, or 7 for 3D.");
+    pos_ptr = new StateBlock(_extrinsics_pq.head(3));
+    ori_ptr = new StateQuaternion(_extrinsics_pq.tail(4));
+
+    SensorBase* sen = new SensorCamera(pos_ptr, ori_ptr, intr_ptr, intrinsics->width, intrinsics->height);
     sen->setName(_name);
     return sen;
 }
-const bool registered_camera = SensorFactory::get()->registerSensor("CAMERA", createCamera);
+const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", createCamera);
 }
 
 } // namespace wolf

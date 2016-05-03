@@ -4,7 +4,6 @@
 
 //wolf includes
 #include "sensor_base.h"
-#include "sensor_factory.h"
 
 // std includes
 
@@ -40,16 +39,22 @@ class SensorGPSFix : public SensorBase
         
 };
 
+} // namespace wolf
+
+#include "sensor_factory.h"
+
+namespace wolf {
+
 // Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createGPSFix(std::string& _name, std::string _params_filename = "")
+SensorBase* createGPSFix(std::string& _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
     SensorBase* sen = new SensorGPSFix(nullptr, nullptr, 0);
     sen->setName(_name);
     return sen;
 }
-const bool registered_gps_fix = SensorFactory::get()->registerSensor("GPS FIX", createGPSFix);
+const bool registered_gps_fix = SensorFactory::get()->registerCreator("GPS FIX", createGPSFix);
 }
 } // namespace wolf
 

@@ -43,10 +43,16 @@ public:
 
 };
 
+} // namespace wolf
+
+#include "sensor_factory.h"
+
+namespace wolf {
+
 //// Define the factory method and register it in the SensorFactory
 //namespace
 //{
-//SensorBase* createGPS(std::string& _name, std::string _params_filename = "")
+//SensorBase* createGPS(std::string& _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 //{
 //    SensorBase* sen = new SensorGPS(nullptr, nullptr, nullptr, nullptr, nullptr);
 //    sen->setName(_name);

@@ -23,12 +23,17 @@ int main(void)
 
     Problem problem(FRM_PO_3D);
 
-    problem.addSensor("CAMERA", "left camera", "");
-    problem.addSensor("CAMERA", "right camera", "");
-    problem.addSensor("ODOM 2D", "main odometer", "");
-    problem.addSensor("GPS FIX", "GPS fix", "");
-    problem.addSensor("CAMERA", "rear camera", "");
-    SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", "");
+    Eigen::VectorXs extr(7);
+    IntrinsicsBase* intr_cam = new IntrinsicsCamera;
+    IntrinsicsBase* intr_odom2d = new IntrinsicsOdom2D;
+    IntrinsicsBase* intr = new IntrinsicsBase;
+
+    problem.addSensor("CAMERA", "left camera", extr, intr_cam);
+    problem.addSensor("CAMERA", "right camera", extr, intr_cam);
+    problem.addSensor("ODOM 2D", "main odometer", extr, intr_odom2d);
+    problem.addSensor("GPS FIX", "GPS fix", extr, intr);
+    problem.addSensor("CAMERA", "rear camera", extr, intr_cam);
+    SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", extr, intr_odom2d);
 
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
         std::cout << "Sensor: " << sen->id() << " | type " << sen->typeId() << ": " << sen->getType() << "\t| name: " << sen->getName() << std::endl;

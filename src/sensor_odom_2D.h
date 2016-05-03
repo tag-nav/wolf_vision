@@ -4,9 +4,10 @@
 
 //wolf includes
 #include "sensor_base.h"
-#include "sensor_factory.h"
 
 namespace wolf {
+
+struct IntrinsicsOdom2D : public IntrinsicsBase{};
 
 class SensorOdom2D : public SensorBase
 {
@@ -50,16 +51,23 @@ class SensorOdom2D : public SensorBase
         
 };
 
+} // namespace wolf
+
+#include "sensor_factory.h"
+
+namespace wolf {
+
 // Define the factory method and register it in the SensorFactory
 namespace
 {
-SensorBase* createOdom2D(std::string& _name, std::string _params_filename = "")
+SensorBase* createOdom2D(std::string& _name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
+//    IntrinsicsOdom2D* intrinsics = (IntrinsicsOdom2D*)_intrinsics;
     SensorBase* odo = new SensorOdom2D(nullptr, nullptr,0,0);
     odo->setName(_name);
     return odo;
 }
-const bool registered_odom_2d = SensorFactory::get()->registerSensor("ODOM 2D", createOdom2D);
+const bool registered_odom_2d = SensorFactory::get()->registerCreator("ODOM 2D", createOdom2D);
 }
 
 
