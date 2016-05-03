@@ -9,6 +9,9 @@
 #include "sensor_base.h"
 #include "sensor_factory.h"
 
+
+#include "processor_tracker_landmark_dummy.h"
+
 namespace wolf
 {
 
@@ -60,6 +63,22 @@ SensorBase* Problem::addSensor(std::string _sen_type, std::string _unique_sensor
     return sen_ptr;
 }
 
+ProcessorBase* Problem::addProcessor(std::string _prc_type, std::string _unique_processor_name,
+                                     std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params)
+{
+    auto sen_it = std::find_if(getHardwarePtr()->getSensorListPtr()->begin(),
+                               getHardwarePtr()->getSensorListPtr()->end(), [&](SensorBase*& sb)
+                               { // lambda function for the find_if
+                                    return sb->getName() == _corresponding_sensor_name;
+                               });
+    if (sen_it == getHardwarePtr()->getSensorListPtr()->end())
+        throw std::runtime_error("Sensor not found");
+
+    //    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(_prc_type, _unique_processor_name, _prc_params);
+    ProcessorBase* prc_ptr = new ProcessorTrackerLandmarkDummy(10); // DUMMY  to be removed
+    (*sen_it)->addProcessor(prc_ptr);
+    return prc_ptr;
+}
 
 void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
 {

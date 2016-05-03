@@ -9,6 +9,7 @@ class MapBase;
 class ProcessorMotion;
 class TimeStamp;
 struct IntrinsicsBase;
+struct ProcessorParamsBase;
 }
 
 //wolf includes
@@ -83,6 +84,7 @@ class Problem : public NodeBase
          */
         SensorBase* addSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
 
+        ProcessorBase* addProcessor(std::string _sen_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params);
 
         /** \brief Set the processor motion
          *
