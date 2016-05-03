@@ -38,16 +38,16 @@ namespace wolf
  * You provide a sensor type string (above), and a pointer to a static method
  * that knows how to create your specific sensor, e.g.:
  *
- *     register("CAMERA", createCamera);
+ *     registerCreator("CAMERA", SensorCamera::create);
  *
- * The method createCamera() exists somewhere else (e.g. in the sensor_camera.h file).
- * All these methods need the same API, regardless of the sensor type.
- * The API includes a pointer to a struct of intrinsic parameters, IntrinsicsBase*,
+ * The method SensorCamera::create() exists in the SensorCamera class as a static method.
+ * All these create() methods in all SensorXxx classes need to have exactly the same API, regardless of the sensor type.
+ * This API includes a sensor name, a vector of extrinsic parameters, and a pointer to a base struct of intrinsic parameters, IntrinsicsBase*,
  * that must be derived for each derived sensor.
  *
- * Here is an example of createCamera() extracted from sensor_camera.h:
+ * Here is an example of SensorCamera::create() extracted from sensor_camera.h:
  *
- *      SensorBase* createCamera(std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
+ *      static SensorBase* create(std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
  *      {
  *          // decode extrinsics vector
  *          assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
@@ -63,9 +63,9 @@ namespace wolf
  *          return sen;
  *      }
  *
- * The method unregisterCreator() does the opposite.
+ * The method unregisterCreator() unregisters the SensorXxx::create() method. It only needs to be passed the string of the sensor type.
  *
- * This class is a singleton: it can only exist once in your application.
+ * The SensorFactory class is a singleton: it can only exist once in your application.
  * To obtain a pointer to it, use the static method get(),
  *
  *     SensorFactory::get()
@@ -75,12 +75,12 @@ namespace wolf
  *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, intrinsics_ptr);
  *
  * where ABSOLUTELY ALL members are important. In particular, the sensor name "Front-left camera" will be used to identify this camera
- * and to assign it the appropriate processors.
+ * and to assign it the appropriate processors. DO NOT USE IT WITH DUMMY PARAMETERS!
  *
  * Currently, registering is performed in each specific SensorXxxx header file, sensor_xxxx.h.
  * For example, in sensor_camera.h we find the line:
  *
- *      const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", createCamera);
+ *      const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
  *
  * which is a static invocation (i.e., it is placed at global scope outside of the SensorCamera class).
  * Therefore, at application level, ````#include````-ing the header file sensor_xxx.h is enough for registering the SensorXxx creator into the factory.
@@ -90,7 +90,7 @@ namespace wolf
  *      #include "sensor_factory.h"
  *      #include "sensor_camera.h" // provides SensorCamera and registers the pair <"CAMERA", createCamera>
  *
- *      // Note: createCamera() is already registered. To invoke it, use the std::string "CAMERA" as in the lines below.
+ *      // Note: SensorCamera::create() is already registered. To invoke it, use the std::string "CAMERA" as in the lines below.
  *
  *      // We create two cameras...
  *
@@ -105,6 +105,8 @@ namespace wolf
  *      extrinsics = ...; // give it some other values...
  *      intrinsics = ...; // also fill in the derived struct for the second camera...
  *      SensorFactory::get()->create("CAMERA", "Front-right camera", extrinsics, &intrinsics);
+ *
+ * You can also check the code in the example file ````src/examples/test_sensor_factory.cpp````.
  */
 class SensorFactory
 {

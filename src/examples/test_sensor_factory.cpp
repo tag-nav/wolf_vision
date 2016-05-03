@@ -38,7 +38,7 @@ int main(void)
         std::cout << "Sensor: " << sen->id() << " | type " << sen->typeId() << ": " << sen->getType() << "\t| name: " << sen->getName() << std::endl;
     }
 
-    std::cout << "aux odometer\'s pointer: " << sen_ptr << std::endl;
+    std::cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << std::endl;
 
     return 0;
 }
