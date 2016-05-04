@@ -106,6 +106,16 @@ IF(faramotics_FOUND)
                                 ${pose_state_time_LIBRARIES} 
                                 ${faramotics_LIBRARIES}
                                 ${PROJECT_NAME})
+        ADD_EXECUTABLE(test_2_lasers_offline test_2_lasers_offline.cpp)
+        TARGET_LINK_LIBRARIES(test_2_lasers_offline 
+                                ${pose_state_time_LIBRARIES} 
+                                ${faramotics_LIBRARIES}
+                                ${PROJECT_NAME})
+        ADD_EXECUTABLE(test_faramotics_simulation test_faramotics_simulation.cpp)
+        TARGET_LINK_LIBRARIES(test_faramotics_simulation 
+                                ${pose_state_time_LIBRARIES} 
+                                ${faramotics_LIBRARIES}
+                                ${PROJECT_NAME})
 #        ADD_EXECUTABLE(test_autodiff test_autodiff.cpp)
 #        TARGET_LINK_LIBRARIES(test_autodiff 
 #                                ${pose_state_time_LIBRARIES} 
