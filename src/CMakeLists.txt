@@ -136,6 +136,7 @@ SET(HDRS
     node_terminus.h
     problem.h
     processor_base.h
+    processor_factory.h
     processor_motion.h
     processor_odom_2D.h
     processor_odom_3D.h
@@ -191,6 +192,7 @@ SET(SRCS
     node_base.cpp
     problem.cpp
     processor_base.cpp
+    processor_factory.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
     processor_tracker_feature_dummy.cpp

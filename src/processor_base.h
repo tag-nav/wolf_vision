@@ -13,6 +13,8 @@ class NodeTerminus;
 
 namespace wolf {
 
+struct ProcessorParamsBase{};
+
 //class ProcessorBase
 class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 {
