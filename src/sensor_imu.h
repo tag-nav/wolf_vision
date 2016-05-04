@@ -3,10 +3,14 @@
 
 //wolf includes
 #include "sensor_base.h"
-#include "sensor_factory.h"
-
 
 namespace wolf {
+
+struct IntrinsicsIMU : public IntrinsicsBase
+{
+        // add IMU parameters here
+};
+
 
 class SensorIMU : public SensorBase
 {
@@ -20,9 +24,10 @@ class SensorIMU : public SensorBase
          * Constructor with arguments
          * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
          * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
+         * \param _a_w_biases_ptr StateBlock pointer to the vector of acc and gyro biases
          *
          **/
-        SensorIMU(StateBlock* _p_ptr, StateBlock* _o_ptr);
+        SensorIMU(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _a_w_biases_ptr = nullptr);
 
         /** \brief Default destructor (not recommended)
          *
@@ -31,22 +36,22 @@ class SensorIMU : public SensorBase
          **/
         virtual ~SensorIMU();
 
+    public:
+        static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);
+
+
 };
 
-// Define the factory method and register it in the SensorFactory
+} // namespace wolf
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
 namespace
 {
-SensorBase* createIMU(std::string& _name, std::string _params_filename = "")
-{
-    SensorBase* sen = new SensorIMU(nullptr, nullptr);
-    sen->setName(_name);
-    return sen;
+const bool registered_imu = SensorFactory::get()->registerCreator("IMU", SensorIMU::create);
 }
-const bool registered_imu = SensorFactory::get()->registerSensor("IMU", createIMU);
-}
-
-
-
 } // namespace wolf
 
 #endif // SENSOR_IMU_H

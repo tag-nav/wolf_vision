@@ -8,11 +8,14 @@ class TrajectoryBase;
 class MapBase;
 class ProcessorMotion;
 class TimeStamp;
+struct IntrinsicsBase;
+struct ProcessorParamsBase;
 }
 
 //wolf includes
 #include "node_base.h"
-#include "sensor_factory.h"
+#include "sensor_base.h"
+//#include "sensor_factory.h"
 #include "wolf.h"
 
 // std includes
@@ -20,6 +23,7 @@ class TimeStamp;
 
 
 namespace wolf {
+
 
 /** \brief Wolf problem node element in the Wolf Tree
  * 
@@ -78,8 +82,9 @@ class Problem : public NodeBase
 
         /** \brief Factory method to add sensor only from its properties
          */
-        SensorBase* addSensor(std::string _sen_type, std::string _sen_name, std::string _sen_params_filename);
+        SensorBase* addSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
 
+        ProcessorBase* addProcessor(std::string _sen_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params);
 
         /** \brief Set the processor motion
          *
@@ -181,10 +186,6 @@ class Problem : public NodeBase
         /** \brief Adds a trajectory
          */
         TrajectoryBase* addTrajectory(TrajectoryBase* _trajectory_ptr);
-
-        /** \brief Adds a hardware
-         */
-        HardwareBase* addHarware(HardwareBase* _hardware_ptr);
 
         /** \brief Gets a pointer to map
          */

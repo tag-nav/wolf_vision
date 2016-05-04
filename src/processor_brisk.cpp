@@ -10,7 +10,7 @@ namespace wolf
 {
 
 //Constructor
-ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params) :
+ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters& _params) :
         ProcessorTrackerFeature(PRC_TRACKER_BRISK),
         detector_(_params.detector.threshold, _params.detector.octaves, _params.descriptor.pattern_scale),
         descriptor_(_params.detector.threshold, _params.detector.octaves, _params.descriptor.pattern_scale),

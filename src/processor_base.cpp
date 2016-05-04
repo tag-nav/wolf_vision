@@ -19,5 +19,9 @@ ProcessorBase::~ProcessorBase()
     //
 }
 
+bool ProcessorBase::permittedKeyFrame()
+{
+    return getProblem()->permitKeyFrame(this);
+}
 
 } // namespace wolf

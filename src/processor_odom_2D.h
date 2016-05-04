@@ -14,22 +14,6 @@
 
 namespace wolf {
 
-/**\brief The Motion Delta type
- *
- * The motion delta, as a composite struct containing position increment and orientation quaternion increment.
- */
-struct Odom2dDelta{
-        Eigen::Vector2s dp;    ///< Position increment
-        Scalar dq; ///< Orientation increment as a quaternion
-        Odom2dDelta() : dp(0,0), dq(0){};
-        Odom2dDelta(const Eigen::Vector2s& _dp, const Scalar& _dq) : dp(_dp), dq(_dq) {};
-        void set(Eigen::Vector2s _dp, Scalar _dq){dp = _dp; dq = _dq;};
-        void setZero() {dp.setZero(); dq=0;}
-        static Odom2dDelta Zero() {return Odom2dDelta();}
-};
-
-
-
 class ProcessorOdom2d : public ProcessorMotion
 {
     public:
@@ -39,8 +23,8 @@ class ProcessorOdom2d : public ProcessorMotion
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
 
     protected:
-        virtual void preProcess(){}
-        virtual void postProcess(){}
+//        virtual void preProcess(){}
+//        virtual void postProcess(){}
 
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
