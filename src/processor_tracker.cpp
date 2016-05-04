@@ -19,8 +19,22 @@ ProcessorTracker::ProcessorTracker(ProcessorType _tp, const unsigned int _max_ne
 
 ProcessorTracker::~ProcessorTracker()
 {
-    if (incoming_ptr_ != nullptr && incoming_ptr_->upperNodePtr() != nullptr)
+    if (last_ptr_ != nullptr && last_ptr_->upperNodePtr() == nullptr)
+        last_ptr_->destruct();
+
+    if (incoming_ptr_ != nullptr && incoming_ptr_->upperNodePtr() == nullptr)
         incoming_ptr_->destruct();
+
+    while (!new_features_last_.empty())
+    {
+        delete new_features_last_.front();
+        new_features_last_.pop_front();
+    }
+    while (!new_features_incoming_.empty())
+    {
+        delete new_features_incoming_.front();
+        new_features_incoming_.pop_front();
+    }
 }
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
@@ -58,28 +72,25 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         // Establish constraints from last
         establishConstraints();
 
-        // reset the derived tracker
-        reset();
-
-        // reset this: Clear incoming ptr. Origin and last are already OK.
-        origin_ptr_ = last_ptr_;
-        incoming_ptr_ = nullptr;
-
         //        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
     }
     // SECOND TIME or after KEY FRAME CALLBACK
-    else if (origin_ptr_ == last_ptr_)
+    else if (origin_ptr_ == nullptr)
     {
         std::cout << "SECOND TIME or after KEY FRAME CALLBACK" << std::endl;
         //std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
-        // First we track the known Features and create new constraints as needed
+        // First we track the known Features
         processKnown();
 
-        // Advance the derived Tracker
-        advance(); //reset();
+        // Create a new non-key Frame in the Trajectory with the incoming Capture
+        makeFrame(incoming_ptr_);
 
-        // Advance this (without destructing last_ptr_ since it is origin)
+        // Reset the derived Tracker
+        reset();
+
+        // Reset this (without destructing last_ptr_ since it is origin)
+        origin_ptr_ = last_ptr_;
         last_ptr_ = incoming_ptr_;
         incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 
@@ -146,8 +157,6 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 
 bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr)
 {
-    std::cout << "ProcessorTracker::keyFrameCallback sensor " << getSensorPtr()->id() << std::endl;
-
     Scalar _dt_max = 0.1; // hardcoded for now
 
     // Nothing to do if:
@@ -158,11 +167,13 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr)
     if (last_ptr_ == nullptr || (last_ptr_->getFramePtr() != nullptr && last_ptr_->getFramePtr()->isKey()) || std::abs(last_ptr_->getTimeStamp() - _keyframe_ptr->getTimeStamp()) > _dt_max)
         return false;
 
+    std::cout << "ProcessorTracker::keyFrameCallback sensor " << getSensorPtr()->id() << std::endl;
+
     // Capture last_ is going to be added to the new keyframe
     if (last_ptr_->getFramePtr() != nullptr)
     {
         FrameBase* last_old_frame = last_ptr_->getFramePtr();
-        last_ptr_->unlinkFromUpperNode();
+        last_old_frame->unlinkDownNode(last_ptr_);
         last_old_frame->destruct();
         _keyframe_ptr->addCapture(last_ptr_);
     }
@@ -170,20 +181,11 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr)
     // Detect new Features, initialize Landmarks, create Constraints, ...
     processNew(max_new_features_);
 
-    // Create a new non-key Frame in the Trajectory with the incoming Capture
-    if (incoming_ptr_ != nullptr)
-        makeFrame(incoming_ptr_);
-
     // Establish constraints between last and origin
     establishConstraints();
 
-    // Reset the derived Tracker
-    reset();
-
-    // Reset this
-    origin_ptr_ = last_ptr_;
-    last_ptr_ = incoming_ptr_;
-    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+    // Set ready to go to 2nd case in process()
+    origin_ptr_ = nullptr;
 
     return true;
 }
