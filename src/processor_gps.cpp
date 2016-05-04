@@ -15,6 +15,8 @@ ProcessorGPS::ProcessorGPS() : ProcessorBase(PRC_GPS_RAW),
 {
     std::cout << "ProcessorGPS constructor" << std::endl;
 
+    setType("GPS");
+
     gps_covariance_ = 10;
 }
 
@@ -55,5 +57,11 @@ void ProcessorGPS::process(CaptureBase* _capture_ptr)
     //std::cout << "Constraints established" << std::endl;
 }
 
+ProcessorBase* ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+{
+    ProcessorGPS* prc_ptr = new ProcessorGPS();
+    prc_ptr->setName(_unique_name);
+    return prc_ptr;
+}
 
 } // namespace wolf

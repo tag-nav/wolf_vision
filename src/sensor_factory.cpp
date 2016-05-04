@@ -7,12 +7,19 @@
 
 #include "sensor_factory.h"
 
+#include <iostream>
+
 namespace wolf
 {
 
 bool SensorFactory::registerCreator(const std::string& _sensor_type, CreateSensorCallback createFn)
 {
-    return callbacks_.insert(CallbackMap::value_type(_sensor_type, createFn)).second;
+    bool reg = callbacks_.insert(CallbackMap::value_type(_sensor_type, createFn)).second;
+    if (reg)
+        std::cout << "Registered sensor " << _sensor_type << std::endl;
+    else
+        std::cout << "Could not register sensor " << _sensor_type << std::endl;
+    return reg;
 }
 
 bool SensorFactory::unregisterCreator(const std::string& _sensor_type)

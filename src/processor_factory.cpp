@@ -7,12 +7,20 @@
 
 #include "processor_factory.h"
 
+#include <iostream>
+
 namespace wolf
 {
 
 bool ProcessorFactory::registerCreator(const std::string& _processor_type, CreateProcessorCallback createFn)
 {
-    return callbacks_.insert(CallbackMap::value_type(_processor_type, createFn)).second;
+    bool reg = callbacks_.insert(CallbackMap::value_type(_processor_type, createFn)).second;
+    if (reg)
+        std::cout << "Registered processor " << _processor_type << std::endl;
+    else
+        std::cout << "Could not register processor " << _processor_type << std::endl;
+
+    return reg;
 }
 
 bool ProcessorFactory::unregisterCreator(const std::string& _processor_type)

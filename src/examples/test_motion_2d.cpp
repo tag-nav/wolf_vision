@@ -55,7 +55,7 @@ int main()
                                             new StateBlock(Eigen::Vector1s::Zero(), true),
                                             new StateBlock(Eigen::VectorXs::Zero(0), true), 0);
     SensorBase* sensor_fix_ptr = new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0);
-    ProcessorOdom2d* odom2d_ptr = new ProcessorOdom2d();
+    ProcessorOdom2D* odom2d_ptr = new ProcessorOdom2D();
     // Assemble Wolf tree by linking the nodes
     sensor_odom_ptr->addProcessor(odom2d_ptr);
     problem_ptr->addSensor(sensor_odom_ptr);

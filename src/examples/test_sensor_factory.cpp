@@ -4,22 +4,32 @@
  *  Created on: Apr 25, 2016
  *      \author: jsola
  */
+#include "../problem.h"
 
+#include "../sensor_factory.h"
 #include "../sensor_gps_fix.h"
 #include "../sensor_camera.h"
 #include "../sensor_odom_2D.h"
-#include "../sensor_factory.h"
-#include "../problem.h"
+
+#include "../processor_factory.h"
+#include "../processor_odom_2D.h"
 //#include "../sensor_imu.h" // this class not finished
 
+#include <iostream>
+#include <iomanip>
 
 int main(void)
 {
     using namespace wolf;
+    using namespace std;
 
-    std::cout << "================ Sensor Factory ================" << std::endl;
+    cout << "\n================ Wolf Factories ================" << endl;
+
+    cout << "If you look above, you see the registered methods.\nThere is one attempt per #include of the file, I ignore why!" << endl;
 
     Problem problem(FRM_PO_3D);
+
+    cout << "\n================ Sensor Factory ================" << endl;
 
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
     IntrinsicsCamera intr_cam;
@@ -28,8 +38,6 @@ int main(void)
 
     problem.addSensor("CAMERA",     "front left camera",      pq_3d,  &intr_cam);
     problem.addSensor("Camera",     "front right camera",     pq_3d,  &intr_cam);
-    problem.addSensor("CaMeRa",     "back right camera",      pq_3d,  &intr_cam);
-    problem.addSensor("camera",     "back left camera",       pq_3d,  &intr_cam);
     problem.addSensor("ODOM 2D",    "main odometer",    po_2d,  &intr_odom2d);
     problem.addSensor("GPS FIX",    "GPS fix",          p_3d,   &intr_gps_fix);
     problem.addSensor("CAMERA",     "rear camera",      pq_3d,  &intr_cam);
@@ -37,10 +45,21 @@ int main(void)
     SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
 
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
-        std::cout << "Sensor: " << sen->id() << " | type " << sen->typeId() << ": " << sen->getType() << "\t| name: " << sen->getName() << std::endl;
+        cout << "Sensor: " << setw(2) << left << sen->id() << " | type " << setw(2) << sen->typeId() << ": " << setw(8) << left << sen->getType() << " | name: " << sen->getName() << endl;
     }
 
-    std::cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << std::endl;
+    cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << endl;
+
+    cout << "\n=============== Processor Factory ===============" << endl;
+
+    problem.addProcessor("ODOM 2D", "main odometry",    "main odometer",    nullptr);
+    problem.addProcessor("GPS",     "GPS fixes",        "GPS fix",          nullptr);
+    problem.addProcessor("ODOM 2D", "sec. odometry",    "aux odometer",     nullptr);
+
+    for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr()))
+        for (auto prc : *(sen->getProcessorListPtr()))
+            cout << "Processor: " << setw(2) << left  << prc->id() << " | type : " << setw(8) << left << prc->getType() << "| name: " << setw(15) << left << prc->getName() << " | binded to sensor: " << prc->getSensorPtr()->getName() << endl;
+
 
     return 0;
 }
