@@ -10,9 +10,6 @@
 #include "sensor_factory.h"
 #include "processor_factory.h"
 
-
-#include "processor_tracker_landmark_dummy.h"  // TODO: DUMMY  to be removed
-
 namespace wolf
 {
 
