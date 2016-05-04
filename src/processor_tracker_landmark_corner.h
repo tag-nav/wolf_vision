@@ -39,7 +39,6 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
     private:
         //laserscanutils::ScanParams scan_params_;
         //laserscanutils::ExtractCornerParams corner_alg_params_;
-        laserscanutils::LaserScan laser_data_;
         laserscanutils::LineFinderIterative line_finder_;
         laserscanutils::CornerFinder corner_finder_;
         //TODO: add corner_finder_params
@@ -72,6 +71,12 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
         void advance()
         {
             ProcessorTrackerLandmark::advance();
+            corners_last_ = std::move(corners_incoming_);
+        }
+
+        void reset()
+        {
+            ProcessorTrackerLandmark::reset();
             corners_last_ = std::move(corners_incoming_);
         }
 
@@ -142,6 +147,16 @@ inline ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(const lase
 
 inline ProcessorTrackerLandmarkCorner::~ProcessorTrackerLandmarkCorner()
 {
+    while (!corners_last_.empty())
+    {
+        delete corners_last_.front();
+        corners_last_.pop_front();
+    }
+    while (!corners_incoming_.empty())
+    {
+        delete corners_incoming_.front();
+        corners_incoming_.pop_front();
+    }
 }
 
 inline unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const unsigned int& _max_features)
@@ -164,6 +179,8 @@ inline LandmarkBase* ProcessorTrackerLandmarkCorner::createLandmark(FeatureBase*
 
 inline ConstraintBase* ProcessorTrackerLandmarkCorner::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
+    assert(_feature_ptr != nullptr && _landmark_ptr != nullptr && "ProcessorTrackerLandmarkCorner::createConstraint: feature and landmark pointers can not be nullptr!");
+
     return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*)((_landmark_ptr)));
 }
 
