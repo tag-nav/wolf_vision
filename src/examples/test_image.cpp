@@ -12,7 +12,7 @@
 #include "unistd.h"
 #include <time.h>
 #include "opencv2/calib3d/calib3d.hpp"
-#include <uEye.h> //used to use the camera?
+//#include <uEye.h> //used to use the camera?
 
 //std includes
 #include <iostream>
