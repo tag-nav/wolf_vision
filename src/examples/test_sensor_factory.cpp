@@ -45,7 +45,10 @@ int main(void)
     SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
 
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
-        cout << "Sensor: " << setw(2) << left << sen->id() << " | type " << setw(2) << sen->typeId() << ": " << setw(8) << left << sen->getType() << " | name: " << sen->getName() << endl;
+        cout << "Sensor: " << setw(2) << left << sen->id()
+                << " | type " << setw(2) << sen->typeId()
+                << ": " << setw(8) << sen->getType()
+                << " | name: " << sen->getName() << endl;
     }
 
     cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << endl;
@@ -58,7 +61,10 @@ int main(void)
 
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr()))
         for (auto prc : *(sen->getProcessorListPtr()))
-            cout << "Processor: " << setw(2) << left  << prc->id() << " | type : " << setw(8) << left << prc->getType() << "| name: " << setw(15) << left << prc->getName() << " | binded to sensor: " << prc->getSensorPtr()->getName() << endl;
+            cout << "Processor: " << setw(2) << left  << prc->id()
+            << " | type : " << setw(8) << prc->getType()
+            << " | name: " << setw(15) << prc->getName()
+            << " | bound to sensor: " << prc->getSensorPtr()->getName() << endl;
 
 
     return 0;

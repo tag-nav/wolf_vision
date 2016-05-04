@@ -13,10 +13,7 @@ ProcessorGPS::ProcessorGPS() : ProcessorBase(PRC_GPS_RAW),
         //sensor_gps_ptr_((SensorGPS*)(upperNodePtr())), //TODO here there's a crash. Look at what they'll do in processorLaser and modify as consequence
         capture_gps_ptr_(nullptr)
 {
-    std::cout << "ProcessorGPS constructor" << std::endl;
-
     setType("GPS");
-
     gps_covariance_ = 10;
 }
 
