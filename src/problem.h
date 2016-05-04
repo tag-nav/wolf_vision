@@ -187,10 +187,6 @@ class Problem : public NodeBase
          */
         TrajectoryBase* addTrajectory(TrajectoryBase* _trajectory_ptr);
 
-        /** \brief Adds a hardware
-         */
-        HardwareBase* addHarware(HardwareBase* _hardware_ptr);
-
         /** \brief Gets a pointer to map
          */
         MapBase* getMapPtr();
