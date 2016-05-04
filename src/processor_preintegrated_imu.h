@@ -2,7 +2,7 @@
 #define PROCESSOR_PREINTEGRATED_IMU_H
 
 // Wolf
-#include "processor_motion2.h"
+#include "processor_motion.h"
 #include "capture_imu.h"
 #include "sensor_imu.h"
 #include "wolf.h"
@@ -12,7 +12,7 @@
 
 namespace wolf {
 
-class ProcessorPreintegratedIMU : public ProcessorMotion2{
+class ProcessorPreintegratedIMU : public ProcessorMotion{
     public:
         ProcessorPreintegratedIMU(ProcessorType _tp);
         virtual ~ProcessorPreintegratedIMU();

@@ -23,7 +23,7 @@
 
 namespace wolf {
 
-struct ProcessorImageParameters
+struct ProcessorImageParameters : public ProcessorParamsBase
 {
         struct Image
         {

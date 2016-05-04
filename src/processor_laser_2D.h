@@ -45,6 +45,13 @@ const Scalar MAX_ACCEPTED_APERTURE_DIFF = 20.0*M_PI/180.; //20 degrees
 const Scalar CONTAINER_WIDTH = 2.44;
 const Scalar CONTAINER_LENGTH = 12.20;
 
+struct ProcessorParamsLaser2D : public ProcessorParamsBase
+{
+        Scalar max_accepted_aperture_diff = 20.0*M_PI/180.; //20 degrees
+        Scalar container_width = 2.44;
+        Scalar container_length = 12.20;
+};
+
 
 
 class ProcessorLaser2D : public ProcessorBase

@@ -8,6 +8,7 @@
 #include "processor_motion.h"
 #include "sensor_base.h"
 #include "sensor_factory.h"
+#include "processor_factory.h"
 
 
 #include "processor_tracker_landmark_dummy.h"  // TODO: DUMMY  to be removed
@@ -72,8 +73,7 @@ ProcessorBase* Problem::addProcessor(std::string _prc_type, std::string _unique_
     if (sen_it == getHardwarePtr()->getSensorListPtr()->end())
         throw std::runtime_error("Sensor not found");
 
-    //    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(_prc_type, _unique_processor_name, _prc_params);
-    ProcessorBase* prc_ptr = new ProcessorTrackerLandmarkDummy(10); // TODO: DUMMY  to be removed
+    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(_prc_type, _unique_processor_name, _prc_params);
     (*sen_it)->addProcessor(prc_ptr);
     return prc_ptr;
 }
