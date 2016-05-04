@@ -70,7 +70,7 @@ ProcessorBase* Problem::addProcessor(std::string _prc_type, std::string _unique_
     if (sen_it == getHardwarePtr()->getSensorListPtr()->end())
         throw std::runtime_error("Sensor not found. Cannot bind Processor.");
 
-    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(_prc_type, _unique_processor_name, _prc_params);
+    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(uppercase(_prc_type), _unique_processor_name, _prc_params);
     (*sen_it)->addProcessor(prc_ptr);
     return prc_ptr;
 }
