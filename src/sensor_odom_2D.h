@@ -4,9 +4,14 @@
 
 //wolf includes
 #include "sensor_base.h"
-#include "sensor_factory.h"
 
 namespace wolf {
+
+struct IntrinsicsOdom2D : public IntrinsicsBase
+{
+        Scalar k_disp_to_disp; ///< ratio of displacement variance to displacement, for odometry noise calculation
+        Scalar k_rot_to_rot; ///< ratio of rotation variance to rotation, for odometry noise calculation
+};
 
 class SensorOdom2D : public SensorBase
 {
@@ -48,21 +53,25 @@ class SensorOdom2D : public SensorBase
          **/        
         double getRotVarToRotNoiseFactor() const;
         
+
+	public:
+        static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);
+
+
 };
 
-// Define the factory method and register it in the SensorFactory
+} // namespace wolf
+
+
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
 namespace
 {
-SensorBase* createOdom2D(std::string& _name, std::string _params_filename = "")
-{
-    SensorBase* odo = new SensorOdom2D(nullptr, nullptr,0,0);
-    odo->setName(_name);
-    return odo;
+const bool registered_odom_2d = SensorFactory::get()->registerCreator("ODOM 2D", SensorOdom2D::create);
 }
-const bool registered_odom_2d = SensorFactory::get()->registerSensor("ODOM 2D", createOdom2D);
-}
-
-
 } // namespace wolf
 
 #endif

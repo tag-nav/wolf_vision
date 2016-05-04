@@ -2,7 +2,10 @@
 
 namespace wolf {
 
-ProcessorPreintegratedIMU::ProcessorPreintegratedIMU(ProcessorType _tp) : ProcessorMotion(_tp)
+ProcessorPreintegratedIMU::ProcessorPreintegratedIMU(ProcessorType _tp) :
+        ProcessorMotion(_tp, 16, 10, 6),
+        sensor_imu_ptr_(nullptr),
+        capture_imu_ptr_(nullptr)
 {
 }
 

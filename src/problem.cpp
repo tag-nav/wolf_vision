@@ -6,9 +6,18 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 #include "processor_motion.h"
+#include "sensor_base.h"
+#include "sensor_factory.h"
+#include "processor_factory.h"
 
 namespace wolf
 {
+
+// unnamed namespace used for helper functions local to this file.
+namespace {
+std::string uppercase(std::string& s) {for (auto & c: s) c = std::toupper(c); return s;}
+}
+
 
 Problem::Problem(FrameStructure _frame_structure) :
         NodeBase("PROBLEM"), //
@@ -45,13 +54,26 @@ void Problem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-SensorBase* Problem::addSensor(std::string _sen_type, std::string _sen_name, std::string _sen_params_filename)
+SensorBase* Problem::addSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
-    SensorBase* sen_ptr = SensorFactory::get()->createSensor(_sen_type, _sen_name, _sen_params_filename);
+    SensorBase* sen_ptr = SensorFactory::get()->create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
     addSensor(sen_ptr);
     return sen_ptr;
 }
 
+ProcessorBase* Problem::addProcessor(std::string _prc_type, std::string _unique_processor_name,
+                                     std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params)
+{
+    auto sen_it = std::find_if(getHardwarePtr()->getSensorListPtr()->begin(),
+                               getHardwarePtr()->getSensorListPtr()->end(),
+                               [&](SensorBase* sb) { return sb->getName() == _corresponding_sensor_name; }); // lambda function for the find_if
+    if (sen_it == getHardwarePtr()->getSensorListPtr()->end())
+        throw std::runtime_error("Sensor not found. Cannot bind Processor.");
+
+    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(uppercase(_prc_type), _unique_processor_name, _prc_params);
+    (*sen_it)->addProcessor(prc_ptr);
+    return prc_ptr;
+}
 
 void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
 {
@@ -121,18 +143,19 @@ FrameBase* Problem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _f
     return trajectory_ptr_->getLastFramePtr();
 }
 
-void Problem::getCurrentState(Eigen::VectorXs& state)
-{
-    if (processor_motion_ptr_ != nullptr)
-        processor_motion_ptr_->getState(state);
-    else
-        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
-}
-
 Eigen::VectorXs Problem::getCurrentState()
 {
     if (processor_motion_ptr_ != nullptr)
         return processor_motion_ptr_->getState();
+    else
+        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+}
+
+
+void Problem::getCurrentState(Eigen::VectorXs& state)
+{
+    if (processor_motion_ptr_ != nullptr)
+        processor_motion_ptr_->getState(state);
     else
         throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
 }

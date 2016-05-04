@@ -13,6 +13,11 @@
 
 namespace wolf {
 
+struct ProcessorParamsTracker : public ProcessorParamsBase
+{
+        unsigned int max_new_features;
+};
+
 /** \brief General tracker processor
  *
  * This is an abstract class.

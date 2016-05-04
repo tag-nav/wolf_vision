@@ -12,30 +12,35 @@
 #include "../problem.h"
 //#include "../sensor_imu.h" // this class not finished
 
-#include <list>
 
 int main(void)
 {
     using namespace wolf;
 
-    std::list<SensorBase*> sensors;
-
     std::cout << "================ Sensor Factory ================" << std::endl;
 
     Problem problem(FRM_PO_3D);
 
-    problem.addSensor("CAMERA", "left camera", "");
-    problem.addSensor("CAMERA", "right camera", "");
-    problem.addSensor("ODOM 2D", "main odometer", "");
-    problem.addSensor("GPS FIX", "GPS fix", "");
-    problem.addSensor("CAMERA", "rear camera", "");
-    SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", "");
+    Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
+    IntrinsicsCamera intr_cam;
+    IntrinsicsOdom2D intr_odom2d;
+    IntrinsicsGPSFix intr_gps_fix;
+
+    problem.addSensor("CAMERA",     "front left camera",      pq_3d,  &intr_cam);
+    problem.addSensor("Camera",     "front right camera",     pq_3d,  &intr_cam);
+    problem.addSensor("CaMeRa",     "back right camera",      pq_3d,  &intr_cam);
+    problem.addSensor("camera",     "back left camera",       pq_3d,  &intr_cam);
+    problem.addSensor("ODOM 2D",    "main odometer",    po_2d,  &intr_odom2d);
+    problem.addSensor("GPS FIX",    "GPS fix",          p_3d,   &intr_gps_fix);
+    problem.addSensor("CAMERA",     "rear camera",      pq_3d,  &intr_cam);
+
+    SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
 
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
         std::cout << "Sensor: " << sen->id() << " | type " << sen->typeId() << ": " << sen->getType() << "\t| name: " << sen->getName() << std::endl;
     }
 
-    std::cout << "aux odometer\'s pointer: " << sen_ptr << std::endl;
+    std::cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << std::endl;
 
     return 0;
 }

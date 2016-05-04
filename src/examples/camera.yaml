@@ -1,0 +1,11 @@
+sensor type: "CAMERA"                   # This must match the KEY used in the SensorFactory. Otherwise it is an error.
+sensor name: "Front left camera"        # This is ignored. The name provided to the SensorFactory prevails
+parameters: 
+    image size:   [640, 480]              # rows, cols        [pix]
+    intrinsic:    [320, 240, 320, 320]    # u0, v0, au, av    [pix]
+    distortion:   [ ]                     # d0, d1, d2, ... radial distortion polynomial coeffs
+    correction:   [ ]                     # c0, c1, c2, ... radial correction polynomial coeffs
+extrinsic: 
+    position:     [0, 0, 0.5]             #  x, y, z          [m]
+    orientation:  [-90, 0, -90]           # roll, pitch, yaw  [deg]
+
