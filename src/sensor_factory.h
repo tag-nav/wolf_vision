@@ -126,7 +126,7 @@ class SensorFactory
     private:
         SensorFactory(); // Prevent clients from creating a new Singleton
         SensorFactory(const SensorFactory&); // Prevent clients from creating a copy of the Singleton
-        static SensorFactory* pInstance_;
+        ~SensorFactory(); // Prevent clients from deleting the Singleton
 };
 
 } /* namespace wolf */
