@@ -33,7 +33,7 @@ class ProcessorFactory
     private:
         ProcessorFactory(); // Prevent clients from creating a new Singleton
         ProcessorFactory(const ProcessorFactory&); // Prevent clients from creating a copy of the Singleton
-        static ProcessorFactory* pInstance_;
+        ~ProcessorFactory(); // Prevent clients from deleting the Singleton
 };
 
 } /* namespace wolf */

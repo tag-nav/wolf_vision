@@ -43,18 +43,14 @@ wolf::ProcessorBase* ProcessorFactory::create(const std::string& _processor_type
 // Singleton ---------------------------------------------------
 // This class is a singleton. The code below guarantees this.
 
-ProcessorFactory* ProcessorFactory::pInstance_ = nullptr;
-
 wolf::ProcessorFactory* ProcessorFactory::get() // Unique point of access;
 {
-    if (pInstance_ == nullptr)
-        pInstance_ = new ProcessorFactory;
-    return pInstance_;
+    static ProcessorFactory pInstance_;
+    return &pInstance_;
 }
 
 // singleton: constructor and destructor are private
-ProcessorFactory::ProcessorFactory(const ProcessorFactory&){}
-ProcessorFactory::ProcessorFactory(){}
-
-
+ProcessorFactory::ProcessorFactory(const ProcessorFactory&) { }
+ProcessorFactory::ProcessorFactory() { }
+ProcessorFactory::~ProcessorFactory() { }
 } /* namespace wolf */
