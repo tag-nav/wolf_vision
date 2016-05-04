@@ -42,17 +42,14 @@ wolf::SensorBase* SensorFactory::create(const std::string& _sensor_type, const s
 // Singleton ---------------------------------------------------
 // This class is a singleton. The code below guarantees this.
 
-SensorFactory* SensorFactory::pInstance_ = nullptr;
-
 wolf::SensorFactory* SensorFactory::get() // Unique point of access;
 {
-    if (pInstance_ == nullptr)
-        pInstance_ = new SensorFactory;
-    return pInstance_;
+    static SensorFactory pInstance_;
+    return &pInstance_;
 }
 
 // singleton: constructor and destructor are private
-SensorFactory::SensorFactory(const SensorFactory&){}
-SensorFactory::SensorFactory(){}
-
+SensorFactory::SensorFactory(const SensorFactory&){ }
+SensorFactory::SensorFactory() { }
+SensorFactory::~SensorFactory() { }
 } /* namespace wolf */
