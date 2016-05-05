@@ -40,6 +40,7 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
     {
         // create new landmark
         LandmarkBase* new_lmk_ptr = createLandmark(new_feature_ptr);
+        std::cout << "\tnew_landmark: " << new_lmk_ptr->id() << std::endl;
         new_landmarks.push_back(new_lmk_ptr);
         // create new correspondence
         matches_landmark_from_last_[new_feature_ptr] = LandmarkMatch(new_lmk_ptr, 1); // max score
@@ -61,7 +62,7 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
 
     // Append new landmarks to the map
     getProblem()->addLandmarkList(new_landmarks);
-    std::cout << "\tnew landmarks added " << std::endl;
+    std::cout << "\tnew landmarks added: " << getProblem()->getMapPtr()->getLandmarkListPtr()->size() << std::endl;
 
     // return the number of new features detected in \b last
     std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
