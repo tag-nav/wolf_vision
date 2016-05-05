@@ -144,7 +144,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
     detector_ptr_->detect(_image_roi, _new_keypoints);
     for (unsigned int i = 0; i < _new_keypoints.size(); i++)
     {
-        std::cout << "keypoints: " << _new_keypoints[i].pt << std::endl;
+        //std::cout << "keypoints: " << _new_keypoints[i].pt << std::endl;
     }
     descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
 
@@ -152,7 +152,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
     for (unsigned int i = 0; i < _new_keypoints.size(); i++)
     {
-        std::cout << "keypoints 2: " << _new_keypoints[i].pt << std::endl;
+        //std::cout << "keypoints 2: " << _new_keypoints[i].pt << std::endl;
         _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
         _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
     }
@@ -162,7 +162,6 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_features)
 {
     std::cout << "\n---------------- detectNewFeatures -------------" << std::endl;
-//    resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()), *(incoming_ptr_->getFeatureListPtr()));
     cv::Rect roi;
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
@@ -255,14 +254,6 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
 //            matcher_.match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
             matcher_ptr_->match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
-
-//        	std::cout << "\t [trainIdx]:distance: ";
-//            for(int i = 0; i < candidate_descriptors.rows; i++)
-//            {
-//                double dist = cv::norm( feature_ptr->getDescriptor(), candidate_descriptors.row(i), cv::NORM_HAMMING);
-//                std::cout << "[" << i << "]:" << dist << " | ";
-//            }
-//            std::cout  << std::endl;
 
             std::cout << "\n\tBest is: [" << cv_matches[0].trainIdx << "]:" << cv_matches[0].distance;
 
