@@ -23,9 +23,9 @@ Problem::Problem(FrameStructure _frame_structure) :
 Problem::~Problem()
 {
     //std::cout << "deleting wolf problem " << nodeId() << std::endl;
+    hardware_ptr_->destruct();
     trajectory_ptr_->destruct();
     map_ptr_->destruct();
-    hardware_ptr_->destruct();
 }
 
 void Problem::destruct()
