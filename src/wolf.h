@@ -229,7 +229,8 @@ typedef enum
     PRC_GPS_RAW,
     PRC_LIDAR,
     PRC_ODOM_2D,
-    PRC_ODOM_3D
+    PRC_ODOM_3D,
+    PRC_IMU
 } ProcessorType;
 
 /** \brief enumeration of all possible Feature types

@@ -7,15 +7,17 @@
 #include "../problem.h"
 
 #include "../sensor_factory.h"
+#include "../processor_factory.h"
+
 #include "../sensor_gps_fix.h"
 #include "../sensor_camera.h"
-#include "../sensor_odom_2D.h"
-//#include "../sensor_imu.h" // this class not finished
 
-#include "../processor_factory.h"
+#include "../sensor_odom_2D.h"
 #include "../processor_odom_2D.h"
 #include "../processor_odom_3D.h"
-//#include "../processor_preintegrated_imu.h"
+
+#include "../sensor_imu.h"
+#include "../processor_imu.h"
 
 #include <iostream>
 #include <iomanip>
@@ -43,6 +45,7 @@ int main(void)
     problem.addSensor("ODOM 2D",    "main odometer",    po_2d,  &intr_odom2d);
     problem.addSensor("GPS FIX",    "GPS fix",          p_3d,   &intr_gps_fix);
     problem.addSensor("CAMERA",     "rear camera",      pq_3d,  &intr_cam);
+    problem.addSensor("IMU",        "inertial",         pq_3d,  &intr_cam);
 
     SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
 
@@ -59,6 +62,7 @@ int main(void)
 
     problem.addProcessor("ODOM 2D", "main odometry",    "main odometer",    nullptr);
     problem.addProcessor("ODOM 3D", "sec. odometry",    "aux odometer",     nullptr);
+    problem.addProcessor("IMU",     "pre-integrated",   "inertial",         nullptr);
 
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr()))
         for (auto prc : *(sen->getProcessorListPtr()))

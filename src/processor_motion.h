@@ -288,11 +288,11 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
-        Motion motionZero(TimeStamp& _ts);
-
         virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts) = 0;
 
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin) = 0;
+
+        Motion motionZero(TimeStamp& _ts);
 
     protected:
         // Attributes
