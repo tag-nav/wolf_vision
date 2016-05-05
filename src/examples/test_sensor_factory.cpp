@@ -4,7 +4,6 @@
  *  Created on: Apr 25, 2016
  *      \author: jsola
  */
-#include "../problem.h"
 
 #include "../sensor_factory.h"
 #include "../processor_factory.h"
@@ -18,6 +17,8 @@
 
 #include "../sensor_imu.h"
 #include "../processor_imu.h"
+
+#include "../problem.h"
 
 #include <iostream>
 #include <iomanip>
