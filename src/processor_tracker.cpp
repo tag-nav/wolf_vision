@@ -27,12 +27,12 @@ ProcessorTracker::~ProcessorTracker()
 
     while (!new_features_last_.empty())
     {
-        delete new_features_last_.front();
+        new_features_last_.front()->destruct();
         new_features_last_.pop_front();
     }
     while (!new_features_incoming_.empty())
     {
-        delete new_features_incoming_.front();
+        new_features_incoming_.front()->destruct();
         new_features_incoming_.pop_front();
     }
 }
