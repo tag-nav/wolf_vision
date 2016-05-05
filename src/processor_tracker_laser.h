@@ -55,7 +55,7 @@ class ProcessorTrackerLaser : public ProcessorTrackerLandmark
     protected:
 
         virtual void preProcess();
-        virtual void postProcess(){}
+//        virtual void postProcess() { }
 
         /** \brief Find provided landmarks in the incoming capture
          * \param _landmark_list_in input list of landmarks to be found in incoming

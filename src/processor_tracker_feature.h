@@ -77,10 +77,10 @@ typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
  *   - establishConstraints() : which calls the pure virtual:
  *     - createConstraint() : create constraint of the correct derived type         <=== IMPLEMENT
  *
- * Should you need extra functionality for your derived types, you can implement the two pure virtuals,
+ * Should you need extra functionality for your derived types, you can overload these two methods,
  *
- *   -  preProcess()
- *   -  postProcess()
+ *   -  preProcess() { }
+ *   -  postProcess() { }
  *
  * which are called at the beginning and at the end of process() respectively.
  * See the doc of these functions for more info.

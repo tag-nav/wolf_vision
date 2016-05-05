@@ -45,8 +45,8 @@ class ProcessorOdom3D : public ProcessorMotion
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
 
     protected:
-        virtual void preProcess(){}
-        virtual void postProcess(){}
+//        virtual void preProcess(){}
+//        virtual void postProcess(){}
 
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);

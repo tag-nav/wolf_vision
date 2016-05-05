@@ -21,8 +21,8 @@ class ProcessorPreintegratedIMU : public ProcessorMotion{
 
     protected:
 
-        virtual void preProcess(){}
-        virtual void postProcess(){}
+//        virtual void preProcess(){}
+//        virtual void postProcess(){}
 
         // Helper functions
 
