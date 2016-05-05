@@ -183,22 +183,8 @@ int main(int argc, char** argv)
     Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
     laser_2_pose << -1.2, 0, 0, Constants::PI; //laser 2
-    std::stringstream laser_params;
-    laser_params << Constants::PI/2;
-    laser_params << " ";
-    laser_params << -Constants::PI/2;
-    laser_params << " ";
-    laser_params << -Constants::PI/720;
-    laser_params << " ";
-    laser_params << 0.01;
-    laser_params << " ";
-    laser_params << 0.2;
-    laser_params << " ";
-    laser_params << 100;
-    laser_params << " ";
-    laser_params << 0.01;
-    laser_params << " ";
-    laser_params << 0.01;
+    Eigen::VectorXs laser_params(8);
+    laser_params << Constants::PI/2, -Constants::PI/2, -Constants::PI/720, 0.01, 0.2, 100, 0.01, 0.01;
     std::vector<float> scan1, scan2;
 
     // Simulated robot
@@ -215,8 +201,8 @@ int main(int argc, char** argv)
     laser_2_file.open("simulated_laser_2.txt", std::ofstream::out); //open log file
 
     // write laser params
-    laser_1_file << 0 << " " << laser_params << " " << robot.myScanner->getNumPoints() << std::endl;
-    laser_2_file << 0 << " " << laser_params << " " << robot.myScanner->getNumPoints() << std::endl;
+    laser_1_file << 0 << " " << laser_params.transpose() << " " << robot.myScanner->getNumPoints() << std::endl;
+    laser_2_file << 0 << " " << laser_params.transpose() << " " << robot.myScanner->getNumPoints() << std::endl;
     laser_1_file << 0 << " " << laser_1_pose.transpose() << std::endl;
     laser_2_file << 0 << " " << laser_2_pose.transpose() << std::endl;
 
