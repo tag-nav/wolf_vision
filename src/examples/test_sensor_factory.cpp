@@ -10,10 +10,12 @@
 #include "../sensor_gps_fix.h"
 #include "../sensor_camera.h"
 #include "../sensor_odom_2D.h"
+//#include "../sensor_imu.h" // this class not finished
 
 #include "../processor_factory.h"
 #include "../processor_odom_2D.h"
-//#include "../sensor_imu.h" // this class not finished
+#include "../processor_odom_3D.h"
+//#include "../processor_preintegrated_imu.h"
 
 #include <iostream>
 #include <iomanip>
@@ -56,8 +58,7 @@ int main(void)
     cout << "\n=============== Processor Factory ===============" << endl;
 
     problem.addProcessor("ODOM 2D", "main odometry",    "main odometer",    nullptr);
-    problem.addProcessor("GPS",     "GPS fixes",        "GPS fix",          nullptr);
-    problem.addProcessor("ODOM 2D", "sec. odometry",    "aux odometer",     nullptr);
+    problem.addProcessor("ODOM 3D", "sec. odometry",    "aux odometer",     nullptr);
 
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr()))
         for (auto prc : *(sen->getProcessorListPtr()))
