@@ -5,9 +5,11 @@
 #ifndef WOLF_PROCESSOR_GPS_H
 #define WOLF_PROCESSOR_GPS_H
 
+class CaptureGPS;
+
 // Wolf includes
 #include "processor_base.h"
-#include "capture_gps.h"
+//#include "capture_gps.h"
 
 // Std includes
 
@@ -27,23 +29,15 @@ class ProcessorGPS : public ProcessorBase
     public:
         ProcessorGPS();
         virtual ~ProcessorGPS();
-
         virtual void init(CaptureBase* _capture_ptr);
-
         virtual void process(CaptureBase* _capture_ptr);
-
-        virtual bool voteForKeyFrame(){return false;}
-
-        virtual bool keyFrameCallback(wolf::FrameBase*){return false;}
+        virtual bool voteForKeyFrame();
+        virtual bool keyFrameCallback(wolf::FrameBase*);
 
     public:
-        static ProcessorBase* create(const std::string & _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 
 };
-
-inline void ProcessorGPS::init(CaptureBase* _capture_ptr)
-{
-}
 
 } // namespace wolf
 

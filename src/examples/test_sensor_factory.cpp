@@ -18,6 +18,9 @@
 #include "../sensor_imu.h"
 #include "../processor_imu.h"
 
+#include "../sensor_gps.h"
+//#include "../processor_gps.h"
+
 #include "../problem.h"
 
 #include <iostream>
