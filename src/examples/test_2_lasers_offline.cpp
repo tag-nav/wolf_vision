@@ -54,7 +54,7 @@ void extractScan(std::ifstream& text_file, std::vector<float>& scan, wolf::Scala
     std::getline(text_file, line);
     std::stringstream line_stream(line);
     line_stream >> ts;
-    for (auto i = 0; i < scan.size(); i++)
+    for (unsigned int i = 0; i < scan.size(); i++)
         line_stream >> scan[i];
 }
 
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 {
     using namespace wolf;
 
-    std::cout << "\n==================================================================";
+    std::cout << "\n==================================================================\n";
     std::cout << "========== 2D Robot with offline odometry and 2 LIDARs =============\n";
 
     // USER INPUT ============================================================================================
@@ -112,17 +112,17 @@ int main(int argc, char** argv)
     // Wolf Tree initialization
     Eigen::Vector3s odom_pose = Eigen::Vector3s::Zero();
     Eigen::Vector3s gps_pose = Eigen::Vector3s::Zero();
-    Eigen::VectorXs laser_1_pose(4), laser_2_pose(4); //xyz + theta
     Eigen::VectorXs laser_1_params(9), laser_2_params(9);
+    Eigen::VectorXs laser_1_pose(4), laser_2_pose(4); //xyz + theta
 
     // laser 1 extrinsics and intrinsics
-    extractVector(laser_1_file, laser_1_pose, timestamp);
     extractVector(laser_1_file, laser_1_params, timestamp);
+    extractVector(laser_1_file, laser_1_pose, timestamp);
     std::vector<float> scan1(laser_1_params(8)); // number of ranges in a scan
 
     // laser 2 extrinsics and intrinsics
-    extractVector(laser_2_file, laser_2_pose, timestamp);
     extractVector(laser_2_file, laser_2_params, timestamp);
+    extractVector(laser_2_file, laser_2_pose, timestamp);
     std::vector<float> scan2(laser_2_params(8));
 
     Problem* problem = new Problem(FRM_PO_2D);
@@ -139,6 +139,7 @@ int main(int argc, char** argv)
     laser_1_sensor->addProcessor(laser_1_processor);
     laser_2_sensor->addProcessor(laser_2_processor);
     problem->addSensor(odom_sensor);
+    problem->addSensor(gps_sensor);
     problem->addSensor(laser_1_sensor);
     problem->addSensor(laser_2_sensor);
     problem->setProcessorMotion(odom_processor);
