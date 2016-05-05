@@ -244,7 +244,8 @@ typedef enum
     FEAT_GPS_PR,
     FEAT_ODOM_2D,
     FEAT_MOTION,
-    FEAT_POINT_IMAGE
+    FEAT_POINT_IMAGE, 
+    FEAT_LINE_2D
 }FeatureType;
 
 /** \brief Enumeration of all possible landmark types
