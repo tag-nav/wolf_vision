@@ -235,6 +235,7 @@ int main(int argc, char** argv)
     laser_1_sensor->addProcessor(laser_1_processor);
     laser_2_sensor->addProcessor(laser_2_processor);
     problem->addSensor(odom_sensor);
+    problem->addSensor(gps_sensor);
     problem->addSensor(laser_1_sensor);
     problem->addSensor(laser_2_sensor);
     problem->setProcessorMotion(odom_processor);
