@@ -204,7 +204,7 @@ SET(SRCS
     sensor_base.cpp
     sensor_camera.cpp
     sensor_factory.cpp
-    sensor_gps.cpp   # What is this doing here?
+#    sensor_gps.cpp   # What is this doing here?
     sensor_gps_fix.cpp
     sensor_imu.cpp
     sensor_odom_2D.cpp
