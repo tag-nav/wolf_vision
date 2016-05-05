@@ -28,12 +28,14 @@ class ProcessorFactory
 
         // Singleton ---------------------------------------------------
         // This class is a singleton. The code below guarantees this.
+        // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
     public:
         static ProcessorFactory* get(); // Unique point of access
     private:
-        ProcessorFactory(); // Prevent clients from creating a new Singleton
+        ProcessorFactory() { }
         ProcessorFactory(const ProcessorFactory&); // Prevent clients from creating a copy of the Singleton
-        ~ProcessorFactory(); // Prevent clients from deleting the Singleton
+        ~ProcessorFactory() { } // Prevent clients from deleting the Singleton
+        void operator=(ProcessorFactory const&); // Don't implement
 };
 
 } /* namespace wolf */

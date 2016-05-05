@@ -121,12 +121,14 @@ class SensorFactory
 
         // Singleton ---------------------------------------------------
         // This class is a singleton. The code below guarantees this.
+        // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
     public:
         static SensorFactory* get(); // Unique point of access
     private:
-        SensorFactory(); // Prevent clients from creating a new Singleton
+        SensorFactory() { } // Prevent clients from creating a new Singleton
         SensorFactory(const SensorFactory&); // Prevent clients from creating a copy of the Singleton
-        ~SensorFactory(); // Prevent clients from deleting the Singleton
+        ~SensorFactory() { }; // Prevent clients from deleting the Singleton
+        void operator=(SensorFactory const&); // Don't implement
 };
 
 } /* namespace wolf */
