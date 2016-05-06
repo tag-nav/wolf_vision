@@ -13,28 +13,28 @@
 
 namespace wolf {
 
-class StateHomogeneous3d : public StateBlock
+class StateHomogeneous3D : public StateBlock
 {
     public:
-        StateHomogeneous3d(bool _fixed = false);
-        StateHomogeneous3d(const Eigen::VectorXs _state, bool _fixed = false);
-        virtual ~StateHomogeneous3d();
+        StateHomogeneous3D(bool _fixed = false);
+        StateHomogeneous3D(const Eigen::VectorXs _state, bool _fixed = false);
+        virtual ~StateHomogeneous3D();
 };
 
-inline StateHomogeneous3d::StateHomogeneous3d(const Eigen::VectorXs _state, bool _fixed) :
+inline StateHomogeneous3D::StateHomogeneous3D(const Eigen::VectorXs _state, bool _fixed) :
         StateBlock(_state, _fixed)
 {
-    assert(_state.size() == 4 && "Homogeneous 3d must be size 4.");
+    assert(_state.size() == 4 && "Homogeneous 3D must be size 4.");
     local_param_ptr_ = new LocalParametrizationHomogeneous;
 }
 
-inline StateHomogeneous3d::StateHomogeneous3d(bool _fixed) :
+inline StateHomogeneous3D::StateHomogeneous3D(bool _fixed) :
         StateBlock(4, _fixed)
 {
     local_param_ptr_ = new LocalParametrizationHomogeneous;
 }
 
-inline StateHomogeneous3d::~StateHomogeneous3d()
+inline StateHomogeneous3D::~StateHomogeneous3D()
 {
     delete local_param_ptr_;
 }
