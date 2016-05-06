@@ -104,7 +104,7 @@ int main(int argc, char** argv)
     Eigen::VectorXs ground_truth(n_execution * 3); //all true poses
     Eigen::VectorXs ground_truth_pose(3); //last true pose
     Eigen::VectorXs odom_trajectory(n_execution * 3); //open loop trajectory
-    Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(7);
+    Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(5);
     clock_t t1, t2;
     Scalar timestamp;
     TimeStamp ts(0);
@@ -247,8 +247,8 @@ int main(int argc, char** argv)
         // TIME MANAGEMENT ---------------------------
         double total_t = ((double) clock() - t2) / CLOCKS_PER_SEC;
         mean_times(5) += total_t;
-        if (total_t < 0.5)
-            usleep(500000 - 1e6 * total_t);
+        if (total_t < 0.2)
+            usleep(200000 - 1e6 * total_t);
 
 //		std::cout << "\nTree after step..." << std::endl;
     }
@@ -261,7 +261,7 @@ int main(int argc, char** argv)
     std::cout << "  ceres managing:     " << mean_times(2) << std::endl;
     std::cout << "  ceres optimization: " << mean_times(3) << std::endl;
     std::cout << "  ceres covariance:   " << mean_times(4) << std::endl;
-    std::cout << "  loop time:          " << mean_times(6) << std::endl;
+    std::cout << "  loop time:          " << mean_times(5) << std::endl;
 
     //	std::cout << "\nTree before deleting..." << std::endl;
 
