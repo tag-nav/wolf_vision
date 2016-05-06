@@ -10,29 +10,10 @@
 
 #include "processor_tracker.h"
 #include "capture_base.h"
+#include "wolf.h"
 
 namespace wolf
 {
-
-// Match Feature - Landmark
-struct LandmarkMatch
-{
-        LandmarkBase* landmark_ptr_;
-        Scalar normalized_score_;
-
-        LandmarkMatch() :
-                landmark_ptr_(nullptr), normalized_score_(0.0)
-        {
-        }
-        LandmarkMatch(LandmarkBase* _landmark_ptr, const Scalar& _normalized_score) :
-                landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
-        {
-
-        }
-};
-
-// Match map Feature - Landmark
-typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
 
 /** \brief Landmark tracker processor
  *

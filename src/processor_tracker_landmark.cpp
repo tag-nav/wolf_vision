@@ -43,7 +43,7 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
         std::cout << "\tnew_landmark: " << new_lmk_ptr->id() << std::endl;
         new_landmarks.push_back(new_lmk_ptr);
         // create new correspondence
-        matches_landmark_from_last_[new_feature_ptr] = LandmarkMatch(new_lmk_ptr, 1); // max score
+        matches_landmark_from_last_[new_feature_ptr] = LandmarkMatch({new_lmk_ptr, 1}); // max score
     }
     std::cout << "\tnew_landmarks: " << new_landmarks.size() << std::endl;
     std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;

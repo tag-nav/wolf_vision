@@ -353,10 +353,31 @@ typedef std::list<StateBlock*> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
 
 
+// Match Feature - Landmark
+struct LandmarkMatch
+{
+        LandmarkBase* landmark_ptr_;
+        Scalar normalized_score_;
+};
+
+// Match map Feature - Landmark
+typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
+
+
 inline Scalar pi2pi(const Scalar& angle)
 {
     return (angle > 0 ? fmod(angle + Constants::PI, 2 * Constants::PI) - Constants::PI : fmod(angle - Constants::PI, 2 * Constants::PI) + Constants::PI);
 }
+
+
+// Feature-Feature correspondence
+struct FeatureMatch
+{
+        FeatureBase* feature_ptr_;
+        Scalar normalized_score_;
+};
+
+typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
 
 } // namespace wolf
 
