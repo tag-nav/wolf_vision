@@ -1,4 +1,5 @@
 #include "sensor_imu.h"
+
 #include "state_block.h"
 #include "state_quaternion.h"
 
@@ -23,8 +24,9 @@ SensorBase* SensorIMU::create(const std::string& _unique_name, const Eigen::Vect
     assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
     StateBlock* pos_ptr = new StateBlock(_extrinsics_pq.head(3), true);
     StateBlock* ori_ptr = new StateQuaternion(_extrinsics_pq.tail(4), true);
+
     // cast instrinsics to good type and extract intrinsic vector
-    IntrinsicsIMU* intrinsics = (IntrinsicsIMU*)((_intrinsics));
+    //    IntrinsicsIMU* intrinsics = (IntrinsicsIMU*)((_intrinsics));
     StateBlock* bias_ptr = new StateBlock(6, false); // We'll have the IMU biases here
     SensorBase* sen = new SensorIMU(pos_ptr, ori_ptr, bias_ptr);
     sen->setName(_unique_name);

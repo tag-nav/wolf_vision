@@ -210,7 +210,7 @@ typedef enum
     SEN_IMU,		      ///< Inertial measurement unit with 3 acceleros, 3 gyros
     SEN_CAMERA,		    ///< Regular pinhole camera
     SEN_GPS_FIX,	    ///< GPS fix calculated from a GPS receiver
-    SEN_GPS_RAW,      ///< GPS pseudo ranges, doppler and satellite ephemerides
+    SEN_GPS_RAW,      ///< GPS pseudo ranges, Doppler and satellite ephemerides
     SEN_LIDAR,		    ///< Laser Range Finder, 2D
     SEN_RADAR,		    ///< Radar
     SEN_ABSOLUTE_POSE ///< Full absolute pose (XYZ+quaternion)
@@ -230,7 +230,8 @@ typedef enum
     PRC_GPS_RAW,
     PRC_LIDAR,
     PRC_ODOM_2D,
-    PRC_ODOM_3D
+    PRC_ODOM_3D,
+    PRC_IMU
 } ProcessorType;
 
 /** \brief enumeration of all possible Feature types

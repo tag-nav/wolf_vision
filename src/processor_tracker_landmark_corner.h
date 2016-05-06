@@ -66,7 +66,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
     protected:
 
         virtual void preProcess();
-        virtual void postProcess(){}
+//        virtual void postProcess() { }
 
         void advance()
         {

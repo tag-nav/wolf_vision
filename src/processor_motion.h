@@ -56,6 +56,12 @@ namespace wolf
  *
  *     \code    xPlusDelta(R_old, delta_R, R_new) \endcode
  *
+ * Should you need extra functionality for your derived types, you can overload these two methods,
+ *
+ *   -  preProcess() { }
+ *   -  postProcess() { }
+ *
+ * which are called at the beginning and at the end of process(). See the doc of these functions for more info.
  *
  *
  * ### Defining (or not) the fromSensorFrame():
@@ -167,10 +173,35 @@ class ProcessorMotion : public ProcessorBase
         const MotionBuffer* getBufferPtr() const;
 
     protected:
+        void updateDt();
         void integrate();
         void reintegrate();
 
-        void updateDt();
+        /** Pre-process incoming Capture
+         *
+         * This is called by process() just after assigning incoming_ptr_ to a valid Capture.
+         *
+         * Overload this function to prepare stuff on derived classes.
+         *
+         * Typical uses of prePrecess() are:
+         *   - casting base types to derived types
+         *   - initializing counters, flags, or any derived variables
+         *   - initializing algorithms needed for processing the derived data
+         */
+        virtual void preProcess() { };
+
+        /** Post-process
+         *
+         * This is called by process() after finishing the processing algorithm.
+         *
+         * Overload this function to post-process stuff on derived classes.
+         *
+         * Typical uses of postPrecess() are:
+         *   - resetting and/or clearing variables and/or algorithms at the end of processing
+         *   - drawing / printing / logging the results of the processing
+         */
+        virtual void postProcess() { };
+
 
         // These are the pure virtual functions doing the mathematics
     protected:
@@ -257,11 +288,11 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
-        Motion motionZero(TimeStamp& _ts);
-
         virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts) = 0;
 
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin) = 0;
+
+        Motion motionZero(TimeStamp& _ts);
 
     protected:
         // Attributes
@@ -358,9 +389,9 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame, const TimeStamp
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
     incoming_ptr_ = (CaptureMotion2*)(_incoming_ptr);
-    //    preProcess();
+    preProcess();
     integrate();
-    //    postProcess();
+    postProcess();
 }
 
 inline void ProcessorMotion::integrate()

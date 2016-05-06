@@ -136,6 +136,7 @@ SET(HDRS
     node_terminus.h
     problem.h
     processor_base.h
+    processor_imu.h
     processor_factory.h
     processor_motion.h
     processor_odom_2D.h
@@ -150,6 +151,7 @@ SET(HDRS
     sensor_factory.h
 #    sensor_gps.h      # What is this doing here?
     sensor_gps_fix.h
+    sensor_imu.h
     sensor_odom_2D.h
     state_block.h
     state_homogeneous_3d.h
@@ -193,6 +195,7 @@ SET(SRCS
     problem.cpp
     processor_base.cpp
     processor_factory.cpp
+    processor_imu.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
     processor_tracker_feature_dummy.cpp
@@ -203,6 +206,7 @@ SET(SRCS
     sensor_factory.cpp
     sensor_gps.cpp   # What is this doing here?
     sensor_gps_fix.cpp
+    sensor_imu.cpp
     sensor_odom_2D.cpp
     time_stamp.cpp
     trajectory_base.cpp

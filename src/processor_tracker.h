@@ -56,10 +56,10 @@ struct ProcessorParamsTracker : public ProcessorParamsBase
  *       - Advance the tracker one Capture ahead: advance()                         <=== IMPLEMENT
  *
  * This functionality exists by default in the virtual method process().
- * Should you need extra functionality for your derived types, you can use the two pure virtuals,
+ * Should you need extra functionality for your derived types, you can overload the two methods,
  *
- *   -  preProcess()
- *   -  postProcess()
+ *   -  preProcess() { }
+ *   -  postProcess() { }
  *
  * which are called at the beginning and at the end of process(). See the doc of these functions for more info.
  */
@@ -97,35 +97,25 @@ class ProcessorTracker : public ProcessorBase
          * This is called by process() just after assigning incoming_ptr_ to a valid Capture.
          *
          * Overload this function to prepare stuff on derived classes.
-         * Define it empty if no pre-processing is needed, as follows:
-         *
-         * <code>
-         *      virtual void preProcess(){}
-         * </code>
          *
          * Typical uses of prePrecess() are:
          *   - casting base types to derived types
          *   - initializing counters, flags, or any derived variables
          *   - initializing algorithms needed for processing the derived data
          */
-        virtual void preProcess() = 0;
+        virtual void preProcess() { };
 
         /** Post-process
          *
          * This is called by process() after finishing the processing algorithm.
          *
          * Overload this function to post-process stuff on derived classes.
-         * Define it empty if no post-processing is needed, as follows:
-         *
-         * <code>
-         *      virtual void postProcess(){}
-         * </code>
          *
          * Typical uses of postPrecess() are:
          *   - resetting and/or clearing variables and/or algorithms at the end of processing
          *   - drawing / printing / logging the results of the processing
          */
-        virtual void postProcess() = 0;
+        virtual void postProcess() { };
 
         /** \brief Tracker function
          * \return The number of successful tracks.

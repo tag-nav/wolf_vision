@@ -14,11 +14,11 @@
 
 namespace wolf {
 
-class ProcessorOdom2d : public ProcessorMotion
+class ProcessorOdom2D : public ProcessorMotion
 {
     public:
-        ProcessorOdom2d();
-        virtual ~ProcessorOdom2d();
+        ProcessorOdom2D();
+        virtual ~ProcessorOdom2D();
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
 
@@ -38,19 +38,24 @@ class ProcessorOdom2d : public ProcessorMotion
         Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts);
 
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin);
+
+        // Factory method
+        public:
+            static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
 
-inline ProcessorOdom2d::ProcessorOdom2d() :
+inline ProcessorOdom2D::ProcessorOdom2D() :
         ProcessorMotion(PRC_ODOM_2D, 3, 3, 2)
 {
+    setType("ODOM 2D");
 }
 
-inline ProcessorOdom2d::~ProcessorOdom2d()
+inline ProcessorOdom2D::~ProcessorOdom2D()
 {
 }
 
-inline void ProcessorOdom2d::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
+inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                         Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
 {
     //std::cout << "ProcessorOdom2d::data2delta" << std::endl;
@@ -82,7 +87,7 @@ inline void ProcessorOdom2d::data2delta(const Eigen::VectorXs& _data, const Eige
     //std::cout << "delta cov:" << std::endl << _delta_cov << std::endl;
 }
 
-inline void ProcessorOdom2d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
+inline void ProcessorOdom2D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
 {
     //std::cout << "ProcessorOdom2d::xPlusDelta" << std::endl;
 
@@ -101,7 +106,7 @@ inline void ProcessorOdom2d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
 //    std::cout << "_x_plus_delta: " << _x_plus_delta.transpose() << std::endl;
 }
 
-inline void ProcessorOdom2d::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
+inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
 {
     //std::cout << "ProcessorOdom2d::deltaPlusDelta" << std::endl;
     assert(_delta1.size() == delta_size_ && "Wrong _delta1 vector size");
@@ -120,7 +125,7 @@ inline void ProcessorOdom2d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
 //    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 }
 
-inline void ProcessorOdom2d::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                             Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                             Eigen::MatrixXs& _jacobian2)
 {
@@ -152,7 +157,7 @@ inline void ProcessorOdom2d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     //std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 }
 
-inline void ProcessorOdom2d::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+inline void ProcessorOdom2D::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                              Eigen::VectorXs& _delta2_minus_delta1)
 {
     //std::cout << "ProcessorOdom2d::deltaMinusDelta" << std::endl;
@@ -172,17 +177,17 @@ inline void ProcessorOdom2d::deltaMinusDelta(const Eigen::VectorXs& _delta1, con
 //    std::cout << "_delta2_minus_delta1: " << _delta2_minus_delta1.transpose() << std::endl;
 }
 
-inline Eigen::VectorXs ProcessorOdom2d::deltaZero() const
+inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
 {
     return Eigen::VectorXs::Zero(delta_size_);
 }
 
-inline ConstraintBase* ProcessorOdom2d::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
+inline ConstraintBase* ProcessorOdom2D::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
 {
     return new ConstraintOdom2D(_feature_motion, _frame_origin);
 }
 
-inline Motion ProcessorOdom2d::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
+inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
 {
     Motion tmp(_motion_ref);
     tmp.ts_ = _ts;
@@ -191,6 +196,26 @@ inline Motion ProcessorOdom2d::interpolate(const Motion& _motion_ref, Motion& _m
     return tmp;
 }
 
+ProcessorBase* ProcessorOdom2D::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+{
+    ProcessorOdom2D* prc_ptr = new ProcessorOdom2D();
+    prc_ptr->setName(_unique_name);
+    return prc_ptr;
+}
+
 } // namespace wolf
+
+
+
+// Register in the ProcessorFactory
+#include "processor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_prc_odom_2d = ProcessorFactory::get()->registerCreator("ODOM 2D", ProcessorOdom2D::create);
+}
+} // namespace wolf
+
+
 
 #endif /* SRC_PROCESSOR_ODOM_2D_H_ */
