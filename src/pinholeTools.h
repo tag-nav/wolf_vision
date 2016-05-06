@@ -55,7 +55,7 @@ namespace pinhole {
 
                 up(0) = v(0) / v(2);
                 up(1) = v(1) / v(2);
-                dist = ublas::norm_2(v);
+                dist = v.norm();
             }
 
 
@@ -175,7 +175,7 @@ namespace pinhole {
              * \return the distorted point
              */
             template<class VD, class VU>
-            jblas::vec2 distortPoint(const VD & d, const VU & up) {
+            Eigen::Vector2s distortPoint(const VD & d, const VU & up) {
                 size_t n = d.size();
                 if (n == 0)
                     return up;
@@ -203,12 +203,12 @@ namespace pinhole {
             template<class VD, class VUp, class VUd, class MUD_up>
             void distortPoint(const VD & d, const VUp & up, VUd & ud, MUD_up & UD_up) {
                 size_t n = d.size();
-                jblas::vec2 R2_up;
-                jblas::vec2 S_up;
+                Eigen::Vector2s R2_up;
+                Eigen::Vector2s S_up;
 
                 if (n == 0) {
                     ud = up;
-                    UD_up = jblas::identity_mat(2);
+                    UD_up = Eigen::Matrix2s::setOnes(2);  /// test this one
                 }
 
                 else {
@@ -243,7 +243,7 @@ namespace pinhole {
 
             }
             template<class VC, class VU>
-            jblas::vec2 undistortPoint(const VC & c, const VU & ud) {
+            Eigen::Vector2s undistortPoint(const VC & c, const VU & ud) {
                 size_t n = c.size();
                 if (n == 0)
                     return ud;
@@ -263,12 +263,12 @@ namespace pinhole {
             template<class VC, class VUd, class VUp, class MUP_ud>
             void undistortPoint(const VC & c, const VUd & ud, VUp & up, MUP_ud & UP_ud) {
                 size_t n = c.size();
-                jblas::vec2 R2_ud;
-                jblas::vec2 S_ud;
+                Eigen::Vector2s R2_ud;
+                Eigen::Vector2s S_ud;
 
                 if (n == 0) {
                     up = ud;
-                    UP_ud = jblas::identity_mat(2);
+                    UP_ud = Eigen::Matrix2s::setOnes(2);  /// test this one
                 }
 
                 else {
@@ -310,7 +310,7 @@ namespace pinhole {
              * \return the point in pixels coordinates
              */
             template<class VK, class VU>
-            jblas::vec2 pixellizePoint(const VK & k, const VU & ud) {
+            Eigen::Vector2s pixellizePoint(const VK & k, const VU & ud) {
                 double u_0 = k(0);
                 double v_0 = k(1);
                 double a_u = k(2);
@@ -352,7 +352,7 @@ namespace pinhole {
              * \return the depixellized point, adimensional
              */
             template<class VK, class VU>
-            jblas::vec2 depixellizePoint(const VK & k, const VU & u) {
+            Eigen::Vector2s depixellizePoint(const VK & k, const VU & u) {
                 double u_0 = k(0);
                 double v_0 = k(1);
                 double a_u = k(2);
@@ -425,15 +425,15 @@ namespace pinhole {
             template<class VK, class VD, class V, class VU, class MU_v>
             void projectPoint(const VK & k, const VD & d, const V & v, VU & u, MU_v & U_v) {
                 Eigen::Vector2s up, ud;
-                mat23 UP_v;
-                mat22 UD_up, U_ud;
+                Eigen::MatrixXs UP_v(2,3); /// Check this one -> mat23
+                Eigen::Matrix2s UD_up, U_ud;
                 projectPointToNormalizedPlane(v, up, UP_v);
                 distortPoint(d, up, ud, UD_up);
                 pixellizePoint(k, ud, u, U_ud);
 
-                mat23 U_v1;
-                U_v1 = ublas::prod(UD_up, UP_v);
-                U_v = ublas::prod(U_ud, U_v1);
+                Eigen::MatrixXs U_v1(2,3); /// Check this one -> mat23
+                U_v1 = UD_up * UP_v;
+                U_v = U_ud * U_v1;
             }
 
             /**
@@ -448,15 +448,15 @@ namespace pinhole {
             template<class VK, class VD, class V, class VU, class MU_v>
             void projectPoint(const VK & k, const VD & d, const V & v, VU & u, double & dist, MU_v & U_v) {
                 Eigen::Vector2s up, ud;
-                mat23 UP_v;
-                mat22 UD_up, U_ud;
+                Eigen::MatrixXs UP_v(2,3); /// Check this one -> mat23
+                Eigen::Matrix2s UD_up, U_ud;
                 projectPointToNormalizedPlane(v, up, dist, UP_v);
                 distortPoint(d, up, ud, UD_up);
                 pixellizePoint(k, ud, u, U_ud);
 
-                mat23 U_v1;
-                U_v1 = ublas::prod(UD_up, UP_v);
-                U_v = ublas::prod(U_ud, U_v1);
+                Eigen::MatrixXs U_v1(2,3); /// Check this one -> mat23
+                U_v1 = UD_up * UP_v;
+                U_v = U_ud * U_v1;
             }
 
 
@@ -486,13 +486,14 @@ namespace pinhole {
             template<class VK, class VC, class U, class P, class MP_u, class MP_depth>
             void backProjectPoint(const VK & k, const VC & c, const U & u, double depth, P & p, MP_u & P_u, MP_depth & P_depth) {
                 Eigen::Vector2s up, ud;
-                mat32 P_up;
-                mat22 UP_ud, UD_u;
+                                        //rows //cols
+                Eigen::MatrixXs P_up(3,2); /// Check this one -> mat32
+                Eigen::Matrix2s UP_ud, UD_u;
                 depixellizePoint(k, u, ud, UD_u);
                 undistortPoint(c, ud, up, UP_ud);
                 backprojectPointFromNormalizedPlane(up, depth, p, P_up, P_depth);
 
-                P_u = ublas::prod(P_up, ublas::prod<mat>(UP_ud, UD_u));
+                P_u = P_up * UP_ud * UD_u;
             }
 
 
@@ -537,8 +538,10 @@ namespace pinhole {
                     size_t N_samples = 200; // number of samples
                     double iN_samples = 1 / (double) N_samples;
                     double rd_n, rc_2, rd_2;
-                    vec rd(N_samples+1), rc(N_samples+1);
-                    mat Rd(N_samples+1, size);
+//                    vec rd(N_samples+1), rc(N_samples+1);
+//                    mat Rd(N_samples+1, size);
+                    Eigen::VectorXs rd(N_samples+1), rc(N_samples+1);
+                    Eigen::MatrixXs Rd(N_samples+1, size);
 
 
                     for (size_t sample = 0; sample <= N_samples; sample++) {
@@ -565,13 +568,15 @@ namespace pinhole {
                     // jmath::LinearSolvers::solve_Cholesky(Rd, (rc - rd), c);
 
                     // therefore we solve manually the pseudo-inverse:
-                    jblas::mat RdtRd(size,size);
-                    RdtRd = ublas::prod(ublas::trans(Rd), Rd);
-                    jblas::mat iRdtRd(size, size);
-                    jmath::ublasExtra::inv(RdtRd, iRdtRd);
-                    mat iRd = ublas::prod(iRdtRd, ublas::trans<jblas::mat>(Rd));
+                    Eigen::MatrixXs RdtRd(size,size);
+                    RdtRd = Rd.transpose() * Rd;
+                    Eigen::MatrixXs iRdtRd(size, size);
+                    //jmath::ublasExtra::inv(RdtRd, iRdtRd);
+                    // I understood that iRdtRd is the inverse of RdtRd)
+                    iRdtRd = RdtRd.inverse();
+                    Eigen::MatrixXs iRd = iRdtRd * Rd.transpose();
 
-                    c = ublas::prod(iRd,(rc-rd));
+                    c = iRd * (rc-rd);
         }
     }
 
