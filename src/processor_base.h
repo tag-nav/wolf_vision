@@ -43,7 +43,7 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
         virtual bool permittedKeyFrame() final;
 
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr) = 0;
+        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tolerance) = 0;
 
         SensorBase* getSensorPtr();
 

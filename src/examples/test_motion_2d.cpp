@@ -200,7 +200,7 @@ int main()
 
     FrameBase* new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
 
-    odom2d_ptr->keyFrameCallback(new_keyframe_ptr);
+    odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     std::cout << "New buffer: oldest part:   < ";
     for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
@@ -236,7 +236,7 @@ int main()
     std::cout << "New split time:              " << t_split - t0 << std::endl;
 
     new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
-    odom2d_ptr->keyFrameCallback(new_keyframe_ptr);
+    odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     std::cout << "All in one row:            < ";
     for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())

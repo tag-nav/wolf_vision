@@ -72,9 +72,10 @@ class ProcessorTracker : public ProcessorBase
         FeatureBaseList new_features_last_; ///< List of new features in \b last for landmark initialization and new key-frame creation.
         FeatureBaseList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
         unsigned int max_new_features_; ///< max features alowed to detect in one iteration. 0 = no limit
+        Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
 
     public:
-        ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features = 0);
+        ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features = 0, const Scalar& _time_tolerance = 0);
         virtual ~ProcessorTracker();
 
         /** \brief Full processing of an incoming Capture.
@@ -87,7 +88,7 @@ class ProcessorTracker : public ProcessorBase
         void setMaxNewFeatures(const unsigned int& _max_new_features);
         const unsigned int getMaxNewFeatures();
 
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr);
+        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _dt);
 
         virtual CaptureBase* getLastPtr();
 

@@ -155,7 +155,7 @@ class ProcessorMotion : public ProcessorBase
          */
         void setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin);
 
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr);
+        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol);
 
         // Helper functions:
     public:
@@ -454,7 +454,7 @@ inline void ProcessorMotion::reintegrate()
     }
 }
 
-inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
+inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
 {
     // get time stamp
     TimeStamp ts = _keyframe_ptr->getTimeStamp();

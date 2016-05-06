@@ -145,7 +145,7 @@ class Problem : public NodeBase
          *
          * New key frame callback: It should be called by any processor that creates a new keyframe. It calls the keyFrameCallback of the rest of processors.
          */
-        void keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr);
+        void keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr, const Scalar& _time_tolerance);
 
         LandmarkBase* addLandmark(LandmarkBase* _lmk_ptr);
 

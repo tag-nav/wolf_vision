@@ -174,12 +174,12 @@ bool Problem::permitKeyFrame(ProcessorBase* _processor_ptr)
     return true;
 }
 
-void Problem::keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr)
+void Problem::keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr, const Scalar& _time_tolerance)
 {
     for (auto sensor : (*hardware_ptr_->getSensorListPtr()))
         for (auto processor : (*sensor->getProcessorListPtr()))
             if (processor->id() != _processor_ptr->id())
-                processor->keyFrameCallback(_keyframe_ptr);
+                processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
 }
 
 LandmarkBase* Problem::addLandmark(LandmarkBase* _lmk_ptr)

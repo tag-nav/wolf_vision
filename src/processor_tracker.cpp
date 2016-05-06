@@ -10,9 +10,9 @@
 namespace wolf
 {
 
-ProcessorTracker::ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features) :
+ProcessorTracker::ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features, const Scalar& _time_tolerance) :
         ProcessorBase(_tp), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
-        max_new_features_(_max_new_features)
+        max_new_features_(_max_new_features), time_tolerance_(_time_tolerance)
 {
     //
 }
@@ -67,7 +67,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         last_ptr_->getFramePtr()->setKey();
 
         // Call the new keyframe callback in order to let the other processors to establish their constraints
-        getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), this);
+        getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), this, time_tolerance_);
 
         // Establish constraints from last
         establishConstraints();
@@ -89,7 +89,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         // Reset the derived Tracker
         reset();
 
-        // Reset this (without destructing last_ptr_ since it is origin)
+        // Reset this
         origin_ptr_ = last_ptr_;
         last_ptr_ = incoming_ptr_;
         incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
@@ -137,7 +137,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             establishConstraints();
 
             // Call the new keyframe callback in order to let the other processors to establish their constraints
-            getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), (ProcessorBase*)this);
+            getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), (ProcessorBase*)this, time_tolerance_);
 
             // Reset the derived Tracker
             reset();
@@ -155,28 +155,26 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     postProcess();
 }
 
-bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr)
+bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
 {
-    Scalar _dt_max = 0.1; // hardcoded for now
+    assert(last_ptr_->getFramePtr() != nullptr && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame allways");
+
+    Scalar time_tol = std::max(time_tolerance_, _time_tol);
 
     // Nothing to do if:
     //   - there is no last
-    //   - last hasn't frame (just a check)
     //   - last frame is already a key frame
     //   - last frame is too far in time from keyframe
-    if (last_ptr_ == nullptr || (last_ptr_->getFramePtr() != nullptr && last_ptr_->getFramePtr()->isKey()) || std::abs(last_ptr_->getTimeStamp() - _keyframe_ptr->getTimeStamp()) > _dt_max)
+    if (last_ptr_ == nullptr || last_ptr_->getFramePtr()->isKey() || std::abs(last_ptr_->getTimeStamp() - _keyframe_ptr->getTimeStamp()) > time_tol)
         return false;
 
     std::cout << "ProcessorTracker::keyFrameCallback sensor " << getSensorPtr()->id() << std::endl;
 
-    // Capture last_ is going to be added to the new keyframe
-    if (last_ptr_->getFramePtr() != nullptr)
-    {
-        FrameBase* last_old_frame = last_ptr_->getFramePtr();
-        last_old_frame->unlinkDownNode(last_ptr_);
-        last_old_frame->destruct();
-        _keyframe_ptr->addCapture(last_ptr_);
-    }
+    // Capture last_ is added to the new keyframe
+    FrameBase* last_old_frame = last_ptr_->getFramePtr();
+    last_old_frame->unlinkDownNode(last_ptr_);
+    last_old_frame->destruct();
+    _keyframe_ptr->addCapture(last_ptr_);
 
     // Detect new Features, initialize Landmarks, create Constraints, ...
     processNew(max_new_features_);
