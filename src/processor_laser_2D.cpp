@@ -7,6 +7,7 @@ ProcessorLaser2D::ProcessorLaser2D() : ProcessorBase(PRC_LIDAR),
 		sensor_laser_ptr_(nullptr),
         capture_laser_ptr_(nullptr)
 {
+    setType("LASER 2D");
 }
 
 ProcessorLaser2D::~ProcessorLaser2D()
@@ -637,5 +638,15 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
     // Remove corner landmark (it will remove all old constraints)
     getProblem()->getMapPtr()->removeLandmark(_old_corner_landmark_ptr);
 }
+
+
+ProcessorBase* ProcessorLaser2D::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+{
+    ProcessorParamsLaser2D* params_ptr = (ProcessorParamsLaser2D*)_params;
+    ProcessorLaser2D* prc_ptr = new ProcessorLaser2D();
+    prc_ptr->setName(_unique_name);
+    return prc_ptr;
+}
+
 
 } // namespace wolf

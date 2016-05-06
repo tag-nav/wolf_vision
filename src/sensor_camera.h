@@ -59,7 +59,7 @@ class SensorCamera : public SensorBase
 namespace wolf {
 namespace
 {
-const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+//const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
 }
 } // namespace wolf
 

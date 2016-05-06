@@ -39,7 +39,6 @@ class SensorIMU : public SensorBase
     public:
         static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);
 
-
 };
 
 } // namespace wolf
@@ -50,7 +49,7 @@ class SensorIMU : public SensorBase
 namespace wolf {
 namespace
 {
-const bool registered_imu = SensorFactory::get()->registerCreator("IMU", SensorIMU::create);
+//const bool registered_imu = SensorFactory::get()->registerCreator("IMU", SensorIMU::create);
 }
 } // namespace wolf
 

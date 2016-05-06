@@ -7,12 +7,19 @@
 
 #include "sensor_factory.h"
 
+#include <iostream>
+
 namespace wolf
 {
 
 bool SensorFactory::registerCreator(const std::string& _sensor_type, CreateSensorCallback createFn)
 {
-    return callbacks_.insert(CallbackMap::value_type(_sensor_type, createFn)).second;
+    bool reg = callbacks_.insert(CallbackMap::value_type(_sensor_type, createFn)).second;
+    if (reg)
+        std::cout << "Registered sensor " << _sensor_type << std::endl;
+    else
+        std::cout << "Could not register sensor " << _sensor_type << std::endl;
+    return reg;
 }
 
 bool SensorFactory::unregisterCreator(const std::string& _sensor_type)
@@ -35,17 +42,10 @@ wolf::SensorBase* SensorFactory::create(const std::string& _sensor_type, const s
 // Singleton ---------------------------------------------------
 // This class is a singleton. The code below guarantees this.
 
-SensorFactory* SensorFactory::pInstance_ = nullptr;
-
 wolf::SensorFactory* SensorFactory::get() // Unique point of access;
 {
-    if (pInstance_ == nullptr)
-        pInstance_ = new SensorFactory;
-    return pInstance_;
+    static SensorFactory pInstance_;
+    return &pInstance_;
 }
-
-// singleton: constructor and destructor are private
-SensorFactory::SensorFactory(const SensorFactory&){}
-SensorFactory::SensorFactory(){}
 
 } /* namespace wolf */

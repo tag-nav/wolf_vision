@@ -24,8 +24,8 @@ class ProcessorTrackerLandmarkDummy : public wolf::ProcessorTrackerLandmark
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
 
-        virtual void preProcess();
-        virtual void postProcess();
+//        virtual void preProcess() { }
+        virtual void postProcess(); // implemented
 
         /** \brief Find provided landmarks in the incoming capture
          * \param _landmark_list_in input list of landmarks to be found in incoming
@@ -74,22 +74,19 @@ class ProcessorTrackerLandmarkDummy : public wolf::ProcessorTrackerLandmark
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr);
 };
 
+inline void ProcessorTrackerLandmarkDummy::postProcess()
+{
+    landmark_idx_non_visible_++;
+    std::cout << "------- Landmarks until " << landmark_idx_non_visible_ << " are now out of scope" << std::endl
+            << std::endl;
+}
+
 } // namespace wolf
 
 // IMPLEMENTATION
 
 namespace wolf
 {
-
-inline void ProcessorTrackerLandmarkDummy::preProcess()
-{
-}
-
-inline void ProcessorTrackerLandmarkDummy::postProcess()
-{
-    landmark_idx_non_visible_++;
-    std::cout << "------- Landmarks until " << landmark_idx_non_visible_ << " are now out of scope" << std::endl << std::endl;
-}
 
 } // namespace wolf
 

@@ -70,7 +70,7 @@ class SensorOdom2D : public SensorBase
 namespace wolf {
 namespace
 {
-const bool registered_odom_2d = SensorFactory::get()->registerCreator("ODOM 2D", SensorOdom2D::create);
+//const bool registered_odom_2d = SensorFactory::get()->registerCreator("ODOM 2D", SensorOdom2D::create);
 }
 } // namespace wolf
 

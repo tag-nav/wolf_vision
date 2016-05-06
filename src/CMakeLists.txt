@@ -4,7 +4,8 @@ MESSAGE("Starting WOLF CMakeLists ...")
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 #CMAKE modules
-SET(CMAKE_MODULE_PATH ../cmake_modules)
+SET(CMAKE_MODULE_PATH ${CMAKE_ROOT}/Modules/; ../cmake_modules)
+MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
 #find dependencies. 
 FIND_PACKAGE(Ceres QUIET) #Ceres is not required
@@ -24,7 +25,7 @@ IF(laser_scan_utils_FOUND)
     MESSAGE("laser_scan_utils Library FOUND: laser_scan_utils related sources will be built.")
 ENDIF(laser_scan_utils_FOUND)
 
-FIND_PACKAGE(raw_gps_utils QUIET) #raw_gps_utils is not required
+FIND_PACKAGE(raw_gps_utils ) #raw_gps_utils is not required
 IF(raw_gps_utils_FOUND)
     MESSAGE("raw_gps_utils Library FOUND: raw_gps_utils related sources will be built.")
 ENDIF(raw_gps_utils_FOUND)
@@ -40,8 +41,8 @@ SET(YAMLCPP_USE_STATIC_LIBS TRUE) #Use static library : not working: TO BE REVIS
 FIND_PACKAGE(YamlCpp)
 IF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library FOUND: yaml-cpp related sources will be built.")
-    MESSAGE("-- YamlCpp includes: " ${YAMLCPP_INCLUDE_DIR})
-    MESSAGE("-- YamlCpp library: " ${YAMLCPP_LIBRARY})
+    MESSAGE(STATUS ${YAMLCPP_INCLUDE_DIR})
+    MESSAGE(STATUS ${YAMLCPP_LIBRARY})
 ELSEIF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library NOT FOUND!")
 ENDIF(YAMLCPP_FOUND)
@@ -105,10 +106,10 @@ SET(HDRS
     constraint_analytic.h
     constraint_epipolar.h
     constraint_sparse.h
+    constraint_fix.h
     constraint_gps_2D.h
     constraint_gps_pseudorange_3D.h
     constraint_gps_pseudorange_2D.h
-    constraint_fix.h
     constraint_odom_2D.h
     constraint_odom_2D_analytic.h
     constraint_corner_2D.h
@@ -136,6 +137,7 @@ SET(HDRS
     node_terminus.h
     problem.h
     processor_base.h
+    processor_imu.h
     processor_factory.h
     processor_motion.h
     processor_odom_2D.h
@@ -148,8 +150,9 @@ SET(HDRS
     sensor_base.h
     sensor_camera.h
     sensor_factory.h
-#    sensor_gps.h      # What is this doing here?
+    sensor_gps.h
     sensor_gps_fix.h
+    sensor_imu.h
     sensor_odom_2D.h
     state_block.h
     state_homogeneous_3d.h
@@ -178,6 +181,7 @@ SET(SRCS
     feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
+    feature_gps_pseudorange.cpp
     feature_fix.cpp
     feature_odom_2D.cpp
     frame_base.cpp
@@ -193,6 +197,7 @@ SET(SRCS
     problem.cpp
     processor_base.cpp
     processor_factory.cpp
+    processor_imu.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
     processor_tracker_feature_dummy.cpp
@@ -201,8 +206,9 @@ SET(SRCS
     sensor_base.cpp
     sensor_camera.cpp
     sensor_factory.cpp
-    sensor_gps.cpp   # What is this doing here?
+    sensor_gps.cpp
     sensor_gps_fix.cpp
+    sensor_imu.cpp
     sensor_odom_2D.cpp
     time_stamp.cpp
     trajectory_base.cpp
@@ -250,15 +256,11 @@ ENDIF(laser_scan_utils_FOUND)
 IF (raw_gps_utils_FOUND)
     SET(HDRS ${HDRS}
         capture_gps.h
-        feature_gps_pseudorange.h
         processor_gps.h
-        sensor_gps.h
         )
     SET(SRCS ${SRCS}
         capture_gps.cpp
-        feature_gps_pseudorange.cpp
         processor_gps.cpp
-        sensor_gps.cpp
         )
 ENDIF(raw_gps_utils_FOUND)
 

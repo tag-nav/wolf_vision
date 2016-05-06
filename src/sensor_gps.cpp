@@ -15,7 +15,7 @@ SensorGPS::SensorGPS(StateBlock* _p_ptr, //GPS sensor position with respect to t
         map_p_ptr_(_map_p_ptr),
         map_o_ptr_(_map_o_ptr)
 {
-    setType("GPS RAW");
+    setType("GPS");
 }
 
 // TODO Check carefully this destructor!

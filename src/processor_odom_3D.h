@@ -36,17 +36,17 @@ namespace wolf {
  *
  * All frames are assumed FLU (front, left, up).
  */
-class ProcessorOdom3d : public ProcessorMotion
+class ProcessorOdom3D : public ProcessorMotion
 {
     public:
-        ProcessorOdom3d();
-        virtual ~ProcessorOdom3d();
+        ProcessorOdom3D();
+        virtual ~ProcessorOdom3D();
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
 
     protected:
-        virtual void preProcess(){}
-        virtual void postProcess(){}
+//        virtual void preProcess(){}
+//        virtual void postProcess(){}
 
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
@@ -67,10 +67,14 @@ class ProcessorOdom3d : public ProcessorMotion
         Eigen::Map<const Eigen::Quaternions> q1_, q2_;
         Eigen::Map<Eigen::Quaternions> q_out_;
         void remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out);
+
+    // Factory method
+    public:
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
 
-inline ProcessorOdom3d::ProcessorOdom3d() :
+inline ProcessorOdom3D::ProcessorOdom3D() :
         ProcessorMotion(PRC_ODOM_3D, 7, 7, 6),
         p1_(nullptr),
         p2_(nullptr),
@@ -79,13 +83,14 @@ inline ProcessorOdom3d::ProcessorOdom3d() :
         q2_(nullptr),
         q_out_(nullptr)
 {
+    setType("ODOM 3D");
 }
 
-inline ProcessorOdom3d::~ProcessorOdom3d()
+inline ProcessorOdom3D::~ProcessorOdom3D()
 {
 }
 
-inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
+inline void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                         Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
 {
     _delta.head(3) = _data.head(3);
@@ -96,7 +101,7 @@ inline void ProcessorOdom3d::data2delta(const Eigen::VectorXs& _data, const Eige
     _delta_cov = Eigen::MatrixXs::Identity(delta_size_, delta_size_) * 0.01;
 }
 
-inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
+inline void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
 {
     assert(_x.size() == 7 && "Wrong _x vector size");
     assert(_delta.size() == 7 && "Wrong _delta vector size");
@@ -108,7 +113,7 @@ inline void ProcessorOdom3d::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
     q_out_ = q1_ * q2_;
 }
 
-inline void ProcessorOdom3d::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
+inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
 {
     assert(_delta1.size() == 7 && "Wrong _delta1 vector size");
     assert(_delta2.size() == 7 && "Wrong _delta2 vector size");
@@ -119,7 +124,7 @@ inline void ProcessorOdom3d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     q_out_ = q1_ * q2_;
 }
 
-inline void ProcessorOdom3d::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                             Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                             Eigen::MatrixXs& _jacobian2)
 {
@@ -137,7 +142,7 @@ inline void ProcessorOdom3d::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     _jacobian2 = Eigen::MatrixXs::Identity(delta_size_,delta_size_);
 }
 
-inline void ProcessorOdom3d::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+inline void ProcessorOdom3D::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                              Eigen::VectorXs& _delta2_minus_delta1)
 {
     assert(_delta1.size() == 7 && "Wrong _delta1 vector size");
@@ -149,14 +154,14 @@ inline void ProcessorOdom3d::deltaMinusDelta(const Eigen::VectorXs& _delta1, con
     q_out_ = q1_.conjugate() * q2_;
 }
 
-inline Eigen::VectorXs ProcessorOdom3d::deltaZero() const
+inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
 {
     Eigen::VectorXs delta_zero(7);
     delta_zero << 0, 0, 0, 0, 0, 0, 1;;
     return delta_zero;
 }
 
-inline Motion ProcessorOdom3d::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
+inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
 {
     Motion tmp(_motion_ref);
     tmp.ts_ = _ts;
@@ -165,12 +170,12 @@ inline Motion ProcessorOdom3d::interpolate(const Motion& _motion_ref, Motion& _m
     return tmp;
 }
 
-inline ConstraintBase* ProcessorOdom3d::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
+inline ConstraintBase* ProcessorOdom3D::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
 {
     return new ConstraintOdom2D(_feature_motion, _frame_origin);
 }
 
-inline void ProcessorOdom3d::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
+inline void ProcessorOdom3D::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
 {
     new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x1.data());
     new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x1.data() + 3);
@@ -180,6 +185,26 @@ inline void ProcessorOdom3d::remap(const Eigen::VectorXs& _x1, const Eigen::Vect
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_x_out.data() + 3);
 }
 
+ProcessorBase* ProcessorOdom3D::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+{
+    ProcessorOdom3D* prc_ptr = new ProcessorOdom3D();
+    prc_ptr->setName(_unique_name);
+    return prc_ptr;
+}
+
+
 } // namespace wolf
+
+
+
+// Register in the SensorFactory
+#include "processor_factory.h"
+namespace wolf {
+namespace
+{
+//const bool registered_prc_odom_3d = ProcessorFactory::get()->registerCreator("ODOM 3D", ProcessorOdom3D::create);
+}
+} // namespace wolf
+
 
 #endif /* SRC_PROCESSOR_ODOM_3D_H_ */

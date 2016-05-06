@@ -6,6 +6,9 @@ if(COMMAND cmake_policy)
   cmake_policy(SET CMP0005 NEW) 
   cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
+# MAC OSX RPATH
+SET(CMAKE_MACOSX_RPATH 1)
+
 
 # The project name and the type of project
 PROJECT(wolf)
@@ -39,9 +42,6 @@ endif()
 
 
 ADD_SUBDIRECTORY(src)
-
-# MAC OSX RPATH
-SET(CMAKE_MACOSX_RPATH 1)
 
 FIND_PACKAGE(Doxygen)
 
