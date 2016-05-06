@@ -118,6 +118,11 @@ class ActiveSearchGrid {
 
     public:
         /**
+         * Void constructor
+         */
+        ActiveSearchGrid();
+
+        /**
          * Constructor.
          * \param _img_size_h horizontal image size, in pixels.
          * \param _img_size_v vertical image size.
@@ -129,6 +134,19 @@ class ActiveSearchGrid {
         ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v,
         		const int & _n_cells_h, const int & _n_cells_v,
 				const int & _margin = 0, const int & _separation = 0);
+
+        /**
+         * Function to set the parameters of the active search grid
+         * \param _img_size_h horizontal image size, in pixels.
+         * \param _img_size_v vertical image size.
+         * \param _n_cells_h horizontal number of cells per image width.
+         * \param _n_cells_v vertical number of cells per image height.
+         * \param _separation minimum separation between existing and new points.
+         * \param _margin minimum separation to the edge of the image
+         */
+        void setParameters(const int & _img_size_h, const int & _img_size_v,
+                           const int & _n_cells_h, const int & _n_cells_v,
+                           const int & _margin = 0, const int & _separation = 0);
 
         /** \brief Clear grid.
          *
