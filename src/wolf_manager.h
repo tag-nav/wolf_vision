@@ -6,7 +6,7 @@
 #include "capture_motion.h"
 #include "capture_odom_2D.h"
 #include "capture_gps_fix.h"
-#include "capture_laser_2D.h"
+//#include "capture_laser_2D.h"
 #include "state_block.h"
 #include "constraint_sparse.h"
 #include "constraint_gps_2D.h"
