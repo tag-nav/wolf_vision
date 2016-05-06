@@ -39,12 +39,58 @@ void ProcessorTrackerLandmarkCorner::preProcess()
     //std::cout << "PreProcess: incoming new features: " << corners_incoming_.size() << std::endl;
 }
 
-unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(LandmarkBaseList& _landmarks_corner_searched,
+unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseList& _landmarks_corner_searched,
                                                            FeatureBaseList& _features_corner_found,
                                                            LandmarkMatchMap& _feature_landmark_correspondences)
 {
     std::cout << "ProcessorTrackerLandmarkCorner::findLandmarks: " << _landmarks_corner_searched.size() << " features: " << corners_incoming_.size()  << std::endl;
 
+    // NAIVE FIRST NEAREST NEIGHBOR MATCHING
+    LandmarkBaseList not_matched_landmarks = _landmarks_corner_searched;
+    Scalar dm2;
+
+    // COMPUTING ALL EXPECTED FEATURES
+    std::map<LandmarkBase*, Eigen::Vector4s> expected_features;
+    std::map<LandmarkBase*, Eigen::Matrix3s> expected_features_covs;
+    for (auto landmark : not_matched_landmarks)
+        expectedFeature(landmark, expected_features[landmark], expected_features_covs[landmark]);
+
+    auto next_feature_it = corners_incoming_.begin();
+    auto feature_it = ++next_feature_it;
+    while (feature_it != corners_incoming_.end())
+    {
+        LandmarkBaseIter closest_landmark = not_matched_landmarks.end();
+        Scalar closest_dm2 = 1e3;
+        for (auto landmark_it = not_matched_landmarks.begin(); landmark_it != not_matched_landmarks.end(); landmark_it++)
+        {
+            if ((*landmark_it)->getType() == LANDMARK_CORNER &&
+                fabs(pi2pi(((FeatureCorner2D*)(*feature_it))->getAperture() - (*landmark_it)->getDescriptor(0))) < aperture_error_th_)
+            {
+                dm2 = computeSquaredMahalanobisDistances((*feature_it), expected_features[*landmark_it],
+                                                         expected_features_covs[*landmark_it],
+                                                         Eigen::MatrixXs::Zero(3, 1))(0); //Mahalanobis squared
+                if (dm2 < 0.5 && (closest_landmark == not_matched_landmarks.end() || dm2 < closest_dm2))
+                {
+                    std::cout << "pair feature " << (*feature_it)->id() << " & landmark " << (*landmark_it)->id() << std::endl;
+                    std::cout << "pair SqMahalanobisDist = " << dm2 << std::endl;
+                    closest_dm2 = dm2;
+                    closest_landmark = landmark_it;
+                }
+            }
+        }
+        if (closest_landmark != not_matched_landmarks.end())
+        {
+            // match
+            matches_landmark_from_incoming_[*feature_it] = LandmarkMatch(*closest_landmark, closest_dm2);
+            // erase from the landmarks to be found
+            not_matched_landmarks.erase(closest_landmark);
+            // move corner feature to output list
+            _features_corner_found.splice(_features_corner_found.end(), corners_incoming_, feature_it);
+        }
+        auto feature_it = ++next_feature_it;
+    }
+
+/*
     // MATCHING FROM MAP
     if (!corners_incoming_.empty() && !_landmarks_corner_searched.empty())
     {
@@ -139,6 +185,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(LandmarkBaseList& _la
     }
     else
         std::cout << "0 corners incoming or 0 landmarks to search" <<std::endl;
+*/
     return matches_landmark_from_incoming_.size();
 }
 

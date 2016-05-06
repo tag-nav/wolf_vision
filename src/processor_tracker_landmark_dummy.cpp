@@ -24,7 +24,7 @@ ProcessorTrackerLandmarkDummy::~ProcessorTrackerLandmarkDummy()
     // TODO Auto-generated destructor stub
 }
 
-unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(LandmarkBaseList& _landmark_list_in,
+unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(const LandmarkBaseList& _landmark_list_in,
                                                           FeatureBaseList& _feature_list_out,
                                                           LandmarkMatchMap& _feature_landmark_correspondences)
 {
