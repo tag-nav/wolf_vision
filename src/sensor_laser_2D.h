@@ -149,7 +149,7 @@ class SensorLaser2D : public SensorBase
 namespace wolf {
 namespace
 {
-const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", SensorLaser2D::create);
+//const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", SensorLaser2D::create);
 }
 } // namespace wolf
 

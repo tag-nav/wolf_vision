@@ -212,7 +212,7 @@ ProcessorBase* ProcessorOdom2D::create(const std::string& _unique_name, const Pr
 namespace wolf {
 namespace
 {
-const bool registered_prc_odom_2d = ProcessorFactory::get()->registerCreator("ODOM 2D", ProcessorOdom2D::create);
+//const bool registered_prc_odom_2d = ProcessorFactory::get()->registerCreator("ODOM 2D", ProcessorOdom2D::create);
 }
 } // namespace wolf
 

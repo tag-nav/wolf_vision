@@ -60,7 +60,7 @@ public:
 namespace wolf {
 namespace
 {
-const bool registered_gps = SensorFactory::get()->registerCreator("GPS", SensorGPS::create);
+//const bool registered_gps = SensorFactory::get()->registerCreator("GPS", SensorGPS::create);
 }
 } // namespace wolf
 

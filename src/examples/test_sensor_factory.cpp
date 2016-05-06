@@ -21,10 +21,16 @@
 #include "../sensor_gps.h"
 //#include "../processor_gps.h"
 
+//#include "../sensor_laser_2D.h"
+
 #include "../problem.h"
+
 
 #include <iostream>
 #include <iomanip>
+
+// Put the register include down here just before the main():
+#include "factory_registers.hpp"
 
 int main(void)
 {

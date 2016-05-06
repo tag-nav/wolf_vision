@@ -122,7 +122,7 @@ inline void ProcessorLaser2D::init(CaptureBase* _origin_ptr)
 namespace wolf {
 namespace
 {
-const bool registered_prc_laser_2d = ProcessorFactory::get()->registerCreator("LASER 2D", ProcessorLaser2D::create);
+//const bool registered_prc_laser_2d = ProcessorFactory::get()->registerCreator("LASER 2D", ProcessorLaser2D::create);
 }
 } // namespace wolf
 

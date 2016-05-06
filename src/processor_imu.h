@@ -136,7 +136,7 @@ ProcessorBase* ProcessorIMU::create(const std::string& _unique_name, const Proce
 namespace wolf {
 namespace
 {
-const bool registered_prc_imu = ProcessorFactory::get()->registerCreator("IMU", ProcessorIMU::create);
+//const bool registered_prc_imu = ProcessorFactory::get()->registerCreator("IMU", ProcessorIMU::create);
 }
 } // namespace wolf
 #endif // PROCESSOR_IMU_H

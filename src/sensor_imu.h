@@ -49,7 +49,7 @@ class SensorIMU : public SensorBase
 namespace wolf {
 namespace
 {
-const bool registered_imu = SensorFactory::get()->registerCreator("IMU", SensorIMU::create);
+//const bool registered_imu = SensorFactory::get()->registerCreator("IMU", SensorIMU::create);
 }
 } // namespace wolf
 
