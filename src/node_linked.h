@@ -25,13 +25,35 @@ namespace wolf
  * \param LowerType the type of node one level down in the Wolf tree.
  *
  * Inherit from this class to implement a node element to be placed somewhere in the Wolf Tree.
- * A node has five main data members:
- * - An unique ID to identify it over the whole Wolf Tree (inherited from Node)
- * - A label indicating the node nature (inherited from Node)
- * - An enum indicating tree location (see NodeLocation enum at wolf.h)
- * - down_node_list_: A list of shared pointers to derived node objects, specified by the template parameter LowerType.
- * - up_node_: A regular pointer to a derived node object, specified by the template parameter UpperType.
- *
+ * A linked node has seven main data members:
+ *  - An unique ID to identify it over the whole Wolf Tree (inherited from NodeBase)
+ *  - An enum indicating the node location in the tree (see NodeLocation enum in wolf.h)
+ *  - down_node_list_: A list of pointers to derived node objects, specified by the template parameter LowerType.
+ *  - up_node_: A pointer to a derived node object, specified by the template parameter UpperType.
+ *  - A unique class name, inherited from NodeBase, strictly within this range of possibilities:
+ *    - "UNDEFINED"     : used for NodeTerminus
+ *    - "PROBLEM"       : for Problem and all derived classes -- beware: Problem is at this time deriving NodeBase.
+ *    - "HARDWARE"      : for HardwareBase and all derived classes
+ *    - "SENSOR"        : for SensorBase and all derived classes
+ *    - "PROCESSOR"     : for ProcessorBase and all derived classes
+ *    - "TRAJECTORY"    : for TrajectoryBase and all derived classes
+ *    - "FRAME"         : for FrameBase and all derived classes
+ *    - "CAPTURE"       : for CaptureBase and all derived classes
+ *    - "FEATURE"       : for FeatureBase and all derived classes
+ *    - "CONSTRAINT"    : for ConstraintBase and all derived classes
+ *    - "MAP"           : for MapBase and all derived classes
+ *    - "LANDMARK"      : for LandmarkBase and all derived classes
+ *  - A unique type label, inherited from NodeBase, which is a subclass of the above. A few  examples are:
+ *    - "CAMERA"        : for the class SensorCamera
+ *    - "LASER 2D"      : for the class SensorLaser2D
+ *    - "POINT 3D"      : for the class LandmarkPoint3D
+ *    - "PROCESSOR LASER 2D" : for the class ProcessorLaser2D
+ *    Please refer to each base class derived from NodeLinked (those listed just above) for a list of type labels.
+ *  - A name, inherited from NodeBase, defined in each application, which is specific of each object. A few examples follow:
+ *    - "Camera"
+ *    - "LIDAR 2D"
+ *    - "Point 3D"
+ *    - "Lidar 2D processor"
  */
 template<class UpperType, class LowerType>
 class NodeLinked : public NodeBase
@@ -54,7 +76,7 @@ class NodeLinked : public NodeBase
 
         /** \brief Constructor without specify up node
          */
-        NodeLinked(const NodeLocation _loc, const std::string& _label);
+        NodeLinked(const NodeLocation _loc, const std::string& _class);
 
         /** \brief Default destructor (not recommended)
          *
@@ -190,8 +212,8 @@ namespace wolf
 {
 
 template<class UpperType, class LowerType>
-NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _label) :
-        NodeBase(_label), //
+NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _class) :
+        NodeBase(_class), //
         location_(_loc), //
         up_node_ptr_(nullptr), down_node_list_(), is_deleting_(false)
 {

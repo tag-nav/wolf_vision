@@ -12,6 +12,7 @@
 #include "unistd.h"
 #include <time.h>
 #include "opencv2/calib3d/calib3d.hpp"
+//#include <uEye.h> //used to use the camera?
 
 //std includes
 #include <iostream>
@@ -37,11 +38,13 @@ int main(int argc, char** argv)
     //ProcessorBrisk test
     std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
 
+    cv::VideoCapture capture;
     unsigned int f = 0;
     const char * filename;
     if (argc == 1)
     {
         filename = "/home/jtarraso/Vídeos/House interior.mp4";
+        capture.open(filename);
     }
     else
     {
@@ -49,14 +52,16 @@ int main(int argc, char** argv)
         {
             //camera
             filename = "0";
+            capture.open(0);
         }
         else
         {
             filename = argv[1];
+            capture.open(filename);
         }
     }
     std::cout << "Input video file: " << filename << std::endl;
-    cv::VideoCapture capture(filename);
+    //cv::VideoCapture capture(filename);
     if(!capture.isOpened())  // check if we succeeded
     {
         std::cout << "failed" << std::endl;
@@ -65,7 +70,7 @@ int main(int argc, char** argv)
     {
         std::cout << "succeded" << std::endl;
     }
-    capture.set(CV_CAP_PROP_POS_MSEC, 0000);
+    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
     unsigned int img_width = (unsigned int)capture.get(CV_CAP_PROP_FRAME_WIDTH);
     unsigned int img_height = (unsigned int)capture.get(CV_CAP_PROP_FRAME_HEIGHT);
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
@@ -80,7 +85,9 @@ int main(int argc, char** argv)
 
     Eigen::Vector4s k = {320,240,320,320};
     StateBlock* intr = new StateBlock(k,false);
-    SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()), new StateBlock(Eigen::Vector3s::Zero()), intr,img_width,img_height);
+    SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()),
+                                              new StateBlock(Eigen::Vector3s::Zero()),
+                                              intr,img_width,img_height);
 
 
     Problem* wolf_problem_ = new Problem(FRM_PO_3D);
@@ -105,8 +112,58 @@ int main(int argc, char** argv)
     tracker_params.algorithm.max_new_features = 25;
     tracker_params.algorithm.min_features_for_keyframe = 20;
 
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params);
-    sen_cam_->addProcessor(p_brisk);
+    //ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params);
+    //sen_cam_->addProcessor(p_brisk);
+
+    /* TEST */
+
+    /* detector */
+//    cv::BRISK* det_ptr = new cv::BRISK(tracker_params.detector.threshold,
+//                                       tracker_params.detector.octaves,
+//                                       tracker_params.descriptor.pattern_scale);
+    cv::ORB* det_ptr = new cv::ORB(500, 1.0f, 1, 4);
+
+    /* descriptor */
+//    cv::BRISK* desc_ext_ptr = new cv::BRISK(tracker_params.detector.threshold,
+//                                                          tracker_params.detector.octaves,
+//                                                          tracker_params.descriptor.pattern_scale);
+    cv::ORB* desc_ext_ptr = new cv::ORB(500, 1.0f, 1, 4);
+
+    /* matcher */
+    cv::BFMatcher* match_ptr = new cv::BFMatcher(tracker_params.matcher.similarity_norm);
+
+
+    ProcessorBrisk* test_p_brisk = new ProcessorBrisk(det_ptr,desc_ext_ptr,match_ptr,tracker_params);
+    sen_cam_->addProcessor(test_p_brisk);
+
+
+//    std::vector<cv::KeyPoint> new_keypoints;
+//    cv::Mat testing_frame;
+//    capture >> testing_frame;
+//    det_ptr->detect(testing_frame,new_keypoints);
+
+//    std::cout << "keypoints detected: " << new_keypoints.size() << std::endl;
+//    for(unsigned int i = 0; i < new_keypoints.size();i++)
+//    {
+//        cv::circle(testing_frame, new_keypoints[i].pt, 2, cv::Scalar(0.0, 255.0, 255.0), -1, 8, 0);
+//    }
+
+//    cv::imshow("ORB TEST", testing_frame);
+//    cv::waitKey(0);
+
+    /* END TEST */
+
+
+
+    /* TEST 2 */
+//    std::string _detector, _descriptor, _matcher, _distance;
+//    _detector = "BRISK";
+//    _descriptor = "BRISK";
+//    _matcher = "BFMatcher";
+//    _distance = "";
+
+//    ProcessorBrisk* test2_p_brisk = new ProcessorBrisk(_detector, _descriptor, _matcher, _distance, tracker_params);
+    /* END TEST 2 */
 
     CaptureImage* capture_brisk_ptr;
 
@@ -121,9 +178,10 @@ int main(int argc, char** argv)
 
         capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame[f % buffer_size],img_width,img_height);
 
-        //        clock_t t1 = clock();
-        p_brisk->process(capture_brisk_ptr);
-        //        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+        clock_t t1 = clock();
+        //p_brisk->process(capture_brisk_ptr);
+        test_p_brisk->process(capture_brisk_ptr);
+        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
         //capture_brisk_ptr->getTimeStamp().getSeconds()
         last_frame = frame[f % buffer_size];
         f++;

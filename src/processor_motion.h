@@ -382,8 +382,12 @@ inline void ProcessorMotion::integrate()
     //std::cout << delta_integrated_cov_ << std::endl;
 
         // then push it into buffer
-    getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_, delta_cov_,
-                                             delta_integrated_cov_, Eigen::MatrixXs::Zero(delta_size_, delta_size_),
+    getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(),
+                                             delta_,
+                                             delta_integrated_,
+                                             delta_cov_,
+                                             delta_integrated_cov_,
+                                             Eigen::MatrixXs::Zero(delta_size_, delta_size_),
                                              Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
     //std::cout << "getBufferPtr()->get().back().delta_integrated_cov_" << std::endl;
     //std::cout << getBufferPtr()->get().back().delta_integr_cov_ << std::endl;
@@ -391,14 +395,14 @@ inline void ProcessorMotion::integrate()
 
 inline void ProcessorMotion::reintegrate()
 {
-    Motion zero_motion; // call constructor with params
+    Motion zero_motion; // call constructor with params // TODO use motionZero(ts)
     zero_motion.ts_ = origin_ptr_->getTimeStamp();
     zero_motion.delta_ = deltaZero();
     zero_motion.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
     zero_motion.delta_integr_ = deltaZero();
     zero_motion.jacobian_0.setIdentity();
     zero_motion.delta_integr_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-    ;
+
     this->getBufferPtr()->get().push_front(zero_motion);
 
     auto motion_it = getBufferPtr()->get().begin();
@@ -551,9 +555,13 @@ inline MotionBuffer* ProcessorMotion::getBufferPtr()
 inline Motion ProcessorMotion::motionZero(TimeStamp& _ts)
 {
     return Motion(
-            {_ts, deltaZero(), deltaZero(), Eigen::MatrixXs::Zero(delta_size_, delta_size_), Eigen::MatrixXs::Zero(
-                    delta_size_, delta_size_),
-             Eigen::MatrixXs::Identity(delta_size_, delta_size_), Eigen::MatrixXs::Identity(delta_size_, delta_size_)});
+            {_ts,
+             deltaZero(),
+             deltaZero(),
+             Eigen::MatrixXs::Zero(delta_size_, delta_size_),
+             Eigen::MatrixXs::Zero(delta_size_, delta_size_),
+             Eigen::MatrixXs::Identity(delta_size_, delta_size_),
+             Eigen::MatrixXs::Identity(delta_size_, delta_size_)});
 }
 
 } // namespace wolf

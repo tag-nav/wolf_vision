@@ -1,4 +1,5 @@
 #include "sensor_laser_2D.h"
+#include "state_block.h"
 
 namespace wolf {
 
@@ -12,6 +13,7 @@ namespace wolf {
 SensorLaser2D::SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr) :
     SensorBase(SEN_LIDAR, _p_ptr, _o_ptr, nullptr, 8)
 {
+    setType("LASER 2D");
     setDefaultScanParams();
 }
 
@@ -47,6 +49,23 @@ void SensorLaser2D::setScanParams(const laserscanutils::LaserScanParams & _param
 const laserscanutils::LaserScanParams& SensorLaser2D::getScanParams() const
 {
     return scan_params_;
+}
+
+// Define the factory method
+SensorBase* SensorLaser2D::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po,
+                                  const IntrinsicsBase* _intrinsics)
+{
+    // decode extrinsics vector
+    assert(_extrinsics_po.size() == 3 && "Bad extrinsics vector length. Should be 3 for 2D.");
+    StateBlock* pos_ptr = new StateBlock(_extrinsics_po.head(2), true);
+    StateBlock* ori_ptr = new StateBlock(_extrinsics_po.tail(1), true);
+    // cast intrinsics into derived type
+    IntrinsicsLaser2D* params = (IntrinsicsLaser2D*)(_intrinsics);
+    SensorLaser2D* sen = new SensorLaser2D(pos_ptr, ori_ptr);
+    sen->setName(_unique_name);
+    sen->setScanParams(params->scan_params);
+    sen->setCornerAlgParams(params->corners_alg_params);
+    return sen;
 }
 
 } // namespace wolf

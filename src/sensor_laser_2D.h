@@ -13,6 +13,13 @@
 
 namespace wolf {
 
+struct IntrinsicsLaser2D : public IntrinsicsBase
+{
+        laserscanutils::ScanParams scan_params;
+        laserscanutils::ExtractCornerParams corners_alg_params; //parameters for corner extraction algorithm.
+};
+
+
 class SensorLaser2D : public SensorBase
 {
     protected:
@@ -58,8 +65,22 @@ class SensorLaser2D : public SensorBase
          * 
          **/                        
         const laserscanutils::LaserScanParams & getScanParams() const;
+
+    public:
+        static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po, const IntrinsicsBase* _intrinsics);
+
 };
 
+} // namespace wolf
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", SensorLaser2D::create);
+}
 } // namespace wolf
 
 

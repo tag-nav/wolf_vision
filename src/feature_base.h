@@ -26,7 +26,7 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
         unsigned int feature_id_;
         unsigned int track_id_; // ID of the feature track
         unsigned int landmark_id_; // ID of the landmark
-        FeatureType type_;          ///< Feature type. See wolf.h for a list of all possible features.
+        FeatureType type_id_;          ///< Feature type. See wolf.h for a list of all possible features.
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix

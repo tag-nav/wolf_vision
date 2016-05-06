@@ -8,7 +8,14 @@
 // std includes
 
 
+
+
 namespace wolf {
+
+struct IntrinsicsGPSFix : public IntrinsicsBase
+{
+        // TODO: Fill in the necessary fields here
+};
 
 class SensorGPSFix : public SensorBase
 {
@@ -37,8 +44,22 @@ class SensorGPSFix : public SensorBase
          **/        
         double getNoise() const;
         
+    public:
+        static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);
+
 };
 
+} // namespace wolf
+
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_gps_fix = SensorFactory::get()->registerCreator("GPS FIX", SensorGPSFix::create);
+}
 } // namespace wolf
 
 #endif

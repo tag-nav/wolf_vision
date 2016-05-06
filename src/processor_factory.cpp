@@ -1,0 +1,52 @@
+/**
+ * \file processor_factory.cpp
+ *
+ *  Created on: May 4, 2016
+ *      \author: jsola
+ */
+
+#include "processor_factory.h"
+
+namespace wolf
+{
+
+bool ProcessorFactory::registerCreator(const std::string& _processor_type, CreateProcessorCallback createFn)
+{
+    return callbacks_.insert(CallbackMap::value_type(_processor_type, createFn)).second;
+}
+
+bool ProcessorFactory::unregisterCreator(const std::string& _processor_type)
+{
+    return callbacks_.erase(_processor_type) == 1;
+}
+
+wolf::ProcessorBase* ProcessorFactory::create(const std::string& _processor_type, const std::string& _name, const ProcessorParamsBase* _params)
+{
+    CallbackMap::const_iterator i = callbacks_.find(_processor_type);
+    if (i == callbacks_.end())
+    {
+        // not found
+        throw std::runtime_error("Unknown Processor type");
+    }
+    // Invoke the creation function
+    return (i->second)(_name, _params);
+}
+
+// Singleton ---------------------------------------------------
+// This class is a singleton. The code below guarantees this.
+
+ProcessorFactory* ProcessorFactory::pInstance_ = nullptr;
+
+wolf::ProcessorFactory* ProcessorFactory::get() // Unique point of access;
+{
+    if (pInstance_ == nullptr)
+        pInstance_ = new ProcessorFactory;
+    return pInstance_;
+}
+
+// singleton: constructor and destructor are private
+ProcessorFactory::ProcessorFactory(const ProcessorFactory&){}
+ProcessorFactory::ProcessorFactory(){}
+
+
+} /* namespace wolf */

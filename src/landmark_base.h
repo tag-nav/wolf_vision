@@ -27,7 +27,7 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         static unsigned int landmark_id_count_;
     protected:
         unsigned int landmark_id_;
-        LandmarkType type_;     ///< type of landmark. (types defined at wolf.h)
+        LandmarkType type_id_;     ///< type of landmark. (types defined at wolf.h)
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
         StateBlock* p_ptr_;     ///< Position state unit pointer
@@ -172,7 +172,7 @@ inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
 
 inline const LandmarkType LandmarkBase::getType() const
 {
-    return type_;
+    return type_id_;
 }
 
 } // namespace wolf

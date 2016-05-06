@@ -66,7 +66,7 @@ int main(int argc, char** argv)
     cv::Mat img_1, img_2;
 
     // user interface
-    cv::namedWindow("Feature tracker", cv::WINDOW_AUTOSIZE); // Creates a window for display.
+    cv::namedWindow("Feature tracker"); // Creates a window for display.
     cv::moveWindow("Feature tracker", 0, 0);
 
     // set image processors
@@ -118,28 +118,36 @@ int main(int argc, char** argv)
                 descriptor.compute(img_1, keypoints_1, descriptors_1);
                 descriptor.compute(img_2, keypoints_2, descriptors_2);
 
-                // match (try flann later)
-                //-- Step 3: Matching descriptor vectors using FLANN matcher
-                matcher.match(descriptors_1, descriptors_2, matches);
+                unsigned int max_dist = 0;
+                unsigned int min_dist = 512;
 
-                double max_dist = 0;
-                double min_dist = 512;
-
-                //-- Quick calculation of max and min distances between keypoints
-                for (int i = 0; i < descriptors_1.rows; i++)
+                if (keypoints_1.size() * keypoints_2.size() != 0)
                 {
-                    double dist = matches[i].distance;
-                    if (dist < min_dist)
-                        min_dist = dist;
-                    if (dist > max_dist)
-                        max_dist = dist;
+                    // match (try flann later)
+                    //-- Step 3: Matching descriptor vectors using FLANN matcher
+                    matcher.match(descriptors_1, descriptors_2, matches);
+
+                    //-- Quick calculation of max and min distances between keypoints
+                    for (int i = 0; i < descriptors_1.rows; i++)
+                    {
+                        unsigned int dist = matches[i].distance;
+                        if (dist < min_dist)
+                            min_dist = dist;
+                        if (dist > max_dist)
+                            max_dist = dist;
+                    }
+                }
+                else
+                {
+                    min_dist = 999;
+                    max_dist = 999;
                 }
 
-                printf("-- Max dist : %f \n", max_dist);
-                printf("-- Min dist : %f \n", min_dist);
+                printf("-- Max dist : %d \n", max_dist);
+                printf("-- Min dist : %d \n", min_dist);
 
                 //-- Select only "good" matches (i.e. those at a distance which is small)
-                for (int i = 0; i < matches.size(); i++)
+                for (unsigned int i = 0; i < matches.size(); i++)
                 {
                     if (matches[i].distance <= 100) //std::max(2*min_dist, 0.02) )
                     {
@@ -158,7 +166,7 @@ int main(int argc, char** argv)
                     std::cout << "F = " << F << std::endl;
 
                     // Recover the inlier matches
-                    for (int i = 0; i < good_matches.size(); i++)
+                    for (unsigned int i = 0; i < good_matches.size(); i++)
                         if (inliers_bool.at<char>(i) == 1)
                             inlier_matches.push_back(good_matches[i]);
                 }
@@ -170,8 +178,10 @@ int main(int argc, char** argv)
                 cv::drawMatches(img_1, keypoints_1, img_2, keypoints_2, inlier_matches, img_matches,
                                 cv::Scalar::all(-1), cv::Scalar::all(-1), std::vector<char>(), 0); //cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
                 //-- Show detected matches
-                resize(img_matches, img_scaled, cv::Size(), scale, scale, cv::INTER_NEAREST);
-                imshow("Feature tracker", img_scaled);
+//                resize(img_matches, img_scaled, cv::Size(), scale, scale, cv::INTER_NEAREST);
+//                imshow("Feature tracker", img_1);
+//                imshow("Feature tracker", img_2);
+                imshow("Feature tracker", img_matches);
 
                 // pause every X images and wait for key
                 if (f % 100)
