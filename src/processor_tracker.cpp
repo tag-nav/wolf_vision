@@ -46,7 +46,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // FIRST TIME
     if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
     {
-        //        std::cout << "FIRST TIME" << std::endl;
+        std::cout << "FIRST TIME" << std::endl;
         //        std::cout << "Features in origin: " << 0 << "; in last: " << 0 << std::endl;
 
         // advance
@@ -72,7 +72,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         // Establish constraints from last
         establishConstraints();
 
-        //        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+        std::cout << "Features in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
     }
     // SECOND TIME or after KEY FRAME CALLBACK
     else if (origin_ptr_ == nullptr)
