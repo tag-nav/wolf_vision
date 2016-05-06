@@ -5,82 +5,76 @@
 
 // other includes
 #include <bitset>
+#include <algorithm>
 
 namespace wolf
 {
 
-//Constructor
-ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters& _params) :
-        ProcessorTrackerFeature(PRC_TRACKER_BRISK),
-        detector_(_params.detector.threshold, _params.detector.octaves, _params.descriptor.pattern_scale),
-        descriptor_(_params.detector.threshold, _params.detector.octaves, _params.descriptor.pattern_scale),
-        matcher_(_params.matcher.similarity_norm),
-        act_search_grid_(_params.image.width, _params.image.height,
-        		_params.active_search.grid_width, _params.active_search.grid_height,
-				_params.descriptor.nominal_pattern_radius*_params.descriptor.pattern_scale,
-				_params.active_search.separation),
-        params_(_params)
-{
-    ProcessorTrackerFeature::setMaxNewFeatures(_params.algorithm.max_new_features);
-    params_.detector.pattern_radius = (float)(_params.detector.nominal_pattern_radius)*pow(2,_params.detector.octaves);
-    params_.descriptor.pattern_radius = (float)(_params.descriptor.nominal_pattern_radius)*_params.descriptor.pattern_scale;
-    params_.descriptor.size_bits = descriptor_.descriptorSize() * 8;
 
-    std::cout << "detector   pattern radius: " << params_.detector.pattern_radius << std::endl;
-    std::cout << "descriptor pattern radius: " << params_.descriptor.pattern_radius << std::endl;
-    std::cout << "descriptor size          : " << params_.descriptor.size_bits << std::endl;
-}
+//ProcessorBrisk::ProcessorBrisk(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr,
+//               cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters _params) :
+//        ProcessorTrackerFeature(PRC_TRACKER_BRISK),
+//        detector_ptr_(_det_ptr), descriptor_ptr_(_desc_ext_ptr), matcher_ptr_(_match_ptr),
+//        act_search_grid_(_params.image.width, _params.image.height,
+//                _params.active_search.grid_width, _params.active_search.grid_height,
+//                _params.descriptor.nominal_pattern_radius*_params.descriptor.pattern_scale,
+//                _params.active_search.separation),
+//        params_(_params)
+//{
+//    ProcessorTrackerFeature::setMaxNewFeatures(_params.algorithm.max_new_features);
+//    params_.detector.pattern_radius = (float)(_params.detector.nominal_pattern_radius)*pow(2,_params.detector.octaves);
+//    params_.descriptor.pattern_radius = (float)(_params.descriptor.nominal_pattern_radius)*_params.descriptor.pattern_scale;
+//    params_.descriptor.size_bits = descriptor_ptr_->descriptorSize() * 8;
 
-ProcessorBrisk::ProcessorBrisk(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr,
-               cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters _params) :
-        ProcessorTrackerFeature(PRC_TRACKER_BRISK),
-        detector_ptr_(_det_ptr), descriptor_ptr_(_desc_ext_ptr), matcher_ptr_(_match_ptr),
-        act_search_grid_(_params.image.width, _params.image.height,
-                _params.active_search.grid_width, _params.active_search.grid_height,
-                _params.descriptor.nominal_pattern_radius*_params.descriptor.pattern_scale,
-                _params.active_search.separation),
-        params_(_params)
-{
-    ProcessorTrackerFeature::setMaxNewFeatures(_params.algorithm.max_new_features);
-    params_.detector.pattern_radius = (float)(_params.detector.nominal_pattern_radius)*pow(2,_params.detector.octaves);
-    params_.descriptor.pattern_radius = (float)(_params.descriptor.nominal_pattern_radius)*_params.descriptor.pattern_scale;
-    params_.descriptor.size_bits = descriptor_ptr_->descriptorSize() * 8;
+//    std::cout << "detector   pattern radius: " << params_.detector.pattern_radius << std::endl;
+//    std::cout << "descriptor pattern radius: " << params_.descriptor.pattern_radius << std::endl;
+//    std::cout << "descriptor size          : " << params_.descriptor.size_bits << std::endl;
+//}
 
-    std::cout << "detector   pattern radius: " << params_.detector.pattern_radius << std::endl;
-    std::cout << "descriptor pattern radius: " << params_.descriptor.pattern_radius << std::endl;
-    std::cout << "descriptor size          : " << params_.descriptor.size_bits << std::endl;
-}
-
-//ProcessorBrisk::ProcessorBrisk(std::string _detector, std::string _descriptor, std::string matcher, std::string _distance, ProcessorImageParameters _params) :
-//    ProcessorTrackerFeature(PRC_TRACKER_BRISK),
-//    detector_ptr_(nullptr), descriptor_ptr_(nullptr), matcher_ptr_(nullptr), params_(_params),
+ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescriptorParamsBase* _dd_base_ptr) :
+    ProcessorTrackerFeature(PRC_TRACKER_BRISK),
+    detector_descriptor_ptr_(nullptr), matcher_ptr_(nullptr), params_(_params),
+    act_search_grid_()
 //    act_search_grid_(_params.image.width, _params.image.height,
 //            _params.active_search.grid_width, _params.active_search.grid_height,
 //            _params.descriptor.nominal_pattern_radius*_params.descriptor.pattern_scale,
 //            _params.active_search.separation)
-//{
-//    switch (_detector){
-//        case "BRISK":
-//            detector_ptr_ = new cv::BRISK();
-//            break;
-//        default:
-//            //throw runtime_error;
-//    }
-//    switch(_descriptor){
-//        case "BRISK":
-//            descriptor_ptr_ = new cv::BRISK();
-//            break;
-//        default:
-//            //throw runtime_error;
-//    }
-//    switch(_matcher){
-//        case "BFMatcher":
-//            matcher_ptr_ = new cv::BFMatcher();
-//            break;
-//        default:
-//            //throw runtime_error;
-//    }
-//}
+{
+    switch (_dd_base_ptr->type){
+        case DD_BRISK:
+            {
+            DetectorDescriptorParamsBrisk* dd_brisk = (DetectorDescriptorParamsBrisk*) _dd_base_ptr;
+            detector_descriptor_ptr_ = new cv::BRISK(dd_brisk->threshold,dd_brisk->octaves,dd_brisk->pattern_scale);
+            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((_dd_base_ptr->nominal_pattern_radius)*pow(2,dd_brisk->octaves)),
+                                                                   (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*dd_brisk->pattern_scale));
+            act_search_grid_.setParameters(_params.image.width, _params.image.height,
+                    _params.active_search.grid_width, _params.active_search.grid_height,
+                    _dd_base_ptr->nominal_pattern_radius * dd_brisk->pattern_scale,
+                    _params.active_search.separation);
+            break;
+            }
+        case DD_ORB:
+            {
+            DetectorDescriptorParamsOrb* dd_orb = (DetectorDescriptorParamsOrb*) _dd_base_ptr;
+            //used to test
+            _dd_base_ptr->nominal_pattern_radius = 21;
+            //
+            detector_descriptor_ptr_ = new cv::ORB(dd_orb->nfeatures,dd_orb->scaleFactor,dd_orb->nlevels,dd_orb->edgeThreshold,
+                                                   dd_orb->firstLevel,dd_orb->WTA_K,dd_orb->scoreType,dd_orb->patchSize);
+            detector_descriptor_params_.pattern_radius_ =
+                    (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*pow(dd_orb->scaleFactor,dd_orb->nlevels-1));
+            act_search_grid_.setParameters(_params.image.width, _params.image.height,
+                    _params.active_search.grid_width, _params.active_search.grid_height,
+                    std::max(dd_orb->edgeThreshold,dd_orb->patchSize), //check this out
+                    _params.active_search.separation);
+            break;
+            }
+        default:
+            throw std::runtime_error("Unknown detector-descriptor");
+    }
+    matcher_ptr_ = new cv::BFMatcher(_params.matcher.similarity_norm);
+    detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+}
 
 //Destructor
 ProcessorBrisk::~ProcessorBrisk()
@@ -141,12 +135,12 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
 //    detector_.detect(_image_roi, _new_keypoints);
 //    descriptor_.compute(_image_roi, _new_keypoints, new_descriptors);
-    detector_ptr_->detect(_image_roi, _new_keypoints);
+    detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
     for (unsigned int i = 0; i < _new_keypoints.size(); i++)
     {
         //std::cout << "keypoints: " << _new_keypoints[i].pt << std::endl;
     }
-    descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
+    detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
 
     //std::cout << "detect roi2: " << _roi << std::endl;
 
@@ -167,7 +161,7 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_feat
     cv::Mat new_descriptors;
     unsigned int n_new_features = 0;
 
-    for (unsigned int n_iterations = 0; n_iterations < _max_new_features * 1.25; n_iterations++)
+    for (unsigned int n_iterations = 0; n_iterations < 50 * 1.25; n_iterations++)//_max_new_features * 1.25; n_iterations++)
     {
         if (act_search_grid_.pickRoi(roi))
         {
@@ -259,7 +253,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
             std::cout << " | at: " << candidate_keypoints[cv_matches[0].trainIdx].pt;
 
-            Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/params_.descriptor.size_bits;
+            Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
 
             std::cout << " | score: " << normalized_score;
 
@@ -324,7 +318,7 @@ void ProcessorBrisk::trimRoi(cv::Rect& _roi)
 void ProcessorBrisk::inflateRoi(cv::Rect& _roi)
 {
     // now both the detector and descriptor patter_radius is the same, but when not, shouldn't the method have that as input parameter?
-    int inflation_rate = params_.descriptor.pattern_radius;
+    int inflation_rate = detector_descriptor_params_.pattern_radius_;
 
     _roi.x = _roi.x - inflation_rate;
     _roi.y = _roi.y - inflation_rate;

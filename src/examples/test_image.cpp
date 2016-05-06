@@ -79,7 +79,27 @@ int main(int argc, char** argv)
     std::vector<cv::Mat> frame(buffer_size);
     cv::Mat last_frame;
 
+    //TESTS
+    size_t size = 3;
+    const int s = (int) size;
+    size_t N_samples = 200; // number of samples
+    int d = (int) (N_samples+1);
+    const int z = 3;
+    const int y = 2;
+    //Eigen::Matrix<wolf::Scalar, s, y> Rd;
+    Eigen::MatrixXs U_v1(size,size);
+    U_v1.setRandom();
+    std::cout << "matrix cols: " << U_v1.cols();
+    std::cout << "; matrix rows: " << U_v1.rows() << std::endl;
+    Eigen::MatrixXs U_v2 = U_v1.inverse();
+    std::cout << "matrix cols: " << U_v2.cols();
+    std::cout << "; matrix rows: " << U_v2.rows() << std::endl;
 
+    const int size1 = 3, size2 = 2;
+    Eigen::Matrix<wolf::Scalar, size1, size2, Eigen::RowMajor> test_matrix;
+    std::cout << "matrix cols: " << test_matrix.cols();
+    std::cout << "; matrix rows: " << test_matrix.rows() << std::endl;
+    //END TESTS
 
     TimeStamp t = 1;
 
@@ -95,13 +115,13 @@ int main(int argc, char** argv)
 
     ProcessorImageParameters tracker_params;
     tracker_params.image = {img_width,  img_height};
-    tracker_params.detector.threshold = 30;
-    tracker_params.detector.threshold_new_features = 70;
-    tracker_params.detector.octaves = 2;
-    tracker_params.detector.nominal_pattern_radius = 4;
-//    tracker_params.descriptor.size = 512;
-    tracker_params.descriptor.pattern_scale = 0.5;
-    tracker_params.descriptor.nominal_pattern_radius = 18;
+//    tracker_params.detector.threshold = 30;
+//    tracker_params.detector.threshold_new_features = 70;
+//    tracker_params.detector.octaves = 2;
+//    tracker_params.detector.nominal_pattern_radius = 4;
+////    tracker_params.descriptor.size = 512;
+//    tracker_params.descriptor.pattern_scale = 0.5;
+//    tracker_params.descriptor.nominal_pattern_radius = 18;
     tracker_params.matcher.min_normalized_score = 0.75;
     tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
     tracker_params.matcher.roi_width = 30;
@@ -112,58 +132,28 @@ int main(int argc, char** argv)
     tracker_params.algorithm.max_new_features = 25;
     tracker_params.algorithm.min_features_for_keyframe = 20;
 
-    //ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params);
-    //sen_cam_->addProcessor(p_brisk);
+
+    DetectorDescriptorParamsOrb orb_params;
+    orb_params.type = DD_ORB;
+
+    DetectorDescriptorParamsBrisk brisk_params;
+    brisk_params.type = DD_BRISK;
+
 
     /* TEST */
-
-    /* detector */
-//    cv::BRISK* det_ptr = new cv::BRISK(tracker_params.detector.threshold,
-//                                       tracker_params.detector.octaves,
-//                                       tracker_params.descriptor.pattern_scale);
-    cv::ORB* det_ptr = new cv::ORB(500,1.2f, 1, 4);//(500, 1.0f, 1, 4);
-
-    /* descriptor */
-//    cv::BRISK* desc_ext_ptr = new cv::BRISK(tracker_params.detector.threshold,
-//                                                          tracker_params.detector.octaves,
-//                                                          tracker_params.descriptor.pattern_scale);
     cv::ORB* desc_ext_ptr = new cv::ORB(500,0.4f, 1, 4);//(500, 1.0f, 1, 4);
 
     /* matcher */
     cv::BFMatcher* match_ptr = new cv::BFMatcher(cv::NORM_HAMMING);
 
 
-    ProcessorBrisk* test_p_brisk = new ProcessorBrisk(det_ptr,desc_ext_ptr,match_ptr,tracker_params);
+    //ProcessorBrisk* test_p_brisk = new ProcessorBrisk(det_ptr,desc_ext_ptr,match_ptr,tracker_params);
+    ProcessorBrisk* test_p_brisk = new ProcessorBrisk(tracker_params, &orb_params);
     sen_cam_->addProcessor(test_p_brisk);
 
 
-//    std::vector<cv::KeyPoint> new_keypoints;
-//    cv::Mat testing_frame;
-//    capture >> testing_frame;
-//    det_ptr->detect(testing_frame,new_keypoints);
-
-//    std::cout << "keypoints detected: " << new_keypoints.size() << std::endl;
-//    for(unsigned int i = 0; i < new_keypoints.size();i++)
-//    {
-//        cv::circle(testing_frame, new_keypoints[i].pt, 2, cv::Scalar(0.0, 255.0, 255.0), -1, 8, 0);
-//    }
-
-//    cv::imshow("ORB TEST", testing_frame);
-//    cv::waitKey(0);
-
     /* END TEST */
 
-
-
-    /* TEST 2 */
-//    std::string _detector, _descriptor, _matcher, _distance;
-//    _detector = "BRISK";
-//    _descriptor = "BRISK";
-//    _matcher = "BFMatcher";
-//    _distance = "";
-
-//    ProcessorBrisk* test2_p_brisk = new ProcessorBrisk(_detector, _descriptor, _matcher, _distance, tracker_params);
-    /* END TEST 2 */
 
     CaptureImage* capture_brisk_ptr;
 
