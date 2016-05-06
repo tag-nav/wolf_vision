@@ -47,8 +47,8 @@ struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
 {
         unsigned int nfeatures=500;
         float scaleFactor=1.2f;
-        unsigned int nlevels=8;
-        unsigned int edgeThreshold=31;
+        unsigned int nlevels=1;//8
+        unsigned int edgeThreshold=4; //31
         unsigned int firstLevel=0;
         unsigned int WTA_K=2;
         unsigned int scoreType=cv::ORB::HARRIS_SCORE;
@@ -102,8 +102,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 {
 
     protected:
-        cv::FeatureDetector* detector_ptr_;
-        cv::DescriptorExtractor* descriptor_ptr_;
+        //cv::FeatureDetector* detector_ptr_;
+        //cv::DescriptorExtractor* descriptor_ptr_;
         cv::DescriptorMatcher* matcher_ptr_;
         cv::Feature2D* detector_descriptor_ptr_;
     protected:
@@ -139,7 +139,20 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 //        }
 
     protected:
+
+        /**
+         * \brief Does whatever needs to be done before the Process() takes place, such as initializations or assignations
+         * not relevant to the Process().
+         *
+         * Used for debugging
+         */
         void preProcess();
+
+        /**
+         * \brief Does whatever needs to be done after the Process(), like drawing the features.
+         *
+         * Used for debugging
+         */
         void postProcess();
 
         virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,

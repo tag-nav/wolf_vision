@@ -35,10 +35,6 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescrip
     ProcessorTrackerFeature(PRC_TRACKER_BRISK),
     detector_descriptor_ptr_(nullptr), matcher_ptr_(nullptr), params_(_params),
     act_search_grid_()
-//    act_search_grid_(_params.image.width, _params.image.height,
-//            _params.active_search.grid_width, _params.active_search.grid_height,
-//            _params.descriptor.nominal_pattern_radius*_params.descriptor.pattern_scale,
-//            _params.active_search.separation)
 {
     switch (_dd_base_ptr->type){
         case DD_BRISK:
@@ -57,7 +53,7 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescrip
             {
             DetectorDescriptorParamsOrb* dd_orb = (DetectorDescriptorParamsOrb*) _dd_base_ptr;
             //used to test
-            _dd_base_ptr->nominal_pattern_radius = 21;
+            _dd_base_ptr->nominal_pattern_radius = 18;
             //
             detector_descriptor_ptr_ = new cv::ORB(dd_orb->nfeatures,dd_orb->scaleFactor,dd_orb->nlevels,dd_orb->edgeThreshold,
                                                    dd_orb->firstLevel,dd_orb->WTA_K,dd_orb->scoreType,dd_orb->patchSize);
@@ -65,7 +61,7 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescrip
                     (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*pow(dd_orb->scaleFactor,dd_orb->nlevels-1));
             act_search_grid_.setParameters(_params.image.width, _params.image.height,
                     _params.active_search.grid_width, _params.active_search.grid_height,
-                    std::max(dd_orb->edgeThreshold,dd_orb->patchSize), //check this out
+                    std::max(dd_orb->edgeThreshold,dd_orb->patchSize), //check this out /2?
                     _params.active_search.separation);
             break;
             }
