@@ -121,14 +121,6 @@ class ProcessorIMU : public ProcessorMotion{
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
-ProcessorBase* ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
-{
-    ProcessorIMU* prc_ptr = new ProcessorIMU();
-    prc_ptr->setName(_unique_name);
-    return prc_ptr;
-}
-
-
 } // namespace wolf
 
 #endif // PROCESSOR_IMU_H

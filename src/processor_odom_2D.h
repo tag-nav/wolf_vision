@@ -194,13 +194,6 @@ inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _m
     return tmp;
 }
 
-ProcessorBase* ProcessorOdom2D::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
-{
-    ProcessorOdom2D* prc_ptr = new ProcessorOdom2D();
-    prc_ptr->setName(_unique_name);
-    return prc_ptr;
-}
-
 } // namespace wolf
 
 #endif /* SRC_PROCESSOR_ODOM_2D_H_ */

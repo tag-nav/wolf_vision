@@ -185,14 +185,6 @@ inline void ProcessorOdom3D::remap(const Eigen::VectorXs& _x1, const Eigen::Vect
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_x_out.data() + 3);
 }
 
-ProcessorBase* ProcessorOdom3D::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
-{
-    ProcessorOdom3D* prc_ptr = new ProcessorOdom3D();
-    prc_ptr->setName(_unique_name);
-    return prc_ptr;
-}
-
-
 } // namespace wolf
 
 #endif /* SRC_PROCESSOR_ODOM_3D_H_ */
