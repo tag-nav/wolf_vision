@@ -41,5 +41,4 @@ class ProcessorGPS : public ProcessorBase
 
 } // namespace wolf
 
-
 #endif //WOLF_PROCESSOR_GPS_H

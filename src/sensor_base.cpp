@@ -1,7 +1,5 @@
 #include "sensor_base.h"
 #include "state_block.h"
-#include "hardware_base.h"
-#include "processor_base.h"
 
 
 namespace wolf {

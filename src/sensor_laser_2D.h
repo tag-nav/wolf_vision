@@ -143,5 +143,4 @@ class SensorLaser2D : public SensorBase
 
 } // namespace wolf
 
-
 #endif /*SENSOR_LASER_2D_H_*/

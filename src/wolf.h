@@ -150,7 +150,6 @@ typedef enum
     CTR_CONTAINER,              ///< 2D container constraint .
     CTR_IMG_PNT_TO_EP,          ///< constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
-    CTR_IMG_PNT_TO_IMG_PNT,     ///< constraint between two image point features
     CTR_EPIPOLAR                ///< Epipolar constraint
 } ConstraintType;
 

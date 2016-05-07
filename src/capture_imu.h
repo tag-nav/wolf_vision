@@ -3,8 +3,6 @@
 
 //Wolf includes
 #include "capture_motion.h"
-#include "feature_base.h" //must be replaced by feature_imu if needed
-#include "sensor_base.h" //must be replaced by sensor_imu
 
 namespace wolf {
 

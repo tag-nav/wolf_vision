@@ -203,5 +203,4 @@ ProcessorBase* ProcessorOdom2D::create(const std::string& _unique_name, const Pr
 
 } // namespace wolf
 
-
 #endif /* SRC_PROCESSOR_ODOM_2D_H_ */
