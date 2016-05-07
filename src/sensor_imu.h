@@ -43,14 +43,4 @@ class SensorIMU : public SensorBase
 
 } // namespace wolf
 
-
-//// Register in the SensorFactory
-//#include "sensor_factory.h"
-//namespace wolf {
-//namespace
-//{
-//const bool registered_imu = SensorFactory::get()->registerCreator("IMU", SensorIMU::create);
-//}
-//} // namespace wolf
-
 #endif // SENSOR_IMU_H

@@ -51,15 +51,4 @@ class SensorGPSFix : public SensorBase
 
 } // namespace wolf
 
-
-
-//// Register in the SensorFactory
-//#include "sensor_factory.h"
-//namespace wolf {
-//namespace
-//{
-//const bool registered_gps_fix = SensorFactory::get()->registerCreator("GPS FIX", SensorGPSFix::create);
-//}
-//} // namespace wolf
-
 #endif
