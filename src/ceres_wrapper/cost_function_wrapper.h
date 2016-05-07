@@ -39,10 +39,10 @@ class CostFunctionWrapper : public ceres::CostFunction
             // load parameters evaluation value
             std::vector<Eigen::Map<const Eigen::VectorXs>> state_blocks_map_;
             for (unsigned int i = 0; i < state_blocks_sizes_.size(); i++)
-                state_blocks_map_.push_back(Eigen::Map<const Eigen::VectorXs>(parameters[i], state_blocks_sizes_[i]));
+                state_blocks_map_.push_back(Eigen::Map<const Eigen::VectorXs>((Scalar*)parameters[i], state_blocks_sizes_[i]));
 
             // residuals
-            Eigen::Map<Eigen::VectorXs> residuals_map(residuals, constraint_ptr_->getSize());
+            Eigen::Map<Eigen::VectorXs> residuals_map((Scalar*)residuals, constraint_ptr_->getSize());
             residuals_map = constraint_ptr_->evaluateResiduals(state_blocks_map_);
 
             // also compute jacobians
@@ -55,7 +55,7 @@ class CostFunctionWrapper : public ceres::CostFunction
                 {
                     compute_jacobians_[i] = (jacobians[i] != nullptr);
                     if (jacobians[i] != nullptr)
-                        jacobians_map_.push_back(Eigen::Map<Eigen::MatrixXs>(jacobians[i], constraint_ptr_->getSize(), state_blocks_sizes_[i]));
+                        jacobians_map_.push_back(Eigen::Map<Eigen::MatrixXs>((Scalar*)jacobians[i], constraint_ptr_->getSize(), state_blocks_sizes_[i]));
                     else
                         jacobians_map_.push_back(Eigen::Map<Eigen::MatrixXs>(nullptr, 0, 0)); //TODO: check if it can be done
                 }

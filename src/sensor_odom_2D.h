@@ -44,14 +44,14 @@ class SensorOdom2D : public SensorBase
          * Returns displacement noise factor
          * 
          **/        
-        double getDispVarToDispNoiseFactor() const;
+        Scalar getDispVarToDispNoiseFactor() const;
 
         /** \brief Returns rotation noise factor
          * 
          * Returns rotation noise factor
          * 
          **/        
-        double getRotVarToRotNoiseFactor() const;
+        Scalar getRotVarToRotNoiseFactor() const;
         
 
 	public:

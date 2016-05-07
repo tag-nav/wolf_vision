@@ -42,7 +42,7 @@ class SensorGPSFix : public SensorBase
          * Returns noise standard deviation
          * 
          **/        
-        double getNoise() const;
+        Scalar getNoise() const;
         
     public:
         static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);

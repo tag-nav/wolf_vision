@@ -2,7 +2,6 @@
 #include "state_block.h"
 #include "state_quaternion.h"
 
-
 namespace wolf {
 
 /**
@@ -41,5 +40,6 @@ SensorBase* SensorCamera::create(const std::string& _unique_name, const Eigen::V
     sen_ptr->setName(_unique_name);
     return sen_ptr;
 }
+
 
 } // namespace wolf
