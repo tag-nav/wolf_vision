@@ -40,8 +40,6 @@ class HardwareBase : public NodeLinked<Problem, SensorBase>
 
 // IMPLEMENTATION
 
-#include "sensor_base.h"
-
 namespace wolf {
 
 inline void HardwareBase::removeSensor(const SensorBaseIter& _sensor_iter)

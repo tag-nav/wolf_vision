@@ -8,11 +8,17 @@
 #ifndef PROCESSOR_FACTORY_H_
 #define PROCESSOR_FACTORY_H_
 
-#include "processor_base.h"
+namespace wolf
+{
+class ProcessorBase;
+struct ProcessorParamsBase;
+}
+
+#include <string>
+#include <map>
 
 namespace wolf
 {
-
 class ProcessorFactory
 {
     public:
