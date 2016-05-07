@@ -44,13 +44,11 @@ class ProcessorOdom2D : public ProcessorMotion
             static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
-
 inline ProcessorOdom2D::ProcessorOdom2D() :
         ProcessorMotion(PRC_ODOM_2D, 3, 3, 2)
 {
     setType("ODOM 2D");
 }
-
 inline ProcessorOdom2D::~ProcessorOdom2D()
 {
 }
@@ -207,14 +205,14 @@ ProcessorBase* ProcessorOdom2D::create(const std::string& _unique_name, const Pr
 
 
 
-// Register in the ProcessorFactory
-#include "processor_factory.h"
-namespace wolf {
-namespace
-{
-const bool registered_prc_odom_2d = ProcessorFactory::get()->registerCreator("ODOM 2D", ProcessorOdom2D::create);
-}
-} // namespace wolf
+//// Register in the ProcessorFactory
+//#include "processor_factory.h"
+//namespace wolf {
+//namespace
+//{
+//const bool registered_prc_odom_2d = ProcessorFactory::get()->registerCreator("ODOM 2D", ProcessorOdom2D::create);
+//}
+//} // namespace wolf
 
 
 

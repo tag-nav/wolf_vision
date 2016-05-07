@@ -198,6 +198,8 @@ SET(SRCS
     processor_base.cpp
     processor_factory.cpp
     processor_imu.cpp
+    processor_odom_2D.cpp
+    processor_odom_3D.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
     processor_tracker_feature_dummy.cpp

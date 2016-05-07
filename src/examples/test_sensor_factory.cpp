@@ -33,7 +33,8 @@ int main(void)
 
     cout << "\n================ Wolf Factories ================" << endl;
 
-    cout << "If you look above, you see the registered methods.\nThere is one attempt per #include of the file, I ignore why!" << endl;
+    cout << "If you look above, you see the registered methods.\n"
+            "There is only one attempt per class, and it is successful!" << endl;
 
     Problem problem(FRM_PO_3D);
 

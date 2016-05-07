@@ -144,14 +144,14 @@ class SensorLaser2D : public SensorBase
 } // namespace wolf
 
 
-// Register in the SensorFactory
-#include "sensor_factory.h"
-namespace wolf {
-namespace
-{
-const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", SensorLaser2D::create);
-}
-} // namespace wolf
+//// Register in the SensorFactory
+//#include "sensor_factory.h"
+//namespace wolf {
+//namespace
+//{
+//const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", SensorLaser2D::create);
+//}
+//} // namespace wolf
 
 
 #endif /*SENSOR_LASER_2D_H_*/

@@ -55,13 +55,13 @@ public:
 } // namespace wolf
 
 
-// Register in the SensorFactory
-#include "sensor_factory.h"
-namespace wolf {
-namespace
-{
-const bool registered_gps = SensorFactory::get()->registerCreator("GPS", SensorGPS::create);
-}
-} // namespace wolf
+//// Register in the SensorFactory
+//#include "sensor_factory.h"
+//namespace wolf {
+//namespace
+//{
+//const bool registered_gps = SensorFactory::get()->registerCreator("GPS", SensorGPS::create);
+//}
+//} // namespace wolf
 
 #endif //SENSOR_GPS_H_

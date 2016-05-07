@@ -65,4 +65,14 @@ wolf::ProcessorBase* ProcessorGPS::create(const std::string& _unique_name, const
     return prc_ptr;
 }
 
+} // namespace wolf
+
+
+// Register in the SensorFactory
+#include "processor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_prc_gps = ProcessorFactory::get()->registerCreator("GPS", ProcessorGPS::create);
 }
+} // namespace wolf

@@ -164,3 +164,13 @@ SensorBase* SensorLaser2D::create(const std::string& _unique_name, const Eigen::
 }
 
 } // namespace wolf
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", SensorLaser2D::create);
+}
+} // namespace wolf

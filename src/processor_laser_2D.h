@@ -117,14 +117,14 @@ inline void ProcessorLaser2D::init(CaptureBase* _origin_ptr)
 } // namespace wolf
 
 
-// Register in the SensorFactory
-#include "processor_factory.h"
-namespace wolf {
-namespace
-{
-const bool registered_prc_laser_2d = ProcessorFactory::get()->registerCreator("LASER 2D", ProcessorLaser2D::create);
-}
-} // namespace wolf
+//// Register in the SensorFactory
+//#include "processor_factory.h"
+//namespace wolf {
+//namespace
+//{
+//const bool registered_prc_laser_2d = ProcessorFactory::get()->registerCreator("LASER 2D", ProcessorLaser2D::create);
+//}
+//} // namespace wolf
 
 
 #endif /* SRC_PROCESSOR_LASER_2D_H_ */

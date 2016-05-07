@@ -65,13 +65,13 @@ class SensorOdom2D : public SensorBase
 
 
 
-// Register in the SensorFactory
-#include "sensor_factory.h"
-namespace wolf {
-namespace
-{
-const bool registered_odom_2d = SensorFactory::get()->registerCreator("ODOM 2D", SensorOdom2D::create);
-}
-} // namespace wolf
+//// Register in the SensorFactory
+//#include "sensor_factory.h"
+//namespace wolf {
+//namespace
+//{
+//const bool registered_odom_2d = SensorFactory::get()->registerCreator("ODOM 2D", SensorOdom2D::create);
+//}
+//} // namespace wolf
 
 #endif
