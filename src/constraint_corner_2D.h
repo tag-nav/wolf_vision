@@ -24,10 +24,10 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          **/
-		virtual ~ConstraintCorner2D()
-		{
-			//std::cout << "deleting ConstraintCorner2D " << nodeId() << std::endl;
-		}
+        virtual ~ConstraintCorner2D()
+        {
+            //std::cout << "deleting ConstraintCorner2D " << nodeId() << std::endl;
+        }
 
 		LandmarkCorner2D* getLandmarkPtr()
 		{
@@ -47,6 +47,14 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
         {
             return JAC_AUTO;
         }
+
+    public:
+        static ConstraintBase* create(const NodeBase* _correspondant_ptr)
+        {
+            LandmarkCorner2D* lmk = (LandmarkCorner2D*) _correspondant_ptr;
+            return new ConstraintCorner2D(nullptr, lmk);
+        }
+
 };
 
 template<typename T>
@@ -117,5 +125,7 @@ inline bool ConstraintCorner2D::operator ()(const T* const _robotP, const T* con
 }
 
 } // namespace wolf
+
+
 
 #endif
