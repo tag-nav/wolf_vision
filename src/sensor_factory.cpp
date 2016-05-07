@@ -18,7 +18,7 @@ bool SensorFactory::registerCreator(const std::string& _sensor_type, CreateSenso
     if (reg)
         std::cout << "Registered sensor " << _sensor_type << std::endl;
     else
-        std::cout << "Could not register sensor " << _sensor_type << std::endl;
+        std::cout << "Sensor " << _sensor_type << " already registered. Skipping. " << std::endl;
     return reg;
 }
 
@@ -44,8 +44,8 @@ wolf::SensorBase* SensorFactory::create(const std::string& _sensor_type, const s
 
 wolf::SensorFactory* SensorFactory::get() // Unique point of access;
 {
-    static SensorFactory pInstance_;
-    return &pInstance_;
+    static SensorFactory instance_;
+    return &instance_;
 }
 
 } /* namespace wolf */

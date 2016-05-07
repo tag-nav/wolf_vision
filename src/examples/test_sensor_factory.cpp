@@ -34,15 +34,17 @@ int main(void)
     using namespace wolf;
     using namespace std;
 
-    cout << "\n================ Wolf Factories ================" << endl;
+    cout << "\n====== Registering creators in the Wolf Factories ======" << endl;
 
-    cout << "If you look above, you see the registered methods.\n"
+    cout << "If you look above, you see the registered creators.\n"
             "There is only one attempt per class, and it is successful!\n"
-            "We do this by registering in the class\'s .cpp file." << endl;
+            "We do this by registering in the class\'s .cpp file.\n"
+            "\n"
+            "See [wolf]/src/examples/test_sensor_factory.cpp for the way to add sensors and processors to wolf::Problem." << endl;
 
     Problem problem(FRM_PO_3D);
 
-    cout << "\n================ Sensor Factory ================" << endl;
+    cout << "\n==================== Sensor Factory ====================" << endl;
 
     // define some useful parameters
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
@@ -70,7 +72,7 @@ int main(void)
     }
     cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << endl;
 
-    cout << "\n=============== Processor Factory ===============" << endl;
+    cout << "\n=================== Processor Factory ===================" << endl;
 
     // Add processors and bind them to sensors -- by sensor name!
     problem.addProcessor("ODOM 2D", "main odometry",    "main odometer",    nullptr);
@@ -83,7 +85,7 @@ int main(void)
             cout << "Processor: " << setw(2) << left  << prc->id()
             << " | type : " << setw(8) << prc->getType()
             << " | name: " << setw(15) << prc->getName()
-            << " | bound to sensor: " << prc->getSensorPtr()->getName() << endl;
+            << " | bound to sensor " << setw(2) << prc->getSensorPtr()->id() << ": " << prc->getSensorPtr()->getName() << endl;
 
 
     return 0;

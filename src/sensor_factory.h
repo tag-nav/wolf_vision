@@ -124,11 +124,13 @@ class SensorFactory
         // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
     public:
         static SensorFactory* get(); // Unique point of access
+
+    public: // see http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
+        SensorFactory(const SensorFactory&) = delete;
+        void operator=(SensorFactory const&) = delete;
     private:
-        SensorFactory() { } // Prevent clients from creating a new Singleton
-        SensorFactory(const SensorFactory&); // Prevent clients from creating a copy of the Singleton
-        ~SensorFactory() { }; // Prevent clients from deleting the Singleton
-        void operator=(SensorFactory const&); // Don't implement
+        SensorFactory() { }
+        ~SensorFactory() { }
 };
 
 } /* namespace wolf */

@@ -18,7 +18,7 @@ bool ProcessorFactory::registerCreator(const std::string& _processor_type, Creat
     if (reg)
         std::cout << "Registered processor " << _processor_type << std::endl;
     else
-        std::cout << "Could not register processor " << _processor_type << std::endl;
+        std::cout << "Processor " << _processor_type << " already registered. Skipping. " << std::endl;
 
     return reg;
 }
@@ -28,7 +28,7 @@ bool ProcessorFactory::unregisterCreator(const std::string& _processor_type)
     return callbacks_.erase(_processor_type) == 1;
 }
 
-wolf::ProcessorBase* ProcessorFactory::create(const std::string& _processor_type, const std::string& _name, const ProcessorParamsBase* _params)
+ProcessorBase* ProcessorFactory::create(const std::string& _processor_type, const std::string& _name, const ProcessorParamsBase* _params)
 {
     CallbackMap::const_iterator i = callbacks_.find(_processor_type);
     if (i == callbacks_.end())
@@ -40,11 +40,11 @@ wolf::ProcessorBase* ProcessorFactory::create(const std::string& _processor_type
     return (i->second)(_name, _params);
 }
 
-wolf::ProcessorFactory* ProcessorFactory::get() // Unique point of access;
+ProcessorFactory* ProcessorFactory::get() // Unique point of access;
 {
-    static ProcessorFactory pInstance_; // Guaranteed to be destroyed.
+    static ProcessorFactory instance_; // Guaranteed to be destroyed.
                                         // Instantiated on first use.
-    return &pInstance_;
+    return &instance_;
 }
 
 } /* namespace wolf */
