@@ -1,12 +1,19 @@
-/**
+/** \file node_linked.h
+ *
+ * \author Joan Sola
+ *
  * This file defines the basic template class for linked nodes.
  *
  * As a definition of a template class of a significant complexity,
- * this file is organized with member definitions within the class declaration.
+ * this file is organized with member definitions after the class declaration.
  * This has some advantages:
  * - Functions can be inlined.
  * - typedefs within the class can be used straightforwardly in definitions.
  * - Circular references are minimized.
+ *
+ * and some implications:
+ * - After the class declaration, we need to #include all headers of the classes acting as the template parameters.
+ * - This makes circular references again a risk.
  */
 
 #ifndef NODE_LINKED_H_
@@ -50,9 +57,8 @@ namespace wolf
  *    - "PROCESSOR LASER 2D" : for the class ProcessorLaser2D
  *    Please refer to each base class derived from NodeLinked (those listed just above) for a list of type labels.
  *  - A name, inherited from NodeBase, defined in each application, which is specific of each object. A few examples follow:
- *    - "Camera"
- *    - "LIDAR 2D"
- *    - "Point 3D"
+ *    - "Front-left Camera"
+ *    - "Left-side LIDAR 2D"
  *    - "Lidar 2D processor"
  */
 template<class UpperType, class LowerType>

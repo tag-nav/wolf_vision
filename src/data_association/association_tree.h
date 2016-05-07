@@ -14,15 +14,12 @@
 #include "association_node.h"
 #include <map>
 
-/** \brief The whole decision tree
- * 
- * The whole decision tree
- * 
-*/
 
 namespace wolf
 {
 
+/** \brief The whole decision tree
+ */
 class AssociationTree : public AssociationSolver
 {
     protected:

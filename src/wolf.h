@@ -295,7 +295,7 @@ class StateBlock;
 // TODO: No seria millor que cada classe es defineixi aquests typedefs?
 
 //Problem
-typedef Problem* WolfProblemPtr;
+typedef Problem* ProblemPtr;
 
 //Map
 typedef std::list<MapBase*> MapBaseList;
