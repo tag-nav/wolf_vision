@@ -77,32 +77,34 @@ namespace wolf
  * where ABSOLUTELY ALL input parameters are important. In particular, the sensor name "Front-left camera" will be used to identify this camera
  * and to assign it the appropriate processors. DO NOT USE IT WITH DUMMY PARAMETERS!
  *
- * Currently, registering is performed in each specific SensorXxxx header file, sensor_xxxx.h.
- * For example, in sensor_camera.h we find the line:
+ * Currently, registering is performed in each specific SensorXxxx source file, sensor_xxxx.cpp.
+ * For example, in sensor_camera.cpp we find the line:
  *
  *      const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
  *
  * which is a static invocation (i.e., it is placed at global scope outside of the SensorCamera class).
- * Therefore, at application level, ````#include````-ing the header file sensor_xxx.h is enough for registering the SensorXxx creator into the factory.
+ * Therefore, at application level, all sensors that have a .cpp file compiled are automatically registered.
  *
  * We finally provide the necessary steps to create a sensor of class SensorCamera in our application:
  *
  *      #include "sensor_factory.h"
- *      #include "sensor_camera.h" // provides SensorCamera and registers the pair <"CAMERA", SensorCamera::create>
+ *      #include "sensor_camera.h" // provides SensorCamera
  *
- *      // Note: SensorCamera::create() is already registered. To invoke it, use the std::string "CAMERA" as in the lines below.
+ *      // Note: SensorCamera::create() is already registered, automatically.
  *
- *      // We create two cameras...
+ *      // To create a camera, provide a type="CAMERA", a name="Front-left camera", an extrinsics vector, and a pointer to the intrinsics struct:
  *
- *      // To create a camera, provide a "TYPE", a "Name", an extrinsics vector, and a pointer to the intrinsics struct:
- *      Eigen::VectorXs extrinsics(7); // give it some values...
- *      IntrinsicsCamera intrinsics({...}); // also fill in the derived struct (here we suggested the struct initializer with '{}')...
- *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, &intrinsics);
+ *      Eigen::VectorXs   extrinsics(7);        // give it some values...
+ *      IntrinsicsCamera  intrinsics({...});    // also fill in the derived struct
+ *
+ *      SensorBase* camera_1_ptr =
+ *          SensorFactory::get()->create ( "CAMERA" , "Front-left camera" , extrinsics , &intrinsics );
  *
  *      // Second camera... with a different name!
- *      extrinsics = ...; // give it some other values...
- *      intrinsics = ...; // idem...
- *      SensorFactory::get()->create("CAMERA", "Front-right camera", extrinsics, &intrinsics);
+ *      extrinsics = ...;
+ *      intrinsics = ...;
+ *      SensorBase* camera_2_ptr =
+ *          SensorFactory::get()->create( "CAMERA" , "Front-right camera" , extrinsics , &intrinsics );
  *
  * You can also check the code in the example file ````src/examples/test_sensor_factory.cpp````.
  */
