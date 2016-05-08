@@ -41,6 +41,16 @@ class ConstraintGPS2D : public ConstraintSparse<2, 2>
         {
             return JAC_AUTO;
         }
+
+
+    public:
+        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+                                            NodeBase* _correspondant_ptr, //
+                                            ConstraintParamsBase* _params = nullptr)
+        {
+            return new ConstraintGPS2D(_feature_ptr, (FrameBase*)_correspondant_ptr);
+        }
+
 };
 
 template<typename T>

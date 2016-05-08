@@ -75,6 +75,14 @@ protected:
     Eigen::Vector3s sat_position_;
     Scalar pseudorange_;
 
+public:
+    static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+                                        NodeBase* _correspondant_ptr = nullptr, //
+                                        ConstraintParamsBase* _params = nullptr)
+    {
+        return new ConstraintGPSPseudorange2D(_feature_ptr);
+    }
+
 };
 
 /*
