@@ -180,6 +180,7 @@ SET(SRCS
     constraint_base.cpp
     constraint_analytic.cpp
     constraint_corner_2D.cpp
+    constraint_container.cpp
     constraint_factory.cpp
     feature_base.cpp
     feature_corner_2D.cpp

@@ -13,6 +13,7 @@ namespace wolf
 class NodeBase;  // Feature, Frame and Landmark are NodeBase
 class FeatureBase;
 class ConstraintBase;
+struct ConstraintParamsBase;
 }
 
 #include <string>
@@ -25,13 +26,13 @@ class ConstraintFactory
 {
     public:
         // TODO: Use const in _feature --> need to change aaaallll the ConstraintXxxs' APIs !
-        typedef ConstraintBase* (*CreateConstraintCallback)(FeatureBase* _feature, NodeBase* _correspondant);
+        typedef ConstraintBase* (*CreateConstraintCallback)(FeatureBase* _feature, NodeBase* _correspondant, ConstraintParamsBase* _params);
     private:
         typedef std::map<std::string, CreateConstraintCallback> CallbackMap;
     public:
         bool registerCreator(const std::string& _constraint_type, CreateConstraintCallback createFn);
         bool unregisterCreator(const std::string& _constraint_type);
-        ConstraintBase* create(const std::string& _constraint_type, FeatureBase* _feature, NodeBase* _correspondant);
+        ConstraintBase* create(const std::string& _constraint_type, FeatureBase* _feature, NodeBase* _correspondant, ConstraintParamsBase* _params);
     private:
         CallbackMap callbacks_;
 
