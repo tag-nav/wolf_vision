@@ -41,9 +41,9 @@ namespace wolf
  *     registerCreator("CAMERA", SensorCamera::create);
  *
  * The method SensorCamera::create() exists in the SensorCamera class as a static method.
- * All these create() methods in all SensorXxx classes need to have exactly the same API, regardless of the sensor type.
+ * All these SensorXxx::create() methods need to have exactly the same API, regardless of the sensor type.
  * This API includes a sensor name, a vector of extrinsic parameters, and a pointer to a base struct of intrinsic parameters, IntrinsicsBase*,
- * that must be derived for each derived sensor.
+ * that can be derived for each derived sensor.
  *
  * Here is an example of SensorCamera::create() extracted from sensor_camera.h:
  *
@@ -106,7 +106,7 @@ namespace wolf
  *      SensorBase* camera_2_ptr =
  *          SensorFactory::get()->create( "CAMERA" , "Front-right camera" , extrinsics , &intrinsics );
  *
- * You can also check the code in the example file ````src/examples/test_sensor_factory.cpp````.
+ * You can also check the code in the example file ````src/examples/test_wolf_factories.cpp````.
  */
 class SensorFactory
 {
