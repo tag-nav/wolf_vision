@@ -141,9 +141,9 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
         {
             unsigned int corner = 0;
             if (_params != nullptr)
-                corner = ((ConstraintContainerParams*)(((_params))))->corner;
+                corner = ((ConstraintContainerParams*)_params)->corner;
 
-            return new ConstraintContainer(_feature_ptr, (LandmarkContainer*)(((_correspondant_ptr))), corner);
+            return new ConstraintContainer(_feature_ptr, (LandmarkContainer*)_correspondant_ptr, corner);
         }
 
 };

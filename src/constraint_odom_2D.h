@@ -33,9 +33,6 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
                          T* _residuals) const;
 
         /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
          **/
         virtual JacobianMethod getJacobianMethod() const
         {
