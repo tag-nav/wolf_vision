@@ -27,6 +27,15 @@ class ConstraintEpipolar : public ConstraintBase
         /** \brief Returns the constraint residual size
          **/
         virtual unsigned int getSize() const{return 0;}
+
+    public:
+        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+                                            NodeBase* _correspondant_ptr, //
+                                            ConstraintParamsBase* _params = nullptr)
+        {
+            return new ConstraintEpipolar(_feature_ptr, (FeatureBase*)_correspondant_ptr);
+        }
+
 };
 
 inline ConstraintEpipolar::ConstraintEpipolar(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) :
