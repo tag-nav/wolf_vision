@@ -32,7 +32,7 @@ class ConstraintFactory
     public:
         bool registerCreator(const std::string& _constraint_type, CreateConstraintCallback createFn);
         bool unregisterCreator(const std::string& _constraint_type);
-        ConstraintBase* create(const std::string& _constraint_type, FeatureBase* _feature, NodeBase* _correspondant, ConstraintParamsBase* _params);
+        ConstraintBase* create(const std::string& _constraint_type, FeatureBase* _feature, NodeBase* _correspondant, ConstraintParamsBase* _params = nullptr);
     private:
         CallbackMap callbacks_;
 
