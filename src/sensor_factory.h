@@ -56,9 +56,9 @@ namespace wolf
  *
  *          // cast instrinsics to good type and extract intrinsic vector
  *          IntrinsicsCamera* intrinsics = (IntrinsicsCamera*)_intrinsics;
- *          StateBlock* intr_ptr = new StateBlock(intrinsics->intrinsic_vector);
+ *          StateBlock*       intr_ptr   = new StateBlock(intrinsics->intrinsic_vector);
  *
- *          SensorBase* sen = new SensorCamera(pos_ptr, ori_ptr, intr_ptr, intrinsics->width, intrinsics->height);
+ *          SensorBase* sen = new SensorCamera( pos_ptr , ori_ptr , intr_ptr , intrinsics->width , intrinsics->height );
  *          sen->setName(_name); // pass the name to the created SensorCamera.
  *          return sen;
  *      }
