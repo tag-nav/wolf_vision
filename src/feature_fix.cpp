@@ -7,7 +7,6 @@ FeatureFix::FeatureFix(const Eigen::VectorXs& _measurement, const Eigen::MatrixX
     FeatureBase(FEAT_FIX, _measurement, _meas_covariance)
 {
     setType("FIX");
-	//
 }
 
 FeatureFix::~FeatureFix()

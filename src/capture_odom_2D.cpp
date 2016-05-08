@@ -20,7 +20,6 @@ CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_
         CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
 {
     setType("ODOM 2D");
-    //
 }
 
 CaptureOdom2D::~CaptureOdom2D()

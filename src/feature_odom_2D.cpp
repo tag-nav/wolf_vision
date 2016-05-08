@@ -6,7 +6,6 @@ FeatureOdom2D::FeatureOdom2D(unsigned int _dim_measurement) :
     FeatureBase(FEAT_ODOM_2D, _dim_measurement)
 {
     setType("ODOM 2D");
-    //
 }
 
 FeatureOdom2D::FeatureOdom2D(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :

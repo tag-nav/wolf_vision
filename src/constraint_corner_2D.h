@@ -17,7 +17,6 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 			ConstraintSparse<3,2,1,2,1>(_ftr_ptr, CTR_CORNER_2D, _lmk_ptr, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
 		{
             setType("CORNER 2D");
-		    //
 		}
 
         /** \brief Default destructor (not recommended)

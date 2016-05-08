@@ -7,7 +7,6 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, Se
                              const Eigen::Vector6s& _data) :
         CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data)
 {
-
     setType("IMU");
 }
 
@@ -15,7 +14,6 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, Se
                              const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance) :
         CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
 {
-    //
     setType("IMU");
 }
 
