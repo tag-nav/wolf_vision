@@ -14,7 +14,7 @@ namespace wolf {
 
 struct IntrinsicsGPSFix : public IntrinsicsBase
 {
-        // TODO: Fill in the necessary fields here
+        // Empty -- it acts only as a typedef for IntrinsicsBase, but allows future extension with parameters
 };
 
 class SensorGPSFix : public SensorBase

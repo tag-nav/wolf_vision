@@ -101,7 +101,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 
             // Advance this
             last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-            last_ptr_->destruct(); // TODO: JS->JV why this does not work?? Destruct now the obsolete last before reassigning a new pointer
+            last_ptr_->destruct(); //
             incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
             last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
             incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.

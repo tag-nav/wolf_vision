@@ -83,12 +83,12 @@ inline ProcessorTrackerFeatureDummy::ProcessorTrackerFeatureDummy() :
         ProcessorTrackerFeature(PRC_TRACKER_DUMMY),
         n_feature_(0)
 {
-    // TODO Auto-generated constructor stub
+    //
 }
 
 inline ProcessorTrackerFeatureDummy::~ProcessorTrackerFeatureDummy()
 {
-    // TODO Auto-generated destructor stub
+    //
 }
 
 inline bool ProcessorTrackerFeatureDummy::correctFeatureDrift(const FeatureBase* _last_feature,

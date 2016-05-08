@@ -18,10 +18,9 @@ SensorGPS::SensorGPS(StateBlock* _p_ptr, //GPS sensor position with respect to t
     setType("GPS");
 }
 
-// TODO Check carefully this destructor!
 SensorGPS::~SensorGPS()
 {
-
+    // TODO Check carefully this destructor!
 }
 
 StateBlock *SensorGPS::getMapPPtr() const

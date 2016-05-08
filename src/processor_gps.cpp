@@ -29,7 +29,7 @@ void ProcessorGPS::process(CaptureBase* _capture_ptr)
 {
     std::cout << "ProcessorGPS::process(GPScapture)" << std::endl;
     //TODO add assert with dynamic_cast when it will be ready
-    capture_gps_ptr_ = (CaptureGPS*)((((_capture_ptr))));
+    capture_gps_ptr_ = (CaptureGPS*)_capture_ptr;
     //std::cout << "Extracting gps features..." << std::endl;
     rawgpsutils::SatellitesObs obs = capture_gps_ptr_->getData();
     for (unsigned int i = 0; i < obs.measurements_.size(); ++i)

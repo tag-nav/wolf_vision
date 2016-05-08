@@ -47,15 +47,15 @@ int main(void)
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
     IntrinsicsCamera intr_cam;
     IntrinsicsOdom2D intr_odom2d;
-    IntrinsicsGPSFix intr_gps_fix;
+    IntrinsicsBase intr_gps_fix;
 
     // Add sensors
-    problem.addSensor("CAMERA",     "front left camera",      pq_3d,  &intr_cam);
-    problem.addSensor("Camera",     "front right camera",     pq_3d,  &intr_cam);
-    problem.addSensor("ODOM 2D",    "main odometer",    po_2d,  &intr_odom2d);
-    problem.addSensor("GPS FIX",    "GPS fix",          p_3d,   &intr_gps_fix);
-    problem.addSensor("CAMERA",     "rear camera",      pq_3d,  &intr_cam);
-    problem.addSensor("IMU",        "inertial",         pq_3d,  &intr_cam);
+    problem.addSensor("CAMERA",     "front left camera",    pq_3d,  &intr_cam);
+    problem.addSensor("Camera",     "front right camera",   pq_3d,  &intr_cam);
+    problem.addSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
+    problem.addSensor("GPS FIX",    "GPS fix",              p_3d,   &intr_gps_fix);
+    problem.addSensor("CAMERA",     "rear camera",          pq_3d,  &intr_cam);
+    problem.addSensor("IMU",        "inertial",             pq_3d,  &intr_cam);
 
     // Add this sensor and recover a pointer to it
     SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
