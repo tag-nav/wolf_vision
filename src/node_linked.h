@@ -221,7 +221,9 @@ template<class UpperType, class LowerType>
 NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std::string& _class) :
         NodeBase(_class), //
         location_(_loc), //
-        up_node_ptr_(nullptr), down_node_list_(), is_deleting_(false)
+        up_node_ptr_(nullptr), //
+        down_node_list_(), //
+        is_deleting_(false)
 {
 }
 
