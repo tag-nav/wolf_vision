@@ -57,7 +57,7 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
 }
 
-#include "problem.h"
+//#include "problem.h"
 
 namespace wolf {
 

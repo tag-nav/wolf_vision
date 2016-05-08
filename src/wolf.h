@@ -9,7 +9,6 @@
 #define WOLF_H_
 
 //includes from std lib
-#include <memory>
 #include <list>
 #include <map>
 
