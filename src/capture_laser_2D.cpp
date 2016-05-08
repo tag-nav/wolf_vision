@@ -16,6 +16,7 @@ CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts,
                                CaptureBase(_ts, _sensor_ptr), 
                                ranges_(_ranges)
 {
+    setType("LASER 2D");
     laser_ptr_ = (SensorLaser2D*) sensor_ptr_;
 }
 
@@ -29,6 +30,7 @@ CaptureLaser2D::CaptureLaser2D(const TimeStamp & _ts,
                                ranges_(_ranges), 
                                intensities_(_intensities)
 {
+    setType("LASER 2D");
     laser_ptr_ = (SensorLaser2D*) sensor_ptr_;
 }
 

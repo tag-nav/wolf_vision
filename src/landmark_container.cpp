@@ -8,6 +8,7 @@ LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, con
 	LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
 	corners_(3,4)
 {
+    setType("CONTAINER");
     Eigen::VectorXs descriptor(2);
     descriptor << _witdh, _length;
   	setDescriptor(descriptor);
@@ -21,6 +22,7 @@ LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, con
     LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
     corners_(3,4)
 {
+    setType("CONTAINER");
     Eigen::VectorXs descriptor(2);
     descriptor << _witdh, _length;
     setDescriptor(descriptor);

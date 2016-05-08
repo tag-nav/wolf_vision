@@ -19,6 +19,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
             o_ptr_(_o_ptr),
             v_ptr_(_v_ptr)
 {
+    setType("BASE");
     //
 }
 

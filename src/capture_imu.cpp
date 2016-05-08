@@ -8,6 +8,7 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, Se
         CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data)
 {
 
+    setType("IMU");
 }
 
 CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr,
@@ -15,6 +16,7 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, Se
         CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
 {
     //
+    setType("IMU");
 }
 
 CaptureIMU::~CaptureIMU()

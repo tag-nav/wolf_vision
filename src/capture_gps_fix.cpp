@@ -7,6 +7,7 @@ CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, cons
 	CaptureBase(_ts, _sensor_ptr),
 	data_(_data)
 {
+    setType("GPS FIX");
 	//
 }
 
@@ -15,6 +16,7 @@ CaptureGPSFix::CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, cons
 	data_(_data),
 	data_covariance_(_data_covariance)
 {
+    setType("GPS FIX");
 	//
 }
 
