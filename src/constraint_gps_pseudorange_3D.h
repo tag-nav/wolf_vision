@@ -34,6 +34,7 @@ public:
                             ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr(), // initial vehicle position wrt ecef frame
                             ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr())  // initial vehicle orientation wrt ecef frame
     {
+        setType("GPS PR 3D");
         sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
         pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
 

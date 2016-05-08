@@ -16,7 +16,7 @@ class ConstraintGPS2D : public ConstraintSparse<2, 2>
         ConstraintGPS2D(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<2, 2>(_ftr_ptr, CTR_GPS_FIX_2D, _status, _frame_ptr->getPPtr())
         {
-            //
+            setType("GPS FIX 2D");
         }
 
         /** \brief Default destructor (not recommended)

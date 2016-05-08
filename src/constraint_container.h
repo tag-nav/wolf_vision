@@ -23,6 +23,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 			corner_(_corner)
 		{
             assert(_corner >= 0 && _corner <= 3 && "Wrong corner id in constraint container constructor");
+            setType("CONTAINER");
 
             std::cout << "new constraint container: corner idx = " << corner_ << std::endl;
 		}

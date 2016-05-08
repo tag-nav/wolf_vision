@@ -32,6 +32,7 @@ class ConstraintEpipolar : public ConstraintBase
 inline ConstraintEpipolar::ConstraintEpipolar(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) :
         ConstraintBase(CTR_EPIPOLAR, _feature_other_ptr, CTR_INACTIVE)
 {
+    setType("EPIPOLAR");
 }
 
 inline ConstraintEpipolar::~ConstraintEpipolar(){}

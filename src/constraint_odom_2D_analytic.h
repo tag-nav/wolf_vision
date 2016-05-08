@@ -13,7 +13,7 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
         ConstraintOdom2DAnalytic(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintRelative2DAnalytic(_ftr_ptr, CTR_ODOM_2D, _frame_ptr, _status)
         {
-            //
+            setType("ODOM 2D ANALYTIC");
         }
 
         /** \brief Default destructor (not recommended)

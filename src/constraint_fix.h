@@ -18,6 +18,7 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
                 ConstraintSparse<3, 2, 1>(_ftr_ptr, CTR_FIX, _status, _ftr_ptr->getFramePtr()->getPPtr(),
                                           _ftr_ptr->getFramePtr()->getOPtr())
         {
+            setType("FIX");
             //std::cout << "creating ConstraintFix " << std::endl;
         }
 
