@@ -182,6 +182,7 @@ SET(SRCS
     constraint_corner_2D.cpp
     constraint_container.cpp
     constraint_factory.cpp
+    constraint_fix.cpp
     feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp

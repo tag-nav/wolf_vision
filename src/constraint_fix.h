@@ -44,6 +44,15 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
         {
             return JAC_AUTO;
         }
+
+    public:
+        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+                NodeBase* _correspondant_ptr = nullptr, //
+                ConstraintParamsBase* _params = nullptr)
+        {
+            return new ConstraintFix(_feature_ptr);
+        }
+
 };
 
 template<typename T>
