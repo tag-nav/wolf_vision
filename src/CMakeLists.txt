@@ -31,7 +31,7 @@ IF(raw_gps_utils_FOUND)
 ENDIF(raw_gps_utils_FOUND)
 
 # OpenCV
-FIND_PACKAGE(OpenCV QUIET)
+FIND_PACKAGE(OpenCV 2 QUIET)
 IF(OpenCV_FOUND)
     MESSAGE("OpenCV Library FOUND: OpenCV related sources will be built.")
 ENDIF(OpenCV_FOUND)
