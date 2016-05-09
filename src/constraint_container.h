@@ -8,6 +8,11 @@
 
 namespace wolf {
 
+struct ConstraintContainerParams : public ConstraintParamsBase
+{
+        unsigned int corner;
+};
+
 class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 {
 	protected:
@@ -23,6 +28,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 			corner_(_corner)
 		{
             assert(_corner >= 0 && _corner <= 3 && "Wrong corner id in constraint container constructor");
+            setType("CONTAINER");
 
             std::cout << "new constraint container: corner idx = " << corner_ << std::endl;
 		}
@@ -127,6 +133,19 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
         {
             return JAC_AUTO;
         }
+
+
+    public:
+        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, NodeBase* _correspondant_ptr,
+                                            ConstraintParamsBase* _params = nullptr)
+        {
+            unsigned int corner = 0;
+            if (_params != nullptr)
+                corner = ((ConstraintContainerParams*)_params)->corner;
+
+            return new ConstraintContainer(_feature_ptr, (LandmarkContainer*)_correspondant_ptr, corner);
+        }
+
 };
 
 } // namespace wolf

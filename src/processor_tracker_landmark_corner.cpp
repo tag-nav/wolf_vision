@@ -81,7 +81,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         if (closest_landmark != not_matched_landmarks.end())
         {
             // match
-            matches_landmark_from_incoming_[*feature_it] = LandmarkMatch(*closest_landmark, closest_dm2);
+            matches_landmark_from_incoming_[*feature_it] = LandmarkMatch({*closest_landmark, closest_dm2});
             // erase from the landmarks to be found
             not_matched_landmarks.erase(closest_landmark);
             // move corner feature to output list

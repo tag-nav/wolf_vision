@@ -152,7 +152,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * This function only creates the constraint, it doesn't add it to any feature.
          *
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
-         * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
+         * This factory only needs to know the two derived types to decide on the actual Constraint created.
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) = 0;
 

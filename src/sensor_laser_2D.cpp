@@ -3,13 +3,6 @@
 
 namespace wolf {
 
-// SensorLaser2D::SensorLaser2D(const Eigen::VectorXs & _sp, Scalar _angle_min, Scalar _angle_max, Scalar _angle_increment, Scalar _range_min, Scalar _range_max, Scalar _range_stdev, Scalar _time_increment, Scalar _scan_time) :
-//         SensorBase(LIDAR, _sp, 8)
-// //        SensorBase(LIDAR, _sp,{(Scalar)(_nrays), _apert, _rmin, _rmax, _range_stdev})
-// {
-//     params_ << _angle_min, _angle_max, _angle_increment, _range_min, _range_max, _range_stdev, _time_increment, _scan_time;
-// }
-
 SensorLaser2D::SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr) :
     SensorBase(SEN_LIDAR, _p_ptr, _o_ptr, nullptr, 8)
 {
@@ -21,6 +14,14 @@ SensorLaser2D::SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const doubl
         SensorBase(SEN_LIDAR, _p_ptr, _o_ptr, nullptr, 8),
         scan_params_({ _angle_min, _angle_max, _angle_step, _scan_time, _range_min, _range_max, _range_std_dev, _angle_std_dev })
 {
+    setType("LASER 2D");
+}
+
+SensorLaser2D::SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const laserscanutils::LaserScanParams& _params) :
+        SensorBase(SEN_LIDAR, _p_ptr, _o_ptr, nullptr, 8),
+        scan_params_(_params)
+{
+    setType("LASER 2D");
 }
 
 SensorLaser2D::~SensorLaser2D()
@@ -61,9 +62,19 @@ SensorBase* SensorLaser2D::create(const std::string& _unique_name, const Eigen::
     StateBlock* ori_ptr = new StateBlock(_extrinsics_po.tail(1), true);
     // cast intrinsics into derived type
     IntrinsicsLaser2D* params = (IntrinsicsLaser2D*)(_intrinsics);
-    SensorLaser2D* sen = new SensorLaser2D(pos_ptr, ori_ptr, _intrinsics);
+    SensorLaser2D* sen = new SensorLaser2D(pos_ptr, ori_ptr, params->scan_params);
     sen->setName(_unique_name);
     return sen;
 }
 
+} // namespace wolf
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", SensorLaser2D::create);
+}
 } // namespace wolf

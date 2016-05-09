@@ -40,3 +40,13 @@ SensorBase* SensorOdom2D::create(const std::string& _unique_name, const Eigen::V
 }
 
 } // namespace wolf
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_odom_2d = SensorFactory::get()->registerCreator("ODOM 2D", SensorOdom2D::create);
+}
+} // namespace wolf

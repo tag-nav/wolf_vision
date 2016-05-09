@@ -224,13 +224,11 @@ int main(int argc, char** argv)
     Problem* problem = new Problem(FRM_PO_2D);
     SensorOdom2D* odom_sensor = new SensorOdom2D(new StateBlock(odom_pose.head(2), true), new StateBlock(odom_pose.tail(1), true), odom_std_factor, odom_std_factor);
     SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
-    SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true));
-    SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true));
-    laser_1_sensor->setScanParams(laserscanutils::LaserScanParams({Constants::PI/2,-Constants::PI/2, -Constants::PI/720,0.01,0.2,100,0.01,0.01}));
-    laser_2_sensor->setScanParams(laserscanutils::LaserScanParams({Constants::PI/2,-Constants::PI/2, -Constants::PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({Constants::PI/2,-Constants::PI/2, -Constants::PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({Constants::PI/2,-Constants::PI/2, -Constants::PI/720,0.01,0.2,100,0.01,0.01}));
     ProcessorTrackerLandmarkCorner* laser_1_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
     ProcessorTrackerLandmarkCorner* laser_2_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
-    ProcessorOdom2d* odom_processor = new ProcessorOdom2d();
+    ProcessorOdom2D* odom_processor = new ProcessorOdom2D();
     odom_sensor->addProcessor(odom_processor);
     laser_1_sensor->addProcessor(laser_1_processor);
     laser_2_sensor->addProcessor(laser_2_processor);

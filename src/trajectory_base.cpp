@@ -1,6 +1,4 @@
 #include "trajectory_base.h"
-#include "frame_base.h"
-#include "problem.h"
 
 namespace wolf {
 

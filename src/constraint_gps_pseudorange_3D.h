@@ -34,6 +34,7 @@ public:
                             ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr(), // initial vehicle position wrt ecef frame
                             ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr())  // initial vehicle orientation wrt ecef frame
     {
+        setType("GPS PR 3D");
         sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
         pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
 
@@ -72,6 +73,16 @@ public:
 protected:
     Eigen::Vector3s sat_position_;
     Scalar pseudorange_;
+
+
+public:
+    static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+                                        NodeBase* _correspondant_ptr = nullptr, //
+                                        ConstraintParamsBase* _params = nullptr)
+    {
+        return new ConstraintGPSPseudorange3D(_feature_ptr);
+    }
+
 
 };
 

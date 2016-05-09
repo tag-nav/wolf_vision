@@ -9,7 +9,6 @@
 #define WOLF_H_
 
 //includes from std lib
-#include <memory>
 #include <list>
 #include <map>
 
@@ -150,7 +149,6 @@ typedef enum
     CTR_CONTAINER,              ///< 2D container constraint .
     CTR_IMG_PNT_TO_EP,          ///< constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
-    CTR_IMG_PNT_TO_IMG_PNT,     ///< constraint between two image point features
     CTR_EPIPOLAR                ///< Epipolar constraint
 } ConstraintType;
 
@@ -298,7 +296,7 @@ class StateBlock;
 // TODO: No seria millor que cada classe es defineixi aquests typedefs?
 
 //Problem
-typedef Problem* WolfProblemPtr;
+typedef Problem* ProblemPtr;
 
 //Map
 typedef std::list<MapBase*> MapBaseList;

@@ -52,15 +52,4 @@ class SensorCamera : public SensorBase
 
 } // namespace wolf
 
-
-
-// Register in the SensorFactory
-#include "sensor_factory.h"
-namespace wolf {
-namespace
-{
-const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
-}
-} // namespace wolf
-
 #endif // SENSOR_CAMERA_H

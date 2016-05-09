@@ -15,7 +15,7 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
         ConstraintOdom2D(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<3, 2, 1, 2, 1>(_ftr_ptr, CTR_ODOM_2D, _frame_ptr, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
-            //
+            setType("ODOM 2D");
         }
 
         /** \brief Default destructor (not recommended)
@@ -33,14 +33,20 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
                          T* _residuals) const;
 
         /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
          **/
         virtual JacobianMethod getJacobianMethod() const
         {
             return JAC_AUTO;
         }
+
+    public:
+        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+                                            NodeBase* _correspondant_ptr, //
+                                            ConstraintParamsBase* _params = nullptr)
+        {
+            return new ConstraintOdom2D(_feature_ptr, (FrameBase*)_correspondant_ptr);
+        }
+
 };
 
 template<typename T>

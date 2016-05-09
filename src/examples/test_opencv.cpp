@@ -17,7 +17,8 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 // General includes
-#include <math.h>
+//#include <math.h>
+#include <cmath>
 #include <complex>      // std::complex, std::norm
 
 //std includes

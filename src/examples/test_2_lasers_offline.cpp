@@ -83,9 +83,12 @@ int main(int argc, char** argv)
 
     if (!(laser_1_file.is_open() && laser_2_file.is_open() && odom_file.is_open() && groundtruth_file.is_open()))
     {
-      std::cout << "Error opening simulated data files. Remember to run test_faramotics_simulation before this test!" << std::endl;
-      return -1;
+        std::cout << "Error opening simulated data files. Remember to run test_faramotics_simulation before this test!" << std::endl;
+        return -1;
     }
+    else
+        std::cout << "Simulated data files opened correctly..." << std::endl;
+
 
     unsigned int n_execution = (unsigned int) atoi(argv[1]); //number of iterations of the whole execution
 
@@ -104,7 +107,7 @@ int main(int argc, char** argv)
     Eigen::VectorXs ground_truth(n_execution * 3); //all true poses
     Eigen::VectorXs ground_truth_pose(3); //last true pose
     Eigen::VectorXs odom_trajectory(n_execution * 3); //open loop trajectory
-    Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(5);
+    Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(6);
     clock_t t1, t2;
     Scalar timestamp;
     TimeStamp ts(0);
@@ -128,13 +131,11 @@ int main(int argc, char** argv)
     Problem* problem = new Problem(FRM_PO_2D);
     SensorOdom2D* odom_sensor = new SensorOdom2D(new StateBlock(odom_pose.head(2), true), new StateBlock(odom_pose.tail(1), true), odom_std_factor, odom_std_factor);
     SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
-    SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true));
-    SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true));
-    laser_1_sensor->setScanParams(laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)}));
-    laser_2_sensor->setScanParams(laserscanutils::LaserScanParams({laser_2_params(0), laser_2_params(1), laser_2_params(2), laser_2_params(3), laser_2_params(4), laser_2_params(5), laser_2_params(6), laser_2_params(7)}));
+    SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)}));
+    SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)}));
     ProcessorTrackerLandmarkCorner* laser_1_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
     ProcessorTrackerLandmarkCorner* laser_2_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
-    ProcessorOdom2d* odom_processor = new ProcessorOdom2d();
+    ProcessorOdom2D* odom_processor = new ProcessorOdom2D();
     odom_sensor->addProcessor(odom_processor);
     laser_1_sensor->addProcessor(laser_1_processor);
     laser_2_sensor->addProcessor(laser_2_processor);
@@ -143,6 +144,8 @@ int main(int argc, char** argv)
     problem->addSensor(laser_1_sensor);
     problem->addSensor(laser_2_sensor);
     problem->setProcessorMotion(odom_processor);
+
+    std::cout << "Wolf tree setted correctly!" << std::endl;
 
     CaptureMotion2* odom_capture = new CaptureMotion2(ts, odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor);
 
@@ -173,7 +176,7 @@ int main(int argc, char** argv)
     CeresManager* ceres_manager = new CeresManager(problem);
     std::ofstream log_file, landmark_file;  //output file
 
-    //std::cout << "START TRAJECTORY..." << std::endl;
+    std::cout << "START TRAJECTORY..." << std::endl;
     // START TRAJECTORY ============================================================================================
     for (unsigned int step = 1; step < n_execution; step++)
     {
@@ -181,6 +184,7 @@ int main(int argc, char** argv)
         t2 = clock();
 
         // GROUNDTRUTH ---------------------------
+        //std::cout << "GROUND TRUTH..." << std::endl;
         t1 = clock();
         extractVector(groundtruth_file, ground_truth_pose, timestamp);
         ground_truth.segment(step * 3, 3) = ground_truth_pose;
@@ -189,6 +193,7 @@ int main(int argc, char** argv)
         ts = TimeStamp(timestamp);
 
         // ODOMETRY DATA -------------------------------------
+        //std::cout << "ODOMETRY DATA..." << std::endl;
         extractVector(odom_file, odom_data, timestamp);
         // noisy odometry
         odom_data(0) += distribution_odom(generator) * (odom_data(0) == 0 ? 1e-6 : odom_data(0));

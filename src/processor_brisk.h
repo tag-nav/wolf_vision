@@ -16,7 +16,7 @@
 #include <opencv2/core/core.hpp>
 
 // General includes
-#include <math.h>
+#include <cmath>
 #include <complex>      // std::complex, std::norm
 
 

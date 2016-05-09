@@ -7,6 +7,7 @@ FeatureGPSPseudorange::FeatureGPSPseudorange(Eigen::Vector3s &_sat_position, Sca
         sat_position_(_sat_position),
         pseudorange_(_pseudorange)
 {
+    setType("GPS PR");
 //    std::cout << "FeatureGPSPseudorange() " << std::setprecision(12)
 //              << "   --pr=" << pseudorange_
 //              << "\t--pos("  << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")"

@@ -40,6 +40,7 @@ public:
                                                   ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr(), // map position with respect to ecef
                                                   ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr()) // map orientation with respect to ecef
     {
+        setType("GPS PR 2D");
         sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
         pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
         //std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
@@ -73,6 +74,14 @@ public:
 protected:
     Eigen::Vector3s sat_position_;
     Scalar pseudorange_;
+
+public:
+    static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+                                        NodeBase* _correspondant_ptr = nullptr, //
+                                        ConstraintParamsBase* _params = nullptr)
+    {
+        return new ConstraintGPSPseudorange2D(_feature_ptr);
+    }
 
 };
 

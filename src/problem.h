@@ -14,8 +14,6 @@ struct ProcessorParamsBase;
 
 //wolf includes
 #include "node_base.h"
-#include "sensor_base.h"
-//#include "sensor_factory.h"
 #include "wolf.h"
 
 // std includes

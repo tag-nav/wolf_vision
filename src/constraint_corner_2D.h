@@ -16,7 +16,7 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 		ConstraintCorner2D(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr, ConstraintStatus _status = CTR_ACTIVE) :
 			ConstraintSparse<3,2,1,2,1>(_ftr_ptr, CTR_CORNER_2D, _lmk_ptr, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
 		{
-		    //
+            setType("CORNER 2D");
 		}
 
         /** \brief Default destructor (not recommended)
@@ -24,10 +24,10 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          *
          **/
-		virtual ~ConstraintCorner2D()
-		{
-			//std::cout << "deleting ConstraintCorner2D " << nodeId() << std::endl;
-		}
+        virtual ~ConstraintCorner2D()
+        {
+            //std::cout << "deleting ConstraintCorner2D " << nodeId() << std::endl;
+        }
 
 		LandmarkCorner2D* getLandmarkPtr()
 		{
@@ -47,6 +47,13 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
         {
             return JAC_AUTO;
         }
+
+    public:
+        static ConstraintBase* create(FeatureBase* _feature_ptr, NodeBase* _correspondant_ptr, ConstraintParamsBase* _params)
+        {
+            return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*) _correspondant_ptr);
+        }
+
 };
 
 template<typename T>
@@ -117,5 +124,7 @@ inline bool ConstraintCorner2D::operator ()(const T* const _robotP, const T* con
 }
 
 } // namespace wolf
+
+
 
 #endif

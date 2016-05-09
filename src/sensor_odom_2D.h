@@ -44,14 +44,14 @@ class SensorOdom2D : public SensorBase
          * Returns displacement noise factor
          * 
          **/        
-        double getDispVarToDispNoiseFactor() const;
+        Scalar getDispVarToDispNoiseFactor() const;
 
         /** \brief Returns rotation noise factor
          * 
          * Returns rotation noise factor
          * 
          **/        
-        double getRotVarToRotNoiseFactor() const;
+        Scalar getRotVarToRotNoiseFactor() const;
         
 
 	public:
@@ -62,16 +62,4 @@ class SensorOdom2D : public SensorBase
 
 } // namespace wolf
 
-
-
-
-// Register in the SensorFactory
-#include "sensor_factory.h"
-namespace wolf {
-namespace
-{
-const bool registered_odom_2d = SensorFactory::get()->registerCreator("ODOM 2D", SensorOdom2D::create);
-}
-} // namespace wolf
-
-#endif
+#endif // SENSOR_ODOM_2D_H_

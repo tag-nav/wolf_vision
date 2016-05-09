@@ -18,6 +18,7 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
                 ConstraintSparse<3, 2, 1>(_ftr_ptr, CTR_FIX, _status, _ftr_ptr->getFramePtr()->getPPtr(),
                                           _ftr_ptr->getFramePtr()->getOPtr())
         {
+            setType("FIX");
             //std::cout << "creating ConstraintFix " << std::endl;
         }
 
@@ -43,6 +44,15 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
         {
             return JAC_AUTO;
         }
+
+    public:
+        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+                NodeBase* _correspondant_ptr = nullptr, //
+                ConstraintParamsBase* _params = nullptr)
+        {
+            return new ConstraintFix(_feature_ptr);
+        }
+
 };
 
 template<typename T>

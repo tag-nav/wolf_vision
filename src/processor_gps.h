@@ -5,9 +5,14 @@
 #ifndef WOLF_PROCESSOR_GPS_H
 #define WOLF_PROCESSOR_GPS_H
 
+namespace wolf
+{
+    class CaptureGPS;
+}
+
 // Wolf includes
 #include "processor_base.h"
-#include "capture_gps.h"
+//#include "capture_gps.h"
 
 // Std includes
 
@@ -27,35 +32,16 @@ class ProcessorGPS : public ProcessorBase
     public:
         ProcessorGPS();
         virtual ~ProcessorGPS();
-
         virtual void init(CaptureBase* _capture_ptr);
-
         virtual void process(CaptureBase* _capture_ptr);
-
-        virtual bool voteForKeyFrame(){return false;}
-
-        virtual bool keyFrameCallback(wolf::FrameBase*, const Scalar& _time_tol){return false;}
+        virtual bool voteForKeyFrame();
+        virtual bool keyFrameCallback(wolf::FrameBase*, const Scalar& _time_tol);
 
     public:
-        static ProcessorBase* create(const std::string & _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 
 };
 
-inline void ProcessorGPS::init(CaptureBase* _capture_ptr)
-{
-}
-
 } // namespace wolf
-
-
-// Register in the SensorFactory
-#include "processor_factory.h"
-namespace wolf {
-namespace
-{
-const bool registered_prc_gps = ProcessorFactory::get()->registerCreator("GPS", ProcessorGPS::create);
-}
-} // namespace wolf
-
 
 #endif //WOLF_PROCESSOR_GPS_H

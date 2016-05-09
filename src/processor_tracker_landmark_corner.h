@@ -34,11 +34,22 @@ const Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
 const Scalar position_error_th_ = 1;
 const Scalar min_features_ratio_th_ = 0.5;
 
+struct ProcessorParamsLaser : public ProcessorParamsBase
+{
+        laserscanutils::LineFinderIterativeParams line_finder_params_;
+        //TODO: add corner_finder_params
+        unsigned int n_corners_th;
+
+        // These values below are constant and defined within the class -- provide a setter or accept them at construction time if you need to configure them
+        //        Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
+        //        Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
+        //        Scalar position_error_th_ = 1;
+        //        Scalar min_features_ratio_th_ = 0.5;
+};
+
 class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 {
     private:
-        //laserscanutils::ScanParams scan_params_;
-        //laserscanutils::ExtractCornerParams corner_alg_params_;
         laserscanutils::LineFinderIterative line_finder_;
         laserscanutils::CornerFinder corner_finder_;
         //TODO: add corner_finder_params
@@ -48,7 +59,13 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
         FeatureBaseList corners_last_;
         unsigned int n_corners_th_;
 
-        Eigen::Matrix3s R_sensor_world_, R_world_sensor_, R_world_sensor_prev_, R_sensor_world_prev_;
+        // These values are constant -- provide a setter or accept them at construction time if you need to configure them
+        Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
+        Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
+        Scalar position_error_th_ = 1;
+        Scalar min_features_ratio_th_ = 0.5;
+
+        Eigen::Matrix3s R_sensor_world_, R_world_sensor_;
         Eigen::Matrix3s R_robot_sensor_;
         Eigen::Matrix3s R_current_prev_;
         Eigen::Vector3s t_sensor_world_, t_world_sensor_, t_world_sensor_prev_, t_sensor_world_prev_;
@@ -137,6 +154,9 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
                                                            const Eigen::Vector4s& _expected_feature,
                                                            const Eigen::Matrix3s& _expected_feature_cov,
                                                            const Eigen::MatrixXs& _mu);
+    // Factory method
+    public:
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
 inline ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
@@ -184,6 +204,25 @@ inline ConstraintBase* ProcessorTrackerLandmarkCorner::createConstraint(FeatureB
     return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*)((_landmark_ptr)));
 }
 
+ProcessorBase* ProcessorTrackerLandmarkCorner::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+{
+    ProcessorParamsLaser* params = (ProcessorParamsLaser*)_params;
+    ProcessorTrackerLandmarkCorner* prc_ptr = new ProcessorTrackerLandmarkCorner(params->line_finder_params_, params->n_corners_th);
+    prc_ptr->setName(_unique_name);
+    return prc_ptr;
+}
+
 } // namespace wolf
+
+
+// Register in the SensorFactory
+#include "processor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_prc_laser = ProcessorFactory::get()->registerCreator("LASER", ProcessorTrackerLandmarkCorner::create);
+}
+} // namespace wolf
+
 
 #endif /* SRC_PROCESSOR_TRACKER_LASER_H_ */

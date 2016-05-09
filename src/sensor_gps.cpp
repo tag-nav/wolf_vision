@@ -18,10 +18,9 @@ SensorGPS::SensorGPS(StateBlock* _p_ptr, //GPS sensor position with respect to t
     setType("GPS");
 }
 
-// TODO Check carefully this destructor!
 SensorGPS::~SensorGPS()
 {
-
+    // TODO Check carefully this destructor!
 }
 
 StateBlock *SensorGPS::getMapPPtr() const
@@ -68,4 +67,14 @@ SensorBase* SensorGPS::create(const std::string& _unique_name, const Eigen::Vect
     return sen;
 }
 
+} // namespace wolf
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_gps = SensorFactory::get()->registerCreator("GPS", SensorGPS::create);
+}
 } // namespace wolf
