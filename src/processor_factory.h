@@ -100,7 +100,7 @@ class ProcessorFactory
     public:
         bool registerCreator(const std::string& _processor_type, CreateProcessorCallback createFn);
         bool unregisterCreator(const std::string& _processor_type);
-        ProcessorBase* create(const std::string& _processor_type, const std::string& _unique_name, const ProcessorParamsBase* _params);
+        ProcessorBase* create(const std::string& _processor_type, const std::string& _unique_name, const ProcessorParamsBase* _params = nullptr);
     private:
         CallbackMap callbacks_;
 

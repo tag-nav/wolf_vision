@@ -84,7 +84,7 @@ class Problem : public NodeBase
          * \param _extrinsics a vector of extrinsic parameters: size 2 for 2D position, 3 for 2D pose, 3 for 3D position, 7 for 3D pose.
          * \param _intrinsics a base-pointer to a derived struct defining the intrinsic parameters.
          */
-        SensorBase* createSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
+        SensorBase* createSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics = nullptr);
 
         /** \brief Factory method to create and add processors only from its properties
          *
@@ -94,7 +94,7 @@ class Problem : public NodeBase
          * \param _corresponding_sensor_name corresponding sensor name, used to bind the processor to the particular instance of the sensor
          * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
          */
-        ProcessorBase* createProcessor(std::string _sen_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params);
+        ProcessorBase* createProcessor(std::string _sen_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params = nullptr);
 
         /** \brief Set the processor motion
          *
