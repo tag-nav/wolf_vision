@@ -40,6 +40,9 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescrip
         case DD_BRISK:
             {
             DetectorDescriptorParamsBrisk* dd_brisk = (DetectorDescriptorParamsBrisk*) _dd_base_ptr;
+            //used to test
+            _dd_base_ptr->nominal_pattern_radius = 18;
+            //
             detector_descriptor_ptr_ = new cv::BRISK(dd_brisk->threshold,dd_brisk->octaves,dd_brisk->pattern_scale);
             detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((_dd_base_ptr->nominal_pattern_radius)*pow(2,dd_brisk->octaves)),
                                                                    (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*dd_brisk->pattern_scale));

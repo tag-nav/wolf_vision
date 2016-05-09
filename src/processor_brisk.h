@@ -38,9 +38,9 @@ struct DetectorDescriptorParamsBase
 
 struct DetectorDescriptorParamsBrisk : public DetectorDescriptorParamsBase
 {
-        unsigned int threshold; ///< on the keypoint strength to declare it key-point
-        unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
-        float pattern_scale; ///< Scale of the base pattern wrt the nominal one
+        unsigned int threshold=30; ///< on the keypoint strength to declare it key-point
+        unsigned int octaves=0; ///< Multi-scale evaluation. 0: no multi-scale
+        float pattern_scale=1.0f; ///< Scale of the base pattern wrt the nominal one
 };
 
 struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase

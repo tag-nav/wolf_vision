@@ -144,7 +144,7 @@ int main(int argc, char** argv)
 
 
     //ProcessorBrisk* test_p_brisk = new ProcessorBrisk(det_ptr,desc_ext_ptr,match_ptr,tracker_params);
-    ProcessorBrisk* test_p_brisk = new ProcessorBrisk(tracker_params, &orb_params);
+    ProcessorBrisk* test_p_brisk = new ProcessorBrisk(tracker_params, &brisk_params);
     sen_cam_->addProcessor(test_p_brisk);
 
 
