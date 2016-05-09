@@ -77,8 +77,7 @@ protected:
 
 public:
     static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                                        NodeBase* _correspondant_ptr = nullptr, //
-                                        ConstraintParamsBase* _params = nullptr)
+                                        NodeBase* _correspondant_ptr = nullptr)
     {
         return new ConstraintGPSPseudorange3D(_feature_ptr);
     }

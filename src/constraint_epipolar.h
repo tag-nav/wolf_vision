@@ -30,8 +30,7 @@ class ConstraintEpipolar : public ConstraintBase
 
     public:
         static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                                            NodeBase* _correspondant_ptr, //
-                                            ConstraintParamsBase* _params = nullptr)
+                                            NodeBase* _correspondant_ptr)
         {
             return new ConstraintEpipolar(_feature_ptr, (FeatureBase*)_correspondant_ptr);
         }
