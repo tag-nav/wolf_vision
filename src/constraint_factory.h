@@ -97,13 +97,13 @@ class ConstraintFactory
 {
     public:
         // TODO: Use const in _feature --> need to change aaaallll the ConstraintXxxs' APIs !
-        typedef ConstraintBase* (*CreateConstraintCallback)(FeatureBase* _feature, NodeBase* _correspondant, ConstraintParamsBase* _params);
+        typedef ConstraintBase* (*CreateConstraintCallback)(FeatureBase* _feature, NodeBase* _correspondant);
     private:
         typedef std::map<std::string, CreateConstraintCallback> CallbackMap;
     public:
         bool registerCreator(const std::string& _constraint_type, CreateConstraintCallback createFn);
         bool unregisterCreator(const std::string& _constraint_type);
-        ConstraintBase* create(const std::string& _constraint_type, FeatureBase* _feature, NodeBase* _correspondant = nullptr, ConstraintParamsBase* _params = nullptr);
+        ConstraintBase* create(const std::string& _constraint_type, FeatureBase* _feature, NodeBase* _correspondant = nullptr);
     private:
         CallbackMap callbacks_;
 

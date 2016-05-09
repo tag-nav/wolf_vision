@@ -41,8 +41,7 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
 
     public:
         static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                                            NodeBase* _correspondant_ptr, //
-                                            ConstraintParamsBase* _params = nullptr)
+                                            NodeBase* _correspondant_ptr)
         {
             return new ConstraintOdom2D(_feature_ptr, (FrameBase*)_correspondant_ptr);
         }

@@ -16,12 +16,6 @@ class NodeTerminus;
 
 namespace wolf {
 
-/** \brief base class for constraint parameters
- *
- * Derive from this class to define parameters for a specific constraint class.
- */
-struct ConstraintParamsBase { };
-
 //TODO: add a member to indicate how jacobian is computed, called "jacobian_method_"
 //class ConstraintBase
 class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>

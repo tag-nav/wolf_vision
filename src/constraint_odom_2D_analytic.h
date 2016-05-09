@@ -106,8 +106,7 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 
     public:
         static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                                            NodeBase* _correspondant_ptr, //
-                                            ConstraintParamsBase* _params = nullptr)
+                                            NodeBase* _correspondant_ptr)
         {
             return new ConstraintOdom2DAnalytic(_feature_ptr, (FrameBase*)_correspondant_ptr);
         }
