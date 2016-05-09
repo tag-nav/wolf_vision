@@ -208,7 +208,7 @@ namespace pinhole {
 
                 if (n == 0) {
                     ud = up;
-                    UD_up = Eigen::Matrix2s::setOnes(2);  /// test this one
+                    UD_up.setOnes(2);  /// test this one //PROBLEM HERE
                 }
 
                 else {
@@ -268,7 +268,7 @@ namespace pinhole {
 
                 if (n == 0) {
                     up = ud;
-                    UP_ud = Eigen::Matrix2s::setOnes(2);  /// test this one
+                    UP_ud.setOnes(2);  /// test this one
                 }
 
                 else {
