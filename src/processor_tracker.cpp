@@ -64,10 +64,13 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         processNew(max_new_features_);
 
         // Make the last Capture's Frame a KeyFrame so that it gets into the solver
-        last_ptr_->getFramePtr()->setKey();
-
-        // Call the new keyframe callback in order to let the other processors to establish their constraints
-        getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), this, time_tolerance_);
+        if (!last_ptr_->getFramePtr()->isKey())
+        {
+            last_ptr_->getFramePtr()->setKey();
+            std::cout << "setted key" << std::endl;
+            // Call the new keyframe callback in order to let the other processors to establish their constraints
+            getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), this, time_tolerance_);
+        }
 
         // Establish constraints from last
         establishConstraints();
@@ -157,8 +160,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 
 bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
 {
-    assert(last_ptr_->getFramePtr() != nullptr && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame allways");
-
+    assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame allways");
     Scalar time_tol = std::max(time_tolerance_, _time_tol);
 
     // Nothing to do if:
@@ -167,6 +169,7 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& 
     //   - last frame is too far in time from keyframe
     if (last_ptr_ == nullptr || last_ptr_->getFramePtr()->isKey() || std::abs(last_ptr_->getTimeStamp() - _keyframe_ptr->getTimeStamp()) > time_tol)
         return false;
+
 
     std::cout << "ProcessorTracker::keyFrameCallback sensor " << getSensorPtr()->id() << std::endl;
 

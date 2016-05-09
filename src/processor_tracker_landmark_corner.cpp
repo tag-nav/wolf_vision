@@ -56,7 +56,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         expectedFeature(landmark, expected_features[landmark], expected_features_covs[landmark]);
 
     auto next_feature_it = corners_incoming_.begin();
-    auto feature_it = ++next_feature_it;
+    auto feature_it = next_feature_it++;
     while (feature_it != corners_incoming_.end())
     {
         LandmarkBaseIter closest_landmark = not_matched_landmarks.end();
@@ -71,15 +71,17 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
                                                          Eigen::MatrixXs::Zero(3, 1))(0); //Mahalanobis squared
                 if (dm2 < 0.5 && (closest_landmark == not_matched_landmarks.end() || dm2 < closest_dm2))
                 {
-                    std::cout << "pair feature " << (*feature_it)->id() << " & landmark " << (*landmark_it)->id() << std::endl;
-                    std::cout << "pair SqMahalanobisDist = " << dm2 << std::endl;
+                    //std::cout << "pair feature " << (*feature_it)->id() << " & landmark " << (*landmark_it)->id() << std::endl;
+                    //std::cout << "pair SqMahalanobisDist = " << dm2 << std::endl;
                     closest_dm2 = dm2;
                     closest_landmark = landmark_it;
                 }
             }
         }
+        //std::cout << "all landmarks checked with feature " << (*feature_it)->id() << std::endl;
         if (closest_landmark != not_matched_landmarks.end())
         {
+            //std::cout << "closest landmark: " << (*closest_landmark)->id() << std::endl;
             // match
             matches_landmark_from_incoming_[*feature_it] = LandmarkMatch({*closest_landmark, closest_dm2});
             // erase from the landmarks to be found
@@ -87,7 +89,9 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
             // move corner feature to output list
             _features_corner_found.splice(_features_corner_found.end(), corners_incoming_, feature_it);
         }
-        auto feature_it = ++next_feature_it;
+        //else
+        //    std::cout << "no landmark close enough found." << std::endl;
+        feature_it = next_feature_it++;
     }
 
 /*
