@@ -39,14 +39,14 @@ int main()
 
     // Origin frame:
     Eigen::Vector3s pos(0.5, -0.5-sqrt(0.5), 0);
-    Eigen::Quaternions quat(Eigen::AngleAxiss(Constants::PI/4, Eigen::Vector3s(0,0,1)));
+    Eigen::Quaternions quat(Eigen::AngleAxiss(M_PI_4, Eigen::Vector3s(0,0,1)));
     Eigen::Vector7s x0;
     x0 << pos, quat.coeffs();
 
     // motion data
     Eigen::VectorXs data(6);
     data << 1, 0, 0,   // advance 1m
-            0, 0, Constants::PI/4; // 45 deg
+            0, 0, M_PI_4; // 45 deg
     Eigen::MatrixXs data_cov = 0.1 * Eigen::MatrixXs::Identity(6,6);
 
     // Create Wolf tree nodes

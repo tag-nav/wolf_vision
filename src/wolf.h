@@ -52,9 +52,9 @@ const Scalar EPS = 1e-8;
 const Scalar EPS_SMALL = 1e-16;
 
 // use it in odometry covariances for instance.
-const Scalar MIN_VARIANCE = 1e-6;
+//const Scalar MIN_VARIANCE = 1e-6; // 9/5/16: Delete this after 9/6/16 if nobody complains
 
-const Scalar PI = 3.14159265358979323846264338328;
+//const Scalar PI = 3.14159265358979323846264338328; // Use M_PI from math.h. There are a bunch of other useful constants there.
 
 }
 
@@ -118,8 +118,8 @@ typedef enum
  */
 typedef enum
 {
-    NON_KEY_FRAME = 0, ///< regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
-    KEY_FRAME = 1    ///< key frame. It will stay in the frames window and play at optimizations.
+    NON_KEY_FRAME = 0,  ///< regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
+    KEY_FRAME = 1       ///< key frame. It will stay in the frames window and play at optimizations.
 } FrameType;
 
 /** \brief Enumeration of all possible frames
@@ -129,9 +129,9 @@ typedef enum
 typedef enum
 {
     FRM_PO_2D = 1,  ///< 2D frame containing position (x,y) and orientation angle.
-    FRM_PO_3D,  ///< 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
-    FRM_POV_3D,  ///< 3D frame with position, orientation quaternion, and linear velocity (vx,vy,vz)
-    FRM_PQVBB_3D ///< 3D frame with pos, orient quat, velocity, acc bias (abx,aby,abz), and gyro bias (wbx,wby,wbz).
+    FRM_PO_3D,      ///< 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
+    FRM_POV_3D,     ///< 3D frame with position, orientation quaternion, and linear velocity (vx,vy,vz)
+    FRM_PQVBB_3D    ///< 3D frame with pos, orient quat, velocity, acc bias (abx,aby,abz), and gyro bias (wbx,wby,wbz).
 } FrameStructure;
 
 /** \brief Enumeration of all possible constraints
@@ -140,7 +140,7 @@ typedef enum
  */
 typedef enum
 {
-    CTR_GPS_FIX_2D = 1,             ///< 2D GPS Fix constraint.
+    CTR_GPS_FIX_2D = 1,         ///< 2D GPS Fix constraint.
     CTR_GPS_PR_2D,              ///< 2D GPS Pseudorange constraint.
     CTR_GPS_PR_3D,              ///< 3D GPS Pseudorange constraint.
     CTR_FIX,                    ///< Fix constraint (for priors).
@@ -159,9 +159,9 @@ typedef enum
 typedef enum
 {
     CTR_ABSOLUTE = 1,   ///< Constraint established with absolute reference.
-    CTR_FRAME,      ///< Constraint established with a frame (odometry).
-    CTR_FEATURE,    ///< Constraint established with a feature (correspondence).
-    CTR_LANDMARK    ///< Constraint established with a landmark (correpondence).
+    CTR_FRAME,          ///< Constraint established with a frame (odometry).
+    CTR_FEATURE,        ///< Constraint established with a feature (correspondence).
+    CTR_LANDMARK        ///< Constraint established with a landmark (correpondence).
 } ConstraintCategory;
 
 /** \brief Enumeration of constraint status
@@ -170,8 +170,8 @@ typedef enum
  */
 typedef enum
 {
-    CTR_INACTIVE = 0,  ///< Constraint established with a frame (odometry).
-    CTR_ACTIVE = 1   ///< Constraint established with absolute reference.
+    CTR_INACTIVE = 0,   ///< Constraint established with a frame (odometry).
+    CTR_ACTIVE = 1      ///< Constraint established with absolute reference.
 } ConstraintStatus;
 
 /** \brief Enumeration of jacobian computation method
@@ -180,9 +180,9 @@ typedef enum
  */
 typedef enum
 {
-    JAC_AUTO = 1,    ///< Auto differentiation (AutoDiffCostFunctionWrapper or ceres::NumericDiffCostFunction).
-    JAC_NUMERIC, ///< Numeric differentiation (ceres::NumericDiffCostFunction).
-    JAC_ANALYTIC ///< Analytic jacobians.
+    JAC_AUTO = 1,   ///< Auto differentiation (AutoDiffCostFunctionWrapper or ceres::NumericDiffCostFunction).
+    JAC_NUMERIC,    ///< Numeric differentiation (ceres::NumericDiffCostFunction).
+    JAC_ANALYTIC    ///< Analytic jacobians.
 } JacobianMethod;
 
 
@@ -192,8 +192,8 @@ typedef enum
  */
 typedef enum
 {
-    ST_ESTIMATED = 0,		///< State in estimation (default)
-    ST_FIXED = 1,			  ///< State fixed, estimated enough or fixed infrastructure.
+    ST_ESTIMATED = 0,   ///< State in estimation (default)
+    ST_FIXED = 1,       ///< State fixed, estimated enough or fixed infrastructure.
 } StateStatus;
 
 /** \brief Enumeration of all possible sensor types
@@ -202,16 +202,16 @@ typedef enum
  */
 typedef enum
 {
-    SEN_ODOM_2D = 1,        ///< 2D Odometry measurement from encoders: displacement and rotation.
+    SEN_ODOM_2D = 1,    ///< 2D Odometry measurement from encoders: displacement and rotation.
     SEN_ODOM_3D,        ///< 3D Odometry measurement from encoders: displacement and rotation.
     SEN_TWIST_2D,       ///< Twist measurement form encoders or motion command: lineal and angular velocities.
-    SEN_IMU,		      ///< Inertial measurement unit with 3 acceleros, 3 gyros
+    SEN_IMU,		    ///< Inertial measurement unit with 3 acceleros, 3 gyros
     SEN_CAMERA,		    ///< Regular pinhole camera
     SEN_GPS_FIX,	    ///< GPS fix calculated from a GPS receiver
-    SEN_GPS_RAW,      ///< GPS pseudo ranges, Doppler and satellite ephemerides
+    SEN_GPS_RAW,        ///< GPS pseudo ranges, Doppler and satellite ephemerides
     SEN_LIDAR,		    ///< Laser Range Finder, 2D
     SEN_RADAR,		    ///< Radar
-    SEN_ABSOLUTE_POSE ///< Full absolute pose (XYZ+quaternion)
+    SEN_ABSOLUTE_POSE   ///< Full absolute pose (XYZ+quaternion)
 } SensorType;
 
 /** \brief Enumeration of all possible Processor types
@@ -351,7 +351,7 @@ typedef StateBlockList::iterator StateBlockIter;
 
 inline Scalar pi2pi(const Scalar& angle)
 {
-    return (angle > 0 ? fmod(angle + Constants::PI, 2 * Constants::PI) - Constants::PI : fmod(angle - Constants::PI, 2 * Constants::PI) + Constants::PI);
+    return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
 }
 
 } // namespace wolf
