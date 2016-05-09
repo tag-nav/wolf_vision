@@ -3,6 +3,7 @@
 //
 
 #include "processor_gps.h"
+#include "capture_gps.h"
 #include "feature_gps_pseudorange.h"
 #include "constraint_gps_pseudorange_2D.h"
 
