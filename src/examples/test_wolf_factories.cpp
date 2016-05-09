@@ -16,7 +16,7 @@
 #include "../processor_imu.h"
 
 #include "../sensor_gps.h"
-//#include "../processor_gps.h"
+#include "../processor_gps.h"
 
 //#include "../sensor_laser_2D.h"
 
@@ -50,19 +50,20 @@ int main(void)
     IntrinsicsBase intr_gps_fix;
 
     // Add sensors
-    problem.addSensor("CAMERA",     "front left camera",    pq_3d,  &intr_cam);
-    problem.addSensor("Camera",     "front right camera",   pq_3d,  &intr_cam);
-    problem.addSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
-    problem.addSensor("GPS FIX",    "GPS fix",              p_3d,   &intr_gps_fix);
-    problem.addSensor("CAMERA",     "rear camera",          pq_3d,  &intr_cam);
-    problem.addSensor("IMU",        "inertial",             pq_3d,  &intr_cam);
+    problem.createSensor("CAMERA",     "front left camera",    pq_3d,  &intr_cam);
+    problem.createSensor("Camera",     "front right camera",   pq_3d,  &intr_cam);
+    problem.createSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
+    problem.createSensor("GPS FIX",    "GPS fix",              p_3d,   &intr_gps_fix);
+    problem.createSensor("CAMERA",     "rear camera",          pq_3d,  &intr_cam);
+    problem.createSensor("IMU",        "inertial",             pq_3d,  &intr_cam);
+    problem.createSensor("GPS",        "GPS raw",              p_3d,   &intr_cam);
 
     // Add this sensor and recover a pointer to it
-    SensorBase* sen_ptr = problem.addSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
+    SensorBase* sen_ptr = problem.createSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
 
     // print available sensors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
-        cout << "Sensor: " << setw(2) << left << sen->id()
+        cout << "Sensor " << setw(2) << left << sen->id()
                 << " | type " << setw(2) << sen->typeId()
                 << ": " << setw(8) << sen->getType()
                 << " | name: " << sen->getName() << endl;
@@ -72,16 +73,17 @@ int main(void)
     cout << "\n=================== Processor Factory ===================" << endl;
 
     // Add processors and bind them to sensors -- by sensor name!
-    problem.addProcessor("ODOM 2D", "main odometry",    "main odometer",    nullptr);
-    problem.addProcessor("ODOM 3D", "sec. odometry",    "aux odometer",     nullptr);
-    problem.addProcessor("IMU",     "pre-integrated",   "inertial",         nullptr);
+    problem.createProcessor("ODOM 2D", "main odometry",    "main odometer",    nullptr);
+    problem.createProcessor("ODOM 3D", "sec. odometry",    "aux odometer",     nullptr);
+    problem.createProcessor("IMU",     "pre-integrated",   "inertial",         nullptr);
+    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw",          nullptr);
 
     // print installed processors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr()))
         for (auto prc : *(sen->getProcessorListPtr()))
-            cout << "Processor: " << setw(2) << left  << prc->id()
+            cout << "Processor " << setw(2) << left  << prc->id()
             << " | type : " << setw(8) << prc->getType()
-            << " | name: " << setw(15) << prc->getName()
+            << " | name: " << setw(17) << prc->getName()
             << " | bound to sensor " << setw(2) << prc->getSensorPtr()->id() << ": " << prc->getSensorPtr()->getName() << endl;
 
 

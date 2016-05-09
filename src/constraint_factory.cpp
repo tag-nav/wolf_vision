@@ -16,9 +16,9 @@ bool ConstraintFactory::registerCreator(const std::string& _constraint_type, Cre
 {
     bool reg = callbacks_.insert(CallbackMap::value_type(_constraint_type, createFn)).second;
     if (reg)
-        std::cout << "ConstraintFactory: registered " << _constraint_type << std::endl;
+        std::cout << "ConstraintFactory : registered " << _constraint_type << std::endl;
     else
-        std::cout << "ConstraintFactory: constraint " << _constraint_type << " already registered. Skipping. " << std::endl;
+        std::cout << "ConstraintFactory : constraint " << _constraint_type << " already registered. Skipping. " << std::endl;
 
     return reg;
 }
