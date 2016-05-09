@@ -61,10 +61,8 @@ SensorBase* SensorLaser2D::create(const std::string& _unique_name, const Eigen::
     StateBlock* ori_ptr = new StateBlock(_extrinsics_po.tail(1), true);
     // cast intrinsics into derived type
     IntrinsicsLaser2D* params = (IntrinsicsLaser2D*)(_intrinsics);
-    SensorLaser2D* sen = new SensorLaser2D(pos_ptr, ori_ptr);
+    SensorLaser2D* sen = new SensorLaser2D(pos_ptr, ori_ptr, _intrinsics);
     sen->setName(_unique_name);
-    sen->setScanParams(params->scan_params);
-    sen->setCornerAlgParams(params->corners_alg_params);
     return sen;
 }
 
