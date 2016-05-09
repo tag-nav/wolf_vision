@@ -78,7 +78,7 @@ class Problem : public NodeBase
          */
         void addSensor(SensorBase* _sen_ptr);
 
-        /** \brief Factory method to add sensor only from its properties
+        /** \brief Factory method to create and add sensor only from its properties
          */
         SensorBase* createSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
 
