@@ -91,7 +91,7 @@ inline bool ConstraintOdom2D::operator ()(const T* const _p1, const T* const _o1
 
     // Error
     residuals_map = expected_measurement - getMeasurement().cast<T>();
-    // pi2pi
+    // pi2pi - cannot use wolf::pi2pi() because of template T
     while (residuals_map(2) > T(M_PI))
         residuals_map(2) = residuals_map(2) - T(2 * M_PI);
     while (residuals_map(2) <= T(-M_PI))
