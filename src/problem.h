@@ -80,9 +80,9 @@ class Problem : public NodeBase
 
         /** \brief Factory method to add sensor only from its properties
          */
-        SensorBase* addSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
+        SensorBase* createSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
 
-        ProcessorBase* addProcessor(std::string _sen_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params);
+        ProcessorBase* createProcessor(std::string _sen_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params);
 
         /** \brief Set the processor motion
          *

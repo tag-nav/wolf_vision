@@ -54,14 +54,14 @@ void Problem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-SensorBase* Problem::addSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
+SensorBase* Problem::createSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
     SensorBase* sen_ptr = SensorFactory::get()->create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
     addSensor(sen_ptr);
     return sen_ptr;
 }
 
-ProcessorBase* Problem::addProcessor(std::string _prc_type, std::string _unique_processor_name,
+ProcessorBase* Problem::createProcessor(std::string _prc_type, std::string _unique_processor_name,
                                      std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params)
 {
     auto sen_it = std::find_if(getHardwarePtr()->getSensorListPtr()->begin(),
