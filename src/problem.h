@@ -245,6 +245,8 @@ class Problem : public NodeBase
          */
         void removeDownNode(const LowerNodePtr _ptr){};
 
+//    protected:
+        virtual Problem* getTop();
 };
 
 } // namespace wolf
@@ -270,6 +272,11 @@ inline std::list<unsigned int>* Problem::getConstraintRemoveList()
 }
 
 inline Problem* Problem::getProblem()
+{
+    return this;
+}
+
+inline Problem* Problem::getTop()
 {
     return this;
 }

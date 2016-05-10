@@ -26,6 +26,8 @@
 namespace wolf
 {
 
+class Problem;
+
 /** \brief Linked node element in the Wolf Tree
  * 
  * \param UpperType the type of node one level up in the Wolf tree.
@@ -77,6 +79,7 @@ class NodeLinked : public NodeBase
         UpperNodePtr up_node_ptr_; ///< Pointer to upper node
         LowerNodeList down_node_list_; ///< A list of pointers to lower nodes
         bool is_deleting_; ///< This node is being deleted.
+        Problem* problem_ptr_;
 
     public:
 
@@ -188,9 +191,10 @@ class NodeLinked : public NodeBase
          **/
         virtual Problem* getProblem();
 
-    protected:
+        virtual Problem* getTop();
 
 };
+
 
 } // namespace wolf
 
@@ -225,6 +229,7 @@ NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std:
         down_node_list_(), //
         is_deleting_(false)
 {
+        problem_ptr_ = nullptr;
 }
 
 template<class UpperType, class LowerType>
@@ -311,7 +316,6 @@ inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodePtr _ptr)
     assert(!isBottom() && "Trying to add a down node to a bottom node");
     down_node_list_.push_back(_ptr);
     _ptr->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
-    //std::cout << "node: " << _ptr->nodeId() << " linked to " <<_ptr->upperNodePtr()->nodeId() << std::endl;
 }
 template<class UpperType, class LowerType>
 void NodeLinked<UpperType, LowerType>::addDownNodeList(LowerNodeList& _new_down_node_list)
@@ -392,10 +396,20 @@ inline void NodeLinked<UpperType, LowerType>::unlinkDownNode(const LowerNodeIter
 template<class UpperType, class LowerType>
 Problem* NodeLinked<UpperType, LowerType>::getProblem()
 {
+    if (problem_ptr_ == nullptr)
+        problem_ptr_ = getTop();
+    return problem_ptr_;
+}
+
+template<class UpperType, class LowerType>
+inline Problem* NodeLinked<UpperType, LowerType>::getTop()
+{
     if (up_node_ptr_ != nullptr)
-        return up_node_ptr_->getProblem();
+        return up_node_ptr_->getTop();
+
     return nullptr;
 }
+
 
 } // namespace wolf
 
