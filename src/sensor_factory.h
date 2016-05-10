@@ -40,7 +40,7 @@ namespace wolf
  *
  *     SensorFactory::get()
  *
- * You can then call the methods you like, e.g. to create a SensorCamera, you type:
+ * You can then call the methods you like, e.g. to create a sensor, you type:
  *
  *      SensorFactory::get()->create(... see below for creating sensors ...);
  *
