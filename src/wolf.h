@@ -223,7 +223,8 @@ typedef enum
     PRC_TRACKER_DUMMY = 1,
     PRC_TRACKER_BRISK,
     PRC_TRACKER_ORB,
-    PRC_TRACKER_LIDAR,
+    PRC_TRACKER_LANDMARK_CORNER,
+    PRC_TRACKER_FEATURE_CORNER,
     PRC_GPS_RAW,
     PRC_LIDAR,
     PRC_ODOM_2D,
@@ -243,7 +244,8 @@ typedef enum
     FEAT_GPS_PR,
     FEAT_ODOM_2D,
     FEAT_MOTION,
-    FEAT_POINT_IMAGE
+    FEAT_POINT_IMAGE, 
+    FEAT_LINE_2D
 }FeatureType;
 
 /** \brief Enumeration of all possible landmark types
@@ -349,10 +351,31 @@ typedef std::list<StateBlock*> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
 
 
+// Match Feature - Landmark
+struct LandmarkMatch
+{
+        LandmarkBase* landmark_ptr_;
+        Scalar normalized_score_;
+};
+
+// Match map Feature - Landmark
+typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
+
+
 inline Scalar pi2pi(const Scalar& angle)
 {
     return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
 }
+
+
+// Feature-Feature correspondence
+struct FeatureMatch
+{
+        FeatureBase* feature_ptr_;
+        Scalar normalized_score_;
+};
+
+typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
 
 } // namespace wolf
 

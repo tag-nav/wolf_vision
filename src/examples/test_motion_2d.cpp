@@ -66,11 +66,7 @@ int main()
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr, problem_options);
+    CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr);
 
 
     // Origin Key Frame
@@ -204,7 +200,7 @@ int main()
 
     FrameBase* new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
 
-    odom2d_ptr->keyFrameCallback(new_keyframe_ptr);
+    odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     std::cout << "New buffer: oldest part:   < ";
     for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
@@ -240,7 +236,7 @@ int main()
     std::cout << "New split time:              " << t_split - t0 << std::endl;
 
     new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
-    odom2d_ptr->keyFrameCallback(new_keyframe_ptr);
+    odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     std::cout << "All in one row:            < ";
     for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())

@@ -54,7 +54,7 @@ bool ProcessorGPS::voteForKeyFrame()
     return false;
 }
 
-bool ProcessorGPS::keyFrameCallback(wolf::FrameBase*)
+bool ProcessorGPS::keyFrameCallback(wolf::FrameBase*, const Scalar& _time_tol)
 {
     return false;
 }

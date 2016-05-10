@@ -58,6 +58,14 @@ class CaptureMotion2 : public CaptureBase
         {
             return data_cov_;
         }
+        void setData(const Eigen::VectorXs& _data)
+        {
+            data_ = _data;
+        }
+        void setDataCovariance(const Eigen::MatrixXs& _data_cov)
+        {
+            data_cov_ = _data_cov;
+        }
         MotionBuffer* getBufferPtr()
         {
             return &buffer_;

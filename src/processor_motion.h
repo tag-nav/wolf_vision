@@ -146,15 +146,15 @@ class ProcessorMotion : public ProcessorBase
          * \param _origin_frame the key frame to be the origin
          * \param _ts_origin origin timestamp.
          */
-        void setOrigin(FrameBase* _origin_frame, TimeStamp& _ts_origin);
+        void setOrigin(FrameBase* _origin_frame, const TimeStamp& _ts_origin);
 
         /** Set the origin of all motion for this processor
          * \param _x_origin the state at the origin
          * \param _ts_origin origin timestamp.
          */
-        void setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin);
+        void setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin);
 
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr);
+        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol);
 
         // Helper functions:
     public:
@@ -353,7 +353,7 @@ inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_
     //std::cout << _delta_cov1_plus_delta_cov2 << std::endl;
 }
 
-inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin)
+inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
     // make a new key frame
     FrameBase* key_frame_ptr = getProblem()->createFrame(KEY_FRAME, _x_origin, _ts_origin);
@@ -361,7 +361,7 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeSta
     setOrigin(key_frame_ptr, _ts_origin);
 }
 
-inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame, TimeStamp& _ts_origin)
+inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame, const TimeStamp& _ts_origin)
 {
     // make (empty) origin Capture
     origin_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
@@ -453,14 +453,17 @@ inline void ProcessorMotion::reintegrate()
     }
 }
 
-inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
+inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
 {
+    //std::cout << "ProcessorMotion::keyFrameCallback: " << std::endl;
+    //std::cout << "\tnew keyframe " << _keyframe_ptr->id() << std::endl;
+    //std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
+
     // get time stamp
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
     // create motion capture
     CaptureMotion2* key_capture_ptr = new CaptureMotion2(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                                          Eigen::MatrixXs::Zero(data_size_, data_size_));
-
     // add motion capture to keyframe
     _keyframe_ptr->addCapture(key_capture_ptr);
 
@@ -470,8 +473,8 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
 
     // interpolate individual delta
     Motion mot = interpolate(key_capture_ptr->getBufferPtr()->get().back(), // last Motion of old buffer
-            getBufferPtr()->get().front(), // first motion of new buffer
-            ts);
+                             getBufferPtr()->get().front(), // first motion of new buffer
+                             ts);
 
     // add to old buffer
     key_capture_ptr->getBufferPtr()->get().push_back(mot);

@@ -7,6 +7,9 @@
 //wolf includes
 #include "capture_base.h"
 
+//laserscanutils includes
+#include "laser_scan_utils/laser_scan.h"
+
 namespace wolf {
 
 class CaptureLaser2D : public CaptureBase
@@ -14,11 +17,7 @@ class CaptureLaser2D : public CaptureBase
     public:
         /** \brief Constructor with ranges
          **/
-        CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges);
-
-        /** \brief Constructor with ranges and intensities
-         **/
-        CaptureLaser2D(const TimeStamp & _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges, const std::vector<float>& _intensities);
+        CaptureLaser2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges);
 
         /** \brief Default destructor (not recommended)
          *
@@ -26,32 +25,17 @@ class CaptureLaser2D : public CaptureBase
          **/        
         virtual ~CaptureLaser2D();
         
-        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
-
-        SensorLaser2D const * getLaserPtr() const;
-        const std::vector<float>& getRanges() const;
-        const std::vector<float>& getIntensities() const;
+        laserscanutils::LaserScan& getScan();
 
     private:
         SensorLaser2D* laser_ptr_; //specific pointer to sensor laser 2D object
-        std::vector<float> ranges_; // ranges vector. Type float to match ROS LaserScan message
-        std::vector<float> intensities_; // intensities vector. Type float to match ROS LaserScan message
+        laserscanutils::LaserScan scan_;
 
 };
 
-inline const std::vector<float>& CaptureLaser2D::getIntensities() const
+inline laserscanutils::LaserScan& CaptureLaser2D::getScan()
 {
-    return intensities_;
-}
-
-inline SensorLaser2D const * CaptureLaser2D::getLaserPtr() const
-{
-    return laser_ptr_;
-}
-
-inline const std::vector<float>& CaptureLaser2D::getRanges() const
-{
-    return ranges_;
+    return scan_;
 }
 
 } // namespace wolf

@@ -522,12 +522,12 @@ void ConstraintSparse<MEASUREMENT_SIZE,
 {
     for (unsigned int ii = 1; ii<state_block_sizes_vector_.size(); ii++)
     {
-        if (state_ptr_vector_.at(ii) != nullptr)
-            assert(state_block_sizes_vector_.at(ii) != 0 && "Too many non-null state pointers in ConstraintSparse constructor");
+        if (state_block_sizes_vector_.at(ii) != 0)
+            assert(state_ptr_vector_.at(ii) != nullptr && "ConstraintSparse: Null state pointer in a non-zero sized block!");
 
         else
         {
-            assert(state_block_sizes_vector_.at(ii) == 0 && "No non-null state pointers enough in ConstraintSparse constructor");
+            assert(state_ptr_vector_.at(ii) == nullptr && "ConstraintSparse: Non-null state pointer in a zero sized block!");
             state_ptr_vector_.resize(ii);
             state_block_sizes_vector_.resize(ii);
             break;

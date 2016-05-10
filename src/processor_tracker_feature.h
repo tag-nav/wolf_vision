@@ -10,29 +10,10 @@
 
 #include "processor_tracker.h"
 #include "capture_base.h"
+#include "wolf.h"
 
 namespace wolf
 {
-
-// Feature-Feature correspondence
-struct FeatureMatch
-{
-        FeatureBase* feature_ptr_;
-        Scalar normalized_score_;
-
-        FeatureMatch() :
-                feature_ptr_(nullptr), normalized_score_(0.0)
-        {
-
-        }
-        FeatureMatch(FeatureBase* _last_feature_ptr, const Scalar& _normalized_score) :
-                feature_ptr_(_last_feature_ptr), normalized_score_(_normalized_score)
-        {
-
-        }
-};
-
-typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
 
 /** \brief Feature tracker processor
  *
@@ -91,7 +72,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
 
         /** \brief Constructor with type
          */
-        ProcessorTrackerFeature(ProcessorType _tp);
+        ProcessorTrackerFeature(ProcessorType _tp, const unsigned int _max_new_features = 0);
         virtual ~ProcessorTrackerFeature();
 
     protected:

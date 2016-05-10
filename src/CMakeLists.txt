@@ -249,14 +249,16 @@ IF (laser_scan_utils_FOUND)
     SET(HDRS ${HDRS}
         capture_laser_2D.h
         sensor_laser_2D.h
-        processor_laser_2D.h
-        processor_tracker_laser.h
+        #processor_laser_2D.h
+        processor_tracker_landmark_corner.h
+        processor_tracker_feature_corner.h
         )
     SET(SRCS ${SRCS}
         capture_laser_2D.cpp
         sensor_laser_2D.cpp
-        processor_laser_2D.cpp
-        processor_tracker_laser.cpp
+        #processor_laser_2D.cpp
+        processor_tracker_landmark_corner.cpp
+        processor_tracker_feature_corner.cpp
         )
 ENDIF(laser_scan_utils_FOUND)
 

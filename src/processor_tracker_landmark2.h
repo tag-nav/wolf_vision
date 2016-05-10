@@ -1,19 +1,38 @@
 /**
- * \file processor_tracker_landmark.h
+ * \file processor_tracker_landmark2.h
  *
- *  Created on: Apr 7, 2016
+ *  Created on: Apr 29, 2016
  *      \author: jvallve
  */
 
-#ifndef PROCESSOR_TRACKER_LANDMARK_H_
-#define PROCESSOR_TRACKER_LANDMARK_H_
+#ifndef PROCESSOR_TRACKER_LANDMARK2_H_
+#define PROCESSOR_TRACKER_LANDMARK2_H_
 
 #include "processor_tracker.h"
 #include "capture_base.h"
-#include "wolf.h"
 
 namespace wolf
 {
+
+// Match Feature - Landmark
+struct LandmarkMatch
+{
+        LandmarkBase* landmark_ptr_;
+        Scalar normalized_score_;
+
+        LandmarkMatch() :
+                landmark_ptr_(nullptr), normalized_score_(0.0)
+        {
+        }
+        LandmarkMatch(LandmarkBase* _landmark_ptr, const Scalar& _normalized_score) :
+                landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
+        {
+
+        }
+};
+
+// Match map Feature - Landmark
+typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
 
 /** \brief Landmark tracker processor
  *
@@ -58,19 +77,19 @@ namespace wolf
  *   - establishConstraints() : which calls the pure virtual:
  *     - createConstraint() : create a Feature-Landmark constraint of the correct derived type <=== IMPLEMENT
  *
- * Should you need extra functionality for your derived types, you can overload these two methods,
+ * Should you need extra functionality for your derived types, you can implement the two pure virtuals,
  *
- *   -  preProcess() { }
- *   -  postProcess() { }
+ *   -  preProcess()
+ *   -  postProcess()
  *
  * which are called at the beginning and at the end of process() respectively.
  * See the doc of these functions for more info.
  */
-class ProcessorTrackerLandmark : public ProcessorTracker
+class ProcessorTrackerLandmark2 : public ProcessorTracker
 {
     public:
-        ProcessorTrackerLandmark(ProcessorType _tp, const unsigned int& _max_new_features = 0);
-        virtual ~ProcessorTrackerLandmark();
+        ProcessorTrackerLandmark2(ProcessorType _tp, const unsigned int& _max_new_features = 0);
+        virtual ~ProcessorTrackerLandmark2();
 
     protected:
 
@@ -98,12 +117,20 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          */
         virtual unsigned int processKnown();
 
+        /** \brief Find provided features in the incoming capture
+         * \param _feature_list_in input list of features to be found in incoming
+         * \param _feature_list_out returned list of incoming features corresponding to a features in _feature_list_in
+         * \param _feature_correspondences returned map of feature correspondences: _feature_correspondences[_feature_out_ptr] = feature_in_ptr
+         */
+        virtual unsigned int trackFeatures(FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
+                                           FeatureMatchMap& _feature_correspondences) = 0;
+
         /** \brief Find provided landmarks in the incoming capture
          * \param _landmark_list_in input list of landmarks to be found in incoming
          * \param _feature_list_out returned list of incoming features corresponding to a landmark of _landmark_list_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          */
-        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
+        virtual unsigned int findLandmarksNotInLast(LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
                                            LandmarkMatchMap& _feature_landmark_correspondences) = 0;
 
         /** \brief Vote for KeyFrame generation
@@ -166,31 +193,29 @@ class ProcessorTrackerLandmark : public ProcessorTracker
 #include <utility>
 namespace wolf
 {
-inline void ProcessorTrackerLandmark::advance()
+inline void ProcessorTrackerLandmark2::advance()
 {
-    std::cout << "ProcessorTrackerLandmark::advance" << std::endl;
+    std::cout << "ProcessorTrackerLandmark2::advance" << std::endl;
+    matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
+
+    for (auto match : matches_landmark_from_last_)
+            std::cout << "\t" << match.first->getMeasurement() << " to " << match.second.landmark_ptr_->getDescriptor() << std::endl;
+}
+
+inline void ProcessorTrackerLandmark2::reset()
+{
+    std::cout << "ProcessorTrackerLandmark2::reset" << std::endl;
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
 
     new_features_last_ = std::move(new_features_incoming_);
 
-//    for (auto match : matches_landmark_from_last_)
-//            std::cout << "\t" << match.first->id() << " to " << match.second.landmark_ptr_->id() << std::endl;
+    for (auto match : matches_landmark_from_last_)
+            std::cout << "\t" << match.first->getMeasurement() << " to " << match.second.landmark_ptr_->getDescriptor() << std::endl;
 }
 
-inline void ProcessorTrackerLandmark::reset()
+inline void ProcessorTrackerLandmark2::establishConstraints()
 {
-    std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
-    matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
-
-    new_features_last_ = std::move(new_features_incoming_);
-
-//    for (auto match : matches_landmark_from_last_)
-//            std::cout << "\t" << match.first->id() << " to " << match.second.landmark_ptr_->id() << std::endl;
-}
-
-inline void ProcessorTrackerLandmark::establishConstraints()
-{
-    std::cout << "ProcessorTrackerLandmark::establishConstraints" << std::endl;
+    std::cout << "ProcessorTrackerLandmark2::establishConstraints" << std::endl;
     std::cout << "\tfeatures:" << last_ptr_->getFeatureListPtr()->size() << std::endl;
     std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
 

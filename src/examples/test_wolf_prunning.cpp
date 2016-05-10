@@ -93,8 +93,8 @@ int main(int argc, char** argv)
     problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full, problem_options);
-    CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun, problem_options);
+    CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full);
+    CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun);
 
     // load graph from .txt
     offLineFile_.open(file_path_.c_str(), std::ifstream::in);
@@ -151,8 +151,8 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add frame to problem
-                    FrameBase* vertex_frame_ptr_full = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
-                    FrameBase* vertex_frame_ptr_prun = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBase* vertex_frame_ptr_full = new FrameBase(KEY_FRAME, TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBase* vertex_frame_ptr_prun = new FrameBase(KEY_FRAME, TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
                     wolf_problem_full->getTrajectoryPtr()->addFrame(vertex_frame_ptr_full);
                     wolf_problem_prun->getTrajectoryPtr()->addFrame(vertex_frame_ptr_prun);
                     // store

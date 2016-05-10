@@ -275,8 +275,8 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
                 incoming_point_ptr->setTrackId(feature_ptr->trackId());
 
-                _feature_matches[incoming_point_ptr] = FeatureMatch(feature_base_ptr,
-                                                            normalized_score);
+                _feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr,
+                                                            normalized_score}); //FIXME: 512 is the maximum HAMMING distance
 
             }
             else

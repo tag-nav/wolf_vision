@@ -21,6 +21,24 @@ struct ProcessorParamsBase;
 
 
 namespace wolf {
+enum Notification
+{
+    ADD,
+    REMOVE,
+    UPDATE
+};
+struct StateBlockNotification
+{
+        Notification notification_;
+        StateBlock* state_block_ptr_;
+        Scalar* scalar_ptr_;
+};
+struct ConstraintNotification
+{
+        Notification notification_;
+        ConstraintBase* constraint_ptr_;
+        unsigned int id_;
+};
 
 
 /** \brief Wolf problem node element in the Wolf Tree
@@ -46,11 +64,8 @@ class Problem : public NodeBase
         HardwareBase* hardware_ptr_;
         ProcessorMotion* processor_motion_ptr_;
         StateBlockList state_block_ptr_list_;
-        std::list<StateBlock*> state_block_add_list_;
-        std::list<StateBlock*> state_block_update_list_;
-        std::list<Scalar*> state_block_remove_list_;
-        std::list<ConstraintBase*> constraint_add_list_;
-        std::list<unsigned int> constraint_remove_list_;
+        std::list<StateBlockNotification> state_block_notification_list_;
+        std::list<ConstraintNotification> constraint_notification_list_;
 
     public:
 
@@ -134,7 +149,7 @@ class Problem : public NodeBase
          *
          * New key frame callback: It should be called by any processor that creates a new keyframe. It calls the keyFrameCallback of the rest of processors.
          */
-        void keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr);
+        void keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr, const Scalar& _time_tolerance);
 
         LandmarkBase* addLandmark(LandmarkBase* _lmk_ptr);
 
@@ -203,33 +218,25 @@ class Problem : public NodeBase
          */
         HardwareBase* getHardwarePtr();
 
-        /** \brief Returns a pointer to last Frame
+        /** \brief Returns a pointer to last frame
          **/
         FrameBase* getLastFramePtr();
+
+        /** \brief Returns a pointer to last key frame
+         */
+        FrameBase* getLastKeyFramePtr();
 
         /** \brief Gets a pointer to the state units list
          */
         StateBlockList* getStateListPtr();
 
-        /** \brief Gets a queue of state blocks to be added in the solver
+        /** \brief Gets a queue of state blocks notification to be handled by the solver
          */
-        std::list<StateBlock*>* getStateBlockAddList();
+        std::list<StateBlockNotification>& getStateBlockNotificationList();
 
-        /** \brief Gets a queue of state blocks to be updated in the solver
+        /** \brief Gets a queue of constraint notification to be handled by the solver
          */
-        std::list<StateBlock*>* getStateBlockUpdateList();
-
-        /** \brief Gets a queue of state blocks to be removed from the solver
-         */
-        std::list<Scalar*>* getStateBlockRemoveList();
-
-        /** \brief Gets a queue of constraint ids to be added in the solver
-         */
-        std::list<ConstraintBase*>* getConstraintAddList();
-
-        /** \brief Gets a queue of constraint ids to be removed from the solver
-         */
-        std::list<unsigned int>* getConstraintRemoveList();
+        std::list<ConstraintNotification>& getConstraintNotificationList();
 
         /** \brief get top node
          */
@@ -256,19 +263,14 @@ class Problem : public NodeBase
 namespace wolf
 {
 
-inline std::list<Scalar*>* Problem::getStateBlockRemoveList()
+inline std::list<StateBlockNotification>& Problem::getStateBlockNotificationList()
 {
-    return &state_block_remove_list_;
+    return state_block_notification_list_;
 }
 
-inline std::list<ConstraintBase*>* Problem::getConstraintAddList()
+inline std::list<ConstraintNotification>& Problem::getConstraintNotificationList()
 {
-    return &constraint_add_list_;
-}
-
-inline std::list<unsigned int>* Problem::getConstraintRemoveList()
-{
-    return &constraint_remove_list_;
+    return constraint_notification_list_;
 }
 
 inline Problem* Problem::getProblem()

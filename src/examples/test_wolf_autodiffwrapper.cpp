@@ -54,12 +54,8 @@ int main(int argc, char** argv)
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_ceres_diff = new CeresManager(wolf_problem_ceres_diff, problem_options, false);
-    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_wolf_diff, problem_options, true);
+    CeresManager* ceres_manager_ceres_diff = new CeresManager(wolf_problem_ceres_diff, false);
+    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_wolf_diff, true);
 
 
 

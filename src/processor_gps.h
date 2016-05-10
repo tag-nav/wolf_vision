@@ -7,7 +7,7 @@
 
 namespace wolf
 {
-class CaptureGPS;
+    class CaptureGPS;
 }
 
 // Wolf includes
@@ -34,7 +34,7 @@ class ProcessorGPS : public ProcessorBase
         virtual void init(CaptureBase* _capture_ptr);
         virtual void process(CaptureBase* _capture_ptr);
         virtual bool voteForKeyFrame();
-        virtual bool keyFrameCallback(wolf::FrameBase*);
+        virtual bool keyFrameCallback(wolf::FrameBase*, const Scalar& _time_tol);
 
     public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);

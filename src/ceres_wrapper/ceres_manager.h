@@ -45,7 +45,7 @@ class CeresManager
 		bool use_wolf_auto_diff_;
 
 	public:
-		CeresManager(Problem* _wolf_problem, ceres::Problem::Options _options, const bool _use_wolf_cost_functions = true);
+		CeresManager(Problem* _wolf_problem, const bool _use_wolf_auto_diff = true);
 
 		~CeresManager();
 
@@ -55,7 +55,7 @@ class CeresManager
 
 		void update(const bool _apply_loss_function = false);
 
-		void addConstraint(ConstraintBase* _corr_ptr, const bool _apply_loss);
+		void addConstraint(ConstraintBase* _corr_ptr, unsigned int _id, const bool _apply_loss);
 
 		void removeConstraint(const unsigned int& _corr_idx);
 
