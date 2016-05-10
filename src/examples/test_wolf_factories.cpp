@@ -49,16 +49,16 @@ int main(void)
     IntrinsicsOdom2D intr_odom2d;
 
     // Add sensors
-    problem.createSensor("CAMERA",     "front left camera",    pq_3d,  &intr_cam);
-    problem.createSensor("Camera",     "front right camera",   pq_3d,  &intr_cam);
-    problem.createSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
-    problem.createSensor("GPS FIX",    "GPS fix",              p_3d);
-    problem.createSensor("CAMERA",     "rear camera",          pq_3d,  &intr_cam);
-    problem.createSensor("IMU",        "inertial",             pq_3d);
-    problem.createSensor("GPS",        "GPS raw",              p_3d);
+    problem.installSensor("CAMERA",     "front left camera",    pq_3d,  &intr_cam);
+    problem.installSensor("Camera",     "front right camera",   pq_3d,  &intr_cam);
+    problem.installSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
+    problem.installSensor("GPS FIX",    "GPS fix",              p_3d);
+    problem.installSensor("CAMERA",     "rear camera",          pq_3d,  &intr_cam);
+    problem.installSensor("IMU",        "inertial",             pq_3d);
+    problem.installSensor("GPS",        "GPS raw",              p_3d);
 
     // Add this sensor and recover a pointer to it
-    SensorBase* sen_ptr = problem.createSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
+    SensorBase* sen_ptr = problem.installSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
 
     // print available sensors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
@@ -72,9 +72,9 @@ int main(void)
     cout << "\n=================== Processor Factory ===================" << endl;
 
     // Add processors and bind them to sensors -- by sensor name!
-    problem.createProcessor("ODOM 2D", "main odometry",    "main odometer");
-    problem.createProcessor("ODOM 3D", "sec. odometry",    "aux odometer",     nullptr);
-    problem.createProcessor("IMU",     "pre-integrated",   "inertial",         nullptr);
+    problem.installProcessor("ODOM 2D", "main odometry",    "main odometer");
+    problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer",     nullptr);
+    problem.installProcessor("IMU",     "pre-integrated",   "inertial",         nullptr);
 //    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw",          nullptr);
 
     // print installed processors
