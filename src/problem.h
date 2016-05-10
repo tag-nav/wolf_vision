@@ -117,22 +117,16 @@ class Problem : public NodeBase
                                const TimeStamp& _time_stamp);
 
         /** \brief Get the state at last timestamp
-         *
-         * Get the state at last timestamp
          */
         Eigen::VectorXs getCurrentState();
         void getCurrentState(Eigen::VectorXs& state);
 
         /** \brief Get the state at a given timestamp
-         *
-         * Get the state at a given timestamp
          */
         Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
         void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
 
         /** \brief Give the permission to a processor to create a new keyFrame
-         *
-         * Give the permission to a processor to create a new keyFrame
          */
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
 
