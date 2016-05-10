@@ -151,8 +151,8 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add frame to problem
-                    FrameBase* vertex_frame_ptr_full = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
-                    FrameBase* vertex_frame_ptr_prun = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBase* vertex_frame_ptr_full = new FrameBase(KEY_FRAME, TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBase* vertex_frame_ptr_prun = new FrameBase(KEY_FRAME, TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
                     wolf_problem_full->getTrajectoryPtr()->addFrame(vertex_frame_ptr_full);
                     wolf_problem_prun->getTrajectoryPtr()->addFrame(vertex_frame_ptr_prun);
                     // store
