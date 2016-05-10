@@ -302,7 +302,7 @@ bool Problem::getLandmarkCovariance(LandmarkBase* _landmark_ptr, Eigen::MatrixXs
     getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), _covariance, _landmark_ptr->getPPtr()->getSize() ,_landmark_ptr->getPPtr()->getSize());
 }
 
-Eigen::MatrixXs Problem::getFrameCovariance(LandmarkBase* _landmark_ptr)
+Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBase* _landmark_ptr)
 {
     Eigen::MatrixXs covariance = Eigen::MatrixXs::Zero(_landmark_ptr->getPPtr()->getSize()+_landmark_ptr->getOPtr()->getSize(), _landmark_ptr->getPPtr()->getSize()+_landmark_ptr->getOPtr()->getSize());
     getLandmarkCovariance(_landmark_ptr, covariance);

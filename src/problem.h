@@ -184,10 +184,10 @@ class Problem : public NodeBase
         bool getFrameCovariance(FrameBase* _frame_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getFrameCovariance(FrameBase* _frame_ptr);
 
-        /** \brief Gets the covariance of a frame
+        /** \brief Gets the covariance of a landmark
          */
         bool getLandmarkCovariance(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& _covariance);
-        Eigen::MatrixXs getFrameCovariance(LandmarkBase* _landmark_ptr);
+        Eigen::MatrixXs getLandmarkCovariance(LandmarkBase* _landmark_ptr);
 
         /** \brief Adds a map
          */
