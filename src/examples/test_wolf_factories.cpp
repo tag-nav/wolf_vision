@@ -75,7 +75,7 @@ int main(void)
     problem.createProcessor("ODOM 2D", "main odometry",    "main odometer");
     problem.createProcessor("ODOM 3D", "sec. odometry",    "aux odometer",     nullptr);
     problem.createProcessor("IMU",     "pre-integrated",   "inertial",         nullptr);
-    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw",          nullptr);
+//    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw",          nullptr);
 
     // print installed processors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr()))
