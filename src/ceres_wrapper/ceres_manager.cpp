@@ -52,7 +52,7 @@ ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_
 
 void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 {
-    //std::cout << "computing covariances..." << std::endl;
+    //std::cout << "CeresManager: computing covariances..." << std::endl;
 
     // CLEAR STORED COVARIANCE BLOCKS IN WOLF PROBLEM
     wolf_problem_->clearCovariance();
@@ -128,30 +128,30 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         case ROBOT_LANDMARKS:
         {
             //robot-robot
-            FrameBase* last_frame = wolf_problem_->getTrajectoryPtr()->getFrameListPtr()->back();
+            auto last_key_frame = wolf_problem_->getLastKeyFramePtr();
 
-            state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), last_frame->getPPtr()));
-            state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), last_frame->getOPtr()));
-            state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), last_frame->getOPtr()));
+            state_block_pairs.push_back(std::make_pair(last_key_frame->getPPtr(), last_key_frame->getPPtr()));
+            state_block_pairs.push_back(std::make_pair(last_key_frame->getPPtr(), last_key_frame->getOPtr()));
+            state_block_pairs.push_back(std::make_pair(last_key_frame->getOPtr(), last_key_frame->getOPtr()));
 
-            double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), last_frame->getPPtr()->getPtr()));
-            double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), last_frame->getOPtr()->getPtr()));
-            double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), last_frame->getOPtr()->getPtr()));
+            double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), last_key_frame->getPPtr()->getPtr()));
+            double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), last_key_frame->getOPtr()->getPtr()));
+            double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), last_key_frame->getOPtr()->getPtr()));
 
             for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
             {
-                state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), l_ptr->getPPtr()));
-                state_block_pairs.push_back(std::make_pair(last_frame->getPPtr(), l_ptr->getOPtr()));
-                state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), l_ptr->getPPtr()));
-                state_block_pairs.push_back(std::make_pair(last_frame->getOPtr(), l_ptr->getOPtr()));
+                state_block_pairs.push_back(std::make_pair(last_key_frame->getPPtr(), l_ptr->getPPtr()));
+                state_block_pairs.push_back(std::make_pair(last_key_frame->getPPtr(), l_ptr->getOPtr()));
+                state_block_pairs.push_back(std::make_pair(last_key_frame->getOPtr(), l_ptr->getPPtr()));
+                state_block_pairs.push_back(std::make_pair(last_key_frame->getOPtr(), l_ptr->getOPtr()));
                 state_block_pairs.push_back(std::make_pair(l_ptr->getPPtr(), l_ptr->getPPtr()));
                 state_block_pairs.push_back(std::make_pair(l_ptr->getPPtr(), l_ptr->getOPtr()));
                 state_block_pairs.push_back(std::make_pair(l_ptr->getOPtr(), l_ptr->getOPtr()));
 
-                double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_frame->getPPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_frame->getOPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
+                double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
                 double_pairs.push_back(std::make_pair(l_ptr->getPPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
                 double_pairs.push_back(std::make_pair(l_ptr->getPPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
                 double_pairs.push_back(std::make_pair(l_ptr->getOPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
@@ -159,6 +159,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             break;
         }
     }
+    //std::cout << "pairs... " << double_pairs.size() << std::endl;
 
     // COMPUTE DESIRED COVARIANCES
     if (covariance_->Compute(double_pairs, ceres_problem_))
@@ -168,8 +169,8 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         {
             Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> cov(state_block_pairs[i].first->getSize(),state_block_pairs[i].second->getSize());
             covariance_->GetCovarianceBlock(double_pairs[i].first, double_pairs[i].second, cov.data());
-            //std::cout << "getted covariance " << std::endl << cov << std::endl;
             wolf_problem_->addCovarianceBlock(state_block_pairs[i].first, state_block_pairs[i].second, cov);
+            //std::cout << "getted covariance " << std::endl << cov << std::endl;
         }
     }
     else
@@ -178,7 +179,9 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 
 void CeresManager::update(const bool _apply_loss_function)
 {
-    //std::cout << "CeresManager: updating... getConstraintRemoveList()->size()" << wolf_problem_->getConstraintRemoveList()->size() << std::endl;
+    //std::cout << "CeresManager: updating... " << std::endl;
+    //std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
+    //std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
 
     // UPDATE STATE BLOCKS
     while (!wolf_problem_->getStateBlockNotificationList().empty())

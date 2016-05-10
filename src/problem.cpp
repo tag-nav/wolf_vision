@@ -344,6 +344,11 @@ FrameBase* Problem::getLastFramePtr()
     return trajectory_ptr_->getLastFramePtr();
 }
 
+FrameBase* Problem::getLastKeyFramePtr()
+{
+    return trajectory_ptr_->getLastKeyFramePtr();;
+}
+
 StateBlockList* Problem::getStateListPtr()
 {
     return &state_block_ptr_list_;

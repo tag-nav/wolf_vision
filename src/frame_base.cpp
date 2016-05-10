@@ -93,6 +93,9 @@ void FrameBase::setKey()
     {
         type_id_ = KEY_FRAME;
         registerNewStateBlocks();
+
+        if (getTrajectoryPtr()->getLastKeyFramePtr() == nullptr || getTrajectoryPtr()->getLastKeyFramePtr()->getTimeStamp() < time_stamp_)
+            getTrajectoryPtr()->setLastKeyFramePtr(this);
     }
 }
 

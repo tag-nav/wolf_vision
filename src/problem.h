@@ -218,9 +218,13 @@ class Problem : public NodeBase
          */
         HardwareBase* getHardwarePtr();
 
-        /** \brief Returns a pointer to last Frame
+        /** \brief Returns a pointer to last frame
          **/
         FrameBase* getLastFramePtr();
+
+        /** \brief Returns a pointer to last key frame
+         */
+        FrameBase* getLastKeyFramePtr();
 
         /** \brief Gets a pointer to the state units list
          */
