@@ -164,8 +164,8 @@ class ProcessorMotion : public ProcessorBase
 
         //        void reset(CaptureMotion2* _capture_ptr);
 
-        FrameBase* makeFrame(CaptureBase* _capture_ptr, FrameType _type = NON_KEY_FRAME);
-        FrameBase* makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameType _type);
+        FrameBase* makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
+        FrameBase* makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type);
 
         MotionBuffer* getBufferPtr();
 
@@ -497,7 +497,7 @@ inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer
     last_ptr_->getBufferPtr()->split(_t_split, _oldest_part);
 }
 
-inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameType _type)
+inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
     FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
@@ -505,7 +505,7 @@ inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Ei
     return new_frame_ptr;
 }
 
-inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
+inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
     FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());

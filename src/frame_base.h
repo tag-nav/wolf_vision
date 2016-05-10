@@ -26,7 +26,7 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
         static unsigned int frame_id_count_;
     protected:
         unsigned int frame_id_;
-        FrameType type_id_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
+        FrameKeyType type_id_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
         TimeStamp time_stamp_;   ///< frame time stamp
         StateStatus status_;     ///< status of the estimation of the frame state
         StateBlock* p_ptr_;      ///< Position state block pointer
@@ -52,7 +52,7 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
          * \param _p_ptr StateBlock pointer to the position (default: nullptr)
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          **/        
-        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
+        FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
 
         /** \brief Default destructor (not recommended)
          *

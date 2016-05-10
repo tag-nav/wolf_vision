@@ -80,7 +80,7 @@ void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
     processor_motion_ptr_ = _processor_motion_ptr;
 }
 
-FrameBase* Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
+FrameBase* Problem::createFrame(FrameKeyType _frame_type, const TimeStamp& _time_stamp)
 {
     if (processor_motion_ptr_ != nullptr)
         return createFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
@@ -104,7 +104,7 @@ FrameBase* Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_st
     }
 }
 
-FrameBase* Problem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
+FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
     //std::cout << "creating new frame..." << std::endl;

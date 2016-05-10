@@ -120,7 +120,7 @@ typedef enum
 {
     NON_KEY_FRAME = 0,  ///< regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
     KEY_FRAME = 1       ///< key frame. It will stay in the frames window and play at optimizations.
-} FrameType;
+} FrameKeyType;
 
 /** \brief Enumeration of all possible frames
  *
