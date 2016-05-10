@@ -33,7 +33,8 @@ enum DetectorDescriptorType
 struct DetectorDescriptorParamsBase
 {
         DetectorDescriptorType type;
-        unsigned int nominal_pattern_radius; ///< Radius of the pattern before scaling
+        unsigned int nominal_pattern_radius = 18; ///< Radius of the pattern before scaling
+        //should this be here? doesn't it depend on the descriptor?
 };
 
 struct DetectorDescriptorParamsBrisk : public DetectorDescriptorParamsBase

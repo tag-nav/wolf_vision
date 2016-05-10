@@ -33,16 +33,13 @@ namespace wolf
 
 ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescriptorParamsBase* _dd_base_ptr) :
     ProcessorTrackerFeature(PRC_TRACKER_BRISK),
-    detector_descriptor_ptr_(nullptr), matcher_ptr_(nullptr), params_(_params),
+    matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     act_search_grid_()
 {
     switch (_dd_base_ptr->type){
         case DD_BRISK:
             {
             DetectorDescriptorParamsBrisk* dd_brisk = (DetectorDescriptorParamsBrisk*) _dd_base_ptr;
-            //used to test
-            _dd_base_ptr->nominal_pattern_radius = 18;
-            //
             detector_descriptor_ptr_ = new cv::BRISK(dd_brisk->threshold,dd_brisk->octaves,dd_brisk->pattern_scale);
             detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((_dd_base_ptr->nominal_pattern_radius)*pow(2,dd_brisk->octaves)),
                                                                    (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*dd_brisk->pattern_scale));
@@ -55,9 +52,6 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescrip
         case DD_ORB:
             {
             DetectorDescriptorParamsOrb* dd_orb = (DetectorDescriptorParamsOrb*) _dd_base_ptr;
-            //used to test
-            _dd_base_ptr->nominal_pattern_radius = 18;
-            //
             detector_descriptor_ptr_ = new cv::ORB(dd_orb->nfeatures,dd_orb->scaleFactor,dd_orb->nlevels,dd_orb->edgeThreshold,
                                                    dd_orb->firstLevel,dd_orb->WTA_K,dd_orb->scoreType,dd_orb->patchSize);
             detector_descriptor_params_.pattern_radius_ =

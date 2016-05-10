@@ -80,7 +80,7 @@ int main(int argc, char** argv)
     std::vector<cv::Mat> frame(buffer_size);
     cv::Mat last_frame;
 
-    //TESTS
+    //TESTS ========================================================================
     size_t size = 3;
     //Eigen::Matrix<wolf::Scalar, s, y> Rd;
     Eigen::MatrixXs U_v1(size,size);
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     Eigen::Matrix<wolf::Scalar, size1, size2, Eigen::RowMajor> test_matrix;
     std::cout << "matrix cols: " << test_matrix.cols();
     std::cout << "; matrix rows: " << test_matrix.rows() << std::endl;
-    //END TESTS
+    //END TESTS ====================================================================
 
     TimeStamp t = 1;
 
@@ -111,13 +111,6 @@ int main(int argc, char** argv)
 
     ProcessorImageParameters tracker_params;
     tracker_params.image = {img_width,  img_height};
-//    tracker_params.detector.threshold = 30;
-//    tracker_params.detector.threshold_new_features = 70;
-//    tracker_params.detector.octaves = 2;
-//    tracker_params.detector.nominal_pattern_radius = 4;
-////    tracker_params.descriptor.size = 512;
-//    tracker_params.descriptor.pattern_scale = 0.5;
-//    tracker_params.descriptor.nominal_pattern_radius = 18;
     tracker_params.matcher.min_normalized_score = 0.75;
     tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
     tracker_params.matcher.roi_width = 30;
@@ -136,19 +129,8 @@ int main(int argc, char** argv)
     brisk_params.type = DD_BRISK;
 
 
-    /* TEST */
-    //cv::ORB* desc_ext_ptr = new cv::ORB(500,0.4f, 1, 4);//(500, 1.0f, 1, 4);
-
-    /* matcher */
-    //cv::BFMatcher* match_ptr = new cv::BFMatcher(cv::NORM_HAMMING);
-
-
-    //ProcessorBrisk* test_p_brisk = new ProcessorBrisk(det_ptr,desc_ext_ptr,match_ptr,tracker_params);
-    ProcessorBrisk* test_p_brisk = new ProcessorBrisk(tracker_params, &brisk_params);
-    sen_cam_->addProcessor(test_p_brisk);
-
-
-    /* END TEST */
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params, &brisk_params);
+    sen_cam_->addProcessor(p_brisk);
 
 
     CaptureImage* capture_brisk_ptr;
@@ -166,7 +148,7 @@ int main(int argc, char** argv)
 
         clock_t t1 = clock();
         //p_brisk->process(capture_brisk_ptr);
-        test_p_brisk->process(capture_brisk_ptr);
+        p_brisk->process(capture_brisk_ptr);
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
         //capture_brisk_ptr->getTimeStamp().getSeconds()
         last_frame = frame[f % buffer_size];
