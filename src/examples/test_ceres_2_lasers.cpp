@@ -60,12 +60,12 @@ class FaramoticsRobot
             devicePose.setPose(2, 8, 0.2, 0, 0, 0);
             viewPoint.setPose(devicePose);
             viewPoint.moveForward(10);
-            viewPoint.rt.setEuler(viewPoint.rt.head() + Constants::PI / 2, viewPoint.rt.pitch() + 30. * Constants::PI / 180., viewPoint.rt.roll());
+            viewPoint.rt.setEuler(viewPoint.rt.head() + M_PI / 2, viewPoint.rt.pitch() + 30. * M_PI / 180., viewPoint.rt.roll());
             viewPoint.moveForward(-15);
             //glut initialization
             faramotics::initGLUT(argc, argv);
             //create a viewer for the 3D model and scan points
-            myRender = new CdynamicSceneRender(1200, 700, 90 * Constants::PI / 180, 90 * 700.0 * Constants::PI / (1200.0 * 180.0), 0.2, 100);
+            myRender = new CdynamicSceneRender(1200, 700, 90 * M_PI / 180, 90 * 700.0 * M_PI / (1200.0 * 180.0), 0.2, 100);
             myRender->loadAssimpModel(modelFileName, true); //with wireframe
             //create scanner and load 3D model
             myScanner = new CrangeScan2D(HOKUYO_UTM30LX_180DEG);  //HOKUYO_UTM30LX_180DEG or LEUZE_RS4
@@ -77,13 +77,13 @@ class FaramoticsRobot
         Eigen::Vector3s motionCampus(unsigned int ii, double& displacement_, double& rotation_)
         {
             if (ii <= 120){         displacement_ = 0.1;    rotation_ = 0; }
-            else if (ii <= 170) {   displacement_ = 0.2;    rotation_ = 1.8 * Constants::PI / 180; }
-            else if (ii <= 220) {   displacement_ = 0;      rotation_ =-1.8 * Constants::PI / 180; }
+            else if (ii <= 170) {   displacement_ = 0.2;    rotation_ = 1.8 * M_PI / 180; }
+            else if (ii <= 220) {   displacement_ = 0;      rotation_ =-1.8 * M_PI / 180; }
             else if (ii <= 310) {   displacement_ = 0.1;    rotation_ = 0; }
-            else if (ii <= 487) {   displacement_ = 0.1;    rotation_ =-1.0 * Constants::PI / 180; }
+            else if (ii <= 487) {   displacement_ = 0.1;    rotation_ =-1.0 * M_PI / 180; }
             else if (ii <= 600) {   displacement_ = 0.2;    rotation_ = 0; }
-            else if (ii <= 700) {   displacement_ = 0.1;    rotation_ =-1.0 * Constants::PI / 180; }
-            else if (ii <= 780) {   displacement_ = 0;      rotation_ =-1.0 * Constants::PI / 180; }
+            else if (ii <= 700) {   displacement_ = 0.1;    rotation_ =-1.0 * M_PI / 180; }
+            else if (ii <= 780) {   displacement_ = 0;      rotation_ =-1.0 * M_PI / 180; }
             else {                  displacement_ = 0.3;    rotation_ = 0; }
 
             devicePose.moveForward(displacement_);
@@ -167,11 +167,11 @@ class FaramoticsRobot
             //Set view point and render the scene
             //locate visualization view point, somewhere behind the device
     //      viewPoint.setPose(devicePose);
-    //      viewPoint.rt.setEuler( viewPoint.rt.head(), viewPoint.rt.pitch()+20.*Constants::PI/180., viewPoint.rt.roll() );
+    //      viewPoint.rt.setEuler( viewPoint.rt.head(), viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
     //      viewPoint.moveForward(-5);
             myRender->setViewPoint(viewPoint);
             myRender->drawPoseAxis(devicePose);
-            myRender->drawScan(laser == 1 ? laser1Pose : laser2Pose, laser == 1 ? scan1 : scan2, 180. * Constants::PI / 180., 90. * Constants::PI / 180.); //draw scan
+            myRender->drawScan(laser == 1 ? laser1Pose : laser2Pose, laser == 1 ? scan1 : scan2, 180. * M_PI / 180., 90. * M_PI / 180.); //draw scan
             myRender->render();
         }
 };
@@ -219,13 +219,13 @@ int main(int argc, char** argv)
     Eigen::Vector3s gps_pose = Eigen::Vector3s::Zero();
     Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
-    laser_2_pose << -1.2, 0, 0, Constants::PI; //laser 2
+    laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
 
     Problem* problem = new Problem(FRM_PO_2D);
     SensorOdom2D* odom_sensor = new SensorOdom2D(new StateBlock(odom_pose.head(2), true), new StateBlock(odom_pose.tail(1), true), odom_std_factor, odom_std_factor);
     SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
-    SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({Constants::PI/2,-Constants::PI/2, -Constants::PI/720,0.01,0.2,100,0.01,0.01}));
-    SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({Constants::PI/2,-Constants::PI/2, -Constants::PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
     ProcessorTrackerLandmarkCorner* laser_1_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
     ProcessorTrackerLandmarkCorner* laser_2_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
     ProcessorOdom2D* odom_processor = new ProcessorOdom2D();

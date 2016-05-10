@@ -16,9 +16,9 @@ bool ProcessorFactory::registerCreator(const std::string& _processor_type, Creat
 {
     bool reg = callbacks_.insert(CallbackMap::value_type(_processor_type, createFn)).second;
     if (reg)
-        std::cout << "ProcessorFactory: registered " << _processor_type << std::endl;
+        std::cout << "ProcessorFactory  : registered " << _processor_type << std::endl;
     else
-        std::cout << "ProcessorFactory: processor " << _processor_type << " already registered. Skipping. " << std::endl;
+        std::cout << "ProcessorFactory  : processor " << _processor_type << " already registered. Skipping. " << std::endl;
 
     return reg;
 }

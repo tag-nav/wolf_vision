@@ -47,14 +47,14 @@ void Problem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-SensorBase* Problem::addSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
+SensorBase* Problem::createSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
     SensorBase* sen_ptr = SensorFactory::get()->create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
     addSensor(sen_ptr);
     return sen_ptr;
 }
 
-ProcessorBase* Problem::addProcessor(std::string _prc_type, std::string _unique_processor_name,
+ProcessorBase* Problem::createProcessor(std::string _prc_type, std::string _unique_processor_name,
                                      std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params)
 {
     auto sen_it = std::find_if(getHardwarePtr()->getSensorListPtr()->begin(),
@@ -73,7 +73,7 @@ void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
     processor_motion_ptr_ = _processor_motion_ptr;
 }
 
-FrameBase* Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
+FrameBase* Problem::createFrame(FrameKeyType _frame_type, const TimeStamp& _time_stamp)
 {
     if (processor_motion_ptr_ != nullptr)
         return createFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
@@ -97,7 +97,7 @@ FrameBase* Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_st
     }
 }
 
-FrameBase* Problem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
+FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
     //std::cout << "creating new frame..." << std::endl;
@@ -300,7 +300,7 @@ bool Problem::getLandmarkCovariance(LandmarkBase* _landmark_ptr, Eigen::MatrixXs
     getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), _covariance, _landmark_ptr->getPPtr()->getSize() ,_landmark_ptr->getPPtr()->getSize());
 }
 
-Eigen::MatrixXs Problem::getFrameCovariance(LandmarkBase* _landmark_ptr)
+Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBase* _landmark_ptr)
 {
     Eigen::MatrixXs covariance = Eigen::MatrixXs::Zero(_landmark_ptr->getPPtr()->getSize()+_landmark_ptr->getOPtr()->getSize(), _landmark_ptr->getPPtr()->getSize()+_landmark_ptr->getOPtr()->getSize());
     getLandmarkCovariance(_landmark_ptr, covariance);

@@ -93,11 +93,23 @@ class Problem : public NodeBase
          */
         void addSensor(SensorBase* _sen_ptr);
 
-        /** \brief Factory method to add sensor only from its properties
+        /** \brief Factory method to create and add sensors only from its properties
+         * \param _sen_type type of sensor
+         * \param _unique_sensor_name unique sensor name, used to identify the particular instance of the sensor
+         * \param _extrinsics a vector of extrinsic parameters: size 2 for 2D position, 3 for 2D pose, 3 for 3D position, 7 for 3D pose.
+         * \param _intrinsics a base-pointer to a derived struct defining the intrinsic parameters.
          */
-        SensorBase* addSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics);
+        SensorBase* createSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics = nullptr);
 
-        ProcessorBase* addProcessor(std::string _sen_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params);
+        /** \brief Factory method to create and add processors only from its properties
+         *
+         * Also, bind the processor to the sensor matching the sensor name
+         * \param _sen_type type of processor
+         * \param _unique_processor_name unique processor name, used to identify the particular instance of the processor
+         * \param _corresponding_sensor_name corresponding sensor name, used to bind the processor to the particular instance of the sensor
+         * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
+         */
+        ProcessorBase* createProcessor(std::string _sen_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params = nullptr);
 
         /** \brief Set the processor motion
          *
@@ -110,32 +122,26 @@ class Problem : public NodeBase
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        FrameBase* createFrame(FrameType _frameType, const TimeStamp& _time_stamp);
+        FrameBase* createFrame(FrameKeyType _frame_key_type, const TimeStamp& _time_stamp);
 
         /** \brief Create Frame from vector
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        FrameBase* createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
+        FrameBase* createFrame(FrameKeyType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
         /** \brief Get the state at last timestamp
-         *
-         * Get the state at last timestamp
          */
         Eigen::VectorXs getCurrentState();
         void getCurrentState(Eigen::VectorXs& state);
 
         /** \brief Get the state at a given timestamp
-         *
-         * Get the state at a given timestamp
          */
         Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
         void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
 
         /** \brief Give the permission to a processor to create a new keyFrame
-         *
-         * Give the permission to a processor to create a new keyFrame
          */
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
 
@@ -187,10 +193,10 @@ class Problem : public NodeBase
         bool getFrameCovariance(FrameBase* _frame_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getFrameCovariance(FrameBase* _frame_ptr);
 
-        /** \brief Gets the covariance of a frame
+        /** \brief Gets the covariance of a landmark
          */
         bool getLandmarkCovariance(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& _covariance);
-        Eigen::MatrixXs getFrameCovariance(LandmarkBase* _landmark_ptr);
+        Eigen::MatrixXs getLandmarkCovariance(LandmarkBase* _landmark_ptr);
 
         /** \brief Adds a map
          */

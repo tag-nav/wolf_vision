@@ -12,7 +12,6 @@ namespace wolf
 
 // Wolf includes
 #include "processor_base.h"
-//#include "capture_gps.h"
 
 // Std includes
 

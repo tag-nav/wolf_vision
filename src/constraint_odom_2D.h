@@ -41,8 +41,7 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
 
     public:
         static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                                            NodeBase* _correspondant_ptr, //
-                                            ConstraintParamsBase* _params = nullptr)
+                                            NodeBase* _correspondant_ptr)
         {
             return new ConstraintOdom2D(_feature_ptr, (FrameBase*)_correspondant_ptr);
         }
@@ -91,11 +90,11 @@ inline bool ConstraintOdom2D::operator ()(const T* const _p1, const T* const _o1
 
     // Error
     residuals_map = expected_measurement - getMeasurement().cast<T>();
-    // pi2pi
-    while (residuals_map(2) > T(Constants::PI))
-        residuals_map(2) = residuals_map(2) - T(2 * Constants::PI);
-    while (residuals_map(2) <= T(-Constants::PI))
-        residuals_map(2) = residuals_map(2) + T(2 * Constants::PI);
+    // pi2pi - cannot use wolf::pi2pi() because of template T
+    while (residuals_map(2) > T(M_PI))
+        residuals_map(2) = residuals_map(2) - T(2 * M_PI);
+    while (residuals_map(2) <= T(-M_PI))
+        residuals_map(2) = residuals_map(2) + T(2 * M_PI);
 
     // Residuals
     residuals_map = getMeasurementSquareRootInformation().cast<T>() * residuals_map;

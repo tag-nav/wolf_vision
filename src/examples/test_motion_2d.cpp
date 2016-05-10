@@ -39,14 +39,14 @@ int main()
     // Origin frame:
     Eigen::Vector2s p0;
     p0 << 0.5, -0.5 - sqrt(0.5);
-    Eigen::Vector1s o0(Eigen::Vector1s::Constant(Constants::PI / 4));
+    Eigen::Vector1s o0(Eigen::Vector1s::Constant(M_PI_4));
     Eigen::Vector3s x0;
     x0 << p0, o0;
     Eigen::Matrix3s init_cov = Eigen::Matrix3s::Identity() * 0.1;
 
     // motion data
     Eigen::VectorXs data(2);
-    data << 1, Constants::PI / 4;  // advance 1m turn pi/4 rad (45 deg). Need 8 steps for a complete turn
+    data << 1, M_PI_4;  // advance 1m turn pi/4 rad (45 deg). Need 8 steps for a complete turn
     Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2, 2) * 0.01;
 
     // Create Wolf tree nodes

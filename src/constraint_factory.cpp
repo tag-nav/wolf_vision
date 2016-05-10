@@ -16,9 +16,9 @@ bool ConstraintFactory::registerCreator(const std::string& _constraint_type, Cre
 {
     bool reg = callbacks_.insert(CallbackMap::value_type(_constraint_type, createFn)).second;
     if (reg)
-        std::cout << "ConstraintFactory: registered " << _constraint_type << std::endl;
+        std::cout << "ConstraintFactory : registered " << _constraint_type << std::endl;
     else
-        std::cout << "ConstraintFactory: constraint " << _constraint_type << " already registered. Skipping. " << std::endl;
+        std::cout << "ConstraintFactory : constraint " << _constraint_type << " already registered. Skipping. " << std::endl;
 
     return reg;
 }
@@ -28,7 +28,7 @@ bool ConstraintFactory::unregisterCreator(const std::string& _constraint_type)
     return callbacks_.erase(_constraint_type) == 1;
 }
 
-ConstraintBase* ConstraintFactory::create(const std::string& _constraint_type, FeatureBase* _feature, NodeBase* _correspondant, ConstraintParamsBase* _params)
+ConstraintBase* ConstraintFactory::create(const std::string& _constraint_type, FeatureBase* _feature, NodeBase* _correspondant)
 {
     CallbackMap::const_iterator i = callbacks_.find(_constraint_type);
     if (i == callbacks_.end())
@@ -37,7 +37,7 @@ ConstraintBase* ConstraintFactory::create(const std::string& _constraint_type, F
         throw std::runtime_error("Unknown Constraint type");
     }
     // Invoke the creation function
-    return (i->second)(_feature, _correspondant, _params);
+    return (i->second)(_feature, _correspondant);
 }
 
 ConstraintFactory* ConstraintFactory::get() // Unique point of access;

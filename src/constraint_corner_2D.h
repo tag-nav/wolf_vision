@@ -49,7 +49,7 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
         }
 
     public:
-        static ConstraintBase* create(FeatureBase* _feature_ptr, NodeBase* _correspondant_ptr, ConstraintParamsBase* _params)
+        static ConstraintBase* create(FeatureBase* _feature_ptr, NodeBase* _correspondant_ptr)
         {
             return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*) _correspondant_ptr);
         }

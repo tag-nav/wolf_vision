@@ -170,7 +170,7 @@ class ProcessorTracker : public ProcessorBase
 
         /**\brief make a non-key Frame with the provided Capture
          */
-        void makeFrame(CaptureBase* _capture_ptr, FrameType _type = NON_KEY_FRAME);
+        void makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
 
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
@@ -197,7 +197,7 @@ inline const unsigned int ProcessorTracker::getMaxNewFeatures()
     return max_new_features_;
 }
 
-inline void ProcessorTracker::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
+inline void ProcessorTracker::makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
     FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
