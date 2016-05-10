@@ -208,7 +208,10 @@ namespace pinhole {
 
                 if (n == 0) {
                     ud = up;
-                    UD_up.setOnes(2);  /// test this one //PROBLEM HERE
+                    UD_up(0, 0) = 1;  /// test this one
+                    UD_up(0, 1) = 1;
+                    UD_up(1, 0) = 1;
+                    UD_up(1, 1) = 1;
                 }
 
                 else {
@@ -242,6 +245,8 @@ namespace pinhole {
                 }
 
             }
+
+            // c is correction?
             template<class VC, class VU>
             Eigen::Vector2s undistortPoint(const VC & c, const VU & ud) {
                 size_t n = c.size();
@@ -268,7 +273,10 @@ namespace pinhole {
 
                 if (n == 0) {
                     up = ud;
-                    UP_ud.setOnes(2);  /// test this one
+                    UP_ud(0, 0) = 1;  /// test this one
+                    UP_ud(0, 1) = 1;
+                    UP_ud(1, 0) = 1;
+                    UP_ud(1, 1) = 1;
                 }
 
                 else {

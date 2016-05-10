@@ -224,13 +224,144 @@ int main(int argc, char** argv)
 
     Eigen::Vector2s distored_point2;
     Eigen::Matrix2s distortion_jacobian;
+    //distortion_jacobian(0, 0) = 1;
     pinhole::distortPoint(distortion,dis_point,distored_point2,distortion_jacobian);
 
-    std::cout << std::endl << "TEST distortPoint" << std::endl;
+    std::cout << std::endl << "TEST distortPoint, jacobian" << std::endl;
     std::cout << "x: " << distored_point2[0] << "; y: " << distored_point2[1] << std::endl;
-//    std::cout << "Jacobian" << std::endl <<
-//                 distortion_jacobian.row(0).col(0) << " " << distortion_jacobian.row(0).col(1) << std::endl <<
-//                 distortion_jacobian.row(1).col(0) << " " << distortion_jacobian.row(1).col(1) << std::endl;
+    std::cout << "Jacobian" << std::endl <<
+                 distortion_jacobian.row(0).col(0) << " " << distortion_jacobian.row(0).col(1) << std::endl <<
+                 distortion_jacobian.row(1).col(0) << " " << distortion_jacobian.row(1).col(1) << std::endl;
+
+    //================================= distortPoint
+
+    Eigen::Vector2s correction;
+    correction[0] = 1;
+    correction[1] = 1.2;
+    Eigen::Vector2s cor_point;
+    cor_point[0] = 40;
+    cor_point[1] = 40;
+
+    Eigen::Vector2s corrected_point;
+    corrected_point = pinhole::undistortPoint(correction,cor_point);
+
+    std::cout << std::endl << "TEST undistortPoint" << std::endl;
+    std::cout << "x: " << corrected_point[0] << "; y: " << corrected_point[1] << std::endl;
+
+
+
+    Eigen::Vector2s corrected_point2;
+    Eigen::Matrix2s corrected_jacobian;
+    //distortion_jacobian(0, 0) = 1;
+    pinhole::undistortPoint(correction,cor_point,corrected_point2,corrected_jacobian);
+
+    std::cout << std::endl << "TEST undistortPoint, jacobian" << std::endl;
+    std::cout << "x: " << corrected_point2[0] << "; y: " << corrected_point2[1] << std::endl;
+    std::cout << "Jacobian" << std::endl <<
+                 corrected_jacobian.row(0).col(0) << " " << corrected_jacobian.row(0).col(1) << std::endl <<
+                 corrected_jacobian.row(1).col(0) << " " << corrected_jacobian.row(1).col(1) << std::endl;
+
+    //================================= projectPoint Complete
+
+    Eigen::Vector2s distortion_test;
+    distortion_test[0] = 1;
+    distortion_test[1] = 0.8;
+    Eigen::Vector4f k_test;
+    k_test[0] = 0.5;
+    k_test[1] = 0.4;
+    k_test[2] = 1.2;
+    k_test[3] = 1.2;
+    Eigen::Vector3s point3D_test;
+    point3D_test[0] = 3;
+    point3D_test[1] = 3;
+    point3D_test[2] = 3;
+
+    Eigen::Vector2s point2D_test;
+    point2D_test = pinhole::projectPoint(k_test,distortion_test,point3D_test);
+
+    std::cout << std::endl << "TEST projectPoint Complete" << std::endl;
+    std::cout << "x: " << point2D_test[0] << "; y: " << point2D_test[1] << std::endl;
+
+
+    Eigen::Vector2s point2D_test2;
+    double distance_test;
+    pinhole::projectPoint(k_test,distortion_test,point3D_test,point2D_test2,distance_test);
+
+    std::cout << std::endl << "TEST projectPoint Complete, distance" << std::endl;
+    std::cout << "x: " << point2D_test2[0] << "; y: " << point2D_test2[1] << "; dist: " << distance_test << std::endl;
+
+
+    Eigen::Vector2s point2D_test3;
+    Eigen::MatrixXs jacobian_test(2,3);
+    pinhole::projectPoint(k_test,distortion_test,point3D_test,point2D_test3,jacobian_test);
+
+    std::cout << std::endl << "TEST projectPoint Complete, jacobian" << std::endl;
+    std::cout << "x: " << point2D_test3[0] << "; y: " << point2D_test3[1] << std::endl;
+    std::cout << "Jacobian" << std::endl <<
+                 jacobian_test.row(0).col(0) << " " << jacobian_test.row(0).col(1) << " " << jacobian_test.row(0).col(2) << std::endl <<
+                 jacobian_test.row(1).col(0) << " " << jacobian_test.row(1).col(1) << " " << jacobian_test.row(1).col(2) << std::endl;
+
+
+    Eigen::Vector2s point2D_test4;
+    Eigen::MatrixXs jacobian_test2(2,3);
+    double distance_test2;
+    pinhole::projectPoint(k_test,distortion_test,point3D_test,point2D_test4,distance_test2,jacobian_test2);
+
+    std::cout << std::endl << "TEST projectPoint Complete, distance and jacobian" << std::endl;
+    std::cout << "x: " << point2D_test4[0] << "; y: " << point2D_test4[1] << "; dist: " << distance_test2 << std::endl;
+    std::cout << "Jacobian" << std::endl <<
+                 jacobian_test2.row(0).col(0) << " " << jacobian_test2.row(0).col(1) << " " << jacobian_test2.row(0).col(2) << std::endl <<
+                 jacobian_test2.row(1).col(0) << " " << jacobian_test2.row(1).col(1) << " " << jacobian_test2.row(1).col(2) << std::endl;
+
+    //================================= backprojectPoint Complete
+
+
+    Eigen::Vector2s correction_test;
+    correction_test[0] = 1;
+    correction_test[1] = 0.8;
+    Eigen::Vector2s point2D_backproj;
+    point2D_backproj[0] = 3;
+    point2D_backproj[1] = 3;
+    double depth2 = 3;
+
+    Eigen::Vector3s point3D_backproj;
+    point3D_backproj = pinhole::backprojectPoint(k_test,correction_test,point2D_backproj,depth2);
+
+    std::cout << std::endl << "TEST backprojectPoint Complete" << std::endl;
+    std::cout << "x: " << point3D_backproj[0] << "; y: " << point3D_backproj[1] << "; z: " << point3D_backproj[2] << std::endl;
+
+
+    Eigen::Vector3s point3D_backproj2;
+    Eigen::MatrixXs jacobian_backproj(3,2);
+    Eigen::Vector3s depth_jacobian;
+    pinhole::backProjectPoint(k_test,correction_test,point2D_backproj,depth2,point3D_backproj2,jacobian_backproj,depth_jacobian);
+
+    std::cout << std::endl << "TEST backprojectPoint Complete, jacobian and depth jacobian" << std::endl;
+    std::cout << "x: " << point3D_backproj2[0] << "; y: " << point3D_backproj2[1] << "; z: " << point3D_backproj2[2] << std::endl;
+    std::cout << "Jacobian" << std::endl <<
+                 jacobian_backproj.row(0).col(0) << " " << jacobian_backproj.row(0).col(1) << std::endl <<
+                 jacobian_backproj.row(1).col(0) << " " << jacobian_backproj.row(1).col(1) << std::endl <<
+                 jacobian_backproj.row(2).col(0) << " " << jacobian_backproj.row(2).col(1) << std::endl;
+    std::cout << "Jacobian - depth" << std::endl <<
+                 depth_jacobian[0] << " " << depth_jacobian[1] << " " << depth_jacobian[2] << " " << std::endl;
+
+    //================================= computeCorrectionModel
+
+    Eigen::Vector2s distortion_test2;
+    distortion_test2[0] = 1;
+    distortion_test2[1] = 0.8;
+    Eigen::Vector4f k_test2;
+    k_test2[0] = 0.5;
+    k_test2[1] = 0.4;
+    k_test2[2] = 1.2;
+    k_test2[3] = 1.2;
+
+    Eigen::Vector2s correction_test2;
+    pinhole::computeCorrectionModel(k_test2,distortion_test2,correction_test2);
+
+    std::cout << std::endl << "TEST computeCorrectionModel" << std::endl;
+    std::cout << "c1: " << correction_test2[0] << "; c2: " << correction_test2[1] << std::endl;
+
 }
 
 
