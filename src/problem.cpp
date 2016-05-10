@@ -80,7 +80,7 @@ void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
     processor_motion_ptr_ = _processor_motion_ptr;
 }
 
-FrameBase* Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
+FrameBase* Problem::createFrame(FrameKeyType _frame_type, const TimeStamp& _time_stamp)
 {
     if (processor_motion_ptr_ != nullptr)
         return createFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
@@ -104,7 +104,7 @@ FrameBase* Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_st
     }
 }
 
-FrameBase* Problem::createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
+FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
     //std::cout << "creating new frame..." << std::endl;
@@ -302,7 +302,7 @@ bool Problem::getLandmarkCovariance(LandmarkBase* _landmark_ptr, Eigen::MatrixXs
     getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), _covariance, _landmark_ptr->getPPtr()->getSize() ,_landmark_ptr->getPPtr()->getSize());
 }
 
-Eigen::MatrixXs Problem::getFrameCovariance(LandmarkBase* _landmark_ptr)
+Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBase* _landmark_ptr)
 {
     Eigen::MatrixXs covariance = Eigen::MatrixXs::Zero(_landmark_ptr->getPPtr()->getSize()+_landmark_ptr->getOPtr()->getSize(), _landmark_ptr->getPPtr()->getSize()+_landmark_ptr->getOPtr()->getSize());
     getLandmarkCovariance(_landmark_ptr, covariance);

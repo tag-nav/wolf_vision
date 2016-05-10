@@ -107,32 +107,26 @@ class Problem : public NodeBase
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        FrameBase* createFrame(FrameType _frameType, const TimeStamp& _time_stamp);
+        FrameBase* createFrame(FrameKeyType _frame_key_type, const TimeStamp& _time_stamp);
 
         /** \brief Create Frame from vector
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        FrameBase* createFrame(FrameType _frame_type, const Eigen::VectorXs& _frame_state,
+        FrameBase* createFrame(FrameKeyType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
         /** \brief Get the state at last timestamp
-         *
-         * Get the state at last timestamp
          */
         Eigen::VectorXs getCurrentState();
         void getCurrentState(Eigen::VectorXs& state);
 
         /** \brief Get the state at a given timestamp
-         *
-         * Get the state at a given timestamp
          */
         Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
         void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
 
         /** \brief Give the permission to a processor to create a new keyFrame
-         *
-         * Give the permission to a processor to create a new keyFrame
          */
         bool permitKeyFrame(ProcessorBase* _processor_ptr);
 
@@ -184,10 +178,10 @@ class Problem : public NodeBase
         bool getFrameCovariance(FrameBase* _frame_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getFrameCovariance(FrameBase* _frame_ptr);
 
-        /** \brief Gets the covariance of a frame
+        /** \brief Gets the covariance of a landmark
          */
         bool getLandmarkCovariance(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& _covariance);
-        Eigen::MatrixXs getFrameCovariance(LandmarkBase* _landmark_ptr);
+        Eigen::MatrixXs getLandmarkCovariance(LandmarkBase* _landmark_ptr);
 
         /** \brief Adds a map
          */
@@ -251,6 +245,8 @@ class Problem : public NodeBase
          */
         void removeDownNode(const LowerNodePtr _ptr){};
 
+//    protected:
+        virtual Problem* getTop();
 };
 
 } // namespace wolf
@@ -276,6 +272,11 @@ inline std::list<unsigned int>* Problem::getConstraintRemoveList()
 }
 
 inline Problem* Problem::getProblem()
+{
+    return this;
+}
+
+inline Problem* Problem::getTop()
 {
     return this;
 }
