@@ -246,7 +246,7 @@ int main(int argc, char** argv)
         // COMPUTE COVARIANCES ---------------------------
         //std::cout << "COMPUTING COVARIANCES..." << std::endl;
         t1 = clock();
-        //ceres_manager->computeCovariances();
+        ceres_manager->computeCovariances();
         mean_times(4) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // TIME MANAGEMENT ---------------------------
