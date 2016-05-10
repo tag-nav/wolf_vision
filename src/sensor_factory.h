@@ -104,7 +104,11 @@ namespace wolf
  *
  *      // Note: SensorCamera::create() is already registered, automatically.
  *
- *      // To create a camera, provide a type="CAMERA", a name="Front-left camera", an extrinsics vector, and a pointer to the intrinsics struct:
+ *      // To create a camera, provide:
+ *      //    a type = "CAMERA",
+ *      //    a name = "Front-left camera",
+ *      //    an extrinsics vector, and
+ *      //    a pointer to the intrinsics struct:
  *
  *      Eigen::VectorXs   extrinsics(7);        // give it some values...
  *      IntrinsicsCamera  intrinsics({...});    // also fill in the derived struct
