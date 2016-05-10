@@ -34,11 +34,22 @@ namespace wolf
  * The rule to make new TYPE strings unique is that you skip the prefix 'Sensor' from your class name,
  * and you build a string in CAPITALS with space separators.
  *
+ * #### Accessing the Factory
+ * The SensorFactory class is a singleton: it can only exist once in your application.
+ * To obtain a pointer to it, use the static method get(),
+ *
+ *     SensorFactory::get()
+ *
+ * You can then call the methods you like, e.g. to create a SensorCamera, you type:
+ *
+ *      SensorFactory::get()->create(... see below for creating sensors ...);
+ *
+ * #### Registering sensor creators
  * Registering sensor creators into the factory is done through registerCreator().
  * You provide a sensor type string (above), and a pointer to a static method
  * that knows how to create your specific sensor, e.g.:
  *
- *     registerCreator("CAMERA", SensorCamera::create);
+ *     SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
  *
  * The method SensorCamera::create() exists in the SensorCamera class as a static method.
  * All these SensorXxx::create() methods need to have exactly the same API, regardless of the sensor type.
@@ -63,20 +74,20 @@ namespace wolf
  *          return sen;
  *      }
  *
+ * See below for achieving automatic registration of your sensors.
+ *
+ * #### Unregistering sensor creators
  * The method unregisterCreator() unregisters the SensorXxx::create() method. It only needs to be passed the string of the sensor type.
  *
- * The SensorFactory class is a singleton: it can only exist once in your application.
- * To obtain a pointer to it, use the static method get(),
- *
- *     SensorFactory::get()
- *
- * You can then call the methods you like, e.g. to create a SensorCamera, you type:
+ * #### Creating sensors
+ * To create e.g. a SensorCamera, you type:
  *
  *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, intrinsics_ptr);
  *
  * where ABSOLUTELY ALL input parameters are important. In particular, the sensor name "Front-left camera" will be used to identify this camera
  * and to assign it the appropriate processors. DO NOT USE IT WITH DUMMY PARAMETERS!
  *
+ * #### Achieving automatic registration
  * Currently, registering is performed in each specific SensorXxxx source file, sensor_xxxx.cpp.
  * For example, in sensor_camera.cpp we find the line:
  *
@@ -85,6 +96,7 @@ namespace wolf
  * which is a static invocation (i.e., it is placed at global scope outside of the SensorCamera class).
  * Therefore, at application level, all sensors that have a .cpp file compiled are automatically registered.
  *
+ * #### Example
  * We finally provide the necessary steps to create a sensor of class SensorCamera in our application:
  *
  *      #include "sensor_factory.h"
