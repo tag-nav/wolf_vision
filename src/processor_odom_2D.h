@@ -187,10 +187,13 @@ inline ConstraintBase* ProcessorOdom2D::createConstraint(FeatureBase* _feature_m
 
 inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
 {
+    // TODO: Implement actual interpolation
+    // Implementation: motion ref keeps the same
     Motion tmp(_motion_ref);
     tmp.ts_ = _ts;
     tmp.delta_ = deltaZero();
     tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
+    tmp.delta_integr_cov_ += Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-9;
     return tmp;
 }
 
