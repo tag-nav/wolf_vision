@@ -45,6 +45,9 @@ namespace wolf
  *      SensorFactory::get()->create(... see below for creating sensors ...);
  *
  * #### Registering sensor creators
+ * Prior to invoking the creation of a sensor of a particular type,
+ * you must register the creator for this type into the factory.
+ *
  * Registering sensor creators into the factory is done through registerCreator().
  * You provide a sensor type string (above), and a pointer to a static method
  * that knows how to create your specific sensor, e.g.:
@@ -76,17 +79,6 @@ namespace wolf
  *
  * See below for achieving automatic registration of your sensors.
  *
- * #### Unregistering sensor creators
- * The method unregisterCreator() unregisters the SensorXxx::create() method. It only needs to be passed the string of the sensor type.
- *
- * #### Creating sensors
- * To create e.g. a SensorCamera, you type:
- *
- *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, intrinsics_ptr);
- *
- * where ABSOLUTELY ALL input parameters are important. In particular, the sensor name "Front-left camera" will be used to identify this camera
- * and to assign it the appropriate processors. DO NOT USE IT WITH DUMMY PARAMETERS!
- *
  * #### Achieving automatic registration
  * Currently, registering is performed in each specific SensorXxxx source file, sensor_xxxx.cpp.
  * For example, in sensor_camera.cpp we find the line:
@@ -95,6 +87,22 @@ namespace wolf
  *
  * which is a static invocation (i.e., it is placed at global scope outside of the SensorCamera class).
  * Therefore, at application level, all sensors that have a .cpp file compiled are automatically registered.
+ *
+ * #### Unregistering sensor creators
+ * The method unregisterCreator() unregisters the SensorXxx::create() method. It only needs to be passed the string of the sensor type.
+ *
+ *     SensorFactory::get()->unregisterCreator("CAMERA");
+ *
+ * #### Creating sensors
+ * Prior to invoking the creation of a sensor of a particular type,
+ * you must register the creator for this type into the factory.
+ *
+ * To create e.g. a SensorCamera, you type:
+ *
+ *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, intrinsics_ptr);
+ *
+ * where ABSOLUTELY ALL input parameters are important. In particular, the sensor name "Front-left camera" will be used to identify this camera
+ * and to assign it the appropriate processors. DO NOT USE IT WITH DUMMY PARAMETERS!
  *
  * #### Example
  * We finally provide the necessary steps to create a sensor of class SensorCamera in our application:
