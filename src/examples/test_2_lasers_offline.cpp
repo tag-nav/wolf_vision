@@ -112,7 +112,7 @@ int main(int argc, char** argv)
     Scalar timestamp;
     TimeStamp ts(0);
 
-    // Wolf Tree initialization
+    // Wolf initialization
     Eigen::Vector3s odom_pose = Eigen::Vector3s::Zero();
     Eigen::Vector3s gps_pose = Eigen::Vector3s::Zero();
     Eigen::VectorXs laser_1_params(9), laser_2_params(9);
@@ -128,7 +128,7 @@ int main(int argc, char** argv)
     extractVector(laser_2_file, laser_2_pose, timestamp);
     std::vector<float> scan2(laser_2_params(8));
 
-    Problem* problem = new Problem(FRM_PO_2D);
+    Problem problem(FRM_PO_2D);
     SensorOdom2D* odom_sensor = new SensorOdom2D(new StateBlock(odom_pose.head(2), true), new StateBlock(odom_pose.tail(1), true), odom_std_factor, odom_std_factor);
     SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
     SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)}));
@@ -139,11 +139,11 @@ int main(int argc, char** argv)
     odom_sensor->addProcessor(odom_processor);
     laser_1_sensor->addProcessor(laser_1_processor);
     laser_2_sensor->addProcessor(laser_2_processor);
-    problem->addSensor(odom_sensor);
-    problem->addSensor(gps_sensor);
-    problem->addSensor(laser_1_sensor);
-    problem->addSensor(laser_2_sensor);
-    problem->setProcessorMotion(odom_processor);
+    problem.addSensor(odom_sensor);
+    problem.addSensor(gps_sensor);
+    problem.addSensor(laser_1_sensor);
+    problem.addSensor(laser_2_sensor);
+    problem.setProcessorMotion(odom_processor);
 
     std::cout << "Wolf tree setted correctly!" << std::endl;
 
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
     odom_trajectory.head(3) = ground_truth_pose;
 
     // Origin Key Frame
-    FrameBase* origin_frame = problem->createFrame(KEY_FRAME, ground_truth_pose, ts);
+    FrameBase* origin_frame = problem.createFrame(KEY_FRAME, ground_truth_pose, ts);
 
     // Prior covariance
     CaptureFix* initial_covariance = new CaptureFix(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1);
@@ -173,7 +173,7 @@ int main(int argc, char** argv)
     //    ceres_options.max_num_iterations = 100;
     google::InitGoogleLogging(argv[0]);
 
-    CeresManager* ceres_manager = new CeresManager(problem);
+    CeresManager ceres_manager(&problem);
     std::ofstream log_file, landmark_file;  //output file
 
     std::cout << "START TRAJECTORY..." << std::endl;
@@ -203,7 +203,7 @@ int main(int argc, char** argv)
         odom_capture->setData(odom_data);
         odom_processor->process(odom_capture);
         // odometry integration
-        odom_trajectory.segment(step * 3, 3) = problem->getCurrentState();
+        odom_trajectory.segment(step * 3, 3) = problem.getCurrentState();
 
         // LIDAR DATA ---------------------------
         extractScan(laser_1_file, scan1, timestamp);
@@ -230,23 +230,23 @@ int main(int argc, char** argv)
 
 
         // UPDATING CERES ---------------------------
-        //std::cout << "UPDATING CERES..." << std::endl;
+        std::cout << "UPDATING CERES..." << std::endl;
         t1 = clock();
         // update state units and constraints in ceres
-        ceres_manager->update();
+        ceres_manager.update();
         mean_times(2) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // SOLVE OPTIMIZATION ---------------------------
-        //std::cout << "SOLVING..." << std::endl;
+        std::cout << "SOLVING..." << std::endl;
         t1 = clock();
-        ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
+        ceres::Solver::Summary summary = ceres_manager.solve(ceres_options);
         //std::cout << summary.FullReport() << std::endl;
         mean_times(3) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // COMPUTE COVARIANCES ---------------------------
-        //std::cout << "COMPUTING COVARIANCES..." << std::endl;
+        std::cout << "COMPUTING COVARIANCES..." << std::endl;
         t1 = clock();
-        ceres_manager->computeCovariances();
+        ceres_manager.computeCovariances();
         mean_times(4) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // TIME MANAGEMENT ---------------------------
@@ -274,7 +274,7 @@ int main(int argc, char** argv)
     // Vehicle poses
     int i = 0;
     Eigen::VectorXs state_poses = Eigen::VectorXs::Zero(n_execution * 3);
-    for (auto frame : *(problem->getTrajectoryPtr()->getFrameListPtr()))
+    for (auto frame : *(problem.getTrajectoryPtr()->getFrameListPtr()))
     {
         state_poses.segment(i, 3) << frame->getPPtr()->getVector(), frame->getOPtr()->getVector();
         i += 3;
@@ -282,8 +282,8 @@ int main(int argc, char** argv)
 
     // Landmarks
     i = 0;
-    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem->getMapPtr()->getLandmarkListPtr()->size() * 2);
-    for (auto landmark : *(problem->getMapPtr()->getLandmarkListPtr()))
+    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkListPtr()->size() * 2);
+    for (auto landmark : *(problem.getMapPtr()->getLandmarkListPtr()))
     {
         landmarks.segment(i, 2) = landmark->getPPtr()->getVector();
         i += 2;
@@ -319,11 +319,6 @@ int main(int argc, char** argv)
 
     std::cout << "Press any key for ending... " << std::endl << std::endl;
     std::getchar();
-
-    problem->destruct();
-    std::cout << "wolf deleted" << std::endl;
-    delete ceres_manager;
-    std::cout << "ceres_manager deleted" << std::endl;
 
     std::cout << " ========= END ===========" << std::endl << std::endl;
 
