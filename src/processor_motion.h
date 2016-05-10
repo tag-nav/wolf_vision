@@ -455,12 +455,15 @@ inline void ProcessorMotion::reintegrate()
 
 inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
 {
+    //std::cout << "ProcessorMotion::keyFrameCallback: " << std::endl;
+    //std::cout << "\tnew keyframe " << _keyframe_ptr->id() << std::endl;
+    //std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
+
     // get time stamp
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
     // create motion capture
     CaptureMotion2* key_capture_ptr = new CaptureMotion2(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                                          Eigen::MatrixXs::Zero(data_size_, data_size_));
-
     // add motion capture to keyframe
     _keyframe_ptr->addCapture(key_capture_ptr);
 
@@ -470,8 +473,8 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
 
     // interpolate individual delta
     Motion mot = interpolate(key_capture_ptr->getBufferPtr()->get().back(), // last Motion of old buffer
-            getBufferPtr()->get().front(), // first motion of new buffer
-            ts);
+                             getBufferPtr()->get().front(), // first motion of new buffer
+                             ts);
 
     // add to old buffer
     key_capture_ptr->getBufferPtr()->get().push_back(mot);
