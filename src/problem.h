@@ -114,6 +114,8 @@ class Problem : public NodeBase
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
          * This method creates a Processor, and adds it to the specified sensor's list of processors
+         *
+         * This method is a helper wrapper around the version accepting a sensor pointer instead of a sensor name.
          * \param _sen_type type of processor
          * \param _unique_processor_name unique processor name, used to identify the particular instance of the processor
          * \param _corresponding_sensor_name corresponding sensor name, used to bind the processor to the particular instance of the sensor
