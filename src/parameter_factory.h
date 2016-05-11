@@ -8,16 +8,15 @@
 #ifndef PARAMETER_FACTORY_H_
 #define PARAMETER_FACTORY_H_
 
-namespace wolf
-{
-struct ParameterBase;
-}
+#include "sensor_base.h"
 
 #include <string>
 #include <map>
 
 namespace wolf
 {
+
+typedef IntrinsicsBase ParameterBase; // Delete after renaming all the factory to IntrinsicsFactory
 
 class ParameterFactory
 {
