@@ -12,7 +12,7 @@
  * - Circular references are minimized.
  *
  * and some implications:
- * - After the class declaration, we need to #include all headers of the classes acting as the template parameters.
+ * - After the class declaration, we need to include all headers of the classes acting as the template parameters.
  * - This makes circular references again a risk.
  */
 
@@ -25,6 +25,8 @@
 
 namespace wolf
 {
+
+class Problem;
 
 /** \brief Linked node element in the Wolf Tree
  * 
@@ -77,6 +79,8 @@ class NodeLinked : public NodeBase
         UpperNodePtr up_node_ptr_; ///< Pointer to upper node
         LowerNodeList down_node_list_; ///< A list of pointers to lower nodes
         bool is_deleting_; ///< This node is being deleted.
+    private:
+        Problem* problem_ptr_;
 
     public:
 
@@ -182,15 +186,16 @@ class NodeLinked : public NodeBase
          */
         void unlinkDownNode(const unsigned int _id);
 
-        /** \brief Gets a pointer to the tree top node
-         * 
-         * TODO: Review if it could return a pointer to a derived class instead of NodeBase JVN: I tried to do so...
+        /** \brief Gets a pointer to the tree top node - direct method
          **/
-        virtual Problem* getProblem();
+        Problem* getProblem();
 
-    protected:
+        /** \brief Gets a pointer to the tree top node - recursive method
+         **/
+        Problem* getTop();
 
 };
+
 
 } // namespace wolf
 
@@ -225,6 +230,7 @@ NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std:
         down_node_list_(), //
         is_deleting_(false)
 {
+        problem_ptr_ = nullptr;
 }
 
 template<class UpperType, class LowerType>
@@ -311,7 +317,6 @@ inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodePtr _ptr)
     assert(!isBottom() && "Trying to add a down node to a bottom node");
     down_node_list_.push_back(_ptr);
     _ptr->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
-    //std::cout << "node: " << _ptr->nodeId() << " linked to " <<_ptr->upperNodePtr()->nodeId() << std::endl;
 }
 template<class UpperType, class LowerType>
 void NodeLinked<UpperType, LowerType>::addDownNodeList(LowerNodeList& _new_down_node_list)
@@ -392,10 +397,20 @@ inline void NodeLinked<UpperType, LowerType>::unlinkDownNode(const LowerNodeIter
 template<class UpperType, class LowerType>
 Problem* NodeLinked<UpperType, LowerType>::getProblem()
 {
+    if (problem_ptr_ == nullptr)
+        problem_ptr_ = getTop();
+    return problem_ptr_;
+}
+
+template<class UpperType, class LowerType>
+inline Problem* NodeLinked<UpperType, LowerType>::getTop()
+{
     if (up_node_ptr_ != nullptr)
-        return up_node_ptr_->getProblem();
+        return up_node_ptr_->getTop();
+
     return nullptr;
 }
+
 
 } // namespace wolf
 

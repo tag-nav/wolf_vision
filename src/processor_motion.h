@@ -93,23 +93,23 @@ class ProcessorMotion : public ProcessorBase
         virtual bool voteForKeyFrame();
 
         /** \brief Fills a reference to the state integrated so far
-         * \param the returned state vector
+         * \param _x the returned state vector
          */
         const void getState(Eigen::VectorXs& _x);
 
         /** \brief Gets a constant reference to the state integrated so far
-         * \return the state vector
+         * \param _x the state vector
          */
         const Eigen::VectorXs& getState();
 
         /** \brief Fills the state corresponding to the provided time-stamp
-         * \param _t the time stamp
+         * \param _ts the time stamp
          * \param _x the returned state
          */
         void getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
 
         /** \brief Gets the state corresponding to the provided time-stamp
-         * \param _t the time stamp
+         * \param _ts the time stamp
          * \return the state vector
          */
         Eigen::VectorXs& getState(const TimeStamp& _ts);

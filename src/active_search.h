@@ -166,7 +166,7 @@ class ActiveSearchGrid {
 
         /**
          * Get ROI of a random empty cell.
-         * \param roi the resulting ROI
+         * \param _roi the resulting ROI
          * \return true if ROI exists.
          */
         bool pickRoi(cv::Rect & _roi);
@@ -174,7 +174,7 @@ class ActiveSearchGrid {
         /**
          * Call this after pickRoi if no point was found in the roi
          * in order to avoid searching again in it.
-         * \param roi the ROI where nothing was found
+         * \param _roi the ROI where nothing was found
          */
         void blockCell(const cv::Rect & _roi);
 

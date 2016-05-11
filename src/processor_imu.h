@@ -30,9 +30,11 @@ class ProcessorIMU : public ProcessorMotion{
 
         /**
          * @brief extractData Extract data from the capture_imu object and store them
-         * @param _capture_ptr pointer to the capture to be used for data extraction
-         * @param _ts
          * @param _data
+         * @param _data_cov
+         * @param _dt
+         * @param _delta
+         * @param _delta_cov
          */
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
