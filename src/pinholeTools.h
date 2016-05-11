@@ -19,7 +19,7 @@
 //#include "jmath/matlab.hpp"
 #include "wolf.h"
 
-
+//namespace wolf {
 /**
  * Namespace for operations related to the pin-hole model of a camera.
  *
@@ -208,9 +208,9 @@ namespace pinhole {
 
                 if (n == 0) {
                     ud = up;
-                    UD_up(0, 0) = 1;  /// test this one
-                    UD_up(0, 1) = 1;
-                    UD_up(1, 0) = 1;
+                    UD_up(0, 0) = 1;
+                    UD_up(0, 1) = 0;
+                    UD_up(1, 0) = 0;
                     UD_up(1, 1) = 1;
                 }
 
@@ -273,9 +273,9 @@ namespace pinhole {
 
                 if (n == 0) {
                     up = ud;
-                    UP_ud(0, 0) = 1;  /// test this one
-                    UP_ud(0, 1) = 1;
-                    UP_ud(1, 0) = 1;
+                    UP_ud(0, 0) = 1;
+                    UP_ud(0, 1) = 0;
+                    UP_ud(1, 0) = 0;
                     UP_ud(1, 1) = 1;
                 }
 
@@ -592,7 +592,7 @@ namespace pinhole {
 
 
 
-
+//} // namespace wolf
 
 
 #endif // PINHOLETOOLS_H

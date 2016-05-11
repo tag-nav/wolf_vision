@@ -142,15 +142,12 @@ class ProcessorBrisk : public ProcessorTrackerFeature
     protected:
 
         /**
-         * \brief Does whatever needs to be done before the Process() takes place, such as initializations or assignations
-         * not relevant to the Process().
-         *
-         * Used for debugging
+         * \brief Does cast of the images and renews the active grid.
          */
         void preProcess();
 
         /**
-         * \brief Does whatever needs to be done after the Process(), like drawing the features.
+         * \brief Does the drawing of the features.
          *
          * Used for debugging
          */

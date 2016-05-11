@@ -45,7 +45,7 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescrip
                                                                    (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*dd_brisk->pattern_scale));
             act_search_grid_.setParameters(_params.image.width, _params.image.height,
                     _params.active_search.grid_width, _params.active_search.grid_height,
-                    _dd_base_ptr->nominal_pattern_radius * dd_brisk->pattern_scale,
+                    detector_descriptor_params_.pattern_radius_,
                     _params.active_search.separation);
             break;
             }
@@ -58,13 +58,15 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescrip
                     (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*pow(dd_orb->scaleFactor,dd_orb->nlevels-1));
             act_search_grid_.setParameters(_params.image.width, _params.image.height,
                     _params.active_search.grid_width, _params.active_search.grid_height,
-                    std::max(dd_orb->edgeThreshold,dd_orb->patchSize), //check this out /2?
+                    //std::max(dd_orb->edgeThreshold,dd_orb->patchSize), //check this out /2?
+                    detector_descriptor_params_.pattern_radius_,
                     _params.active_search.separation);
             break;
             }
         default:
             throw std::runtime_error("Unknown detector-descriptor");
     }
+
     matcher_ptr_ = new cv::BFMatcher(_params.matcher.similarity_norm);
     detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
 }
@@ -85,6 +87,8 @@ void ProcessorBrisk::preProcess()
         image_last_ = ((CaptureImage*)last_ptr_)->getImage();
 
     act_search_grid_.renew();
+
+    //The visualization part is only for debugging, not the casts done here.
 
     if(last_ptr_ != nullptr)
         resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()));
@@ -126,8 +130,6 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
     std::cout << "detect roi: " << _roi << std::endl;
 
-//    detector_.detect(_image_roi, _new_keypoints);
-//    descriptor_.compute(_image_roi, _new_keypoints, new_descriptors);
     detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
     for (unsigned int i = 0; i < _new_keypoints.size(); i++)
     {
@@ -239,7 +241,6 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 
         	std::cout << " --> " << candidate_keypoints.size() << " candidates";
 
-//            matcher_.match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
             matcher_ptr_->match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
 
             std::cout << "\n\tBest is: [" << cv_matches[0].trainIdx << "]:" << cv_matches[0].distance;

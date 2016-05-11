@@ -100,10 +100,10 @@ int main(int argc, char** argv)
     TimeStamp t = 1;
 
     Eigen::Vector4s k = {320,240,320,320};
-    StateBlock* intr = new StateBlock(k,false);
+    //StateBlock* intr = new StateBlock(k,false);
     SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()),
                                               new StateBlock(Eigen::Vector3s::Zero()),
-                                              intr,img_width,img_height);
+                                              new StateBlock(k,false),img_width,img_height);
 
 
     Problem* wolf_problem_ = new Problem(FRM_PO_3D);
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     brisk_params.type = DD_BRISK;
 
 
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params, &brisk_params);
+    ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params, &orb_params);
     sen_cam_->addProcessor(p_brisk);
 
 
@@ -147,10 +147,9 @@ int main(int argc, char** argv)
         capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame[f % buffer_size],img_width,img_height);
 
         clock_t t1 = clock();
-        //p_brisk->process(capture_brisk_ptr);
         p_brisk->process(capture_brisk_ptr);
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        //capture_brisk_ptr->getTimeStamp().getSeconds()
+
         last_frame = frame[f % buffer_size];
         f++;
         capture >> frame[f % buffer_size];
