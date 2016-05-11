@@ -75,7 +75,7 @@ SensorBase* SensorLaser2D::create(const std::string& _unique_name, const Eigen::
 
 // Register in the SensorFactory and the ParameterFactory
 #include "sensor_factory.h"
-#include "parameter_factory.h"
+#include "intrinsics_factory.h"
 #include "yaml-cpp/yaml.h"
 namespace wolf {
 // Yaml parser here !
@@ -88,6 +88,6 @@ IntrinsicsBase* SensorLaser2D::createParams(const std::string _filename_dot_yaml
 namespace
 {
 const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", SensorLaser2D::create);
-const bool registered_laser_params = ParameterFactory::get()->registerCreator("LASER 2D", SensorLaser2D::createParams);
+const bool registered_laser_params = IntrinsicsFactory::get()->registerCreator("LASER 2D", SensorLaser2D::createParams);
 }
 } // namespace wolf

@@ -124,6 +124,7 @@ SET(HDRS
     feature_odom_2D.h
     frame_base.h
     hardware_base.h
+    intrinsics_factory.h
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
@@ -137,7 +138,6 @@ SET(HDRS
     node_constrained.h
     node_linked.h
     node_terminus.h
-    parameter_factory.h
     problem.h
     processor_base.h
     processor_imu.h
@@ -189,6 +189,7 @@ SET(SRCS
     feature_odom_2D.cpp
     frame_base.cpp
     hardware_base.cpp
+    intrinsics_factory.cpp
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
@@ -198,7 +199,6 @@ SET(SRCS
     local_parametrization_homogeneous.cpp
     map_base.cpp
     node_base.cpp
-    parameter_factory.cpp
     problem.cpp
     processor_base.cpp
     processor_factory.cpp
