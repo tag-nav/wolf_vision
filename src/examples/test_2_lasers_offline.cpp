@@ -16,15 +16,15 @@
 #include "glog/logging.h"
 
 //Wolf includes
-#include "problem.h"
-#include "processor_tracker_landmark_corner.h"
-#include "processor_odom_2D.h"
-#include "sensor_laser_2D.h"
-#include "sensor_odom_2D.h"
-#include "sensor_gps_fix.h"
-#include "capture_fix.h"
-#include "capture_odom_2D.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "../problem.h"
+#include "../processor_tracker_landmark_corner.h"
+#include "../processor_odom_2D.h"
+#include "../sensor_laser_2D.h"
+#include "../sensor_odom_2D.h"
+#include "../sensor_gps_fix.h"
+#include "../capture_fix.h"
+#include "../capture_odom_2D.h"
+#include "../ceres_wrapper/ceres_manager.h"
 
 // laserscanutils
 #include "laser_scan_utils/line_finder_iterative.h"
@@ -113,10 +113,15 @@ int main(int argc, char** argv)
     TimeStamp ts(0);
 
     // Wolf initialization
-    Eigen::Vector3s odom_pose = Eigen::Vector3s::Zero();
-    Eigen::Vector3s gps_pose = Eigen::Vector3s::Zero();
+    Eigen::VectorXs odom_pose = Eigen::VectorXs::Zero(3);
+    Eigen::VectorXs gps_pose = Eigen::VectorXs::Zero(3);
     Eigen::VectorXs laser_1_params(9), laser_2_params(9);
     Eigen::VectorXs laser_1_pose(4), laser_2_pose(4); //xyz + theta
+
+    // odometry intrinsics
+    IntrinsicsOdom2D odom_param;
+    odom_param.k_disp_to_disp = odom_std_factor;
+    odom_param.k_rot_to_rot = odom_std_factor;
 
     // laser 1 extrinsics and intrinsics
     extractVector(laser_1_file, laser_1_params, timestamp);
@@ -129,17 +134,15 @@ int main(int argc, char** argv)
     std::vector<float> scan2(laser_2_params(8));
 
     Problem problem(FRM_PO_2D);
-    SensorOdom2D* odom_sensor = new SensorOdom2D(new StateBlock(odom_pose.head(2), true), new StateBlock(odom_pose.tail(1), true), odom_std_factor, odom_std_factor);
+    SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.createSensor("ODOM 2D", "odometer", odom_pose, &odom_param);
+    ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.createProcessor("ODOM 2D", "main odometry", "odometer");
     SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
     SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)}));
     SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)}));
     ProcessorTrackerLandmarkCorner* laser_1_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
     ProcessorTrackerLandmarkCorner* laser_2_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
-    ProcessorOdom2D* odom_processor = new ProcessorOdom2D();
-    odom_sensor->addProcessor(odom_processor);
     laser_1_sensor->addProcessor(laser_1_processor);
     laser_2_sensor->addProcessor(laser_2_processor);
-    problem.addSensor(odom_sensor);
     problem.addSensor(gps_sensor);
     problem.addSensor(laser_1_sensor);
     problem.addSensor(laser_2_sensor);
