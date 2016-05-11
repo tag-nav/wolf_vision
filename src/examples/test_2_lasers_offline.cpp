@@ -148,13 +148,13 @@ int main(int argc, char** argv)
     laser_2_processor_params.n_corners_th = 10;
 
     Problem problem(FRM_PO_2D);
-    SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.createSensor("ODOM 2D", "odometer", odom_pose, &odom_intrinsics);
-    ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.createProcessor("ODOM 2D", "main odometry", "odometer");
-    SensorBase* gps_sensor = problem.createSensor("GPS FIX", "GPS fix", gps_position);
-    SensorBase* laser_1_sensor = problem.createSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
-    SensorBase* laser_2_sensor = problem.createSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
-    problem.createProcessor("LASER 2D", "front laser processor", "front laser", &laser_1_processor_params);
-    problem.createProcessor("LASER 2D", "rear laser processor", "rear laser", &laser_2_processor_params);
+    SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.installSensor("ODOM 2D", "odometer", odom_pose, &odom_intrinsics);
+    ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.installProcessor("ODOM 2D", "main odometry", "odometer");
+    SensorBase* gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
+    SensorBase* laser_1_sensor = problem.installSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
+    SensorBase* laser_2_sensor = problem.installSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
+    problem.installProcessor("LASER 2D", "front laser processor", "front laser", &laser_1_processor_params);
+    problem.installProcessor("LASER 2D", "rear laser processor", "rear laser", &laser_2_processor_params);
     problem.setProcessorMotion(odom_processor);
 
     std::cout << "Wolf tree setted correctly!" << std::endl;
