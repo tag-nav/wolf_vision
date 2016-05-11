@@ -79,6 +79,7 @@ class NodeLinked : public NodeBase
         UpperNodePtr up_node_ptr_; ///< Pointer to upper node
         LowerNodeList down_node_list_; ///< A list of pointers to lower nodes
         bool is_deleting_; ///< This node is being deleted.
+    private:
         Problem* problem_ptr_;
 
     public:
@@ -185,13 +186,13 @@ class NodeLinked : public NodeBase
          */
         void unlinkDownNode(const unsigned int _id);
 
-        /** \brief Gets a pointer to the tree top node
-         * 
-         * TODO: Review if it could return a pointer to a derived class instead of NodeBase JVN: I tried to do so...
+        /** \brief Gets a pointer to the tree top node - direct method
          **/
-        virtual Problem* getProblem();
+        Problem* getProblem();
 
-        virtual Problem* getTop();
+        /** \brief Gets a pointer to the tree top node - recursive method
+         **/
+        Problem* getTop();
 
 };
 
