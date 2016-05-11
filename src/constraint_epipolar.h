@@ -8,7 +8,7 @@ namespace wolf {
 class ConstraintEpipolar : public ConstraintBase
 {
     public:
-        ConstraintEpipolar(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr);
+        ConstraintEpipolar(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE);
 
         virtual ~ConstraintEpipolar();
 
@@ -37,8 +37,8 @@ class ConstraintEpipolar : public ConstraintBase
 
 };
 
-inline ConstraintEpipolar::ConstraintEpipolar(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) :
-        ConstraintBase(CTR_EPIPOLAR, _feature_other_ptr, CTR_INACTIVE)
+inline ConstraintEpipolar::ConstraintEpipolar(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr, bool _apply_loss_function, ConstraintStatus _status) :
+        ConstraintBase(CTR_EPIPOLAR, _feature_other_ptr, _apply_loss_function, _status)
 {
     setType("EPIPOLAR");
 }
