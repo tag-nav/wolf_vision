@@ -255,7 +255,8 @@ typedef enum
 {
     LANDMARK_POINT = 1,     ///< A Euclidean point landmark, either 3D or 2D
     LANDMARK_CORNER,    ///< A corner landmark (2D)
-    LANDMARK_CONTAINER  ///< A container landmark (2D)
+    LANDMARK_CONTAINER,  ///< A container landmark (2D)
+    LANDMARK_LINE_2D
 } LandmarkType;
 
 typedef enum

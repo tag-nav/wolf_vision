@@ -9,7 +9,7 @@ FeatureLine2D::FeatureLine2D(const Eigen::Vector3s & _line_homogeneous_params,
                first_point_(_point1),
                last_point_(_point2)
 {
-    
+        setType("LINE_2D");
 }
 
 FeatureLine2D::~FeatureLine2D()
