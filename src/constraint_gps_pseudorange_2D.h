@@ -28,9 +28,10 @@ namespace wolf {
 class ConstraintGPSPseudorange2D : public ConstraintSparse<1, 2, 1, 3, 1, 3, 1>
 {
 public:
-    ConstraintGPSPseudorange2D(FeatureBase* _ftr_ptr, ConstraintStatus _status = CTR_ACTIVE) :
+    ConstraintGPSPseudorange2D(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 2, 1, 3, 1, 3, 1>(_ftr_ptr,
                                                   CTR_GPS_PR_2D,
+                                                  _apply_loss_function,
                                                   _status,
                                                   _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame
                                                   _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // orientation of the vehicle's frame

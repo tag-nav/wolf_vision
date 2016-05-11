@@ -7,12 +7,13 @@ namespace wolf {
 
 unsigned int ConstraintBase::constraint_id_count_ = 0;
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_ABSOLUTE),
     status_(_status),
+    apply_loss_function_(_apply_loss_function),
     frame_ptr_(nullptr),
     feature_ptr_(nullptr),
     landmark_ptr_(nullptr)
@@ -21,12 +22,13 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, ConstraintStatus _status) :
 }
 
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_FRAME),
     status_(_status),
+    apply_loss_function_(_apply_loss_function),
     frame_ptr_(_frame_ptr),
     feature_ptr_(nullptr),
     landmark_ptr_(nullptr)
@@ -36,12 +38,13 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, Constr
 }
 
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_FEATURE),
     status_(_status),
+    apply_loss_function_(_apply_loss_function),
     frame_ptr_(nullptr),
     feature_ptr_(_feature_ptr),
     landmark_ptr_(nullptr)
@@ -51,12 +54,13 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, Co
 }
 
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeLinked(BOTTOM, "CONSTRAINT"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_LANDMARK),
     status_(_status),
+    apply_loss_function_(_apply_loss_function),
     frame_ptr_(nullptr),
     feature_ptr_(nullptr),
     landmark_ptr_(_landmark_ptr)

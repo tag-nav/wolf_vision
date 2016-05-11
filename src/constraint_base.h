@@ -24,9 +24,10 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
         static unsigned int constraint_id_count_;
     protected:
         unsigned int constraint_id_;
-        ConstraintType type_id_;                           ///< type of constraint (types defined at wolf.h)
+        ConstraintType type_id_;                        ///< type of constraint (types defined at wolf.h)
         ConstraintCategory category_;                   ///< category of constraint (types defined at wolf.h)
         ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
+        bool apply_loss_function_;                      ///< flag for applying loss function to this constraint
         FrameBase* frame_ptr_;                          ///< FrameBase pointer (for category CTR_FRAME)
         FeatureBase* feature_ptr_;                      ///< FeatureBase pointer (for category CTR_FEATURE)
         LandmarkBase* landmark_ptr_;                    ///< LandmarkBase pointer (for category CTR_LANDMARK)
@@ -35,19 +36,19 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 
         /** \brief Constructor of category CTR_ABSOLUTE
          **/
-        ConstraintBase(ConstraintType _tp, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status);
 
         /** \brief Constructor of category CTR_FRAME
          **/
-        ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
         /** \brief Constructor of category CTR_FEATURE
          **/
-        ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
         /** \brief Constructor of category CTR_LANDMARK
          **/
-        ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
         /** \brief Default destructor (not recommended)
          *
@@ -110,6 +111,14 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
          */
         void setStatus(ConstraintStatus _status);
 
+        /** \brief Gets the apply loss function flag
+         */
+        bool getApplyLossFunction();
+
+        /** \brief Gets the apply loss function flag
+         */
+        void setApplyLossFunction(const bool _apply);
+
         /** \brief Returns a pointer to the frame constrained to
          **/
         FrameBase* getFrameOtherPtr();
@@ -148,6 +157,25 @@ inline ConstraintCategory ConstraintBase::getCategory() const
 inline ConstraintStatus ConstraintBase::getStatus() const
 {
     return status_;
+}
+
+inline bool ConstraintBase::getApplyLossFunction()
+{
+    return apply_loss_function_;
+}
+
+inline void ConstraintBase::setApplyLossFunction(const bool _apply)
+{
+    if (apply_loss_function_ != _apply)
+    {
+        if (getProblem() == nullptr)
+            std::cout << "constraint not linked with Problem, apply loss function change not notified" << std::endl;
+        else
+        {
+            getProblem()->removeConstraintPtr(this);
+            getProblem()->addConstraintPtr(this);
+        }
+    }
 }
 
 inline FrameBase* ConstraintBase::getFrameOtherPtr()

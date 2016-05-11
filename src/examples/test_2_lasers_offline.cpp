@@ -95,15 +95,12 @@ int main(int argc, char** argv)
     // INITIALIZATION ============================================================================================
     //init random generators
     Scalar odom_std_factor = 0.5;
-    Scalar gps_std = 1;
     std::default_random_engine generator(1);
     std::normal_distribution<Scalar> distribution_odom(0.0, odom_std_factor); //odometry noise
-    std::normal_distribution<Scalar> distribution_gps(0.0, gps_std); //GPS noise
 
     //variables
     std::string line;
     Eigen::VectorXs odom_data = Eigen::VectorXs::Zero(2);
-    Eigen::Vector2s gps_fix_reading;
     Eigen::VectorXs ground_truth(n_execution * 3); //all true poses
     Eigen::VectorXs ground_truth_pose(3); //last true pose
     Eigen::VectorXs odom_trajectory(n_execution * 3); //open loop trajectory
@@ -114,38 +111,50 @@ int main(int argc, char** argv)
 
     // Wolf initialization
     Eigen::VectorXs odom_pose = Eigen::VectorXs::Zero(3);
-    Eigen::VectorXs gps_pose = Eigen::VectorXs::Zero(3);
+    Eigen::VectorXs gps_position = Eigen::VectorXs::Zero(2);
     Eigen::VectorXs laser_1_params(9), laser_2_params(9);
     Eigen::VectorXs laser_1_pose(4), laser_2_pose(4); //xyz + theta
+    Eigen::VectorXs laser_1_pose2D(3), laser_2_pose2D(3); //xy + theta
 
     // odometry intrinsics
-    IntrinsicsOdom2D odom_param;
-    odom_param.k_disp_to_disp = odom_std_factor;
-    odom_param.k_rot_to_rot = odom_std_factor;
+    IntrinsicsOdom2D odom_intrinsics;
+    odom_intrinsics.k_disp_to_disp = odom_std_factor;
+    odom_intrinsics.k_rot_to_rot = odom_std_factor;
 
     // laser 1 extrinsics and intrinsics
     extractVector(laser_1_file, laser_1_params, timestamp);
     extractVector(laser_1_file, laser_1_pose, timestamp);
+    laser_1_pose2D.head<2>() = laser_1_pose.head<2>();
+    laser_1_pose2D(2) = laser_1_pose(3);
     std::vector<float> scan1(laser_1_params(8)); // number of ranges in a scan
+    IntrinsicsLaser2D laser_1_intrinsics;
+    laser_1_intrinsics.scan_params = laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)});
+
+    ProcessorParamsLaser laser_1_processor_params;
+    laser_1_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
+    laser_1_processor_params.n_corners_th = 10;
 
     // laser 2 extrinsics and intrinsics
     extractVector(laser_2_file, laser_2_params, timestamp);
     extractVector(laser_2_file, laser_2_pose, timestamp);
+    laser_2_pose2D.head<2>() = laser_2_pose.head<2>();
+    laser_2_pose2D(2) = laser_2_pose(3);
     std::vector<float> scan2(laser_2_params(8));
+    IntrinsicsLaser2D laser_2_intrinsics;
+    laser_2_intrinsics.scan_params = laserscanutils::LaserScanParams({laser_2_params(0), laser_2_params(1), laser_2_params(2), laser_2_params(3), laser_2_params(4), laser_2_params(5), laser_2_params(6), laser_2_params(7)});
+
+    ProcessorParamsLaser laser_2_processor_params;
+    laser_2_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
+    laser_2_processor_params.n_corners_th = 10;
 
     Problem problem(FRM_PO_2D);
-    SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.createSensor("ODOM 2D", "odometer", odom_pose, &odom_param);
+    SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.createSensor("ODOM 2D", "odometer", odom_pose, &odom_intrinsics);
     ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.createProcessor("ODOM 2D", "main odometry", "odometer");
-    SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
-    SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)}));
-    SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)}));
-    ProcessorTrackerLandmarkCorner* laser_1_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
-    ProcessorTrackerLandmarkCorner* laser_2_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
-    laser_1_sensor->addProcessor(laser_1_processor);
-    laser_2_sensor->addProcessor(laser_2_processor);
-    problem.addSensor(gps_sensor);
-    problem.addSensor(laser_1_sensor);
-    problem.addSensor(laser_2_sensor);
+    SensorBase* gps_sensor = problem.createSensor("GPS FIX", "GPS fix", gps_position);
+    SensorBase* laser_1_sensor = problem.createSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
+    SensorBase* laser_2_sensor = problem.createSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
+    problem.createProcessor("LASER 2D", "front laser processor", "front laser", &laser_1_processor_params);
+    problem.createProcessor("LASER 2D", "rear laser processor", "rear laser", &laser_2_processor_params);
     problem.setProcessorMotion(odom_processor);
 
     std::cout << "Wolf tree setted correctly!" << std::endl;
@@ -176,7 +185,7 @@ int main(int argc, char** argv)
     //    ceres_options.max_num_iterations = 100;
     google::InitGoogleLogging(argv[0]);
 
-    CeresManager ceres_manager(&problem);
+    CeresManager ceres_manager(&problem, ceres_options);
     std::ofstream log_file, landmark_file;  //output file
 
     std::cout << "START TRAJECTORY..." << std::endl;
@@ -213,36 +222,20 @@ int main(int argc, char** argv)
         extractScan(laser_2_file, scan2, timestamp);
         if (step % 3 == 0)
         {
-            std::cout << "--PROCESS LIDAR 1 DATA..." << laser_1_sensor->id() << std::endl;
-            laser_1_processor->process(new CaptureLaser2D(ts, laser_1_sensor, scan1));
-            std::cout << "--PROCESS LIDAR 2 DATA..." << laser_2_sensor->id() << std::endl;
-            laser_2_processor->process(new CaptureLaser2D(ts, laser_2_sensor, scan2));
-        }
-
-        // GPS DATA ---------------------------
-        if (step % 5 == 0)
-        {
-            // compute GPS
-            gps_fix_reading  = ground_truth_pose.head<2>();
-            gps_fix_reading(0) += distribution_gps(generator);
-            gps_fix_reading(1) += distribution_gps(generator);
-            // process data
-            //(new CaptureGPSFix(ts, &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+            std::cout << "--PROCESS LIDAR 1 DATA..." << std::endl;
+            CaptureLaser2D* new_scan_1 = new CaptureLaser2D(ts, laser_1_sensor, scan1);
+            new_scan_1->process();
+            std::cout << "--PROCESS LIDAR 2 DATA..." << std::endl;
+            CaptureLaser2D* new_scan_2 = new CaptureLaser2D(ts, laser_2_sensor, scan2);
+            new_scan_2->process();
         }
         mean_times(0) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
 
-        // UPDATING CERES ---------------------------
-        std::cout << "UPDATING CERES..." << std::endl;
-        t1 = clock();
-        // update state units and constraints in ceres
-        ceres_manager.update();
-        mean_times(2) += ((double) clock() - t1) / CLOCKS_PER_SEC;
-
         // SOLVE OPTIMIZATION ---------------------------
         std::cout << "SOLVING..." << std::endl;
         t1 = clock();
-        ceres::Solver::Summary summary = ceres_manager.solve(ceres_options);
+        ceres::Solver::Summary summary = ceres_manager.solve();
         //std::cout << summary.FullReport() << std::endl;
         mean_times(3) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 

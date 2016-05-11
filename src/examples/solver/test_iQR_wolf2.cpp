@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
     //    ceres_options.max_num_iterations = 100;
-    CeresManager* ceres_manager = new CeresManager(wolf_manager_ceres->getProblemPtr());
+    CeresManager* ceres_manager = new CeresManager(wolf_manager_ceres->getProblemPtr(), ceres_options);
     std::ofstream log_file, landmark_file;  //output file
 
     // Own solver
@@ -260,14 +260,13 @@ int main(int argc, char *argv[])
         //std::cout << "UPDATING..." << std::endl;
         // update state units and constraints in ceres
         solver_.update();
-        ceres_manager->update();
 
         // PRINT PROBLEM
         //solver_.printProblem();
 
         // SOLVE OPTIMIZATION ---------------------------
         //std::cout << "SOLVING..." << std::endl;
-        ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
+        ceres::Solver::Summary summary = ceres_manager->solve();
         solver_.solve(solving_mode);
 
         std::cout << "========================= RESULTS " << step << ":" << std::endl;

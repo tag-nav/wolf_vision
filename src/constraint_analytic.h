@@ -21,7 +21,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_ABSOLUTE
          *
          **/
-        ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, ConstraintStatus _status,
+        ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
                          StateBlock* _state0Ptr,
                          StateBlock* _state1Ptr = nullptr,
                          StateBlock* _state2Ptr = nullptr,
@@ -38,7 +38,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_FRAME
          *
          **/
-        ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status,
+        ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
                          StateBlock* _state0Ptr,
                          StateBlock* _state1Ptr = nullptr,
                          StateBlock* _state2Ptr = nullptr,
@@ -55,7 +55,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_FEATURE
          *
          **/
-        ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _feature_ptr, ConstraintStatus _status,
+        ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
                          StateBlock* _state0Ptr,
                          StateBlock* _state1Ptr = nullptr,
                          StateBlock* _state2Ptr = nullptr,
@@ -72,7 +72,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_LANDMARK
          *
          **/
-        ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status,
+        ConstraintAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
                          StateBlock* _state0Ptr,
                          StateBlock* _state1Ptr = nullptr,
                          StateBlock* _state2Ptr = nullptr,
