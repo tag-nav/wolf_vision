@@ -1,14 +1,10 @@
 #include "sensor_camera.h"
 #include "state_block.h"
 #include "state_quaternion.h"
+#include "yaml-cpp/yaml.h"
+#include "pinholeTools.h"
 
 namespace wolf {
-
-/**
- *
- * Test for the camera sensor
- *
- **/
 
 SensorCamera::SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr,
                            int _img_width, int _img_height) :
@@ -41,6 +37,64 @@ SensorBase* SensorCamera::create(const std::string& _unique_name, const Eigen::V
     return sen_ptr;
 }
 
+IntrinsicsBase* SensorCamera::createParams(const std::string _filename_dot_yaml)
+{
+    YAML::Node camera_config = YAML::LoadFile(_filename_dot_yaml);
+
+    if (camera_config["sensor type"])
+    {
+
+        // YAML:: to std::
+        std::string sensor_type = camera_config["sensor type"].as<std::string>();
+        std::string sensor_name = camera_config["sensor name"].as<std::string>();
+        std::vector<double> p   = camera_config["extrinsic"] ["position"].as<std::vector<double> >(); // in one go: it works!
+        std::vector<double> o   = camera_config["extrinsic"] ["orientation"].as<std::vector<double> >();
+        std::vector<double> s   = camera_config["parameters"]["image size"].as<std::vector<double> >();
+        std::vector<double> k   = camera_config["parameters"]["intrinsic"].as<std::vector<double> >();
+        std::vector<double> d   = camera_config["parameters"]["distortion"].as<std::vector<double> >();
+        std::vector<double> c   = camera_config["parameters"]["correction"].as<std::vector<double> >();
+
+        // std:: to Eigen::
+        // Using Eigen vector constructors from data pointers. Mind the vector sizes!
+        using namespace Eigen;
+        Vector3d pos(p.data());
+        Vector3d ori(o.data());
+        ori *= M_PI / 180; // deg to rad
+        Vector2d size(s.data());
+        Vector4d intrinsic(k.data());
+        Map<VectorXd> distortion(d.data(), d.size());
+        VectorXs correction(d.size());
+
+        pinhole::computeCorrectionModel(intrinsic, distortion, correction);
+
+        std::cout << "sensor type: " << sensor_type << std::endl;
+        std::cout << "sensor name: " << sensor_name << std::endl;
+        std::cout << "sensor extrinsics: " << std::endl;
+        std::cout << "\tposition    : " << pos.transpose() << std::endl;
+        std::cout << "\torientation : " << ori.transpose() << std::endl;
+        std::cout << "sensor parameters: " << std::endl;
+        std::cout << "\timage size  : " << size.transpose() << std::endl;
+        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
+        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
+        std::cout << "\tcorrection  : " << correction.transpose() << std::endl;
+
+        // Eigen:: to wolf::
+        IntrinsicsCamera* intrinsics_cam = new IntrinsicsCamera;
+        intrinsics_cam->type = sensor_type;
+        intrinsics_cam->name = sensor_name;
+        intrinsics_cam->intrinsic_vector = intrinsic;
+        intrinsics_cam->distortion = distortion;
+        intrinsics_cam->correction = correction;
+        intrinsics_cam->width = size(0);
+        intrinsics_cam->height = size(1);
+
+        return intrinsics_cam;
+    }
+
+    std::cout << "Bad configuration file. No sensor type found." << std::endl;
+    return nullptr;
+}
+
 
 } // namespace wolf
 
@@ -53,3 +107,4 @@ namespace
 const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
 }
 } // namespace wolf
+

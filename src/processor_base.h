@@ -15,6 +15,8 @@ namespace wolf {
 
 struct ProcessorParamsBase
 {
+    std::string type;
+    std::string name;
     // This struct empty. Derive from it to create classes for processor parameters.
 };
 

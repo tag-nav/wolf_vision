@@ -22,7 +22,9 @@ namespace wolf {
  */
 struct IntrinsicsBase
 {
-        // This struct empty. Derive from it to create classes for sensor intrinsic parameters.
+    std::string type;
+    std::string name;
+    // This struct empty. Derive from it to create classes for sensor intrinsic parameters.
 };
 
 class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
