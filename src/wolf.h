@@ -238,14 +238,14 @@ typedef enum
  */
 typedef enum
 {
-    FEAT_CORNER = 1,
-    FEAT_FIX,
-    FEAT_GPS_FIX,
-    FEAT_GPS_PR,
-    FEAT_ODOM_2D,
-    FEAT_MOTION,
-    FEAT_POINT_IMAGE, 
-    FEAT_LINE_2D
+    FEATURE_CORNER = 1,
+    FEATURE_FIX,
+    FEATURE_GPS_FIX,
+    FEATURE_GPS_PSEUDORANGE,
+    FEATURE_ODOM_2D,
+    FEATURE_MOTION,
+    FEATURE_POINT_IMAGE, 
+    FEATURE_LINE_2D
 }FeatureType;
 
 /** \brief Enumeration of all possible landmark types
