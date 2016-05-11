@@ -13,7 +13,10 @@ class NodeTerminus;
 
 namespace wolf {
 
-struct ProcessorParamsBase{};
+struct ProcessorParamsBase
+{
+    // This struct empty. Derive from it to create classes for processor parameters.
+};
 
 //class ProcessorBase
 class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
