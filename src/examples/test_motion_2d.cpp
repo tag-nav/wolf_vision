@@ -66,7 +66,7 @@ int main()
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr);
+    CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr, ceres_options);
 
 
     // Origin Key Frame
@@ -217,8 +217,7 @@ int main()
     std::cout << "Covariance: " << std::endl << new_keyframe_ptr->getCaptureListPtr()->front()->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
 
     // Solve
-    ceres_manager_ptr->update();
-    ceres::Solver::Summary summary = ceres_manager_ptr->solve(ceres_options);
+    ceres::Solver::Summary summary = ceres_manager_ptr->solve();
     //std::cout << summary.FullReport() << std::endl;
     ceres_manager_ptr->computeCovariances(ALL_MARGINALS);
 

@@ -25,7 +25,7 @@ class FeatureLine2D : public FeatureBase
     public:
         /** \brief Constructor 
          * 
-         * Constructor, with measurement and decriptor
+         * Constructor, with measurement and descriptor
          * 
          */
         FeatureLine2D(const Eigen::Vector3s & _line_homogeneous_params, const Eigen::Matrix3s & _params_covariance, 

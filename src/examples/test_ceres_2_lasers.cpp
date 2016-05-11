@@ -267,7 +267,7 @@ int main(int argc, char** argv)
     //    ceres_options.max_num_iterations = 100;
     google::InitGoogleLogging(argv[0]);
 
-    CeresManager ceres_manager(&problem);
+    CeresManager ceres_manager(&problem, ceres_options);
     std::ofstream log_file, landmark_file;  //output file
 
     //std::cout << "START TRAJECTORY..." << std::endl;
@@ -319,18 +319,10 @@ int main(int argc, char** argv)
         }
         mean_times(0) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
-
-        // UPDATING CERES ---------------------------
-        //std::cout << "UPDATING CERES..." << std::endl;
-        t1 = clock();
-        // update state units and constraints in ceres
-        ceres_manager.update();
-        mean_times(2) += ((double) clock() - t1) / CLOCKS_PER_SEC;
-
         // SOLVE OPTIMIZATION ---------------------------
         //std::cout << "SOLVING..." << std::endl;
         t1 = clock();
-        ceres::Solver::Summary summary = ceres_manager.solve(ceres_options);
+        ceres::Solver::Summary summary = ceres_manager.solve();
         //std::cout << summary.FullReport() << std::endl;
         mean_times(3) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 

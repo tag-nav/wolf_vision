@@ -30,7 +30,7 @@ class FeaturePointImage : public FeatureBase
         FeaturePointImage(const Eigen::Vector2s & _measurement);
 
         FeaturePointImage(const Eigen::Vector2s & _measurement, const Eigen::Matrix2s& _meas_covariance) :
-                FeatureBase(FEAT_POINT_IMAGE, _measurement, _meas_covariance)
+                FeatureBase(FEATURE_POINT_IMAGE, _measurement, _meas_covariance)
         {
             keypoint_.pt.x = measurement_(0);
             keypoint_.pt.y = measurement_(1);
@@ -39,7 +39,7 @@ class FeaturePointImage : public FeatureBase
         //_known_or_new: known = true; new = false;
         FeaturePointImage(const cv::KeyPoint& _keypoint,
                           const cv::Mat& _descriptor, bool _is_known) :
-                FeatureBase(FEAT_POINT_IMAGE, Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
+                FeatureBase(FEATURE_POINT_IMAGE, Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
                 keypoint_(_keypoint),
                 descriptor_(_descriptor)
         {

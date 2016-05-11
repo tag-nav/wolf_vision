@@ -13,8 +13,8 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 	public:
 		static const unsigned int N_BLOCKS = 4;
 
-		ConstraintCorner2D(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr, ConstraintStatus _status = CTR_ACTIVE) :
-			ConstraintSparse<3,2,1,2,1>(_ftr_ptr, CTR_CORNER_2D, _lmk_ptr, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
+		ConstraintCorner2D(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+			ConstraintSparse<3,2,1,2,1>(_ftr_ptr, CTR_CORNER_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
 		{
             setType("CORNER 2D");
 		}

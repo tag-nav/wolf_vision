@@ -195,8 +195,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
 
 bool ProcessorTrackerLandmarkCorner::voteForKeyFrame()
 {
-    return true;
-    //return matches_landmark_from_incoming_.size() < n_corners_th_ && matches_landmark_from_last_.size() > matches_landmark_from_incoming_.size();
+    return matches_landmark_from_incoming_.size() < n_corners_th_ && matches_landmark_from_last_.size() > matches_landmark_from_incoming_.size();
 }
 
 void ProcessorTrackerLandmarkCorner::extractCorners(CaptureLaser2D* _capture_laser_ptr,
