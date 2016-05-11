@@ -137,6 +137,7 @@ SET(HDRS
     node_constrained.h
     node_linked.h
     node_terminus.h
+    parameter_factory.h
     problem.h
     processor_base.h
     processor_imu.h
@@ -197,6 +198,7 @@ SET(SRCS
     local_parametrization_homogeneous.cpp
     map_base.cpp
     node_base.cpp
+    parameter_factory.cpp
     problem.cpp
     processor_base.cpp
     processor_factory.cpp
