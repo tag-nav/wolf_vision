@@ -95,15 +95,13 @@ int main(int argc, char** argv)
     // INITIALIZATION ============================================================================================
     //init random generators
     Scalar odom_std_factor = 0.5;
-    Scalar gps_std = 1;
+    Scalar gps_std = 0.5;
     std::default_random_engine generator(1);
     std::normal_distribution<Scalar> distribution_odom(0.0, odom_std_factor); //odometry noise
-    std::normal_distribution<Scalar> distribution_gps(0.0, gps_std); //GPS noise
 
     //variables
     std::string line;
     Eigen::VectorXs odom_data = Eigen::VectorXs::Zero(2);
-    Eigen::Vector2s gps_fix_reading;
     Eigen::VectorXs ground_truth(n_execution * 3); //all true poses
     Eigen::VectorXs ground_truth_pose(3); //last true pose
     Eigen::VectorXs odom_trajectory(n_execution * 3); //open loop trajectory
@@ -217,17 +215,6 @@ int main(int argc, char** argv)
             laser_1_processor->process(new CaptureLaser2D(ts, laser_1_sensor, scan1));
             std::cout << "--PROCESS LIDAR 2 DATA..." << laser_2_sensor->id() << std::endl;
             laser_2_processor->process(new CaptureLaser2D(ts, laser_2_sensor, scan2));
-        }
-
-        // GPS DATA ---------------------------
-        if (step % 5 == 0)
-        {
-            // compute GPS
-            gps_fix_reading  = ground_truth_pose.head<2>();
-            gps_fix_reading(0) += distribution_gps(generator);
-            gps_fix_reading(1) += distribution_gps(generator);
-            // process data
-            //(new CaptureGPSFix(ts, &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
         }
         mean_times(0) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
