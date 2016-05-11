@@ -9,6 +9,7 @@
 #define PROCESSOR_MOTION_H_
 
 // Wolf
+#include "processor_base.h"
 #include "capture_motion2.h"
 #include "motion_buffer.h"
 #include "time_stamp.h"
