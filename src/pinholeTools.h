@@ -2,7 +2,7 @@
 #define PINHOLETOOLS_H
 
 /**
- * \file pinholeTools.hpp
+ * \file pinholeTools.h
  *
  * \date 06/04/2010
  * \author jsola
@@ -142,6 +142,7 @@ namespace pinhole {
 
             /**
              * Distortion factor for the model s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
+             * \param d the distortion parameters vector
              * \param r2 the square of the radius to evaluate, r2 = r^2.
              * \return the distortion factor so that rd = s*r
              */
@@ -405,6 +406,7 @@ namespace pinhole {
              * \param d the radial distortion parameters vector
              * \param v the 3D point to project, or the 3D director vector
              * \param u the projected and distorted point
+             * \param dist distance from the optical center to the 3D point
              */
             template<class VK, class VD, class V, class U>
             void projectPoint(const VK & k, const VD & d, const V & v, U & u, double & dist) {
@@ -499,7 +501,10 @@ namespace pinhole {
             /**
              * Determine if a pixel is inside the region of interest
              * \param pix the pixel to test
-             * \param roi the region of interest, in pixels
+             * \param x the region of interest, top-left x
+             * \param y the region of interest, top-left y
+             * \param width the region of interest width
+             * \param height the region of interest height
              */
             template<class VPix>
             bool isInRoi(const VPix & pix, const int x, const int y, const int width, const int height) {
@@ -522,8 +527,9 @@ namespace pinhole {
              * Compute distortion correction parameters.
              *
              * This method follows the one in Joan Sola's thesis [1], pag 46--49.
-             *
-             * \param size: the size of the desired correction vector.
+             * \param k the intrinsic parameters vector
+             * \param d the distortion parameters vector
+             * \param c the correction parameters vector. Provide it with the desired size.
              */
             template<class Vk, class Vd, class Vc>
             void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c) {

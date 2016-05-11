@@ -45,8 +45,7 @@ class ProcessorTrackerLandmarkDummy : public wolf::ProcessorTrackerLandmark
         virtual bool voteForKeyFrame();
 
         /** \brief Detect new Features
-         * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
-         * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
+         * \param _max_features maximum number of features to detect.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.

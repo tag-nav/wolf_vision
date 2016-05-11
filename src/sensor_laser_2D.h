@@ -35,7 +35,6 @@ class SensorLaser2D : public SensorBase
          *
          * \param _p_ptr StateBlock pointer to the sensor position
          * \param _o_ptr StateBlock pointer to the sensor orientation
-         * \param _params Scan parameters
          *
          **/
         SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const double& _angle_min, const double& _angle_max, const double& _angle_step, const double& _scan_time, const double& _range_min, const double& _range_max, const double& _range_std_dev, const double& _angle_std_dev);

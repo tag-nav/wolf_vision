@@ -12,7 +12,7 @@
  * - Circular references are minimized.
  *
  * and some implications:
- * - After the class declaration, we need to #include all headers of the classes acting as the template parameters.
+ * - After the class declaration, we need to include all headers of the classes acting as the template parameters.
  * - This makes circular references again a risk.
  */
 
