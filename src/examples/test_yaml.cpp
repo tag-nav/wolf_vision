@@ -5,6 +5,8 @@
  *      \author: jsola
  */
 
+#include "pinholeTools.h"
+
 #include "yaml-cpp/yaml.h"
 
 #include <iostream>
@@ -15,7 +17,7 @@
 int main()
 {
 
-    YAML::Node camera_config = YAML::LoadFile("/home/jsola/dev/wolf/src/examples/camera.yaml");
+    YAML::Node camera_config = YAML::LoadFile("/Users/jsola/dev/wolf/src/examples/camera.yaml");
 
     if (camera_config["sensor type"])
     {
@@ -41,7 +43,10 @@ int main()
         Vector2d size(s.data());
         Vector4d intrinsic(k.data());
         Map<VectorXd> distortion(d.data(), d.size());
-        Map<VectorXd> correction(c.data(), c.size());
+//        Map<VectorXd> correction(c.data(), c.size());
+        VectorXd correction(d.size()+1);
+
+        pinhole::computeCorrectionModel(intrinsic, distortion, correction);
 
         std::cout << "sensor type: " << sensor_type << std::endl;
         std::cout << "sensor name: " << sensor_name << std::endl;
