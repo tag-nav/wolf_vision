@@ -54,18 +54,26 @@ SensorBase* Problem::installSensor(std::string _sen_type, std::string _unique_se
     return sen_ptr;
 }
 
-ProcessorBase* Problem::installProcessor(std::string _prc_type, std::string _unique_processor_name,
-                                     std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params)
+ProcessorBase* Problem::installProcessor(std::string _prc_type, //
+                                         std::string _unique_processor_name, //
+                                         SensorBase* _corresponding_sensor_ptr, //
+                                         ProcessorParamsBase* _prc_params)
 {
-    auto sen_it = std::find_if(getHardwarePtr()->getSensorListPtr()->begin(),
-                               getHardwarePtr()->getSensorListPtr()->end(),
-                               [&](SensorBase* sb) { return sb->getName() == _corresponding_sensor_name; }); // lambda function for the find_if
-    if (sen_it == getHardwarePtr()->getSensorListPtr()->end())
+    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(uppercase(_prc_type), _unique_processor_name, _prc_params);
+    _corresponding_sensor_ptr->addProcessor(prc_ptr);
+    return prc_ptr;
+}
+
+ProcessorBase* Problem::installProcessor(std::string _prc_type, //
+                                         std::string _unique_processor_name, //
+                                         std::string _corresponding_sensor_name, //
+                                         ProcessorParamsBase* _prc_params)
+{
+    SensorBase* sen_ptr = getSensorPtr(_corresponding_sensor_name);
+    if (sen_ptr == nullptr)
         throw std::runtime_error("Sensor not found. Cannot bind Processor.");
 
-    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(uppercase(_prc_type), _unique_processor_name, _prc_params);
-    (*sen_it)->addProcessor(prc_ptr);
-    return prc_ptr;
+    return installProcessor(_prc_type, _unique_processor_name, sen_ptr, _prc_params);
 }
 
 void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
@@ -352,6 +360,19 @@ FrameBase* Problem::getLastKeyFramePtr()
 StateBlockList* Problem::getStateListPtr()
 {
     return &state_block_ptr_list_;
+}
+
+wolf::SensorBase* Problem::getSensorPtr(const std::string& _sensor_name)
+{
+    auto sen_it = std::find_if(getHardwarePtr()->getSensorListPtr()->begin(),
+                               getHardwarePtr()->getSensorListPtr()->end(), [&](SensorBase* sb)
+                               {
+                                   return sb->getName() == _sensor_name;
+                               }); // lambda function for the find_if
+    if (sen_it == getHardwarePtr()->getSensorListPtr()->end())
+        return nullptr;
+
+    return (*sen_it);
 }
 
 } // namespace wolf

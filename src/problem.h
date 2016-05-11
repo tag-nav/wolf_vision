@@ -106,10 +106,20 @@ class Problem : public NodeBase
          * This method creates a Processor, and adds it to the specified sensor's list of processors
          * \param _sen_type type of processor
          * \param _unique_processor_name unique processor name, used to identify the particular instance of the processor
+         * \param _corresponding_sensor_ptr pointer to the sensor where the processor will be installed.
+         * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
+         */
+        ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, SensorBase* _corresponding_sensor_ptr, ProcessorParamsBase* _prc_params = nullptr);
+
+        /** \brief Factory method to install (create, and add to sensor) processors only from its properties
+         *
+         * This method creates a Processor, and adds it to the specified sensor's list of processors
+         * \param _sen_type type of processor
+         * \param _unique_processor_name unique processor name, used to identify the particular instance of the processor
          * \param _corresponding_sensor_name corresponding sensor name, used to bind the processor to the particular instance of the sensor
          * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
          */
-        ProcessorBase* installProcessor(std::string _sen_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params = nullptr);
+        ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params = nullptr);
 
         /** \brief Set the processor motion
          *
@@ -255,6 +265,11 @@ class Problem : public NodeBase
          * This empty function is needed by the destruct() node_linked function.
          */
         void removeDownNode(const LowerNodePtr _ptr){};
+
+        /** \brief get a sensor pointer by its name
+         * \param _sensor_name The sensor name, as it was installed with installSensor()
+         */
+        SensorBase* getSensorPtr(const std::string& _sensor_name);
 
 };
 
