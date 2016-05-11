@@ -2,18 +2,19 @@
 
 namespace wolf {
 
-CeresManager::CeresManager(Problem* _wolf_problem, const bool _use_wolf_auto_diff) :
+CeresManager::CeresManager(Problem* _wolf_problem, const ceres::Solver::Options& _ceres_options, const bool _use_wolf_auto_diff) :
+    ceres_options_(_ceres_options),
     wolf_problem_(_wolf_problem),
     use_wolf_auto_diff_(_use_wolf_auto_diff)
 {
-	ceres::Covariance::Options covariance_options;
+    ceres::Covariance::Options covariance_options;
     covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
     covariance_options.num_threads = 8;//ceres::DENSE_SVD;
     covariance_options.apply_loss_function = false;
-	//covariance_options.null_space_rank = -1;
-	covariance_ = new ceres::Covariance(covariance_options);
+    //covariance_options.null_space_rank = -1;
+    covariance_ = new ceres::Covariance(covariance_options);
 
-	ceres::Problem::Options problem_options;
+    ceres::Problem::Options problem_options;
     problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
@@ -36,15 +37,18 @@ CeresManager::~CeresManager()
     //std::cout << "ceres problem deleted! \n";
 }
 
-ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_options)
+ceres::Solver::Summary CeresManager::solve()
 {
 	//std::cout << "Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+
+    // update problem
+    update();
 
 	// create summary
 	ceres::Solver::Summary ceres_summary_;
 
 	// run Ceres Solver
-	ceres::Solve(_ceres_options, ceres_problem_, &ceres_summary_);
+	ceres::Solve(ceres_options_, ceres_problem_, &ceres_summary_);
 
 	//return results
 	return ceres_summary_;
@@ -53,6 +57,9 @@ ceres::Solver::Summary CeresManager::solve(const ceres::Solver::Options& _ceres_
 void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 {
     //std::cout << "CeresManager: computing covariances..." << std::endl;
+
+    // update problem
+    update();
 
     // CLEAR STORED COVARIANCE BLOCKS IN WOLF PROBLEM
     wolf_problem_->clearCovariance();
@@ -177,7 +184,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
-void CeresManager::update(const bool _apply_loss_function)
+void CeresManager::update()
 {
     //std::cout << "CeresManager: updating... " << std::endl;
     //std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
@@ -215,7 +222,7 @@ void CeresManager::update(const bool _apply_loss_function)
         {
             case ADD:
             {
-                addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_,wolf_problem_->getConstraintNotificationList().front().id_, _apply_loss_function);
+                addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_,wolf_problem_->getConstraintNotificationList().front().id_);
                 break;
             }
             case REMOVE:
@@ -230,14 +237,14 @@ void CeresManager::update(const bool _apply_loss_function)
     }
 }
 
-void CeresManager::addConstraint(ConstraintBase* _corr_ptr, unsigned int _id, const bool _apply_loss)
+void CeresManager::addConstraint(ConstraintBase* _ctr_ptr, unsigned int _id)
 {
-    id_2_costfunction_[_id] = createCostFunction(_corr_ptr);
+    id_2_costfunction_[_id] = createCostFunction(_ctr_ptr);
 
-    if (_apply_loss)
-        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _corr_ptr->getStateBlockPtrVector());
+    if (_ctr_ptr->getApplyLossFunction())
+        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateBlockPtrVector());
     else
-        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], NULL, _corr_ptr->getStateBlockPtrVector());
+        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], NULL, _ctr_ptr->getStateBlockPtrVector());
 }
 
 void CeresManager::removeConstraint(const unsigned int& _corr_id)
