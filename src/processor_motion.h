@@ -480,7 +480,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
     key_capture_ptr->getBufferPtr()->get().push_back(mot);
 
     // create motion constraint and add it to the new keyframe
-    FeatureBase* key_feature_ptr = new FeatureBase(FEAT_MOTION,
+    FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION,
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_);
     key_capture_ptr->addFeature(key_feature_ptr);
