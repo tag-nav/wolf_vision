@@ -132,7 +132,7 @@ int main(int argc, char** argv)
 
     ProcessorParamsLaser laser_1_processor_params;
     laser_1_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
-    laser_1_processor_params.n_corners_th = 3;
+    laser_1_processor_params.n_corners_th = 10;
 
     // laser 2 extrinsics and intrinsics
     extractVector(laser_2_file, laser_2_params, timestamp);
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 
     ProcessorParamsLaser laser_2_processor_params;
     laser_2_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
-    laser_2_processor_params.n_corners_th = 3;
+    laser_2_processor_params.n_corners_th = 10;
 
     Problem problem(FRM_PO_2D);
     SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.createSensor("ODOM 2D", "odometer", odom_pose, &odom_intrinsics);
@@ -185,7 +185,7 @@ int main(int argc, char** argv)
     //    ceres_options.max_num_iterations = 100;
     google::InitGoogleLogging(argv[0]);
 
-    CeresManager ceres_manager(&problem);
+    CeresManager ceres_manager(&problem, ceres_options);
     std::ofstream log_file, landmark_file;  //output file
 
     std::cout << "START TRAJECTORY..." << std::endl;
@@ -232,17 +232,10 @@ int main(int argc, char** argv)
         mean_times(0) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
 
-        // UPDATING CERES ---------------------------
-        std::cout << "UPDATING CERES..." << std::endl;
-        t1 = clock();
-        // update state units and constraints in ceres
-        ceres_manager.update();
-        mean_times(2) += ((double) clock() - t1) / CLOCKS_PER_SEC;
-
         // SOLVE OPTIMIZATION ---------------------------
         std::cout << "SOLVING..." << std::endl;
         t1 = clock();
-        ceres::Solver::Summary summary = ceres_manager.solve(ceres_options);
+        ceres::Solver::Summary summary = ceres_manager.solve();
         //std::cout << summary.FullReport() << std::endl;
         mean_times(3) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 

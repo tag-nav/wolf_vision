@@ -89,12 +89,8 @@ int main(int argc, char** argv)
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full);
-    CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun);
+    CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full, ceres_options);
+    CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun,ceres_options);
 
     // load graph from .txt
     offLineFile_.open(file_path_.c_str(), std::ifstream::in);
@@ -340,12 +336,6 @@ int main(int argc, char** argv)
     Lambda = Lambda + DeltaLambda;
     t_sigma_manual += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
-    // BUILD SOLVER PROBLEM
-    std::cout << "updating ceres..." << std::endl;
-    ceres_manager_full->update();
-    ceres_manager_prun->update();
-    std::cout << "updated!" << std::endl;
-
     // COMPUTE COVARIANCES
     ConstraintBaseList constraints;
     wolf_problem_prun->getTrajectoryPtr()->getConstraintList(constraints);
@@ -557,13 +547,11 @@ int main(int argc, char** argv)
     // SOLVING PROBLEMS
     std::cout << "FULL PROBLEM" << std::endl;
     std::cout << "solving..." << std::endl;
-    summary_full = ceres_manager_full->solve(ceres_options);
+    summary_full = ceres_manager_full->solve();
     std::cout << summary_full.FullReport() << std::endl;
     std::cout << "PRUNNED PROBLEM" << std::endl;
-    std::cout << "updating..." << std::endl;
-    ceres_manager_prun->update();
     std::cout << "solving..." << std::endl;
-    summary_prun = ceres_manager_prun->solve(ceres_options);
+    summary_prun = ceres_manager_prun->solve();
     std::cout << summary_prun.FullReport() << std::endl;
 
     delete wolf_problem_full; //not necessary to delete anything more, wolf will do it!

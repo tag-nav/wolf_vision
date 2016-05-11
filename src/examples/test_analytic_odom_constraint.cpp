@@ -68,8 +68,8 @@ int main(int argc, char** argv)
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    CeresManager* ceres_manager_autodiff = new CeresManager(wolf_problem_autodiff);
-    CeresManager* ceres_manager_analytic = new CeresManager(wolf_problem_analytic);
+    CeresManager* ceres_manager_autodiff = new CeresManager(wolf_problem_autodiff, ceres_options);
+    CeresManager* ceres_manager_analytic = new CeresManager(wolf_problem_analytic, ceres_options);
 
 
 
@@ -286,19 +286,13 @@ int main(int argc, char** argv)
     initial_covariance_analytic->process();
     //std::cout << "initial covariance: constraint " << initial_covariance_analytic->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_analytic->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
 
-    // BUILD SOLVER PROBLEM
-    std::cout << "updating ceres..." << std::endl;
-    ceres_manager_autodiff->update();
-    ceres_manager_analytic->update();
-    std::cout << "updated!" << std::endl;
-
     // SOLVING PROBLEMS
     std::cout << "solving..." << std::endl;
     std::cout << "ANALYTIC -----------------------------------" << std::endl;
-    summary_analytic = ceres_manager_analytic->solve(ceres_options);
+    summary_analytic = ceres_manager_analytic->solve();
     std::cout << summary_analytic.FullReport() << std::endl;
     std::cout << "AUTODIFF -----------------------------------" << std::endl;
-    summary_autodiff = ceres_manager_autodiff->solve(ceres_options);
+    summary_autodiff = ceres_manager_autodiff->solve();
     std::cout << summary_autodiff.FullReport() << std::endl;
 
     // COMPUTE COVARIANCES
