@@ -238,13 +238,17 @@ class Problem : public NodeBase
          */
         std::list<ConstraintNotification>& getConstraintNotificationList();
 
-        /** \brief get top node
+        /** \brief get top node (this)
          */
-        virtual Problem* getProblem();
+        Problem* getTop();
+
+        /** \brief get this node
+         */
+        Problem* getProblem();
 
         /** \brief Returns a true (is top)
          */
-        virtual bool isTop();
+        bool isTop();
 
         /** \brief Remove Down Node
          *
@@ -252,8 +256,6 @@ class Problem : public NodeBase
          */
         void removeDownNode(const LowerNodePtr _ptr){};
 
-//    protected:
-        virtual Problem* getTop();
 };
 
 } // namespace wolf
