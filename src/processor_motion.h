@@ -145,9 +145,8 @@ class ProcessorMotion : public ProcessorBase
                                   Eigen::MatrixXs& _delta_cov1_plus_delta_cov2);
         /** Set the origin of all motion for this processor
          * \param _origin_frame the key frame to be the origin
-         * \param _ts_origin origin timestamp.
          */
-        void setOrigin(FrameBase* _origin_frame, const TimeStamp& _ts_origin);
+        void setOrigin(FrameBase* _origin_frame);
 
         /** Set the origin of all motion for this processor
          * \param _x_origin the state at the origin
@@ -171,6 +170,8 @@ class ProcessorMotion : public ProcessorBase
         MotionBuffer* getBufferPtr();
 
         const MotionBuffer* getBufferPtr() const;
+
+        virtual bool isMotion();
 
     protected:
         void updateDt();
@@ -359,22 +360,21 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const T
     // make a new key frame
     FrameBase* key_frame_ptr = getProblem()->createFrame(KEY_FRAME, _x_origin, _ts_origin);
     // set the key frame as origin
-    setOrigin(key_frame_ptr, _ts_origin);
+    setOrigin(key_frame_ptr);
 }
 
-inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame, const TimeStamp& _ts_origin)
+inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
 {
+    assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
+
     // make (empty) origin Capture
-    origin_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
+    origin_ptr_ = new CaptureMotion2(_origin_frame->getTimeStamp(), this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                      Eigen::MatrixXs::Zero(data_size_, data_size_));
     // Add origin capture to origin frame
     _origin_frame->addCapture(origin_ptr_);
 
-    // Set timestamp to origin frame
-    _origin_frame->setTimeStamp(_ts_origin);
-
     // make (emtpy) last Capture
-    last_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
+    last_ptr_ = new CaptureMotion2(_origin_frame->getTimeStamp(), this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                    Eigen::MatrixXs::Zero(data_size_, data_size_));
 
     // Make frame at last Capture
@@ -382,7 +382,7 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame, const TimeStamp
 
     getBufferPtr()->get().clear();
     getBufferPtr()->get().push_back(
-            Motion( {_ts_origin, deltaZero(), deltaZero(), Eigen::MatrixXs::Zero(delta_size_, delta_size_),
+            Motion( {_origin_frame->getTimeStamp(), deltaZero(), deltaZero(), Eigen::MatrixXs::Zero(delta_size_, delta_size_),
                      Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
 }
 
@@ -569,6 +569,11 @@ inline void ProcessorMotion::sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2
 {
     // TODO: what should it return, now? also covariance? jacobians? a new CaptureMotion..?
     //deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
+}
+
+inline bool ProcessorMotion::isMotion()
+{
+    return true;
 }
 
 inline void ProcessorMotion::updateDt()

@@ -47,6 +47,8 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
         SensorBase* getSensorPtr();
 
+        virtual bool isMotion();
+
     private:
         static unsigned int processor_id_count_;
 
@@ -54,6 +56,11 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
         unsigned int processor_id_;
         ProcessorType type_id_;
 };
+
+inline bool ProcessorBase::isMotion()
+{
+    return false;
+}
 
 }
 
