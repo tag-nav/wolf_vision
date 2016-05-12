@@ -13,34 +13,25 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
     public:
 
         /** \brief Constructor of category CTR_FRAME
-         *
-         * Constructor of category CTR_FRAME
-         *
          **/
-        ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_ftr_ptr, _tp, _frame_ptr, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+        ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAnalytic(_ftr_ptr, _tp, _frame_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             //
         }
 
         /** \brief Constructor of category CTR_FEATURE
-         *
-         * Constructor of category CTR_FEATURE
-         *
          **/
-        ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _ftr_other_ptr, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_ftr_ptr, _tp, _ftr_other_ptr, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _ftr_other_ptr->getFramePtr()->getPPtr(), _ftr_other_ptr->getFramePtr()->getOPtr() )
+        ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _ftr_other_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAnalytic(_ftr_ptr, _tp, _ftr_other_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _ftr_other_ptr->getFramePtr()->getPPtr(), _ftr_other_ptr->getFramePtr()->getOPtr() )
         {
             //
         }
 
         /** \brief Constructor of category CTR_LANDMARK
-         *
-         * Constructor of category CTR_LANDMARK
-         *
          **/
-        ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_ftr_ptr, _tp, _landmark_ptr, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _landmark_ptr->getPPtr(), _landmark_ptr->getOPtr())
+        ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAnalytic(_ftr_ptr, _tp, _landmark_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _landmark_ptr->getPPtr(), _landmark_ptr->getOPtr())
         {
             //
         }
@@ -48,7 +39,6 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
          **/
         virtual ~ConstraintRelative2DAnalytic()
         {
@@ -56,9 +46,6 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
         }
 
         /** \brief Returns the constraint residual size
-         *
-         * Returns the constraint residual size
-         *
          **/
         virtual unsigned int getSize() const
         {
@@ -67,8 +54,7 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 
         /** \brief Returns the residual evaluated in the states provided
          *
-         * Returns the residual evaluated in the states provided in std::vector of mapped Eigen::VectorXs
-         *
+         * Returns the residual evaluated in the states provided in a std::vector of mapped Eigen::VectorXs
          **/
         virtual Eigen::VectorXs evaluateResiduals(
                 const std::vector<Eigen::Map<const Eigen::VectorXs> >& _st_vector) const;
@@ -88,9 +74,6 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
                                        const std::vector<bool>& _compute_jacobian) const;
 
         /** \brief Returns the pure jacobians (without measurement noise) evaluated in the state blocks values
-         *
-         * Returns the pure jacobians (without measurement noise) evaluated in the state blocks values
-         *
          * \param _st_vector is a vector containing the mapped eigen vectors of all state blocks involved in the constraint
          * \param jacobians is an output vector of mapped eigen matrices that sould contain the jacobians w.r.t each state block
          *
@@ -98,9 +81,6 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
         virtual void evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const;
 
         /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
          **/
         virtual JacobianMethod getJacobianMethod() const
         {
@@ -149,19 +129,25 @@ inline void ConstraintRelative2DAnalytic::evaluateJacobians(
 
 inline void ConstraintRelative2DAnalytic::evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const
 {
-    jacobians[0] << -cos(getStatePtrVector()[1]->getVector()(0)), -sin(getStatePtrVector()[1]->getVector()(0)), sin(
+    jacobians[0]
+              << -cos(getStatePtrVector()[1]->getVector()(0)), -sin(getStatePtrVector()[1]->getVector()(0)), sin(
             getStatePtrVector()[1]->getVector()(0)), -cos(getStatePtrVector()[1]->getVector()(0)), 0, 0;
+
     jacobians[1]
-            << -(getStatePtrVector()[2]->getVector()(0) - getStatePtrVector()[0]->getVector()(0))
+              << -(getStatePtrVector()[2]->getVector()(0) - getStatePtrVector()[0]->getVector()(0))
                     * sin(getStatePtrVector()[1]->getVector()(0))
                     + (getStatePtrVector()[2]->getVector()(1) - getStatePtrVector()[0]->getVector()(1))
                             * cos(getStatePtrVector()[1]->getVector()(0)), -(getStatePtrVector()[2]->getVector()(0)
             - getStatePtrVector()[0]->getVector()(0)) * cos(getStatePtrVector()[1]->getVector()(0))
             - (getStatePtrVector()[2]->getVector()(1) - getStatePtrVector()[0]->getVector()(1))
                     * sin(getStatePtrVector()[1]->getVector()(0)), -1;
-    jacobians[2] << cos(getStatePtrVector()[1]->getVector()(0)), sin(getStatePtrVector()[1]->getVector()(0)), -sin(
+
+    jacobians[2]
+              << cos(getStatePtrVector()[1]->getVector()(0)), sin(getStatePtrVector()[1]->getVector()(0)), -sin(
             getStatePtrVector()[1]->getVector()(0)), cos(getStatePtrVector()[1]->getVector()(0)), 0, 0;
-    jacobians[3] << 0, 0, 1;
+
+    jacobians[3]
+              << 0, 0, 1;
 }
 
 } // namespace wolf

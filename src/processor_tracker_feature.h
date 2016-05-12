@@ -10,29 +10,10 @@
 
 #include "processor_tracker.h"
 #include "capture_base.h"
+#include "wolf.h"
 
 namespace wolf
 {
-
-// Feature-Feature correspondence
-struct FeatureMatch
-{
-        FeatureBase* feature_ptr_;
-        Scalar normalized_score_;
-
-        FeatureMatch() :
-                feature_ptr_(nullptr), normalized_score_(0.0)
-        {
-
-        }
-        FeatureMatch(FeatureBase* _last_feature_ptr, const Scalar& _normalized_score) :
-                feature_ptr_(_last_feature_ptr), normalized_score_(_normalized_score)
-        {
-
-        }
-};
-
-typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
 
 /** \brief Feature tracker processor
  *
@@ -91,7 +72,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
 
         /** \brief Constructor with type
          */
-        ProcessorTrackerFeature(ProcessorType _tp);
+        ProcessorTrackerFeature(ProcessorType _tp, const unsigned int _max_new_features = 0);
         virtual ~ProcessorTrackerFeature();
 
     protected:
@@ -171,7 +152,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * This function only creates the constraint, it doesn't add it to any feature.
          *
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
-         * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
+         * This factory only needs to know the two derived types to decide on the actual Constraint created.
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) = 0;
 

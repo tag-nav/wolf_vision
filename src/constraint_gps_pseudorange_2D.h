@@ -28,9 +28,10 @@ namespace wolf {
 class ConstraintGPSPseudorange2D : public ConstraintSparse<1, 2, 1, 3, 1, 3, 1>
 {
 public:
-    ConstraintGPSPseudorange2D(FeatureBase* _ftr_ptr, ConstraintStatus _status = CTR_ACTIVE) :
+    ConstraintGPSPseudorange2D(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 2, 1, 3, 1, 3, 1>(_ftr_ptr,
                                                   CTR_GPS_PR_2D,
+                                                  _apply_loss_function,
                                                   _status,
                                                   _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame
                                                   _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
@@ -40,6 +41,7 @@ public:
                                                   ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr(), // map position with respect to ecef
                                                   ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr()) // map orientation with respect to ecef
     {
+        setType("GPS PR 2D");
         sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
         pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
         //std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
@@ -73,6 +75,13 @@ public:
 protected:
     Eigen::Vector3s sat_position_;
     Scalar pseudorange_;
+
+public:
+    static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+                                        NodeBase* _correspondant_ptr = nullptr)
+    {
+        return new ConstraintGPSPseudorange2D(_feature_ptr);
+    }
 
 };
 

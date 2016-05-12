@@ -17,12 +17,13 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 	public:
 		static const unsigned int N_BLOCKS = 4;
 
-	    ConstraintContainer(FeatureBase* _ftr_ptr, LandmarkContainer* _lmk_ptr, const unsigned int _corner, ConstraintStatus _status = CTR_ACTIVE) :
-			ConstraintSparse<3,2,1,2,1>(_ftr_ptr, CTR_CONTAINER, _lmk_ptr, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
+	    ConstraintContainer(FeatureBase* _ftr_ptr, LandmarkContainer* _lmk_ptr, const unsigned int _corner, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+			ConstraintSparse<3,2,1,2,1>(_ftr_ptr, CTR_CONTAINER, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
 		{
             assert(_corner >= 0 && _corner <= 3 && "Wrong corner id in constraint container constructor");
+            setType("CONTAINER");
 
             std::cout << "new constraint container: corner idx = " << corner_ << std::endl;
 		}
@@ -127,6 +128,16 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
         {
             return JAC_AUTO;
         }
+
+
+    public:
+        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, NodeBase* _correspondant_ptr)
+        {
+            unsigned int corner = 0; // Hard-coded, but this class is nevertheless deprecated.
+
+            return new ConstraintContainer(_feature_ptr, (LandmarkContainer*)_correspondant_ptr, corner);
+        }
+
 };
 
 } // namespace wolf

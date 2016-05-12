@@ -12,10 +12,10 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
     public:
         static const unsigned int N_BLOCKS = 4;
 
-        ConstraintOdom2D(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintSparse<3, 2, 1, 2, 1>(_ftr_ptr, CTR_ODOM_2D, _frame_ptr, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+        ConstraintOdom2D(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+                ConstraintSparse<3, 2, 1, 2, 1>(_ftr_ptr, CTR_ODOM_2D, _frame_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
-            //
+            setType("ODOM 2D");
         }
 
         /** \brief Default destructor (not recommended)
@@ -33,14 +33,19 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
                          T* _residuals) const;
 
         /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
          **/
         virtual JacobianMethod getJacobianMethod() const
         {
             return JAC_AUTO;
         }
+
+    public:
+        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+                                            NodeBase* _correspondant_ptr)
+        {
+            return new ConstraintOdom2D(_feature_ptr, (FrameBase*)_correspondant_ptr);
+        }
+
 };
 
 template<typename T>
@@ -85,11 +90,11 @@ inline bool ConstraintOdom2D::operator ()(const T* const _p1, const T* const _o1
 
     // Error
     residuals_map = expected_measurement - getMeasurement().cast<T>();
-    // pi2pi
-    while (residuals_map(2) > T(Constants::PI))
-        residuals_map(2) = residuals_map(2) - T(2 * Constants::PI);
-    while (residuals_map(2) <= T(-Constants::PI))
-        residuals_map(2) = residuals_map(2) + T(2 * Constants::PI);
+    // pi2pi - cannot use wolf::pi2pi() because of template T
+    while (residuals_map(2) > T(M_PI))
+        residuals_map(2) = residuals_map(2) - T(2 * M_PI);
+    while (residuals_map(2) <= T(-M_PI))
+        residuals_map(2) = residuals_map(2) + T(2 * M_PI);
 
     // Residuals
     residuals_map = getMeasurementSquareRootInformation().cast<T>() * residuals_map;

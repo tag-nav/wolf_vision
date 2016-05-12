@@ -167,8 +167,8 @@ int main(int argc, char *argv[])
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
     SensorOdom2D odom_sensor(new StateBlock(odom_pose.head(2)), new StateBlock(odom_pose.tail(1)), odom_std_factor, odom_std_factor);
     SensorGPSFix gps_sensor(new StateBlock(gps_pose.head(2)), new StateBlock(gps_pose.tail(1)), gps_std);
-    SensorLaser2D laser_1_sensor(new StateBlock(laser_1_pose.head(2)), new StateBlock(laser_1_pose.tail(1)));
-    SensorLaser2D laser_2_sensor(new StateBlock(laser_2_pose.head(2)), new StateBlock(laser_2_pose.tail(1)));
+    SensorLaser2D laser_1_sensor(new StateBlock(laser_1_pose.head(2)), new StateBlock(laser_1_pose.tail(1)), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorLaser2D laser_2_sensor(new StateBlock(laser_2_pose.head(2)), new StateBlock(laser_2_pose.tail(1)), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
 
     // Initial pose
     pose_odom << 2, 8, 0;
@@ -185,11 +185,7 @@ int main(int argc, char *argv[])
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
     //    ceres_options.max_num_iterations = 100;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager = new CeresManager(wolf_manager_ceres->getProblemPtr(), problem_options);
+    CeresManager* ceres_manager = new CeresManager(wolf_manager_ceres->getProblemPtr(), ceres_options);
     std::ofstream log_file, landmark_file;  //output file
 
     // Own solver
@@ -264,14 +260,13 @@ int main(int argc, char *argv[])
         //std::cout << "UPDATING..." << std::endl;
         // update state units and constraints in ceres
         solver_.update();
-        ceres_manager->update();
 
         // PRINT PROBLEM
         //solver_.printProblem();
 
         // SOLVE OPTIMIZATION ---------------------------
         //std::cout << "SOLVING..." << std::endl;
-        ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
+        ceres::Solver::Summary summary = ceres_manager->solve();
         solver_.solve(solving_mode);
 
         std::cout << "========================= RESULTS " << step << ":" << std::endl;

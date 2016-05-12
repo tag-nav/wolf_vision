@@ -27,8 +27,8 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
         }
         else
         {
-            _feature_list_out.push_back(new FeatureBase(FEAT_POINT_IMAGE, feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
-            _feature_correspondences[_feature_list_out.back()] = FeatureMatch(feat_in_ptr,0);
+            _feature_list_out.push_back(new FeatureBase(FEATURE_POINT_IMAGE, feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
+            _feature_correspondences[_feature_list_out.back()] = FeatureMatch({feat_in_ptr,0});
             std::cout << "feature " << feat_in_ptr->getMeasurement() << " tracked!" << std::endl;
         }
     }
@@ -50,7 +50,7 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
     {
         n_feature_++;
         new_features_last_.push_back(
-                new FeatureBase(FEAT_POINT_IMAGE, n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
+                new FeatureBase(FEATURE_POINT_IMAGE, n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
         std::cout << "feature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
     }
 

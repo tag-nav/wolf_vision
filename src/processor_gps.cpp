@@ -30,7 +30,7 @@ void ProcessorGPS::process(CaptureBase* _capture_ptr)
 {
     std::cout << "ProcessorGPS::process(GPScapture)" << std::endl;
     //TODO add assert with dynamic_cast when it will be ready
-    capture_gps_ptr_ = (CaptureGPS*)((((_capture_ptr))));
+    capture_gps_ptr_ = (CaptureGPS*)_capture_ptr;
     //std::cout << "Extracting gps features..." << std::endl;
     rawgpsutils::SatellitesObs obs = capture_gps_ptr_->getData();
     for (unsigned int i = 0; i < obs.measurements_.size(); ++i)
@@ -54,7 +54,7 @@ bool ProcessorGPS::voteForKeyFrame()
     return false;
 }
 
-bool ProcessorGPS::keyFrameCallback(wolf::FrameBase*)
+bool ProcessorGPS::keyFrameCallback(wolf::FrameBase*, const Scalar& _time_tol)
 {
     return false;
 }
@@ -66,4 +66,14 @@ wolf::ProcessorBase* ProcessorGPS::create(const std::string& _unique_name, const
     return prc_ptr;
 }
 
+} // namespace wolf
+
+
+// Register in the SensorFactory
+#include "processor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_prc_gps = ProcessorFactory::get()->registerCreator("GPS", ProcessorGPS::create);
 }
+} // namespace wolf

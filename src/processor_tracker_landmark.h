@@ -10,29 +10,10 @@
 
 #include "processor_tracker.h"
 #include "capture_base.h"
+#include "wolf.h"
 
 namespace wolf
 {
-
-// Correspondence Feature incoming - Landmark
-struct LandmarkMatch
-{
-        LandmarkBase* landmark_ptr_;
-        Scalar normalized_score_;
-
-        LandmarkMatch() :
-                landmark_ptr_(nullptr), normalized_score_(0.0)
-        {
-        }
-        LandmarkMatch(LandmarkBase* _landmark_ptr, const Scalar& _normalized_score) :
-                landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
-        {
-
-        }
-};
-
-// Correspondence Landmark - Feature
-typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
 
 /** \brief Landmark tracker processor
  *
@@ -122,7 +103,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          * \param _feature_list_out returned list of incoming features corresponding to a landmark of _landmark_list_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          */
-        virtual unsigned int findLandmarks(LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
+        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
                                            LandmarkMatchMap& _feature_landmark_correspondences) = 0;
 
         /** \brief Vote for KeyFrame generation
@@ -192,8 +173,8 @@ inline void ProcessorTrackerLandmark::advance()
 
     new_features_last_ = std::move(new_features_incoming_);
 
-    for (auto match : matches_landmark_from_last_)
-            std::cout << "\t" << match.first->getMeasurement() << " to " << match.second.landmark_ptr_->getDescriptor() << std::endl;
+//    for (auto match : matches_landmark_from_last_)
+//            std::cout << "\t" << match.first->id() << " to " << match.second.landmark_ptr_->id() << std::endl;
 }
 
 inline void ProcessorTrackerLandmark::reset()
@@ -203,8 +184,8 @@ inline void ProcessorTrackerLandmark::reset()
 
     new_features_last_ = std::move(new_features_incoming_);
 
-    for (auto match : matches_landmark_from_last_)
-            std::cout << "\t" << match.first->getMeasurement() << " to " << match.second.landmark_ptr_->getDescriptor() << std::endl;
+//    for (auto match : matches_landmark_from_last_)
+//            std::cout << "\t" << match.first->id() << " to " << match.second.landmark_ptr_->id() << std::endl;
 }
 
 inline void ProcessorTrackerLandmark::establishConstraints()

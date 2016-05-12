@@ -6,6 +6,7 @@ namespace wolf {
 CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCamera* _camera_ptr, cv::Mat _data_cv, int _img_width, int _img_height) :
     CaptureBase(_ts, _camera_ptr), image_(_data_cv)
 {
+    setType("IMAGE");
     //assert((_img_width == _camera_ptr->img_width_ && _img_height == _camera_ptr->img_height_) && "Image and camera sizes don't match");
 }
 

@@ -37,6 +37,7 @@ class StateBlock
          *
          * \param _size is state size
          * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter
+         * \param _local_param_ptr pointer to the local parametrization for the block
          */
         StateBlock(const unsigned int _size, bool _fixed = false, LocalParametrizationBase* _local_param_ptr = nullptr);
 
@@ -44,6 +45,7 @@ class StateBlock
          * 
          * \param _state is state vector
          * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter
+         * \param _local_param_ptr pointer to the local parametrization for the block
          **/
         StateBlock(const Eigen::VectorXs _state, bool _fixed = false, LocalParametrizationBase* _local_param_ptr = nullptr);
         

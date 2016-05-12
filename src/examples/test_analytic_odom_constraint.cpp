@@ -68,12 +68,8 @@ int main(int argc, char** argv)
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_autodiff = new CeresManager(wolf_problem_autodiff, problem_options);
-    CeresManager* ceres_manager_analytic = new CeresManager(wolf_problem_analytic, problem_options);
+    CeresManager* ceres_manager_autodiff = new CeresManager(wolf_problem_autodiff, ceres_options);
+    CeresManager* ceres_manager_analytic = new CeresManager(wolf_problem_analytic, ceres_options);
 
 
 
@@ -242,7 +238,7 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add capture, feature and constraint to problem
-                    FeatureBase* feature_ptr_autodiff = new FeatureBase(FEAT_FIX, edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_autodiff = new FeatureBase(FEATURE_FIX, edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_autodiff = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_autodiff.find(edge_old) != index_2_frame_ptr_autodiff.end() && "edge from vertex not added!");
                     FrameBase* frame_old_ptr_autodiff = index_2_frame_ptr_autodiff[edge_old];
@@ -255,7 +251,7 @@ int main(int argc, char** argv)
                     //std::cout << "Added autodiff edge! " << constraint_ptr_autodiff->nodeId() << " from vertex " << constraint_ptr_autodiff->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_autodiff->getFrameOtherPtr()->nodeId() << std::endl;
 
                     // add capture, feature and constraint to problem
-                    FeatureBase* feature_ptr_analytic = new FeatureBase(FEAT_FIX, edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_analytic = new FeatureBase(FEATURE_FIX, edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_analytic = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_analytic.find(edge_old) != index_2_frame_ptr_analytic.end() && "edge from vertex not added!");
                     FrameBase* frame_old_ptr_analytic = index_2_frame_ptr_analytic[edge_old];
@@ -290,19 +286,13 @@ int main(int argc, char** argv)
     initial_covariance_analytic->process();
     //std::cout << "initial covariance: constraint " << initial_covariance_analytic->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_analytic->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
 
-    // BUILD SOLVER PROBLEM
-    std::cout << "updating ceres..." << std::endl;
-    ceres_manager_autodiff->update();
-    ceres_manager_analytic->update();
-    std::cout << "updated!" << std::endl;
-
     // SOLVING PROBLEMS
     std::cout << "solving..." << std::endl;
     std::cout << "ANALYTIC -----------------------------------" << std::endl;
-    summary_analytic = ceres_manager_analytic->solve(ceres_options);
+    summary_analytic = ceres_manager_analytic->solve();
     std::cout << summary_analytic.FullReport() << std::endl;
     std::cout << "AUTODIFF -----------------------------------" << std::endl;
-    summary_autodiff = ceres_manager_autodiff->solve(ceres_options);
+    summary_autodiff = ceres_manager_autodiff->solve();
     std::cout << summary_autodiff.FullReport() << std::endl;
 
     // COMPUTE COVARIANCES

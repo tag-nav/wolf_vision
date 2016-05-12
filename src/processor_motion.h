@@ -9,6 +9,7 @@
 #define PROCESSOR_MOTION_H_
 
 // Wolf
+#include "processor_base.h"
 #include "capture_motion2.h"
 #include "motion_buffer.h"
 #include "time_stamp.h"
@@ -92,23 +93,23 @@ class ProcessorMotion : public ProcessorBase
         virtual bool voteForKeyFrame();
 
         /** \brief Fills a reference to the state integrated so far
-         * \param the returned state vector
+         * \param _x the returned state vector
          */
         const void getState(Eigen::VectorXs& _x);
 
         /** \brief Gets a constant reference to the state integrated so far
-         * \return the state vector
+         * \param _x the state vector
          */
         const Eigen::VectorXs& getState();
 
         /** \brief Fills the state corresponding to the provided time-stamp
-         * \param _t the time stamp
+         * \param _ts the time stamp
          * \param _x the returned state
          */
         void getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
 
         /** \brief Gets the state corresponding to the provided time-stamp
-         * \param _t the time stamp
+         * \param _ts the time stamp
          * \return the state vector
          */
         Eigen::VectorXs& getState(const TimeStamp& _ts);
@@ -146,15 +147,15 @@ class ProcessorMotion : public ProcessorBase
          * \param _origin_frame the key frame to be the origin
          * \param _ts_origin origin timestamp.
          */
-        void setOrigin(FrameBase* _origin_frame, TimeStamp& _ts_origin);
+        void setOrigin(FrameBase* _origin_frame, const TimeStamp& _ts_origin);
 
         /** Set the origin of all motion for this processor
          * \param _x_origin the state at the origin
          * \param _ts_origin origin timestamp.
          */
-        void setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin);
+        void setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin);
 
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr);
+        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol);
 
         // Helper functions:
     public:
@@ -164,8 +165,8 @@ class ProcessorMotion : public ProcessorBase
 
         //        void reset(CaptureMotion2* _capture_ptr);
 
-        FrameBase* makeFrame(CaptureBase* _capture_ptr, FrameType _type = NON_KEY_FRAME);
-        FrameBase* makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameType _type);
+        FrameBase* makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
+        FrameBase* makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type);
 
         MotionBuffer* getBufferPtr();
 
@@ -353,7 +354,7 @@ inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_
     //std::cout << _delta_cov1_plus_delta_cov2 << std::endl;
 }
 
-inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeStamp& _ts_origin)
+inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
     // make a new key frame
     FrameBase* key_frame_ptr = getProblem()->createFrame(KEY_FRAME, _x_origin, _ts_origin);
@@ -361,7 +362,7 @@ inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, TimeSta
     setOrigin(key_frame_ptr, _ts_origin);
 }
 
-inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame, TimeStamp& _ts_origin)
+inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame, const TimeStamp& _ts_origin)
 {
     // make (empty) origin Capture
     origin_ptr_ = new CaptureMotion2(_ts_origin, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
@@ -453,14 +454,17 @@ inline void ProcessorMotion::reintegrate()
     }
 }
 
-inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
+inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
 {
+    //std::cout << "ProcessorMotion::keyFrameCallback: " << std::endl;
+    //std::cout << "\tnew keyframe " << _keyframe_ptr->id() << std::endl;
+    //std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
+
     // get time stamp
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
     // create motion capture
     CaptureMotion2* key_capture_ptr = new CaptureMotion2(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                                          Eigen::MatrixXs::Zero(data_size_, data_size_));
-
     // add motion capture to keyframe
     _keyframe_ptr->addCapture(key_capture_ptr);
 
@@ -470,14 +474,14 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr)
 
     // interpolate individual delta
     Motion mot = interpolate(key_capture_ptr->getBufferPtr()->get().back(), // last Motion of old buffer
-            getBufferPtr()->get().front(), // first motion of new buffer
-            ts);
+                             getBufferPtr()->get().front(), // first motion of new buffer
+                             ts);
 
     // add to old buffer
     key_capture_ptr->getBufferPtr()->get().push_back(mot);
 
     // create motion constraint and add it to the new keyframe
-    FeatureBase* key_feature_ptr = new FeatureBase(FEAT_MOTION,
+    FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION,
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_);
     key_capture_ptr->addFeature(key_feature_ptr);
@@ -497,7 +501,7 @@ inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer
     last_ptr_->getBufferPtr()->split(_t_split, _oldest_part);
 }
 
-inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameType _type)
+inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
     FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
@@ -505,7 +509,7 @@ inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Ei
     return new_frame_ptr;
 }
 
-inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameType _type)
+inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
     FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());

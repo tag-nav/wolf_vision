@@ -25,8 +25,9 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
 {
     private:
         static unsigned int landmark_id_count_;
+        
     protected:
-        unsigned int landmark_id_;
+        unsigned int landmark_id_; ///< landmark unique id
         LandmarkType type_id_;     ///< type of landmark. (types defined at wolf.h)
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
@@ -55,7 +56,8 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          **/
         virtual ~LandmarkBase();
 
-
+        /** \brief Returns landmark_id_, the landmark unique id
+         **/
         unsigned int id();
 
         /** \brief Sets the Landmark status
@@ -70,6 +72,9 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          **/
         void unfix();
 
+        /** \brief Remove the given constraint from the list. 
+         *  If list becomes empty, deletes this object by calling destruct()
+         **/
         void removeConstrainedBy(ConstraintBase* _ctr_ptr);
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks

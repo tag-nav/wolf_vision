@@ -642,11 +642,20 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
 
 ProcessorBase* ProcessorLaser2D::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
 {
-    ProcessorParamsLaser2D* params_ptr = (ProcessorParamsLaser2D*)_params;
     ProcessorLaser2D* prc_ptr = new ProcessorLaser2D();
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
 
 
+} // namespace wolf
+
+
+// Register in the SensorFactory
+#include "processor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_prc_laser_2d = ProcessorFactory::get()->registerCreator("LASER 2D", ProcessorLaser2D::create);
+}
 } // namespace wolf

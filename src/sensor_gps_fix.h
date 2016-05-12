@@ -14,7 +14,7 @@ namespace wolf {
 
 struct IntrinsicsGPSFix : public IntrinsicsBase
 {
-        // TODO: Fill in the necessary fields here
+        // Empty -- it acts only as a typedef for IntrinsicsBase, but allows future extension with parameters
 };
 
 class SensorGPSFix : public SensorBase
@@ -42,24 +42,13 @@ class SensorGPSFix : public SensorBase
          * Returns noise standard deviation
          * 
          **/        
-        double getNoise() const;
+        Scalar getNoise() const;
         
     public:
         static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);
 
 };
 
-} // namespace wolf
-
-
-
-// Register in the SensorFactory
-#include "sensor_factory.h"
-namespace wolf {
-namespace
-{
-//const bool registered_gps_fix = SensorFactory::get()->registerCreator("GPS FIX", SensorGPSFix::create);
-}
 } // namespace wolf
 
 #endif

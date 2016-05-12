@@ -5,7 +5,6 @@
 #include "feature_base.h"
 
 //std includes
-//
 
 
 namespace wolf {

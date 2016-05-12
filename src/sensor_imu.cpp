@@ -34,3 +34,13 @@ SensorBase* SensorIMU::create(const std::string& _unique_name, const Eigen::Vect
 }
 
 } // namespace wolf
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_imu = SensorFactory::get()->registerCreator("IMU", SensorIMU::create);
+}
+} // namespace wolf

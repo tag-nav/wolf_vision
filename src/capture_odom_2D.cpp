@@ -1,4 +1,5 @@
 #include "capture_odom_2D.h"
+#include <cmath>
 
 namespace wolf {
 
@@ -6,10 +7,11 @@ CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_
                              const Eigen::Vector3s& _data) :
         CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data)
 {
+    setType("ODOM 2D");
     data_covariance_ = Eigen::Matrix3s::Zero();
-    data_covariance_(0, 0) = std::max(1e-10, _data(0) * ((SensorOdom2D*)_sensor_ptr)->getDispVarToDispNoiseFactor());
-    data_covariance_(1, 1) = std::max(1e-10, _data(1) * ((SensorOdom2D*)_sensor_ptr)->getDispVarToDispNoiseFactor());
-    data_covariance_(2, 2) = std::max(1e-10, _data(2) * ((SensorOdom2D*)_sensor_ptr)->getRotVarToRotNoiseFactor());
+    data_covariance_(0, 0) = std::max((Scalar)1e-10, _data(0) * ((SensorOdom2D*)_sensor_ptr)->getDispVarToDispNoiseFactor());
+    data_covariance_(1, 1) = std::max((Scalar)1e-10, _data(1) * ((SensorOdom2D*)_sensor_ptr)->getDispVarToDispNoiseFactor());
+    data_covariance_(2, 2) = std::max((Scalar)1e-10, _data(2) * ((SensorOdom2D*)_sensor_ptr)->getRotVarToRotNoiseFactor());
 //  std::cout << data_covariance_ << std::endl;
 }
 
@@ -17,7 +19,7 @@ CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_
                              const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance) :
         CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
 {
-    //
+    setType("ODOM 2D");
 }
 
 CaptureOdom2D::~CaptureOdom2D()

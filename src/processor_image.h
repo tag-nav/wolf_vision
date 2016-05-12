@@ -17,7 +17,7 @@
 
 
 // General includes
-#include <math.h>
+#include <cmath>
 #include <complex>      // std::complex, std::norm
 
 

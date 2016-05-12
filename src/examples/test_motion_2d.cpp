@@ -39,14 +39,14 @@ int main()
     // Origin frame:
     Eigen::Vector2s p0;
     p0 << 0.5, -0.5 - sqrt(0.5);
-    Eigen::Vector1s o0(Eigen::Vector1s::Constant(Constants::PI / 4));
+    Eigen::Vector1s o0(Eigen::Vector1s::Constant(M_PI_4));
     Eigen::Vector3s x0;
     x0 << p0, o0;
     Eigen::Matrix3s init_cov = Eigen::Matrix3s::Identity() * 0.1;
 
     // motion data
     Eigen::VectorXs data(2);
-    data << 1, Constants::PI / 4;  // advance 1m turn pi/4 rad (45 deg). Need 8 steps for a complete turn
+    data << 1, M_PI_4;  // advance 1m turn pi/4 rad (45 deg). Need 8 steps for a complete turn
     Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2, 2) * 0.01;
 
     // Create Wolf tree nodes
@@ -66,11 +66,7 @@ int main()
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr, problem_options);
+    CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr, ceres_options);
 
 
     // Origin Key Frame
@@ -204,7 +200,7 @@ int main()
 
     FrameBase* new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
 
-    odom2d_ptr->keyFrameCallback(new_keyframe_ptr);
+    odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     std::cout << "New buffer: oldest part:   < ";
     for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
@@ -221,8 +217,7 @@ int main()
     std::cout << "Covariance: " << std::endl << new_keyframe_ptr->getCaptureListPtr()->front()->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
 
     // Solve
-    ceres_manager_ptr->update();
-    ceres::Solver::Summary summary = ceres_manager_ptr->solve(ceres_options);
+    ceres::Solver::Summary summary = ceres_manager_ptr->solve();
     //std::cout << summary.FullReport() << std::endl;
     ceres_manager_ptr->computeCovariances(ALL_MARGINALS);
 
@@ -240,7 +235,7 @@ int main()
     std::cout << "New split time:              " << t_split - t0 << std::endl;
 
     new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
-    odom2d_ptr->keyFrameCallback(new_keyframe_ptr);
+    odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     std::cout << "All in one row:            < ";
     for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())

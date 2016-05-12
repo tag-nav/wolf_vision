@@ -16,9 +16,19 @@
 #include "glog/logging.h"
 
 //Wolf includes
-#include "wolf_manager.h"
+#include "problem.h"
+#include "processor_tracker_landmark_corner.h"
+#include "processor_odom_2D.h"
 #include "sensor_laser_2D.h"
+#include "sensor_odom_2D.h"
+#include "sensor_gps_fix.h"
+#include "capture_fix.h"
+#include "capture_odom_2D.h"
 #include "ceres_wrapper/ceres_manager.h"
+
+// laserscanutils
+#include "laser_scan_utils/line_finder_iterative.h"
+#include "laser_scan_utils/laser_scan.h"
 
 //C includes for sleep, time and main args
 #include "unistd.h"
@@ -28,111 +38,226 @@
 #include "faramotics/rangeScan2D.h"
 #include "btr-headers/pose3d.h"
 
-//laser_scan_utils
-#include "iri-algorithms/laser_scan_utils/corner_detector.h"
-#include "iri-algorithms/laser_scan_utils/entities.h"
-
 namespace wolf {
-//function travel around
-void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
+class FaramoticsRobot
 {
-    if (ii <= 120){         displacement_ = 0.1;    rotation_ = 0; }
-    else if (ii <= 170) {   displacement_ = 0.2;    rotation_ = 1.8 * M_PI / 180; }
-    else if (ii <= 220) {   displacement_ = 0;      rotation_ =-1.8 * M_PI / 180; }
-    else if (ii <= 310) {   displacement_ = 0.1;    rotation_ = 0; }
-    else if (ii <= 487) {   displacement_ = 0.1;    rotation_ =-1.0 * M_PI / 180; }
-    else if (ii <= 600) {   displacement_ = 0.2;    rotation_ = 0; }
-    else if (ii <= 700) {   displacement_ = 0.1;    rotation_ =-1.0 * M_PI / 180; }
-    else if (ii <= 780) {   displacement_ = 0;      rotation_ =-1.0 * M_PI / 180; }
-    else {                  displacement_ = 0.3;    rotation_ = 0; }
+    public:
 
-    pose.moveForward(displacement_);
-    pose.rt.setEuler(pose.rt.head() + rotation_, pose.rt.pitch(), pose.rt.roll());
-}
+        Cpose3d viewPoint, devicePose, laser1Pose, laser2Pose, estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose;
+        vector < Cpose3d > devicePoses;
+        vector<float> scan1, scan2;
+        string modelFileName;
+        CrangeScan2D* myScanner;
+        CdynamicSceneRender* myRender;
+        Eigen::Vector3s ground_truth_pose_;
+        Eigen::Vector4s laser_1_pose_, laser_2_pose_;
+
+        FaramoticsRobot(int argc, char** argv, const Eigen::Vector4s& _laser_1_pose, const Eigen::Vector4s& _laser_2_pose) :
+            modelFileName("/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj"),
+            laser_1_pose_(_laser_1_pose),
+            laser_2_pose_(_laser_2_pose)
+        {
+            devicePose.setPose(2, 8, 0.2, 0, 0, 0);
+            viewPoint.setPose(devicePose);
+            viewPoint.moveForward(10);
+            viewPoint.rt.setEuler(viewPoint.rt.head() + M_PI / 2, viewPoint.rt.pitch() + 30. * M_PI / 180., viewPoint.rt.roll());
+            viewPoint.moveForward(-15);
+            //glut initialization
+            faramotics::initGLUT(argc, argv);
+            //create a viewer for the 3D model and scan points
+            myRender = new CdynamicSceneRender(1200, 700, 90 * M_PI / 180, 90 * 700.0 * M_PI / (1200.0 * 180.0), 0.2, 100);
+            myRender->loadAssimpModel(modelFileName, true); //with wireframe
+            //create scanner and load 3D model
+            myScanner = new CrangeScan2D(HOKUYO_UTM30LX_180DEG);  //HOKUYO_UTM30LX_180DEG or LEUZE_RS4
+            myScanner->loadAssimpModel(modelFileName);
+        }
+
+
+        //function travel around
+        Eigen::Vector3s motionCampus(unsigned int ii, double& displacement_, double& rotation_)
+        {
+            if (ii <= 120){         displacement_ = 0.1;    rotation_ = 0; }
+            else if (ii <= 170) {   displacement_ = 0.2;    rotation_ = 1.8 * M_PI / 180; }
+            else if (ii <= 220) {   displacement_ = 0;      rotation_ =-1.8 * M_PI / 180; }
+            else if (ii <= 310) {   displacement_ = 0.1;    rotation_ = 0; }
+            else if (ii <= 487) {   displacement_ = 0.1;    rotation_ =-1.0 * M_PI / 180; }
+            else if (ii <= 600) {   displacement_ = 0.2;    rotation_ = 0; }
+            else if (ii <= 700) {   displacement_ = 0.1;    rotation_ =-1.0 * M_PI / 180; }
+            else if (ii <= 780) {   displacement_ = 0;      rotation_ =-1.0 * M_PI / 180; }
+            else {                  displacement_ = 0.3;    rotation_ = 0; }
+
+            devicePose.moveForward(displacement_);
+            devicePose.rt.setEuler(devicePose.rt.head() + rotation_, devicePose.rt.pitch(), devicePose.rt.roll());
+
+            // laser 1
+            laser1Pose.setPose(devicePose);
+            laser1Pose.moveForward(laser_1_pose_(0));
+            // laser 2
+            laser2Pose.setPose(devicePose);
+            laser2Pose.moveForward(laser_2_pose_(0));
+            laser2Pose.rt.setEuler(laser2Pose.rt.head() + laser_2_pose_(3), laser2Pose.rt.pitch(), laser2Pose.rt.roll());
+
+            devicePoses.push_back(devicePose);
+
+            ground_truth_pose_ << devicePose.pt(0), devicePose.pt(1), devicePose.rt.head();
+            return ground_truth_pose_;
+        }
+
+        ~FaramoticsRobot()
+        {
+            std::cout << "deleting render and scanner.." << std::endl;
+            delete myRender;
+            delete myScanner;
+            std::cout << "deleted!" << std::endl;
+        }
+
+        //compute scans
+        vector<float> computeScan(const int scan_id)
+        {
+            if (scan_id == 1)
+            {
+                scan1.clear();
+                myScanner->computeScan(laser1Pose, scan1);
+                return scan1;
+            }
+            else
+            {
+                scan2.clear();
+                myScanner->computeScan(laser2Pose, scan2);
+                return scan2;
+            }
+        }
+
+        void render(const FeatureBaseList& feature_list, int laser, const LandmarkBaseList& landmark_list, const Eigen::Vector3s& estimated_pose)
+        {
+            // detected corners
+            //std::cout << "   drawCorners: " << feature_list.size() << std::endl;
+            std::vector<double> corner_vector;
+            corner_vector.reserve(2*feature_list.size());
+            for (auto corner : feature_list)
+            {
+                //std::cout << "       corner " << corner->id() << std::endl;
+                corner_vector.push_back(corner->getMeasurement(0));
+                corner_vector.push_back(corner->getMeasurement(1));
+            }
+            myRender->drawCorners(laser == 1 ? laser1Pose : laser2Pose, corner_vector);
+
+            // landmarks
+            //std::cout << "   drawLandmarks: " << landmark_list.size() << std::endl;
+            std::vector<double> landmark_vector;
+            landmark_vector.reserve(3*landmark_list.size());
+            for (auto landmark : landmark_list)
+            {
+                Scalar* position_ptr = landmark->getPPtr()->getPtr();
+                landmark_vector.push_back(*position_ptr); //x
+                landmark_vector.push_back(*(position_ptr + 1)); //y
+                landmark_vector.push_back(0.2); //z
+            }
+            myRender->drawLandmarks(landmark_vector);
+
+            // draw localization and sensors
+            estimated_vehicle_pose.setPose(estimated_pose(0), estimated_pose(1), 0.2, estimated_pose(2), 0, 0);
+            estimated_laser_1_pose.setPose(estimated_vehicle_pose);
+            estimated_laser_1_pose.moveForward(laser_1_pose_(0));
+            estimated_laser_2_pose.setPose(estimated_vehicle_pose);
+            estimated_laser_2_pose.moveForward(laser_2_pose_(0));
+            estimated_laser_2_pose.rt.setEuler(estimated_laser_2_pose.rt.head() + laser_2_pose_(3), estimated_laser_2_pose.rt.pitch(), estimated_laser_2_pose.rt.roll());
+            myRender->drawPoseAxisVector( { estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose });
+
+            //Set view point and render the scene
+            //locate visualization view point, somewhere behind the device
+    //      viewPoint.setPose(devicePose);
+    //      viewPoint.rt.setEuler( viewPoint.rt.head(), viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
+    //      viewPoint.moveForward(-5);
+            myRender->setViewPoint(viewPoint);
+            myRender->drawPoseAxis(devicePose);
+            myRender->drawScan(laser == 1 ? laser1Pose : laser2Pose, laser == 1 ? scan1 : scan2, 180. * M_PI / 180., 90. * M_PI / 180.); //draw scan
+            myRender->render();
+        }
+};
 }
 
 int main(int argc, char** argv)
 {
     using namespace wolf;
 
-    std::cout << "\n ========= 2D Robot with odometry and 2 LIDARs ===========\n";
+    std::cout << "\n============================================================\n";
+    std::cout << "========== 2D Robot with odometry and 2 LIDARs =============\n";
 
     // USER INPUT ============================================================================================
-    if (argc != 3 || atoi(argv[1]) < 1 || atoi(argv[2]) < 1 )
+    if (argc != 2 || atoi(argv[1]) < 1 )
     {
         std::cout << "Please call me with: [./test_ceres_manager NI PRINT], where:" << std::endl;
         std::cout << "     - NI is the number of iterations (NI > 0)" << std::endl;
-        std::cout << "     - WS is the window size (WS > 0)" << std::endl;
         std::cout << "EXIT due to bad user input" << std::endl << std::endl;
         return -1;
     }
 
     unsigned int n_execution = (unsigned int) atoi(argv[1]); //number of iterations of the whole execution
-    unsigned int window_size = (unsigned int) atoi(argv[2]);
 
     // INITIALIZATION ============================================================================================
     //init random generators
-    Scalar odom_std_factor = 0.1;
+    Scalar odom_std_factor = 0.5;
     Scalar gps_std = 1;
     std::default_random_engine generator(1);
     std::normal_distribution<Scalar> distribution_odom(0.0, odom_std_factor); //odometry noise
     std::normal_distribution<Scalar> distribution_gps(0.0, gps_std); //GPS noise
 
-    //init google log
-    //google::InitGoogleLogging(argv[0]);
-
-    // Faramotics stuff
-    Cpose3d viewPoint, devicePose, laser1Pose, laser2Pose, estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose;
-    vector < Cpose3d > devicePoses;
-    vector<float> scan1, scan2;
-    string modelFileName;
-
-    //model and initial view point
-    modelFileName = "/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj";
-    //modelFileName = "/home/acoromin/dev/br/faramotics/models/campusNordUPC.obj";
-    //modelFileName = "/home/andreu/dev/faramotics/models/campusNordUPC.obj";
-    devicePose.setPose(2, 8, 0.2, 0, 0, 0);
-    viewPoint.setPose(devicePose);
-    viewPoint.moveForward(10);
-    viewPoint.rt.setEuler(viewPoint.rt.head() + M_PI / 2, viewPoint.rt.pitch() + 30. * M_PI / 180., viewPoint.rt.roll());
-    viewPoint.moveForward(-15);
-    //glut initialization
-    faramotics::initGLUT(argc, argv);
-
-    //create a viewer for the 3D model and scan points
-    CdynamicSceneRender* myRender = new CdynamicSceneRender(1200, 700, 90 * M_PI / 180, 90 * 700.0 * M_PI / (1200.0 * 180.0), 0.2, 100);
-    myRender->loadAssimpModel(modelFileName, true); //with wireframe
-    //create scanner and load 3D model
-    CrangeScan2D* myScanner = new CrangeScan2D(HOKUYO_UTM30LX_180DEG);	//HOKUYO_UTM30LX_180DEG or LEUZE_RS4
-    myScanner->loadAssimpModel(modelFileName);
-
     //variables
-    Eigen::Vector3s odom_reading;
+    Eigen::Vector2s odom_data;
     Eigen::Vector2s gps_fix_reading;
-    Eigen::VectorXs pose_odom(3); //current odometry integred pose
     Eigen::VectorXs ground_truth(n_execution * 3); //all true poses
+    Eigen::Vector3s ground_truth_pose; //last true pose
     Eigen::VectorXs odom_trajectory(n_execution * 3); //open loop trajectory
     Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(7);
     clock_t t1, t2;
+    Scalar dt = 0.05;
+    TimeStamp ts(0);
 
-    // Wolf manager initialization
+    // Wolf Tree initialization
     Eigen::Vector3s odom_pose = Eigen::Vector3s::Zero();
     Eigen::Vector3s gps_pose = Eigen::Vector3s::Zero();
     Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
-    SensorOdom2D odom_sensor(new StateBlock(odom_pose.head(2)), new StateBlock(odom_pose.tail(1)), odom_std_factor, odom_std_factor);
-    SensorGPSFix gps_sensor(new StateBlock(gps_pose.head(2)), new StateBlock(gps_pose.tail(1)), gps_std);
-    SensorLaser2D laser_1_sensor(new StateBlock(laser_1_pose.head(2)), new StateBlock(laser_1_pose.tail(1)));
-    SensorLaser2D laser_2_sensor(new StateBlock(laser_2_pose.head(2)), new StateBlock(laser_2_pose.tail(1)));
+
+    Problem problem(FRM_PO_2D);
+    SensorOdom2D* odom_sensor = new SensorOdom2D(new StateBlock(odom_pose.head(2), true), new StateBlock(odom_pose.tail(1), true), odom_std_factor, odom_std_factor);
+    SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
+    SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
+    ProcessorTrackerLandmarkCorner* laser_1_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
+    ProcessorTrackerLandmarkCorner* laser_2_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3);
+    ProcessorOdom2D* odom_processor = new ProcessorOdom2D();
+    odom_sensor->addProcessor(odom_processor);
+    laser_1_sensor->addProcessor(laser_1_processor);
+    laser_2_sensor->addProcessor(laser_2_processor);
+    problem.addSensor(odom_sensor);
+    problem.addSensor(gps_sensor);
+    problem.addSensor(laser_1_sensor);
+    problem.addSensor(laser_2_sensor);
+    problem.setProcessorMotion(odom_processor);
+
+    CaptureMotion2* odom_capture = new CaptureMotion2(ts,odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor);
+
+    // Simulated robot
+    FaramoticsRobot robot(argc, argv, laser_1_pose, laser_2_pose);
 
     // Initial pose
-    pose_odom << 2, 8, 0;
-    ground_truth.head(3) = pose_odom;
-    odom_trajectory.head(3) = pose_odom;
+    ground_truth_pose << 2, 8, 0;
+    ground_truth.head(3) = ground_truth_pose;
+    odom_trajectory.head(3) = ground_truth_pose;
 
-    WolfManager* wolf_manager = new WolfManager(FRM_PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
-    
+    // Origin Key Frame
+    FrameBase* origin_frame = problem.createFrame(KEY_FRAME, ground_truth_pose, ts);
+
+    // Prior covariance
+    CaptureFix* initial_covariance = new CaptureFix(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1);
+    origin_frame->addCapture(initial_covariance);
+    initial_covariance->process();
+
+    odom_processor->setOrigin(origin_frame, ts);
+
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
@@ -140,17 +265,18 @@ int main(int argc, char** argv)
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
     //    ceres_options.max_num_iterations = 100;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager = new CeresManager(wolf_manager->getProblemPtr(), problem_options);
+    google::InitGoogleLogging(argv[0]);
+
+    CeresManager ceres_manager(&problem, ceres_options);
     std::ofstream log_file, landmark_file;  //output file
 
     //std::cout << "START TRAJECTORY..." << std::endl;
     // START TRAJECTORY ============================================================================================
     for (unsigned int step = 1; step < n_execution; step++)
     {
+        // timestamp
+        ts = TimeStamp(step*dt);
+
         //get init time
         t2 = clock();
 
@@ -158,128 +284,67 @@ int main(int argc, char** argv)
         //std::cout << "ROBOT MOVEMENT..." << std::endl;
         // moves the device position
         t1 = clock();
-        motionCampus(step, devicePose, odom_reading(0), odom_reading(2));
-        odom_reading(1) = 0;
-        devicePoses.push_back(devicePose);
+        ground_truth_pose = robot.motionCampus(step, odom_data(0), odom_data(1));
+        ground_truth.segment(step * 3, 3) = ground_truth_pose;
 
-        // SENSOR DATA ---------------------------
-        //std::cout << "SENSOR DATA..." << std::endl;
-        // store groundtruth
-        ground_truth.segment(step * 3, 3) << devicePose.pt(0), devicePose.pt(1), devicePose.rt.head();
-
-        // compute odometry
-        odom_reading(0) += distribution_odom(generator) * (odom_reading(0) == 0 ? 1e-6 : odom_reading(0));
-        odom_reading(1) += distribution_odom(generator) * 1e-6;
-        odom_reading(2) += distribution_odom(generator) * (odom_reading(2) == 0 ? 1e-6 : odom_reading(2));
-
+        // ODOMETRY DATA -------------------------------------
+        // noisy odometry
+        odom_data(0) += distribution_odom(generator) * (odom_data(0) == 0 ? 1e-6 : odom_data(0));
+        odom_data(1) += distribution_odom(generator) * (odom_data(1) == 0 ? 1e-6 : odom_data(1));
+        // process odometry
+        odom_capture->setTimeStamp(TimeStamp(ts));
+        odom_capture->setData(odom_data);
+        odom_processor->process(odom_capture);
         // odometry integration
-        pose_odom(0) = pose_odom(0) + odom_reading(0) * cos(pose_odom(2)) - odom_reading(1) * sin(pose_odom(2));
-        pose_odom(1) = pose_odom(1) + odom_reading(0) * sin(pose_odom(2)) + odom_reading(1) * cos(pose_odom(2));
-        pose_odom(2) = pose_odom(2) + odom_reading(1);
-        odom_trajectory.segment(step * 3, 3) = pose_odom;
+        odom_trajectory.segment(step * 3, 3) = problem.getCurrentState();
 
-        // compute GPS
-        gps_fix_reading << devicePose.pt(0), devicePose.pt(1);
-        gps_fix_reading(0) += distribution_gps(generator);
-        gps_fix_reading(1) += distribution_gps(generator);
+        // LIDAR DATA ---------------------------
+        if (step % 3 == 0)
+        {
+            std::cout << "--PROCESS LIDAR 1 DATA..." << laser_1_sensor->id() << std::endl;
+            laser_1_processor->process(new CaptureLaser2D(ts, laser_1_sensor, robot.computeScan(1)));
+            std::cout << "--PROCESS LIDAR 2 DATA..." << laser_2_sensor->id() << std::endl;
+            laser_2_processor->process(new CaptureLaser2D(ts, laser_2_sensor, robot.computeScan(2)));
+        }
 
-        //compute scans
-        scan1.clear();
-        scan2.clear();
-        // scan 1
-        laser1Pose.setPose(devicePose);
-        laser1Pose.moveForward(laser_1_pose(0));
-        myScanner->computeScan(laser1Pose, scan1);
-        // scan 2
-        laser2Pose.setPose(devicePose);
-        laser2Pose.moveForward(laser_2_pose(0));
-        laser2Pose.rt.setEuler(laser2Pose.rt.head() + M_PI, laser2Pose.rt.pitch(), laser2Pose.rt.roll());
-        myScanner->computeScan(laser2Pose, scan2);
-
+        // GPS DATA ---------------------------
+        if (step % 5 == 0)
+        {
+            // compute GPS
+            gps_fix_reading  = ground_truth_pose.head<2>();
+            gps_fix_reading(0) += distribution_gps(generator);
+            gps_fix_reading(1) += distribution_gps(generator);
+            // process data
+            //(new CaptureGPSFix(ts, &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+        }
         mean_times(0) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
-        // ADD CAPTURES ---------------------------
-        std::cout << "ADD CAPTURES..." << std::endl;
-        t1 = clock();
-        // adding new sensor captures
-        wolf_manager->addCapture(new CaptureOdom2D(TimeStamp(),TimeStamp(), &odom_sensor, odom_reading));		//, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
-		wolf_manager->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
-        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
-        wolf_manager->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
-        // updating problem
-        wolf_manager->update();
-        mean_times(1) += ((double) clock() - t1) / CLOCKS_PER_SEC;
-
-        // UPDATING CERES ---------------------------
-        std::cout << "UPDATING CERES..." << std::endl;
-        t1 = clock();
-        // update state units and constraints in ceres
-        ceres_manager->update();
-        mean_times(2) += ((double) clock() - t1) / CLOCKS_PER_SEC;
-
         // SOLVE OPTIMIZATION ---------------------------
-        std::cout << "SOLVING..." << std::endl;
+        //std::cout << "SOLVING..." << std::endl;
         t1 = clock();
-        ceres::Solver::Summary summary = ceres_manager->solve(ceres_options);
+        ceres::Solver::Summary summary = ceres_manager.solve();
         //std::cout << summary.FullReport() << std::endl;
         mean_times(3) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // COMPUTE COVARIANCES ---------------------------
-        std::cout << "COMPUTING COVARIANCES..." << std::endl;
+        //std::cout << "COMPUTING COVARIANCES..." << std::endl;
         t1 = clock();
-        ceres_manager->computeCovariances();
+        ceres_manager.computeCovariances();
         mean_times(4) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // DRAWING STUFF ---------------------------
+        //std::cout << "RENDERING..." << std::endl;
         t1 = clock();
-        // draw detected corners
-//        std::list < laserscanutils::Corner > corner_list;
-//        std::vector<double> corner_vector;
-//        CaptureLaser2D last_scan(TimeStamp(), &laser_1_sensor, scan1);
-//        last_scan.extractCorners(corner_list);
-//        for (std::list<laserscanutils::Corner>::iterator corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it++)
-//        {
-//            corner_vector.push_back(corner_it->pt_(0));
-//            corner_vector.push_back(corner_it->pt_(1));
-//        }
-//        myRender->drawCorners(laser1Pose, corner_vector);
-
-        // draw landmarks
-        std::vector<double> landmark_vector;
-        for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
-        {
-            Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
-            landmark_vector.push_back(*position_ptr); //x
-            landmark_vector.push_back(*(position_ptr + 1)); //y
-            landmark_vector.push_back(0.2); //z
-        }
-        myRender->drawLandmarks(landmark_vector);
-
-        // draw localization and sensors
-        estimated_vehicle_pose.setPose(wolf_manager->getVehiclePose()(0), wolf_manager->getVehiclePose()(1), 0.2, wolf_manager->getVehiclePose()(2), 0, 0);
-        estimated_laser_1_pose.setPose(estimated_vehicle_pose);
-        estimated_laser_1_pose.moveForward(laser_1_pose(0));
-        estimated_laser_2_pose.setPose(estimated_vehicle_pose);
-        estimated_laser_2_pose.moveForward(laser_2_pose(0));
-        estimated_laser_2_pose.rt.setEuler(estimated_laser_2_pose.rt.head() + M_PI, estimated_laser_2_pose.rt.pitch(), estimated_laser_2_pose.rt.roll());
-        myRender->drawPoseAxisVector( { estimated_vehicle_pose, estimated_laser_1_pose, estimated_laser_2_pose });
-
-        //Set view point and render the scene
-        //locate visualization view point, somewhere behind the device
-//		viewPoint.setPose(devicePose);
-//		viewPoint.rt.setEuler( viewPoint.rt.head(), viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
-//		viewPoint.moveForward(-5);
-        myRender->setViewPoint(viewPoint);
-        myRender->drawPoseAxis(devicePose);
-        myRender->drawScan(laser1Pose, scan1, 180. * M_PI / 180., 90. * M_PI / 180.); //draw scan
-        myRender->render();
+        if (step % 3 == 0)
+            robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureListPtr(), 1, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
+            //robot.render(laser_2_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_2_processor->getLastPtr()->getFeatureListPtr(), 2, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
         mean_times(5) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // TIME MANAGEMENT ---------------------------
-        double dt = ((double) clock() - t2) / CLOCKS_PER_SEC;
-        mean_times(6) += dt;
-        if (dt < 0.1)
-            usleep(100000 - 1e6 * dt);
+        double total_t = ((double) clock() - t2) / CLOCKS_PER_SEC;
+        mean_times(6) += total_t;
+        if (total_t < 0.5)
+            usleep(500000 - 1e6 * total_t);
 
 //		std::cout << "\nTree after step..." << std::endl;
     }
@@ -295,42 +360,27 @@ int main(int argc, char** argv)
     std::cout << "  results drawing:    " << mean_times(5) << std::endl;
     std::cout << "  loop time:          " << mean_times(6) << std::endl;
 
-//	std::cout << "\nTree before deleting..." << std::endl;
+    //	std::cout << "\nTree before deleting..." << std::endl;
 
     // Draw Final result -------------------------
-    std::vector<double> landmark_vector;
-    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
-    {
-        Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
-        landmark_vector.push_back(*position_ptr); //x
-        landmark_vector.push_back(*(position_ptr + 1)); //y
-        landmark_vector.push_back(0.2); //z
-    }
-    myRender->drawLandmarks(landmark_vector);
-//	viewPoint.setPose(devicePoses.front());
-//	viewPoint.moveForward(10);
-//	viewPoint.rt.setEuler( viewPoint.rt.head()+M_PI/4, viewPoint.rt.pitch()+20.*M_PI/180., viewPoint.rt.roll() );
-//	viewPoint.moveForward(-10);
-    myRender->setViewPoint(viewPoint);
-    myRender->render();
+    robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureListPtr(), 1, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
 
     // Print Final result in a file -------------------------
     // Vehicle poses
     int i = 0;
-    Eigen::VectorXs state_poses(n_execution * 3);
-    for (auto frame_it = wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_it != wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->end(); frame_it++)
+    Eigen::VectorXs state_poses = Eigen::VectorXs::Zero(n_execution * 3);
+    for (auto frame : *(problem.getTrajectoryPtr()->getFrameListPtr()))
     {
-        state_poses.segment(i, 3) << *(*frame_it)->getPPtr()->getPtr(), *((*frame_it)->getPPtr()->getPtr() + 1), *(*frame_it)->getOPtr()->getPtr();
+        state_poses.segment(i, 3) << frame->getPPtr()->getVector(), frame->getOPtr()->getVector();
         i += 3;
     }
 
     // Landmarks
     i = 0;
-    Eigen::VectorXs landmarks(wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->size() * 2);
-    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkListPtr()->size() * 2);
+    for (auto landmark : *(problem.getMapPtr()->getLandmarkListPtr()))
     {
-        Eigen::Map<Eigen::Vector2s> landmark((*landmark_it)->getPPtr()->getPtr());
-        landmarks.segment(i, 2) = landmark;
+        landmarks.segment(i, 2) = landmark->getPPtr()->getVector();
         i += 2;
     }
 
@@ -364,13 +414,6 @@ int main(int argc, char** argv)
 
     std::cout << "Press any key for ending... " << std::endl << std::endl;
     std::getchar();
-
-    delete myRender;
-    delete myScanner;
-    delete wolf_manager;
-    std::cout << "wolf deleted" << std::endl;
-    delete ceres_manager;
-    std::cout << "ceres_manager deleted" << std::endl;
 
     std::cout << " ========= END ===========" << std::endl << std::endl;
 

@@ -15,16 +15,16 @@ namespace wolf
 ProcessorTrackerLandmarkDummy::ProcessorTrackerLandmarkDummy(const unsigned int& _max_new_features) :
         ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, _max_new_features), n_feature_(0), landmark_idx_non_visible_(0)
 {
-    // TODO Auto-generated constructor stub
+    //
 
 }
 
 ProcessorTrackerLandmarkDummy::~ProcessorTrackerLandmarkDummy()
 {
-    // TODO Auto-generated destructor stub
+    //
 }
 
-unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(LandmarkBaseList& _landmark_list_in,
+unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(const LandmarkBaseList& _landmark_list_in,
                                                           FeatureBaseList& _feature_list_out,
                                                           LandmarkMatchMap& _feature_landmark_correspondences)
 {
@@ -43,8 +43,8 @@ unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(LandmarkBaseList& _lan
         else
         {
             _feature_list_out.push_back(
-                    new FeatureBase(FEAT_POINT_IMAGE, landmark_in_ptr->getDescriptor(), Eigen::MatrixXs::Ones(1, 1)));
-            _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch(landmark_in_ptr, 0);
+                    new FeatureBase(FEATURE_POINT_IMAGE, landmark_in_ptr->getDescriptor(), Eigen::MatrixXs::Ones(1, 1)));
+            _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, 0});
             std::cout << "\t\tlandmark " << landmark_in_ptr->getDescriptor() << " found!" << std::endl;
         }
     }
@@ -65,7 +65,7 @@ unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int
     {
         n_feature_++;
         new_features_last_.push_back(
-                new FeatureBase(FEAT_POINT_IMAGE, n_feature_ * Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
+                new FeatureBase(FEATURE_POINT_IMAGE, n_feature_ * Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
         std::cout << "\t\tfeature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
     }
     return new_features_last_.size();

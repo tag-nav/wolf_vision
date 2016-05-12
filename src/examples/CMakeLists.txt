@@ -1,6 +1,6 @@
 # SensorFactory classes test
-ADD_EXECUTABLE(test_sensor_factory test_sensor_factory.cpp)
-TARGET_LINK_LIBRARIES(test_sensor_factory ${PROJECT_NAME})
+ADD_EXECUTABLE(test_wolf_factories test_wolf_factories.cpp)
+TARGET_LINK_LIBRARIES(test_wolf_factories ${PROJECT_NAME})
 
 # ProcessorMotion classes test
 ADD_EXECUTABLE(test_motion test_motion.cpp)
@@ -118,11 +118,21 @@ IF(faramotics_FOUND)
                                 ${pose_state_time_LIBRARIES} 
                                 ${faramotics_LIBRARIES}
                                 ${PROJECT_NAME})
-        ADD_EXECUTABLE(test_autodiff test_autodiff.cpp)
-        TARGET_LINK_LIBRARIES(test_autodiff 
+        ADD_EXECUTABLE(test_2_lasers_offline test_2_lasers_offline.cpp)
+        TARGET_LINK_LIBRARIES(test_2_lasers_offline 
                                 ${pose_state_time_LIBRARIES} 
                                 ${faramotics_LIBRARIES}
                                 ${PROJECT_NAME})
+        ADD_EXECUTABLE(test_faramotics_simulation test_faramotics_simulation.cpp)
+        TARGET_LINK_LIBRARIES(test_faramotics_simulation 
+                                ${pose_state_time_LIBRARIES} 
+                                ${faramotics_LIBRARIES}
+                                ${PROJECT_NAME})
+#        ADD_EXECUTABLE(test_autodiff test_autodiff.cpp)
+#        TARGET_LINK_LIBRARIES(test_autodiff 
+#                                ${pose_state_time_LIBRARIES} 
+#                                ${faramotics_LIBRARIES}
+#                                ${PROJECT_NAME})
                                 
         IF(Suitesparse_FOUND)
             ADD_EXECUTABLE(test_iQR_wolf2 solver/test_iQR_wolf2.cpp)

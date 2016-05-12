@@ -102,7 +102,7 @@ class ProcessorLaser2D : public ProcessorBase
                                      LandmarkCorner2D* _old_corner_landmark_ptr, int& _feature_idx, int& _corner_idx);
 
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params = nullptr);
 };
 
 inline bool ProcessorLaser2D::voteForKeyFrame()
@@ -115,16 +115,5 @@ inline void ProcessorLaser2D::init(CaptureBase* _origin_ptr)
 }
 
 } // namespace wolf
-
-
-// Register in the SensorFactory
-#include "processor_factory.h"
-namespace wolf {
-namespace
-{
-//const bool registered_prc_laser_2d = ProcessorFactory::get()->registerCreator("LASER 2D", ProcessorLaser2D::create);
-}
-} // namespace wolf
-
 
 #endif /* SRC_PROCESSOR_LASER_2D_H_ */

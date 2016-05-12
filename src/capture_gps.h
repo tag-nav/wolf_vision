@@ -3,7 +3,7 @@
 
 
 // Wolf includes
-#include "iri-algorithms/raw_gps_utils/satellites_obs.h"
+#include "raw_gps_utils/satellites_obs.h"
 #include "capture_base.h"
 
 namespace wolf {

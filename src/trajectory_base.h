@@ -22,6 +22,7 @@ class TrajectoryBase : public NodeLinked<Problem,FrameBase>
 {
     protected:
         FrameStructure frame_structure_; // Defines the structure of the Frames in the Trajectory.
+        FrameBase* last_key_frame_ptr_;  // keeps pointer to the last key frame
         // TODO: JVN: No seria millor que aixo ho tingui el problem o el wolf_manager? JS: segurament. Pero fixed_size_ seria una de les opcions de moltes...
         unsigned int fixed_size_; // Limits the number of Frames forming the Trajectory
         
@@ -43,14 +44,21 @@ class TrajectoryBase : public NodeLinked<Problem,FrameBase>
          **/
         void removeFrame(const FrameBaseIter& _frame_iter);
 
-        /** \brief Returns a pointer to Frame list
+        /** \brief Returns a pointer to frame list
          **/
         FrameBaseList* getFrameListPtr();
 
-        /** \brief Returns a pointer to last Frame
+        /** \brief Returns a pointer to last frame
          **/
         FrameBase* getLastFramePtr();
 
+        /** \brief Returns a pointer to last key frame
+         */
+        FrameBase* getLastKeyFramePtr();
+
+        /** \brief Sets the pointer to last key frame
+         */
+        void setLastKeyFramePtr(FrameBase* _key_frame_ptr);
 
         /** \brief Returns a list of all constraints in the trajectory thru reference
          **/
@@ -72,6 +80,16 @@ inline FrameBaseList* TrajectoryBase::getFrameListPtr()
 inline FrameBase* TrajectoryBase::getLastFramePtr()
 {
     return getDownNodeListPtr()->back();
+}
+
+inline FrameBase* TrajectoryBase::getLastKeyFramePtr()
+{
+    return last_key_frame_ptr_;
+}
+
+inline void TrajectoryBase::setLastKeyFramePtr(FrameBase* _key_frame_ptr)
+{
+    last_key_frame_ptr_ = _key_frame_ptr;
 }
 
 inline FrameStructure TrajectoryBase::getFrameStructure() const

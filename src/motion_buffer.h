@@ -1,5 +1,5 @@
 /**
- * \file MotionBuffer.h
+ * \file motion_buffer.h
  *
  *  Created on: Apr 14, 2016
  *      \author: jsola

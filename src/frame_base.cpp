@@ -19,10 +19,10 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
             o_ptr_(_o_ptr),
             v_ptr_(_v_ptr)
 {
-    //
+    setType("BASE");
 }
 
-FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
+FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeConstrained(MID, "FRAME"),
             frame_id_(++frame_id_count_),
             type_id_(_tp),
@@ -43,22 +43,23 @@ FrameBase::~FrameBase()
 	// Remove Frame State Blocks
 	if (p_ptr_ != nullptr)
 	{
-        if (getProblem() != nullptr)
+        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(p_ptr_);
 	    delete p_ptr_;
 	}
     if (o_ptr_ != nullptr)
     {
-        if (getProblem() != nullptr)
+        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(o_ptr_);
         delete o_ptr_;
     }
     if (v_ptr_ != nullptr)
     {
-        if (getProblem() != nullptr)
+        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(v_ptr_);
         delete v_ptr_;
     }
+
     //std::cout << "states deleted" << std::endl;
 
 
@@ -92,6 +93,9 @@ void FrameBase::setKey()
     {
         type_id_ = KEY_FRAME;
         registerNewStateBlocks();
+
+        if (getTrajectoryPtr()->getLastKeyFramePtr() == nullptr || getTrajectoryPtr()->getLastKeyFramePtr()->getTimeStamp() < time_stamp_)
+            getTrajectoryPtr()->setLastKeyFramePtr(this);
     }
 }
 

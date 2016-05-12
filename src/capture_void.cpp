@@ -5,7 +5,7 @@ namespace wolf {
 CaptureVoid::CaptureVoid(const TimeStamp& _ts, SensorBase* _sensor_ptr) :
     CaptureBase(_ts, _sensor_ptr)
 {
-    //
+    setType("VOID");
 }
 
 CaptureVoid::~CaptureVoid()

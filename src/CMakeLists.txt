@@ -7,6 +7,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(CMAKE_MODULE_PATH ${CMAKE_ROOT}/Modules/; ../cmake_modules)
 MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
+
 #find dependencies. 
 FIND_PACKAGE(Ceres QUIET) #Ceres is not required
 IF(Ceres_FOUND)
@@ -31,7 +32,7 @@ IF(raw_gps_utils_FOUND)
 ENDIF(raw_gps_utils_FOUND)
 
 # OpenCV
-FIND_PACKAGE(OpenCV QUIET)
+FIND_PACKAGE(OpenCV 2 QUIET)
 IF(OpenCV_FOUND)
     MESSAGE("OpenCV Library FOUND: OpenCV related sources will be built.")
 ENDIF(OpenCV_FOUND)
@@ -104,6 +105,8 @@ SET(HDRS
     capture_void.h
     constraint_base.h
     constraint_analytic.h
+    constraint_container.h
+    constraint_corner_2D.h
     constraint_epipolar.h
     constraint_sparse.h
     constraint_fix.h
@@ -112,8 +115,6 @@ SET(HDRS
     constraint_gps_pseudorange_2D.h
     constraint_odom_2D.h
     constraint_odom_2D_analytic.h
-    constraint_corner_2D.h
-    constraint_container.h
     constraint_relative_2D_analytic.h
     feature_base.h
     feature_corner_2D.h
@@ -126,6 +127,7 @@ SET(HDRS
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
+    #landmark_line_2D.h
     local_parametrization_base.h
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
@@ -189,6 +191,7 @@ SET(SRCS
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
+    #landmark_line_2D.cpp
     local_parametrization_base.cpp
     local_parametrization_quaternion.cpp
     local_parametrization_homogeneous.cpp
@@ -198,6 +201,8 @@ SET(SRCS
     processor_base.cpp
     processor_factory.cpp
     processor_imu.cpp
+    processor_odom_2D.cpp
+    processor_odom_3D.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
     processor_tracker_feature_dummy.cpp
@@ -242,14 +247,16 @@ IF (laser_scan_utils_FOUND)
     SET(HDRS ${HDRS}
         capture_laser_2D.h
         sensor_laser_2D.h
-        processor_laser_2D.h
-        processor_tracker_laser.h
+        #processor_laser_2D.h
+        processor_tracker_landmark_corner.h
+        processor_tracker_feature_corner.h
         )
     SET(SRCS ${SRCS}
         capture_laser_2D.cpp
         sensor_laser_2D.cpp
-        processor_laser_2D.cpp
-        processor_tracker_laser.cpp
+        #processor_laser_2D.cpp
+        processor_tracker_landmark_corner.cpp
+        processor_tracker_feature_corner.cpp
         )
 ENDIF(laser_scan_utils_FOUND)
 

@@ -44,13 +44,11 @@ class ProcessorOdom2D : public ProcessorMotion
             static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
-
 inline ProcessorOdom2D::ProcessorOdom2D() :
         ProcessorMotion(PRC_ODOM_2D, 3, 3, 2)
 {
     setType("ODOM 2D");
 }
-
 inline ProcessorOdom2D::~ProcessorOdom2D()
 {
 }
@@ -189,33 +187,16 @@ inline ConstraintBase* ProcessorOdom2D::createConstraint(FeatureBase* _feature_m
 
 inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
 {
+    // TODO: Implement actual interpolation
+    // Implementation: motion ref keeps the same
     Motion tmp(_motion_ref);
     tmp.ts_ = _ts;
     tmp.delta_ = deltaZero();
     tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
+    tmp.delta_integr_cov_ += Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-9;
     return tmp;
 }
 
-ProcessorBase* ProcessorOdom2D::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
-{
-    ProcessorOdom2D* prc_ptr = new ProcessorOdom2D();
-    prc_ptr->setName(_unique_name);
-    return prc_ptr;
-}
-
 } // namespace wolf
-
-
-
-// Register in the ProcessorFactory
-#include "processor_factory.h"
-namespace wolf {
-namespace
-{
-//const bool registered_prc_odom_2d = ProcessorFactory::get()->registerCreator("ODOM 2D", ProcessorOdom2D::create);
-}
-} // namespace wolf
-
-
 
 #endif /* SRC_PROCESSOR_ODOM_2D_H_ */

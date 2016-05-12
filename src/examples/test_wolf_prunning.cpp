@@ -89,12 +89,8 @@ int main(int argc, char** argv)
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full, problem_options);
-    CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun, problem_options);
+    CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full, ceres_options);
+    CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun,ceres_options);
 
     // load graph from .txt
     offLineFile_.open(file_path_.c_str(), std::ifstream::in);
@@ -151,8 +147,8 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add frame to problem
-                    FrameBase* vertex_frame_ptr_full = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
-                    FrameBase* vertex_frame_ptr_prun = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBase* vertex_frame_ptr_full = new FrameBase(KEY_FRAME, TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBase* vertex_frame_ptr_prun = new FrameBase(KEY_FRAME, TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
                     wolf_problem_full->getTrajectoryPtr()->addFrame(vertex_frame_ptr_full);
                     wolf_problem_prun->getTrajectoryPtr()->addFrame(vertex_frame_ptr_prun);
                     // store
@@ -265,8 +261,8 @@ int main(int argc, char** argv)
 
                     //std::cout << "Adding edge... " << std::endl;
                     // add capture, feature and constraint to problem
-                    FeatureBase* feature_ptr_full = new FeatureBase(FEAT_FIX, edge_vector, edge_information.inverse());
-                    FeatureBase* feature_ptr_prun = new FeatureBase(FEAT_FIX, edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_full = new FeatureBase(FEATURE_FIX, edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_prun = new FeatureBase(FEATURE_FIX, edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_full = new CaptureVoid(TimeStamp(0), sensor);
                     CaptureVoid* capture_ptr_prun = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_full.find(edge_old) != index_2_frame_ptr_full.end() && "edge from vertex not added!");
@@ -339,12 +335,6 @@ int main(int argc, char** argv)
     insertSparseBlock((Eigen::Matrix3s::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
     Lambda = Lambda + DeltaLambda;
     t_sigma_manual += ((double) clock() - t1) / CLOCKS_PER_SEC;
-
-    // BUILD SOLVER PROBLEM
-    std::cout << "updating ceres..." << std::endl;
-    ceres_manager_full->update();
-    ceres_manager_prun->update();
-    std::cout << "updated!" << std::endl;
 
     // COMPUTE COVARIANCES
     ConstraintBaseList constraints;
@@ -557,13 +547,11 @@ int main(int argc, char** argv)
     // SOLVING PROBLEMS
     std::cout << "FULL PROBLEM" << std::endl;
     std::cout << "solving..." << std::endl;
-    summary_full = ceres_manager_full->solve(ceres_options);
+    summary_full = ceres_manager_full->solve();
     std::cout << summary_full.FullReport() << std::endl;
     std::cout << "PRUNNED PROBLEM" << std::endl;
-    std::cout << "updating..." << std::endl;
-    ceres_manager_prun->update();
     std::cout << "solving..." << std::endl;
-    summary_prun = ceres_manager_prun->solve(ceres_options);
+    summary_prun = ceres_manager_prun->solve();
     std::cout << summary_prun.FullReport() << std::endl;
 
     delete wolf_problem_full; //not necessary to delete anything more, wolf will do it!

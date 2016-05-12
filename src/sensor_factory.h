@@ -34,19 +34,40 @@ namespace wolf
  * The rule to make new TYPE strings unique is that you skip the prefix 'Sensor' from your class name,
  * and you build a string in CAPITALS with space separators.
  *
+ * #### Accessing the Factory
+ * The SensorFactory class is a singleton: it can only exist once in your application.
+ * To obtain a pointer to it, use the static method get(),
+ *
+ *     \code
+ *     SensorFactory::get()
+ *     \endcode
+ *
+ * You can then call the methods you like, e.g. to create a sensor, you type:
+ *
+ *     \code
+ *      SensorFactory::get()->create(...); // see below for creating sensors ...
+ *     \endcode
+ *
+ * #### Registering sensor creators
+ * Prior to invoking the creation of a sensor of a particular type,
+ * you must register the creator for this type into the factory.
+ *
  * Registering sensor creators into the factory is done through registerCreator().
  * You provide a sensor type string (above), and a pointer to a static method
  * that knows how to create your specific sensor, e.g.:
  *
- *     registerCreator("CAMERA", SensorCamera::create);
+ *     \code
+ *     SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+ *     \endcode
  *
  * The method SensorCamera::create() exists in the SensorCamera class as a static method.
- * All these create() methods in all SensorXxx classes need to have exactly the same API, regardless of the sensor type.
+ * All these SensorXxx::create() methods need to have exactly the same API, regardless of the sensor type.
  * This API includes a sensor name, a vector of extrinsic parameters, and a pointer to a base struct of intrinsic parameters, IntrinsicsBase*,
- * that must be derived for each derived sensor.
+ * that can be derived for each derived sensor.
  *
  * Here is an example of SensorCamera::create() extracted from sensor_camera.h:
  *
+ *     \code
  *      static SensorBase* create(std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
  *      {
  *          // decode extrinsics vector
@@ -56,55 +77,76 @@ namespace wolf
  *
  *          // cast instrinsics to good type and extract intrinsic vector
  *          IntrinsicsCamera* intrinsics = (IntrinsicsCamera*)_intrinsics;
- *          StateBlock* intr_ptr = new StateBlock(intrinsics->intrinsic_vector);
+ *          StateBlock*       intr_ptr   = new StateBlock(intrinsics->intrinsic_vector);
  *
- *          SensorBase* sen = new SensorCamera(pos_ptr, ori_ptr, intr_ptr, intrinsics->width, intrinsics->height);
+ *          SensorBase* sen = new SensorCamera( pos_ptr , ori_ptr , intr_ptr , intrinsics->width , intrinsics->height );
  *          sen->setName(_name); // pass the name to the created SensorCamera.
  *          return sen;
  *      }
+ *     \endcode
  *
+ * See below for achieving automatic registration of your sensors.
+ *
+ * #### Achieving automatic registration
+ * Currently, registering is performed in each specific SensorXxxx source file, sensor_xxxx.cpp.
+ * For example, in sensor_camera.cpp we find the line:
+ *
+ *     \code
+ *      const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+ *     \endcode
+ *
+ * which is a static invocation (i.e., it is placed at global scope outside of the SensorCamera class).
+ * Therefore, at application level, all sensors that have a .cpp file compiled are automatically registered.
+ *
+ * #### Unregistering sensor creators
  * The method unregisterCreator() unregisters the SensorXxx::create() method. It only needs to be passed the string of the sensor type.
  *
- * The SensorFactory class is a singleton: it can only exist once in your application.
- * To obtain a pointer to it, use the static method get(),
+ *     \code
+ *     SensorFactory::get()->unregisterCreator("CAMERA");
+ *     \endcode
  *
- *     SensorFactory::get()
+ * #### Creating sensors
+ * Prior to invoking the creation of a sensor of a particular type,
+ * you must register the creator for this type into the factory.
  *
- * You can then call the methods you like, e.g. to create a SensorCamera, you type:
+ * To create e.g. a SensorCamera, you type:
  *
+ *     \code
  *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, intrinsics_ptr);
+ *     \endcode
  *
  * where ABSOLUTELY ALL input parameters are important. In particular, the sensor name "Front-left camera" will be used to identify this camera
  * and to assign it the appropriate processors. DO NOT USE IT WITH DUMMY PARAMETERS!
  *
- * Currently, registering is performed in each specific SensorXxxx header file, sensor_xxxx.h.
- * For example, in sensor_camera.h we find the line:
- *
- *      const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
- *
- * which is a static invocation (i.e., it is placed at global scope outside of the SensorCamera class).
- * Therefore, at application level, ````#include````-ing the header file sensor_xxx.h is enough for registering the SensorXxx creator into the factory.
- *
+ * #### Example
  * We finally provide the necessary steps to create a sensor of class SensorCamera in our application:
  *
+ *     \code
  *      #include "sensor_factory.h"
- *      #include "sensor_camera.h" // provides SensorCamera and registers the pair <"CAMERA", SensorCamera::create>
+ *      #include "sensor_camera.h" // provides SensorCamera
  *
- *      // Note: SensorCamera::create() is already registered. To invoke it, use the std::string "CAMERA" as in the lines below.
+ *      // Note: SensorCamera::create() is already registered, automatically.
  *
- *      // We create two cameras...
+ *      // To create a camera, provide:
+ *      //    a type = "CAMERA",
+ *      //    a name = "Front-left camera",
+ *      //    an extrinsics vector, and
+ *      //    a pointer to the intrinsics struct:
  *
- *      // To create a camera, provide a "TYPE", a "Name", an extrinsics vector, and a pointer to the intrinsics struct:
- *      Eigen::VectorXs extrinsics(7); // give it some values...
- *      IntrinsicsCamera intrinsics({...}); // also fill in the derived struct (here we suggested the struct initializer with '{}')...
- *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, &intrinsics);
+ *      Eigen::VectorXs   extrinsics(7);        // give it some values...
+ *      IntrinsicsCamera  intrinsics({...});    // also fill in the derived struct
+ *
+ *      SensorBase* camera_1_ptr =
+ *          SensorFactory::get()->create ( "CAMERA" , "Front-left camera" , extrinsics , &intrinsics );
  *
  *      // Second camera... with a different name!
- *      extrinsics = ...; // give it some other values...
- *      intrinsics = ...; // idem...
- *      SensorFactory::get()->create("CAMERA", "Front-right camera", extrinsics, &intrinsics);
+ *      extrinsics = ...;
+ *      intrinsics = ...;
+ *      SensorBase* camera_2_ptr =
+ *          SensorFactory::get()->create( "CAMERA" , "Front-right camera" , extrinsics , &intrinsics );
+ *     \endcode
  *
- * You can also check the code in the example file ````src/examples/test_sensor_factory.cpp````.
+ * You can also check the code in the example file ````src/examples/test_wolf_factories.cpp````.
  */
 class SensorFactory
 {
@@ -115,7 +157,7 @@ class SensorFactory
     public:
         bool registerCreator(const std::string& _sensor_type, CreateSensorCallback createFn);
         bool unregisterCreator(const std::string& _sensor_type);
-        SensorBase* create(const std::string& _sensor_type, const std::string& _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
+        SensorBase* create(const std::string& _sensor_type, const std::string& _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics = nullptr);
     private:
         CallbackMap callbacks_;
 
@@ -124,11 +166,13 @@ class SensorFactory
         // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
     public:
         static SensorFactory* get(); // Unique point of access
+
+    public: // see http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
+        SensorFactory(const SensorFactory&) = delete;
+        void operator=(SensorFactory const&) = delete;
     private:
-        SensorFactory() { } // Prevent clients from creating a new Singleton
-        SensorFactory(const SensorFactory&); // Prevent clients from creating a copy of the Singleton
-        ~SensorFactory() { }; // Prevent clients from deleting the Singleton
-        void operator=(SensorFactory const&); // Don't implement
+        SensorFactory() { }
+        ~SensorFactory() { }
 };
 
 } /* namespace wolf */

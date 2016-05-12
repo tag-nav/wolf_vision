@@ -14,7 +14,8 @@
 // Std includes
 #include <eigen3/Eigen/Dense>
 
-namespace wolf {
+namespace wolf
+{
 
 /**
  * Class for 3D frame transforms.
@@ -41,14 +42,14 @@ class TF
         /**
          * Default constructor to the origin, P=(0,0,0), Q=(0,0,0,1), R=identity, H=identity
          */
-        TF() : epoch_(0),
-               p_(Eigen::Vector3s::Zero()),
-               q_vector_(0,0,0,1), // Impose an identity quaternion with real part at the end. This is Eigen compatible. TODO: check components order
-               q_(Eigen::Quaternions::Identity()),
-               R_(Eigen::Matrix3s::Identity()),
-               H_(Eigen::Matrix4s::Identity())
-    {
-    }
+        TF() :
+                epoch_(0), p_(Eigen::Vector3s::Zero()), //
+                q_vector_(0, 0, 0, 1), // Impose an identity quaternion with real part at the end. This is Eigen compatible.
+                q_(Eigen::Quaternions::Identity()), //
+                R_(Eigen::Matrix3s::Identity()), //
+                H_(Eigen::Matrix4s::Identity())
+        {
+        }
 
         /**
          * Initializer constuctor
@@ -56,15 +57,17 @@ class TF
          * \param _q_vec_ptr pointer to quaternion vector (real part at the end)
          */
         TF(double* _p_ptr, double* _q_vec_ptr) :
-            epoch_(0),
-            p_(_p_ptr[0], _p_ptr[1], _p_ptr[2]),
-            q_vector_(_q_vec_ptr[0],_q_vec_ptr[1],_q_vec_ptr[2],_q_vec_ptr[3]), //TODO: check components order!
-            q_(_q_vec_ptr), //TODO: check components order!
-            R_(q_.matrix()),
-            H_(Eigen::Matrix4s::Identity())
+                epoch_(0),
+                // p_(_p_ptr[0], _p_ptr[1], _p_ptr[2]),
+                // q_vector_(_q_vec_ptr[0],_q_vec_ptr[1],_q_vec_ptr[2],_q_vec_ptr[3]), //
+                p_(_p_ptr), //
+                q_vector_(_q_vec_ptr), //
+                q_(_q_vec_ptr), //
+                R_(q_.matrix()), //
+                H_(Eigen::Matrix4s::Identity())
         {
-            H_.block<3,3>(0,0) = R_;
-            H_.block<3,1>(0,3) = p_;
+            H_.block<3, 3>(0, 0) = R_;
+            H_.block<3, 1>(0, 3) = p_;
         }
 
     public:
@@ -78,14 +81,13 @@ class TF
 
         void checkAndUpdate(double* _p_ptr, double* _q_vec_ptr, unsigned int _epoch)
         {
-            if(_epoch != epoch_)
+            if (_epoch != epoch_)
             {
                 epoch_ = _epoch;
                 updateP(_p_ptr);
                 updateO(_q_vec_ptr);
             }
         }
-
 
     private:
         /** Check if P has not changed
@@ -101,7 +103,8 @@ class TF
          */
         bool equalQ(double * _q_vec_ptr)
         {
-            return ((_q_vec_ptr[0] == q_vector_(0)) && (_q_vec_ptr[1] == q_vector_(1)) && (_q_vec_ptr[2] == q_vector_(2)) && (_q_vec_ptr[3] == q_vector_(3)));
+            return ((_q_vec_ptr[0] == q_vector_(0)) && (_q_vec_ptr[1] == q_vector_(1))
+                    && (_q_vec_ptr[2] == q_vector_(2)) && (_q_vec_ptr[3] == q_vector_(3)));
         }
 
         /** Update translation vector
@@ -112,7 +115,7 @@ class TF
             p_(0) = _p_ptr[0];
             p_(1) = _p_ptr[1];
             p_(2) = _p_ptr[2];
-            H_.block<3,1>(0,3) = p_;
+            H_.block<3, 1>(0, 3) = p_;
         }
 
         /** Update orientation parts
@@ -126,7 +129,7 @@ class TF
             q_vector_(3) = _q_vec_ptr[3];
             q_ = Eigen::Quaternion(_q_vec_ptr);
             R_ = q_.matrix();
-            H_.block<3,3>(0,0) = R_;
+            H_.block<3, 3>(0, 0) = R_;
         }
 
 };

@@ -30,9 +30,11 @@ class ProcessorIMU : public ProcessorMotion{
 
         /**
          * @brief extractData Extract data from the capture_imu object and store them
-         * @param _capture_ptr pointer to the capture to be used for data extraction
-         * @param _ts
          * @param _data
+         * @param _data_cov
+         * @param _dt
+         * @param _delta
+         * @param _delta_cov
          */
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
@@ -121,22 +123,6 @@ class ProcessorIMU : public ProcessorMotion{
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
-ProcessorBase* ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
-{
-    ProcessorIMU* prc_ptr = new ProcessorIMU();
-    prc_ptr->setName(_unique_name);
-    return prc_ptr;
-}
-
-
 } // namespace wolf
 
-// Register in the SensorFactory
-#include "processor_factory.h"
-namespace wolf {
-namespace
-{
-//const bool registered_prc_imu = ProcessorFactory::get()->registerCreator("IMU", ProcessorIMU::create);
-}
-} // namespace wolf
 #endif // PROCESSOR_IMU_H

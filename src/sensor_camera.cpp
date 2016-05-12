@@ -2,7 +2,6 @@
 #include "state_block.h"
 #include "state_quaternion.h"
 
-
 namespace wolf {
 
 /**
@@ -42,4 +41,15 @@ SensorBase* SensorCamera::create(const std::string& _unique_name, const Eigen::V
     return sen_ptr;
 }
 
+
+} // namespace wolf
+
+
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+}
 } // namespace wolf

@@ -34,7 +34,7 @@ class ProcessorGPS : public ProcessorBase
         virtual void init(CaptureBase* _capture_ptr);
         virtual void process(CaptureBase* _capture_ptr);
         virtual bool voteForKeyFrame();
-        virtual bool keyFrameCallback(wolf::FrameBase*);
+        virtual bool keyFrameCallback(wolf::FrameBase*, const Scalar& _time_tol);
 
     public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
@@ -42,16 +42,5 @@ class ProcessorGPS : public ProcessorBase
 };
 
 } // namespace wolf
-
-
-// Register in the SensorFactory
-#include "processor_factory.h"
-namespace wolf {
-namespace
-{
-//const bool registered_prc_gps = ProcessorFactory::get()->registerCreator("GPS", ProcessorGPS::create);
-}
-} // namespace wolf
-
 
 #endif //WOLF_PROCESSOR_GPS_H

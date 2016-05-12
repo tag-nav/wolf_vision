@@ -54,12 +54,8 @@ int main(int argc, char** argv)
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-    CeresManager* ceres_manager_ceres_diff = new CeresManager(wolf_problem_ceres_diff, problem_options, false);
-    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_wolf_diff, problem_options, true);
+    CeresManager* ceres_manager_ceres_diff = new CeresManager(wolf_problem_ceres_diff, ceres_options, false);
+    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_wolf_diff, ceres_options, true);
 
 
 
@@ -229,8 +225,8 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add capture, feature and constraint to problem
-                    FeatureBase* feature_ptr_ceres_diff = new FeatureBase(FEAT_FIX, edge_vector, edge_information.inverse());
-                    FeatureBase* feature_ptr_wolf_diff = new FeatureBase(FEAT_FIX, edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_ceres_diff = new FeatureBase(FEATURE_FIX, edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_wolf_diff = new FeatureBase(FEATURE_FIX, edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_ceres_diff = new CaptureVoid(TimeStamp(0), sensor);
                     CaptureVoid* capture_ptr_wolf_diff = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_ceres_diff.find(edge_old) != index_2_frame_ptr_ceres_diff.end() && "edge from vertex not added!");
@@ -274,16 +270,6 @@ int main(int argc, char** argv)
     initial_covariance_wolf_diff->process();
     //std::cout << "initial covariance: constraint " << initial_covariance_wolf_diff->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_wolf_diff->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
 
-    // BUILD SOLVER PROBLEM
-    std::cout << "updating ceres..." << std::endl;
-    t1 = clock();
-    ceres_manager_ceres_diff->update();
-    double t_update_ceres = ((double) clock() - t1) / CLOCKS_PER_SEC;
-    t1 = clock();
-    ceres_manager_wolf_diff->update();
-    double t_update_wolf = ((double) clock() - t1) / CLOCKS_PER_SEC;
-    std::cout << "updated!" << std::endl;
-
     // COMPUTE COVARIANCES
     std::cout << "computing covariances..." << std::endl;
     t1 = clock();
@@ -297,25 +283,22 @@ int main(int argc, char** argv)
     // SOLVING PROBLEMS
     std::cout << "solving..." << std::endl;
     Eigen::VectorXs prev_ceres_state = wolf_problem_ceres_diff->getTrajectoryPtr()->getFrameListPtr()->back()->getState();
-    summary_ceres_diff = ceres_manager_ceres_diff->solve(ceres_options);
+    summary_ceres_diff = ceres_manager_ceres_diff->solve();
     Eigen::VectorXs post_ceres_state = wolf_problem_ceres_diff->getTrajectoryPtr()->getFrameListPtr()->back()->getState();
     //std::cout << summary_ceres_diff.BriefReport() << std::endl;
-    ceres_manager_wolf_diff->update();
     Eigen::VectorXs prev_wolf_state = wolf_problem_wolf_diff->getTrajectoryPtr()->getFrameListPtr()->back()->getState();
-    summary_wolf_diff = ceres_manager_wolf_diff->solve(ceres_options);
+    summary_wolf_diff = ceres_manager_wolf_diff->solve();
     Eigen::VectorXs post_wolf_state = wolf_problem_wolf_diff->getTrajectoryPtr()->getFrameListPtr()->back()->getState();
     //std::cout << summary_wolf_diff.BriefReport() << std::endl;
     std::cout << "solved!" << std::endl;
 
     std::cout << "CERES AUTODIFF:" << std::endl;
-    std::cout << "Ceres update:           " << t_update_ceres << "s" << std::endl;
     std::cout << "Covariance computation: " << t_sigma_ceres << "s" << std::endl;
     std::cout << "Solving:                " << summary_ceres_diff.total_time_in_seconds << "s" << std::endl;
     std::cout << "Prev:                   " << prev_ceres_state.transpose() << std::endl;
     std::cout << "Post:                   " << post_ceres_state.transpose() << std::endl;
 
     std::cout << std::endl << "WOLF AUTODIFF:" << std::endl;
-    std::cout << "Ceres update:           " << t_update_wolf << "s" << std::endl;
     std::cout << "Covariance computation: " << t_sigma_wolf << "s" << std::endl;
     std::cout << "Solving:                " << summary_wolf_diff.total_time_in_seconds << "s" << std::endl;
     std::cout << "Prev:                   " << prev_wolf_state.transpose() << std::endl;
