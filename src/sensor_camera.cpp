@@ -37,7 +37,7 @@ SensorBase* SensorCamera::create(const std::string& _unique_name, const Eigen::V
     return sen_ptr;
 }
 
-IntrinsicsBase* SensorCamera::createParams(const std::string _filename_dot_yaml)
+IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot_yaml)
 {
     YAML::Node camera_config = YAML::LoadFile(_filename_dot_yaml);
 
@@ -101,9 +101,11 @@ IntrinsicsBase* SensorCamera::createParams(const std::string _filename_dot_yaml)
 
 // Register in the SensorFactory
 #include "sensor_factory.h"
+#include "intrinsics_factory.h"
 namespace wolf {
 namespace
 {
+const bool registered_camera_intr = IntrinsicsFactory::get()->registerCreator("CAMERA", SensorCamera::createIntrinsics);
 const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
 }
 } // namespace wolf

@@ -45,20 +45,22 @@ int main(void)
 
     // define some useful parameters
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
-    IntrinsicsCamera intr_cam;
     IntrinsicsOdom2D intr_odom2d;
 
-    // Add sensors
-    problem.installSensor("CAMERA",     "front left camera",    pq_3d,  &intr_cam);
-    problem.installSensor("Camera",     "front right camera",   pq_3d,  &intr_cam);
+    // Use params factory for camera intrinsics
+    IntrinsicsBase* intr_cam = SensorCamera::createIntrinsics("/Users/jsola/dev/wolf/src/examples/camera.yaml");
+
+    // Install sensors
+    problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam);
+    problem.installSensor("Camera",     "front right camera",   pq_3d,  intr_cam);
     problem.installSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
     problem.installSensor("GPS FIX",    "GPS fix",              p_3d);
-    problem.installSensor("CAMERA",     "rear camera",          pq_3d,  &intr_cam);
     problem.installSensor("IMU",        "inertial",             pq_3d);
     problem.installSensor("GPS",        "GPS raw",              p_3d);
+    problem.installSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
 
     // Add this sensor and recover a pointer to it
-    SensorBase* sen_ptr = problem.installSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
+    SensorBase* sen_ptr = problem.installSensor("CAMERA",     "rear camera",          pq_3d,  intr_cam);
 
     // print available sensors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
@@ -68,10 +70,11 @@ int main(void)
                 << " | name: " << sen->getName() << endl;
     }
     cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << endl;
+    cout << "\twith intrinsics: " << sen_ptr->getIntrinsicPtr()->getVector().transpose() << endl;
 
     cout << "\n=================== Processor Factory ===================" << endl;
 
-    // Add processors and bind them to sensors -- by sensor name!
+    // Install processors and bind them to sensors -- by sensor name!
     problem.installProcessor("ODOM 2D", "main odometry",    "main odometer");
     problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer",     nullptr);
     problem.installProcessor("IMU",     "pre-integrated",   "inertial",         nullptr);
