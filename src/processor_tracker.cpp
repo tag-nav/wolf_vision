@@ -40,8 +40,14 @@ ProcessorTracker::~ProcessorTracker()
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
     //std::cout << "\nProcessorTracker::process..." << std::endl;
+    std::cout << "-----nProcessorTracker::process():" << std::endl;
+    std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
+    std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
+    std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
+    std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
 
     incoming_ptr_ = _incoming_ptr;
+
     preProcess();
     // FIRST TIME
     if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
@@ -156,6 +162,12 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     }
 
     postProcess();
+
+    std::cout << "-----End of process():" << std::endl;
+    std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
+    std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
+    std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
+    std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
 }
 
 bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
