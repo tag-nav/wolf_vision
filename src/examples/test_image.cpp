@@ -4,7 +4,7 @@
 #include "sensor_camera.h"
 #include "capture_image.h"
 #include "feature_point_image.h"
-#include "processor_brisk.h"
+#include "processor_image.h"
 #include "state_block.h"
 #include "state_quaternion.h"
 
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     brisk_params.type = DD_BRISK;
 
 
-    ProcessorBrisk* p_brisk = new ProcessorBrisk(tracker_params, &orb_params);
+    ProcessorImage* p_brisk = new ProcessorImage(tracker_params, &orb_params);
     sen_cam_->addProcessor(p_brisk);
 
 

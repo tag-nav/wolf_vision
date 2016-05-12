@@ -1,5 +1,5 @@
 // Wolf includes
-#include "processor_brisk.h"
+#include "processor_image.h"
 
 // OpenCV includes
 
@@ -31,7 +31,7 @@ namespace wolf
 //    std::cout << "descriptor size          : " << params_.descriptor.size_bits << std::endl;
 //}
 
-ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescriptorParamsBase* _dd_base_ptr) :
+ProcessorImage::ProcessorImage(ProcessorImageParameters _params, DetectorDescriptorParamsBase* _dd_base_ptr) :
     ProcessorTrackerFeature(PRC_TRACKER_BRISK),
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     act_search_grid_()
@@ -72,12 +72,12 @@ ProcessorBrisk::ProcessorBrisk(ProcessorImageParameters _params, DetectorDescrip
 }
 
 //Destructor
-ProcessorBrisk::~ProcessorBrisk()
+ProcessorImage::~ProcessorImage()
 {
 
 }
 
-void ProcessorBrisk::preProcess()
+void ProcessorImage::preProcess()
 {
     image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
 
@@ -104,7 +104,7 @@ void ProcessorBrisk::preProcess()
 //        std::cout << "--------------------------------------------------------------------------SON IGUALES (pre)" << std::endl;
 }
 
-void ProcessorBrisk::postProcess()
+void ProcessorImage::postProcess()
 {
     drawFeatures(last_ptr_);
 //    if(image_last_.data == image_incoming_.data)
@@ -116,12 +116,12 @@ void ProcessorBrisk::postProcess()
     cv::waitKey(30);
 }
 
-bool ProcessorBrisk::correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
+bool ProcessorImage::correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
 {
     return true;
 }
 
-unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
+unsigned int ProcessorImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
                                     cv::Mat& new_descriptors)
 {
     cv::Mat _image_roi;
@@ -148,7 +148,7 @@ unsigned int ProcessorBrisk::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
     return _new_keypoints.size();
 }
 
-unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_features)
+unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_features)
 {
     std::cout << "\n---------------- detectNewFeatures -------------" << std::endl;
     cv::Rect roi;
@@ -194,7 +194,7 @@ unsigned int ProcessorBrisk::detectNewFeatures(const unsigned int& _max_new_feat
     return n_new_features;
 }
 
-void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
+void ProcessorImage::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
 {
     for (auto feature_base_last_ptr : _feature_list_last)
     {
@@ -203,7 +203,7 @@ void ProcessorBrisk::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
     }
 }
 
-unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
+unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
     std::cout << "\n---------------- trackFeatures ----------------" << std::endl;
@@ -283,7 +283,7 @@ unsigned int ProcessorBrisk::trackFeatures(const FeatureBaseList& _feature_list_
 }
 
 
-void ProcessorBrisk::trimRoi(cv::Rect& _roi)
+void ProcessorImage::trimRoi(cv::Rect& _roi)
 {
     if(_roi.x < 0)
     {
@@ -309,7 +309,7 @@ void ProcessorBrisk::trimRoi(cv::Rect& _roi)
     }
 }
 
-void ProcessorBrisk::inflateRoi(cv::Rect& _roi)
+void ProcessorImage::inflateRoi(cv::Rect& _roi)
 {
     // now both the detector and descriptor patter_radius is the same, but when not, shouldn't the method have that as input parameter?
     int inflation_rate = detector_descriptor_params_.pattern_radius_;
@@ -320,7 +320,7 @@ void ProcessorBrisk::inflateRoi(cv::Rect& _roi)
     _roi.height = _roi.height + 2*inflation_rate;
 }
 
-void ProcessorBrisk::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
+void ProcessorImage::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
 {
 
     inflateRoi(_roi);
@@ -333,7 +333,7 @@ void ProcessorBrisk::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _ro
 
 // draw functions ===================================================================
 
-void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list)
+void ProcessorImage::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list)
 {
     // These "tracking features" are the feature to be used in tracking as well as its candidates
 
@@ -352,7 +352,7 @@ void ProcessorBrisk::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _
 
 }
 
-void ProcessorBrisk::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
+void ProcessorImage::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
 {
     for (auto roi : _roi_list)
     {
@@ -361,7 +361,7 @@ void ProcessorBrisk::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::
     cv::imshow("Feature tracker", _image);
 }
 
-void ProcessorBrisk::drawFeatures(CaptureBase* const _last_ptr)
+void ProcessorImage::drawFeatures(CaptureBase* const _last_ptr)
 {
     for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
     {
