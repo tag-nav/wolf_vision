@@ -7,6 +7,8 @@
 #include "map_base.h"
 #include "processor_motion.h"
 #include "sensor_base.h"
+#include "sensor_gps.h"
+#include "capture_fix.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
 
@@ -22,7 +24,7 @@ std::string uppercase(std::string& s) {for (auto & c: s) c = std::toupper(c); re
 Problem::Problem(FrameStructure _frame_structure) :
         NodeBase("PROBLEM"), //
         location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(
-                new HardwareBase), processor_motion_ptr_(nullptr)
+                new HardwareBase), processor_motion_ptr_(nullptr), origin_setted_(false)
 {
     trajectory_ptr_->linkToUpperNode(this);
     map_ptr_->linkToUpperNode(this);
@@ -47,7 +49,7 @@ void Problem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-SensorBase* Problem::installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
+SensorBase* Problem::installSensor(std::string _sen_type, std::string _unique_sensor_name, const Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
     SensorBase* sen_ptr = SensorFactory::get()->create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
     addSensor(sen_ptr);
@@ -61,6 +63,15 @@ ProcessorBase* Problem::installProcessor(std::string _prc_type, //
 {
     ProcessorBase* prc_ptr = ProcessorFactory::get()->create(uppercase(_prc_type), _unique_processor_name, _prc_params);
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
+
+    // setting the origin in all processor motion if origin already setted
+    if (prc_ptr->isMotion() && origin_setted_)
+        ((ProcessorMotion*)prc_ptr)->setOrigin(getLastKeyFramePtr());
+
+    // setting the main processor motion
+    if (processor_motion_ptr_ == nullptr)
+        processor_motion_ptr_ = (ProcessorMotion*)prc_ptr;
+
     return prc_ptr;
 }
 
@@ -373,6 +384,31 @@ wolf::SensorBase* Problem::getSensorPtr(const std::string& _sensor_name)
         return nullptr;
 
     return (*sen_it);
+}
+
+void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov, const TimeStamp& _ts)
+{
+    if (!origin_setted_)
+    {
+        // Create origin frame
+        FrameBase* origin_frame_ptr = createFrame(KEY_FRAME, _origin_pose, _ts);
+        // FIXME: create a fix sensor
+        IntrinsicsBase fix_instrinsics;
+        SensorBase* fix_sensor_ptr = installSensor("GPS", "initial pose", Eigen::VectorXs::Zero(3), &fix_instrinsics );
+        CaptureFix* init_capture = new CaptureFix(_ts, fix_sensor_ptr, _origin_pose, _origin_cov);
+        origin_frame_ptr->addCapture(init_capture);
+        init_capture->process();
+
+        // notify processors about the new keyframe
+        for (auto sensor_ptr : (*hardware_ptr_->getSensorListPtr()))
+            for (auto processor_ptr : (*sensor_ptr->getProcessorListPtr()))
+                if (processor_ptr->isMotion())
+                    ((ProcessorMotion*)processor_ptr)->setOrigin(origin_frame_ptr);
+
+        origin_setted_ = true;
+    }
+    else
+        throw std::runtime_error("Origin already setted!");
 }
 
 } // namespace wolf

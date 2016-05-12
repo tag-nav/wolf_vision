@@ -66,6 +66,7 @@ class Problem : public NodeBase
         StateBlockList state_block_ptr_list_;
         std::list<StateBlockNotification> state_block_notification_list_;
         std::list<ConstraintNotification> constraint_notification_list_;
+        bool origin_setted_;
 
     public:
 
@@ -88,6 +89,14 @@ class Problem : public NodeBase
          */
         virtual void destruct() final;
 
+        /** \brief Sets an origin frame with a covariance
+         *
+         * Sets an origin frame with a covariance
+         *
+         */
+        virtual void setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov,
+                               const TimeStamp& _ts);
+
 
         /** \brief add sensor to hardware
          */
@@ -99,7 +108,7 @@ class Problem : public NodeBase
          * \param _extrinsics a vector of extrinsic parameters: size 2 for 2D position, 3 for 2D pose, 3 for 3D position, 7 for 3D pose.
          * \param _intrinsics a base-pointer to a derived struct defining the intrinsic parameters.
          */
-        SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics = nullptr);
+        SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, const Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics = nullptr);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
