@@ -48,7 +48,7 @@ int main(void)
     IntrinsicsOdom2D intr_odom2d;
 
     // Use params factory for camera intrinsics
-    IntrinsicsBase* intr_cam = SensorCamera::createIntrinsics("/Users/jsola/dev/wolf/src/examples/camera.yaml");
+    IntrinsicsBase* intr_cam = SensorCamera::createIntrinsics("/home/jsola/dev/wolf/src/examples/camera.yaml");
 
     // Install sensors
     problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam);
@@ -57,7 +57,7 @@ int main(void)
     problem.installSensor("GPS FIX",    "GPS fix",              p_3d);
     problem.installSensor("IMU",        "inertial",             pq_3d);
     problem.installSensor("GPS",        "GPS raw",              p_3d);
-    problem.installSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
+    problem.installSensor("ODOM 2D",    "aux odometer",         po_2d,  &intr_odom2d);
 
     // Add this sensor and recover a pointer to it
     SensorBase* sen_ptr = problem.installSensor("CAMERA",     "rear camera",          pq_3d,  intr_cam);
