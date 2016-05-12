@@ -73,8 +73,10 @@ int main(int argc, char** argv)
     // set image processors
     cv::BRISK detector(30, 0, 1.0);
     cv::BRISK descriptor(30, 0, 1.0);
-//    cv::FlannBasedMatcher matcher;
     cv::BFMatcher matcher(cv::NORM_HAMMING);
+//    cv::ORB detector();
+//    cv::ORB descriptor();
+//    cv::FlannBasedMatcher matcher;
 
     // declare all variables
     std::vector<cv::KeyPoint> keypoints_1, keypoints_2;

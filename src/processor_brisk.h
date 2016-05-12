@@ -15,6 +15,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
 
+
 // General includes
 #include <cmath>
 #include <complex>      // std::complex, std::norm
@@ -23,6 +24,38 @@
 
 namespace wolf {
 
+enum DetectorDescriptorType
+{
+    DD_BRISK,
+    DD_ORB
+};
+
+struct DetectorDescriptorParamsBase
+{
+        DetectorDescriptorType type;
+        unsigned int nominal_pattern_radius = 18; ///< Radius of the pattern before scaling
+        //should this be here? doesn't it depend on the descriptor?
+};
+
+struct DetectorDescriptorParamsBrisk : public DetectorDescriptorParamsBase
+{
+        unsigned int threshold=30; ///< on the keypoint strength to declare it key-point
+        unsigned int octaves=0; ///< Multi-scale evaluation. 0: no multi-scale
+        float pattern_scale=1.0f; ///< Scale of the base pattern wrt the nominal one
+};
+
+struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
+{
+        unsigned int nfeatures=500;
+        float scaleFactor=1.2f;
+        unsigned int nlevels=1;//8
+        unsigned int edgeThreshold=4; //31
+        unsigned int firstLevel=0;
+        unsigned int WTA_K=2;
+        unsigned int scoreType=cv::ORB::HARRIS_SCORE;
+        unsigned int patchSize=31;
+};
+
 struct ProcessorImageParameters : public ProcessorParamsBase
 {
         struct Image
@@ -30,21 +63,22 @@ struct ProcessorImageParameters : public ProcessorParamsBase
                 unsigned int width;
                 unsigned int height;
         }image;
-        struct Detector
-        {
-                unsigned int threshold; ///< on the keypoint strength to declare it key-point
-                unsigned int threshold_new_features; ///< on the keypoint strength to declare it key-point
-                unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
-                unsigned int nominal_pattern_radius; ///< Radius of the detector pattern before scaling
-                unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
-        }detector;
-        struct Descriptor
-        {
-                unsigned int nominal_pattern_radius; ///< Radius of the descriptor pattern before scaling
-                float pattern_scale; ///< Scale of the base pattern wrt the nominal one
-                unsigned int pattern_radius; ///< radius of the pattern used to describe a key-point at pattern_scale = 1.0 and octaves = 0
-                unsigned int size_bits; ///< length of the descriptor vector in bits
-        }descriptor;
+
+//        struct Detector
+//        {
+//                unsigned int threshold; ///< on the keypoint strength to declare it key-point
+//                unsigned int threshold_new_features; ///< on the keypoint strength to declare it key-point
+//                unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
+//                unsigned int nominal_pattern_radius; ///< Radius of the detector pattern before scaling
+//                unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
+//        }detector;
+//        struct Descriptor
+//        {
+//                unsigned int nominal_pattern_radius; ///< Radius of the descriptor pattern before scaling
+//                float pattern_scale; ///< Scale of the base pattern wrt the nominal one
+//                unsigned int pattern_radius; ///< radius of the pattern used to describe a key-point at pattern_scale = 1.0 and octaves = 0
+//                unsigned int size_bits; ///< length of the descriptor vector in bits
+//        }descriptor;
         struct Matcher
         {
                 Scalar min_normalized_score; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
@@ -69,16 +103,19 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 {
 
     protected:
-        cv::FeatureDetector* detector_ptr_;
-        cv::DescriptorExtractor* descriptor_ptr_;
+        //cv::FeatureDetector* detector_ptr_;
+        //cv::DescriptorExtractor* descriptor_ptr_;
         cv::DescriptorMatcher* matcher_ptr_;
+        cv::Feature2D* detector_descriptor_ptr_;
     protected:
-        cv::BRISK detector_;                    // Brisk detector
-        cv::BRISK descriptor_;                  // Brisk descriptor
-        cv::BFMatcher matcher_;                 // Brute force matcher
+        ProcessorImageParameters params_;       // Struct with parameters of the processors
         ActiveSearchGrid act_search_grid_;      // Active Search
         cv::Mat image_last_, image_incoming_;   // Images from the "last" and "incoming" Captures
-        ProcessorImageParameters params_;       // Struct with parameters of the processors
+        struct
+        {
+                unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
+                unsigned int size_bits_; ///< length of the descriptor vector in bits
+        }detector_descriptor_params_;
 
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
@@ -88,7 +125,8 @@ class ProcessorBrisk : public ProcessorTrackerFeature
         std::list<cv::Point> tracker_candidates_;
 
     public:
-        ProcessorBrisk(ProcessorImageParameters& _params);
+        //ProcessorBrisk(ProcessorImageParameters& _params);
+        ProcessorBrisk(ProcessorImageParameters _params, DetectorDescriptorParamsBase* _dd_base_ptr);
 
         ProcessorBrisk(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr,
                        cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters _params);
@@ -102,7 +140,17 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 //        }
 
     protected:
+
+        /**
+         * \brief Does cast of the images and renews the active grid.
+         */
         void preProcess();
+
+        /**
+         * \brief Does the drawing of the features.
+         *
+         * Used for debugging
+         */
         void postProcess();
 
         virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,

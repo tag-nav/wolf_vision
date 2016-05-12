@@ -7,7 +7,7 @@
 
 namespace wolf
 {
-    class CaptureGPS;
+class CaptureGPS;
 }
 
 // Wolf includes
