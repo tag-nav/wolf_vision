@@ -87,12 +87,23 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 
         void advance()
         {
+            //std::cout << "\tProcessorTrackerLandmarkCorner::advance:" << std::endl;
+            //std::cout << "\t\tcorners_last: " << corners_last_.size() << std::endl;
+            //std::cout << "\t\tcorners_incoming_: " << corners_incoming_.size() << std::endl;
             ProcessorTrackerLandmark::advance();
+            while (!corners_last_.empty())
+            {
+                corners_last_.front()->destruct();
+                corners_last_.pop_front();
+            }
             corners_last_ = std::move(corners_incoming_);
         }
 
         void reset()
         {
+            //std::cout << "\tProcessorTrackerLandmarkCorner::reset:" << std::endl;
+            //std::cout << "\t\tcorners_last: " << corners_last_.size() << std::endl;
+            //std::cout << "\t\tcorners_incoming_: " << corners_incoming_.size() << std::endl;
             ProcessorTrackerLandmark::reset();
             corners_last_ = std::move(corners_incoming_);
         }
@@ -169,12 +180,12 @@ inline ProcessorTrackerLandmarkCorner::~ProcessorTrackerLandmarkCorner()
 {
     while (!corners_last_.empty())
     {
-        delete corners_last_.front();
+        corners_last_.front()->destruct();
         corners_last_.pop_front();
     }
     while (!corners_incoming_.empty())
     {
-        delete corners_incoming_.front();
+        corners_incoming_.front()->destruct();
         corners_incoming_.pop_front();
     }
 }
