@@ -108,11 +108,11 @@ class ProcessorTrackerFeature : public ProcessorTracker
                                            FeatureMatchMap& _feature_correspondences) = 0;
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
-         * \param _last_feature input feature in last capture tracked
+         * \param _origin_feature input feature in origin capture tracked
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature) = 0;
+        virtual bool correctFeatureDrift(const FeatureBase* _origin_feature, FeatureBase* _incoming_feature) = 0;
 
         /** \brief Vote for KeyFrame generation
          *

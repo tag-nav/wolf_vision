@@ -12,6 +12,8 @@
 
 int main(int argc, char** argv)
 {
+    using namespace wolf;
+
     std::cout << std::endl << " ========= ProjectPoints test ===========" << std::endl << std::endl;
 
     cv::Point3f points3D;
@@ -66,7 +68,7 @@ int main(int argc, char** argv)
 
 
     Eigen::Vector2s output2;
-    double dist;
+    Scalar dist;
     pinhole::projectPointToNormalizedPlane(test_p,output2,dist);
 
     std::cout << std::endl << "TEST projectPointToNormalizedPlane; distance" << std::endl;
@@ -88,7 +90,7 @@ int main(int argc, char** argv)
 
     Eigen::Vector2s output4;
     Eigen::Matrix3s jacobian2;
-    double dist2;
+    Scalar dist2;
     pinhole::projectPointToNormalizedPlane(test_p,output4,dist2,jacobian2);
 
     std::cout << std::endl << "TEST projectPointToNormalizedPlane; jacobian and distance" << std::endl;
@@ -104,7 +106,7 @@ int main(int argc, char** argv)
     Eigen::Vector2s back_proj_vector_test;
     back_proj_vector_test[0] = 1;
     back_proj_vector_test[1] = 1;
-    double depth = 3;
+    Scalar depth = 3;
 
     Eigen::Vector3s back_proj_output;
     back_proj_output = pinhole::backprojectPointFromNormalizedPlane(back_proj_vector_test,depth);
@@ -284,7 +286,7 @@ int main(int argc, char** argv)
 
 
     Eigen::Vector2s point2D_test2;
-    double distance_test;
+    Scalar distance_test;
     pinhole::projectPoint(k_test,distortion_test,point3D_test,point2D_test2,distance_test);
 
     std::cout << std::endl << "TEST projectPoint Complete, distance" << std::endl;
@@ -304,7 +306,7 @@ int main(int argc, char** argv)
 
     Eigen::Vector2s point2D_test4;
     Eigen::MatrixXs jacobian_test2(2,3);
-    double distance_test2;
+    Scalar distance_test2;
     pinhole::projectPoint(k_test,distortion_test,point3D_test,point2D_test4,distance_test2,jacobian_test2);
 
     std::cout << std::endl << "TEST projectPoint Complete, distance and jacobian" << std::endl;
@@ -322,7 +324,7 @@ int main(int argc, char** argv)
     Eigen::Vector2s point2D_backproj;
     point2D_backproj[0] = 3;
     point2D_backproj[1] = 3;
-    double depth2 = 3;
+    Scalar depth2 = 3;
 
     Eigen::Vector3s point3D_backproj;
     point3D_backproj = pinhole::backprojectPoint(k_test,correction_test,point2D_backproj,depth2);

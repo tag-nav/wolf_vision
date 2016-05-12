@@ -19,7 +19,7 @@
 //#include "jmath/matlab.hpp"
 #include "wolf.h"
 
-//namespace wolf {
+namespace wolf {
 /**
  * Namespace for operations related to the pin-hole model of a camera.
  *
@@ -51,7 +51,7 @@ namespace pinhole {
              * \param dist the distance from the camera to the point
              */
             template<class V, class P>
-            void projectPointToNormalizedPlane(const V & v, P & up, double & dist) {
+            void projectPointToNormalizedPlane(const V & v, P & up, Scalar & dist) {
 
                 up(0) = v(0) / v(2);
                 up(1) = v(1) / v(2);
@@ -87,7 +87,7 @@ namespace pinhole {
              * \param UP_v the Jacibian of \a u wrt \a v
              */
             template<class V, class U, class MU_v>
-            void projectPointToNormalizedPlane(const V & v, U & up, double & dist, MU_v & UP_v) {
+            void projectPointToNormalizedPlane(const V & v, U & up, Scalar & dist, MU_v & UP_v) {
 
                 projectPointToNormalizedPlane(v, up, dist);
 
@@ -107,7 +107,7 @@ namespace pinhole {
              * \return the 3D point
              */
             template<class U>
-            Eigen::Vector3s backprojectPointFromNormalizedPlane(const U & u, double depth = 1) {
+            Eigen::Vector3s backprojectPointFromNormalizedPlane(const U & u, Scalar depth = 1) {
 
                 Eigen::Vector3s p;
                 p(0) = depth * u(0);
@@ -125,7 +125,7 @@ namespace pinhole {
              * \param P_depth Jacobian of p wrt depth.
              */
             template<class U, class P, class MP_u, class MP_depth>
-            void backprojectPointFromNormalizedPlane(const U & u, const double depth, P & p, MP_u & P_u, MP_depth & P_depth) {
+            void backprojectPointFromNormalizedPlane(const U & u, const Scalar depth, P & p, MP_u & P_u, MP_depth & P_depth) {
                 p = backprojectPointFromNormalizedPlane(u, depth);
 
                 P_u(0, 0) = depth;
@@ -147,10 +147,10 @@ namespace pinhole {
              * \return the distortion factor so that rd = s*r
              */
             template<class VD>
-            double distortFactor(const VD & d, double r2){
+            Scalar distortFactor(const VD & d, Scalar r2){
                 if (d.size() == 0) return 1.0;
-                double s = 1.0;
-                double r2i = 1.0;
+                Scalar s = 1.0;
+                Scalar r2i = 1.0;
                 for (size_t i = 0; i < d.size(); i++) { //   here we are doing:
                     r2i = r2i * r2; //                    r2i = r^(2*(i+1))
                     s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
@@ -181,10 +181,10 @@ namespace pinhole {
                 if (n == 0)
                     return up;
                 else {
-                    double r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
+                    Scalar r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
                     return distortFactor(d, r2) * up;
-//					double s = 1.0;
-//					double r2i = 1.0;
+//					Scalar s = 1.0;
+//					Scalar r2i = 1.0;
 //					for (size_t i = 0; i < n; i++) { //   here we are doing:
 //						r2i = r2i * r2; //                    r2i = r^(2*(i+1))
 //						s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
@@ -216,11 +216,11 @@ namespace pinhole {
                 }
 
                 else {
-                    double r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
-                    double s = 1.0;
-                    double r2i = 1.0;
-                    double r2im1 = 1.0; //r2*(i-1)
-                    double S_r2 = 0.0;
+                    Scalar r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
+                    Scalar s = 1.0;
+                    Scalar r2i = 1.0;
+                    Scalar r2im1 = 1.0; //r2*(i-1)
+                    Scalar S_r2 = 0.0;
 
                     for (size_t i = 0; i < n; i++) { //.. here we are doing:
                         r2i = r2i * r2; //................. r2i = r^(2*(i+1))
@@ -254,10 +254,10 @@ namespace pinhole {
                 if (n == 0)
                     return ud;
                 else {
-                    double r2 = ud(0) * ud(0) + ud(1) * ud(1); // this is the norm squared: r2 = ||u||^2
+                    Scalar r2 = ud(0) * ud(0) + ud(1) * ud(1); // this is the norm squared: r2 = ||u||^2
                     return distortFactor(c, r2) * ud;
-//					double s = 1.0;
-//					double r2i = 1.0;
+//					Scalar s = 1.0;
+//					Scalar r2i = 1.0;
 //					for (size_t i = 0; i < n; i++) { //   here we are doing:
 //						r2i = r2i * r2; //                    r2i = r^(2*(i+1))
 //						s += c(i) * r2i; //                   s = 1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...
@@ -281,11 +281,11 @@ namespace pinhole {
                 }
 
                 else {
-                    double r2 = ud(0) * ud(0) + ud(1) * ud(1); // this is the norm squared: r2 = ||u||^2
-                    double s = 1.0;
-                    double r2i = 1.0;
-                    double r2im1 = 1.0; //r2*(i-1)
-                    double S_r2 = 0.0;
+                    Scalar r2 = ud(0) * ud(0) + ud(1) * ud(1); // this is the norm squared: r2 = ||u||^2
+                    Scalar s = 1.0;
+                    Scalar r2i = 1.0;
+                    Scalar r2im1 = 1.0; //r2*(i-1)
+                    Scalar S_r2 = 0.0;
 
                     for (size_t i = 0; i < n; i++) { //.. here we are doing:
                         r2i = r2i * r2; //................. r2i = r^(2*(i+1))
@@ -320,10 +320,10 @@ namespace pinhole {
              */
             template<class VK, class VU>
             Eigen::Vector2s pixellizePoint(const VK & k, const VU & ud) {
-                double u_0 = k(0);
-                double v_0 = k(1);
-                double a_u = k(2);
-                double a_v = k(3);
+                Scalar u_0 = k(0);
+                Scalar v_0 = k(1);
+                Scalar a_u = k(2);
+                Scalar a_v = k(3);
                 Eigen::Vector2s u;
                 u(0) = u_0 + a_u * ud(0);
                 u(1) = v_0 + a_v * ud(1);
@@ -340,10 +340,10 @@ namespace pinhole {
              */
             template<class VK, class VUd, class VU, class MU_ud>
             void pixellizePoint(const VK & k, const VUd & ud, VU & u, MU_ud & U_ud) {
-                //double u_0 = k(0);
-                //double v_0 = k(1);
-                double a_u = k(2);
-                double a_v = k(3);
+                //Scalar u_0 = k(0);
+                //Scalar v_0 = k(1);
+                Scalar a_u = k(2);
+                Scalar a_v = k(3);
 
                 u = pixellizePoint(k, ud);
 
@@ -362,10 +362,10 @@ namespace pinhole {
              */
             template<class VK, class VU>
             Eigen::Vector2s depixellizePoint(const VK & k, const VU & u) {
-                double u_0 = k(0);
-                double v_0 = k(1);
-                double a_u = k(2);
-                double a_v = k(3);
+                Scalar u_0 = k(0);
+                Scalar v_0 = k(1);
+                Scalar a_u = k(2);
+                Scalar a_v = k(3);
                 Eigen::Vector2s ud;
                 ud(0) = (u(0) - u_0) / a_u;
                 ud(1) = (u(1) - v_0) / a_v;
@@ -382,10 +382,10 @@ namespace pinhole {
              */
             template<class VK, class VUd, class VU, class MUD_u>
             void depixellizePoint(const VK & k, const VU & u, VUd & ud, MUD_u & UD_u) {
-                //				double u_0 = k(0);
-                //				double v_0 = k(1);
-                double a_u = k(2);
-                double a_v = k(3);
+                //				Scalar u_0 = k(0);
+                //				Scalar v_0 = k(1);
+                Scalar a_u = k(2);
+                Scalar a_v = k(3);
 
                 ud = depixellizePoint(k, u);
 
@@ -417,7 +417,7 @@ namespace pinhole {
              * \param dist distance from the optical center to the 3D point
              */
             template<class VK, class VD, class V, class U>
-            void projectPoint(const VK & k, const VD & d, const V & v, U & u, double & dist) {
+            void projectPoint(const VK & k, const VD & d, const V & v, U & u, Scalar & dist) {
                 Eigen::Vector2s up;
                 projectPointToNormalizedPlane(v, up, dist);
                 u = pixellizePoint(k, distortPoint(d, up));
@@ -456,7 +456,7 @@ namespace pinhole {
              * \param U_v the Jacobian of \a u wrt \a v
              */
             template<class VK, class VD, class V, class VU, class MU_v>
-            void projectPoint(const VK & k, const VD & d, const V & v, VU & u, double & dist, MU_v & U_v) {
+            void projectPoint(const VK & k, const VD & d, const V & v, VU & u, Scalar & dist, MU_v & U_v) {
                 Eigen::Vector2s up, ud;
                 Eigen::MatrixXs UP_v(2,3); /// Check this one -> mat23
                 Eigen::Matrix2s UD_up, U_ud;
@@ -479,7 +479,7 @@ namespace pinhole {
              * \return the back-projected 3D point
              */
             template<class VK, class VC, class U>
-            Eigen::Vector3s backprojectPoint(const VK & k, const VC & c, const U & u, const double depth = 1.0) {
+            Eigen::Vector3s backprojectPoint(const VK & k, const VC & c, const U & u, const Scalar depth = 1.0) {
                 return backprojectPointFromNormalizedPlane(undistortPoint(c, depixellizePoint(k, u)), depth);
             }
 
@@ -494,7 +494,7 @@ namespace pinhole {
              * \param P_depth Jacobian of p wrt depth
              */
             template<class VK, class VC, class U, class P, class MP_u, class MP_depth>
-            void backProjectPoint(const VK & k, const VC & c, const U & u, double depth, P & p, MP_u & P_u, MP_depth & P_depth) {
+            void backProjectPoint(const VK & k, const VC & c, const U & u, Scalar depth, P & p, MP_u & P_u, MP_depth & P_depth) {
                 Eigen::Vector2s up, ud;
                                         //rows //cols
                 Eigen::MatrixXs P_up(3,2); /// Check this one -> mat32
@@ -546,12 +546,12 @@ namespace pinhole {
 
                 if (size != 0) {
 
-                    double r_max = sqrt(k(0)*k(0) / (k(2)*k(2)) + k(1)*k(1) / (k(3)*k(3)));
-                    double rd_max = 1.1 * r_max;
+                    Scalar r_max = sqrt(k(0)*k(0) / (k(2)*k(2)) + k(1)*k(1) / (k(3)*k(3)));
+                    Scalar rd_max = 1.1 * r_max;
 
                     size_t N_samples = 200; // number of samples
-                    double iN_samples = 1 / (double) N_samples;
-                    double rd_n, rc_2, rd_2;
+                    Scalar iN_samples = 1 / (Scalar) N_samples;
+                    Scalar rd_n, rc_2, rd_2;
 //                    vec rd(N_samples+1), rc(N_samples+1);
 //                    mat Rd(N_samples+1, size);
                     Eigen::VectorXs rd(N_samples+1), rc(N_samples+1);
@@ -598,7 +598,7 @@ namespace pinhole {
 
 
 
-//} // namespace wolf
+} // namespace wolf
 
 
 #endif // PINHOLETOOLS_H

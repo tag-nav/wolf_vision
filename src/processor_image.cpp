@@ -32,7 +32,7 @@ namespace wolf
 //}
 
 ProcessorImage::ProcessorImage(ProcessorImageParameters _params, DetectorDescriptorParamsBase* _dd_base_ptr) :
-    ProcessorTrackerFeature(PRC_TRACKER_BRISK),
+    ProcessorTrackerFeature(PRC_TRACKER_BRISK, _params.algorithm.max_new_features),
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     act_search_grid_()
 {
@@ -99,16 +99,11 @@ void ProcessorImage::preProcess()
     detector_roi_.clear();
     tracker_target_.clear();
     tracker_candidates_.clear();
-
-//    if(image_last_.data == image_incoming_.data)
-//        std::cout << "--------------------------------------------------------------------------SON IGUALES (pre)" << std::endl;
 }
 
 void ProcessorImage::postProcess()
 {
     drawFeatures(last_ptr_);
-//    if(image_last_.data == image_incoming_.data)
-//        std::cout << "--------------------------------------------------------------------------SON IGUALES (post)" << std::endl;
 //    drawRoi(image_last_,detector_roi_,cv::Scalar(88.0, 70.0, 255.0));//detector roi(now only shown when it collides with the the image)
 //    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0)); //tracker roi
 //    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
@@ -116,9 +111,33 @@ void ProcessorImage::postProcess()
     cv::waitKey(30);
 }
 
-bool ProcessorImage::correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
+bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, FeatureBase* _incoming_feature)
 {
-    return true;
+    //last should be origin, right?
+    std::vector<cv::DMatch> matches_mat;
+    FeaturePointImage* feat_incoming_ptr = (FeaturePointImage*)_incoming_feature;
+    FeaturePointImage* feat_origin_ptr = (FeaturePointImage*)_origin_feature;
+
+    std::cout << "=============== DRIFT =================" << std::endl;
+
+    matcher_ptr_->match(feat_origin_ptr->getDescriptor(), feat_incoming_ptr->getDescriptor(), matches_mat);
+
+    std::cout << "\n\tBest is: [" << matches_mat[0].trainIdx << "]:" << matches_mat[0].distance;
+
+    Scalar normalized_score = 1 - (Scalar)(matches_mat[0].distance)/detector_descriptor_params_.size_bits_;
+
+    std::cout << " | score: " << normalized_score;
+
+    std::cout << "\n=============== END DRIFT =================" << std::endl;
+
+    if(normalized_score > 0.5)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 unsigned int ProcessorImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
@@ -157,7 +176,7 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
     cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
 
-    for (unsigned int n_iterations = 0; n_iterations < 50 * 1.25; n_iterations++)//_max_new_features * 1.25; n_iterations++)
+    for (unsigned int n_iterations = 0; _max_new_features == 0 || n_iterations < _max_new_features; n_iterations++)
     {
         if (act_search_grid_.pickRoi(roi))
         {
@@ -169,12 +188,12 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
                 point_ptr->setTrackId(point_ptr->id());
                 addNewFeatureLast(point_ptr);
                 act_search_grid_.hitCell(new_keypoints[0]);
+                act_search_grid_.blockCell(roi);
 
                 std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 
-                n_new_features++;
-                if (n_new_features >= 20)//_max_new_features)
-                    break;
+                n_new_features;
+
             }
             else
             {

@@ -120,7 +120,7 @@ int main(int argc, char** argv)
     tracker_params.active_search.grid_width = 12;
     tracker_params.active_search.grid_height = 8;
     tracker_params.active_search.separation = 1;
-    tracker_params.algorithm.max_new_features = 25;
+    tracker_params.algorithm.max_new_features =0;
     tracker_params.algorithm.min_features_for_keyframe = 20;
 
 

@@ -34,16 +34,24 @@ unsigned int ProcessorTrackerFeature::processKnown()
     std::cout << "Tracked: " << known_features_incoming_.size() << std::endl;
 
     // Check/correct incoming-origin correspondences
-    for (auto known_incoming_feature_ptr : known_features_incoming_)
-        // Check and correct the correspondence
-        if (!correctFeatureDrift(known_incoming_feature_ptr,
-                                 matches_last_from_incoming_[known_incoming_feature_ptr].feature_ptr_))
+    if (origin_ptr_ != nullptr)
+    {
+        auto known_incoming_feature_it = known_features_incoming_.begin();
+        while (known_incoming_feature_it != known_features_incoming_.end())
         {
-            // Correspondence not confirmed -> Remove correspondence and destruct incoming feature
-            matches_last_from_incoming_.erase(known_incoming_feature_ptr);
-            known_incoming_feature_ptr->destruct();
+            if (!correctFeatureDrift(matches_origin_from_last_[matches_last_from_incoming_[*known_incoming_feature_it].feature_ptr_].feature_ptr_, *known_incoming_feature_it))
+            {
+                // Correspondence not confirmed -> Remove correspondence and destruct incoming feature
+                matches_last_from_incoming_.erase(*known_incoming_feature_it);
+                // Destruct the feature
+                (*known_incoming_feature_it)->destruct();
+                // Remove from known_features_incoming
+                known_incoming_feature_it = known_features_incoming_.erase(known_incoming_feature_it);
+            }
+            else
+                known_incoming_feature_it++;
         }
-
+    }
     // Append not destructed incoming features -> this empties known_features_incoming_
     incoming_ptr_->addDownNodeList(known_features_incoming_);
     std::cout << "Added to incoming features: " << incoming_ptr_->getFeatureListPtr()->size() << std::endl;
