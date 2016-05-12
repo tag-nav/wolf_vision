@@ -256,7 +256,7 @@ int main(int argc, char** argv)
     origin_frame->addCapture(initial_covariance);
     initial_covariance->process();
 
-    odom_processor->setOrigin(origin_frame, ts);
+    odom_processor->setOrigin(origin_frame);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;

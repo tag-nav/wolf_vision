@@ -78,7 +78,7 @@ int main()
     initial_covariance->process();
 
     // Initialize processor motion
-    odom2d_ptr->setOrigin(origin_frame, t0);
+    odom2d_ptr->setOrigin(origin_frame);
 
     std::cout << "Initial pose : " << problem_ptr->getLastFramePtr()->getState().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
