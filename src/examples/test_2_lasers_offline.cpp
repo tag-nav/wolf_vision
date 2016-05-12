@@ -111,7 +111,7 @@ int main(int argc, char** argv)
 
     // Wolf initialization
     Eigen::VectorXs odom_pose = Eigen::VectorXs::Zero(3);
-    Eigen::VectorXs gps_position = Eigen::VectorXs::Zero(2);
+    //Eigen::VectorXs gps_position = Eigen::VectorXs::Zero(2);
     Eigen::VectorXs laser_1_params(9), laser_2_params(9);
     Eigen::VectorXs laser_1_pose(4), laser_2_pose(4); //xyz + theta
     Eigen::VectorXs laser_1_pose2D(3), laser_2_pose2D(3); //xy + theta
@@ -150,12 +150,11 @@ int main(int argc, char** argv)
     Problem problem(FRM_PO_2D);
     SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.installSensor("ODOM 2D", "odometer", odom_pose, &odom_intrinsics);
     ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.installProcessor("ODOM 2D", "main odometry", "odometer");
-    SensorBase* gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
+    //SensorBase* gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
     SensorBase* laser_1_sensor = problem.installSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
     SensorBase* laser_2_sensor = problem.installSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
     problem.installProcessor("LASER 2D", "front laser processor", "front laser", &laser_1_processor_params);
     problem.installProcessor("LASER 2D", "rear laser processor", "rear laser", &laser_2_processor_params);
-    problem.setProcessorMotion(odom_processor);
 
     std::cout << "Wolf tree setted correctly!" << std::endl;
 
@@ -166,15 +165,16 @@ int main(int argc, char** argv)
     ground_truth.head(3) = ground_truth_pose;
     odom_trajectory.head(3) = ground_truth_pose;
 
-    // Origin Key Frame
-    FrameBase* origin_frame = problem.createFrame(KEY_FRAME, ground_truth_pose, ts);
-
-    // Prior covariance
-    CaptureFix* initial_covariance = new CaptureFix(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1);
-    origin_frame->addCapture(initial_covariance);
-    initial_covariance->process();
-
-    odom_processor->setOrigin(origin_frame, ts);
+    // Origin Key Frame with covariance
+    problem.setOrigin(ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1, ts);
+//    FrameBase* origin_frame = problem.createFrame(KEY_FRAME, ground_truth_pose, ts);
+//
+//    // Prior covariance
+//    CaptureFix* initial_covariance = new CaptureFix(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1);
+//    origin_frame->addCapture(initial_covariance);
+//    initial_covariance->process();
+//
+//    odom_processor->setOrigin(origin_frame);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -315,6 +315,11 @@ int main(int argc, char** argv)
 
     std::cout << "Press any key for ending... " << std::endl << std::endl;
     std::getchar();
+
+    std::cout << "Problem:" << std::endl;
+    std::cout << "Frames: " << problem.getTrajectoryPtr()->getFrameListPtr()->size() << std::endl;
+    std::cout << "Landmarks: " << problem.getMapPtr()->getLandmarkListPtr()->size() << std::endl;
+    std::cout << "Sensors: " << problem.getHardwarePtr()->getSensorListPtr()->size() << std::endl;
 
     std::cout << " ========= END ===========" << std::endl << std::endl;
 
