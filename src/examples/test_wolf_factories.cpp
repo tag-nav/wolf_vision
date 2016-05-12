@@ -48,7 +48,8 @@ int main(void)
     IntrinsicsOdom2D intr_odom2d;
 
     // Use params factory for camera intrinsics
-    IntrinsicsBase* intr_cam = SensorCamera::createIntrinsics("/home/jsola/dev/wolf/src/examples/camera.yaml");
+    // TODO: Use some automatic path syntax to find the file
+    IntrinsicsBase* intr_cam = SensorCamera::createIntrinsics("/home/jsola/dev/wolf/src/examples/camera.yaml"); // <-- change this name file to suit your system
 
     // Install sensors
     problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam);
