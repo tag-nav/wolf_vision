@@ -154,6 +154,7 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
     cv::Rect roi;
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
+    cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
 
     for (unsigned int n_iterations = 0; n_iterations < 50 * 1.25; n_iterations++)//_max_new_features * 1.25; n_iterations++)
@@ -161,12 +162,9 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
         if (act_search_grid_.pickRoi(roi))
         {
         	detector_roi_.push_back(roi);
-//            std::cout << "roi: " << roi << std::endl;
             if (detect(image_last_, roi, new_keypoints, new_descriptors))
             {
-                //Escoger uno de los features encontrados -> el 0 o primero.
-//                std::cout << new_keypoints.size() << " new features detected in active search roi. Picking only the first one." << std::endl;
-
+                keypoint_filter.retainBest(new_keypoints,1);
                 FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
                 point_ptr->setTrackId(point_ptr->id());
                 addNewFeatureLast(point_ptr);
@@ -175,7 +173,7 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
                 std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 
                 n_new_features++;
-                if (n_new_features >= _max_new_features)
+                if (n_new_features >= 20)//_max_new_features)
                     break;
             }
             else
