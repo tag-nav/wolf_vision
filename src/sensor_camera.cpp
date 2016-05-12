@@ -4,13 +4,13 @@
 #include "yaml-cpp/yaml.h"
 #include "pinholeTools.h"
 
-namespace wolf {
+namespace wolf
+{
 
-SensorCamera::SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr,
+SensorCamera::SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, //
                            int _img_width, int _img_height) :
-        SensorBase(SEN_CAMERA, _p_ptr, _o_ptr, _intr_ptr, 2),
-        img_width_(_img_width),
-        img_height_(_img_height)
+        SensorBase(SEN_CAMERA, _p_ptr, _o_ptr, _intr_ptr, 2), //
+        img_width_(_img_width), img_height_(_img_height)
 {
     setType("CAMERA");
 }
@@ -21,7 +21,8 @@ SensorCamera::~SensorCamera()
 }
 
 // Define the factory method
-SensorBase* SensorCamera::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq,
+SensorBase* SensorCamera::create(const std::string& _unique_name, //
+                                 const Eigen::VectorXs& _extrinsics_pq, //
                                  const IntrinsicsBase* _intrinsics)
 {
     // decode extrinsics vector
@@ -47,12 +48,12 @@ IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot
         // YAML:: to std::
         std::string sensor_type = camera_config["sensor type"].as<std::string>();
         std::string sensor_name = camera_config["sensor name"].as<std::string>();
-        std::vector<double> p   = camera_config["extrinsic"] ["position"].as<std::vector<double> >(); // in one go: it works!
-        std::vector<double> o   = camera_config["extrinsic"] ["orientation"].as<std::vector<double> >();
-        std::vector<double> s   = camera_config["parameters"]["image size"].as<std::vector<double> >();
-        std::vector<double> k   = camera_config["parameters"]["intrinsic"].as<std::vector<double> >();
-        std::vector<double> d   = camera_config["parameters"]["distortion"].as<std::vector<double> >();
-        std::vector<double> c   = camera_config["parameters"]["correction"].as<std::vector<double> >();
+        std::vector<double> p = camera_config["extrinsic"]["position"].as<std::vector<double> >(); // in one go: it works!
+        std::vector<double> o = camera_config["extrinsic"]["orientation"].as<std::vector<double> >();
+        std::vector<double> s = camera_config["parameters"]["image size"].as<std::vector<double> >();
+        std::vector<double> k = camera_config["parameters"]["intrinsic"].as<std::vector<double> >();
+        std::vector<double> d = camera_config["parameters"]["distortion"].as<std::vector<double> >();
+        std::vector<double> c = camera_config["parameters"]["correction"].as<std::vector<double> >();
 
         // std:: to Eigen::
         // Using Eigen vector constructors from data pointers. Mind the vector sizes!
@@ -67,16 +68,16 @@ IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot
 
         pinhole::computeCorrectionModel(intrinsic, distortion, correction);
 
-        std::cout << "sensor type: " << sensor_type << std::endl;
-        std::cout << "sensor name: " << sensor_name << std::endl;
-        std::cout << "sensor extrinsics: " << std::endl;
-        std::cout << "\tposition    : " << pos.transpose() << std::endl;
-        std::cout << "\torientation : " << ori.transpose() << std::endl;
-        std::cout << "sensor parameters: " << std::endl;
-        std::cout << "\timage size  : " << size.transpose() << std::endl;
-        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
-        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
-        std::cout << "\tcorrection  : " << correction.transpose() << std::endl;
+//        std::cout << "sensor type: " << sensor_type << std::endl;
+//        std::cout << "sensor name: " << sensor_name << std::endl;
+//        std::cout << "sensor extrinsics: " << std::endl;
+//        std::cout << "\tposition    : " << pos.transpose() << std::endl;
+//        std::cout << "\torientation : " << ori.transpose() << std::endl;
+//        std::cout << "sensor parameters: " << std::endl;
+//        std::cout << "\timage size  : " << size.transpose() << std::endl;
+//        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
+//        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
+//        std::cout << "\tcorrection  : " << correction.transpose() << std::endl;
 
         // Eigen:: to wolf::
         IntrinsicsCamera* intrinsics_cam = new IntrinsicsCamera;
@@ -95,14 +96,13 @@ IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot
     return nullptr;
 }
 
-
 } // namespace wolf
-
 
 // Register in the SensorFactory
 #include "sensor_factory.h"
 #include "intrinsics_factory.h"
-namespace wolf {
+namespace wolf
+{
 namespace
 {
 const bool registered_camera_intr = IntrinsicsFactory::get()->registerCreator("CAMERA", SensorCamera::createIntrinsics);
