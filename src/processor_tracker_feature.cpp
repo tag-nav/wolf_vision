@@ -39,7 +39,8 @@ unsigned int ProcessorTrackerFeature::processKnown()
         auto known_incoming_feature_it = known_features_incoming_.begin();
         while (known_incoming_feature_it != known_features_incoming_.end())
         {
-            if (!correctFeatureDrift(matches_origin_from_last_[matches_last_from_incoming_[*known_incoming_feature_it].feature_ptr_].feature_ptr_, *known_incoming_feature_it))
+            if (!correctFeatureDrift(matches_origin_from_last_[matches_last_from_incoming_[*known_incoming_feature_it].feature_ptr_].feature_ptr_,
+                                     matches_last_from_incoming_[*known_incoming_feature_it].feature_ptr_,*known_incoming_feature_it))
             {
                 // Correspondence not confirmed -> Remove correspondence and destruct incoming feature
                 matches_last_from_incoming_.erase(*known_incoming_feature_it);

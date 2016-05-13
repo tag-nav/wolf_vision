@@ -10,27 +10,6 @@
 namespace wolf
 {
 
-
-//ProcessorBrisk::ProcessorBrisk(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr,
-//               cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters _params) :
-//        ProcessorTrackerFeature(PRC_TRACKER_BRISK),
-//        detector_ptr_(_det_ptr), descriptor_ptr_(_desc_ext_ptr), matcher_ptr_(_match_ptr),
-//        act_search_grid_(_params.image.width, _params.image.height,
-//                _params.active_search.grid_width, _params.active_search.grid_height,
-//                _params.descriptor.nominal_pattern_radius*_params.descriptor.pattern_scale,
-//                _params.active_search.separation),
-//        params_(_params)
-//{
-//    ProcessorTrackerFeature::setMaxNewFeatures(_params.algorithm.max_new_features);
-//    params_.detector.pattern_radius = (float)(_params.detector.nominal_pattern_radius)*pow(2,_params.detector.octaves);
-//    params_.descriptor.pattern_radius = (float)(_params.descriptor.nominal_pattern_radius)*_params.descriptor.pattern_scale;
-//    params_.descriptor.size_bits = descriptor_ptr_->descriptorSize() * 8;
-
-//    std::cout << "detector   pattern radius: " << params_.detector.pattern_radius << std::endl;
-//    std::cout << "descriptor pattern radius: " << params_.descriptor.pattern_radius << std::endl;
-//    std::cout << "descriptor size          : " << params_.descriptor.size_bits << std::endl;
-//}
-
 ProcessorImage::ProcessorImage(ProcessorImageParameters _params, DetectorDescriptorParamsBase* _dd_base_ptr) :
     ProcessorTrackerFeature(PRC_TRACKER_BRISK, _params.algorithm.max_new_features),
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
@@ -111,9 +90,8 @@ void ProcessorImage::postProcess()
     cv::waitKey(30);
 }
 
-bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, FeatureBase* _incoming_feature)
+bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
 {
-    //last should be origin, right?
     std::vector<cv::DMatch> matches_mat;
     FeaturePointImage* feat_incoming_ptr = (FeaturePointImage*)_incoming_feature;
     FeaturePointImage* feat_origin_ptr = (FeaturePointImage*)_origin_feature;
@@ -122,20 +100,89 @@ bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, Fea
 
     matcher_ptr_->match(feat_origin_ptr->getDescriptor(), feat_incoming_ptr->getDescriptor(), matches_mat);
 
+    std::cout << "Search feature incoming: " << feat_incoming_ptr->trackId() << " at: " << feat_incoming_ptr->getKeypoint().pt;
+    std::cout << "\nSearch feature origin: " << feat_origin_ptr->trackId() << " at: " << feat_origin_ptr->getKeypoint().pt;
     std::cout << "\n\tBest is: [" << matches_mat[0].trainIdx << "]:" << matches_mat[0].distance;
 
     Scalar normalized_score = 1 - (Scalar)(matches_mat[0].distance)/detector_descriptor_params_.size_bits_;
-
     std::cout << " | score: " << normalized_score;
 
     std::cout << "\n=============== END DRIFT =================" << std::endl;
 
-    if(normalized_score > 0.5)
+    if(normalized_score > 0.8)
     {
         return true;
     }
     else
     {
+        /* CORRECT */
+
+        std::cout << "=============== CORRECTION =================" << std::endl;
+
+        unsigned int roi_width = params_.matcher.roi_width;
+        unsigned int roi_heigth = params_.matcher.roi_height;
+        unsigned int roi_x;
+        unsigned int roi_y;
+
+        std::vector<cv::KeyPoint> correction_keypoints;
+        cv::Mat correction_descriptors;
+        std::vector<cv::DMatch> correction_matches;
+
+        FeaturePointImage* feat_last_ptr = (FeaturePointImage*)_last_feature;
+        act_search_grid_.hitCell(feat_last_ptr->getKeypoint());
+
+        std::cout << "Search feature last: " << feat_last_ptr->trackId() << " at: " << feat_last_ptr->getKeypoint().pt;
+
+        roi_x = (feat_last_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
+        roi_y = (feat_last_ptr->getKeypoint().pt.y) - (roi_width / 2);
+        cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+
+        if (detect(image_incoming_, roi, correction_keypoints, correction_descriptors))
+        {
+            //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
+
+            std::cout << " --> " << correction_keypoints.size() << " candidates";
+
+            matcher_ptr_->match(feat_origin_ptr->getDescriptor(), correction_descriptors, correction_matches);
+
+            std::cout << "\n\tBest is: [" << correction_matches[0].trainIdx << "]:" << correction_matches[0].distance;
+            std::cout << " | at: " << correction_keypoints[correction_matches[0].trainIdx].pt;
+
+            Scalar normalized_score_correction = 1 - (Scalar)(correction_matches[0].distance)/detector_descriptor_params_.size_bits_;
+            std::cout << " | score: " << normalized_score_correction;
+
+
+            //TODO: Mirar sobre los features que parecen ser el mismo.
+            //TODO: Cuando haces el detect sobre el origin, asegurate que eso no es un track ya existente. Puede estar relacionado con el de arriba.
+            //
+
+
+
+            if(normalized_score_correction > 0.8)
+            {
+                FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
+                        correction_keypoints[correction_matches[0].trainIdx], (correction_descriptors.row(correction_matches[0].trainIdx)),
+                        feat_origin_ptr->isKnown());
+
+                incoming_point_ptr->setTrackId(feat_incoming_ptr->trackId());
+                feat_incoming_ptr = incoming_point_ptr;
+                //delete incoming_point_ptr;
+
+    //            _feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr,
+    //                                                        normalized_score}); //FIXME: 512 is the maximum HAMMING distance
+
+                std::cout << "\n=============== END CORRECTION true =================" << std::endl;
+                return true;
+            }
+            else
+            {
+                std::cout << "\n=============== END CORRECTION false =================" << std::endl;
+                return false;
+            }
+
+
+        }
+        std::cout << "\n=============== No CORRECTION -> false =================" << std::endl;
         return false;
     }
 }
@@ -192,7 +239,7 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
 
                 std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 
-                n_new_features;
+                n_new_features++;
 
             }
             else
@@ -238,7 +285,7 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
     for (auto feature_base_ptr : _feature_list_in)
     {
         FeaturePointImage* feature_ptr = (FeaturePointImage*)(((feature_base_ptr)));
-        act_search_grid_.hitCell(feature_ptr->getKeypoint());
+        act_search_grid_.hitCell(feature_ptr->getKeypoint());  //TODO: Mirar el hitcell en este punto
 
         std::cout << "Search feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
 

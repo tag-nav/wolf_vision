@@ -161,7 +161,7 @@ class ProcessorImage : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBase* _origin_feature, FeatureBase* _incoming_feature);
+        virtual bool correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
 
         /** \brief Vote for KeyFrame generation
          *
