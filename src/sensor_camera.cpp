@@ -66,12 +66,14 @@ IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot
         using namespace Eigen;
         std::string sensor_type = camera_config["sensor type"].as<std::string>();
         std::string sensor_name = camera_config["sensor name"].as<std::string>();
-        Vector3d pos            = camera_config["extrinsic"]["position"].as<Vector3d>();
-        Vector3d ori            = camera_config["extrinsic"]["orientation"].as<Vector3d>() * M_PI / 180; // roll, pitch, yaw [rad]
         Quaternions quat; v2q(ori, quat);
         Vector2d size           = camera_config["intrinsic"]["image size"].as<Vector2d>();
         Vector4d intrinsic      = camera_config["intrinsic"]["pinhole model"].as<Vector4d>();
         VectorXd distortion     = camera_config["intrinsic"]["distortion"].as<VectorXd>();
+
+        // extrinsics discarded in this creator
+        //        Vector3d pos            = camera_config["extrinsic"]["position"].as<Vector3d>();
+        //        Vector3d ori            = camera_config["extrinsic"]["orientation"].as<Vector3d>() * M_PI / 180; // roll, pitch, yaw [rad]
 
 //        std::cout << "\n--- Parsed Parameters from YAML file ---" << std::endl;
 //        std::cout << "sensor type: " << sensor_type << std::endl;
