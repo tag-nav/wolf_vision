@@ -167,14 +167,6 @@ int main(int argc, char** argv)
 
     // Origin Key Frame with covariance
     problem.setOrigin(ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1, ts);
-//    FrameBase* origin_frame = problem.createFrame(KEY_FRAME, ground_truth_pose, ts);
-//
-//    // Prior covariance
-//    CaptureFix* initial_covariance = new CaptureFix(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1);
-//    origin_frame->addCapture(initial_covariance);
-//    initial_covariance->process();
-//
-//    odom_processor->setOrigin(origin_frame);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
