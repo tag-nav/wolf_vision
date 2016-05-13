@@ -98,7 +98,7 @@ class ProcessorMotion : public ProcessorBase
         const void getState(Eigen::VectorXs& _x);
 
         /** \brief Gets a constant reference to the state integrated so far
-         * \param _x the state vector
+         * \return the state vector
          */
         const Eigen::VectorXs& getState();
 

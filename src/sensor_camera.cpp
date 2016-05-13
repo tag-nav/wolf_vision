@@ -5,13 +5,13 @@
 #include "pinholeTools.h"
 #include "yaml_conversion.h"
 
-namespace wolf {
+namespace wolf
+{
 
-SensorCamera::SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr,
+SensorCamera::SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, //
                            int _img_width, int _img_height) :
-        SensorBase(SEN_CAMERA, _p_ptr, _o_ptr, _intr_ptr, 2),
-        img_width_(_img_width),
-        img_height_(_img_height)
+        SensorBase(SEN_CAMERA, _p_ptr, _o_ptr, _intr_ptr, 2), //
+        img_width_(_img_width), img_height_(_img_height)
 {
     setType("CAMERA");
 }
@@ -38,7 +38,8 @@ SensorCamera::~SensorCamera()
 }
 
 // Define the factory method
-SensorBase* SensorCamera::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq,
+SensorBase* SensorCamera::create(const std::string& _unique_name, //
+                                 const Eigen::VectorXs& _extrinsics_pq, //
                                  const IntrinsicsBase* _intrinsics)
 {
     // decode extrinsics vector
@@ -106,14 +107,13 @@ IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot
     return nullptr;
 }
 
-
 } // namespace wolf
-
 
 // Register in the SensorFactory
 #include "sensor_factory.h"
 #include "intrinsics_factory.h"
-namespace wolf {
+namespace wolf
+{
 namespace
 {
 const bool registered_camera_intr = IntrinsicsFactory::get()->registerCreator("CAMERA", SensorCamera::createIntrinsics);

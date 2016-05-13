@@ -4,7 +4,8 @@
 //wolf includes
 #include "sensor_base.h"
 
-namespace wolf {
+namespace wolf
+{
 
 /** Struct of all intrinsic camera parameters
  */
@@ -21,17 +22,17 @@ struct IntrinsicsCamera : public IntrinsicsBase
 class SensorCamera : public SensorBase
 {
     public:
-    /** \brief Constructor with arguments
-     *
-     * Constructor with arguments
-     * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
-     * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
-     * \param _intr_ptr contains intrinsic values for the camera
-     * \param _img_width image height in pixels
-     * \param _img_height image width in pixels
-     *
-     **/
-    SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, int _img_width, int _img_height);
+        /** \brief Constructor with arguments
+         *
+         * Constructor with arguments
+         * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
+         * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
+         * \param _intr_ptr contains intrinsic values for the camera
+         * \param _img_width image height in pixels
+         * \param _img_height image width in pixels
+         *
+         **/
+        SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, int _img_width, int _img_height);
 
     SensorCamera(const Eigen::VectorXs & _extrinsics, const IntrinsicsCamera * _intrinsics_ptr);
 
@@ -54,11 +55,12 @@ class SensorCamera : public SensorBase
     Eigen::VectorXs correction_;
 
     public:
-        static SensorBase* create(const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
+        static SensorBase* create(const std::string & _unique_name, //
+                                  const Eigen::VectorXs& _extrinsics, //
+                                  const IntrinsicsBase* _intrinsics);
         static IntrinsicsBase* createIntrinsics(const std::string & _filename_dot_yaml);
 
 };
-
 
 } // namespace wolf
 
