@@ -14,7 +14,6 @@ struct IntrinsicsCamera : public IntrinsicsBase
         unsigned int height;                // Image height in pixels
         Eigen::Vector4s intrinsic_vector;   // k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::VectorXs distortion;         // d = [d_1, d_2, d_3, ...] radial distortion coefficients
-        Eigen::VectorXs correction;         // c = [c_1, c_2, c_3, ...] radial distortion correction coefficients
 };
 
 /**Pin-hole camera sensor
@@ -34,6 +33,8 @@ class SensorCamera : public SensorBase
      **/
     SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, int _img_width, int _img_height);
 
+    SensorCamera(const Eigen::VectorXs & _extrinsics, const IntrinsicsCamera * _intrinsics_ptr);
+
     /** \brief Default destructor (not recommended)
      *
      * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
@@ -41,8 +42,16 @@ class SensorCamera : public SensorBase
      **/
     virtual ~SensorCamera();
 
+    Eigen::VectorXs getDistortionVector(){return distortion_;}
+    Eigen::VectorXs getCorrectionVector(){return correction_;}
+    int getImgWidth(){return img_width_;}
+    int getImgHeight(){return img_height_;}
+
+    private:
     int img_width_;
     int img_height_;
+    Eigen::VectorXs distortion_;
+    Eigen::VectorXs correction_;
 
     public:
         static SensorBase* create(const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);

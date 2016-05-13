@@ -6,6 +6,7 @@
  */
 
 #include "pinholeTools.h"
+#include "yaml_conversion.h"
 
 #include "yaml-cpp/yaml.h"
 
@@ -17,7 +18,7 @@
 int main()
 {
 
-    YAML::Node camera_config = YAML::LoadFile("/Users/jsola/dev/wolf/src/examples/camera.yaml");
+    YAML::Node camera_config = YAML::LoadFile("/home/jsola/dev/wolf/src/examples/camera.yaml");
 
     if (camera_config["sensor type"])
     {
@@ -27,27 +28,19 @@ int main()
 
         YAML::Node params = camera_config["parameters"];
 
-        std::vector<double> p = camera_config["extrinsic"]["position"].as<std::vector<double> >(); // in one go: it works!
-        std::vector<double> o = camera_config["extrinsic"]["orientation"].as<std::vector<double> >();
-        std::vector<double> s = params["image size"].as<std::vector<double> >();
-        std::vector<double> k = params["intrinsic"].as<std::vector<double> >();
-        std::vector<double> d = params["distortion"].as<std::vector<double> >();
-        std::vector<double> c = params["correction"].as<std::vector<double> >();
-
+        // convert yaml to Eigen
         using namespace Eigen;
+        Vector3s pos = camera_config["extrinsic"]["position"].as<Vector3s>();
+        Vector3s ori = camera_config["extrinsic"]["orientation"].as<Vector3s>() * M_PI / 180;
+        Vector2s size = params["image size"].as<Vector2s>();
+        Vector4s intrinsic = params["intrinsic"].as<Vector4s>();
+        VectorXs distortion = params["distortion"].as<VectorXs>();
 
-        // Using Eigen vector constructors from data pionters. Mind the vector sizes!
-        Vector3d pos(p.data());
-        Vector3d ori(o.data());
-        ori *= 3.1415926536 / 180;
-        Vector2d size(s.data());
-        Vector4d intrinsic(k.data());
-        Map<VectorXd> distortion(d.data(), d.size());
-//        Map<VectorXd> correction(c.data(), c.size());
-        VectorXd correction(d.size()+1);
-
+        // compute correction model
+        VectorXs correction(distortion.size());
         pinhole::computeCorrectionModel(intrinsic, distortion, correction);
 
+        // output
         std::cout << "sensor type: " << sensor_type << std::endl;
         std::cout << "sensor name: " << sensor_name << std::endl;
         std::cout << "sensor extrinsics: " << std::endl;

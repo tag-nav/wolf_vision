@@ -3,6 +3,7 @@
 #include "state_quaternion.h"
 #include "yaml-cpp/yaml.h"
 #include "pinholeTools.h"
+#include "yaml_conversion.h"
 
 namespace wolf {
 
@@ -14,6 +15,22 @@ SensorCamera::SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _
 {
     setType("CAMERA");
 }
+
+SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsCamera* _intrinsics_ptr) :
+                SensorBase(SEN_CAMERA, nullptr, nullptr, nullptr, 2), // will initialize state blocks later
+                img_width_(_intrinsics_ptr->width), //
+                img_height_(_intrinsics_ptr->height), //
+                distortion_(_intrinsics_ptr->distortion), //
+                correction_(distortion_.size()) // make correction vector of the same size as distortion vector
+{
+    assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
+    setType("CAMERA");
+    p_ptr_ = new StateBlock(_extrinsics.head(3));
+    o_ptr_ = new StateQuaternion(_extrinsics.tail(4));
+    intrinsic_ptr_ = new StateBlock(_intrinsics_ptr->intrinsic_vector);
+    pinhole::computeCorrectionModel(intrinsic_ptr_->getVector(), distortion_, correction_);
+}
+
 
 SensorCamera::~SensorCamera()
 {
@@ -52,7 +69,6 @@ IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot
         std::vector<double> s   = camera_config["parameters"]["image size"].as<std::vector<double> >();
         std::vector<double> k   = camera_config["parameters"]["intrinsic"].as<std::vector<double> >();
         std::vector<double> d   = camera_config["parameters"]["distortion"].as<std::vector<double> >();
-        std::vector<double> c   = camera_config["parameters"]["correction"].as<std::vector<double> >();
 
         // std:: to Eigen::
         // Using Eigen vector constructors from data pointers. Mind the vector sizes!
@@ -63,9 +79,6 @@ IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot
         Vector2d size(s.data());
         Vector4d intrinsic(k.data());
         Map<VectorXd> distortion(d.data(), d.size());
-        VectorXs correction(d.size());
-
-        pinhole::computeCorrectionModel(intrinsic, distortion, correction);
 
         std::cout << "sensor type: " << sensor_type << std::endl;
         std::cout << "sensor name: " << sensor_name << std::endl;
@@ -76,7 +89,6 @@ IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot
         std::cout << "\timage size  : " << size.transpose() << std::endl;
         std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
         std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
-        std::cout << "\tcorrection  : " << correction.transpose() << std::endl;
 
         // Eigen:: to wolf::
         IntrinsicsCamera* intrinsics_cam = new IntrinsicsCamera;
@@ -84,7 +96,6 @@ IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot
         intrinsics_cam->name = sensor_name;
         intrinsics_cam->intrinsic_vector = intrinsic;
         intrinsics_cam->distortion = distortion;
-        intrinsics_cam->correction = correction;
         intrinsics_cam->width = size(0);
         intrinsics_cam->height = size(1);
 
