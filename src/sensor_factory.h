@@ -48,7 +48,7 @@ namespace wolf
  *
  * #### Accessing the Factory
  * The SensorFactory class is a <a href="http://stackoverflow.com/questions/1008019/c-singleton-design-pattern#1008289">singleton</a>: it can only exist once in your application.
- * To obtain a pointer to it, use the static method get(),
+ * To obtain an instance of it, use the static method get(),
  *
  *     \code
  *     SensorFactory::get()
@@ -57,7 +57,7 @@ namespace wolf
  * You can then call the methods you like, e.g. to create a sensor, you type:
  *
  *     \code
- *      SensorFactory::get()->create(...); // see below for creating sensors ...
+ *      SensorFactory::get().create(...); // see below for creating sensors ...
  *     \endcode
  *
  * #### Registering sensor creators
@@ -69,7 +69,7 @@ namespace wolf
  * that knows how to create your specific sensor, e.g.:
  *
  *     \code
- *     SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+ *     SensorFactory::get().registerCreator("CAMERA", SensorCamera::create);
  *     \endcode
  *
  * The method SensorCamera::create() exists in the SensorCamera class as a static method.
@@ -89,7 +89,7 @@ namespace wolf
  * For example, in sensor_camera.cpp we find the line:
  *
  *     \code
- *      const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+ *      const bool registered_camera = SensorFactory::get().registerCreator("CAMERA", SensorCamera::create);
  *     \endcode
  *
  * which is a static invocation (i.e., it is placed at global scope outside of the SensorCamera class).
@@ -99,7 +99,7 @@ namespace wolf
  * The method unregisterCreator() unregisters the SensorXxx::create() method. It only needs to be passed the string of the sensor type.
  *
  *     \code
- *     SensorFactory::get()->unregisterCreator("CAMERA");
+ *     SensorFactory::get().unregisterCreator("CAMERA");
  *     \endcode
  *
  * #### Creating sensors
@@ -109,7 +109,7 @@ namespace wolf
  * To create e.g. a SensorCamera, you type:
  *
  *     \code
- *      SensorFactory::get()->create("CAMERA", "Front-left camera", extrinsics, intrinsics_ptr);
+ *      SensorFactory::get().create("CAMERA", "Front-left camera", extrinsics, intrinsics_ptr);
  *     \endcode
  *
  * where ABSOLUTELY ALL input parameters are important. In particular, the sensor name "Front-left camera" will be used to identify this camera
@@ -148,14 +148,14 @@ namespace wolf
  *   Put the code either at global scope,
  *      \code
  *      namespace {
- *      const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+ *      const bool registered_camera = SensorFactory::get().registerCreator("CAMERA", SensorCamera::create);
  *      }
  *      main () { ... }
  *      \endcode
  *   or inside your main():
  *      \code
  *      main () {
- *          SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+ *          SensorFactory::get().registerCreator("CAMERA", SensorCamera::create);
  *          ...
  *      }
  *      \endcode
@@ -164,7 +164,7 @@ namespace wolf
  *   Put the code at the last line of the sensor_xxx.cpp file,
  *      \code
  *      namespace {
- *      const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+ *      const bool registered_camera = SensorFactory::get().registerCreator("CAMERA", SensorCamera::create);
  *      }
  *      \endcode
  *
@@ -187,7 +187,7 @@ namespace wolf
  *      IntrinsicsCamera  intrinsics_1({...});    // also fill in the derived struct
  *
  *      SensorBase* camera_1_ptr =
- *          SensorFactory::get()->create ( "CAMERA" , "Front-left camera" , extrinsics_1 , &intrinsics_1 );
+ *          SensorFactory::get().create ( "CAMERA" , "Front-left camera" , extrinsics_1 , &intrinsics_1 );
  *
  *      // A second camera... with a different name!
  *
@@ -195,7 +195,7 @@ namespace wolf
  *      IntrinsicsCamera  intrinsics_2({...});
  *
  *      SensorBase* camera_2_ptr =
- *          SensorFactory::get()->create( "CAMERA" , "Front-right camera" , extrinsics_2 , &intrinsics_2 );
+ *          SensorFactory::get().create( "CAMERA" , "Front-right camera" , extrinsics_2 , &intrinsics_2 );
  *     \endcode
  *
  * You can also check the code in the example file ````src/examples/test_wolf_factories.cpp````.
@@ -217,7 +217,7 @@ class SensorFactory
         // This class is a singleton. The code below guarantees this.
         // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
     public:
-        static SensorFactory* get(); // Unique point of access
+        static SensorFactory& get(); // Unique point of access
 
     public: // see http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
         SensorFactory(const SensorFactory&) = delete;

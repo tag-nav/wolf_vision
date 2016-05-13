@@ -33,7 +33,7 @@ class IntrinsicsFactory
         // This class is a singleton. The code below guarantees this.
         // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
     public:
-        static IntrinsicsFactory* get(); // Unique point of access
+        static IntrinsicsFactory& get(); // Unique point of access
 
     public: // see http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
         IntrinsicsFactory(const IntrinsicsFactory&) = delete;

@@ -42,10 +42,10 @@ SensorBase* SensorFactory::create(const std::string& _sensor_type, const std::st
 // Singleton ---------------------------------------------------
 // This class is a singleton. The code below guarantees this.
 
-SensorFactory* SensorFactory::get() // Unique point of access;
+SensorFactory& SensorFactory::get() // Unique point of access;
 {
     static SensorFactory instance_;
-    return &instance_;
+    return instance_;
 }
 
 } /* namespace wolf */

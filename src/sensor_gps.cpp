@@ -75,6 +75,6 @@ SensorBase* SensorGPS::create(const std::string& _unique_name, const Eigen::Vect
 namespace wolf {
 namespace
 {
-const bool registered_gps = SensorFactory::get()->registerCreator("GPS", SensorGPS::create);
+const bool registered_gps = SensorFactory::get().registerCreator("GPS", SensorGPS::create);
 }
 } // namespace wolf

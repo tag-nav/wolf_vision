@@ -48,7 +48,7 @@ namespace wolf
  *
  * #### Accessing the Factory
  * The ProcessorFactory class is a singleton: it can only exist once in your application.
- * To obtain a pointer to it, use the static method get(),
+ * To obtain an instance of it, use the static method get(),
  *
  *     \code
  *     ProcessorFactory::get()
@@ -57,7 +57,7 @@ namespace wolf
  * You can then call the methods you like, e.g. to create a processor, you type:
  *
  *     \code
- *     ProcessorFactory::get()->create(...); // see below for creating processors ...
+ *     ProcessorFactory::get().create(...); // see below for creating processors ...
  *     \endcode
  *
  * #### Registering processor creators
@@ -69,7 +69,7 @@ namespace wolf
  * that knows how to create your specific processor, e.g.:
  *
  *     \code
- *     ProcessorFactory::get()->registerCreator("ODOM 2D", ProcessorOdom2D::create);
+ *     ProcessorFactory::get().registerCreator("ODOM 2D", ProcessorOdom2D::create);
  *     \endcode
  *
  * The method ProcessorOdom2D::create() exists in the ProcessorOdom2D class as a static method.
@@ -96,7 +96,7 @@ namespace wolf
  * For example, in processor_odom_2D.cpp we find the line:
  *
  *     \code
- *     const bool registered_odom_2D = ProcessorFactory::get()->registerCreator("ODOM 2D", ProcessorOdom2D::create);
+ *     const bool registered_odom_2D = ProcessorFactory::get().registerCreator("ODOM 2D", ProcessorOdom2D::create);
  *     \endcode
  *
  * which is a static invocation (i.e., it is placed at global scope outside of the ProcessorOdom2D class).
@@ -107,7 +107,7 @@ namespace wolf
  * It only needs to be passed the string of the processor type.
  *
  *     \code
- *     ProcessorFactory::get()->unregisterCreator("ODOM 2D");
+ *     ProcessorFactory::get().unregisterCreator("ODOM 2D");
  *     \endcode
  *
  * #### Creating processors
@@ -117,7 +117,7 @@ namespace wolf
  * To create a ProcessorOdom2D, you type:
  *
  *     \code
- *     ProcessorFactory::get()->create("ODOM 2D", "main odometry", params_ptr);
+ *     ProcessorFactory::get().create("ODOM 2D", "main odometry", params_ptr);
  *     \endcode
  *
  * #### Example 1 : using the Factories alone
@@ -132,14 +132,14 @@ namespace wolf
  *     // Note: ProcessorOdom2D::create() is already registered, automatically.
  *
  *     // First create the sensor (See SensorFactory for details)
- *     SensorBase* sensor_ptr = SensorFactory::get()->create ( "ODOM 2D" , "Main odometer" , extrinsics , &intrinsics );
+ *     SensorBase* sensor_ptr = SensorFactory::get().create ( "ODOM 2D" , "Main odometer" , extrinsics , &intrinsics );
  *
  *     // To create a odometry integrator, provide a type="ODOM 2D", a name="main odometry", and a pointer to the parameters struct:
  *
  *     ProcessorParamsOdom2D  params({...});   // fill in the derived struct (note: ProcessorOdom2D actually has no input params)
  *
  *     ProcessorBase* processor_ptr =
- *         ProcessorFactory::get()->create ( "ODOM 2D" , "main odometry" , &params );
+ *         ProcessorFactory::get().create ( "ODOM 2D" , "main odometry" , &params );
  *
  *     // Bind processor to sensor
  *     sensor_ptr->addProcessor(processor_ptr);
@@ -181,7 +181,7 @@ class ProcessorFactory
         // This class is a singleton. The code below guarantees this.
         // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
     public:
-        static ProcessorFactory* get(); // Unique point of access
+        static ProcessorFactory& get(); // Unique point of access
 
     public: // see http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
         ProcessorFactory(const ProcessorFactory&) = delete;

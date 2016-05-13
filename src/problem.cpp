@@ -49,7 +49,7 @@ void Problem::addSensor(SensorBase* _sen_ptr)
 
 SensorBase* Problem::installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
 {
-    SensorBase* sen_ptr = SensorFactory::get()->create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
+    SensorBase* sen_ptr = SensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
     addSensor(sen_ptr);
     return sen_ptr;
 }
@@ -59,7 +59,7 @@ ProcessorBase* Problem::installProcessor(std::string _prc_type, //
                                          SensorBase* _corresponding_sensor_ptr, //
                                          ProcessorParamsBase* _prc_params)
 {
-    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(uppercase(_prc_type), _unique_processor_name, _prc_params);
+    ProcessorBase* prc_ptr = ProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _prc_params);
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
     return prc_ptr;
 }

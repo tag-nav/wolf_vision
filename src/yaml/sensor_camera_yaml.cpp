@@ -77,7 +77,7 @@ static IntrinsicsBase* createIntrinsicsCamera(const std::string & _filename_dot_
 }
 
 // Register in the SensorFactory
-const bool registered_camera_intr = IntrinsicsFactory::get()->registerCreator("CAMERA", createIntrinsicsCamera);
+const bool registered_camera_intr = IntrinsicsFactory::get().registerCreator("CAMERA", createIntrinsicsCamera);
 
 } // namespace [unnamed]
 

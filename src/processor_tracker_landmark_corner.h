@@ -220,7 +220,7 @@ ProcessorBase* ProcessorTrackerLandmarkCorner::create(const std::string& _unique
 namespace wolf {
 namespace
 {
-const bool registered_prc_laser = ProcessorFactory::get()->registerCreator("LASER 2D", ProcessorTrackerLandmarkCorner::create);
+const bool registered_prc_laser = ProcessorFactory::get().registerCreator("LASER 2D", ProcessorTrackerLandmarkCorner::create);
 }
 } // namespace wolf
 

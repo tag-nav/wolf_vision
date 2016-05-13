@@ -86,7 +86,7 @@ IntrinsicsBase* createIntrinsicsLaser2D(const std::string _filename_dot_yaml)
 }
 namespace
 {
-const bool registered_laser = SensorFactory::get()->registerCreator("LASER 2D", SensorLaser2D::create);
-const bool registered_laser_params = IntrinsicsFactory::get()->registerCreator("LASER 2D", createIntrinsicsLaser2D);
+const bool registered_laser = SensorFactory::get().registerCreator("LASER 2D", SensorLaser2D::create);
+const bool registered_laser_params = IntrinsicsFactory::get().registerCreator("LASER 2D", createIntrinsicsLaser2D);
 }
 } // namespace wolf

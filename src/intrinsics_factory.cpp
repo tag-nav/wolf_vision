@@ -42,10 +42,10 @@ IntrinsicsBase* IntrinsicsFactory::create(const std::string& _intrinsics_type, c
 // Singleton ---------------------------------------------------
 // This class is a singleton. The code below guarantees this.
 
-IntrinsicsFactory* IntrinsicsFactory::get() // Unique point of access;
+IntrinsicsFactory& IntrinsicsFactory::get() // Unique point of access;
 {
     static IntrinsicsFactory instance_;
-    return &instance_;
+    return instance_;
 }
 
 } /* namespace wolf */

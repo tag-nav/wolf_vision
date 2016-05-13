@@ -40,11 +40,11 @@ ProcessorBase* ProcessorFactory::create(const std::string& _processor_type, cons
     return (i->second)(_name, _params);
 }
 
-ProcessorFactory* ProcessorFactory::get() // Unique point of access;
+ProcessorFactory& ProcessorFactory::get() // Unique point of access;
 {
     static ProcessorFactory instance_; // Guaranteed to be destroyed.
                                         // Instantiated on first use.
-    return &instance_;
+    return instance_;
 }
 
 } /* namespace wolf */
