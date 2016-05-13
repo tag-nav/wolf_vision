@@ -38,7 +38,7 @@ IF(OpenCV_FOUND)
 ENDIF(OpenCV_FOUND)
 
 # YAML with yaml-cpp
-SET(YAMLCPP_USE_STATIC_LIBS TRUE) #Use static library : not working: TO BE REVISED
+#SET(YAMLCPP_USE_STATIC_LIBS TRUE) #Use static library : not working: TO BE REVISED
 FIND_PACKAGE(YamlCpp)
 IF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library FOUND: yaml-cpp related sources will be built.")

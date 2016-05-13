@@ -49,6 +49,7 @@ int main(void)
 
     // Use params factory for camera intrinsics
     IntrinsicsBase* intr_cam_ptr = SensorCamera::createIntrinsics("/Users/jsola/dev/wolf/src/examples/camera.yaml");
+    // TODO: Use some automatic path syntax to find the file
 
     // Install sensors
     problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
