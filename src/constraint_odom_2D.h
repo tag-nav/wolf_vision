@@ -2,7 +2,6 @@
 #define CONSTRAINT_ODOM_2D_THETA_H_
 
 //Wolf includes
-#include "wolf.h"
 #include "constraint_sparse.h"
 
 namespace wolf {

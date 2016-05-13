@@ -4,7 +4,6 @@
 
 //Wolf includes
 #include "landmark_base.h"
-#include "wolf.h"
 
 // Std includes
 

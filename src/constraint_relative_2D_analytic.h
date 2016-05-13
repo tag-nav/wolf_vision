@@ -2,7 +2,6 @@
 #define CONSTRAINT_RELATIVE_2D_ANALYTIC_H_
 
 //Wolf includes
-#include "wolf.h"
 #include "constraint_analytic.h"
 #include "landmark_base.h"
 

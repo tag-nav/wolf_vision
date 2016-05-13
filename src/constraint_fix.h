@@ -3,7 +3,6 @@
 #define CONSTRAINT_FIX_H_
 
 //Wolf includes
-#include "wolf.h"
 #include "constraint_sparse.h"
 
 

@@ -13,7 +13,7 @@
 #include "../sensor_camera.h"
 
 // yaml library
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 
 namespace wolf
 {
@@ -63,7 +63,7 @@ static IntrinsicsBase* createIntrinsicsCamera(const std::string & _filename_dot_
         std::cout << "sensor intrinsics: " << std::endl;
         std::cout << "\timage size  : " << size.transpose() << std::endl;
         std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
-        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl << std::endl;
+        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
         //=========================================
         //=========================================
 

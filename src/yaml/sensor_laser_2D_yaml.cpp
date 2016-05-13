@@ -14,7 +14,7 @@
 #include "../sensor_laser_2D.h"
 
 // yaml library
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 
 namespace wolf
 {
