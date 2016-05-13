@@ -171,11 +171,14 @@ namespace wolf
  * #### Example 2: creating sensors
  * We finally provide the necessary steps to create a sensor of class SensorCamera in our application:
  *
- *     \code
- *      #include "sensor_factory.h"
- *      #include "sensor_camera.h" // provides SensorCamera
+ *  \code
+ *  #include "sensor_factory.h"
+ *  #include "sensor_camera.h" // provides SensorCamera
  *
- *      // Note: SensorCamera::create() is already registered, automatically.
+ *  // Note: SensorCamera::create() is already registered, automatically.
+ *
+ *  using namespace wolf;
+ *  int main() {
  *
  *      // To create a camera, provide:
  *      //    a type = "CAMERA",
@@ -184,7 +187,7 @@ namespace wolf
  *      //    a pointer to the intrinsics struct:
  *
  *      Eigen::VectorXs   extrinsics_1(7);        // give it some values...
- *      IntrinsicsCamera  intrinsics_1({...});    // also fill in the derived struct
+ *      IntrinsicsCamera  intrinsics_1({...});    // see IntrinsicsFactory to fill in the derived struct
  *
  *      SensorBase* camera_1_ptr =
  *          SensorFactory::get().create ( "CAMERA" , "Front-left camera" , extrinsics_1 , &intrinsics_1 );
@@ -196,7 +199,10 @@ namespace wolf
  *
  *      SensorBase* camera_2_ptr =
  *          SensorFactory::get().create( "CAMERA" , "Front-right camera" , extrinsics_2 , &intrinsics_2 );
- *     \endcode
+ *
+ *      return 0;
+ *  }
+ *  \endcode
  *
  * You can also check the code in the example file ````src/examples/test_wolf_factories.cpp````.
  */
