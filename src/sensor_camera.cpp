@@ -62,34 +62,27 @@ IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot
     if (camera_config["sensor type"])
     {
 
-        // YAML:: to std::
+        // YAML:: to Eigen::
+        using namespace Eigen;
         std::string sensor_type = camera_config["sensor type"].as<std::string>();
         std::string sensor_name = camera_config["sensor name"].as<std::string>();
-        std::vector<double> p   = camera_config["extrinsic"] ["position"].as<std::vector<double> >(); // in one go: it works!
-        std::vector<double> o   = camera_config["extrinsic"] ["orientation"].as<std::vector<double> >();
-        std::vector<double> s   = camera_config["parameters"]["image size"].as<std::vector<double> >();
-        std::vector<double> k   = camera_config["parameters"]["intrinsic"].as<std::vector<double> >();
-        std::vector<double> d   = camera_config["parameters"]["distortion"].as<std::vector<double> >();
+        Vector3d pos            = camera_config["extrinsic"]["position"].as<Vector3d>();
+        Vector3d ori            = camera_config["extrinsic"]["orientation"].as<Vector3d>() * M_PI / 180; // roll, pitch, yaw [rad]
+        Quaternions quat; v2q(ori, quat);
+        Vector2d size           = camera_config["intrinsic"]["image size"].as<Vector2d>();
+        Vector4d intrinsic      = camera_config["intrinsic"]["pinhole model"].as<Vector4d>();
+        VectorXd distortion     = camera_config["intrinsic"]["distortion"].as<VectorXd>();
 
-        // std:: to Eigen::
-        // Using Eigen vector constructors from data pointers. Mind the vector sizes!
-        using namespace Eigen;
-        Vector3d pos(p.data());
-        Vector3d ori(o.data());
-        ori *= M_PI / 180; // deg to rad
-        Vector2d size(s.data());
-        Vector4d intrinsic(k.data());
-        Map<VectorXd> distortion(d.data(), d.size());
-
-        std::cout << "sensor type: " << sensor_type << std::endl;
-        std::cout << "sensor name: " << sensor_name << std::endl;
-        std::cout << "sensor extrinsics: " << std::endl;
-        std::cout << "\tposition    : " << pos.transpose() << std::endl;
-        std::cout << "\torientation : " << ori.transpose() << std::endl;
-        std::cout << "sensor parameters: " << std::endl;
-        std::cout << "\timage size  : " << size.transpose() << std::endl;
-        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
-        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
+//        std::cout << "\n--- Parsed Parameters from YAML file ---" << std::endl;
+//        std::cout << "sensor type: " << sensor_type << std::endl;
+//        std::cout << "sensor name: " << sensor_name << std::endl;
+//        std::cout << "sensor extrinsics: " << std::endl;
+//        std::cout << "\tposition    : " << pos.transpose() << std::endl;
+//        std::cout << "\torientation : " << ori.transpose() << std::endl;
+//        std::cout << "sensor intrinsics: " << std::endl;
+//        std::cout << "\timage size  : " << size.transpose() << std::endl;
+//        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
+//        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl << std::endl;
 
         // Eigen:: to wolf::
         IntrinsicsCamera* intrinsics_cam = new IntrinsicsCamera;
