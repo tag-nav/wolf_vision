@@ -25,7 +25,7 @@ namespace wolf
  *
  * This factory can create objects of classes deriving from ProcessorBase.
  *
- * Specific object creation is invoked by create(), and the type of processor is identified with a string.
+ * Specific object creation is invoked by create(TYPE, params), and the TYPE of processor is identified with a string.
  * For example, the following processor types are implemented,
  *   - "ODOM 3D" for ProcessorOdom3D
  *   - "ODOM 2D" for ProcessorOdom2D
@@ -33,6 +33,18 @@ namespace wolf
  *
  * The rule to make new TYPE strings unique is that you skip the prefix 'Processor' from your class name,
  * and you build a string in CAPITALS with space separators.
+ *   - ProcessorImage -> ````"IMAGE"````
+ *   - ProcessorLaser2D -> ````"LASER 2D"````
+ *   - etc.
+ *
+ * The methods to create specific processors are called __creators__.
+ * Creators must be registered to the factory before they can be invoked for processor creation.
+ *
+ * This documentation shows you how to:
+ *   - Access the Factory
+ *   - Register and unregister creators
+ *   - Create processors
+ *   - Write a processor creator for ProcessorOdom2D (example).
  *
  * #### Accessing the Factory
  * The ProcessorFactory class is a singleton: it can only exist once in your application.

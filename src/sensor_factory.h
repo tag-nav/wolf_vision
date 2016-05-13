@@ -25,17 +25,29 @@ namespace wolf
  *
  * This factory can create objects of classes deriving from SensorBase.
  *
- * Specific object creation is invoked by create(), and the type of sensor is identified with a string.
+ * Specific object creation is invoked by ````create(TYPE, params ... )````, and the TYPE of sensor is identified with a string.
  * Currently, the following sensor types are implemented,
  *   - "CAMERA" for SensorCamera
  *   - "ODOM 2D" for SensorOdom2D
  *   - "GPS FIX" for SensorGPSFix
  *
  * The rule to make new TYPE strings unique is that you skip the prefix 'Sensor' from your class name,
- * and you build a string in CAPITALS with space separators.
+ * and you build a string in CAPITALS with space separators, e.g.:
+ *   - SensorCamera -> ````"CAMERA"````
+ *   - SensorLaser2D -> ````"LASER 2D"````
+ *   - etc.
+ *
+ * The methods to create specific sensors are called __creators__.
+ * Creators must be registered to the factory before they can be invoked for sensor creation.
+ *
+ * This documentation shows you how to:
+ *   - Access the Factory
+ *   - Register and unregister creators
+ *   - Create sensors
+ *   - Write a sensor creator for SensorCamera (example).
  *
  * #### Accessing the Factory
- * The SensorFactory class is a singleton: it can only exist once in your application.
+ * The SensorFactory class is a <a href="http://stackoverflow.com/questions/1008019/c-singleton-design-pattern#1008289">singleton</a>: it can only exist once in your application.
  * To obtain a pointer to it, use the static method get(),
  *
  *     \code
@@ -61,31 +73,16 @@ namespace wolf
  *     \endcode
  *
  * The method SensorCamera::create() exists in the SensorCamera class as a static method.
- * All these SensorXxx::create() methods need to have exactly the same API, regardless of the sensor type.
- * This API includes a sensor name, a vector of extrinsic parameters, and a pointer to a base struct of intrinsic parameters, IntrinsicsBase*,
- * that can be derived for each derived sensor.
+ * All these ````SensorXxx::create()```` methods need to have exactly the same API, regardless of the sensor type.
+ * This API includes a sensor name, a vector of extrinsic parameters,
+ * and a pointer to a base struct of intrinsic parameters, IntrinsicsBase*,
+ * that can be derived for each derived sensor:
  *
- * Here is an example of SensorCamera::create() extracted from sensor_camera.h:
- *
- *     \code
+ *      \code
  *      static SensorBase* create(std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
- *      {
- *          // decode extrinsics vector
- *          assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
- *          StateBlock* pos_ptr = new StateBlock(_extrinsics_pq.head(3));
- *          StateBlock* ori_ptr = new StateQuaternion(_extrinsics_pq.tail(4));
+ *      \endcode
  *
- *          // cast instrinsics to good type and extract intrinsic vector
- *          IntrinsicsCamera* intrinsics = (IntrinsicsCamera*)_intrinsics;
- *          StateBlock*       intr_ptr   = new StateBlock(intrinsics->intrinsic_vector);
- *
- *          SensorBase* sen = new SensorCamera( pos_ptr , ori_ptr , intr_ptr , intrinsics->width , intrinsics->height );
- *          sen->setName(_name); // pass the name to the created SensorCamera.
- *          return sen;
- *      }
- *     \endcode
- *
- * See below for achieving automatic registration of your sensors.
+ * See further down for an implementation example.
  *
  * #### Achieving automatic registration
  * Currently, registering is performed in each specific SensorXxxx source file, sensor_xxxx.cpp.
@@ -106,7 +103,7 @@ namespace wolf
  *     \endcode
  *
  * #### Creating sensors
- * Prior to invoking the creation of a sensor of a particular type,
+ * Note: Prior to invoking the creation of a sensor of a particular type,
  * you must register the creator for this type into the factory.
  *
  * To create e.g. a SensorCamera, you type:
@@ -118,7 +115,60 @@ namespace wolf
  * where ABSOLUTELY ALL input parameters are important. In particular, the sensor name "Front-left camera" will be used to identify this camera
  * and to assign it the appropriate processors. DO NOT USE IT WITH DUMMY PARAMETERS!
  *
- * #### Example
+ * #### See also
+ *  - IntrinsicsFactory: to create intrinsic structs deriving from IntrinsicsBase directly from YAML files.
+ *  - ProcessorFactory: to create processors that will be bound to sensors.
+ *  - Problem::installSensor() : to install sensors in WOLF Problem.
+ *
+ * #### Example 1: writing a specific sensor creator
+ * Here is an example of SensorCamera::create() extracted from sensor_camera.cpp:
+ *
+ *     \code
+ *      static SensorBase* create(std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
+ *      {
+ *          // check extrinsics vector
+ *          assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
+ *
+ *          // cast instrinsics to good type
+ *          IntrinsicsCamera* intrinsics_ptr = (IntrinsicsCamera*) _intrinsics;
+ *
+ *          // Do create the SensorCamera object, and complete its setup
+ *          SensorCamera* sen_ptr = new SensorCamera(_extrinsics_pq, intrinsics_ptr);
+ *          sen_ptr->setName(_unique_name);
+ *
+ *          return sen_ptr;
+ *      }
+ *     \endcode
+ *
+ * #### Example 2: registering a sensor creator into the factory
+ * Registration can be done manually or automatically. It involves the call to static functions.
+ * It is advisable to put these calls within unnamed namespaces.
+ *
+ *   - __Manual registration__: you control registration at application level.
+ *   Put the code either at global scope,
+ *      \code
+ *      namespace {
+ *      const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+ *      }
+ *      main () { ... }
+ *      \endcode
+ *   or inside your main():
+ *      \code
+ *      main () {
+ *          SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+ *          ...
+ *      }
+ *      \endcode
+ *
+ *   - __Automatic registration__: registration is performed at library level.
+ *   Put the code at the last line of the sensor_xxx.cpp file,
+ *      \code
+ *      namespace {
+ *      const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
+ *      }
+ *      \endcode
+ *
+ * #### Example 2: creating sensors
  * We finally provide the necessary steps to create a sensor of class SensorCamera in our application:
  *
  *     \code
@@ -133,17 +183,19 @@ namespace wolf
  *      //    an extrinsics vector, and
  *      //    a pointer to the intrinsics struct:
  *
- *      Eigen::VectorXs   extrinsics(7);        // give it some values...
- *      IntrinsicsCamera  intrinsics({...});    // also fill in the derived struct
+ *      Eigen::VectorXs   extrinsics_1(7);        // give it some values...
+ *      IntrinsicsCamera  intrinsics_1({...});    // also fill in the derived struct
  *
  *      SensorBase* camera_1_ptr =
- *          SensorFactory::get()->create ( "CAMERA" , "Front-left camera" , extrinsics , &intrinsics );
+ *          SensorFactory::get()->create ( "CAMERA" , "Front-left camera" , extrinsics_1 , &intrinsics_1 );
  *
- *      // Second camera... with a different name!
- *      extrinsics = ...;
- *      intrinsics = ...;
+ *      // A second camera... with a different name!
+ *
+ *      Eigen::VectorXs   extrinsics_2(7);
+ *      IntrinsicsCamera  intrinsics_2({...});
+ *
  *      SensorBase* camera_2_ptr =
- *          SensorFactory::get()->create( "CAMERA" , "Front-right camera" , extrinsics , &intrinsics );
+ *          SensorFactory::get()->create( "CAMERA" , "Front-right camera" , extrinsics_2 , &intrinsics_2 );
  *     \endcode
  *
  * You can also check the code in the example file ````src/examples/test_wolf_factories.cpp````.

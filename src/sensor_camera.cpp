@@ -25,7 +25,7 @@ SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsC
     setType("CAMERA");
     p_ptr_ = new StateBlock(_extrinsics.head(3));
     o_ptr_ = new StateQuaternion(_extrinsics.tail(4));
-    intrinsic_ptr_ = new StateBlock(_intrinsics_ptr->intrinsic_vector);
+    intrinsic_ptr_ = new StateBlock(_intrinsics_ptr->pinhole_model);
     pinhole::computeCorrectionModel(intrinsic_ptr_->getVector(), distortion_, correction_);
 }
 
@@ -40,16 +40,12 @@ SensorBase* SensorCamera::create(const std::string& _unique_name, //
                                  const Eigen::VectorXs& _extrinsics_pq, //
                                  const IntrinsicsBase* _intrinsics)
 {
-    // decode extrinsics vector
     assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
-    StateBlock* pos_ptr = new StateBlock(_extrinsics_pq.head(3), true);
-    StateBlock* ori_ptr = new StateQuaternion(_extrinsics_pq.tail(4), true);
-    // cast instrinsics to good type and extract intrinsic vector
-    IntrinsicsCamera* intrinsics = (IntrinsicsCamera*)((_intrinsics));
-    StateBlock* intr_ptr = new StateBlock(intrinsics->intrinsic_vector);
-    // Construct camera and give it a name
-    SensorCamera* sen_ptr = new SensorCamera(pos_ptr, ori_ptr, intr_ptr, intrinsics->width, intrinsics->height);
+
+    IntrinsicsCamera* intrinsics_ptr = (IntrinsicsCamera*)_intrinsics;
+    SensorCamera* sen_ptr = new SensorCamera(_extrinsics_pq, intrinsics_ptr);
     sen_ptr->setName(_unique_name);
+
     return sen_ptr;
 }
 

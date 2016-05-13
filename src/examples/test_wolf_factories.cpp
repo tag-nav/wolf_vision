@@ -50,7 +50,7 @@ int main(void)
     IntrinsicsOdom2D intr_odom2d;
 
     // Use params factory for camera intrinsics
-    IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get()->create("CAMERA", "/home/jsola/dev/wolf/src/examples/camera.yaml");
+    IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get()->create("CAMERA", "/Users/jsola/dev/wolf/src/examples/camera.yaml");
     // TODO: Use some automatic path syntax to find the file
 
     cout << "\n==================== Sensor Factory ====================" << endl;
