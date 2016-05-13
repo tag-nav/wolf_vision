@@ -43,7 +43,7 @@ int main(void)
 
     Problem problem(FRM_PO_3D);
 
-    cout << "\n==================== Sensor Factory ====================" << endl;
+    cout << "\n================= Intrinsics Factory ===================" << endl;
 
     // define some useful parameters
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
@@ -52,6 +52,8 @@ int main(void)
     // Use params factory for camera intrinsics
     IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get()->create("CAMERA", "/home/jsola/dev/wolf/src/examples/camera.yaml");
     // TODO: Use some automatic path syntax to find the file
+
+    cout << "\n==================== Sensor Factory ====================" << endl;
 
     // Install sensors
     problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
@@ -72,7 +74,7 @@ int main(void)
                 << ": " << setw(8) << sen->getType()
                 << " | name: " << sen->getName() << endl;
     }
-    cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << endl;
+//    cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << endl;
     cout << "\twith intrinsics: " << sen_ptr->getIntrinsicPtr()->getVector().transpose() << endl;
 
     cout << "\n=================== Processor Factory ===================" << endl;
