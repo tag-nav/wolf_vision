@@ -91,6 +91,10 @@ IF(Suitesparse_FOUND)
     INCLUDE_DIRECTORIES(${Suitesparse_INCLUDE_DIRS})
 ENDIF(Suitesparse_FOUND)
 
+IF(YAMLCPP_FOUND)
+    INCLUDE_DIRECTORIES(${YAMLCPP_INCLUDE_DIR})
+ENDIF(YAMLCPP_FOUND)
+
 #headers
 SET(HDRS_BASE
     wolf.h)
@@ -293,10 +297,31 @@ IF (Suitesparse_FOUND)
     ADD_SUBDIRECTORY(solver)
 ENDIF(Suitesparse_FOUND)
 
+# LEAVE YAML FILES ALWAYS IN THE LAST POSITION !!
+IF(YAMLCPP_FOUND)
+    # headers
+    SET(HDRS ${HDRS}
+        yaml/yaml_conversion.h
+        )
+
+    # sources
+    SET(SRCS ${SRCS}
+        yaml/sensor_camera_yaml.cpp
+        )
+    IF(laser_scan_utils_FOUND)
+        SET(SRCS ${SRCS}
+            yaml/sensor_laser_2D_yaml.cpp
+            )
+    ENDIF(laser_scan_utils_FOUND)
+ENDIF(YAMLCPP_FOUND)
+
+
+
 # create the shared library
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_WRAPPER})
 
-#Link the created library with ceres
+#Link the created libraries
+#=============================================================
 IF (Ceres_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CERES_LIBRARIES})
 ENDIF(Ceres_FOUND)
@@ -320,6 +345,7 @@ ENDIF (YAMLCPP_FOUND)
 
 
 #install library
+#=============================================================
 INSTALL(TARGETS ${PROJECT_NAME}
       RUNTIME DESTINATION bin
       LIBRARY DESTINATION lib/iri-algorithms

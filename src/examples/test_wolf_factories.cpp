@@ -18,6 +18,8 @@
 #include "../sensor_gps.h"
 #include "../processor_gps.h"
 
+#include "intrinsics_factory.h"
+
 //#include "../sensor_laser_2D.h"
 
 #include "../problem.h"
@@ -48,7 +50,7 @@ int main(void)
     IntrinsicsOdom2D intr_odom2d;
 
     // Use params factory for camera intrinsics
-    IntrinsicsBase* intr_cam_ptr = SensorCamera::createIntrinsics("/home/jsola/dev/wolf/src/examples/camera.yaml");
+    IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get()->create("CAMERA", "/home/jsola/dev/wolf/src/examples/camera.yaml");
     // TODO: Use some automatic path syntax to find the file
 
     // Install sensors

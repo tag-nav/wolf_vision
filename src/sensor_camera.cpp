@@ -1,9 +1,7 @@
 #include "sensor_camera.h"
 #include "state_block.h"
 #include "state_quaternion.h"
-#include "yaml-cpp/yaml.h"
 #include "pinholeTools.h"
-#include "yaml_conversion.h"
 
 namespace wolf
 {
@@ -55,63 +53,15 @@ SensorBase* SensorCamera::create(const std::string& _unique_name, //
     return sen_ptr;
 }
 
-IntrinsicsBase* SensorCamera::createIntrinsics(const std::string & _filename_dot_yaml)
-{
-    YAML::Node camera_config = YAML::LoadFile(_filename_dot_yaml);
-
-    if (camera_config["sensor type"])
-    {
-
-        // YAML:: to Eigen::
-        using namespace Eigen;
-        std::string sensor_type = camera_config["sensor type"].as<std::string>();
-        std::string sensor_name = camera_config["sensor name"].as<std::string>();
-        Quaternions quat; v2q(ori, quat);
-        Vector2d size           = camera_config["intrinsic"]["image size"].as<Vector2d>();
-        Vector4d intrinsic      = camera_config["intrinsic"]["pinhole model"].as<Vector4d>();
-        VectorXd distortion     = camera_config["intrinsic"]["distortion"].as<VectorXd>();
-
-        // extrinsics discarded in this creator
-        //        Vector3d pos            = camera_config["extrinsic"]["position"].as<Vector3d>();
-        //        Vector3d ori            = camera_config["extrinsic"]["orientation"].as<Vector3d>() * M_PI / 180; // roll, pitch, yaw [rad]
-
-//        std::cout << "\n--- Parsed Parameters from YAML file ---" << std::endl;
-//        std::cout << "sensor type: " << sensor_type << std::endl;
-//        std::cout << "sensor name: " << sensor_name << std::endl;
-//        std::cout << "sensor extrinsics: " << std::endl;
-//        std::cout << "\tposition    : " << pos.transpose() << std::endl;
-//        std::cout << "\torientation : " << ori.transpose() << std::endl;
-//        std::cout << "sensor intrinsics: " << std::endl;
-//        std::cout << "\timage size  : " << size.transpose() << std::endl;
-//        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
-//        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl << std::endl;
-
-        // Eigen:: to wolf::
-        IntrinsicsCamera* intrinsics_cam = new IntrinsicsCamera;
-        intrinsics_cam->type = sensor_type;
-        intrinsics_cam->name = sensor_name;
-        intrinsics_cam->intrinsic_vector = intrinsic;
-        intrinsics_cam->distortion = distortion;
-        intrinsics_cam->width = size(0);
-        intrinsics_cam->height = size(1);
-
-        return intrinsics_cam;
-    }
-
-    std::cout << "Bad configuration file. No sensor type found." << std::endl;
-    return nullptr;
-}
 
 } // namespace wolf
 
 // Register in the SensorFactory
 #include "sensor_factory.h"
-#include "intrinsics_factory.h"
 namespace wolf
 {
 namespace
 {
-const bool registered_camera_intr = IntrinsicsFactory::get()->registerCreator("CAMERA", SensorCamera::createIntrinsics);
 const bool registered_camera = SensorFactory::get()->registerCreator("CAMERA", SensorCamera::create);
 }
 } // namespace wolf

@@ -1,6 +1,3 @@
-# SensorFactory classes test
-ADD_EXECUTABLE(test_wolf_factories test_wolf_factories.cpp)
-TARGET_LINK_LIBRARIES(test_wolf_factories ${PROJECT_NAME})
 
 # ProcessorMotion classes test
 ADD_EXECUTABLE(test_motion test_motion.cpp)
@@ -33,6 +30,10 @@ TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
 IF(YAMLCPP_FOUND)
     ADD_EXECUTABLE(test_yaml test_yaml.cpp)
     TARGET_LINK_LIBRARIES(test_yaml ${PROJECT_NAME})
+
+    # SensorFactory classes test
+    ADD_EXECUTABLE(test_wolf_factories test_wolf_factories.cpp)
+    TARGET_LINK_LIBRARIES(test_wolf_factories ${PROJECT_NAME})
 ENDIF(YAMLCPP_FOUND)
 
 IF(Suitesparse_FOUND)

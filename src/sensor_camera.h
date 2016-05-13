@@ -58,7 +58,7 @@ class SensorCamera : public SensorBase
         static SensorBase* create(const std::string & _unique_name, //
                                   const Eigen::VectorXs& _extrinsics, //
                                   const IntrinsicsBase* _intrinsics);
-        static IntrinsicsBase* createIntrinsics(const std::string & _filename_dot_yaml);
+//        static IntrinsicsBase* createIntrinsics(const std::string & _filename_dot_yaml);
 
 };
 

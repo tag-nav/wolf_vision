@@ -6,14 +6,13 @@
  */
 
 #include "pinholeTools.h"
-#include "yaml_conversion.h"
-
 #include "yaml-cpp/yaml.h"
 
 #include <iostream>
 #include <fstream>
 
 #include <eigen3/Eigen/Dense>
+#include "../yaml/yaml_conversion.h"
 
 int main()
 {

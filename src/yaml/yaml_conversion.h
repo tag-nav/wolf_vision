@@ -5,8 +5,8 @@
  *      \author: jsola
  */
 
-#ifndef YAML_CONVERSION_H_
-#define YAML_CONVERSION_H_
+#ifndef YAML_YAML_CONVERSION_H_
+#define YAML_YAML_CONVERSION_H_
 
 // Yaml
 #include <yaml-cpp/yaml.h>
@@ -141,4 +141,4 @@ struct convert<Eigen::Quaternion<_Scalar, _Options> >
 
 } // namespace YAML
 
-#endif /* YAML_CONVERSION_H_ */
+#endif /* YAML_YAML_CONVERSION_H_ */
