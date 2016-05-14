@@ -145,14 +145,14 @@ namespace wolf
  * It is advisable to put these calls within unnamed namespaces.
  *
  *   - __Manual registration__: you control registration at application level.
- *   Put the code either at global scope,
+ *   Put the code either at global scope (you must define a dummy variable for this),
  *      \code
  *      namespace {
  *      const bool registered_camera = SensorFactory::get().registerCreator("CAMERA", SensorCamera::create);
  *      }
  *      main () { ... }
  *      \endcode
- *   or inside your main():
+ *   or inside your main(), where a direct call is possible:
  *      \code
  *      main () {
  *          SensorFactory::get().registerCreator("CAMERA", SensorCamera::create);
@@ -167,6 +167,8 @@ namespace wolf
  *      const bool registered_camera = SensorFactory::get().registerCreator("CAMERA", SensorCamera::create);
  *      }
  *      \endcode
+ *   Automatic registration is recommended in wolf, and implemented in the classes shipped with it.
+ *   You are free to comment out these lines and place them wherever you consider it more convenient for your design.
  *
  * #### Example 2: creating sensors
  * We finally provide the necessary steps to create a sensor of class SensorCamera in our application:
