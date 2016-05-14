@@ -7,23 +7,18 @@
 
 #include "../sensor_gps_fix.h"
 #include "../sensor_camera.h"
-
 #include "../sensor_odom_2D.h"
+#include "../sensor_imu.h"
+#include "../sensor_gps.h"
+
+#include "../intrinsics_factory.h"
+
 #include "../processor_odom_2D.h"
 #include "../processor_odom_3D.h"
-
-#include "../sensor_imu.h"
 #include "../processor_imu.h"
-
-#include "../sensor_gps.h"
 #include "../processor_gps.h"
 
-#include "intrinsics_factory.h"
-
-//#include "../sensor_laser_2D.h"
-
 #include "../problem.h"
-
 
 #include <iostream>
 #include <iomanip>

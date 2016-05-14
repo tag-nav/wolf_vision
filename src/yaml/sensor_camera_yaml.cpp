@@ -9,10 +9,10 @@
 #include "yaml_conversion.h"
 
 // wolf
-#include "../intrinsics_factory.h"
 #include "../sensor_camera.h"
+#include "../intrinsics_factory.h"
 
-// yaml library
+// yaml-cpp library
 #include <yaml-cpp/yaml.h>
 
 namespace wolf
