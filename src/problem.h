@@ -99,6 +99,7 @@ class Problem : public NodeBase
          * \param _intrinsics a base-pointer to a derived struct defining the intrinsic parameters.
          */
         SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics = nullptr);
+        SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, std::string _intrinsics_filename);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
@@ -109,6 +110,7 @@ class Problem : public NodeBase
          * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
          */
         ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, SensorBase* _corresponding_sensor_ptr, ProcessorParamsBase* _prc_params = nullptr);
+        ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, SensorBase* _corresponding_sensor_ptr, std::string _params_filename);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
@@ -121,6 +123,7 @@ class Problem : public NodeBase
          * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
          */
         ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params = nullptr);
+        ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, std::string _params_filename);
 
         /** \brief Set the processor motion
          *
@@ -128,6 +131,7 @@ class Problem : public NodeBase
          *
          */
         void setProcessorMotion(ProcessorMotion* _processor_motion_ptr);
+        void setProcessorMotion(std::string _unique_processor_name);
 
         /** \brief Create Frame of the correct size
          *
