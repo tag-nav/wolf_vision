@@ -89,6 +89,7 @@ class Problem : public NodeBase
 
 
         /** \brief add sensor to hardware
+         * \param _sen_ptr pointer to the sensor to add
          */
         void addSensor(SensorBase* _sen_ptr);
 
@@ -100,11 +101,11 @@ class Problem : public NodeBase
          */
         SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics = nullptr);
 
-        /** \brief Factory method to install (create and add) sensors only from its properties -- Helper method with file parameters
+        /** \brief Factory method to install (create and add) sensors only from its properties -- Helper method loading parameters from file
          * \param _sen_type type of sensor
          * \param _unique_sensor_name unique sensor name, used to identify the particular instance of the sensor
          * \param _extrinsics a vector of extrinsic parameters: size 2 for 2D position, 3 for 2D pose, 3 for 3D position, 7 for 3D pose.
-         * \param _intrinsics_filename the name of a file containing the intrinsic parameters in a format compatible with the intrinsics translator registered in IntrinsicsFactory.
+         * \param _intrinsics_filename the name of a file containing the intrinsic parameters in a format compatible with the intrinsics creator registered in IntrinsicsFactory under the key _sen_type.
          */
         SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, std::string _intrinsics_filename);
 
