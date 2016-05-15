@@ -133,7 +133,19 @@ Or, in case you don't have permissions:
     $ cmake ..
     $ make
     $ sudo make install
+    
+### Yaml-cpp (Optional. Install only if you want to use YAML for parsing your configuration files)
 
+**(1)** Obtain:
+
+    - Ubuntu:
+    `$ sudo apt-get install libyaml-cpp-dev`
+
+    - Mac:
+    `$ brew install yaml-cpp`
+    
+We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf.
+    
 Download and build
 ------------------
 
