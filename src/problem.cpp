@@ -8,6 +8,7 @@
 #include "processor_motion.h"
 #include "sensor_base.h"
 #include "sensor_factory.h"
+#include "intrinsics_factory.h"
 #include "processor_factory.h"
 
 namespace wolf
@@ -52,6 +53,13 @@ SensorBase* Problem::installSensor(std::string _sen_type, std::string _unique_se
     SensorBase* sen_ptr = SensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
     addSensor(sen_ptr);
     return sen_ptr;
+}
+
+SensorBase* Problem::installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics,
+                                   std::string _intrinsics_filename)
+{
+    IntrinsicsBase* intr_ptr = IntrinsicsFactory::get().create(_sen_type, _intrinsics_filename);
+    return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
 }
 
 ProcessorBase* Problem::installProcessor(std::string _prc_type, //
