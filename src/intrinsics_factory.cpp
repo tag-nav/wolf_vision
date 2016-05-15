@@ -12,31 +12,34 @@
 namespace wolf
 {
 
-bool IntrinsicsFactory::registerCreator(const std::string& _intrinsics_type, CreateIntrinsicsCallback createFn)
+bool IntrinsicsFactory::registerCreator(const std::string& _sensor_type, CreateIntrinsicsCallback createFn)
 {
-    bool reg = callbacks_.insert(CallbackMap::value_type(_intrinsics_type, createFn)).second;
+    bool reg = callbacks_.insert(CallbackMap::value_type(_sensor_type, createFn)).second;
     if (reg)
-        std::cout << "IntrinsicsFactory : registered " << _intrinsics_type << std::endl;
+        std::cout << "IntrinsicsFactory : registered " << _sensor_type << std::endl;
     else
-        std::cout << "IntrinsicsFactory : intrinsics " << _intrinsics_type << " already registered. Skipping. " << std::endl;
+        std::cout << "IntrinsicsFactory : intrinsics " << _sensor_type << " already registered. Skipping. " << std::endl;
     return reg;
 }
 
-bool IntrinsicsFactory::unregisterCreator(const std::string& _intrinsics_type)
+bool IntrinsicsFactory::unregisterCreator(const std::string& _sensor_type)
 {
-    return callbacks_.erase(_intrinsics_type) == 1;
+    return callbacks_.erase(_sensor_type) == 1;
 }
 
-IntrinsicsBase* IntrinsicsFactory::create(const std::string& _intrinsics_type, const std::string & _filename_dot_yaml)
+IntrinsicsBase* IntrinsicsFactory::create(const std::string& _sensor_type, const std::string & _filename)
 {
-    CallbackMap::const_iterator i = callbacks_.find(_intrinsics_type);
+    CallbackMap::const_iterator i = callbacks_.find(_sensor_type);
     if (i == callbacks_.end())
     {
         // not found
         throw std::runtime_error("Unknown Intrinsics type");
     }
     // Invoke the creation function
-    return (i->second)(_filename_dot_yaml);
+    std::cout << "Creating intrinsics for sensor " << _sensor_type << "...";
+    IntrinsicsBase* p = (i->second)(_filename);
+    std::cout << " OK." << std::endl;
+    return p;
 }
 
 // Singleton ---------------------------------------------------

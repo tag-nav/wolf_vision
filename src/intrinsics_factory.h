@@ -19,13 +19,13 @@ namespace wolf
 class IntrinsicsFactory
 {
     public:
-        typedef IntrinsicsBase* (*CreateIntrinsicsCallback)(const std::string & _filename_dot_yaml);
+        typedef IntrinsicsBase* (*CreateIntrinsicsCallback)(const std::string & _filename);
     private:
         typedef std::map<std::string, CreateIntrinsicsCallback> CallbackMap;
     public:
-        bool registerCreator(const std::string& _intrinsics_type, CreateIntrinsicsCallback createFn);
-        bool unregisterCreator(const std::string& _intrinsics_type);
-        IntrinsicsBase* create(const std::string& _intrinsics_type, const std::string & _filename_dot_yaml = "");
+        bool registerCreator(const std::string& _sensor_type, CreateIntrinsicsCallback createFn);
+        bool unregisterCreator(const std::string& _sensor_type);
+        IntrinsicsBase* create(const std::string& _sensor_type, const std::string & _filename = "");
     private:
         CallbackMap callbacks_;
 
