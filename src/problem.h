@@ -99,6 +99,13 @@ class Problem : public NodeBase
          * \param _intrinsics a base-pointer to a derived struct defining the intrinsic parameters.
          */
         SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics = nullptr);
+
+        /** \brief Factory method to install (create and add) sensors only from its properties -- Helper method with file parameters
+         * \param _sen_type type of sensor
+         * \param _unique_sensor_name unique sensor name, used to identify the particular instance of the sensor
+         * \param _extrinsics a vector of extrinsic parameters: size 2 for 2D position, 3 for 2D pose, 3 for 3D position, 7 for 3D pose.
+         * \param _intrinsics_filename the name of a file containing the intrinsic parameters in a format compatible with the intrinsics translator registered in IntrinsicsFactory.
+         */
         SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, std::string _intrinsics_filename);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
