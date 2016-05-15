@@ -31,6 +31,9 @@ IF(YAMLCPP_FOUND)
     ADD_EXECUTABLE(test_yaml test_yaml.cpp)
     TARGET_LINK_LIBRARIES(test_yaml ${PROJECT_NAME})
 
+    ADD_EXECUTABLE(test_yaml_conversions test_yaml_conversions.cpp)
+    TARGET_LINK_LIBRARIES(test_yaml_conversions ${PROJECT_NAME})
+
     # SensorFactory classes test
     ADD_EXECUTABLE(test_wolf_factories test_wolf_factories.cpp)
     TARGET_LINK_LIBRARIES(test_wolf_factories ${PROJECT_NAME})

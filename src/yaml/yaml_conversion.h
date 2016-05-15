@@ -21,15 +21,17 @@
 namespace YAML
 {
 
-/**\brief Bridge YAML <--> Eigen::Matrix <> with all template possibilities except full dynamic.
+/**\brief Bridge YAML to and from Eigen::Matrix< >.
  *
  */
 template<typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
 struct convert<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
 {
+        /** \brief Encode a YAML Sequence from an Eigen::Matrix< >
+         */
         static Node encode(const Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& matrix)
         {
-            Node node;//(NodeType::Sequence);
+            Node node; //(NodeType::Sequence);
 
             int nValues = matrix.rows() * matrix.cols();
 
@@ -41,55 +43,125 @@ struct convert<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols
             return node;
         }
 
+        /** \brief Decode a YAML sequence into a ````Eigen::Matrix<typename _Scalar, int _Rows, int _Cols>````
+         *
+         * Two YAML formats are accepted:
+         *
+         *  - For matrices where at least one dimension is not Dynamic:
+         *  We use a single sequence of matrix entries: the matrix dimensions are inferred
+         *  ````
+         *  [ v1, v2, v3, ...]
+         *  ````
+         *  - For all kinds of matrices. We use a sequence of two sequences.
+         *  The first sequence is a vector of dimensions; the second sequence contains the matrix entries
+         *  ````
+         *  [ [ rows, cols ], [v1, v2, v3, ...] ]
+         *  ````
+         */
         static bool decode(const Node& node, Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& matrix)
         {
-            if (_Rows == Eigen::Dynamic && _Cols == Eigen::Dynamic)
+            YAML::Node values;
+
+            // ==========================================================================================
+            if (node[0].Type() == NodeType::Sequence) // sizes given by YAML
             {
-                std::cout << "Bridge to Eigen::Matrix: Matrices may only be dynamic in one dimension!"
-                        << std::endl;
-                return false;
-            }
-
-            int nSize = node.size();
-
-            // If one dimension is dynamic -> calculate and resize
-
-            // _Rows is Dynamic
-            if (_Rows == Eigen::Dynamic)
-            {
-                if (nSize % _Cols != 0)
+                if (node.size() == 2 && node[0].size() == 2 && node[1].Type() == NodeType::Sequence
+                        && node[1].size() == node[0][0].as<int>() * node[0][1].as<int>()) // YAML string is well formed
                 {
-                    std::cout << "Bridge to Eigen::Matrix: Input size of dynamic row matrix is not a multiple of fixed column size" << std::endl;
+                    int rows = node[0][0].as<int>();
+                    int cols = node[0][1].as<int>();
+                    values = node[1];
+                    if (_Rows == Eigen::Dynamic && _Cols == Eigen::Dynamic) // full dynamic
+                    {
+                        matrix.resize(rows, cols);
+                    }
+                    else if (_Rows == Eigen::Dynamic) // rows dynamic
+                    {
+                        if (_Cols != cols)
+                        {
+                            std::cout << "Wrong number of cols" << std::endl;
+                            return false;
+                        }
+                        matrix.resize(rows, Eigen::NoChange);
+                    }
+                    else if (_Cols == Eigen::Dynamic) // cols dynamic
+                    {
+                        if (_Rows != rows)
+                        {
+                            std::cout << "Wrong number of rows" << std::endl;
+                            return false;
+                        }
+                        matrix.resize(Eigen::NoChange, cols);
+                    }
+                    else // fixed size
+                    {
+                        if (_Rows != rows || _Cols != cols)
+                        {
+                            std::cout << "Wrong size" << std::endl;
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    std::cout << "Bad matrix specification" << std::endl;
                     return false;
                 }
-
-                int nDynRows = nSize / _Cols;
-                matrix.resize(nDynRows, Eigen::NoChange);
             }
-
-            // _Cols is Dynamic
-            if (_Cols == Eigen::Dynamic)
+            else // sizes given by Matrix
             {
-                if (nSize % _Rows != 0)
+                // If full dynamic -> error
+                if (_Rows == Eigen::Dynamic && _Cols == Eigen::Dynamic)
                 {
-                    std::cout << "Bridge to Eigen::Matrix: Input size of dynamic column matrix is not a multiple of fixed row size!" << std::endl;
+                    std::cout << "Bad yaml format. A full dynamic matrix requires [ [rows, cols], [... values ...] ]"
+                            << std::endl;
                     return false;
                 }
+                values = node;
 
-                int nDynCols = nSize / _Rows;
-                matrix.resize(Eigen::NoChange, nDynCols);
+                // If one dimension is dynamic -> calculate and resize
+
+                // _Rows is Dynamic
+                if (_Rows == Eigen::Dynamic)
+                {
+                    if (values.size() % _Cols != 0)
+                    {
+                        std::cout << "Input size of dynamic row matrix is not a multiple of fixed column size"
+                                << std::endl;
+                        return false;
+                    }
+
+                    int nDynRows = values.size() / _Cols;
+                    matrix.resize(nDynRows, Eigen::NoChange);
+                }
+
+                // _Cols is Dynamic
+                if (_Cols == Eigen::Dynamic)
+                {
+                    if (values.size() % _Rows != 0)
+                    {
+                        std::cout << "Input size of dynamic column matrix is not a multiple of fixed row size"
+                                << std::endl;
+                        return false;
+                    }
+
+                    int nDynCols = values.size() / _Rows;
+                    matrix.resize(Eigen::NoChange, nDynCols);
+                }
             }
 
             // final check for good size
-            if (nSize != matrix.rows() * matrix.cols())
+            if (values.size() != matrix.rows() * matrix.cols())
             {
-                std::cout << "Bridge to Eigen::Matrix. Wrong input size!" << std::endl;
+                std::cout << "Wrong input size" << std::endl;
                 return false;
             }
             else // Fill the matrix
+            {
                 for (int i = 0; i < matrix.rows(); i++)
                     for (int j = 0; j < matrix.cols(); j++)
-                        matrix(i, j) = node[(int)(i * matrix.cols() + j)].as<_Scalar>();
+                        matrix(i, j) = values[(int)(i * matrix.cols() + j)].as<_Scalar>();
+            }
             return true;
         }
 };
@@ -123,9 +195,7 @@ struct convert<Eigen::Quaternion<_Scalar, _Options> >
             int nSize = node.size(); // Sequence check is implicit
             if (nSize != 4)
             {
-                std::cout
-                        << "Bridge to Eigen::QuaternionBase< Eigen::Quaternion<_Scalar,_Options> >: Wrong input size!"
-                        << std::endl;
+                std::cout << "Wrong quaternion input size!" << std::endl;
                 return false;
             }
             else

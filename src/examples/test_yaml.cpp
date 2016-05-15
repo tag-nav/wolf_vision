@@ -19,7 +19,10 @@
 int main()
 {
 
-    YAML::Node camera_config = YAML::LoadFile("/home/jsola/dev/wolf/src/examples/camera.yaml");
+    using namespace Eigen;
+    using namespace wolf;
+
+    YAML::Node camera_config = YAML::LoadFile("/Users/jsola/dev/wolf/src/examples/camera.yaml");
 
     if (camera_config["sensor type"])
     {
@@ -30,7 +33,6 @@ int main()
         YAML::Node params = camera_config["intrinsic"];
 
         // convert yaml to Eigen
-        using namespace Eigen;
         Vector3s pos = camera_config["extrinsic"]["position"].as<Vector3s>();
         Vector3s ori = camera_config["extrinsic"]["orientation"].as<Vector3s>() * M_PI / 180;
         Vector2s size = params["image size"].as<Vector2s>();
