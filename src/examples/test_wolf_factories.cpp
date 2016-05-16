@@ -69,7 +69,6 @@ int main(void)
                 << ": " << setw(8) << sen->getType()
                 << " | name: " << sen->getName() << endl;
     }
-//    cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << endl;
     cout << "\twith intrinsics: " << sen_ptr->getIntrinsicPtr()->getVector().transpose() << endl;
 
     cout << "\n=================== Processor Factory ===================" << endl;

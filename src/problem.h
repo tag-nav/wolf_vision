@@ -129,8 +129,8 @@ class Problem : public NodeBase
          * \param _corresponding_sensor_name corresponding sensor name, used to bind the processor to the particular instance of the sensor
          * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
          */
-        ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params = nullptr);
-        ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, std::string _params_filename);
+//        ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params = nullptr);
+        void installProcessor(std::string _prc_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, std::string _params_filename = "");
 
         /** \brief Set the processor motion
          *
