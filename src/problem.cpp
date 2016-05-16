@@ -84,6 +84,19 @@ ProcessorBase* Problem::installProcessor(std::string _prc_type, //
     return installProcessor(_prc_type, _unique_processor_name, sen_ptr, _prc_params);
 }
 
+ProcessorBase* Problem::installProcessor(std::string _prc_type, std::string _unique_processor_name,
+                                         std::string _corresponding_sensor_name, std::string _params_filename)
+{
+    // Need to implement ProcessorParamsFactory
+//    SensorBase* sen_ptr = getSensorPtr(_corresponding_sensor_name);
+//    if (sen_ptr == nullptr)
+//        throw std::runtime_error("Sensor not found. Cannot bind Processor.");
+//    ProcessorParamsBase* prc_params = ProcessorPaparmsFactory::get().create(_prc_type, _params_filename);
+//    return installProcessor(_prc_type, _unique_processor_name, sen_ptr, _prc_params);
+}
+
+
+
 void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
 {
     processor_motion_ptr_ = _processor_motion_ptr;

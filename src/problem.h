@@ -118,7 +118,6 @@ class Problem : public NodeBase
          * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
          */
         ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, SensorBase* _corresponding_sensor_ptr, ProcessorParamsBase* _prc_params = nullptr);
-        ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, SensorBase* _corresponding_sensor_ptr, std::string _params_filename);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
