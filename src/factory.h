@@ -27,34 +27,9 @@ class Factory
     private:
         typedef std::map<std::string, CreatorCallback> CallbackMap;
     public:
-        bool registerCreator(const std::string& _type, CreatorCallback createFn)
-        {
-            bool reg = callbacks_.insert(typename CallbackMap::value_type(_type, createFn)).second;
-            if (reg)
-                std::cout << "Factory : registered " << _type << std::endl;
-            else
-                std::cout << "Factory :  " << _type << " already registered. Skipping. " << std::endl;
-
-            return reg;
-        }
-        bool unregisterCreator(const std::string& _type)
-        {
-            return callbacks_.erase(_type) == 1;
-        }
-        TypeBase* create(const std::string& _type, const std::string& _filename = "")
-        {
-            typename CallbackMap::const_iterator i = callbacks_.find(_type);
-            if (i == callbacks_.end())
-            {
-                // not found
-                throw std::runtime_error("Unknown type. Possibly you tried to use an unregistered creator.");
-            }
-            // Invoke the creation function
-            std::cout << "Creating params for " << _type << "...";
-            TypeBase* p = (i->second)(_filename);
-            std::cout << " OK." << std::endl;
-            return p;
-        }
+        bool registerCreator(const std::string& _type, CreatorCallback createFn);
+        bool unregisterCreator(const std::string& _type);
+        TypeBase* create(const std::string& _type, const std::string& _filename = "");
     private:
         CallbackMap callbacks_;
 
@@ -62,14 +37,7 @@ class Factory
         // This class is a singleton. The code below guarantees this.
         // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
     public:
-        // Singleton ---------------------------------------------------
-        // This class is a singleton. The code below guarantees this.
-        static Factory& get()
-        {
-            static Factory instance_;
-            return instance_;
-        }
-
+        static Factory& get();
     public: // see http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
         Factory(const Factory&)         = delete;
         void operator=(Factory const&)  = delete;
@@ -77,6 +45,63 @@ class Factory
         Factory()  { }
         ~Factory() { }
 };
+
+/** \brief singleton factory
+ * \param Typebase          base type of the objects created by the factory
+ * \param CreatorCallback   type of the pointer to the creator method
+ */
+template<class TypeBase>
+inline bool Factory<TypeBase>::registerCreator(const std::string& _type, CreatorCallback createFn)
+{
+    bool reg = callbacks_.insert(typename CallbackMap::value_type(_type, createFn)).second;
+    if (reg)
+        std::cout << "Factory : registered " << _type << std::endl;
+    else
+        std::cout << "Factory :  " << _type << " already registered. Skipping. " << std::endl;
+
+    return reg;
+}
+
+/** \brief singleton factory
+ * \param Typebase          base type of the objects created by the factory
+ * \param CreatorCallback   type of the pointer to the creator method
+ */
+template<class TypeBase>
+inline bool Factory<TypeBase>::unregisterCreator(const std::string& _type)
+{
+    return callbacks_.erase(_type) == 1;
+}
+
+/** \brief singleton factory
+ * \param Typebase          base type of the objects created by the factory
+ * \param CreatorCallback   type of the pointer to the creator method
+ */
+template<class TypeBase>
+inline TypeBase* Factory<TypeBase>::create(const std::string& _type, const std::string& _filename)
+{
+    typename CallbackMap::const_iterator i = callbacks_.find(_type);
+    if (i == callbacks_.end())
+    {
+        // not found
+        throw std::runtime_error("Unknown type. Possibly you tried to use an unregistered creator.");
+    }
+    // Invoke the creation function
+    std::cout << "Creating params for " << _type << "...";
+    TypeBase* p = (i->second)(_filename);
+    std::cout << " OK." << std::endl;
+    return p;
+}
+
+/** \brief singleton factory
+ * \param Typebase          base type of the objects created by the factory
+ * \param CreatorCallback   type of the pointer to the creator method
+ */
+template<class TypeBase>
+inline wolf::Factory<TypeBase>& Factory<TypeBase>::get()
+{
+    static Factory instance_;
+    return instance_;
+}
 
 } // namespace wolf
 
