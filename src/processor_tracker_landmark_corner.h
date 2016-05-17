@@ -216,7 +216,8 @@ ProcessorBase* ProcessorTrackerLandmarkCorner::create(const std::string& _unique
 
 
 // Register in the SensorFactory
-#include "processor_factory.h"
+//#include "processor_factory.h"
+#include "factory.h"
 namespace wolf {
 namespace
 {

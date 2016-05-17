@@ -10,7 +10,8 @@
 
 // wolf
 #include "../sensor_camera.h"
-#include "../intrinsics_factory.h"
+//#include "../intrinsics_factory.h"
+#include "../factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>

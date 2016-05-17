@@ -652,7 +652,8 @@ ProcessorBase* ProcessorLaser2D::create(const std::string& _unique_name, const P
 
 
 // Register in the SensorFactory
-#include "processor_factory.h"
+//#include "processor_factory.h"
+#include "factory.h"
 namespace wolf {
 namespace
 {

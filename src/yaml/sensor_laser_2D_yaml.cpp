@@ -10,7 +10,8 @@
 #include "yaml_conversion.h"
 
 // wolf
-#include "../intrinsics_factory.h"
+//#include "../intrinsics_factory.h"
+#include "../factory.h"
 #include "../sensor_laser_2D.h"
 
 // yaml library

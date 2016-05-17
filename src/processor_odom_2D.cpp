@@ -13,7 +13,8 @@ ProcessorBase* ProcessorOdom2D::create(const std::string& _unique_name, const Pr
 
 
 // Register in the ProcessorFactory
-#include "processor_factory.h"
+//#include "processor_factory.h"
+#include "factory.h"
 namespace wolf {
 namespace
 {

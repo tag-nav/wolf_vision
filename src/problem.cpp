@@ -7,10 +7,11 @@
 #include "map_base.h"
 #include "processor_motion.h"
 #include "sensor_base.h"
-#include "sensor_factory.h"
-#include "intrinsics_factory.h"
-#include "processor_factory.h"
-#include "processor_params_factory.h"
+#include "factory.h"
+//#include "sensor_factory.h"
+//#include "intrinsics_factory.h"
+//#include "processor_factory.h"
+//#include "processor_params_factory.h"
 
 namespace wolf
 {
