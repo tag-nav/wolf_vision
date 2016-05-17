@@ -178,10 +178,13 @@ namespace pinhole {
             template<class VD, class VU>
             Eigen::Vector2s distortPoint(const VD & d, const VU & up) {
                 size_t n = d.size();
+                std::cout << "n: " << n << std::endl;
                 if (n == 0)
                     return up;
                 else {
                     Scalar r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
+                    std::cout << "r2: " << r2 << std::endl;
+                    std::cout << "distortPoint: " << distortFactor(d, r2) * up << std::endl;
                     return distortFactor(d, r2) * up;
 //					Scalar s = 1.0;
 //					Scalar r2i = 1.0;
