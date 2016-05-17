@@ -25,7 +25,7 @@ class Factory
     public:
         bool registerCreator(const std::string& _type, CreatorCallback createFn)
         {
-            bool reg = callbacks_.insert(CallbackMap::value_type(_type, createFn)).second;
+            bool reg = callbacks_.insert(typename CallbackMap::value_type(_type, createFn)).second;
             if (reg)
                 std::cout << "Factory : registered " << _type << std::endl;
             else
