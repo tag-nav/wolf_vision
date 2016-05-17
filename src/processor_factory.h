@@ -15,7 +15,7 @@ struct ProcessorParamsBase;
 }
 
 // wolf
-#include "processor_base.h"
+#include "wolf.h"
 
 // std
 #include <string>

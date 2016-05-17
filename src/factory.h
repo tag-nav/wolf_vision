@@ -78,16 +78,13 @@ class Factory
         ~Factory() { }
 };
 
-// creator callbacks
-namespace{ // hide these typedefs
-//typedef SensorBase*          (*CreateSensorCallback)          (const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
-//typedef ProcessorBase*       (*CreateProcessorCallback)       (const std::string & _unique_name, const ProcessorParamsBase* _params);
-//typedef IntrinsicsBase*      (*CreateIntrinsicsCallback)      (const std::string & _filename);
-//typedef ProcessorParamsBase* (*CreateProcessorParamsCallback) (const std::string & _filename);
-}
+} // namespace wolf
 
-//typedef Factory<SensorBase,          CreateSensorCallback>          SensorFactory;
-//typedef Factory<ProcessorBase,       CreateProcessorCallback>       ProcessorFactory;
+#include "sensor_base.h"
+#include "processor_base.h"
+
+namespace wolf{
+
 typedef Factory<IntrinsicsBase>      IntrinsicsFactory;
 typedef Factory<ProcessorParamsBase> ProcessorParamsFactory;
 

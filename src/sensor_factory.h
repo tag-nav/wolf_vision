@@ -8,8 +8,14 @@
 #ifndef SENSOR_FACTORY_H_
 #define SENSOR_FACTORY_H_
 
+namespace wolf
+{
+class SensorBase;
+struct IntrinsicsBase;
+}
+
 // wolf
-#include "sensor_base.h"
+#include "wolf.h"
 
 // std
 #include <string>
@@ -17,7 +23,6 @@
 
 namespace wolf
 {
-struct IntrinsicsBase;
 
 /** \brief Sensor factory class
  *
