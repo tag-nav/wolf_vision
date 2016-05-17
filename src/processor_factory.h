@@ -14,8 +14,10 @@ class ProcessorBase;
 struct ProcessorParamsBase;
 }
 
-#include "wolf.h"
+// wolf
+#include "processor_base.h"
 
+// std
 #include <string>
 #include <map>
 

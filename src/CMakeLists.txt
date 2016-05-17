@@ -128,7 +128,7 @@ SET(HDRS
     feature_odom_2D.h
     frame_base.h
     hardware_base.h
-    intrinsics_factory.h
+#    intrinsics_factory.h
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
@@ -149,7 +149,7 @@ SET(HDRS
     processor_motion.h
     processor_odom_2D.h
     processor_odom_3D.h
-    processor_params_factory.h
+#    processor_params_factory.h
     processor_tracker.h
     processor_tracker_feature.h
     processor_tracker_feature_dummy.h
@@ -194,7 +194,7 @@ SET(SRCS
     feature_odom_2D.cpp
     frame_base.cpp
     hardware_base.cpp
-    intrinsics_factory.cpp
+#    intrinsics_factory.cpp
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
@@ -210,7 +210,7 @@ SET(SRCS
     processor_imu.cpp
     processor_odom_2D.cpp
     processor_odom_3D.cpp
-    processor_params_factory.cpp
+#    processor_params_factory.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
     processor_tracker_feature_dummy.cpp

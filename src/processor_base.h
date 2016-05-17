@@ -13,11 +13,14 @@ class NodeTerminus;
 
 namespace wolf {
 
+/** \brief base struct for processor parameters
+ *
+ * Derive from this struct to create structs of processor parameters.
+ */
 struct ProcessorParamsBase
 {
-    std::string type;
-    std::string name;
-    // This struct empty. Derive from it to create classes for processor parameters.
+        std::string type;
+        std::string name;
 };
 
 //class ProcessorBase

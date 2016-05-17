@@ -8,6 +8,10 @@
 #ifndef FACTORY_H_
 #define FACTORY_H_
 
+// std
+#include <string>
+#include <map>
+
 namespace wolf
 {
 
@@ -15,11 +19,11 @@ namespace wolf
  * \param Typebase          base type of the objects created by the factory
  * \param CreatorCallback   type of the pointer to the creator method
  */
-template<class TypeBase, typename CreatorCallback>
+template<class TypeBase>
 class Factory
 {
     public:
-        // typedef TypeBase* (*CreatorCallback)(const std::string & _filename); // example of creator callback (see typedefs below)
+         typedef TypeBase* (*CreatorCallback)(const std::string & _filename); // example of creator callback (see typedefs below)
     private:
         typedef std::map<std::string, CreatorCallback> CallbackMap;
     public:
@@ -43,7 +47,7 @@ class Factory
             if (i == callbacks_.end())
             {
                 // not found
-                throw std::runtime_error("Unknown  type");
+                throw std::runtime_error("Unknown type. Possibly you tried to use an unregistered creator.");
             }
             // Invoke the creation function
             std::cout << "Creating params for " << _type << "...";
@@ -76,17 +80,16 @@ class Factory
 
 // creator callbacks
 namespace{ // hide these typedefs
-typedef SensorBase*          (*CreateSensorCallback)          (const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
-typedef ProcessorBase*       (*CreateProcessorCallback)       (const std::string & _unique_name, const ProcessorParamsBase* _params);
-typedef IntrinsicsBase*      (*CreateIntrinsicsCallback)      (const std::string & _filename);
-typedef ProcessorParamsBase* (*CreateProcessorParamsCallback) (const std::string & _filename);
+//typedef SensorBase*          (*CreateSensorCallback)          (const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics);
+//typedef ProcessorBase*       (*CreateProcessorCallback)       (const std::string & _unique_name, const ProcessorParamsBase* _params);
+//typedef IntrinsicsBase*      (*CreateIntrinsicsCallback)      (const std::string & _filename);
+//typedef ProcessorParamsBase* (*CreateProcessorParamsCallback) (const std::string & _filename);
 }
 
-// factories -- remove the "1" at the end when individual non-template factories will be deleted.
-typedef Factory<SensorBase,          CreateSensorCallback>          SensorFactory;
-typedef Factory<ProcessorBase,       CreateProcessorCallback>       ProcessorFactory;
-typedef Factory<IntrinsicsBase,      CreateIntrinsicsCallback>      IntrinsicsFactory;
-typedef Factory<ProcessorParamsBase, CreateProcessorParamsCallback> ProcessorParamsFactory;
+//typedef Factory<SensorBase,          CreateSensorCallback>          SensorFactory;
+//typedef Factory<ProcessorBase,       CreateProcessorCallback>       ProcessorFactory;
+typedef Factory<IntrinsicsBase>      IntrinsicsFactory;
+typedef Factory<ProcessorParamsBase> ProcessorParamsFactory;
 
 } /* namespace wolf */
 
