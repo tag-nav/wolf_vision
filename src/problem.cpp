@@ -69,7 +69,9 @@ ProcessorBase* Problem::installProcessor(std::string _prc_type, //
                                          SensorBase* _corresponding_sensor_ptr, //
                                          ProcessorParamsBase* _prc_params)
 {
+    std::cout << "Creating processor " << _unique_processor_name << " of type " << _prc_type << std::endl;
     ProcessorBase* prc_ptr = ProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _prc_params);
+    std::cout << "Created  processor " << prc_ptr->getName() << " of type " << prc_ptr->getType() << std::endl;
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
     return prc_ptr;
 }
@@ -92,11 +94,18 @@ void Problem::installProcessor(std::string _prc_type, std::string _unique_proces
     SensorBase* sen_ptr = getSensorPtr(_corresponding_sensor_name);
     if (sen_ptr == nullptr)
         throw std::runtime_error("Sensor not found. Cannot bind Processor.");
+    std::cout << "Found sensor " << sen_ptr->getName() << " of type " << sen_ptr->getType() << std::endl;
     ProcessorParamsBase* prc_params;
     if (_params_filename == "")
-        prc_params = ProcessorParamsFactory::get().create(_prc_type, nullptr);
+    {
+        std::cout << "No config file" << std::endl;
+        prc_params = nullptr;
+    }
     else
+    {
+        std::cout << "Using config file " << _params_filename << std::endl;
         prc_params = ProcessorParamsFactory::get().create(_prc_type, _params_filename);
+    }
     installProcessor(_prc_type, _unique_processor_name, sen_ptr, prc_params);
 }
 
