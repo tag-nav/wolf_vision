@@ -35,7 +35,7 @@ const Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
 const Scalar position_error_th_ = 1;
 const Scalar min_features_ratio_th_ = 0.5;
 
-class ProcessorTrackerFeatureCorner : public wolf::ProcessorTrackerFeature
+class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
 {
     private:
         //laserscanutils::ScanParams scan_params_;

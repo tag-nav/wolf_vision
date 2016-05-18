@@ -13,7 +13,7 @@
 namespace wolf
 {
 
-class ProcessorTrackerLandmarkDummy : public wolf::ProcessorTrackerLandmark
+class ProcessorTrackerLandmarkDummy : public ProcessorTrackerLandmark
 {
     public:
         ProcessorTrackerLandmarkDummy(const unsigned int& _max_new_features);
