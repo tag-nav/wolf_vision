@@ -33,7 +33,7 @@ class LocalParametrizationWrapper : public ceres::LocalParameterization
 
 } // namespace wolf
 
-#include "local_parametrization_base.h"
+#include "../local_parametrization_base.h"
 
 namespace wolf {
 
