@@ -215,14 +215,6 @@ inline ConstraintBase* ProcessorTrackerLandmarkCorner::createConstraint(FeatureB
     return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*)((_landmark_ptr)));
 }
 
-ProcessorBase* ProcessorTrackerLandmarkCorner::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
-{
-    ProcessorParamsLaser* params = (ProcessorParamsLaser*)_params;
-    ProcessorTrackerLandmarkCorner* prc_ptr = new ProcessorTrackerLandmarkCorner(params->line_finder_params_, params->n_corners_th);
-    prc_ptr->setName(_unique_name);
-    return prc_ptr;
-}
-
 } // namespace wolf
 
 
