@@ -16,8 +16,7 @@ namespace wolf
 {
 
 /** \brief singleton factory
- * \param Typebase          base type of the objects created by the factory
- * \param CreatorCallback   type of the pointer to the creator method
+ * \param TypeBase          base type of all the objects created by the factory
  */
 template<class TypeBase>
 class Factory
@@ -38,7 +37,7 @@ class Factory
         // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
     public:
         static Factory& get();
-    public: // see http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
+    public:
         Factory(const Factory&)         = delete;
         void operator=(Factory const&)  = delete;
     private:
@@ -46,10 +45,6 @@ class Factory
         ~Factory() { }
 };
 
-/** \brief singleton factory
- * \param Typebase          base type of the objects created by the factory
- * \param CreatorCallback   type of the pointer to the creator method
- */
 template<class TypeBase>
 inline bool Factory<TypeBase>::registerCreator(const std::string& _type, CreatorCallback createFn)
 {
@@ -62,20 +57,12 @@ inline bool Factory<TypeBase>::registerCreator(const std::string& _type, Creator
     return reg;
 }
 
-/** \brief singleton factory
- * \param Typebase          base type of the objects created by the factory
- * \param CreatorCallback   type of the pointer to the creator method
- */
 template<class TypeBase>
 inline bool Factory<TypeBase>::unregisterCreator(const std::string& _type)
 {
     return callbacks_.erase(_type) == 1;
 }
 
-/** \brief singleton factory
- * \param Typebase          base type of the objects created by the factory
- * \param CreatorCallback   type of the pointer to the creator method
- */
 template<class TypeBase>
 inline TypeBase* Factory<TypeBase>::create(const std::string& _type, const std::string& _filename)
 {
@@ -92,10 +79,6 @@ inline TypeBase* Factory<TypeBase>::create(const std::string& _type, const std::
     return p;
 }
 
-/** \brief singleton factory
- * \param Typebase          base type of the objects created by the factory
- * \param CreatorCallback   type of the pointer to the creator method
- */
 template<class TypeBase>
 inline wolf::Factory<TypeBase>& Factory<TypeBase>::get()
 {

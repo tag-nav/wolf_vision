@@ -11,8 +11,6 @@
 #include "../sensor_imu.h"
 #include "../sensor_gps.h"
 
-//#include "../intrinsics_factory.h"
-
 #include "../processor_odom_2D.h"
 #include "../processor_odom_3D.h"
 #include "../processor_imu.h"
@@ -54,7 +52,7 @@ int main(void)
     problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
     problem.installSensor("CAMERA",     "front right camera",   pq_3d,  "/Users/jsola/dev/wolf/src/examples/camera.yaml");
     problem.installSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
-    problem.installSensor("GPS FIX",    "GPS fix",              p_3d); // no intrinsics : leave empty
+    problem.installSensor("GPS FIX",    "GPS fix",              p_3d);
     problem.installSensor("IMU",        "inertial",             pq_3d);
     problem.installSensor("GPS",        "GPS raw",              p_3d);
     problem.installSensor("ODOM 2D",    "aux odometer",         po_2d,  &intr_odom2d);
@@ -75,9 +73,9 @@ int main(void)
 
     // Install processors and bind them to sensors -- by sensor name!
     problem.installProcessor("ODOM 2D", "main odometry",    "main odometer");
-    problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer",     nullptr);
-    problem.installProcessor("IMU",     "pre-integrated",   "inertial",         nullptr);
-//    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw",          nullptr);
+    problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer");
+    problem.installProcessor("IMU",     "pre-integrated",   "inertial");
+//    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr()))

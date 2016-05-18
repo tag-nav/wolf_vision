@@ -49,22 +49,22 @@ static IntrinsicsBase* createIntrinsicsCamera(const std::string & _filename_dot_
         //=========================================
         // ===== this part for debugging only =====
         //=========================================
-        std::cout << "\n--- Parameters Parsed from YAML file ---" << std::endl;
-        std::cout << "sensor type: " << sensor_type << std::endl;
-        std::cout << "sensor name: " << sensor_name << std::endl;
-
-        // extrinsics discarded in this creator
-        Vector3d pos            = camera_config["extrinsic"]["position"].as<Vector3d>();
-        Vector3d ori            = camera_config["extrinsic"]["orientation"].as<Vector3d>() * M_PI / 180; // roll, pitch, yaw [rad]
-        Quaternions quat; v2q(ori, quat);
-        std::cout << "sensor extrinsics: " << std::endl;
-        std::cout << "\tposition    : " << pos.transpose() << std::endl;
-        std::cout << "\torientation : " << ori.transpose() << std::endl;
-
-        std::cout << "sensor intrinsics: " << std::endl;
-        std::cout << "\timage size  : " << size.transpose() << std::endl;
-        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
-        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
+//        std::cout << "\n--- Parameters Parsed from YAML file ---" << std::endl;
+//        std::cout << "sensor type: " << sensor_type << std::endl;
+//        std::cout << "sensor name: " << sensor_name << std::endl;
+//
+//        // extrinsics discarded in this creator
+//        Vector3d pos            = camera_config["extrinsic"]["position"].as<Vector3d>();
+//        Vector3d ori            = camera_config["extrinsic"]["orientation"].as<Vector3d>() * M_PI / 180; // roll, pitch, yaw [rad]
+//        Quaternions quat; v2q(ori, quat);
+//        std::cout << "sensor extrinsics: " << std::endl;
+//        std::cout << "\tposition    : " << pos.transpose() << std::endl;
+//        std::cout << "\torientation : " << ori.transpose() << std::endl;
+//
+//        std::cout << "sensor intrinsics: " << std::endl;
+//        std::cout << "\timage size  : " << size.transpose() << std::endl;
+//        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
+//        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
         //=========================================
         //=========================================
 

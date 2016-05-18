@@ -99,7 +99,10 @@ class Problem : public NodeBase
          * \param _extrinsics a vector of extrinsic parameters: size 2 for 2D position, 3 for 2D pose, 3 for 3D position, 7 for 3D pose.
          * \param _intrinsics a base-pointer to a derived struct defining the intrinsic parameters.
          */
-        SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics = nullptr);
+        SensorBase* installSensor(std::string _sen_type, //
+                                  std::string _unique_sensor_name, //
+                                  Eigen::VectorXs& _extrinsics, //
+                                  IntrinsicsBase* _intrinsics = nullptr);
 
         /** \brief Factory method to install (create and add) sensors only from its properties -- Helper method loading parameters from file
          * \param _sen_type type of sensor
@@ -107,7 +110,10 @@ class Problem : public NodeBase
          * \param _extrinsics a vector of extrinsic parameters: size 2 for 2D position, 3 for 2D pose, 3 for 3D position, 7 for 3D pose.
          * \param _intrinsics_filename the name of a file containing the intrinsic parameters in a format compatible with the intrinsics creator registered in IntrinsicsFactory under the key _sen_type.
          */
-        SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, Eigen::VectorXs& _extrinsics, std::string _intrinsics_filename);
+        SensorBase* installSensor(std::string _sen_type, //
+                                  std::string _unique_sensor_name, //
+                                  Eigen::VectorXs& _extrinsics, //
+                                  std::string _intrinsics_filename);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
@@ -117,7 +123,10 @@ class Problem : public NodeBase
          * \param _corresponding_sensor_ptr pointer to the sensor where the processor will be installed.
          * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
          */
-        ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, SensorBase* _corresponding_sensor_ptr, ProcessorParamsBase* _prc_params = nullptr);
+        ProcessorBase* installProcessor(std::string _prc_type, //
+                                        std::string _unique_processor_name, //
+                                        SensorBase* _corresponding_sensor_ptr, //
+                                        ProcessorParamsBase* _prc_params = nullptr);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
@@ -129,8 +138,10 @@ class Problem : public NodeBase
          * \param _corresponding_sensor_name corresponding sensor name, used to bind the processor to the particular instance of the sensor
          * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
          */
-//        ProcessorBase* installProcessor(std::string _prc_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, ProcessorParamsBase* _prc_params = nullptr);
-        void installProcessor(std::string _prc_type, std::string _unique_processor_name, std::string _corresponding_sensor_name, std::string _params_filename = "");
+        void installProcessor(std::string _prc_type, //
+                              std::string _unique_processor_name, //
+                              std::string _corresponding_sensor_name, //
+                              std::string _params_filename = "");
 
         /** \brief Set the processor motion
          *
