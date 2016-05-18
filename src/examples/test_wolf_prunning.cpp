@@ -13,6 +13,7 @@
 //Wolf includes
 #include "wolf_manager.h"
 #include "capture_void.h"
+#include "constraint_base.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 // EIGEN
@@ -81,7 +82,7 @@ int main(int argc, char** argv)
     Eigen::SparseMatrix<Scalar> Lambda(0,0);
 
     // prunning
-    std::list<ConstraintBase*> ordered_ctr_ptr;
+    ConstraintBaseList ordered_ctr_ptr;
     std::list<Scalar> ordered_ig;
 
     // Ceres wrapper
