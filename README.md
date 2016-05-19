@@ -146,7 +146,7 @@ Or, in case you don't have permissions:
   
     `$ brew install yaml-cpp`
     
-We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf.
+We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
     
 Download and build
 ------------------
