@@ -30,10 +30,6 @@ class Factory
         bool unregisterCreator(const std::string& _type);
         TypeBase* create(const std::string& _type, const std::string& _filename = "");
         std::string getClass();
-//        template<>
-//        std::string Factory<IntrinsicsBase>::getClass();
-//        template<>
-//        std::string Factory<ProcessorParamsBase>::getClass();
 
     private:
         CallbackMap callbacks_;
@@ -74,14 +70,10 @@ inline TypeBase* Factory<TypeBase>::create(const std::string& _type, const std::
 {
     typename CallbackMap::const_iterator i = callbacks_.find(_type);
     if (i == callbacks_.end())
-    {
         // not found
         throw std::runtime_error("Unknown type. Possibly you tried to use an unregistered creator.");
-    }
     // Invoke the creation function
-//    std::cout << "Creating params for " << _type << "...";
     TypeBase* p = (i->second)(_filename);
-//    std::cout << " OK." << std::endl;
     return p;
 }
 
