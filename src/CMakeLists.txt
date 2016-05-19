@@ -280,13 +280,13 @@ IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
         feature_point_image.h
-        processor_brisk.h
+        processor_image.h
         active_search.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
         feature_point_image.cpp
-        processor_brisk.cpp
+        processor_image.cpp
         active_search.cpp
         )
 ENDIF(OpenCV_FOUND)

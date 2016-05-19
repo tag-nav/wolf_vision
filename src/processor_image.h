@@ -1,5 +1,5 @@
-#ifndef PROCESSOR_BRISK_H
-#define PROCESSOR_BRISK_H
+#ifndef PROCESSOR_IMAGE_H
+#define PROCESSOR_IMAGE_H
 
 // Wolf includes
 #include "sensor_camera.h"
@@ -99,7 +99,7 @@ struct ProcessorImageParameters : public ProcessorParamsBase
         }algorithm;
 };
 
-class ProcessorBrisk : public ProcessorTrackerFeature
+class ProcessorImage : public ProcessorTrackerFeature
 {
 
     protected:
@@ -126,14 +126,14 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 
     public:
         //ProcessorBrisk(ProcessorImageParameters& _params);
-        ProcessorBrisk(ProcessorImageParameters _params, DetectorDescriptorParamsBase* _dd_base_ptr);
+        ProcessorImage(ProcessorImageParameters _params, DetectorDescriptorParamsBase* _dd_base_ptr);
 
-        ProcessorBrisk(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr,
+        ProcessorImage(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr,
                        cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters _params);
 
    //     ProcessorBrisk(std::string _detector, std::string _descriptor, std::string matcher, std::string _distance, ProcessorImageParameters _params);
 
-        virtual ~ProcessorBrisk();
+        virtual ~ProcessorImage();
 
 //        virtual ~ProcessorBrisk(){
 //            delete detector_ptr_; delete descriptor_ptr_; delete matcher_ptr_;
@@ -161,7 +161,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
+        virtual bool correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
 
         /** \brief Vote for KeyFrame generation
          *
@@ -222,7 +222,7 @@ class ProcessorBrisk : public ProcessorTrackerFeature
          */
         virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
-
+        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches);
 
 
 
@@ -243,14 +243,14 @@ class ProcessorBrisk : public ProcessorTrackerFeature
 
 };
 
-inline bool ProcessorBrisk::voteForKeyFrame()
+inline bool ProcessorImage::voteForKeyFrame()
 {
 //    std::cout << "voteForKeyFrame?: "
 //            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
     return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
 }
 
-inline ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr)
+inline ConstraintBase* ProcessorImage::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr)
 {
     ConstraintEpipolar* const_epipolar_ptr = new ConstraintEpipolar(_feature_ptr, _feature_other_ptr);
     return const_epipolar_ptr; // TODO Crear constraint
@@ -259,4 +259,4 @@ inline ConstraintBase* ProcessorBrisk::createConstraint(FeatureBase* _feature_pt
 } // namespace wolf
 
 
-#endif // PROCESSOR_BRISK_H
+#endif // PROCESSOR_IMAGE_H
