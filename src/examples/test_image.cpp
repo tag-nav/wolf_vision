@@ -82,23 +82,6 @@ int main(int argc, char** argv)
     std::vector<cv::Mat> frame(buffer_size);
     cv::Mat last_frame;
 
-    //TESTS ========================================================================
-    size_t size = 3;
-    //Eigen::Matrix<wolf::Scalar, s, y> Rd;
-    Eigen::MatrixXs U_v1(size,size);
-    U_v1.setRandom();
-    std::cout << "matrix cols: " << U_v1.cols();
-    std::cout << "; matrix rows: " << U_v1.rows() << std::endl;
-    Eigen::MatrixXs U_v2 = U_v1.inverse();
-    std::cout << "matrix cols: " << U_v2.cols();
-    std::cout << "; matrix rows: " << U_v2.rows() << std::endl;
-
-    const int size1 = 3, size2 = 2;
-    Eigen::Matrix<wolf::Scalar, size1, size2, Eigen::RowMajor> test_matrix;
-    std::cout << "matrix cols: " << test_matrix.cols();
-    std::cout << "; matrix rows: " << test_matrix.rows() << std::endl;
-    //END TESTS ====================================================================
-
     TimeStamp t = 1;
 
     Eigen::Vector4s k = {320,240,320,320};

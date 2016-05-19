@@ -87,7 +87,7 @@ void ProcessorImage::postProcess()
 //    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0)); //tracker roi
 //    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
 //    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
-    cv::waitKey(30);
+    cv::waitKey(0);
 }
 
 bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
@@ -98,14 +98,13 @@ bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, con
 
     std::cout << "=============== DRIFT =================" << std::endl;
 
-    matcher_ptr_->match(feat_origin_ptr->getDescriptor(), feat_incoming_ptr->getDescriptor(), matches_mat);
+    cv::Mat origin_descriptor = feat_origin_ptr->getDescriptor();
+    cv::Mat incoming_descriptor = feat_incoming_ptr->getDescriptor();
 
-    std::cout << "Search feature incoming: " << feat_incoming_ptr->trackId() << " at: " << feat_incoming_ptr->getKeypoint().pt;
-    std::cout << "\nSearch feature origin: " << feat_origin_ptr->trackId() << " at: " << feat_origin_ptr->getKeypoint().pt;
-    std::cout << "\n\tBest is: [" << matches_mat[0].trainIdx << "]:" << matches_mat[0].distance;
-
-    Scalar normalized_score = 1 - (Scalar)(matches_mat[0].distance)/detector_descriptor_params_.size_bits_;
-    std::cout << " | score: " << normalized_score;
+    std::vector<cv::KeyPoint> origin_keypoint;
+    origin_keypoint.push_back(feat_origin_ptr->getKeypoint());
+    //the matcher is now inside the match function
+    Scalar normalized_score = match(origin_descriptor,incoming_descriptor,origin_keypoint,matches_mat);
 
     std::cout << "\n=============== END DRIFT =================" << std::endl;
 
@@ -139,17 +138,9 @@ bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, con
 
         if (detect(image_incoming_, roi, correction_keypoints, correction_descriptors))
         {
-            //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
 
-            std::cout << " --> " << correction_keypoints.size() << " candidates";
-
-            matcher_ptr_->match(feat_origin_ptr->getDescriptor(), correction_descriptors, correction_matches);
-
-            std::cout << "\n\tBest is: [" << correction_matches[0].trainIdx << "]:" << correction_matches[0].distance;
-            std::cout << " | at: " << correction_keypoints[correction_matches[0].trainIdx].pt;
-
-            Scalar normalized_score_correction = 1 - (Scalar)(correction_matches[0].distance)/detector_descriptor_params_.size_bits_;
-            std::cout << " | score: " << normalized_score_correction;
+            //the matcher is now inside the match function
+            Scalar normalized_score_correction = match(origin_descriptor,correction_descriptors,correction_keypoints,correction_matches);
 
 
             //TODO: Mirar sobre los features que parecen ser el mismo.
@@ -194,7 +185,7 @@ unsigned int ProcessorImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
     adaptRoi(_image_roi, _image, _roi);
 
-    std::cout << "detect roi: " << _roi << std::endl;
+    //std::cout << "detect roi: " << _roi << std::endl;
 
     detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
     for (unsigned int i = 0; i < _new_keypoints.size(); i++)
@@ -287,13 +278,13 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
         FeaturePointImage* feature_ptr = (FeaturePointImage*)(((feature_base_ptr)));
         act_search_grid_.hitCell(feature_ptr->getKeypoint());  //TODO: Mirar el hitcell en este punto
 
-        std::cout << "Search feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
+        std::cout << "\nSearch feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
 
         roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
 
-//        std::cout << "roi: " << roi << std::endl;
+        cv::Mat target_descriptor = feature_ptr->getDescriptor();
 
         //lists used to debug
         tracker_target_.push_back(feature_ptr->getKeypoint().pt);
@@ -301,19 +292,8 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 
         if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
         {
-            //POSIBLE PROBLEMA: Brisk deja una distancia a la hora de detectar. Si es muy pequeño el roi puede que no detecte nada
-
-        	std::cout << " --> " << candidate_keypoints.size() << " candidates";
-
-            matcher_ptr_->match(feature_ptr->getDescriptor(), candidate_descriptors, cv_matches);
-
-            std::cout << "\n\tBest is: [" << cv_matches[0].trainIdx << "]:" << cv_matches[0].distance;
-
-            std::cout << " | at: " << candidate_keypoints[cv_matches[0].trainIdx].pt;
-
-            Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
-
-            std::cout << " | score: " << normalized_score;
+            //the matcher is now inside the match function
+            Scalar normalized_score = match(target_descriptor,candidate_descriptors,candidate_keypoints,cv_matches);
 
             if (normalized_score > params_.matcher.min_normalized_score)
             {
@@ -327,7 +307,6 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 
                 _feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr,
                                                             normalized_score}); //FIXME: 512 is the maximum HAMMING distance
-
             }
             else
             {
@@ -344,6 +323,24 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
     }
     std::cout << "Number of Features tracked: " << _feature_list_out.size() << std::endl;
     return _feature_list_out.size();
+}
+
+Scalar ProcessorImage::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors,
+                             std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches)
+{
+    std::cout << " --> " << _candidate_keypoints.size() << " candidates";
+
+    matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
+
+    std::cout << "\n\tBest is: [" << _cv_matches[0].trainIdx << "]:" << _cv_matches[0].distance;
+
+    std::cout << " | at: " << _candidate_keypoints[_cv_matches[0].trainIdx].pt;
+
+    Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
+
+    std::cout << " | score: " << normalized_score;
+
+    return normalized_score;
 }
 
 
