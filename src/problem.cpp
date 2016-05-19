@@ -9,15 +9,14 @@
 #include "sensor_base.h"
 #include "factory.h"
 #include "sensor_factory.h"
-//#include "intrinsics_factory.h"
 #include "processor_factory.h"
-//#include "processor_params_factory.h"
 
 namespace wolf
 {
 
 // unnamed namespace used for helper functions local to this file.
-namespace {
+namespace
+{
 std::string uppercase(std::string& s) {for (auto & c: s) c = std::toupper(c); return s;}
 }
 
@@ -34,7 +33,6 @@ Problem::Problem(FrameStructure _frame_structure) :
 
 Problem::~Problem()
 {
-    //std::cout << "deleting wolf problem " << nodeId() << std::endl;
     hardware_ptr_->destruct();
     trajectory_ptr_->destruct();
     map_ptr_->destruct();
@@ -128,7 +126,6 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const TimeStamp& _time
 FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
-    //std::cout << "creating new frame..." << std::endl;
 
     // ---------------------- CREATE NEW FRAME ---------------------
     // Create frame
@@ -160,7 +157,6 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs&
             throw std::runtime_error(
                     "Unknown frame structure. Add appropriate frame structure to the switch statement.");
     }
-    //std::cout << "new frame created" << std::endl;
     return trajectory_ptr_->getLastFramePtr();
 }
 
