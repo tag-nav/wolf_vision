@@ -39,12 +39,11 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    //std::cout << "\nProcessorTracker::process..." << std::endl;
-    std::cout << "-----nProcessorTracker::process():" << std::endl;
-    std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
-    std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
-    std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
-    std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
+    //std::cout << "-----nProcessorTracker::process():" << std::endl;
+    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
+    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
 
     incoming_ptr_ = _incoming_ptr;
 
@@ -52,8 +51,8 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // FIRST TIME
     if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
     {
-        std::cout << "FIRST TIME" << std::endl;
-        //        std::cout << "Features in origin: " << 0 << "; in last: " << 0 << std::endl;
+        //std::cout << "FIRST TIME" << std::endl;
+        //std::cout << "Features in origin: " << 0 << "; in last: " << 0 << std::endl;
 
         // advance
         advance();
@@ -73,7 +72,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         if (!last_ptr_->getFramePtr()->isKey())
         {
             last_ptr_->getFramePtr()->setKey();
-            std::cout << "setted key" << std::endl;
+            //std::cout << "setted key" << std::endl;
             // Call the new keyframe callback in order to let the other processors to establish their constraints
             getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), this, time_tolerance_);
         }
@@ -81,12 +80,12 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         // Establish constraints from last
         establishConstraints();
 
-        std::cout << "Features in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+        //std::cout << "Features in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
     }
     // SECOND TIME or after KEY FRAME CALLBACK
     else if (origin_ptr_ == nullptr)
     {
-        std::cout << "SECOND TIME or after KEY FRAME CALLBACK" << std::endl;
+        //std::cout << "SECOND TIME or after KEY FRAME CALLBACK" << std::endl;
         //std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
         // First we track the known Features
@@ -108,9 +107,8 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // OTHER TIMES
     else
     {
-        std::cout << "OTHER TIMES" << std::endl;
-        //
-        //        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+        //std::cout << "OTHER TIMES" << std::endl;
+        //std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
         // 1. First we track the known Features and create new constraints as needed
 
@@ -157,17 +155,17 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
         }
 
-        //        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+        //std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
     }
 
     postProcess();
 
-    std::cout << "-----End of process():" << std::endl;
-    std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
-    std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
-    std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
-    std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
+    //std::cout << "-----End of process():" << std::endl;
+    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
+    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
 }
 
 bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
@@ -183,7 +181,7 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& 
         return false;
 
 
-    std::cout << "ProcessorTracker::keyFrameCallback sensor " << getSensorPtr()->id() << std::endl;
+//    std::cout << "ProcessorTracker::keyFrameCallback sensor " << getSensorPtr()->id() << std::endl;
 
     // Capture last_ is added to the new keyframe
     FrameBase* last_old_frame = last_ptr_->getFramePtr();

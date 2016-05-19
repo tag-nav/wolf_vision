@@ -43,7 +43,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
                                                            FeatureBaseList& _features_corner_found,
                                                            LandmarkMatchMap& _feature_landmark_correspondences)
 {
-    std::cout << "ProcessorTrackerLandmarkCorner::findLandmarks: " << _landmarks_corner_searched.size() << " features: " << corners_incoming_.size()  << std::endl;
+    //std::cout << "ProcessorTrackerLandmarkCorner::findLandmarks: " << _landmarks_corner_searched.size() << " features: " << corners_incoming_.size()  << std::endl;
 
     // NAIVE FIRST NEAREST NEIGHBOR MATCHING
     LandmarkBaseList not_matched_landmarks = _landmarks_corner_searched;
