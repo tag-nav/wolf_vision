@@ -29,6 +29,12 @@ class Factory
         bool registerCreator(const std::string& _type, CreatorCallback createFn);
         bool unregisterCreator(const std::string& _type);
         TypeBase* create(const std::string& _type, const std::string& _filename = "");
+        std::string getClass();
+//        template<>
+//        std::string Factory<IntrinsicsBase>::getClass();
+//        template<>
+//        std::string Factory<ProcessorParamsBase>::getClass();
+
     private:
         CallbackMap callbacks_;
 
@@ -50,9 +56,9 @@ inline bool Factory<TypeBase>::registerCreator(const std::string& _type, Creator
 {
     bool reg = callbacks_.insert(typename CallbackMap::value_type(_type, createFn)).second;
     if (reg)
-        std::cout << "Factory : registered " << _type << std::endl;
+        std::cout << getClass() << " : registered " << _type << std::endl;
     else
-        std::cout << "Factory :  " << _type << " already registered. Skipping. " << std::endl;
+        std::cout << getClass() << " :  " << _type << " already registered. Skipping. " << std::endl;
 
     return reg;
 }
@@ -73,28 +79,51 @@ inline TypeBase* Factory<TypeBase>::create(const std::string& _type, const std::
         throw std::runtime_error("Unknown type. Possibly you tried to use an unregistered creator.");
     }
     // Invoke the creation function
-    std::cout << "Creating params for " << _type << "...";
+//    std::cout << "Creating params for " << _type << "...";
     TypeBase* p = (i->second)(_filename);
-    std::cout << " OK." << std::endl;
+//    std::cout << " OK." << std::endl;
     return p;
 }
 
 template<class TypeBase>
-inline wolf::Factory<TypeBase>& Factory<TypeBase>::get()
+inline Factory<TypeBase>& Factory<TypeBase>::get()
 {
     static Factory instance_;
     return instance_;
 }
 
+typedef Factory<IntrinsicsBase>      IntrinsicsFactory;
+typedef Factory<ProcessorParamsBase> ProcessorParamsFactory;
+
+template<class TypeBase>
+inline std::string Factory<TypeBase>::getClass()
+{
+    return "Factory<class TypeBase>";
+}
+
 } // namespace wolf
+
+
+// Some specializations
 
 #include "sensor_base.h"
 #include "processor_base.h"
 
-namespace wolf{
+namespace wolf
+{
 
-typedef Factory<IntrinsicsBase>      IntrinsicsFactory;
-typedef Factory<ProcessorParamsBase> ProcessorParamsFactory;
+template<>
+inline std::string Factory<IntrinsicsBase>::getClass()
+{
+    return "IntrinsicsFactory";
+}
+
+template<>
+inline std::string Factory<ProcessorParamsBase>::getClass()
+{
+    return "ProcessorParamsFactory";
+}
+
 
 } /* namespace wolf */
 
