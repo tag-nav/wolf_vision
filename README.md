@@ -139,12 +139,12 @@ Or, in case you don't have permissions:
 **(1)** Obtain:
 
   - Ubuntu:
-    
-    $ sudo apt-get install libyaml-cpp-dev
+   
+   `$ sudo apt-get install libyaml-cpp-dev`
 
   - Mac:
-    
-    $ brew install yaml-cpp
+  
+    `$ brew install yaml-cpp`
     
 We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf.
     
