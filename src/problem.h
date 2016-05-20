@@ -155,7 +155,9 @@ class Problem : public NodeBase
         /** \brief Get the state at last timestamp
          */
         Eigen::VectorXs getCurrentState();
+        Eigen::VectorXs getCurrentState(TimeStamp& _ts);
         void getCurrentState(Eigen::VectorXs& state);
+        void getCurrentState(Eigen::VectorXs& state, TimeStamp& _ts);
 
         /** \brief Get the state at a given timestamp
          */

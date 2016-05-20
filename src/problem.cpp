@@ -158,16 +158,32 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs&
 Eigen::VectorXs Problem::getCurrentState()
 {
     if (processor_motion_ptr_ != nullptr)
-        return processor_motion_ptr_->getState();
+        return processor_motion_ptr_->getCurrentState();
+    else
+        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+}
+
+Eigen::VectorXs Problem::getCurrentState(TimeStamp& _ts)
+{
+    if (processor_motion_ptr_ != nullptr)
+        return processor_motion_ptr_->getState(_ts);
+    else
+        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+}
+
+void Problem::getCurrentState(Eigen::VectorXs& state)
+{
+    if (processor_motion_ptr_ != nullptr)
+        processor_motion_ptr_->getCurrentState(state);
     else
         throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
 }
 
 
-void Problem::getCurrentState(Eigen::VectorXs& state)
+void Problem::getCurrentState(Eigen::VectorXs& state, TimeStamp& _ts)
 {
     if (processor_motion_ptr_ != nullptr)
-        processor_motion_ptr_->getState(state);
+        processor_motion_ptr_->getCurrentState(state, _ts);
     else
         throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
 }

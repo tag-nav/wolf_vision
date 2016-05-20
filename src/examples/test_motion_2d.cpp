@@ -85,7 +85,7 @@ int main()
 
     std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
 
-    std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getState().transpose() << std::endl;
+    std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
     // Capture to use as container for all incoming data
     t += dt;
     CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_odom_ptr, data, data_cov);
@@ -162,7 +162,7 @@ int main()
         //        << (odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_covariance).maxCoeff()
         //        << std::endl;
 
-        if ((odom2d_ptr->getState() - integrated_x).norm() > 1e-12)
+        if ((odom2d_ptr->getCurrentState() - integrated_x).norm() > 1e-12)
             throw std::runtime_error("Integrated state different from reference.");
 
         if ((odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_delta_covariance).maxCoeff() > 1e-12)

@@ -95,12 +95,24 @@ class ProcessorMotion : public ProcessorBase
         /** \brief Fills a reference to the state integrated so far
          * \param _x the returned state vector
          */
-        const void getState(Eigen::VectorXs& _x);
+        const void getCurrentState(Eigen::VectorXs& _x);
+
+        /** \brief Fills a reference to the state integrated so far and its stamp
+         * \param _x the returned state vector
+         * \param _ts the returned stamp
+         */
+        const void getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts);
 
         /** \brief Gets a constant reference to the state integrated so far
-         * \param _x the state vector
+         * \return the state vector
          */
-        const Eigen::VectorXs& getState();
+        const Eigen::VectorXs& getCurrentState();
+
+        /** \brief Gets a constant reference to the state integrated so far and its stamp
+         * \param _ts the returned stamp
+         * return the state vector
+         */
+        const Eigen::VectorXs& getCurrentState(TimeStamp& _ts);
 
         /** \brief Fills the state corresponding to the provided time-stamp
          * \param _ts the time stamp
@@ -456,9 +468,9 @@ inline void ProcessorMotion::reintegrate()
 
 inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
 {
-    //std::cout << "ProcessorMotion::keyFrameCallback: " << std::endl;
-    //std::cout << "\tnew keyframe " << _keyframe_ptr->id() << std::endl;
-    //std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
+    std::cout << "ProcessorMotion::keyFrameCallback: " << std::endl;
+    std::cout << "\tnew keyframe " << _keyframe_ptr->id() << ": " << _keyframe_ptr->getState().transpose() << std::endl;
+    std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
 
     // get time stamp
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
@@ -479,6 +491,11 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
 
     // add to old buffer
     key_capture_ptr->getBufferPtr()->get().push_back(mot);
+
+    // debug cout
+    Eigen::VectorXs interpolated_state(3);
+    xPlusDelta(origin_ptr_->getFramePtr()->getState(), key_capture_ptr->getBufferPtr()->get().back().delta_integr_, interpolated_state);
+    std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
 
     // create motion constraint and add it to the new keyframe
     FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION,
@@ -533,15 +550,27 @@ inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(_ts), _x);
 }
 
-inline const Eigen::VectorXs& ProcessorMotion::getState()
+inline const Eigen::VectorXs& ProcessorMotion::getCurrentState()
 {
-    getState(x_);
+    getCurrentState(x_);
     return x_;
 }
 
-inline const void ProcessorMotion::getState(Eigen::VectorXs& _x)
+inline const Eigen::VectorXs& ProcessorMotion::getCurrentState(TimeStamp& _ts)
+{
+    getCurrentState(x_, _ts);
+    return x_;
+}
+
+inline const void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 {
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, _x);
+}
+
+inline const void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts)
+{
+    getCurrentState(_x);
+    _ts = getBufferPtr()->get().back().ts_;
 }
 
 inline const Motion& ProcessorMotion::getMotion() const

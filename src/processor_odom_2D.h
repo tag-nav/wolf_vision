@@ -90,7 +90,7 @@ inline void ProcessorOdom2D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
     //std::cout << "ProcessorOdom2d::xPlusDelta" << std::endl;
 
     assert(_x.size() == x_size_ && "Wrong _x vector size");
-    assert(_x_plus_delta.size() == delta_size_ && "Wrong _x_plus_delta vector size");
+    assert(_x_plus_delta.size() == x_size_ && "Wrong _x_plus_delta vector size");
 
 //    std::cout << "xPlusDelta ------------------------------------" << std::endl;
 //    std::cout << "_x:     " << _x.transpose() << std::endl;
