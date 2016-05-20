@@ -75,7 +75,7 @@ class ProcessorTracker : public ProcessorBase
         Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
 
     public:
-        ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features = 0, const Scalar& _time_tolerance = 0);
+        ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features = 0, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorTracker();
 
         /** \brief Full processing of an incoming Capture.
@@ -176,9 +176,11 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void reset() = 0;
 
-    protected:
+    public:
 
         FeatureBaseList& getNewFeaturesListLast();
+
+    protected:
 
         void addNewFeatureLast(FeatureBase* _feature_ptr);
 
