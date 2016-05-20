@@ -38,7 +38,8 @@ struct ProcessorParamsLaser : public ProcessorParamsBase
 {
         laserscanutils::LineFinderIterativeParams line_finder_params_;
         //TODO: add corner_finder_params
-        unsigned int n_corners_th;
+        unsigned int new_corners_th;
+        unsigned int loop_frames_th;
 
         // These values below are constant and defined within the class -- provide a setter or accept them at construction time if you need to configure them
         //        Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
@@ -57,7 +58,8 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 
         FeatureBaseList corners_incoming_;
         FeatureBaseList corners_last_;
-        unsigned int n_corners_th_;
+        unsigned int new_corners_th_;
+        unsigned int loop_frames_th_;
 
         // These values are constant -- provide a setter or accept them at construction time if you need to configure them
         Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
@@ -76,7 +78,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 
     public:
         ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                       const unsigned int& _n_corners_th);
+                                       const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th);
 
         virtual ~ProcessorTrackerLandmarkCorner();
 
@@ -171,8 +173,8 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 };
 
 inline ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                                                      const unsigned int& _n_corners_th) :
-        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0), line_finder_(_line_finder_params), n_corners_th_(_n_corners_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
+                                                                      const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th) :
+        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0), line_finder_(_line_finder_params), new_corners_th_(_new_corners_th), loop_frames_th_(_loop_frames_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
 {
 }
 

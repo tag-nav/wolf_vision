@@ -132,7 +132,7 @@ int main(int argc, char** argv)
 
     ProcessorParamsLaser laser_1_processor_params;
     laser_1_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
-    laser_1_processor_params.n_corners_th = 10;
+    laser_1_processor_params.new_corners_th = 10;
 
     // laser 2 extrinsics and intrinsics
     extractVector(laser_2_file, laser_2_params, timestamp);
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 
     ProcessorParamsLaser laser_2_processor_params;
     laser_2_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
-    laser_2_processor_params.n_corners_th = 10;
+    laser_2_processor_params.new_corners_th = 10;
 
     Problem problem(FRM_PO_2D);
     SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.installSensor("ODOM 2D", "odometer", odom_pose, &odom_intrinsics);
