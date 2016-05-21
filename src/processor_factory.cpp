@@ -8,6 +8,7 @@
 #include "processor_factory.h"
 
 #include <iostream>
+#include <iomanip>
 
 namespace wolf
 {
@@ -16,7 +17,7 @@ bool ProcessorFactory::registerCreator(const std::string& _processor_type, Creat
 {
     bool reg = callbacks_.insert(CallbackMap::value_type(_processor_type, createFn)).second;
     if (reg)
-        std::cout << "ProcessorFactory  : registered " << _processor_type << std::endl;
+        std::cout << std::setw(22) << std::left << "ProcessorFactory" << " : registered " << _processor_type << std::endl;
     else
         std::cout << "ProcessorFactory  : processor " << _processor_type << " already registered. Skipping. " << std::endl;
 

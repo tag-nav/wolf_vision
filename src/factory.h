@@ -11,6 +11,8 @@
 // std
 #include <string>
 #include <map>
+#include <iostream>
+#include <iomanip>
 
 namespace wolf
 {
@@ -52,7 +54,7 @@ inline bool Factory<TypeBase>::registerCreator(const std::string& _type, Creator
 {
     bool reg = callbacks_.insert(typename CallbackMap::value_type(_type, createFn)).second;
     if (reg)
-        std::cout << getClass() << " : registered " << _type << std::endl;
+        std::cout << std::setw(22) << std::left << getClass() << " : registered " << _type << std::endl;
     else
         std::cout << getClass() << " :  " << _type << " already registered. Skipping. " << std::endl;
 

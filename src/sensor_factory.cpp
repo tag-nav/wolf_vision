@@ -8,6 +8,7 @@
 #include "sensor_factory.h"
 
 #include <iostream>
+#include <iomanip>
 
 namespace wolf
 {
@@ -16,7 +17,7 @@ bool SensorFactory::registerCreator(const std::string& _sensor_type, CreateSenso
 {
     bool reg = callbacks_.insert(CallbackMap::value_type(_sensor_type, createFn)).second;
     if (reg)
-        std::cout << "SensorFactory     : registered " << _sensor_type << std::endl;
+        std::cout << std::setw(22) << std::left << "SensorFactory" << " : registered " << _sensor_type << std::endl;
     else
         std::cout << "SensorFactory     : sensor " << _sensor_type << " already registered. Skipping. " << std::endl;
     return reg;
