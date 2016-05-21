@@ -84,9 +84,6 @@ inline Factory<TypeBase>& Factory<TypeBase>::get()
     return instance_;
 }
 
-typedef Factory<IntrinsicsBase>      IntrinsicsFactory;
-typedef Factory<ProcessorParamsBase> ProcessorParamsFactory;
-
 template<class TypeBase>
 inline std::string Factory<TypeBase>::getClass()
 {
@@ -103,6 +100,9 @@ inline std::string Factory<TypeBase>::getClass()
 
 namespace wolf
 {
+
+typedef Factory<IntrinsicsBase>      IntrinsicsFactory;
+typedef Factory<ProcessorParamsBase> ProcessorParamsFactory;
 
 template<>
 inline std::string Factory<IntrinsicsBase>::getClass()
