@@ -15,40 +15,55 @@ ProcessorImage::ProcessorImage(ProcessorImageParameters _params) :
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     active_search_grid_()
 {
-    DetectorDescriptorParamsBase* _dd_base_ptr = _params.detector_descriptor_params_ptr;
-    switch (_dd_base_ptr->type){
+    // 1. detector-descriptor params
+    DetectorDescriptorParamsBase* _dd_params = _params.detector_descriptor_params_ptr;
+    switch (_dd_params->type){
         case DD_BRISK:
             {
-            DetectorDescriptorParamsBrisk* dd_brisk = (DetectorDescriptorParamsBrisk*) _dd_base_ptr;
-            detector_descriptor_ptr_ = new cv::BRISK(dd_brisk->threshold,dd_brisk->octaves,dd_brisk->pattern_scale);
-            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((_dd_base_ptr->nominal_pattern_radius)*pow(2,dd_brisk->octaves)),
-                                                                   (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*dd_brisk->pattern_scale));
-            active_search_grid_.setParameters(_params.image.width, _params.image.height,
-                    _params.active_search.grid_width, _params.active_search.grid_height,
-                    detector_descriptor_params_.pattern_radius_,
-                    _params.active_search.separation);
+            DetectorDescriptorParamsBrisk* params_brisk = (DetectorDescriptorParamsBrisk*) _dd_params;
+            detector_descriptor_ptr_ = new cv::BRISK(params_brisk->threshold, //
+                                                     params_brisk->octaves, //
+                                                     params_brisk->pattern_scale);
+
+            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((_dd_params->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
+                                                                   (unsigned int)((_dd_params->nominal_pattern_radius)*params_brisk->pattern_scale));
+
+            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+
             break;
             }
         case DD_ORB:
             {
-            DetectorDescriptorParamsOrb* dd_orb = (DetectorDescriptorParamsOrb*) _dd_base_ptr;
-            detector_descriptor_ptr_ = new cv::ORB(dd_orb->nfeatures,dd_orb->scaleFactor,dd_orb->nlevels,dd_orb->edgeThreshold,
-                                                   dd_orb->firstLevel,dd_orb->WTA_K,dd_orb->scoreType,dd_orb->patchSize);
+            DetectorDescriptorParamsOrb* params_orb = (DetectorDescriptorParamsOrb*) _dd_params;
+            detector_descriptor_ptr_ = new cv::ORB(params_orb->nfeatures, //
+                                                   params_orb->scaleFactor, //
+                                                   params_orb->nlevels, //
+                                                   params_orb->edgeThreshold, //
+                                                   params_orb->firstLevel, //
+                                                   params_orb->WTA_K, //
+                                                   params_orb->scoreType, //
+                                                   params_orb->patchSize);
+
             detector_descriptor_params_.pattern_radius_ =
-                    (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*pow(dd_orb->scaleFactor,dd_orb->nlevels-1));
-            active_search_grid_.setParameters(_params.image.width, _params.image.height,
-                    _params.active_search.grid_width, _params.active_search.grid_height,
-                    //std::max(dd_orb->edgeThreshold,dd_orb->patchSize), //check this out /2?
-                    detector_descriptor_params_.pattern_radius_,
-                    _params.active_search.separation);
+                    (unsigned int)( (_dd_params->nominal_pattern_radius) * pow(params_orb->scaleFactor, params_orb->nlevels-1) );
+
+            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+
             break;
             }
         default:
-            throw std::runtime_error("Unknown detector-descriptor");
+            throw std::runtime_error("Unknown detector-descriptor type");
     }
 
+    // 2. active search params
+    active_search_grid_.setParameters(_params.image.width, _params.image.height,
+            _params.active_search.grid_width, _params.active_search.grid_height,
+            detector_descriptor_params_.pattern_radius_,
+            _params.active_search.separation);
+
+    // 3. matcher params
     matcher_ptr_ = new cv::BFMatcher(_params.matcher.similarity_norm);
-    detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+
 }
 
 //Destructor
