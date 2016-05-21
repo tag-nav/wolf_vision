@@ -15,6 +15,7 @@ ProcessorImage::ProcessorImage(ProcessorImageParameters _params) :
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     act_search_grid_()
 {
+    DetectorDescriptorParamsBase* _dd_base_ptr = _params.detector_descriptor_params_ptr;
     switch (_dd_base_ptr->type){
         case DD_BRISK:
             {

@@ -64,6 +64,8 @@ struct ProcessorImageParameters : public ProcessorParamsBase
                 unsigned int height;
         }image;
 
+        DetectorDescriptorParamsBase* detector_descriptor_params_ptr;
+
 //        struct Detector
 //        {
 //                unsigned int threshold; ///< on the keypoint strength to declare it key-point
@@ -125,19 +127,8 @@ class ProcessorImage : public ProcessorTrackerFeature
         std::list<cv::Point> tracker_candidates_;
 
     public:
-        //ProcessorBrisk(ProcessorImageParameters& _params);
-        ProcessorImage(ProcessorImageParameters _params, DetectorDescriptorParamsBase* _dd_base_ptr);
-
-        ProcessorImage(cv::FeatureDetector* _det_ptr, cv::DescriptorExtractor* _desc_ext_ptr,
-                       cv::DescriptorMatcher* _match_ptr, ProcessorImageParameters _params);
-
-   //     ProcessorBrisk(std::string _detector, std::string _descriptor, std::string matcher, std::string _distance, ProcessorImageParameters _params);
-
+        ProcessorImage(ProcessorImageParameters _params);
         virtual ~ProcessorImage();
-
-//        virtual ~ProcessorBrisk(){
-//            delete detector_ptr_; delete descriptor_ptr_; delete matcher_ptr_;
-//        }
 
     protected:
 

@@ -113,8 +113,11 @@ int main(int argc, char** argv)
     DetectorDescriptorParamsBrisk brisk_params;
     brisk_params.type = DD_BRISK;
 
+    // select the kind of detector_descriptor parameters
+    tracker_params.detector_descriptor_params_ptr = &orb_params;
 
-    ProcessorImage* p_brisk = new ProcessorImage(tracker_params, &orb_params);
+    ProcessorImage* p_brisk = new ProcessorImage(tracker_params);
+
     sen_cam_->addProcessor(p_brisk);
 
 
