@@ -305,6 +305,7 @@ IF(YAMLCPP_FOUND)
     # sources
     SET(SRCS ${SRCS}
         yaml/sensor_camera_yaml.cpp
+        yaml/processor_image_yaml.cpp
         )
     IF(laser_scan_utils_FOUND)
         SET(SRCS ${SRCS}
