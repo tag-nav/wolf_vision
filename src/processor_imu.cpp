@@ -26,7 +26,6 @@ ProcessorBase* ProcessorIMU::create(const std::string& _unique_name, const Proce
 
 // Register in the SensorFactory
 #include "processor_factory.h"
-//#include "factory.h"
 namespace wolf {
 namespace
 {

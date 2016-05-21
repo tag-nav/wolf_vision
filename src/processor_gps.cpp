@@ -70,8 +70,7 @@ wolf::ProcessorBase* ProcessorGPS::create(const std::string& _unique_name, const
 
 
 // Register in the SensorFactory
-//#include "processor_factory.h"
-#include "factory.h"
+#include "processor_factory.h"
 namespace wolf {
 namespace
 {

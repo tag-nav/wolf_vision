@@ -14,7 +14,6 @@ ProcessorBase* ProcessorOdom3D::create(const std::string& _unique_name, const Pr
 
 // Register in the SensorFactory
 #include "processor_factory.h"
-//#include "factory.h"
 namespace wolf {
 namespace
 {
