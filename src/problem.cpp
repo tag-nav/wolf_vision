@@ -50,7 +50,7 @@ void Problem::addSensor(SensorBase* _sen_ptr)
 
 SensorBase* Problem::installSensor(std::string _sen_type, //
                                    std::string _unique_sensor_name, //
-                                   Eigen::VectorXs& _extrinsics, //
+                                   const Eigen::VectorXs& _extrinsics, //
                                    IntrinsicsBase* _intrinsics)
 {
     SensorBase* sen_ptr = SensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
@@ -60,7 +60,7 @@ SensorBase* Problem::installSensor(std::string _sen_type, //
 
 SensorBase* Problem::installSensor(std::string _sen_type, //
                                    std::string _unique_sensor_name, //
-                                   Eigen::VectorXs& _extrinsics, //
+                                   const Eigen::VectorXs& _extrinsics, //
                                    std::string _intrinsics_filename)
 {
     IntrinsicsBase* intr_ptr = IntrinsicsFactory::get().create(_sen_type, _intrinsics_filename);

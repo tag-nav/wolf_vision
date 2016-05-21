@@ -101,7 +101,7 @@ class Problem : public NodeBase
          */
         SensorBase* installSensor(std::string _sen_type, //
                                   std::string _unique_sensor_name, //
-                                  Eigen::VectorXs& _extrinsics, //
+                                  const Eigen::VectorXs& _extrinsics, //
                                   IntrinsicsBase* _intrinsics = nullptr);
 
         /** \brief Factory method to install (create and add) sensors only from its properties -- Helper method loading parameters from file
@@ -112,7 +112,7 @@ class Problem : public NodeBase
          */
         SensorBase* installSensor(std::string _sen_type, //
                                   std::string _unique_sensor_name, //
-                                  Eigen::VectorXs& _extrinsics, //
+                                  const Eigen::VectorXs& _extrinsics, //
                                   std::string _intrinsics_filename);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
