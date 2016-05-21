@@ -10,7 +10,7 @@ detector-descriptor:
     nominal pattern radius: 18
     nfeatures: 500
     scale factor: 1.2
-    nlavels: 1
+    nlevels: 1
     edge threshold: 4
     first level: 0 
     WTA_K: 2
@@ -19,7 +19,7 @@ detector-descriptor:
 
 matcher:
     minimum normalized score: 0.9
-    siilarity norm: cv::HAMMING
+    similarity norm: cv::NORM_HAMMING
     roi:
         width: 20
         height: 20
