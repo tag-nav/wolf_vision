@@ -220,15 +220,15 @@ typedef enum
  */
 typedef enum
 {
-    PRC_TRACKER_DUMMY = 1,
-    PRC_TRACKER_IMAGE,
-    PRC_TRACKER_LANDMARK_CORNER,
-    PRC_TRACKER_FEATURE_CORNER,
-    PRC_GPS_RAW,
-    PRC_LIDAR,
-    PRC_ODOM_2D,
-    PRC_ODOM_3D,
-    PRC_IMU
+    PRC_TRACKER_DUMMY = 1, ///< Dummy tracker for tests
+    PRC_TRACKER_IMAGE, ///< Point feature tracker for video sequences
+    PRC_TRACKER_LANDMARK_CORNER, ///< Tracker of corner Landmarks
+    PRC_TRACKER_FEATURE_CORNER, ///<  Tracker of corner Features
+    PRC_GPS_RAW, ///< Raw GPS processor
+    PRC_LIDAR, ///< Laser 2D processor
+    PRC_ODOM_2D, ///< 2D odometry integrator
+    PRC_ODOM_3D, ///< 2D odometry integrator
+    PRC_IMU ///< IMU delta pre-integrator
 } ProcessorType;
 
 /** \brief enumeration of all possible Feature types
