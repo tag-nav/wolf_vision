@@ -33,24 +33,27 @@ static ProcessorParamsBase* createProcessorParamsImage(const std::string & _file
         Node dd_yaml = params["detector-descriptor"];
         if(dd_yaml["type"].as<string>() == "ORB")
         {
-            DetectorDescriptorParamsOrb dd;
-            dd.type                     = DD_ORB;
-            dd.nominal_pattern_radius   = dd_yaml["nominal pattern radius"].as<unsigned int>();
-            dd.nfeatures                = dd_yaml["nfeatures"].as<unsigned int>();
-            dd.scaleFactor              = dd_yaml["scale factor"].as<float>();
-            dd.nlevels                  = dd_yaml["nlevels"].as<unsigned int>();
-            dd.edgeThreshold            = dd_yaml["edge threshold"].as<unsigned int>();
-            dd.firstLevel               = dd_yaml["first level"].as<unsigned int>();
-            dd.WTA_K                    = dd_yaml["WTA_K"].as<unsigned int>();
+            DetectorDescriptorParamsOrb* dd = new DetectorDescriptorParamsOrb;
+            dd->type                     = DD_ORB;
+            dd->nominal_pattern_radius   = dd_yaml["nominal pattern radius"].as<unsigned int>();
+            dd->nfeatures                = dd_yaml["nfeatures"].as<unsigned int>();
+            dd->scaleFactor              = dd_yaml["scale factor"].as<float>();
+            dd->nlevels                  = dd_yaml["nlevels"].as<unsigned int>();
+            dd->edgeThreshold            = dd_yaml["edge threshold"].as<unsigned int>();
+            dd->firstLevel               = dd_yaml["first level"].as<unsigned int>();
+            dd->WTA_K                    = dd_yaml["WTA_K"].as<unsigned int>();
             string st = dd_yaml["score type"].as<string>();
             if (st == "cv::ORB::HARRIS_SCORE")
-                dd.scoreType            = cv::ORB::HARRIS_SCORE;
+                dd->scoreType            = cv::ORB::HARRIS_SCORE;
             else
-            {}
-            dd.patchSize                = dd_yaml["patch size"].as<unsigned int>();
-            p->detector_descriptor_params_ptr = &dd;
-        }else if(false)
+            {
+                std::cout << "Unknown score type" << std::endl;
+            }
+            dd->patchSize                = dd_yaml["patch size"].as<unsigned int>();
+            p->detector_descriptor_params_ptr = dd;
+        }else
         {
+            std::cout << "Unknown detector-descriptor type " << dd_yaml["type"].as<string>() << std::endl;
             // TODO: add BRISK params struct
         }
 
@@ -59,7 +62,10 @@ static ProcessorParamsBase* createProcessorParamsImage(const std::string & _file
         string sn = m["similarity norm"].as<string>();
         if(sn == "cv::NORM_HAMMING")
             p->matcher.similarity_norm  = cv::NORM_HAMMING;
-        else {}
+        else
+        {
+            std::cout << "Unknown distance type" << std::endl;
+        }
         p->matcher.roi_width            = m["roi"]["width"].as<unsigned int>();
         p->matcher.roi_height           = m["roi"]["height"].as<unsigned int>();
 
