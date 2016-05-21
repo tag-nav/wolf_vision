@@ -111,8 +111,8 @@ class ProcessorImage : public ProcessorTrackerFeature
         cv::Feature2D* detector_descriptor_ptr_;
     protected:
         ProcessorImageParameters params_;       // Struct with parameters of the processors
-        ActiveSearchGrid act_search_grid_;      // Active Search
-        cv::Mat image_last_, image_incoming_;   // Images from the "last" and "incoming" Captures
+        ActiveSearchGrid active_search_grid_;   // Active Search
+        cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
         struct
         {
                 unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
@@ -206,7 +206,7 @@ class ProcessorImage : public ProcessorTrackerFeature
         virtual void inflateRoi(cv::Rect& _roi);
 
         /**
-         * \brief Adapts a certain roi to maximize its performance and asign it to the image. It's composed by inflateRoi and trimRoi.
+         * \brief Adapts a certain roi to maximize its performance and assign it to the image. It's composed by inflateRoi and trimRoi.
          * \param _image_roi output image to be applied the adapted roi
          * \param _image input image (incoming or last) in which the roi will be applied to obtain \b _image_roi
          * \param _roi input roi to be adapted
@@ -230,6 +230,8 @@ class ProcessorImage : public ProcessorTrackerFeature
 
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
 
+    public:
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 
 
 };

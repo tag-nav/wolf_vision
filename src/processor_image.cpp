@@ -13,7 +13,7 @@ namespace wolf
 ProcessorImage::ProcessorImage(ProcessorImageParameters _params) :
     ProcessorTrackerFeature(PRC_TRACKER_IMAGE, _params.algorithm.max_new_features),
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
-    act_search_grid_()
+    active_search_grid_()
 {
     DetectorDescriptorParamsBase* _dd_base_ptr = _params.detector_descriptor_params_ptr;
     switch (_dd_base_ptr->type){
@@ -23,7 +23,7 @@ ProcessorImage::ProcessorImage(ProcessorImageParameters _params) :
             detector_descriptor_ptr_ = new cv::BRISK(dd_brisk->threshold,dd_brisk->octaves,dd_brisk->pattern_scale);
             detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((_dd_base_ptr->nominal_pattern_radius)*pow(2,dd_brisk->octaves)),
                                                                    (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*dd_brisk->pattern_scale));
-            act_search_grid_.setParameters(_params.image.width, _params.image.height,
+            active_search_grid_.setParameters(_params.image.width, _params.image.height,
                     _params.active_search.grid_width, _params.active_search.grid_height,
                     detector_descriptor_params_.pattern_radius_,
                     _params.active_search.separation);
@@ -36,7 +36,7 @@ ProcessorImage::ProcessorImage(ProcessorImageParameters _params) :
                                                    dd_orb->firstLevel,dd_orb->WTA_K,dd_orb->scoreType,dd_orb->patchSize);
             detector_descriptor_params_.pattern_radius_ =
                     (unsigned int)((_dd_base_ptr->nominal_pattern_radius)*pow(dd_orb->scaleFactor,dd_orb->nlevels-1));
-            act_search_grid_.setParameters(_params.image.width, _params.image.height,
+            active_search_grid_.setParameters(_params.image.width, _params.image.height,
                     _params.active_search.grid_width, _params.active_search.grid_height,
                     //std::max(dd_orb->edgeThreshold,dd_orb->patchSize), //check this out /2?
                     detector_descriptor_params_.pattern_radius_,
@@ -66,7 +66,7 @@ void ProcessorImage::preProcess()
     else
         image_last_ = ((CaptureImage*)last_ptr_)->getImage();
 
-    act_search_grid_.renew();
+    active_search_grid_.renew();
 
     //The visualization part is only for debugging, not the casts done here.
 
@@ -84,10 +84,10 @@ void ProcessorImage::preProcess()
 void ProcessorImage::postProcess()
 {
     drawFeatures(last_ptr_);
-//    drawRoi(image_last_,detector_roi_,cv::Scalar(88.0, 70.0, 255.0));//detector roi(now only shown when it collides with the the image)
-//    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0)); //tracker roi
-//    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));//inflated roi(now only shown when it collides with the the image)
-//    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
+    drawRoi(image_last_,detector_roi_,cv::Scalar(88.0, 70.0, 255.0));   //detector roi(now only shown when it collides with the the image)
+    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0));   //tracker roi
+    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));   //inflated roi(now only shown when it collides with the the image)
+    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
     cv::waitKey(0);
 }
 
@@ -129,7 +129,7 @@ bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, con
         std::vector<cv::DMatch> correction_matches;
 
         FeaturePointImage* feat_last_ptr = (FeaturePointImage*)_last_feature;
-        act_search_grid_.hitCell(feat_last_ptr->getKeypoint());
+        active_search_grid_.hitCell(feat_last_ptr->getKeypoint());
 
         std::cout << "Search feature last: " << feat_last_ptr->trackId() << " at: " << feat_last_ptr->getKeypoint().pt;
 
@@ -217,7 +217,7 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
 
     for (unsigned int n_iterations = 0; _max_new_features == 0 || n_iterations < _max_new_features; n_iterations++)
     {
-        if (act_search_grid_.pickRoi(roi))
+        if (active_search_grid_.pickRoi(roi))
         {
         	detector_roi_.push_back(roi);
             if (detect(image_last_, roi, new_keypoints, new_descriptors))
@@ -226,8 +226,8 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
                 FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
                 point_ptr->setTrackId(point_ptr->id());
                 addNewFeatureLast(point_ptr);
-                act_search_grid_.hitCell(new_keypoints[0]);
-                act_search_grid_.blockCell(roi);
+                active_search_grid_.hitCell(new_keypoints[0]);
+                active_search_grid_.blockCell(roi);
 
                 std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 
@@ -236,7 +236,7 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
             }
             else
             {
-                act_search_grid_.blockCell(roi);
+                active_search_grid_.blockCell(roi);
             }
         }
         else
@@ -277,7 +277,7 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
     for (auto feature_base_ptr : _feature_list_in)
     {
         FeaturePointImage* feature_ptr = (FeaturePointImage*)(((feature_base_ptr)));
-        act_search_grid_.hitCell(feature_ptr->getKeypoint());  //TODO: Mirar el hitcell en este punto
+        active_search_grid_.hitCell(feature_ptr->getKeypoint());  //TODO: Mirar el hitcell en este punto
 
         std::cout << "\nSearch feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
 
@@ -441,5 +441,24 @@ void ProcessorImage::drawFeatures(CaptureBase* const _last_ptr)
     cv::imshow("Feature tracker", image_last_);
 }
 
+
+ProcessorBase* ProcessorImage::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+{
+    ProcessorImage* prc_ptr = new ProcessorImage(*((ProcessorImageParameters*)_params));
+    prc_ptr->setName(_unique_name);
+    return prc_ptr;
+}
+
+
+} // namespace wolf
+
+
+// Register in the SensorFactory
+#include "processor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_prc_image = ProcessorFactory::get().registerCreator("IMAGE", ProcessorImage::create);
+}
 } // namespace wolf
 

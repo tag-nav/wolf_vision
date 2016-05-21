@@ -7,6 +7,7 @@
 #include "processor_image.h"
 #include "state_block.h"
 #include "state_quaternion.h"
+#include "factory.h"
 
 
 
@@ -38,7 +39,7 @@ int main(int argc, char** argv)
     */
 
     //ProcessorBrisk test
-    std::cout << std::endl << " ========= ProcessorBrisk test ===========" << std::endl << std::endl;
+    std::cout << std::endl << " ========= ProcessorImage test ===========" << std::endl << std::endl;
 
     cv::VideoCapture capture;
     unsigned int f = 0;
@@ -73,6 +74,7 @@ int main(int argc, char** argv)
     {
         std::cout << "succeded" << std::endl;
     }
+
     capture.set(CV_CAP_PROP_POS_MSEC, 3000);
     unsigned int img_width = (unsigned int)capture.get(CV_CAP_PROP_FRAME_WIDTH);
     unsigned int img_height = (unsigned int)capture.get(CV_CAP_PROP_FRAME_HEIGHT);
@@ -80,20 +82,25 @@ int main(int argc, char** argv)
 
     unsigned int buffer_size = 4;
     std::vector<cv::Mat> frame(buffer_size);
-    cv::Mat last_frame;
 
     TimeStamp t = 1;
 
+
+    Problem* wolf_problem_ = new Problem(FRM_PO_3D);
+
+    //=====================================================
+    // Method 1: Use data generated here for sensor and processor
+    //=====================================================
+
+    // SENSOR
     Eigen::Vector4s k = {320,240,320,320};
-    //StateBlock* intr = new StateBlock(k,false);
     SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()),
                                               new StateBlock(Eigen::Vector3s::Zero()),
                                               new StateBlock(k,false),img_width,img_height);
 
-
-    Problem* wolf_problem_ = new Problem(FRM_PO_3D);
     wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
 
+    // PROCESSOR
     ProcessorImageParameters tracker_params;
     tracker_params.image = {img_width,  img_height};
     tracker_params.matcher.min_normalized_score = 0.75;
@@ -106,22 +113,40 @@ int main(int argc, char** argv)
     tracker_params.algorithm.max_new_features =0;
     tracker_params.algorithm.min_features_for_keyframe = 20;
 
-
     DetectorDescriptorParamsOrb orb_params;
     orb_params.type = DD_ORB;
 
     DetectorDescriptorParamsBrisk brisk_params;
     brisk_params.type = DD_BRISK;
 
-    // select the kind of detector_descriptor parameters
-    tracker_params.detector_descriptor_params_ptr = &orb_params;
+    // select the kind of detector-descriptor parameters
+    tracker_params.detector_descriptor_params_ptr = &orb_params; // choose ORB
 
-    ProcessorImage* p_brisk = new ProcessorImage(tracker_params);
+    ProcessorImage* prc_image = new ProcessorImage(tracker_params);
 
-    sen_cam_->addProcessor(p_brisk);
+    sen_cam_->addProcessor(prc_image);
+    //=====================================================
 
 
-    CaptureImage* capture_brisk_ptr;
+    //=====================================================
+    // Method 2: Use factory to create sensor and processor
+    //=====================================================
+
+    // SENSOR
+    // one-liner API
+    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/Users/jsola/dev/wolf/src/examples/camera.yaml");
+
+    // PROCESSOR
+    // one-liner API
+    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+    // two-liner alternative with explicit access to pointers and params
+    //    ProcessorParamsBase* prc_params = ProcessorParamsFactory::get().create("IMAGE", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+    //    ProcessorBase* prc_ptr = wolf_problem_->installProcessor("IMAGE", "ORB", sensor_ptr, prc_params);
+    //=====================================================
+
+
+    // CAPTURES
+    CaptureImage* capture_image_ptr;
 
     cv::namedWindow("Feature tracker");    // Creates a window for display.
     cv::moveWindow("Feature tracker", 0, 0);
@@ -132,13 +157,18 @@ int main(int argc, char** argv)
     {
         std::cout << "\n=============== Frame #: " << f << " in buffer: " << f%buffer_size << " ===============" << std::endl;
 
-        capture_brisk_ptr = new CaptureImage(t,sen_cam_,frame[f % buffer_size],img_width,img_height);
-
         clock_t t1 = clock();
-        p_brisk->process(capture_brisk_ptr);
+
+        // Old method with non-factory objects
+        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size], img_width, img_height);
+        prc_image->process(capture_image_ptr);
+
+        // Preferred method with factory objects: FIXME: not working yet
+        //        capture_image_ptr = new CaptureImage(t, (SensorCamera*)sensor_ptr, frame[f % buffer_size], img_width, img_height);
+        //        capture_image_ptr->process();
+
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
-        last_frame = frame[f % buffer_size];
         f++;
         capture >> frame[f % buffer_size];
     }
