@@ -75,7 +75,7 @@ int main(void)
     problem.installProcessor("ODOM 2D", "main odometry",    "main odometer");
     problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer");
     problem.installProcessor("IMU",     "pre-integrated",   "inertial");
-    problem.installProcessor("TRACKER IMAGE", "ORB", "front left camera", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+    problem.installProcessor("IMAGE", "ORB", "front left camera", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
 //    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors
