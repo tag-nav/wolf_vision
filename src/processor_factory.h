@@ -35,7 +35,7 @@ namespace wolf
  *
  * The rule to make new TYPE strings unique is that you skip the prefix 'Processor' from your class name,
  * and you build a string in CAPITALS with space separators.
- *   - ProcessorImage -> ````"IMAGE"````
+ *   - ProcessorImage -> ````"TRACKER IMAGE"````
  *   - ProcessorLaser2D -> ````"LASER 2D"````
  *   - etc.
  *

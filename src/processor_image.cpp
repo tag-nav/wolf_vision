@@ -15,6 +15,7 @@ ProcessorImage::ProcessorImage(ProcessorImageParameters _params) :
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     active_search_grid_()
 {
+    setType("TRACKER IMAGE");
     // 1. detector-descriptor params
     DetectorDescriptorParamsBase* _dd_params = _params.detector_descriptor_params_ptr;
     switch (_dd_params->type){
@@ -472,7 +473,7 @@ ProcessorBase* ProcessorImage::create(const std::string& _unique_name, const Pro
 namespace wolf {
 namespace
 {
-const bool registered_prc_image = ProcessorFactory::get().registerCreator("IMAGE", ProcessorImage::create);
+const bool registered_prc_image = ProcessorFactory::get().registerCreator("TRACKER IMAGE", ProcessorImage::create);
 }
 } // namespace wolf
 

@@ -88,7 +88,7 @@ static ProcessorParamsBase* createProcessorParamsImage(const std::string & _file
 }
 
 // Register in the SensorFactory
-const bool registered_prc_image_par = ProcessorParamsFactory::get().registerCreator("IMAGE", createProcessorParamsImage);
+const bool registered_prc_image_par = ProcessorParamsFactory::get().registerCreator("TRACKER IMAGE", createProcessorParamsImage);
 
 
 }
