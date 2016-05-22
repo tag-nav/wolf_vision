@@ -7,7 +7,7 @@ image:
 
 detector-descriptor:
     type: "ORB"   # This affects the structure below. See processor_image_BRISK.yaml for another example
-    nominal pattern radius: 18
+    nominal pattern radius: 18 # 0 # 18?
     nfeatures: 500
     scale factor: 1.2
     nlevels: 1
@@ -25,10 +25,17 @@ matcher:
         height: 30
 
 active search:
-    grid width: 12
-    grid height: 8
+    grid width: 16
+    grid height: 12
     separation: 1
 
 algorithm:
-    maximum new features: 20
-    minimum features for new keyframe: 20
+    maximum new features: 40
+    minimum features for new keyframe: 40
+    
+draw: # Not implemented yet. Use it to control drawing options
+    features: true
+    detection roi: true
+    tracking roi: false
+    inflated tracking roi: true
+    
