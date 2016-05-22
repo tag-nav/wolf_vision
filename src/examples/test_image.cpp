@@ -3,21 +3,23 @@
 //Wolf includes
 #include "sensor_camera.h"
 #include "capture_image.h"
-#include "feature_point_image.h"
 #include "processor_image.h"
-#include "state_block.h"
-#include "state_quaternion.h"
-#include "factory.h"
 
+//#include "feature_point_image.h"
+//#include "state_block.h"
+//#include "state_quaternion.h"
+//#include "factory.h"
 
+// opencv
+//#include "opencv2/calib3d/calib3d.hpp"
 
 // general includes
-#include "unistd.h"
-#include <time.h>
-#include "opencv2/calib3d/calib3d.hpp"
+//#include "unistd.h"
+//#include <time.h>
 //#include <uEye.h> //used to use the camera?
 
 //std includes
+#include <ctime>
 #include <iostream>
 
 
