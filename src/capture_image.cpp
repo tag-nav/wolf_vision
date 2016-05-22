@@ -6,7 +6,6 @@ namespace wolf {
 CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCamera* _camera_ptr, cv::Mat _data_cv) :
     CaptureBase(_ts, _camera_ptr), image_(_data_cv)
 {
-    //assert((_img_width == _camera_ptr->img_width_ && _img_height == _camera_ptr->img_height_) && "Image and camera sizes don't match");
     setType("IMAGE");
 }
 
@@ -30,12 +29,12 @@ void CaptureImage::setKeypoints(const std::vector<cv::KeyPoint> &_keypoints)
     keypoints_ = _keypoints;
 }
 
-cv::Mat CaptureImage::getDescriptors() const
+cv::Mat& CaptureImage::getDescriptors()
 {
     return descriptors_;
 }
 
-std::vector<cv::KeyPoint> CaptureImage::getKeypoints() const
+std::vector<cv::KeyPoint>& CaptureImage::getKeypoints()
 {
     return keypoints_;
 }

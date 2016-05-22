@@ -14,7 +14,12 @@
 
 namespace wolf {
 
-//class CaptureImage
+/**
+ * \brief class CaptureImage
+ *
+ * This class stores a cv::Mat image, with keypoints and descriptors defined in the OpenCV format.
+ * This encapsulation allows this Capture to be used in OpenCV with ease.
+ */
 class CaptureImage : public CaptureBase
 {
     protected:
@@ -28,23 +33,14 @@ class CaptureImage : public CaptureBase
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
+         */
         virtual ~CaptureImage();
 
-        //virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
-
-        //cv::Mat data_cv_; //this should be protected
-
         virtual const cv::Mat& getImage() const;
-
         virtual void setDescriptors(const cv::Mat &_descriptors);
-
         virtual void setKeypoints(const std::vector<cv::KeyPoint>& _keypoints);
-
-        virtual cv::Mat getDescriptors() const;
-
-        virtual std::vector<cv::KeyPoint> getKeypoints() const;
+        virtual cv::Mat& getDescriptors();
+        virtual std::vector<cv::KeyPoint>& getKeypoints();
 
 
 
