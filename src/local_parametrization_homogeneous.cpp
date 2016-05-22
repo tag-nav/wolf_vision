@@ -36,7 +36,7 @@ bool LocalParametrizationHomogeneous::plus(const Eigen::Map<const Eigen::VectorX
         // compute rotation axis -- this guarantees unity norm
         Vector3s axis = _delta / norm_delta;
 
-        // express delta as a quaternion
+        // express delta as a quaternion -- this is exp(delta)
         Quaternions dq(AngleAxis<Scalar>(norm_delta, axis));
 
         // result as a homogeneous point -- we use the quaternion product for keeping in the 4-sphere

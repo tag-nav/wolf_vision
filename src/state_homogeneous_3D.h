@@ -1,5 +1,5 @@
 /*
- * \file state_homogeneous_3d.h
+ * \file state_homogeneous_3D.h
  *
  *  Created on: Mar 7, 2016
  *      \author: jsola
@@ -32,6 +32,7 @@ inline StateHomogeneous3D::StateHomogeneous3D(bool _fixed) :
         StateBlock(4, _fixed)
 {
     local_param_ptr_ = new LocalParametrizationHomogeneous;
+    state_ << 0, 0, 0, 1; // Set origin
 }
 
 inline StateHomogeneous3D::~StateHomogeneous3D()
