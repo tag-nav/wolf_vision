@@ -140,10 +140,10 @@ int main(int argc, char** argv)
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_->installProcessor("TRACKER IMAGE", "ORB", "PinHole", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
     // two-liner alternative with explicit access to pointers and params
-    //    ProcessorParamsBase* prc_params = ProcessorParamsFactory::get().create("TRACKER IMAGE", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
-    //    ProcessorBase* prc_ptr = wolf_problem_->installProcessor("TRACKER IMAGE", "ORB", sensor_ptr, prc_params);
+    //    ProcessorParamsBase* prc_params = ProcessorParamsFactory::get().create("IMAGE", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+    //    ProcessorBase* prc_ptr = wolf_problem_->installProcessor("IMAGE", "ORB", sensor_ptr, prc_params);
     //=====================================================
 
 
@@ -163,11 +163,11 @@ int main(int argc, char** argv)
         clock_t t1 = clock();
 
         // Old method with non-factory objects
-        //        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size], img_width, img_height);
+        //        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size]);
         //        prc_image->process(capture_image_ptr);
 
         // Preferred method with factory objects: FIXME: not working yet
-        capture_image_ptr = new CaptureImage(t, (SensorCamera*)sensor_ptr, frame[f % buffer_size], img_width, img_height);
+        capture_image_ptr = new CaptureImage(t, (SensorCamera*)sensor_ptr, frame[f % buffer_size]);
         capture_image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
