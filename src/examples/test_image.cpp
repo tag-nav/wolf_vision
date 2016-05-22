@@ -166,7 +166,7 @@ int main(int argc, char** argv)
         //        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size]);
         //        prc_image->process(capture_image_ptr);
 
-        // Preferred method with factory objects: FIXME: not working yet
+        // Preferred method with factory objects:
         capture_image_ptr = new CaptureImage(t, (SensorCamera*)sensor_ptr, frame[f % buffer_size]);
         capture_image_ptr->process();
 
