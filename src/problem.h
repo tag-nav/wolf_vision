@@ -136,7 +136,7 @@ class Problem : public NodeBase
          * \param _prc_type type of processor
          * \param _unique_processor_name unique processor name, used to identify the particular instance of the processor
          * \param _corresponding_sensor_name corresponding sensor name, used to bind the processor to the particular instance of the sensor
-         * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
+         * \param _params_filename name of formatted file (xml, yaml, etc) defining the processor parameters.
          */
         void installProcessor(std::string _prc_type, //
                               std::string _unique_processor_name, //
