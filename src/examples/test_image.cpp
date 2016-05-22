@@ -92,39 +92,39 @@ int main(int argc, char** argv)
     // Method 1: Use data generated here for sensor and processor
     //=====================================================
 
-    // SENSOR
-    Eigen::Vector4s k = {320,240,320,320};
-    SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()),
-                                              new StateBlock(Eigen::Vector3s::Zero()),
-                                              new StateBlock(k,false),img_width,img_height);
-
-    wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-
-    // PROCESSOR
-    ProcessorImageParameters tracker_params;
-    tracker_params.image = {img_width,  img_height};
-    tracker_params.matcher.min_normalized_score = 0.75;
-    tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
-    tracker_params.matcher.roi_width = 30;
-    tracker_params.matcher.roi_height = 30;
-    tracker_params.active_search.grid_width = 12;
-    tracker_params.active_search.grid_height = 8;
-    tracker_params.active_search.separation = 1;
-    tracker_params.algorithm.max_new_features =0;
-    tracker_params.algorithm.min_features_for_keyframe = 20;
-
-    DetectorDescriptorParamsOrb orb_params;
-    orb_params.type = DD_ORB;
-
-    DetectorDescriptorParamsBrisk brisk_params;
-    brisk_params.type = DD_BRISK;
-
-    // select the kind of detector-descriptor parameters
-    tracker_params.detector_descriptor_params_ptr = &orb_params; // choose ORB
-
-    ProcessorImage* prc_image = new ProcessorImage(tracker_params);
-
-    sen_cam_->addProcessor(prc_image);
+    //    // SENSOR
+    //    Eigen::Vector4s k = {320,240,320,320};
+    //    SensorCamera* sen_cam_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()),
+    //                                              new StateBlock(Eigen::Vector3s::Zero()),
+    //                                              new StateBlock(k,false),img_width,img_height);
+    //
+    //    wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
+    //
+    //    // PROCESSOR
+    //    ProcessorImageParameters tracker_params;
+    //    tracker_params.image = {img_width,  img_height};
+    //    tracker_params.matcher.min_normalized_score = 0.75;
+    //    tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
+    //    tracker_params.matcher.roi_width = 30;
+    //    tracker_params.matcher.roi_height = 30;
+    //    tracker_params.active_search.grid_width = 12;
+    //    tracker_params.active_search.grid_height = 8;
+    //    tracker_params.active_search.separation = 1;
+    //    tracker_params.algorithm.max_new_features =0;
+    //    tracker_params.algorithm.min_features_for_keyframe = 20;
+    //
+    //    DetectorDescriptorParamsOrb orb_params;
+    //    orb_params.type = DD_ORB;
+    //
+    //    DetectorDescriptorParamsBrisk brisk_params;
+    //    brisk_params.type = DD_BRISK;
+    //
+    //    // select the kind of detector-descriptor parameters
+    //    tracker_params.detector_descriptor_params_ptr = &orb_params; // choose ORB
+    //
+    //    ProcessorImage* prc_image = new ProcessorImage(tracker_params);
+    //
+    //    sen_cam_->addProcessor(prc_image);
     //=====================================================
 
 
@@ -148,11 +148,12 @@ int main(int argc, char** argv)
     // CAPTURES
     CaptureImage* capture_image_ptr;
 
+    f  = 1;
+    capture >> frame[f % buffer_size];
+
     cv::namedWindow("Feature tracker");    // Creates a window for display.
     cv::moveWindow("Feature tracker", 0, 0);
 
-    f  = 1;
-    capture >> frame[f % buffer_size];
     while(!(frame[f % buffer_size].empty()))
     {
         std::cout << "\n=============== Frame #: " << f << " in buffer: " << f%buffer_size << " ===============" << std::endl;
@@ -160,14 +161,15 @@ int main(int argc, char** argv)
         clock_t t1 = clock();
 
         // Old method with non-factory objects
-        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size], img_width, img_height);
-        prc_image->process(capture_image_ptr);
+        //        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size], img_width, img_height);
+        //        prc_image->process(capture_image_ptr);
 
         // Preferred method with factory objects: FIXME: not working yet
-        //        capture_image_ptr = new CaptureImage(t, (SensorCamera*)sensor_ptr, frame[f % buffer_size], img_width, img_height);
-        //        capture_image_ptr->process();
+        capture_image_ptr = new CaptureImage(t, (SensorCamera*)sensor_ptr, frame[f % buffer_size], img_width, img_height);
+        capture_image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+        cv::waitKey(10);
 
         f++;
         capture >> frame[f % buffer_size];
