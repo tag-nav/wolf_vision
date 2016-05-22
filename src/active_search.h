@@ -19,8 +19,8 @@
 
 namespace wolf{
 
-/**
-         * Active search tesselation grid.
+        /**
+         * \brief Active search tesselation grid.
          *
          * \author jsola, dinesh
          *
@@ -36,7 +36,7 @@ namespace wolf{
          *
          * The feature density can be controlled by
          * adjusting the grid's number of cells.
-         * Typically, use grids of 5x5 to 9x9 cells.
+         * Typically, use grids of 5x5 to 18x12 cells. Try to make reasonably square cells.
          *
          * This class implements a few interesting features:
          * - The grid can be randomly re-positioned at each frame to avoid dead zones at the cell edges.
@@ -102,7 +102,6 @@ namespace wolf{
          * \endcode
          *
          */
-
 class ActiveSearchGrid {
 
     private:
@@ -118,12 +117,14 @@ class ActiveSearchGrid {
 
     public:
         /**
-         * Void constructor
+         * \brief Void constructor
+         *
+         * Calling this constructor requires the use of setParameters() to configure.
          */
         ActiveSearchGrid();
 
         /**
-         * Constructor.
+         * \brief Constructor.
          * \param _img_size_h horizontal image size, in pixels.
          * \param _img_size_v vertical image size.
          * \param _n_cells_h horizontal number of cells per image width.
@@ -136,7 +137,7 @@ class ActiveSearchGrid {
 				const int & _margin = 0, const int & _separation = 0);
 
         /**
-         * Function to set the parameters of the active search grid
+         * \brief Function to set the parameters of the active search grid
          * \param _img_size_h horizontal image size, in pixels.
          * \param _img_size_v vertical image size.
          * \param _n_cells_h horizontal number of cells per image width.
@@ -183,14 +184,14 @@ class ActiveSearchGrid {
         void hitCell(const cv::KeyPoint& _pix);
 
         /**
-         * Get ROI of a random empty cell.
+         * \brief Get ROI of a random empty cell.
          * \param _roi the resulting ROI
          * \return true if ROI exists.
          */
         bool pickRoi(cv::Rect & _roi);
 
         /**
-         * Call this after pickRoi if no point was found in the roi
+         * \brief Call this after pickRoi if no point was found in the roi
          * in order to avoid searching again in it.
          * \param _roi the ROI where nothing was found
          */
@@ -199,28 +200,28 @@ class ActiveSearchGrid {
 
     private:
         /**
-         * Get cell corresponding to pixel
+         * \brief Get cell corresponding to pixel
          */
         template<typename Scalar>
         Eigen::Vector2i coords2cell(const Scalar _x, const Scalar _y);
 
         /**
-         * Get cell origin (exact pixel)
+         * \brief Get cell origin (exact pixel)
          */
         Eigen::Vector2i cellOrigin(const Eigen::Vector2i & _cell);
 
         /**
-         * Get cell center (can be decimal if size of cell is an odd number of pixels)
+         * \brief Get cell center (can be decimal if size of cell is an odd number of pixels)
          */
         Eigen::Vector2i cellCenter(const Eigen::Vector2i& _cell);
 
         /**
-         * Get one random empty cell
+         * \brief Get one random empty cell
          */
         bool pickEmptyCell(Eigen::Vector2i & _cell);
 
         /**
-         * Get the region of interest, reduced by a margin.
+         * \brief Get the region of interest, reduced by a margin.
          */
         void cell2roi(const Eigen::Vector2i & _cell, cv::Rect& _roi);
 

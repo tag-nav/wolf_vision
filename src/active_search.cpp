@@ -11,29 +11,10 @@
 namespace wolf{
 
 // CLASS ActiveSearchGrid
-ActiveSearchGrid::ActiveSearchGrid(){}
+ActiveSearchGrid::ActiveSearchGrid() : separation_(0), margin_(0) {}
 
 ActiveSearchGrid::ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v, const int & _n_cells_h,
                                    const int & _n_cells_v, const int & _margin, const int & _separation)
-//    : separation_(_separation), margin_(_margin) {
-
-//    projections_count_.resize(_n_cells_h + 1, _n_cells_v + 1);
-//    empty_cells_tile_tmp_.resize(2, (_n_cells_h + 1) * (_n_cells_v + 1));
-//    img_size_(0) = _img_size_h;
-//    img_size_(1) = _img_size_v;
-//    grid_size_(0) = _n_cells_h + 1;
-//    grid_size_(1) = _n_cells_v + 1;
-//    cell_size_(0) = _img_size_h / _n_cells_h;
-//    cell_size_(1) = _img_size_v / _n_cells_v;
-//    offset_ = -cell_size_ / 2;
-//    renew();
-
-//    std::cout << "img_size_: " << img_size_.transpose() << std::endl;
-//    std::cout << "grid_size_: " << grid_size_.transpose() << std::endl;
-//    std::cout << "cell_size_: " << cell_size_.transpose() << std::endl;
-//    std::cout << "offset_: " << offset_.transpose() << std::endl;
-//    std::cout << "projections_count_: " << projections_count_.transpose() << std::endl;
-//    std::cout << "empty_cells_tile_tmp_: " << empty_cells_tile_tmp_ << std::endl;
 {
     setParameters(_img_size_h, _img_size_v, _n_cells_h, _n_cells_v, _margin, _separation);
 }
@@ -55,7 +36,6 @@ void ActiveSearchGrid::setParameters(const int & _img_size_h, const int & _img_s
     cell_size_(1) = _img_size_v / _n_cells_v;
     offset_ = -cell_size_ / 2;
     renew();
-
 }
 
 // Functions to fill in cells
