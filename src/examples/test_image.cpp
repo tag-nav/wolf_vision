@@ -163,11 +163,11 @@ int main(int argc, char** argv)
         clock_t t1 = clock();
 
         // Old method with non-factory objects
-        //        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size], img_width, img_height);
+        //        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size]);
         //        prc_image->process(capture_image_ptr);
 
         // Preferred method with factory objects: FIXME: not working yet
-        capture_image_ptr = new CaptureImage(t, (SensorCamera*)sensor_ptr, frame[f % buffer_size], img_width, img_height);
+        capture_image_ptr = new CaptureImage(t, (SensorCamera*)sensor_ptr, frame[f % buffer_size]);
         capture_image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;

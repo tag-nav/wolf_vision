@@ -23,7 +23,7 @@ class CaptureImage : public CaptureBase
         std::vector<cv::KeyPoint> keypoints_;
 
     public:
-        CaptureImage(const TimeStamp& _ts, SensorCamera* _camera_ptr, cv::Mat _data_cv, int _img_width, int _img_height);
+        CaptureImage(const TimeStamp& _ts, SensorCamera* _camera_ptr, cv::Mat _data_cv);
 
         /** \brief Default destructor (not recommended)
          *

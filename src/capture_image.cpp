@@ -3,7 +3,7 @@
 
 namespace wolf {
 
-CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCamera* _camera_ptr, cv::Mat _data_cv, int _img_width, int _img_height) :
+CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCamera* _camera_ptr, cv::Mat _data_cv) :
     CaptureBase(_ts, _camera_ptr), image_(_data_cv)
 {
     setType("TRACKER IMAGE");
