@@ -99,10 +99,10 @@ void ProcessorImage::preProcess()
 void ProcessorImage::postProcess()
 {
     drawFeatures(last_ptr_);
-    drawRoi(image_last_,detector_roi_,cv::Scalar(88.0, 70.0, 255.0));   //detector roi(now only shown when it collides with the the image)
-    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0));   //tracker roi
-    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));   //inflated roi(now only shown when it collides with the the image)
-    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
+//    drawRoi(image_last_,detector_roi_,cv::Scalar(88.0, 70.0, 255.0));   //detector roi(now only shown when it collides with the the image)
+//    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0));   //tracker roi
+//    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));   //inflated roi(now only shown when it collides with the the image)
+//    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
 }
 
 bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
