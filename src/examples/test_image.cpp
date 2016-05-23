@@ -146,10 +146,11 @@ int main(int argc, char** argv)
         image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(10);
 
         f++;
         capture >> frame[f % buffer_size];
+
+        cv::waitKey(10);
     }
 
     wolf_problem_->destruct();

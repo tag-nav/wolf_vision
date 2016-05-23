@@ -77,6 +77,14 @@ void ProcessorImage::preProcess()
 {
     image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
 
+    if (last_ptr_ == nullptr) // do this just one time!
+    {
+        params_.image.width = image_incoming_.cols;
+        params_.image.height = image_incoming_.rows;
+        active_search_grid_.resizeImage(image_incoming_.cols, image_incoming_.rows);
+        std::cout << "resized!" << std::endl;
+    }
+
     if (last_ptr_ == nullptr)
         image_last_ = ((CaptureImage*)incoming_ptr_)->getImage();
     else
