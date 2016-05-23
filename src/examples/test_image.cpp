@@ -27,24 +27,10 @@ int main(int argc, char** argv)
 {
     using namespace wolf;
 
-    /**
-    if (argc != 2 || atoi(argv[1]) < 0 || atoi(argv[1]) > 1)
-    {
-        std::cout << "Please call me with: [./test_image IS_VIDEO], where:" << std::endl;
-        std::cout << "    IS_VIDEO is 0 for image and 1 for video" << std::endl;
-        std::cout << "EXIT due to bad user input" << std::endl << std::endl;
-        return -1;
-    }
-
-    // auxiliar variables
-    bool image_or_video = (atoi(argv[1]) == 1);
-    */
-
-    //ProcessorBrisk test
+    //ProcessorImage test
     std::cout << std::endl << " ========= ProcessorImage test ===========" << std::endl << std::endl;
 
     cv::VideoCapture capture;
-    unsigned int f = 0;
     const char * filename;
     if (argc == 1)
     {
@@ -52,34 +38,23 @@ int main(int argc, char** argv)
         filename = "/home/jtarraso/Vídeos/gray.mp4";
         capture.open(filename);
     }
+    else if (std::string(argv[1]) == "0")
+    {
+        //camera
+        filename = "0";
+        capture.open(0);
+    }
     else
     {
-        if (std::string(argv[1]) == "0")
-        {
-            //camera
-            filename = "0";
-            capture.open(0);
-        }
-        else
-        {
-            filename = argv[1];
-            capture.open(filename);
-        }
+        filename = argv[1];
+        capture.open(filename);
     }
     std::cout << "Input video file: " << filename << std::endl;
-    //cv::VideoCapture capture(filename);
-    if(!capture.isOpened())  // check if we succeeded
-    {
-        std::cout << "failed" << std::endl;
-    }
-    else
-    {
-        std::cout << "succeded" << std::endl;
-    }
-
+    if(!capture.isOpened()) std::cout << "failed" << std::endl; else std::cout << "succeded" << std::endl;
     capture.set(CV_CAP_PROP_POS_MSEC, 3000);
-    unsigned int img_width = (unsigned int)capture.get(CV_CAP_PROP_FRAME_WIDTH);
-    unsigned int img_height = (unsigned int)capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+
+    unsigned int img_width  = capture.get(CV_CAP_PROP_FRAME_WIDTH);
+    unsigned int img_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
     unsigned int buffer_size = 4;
@@ -137,20 +112,18 @@ int main(int argc, char** argv)
     // SENSOR
     // one-liner API
     SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jsola/dev/wolf/src/examples/camera.yaml");
+    SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
 
     // PROCESSOR
     // one-liner API
     wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", "/home/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
-    // two-liner alternative with explicit access to pointers and params
-    //    ProcessorParamsBase* prc_params = ProcessorParamsFactory::get().create("IMAGE", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
-    //    ProcessorBase* prc_ptr = wolf_problem_->installProcessor("IMAGE", "ORB", sensor_ptr, prc_params);
     //=====================================================
 
 
     // CAPTURES
-    CaptureImage* capture_image_ptr;
+    CaptureImage* image_ptr;
 
-    f  = 1;
+    unsigned int f  = 1;
     capture >> frame[f % buffer_size];
 
     cv::namedWindow("Feature tracker");    // Creates a window for display.
@@ -160,15 +133,17 @@ int main(int argc, char** argv)
     {
         std::cout << "\n=============== Frame #: " << f << " in buffer: " << f%buffer_size << " ===============" << std::endl;
 
+        t.setToNow();
+
         clock_t t1 = clock();
 
         // Old method with non-factory objects
         //        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size]);
         //        prc_image->process(capture_image_ptr);
 
-        // Preferred method with factory objects: FIXME: not working yet
-        capture_image_ptr = new CaptureImage(t, (SensorCamera*)sensor_ptr, frame[f % buffer_size]);
-        capture_image_ptr->process();
+        // Preferred method with factory objects:
+        image_ptr = new CaptureImage(t, camera_ptr, frame[f % buffer_size]);
+        image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
         cv::waitKey(10);
