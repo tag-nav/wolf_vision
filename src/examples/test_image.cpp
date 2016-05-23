@@ -21,11 +21,29 @@
 //std includes
 #include <ctime>
 #include <iostream>
+#include <cstdio>
 
 
 int main(int argc, char** argv)
 {
     using namespace wolf;
+
+    //=============================================================================================
+    // Get wolf root directory from the environment variable WOLF_ROOT
+    // To make this work, you need to set the variable WOLF_ROOT:
+    //  - To run from terminal, edit your ~/.bashrc, or ~/.bash_profile and add this line:
+    //    - export WOLF_ROOT=/path/to/wolf
+    //  - To run from eclipse, open the 'run configuration' of this executable, tab 'Environment'
+    //    - add variable WOLF_ROOT set to /path/to/wolf
+    std::string WOLF_ROOT;
+    char* w = std::getenv("WOLF_ROOT");
+    if (w != NULL)
+        WOLF_ROOT = w;
+    else
+        throw std::runtime_error("Environment variable WOLF_ROOT not found");
+    std::cout << "\nwolf root directory: " << WOLF_ROOT << std::endl;
+    //=============================================================================================
+
 
     //ProcessorImage test
     std::cout << std::endl << " ========= ProcessorImage test ===========" << std::endl << std::endl;
@@ -111,12 +129,12 @@ int main(int argc, char** argv)
 
     // SENSOR
     // one-liner API
-    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jsola/dev/wolf/src/examples/camera.yaml");
+    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), WOLF_ROOT + "/src/examples/camera.yaml");
     SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", "/home/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", WOLF_ROOT + "/src/examples/processor_image_ORB.yaml");
     //=====================================================
 
 
