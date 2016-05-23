@@ -432,12 +432,16 @@ inline void ProcessorMotion::integrate()
                                              delta_integrated_cov_,
                                              Eigen::MatrixXs::Zero(delta_size_, delta_size_),
                                              Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
-    //std::cout << "getBufferPtr()->get().back().delta_integrated_cov_" << std::endl;
-    //std::cout << getBufferPtr()->get().back().delta_integr_cov_ << std::endl;
+
+    //std::cout << "motion integrated: " << getBufferPtr()->get().size()-1 << std::endl;
+    //std::cout << "\tts: " << getBufferPtr()->get().back().ts_.getSeconds() << "." << getBufferPtr()->get().back().ts_.getNanoSeconds() << std::endl;
+    //xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, x_);
+    //std::cout << "\tx_integrated_: " << x_.transpose() << std::endl;
 }
 
 inline void ProcessorMotion::reintegrate()
 {
+    //std::cout << "ProcessorMotion::reintegrate" << std::endl;
     Motion zero_motion; // call constructor with params // TODO use motionZero(ts)
     zero_motion.ts_ = origin_ptr_->getTimeStamp();
     zero_motion.delta_ = deltaZero();
@@ -461,6 +465,12 @@ inline void ProcessorMotion::reintegrate()
         deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_, motion_it->delta_cov_, jacobian_prev, jacobian_curr,
                              motion_it->delta_integr_cov_);
         //std::cout << "delta_cov reintegrated" << std::endl;
+
+        //std::cout << "\tmotion reintegrated: " << std::distance(getBufferPtr()->get().begin(), motion_it) << std::endl;
+        //std::cout << "\t\tts: " << motion_it->ts_.getSeconds() << "." << motion_it->ts_.getNanoSeconds() << std::endl;
+        //xPlusDelta(origin_ptr_->getFramePtr()->getState(), motion_it->delta_integr_, x_);
+        //std::cout << "\t\tx_integrated_: " << x_.transpose() << std::endl;
+
         motion_it++;
         prev_motion_it++;
     }
@@ -468,9 +478,9 @@ inline void ProcessorMotion::reintegrate()
 
 inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
 {
-    std::cout << "ProcessorMotion::keyFrameCallback: " << std::endl;
-    std::cout << "\tnew keyframe " << _keyframe_ptr->id() << ": " << _keyframe_ptr->getState().transpose() << std::endl;
-    std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
+    //std::cout << "ProcessorMotion::keyFrameCallback: ts = " << _keyframe_ptr->getTimeStamp().getSeconds() << "." << _keyframe_ptr->getTimeStamp().getNanoSeconds() << std::endl;
+    //std::cout << "\tnew keyframe " << _keyframe_ptr->id() << ": " << _keyframe_ptr->getState().transpose() << std::endl;
+    //std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
 
     // get time stamp
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
@@ -492,10 +502,10 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
     // add to old buffer
     key_capture_ptr->getBufferPtr()->get().push_back(mot);
 
-    // debug cout
-    Eigen::VectorXs interpolated_state(3);
-    xPlusDelta(origin_ptr_->getFramePtr()->getState(), key_capture_ptr->getBufferPtr()->get().back().delta_integr_, interpolated_state);
-    std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
+    //// debug cout
+    //Eigen::VectorXs interpolated_state(3);
+    //xPlusDelta(origin_ptr_->getFramePtr()->getState(), key_capture_ptr->getBufferPtr()->get().back().delta_integr_, interpolated_state);
+    //std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
 
     // create motion constraint and add it to the new keyframe
     FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION,
