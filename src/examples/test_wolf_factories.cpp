@@ -43,14 +43,14 @@ int main(void)
     IntrinsicsOdom2D intr_odom2d;
 
     // Use params factory for camera intrinsics
-    IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", "/Users/jsola/dev/wolf/src/examples/camera.yaml");
+    IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", "/home/jsola/dev/wolf/src/examples/camera.yaml");
     // TODO: Use some automatic path syntax to find the file
 
     cout << "\n==================== Sensor Factory ====================" << endl;
 
     // Install sensors
     problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
-    problem.installSensor("CAMERA",     "front right camera",   pq_3d,  "/Users/jsola/dev/wolf/src/examples/camera.yaml");
+    problem.installSensor("CAMERA",     "front right camera",   pq_3d,  "/home/jsola/dev/wolf/src/examples/camera.yaml");
     problem.installSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
     problem.installSensor("GPS FIX",    "GPS fix",              p_3d);
     problem.installSensor("IMU",        "inertial",             pq_3d);
@@ -58,7 +58,7 @@ int main(void)
     problem.installSensor("ODOM 2D",    "aux odometer",         po_2d,  &intr_odom2d);
 
     // Full YAML support: Add this sensor and recover a pointer to it
-    SensorBase* sen_ptr = problem.installSensor("CAMERA", "rear camera", pq_3d, "/Users/jsola/dev/wolf/src/examples/camera.yaml");
+    SensorBase* sen_ptr = problem.installSensor("CAMERA", "rear camera", pq_3d, "/home/jsola/dev/wolf/src/examples/camera.yaml");
 
     // print available sensors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
@@ -75,7 +75,7 @@ int main(void)
     problem.installProcessor("ODOM 2D", "main odometry",    "main odometer");
     problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer");
     problem.installProcessor("IMU",     "pre-integrated",   "inertial");
-    problem.installProcessor("IMAGE", "ORB", "front left camera", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+    problem.installProcessor("IMAGE", "ORB", "front left camera", "/home/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
 //    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors
