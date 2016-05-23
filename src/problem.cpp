@@ -9,6 +9,7 @@
 #include "sensor_base.h"
 #include "sensor_gps.h"
 #include "capture_fix.h"
+#include "factory.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
 
@@ -16,7 +17,8 @@ namespace wolf
 {
 
 // unnamed namespace used for helper functions local to this file.
-namespace {
+namespace
+{
 std::string uppercase(std::string& s) {for (auto & c: s) c = std::toupper(c); return s;}
 }
 
@@ -33,7 +35,6 @@ Problem::Problem(FrameStructure _frame_structure) :
 
 Problem::~Problem()
 {
-    //std::cout << "deleting wolf problem " << nodeId() << std::endl;
     hardware_ptr_->destruct();
     trajectory_ptr_->destruct();
     map_ptr_->destruct();
@@ -49,19 +50,37 @@ void Problem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-SensorBase* Problem::installSensor(std::string _sen_type, std::string _unique_sensor_name, const Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics)
+//<<<<<<< HEAD
+//SensorBase* Problem::installSensor(std::string _sen_type,
+//                                   std::string _unique_sensor_name,
+//                                   const Eigen::VectorXs& _extrinsics,
+//                                   IntrinsicsBase* _intrinsics)
+//=======
+SensorBase* Problem::installSensor(std::string _sen_type, //
+                                   std::string _unique_sensor_name, //
+                                   const Eigen::VectorXs& _extrinsics, //
+                                   IntrinsicsBase* _intrinsics)
 {
-    SensorBase* sen_ptr = SensorFactory::get()->create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
+    SensorBase* sen_ptr = SensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
     addSensor(sen_ptr);
     return sen_ptr;
 }
+
+//SensorBase* Problem::installSensor(std::string _sen_type, //
+//                                   std::string _unique_sensor_name, //
+//                                   const Eigen::VectorXs& _extrinsics, //
+//                                   std::string _intrinsics_filename)
+//{
+//    IntrinsicsBase* intr_ptr = IntrinsicsFactory::get().create(_sen_type, _intrinsics_filename);
+//    return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
+//}
 
 ProcessorBase* Problem::installProcessor(std::string _prc_type, //
                                          std::string _unique_processor_name, //
                                          SensorBase* _corresponding_sensor_ptr, //
                                          ProcessorParamsBase* _prc_params)
 {
-    ProcessorBase* prc_ptr = ProcessorFactory::get()->create(uppercase(_prc_type), _unique_processor_name, _prc_params);
+    ProcessorBase* prc_ptr = ProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _prc_params);
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
 
     // setting the origin in all processor motion if origin already setted
@@ -75,16 +94,21 @@ ProcessorBase* Problem::installProcessor(std::string _prc_type, //
     return prc_ptr;
 }
 
-ProcessorBase* Problem::installProcessor(std::string _prc_type, //
-                                         std::string _unique_processor_name, //
-                                         std::string _corresponding_sensor_name, //
-                                         ProcessorParamsBase* _prc_params)
+void Problem::installProcessor(std::string _prc_type, //
+                               std::string _unique_processor_name, //
+                               std::string _corresponding_sensor_name, //
+                               std::string _params_filename)
 {
     SensorBase* sen_ptr = getSensorPtr(_corresponding_sensor_name);
     if (sen_ptr == nullptr)
         throw std::runtime_error("Sensor not found. Cannot bind Processor.");
-
-    return installProcessor(_prc_type, _unique_processor_name, sen_ptr, _prc_params);
+    if (_params_filename == "")
+        installProcessor(_prc_type, _unique_processor_name, sen_ptr, nullptr);
+    else
+    {
+        ProcessorParamsBase* prc_params = ProcessorParamsFactory::get().create(_prc_type, _params_filename);
+        installProcessor(_prc_type, _unique_processor_name, sen_ptr, prc_params);
+    }
 }
 
 void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
@@ -119,7 +143,6 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const TimeStamp& _time
 FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
-    //std::cout << "creating new frame..." << std::endl;
 
     // ---------------------- CREATE NEW FRAME ---------------------
     // Create frame
@@ -151,7 +174,6 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs&
             throw std::runtime_error(
                     "Unknown frame structure. Add appropriate frame structure to the switch statement.");
     }
-    //std::cout << "new frame created" << std::endl;
     return trajectory_ptr_->getLastFramePtr();
 }
 

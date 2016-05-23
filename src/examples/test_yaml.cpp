@@ -5,17 +5,30 @@
  *      \author: jsola
  */
 
-#include "yaml-cpp/yaml.h"
+#include "pinholeTools.h"
+#include "yaml/yaml_conversion.h"
+#include "processor_image.h"
+#include "factory.h"
+
+#include <yaml-cpp/yaml.h>
+
+#include <eigen3/Eigen/Dense>
 
 #include <iostream>
 #include <fstream>
 
-#include <eigen3/Eigen/Dense>
 
 int main()
 {
 
-    YAML::Node camera_config = YAML::LoadFile("/home/jsola/dev/wolf/src/examples/camera.yaml");
+    using namespace Eigen;
+    using namespace wolf;
+    using std::string;
+    using YAML::Node;
+
+    // Camera parameters
+
+    YAML::Node camera_config = YAML::LoadFile("/Users/jsola/dev/wolf/src/examples/camera.yaml");
 
     if (camera_config["sensor type"])
     {
@@ -23,39 +36,94 @@ int main()
 
         std::string sensor_name = camera_config["sensor name"].as<std::string>();
 
-        YAML::Node params = camera_config["parameters"];
+        YAML::Node params   = camera_config["intrinsic"];
 
-        std::vector<double> p = camera_config["extrinsic"]["position"].as<std::vector<double> >(); // in one go: it works!
-        std::vector<double> o = camera_config["extrinsic"]["orientation"].as<std::vector<double> >();
-        std::vector<double> s = params["image size"].as<std::vector<double> >();
-        std::vector<double> k = params["intrinsic"].as<std::vector<double> >();
-        std::vector<double> d = params["distortion"].as<std::vector<double> >();
-        std::vector<double> c = params["correction"].as<std::vector<double> >();
+        // convert yaml to Eigen
+        Vector3s pos        = camera_config["extrinsic"]["position"].as<Vector3s>();
+        Vector3s ori        = camera_config["extrinsic"]["orientation"].as<Vector3s>() * M_PI / 180;
+        Vector2s size       = params["image size"].as<Vector2s>();
+        Vector4s intrinsic  = params["pinhole model"].as<Vector4s>();
+        VectorXs distortion = params["distortion"].as<VectorXs>();
 
-        using namespace Eigen;
+        // compute correction model
+        VectorXs correction(distortion.size());
+        pinhole::computeCorrectionModel(intrinsic, distortion, correction);
 
-        // Using Eigen vector constructors from data pionters. Mind the vector sizes!
-        Vector3d pos(p.data());
-        Vector3d ori(o.data());
-        ori *= 3.1415926536 / 180;
-        Vector2d size(s.data());
-        Vector4d intrinsic(k.data());
-        Map<VectorXd> distortion(d.data(), d.size());
-        Map<VectorXd> correction(c.data(), c.size());
-
-        std::cout << "sensor type: " << sensor_type << std::endl;
-        std::cout << "sensor name: " << sensor_name << std::endl;
-        std::cout << "sensor extrinsics: " << std::endl;
-        std::cout << "\tposition    : " << pos.transpose() << std::endl;
-        std::cout << "\torientation : " << ori.transpose() << std::endl;
-        std::cout << "sensor parameters: " << std::endl;
-        std::cout << "\timage size  : " << size.transpose() << std::endl;
-        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
-        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
-        std::cout << "\tcorrection  : " << correction.transpose() << std::endl;
+        // output
+        std::cout << "sensor type       : " << sensor_type << std::endl;
+        std::cout << "sensor name       : " << sensor_name << std::endl;
+        std::cout << "sensor extrinsics : " << std::endl;
+        std::cout << "\tposition        : " << pos.transpose() << std::endl;
+        std::cout << "\torientation     : " << ori.transpose() << std::endl;
+        std::cout << "sensor parameters : " << std::endl;
+        std::cout << "\timage size      : " << size.transpose() << std::endl;
+        std::cout << "\tpinhole model   : " << intrinsic.transpose() << std::endl;
+        std::cout << "\tdistoriton      : " << distortion.transpose() << std::endl;
+        std::cout << "\tcorrection      : " << correction.transpose() << std::endl;
     }
     else
         std::cout << "Bad configuration file. No sensor type found." << std::endl;
+
+
+
+    // Processor Image parameters
+
+    ProcessorImageParameters p;
+
+    Node params = YAML::LoadFile("/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+
+    if (params["processor type"])
+    {
+        Node dd_yaml = params["detector-descriptor"];
+        if(dd_yaml["type"].as<string>() == "ORB")
+        {
+            DetectorDescriptorParamsOrb* dd = new DetectorDescriptorParamsOrb;
+            dd->type                    = DD_ORB;
+            dd->nominal_pattern_radius  = dd_yaml["nominal pattern radius"].as<unsigned int>();
+            dd->nfeatures               = dd_yaml["nfeatures"].as<unsigned int>();
+            dd->scaleFactor             = dd_yaml["scale factor"].as<float>();
+            dd->nlevels                 = dd_yaml["nlevels"].as<unsigned int>();
+            dd->edgeThreshold           = dd_yaml["edge threshold"].as<unsigned int>();
+            dd->firstLevel              = dd_yaml["first level"].as<unsigned int>();
+            dd->WTA_K                   = dd_yaml["WTA_K"].as<unsigned int>();
+            string st = dd_yaml["score type"].as<string>();
+            if (st == "cv::ORB::HARRIS_SCORE")
+                dd->scoreType           = cv::ORB::HARRIS_SCORE;
+            else
+            {
+                std::cout << "Unknown score type" << std::endl;
+            }
+            dd->patchSize               = dd_yaml["patch size"].as<unsigned int>();
+            p.detector_descriptor_params_ptr = dd;
+        }
+        else
+            std::cout << "Unknown detector-descriptor type " << dd_yaml["type"].as<string>() << std::endl;
+
+        Node m = params["matcher"];
+        p.matcher.min_normalized_score  = m["minimum normalized score"].as<Scalar>();
+        string sn = m["similarity norm"].as<string>();
+        if(sn == "cv::NORM_HAMMING")
+            p.matcher.similarity_norm   = cv::NORM_HAMMING;
+        else
+            std::cout << "Unknown distance type" << std::endl;
+
+        p.matcher.roi_width             = m["roi"]["width"].as<unsigned int>();
+        p.matcher.roi_height            = m["roi"]["height"].as<unsigned int>();
+
+        Node as = params["active search"];
+        p.active_search.grid_width      = as["grid width"].as<unsigned int>();
+        p.active_search.grid_height     = as["grid height"].as<unsigned int>();
+        p.active_search.separation      = as["separation"].as<unsigned int>();
+
+        Node img = params["image"];
+        p.image.width                   = img["width"].as<unsigned int>();
+        p.image.height                  = img["height"].as<unsigned int>();
+
+        Node alg = params["algorithm"];
+        p.algorithm.max_new_features            = alg["maximum new features"].as<unsigned int>();
+        p.algorithm.min_features_for_keyframe   = alg["minimum features for new keyframe"].as<unsigned int>();
+    }
+
 
     return 0;
 }

@@ -656,6 +656,6 @@ ProcessorBase* ProcessorLaser2D::create(const std::string& _unique_name, const P
 namespace wolf {
 namespace
 {
-const bool registered_prc_laser_2d = ProcessorFactory::get()->registerCreator("LASER 2D", ProcessorLaser2D::create);
+const bool registered_prc_laser_2d = ProcessorFactory::get().registerCreator("LASER 2D", ProcessorLaser2D::create);
 }
 } // namespace wolf

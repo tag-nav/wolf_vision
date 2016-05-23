@@ -38,7 +38,7 @@ IF(OpenCV_FOUND)
 ENDIF(OpenCV_FOUND)
 
 # YAML with yaml-cpp
-SET(YAMLCPP_USE_STATIC_LIBS TRUE) #Use static library : not working: TO BE REVISED
+#SET(YAMLCPP_USE_STATIC_LIBS TRUE) #Use static library : not working: TO BE REVISED
 FIND_PACKAGE(YamlCpp)
 IF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library FOUND: yaml-cpp related sources will be built.")
@@ -90,6 +90,10 @@ ENDIF(OpenCV_FOUND)
 IF(Suitesparse_FOUND)
     INCLUDE_DIRECTORIES(${Suitesparse_INCLUDE_DIRS})
 ENDIF(Suitesparse_FOUND)
+
+IF(YAMLCPP_FOUND)
+    INCLUDE_DIRECTORIES(${YAMLCPP_INCLUDE_DIR})
+ENDIF(YAMLCPP_FOUND)
 
 #headers
 SET(HDRS_BASE
@@ -278,13 +282,13 @@ IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
         feature_point_image.h
-        processor_brisk.h
+        processor_image.h
         active_search.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
         feature_point_image.cpp
-        processor_brisk.cpp
+        processor_image.cpp
         active_search.cpp
         )
 ENDIF(OpenCV_FOUND)
@@ -293,10 +297,32 @@ IF (Suitesparse_FOUND)
     ADD_SUBDIRECTORY(solver)
 ENDIF(Suitesparse_FOUND)
 
+# LEAVE YAML FILES ALWAYS IN THE LAST POSITION !!
+IF(YAMLCPP_FOUND)
+    # headers
+    SET(HDRS ${HDRS}
+        yaml/yaml_conversion.h
+        )
+
+    # sources
+    SET(SRCS ${SRCS}
+        yaml/sensor_camera_yaml.cpp
+        yaml/processor_image_yaml.cpp
+        )
+    IF(laser_scan_utils_FOUND)
+        SET(SRCS ${SRCS}
+            yaml/sensor_laser_2D_yaml.cpp
+            )
+    ENDIF(laser_scan_utils_FOUND)
+ENDIF(YAMLCPP_FOUND)
+
+
+
 # create the shared library
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_WRAPPER})
 
-#Link the created library with ceres
+#Link the created libraries
+#=============================================================
 IF (Ceres_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CERES_LIBRARIES})
 ENDIF(Ceres_FOUND)
@@ -320,6 +346,7 @@ ENDIF (YAMLCPP_FOUND)
 
 
 #install library
+#=============================================================
 INSTALL(TARGETS ${PROJECT_NAME}
       RUNTIME DESTINATION bin
       LIBRARY DESTINATION lib/iri-algorithms

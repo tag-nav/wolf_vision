@@ -2,7 +2,6 @@
 #define CONSTRAINT_CORNER_2D_THETA_H_
 
 //Wolf includes
-#include "wolf.h"
 #include "constraint_sparse.h"
 #include "landmark_corner_2D.h"
 

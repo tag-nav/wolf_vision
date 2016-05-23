@@ -1,0 +1,41 @@
+processor type: "IMAGE"
+processor name: "ORB feature tracker"
+
+image:
+    width: 640
+    height: 360
+
+detector-descriptor:
+    type: "ORB"   # This affects the structure below. See processor_image_BRISK.yaml for another example
+    nominal pattern radius: 18 # 0 # 18?
+    nfeatures: 500
+    scale factor: 1.2
+    nlevels: 1
+    edge threshold: 4
+    first level: 0 
+    WTA_K: 2
+    score type: cv::ORB::HARRIS_SCORE
+    patch size: 31
+
+matcher:
+    minimum normalized score: 0.8
+    similarity norm: cv::NORM_HAMMING
+    roi:
+        width: 30
+        height: 30
+
+active search:
+    grid width: 16
+    grid height: 12
+    separation: 1
+
+algorithm:
+    maximum new features: 40
+    minimum features for new keyframe: 40
+    
+draw: # Not implemented yet. Use it to control drawing options
+    features: true
+    detection roi: true
+    tracking roi: false
+    inflated tracking roi: true
+    

@@ -7,21 +7,16 @@
 
 #include "../sensor_gps_fix.h"
 #include "../sensor_camera.h"
-
 #include "../sensor_odom_2D.h"
+#include "../sensor_imu.h"
+#include "../sensor_gps.h"
+
 #include "../processor_odom_2D.h"
 #include "../processor_odom_3D.h"
-
-#include "../sensor_imu.h"
 #include "../processor_imu.h"
-
-#include "../sensor_gps.h"
 #include "../processor_gps.h"
 
-//#include "../sensor_laser_2D.h"
-
 #include "../problem.h"
-
 
 #include <iostream>
 #include <iomanip>
@@ -41,24 +36,29 @@ int main(void)
 
     Problem problem(FRM_PO_3D);
 
-    cout << "\n==================== Sensor Factory ====================" << endl;
+    cout << "\n================= Intrinsics Factory ===================" << endl;
 
     // define some useful parameters
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
-    IntrinsicsCamera intr_cam;
     IntrinsicsOdom2D intr_odom2d;
 
-    // Add sensors
-    problem.installSensor("CAMERA",     "front left camera",    pq_3d,  &intr_cam);
-    problem.installSensor("Camera",     "front right camera",   pq_3d,  &intr_cam);
+    // Use params factory for camera intrinsics
+    IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", "/home/jsola/dev/wolf/src/examples/camera.yaml");
+    // TODO: Use some automatic path syntax to find the file
+
+    cout << "\n==================== Sensor Factory ====================" << endl;
+
+    // Install sensors
+    problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
+    problem.installSensor("CAMERA",     "front right camera",   pq_3d,  "/home/jsola/dev/wolf/src/examples/camera.yaml");
     problem.installSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
     problem.installSensor("GPS FIX",    "GPS fix",              p_3d);
-    problem.installSensor("CAMERA",     "rear camera",          pq_3d,  &intr_cam);
     problem.installSensor("IMU",        "inertial",             pq_3d);
     problem.installSensor("GPS",        "GPS raw",              p_3d);
+    problem.installSensor("ODOM 2D",    "aux odometer",         po_2d,  &intr_odom2d);
 
-    // Add this sensor and recover a pointer to it
-    SensorBase* sen_ptr = problem.installSensor("ODOM 2D", "aux odometer", po_2d, &intr_odom2d);
+    // Full YAML support: Add this sensor and recover a pointer to it
+    SensorBase* sen_ptr = problem.installSensor("CAMERA", "rear camera", pq_3d, "/home/jsola/dev/wolf/src/examples/camera.yaml");
 
     // print available sensors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
@@ -67,15 +67,16 @@ int main(void)
                 << ": " << setw(8) << sen->getType()
                 << " | name: " << sen->getName() << endl;
     }
-    cout << sen_ptr->getName() << "\'s pointer: " << sen_ptr << " --------> All pointers are accessible if needed!" << endl;
+    cout << "\twith intrinsics: " << sen_ptr->getIntrinsicPtr()->getVector().transpose() << endl;
 
     cout << "\n=================== Processor Factory ===================" << endl;
 
-    // Add processors and bind them to sensors -- by sensor name!
+    // Install processors and bind them to sensors -- by sensor name!
     problem.installProcessor("ODOM 2D", "main odometry",    "main odometer");
-    problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer",     nullptr);
-    problem.installProcessor("IMU",     "pre-integrated",   "inertial",         nullptr);
-//    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw",          nullptr);
+    problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer");
+    problem.installProcessor("IMU",     "pre-integrated",   "inertial");
+    problem.installProcessor("IMAGE", "ORB", "front left camera", "/home/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+//    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr()))

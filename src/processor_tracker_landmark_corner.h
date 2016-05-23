@@ -219,15 +219,4 @@ inline ConstraintBase* ProcessorTrackerLandmarkCorner::createConstraint(FeatureB
 
 } // namespace wolf
 
-
-// Register in the SensorFactory
-#include "processor_factory.h"
-namespace wolf {
-namespace
-{
-const bool registered_prc_laser = ProcessorFactory::get()->registerCreator("LASER 2D", ProcessorTrackerLandmarkCorner::create);
-}
-} // namespace wolf
-
-
 #endif /* SRC_PROCESSOR_TRACKER_LASER_H_ */

@@ -74,6 +74,6 @@ wolf::ProcessorBase* ProcessorGPS::create(const std::string& _unique_name, const
 namespace wolf {
 namespace
 {
-const bool registered_prc_gps = ProcessorFactory::get()->registerCreator("GPS", ProcessorGPS::create);
+const bool registered_prc_gps = ProcessorFactory::get().registerCreator("GPS", ProcessorGPS::create);
 }
 } // namespace wolf

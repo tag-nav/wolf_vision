@@ -10,7 +10,6 @@
 
 #include "processor_tracker.h"
 #include "capture_base.h"
-#include "wolf.h"
 
 namespace wolf
 {

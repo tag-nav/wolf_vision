@@ -2,7 +2,6 @@
 #define CONSTRAINT_ODOM_2D_ANALYTIC_H_
 
 //Wolf includes
-#include "wolf.h"
 #include "constraint_relative_2D_analytic.h"
 
 namespace wolf {

@@ -149,12 +149,13 @@ int main(int argc, char** argv)
 
     Problem problem(FRM_PO_2D);
     SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.installSensor("ODOM 2D", "odometer", odom_pose, &odom_intrinsics);
-    ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.installProcessor("ODOM 2D", "main odometry", "odometer");
+    ProcessorParamsBase odometer_params;
+    ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.installProcessor("ODOM 2D", "main odometry", odom_sensor, &odometer_params);
     //SensorBase* gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
     SensorBase* laser_1_sensor = problem.installSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
     SensorBase* laser_2_sensor = problem.installSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
-    problem.installProcessor("LASER 2D", "front laser processor", "front laser", &laser_1_processor_params);
-    problem.installProcessor("LASER 2D", "rear laser processor", "rear laser", &laser_2_processor_params);
+    problem.installProcessor("LASER 2D", "front laser processor", laser_1_sensor, &laser_1_processor_params);
+    problem.installProcessor("LASER 2D", "rear laser processor", laser_2_sensor, &laser_2_processor_params);
 
     std::cout << "Wolf tree setted correctly!" << std::endl;
 

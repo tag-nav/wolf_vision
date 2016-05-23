@@ -3,7 +3,6 @@
 #define CONSTRAINT_SPARSE_H_
 
 //Wolf includes
-#include "wolf.h"
 #include "constraint_base.h"
 #include "state_block.h"
 

@@ -3,7 +3,6 @@
 #define CAPTURE_RELATIVE_H_
 
 //Wolf includes
-#include "wolf.h"
 #include "capture_base.h"
 
 //std includes

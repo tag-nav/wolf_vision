@@ -3,7 +3,6 @@
 #define CONSTRAINT_ANALYTIC_H_
 
 //Wolf includes
-#include "wolf.h"
 #include "constraint_base.h"
 
 namespace wolf {
