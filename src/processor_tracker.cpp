@@ -140,6 +140,9 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             // Make the last Capture's Frame a KeyFrame so that it gets into the solver
             last_ptr_->getFramePtr()->setKey();
 
+            // Set state to the keyframe
+            last_ptr_->getFramePtr()->setState(getProblem()->getStateAtTimeStamp(last_ptr_->getTimeStamp()));
+
             // Establish constraints between last and origin
             establishConstraints();
 
@@ -181,7 +184,7 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& 
         return false;
 
 
-//    std::cout << "ProcessorTracker::keyFrameCallback sensor " << getSensorPtr()->id() << std::endl;
+    //std::cout << "ProcessorTracker::keyFrameCallback in sensor " << getSensorPtr()->id() << std::endl;
 
     // Capture last_ is added to the new keyframe
     FrameBase* last_old_frame = last_ptr_->getFramePtr();
