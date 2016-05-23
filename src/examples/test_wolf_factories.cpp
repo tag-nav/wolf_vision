@@ -18,6 +18,8 @@
 
 #include "../problem.h"
 
+#include "../factory.h"
+
 #include <iostream>
 #include <iomanip>
 
