@@ -108,9 +108,6 @@ class Problem : public NodeBase
          * \param _extrinsics a vector of extrinsic parameters: size 2 for 2D position, 3 for 2D pose, 3 for 3D position, 7 for 3D pose.
          * \param _intrinsics a base-pointer to a derived struct defining the intrinsic parameters.
          */
-//<<<<<<< HEAD
-//        SensorBase* installSensor(std::string _sen_type, std::string _unique_sensor_name, const Eigen::VectorXs& _extrinsics, IntrinsicsBase* _intrinsics = nullptr);
-//=======
         SensorBase* installSensor(std::string _sen_type, //
                                   std::string _unique_sensor_name, //
                                   const Eigen::VectorXs& _extrinsics, //
@@ -126,7 +123,6 @@ class Problem : public NodeBase
                                   std::string _unique_sensor_name, //
                                   const Eigen::VectorXs& _extrinsics, //
                                   std::string _intrinsics_filename);
-//>>>>>>> master
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *

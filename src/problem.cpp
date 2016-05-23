@@ -50,12 +50,6 @@ void Problem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-//<<<<<<< HEAD
-//SensorBase* Problem::installSensor(std::string _sen_type,
-//                                   std::string _unique_sensor_name,
-//                                   const Eigen::VectorXs& _extrinsics,
-//                                   IntrinsicsBase* _intrinsics)
-//=======
 SensorBase* Problem::installSensor(std::string _sen_type, //
                                    std::string _unique_sensor_name, //
                                    const Eigen::VectorXs& _extrinsics, //
@@ -66,14 +60,14 @@ SensorBase* Problem::installSensor(std::string _sen_type, //
     return sen_ptr;
 }
 
-//SensorBase* Problem::installSensor(std::string _sen_type, //
-//                                   std::string _unique_sensor_name, //
-//                                   const Eigen::VectorXs& _extrinsics, //
-//                                   std::string _intrinsics_filename)
-//{
-//    IntrinsicsBase* intr_ptr = IntrinsicsFactory::get().create(_sen_type, _intrinsics_filename);
-//    return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
-//}
+SensorBase* Problem::installSensor(std::string _sen_type, //
+                                   std::string _unique_sensor_name, //
+                                   const Eigen::VectorXs& _extrinsics, //
+                                   std::string _intrinsics_filename)
+{
+    IntrinsicsBase* intr_ptr = IntrinsicsFactory::get().create(_sen_type, _intrinsics_filename);
+    return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
+}
 
 ProcessorBase* Problem::installProcessor(std::string _prc_type, //
                                          std::string _unique_processor_name, //
