@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     unsigned int img_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
-    unsigned int buffer_size = 4;
+    unsigned int buffer_size = 8;
     std::vector<cv::Mat> frame(buffer_size);
 
     TimeStamp t = 1;
@@ -111,12 +111,12 @@ int main(int argc, char** argv)
 
     // SENSOR
     // one-liner API
-    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/Users/jsola/dev/wolf/src/examples/camera.yaml");
+    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jtarraso/dev/Wolf/src/examples/camera.yaml");
     SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", "/Users/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", "/home/jtarraso/dev/Wolf/src/examples/processor_image_ORB.yaml");
     //=====================================================
 
 
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
         image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(10);
+        cv::waitKey(0);
 
         f++;
         capture >> frame[f % buffer_size];
