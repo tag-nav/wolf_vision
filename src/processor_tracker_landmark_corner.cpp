@@ -198,27 +198,27 @@ bool ProcessorTrackerLandmarkCorner::voteForKeyFrame()
     // option 1: more than TH new features in last
     if (corners_last_.size() >= new_corners_th_)
     {
-        std::cout << "------------- NEW KEY FRAME: Option 1" << std::endl;
+        std::cout << "------------- NEW KEY FRAME: Option 1 - Enough new features" << std::endl;
         //std::cout << "\tnew features in last = " << corners_last_.size() << std::endl;
         return true;
     }
-    // option 2: less than half matched in origin, matched in incoming (more than half in last)
-    if (matches_landmark_from_incoming_.size()*2 < origin_ptr_->getFeatureListPtr()->size() && matches_landmark_from_last_.size()*2 > origin_ptr_->getFeatureListPtr()->size())
-    {
-        std::cout << "------------- NEW KEY FRAME: Option 2" << std::endl;
-        //std::cout << "\tmatches in incoming = " << matches_landmark_from_incoming_.size() << std::endl<< "\tmatches in origin = " << origin_ptr_->getFeatureListPtr()->size() << std::endl;
-        return true;
-    }
-    // option 3: loop closure (if the newest frame from which a matched landmark was observed is old enough)
+    // option 2: loop closure (if the newest frame from which a matched landmark was observed is old enough)
     for (auto new_feat : new_features_last_)
     {
         if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_feat].landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() > loop_frames_th_)
         {
-            std::cout << "------------- NEW KEY FRAME: Option 3" << std::endl;
+            std::cout << "------------- NEW KEY FRAME: Option 2 - Loop closure" << std::endl;
             //std::cout << "\tmatched landmark from frame = " << matches_landmark_from_last_[new_feat].landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() << std::endl;
             return true;
         }
     }
+    //// option 3: less than half matched in origin, matched in incoming (more than half in last)
+    //if (matches_landmark_from_incoming_.size()*2 < origin_ptr_->getFeatureListPtr()->size() && matches_landmark_from_last_.size()*2 > origin_ptr_->getFeatureListPtr()->size())
+    //{
+    //    std::cout << "------------- NEW KEY FRAME: Option 3 - " << std::endl;
+    //    //std::cout << "\tmatches in incoming = " << matches_landmark_from_incoming_.size() << std::endl<< "\tmatches in origin = " << origin_ptr_->getFeatureListPtr()->size() << std::endl;
+    //    return true;
+    //}
     return false;
 }
 
