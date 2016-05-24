@@ -15,6 +15,7 @@
 #include "../processor_odom_3D.h"
 #include "../processor_imu.h"
 #include "../processor_gps.h"
+#include "../processor_image.h"
 
 #include "../problem.h"
 
@@ -31,7 +32,7 @@ int main(void)
     using namespace std;
 
 
-    cout << "\n====== Registering creators in the Wolf Factories ======" << endl;
+    cout << "\n====== Registering creators in the Wolf Factories =======" << endl;
 
     cout << "If you look above, you see the registered creators.\n"
             "There is only one attempt per class, and it is successful!\n"
@@ -64,12 +65,16 @@ int main(void)
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
     IntrinsicsOdom2D intr_odom2d;
 
-    cout << "\n================= Intrinsics Factory ===================" << endl;
+    cout << "\n================== Intrinsics Factory ===================" << endl;
 
     // Use params factory for camera intrinsics
     IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", WOLF_CONFIG + "/camera.yaml");
+    ProcessorParamsBase* params_ptr = ProcessorParamsFactory::get().create("IMAGE", WOLF_CONFIG + "/processor_image_ORB.yaml");
 
-    cout << "\n==================== Sensor Factory ====================" << endl;
+    cout << "CAMERA with intrinsics      : " << ((IntrinsicsCamera*)intr_cam_ptr)->pinhole_model.transpose() << endl;
+    cout << "Processor IMAGE image width : " << ((ProcessorImageParameters*)params_ptr)->image.width << endl;
+
+    cout << "\n==================== Install Sensors ====================" << endl;
 
     // Install sensors
     problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
@@ -79,9 +84,7 @@ int main(void)
     problem.installSensor("IMU",        "inertial",             pq_3d);
     problem.installSensor("GPS",        "GPS raw",              p_3d);
     problem.installSensor("ODOM 2D",    "aux odometer",         po_2d,  &intr_odom2d);
-
-    // Full YAML support: Add this sensor and recover a pointer to it
-    SensorBase* sen_ptr = problem.installSensor("CAMERA", "rear camera", pq_3d, WOLF_CONFIG + "/camera.yaml");
+    problem.installSensor("CAMERA", "rear camera", pq_3d, WOLF_ROOT + "/src/examples/camera.yaml");
 
     // print available sensors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
@@ -90,9 +93,8 @@ int main(void)
                 << ": " << setw(8) << sen->getType()
                 << " | name: " << sen->getName() << endl;
     }
-    cout << "\twith intrinsics: " << sen_ptr->getIntrinsicPtr()->getVector().transpose() << endl;
 
-    cout << "\n=================== Processor Factory ===================" << endl;
+    cout << "\n=================== Install Processors ===================" << endl;
 
     // Install processors and bind them to sensors -- by sensor name!
     problem.installProcessor("ODOM 2D", "main odometry",    "main odometer");
