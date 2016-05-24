@@ -165,14 +165,16 @@ Download and build
     $ sudo make install  //optional in case you want to install wolf library
 
 
-**Set the WOLF environment**
+**Set the WOLF_ROOT environment variable**
 
-We need a platform-independent way to specify where are our configuration files. 
-For example, if we want to use YAML files for configuring sensors, `YAML::LoadFile(filename)` needs an absolute path to a `filename`
+We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at tun-time. 
+For example, if we want to use YAML files for configuring sensors, `YAML::LoadFile(filename)` needs an absolute path to a `filename`. This name is platform-specific, and many times user-specific.
 
-__Solution:__
+Usually, these files are out of the WOLF project. But for testing purposes, some of these files exist within the WOLF directories.
 
-  1. To run from __Terminal__, you need to create an environment variable WOLF_ROOT pointing to where the wolf project is
+Proceed as follows:
+
+  1. To run from __Terminal__ (the default), you need to create an environment variable WOLF_ROOT pointing to where the wolf project is
      - Edit file ````~/.bashrc````, or ````~/.bash_profile````, and add these lines:
     
         ````
