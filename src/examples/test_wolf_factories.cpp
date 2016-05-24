@@ -39,13 +39,14 @@ int main(void)
             "\n"
             "See [wolf]/src/examples/test_sensor_factory.cpp for the way to add sensors and processors to wolf::Problem." << endl;
 
-    //=============================================================================================
-    // Get wolf root directory from the environment variable WOLF_ROOT
-    // To make this work, you need to set the variable WOLF_ROOT:
-    //  - To run from terminal, edit your ~/.bashrc, or ~/.bash_profile and add this line:
-    //    - export WOLF_ROOT=/path/to/wolf
-    //  - To run from eclipse, open the 'run configuration' of this executable, tab 'Environment'
-    //    - add variable WOLF_ROOT set to /path/to/wolf
+    /**=============================================================================================
+     * Get wolf root directory from the environment variable WOLF_ROOT
+     * To make this work, you need to set the environment variable WOLF_ROOT:
+     *  - To run from terminal, edit your ~/.bashrc, or ~/.bash_profile and add this line:
+     *        export WOLF_ROOT="/path/to/wolf"
+     *  - To run from eclipse, open the 'run configuration' of this executable, tab 'Environment'
+     *    and add variable WOLF_ROOT set to /path/to/wolf
+     */
     std::string WOLF_ROOT;
     char* w = std::getenv("WOLF_ROOT");
     if (w != NULL)
