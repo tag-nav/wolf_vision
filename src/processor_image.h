@@ -144,6 +144,18 @@ class ProcessorImage : public ProcessorTrackerFeature
          */
         void postProcess();
 
+        void advance()
+        {
+            ProcessorTrackerFeature::advance();
+            image_last_ = image_incoming_;
+        }
+
+        void reset()
+        {
+            ProcessorTrackerFeature::reset();
+            image_last_ = image_incoming_;
+        }
+
         virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_correspondences);
 

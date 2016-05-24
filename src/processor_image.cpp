@@ -77,10 +77,13 @@ void ProcessorImage::preProcess()
 {
     image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
 
-    if (last_ptr_ == nullptr)
-        image_last_ = ((CaptureImage*)incoming_ptr_)->getImage();
-    else
-        image_last_ = ((CaptureImage*)last_ptr_)->getImage();
+    if (last_ptr_ == nullptr) // do this just one time!
+    {
+        params_.image.width = image_incoming_.cols;
+        params_.image.height = image_incoming_.rows;
+        active_search_grid_.resizeImage(image_incoming_.cols, image_incoming_.rows);
+        std::cout << "resized!" << std::endl;
+    }
 
     active_search_grid_.renew();
 
@@ -99,7 +102,8 @@ void ProcessorImage::preProcess()
 
 void ProcessorImage::postProcess()
 {
-    drawFeatures(last_ptr_);
+    if (last_ptr_!=nullptr)
+        drawFeatures(last_ptr_);
 //    drawRoi(image_last_,detector_roi_,cv::Scalar(88.0, 70.0, 255.0));   //detector roi(now only shown when it collides with the the image)
 //    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0));   //tracker roi
 //    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));   //inflated roi(now only shown when it collides with the the image)
@@ -192,6 +196,7 @@ bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, con
         std::cout << "\n=============== No CORRECTION -> false =================" << std::endl;
         return false;
     }
+    //return true;
 }
 
 unsigned int ProcessorImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
@@ -233,9 +238,9 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
                 point_ptr->setTrackId(point_ptr->id());
                 addNewFeatureLast(point_ptr);
                 active_search_grid_.hitCell(new_keypoints[0]);
-                active_search_grid_.blockCell(roi);
+                //active_search_grid_.blockCell(roi);
 
-                std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
+                //std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 
                 n_new_features++;
 
@@ -280,16 +285,36 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 
     std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl;
 
+    //Asegurarse que el target no está repetido (que dos targets esten muy cerca el uno del otro)
+
+
+    for (auto feature_list_1_ptr : _feature_list_in)
+    {
+        FeaturePointImage* feature_1_ptr = (FeaturePointImage*)(((feature_list_1_ptr)));
+        for (auto feature_list_2_ptr : _feature_list_in)
+        {
+            FeaturePointImage* feature_2_ptr = (FeaturePointImage*)(((feature_list_2_ptr)));
+            if(feature_1_ptr != feature_2_ptr)
+            {
+                if(feature_1_ptr->getKeypoint().pt == feature_2_ptr->getKeypoint().pt)
+                    std::cout << "Repeated feature" << std::endl;
+            }
+        }
+    }
+
+
     for (auto feature_base_ptr : _feature_list_in)
     {
         FeaturePointImage* feature_ptr = (FeaturePointImage*)(((feature_base_ptr)));
-        active_search_grid_.hitCell(feature_ptr->getKeypoint());  //TODO: Mirar el hitcell en este punto
 
-        std::cout << "\nSearch feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
+        //std::cout << "\nSearch feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
 
         roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+
+        active_search_grid_.hitCell(feature_ptr->getKeypoint());  //TODO: Mirar el hitcell en este punto
+        //active_search_grid_.blockCell(roi);
 
         cv::Mat target_descriptor = feature_ptr->getDescriptor();
 
@@ -304,7 +329,7 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 
             if (normalized_score > params_.matcher.min_normalized_score)
             {
-                std::cout << "\t <--TRACKED" << std::endl;
+                //std::cout << "\t <--TRACKED" << std::endl;
                 FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
@@ -317,7 +342,7 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
             }
             else
             {
-                std::cout << "\t <--NOT TRACKED" << std::endl;
+                //std::cout << "\t <--NOT TRACKED" << std::endl;
             }
             for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
             {
@@ -325,8 +350,8 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 
             }
         }
-        else
-            std::cout << "\t <--NOT FOUND" << std::endl;
+        //else
+            //std::cout << "\t <--NOT FOUND" << std::endl;
     }
     std::cout << "Number of Features tracked: " << _feature_list_out.size() << std::endl;
     return _feature_list_out.size();
@@ -335,17 +360,17 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 Scalar ProcessorImage::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors,
                              std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches)
 {
-    std::cout << " --> " << _candidate_keypoints.size() << " candidates";
+    //std::cout << " --> " << _candidate_keypoints.size() << " candidates";
 
     matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
 
-    std::cout << "\n\tBest is: [" << _cv_matches[0].trainIdx << "]:" << _cv_matches[0].distance;
+    //std::cout << "\n\tBest is: [" << _cv_matches[0].trainIdx << "]:" << _cv_matches[0].distance;
 
-    std::cout << " | at: " << _candidate_keypoints[_cv_matches[0].trainIdx].pt;
+    //std::cout << " | at: " << _candidate_keypoints[_cv_matches[0].trainIdx].pt;
 
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
 
-    std::cout << " | score: " << normalized_score;
+    //std::cout << " | score: " << normalized_score;
 
     return normalized_score;
 }

@@ -2,8 +2,8 @@ processor type: "IMAGE"
 processor name: "ORB feature tracker"
 
 image:
-    width: 720
-    height: 416
+    width: 640
+    height: 360
 
 detector-descriptor:
     type: "ORB"   # This affects the structure below. See processor_image_BRISK.yaml for another example
