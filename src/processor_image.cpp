@@ -84,7 +84,7 @@ void ProcessorImage::preProcess()
 
     active_search_grid_.renew();
 
-    //The visualization part is only for debugging, not the casts done here.
+    //The visualization part is only for debugging. The casts above are necessary.
 
     if(last_ptr_ != nullptr)
         resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()));
@@ -201,20 +201,11 @@ unsigned int ProcessorImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
     adaptRoi(_image_roi, _image, _roi);
 
-    //std::cout << "detect roi: " << _roi << std::endl;
-
     detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
-    for (unsigned int i = 0; i < _new_keypoints.size(); i++)
-    {
-        //std::cout << "keypoints: " << _new_keypoints[i].pt << std::endl;
-    }
     detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
 
-    //std::cout << "detect roi2: " << _roi << std::endl;
-
     for (unsigned int i = 0; i < _new_keypoints.size(); i++)
     {
-        //std::cout << "keypoints 2: " << _new_keypoints[i].pt << std::endl;
         _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
         _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
     }
