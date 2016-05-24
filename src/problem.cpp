@@ -182,7 +182,7 @@ Eigen::VectorXs Problem::getCurrentState()
 Eigen::VectorXs Problem::getCurrentState(TimeStamp& _ts)
 {
     if (processor_motion_ptr_ != nullptr)
-        return processor_motion_ptr_->getState(_ts);
+        return processor_motion_ptr_->getCurrentState(_ts);
     else
         throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
 }
@@ -209,7 +209,7 @@ void Problem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
     if (processor_motion_ptr_ != nullptr)
         processor_motion_ptr_->getState(_ts, state);
     else
-        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+        throw std::runtime_error("WolfProblem::getStateAtTimeStamp: processor motion not set!");
 }
 
 Eigen::VectorXs Problem::getStateAtTimeStamp(const TimeStamp& _ts)
@@ -217,7 +217,10 @@ Eigen::VectorXs Problem::getStateAtTimeStamp(const TimeStamp& _ts)
     if (processor_motion_ptr_ != nullptr)
         return processor_motion_ptr_->getState(_ts);
     else
-        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+    {
+
+        //throw std::runtime_error("WolfProblem::getStateAtTimeStamp: processor motion not set!");
+    }
 }
 
 bool Problem::permitKeyFrame(ProcessorBase* _processor_ptr)

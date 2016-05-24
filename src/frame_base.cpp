@@ -96,6 +96,8 @@ void FrameBase::setKey()
 
         if (getTrajectoryPtr()->getLastKeyFramePtr() == nullptr || getTrajectoryPtr()->getLastKeyFramePtr()->getTimeStamp() < time_stamp_)
             getTrajectoryPtr()->setLastKeyFramePtr(this);
+
+        getTrajectoryPtr()->sortFrame(this);
     }
 }
 
