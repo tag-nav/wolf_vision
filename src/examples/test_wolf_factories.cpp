@@ -32,14 +32,6 @@ int main(void)
     using namespace std;
 
 
-    cout << "\n====== Registering creators in the Wolf Factories =======" << endl;
-
-    cout << "If you look above, you see the registered creators.\n"
-            "There is only one attempt per class, and it is successful!\n"
-            "We do this by registering in the class\'s .cpp file.\n"
-            "\n"
-            "See [wolf]/src/examples/test_sensor_factory.cpp for the way to add sensors and processors to wolf::Problem." << endl;
-
     /**=============================================================================================
      * Get wolf root directory from the environment variable WOLF_ROOT
      * To make this work, you need to set the environment variable WOLF_ROOT:
@@ -56,6 +48,15 @@ int main(void)
     std::string WOLF_CONFIG     = WOLF_ROOT + "/src/examples";
     std::cout << "\nwolf directory for configuration files: " << WOLF_CONFIG << std::endl;
     //==============================================================================================
+
+    cout << "\n====== Registering creators in the Wolf Factories =======" << endl;
+
+    cout << "If you look above, you see the registered creators.\n"
+            "There is only one attempt per class, and it is successful!\n"
+            "We do this by registering in the class\'s .cpp file.\n"
+            "\n"
+            "- See \'" << WOLF_ROOT << "/src/examples/test_wolf_factories.cpp\'\n"
+            "  for the way to install sensors and processors to wolf::Problem." << endl;
 
     // Start creating the problem
 
