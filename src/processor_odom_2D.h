@@ -22,6 +22,15 @@ class ProcessorOdom2D : public ProcessorMotion
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
 
+        virtual bool voteForKeyFrame()
+        {
+            if (getBufferPtr()->get().back().delta_integr_.norm() > 10)
+                return true;
+            if (getBufferPtr()->get().back().delta_integr_cov_.determinant() > 10)
+                return true;
+            return false;
+        }
+
     protected:
 //        virtual void preProcess(){}
 //        virtual void postProcess(){}
