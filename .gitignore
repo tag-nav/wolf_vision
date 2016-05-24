@@ -12,3 +12,4 @@ lib/
 ./Wolf.files
 ./Wolf.includes
 ./Wolf/
+/CMakeLists.txt.user
