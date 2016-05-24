@@ -47,14 +47,14 @@ int main(void)
      *  - To run from eclipse, open the 'run configuration' of this executable, tab 'Environment'
      *    and add variable WOLF_ROOT set to /path/to/wolf
      */
-    std::string WOLF_ROOT;
     char* w = std::getenv("WOLF_ROOT");
-    if (w != NULL)
-        WOLF_ROOT = w;
-    else
+    if (w == NULL)
         throw std::runtime_error("Environment variable WOLF_ROOT not found");
-    std::cout << "\nwolf root directory: " << WOLF_ROOT << std::endl;
-    //=============================================================================================
+
+    std::string WOLF_ROOT       = w;
+    std::string WOLF_CONFIG     = WOLF_ROOT + "/src/examples";
+    std::cout << "\nwolf directory for configuration files: " << WOLF_CONFIG << std::endl;
+    //==============================================================================================
 
     // Start creating the problem
 
@@ -67,13 +67,13 @@ int main(void)
     cout << "\n================= Intrinsics Factory ===================" << endl;
 
     // Use params factory for camera intrinsics
-    IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", WOLF_ROOT + "/src/examples/camera.yaml");
+    IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", WOLF_CONFIG + "/camera.yaml");
 
     cout << "\n==================== Sensor Factory ====================" << endl;
 
     // Install sensors
     problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
-    problem.installSensor("CAMERA",     "front right camera",   pq_3d,  WOLF_ROOT + "/src/examples/camera.yaml");
+    problem.installSensor("CAMERA",     "front right camera",   pq_3d,  WOLF_CONFIG + "/camera.yaml");
     problem.installSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
     problem.installSensor("GPS FIX",    "GPS fix",              p_3d);
     problem.installSensor("IMU",        "inertial",             pq_3d);
@@ -81,7 +81,7 @@ int main(void)
     problem.installSensor("ODOM 2D",    "aux odometer",         po_2d,  &intr_odom2d);
 
     // Full YAML support: Add this sensor and recover a pointer to it
-    SensorBase* sen_ptr = problem.installSensor("CAMERA", "rear camera", pq_3d, WOLF_ROOT + "/src/examples/camera.yaml");
+    SensorBase* sen_ptr = problem.installSensor("CAMERA", "rear camera", pq_3d, WOLF_CONFIG + "/camera.yaml");
 
     // print available sensors
     for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
@@ -98,7 +98,7 @@ int main(void)
     problem.installProcessor("ODOM 2D", "main odometry",    "main odometer");
     problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer");
     problem.installProcessor("IMU",     "pre-integrated",   "inertial");
-    problem.installProcessor("IMAGE", "ORB", "front left camera", WOLF_ROOT + "/src/examples/processor_image_ORB.yaml");
+    problem.installProcessor("IMAGE", "ORB", "front left camera", WOLF_CONFIG + "/processor_image_ORB.yaml");
 //    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors
