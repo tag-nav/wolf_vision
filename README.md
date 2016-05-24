@@ -175,16 +175,16 @@ __Solution:__
   1. To run from __Terminal__, you need to create an environment variable WOLF_ROOT pointing to where the wolf project is
      - Edit file ````~/.bashrc````, or ````~/.bash_profile````, and add these lines:
     
-````
-# WOLF
-export WOLF_ROOT="/abs/path/to/wolf"
-````
+        ````
+        # WOLF
+        export WOLF_ROOT="/abs/path/to/wolf"
+        ````
 
     - Then you need to source the file to get effect, 
 
-````
-    source ~/.bash_profile    // or ~/.bashrc, of course
-````
+        ````
+        source ~/.bash_profile    // or ~/.bashrc, of course
+        ````
 
   2. If you run your application from __eclipse__, do:
      - Menu Run > Run configurations...
