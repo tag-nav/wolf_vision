@@ -23,8 +23,6 @@ class TrajectoryBase : public NodeLinked<Problem,FrameBase>
     protected:
         FrameStructure frame_structure_; // Defines the structure of the Frames in the Trajectory.
         FrameBase* last_key_frame_ptr_;  // keeps pointer to the last key frame
-        // TODO: JVN: No seria millor que aixo ho tingui el problem o el wolf_manager? JS: segurament. Pero fixed_size_ seria una de les opcions de moltes...
-        unsigned int fixed_size_; // Limits the number of Frames forming the Trajectory
         
     public:
         TrajectoryBase(FrameStructure _frame_sturcture);
