@@ -133,6 +133,17 @@ Eigen::VectorXs FrameBase::getState() const
                           (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
                           (v_ptr_==nullptr ? 0 : v_ptr_->getSize()));
 
+    getState(state);
+
+    return state;
+}
+
+void FrameBase::getState(Eigen::VectorXs& state) const
+{
+    assert(state.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize()) +
+                            (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
+                            (v_ptr_==nullptr ? 0 : v_ptr_->getSize())));
+
     unsigned int index = 0;
     if (p_ptr_!=nullptr)
     {
@@ -149,8 +160,6 @@ Eigen::VectorXs FrameBase::getState() const
         state.segment(index, v_ptr_->getSize()) = v_ptr_->getVector();
         //   index += v_ptr_->getSize();
     }
-
-    return state;
 }
 
 CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)

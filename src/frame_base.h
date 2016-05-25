@@ -92,7 +92,7 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
 
         void setState(const Eigen::VectorXs& _st);
         Eigen::VectorXs getState() const;
-
+        void getState(Eigen::VectorXs& state) const;
 
 
         // Wolf tree access ---------------------------------------------------
