@@ -111,12 +111,12 @@ int main(int argc, char** argv)
 
     // SENSOR
     // one-liner API
-    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jsola/dev/wolf/src/examples/camera.yaml");
+    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jvallve/iri-lab/wolf/src/examples/camera.yaml");
     SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", "/home/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", "/home/jvallve/iri-lab/wolf/src/examples/processor_image_ORB.yaml");
     //=====================================================
 
 
