@@ -173,53 +173,76 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs&
 
 Eigen::VectorXs Problem::getCurrentState()
 {
-    if (processor_motion_ptr_ != nullptr)
-        return processor_motion_ptr_->getCurrentState();
-    else
-        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+    Eigen::VectorXs state(getFrameStructureSize());
+    getCurrentState(state);
+    return state;
 }
 
-Eigen::VectorXs Problem::getCurrentState(TimeStamp& _ts)
+Eigen::VectorXs Problem::getCurrentState(TimeStamp& ts)
 {
-    if (processor_motion_ptr_ != nullptr)
-        return processor_motion_ptr_->getCurrentState(_ts);
-    else
-        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+    Eigen::VectorXs state(getFrameStructureSize());
+    getCurrentState(state, ts);
+    return state;
 }
 
 void Problem::getCurrentState(Eigen::VectorXs& state)
 {
-    if (processor_motion_ptr_ != nullptr)
-        processor_motion_ptr_->getCurrentState(state);
-    else
-        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+    TimeStamp ts;
+    getCurrentState(state, ts);
 }
 
 
-void Problem::getCurrentState(Eigen::VectorXs& state, TimeStamp& _ts)
+void Problem::getCurrentState(Eigen::VectorXs& state, TimeStamp& ts)
 {
+    assert(state.size() == getFrameStructureSize() && "Problem::getCurrentState: bad state size");
+
     if (processor_motion_ptr_ != nullptr)
-        processor_motion_ptr_->getCurrentState(state, _ts);
+        processor_motion_ptr_->getCurrentState(state, ts);
+    else if (trajectory_ptr_->getLastKeyFramePtr() != nullptr)
+    {
+        trajectory_ptr_->getLastKeyFramePtr()->getTimeStamp(ts);
+        trajectory_ptr_->getLastKeyFramePtr()->getState(state);
+    }
     else
-        throw std::runtime_error("WolfProblem::getCurrentState: processor motion not set!");
+        state = Eigen::VectorXs::Zero(getFrameStructureSize());
 }
 
 void Problem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
 {
+    assert(state.size() == getFrameStructureSize() && "Problem::getStateAtTimeStamp: bad state size");
+
     if (processor_motion_ptr_ != nullptr)
         processor_motion_ptr_->getState(_ts, state);
     else
-        throw std::runtime_error("WolfProblem::getStateAtTimeStamp: processor motion not set!");
+    {
+        FrameBase* closest_frame = trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
+        if (closest_frame != nullptr)
+            trajectory_ptr_->closestKeyFrameToTimeStamp(_ts)->getState(state);
+        else
+            state = Eigen::VectorXs::Zero(getFrameStructureSize());
+    }
 }
 
 Eigen::VectorXs Problem::getStateAtTimeStamp(const TimeStamp& _ts)
 {
-    if (processor_motion_ptr_ != nullptr)
-        return processor_motion_ptr_->getState(_ts);
-    else
-    {
+    Eigen::VectorXs state(getFrameStructureSize());
+    getStateAtTimeStamp(_ts, state);
+    return state;
+}
 
-        //throw std::runtime_error("WolfProblem::getStateAtTimeStamp: processor motion not set!");
+unsigned int Problem::getFrameStructureSize()
+{
+    switch (trajectory_ptr_->getFrameStructure())
+    {
+        case FRM_PO_2D:
+            return 3;
+        case FRM_PO_3D:
+            return 7;
+        case FRM_POV_3D:
+            return 10;
+        default:
+            throw std::runtime_error(
+                    "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
     }
 }
 
