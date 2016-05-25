@@ -26,6 +26,10 @@ TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
 ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
 TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
 
+# Testing Sorting Key Frames
+ADD_EXECUTABLE(test_sort_keyframes test_sort_keyframes.cpp)
+TARGET_LINK_LIBRARIES(test_sort_keyframes ${PROJECT_NAME})
+
 # Enable Yaml config files
 IF(YAMLCPP_FOUND)
     ADD_EXECUTABLE(test_yaml test_yaml.cpp)
