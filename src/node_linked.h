@@ -348,9 +348,11 @@ template<class UpperType, class LowerType>
 inline void NodeLinked<UpperType, LowerType>::moveDownNode(LowerNodePtr _ptr, LowerNodeIter _place)
 {
     assert(!isBottom() && "Trying to move a down node to a bottom node");
-    down_node_list_.remove(_ptr);
-    down_node_list_.insert(_place, _ptr);
-    _ptr->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
+    if (*_place != _ptr)
+    {
+        down_node_list_.remove(_ptr);
+        down_node_list_.insert(_place, _ptr);
+    }
 }
 
 template<class UpperType, class LowerType>
