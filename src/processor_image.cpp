@@ -293,11 +293,17 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
         FeaturePointImage* feature_1_ptr = (FeaturePointImage*)(((feature_list_1_ptr)));
         for (auto feature_list_2_ptr : _feature_list_in)
         {
+
             FeaturePointImage* feature_2_ptr = (FeaturePointImage*)(((feature_list_2_ptr)));
             if(feature_1_ptr != feature_2_ptr)
             {
+                std::cout << "feature 1 track id: " << (int)feature_1_ptr->trackId() << std::endl;
+                std::cout << "feature 1 track id: " << feature_1_ptr->getKeypoint().pt << std::endl;
+                std::cout << "feature 2 track id: " << (int)feature_2_ptr->trackId() << std::endl;
+                std::cout << "feature 2 track id: " << feature_2_ptr->getKeypoint().pt << std::endl;
                 if(feature_1_ptr->getKeypoint().pt == feature_2_ptr->getKeypoint().pt)
-                    std::cout << "Repeated feature" << std::endl;
+                    std::cout << "\t\t\t\tRepeated feature" << std::endl;
+                    //si borro un elemento de la lista... se borra al hacer el for?
             }
         }
     }
