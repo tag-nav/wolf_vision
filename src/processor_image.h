@@ -227,7 +227,7 @@ class ProcessorImage : public ProcessorTrackerFeature
 
         virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches);
 
-
+        virtual void filterFeatureLists(FeatureBaseList _original_list, FeatureBaseList& _filtered_list);
 
 
 
