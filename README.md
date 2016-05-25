@@ -164,6 +164,46 @@ Download and build
     $ make
     $ sudo make install  //optional in case you want to install wolf library
 
+
+**Set the WOLF_ROOT environment variable**
+
+We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at tun-time. 
+For example, if we want to use YAML files for configuring sensors, `YAML::LoadFile(filename)` needs an absolute path to a `filename`. This name is platform-specific, and many times user-specific.
+
+Usually, these files are out of the WOLF project. But for testing purposes, some of these files exist within the WOLF directories.
+
+Proceed as follows:
+
+  1. To run from __Terminal__ (the default), you need to create an environment variable WOLF_ROOT pointing to where the wolf project is
+     - Edit file ````~/.bashrc````, or ````~/.bash_profile````, and add these lines:
+    
+        ````
+        # WOLF
+        export WOLF_ROOT="/abs/path/to/wolf"
+        ````
+
+    - Then you need to source the file to get effect, 
+
+        ````
+        source ~/.bash_profile    // or ~/.bashrc, of course
+        ````
+
+  2. If you run your application from __eclipse__, do:
+     - Menu Run > Run configurations...
+     - Add, or edit, a run configuration for the executable you want to run
+     - Click on tab 'Environment'
+     - Add a variable named ````WOLF_ROOT````, with value ````/abs/path/to/wolf````
+
+  3. If you run from __QtCreator__
+     - Click on Left bar > Projects > Tab 'Build'
+         - Under 'Build Environment', click 'Details'
+             - Add variable `WOLF_ROOT` with value `/abs/path/to/wolf`
+     - Click on Tab 'Run'
+         - Select your Run configuration
+         - Under 'Run Environment', make sure it says 'Use Build Environment'
+         - If not, click on 'Details' 
+             - Under 'Base environment for this run configuration', select 'Build Environment'
+
 ### Wolf ROS Node
 
 `$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
