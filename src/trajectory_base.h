@@ -73,6 +73,10 @@ class TrajectoryBase : public NodeLinked<Problem,FrameBase>
         /** \brief Compute the position where the frame should be
          **/
         FrameBaseIter computeFrameOrder(FrameBase* _frame_ptr);
+
+        /** \brief Finds the closes key frame to a given timestamp
+         **/
+        FrameBase* closestKeyFrameToTimeStamp(const TimeStamp& _ts);
 };
 
 inline void TrajectoryBase::removeFrame(const FrameBaseIter& _frame_iter)

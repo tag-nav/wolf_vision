@@ -49,4 +49,23 @@ FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBase* _frame_ptr)
     return getFrameListPtr()->begin();
 }
 
+FrameBase* TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
+{
+    FrameBase* closest_kf = nullptr;
+    Scalar min_dt = 1e9;
+
+    for (auto frm_rit = getFrameListPtr()->rbegin(); frm_rit != getFrameListPtr()->rend(); frm_rit++)
+        if ((*frm_rit)->isKey())
+        {
+            if (std::abs((*frm_rit)->getTimeStamp().get() - _ts.get()) < min_dt)
+            {
+                min_dt = std::abs((*frm_rit)->getTimeStamp().get() - _ts.get());
+                closest_kf = *frm_rit;
+            }
+            else
+                break;
+        }
+    return closest_kf;
+}
+
 } // namespace wolf
