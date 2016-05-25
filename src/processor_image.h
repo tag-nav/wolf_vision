@@ -32,7 +32,7 @@ enum DetectorDescriptorType
 
 struct DetectorDescriptorParamsBase
 {
-        DetectorDescriptorType type;
+        DetectorDescriptorType type; ///< Type of algorithm. Accepted values in wolf.h
         unsigned int nominal_pattern_radius = 18; ///< Radius of the pattern before scaling
         //should this be here? doesn't it depend on the descriptor?
 };
@@ -46,13 +46,13 @@ struct DetectorDescriptorParamsBrisk : public DetectorDescriptorParamsBase
 
 struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
 {
-        unsigned int nfeatures=500;
-        float scaleFactor=1.2f;
-        unsigned int nlevels=1;//8
-        unsigned int edgeThreshold=4; //31
+        unsigned int nfeatures=500; ///< Nbr of features to extract
+        float scaleFactor=1.2f; ///< Scale factor between two consecutive scales of the image pyramid
+        unsigned int nlevels=1;///< Number of levels in the pyramid. Default: 8
+        unsigned int edgeThreshold=4; ///< ? //Default: 31
         unsigned int firstLevel=0;
         unsigned int WTA_K=2;
-        unsigned int scoreType=cv::ORB::HARRIS_SCORE;
+        unsigned int scoreType=cv::ORB::HARRIS_SCORE; ///< Type of score to rank the detected points
         unsigned int patchSize=31;
 };
 
@@ -60,8 +60,8 @@ struct ProcessorImageParameters : public ProcessorParamsBase
 {
         struct Image
         {
-                unsigned int width;
-                unsigned int height;
+                unsigned int width; ///< image width (horizontal dimension or nbr of columns)
+                unsigned int height; ///< image height (vertical dimension or nbr of rows)
         }image;
 
         DetectorDescriptorParamsBase* detector_descriptor_params_ptr;
@@ -83,16 +83,16 @@ struct ProcessorImageParameters : public ProcessorParamsBase
 //        }descriptor;
         struct Matcher
         {
-                Scalar min_normalized_score; ///< 0: perfect match; 1 or -1: awful match; out of [-1,1]: error
+                Scalar min_normalized_score; ///< [-1..0]: awful match; 1: perfect match; out of [-1,1]: error
                 int similarity_norm; ///< Norm used to measure the distance between two descriptors
-                unsigned int roi_width; ///< Width of the roi used in the tracking
-                unsigned int roi_height; ///< Height of the roi used in the tracking
+                unsigned int roi_width; ///< Width of the roi used in tracking
+                unsigned int roi_height; ///< Height of the roi used in tracking
         }matcher;
         struct Adtive_search
         {
                 unsigned int grid_width; ///< cells per horizontal dimension of image
                 unsigned int grid_height; ///< cells per vertical dimension of image
-                unsigned int separation; ///<
+                unsigned int separation; ///< Distance between the border of the cell and the border of the associated ROI
         }active_search;
         struct Algorithm
         {
