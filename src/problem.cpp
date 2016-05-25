@@ -82,7 +82,7 @@ ProcessorBase* Problem::installProcessor(std::string _prc_type, //
         ((ProcessorMotion*)prc_ptr)->setOrigin(getLastKeyFramePtr());
 
     // setting the main processor motion
-    if (processor_motion_ptr_ == nullptr)
+    if (prc_ptr->isMotion() && processor_motion_ptr_ == nullptr)
         processor_motion_ptr_ = (ProcessorMotion*)prc_ptr;
 
     return prc_ptr;
@@ -112,32 +112,12 @@ void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
 
 FrameBase* Problem::createFrame(FrameKeyType _frame_type, const TimeStamp& _time_stamp)
 {
-    if (processor_motion_ptr_ != nullptr)
-        return createFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
-    switch (trajectory_ptr_->getFrameStructure())
-    {
-        case FRM_PO_2D:
-            return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_type, _time_stamp, new StateBlock(2), new StateBlock(1)));
-
-        case FRM_PO_3D:
-            return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_type, _time_stamp, new StateBlock(3), new StateQuaternion));
-
-        case FRM_POV_3D:
-            return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_type, _time_stamp, new StateBlock(3), new StateQuaternion, new StateBlock(3)));
-
-        default:
-            throw std::runtime_error(
-                    "Unknown frame structure. Add appropriate frame structure to the switch statement.");
-    }
+    return createFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
 }
 
 FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
-
     // ---------------------- CREATE NEW FRAME ---------------------
     // Create frame
     switch (trajectory_ptr_->getFrameStructure())
@@ -217,7 +197,7 @@ void Problem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
     {
         FrameBase* closest_frame = trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
         if (closest_frame != nullptr)
-            trajectory_ptr_->closestKeyFrameToTimeStamp(_ts)->getState(state);
+            closest_frame->getState(state);
         else
             state = Eigen::VectorXs::Zero(getFrameStructureSize());
     }
