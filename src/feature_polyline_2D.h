@@ -26,6 +26,7 @@ class FeaturePolyline2D : public FeatureBase
         const Eigen::MatrixXs& getPoints() const;
         bool isFirstExtreme() const;
         bool isLastExtreme() const;
+        unsigned int getNPoints() const;
 };
 
 inline FeaturePolyline2D::FeaturePolyline2D(const Eigen::MatrixXs& _points, const bool& _first_extreme, const bool& _last_extreme) :
@@ -53,6 +54,10 @@ inline bool FeaturePolyline2D::isLastExtreme() const
     return last_extreme_;
 }
 
+inline unsigned int FeaturePolyline2D::getNPoints() const
+{
+    return points_.cols();
+}
 
 } /* namespace wolf */
 

@@ -23,6 +23,7 @@ class LandmarkPolyline2D : public LandmarkBase
 
     public:
         LandmarkPolyline2D(FeaturePolyline2D* _polyline_ptr);
+        LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme);
         virtual ~LandmarkPolyline2D();
 
         /** \brief Gets a const reference to the point state block pointer vector
@@ -33,6 +34,8 @@ class LandmarkPolyline2D : public LandmarkBase
          **/
         bool isFirstExtreme() const;
         bool isLastExtreme() const;
+
+        unsigned int getNPoints() const;
 
         /** \brief Adds a new point to the landmark
          * \param _point: the point to be added
@@ -63,6 +66,11 @@ inline bool LandmarkPolyline2D::isFirstExtreme() const
 inline bool LandmarkPolyline2D::isLastExtreme() const
 {
     return last_extreme_;
+}
+
+inline unsigned int LandmarkPolyline2D::getNPoints() const
+{
+    return point_state_ptr_vector_.size();
 }
 
 } /* namespace wolf */

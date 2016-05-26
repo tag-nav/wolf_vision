@@ -20,6 +20,13 @@ LandmarkPolyline2D::LandmarkPolyline2D(FeaturePolyline2D* _polyline_ptr) :
         point_state_ptr_vector_.push_back(new StateBlock(_polyline_ptr->getPoints().col(i)));
 }
 
+LandmarkPolyline2D::LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme) :
+        LandmarkBase(LANDMARK_POLYLINE_2D, nullptr, nullptr), first_extreme_(_first_extreme), last_extreme_(_last_extreme)
+{
+    for (auto i = 0; i < _points.cols(); i++)
+        point_state_ptr_vector_.push_back(new StateBlock(_points.col(i)));
+}
+
 LandmarkPolyline2D::~LandmarkPolyline2D()
 {
     while (!point_state_ptr_vector_.empty())
@@ -34,7 +41,7 @@ LandmarkPolyline2D::~LandmarkPolyline2D()
 
 void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _extreme, const bool& _back)
 {
-
+    assert(_point.size() >= 2 && "bad point size");
     if (_back)
     {
         point_state_ptr_vector_.push_back(new StateBlock(_point.head<2>()));
@@ -50,6 +57,7 @@ void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _ex
 void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const int& _idx, const bool& _extreme,
                                    const bool& _back)
 {
+    assert(_points.cols() >= 2 && "bad points size");
 
     if (_back)
     {
