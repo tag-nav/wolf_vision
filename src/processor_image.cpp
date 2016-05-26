@@ -270,6 +270,57 @@ void ProcessorImage::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
     }
 }
 
+void ProcessorImage::filterFeatureLists(FeatureBaseList _original_list, FeatureBaseList& _filtered_list)
+{
+    unsigned int counter_repeated_features = 0;
+    unsigned int counter_total_repeated_features = 0;
+
+    for (std::list<FeatureBase*>::const_iterator first_feature_iterator = _original_list.begin();
+                                                 first_feature_iterator != _original_list.end();
+                                                 first_feature_iterator++)
+    {
+        FeaturePointImage* tested_feature_ptr = (FeaturePointImage*)*first_feature_iterator;
+        bool repeated_feature = false;
+
+        for (std::list<FeatureBase*>::const_iterator second_feature_iterator = first_feature_iterator;
+                                                     second_feature_iterator != _original_list.begin();
+                                                     second_feature_iterator--)
+        {
+           FeaturePointImage* secondary_feature_ptr = (FeaturePointImage*)*second_feature_iterator;
+
+           if(tested_feature_ptr->getKeypoint().pt == secondary_feature_ptr->getKeypoint().pt && tested_feature_ptr->id() != secondary_feature_ptr->id())
+           {
+               std::cout << "feature 1 track id: " << (int)tested_feature_ptr->trackId() << std::endl;
+               std::cout << "feature 1 point: " << tested_feature_ptr->getKeypoint().pt << std::endl;
+               std::cout << "feature 2 track id: " << (int)secondary_feature_ptr->trackId() << std::endl;
+               std::cout << "feature 2 point: " << secondary_feature_ptr->getKeypoint().pt << std::endl;
+               std::cout << "\t\t\t\tRepeated feature" << std::endl;
+               counter_total_repeated_features++;
+               repeated_feature = true;
+           }
+        }
+        if(!repeated_feature)
+        {
+            std::cout << "ADDED feature track id: " << (int)tested_feature_ptr->trackId() << std::endl;
+            std::cout << "ADDED feature point: " << tested_feature_ptr->getKeypoint().pt << std::endl;
+            std::cout << "\t\tAdded feature" << std::endl;
+            _filtered_list.push_back(tested_feature_ptr);
+        }
+        else
+        {
+            std::cout << "REPEATED feature track id: " << (int)tested_feature_ptr->trackId() << std::endl;
+            std::cout << "REPEATED feature point: " << tested_feature_ptr->getKeypoint().pt << std::endl;
+            std::cout << "\t\tDiscarted feature" << std::endl;
+            counter_repeated_features++;
+        }
+    }
+    std::cout << "feature_list_in SIZE: " << _original_list.size() << std::endl;
+    std::cout << "counter of repeated features: " << counter_repeated_features << std::endl;
+    std::cout << "counter of TOTAL repeated features: " << counter_total_repeated_features << std::endl;
+    std::cout << "filtered_list SIZE: " << _filtered_list.size() << std::endl;
+
+}
+
 unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
@@ -286,26 +337,13 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
     std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl;
 
     //Asegurarse que el target no está repetido (que dos targets esten muy cerca el uno del otro)
+    FeatureBaseList filtered_list;
+    filterFeatureLists(_feature_list_in,filtered_list);
 
 
-    for (auto feature_list_1_ptr : _feature_list_in)
+    for (auto feature_base_ptr : filtered_list)//_feature_list_in)
     {
-        FeaturePointImage* feature_1_ptr = (FeaturePointImage*)(((feature_list_1_ptr)));
-        for (auto feature_list_2_ptr : _feature_list_in)
-        {
-            FeaturePointImage* feature_2_ptr = (FeaturePointImage*)(((feature_list_2_ptr)));
-            if(feature_1_ptr != feature_2_ptr)
-            {
-                if(feature_1_ptr->getKeypoint().pt == feature_2_ptr->getKeypoint().pt)
-                    std::cout << "Repeated feature" << std::endl;
-            }
-        }
-    }
-
-
-    for (auto feature_base_ptr : _feature_list_in)
-    {
-        FeaturePointImage* feature_ptr = (FeaturePointImage*)(((feature_base_ptr)));
+        FeaturePointImage* feature_ptr = (FeaturePointImage*)feature_base_ptr;
 
         //std::cout << "\nSearch feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
 
