@@ -361,7 +361,7 @@ struct LandmarkMatch
 };
 
 // Match map Feature - Landmark
-typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
+typedef std::map<FeatureBase*, LandmarkMatch*> LandmarkMatchMap;
 
 
 inline Scalar pi2pi(const Scalar& angle)
