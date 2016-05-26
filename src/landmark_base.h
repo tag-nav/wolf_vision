@@ -39,7 +39,7 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
 
     public:
 
-        /** \brief Constructor with type, time stamp and the position state pointer
+        /** \brief Constructor with type, time stamp and the position state pointer (optional orientation state pointer)
          *
          * Constructor with type, and state pointer
          * \param _tp indicates landmark type.(types defined at wolf.h)
