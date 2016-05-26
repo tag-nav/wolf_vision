@@ -17,6 +17,10 @@ ProcessorTrackerLandmark::ProcessorTrackerLandmark(ProcessorType _tp, const unsi
 
 ProcessorTrackerLandmark::~ProcessorTrackerLandmark()
 {
+    for ( auto match : matches_landmark_from_incoming_)
+        delete match.second;
+    for ( auto match : matches_landmark_from_last_)
+        delete match.second;
 }
 
 unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
@@ -40,20 +44,12 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
     // We first need to populate the \b last Capture with new Features
     unsigned int n = detectNewFeatures(_max_features);
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
+
     LandmarkBaseList new_landmarks;
-    for (auto new_feature_ptr : new_features_last_)
-    {
-        // create new landmark
-        LandmarkBase* new_lmk_ptr = createLandmark(new_feature_ptr);
-        //std::cout << "\tnew_landmark: " << new_lmk_ptr->id() << std::endl;
-        new_landmarks.push_back(new_lmk_ptr);
-        // create new correspondence
-        matches_landmark_from_last_[new_feature_ptr] = LandmarkMatch({new_lmk_ptr, 1}); // max score
-    }
-    //std::cout << "\tnew_landmarks: " << new_landmarks.size() << std::endl;
-    //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
-    // Find the new landmarks in incoming_ptr_ (if it's not the same as last_ptr_ nor nullptr)
-    if (incoming_ptr_ != last_ptr_ && incoming_ptr_ != nullptr)
+    createNewLandmarks(new_landmarks);
+
+    // Find the new landmarks in incoming_ptr_ (if it's not nullptr)
+    if (incoming_ptr_ != nullptr)
     {
         findLandmarks(new_landmarks, new_features_incoming_, matches_landmark_from_incoming_);
 
@@ -79,6 +75,21 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
 
     // return the number of new features detected in \b last
     return n;
+}
+
+void ProcessorTrackerLandmark::createNewLandmarks(LandmarkBaseList& _new_landmarks)
+{
+    for (auto new_feature_ptr : new_features_last_)
+    {
+        // create new landmark
+        LandmarkBase* new_lmk_ptr = createLandmark(new_feature_ptr);
+        //std::cout << "\tnew_landmark: " << new_lmk_ptr->id() << std::endl;
+        _new_landmarks.push_back(new_lmk_ptr);
+        // create new correspondence
+        matches_landmark_from_last_[new_feature_ptr] = new LandmarkMatch({new_lmk_ptr, 1}); // max score
+    }
+    //std::cout << "\tnew_landmarks: " << new_landmarks.size() << std::endl;
+    //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
 }
 
 unsigned int ProcessorTrackerLandmark::processKnown()

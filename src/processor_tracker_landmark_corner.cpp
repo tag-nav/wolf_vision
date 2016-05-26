@@ -83,7 +83,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         {
             //std::cout << "closest landmark: " << (*closest_landmark)->id() << std::endl;
             // match
-            matches_landmark_from_incoming_[*feature_it] = LandmarkMatch({*closest_landmark, closest_dm2});
+            matches_landmark_from_incoming_[*feature_it] = new LandmarkMatch({*closest_landmark, closest_dm2});
             // erase from the landmarks to be found
             not_matched_landmarks.erase(closest_landmark);
             // move corner feature to output list
@@ -178,7 +178,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         for (auto pair : ft_lk_pairs)
         {
             // match
-            matches_landmark_from_incoming_[*features_map[pair.first]] = LandmarkMatch(
+            matches_landmark_from_incoming_[*features_map[pair.first]] = new LandmarkMatch(
                     *landmarks_map[pair.second], tree.getScore(pair.first, pair.second));
             // move matched feature to list
             _features_corner_found.splice(_features_corner_found.end(), corners_incoming_, features_map[pair.first]);
@@ -205,10 +205,10 @@ bool ProcessorTrackerLandmarkCorner::voteForKeyFrame()
     // option 2: loop closure (if the newest frame from which a matched landmark was observed is old enough)
     for (auto new_feat : new_features_last_)
     {
-        if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_feat].landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() > loop_frames_th_)
+        if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_feat]->landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() > loop_frames_th_)
         {
             std::cout << "------------- NEW KEY FRAME: Option 2 - Loop closure" << std::endl;
-            //std::cout << "\tmatched landmark from frame = " << matches_landmark_from_last_[new_feat].landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() << std::endl;
+            //std::cout << "\tmatched landmark from frame = " << matches_landmark_from_last_[new_feat]->landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() << std::endl;
             return true;
         }
     }

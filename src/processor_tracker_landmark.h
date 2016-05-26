@@ -135,6 +135,10 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          */
         virtual unsigned int detectNewFeatures(const unsigned int& _max_features) = 0;
 
+        /** \brief Creates a landmark for each of new_features_last_
+         **/
+        virtual void createNewLandmarks(LandmarkBaseList& _new_landmarks);
+
         /** \brief Create one landmark
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
@@ -168,6 +172,9 @@ namespace wolf
 inline void ProcessorTrackerLandmark::advance()
 {
     //std::cout << "ProcessorTrackerLandmark::advance" << std::endl;
+    for ( auto match : matches_landmark_from_last_)
+        delete match.second;
+
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
 
     new_features_last_ = std::move(new_features_incoming_);
@@ -179,6 +186,9 @@ inline void ProcessorTrackerLandmark::advance()
 inline void ProcessorTrackerLandmark::reset()
 {
     //std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
+    for ( auto match : matches_landmark_from_last_)
+        delete match.second;
+
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
 
     new_features_last_ = std::move(new_features_incoming_);
@@ -194,7 +204,7 @@ inline void ProcessorTrackerLandmark::establishConstraints()
     //std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
 
     for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
-        last_feature->addConstraint(createConstraint(last_feature, matches_landmark_from_last_[last_feature].landmark_ptr_));
+        last_feature->addConstraint(createConstraint(last_feature, matches_landmark_from_last_[last_feature]->landmark_ptr_));
 }
 
 }// namespace wolf
