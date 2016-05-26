@@ -244,7 +244,8 @@ typedef enum
     FEATURE_ODOM_2D,
     FEATURE_MOTION,
     FEATURE_POINT_IMAGE, 
-    FEATURE_LINE_2D
+    FEATURE_LINE_2D,
+    FEATURE_POLYLINE_2D
 }FeatureType;
 
 /** \brief Enumeration of all possible landmark types
@@ -255,7 +256,8 @@ typedef enum
     LANDMARK_POINT = 1,     ///< A Euclidean point landmark, either 3D or 2D
     LANDMARK_CORNER,    ///< A corner landmark (2D)
     LANDMARK_CONTAINER,  ///< A container landmark (2D)
-    LANDMARK_LINE_2D
+    LANDMARK_LINE_2D,  ///< A line landmark (2D)
+    LANDMARK_POLYLINE_2D   ///< A polyline landmark (2D)
 } LandmarkType;
 
 typedef enum
