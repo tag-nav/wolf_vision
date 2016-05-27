@@ -171,15 +171,20 @@ bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, con
 
             if(normalized_score_correction > 0.8)
             {
-                FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
-                        correction_keypoints[correction_matches[0].trainIdx], (correction_descriptors.row(correction_matches[0].trainIdx)),
-                        feat_origin_ptr->isKnown());
+//                FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
+//                        correction_keypoints[correction_matches[0].trainIdx], (correction_descriptors.row(correction_matches[0].trainIdx)),
+//                        feat_origin_ptr->isKnown());
 
-                incoming_point_ptr->setTrackId(feat_incoming_ptr->trackId());
-                feat_incoming_ptr = incoming_point_ptr;
+//                incoming_point_ptr->setTrackId(feat_incoming_ptr->trackId());
+
+                feat_incoming_ptr->setKeypoint(correction_keypoints[correction_matches[0].trainIdx]);
+                feat_incoming_ptr->setDescriptor(correction_descriptors.row(correction_matches[0].trainIdx));
+
+                //feat_incoming_ptr->destruct();
+                //feat_incoming_ptr = incoming_point_ptr;
                 //delete incoming_point_ptr;
 
-    //            _feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr, normalized_score});
+                //_feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr, normalized_score});
 
                 std::cout << "\n=============== END CORRECTION true =================" << std::endl;
                 return true;
