@@ -179,8 +179,7 @@ bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, con
                 feat_incoming_ptr = incoming_point_ptr;
                 //delete incoming_point_ptr;
 
-    //            _feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr,
-    //                                                        normalized_score}); //FIXME: 512 is the maximum HAMMING distance
+    //            _feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr, normalized_score});
 
                 std::cout << "\n=============== END CORRECTION true =================" << std::endl;
                 return true;
@@ -196,7 +195,6 @@ bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, con
         std::cout << "\n=============== No CORRECTION -> false =================" << std::endl;
         return false;
     }
-    //return true;
 }
 
 unsigned int ProcessorImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
@@ -238,7 +236,7 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
                 point_ptr->setTrackId(point_ptr->id());
                 addNewFeatureLast(point_ptr);
                 active_search_grid_.hitCell(new_keypoints[0]);
-                //active_search_grid_.blockCell(roi);
+                active_search_grid_.blockCell(roi);
 
                 //std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 
