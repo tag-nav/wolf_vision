@@ -281,12 +281,14 @@ IF (OpenCV_FOUND)
         capture_image.h
         feature_point_image.h
         processor_image.h
+        processor_image_landmark.h
         active_search.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
         feature_point_image.cpp
         processor_image.cpp
+        processor_image_landmark.cpp
         active_search.cpp
         )
 ENDIF(OpenCV_FOUND)

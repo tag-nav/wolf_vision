@@ -100,6 +100,10 @@ IF(OpenCV_FOUND)
     # Testing OpenCV functions for projection of points
     ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
     TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
+
+    # Processor Image Landmark test
+    ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
+    TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
 
 # Processor Tracker Feature test
