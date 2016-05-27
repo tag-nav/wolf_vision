@@ -39,6 +39,20 @@ LandmarkPolyline2D::~LandmarkPolyline2D()
     }
 }
 
+void LandmarkPolyline2D::setFirstExtreme(const Eigen::VectorXs& _point)
+{
+    assert(_point.size() >= 2 && "LandmarkPolyline2D::setFirstExtreme: bad point size");
+    point_state_ptr_vector_.front()->setVector(_point.head(2));
+    first_extreme_ = true;
+}
+
+void LandmarkPolyline2D::setLastExtreme(const Eigen::VectorXs& _point)
+{
+    assert(_point.size() >= 2 && "LandmarkPolyline2D::setLastExtreme: bad point size");
+    point_state_ptr_vector_.back()->setVector(_point.head(2));
+    last_extreme_ = true;
+}
+
 void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _extreme, const bool& _back)
 {
     assert(_point.size() >= 2 && "bad point size");

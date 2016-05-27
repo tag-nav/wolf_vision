@@ -13,7 +13,7 @@
 #include "capture_laser_2D.h"
 #include "feature_polyline_2D.h"
 #include "landmark_polyline_2D.h"
-#include "constraint_corner_2D.h"
+#include "constraint_point_2D.h"
 #include "state_block.h"
 #include "data_association/association_tree.h"
 #include "processor_tracker_landmark.h"
@@ -22,7 +22,6 @@
 #include "laser_scan_utils/laser_scan.h"
 #include "laser_scan_utils/line_finder_iterative.h"
 #include "laser_scan_utils/polyline.h"
-#include "laser_scan_utils/polyline_finder.h"
 
 namespace wolf
 {
@@ -45,11 +44,24 @@ struct LandmarkPolylineMatch : public LandmarkMatch
 //    std::vector<unsigned int> feature_points_add_back_;
 };
 
+struct ProcessorParamsPolyline : public ProcessorParamsBase
+{
+        laserscanutils::LineFinderIterativeParams line_finder_params_;
+        //TODO: add corner_finder_params
+        unsigned int new_corners_th;
+        unsigned int loop_frames_th;
+
+        // These values below are constant and defined within the class -- provide a setter or accept them at construction time if you need to configure them
+        //        Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
+        //        Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
+        //        Scalar position_error_th_ = 1;
+        //        Scalar min_features_ratio_th_ = 0.5;
+};
+
 class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 {
     private:
         laserscanutils::LineFinderIterative line_finder_;
-        laserscanutils::PolylineFinder polyline_finder_;
         //TODO: add corner_finder_params
 
         FeatureBaseList polylines_incoming_;
@@ -83,26 +95,9 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         virtual void preProcess();
 //        virtual void postProcess() { }
 
-        void advance()
-        {
-            //std::cout << "\tProcessorTrackerLandmarkPolyline::advance:" << std::endl;
-            //std::cout << "\t\tcorners_last: " << polylines_last_.size() << std::endl;
-            //std::cout << "\t\tcorners_incoming_: " << polylines_incoming_.size() << std::endl;
-            ProcessorTrackerLandmark::advance();
-            for ( auto polyline : polylines_last_)
-                polyline->destruct();
+        void advance();
 
-            polylines_last_ = std::move(polylines_incoming_);
-        }
-
-        void reset()
-        {
-            //std::cout << "\tProcessorTrackerLandmarkPolyline::reset:" << std::endl;
-            //std::cout << "\t\tcorners_last: " << corners_last_.size() << std::endl;
-            //std::cout << "\t\tcorners_incoming_: " << polylines_incoming_.size() << std::endl;
-            ProcessorTrackerLandmark::reset();
-            polylines_last_ = std::move(polylines_incoming_);
-        }
+        void reset();
 
         /** \brief Find provided landmarks in the incoming capture
          * \param _landmark_list_in input list of landmarks to be found in incoming
@@ -162,13 +157,16 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 
         void extractPolylines(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _polyline_list);
 
-        void expectedFeature(LandmarkBase* _landmark_ptr, Eigen::Vector4s& expected_feature_,
-                             Eigen::Matrix3s& expected_feature_cov_);
+        void expectedFeature(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& expected_feature_,
+                             Eigen::MatrixXs& expected_feature_cov_);
 
-        Eigen::VectorXs computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr,
-                                                           const Eigen::Vector4s& _expected_feature,
-                                                           const Eigen::Matrix3s& _expected_feature_cov,
+        Eigen::VectorXs computeSquaredMahalanobisDistances(const Eigen::Vector2s& _feature,
+                                                           const Eigen::Matrix2s& _feature_cov,
+                                                           const Eigen::Vector2s& _expected_feature,
+                                                           const Eigen::Matrix2s& _expected_feature_cov,
                                                            const Eigen::MatrixXs& _mu);
+        Scalar distPointToLine(const Eigen::VectorXs& _A, const Eigen::VectorXs& _A_aux, const Eigen::VectorXs& _B,
+                               bool _A_extreme, bool _B_extreme);
     // Factory method
     public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
@@ -176,7 +174,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 
 inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
                                                                       const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th) :
-        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0), line_finder_(_line_finder_params), new_features_th_(_new_corners_th), loop_frames_th_(_loop_frames_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
+        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0), line_finder_(_line_finder_params), new_features_th_(_new_corners_th), loop_frames_th_(_loop_frames_th), R_sensor_world_(Eigen::Matrix2s::Identity()), R_world_sensor_(Eigen::Matrix2s::Identity()), R_robot_sensor_(Eigen::Matrix2s::Identity()), extrinsics_transformation_computed_(false)
 {
 }
 
@@ -187,7 +185,25 @@ inline unsigned int ProcessorTrackerLandmarkPolyline::detectNewFeatures(const un
     return new_features_last_.size();
 }
 
+inline void ProcessorTrackerLandmarkPolyline::advance()
+{
+    //std::cout << "\tProcessorTrackerLandmarkPolyline::advance:" << std::endl;
+    //std::cout << "\t\tcorners_last: " << polylines_last_.size() << std::endl;
+    //std::cout << "\t\tcorners_incoming_: " << polylines_incoming_.size() << std::endl;
+    ProcessorTrackerLandmark::advance();
+    for (auto polyline : polylines_last_)
+        polyline->destruct();
+    polylines_last_ = std::move(polylines_incoming_);
+}
 
+inline void ProcessorTrackerLandmarkPolyline::reset()
+{
+    //std::cout << "\tProcessorTrackerLandmarkPolyline::reset:" << std::endl;
+    //std::cout << "\t\tcorners_last: " << corners_last_.size() << std::endl;
+    //std::cout << "\t\tcorners_incoming_: " << polylines_incoming_.size() << std::endl;
+    ProcessorTrackerLandmark::reset();
+    polylines_last_ = std::move(polylines_incoming_);
+}
 
 } // namespace wolf
 

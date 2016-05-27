@@ -107,19 +107,20 @@ SET(HDRS
     capture_motion2.h
     capture_odom_2D.h
     capture_void.h
-    constraint_base.h
     constraint_analytic.h
+    constraint_base.h
     constraint_container.h
     constraint_corner_2D.h
     constraint_epipolar.h
-    constraint_sparse.h
     constraint_fix.h
     constraint_gps_2D.h
     constraint_gps_pseudorange_3D.h
     constraint_gps_pseudorange_2D.h
     constraint_odom_2D.h
     constraint_odom_2D_analytic.h
+    constraint_point_2D.h
     constraint_relative_2D_analytic.h
+    constraint_sparse.h
     feature_base.h
     feature_corner_2D.h
     feature_gps_fix.h
@@ -259,6 +260,7 @@ IF (laser_scan_utils_FOUND)
         sensor_laser_2D.h
         #processor_laser_2D.h
         processor_tracker_landmark_corner.h
+        processor_tracker_landmark_polyline.h
         processor_tracker_feature_corner.h
         )
     SET(SRCS ${SRCS}
@@ -266,6 +268,7 @@ IF (laser_scan_utils_FOUND)
         sensor_laser_2D.cpp
         #processor_laser_2D.cpp
         processor_tracker_landmark_corner.cpp
+        processor_tracker_landmark_polyline.cpp
         processor_tracker_feature_corner.cpp
         )
 ENDIF(laser_scan_utils_FOUND)

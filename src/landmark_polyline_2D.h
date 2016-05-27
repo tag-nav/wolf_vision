@@ -35,6 +35,11 @@ class LandmarkPolyline2D : public LandmarkBase
         bool isFirstExtreme() const;
         bool isLastExtreme() const;
 
+        /** \brief Sets the first/last extreme point
+         **/
+        void setFirstExtreme(const Eigen::VectorXs& _point);
+        void setLastExtreme(const Eigen::VectorXs& _point);
+
         unsigned int getNPoints() const;
 
         /** \brief Adds a new point to the landmark
