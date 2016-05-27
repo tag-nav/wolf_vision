@@ -14,7 +14,7 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
         /** \brief Constructor of category CTR_FRAME
          **/
         ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_ftr_ptr, _tp, _frame_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+            ConstraintAnalytic(_tp, _frame_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             //
         }
@@ -22,7 +22,7 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
         /** \brief Constructor of category CTR_FEATURE
          **/
         ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _ftr_other_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_ftr_ptr, _tp, _ftr_other_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _ftr_other_ptr->getFramePtr()->getPPtr(), _ftr_other_ptr->getFramePtr()->getOPtr() )
+            ConstraintAnalytic(_tp, _ftr_other_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _ftr_other_ptr->getFramePtr()->getPPtr(), _ftr_other_ptr->getFramePtr()->getOPtr() )
         {
             //
         }
@@ -30,7 +30,7 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
         /** \brief Constructor of category CTR_LANDMARK
          **/
         ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_ftr_ptr, _tp, _landmark_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _landmark_ptr->getPPtr(), _landmark_ptr->getOPtr())
+            ConstraintAnalytic(_tp, _landmark_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _landmark_ptr->getPPtr(), _landmark_ptr->getOPtr())
         {
             //
         }

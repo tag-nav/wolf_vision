@@ -29,12 +29,11 @@ class ConstraintGPSPseudorange2D : public ConstraintSparse<1, 2, 1, 3, 1, 3, 1>
 {
 public:
     ConstraintGPSPseudorange2D(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintSparse<1, 2, 1, 3, 1, 3, 1>(_ftr_ptr,
-                                                  CTR_GPS_PR_2D,
+            ConstraintSparse<1, 2, 1, 3, 1, 3, 1>(CTR_GPS_PR_2D,
                                                   _apply_loss_function,
                                                   _status,
-                                                  _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame
-                                                  _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
+                                                  _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame
+                                                  _ftr_ptr->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
                                                   _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
                                                                                               // orientation of antenna is not needed, because omnidirectional
                                                   _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter = receiver time bias
@@ -75,13 +74,6 @@ public:
 protected:
     Eigen::Vector3s sat_position_;
     Scalar pseudorange_;
-
-public:
-    static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                                        NodeBase* _correspondant_ptr = nullptr)
-    {
-        return new ConstraintGPSPseudorange2D(_feature_ptr);
-    }
 
 };
 

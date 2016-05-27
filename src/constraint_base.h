@@ -77,15 +77,15 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 
         /** \brief Returns a reference to the feature measurement
          **/
-        const Eigen::VectorXs& getMeasurement() const;
+        virtual const Eigen::VectorXs& getMeasurement() const;
 
         /** \brief Returns a reference to the feature measurement covariance
          **/
-        const Eigen::MatrixXs& getMeasurementCovariance() const;
+        virtual const Eigen::MatrixXs& getMeasurementCovariance() const;
 
         /** \brief Returns a reference to the feature measurement square root information
          **/
-        const Eigen::MatrixXs& getMeasurementSquareRootInformation() const;
+        virtual const Eigen::MatrixXs& getMeasurementSquareRootInformation() const;
 
         /** \brief Returns a pointer to the feature constrained from
          **/
