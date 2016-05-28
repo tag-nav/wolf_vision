@@ -1,3 +1,5 @@
+# Matrix product test
+#ADD_EXECUTABLE(test_matrix_prod test_matrix_prod.cpp)
 
 # ProcessorMotion classes test
 ADD_EXECUTABLE(test_motion test_motion.cpp)
