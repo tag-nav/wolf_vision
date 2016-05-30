@@ -88,7 +88,7 @@ struct ProcessorImageParameters : public ProcessorParamsBase
                 unsigned int roi_width; ///< Width of the roi used in tracking
                 unsigned int roi_height; ///< Height of the roi used in tracking
         }matcher;
-        struct Adtive_search
+        struct Active_search
         {
                 unsigned int grid_width; ///< cells per horizontal dimension of image
                 unsigned int grid_height; ///< cells per vertical dimension of image

@@ -82,7 +82,7 @@ void ProcessorImage::preProcess()
         params_.image.width = image_incoming_.cols;
         params_.image.height = image_incoming_.rows;
         active_search_grid_.resizeImage(image_incoming_.cols, image_incoming_.rows);
-        std::cout << "resized!" << std::endl;
+        std::cout << "resized active-search image size!" << std::endl;
     }
 
     active_search_grid_.renew();
