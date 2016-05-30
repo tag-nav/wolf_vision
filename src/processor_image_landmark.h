@@ -240,21 +240,20 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          * \param new_descriptors output descriptors obtained in the function
          * \return the number of detected features
          */
-//        virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
-//                                         cv::Mat& new_descriptors);
+        virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,cv::Mat& new_descriptors);
 
     private:
         /**
          * \brief Trims the roi of a matrix which exceeds the boundaries of the image
          * \param _roi input/output roi to be trimmed if necessary
          */
-//        virtual void trimRoi(cv::Rect& _roi);
+        virtual void trimRoi(cv::Rect& _roi);
 
         /**
          * \brief Augments the designed roi so that the detector and descriptor analize the whole region of interest
          * \param _roi input/output roi to be inflated the necessary amount
          */
-//        virtual void inflateRoi(cv::Rect& _roi);
+        virtual void inflateRoi(cv::Rect& _roi);
 
         /**
          * \brief Adapts a certain roi to maximize its performance and assign it to the image. It's composed by inflateRoi and trimRoi.
@@ -262,7 +261,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          * \param _image input image (incoming or last) in which the roi will be applied to obtain \b _image_roi
          * \param _roi input roi to be adapted
          */
-//        virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
+        virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
 //        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches);
 

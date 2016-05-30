@@ -16,24 +16,58 @@
 #include "processor_image_landmark.h"
 #include "capture_void.h"
 
-int main()
+int main(int argc, char** argv)
 {
     using namespace wolf;
 
     std::cout << std::endl << "==================== processor image landmark test ======================" << std::endl;
 
-    unsigned int img_width = 640;
-    unsigned int img_height = 480;
+    cv::VideoCapture capture;
+    const char * filename;
+    if (argc == 1)
+    {
+        //filename = "/home/jtarraso/Vídeos/House interior.mp4";
+        filename = "/home/jtarraso/Vídeos/gray.mp4";
+        capture.open(filename);
+    }
+    else if (std::string(argv[1]) == "0")
+    {
+        //camera
+        filename = "0";
+        capture.open(0);
+    }
+    else
+    {
+        filename = argv[1];
+        capture.open(filename);
+    }
+    std::cout << "Input video file: " << filename << std::endl;
+    if(!capture.isOpened()) std::cout << "failed" << std::endl; else std::cout << "succeded" << std::endl;
+    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
+
+    unsigned int img_width  = capture.get(CV_CAP_PROP_FRAME_WIDTH);
+    unsigned int img_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+    std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
+
+    unsigned int buffer_size = 8;
+    std::vector<cv::Mat> frame(buffer_size);
+
+    TimeStamp t = 1;
+
+
+
 
 
     // Wolf problem
     Problem* wolf_problem_ptr_ = new Problem(FRM_PO_3D);
-    SensorBase* sensor_ptr_ = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)),
-                                             new StateBlock(Eigen::VectorXs::Zero(1)),
-                                             new StateBlock(Eigen::VectorXs::Zero(2)), 2);
+//    SensorBase* sensor_ptr_ = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)),
+//                                             new StateBlock(Eigen::VectorXs::Zero(1)),
+//                                             new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
-
-    //wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
+    Eigen::Vector4s k = {320,240,320,320};
+    SensorCamera* sensor_ptr_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()),
+                                              new StateBlock(Eigen::Vector3s::Zero()),
+                                              new StateBlock(k,false),img_width,img_height);
 
     // PROCESSOR
     ProcessorImageParameters tracker_params;
@@ -59,8 +93,6 @@ int main()
 
     ProcessorImageLandmark* prc_image_ldmk = new ProcessorImageLandmark(tracker_params);
 
-    //sen_cam_->addProcessor(prc_image_ldmk);
-
 
 //    //=====================================================
 //    // Method 2: Use factory to create sensor and processor
@@ -78,15 +110,53 @@ int main()
 //    wolf_problem_ptr_->installProcessor("IMAGE", "ORB", "PinHole", "/home/jtarraso/dev/Wolf/src/examples/processor_image_ORB.yaml");
 //    //=====================================================
 
-    //ProcessorImageLandmark* processor_ptr_ = new ProcessorImageLandmark(5);
+
+
+
+
+
+
+    // CAPTURES
+    CaptureImage* image_ptr;
+
 
     wolf_problem_ptr_->addSensor(sensor_ptr_);
     sensor_ptr_->addProcessor(prc_image_ldmk);
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
-    for (auto i = 0; i < 10; i++)
-        prc_image_ldmk->process(new CaptureVoid(TimeStamp(0), sensor_ptr_));
+
+
+
+    unsigned int f  = 1;
+    capture >> frame[f % buffer_size];
+
+    cv::namedWindow("Feature tracker");    // Creates a window for display.
+    cv::moveWindow("Feature tracker", 0, 0);
+
+
+
+
+
+    while(!(frame[f % buffer_size].empty()))
+    {
+        t.setToNow();
+
+        clock_t t1 = clock();
+
+        // Preferred method with factory objects:
+        image_ptr = new CaptureImage(t, sensor_ptr_, frame[f % buffer_size]);
+
+        /* process */
+        //prc_image_ldmk->process(new CaptureVoid(TimeStamp(0), sensor_ptr_));
+        image_ptr->process();
+
+        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+        cv::waitKey(0);
+
+        f++;
+        capture >> frame[f % buffer_size];
+    }
 
     delete wolf_problem_ptr_;
 
