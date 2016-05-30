@@ -3,6 +3,7 @@
 #include "landmark_corner_2D.h"
 #include "landmark_point_3d.h"
 #include "constraint_corner_2D.h"
+#include "pinholeTools.h"
 
 namespace wolf
 {
@@ -93,26 +94,118 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                                                           FeatureBaseList& _feature_list_out,
                                                           LandmarkMatchMap& _feature_landmark_correspondences)
 {
-    std::cout << "\tProcessorTrackerLandmarkDummy::findLandmarks"  << std::endl;
-    std::cout << "\t\t"  << _landmark_list_in.size() << " landmarks..." << std::endl;
+    /* tracker with project */
 
-    // loosing the track of the first 2 features
-    auto landmarks_lost = 0;
-    for (auto landmark_in_ptr : _landmark_list_in)
+//    std::cout << "\tProcessorTrackerLandmarkDummy::findLandmarks"  << std::endl;
+//    std::cout << "\t\t"  << _landmark_list_in.size() << " landmarks..." << std::endl;
+
+//    // loosing the track of the first 2 features
+//    auto landmarks_lost = 0;
+//    for (auto landmark_in_ptr : _landmark_list_in)
+//    {
+//        if (landmark_in_ptr->getDescriptor(0) <= landmark_idx_non_visible_)
+//        {
+//            landmarks_lost++;
+//            std::cout << "\t\tlandmark " << landmark_in_ptr->getDescriptor() << " lost!" << std::endl;
+//        }
+//        else
+//        {
+//            _feature_list_out.push_back(
+//                    new FeatureBase(FEATURE_POINT_IMAGE, landmark_in_ptr->getDescriptor(), Eigen::MatrixXs::Ones(1, 1)));
+//            _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, 0});
+//            std::cout << "\t\tlandmark " << landmark_in_ptr->getDescriptor() << " found!" << std::endl;
+//        }
+//    }
+//    return _feature_list_out.size();
+
+
+
+
+
+
+
+
+
+
+
+    unsigned int roi_width = params_.matcher.roi_width;
+    unsigned int roi_heigth = params_.matcher.roi_height;
+    unsigned int roi_x;
+    unsigned int roi_y;
+    std::vector<cv::KeyPoint> candidate_keypoints;
+    cv::Mat candidate_descriptors;
+    std::vector<cv::DMatch> cv_matches;
+
+    std::cout << "Number of features to track: " << _landmark_list_in.size() << std::endl;
+
+    //FeatureBaseList features_from_landmark;
+    for (auto landmark_in_ptr : _landmark_list_in)//_feature_list_in)
     {
-        if (landmark_in_ptr->getDescriptor(0) <= landmark_idx_non_visible_)
+        /* project */
+        LandmarkPoint3D* landmark_ptr = (LandmarkPoint3D*)landmark_in_ptr;
+        Eigen::Vector3s point3D = landmark_ptr->getPosition();//landmark_ptr->getPPtr()->getVector();
+
+        Eigen::Vector2s distortion;
+        distortion[0] = -0.301701;
+        distortion[1] = 0.0963189;
+        Eigen::Vector4f k_parameters;
+        //k = [u0, v0, au, av]
+        k_parameters[0] = 516.686; //u0
+        k_parameters[1] = 355.129; //v0
+        k_parameters[2] = 991.852; //au
+        k_parameters[3] = 995.269; //av
+
+        Eigen::Vector2s point2D;
+        point2D = pinhole::projectPoint(k_parameters,distortion,point3D);
+
+
+        /* something */
+
+        roi_x = (point2D[0]) - (roi_heigth / 2);
+        roi_y = (point2D[1]) - (roi_width / 2);
+        cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+
+        active_search_grid_.hitCell(point2D);  //TODO: Mirar el hitcell en este punto
+        //active_search_grid_.blockCell(roi);
+
+        cv::Mat target_descriptor = landmark_ptr->getDescriptor();
+
+
+        if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
         {
-            landmarks_lost++;
-            std::cout << "\t\tlandmark " << landmark_in_ptr->getDescriptor() << " lost!" << std::endl;
+            //the matcher is now inside the match function
+            Scalar normalized_score = match(target_descriptor,candidate_descriptors,candidate_keypoints,cv_matches);
+
+            if (normalized_score > params_.matcher.min_normalized_score)
+            {
+                //std::cout << "\t <--TRACKED" << std::endl;
+                FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
+                        candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
+                        true);
+                _feature_list_out.push_back(incoming_point_ptr);
+
+                incoming_point_ptr->setTrackId(incoming_point_ptr->id());
+
+//                _feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr,
+//                                                            normalized_score}); //FIXME: 512 is the maximum HAMMING distance
+
+
+                _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, 0});
+            }
+            else
+            {
+                //std::cout << "\t <--NOT TRACKED" << std::endl;
+            }
+//            for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
+//            {
+//                tracker_candidates_.push_back(candidate_keypoints[i].pt);
+
+//            }
         }
-        else
-        {
-            _feature_list_out.push_back(
-                    new FeatureBase(FEATURE_POINT_IMAGE, landmark_in_ptr->getDescriptor(), Eigen::MatrixXs::Ones(1, 1)));
-            _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, 0});
-            std::cout << "\t\tlandmark " << landmark_in_ptr->getDescriptor() << " found!" << std::endl;
-        }
+        //else
+            //std::cout << "\t <--NOT FOUND" << std::endl;
     }
+    std::cout << "Number of Features tracked: " << _feature_list_out.size() << std::endl;
     return _feature_list_out.size();
 }
 
@@ -123,20 +216,6 @@ bool ProcessorImageLandmark::voteForKeyFrame()
 
 unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_features)
 {
-//    std::cout << "\tProcessorTrackerLandmarkDummy::detectNewFeatures" << std::endl;
-
-//    // detecting 5 new features
-//    for (unsigned int i = 1; i <= _max_features; i++)
-//    {
-//        n_feature_++;
-//        new_features_last_.push_back(
-//                new FeatureBase(FEATURE_POINT_IMAGE, n_feature_ * Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
-//        std::cout << "\t\tfeature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
-//    }
-//    return new_features_last_.size();
-
-
-
     std::cout << "\n---------------- detectNewFeatures -------------" << std::endl;
     cv::Rect roi;
     std::vector<cv::KeyPoint> new_keypoints;
@@ -182,8 +261,32 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 {
     //std::cout << "ProcessorTrackerLandmarkDummy::createLandmark" << std::endl;
-    //return new LandmarkCorner2D(new StateBlock(2), new StateBlock(1), _feature_ptr->getMeasurement(0));
-    return new LandmarkPoint3D(new StateBlock(3), new StateBlock(3));
+
+    FeaturePointImage* feat_point_image_ptr = (FeaturePointImage*) _feature_ptr;
+
+    Eigen::Vector2s point2D;
+    point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
+    point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
+
+    Eigen::Vector2s distortion;
+    distortion[0] = -0.301701;
+    distortion[1] = 0.0963189;
+    Eigen::Vector4f k_parameters;
+    //k = [u0, v0, au, av]
+    k_parameters[0] = 516.686; //u0
+    k_parameters[1] = 355.129; //v0
+    k_parameters[2] = 991.852; //au
+    k_parameters[3] = 995.269; //av
+
+    Eigen::Vector2s correction;
+    pinhole::computeCorrectionModel(k_parameters,distortion,correction);
+
+    Scalar depth = 10;// = project_point_normalized_test[2];
+
+    Eigen::Vector3s point3D;
+    point3D = pinhole::backprojectPoint(k_parameters,correction,point2D,depth);
+
+    return new LandmarkPoint3D(new StateBlock(point3D), new StateBlock(3),point3D,feat_point_image_ptr->getDescriptor());
 }
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
@@ -198,6 +301,23 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
 
 // ==================================================================== My own functions
 
+Scalar ProcessorImageLandmark::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors,
+                             std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches)
+{
+    //std::cout << " --> " << _candidate_keypoints.size() << " candidates";
+
+    matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
+
+    //std::cout << "\n\tBest is: [" << _cv_matches[0].trainIdx << "]:" << _cv_matches[0].distance;
+
+    //std::cout << " | at: " << _candidate_keypoints[_cv_matches[0].trainIdx].pt;
+
+    Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
+
+    //std::cout << " | score: " << normalized_score;
+
+    return normalized_score;
+}
 
 unsigned int ProcessorImageLandmark::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
                                     cv::Mat& new_descriptors)
