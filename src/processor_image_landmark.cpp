@@ -63,6 +63,11 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorImageParameters _params)
     // 3. matcher params
     matcher_ptr_ = new cv::BFMatcher(_params.matcher.similarity_norm);
 
+    // 4. pinhole params
+    k_parameters_ = _params.pinhole_params.k_parameters;
+    distortion_ = _params.pinhole_params.distortion;
+    pinhole::computeCorrectionModel(k_parameters_,distortion_,correction_);
+
 }
 
 ProcessorImageLandmark::~ProcessorImageLandmark()
@@ -145,21 +150,12 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         LandmarkPoint3D* landmark_ptr = (LandmarkPoint3D*)landmark_in_ptr;
         Eigen::Vector3s point3D = landmark_ptr->getPosition();//landmark_ptr->getPPtr()->getVector();
 
-        Eigen::Vector2s distortion;
-        distortion[0] = -0.301701;
-        distortion[1] = 0.0963189;
-        Eigen::Vector4f k_parameters;
-        //k = [u0, v0, au, av]
-        k_parameters[0] = 516.686; //u0
-        k_parameters[1] = 355.129; //v0
-        k_parameters[2] = 991.852; //au
-        k_parameters[3] = 995.269; //av
 
         Eigen::Vector2s point2D;
-        point2D = pinhole::projectPoint(k_parameters,distortion,point3D);
+        point2D = pinhole::projectPoint(k_parameters_,distortion_,point3D);
 
 
-        /* something */
+        /* tracking */
 
         roi_x = (point2D[0]) - (roi_heigth / 2);
         roi_y = (point2D[1]) - (roi_width / 2);
@@ -268,23 +264,10 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
     point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
 
-    Eigen::Vector2s distortion;
-    distortion[0] = -0.301701;
-    distortion[1] = 0.0963189;
-    Eigen::Vector4f k_parameters;
-    //k = [u0, v0, au, av]
-    k_parameters[0] = 516.686; //u0
-    k_parameters[1] = 355.129; //v0
-    k_parameters[2] = 991.852; //au
-    k_parameters[3] = 995.269; //av
-
-    Eigen::Vector2s correction;
-    pinhole::computeCorrectionModel(k_parameters,distortion,correction);
-
     Scalar depth = 10;// = project_point_normalized_test[2];
 
     Eigen::Vector3s point3D;
-    point3D = pinhole::backprojectPoint(k_parameters,correction,point2D,depth);
+    point3D = pinhole::backprojectPoint(k_parameters_,correction_,point2D,depth);
 
     return new LandmarkPoint3D(new StateBlock(point3D), new StateBlock(3),point3D,feat_point_image_ptr->getDescriptor());
 }
