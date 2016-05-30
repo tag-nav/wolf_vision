@@ -1,6 +1,7 @@
 #include "processor_image_landmark.h"
 
 #include "landmark_corner_2D.h"
+#include "landmark_point_3d.h"
 #include "constraint_corner_2D.h"
 
 namespace wolf
@@ -181,15 +182,17 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 {
     //std::cout << "ProcessorTrackerLandmarkDummy::createLandmark" << std::endl;
-    return new LandmarkCorner2D(new StateBlock(2), new StateBlock(1), _feature_ptr->getMeasurement(0));
+    //return new LandmarkCorner2D(new StateBlock(2), new StateBlock(1), _feature_ptr->getMeasurement(0));
+    return new LandmarkPoint3D(new StateBlock(3), new StateBlock(3));
 }
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
+    LandmarkCorner2D* lndmk_corner = new LandmarkCorner2D(new StateBlock(2), new StateBlock(1), _feature_ptr->getMeasurement(0));
     std::cout << "\tProcessorTrackerLandmarkDummy::createConstraint" << std::endl;
     std::cout << "\t\tfeature " << _feature_ptr->getMeasurement() << std::endl;
-    std::cout << "\t\tlandmark "<< _landmark_ptr->getDescriptor() << std::endl;
-    return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*)(_landmark_ptr));
+    std::cout << "\t\tlandmark "<< lndmk_corner->getDescriptor() << std::endl;
+    return new ConstraintCorner2D(_feature_ptr, lndmk_corner);
 }
 
 
