@@ -162,7 +162,7 @@ SET(HDRS
     sensor_imu.h
     sensor_odom_2D.h
     state_block.h
-    state_homogeneous_3d.h
+    state_homogeneous_3D.h
     state_quaternion.h
     time_stamp.h
     trajectory_base.h
