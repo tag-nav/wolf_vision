@@ -18,12 +18,12 @@ class LandmarkPolyline2D : public LandmarkBase
 {
     protected:
         std::deque<StateBlock*> point_state_ptr_vector_; ///< polyline points state blocks
-        bool first_extreme_;            ///< Wether the first point is an extreme of a line or the line may continue
-        bool last_extreme_;             ///< Wether the last point is an extreme of a line or the line may continue
+        bool first_defined_;            ///< Wether the first point is an extreme of a line or the line may continue
+        bool last_defined_;             ///< Wether the last point is an extreme of a line or the line may continue
 
     public:
         LandmarkPolyline2D(FeaturePolyline2D* _polyline_ptr);
-        LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme);
+        LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined);
         virtual ~LandmarkPolyline2D();
 
         /** \brief Gets a const reference to the point state block pointer vector
@@ -32,13 +32,13 @@ class LandmarkPolyline2D : public LandmarkBase
 
         /** \brief Gets wether the first/last points are extreme or not
          **/
-        bool isFirstExtreme() const;
-        bool isLastExtreme() const;
+        bool isFirstDefined() const;
+        bool isLastDefined() const;
 
         /** \brief Sets the first/last extreme point
          **/
-        void setFirstExtreme(const Eigen::VectorXs& _point);
-        void setLastExtreme(const Eigen::VectorXs& _point);
+        void setFirst(const Eigen::VectorXs& _point, bool _defined);
+        void setLast(const Eigen::VectorXs& _point, bool _defined);
 
         unsigned int getNPoints() const;
 
@@ -47,7 +47,7 @@ class LandmarkPolyline2D : public LandmarkBase
          * \param _extreme: if its extreme or not
          * \param _back: if it have to be added in the back (true) or in the front (false)
          **/
-        void addPoint(const Eigen::VectorXs& _point, const bool& _extreme, const bool& _back);
+        void addPoint(const Eigen::VectorXs& _point, const bool& _defined, const bool& _back);
 
         /** \brief Adds new points to the landmark
          * \param _points: a matrix containing points, some of them to be added
@@ -55,7 +55,7 @@ class LandmarkPolyline2D : public LandmarkBase
          * \param _extreme: if last point to be added is extreme or not
          * \param _back: if the points have to be added in the back (true) or in the front (false)
          **/
-        void addPoints(const Eigen::MatrixXs& _points, const int& _idx, const bool& _extreme, const bool& _back);
+        void addPoints(const Eigen::MatrixXs& _points, const int& _idx, const bool& _defined, const bool& _back);
 };
 
 inline std::deque<StateBlock*>& LandmarkPolyline2D::getPointStatePtrDeque()
@@ -63,14 +63,14 @@ inline std::deque<StateBlock*>& LandmarkPolyline2D::getPointStatePtrDeque()
     return point_state_ptr_vector_;
 }
 
-inline bool LandmarkPolyline2D::isFirstExtreme() const
+inline bool LandmarkPolyline2D::isFirstDefined() const
 {
-    return first_extreme_;
+    return first_defined_;
 }
 
-inline bool LandmarkPolyline2D::isLastExtreme() const
+inline bool LandmarkPolyline2D::isLastDefined() const
 {
-    return last_extreme_;
+    return last_defined_;
 }
 
 inline unsigned int LandmarkPolyline2D::getNPoints() const
