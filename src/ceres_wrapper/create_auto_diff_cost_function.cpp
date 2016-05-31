@@ -15,6 +15,8 @@
 #include "../constraint_gps_pseudorange_2D.h"
 #include "../constraint_odom_2D.h"
 #include "../constraint_corner_2D.h"
+#include "../constraint_point_2D.h"
+#include "../constraint_point_to_line_2D.h"
 #include "../constraint_container.h"
 
 // Wolf and ceres auto_diff creators
@@ -69,16 +71,29 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _
             else
                 return createAutoDiffCostFunctionCeres<ConstraintGPSPseudorange2D>(_ctr_ptr);
 
-        /* For adding a new constraint, add the #include and a case:
-        case CTR_ENUM:
+        case CTR_POINT_2D:
             if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintType>(_ctr_ptr);
+                return createAutoDiffCostFunctionWrapper<ConstraintPoint2D>(_ctr_ptr);
             else
-                return createAutoDiffCostFunctionCeres<ConstraintType>(_ctr_ptr);
-         */
+                return createAutoDiffCostFunctionCeres<ConstraintPoint2D>(_ctr_ptr);
+
+        case CTR_POINT_TO_LINE_2D:
+            if (_use_wolf_autodiff)
+                return createAutoDiffCostFunctionWrapper<ConstraintPointToLine2D>(_ctr_ptr);
+            else
+                return createAutoDiffCostFunctionCeres<ConstraintPointToLine2D>(_ctr_ptr);
+
+
+            /* For adding a new constraint, add the #include and a case:
+            case CTR_ENUM:
+                if (_use_wolf_autodiff)
+                    return createAutoDiffCostFunctionWrapper<ConstraintType>(_ctr_ptr);
+                else
+                    return createAutoDiffCostFunctionCeres<ConstraintType>(_ctr_ptr);
+             */
 
         default:
-            throw std::invalid_argument( "Unknown constraint type! Please add it in the file: ceres_wrapper/create_auto_diff_cost_function.h" );
+            throw std::invalid_argument( "Unknown constraint type! Please add it in the file: ceres_wrapper/create_auto_diff_cost_function.cpp" );
     }
 }
 
