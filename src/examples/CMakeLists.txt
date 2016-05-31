@@ -126,6 +126,11 @@ IF(faramotics_FOUND)
                                 ${pose_state_time_LIBRARIES} 
                                 ${faramotics_LIBRARIES}
                                 ${PROJECT_NAME})
+        ADD_EXECUTABLE(test_ceres_2_lasers_polylines test_ceres_2_lasers_polylines.cpp)
+        TARGET_LINK_LIBRARIES(test_ceres_2_lasers_polylines 
+                                ${pose_state_time_LIBRARIES} 
+                                ${faramotics_LIBRARIES}
+                                ${PROJECT_NAME})
         ADD_EXECUTABLE(test_2_lasers_offline test_2_lasers_offline.cpp)
         TARGET_LINK_LIBRARIES(test_2_lasers_offline 
                                 ${pose_state_time_LIBRARIES} 
