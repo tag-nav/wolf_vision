@@ -332,7 +332,6 @@ Eigen::VectorXs ProcessorTrackerLandmarkCorner::computeSquaredMahalanobisDistanc
                                                                           const Eigen::Matrix3s& _expected_feature_cov,
                                                                           const Eigen::MatrixXs& _mu)
 {
-
     const Eigen::Vector2s& p_feature = _feature_ptr->getMeasurement().head(2);
     const Scalar& o_feature = _feature_ptr->getMeasurement()(2);
     // ------------------------ d

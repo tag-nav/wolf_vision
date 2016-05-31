@@ -14,6 +14,7 @@
 #include "feature_polyline_2D.h"
 #include "landmark_polyline_2D.h"
 #include "constraint_point_2D.h"
+#include "constraint_point_to_line_2D.h"
 #include "state_block.h"
 #include "data_association/association_tree.h"
 #include "processor_tracker_landmark.h"
@@ -48,7 +49,7 @@ struct ProcessorParamsPolyline : public ProcessorParamsBase
 {
         laserscanutils::LineFinderIterativeParams line_finder_params_;
         //TODO: add corner_finder_params
-        unsigned int new_corners_th;
+        unsigned int new_features_th;
         unsigned int loop_frames_th;
 
         // These values below are constant and defined within the class -- provide a setter or accept them at construction time if you need to configure them
@@ -148,7 +149,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          *
          * Implement this method in derived classes.
          *
-         * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
+         * TODO: Make a general ConstraintFactory, and put it in WolfProblem. JV: I disagree..
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr);
@@ -165,7 +166,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
                                                            const Eigen::Vector2s& _expected_feature,
                                                            const Eigen::Matrix2s& _expected_feature_cov,
                                                            const Eigen::MatrixXs& _mu);
-        Scalar distPointToLine(const Eigen::VectorXs& _A, const Eigen::VectorXs& _A_aux, const Eigen::VectorXs& _B,
+        Scalar sqDistPointToLine(const Eigen::Vector3s& _A, const Eigen::Vector3s& _A_aux, const Eigen::Vector3s& _B,
                                bool _A_extreme, bool _B_extreme);
     // Factory method
     public:
