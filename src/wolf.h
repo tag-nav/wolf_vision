@@ -147,6 +147,7 @@ typedef enum
     CTR_ODOM_2D,                ///< 2D Odometry constraint .
     CTR_CORNER_2D,              ///< 2D corner constraint .
     CTR_POINT_2D,               ///< 2D point constraint .
+    CTR_POINT_TO_LINE_2D,       ///< 2D point constraint .
     CTR_CONTAINER,              ///< 2D container constraint .
     CTR_IMG_PNT_TO_EP,          ///< constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
