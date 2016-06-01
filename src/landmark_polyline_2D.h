@@ -55,7 +55,7 @@ class LandmarkPolyline2D : public LandmarkBase
          * \param _extreme: if last point to be added is extreme or not
          * \param _back: if the points have to be added in the back (true) or in the front (false)
          **/
-        void addPoints(const Eigen::MatrixXs& _points, const int& _idx, const bool& _defined, const bool& _back);
+        void addPoints(const Eigen::MatrixXs& _points, const unsigned int& _idx, const bool& _defined, const bool& _back);
 };
 
 inline std::deque<StateBlock*>& LandmarkPolyline2D::getPointStatePtrDeque()

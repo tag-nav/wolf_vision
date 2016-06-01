@@ -41,7 +41,7 @@ LandmarkPolyline2D::~LandmarkPolyline2D()
 
 void LandmarkPolyline2D::setFirst(const Eigen::VectorXs& _point, bool _defined)
 {
-    std::cout << "LandmarkPolyline2D::setFirst" << std::endl;
+    //std::cout << "LandmarkPolyline2D::setFirst" << std::endl;
     assert(_point.size() >= 2 && "LandmarkPolyline2D::setFirstExtreme: bad point size");
     point_state_ptr_vector_.front()->setVector(_point.head(2));
     first_defined_ = _defined;
@@ -49,7 +49,7 @@ void LandmarkPolyline2D::setFirst(const Eigen::VectorXs& _point, bool _defined)
 
 void LandmarkPolyline2D::setLast(const Eigen::VectorXs& _point, bool _defined)
 {
-    std::cout << "LandmarkPolyline2D::setLast" << std::endl;
+    //std::cout << "LandmarkPolyline2D::setLast" << std::endl;
     assert(_point.size() >= 2 && "LandmarkPolyline2D::setLastExtreme: bad point size");
     point_state_ptr_vector_.back()->setVector(_point.head(2));
     last_defined_ = _defined;
@@ -70,21 +70,23 @@ void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _de
     }
 }
 
-void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const int& _idx, const bool& _defined,
+void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigned int& _idx, const bool& _defined,
                                    const bool& _back)
 {
-    assert(_points.cols() >= 2 && "bad points size");
+    //std::cout << "LandmarkPolyline2D::addPoints from/to: " << _idx << std::endl << _points << std::endl;
+    assert(_points.rows() >= 2 && "bad points size");
+    assert(_idx < _points.cols() && _idx >= 0 && "bad index!");
 
     if (_back)
     {
-        for (auto i = _idx; _idx < _points.cols(); i++)
-            point_state_ptr_vector_.push_back(new StateBlock(_points.col(i).head<2>()));
+        for (int i = _idx; i < _points.cols(); i++)
+            point_state_ptr_vector_.push_back(new StateBlock(_points.block(0,i,2,1)));
         last_defined_ = _defined;
     }
     else
     {
-        for (auto i = _idx; _idx > 0; i--)
-            point_state_ptr_vector_.push_front(new StateBlock(_points.col(i).head<2>()));
+        for (int i = _idx; i >= 0; i--)
+            point_state_ptr_vector_.push_front(new StateBlock(_points.block(0,i,2,1)));
         first_defined_ = _defined;
     }
 }
