@@ -93,8 +93,6 @@ struct ProcessorImageParameters : public ProcessorParamsBase
 class ProcessorImageLandmark : public ProcessorTrackerLandmark
 {
     protected:
-        //cv::FeatureDetector* detector_ptr_;
-        //cv::DescriptorExtractor* descriptor_ptr_;
         cv::DescriptorMatcher* matcher_ptr_;
         cv::Feature2D* detector_descriptor_ptr_;
     protected:
@@ -215,9 +213,6 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         //Other functions
 
-//        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
-//                                           FeatureMatchMap& _feature_correspondences);
-
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _last_feature input feature in last capture tracked
          * \param _incoming_feature input/output feature in incoming capture to be corrected
@@ -267,7 +262,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         // These only to debug, will disappear one day soon
     public:
-//        virtual void drawFeatures(CaptureBase* const _last_ptr);
+        virtual void drawFeatures(CaptureBase* const _last_ptr);
 
 //        virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
 

@@ -92,7 +92,8 @@ void ProcessorImageLandmark::preProcess()
 
 void ProcessorImageLandmark::postProcess()
 {
-
+    if (last_ptr_!=nullptr)
+        drawFeatures(last_ptr_);
 }
 
 unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _landmark_list_in,
@@ -100,38 +101,6 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                                                           LandmarkMatchMap& _feature_landmark_correspondences)
 {
     /* tracker with project */
-
-//    std::cout << "\tProcessorTrackerLandmarkDummy::findLandmarks"  << std::endl;
-//    std::cout << "\t\t"  << _landmark_list_in.size() << " landmarks..." << std::endl;
-
-//    // loosing the track of the first 2 features
-//    auto landmarks_lost = 0;
-//    for (auto landmark_in_ptr : _landmark_list_in)
-//    {
-//        if (landmark_in_ptr->getDescriptor(0) <= landmark_idx_non_visible_)
-//        {
-//            landmarks_lost++;
-//            std::cout << "\t\tlandmark " << landmark_in_ptr->getDescriptor() << " lost!" << std::endl;
-//        }
-//        else
-//        {
-//            _feature_list_out.push_back(
-//                    new FeatureBase(FEATURE_POINT_IMAGE, landmark_in_ptr->getDescriptor(), Eigen::MatrixXs::Ones(1, 1)));
-//            _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, 0});
-//            std::cout << "\t\tlandmark " << landmark_in_ptr->getDescriptor() << " found!" << std::endl;
-//        }
-//    }
-//    return _feature_list_out.size();
-
-
-
-
-
-
-
-
-
-
 
     unsigned int roi_width = params_.matcher.roi_width;
     unsigned int roi_heigth = params_.matcher.roi_height;
@@ -182,11 +151,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
                 incoming_point_ptr->setTrackId(incoming_point_ptr->id());
 
-//                _feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr,
-//                                                            normalized_score}); //FIXME: 512 is the maximum HAMMING distance
-
-
-                _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, 0});
+                _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, normalized_score});
             }
             else
             {
@@ -256,15 +221,13 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 
 LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 {
-    //std::cout << "ProcessorTrackerLandmarkDummy::createLandmark" << std::endl;
-
     FeaturePointImage* feat_point_image_ptr = (FeaturePointImage*) _feature_ptr;
 
     Eigen::Vector2s point2D;
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
     point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
 
-    Scalar depth = 10;// = project_point_normalized_test[2];
+    Scalar depth = 10; // arbitrary value
 
     Eigen::Vector3s point3D;
     point3D = pinhole::backprojectPoint(k_parameters_,correction_,point2D,depth);
@@ -366,6 +329,24 @@ void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::R
     tracker_roi_inflated_.push_back(_roi);
 
     _image_roi = _image(_roi);
+}
+
+void ProcessorImageLandmark::drawFeatures(CaptureBase* const _last_ptr)
+{
+    for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
+    {
+        FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
+        if (point_ptr->isKnown())
+        {
+            cv::circle(image_last_, point_ptr->getKeypoint().pt, 7, cv::Scalar(51.0, 255.0, 51.0), 1, 3, 0);
+        }
+        else
+        {
+            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
+        }
+        cv::putText(image_last_, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+    }
+    cv::imshow("Feature tracker", image_last_);
 }
 
 
