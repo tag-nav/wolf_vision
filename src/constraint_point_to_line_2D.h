@@ -82,7 +82,7 @@ inline bool ConstraintPointToLine2D::operator ()(const T* const _robotP, const T
 {
     // Mapping
     Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_position_map(_landmarkP);
-    Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_aux_position_map(_landmarkP);
+    Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_aux_position_map(_landmarkPaux);
     Eigen::Map<const Eigen::Matrix<T,2,1>> robot_position_map(_robotP);
 
     // sensor transformation
