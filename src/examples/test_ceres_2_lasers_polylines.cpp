@@ -320,23 +320,23 @@ int main(int argc, char** argv)
         mean_times(0) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // SOLVE OPTIMIZATION ---------------------------
-        //std::cout << "SOLVING..." << std::endl;
+        std::cout << "SOLVING..." << std::endl;
         t1 = clock();
         ceres::Solver::Summary summary = ceres_manager.solve();
-        //std::cout << summary.FullReport() << std::endl;
+        std::cout << summary.FullReport() << std::endl;
         mean_times(3) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // COMPUTE COVARIANCES ---------------------------
-        //std::cout << "COMPUTING COVARIANCES..." << std::endl;
+        std::cout << "COMPUTING COVARIANCES..." << std::endl;
         t1 = clock();
-        ceres_manager.computeCovariances();
+        //ceres_manager.computeCovariances();
         mean_times(4) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // DRAWING STUFF ---------------------------
-        //std::cout << "RENDERING..." << std::endl;
+        std::cout << "RENDERING..." << std::endl;
         t1 = clock();
-        if (step % 3 == 0)
-            robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureListPtr(), 1, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
+//        if (step % 3 == 0)
+//            robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureListPtr(), 1, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
             //robot.render(laser_2_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_2_processor->getLastPtr()->getFeatureListPtr(), 2, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
         mean_times(5) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
