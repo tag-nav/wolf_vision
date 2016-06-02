@@ -27,7 +27,7 @@ struct ProcessorParamsBase
 class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 {
     public:
-        ProcessorBase(ProcessorType _tp);
+        ProcessorBase(ProcessorType _tp, const Scalar& _time_tolerance = 0);
 
         /** \brief Default destructor (not recommended)
          *
@@ -51,6 +51,10 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
         virtual bool permittedKeyFrame() final;
 
+        /**\brief make a Frame with the provided Capture
+         */
+        virtual void makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
+
         virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tolerance) = 0;
 
         SensorBase* getSensorPtr();
@@ -63,6 +67,7 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
     protected:
         unsigned int processor_id_;
         ProcessorType type_id_;
+        Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
 };
 
 inline bool ProcessorBase::isMotion()

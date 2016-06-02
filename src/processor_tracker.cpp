@@ -11,8 +11,8 @@ namespace wolf
 {
 
 ProcessorTracker::ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features, const Scalar& _time_tolerance) :
-        ProcessorBase(_tp), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
-        max_new_features_(_max_new_features), time_tolerance_(_time_tolerance)
+        ProcessorBase(_tp, _time_tolerance), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
+        max_new_features_(_max_new_features)
 {
     //
 }
@@ -39,7 +39,7 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    std::cout << "-----nProcessorTracker::process():" << std::endl;
+    //std::cout << "-----nProcessorTracker::process():" << std::endl;
     //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
     //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
@@ -97,7 +97,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // OTHER TIMES
     else
     {
-        std::cout << "OTHER TIMES" << std::endl;
+        //std::cout << "OTHER TIMES" << std::endl;
         //std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
         // 1. First we track the known Features and create new constraints as needed
@@ -146,7 +146,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     }
     postProcess();
 
-    std::cout << "-----End of process():" << std::endl;
+    //std::cout << "-----End of process():" << std::endl;
     //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
     //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
@@ -183,16 +183,6 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& 
     origin_ptr_ = nullptr;
 
     return true;
-}
-
-void ProcessorTracker::makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type)
-{
-    // We need to create the new free Frame to hold what will become the last Capture
-    FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
-    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
-    if (_type == KEY_FRAME)
-        // Keyframe callback in order to let the other processors to establish their constraints
-        getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), this, time_tolerance_);
 }
 
 void ProcessorTracker::setKeyFrame(CaptureBase* _capture_ptr)
