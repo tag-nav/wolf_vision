@@ -11,6 +11,7 @@ namespace wolf {
 class ConstraintPoint2D: public ConstraintSparse<2,2,1,2>
 {
     protected:
+        StateBlock* point_state_ptr_;
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
@@ -19,7 +20,7 @@ class ConstraintPoint2D: public ConstraintSparse<2,2,1,2>
 
 		ConstraintPoint2D(FeaturePolyline2D* _ftr_ptr, LandmarkPolyline2D* _lmk_ptr, unsigned int _ftr_point_id, unsigned int _lmk_point_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
 			ConstraintSparse<2,2,1,2>(CTR_POINT_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPointStatePtrDeque()[_lmk_point_id]),
-			measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
+			point_state_ptr_(_lmk_ptr->getPointStatePtrDeque()[_lmk_point_id]), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
 		{
             setType("CORNER 2D");
             Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
@@ -41,6 +42,11 @@ class ConstraintPoint2D: public ConstraintSparse<2,2,1,2>
 		{
 			return (LandmarkPolyline2D*) landmark_ptr_;
 		}
+
+        StateBlock* getLandmarkPointPtr()
+        {
+            return point_state_ptr_;
+        }
 
 		template <typename T>
         bool operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkP, T* _residuals) const;
