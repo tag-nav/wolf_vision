@@ -91,10 +91,17 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 
         virtual ~ProcessorTrackerLandmarkPolyline();
 
+        const FeatureBaseList& getLastPolylines() const;
+
     protected:
 
         virtual void preProcess();
-//        virtual void postProcess() { }
+        virtual void postProcess()
+        {
+            std::cout << "postProcess: " << std::endl;
+            std::cout << "New Last features: " << getNewFeaturesListLast().size() << std::endl;
+            std::cout << "Last features: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+        }
 
         void advance();
 
@@ -204,6 +211,11 @@ inline void ProcessorTrackerLandmarkPolyline::reset()
     //std::cout << "\t\tcorners_incoming_: " << polylines_incoming_.size() << std::endl;
     ProcessorTrackerLandmark::reset();
     polylines_last_ = std::move(polylines_incoming_);
+}
+
+inline const FeatureBaseList& ProcessorTrackerLandmarkPolyline::getLastPolylines() const
+{
+    return polylines_last_;
 }
 
 } // namespace wolf
