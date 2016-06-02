@@ -119,6 +119,7 @@ SET(HDRS
     constraint_odom_2D.h
     constraint_odom_2D_analytic.h
     constraint_point_2D.h
+    constraint_point_to_line_2D.h
     constraint_relative_2D_analytic.h
     constraint_sparse.h
     feature_base.h
