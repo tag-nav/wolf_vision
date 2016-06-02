@@ -11,6 +11,8 @@ namespace wolf {
 class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,2>
 {
     protected:
+        StateBlock* point_state_ptr_;
+        StateBlock* point_aux_state_ptr_;
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;  ///<  the squared root information matrix
@@ -19,7 +21,7 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,2>
 
 		ConstraintPointToLine2D(FeaturePolyline2D* _ftr_ptr, LandmarkPolyline2D* _lmk_ptr, unsigned int _ftr_point_id, unsigned int _lmk_point_id,  unsigned int _lmk_point_aux_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
 			ConstraintSparse<1,2,1,2,2>(CTR_POINT_TO_LINE_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPointStatePtrDeque()[_lmk_point_id], _lmk_ptr->getPointStatePtrDeque()[_lmk_point_aux_id]),
-			measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
+			point_state_ptr_(_lmk_ptr->getPointStatePtrDeque()[_lmk_point_id]), point_aux_state_ptr_(_lmk_ptr->getPointStatePtrDeque()[_lmk_point_aux_id]), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
 		{
             setType("CORNER 2D");
             Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
@@ -41,6 +43,16 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,2>
 		{
 			return (LandmarkPolyline2D*) landmark_ptr_;
 		}
+
+        StateBlock* getLandmarkPointPtr()
+        {
+            return point_state_ptr_;
+        }
+
+        StateBlock* getLandmarkPointAuxPtr()
+        {
+            return point_state_ptr_;
+        }
 
 		template <typename T>
         bool operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkP, const T* const _landmarkPaux, T* _residuals) const;
@@ -102,8 +114,6 @@ inline bool ConstraintPointToLine2D::operator ()(const T* const _robotP, const T
     normal = normal / normal.norm();
     T projected_cov = normal.transpose() * measurement_covariance_.cast<T>() * normal;
     _residuals[0] = _residuals[0] / sqrt(projected_cov);
-
-    //residuals_map = getMeasurementSquareRootInformation().cast<T>() * (expected_feature_position - getMeasurement().head<2>().cast<T>());
 
     return true;
 }
