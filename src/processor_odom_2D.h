@@ -14,19 +14,26 @@
 
 namespace wolf {
 
+struct ProcessorParamsOdom2D : public ProcessorParamsBase
+{
+    Scalar dist_traveled_th_;
+    Scalar cov_det_th_;
+};
+
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
-        ProcessorOdom2D();
+        ProcessorOdom2D(const Scalar& _traveled_dist_th = 10, const Scalar& _cov_det_th = 1);
         virtual ~ProcessorOdom2D();
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
 
         virtual bool voteForKeyFrame()
         {
-            if (getBufferPtr()->get().back().delta_integr_.norm() > 10)
+            //std::cout << "ProcessorOdom2D::voteForKeyFrame: traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
+            if (getBufferPtr()->get().back().delta_integr_.norm() > dist_traveled_th_)
                 return true;
-            if (getBufferPtr()->get().back().delta_integr_cov_.determinant() > 10)
+            if (getBufferPtr()->get().back().delta_integr_cov_.determinant() > cov_det_th_)
                 return true;
             return false;
         }
@@ -34,6 +41,8 @@ class ProcessorOdom2D : public ProcessorMotion
     protected:
 //        virtual void preProcess(){}
 //        virtual void postProcess(){}
+        Scalar dist_traveled_th_;
+        Scalar cov_det_th_;
 
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
@@ -53,8 +62,10 @@ class ProcessorOdom2D : public ProcessorMotion
             static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
-inline ProcessorOdom2D::ProcessorOdom2D() :
-        ProcessorMotion(PRC_ODOM_2D, 3, 3, 2)
+inline ProcessorOdom2D::ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th) :
+        ProcessorMotion(PRC_ODOM_2D, 3, 3, 2),
+        dist_traveled_th_(_traveled_dist_th),
+        cov_det_th_(_cov_det_th)
 {
     setType("ODOM 2D");
 }
