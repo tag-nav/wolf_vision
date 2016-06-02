@@ -22,6 +22,7 @@ FeatureBase::FeatureBase(FeatureType _tp, const Eigen::VectorXs& _measurement, c
 	measurement_(_measurement),
 	measurement_covariance_(_meas_covariance)
 {
+    assert(_meas_covariance.determinant() > 0 && "Not positive definite measurement covariance");
     Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
@@ -47,7 +48,8 @@ ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
     // add constraint to be added in solver
     if (getProblem() != nullptr)
         getProblem()->addConstraintPtr(_co_ptr);
-
+    else
+        std::cout << "WARNING: ADDING CONSTRAINT TO A FEATURE NOT CONNECTED WITH PROBLEM." << std::endl;
     return _co_ptr;
 }
 
@@ -69,6 +71,7 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 {
+    assert(_meas_cov.determinant() > 0 && "Not positive definite measurement covariance");
 	measurement_covariance_ = _meas_cov;
 	Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
