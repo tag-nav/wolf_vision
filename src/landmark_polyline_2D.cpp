@@ -55,6 +55,11 @@ void LandmarkPolyline2D::setLast(const Eigen::VectorXs& _point, bool _defined)
     last_defined_ = _defined;
 }
 
+const Eigen::VectorXs& LandmarkPolyline2D::getPointVector(unsigned int _i) const
+{
+    return point_state_ptr_vector_[_i]->getVector();
+}
+
 void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _defined, const bool& _back)
 {
     assert(_point.size() >= 2 && "bad point size");
@@ -75,7 +80,7 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
 {
     //std::cout << "LandmarkPolyline2D::addPoints from/to: " << _idx << std::endl << _points << std::endl;
     assert(_points.rows() >= 2 && "bad points size");
-    assert(_idx < _points.cols() && _idx >= 0 && "bad index!");
+    assert(_idx < _points.cols() && "bad index!");
 
     if (_back)
     {

@@ -41,6 +41,7 @@ class LandmarkPolyline2D : public LandmarkBase
         void setLast(const Eigen::VectorXs& _point, bool _defined);
 
         unsigned int getNPoints() const;
+        const Eigen::VectorXs& getPointVector(unsigned int _i) const;
 
         /** \brief Adds a new point to the landmark
          * \param _point: the point to be added
