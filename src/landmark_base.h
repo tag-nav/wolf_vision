@@ -106,8 +106,6 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         const Eigen::VectorXs& getDescriptor() const;        
         
         /** \brief Returns _ii component of descriptor vector
-         * 
-         * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
          **/
         Scalar getDescriptor(unsigned int _ii) const;
 
@@ -167,6 +165,7 @@ inline void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)
 
 inline Scalar LandmarkBase::getDescriptor(unsigned int _ii) const
 {
+    assert(_ii < descriptor_.size() && "LandmarkBase::getDescriptor: bad index");
     return descriptor_(_ii);
 }
 
