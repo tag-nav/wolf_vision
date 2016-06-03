@@ -29,10 +29,10 @@ int main()
 {
     Problem problem(FRM_PO_2D);
 
-    FrameBase* frm1 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.1));
+    problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.1));
     FrameBase* frm2 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.2));
     FrameBase* frm3 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.3));
-    FrameBase* frm4 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.4));
+    problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.4));
     FrameBase* frm5 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.5));
     FrameBase* frm6 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.6));
 
