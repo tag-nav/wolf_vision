@@ -58,6 +58,7 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
         virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tolerance) = 0;
 
         SensorBase* getSensorPtr();
+        const SensorBase* getSensorPtr() const;
 
         virtual bool isMotion();
 
@@ -87,6 +88,11 @@ inline unsigned int ProcessorBase::id()
 }
 
 inline SensorBase* ProcessorBase::getSensorPtr()
+{
+    return upperNodePtr();
+}
+
+inline const SensorBase* ProcessorBase::getSensorPtr() const
 {
     return upperNodePtr();
 }
