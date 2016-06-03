@@ -228,7 +228,7 @@ int main(int argc, char** argv)
     SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
     ProcessorTrackerLandmarkPolyline* laser_1_processor = new ProcessorTrackerLandmarkPolyline(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3, 10);
     ProcessorTrackerLandmarkPolyline* laser_2_processor = new ProcessorTrackerLandmarkPolyline(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3, 10);
-    ProcessorOdom2D* odom_processor = new ProcessorOdom2D();
+    ProcessorOdom2D* odom_processor = new ProcessorOdom2D(1,1);
     odom_sensor->addProcessor(odom_processor);
     laser_1_sensor->addProcessor(laser_1_processor);
     laser_2_sensor->addProcessor(laser_2_processor);
@@ -238,7 +238,7 @@ int main(int argc, char** argv)
     problem.addSensor(laser_2_sensor);
     problem.setProcessorMotion(odom_processor);
 
-    CaptureMotion2* odom_capture = new CaptureMotion2(ts,odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor);
+    CaptureMotion2* odom_capture = new CaptureMotion2(ts,odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor, nullptr);
 
     // Simulated robot
     FaramoticsRobot robot(argc, argv, laser_1_pose, laser_2_pose);

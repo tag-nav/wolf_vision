@@ -41,8 +41,8 @@ class CaptureMotion2 : public CaptureBase
 {
         // public interface:
     public:
-        CaptureMotion2(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov) :
-                CaptureBase(_ts, _sensor_ptr), data_(_data), data_cov_(_data_cov), buffer_()
+        CaptureMotion2(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, FrameBase* _origin_frame_ptr) :
+                CaptureBase(_ts, _sensor_ptr), data_(_data), data_cov_(_data_cov), buffer_(), origin_frame_ptr_(_origin_frame_ptr)
         {
             //
         }
@@ -74,15 +74,25 @@ class CaptureMotion2 : public CaptureBase
         {
             return &buffer_;
         }
-        const Eigen::VectorXs& getDelta() const{
+        const Eigen::VectorXs& getDelta() const
+        {
             return buffer_.get().back().delta_integr_;
+        }
+        FrameBase* getOriginFramePtr()
+        {
+            return origin_frame_ptr_;
+        }
+        void setOriginFramePtr(FrameBase* _frame_ptr)
+        {
+            origin_frame_ptr_ = _frame_ptr;
         }
 
         // member data:
     private:
-        Eigen::VectorXs data_;     ///< Motion data in form of vector mandatory
-        Eigen::MatrixXs data_cov_; ///< Motion data in form of vector mandatory
-        MotionBuffer buffer_;      ///< Buffer of motions between this Capture and the next one.
+        Eigen::VectorXs data_;        ///< Motion data in form of vector mandatory
+        Eigen::MatrixXs data_cov_;    ///< Motion data in form of vector mandatory
+        MotionBuffer buffer_;         ///< Buffer of motions between this Capture and the next one.
+        FrameBase* origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
 
 } // namespace wolf
