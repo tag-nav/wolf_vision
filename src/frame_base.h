@@ -105,7 +105,8 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
         CaptureBaseList* getCaptureListPtr();
         CaptureBase* addCapture(CaptureBase* _capt_ptr);
         void removeCapture(CaptureBaseIter& _capt_iter);
-        CaptureBaseIter hasCaptureOf(const SensorBase* _sensor_ptr);
+        void removeCapture(CaptureBase* _capt_ptr);
+        CaptureBase* hasCaptureOf(const SensorBase* _sensor_ptr);
 
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
@@ -203,6 +204,12 @@ inline void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
 {
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
     removeDownNode(_capt_iter);
+}
+
+inline void FrameBase::removeCapture(CaptureBase* _capt_ptr)
+{
+    //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
+    removeDownNode(_capt_ptr);
 }
 
 inline StateStatus FrameBase::getStatus() const

@@ -162,12 +162,12 @@ void FrameBase::getState(Eigen::VectorXs& state) const
     }
 }
 
-CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
+CaptureBase* FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
 {
-    for (auto capture_it = getCaptureListPtr()->begin(); capture_it != getCaptureListPtr()->end(); capture_it++)
-        if ((*capture_it)->getSensorPtr() == _sensor_ptr)
-            return capture_it;
-    return getCaptureListPtr()->end();
+    for (auto capture_ptr : *getCaptureListPtr())
+        if (capture_ptr->getSensorPtr() == _sensor_ptr)
+            return capture_ptr;
+    return nullptr;
 }
 
 void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)

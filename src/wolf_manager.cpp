@@ -185,12 +185,12 @@ void WolfManager::update()
 
             // ADD CAPTURE TO THE CURRENT FRAME (or substitute the same sensor previous capture)
             //std::cout << "searching repeated capture..." << new_capture->nodeId() << std::endl;
-            CaptureBaseIter repeated_capture_it = current_frame_->hasCaptureOf(new_capture->getSensorPtr());
+            CaptureBase* repeated_capture_ptr = current_frame_->hasCaptureOf(new_capture->getSensorPtr());
 
-            if (repeated_capture_it != current_frame_->getCaptureListPtr()->end()) // repeated capture
+            if (repeated_capture_ptr != nullptr) // repeated capture
             {
                 //std::cout << "repeated capture, keeping new capture" << new_capture->nodeId() << std::endl;
-                current_frame_->removeCapture(repeated_capture_it);
+                current_frame_->removeCapture(repeated_capture_ptr);
                 current_frame_->addCapture(new_capture);
             }
             else
