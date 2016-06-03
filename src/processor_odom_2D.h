@@ -23,7 +23,7 @@ struct ProcessorParamsOdom2D : public ProcessorParamsBase
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
-        ProcessorOdom2D(const Scalar& _traveled_dist_th = 10, const Scalar& _cov_det_th = 1);
+        ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th);
         virtual ~ProcessorOdom2D();
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
@@ -213,7 +213,7 @@ inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _m
     tmp.ts_ = _ts;
     tmp.delta_ = deltaZero();
     tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-    tmp.delta_integr_cov_ += Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-9;
+    tmp.delta_integr_cov_ += Eigen::MatrixXs::Zero(delta_size_, delta_size_);
     return tmp;
 }
 
