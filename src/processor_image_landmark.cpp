@@ -333,18 +333,47 @@ void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::R
 
 void ProcessorImageLandmark::drawFeatures(CaptureBase* const _last_ptr)
 {
-    for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
+//    for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
+//    {
+//        FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
+//        if (point_ptr->isKnown())
+//        {
+//            cv::circle(image_last_, point_ptr->getKeypoint().pt, 7, cv::Scalar(51.0, 255.0, 51.0), 1, 3, 0);
+//        }
+//        else
+//        {
+//            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
+//        }
+//        cv::putText(image_last_, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+//    }
+//    cv::imshow("Feature tracker", image_last_);
+
+    unsigned int counter = 1;
+    LandmarkBaseList* last_landmark_list = getProblem()->getMapPtr()->getLandmarkListPtr();
+    for (auto landmark_base_ptr : *last_landmark_list)
     {
-        FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
-        if (point_ptr->isKnown())
+        LandmarkPoint3D* landmark_ptr = (LandmarkPoint3D*)landmark_base_ptr;
+        Eigen::Vector3s point3D = landmark_ptr->getPosition();//landmark_ptr->getPPtr()->getVector();
+
+        Eigen::Vector2s point2D;
+        point2D = pinhole::projectPoint(k_parameters_,distortion_,point3D);
+
+        std::cout << "Landmark " << counter << std::endl;
+        std::cout << "x: " << point2D[0] << "; y: " << point2D[1] << std::endl;
+        std::cout << "is in the image?: "
+                  << pinhole::isInImage(point2D,params_.image.width,params_.image.height) << std::endl;
+
+        if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 7, cv::Scalar(51.0, 255.0, 51.0), 1, 3, 0);
+
+            cv::Point point;
+            point.x = point2D[0];
+            point.y = point2D[1];
+
+            cv::circle(image_last_, point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
+            cv::putText(image_last_, std::to_string(counter), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
         }
-        else
-        {
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
-        }
-        cv::putText(image_last_, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+        counter++;
     }
     cv::imshow("Feature tracker", image_last_);
 }

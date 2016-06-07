@@ -82,6 +82,12 @@ int main(int argc, char** argv)
     tracker_params.algorithm.max_new_features =0;
     tracker_params.algorithm.min_features_for_keyframe = 20;
 
+    tracker_params.pinhole_params.k_parameters = {830.748734, 831.18208, 327.219132,234.720244};
+    tracker_params.pinhole_params.distortion = {0.0006579999999999999, 0.023847};
+
+
+
+
     DetectorDescriptorParamsOrb orb_params;
     orb_params.type = DD_ORB;
 
