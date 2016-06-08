@@ -18,6 +18,7 @@ struct ProcessorParamsOdom2D : public ProcessorParamsBase
 {
     Scalar dist_traveled_th_;
     Scalar cov_det_th_;
+    Scalar elapsed_time_th_;
 };
 
 class ProcessorOdom2D : public ProcessorMotion
@@ -35,6 +36,8 @@ class ProcessorOdom2D : public ProcessorMotion
                 return true;
             if (getBufferPtr()->get().back().delta_integr_cov_.determinant() > cov_det_th_)
                 return true;
+            if (getBufferPtr()->get().back().ts_.get() - origin_ptr_->getTimeStamp().get() > elapsed_time_th_)
+                return true;
             return false;
         }
 
@@ -43,6 +46,7 @@ class ProcessorOdom2D : public ProcessorMotion
 //        virtual void postProcess(){}
         Scalar dist_traveled_th_;
         Scalar cov_det_th_;
+        Scalar elapsed_time_th_;
 
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
