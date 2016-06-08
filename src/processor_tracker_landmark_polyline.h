@@ -96,11 +96,12 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
     protected:
 
         virtual void preProcess();
+        void computeTransformations(const TimeStamp& _ts);
         virtual void postProcess()
         {
-            std::cout << "postProcess: " << std::endl;
-            std::cout << "New Last features: " << getNewFeaturesListLast().size() << std::endl;
-            std::cout << "Last features: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+//            std::cout << "postProcess: " << std::endl;
+//            std::cout << "New Last features: " << getNewFeaturesListLast().size() << std::endl;
+//            std::cout << "Last features: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
         }
 
         void advance();
@@ -202,6 +203,7 @@ inline void ProcessorTrackerLandmarkPolyline::advance()
     for (auto polyline : polylines_last_)
         polyline->destruct();
     polylines_last_ = std::move(polylines_incoming_);
+    //std::cout << "advanced" << std::endl;
 }
 
 inline void ProcessorTrackerLandmarkPolyline::reset()

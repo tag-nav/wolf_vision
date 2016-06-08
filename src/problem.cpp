@@ -233,6 +233,7 @@ bool Problem::permitKeyFrame(ProcessorBase* _processor_ptr)
 
 void Problem::keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr, const Scalar& _time_tolerance)
 {
+    //std::cout << "Problem::keyFrameCallback: processor " << _processor_ptr->id() << std::endl;
     for (auto sensor : (*hardware_ptr_->getSensorListPtr()))
         for (auto processor : (*sensor->getProcessorListPtr()))
             if (processor->id() != _processor_ptr->id())
