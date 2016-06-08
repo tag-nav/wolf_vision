@@ -402,7 +402,7 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
 
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
-    std::cout << "ProcessorMotion::process:" << std::endl;
+    //std::cout << "ProcessorMotion::process:" << std::endl;
     incoming_ptr_ = (CaptureMotion2*)(_incoming_ptr);
     preProcess();
     integrate();
@@ -490,7 +490,7 @@ inline void ProcessorMotion::integrate()
 
 inline void ProcessorMotion::reintegrate(CaptureMotion2* _capture_ptr)
 {
-    std::cout << "ProcessorMotion::reintegrate" << std::endl;
+    //std::cout << "ProcessorMotion::reintegrate" << std::endl;
     Motion zero_motion; // call constructor with params // TODO use motionZero(ts)
     zero_motion.ts_ = _capture_ptr->getOriginFramePtr()->getTimeStamp();
     zero_motion.delta_ = deltaZero();
@@ -529,8 +529,8 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
 {
     assert(_keyframe_ptr->getTrajectoryPtr() != nullptr && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
     std::cout << "ProcessorMotion::keyFrameCallback: ts = " << _keyframe_ptr->getTimeStamp().getSeconds() << "." << _keyframe_ptr->getTimeStamp().getNanoSeconds() << std::endl;
-    //std::cout << "\tnew keyframe " << _keyframe_ptr->id() << ": " << _keyframe_ptr->getState().transpose() << std::endl;
-    //std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
+    std::cout << "\tnew keyframe " << _keyframe_ptr->id() << ": " << _keyframe_ptr->getState().transpose() << std::endl;
+    std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
 
 
 
@@ -539,6 +539,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
 
     // find capture in which the new keyframe is interpolated
     CaptureMotion2* capture_ptr = findCaptureContainingTimeStamp(ts);
+    assert(capture_ptr != nullptr && "ProcessorMotion::keyFrameCallback: no motion capture containing the required TimeStamp found");
 
     FrameBase* key_capture_origin = capture_ptr->getOriginFramePtr();
 
@@ -685,7 +686,7 @@ inline void ProcessorMotion::getMotion(const TimeStamp& _ts, Motion& _motion) co
 
 inline CaptureMotion2* ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
 {
-    std::cout << "ProcessorMotion::findCaptureContainingTimeStamp: ts = " << _ts.getSeconds() << "." << _ts.getNanoSeconds() << std::endl;
+    //std::cout << "ProcessorMotion::findCaptureContainingTimeStamp: ts = " << _ts.getSeconds() << "." << _ts.getNanoSeconds() << std::endl;
     auto capture_ptr = last_ptr_;
     while (capture_ptr != nullptr)
     {
