@@ -85,7 +85,7 @@ struct ProcessorImageParameters : public ProcessorParamsBase
         }algorithm;
         struct Pinhole_params
         {
-                Eigen::Vector4f k_parameters;
+                Eigen::Vector4s k_parameters;
                 Eigen::Vector2s distortion;
         }pinhole_params;
 };
@@ -106,7 +106,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         }detector_descriptor_params_;
 
         /* pinhole params */
-        Eigen::Vector4f k_parameters_;
+        Eigen::Vector4s k_parameters_;
         Eigen::Vector2s distortion_;
         Eigen::Vector2s correction_;
 
@@ -119,6 +119,8 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
+
+        unsigned int landmarks_in_image_ = 0;
 
     public:
         ProcessorImageLandmark(ProcessorImageParameters _params);
@@ -200,7 +202,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
          *
-         * Implement this method in derived classes.
+         *
          *
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.

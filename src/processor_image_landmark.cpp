@@ -3,6 +3,7 @@
 #include "landmark_corner_2D.h"
 #include "landmark_point_3d.h"
 #include "constraint_corner_2D.h"
+#include "constraint_image.h"
 #include "pinholeTools.h"
 
 namespace wolf
@@ -123,56 +124,59 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         Eigen::Vector2s point2D;
         point2D = pinhole::projectPoint(k_parameters_,distortion_,point3D);
 
-
-        /* tracking */
-
-        roi_x = (point2D[0]) - (roi_heigth / 2);
-        roi_y = (point2D[1]) - (roi_width / 2);
-        cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
-
-        active_search_grid_.hitCell(point2D);  //TODO: Mirar el hitcell en este punto
-        //active_search_grid_.blockCell(roi);
-
-        cv::Mat target_descriptor = landmark_ptr->getDescriptor();
-
-
-        if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
+        if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {
-            //the matcher is now inside the match function
-            Scalar normalized_score = match(target_descriptor,candidate_descriptors,candidate_keypoints,cv_matches);
 
-            if (normalized_score > params_.matcher.min_normalized_score)
+            /* tracking */
+
+            roi_x = (point2D[0]) - (roi_heigth / 2);
+            roi_y = (point2D[1]) - (roi_width / 2);
+            cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+
+            active_search_grid_.hitCell(point2D);  //TODO: Mirar el hitcell en este punto
+            //active_search_grid_.blockCell(roi);
+
+            cv::Mat target_descriptor = landmark_ptr->getDescriptor();
+
+
+            if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
             {
-                //std::cout << "\t <--TRACKED" << std::endl;
-                FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
-                        candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
-                        true);
-                _feature_list_out.push_back(incoming_point_ptr);
+                //the matcher is now inside the match function
+                Scalar normalized_score = match(target_descriptor,candidate_descriptors,candidate_keypoints,cv_matches);
 
-                incoming_point_ptr->setTrackId(incoming_point_ptr->id());
+                if (normalized_score > params_.matcher.min_normalized_score)
+                {
+                    //std::cout << "\t <--TRACKED" << std::endl;
+                    FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
+                                candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
+                            true);
+                    _feature_list_out.push_back(incoming_point_ptr);
 
-                _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, normalized_score});
+                    incoming_point_ptr->setTrackId(incoming_point_ptr->id());
+
+                    _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, normalized_score});
+                }
+                else
+                {
+                    //std::cout << "\t <--NOT TRACKED" << std::endl;
+                }
+                //            for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
+                //            {
+                //                tracker_candidates_.push_back(candidate_keypoints[i].pt);
+
+                //            }
             }
-            else
-            {
-                //std::cout << "\t <--NOT TRACKED" << std::endl;
-            }
-//            for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
-//            {
-//                tracker_candidates_.push_back(candidate_keypoints[i].pt);
-
-//            }
         }
-        //else
-            //std::cout << "\t <--NOT FOUND" << std::endl;
     }
     std::cout << "Number of Features tracked: " << _feature_list_out.size() << std::endl;
+    landmarks_in_image_ = _feature_list_out.size();
     return _feature_list_out.size();
 }
 
 bool ProcessorImageLandmark::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureListPtr()->size() < 5;
+    //TODO: Keep the number of landmarks that are in the image and compare it to a fixed number
+    return landmarks_in_image_ < 10;
 }
 
 unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_features)
@@ -237,11 +241,21 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
-    LandmarkCorner2D* lndmk_corner = new LandmarkCorner2D(new StateBlock(2), new StateBlock(1), _feature_ptr->getMeasurement(0));
-    std::cout << "\tProcessorTrackerLandmarkDummy::createConstraint" << std::endl;
-    std::cout << "\t\tfeature " << _feature_ptr->getMeasurement() << std::endl;
-    std::cout << "\t\tlandmark "<< lndmk_corner->getDescriptor() << std::endl;
-    return new ConstraintCorner2D(_feature_ptr, lndmk_corner);
+    std::cout << "\tProcessorImageLandmark::createConstraint" << std::endl;
+    std::cout << "\t\tFeature: " << ((FeaturePointImage*)_feature_ptr)->getMeasurement()[0]
+              << "\t" << ((FeaturePointImage*)_feature_ptr)->getMeasurement()[1] << std::endl;
+    std::cout << "\t\tLandmark: "<< ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[0]
+              << "\t" << ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[1]
+              << "\t" << ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[2] << std::endl;
+
+    Eigen::Vector3s point3D = ((LandmarkPoint3D*)_landmark_ptr)->getPosition();
+    Eigen::Vector2s point2D;
+    point2D = pinhole::projectPoint(k_parameters_,distortion_,point3D);
+
+    std::cout << "\t\tProjection: "<< point2D[0] << "\t" << point2D[1] << std::endl;
+
+    return new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr() , _landmark_ptr,
+                               params_.pinhole_params.k_parameters,params_.pinhole_params.distortion);
 }
 
 
@@ -358,10 +372,10 @@ void ProcessorImageLandmark::drawFeatures(CaptureBase* const _last_ptr)
         Eigen::Vector2s point2D;
         point2D = pinhole::projectPoint(k_parameters_,distortion_,point3D);
 
-        std::cout << "Landmark " << counter << std::endl;
-        std::cout << "x: " << point2D[0] << "; y: " << point2D[1] << std::endl;
-        std::cout << "is in the image?: "
-                  << pinhole::isInImage(point2D,params_.image.width,params_.image.height) << std::endl;
+//        std::cout << "Landmark " << counter << std::endl;
+//        std::cout << "x: " << point2D[0] << "; y: " << point2D[1] << std::endl;
+//        std::cout << "is in the image?: "
+//                  << pinhole::isInImage(point2D,params_.image.width,params_.image.height) << std::endl;
 
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {

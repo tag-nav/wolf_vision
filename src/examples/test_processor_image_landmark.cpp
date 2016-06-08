@@ -82,9 +82,10 @@ int main(int argc, char** argv)
     tracker_params.algorithm.max_new_features =0;
     tracker_params.algorithm.min_features_for_keyframe = 20;
 
-    tracker_params.pinhole_params.k_parameters = {830.748734, 831.18208, 327.219132,234.720244};
-    tracker_params.pinhole_params.distortion = {0.0006579999999999999, 0.023847};
-
+//    tracker_params.pinhole_params.k_parameters = {830.748734, 831.18208, 327.219132,234.720244};
+//    tracker_params.pinhole_params.distortion = {0.0006579999999999999, 0.023847};
+    tracker_params.pinhole_params.k_parameters = {872.791604, 883.154343, 407.599166, 270.343971};
+    tracker_params.pinhole_params.distortion = {-0.284384, -0.030014};
 
 
 
@@ -158,7 +159,7 @@ int main(int argc, char** argv)
         image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(0);
+        cv::waitKey(5);
 
         f++;
         capture >> frame[f % buffer_size];
