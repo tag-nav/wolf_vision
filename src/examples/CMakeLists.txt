@@ -114,10 +114,6 @@ TARGET_LINK_LIBRARIES(test_processor_tracker_feature ${PROJECT_NAME})
 ADD_EXECUTABLE(test_processor_tracker_landmark test_processor_tracker_landmark.cpp)
 TARGET_LINK_LIBRARIES(test_processor_tracker_landmark ${PROJECT_NAME})
 
-# Processor Tracker Landmark test
-ADD_EXECUTABLE(test_polylines test_polylines.cpp)
-TARGET_LINK_LIBRARIES(test_polylines ${PROJECT_NAME})
-
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
 #     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
