@@ -35,10 +35,19 @@ namespace pinhole {
              * \param v a 3D point
              */
             template<class V>
-            //vec2 projectPointToNormalizedPlane(const V & v) {
             Eigen::Vector2s projectPointToNormalizedPlane(const V & v) {
 
                 Eigen::Vector2s up;
+                up(0) = v(0) / v(2);
+                up(1) = v(1) / v(2);
+                return up;
+            }
+
+            //TEMPLATE
+            template<class T>
+            Eigen::Matrix<T,2,1> projectPointToNormalizedPlane(const Eigen::Matrix<T,3,1>& v) {
+
+                Eigen::Matrix<T,2,1> up;
                 up(0) = v(0) / v(2);
                 up(1) = v(1) / v(2);
                 return up;
@@ -57,7 +66,6 @@ namespace pinhole {
                 up(1) = v(1) / v(2);
                 dist = v.norm();
             }
-
 
             /**
              * Pin-hole canonical projection, with jacobian
@@ -169,6 +177,20 @@ namespace pinhole {
             }
 
 
+            //TEMPLATE
+            template<class T, class R, class S>
+            R distortFactor(Eigen::Matrix<T,2,1>& d, R r2){
+                if (d.size() == 0) return 1.0;
+                R s = 1.0;
+                R r2i = 1.0;
+                for (S i = 0; i < d.size(); i++) { //   here we are doing:
+                    r2i = r2i * r2; //                    r2i = r^(2*(i+1))
+                    s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
+                }
+                if (s < 0.6) s = 1.0;
+                return s;
+            }
+
             /**
              * Radial distortion: ud = (1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + etc) * u
              * \param d the distortion parameters vector
@@ -190,6 +212,19 @@ namespace pinhole {
 //						s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
 //					}
 //					return s * up; //                     finally: ud = (1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...) * u;
+                }
+            }
+
+
+            //TEMPLATE
+            template<class T, class R, class S>
+            Eigen::Matrix<T,2,1> distortPoint(Eigen::Matrix<T,2,1>& d, Eigen::Matrix<T,2,1>& up) {
+                S n = d.size();
+                if (n == 0)
+                    return up;
+                else {
+                    R r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
+                    return distortFactor(d, r2) * up;
                 }
             }
 
@@ -330,6 +365,19 @@ namespace pinhole {
                 return u;
             }
 
+            //TEMPLATE
+            template<class T, class R>
+            Eigen::Matrix<T,2,1> pixellizePoint(Eigen::Matrix<T,4,1>& k, Eigen::Matrix<T,2,1>& ud) {
+                R u_0 = k(0);
+                R v_0 = k(1);
+                R a_u = k(2);
+                R a_v = k(3);
+                Eigen::Matrix<T,2,1> u;
+                u(0) = u_0 + a_u * ud(0);
+                u(1) = v_0 + a_v * ud(1);
+                return u;
+            }
+
 
             /**
              * Pixellization from k = [u_0, v_0, a_u, a_v] with jacobians
@@ -405,6 +453,13 @@ namespace pinhole {
              */
             template<class VK, class VD, class V>
             Eigen::Vector2s projectPoint(const VK & k, const VD & d, const V & v) {
+                return pixellizePoint(k, distortPoint(d, projectPointToNormalizedPlane(v)));
+            }
+
+            //TEMPLATE
+            template<class T>
+            Eigen::Matrix<T,2,1> projectPoint(const Eigen::Matrix<T,4,1>& k, const Eigen::Matrix<T,2,1>& d,
+                                              const Eigen::Matrix<T,2,1>& v) {
                 return pixellizePoint(k, distortPoint(d, projectPointToNormalizedPlane(v)));
             }
 
