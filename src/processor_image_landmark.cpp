@@ -149,7 +149,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                     //std::cout << "\t <--TRACKED" << std::endl;
                     FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
                                 candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
-                            true);
+                            Eigen::Matrix2s::Identity());
                     _feature_list_out.push_back(incoming_point_ptr);
 
                     incoming_point_ptr->setTrackId(incoming_point_ptr->id());

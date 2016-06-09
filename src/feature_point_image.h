@@ -48,6 +48,16 @@ class FeaturePointImage : public FeatureBase
             is_known_=_is_known;
         }
 
+        FeaturePointImage(const cv::KeyPoint& _keypoint,
+                          const cv::Mat& _descriptor, const Eigen::Matrix2s& _meas_covariance) :
+                FeatureBase(FEATURE_POINT_IMAGE, Eigen::Vector2s::Zero(), _meas_covariance),
+                keypoint_(_keypoint),
+                descriptor_(_descriptor)
+        {
+            measurement_(0) = Scalar(_keypoint.pt.x);
+            measurement_(1) = Scalar(_keypoint.pt.y);
+        }
+
 
         /** \brief Default destructor (not recommended)
          *

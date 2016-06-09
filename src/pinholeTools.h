@@ -178,12 +178,12 @@ namespace pinhole {
 
 
             //TEMPLATE
-            template<class T, class R, class S>
+            template<class T, class R>
             R distortFactor(Eigen::Matrix<T,2,1>& d, R r2){
                 if (d.size() == 0) return 1.0;
                 R s = 1.0;
                 R r2i = 1.0;
-                for (S i = 0; i < d.size(); i++) { //   here we are doing:
+                for (unsigned int i = 0; i < d.size(); i++) { //   here we are doing:
                     r2i = r2i * r2; //                    r2i = r^(2*(i+1))
                     s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
                 }
