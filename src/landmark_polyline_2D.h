@@ -43,6 +43,13 @@ class LandmarkPolyline2D : public LandmarkBase
         unsigned int getNPoints() const;
         const Eigen::VectorXs& getPointVector(unsigned int _i) const;
 
+        /** \brief Gets a vector of all state blocks pointers
+         **/
+        virtual std::vector<StateBlock*> getStateBlockVector() const
+        {
+            return std::vector<StateBlock*>(point_state_ptr_vector_.begin(), point_state_ptr_vector_.end());
+        }
+
         /** \brief Adds a new point to the landmark
          * \param _point: the point to be added
          * \param _extreme: if its extreme or not

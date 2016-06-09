@@ -89,6 +89,19 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          **/
         StateBlock* getOPtr() const;
 
+        /** \brief Gets a vector of all state blocks pointers
+         **/
+        virtual std::vector<StateBlock*> getStateBlockVector() const
+        {
+            if (p_ptr_ == nullptr && o_ptr_ == nullptr)
+                return std::vector<StateBlock*>(0);
+            if (p_ptr_ == nullptr)
+                return std::vector<StateBlock*>({o_ptr_});
+            if (o_ptr_ == nullptr)
+                return std::vector<StateBlock*>({p_ptr_});
+            return std::vector<StateBlock*>({p_ptr_, o_ptr_});
+        }
+
         /** \brief Sets the position state block pointer
          **/
         void setPPtr(StateBlock* _st_ptr);
