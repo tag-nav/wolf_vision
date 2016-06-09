@@ -77,7 +77,7 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
 
     auto next_feature_it = polylines_incoming_.begin();
     auto feature_it = next_feature_it++;
-    int max_ftr, max_lmk, max_offset, min_offset, offset, from_ftr, from_lmk, N_overlapped;
+    int max_ftr, max_lmk, max_offset, min_offset, offset, from_ftr, from_lmk, to_ftr, to_lmk, N_overlapped;
 
     // iterate over all polylines features
     while (feature_it != polylines_incoming_.end())
@@ -85,6 +85,7 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
         polyline_feature = (FeaturePolyline2D*)(*feature_it);
         max_ftr = polyline_feature->getNPoints() - 1;
         //std::cout << "feature " << (*feature_it)->id() << ": 0-" << max_ftr << std::endl;
+        //std::cout << polyline_feature->getPoints() << std::endl;
 
         // Check with all landmarks
         for (auto landmark_it = not_matched_landmarks.begin(); landmark_it != not_matched_landmarks.end(); landmark_it++)
@@ -93,10 +94,11 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
 
             // Check all overlapping positions between each feature-landmark pair
             max_lmk = polyline_landmark->getNPoints() - 1;
-            max_offset = max_ftr - (polyline_landmark->isFirstDefined() || polyline_feature->isLastDefined() ? 0 : 1);
-            min_offset = -max_lmk + (polyline_feature->isFirstDefined() || polyline_landmark->isLastDefined() ? 0 : 1);
+            max_offset = max_ftr;// - (polyline_landmark->isFirstDefined() || polyline_feature->isLastDefined() ? 0 : 1);
+            min_offset = -max_lmk;// + (polyline_feature->isFirstDefined() || polyline_landmark->isLastDefined() ? 0 : 1);
 
             //std::cout << "\tlandmark " << (*landmark_it)->id() << ": 0-" << max_lmk<< std::endl;
+            //std::cout << expected_features[*landmark_it] << std::endl;
             //std::cout << "\tmax_offset " << max_offset << std::endl;
             //std::cout << "\tmin_offset " << min_offset << std::endl;
 
@@ -105,8 +107,10 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
             {
                 from_lmk = std::max(0, -offset);
                 from_ftr = std::max(0, offset);
-
                 N_overlapped = std::min(max_ftr - from_ftr, max_lmk - from_lmk)+1;
+                to_lmk = from_lmk+N_overlapped-1;
+                to_ftr = from_ftr+N_overlapped-1;
+
                 //std::cout << "\t\toffset " << offset << std::endl;
                 //std::cout << "\t\t\tfrom_lmk " << from_lmk << std::endl;
                 //std::cout << "\t\t\tfrom_ftr " << from_ftr << std::endl;
@@ -119,52 +123,39 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
                 Eigen::ArrayXd dist2 = d.row(0).pow(2) + d.row(1).pow(2);
                 //std::cout << "\t\t\tsquared distances = " << dist2.transpose() << std::endl;
 
-                bool ftr_first_not_defined_overlapped = !polyline_feature->isFirstDefined() && from_ftr == 0;
-                bool lmk_first_not_defined_overlapped = !polyline_landmark->isFirstDefined() && from_lmk == 0;
-                bool ftr_last_not_defined_overlapped = !polyline_feature->isLastDefined() && from_ftr+N_overlapped-1 == max_ftr;
-                bool lmk_last_not_defined_overlapped = !polyline_landmark->isLastDefined() && from_lmk+N_overlapped-1 == max_lmk;
-                // First feature not defined distance to line
-                if (ftr_first_not_defined_overlapped)
+                if (offset != min_offset && offset != max_offset)
                 {
-                    //std::cout << "\t\t\tFirst feature not defined distance to line" << std::endl;
-                    //punt a línia from_ftr, from_ftr+1 i from_lmk
-                    dist2(0) = sqDistPointToLine(polyline_feature->getPoints().col(from_ftr),
-                                                 polyline_feature->getPoints().col(from_ftr+1),
-                                                 expected_features[*landmark_it].col(from_lmk),
-                                                 !ftr_first_not_defined_overlapped,
-                                                 !lmk_first_not_defined_overlapped);
-                }// First landmark not defined distance to line
-                else if (N_overlapped > 1 && lmk_first_not_defined_overlapped)
-                {
-                    //std::cout << "\t\t\tFirst landmark not defined distance to line" << std::endl;
-                    //punt a línia from_ftr, from_ftr+1 i from_lmk
-                    dist2(0) = sqDistPointToLine(expected_features[*landmark_it].col(from_lmk),
-                                                 expected_features[*landmark_it].col(from_lmk+1),
-                                                 polyline_feature->getPoints().col(from_ftr),
-                                                 !lmk_first_not_defined_overlapped,
-                                                 !ftr_first_not_defined_overlapped);
-                }
-                // Last feature not defined distance to line
-                if (ftr_last_not_defined_overlapped)
-                {
-                    //std::cout << "\t\t\tLast feature not defined distance to line" << std::endl;
-                    // punt a línia from_ftr, from_ftr+1 i from_lmk
-                    dist2(N_overlapped-1) = sqDistPointToLine(polyline_feature->getPoints().col(from_ftr+N_overlapped-1),
-                                                              polyline_feature->getPoints().col(from_ftr+N_overlapped-2),
-                                                              expected_features[*landmark_it].col(from_lmk+N_overlapped-1),
-                                                              !ftr_last_not_defined_overlapped,
-                                                              !lmk_last_not_defined_overlapped);
-                }
-                // Last feature or landmark not defined distance to line
-                else if (N_overlapped > 1 && lmk_last_not_defined_overlapped)
-                {
-                    //std::cout << "\t\t\tLast landmark not defined distance to line" << std::endl;
-                    // punt a línia from_ftr, from_ftr+1 i from_lmk
-                    dist2(N_overlapped-1) = sqDistPointToLine(expected_features[*landmark_it].col(from_lmk+N_overlapped-1),
-                                                              expected_features[*landmark_it].col(from_lmk+N_overlapped-2),
-                                                              polyline_feature->getPoints().col(from_ftr+N_overlapped-1),
-                                                              !lmk_last_not_defined_overlapped,
-                                                              !ftr_last_not_defined_overlapped);
+                    // Point-to-line first distance
+                    bool from_ftr_not_defined = from_ftr == 0 && !polyline_feature->isFirstDefined();
+                    bool from_lmk_not_defined = from_lmk == 0 && !polyline_landmark->isFirstDefined();
+                    if (from_ftr_not_defined || from_lmk_not_defined)
+                    {
+                        //std::cout << "\t\t\tFirst feature not defined distance to line" << std::endl;
+                        //std::cout << "\t\t\tA" << expected_features[*landmark_it].col(from_lmk).transpose() << std::endl;
+                        //std::cout << "\t\t\tAaux" << expected_features[*landmark_it].col(from_lmk+1).transpose() << std::endl;
+                        //std::cout << "\t\t\tB" << polyline_feature->getPoints().col(from_ftr).transpose() << std::endl;
+                        dist2(0) = sqDistPointToLine(expected_features[*landmark_it].col(from_lmk),
+                                                     expected_features[*landmark_it].col(from_lmk+1),
+                                                     polyline_feature->getPoints().col(from_ftr),
+                                                     !from_lmk_not_defined,
+                                                     !from_ftr_not_defined);
+                    }
+
+                    // Point-to-line last distance
+                    bool last_ftr_not_defined = !polyline_feature->isLastDefined() && to_ftr == max_ftr;
+                    bool last_lmk_not_defined = !polyline_landmark->isLastDefined() && to_lmk == max_lmk;
+                    if (last_ftr_not_defined || last_lmk_not_defined)
+                    {
+                        //std::cout << "\t\t\tLast feature not defined distance to line" << std::endl;
+                        //std::cout << "\t\t\tA" << expected_features[*landmark_it].col(to_lmk).transpose() << std::endl;
+                        //std::cout << "\t\t\tAaux" << expected_features[*landmark_it].col(to_lmk-1).transpose() << std::endl;
+                        //std::cout << "\t\t\tB" << polyline_feature->getPoints().col(to_ftr).transpose() << std::endl;
+                        dist2(N_overlapped-1) = sqDistPointToLine(expected_features[*landmark_it].col(to_lmk),
+                                                                  expected_features[*landmark_it].col(to_lmk-1),
+                                                                  polyline_feature->getPoints().col(to_ftr),
+                                                                  !last_lmk_not_defined,
+                                                                  !last_ftr_not_defined);
+                    }
                 }
                 //std::cout << "\t\t\tsquared distances = " << dist2.transpose() << std::endl;
 
@@ -191,15 +182,16 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
             //std::cout << "\tclosest landmark: " << best_match->landmark_ptr_->id() << std::endl;
             // match
             matches_landmark_from_incoming_[*feature_it] = best_match;
-            // erase from the landmarks to be found
-            not_matched_landmarks.remove(best_match->landmark_ptr_);
             // move corner feature to output list
             _features_found.splice(_features_found.end(), polylines_incoming_, feature_it);
             // reset match
             best_match = nullptr;
         }
         //else
-            //std::cout << "\tno landmark close enough found." << std::endl;
+        //{
+        //    std::cout << "\t-------------------------->NO LANDMARK CLOSE ENOUGH!!!!" << std::endl;
+        //    std::getchar();
+        //}
         feature_it = next_feature_it++;
     }
     return matches_landmark_from_incoming_.size();
@@ -251,6 +243,11 @@ void ProcessorTrackerLandmarkPolyline::extractPolylines(CaptureLaser2D* _capture
         //std::cout << "covs: " << std::endl << pl.covs_ << std::endl;
         _polyline_list.push_back(new FeaturePolyline2D(pl.points_, pl.covs_, pl.first_defined_, pl.last_defined_));
         //std::cout << "new polyline detected: " << std::endl;
+
+        //if (pl.first_defined_ || pl.last_defined_)
+        //    std::cout << "FEATURE WITH EXTREME POINT DEFINED!!!!!!!!!" << std::endl;
+        //else
+        //    std::cout << "feature with extreme points not defined" << std::endl;
     }
     //std::cout << _polyline_list.size() << " polylines extracted" << std::endl;
 }
@@ -356,19 +353,29 @@ Scalar ProcessorTrackerLandmarkPolyline::sqDistPointToLine(const Eigen::Vector3s
         {
             // Case 1.1
             if (!_A_defined)
-                return AB_sq - std::pow(((_A-_A_aux).head<2>()).dot((_B-_A).head<2>()),2) / AAaux_sq; //squared distance to line
+            {
+                //std::cout << "case 1.1" << std::endl;
+                return AB_sq - std::pow(((_A_aux-_A).head<2>()).dot((_B-_A).head<2>()),2) / AAaux_sq; //squared distance to line
+            }
             // Case 1.2
             else if (AauxB_sq <= AB_sq + AAaux_sq)
-                return AB_sq - std::pow(((_A-_A_aux).head<2>()).dot((_B-_A).head<2>()),2) / AAaux_sq; //squared distance to line
+            {
+                //std::cout << "case 1.2" << std::endl;
+                return AB_sq - std::pow(((_A_aux-_A).head<2>()).dot((_B-_A).head<2>()),2) / AAaux_sq; //squared distance to line
+            }
         }
     }
     // Case 2
     else if (!_A_defined && _B_defined)
     {
         if (AauxB_sq >= AB_sq + AAaux_sq)
-            return AB_sq - std::pow(((_A-_A_aux).head<2>()).dot((_B-_A).head<2>()),2) / AAaux_sq; //squared distance to line
+        {
+            //std::cout << "case 1.2" << std::endl;
+            return AB_sq - std::pow(((_A_aux-_A).head<2>()).dot((_B-_A).head<2>()),2) / AAaux_sq; //squared distance to line
+        }
     }
 
+    //std::cout << "return point to point distance" << std::endl;
     // Default return A-B squared distance
     return (_A.head<2>() - _B.head<2>()).squaredNorm();
 }

@@ -118,6 +118,7 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const TimeStamp& _time
 FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
+    //std::cout << "Problem::createFrame" << std::endl;
     // ---------------------- CREATE NEW FRAME ---------------------
     // Create frame
     switch (trajectory_ptr_->getFrameStructure())
@@ -233,7 +234,7 @@ bool Problem::permitKeyFrame(ProcessorBase* _processor_ptr)
 
 void Problem::keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _processor_ptr, const Scalar& _time_tolerance)
 {
-    //std::cout << "Problem::keyFrameCallback: processor " << _processor_ptr->id() << std::endl;
+    //std::cout << "Problem::keyFrameCallback: processor " << _processor_ptr->getName() << std::endl;
     for (auto sensor : (*hardware_ptr_->getSensorListPtr()))
         for (auto processor : (*sensor->getProcessorListPtr()))
             if (processor->id() != _processor_ptr->id())
