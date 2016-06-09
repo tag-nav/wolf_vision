@@ -24,7 +24,7 @@ struct ProcessorParamsOdom2D : public ProcessorParamsBase
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
-        ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th);
+        ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th);
         virtual ~ProcessorOdom2D();
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
@@ -33,11 +33,20 @@ class ProcessorOdom2D : public ProcessorMotion
         {
             //std::cout << "ProcessorOdom2D::voteForKeyFrame: traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
             if (getBufferPtr()->get().back().delta_integr_.norm() > dist_traveled_th_)
+            {
+                std::cout << "ProcessorOdom2D:: VOTE FOR KEY FRAME traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
                 return true;
+            }
             if (getBufferPtr()->get().back().delta_integr_cov_.determinant() > cov_det_th_)
+            {
+                std::cout << "ProcessorOdom2D:: VOTE FOR KEY FRAME covariance det " << getBufferPtr()->get().back().delta_integr_cov_.determinant() << std::endl;
                 return true;
+            }
             if (getBufferPtr()->get().back().ts_.get() - origin_ptr_->getTimeStamp().get() > elapsed_time_th_)
+            {
+                std::cout << "ProcessorOdom2D:: VOTE FOR KEY FRAME elapsed time " << getBufferPtr()->get().back().ts_.get() - origin_ptr_->getTimeStamp().get() << std::endl;
                 return true;
+            }
             return false;
         }
 
@@ -66,10 +75,11 @@ class ProcessorOdom2D : public ProcessorMotion
             static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
-inline ProcessorOdom2D::ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th) :
+inline ProcessorOdom2D::ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th) :
         ProcessorMotion(PRC_ODOM_2D, 3, 3, 2),
         dist_traveled_th_(_traveled_dist_th),
-        cov_det_th_(_cov_det_th)
+        cov_det_th_(_cov_det_th),
+        elapsed_time_th_(_elapsed_time_th)
 {
     setType("ODOM 2D");
 }
