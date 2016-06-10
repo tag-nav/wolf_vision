@@ -139,6 +139,7 @@ SET(HDRS
     local_parametrization_base.h
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
+    local_parametrization_polyline_extreme.h
     map_base.h
     motion_buffer.h
     node_base.h
@@ -205,6 +206,7 @@ SET(SRCS
     local_parametrization_base.cpp
     local_parametrization_quaternion.cpp
     local_parametrization_homogeneous.cpp
+    local_parametrization_polyline_extreme.cpp
     map_base.cpp
     node_base.cpp
     problem.cpp
