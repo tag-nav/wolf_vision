@@ -45,10 +45,7 @@ class LandmarkPolyline2D : public LandmarkBase
 
         /** \brief Gets a vector of all state blocks pointers
          **/
-        virtual std::vector<StateBlock*> getStateBlockVector() const
-        {
-            return std::vector<StateBlock*>(point_state_ptr_vector_.begin(), point_state_ptr_vector_.end());
-        }
+        virtual std::vector<StateBlock*> getStateBlockVector() const;
 
         /** \brief Adds a new point to the landmark
          * \param _point: the point to be added
@@ -84,6 +81,11 @@ inline bool LandmarkPolyline2D::isLastDefined() const
 inline unsigned int LandmarkPolyline2D::getNPoints() const
 {
     return point_state_ptr_vector_.size();
+}
+
+inline std::vector<StateBlock*> LandmarkPolyline2D::getStateBlockVector() const
+{
+    return std::vector<StateBlock*>(point_state_ptr_vector_.begin(), point_state_ptr_vector_.end());
 }
 
 } /* namespace wolf */
