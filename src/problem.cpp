@@ -257,7 +257,6 @@ StateBlock* Problem::addStateBlockPtr(StateBlock* _state_ptr)
     // add the state unit to the list
     state_block_ptr_list_.push_back(_state_ptr);
     // queue for solver manager
-    //state_block_add_list_.push_back(_state_ptr);
     state_block_notification_list_.push_back(StateBlockNotification({ADD,_state_ptr}));
 
     return _state_ptr;
@@ -266,7 +265,6 @@ StateBlock* Problem::addStateBlockPtr(StateBlock* _state_ptr)
 void Problem::updateStateBlockPtr(StateBlock* _state_ptr)
 {
     // queue for solver manager
-    //state_block_update_list_.push_back(_state_ptr);
     state_block_notification_list_.push_back(StateBlockNotification({UPDATE,_state_ptr}));
 }
 
@@ -275,14 +273,12 @@ void Problem::removeStateBlockPtr(StateBlock* _state_ptr)
     // add the state unit to the list
     state_block_ptr_list_.remove(_state_ptr);
     // queue for solver manager
-    //state_block_remove_list_.push_back(_state_ptr->getPtr());
     state_block_notification_list_.push_back(StateBlockNotification({REMOVE, nullptr, _state_ptr->getPtr()}));
 }
 
 ConstraintBase* Problem::addConstraintPtr(ConstraintBase* _constraint_ptr)
 {
     // queue for solver manager
-    //constraint_add_list_.push_back(_constraint_ptr);
     constraint_notification_list_.push_back(ConstraintNotification({ADD, _constraint_ptr, _constraint_ptr->id()}));
 
     return _constraint_ptr;
@@ -290,9 +286,22 @@ ConstraintBase* Problem::addConstraintPtr(ConstraintBase* _constraint_ptr)
 
 void Problem::removeConstraintPtr(ConstraintBase* _constraint_ptr)
 {
-    // queue for solver manager
-    //constraint_remove_list_.push_back(_constraint_ptr->nodeId());
-    constraint_notification_list_.push_back(ConstraintNotification({REMOVE, nullptr, _constraint_ptr->id()}));
+    // Check if the constraint addition is still as a notification
+    auto ctr_found_it = constraint_notification_list_.end();
+    for (auto ctr_notif_it = constraint_notification_list_.begin(); ctr_notif_it != constraint_notification_list_.end(); ctr_notif_it++)
+    {
+        if (ctr_notif_it->notification_ == ADD && ctr_notif_it->constraint_ptr_ == _constraint_ptr)
+        {
+            ctr_found_it = ctr_notif_it;
+            break;
+        }
+    }
+    // Remove addition notification
+    if (ctr_found_it != constraint_notification_list_.end())
+        constraint_notification_list_.erase(ctr_found_it);
+    // Add remove notification
+    else
+        constraint_notification_list_.push_back(ConstraintNotification({REMOVE, nullptr, _constraint_ptr->id()}));
 }
 
 void Problem::clearCovariance()
