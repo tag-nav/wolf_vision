@@ -111,7 +111,7 @@ int main(int argc, char** argv)
 
     // SENSOR
     // one-liner API
-    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jtarraso/dev/Wolf/src/examples/camera.yaml");
+    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jtarraso/dev/Wolf/src/examples/camera_params.yml");
     SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
 
     // PROCESSOR
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
         image_ptr->process();
         //cv::imshow("test",frame[f % buffer_size]);
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(0);
+        cv::waitKey(5);
 
         f++;
         capture >> frame[f % buffer_size];

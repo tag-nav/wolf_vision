@@ -65,6 +65,8 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorImageParameters _params)
     matcher_ptr_ = new cv::BFMatcher(_params.matcher.similarity_norm);
 
     // 4. pinhole params
+    /* problem here */
+    //k_parameters_ = getProblem()->getSensorPtr("narrow_stereo")->getIntrinsicPtr()->getVector();
     k_parameters_ = _params.pinhole_params.k_parameters;
     distortion_ = _params.pinhole_params.distortion;
     pinhole::computeCorrectionModel(k_parameters_,distortion_,correction_);
@@ -119,7 +121,6 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         /* project */
         LandmarkPoint3D* landmark_ptr = (LandmarkPoint3D*)landmark_in_ptr;
         Eigen::Vector3s point3D = landmark_ptr->getPosition();//landmark_ptr->getPPtr()->getVector();
-
 
         Eigen::Vector2s point2D;
         point2D = pinhole::projectPoint(k_parameters_,distortion_,point3D);

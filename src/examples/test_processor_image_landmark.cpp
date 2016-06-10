@@ -64,10 +64,10 @@ int main(int argc, char** argv)
 //                                             new StateBlock(Eigen::VectorXs::Zero(1)),
 //                                             new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
-    Eigen::Vector4s k = {320,240,320,320};
-    SensorCamera* sensor_ptr_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()),
-                                              new StateBlock(Eigen::Vector3s::Zero()),
-                                              new StateBlock(k,false),img_width,img_height);
+//    Eigen::Vector4s k = {320,240,320,320};
+//    SensorCamera* sensor_ptr_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()),
+//                                              new StateBlock(Eigen::Vector3s::Zero()),
+//                                              new StateBlock(k,false),img_width,img_height);
 
     // PROCESSOR
     ProcessorImageParameters tracker_params;
@@ -101,21 +101,21 @@ int main(int argc, char** argv)
     ProcessorImageLandmark* prc_image_ldmk = new ProcessorImageLandmark(tracker_params);
 
 
-//    //=====================================================
-//    // Method 2: Use factory to create sensor and processor
-//    //=====================================================
+    //=====================================================
+    // Method 2: Use factory to create sensor and processor
+    //=====================================================
 
 //    Problem* wolf_problem_ptr_ = new Problem(FRM_PO_3D);
 
-//    // SENSOR
-//    // one-liner API
-//    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jtarraso/dev/Wolf/src/examples/camera.yaml");
-//    SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
+    // SENSOR
+    // one-liner API
+    SensorBase* camera_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jtarraso/dev/Wolf/src/examples/camera_params.yml");
+    SensorCamera* sensor_ptr_ = (SensorCamera*)camera_ptr;
 
-//    // PROCESSOR
-//    // one-liner API
-//    wolf_problem_ptr_->installProcessor("IMAGE", "ORB", "PinHole", "/home/jtarraso/dev/Wolf/src/examples/processor_image_ORB.yaml");
-//    //=====================================================
+    // PROCESSOR
+    // one-liner API
+    //wolf_problem_ptr_->installProcessor("IMAGE", "ORB", "PinHole", "/home/jtarraso/dev/Wolf/src/examples/processor_image_ORB.yaml");
+    //=====================================================
 
 
 
