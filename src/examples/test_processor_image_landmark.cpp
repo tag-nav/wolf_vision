@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     // select the kind of detector-descriptor parameters
     tracker_params.detector_descriptor_params_ptr = &orb_params; // choose ORB
 
-    ProcessorImageLandmark* prc_image_ldmk = new ProcessorImageLandmark(tracker_params);
+    //ProcessorImageLandmark* prc_image_ldmk = new ProcessorImageLandmark(tracker_params);
 
 
     //=====================================================
@@ -109,8 +109,28 @@ int main(int argc, char** argv)
 
     // SENSOR
     // one-liner API
+
+
+
     SensorBase* camera_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jtarraso/dev/Wolf/src/examples/camera_params.yml");
     SensorCamera* sensor_ptr_ = (SensorCamera*)camera_ptr;
+
+    /* test */
+//    std::string name;
+//    for(SensorBaseList::iterator sb = wolf_problem_ptr_->getHardwarePtr()->getSensorListPtr()->begin();
+//        sb != wolf_problem_ptr_->getHardwarePtr()->getSensorListPtr()->end(); ++sb)
+//                               {
+//                                    std::cout << "NAMES" << std::endl;
+//                                    SensorBase* sen_base = (SensorBase*)*sb;
+//                                    name = sen_base->getName();
+//                                    std::cout << name << std::endl;
+//                               };
+//    std::cout << "obtained: " << wolf_problem_ptr_->getSensorPtr(name)->getIntrinsicPtr()->getVector() << std::endl;
+
+//    tracker_params.pinhole_params.k_parameters = wolf_problem_ptr_->getSensorPtr(name)->getIntrinsicPtr()->getVector();
+//    std::cout << "manual: " << tracker_params.pinhole_params.k_parameters << std::endl;
+
+    /* end test */
 
     // PROCESSOR
     // one-liner API
@@ -118,7 +138,7 @@ int main(int argc, char** argv)
     //=====================================================
 
 
-
+    ProcessorImageLandmark* prc_image_ldmk = new ProcessorImageLandmark(tracker_params);
 
 
 

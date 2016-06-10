@@ -66,7 +66,18 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorImageParameters _params)
 
     // 4. pinhole params
     /* problem here */
-    //k_parameters_ = getProblem()->getSensorPtr("narrow_stereo")->getIntrinsicPtr()->getVector();
+//    std::string name;
+//    for(SensorBaseList::iterator sb = getProblem()->getHardwarePtr()->getSensorListPtr()->begin();
+//        sb != getProblem()->getHardwarePtr()->getSensorListPtr()->end(); ++sb)
+//                               {
+//                                    std::cout << "NAMES" << std::endl;
+//                                    SensorBase* sen_base = (SensorBase*)*sb;
+//                                    name = sen_base->getName();
+//                                    std::cout << name << std::endl;
+//                               };
+//    Eigen::VectorXs test_k_params = getProblem()->getSensorPtr(name)->getIntrinsicPtr()->getVector();
+
+
     k_parameters_ = _params.pinhole_params.k_parameters;
     distortion_ = _params.pinhole_params.distortion;
     pinhole::computeCorrectionModel(k_parameters_,distortion_,correction_);
