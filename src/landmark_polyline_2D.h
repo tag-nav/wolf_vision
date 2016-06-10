@@ -30,10 +30,14 @@ class LandmarkPolyline2D : public LandmarkBase
          **/
         std::deque<StateBlock*>& getPointStatePtrDeque();
 
-        /** \brief Gets wether the first/last points are extreme or not
+        /** \brief Gets wether the first/last points are defined or not
          **/
         bool isFirstDefined() const;
         bool isLastDefined() const;
+
+        /** \brief Gets wether the given state block point is defined or not (assumes the state block is in the landmark)
+         **/
+        bool isDefined(StateBlock* _state_block) const;
 
         /** \brief Sets the first/last extreme point
          **/
@@ -61,6 +65,10 @@ class LandmarkPolyline2D : public LandmarkBase
          * \param _back: if the points have to be added in the back (true) or in the front (false)
          **/
         void addPoints(const Eigen::MatrixXs& _points, const unsigned int& _idx, const bool& _defined, const bool& _back);
+
+        /** \brief Gets a vector of all state blocks pointers
+         **/
+        virtual void defineExtreme(const bool _back);
 };
 
 inline std::deque<StateBlock*>& LandmarkPolyline2D::getPointStatePtrDeque()
@@ -76,6 +84,17 @@ inline bool LandmarkPolyline2D::isFirstDefined() const
 inline bool LandmarkPolyline2D::isLastDefined() const
 {
     return last_defined_;
+}
+
+inline bool LandmarkPolyline2D::isDefined(StateBlock* _state_block) const
+{
+    if (_state_block == point_state_ptr_vector_.front())
+        return first_defined_;
+
+    if (_state_block == point_state_ptr_vector_.back())
+        return last_defined_;
+
+    return true;
 }
 
 inline unsigned int LandmarkPolyline2D::getNPoints() const

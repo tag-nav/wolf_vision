@@ -85,6 +85,10 @@ class StateBlock
 
         LocalParametrizationBase* getLocalParametrizationPtr();
 
+        void setLocalParametrizationPtr(LocalParametrizationBase* _local_param);
+
+        void removeLocalParametrization();
+
 };
 
 } // namespace wolf
@@ -156,6 +160,19 @@ inline bool StateBlock::hasLocalParametrization()
 inline LocalParametrizationBase* StateBlock::getLocalParametrizationPtr()
 {
     return local_param_ptr_;
+}
+
+inline void StateBlock::removeLocalParametrization()
+{
+    if (local_param_ptr_ != nullptr)
+        delete local_param_ptr_;
+
+    local_param_ptr_ = nullptr;
+}
+
+inline void StateBlock::setLocalParametrizationPtr(LocalParametrizationBase* _local_param)
+{
+    local_param_ptr_ = _local_param;
 }
 
 } // namespace wolf
