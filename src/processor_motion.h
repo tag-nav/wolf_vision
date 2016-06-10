@@ -700,7 +700,13 @@ inline CaptureMotion2* ProcessorMotion::findCaptureContainingTimeStamp(const Tim
         else if (capture_ptr->getOriginFramePtr() == nullptr)
             return nullptr;
         else
-            capture_ptr = (CaptureMotion2*)(capture_ptr->getOriginFramePtr()->hasCaptureOf(getSensorPtr()));
+        {
+            CaptureBase* capture_base_ptr = capture_ptr->getOriginFramePtr()->hasCaptureOf(getSensorPtr());
+            if (capture_base_ptr == nullptr)
+                return nullptr;
+            else
+                capture_ptr = (CaptureMotion2*)capture_base_ptr;
+        }
     }
     return capture_ptr;
 }
