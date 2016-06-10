@@ -353,29 +353,17 @@ Scalar ProcessorTrackerLandmarkPolyline::sqDistPointToLine(const Eigen::Vector3s
         {
             // Case 1.1
             if (!_A_defined)
-            {
-                //std::cout << "case 1.1" << std::endl;
                 return AB_sq - std::pow(((_A_aux-_A).head<2>()).dot((_B-_A).head<2>()),2) / AAaux_sq; //squared distance to line
-            }
             // Case 1.2
             else if (AauxB_sq <= AB_sq + AAaux_sq)
-            {
-                //std::cout << "case 1.2" << std::endl;
                 return AB_sq - std::pow(((_A_aux-_A).head<2>()).dot((_B-_A).head<2>()),2) / AAaux_sq; //squared distance to line
-            }
         }
     }
     // Case 2
     else if (!_A_defined && _B_defined)
-    {
         if (AauxB_sq >= AB_sq + AAaux_sq)
-        {
-            //std::cout << "case 1.2" << std::endl;
             return AB_sq - std::pow(((_A_aux-_A).head<2>()).dot((_B-_A).head<2>()),2) / AAaux_sq; //squared distance to line
-        }
-    }
 
-    //std::cout << "return point to point distance" << std::endl;
     // Default return A-B squared distance
     return (_A.head<2>() - _B.head<2>()).squaredNorm();
 }
@@ -454,27 +442,33 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
         polyline_match = (LandmarkPolylineMatch*)matches_landmark_from_last_[last_feature];
         polyline_landmark = (LandmarkPolyline2D*)(polyline_match->landmark_ptr_);
 
-        //std::cout << "match " << std::endl;
-        //std::cout << "\tlandmark id " << polyline_match->landmark_ptr_->id() << std::endl;
-        //std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
-        //std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
-        //std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
-        //std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
-
         Eigen::MatrixXs points_global = R_world_sensor_ * polyline_feature->getPoints().topRows<2>() +
                                         t_world_sensor_ * Eigen::VectorXs::Ones(polyline_feature->getNPoints()).transpose();
         // GROW LANDMARK
         // Add new front points
         if (polyline_match->feature_match_from_id_ > 0)
         {
-            //std::cout << "Add new front points" << std::endl;
+            std::cout << "Add new front points" << std::endl;
+            std::cout << "match " << std::endl;
+            std::cout << "\tlandmark id " << polyline_match->landmark_ptr_->id() << std::endl;
+            std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
+            std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
+            std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
+            std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
+
             polyline_landmark->addPoints(points_global, // points matrix in global coordinates
                                          polyline_match->feature_match_from_id_-1, // last feature point index to be added
                                          polyline_feature->isFirstDefined(), // is defined
                                          false); // front
 
+            polyline_match->landmark_match_to_id_ += polyline_match->feature_match_from_id_;
             polyline_match->feature_match_from_id_ = 0;
-            polyline_match->landmark_match_to_id_ += polyline_match->feature_match_from_id_-1;
+            std::cout << "match " << std::endl;
+            std::cout << "\tlandmark id " << polyline_match->landmark_ptr_->id() << std::endl;
+            std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
+            std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
+            std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
+            std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
         }
         // Change first point
         else if (polyline_match->landmark_match_from_id_ == 0 && !polyline_landmark->isFirstDefined()) // && polyline_match->feature_match_from_id_ == 0
@@ -497,14 +491,27 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
         // Add back points
         if (polyline_match->feature_match_to_id_ < polyline_feature->getNPoints()-1)
         {
-            //std::cout << "Add back points" << std::endl;
+            std::cout << "Add back points" << std::endl;
+            std::cout << "match " << std::endl;
+            std::cout << "\tlandmark id " << polyline_match->landmark_ptr_->id() << std::endl;
+            std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
+            std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
+            std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
+            std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
+
             polyline_landmark->addPoints(points_global, // points matrix in global coordinates
                                          polyline_match->feature_match_to_id_+1, // last feature point index to be added
                                          polyline_feature->isLastDefined(), // is defined
                                          true); // back
 
+            polyline_match->landmark_match_to_id_ = polyline_landmark->getNPoints()-1;
             polyline_match->feature_match_to_id_ = polyline_feature->getNPoints()-1;
-            polyline_match->landmark_match_to_id_ += polyline_match->feature_match_to_id_-1;
+            std::cout << "match " << std::endl;
+            std::cout << "\tlandmark id " << polyline_match->landmark_ptr_->id() << std::endl;
+            std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
+            std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
+            std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
+            std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
         }
         // Change last point
         else if (polyline_match->landmark_match_to_id_ == polyline_landmark->getNPoints()-1 && !polyline_landmark->isLastDefined()) //&& polyline_match->feature_match_to_id_ == polyline_feature->getNPoints()-1
@@ -526,20 +533,30 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
         unsigned int offset_id = polyline_match->landmark_match_from_id_ - polyline_match->feature_match_from_id_;
         for (unsigned int i = 0; i < polyline_feature->getNPoints(); i++)
         {
+            //std::cout << "feature point " << i << std::endl;
             // First not defined point
             if (i == 0 && !polyline_feature->isFirstDefined())
                 // last point to line constraint
+            {
+                //std::cout << "point-line: landmark points " << i+offset_id << ", " << i+offset_id+1 << std::endl;
                 last_feature->addConstraint(new ConstraintPointToLine2D(polyline_feature, polyline_landmark, i, i+offset_id, i+offset_id+1));
+            }
 
             // Last not defined point
             else if (i == polyline_feature->getNPoints()-1 && !polyline_feature->isLastDefined())
                 // last point to line constraint
+            {
+                //std::cout << "point-line: landmark points " << i+offset_id << ", " << i+offset_id-1 << std::endl;
                 last_feature->addConstraint(new ConstraintPointToLine2D(polyline_feature, polyline_landmark, i, i+offset_id, i+offset_id-1));
+            }
 
             // Defined point
             else
                 // point to point constraint
+            {
+                //std::cout << "point-point: landmark point " << i+offset_id << std::endl;
                 last_feature->addConstraint(new ConstraintPoint2D(polyline_feature, polyline_landmark, i, i+offset_id));
+            }
         }
     }
 }

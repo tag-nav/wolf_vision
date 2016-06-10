@@ -104,17 +104,30 @@ inline bool ConstraintPointToLine2D::operator ()(const T* const _robotP, const T
     Eigen::Matrix<T,2,2> inverse_R_robot = Eigen::Rotation2D<T>(-_robotO[0]).matrix();
 
     // Expected measurement
-    Eigen::Matrix<T,2,1> expected_feature_position = inverse_R_sensor * (inverse_R_robot * (landmark_position_map - robot_position_map) - sensor_position);
+    Eigen::Matrix<T,2,1> expected_P = inverse_R_sensor * (inverse_R_robot * (landmark_position_map - robot_position_map) - sensor_position);
+    Eigen::Matrix<T,2,1> expected_Paux = inverse_R_sensor * (inverse_R_robot * (landmark_aux_position_map - robot_position_map) - sensor_position);
 
-    // Residuals
-    _residuals[0] = (landmark_position_map-expected_feature_position).dot(landmark_position_map-landmark_aux_position_map) / (landmark_position_map-landmark_aux_position_map).norm(); // distance to line
+    // Case projection inside the segment P-Paux
 
-    // project feature covariance to normal vector
-    Eigen::Matrix<T,2,1> normal(landmark_aux_position_map(1)-landmark_position_map(1), landmark_position_map(0)-landmark_aux_position_map(0));
+    // Case projection ouside (P side)
+
+    // Case projection ouside (Paux side)
+
+    // normal vector
+    Eigen::Matrix<T,2,1> normal(expected_Paux(1)-expected_P(1), expected_P(0)-expected_Paux(0));
     normal = normal / normal.norm();
+
+    // Residual: distance = projection to the normal vector
+    _residuals[0] = ((expected_P-measurement_.head<2>().cast<T>()).dot(normal));
+
     T projected_cov = normal.transpose() * measurement_covariance_.cast<T>() * normal;
     _residuals[0] = _residuals[0] / sqrt(projected_cov);
 
+    //std::cout << "landmark points:" << std::endl;
+    //std::cout << "A: " << expected_P(0) << " " << expected_P(1) << std::endl;
+    //std::cout << "Aaux: " << expected_Paux(0) << " " << expected_Paux(1) << std::endl;
+    //std::cout << "B: " << measurement_.transpose() << std::endl;
+    //std::cout << "d: " << _residuals[0] << std::endl;
     return true;
 }
 
