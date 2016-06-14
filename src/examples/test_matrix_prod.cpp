@@ -140,7 +140,9 @@ int main()
     }
     t1 = clock();
     std::cout << "Time w = R * v: " << (double)(t1 - t0) * 1e9 / CLOCKS_PER_SEC / N << "ns" << std::endl;
+    std::cout << "v norm change: " << 10*log((long double)v.norm()/(long double)vn) << " dB" << std::endl;
 
+    v << 1,2,3; vn = v.norm();
     t0 = clock();
     for (int i = 0; i < N; i++)
     {
