@@ -236,8 +236,8 @@ void Problem::keyFrameCallback(FrameBase* _keyframe_ptr, ProcessorBase* _process
 {
     //std::cout << "Problem::keyFrameCallback: processor " << _processor_ptr->getName() << std::endl;
     for (auto sensor : (*hardware_ptr_->getSensorListPtr()))
-        for (auto processor : (*sensor->getProcessorListPtr()))
-            if (processor->id() != _processor_ptr->id())
+    	for (auto processor : (*sensor->getProcessorListPtr()))
+    		if (processor->id() != _processor_ptr->id())
                 processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
 }
 
@@ -272,8 +272,24 @@ void Problem::removeStateBlockPtr(StateBlock* _state_ptr)
 {
     // add the state unit to the list
     state_block_ptr_list_.remove(_state_ptr);
-    // queue for solver manager
-    state_block_notification_list_.push_back(StateBlockNotification({REMOVE, nullptr, _state_ptr->getPtr()}));
+
+    // Check if the state addition is still as a notification
+    auto state_found_it = state_block_notification_list_.end();
+    for (auto state_notif_it = state_block_notification_list_.begin(); state_notif_it != state_block_notification_list_.end(); state_notif_it++)
+    {
+        if (state_notif_it->notification_ == ADD && state_notif_it->state_block_ptr_ == _state_ptr)
+        {
+            state_found_it = state_notif_it;
+            break;
+        }
+    }
+    // Remove addition notification
+    if (state_found_it != state_block_notification_list_.end())
+    	state_block_notification_list_.erase(state_found_it);
+    // Add remove notification
+    else
+    	state_block_notification_list_.push_back(StateBlockNotification({REMOVE, nullptr, _state_ptr->getPtr()}));
+
 }
 
 ConstraintBase* Problem::addConstraintPtr(ConstraintBase* _constraint_ptr)
