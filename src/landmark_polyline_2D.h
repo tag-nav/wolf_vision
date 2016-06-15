@@ -18,11 +18,11 @@ class LandmarkPolyline2D : public LandmarkBase
 {
     protected:
         std::deque<StateBlock*> point_state_ptr_vector_; ///< polyline points state blocks
+        int first_id_;
         bool first_defined_;            ///< Wether the first point is an extreme of a line or the line may continue
         bool last_defined_;             ///< Wether the last point is an extreme of a line or the line may continue
 
     public:
-        LandmarkPolyline2D(FeaturePolyline2D* _polyline_ptr);
         LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined);
         virtual ~LandmarkPolyline2D();
 
@@ -44,8 +44,13 @@ class LandmarkPolyline2D : public LandmarkBase
         void setFirst(const Eigen::VectorXs& _point, bool _defined);
         void setLast(const Eigen::VectorXs& _point, bool _defined);
 
-        unsigned int getNPoints() const;
-        const Eigen::VectorXs& getPointVector(unsigned int _i) const;
+        int getNPoints() const;
+		int getFirstId() const;
+		int getLastId() const;
+
+        const Eigen::VectorXs& getPointVector(int _i) const;
+
+        StateBlock* getPointStateBlockPtr(int _i);
 
         /** \brief Gets a vector of all state blocks pointers
          **/
@@ -69,6 +74,10 @@ class LandmarkPolyline2D : public LandmarkBase
         /** \brief Gets a vector of all state blocks pointers
          **/
         virtual void defineExtreme(const bool _back);
+
+        /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
+         **/
+        virtual void registerNewStateBlocks();
 };
 
 inline std::deque<StateBlock*>& LandmarkPolyline2D::getPointStatePtrDeque()
@@ -97,9 +106,17 @@ inline bool LandmarkPolyline2D::isDefined(StateBlock* _state_block) const
     return true;
 }
 
-inline unsigned int LandmarkPolyline2D::getNPoints() const
+inline int LandmarkPolyline2D::getNPoints() const
 {
-    return point_state_ptr_vector_.size();
+    return (int)point_state_ptr_vector_.size();
+}
+
+inline int LandmarkPolyline2D::getFirstId() const {
+	return first_id_;
+}
+
+inline int LandmarkPolyline2D::getLastId() const {
+	return first_id_ + (int) (point_state_ptr_vector_.size()) - 1;
 }
 
 inline std::vector<StateBlock*> LandmarkPolyline2D::getStateBlockVector() const
