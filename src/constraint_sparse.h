@@ -522,7 +522,12 @@ void ConstraintSparse<MEASUREMENT_SIZE,
     for (unsigned int ii = 1; ii<state_block_sizes_vector_.size(); ii++)
     {
         if (state_block_sizes_vector_.at(ii) != 0)
-            assert(state_ptr_vector_.at(ii) != nullptr && "ConstraintSparse: Null state pointer in a non-zero sized block!");
+        {
+        	for (unsigned int jj = 0; jj < ii; jj++)
+        		assert(state_ptr_vector_.at(ii) != state_ptr_vector_.at(jj) && "ConstraintSparse: Repeated state block.");
+        	std::cout << ii << std::endl;
+        	assert(state_ptr_vector_.at(ii) != nullptr && "ConstraintSparse: Null state pointer in a non-zero sized block!");
+        }
 
         else
         {
