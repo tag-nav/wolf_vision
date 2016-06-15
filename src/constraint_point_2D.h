@@ -18,10 +18,12 @@ class ConstraintPoint2D: public ConstraintSparse<2,2,1,2>
 	public:
 		static const unsigned int N_BLOCKS = 3;
 
-		ConstraintPoint2D(FeaturePolyline2D* _ftr_ptr, LandmarkPolyline2D* _lmk_ptr, unsigned int _ftr_point_id, unsigned int _lmk_point_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-			ConstraintSparse<2,2,1,2>(CTR_POINT_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPointStatePtrDeque()[_lmk_point_id]),
-			point_state_ptr_(_lmk_ptr->getPointStatePtrDeque()[_lmk_point_id]), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
+		ConstraintPoint2D(FeaturePolyline2D* _ftr_ptr, LandmarkPolyline2D* _lmk_ptr, unsigned int _ftr_point_id, int _lmk_point_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+			ConstraintSparse<2,2,1,2>(CTR_POINT_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)),
+			point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
 		{
+			std::cout << "Constriant point: feature " << _ftr_ptr->id() << " landmark " << _lmk_ptr->id() << "(point " << _lmk_point_id << ")" << std::endl;
+			std::cout << "landmark state block " << _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)->getVector().transpose() << std::endl;
             setType("CORNER 2D");
             Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
             Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
