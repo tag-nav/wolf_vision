@@ -35,10 +35,10 @@ const Scalar min_features_ratio_th_ = 0.5;
 // Match Feature - Landmark
 struct LandmarkPolylineMatch : public LandmarkMatch
 {
-        unsigned int landmark_match_from_id_;
-        unsigned int feature_match_from_id_;
-        unsigned int landmark_match_to_id_;
-        unsigned int feature_match_to_id_;
+         int landmark_match_from_id_;
+         int feature_match_from_id_;
+         int landmark_match_to_id_;
+         int feature_match_to_id_;
 //    std::vector<unsigned int> landmark_points_match_;
 //    std::vector<unsigned int> feature_points_match_;
 //    std::vector<unsigned int> feature_points_add_front_;
