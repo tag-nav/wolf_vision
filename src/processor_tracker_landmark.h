@@ -68,7 +68,7 @@ namespace wolf
 class ProcessorTrackerLandmark : public ProcessorTracker
 {
     public:
-        ProcessorTrackerLandmark(ProcessorType _tp, const unsigned int& _max_new_features = 0);
+        ProcessorTrackerLandmark(ProcessorType _tp, const unsigned int& _max_new_features = 0, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorTrackerLandmark();
 
     protected:

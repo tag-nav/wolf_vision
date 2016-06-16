@@ -51,6 +51,7 @@ struct ProcessorParamsPolyline : public ProcessorParamsBase
         //TODO: add corner_finder_params
         unsigned int new_features_th;
         unsigned int loop_frames_th;
+        Scalar time_tolerance;
 
         // These values below are constant and defined within the class -- provide a setter or accept them at construction time if you need to configure them
         //        Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
@@ -87,7 +88,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 
     public:
         ProcessorTrackerLandmarkPolyline(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                       const unsigned int& _new_features_th, const unsigned int& _loop_frames_th);
+                                       const unsigned int& _new_features_th, const unsigned int& _loop_frames_th, const Scalar& _time_tolerance = 0.1);
 
         virtual ~ProcessorTrackerLandmarkPolyline();
 
@@ -182,8 +183,8 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 };
 
 inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                                                      const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th) :
-        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0), line_finder_(_line_finder_params), new_features_th_(_new_corners_th), loop_frames_th_(_loop_frames_th), R_sensor_world_(Eigen::Matrix2s::Identity()), R_world_sensor_(Eigen::Matrix2s::Identity()), R_robot_sensor_(Eigen::Matrix2s::Identity()), extrinsics_transformation_computed_(false)
+                                                                      const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th, const Scalar& _time_tolerance) :
+        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0, _time_tolerance), line_finder_(_line_finder_params), new_features_th_(_new_corners_th), loop_frames_th_(_loop_frames_th), R_sensor_world_(Eigen::Matrix2s::Identity()), R_world_sensor_(Eigen::Matrix2s::Identity()), R_robot_sensor_(Eigen::Matrix2s::Identity()), extrinsics_transformation_computed_(false)
 {
 }
 
