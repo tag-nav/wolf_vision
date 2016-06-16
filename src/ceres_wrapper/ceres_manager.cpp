@@ -195,9 +195,9 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 
 void CeresManager::update()
 {
-    //std::cout << "CeresManager: updating... " << std::endl;
-    //std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
-    //std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
+	//std::cout << "CeresManager: updating... " << std::endl;
+	//std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
+	//std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
 
     // UPDATE STATE BLOCKS
     while (!wolf_problem_->getStateBlockNotificationList().empty())
@@ -231,12 +231,16 @@ void CeresManager::update()
         {
             case ADD:
             {
+                std::cout << "adding constraint" << std::endl;
                 addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_,wolf_problem_->getConstraintNotificationList().front().id_);
+                std::cout << "added" << std::endl;
                 break;
             }
             case REMOVE:
             {
+                std::cout << "removing constraint" << std::endl;
                 removeConstraint(wolf_problem_->getConstraintNotificationList().front().id_);
+                std::cout << "removed" << std::endl;
                 break;
             }
             default:
@@ -249,6 +253,8 @@ void CeresManager::update()
 void CeresManager::addConstraint(ConstraintBase* _ctr_ptr, unsigned int _id)
 {
     id_2_costfunction_[_id] = createCostFunction(_ctr_ptr);
+
+    //std::cout << "adding residual" << std::endl;
 
     if (_ctr_ptr->getApplyLossFunction())
         id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateBlockPtrVector());
@@ -309,7 +315,7 @@ void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 
 ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
 {
-	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
+	//std::cout << "creating cost function for constraint " << _corrPtr->nodeId() << std::endl;
 
     // analitic jacobian
     if (_corrPtr->getJacobianMethod() == JAC_ANALYTIC)
