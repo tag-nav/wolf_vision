@@ -6,6 +6,7 @@
 #include "capture_image.h"
 #include "feature_point_image.h"
 #include "state_block.h"
+#include "state_quaternion.h"
 #include "active_search.h"
 #include "processor_tracker_landmark.h"
 #include "constraint_epipolar.h"
@@ -259,7 +260,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
 //        virtual void filterFeatureLists(FeatureBaseList _original_list, FeatureBaseList& _filtered_list);
 
-
+        virtual void referenceToCamera(Eigen::Vector3s& _landmark);
 
 
         // These only to debug, will disappear one day soon

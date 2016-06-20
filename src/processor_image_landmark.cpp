@@ -6,6 +6,8 @@
 #include "constraint_image.h"
 #include "pinholeTools.h"
 
+#include <Eigen/Geometry>
+
 namespace wolf
 {
 
@@ -132,6 +134,8 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         /* project */
         LandmarkPoint3D* landmark_ptr = (LandmarkPoint3D*)landmark_in_ptr;
         Eigen::Vector3s point3D = landmark_ptr->getPosition();//landmark_ptr->getPPtr()->getVector();
+
+        referenceToCamera(point3D);
 
         Eigen::Vector2s point2D;
         point2D = pinhole::projectPoint(k_parameters_,distortion_,point3D);
@@ -272,6 +276,19 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
 
 
 // ==================================================================== My own functions
+
+void ProcessorImageLandmark::referenceToCamera(Eigen::Vector3s& _landmark)
+{
+    //Eigen::Vector3s camera_pose = getProblem()->getSensorPtr("narrow_stereo")->getPPtr()->getVector();
+    //Eigen::Vector4s camera_orientation = getProblem()->getSensorPtr("narrow_stereo")->getOPtr()->getVector();
+
+    //Eigen::VectorXs test_k_params = getProblem()->getSensorPtr("narrow_stereo")->getIntrinsicPtr()->getVector();
+
+    Eigen::Vector3s robot_pose = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
+    Eigen::Vector4s robot_orientation = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
+
+    //Eigen::toRotationMatrix();
+}
 
 Scalar ProcessorImageLandmark::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors,
                              std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches)
