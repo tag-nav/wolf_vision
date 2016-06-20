@@ -525,8 +525,8 @@ void ConstraintSparse<MEASUREMENT_SIZE,
         {
         	for (unsigned int jj = 0; jj < ii; jj++)
         		assert(state_ptr_vector_.at(ii) != state_ptr_vector_.at(jj) && "ConstraintSparse: Repeated state block.");
-        	std::cout << ii << std::endl;
         	assert(state_ptr_vector_.at(ii) != nullptr && "ConstraintSparse: Null state pointer in a non-zero sized block!");
+        	assert(state_ptr_vector_[ii]->getSize() == state_block_sizes_vector_[ii] && "incoherent state block size and template block size");
         }
 
         else
