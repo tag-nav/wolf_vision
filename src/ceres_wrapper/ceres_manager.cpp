@@ -44,12 +44,14 @@ ceres::Solver::Summary CeresManager::solve()
     // update problem
     update();
 
+    //std::cout << "After Update: Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+
 	// create summary
 	ceres::Solver::Summary ceres_summary_;
 
 	// run Ceres Solver
 	ceres::Solve(ceres_options_, ceres_problem_, &ceres_summary_);
-
+	//std::cout << "solved" << std::endl;
 	//return results
 	return ceres_summary_;
 }
@@ -231,16 +233,16 @@ void CeresManager::update()
         {
             case ADD:
             {
-                std::cout << "adding constraint" << std::endl;
+                //std::cout << "adding constraint" << std::endl;
                 addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_,wolf_problem_->getConstraintNotificationList().front().id_);
-                std::cout << "added" << std::endl;
+                //std::cout << "added" << std::endl;
                 break;
             }
             case REMOVE:
             {
-                std::cout << "removing constraint" << std::endl;
+                //std::cout << "removing constraint" << std::endl;
                 removeConstraint(wolf_problem_->getConstraintNotificationList().front().id_);
-                std::cout << "removed" << std::endl;
+                //std::cout << "removed" << std::endl;
                 break;
             }
             default:
@@ -248,6 +250,7 @@ void CeresManager::update()
         }
         wolf_problem_->getConstraintNotificationList().pop_front();
     }
+    //std::cout << "all constraints added" << std::endl;
 }
 
 void CeresManager::addConstraint(ConstraintBase* _ctr_ptr, unsigned int _id)
@@ -274,11 +277,13 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 
 void CeresManager::addStateBlock(StateBlock* _st_ptr)
 {
-    //std::cout << "Adding State Unit with size: " <<  _st_ptr->getSize() << std::endl;
+    //std::cout << "Adding State Block" << std::endl;
+    //std::cout << " size: " <<  _st_ptr->getSize() << std::endl;
+    //std::cout << " vector: " <<  _st_ptr->getVector() << std::endl;
 
     if (_st_ptr->hasLocalParametrization())
     {
-        //std::cout << "Local Parametrization to be added" << std::endl;
+        //std::cout << "Local Parametrization to be added:" << _st_ptr->getLocalParametrizationPtr() << std::endl;
         ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), new LocalParametrizationWrapper(_st_ptr->getLocalParametrizationPtr()));
     }
     else
@@ -292,6 +297,7 @@ void CeresManager::addStateBlock(StateBlock* _st_ptr)
 
 void CeresManager::removeStateBlock(double* _st_ptr)
 {
+	assert(_st_ptr != nullptr);
     ceres_problem_->RemoveParameterBlock(_st_ptr);
 }
 
@@ -307,6 +313,7 @@ void CeresManager::removeAllStateBlocks()
 
 void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 {
+	assert(_st_ptr != nullptr);
 	if (_st_ptr->isFixed())
 		ceres_problem_->SetParameterBlockConstant(_st_ptr->getPtr());
 	else
@@ -315,7 +322,8 @@ void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 
 ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
 {
-	//std::cout << "creating cost function for constraint " << _corrPtr->nodeId() << std::endl;
+	assert(_corrPtr != nullptr);
+	//std::cout << "creating cost function for constraint " << _corrPtr->id() << std::endl;
 
     // analitic jacobian
     if (_corrPtr->getJacobianMethod() == JAC_ANALYTIC)
