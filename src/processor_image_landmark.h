@@ -260,7 +260,11 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
 //        virtual void filterFeatureLists(FeatureBaseList _original_list, FeatureBaseList& _filtered_list);
 
-        virtual void referenceToCamera(Eigen::Vector3s& _landmark);
+        virtual void referenceWorldToCamera(Eigen::Vector3s& _wc_translation, Eigen::Vector4s& _wc_orientation);
+
+        virtual void rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation);
+
+        virtual void frameTransformation(Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D);
 
 
         // These only to debug, will disappear one day soon
