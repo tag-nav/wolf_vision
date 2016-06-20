@@ -28,7 +28,7 @@ class FeaturePolyline2D : public FeatureBase
         const Eigen::MatrixXs& getPointsCov() const;
         bool isFirstDefined() const;
         bool isLastDefined() const;
-        unsigned int getNPoints() const;
+        int getNPoints() const;
 };
 
 inline FeaturePolyline2D::FeaturePolyline2D(const Eigen::MatrixXs& _points, const Eigen::MatrixXs& _points_cov, const bool& _first_defined, const bool& _last_defined) :
@@ -62,7 +62,7 @@ inline bool FeaturePolyline2D::isLastDefined() const
     return last_defined_;
 }
 
-inline unsigned int FeaturePolyline2D::getNPoints() const
+inline int FeaturePolyline2D::getNPoints() const
 {
     return points_.cols();
 }
