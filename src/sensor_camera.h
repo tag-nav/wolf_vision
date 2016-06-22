@@ -53,11 +53,19 @@ class SensorCamera : public SensorBase
     int img_height_;
     Eigen::VectorXs distortion_;
     Eigen::VectorXs correction_;
+    public:
+    Eigen::Vector4s pinhole_model_;
 
     public:
         static SensorBase* create(const std::string & _unique_name, //
                                   const Eigen::VectorXs& _extrinsics, //
                                   const IntrinsicsBase* _intrinsics);
+
+    public:
+        Eigen::Vector4s const getPinholeModel(){return pinhole_model_;}
+        Eigen::VectorXs const getDistortion(){return distortion_;}
+        Eigen::VectorXs const getCorrection(){return correction_;}
+
 
 };
 

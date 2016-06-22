@@ -262,6 +262,8 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         virtual void referenceWorldToCamera(Eigen::Vector3s& _wc_translation, Eigen::Vector4s& _wc_orientation);
 
+        virtual void referenceCameraToWorld(Eigen::Vector3s& _cw_translation, Eigen::Vector4s& _cw_orientation, Eigen::Vector3s& _point3D);
+
         virtual void rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation);
 
         virtual void frameTransformation(Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D);

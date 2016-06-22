@@ -105,7 +105,7 @@ int main(int argc, char** argv)
     // Method 2: Use factory to create sensor and processor
     //=====================================================
 
-//    Problem* wolf_problem_ptr_ = new Problem(FRM_PO_3D);
+    //Problem* wolf_problem_ptr_ = new Problem(FRM_PO_3D);
 
     // SENSOR
     // one-liner API
