@@ -332,10 +332,14 @@ void ProcessorImageLandmark::referenceWorldToCamera(Eigen::Vector3s& _wc_transla
     Eigen::Vector3s camera_pose = {0,0,0};
     Eigen::Vector4s camera_orientation = {0,0,0,1};
 
-//    Eigen::Vector3s robot_pose = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
-//    Eigen::Vector4s robot_orientation = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
-    Eigen::Vector3s robot_pose = {0,0,0};
-    Eigen::Vector4s robot_orientation = {0,0,0,1};
+    Eigen::Vector3s robot_pose = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
+    Eigen::Vector4s robot_orientation = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
+    //Eigen::Vector3s robot_pose = {0,0,0};
+    //Eigen::Vector4s robot_orientation = {0,0,0,1};
+
+//    std::cout << "rob_pos x: " << robot_pose(0) << "\trob_pos y: " << robot_pose(1) << "\trob_pos z: " << robot_pose(2) << std::endl;
+//    std::cout << "rob_orien x: " << robot_orientation(0) << "\trob_orien y: " << robot_orientation(1)
+//              << "\trob_orien z: " << robot_orientation(2) << "\trob_orien w: " << robot_orientation(3) << std::endl;
 
 
     Eigen::Matrix3s rot_mat;
@@ -447,22 +451,6 @@ void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::R
 
 void ProcessorImageLandmark::drawFeatures(CaptureBase* const _last_ptr)
 {
-//    for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
-//    {
-//        FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
-//        if (point_ptr->isKnown())
-//        {
-//            cv::circle(image_last_, point_ptr->getKeypoint().pt, 7, cv::Scalar(51.0, 255.0, 51.0), 1, 3, 0);
-//        }
-//        else
-//        {
-//            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
-//        }
-//        cv::putText(image_last_, std::to_string(feature_ptr->trackId()),
-//                    point_ptr->getKeypoint().pt, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
-//    }
-//    cv::imshow("Feature tracker", image_last_);
-
     unsigned int counter = 1;
     LandmarkBaseList* last_landmark_list = getProblem()->getMapPtr()->getLandmarkListPtr();
     for (auto landmark_base_ptr : *last_landmark_list)
