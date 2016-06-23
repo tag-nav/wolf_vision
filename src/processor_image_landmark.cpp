@@ -71,19 +71,22 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorImageParameters _params)
 
     //k_parameters_= this->getSensorPtr()->getIntrinsicPtr()->getVector();
 
-//    k_parameters_ = _params.pinhole_params.k_parameters;
-//    distortion_ = _params.pinhole_params.distortion;
-//    pinhole::computeCorrectionModel(k_parameters_,distortion_,correction_);
+    k_parameters_ = _params.pinhole_params.k_parameters;
+    distortion_ = _params.pinhole_params.distortion;
+    pinhole::computeCorrectionModel(k_parameters_,distortion_,correction_);
 
     //k_parameters_ = this->getSensorPtr()->getIntrinsicPtr()->getVector();
 
     SensorCamera* sensor_camera = (SensorCamera*)(this->getSensorPtr());
+    // TO DO: The problem is that "sensor_camera" is void. It doesn't have anything.
 
-    distortion_ = sensor_camera->getDistortionVector();
-    correction_ = sensor_camera->getCorrectionVector();
+    std::cout << "distortion: " << sensor_camera->getDistortionVector().transpose() << std::endl;
 
-    //k_parameters_ = sensor_camera->getIntrinsicPtr()->getVector();
-    k_parameters_ = sensor_camera->getPinholeModel().transpose();
+//    distortion_ = sensor_camera->getDistortionVector();
+//    correction_ = sensor_camera->getCorrectionVector();
+
+//    //k_parameters_ = sensor_camera->getIntrinsicPtr()->getVector();
+//    k_parameters_ = sensor_camera->getPinholeModel().transpose();
 
 }
 

@@ -115,6 +115,13 @@ int main(int argc, char** argv)
     SensorBase* camera_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jtarraso/dev/Wolf/src/examples/camera_params.yml");
     SensorCamera* sensor_ptr_ = (SensorCamera*)camera_ptr;
 
+    std::cout << "========intrinsics: " << sensor_ptr_->getIntrinsicPtr()->getVector().transpose() << std::endl;
+    std::cout << "========camera position: " << sensor_ptr_->getPPtr()->getVector().transpose() << std::endl;
+    std::cout << "========camera orientation: " << sensor_ptr_->getOPtr()->getVector().transpose() << std::endl;
+    std::cout << "========distortion: " << sensor_ptr_->getDistortionVector().transpose() << std::endl;
+    std::cout << "========correction: " << sensor_ptr_->getCorrectionVector().transpose() << std::endl;
+
+
     /* test */
 //    std::string name;
 //    for(SensorBaseList::iterator sb = wolf_problem_ptr_->getHardwarePtr()->getSensorListPtr()->begin();
