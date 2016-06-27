@@ -532,8 +532,6 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
     std::cout << "\tnew keyframe " << _keyframe_ptr->id() << ": " << _keyframe_ptr->getState().transpose() << std::endl;
     std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
 
-
-
     // get time stamp
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
 

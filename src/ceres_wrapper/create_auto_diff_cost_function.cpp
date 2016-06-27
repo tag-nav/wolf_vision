@@ -73,13 +73,13 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _
 
         case CTR_POINT_2D:
             if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintPoint2D>(_ctr_ptr);
+            	return createAutoDiffCostFunctionWrapper<ConstraintPoint2D>(_ctr_ptr);
             else
                 return createAutoDiffCostFunctionCeres<ConstraintPoint2D>(_ctr_ptr);
 
         case CTR_POINT_TO_LINE_2D:
             if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintPointToLine2D>(_ctr_ptr);
+            	return createAutoDiffCostFunctionWrapper<ConstraintPointToLine2D>(_ctr_ptr);
             else
                 return createAutoDiffCostFunctionCeres<ConstraintPointToLine2D>(_ctr_ptr);
 

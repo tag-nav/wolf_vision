@@ -18,7 +18,7 @@ MapBase::~MapBase()
 
 LandmarkBase* MapBase::addLandmark(LandmarkBase* _landmark_ptr)
 {
-	std::cout << "MapBase::addLandmark" << std::endl;
+	//std::cout << "MapBase::addLandmark" << std::endl;
     addDownNode(_landmark_ptr);
     _landmark_ptr->registerNewStateBlocks();
     return _landmark_ptr;
@@ -26,7 +26,7 @@ LandmarkBase* MapBase::addLandmark(LandmarkBase* _landmark_ptr)
 
 void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)
 {
-	std::cout << "MapBase::addLandmarkList" << std::endl;
+	//std::cout << "MapBase::addLandmarkList" << std::endl;
 	LandmarkBaseList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
 	addDownNodeList(_landmark_list);
     for (auto landmark_ptr : lmk_list_copy)

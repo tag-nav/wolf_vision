@@ -25,6 +25,7 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,2>
 			ConstraintSparse<1,2,1,2,2>(CTR_POINT_TO_LINE_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id), _lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)),
 			point_id_(_lmk_point_id), point_aux_id_(_lmk_point_aux_id), point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), point_aux_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
 		{
+			//std::cout << "ConstraintPointToLine2D" << std::endl;
             setType("CORNER 2D");
             Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
             Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
@@ -104,6 +105,7 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,2>
 template<typename T>
 inline bool ConstraintPointToLine2D::operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkP, const T* const _landmarkPaux, T* _residuals) const
 {
+	//std::cout << "ConstraintPointToLine2D::operator" << std::endl;
     // Mapping
     Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_position_map(_landmarkP);
     Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_aux_position_map(_landmarkPaux);
@@ -135,11 +137,11 @@ inline bool ConstraintPointToLine2D::operator ()(const T* const _robotP, const T
     T projected_cov = normal.transpose() * measurement_covariance_.cast<T>() * normal;
     _residuals[0] = _residuals[0] / sqrt(projected_cov);
 
-    //std::cout << "landmark points:" << std::endl;
-    //std::cout << "A: " << expected_P(0) << " " << expected_P(1) << std::endl;
-    //std::cout << "Aaux: " << expected_Paux(0) << " " << expected_Paux(1) << std::endl;
-    //std::cout << "B: " << measurement_.transpose() << std::endl;
-    //std::cout << "d: " << _residuals[0] << std::endl;
+	//std::cout << "landmark points:" << std::endl;
+	//std::cout << "A: " << expected_P(0) << " " << expected_P(1) << std::endl;
+	//std::cout << "Aaux: " << expected_Paux(0) << " " << expected_Paux(1) << std::endl;
+	//std::cout << "B: " << measurement_.transpose() << std::endl;
+	//std::cout << "d: " << _residuals[0] << std::endl;
     return true;
 }
 

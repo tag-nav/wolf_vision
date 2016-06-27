@@ -44,8 +44,9 @@ LandmarkPolyline2D::~LandmarkPolyline2D()
 
 void LandmarkPolyline2D::setFirst(const Eigen::VectorXs& _point, bool _defined)
 {
-    //std::cout << "LandmarkPolyline2D::setFirst" << std::endl;
+    std::cout << "LandmarkPolyline2D::setFirst. Defined " << _defined << std::endl;
     assert(_point.size() >= 2 && "LandmarkPolyline2D::setFirstExtreme: bad point size");
+    assert(!(!_defined && first_defined_) && "setting a defined extreme with a not defined point");
     point_state_ptr_vector_.front()->setVector(_point.head(2));
     if (!first_defined_ && _defined)
     	defineExtreme(false);
@@ -53,8 +54,9 @@ void LandmarkPolyline2D::setFirst(const Eigen::VectorXs& _point, bool _defined)
 
 void LandmarkPolyline2D::setLast(const Eigen::VectorXs& _point, bool _defined)
 {
-    //std::cout << "LandmarkPolyline2D::setLast" << std::endl;
+    std::cout << "LandmarkPolyline2D::setLast. Defined " << _defined << std::endl;
     assert(_point.size() >= 2 && "LandmarkPolyline2D::setLastExtreme: bad point size");
+    assert(!(!_defined && last_defined_) && "setting a defined extreme with a not defined point");
     point_state_ptr_vector_.back()->setVector(_point.head(2));
     if (!last_defined_ && _defined)
     	defineExtreme(true);
@@ -76,11 +78,11 @@ StateBlock* LandmarkPolyline2D::getPointStateBlockPtr(int _i)
 
 void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _defined, const bool& _back)
 {
-	//std::cout << "LandmarkPolyline2D::addPoint" << std::endl;
+	std::cout << "LandmarkPolyline2D::addPoint. Defined " << _defined << std::endl;
     assert(_point.size() >= 2 && "bad point size");
 
     // define previous extreme if not defined
-    if (_back ? !last_defined_ : !first_defined_ && _defined)
+    if (_back ? !last_defined_ : !first_defined_)
     	defineExtreme(_back);
 
     // add new extreme
@@ -112,12 +114,12 @@ void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _de
 void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigned int& _idx, const bool& _defined,
                                    const bool& _back)
 {
-    //std::cout << "LandmarkPolyline2D::addPoints from/to: " << _idx << std::endl << _points << std::endl;
+    std::cout << "LandmarkPolyline2D::addPoints from/to: " << _idx << " Defined " << _defined << std::endl;
     assert(_points.rows() >= 2 && "bad points size");
     assert(_idx < _points.cols() && "bad index!");
 
     // define previous extreme if not defined
-    if (_back ? !last_defined_ : !first_defined_ && _defined)
+    if (_back ? !last_defined_ : !first_defined_)
     	defineExtreme(_back);
 
     // add new extreme points
@@ -130,8 +132,6 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
         													 (i == _points.cols()-1 && !_defined ?
         															 new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.back()) :
         															 nullptr)));
-        	if (i == _points.cols()-1 && !_defined)
-        		std::cout << "last point added with local param " << point_state_ptr_vector_.back()->getLocalParametrizationPtr() << std::endl;
         	if (getProblem() != nullptr)
         		getProblem()->addStateBlockPtr(point_state_ptr_vector_.back());
         }
@@ -154,11 +154,12 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
 		first_defined_ = _defined;
 		assert(point_state_ptr_vector_.front()->hasLocalParametrization() ? !first_defined_ : first_defined_);
     }
+
+    std::cout << "final number of points: " << point_state_ptr_vector_.size() << std::endl;
 }
 
 void LandmarkPolyline2D::defineExtreme(const bool _back)
 {
-
     StateBlock* state = (_back ? point_state_ptr_vector_.back() : point_state_ptr_vector_.front());
     assert((_back ? !last_defined_: !first_defined_) && "defining an already defined extreme");
     assert(state->hasLocalParametrization() && "not defined extreme without local parameterization");
@@ -188,7 +189,6 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
 
 void LandmarkPolyline2D::registerNewStateBlocks()
 {
-	//std::cout << "LandmarkPolyline2D::registerNewStateBlocks" << std::endl;
 	if (getProblem() != nullptr)
 		for (auto state : point_state_ptr_vector_)
 			getProblem()->addStateBlockPtr(state);
