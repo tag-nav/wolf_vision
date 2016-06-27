@@ -188,14 +188,8 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          */
         virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr);
 
-
-        /* to be deleted */
-        /** \brief Create a new constraint
-         *
-         * Creates a constraint from feature to feature
-         */
-//        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr);
-        /* to be deleted */
+    public:
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 
 
 

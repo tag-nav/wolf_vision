@@ -561,4 +561,24 @@ void ProcessorImageLandmark::drawFeatures(CaptureBase* const _last_ptr)
 }
 
 
+//namespace wolf{
+
+ProcessorBase* ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+{
+    ProcessorImageLandmark* prc_ptr = new ProcessorImageLandmark(*((ProcessorImageParameters*)_params));
+    prc_ptr->setName(_unique_name);
+    return prc_ptr;
 }
+//} // namespace wolf
+}
+
+// Register in the SensorFactory
+#include "processor_factory.h"
+namespace wolf {
+namespace
+{
+const bool registered_prc_image = ProcessorFactory::get().registerCreator("IMAGE LANDMARK", ProcessorImageLandmark::create);
+}
+} // namespace wolf
+
+//}

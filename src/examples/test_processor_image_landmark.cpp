@@ -120,6 +120,32 @@ int main(int argc, char** argv)
     std::cout << "========camera orientation: " << sensor_ptr_->getOPtr()->getVector().transpose() << std::endl;
     std::cout << "========distortion: " << sensor_ptr_->getDistortionVector().transpose() << std::endl;
     std::cout << "========correction: " << sensor_ptr_->getCorrectionVector().transpose() << std::endl;
+    std::cout << "========height: " << sensor_ptr_->getImgHeight() << std::endl;
+    std::cout << "========width: " << sensor_ptr_->getImgWidth() << std::endl;
+
+    IntrinsicsCamera* intrinsic_cam;
+    Eigen::Vector4s intr = sensor_ptr_->getIntrinsicPtr()->getVector();
+    intrinsic_cam->pinhole_model = {intr(0),intr(1),intr(2), intr(3)};
+    intrinsic_cam->distortion = sensor_ptr_->getDistortionVector();
+    intrinsic_cam->height = 480;
+    intrinsic_cam->width = 640;
+
+    Eigen::VectorXs p = sensor_ptr_->getPPtr()->getVector();
+    Eigen::VectorXs o = sensor_ptr_->getOPtr()->getVector();
+    Eigen::Vector7s extrinsic_cam;
+    extrinsic_cam(0) = p(0);
+    extrinsic_cam[1] = p[1];
+    extrinsic_cam[2] = p[2];
+    extrinsic_cam[3] = o[0];
+    extrinsic_cam[4] = o[1];
+    extrinsic_cam[5] = o[2];
+    extrinsic_cam[6] = o[3];
+    std::cout << "========extrinsic_cam: " << extrinsic_cam.transpose() << std::endl;
+    const Eigen::VectorXs extr = extrinsic_cam;
+
+    SensorCamera* sensor_ptr_2 = new SensorCamera(extr,intrinsic_cam);
+
+
 
 
     /* test */
@@ -141,7 +167,7 @@ int main(int argc, char** argv)
 
     // PROCESSOR
     // one-liner API
-    //wolf_problem_ptr_->installProcessor("IMAGE", "ORB", "PinHole", "/home/jtarraso/dev/Wolf/src/examples/processor_image_ORB.yaml");
+    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", "/home/jtarraso/dev/Wolf/src/examples/processor_image_ORB.yaml");
     //=====================================================
 
 
@@ -154,8 +180,8 @@ int main(int argc, char** argv)
     CaptureImage* image_ptr;
 
 
-    wolf_problem_ptr_->addSensor(sensor_ptr_);
-    sensor_ptr_->addProcessor(prc_image_ldmk);
+//    wolf_problem_ptr_->addSensor(sensor_ptr_2);
+//    sensor_ptr_2->addProcessor(prc_image_ldmk);
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
