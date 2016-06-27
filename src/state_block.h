@@ -162,14 +162,14 @@ inline LocalParametrizationBase* StateBlock::getLocalParametrizationPtr()
 
 inline void StateBlock::removeLocalParametrization()
 {
-    if (local_param_ptr_ != nullptr)
-        delete local_param_ptr_;
-
+	assert(local_param_ptr_ != nullptr && "state block without local parametrization");
+	delete local_param_ptr_;
     local_param_ptr_ = nullptr;
 }
 
 inline void StateBlock::setLocalParametrizationPtr(LocalParametrizationBase* _local_param)
 {
+	assert(_local_param != nullptr && "setting a null local parametrization");
     local_param_ptr_ = _local_param;
 }
 
