@@ -47,8 +47,8 @@ struct LandmarkPolylineMatch : public LandmarkMatch
 
 struct ProcessorParamsPolyline : public ProcessorParamsBase
 {
-        laserscanutils::LineFinderIterativeParams line_finder_params_;
-        //TODO: add corner_finder_params
+        laserscanutils::LineFinderIterativeParams line_finder_params;
+        Scalar position_error_th;
         unsigned int new_features_th;
         unsigned int loop_frames_th;
         Scalar time_tolerance;
@@ -64,18 +64,10 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 {
     private:
         laserscanutils::LineFinderIterative line_finder_;
-        //TODO: add corner_finder_params
+        ProcessorParamsPolyline params_;
 
         FeatureBaseList polylines_incoming_;
         FeatureBaseList polylines_last_;
-        unsigned int new_features_th_;
-        unsigned int loop_frames_th_;
-
-        // These values are constant -- provide a setter or accept them at construction time if you need to configure them
-        Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
-        Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
-        Scalar position_error_th_ = 1;
-        Scalar min_features_ratio_th_ = 0.5;
 
         Eigen::Matrix2s R_sensor_world_, R_world_sensor_;
         Eigen::Matrix2s R_robot_sensor_;
@@ -87,8 +79,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         bool extrinsics_transformation_computed_;
 
     public:
-        ProcessorTrackerLandmarkPolyline(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                       const unsigned int& _new_features_th, const unsigned int& _loop_frames_th, const Scalar& _time_tolerance = 0.1);
+        ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params);
 
         virtual ~ProcessorTrackerLandmarkPolyline();
 
@@ -182,9 +173,11 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
-inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                                                      const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th, const Scalar& _time_tolerance) :
-        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0, _time_tolerance), line_finder_(_line_finder_params), new_features_th_(_new_corners_th), loop_frames_th_(_loop_frames_th), R_sensor_world_(Eigen::Matrix2s::Identity()), R_world_sensor_(Eigen::Matrix2s::Identity()), R_robot_sensor_(Eigen::Matrix2s::Identity()), extrinsics_transformation_computed_(false)
+inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params) :
+        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0, _params.time_tolerance),
+        line_finder_(_params.line_finder_params),
+        params_(_params),
+        extrinsics_transformation_computed_(false)
 {
 }
 
