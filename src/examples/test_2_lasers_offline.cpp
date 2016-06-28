@@ -131,7 +131,7 @@ int main(int argc, char** argv)
     laser_1_intrinsics.scan_params = laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)});
 
     ProcessorParamsLaser laser_1_processor_params;
-    laser_1_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
+    laser_1_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2});
     laser_1_processor_params.new_corners_th = 10;
 
     // laser 2 extrinsics and intrinsics
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
     laser_2_intrinsics.scan_params = laserscanutils::LaserScanParams({laser_2_params(0), laser_2_params(1), laser_2_params(2), laser_2_params(3), laser_2_params(4), laser_2_params(5), laser_2_params(6), laser_2_params(7)});
 
     ProcessorParamsLaser laser_2_processor_params;
-    laser_2_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
+    laser_2_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2});
     laser_2_processor_params.new_corners_th = 10;
 
     Problem problem(FRM_PO_2D);

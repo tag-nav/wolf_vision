@@ -226,8 +226,15 @@ int main(int argc, char** argv)
     SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
     SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
     SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
-    ProcessorTrackerLandmarkPolyline* laser_1_processor = new ProcessorTrackerLandmarkPolyline(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3, 10);
-    ProcessorTrackerLandmarkPolyline* laser_2_processor = new ProcessorTrackerLandmarkPolyline(laserscanutils::LineFinderIterativeParams({0.1, 5}), 3, 10);
+
+    wolf::ProcessorParamsPolyline laser_processor_params;
+    laser_processor_params.line_finder_params = laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2});
+    laser_processor_params.new_features_th = 3;
+    laser_processor_params.loop_frames_th = 10;
+    laser_processor_params.time_tolerance = 0.1;
+    laser_processor_params.position_error_th = 0.5;
+    ProcessorTrackerLandmarkPolyline* laser_1_processor = new ProcessorTrackerLandmarkPolyline(laser_processor_params);
+    ProcessorTrackerLandmarkPolyline* laser_2_processor = new ProcessorTrackerLandmarkPolyline(laser_processor_params);
     ProcessorOdom2D* odom_processor = new ProcessorOdom2D(1,1,100);
     odom_sensor->addProcessor(odom_processor);
     laser_1_sensor->addProcessor(laser_1_processor);
