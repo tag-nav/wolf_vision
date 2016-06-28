@@ -18,16 +18,13 @@ SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsC
                 SensorBase(SEN_CAMERA, nullptr, nullptr, nullptr, 2), // will initialize state blocks later
                 img_width_(_intrinsics_ptr->width), //
                 img_height_(_intrinsics_ptr->height), //
-                pinhole_model_(_intrinsics_ptr->pinhole_model),
                 distortion_(_intrinsics_ptr->distortion), //
                 correction_(distortion_.size()) // make correction vector of the same size as distortion vector
 {
     assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
     setType("CAMERA");
-    const Eigen::Vector3s pos = {0,0,0};
-    const Eigen::Vector4s ori = {1,0,0,0};
-    p_ptr_ = new StateBlock(pos); //new StateBlock(_extrinsics.head(3));
-    o_ptr_ = new StateQuaternion(ori); //new StateQuaternion(_extrinsics.tail(4));
+    p_ptr_ = new StateBlock(_extrinsics.head(3));
+    o_ptr_ = new StateQuaternion(_extrinsics.tail(4));
     intrinsic_ptr_ = new StateBlock(_intrinsics_ptr->pinhole_model);
     pinhole::computeCorrectionModel(intrinsic_ptr_->getVector(), distortion_, correction_);
     std::cout << "\tintrinsic_ptr  : " << intrinsic_ptr_->getVector().transpose() << std::endl;

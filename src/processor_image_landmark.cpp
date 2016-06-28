@@ -69,18 +69,26 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorImageParameters _params)
 
     // 4. pinhole params
 
+    /* TO USE WHILE TESTING */
+    k_parameters_ = {872.791604, 883.154343, 407.599166, 270.343971};
+    distortion_ = {-0.284384, -0.030014};
+    pinhole::computeCorrectionModel(k_parameters_,distortion_,correction_);
+
+
+
     //k_parameters_= this->getSensorPtr()->getIntrinsicPtr()->getVector();
 
-    k_parameters_ = _params.pinhole_params.k_parameters;
-    distortion_ = _params.pinhole_params.distortion;
-    pinhole::computeCorrectionModel(k_parameters_,distortion_,correction_);
+//    k_parameters_ = _params.pinhole_params.k_parameters;
+//    distortion_ = _params.pinhole_params.distortion;
+//    pinhole::computeCorrectionModel(k_parameters_,distortion_,correction_);
+
 
     //k_parameters_ = this->getSensorPtr()->getIntrinsicPtr()->getVector();
 
-    SensorCamera* sensor_camera = (SensorCamera*)(this->getSensorPtr());
+    //SensorCamera* sensor_camera = (SensorCamera*)(this->getSensorPtr());
     // TO DO: The problem is that "sensor_camera" is void. It doesn't have anything.
 
-    std::cout << "distortion: " << sensor_camera->getDistortionVector().transpose() << std::endl;
+    //std::cout << "distortion: " << sensor_camera->getDistortionVector().transpose() << std::endl;
 
 //    distortion_ = sensor_camera->getDistortionVector();
 //    correction_ = sensor_camera->getCorrectionVector();
@@ -148,12 +156,13 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
 
         Eigen::Vector2s point2D;
-        point2D = pinhole::projectPoint(k_parameters_,distortion_,point3D);
+        point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
+                                        ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point3D);
 
-        std::cout << "k_params 1: " << k_parameters_(0) << "\t2: " << k_parameters_(1)
-                  << "\t3: " << k_parameters_(2) << "\t4: " << k_parameters_(3) << std::endl;
-        std::cout << "distortion 1: " << distortion_(0) << "\t2: " << distortion_(1) << std::endl;
-        std::cout << "\nPOINT 2D\nx: " << point2D(0) << "\ty: " << point2D(1) << std::endl;
+//        std::cout << "k_params 1: " << k_parameters_(0) << "\t2: " << k_parameters_(1)
+//                  << "\t3: " << k_parameters_(2) << "\t4: " << k_parameters_(3) << std::endl;
+//        std::cout << "distortion 1: " << distortion_(0) << "\t2: " << distortion_(1) << std::endl;
+//        std::cout << "\nPOINT 2D\nx: " << point2D(0) << "\ty: " << point2D(1) << std::endl;
 
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {
@@ -265,7 +274,8 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     Scalar depth = 10; // arbitrary value
 
     Eigen::Vector3s point3D;
-    point3D = pinhole::backprojectPoint(k_parameters_,correction_,point2D,depth);
+    point3D = pinhole::backprojectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
+                                        ((SensorCamera*)(this->getSensorPtr()))->getCorrectionVector(),point2D,depth);
 
     std::cout << "point3D BEFORE CHANGE REF x: " << point3D(0) << "; y: " << point3D(1) << "; z: " << point3D(2) << std::endl;
 
@@ -288,12 +298,15 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
 
     Eigen::Vector3s point3D = ((LandmarkPoint3D*)_landmark_ptr)->getPosition();
     Eigen::Vector2s point2D;
-    point2D = pinhole::projectPoint(k_parameters_,distortion_,point3D);
+    point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
+                                    ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point3D);
 
     std::cout << "\t\tProjection: "<< point2D[0] << "\t" << point2D[1] << std::endl;
 
-    return new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr() , _landmark_ptr,
-                               params_.pinhole_params.k_parameters,params_.pinhole_params.distortion);
+    Eigen::VectorXs intrinsic_values =  this->getSensorPtr()->getIntrinsicPtr()->getVector();
+    Eigen::VectorXs distortion = ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector();
+    // TO DO: CHANGE THE K_PARAMETERS AND THE OTHERS TO THE APROPRIATE VARIABLE (IF NEEDED)
+    return new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), _landmark_ptr, intrinsic_values,distortion);
 }
 
 
@@ -525,7 +538,8 @@ void ProcessorImageLandmark::drawFeatures(CaptureBase* const _last_ptr)
         Eigen::Vector3s point3D = landmark_ptr->getPosition();//landmark_ptr->getPPtr()->getVector();
 
         Eigen::Vector2s point2D;
-        point2D = pinhole::projectPoint(k_parameters_,distortion_,point3D);
+        point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
+                                        ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point3D);
 
 //        std::cout << "Landmark " << counter << std::endl;
 //        std::cout << "x: " << point2D[0] << "; y: " << point2D[1] << std::endl;

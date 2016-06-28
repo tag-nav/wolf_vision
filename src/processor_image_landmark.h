@@ -84,11 +84,11 @@ struct ProcessorImageParameters : public ProcessorParamsBase
                 unsigned int max_new_features; ///< Max nbr. of features to detect in one frame
                 unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
         }algorithm;
-        struct Pinhole_params
-        {
-                Eigen::Vector4s k_parameters;
-                Eigen::Vector2s distortion;
-        }pinhole_params;
+//        struct Pinhole_params
+//        {
+//                Eigen::Vector4s k_parameters;
+//                Eigen::Vector2s distortion;
+//        }pinhole_params;
 };
 
 class ProcessorImageLandmark : public ProcessorTrackerLandmark

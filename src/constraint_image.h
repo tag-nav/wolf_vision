@@ -13,13 +13,13 @@ class ConstraintImage : public ConstraintSparse<2, 3, 3, 3>
 {
     private:
         Eigen::Vector4s k_parameters_;
-        Eigen::Vector2s distortion_;
+        Eigen::VectorXs distortion_;
         Eigen::Vector2s feature_position_;
 
     public:
         static const unsigned int N_BLOCKS = 3;
 
-        ConstraintImage(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, LandmarkBase* _landmark_ptr, Eigen::Vector4s _k_parameters, Eigen::Vector2s _distortion_,
+        ConstraintImage(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, LandmarkBase* _landmark_ptr, Eigen::Vector4s _k_parameters, Eigen::VectorXs _distortion_,
                         bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<2, 3, 3, 3>(_ftr_ptr, CTR_EPIPOLAR, _landmark_ptr, _apply_loss_function, _status,
                                              _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _landmark_ptr->getPPtr()),
@@ -70,7 +70,7 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
 
     Eigen::Matrix<T,3,1> landmark_position = ((LandmarkPoint3D) *_plmk).getPosition();
     Eigen::Matrix<T,4,1> k_params = k_parameters_;
-    Eigen::Matrix<T,2,1> distortion = distortion_;
+    Eigen::Matrix<T,Eigen::Dynamic,1> distortion = distortion_;
 
     Eigen::Matrix<T,2,1> projectionOfLandmark;
     projectionOfLandmark = pinhole::projectPoint( k_params, distortion, landmark_position);
