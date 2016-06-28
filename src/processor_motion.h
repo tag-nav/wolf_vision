@@ -528,9 +528,9 @@ inline void ProcessorMotion::reintegrate(CaptureMotion2* _capture_ptr)
 inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
 {
     assert(_keyframe_ptr->getTrajectoryPtr() != nullptr && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
-    std::cout << "ProcessorMotion::keyFrameCallback: ts = " << _keyframe_ptr->getTimeStamp().getSeconds() << "." << _keyframe_ptr->getTimeStamp().getNanoSeconds() << std::endl;
-    std::cout << "\tnew keyframe " << _keyframe_ptr->id() << ": " << _keyframe_ptr->getState().transpose() << std::endl;
-    std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
+    //std::cout << "ProcessorMotion::keyFrameCallback: ts = " << _keyframe_ptr->getTimeStamp().getSeconds() << "." << _keyframe_ptr->getTimeStamp().getNanoSeconds() << std::endl;
+    //std::cout << "\tnew keyframe " << _keyframe_ptr->id() << ": " << _keyframe_ptr->getState().transpose() << std::endl;
+    //std::cout << "\torigin keyframe " << origin_ptr_->getFramePtr()->id() << std::endl;
 
     // get time stamp
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
