@@ -108,13 +108,13 @@ int main(int argc, char** argv)
 
     /* Do this while there aren't extrinsic parameters on the yaml */
     Eigen::Vector7s extrinsic_cam;
-    extrinsic_cam(0) = 2;
-    extrinsic_cam[1] = 4;
-    extrinsic_cam[2] = 3;
-    extrinsic_cam[3] = 1;
-    extrinsic_cam[4] = 0;
-    extrinsic_cam[5] = 0;
-    extrinsic_cam[6] = 0;
+    extrinsic_cam[0] = 0; //px
+    extrinsic_cam[1] = 0; //py
+    extrinsic_cam[2] = 0; //pz
+    extrinsic_cam[3] = 0; //qx
+    extrinsic_cam[4] = 0; //qy
+    extrinsic_cam[5] = 0; //qz
+    extrinsic_cam[6] = 1; //qw
     std::cout << "========extrinsic_cam: " << extrinsic_cam.transpose() << std::endl;
     const Eigen::VectorXs extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */

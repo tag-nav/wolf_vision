@@ -314,10 +314,6 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
 
 void ProcessorImageLandmark::frameTransformation(Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D)
 {
-
-//    Eigen::Vector3s camera_pose = {30,0,0};
-//    Eigen::Vector4s camera_orientation = {0,0,0,1};
-
     Eigen::Matrix3s rot_mat;
     rotationMatrix(rot_mat, _wc_orientation);
 
@@ -349,14 +345,11 @@ void ProcessorImageLandmark::referenceCameraToWorld(Eigen::Vector3s& _cw_transla
     Eigen::Vector3s cw_translation;
     Eigen::Vector4s cw_orientation;
 
-
-    Eigen::Vector3s camera_pose = {0,0,0};
-    Eigen::Vector4s camera_orientation = {0,0,0,1};
+    Eigen::Vector3s camera_pose = this->getSensorPtr()->getPPtr()->getVector();
+    Eigen::Vector4s camera_orientation = this->getSensorPtr()->getOPtr()->getVector();
 
     Eigen::Vector3s robot_pose = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
     Eigen::Vector4s robot_orientation = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
-    //Eigen::Vector3s robot_pose = {0,0,0};
-    //Eigen::Vector4s robot_orientation = {0,0,0,1};
 
 //    std::cout << "rob_pos x: " << robot_pose(0) << "\trob_pos y: " << robot_pose(1) << "\trob_pos z: " << robot_pose(2) << std::endl;
 //    std::cout << "rob_orien x: " << robot_orientation(0) << "\trob_orien y: " << robot_orientation(1)
