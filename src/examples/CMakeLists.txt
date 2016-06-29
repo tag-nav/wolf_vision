@@ -146,14 +146,13 @@ IF(faramotics_FOUND)
 #                                ${pose_state_time_LIBRARIES} 
 #                                ${faramotics_LIBRARIES}
 #                                ${PROJECT_NAME})
-                                
-        IF(Suitesparse_FOUND)
-            ADD_EXECUTABLE(test_iQR_wolf2 solver/test_iQR_wolf2.cpp)
-            TARGET_LINK_LIBRARIES(test_iQR_wolf2 
-                                ${pose_state_time_LIBRARIES} 
-                                ${faramotics_LIBRARIES}
-                                ${PROJECT_NAME})
-        ENDIF(Suitesparse_FOUND)                      
+#        IF(Suitesparse_FOUND)
+#            ADD_EXECUTABLE(test_iQR_wolf2 solver/test_iQR_wolf2.cpp)
+#            TARGET_LINK_LIBRARIES(test_iQR_wolf2 
+#                                ${pose_state_time_LIBRARIES} 
+#                                ${faramotics_LIBRARIES}
+#                                ${PROJECT_NAME})
+#        ENDIF(Suitesparse_FOUND)                      
     ENDIF (laser_scan_utils_FOUND)
 ENDIF(faramotics_FOUND)
 
