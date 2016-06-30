@@ -111,6 +111,13 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         Eigen::Vector2s distortion_;
         Eigen::Vector2s correction_;
 
+        /* transformations */
+        Eigen::Vector3s world2cam_translation_;
+        Eigen::Vector4s world2cam_orientation_;
+
+        Eigen::Vector3s cam2world_translation_;
+        Eigen::Vector4s cam2world_orientation_;
+
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
@@ -256,11 +263,15 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         virtual void referenceWorldToCamera(Eigen::Vector3s& _wc_translation, Eigen::Vector4s& _wc_orientation);
 
-        virtual void referenceCameraToWorld(Eigen::Vector3s& _cw_translation, Eigen::Vector4s& _cw_orientation, Eigen::Vector3s& _point3D);
+        virtual void referenceCameraToWorld(Eigen::Vector3s& _cw_translation, Eigen::Vector4s& _cw_orientation);
 
         virtual void rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation);
 
-        virtual void frameTransformation(Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D);
+        virtual void quaternionProduct(Eigen::Vector4s _p, Eigen::Vector4s _q, Eigen::Vector4s& _quaternion_product);
+
+        virtual void world2CameraFrameTransformation(Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D);
+
+        virtual void camera2WorldFrameTransformation(Eigen::Vector3s _cw_translation, Eigen::Vector4s _cw_orientation, Eigen::Vector3s& _point3D);
 
 
         // These only to debug, will disappear one day soon
@@ -273,31 +284,10 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
 //        virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
 
-    public:
-//        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 
 
 };
 
-//inline bool ProcessorImageLandmark::voteForKeyFrame()
-//{
-////    std::cout << "voteForKeyFrame?: "
-////            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
-//    return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
-//}
-
-//inline ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr)
-//{
-//    ConstraintEpipolar* const_epipolar_ptr = new ConstraintEpipolar(_feature_ptr, _feature_other_ptr);
-//    return const_epipolar_ptr; // TODO Crear constraint
-//}
-
-//inline ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
-//{
-//    FeatureBase* _feature_other_ptr = _feature_ptr; //just to test
-//    ConstraintEpipolar* const_epipolar_ptr = new ConstraintEpipolar(_feature_ptr, _feature_other_ptr);
-//    return const_epipolar_ptr; // TODO Crear constraint
-//}
 
 } // namespace wolf
 
