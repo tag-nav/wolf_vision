@@ -33,7 +33,7 @@ enum DetectorDescriptorType
 struct DetectorDescriptorParamsBase
 {
         DetectorDescriptorType type; ///< Type of algorithm. Accepted values in wolf.h
-        unsigned int nominal_pattern_radius = 18; ///< Radius of the pattern before scaling
+        unsigned int nominal_pattern_radius = 0; ///< Radius of the pattern before scaling //18 for brisk
         //should this be here? doesn't it depend on the descriptor?
 };
 
@@ -276,11 +276,11 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         // These only to debug, will disappear one day soon
     public:
-        virtual void drawFeatures(CaptureBase* const _last_ptr);
+        virtual void drawFeatures(cv::Mat& _image);
 
-//        virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
+        virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
 
-//        virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
+        virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
 
 //        virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
 

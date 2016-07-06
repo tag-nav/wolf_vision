@@ -7,7 +7,7 @@ image:
 
 detector-descriptor:
     type: "ORB"   # This affects the structure below. See processor_image_BRISK.yaml for another example
-    nominal pattern radius: 18 # 0 # 18?
+    nominal pattern radius: 2 # 0 # 18?
     nfeatures: 500
     scale factor: 1.2
     nlevels: 1

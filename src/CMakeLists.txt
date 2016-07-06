@@ -282,6 +282,7 @@ IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
         feature_point_image.h
+        landmark_AHP.h
         processor_image.h
         processor_image_landmark.h
         active_search.h
@@ -289,6 +290,7 @@ IF (OpenCV_FOUND)
     SET(SRCS ${SRCS}
         capture_image.cpp
         feature_point_image.cpp
+        landmark_AHP.cpp
         processor_image.cpp
         processor_image_landmark.cpp
         active_search.cpp
