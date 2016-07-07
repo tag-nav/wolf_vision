@@ -1,7 +1,6 @@
 #include "processor_image_landmark.h"
 
 #include "landmark_corner_2D.h"
-#include "landmark_point_3d.h"
 #include "landmark_AHP.h"
 #include "constraint_corner_2D.h"
 #include "constraint_image.h"
@@ -286,22 +285,19 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     FrameBase* frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
 
     Eigen::Vector4s vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/depth};
-    return new LandmarkAHP(new StateBlock(point3D),new StateBlock(3),feat_point_image_ptr->getDescriptor(),
-                                           vec_homogeneous,frame);
-
-    //return new LandmarkPoint3D(new StateBlock(point3D), new StateBlock(3),point3D,feat_point_image_ptr->getDescriptor());
+    return new LandmarkAHP(new StateBlock(point3D),feat_point_image_ptr->getDescriptor(),vec_homogeneous,frame);
 }
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
-    std::cout << "\tProcessorImageLandmark::createConstraint" << std::endl;
-    std::cout << "\t\tFeature: " << ((FeaturePointImage*)_feature_ptr)->getMeasurement()[0]
-              << "\t" << ((FeaturePointImage*)_feature_ptr)->getMeasurement()[1] << std::endl;
-    std::cout << "\t\tLandmark: "<< ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[0]
-              << "\t" << ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[1]
-              << "\t" << ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[2] << std::endl;
+//    std::cout << "\tProcessorImageLandmark::createConstraint" << std::endl;
+//    std::cout << "\t\tFeature: " << ((FeaturePointImage*)_feature_ptr)->getMeasurement()[0]
+//              << "\t" << ((FeaturePointImage*)_feature_ptr)->getMeasurement()[1] << std::endl;
+//    std::cout << "\t\tLandmark: "<< ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[0]
+//              << "\t" << ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[1]
+//              << "\t" << ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[2] << std::endl;
 
-    Eigen::Vector3s point3D = ((LandmarkPoint3D*)_landmark_ptr)->getPosition();
+    Eigen::Vector3s point3D = ((LandmarkAHP*)_landmark_ptr)->getPPtr()->getVector();
 
     world2CameraFrameTransformation(world2cam_translation_,world2cam_orientation_,point3D);
 
@@ -316,8 +312,19 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
 
     Eigen::VectorXs intrinsic_values =  this->getSensorPtr()->getIntrinsicPtr()->getVector();
     Eigen::VectorXs distortion = ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector();
+    SensorBase* sensor_ptr = this->getSensorPtr();
     // TO DO: CHANGE THE K_PARAMETERS AND THE OTHERS TO THE APROPRIATE VARIABLE (IF NEEDED)
-    return new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), _landmark_ptr, intrinsic_values,distortion);
+
+    ConstraintImage* constraint = new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), _landmark_ptr, sensor_ptr);
+
+    Eigen::Vector2s residuals;
+    Eigen::Vector3s robot_p;
+    Eigen::Vector4s robot_o, landmark;
+    constraint<double>()(robot_p.data(), robot_o.data(), landmark.data(), residuals.data());
+
+
+
+    return new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), _landmark_ptr, sensor_ptr);
 }
 
 

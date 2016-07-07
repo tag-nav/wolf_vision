@@ -5,13 +5,12 @@
 namespace wolf {
 
 /* Landmark - Anchored Homogeneous Point*/
-LandmarkAHP::LandmarkAHP(StateBlock* _p_ptr, StateBlock* _o_ptr, cv::Mat _2D_descriptor,
-                         Eigen::Vector4s _position, FrameBase* _frame) :
-    LandmarkBase(LANDMARK_CORNER, _p_ptr, new StateBlock(3)), //TODO: Change "LANDMARK_CORNER"
-    descriptor_(_2D_descriptor)
+LandmarkAHP::LandmarkAHP(StateBlock* _p_ptr, cv::Mat _2D_descriptor, Eigen::Vector4s _position, FrameBase* _frame) :
+    LandmarkBase(LANDMARK_CORNER, new StateHomogeneous3D(_position)), //TODO: Change "LANDMARK_CORNER"
+    descriptor_(_2D_descriptor), anchor_frame_(_frame)
 {
     setType("Image"); //TODO: ¿?
-    position = new StateHomogeneous3D(_position);
+    position_ = new StateHomogeneous3D(_position);
     anchorRobot_ = _frame->getPPtr();
 }
 
