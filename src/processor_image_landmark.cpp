@@ -131,7 +131,11 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     {
         /* project */
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_in_ptr;
-        Eigen::Vector3s point3D = landmark_ptr->getPPtr()->getVector();
+        Eigen::Vector4s vector = landmark_ptr->getPPtr()->getVector();
+        Eigen::Vector3s point3D;
+        point3D(0) = vector(0);
+        point3D(1) = vector(1);
+        point3D(2) = vector(2);
 
         world2CameraFrameTransformation(world2cam_translation_,world2cam_orientation_,point3D);
 
@@ -297,34 +301,34 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
 //              << "\t" << ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[1]
 //              << "\t" << ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[2] << std::endl;
 
-    Eigen::Vector3s point3D = ((LandmarkAHP*)_landmark_ptr)->getPPtr()->getVector();
+//    Eigen::Vector3s point3D = ((LandmarkAHP*)_landmark_ptr)->getPPtr()->getVector();
 
-    world2CameraFrameTransformation(world2cam_translation_,world2cam_orientation_,point3D);
+//    world2CameraFrameTransformation(world2cam_translation_,world2cam_orientation_,point3D);
 
-    Eigen::Vector2s point2D;
-    point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
-                                    ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point3D);
+//    Eigen::Vector2s point2D;
+//    point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
+//                                    ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point3D);
 
-    std::cout << "\t\tProjection: "<< point2D[0] << "\t" << point2D[1] << std::endl;
-
-
+//    std::cout << "\t\tProjection: "<< point2D[0] << "\t" << point2D[1] << std::endl;
 
 
-    Eigen::VectorXs intrinsic_values =  this->getSensorPtr()->getIntrinsicPtr()->getVector();
-    Eigen::VectorXs distortion = ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector();
-    SensorBase* sensor_ptr = this->getSensorPtr();
+
+
+//    Eigen::VectorXs intrinsic_values =  this->getSensorPtr()->getIntrinsicPtr()->getVector();
+//    Eigen::VectorXs distortion = ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector();
+//    SensorBase* sensor_ptr = this->getSensorPtr();
     // TO DO: CHANGE THE K_PARAMETERS AND THE OTHERS TO THE APROPRIATE VARIABLE (IF NEEDED)
 
-    ConstraintImage* constraint = new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), _landmark_ptr, sensor_ptr);
+    ConstraintImage* constraint = new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), (LandmarkAHP*)_landmark_ptr);
 
     Eigen::Vector2s residuals;
     Eigen::Vector3s robot_p;
     Eigen::Vector4s robot_o, landmark;
-    constraint<double>()(robot_p.data(), robot_o.data(), landmark.data(), residuals.data());
+    (*constraint)(robot_p.data(), robot_o.data(), landmark.data(), residuals.data());
 
 
 
-    return new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), _landmark_ptr, sensor_ptr);
+    return new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), (LandmarkAHP*)_landmark_ptr);
 }
 
 
@@ -561,7 +565,11 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
     for (auto landmark_base_ptr : *last_landmark_list)
     {
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_base_ptr;
-        Eigen::Vector3s point3D = landmark_ptr->getPPtr()->getVector();
+        Eigen::Vector4s vector = landmark_ptr->getPPtr()->getVector();
+        Eigen::Vector3s point3D;
+        point3D(0) = vector(0);
+        point3D(1) = vector(1);
+        point3D(2) = vector(2);
 
         world2CameraFrameTransformation(world2cam_translation_,world2cam_orientation_,point3D);
 
