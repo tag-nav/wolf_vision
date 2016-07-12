@@ -23,14 +23,14 @@ CeresManager::CeresManager(Problem* _wolf_problem, const ceres::Solver::Options&
 
 CeresManager::~CeresManager()
 {
+	std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
+	std::cout << "ceres parameter blocks:  " << ceres_problem_->NumParameterBlocks() << std::endl;
     while (!id_2_residual_idx_.empty())
         removeConstraint(id_2_residual_idx_.begin()->first);
-
+	std::cout << "all residuals removed! \n";
     removeAllStateBlocks();
+    std::cout << "all parameter blocks removed! \n";
 
-	//std::cout << "all state units removed! \n";
-	//std::cout << "residual blocks: " << ceres_problem_->NumResidualBlocks() << "\n";
-	//std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << "\n";
 	delete covariance_;
     //std::cout << "covariance deleted! \n";
     delete ceres_problem_;
@@ -201,19 +201,6 @@ void CeresManager::update()
 	//std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
 	//std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
 
-	// REMOVE STATE BLOCKS
-	auto state_notification_it = wolf_problem_->getStateBlockNotificationList().begin();
-	while ( state_notification_it != wolf_problem_->getStateBlockNotificationList().end() )
-	{
-		if (state_notification_it->notification_ == REMOVE)
-		{
-			removeStateBlock((double *)(state_notification_it->scalar_ptr_));
-			state_notification_it = wolf_problem_->getStateBlockNotificationList().erase(state_notification_it);
-		}
-		else
-			state_notification_it++;
-	}
-
 	// REMOVE CONSTRAINTS
 	auto ctr_notification_it = wolf_problem_->getConstraintNotificationList().begin();
 	while ( ctr_notification_it != wolf_problem_->getConstraintNotificationList().end() )
@@ -225,6 +212,19 @@ void CeresManager::update()
 		}
 		else
 			ctr_notification_it++;
+	}
+
+	// REMOVE STATE BLOCKS
+	auto state_notification_it = wolf_problem_->getStateBlockNotificationList().begin();
+	while ( state_notification_it != wolf_problem_->getStateBlockNotificationList().end() )
+	{
+		if (state_notification_it->notification_ == REMOVE)
+		{
+			removeStateBlock((double *)(state_notification_it->scalar_ptr_));
+			state_notification_it = wolf_problem_->getStateBlockNotificationList().erase(state_notification_it);
+		}
+		else
+			state_notification_it++;
 	}
 
     // ADD/UPDATE STATE BLOCKS
@@ -265,13 +265,18 @@ void CeresManager::update()
         wolf_problem_->getConstraintNotificationList().pop_front();
     }
     //std::cout << "all constraints added" << std::endl;
+	//std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
+    //std::cout << "wrapper residual blocks: " << id_2_residual_idx_.size() << std::endl;
+    //std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+
+	assert(ceres_problem_->NumResidualBlocks() == id_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
 void CeresManager::addConstraint(ConstraintBase* _ctr_ptr, unsigned int _id)
 {
     id_2_costfunction_[_id] = createCostFunction(_ctr_ptr);
 
-    //std::cout << "adding residual" << std::endl;
+    //std::cout << "adding residual " << _ctr_ptr->id() << std::endl;
 
     if (_ctr_ptr->getApplyLossFunction())
         id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateBlockPtrVector());
@@ -291,7 +296,7 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 
 void CeresManager::addStateBlock(StateBlock* _st_ptr)
 {
-    //std::cout << "Adding State Block" << std::endl;
+    //std::cout << "Adding State Block " << _st_ptr->getPtr() << std::endl;
     //std::cout << " size: " <<  _st_ptr->getSize() << std::endl;
     //std::cout << " vector: " <<  _st_ptr->getVector() << std::endl;
 
@@ -311,6 +316,7 @@ void CeresManager::addStateBlock(StateBlock* _st_ptr)
 
 void CeresManager::removeStateBlock(double* _st_ptr)
 {
+    //std::cout << "Removing State Block " << _st_ptr << std::endl;
 	assert(_st_ptr != nullptr);
     ceres_problem_->RemoveParameterBlock(_st_ptr);
 }
