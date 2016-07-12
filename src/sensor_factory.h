@@ -44,12 +44,12 @@ namespace wolf
  * Creators must be registered to the factory before they can be invoked for sensor creation.
  *
  * This documentation shows you how to:
- *   - Access the Factory
+ *   - Access the factory
  *   - Register and unregister creators
  *   - Create sensors
  *   - Write a sensor creator for SensorCamera (example).
  *
- * #### Accessing the Factory
+ * #### Accessing the factory
  * The SensorFactory class is a <a href="http://stackoverflow.com/questions/1008019/c-singleton-design-pattern#1008289">singleton</a>: it can only exist once in your application.
  * To obtain an instance of it, use the static method get(),
  *

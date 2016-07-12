@@ -156,9 +156,7 @@ inline void ProcessorOdom3D::deltaMinusDelta(const Eigen::VectorXs& _delta1, con
 
 inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
 {
-    Eigen::VectorXs delta_zero(7);
-    delta_zero << 0, 0, 0, 0, 0, 0, 1;;
-    return delta_zero;
+    return (Eigen::VectorXs(7) << 0,0,0, 0,0,0,1).finished(); // p, q
 }
 
 inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
