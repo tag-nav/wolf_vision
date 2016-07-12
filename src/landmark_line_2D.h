@@ -20,6 +20,8 @@ class LandmarkLine2D : public LandmarkBase
         Eigen::Vector3s point2_;
         
     public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
         /** \brief Constructor with homogeneous parameters of the line
          *
          * \param _p_ptr homogeneous parameters of the line: (a,b,c) from ax+by+c=0, normalized according line/sqrt(a*a+b*b) 

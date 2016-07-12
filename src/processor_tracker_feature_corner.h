@@ -59,6 +59,8 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
         bool extrinsics_transformation_computed_;
 
     public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
         ProcessorTrackerFeatureCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
                                       const unsigned int& _n_corners_th);
         virtual ~ProcessorTrackerFeatureCorner();

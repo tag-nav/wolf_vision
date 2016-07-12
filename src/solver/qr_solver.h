@@ -30,6 +30,7 @@
 // eigen includes
 #include <eigen3/Eigen/OrderingMethods>
 #include <eigen3/Eigen/SparseQR>
+#include <Eigen/StdVector>
 
 namespace wolf
 {

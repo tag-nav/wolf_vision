@@ -50,8 +50,8 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
     Scalar dm2;
 
     // COMPUTING ALL EXPECTED FEATURES
-    std::map<LandmarkBase*, Eigen::Vector4s> expected_features;
-    std::map<LandmarkBase*, Eigen::Matrix3s> expected_features_covs;
+    std::map<LandmarkBase*, Eigen::Vector4s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Vector4s> > > expected_features;
+    std::map<LandmarkBase*, Eigen::Matrix3s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Matrix3s> > > expected_features_covs;
     for (auto landmark : not_matched_landmarks)
         expectedFeature(landmark, expected_features[landmark], expected_features_covs[landmark]);
 
@@ -103,8 +103,8 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         unsigned int ii, jj;
 
         // COMPUTING ALL EXPECTED FEATURES
-        std::map<LandmarkBase*, Eigen::Vector4s> expected_features;
-        std::map<LandmarkBase*, Eigen::Matrix3s> expected_features_covs;
+        std::map<LandmarkBase*, Eigen::Vector4s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Vector4s> > > expected_features;
+        std::map<LandmarkBase*, Eigen::Matrix3s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Matrix3s> > > expected_features_covs;
         for (auto landmark : _landmarks_corner_searched)
             expectedFeature(landmark, expected_features[landmark], expected_features_covs[landmark]);
         //std::cout << "expected features!" << std::endl;

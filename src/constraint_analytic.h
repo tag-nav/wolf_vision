@@ -4,6 +4,7 @@
 
 //Wolf includes
 #include "constraint_base.h"
+#include <Eigen/StdVector>
 
 namespace wolf {
 

@@ -77,6 +77,8 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
         bool extrinsics_transformation_computed_;
 
     public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
         ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
                                        const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th);
 

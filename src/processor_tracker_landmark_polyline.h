@@ -79,6 +79,8 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         bool extrinsics_transformation_computed_;
 
     public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
         ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params);
 
         virtual ~ProcessorTrackerLandmarkPolyline();

@@ -74,8 +74,9 @@ protected:
     Eigen::Vector3s sat_position_;
     Scalar pseudorange_;
 
-
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
     static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
                                         NodeBase* _correspondant_ptr = nullptr)
     {
