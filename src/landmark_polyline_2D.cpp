@@ -164,22 +164,26 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
     assert((_back ? !last_defined_: !first_defined_) && "defining an already defined extreme");
     assert(state->hasLocalParametrization() && "not defined extreme without local parameterization");
 
+    //std::cout << "Defining extreme --> Removing and adding state blocks and constraints" << std::endl;
+
     // remove and add state block without local parameterization
     if (getProblem() != nullptr)
     	getProblem()->removeStateBlockPtr(state);
+
     state->removeLocalParametrization();
 
     if (getProblem() != nullptr)
     	getProblem()->addStateBlockPtr(state);
 
     // remove and add all constraints to the point
-    for (auto ctr_ptr : constrained_by_list_)
+    for (auto ctr_ptr : *getConstrainedByListPtr())
         for (auto st_ptr : ctr_ptr->getStatePtrVector())
             if (st_ptr == state && getProblem() != nullptr)
             {
                 getProblem()->removeConstraintPtr(ctr_ptr);
                 getProblem()->addConstraintPtr(ctr_ptr);
             }
+
     // update boolean
     if (_back)
         last_defined_ = true;

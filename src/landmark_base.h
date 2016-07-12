@@ -34,8 +34,6 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         StateBlock* p_ptr_;     ///< Position state unit pointer
         StateBlock* o_ptr_;     ///< Orientation state unit pointer
         Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
-        ConstraintBaseList constrained_by_list_; ///< List of constraints linked to this landmark
-
 
     public:
 
@@ -138,7 +136,7 @@ inline void LandmarkBase::unfix()
 inline void LandmarkBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
 {
     NodeConstrained::removeConstrainedBy(_ctr_ptr);
-    if (constrained_by_list_.empty())
+    if (getConstrainedByListPtr()->empty())
         this->destruct();
 }
 

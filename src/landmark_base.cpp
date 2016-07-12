@@ -16,7 +16,6 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBl
             status_(LANDMARK_CANDIDATE),
 			p_ptr_(_p_ptr),
 			o_ptr_(_o_ptr)
-//			constrained_by_list_({})
 {
     //
 }
