@@ -275,6 +275,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
     point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
 
+    std::cout << "point2D x: " << point2D(0) << "; y: " << point2D(1) << std::endl;
     Scalar depth = 10; // arbitrary value
 
     Eigen::Vector3s point3D;
@@ -283,18 +284,33 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 
     std::cout << "point3D BEFORE CHANGE REF x: " << point3D(0) << "; y: " << point3D(1) << "; z: " << point3D(2) << std::endl;
 
-    camera2WorldFrameTransformation(cam2world_translation_,cam2world_orientation_,point3D);
+    //camera2WorldFrameTransformation(cam2world_translation_,cam2world_orientation_,point3D);
+    camera2WorldFrameTransformation(world2cam_translation_,world2cam_orientation_,point3D);
 
     //cv::waitKey(0);
     FrameBase* frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
 
-    Eigen::Vector4s vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/depth};
+    Eigen::Vector3s camera_center = {0,0,0};
+    Eigen::Vector3s unitary_vec;
+    unitary_vec(0) = (point3D(0) - camera_center(0)) / depth;
+    unitary_vec(1) = (point3D(1) - camera_center(1)) / depth;
+    unitary_vec(2) = (point3D(2) - camera_center(2)) / depth;
+
+    Eigen::Vector4s vec_homogeneous = {unitary_vec(0),unitary_vec(1),unitary_vec(2),1/depth};
+    std::cout << "vec_homogeneous x: " << vec_homogeneous(0) << "; y: " << vec_homogeneous(1) << "; z: " << vec_homogeneous(2) << std::endl;
+
+    Eigen::Vector3s robot_p = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
+    Eigen::Vector4s robot_o = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
+
+    std::cout << "robot_p:\n" << robot_p(0) << "\t" << robot_p(1) << "\t" << robot_p(2) << std::endl;
+    std::cout << "robot_o:\n" << robot_o(0) << "\t" << robot_o(1) << "\t" << robot_o(2) << "\t" << robot_o(3)<< std::endl;
+
     return new LandmarkAHP(new StateBlock(point3D),feat_point_image_ptr->getDescriptor(),vec_homogeneous,frame);
 }
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
-//    std::cout << "\tProcessorImageLandmark::createConstraint" << std::endl;
+    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
 //    std::cout << "\t\tFeature: " << ((FeaturePointImage*)_feature_ptr)->getMeasurement()[0]
 //              << "\t" << ((FeaturePointImage*)_feature_ptr)->getMeasurement()[1] << std::endl;
 //    std::cout << "\t\tLandmark: "<< ((LandmarkPoint3D*)_landmark_ptr)->getPosition()[0]
@@ -322,8 +338,9 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
     ConstraintImage* constraint = new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), (LandmarkAHP*)_landmark_ptr);
 
     Eigen::Vector2s residuals;
-    Eigen::Vector3s robot_p;
-    Eigen::Vector4s robot_o, landmark;
+    Eigen::Vector3s robot_p = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
+    Eigen::Vector4s robot_o = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
+    Eigen::Vector4s landmark = ((LandmarkAHP*)_landmark_ptr)->getPPtr()->getVector();
     (*constraint)(robot_p.data(), robot_o.data(), landmark.data(), residuals.data());
 
 
@@ -349,9 +366,24 @@ void ProcessorImageLandmark::camera2WorldFrameTransformation(Eigen::Vector3s _cw
     Eigen::Matrix3s rot_mat;
     rotationMatrix(rot_mat, _cw_orientation);
 
-    _point3D = rot_mat.transpose()*_point3D + _cw_translation;
+    Eigen::Vector3s translation;
+    translation = (-rot_mat.transpose()*_cw_translation);
+
+    _point3D = rot_mat.transpose()*_point3D + translation;
+
+    std::cout << "translation:\n" << _cw_translation(0) << "\t" << _cw_translation(1) << "\t" << _cw_translation(2) << std::endl;
+    std::cout << "orientation:\n" << _cw_orientation(0) << "\t" << _cw_orientation(1) << "\t" << _cw_orientation(2)
+              << "\t" << _cw_orientation(3) << std::endl;
 
     std::cout << "point3D USED IN BACKPROJECT x: " << _point3D(0) << "; y: " << _point3D(1) << "; z: " << _point3D(2) << std::endl;
+
+    // ===============================================
+//    Eigen::Matrix3s rot_mat;
+//    rotationMatrix(rot_mat, _cw_orientation);
+
+//    _point3D = rot_mat.transpose()*_point3D + _cw_translation;
+
+//    std::cout << "point3D USED IN BACKPROJECT x: " << _point3D(0) << "; y: " << _point3D(1) << "; z: " << _point3D(2) << std::endl;
 }
 
 void ProcessorImageLandmark::rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation)

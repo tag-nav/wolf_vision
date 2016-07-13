@@ -76,9 +76,10 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
     Eigen::Map<const Eigen::Matrix<T, 4, 1> > orobotmap(_orobot);
     Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap(_residuals);
 
-    // error = (expected measurement - getMeasurement() ) * getSquareRootInformation()
-    // _residuals = (projectionOfTheLandmark - featurePosition) * getSquareRootInformation()
-
+    std::cout << "probot:\n" << translation_F1_world2robot(0) << "\t" << translation_F1_world2robot(1)
+              << "\t" << translation_F1_world2robot(2) << std::endl;
+    std::cout << "orobot:\n" << orobotmap(0) << "\t" << orobotmap(1) << "\t" << orobotmap(2) << "\t" << orobotmap(3)<< std::endl;
+    std::cout << "residuals:\n" << residualsmap(0) << "\t" << residualsmap(1) << std::endl;
 
     Eigen::Matrix<T,4,1> k_params = intrinsics_.cast<T>();
     Eigen::Matrix<T,3,3> K;
@@ -90,13 +91,25 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
     K(1,2) = k_params(3);
     K(2,0) = 0;
     K(2,1) = 0;
-    K(2,2) = 0;
+    K(2,2) = 1;
+
+    std::cout << "K matrix:\n" << K(0,0) << "\t" << K(0,1) << "\t" << K(0,2) << "\n"
+              << K(1,0) << "\t" << K(1,1) << "\t" << K(1,2) << "\n"
+              << K(2,0) << "\t" << K(2,1) << "\t" << K(2,2) << "\n" << std::endl;
 
     Eigen::Matrix<T,3,1> translation_robot2camera = extrinsics_p_.cast<T>();
     Eigen::Matrix<T,4,1> sensor_orientation = extrinsics_o_.cast<T>();
+    std::cout << "translation robot to camera:\n" << translation_robot2camera(0) << "\t" << translation_robot2camera(1)
+              << "\t" << translation_robot2camera(2) << std::endl;
+    std::cout << "orientation robot to camera:\n" << sensor_orientation(0) << "\t" << sensor_orientation(1) << "\t"
+              << sensor_orientation(2) << "\t" << sensor_orientation(3)<< std::endl;
 
     Eigen::Matrix<T,3,1> translation_F0_world2robot = anchor_p_.cast<T>();
     Eigen::Matrix<T,4,1> anchor_orientation = anchor_o_.cast<T>();
+    std::cout << "translation F0 world to robot:\n" << translation_F0_world2robot(0) << "\t" << translation_F0_world2robot(1)
+              << "\t" << translation_F0_world2robot(2) << std::endl;
+    std::cout << "orientation F0 world to robot:\n" << anchor_orientation(0) << "\t" << anchor_orientation(1) << "\t"
+              << anchor_orientation(2) << "\t" << anchor_orientation(3)<< std::endl;
 
 
     Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmarkmap(_lmk);
@@ -105,7 +118,7 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
     m(0) = landmarkmap(0);
     m(1) = landmarkmap(1);
     m(2) = landmarkmap(2);
-    //inverse_depth = landmarkmap(3);
+    std::cout << "m:\n" << m(0) << "\t" << m(1) << "\t" << m(2) << "\ninverse depth: " << landmarkmap(3) << std::endl;
 
     /* making the rotations manually now */
     Eigen::Matrix<T,3,3> rotation_F1_world2robot;
@@ -172,23 +185,39 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
     //
     Eigen::Matrix<T,3,1> v;
     v = (rotation_c2c1 * m) + (translation_c2c1 * landmarkmap(3));
-
+    std::cout << "v:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << std::endl;
     // ==================================================
 
     Eigen::Matrix<T,3,1> u_;
     u_ = K * v;
+    std::cout << "u_:\n" << u_(0) << "\t" << u_(1) << "\t" << u_(2) << std::endl;
+
+    Eigen::Matrix<T,3,1> m2;
+    m2 = rotation_c2c1*K.inverse()*u_;
+    std::cout << "m2:\n" << m2(0) << "\t" << m2(1) << "\t" << m2(2) << std::endl;
 
     Eigen::Matrix<T,2,1> u_12;
     u_12(0) = u_(0);
     u_12(1) = u_(1);
 
     Eigen::Matrix<T,2,1> u;
-    u = u_12 / u_(2);
-
+    if(u_(2)!=0)
+    {
+        u = u_12 / u_(2);
+        std::cout << "u_(2) != 0" << std::endl;
+    }
+    else
+    {
+        u = u_12;
+        std::cout << "u_(2) == 0" << std::endl;
+    }
+        std::cout << "u:\n" << u(0) << "\t" << u(1) << std::endl;
     // ==================================================
 
-//    Eigen::Matrix<T,Eigen::Dynamic,1> feature_pos = getMeasurement().cast<T>();
-    Eigen::Matrix<T,Eigen::Dynamic,1> feature_pos = feature_image_.getMeasurement().cast<T>();
+    std::cout << "estimation of the projection: " << u.transpose() << std::endl;
+    std::cout << "feature: " << feature_image_.getMeasurement().transpose() << std::endl;
+    //Eigen::Matrix<T,2,1> feature_pos = getMeasurement().cast<T>();
+    Eigen::Matrix<T,2,1> feature_pos = feature_image_.getMeasurement().cast<T>();
 
     residualsmap[0] = (u[0] - feature_pos[0]) * getMeasurementSquareRootInformation()(0, 0);
     residualsmap[1] = (u[1] - feature_pos[1]) * getMeasurementSquareRootInformation()(1, 1);
