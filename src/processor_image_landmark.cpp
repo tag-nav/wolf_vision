@@ -106,6 +106,22 @@ void ProcessorImageLandmark::postProcess()
         drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));
         drawTrackingFeatures(image,tracker_candidates_,tracker_candidates_);
     }
+    if (origin_ptr_!=nullptr)
+    {
+        for(auto feature_ptr : *origin_ptr_->getFeatureListPtr())
+        {
+            for(auto constraint_ptr : *feature_ptr->getConstraintListPtr())
+            {
+
+                Eigen::Vector2s residuals;
+                Eigen::Vector3s robot_p = origin_ptr_->getFramePtr()->getPPtr()->getVector();
+                Eigen::Vector4s robot_o = origin_ptr_->getFramePtr()->getOPtr()->getVector();
+                Eigen::Vector4s landmark = constraint_ptr->getLandmarkOtherPtr()->getPPtr()->getVector();
+                (*((ConstraintImage*) constraint_ptr))(robot_p.data(), robot_o.data(), landmark.data(), residuals.data());
+            }
+        }
+
+    }
 }
 
 unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _landmark_list_in,
@@ -290,20 +306,19 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     //cv::waitKey(0);
     FrameBase* frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
 
-    Eigen::Vector3s camera_center = {0,0,0};
+    Scalar magnitude = sqrt(pow(point3D(0),2)+pow(point3D(1),2)+pow(point3D(2),2));
+    std::cout << "magnitude: " << magnitude << std::endl;
     Eigen::Vector3s unitary_vec;
-    unitary_vec(0) = (point3D(0) - camera_center(0)) / depth;
-    unitary_vec(1) = (point3D(1) - camera_center(1)) / depth;
-    unitary_vec(2) = (point3D(2) - camera_center(2)) / depth;
+    unitary_vec = point3D / magnitude;
 
     Eigen::Vector4s vec_homogeneous = {unitary_vec(0),unitary_vec(1),unitary_vec(2),1/depth};
-    std::cout << "vec_homogeneous x: " << vec_homogeneous(0) << "; y: " << vec_homogeneous(1) << "; z: " << vec_homogeneous(2) << std::endl;
+    std::cout << "unitary_vec x: " << unitary_vec(0) << "; y: " << unitary_vec(1) << "; z: " << unitary_vec(2) << std::endl;
 
-    Eigen::Vector3s robot_p = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
-    Eigen::Vector4s robot_o = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
+//    Eigen::Vector3s robot_p = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
+//    Eigen::Vector4s robot_o = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
 
-    std::cout << "robot_p:\n" << robot_p(0) << "\t" << robot_p(1) << "\t" << robot_p(2) << std::endl;
-    std::cout << "robot_o:\n" << robot_o(0) << "\t" << robot_o(1) << "\t" << robot_o(2) << "\t" << robot_o(3)<< std::endl;
+//    std::cout << "robot_p:\n" << robot_p(0) << "\t" << robot_p(1) << "\t" << robot_p(2) << std::endl;
+//    std::cout << "robot_o:\n" << robot_o(0) << "\t" << robot_o(1) << "\t" << robot_o(2) << "\t" << robot_o(3)<< std::endl;
 
     return new LandmarkAHP(new StateBlock(point3D),feat_point_image_ptr->getDescriptor(),vec_homogeneous,frame);
 }
@@ -335,13 +350,41 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
 //    SensorBase* sensor_ptr = this->getSensorPtr();
     // TO DO: CHANGE THE K_PARAMETERS AND THE OTHERS TO THE APROPRIATE VARIABLE (IF NEEDED)
 
-    ConstraintImage* constraint = new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), (LandmarkAHP*)_landmark_ptr);
+//    ConstraintImage* constraint = new ConstraintImage(_feature_ptr, getProblem()->getTrajectoryPtr()->getLastFramePtr(), (LandmarkAHP*)_landmark_ptr);
 
-    Eigen::Vector2s residuals;
-    Eigen::Vector3s robot_p = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
-    Eigen::Vector4s robot_o = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
-    Eigen::Vector4s landmark = ((LandmarkAHP*)_landmark_ptr)->getPPtr()->getVector();
-    (*constraint)(robot_p.data(), robot_o.data(), landmark.data(), residuals.data());
+//    Eigen::Vector2s residuals;
+//    Eigen::Vector3s robot_p = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
+//    Eigen::Vector4s robot_o = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
+//    Eigen::Vector4s landmark = ((LandmarkAHP*)_landmark_ptr)->getPPtr()->getVector();
+
+
+//    std::cout << "landmark m:\n" << landmark(0) << "\t" << landmark(1) << "\t" << landmark(2) << std::endl;
+//    std::cout << "landmark inverse depth:\n" << landmark(3) << std::endl;
+
+//    std::cout << "3d point:\n" << landmark(0)/landmark(3) << "\t" << landmark(1)/landmark(3) << "\t" << landmark(2)/landmark(3) << std::endl;
+
+//    Eigen::Vector3s point3D;
+//    point3D(0) = landmark(0)/landmark(3);
+//    point3D(1) = landmark(1)/landmark(3);
+//    point3D(2) = landmark(2)/landmark(3);
+
+//    Eigen::Vector2s point2D;
+//    point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
+//                                    ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point3D);
+//    std::cout << "2d point projected TOTAL:\n" << point2D(0) << "\t" << point2D(1) << std::endl << std::endl;
+
+//    point2D = pinhole::projectPointToNormalizedPlane(point3D);
+//    std::cout << "2d point projected:\n" << point2D(0) << "\t" << point2D(1) << std::endl << std::endl;
+
+//    point2D = pinhole::distortPoint(((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point2D);
+//    std::cout << "2d point distorted:\n" << point2D(0) << "\t" << point2D(1) << std::endl << std::endl;
+
+//    point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
+//    std::cout << "2d point pixellized:\n" << point2D(0) << "\t" << point2D(1) << std::endl << std::endl;
+
+//    // WARNING: the projection here is done okay, the problem is probably in the constraint class
+
+//    //(*constraint)(robot_p.data(), robot_o.data(), landmark.data(), residuals.data());
 
 
 

@@ -83,12 +83,12 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
 
     Eigen::Matrix<T,4,1> k_params = intrinsics_.cast<T>();
     Eigen::Matrix<T,3,3> K;
-    K(0,0) = k_params(0);
+    K(0,0) = k_params(2);
     K(0,1) = 0;
-    K(0,2) = k_params(2);
+    K(0,2) = k_params(0);
     K(1,0) = 0;
-    K(1,1) = k_params(1);
-    K(1,2) = k_params(3);
+    K(1,1) = k_params(3);
+    K(1,2) = k_params(1);
     K(2,0) = 0;
     K(2,1) = 0;
     K(2,2) = 1;
@@ -132,6 +132,11 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
     rotation_F1_world2robot(2,1) = 2*(orobotmap(1)*orobotmap(2) - orobotmap(3)*orobotmap(0));
     rotation_F1_world2robot(2,2) = pow(orobotmap(3),2) - pow(orobotmap(0),2) - pow(orobotmap(1),2) + pow(orobotmap(2),2);
 
+    std::cout << "\nrotation F1 world to robot:\n"
+              << rotation_F1_world2robot(0,0) << "\t" << rotation_F1_world2robot(0,1) << "\t" << rotation_F1_world2robot(0,2) << "\n"
+              << rotation_F1_world2robot(1,0) << "\t" << rotation_F1_world2robot(1,1) << "\t" << rotation_F1_world2robot(1,2) << "\n"
+              << rotation_F1_world2robot(2,0) << "\t" << rotation_F1_world2robot(2,1) << "\t" << rotation_F1_world2robot(2,2) << "\n\n";
+
     Eigen::Matrix<T,3,3> rotation_F0_world2robot;
     rotation_F0_world2robot(0,0) = pow(anchor_orientation(3),2) + pow(anchor_orientation(0),2) - pow(anchor_orientation(1),2) - pow(anchor_orientation(2),2);
     rotation_F0_world2robot(0,1) = 2*(anchor_orientation(0)*anchor_orientation(1) + anchor_orientation(3)*anchor_orientation(2));
@@ -143,6 +148,11 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
     rotation_F0_world2robot(2,1) = 2*(anchor_orientation(1)*anchor_orientation(2) - anchor_orientation(3)*anchor_orientation(0));
     rotation_F0_world2robot(2,2) = pow(anchor_orientation(3),2) - pow(anchor_orientation(0),2) - pow(anchor_orientation(1),2) + pow(anchor_orientation(2),2);
 
+    std::cout << "\nrotation F0 world to robot:\n"
+              << rotation_F0_world2robot(0,0) << "\t" << rotation_F0_world2robot(0,1) << "\t" << rotation_F0_world2robot(0,2) << "\n"
+              << rotation_F0_world2robot(1,0) << "\t" << rotation_F0_world2robot(1,1) << "\t" << rotation_F0_world2robot(1,2) << "\n"
+              << rotation_F0_world2robot(2,0) << "\t" << rotation_F0_world2robot(2,1) << "\t" << rotation_F0_world2robot(2,2) << "\n\n";
+
     Eigen::Matrix<T,3,3> rotation_robot2camera;
     rotation_robot2camera(0,0) = pow(sensor_orientation(3),2) + pow(sensor_orientation(0),2) - pow(sensor_orientation(1),2) - pow(sensor_orientation(2),2);
     rotation_robot2camera(0,1) = 2*(sensor_orientation(0)*sensor_orientation(1) + sensor_orientation(3)*sensor_orientation(2));
@@ -153,6 +163,12 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
     rotation_robot2camera(2,0) = 2*(sensor_orientation(0)*sensor_orientation(2) + sensor_orientation(3)*sensor_orientation(1));
     rotation_robot2camera(2,1) = 2*(sensor_orientation(1)*sensor_orientation(2) - sensor_orientation(3)*sensor_orientation(0));
     rotation_robot2camera(2,2) = pow(sensor_orientation(3),2) - pow(sensor_orientation(0),2) - pow(sensor_orientation(1),2) + pow(sensor_orientation(2),2);
+
+    std::cout << "\nrotation robot to camera:\n"
+              << rotation_robot2camera(0,0) << "\t" << rotation_robot2camera(0,1) << "\t" << rotation_robot2camera(0,2) << "\n"
+              << rotation_robot2camera(1,0) << "\t" << rotation_robot2camera(1,1) << "\t" << rotation_robot2camera(1,2) << "\n"
+              << rotation_robot2camera(2,0) << "\t" << rotation_robot2camera(2,1) << "\t" << rotation_robot2camera(2,2) << "\n\n";
+
     /* end making the rotations */
 
 
@@ -163,38 +179,58 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
     Eigen::Matrix<T,3,3> rotation_c2w;
     rotation_c2w = rotation_F0_world2robot*rotation_robot2camera;
 
+    std::cout << "\nrotation_c2w:\n"
+              << rotation_c2w(0,0) << "\t" << rotation_c2w(0,1) << "\t" << rotation_c2w(0,2) << "\n"
+              << rotation_c2w(1,0) << "\t" << rotation_c2w(1,1) << "\t" << rotation_c2w(1,2) << "\n"
+              << rotation_c2w(2,0) << "\t" << rotation_c2w(2,1) << "\t" << rotation_c2w(2,2) << "\n";
+
     Eigen::Matrix<T,3,1> translation_c2w;
     translation_c2w = (rotation_F0_world2robot*translation_robot2camera) + translation_F0_world2robot;
+
+    std::cout << "\ntranslation_c2w:\n" << translation_c2w(0) << "\t" << translation_c2w(1) << "\t" << translation_c2w(2) << std::endl;
 
     // world in camera1 coordinates
     Eigen::Matrix<T,3,3> rotation_w2c1;
     rotation_w2c1 = rotation_robot2camera.transpose()*rotation_F1_world2robot.transpose();
 
+    std::cout << "\nrotation_w2c1:\n"
+              << rotation_w2c1(0,0) << "\t" << rotation_w2c1(0,1) << "\t" << rotation_w2c1(0,2) << "\n"
+              << rotation_w2c1(1,0) << "\t" << rotation_w2c1(1,1) << "\t" << rotation_w2c1(1,2) << "\n"
+              << rotation_w2c1(2,0) << "\t" << rotation_w2c1(2,1) << "\t" << rotation_w2c1(2,2) << "\n";
+
     Eigen::Matrix<T,3,1> translation_w2c1;
     translation_w2c1 = (rotation_robot2camera.transpose()*(-rotation_F1_world2robot.transpose()*translation_F1_world2robot)) +
             (-rotation_robot2camera.transpose()*translation_robot2camera);
 
-    // camera in camera1 coordinates, through world
+    std::cout << "\ntranslation_w2c1:\n" << translation_w2c1(0) << "\t" << translation_w2c1(1) << "\t" << translation_w2c1(2) << std::endl;
 
+    // camera in camera1 coordinates, through world
     Eigen::Matrix<T,3,3> rotation_c2c1;
     rotation_c2c1 = rotation_w2c1 * rotation_c2w;
+
+    std::cout << "\nrotation_c2c1:\n"
+              << rotation_c2c1(0,0) << "\t" << rotation_c2c1(0,1) << "\t" << rotation_c2c1(0,2) << "\n"
+              << rotation_c2c1(1,0) << "\t" << rotation_c2c1(1,1) << "\t" << rotation_c2c1(1,2) << "\n"
+              << rotation_c2c1(2,0) << "\t" << rotation_c2c1(2,1) << "\t" << rotation_c2c1(2,2) << "\n";
 
     Eigen::Matrix<T,3,1> translation_c2c1;
     translation_c2c1 = (rotation_w2c1 * translation_c2w) + translation_w2c1;
 
+    std::cout << "\ntranslation_c2c1:\n" << translation_c2c1(0) << "\t" << translation_c2c1(1) << "\t" << translation_c2c1(2) << std::endl;
+
     //
     Eigen::Matrix<T,3,1> v;
     v = (rotation_c2c1 * m) + (translation_c2c1 * landmarkmap(3));
-    std::cout << "v:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << std::endl;
+    std::cout << "\nv:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << std::endl;
     // ==================================================
 
     Eigen::Matrix<T,3,1> u_;
     u_ = K * v;
-    std::cout << "u_:\n" << u_(0) << "\t" << u_(1) << "\t" << u_(2) << std::endl;
+    std::cout << "\nu_:\n" << u_(0) << "\t" << u_(1) << "\t" << u_(2) << std::endl;
 
-    Eigen::Matrix<T,3,1> m2;
-    m2 = rotation_c2c1*K.inverse()*u_;
-    std::cout << "m2:\n" << m2(0) << "\t" << m2(1) << "\t" << m2(2) << std::endl;
+//    Eigen::Matrix<T,3,1> m2;
+//    m2 = rotation_c2c1*K.inverse()*u_;
+//    std::cout << "m2:\n" << m2(0) << "\t" << m2(1) << "\t" << m2(2) << std::endl;
 
     Eigen::Matrix<T,2,1> u_12;
     u_12(0) = u_(0);
@@ -211,16 +247,20 @@ inline bool ConstraintImage::operator ()(const T* const _probot, const T* const 
         u = u_12;
         std::cout << "u_(2) == 0" << std::endl;
     }
-        std::cout << "u:\n" << u(0) << "\t" << u(1) << std::endl;
+        std::cout << "\nu:\n" << u(0) << "\t" << u(1) << std::endl;
     // ==================================================
 
     std::cout << "estimation of the projection: " << u.transpose() << std::endl;
     std::cout << "feature: " << feature_image_.getMeasurement().transpose() << std::endl;
-    //Eigen::Matrix<T,2,1> feature_pos = getMeasurement().cast<T>();
-    Eigen::Matrix<T,2,1> feature_pos = feature_image_.getMeasurement().cast<T>();
+    Eigen::Matrix<T,2,1> feature_pos = getMeasurement().cast<T>();
+    //Eigen::Matrix<T,2,1> feature_pos = feature_image_.getMeasurement().cast<T>();
 
-    residualsmap[0] = (u[0] - feature_pos[0]) * getMeasurementSquareRootInformation()(0, 0);
-    residualsmap[1] = (u[1] - feature_pos[1]) * getMeasurementSquareRootInformation()(1, 1);
+    std::cout << "measurement square root information" << getMeasurementSquareRootInformation()(0, 0) << std::endl;
+
+//    residualsmap[0] = (u[0] - feature_pos[0]) * getMeasurementSquareRootInformation()(0, 0);
+//    residualsmap[1] = (u[1] - feature_pos[1]) * getMeasurementSquareRootInformation()(1, 1);
+
+    residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
 
     std::cout << "\n\tRESIDUALS: \n" << residualsmap[0] << "\n" << residualsmap[1] << std::endl;
 
