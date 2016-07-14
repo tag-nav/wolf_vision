@@ -15,6 +15,7 @@
 #include "state_block.h"
 #include "processor_image_landmark.h"
 #include "capture_void.h"
+#include "ceres_wrapper/ceres_manager.h"
 
 int main(int argc, char** argv)
 {
@@ -133,6 +134,23 @@ int main(int argc, char** argv)
 
 
 
+    // Ceres wrapper
+    ceres::Solver::Options ceres_options;
+    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+    ceres_options.max_line_search_step_contraction = 1e-3;
+    //    ceres_options.minimizer_progress_to_stdout = false;
+    //    ceres_options.line_search_direction_type = ceres::LBFGS;
+    //    ceres_options.max_num_iterations = 100;
+    google::InitGoogleLogging(argv[0]);
+
+    CeresManager ceres_manager(&(*wolf_problem_ptr_), ceres_options);
+
+
+
+
+
+
+
     // CAPTURES
     CaptureImage* image_ptr;
 
@@ -157,6 +175,9 @@ int main(int argc, char** argv)
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
         cv::waitKey(5);
+
+//        ceres::Solver::Summary summary = ceres_manager.solve();
+//        std::cout << summary.FullReport() << std::endl;
 
         f++;
         capture >> frame[f % buffer_size];
