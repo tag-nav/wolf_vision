@@ -40,10 +40,10 @@ static IntrinsicsBase* createIntrinsicsCamera(const std::string & _filename_dot_
         IntrinsicsCamera* intrinsics_cam = new IntrinsicsCamera;
         intrinsics_cam->type = sensor_type;
         intrinsics_cam->name = sensor_name;
-        intrinsics_cam->pinhole_model[0] = intrinsic[0];
-        intrinsics_cam->pinhole_model[1] = intrinsic[4];
-        intrinsics_cam->pinhole_model[2] = intrinsic[2];
-        intrinsics_cam->pinhole_model[3] = intrinsic[5];
+        intrinsics_cam->pinhole_model[0] = intrinsic[2];
+        intrinsics_cam->pinhole_model[1] = intrinsic[5];
+        intrinsics_cam->pinhole_model[2] = intrinsic[0];
+        intrinsics_cam->pinhole_model[3] = intrinsic[4];
         intrinsics_cam->distortion = distortion;
         intrinsics_cam->width = width;
         intrinsics_cam->height = height;
