@@ -179,7 +179,7 @@ int main(int argc, char** argv)
         if((f%buffer_size) == 1)
         {
             ceres::Solver::Summary summary = ceres_manager.solve();
-            //std::cout << summary.FullReport() << std::endl;
+            std::cout << summary.FullReport() << std::endl;
         }
 
         f++;
