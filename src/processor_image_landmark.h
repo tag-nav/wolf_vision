@@ -10,6 +10,7 @@
 #include "active_search.h"
 #include "processor_tracker_landmark.h"
 #include "constraint_epipolar.h"
+#include "landmark_AHP.h"
 
 // OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
@@ -273,6 +274,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         virtual void camera2WorldFrameTransformation(Eigen::Vector3s _cw_translation, Eigen::Vector4s _cw_orientation, Eigen::Vector3s& _point3D);
 
+        virtual void changeOfReference(LandmarkAHP* _landmark, Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D);
 
         // These only to debug, will disappear one day soon
     public:

@@ -46,9 +46,9 @@ class FeaturePointImage : public FeatureBase
             measurement_(0) = Scalar(_keypoint.pt.x);
             measurement_(1) = Scalar(_keypoint.pt.y);
             is_known_=_is_known;
-            std::cout << "FEATURE TESTING\n";
-            std::cout << "Measurement:\n" << getMeasurement() << std::endl;
-            std::cout << "Measurement Sqrt:\n" << getMeasurementSquareRootInformation() << std::endl;
+//            std::cout << "FEATURE TESTING\n";
+//            std::cout << "Measurement:\n" << getMeasurement() << std::endl;
+//            std::cout << "Measurement Sqrt:\n" << getMeasurementSquareRootInformation() << std::endl;
         }
 
         FeaturePointImage(const cv::KeyPoint& _keypoint,

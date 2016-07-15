@@ -264,7 +264,7 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
 
     residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
 
-//    std::cout << "\n\tRESIDUALS: \n" << residualsmap[0] << "\n" << residualsmap[1] << std::endl;
+    std::cout << "\n\tRESIDUALS: \n" << residualsmap[0] << "\n" << residualsmap[1] << std::endl;
 
     return true;
 }
