@@ -176,8 +176,11 @@ int main(int argc, char** argv)
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
         cv::waitKey(5);
 
-//        ceres::Solver::Summary summary = ceres_manager.solve();
-//        std::cout << summary.FullReport() << std::endl;
+        if((f%buffer_size) == 1)
+        {
+            ceres::Solver::Summary summary = ceres_manager.solve();
+            //std::cout << summary.FullReport() << std::endl;
+        }
 
         f++;
         capture >> frame[f % buffer_size];
