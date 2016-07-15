@@ -14,12 +14,10 @@ class LandmarkAHP : public LandmarkBase
 {
     protected:
         cv::Mat descriptor_;
-        StateBlock* position_;
-        StateBlock* anchorRobot_;
         FrameBase* anchor_frame_;
 
     public:
-        LandmarkAHP(StateBlock* _p_ptr, cv::Mat _2D_descriptor, Eigen::Vector4s _position, FrameBase* _frame);
+        LandmarkAHP(Eigen::Vector4s _position, FrameBase* _frame, cv::Mat _2D_descriptor);
 
         virtual ~LandmarkAHP();
 
@@ -30,9 +28,6 @@ class LandmarkAHP : public LandmarkBase
         }
 
         const FrameBase* getAnchorFrame() const;
-
-        StateBlock* getPosition() const;
-
 };
 
 inline const cv::Mat& LandmarkAHP::getDescriptor() const
@@ -43,11 +38,6 @@ inline const cv::Mat& LandmarkAHP::getDescriptor() const
 inline const FrameBase* LandmarkAHP::getAnchorFrame() const
 {
     return anchor_frame_;
-}
-
-inline StateBlock* LandmarkAHP::getPosition() const
-{
-    return position_;
 }
 
 } // namespace wolf

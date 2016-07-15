@@ -321,7 +321,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 //    std::cout << "robot_p:\n" << robot_p(0) << "\t" << robot_p(1) << "\t" << robot_p(2) << std::endl;
 //    std::cout << "robot_o:\n" << robot_o(0) << "\t" << robot_o(1) << "\t" << robot_o(2) << "\t" << robot_o(3)<< std::endl;
 
-    return new LandmarkAHP(new StateBlock(point3D),feat_point_image_ptr->getDescriptor(),vec_homogeneous,frame);
+    return new LandmarkAHP(vec_homogeneous,frame,feat_point_image_ptr->getDescriptor());
 }
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
