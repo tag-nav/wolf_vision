@@ -89,13 +89,20 @@ void LandmarkBase::setStatus(LandmarkStatus _st)
 
 void LandmarkBase::registerNewStateBlocks()
 {
+    std::cout << "registerNewStateBlocks" << std::endl;
     if (getProblem() != nullptr)
     {
+        std::cout << "problem != nullptr" << std::endl;
         if (p_ptr_ != nullptr)
+        {
+            std::cout << "p != nullptr" << std::endl;
             getProblem()->addStateBlockPtr(p_ptr_);
-
+        }
         if (o_ptr_ != nullptr)
+        {
+            std::cout << "o != nullptr" << std::endl;
             getProblem()->addStateBlockPtr(o_ptr_);
+        }
     }
 }
 

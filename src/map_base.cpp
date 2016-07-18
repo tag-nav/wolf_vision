@@ -25,6 +25,7 @@ LandmarkBase* MapBase::addLandmark(LandmarkBase* _landmark_ptr)
 
 void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)
 {
+    std::cout << "MapBase::addLandmarkList: " << _landmark_list.size() << std::endl;
     addDownNodeList(_landmark_list);
     for (auto landmark_ptr : _landmark_list)
         landmark_ptr->registerNewStateBlocks();

@@ -214,6 +214,7 @@ LandmarkBase* Problem::addLandmark(LandmarkBase* _lmk_ptr)
 
 void Problem::addLandmarkList(LandmarkBaseList _lmk_list)
 {
+    std::cout << "Problem::addLandmarkList" << std::endl;
     getMapPtr()->addLandmarkList(_lmk_list);
 }
 
