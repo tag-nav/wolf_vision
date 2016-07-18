@@ -219,6 +219,7 @@ void Problem::addLandmarkList(LandmarkBaseList _lmk_list)
 
 StateBlock* Problem::addStateBlockPtr(StateBlock* _state_ptr)
 {
+    std::cout << "addStateBlockPtr" << std::endl;
     // add the state unit to the list
     state_block_ptr_list_.push_back(_state_ptr);
     // queue for solver manager
@@ -246,6 +247,7 @@ void Problem::removeStateBlockPtr(StateBlock* _state_ptr)
 
 ConstraintBase* Problem::addConstraintPtr(ConstraintBase* _constraint_ptr)
 {
+    std::cout << "addConstraintPtr" << std::endl;
     // queue for solver manager
     //constraint_add_list_.push_back(_constraint_ptr);
     constraint_notification_list_.push_back(ConstraintNotification({ADD, _constraint_ptr, _constraint_ptr->id()}));

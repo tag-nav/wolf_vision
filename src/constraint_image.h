@@ -251,20 +251,17 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
     }
 //        std::cout << "\nu:\n" << u(0) << "\t" << u(1) << std::endl;
     // ==================================================
+    std::cout << "==============================================\nCONSTRAINT INFO" << std::endl;
+    std::cout << "Estimation of the Projection:\n\t" << u(0) << "\n\t" << u(1) << std::endl;
+    std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
 
-    //std::cout << "estimation of the projection: " << u.transpose() << std::endl;
-    //std::cout << "feature: " << feature_image_.getMeasurement().transpose() << std::endl;
     Eigen::Matrix<T,2,1> feature_pos = getMeasurement().cast<T>();
-    //Eigen::Matrix<T,2,1> feature_pos = feature_image_.getMeasurement().cast<T>();
 
-//    std::cout << "measurement square root information" << getMeasurementSquareRootInformation()(0, 0) << std::endl;
-
-//    residualsmap[0] = (u[0] - feature_pos[0]) * getMeasurementSquareRootInformation()(0, 0);
-//    residualsmap[1] = (u[1] - feature_pos[1]) * getMeasurementSquareRootInformation()(1, 1);
+    //std::cout << "Square Root Information:\n" << getMeasurementSquareRootInformation() << std::endl;
 
     residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
 
-    std::cout << "\n\tRESIDUALS: \n" << residualsmap[0] << "\n" << residualsmap[1] << std::endl;
+    std::cout << "\nRESIDUALS: \n\t" << residualsmap[0] << "\n\t" << residualsmap[1] << std::endl;
 
     return true;
 }

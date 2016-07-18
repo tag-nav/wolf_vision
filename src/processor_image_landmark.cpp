@@ -328,7 +328,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
-    //std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
+    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
     if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
         return new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
     else
@@ -636,9 +636,6 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_base_ptr;
         Eigen::Vector4s vector = landmark_ptr->getPPtr()->getVector();
         Eigen::Vector3s point3D;
-//        point3D(0) = vector(0);
-//        point3D(1) = vector(1);
-//        point3D(2) = vector(2);
 
         changeOfReference(landmark_ptr,world2cam_translation_,world2cam_orientation_,point3D);
 
