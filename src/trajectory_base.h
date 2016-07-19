@@ -23,8 +23,6 @@ class TrajectoryBase : public NodeLinked<Problem,FrameBase>
     protected:
         FrameStructure frame_structure_; // Defines the structure of the Frames in the Trajectory.
         FrameBase* last_key_frame_ptr_;  // keeps pointer to the last key frame
-        // TODO: JVN: No seria millor que aixo ho tingui el problem o el wolf_manager? JS: segurament. Pero fixed_size_ seria una de les opcions de moltes...
-        unsigned int fixed_size_; // Limits the number of Frames forming the Trajectory
         
     public:
         TrajectoryBase(FrameStructure _frame_sturcture);
@@ -64,7 +62,21 @@ class TrajectoryBase : public NodeLinked<Problem,FrameBase>
          **/
         void getConstraintList(ConstraintBaseList & _ctr_list);
         
+        /** \brief Returns the frame structure (see wolf.h)
+         **/
         FrameStructure getFrameStructure() const;
+
+        /** \brief Sorts the frame by timestamp
+         **/
+        void sortFrame(FrameBase* _frame_iter);
+
+        /** \brief Compute the position where the frame should be
+         **/
+        FrameBaseIter computeFrameOrder(FrameBase* _frame_ptr);
+
+        /** \brief Finds the closes key frame to a given timestamp
+         **/
+        FrameBase* closestKeyFrameToTimeStamp(const TimeStamp& _ts);
 };
 
 inline void TrajectoryBase::removeFrame(const FrameBaseIter& _frame_iter)

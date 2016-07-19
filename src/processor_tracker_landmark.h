@@ -68,7 +68,7 @@ namespace wolf
 class ProcessorTrackerLandmark : public ProcessorTracker
 {
     public:
-        ProcessorTrackerLandmark(ProcessorType _tp, const unsigned int& _max_new_features = 0);
+        ProcessorTrackerLandmark(ProcessorType _tp, const unsigned int& _max_new_features = 0, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorTrackerLandmark();
 
     protected:
@@ -135,6 +135,10 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          */
         virtual unsigned int detectNewFeatures(const unsigned int& _max_features) = 0;
 
+        /** \brief Creates a landmark for each of new_features_last_
+         **/
+        virtual void createNewLandmarks(LandmarkBaseList& _new_landmarks);
+
         /** \brief Create one landmark
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
@@ -167,18 +171,24 @@ namespace wolf
 {
 inline void ProcessorTrackerLandmark::advance()
 {
-    std::cout << "ProcessorTrackerLandmark::advance" << std::endl;
+    //std::cout << "ProcessorTrackerLandmark::advance" << std::endl;
+    for ( auto match : matches_landmark_from_last_)
+        delete match.second;
+
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
 
     new_features_last_ = std::move(new_features_incoming_);
 
-//    for (auto match : matches_landmark_from_last_)
-//            std::cout << "\t" << match.first->id() << " to " << match.second.landmark_ptr_->id() << std::endl;
+    //for (auto match : matches_landmark_from_last_)
+    //        std::cout << "\t" << match.first->id() << " to " << match.second->landmark_ptr_->id() << std::endl;
 }
 
 inline void ProcessorTrackerLandmark::reset()
 {
-    std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
+    //std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
+    for ( auto match : matches_landmark_from_last_)
+        delete match.second;
+
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
 
     new_features_last_ = std::move(new_features_incoming_);
@@ -189,12 +199,12 @@ inline void ProcessorTrackerLandmark::reset()
 
 inline void ProcessorTrackerLandmark::establishConstraints()
 {
-    std::cout << "ProcessorTrackerLandmark::establishConstraints" << std::endl;
-    std::cout << "\tfeatures:" << last_ptr_->getFeatureListPtr()->size() << std::endl;
-    std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
+    //std::cout << "ProcessorTrackerLandmark::establishConstraints" << std::endl;
+    //std::cout << "\tfeatures:" << last_ptr_->getFeatureListPtr()->size() << std::endl;
+    //std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
 
     for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
-        last_feature->addConstraint(createConstraint(last_feature, matches_landmark_from_last_[last_feature].landmark_ptr_));
+        last_feature->addConstraint(createConstraint(last_feature, matches_landmark_from_last_[last_feature]->landmark_ptr_));
 }
 
 }// namespace wolf

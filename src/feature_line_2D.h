@@ -23,6 +23,8 @@ class FeatureLine2D : public FeatureBase
         Eigen::Vector3s last_point_;
         
     public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
         /** \brief Constructor 
          * 
          * Constructor, with measurement and descriptor

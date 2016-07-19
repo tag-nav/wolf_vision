@@ -34,12 +34,10 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         StateBlock* p_ptr_;     ///< Position state unit pointer
         StateBlock* o_ptr_;     ///< Orientation state unit pointer
         Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
-        ConstraintBaseList constrained_by_list_; ///< List of constraints linked to this landmark
-
 
     public:
 
-        /** \brief Constructor with type, time stamp and the position state pointer
+        /** \brief Constructor with type, time stamp and the position state pointer (optional orientation state pointer)
          *
          * Constructor with type, and state pointer
          * \param _tp indicates landmark type.(types defined at wolf.h)
@@ -89,6 +87,10 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          **/
         StateBlock* getOPtr() const;
 
+        /** \brief Gets a vector of all state blocks pointers
+         **/
+        virtual std::vector<StateBlock*> getStateBlockVector() const;
+
         /** \brief Sets the position state block pointer
          **/
         void setPPtr(StateBlock* _st_ptr);
@@ -106,8 +108,6 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         const Eigen::VectorXs& getDescriptor() const;        
         
         /** \brief Returns _ii component of descriptor vector
-         * 
-         * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
          **/
         Scalar getDescriptor(unsigned int _ii) const;
 
@@ -136,7 +136,7 @@ inline void LandmarkBase::unfix()
 inline void LandmarkBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
 {
     NodeConstrained::removeConstrainedBy(_ctr_ptr);
-    if (constrained_by_list_.empty())
+    if (getConstrainedByListPtr()->empty())
         this->destruct();
 }
 
@@ -148,6 +148,20 @@ inline StateBlock* LandmarkBase::getPPtr() const
 inline StateBlock* LandmarkBase::getOPtr() const
 {
     return o_ptr_;
+}
+
+inline std::vector<StateBlock*> LandmarkBase::getStateBlockVector() const
+{
+    if (p_ptr_ == nullptr && o_ptr_ == nullptr)
+        return std::vector<StateBlock*>(0);
+
+    if (p_ptr_ == nullptr)
+        return std::vector<StateBlock*>( {o_ptr_});
+
+    if (o_ptr_ == nullptr)
+        return std::vector<StateBlock*>( {p_ptr_});
+
+    return std::vector<StateBlock*>( {p_ptr_, o_ptr_});
 }
 
 inline void LandmarkBase::setPPtr(StateBlock* _st_ptr)
@@ -167,6 +181,7 @@ inline void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)
 
 inline Scalar LandmarkBase::getDescriptor(unsigned int _ii) const
 {
+    assert(_ii < descriptor_.size() && "LandmarkBase::getDescriptor: bad index");
     return descriptor_(_ii);
 }
 

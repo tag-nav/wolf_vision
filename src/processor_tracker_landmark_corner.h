@@ -38,7 +38,8 @@ struct ProcessorParamsLaser : public ProcessorParamsBase
 {
         laserscanutils::LineFinderIterativeParams line_finder_params_;
         //TODO: add corner_finder_params
-        unsigned int n_corners_th;
+        unsigned int new_corners_th;
+        unsigned int loop_frames_th;
 
         // These values below are constant and defined within the class -- provide a setter or accept them at construction time if you need to configure them
         //        Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
@@ -57,7 +58,8 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 
         FeatureBaseList corners_incoming_;
         FeatureBaseList corners_last_;
-        unsigned int n_corners_th_;
+        unsigned int new_corners_th_;
+        unsigned int loop_frames_th_;
 
         // These values are constant -- provide a setter or accept them at construction time if you need to configure them
         Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
@@ -75,8 +77,10 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
         bool extrinsics_transformation_computed_;
 
     public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
         ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                       const unsigned int& _n_corners_th);
+                                       const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th);
 
         virtual ~ProcessorTrackerLandmarkCorner();
 
@@ -87,12 +91,23 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 
         void advance()
         {
+            //std::cout << "\tProcessorTrackerLandmarkCorner::advance:" << std::endl;
+            //std::cout << "\t\tcorners_last: " << corners_last_.size() << std::endl;
+            //std::cout << "\t\tcorners_incoming_: " << corners_incoming_.size() << std::endl;
             ProcessorTrackerLandmark::advance();
+            while (!corners_last_.empty())
+            {
+                corners_last_.front()->destruct();
+                corners_last_.pop_front();
+            }
             corners_last_ = std::move(corners_incoming_);
         }
 
         void reset()
         {
+            //std::cout << "\tProcessorTrackerLandmarkCorner::reset:" << std::endl;
+            //std::cout << "\t\tcorners_last: " << corners_last_.size() << std::endl;
+            //std::cout << "\t\tcorners_incoming_: " << corners_incoming_.size() << std::endl;
             ProcessorTrackerLandmark::reset();
             corners_last_ = std::move(corners_incoming_);
         }
@@ -160,8 +175,8 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 };
 
 inline ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                                                      const unsigned int& _n_corners_th) :
-        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0), line_finder_(_line_finder_params), n_corners_th_(_n_corners_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
+                                                                      const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th) :
+        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0), line_finder_(_line_finder_params), new_corners_th_(_new_corners_th), loop_frames_th_(_loop_frames_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
 {
 }
 
@@ -169,12 +184,12 @@ inline ProcessorTrackerLandmarkCorner::~ProcessorTrackerLandmarkCorner()
 {
     while (!corners_last_.empty())
     {
-        delete corners_last_.front();
+        corners_last_.front()->destruct();
         corners_last_.pop_front();
     }
     while (!corners_incoming_.empty())
     {
-        delete corners_incoming_.front();
+        corners_incoming_.front()->destruct();
         corners_incoming_.pop_front();
     }
 }
@@ -204,26 +219,6 @@ inline ConstraintBase* ProcessorTrackerLandmarkCorner::createConstraint(FeatureB
     return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*)((_landmark_ptr)));
 }
 
-ProcessorBase* ProcessorTrackerLandmarkCorner::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
-{
-    ProcessorParamsLaser* params = (ProcessorParamsLaser*)_params;
-    ProcessorTrackerLandmarkCorner* prc_ptr = new ProcessorTrackerLandmarkCorner(params->line_finder_params_, params->n_corners_th);
-    prc_ptr->setName(_unique_name);
-    return prc_ptr;
-}
-
 } // namespace wolf
-
-
-// Register in the SensorFactory
-//#include "processor_factory.h"
-#include "factory.h"
-namespace wolf {
-namespace
-{
-const bool registered_prc_laser = ProcessorFactory::get().registerCreator("LASER 2D", ProcessorTrackerLandmarkCorner::create);
-}
-} // namespace wolf
-
 
 #endif /* SRC_PROCESSOR_TRACKER_LASER_H_ */

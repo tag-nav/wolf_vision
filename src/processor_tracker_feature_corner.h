@@ -35,7 +35,7 @@ const Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
 const Scalar position_error_th_ = 1;
 const Scalar min_features_ratio_th_ = 0.5;
 
-class ProcessorTrackerFeatureCorner : public wolf::ProcessorTrackerFeature
+class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
 {
     private:
         //laserscanutils::ScanParams scan_params_;
@@ -59,6 +59,8 @@ class ProcessorTrackerFeatureCorner : public wolf::ProcessorTrackerFeature
         bool extrinsics_transformation_computed_;
 
     public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
         ProcessorTrackerFeatureCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
                                       const unsigned int& _n_corners_th);
         virtual ~ProcessorTrackerFeatureCorner();

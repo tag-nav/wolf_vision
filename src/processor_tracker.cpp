@@ -11,8 +11,8 @@ namespace wolf
 {
 
 ProcessorTracker::ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features, const Scalar& _time_tolerance) :
-        ProcessorBase(_tp), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
-        max_new_features_(_max_new_features), time_tolerance_(_time_tolerance)
+        ProcessorBase(_tp, _time_tolerance), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
+        max_new_features_(_max_new_features)
 {
     //
 }
@@ -39,15 +39,20 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
 {
-    //std::cout << "\nProcessorTracker::process..." << std::endl;
+    //std::cout << "-----nProcessorTracker::process():" << std::endl;
+    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
+    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
 
     incoming_ptr_ = _incoming_ptr;
+
     preProcess();
     // FIRST TIME
     if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
     {
-        std::cout << "FIRST TIME" << std::endl;
-        //        std::cout << "Features in origin: " << 0 << "; in last: " << 0 << std::endl;
+        //std::cout << "FIRST TIME" << std::endl;
+        //std::cout << "Features in origin: " << 0 << "; in last: " << 0 << std::endl;
 
         // advance
         advance();
@@ -57,30 +62,20 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
         incoming_ptr_ = nullptr;
 
         // keyframe creation on last
-        if (last_ptr_->getFramePtr() == nullptr)
-            makeFrame(last_ptr_);
+        makeFrame(last_ptr_, KEY_FRAME);
 
         // Detect new Features, initialize Landmarks, create Constraints, ...
         processNew(max_new_features_);
 
-        // Make the last Capture's Frame a KeyFrame so that it gets into the solver
-        if (!last_ptr_->getFramePtr()->isKey())
-        {
-            last_ptr_->getFramePtr()->setKey();
-            std::cout << "setted key" << std::endl;
-            // Call the new keyframe callback in order to let the other processors to establish their constraints
-            getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), this, time_tolerance_);
-        }
-
         // Establish constraints from last
         establishConstraints();
 
-        std::cout << "Features in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+        //std::cout << "Features in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
     }
     // SECOND TIME or after KEY FRAME CALLBACK
     else if (origin_ptr_ == nullptr)
     {
-        std::cout << "SECOND TIME or after KEY FRAME CALLBACK" << std::endl;
+        //std::cout << "SECOND TIME or after KEY FRAME CALLBACK" << std::endl;
         //std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
         // First we track the known Features
@@ -102,9 +97,8 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // OTHER TIMES
     else
     {
-        std::cout << "OTHER TIMES" << std::endl;
-        //
-        //        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+        //std::cout << "OTHER TIMES" << std::endl;
+        //std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
         // 1. First we track the known Features and create new constraints as needed
 
@@ -134,13 +128,10 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             makeFrame(incoming_ptr_);
 
             // Make the last Capture's Frame a KeyFrame so that it gets into the solver
-            last_ptr_->getFramePtr()->setKey();
+            setKeyFrame(last_ptr_);
 
             // Establish constraints between last and origin
             establishConstraints();
-
-            // Call the new keyframe callback in order to let the other processors to establish their constraints
-            getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), (ProcessorBase*)this, time_tolerance_);
 
             // Reset the derived Tracker
             reset();
@@ -150,12 +141,16 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
             last_ptr_ = incoming_ptr_;
             incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
         }
-
-        //        std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+        //std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
     }
-
     postProcess();
+
+    //std::cout << "-----End of process():" << std::endl;
+    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
+    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
 }
 
 bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
@@ -170,8 +165,7 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& 
     if (last_ptr_ == nullptr || last_ptr_->getFramePtr()->isKey() || std::abs(last_ptr_->getTimeStamp() - _keyframe_ptr->getTimeStamp()) > time_tol)
         return false;
 
-
-    std::cout << "ProcessorTracker::keyFrameCallback sensor " << getSensorPtr()->id() << std::endl;
+    //std::cout << "ProcessorTracker::keyFrameCallback in sensor " << getSensorPtr()->id() << std::endl;
 
     // Capture last_ is added to the new keyframe
     FrameBase* last_old_frame = last_ptr_->getFramePtr();
@@ -190,6 +184,21 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& 
 
     return true;
 }
+
+void ProcessorTracker::setKeyFrame(CaptureBase* _capture_ptr)
+{
+    assert(_capture_ptr != nullptr && _capture_ptr->getFramePtr() != nullptr && "ProcessorTracker::setKeyFrame: null capture or capture without frame");
+    if (!_capture_ptr->getFramePtr()->isKey())
+    {
+        // Set key
+        _capture_ptr->getFramePtr()->setKey();
+        // Set state to the keyframe
+        _capture_ptr->getFramePtr()->setState(getProblem()->getStateAtTimeStamp(_capture_ptr->getTimeStamp()));
+        // Call the new keyframe callback in order to let the other processors to establish their constraints
+        getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), (ProcessorBase*)((this)), time_tolerance_);
+    }
+}
+
 
 } // namespace wolf
 

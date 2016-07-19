@@ -21,6 +21,8 @@ protected:
     Scalar pseudorange_;
 
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
     FeatureGPSPseudorange(Eigen::Vector3s& _sat_position, Scalar _pseudorange, Scalar _covariance);
 
     /** \brief Default destructor (not recommended)

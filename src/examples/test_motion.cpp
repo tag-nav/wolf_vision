@@ -66,16 +66,16 @@ int main()
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
-    std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->getState().transpose() << std::endl;
+    std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->getCurrentState().transpose() << std::endl;
 
     // Capture to use as container for all incoming data
     t += dt;
-    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_ptr, data, data_cov);
+    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_ptr, data, data_cov, nullptr);
 
     for (int i = 0; i <= 8; i++)
     {
         odom3d_ptr->process(cap_ptr);
-        std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->getState().transpose() << std::endl;
+        std::cout << "State(" << (t-t0) << ") : " << odom3d_ptr->getCurrentState().transpose() << std::endl;
 
         t += dt;
         cap_ptr->setTimeStamp(t);

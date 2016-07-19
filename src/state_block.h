@@ -59,7 +59,7 @@ class StateBlock
         
         /** \brief Returns the state vector
          **/
-        Eigen::VectorXs getVector();
+        const Eigen::VectorXs& getVector() const;
 
         /** \brief Sets the state vector
          **/
@@ -85,6 +85,10 @@ class StateBlock
 
         LocalParametrizationBase* getLocalParametrizationPtr();
 
+        void setLocalParametrizationPtr(LocalParametrizationBase* _local_param);
+
+        void removeLocalParametrization();
+
 };
 
 } // namespace wolf
@@ -96,13 +100,11 @@ namespace wolf {
 inline StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed, LocalParametrizationBase* _local_param_ptr) :
         state_(_state), fixed_(_fixed), local_param_ptr_(_local_param_ptr)
 {
-    //
 }
 
 inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParametrizationBase* _local_param_ptr) :
-        state_(_size), fixed_(_fixed), local_param_ptr_(_local_param_ptr)
+        state_(Eigen::VectorXs::Zero(_size)), fixed_(_fixed), local_param_ptr_(_local_param_ptr)
 {
-    state_.setZero();
     //
 }
 
@@ -117,7 +119,7 @@ inline Scalar* StateBlock::getPtr()
     return state_.data();
 }
 
-inline Eigen::VectorXs StateBlock::getVector()
+inline const Eigen::VectorXs& StateBlock::getVector() const
 {
     return state_;
 }
@@ -156,6 +158,19 @@ inline bool StateBlock::hasLocalParametrization()
 inline LocalParametrizationBase* StateBlock::getLocalParametrizationPtr()
 {
     return local_param_ptr_;
+}
+
+inline void StateBlock::removeLocalParametrization()
+{
+	assert(local_param_ptr_ != nullptr && "state block without local parametrization");
+	delete local_param_ptr_;
+    local_param_ptr_ = nullptr;
+}
+
+inline void StateBlock::setLocalParametrizationPtr(LocalParametrizationBase* _local_param)
+{
+	assert(_local_param != nullptr && "setting a null local parametrization");
+    local_param_ptr_ = _local_param;
 }
 
 } // namespace wolf

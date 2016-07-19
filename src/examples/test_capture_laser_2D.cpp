@@ -5,6 +5,9 @@
 //wolf
 #include "capture_laser_2D.h"
 
+// Eigen in std vector
+#include <Eigen/StdVector>
+
 //main
 int main(int argc, char *argv[])
 {
@@ -91,8 +94,7 @@ int main(int argc, char *argv[])
     device_pose << 0,0,0,0,0,0; //origin, no rotation
     TimeStamp time_stamp;
     time_stamp.setToNow();
-    std::list<Eigen::Vector4s> corner_list;
-    std::list<Eigen::Vector4s>::iterator corner_it;
+    std::list<Eigen::Vector4s, Eigen::aligned_allocator<Eigen::Vector4s> > corner_list;
     
     //Create Device objects 
     //SensorLaser2D device(device_pose, ranges.size(), M_PI, 0.2, 30.0, 0.01);
@@ -120,7 +122,7 @@ int main(int argc, char *argv[])
 
     //print corners
     std::cout << "CORNER LIST" << std::endl;            
-    for ( corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it ++ )
+    for (auto corner_it = corner_list.begin(); corner_it != corner_list.end(); corner_it ++ )
     {
         std::cout << corner_it->x() << " , " << corner_it->y() << std::endl;
     }

@@ -14,7 +14,7 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
         static const unsigned int N_BLOCKS = 2;
 
         ConstraintFix(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintSparse<3, 2, 1>(_ftr_ptr, CTR_FIX, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),
+                ConstraintSparse<3, 2, 1>(CTR_FIX, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),
                                           _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("FIX");
@@ -42,13 +42,6 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
         virtual JacobianMethod getJacobianMethod() const
         {
             return JAC_AUTO;
-        }
-
-    public:
-        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                NodeBase* _correspondant_ptr = nullptr)
-        {
-            return new ConstraintFix(_feature_ptr);
         }
 
 };

@@ -138,8 +138,8 @@ void ProcessorLaser2D::establishConstraintsMHTree()
         Eigen::VectorXs squared_mahalanobis_distances;
 
         // COMPUTING ALL EXPECTED FEATURES
-        std::map<LandmarkBase*, Eigen::Vector4s> expected_features;
-        std::map<LandmarkBase*, Eigen::Matrix3s> expected_features_covs;
+        std::map<LandmarkBase*, Eigen::Vector4s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Vector4s> > > expected_features;
+        std::map<LandmarkBase*, Eigen::Matrix3s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Matrix3s> > > expected_features_covs;
         unsigned int i = 0;
         for (auto j_it = getProblem()->getMapPtr()->getLandmarkListPtr()->begin(); j_it != getProblem()->getMapPtr()->getLandmarkListPtr()->end(); j_it++, i++)
             computeExpectedFeature(*j_it, expected_features[*j_it], expected_features_covs[*j_it]);

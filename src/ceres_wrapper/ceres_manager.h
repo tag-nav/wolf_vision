@@ -56,6 +56,8 @@ class CeresManager
 
         ceres::Solver::Options& getSolverOptions();
 
+        void setUseWolfAutoDiff(bool _use_wolf_auto_diff);
+
 	private:
 
 		void update();
@@ -78,6 +80,11 @@ class CeresManager
 inline ceres::Solver::Options& CeresManager::getSolverOptions()
 {
     return ceres_options_;
+}
+
+inline void CeresManager::setUseWolfAutoDiff(bool _use_wolf_auto_diff)
+{
+    use_wolf_auto_diff_ = _use_wolf_auto_diff;
 }
 
 } // namespace wolf

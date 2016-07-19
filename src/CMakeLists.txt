@@ -107,8 +107,8 @@ SET(HDRS
     capture_motion2.h
     capture_odom_2D.h
     capture_void.h
-    constraint_base.h
     constraint_analytic.h
+    constraint_base.h
     constraint_container.h
     constraint_corner_2D.h
     constraint_epipolar.h
@@ -121,23 +121,29 @@ SET(HDRS
     constraint_gps_pseudorange_2D.h
     constraint_odom_2D.h
     constraint_odom_2D_analytic.h
+    constraint_point_2D.h
+    constraint_point_to_line_2D.h
     constraint_relative_2D_analytic.h
+    constraint_sparse.h
     feature_base.h
     feature_corner_2D.h
     feature_gps_fix.h
     feature_gps_pseudorange.h
     feature_fix.h
     feature_odom_2D.h
+    feature_polyline_2D.h
     frame_base.h
     hardware_base.h
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
-    #landmark_line_2D.h
     landmark_point_3d.h
+    landmark_line_2D.h
+    landmark_polyline_2D.h
     local_parametrization_base.h
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
+    local_parametrization_polyline_extreme.h
     map_base.h
     motion_buffer.h
     node_base.h
@@ -193,16 +199,19 @@ SET(SRCS
     feature_gps_pseudorange.cpp
     feature_fix.cpp
     feature_odom_2D.cpp
+    feature_polyline_2D.cpp
     frame_base.cpp
     hardware_base.cpp
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
-    #landmark_line_2D.cpp
     landmark_point_3d.cpp
+    landmark_line_2D.cpp
+    landmark_polyline_2D.cpp
     local_parametrization_base.cpp
     local_parametrization_quaternion.cpp
     local_parametrization_homogeneous.cpp
+    local_parametrization_polyline_extreme.cpp
     map_base.cpp
     node_base.cpp
     problem.cpp
@@ -245,6 +254,8 @@ IF (Ceres_FOUND)
         ceres_wrapper/local_parametrization_wrapper.h )
     SET(SRCS_WRAPPER
         ceres_wrapper/ceres_manager.cpp
+        ceres_wrapper/create_auto_diff_cost_function.cpp
+        ceres_wrapper/create_numeric_diff_cost_function.cpp
         ceres_wrapper/local_parametrization_wrapper.cpp )
 ELSE(Ceres_FOUND)
     SET(HDRS_WRAPPER)
@@ -257,6 +268,7 @@ IF (laser_scan_utils_FOUND)
         sensor_laser_2D.h
         #processor_laser_2D.h
         processor_tracker_landmark_corner.h
+        processor_tracker_landmark_polyline.h
         processor_tracker_feature_corner.h
         )
     SET(SRCS ${SRCS}
@@ -264,6 +276,7 @@ IF (laser_scan_utils_FOUND)
         sensor_laser_2D.cpp
         #processor_laser_2D.cpp
         processor_tracker_landmark_corner.cpp
+        processor_tracker_landmark_polyline.cpp
         processor_tracker_feature_corner.cpp
         )
 ENDIF(laser_scan_utils_FOUND)

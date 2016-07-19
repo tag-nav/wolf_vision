@@ -16,7 +16,6 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBl
             status_(LANDMARK_CANDIDATE),
 			p_ptr_(_p_ptr),
 			o_ptr_(_o_ptr)
-//			constrained_by_list_({})
 {
     //
 }
@@ -89,20 +88,12 @@ void LandmarkBase::setStatus(LandmarkStatus _st)
 
 void LandmarkBase::registerNewStateBlocks()
 {
-    std::cout << "registerNewStateBlocks" << std::endl;
     if (getProblem() != nullptr)
     {
-        std::cout << "problem != nullptr" << std::endl;
         if (p_ptr_ != nullptr)
-        {
-            std::cout << "p != nullptr" << std::endl;
             getProblem()->addStateBlockPtr(p_ptr_);
-        }
         if (o_ptr_ != nullptr)
-        {
-            std::cout << "o != nullptr" << std::endl;
             getProblem()->addStateBlockPtr(o_ptr_);
-        }
     }
 }
 

@@ -8,6 +8,9 @@
 // CERES
 #include "ceres/cost_function.h"
 
+// EIGEN
+#include <Eigen/StdVector>
+
 namespace wolf {
 
 class CostFunctionWrapper : public ceres::CostFunction

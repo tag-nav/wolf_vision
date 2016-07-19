@@ -76,7 +76,8 @@ SensorBase* SensorLaser2D::create(const std::string& _unique_name, const Eigen::
 // Register in the SensorFactory and the ParameterFactory
 //#include "sensor_factory.h"
 //#include "intrinsics_factory.h"
-#include "factory.h"
+#include "sensor_factory.h"
+//#include "factory.h"
 //#include "yaml-cpp/yaml.h"
 namespace wolf {
 //// Yaml parser here !

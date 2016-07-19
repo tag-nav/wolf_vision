@@ -18,6 +18,7 @@
 
 //#include "jmath/matlab.hpp"
 #include "wolf.h"
+#include "iostream"
 
 namespace wolf {
 /**
@@ -121,6 +122,7 @@ namespace pinhole {
                 p(0) = depth * u(0);
                 p(1) = depth * u(1);
                 p(2) = depth;
+                std::cout << "backprojectPoint. p(0): " << p(0) << "; p(1): " << p(1) << "; p(2): " << p(2) << std::endl;
                 return p;
             }
 
@@ -162,6 +164,7 @@ namespace pinhole {
                 for (size_t i = 0; i < d.size(); i++) { //   here we are doing:
                     r2i = r2i * r2; //                    r2i = r^(2*(i+1))
                     s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
+                    std::cout << "s: " << s << std::endl;
                 }
                 /*
                     The model is not valid out of the image, and it can bring back landmarks very quickly after they got out.
@@ -290,6 +293,7 @@ namespace pinhole {
                     return ud;
                 else {
                     Scalar r2 = ud(0) * ud(0) + ud(1) * ud(1); // this is the norm squared: r2 = ||u||^2
+                    std::cout << "undistortPoint: \n" << distortFactor(c, r2) * ud;
                     return distortFactor(c, r2) * ud;
 //					Scalar s = 1.0;
 //					Scalar r2i = 1.0;
@@ -343,7 +347,7 @@ namespace pinhole {
                     UP_ud(1, 0) = S_ud(0) * ud(1);
                     UP_ud(1, 1) = S_ud(1) * ud(1) + s;
                 }
-
+                std::cout << "undistortPoint. up(0): " << up(0) << "; up(1): " << up(1) << std::endl;
             }
 
 
@@ -417,6 +421,7 @@ namespace pinhole {
                 Eigen::Vector2s ud;
                 ud(0) = (u(0) - u_0) / a_u;
                 ud(1) = (u(1) - v_0) / a_v;
+                std::cout << "depixellizePoint. ud(0): " << ud(0) << "; ud(1): " << ud(1) << std::endl;
                 return ud;
             }
 

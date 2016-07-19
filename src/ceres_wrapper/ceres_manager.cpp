@@ -23,14 +23,14 @@ CeresManager::CeresManager(Problem* _wolf_problem, const ceres::Solver::Options&
 
 CeresManager::~CeresManager()
 {
+	std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
+	std::cout << "ceres parameter blocks:  " << ceres_problem_->NumParameterBlocks() << std::endl;
     while (!id_2_residual_idx_.empty())
         removeConstraint(id_2_residual_idx_.begin()->first);
-
+	std::cout << "all residuals removed! \n";
     removeAllStateBlocks();
+    std::cout << "all parameter blocks removed! \n";
 
-	//std::cout << "all state units removed! \n";
-	//std::cout << "residual blocks: " << ceres_problem_->NumResidualBlocks() << "\n";
-	//std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << "\n";
 	delete covariance_;
     //std::cout << "covariance deleted! \n";
     delete ceres_problem_;
@@ -44,12 +44,14 @@ ceres::Solver::Summary CeresManager::solve()
     // update problem
     update();
 
+    //std::cout << "After Update: Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+
 	// create summary
 	ceres::Solver::Summary ceres_summary_;
 
 	// run Ceres Solver
 	ceres::Solve(ceres_options_, ceres_problem_, &ceres_summary_);
-
+	//std::cout << "solved" << std::endl;
 	//return results
 	return ceres_summary_;
 }
@@ -73,7 +75,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         case ALL:
         {
             // first create a vector containing all state blocks
-            std::vector<StateBlock*> all_state_blocks;
+            std::vector<StateBlock*> all_state_blocks, landmark_state_blocks;
             //frame state blocks
             for(auto fr_ptr : *(wolf_problem_->getTrajectoryPtr()->getFrameListPtr()))
             {
@@ -86,8 +88,10 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             // landmark state blocks
             for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
             {
-                all_state_blocks.push_back(l_ptr->getPPtr());
-                all_state_blocks.push_back(l_ptr->getOPtr());
+                landmark_state_blocks = l_ptr->getStateBlockVector();
+                all_state_blocks.insert(all_state_blocks.end(), landmark_state_blocks.begin(), landmark_state_blocks.end());
+                //all_state_blocks.push_back(l_ptr->getPPtr());
+                //all_state_blocks.push_back(l_ptr->getOPtr());
             }
             // double loop all against all (without repetitions)
             for (unsigned int i = 0; i < all_state_blocks.size(); i++)
@@ -103,7 +107,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         case ALL_MARGINALS:
         {
             // first create a vector containing all state blocks
-            std::vector<StateBlock*> all_state_blocks;
+            std::vector<StateBlock*> all_state_blocks, landmark_state_blocks;
             //frame state blocks
             for(auto fr_ptr : *(wolf_problem_->getTrajectoryPtr()->getFrameListPtr()))
             {
@@ -116,8 +120,10 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             // landmark state blocks
             for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
             {
-                all_state_blocks.push_back(l_ptr->getPPtr());
-                all_state_blocks.push_back(l_ptr->getOPtr());
+                landmark_state_blocks = l_ptr->getStateBlockVector();
+                all_state_blocks.insert(all_state_blocks.end(), landmark_state_blocks.begin(), landmark_state_blocks.end());
+                //all_state_blocks.push_back(l_ptr->getPPtr());
+                //all_state_blocks.push_back(l_ptr->getOPtr());
             }
             // loop all marginals (PO marginals)
             for (unsigned int i = 0; 2*i+1 < all_state_blocks.size(); i++)
@@ -145,23 +151,28 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), last_key_frame->getOPtr()->getPtr()));
             double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), last_key_frame->getOPtr()->getPtr()));
 
+            // landmarks
+            std::vector<StateBlock*> landmark_state_blocks;
             for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
             {
-                state_block_pairs.push_back(std::make_pair(last_key_frame->getPPtr(), l_ptr->getPPtr()));
-                state_block_pairs.push_back(std::make_pair(last_key_frame->getPPtr(), l_ptr->getOPtr()));
-                state_block_pairs.push_back(std::make_pair(last_key_frame->getOPtr(), l_ptr->getPPtr()));
-                state_block_pairs.push_back(std::make_pair(last_key_frame->getOPtr(), l_ptr->getOPtr()));
-                state_block_pairs.push_back(std::make_pair(l_ptr->getPPtr(), l_ptr->getPPtr()));
-                state_block_pairs.push_back(std::make_pair(l_ptr->getPPtr(), l_ptr->getOPtr()));
-                state_block_pairs.push_back(std::make_pair(l_ptr->getOPtr(), l_ptr->getOPtr()));
+                // load state blocks vector
+                landmark_state_blocks = l_ptr->getStateBlockVector();
 
-                double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(l_ptr->getPPtr()->getPtr(), l_ptr->getPPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(l_ptr->getPPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
-                double_pairs.push_back(std::make_pair(l_ptr->getOPtr()->getPtr(), l_ptr->getOPtr()->getPtr()));
+                for (auto state_it = landmark_state_blocks.begin(); state_it != landmark_state_blocks.end(); state_it++)
+                {
+                    // robot - landmark
+                    state_block_pairs.push_back(std::make_pair(last_key_frame->getPPtr(), *state_it));
+                    state_block_pairs.push_back(std::make_pair(last_key_frame->getOPtr(), *state_it));
+                    double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), (*state_it)->getPtr()));
+                    double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), (*state_it)->getPtr()));
+
+                    // landmark marginal
+                    for (auto next_state_it = state_it; next_state_it != landmark_state_blocks.end(); next_state_it++)
+                    {
+                        state_block_pairs.push_back(std::make_pair(*state_it, *next_state_it));
+                        double_pairs.push_back(std::make_pair((*state_it)->getPtr(), (*next_state_it)->getPtr()));
+                    }
+                }
             }
             break;
         }
@@ -186,11 +197,37 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 
 void CeresManager::update()
 {
-    //std::cout << "CeresManager: updating... " << std::endl;
-    //std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
-    //std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
+	//std::cout << "CeresManager: updating... " << std::endl;
+	//std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
+	//std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
 
-    // UPDATE STATE BLOCKS
+	// REMOVE CONSTRAINTS
+	auto ctr_notification_it = wolf_problem_->getConstraintNotificationList().begin();
+	while ( ctr_notification_it != wolf_problem_->getConstraintNotificationList().end() )
+	{
+		if (ctr_notification_it->notification_ == REMOVE)
+		{
+			removeConstraint(ctr_notification_it->id_);
+			ctr_notification_it = wolf_problem_->getConstraintNotificationList().erase(ctr_notification_it);
+		}
+		else
+			ctr_notification_it++;
+	}
+
+	// REMOVE STATE BLOCKS
+	auto state_notification_it = wolf_problem_->getStateBlockNotificationList().begin();
+	while ( state_notification_it != wolf_problem_->getStateBlockNotificationList().end() )
+	{
+		if (state_notification_it->notification_ == REMOVE)
+		{
+			removeStateBlock((double *)(state_notification_it->scalar_ptr_));
+			state_notification_it = wolf_problem_->getStateBlockNotificationList().erase(state_notification_it);
+		}
+		else
+			state_notification_it++;
+	}
+
+    // ADD/UPDATE STATE BLOCKS
     while (!wolf_problem_->getStateBlockNotificationList().empty())
     {
         switch (wolf_problem_->getStateBlockNotificationList().front().notification_)
@@ -205,29 +242,21 @@ void CeresManager::update()
                 updateStateBlockStatus(wolf_problem_->getStateBlockNotificationList().front().state_block_ptr_);
                 break;
             }
-            case REMOVE:
-            {
-                removeStateBlock((double *)(wolf_problem_->getStateBlockNotificationList().front().scalar_ptr_));
-                break;
-            }
             default:
                 throw std::runtime_error("CeresManager::update: State Block notification must be ADD, UPATE or REMOVE.");
         }
         wolf_problem_->getStateBlockNotificationList().pop_front();
     }
-    // UPDATE CONSTRAINTS
+    // ADD CONSTRAINTS
     while (!wolf_problem_->getConstraintNotificationList().empty())
     {
         switch (wolf_problem_->getConstraintNotificationList().front().notification_)
         {
             case ADD:
             {
+                //std::cout << "adding constraint" << std::endl;
                 addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_,wolf_problem_->getConstraintNotificationList().front().id_);
-                break;
-            }
-            case REMOVE:
-            {
-                removeConstraint(wolf_problem_->getConstraintNotificationList().front().id_);
+                //std::cout << "added" << std::endl;
                 break;
             }
             default:
@@ -235,11 +264,19 @@ void CeresManager::update()
         }
         wolf_problem_->getConstraintNotificationList().pop_front();
     }
+    //std::cout << "all constraints added" << std::endl;
+	//std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
+    //std::cout << "wrapper residual blocks: " << id_2_residual_idx_.size() << std::endl;
+    //std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+
+	assert(ceres_problem_->NumResidualBlocks() == id_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
 void CeresManager::addConstraint(ConstraintBase* _ctr_ptr, unsigned int _id)
 {
     id_2_costfunction_[_id] = createCostFunction(_ctr_ptr);
+
+    //std::cout << "adding residual " << _ctr_ptr->id() << std::endl;
 
     if (_ctr_ptr->getApplyLossFunction())
         id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateBlockPtrVector());
@@ -259,11 +296,13 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 
 void CeresManager::addStateBlock(StateBlock* _st_ptr)
 {
-    //std::cout << "Adding State Unit with size: " <<  _st_ptr->getSize() << std::endl;
+    //std::cout << "Adding State Block " << _st_ptr->getPtr() << std::endl;
+    //std::cout << " size: " <<  _st_ptr->getSize() << std::endl;
+    //std::cout << " vector: " <<  _st_ptr->getVector() << std::endl;
 
     if (_st_ptr->hasLocalParametrization())
     {
-        //std::cout << "Local Parametrization to be added" << std::endl;
+        //std::cout << "Local Parametrization to be added:" << _st_ptr->getLocalParametrizationPtr() << std::endl;
         ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), new LocalParametrizationWrapper(_st_ptr->getLocalParametrizationPtr()));
     }
     else
@@ -277,6 +316,8 @@ void CeresManager::addStateBlock(StateBlock* _st_ptr)
 
 void CeresManager::removeStateBlock(double* _st_ptr)
 {
+    //std::cout << "Removing State Block " << _st_ptr << std::endl;
+	assert(_st_ptr != nullptr);
     ceres_problem_->RemoveParameterBlock(_st_ptr);
 }
 
@@ -292,6 +333,7 @@ void CeresManager::removeAllStateBlocks()
 
 void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 {
+	assert(_st_ptr != nullptr);
 	if (_st_ptr->isFixed())
 		ceres_problem_->SetParameterBlockConstant(_st_ptr->getPtr());
 	else
@@ -300,7 +342,8 @@ void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 
 ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
 {
-	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
+	assert(_corrPtr != nullptr);
+	//std::cout << "creating cost function for constraint " << _corrPtr->id() << std::endl;
 
     // analitic jacobian
     if (_corrPtr->getJacobianMethod() == JAC_ANALYTIC)

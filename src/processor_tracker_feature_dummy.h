@@ -15,7 +15,7 @@
 namespace wolf
 {
 
-class ProcessorTrackerFeatureDummy : public wolf::ProcessorTrackerFeature
+class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
 {
 
     public:

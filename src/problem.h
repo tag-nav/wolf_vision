@@ -65,6 +65,7 @@ class Problem : public NodeBase
         StateBlockList state_block_ptr_list_;
         std::list<StateBlockNotification> state_block_notification_list_;
         std::list<ConstraintNotification> constraint_notification_list_;
+        bool origin_setted_;
 
     public:
 
@@ -86,6 +87,14 @@ class Problem : public NodeBase
          *
          */
         virtual void destruct() final;
+
+        /** \brief Sets an origin frame with a covariance
+         *
+         * Sets an origin frame with a covariance
+         *
+         */
+        virtual void setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov,
+                               const TimeStamp& _ts);
 
 
         /** \brief add sensor to hardware
@@ -164,15 +173,20 @@ class Problem : public NodeBase
         FrameBase* createFrame(FrameKeyType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
-        /** \brief Get the state at last timestamp
+        /** \brief Get the state at last timestamp (and return timestamp via parameter)
          */
         Eigen::VectorXs getCurrentState();
+        Eigen::VectorXs getCurrentState(TimeStamp& _ts);
         void getCurrentState(Eigen::VectorXs& state);
+        void getCurrentState(Eigen::VectorXs& state, TimeStamp& _ts);
 
         /** \brief Get the state at a given timestamp
          */
         Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
         void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
+
+        unsigned int getFrameStructureSize();
+        Eigen::VectorXs zeroState();
 
         /** \brief Give the permission to a processor to create a new keyFrame
          */

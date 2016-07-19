@@ -111,7 +111,7 @@ int main(int argc, char** argv)
 
     // Wolf initialization
     Eigen::VectorXs odom_pose = Eigen::VectorXs::Zero(3);
-    Eigen::VectorXs gps_position = Eigen::VectorXs::Zero(2);
+    //Eigen::VectorXs gps_position = Eigen::VectorXs::Zero(2);
     Eigen::VectorXs laser_1_params(9), laser_2_params(9);
     Eigen::VectorXs laser_1_pose(4), laser_2_pose(4); //xyz + theta
     Eigen::VectorXs laser_1_pose2D(3), laser_2_pose2D(3); //xy + theta
@@ -131,8 +131,8 @@ int main(int argc, char** argv)
     laser_1_intrinsics.scan_params = laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)});
 
     ProcessorParamsLaser laser_1_processor_params;
-    laser_1_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
-    laser_1_processor_params.n_corners_th = 10;
+    laser_1_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2});
+    laser_1_processor_params.new_corners_th = 10;
 
     // laser 2 extrinsics and intrinsics
     extractVector(laser_2_file, laser_2_params, timestamp);
@@ -144,37 +144,33 @@ int main(int argc, char** argv)
     laser_2_intrinsics.scan_params = laserscanutils::LaserScanParams({laser_2_params(0), laser_2_params(1), laser_2_params(2), laser_2_params(3), laser_2_params(4), laser_2_params(5), laser_2_params(6), laser_2_params(7)});
 
     ProcessorParamsLaser laser_2_processor_params;
-    laser_2_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
-    laser_2_processor_params.n_corners_th = 10;
+    laser_2_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2});
+    laser_2_processor_params.new_corners_th = 10;
 
     Problem problem(FRM_PO_2D);
     SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.installSensor("ODOM 2D", "odometer", odom_pose, &odom_intrinsics);
-    ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.installProcessor("ODOM 2D", "main odometry", "odometer");
-    SensorBase* gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
+    ProcessorParamsOdom2D odom_params;
+    odom_params.cov_det_th_ = 1;
+    odom_params.dist_traveled_th_ = 5;
+    odom_params.elapsed_time_th_ = 10;
+    ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.installProcessor("ODOM 2D", "main odometry", odom_sensor, &odom_params);
+    //SensorBase* gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
     SensorBase* laser_1_sensor = problem.installSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
     SensorBase* laser_2_sensor = problem.installSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
-    problem.installProcessor("LASER 2D", "front laser processor", "front laser", &laser_1_processor_params);
-    problem.installProcessor("LASER 2D", "rear laser processor", "rear laser", &laser_2_processor_params);
-    problem.setProcessorMotion(odom_processor);
+    problem.installProcessor("LASER 2D", "front laser processor", laser_1_sensor, &laser_1_processor_params);
+    problem.installProcessor("LASER 2D", "rear laser processor", laser_2_sensor, &laser_2_processor_params);
 
     std::cout << "Wolf tree setted correctly!" << std::endl;
 
-    CaptureMotion2* odom_capture = new CaptureMotion2(ts, odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor);
+    CaptureMotion2* odom_capture = new CaptureMotion2(ts, odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor, nullptr);
 
     // Initial pose
     ground_truth_pose << 2, 8, 0;
     ground_truth.head(3) = ground_truth_pose;
     odom_trajectory.head(3) = ground_truth_pose;
 
-    // Origin Key Frame
-    FrameBase* origin_frame = problem.createFrame(KEY_FRAME, ground_truth_pose, ts);
-
-    // Prior covariance
-    CaptureFix* initial_covariance = new CaptureFix(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1);
-    origin_frame->addCapture(initial_covariance);
-    initial_covariance->process();
-
-    odom_processor->setOrigin(origin_frame, ts);
+    // Origin Key Frame with covariance
+    problem.setOrigin(ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1, ts);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -315,6 +311,11 @@ int main(int argc, char** argv)
 
     std::cout << "Press any key for ending... " << std::endl << std::endl;
     std::getchar();
+
+    std::cout << "Problem:" << std::endl;
+    std::cout << "Frames: " << problem.getTrajectoryPtr()->getFrameListPtr()->size() << std::endl;
+    std::cout << "Landmarks: " << problem.getMapPtr()->getLandmarkListPtr()->size() << std::endl;
+    std::cout << "Sensors: " << problem.getHardwarePtr()->getSensorListPtr()->size() << std::endl;
 
     std::cout << " ========= END ===========" << std::endl << std::endl;
 

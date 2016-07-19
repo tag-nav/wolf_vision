@@ -199,7 +199,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
                     incoming_point_ptr->setTrackId(incoming_point_ptr->id());
 
-                    _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, normalized_score});
+                    _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, normalized_score});
                 }
                 else
                 {
@@ -256,7 +256,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
         if (active_search_grid_.pickRoi(roi))
         {
             detector_roi_.push_back(roi);
-            if (detect(image_incoming_, roi, new_keypoints, new_descriptors))
+            if (detect(image_last_, roi, new_keypoints, new_descriptors))
             {
                 keypoint_filter.retainBest(new_keypoints,1);
                 FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
@@ -290,31 +290,41 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 {
     FeaturePointImage* feat_point_image_ptr = (FeaturePointImage*) _feature_ptr;
 
-    Eigen::Vector2s point2D;
+    Eigen::Vector3s point2D;
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
     point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
+    point2D[2] = 1;
 
-//    std::cout << "point2D x: " << point2D(0) << "; y: " << point2D(1) << std::endl;
-    Scalar depth = 10; // arbitrary value
+    std::cout << "point2D x: " << point2D(0) << "; y: " << point2D(1) << "; z: " << point2D(2) << std::endl;
+    Scalar depth = 2; // arbitrary value
 
-    Eigen::Vector3s point3D;
-    point3D = pinhole::backprojectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
-                                        ((SensorCamera*)(this->getSensorPtr()))->getCorrectionVector(),point2D,depth);
+    std::cout << "K: " << this->getSensorPtr()->getIntrinsicPtr()->getVector().transpose() << std::endl;
+    std::cout << "distort: " << ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector().transpose() << std::endl;
+    std::cout << "correct: " << ((SensorCamera*)(this->getSensorPtr()))->getCorrectionVector().transpose() << std::endl;
 
-//    std::cout << "point3D BEFORE CHANGE REF x: " << point3D(0) << "; y: " << point3D(1) << "; z: " << point3D(2) << std::endl;
+    Eigen::Vector4s k_params = this->getSensorPtr()->getIntrinsicPtr()->getVector();
+    Eigen::Matrix3s K;
+    K(0,0) = k_params(2);
+    K(0,1) = 0;
+    K(0,2) = k_params(0);
+    K(1,0) = 0;
+    K(1,1) = k_params(3);
+    K(1,2) = k_params(1);
+    K(2,0) = 0;
+    K(2,1) = 0;
+    K(2,2) = 1;
 
-    //camera2WorldFrameTransformation(cam2world_translation_,cam2world_orientation_,point3D);
-    camera2WorldFrameTransformation(world2cam_translation_,world2cam_orientation_,point3D);
+    Eigen::Vector3s unitary_vector;
+    unitary_vector = K.inverse() * point2D;
+    unitary_vector.normalize();
+    std::cout << "unitary_vector: " << unitary_vector(0) << "\t" << unitary_vector(1) << "\t" << unitary_vector(2) << std::endl;
 
-    //cv::waitKey(0);
     FrameBase* frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
 
-    Scalar magnitude = sqrt(pow(point3D(0),2)+pow(point3D(1),2)+pow(point3D(2),2));
-//    std::cout << "magnitude: " << magnitude << std::endl;
-    Eigen::Vector3s unitary_vec;
-    unitary_vec = point3D / magnitude;
+    // TODO: Poner el anchor del punto (ahora mismo está en el 0 del world, pero no hay código por si cambia)
 
-    Eigen::Vector4s vec_homogeneous = {unitary_vec(0),unitary_vec(1),unitary_vec(2),1/depth};
+
+    Eigen::Vector4s vec_homogeneous = {unitary_vector(0),unitary_vector(1),unitary_vector(2),1/depth};
 //    std::cout << "unitary_vec x: " << unitary_vec(0) << "; y: " << unitary_vec(1) << "; z: " << unitary_vec(2) << std::endl;
 
 //    Eigen::Vector3s robot_p = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
@@ -406,21 +416,25 @@ void ProcessorImageLandmark::world2CameraFrameTransformation(Eigen::Vector3s _wc
 
 void ProcessorImageLandmark::camera2WorldFrameTransformation(Eigen::Vector3s _translation, Eigen::Vector4s _orientation, Eigen::Vector3s& _point3D)
 {
+//    std::cout << "Translation:\n" << _translation(0) << "\t" << _translation(1) << "\t" << _translation(2) << std::endl;
+//    std::cout << "Orientation:\n" << _orientation(0) << "\t" << _orientation(1) << "\t" << _orientation(2) << "\t" << _orientation(3) << std::endl;
+//    std::cout << "Point3D:\n" << _point3D(0) << "\t" << _point3D(1) << "\t" << _point3D(2) << std::endl;
     Eigen::Matrix3s rot_mat;
     rotationMatrix(rot_mat, _orientation);
 
     // since it has to be from "camera" to "world", the rotation and translation matrices have to be "inversed".
+
+//    std::cout << "\nrot_mat:\n"
+//              << rot_mat(0,0) << "\t" << rot_mat(0,1) << "\t" << rot_mat(0,2) << "\n"
+//              << rot_mat(1,0) << "\t" << rot_mat(1,1) << "\t" << rot_mat(1,2) << "\n"
+//              << rot_mat(2,0) << "\t" << rot_mat(2,1) << "\t" << rot_mat(2,2) << "\n\n";
 
     Eigen::Vector3s new_translation;
     new_translation = (-rot_mat.transpose()*_translation);
 
     _point3D = rot_mat.transpose()*_point3D + new_translation;
 
-//    std::cout << "translation:\n" << _translation(0) << "\t" << _translation(1) << "\t" << _translation(2) << std::endl;
-//    std::cout << "orientation:\n" << _orientation(0) << "\t" << _orientation(1) << "\t" << _orientation(2)
-//              << "\t" << _orientation(3) << std::endl;
-
-//    std::cout << "point3D USED IN BACKPROJECT x: " << _point3D(0) << "; y: " << _point3D(1) << "; z: " << _point3D(2) << std::endl;
+//    std::cout << "Point3D:\n" << _point3D(0) << "\t" << _point3D(1) << "\t" << _point3D(2) << std::endl;
 }
 
 void ProcessorImageLandmark::rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation)
@@ -504,22 +518,22 @@ void ProcessorImageLandmark::referenceWorldToCamera(Eigen::Vector3s& _wc_transla
     Eigen::Vector3s robot_pose = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
     Eigen::Vector4s robot_orientation = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
 
-//    std::cout << "rob_pos x: " << robot_pose(0) << "\trob_pos y: " << robot_pose(1) << "\trob_pos z: " << robot_pose(2) << std::endl;
-//    std::cout << "rob_orien x: " << robot_orientation(0) << "\trob_orien y: " << robot_orientation(1)
-//              << "\trob_orien z: " << robot_orientation(2) << "\trob_orien w: " << robot_orientation(3) << std::endl;
+    std::cout << "rob_pos x: " << robot_pose(0) << "\trob_pos y: " << robot_pose(1) << "\trob_pos z: " << robot_pose(2) << std::endl;
+    std::cout << "rob_orien x: " << robot_orientation(0) << "\trob_orien y: " << robot_orientation(1)
+              << "\trob_orien z: " << robot_orientation(2) << "\trob_orien w: " << robot_orientation(3) << std::endl;
 
     Eigen::Matrix3s rot_mat;
     rotationMatrix(rot_mat,robot_orientation);
 
     _wc_translation = robot_pose + (rot_mat*camera_pose);
-//    std::cout << "trans x: " << _wc_translation(0) << "; trans y: " << _wc_translation(1) << "; trans z: " << _wc_translation(2) << std::endl;
+    std::cout << "trans x: " << _wc_translation(0) << "; trans y: " << _wc_translation(1) << "; trans z: " << _wc_translation(2) << std::endl;
 
 
     quaternionProduct(robot_orientation,camera_orientation,_wc_orientation);
 
 
-//    std::cout << "orien x: " << _wc_orientation(0) << "; orien y: " << _wc_orientation(1)
-//              << "; orien z: " << _wc_orientation(2) << "; orien w: " << _wc_orientation(3) << std::endl;
+    std::cout << "orien x: " << _wc_orientation(0) << "; orien y: " << _wc_orientation(1)
+              << "; orien z: " << _wc_orientation(2) << "; orien w: " << _wc_orientation(3) << std::endl;
 
 }
 

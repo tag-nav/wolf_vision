@@ -72,10 +72,9 @@ class ProcessorTracker : public ProcessorBase
         FeatureBaseList new_features_last_; ///< List of new features in \b last for landmark initialization and new key-frame creation.
         FeatureBaseList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
         unsigned int max_new_features_; ///< max features alowed to detect in one iteration. 0 = no limit
-        Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
 
     public:
-        ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features = 0, const Scalar& _time_tolerance = 0);
+        ProcessorTracker(ProcessorType _tp, const unsigned int _max_new_features = 0, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorTracker();
 
         /** \brief Full processing of an incoming Capture.
@@ -168,17 +167,19 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void establishConstraints()=0;
 
-        /**\brief make a non-key Frame with the provided Capture
+        /**\brief set key Frame to the provided Capture's frame
          */
-        void makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
+        virtual void setKeyFrame(CaptureBase* _capture_ptr);
 
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
         virtual void reset() = 0;
 
-    protected:
+    public:
 
         FeatureBaseList& getNewFeaturesListLast();
+
+    protected:
 
         void addNewFeatureLast(FeatureBase* _feature_ptr);
 
@@ -195,13 +196,6 @@ inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_fea
 inline const unsigned int ProcessorTracker::getMaxNewFeatures()
 {
     return max_new_features_;
-}
-
-inline void ProcessorTracker::makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type)
-{
-    // We need to create the new free Frame to hold what will become the last Capture
-    FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
-    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
 }
 
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesListLast()

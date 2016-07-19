@@ -142,6 +142,14 @@ class NodeLinked : public NodeBase
          */
         void addDownNodeList(LowerNodeList& _new_down_node_list);
 
+        /** \brief Inserts a down node in an specific position
+         */
+        inline void insertDownNode(LowerNodePtr _ptr, LowerNodeIter _place);
+
+        /** \brief Move a down node to an specific position
+         */
+        inline void moveDownNode(LowerNodePtr _ptr, LowerNodeIter _place);
+
         /** \brief Gets a reference to down node list
          */
         LowerNodeList& downNodeList() const;
@@ -318,6 +326,7 @@ inline void NodeLinked<UpperType, LowerType>::addDownNode(LowerNodePtr _ptr)
     down_node_list_.push_back(_ptr);
     _ptr->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
 }
+
 template<class UpperType, class LowerType>
 void NodeLinked<UpperType, LowerType>::addDownNodeList(LowerNodeList& _new_down_node_list)
 {
@@ -325,6 +334,25 @@ void NodeLinked<UpperType, LowerType>::addDownNodeList(LowerNodeList& _new_down_
     for (auto new_down_node : _new_down_node_list)
         new_down_node->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
     down_node_list_.splice(down_node_list_.end(), _new_down_node_list);
+}
+
+template<class UpperType, class LowerType>
+inline void NodeLinked<UpperType, LowerType>::insertDownNode(LowerNodePtr _ptr, LowerNodeIter _place)
+{
+    assert(!isBottom() && "Trying to insert a down node to a bottom node");
+    down_node_list_.insert(_place, _ptr);
+    _ptr->linkToUpperNode((typename LowerType::UpperNodePtr)(this));
+}
+
+template<class UpperType, class LowerType>
+inline void NodeLinked<UpperType, LowerType>::moveDownNode(LowerNodePtr _ptr, LowerNodeIter _place)
+{
+    assert(!isBottom() && "Trying to move a down node to a bottom node");
+    if (*_place != _ptr)
+    {
+        down_node_list_.remove(_ptr);
+        down_node_list_.insert(_place, _ptr);
+    }
 }
 
 template<class UpperType, class LowerType>

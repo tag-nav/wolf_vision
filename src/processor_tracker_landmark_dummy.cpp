@@ -44,7 +44,7 @@ unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(const LandmarkBaseList
         {
             _feature_list_out.push_back(
                     new FeatureBase(FEATURE_POINT_IMAGE, landmark_in_ptr->getDescriptor(), Eigen::MatrixXs::Ones(1, 1)));
-            _feature_landmark_correspondences[_feature_list_out.back()] = LandmarkMatch({landmark_in_ptr, 0});
+            _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, 0});
             std::cout << "\t\tlandmark " << landmark_in_ptr->getDescriptor() << " found!" << std::endl;
         }
     }
