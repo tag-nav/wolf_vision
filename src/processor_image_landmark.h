@@ -85,11 +85,6 @@ struct ProcessorImageParameters : public ProcessorParamsBase
                 unsigned int max_new_features; ///< Max nbr. of features to detect in one frame
                 unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
         }algorithm;
-//        struct Pinhole_params
-//        {
-//                Eigen::Vector4s k_parameters;
-//                Eigen::Vector2s distortion;
-//        }pinhole_params;
 };
 
 class ProcessorImageLandmark : public ProcessorTrackerLandmark
@@ -129,7 +124,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
 
-        unsigned int landmarks_in_image_ = 0;
+        unsigned int landmarks_tracked_ = 0;
 
     public:
         ProcessorImageLandmark(ProcessorImageParameters _params);
@@ -217,14 +212,6 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
 
         //Other functions
-
-        /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
-         * \param _last_feature input feature in last capture tracked
-         * \param _incoming_feature input/output feature in incoming capture to be corrected
-         * \return false if the the process discards the correspondence with origin's feature
-         */
-//        virtual bool correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
-
     private:
 
         /**
@@ -260,19 +247,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches);
 
-//        virtual void filterFeatureLists(FeatureBaseList _original_list, FeatureBaseList& _filtered_list);
-
-//        virtual void referenceWorldToCamera(Eigen::Vector3s& _wc_translation, Eigen::Vector4s& _wc_orientation);
-
-//        virtual void referenceCameraToWorld(Eigen::Vector3s& _cw_translation, Eigen::Vector4s& _cw_orientation);
-
         virtual void rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation);
-
-//        virtual void quaternionProduct(Eigen::Vector4s _p, Eigen::Vector4s _q, Eigen::Vector4s& _quaternion_product);
-
-//        virtual void world2CameraFrameTransformation(Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D);
-
-//        virtual void camera2WorldFrameTransformation(Eigen::Vector3s _cw_translation, Eigen::Vector4s _cw_orientation, Eigen::Vector3s& _point3D);
 
         virtual void changeOfReferenceFrame(LandmarkAHP* _landmark, Eigen::Vector3s& _translation, Eigen::Matrix3s& _rotation);
 
@@ -285,10 +260,6 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
 
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
-
-//        virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
-
-
 
 };
 

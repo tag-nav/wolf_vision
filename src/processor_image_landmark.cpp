@@ -167,11 +167,11 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         point2D = pinhole::projectPointToNormalizedPlane(point3D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
 
-//        std::cout << "point2D x: " << point2D(0) << "\ty: " << point2D(1) << std::endl;
+        std::cout << "point2D x: " << point2D(0) << "\ty: " << point2D(1) << std::endl;
 
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {
-//            std::cout << "is in image" << std::endl;
+            std::cout << "is in image" << std::endl;
             /* tracking */
 
             roi_x = (point2D[0]) - (roi_heigth / 2);
@@ -194,7 +194,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
                 if (normalized_score > params_.matcher.min_normalized_score)
                 {
-                    //std::cout << "TRACKED\n\n" << std::endl;
+                    std::cout << "TRACKED\n\n" << std::endl;
                     FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
                                 candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                             Eigen::Matrix2s::Identity());
@@ -206,7 +206,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                 }
                 else
                 {
-                    //std::cout << "NOT TRACKED\n\n" << std::endl;
+                    std::cout << "NOT TRACKED" << std::endl;
                 }
                 for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
                 {
@@ -217,21 +217,21 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
             else
             {
                 //this one means that the detector/descriptor searched the roi, but didn't find ANYTHING at all. So, NOT tracked.
-                //std::cout << "not detected / NOT TRACKED\n\n" << std::endl;
+                std::cout << "not detected / NOT TRACKED\n\n" << std::endl;
             }
         }
-//        else
-//            std::cout << "is NOT in image\n" << std::endl;
+        else
+            std::cout << "is NOT in image" << std::endl;
     }
     //std::cout << "Number of Features tracked: " << _feature_list_out.size() << std::endl;
-    landmarks_in_image_ = _feature_list_out.size();
+    landmarks_tracked_ = _feature_list_out.size();
     return _feature_list_out.size();
 }
 
 bool ProcessorImageLandmark::voteForKeyFrame()
 {
     //TODO: Keep the number of landmarks that are in the image and compare it to a fixed number
-    return landmarks_in_image_ < 10;
+    return landmarks_tracked_ < 10;
 }
 
 unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_features)
@@ -242,17 +242,6 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
     cv::Mat new_descriptors;
     cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
-
-//    if(incoming_ptr_ == nullptr)
-//    {
-//        referenceWorldToCamera(world2cam_translation_,world2cam_orientation_);
-//    }
-//    else
-//    {
-//        //it is actually used in the creation of the landmarks, but I find it here to use the if.
-//        //referenceCameraToWorld(cam2world_translation_,cam2world_orientation_);
-//    }
-
 
     for (unsigned int n_iterations = 0; _max_features == 0 || n_iterations < _max_features; n_iterations++)
     {
@@ -330,20 +319,17 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     Eigen::Vector4s vec_homogeneous = {unitary_vector(0),unitary_vector(1),unitary_vector(2),1/depth};
 //    std::cout << "unitary_vec x: " << unitary_vec(0) << "; y: " << unitary_vec(1) << "; z: " << unitary_vec(2) << std::endl;
 
-//    Eigen::Vector3s robot_p = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
-//    Eigen::Vector4s robot_o = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
-
-//    std::cout << "robot_p:\n" << robot_p(0) << "\t" << robot_p(1) << "\t" << robot_p(2) << std::endl;
-//    std::cout << "robot_o:\n" << robot_o(0) << "\t" << robot_o(1) << "\t" << robot_o(2) << "\t" << robot_o(3)<< std::endl;
-
     return new LandmarkAHP(vec_homogeneous,frame,feat_point_image_ptr->getDescriptor());
 }
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
-    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
+//    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
     if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
+    {
         return new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
+        //std::cout << "DO NOTHING" << std::endl;
+    }
     else
         return new ConstraintImage(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
 }
@@ -396,7 +382,6 @@ void ProcessorImageLandmark::changeOfReferenceFrame(LandmarkAHP* _landmark,Eigen
     translation_world2camera = (rotation_F0_world2robot*translation_robot2camera) + translation_F0_world2robot;
 
 
-
     // world to camera1 (inversion)
     Eigen::Matrix3s rotation_camera1_2world;
     rotation_camera1_2world = rotation_robot2camera.transpose()*rotation_F1_world2robot.transpose();
@@ -404,7 +389,6 @@ void ProcessorImageLandmark::changeOfReferenceFrame(LandmarkAHP* _landmark,Eigen
     Eigen::Vector3s translation_camera1_2world;
     translation_camera1_2world = (rotation_robot2camera.transpose()*(-rotation_F1_world2robot.transpose()*translation_F1_world2robot)) +
             (-rotation_robot2camera.transpose()*translation_robot2camera);
-
 
 
     //camera0 to camera1
@@ -416,55 +400,7 @@ void ProcessorImageLandmark::changeOfReferenceFrame(LandmarkAHP* _landmark,Eigen
 
     _translation = translation_camera1_2camera;
     _rotation = rotation_camera1_2camera;
-
-//    //point3D
-//    Eigen::Vector4s landmark_point = _landmark->getPPtr()->getVector();
-//    Eigen::Vector3s m;
-//    m(0) = landmark_point(0);
-//    m(1) = landmark_point(1);
-//    m(2) = landmark_point(2);
-
-//    Eigen::Vector3s v;
-//    v = (rotation_camera1_2camera * m) + (translation_camera1_2camera * landmark_point(3));
-
-//    _point3D(0) = v(0) / landmark_point(3);
-//    _point3D(1) = v(1) / landmark_point(3);
-//    _point3D(2) = v(2) / landmark_point(3);
 }
-
-
-//void ProcessorImageLandmark::world2CameraFrameTransformation(Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D)
-//{
-//    Eigen::Matrix3s rot_mat;
-//    rotationMatrix(rot_mat, _wc_orientation);
-
-//    _point3D = rot_mat.transpose()*(_wc_translation - _point3D);
-
-//    //std::cout << "point3D x: " << _point3D(0) << "; y: " << _point3D(1) << "; z: " << _point3D(2) << std::endl;
-//}
-
-//void ProcessorImageLandmark::camera2WorldFrameTransformation(Eigen::Vector3s _translation, Eigen::Vector4s _orientation, Eigen::Vector3s& _point3D)
-//{
-////    std::cout << "Translation:\n" << _translation(0) << "\t" << _translation(1) << "\t" << _translation(2) << std::endl;
-////    std::cout << "Orientation:\n" << _orientation(0) << "\t" << _orientation(1) << "\t" << _orientation(2) << "\t" << _orientation(3) << std::endl;
-////    std::cout << "Point3D:\n" << _point3D(0) << "\t" << _point3D(1) << "\t" << _point3D(2) << std::endl;
-//    Eigen::Matrix3s rot_mat;
-//    rotationMatrix(rot_mat, _orientation);
-
-//    // since it has to be from "camera" to "world", the rotation and translation matrices have to be "inversed".
-
-////    std::cout << "\nrot_mat:\n"
-////              << rot_mat(0,0) << "\t" << rot_mat(0,1) << "\t" << rot_mat(0,2) << "\n"
-////              << rot_mat(1,0) << "\t" << rot_mat(1,1) << "\t" << rot_mat(1,2) << "\n"
-////              << rot_mat(2,0) << "\t" << rot_mat(2,1) << "\t" << rot_mat(2,2) << "\n\n";
-
-//    Eigen::Vector3s new_translation;
-//    new_translation = (-rot_mat.transpose()*_translation);
-
-//    _point3D = rot_mat.transpose()*_point3D + new_translation;
-
-////    std::cout << "Point3D:\n" << _point3D(0) << "\t" << _point3D(1) << "\t" << _point3D(2) << std::endl;
-//}
 
 void ProcessorImageLandmark::rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation)
 {
@@ -482,89 +418,6 @@ void ProcessorImageLandmark::rotationMatrix(Eigen::Matrix3s& _rotation_matrix, E
     _rotation_matrix(2,2) = pow(_orientation(3),2) - pow(_orientation(0),2)
                                 - pow(_orientation(1),2) + pow(_orientation(2),2);
 }
-
-//void ProcessorImageLandmark::quaternionProduct(Eigen::Vector4s _p, Eigen::Vector4s _q, Eigen::Vector4s& _quaternion_product)
-//{
-//    //is this qw?
-//    _quaternion_product(3) = _p(3)*_q(3) - _p(0)*_q(0) - _p(1)*_q(1) - _p(2)*_q(2);
-//    _quaternion_product(0) = _p(3)*_q(0) + _p(0)*_q(3) + _p(1)*_q(2) - _p(2)*_q(1);
-//    _quaternion_product(1) = _p(3)*_q(1) - _p(0)*_q(2) + _p(1)*_q(3) + _p(2)*_q(0);
-//    //is this qz?
-//    _quaternion_product(2) = _p(3)*_q(2) + _p(0)*_q(1) - _p(1)*_q(0) + _p(2)*_q(3);
-//}
-
-//void ProcessorImageLandmark::referenceCameraToWorld(Eigen::Vector3s& _cw_translation, Eigen::Vector4s& _cw_orientation)
-//{
-//    //REVISAR ESTO -> IT MAY NOT BE NEEDED (not used now, but check if the current change of reference is good)
-//    Eigen::Vector3s camera_pose = this->getSensorPtr()->getPPtr()->getVector();
-//    Eigen::Vector4s camera_orientation = this->getSensorPtr()->getOPtr()->getVector();
-
-//    Eigen::Vector3s robot_pose = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
-//    Eigen::Vector4s robot_orientation = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
-
-////    std::cout << "rob_pos x: " << robot_pose(0) << "\trob_pos y: " << robot_pose(1) << "\trob_pos z: " << robot_pose(2) << std::endl;
-////    std::cout << "rob_orien x: " << robot_orientation(0) << "\trob_orien y: " << robot_orientation(1)
-////              << "\trob_orien z: " << robot_orientation(2) << "\trob_orien w: " << robot_orientation(3) << std::endl;
-
-//    Eigen::Matrix3s rot_mat;
-//    rotationMatrix(rot_mat,robot_orientation);
-
-//    _cw_translation = robot_pose + (rot_mat*camera_pose);
-////    std::cout << "trans x: " << _cw_translation(0) << "; trans y: " << _cw_translation(1) << "; trans z: " << _cw_translation(2) << std::endl;
-
-
-//    quaternionProduct(robot_orientation,camera_orientation,_cw_orientation);
-
-
-////    std::cout << "orien x: " << _cw_orientation(0) << "; orien y: " << _cw_orientation(1)
-////              << "; orien z: " << _cw_orientation(2) << "; orien w: " << _cw_orientation(3) << std::endl;
-
-
-//    //==============================================//
-
-//    Eigen::Matrix3s inv_rot_mat = rot_mat.transpose();
-//    Eigen::Vector3s translation = -inv_rot_mat*_cw_translation;
-
-////    Eigen::Vector4s quaternion_conjugate;
-////    quaternion_conjugate(3) = _cw_orientation(3);
-////    quaternion_conjugate(0) = -_cw_orientation(0);
-////    quaternion_conjugate(1) = -_cw_orientation(1);
-////    quaternion_conjugate(2) = -_cw_orientation(2);
-
-////    Eigen::Vector4s orientation;
-////    quaternionProduct();
-
-//    //TESTING HERE
-
-//}
-
-//void ProcessorImageLandmark::referenceWorldToCamera(Eigen::Vector3s& _wc_translation, Eigen::Vector4s& _wc_orientation)
-//{
-//    //THIS IS OK
-//    Eigen::Vector3s camera_pose = this->getSensorPtr()->getPPtr()->getVector();
-//    Eigen::Vector4s camera_orientation = this->getSensorPtr()->getOPtr()->getVector();
-
-//    Eigen::Vector3s robot_pose = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
-//    Eigen::Vector4s robot_orientation = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
-
-//    std::cout << "rob_pos x: " << robot_pose(0) << "\trob_pos y: " << robot_pose(1) << "\trob_pos z: " << robot_pose(2) << std::endl;
-//    std::cout << "rob_orien x: " << robot_orientation(0) << "\trob_orien y: " << robot_orientation(1)
-//              << "\trob_orien z: " << robot_orientation(2) << "\trob_orien w: " << robot_orientation(3) << std::endl;
-
-//    Eigen::Matrix3s rot_mat;
-//    rotationMatrix(rot_mat,robot_orientation);
-
-//    _wc_translation = robot_pose + (rot_mat*camera_pose);
-//    std::cout << "trans x: " << _wc_translation(0) << "; trans y: " << _wc_translation(1) << "; trans z: " << _wc_translation(2) << std::endl;
-
-
-//    quaternionProduct(robot_orientation,camera_orientation,_wc_orientation);
-
-
-//    std::cout << "orien x: " << _wc_orientation(0) << "; orien y: " << _wc_orientation(1)
-//              << "; orien z: " << _wc_orientation(2) << "; orien w: " << _wc_orientation(3) << std::endl;
-
-//}
 
 Scalar ProcessorImageLandmark::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors,
                              std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches)
@@ -671,7 +524,7 @@ void ProcessorImageLandmark::drawTrackingFeatures(cv::Mat _image, std::list<cv::
 
 void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
 {
-    unsigned int counter = 1;
+    unsigned int counter = 0;
     cv::Mat image = image_incoming_.clone();
     LandmarkBaseList* last_landmark_list = getProblem()->getMapPtr()->getLandmarkListPtr();
 
@@ -694,10 +547,10 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
         point2D = pinhole::projectPointToNormalizedPlane(point3D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
 
-//        std::cout << "Landmark " << counter << std::endl;
-//        std::cout << "x: " << point2D[0] << "; y: " << point2D[1] << std::endl;
-//        std::cout << "is in the image?: "
-//                  << pinhole::isInImage(point2D,params_.image.width,params_.image.height) << std::endl;
+        std::cout << "Landmark " << counter << std::endl;
+        std::cout << "x: " << point2D[0] << "; y: " << point2D[1] << std::endl;
+        std::cout << "is in the image?: "
+                  << pinhole::isInImage(point2D,params_.image.width,params_.image.height) << std::endl;
 
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {
@@ -708,14 +561,13 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
 
             cv::circle(image, point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
             cv::putText(image, std::to_string(counter), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
-        counter++;
+            counter++;
         }
-        //counter++;
     }
     cv::Point label_for_landmark_point;
     label_for_landmark_point.x = 3;
     label_for_landmark_point.y = 10;
-    cv::putText(image, std::to_string(landmarks_in_image_), label_for_landmark_point,
+    cv::putText(image, std::to_string(landmarks_tracked_), label_for_landmark_point,
                 cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
     cv::Point label_for_landmark_point2;
@@ -724,7 +576,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
     cv::putText(image, std::to_string(counter), label_for_landmark_point2,
                 cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
-    //std::cout << "landmarks_in_image: " << landmarks_in_image_ << std::endl;
+    std::cout << "landmarks tracked: " << landmarks_tracked_ << "\ttotal landmarks: " << counter << std::endl;
 
     cv::imshow("Feature tracker", image);
     _image = image;
