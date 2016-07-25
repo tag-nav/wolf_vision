@@ -205,25 +205,25 @@ inline bool ConstraintImageNewLandmark::operator ()(const T* const _p_robot, con
     Eigen::Matrix<T,3,3> rotation_c2c1;
     rotation_c2c1 = rotation_w2c1 * rotation_c2w;
 
-    std::cout << "\nrotation_c2c1:\n"
-              << rotation_c2c1(0,0) << "\t" << rotation_c2c1(0,1) << "\t" << rotation_c2c1(0,2) << "\n"
-              << rotation_c2c1(1,0) << "\t" << rotation_c2c1(1,1) << "\t" << rotation_c2c1(1,2) << "\n"
-              << rotation_c2c1(2,0) << "\t" << rotation_c2c1(2,1) << "\t" << rotation_c2c1(2,2) << "\n";
+//    std::cout << "\nrotation_c2c1:\n"
+//              << rotation_c2c1(0,0) << "\t" << rotation_c2c1(0,1) << "\t" << rotation_c2c1(0,2) << "\n"
+//              << rotation_c2c1(1,0) << "\t" << rotation_c2c1(1,1) << "\t" << rotation_c2c1(1,2) << "\n"
+//              << rotation_c2c1(2,0) << "\t" << rotation_c2c1(2,1) << "\t" << rotation_c2c1(2,2) << "\n";
 
     Eigen::Matrix<T,3,1> translation_c2c1;
     translation_c2c1 = (rotation_w2c1 * translation_c2w) + translation_w2c1;
 
-    std::cout << "\ntranslation_c2c1:\n" << translation_c2c1(0) << "\t" << translation_c2c1(1) << "\t" << translation_c2c1(2) << std::endl;
+//    std::cout << "\ntranslation_c2c1:\n" << translation_c2c1(0) << "\t" << translation_c2c1(1) << "\t" << translation_c2c1(2) << std::endl;
 
     //
     Eigen::Matrix<T,3,1> v;
     v = (rotation_c2c1 * m) + (translation_c2c1 * landmarkmap(3));
-    std::cout << "\nv:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << std::endl;
+//    std::cout << "\nv:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << std::endl;
     // ==================================================
 
     Eigen::Matrix<T,3,1> u_;
     u_ = K * v;
-    std::cout << "\nu_:\n" << u_(0) << "\t" << u_(1) << "\t" << u_(2) << std::endl;
+//    std::cout << "\nu_:\n" << u_(0) << "\t" << u_(1) << "\t" << u_(2) << std::endl;
 
 //    Eigen::Matrix<T,3,1> m2;
 //    m2 = rotation_c2c1*K.inverse()*u_;
@@ -244,22 +244,18 @@ inline bool ConstraintImageNewLandmark::operator ()(const T* const _p_robot, con
         u = u_12;
         //std::cout << "u_(2) == 0" << std::endl;
     }
-        std::cout << "\nu:\n" << u(0) << "\t" << u(1) << std::endl;
+//        std::cout << "\nu:\n" << u(0) << "\t" << u(1) << std::endl;
     // ==================================================
-    std::cout << "==============================================\nCONSTRAINT INFO" << std::endl;
-    std::cout << "Estimation of the Projection:\n\t" << u(0) << "\n\t" << u(1) << std::endl;
-    std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
+//    std::cout << "==============================================\nCONSTRAINT INFO" << std::endl;
+//    std::cout << "Estimation of the Projection:\n\t" << u(0) << "\n\t" << u(1) << std::endl;
+//    std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
     Eigen::Matrix<T,2,1> feature_pos = getMeasurement().cast<T>();
-    //Eigen::Matrix<T,2,1> feature_pos = feature_image_.getMeasurement().cast<T>();
 
 //    std::cout << "measurement square root information" << getMeasurementSquareRootInformation()(0, 0) << std::endl;
 
-//    residualsmap[0] = (u[0] - feature_pos[0]) * getMeasurementSquareRootInformation()(0, 0);
-//    residualsmap[1] = (u[1] - feature_pos[1]) * getMeasurementSquareRootInformation()(1, 1);
-
     residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
 
-    std::cout << "\nRESIDUALS: \n\t" << residualsmap[0] << "\n\t" << residualsmap[1] << std::endl;
+//    std::cout << "RESIDUALS: \n\t" << residualsmap[0] << "\n\t" << residualsmap[1] << std::endl;
 
     return true;
 }

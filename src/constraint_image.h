@@ -258,9 +258,9 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
     }
 //        std::cout << "\nu:\n" << u(0) << "\t" << u(1) << std::endl;
     // ==================================================
-    std::cout << "==============================================\nCONSTRAINT INFO" << std::endl;
-    std::cout << "Estimation of the Projection:\n\t" << u(0) << "\n\t" << u(1) << std::endl;
-    std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
+//    std::cout << "==============================================\nCONSTRAINT INFO" << std::endl;
+//    std::cout << "Estimation of the Projection:\n\t" << u(0) << "\n\t" << u(1) << std::endl;
+//    std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
 
     Eigen::Matrix<T,2,1> feature_pos = getMeasurement().cast<T>();
 
@@ -268,7 +268,7 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
 
     residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
 
-    std::cout << "\nRESIDUALS: \n\t" << residualsmap[0] << "\n\t" << residualsmap[1] << std::endl;
+//    std::cout << "RESIDUALS: \n\t" << residualsmap[0] << "\n\t" << residualsmap[1] << std::endl;
 
     return true;
 }
