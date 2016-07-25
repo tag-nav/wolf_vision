@@ -121,6 +121,7 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
     m(0) = landmarkmap(0);
     m(1) = landmarkmap(1);
     m(2) = landmarkmap(2);
+    T inv_dist = landmarkmap(3); // inverse distance
 //    std::cout << "m:\n" << m(0) << "\t" << m(1) << "\t" << m(2) << "\ninverse depth: " << landmarkmap(3) << std::endl;
 
     /* making the rotations manually now */
@@ -229,7 +230,7 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
 
     // put "m" in the camera1 reference
     Eigen::Matrix<T,3,1> v;
-    v = (rotation_camera1_2camera * m) + (translation_camera1_2camera * landmarkmap(3));
+    v = (rotation_camera1_2camera * m) + (translation_camera1_2camera * inv_dist); // vector defining the line of sight in the new camera
 //    std::cout << "\nv:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << std::endl;
     // ==================================================
 
