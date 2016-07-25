@@ -74,12 +74,13 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
 {
     // Do the magic here
     Eigen::Map<const Eigen::Matrix<T, 3, 1> > translation_F1_world2robot(_p_robot); //translation_world2robot
-    Eigen::Map<const Eigen::Matrix<T, 4, 1> > orobotmap(_o_robot);
+    Eigen::Map<const Eigen::Matrix<T, 4, 1> > quaternion_F1_world2robot(_o_robot);
     Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap(_residuals);
 
 //    std::cout << "probot:\n" << translation_F1_world2robot(0) << "\t" << translation_F1_world2robot(1)
 //              << "\t" << translation_F1_world2robot(2) << std::endl;
-//    std::cout << "orobot:\n" << orobotmap(0) << "\t" << orobotmap(1) << "\t" << orobotmap(2) << "\t" << orobotmap(3)<< std::endl;
+//    std::cout << "quaternion_F1_world2robot:\n" << quaternion_F1_world2robot(0) << "\t" << quaternion_F1_world2robot(1)
+//    << "\t" << quaternion_F1_world2robot(2) << "\t" << quaternion_F1_world2robot(3)<< std::endl;
 //    std::cout << "residuals:\n" << residualsmap(0) << "\t" << residualsmap(1) << std::endl;
 
     Eigen::Matrix<T,4,1> k_params = intrinsics_.cast<T>();
@@ -99,20 +100,20 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
 //              << K(2,0) << "\t" << K(2,1) << "\t" << K(2,2) << "\n" << std::endl;
 
     Eigen::Matrix<T,3,1> translation_robot2camera = extrinsics_p_.cast<T>();
-    Eigen::Matrix<T,4,1> sensor_orientation = extrinsics_o_.cast<T>();
-//    std::cout << "translation robot to camera:\n" << translation_robot2camera(0) << "\t" << translation_robot2camera(1)
+    Eigen::Matrix<T,4,1> quaternion_robot2camera = extrinsics_o_.cast<T>();
+//    std::cout << "translation_robot2camera:\n" << translation_robot2camera(0) << "\t" << translation_robot2camera(1)
 //              << "\t" << translation_robot2camera(2) << std::endl;
-//    std::cout << "orientation robot to camera:\n" << sensor_orientation(0) << "\t" << sensor_orientation(1) << "\t"
-//              << sensor_orientation(2) << "\t" << sensor_orientation(3)<< std::endl;
+//    std::cout << "quaternion_robot2camera:\n" << quaternion_robot2camera(0) << "\t" << quaternion_robot2camera(1) << "\t"
+//              << quaternion_robot2camera(2) << "\t" << quaternion_robot2camera(3)<< std::endl;
 
 
     Eigen::Map<const Eigen::Matrix<T, 3, 1> > translation_F0_world2robot(_p_anchor);
-    Eigen::Map<const Eigen::Matrix<T, 4, 1> > anchor_orientation(_o_anchor);
+    Eigen::Map<const Eigen::Matrix<T, 4, 1> > quaternion_F0_world2robot(_o_anchor);
 
-//    std::cout << "translation F0 world to robot:\n" << translation_F0_world2robot(0) << "\t" << translation_F0_world2robot(1)
+//    std::cout << "translation_F0_world2robot:\n" << translation_F0_world2robot(0) << "\t" << translation_F0_world2robot(1)
 //              << "\t" << translation_F0_world2robot(2) << std::endl;
-//    std::cout << "orientation F0 world to robot:\n" << anchor_orientation(0) << "\t" << anchor_orientation(1) << "\t"
-//              << anchor_orientation(2) << "\t" << anchor_orientation(3)<< std::endl;
+//    std::cout << "quaternion_F0_world2robot:\n" << quaternion_F0_world2robot(0) << "\t" << quaternion_F0_world2robot(1) << "\t"
+//              << quaternion_F0_world2robot(2) << "\t" << quaternion_F0_world2robot(3)<< std::endl;
 
 
     Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmarkmap(_p_lmk);
@@ -124,15 +125,15 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
 
     /* making the rotations manually now */
     Eigen::Matrix<T,3,3> rotation_F1_world2robot;
-    rotation_F1_world2robot(0,0) = pow(orobotmap(3),2) + pow(orobotmap(0),2) - pow(orobotmap(1),2) - pow(orobotmap(2),2);
-    rotation_F1_world2robot(0,1) = T(2)*(orobotmap(0)*orobotmap(1) + orobotmap(3)*orobotmap(2));
-    rotation_F1_world2robot(0,2) = T(2)*(orobotmap(0)*orobotmap(2) - orobotmap(3)*orobotmap(1));;
-    rotation_F1_world2robot(1,0) = T(2)*(orobotmap(0)*orobotmap(1) - orobotmap(3)*orobotmap(2));;
-    rotation_F1_world2robot(1,1) = pow(orobotmap(3),2) - pow(orobotmap(0),2) + pow(orobotmap(1),2) - pow(orobotmap(2),2);
-    rotation_F1_world2robot(1,2) = T(2)*(orobotmap(1)*orobotmap(2) + orobotmap(3)*orobotmap(0));
-    rotation_F1_world2robot(2,0) = T(2)*(orobotmap(0)*orobotmap(2) + orobotmap(3)*orobotmap(1));
-    rotation_F1_world2robot(2,1) = T(2)*(orobotmap(1)*orobotmap(2) - orobotmap(3)*orobotmap(0));
-    rotation_F1_world2robot(2,2) = pow(orobotmap(3),2) - pow(orobotmap(0),2) - pow(orobotmap(1),2) + pow(orobotmap(2),2);
+    rotation_F1_world2robot(0,0) = pow(quaternion_F1_world2robot(3),2) + pow(quaternion_F1_world2robot(0),2) - pow(quaternion_F1_world2robot(1),2) - pow(quaternion_F1_world2robot(2),2);
+    rotation_F1_world2robot(0,1) = T(2)*(quaternion_F1_world2robot(0)*quaternion_F1_world2robot(1) + quaternion_F1_world2robot(3)*quaternion_F1_world2robot(2));
+    rotation_F1_world2robot(0,2) = T(2)*(quaternion_F1_world2robot(0)*quaternion_F1_world2robot(2) - quaternion_F1_world2robot(3)*quaternion_F1_world2robot(1));;
+    rotation_F1_world2robot(1,0) = T(2)*(quaternion_F1_world2robot(0)*quaternion_F1_world2robot(1) - quaternion_F1_world2robot(3)*quaternion_F1_world2robot(2));;
+    rotation_F1_world2robot(1,1) = pow(quaternion_F1_world2robot(3),2) - pow(quaternion_F1_world2robot(0),2) + pow(quaternion_F1_world2robot(1),2) - pow(quaternion_F1_world2robot(2),2);
+    rotation_F1_world2robot(1,2) = T(2)*(quaternion_F1_world2robot(1)*quaternion_F1_world2robot(2) + quaternion_F1_world2robot(3)*quaternion_F1_world2robot(0));
+    rotation_F1_world2robot(2,0) = T(2)*(quaternion_F1_world2robot(0)*quaternion_F1_world2robot(2) + quaternion_F1_world2robot(3)*quaternion_F1_world2robot(1));
+    rotation_F1_world2robot(2,1) = T(2)*(quaternion_F1_world2robot(1)*quaternion_F1_world2robot(2) - quaternion_F1_world2robot(3)*quaternion_F1_world2robot(0));
+    rotation_F1_world2robot(2,2) = pow(quaternion_F1_world2robot(3),2) - pow(quaternion_F1_world2robot(0),2) - pow(quaternion_F1_world2robot(1),2) + pow(quaternion_F1_world2robot(2),2);
 
 //    std::cout << "\nrotation F1 world to robot:\n"
 //              << rotation_F1_world2robot(0,0) << "\t" << rotation_F1_world2robot(0,1) << "\t" << rotation_F1_world2robot(0,2) << "\n"
@@ -140,15 +141,15 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
 //              << rotation_F1_world2robot(2,0) << "\t" << rotation_F1_world2robot(2,1) << "\t" << rotation_F1_world2robot(2,2) << "\n\n";
 
     Eigen::Matrix<T,3,3> rotation_F0_world2robot;
-    rotation_F0_world2robot(0,0) = pow(anchor_orientation(3),2) + pow(anchor_orientation(0),2) - pow(anchor_orientation(1),2) - pow(anchor_orientation(2),2);
-    rotation_F0_world2robot(0,1) = T(2)*(anchor_orientation(0)*anchor_orientation(1) + anchor_orientation(3)*anchor_orientation(2));
-    rotation_F0_world2robot(0,2) = T(2)*(anchor_orientation(0)*anchor_orientation(2) - anchor_orientation(3)*anchor_orientation(1));;
-    rotation_F0_world2robot(1,0) = T(2)*(anchor_orientation(0)*anchor_orientation(1) - anchor_orientation(3)*anchor_orientation(2));;
-    rotation_F0_world2robot(1,1) = pow(anchor_orientation(3),2) - pow(anchor_orientation(0),2) + pow(anchor_orientation(1),2) - pow(anchor_orientation(2),2);
-    rotation_F0_world2robot(1,2) = T(2)*(anchor_orientation(1)*anchor_orientation(2) + anchor_orientation(3)*anchor_orientation(0));
-    rotation_F0_world2robot(2,0) = T(2)*(anchor_orientation(0)*anchor_orientation(2) + anchor_orientation(3)*anchor_orientation(1));
-    rotation_F0_world2robot(2,1) = T(2)*(anchor_orientation(1)*anchor_orientation(2) - anchor_orientation(3)*anchor_orientation(0));
-    rotation_F0_world2robot(2,2) = pow(anchor_orientation(3),2) - pow(anchor_orientation(0),2) - pow(anchor_orientation(1),2) + pow(anchor_orientation(2),2);
+    rotation_F0_world2robot(0,0) = pow(quaternion_F0_world2robot(3),2) + pow(quaternion_F0_world2robot(0),2) - pow(quaternion_F0_world2robot(1),2) - pow(quaternion_F0_world2robot(2),2);
+    rotation_F0_world2robot(0,1) = T(2)*(quaternion_F0_world2robot(0)*quaternion_F0_world2robot(1) + quaternion_F0_world2robot(3)*quaternion_F0_world2robot(2));
+    rotation_F0_world2robot(0,2) = T(2)*(quaternion_F0_world2robot(0)*quaternion_F0_world2robot(2) - quaternion_F0_world2robot(3)*quaternion_F0_world2robot(1));;
+    rotation_F0_world2robot(1,0) = T(2)*(quaternion_F0_world2robot(0)*quaternion_F0_world2robot(1) - quaternion_F0_world2robot(3)*quaternion_F0_world2robot(2));;
+    rotation_F0_world2robot(1,1) = pow(quaternion_F0_world2robot(3),2) - pow(quaternion_F0_world2robot(0),2) + pow(quaternion_F0_world2robot(1),2) - pow(quaternion_F0_world2robot(2),2);
+    rotation_F0_world2robot(1,2) = T(2)*(quaternion_F0_world2robot(1)*quaternion_F0_world2robot(2) + quaternion_F0_world2robot(3)*quaternion_F0_world2robot(0));
+    rotation_F0_world2robot(2,0) = T(2)*(quaternion_F0_world2robot(0)*quaternion_F0_world2robot(2) + quaternion_F0_world2robot(3)*quaternion_F0_world2robot(1));
+    rotation_F0_world2robot(2,1) = T(2)*(quaternion_F0_world2robot(1)*quaternion_F0_world2robot(2) - quaternion_F0_world2robot(3)*quaternion_F0_world2robot(0));
+    rotation_F0_world2robot(2,2) = pow(quaternion_F0_world2robot(3),2) - pow(quaternion_F0_world2robot(0),2) - pow(quaternion_F0_world2robot(1),2) + pow(quaternion_F0_world2robot(2),2);
 
 //    std::cout << "\nrotation F0 world to robot:\n"
 //              << rotation_F0_world2robot(0,0) << "\t" << rotation_F0_world2robot(0,1) << "\t" << rotation_F0_world2robot(0,2) << "\n"
@@ -156,15 +157,15 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
 //              << rotation_F0_world2robot(2,0) << "\t" << rotation_F0_world2robot(2,1) << "\t" << rotation_F0_world2robot(2,2) << "\n\n";
 
     Eigen::Matrix<T,3,3> rotation_robot2camera;
-    rotation_robot2camera(0,0) = pow(sensor_orientation(3),2) + pow(sensor_orientation(0),2) - pow(sensor_orientation(1),2) - pow(sensor_orientation(2),2);
-    rotation_robot2camera(0,1) = T(2)*(sensor_orientation(0)*sensor_orientation(1) + sensor_orientation(3)*sensor_orientation(2));
-    rotation_robot2camera(0,2) = T(2)*(sensor_orientation(0)*sensor_orientation(2) - sensor_orientation(3)*sensor_orientation(1));;
-    rotation_robot2camera(1,0) = T(2)*(sensor_orientation(0)*sensor_orientation(1) - sensor_orientation(3)*sensor_orientation(2));;
-    rotation_robot2camera(1,1) = pow(sensor_orientation(3),2) - pow(sensor_orientation(0),2) + pow(sensor_orientation(1),2) - pow(sensor_orientation(2),2);
-    rotation_robot2camera(1,2) = T(2)*(sensor_orientation(1)*sensor_orientation(2) + sensor_orientation(3)*sensor_orientation(0));
-    rotation_robot2camera(2,0) = T(2)*(sensor_orientation(0)*sensor_orientation(2) + sensor_orientation(3)*sensor_orientation(1));
-    rotation_robot2camera(2,1) = T(2)*(sensor_orientation(1)*sensor_orientation(2) - sensor_orientation(3)*sensor_orientation(0));
-    rotation_robot2camera(2,2) = pow(sensor_orientation(3),2) - pow(sensor_orientation(0),2) - pow(sensor_orientation(1),2) + pow(sensor_orientation(2),2);
+    rotation_robot2camera(0,0) = pow(quaternion_robot2camera(3),2) + pow(quaternion_robot2camera(0),2) - pow(quaternion_robot2camera(1),2) - pow(quaternion_robot2camera(2),2);
+    rotation_robot2camera(0,1) = T(2)*(quaternion_robot2camera(0)*quaternion_robot2camera(1) + quaternion_robot2camera(3)*quaternion_robot2camera(2));
+    rotation_robot2camera(0,2) = T(2)*(quaternion_robot2camera(0)*quaternion_robot2camera(2) - quaternion_robot2camera(3)*quaternion_robot2camera(1));;
+    rotation_robot2camera(1,0) = T(2)*(quaternion_robot2camera(0)*quaternion_robot2camera(1) - quaternion_robot2camera(3)*quaternion_robot2camera(2));;
+    rotation_robot2camera(1,1) = pow(quaternion_robot2camera(3),2) - pow(quaternion_robot2camera(0),2) + pow(quaternion_robot2camera(1),2) - pow(quaternion_robot2camera(2),2);
+    rotation_robot2camera(1,2) = T(2)*(quaternion_robot2camera(1)*quaternion_robot2camera(2) + quaternion_robot2camera(3)*quaternion_robot2camera(0));
+    rotation_robot2camera(2,0) = T(2)*(quaternion_robot2camera(0)*quaternion_robot2camera(2) + quaternion_robot2camera(3)*quaternion_robot2camera(1));
+    rotation_robot2camera(2,1) = T(2)*(quaternion_robot2camera(1)*quaternion_robot2camera(2) - quaternion_robot2camera(3)*quaternion_robot2camera(0));
+    rotation_robot2camera(2,2) = pow(quaternion_robot2camera(3),2) - pow(quaternion_robot2camera(0),2) - pow(quaternion_robot2camera(1),2) + pow(quaternion_robot2camera(2),2);
 
 //    std::cout << "\nrotation robot to camera:\n"
 //              << rotation_robot2camera(0,0) << "\t" << rotation_robot2camera(0,1) << "\t" << rotation_robot2camera(0,2) << "\n"
@@ -177,52 +178,58 @@ inline bool ConstraintImage::operator ()(const T* const _p_robot, const T* const
     // ==================================================
 
     // camera in world coordinates
+    Eigen::Matrix<T,3,3> rotation_world2camera;
+    rotation_world2camera = rotation_F0_world2robot*rotation_robot2camera;
 
-    Eigen::Matrix<T,3,3> rotation_c2w;
-    rotation_c2w = rotation_F0_world2robot*rotation_robot2camera;
+//    std::cout << "\nrotation_world2camera:\n"
+//              << rotation_world2camera(0,0) << "\t" << rotation_world2camera(0,1) << "\t" << rotation_world2camera(0,2) << "\n"
+//              << rotation_world2camera(1,0) << "\t" << rotation_world2camera(1,1) << "\t" << rotation_world2camera(1,2) << "\n"
+//              << rotation_world2camera(2,0) << "\t" << rotation_world2camera(2,1) << "\t" << rotation_world2camera(2,2) << "\n";
 
-//    std::cout << "\nrotation_c2w:\n"
-//              << rotation_c2w(0,0) << "\t" << rotation_c2w(0,1) << "\t" << rotation_c2w(0,2) << "\n"
-//              << rotation_c2w(1,0) << "\t" << rotation_c2w(1,1) << "\t" << rotation_c2w(1,2) << "\n"
-//              << rotation_c2w(2,0) << "\t" << rotation_c2w(2,1) << "\t" << rotation_c2w(2,2) << "\n";
+    Eigen::Matrix<T,3,1> translation_world2camera;
+    translation_world2camera = (rotation_F0_world2robot*translation_robot2camera) + translation_F0_world2robot;
 
-    Eigen::Matrix<T,3,1> translation_c2w;
-    translation_c2w = (rotation_F0_world2robot*translation_robot2camera) + translation_F0_world2robot;
+//    std::cout << "\ntranslation_world2camera:\n" << translation_world2camera(0) << "\t" << translation_world2camera(1)
+//    << "\t" << translation_world2camera(2) << std::endl;
 
-//    std::cout << "\ntranslation_c2w:\n" << translation_c2w(0) << "\t" << translation_c2w(1) << "\t" << translation_c2w(2) << std::endl;
+
 
     // world in camera1 coordinates
-    Eigen::Matrix<T,3,3> rotation_w2c1;
-    rotation_w2c1 = rotation_robot2camera.transpose()*rotation_F1_world2robot.transpose();
+    Eigen::Matrix<T,3,3> rotation_camera1_2world;
+    rotation_camera1_2world = rotation_robot2camera.transpose()*rotation_F1_world2robot.transpose();
 
-//    std::cout << "\nrotation_w2c1:\n"
-//              << rotation_w2c1(0,0) << "\t" << rotation_w2c1(0,1) << "\t" << rotation_w2c1(0,2) << "\n"
-//              << rotation_w2c1(1,0) << "\t" << rotation_w2c1(1,1) << "\t" << rotation_w2c1(1,2) << "\n"
-//              << rotation_w2c1(2,0) << "\t" << rotation_w2c1(2,1) << "\t" << rotation_w2c1(2,2) << "\n";
+//    std::cout << "\nrotation_camera1_2world:\n"
+//              << rotation_camera1_2world(0,0) << "\t" << rotation_camera1_2world(0,1) << "\t" << rotation_camera1_2world(0,2) << "\n"
+//              << rotation_camera1_2world(1,0) << "\t" << rotation_camera1_2world(1,1) << "\t" << rotation_camera1_2world(1,2) << "\n"
+//              << rotation_camera1_2world(2,0) << "\t" << rotation_camera1_2world(2,1) << "\t" << rotation_camera1_2world(2,2) << "\n";
 
-    Eigen::Matrix<T,3,1> translation_w2c1;
-    translation_w2c1 = (rotation_robot2camera.transpose()*(-rotation_F1_world2robot.transpose()*translation_F1_world2robot)) +
+    Eigen::Matrix<T,3,1> translation_camera1_2world;
+    translation_camera1_2world = (rotation_robot2camera.transpose()*(-rotation_F1_world2robot.transpose()*translation_F1_world2robot)) +
             (-rotation_robot2camera.transpose()*translation_robot2camera);
 
-//    std::cout << "\ntranslation_w2c1:\n" << translation_w2c1(0) << "\t" << translation_w2c1(1) << "\t" << translation_w2c1(2) << std::endl;
+//    std::cout << "\ntranslation_camera1_2world:\n" << translation_camera1_2world(0) << "\t" << translation_camera1_2world(1)
+//    << "\t" << translation_camera1_2world(2) << std::endl;
+
+
 
     // camera in camera1 coordinates, through world
-    Eigen::Matrix<T,3,3> rotation_c2c1;
-    rotation_c2c1 = rotation_w2c1 * rotation_c2w;
+    Eigen::Matrix<T,3,3> rotation_camera1_2camera;
+    rotation_camera1_2camera = rotation_camera1_2world * rotation_world2camera;
 
-//    std::cout << "\nrotation_c2c1:\n"
-//              << rotation_c2c1(0,0) << "\t" << rotation_c2c1(0,1) << "\t" << rotation_c2c1(0,2) << "\n"
-//              << rotation_c2c1(1,0) << "\t" << rotation_c2c1(1,1) << "\t" << rotation_c2c1(1,2) << "\n"
-//              << rotation_c2c1(2,0) << "\t" << rotation_c2c1(2,1) << "\t" << rotation_c2c1(2,2) << "\n";
+//    std::cout << "\nrotation_camera1_2camera:\n"
+//              << rotation_camera1_2camera(0,0) << "\t" << rotation_camera1_2camera(0,1) << "\t" << rotation_camera1_2camera(0,2) << "\n"
+//              << rotation_camera1_2camera(1,0) << "\t" << rotation_camera1_2camera(1,1) << "\t" << rotation_camera1_2camera(1,2) << "\n"
+//              << rotation_camera1_2camera(2,0) << "\t" << rotation_camera1_2camera(2,1) << "\t" << rotation_camera1_2camera(2,2) << "\n";
 
-    Eigen::Matrix<T,3,1> translation_c2c1;
-    translation_c2c1 = (rotation_w2c1 * translation_c2w) + translation_w2c1;
+    Eigen::Matrix<T,3,1> translation_camera1_2camera;
+    translation_camera1_2camera = (rotation_camera1_2world * translation_world2camera) + translation_camera1_2world;
 
-//    std::cout << "\ntranslation_c2c1:\n" << translation_c2c1(0) << "\t" << translation_c2c1(1) << "\t" << translation_c2c1(2) << std::endl;
+//    std::cout << "\ntranslation_camera1_2camera:\n" << translation_camera1_2camera(0) << "\t" << translation_camera1_2camera(1)
+//    << "\t" << translation_camera1_2camera(2) << std::endl;
 
-    //
+    // put "m" in the camera1 reference
     Eigen::Matrix<T,3,1> v;
-    v = (rotation_c2c1 * m) + (translation_c2c1 * landmarkmap(3));
+    v = (rotation_camera1_2camera * m) + (translation_camera1_2camera * landmarkmap(3));
 //    std::cout << "\nv:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << std::endl;
     // ==================================================
 
