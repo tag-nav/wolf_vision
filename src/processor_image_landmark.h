@@ -262,19 +262,21 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
 //        virtual void filterFeatureLists(FeatureBaseList _original_list, FeatureBaseList& _filtered_list);
 
-        virtual void referenceWorldToCamera(Eigen::Vector3s& _wc_translation, Eigen::Vector4s& _wc_orientation);
+//        virtual void referenceWorldToCamera(Eigen::Vector3s& _wc_translation, Eigen::Vector4s& _wc_orientation);
 
-        virtual void referenceCameraToWorld(Eigen::Vector3s& _cw_translation, Eigen::Vector4s& _cw_orientation);
+//        virtual void referenceCameraToWorld(Eigen::Vector3s& _cw_translation, Eigen::Vector4s& _cw_orientation);
 
         virtual void rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation);
 
-        virtual void quaternionProduct(Eigen::Vector4s _p, Eigen::Vector4s _q, Eigen::Vector4s& _quaternion_product);
+//        virtual void quaternionProduct(Eigen::Vector4s _p, Eigen::Vector4s _q, Eigen::Vector4s& _quaternion_product);
 
-        virtual void world2CameraFrameTransformation(Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D);
+//        virtual void world2CameraFrameTransformation(Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D);
 
-        virtual void camera2WorldFrameTransformation(Eigen::Vector3s _cw_translation, Eigen::Vector4s _cw_orientation, Eigen::Vector3s& _point3D);
+//        virtual void camera2WorldFrameTransformation(Eigen::Vector3s _cw_translation, Eigen::Vector4s _cw_orientation, Eigen::Vector3s& _point3D);
 
-        virtual void changeOfReference(LandmarkAHP* _landmark, Eigen::Vector3s _wc_translation, Eigen::Vector4s _wc_orientation, Eigen::Vector3s& _point3D);
+        virtual void changeOfReferenceFrame(LandmarkAHP* _landmark, Eigen::Vector3s& _translation, Eigen::Matrix3s& _rotation);
+
+        virtual void getLandmarkInReference(LandmarkAHP* _landmark, Eigen::Vector3s _translation, Eigen::Matrix3s _rotation, Eigen::Vector3s& _point3D);
 
         // These only to debug, will disappear one day soon
     public:
