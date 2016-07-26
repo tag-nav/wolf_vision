@@ -18,6 +18,7 @@
 
 // EIGEN
 //#include <Eigen/CholmodSupport>
+#include <Eigen/StdVector> // Eigen in std vector
 
 namespace wolf{
 // inserts the sparse matrix 'ins' into the sparse matrix 'original' in the place given by 'row' and 'col' integers

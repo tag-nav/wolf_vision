@@ -50,8 +50,8 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
     Scalar dm2;
 
     // COMPUTING ALL EXPECTED FEATURES
-    std::map<LandmarkBase*, Eigen::Vector4s> expected_features;
-    std::map<LandmarkBase*, Eigen::Matrix3s> expected_features_covs;
+    std::map<LandmarkBase*, Eigen::Vector4s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Vector4s> > > expected_features;
+    std::map<LandmarkBase*, Eigen::Matrix3s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Matrix3s> > > expected_features_covs;
     for (auto landmark : not_matched_landmarks)
         expectedFeature(landmark, expected_features[landmark], expected_features_covs[landmark]);
 
@@ -83,7 +83,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         {
             //std::cout << "closest landmark: " << (*closest_landmark)->id() << std::endl;
             // match
-            matches_landmark_from_incoming_[*feature_it] = LandmarkMatch({*closest_landmark, closest_dm2});
+            matches_landmark_from_incoming_[*feature_it] = new LandmarkMatch({*closest_landmark, closest_dm2});
             // erase from the landmarks to be found
             not_matched_landmarks.erase(closest_landmark);
             // move corner feature to output list
@@ -103,8 +103,8 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         unsigned int ii, jj;
 
         // COMPUTING ALL EXPECTED FEATURES
-        std::map<LandmarkBase*, Eigen::Vector4s> expected_features;
-        std::map<LandmarkBase*, Eigen::Matrix3s> expected_features_covs;
+        std::map<LandmarkBase*, Eigen::Vector4s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Vector4s> > > expected_features;
+        std::map<LandmarkBase*, Eigen::Matrix3s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Matrix3s> > > expected_features_covs;
         for (auto landmark : _landmarks_corner_searched)
             expectedFeature(landmark, expected_features[landmark], expected_features_covs[landmark]);
         //std::cout << "expected features!" << std::endl;
@@ -178,7 +178,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         for (auto pair : ft_lk_pairs)
         {
             // match
-            matches_landmark_from_incoming_[*features_map[pair.first]] = LandmarkMatch(
+            matches_landmark_from_incoming_[*features_map[pair.first]] = new LandmarkMatch(
                     *landmarks_map[pair.second], tree.getScore(pair.first, pair.second));
             // move matched feature to list
             _features_corner_found.splice(_features_corner_found.end(), corners_incoming_, features_map[pair.first]);
@@ -198,27 +198,27 @@ bool ProcessorTrackerLandmarkCorner::voteForKeyFrame()
     // option 1: more than TH new features in last
     if (corners_last_.size() >= new_corners_th_)
     {
-        std::cout << "------------- NEW KEY FRAME: Option 1" << std::endl;
+        std::cout << "------------- NEW KEY FRAME: Option 1 - Enough new features" << std::endl;
         //std::cout << "\tnew features in last = " << corners_last_.size() << std::endl;
         return true;
     }
-    // option 2: less than half matched in origin, matched in incoming (more than half in last)
-    if (matches_landmark_from_incoming_.size()*2 < origin_ptr_->getFeatureListPtr()->size() && matches_landmark_from_last_.size()*2 > origin_ptr_->getFeatureListPtr()->size())
-    {
-        std::cout << "------------- NEW KEY FRAME: Option 2" << std::endl;
-        //std::cout << "\tmatches in incoming = " << matches_landmark_from_incoming_.size() << std::endl<< "\tmatches in origin = " << origin_ptr_->getFeatureListPtr()->size() << std::endl;
-        return true;
-    }
-    // option 3: loop closure (if the newest frame from which a matched landmark was observed is old enough)
+    // option 2: loop closure (if the newest frame from which a matched landmark was observed is old enough)
     for (auto new_feat : new_features_last_)
     {
-        if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_feat].landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() > loop_frames_th_)
+        if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_feat]->landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() > loop_frames_th_)
         {
-            std::cout << "------------- NEW KEY FRAME: Option 3" << std::endl;
-            //std::cout << "\tmatched landmark from frame = " << matches_landmark_from_last_[new_feat].landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() << std::endl;
+            std::cout << "------------- NEW KEY FRAME: Option 2 - Loop closure" << std::endl;
+            //std::cout << "\tmatched landmark from frame = " << matches_landmark_from_last_[new_feat]->landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() << std::endl;
             return true;
         }
     }
+    //// option 3: less than half matched in origin, matched in incoming (more than half in last)
+    //if (matches_landmark_from_incoming_.size()*2 < origin_ptr_->getFeatureListPtr()->size() && matches_landmark_from_last_.size()*2 > origin_ptr_->getFeatureListPtr()->size())
+    //{
+    //    std::cout << "------------- NEW KEY FRAME: Option 3 - " << std::endl;
+    //    //std::cout << "\tmatches in incoming = " << matches_landmark_from_incoming_.size() << std::endl<< "\tmatches in origin = " << origin_ptr_->getFeatureListPtr()->size() << std::endl;
+    //    return true;
+    //}
     return false;
 }
 
@@ -332,7 +332,6 @@ Eigen::VectorXs ProcessorTrackerLandmarkCorner::computeSquaredMahalanobisDistanc
                                                                           const Eigen::Matrix3s& _expected_feature_cov,
                                                                           const Eigen::MatrixXs& _mu)
 {
-
     const Eigen::Vector2s& p_feature = _feature_ptr->getMeasurement().head(2);
     const Scalar& o_feature = _feature_ptr->getMeasurement()(2);
     // ------------------------ d

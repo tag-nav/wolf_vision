@@ -55,7 +55,7 @@ int main()
                                             new StateBlock(Eigen::Vector1s::Zero(), true),
                                             new StateBlock(Eigen::VectorXs::Zero(0), true), 0);
     SensorBase* sensor_fix_ptr = new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0);
-    ProcessorOdom2D* odom2d_ptr = new ProcessorOdom2D();
+    ProcessorOdom2D* odom2d_ptr = new ProcessorOdom2D(100,100,100);
     // Assemble Wolf tree by linking the nodes
     sensor_odom_ptr->addProcessor(odom2d_ptr);
     problem_ptr->addSensor(sensor_odom_ptr);
@@ -81,6 +81,7 @@ int main()
     odom2d_ptr->setOrigin(origin_frame);
 
     std::cout << "Initial pose : " << problem_ptr->getLastFramePtr()->getState().transpose() << std::endl;
+    std::cout << "Initial covariance : " << std::endl << problem_ptr->getLastFramePtr()->getState().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
@@ -88,7 +89,7 @@ int main()
     std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
     // Capture to use as container for all incoming data
     t += dt;
-    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_odom_ptr, data, data_cov);
+    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_odom_ptr, data, data_cov, nullptr);
 
     // Check covariance values
     Eigen::Vector3s integrated_x = x0;
@@ -104,10 +105,6 @@ int main()
     {
         // Processor
         odom2d_ptr->process(cap_ptr);
-        //std::cout << "----------- PROCESSOR:" << std::endl;
-        //std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getState().transpose() << std::endl;
-        //std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
-        //        << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ << std::endl;
 
         // Delta Reference
         Ju(0, 0) = cos(integrated_delta(2) + data(1) / 2);
@@ -146,28 +143,38 @@ int main()
         integrated_x_vector.push_back(integrated_x);
         integrated_covariance_vector.push_back(integrated_covariance);
 
-        //std::cout << "REFERENCE:" << std::endl;
-        //std::cout << "State(" << (t - t0) << ") : " << integrated_x.transpose()
-        //        << std::endl;
-        //std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
-        //        << integrated_covariance << std::endl;
+        if ((odom2d_ptr->getCurrentState() - integrated_x).norm() > 1e-10)
+        {
+            std::cout << "----------- PROCESSOR:" << std::endl;
+            std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
+            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
+                      << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ << std::endl;
+            std::cout << "REFERENCE:" << std::endl;
+            std::cout << "State(" << (t - t0) << ") : " << integrated_x.transpose() << std::endl;
+            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl << integrated_delta_covariance << std::endl;
+            std::cout << "ERROR:" << std::endl;
+            std::cout << "State error(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() - integrated_x.transpose() << std::endl;
+            std::cout << "Covariance error(" << (t - t0) << ") : " << std::endl
+                      << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_delta_covariance << std::endl;
 
-        // CHeck
-        //std::cout << "ERROR:" << std::endl;
-        //std::cout << "State error(" << (t - t0) << ") : " << odom2d_ptr->getState().transpose() - integrated_x.transpose()
-        //        << std::endl;
-        //std::cout << "Covariance error(" << (t - t0) << ") : " << std::endl
-        //        << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_covariance << std::endl;
-        //std::cout << "Max coeff: " << std::endl
-        //        << (odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_covariance).maxCoeff()
-        //        << std::endl;
-
-        if ((odom2d_ptr->getCurrentState() - integrated_x).norm() > 1e-12)
             throw std::runtime_error("Integrated state different from reference.");
+        }
 
-        if ((odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_delta_covariance).maxCoeff() > 1e-12)
+        if ((odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_delta_covariance).array().abs().maxCoeff() > 1e-10)
+        {
+            std::cout << "----------- PROCESSOR:" << std::endl;
+            std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
+            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
+                      << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ << std::endl;
+            std::cout << "REFERENCE:" << std::endl;
+            std::cout << "State(" << (t - t0) << ") : " << integrated_x.transpose() << std::endl;
+            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl << integrated_delta_covariance << std::endl;
+            std::cout << "ERROR:" << std::endl;
+            std::cout << "State error(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() - integrated_x.transpose() << std::endl;
+            std::cout << "Covariance error(" << (t - t0) << ") : " << std::endl
+                      << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_delta_covariance << std::endl;
             throw std::runtime_error("Integrated covariance different from reference.");
-
+        }
         // Timestamp
         t += dt;
         cap_ptr->setTimeStamp(t);
@@ -195,7 +202,7 @@ int main()
     std::cout << ">" << std::endl;
 
     // first split at exact timestamp
-    TimeStamp t_split = t0 + 0.15;
+    TimeStamp t_split = t0 + 0.13;
     std::cout << "Split time:                  " << t_split - t0 << std::endl;
 
     FrameBase* new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
@@ -216,26 +223,49 @@ int main()
     std::cout << "Delta: " << new_keyframe_ptr->getCaptureListPtr()->front()->getFeatureListPtr()->front()->getMeasurement().transpose() << std::endl;
     std::cout << "Covariance: " << std::endl << new_keyframe_ptr->getCaptureListPtr()->front()->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
 
+    std::cout << "getState with TS previous than the last keyframe: " << t_split-0.5 << std::endl;
+    std::cout << odom2d_ptr->getState(t_split-0.5) << std::endl;
+
     // Solve
     ceres::Solver::Summary summary = ceres_manager_ptr->solve();
     //std::cout << summary.FullReport() << std::endl;
     ceres_manager_ptr->computeCovariances(ALL_MARGINALS);
 
-    std::cout << "After solving the problem, covariance of new keyframe:" << std::endl;
-    std::cout << "WOLF:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) << std::endl;
-    std::cout << "REFERENCE:" << std::endl << integrated_covariance_vector[14] << std::endl;
-    if ((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[14]).maxCoeff() > 1e-12)
+    if ((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[12]).array().abs().maxCoeff() > 1e-10)
+    {
+        std::cout << "After solving the problem, covariance of new keyframe:" << std::endl;
+        std::cout << "WOLF:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) << std::endl;
+        std::cout << "REFERENCE:" << std::endl << integrated_covariance_vector[12] << std::endl;
+        std::cout << "ERROR:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[12] << std::endl;
         throw std::runtime_error("Integrated covariance different from reference.");
+    }
     else
         std::cout << "TEST COVARIANCE CHECK ------> OK!" << std::endl;
 
 
     // second split as non-exact timestamp
-    t_split = t0 + 0.177;
-    std::cout << "New split time:              " << t_split - t0 << std::endl;
+    t_split = t0 + 0.062;
+    std::cout << "New split time (assyncronous and older than previous keyframe):  " << t_split - t0 << std::endl;
 
     new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
     odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
+
+    // Solve
+    summary = ceres_manager_ptr->solve();
+    //std::cout << summary.FullReport() << std::endl;
+    ceres_manager_ptr->computeCovariances(ALL_MARGINALS);
+
+    if ((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[5]).array().abs().maxCoeff() > 1e-10)
+    {
+        std::cout << "After solving the problem, covariance of new keyframe:" << std::endl;
+        std::cout << "WOLF:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) << std::endl;
+        std::cout << "REFERENCE:" << std::endl << integrated_covariance_vector[5] << std::endl;
+        std::cout << "ERROR:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[5] << std::endl;
+        throw std::runtime_error("Integrated covariance different from reference.");
+    }
+    else
+        std::cout << "2nd TEST COVARIANCE CHECK ------> OK!" << std::endl;
+
 
     std::cout << "All in one row:            < ";
     for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())

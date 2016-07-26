@@ -131,7 +131,7 @@ int main(int argc, char** argv)
     laser_1_intrinsics.scan_params = laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)});
 
     ProcessorParamsLaser laser_1_processor_params;
-    laser_1_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
+    laser_1_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2});
     laser_1_processor_params.new_corners_th = 10;
 
     // laser 2 extrinsics and intrinsics
@@ -144,12 +144,16 @@ int main(int argc, char** argv)
     laser_2_intrinsics.scan_params = laserscanutils::LaserScanParams({laser_2_params(0), laser_2_params(1), laser_2_params(2), laser_2_params(3), laser_2_params(4), laser_2_params(5), laser_2_params(6), laser_2_params(7)});
 
     ProcessorParamsLaser laser_2_processor_params;
-    laser_2_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5});
+    laser_2_processor_params.line_finder_params_ = laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2});
     laser_2_processor_params.new_corners_th = 10;
 
     Problem problem(FRM_PO_2D);
     SensorOdom2D* odom_sensor = (SensorOdom2D*)problem.installSensor("ODOM 2D", "odometer", odom_pose, &odom_intrinsics);
-    ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.installProcessor("ODOM 2D", "main odometry", odom_sensor);
+    ProcessorParamsOdom2D odom_params;
+    odom_params.cov_det_th_ = 1;
+    odom_params.dist_traveled_th_ = 5;
+    odom_params.elapsed_time_th_ = 10;
+    ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.installProcessor("ODOM 2D", "main odometry", odom_sensor, &odom_params);
     //SensorBase* gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
     SensorBase* laser_1_sensor = problem.installSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
     SensorBase* laser_2_sensor = problem.installSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
@@ -158,7 +162,7 @@ int main(int argc, char** argv)
 
     std::cout << "Wolf tree setted correctly!" << std::endl;
 
-    CaptureMotion2* odom_capture = new CaptureMotion2(ts, odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor);
+    CaptureMotion2* odom_capture = new CaptureMotion2(ts, odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor, nullptr);
 
     // Initial pose
     ground_truth_pose << 2, 8, 0;

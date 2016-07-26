@@ -17,7 +17,7 @@
 
 //Wolf includes
 #include "problem.h"
-#include "processor_tracker_landmark_corner.h"
+#include "processor_tracker_landmark_polyline.h"
 #include "processor_odom_2D.h"
 #include "sensor_laser_2D.h"
 #include "sensor_odom_2D.h"
@@ -226,8 +226,15 @@ int main(int argc, char** argv)
     SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
     SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
     SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
-    ProcessorTrackerLandmarkCorner* laser_1_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2}), 3, 10);
-    ProcessorTrackerLandmarkCorner* laser_2_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2}), 3, 10);
+
+    wolf::ProcessorParamsPolyline laser_processor_params;
+    laser_processor_params.line_finder_params = laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2});
+    laser_processor_params.new_features_th = 3;
+    laser_processor_params.loop_frames_th = 10;
+    laser_processor_params.time_tolerance = 0.1;
+    laser_processor_params.position_error_th = 0.5;
+    ProcessorTrackerLandmarkPolyline* laser_1_processor = new ProcessorTrackerLandmarkPolyline(laser_processor_params);
+    ProcessorTrackerLandmarkPolyline* laser_2_processor = new ProcessorTrackerLandmarkPolyline(laser_processor_params);
     ProcessorOdom2D* odom_processor = new ProcessorOdom2D(1,1,100);
     odom_sensor->addProcessor(odom_processor);
     laser_1_sensor->addProcessor(laser_1_processor);
@@ -320,23 +327,23 @@ int main(int argc, char** argv)
         mean_times(0) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // SOLVE OPTIMIZATION ---------------------------
-        //std::cout << "SOLVING..." << std::endl;
+        std::cout << "SOLVING..." << std::endl;
         t1 = clock();
         ceres::Solver::Summary summary = ceres_manager.solve();
-        //std::cout << summary.FullReport() << std::endl;
+        std::cout << summary.FullReport() << std::endl;
         mean_times(3) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // COMPUTE COVARIANCES ---------------------------
-        //std::cout << "COMPUTING COVARIANCES..." << std::endl;
+        std::cout << "COMPUTING COVARIANCES..." << std::endl;
         t1 = clock();
-        ceres_manager.computeCovariances();
+        //ceres_manager.computeCovariances();
         mean_times(4) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // DRAWING STUFF ---------------------------
-        //std::cout << "RENDERING..." << std::endl;
+        std::cout << "RENDERING..." << std::endl;
         t1 = clock();
-        if (step % 3 == 0)
-            robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureListPtr(), 1, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
+//        if (step % 3 == 0)
+//            robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureListPtr(), 1, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
             //robot.render(laser_2_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_2_processor->getLastPtr()->getFeatureListPtr(), 2, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
         mean_times(5) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 

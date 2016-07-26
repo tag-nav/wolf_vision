@@ -146,6 +146,8 @@ typedef enum
     CTR_FIX,                    ///< Fix constraint (for priors).
     CTR_ODOM_2D,                ///< 2D Odometry constraint .
     CTR_CORNER_2D,              ///< 2D corner constraint .
+    CTR_POINT_2D,               ///< 2D point constraint .
+    CTR_POINT_TO_LINE_2D,       ///< 2D point constraint .
     CTR_CONTAINER,              ///< 2D container constraint .
     CTR_IMG_PNT_TO_EP,          ///< constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
@@ -244,7 +246,8 @@ typedef enum
     FEATURE_ODOM_2D,
     FEATURE_MOTION,
     FEATURE_POINT_IMAGE, 
-    FEATURE_LINE_2D
+    FEATURE_LINE_2D,
+    FEATURE_POLYLINE_2D
 }FeatureType;
 
 /** \brief Enumeration of all possible landmark types
@@ -255,7 +258,8 @@ typedef enum
     LANDMARK_POINT = 1,     ///< A Euclidean point landmark, either 3D or 2D
     LANDMARK_CORNER,    ///< A corner landmark (2D)
     LANDMARK_CONTAINER,  ///< A container landmark (2D)
-    LANDMARK_LINE_2D
+    LANDMARK_LINE_2D,  ///< A line landmark (2D)
+    LANDMARK_POLYLINE_2D   ///< A polyline landmark (2D)
 } LandmarkType;
 
 typedef enum
@@ -285,6 +289,7 @@ class CaptureMotion;
 class CaptureLaser2D;
 class FeatureBase;
 class FeatureCorner2D;
+class FeaturePolyline2D;
 class ConstraintBase;
 class SensorBase;
 class SensorLaser2D;
@@ -330,6 +335,10 @@ typedef FeatureBaseList::iterator FeatureBaseIter;
 typedef std::list<FeatureCorner2D*> FeatureCorner2DList;
 typedef FeatureCorner2DList::iterator FeatureCorner2DIter;
 
+// - Feature Polyline 2D
+typedef std::list<FeaturePolyline2D*> FeaturePolyline2DList;
+typedef FeaturePolyline2DList::iterator FeaturePolyline2DIter;
+
 // - Constraint
 typedef std::list<ConstraintBase*> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
@@ -359,7 +368,7 @@ struct LandmarkMatch
 };
 
 // Match map Feature - Landmark
-typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
+typedef std::map<FeatureBase*, LandmarkMatch*> LandmarkMatchMap;
 
 
 inline Scalar pi2pi(const Scalar& angle)

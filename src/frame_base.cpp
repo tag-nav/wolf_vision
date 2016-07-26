@@ -96,6 +96,8 @@ void FrameBase::setKey()
 
         if (getTrajectoryPtr()->getLastKeyFramePtr() == nullptr || getTrajectoryPtr()->getLastKeyFramePtr()->getTimeStamp() < time_stamp_)
             getTrajectoryPtr()->setLastKeyFramePtr(this);
+
+        getTrajectoryPtr()->sortFrame(this);
     }
 }
 
@@ -131,6 +133,17 @@ Eigen::VectorXs FrameBase::getState() const
                           (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
                           (v_ptr_==nullptr ? 0 : v_ptr_->getSize()));
 
+    getState(state);
+
+    return state;
+}
+
+void FrameBase::getState(Eigen::VectorXs& state) const
+{
+    assert(state.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize()) +
+                            (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
+                            (v_ptr_==nullptr ? 0 : v_ptr_->getSize())));
+
     unsigned int index = 0;
     if (p_ptr_!=nullptr)
     {
@@ -147,16 +160,14 @@ Eigen::VectorXs FrameBase::getState() const
         state.segment(index, v_ptr_->getSize()) = v_ptr_->getVector();
         //   index += v_ptr_->getSize();
     }
-
-    return state;
 }
 
-CaptureBaseIter FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
+CaptureBase* FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
 {
-    for (auto capture_it = getCaptureListPtr()->begin(); capture_it != getCaptureListPtr()->end(); capture_it++)
-        if ((*capture_it)->getSensorPtr() == _sensor_ptr)
-            return capture_it;
-    return getCaptureListPtr()->end();
+    for (auto capture_ptr : *getCaptureListPtr())
+        if (capture_ptr->getSensorPtr() == _sensor_ptr)
+            return capture_ptr;
+    return nullptr;
 }
 
 void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)

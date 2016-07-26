@@ -62,6 +62,11 @@ int main(int argc, char** argv)
 
     TimeStamp t = 1;
 
+    char const* tmp = std::getenv( "WOLF_ROOT" );
+    if ( tmp == nullptr )
+        throw std::runtime_error("WOLF_ROOT environment not loaded.");
+
+    std::string wolf_path( tmp );
 
     Problem* wolf_problem_ = new Problem(FRM_PO_3D);
 
@@ -111,12 +116,12 @@ int main(int argc, char** argv)
 
     // SENSOR
     // one-liner API
-    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), "/home/jsola/dev/wolf/src/examples/camera.yaml");
+    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_path + "/src/examples/camera.yaml");
     SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", "/home/jsola/dev/wolf/src/examples/processor_image_ORB.yaml");
+    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
     //=====================================================
 
 

@@ -25,9 +25,9 @@ class ConstraintGPSPseudorange3D: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
 public:
 
     ConstraintGPSPseudorange3D(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintSparse<1, 3, 4, 3, 1, 3, 4>(_ftr_ptr, CTR_GPS_PR_3D, _apply_loss_function, _status,
-                            _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to map frame
-                            _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(), // orientation of the vehicle's frame wrt map frame
+            ConstraintSparse<1, 3, 4, 3, 1, 3, 4>(CTR_GPS_PR_3D, _apply_loss_function, _status,
+                            _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to map frame
+                            _ftr_ptr->getFramePtr()->getOPtr(), // orientation of the vehicle's frame wrt map frame
                             _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to base frame
                                                                         // orientation of antenna is not needed, because omnidirectional
                             _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter  = receiver time bias
@@ -74,8 +74,9 @@ protected:
     Eigen::Vector3s sat_position_;
     Scalar pseudorange_;
 
-
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
     static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
                                         NodeBase* _correspondant_ptr = nullptr)
     {

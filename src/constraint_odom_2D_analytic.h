@@ -3,6 +3,7 @@
 
 //Wolf includes
 #include "constraint_relative_2D_analytic.h"
+#include <Eigen/StdVector>
 
 namespace wolf {
 

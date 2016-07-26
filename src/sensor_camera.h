@@ -34,27 +34,29 @@ class SensorCamera : public SensorBase
          **/
         SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, int _img_width, int _img_height);
 
-    SensorCamera(const Eigen::VectorXs & _extrinsics, const IntrinsicsCamera * _intrinsics_ptr);
+        SensorCamera(const Eigen::VectorXs & _extrinsics, const IntrinsicsCamera * _intrinsics_ptr);
 
-    /** \brief Default destructor (not recommended)
-     *
-     * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-     *
-     **/
-    virtual ~SensorCamera();
+        /** \brief Default destructor (not recommended)
+         *
+         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
+         *
+         **/
+        virtual ~SensorCamera();
 
-    Eigen::VectorXs getDistortionVector(){return distortion_;}
-    Eigen::VectorXs getCorrectionVector(){return correction_;}
-    int getImgWidth(){return img_width_;}
-    int getImgHeight(){return img_height_;}
+        Eigen::VectorXs getDistortionVector(){return distortion_;}
+        Eigen::VectorXs getCorrectionVector(){return correction_;}
+        int getImgWidth(){return img_width_;}
+        int getImgHeight(){return img_height_;}
 
     private:
-    int img_width_;
-    int img_height_;
-    Eigen::VectorXs distortion_;
-    Eigen::VectorXs correction_;
+        int img_width_;
+        int img_height_;
+        Eigen::VectorXs distortion_;
+        Eigen::VectorXs correction_;
 
     public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
         static SensorBase* create(const std::string & _unique_name, //
                                   const Eigen::VectorXs& _extrinsics, //
                                   const IntrinsicsBase* _intrinsics);

@@ -70,7 +70,7 @@ int main()
 
     // Capture to use as container for all incoming data
     t += dt;
-    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_ptr, data, data_cov);
+    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_ptr, data, data_cov, nullptr);
 
     for (int i = 0; i <= 8; i++)
     {

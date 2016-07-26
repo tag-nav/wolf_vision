@@ -12,7 +12,7 @@ bool LocalParametrizationWrapper::Plus(const double* x_raw, const double* delta_
 
 bool LocalParametrizationWrapper::ComputeJacobian(const double* x, double* jacobian) const
 {
-    Eigen::Map<const Eigen::VectorXs> x_map((Scalar*)x, GlobalSize());
+	Eigen::Map<const Eigen::VectorXs> x_map((Scalar*)x, GlobalSize());
     Eigen::Map<Eigen::MatrixXs> jacobian_map((Scalar*)jacobian, GlobalSize(), LocalSize());
     return local_parametrization_ptr_->computeJacobian(x_map, jacobian_map);
 };

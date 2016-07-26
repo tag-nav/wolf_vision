@@ -14,17 +14,48 @@
 
 namespace wolf {
 
+struct ProcessorParamsOdom2D : public ProcessorParamsBase
+{
+    Scalar dist_traveled_th_;
+    Scalar cov_det_th_;
+    Scalar elapsed_time_th_;
+};
+
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
-        ProcessorOdom2D();
+        ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th);
         virtual ~ProcessorOdom2D();
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
 
+        virtual bool voteForKeyFrame()
+        {
+            //std::cout << "ProcessorOdom2D::voteForKeyFrame: traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
+            if (getBufferPtr()->get().back().delta_integr_.norm() > dist_traveled_th_)
+            {
+                std::cout << "ProcessorOdom2D:: " << this->id() << "VOTE FOR KEY FRAME traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
+                return true;
+            }
+            if (getBufferPtr()->get().back().delta_integr_cov_.determinant() > cov_det_th_)
+            {
+                std::cout << "ProcessorOdom2D::  " << this->id() << "VOTE FOR KEY FRAME covariance det " << getBufferPtr()->get().back().delta_integr_cov_.determinant() << std::endl;
+                return true;
+            }
+            if (getBufferPtr()->get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > elapsed_time_th_)
+            {
+                std::cout << "ProcessorOdom2D::  " << this->id() << "VOTE FOR KEY FRAME elapsed time " << getBufferPtr()->get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;
+                return true;
+            }
+            return false;
+        }
+
     protected:
 //        virtual void preProcess(){}
 //        virtual void postProcess(){}
+        Scalar dist_traveled_th_;
+        Scalar cov_det_th_;
+        Scalar elapsed_time_th_;
 
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
@@ -44,8 +75,11 @@ class ProcessorOdom2D : public ProcessorMotion
             static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
-inline ProcessorOdom2D::ProcessorOdom2D() :
-        ProcessorMotion(PRC_ODOM_2D, 3, 3, 2)
+inline ProcessorOdom2D::ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th) :
+        ProcessorMotion(PRC_ODOM_2D, 3, 3, 2),
+        dist_traveled_th_(_traveled_dist_th),
+        cov_det_th_(_cov_det_th),
+        elapsed_time_th_(_elapsed_time_th)
 {
     setType("ODOM 2D");
 }
@@ -193,7 +227,7 @@ inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _m
     tmp.ts_ = _ts;
     tmp.delta_ = deltaZero();
     tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-    tmp.delta_integr_cov_ += Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-9;
+    tmp.delta_integr_cov_ += Eigen::MatrixXs::Zero(delta_size_, delta_size_);
     return tmp;
 }
 

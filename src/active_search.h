@@ -116,6 +116,8 @@ class ActiveSearchGrid {
         int margin_;
 
     public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
         /**
          * \brief Void constructor
          *

@@ -173,7 +173,7 @@ class Problem : public NodeBase
         FrameBase* createFrame(FrameKeyType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
-        /** \brief Get the state at last timestamp
+        /** \brief Get the state at last timestamp (and return timestamp via parameter)
          */
         Eigen::VectorXs getCurrentState();
         Eigen::VectorXs getCurrentState(TimeStamp& _ts);
@@ -184,6 +184,8 @@ class Problem : public NodeBase
          */
         Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
         void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
+
+        unsigned int getFrameStructureSize();
 
         /** \brief Give the permission to a processor to create a new keyFrame
          */
