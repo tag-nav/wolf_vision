@@ -91,10 +91,171 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
             polyline_landmark = (LandmarkPolyline2D*)(*landmark_it);
 
             // Check all overlapping positions between each feature-landmark pair
-            max_lmk = polyline_landmark->getNPoints() - 1;
-            max_offset = max_ftr;// - (!polyline_landmark->isFirstDefined() && !polyline_feature->isLastDefined() ? 1 : 0);
-            min_offset = -max_lmk;// + (!polyline_feature->isFirstDefined() && !polyline_landmark->isLastDefined() ? 1 : 0);
 
+
+
+            // Open landmark polyline
+            if (!polyline_landmark->isClosed())
+            {
+                max_lmk = polyline_landmark->getNPoints() - 1;
+                max_offset = max_ftr;
+                min_offset = -max_lmk;
+
+                // Check all overlapping positions between each feature-landmark pair
+                for (offset = min_offset; offset <= max_offset; offset++)
+                {
+                    if (offset == min_offset && !polyline_landmark->isLastDefined() && !polyline_feature->isFirstDefined())
+                        continue;
+
+                    if (offset == max_offset && !polyline_landmark->isFirstDefined() && !polyline_feature->isLastDefined())
+                        continue;
+
+                    from_lmk = std::max(0, -offset);
+                    from_ftr = std::max(0, offset);
+                    N_overlapped = std::min(max_ftr - from_ftr, max_lmk - from_lmk)+1;
+                    to_lmk = from_lmk+N_overlapped-1;
+                    to_ftr = from_ftr+N_overlapped-1;
+
+                    //std::cout << "\t\toffset " << offset << std::endl;
+                    //std::cout << "\t\t\tfrom_lmk " << from_lmk << std::endl;
+                    //std::cout << "\t\t\tfrom_ftr " << from_ftr << std::endl;
+                    //std::cout << "\t\t\tN_overlapped " << N_overlapped << std::endl;
+
+                    // Compute the squared distance for all overlapped points
+                    Eigen::ArrayXXd d = (polyline_feature->getPoints().block(0,from_ftr, 2,N_overlapped) -
+                                         expected_features[*landmark_it].block(0,from_lmk, 2, N_overlapped)).array();
+
+                    Eigen::ArrayXd dist2 = d.row(0).pow(2) + d.row(1).pow(2);
+                    //std::cout << "\t\t\tsquared distances = " << dist2.transpose() << std::endl;
+
+                    if (offset != min_offset && offset != max_offset)
+                    {
+                        // Point-to-line first distance
+                        bool from_ftr_not_defined = (from_ftr == 0 && !polyline_feature->isFirstDefined());
+                        bool from_lmk_not_defined = (from_lmk == 0 && !polyline_landmark->isFirstDefined());
+                        //std::cout << "\t\tfrom_ftr_not_defined " << from_ftr_not_defined << (from_ftr == 0) << !polyline_feature->isFirstDefined() << std::endl;
+                        //std::cout << "\t\tfrom_lmk_not_defined " << from_lmk_not_defined << (from_lmk == 0) << !polyline_landmark->isFirstDefined() << std::endl;
+                        if (from_ftr_not_defined || from_lmk_not_defined)
+                        {
+                            //std::cout << "\t\t\tFirst feature not defined distance to line" << std::endl;
+                            //std::cout << "\t\t\tA" << expected_features[*landmark_it].col(from_lmk).transpose() << std::endl;
+                            //std::cout << "\t\t\tAaux" << expected_features[*landmark_it].col(from_lmk+1).transpose() << std::endl;
+                            //std::cout << "\t\t\tB" << polyline_feature->getPoints().col(from_ftr).transpose() << std::endl;
+                            dist2(0) = sqDistPointToLine(expected_features[*landmark_it].col(from_lmk),
+                                                         expected_features[*landmark_it].col(from_lmk+1),
+                                                         polyline_feature->getPoints().col(from_ftr),
+                                                         !from_lmk_not_defined,
+                                                         !from_ftr_not_defined);
+                        }
+
+                        // Point-to-line last distance
+                        bool last_ftr_not_defined = !polyline_feature->isLastDefined() && to_ftr == max_ftr;
+                        bool last_lmk_not_defined = !polyline_landmark->isLastDefined() && to_lmk == max_lmk;
+                        //std::cout << "\t\tlast_ftr_not_defined " << last_ftr_not_defined << (to_ftr == max_ftr) << !polyline_feature->isLastDefined() << std::endl;
+                        //std::cout << "\t\tlast_lmk_not_defined " << last_lmk_not_defined << (to_lmk == max_lmk) << !polyline_landmark->isLastDefined() << std::endl;
+                        if (last_ftr_not_defined || last_lmk_not_defined)
+                        {
+                            //std::cout << "\t\t\tLast feature not defined distance to line" << std::endl;
+                            //std::cout << "\t\t\tA" << expected_features[*landmark_it].col(to_lmk).transpose() << std::endl;
+                            //std::cout << "\t\t\tAaux" << expected_features[*landmark_it].col(to_lmk-1).transpose() << std::endl;
+                            //std::cout << "\t\t\tB" << polyline_feature->getPoints().col(to_ftr).transpose() << std::endl;
+                            dist2(N_overlapped-1) = sqDistPointToLine(expected_features[*landmark_it].col(to_lmk),
+                                                                      expected_features[*landmark_it].col(to_lmk-1),
+                                                                      polyline_feature->getPoints().col(to_ftr),
+                                                                      !last_lmk_not_defined,
+                                                                      !last_ftr_not_defined);
+                        }
+                    }
+                    //std::cout << "\t\t\tsquared distances = " << dist2.transpose() << std::endl;
+
+                    // All squared distances should be witin a threshold
+                    // Choose the most overlapped one
+                    if ((dist2 < params_.position_error_th*params_.position_error_th).all() && (best_match == nullptr ||
+                                                                                  (N_overlapped >= best_match->feature_match_to_id_-best_match->feature_match_from_id_+1 &&
+                                                                                   dist2.mean() < best_match->normalized_score_ )))
+                    {
+                        //std::cout << "BEST MATCH" << std::endl;
+                        best_match = new LandmarkPolylineMatch();
+                        best_match->feature_match_from_id_= from_ftr;
+                        best_match->landmark_match_from_id_= from_lmk+polyline_landmark->getFirstId();
+                        best_match->feature_match_to_id_= from_ftr+N_overlapped-1;
+                        best_match->landmark_match_to_id_= from_lmk+N_overlapped-1+polyline_landmark->getFirstId();
+                        best_match->landmark_ptr_=polyline_landmark;
+                        best_match->normalized_score_ = dist2.mean();
+                    }
+                }
+            }
+            // Closed landmark polyline
+            else
+            {
+                if (polyline_feature->getNPoints() > polyline_landmark->getNPoints())
+                    continue;
+
+                // Check all overlapping positions between each feature-landmark pair
+                for (offset = -polyline_landmark->getNPoints() + 1; offset <= 0; offset++)
+                {
+                    from_lmk = -offset;
+                    to_lmk = from_lmk+polyline_feature->getNPoints()-1;
+                    if (to_lmk >= polyline_landmark->getNPoints())
+                        to_lmk -= polyline_landmark->getNPoints();
+
+                    //std::cout << "\t\toffset " << offset << std::endl;
+                    //std::cout << "\t\t\tfrom_lmk " << from_lmk << std::endl;
+                    //std::cout << "\t\t\tto_lmk " << to_lmk << std::endl;
+
+                    // Compute the squared distance for all overlapped points
+                    Eigen::ArrayXXd d = polyline_feature->getPoints().topRows(2).array();
+                    if (to_lmk > from_lmk)
+                        d -= expected_features[*landmark_it].block(0,from_lmk, 2, polyline_feature->getNPoints()).array();
+                    else
+                    {
+                        d.leftCols(polyline_landmark->getNPoints()-from_lmk) -= expected_features[*landmark_it].block(0,from_lmk, 2, polyline_landmark->getNPoints()-from_lmk).array();
+                        d.rightCols(to_lmk+1) -= expected_features[*landmark_it].block(0, 0, 2, to_lmk+1).array();
+                    }
+                    Eigen::ArrayXd dist2 = d.row(0).pow(2) + d.row(1).pow(2);
+                    //std::cout << "\t\t\tsquared distances = " << dist2.transpose() << std::endl;
+
+                    if (offset != min_offset && offset != max_offset)
+                    {
+                        // Point-to-line first distance
+                        if (!polyline_feature->isFirstDefined())
+                        {
+                            int next_from_lmk = (from_lmk+1 == polyline_landmark->getNPoints() ? 0 : from_lmk+1);
+                            dist2(0) = sqDistPointToLine(expected_features[*landmark_it].col(from_lmk),
+                                                         expected_features[*landmark_it].col(next_from_lmk),
+                                                         polyline_feature->getPoints().col(0),
+                                                         true,
+                                                         false);
+                        }
+
+                        // Point-to-line last distance
+                        if (!polyline_feature->isLastDefined())
+                        {
+                            int prev_to_lmk = (to_lmk == 0 ? polyline_landmark->getNPoints()-1 : to_lmk-1);
+                            dist2(polyline_feature->getNPoints()-1) = sqDistPointToLine(expected_features[*landmark_it].col(to_lmk),
+                                                                                        expected_features[*landmark_it].col(prev_to_lmk),
+                                                                                        polyline_feature->getPoints().col(polyline_feature->getNPoints()-1),
+                                                                                        true,
+                                                                                        false);
+                        }
+                    }
+                    //std::cout << "\t\t\tsquared distances = " << dist2.transpose() << std::endl;
+
+                    // All squared distances should be witin a threshold
+                    // Choose the most overlapped one
+                    if ((dist2 < params_.position_error_th*params_.position_error_th).all() && (best_match == nullptr || dist2.mean() < best_match->normalized_score_ ))
+                    {
+                        //std::cout << "BEST MATCH" << std::endl;
+                        best_match = new LandmarkPolylineMatch();
+                        best_match->feature_match_from_id_= 0;
+                        best_match->landmark_match_from_id_= from_lmk+polyline_landmark->getFirstId();
+                        best_match->feature_match_to_id_= polyline_feature->getNPoints()-1;
+                        best_match->landmark_match_to_id_= to_lmk+polyline_landmark->getFirstId();
+                        best_match->landmark_ptr_=polyline_landmark;
+                        best_match->normalized_score_ = dist2.mean();
+                    }
+                }
+            }
 
             //std::cout << "landmark " << (*landmark_it)->id() << ": 0-" << max_lmk << " - defined " << polyline_landmark->isFirstDefined() << polyline_landmark->isLastDefined() << std::endl;
             //std::cout << "feature " << (*feature_it)->id() << ": 0-" << max_ftr << " - defined " << polyline_feature->isFirstDefined() << polyline_feature->isLastDefined() << std::endl;
@@ -106,89 +267,7 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
             //if (!polyline_feature->isFirstDefined() && !polyline_landmark->isLastDefined())
             //    std::cout << "\tLIMITED min offset " << min_offset << std::endl;
 
-            // Check all overlapping positions between each feature-landmark pair
-            for (offset = min_offset; offset <= max_offset; offset++)
-            {
-                if (offset == min_offset && !polyline_landmark->isLastDefined() && !polyline_feature->isFirstDefined())
-                    continue;
 
-                if (offset == max_offset && !polyline_landmark->isFirstDefined() && !polyline_feature->isLastDefined())
-                    continue;
-
-                from_lmk = std::max(0, -offset);
-                from_ftr = std::max(0, offset);
-                N_overlapped = std::min(max_ftr - from_ftr, max_lmk - from_lmk)+1;
-                to_lmk = from_lmk+N_overlapped-1;
-                to_ftr = from_ftr+N_overlapped-1;
-
-                //std::cout << "\t\toffset " << offset << std::endl;
-                //std::cout << "\t\t\tfrom_lmk " << from_lmk << std::endl;
-                //std::cout << "\t\t\tfrom_ftr " << from_ftr << std::endl;
-                //std::cout << "\t\t\tN_overlapped " << N_overlapped << std::endl;
-
-                // Compute the squared distance for all overlapped points
-                Eigen::ArrayXXd d = (polyline_feature->getPoints().block(0,from_ftr, 2,N_overlapped) -
-                                     expected_features[*landmark_it].block(0,from_lmk, 2, N_overlapped)).array();
-
-                Eigen::ArrayXd dist2 = d.row(0).pow(2) + d.row(1).pow(2);
-                //std::cout << "\t\t\tsquared distances = " << dist2.transpose() << std::endl;
-
-                if (offset != min_offset && offset != max_offset)
-                {
-                    // Point-to-line first distance
-                    bool from_ftr_not_defined = (from_ftr == 0 && !polyline_feature->isFirstDefined());
-                    bool from_lmk_not_defined = (from_lmk == 0 && !polyline_landmark->isFirstDefined());
-                    //std::cout << "\t\tfrom_ftr_not_defined " << from_ftr_not_defined << (from_ftr == 0) << !polyline_feature->isFirstDefined() << std::endl;
-                    //std::cout << "\t\tfrom_lmk_not_defined " << from_lmk_not_defined << (from_lmk == 0) << !polyline_landmark->isFirstDefined() << std::endl;
-                    if (from_ftr_not_defined || from_lmk_not_defined)
-                    {
-                        //std::cout << "\t\t\tFirst feature not defined distance to line" << std::endl;
-                        //std::cout << "\t\t\tA" << expected_features[*landmark_it].col(from_lmk).transpose() << std::endl;
-                        //std::cout << "\t\t\tAaux" << expected_features[*landmark_it].col(from_lmk+1).transpose() << std::endl;
-                        //std::cout << "\t\t\tB" << polyline_feature->getPoints().col(from_ftr).transpose() << std::endl;
-                        dist2(0) = sqDistPointToLine(expected_features[*landmark_it].col(from_lmk),
-                                                     expected_features[*landmark_it].col(from_lmk+1),
-                                                     polyline_feature->getPoints().col(from_ftr),
-                                                     !from_lmk_not_defined,
-                                                     !from_ftr_not_defined);
-                    }
-
-                    // Point-to-line last distance
-                    bool last_ftr_not_defined = !polyline_feature->isLastDefined() && to_ftr == max_ftr;
-                    bool last_lmk_not_defined = !polyline_landmark->isLastDefined() && to_lmk == max_lmk;
-                    //std::cout << "\t\tlast_ftr_not_defined " << last_ftr_not_defined << (to_ftr == max_ftr) << !polyline_feature->isLastDefined() << std::endl;
-                    //std::cout << "\t\tlast_lmk_not_defined " << last_lmk_not_defined << (to_lmk == max_lmk) << !polyline_landmark->isLastDefined() << std::endl;
-                    if (last_ftr_not_defined || last_lmk_not_defined)
-                    {
-                        //std::cout << "\t\t\tLast feature not defined distance to line" << std::endl;
-                        //std::cout << "\t\t\tA" << expected_features[*landmark_it].col(to_lmk).transpose() << std::endl;
-                        //std::cout << "\t\t\tAaux" << expected_features[*landmark_it].col(to_lmk-1).transpose() << std::endl;
-                        //std::cout << "\t\t\tB" << polyline_feature->getPoints().col(to_ftr).transpose() << std::endl;
-                        dist2(N_overlapped-1) = sqDistPointToLine(expected_features[*landmark_it].col(to_lmk),
-                                                                  expected_features[*landmark_it].col(to_lmk-1),
-                                                                  polyline_feature->getPoints().col(to_ftr),
-                                                                  !last_lmk_not_defined,
-                                                                  !last_ftr_not_defined);
-                    }
-                }
-                //std::cout << "\t\t\tsquared distances = " << dist2.transpose() << std::endl;
-
-                // All squared distances should be witin a threshold
-                // Choose the most overlapped one
-                if ((dist2 < params_.position_error_th*params_.position_error_th).all() && (best_match == nullptr ||
-                                                                              (N_overlapped >= best_match->feature_match_to_id_-best_match->feature_match_from_id_+1 &&
-                                                                               dist2.mean() < best_match->normalized_score_ )))
-                {
-                    //std::cout << "BEST MATCH" << std::endl;
-                    best_match = new LandmarkPolylineMatch();
-                    best_match->feature_match_from_id_= from_ftr;
-                    best_match->landmark_match_from_id_= from_lmk+polyline_landmark->getFirstId();
-                    best_match->feature_match_to_id_= from_ftr+N_overlapped-1;
-                    best_match->landmark_match_to_id_= from_lmk+N_overlapped-1+polyline_landmark->getFirstId();
-                    best_match->landmark_ptr_=polyline_landmark;
-                    best_match->normalized_score_ = dist2.mean();
-                }
-            }
         }
         // Match found for this feature
         if (best_match != nullptr)
