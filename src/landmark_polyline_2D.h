@@ -21,6 +21,7 @@ class LandmarkPolyline2D : public LandmarkBase
         int first_id_;
         bool first_defined_;            ///< Wether the first point is an extreme of a line or the line may continue
         bool last_defined_;             ///< Wether the last point is an extreme of a line or the line may continue
+        bool closed_;                   ///< Wether the polyline is closed or not
 
     public:
         LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined);
@@ -34,6 +35,10 @@ class LandmarkPolyline2D : public LandmarkBase
          **/
         bool isFirstDefined() const;
         bool isLastDefined() const;
+
+        /** \brief Gets wether the polyline is closed or not
+         **/
+        bool isClosed() const;
 
         /** \brief Gets wether the given state block point is defined or not (assumes the state block is in the landmark)
          **/
@@ -75,6 +80,10 @@ class LandmarkPolyline2D : public LandmarkBase
          **/
         virtual void defineExtreme(const bool _back);
 
+        /** \brief Set the polyline as closed
+         **/
+        virtual void setClosed();
+
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
@@ -93,6 +102,11 @@ inline bool LandmarkPolyline2D::isFirstDefined() const
 inline bool LandmarkPolyline2D::isLastDefined() const
 {
     return last_defined_;
+}
+
+inline bool LandmarkPolyline2D::isClosed() const
+{
+    return closed_;
 }
 
 inline bool LandmarkPolyline2D::isDefined(StateBlock* _state_block) const
@@ -122,6 +136,12 @@ inline int LandmarkPolyline2D::getLastId() const {
 inline std::vector<StateBlock*> LandmarkPolyline2D::getStateBlockVector() const
 {
     return std::vector<StateBlock*>(point_state_ptr_vector_.begin(), point_state_ptr_vector_.end());
+}
+
+inline void LandmarkPolyline2D::setClosed()
+{
+    assert(first_defined_ && last_defined_ && "closing a polyline with a non-defined extreme");
+    closed_ = true;
 }
 
 } /* namespace wolf */
