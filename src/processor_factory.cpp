@@ -31,14 +31,14 @@ bool ProcessorFactory::unregisterCreator(const std::string& _processor_type)
 
 ProcessorBase* ProcessorFactory::create(const std::string& _processor_type, const std::string& _name, const ProcessorParamsBase* _params)
 {
-    CallbackMap::const_iterator i = callbacks_.find(_processor_type);
-    if (i == callbacks_.end())
+    CallbackMap::const_iterator creator_callback_it = callbacks_.find(_processor_type);
+    if (creator_callback_it == callbacks_.end())
     {
         // not found
         throw std::runtime_error("Unknown Processor type");
     }
     // Invoke the creation function
-    return (i->second)(_name, _params);
+    return (creator_callback_it->second)(_name, _params);
 }
 
 ProcessorFactory& ProcessorFactory::get() // Unique point of access;

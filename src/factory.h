@@ -70,12 +70,12 @@ inline bool Factory<TypeBase>::unregisterCreator(const std::string& _type)
 template<class TypeBase>
 inline TypeBase* Factory<TypeBase>::create(const std::string& _type, const std::string& _filename)
 {
-    typename CallbackMap::const_iterator i = callbacks_.find(_type);
-    if (i == callbacks_.end())
+    typename CallbackMap::const_iterator creator_callback_it = callbacks_.find(_type);
+    if (creator_callback_it == callbacks_.end())
         // not found
         throw std::runtime_error("Unknown type. Possibly you tried to use an unregistered creator.");
     // Invoke the creation function
-    TypeBase* p = (i->second)(_filename);
+    TypeBase* p = (creator_callback_it->second)(_filename);
     return p;
 }
 
@@ -99,12 +99,14 @@ inline std::string Factory<TypeBase>::getClass()
 
 #include "sensor_base.h"
 #include "processor_base.h"
+#include "landmark_base.h"
 
 namespace wolf
 {
 
 typedef Factory<IntrinsicsBase>      IntrinsicsFactory;
 typedef Factory<ProcessorParamsBase> ProcessorParamsFactory;
+typedef Factory<LandmarkBase>        LandmarkFactory;
 
 template<>
 inline std::string Factory<IntrinsicsBase>::getClass()
@@ -116,6 +118,12 @@ template<>
 inline std::string Factory<ProcessorParamsBase>::getClass()
 {
     return "ProcessorParamsFactory";
+}
+
+template<>
+inline std::string Factory<LandmarkBase>::getClass()
+{
+    return "LandmarkFactory";
 }
 
 

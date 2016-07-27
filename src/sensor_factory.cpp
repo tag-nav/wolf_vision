@@ -30,14 +30,14 @@ bool SensorFactory::unregisterCreator(const std::string& _sensor_type)
 
 SensorBase* SensorFactory::create(const std::string& _sensor_type, const std::string& _name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics)
 {
-    CallbackMap::const_iterator i = callbacks_.find(_sensor_type);
-    if (i == callbacks_.end())
+    CallbackMap::const_iterator creator_callback_it = callbacks_.find(_sensor_type);
+    if (creator_callback_it == callbacks_.end())
     {
         // not found
         throw std::runtime_error("Unknown Sensor type");
     }
     // Invoke the creation function
-    return (i->second)(_name, _extrinsics, _intrinsics);
+    return (creator_callback_it->second)(_name, _extrinsics, _intrinsics);
 }
 
 // Singleton ---------------------------------------------------
