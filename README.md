@@ -104,6 +104,32 @@ libglog.so will be installed at **/usr/local/lib**
     
 libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/include/ceres**
 
+### Yaml-cpp. Wolf uses YAML files for configuration and for saving and loading workspaces.
+
+**(1)** Obtain:
+
+  - Ubuntu:
+   
+   `$ sudo apt-get install libyaml-cpp-dev`
+
+  - Mac:
+  
+    `$ brew install yaml-cpp`
+    
+We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
+
+**(2)** Configure
+
+  - Ubuntu
+  
+  You need to define an environment variable pointing to WOLF. In your `.bashrc` or `.bash_profile`, add
+  
+  `setenv WOLF_ROOT <your wolf path> # e.g. /home/jsola/dev/wolf`
+  
+  If you are using Eclipse or other GUIs and you want this environment variable to be accessed by them, edit the file `/etc/environment` and add this line:
+  
+  `WOLF_ROOT="<your wolf path>" # e.g. /home/jsola/dev/wolf`
+    
 ### Laser Scan Utils (Optional. Install only if you want to use IRI's laser scan utils)
 
 **(1)** Download:
@@ -133,20 +159,6 @@ Or, in case you don't have permissions:
     $ cmake ..
     $ make
     $ sudo make install
-    
-### Yaml-cpp (Optional. Install only if you want to use YAML for parsing your configuration files)
-
-**(1)** Obtain:
-
-  - Ubuntu:
-   
-   `$ sudo apt-get install libyaml-cpp-dev`
-
-  - Mac:
-  
-    `$ brew install yaml-cpp`
-    
-We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
     
 Download and build
 ------------------
