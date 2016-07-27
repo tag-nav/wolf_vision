@@ -188,7 +188,7 @@ Proceed as follows:
         source ~/.bash_profile    // or ~/.bashrc, of course
         ````
 
-  2. If you are using Eclipse or other GUIs and you want this environment variable to be accessed by them, edit the file `/etc/environment` and add this line:
+  2. If you are using Eclipse or other GUIs and you want this environment variable to be accessed by them, edit the file `/etc/environment` (you need to use `sudo`) and add this line:
   
   `WOLF_ROOT="<your wolf path>" # e.g. /home/jsola/dev/wolf`
 
