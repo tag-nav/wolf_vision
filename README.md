@@ -174,41 +174,52 @@ Usually, these files are out of the WOLF project. But for testing purposes, some
 
 Proceed as follows:
 
-  1. To run from __Terminal__ (the default), you need to create an environment variable WOLF_ROOT pointing to where the wolf project is
-     - Edit file ````~/.bashrc````, or ````~/.bash_profile````, and add these lines:
-    
-        ````
+1. To run from __Terminal__ (the default), you need to create an environment variable WOLF_ROOT pointing to where the wolf project is.
+   
+   Edit file `~/.bashrc`, or `~/.bash_profile`, and add these lines:
+
         # WOLF
         export WOLF_ROOT="/abs/path/to/wolf"
-        ````
 
-    - Then you need to source the file to get effect, 
+   Then you need to source the file to get effect, 
 
-        ````
         source ~/.bash_profile    // or ~/.bashrc, of course
-        ````
 
-  2. If you are using Eclipse or other GUIs and you want this environment variable to be accessed by them, edit the file `/etc/environment` (you need to use `sudo`) and add this line:
+2. If you are using Eclipse or other GUIs and you want this environment variable to be accessed by them, edit the file `/etc/environment` (you need to use `sudo`) and add this line:
   
-  `WOLF_ROOT="<your wolf path>" # e.g. /home/jsola/dev/wolf`
+        WOLF_ROOT="/abs/path/to/wolf"
+     
+  Then reboot your machine.
 
   Alternatively, you can set up the environment variables in your GUIs only. Follow these guidelines:
   
-   - If you run your application from __eclipse__, do:
-      - Menu Run > Run configurations...
-      - Add, or edit, a run configuration for the executable you want to run
-      - Click on tab 'Environment'
-      - Add a variable named ````WOLF_ROOT````, with value ````/abs/path/to/wolf````
+ - If you run your application from __eclipse__, do:  
+    
+  - Menu Run > Run configurations...  
+    
+   - Add, or edit, a run configuration for the executable you want to run  
+    
+   - Click on tab 'Environment'  
+    
+   - Add a variable named `WOLF_ROOT`, with value `/abs/path/to/wolf`  
 
-   - If you run from __QtCreator__
-      - Click on Left bar > Projects > Tab 'Build'
-         - Under 'Build Environment', click 'Details'
-             - Add variable `WOLF_ROOT` with value `/abs/path/to/wolf`
-      - Click on Tab 'Run'
-         - Select your Run configuration
-         - Under 'Run Environment', make sure it says 'Use Build Environment'
-         - If not, click on 'Details' 
-             - Under 'Base environment for this run configuration', select 'Build Environment'
+ - If you run from __QtCreator__  
+    
+  - Click on Left bar > Projects > Tab 'Build'  
+    
+   - Under 'Build Environment', click 'Details'  
+    
+   - Add variable `WOLF_ROOT` with value `/abs/path/to/wolf`  
+    
+  - Click on Tab 'Run'  
+    
+   - Select your Run configuration  
+    
+   - Under 'Run Environment', make sure it says 'Use Build Environment'  
+    
+   - If not, click on 'Details'   
+    
+   - Under 'Base environment for this run configuration', select 'Build Environment'  
 
 ### Wolf ROS Node
 
