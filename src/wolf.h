@@ -152,7 +152,9 @@ typedef enum
     CTR_IMG_PNT_TO_EP,          ///< constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_EPIPOLAR,               ///< Epipolar constraint
-    CTR_EPIPOLAR_NL             ///< Epipolar constraint
+    CTR_AHP,                    ///< Anchored Homogeneous Point constraint
+    CTR_AHP_NL                  ///< Anchored Homogeneous Point constraint (temporal, to be removed)
+
 } ConstraintType;
 
 /** \brief Enumeration of constraint categories
@@ -260,7 +262,8 @@ typedef enum
     LANDMARK_CORNER,    ///< A corner landmark (2D)
     LANDMARK_CONTAINER,  ///< A container landmark (2D)
     LANDMARK_LINE_2D,  ///< A line landmark (2D)
-    LANDMARK_POLYLINE_2D   ///< A polyline landmark (2D)
+    LANDMARK_POLYLINE_2D,   ///< A polyline landmark (2D)
+    LANDMARK_AHP        ///< An anchored homogeneous point (3D)
 } LandmarkType;
 
 typedef enum

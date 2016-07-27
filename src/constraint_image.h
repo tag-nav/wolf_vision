@@ -25,7 +25,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
         ConstraintImage(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, LandmarkAHP* _landmark_ptr,
                         bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_EPIPOLAR, _landmark_ptr, _apply_loss_function, _status,
+                ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP, _landmark_ptr, _apply_loss_function, _status,
                                              _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _landmark_ptr->getAnchorFrame()->getPPtr()
                                                    ,_landmark_ptr->getAnchorFrame()->getOPtr(),_landmark_ptr->getPPtr()),
                 intrinsics_(_ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()->getVector()),
@@ -35,7 +35,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                 anchor_o_(_landmark_ptr->getAnchorFrame()->getOPtr()->getVector()),
                 feature_image_(*((FeaturePointImage*)_ftr_ptr))
         {
-            setType("IMAGE");
+            setType("AHP");
 
         }
 
