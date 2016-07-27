@@ -39,7 +39,25 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
         {
-            // TODO: all the work to be done here
+            Eigen::Vector3s measured_acc(_data.head(3));        // acc  = data[0:2]
+            Eigen::Vector3s measured_gyro(_data.segment(4,6));  // gyro = data[3:5]
+            Eigen::Vector3s bias_acc(_data.segment(7,9));       // acc_bias  = data[7:9]
+            Eigen::Vector3s bias_gyro(_data.segment(10,12));    // gyro_bias = data[10:12]
+
+            /// Quaternion delta
+            Eigen::VectorXs d_theta = (measured_gyro - bias_gyro) * _dt;
+            Eigen::Quaternions d_q;
+            Eigen::v2q(d_theta, d_q);
+
+            /// Velocity delta
+            Eigen::Vector3s d_V = d_q._transformVector((measured_acc - bias_acc) * _dt);
+
+            /// Position delta
+            Eigen::Vector3s d_p = d_V * _dt;
+
+            _delta.segment(0,2) = d_theta;
+            _delta.segment(3,5) = d_V;
+            _delta.segment(6,8) = d_p;
         }
 
         /** \brief composes a delta-state on top of a state
@@ -51,7 +69,7 @@ class ProcessorIMU : public ProcessorMotion{
          */
         virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
         {
-            // TODO: all the work to be done here
+
         }
 
         /** \brief composes a delta-state on top of another delta-state
@@ -63,7 +81,10 @@ class ProcessorIMU : public ProcessorMotion{
          */
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
         {
-            // TODO: all the work to be done here
+          // TODO assert size
+          // TODO : quaternion / angle update
+          _delta1_plus_delta2.segment(3,5) = _delta1.segment(3,5) + _delta2.segment(3,5); // velocity update
+          _delta1_plus_delta2.segment(6,8) = _delta1.segment(6,8) + _delta2.segment(6,8); // position update
         }
 
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -111,6 +132,9 @@ class ProcessorIMU : public ProcessorMotion{
 //        CaptureIMU* capture_imu_ptr_; //specific pointer to capture imu data object
 
     private:
+        Eigen::Vector3s delta_V_;
+        Eigen::Vector3s delta_p_;
+
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
         ///< (first-order propagation from *measurementCovariance*).
         Eigen::Matrix<Scalar,9,9> preint_meas_cov_;
