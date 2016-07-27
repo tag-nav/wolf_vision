@@ -117,18 +117,6 @@ libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/i
     `$ brew install yaml-cpp`
     
 We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
-
-**(2)** Configure
-
-  - Ubuntu
-  
-  You need to define an environment variable pointing to WOLF. In your `.bashrc` or `.bash_profile`, add
-  
-  `setenv WOLF_ROOT <your wolf path> # e.g. /home/jsola/dev/wolf`
-  
-  If you are using Eclipse or other GUIs and you want this environment variable to be accessed by them, edit the file `/etc/environment` and add this line:
-  
-  `WOLF_ROOT="<your wolf path>" # e.g. /home/jsola/dev/wolf`
     
 ### Laser Scan Utils (Optional. Install only if you want to use IRI's laser scan utils)
 
@@ -200,17 +188,23 @@ Proceed as follows:
         source ~/.bash_profile    // or ~/.bashrc, of course
         ````
 
-  2. If you run your application from __eclipse__, do:
-     - Menu Run > Run configurations...
-     - Add, or edit, a run configuration for the executable you want to run
-     - Click on tab 'Environment'
-     - Add a variable named ````WOLF_ROOT````, with value ````/abs/path/to/wolf````
+  2. If you are using Eclipse or other GUIs and you want this environment variable to be accessed by them, edit the file `/etc/environment` and add this line:
+  
+  `WOLF_ROOT="<your wolf path>" # e.g. /home/jsola/dev/wolf`
 
-  3. If you run from __QtCreator__
-     - Click on Left bar > Projects > Tab 'Build'
+  Alternatively, you can set up the environment variables in your GUIs only. Follow these guidelines:
+  
+   - If you run your application from __eclipse__, do:
+      - Menu Run > Run configurations...
+      - Add, or edit, a run configuration for the executable you want to run
+      - Click on tab 'Environment'
+      - Add a variable named ````WOLF_ROOT````, with value ````/abs/path/to/wolf````
+
+   - If you run from __QtCreator__
+      - Click on Left bar > Projects > Tab 'Build'
          - Under 'Build Environment', click 'Details'
              - Add variable `WOLF_ROOT` with value `/abs/path/to/wolf`
-     - Click on Tab 'Run'
+      - Click on Tab 'Run'
          - Select your Run configuration
          - Under 'Run Environment', make sure it says 'Use Build Environment'
          - If not, click on 'Details' 
