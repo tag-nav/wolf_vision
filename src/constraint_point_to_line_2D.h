@@ -8,7 +8,7 @@
 
 namespace wolf {
 
-class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,2>
+class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
 {
     protected:
 		int point_id_;
@@ -19,10 +19,10 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,2>
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;  ///<  the squared root information matrix
 	public:
-		static const unsigned int N_BLOCKS = 3;
+		static const unsigned int N_BLOCKS = 6;
 
 		ConstraintPointToLine2D(FeaturePolyline2D* _ftr_ptr, LandmarkPolyline2D* _lmk_ptr, unsigned int _ftr_point_id, int _lmk_point_id,  int _lmk_point_aux_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-			ConstraintSparse<1,2,1,2,2>(CTR_POINT_TO_LINE_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id), _lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)),
+			ConstraintSparse<1,2,1,2,1,2,2>(CTR_POINT_TO_LINE_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id), _lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)),
 			point_id_(_lmk_point_id), point_aux_id_(_lmk_point_aux_id), point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), point_aux_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
 		{
 			//std::cout << "ConstraintPointToLine2D" << std::endl;
@@ -68,7 +68,7 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,2>
         }
 
 		template <typename T>
-        bool operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkP, const T* const _landmarkPaux, T* _residuals) const;
+        bool operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkOriginPosition, const T* const _landmarkOriginOrientation, const T* const _landmarkPoint, const T* const _landmarkPointAux, T* _residuals) const;
 
         /** \brief Returns the jacobians computation method
          *
@@ -103,13 +103,17 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,2>
 };
 
 template<typename T>
-inline bool ConstraintPointToLine2D::operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkP, const T* const _landmarkPaux, T* _residuals) const
+inline bool ConstraintPointToLine2D::operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkOriginPosition, const T* const _landmarkOriginOrientation, const T* const _landmarkPoint, const T* const _landmarkPointAux, T* _residuals) const
 {
 	//std::cout << "ConstraintPointToLine2D::operator" << std::endl;
     // Mapping
-    Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_position_map(_landmarkP);
-    Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_aux_position_map(_landmarkPaux);
+    Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_origin_position_map(_landmarkOriginPosition);
+    Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_position_map(_landmarkPoint);
+    Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_aux_position_map(_landmarkPointAux);
     Eigen::Map<const Eigen::Matrix<T,2,1>> robot_position_map(_robotP);
+
+    Eigen::Matrix<T,2,1> landmark_point = landmark_origin_position_map + Eigen::Rotation2D<T>(*_landmarkOriginOrientation) * landmark_position_map;
+    Eigen::Matrix<T,2,1> landmark_point_aux = landmark_origin_position_map + Eigen::Rotation2D<T>(*_landmarkOriginOrientation) * landmark_aux_position_map;
 
     // sensor transformation
     Eigen::Matrix<T,2,1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getVector().head(2).cast<T>();
@@ -118,8 +122,8 @@ inline bool ConstraintPointToLine2D::operator ()(const T* const _robotP, const T
     Eigen::Matrix<T,2,2> inverse_R_robot = Eigen::Rotation2D<T>(-_robotO[0]).matrix();
 
     // Expected measurement
-    Eigen::Matrix<T,2,1> expected_P = inverse_R_sensor * (inverse_R_robot * (landmark_position_map - robot_position_map) - sensor_position);
-    Eigen::Matrix<T,2,1> expected_Paux = inverse_R_sensor * (inverse_R_robot * (landmark_aux_position_map - robot_position_map) - sensor_position);
+    Eigen::Matrix<T,2,1> expected_P = inverse_R_sensor * (inverse_R_robot * (landmark_point - robot_position_map) - sensor_position);
+    Eigen::Matrix<T,2,1> expected_Paux = inverse_R_sensor * (inverse_R_robot * (landmark_point_aux - robot_position_map) - sensor_position);
 
     // Case projection inside the segment P-Paux
 
