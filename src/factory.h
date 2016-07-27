@@ -14,23 +14,26 @@
 #include <iostream>
 #include <iomanip>
 
+// yaml
+#include <yaml-cpp/yaml.h>
+
 namespace wolf
 {
 
 /** \brief singleton factory
  * \param TypeBase          base type of all the objects created by the factory
  */
-template<class TypeBase>
+template<class TypeBase, class TypeInput>
 class Factory
 {
     public:
-         typedef TypeBase* (*CreatorCallback)(const std::string & _filename); // example of creator callback (see typedefs below)
+        typedef TypeBase* (*CreatorCallback)(const TypeInput & _input); // example of creator callback (see typedefs below)
     private:
         typedef std::map<std::string, CreatorCallback> CallbackMap;
     public:
         bool registerCreator(const std::string& _type, CreatorCallback createFn);
         bool unregisterCreator(const std::string& _type);
-        TypeBase* create(const std::string& _type, const std::string& _filename = "");
+        TypeBase* create(const std::string& _type, const TypeInput& _input = "");
         std::string getClass();
 
     private:
@@ -49,8 +52,8 @@ class Factory
         ~Factory() { }
 };
 
-template<class TypeBase>
-inline bool Factory<TypeBase>::registerCreator(const std::string& _type, CreatorCallback createFn)
+template<class TypeBase, class TypeInput>
+inline bool Factory<TypeBase, TypeInput>::registerCreator(const std::string& _type, CreatorCallback createFn)
 {
     bool reg = callbacks_.insert(typename CallbackMap::value_type(_type, createFn)).second;
     if (reg)
@@ -61,33 +64,33 @@ inline bool Factory<TypeBase>::registerCreator(const std::string& _type, Creator
     return reg;
 }
 
-template<class TypeBase>
-inline bool Factory<TypeBase>::unregisterCreator(const std::string& _type)
+template<class TypeBase, class TypeInput>
+inline bool Factory<TypeBase, TypeInput>::unregisterCreator(const std::string& _type)
 {
     return callbacks_.erase(_type) == 1;
 }
 
-template<class TypeBase>
-inline TypeBase* Factory<TypeBase>::create(const std::string& _type, const std::string& _filename)
+template<class TypeBase, class TypeInput>
+inline TypeBase* Factory<TypeBase, TypeInput>::create(const std::string& _type, const TypeInput& _input)
 {
     typename CallbackMap::const_iterator creator_callback_it = callbacks_.find(_type);
     if (creator_callback_it == callbacks_.end())
         // not found
         throw std::runtime_error("Unknown type. Possibly you tried to use an unregistered creator.");
     // Invoke the creation function
-    TypeBase* p = (creator_callback_it->second)(_filename);
+    TypeBase* p = (creator_callback_it->second)(_input);
     return p;
 }
 
-template<class TypeBase>
-inline Factory<TypeBase>& Factory<TypeBase>::get()
+template<class TypeBase, class TypeInput>
+inline Factory<TypeBase, TypeInput>& Factory<TypeBase, TypeInput>::get()
 {
     static Factory instance_;
     return instance_;
 }
 
-template<class TypeBase>
-inline std::string Factory<TypeBase>::getClass()
+template<class TypeBase, class TypeInput>
+inline std::string Factory<TypeBase, TypeInput>::getClass()
 {
     return "Factory<class TypeBase>";
 }
@@ -104,24 +107,24 @@ inline std::string Factory<TypeBase>::getClass()
 namespace wolf
 {
 
-typedef Factory<IntrinsicsBase>      IntrinsicsFactory;
-typedef Factory<ProcessorParamsBase> ProcessorParamsFactory;
-typedef Factory<LandmarkBase>        LandmarkFactory;
+typedef Factory<IntrinsicsBase, std::string>        IntrinsicsFactory;
+typedef Factory<ProcessorParamsBase, std::string>   ProcessorParamsFactory;
+typedef Factory<LandmarkBase, YAML::Node>           LandmarkFactory;
 
 template<>
-inline std::string Factory<IntrinsicsBase>::getClass()
+inline std::string Factory<IntrinsicsBase, std::string>::getClass()
 {
     return "IntrinsicsFactory";
 }
 
 template<>
-inline std::string Factory<ProcessorParamsBase>::getClass()
+inline std::string Factory<ProcessorParamsBase, std::string>::getClass()
 {
     return "ProcessorParamsFactory";
 }
 
 template<>
-inline std::string Factory<LandmarkBase>::getClass()
+inline std::string Factory<LandmarkBase, YAML::Node>::getClass()
 {
     return "LandmarkFactory";
 }
