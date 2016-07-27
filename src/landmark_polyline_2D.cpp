@@ -9,6 +9,7 @@
 #include "landmark_polyline_2D.h"
 #include "local_parametrization_polyline_extreme.h"
 #include "state_block.h"
+#include "factory.h"
 
 namespace wolf
 {
@@ -212,6 +213,8 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
         points.col(i) = _lmk_node["points"][i].as<Eigen::Vector2s>();
     }
 
+    std::cout << "Points in lmk: " << id << ":\n" << points << std::endl;
+
     // Create a new landmark
     LandmarkBase* lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
 
@@ -220,5 +223,12 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
     return lmk_ptr;
 
 }
+
+// Register landmark creator
+namespace
+{
+const bool registered_lmk_polyline_2D = LandmarkFactory::get().registerCreator("POLYLINE 2D", LandmarkPolyline2D::create);
+}
+
 
 } /* namespace wolf */
