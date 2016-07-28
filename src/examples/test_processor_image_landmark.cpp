@@ -120,7 +120,7 @@ int main(int argc, char** argv)
     const Eigen::VectorXs extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
-    SensorBase* camera_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, "/home/jtarraso/dev/Wolf/src/examples/camera_params.yml");
+    SensorBase* camera_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, "/home/jtarraso/dev/Wolf/src/examples/camera_params.yaml");
     SensorCamera* sensor_ptr_ = (SensorCamera*)camera_ptr;
 
 

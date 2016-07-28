@@ -18,7 +18,7 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorImageParameters _params)
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     active_search_grid_()
 {
-    setType("IMAGE");
+    setType("IMAGE LANDMARK");
     // 1. detector-descriptor params
     DetectorDescriptorParamsBase* _dd_params = _params.detector_descriptor_params_ptr;
     switch (_dd_params->type){
