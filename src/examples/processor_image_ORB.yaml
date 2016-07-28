@@ -1,4 +1,4 @@
-processor type: "IMAGE LANDMARK"
+processor type: "IMAGE ORB"
 processor name: "ORB feature tracker"
 
 image:

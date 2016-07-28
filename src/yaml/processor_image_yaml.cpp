@@ -28,10 +28,7 @@ static ProcessorParamsBase* createProcessorParamsImage(const std::string & _file
 
     Node params = YAML::LoadFile(_filename_dot_yaml);
 
-    std::string processor_type = params["processor type"].as<std::string>();
-    std::cout << "processor type:: " << processor_type << std::endl;
-
-    if (params["processor type"])
+    if (!params.IsNull())
     {
         Node dd_yaml = params["detector-descriptor"];
         if(dd_yaml["type"].as<string>() == "ORB")
