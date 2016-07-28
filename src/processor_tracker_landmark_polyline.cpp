@@ -557,23 +557,21 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
                     int feat_point_id_matching = polyline_feature->isFirstDefined() ? 0 : 1;
 
                     for (int id_lmk = polyline_landmark->getLastId(); id_lmk != polyline_match->landmark_match_to_id_; id_lmk--)
-                    {
                         if ((points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() < params_.position_error_th*params_.position_error_th)
                         {
                             // add other points (if there are)
                             if (polyline_match->feature_match_from_id_ > feat_point_id_matching + 1)
-                                polyline_landmark->addPoints(points_global.rightCols(feat_point_id_matching + 1), // points matrix in global coordinates
+                                polyline_landmark->addPoints(points_global.rightCols(points_global.cols() - feat_point_id_matching - 1), // points matrix in global coordinates
                                                              polyline_match->feature_match_from_id_-feat_point_id_matching-2, // last feature point index to be added
                                                              true, // defined
                                                              false); // front (!back)
                             // close landmark
                             polyline_landmark->setClosed();
 
-                            polyline_match->landmark_match_from_id_ = id_lmk;
-                            polyline_match->feature_match_from_id_ = feat_point_id_matching;
+                            polyline_match->landmark_match_from_id_ = id_lmk - (polyline_feature->isFirstDefined() ? 0 : 1);
+                            polyline_match->feature_match_from_id_ = 0;
                             break;
                         }
-                    }
                 }
                 // Add new front points
                 else
@@ -617,20 +615,27 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
             // -----------------Back-----------------
             if (polyline_match->feature_match_to_id_ < polyline_feature->getNPoints()-1)
             {
-                // Check closing with landmark's first point
-                if ((points_global.rightCols(1)-polyline_landmark->getPointVector(polyline_landmark->getFirstId())).squaredNorm() < params_.position_error_th*params_.position_error_th)
+                // Check closing with landmark's first points
+                if (polyline_feature->isLastDefined() || polyline_match->feature_match_to_id_ < polyline_feature->getNPoints() - 2) //only if defined last point or second last not matched
                 {
-                    // add other points (if there are)
-                    if (polyline_match->feature_match_to_id_ < polyline_feature->getNPoints()-2)
-                        polyline_landmark->addPoints(points_global.middleCols(1, polyline_match->feature_match_from_id_-1), // points matrix in global coordinates
-                                                     polyline_match->feature_match_from_id_-2, // last feature point index to be added
-                                                     polyline_feature->isLastDefined(), // is defined
-                                                     true); // back
-                    // close landmark
-                    polyline_landmark->setClosed();
+                    int feat_point_id_matching = polyline_feature->getNPoints() - (polyline_feature->isLastDefined() ? 1 : 2);
 
-                    polyline_match->landmark_match_from_id_ = polyline_landmark->getFirstId(); // last of feature matched with first of landmark
-                    polyline_match->feature_match_from_id_ = polyline_feature->getNPoints()-1;
+                    for (int id_lmk = polyline_landmark->getFirstId(); id_lmk != polyline_match->landmark_match_from_id_; id_lmk++)
+                        if ((points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() < params_.position_error_th*params_.position_error_th)
+                        {
+                            // add other points (if there are)
+                            if (polyline_match->feature_match_to_id_ < feat_point_id_matching - 1)
+                                polyline_landmark->addPoints(points_global.leftCols(points_global.cols() - feat_point_id_matching - 1), // points matrix in global coordinates
+                                                             polyline_match->feature_match_to_id_+1, // first feature point index to be added
+                                                             true, // defined
+                                                             true); // back
+                            // close landmark
+                            polyline_landmark->setClosed();
+
+                            polyline_match->landmark_match_to_id_ = id_lmk + (polyline_feature->isLastDefined() ? 0 : 1);
+                            polyline_match->feature_match_to_id_ = polyline_feature->getNPoints() - 1;
+                            break;
+                        }
                 }
                 // Add new back points
                 else
