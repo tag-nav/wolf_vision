@@ -25,7 +25,6 @@ int main()
     char* w = std::getenv("WOLF_ROOT");
     if (w == NULL)
         throw std::runtime_error("Environment variable WOLF_ROOT not found");
-
     std::string WOLF_ROOT       = w;
     std::string WOLF_CONFIG     = WOLF_ROOT + "/src/examples";
     std::cout << "\nWolf directory for configuration files: " << WOLF_CONFIG << std::endl;
@@ -35,7 +34,7 @@ int main()
     std::cout << "Reading map from file: " << filename << std::endl;
     problem.getMapPtr()->load(filename);
 
-    std::cout << "printing map..." << std::endl;
+    std::cout << "Printing map..." << std::endl;
 
     for (auto lmk_ptr : *(problem.getMapPtr()->getLandmarkListPtr()))
     {
@@ -61,7 +60,7 @@ int main()
     std::cout << "Re-reading map from file: " << filename << std::endl;
     problem.getMapPtr()->load(filename);
 
-    std::cout << "printing map..." << std::endl;
+    std::cout << "Printing map..." << std::endl;
     for (auto lmk_ptr : *(problem.getMapPtr()->getLandmarkListPtr()))
     {
         std::cout << "Lmk ID:    " << lmk_ptr->id();
