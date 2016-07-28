@@ -73,7 +73,7 @@ void MapBase::load(const std::string& _map_file_dot_yaml)
 
 }
 
-void MapBase::save(const std::string& _map_file_yaml)
+void MapBase::save(const std::string& _map_file_yaml, const std::string _map_name)
 {
     // Get date and time for archiving purposes
     auto t = std::time(nullptr);
@@ -85,7 +85,7 @@ void MapBase::save(const std::string& _map_file_yaml)
     YAML::Emitter emitter;
 
     emitter << YAML::BeginMap;
-    emitter << "map name"   << "Map saved automatically by Wolf";
+    emitter << "map name"   << _map_name;
     emitter << "date-time" << date_time;
 
     emitter << "nlandmarks" << getLandmarkListPtr()->size();
