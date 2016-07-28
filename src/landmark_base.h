@@ -15,6 +15,9 @@ class StateBlock;
 
 //std includes
 
+// yaml
+#include "yaml-cpp/yaml.h"
+
 namespace wolf {
 
 //class LanrmarkParamsBase {}; ///< class for landmark parameters. Derive it to define your parameters.
@@ -117,6 +120,14 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         /** \brief Return the type of the landmark
          **/
         const LandmarkType getType() const;
+
+        virtual YAML::Node save() const {
+            YAML::Node n;
+            n["id"]             = landmark_id_;
+            n["type"]           = "BASE";
+            return n;
+        };
+
 };
 
 inline unsigned int LandmarkBase::id()
