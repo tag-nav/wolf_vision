@@ -233,7 +233,6 @@ YAML::Node LandmarkPolyline2D::save() const
     n["first_id"]       = first_id_;
     n["first_defined"]  = first_defined_;
     n["last_defined"]   = last_defined_;
-    //n["points"] = YAML::BeginSeq;
 
     int npoints = point_state_ptr_vector_.size();
 
@@ -241,7 +240,6 @@ YAML::Node LandmarkPolyline2D::save() const
     {
         n["points"].push_back(point_state_ptr_vector_[i]->getVector());
     }
-    //n["points"] << YAML::EndSeq;
 
     return n;
 }

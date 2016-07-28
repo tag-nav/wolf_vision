@@ -1,13 +1,19 @@
+
+// wolf
 #include "map_base.h"
-//#include "problem.h"
 #include "landmark_base.h"
 #include "factory.h"
 
-// stl
-#include "fstream"
-
 // YAML
 #include <yaml-cpp/yaml.h>
+
+// stl
+#include <fstream>
+#include <ctime>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+
 
 
 namespace wolf {
@@ -69,27 +75,32 @@ void MapBase::load(const std::string& _map_file_dot_yaml)
 
 void MapBase::save(const std::string& _map_file_yaml)
 {
-    YAML::Emitter e;
+    // Get date and time for archiving purposes
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d/%m/%Y at %H:%M:%S");
+    auto date_time = oss.str();
 
-    e << YAML::BeginMap;
-    e << YAML::Key      << "map name";
-    e << YAML::Value    << "Map saved from Wolf";
-    e << YAML::Key      << "date";
-    e << YAML::Value    << "--/--/--";
-    e << YAML::Key      << "nlandmarks";
-    e << YAML::Value    << getLandmarkListPtr()->size();
-    e << YAML::Key      << "landmarks";
-    e << YAML::Value    << YAML::BeginSeq;
+    YAML::Emitter emitter;
+
+    emitter << YAML::BeginMap;
+    emitter << "map name"   << "Map saved automatically by Wolf";
+    emitter << "date-time" << date_time;
+
+    emitter << "nlandmarks" << getLandmarkListPtr()->size();
+
+    emitter << "landmarks"  << YAML::BeginSeq;
 
     for (auto lmk_ptr : *getLandmarkListPtr())
     {
-        e << lmk_ptr->save();
+        emitter << YAML::Flow << lmk_ptr->save();
     }
-    e << YAML::EndSeq << YAML::EndMap;
+    emitter << YAML::EndSeq << YAML::EndMap;
 
 
     std::ofstream fout(_map_file_yaml);
-    fout << e.c_str();
+    fout << emitter.c_str();
 
 }
 
