@@ -20,9 +20,23 @@
 namespace wolf
 {
 
-/** \brief singleton factory
+/** \brief singleton template factory
  * \param TypeBase          base type of all the objects created by the factory
+ * \param TypeInput         type of the input argument. Typical cases are std::string for file names, and YAML::Node for YAML nodes.
+ *
+ * This class implements generic factory as a singleton.
+ *
+ * The class in templatized on the type of the input parameter of the creator:
+ *   - std::string is used when the input parameter is to be a file name from which to read data.
+ *   - YAML::Node is used when the input parameter is a YAML node with structured data.
+ *
+ * The class is also templatized on the output class, that is, the type of objects created.
+ * These are basically pointers to TypeBase, for example:
+ *   - LandmarkBase: the Factory creates landmarks deriving from LandmarkBase and returns base pointers LandmarkBase* to them
+ *   - IntrinsicsBase: the Factory creates intrinsic parameters deriving from IntrinsicsBase and returns base pointers IntrinsicsBase* to them
+ *   - XxxBase: the Factory creates objects deriving from XxxBase and returns pointers XxxBase* to them
  */
+
 template<class TypeBase, class TypeInput>
 class Factory
 {
