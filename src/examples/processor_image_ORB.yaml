@@ -1,4 +1,4 @@
-processor type: "IMAGE"
+processor type: "IMAGE ORB"
 processor name: "ORB feature tracker"
 
 image:
@@ -7,7 +7,7 @@ image:
 
 detector-descriptor:
     type: "ORB"   # This affects the structure below. See processor_image_BRISK.yaml for another example
-    nominal pattern radius: 18 # 0 # 18?
+    nominal pattern radius: 2 # 0 # 18?
     nfeatures: 500
     scale factor: 1.2
     nlevels: 1
@@ -21,13 +21,13 @@ matcher:
     minimum normalized score: 0.8
     similarity norm: cv::NORM_HAMMING
     roi:
-        width: 30
-        height: 30
+        width: 50
+        height: 50
 
 active search:
     grid width: 16
     grid height: 12
-    separation: 1
+    separation: 0
 
 algorithm:
     maximum new features: 40

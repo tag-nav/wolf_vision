@@ -32,8 +32,8 @@ class FeaturePointImage : public FeatureBase
         FeaturePointImage(const Eigen::Vector2s & _measurement, const Eigen::Matrix2s& _meas_covariance) :
                 FeatureBase(FEATURE_POINT_IMAGE, _measurement, _meas_covariance)
         {
-            keypoint_.pt.x = measurement_(0);
-            keypoint_.pt.y = measurement_(1);
+            keypoint_.pt.x = float(measurement_(0));
+            keypoint_.pt.y = float(measurement_(1));
         }
 
         //_known_or_new: known = true; new = false;
@@ -43,9 +43,22 @@ class FeaturePointImage : public FeatureBase
                 keypoint_(_keypoint),
                 descriptor_(_descriptor)
         {
-            measurement_(0) = _keypoint.pt.x;
-            measurement_(1) = _keypoint.pt.y;
+            measurement_(0) = Scalar(_keypoint.pt.x);
+            measurement_(1) = Scalar(_keypoint.pt.y);
             is_known_=_is_known;
+//            std::cout << "FEATURE TESTING\n";
+//            std::cout << "Measurement:\n" << getMeasurement() << std::endl;
+//            std::cout << "Measurement Sqrt:\n" << getMeasurementSquareRootInformation() << std::endl;
+        }
+
+        FeaturePointImage(const cv::KeyPoint& _keypoint,
+                          const cv::Mat& _descriptor, const Eigen::Matrix2s& _meas_covariance) :
+                FeatureBase(FEATURE_POINT_IMAGE, Eigen::Vector2s::Zero(), _meas_covariance),
+                keypoint_(_keypoint),
+                descriptor_(_descriptor)
+        {
+            measurement_(0) = Scalar(_keypoint.pt.x);
+            measurement_(1) = Scalar(_keypoint.pt.y);
         }
 
 
@@ -55,27 +68,35 @@ class FeaturePointImage : public FeatureBase
          */
         virtual ~FeaturePointImage();
 
-        cv::KeyPoint& getKeypoint();
+        const cv::KeyPoint& getKeypoint() const;
+        void setKeypoint(const cv::KeyPoint& _kp)
+        {
+            keypoint_ = _kp;
+        }
 
-        cv::Mat& getDescriptor();
+        const cv::Mat& getDescriptor() const;
+        void setDescriptor(const cv::Mat& _descriptor)
+        {
+            descriptor_ = _descriptor;
+        }
 
         bool isKnown();
         void setIsKnown(bool _is_known);
 
-        Eigen::VectorXs & getMeasurement(){
+        /*Eigen::VectorXs & getMeasurement(){
             measurement_(0) = Scalar(keypoint_.pt.x);
             measurement_(1) = Scalar(keypoint_.pt.y);
             return measurement_;
-        }
+        }*/
 
 };
 
-inline cv::KeyPoint& FeaturePointImage::getKeypoint()
+inline const cv::KeyPoint& FeaturePointImage::getKeypoint() const
 {
     return keypoint_;
 }
 
-inline cv::Mat& FeaturePointImage::getDescriptor()
+inline const cv::Mat& FeaturePointImage::getDescriptor() const
 {
     return descriptor_;
 }

@@ -186,6 +186,7 @@ class Problem : public NodeBase
         void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
 
         unsigned int getFrameStructureSize();
+        Eigen::VectorXs zeroState();
 
         /** \brief Give the permission to a processor to create a new keyFrame
          */

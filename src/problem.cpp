@@ -142,7 +142,7 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs&
             assert(_frame_state.size() == 10 && "Wrong state vector size");
             return trajectory_ptr_->addFrame(
                     new FrameBase(_frame_type, _time_stamp, new StateBlock(_frame_state.head(3)),
-                                  new StateQuaternion(_frame_state.segment<3>(4)),
+                                  new StateQuaternion(_frame_state.segment<4>(3)),
                                   new StateBlock(_frame_state.tail(3))));
         }
         default:
@@ -185,7 +185,7 @@ void Problem::getCurrentState(Eigen::VectorXs& state, TimeStamp& ts)
         trajectory_ptr_->getLastKeyFramePtr()->getState(state);
     }
     else
-        state = Eigen::VectorXs::Zero(getFrameStructureSize());
+        state = zeroState();
 }
 
 void Problem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
@@ -200,7 +200,7 @@ void Problem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
         if (closest_frame != nullptr)
             closest_frame->getState(state);
         else
-            state = Eigen::VectorXs::Zero(getFrameStructureSize());
+            state = zeroState();
     }
 }
 
@@ -227,6 +227,14 @@ unsigned int Problem::getFrameStructureSize()
     }
 }
 
+Eigen::VectorXs Problem::zeroState()
+{
+    Eigen::VectorXs state = Eigen::VectorXs::Zero(getFrameStructureSize());
+    if (trajectory_ptr_->getFrameStructure() == FRM_PO_3D || trajectory_ptr_->getFrameStructure() == FRM_POV_3D)
+        state(6) = 1;
+    return state;
+}
+
 bool Problem::permitKeyFrame(ProcessorBase* _processor_ptr)
 {
     return true;
@@ -249,11 +257,13 @@ LandmarkBase* Problem::addLandmark(LandmarkBase* _lmk_ptr)
 
 void Problem::addLandmarkList(LandmarkBaseList _lmk_list)
 {
+    //std::cout << "Problem::addLandmarkList" << std::endl;
     getMapPtr()->addLandmarkList(_lmk_list);
 }
 
 StateBlock* Problem::addStateBlockPtr(StateBlock* _state_ptr)
 {
+    //std::cout << "addStateBlockPtr" << std::endl;
     // add the state unit to the list
     state_block_ptr_list_.push_back(_state_ptr);
     // queue for solver manager
@@ -294,6 +304,7 @@ void Problem::removeStateBlockPtr(StateBlock* _state_ptr)
 
 ConstraintBase* Problem::addConstraintPtr(ConstraintBase* _constraint_ptr)
 {
+    //std::cout << "addConstraintPtr" << std::endl;
     // queue for solver manager
     constraint_notification_list_.push_back(ConstraintNotification({ADD, _constraint_ptr, _constraint_ptr->id()}));
 

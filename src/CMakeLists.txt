@@ -112,6 +112,9 @@ SET(HDRS
     constraint_container.h
     constraint_corner_2D.h
     constraint_epipolar.h
+    constraint_image.h
+    constraint_image_new_landmark.h
+    constraint_sparse.h
     constraint_fix.h
     constraint_gps_2D.h
     constraint_gps_pseudorange_3D.h
@@ -134,6 +137,7 @@ SET(HDRS
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
+    landmark_point_3d.h
     landmark_line_2D.h
     landmark_polyline_2D.h
     local_parametrization_base.h
@@ -201,6 +205,7 @@ SET(SRCS
     landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
+    landmark_point_3d.cpp
     landmark_line_2D.cpp
     landmark_polyline_2D.cpp
     local_parametrization_base.cpp
@@ -292,13 +297,17 @@ IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
         feature_point_image.h
+        landmark_AHP.h
         processor_image.h
+        processor_image_landmark.h
         active_search.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
         feature_point_image.cpp
+        landmark_AHP.cpp
         processor_image.cpp
+        processor_image_landmark.cpp
         active_search.cpp
         )
 ENDIF(OpenCV_FOUND)

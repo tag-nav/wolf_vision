@@ -77,14 +77,17 @@ void ProcessorImage::preProcess()
 {
     image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
 
-    if (last_ptr_ == nullptr)
-        image_last_ = ((CaptureImage*)incoming_ptr_)->getImage();
-    else
-        image_last_ = ((CaptureImage*)last_ptr_)->getImage();
+    if (last_ptr_ == nullptr) // do this just one time!
+    {
+        params_.image.width = image_incoming_.cols;
+        params_.image.height = image_incoming_.rows;
+        active_search_grid_.resizeImage(image_incoming_.cols, image_incoming_.rows);
+        std::cout << "resized active-search image size!" << std::endl;
+    }
 
     active_search_grid_.renew();
 
-    //The visualization part is only for debugging, not the casts done here.
+    //The visualization part is only for debugging. The casts above are necessary.
 
     if(last_ptr_ != nullptr)
         resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()));
@@ -99,7 +102,8 @@ void ProcessorImage::preProcess()
 
 void ProcessorImage::postProcess()
 {
-    drawFeatures(last_ptr_);
+    if (last_ptr_!=nullptr)
+        drawFeatures(last_ptr_);
 //    drawRoi(image_last_,detector_roi_,cv::Scalar(88.0, 70.0, 255.0));   //detector roi(now only shown when it collides with the the image)
 //    drawRoi(image_last_,tracker_roi_, cv::Scalar(88.0, 70.0, 255.0));   //tracker roi
 //    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));   //inflated roi(now only shown when it collides with the the image)
@@ -167,16 +171,20 @@ bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, con
 
             if(normalized_score_correction > 0.8)
             {
-                FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
-                        correction_keypoints[correction_matches[0].trainIdx], (correction_descriptors.row(correction_matches[0].trainIdx)),
-                        feat_origin_ptr->isKnown());
+//                FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
+//                        correction_keypoints[correction_matches[0].trainIdx], (correction_descriptors.row(correction_matches[0].trainIdx)),
+//                        feat_origin_ptr->isKnown());
 
-                incoming_point_ptr->setTrackId(feat_incoming_ptr->trackId());
-                feat_incoming_ptr = incoming_point_ptr;
+//                incoming_point_ptr->setTrackId(feat_incoming_ptr->trackId());
+
+                feat_incoming_ptr->setKeypoint(correction_keypoints[correction_matches[0].trainIdx]);
+                feat_incoming_ptr->setDescriptor(correction_descriptors.row(correction_matches[0].trainIdx));
+
+                //feat_incoming_ptr->destruct();
+                //feat_incoming_ptr = incoming_point_ptr;
                 //delete incoming_point_ptr;
 
-    //            _feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr,
-    //                                                        normalized_score}); //FIXME: 512 is the maximum HAMMING distance
+                //_feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr, normalized_score});
 
                 std::cout << "\n=============== END CORRECTION true =================" << std::endl;
                 return true;
@@ -201,20 +209,11 @@ unsigned int ProcessorImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<
 
     adaptRoi(_image_roi, _image, _roi);
 
-    //std::cout << "detect roi: " << _roi << std::endl;
-
     detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
-    for (unsigned int i = 0; i < _new_keypoints.size(); i++)
-    {
-        //std::cout << "keypoints: " << _new_keypoints[i].pt << std::endl;
-    }
     detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
 
-    //std::cout << "detect roi2: " << _roi << std::endl;
-
     for (unsigned int i = 0; i < _new_keypoints.size(); i++)
     {
-        //std::cout << "keypoints 2: " << _new_keypoints[i].pt << std::endl;
         _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
         _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
     }
@@ -244,7 +243,7 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
                 active_search_grid_.hitCell(new_keypoints[0]);
                 active_search_grid_.blockCell(roi);
 
-                std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
+                //std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 
                 n_new_features++;
 
@@ -274,6 +273,57 @@ void ProcessorImage::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
     }
 }
 
+void ProcessorImage::filterFeatureLists(FeatureBaseList _original_list, FeatureBaseList& _filtered_list)
+{
+    unsigned int counter_repeated_features = 0;
+    unsigned int counter_total_repeated_features = 0;
+
+    for (std::list<FeatureBase*>::const_iterator first_feature_iterator = _original_list.begin();
+                                                 first_feature_iterator != _original_list.end();
+                                                 first_feature_iterator++)
+    {
+        FeaturePointImage* tested_feature_ptr = (FeaturePointImage*)*first_feature_iterator;
+        bool repeated_feature = false;
+
+        for (std::list<FeatureBase*>::const_iterator second_feature_iterator = first_feature_iterator;
+                                                     second_feature_iterator != _original_list.begin();
+                                                     second_feature_iterator--)
+        {
+           FeaturePointImage* secondary_feature_ptr = (FeaturePointImage*)*second_feature_iterator;
+
+           if(tested_feature_ptr->getKeypoint().pt == secondary_feature_ptr->getKeypoint().pt && tested_feature_ptr->id() != secondary_feature_ptr->id())
+           {
+               std::cout << "feature 1 track id: " << (int)tested_feature_ptr->trackId() << std::endl;
+               std::cout << "feature 1 point: " << tested_feature_ptr->getKeypoint().pt << std::endl;
+               std::cout << "feature 2 track id: " << (int)secondary_feature_ptr->trackId() << std::endl;
+               std::cout << "feature 2 point: " << secondary_feature_ptr->getKeypoint().pt << std::endl;
+               std::cout << "\t\t\t\tRepeated feature" << std::endl;
+               counter_total_repeated_features++;
+               repeated_feature = true;
+           }
+        }
+        if(!repeated_feature)
+        {
+            std::cout << "ADDED feature track id: " << (int)tested_feature_ptr->trackId() << std::endl;
+            std::cout << "ADDED feature point: " << tested_feature_ptr->getKeypoint().pt << std::endl;
+            std::cout << "\t\tAdded feature" << std::endl;
+            _filtered_list.push_back(tested_feature_ptr);
+        }
+        else
+        {
+            std::cout << "REPEATED feature track id: " << (int)tested_feature_ptr->trackId() << std::endl;
+            std::cout << "REPEATED feature point: " << tested_feature_ptr->getKeypoint().pt << std::endl;
+            std::cout << "\t\tDiscarted feature" << std::endl;
+            counter_repeated_features++;
+        }
+    }
+    std::cout << "feature_list_in SIZE: " << _original_list.size() << std::endl;
+    std::cout << "counter of repeated features: " << counter_repeated_features << std::endl;
+    std::cout << "counter of TOTAL repeated features: " << counter_total_repeated_features << std::endl;
+    std::cout << "filtered_list SIZE: " << _filtered_list.size() << std::endl;
+
+}
+
 unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
@@ -289,16 +339,23 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 
     std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl;
 
-    for (auto feature_base_ptr : _feature_list_in)
-    {
-        FeaturePointImage* feature_ptr = (FeaturePointImage*)(((feature_base_ptr)));
-        active_search_grid_.hitCell(feature_ptr->getKeypoint());  //TODO: Mirar el hitcell en este punto
+    //Asegurarse que el target no está repetido (que dos targets esten muy cerca el uno del otro)
+    FeatureBaseList filtered_list;
+    filterFeatureLists(_feature_list_in,filtered_list);
 
-        std::cout << "\nSearch feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
+
+    for (auto feature_base_ptr : filtered_list)//_feature_list_in)
+    {
+        FeaturePointImage* feature_ptr = (FeaturePointImage*)feature_base_ptr;
+
+        //std::cout << "\nSearch feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
 
         roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+
+        active_search_grid_.hitCell(feature_ptr->getKeypoint());  //TODO: Mirar el hitcell en este punto
+        //active_search_grid_.blockCell(roi);
 
         cv::Mat target_descriptor = feature_ptr->getDescriptor();
 
@@ -313,7 +370,7 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 
             if (normalized_score > params_.matcher.min_normalized_score)
             {
-                std::cout << "\t <--TRACKED" << std::endl;
+                //std::cout << "\t <--TRACKED" << std::endl;
                 FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
@@ -326,7 +383,7 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
             }
             else
             {
-                std::cout << "\t <--NOT TRACKED" << std::endl;
+                //std::cout << "\t <--NOT TRACKED" << std::endl;
             }
             for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
             {
@@ -334,8 +391,8 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 
             }
         }
-        else
-            std::cout << "\t <--NOT FOUND" << std::endl;
+        //else
+            //std::cout << "\t <--NOT FOUND" << std::endl;
     }
     std::cout << "Number of Features tracked: " << _feature_list_out.size() << std::endl;
     return _feature_list_out.size();
@@ -344,17 +401,17 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 Scalar ProcessorImage::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors,
                              std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches)
 {
-    std::cout << " --> " << _candidate_keypoints.size() << " candidates";
+    //std::cout << " --> " << _candidate_keypoints.size() << " candidates";
 
     matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
 
-    std::cout << "\n\tBest is: [" << _cv_matches[0].trainIdx << "]:" << _cv_matches[0].distance;
+    //std::cout << "\n\tBest is: [" << _cv_matches[0].trainIdx << "]:" << _cv_matches[0].distance;
 
-    std::cout << " | at: " << _candidate_keypoints[_cv_matches[0].trainIdx].pt;
+    //std::cout << " | at: " << _candidate_keypoints[_cv_matches[0].trainIdx].pt;
 
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
 
-    std::cout << " | score: " << normalized_score;
+    //std::cout << " | score: " << normalized_score;
 
     return normalized_score;
 }

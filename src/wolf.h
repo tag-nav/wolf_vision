@@ -75,11 +75,11 @@ const Scalar EPS_SMALL = 1e-16;
 namespace Eigen  // Eigen namespace extension
 {
 // 1. Vectors and Matrices
-typedef Matrix<wolf::Scalar, 2, 2, Eigen::RowMajor> Matrix2s;                ///< 2x2 matrix of real Scalar type
-typedef Matrix<wolf::Scalar, 3, 3, Eigen::RowMajor> Matrix3s;                ///< 3x3 matrix of real Scalar type
-typedef Matrix<wolf::Scalar, 4, 4, Eigen::RowMajor> Matrix4s;                ///< 4x4 matrix of real Scalar type
-typedef Matrix<wolf::Scalar, 7, 7, Eigen::RowMajor> Matrix7s;                ///< 7x7 matrix of real Scalar type
-typedef Matrix<wolf::Scalar, Dynamic, Dynamic, Eigen::RowMajor> MatrixXs;    ///< variable size matrix of real Scalar type
+typedef Matrix<wolf::Scalar, 2, 2, RowMajor> Matrix2s;                ///< 2x2 matrix of real Scalar type
+typedef Matrix<wolf::Scalar, 3, 3, RowMajor> Matrix3s;                ///< 3x3 matrix of real Scalar type
+typedef Matrix<wolf::Scalar, 4, 4, RowMajor> Matrix4s;                ///< 4x4 matrix of real Scalar type
+typedef Matrix<wolf::Scalar, 7, 7, RowMajor> Matrix7s;                ///< 7x7 matrix of real Scalar type
+typedef Matrix<wolf::Scalar, Dynamic, Dynamic, RowMajor> MatrixXs;    ///< variable size matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 1, 1> Vector1s;                ///< 1-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 2, 1> Vector2s;                ///< 2-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 3, 1> Vector3s;                ///< 3-vector of real Scalar type
@@ -151,7 +151,10 @@ typedef enum
     CTR_CONTAINER,              ///< 2D container constraint .
     CTR_IMG_PNT_TO_EP,          ///< constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
-    CTR_EPIPOLAR                ///< Epipolar constraint
+    CTR_EPIPOLAR,               ///< Epipolar constraint
+    CTR_AHP,                    ///< Anchored Homogeneous Point constraint
+    CTR_AHP_NL                  ///< Anchored Homogeneous Point constraint (temporal, to be removed)
+
 } ConstraintType;
 
 /** \brief Enumeration of constraint categories
@@ -259,7 +262,8 @@ typedef enum
     LANDMARK_CORNER,    ///< A corner landmark (2D)
     LANDMARK_CONTAINER,  ///< A container landmark (2D)
     LANDMARK_LINE_2D,  ///< A line landmark (2D)
-    LANDMARK_POLYLINE_2D   ///< A polyline landmark (2D)
+    LANDMARK_POLYLINE_2D,   ///< A polyline landmark (2D)
+    LANDMARK_AHP        ///< An anchored homogeneous point (3D)
 } LandmarkType;
 
 typedef enum

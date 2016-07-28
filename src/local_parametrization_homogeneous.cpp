@@ -6,6 +6,7 @@
  */
 
 #include "local_parametrization_homogeneous.h"
+#include "iostream"
 
 namespace wolf {
 

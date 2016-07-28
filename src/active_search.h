@@ -151,6 +151,13 @@ class ActiveSearchGrid {
                            const int & _n_cells_h, const int & _n_cells_v,
                            const int & _margin = 0, const int & _separation = 0);
 
+        /**
+         * \brief Re-set the image size
+         * \param _img_size_h horizontal image size, in pixels.
+         * \param _img_size_v vertical image size.
+         */
+        void resizeImage(unsigned int _img_size_h, unsigned int _img_size_v);
+
         /** \brief Clear grid.
          *
          * Sets all cell counters to zero.
