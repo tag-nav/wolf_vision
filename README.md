@@ -169,7 +169,7 @@ Download and build
 
 **Set the WOLF_ROOT environment variable**
 
-We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at tun-time. 
+We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at run-time. 
 For example, if we want to use YAML files for configuring sensors, `YAML::LoadFile(filename)` needs an absolute path to a `filename`. This name is platform-specific, and many times user-specific.
 
 Usually, these files are out of the WOLF project. But for testing purposes, some of these files exist within the WOLF directories.
