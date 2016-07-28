@@ -213,7 +213,7 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
         points.col(i) = _lmk_node["points"][i].as<Eigen::Vector2s>();
     }
 
-    std::cout << "Points in lmk: " << id << ":\n" << points << std::endl;
+    //std::cout << "Points in lmk: " << id << ":\n" << points << std::endl;
 
     // Create a new landmark
     LandmarkBase* lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
