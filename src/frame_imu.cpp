@@ -19,7 +19,7 @@ namespace wolf {
             ba_ptr_(_ba_ptr),
             bg_ptr_(_bg_ptr)
   {
-      //
+      setType("IMU");
   }
 
   FrameIMU::~FrameIMU()

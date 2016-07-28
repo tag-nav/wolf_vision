@@ -18,7 +18,7 @@ class StateBlock;
 
 namespace wolf {
 
-  class FrameIMU : FrameBase
+  class FrameIMU : public FrameBase
   {
       protected:
           StateBlock* ba_ptr_;      ///< Accleration bias state block pointer
