@@ -131,19 +131,19 @@ class FaramoticsRobot
         void render(const FeatureBaseList& feature_list, int laser, const LandmarkBaseList& landmark_list, const Eigen::Vector3s& estimated_pose)
         {
             // detected corners
-            //std::cout << "   drawCorners: " << feature_list.size() << std::endl;
+            std::cout << "   drawCorners: " << feature_list.size() << std::endl;
             std::vector<double> corner_vector;
             corner_vector.reserve(2*feature_list.size());
             for (auto corner : feature_list)
             {
-                //std::cout << "       corner " << corner->id() << std::endl;
+                std::cout << "       corner " << corner->id() << std::endl;
                 corner_vector.push_back(corner->getMeasurement(0));
                 corner_vector.push_back(corner->getMeasurement(1));
             }
             myRender->drawCorners(laser == 1 ? laser1Pose : laser2Pose, corner_vector);
 
             // landmarks
-            //std::cout << "   drawLandmarks: " << landmark_list.size() << std::endl;
+            std::cout << "   drawLandmarks: " << landmark_list.size() << std::endl;
             std::vector<double> landmark_vector;
             landmark_vector.reserve(3*landmark_list.size());
             for (auto landmark : landmark_list)
@@ -367,59 +367,9 @@ int main(int argc, char** argv)
     std::cout << "  results drawing:    " << mean_times(5) << std::endl;
     std::cout << "  loop time:          " << mean_times(6) << std::endl;
 
-    //	std::cout << "\nTree before deleting..." << std::endl;
+    std::cout << "\nTree before deleting..." << std::endl;
 
-    // Draw Final result -------------------------
-    robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureListPtr(), 1, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
-
-    // Print Final result in a file -------------------------
-    // Vehicle poses
-    int i = 0;
-    Eigen::VectorXs state_poses = Eigen::VectorXs::Zero(n_execution * 3);
-    for (auto frame : *(problem.getTrajectoryPtr()->getFrameListPtr()))
-    {
-        state_poses.segment(i, 3) << frame->getPPtr()->getVector(), frame->getOPtr()->getVector();
-        i += 3;
-    }
-
-    // Landmarks
-    i = 0;
-    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkListPtr()->size() * 2);
-    for (auto landmark : *(problem.getMapPtr()->getLandmarkListPtr()))
-    {
-        landmarks.segment(i, 2) = landmark->getPPtr()->getVector();
-        i += 2;
-    }
-
-    // Print log files
-    std::string filepath = getenv("HOME") + std::string("/Desktop/log_file_2.txt");
-    log_file.open(filepath, std::ofstream::out); //open log file
-
-    if (log_file.is_open())
-    {
-        log_file << 0 << std::endl;
-        for (unsigned int ii = 0; ii < n_execution; ii++)
-            log_file << state_poses.segment(ii * 3, 3).transpose() << "\t" << ground_truth.segment(ii * 3, 3).transpose() << "\t" << (state_poses.segment(ii * 3, 3) - ground_truth.segment(ii * 3, 3)).transpose() << "\t" << odom_trajectory.segment(ii * 3, 3).transpose() << std::endl;
-        log_file.close(); //close log file
-        std::cout << std::endl << "Result file " << filepath << std::endl;
-    }
-    else
-        std::cout << std::endl << "Failed to write the log file " << filepath << std::endl;
-
-    std::string filepath2 = getenv("HOME") + std::string("/Desktop/landmarks_file_2.txt");
-    landmark_file.open(filepath2, std::ofstream::out); //open log file
-
-    if (landmark_file.is_open())
-    {
-        for (unsigned int ii = 0; ii < landmarks.size(); ii += 2)
-            landmark_file << landmarks.segment(ii, 2).transpose() << std::endl;
-        landmark_file.close(); //close log file
-        std::cout << std::endl << "Landmark file " << filepath << std::endl;
-    }
-    else
-        std::cout << std::endl << "Failed to write the landmark file " << filepath << std::endl;
-
-    std::cout << "Press any key for ending... " << std::endl << std::endl;
+        std::cout << "Press any key for ending... " << std::endl << std::endl;
     std::getchar();
 
     std::cout << " ========= END ===========" << std::endl << std::endl;
