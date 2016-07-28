@@ -27,7 +27,7 @@ matcher:
 active search:
     grid width: 16
     grid height: 12
-    separation: 1
+    separation: 0
 
 algorithm:
     maximum new features: 40

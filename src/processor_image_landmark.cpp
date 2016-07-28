@@ -95,6 +95,7 @@ void ProcessorImageLandmark::preProcess()
 
 
     tracker_roi_.clear();
+    detector_roi_.clear();
     tracker_candidates_.clear();
 }
 
@@ -105,6 +106,7 @@ void ProcessorImageLandmark::postProcess()
         cv::Mat image;
         drawFeatures(image);
         drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));
+        drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
         drawTrackingFeatures(image,tracker_candidates_,tracker_candidates_);
     }
     if (origin_ptr_!=nullptr)
@@ -435,6 +437,8 @@ unsigned int ProcessorImageLandmark::detect(cv::Mat _image, cv::Rect& _roi, std:
 
     adaptRoi(_image_roi, _image, _roi);
 
+    std::cout << "ROI: " << _image_roi.cols << "; " << _image_roi.rows << std::endl;
+
     detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
     detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
 
@@ -443,6 +447,7 @@ unsigned int ProcessorImageLandmark::detect(cv::Mat _image, cv::Rect& _roi, std:
         _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
         _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
     }
+    std::cout << "Features detected: " << _new_keypoints.size() << std::endl;
     return _new_keypoints.size();
 }
 
@@ -576,7 +581,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
     cv::putText(image, std::to_string(counter), label_for_landmark_point2,
                 cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
-    std::cout << "landmarks tracked: " << landmarks_tracked_ << "\ttotal landmarks: " << counter << std::endl;
+    std::cout << "\n\n\n\nlandmarks tracked: " << landmarks_tracked_ << "\ttotal landmarks: " << counter << std::endl;
 
     cv::imshow("Feature tracker", image);
     _image = image;

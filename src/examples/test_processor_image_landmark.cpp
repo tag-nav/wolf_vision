@@ -182,6 +182,9 @@ int main(int argc, char** argv)
             std::cout << summary.FullReport() << std::endl;
         }
 
+        cv::waitKey(0);
+        std::cout << "END OF ITERATION" << std::endl;
+
         f++;
         capture >> frame[f % buffer_size];
     }
