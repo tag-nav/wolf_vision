@@ -55,6 +55,11 @@ int main(int argc, char** argv)
 
     TimeStamp t = 1;
 
+    char const* tmp = std::getenv( "WOLF_ROOT" );
+    if ( tmp == nullptr )
+        throw std::runtime_error("WOLF_ROOT environment not loaded.");
+    std::string wolf_path( tmp );
+    std::cout << "Wolf path: " << wolf_path << std::endl;
 
 
     // Wolf problem
@@ -120,13 +125,13 @@ int main(int argc, char** argv)
     const Eigen::VectorXs extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
-    SensorBase* camera_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, "/home/jtarraso/dev/Wolf/src/examples/camera_params.yaml");
+    SensorBase* camera_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
     SensorCamera* sensor_ptr_ = (SensorCamera*)camera_ptr;
 
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", "/home/jtarraso/dev/Wolf/src/examples/processor_image_ORB.yaml");
+    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
     //=====================================================
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
