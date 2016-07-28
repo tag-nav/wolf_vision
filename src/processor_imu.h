@@ -18,6 +18,13 @@ class ProcessorIMU : public ProcessorMotion{
         ProcessorIMU();
         virtual ~ProcessorIMU();
 
+
+        /// Bias interactions
+        void setAccelerometerBias(const Eigen::Vector3s& _bias) { bias_acc_ = _bias; }
+        void setGyroBias(const Eigen::Vector3s& _bias) { bias_gyro_ = _bias; }
+        const Eigen::Vector3s& getAccelerometerBias() { return bias_acc_; }
+        const Eigen::Vector3s& getGyroBias() { return bias_gyro_; }
+
         // not redefining main operations (they should be the same for all derived classes)
 
     protected:
@@ -26,7 +33,6 @@ class ProcessorIMU : public ProcessorMotion{
 //        virtual void postProcess(){}
 
         // Helper functions
-
 
         /**
          * @brief extractData Extract data from the capture_imu object and store them
@@ -39,25 +45,23 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
         {
-            Eigen::Vector3s measured_acc(_data.head(3));        // acc  = data[0:2]
-            Eigen::Vector3s measured_gyro(_data.segment(4,6));  // gyro = data[3:5]
-            Eigen::Vector3s bias_acc(_data.segment(7,9));       // acc_bias  = data[7:9]
-            Eigen::Vector3s bias_gyro(_data.segment(10,12));    // gyro_bias = data[10:12]
+            Eigen::Vector3s measured_acc(_data.segment(0,3));        // acc  = data[0:2]
+            Eigen::Vector3s measured_gyro(_data.segment(3,3));  // gyro = data[3:5]
 
             /// Quaternion delta
-            Eigen::VectorXs d_theta = (measured_gyro - bias_gyro) * _dt;
+            Eigen::VectorXs d_theta = (measured_gyro - bias_gyro_) * _dt;
             Eigen::Quaternions d_q;
             Eigen::v2q(d_theta, d_q);
 
             /// Velocity delta
-            Eigen::Vector3s d_V = d_q._transformVector((measured_acc - bias_acc) * _dt);
+            Eigen::Vector3s d_V = d_q._transformVector((measured_acc - bias_acc_) * _dt);
 
             /// Position delta
             Eigen::Vector3s d_p = d_V * _dt;
 
-            _delta.segment(0,2) = d_theta;
-            _delta.segment(3,5) = d_V;
-            _delta.segment(6,8) = d_p;
+            _delta.segment(0,4) = d_q.coeffs();
+            _delta.segment(4,3) = d_V;
+            _delta.segment(7,3) = d_p;
         }
 
         /** \brief composes a delta-state on top of a state
@@ -82,9 +86,16 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
         {
           // TODO assert size
-          // TODO : quaternion / angle update
-          _delta1_plus_delta2.segment(3,5) = _delta1.segment(3,5) + _delta2.segment(3,5); // velocity update
-          _delta1_plus_delta2.segment(6,8) = _delta1.segment(6,8) + _delta2.segment(6,8); // position update
+
+          Eigen::Vector4s q1_vec = _delta1.segment(0,4);
+          Eigen::Vector4s q2_vec = _delta2.segment(0,4);
+
+          Eigen::Quaternions q1(q1_vec);
+          Eigen::Quaternions q2(q2_vec);
+
+          _delta1_plus_delta2.segment(0,3) = (q1 * q2).coeffs();      // quaternion update
+          _delta1_plus_delta2.segment(4,3) = _delta1.segment(4,3) + _delta2.segment(4,3); // velocity update
+          _delta1_plus_delta2.segment(7,3) = _delta1.segment(7,3) + _delta2.segment(7,3); // position update
         }
 
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -132,8 +143,8 @@ class ProcessorIMU : public ProcessorMotion{
 //        CaptureIMU* capture_imu_ptr_; //specific pointer to capture imu data object
 
     private:
-        Eigen::Vector3s delta_V_;
-        Eigen::Vector3s delta_p_;
+        Eigen::Vector3s bias_acc_;
+        Eigen::Vector3s bias_gyro_;
 
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
         ///< (first-order propagation from *measurementCovariance*).
