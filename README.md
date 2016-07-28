@@ -109,10 +109,12 @@ libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/i
 **(1)** Obtain:
 
 - Ubuntu:
+  
   ```
   $ sudo apt-get install libyaml-cpp-dev
   ```
 - Mac:
+  
   ```
   $ brew install yaml-cpp
   ```
