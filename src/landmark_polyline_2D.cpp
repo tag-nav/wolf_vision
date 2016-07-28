@@ -10,6 +10,7 @@
 #include "local_parametrization_polyline_extreme.h"
 #include "state_block.h"
 #include "factory.h"
+#include "yaml/yaml_conversion.h"
 
 namespace wolf
 {
@@ -224,11 +225,31 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
 
 }
 
+YAML::Node LandmarkPolyline2D::save() const
+{
+    YAML::Node n;
+    n["id"]             = landmark_id_;
+    n["type"]           = "POLYLINE 2D";
+    n["first_id"]       = first_id_;
+    n["first_defined"]  = first_defined_;
+    n["last_defined"]   = last_defined_;
+    //n["points"] = YAML::BeginSeq;
+
+    int npoints = point_state_ptr_vector_.size();
+
+    for (int i = 0; i < npoints; i++)
+    {
+        n["points"].push_back(point_state_ptr_vector_[i]->getVector());
+    }
+    //n["points"] << YAML::EndSeq;
+
+    return n;
+}
+
 // Register landmark creator
 namespace
 {
 const bool registered_lmk_polyline_2D = LandmarkFactory::get().registerCreator("POLYLINE 2D", LandmarkPolyline2D::create);
 }
-
 
 } /* namespace wolf */

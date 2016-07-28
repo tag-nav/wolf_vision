@@ -10,7 +10,6 @@
 
 // Wolf
 #include "landmark_base.h"
-#include "yaml/yaml_conversion.h"
 
 // STL
 #include <deque>
@@ -96,6 +95,8 @@ class LandmarkPolyline2D : public LandmarkBase
         /** Factory method to create new landmarks from YAML nodes
          */
         static LandmarkBase* create(const YAML::Node& _lmk_node);
+
+        YAML::Node save() const;
 };
 
 inline std::deque<StateBlock*>& LandmarkPolyline2D::getPointStatePtrDeque()
