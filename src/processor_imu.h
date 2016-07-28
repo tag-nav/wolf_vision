@@ -46,23 +46,20 @@ class ProcessorIMU : public ProcessorMotion{
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
         {
             Eigen::Vector3s measured_acc(_data.segment(0,3));        // acc  = data[0:2]
-            Eigen::Vector3s measured_gyro(_data.segment(3,3));  // gyro = data[3:5]
+            Eigen::Vector3s measured_gyro(_data.segment(3,3));       // gyro = data[3:5]
 
             /// Quaternion delta
-            Eigen::VectorXs d_theta = (measured_gyro - bias_gyro_) * _dt;
-            Eigen::Quaternions d_q;
-            Eigen::v2q(d_theta, d_q);
+            new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data());
+            Eigen::v2q((measured_gyro - bias_gyro_) * _dt, q_out_);
 
             /// Velocity delta
-            Eigen::Vector3s d_V = d_q._transformVector((measured_acc - bias_acc_) * _dt);
+            new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta.data() + 4);
+            v_out_ = q_out_._transformVector((measured_acc - bias_acc_) * _dt);
 
             /// Position delta
-            Eigen::Vector3s d_p = d_V * _dt;
-
-            _delta.segment(0,4) = d_q.coeffs();
-            _delta.segment(4,3) = d_V;
-            _delta.segment(7,3) = d_p;
-        }
+            new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta.data() + 7);
+            p_out_ = v_out_ * dt_;
+          }
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -73,7 +70,9 @@ class ProcessorIMU : public ProcessorMotion{
          */
         virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
         {
+          remap(_x, _delta, _x_plus_delta);
 
+          deltaPlusDelta(_x, _delta, _x_plus_delta);
         }
 
         /** \brief composes a delta-state on top of another delta-state
@@ -86,16 +85,13 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
         {
           // TODO assert size
+          remap(_delta1, _delta2, _delta1_plus_delta2);
 
-          Eigen::Vector4s q1_vec = _delta1.segment(0,4);
-          Eigen::Vector4s q2_vec = _delta2.segment(0,4);
-
-          Eigen::Quaternions q1(q1_vec);
-          Eigen::Quaternions q2(q2_vec);
-
-          _delta1_plus_delta2.segment(0,3) = (q1 * q2).coeffs();      // quaternion update
-          _delta1_plus_delta2.segment(4,3) = _delta1.segment(4,3) + _delta2.segment(4,3); // velocity update
-          _delta1_plus_delta2.segment(7,3) = _delta1.segment(7,3) + _delta2.segment(7,3); // position update
+          q_out_ = q1_ * q2_;
+          v_out_ = v1_ + v2_;
+          p_out_ = p1_ + p2_;
+          bias_acc_out_ = bias_acc_;
+          bias_gyro_out_ = bias_gyro_;
         }
 
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -117,8 +113,8 @@ class ProcessorIMU : public ProcessorMotion{
 
         virtual Eigen::VectorXs deltaZero() const
         {
-            Eigen::VectorXs tmp(10);
-            tmp <<  0,0,0,  0,0,0,1,  0,0,0;  // p, q, v
+            Eigen::VectorXs tmp(16);
+            tmp <<  0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0;  // p, q, v, ba, bg
             return tmp;
         }
 
@@ -146,6 +142,19 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Vector3s bias_acc_;
         Eigen::Vector3s bias_gyro_;
 
+        Eigen::Map<const Eigen::Quaternions> q1_, q2_;
+        Eigen::Map<Eigen::Quaternions> q_out_;
+        Eigen::Map<const Eigen::Vector3s> v1_, v2_;
+        Eigen::Map<Eigen::Vector3s> v_out_;
+        Eigen::Map<const Eigen::Vector3s> p1_, p2_;
+        Eigen::Map<Eigen::Vector3s> p_out_;
+        Eigen::Map<const Eigen::Vector3s> bias_acc1_, bias_acc2_;
+        Eigen::Map<Eigen::Vector3s> bias_acc_out_;
+        Eigen::Map<const Eigen::Vector3s> bias_gyro1_, bias_gyro2_;
+        Eigen::Map<Eigen::Vector3s> bias_gyro_out_;
+
+        void remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out);
+
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
         ///< (first-order propagation from *measurementCovariance*).
         Eigen::Matrix<Scalar,9,9> preint_meas_cov_;
@@ -157,6 +166,28 @@ class ProcessorIMU : public ProcessorMotion{
     public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
+
+inline void ProcessorIMU::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
+{
+    new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x1.data());
+    new (&v1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 4);
+    new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 7);
+    new (&bias_acc1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 10);
+    new (&bias_gyro1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 13);
+
+    new (&q2_) Eigen::Map<const Eigen::Quaternions>(_x2.data());
+    new (&v2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 4);
+    new (&p2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 7);
+    new (&bias_acc2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 10);
+    new (&bias_gyro2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 13);
+
+    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_x_out.data());
+    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data() + 4);
+    new (&p_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data() + 7);
+    new (&bias_acc_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 10);
+    new (&bias_gyro_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 13);
+
+}
 
 } // namespace wolf
 
