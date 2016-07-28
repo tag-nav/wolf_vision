@@ -46,6 +46,7 @@ class MapBase : public NodeLinked<Problem,LandmarkBase>
         LandmarkBaseList* getLandmarkListPtr();
         
         void load(const std::string& _map_file_yaml);
+        void save(const std::string& _map_file_yaml);
 
 };
 

@@ -3,6 +3,9 @@
 #include "landmark_base.h"
 #include "factory.h"
 
+// stl
+#include "fstream"
+
 // YAML
 #include <yaml-cpp/yaml.h>
 
@@ -61,6 +64,32 @@ void MapBase::load(const std::string& _map_file_dot_yaml)
         LandmarkBase* lmk_ptr = LandmarkFactory::get().create(lmk_node["type"].as<std::string>(), lmk_node);
         addLandmark(lmk_ptr);
     }
+
+}
+
+void MapBase::save(const std::string& _map_file_yaml)
+{
+    YAML::Emitter e;
+
+    e << YAML::BeginMap;
+    e << YAML::Key      << "map name";
+    e << YAML::Value    << "Map saved from Wolf";
+    e << YAML::Key      << "date";
+    e << YAML::Value    << "--/--/--";
+    e << YAML::Key      << "nlandmarks";
+    e << YAML::Value    << getLandmarkListPtr()->size();
+    e << YAML::Key      << "landmarks";
+    e << YAML::Value    << YAML::BeginSeq;
+
+    for (auto lmk_ptr : *getLandmarkListPtr())
+    {
+        e << lmk_ptr->save();
+    }
+    e << YAML::EndSeq << YAML::EndMap;
+
+
+    std::ofstream fout(_map_file_yaml);
+    fout << e.c_str();
 
 }
 
