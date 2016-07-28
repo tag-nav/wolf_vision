@@ -68,6 +68,8 @@ int main(int argc, char** argv)
 
     std::string wolf_path( tmp );
 
+    std::cout << "Wolf path: " << wolf_path << std::endl;
+
     Problem* wolf_problem_ = new Problem(FRM_PO_3D);
 
     //=====================================================
