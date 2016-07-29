@@ -82,7 +82,7 @@ class LandmarkPolyline2D : public LandmarkBase
 
         /** \brief Set the polyline as closed
          **/
-        virtual void setClosed();
+        virtual void setClosed(bool _merge_extremes);
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
@@ -136,12 +136,6 @@ inline int LandmarkPolyline2D::getLastId() const {
 inline std::vector<StateBlock*> LandmarkPolyline2D::getStateBlockVector() const
 {
     return std::vector<StateBlock*>(point_state_ptr_vector_.begin(), point_state_ptr_vector_.end());
-}
-
-inline void LandmarkPolyline2D::setClosed()
-{
-    assert(first_defined_ && last_defined_ && "closing a polyline with a non-defined extreme");
-    closed_ = true;
 }
 
 } /* namespace wolf */

@@ -8,6 +8,8 @@
 #include "feature_polyline_2D.h"
 #include "landmark_polyline_2D.h"
 #include "local_parametrization_polyline_extreme.h"
+#include "constraint_point_2D.h"
+#include "constraint_point_to_line_2D.h"
 #include "state_block.h"
 
 namespace wolf
@@ -193,6 +195,98 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
         last_defined_ = true;
     else
         first_defined_ = true;
+}
+
+void LandmarkPolyline2D::setClosed(bool _merge_extremes)
+{
+    assert(((_merge_extremes && (first_defined_ || last_defined_)) || (first_defined_ && last_defined_)) && "closing a polyline without merging extremes with a non-defined extreme or merging without any defined extreme");
+
+    if (_merge_extremes)
+    {
+        // take a defined extreme as remaining
+        StateBlock* remove_state = (first_defined_ ? point_state_ptr_vector_.back() : point_state_ptr_vector_.front());
+        StateBlock* remain_state = (first_defined_ ? point_state_ptr_vector_.front() : point_state_ptr_vector_.back());
+
+        // new point id for new constraints
+        int remove_id = (first_defined_ ? getLastId() : getFirstId());
+        int remain_id = (first_defined_ ? getFirstId() : getLastId());
+
+        // Change constraints from remove_state to remain_state
+        ConstraintBaseList old_constraints_list = *getConstrainedByListPtr();
+        ConstraintBase* new_ctr_ptr = nullptr;
+        for (auto ctr_ptr : old_constraints_list)
+        {
+            if (ctr_ptr->getType() == CTR_POINT_2D)
+            {
+                ConstraintPoint2D* ctr_point_ptr = (ConstraintPoint2D*)ctr_ptr;
+
+                // If landmark point constrained -> new constraint
+                if (ctr_point_ptr->getLandmarkPointId() == remove_id)
+                    new_ctr_ptr = new ConstraintPoint2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
+                                                        this,
+                                                        ctr_point_ptr->getFeaturePointId(),
+                                                        remain_id,
+                                                        ctr_point_ptr->getApplyLossFunction(),
+                                                        ctr_point_ptr->getStatus());
+            }
+            else if  (ctr_ptr->getType() == CTR_POINT_TO_LINE_2D)
+            {
+                ConstraintPointToLine2D* ctr_point_ptr = (ConstraintPointToLine2D*)ctr_ptr;
+
+                // If landmark point constrained -> new constraint
+                if (ctr_point_ptr->getLandmarkPointId() == remove_id)
+                    new_ctr_ptr = new ConstraintPointToLine2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
+                                                                                      this,
+                                                                                      ctr_point_ptr->getFeaturePointId(),
+                                                                                      remain_id,
+                                                                                      ctr_point_ptr->getLandmarkPointAuxId(),
+                                                                                      ctr_point_ptr->getApplyLossFunction(),
+                                                                                      ctr_point_ptr->getStatus());
+                // If landmark point is aux point -> new constraint
+                else if (ctr_point_ptr->getLandmarkPointAuxId() == remove_id)
+                    new_ctr_ptr = new ConstraintPointToLine2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
+                                                                                      this,
+                                                                                      ctr_point_ptr->getFeaturePointId(),
+                                                                                      ctr_point_ptr->getLandmarkPointId(),
+                                                                                      remain_id,
+                                                                                      ctr_point_ptr->getApplyLossFunction(),
+                                                                                      ctr_point_ptr->getStatus());
+            }
+            else
+                throw std::runtime_error ("polyline constraint of unknown type");
+
+            // If new constraint
+            if (new_ctr_ptr != nullptr)
+            {
+                // add new constraint
+                ctr_ptr->getFeaturePtr()->addConstraint(new_ctr_ptr);
+
+                // delete constraint
+                ctr_ptr->destruct();
+
+                new_ctr_ptr = nullptr;
+            }
+        }
+
+        // Remove remove_state
+        if (getProblem() != nullptr)
+            getProblem()->removeStateBlockPtr(remove_state);
+        delete remove_state;
+
+        if (first_defined_)
+            point_state_ptr_vector_.pop_back();
+        else
+        {
+            point_state_ptr_vector_.pop_front();
+            first_id_++;
+        }
+
+        // all defined
+        last_defined_ = true;
+        first_defined_ = true;
+    }
+
+    closed_ = true;
 }
 
 void LandmarkPolyline2D::registerNewStateBlocks()
