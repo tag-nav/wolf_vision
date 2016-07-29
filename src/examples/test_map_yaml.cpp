@@ -15,10 +15,27 @@
 #include "state_block.h"
 
 #include <iostream>
+using namespace wolf;
+
+void print(MapBase& _map)
+{
+    for (auto lmk_ptr : *(_map.getLandmarkListPtr()))
+    {
+
+        std::cout << "Lmk ID:    " << lmk_ptr->id();
+        LandmarkPolyline2D* poly_ptr = (LandmarkPolyline2D*)(lmk_ptr);
+        std::cout << "\nn points:  " << poly_ptr->getNPoints();
+        std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
+        std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
+        std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
+        for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
+            std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getVector().transpose();
+        std::cout << std::endl;
+    }
+}
 
 int main()
 {
-    using namespace wolf;
 
     std::string filename;
 
@@ -32,22 +49,10 @@ int main()
     Problem problem(FRM_PO_2D);
     filename = WOLF_CONFIG + "/map_polyline_example.yaml";
     std::cout << "Reading map from file: " << filename << std::endl;
-    problem.getMapPtr()->load(filename);
+    problem.loadMap(filename);
 
     std::cout << "Printing map..." << std::endl;
-
-    for (auto lmk_ptr : *(problem.getMapPtr()->getLandmarkListPtr()))
-    {
-        std::cout << "Lmk ID:    " << lmk_ptr->id();
-        LandmarkPolyline2D* poly_ptr = (LandmarkPolyline2D*)lmk_ptr;
-        std::cout << "\nn points:  " << poly_ptr->getNPoints();
-        std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
-        std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
-        std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
-        for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
-            std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getVector().transpose();
-        std::cout << std::endl;
-    }
+    print(*(problem.getMapPtr()));
 
     filename = WOLF_CONFIG + "/map_polyline_example_write.yaml";
     std::cout << "Writing map to file: " << filename << std::endl;
@@ -59,21 +64,10 @@ int main()
     problem.getMapPtr()->getLandmarkListPtr()->clear();
 
     std::cout << "Re-reading map from file: " << filename << std::endl;
-    problem.getMapPtr()->load(filename);
+    problem.loadMap(filename);
 
     std::cout << "Printing map..." << std::endl;
-    for (auto lmk_ptr : *(problem.getMapPtr()->getLandmarkListPtr()))
-    {
-        std::cout << "Lmk ID:    " << lmk_ptr->id();
-        LandmarkPolyline2D* poly_ptr = (LandmarkPolyline2D*)lmk_ptr;
-        std::cout << "\nn points:  " << poly_ptr->getNPoints();
-        std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
-        std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
-        std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
-        for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
-            std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getVector().transpose();
-        std::cout << std::endl;
-    }
+    print(*(problem.getMapPtr()));
 
     return 0;
 }
