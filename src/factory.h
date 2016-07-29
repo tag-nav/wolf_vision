@@ -152,9 +152,12 @@ namespace wolf
  *  - ProcessorFactory: to create processors that will be bound to objects.
  *  - Problem::installSensor() : to install objects in WOLF Problem.
  *
- * #### Example: creating a LandmarkPolyline2D from a YAML node
+ * #### Example 1: Writing and registering the creator of LandmarkPolyline2D from a YAML node
+ *
+ * You can find this code in the landmark_polyline_2D.cpp file.
  *
  * \code
+ *  // Creator (this method is static):
  * LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
  * {
  *    // Parse YAML node with lmk info and data
@@ -175,6 +178,13 @@ namespace wolf
  *
  *    return lmk_ptr;
  * }
+ *
+ * // Register landmark creator (put the register code inside an unnamed namespace):
+ *  namespace
+ *  {
+ *  const bool registered_lmk_polyline_2D = LandmarkFactory::get().registerCreator("POLYLINE 2D", LandmarkPolyline2D::create);
+ *  }
+ *
  * \endcode
  *
  *
