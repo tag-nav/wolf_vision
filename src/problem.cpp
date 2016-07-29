@@ -487,4 +487,14 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::Matrix
         throw std::runtime_error("Origin already setted!");
 }
 
+void Problem::loadMap(const std::string& _filename_dot_yaml)
+{
+    getMapPtr()->load(_filename_dot_yaml);
+}
+
+void Problem::saveMap(const std::string& _filename_dot_yaml, const std::string _map_name)
+{
+    getMapPtr()->save(_filename_dot_yaml, _map_name);
+}
+
 } // namespace wolf
