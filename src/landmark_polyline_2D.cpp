@@ -11,11 +11,13 @@
 #include "constraint_point_2D.h"
 #include "constraint_point_to_line_2D.h"
 #include "state_block.h"
+#include "factory.h"
+#include "yaml/yaml_conversion.h"
 
 namespace wolf
 {
 
-LandmarkPolyline2D::LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme) :
+LandmarkPolyline2D::LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id) :
         LandmarkBase(LANDMARK_POLYLINE_2D, new StateBlock(Eigen::Vector2s::Zero(), true), new StateBlock(Eigen::Vector1s::Zero(), true)), first_id_(0), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false)
 {
     //std::cout << "LandmarkPolyline2D::LandmarkPolyline2D" << std::endl;
@@ -295,6 +297,56 @@ void LandmarkPolyline2D::registerNewStateBlocks()
 	if (getProblem() != nullptr)
 		for (auto state : point_state_ptr_vector_)
 			getProblem()->addStateBlockPtr(state);
+}
+
+LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
+{
+    // Parse YAML node with lmk info and data
+    unsigned int id         = _lmk_node["id"].as<unsigned int>();
+    int first_id            = _lmk_node["first_id"].as<int>();
+    bool first_defined      = _lmk_node["first_defined"].as<bool>();
+    bool last_defined       = _lmk_node["last_defined"].as<bool>();
+    unsigned int npoints    = _lmk_node["points"].size();
+    Eigen::MatrixXs points(2,npoints);
+    for (unsigned int i = 0; i < npoints; i++)
+    {
+        points.col(i) = _lmk_node["points"][i].as<Eigen::Vector2s>();
+    }
+
+    //std::cout << "Points in lmk: " << id << ":\n" << points << std::endl;
+
+    // Create a new landmark
+    LandmarkBase* lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
+
+    lmk_ptr->setId(id);
+
+    return lmk_ptr;
+
+}
+
+YAML::Node LandmarkPolyline2D::saveToYaml() const
+{
+    YAML::Node n;
+    n["id"]             = landmark_id_;
+    n["type"]           = "POLYLINE 2D";
+    n["first_id"]       = first_id_;
+    n["first_defined"]  = first_defined_;
+    n["last_defined"]   = last_defined_;
+
+    int npoints = point_state_ptr_vector_.size();
+
+    for (int i = 0; i < npoints; i++)
+    {
+        n["points"].push_back(point_state_ptr_vector_[i]->getVector());
+    }
+
+    return n;
+}
+
+// Register landmark creator
+namespace
+{
+const bool registered_lmk_polyline_2D = LandmarkFactory::get().registerCreator("POLYLINE 2D", LandmarkPolyline2D::create);
 }
 
 } /* namespace wolf */

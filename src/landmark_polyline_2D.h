@@ -8,11 +8,24 @@
 #ifndef LANDMARK_POLYLINE_2D_H_
 #define LANDMARK_POLYLINE_2D_H_
 
+// Wolf
 #include "landmark_base.h"
+
+// STL
 #include <deque>
+
+// yaml-cpp library
+#include <yaml-cpp/yaml.h>
 
 namespace wolf
 {
+
+//struct LandmarkPolyline2DParams : public LandmarkParamsBase
+//{
+//        unsigned int id_;
+//        unsigned int npoints_;
+//
+//};
 
 class LandmarkPolyline2D : public LandmarkBase
 {
@@ -24,7 +37,7 @@ class LandmarkPolyline2D : public LandmarkBase
         bool closed_;                   ///< Wether the polyline is closed or not
 
     public:
-        LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined);
+        LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined, unsigned int _first_id = 0);
         virtual ~LandmarkPolyline2D();
 
         /** \brief Gets a const reference to the point state block pointer vector
@@ -87,6 +100,12 @@ class LandmarkPolyline2D : public LandmarkBase
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
+
+        /** Factory method to create new landmarks from YAML nodes
+         */
+        static LandmarkBase* create(const YAML::Node& _lmk_node);
+
+        YAML::Node saveToYaml() const;
 };
 
 inline std::deque<StateBlock*>& LandmarkPolyline2D::getPointStatePtrDeque()

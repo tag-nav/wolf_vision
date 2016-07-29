@@ -160,6 +160,9 @@ class Problem : public NodeBase
         void setProcessorMotion(ProcessorMotion* _processor_motion_ptr);
         void setProcessorMotion(std::string _unique_processor_name);
 
+        void loadMap(const std::string& _filename_dot_yaml);
+        void saveMap(const std::string& _filename_dot_yaml, const std::string _map_name = "Map automatically saved by Wolf");
+
         /** \brief Create Frame of the correct size
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
@@ -186,6 +189,7 @@ class Problem : public NodeBase
         void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
 
         unsigned int getFrameStructureSize();
+        Eigen::VectorXs zeroState();
 
         /** \brief Give the permission to a processor to create a new keyFrame
          */

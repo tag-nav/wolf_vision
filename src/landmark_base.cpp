@@ -92,7 +92,6 @@ void LandmarkBase::registerNewStateBlocks()
     {
         if (p_ptr_ != nullptr)
             getProblem()->addStateBlockPtr(p_ptr_);
-
         if (o_ptr_ != nullptr)
             getProblem()->addStateBlockPtr(o_ptr_);
     }

@@ -28,7 +28,7 @@ static ProcessorParamsBase* createProcessorParamsImage(const std::string & _file
 
     Node params = YAML::LoadFile(_filename_dot_yaml);
 
-    if (params["processor type"])
+    if (!params.IsNull())
     {
         Node dd_yaml = params["detector-descriptor"];
         if(dd_yaml["type"].as<string>() == "ORB")
@@ -89,6 +89,7 @@ static ProcessorParamsBase* createProcessorParamsImage(const std::string & _file
 
 // Register in the SensorFactory
 const bool registered_prc_image_par = ProcessorParamsFactory::get().registerCreator("IMAGE", createProcessorParamsImage);
+const bool registered_prc_image_landmark_par = ProcessorParamsFactory::get().registerCreator("IMAGE LANDMARK", createProcessorParamsImage);
 
 
 }

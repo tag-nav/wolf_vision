@@ -38,6 +38,17 @@ void ActiveSearchGrid::setParameters(const int & _img_size_h, const int & _img_s
     renew();
 }
 
+void ActiveSearchGrid::resizeImage(unsigned int _img_size_h, unsigned int _img_size_v)
+{
+    img_size_(0) = _img_size_h;
+    img_size_(1) = _img_size_v;
+    cell_size_(0) = _img_size_h / (grid_size_(0) - 1);
+    cell_size_(1) = _img_size_v / (grid_size_(1) - 1);
+    offset_ = -cell_size_ / 2;
+    renew();
+}
+
+
 // Functions to fill in cells
 bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & _cell) {
     int k = 0;

@@ -6,7 +6,7 @@ intrinsic:
     distortion:     [-0.301701, 0.0963189]  # d0, d1, d2, ... radial distortion polynomial coeffs
     correction:     [ ]                     # c0, c1, c2, ... radial correction polynomial coeffs
 extrinsic: 
-    position:       [0, 0, 0.5]             #  x, y, z          [m]
+    position:       [0, 0, 0]             #  x, y, z          [m]
     orientation:    [-90, 0, -90]           # roll, pitch, yaw  [deg]
 
 

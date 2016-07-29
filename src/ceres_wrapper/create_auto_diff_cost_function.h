@@ -13,6 +13,7 @@
 
 namespace wolf {
     ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _use_wolf_autodiff);
+
 }
 
 #endif /* SRC_CERES_WRAPPER_CREATE_AUTO_DIFF_COST_FUNCTION_H_ */

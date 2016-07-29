@@ -104,6 +104,22 @@ libglog.so will be installed at **/usr/local/lib**
     
 libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/include/ceres**
 
+### Yaml-cpp. Wolf uses YAML files for configuration and for saving and loading workspaces.
+
+**(1)** Obtain:
+
+- Ubuntu:
+  
+  ```
+  $ sudo apt-get install libyaml-cpp-dev
+  ```
+- Mac:
+  
+  ```
+  $ brew install yaml-cpp
+  ```
+We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
+    
 ### Laser Scan Utils (Optional. Install only if you want to use IRI's laser scan utils)
 
 **(1)** Download:
@@ -134,20 +150,6 @@ Or, in case you don't have permissions:
     $ make
     $ sudo make install
     
-### Yaml-cpp (Optional. Install only if you want to use YAML for parsing your configuration files)
-
-**(1)** Obtain:
-
-  - Ubuntu:
-   
-   `$ sudo apt-get install libyaml-cpp-dev`
-
-  - Mac:
-  
-    `$ brew install yaml-cpp`
-    
-We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
-    
 Download and build
 ------------------
 
@@ -167,42 +169,43 @@ Download and build
 
 **Set the WOLF_ROOT environment variable**
 
-We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at tun-time. 
+We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at run-time. 
 For example, if we want to use YAML files for configuring sensors, `YAML::LoadFile(filename)` needs an absolute path to a `filename`. This name is platform-specific, and many times user-specific.
 
 Usually, these files are out of the WOLF project. But for testing purposes, some of these files exist within the WOLF directories.
 
 Proceed as follows:
 
-  1. To run from __Terminal__ (the default), you need to create an environment variable WOLF_ROOT pointing to where the wolf project is
-     - Edit file ````~/.bashrc````, or ````~/.bash_profile````, and add these lines:
-    
-        ````
-        # WOLF
-        export WOLF_ROOT="/abs/path/to/wolf"
-        ````
-
-    - Then you need to source the file to get effect, 
-
-        ````
-        source ~/.bash_profile    // or ~/.bashrc, of course
-        ````
-
-  2. If you run your application from __eclipse__, do:
-     - Menu Run > Run configurations...
-     - Add, or edit, a run configuration for the executable you want to run
-     - Click on tab 'Environment'
-     - Add a variable named ````WOLF_ROOT````, with value ````/abs/path/to/wolf````
-
-  3. If you run from __QtCreator__
-     - Click on Left bar > Projects > Tab 'Build'
-         - Under 'Build Environment', click 'Details'
-             - Add variable `WOLF_ROOT` with value `/abs/path/to/wolf`
-     - Click on Tab 'Run'
-         - Select your Run configuration
-         - Under 'Run Environment', make sure it says 'Use Build Environment'
-         - If not, click on 'Details' 
-             - Under 'Base environment for this run configuration', select 'Build Environment'
+1. To run from __Terminal__ (the default), you need to create an environment variable WOLF_ROOT pointing to where the wolf project is.
+  - Edit file `~/.bashrc`, or `~/.bash_profile`, and add these lines:
+  ```      
+  export WOLF_ROOT="/abs/path/to/wolf"
+  ```
+  * Then you need to source the file to get effect, 
+  ```      
+  source ~/.bash_profile    // or ~/.bashrc, of course
+  ```
+2. If you are using Eclipse or other __GUIs__ and you want this environment variable to be accessed by them, edit the file `/etc/environment` (you need to use `sudo`) and add this line:
+  
+  ```
+  WOLF_ROOT="/abs/path/to/wolf"
+  ```   
+Then reboot your machine.  
+Alternatively, you can set up the environment variables in your GUIs only. Follow these guidelines:
+  - If you run your application from __eclipse__, do:  
+    - Menu Run > Run configurations...  
+    - Add, or edit, a run configuration for the executable you want to run  
+    - Click on tab 'Environment'  
+    - Add a variable named `WOLF_ROOT`, with value `/abs/path/to/wolf`  
+  - If you run from __QtCreator__  
+    - Click on Left bar > Projects > Tab 'Build'  
+      - Under 'Build Environment', click 'Details'  
+      - Add variable `WOLF_ROOT` with value `/abs/path/to/wolf`  
+    - Click on Tab 'Run'  
+      - Select your Run configuration  
+      - Under 'Run Environment', make sure it says 'Use Build Environment'  
+      - If not, click on 'Details'   
+        - Under 'Base environment for this run configuration', select 'Build Environment'  
 
 ### Wolf ROS Node
 

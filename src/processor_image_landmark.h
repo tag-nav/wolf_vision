@@ -1,14 +1,16 @@
-#ifndef PROCESSOR_IMAGE_H
-#define PROCESSOR_IMAGE_H
+#ifndef PROCESSOR_IMAGE_LANDMARK_H
+#define PROCESSOR_IMAGE_LANDMARK_H
 
 // Wolf includes
 #include "sensor_camera.h"
 #include "capture_image.h"
 #include "feature_point_image.h"
 #include "state_block.h"
+#include "state_quaternion.h"
 #include "active_search.h"
-#include "processor_tracker_feature.h"
+#include "processor_tracker_landmark.h"
 #include "constraint_epipolar.h"
+#include "landmark_AHP.h"
 
 // OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
@@ -19,7 +21,6 @@
 // General includes
 #include <cmath>
 #include <complex>      // std::complex, std::norm
-
 
 
 namespace wolf {
@@ -33,7 +34,7 @@ enum DetectorDescriptorType
 struct DetectorDescriptorParamsBase
 {
         DetectorDescriptorType type; ///< Type of algorithm. Accepted values in wolf.h
-        unsigned int nominal_pattern_radius = 18; ///< Radius of the pattern before scaling
+        unsigned int nominal_pattern_radius = 0; ///< Radius of the pattern before scaling //18 for brisk
         //should this be here? doesn't it depend on the descriptor?
 };
 
@@ -66,21 +67,6 @@ struct ProcessorImageParameters : public ProcessorParamsBase
 
         DetectorDescriptorParamsBase* detector_descriptor_params_ptr;
 
-//        struct Detector
-//        {
-//                unsigned int threshold; ///< on the keypoint strength to declare it key-point
-//                unsigned int threshold_new_features; ///< on the keypoint strength to declare it key-point
-//                unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
-//                unsigned int nominal_pattern_radius; ///< Radius of the detector pattern before scaling
-//                unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
-//        }detector;
-//        struct Descriptor
-//        {
-//                unsigned int nominal_pattern_radius; ///< Radius of the descriptor pattern before scaling
-//                float pattern_scale; ///< Scale of the base pattern wrt the nominal one
-//                unsigned int pattern_radius; ///< radius of the pattern used to describe a key-point at pattern_scale = 1.0 and octaves = 0
-//                unsigned int size_bits; ///< length of the descriptor vector in bits
-//        }descriptor;
         struct Matcher
         {
                 Scalar min_normalized_score; ///< [-1..0]: awful match; 1: perfect match; out of [-1,1]: error
@@ -88,7 +74,7 @@ struct ProcessorImageParameters : public ProcessorParamsBase
                 unsigned int roi_width; ///< Width of the roi used in tracking
                 unsigned int roi_height; ///< Height of the roi used in tracking
         }matcher;
-        struct Active_search
+        struct Adtive_search
         {
                 unsigned int grid_width; ///< cells per horizontal dimension of image
                 unsigned int grid_height; ///< cells per vertical dimension of image
@@ -101,12 +87,9 @@ struct ProcessorImageParameters : public ProcessorParamsBase
         }algorithm;
 };
 
-class ProcessorImage : public ProcessorTrackerFeature
+class ProcessorImageLandmark : public ProcessorTrackerLandmark
 {
-
     protected:
-        //cv::FeatureDetector* detector_ptr_;
-        //cv::DescriptorExtractor* descriptor_ptr_;
         cv::DescriptorMatcher* matcher_ptr_;
         cv::Feature2D* detector_descriptor_ptr_;
     protected:
@@ -119,6 +102,18 @@ class ProcessorImage : public ProcessorTrackerFeature
                 unsigned int size_bits_; ///< length of the descriptor vector in bits
         }detector_descriptor_params_;
 
+        /* pinhole params */
+        Eigen::Vector4s k_parameters_;
+        Eigen::Vector2s distortion_;
+        Eigen::Vector2s correction_;
+
+        /* transformations */
+        Eigen::Vector3s world2cam_translation_;
+        Eigen::Vector4s world2cam_orientation_;
+
+        Eigen::Vector3s cam2world_translation_;
+        Eigen::Vector4s cam2world_orientation_;
+
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
@@ -126,9 +121,14 @@ class ProcessorImage : public ProcessorTrackerFeature
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
 
+        unsigned int n_feature_;
+        unsigned int landmark_idx_non_visible_;
+
+        unsigned int landmarks_tracked_ = 0;
+
     public:
-        ProcessorImage(ProcessorImageParameters _params);
-        virtual ~ProcessorImage();
+        ProcessorImageLandmark(ProcessorImageParameters _params);
+        virtual ~ProcessorImageLandmark();
 
     protected:
 
@@ -146,25 +146,25 @@ class ProcessorImage : public ProcessorTrackerFeature
 
         void advance()
         {
-            ProcessorTrackerFeature::advance();
+            ProcessorTrackerLandmark::advance();
             image_last_ = image_incoming_;
         }
 
         void reset()
         {
-            ProcessorTrackerFeature::reset();
+            ProcessorTrackerLandmark::reset();
             image_last_ = image_incoming_;
         }
 
-        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
-                                           FeatureMatchMap& _feature_correspondences);
 
-        /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
-         * \param _last_feature input feature in last capture tracked
-         * \param _incoming_feature input/output feature in incoming capture to be corrected
-         * \return false if the the process discards the correspondence with origin's feature
+        //Pure virtual
+        /** \brief Find provided landmarks in the incoming capture
+         * \param _landmark_list_in input list of landmarks to be found in incoming
+         * \param _feature_list_out returned list of incoming features corresponding to a landmark of _landmark_list_in
+         * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          */
-        virtual bool correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
+        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
+                                           LandmarkMatchMap& _feature_landmark_correspondences);
 
         /** \brief Vote for KeyFrame generation
          *
@@ -185,12 +185,33 @@ class ProcessorImage : public ProcessorTrackerFeature
          */
         virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features);
 
-        /** \brief Create a new constraint
+        /** \brief Create one landmark
          *
-         * Creates a constraint from feature to feature
+         * Implement in derived classes to build the type of landmark you need for this tracker.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr);
+        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr);
 
+    public:
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+
+
+
+        /** \brief Create a new constraint
+         * \param _feature_ptr pointer to the Feature to constrain
+         * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
+         *
+         *
+         *
+         * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
+         * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
+         */
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr);
+
+
+
+
+
+        //Other functions
     private:
 
         /**
@@ -201,8 +222,7 @@ class ProcessorImage : public ProcessorTrackerFeature
          * \param new_descriptors output descriptors obtained in the function
          * \return the number of detected features
          */
-        virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
-                                         cv::Mat& new_descriptors);
+        virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,cv::Mat& new_descriptors);
 
     private:
         /**
@@ -227,41 +247,24 @@ class ProcessorImage : public ProcessorTrackerFeature
 
         virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches);
 
-        virtual void filterFeatureLists(FeatureBaseList _original_list, FeatureBaseList& _filtered_list);
+        virtual void rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation);
 
+        virtual void changeOfReferenceFrame(LandmarkAHP* _landmark, Eigen::Vector3s& _translation, Eigen::Matrix3s& _rotation);
 
-
+        virtual void getLandmarkInReference(LandmarkAHP* _landmark, Eigen::Vector3s _translation, Eigen::Matrix3s _rotation, Eigen::Vector3s& _point3D);
 
         // These only to debug, will disappear one day soon
     public:
-        virtual void drawFeatures(CaptureBase* const _last_ptr);
+        virtual void drawFeatures(cv::Mat& _image);
 
         virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
 
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
 
-        virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
-
-    public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
-
-
 };
 
-inline bool ProcessorImage::voteForKeyFrame()
-{
-//    std::cout << "voteForKeyFrame?: "
-//            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
-    return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
-}
-
-inline ConstraintBase* ProcessorImage::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr)
-{
-    ConstraintEpipolar* const_epipolar_ptr = new ConstraintEpipolar(_feature_ptr, _feature_other_ptr);
-    return const_epipolar_ptr; // TODO Crear constraint
-}
 
 } // namespace wolf
 
 
-#endif // PROCESSOR_IMAGE_H
+#endif // PROCESSOR_IMAGE_LANDMARK_H
