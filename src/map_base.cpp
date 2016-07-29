@@ -73,20 +73,25 @@ void MapBase::load(const std::string& _map_file_dot_yaml)
 
 }
 
-void MapBase::save(const std::string& _map_file_yaml, const std::string _map_name)
+std::string MapBase::dateTimeNow()
 {
     // Get date and time for archiving purposes
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-    std::ostringstream oss;
-    oss << std::put_time(&tm, "%d/%m/%Y at %H:%M:%S");
-    auto date_time = oss.str();
+    std::time_t rawtime;
+    std::time(&rawtime);
+    const std::tm* timeinfo = std::localtime(&rawtime);
+    char time_char[30];
+    std::strftime(time_char, sizeof(time_char), "%d/%m/%Y at %H:%M:%S", timeinfo);
+    std::string date_time(time_char);
+    return date_time;
+}
 
+void MapBase::save(const std::string& _map_file_yaml, const std::string _map_name)
+{
     YAML::Emitter emitter;
 
     emitter << YAML::BeginMap;
     emitter << "map name"   << _map_name;
-    emitter << "date-time" << date_time;
+    emitter << "date-time" << dateTimeNow(); // Get date and time for archiving purposes
 
     emitter << "nlandmarks" << getLandmarkListPtr()->size();
 

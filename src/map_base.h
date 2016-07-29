@@ -48,6 +48,8 @@ class MapBase : public NodeLinked<Problem,LandmarkBase>
         void load(const std::string& _map_file_yaml);
         void save(const std::string& _map_file_yaml, const std::string _map_name = "Map automatically saved by Wolf");
 
+    private:
+        std::string dateTimeNow();
 };
 
 inline LandmarkBaseList* MapBase::getLandmarkListPtr()
