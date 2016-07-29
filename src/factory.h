@@ -34,12 +34,12 @@ namespace wolf
  *
  * The class is templatized on the class of the produced objects, __TypeBase__.
  * The produced objects are always of a class deriving from TypeBase.
+ * The returned data is always a pointer to TypeBase.
+ *
  * For example, you may use as TypeBase the following types:
  *   - LandmarkBase: the Factory creates landmarks deriving from LandmarkBase and returns base pointers LandmarkBase* to them
  *   - IntrinsicsBase: the Factory creates intrinsic parameters deriving from IntrinsicsBase and returns base pointers IntrinsicsBase* to them
  *   - XxxBase: the Factory creates objects deriving from XxxBase and returns pointers XxxBase* to them.
- *
- * The returned data is always a pointer to TypeBase.
  *
  * The class in also templatized on the type of the input parameter of the creator, __TypeInput__:
  *   - ````std::string```` is used when the input parameter is to be a file name from which to read data.
@@ -92,15 +92,16 @@ namespace wolf
  *
  * where, of course, you better make use of the appropriate typedef in place of ````Factory<MyTypeBase, MyTypeInput>````.
  *
- * You can then call the methods you like, e.g. to create a landmark, you type:
+ * You can then call the methods you like, e.g. to create a landmark, you use:
  *
  *     \code
- *      LandmarkFactory::get().create(...); // see below for creating objects ...
+ *     LandmarkFactory::get().create(...); // see below for creating objects ...
  *     \endcode
  *
  * #### Write creator methods (in your derived object classes)
  * The method LandmarkPolyline2D::create(...) exists in the LandmarkPolyline2D class as a static method.
- * All these ````XxxXxx::create()```` methods need to have exactly the same API, regardless of the object type:
+ * All these ````XxxXxx::create()```` methods need to have exactly the same API, regardless of the object type.
+ * The API puts into play the two template parameters:
  *
  * \code
  * static TypeBase* create( const TypeInput& );
@@ -157,13 +158,13 @@ namespace wolf
  * To create e.g. a LandmarkPolyline2D from a YAML node you type:
  *
  *     \code
- *      Factory<LandmarkBase*, YAML::Node>::get().create("POLYLINE 2D", lmk_yaml_node);
+ *     LandmarkBase* lmk_ptr = Factory<LandmarkBase*, YAML::Node>::get().create("POLYLINE 2D", lmk_yaml_node);
  *     \endcode
  *
  * or even better, make use of the convenient typedefs:
  *
  *     \code
- *      LandmarkFactory::get().create("POLYLINE 2D", lmk_yaml_node);
+ *     LandmarkBase* lmk_ptr = LandmarkFactory::get().create("POLYLINE 2D", lmk_yaml_node);
  *     \endcode
  *
  * ### Examples
@@ -186,6 +187,12 @@ namespace wolf
  *    {
  *        points.col(i) = _lmk_node["points"][i].as<Eigen::Vector2s>();
  *    }
+ *    // Create a new landmark
+ *    LandmarkBase* lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
+ *    lmk_ptr->setId(id);
+ *
+ *    return lmk_ptr;
+ * }
  * \endcode
  *
  * #### Example 2: Registering the creator of LandmarkPolyline2D from a YAML node
@@ -193,13 +200,6 @@ namespace wolf
  * You can find this code in the landmark_polyline_2D.cpp file.
  *
  * \code
- *    // Create a new landmark
- *    LandmarkBase* lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
- *    lmk_ptr->setId(id);
- *
- *    return lmk_ptr;
- * }
- *
  * // Register landmark creator (put the register code inside an unnamed namespace):
  *  namespace
  *  {

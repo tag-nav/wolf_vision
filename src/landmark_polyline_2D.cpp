@@ -310,7 +310,7 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
     Eigen::MatrixXs points(2,npoints);
     for (unsigned int i = 0; i < npoints; i++)
     {
-        points.col(i) = _lmk_node["points"][i].as<Eigen::Vector2s>();
+        points.col(i) = _lmk_node["points"][i]["state"].as<Eigen::Vector2s>();
     }
 
     //std::cout << "Points in lmk: " << id << ":\n" << points << std::endl;
@@ -336,20 +336,21 @@ YAML::Node LandmarkPolyline2D::saveToYaml() const
     {
         node["position"]       = p_ptr_->getVector();
         node["position fixed"] = p_ptr_->isFixed();
-        node["position has local param"] = p_ptr_->hasLocalParametrization();
     }
     if (o_ptr_ != nullptr)
     {
         node["orientation"]    = o_ptr_->getVector();
         node["orientation fixed"] = p_ptr_->isFixed();
-        node["orientation has local param"] = p_ptr_->hasLocalParametrization();
     }
 
     int npoints = point_state_ptr_vector_.size();
 
+    YAML::Node point;
     for (int i = 0; i < npoints; i++)
     {
-        node["points"].push_back(point_state_ptr_vector_[i]->getVector());
+        point["fixed"] = point_state_ptr_vector_[i]->isFixed();
+        point["state"] = point_state_ptr_vector_[i]->getVector();
+        node["points"].push_back(point);
     }
 
     return node;
