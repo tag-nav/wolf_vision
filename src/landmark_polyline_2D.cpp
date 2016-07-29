@@ -18,7 +18,7 @@ namespace wolf
 {
 
 LandmarkPolyline2D::LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id) :
-        LandmarkBase(LANDMARK_POLYLINE_2D, new StateBlock(Eigen::Vector2s::Zero(), true), new StateBlock(Eigen::Vector1s::Zero(), true)), first_id_(0), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false)
+        LandmarkBase(LANDMARK_POLYLINE_2D, nullptr, nullptr), first_id_(_first_id), first_defined_(_first_extreme), last_defined_(_last_extreme)
 {
     //std::cout << "LandmarkPolyline2D::LandmarkPolyline2D" << std::endl;
 	assert(_points.cols() >= 2 && "LandmarkPolyline2D::LandmarkPolyline2D: 2 points at least needed.");
@@ -332,12 +332,18 @@ YAML::Node LandmarkPolyline2D::saveToYaml() const
     node["first_id"]       = first_id_;
     node["first_defined"]  = first_defined_;
     node["last_defined"]   = last_defined_;
-    node["position"]       = p_ptr_->getVector();
-    node["orientation"]    = o_ptr_->getVector();
-    node["position fixed"] = p_ptr_->isFixed();
-    node["orientation fixed"] = p_ptr_->isFixed();
-    node["position has local param"] = p_ptr_->hasLocalParametrization();
-    node["orientation has local param"] = p_ptr_->hasLocalParametrization();
+    if (p_ptr_ != nullptr)
+    {
+        node["position"]       = p_ptr_->getVector();
+        node["position fixed"] = p_ptr_->isFixed();
+        node["position has local param"] = p_ptr_->hasLocalParametrization();
+    }
+    if (o_ptr_ != nullptr)
+    {
+        node["orientation"]    = o_ptr_->getVector();
+        node["orientation fixed"] = p_ptr_->isFixed();
+        node["orientation has local param"] = p_ptr_->hasLocalParametrization();
+    }
 
     int npoints = point_state_ptr_vector_.size();
 
