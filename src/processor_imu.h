@@ -87,9 +87,9 @@ class ProcessorIMU : public ProcessorMotion{
           // TODO assert size
           remap(_delta1, _delta2, _delta1_plus_delta2);
 
+          p_out_ = p1_ + p2_;
           q_out_ = q1_ * q2_;
           v_out_ = v1_ + v2_;
-          p_out_ = p1_ + p2_;
           bias_acc_out_ = bias_acc_;
           bias_gyro_out_ = bias_gyro_;
         }
@@ -142,12 +142,12 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Vector3s bias_acc_;
         Eigen::Vector3s bias_gyro_;
 
+        Eigen::Map<const Eigen::Vector3s> p1_, p2_;
+        Eigen::Map<Eigen::Vector3s> p_out_;
         Eigen::Map<const Eigen::Quaternions> q1_, q2_;
         Eigen::Map<Eigen::Quaternions> q_out_;
         Eigen::Map<const Eigen::Vector3s> v1_, v2_;
         Eigen::Map<Eigen::Vector3s> v_out_;
-        Eigen::Map<const Eigen::Vector3s> p1_, p2_;
-        Eigen::Map<Eigen::Vector3s> p_out_;
         Eigen::Map<const Eigen::Vector3s> bias_acc1_, bias_acc2_;
         Eigen::Map<Eigen::Vector3s> bias_acc_out_;
         Eigen::Map<const Eigen::Vector3s> bias_gyro1_, bias_gyro2_;
@@ -169,21 +169,21 @@ class ProcessorIMU : public ProcessorMotion{
 
 inline void ProcessorIMU::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
 {
-    new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x1.data());
-    new (&v1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 4);
-    new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 7);
+    new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x1.data());
+    new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x1.data() + 3);
+    new (&v1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 7);
     new (&bias_acc1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 10);
     new (&bias_gyro1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 13);
 
-    new (&q2_) Eigen::Map<const Eigen::Quaternions>(_x2.data());
-    new (&v2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 4);
-    new (&p2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 7);
+    new (&p2_) Eigen::Map<const Eigen::Vector3s>(_x2.data());
+    new (&q2_) Eigen::Map<const Eigen::Quaternions>(_x2.data()+ 3);
+    new (&v2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 7);
     new (&bias_acc2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 10);
     new (&bias_gyro2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 13);
 
-    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_x_out.data());
-    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data() + 4);
-    new (&p_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data() + 7);
+    new (&p_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data());
+    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_x_out.data() + 3);
+    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data() + 7);
     new (&bias_acc_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 10);
     new (&bias_gyro_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 13);
 
