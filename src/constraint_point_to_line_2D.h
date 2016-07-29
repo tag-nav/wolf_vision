@@ -11,8 +11,9 @@ namespace wolf {
 class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
 {
     protected:
-		int point_id_;
-		int point_aux_id_;
+		int landmark_point_id_;
+		int landmark_point_aux_id_;
+        unsigned int feature_point_id_;
         StateBlock* point_state_ptr_;
         StateBlock* point_aux_state_ptr_;
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
@@ -23,10 +24,10 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
 
 		ConstraintPointToLine2D(FeaturePolyline2D* _ftr_ptr, LandmarkPolyline2D* _lmk_ptr, unsigned int _ftr_point_id, int _lmk_point_id,  int _lmk_point_aux_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
 			ConstraintSparse<1,2,1,2,1,2,2>(CTR_POINT_TO_LINE_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id), _lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)),
-			point_id_(_lmk_point_id), point_aux_id_(_lmk_point_aux_id), point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), point_aux_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
+			landmark_point_id_(_lmk_point_id), landmark_point_aux_id_(_lmk_point_aux_id), feature_point_id_(_ftr_point_id), point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), point_aux_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
 		{
 			//std::cout << "ConstraintPointToLine2D" << std::endl;
-            setType("CORNER 2D");
+            setType("POINT TO LINE 2D");
             Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
             Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
             measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
@@ -47,6 +48,21 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
 			return (LandmarkPolyline2D*) landmark_ptr_;
 		}
 
+        int getLandmarkPointId()
+        {
+            return landmark_point_id_;
+        }
+
+        int getLandmarkPointAuxId()
+        {
+            return landmark_point_aux_id_;
+        }
+
+        unsigned int getFeaturePointId()
+        {
+            return feature_point_id_;
+        }
+
         StateBlock* getLandmarkPointPtr()
         {
             return point_state_ptr_;
@@ -55,16 +71,6 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
         StateBlock* getLandmarkPointAuxPtr()
         {
             return point_state_ptr_;
-        }
-
-        int getLandmarkPointId()
-        {
-            return point_id_;
-        }
-
-        int getLandmarkPointAuxId()
-        {
-            return point_aux_id_;
         }
 
 		template <typename T>
