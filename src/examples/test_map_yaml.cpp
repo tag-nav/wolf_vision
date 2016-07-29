@@ -24,8 +24,8 @@ void print(MapBase& _map)
 
         std::cout << "Lmk ID:    " << lmk_ptr->id();
         LandmarkPolyline2D* poly_ptr = (LandmarkPolyline2D*)(lmk_ptr);
-        std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " - fixed: " << poly_ptr->getPPtr()->isFixed();
-        std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " - fixed: " << poly_ptr->getOPtr()->isFixed();
+        std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " // fixed: " << poly_ptr->getPPtr()->isFixed();
+        std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " // fixed: " << poly_ptr->getOPtr()->isFixed();
         std::cout << "\nn points:  " << poly_ptr->getNPoints();
         std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
         std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
