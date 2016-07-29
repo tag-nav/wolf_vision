@@ -326,21 +326,27 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
 
 YAML::Node LandmarkPolyline2D::saveToYaml() const
 {
-    YAML::Node n;
-    n["id"]             = landmark_id_;
-    n["type"]           = "POLYLINE 2D";
-    n["first_id"]       = first_id_;
-    n["first_defined"]  = first_defined_;
-    n["last_defined"]   = last_defined_;
+    YAML::Node node;
+    node["id"]             = landmark_id_;
+    node["type"]           = "POLYLINE 2D";
+    node["first_id"]       = first_id_;
+    node["first_defined"]  = first_defined_;
+    node["last_defined"]   = last_defined_;
+    node["position"]       = p_ptr_->getVector();
+    node["orientation"]    = o_ptr_->getVector();
+    node["position fixed"] = p_ptr_->isFixed();
+    node["orientation fixed"] = p_ptr_->isFixed();
+    node["position has local param"] = p_ptr_->hasLocalParametrization();
+    node["orientation has local param"] = p_ptr_->hasLocalParametrization();
 
     int npoints = point_state_ptr_vector_.size();
 
     for (int i = 0; i < npoints; i++)
     {
-        n["points"].push_back(point_state_ptr_vector_[i]->getVector());
+        node["points"].push_back(point_state_ptr_vector_[i]->getVector());
     }
 
-    return n;
+    return node;
 }
 
 // Register landmark creator
