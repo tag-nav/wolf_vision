@@ -17,7 +17,7 @@ class StateBlock;
 
 namespace wolf {
 
-//class LanrmarkParamsBase {}; ///< class for landmark parameters. Derive it to define your parameters.
+//class LandmarkParamsBase {}; ///< class for landmark parameters. Derive it to define your parameters.
 
 // TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
