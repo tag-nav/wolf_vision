@@ -6,6 +6,10 @@ landmarks:
 
   - id: 1
     type: "POLYLINE 2D"   # This must match the KEY used in the LandmarkFactory. Otherwise it is an error.
+    position: [1, 1]
+    orientation: [1]
+    position fixed: true
+    orientation fixed: true
     first_id: 0
     first_defined: false
     last_defined: false
@@ -16,6 +20,10 @@ landmarks:
 
   - id: 4
     type: "POLYLINE 2D"   # This must match the KEY used in the LandmarkFactory. Otherwise it is an error.
+    position: [4, 4]
+    orientation: [4]
+    position fixed: true
+    orientation fixed: true
     first_id: -2
     first_defined: false
     last_defined: true
@@ -28,6 +36,10 @@ landmarks:
         
   - id: 6
     type: "POLYLINE 2D"   # This must match the KEY used in the LandmarkFactory. Otherwise it is an error.
+    position: [6, 6]
+    orientation: [6]
+    position fixed: true
+    orientation fixed: true
     first_id: 0
     first_defined: true
     last_defined: false

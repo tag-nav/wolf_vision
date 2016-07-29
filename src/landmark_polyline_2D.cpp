@@ -21,9 +21,9 @@ LandmarkPolyline2D::LandmarkPolyline2D(const Eigen::MatrixXs& _points, const boo
         LandmarkBase(LANDMARK_POLYLINE_2D, new StateBlock(Eigen::Vector2s::Zero(), true), new StateBlock(Eigen::Vector1s::Zero(), true)), first_id_(_first_id), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false)
 {
     //std::cout << "LandmarkPolyline2D::LandmarkPolyline2D" << std::endl;
-	assert(_points.cols() >= 2 && "LandmarkPolyline2D::LandmarkPolyline2D: 2 points at least needed.");
+    assert(_points.cols() >= 2 && "LandmarkPolyline2D::LandmarkPolyline2D: 2 points at least needed.");
     for (auto i = 0; i < _points.cols(); i++)
-    	point_state_ptr_vector_.push_back(new StateBlock(_points.col(i).head<2>()));
+        point_state_ptr_vector_.push_back(new StateBlock(_points.col(i).head<2>()));
 
     if (!first_defined_)
         point_state_ptr_vector_.front()->setLocalParametrizationPtr(new LocalParametrizationPolylineExtreme(point_state_ptr_vector_[1]));
@@ -32,6 +32,27 @@ LandmarkPolyline2D::LandmarkPolyline2D(const Eigen::MatrixXs& _points, const boo
 
     assert(point_state_ptr_vector_.front()->hasLocalParametrization() ? !first_defined_ : first_defined_);
     assert(point_state_ptr_vector_.back()->hasLocalParametrization() ? !last_defined_ : last_defined_);
+
+    setType("POLYLINE 2D");
+}
+
+LandmarkPolyline2D::LandmarkPolyline2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id) :
+        LandmarkBase(LANDMARK_POLYLINE_2D, _p_ptr, _o_ptr), first_id_(_first_id), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false)
+{
+    //std::cout << "LandmarkPolyline2D::LandmarkPolyline2D" << std::endl;
+    assert(_points.cols() >= 2 && "LandmarkPolyline2D::LandmarkPolyline2D: 2 points at least needed.");
+    for (auto i = 0; i < _points.cols(); i++)
+        point_state_ptr_vector_.push_back(new StateBlock(_points.col(i).head<2>()));
+
+    if (!first_defined_)
+        point_state_ptr_vector_.front()->setLocalParametrizationPtr(new LocalParametrizationPolylineExtreme(point_state_ptr_vector_[1]));
+    if (!last_defined_)
+        point_state_ptr_vector_.back()->setLocalParametrizationPtr(new LocalParametrizationPolylineExtreme(point_state_ptr_vector_[point_state_ptr_vector_.size() - 2]));
+
+    assert(point_state_ptr_vector_.front()->hasLocalParametrization() ? !first_defined_ : first_defined_);
+    assert(point_state_ptr_vector_.back()->hasLocalParametrization() ? !last_defined_ : last_defined_);
+
+    setType("POLYLINE 2D");
 }
 
 LandmarkPolyline2D::~LandmarkPolyline2D()
@@ -303,6 +324,10 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
 {
     // Parse YAML node with lmk info and data
     unsigned int id         = _lmk_node["id"].as<unsigned int>();
+    Eigen::VectorXs pos     = _lmk_node["position"].as<Eigen::VectorXs>();
+    bool pos_fixed          = _lmk_node["position fixed"].as<bool>();
+    Eigen::VectorXs ori     = _lmk_node["orientation"].as<Eigen::VectorXs>();
+    bool ori_fixed          = _lmk_node["orientation fixed"].as<bool>();
     int first_id            = _lmk_node["first_id"].as<int>();
     bool first_defined      = _lmk_node["first_defined"].as<bool>();
     bool last_defined       = _lmk_node["last_defined"].as<bool>();
@@ -310,14 +335,11 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
     Eigen::MatrixXs points(2,npoints);
     for (unsigned int i = 0; i < npoints; i++)
     {
-        points.col(i) = _lmk_node["points"][i]["state"].as<Eigen::Vector2s>();
+        points.col(i) = _lmk_node["points"][i].as<Eigen::Vector2s>();
     }
 
-    //std::cout << "Points in lmk: " << id << ":\n" << points << std::endl;
-
     // Create a new landmark
-    LandmarkBase* lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
-
+    LandmarkBase* lmk_ptr = new LandmarkPolyline2D(new StateBlock(pos, pos_fixed), new StateBlock(ori, ori_fixed), points, first_defined, last_defined, first_id);
     lmk_ptr->setId(id);
 
     return lmk_ptr;
@@ -345,12 +367,9 @@ YAML::Node LandmarkPolyline2D::saveToYaml() const
 
     int npoints = point_state_ptr_vector_.size();
 
-    YAML::Node point;
     for (int i = 0; i < npoints; i++)
     {
-        point["fixed"] = point_state_ptr_vector_[i]->isFixed();
-        point["state"] = point_state_ptr_vector_[i]->getVector();
-        node["points"].push_back(point);
+        node["points"].push_back(point_state_ptr_vector_[i]->getVector());
     }
 
     return node;
