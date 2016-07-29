@@ -96,7 +96,7 @@ class LandmarkPolyline2D : public LandmarkBase
          */
         static LandmarkBase* create(const YAML::Node& _lmk_node);
 
-        YAML::Node save() const;
+        YAML::Node saveToYaml() const;
 };
 
 inline std::deque<StateBlock*>& LandmarkPolyline2D::getPointStatePtrDeque()

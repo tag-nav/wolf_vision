@@ -92,9 +92,9 @@ void MapBase::save(const std::string& _map_file_yaml, const std::string _map_nam
 
     emitter << "landmarks"  << YAML::BeginSeq;
 
-    for (auto lmk_ptr : *getLandmarkListPtr())
+    for (LandmarkBase* lmk_ptr : *getLandmarkListPtr())
     {
-        emitter << YAML::Flow << lmk_ptr->save();
+        emitter << YAML::Flow << lmk_ptr->saveToYaml();
     }
     emitter << YAML::EndSeq << YAML::EndMap;
 

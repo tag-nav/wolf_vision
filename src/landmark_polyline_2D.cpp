@@ -225,7 +225,7 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
 
 }
 
-YAML::Node LandmarkPolyline2D::save() const
+YAML::Node LandmarkPolyline2D::saveToYaml() const
 {
     YAML::Node n;
     n["id"]             = landmark_id_;
