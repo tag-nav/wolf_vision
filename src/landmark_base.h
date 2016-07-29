@@ -17,6 +17,8 @@ class StateBlock;
 
 namespace wolf {
 
+//class LanrmarkParamsBase {}; ///< class for landmark parameters. Derive it to define your parameters.
+
 // TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
 
@@ -57,6 +59,7 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         /** \brief Returns landmark_id_, the landmark unique id
          **/
         unsigned int id();
+        void setId(unsigned int _id);
 
         /** \brief Sets the Landmark status
          **/
@@ -119,6 +122,13 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
 inline unsigned int LandmarkBase::id()
 {
     return landmark_id_;
+}
+
+inline void LandmarkBase::setId(unsigned int _id)
+{
+    landmark_id_ = _id;
+    if (_id > landmark_id_count_)
+        landmark_id_count_ = _id;
 }
 
 inline void LandmarkBase::fix()
