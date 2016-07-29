@@ -26,22 +26,24 @@ namespace wolf
  *
  * This class implements generic factory as a singleton.
  *
- * IMPORTANT: This template factory can be used for many different objects except:
- *   - Objects deriving from SensorBase --> see SensorFactory
- *   - Objects deriving from ProcessorBase --> see ProcessorFactory
- * the reasonf for this is that these two cases above need a more elaborated API than the one in this template class.
+ * > IMPORTANT: This template factory can be used for many different objects except:
+ * >   - Objects deriving from SensorBase --> see SensorFactory
+ * >   - Objects deriving from ProcessorBase --> see ProcessorFactory
+ * >
+ * > the reason for this is that these two cases above need a more elaborated API than the one in this template class.
  *
- * The class is templatized on the class of the produced objects, TypeBase.
+ * The class is templatized on the class of the produced objects, __TypeBase__.
  * The produced objects are always of a class deriving from TypeBase.
  * For example, you may use as TypeBase the following types:
  *   - LandmarkBase: the Factory creates landmarks deriving from LandmarkBase and returns base pointers LandmarkBase* to them
  *   - IntrinsicsBase: the Factory creates intrinsic parameters deriving from IntrinsicsBase and returns base pointers IntrinsicsBase* to them
  *   - XxxBase: the Factory creates objects deriving from XxxBase and returns pointers XxxBase* to them.
+ *
  * The returned data is always a pointer to TypeBase.
  *
- * The class in also templatized on the type of the input parameter of the creator, TypeInput:
- *   - std::string is used when the input parameter is to be a file name from which to read data.
- *   - YAML::Node is used when the input parameter is a YAML node with structured data.
+ * The class in also templatized on the type of the input parameter of the creator, __TypeInput__:
+ *   - ````std::string```` is used when the input parameter is to be a file name from which to read data.
+ *   - ````YAML::Node```` is used when the input parameter is a YAML node with structured data.
  *
  * ### Operation of the factory
  *
@@ -49,10 +51,22 @@ namespace wolf
  *
  * This factory can create objects of classes deriving from TypeBase.
  *
- * Specific object creation is invoked by ````create(TYPE, params ... )````, and the TYPE of object is identified with a string.
- * For example,
- *   - "CAMERA" for TypeBase = IntrinsicsBase and derived object of type IntrinsicsCamera
+ * Specific object creation is invoked by the method ````create(TYPE, params ... )````, where
+ *   - the TYPE of object to create is identified with a string
+ *   - the params may be provided in different forms -- see TypeInput.
  *
+ * The methods to create specific objects are called __creators__.
+ * Creators must be registered to the factory before they can be invoked for object creation.
+ *
+ * This documentation shows you how to:
+ *   - Define correct TYPE names
+ *   - Access the factory
+ *   - Write object creators
+ *   - Register and unregister object creators to the factory
+ *   - Create objects using the factory
+ *   - Examples: Write and register a landmark creator for LandmarkPolyline2D.
+ *
+ * #### Define correct TYPE names
  * The rule to make new TYPE strings unique is that you skip the generic 'Type' prefix from your class name,
  * and you build a string in CAPITALS with space separators, e.g.:
  *   - IntrinsicsCamera -> ````"CAMERA"````
@@ -60,46 +74,42 @@ namespace wolf
  *   - LandmarkPolyline2D -> ````"POLYLINE 2D"````
  *   - etc.
  *
- * The methods to create specific objects are called __creators__.
- * Creators must be registered to the factory before they can be invoked for object creation.
+ * #### Access the factory
+ * The first thing to know is that we have defined typedefs for the templates that we are using. For example:
  *
- * This documentation shows you how to:
- *   - Access the factory
- *   - Register and unregister creators
- *   - Create objects
- *   - Write a object creator for LandmarkPolyline2D (example).
+ * \code
+ * typedef Factory<IntrinsicsBase, std::string>        IntrinsicsFactory;
+ * typedef Factory<ProcessorParamsBase, std::string>   ProcessorParamsFactory;
+ * typedef Factory<LandmarkBase, YAML::Node>           LandmarkFactory;
+ * \endcode
  *
- * #### Accessing the factory
- * The Factory class is a <a href="http://stackoverflow.com/questions/1008019/c-singleton-design-pattern#1008289">singleton</a>: it can only exist once in your application.
+ * Second to know, the Factory class is a <a href="http://stackoverflow.com/questions/1008019/c-singleton-design-pattern#1008289">singleton</a>: it can only exist once in your application.
  * To obtain an instance of it, use the static method get(),
  *
  *     \code
  *     Factory<MyTypeBase, MyTypeInput>::get()
  *     \endcode
  *
- * You can then call the methods you like, e.g. to create an object, you type:
+ * where, of course, you better make use of the appropriate typedef in place of ````Factory<MyTypeBase, MyTypeInput>````.
+ *
+ * You can then call the methods you like, e.g. to create a landmark, you type:
  *
  *     \code
- *      Factory<MyTypeBase, MyTypeInput>::get().create(...); // see below for creating objects ...
+ *      LandmarkFactory::get().create(...); // see below for creating objects ...
  *     \endcode
  *
- * #### Registering object creators
- * Prior to invoking the creation of an object of a particular type,
- * you must register the creator for this type into the factory.
+ * #### Write creator methods (in your derived object classes)
+ * The method LandmarkPolyline2D::create(...) exists in the LandmarkPolyline2D class as a static method.
+ * All these ````XxxXxx::create()```` methods need to have exactly the same API, regardless of the object type:
  *
- * Registering object creators into the factory is done through registerCreator().
- * You provide an object type string (above), and a pointer to a static method
- * that knows how to create your specific object, e.g.:
+ * \code
+ * static TypeBase* create( const TypeInput& );
+ * \endcode
  *
- *     \code
- *     Factory<MyTypeBase, MyTypeInput>::get().registerCreator("POLYLINE 2D", LandmarkPolyline2D::create);
- *     \endcode
- *
- * The method LandmarkPolyline2D::create(...) exists in the SensorCamera class as a static method.
- * All these ````XxxXxx::create()```` methods need to have exactly the same API, regardless of the object type.
  * This API includes an element of type TypeInput, which might be either a std::string, or a YAML::node:
- *   - filenames are used to access YAML files with configuration data to create your object
- *   - YAML::Node are used to access parts of a YAML file already encoded as nodes, such as when loading landmarks from a SLAM map ````MapBase````.
+ *   - ````std::string```` are used to indicate file names to access YAML files containing configuration data to create your object.
+ *   - ````YAML::Node```` are used to access parts of a YAML file already encoded as nodes, such as when loading landmarks from a SLAM map ````MapBase````.
+ *
  * Two examples:
  *
  *      \code
@@ -109,7 +119,19 @@ namespace wolf
  *
  * See further down for an implementation example.
  *
- * #### Achieving automatic registration
+ * #### Register object creators
+ * Prior to invoking the creation of an object of a particular type,
+ * you must register the creator for this type into the factory.
+ *
+ * Registering object creators into the factory is done through registerCreator().
+ * You provide an object type string (above), and a pointer to a static method
+ * that knows how to create your specific object, e.g.:
+ *
+ *     \code
+ *     LandmarkFactory::get().registerCreator("POLYLINE 2D", LandmarkPolyline2D::create);
+ *     \endcode
+ *
+ * #### Automatic registration
  * Currently, registering is performed in specific source files, object_xxxx.cpp.
  * For example, in sensor_camera_yaml.cpp we find the line:
  *
@@ -117,17 +139,18 @@ namespace wolf
  *     const bool registered_camera_intr = IntrinsicsFactory::get().registerCreator("CAMERA", createIntrinsicsCamera);
  *     \endcode
  *
- * which is a static invocation (i.e., it is placed at global scope outside of the SensorCamera class).
+ * which is a static invocation (i.e., it is placed at global scope outside of the IntrinsicsCamera class).
+ *
  * Therefore, at application level, all objects that have a .cpp file compiled are automatically registered.
  *
- * #### Unregistering object creators
+ * #### Unregister object creators
  * The method unregisterCreator() unregisters the ObjectXxx::create() method. It only needs to be passed the string of the object type.
  *
  *     \code
  *     Factory<MyTypeBase, MyTypeInput>::get().unregisterCreator("CAMERA");
  *     \endcode
  *
- * #### Creating objects
+ * #### Create objects using the factory
  * Note: Prior to invoking the creation of a object of a particular type,
  * you must register the creator for this type into the factory.
  *
@@ -137,22 +160,14 @@ namespace wolf
  *      Factory<LandmarkBase*, YAML::Node>::get().create("POLYLINE 2D", lmk_yaml_node);
  *     \endcode
  *
- * or even better, make use of the convenient typedefs, ````typedef Factory<LandmarkBase*, YAML::Node> LandmarkFactory````:
+ * or even better, make use of the convenient typedefs:
  *
  *     \code
  *      LandmarkFactory::get().create("POLYLINE 2D", lmk_yaml_node);
  *     \endcode
  *
- * #### See also
- *  - IntrinsicsFactory: typedef of this template to create intrinsic structs deriving from IntrinsicsBase directly from YAML files.
- *  - ProcessorParamsFactory: typedef of this template to create processor params structs deriving from ProcessorParamsBase directly from YAML files.
- *  - LandmarkFactory: typedef of this template to create landmarks deriving from LandmarkBase directly from YAML nodes.
- *  - SensorFactory: to create sensors
- *  - Problem::loadMap() : to load a maps directly from YAML files.
- *  - ProcessorFactory: to create processors that will be bound to objects.
- *  - Problem::installSensor() : to install objects in WOLF Problem.
- *
- * #### Example 1: Writing and registering the creator of LandmarkPolyline2D from a YAML node
+ * ### Examples
+ * #### Example 1: Writing the creator of LandmarkPolyline2D from a YAML node
  *
  * You can find this code in the landmark_polyline_2D.cpp file.
  *
@@ -171,7 +186,13 @@ namespace wolf
  *    {
  *        points.col(i) = _lmk_node["points"][i].as<Eigen::Vector2s>();
  *    }
+ * \endcode
  *
+ * #### Example 2: Registering the creator of LandmarkPolyline2D from a YAML node
+ *
+ * You can find this code in the landmark_polyline_2D.cpp file.
+ *
+ * \code
  *    // Create a new landmark
  *    LandmarkBase* lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
  *    lmk_ptr->setId(id);
@@ -187,8 +208,19 @@ namespace wolf
  *
  * \endcode
  *
+ * ### More information
+ *  - IntrinsicsFactory: typedef of this template to create intrinsic structs deriving from IntrinsicsBase directly from YAML files.
+ *  - ProcessorParamsFactory: typedef of this template to create processor params structs deriving from ProcessorParamsBase directly from YAML files.
+ *  - LandmarkFactory: typedef of this template to create landmarks deriving from LandmarkBase directly from YAML nodes.
+ *  - Problem::loadMap() : to load a maps directly from YAML files.
+ *  - You can also check the code in the example file ````src/examples/test_map_yaml.cpp````.
  *
- * You can also check the code in the example file ````src/examples/test_map_yaml.cpp````.
+ * #### See also
+ *  - SensorFactory: to create sensors
+ *  - ProcessorFactory: to create processors.
+ *  - Problem::installSensor() : to install sensors in WOLF Problem.
+ *  - Problem::installProcessor() : to install processors in WOLF Problem.
+ *
  */
 template<class TypeBase, class TypeInput>
 class Factory
