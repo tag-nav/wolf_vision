@@ -82,21 +82,18 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
     {
         polyline_feature = (FeaturePolyline2D*)(*feature_it);
         max_ftr = polyline_feature->getNPoints() - 1;
-        //std::cout << "feature " << (*feature_it)->id() << ": 0-" << max_ftr << std::endl;
-        //std::cout << polyline_feature->getPoints() << std::endl;
 
         // Check with all landmarks
         for (auto landmark_it = _landmarks_searched.begin(); landmark_it != _landmarks_searched.end(); landmark_it++)
         {
             polyline_landmark = (LandmarkPolyline2D*)(*landmark_it);
 
-            // Check all overlapping positions between each feature-landmark pair
-
-
-
             // Open landmark polyline
             if (!polyline_landmark->isClosed())
             {
+                //std::cout << "MATCHING WITH OPEN LANDMARK" << std::endl;
+                //std::cout << "\tfeature  " << polyline_feature->id() << ": 0-" << max_ftr << std::endl;
+                //std::cout << "\tlandmark " << polyline_landmark->id() << ": 0-" << polyline_landmark->getNPoints() - 1 << std::endl;
                 max_lmk = polyline_landmark->getNPoints() - 1;
                 max_offset = max_ftr;
                 min_offset = -max_lmk;
@@ -191,8 +188,15 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
                 if (polyline_feature->getNPoints() > polyline_landmark->getNPoints())
                     continue;
 
+                //std::cout << "MATCHING WITH CLOSED LANDMARK" << std::endl;
+                //std::cout << "\tfeature  " << polyline_feature->id() << ": 0-" << max_ftr << std::endl;
+                //std::cout << "\tlandmark " << polyline_landmark->id() << ": 0-" << polyline_landmark->getNPoints() - 1 << std::endl;
+
+                max_offset = 0;
+                min_offset = -polyline_landmark->getNPoints() + 1;
+
                 // Check all overlapping positions between each feature-landmark pair
-                for (offset = -polyline_landmark->getNPoints() + 1; offset <= 0; offset++)
+                for (offset = min_offset; offset <= max_offset; offset++)
                 {
                     from_lmk = -offset;
                     to_lmk = from_lmk+polyline_feature->getNPoints()-1;
@@ -215,29 +219,26 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
                     Eigen::ArrayXd dist2 = d.row(0).pow(2) + d.row(1).pow(2);
                     //std::cout << "\t\t\tsquared distances = " << dist2.transpose() << std::endl;
 
-                    if (offset != min_offset && offset != max_offset)
+                    // Point-to-line first distance
+                    if (!polyline_feature->isFirstDefined())
                     {
-                        // Point-to-line first distance
-                        if (!polyline_feature->isFirstDefined())
-                        {
-                            int next_from_lmk = (from_lmk+1 == polyline_landmark->getNPoints() ? 0 : from_lmk+1);
-                            dist2(0) = sqDistPointToLine(expected_features[*landmark_it].col(from_lmk),
-                                                         expected_features[*landmark_it].col(next_from_lmk),
-                                                         polyline_feature->getPoints().col(0),
-                                                         true,
-                                                         false);
-                        }
+                        int next_from_lmk = (from_lmk+1 == polyline_landmark->getNPoints() ? 0 : from_lmk+1);
+                        dist2(0) = sqDistPointToLine(expected_features[*landmark_it].col(from_lmk),
+                                                     expected_features[*landmark_it].col(next_from_lmk),
+                                                     polyline_feature->getPoints().col(0),
+                                                     true,
+                                                     false);
+                    }
 
-                        // Point-to-line last distance
-                        if (!polyline_feature->isLastDefined())
-                        {
-                            int prev_to_lmk = (to_lmk == 0 ? polyline_landmark->getNPoints()-1 : to_lmk-1);
-                            dist2(polyline_feature->getNPoints()-1) = sqDistPointToLine(expected_features[*landmark_it].col(to_lmk),
-                                                                                        expected_features[*landmark_it].col(prev_to_lmk),
-                                                                                        polyline_feature->getPoints().col(polyline_feature->getNPoints()-1),
-                                                                                        true,
-                                                                                        false);
-                        }
+                    // Point-to-line last distance
+                    if (!polyline_feature->isLastDefined())
+                    {
+                        int prev_to_lmk = (to_lmk == 0 ? polyline_landmark->getNPoints()-1 : to_lmk-1);
+                        dist2(polyline_feature->getNPoints()-1) = sqDistPointToLine(expected_features[*landmark_it].col(to_lmk),
+                                                                                    expected_features[*landmark_it].col(prev_to_lmk),
+                                                                                    polyline_feature->getPoints().col(polyline_feature->getNPoints()-1),
+                                                                                    true,
+                                                                                    false);
                     }
                     //std::cout << "\t\t\tsquared distances = " << dist2.transpose() << std::endl;
 
@@ -329,11 +330,6 @@ void ProcessorTrackerLandmarkPolyline::extractPolylines(CaptureLaser2D* _capture
         //std::cout << "covs: " << std::endl << pl.covs_ << std::endl;
         _polyline_list.push_back(new FeaturePolyline2D(pl.points_, pl.covs_, pl.first_defined_, pl.last_defined_));
         //std::cout << "new polyline detected: " << std::endl;
-
-	//if (pl.first_defined_ || pl.last_defined_)
-	//	std::cout << "FEATURE WITH EXTREME POINT DEFINED!!!!!!!!!" << std::endl;
-	//else
-	//	std::cout << "feature with extreme points not defined" << std::endl;
     }
     //std::cout << _polyline_list.size() << " polylines extracted" << std::endl;
 }
@@ -532,6 +528,8 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
         polyline_match = (LandmarkPolylineMatch*)matches_landmark_from_last_[last_feature];
         polyline_landmark = (LandmarkPolyline2D*)(polyline_match->landmark_ptr_);
 
+        assert(polyline_landmark != nullptr && polyline_match != nullptr);
+
         // Modify landmark (only for not closed)
         if (!polyline_landmark->isClosed())
         {
@@ -544,56 +542,102 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
             //std::cout << "\tpoints " << polyline_landmark->getNPoints() << std::endl;
             //std::cout << "\tfirst defined " << polyline_landmark->isFirstDefined() << std::endl;
             //std::cout << "\tlast defined " << polyline_landmark->isLastDefined() << std::endl << std::endl;
+            //std::cout << "\tmatch from feature point " << polyline_match->feature_match_from_id_ << std::endl;
+            //std::cout << "\tmatch to feature point " << polyline_match->feature_match_to_id_ << std::endl;
+            //std::cout << "\tmatch from landmark point " << polyline_match->landmark_match_from_id_ << std::endl;
+            //std::cout << "\tmatch to landmark point " << polyline_match->landmark_match_to_id_ << std::endl;
 
             Eigen::MatrixXs points_global = R_world_sensor_ * polyline_feature->getPoints().topRows<2>() +
                                             t_world_sensor_ * Eigen::VectorXs::Ones(polyline_feature->getNPoints()).transpose();
             // GROW/CLOSE LANDMARK
             // -----------------Front-----------------
-            if (polyline_match->feature_match_from_id_ > 0)
+            bool check_front_closing = // Sufficient conditions
+                                       // condition 1: feature first defined point not matched
+                                       (polyline_feature->isFirstDefined() && polyline_match->feature_match_from_id_ > 0) ||
+                                       // condition 2: feature second point not matched
+                                       (polyline_match->feature_match_from_id_ > 1) ||
+                                       // condition 3: matched front points but feature front point defined and landmark front point not defined
+                                       (polyline_match->landmark_match_from_id_ == polyline_landmark->getFirstId() && polyline_feature->isFirstDefined() && !polyline_landmark->isFirstDefined());
+
+            // Check closing with landmark's last points
+            if (check_front_closing)
             {
-                // Check closing with landmark's last points
-                if (polyline_feature->isFirstDefined() || polyline_match->feature_match_from_id_ > 1) //only if defined first point or second not matched
+                //std::cout << "---------------- Trying to close polyline..." << std::endl;
+                //std::cout << "feature " << polyline_feature->id() << ": " << std::endl;
+                //std::cout << "\tpoints " << polyline_feature->getNPoints() << std::endl;
+                //std::cout << "\tfirst defined " << polyline_feature->isFirstDefined() << std::endl;
+                //std::cout << "\tlast defined " << polyline_feature->isLastDefined() << std::endl;
+                //std::cout << "\tmatch from feature point " << polyline_match->feature_match_from_id_ << std::endl;
+                //std::cout << "\tmatch to feature point " << polyline_match->feature_match_to_id_ << std::endl;
+                //std::cout << "landmark " << polyline_landmark->id() << ": " << std::endl;
+                //std::cout << "\tpoints " << polyline_landmark->getNPoints() << std::endl;
+                //std::cout << "\tfirst defined " << polyline_landmark->isFirstDefined() << std::endl;
+                //std::cout << "\tlast defined " << polyline_landmark->isLastDefined() << std::endl << std::endl;
+                //std::cout << "\tmatch from landmark point " << polyline_match->landmark_match_from_id_ << std::endl;
+                //std::cout << "\tmatch to landmark point " << polyline_match->landmark_match_to_id_ << std::endl;
+
+                int feat_point_id_matching = polyline_feature->isFirstDefined() ? 0 : 1;
+                int lmk_last_defined_point = polyline_landmark->getLastId() - (polyline_landmark->isLastDefined() ? 0 : 1);
+                //std::cout << std::endl << "\tfeat point matching " << feat_point_id_matching << std::endl;
+                //std::cout << std::endl << "\tlmk last defined point " << lmk_last_defined_point << std::endl;
+
+                for (int id_lmk = lmk_last_defined_point; id_lmk > polyline_match->landmark_match_to_id_; id_lmk--)
                 {
-                    int feat_point_id_matching = polyline_feature->isFirstDefined() ? 0 : 1;
+                    //std::cout << "\t\tid_lmk " << id_lmk << std::endl;
+                    //std::cout << "\t\td2 = " << (points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() << " (th = " << params_.position_error_th*params_.position_error_th << std::endl;
 
-                    for (int id_lmk = polyline_landmark->getLastId(); id_lmk != polyline_match->landmark_match_to_id_; id_lmk--)
-                        if ((points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() < params_.position_error_th*params_.position_error_th)
-                        {
-                            // add other points (if there are)
-                            if (polyline_match->feature_match_from_id_ > feat_point_id_matching + 1)
-                                polyline_landmark->addPoints(points_global.rightCols(points_global.cols() - feat_point_id_matching - 1), // points matrix in global coordinates
-                                                             polyline_match->feature_match_from_id_-feat_point_id_matching-2, // last feature point index to be added
-                                                             true, // defined
-                                                             false); // front (!back)
-                            // close landmark
-                            polyline_landmark->setClosed();
+                    if ((points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() < params_.position_error_th*params_.position_error_th)
+                    {
+                        std::cout << "CLOSING POLYLINE" << std::endl;
 
-                            polyline_match->landmark_match_from_id_ = id_lmk - (polyline_feature->isFirstDefined() ? 0 : 1);
-                            polyline_match->feature_match_from_id_ = 0;
-                            break;
-                        }
+                        unsigned int N_back_overlapped = polyline_landmark->getLastId() - id_lmk + 1;
+                        int N_feature_new_points = polyline_match->feature_match_from_id_ - feat_point_id_matching - N_back_overlapped;
+
+                        // define last point (if not defined)
+                        if (!polyline_landmark->isLastDefined())
+                            polyline_landmark->setLast(points_global.col(feat_point_id_matching + N_back_overlapped - 1), true);
+
+                        // add other points (if there are)
+                        if (N_feature_new_points > 0)
+                            polyline_landmark->addPoints(points_global.middleCols(feat_point_id_matching + N_back_overlapped, N_feature_new_points), // points matrix in global coordinates
+                                                         N_feature_new_points-1, // last index to be added
+                                                         true, // defined
+                                                         false); // front (!back)
+
+                        // define first point (if not defined)
+                        if (!polyline_landmark->isFirstDefined())
+                            polyline_landmark->setFirst(points_global.col(polyline_match->feature_match_from_id_), true);
+
+                        // close landmark
+                        polyline_landmark->setClosed(N_feature_new_points == -1); // merge extremes if -1 new points
+
+                        polyline_match->landmark_match_from_id_ = id_lmk - (polyline_feature->isFirstDefined() ? 0 : 1);
+                        polyline_match->feature_match_from_id_ = 0;
+                        break;
+                    }
                 }
-                // Add new front points
-                else
-                {
-                    //std::cout << "Add new front points. Defined: " << polyline_feature->isFirstDefined() << std::endl;
-                    //std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
-                    //std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
-                    //std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
-                    //std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
+            }
+            // Add new front points (if not matched feature points)
+            if (polyline_match->feature_match_from_id_ > 0) // && !polyline_landmark->isClosed()
+            {
+                assert(!polyline_landmark->isClosed() && "feature not matched points in a closed landmark");
+                //std::cout << "Add new front points. Defined: " << polyline_feature->isFirstDefined() << std::endl;
+                //std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
+                //std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
+                //std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
+                //std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
 
-                    polyline_landmark->addPoints(points_global, // points matrix in global coordinates
-                                                 polyline_match->feature_match_from_id_-1, // last feature point index to be added
-                                                 polyline_feature->isFirstDefined(), // is defined
-                                                 false); // front
+                polyline_landmark->addPoints(points_global, // points matrix in global coordinates
+                                             polyline_match->feature_match_from_id_-1, // last feature point index to be added
+                                             polyline_feature->isFirstDefined(), // is defined
+                                             false); // front
 
-                    polyline_match->landmark_match_from_id_ = polyline_landmark->getFirstId();
-                    polyline_match->feature_match_from_id_ = 0;
-                    //std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
-                    //std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
-                    //std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
-                    //std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
-                }
+                polyline_match->landmark_match_from_id_ = polyline_landmark->getFirstId();
+                polyline_match->feature_match_from_id_ = 0;
+                //std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
+                //std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
+                //std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
+                //std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
             }
             // Change first point
             else if (polyline_match->landmark_match_from_id_ == polyline_landmark->getFirstId() && !polyline_landmark->isFirstDefined())
@@ -613,51 +657,82 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
 
             }
             // -----------------Back-----------------
+            bool check_back_closing = // Sufficient conditions
+                                      // condition 1: feature last defined point not matched
+                                      (polyline_feature->isLastDefined() && polyline_match->feature_match_to_id_ < polyline_feature->getNPoints()-1) ||
+                                      // condition 2: feature second last point not matched
+                                      (polyline_match->feature_match_to_id_ < polyline_feature->getNPoints() - 2) ||
+                                      // condition 3: matched back points but feature last point defined and landmark last point not defined
+                                      (polyline_match->landmark_match_to_id_ == polyline_landmark->getLastId() && polyline_feature->isLastDefined() && !polyline_landmark->isLastDefined());
+
+            // Necessary condition: still open landmark
+            check_back_closing = check_back_closing && !polyline_landmark->isClosed();
+
+            // Check closing with landmark's first points
+            if (check_back_closing)
+            {
+                int feat_point_id_matching = polyline_feature->getNPoints() - (polyline_feature->isLastDefined() ? 1 : 2);
+                int lmk_first_defined_point = polyline_landmark->getFirstId() + (polyline_landmark->isFirstDefined() ? 0 : 1);
+                //std::cout << std::endl << "\tfeat point matching " << feat_point_id_matching << std::endl;
+                //std::cout << std::endl << "\tlmk first defined point " << lmk_first_defined_point << std::endl;
+
+                for (int id_lmk = lmk_first_defined_point; id_lmk < polyline_match->landmark_match_from_id_; id_lmk++)
+                {
+                    //std::cout << "\t\tid_lmk " << id_lmk << std::endl;
+                    //std::cout << "\t\td2 = " << (points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() << " (th = " << params_.position_error_th*params_.position_error_th << std::endl;
+
+                    if ((points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() < params_.position_error_th*params_.position_error_th)
+                    {
+                        std::cout << "CLOSING POLYLINE" << std::endl;
+
+                        unsigned int N_front_overlapped = id_lmk - polyline_landmark->getFirstId() + 1;
+                        int N_feature_new_points = feat_point_id_matching - polyline_match->feature_match_to_id_ - N_front_overlapped;
+
+                        // define first point (if not defined)
+                        if (!polyline_landmark->isFirstDefined())
+                            polyline_landmark->setFirst(points_global.col(feat_point_id_matching - N_front_overlapped + 1), true);
+
+                        // add other points (if there are)
+                        if (N_feature_new_points > 0)
+                            polyline_landmark->addPoints(points_global.middleCols(polyline_match->feature_match_to_id_ + 1, N_feature_new_points), // points matrix in global coordinates
+                                                         N_feature_new_points-1, // last index to be added
+                                                         true, // defined
+                                                         false); // front (!back)
+
+                        // define last point (if not defined)
+                        if (!polyline_landmark->isLastDefined())
+                            polyline_landmark->setLast(points_global.col(polyline_match->feature_match_to_id_), true);
+
+                        // close landmark
+                        polyline_landmark->setClosed(N_feature_new_points == -1);
+
+                        polyline_match->landmark_match_to_id_ = id_lmk + (polyline_feature->isLastDefined() ? 0 : 1);
+                        polyline_match->feature_match_to_id_ = polyline_feature->getNPoints() - 1;
+                        break;
+                    }
+                }
+            }
+            // Add new back points (if it wasn't closed)
             if (polyline_match->feature_match_to_id_ < polyline_feature->getNPoints()-1)
             {
-                // Check closing with landmark's first points
-                if (polyline_feature->isLastDefined() || polyline_match->feature_match_to_id_ < polyline_feature->getNPoints() - 2) //only if defined last point or second last not matched
-                {
-                    int feat_point_id_matching = polyline_feature->getNPoints() - (polyline_feature->isLastDefined() ? 1 : 2);
+                assert(!polyline_landmark->isClosed() && "feature not matched points in a closed landmark");
+                //std::cout << "Add back points. Defined: " << polyline_feature->isLastDefined() << std::endl;
+                //std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
+                //std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
+                //std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
+                //std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
 
-                    for (int id_lmk = polyline_landmark->getFirstId(); id_lmk != polyline_match->landmark_match_from_id_; id_lmk++)
-                        if ((points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() < params_.position_error_th*params_.position_error_th)
-                        {
-                            // add other points (if there are)
-                            if (polyline_match->feature_match_to_id_ < feat_point_id_matching - 1)
-                                polyline_landmark->addPoints(points_global.leftCols(points_global.cols() - feat_point_id_matching - 1), // points matrix in global coordinates
-                                                             polyline_match->feature_match_to_id_+1, // first feature point index to be added
-                                                             true, // defined
-                                                             true); // back
-                            // close landmark
-                            polyline_landmark->setClosed();
+                polyline_landmark->addPoints(points_global, // points matrix in global coordinates
+                                             polyline_match->feature_match_to_id_+1, // last feature point index to be added
+                                             polyline_feature->isLastDefined(), // is defined
+                                             true); // back
 
-                            polyline_match->landmark_match_to_id_ = id_lmk + (polyline_feature->isLastDefined() ? 0 : 1);
-                            polyline_match->feature_match_to_id_ = polyline_feature->getNPoints() - 1;
-                            break;
-                        }
-                }
-                // Add new back points
-                else
-                {
-                    //std::cout << "Add back points. Defined: " << polyline_feature->isLastDefined() << std::endl;
-                    //std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
-                    //std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
-                    //std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
-                    //std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
-
-                    polyline_landmark->addPoints(points_global, // points matrix in global coordinates
-                                                 polyline_match->feature_match_to_id_+1, // last feature point index to be added
-                                                 polyline_feature->isLastDefined(), // is defined
-                                                 true); // back
-
-                    polyline_match->landmark_match_to_id_ = polyline_landmark->getLastId();
-                    polyline_match->feature_match_to_id_ = polyline_feature->getNPoints()-1;
-                    //std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
-                    //std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
-                    //std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
-                    //std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
-                }
+                polyline_match->landmark_match_to_id_ = polyline_landmark->getLastId();
+                polyline_match->feature_match_to_id_ = polyline_feature->getNPoints()-1;
+                //std::cout << "\tfeat from " << polyline_match->feature_match_from_id_ << std::endl;
+                //std::cout << "\tfeat to " << polyline_match->feature_match_to_id_ << std::endl;
+                //std::cout << "\tland from " << polyline_match->landmark_match_from_id_ << std::endl;
+                //std::cout << "\tland to " << polyline_match->landmark_match_to_id_ << std::endl;
             }
             // Change last point
             else if (polyline_match->landmark_match_to_id_ == polyline_landmark->getLastId() && !polyline_landmark->isLastDefined()) //&& polyline_match->feature_match_to_id_ == polyline_feature->getNPoints()-1
@@ -688,39 +763,47 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
 
         // ESTABLISH CONSTRAINTS
         //std::cout << "ESTABLISH CONSTRAINTS" << std::endl;
+        //std::cout << "\tfeature " << polyline_feature->id() << std::endl;
+        //std::cout << "\tlandmark " << polyline_landmark->id() << std::endl;
+        //std::cout << "\tmatch from feature point " << polyline_match->feature_match_from_id_ << std::endl;
+        //std::cout << "\tmatch to feature point " << polyline_match->feature_match_to_id_ << std::endl;
+        //std::cout << "\tmatch from landmark point " << polyline_match->landmark_match_from_id_ << std::endl;
+        //std::cout << "\tmatch to landmark point " << polyline_match->landmark_match_to_id_ << std::endl;
 
         // Constraints for all inner and defined feature points
-        int offset_id = polyline_match->landmark_match_from_id_ - polyline_match->feature_match_from_id_;
-        for (int i = 0; i < polyline_feature->getNPoints(); i++)
+        int lmk_point_id = polyline_match->landmark_match_from_id_;
+
+        for (int ftr_point_id = 0; ftr_point_id < polyline_feature->getNPoints(); ftr_point_id++, lmk_point_id++)
         {
-            int lmk_point_id = i+offset_id;
             if (lmk_point_id > polyline_landmark->getLastId())
                 lmk_point_id -= polyline_landmark->getNPoints();
             if (lmk_point_id < polyline_landmark->getFirstId())
                 lmk_point_id += polyline_landmark->getNPoints();
 
-            //std::cout << "feature point " << i << std::endl;
+            //std::cout << "feature point " << ftr_point_id << std::endl;
+            //std::cout << "landmark point " << lmk_point_id << std::endl;
+
             // First not defined point
-            if (i == 0 && !polyline_feature->isFirstDefined())
+            if (ftr_point_id == 0 && !polyline_feature->isFirstDefined())
                 // first point to line constraint
             {
                 int lmk_next_point_id = lmk_point_id+1;
                 if (lmk_next_point_id > polyline_landmark->getLastId())
                     lmk_next_point_id -= polyline_landmark->getNPoints();
                 //std::cout << "point-line: landmark points " << lmk_point_id << ", " << lmk_next_point_id << std::endl;
-                last_feature->addConstraint(new ConstraintPointToLine2D(polyline_feature, polyline_landmark, i, lmk_point_id, lmk_next_point_id));
+                last_feature->addConstraint(new ConstraintPointToLine2D(polyline_feature, polyline_landmark, ftr_point_id, lmk_point_id, lmk_next_point_id));
                 //std::cout << "constraint added" << std::endl;
             }
 
             // Last not defined point
-            else if (i == polyline_feature->getNPoints()-1 && !polyline_feature->isLastDefined())
+            else if (ftr_point_id == polyline_feature->getNPoints()-1 && !polyline_feature->isLastDefined())
                 // last point to line constraint
             {
                 int lmk_prev_point_id = lmk_point_id-1;
                 if (lmk_prev_point_id < polyline_landmark->getFirstId())
                     lmk_prev_point_id += polyline_landmark->getNPoints();
                 //std::cout << "point-line: landmark points " << lmk_point_id << ", " << lmk_prev_point_id << std::endl;
-                last_feature->addConstraint(new ConstraintPointToLine2D(polyline_feature, polyline_landmark, i, lmk_point_id, lmk_prev_point_id));
+                last_feature->addConstraint(new ConstraintPointToLine2D(polyline_feature, polyline_landmark, ftr_point_id, lmk_point_id, lmk_prev_point_id));
                 //std::cout << "constraint added" << std::endl;
             }
 
@@ -732,7 +815,7 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
 				//std::cout << "landmark first id:" << polyline_landmark->getFirstId() << std::endl;
 				//std::cout << "landmark last id:" << polyline_landmark->getLastId() << std::endl;
 				//std::cout << "landmark n points:" << polyline_landmark->getNPoints() << std::endl;
-                last_feature->addConstraint(new ConstraintPoint2D(polyline_feature, polyline_landmark, i, lmk_point_id));
+                last_feature->addConstraint(new ConstraintPoint2D(polyline_feature, polyline_landmark, ftr_point_id, lmk_point_id));
                 //std::cout << "constraint added" << std::endl;
             }
         }
