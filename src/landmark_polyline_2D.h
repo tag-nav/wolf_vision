@@ -20,13 +20,6 @@
 namespace wolf
 {
 
-//struct LandmarkPolyline2DParams : public LandmarkParamsBase
-//{
-//        unsigned int id_;
-//        unsigned int npoints_;
-//
-//};
-
 class LandmarkPolyline2D : public LandmarkBase
 {
     protected:
