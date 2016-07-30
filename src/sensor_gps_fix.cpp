@@ -5,9 +5,9 @@
 namespace wolf {
 
 SensorGPSFix::SensorGPSFix(StateBlock* _p_ptr, StateBlock* _o_ptr, const double& _noise) :
-        SensorBase(SEN_GPS_FIX, _p_ptr, _o_ptr, nullptr, Eigen::VectorXs::Constant(1,_noise))
+        SensorBase(SEN_GPS_FIX, "GPS FIX", _p_ptr, _o_ptr, nullptr, Eigen::VectorXs::Constant(1,_noise))
 {
-    setType("GPS FIX");
+    //
 }
 
 SensorGPSFix::~SensorGPSFix()

@@ -51,7 +51,7 @@ int main()
 
     // Create Wolf tree nodes
     Problem* problem_ptr = new Problem(FRM_PO_3D);
-    SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, new StateBlock(pos, true), new StateQuaternion(quat, true),
+    SensorBase* sensor_ptr = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(pos, true), new StateQuaternion(quat, true),
                                             new StateBlock(Eigen::VectorXs::Zero(0), true), 0);
     ProcessorOdom3D* odom3d_ptr = new ProcessorOdom3D();
 

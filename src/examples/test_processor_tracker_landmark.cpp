@@ -24,7 +24,7 @@ int main()
 
     // Wolf problem
     Problem* wolf_problem_ptr_ = new Problem(FRM_PO_2D);
-    SensorBase* sensor_ptr_ = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)),
+    SensorBase* sensor_ptr_ = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)),
                                              new StateBlock(Eigen::VectorXs::Zero(1)),
                                              new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 

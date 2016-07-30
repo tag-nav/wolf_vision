@@ -6,9 +6,9 @@
 namespace wolf {
 
 SensorIMU::SensorIMU(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _a_w_biases_ptr) :
-        SensorBase(SEN_IMU, _p_ptr, _o_ptr, (_a_w_biases_ptr == nullptr) ? new StateBlock(6, false) : _a_w_biases_ptr, 6)
+        SensorBase(SEN_IMU, "IMU", _p_ptr, _o_ptr, (_a_w_biases_ptr == nullptr) ? new StateBlock(6, false) : _a_w_biases_ptr, 6)
 {
-    setType("IMU");
+    //
 }
 
 SensorIMU::~SensorIMU()

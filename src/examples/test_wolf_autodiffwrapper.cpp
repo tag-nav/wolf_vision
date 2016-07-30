@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     // Wolf problem
     Problem* wolf_problem_ceres_diff = new Problem(FRM_PO_2D);
     Problem* wolf_problem_wolf_diff = new Problem(FRM_PO_2D);
-    SensorBase* sensor = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
+    SensorBase* sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
     // Ceres wrappers
     ceres::Solver::Options ceres_options;
@@ -262,8 +262,8 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBase* first_frame_ceres_diff = wolf_problem_ceres_diff->getTrajectoryPtr()->getFrameListPtr()->front();
     FrameBase* first_frame_wolf_diff = wolf_problem_wolf_diff->getTrajectoryPtr()->getFrameListPtr()->front();
-    CaptureFix* initial_covariance_ceres_diff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_ceres_diff->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_wolf_diff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_wolf_diff->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_ceres_diff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_ceres_diff->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_wolf_diff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_wolf_diff->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_ceres_diff->addCapture(initial_covariance_ceres_diff);
     first_frame_wolf_diff->addCapture(initial_covariance_wolf_diff);
     initial_covariance_ceres_diff->process();

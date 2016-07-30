@@ -63,7 +63,7 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
          * \param _extr_dyn Flag indicating if extrinsics are dynamic (moving) or static (not moving)
          *
          **/
-        SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
+        SensorBase(const SensorType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
 
         /** \brief Constructor with noise std vector
          *
@@ -76,7 +76,7 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
          * \param _extr_dyn Flag indicating if extrinsics are dynamic (moving) or static (not moving)
          *
          **/
-        SensorBase(const SensorType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
+        SensorBase(const SensorType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
 
 
         /** \brief Default destructor (not recommended)
