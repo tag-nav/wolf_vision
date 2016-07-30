@@ -73,7 +73,7 @@ int main(void)
     ProcessorParamsBase* params_ptr = ProcessorParamsFactory::get().create("IMAGE", WOLF_CONFIG + "/processor_image_ORB.yaml");
 
     cout << "CAMERA with intrinsics      : " << ((IntrinsicsCamera*)intr_cam_ptr)->pinhole_model.transpose() << endl;
-    cout << "Processor IMAGE image width : " << ((ProcessorImageParameters*)params_ptr)->image.width << endl;
+    cout << "Processor IMAGE image width : " << ((ProcessorParamsImage*)params_ptr)->image.width << endl;
 
     cout << "\n==================== Install Sensors ====================" << endl;
 

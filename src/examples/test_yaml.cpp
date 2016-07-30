@@ -85,7 +85,7 @@ int main()
 
     // Processor Image parameters
 
-    ProcessorImageParameters p;
+    ProcessorParamsImage p;
 
     Node params = YAML::LoadFile(WOLF_ROOT + "/src/examples/processor_image_ORB.yaml");
 

@@ -56,7 +56,7 @@ struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
         unsigned int patchSize=31;
 };
 
-struct ProcessorImageParameters : public ProcessorParamsBase
+struct ProcessorParamsImage : public ProcessorParamsBase
 {
         struct Image
         {
@@ -110,7 +110,7 @@ class ProcessorImage : public ProcessorTrackerFeature
         cv::DescriptorMatcher* matcher_ptr_;
         cv::Feature2D* detector_descriptor_ptr_;
     protected:
-        ProcessorImageParameters params_;       // Struct with parameters of the processors
+        ProcessorParamsImage params_;       // Struct with parameters of the processors
         ActiveSearchGrid active_search_grid_;   // Active Search
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
         struct
@@ -127,7 +127,7 @@ class ProcessorImage : public ProcessorTrackerFeature
         std::list<cv::Point> tracker_candidates_;
 
     public:
-        ProcessorImage(ProcessorImageParameters _params);
+        ProcessorImage(ProcessorParamsImage _params);
         virtual ~ProcessorImage();
 
     protected:

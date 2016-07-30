@@ -13,7 +13,7 @@
 namespace wolf
 {
 
-ProcessorImageLandmark::ProcessorImageLandmark(ProcessorImageParameters _params) :
+ProcessorImageLandmark::ProcessorImageLandmark(ProcessorParamsImage _params) :
     ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, _params.algorithm.max_new_features), n_feature_(0), landmark_idx_non_visible_(0),
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     active_search_grid_()
@@ -592,7 +592,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
 
 ProcessorBase* ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
 {
-    ProcessorImageLandmark* prc_ptr = new ProcessorImageLandmark(*((ProcessorImageParameters*)_params));
+    ProcessorImageLandmark* prc_ptr = new ProcessorImageLandmark(*((ProcessorParamsImage*)_params));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

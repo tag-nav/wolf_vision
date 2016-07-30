@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     //    wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
     //
     //    // PROCESSOR
-    //    ProcessorImageParameters tracker_params;
+    //    ProcessorParamsImage tracker_params;
     //    tracker_params.image = {img_width,  img_height};
     //    tracker_params.matcher.min_normalized_score = 0.75;
     //    tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;

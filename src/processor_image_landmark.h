@@ -57,7 +57,7 @@ struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
         unsigned int patchSize=31;
 };
 
-struct ProcessorImageParameters : public ProcessorParamsBase
+struct ProcessorParamsImage : public ProcessorParamsBase
 {
         struct Image
         {
@@ -74,7 +74,7 @@ struct ProcessorImageParameters : public ProcessorParamsBase
                 unsigned int roi_width; ///< Width of the roi used in tracking
                 unsigned int roi_height; ///< Height of the roi used in tracking
         }matcher;
-        struct Adtive_search
+        struct Active_search
         {
                 unsigned int grid_width; ///< cells per horizontal dimension of image
                 unsigned int grid_height; ///< cells per vertical dimension of image
@@ -93,7 +93,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         cv::DescriptorMatcher* matcher_ptr_;
         cv::Feature2D* detector_descriptor_ptr_;
     protected:
-        ProcessorImageParameters params_;       // Struct with parameters of the processors
+        ProcessorParamsImage params_;           // Struct with parameters of the processors
         ActiveSearchGrid active_search_grid_;   // Active Search
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
         struct
@@ -127,7 +127,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         unsigned int landmarks_tracked_ = 0;
 
     public:
-        ProcessorImageLandmark(ProcessorImageParameters _params);
+        ProcessorImageLandmark(ProcessorParamsImage _params);
         virtual ~ProcessorImageLandmark();
 
     protected:
