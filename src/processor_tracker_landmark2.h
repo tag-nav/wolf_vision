@@ -88,7 +88,7 @@ typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
 class ProcessorTrackerLandmark2 : public ProcessorTracker
 {
     public:
-        ProcessorTrackerLandmark2(ProcessorType _tp, std::string _type, const unsigned int& _max_new_features = 0);
+        ProcessorTrackerLandmark2(ProcessorType _tp, const std::string&  _type, const unsigned int& _max_new_features = 0);
         virtual ~ProcessorTrackerLandmark2();
 
     protected:

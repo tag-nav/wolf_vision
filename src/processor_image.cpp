@@ -513,7 +513,7 @@ void ProcessorImage::drawFeatures(CaptureBase* const _last_ptr)
 }
 
 
-ProcessorBase* ProcessorImage::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+ProcessorBase* ProcessorImage::create(const std::string&  _unique_name, const ProcessorParamsBase* _params)
 {
     ProcessorImage* prc_ptr = new ProcessorImage(*((ProcessorImageParameters*)_params));
     prc_ptr->setName(_unique_name);

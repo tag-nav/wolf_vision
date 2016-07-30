@@ -2,7 +2,7 @@
 
 namespace wolf {
 
-CaptureMotion::CaptureMotion(std::string _type, const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
+CaptureMotion::CaptureMotion(const std::string&  _type, const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data) :
 	CaptureBase(_type, _init_ts, _sensor_ptr),
 	data_(_data),
 	final_time_stamp_(_final_ts)
@@ -10,7 +10,7 @@ CaptureMotion::CaptureMotion(std::string _type, const TimeStamp& _init_ts, const
 	//
 }
 
-CaptureMotion::CaptureMotion(std::string _type, const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
+CaptureMotion::CaptureMotion(const std::string&  _type, const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
 	CaptureBase(_type, _init_ts, _sensor_ptr),
 	data_(_data),
 	data_covariance_(_data_covariance),

@@ -120,7 +120,7 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Matrix<Scalar,9,3> preintegrated_H_biasOmega_;
 
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBase* create(const std::string&  _unique_name, const ProcessorParamsBase* _params);
 };
 
 } // namespace wolf

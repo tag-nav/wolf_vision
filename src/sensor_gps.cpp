@@ -55,7 +55,7 @@ void SensorGPS::registerNewStateBlocks()
 }
 
 // Define the factory method
-SensorBase* SensorGPS::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_p,
+SensorBase* SensorGPS::create(const std::string&  _unique_name, const Eigen::VectorXs& _extrinsics_p,
                               const IntrinsicsBase* _intrinsics)
 {
     // decode extrinsics vector

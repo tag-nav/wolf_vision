@@ -6,7 +6,7 @@ namespace wolf {
 
 unsigned int FeatureBase::feature_id_count_ = 0;
 
-FeatureBase::FeatureBase(FeatureType _tp, std::string _type, unsigned int _dim_measurement) :
+FeatureBase::FeatureBase(FeatureType _tp, const std::string&  _type, unsigned int _dim_measurement) :
     NodeConstrained(MID, "FEATURE", _type),
     feature_id_(++feature_id_count_),
     type_id_(_tp),
@@ -15,7 +15,7 @@ FeatureBase::FeatureBase(FeatureType _tp, std::string _type, unsigned int _dim_m
     //
 }
 
-FeatureBase::FeatureBase(FeatureType _tp, std::string _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
+FeatureBase::FeatureBase(FeatureType _tp, const std::string&  _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
 	NodeConstrained(MID, "FEATURE", _type),
     feature_id_(++feature_id_count_),
     type_id_(_tp),

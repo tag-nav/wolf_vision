@@ -25,7 +25,7 @@ Scalar SensorOdom2D::getRotVarToRotNoiseFactor() const
 }
 
 // Define the factory method
-SensorBase* SensorOdom2D::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po,
+SensorBase* SensorOdom2D::create(const std::string&  _unique_name, const Eigen::VectorXs& _extrinsics_po,
                                  const IntrinsicsBase* _intrinsics)
 {
     // decode extrinsics vector

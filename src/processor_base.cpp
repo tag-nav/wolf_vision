@@ -4,7 +4,7 @@ namespace wolf {
 
 unsigned int ProcessorBase::processor_id_count_ = 0;
 
-ProcessorBase::ProcessorBase(ProcessorType _tp, std::string _type, const Scalar& _time_tolerance) :
+ProcessorBase::ProcessorBase(ProcessorType _tp, const std::string&  _type, const Scalar& _time_tolerance) :
         NodeLinked(MID, "PROCESSOR"),
         processor_id_(++processor_id_count_),
         type_id_(_tp),

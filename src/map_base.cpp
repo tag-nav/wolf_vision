@@ -85,7 +85,7 @@ std::string MapBase::dateTimeNow()
     return date_time;
 }
 
-void MapBase::save(const std::string& _map_file_yaml, const std::string _map_name)
+void MapBase::save(const std::string& _map_file_yaml, const std::string& _map_name)
 {
     YAML::Emitter emitter;
 

@@ -13,7 +13,7 @@
 namespace wolf
 {
 
-bool ProcessorFactory::registerCreator(const std::string& _processor_type, CreateProcessorCallback createFn)
+bool ProcessorFactory::registerCreator(const std::string&  _processor_type, CreateProcessorCallback createFn)
 {
     bool reg = callbacks_.insert(CallbackMap::value_type(_processor_type, createFn)).second;
     if (reg)
@@ -24,12 +24,12 @@ bool ProcessorFactory::registerCreator(const std::string& _processor_type, Creat
     return reg;
 }
 
-bool ProcessorFactory::unregisterCreator(const std::string& _processor_type)
+bool ProcessorFactory::unregisterCreator(const std::string&  _processor_type)
 {
     return callbacks_.erase(_processor_type) == 1;
 }
 
-ProcessorBase* ProcessorFactory::create(const std::string& _processor_type, const std::string& _name, const ProcessorParamsBase* _params)
+ProcessorBase* ProcessorFactory::create(const std::string&  _processor_type, const std::string&  _name, const ProcessorParamsBase* _params)
 {
     CallbackMap::const_iterator creator_callback_it = callbacks_.find(_processor_type);
     if (creator_callback_it == callbacks_.end())

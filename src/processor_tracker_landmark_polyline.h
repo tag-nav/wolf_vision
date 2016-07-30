@@ -172,7 +172,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
                                bool _A_extreme, bool _B_extreme);
     // Factory method
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBase* create(const std::string&  _unique_name, const ProcessorParamsBase* _params);
 };
 
 inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params) :

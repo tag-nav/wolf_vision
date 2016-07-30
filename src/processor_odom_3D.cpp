@@ -2,7 +2,7 @@
 namespace wolf
 {
 
-ProcessorBase* ProcessorOdom3D::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+ProcessorBase* ProcessorOdom3D::create(const std::string&  _unique_name, const ProcessorParamsBase* _params)
 {
     ProcessorOdom3D* prc_ptr = new ProcessorOdom3D();
     prc_ptr->setName(_unique_name);

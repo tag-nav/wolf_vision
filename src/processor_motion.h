@@ -79,7 +79,7 @@ class ProcessorMotion : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion(ProcessorType _tp, std::string _type, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance = 0.1);
+        ProcessorMotion(ProcessorType _tp, const std::string&  _type, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -332,7 +332,7 @@ class ProcessorMotion : public ProcessorBase
 
 };
 
-inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, std::string _type, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance) :
+inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string&  _type, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance) :
         ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), origin_ptr_(
                 nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_cov_(
                 delta_size_, delta_size_), delta_integrated_(_delta_size), delta_integrated_cov_(delta_size_, delta_size_), data_(

@@ -19,7 +19,7 @@ namespace wolf
 // unnamed namespace used for helper functions local to this file.
 namespace
 {
-std::string uppercase(std::string& s) {for (auto & c: s) c = std::toupper(c); return s;}
+std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); return s;}
 }
 
 
@@ -50,8 +50,8 @@ void Problem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-SensorBase* Problem::installSensor(std::string _sen_type, //
-                                   std::string _unique_sensor_name, //
+SensorBase* Problem::installSensor(const std::string&  _sen_type, //
+                                   const std::string&  _unique_sensor_name, //
                                    const Eigen::VectorXs& _extrinsics, //
                                    IntrinsicsBase* _intrinsics)
 {
@@ -60,17 +60,17 @@ SensorBase* Problem::installSensor(std::string _sen_type, //
     return sen_ptr;
 }
 
-SensorBase* Problem::installSensor(std::string _sen_type, //
-                                   std::string _unique_sensor_name, //
+SensorBase* Problem::installSensor(const std::string&  _sen_type, //
+                                   const std::string&  _unique_sensor_name, //
                                    const Eigen::VectorXs& _extrinsics, //
-                                   std::string _intrinsics_filename)
+                                   const std::string&  _intrinsics_filename)
 {
     IntrinsicsBase* intr_ptr = IntrinsicsFactory::get().create(_sen_type, _intrinsics_filename);
     return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
 }
 
-ProcessorBase* Problem::installProcessor(std::string _prc_type, //
-                                         std::string _unique_processor_name, //
+ProcessorBase* Problem::installProcessor(const std::string&  _prc_type, //
+                                         const std::string&  _unique_processor_name, //
                                          SensorBase* _corresponding_sensor_ptr, //
                                          ProcessorParamsBase* _prc_params)
 {
@@ -88,10 +88,10 @@ ProcessorBase* Problem::installProcessor(std::string _prc_type, //
     return prc_ptr;
 }
 
-void Problem::installProcessor(std::string _prc_type, //
-                               std::string _unique_processor_name, //
-                               std::string _corresponding_sensor_name, //
-                               std::string _params_filename)
+void Problem::installProcessor(const std::string&  _prc_type, //
+                               const std::string&  _unique_processor_name, //
+                               const std::string&  _corresponding_sensor_name, //
+                               const std::string&  _params_filename)
 {
     SensorBase* sen_ptr = getSensorPtr(_corresponding_sensor_name);
     if (sen_ptr == nullptr)
@@ -449,7 +449,7 @@ StateBlockList* Problem::getStateListPtr()
     return &state_block_ptr_list_;
 }
 
-wolf::SensorBase* Problem::getSensorPtr(const std::string& _sensor_name)
+wolf::SensorBase* Problem::getSensorPtr(const std::string&  _sensor_name)
 {
     auto sen_it = std::find_if(getHardwarePtr()->getSensorListPtr()->begin(),
                                getHardwarePtr()->getSensorListPtr()->end(), [&](SensorBase* sb)
@@ -487,12 +487,12 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::Matrix
         throw std::runtime_error("Origin already setted!");
 }
 
-void Problem::loadMap(const std::string& _filename_dot_yaml)
+void Problem::loadMap(const std::string&  _filename_dot_yaml)
 {
     getMapPtr()->load(_filename_dot_yaml);
 }
 
-void Problem::saveMap(const std::string& _filename_dot_yaml, const std::string _map_name)
+void Problem::saveMap(const std::string&  _filename_dot_yaml, const std::string&  _map_name)
 {
     getMapPtr()->save(_filename_dot_yaml, _map_name);
 }

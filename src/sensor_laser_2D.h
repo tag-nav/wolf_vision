@@ -72,8 +72,8 @@ class SensorLaser2D : public SensorBase
         const laserscanutils::LaserScanParams & getScanParams() const;
 
     public:
-        static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po, const IntrinsicsBase* _intrinsics);
-        static IntrinsicsBase* createParams(const std::string _filename_dot_yaml);
+        static SensorBase* create(const std::string&  _unique_name, const Eigen::VectorXs& _extrinsics_po, const IntrinsicsBase* _intrinsics);
+        static IntrinsicsBase* createParams(const std::string&  _filename_dot_yaml);
 
 };
 

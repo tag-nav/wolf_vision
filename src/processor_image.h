@@ -243,7 +243,7 @@ class ProcessorImage : public ProcessorTrackerFeature
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
 
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBase* create(const std::string&  _unique_name, const ProcessorParamsBase* _params);
 
 
 };

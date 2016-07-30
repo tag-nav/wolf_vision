@@ -55,7 +55,7 @@ class SensorOdom2D : public SensorBase
         
 
 	public:
-        static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);
+        static SensorBase* create(const std::string&  _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);
 
 
 };
