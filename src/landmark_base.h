@@ -121,12 +121,7 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          **/
         const LandmarkType getType() const;
 
-        virtual YAML::Node saveToYaml() const {
-            YAML::Node n;
-            n["id"]             = landmark_id_;
-            n["type"]           = "BASE";
-            return n;
-        };
+        virtual YAML::Node saveToYaml() const;
 
 };
 

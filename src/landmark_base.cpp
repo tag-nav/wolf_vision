@@ -4,6 +4,7 @@
 #include "map_base.h"
 #include "node_terminus.h"
 #include "state_block.h"
+#include "yaml/yaml_conversion.h"
 
 namespace wolf {
 
@@ -95,6 +96,24 @@ void LandmarkBase::registerNewStateBlocks()
         if (o_ptr_ != nullptr)
             getProblem()->addStateBlockPtr(o_ptr_);
     }
+}
+
+YAML::Node LandmarkBase::saveToYaml() const
+{
+    YAML::Node node;
+    node["id"] = landmark_id_;
+    node["type"] = "BASE";
+    if (p_ptr_ != nullptr)
+    {
+        node["position"] = p_ptr_->getVector();
+        node["position fixed"] = p_ptr_->isFixed();
+    }
+    if (o_ptr_ != nullptr)
+    {
+        node["orientation"] = o_ptr_->getVector();
+        node["orientation fixed"] = p_ptr_->isFixed();
+    }
+    return node;
 }
 
 } // namespace wolf
