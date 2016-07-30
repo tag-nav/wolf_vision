@@ -225,8 +225,8 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add capture, feature and constraint to problem
-                    FeatureBase* feature_ptr_ceres_diff = new FeatureBase(FEATURE_FIX, edge_vector, edge_information.inverse());
-                    FeatureBase* feature_ptr_wolf_diff = new FeatureBase(FEATURE_FIX, edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_ceres_diff = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_wolf_diff = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_ceres_diff = new CaptureVoid(TimeStamp(0), sensor);
                     CaptureVoid* capture_ptr_wolf_diff = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_ceres_diff.find(edge_old) != index_2_frame_ptr_ceres_diff.end() && "edge from vertex not added!");

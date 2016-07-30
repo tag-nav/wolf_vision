@@ -419,7 +419,7 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
         key_frame_ptr->setKey();
 
         // create motion constraint and add it to the new keyframe
-        FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION,
+        FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION, "MOTION",
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
@@ -566,7 +566,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
     //std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
 
     // create motion constraint and add it to the new keyframe
-    FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION,
+    FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION, "MOTION",
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
