@@ -5,10 +5,9 @@
 namespace wolf {
 
 LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, const Scalar& _witdh, const Scalar& _length) :
-	LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
+	LandmarkBase(LANDMARK_CONTAINER, "CONTAINER", _p_ptr, _o_ptr),
 	corners_(3,4)
 {
-    setType("CONTAINER");
     Eigen::VectorXs descriptor(2);
     descriptor << _witdh, _length;
   	setDescriptor(descriptor);
@@ -19,10 +18,9 @@ LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, con
 }
 
 LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const Scalar& _witdh, const Scalar& _length) :
-    LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
+    LandmarkBase(LANDMARK_CONTAINER, "CONTAINER", _p_ptr, _o_ptr),
     corners_(3,4)
 {
-    setType("CONTAINER");
     Eigen::VectorXs descriptor(2);
     descriptor << _witdh, _length;
     setDescriptor(descriptor);

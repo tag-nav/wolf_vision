@@ -4,11 +4,8 @@
 namespace wolf {
 
 LandmarkLine2D::LandmarkLine2D(StateBlock* _p_ptr, Eigen::Vector3s & _point1, Eigen::Vector3s & _point2) :
-    LandmarkBase(LANDMARK_LINE_2D, _p_ptr)
+    LandmarkBase(LANDMARK_LINE_2D, "LINE 2D", _p_ptr)
 {
-    //set node type
-    setType("LINE_2D");
-    
     //set extreme points
     point1_ = _point1;
     point2_ = _point2; 

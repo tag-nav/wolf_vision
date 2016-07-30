@@ -72,7 +72,7 @@ class NodeBase
 
     public: 
 
-        NodeBase(std::string _class, bool _verbose = false);
+        NodeBase(std::string _class, std::string _type, std::string _name = "", bool _verbose = false);
         virtual ~NodeBase();
 
         unsigned int nodeId() const;
@@ -90,8 +90,8 @@ class NodeBase
 
 namespace wolf{
 
-inline NodeBase::NodeBase(std::string _class, bool _verbose) :
-        node_id_(++node_id_count_), node_class_(_class), verbose_(_verbose)
+inline NodeBase::NodeBase(std::string _class, std::string _type, std::string _name, bool _verbose) :
+        node_id_(++node_id_count_), node_class_(_class), node_type_(_type), node_name_(_name), verbose_(_verbose)
 {
     if (verbose_)
         std::cout << "NodeBase::NodeBase(). Id: " << node_id_ << " Label: " << node_class_ << std::endl;

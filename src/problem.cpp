@@ -24,7 +24,7 @@ std::string uppercase(std::string& s) {for (auto & c: s) c = std::toupper(c); re
 
 
 Problem::Problem(FrameStructure _frame_structure) :
-        NodeBase("PROBLEM"), //
+        NodeBase("PROBLEM", ""), //
         location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(
                 new HardwareBase), processor_motion_ptr_(nullptr), origin_setted_(false)
 {
