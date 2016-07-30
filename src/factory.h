@@ -54,7 +54,7 @@ namespace wolf
  *
  * > For example, if you want to make a Landmark factory, set TypeBase = LandmarkBase.\n
  * > Then, the factory will create specific landmarks deriving from LandmarkBase.\n
- * > The specific type of landmark (e.g. LandmarkCorner, LandmarkAHP, LandmarkPolyline2D, etc) is indicated by a string that we call TYPE in this documentation.
+ * > The specific type of landmark (e.g. LandmarkCorner2D, LandmarkAHP, LandmarkPolyline2D, etc) is indicated by a string that we call TYPE in this documentation.
  *
  * Specific object creation is invoked by the method ````create(TYPE, params ... )````, where
  *   - the TYPE of object to create is identified with a string
@@ -89,7 +89,7 @@ namespace wolf
  * \endcode
  *
  * Second to know, the Factory class is a <a href="http://stackoverflow.com/questions/1008019/c-singleton-design-pattern#1008289">singleton</a>: it can only exist once in your application.
- * To obtain an instance of it, use the static method get(),
+ * To access it, use the static method get(),
  *
  *     \code
  *     Factory<MyTypeBase, MyTypeInput>::get()
@@ -182,16 +182,17 @@ namespace wolf
  * LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
  * {
  *    // Parse YAML node with lmk info and data
- *    unsigned int id         = _lmk_node["id"].as<unsigned int>();
- *    int first_id            = _lmk_node["first_id"].as<int>();
- *    bool first_defined      = _lmk_node["first_defined"].as<bool>();
- *    bool last_defined       = _lmk_node["last_defined"].as<bool>();
- *    unsigned int npoints    = _lmk_node["points"].size();
- *    Eigen::MatrixXs points(2,npoints);
+ *    unsigned int      id              = _lmk_node["id"].as<unsigned int>();
+ *    int               first_id        = _lmk_node["first_id"].as<int>();
+ *    bool              first_defined   = _lmk_node["first_defined"].as<bool>();
+ *    bool              last_defined    = _lmk_node["last_defined"].as<bool>();
+ *    unsigned int      npoints         = _lmk_node["points"].size();
+ *    Eigen::MatrixXs   points(2,npoints);
  *    for (unsigned int i = 0; i < npoints; i++)
  *    {
- *        points.col(i) = _lmk_node["points"][i].as<Eigen::Vector2s>();
+ *        points.col(i)                 = _lmk_node["points"][i].as<Eigen::Vector2s>();
  *    }
+ *
  *    // Create a new landmark
  *    LandmarkBase* lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
  *    lmk_ptr->setId(id);
