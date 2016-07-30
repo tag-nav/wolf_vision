@@ -27,7 +27,7 @@ struct ProcessorParamsBase
 class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 {
     public:
-        ProcessorBase(ProcessorType _tp, const Scalar& _time_tolerance = 0);
+        ProcessorBase(ProcessorType _tp, std::string _type, const Scalar& _time_tolerance = 0);
 
         /** \brief Default destructor (not recommended)
          *

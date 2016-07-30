@@ -13,7 +13,7 @@ namespace wolf
 {
 
 ProcessorTrackerLandmarkDummy::ProcessorTrackerLandmarkDummy(const unsigned int& _max_new_features) :
-        ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, _max_new_features), n_feature_(0), landmark_idx_non_visible_(0)
+        ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, "TRACKER LANDMARK DUMMY", _max_new_features), n_feature_(0), landmark_idx_non_visible_(0)
 {
     //
 

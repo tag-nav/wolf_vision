@@ -80,7 +80,7 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
 };
 
 inline ProcessorTrackerFeatureDummy::ProcessorTrackerFeatureDummy() :
-        ProcessorTrackerFeature(PRC_TRACKER_DUMMY),
+        ProcessorTrackerFeature(PRC_TRACKER_DUMMY, "TRACKER FEATURE DUMMY"),
         n_feature_(0)
 {
     //
