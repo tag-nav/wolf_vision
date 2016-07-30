@@ -640,7 +640,7 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
 }
 
 
-ProcessorBase* ProcessorLaser2D::create(const std::string&  _unique_name, const ProcessorParamsBase* _params)
+ProcessorBase* ProcessorLaser2D::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
 {
     ProcessorLaser2D* prc_ptr = new ProcessorLaser2D();
     prc_ptr->setName(_unique_name);

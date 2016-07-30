@@ -102,7 +102,7 @@ class ProcessorLaser2D : public ProcessorBase
                                      LandmarkCorner2D* _old_corner_landmark_ptr, int& _feature_idx, int& _corner_idx);
 
     public:
-        static ProcessorBase* create(const std::string&  _unique_name, const ProcessorParamsBase* _params = nullptr);
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params = nullptr);
 };
 
 inline bool ProcessorLaser2D::voteForKeyFrame()

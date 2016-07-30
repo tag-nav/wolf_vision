@@ -10,7 +10,7 @@
 namespace wolf
 {
 
-ProcessorTracker::ProcessorTracker(ProcessorType _tp, const std::string&  _type, const unsigned int _max_new_features, const Scalar& _time_tolerance) :
+ProcessorTracker::ProcessorTracker(ProcessorType _tp, const std::string& _type, const unsigned int _max_new_features, const Scalar& _time_tolerance) :
         ProcessorBase(_tp, _type, _time_tolerance), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
         max_new_features_(_max_new_features)
 {

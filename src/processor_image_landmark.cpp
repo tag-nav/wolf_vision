@@ -593,7 +593,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
 
 //namespace wolf{
 
-ProcessorBase* ProcessorImageLandmark::create(const std::string&  _unique_name, const ProcessorParamsBase* _params)
+ProcessorBase* ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
 {
     ProcessorImageLandmark* prc_ptr = new ProcessorImageLandmark(*((ProcessorImageParameters*)_params));
     prc_ptr->setName(_unique_name);

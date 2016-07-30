@@ -356,7 +356,7 @@ Eigen::VectorXs ProcessorTrackerLandmarkCorner::computeSquaredMahalanobisDistanc
     return squared_mahalanobis_distances;
 }
 
-ProcessorBase* ProcessorTrackerLandmarkCorner::create(const std::string&  _unique_name, const ProcessorParamsBase* _params)
+ProcessorBase* ProcessorTrackerLandmarkCorner::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
 {
     ProcessorParamsLaser* params = (ProcessorParamsLaser*)_params;
     ProcessorTrackerLandmarkCorner* prc_ptr = new ProcessorTrackerLandmarkCorner(params->line_finder_params_, params->new_corners_th, params->loop_frames_th);

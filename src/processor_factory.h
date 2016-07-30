@@ -82,7 +82,7 @@ namespace wolf
  * Here is an example of ProcessorOdom2D::create() extracted from processor_odom_2D.h:
  *
  *     \code
- *     static ProcessorBase* create(const std::string&  _name, ProcessorParamsBase* _params)
+ *     static ProcessorBase* create(const std::string& _name, ProcessorParamsBase* _params)
  *     {
  *         // cast _params to good type
  *         ProcessorParamsOdom2D* params = (ProcessorParamsOdom2D*)_params;
@@ -173,9 +173,9 @@ class ProcessorFactory
     private:
         typedef std::map<std::string, CreateProcessorCallback> CallbackMap;
     public:
-        bool registerCreator(const std::string&  _processor_type, CreateProcessorCallback createFn);
-        bool unregisterCreator(const std::string&  _processor_type);
-        ProcessorBase* create(const std::string&  _processor_type, const std::string&  _unique_name, const ProcessorParamsBase* _params = nullptr);
+        bool registerCreator(const std::string& _processor_type, CreateProcessorCallback createFn);
+        bool unregisterCreator(const std::string& _processor_type);
+        ProcessorBase* create(const std::string& _processor_type, const std::string& _unique_name, const ProcessorParamsBase* _params = nullptr);
     private:
         CallbackMap callbacks_;
 

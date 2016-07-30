@@ -37,7 +37,7 @@ class ProcessorGPS : public ProcessorBase
         virtual bool keyFrameCallback(wolf::FrameBase*, const Scalar& _time_tol);
 
     public:
-        static ProcessorBase* create(const std::string&  _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 
 };
 

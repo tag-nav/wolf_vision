@@ -829,7 +829,7 @@ ConstraintBase* ProcessorTrackerLandmarkPolyline::createConstraint(FeatureBase* 
     return nullptr;
 }
 
-ProcessorBase* ProcessorTrackerLandmarkPolyline::create(const std::string&  _unique_name, const ProcessorParamsBase* _params)
+ProcessorBase* ProcessorTrackerLandmarkPolyline::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
 {
     ProcessorParamsPolyline* params = (ProcessorParamsPolyline*)_params;
     ProcessorTrackerLandmarkPolyline* prc_ptr = new ProcessorTrackerLandmarkPolyline(*params);

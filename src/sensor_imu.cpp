@@ -17,7 +17,7 @@ SensorIMU::~SensorIMU()
 }
 
 // Define the factory method
-SensorBase* SensorIMU::create(const std::string&  _unique_name, const Eigen::VectorXs& _extrinsics_pq,
+SensorBase* SensorIMU::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq,
                               const IntrinsicsBase* _intrinsics)
 {
     // decode extrinsics vector

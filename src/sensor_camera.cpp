@@ -41,7 +41,7 @@ SensorCamera::~SensorCamera()
 }
 
 // Define the factory method
-SensorBase* SensorCamera::create(const std::string&  _unique_name, //
+SensorBase* SensorCamera::create(const std::string& _unique_name, //
                                  const Eigen::VectorXs& _extrinsics_pq, //
                                  const IntrinsicsBase* _intrinsics)
 {

@@ -70,7 +70,7 @@ class ProcessorOdom3D : public ProcessorMotion
 
     // Factory method
     public:
-        static ProcessorBase* create(const std::string&  _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
 
