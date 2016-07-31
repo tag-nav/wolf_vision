@@ -183,7 +183,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
             active_search_grid_.hitCell(point2D);  //TODO: Mirar el hitcell en este punto
             active_search_grid_.blockCell(roi);
 
-            cv::Mat target_descriptor = landmark_ptr->getDescriptor();
+            cv::Mat target_descriptor = landmark_ptr->getCvDescriptor();
 
 
             //lists used to debug

@@ -16,7 +16,7 @@ namespace wolf {
 class LandmarkAHP : public LandmarkBase
 {
     protected:
-        cv::Mat descriptor_;
+        cv::Mat cv_descriptor_;
         FrameBase* anchor_frame_;
         SensorBase* anchor_sensor_;
 
@@ -25,8 +25,8 @@ class LandmarkAHP : public LandmarkBase
 
         virtual ~LandmarkAHP();
 
-        const cv::Mat& getDescriptor() const;
-        void setDescriptor(const cv::Mat& _descriptor);
+        const cv::Mat& getCvDescriptor() const;
+        void setCvDescriptor(const cv::Mat& _descriptor);
 
         const FrameBase*  getAnchorFrame () const;
         const SensorBase* getAnchorSensor() const;
@@ -42,14 +42,14 @@ class LandmarkAHP : public LandmarkBase
         static LandmarkBase* create(const YAML::Node& _node);
 };
 
-inline const cv::Mat& LandmarkAHP::getDescriptor() const
+inline const cv::Mat& LandmarkAHP::getCvDescriptor() const
 {
-    return descriptor_;
+    return cv_descriptor_;
 }
 
-inline void LandmarkAHP::setDescriptor(const cv::Mat& _descriptor)
+inline void LandmarkAHP::setCvDescriptor(const cv::Mat& _descriptor)
 {
-    descriptor_ = _descriptor;
+    cv_descriptor_ = _descriptor;
 }
 
 inline const FrameBase* LandmarkAHP::getAnchorFrame() const

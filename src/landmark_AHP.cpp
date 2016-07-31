@@ -12,7 +12,7 @@ LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position_homogeneous,
                          SensorBase* _anchor_sensor,
                          cv::Mat _2D_descriptor) :
     LandmarkBase(LANDMARK_AHP, new StateHomogeneous3D(_position_homogeneous)),
-    descriptor_(_2D_descriptor),
+    cv_descriptor_(_2D_descriptor.clone()),
     anchor_frame_(_anchor_frame),
     anchor_sensor_(_anchor_sensor)
 {
