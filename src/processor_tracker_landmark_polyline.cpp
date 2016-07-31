@@ -337,7 +337,7 @@ void ProcessorTrackerLandmarkPolyline::extractPolylines(CaptureLaser2D* _capture
 void ProcessorTrackerLandmarkPolyline::expectedFeature(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& expected_feature_,
                                                    Eigen::MatrixXs& expected_feature_cov_)
 {
-    assert(_landmark_ptr->getType() == LANDMARK_POLYLINE_2D && "ProcessorTrackerLandmarkPolyline::expectedFeature: Bad landmark type");
+    assert(_landmark_ptr->getTypeId() == LANDMARK_POLYLINE_2D && "ProcessorTrackerLandmarkPolyline::expectedFeature: Bad landmark type");
     LandmarkPolyline2D* polyline_landmark = (LandmarkPolyline2D*)_landmark_ptr;
     assert(expected_feature_.cols() == polyline_landmark->getNPoints() && expected_feature_.rows() == 3 && "ProcessorTrackerLandmarkPolyline::expectedFeature: bad expected_feature_ sizes");
 
