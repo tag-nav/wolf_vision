@@ -15,19 +15,22 @@ class LandmarkAHP : public LandmarkBase
     protected:
         cv::Mat descriptor_;
         FrameBase* anchor_frame_;
+        SensorBase* anchor_sensor_;
 
     public:
-        LandmarkAHP(Eigen::Vector4s _position, FrameBase* _frame, cv::Mat _2D_descriptor);
+        LandmarkAHP(Eigen::Vector4s _position, FrameBase* _frame, SensorBase* _anchor_sensor, cv::Mat _2D_descriptor);
 
         virtual ~LandmarkAHP();
 
         const cv::Mat& getDescriptor() const;
-        void setDescriptor(const cv::Mat& _descriptor)
-        {
-            descriptor_ = _descriptor;
-        }
+        void setDescriptor(const cv::Mat& _descriptor);
 
-        const FrameBase* getAnchorFrame() const;
+        const FrameBase*  getAnchorFrame () const;
+        const SensorBase* getAnchorSensor() const;
+
+        void setAnchorFrame  (FrameBase*  _anchor_frame );
+        void setAnchorSensor (SensorBase* _anchor_sensor);
+        void setAnchor       (FrameBase*  _anchor_frame , SensorBase* _anchor_sensor);
 };
 
 inline const cv::Mat& LandmarkAHP::getDescriptor() const
@@ -35,11 +38,36 @@ inline const cv::Mat& LandmarkAHP::getDescriptor() const
     return descriptor_;
 }
 
+inline void LandmarkAHP::setDescriptor(const cv::Mat& _descriptor)
+{
+    descriptor_ = _descriptor;
+}
+
 inline const FrameBase* LandmarkAHP::getAnchorFrame() const
 {
     return anchor_frame_;
 }
 
+inline void LandmarkAHP::setAnchorFrame(FrameBase* _anchor_frame)
+{
+    anchor_frame_ = _anchor_frame;
+}
+
+inline const SensorBase* LandmarkAHP::getAnchorSensor() const
+{
+    return anchor_sensor_;
+}
+
+inline void LandmarkAHP::setAnchorSensor(SensorBase* _anchor_sensor)
+{
+    anchor_sensor_ = _anchor_sensor;
+}
+
+inline void LandmarkAHP::setAnchor(FrameBase* _anchor_frame, SensorBase* _anchor_sensor)
+{
+    anchor_frame_  = _anchor_frame;
+    anchor_sensor_ = _anchor_sensor;
+}
 } // namespace wolf
 
 #endif // LANDMARK_AHP_H
