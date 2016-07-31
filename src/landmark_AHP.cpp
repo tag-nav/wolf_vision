@@ -19,4 +19,11 @@ LandmarkAHP::~LandmarkAHP()
     //
 }
 
+// Register landmark creator
+namespace
+{
+const bool registered_lmk_ahp = LandmarkFactory::get().registerCreator("AHP", LandmarkAHP::create);
+}
+
+
 } // namespace wolf
