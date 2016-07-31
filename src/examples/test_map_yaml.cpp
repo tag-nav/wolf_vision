@@ -12,7 +12,9 @@
 #include "problem.h"
 #include "map_base.h"
 #include "landmark_polyline_2D.h"
+#include "landmark_AHP.h"
 #include "state_block.h"
+#include "../yaml/yaml_conversion.h"
 
 #include <iostream>
 using namespace wolf;
@@ -21,23 +23,40 @@ void print(MapBase& _map)
 {
     for (auto lmk_ptr : *(_map.getLandmarkListPtr()))
     {
-
         std::cout << "Lmk ID:    " << lmk_ptr->id();
-        LandmarkPolyline2D* poly_ptr = (LandmarkPolyline2D*)(lmk_ptr);
-        std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " // fixed: " << poly_ptr->getPPtr()->isFixed();
-        std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " // fixed: " << poly_ptr->getOPtr()->isFixed();
-        std::cout << "\nn points:  " << poly_ptr->getNPoints();
-        std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
-        std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
-        std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
-        for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
-            std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getVector().transpose();
+        std::cout << "\nLmk type:  " << lmk_ptr->getType();
+//        LandmarkPolyline2D* poly_ptr = (LandmarkPolyline2D*)(lmk_ptr);
+//        std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getPPtr()->isFixed();
+//        std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getOPtr()->isFixed();
+//        std::cout << "\nn points:  " << poly_ptr->getNPoints();
+//        std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
+//        std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
+//        std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
+//        for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
+//            std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getVector().transpose();
         std::cout << std::endl;
     }
 }
 
 int main()
 {
+    using namespace Eigen;
+
+    std::cout << "\nTesting Lmk creator and node saving..." << std::endl;
+    Vector4s v;
+    v << 1, 2, 3, 4;
+    cv::Mat d = (cv::Mat_<int>(8,1) << 1, 2, 3, 4, 5, 6, 7, 8);
+    LandmarkAHP lmk_1(v, nullptr, nullptr, d);
+    std::cout << "Pos 1 = " << lmk_1.getPPtr()->getVector().transpose() << std::endl;
+    std::cout << "Des 1 = " << lmk_1.getCvDescriptor().t() << std::endl;
+
+    YAML::Node n = lmk_1.saveToYaml();
+    std::cout << "Pos n = " << n["position"].as<VectorXs>().transpose() << std::endl;
+    std::cout << "Des n = " << n["descriptor"].as<VectorXs>().transpose() << std::endl;
+
+    LandmarkAHP lmk_2 = *((LandmarkAHP*)LandmarkAHP::create(n));
+    std::cout << "Pos 2 = " << lmk_2.getPPtr()->getVector().transpose() << std::endl;
+    std::cout << "Des 2 = " << lmk_2.getCvDescriptor().t() << std::endl;
 
     std::string filename;
 
@@ -52,6 +71,13 @@ int main()
     filename = WOLF_CONFIG + "/map_polyline_example.yaml";
     std::cout << "Reading map from file: " << filename << std::endl;
     problem.loadMap(filename);
+
+    LandmarkBase* lmk_ahp = (problem.getMapPtr()->getLandmarkListPtr()->back());
+    cv::Mat desc = ((LandmarkAHP*)lmk_ahp)->getCvDescriptor();
+    std::cout << "Test AHP member: " << desc.rows << "x" << desc.cols;
+    std::cout << ": " << desc.t() << std::endl;
+//    std::cout << "Test AHP member: " << (LandmarkAHP*)(problem.getMapPtr()->getLandmarkListPtr()->front())->getDescriptor().transpose() << std::endl;
+
 
     std::cout << "Printing map..." << std::endl;
     print(*(problem.getMapPtr()));

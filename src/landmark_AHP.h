@@ -35,6 +35,8 @@ class LandmarkAHP : public LandmarkBase
         void setAnchorSensor (SensorBase* _anchor_sensor);
         void setAnchor       (FrameBase*  _anchor_frame , SensorBase* _anchor_sensor);
 
+        YAML::Node saveToYaml() const;
+
         /** \brief Creator for Factory<LandmarkBase, YAML::Node>
          * Caution: This creator does not set the landmark's anchor frame and sensor.
          * These need to be set afterwards.

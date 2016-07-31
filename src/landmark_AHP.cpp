@@ -16,7 +16,6 @@ LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position_homogeneous,
     anchor_frame_(_anchor_frame),
     anchor_sensor_(_anchor_sensor)
 {
-//    std::cout << "LandmarkAHP p_ptr" << p_ptr_->getVector().transpose() << std::endl;
     setType("AHP");
 }
 
@@ -25,12 +24,29 @@ LandmarkAHP::~LandmarkAHP()
     //
 }
 
+YAML::Node LandmarkAHP::saveToYaml() const
+{
+    // First base things
+    YAML::Node node = LandmarkBase::saveToYaml();
+
+    // Then add specific things
+    std::vector<int> v;
+    LandmarkAHP::cv_descriptor_.copyTo(v);
+    node["descriptor"] = v;
+    return node;
+}
+
 
 wolf::LandmarkBase* LandmarkAHP::create(const YAML::Node& _node)
 {
-    Eigen::VectorXs pos_homog = _node["position"].as<Eigen::VectorXs>();
-    cv::Mat desc(_node["descriptor"].as<std::vector<unsigned int> >());
-    return new LandmarkAHP(pos_homog, nullptr, nullptr, desc);
+    unsigned int        id          = _node["id"]           .as< unsigned int     >();
+    Eigen::VectorXs     pos_homog   = _node["position"]     .as< Eigen::VectorXs  >();
+    std::vector<int>    v           = _node["descriptor"]   .as< std::vector<int> >();
+    cv::Mat desc(v);
+
+    LandmarkBase* lmk = new LandmarkAHP(pos_homog, nullptr, nullptr, desc);
+    lmk->setId(id);
+    return lmk;
 }
 
 // Register landmark creator
