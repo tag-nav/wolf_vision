@@ -25,15 +25,29 @@ void print(MapBase& _map)
     {
         std::cout << "Lmk ID:    " << lmk_ptr->id();
         std::cout << "\nLmk type:  " << lmk_ptr->getType();
-//        LandmarkPolyline2D* poly_ptr = (LandmarkPolyline2D*)(lmk_ptr);
-//        std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getPPtr()->isFixed();
-//        std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getOPtr()->isFixed();
-//        std::cout << "\nn points:  " << poly_ptr->getNPoints();
-//        std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
-//        std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
-//        std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
-//        for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
-//            std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getVector().transpose();
+        switch (lmk_ptr->getTypeId())
+        {
+            case LANDMARK_POLYLINE_2D:
+            {
+                LandmarkPolyline2D* poly_ptr = (LandmarkPolyline2D*)(lmk_ptr);
+                std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getPPtr()->isFixed();
+                std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getOPtr()->isFixed();
+                std::cout << "\nn points:  " << poly_ptr->getNPoints();
+                std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
+                std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
+                std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
+                for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
+                    std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getVector().transpose();
+                break;
+            }
+            case LANDMARK_AHP:
+            {
+                LandmarkAHP* ahp_ptr = (LandmarkAHP*)lmk_ptr;
+                std::cout << "\npos:       " << ahp_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << ahp_ptr->getPPtr()->isFixed();
+                std::cout << "\ndescript:  " << ahp_ptr->getCvDescriptor().t();
+                break;
+            }
+        }
         std::cout << std::endl;
     }
 }
