@@ -50,7 +50,7 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          *
          **/
-        LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
+        LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
 
         /** \brief Default destructor (not recommended)
          *

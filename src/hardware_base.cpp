@@ -4,7 +4,7 @@
 namespace wolf {
 
 HardwareBase::HardwareBase() :
-    NodeLinked(MID, "HARDWARE")
+    NodeLinked(MID, "HARDWARE", "BASE")
 {
     //std::cout << "HardwareBase::HardwareBase(): " << __LINE__ << std::endl;
 }

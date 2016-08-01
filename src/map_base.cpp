@@ -19,7 +19,7 @@
 namespace wolf {
 
 MapBase::MapBase() :
-    NodeLinked(MID, "MAP")
+    NodeLinked(MID, "MAP", "BASE")
 {
     //std::cout << "MapBase::MapBase(): " << __LINE__ << std::endl;
 }
@@ -85,7 +85,7 @@ std::string MapBase::dateTimeNow()
     return date_time;
 }
 
-void MapBase::save(const std::string& _map_file_yaml, const std::string _map_name)
+void MapBase::save(const std::string& _map_file_yaml, const std::string& _map_name)
 {
     YAML::Emitter emitter;
 

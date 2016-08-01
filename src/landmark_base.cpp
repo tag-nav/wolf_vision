@@ -10,8 +10,8 @@ namespace wolf {
 
 unsigned int LandmarkBase::landmark_id_count_ = 0;
 
-LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr) :
-            NodeConstrained(MID, "LANDMARK"),
+LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr) :
+            NodeConstrained(MID, "LANDMARK", _type),
             landmark_id_(++landmark_id_count_),
             type_id_(_tp),
             status_(LANDMARK_CANDIDATE),

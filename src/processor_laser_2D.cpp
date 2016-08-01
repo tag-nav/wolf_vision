@@ -2,12 +2,12 @@
 
 namespace wolf {
 
-ProcessorLaser2D::ProcessorLaser2D() : ProcessorBase(PRC_LIDAR),
+ProcessorLaser2D::ProcessorLaser2D() : ProcessorBase(PRC_LIDAR, "LASER 2D"),
         //sensor_laser_ptr_((SensorLaser2D*)(upperNodePtr())), // Static cast to specific sensor at construction time TODO: in construction time upperNodePtr is nullptr, it crashes always, to be removed or changed to somewhere (JVN)
 		sensor_laser_ptr_(nullptr),
         capture_laser_ptr_(nullptr)
 {
-    setType("LASER 2D");
+    //
 }
 
 ProcessorLaser2D::~ProcessorLaser2D()

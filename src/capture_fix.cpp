@@ -3,12 +3,11 @@
 namespace wolf{
 
 CaptureFix::CaptureFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
-	CaptureBase(_ts, _sensor_ptr),
+	CaptureBase("FIX", _ts, _sensor_ptr),
 	data_(_data),
 	data_covariance_(_data_covariance)
 {
-    setType("FIX");
-    //std::cout << "capture fix constructor " << std::endl;
+    //
 }
 
 CaptureFix::~CaptureFix()

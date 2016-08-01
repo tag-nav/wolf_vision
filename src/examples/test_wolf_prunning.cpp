@@ -78,7 +78,7 @@ int main(int argc, char** argv)
     // Wolf problem
     Problem* wolf_problem_full = new Problem(FRM_PO_2D);
     Problem* wolf_problem_prun = new Problem(FRM_PO_2D);
-    SensorBase* sensor = new SensorBase(SEN_ODOM_2D, new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
+    SensorBase* sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
     Eigen::SparseMatrix<Scalar> Lambda(0,0);
 
@@ -263,8 +263,8 @@ int main(int argc, char** argv)
 
                     //std::cout << "Adding edge... " << std::endl;
                     // add capture, feature and constraint to problem
-                    FeatureBase* feature_ptr_full = new FeatureBase(FEATURE_FIX, edge_vector, edge_information.inverse());
-                    FeatureBase* feature_ptr_prun = new FeatureBase(FEATURE_FIX, edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_full = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
+                    FeatureBase* feature_ptr_prun = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_full = new CaptureVoid(TimeStamp(0), sensor);
                     CaptureVoid* capture_ptr_prun = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_full.find(edge_old) != index_2_frame_ptr_full.end() && "edge from vertex not added!");
@@ -325,8 +325,8 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBase* first_frame_full = wolf_problem_full->getTrajectoryPtr()->getFrameListPtr()->front();
     FrameBase* first_frame_prun = wolf_problem_prun->getTrajectoryPtr()->getFrameListPtr()->front();
-    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_full->addCapture(initial_covariance_full);
     first_frame_prun->addCapture(initial_covariance_prun);
     initial_covariance_full->process();

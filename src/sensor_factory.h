@@ -82,7 +82,7 @@ namespace wolf
  * that can be derived for each derived sensor:
  *
  *      \code
- *      static SensorBase* create(std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
+ *      static SensorBase* create(const std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
  *      \endcode
  *
  * See further down for an implementation example.
@@ -127,7 +127,7 @@ namespace wolf
  * Here is an example of SensorCamera::create() extracted from sensor_camera.cpp:
  *
  *     \code
- *      static SensorBase* create(std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
+ *      static SensorBase* create(const std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
  *      {
  *          // check extrinsics vector
  *          assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");

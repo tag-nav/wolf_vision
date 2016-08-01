@@ -23,7 +23,7 @@ class NodeTerminus : public NodeBase
 {
     public:
         NodeTerminus() :
-                NodeBase("TERMINUS")
+                NodeBase("TERMINUS", "")
         {
             //
         }
