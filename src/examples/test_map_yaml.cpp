@@ -88,13 +88,6 @@ int main()
     std::cout << "Reading map from file: " << filename << std::endl;
     problem.loadMap(filename);
 
-    LandmarkBase* lmk_ahp = (problem.getMapPtr()->getLandmarkListPtr()->back());
-    cv::Mat desc = ((LandmarkAHP*)lmk_ahp)->getCvDescriptor();
-    std::cout << "Test AHP member: " << desc.rows << "x" << desc.cols;
-    std::cout << ": " << desc.t() << std::endl;
-//    std::cout << "Test AHP member: " << (LandmarkAHP*)(problem.getMapPtr()->getLandmarkListPtr()->front())->getDescriptor().transpose() << std::endl;
-
-
     std::cout << "Printing map..." << std::endl;
     print(*(problem.getMapPtr()));
 
