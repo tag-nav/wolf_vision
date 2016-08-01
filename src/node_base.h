@@ -61,11 +61,10 @@ class NodeBase
         std::string node_class_; ///< Text label identifying the class of node ("SENSOR", "FEATURE", etc)
         std::string node_type_;  ///< Text label identifying the type or subclass of node ("Pin Hole", "Point 2D", etc)
         std::string node_name_;  ///< Text label identifying each specific object ("left camera", "LIDAR 1", "PointGrey", "Andrew", etc)
-        bool verbose_; 
 
     public: 
 
-        NodeBase(const std::string& _class, const std::string& _type, const std::string& _name = "", bool _verbose = false);
+        NodeBase(const std::string& _class, const std::string& _type, const std::string& _name = "");
         virtual ~NodeBase();
 
         unsigned int nodeId() const;
@@ -83,11 +82,10 @@ class NodeBase
 
 namespace wolf{
 
-inline NodeBase::NodeBase(const std::string& _class, const std::string& _type, const std::string& _name, bool _verbose) :
-        node_id_(++node_id_count_), node_class_(_class), node_type_(_type), node_name_(_name), verbose_(_verbose)
+inline NodeBase::NodeBase(const std::string& _class, const std::string& _type, const std::string& _name) :
+        node_id_(++node_id_count_), node_class_(_class), node_type_(_type), node_name_(_name)
 {
-    if (verbose_)
-        std::cout << "NodeBase::NodeBase(). Id: " << node_id_ << " Label: " << node_class_ << std::endl;
+    //
 }
 
 inline NodeBase::~NodeBase()
