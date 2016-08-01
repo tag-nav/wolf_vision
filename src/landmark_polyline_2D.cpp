@@ -97,7 +97,7 @@ const Eigen::VectorXs& LandmarkPolyline2D::getPointVector(int _i) const
 
 StateBlock* LandmarkPolyline2D::getPointStateBlockPtr(int _i)
 {
-	assert(_i >= first_id_ && _i < first_id_+(int)(point_state_ptr_vector_.size()));
+	assert(_i-first_id_ >= 0 && _i-first_id_ <= (int)(point_state_ptr_vector_.size()) && "out of range!");
 	return point_state_ptr_vector_[_i-first_id_];
 }
 
@@ -220,96 +220,119 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
         first_defined_ = true;
 }
 
-void LandmarkPolyline2D::setClosed(bool _merge_extremes)
+void LandmarkPolyline2D::setClosed()
 {
-    assert(((_merge_extremes && (first_defined_ || last_defined_)) || (first_defined_ && last_defined_)) && "closing a polyline without merging extremes with a non-defined extreme or merging without any defined extreme");
+    std::cout << "setting polyline landmark closed" << std::endl;
 
-    if (_merge_extremes)
+    assert(getNPoints() - (first_defined_ ? 0 : 1) - (last_defined_ ? 0 : 1)  >= 2 && "closing a polyline with less than 2 defined points");
+
+    // merge first not defined with last defined
+    if (!first_defined_)
     {
-        // take a defined extreme as remaining
-        StateBlock* remove_state = (first_defined_ ? point_state_ptr_vector_.back() : point_state_ptr_vector_.front());
-        StateBlock* remain_state = (first_defined_ ? point_state_ptr_vector_.front() : point_state_ptr_vector_.back());
+        std::cout << "not defined first point: merging with last definite point" << std::endl;
 
-        // new point id for new constraints
-        int remove_id = (first_defined_ ? getLastId() : getFirstId());
-        int remain_id = (first_defined_ ? getFirstId() : getLastId());
-
-        // Change constraints from remove_state to remain_state
-        ConstraintBaseList old_constraints_list = *getConstrainedByListPtr();
-        ConstraintBase* new_ctr_ptr = nullptr;
-        for (auto ctr_ptr : old_constraints_list)
-        {
-            if (ctr_ptr->getType() == CTR_POINT_2D)
-            {
-                ConstraintPoint2D* ctr_point_ptr = (ConstraintPoint2D*)ctr_ptr;
-
-                // If landmark point constrained -> new constraint
-                if (ctr_point_ptr->getLandmarkPointId() == remove_id)
-                    new_ctr_ptr = new ConstraintPoint2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
-                                                        this,
-                                                        ctr_point_ptr->getFeaturePointId(),
-                                                        remain_id,
-                                                        ctr_point_ptr->getApplyLossFunction(),
-                                                        ctr_point_ptr->getStatus());
-            }
-            else if  (ctr_ptr->getType() == CTR_POINT_TO_LINE_2D)
-            {
-                ConstraintPointToLine2D* ctr_point_ptr = (ConstraintPointToLine2D*)ctr_ptr;
-
-                // If landmark point constrained -> new constraint
-                if (ctr_point_ptr->getLandmarkPointId() == remove_id)
-                    new_ctr_ptr = new ConstraintPointToLine2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
-                                                                                      this,
-                                                                                      ctr_point_ptr->getFeaturePointId(),
-                                                                                      remain_id,
-                                                                                      ctr_point_ptr->getLandmarkPointAuxId(),
-                                                                                      ctr_point_ptr->getApplyLossFunction(),
-                                                                                      ctr_point_ptr->getStatus());
-                // If landmark point is aux point -> new constraint
-                else if (ctr_point_ptr->getLandmarkPointAuxId() == remove_id)
-                    new_ctr_ptr = new ConstraintPointToLine2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
-                                                                                      this,
-                                                                                      ctr_point_ptr->getFeaturePointId(),
-                                                                                      ctr_point_ptr->getLandmarkPointId(),
-                                                                                      remain_id,
-                                                                                      ctr_point_ptr->getApplyLossFunction(),
-                                                                                      ctr_point_ptr->getStatus());
-            }
-            else
-                throw std::runtime_error ("polyline constraint of unknown type");
-
-            // If new constraint
-            if (new_ctr_ptr != nullptr)
-            {
-                // add new constraint
-                ctr_ptr->getFeaturePtr()->addConstraint(new_ctr_ptr);
-
-                // delete constraint
-                ctr_ptr->destruct();
-
-                new_ctr_ptr = nullptr;
-            }
-        }
-
-        // Remove remove_state
-        if (getProblem() != nullptr)
-            getProblem()->removeStateBlockPtr(remove_state);
-        delete remove_state;
-
-        if (first_defined_)
-            point_state_ptr_vector_.pop_back();
-        else
-        {
-            point_state_ptr_vector_.pop_front();
-            first_id_++;
-        }
-
-        // all defined
-        last_defined_ = true;
+        mergePoints(first_id_, getLastId() - (last_defined_ ? 0 : 1));
+        first_id_++;
         first_defined_ = true;
     }
+    // merge last not defined with first (defined for sure)
+    if (!last_defined_)
+    {
+        std::cout << "not defined last point: merging with first point" << std::endl;
 
+        mergePoints(getLastId(), first_id_);
+        last_defined_ = true;
+    }
+
+    // set closed
     closed_ = true;
+}
+
+void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
+{
+    std::cout << "merge points: remove " << _remove_id << " and keep " << _remain_id << " (ids: " << first_id_ << " to " << getLastId() << ")" << std::endl;
+
+    assert(_remove_id >= first_id_ && _remove_id <= getLastId());
+    assert(_remain_id >= first_id_ && _remain_id <= getLastId());
+    assert(_remain_id > first_id_ || first_defined_);
+    assert(_remain_id < getLastId() || last_defined_);
+
+    // take a defined extreme as remaining
+    StateBlock* remove_state = getPointStateBlockPtr(_remove_id);
+    std::cout << "state block to remove " << remove_state->getVector().transpose() << std::endl;
+
+    // Change constraints from remove_state to remain_state
+    ConstraintBaseList old_constraints_list = *getConstrainedByListPtr();
+    std::cout << "changing constraints: " << old_constraints_list.size() << std::endl;
+    ConstraintBase* new_ctr_ptr = nullptr;
+    for (auto ctr_ptr : old_constraints_list)
+    {
+        if (ctr_ptr->getType() == CTR_POINT_2D)
+        {
+            ConstraintPoint2D* ctr_point_ptr = (ConstraintPoint2D*)ctr_ptr;
+
+            // If landmark point constrained -> new constraint
+            if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
+                new_ctr_ptr = new ConstraintPoint2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
+                                                    this,
+                                                    ctr_point_ptr->getFeaturePointId(),
+                                                    _remain_id,
+                                                    ctr_point_ptr->getApplyLossFunction(),
+                                                    ctr_point_ptr->getStatus());
+        }
+        else if  (ctr_ptr->getType() == CTR_POINT_TO_LINE_2D)
+        {
+            ConstraintPointToLine2D* ctr_point_ptr = (ConstraintPointToLine2D*)ctr_ptr;
+
+            // If landmark point constrained -> new constraint
+            if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
+                new_ctr_ptr = new ConstraintPointToLine2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
+                                                                                  this,
+                                                                                  ctr_point_ptr->getFeaturePointId(),
+                                                                                  _remain_id,
+                                                                                  ctr_point_ptr->getLandmarkPointAuxId(),
+                                                                                  ctr_point_ptr->getApplyLossFunction(),
+                                                                                  ctr_point_ptr->getStatus());
+            // If landmark point is aux point -> new constraint
+            else if (ctr_point_ptr->getLandmarkPointAuxId() == _remove_id)
+                new_ctr_ptr = new ConstraintPointToLine2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
+                                                                                  this,
+                                                                                  ctr_point_ptr->getFeaturePointId(),
+                                                                                  ctr_point_ptr->getLandmarkPointId(),
+                                                                                  _remain_id,
+                                                                                  ctr_point_ptr->getApplyLossFunction(),
+                                                                                  ctr_point_ptr->getStatus());
+        }
+        else
+            throw std::runtime_error ("polyline constraint of unknown type");
+
+        // If new constraint
+        if (new_ctr_ptr != nullptr)
+        {
+            std::cout << "created new constraint: " << new_ctr_ptr->id() << std::endl;
+            std::cout << "deleting constraint: " << ctr_ptr->id() << std::endl;
+
+            // add new constraint
+            ctr_ptr->getFeaturePtr()->addConstraint(new_ctr_ptr);
+
+            // delete constraint
+            ctr_ptr->destruct();
+
+            new_ctr_ptr = nullptr;
+        }
+    }
+
+    // Remove remove_state
+    if (getProblem() != nullptr)
+        getProblem()->removeStateBlockPtr(remove_state);
+    std::cout << "state removed " << std::endl;
+
+    delete remove_state;
+    std::cout << "state deleted " << std::endl;
+
+    // remove element from deque
+    point_state_ptr_vector_.erase(point_state_ptr_vector_.begin() + _remove_id - first_id_);
+    std::cout << "state removed from point vector " << std::endl;
 }
 
 void LandmarkPolyline2D::registerNewStateBlocks()

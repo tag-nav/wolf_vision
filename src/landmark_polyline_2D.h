@@ -104,7 +104,11 @@ class LandmarkPolyline2D : public LandmarkBase
 
         /** \brief Set the polyline as closed
          **/
-        virtual void setClosed(bool _merge_extremes);
+        virtual void setClosed();
+
+        /** \brief merge points
+         **/
+        void mergePoints(int _remove_id, int _remain_id);
 
         /** \brief Classify as a known object
          **/
@@ -112,7 +116,7 @@ class LandmarkPolyline2D : public LandmarkBase
 
         /** \brief get classification
          **/
-        LandmarkClassification getClassification();
+        LandmarkClassification getClassification() const;
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
@@ -179,7 +183,7 @@ inline void LandmarkPolyline2D::classify(LandmarkClassification _class)
     classification_ = _class;
 }
 
-inline LandmarkClassification LandmarkPolyline2D::getClassification()
+inline LandmarkClassification LandmarkPolyline2D::getClassification() const
 {
     return classification_;
 }
