@@ -480,7 +480,7 @@ void ProcessorTrackerLandmarkPolyline::createNewLandmarks(LandmarkBaseList& _new
 
 LandmarkBase* ProcessorTrackerLandmarkPolyline::createLandmark(FeatureBase* _feature_ptr)
 {
-    assert(_feature_ptr->getType() == FEATURE_POLYLINE_2D);
+    assert(_feature_ptr->getTypeId() == FEATURE_POLYLINE_2D);
     //std::cout << "ProcessorTrackerLandmarkPolyline::createLandmark" << std::endl;
     //std::cout << "Robot global pose: " << t_world_robot_.transpose() << std::endl;
     //std::cout << "Sensor global pose: " << t_world_sensor_.transpose() << std::endl;

@@ -162,7 +162,7 @@ void ProcessorLaser2D::establishConstraintsMHTree()
             jj = 0;
             for (auto landmark_it = getProblem()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != getProblem()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++, jj++)
             {
-                if ((*landmark_it)->getType() == LANDMARK_CORNER)
+                if ((*landmark_it)->getTypeId() == LANDMARK_CORNER)
                 {
                     landmarks_map[jj] = (*landmark_it);
                     landmarks_index_map[jj] = 0;
@@ -177,7 +177,7 @@ void ProcessorLaser2D::establishConstraintsMHTree()
                     else
                         tree.setScore(ii,jj,0.);//prob to 0
                 }
-                else if ((*landmark_it)->getType() == LANDMARK_CONTAINER)
+                else if ((*landmark_it)->getTypeId() == LANDMARK_CONTAINER)
                 {
                     //std::cout << "Landmark: " << (*j_it)->nodeId() << " - jj: " << jj << " " << jj+1 << " " << jj+2 << " " << jj+3 << std::endl;
                     // Resize tree (expected 1 target for each landmark but containers have 4 targets)
@@ -488,7 +488,7 @@ bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_feature_ptr, Lan
         // Check all existing corners searching a container
         for (auto landmark_it = getProblem()->getMapPtr()->getLandmarkListPtr()->rbegin(); landmark_it != getProblem()->getMapPtr()->getLandmarkListPtr()->rend(); landmark_it++)
         {
-            if ((*landmark_it)->getType() == LANDMARK_CORNER // should be a corner
+            if ((*landmark_it)->getTypeId() == LANDMARK_CORNER // should be a corner
                     && std::fabs(pi2pi(((LandmarkCorner2D*)(*landmark_it))->getAperture() + M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF) // should be a corner
             {
                 //std::cout << "landmark " << (*landmark_it)->nodeId() << std::endl;

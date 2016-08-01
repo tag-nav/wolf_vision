@@ -247,7 +247,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     ConstraintBase* new_ctr_ptr = nullptr;
     for (auto ctr_ptr : old_constraints_list)
     {
-        if (ctr_ptr->getType() == CTR_POINT_2D)
+        if (ctr_ptr->getTypeId() == CTR_POINT_2D)
         {
             ConstraintPoint2D* ctr_point_ptr = (ConstraintPoint2D*)ctr_ptr;
 
@@ -260,7 +260,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
                                                     ctr_point_ptr->getApplyLossFunction(),
                                                     ctr_point_ptr->getStatus());
         }
-        else if  (ctr_ptr->getType() == CTR_POINT_TO_LINE_2D)
+        else if  (ctr_ptr->getTypeId() == CTR_POINT_TO_LINE_2D)
         {
             ConstraintPointToLine2D* ctr_point_ptr = (ConstraintPointToLine2D*)ctr_ptr;
 

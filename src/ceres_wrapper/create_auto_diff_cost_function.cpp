@@ -30,7 +30,7 @@ namespace wolf {
 
 ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _use_wolf_autodiff)
 {
-    switch (_ctr_ptr->getType())
+    switch (_ctr_ptr->getTypeId())
     {
         case CTR_GPS_FIX_2D:
             if (_use_wolf_autodiff)
