@@ -91,12 +91,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 
         virtual void preProcess();
         void computeTransformations(const TimeStamp& _ts);
-        virtual void postProcess()
-        {
-//            std::cout << "postProcess: " << std::endl;
-//            std::cout << "New Last features: " << getNewFeaturesListLast().size() << std::endl;
-//            std::cout << "Last features: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
-        }
+        virtual void postProcess();
 
         void advance();
 
@@ -144,6 +139,10 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         /** \brief Establish constraints between features in Captures \b last and \b origin
          */
         virtual void establishConstraints();
+
+        /** \brief look for known objects in the list of unclassified polylines
+        */
+        void classifyPolilines(LandmarkBaseList* _lmk_list);
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain

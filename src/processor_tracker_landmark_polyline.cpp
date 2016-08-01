@@ -593,9 +593,9 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
                         unsigned int N_back_overlapped = polyline_landmark->getLastId() - id_lmk + 1;
                         int N_feature_new_points = polyline_match->feature_match_from_id_ - feat_point_id_matching - N_back_overlapped;
 
-                        // define last point (if not defined)
-                        if (!polyline_landmark->isLastDefined())
-                            polyline_landmark->setLast(points_global.col(feat_point_id_matching + N_back_overlapped - 1), true);
+                        // define first point (if not defined and no points have to be merged)
+                        if (!polyline_landmark->isFirstDefined() && N_feature_new_points >= 0)
+                            polyline_landmark->setFirst(points_global.col(polyline_match->feature_match_from_id_), true);
 
                         // add other points (if there are)
                         if (N_feature_new_points > 0)
@@ -604,12 +604,12 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
                                                          true, // defined
                                                          false); // front (!back)
 
-                        // define first point (if not defined)
-                        if (!polyline_landmark->isFirstDefined())
-                            polyline_landmark->setFirst(points_global.col(polyline_match->feature_match_from_id_), true);
+                        // define last point (if not defined and no points have to be merged)
+                        if (!polyline_landmark->isLastDefined() && N_feature_new_points >= 0)
+                            polyline_landmark->setLast(points_global.col(feat_point_id_matching + N_back_overlapped - 1), true);
 
                         // close landmark
-                        polyline_landmark->setClosed(N_feature_new_points == -1); // merge extremes if -1 new points
+                        polyline_landmark->setClosed();
 
                         polyline_match->landmark_match_from_id_ = id_lmk - (polyline_feature->isFirstDefined() ? 0 : 1);
                         polyline_match->feature_match_from_id_ = 0;
@@ -688,8 +688,8 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
                         unsigned int N_front_overlapped = id_lmk - polyline_landmark->getFirstId() + 1;
                         int N_feature_new_points = feat_point_id_matching - polyline_match->feature_match_to_id_ - N_front_overlapped;
 
-                        // define first point (if not defined)
-                        if (!polyline_landmark->isFirstDefined())
+                        // define first point (if not defined and no points have to be merged)
+                        if (!polyline_landmark->isFirstDefined() && N_feature_new_points >= 0)
                             polyline_landmark->setFirst(points_global.col(feat_point_id_matching - N_front_overlapped + 1), true);
 
                         // add other points (if there are)
@@ -699,12 +699,12 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
                                                          true, // defined
                                                          false); // front (!back)
 
-                        // define last point (if not defined)
-                        if (!polyline_landmark->isLastDefined())
+                        // define last point (if not defined and no points have to be merged)
+                        if (!polyline_landmark->isLastDefined() && N_feature_new_points >= 0)
                             polyline_landmark->setLast(points_global.col(polyline_match->feature_match_to_id_), true);
 
                         // close landmark
-                        polyline_landmark->setClosed(N_feature_new_points == -1);
+                        polyline_landmark->setClosed();
 
                         polyline_match->landmark_match_to_id_ = id_lmk + (polyline_feature->isLastDefined() ? 0 : 1);
                         polyline_match->feature_match_to_id_ = polyline_feature->getNPoints() - 1;
@@ -821,6 +821,137 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
         }
         //std::cout << "Constraints established" << std::endl;
     }
+}
+
+void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_list)
+{
+    std::cout << "ProcessorTrackerLandmarkPolyline::classifyPolilines: " << _lmk_list->size() << std::endl;
+
+    const Scalar CONT_L = 12;
+    const Scalar CONT_W = 2.345;
+    const Scalar CONT_D = sqrt(CONT_L * CONT_L + CONT_W * CONT_W);
+
+    for (auto lmk_ptr : *_lmk_list)
+        if (lmk_ptr->getType() == LANDMARK_POLYLINE_2D)
+        {
+            LandmarkPolyline2D* polyline_ptr = (LandmarkPolyline2D*)lmk_ptr;
+            auto n_defined_points = polyline_ptr->getNPoints() - (polyline_ptr->isFirstDefined() ? 0 : 1) - (polyline_ptr->isLastDefined() ? 0 : 1);
+            auto A_id = polyline_ptr->getFirstId() + (polyline_ptr->isFirstDefined() ? 0 : 1);
+            auto B_id = A_id + 1;
+            auto C_id = B_id + 1;
+            auto D_id = C_id + 1;
+
+            // necessary conditions
+            if (polyline_ptr->getClassification() != UNCLASSIFIED ||
+                n_defined_points < 3 ||
+                n_defined_points > 4 )
+                continue;
+
+            std::cout << "landmark " << lmk_ptr->id() << std::endl;
+
+            // consider 3 first defined points
+            Scalar dAB = (polyline_ptr->getPointVector(A_id) - polyline_ptr->getPointVector(B_id)).norm();
+            Scalar dBC = (polyline_ptr->getPointVector(B_id) - polyline_ptr->getPointVector(C_id)).norm();
+            Scalar dAC = (polyline_ptr->getPointVector(A_id) - polyline_ptr->getPointVector(C_id)).norm();
+
+            std::cout << "dAB = " << dAB << " error 1: " << fabs(dAB-CONT_L) << " error 2: " << fabs(dAB-CONT_W) << std::endl;
+            std::cout << "dBC = " << dBC << " error 1: " << fabs(dBC-CONT_W) << " error 2: " << fabs(dBC-CONT_L)   << std::endl;
+            std::cout << "dAC = " << dAC << " error 1&2: " << fabs(dAC-CONT_D) << std::endl;
+
+            // big container (position 1)
+            bool container_1 = (fabs(dAB-CONT_L) < params_.position_error_th &&
+                                fabs(dBC-CONT_W) < params_.position_error_th &&
+                                fabs(dAC-CONT_D) < params_.position_error_th);
+
+            // big container (position 2)
+            bool container_2 = (fabs(dAB-CONT_W) < params_.position_error_th &&
+                                fabs(dBC-CONT_L) < params_.position_error_th &&
+                                fabs(dAC-CONT_D) < params_.position_error_th);
+
+            std::cout << "containers positions: " << container_1 << container_2 << std::endl;
+
+            // any container position fitted
+            if (container_1 || container_2)
+            {
+                // if 4 defined checking
+                if (n_defined_points == 4)
+                {
+                    std::cout << "checking with 4th point... " << std::endl;
+
+                    Scalar dAD = (polyline_ptr->getPointVector(A_id) - polyline_ptr->getPointVector(D_id)).norm();
+                    Scalar dBD = (polyline_ptr->getPointVector(B_id) - polyline_ptr->getPointVector(D_id)).norm();
+                    Scalar dCD = (polyline_ptr->getPointVector(C_id) - polyline_ptr->getPointVector(D_id)).norm();
+
+                    // necessary conditions
+                    if (fabs(dAD-dBC) > params_.position_error_th ||
+                        fabs(dBD-dAC) > params_.position_error_th ||
+                        fabs(dCD-dAB) > params_.position_error_th)
+                        continue;
+                }
+
+                // if not 4 defined add/define points
+                else
+                {
+                    std::cout << "adding/defining points... " << std::endl;
+                    if (!polyline_ptr->isFirstDefined())
+                    {
+                        polyline_ptr->defineExtreme(false);
+                        D_id = polyline_ptr->getFirstId();
+                    }
+                    else if (!polyline_ptr->isLastDefined())
+                        polyline_ptr->defineExtreme(true);
+                    else
+                        polyline_ptr->addPoint(Eigen::Vector2s::Zero(), true, true);
+                }
+                std::cout << "conatiner fitted! " << container_1 << container_2 << std::endl;
+
+                // Close
+                polyline_ptr->setClosed();
+
+                // Classify
+                polyline_ptr->classify(CONTAINER);
+
+                // Unfix origin
+                polyline_ptr->getPPtr()->unfix();
+                polyline_ptr->getOPtr()->unfix();
+                getProblem()->updateStateBlockPtr(polyline_ptr->getPPtr());
+                getProblem()->updateStateBlockPtr(polyline_ptr->getOPtr());
+
+                // Move origin to B
+                polyline_ptr->getPPtr()->setVector(polyline_ptr->getPointVector((container_1 ? B_id : A_id)));
+                Eigen::Vector2s frame_x = (container_1 ? polyline_ptr->getPointVector(A_id)-polyline_ptr->getPointVector(B_id) : polyline_ptr->getPointVector(C_id)-polyline_ptr->getPointVector(B_id));
+                polyline_ptr->getOPtr()->setVector(Eigen::Vector1s::Constant(Scalar(atan2(frame_x(1),frame_x(0)))));
+
+                // Fix polyline points to its respective relative positions
+                if (container_1)
+                {
+                    polyline_ptr->getPointStateBlockPtr(A_id)->setVector(Eigen::Vector2s(CONT_L, 0));
+                    polyline_ptr->getPointStateBlockPtr(B_id)->setVector(Eigen::Vector2s(0, 0));
+                    polyline_ptr->getPointStateBlockPtr(C_id)->setVector(Eigen::Vector2s(0, CONT_W));
+                    polyline_ptr->getPointStateBlockPtr(D_id)->setVector(Eigen::Vector2s(CONT_L, CONT_W));
+                }
+                else
+                {
+                    polyline_ptr->getPointStateBlockPtr(A_id)->setVector(Eigen::Vector2s(0, 0));
+                    polyline_ptr->getPointStateBlockPtr(B_id)->setVector(Eigen::Vector2s(0, CONT_W));
+                    polyline_ptr->getPointStateBlockPtr(C_id)->setVector(Eigen::Vector2s(CONT_L, CONT_W));
+                    polyline_ptr->getPointStateBlockPtr(D_id)->setVector(Eigen::Vector2s(CONT_L, 0));
+                }
+                for (auto id = polyline_ptr->getFirstId(); id <= polyline_ptr->getLastId(); id++)
+                {
+                    polyline_ptr->getPointStateBlockPtr(id)->fix();
+                    getProblem()->updateStateBlockPtr(polyline_ptr->getPointStateBlockPtr(id));
+                }
+            }
+        }
+}
+
+void ProcessorTrackerLandmarkPolyline::postProcess()
+{
+    //std::cout << "postProcess: " << std::endl;
+    //std::cout << "New Last features: " << getNewFeaturesListLast().size() << std::endl;
+    //std::cout << "Last features: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+    classifyPolilines(getProblem()->getMapPtr()->getLandmarkListPtr());
 }
 
 ConstraintBase* ProcessorTrackerLandmarkPolyline::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
