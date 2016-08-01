@@ -42,6 +42,7 @@ inline StateQuaternion::StateQuaternion(bool _fixed) :
 
 inline StateQuaternion::~StateQuaternion()
 {
+    // The local_param_ptr_ pointer is already deleted by the base class
 }
 
 } // namespace wolf

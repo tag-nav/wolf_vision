@@ -110,6 +110,9 @@ inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParame
 
 inline StateBlock::~StateBlock()
 {
+    // We prefer to delete the local_param_ptr_ pointer here in the base class,
+    // because sometimes this local_param_ptr_ is set by a set() method in this same base class,
+    // thus not in the constructor of any derived class.
     if (local_param_ptr_ != nullptr)
         delete local_param_ptr_;
 }
