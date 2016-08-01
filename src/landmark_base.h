@@ -119,7 +119,7 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
 
         /** \brief Return the type of the landmark
          **/
-        const LandmarkType getType() const;
+        const LandmarkType getTypeId() const;
 
         virtual YAML::Node saveToYaml() const;
 
@@ -206,7 +206,7 @@ inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
     return descriptor_;
 }
 
-inline const LandmarkType LandmarkBase::getType() const
+inline const LandmarkType LandmarkBase::getTypeId() const
 {
     return type_id_;
 }

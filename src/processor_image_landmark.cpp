@@ -183,7 +183,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
             active_search_grid_.hitCell(point2D);  //TODO: Mirar el hitcell en este punto
             active_search_grid_.blockCell(roi);
 
-            cv::Mat target_descriptor = landmark_ptr->getDescriptor();
+            cv::Mat target_descriptor = landmark_ptr->getCvDescriptor();
 
 
             //lists used to debug
@@ -313,7 +313,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     unitary_vector.normalize();
 //    std::cout << "unitary_vector: " << unitary_vector(0) << "\t" << unitary_vector(1) << "\t" << unitary_vector(2) << std::endl;
 
-    FrameBase* frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
+    FrameBase* anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
 
     // TODO: Poner el anchor del punto (ahora mismo está en el 0 del world, pero no hay código por si cambia)
 
@@ -321,7 +321,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     Eigen::Vector4s vec_homogeneous = {unitary_vector(0),unitary_vector(1),unitary_vector(2),1/depth};
 //    std::cout << "unitary_vec x: " << unitary_vec(0) << "; y: " << unitary_vec(1) << "; z: " << unitary_vec(2) << std::endl;
 
-    return new LandmarkAHP(vec_homogeneous,frame,feat_point_image_ptr->getDescriptor());
+    return new LandmarkAHP(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
 }
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)

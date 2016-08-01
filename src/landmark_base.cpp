@@ -102,7 +102,7 @@ YAML::Node LandmarkBase::saveToYaml() const
 {
     YAML::Node node;
     node["id"] = landmark_id_;
-    node["type"] = "BASE";
+    node["type"] = node_type_;
     if (p_ptr_ != nullptr)
     {
         node["position"] = p_ptr_->getVector();

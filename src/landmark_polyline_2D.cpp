@@ -342,8 +342,7 @@ YAML::Node LandmarkPolyline2D::saveToYaml() const
     // First base things
     YAML::Node node = LandmarkBase::saveToYaml();
 
-    // Then add specific things (we rewrite the type, obviously)
-    node["type"]           = "POLYLINE 2D";
+    // Then add specific things
     node["first_id"]       = first_id_;
     node["first_defined"]  = first_defined_;
     node["last_defined"]   = last_defined_;

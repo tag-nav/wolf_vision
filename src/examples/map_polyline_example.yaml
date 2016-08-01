@@ -1,6 +1,6 @@
 map name: "Example of map of Polyline2D landmarks"
 
-nlandmarks: 3          # This must match the number of landmarks in the list that follows. Otherwise it is an error.
+nlandmarks: 4          # This must match the number of landmarks in the list that follows. Otherwise it is an error.
 
 landmarks:
 
@@ -46,4 +46,9 @@ landmarks:
     points:
         - [6, 1]
         - [6, 2]
+        
+  - id: 7
+    type: "AHP"
+    position: [1, 2, 3, 4]
+    descriptor: [1, 0, 1, 0, 1, 1, 0, 0]
         
