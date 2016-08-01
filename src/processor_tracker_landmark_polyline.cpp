@@ -61,7 +61,7 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
     std::map<LandmarkBase*, Eigen::MatrixXs> expected_features;
     std::map<LandmarkBase*, Eigen::MatrixXs> expected_features_covs;
     for (auto landmark : _landmarks_searched)
-        if (landmark->getType() == LANDMARK_POLYLINE_2D)
+        if (landmark->getTypeId() == LANDMARK_POLYLINE_2D)
         {
             expected_features[landmark] = Eigen::MatrixXs(3, ((LandmarkPolyline2D*)landmark)->getNPoints());
             expected_features_covs[landmark] = Eigen::MatrixXs(2, 2*((LandmarkPolyline2D*)landmark)->getNPoints());
@@ -496,7 +496,7 @@ LandmarkBase* ProcessorTrackerLandmarkPolyline::createLandmark(FeatureBase* _fea
     //std::cout << "New landmark: extremes defined " << polyline_ptr->isFirstDefined() << polyline_ptr->isLastDefined() << std::endl;
 
     // Create new landmark
-    return new LandmarkPolyline2D(points_global, polyline_ptr->isFirstDefined(), polyline_ptr->isLastDefined());
+    return new LandmarkPolyline2D(new StateBlock(Eigen::Vector2s::Zero(), true), new StateBlock(Eigen::Vector1s::Zero(), true), points_global, polyline_ptr->isFirstDefined(), polyline_ptr->isLastDefined());
 }
 
 ProcessorTrackerLandmarkPolyline::~ProcessorTrackerLandmarkPolyline()
@@ -832,7 +832,7 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_
     const Scalar CONT_D = sqrt(CONT_L * CONT_L + CONT_W * CONT_W);
 
     for (auto lmk_ptr : *_lmk_list)
-        if (lmk_ptr->getType() == LANDMARK_POLYLINE_2D)
+        if (lmk_ptr->getTypeId() == LANDMARK_POLYLINE_2D)
         {
             LandmarkPolyline2D* polyline_ptr = (LandmarkPolyline2D*)lmk_ptr;
             auto n_defined_points = polyline_ptr->getNPoints() - (polyline_ptr->isFirstDefined() ? 0 : 1) - (polyline_ptr->isLastDefined() ? 0 : 1);
