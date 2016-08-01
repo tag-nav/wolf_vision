@@ -47,6 +47,8 @@ void print(MapBase& _map)
                 std::cout << "\ndescript:  " << ahp_ptr->getCvDescriptor().t();
                 break;
             }
+            default:
+                break;
         }
         std::cout << std::endl;
     }
