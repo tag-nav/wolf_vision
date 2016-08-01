@@ -13,12 +13,11 @@
 namespace wolf
 {
 
-ProcessorImageLandmark::ProcessorImageLandmark(ProcessorImageParameters _params) :
-    ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, _params.algorithm.max_new_features), n_feature_(0), landmark_idx_non_visible_(0),
+ProcessorImageLandmark::ProcessorImageLandmark(ProcessorParamsImage _params) :
+    ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, "IMAGE LANDMARK", _params.algorithm.max_new_features), n_feature_(0), landmark_idx_non_visible_(0),
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     active_search_grid_()
 {
-    setType("IMAGE LANDMARK");
     // 1. detector-descriptor params
     DetectorDescriptorParamsBase* _dd_params = _params.detector_descriptor_params_ptr;
     switch (_dd_params->type){
@@ -183,7 +182,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
             active_search_grid_.hitCell(point2D);  //TODO: Mirar el hitcell en este punto
             active_search_grid_.blockCell(roi);
 
-            cv::Mat target_descriptor = landmark_ptr->getDescriptor();
+            cv::Mat target_descriptor = landmark_ptr->getCvDescriptor();
 
 
             //lists used to debug
@@ -313,7 +312,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     unitary_vector.normalize();
 //    std::cout << "unitary_vector: " << unitary_vector(0) << "\t" << unitary_vector(1) << "\t" << unitary_vector(2) << std::endl;
 
-    FrameBase* frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
+    FrameBase* anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
 
     // TODO: Poner el anchor del punto (ahora mismo está en el 0 del world, pero no hay código por si cambia)
 
@@ -321,7 +320,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     Eigen::Vector4s vec_homogeneous = {unitary_vector(0),unitary_vector(1),unitary_vector(2),1/depth};
 //    std::cout << "unitary_vec x: " << unitary_vec(0) << "; y: " << unitary_vec(1) << "; z: " << unitary_vec(2) << std::endl;
 
-    return new LandmarkAHP(vec_homogeneous,frame,feat_point_image_ptr->getDescriptor());
+    return new LandmarkAHP(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
 }
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
@@ -592,7 +591,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
 
 ProcessorBase* ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
 {
-    ProcessorImageLandmark* prc_ptr = new ProcessorImageLandmark(*((ProcessorImageParameters*)_params));
+    ProcessorImageLandmark* prc_ptr = new ProcessorImageLandmark(*((ProcessorParamsImage*)_params));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

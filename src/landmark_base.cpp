@@ -4,13 +4,14 @@
 #include "map_base.h"
 #include "node_terminus.h"
 #include "state_block.h"
+#include "yaml/yaml_conversion.h"
 
 namespace wolf {
 
 unsigned int LandmarkBase::landmark_id_count_ = 0;
 
-LandmarkBase::LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr) :
-            NodeConstrained(MID, "LANDMARK"),
+LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr) :
+            NodeConstrained(MID, "LANDMARK", _type),
             landmark_id_(++landmark_id_count_),
             type_id_(_tp),
             status_(LANDMARK_CANDIDATE),
@@ -95,6 +96,24 @@ void LandmarkBase::registerNewStateBlocks()
         if (o_ptr_ != nullptr)
             getProblem()->addStateBlockPtr(o_ptr_);
     }
+}
+
+YAML::Node LandmarkBase::saveToYaml() const
+{
+    YAML::Node node;
+    node["id"] = landmark_id_;
+    node["type"] = node_type_;
+    if (p_ptr_ != nullptr)
+    {
+        node["position"] = p_ptr_->getVector();
+        node["position fixed"] = p_ptr_->isFixed();
+    }
+    if (o_ptr_ != nullptr)
+    {
+        node["orientation"] = o_ptr_->getVector();
+        node["orientation fixed"] = p_ptr_->isFixed();
+    }
+    return node;
 }
 
 } // namespace wolf

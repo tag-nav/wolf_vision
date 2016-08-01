@@ -4,24 +4,23 @@
 namespace wolf {
 
 SensorLaser2D::SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr) :
-    SensorBase(SEN_LIDAR, _p_ptr, _o_ptr, nullptr, 8)
+    SensorBase(SEN_LIDAR, "LASER 2D", _p_ptr, _o_ptr, nullptr, 8)
 {
-    setType("LASER 2D");
     setDefaultScanParams();
 }
 
 SensorLaser2D::SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const double& _angle_min, const double& _angle_max, const double& _angle_step, const double& _scan_time, const double& _range_min, const double& _range_max, const double& _range_std_dev, const double& _angle_std_dev) :
-        SensorBase(SEN_LIDAR, _p_ptr, _o_ptr, nullptr, 8),
+        SensorBase(SEN_LIDAR, "LASER 2D", _p_ptr, _o_ptr, nullptr, 8),
         scan_params_({ _angle_min, _angle_max, _angle_step, _scan_time, _range_min, _range_max, _range_std_dev, _angle_std_dev })
 {
-    setType("LASER 2D");
+    //
 }
 
 SensorLaser2D::SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const laserscanutils::LaserScanParams& _params) :
-        SensorBase(SEN_LIDAR, _p_ptr, _o_ptr, nullptr, 8),
+        SensorBase(SEN_LIDAR, "LASER 2D", _p_ptr, _o_ptr, nullptr, 8),
         scan_params_(_params)
 {
-    setType("LASER 2D");
+    //
 }
 
 SensorLaser2D::~SensorLaser2D()
@@ -81,7 +80,7 @@ SensorBase* SensorLaser2D::create(const std::string& _unique_name, const Eigen::
 //#include "yaml-cpp/yaml.h"
 namespace wolf {
 //// Yaml parser here !
-//IntrinsicsBase* createIntrinsicsLaser2D(const std::string _filename_dot_yaml)
+//IntrinsicsBase* createIntrinsicsLaser2D(const std::string& _filename_dot_yaml)
 //{
 //    IntrinsicsBase* params; // dummy
 //    return params;

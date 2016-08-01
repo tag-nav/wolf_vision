@@ -2,12 +2,12 @@
 
 namespace wolf {
 
-ProcessorLaser2D::ProcessorLaser2D() : ProcessorBase(PRC_LIDAR),
+ProcessorLaser2D::ProcessorLaser2D() : ProcessorBase(PRC_LIDAR, "LASER 2D"),
         //sensor_laser_ptr_((SensorLaser2D*)(upperNodePtr())), // Static cast to specific sensor at construction time TODO: in construction time upperNodePtr is nullptr, it crashes always, to be removed or changed to somewhere (JVN)
 		sensor_laser_ptr_(nullptr),
         capture_laser_ptr_(nullptr)
 {
-    setType("LASER 2D");
+    //
 }
 
 ProcessorLaser2D::~ProcessorLaser2D()
@@ -255,11 +255,11 @@ void ProcessorLaser2D::establishConstraintsMHTree()
                 LandmarkBase* associed_landmark = landmarks_map[ft_lk_pairs[ii]];
                 unsigned int associed_landmark_index = landmarks_index_map[ft_lk_pairs[ii]];
 
-                if (associed_landmark->getType() == LANDMARK_CORNER)
+                if (associed_landmark->getTypeId() == LANDMARK_CORNER)
                     associed_feature->addConstraint(new ConstraintCorner2D(associed_feature,                                // feature pointer
                                                                            (LandmarkCorner2D*)(associed_landmark)));    // landmark pointer
 
-                else if (associed_landmark->getType() == LANDMARK_CONTAINER)
+                else if (associed_landmark->getTypeId() == LANDMARK_CONTAINER)
                     associed_feature->addConstraint(new ConstraintContainer(associed_feature,                       //feature pointer
                                                                                 (LandmarkContainer*)(associed_landmark), //landmark pointer
                                                                                 associed_landmark_index ));                 // corner index
@@ -339,11 +339,11 @@ void ProcessorLaser2D::computeExpectedFeature(LandmarkBase* _landmark_ptr, Eigen
     expected_feature_.head(2) = - R_sr.transpose() * p_robot_landmark - R_sensor.transpose() * p_sensor;
     expected_feature_(2) = pi2pi(o_landmark - o_robot - o_sensor);
 
-    if (_landmark_ptr->getType() == LANDMARK_CONTAINER)
+    if (_landmark_ptr->getTypeId() == LANDMARK_CONTAINER)
     {
         expected_feature_(3) = 3 * M_PI / 2;
     }
-    else if (_landmark_ptr->getType() == LANDMARK_CORNER)
+    else if (_landmark_ptr->getTypeId() == LANDMARK_CORNER)
     {
         expected_feature_(3) = ((LandmarkCorner2D*)(_landmark_ptr))->getAperture();
     }

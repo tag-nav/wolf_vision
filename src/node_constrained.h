@@ -28,8 +28,8 @@ template<class UpperType, class LowerType>
 class NodeConstrained : public NodeLinked<UpperType, LowerType>
 {
     public:
-        NodeConstrained(const NodeLocation _loc, const std::string& _label) :
-                NodeLinked<UpperType, LowerType>(_loc, _label),
+        NodeConstrained(const NodeLocation _loc, const std::string& _class, const std::string& _type = "BASE", const std::string& _name = "") :
+                NodeLinked<UpperType, LowerType>(_loc, _class, _type, _name),
                 constrained_by_list_({})
         {
         }

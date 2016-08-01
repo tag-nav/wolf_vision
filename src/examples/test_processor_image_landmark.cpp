@@ -78,7 +78,7 @@ int main(int argc, char** argv)
     //    wolf_problem_ptr_->getHardwarePtr()->addSensor(sensor_ptr_);
 
     //    // PROCESSOR
-    //    ProcessorImageParameters tracker_params;
+    //    ProcessorParamsImage tracker_params;
     //    tracker_params.image = {img_width,  img_height};
     //    tracker_params.matcher.min_normalized_score = 0.75;
     //    tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
@@ -125,8 +125,8 @@ int main(int argc, char** argv)
     const Eigen::VectorXs extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
-    SensorBase* camera_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
-    SensorCamera* sensor_ptr_ = (SensorCamera*)camera_ptr;
+    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
+    SensorCamera* camera_ptr_ = (SensorCamera*)sensor_ptr;
 
 
     // PROCESSOR
@@ -173,7 +173,7 @@ int main(int argc, char** argv)
         clock_t t1 = clock();
 
         // Preferred method with factory objects:
-        image_ptr = new CaptureImage(t, sensor_ptr_, frame[f % buffer_size]);
+        image_ptr = new CaptureImage(t, camera_ptr_, frame[f % buffer_size]);
 
         /* process */
         image_ptr->process();

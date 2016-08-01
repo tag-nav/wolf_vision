@@ -50,7 +50,7 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          *
          **/
-        LandmarkBase(const LandmarkType & _tp, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
+        LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
 
         /** \brief Default destructor (not recommended)
          *
@@ -119,14 +119,9 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
 
         /** \brief Return the type of the landmark
          **/
-        const LandmarkType getType() const;
+        const LandmarkType getTypeId() const;
 
-        virtual YAML::Node saveToYaml() const {
-            YAML::Node n;
-            n["id"]             = landmark_id_;
-            n["type"]           = "BASE";
-            return n;
-        };
+        virtual YAML::Node saveToYaml() const;
 
 };
 
@@ -211,7 +206,7 @@ inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
     return descriptor_;
 }
 
-inline const LandmarkType LandmarkBase::getType() const
+inline const LandmarkType LandmarkBase::getTypeId() const
 {
     return type_id_;
 }

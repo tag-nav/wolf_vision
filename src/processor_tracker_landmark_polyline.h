@@ -175,7 +175,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 };
 
 inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params) :
-        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, 0, _params.time_tolerance),
+        ProcessorTrackerLandmark(PRC_TRACKER_LANDMARK_CORNER, "TRACKER LANDMARK POLYLINE", 0, _params.time_tolerance),
         line_finder_(_params.line_finder_params),
         params_(_params),
         extrinsics_transformation_computed_(false)

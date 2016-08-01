@@ -10,7 +10,7 @@ namespace wolf {
 unsigned int FrameBase::frame_id_count_ = 0;
 
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
-            NodeConstrained(MID, "FRAME"),
+            NodeConstrained(MID, "FRAME", "BASE"),
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
             time_stamp_(_ts),
@@ -19,11 +19,11 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
             o_ptr_(_o_ptr),
             v_ptr_(_v_ptr)
 {
-    setType("BASE");
+    //
 }
 
 FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
-            NodeConstrained(MID, "FRAME"),
+            NodeConstrained(MID, "FRAME", "BASE"),
             frame_id_(++frame_id_count_),
             type_id_(_tp),
             time_stamp_(_ts),

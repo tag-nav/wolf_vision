@@ -5,9 +5,8 @@ namespace wolf {
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr,
                              const Eigen::Vector3s& _data) :
-        CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data)
+        CaptureMotion("ODOM 2D", _init_ts, _final_ts, _sensor_ptr, _data)
 {
-    setType("ODOM 2D");
     data_covariance_ = Eigen::Matrix3s::Zero();
     data_covariance_(0, 0) = std::max((Scalar)1e-10, _data(0) * ((SensorOdom2D*)_sensor_ptr)->getDispVarToDispNoiseFactor());
     data_covariance_(1, 1) = std::max((Scalar)1e-10, _data(1) * ((SensorOdom2D*)_sensor_ptr)->getDispVarToDispNoiseFactor());
@@ -17,9 +16,9 @@ CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_
 
 CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr,
                              const Eigen::Vector3s& _data, const Eigen::Matrix3s& _data_covariance) :
-        CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
+        CaptureMotion("ODOM 2D", _init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
 {
-    setType("ODOM 2D");
+    //
 }
 
 CaptureOdom2D::~CaptureOdom2D()

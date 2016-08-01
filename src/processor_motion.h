@@ -79,7 +79,7 @@ class ProcessorMotion : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance = 0.1);
+        ProcessorMotion(ProcessorType _tp, const std::string& _type, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -332,8 +332,8 @@ class ProcessorMotion : public ProcessorBase
 
 };
 
-inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance) :
-        ProcessorBase(_tp, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), origin_ptr_(
+inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance) :
+        ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), origin_ptr_(
                 nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_cov_(
                 delta_size_, delta_size_), delta_integrated_(_delta_size), delta_integrated_cov_(delta_size_, delta_size_), data_(
                 _data_size), jacobian_prev_(delta_size_, delta_size_), jacobian_curr_(delta_size_, delta_size_)
@@ -419,7 +419,7 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
         key_frame_ptr->setKey();
 
         // create motion constraint and add it to the new keyframe
-        FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION,
+        FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION, "MOTION",
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
@@ -566,7 +566,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
     //std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
 
     // create motion constraint and add it to the new keyframe
-    FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION,
+    FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION, "MOTION",
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :

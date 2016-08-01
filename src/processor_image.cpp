@@ -10,12 +10,11 @@
 namespace wolf
 {
 
-ProcessorImage::ProcessorImage(ProcessorImageParameters _params) :
-    ProcessorTrackerFeature(PRC_TRACKER_IMAGE, _params.algorithm.max_new_features),
+ProcessorImage::ProcessorImage(ProcessorParamsImage _params) :
+    ProcessorTrackerFeature(PRC_TRACKER_IMAGE, "IMAGE", _params.algorithm.max_new_features),
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     active_search_grid_()
 {
-    setType("IMAGE");
     // 1. detector-descriptor params
     DetectorDescriptorParamsBase* _dd_params = _params.detector_descriptor_params_ptr;
     switch (_dd_params->type){
@@ -516,7 +515,7 @@ void ProcessorImage::drawFeatures(CaptureBase* const _last_ptr)
 
 ProcessorBase* ProcessorImage::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
 {
-    ProcessorImage* prc_ptr = new ProcessorImage(*((ProcessorImageParameters*)_params));
+    ProcessorImage* prc_ptr = new ProcessorImage(*((ProcessorParamsImage*)_params));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

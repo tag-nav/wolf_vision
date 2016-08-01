@@ -8,21 +8,20 @@ namespace wolf
 
 SensorCamera::SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, //
                            int _img_width, int _img_height) :
-        SensorBase(SEN_CAMERA, _p_ptr, _o_ptr, _intr_ptr, 2), //
+        SensorBase(SEN_CAMERA, "CAMERA", _p_ptr, _o_ptr, _intr_ptr, 2), //
         img_width_(_img_width), img_height_(_img_height)
 {
-    setType("CAMERA");
+    //
 }
 
 SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsCamera* _intrinsics_ptr) :
-                SensorBase(SEN_CAMERA, nullptr, nullptr, nullptr, 2), // will initialize state blocks later
+                SensorBase(SEN_CAMERA, "CAMERA", nullptr, nullptr, nullptr, 2), // will initialize state blocks later
                 img_width_(_intrinsics_ptr->width), //
                 img_height_(_intrinsics_ptr->height), //
                 distortion_(_intrinsics_ptr->distortion), //
                 correction_(distortion_.size()) // make correction vector of the same size as distortion vector
 {
     assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
-    setType("CAMERA");
     p_ptr_ = new StateBlock(_extrinsics.head(3));
     o_ptr_ = new StateQuaternion(_extrinsics.tail(4));
     intrinsic_ptr_ = new StateBlock(_intrinsics_ptr->pinhole_model);

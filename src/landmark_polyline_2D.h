@@ -20,12 +20,6 @@
 namespace wolf
 {
 
-//struct LandmarkPolyline2DParams : public LandmarkParamsBase
-//{
-//        unsigned int id_;
-//        unsigned int npoints_;
-//
-//};
 typedef enum
 {
     UNCLASSIFIED,
@@ -45,7 +39,6 @@ class LandmarkPolyline2D : public LandmarkBase
         LandmarkClassification classification_; ///< The classification of the landmark
 
     public:
-        LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined, unsigned int _first_id = 0, LandmarkClassification _class = UNCLASSIFIED);
         LandmarkPolyline2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined, unsigned int _first_id = 0, LandmarkClassification _class = UNCLASSIFIED);
         virtual ~LandmarkPolyline2D();
 

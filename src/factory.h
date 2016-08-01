@@ -21,28 +21,29 @@ namespace wolf
 {
 
 /** \brief Singleton template factory
- * \param TypeBase          base type of all the objects created by the factory
- * \param TypeInput         type of the input argument. Typical cases are std::string for file names, and YAML::Node for YAML nodes.
  *
- * This class implements generic factory as a singleton.
+ * This class implements a generic factory as a singleton.
  *
- * > IMPORTANT: This template factory can be used for many different objects except:
+ * > IMPORTANT: This template factory can be used to construct many different objects except:
  * >   - Objects deriving from SensorBase --> see SensorFactory
  * >   - Objects deriving from ProcessorBase --> see ProcessorFactory
  * >
- * > the reason for this is that these two cases above need a more elaborated API than the one in this template class.
+ * > The reason for this is that the two cases above need a more elaborated API than the one in this template class.
  *
- * The class is templatized on the class of the produced objects, __TypeBase__.
- * The produced objects are always of a class deriving from TypeBase.
- * The returned data is always a pointer to TypeBase.
+ * \param TypeBase          base type of all the objects created by the factory
+ * \param TypeInput         type of the input argument. Typical cases are std::string for file names, and YAML::Node for YAML nodes.
  *
- * For example, you may use as TypeBase the following types:
- *   - LandmarkBase: the Factory creates landmarks deriving from LandmarkBase and returns base pointers LandmarkBase* to them
- *   - IntrinsicsBase: the Factory creates intrinsic parameters deriving from IntrinsicsBase and returns base pointers IntrinsicsBase* to them
- *   - XxxBase: the Factory creates objects deriving from XxxBase and returns pointers XxxBase* to them.
+ * - The class is templatized on the class of the produced objects, __TypeBase__.
+ *   The produced objects are always of a class deriving from TypeBase.
+ *   The returned data is always a pointer to TypeBase.
  *
- * The class in also templatized on the type of the input parameter of the creator, __TypeInput__:
- *   - ````std::string```` is used when the input parameter is to be a file name from which to read data.
+ *   For example, you may use as __TypeBase__ the following types:
+ *     - LandmarkBase: the Factory creates landmarks deriving from LandmarkBase and returns base pointers ````LandmarkBase*```` to them
+ *     - IntrinsicsBase: the Factory creates intrinsic parameters deriving from IntrinsicsBase and returns base pointers ````IntrinsicsBase*```` to them
+ *     - XxxBase: the Factory creates objects deriving from XxxBase and returns pointers ````XxxBase*```` to them.
+ *
+ * - The class in also templatized on the type of the input parameter of the creator, __TypeInput__:
+ *   - ````std::string```` is used when the input parameter is a file name from which to read data (typically a YAML file).
  *   - ````YAML::Node```` is used when the input parameter is a YAML node with structured data.
  *
  * ### Operation of the factory
@@ -50,6 +51,10 @@ namespace wolf
  * #### Rationale
  *
  * This factory can create objects of classes deriving from TypeBase.
+ *
+ * > For example, if you want to make a Landmark factory, set TypeBase = LandmarkBase.\n
+ * > Then, the factory will create specific landmarks deriving from LandmarkBase.\n
+ * > The specific type of landmark (e.g. LandmarkCorner2D, LandmarkAHP, LandmarkPolyline2D, etc) is indicated by a string that we call TYPE in this documentation.
  *
  * Specific object creation is invoked by the method ````create(TYPE, params ... )````, where
  *   - the TYPE of object to create is identified with a string
@@ -84,7 +89,7 @@ namespace wolf
  * \endcode
  *
  * Second to know, the Factory class is a <a href="http://stackoverflow.com/questions/1008019/c-singleton-design-pattern#1008289">singleton</a>: it can only exist once in your application.
- * To obtain an instance of it, use the static method get(),
+ * To access it, use the static method get(),
  *
  *     \code
  *     Factory<MyTypeBase, MyTypeInput>::get()
@@ -108,8 +113,8 @@ namespace wolf
  * \endcode
  *
  * This API includes an element of type TypeInput, which might be either a std::string, or a YAML::node:
- *   - ````std::string```` are used to indicate file names to access YAML files containing configuration data to create your object.
- *   - ````YAML::Node```` are used to access parts of a YAML file already encoded as nodes, such as when loading landmarks from a SLAM map ````MapBase````.
+ *   - ````std::string```` is used to indicate the name of a configuration file. These files are usually YAML files containing configuration data to create your object.
+ *   - ````YAML::Node```` is used to access parts of a YAML file already encoded as nodes, such as when loading landmarks from a SLAM map stored as a YAML file.
  *
  * Two examples:
  *
@@ -121,11 +126,11 @@ namespace wolf
  * See further down for an implementation example.
  *
  * #### Register object creators
- * Prior to invoking the creation of an object of a particular type,
+ * Prior to invoking the creation of an object of a particular TYPE,
  * you must register the creator for this type into the factory.
  *
  * Registering object creators into the factory is done through registerCreator().
- * You provide an object type string (above), and a pointer to a static method
+ * You provide an object TYPE string (above), and a pointer to a static method
  * that knows how to create your specific object, e.g.:
  *
  *     \code
@@ -177,16 +182,17 @@ namespace wolf
  * LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
  * {
  *    // Parse YAML node with lmk info and data
- *    unsigned int id         = _lmk_node["id"].as<unsigned int>();
- *    int first_id            = _lmk_node["first_id"].as<int>();
- *    bool first_defined      = _lmk_node["first_defined"].as<bool>();
- *    bool last_defined       = _lmk_node["last_defined"].as<bool>();
- *    unsigned int npoints    = _lmk_node["points"].size();
- *    Eigen::MatrixXs points(2,npoints);
+ *    unsigned int      id              = _lmk_node["id"].as<unsigned int>();
+ *    int               first_id        = _lmk_node["first_id"].as<int>();
+ *    bool              first_defined   = _lmk_node["first_defined"].as<bool>();
+ *    bool              last_defined    = _lmk_node["last_defined"].as<bool>();
+ *    unsigned int      npoints         = _lmk_node["points"].size();
+ *    Eigen::MatrixXs   points(2,npoints);
  *    for (unsigned int i = 0; i < npoints; i++)
  *    {
- *        points.col(i) = _lmk_node["points"][i].as<Eigen::Vector2s>();
+ *        points.col(i)                 = _lmk_node["points"][i].as<Eigen::Vector2s>();
  *    }
+ *
  *    // Create a new landmark
  *    LandmarkBase* lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
  *    lmk_ptr->setId(id);

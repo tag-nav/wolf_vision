@@ -39,7 +39,7 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 
     public:
 
-        CaptureBase(const TimeStamp& _ts, SensorBase* _sensor_ptr);
+        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBase* _sensor_ptr);
 
         /** \brief Default destructor (not recommended)
          *

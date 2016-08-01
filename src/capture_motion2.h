@@ -42,7 +42,7 @@ class CaptureMotion2 : public CaptureBase
         // public interface:
     public:
         CaptureMotion2(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, FrameBase* _origin_frame_ptr) :
-                CaptureBase(_ts, _sensor_ptr), data_(_data), data_cov_(_data_cov), buffer_(), origin_frame_ptr_(_origin_frame_ptr)
+                CaptureBase("MOTION 2", _ts, _sensor_ptr), data_(_data), data_cov_(_data_cov), buffer_(), origin_frame_ptr_(_origin_frame_ptr)
         {
             //
         }
