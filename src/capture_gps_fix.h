@@ -33,7 +33,6 @@ class CaptureGPSFix : public CaptureBase
 
         virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
 
-        //virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 };
 
 } //namespace wolf
