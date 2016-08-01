@@ -50,8 +50,8 @@ void Problem::addSensor(SensorBase* _sen_ptr)
     getHardwarePtr()->addSensor(_sen_ptr);
 }
 
-SensorBase* Problem::installSensor(const std::string& _sen_type, //
-                                   const std::string& _unique_sensor_name, //
+SensorBase* Problem::installSensor(const std::string _sen_type, //
+                                   const std::string _unique_sensor_name, //
                                    const Eigen::VectorXs& _extrinsics, //
                                    IntrinsicsBase* _intrinsics)
 {
@@ -60,17 +60,17 @@ SensorBase* Problem::installSensor(const std::string& _sen_type, //
     return sen_ptr;
 }
 
-SensorBase* Problem::installSensor(const std::string& _sen_type, //
-                                   const std::string& _unique_sensor_name, //
+SensorBase* Problem::installSensor(const std::string _sen_type, //
+                                   const std::string _unique_sensor_name, //
                                    const Eigen::VectorXs& _extrinsics, //
-                                   const std::string& _intrinsics_filename)
+                                   const std::string _intrinsics_filename)
 {
     IntrinsicsBase* intr_ptr = IntrinsicsFactory::get().create(_sen_type, _intrinsics_filename);
     return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
 }
 
-ProcessorBase* Problem::installProcessor(const std::string& _prc_type, //
-                                         const std::string& _unique_processor_name, //
+ProcessorBase* Problem::installProcessor(const std::string _prc_type, //
+                                         const std::string _unique_processor_name, //
                                          SensorBase* _corresponding_sensor_ptr, //
                                          ProcessorParamsBase* _prc_params)
 {
@@ -88,10 +88,10 @@ ProcessorBase* Problem::installProcessor(const std::string& _prc_type, //
     return prc_ptr;
 }
 
-void Problem::installProcessor(const std::string& _prc_type, //
-                               const std::string& _unique_processor_name, //
-                               const std::string& _corresponding_sensor_name, //
-                               const std::string& _params_filename)
+void Problem::installProcessor(const std::string _prc_type, //
+                               const std::string _unique_processor_name, //
+                               const std::string _corresponding_sensor_name, //
+                               const std::string _params_filename)
 {
     SensorBase* sen_ptr = getSensorPtr(_corresponding_sensor_name);
     if (sen_ptr == nullptr)
