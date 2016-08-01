@@ -73,18 +73,6 @@ void MapBase::load(const std::string& _map_file_dot_yaml)
 
 }
 
-std::string MapBase::dateTimeNow()
-{
-    // Get date and time for archiving purposes
-    std::time_t rawtime;
-    std::time(&rawtime);
-    const std::tm* timeinfo = std::localtime(&rawtime);
-    char time_char[30];
-    std::strftime(time_char, sizeof(time_char), "%d/%m/%Y at %H:%M:%S", timeinfo);
-    std::string date_time(time_char);
-    return date_time;
-}
-
 void MapBase::save(const std::string& _map_file_yaml, const std::string& _map_name)
 {
     YAML::Emitter emitter;
@@ -107,6 +95,18 @@ void MapBase::save(const std::string& _map_file_yaml, const std::string& _map_na
     std::ofstream fout(_map_file_yaml);
     fout << emitter.c_str();
 
+}
+
+std::string MapBase::dateTimeNow()
+{
+    // Get date and time for archiving purposes
+    std::time_t rawtime;
+    std::time(&rawtime);
+    const std::tm* timeinfo = std::localtime(&rawtime);
+    char time_char[30];
+    std::strftime(time_char, sizeof(time_char), "%d/%m/%Y at %H:%M:%S", timeinfo);
+    std::string date_time(time_char);
+    return date_time;
 }
 
 } // namespace wolf

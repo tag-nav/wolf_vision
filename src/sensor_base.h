@@ -104,7 +104,7 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 
         void unfix();
 
-        /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
+        /** \brief Adds all stateBlocks of the sensor to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
 

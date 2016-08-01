@@ -89,8 +89,6 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
         //Should be virtual in ProcessorBase with an empty/error message
         virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const {return Eigen::VectorXs::Zero(0);};
 
-		
-//        virtual void printSelf(unsigned int _ntabs = 0, std::ostream & _ost = std::cout) const;
 };
 
 inline unsigned int CaptureBase::id()
