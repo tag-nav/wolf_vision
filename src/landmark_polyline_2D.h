@@ -26,6 +26,13 @@ namespace wolf
 //        unsigned int npoints_;
 //
 //};
+typedef enum
+{
+    UNCLASSIFIED,
+    CONTAINER,        ///< A container 12.2 x 2.44 (m)
+    SMALL_CONTAINER,  ///< A small container 6.1 x 2.44 (m)
+    PALLET,           ///< A pallet box 0.9 x 1.2 (m)
+} LandmarkClassification;
 
 class LandmarkPolyline2D : public LandmarkBase
 {
@@ -35,9 +42,10 @@ class LandmarkPolyline2D : public LandmarkBase
         bool first_defined_;            ///< Wether the first point is an extreme of a line or the line may continue
         bool last_defined_;             ///< Wether the last point is an extreme of a line or the line may continue
         bool closed_;                   ///< Wether the polyline is closed or not
+        LandmarkClassification classification_; ///< The classification of the landmark
 
     public:
-        LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined, unsigned int _first_id = 0);
+        LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined, unsigned int _first_id = 0, LandmarkClassification _class = UNCLASSIFIED);
         virtual ~LandmarkPolyline2D();
 
         /** \brief Gets a const reference to the point state block pointer vector
@@ -97,6 +105,14 @@ class LandmarkPolyline2D : public LandmarkBase
          **/
         virtual void setClosed(bool _merge_extremes);
 
+        /** \brief Classify as a known object
+         **/
+        void classify(LandmarkClassification _class);
+
+        /** \brief get classification
+         **/
+        LandmarkClassification getClassification();
+
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
@@ -155,6 +171,16 @@ inline int LandmarkPolyline2D::getLastId() const {
 inline std::vector<StateBlock*> LandmarkPolyline2D::getStateBlockVector() const
 {
     return std::vector<StateBlock*>(point_state_ptr_vector_.begin(), point_state_ptr_vector_.end());
+}
+
+inline void LandmarkPolyline2D::classify(LandmarkClassification _class)
+{
+    classification_ = _class;
+}
+
+inline LandmarkClassification LandmarkPolyline2D::getClassification()
+{
+    return classification_;
 }
 
 } /* namespace wolf */

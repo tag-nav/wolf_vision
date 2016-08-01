@@ -17,8 +17,8 @@
 namespace wolf
 {
 
-LandmarkPolyline2D::LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id) :
-        LandmarkBase(LANDMARK_POLYLINE_2D, new StateBlock(Eigen::Vector2s::Zero(), true), new StateBlock(Eigen::Vector1s::Zero(), true)), first_id_(_first_id), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false)
+LandmarkPolyline2D::LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id, LandmarkClassification _class) :
+        LandmarkBase(LANDMARK_POLYLINE_2D, new StateBlock(Eigen::Vector2s::Zero(), true), new StateBlock(Eigen::Vector1s::Zero(), true)), first_id_(_first_id), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false), classification_(_class)
 {
     //std::cout << "LandmarkPolyline2D::LandmarkPolyline2D" << std::endl;
 	assert(_points.cols() >= 2 && "LandmarkPolyline2D::LandmarkPolyline2D: 2 points at least needed.");
