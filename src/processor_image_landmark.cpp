@@ -13,21 +13,10 @@
 namespace wolf
 {
 
-//<<<<<<< HEAD
 ProcessorImageLandmark::ProcessorImageLandmark(ProcessorParamsImage _params) :
     ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, "IMAGE LANDMARK", _params.algorithm.max_new_features), n_feature_(0), landmark_idx_non_visible_(0),
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     active_search_grid_()
-//=======
-//ProcessorImageLandmark::ProcessorImageLandmark(ProcessorImageParameters _params) :
-//    ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, "IMAGE LANDMARK", _params.algorithm.max_new_features),
-//    matcher_ptr_(nullptr),
-//    detector_descriptor_ptr_(nullptr),
-//    params_(_params),
-//    active_search_grid_(),
-//    n_feature_(0),
-//    landmark_idx_non_visible_(0)
-//>>>>>>> nodelabels
 {
     // 1. detector-descriptor params
     DetectorDescriptorParamsBase* _dd_params = _params.detector_descriptor_params_ptr;

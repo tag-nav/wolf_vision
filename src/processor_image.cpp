@@ -10,13 +10,8 @@
 namespace wolf
 {
 
-//<<<<<<< HEAD
 ProcessorImage::ProcessorImage(ProcessorParamsImage _params) :
     ProcessorTrackerFeature(PRC_TRACKER_IMAGE, "IMAGE", _params.algorithm.max_new_features),
-//=======
-//ProcessorImage::ProcessorImage(ProcessorImageParameters _params) :
-//    ProcessorTrackerFeature(PRC_TRACKER_IMAGE, "IMAGE", _params.algorithm.max_new_features),
-//>>>>>>> nodelabels
     matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
     active_search_grid_()
 {

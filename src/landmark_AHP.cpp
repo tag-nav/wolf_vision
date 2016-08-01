@@ -7,7 +7,6 @@
 namespace wolf {
 
 /* Landmark - Anchored Homogeneous Point*/
-//<<<<<<< HEAD
 LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position_homogeneous,
                          FrameBase* _anchor_frame,
                          SensorBase* _anchor_sensor,
@@ -17,14 +16,6 @@ LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position_homogeneous,
     anchor_frame_(_anchor_frame),
     anchor_sensor_(_anchor_sensor)
 {
-//    setType("AHP");
-//=======
-//LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position, FrameBase* _frame, cv::Mat _2D_descriptor) :
-//    LandmarkBase(LANDMARK_AHP, "AHP", new StateHomogeneous3D(_position)), //TODO: Change "LANDMARK_CORNER"
-//    descriptor_(_2D_descriptor), anchor_frame_(_frame)
-//{
-////    std::cout << "LandmarkAHP p_ptr" << p_ptr_->getVector().transpose() << std::endl;
-//>>>>>>> nodelabels
 }
 
 LandmarkAHP::~LandmarkAHP()

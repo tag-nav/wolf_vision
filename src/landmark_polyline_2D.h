@@ -20,14 +20,6 @@
 namespace wolf
 {
 
-//<<<<<<< HEAD
-//=======
-////struct LandmarkPolyline2DParams : public LandmarkParamsBase
-////{
-////        unsigned int id_;
-////        unsigned int npoints_;
-////
-////};
 typedef enum
 {
     UNCLASSIFIED,
@@ -36,7 +28,6 @@ typedef enum
     PALLET,           ///< A pallet box 0.9 x 1.2 (m)
 } LandmarkClassification;
 
-//>>>>>>> polylines
 class LandmarkPolyline2D : public LandmarkBase
 {
     protected:
@@ -48,17 +39,7 @@ class LandmarkPolyline2D : public LandmarkBase
         LandmarkClassification classification_; ///< The classification of the landmark
 
     public:
-//<<<<<<< HEAD
-//        LandmarkPolyline2D(StateBlock* _p_ptr,
-//                           StateBlock* _o_ptr,
-//                           const Eigen::MatrixXs& _points,
-//                           const bool _first_defined,
-//                           const bool _last_defined,
-//                           unsigned int _first_id = 0);
-//=======
-        LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined, unsigned int _first_id = 0, LandmarkClassification _class = UNCLASSIFIED);
         LandmarkPolyline2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined, unsigned int _first_id = 0, LandmarkClassification _class = UNCLASSIFIED);
-//>>>>>>> polylines
         virtual ~LandmarkPolyline2D();
 
         /** \brief Gets a const reference to the point state block pointer vector
