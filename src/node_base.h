@@ -1,15 +1,8 @@
 #ifndef NODE_BASE_H_
 #define NODE_BASE_H_
 
-// Fwd references
-namespace wolf{
-class Problem;
-}
-
 // Wolf includes
 #include "wolf.h"
-
-// std includes
 
 
 namespace wolf {

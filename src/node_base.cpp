@@ -1,5 +1,4 @@
 #include "node_base.h"
-#include "problem.h"
 
 namespace wolf {
 
