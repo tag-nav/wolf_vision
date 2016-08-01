@@ -79,6 +79,7 @@ class NodeLinked : public NodeBase
         UpperNodePtr up_node_ptr_; ///< Pointer to upper node
         LowerNodeList down_node_list_; ///< A list of pointers to lower nodes
         bool is_deleting_; ///< This node is being deleted.
+
     private:
         Problem* problem_ptr_;
 
@@ -236,9 +237,10 @@ NodeLinked<UpperType, LowerType>::NodeLinked(const NodeLocation _loc, const std:
         location_(_loc), //
         up_node_ptr_(nullptr), //
         down_node_list_(), //
-        is_deleting_(false)
+        is_deleting_(false),
+        problem_ptr_(nullptr)
 {
-        problem_ptr_ = nullptr;
+        //
 }
 
 template<class UpperType, class LowerType>
