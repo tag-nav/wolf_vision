@@ -48,17 +48,23 @@ class ProcessorIMU : public ProcessorMotion{
             Eigen::Vector3s measured_acc(_data.segment(0,3));        // acc  = data[0:2]
             Eigen::Vector3s measured_gyro(_data.segment(3,3));       // gyro = data[3:5]
 
-            /// Quaternion delta
-            new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data());
-            Eigen::v2q((measured_gyro - bias_gyro_) * _dt, q_out_);
-
-            /// Velocity delta
-            new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta.data() + 4);
-            v_out_ = q_out_._transformVector((measured_acc - bias_acc_) * _dt);
+            // remap
+            new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta.data());
+            new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data() + 3);
+            new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta.data() + 7);
 
             /// Position delta
-            new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta.data() + 7);
-            p_out_ = v_out_ * dt_;
+            p_out_ = v_out_ * dt_; /// FIXME change v_out by p_ij or v_Delta
+
+            /// Velocity delta
+            v_out_ = q_out_._transformVector((measured_acc - bias_acc_) * _dt); // FIXME: q_out_ here should be q_ij or q_Delta
+
+            /// Quaternion delta
+            Eigen::v2q((measured_gyro - bias_gyro_) * _dt, q_out_);
+
+            // Null bias deltas
+            _delta.tail(6) = Eigen::VectorXs::Zero(6); // TODO: See if we can avoid consuming time here
+
           }
 
         /** \brief composes a delta-state on top of a state
