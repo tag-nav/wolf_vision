@@ -17,17 +17,41 @@
 namespace wolf
 {
 
-LandmarkPolyline2D::LandmarkPolyline2D(StateBlock* _p_ptr,
-                                       StateBlock* _o_ptr,
-                                       const Eigen::MatrixXs& _points,
-                                       const bool _first_extreme,
-                                       const bool _last_extreme,
-                                       unsigned int _first_id) :
-        LandmarkBase(LANDMARK_POLYLINE_2D, _p_ptr, _o_ptr),
-        first_id_(_first_id),
-        first_defined_(_first_extreme),
-        last_defined_(_last_extreme),
-        closed_(false)
+//<<<<<<< HEAD
+//LandmarkPolyline2D::LandmarkPolyline2D(StateBlock* _p_ptr,
+//                                       StateBlock* _o_ptr,
+//                                       const Eigen::MatrixXs& _points,
+//                                       const bool _first_extreme,
+//                                       const bool _last_extreme,
+//                                       unsigned int _first_id) :
+//        LandmarkBase(LANDMARK_POLYLINE_2D, _p_ptr, _o_ptr),
+//        first_id_(_first_id),
+//        first_defined_(_first_extreme),
+//        last_defined_(_last_extreme),
+//        closed_(false)
+//=======
+LandmarkPolyline2D::LandmarkPolyline2D(const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id, LandmarkClassification _class) :
+        LandmarkBase(LANDMARK_POLYLINE_2D, new StateBlock(Eigen::Vector2s::Zero(), true), new StateBlock(Eigen::Vector1s::Zero(), true)), first_id_(_first_id), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false), classification_(_class)
+{
+    //std::cout << "LandmarkPolyline2D::LandmarkPolyline2D" << std::endl;
+    assert(_points.cols() >= 2 && "LandmarkPolyline2D::LandmarkPolyline2D: 2 points at least needed.");
+    for (auto i = 0; i < _points.cols(); i++)
+        point_state_ptr_vector_.push_back(new StateBlock(_points.col(i).head<2>()));
+
+    if (!first_defined_)
+        point_state_ptr_vector_.front()->setLocalParametrizationPtr(new LocalParametrizationPolylineExtreme(point_state_ptr_vector_[1]));
+    if (!last_defined_)
+        point_state_ptr_vector_.back()->setLocalParametrizationPtr(new LocalParametrizationPolylineExtreme(point_state_ptr_vector_[point_state_ptr_vector_.size() - 2]));
+
+    assert(point_state_ptr_vector_.front()->hasLocalParametrization() ? !first_defined_ : first_defined_);
+    assert(point_state_ptr_vector_.back()->hasLocalParametrization() ? !last_defined_ : last_defined_);
+
+    setType("POLYLINE 2D");
+}
+
+LandmarkPolyline2D::LandmarkPolyline2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id, LandmarkClassification _class) :
+        LandmarkBase(LANDMARK_POLYLINE_2D, _p_ptr, _o_ptr), first_id_(_first_id), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false), classification_(_class)
+//>>>>>>> polylines
 {
     //std::cout << "LandmarkPolyline2D::LandmarkPolyline2D" << std::endl;
     assert(_points.cols() >= 2 && "LandmarkPolyline2D::LandmarkPolyline2D: 2 points at least needed.");
