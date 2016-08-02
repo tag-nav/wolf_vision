@@ -40,11 +40,4 @@ std::vector<cv::KeyPoint>& CaptureImage::getKeypoints()
 }
 
 
-
-// TODO: This needs to go out some day
-Eigen::VectorXs CaptureImage::computeFramePose(const TimeStamp& _now) const
-{
-    return Eigen::VectorXs::Zero(7);
-}
-
 } // namespace wolf

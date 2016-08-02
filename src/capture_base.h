@@ -83,12 +83,6 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
          */
         virtual void process(); 
 
-        // TODO Move it to ProcessorX class()
-        //      Rename to computeFrameInitialGuess() ... for instance
-        //      Another name could be provideFrameInitialGuess();
-        //Should be virtual in ProcessorBase with an empty/error message
-        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const {return Eigen::VectorXs::Zero(0);};
-
 };
 
 inline unsigned int CaptureBase::id()

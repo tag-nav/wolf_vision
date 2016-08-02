@@ -32,7 +32,6 @@ class CaptureFix : public CaptureBase
 
         virtual void process();
 
-        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
 };
 
 } //namespace wolf

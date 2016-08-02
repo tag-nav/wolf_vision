@@ -43,12 +43,6 @@ class CaptureImage : public CaptureBase
         virtual std::vector<cv::KeyPoint>& getKeypoints();
 
 
-
-
-        // TODO: This needs to go out some day
-        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const;
-
-
 };
 
 } // namespace wolf

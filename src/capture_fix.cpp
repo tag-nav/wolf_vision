@@ -29,9 +29,5 @@ void CaptureFix::process()
     //std::cout << "ConstraintFix added " << std::endl;
 }
 
-Eigen::VectorXs CaptureFix::computeFramePose(const TimeStamp& _now) const
-{
-	return data_;
-}
 
 } // namespace wolf
