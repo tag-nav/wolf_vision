@@ -329,13 +329,14 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
     // Parse YAML node with lmk info and data
     unsigned int    id              = _lmk_node["id"].as<unsigned int>();
     Eigen::VectorXs pos             = _lmk_node["position"].as<Eigen::VectorXs>();
-    bool            pos_fixed       = _lmk_node["position fixed"].as<bool>();
+    bool            pos_fixed       = true;//_lmk_node["position fixed"].as<bool>();
     Eigen::VectorXs ori             = _lmk_node["orientation"].as<Eigen::VectorXs>();
-    bool            ori_fixed       = _lmk_node["orientation fixed"].as<bool>();
+    bool            ori_fixed       = true;//_lmk_node["orientation fixed"].as<bool>();
     int             first_id        = _lmk_node["first_id"].as<int>();
     bool            first_defined   = _lmk_node["first_defined"].as<bool>();
     bool            last_defined    = _lmk_node["last_defined"].as<bool>();
     unsigned int    npoints         = _lmk_node["points"].size();
+    LandmarkClassification classification = (LandmarkClassification)(_lmk_node["classification"].as<int>());
     Eigen::MatrixXs points(2,npoints);
     for (unsigned int i = 0; i < npoints; i++)
     {
@@ -343,11 +344,14 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
     }
 
     // Create a new landmark
-    LandmarkBase* lmk_ptr = new LandmarkPolyline2D(new StateBlock(pos, pos_fixed), new StateBlock(ori, ori_fixed), points, first_defined, last_defined, first_id);
+    LandmarkPolyline2D* lmk_ptr = new LandmarkPolyline2D(new StateBlock(pos, pos_fixed), new StateBlock(ori, ori_fixed), points, first_defined, last_defined, first_id, classification);
     lmk_ptr->setId(id);
 
-    return lmk_ptr;
+    // fix all points
+    for (auto st_ptr : lmk_ptr->getStateBlockVector())
+        st_ptr->fix();
 
+    return lmk_ptr;
 }
 
 YAML::Node LandmarkPolyline2D::saveToYaml() const
@@ -359,6 +363,7 @@ YAML::Node LandmarkPolyline2D::saveToYaml() const
     node["first_id"]       = first_id_;
     node["first_defined"]  = first_defined_;
     node["last_defined"]   = last_defined_;
+    node["classification"] = (int)classification_;
 
     int npoints = point_state_ptr_vector_.size();
 
