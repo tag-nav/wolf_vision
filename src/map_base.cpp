@@ -106,7 +106,7 @@ void MapBase::save(const std::string& _map_file_yaml, const std::string& _map_na
 
     std::ofstream fout(_map_file_yaml);
     fout << emitter.c_str();
-
+    fout.close();
 }
 
 } // namespace wolf
