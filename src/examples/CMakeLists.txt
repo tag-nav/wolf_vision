@@ -5,10 +5,6 @@
 ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
 TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
 
-# ProcessorMotion classes test
-# ADD_EXECUTABLE(test_motion test_motion.cpp)
-# TARGET_LINK_LIBRARIES(test_motion ${PROJECT_NAME})
-
 ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
 TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
 
@@ -124,10 +120,10 @@ TARGET_LINK_LIBRARIES(test_processor_tracker_feature ${PROJECT_NAME})
 ADD_EXECUTABLE(test_processor_tracker_landmark test_processor_tracker_landmark.cpp)
 TARGET_LINK_LIBRARIES(test_processor_tracker_landmark ${PROJECT_NAME})
 
-# IF (laser_scan_utils_FOUND)
-#     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
-#     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
-# #ENDIF (laser_scan_utils_FOUND)
+#IF (laser_scan_utils_FOUND)
+#    ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
+#    TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
+#ENDIF (laser_scan_utils_FOUND)
 
 IF(faramotics_FOUND)
     IF (laser_scan_utils_FOUND)
