@@ -82,6 +82,11 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                      Eigen::VectorXs& _delta2_minus_delta1) { };
 
+        virtual void integrateDelta(const Eigen::VectorXs& _delta)
+        {
+          // TODO: all the work to be done here
+        }
+
         virtual Eigen::VectorXs deltaZero() const
         {
             Eigen::VectorXs tmp(10);

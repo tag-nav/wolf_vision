@@ -290,13 +290,21 @@ class ProcessorMotion : public ProcessorBase
                                     Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                     Eigen::MatrixXs& _jacobian2) = 0;
 
+        /** \brief Adds a delta-increment into the pre-integrated Delta-state
+        * \param _delta the delta increment to add
+        *
+        * This function implements the pre-integrated measurements update :
+        *   Delta_ik = Delta_ij (+) _delta_jk
+        */
+        virtual void integrateDelta(const Eigen::VectorXs& _delta) = 0;
+
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
          *
          * Examples (see documentation of the the class for info on Eigen::VectorXs):
          *   - 2D odometry: a 3-vector with all zeros, e.g. VectorXs::Zero(3)
          *   - 3D odometry: delta type is a PQ vector: 7-vector with [0,0,0, 0,0,0,1]
-         *   - IMU: PQVBB 16-vector with [0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0]
+         *   - IMU: PQVBB 16-vector with [0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0] // FIXME : no biases in the delta !!
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
@@ -462,15 +470,14 @@ inline void ProcessorMotion::integrate()
     //delta_from_data = createDelta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance());
 
     // then integrate delta
-    deltaPlusDelta(getBufferPtr()->get().back().delta_integr_, delta_, delta_integrated_, jacobian_prev_,
-                   jacobian_curr_);
-    //integrateDelta(deltaFromData);
+    integrateDelta(delta_);
 
     // and covariance
+    // TODO:
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,
                          delta_integrated_cov_);
 
-        // then push it into buffer
+    // then push it into buffer
     getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(),
                                              delta_,
                                              delta_integrated_,

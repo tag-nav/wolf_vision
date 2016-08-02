@@ -55,6 +55,7 @@ class ProcessorOdom3D : public ProcessorMotion
                             Eigen::MatrixXs& _jacobian2);
         virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                      Eigen::VectorXs& _delta2_minus_delta1);
+        void integrateDelta(const Eigen::VectorXs& _delta);
         Eigen::VectorXs deltaZero() const;
         Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts);
 
@@ -150,6 +151,13 @@ inline void ProcessorOdom3D::deltaMinusDelta(const Eigen::VectorXs& _delta1, con
     remap(_delta1, _delta2, _delta2_minus_delta1);
     p_out_ = q1_.conjugate() * (p2_ - p1_);
     q_out_ = q1_.conjugate() * q2_;
+}
+
+inline void ProcessorOdom3D::integrateDelta(const Eigen::VectorXs& _delta)
+{
+    assert(_delta.size() == 7 && "Wrong _delta vector size");
+
+    deltaPlusDelta(delta_integrated_, _delta , delta_integrated_);
 }
 
 inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
