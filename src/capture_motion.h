@@ -5,7 +5,7 @@
  *      \author: jsola
  */
 
-#ifndef SRC_CAPTURE_MOTION2_H_
+#ifndef SRC_CAPTURE_MOTION_H_
 #define SRC_CAPTURE_MOTION_H_
 
 // Wolf includes
