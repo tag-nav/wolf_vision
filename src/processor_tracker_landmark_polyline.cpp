@@ -916,7 +916,7 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_
                 // if 4 defined checking
                 if (n_defined_points == 4)
                 {
-                    std::cout << "checking with 4th point... " << std::endl;
+                    //std::cout << "checking with 4th point... " << std::endl;
 
                     Scalar dAD = (polyline_ptr->getPointVector(A_id) - polyline_ptr->getPointVector(D_id)).norm();
                     Scalar dBD = (polyline_ptr->getPointVector(B_id) - polyline_ptr->getPointVector(D_id)).norm();
@@ -932,7 +932,7 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_
                 // if not 4 defined add/define points
                 else
                 {
-                    std::cout << "adding/defining points... " << std::endl;
+                    //std::cout << "adding/defining points... " << std::endl;
                     if (!polyline_ptr->isFirstDefined())
                     {
                         polyline_ptr->defineExtreme(false);
@@ -943,7 +943,7 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_
                     else
                         polyline_ptr->addPoint(Eigen::Vector2s::Zero(), true, true);
                 }
-                std::cout << "landmark " << lmk_ptr->id() << " classified as " << object_class[classification] << " in configuration " << configuration << std::endl;
+                //std::cout << "landmark " << lmk_ptr->id() << " classified as " << object_class[classification] << " in configuration " << configuration << std::endl;
 
                 // Close
                 polyline_ptr->setClosed();
@@ -962,12 +962,12 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_
                 Eigen::Vector2s frame_x = (configuration ? polyline_ptr->getPointVector(A_id)-polyline_ptr->getPointVector(B_id) : polyline_ptr->getPointVector(C_id)-polyline_ptr->getPointVector(B_id));
                 polyline_ptr->getOPtr()->setVector(Eigen::Vector1s::Constant(atan2(frame_x(1),frame_x(0))));
 
-                std::cout << "A: " << polyline_ptr->getPointVector(A_id).transpose() << std::endl;
-                std::cout << "B: " << polyline_ptr->getPointVector(B_id).transpose() << std::endl;
-                std::cout << "C: " << polyline_ptr->getPointVector(C_id).transpose() << std::endl;
-                std::cout << "frame_x:           " << frame_x.transpose() << std::endl;
-                std::cout << "frame position:    " << polyline_ptr->getPPtr()->getVector().transpose() << std::endl;
-                std::cout << "frame orientation: " << polyline_ptr->getOPtr()->getVector() << std::endl;
+                //std::cout << "A: " << polyline_ptr->getPointVector(A_id).transpose() << std::endl;
+                //std::cout << "B: " << polyline_ptr->getPointVector(B_id).transpose() << std::endl;
+                //std::cout << "C: " << polyline_ptr->getPointVector(C_id).transpose() << std::endl;
+                //std::cout << "frame_x:           " << frame_x.transpose() << std::endl;
+                //std::cout << "frame position:    " << polyline_ptr->getPPtr()->getVector().transpose() << std::endl;
+                //std::cout << "frame orientation: " << polyline_ptr->getOPtr()->getVector() << std::endl;
 
                 // Fix polyline points to its respective relative positions
                 if (configuration)
