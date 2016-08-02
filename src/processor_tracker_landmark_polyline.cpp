@@ -348,20 +348,46 @@ void ProcessorTrackerLandmarkPolyline::expectedFeature(LandmarkBase* _landmark_p
     expected_feature_ = Eigen::MatrixXs::Zero(3,polyline_landmark->getNPoints());
     expected_feature_cov_ = Eigen::MatrixXs::Zero(2,2*polyline_landmark->getNPoints());
     Eigen::Vector3s col = Eigen::Vector3s::Ones();
-    for (auto i = 0; i < polyline_landmark->getNPoints(); i++)
+
+    ////////// global coordinates points
+    if (polyline_landmark->getClassification() == UNCLASSIFIED)
+        for (auto i = 0; i < polyline_landmark->getNPoints(); i++)
+        {
+            //std::cout << "Point " << i+polyline_landmark->getFirstId() << std::endl;
+            //std::cout << "First Point " << polyline_landmark->getFirstId() << std::endl;
+            //std::cout << "Landmark global position: " << polyline_landmark->getPointVector(i+polyline_landmark->getFirstId()).transpose() << std::endl;
+
+            // ------------ expected feature point
+            col.head<2>() = R_sensor_world_ * (polyline_landmark->getPointVector(i+polyline_landmark->getFirstId()) - t_world_sensor_);
+            expected_feature_.col(i) = col;
+
+            //std::cout << "Expected point " << i << ": " << expected_feature_.col(i).transpose() << std::endl;
+            // ------------ expected feature point covariance
+            // TODO
+            expected_feature_cov_.middleCols(i*2, 2) = Eigen::MatrixXs::Identity(2,2);
+        }
+
+    ////////// landmark with origin
+    else
     {
-        //std::cout << "Point " << i+polyline_landmark->getFirstId() << std::endl;
-        //std::cout << "First Point " << polyline_landmark->getFirstId() << std::endl;
-        //std::cout << "Landmark global position: " << polyline_landmark->getPointVector(i+polyline_landmark->getFirstId()).transpose() << std::endl;
+        Eigen::Matrix2s R_world_points = Eigen::Rotation2Ds(polyline_landmark->getOPtr()->getVector()(0)).matrix();
+        const Eigen::VectorXs& t_world_points = polyline_landmark->getPPtr()->getVector();
 
-    	// ------------ expected feature point
-        col.head<2>() = R_sensor_world_ * (polyline_landmark->getPointVector(i+polyline_landmark->getFirstId()) - t_world_sensor_);
-        expected_feature_.col(i) = col;
+        for (auto i = 0; i < polyline_landmark->getNPoints(); i++)
+        {
+            //std::cout << "Point " << i+polyline_landmark->getFirstId() << std::endl;
+            //std::cout << "First Point " << polyline_landmark->getFirstId() << std::endl;
+            //std::cout << "Landmark global position: " << polyline_landmark->getPointVector(i+polyline_landmark->getFirstId()).transpose() << std::endl;
 
-        //std::cout << "Expected point " << i << ": " << expected_feature_.col(i).transpose() << std::endl;
-        // ------------ expected feature point covariance
-        // TODO
-        expected_feature_cov_.middleCols(i*2, 2) = Eigen::MatrixXs::Identity(2,2);
+            // ------------ expected feature point
+            col.head<2>() = R_sensor_world_ * (R_world_points * polyline_landmark->getPointVector(i+polyline_landmark->getFirstId()) + t_world_points - t_world_sensor_);
+            expected_feature_.col(i) = col;
+
+            //std::cout << "Expected point " << i << ": " << expected_feature_.col(i).transpose() << std::endl;
+            // ------------ expected feature point covariance
+            // TODO
+            expected_feature_cov_.middleCols(i*2, 2) = Eigen::MatrixXs::Identity(2,2);
+        }
     }
 }
 
@@ -825,11 +851,11 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
 
 void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_list)
 {
-    std::cout << "ProcessorTrackerLandmarkPolyline::classifyPolilines: " << _lmk_list->size() << std::endl;
-
-    const Scalar CONT_L = 12;
-    const Scalar CONT_W = 2.345;
-    const Scalar CONT_D = sqrt(CONT_L * CONT_L + CONT_W * CONT_W);
+    //std::cout << "ProcessorTrackerLandmarkPolyline::classifyPolilines: " << _lmk_list->size() << std::endl;
+    std::vector<Scalar> object_L({12, 5.9, 1.2});
+    std::vector<Scalar> object_W({2.345, 2.345, 0.9});
+    std::vector<Scalar> object_D({sqrt(12*12+2.345*2.345), sqrt(5.9*5.9+2.345*2.345), sqrt(0.9*0.9+1.2*1.2)});
+    std::vector<LandmarkClassification> object_class({CONTAINER, SMALL_CONTAINER, PALLET});
 
     for (auto lmk_ptr : *_lmk_list)
         if (lmk_ptr->getTypeId() == LANDMARK_POLYLINE_2D)
@@ -847,36 +873,50 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_
                 n_defined_points > 4 )
                 continue;
 
-            std::cout << "landmark " << lmk_ptr->id() << std::endl;
+            //std::cout << "landmark " << lmk_ptr->id() << std::endl;
 
             // consider 3 first defined points
             Scalar dAB = (polyline_ptr->getPointVector(A_id) - polyline_ptr->getPointVector(B_id)).norm();
             Scalar dBC = (polyline_ptr->getPointVector(B_id) - polyline_ptr->getPointVector(C_id)).norm();
             Scalar dAC = (polyline_ptr->getPointVector(A_id) - polyline_ptr->getPointVector(C_id)).norm();
 
-            std::cout << "dAB = " << dAB << " error 1: " << fabs(dAB-CONT_L) << " error 2: " << fabs(dAB-CONT_W) << std::endl;
-            std::cout << "dBC = " << dBC << " error 1: " << fabs(dBC-CONT_W) << " error 2: " << fabs(dBC-CONT_L)   << std::endl;
-            std::cout << "dAC = " << dAC << " error 1&2: " << fabs(dAC-CONT_D) << std::endl;
+            //std::cout << "dAB = " << dAB << " error 1: " << fabs(dAB-CONT_L) << " error 2: " << fabs(dAB-CONT_W) << std::endl;
+            //std::cout << "dBC = " << dBC << " error 1: " << fabs(dBC-CONT_W) << " error 2: " << fabs(dBC-CONT_L)   << std::endl;
+            //std::cout << "dAC = " << dAC << " error 1&2: " << fabs(dAC-CONT_D) << std::endl;
 
-            // big container (position 1)
-            bool container_1 = (fabs(dAB-CONT_L) < params_.position_error_th &&
-                                fabs(dBC-CONT_W) < params_.position_error_th &&
-                                fabs(dAC-CONT_D) < params_.position_error_th);
+            auto classification = -1;
+            bool configuration;
 
-            // big container (position 2)
-            bool container_2 = (fabs(dAB-CONT_W) < params_.position_error_th &&
-                                fabs(dBC-CONT_L) < params_.position_error_th &&
-                                fabs(dAC-CONT_D) < params_.position_error_th);
+            for (unsigned int i = 0; i < object_L.size(); i++)
+            {
+                // check configuration 1
+                if(fabs(dAB-object_L[i]) < params_.position_error_th &&
+                   fabs(dBC-object_W[i]) < params_.position_error_th &&
+                   fabs(dAC-object_D[i]) < params_.position_error_th)
+                {
+                    configuration = true;
+                    classification = i;
+                    break;
+                }
 
-            std::cout << "containers positions: " << container_1 << container_2 << std::endl;
+                // check configuration 2
+                if(fabs(dAB-object_W[i]) < params_.position_error_th &&
+                   fabs(dBC-object_L[i]) < params_.position_error_th &&
+                   fabs(dAC-object_D[i]) < params_.position_error_th)
+                {
+                    configuration = false;
+                    classification = i;
+                    break;
+                }
+            }
 
             // any container position fitted
-            if (container_1 || container_2)
+            if (classification != -1)
             {
                 // if 4 defined checking
                 if (n_defined_points == 4)
                 {
-                    std::cout << "checking with 4th point... " << std::endl;
+                    //std::cout << "checking with 4th point... " << std::endl;
 
                     Scalar dAD = (polyline_ptr->getPointVector(A_id) - polyline_ptr->getPointVector(D_id)).norm();
                     Scalar dBD = (polyline_ptr->getPointVector(B_id) - polyline_ptr->getPointVector(D_id)).norm();
@@ -892,7 +932,7 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_
                 // if not 4 defined add/define points
                 else
                 {
-                    std::cout << "adding/defining points... " << std::endl;
+                    //std::cout << "adding/defining points... " << std::endl;
                     if (!polyline_ptr->isFirstDefined())
                     {
                         polyline_ptr->defineExtreme(false);
@@ -903,13 +943,13 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_
                     else
                         polyline_ptr->addPoint(Eigen::Vector2s::Zero(), true, true);
                 }
-                std::cout << "conatiner fitted! " << container_1 << container_2 << std::endl;
+                //std::cout << "landmark " << lmk_ptr->id() << " classified as " << object_class[classification] << " in configuration " << configuration << std::endl;
 
                 // Close
                 polyline_ptr->setClosed();
 
                 // Classify
-                polyline_ptr->classify(CONTAINER);
+                polyline_ptr->classify(object_class[classification]);
 
                 // Unfix origin
                 polyline_ptr->getPPtr()->unfix();
@@ -918,24 +958,31 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList* _lmk_
                 getProblem()->updateStateBlockPtr(polyline_ptr->getOPtr());
 
                 // Move origin to B
-                polyline_ptr->getPPtr()->setVector(polyline_ptr->getPointVector((container_1 ? B_id : A_id)));
-                Eigen::Vector2s frame_x = (container_1 ? polyline_ptr->getPointVector(A_id)-polyline_ptr->getPointVector(B_id) : polyline_ptr->getPointVector(C_id)-polyline_ptr->getPointVector(B_id));
-                polyline_ptr->getOPtr()->setVector(Eigen::Vector1s::Constant(Scalar(atan2(frame_x(1),frame_x(0)))));
+                polyline_ptr->getPPtr()->setVector(polyline_ptr->getPointVector((configuration ? B_id : A_id)));
+                Eigen::Vector2s frame_x = (configuration ? polyline_ptr->getPointVector(A_id)-polyline_ptr->getPointVector(B_id) : polyline_ptr->getPointVector(C_id)-polyline_ptr->getPointVector(B_id));
+                polyline_ptr->getOPtr()->setVector(Eigen::Vector1s::Constant(atan2(frame_x(1),frame_x(0))));
+
+                //std::cout << "A: " << polyline_ptr->getPointVector(A_id).transpose() << std::endl;
+                //std::cout << "B: " << polyline_ptr->getPointVector(B_id).transpose() << std::endl;
+                //std::cout << "C: " << polyline_ptr->getPointVector(C_id).transpose() << std::endl;
+                //std::cout << "frame_x:           " << frame_x.transpose() << std::endl;
+                //std::cout << "frame position:    " << polyline_ptr->getPPtr()->getVector().transpose() << std::endl;
+                //std::cout << "frame orientation: " << polyline_ptr->getOPtr()->getVector() << std::endl;
 
                 // Fix polyline points to its respective relative positions
-                if (container_1)
+                if (configuration)
                 {
-                    polyline_ptr->getPointStateBlockPtr(A_id)->setVector(Eigen::Vector2s(CONT_L, 0));
+                    polyline_ptr->getPointStateBlockPtr(A_id)->setVector(Eigen::Vector2s(object_L[classification], 0));
                     polyline_ptr->getPointStateBlockPtr(B_id)->setVector(Eigen::Vector2s(0, 0));
-                    polyline_ptr->getPointStateBlockPtr(C_id)->setVector(Eigen::Vector2s(0, CONT_W));
-                    polyline_ptr->getPointStateBlockPtr(D_id)->setVector(Eigen::Vector2s(CONT_L, CONT_W));
+                    polyline_ptr->getPointStateBlockPtr(C_id)->setVector(Eigen::Vector2s(0, object_W[classification]));
+                    polyline_ptr->getPointStateBlockPtr(D_id)->setVector(Eigen::Vector2s(object_L[classification], object_W[classification]));
                 }
                 else
                 {
                     polyline_ptr->getPointStateBlockPtr(A_id)->setVector(Eigen::Vector2s(0, 0));
-                    polyline_ptr->getPointStateBlockPtr(B_id)->setVector(Eigen::Vector2s(0, CONT_W));
-                    polyline_ptr->getPointStateBlockPtr(C_id)->setVector(Eigen::Vector2s(CONT_L, CONT_W));
-                    polyline_ptr->getPointStateBlockPtr(D_id)->setVector(Eigen::Vector2s(CONT_L, 0));
+                    polyline_ptr->getPointStateBlockPtr(B_id)->setVector(Eigen::Vector2s(0, object_W[classification]));
+                    polyline_ptr->getPointStateBlockPtr(C_id)->setVector(Eigen::Vector2s(object_L[classification], object_W[classification]));
+                    polyline_ptr->getPointStateBlockPtr(D_id)->setVector(Eigen::Vector2s(object_L[classification], 0));
                 }
                 for (auto id = polyline_ptr->getFirstId(); id <= polyline_ptr->getLastId(); id++)
                 {
