@@ -162,7 +162,7 @@ int main(int argc, char** argv)
 
     std::cout << "Wolf tree setted correctly!" << std::endl;
 
-    CaptureMotion2* odom_capture = new CaptureMotion2(ts, odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor, nullptr);
+    CaptureMotion* odom_capture = new CaptureMotion(ts, odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor, nullptr);
 
     // Initial pose
     ground_truth_pose << 2, 8, 0;

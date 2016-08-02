@@ -6,7 +6,7 @@
  */
 
 #ifndef SRC_CAPTURE_MOTION2_H_
-#define SRC_CAPTURE_MOTION2_H_
+#define SRC_CAPTURE_MOTION_H_
 
 // Wolf includes
 #include "capture_base.h"
@@ -37,16 +37,16 @@ namespace wolf {
  * It is then used to compute the factor that links the Frame of this capture to the previous key-frame in the Trajectory.
  */
 
-class CaptureMotion2 : public CaptureBase
+class CaptureMotion : public CaptureBase
 {
         // public interface:
     public:
-        CaptureMotion2(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, FrameBase* _origin_frame_ptr) :
+        CaptureMotion(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, FrameBase* _origin_frame_ptr) :
                 CaptureBase("MOTION 2", _ts, _sensor_ptr), data_(_data), data_cov_(_data_cov), buffer_(), origin_frame_ptr_(_origin_frame_ptr)
         {
             //
         }
-        virtual ~CaptureMotion2()
+        virtual ~CaptureMotion()
         {
             //
         }
@@ -97,4 +97,4 @@ class CaptureMotion2 : public CaptureBase
 
 } // namespace wolf
 
-#endif /* SRC_CAPTURE_MOTION2_H_ */
+#endif /* SRC_CAPTURE_MOTION_H_ */

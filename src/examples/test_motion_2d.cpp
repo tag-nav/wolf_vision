@@ -1,5 +1,5 @@
 /**
- * \file test_motion.cpp
+ * \file test_motion_2d.cpp
  *
  *  Created on: Mar 15, 2016
  *      \author: jsola
@@ -89,7 +89,7 @@ int main()
     std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
     // Capture to use as container for all incoming data
     t += dt;
-    CaptureMotion2* cap_ptr = new CaptureMotion2(t, sensor_odom_ptr, data, data_cov, nullptr);
+    CaptureMotion* cap_ptr = new CaptureMotion(t, sensor_odom_ptr, data, data_cov, nullptr);
 
     // Check covariance values
     Eigen::Vector3s integrated_x = x0;
@@ -210,7 +210,7 @@ int main()
     odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     std::cout << "New buffer: oldest part:   < ";
-    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
+    for (const auto &s : ((CaptureMotion*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
@@ -268,7 +268,7 @@ int main()
 
 
     std::cout << "All in one row:            < ";
-    for (const auto &s : ((CaptureMotion2*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
+    for (const auto &s : ((CaptureMotion*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << "> " << t_split - t0 << " < ";
     for (const auto &s : odom2d_ptr->getBufferPtr()->get())
