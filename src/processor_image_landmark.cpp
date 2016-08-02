@@ -14,9 +14,13 @@ namespace wolf
 {
 
 ProcessorImageLandmark::ProcessorImageLandmark(ProcessorParamsImage _params) :
-    ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, "IMAGE LANDMARK", _params.algorithm.max_new_features), n_feature_(0), landmark_idx_non_visible_(0),
-    matcher_ptr_(nullptr), detector_descriptor_ptr_(nullptr), params_(_params),
-    active_search_grid_()
+    ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, "IMAGE LANDMARK", _params.algorithm.max_new_features),
+    matcher_ptr_(nullptr),
+    detector_descriptor_ptr_(nullptr),
+    params_(_params),
+    active_search_grid_(),
+    n_feature_(0),
+    landmark_idx_non_visible_(0)
 {
     // 1. detector-descriptor params
     DetectorDescriptorParamsBase* _dd_params = _params.detector_descriptor_params_ptr;
@@ -114,7 +118,6 @@ void ProcessorImageLandmark::postProcess()
         {
             for(auto constraint_ptr : *feature_ptr->getConstraintListPtr())
             {
-
 //                Eigen::Vector2s residuals;
 //                Eigen::Vector3s robot_p = origin_ptr_->getFramePtr()->getPPtr()->getVector();
 //                Eigen::Vector4s robot_o = origin_ptr_->getFramePtr()->getOPtr()->getVector();

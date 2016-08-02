@@ -56,7 +56,7 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
         void setTrackId(unsigned int _tr_id){track_id_ = _tr_id;}
         unsigned int landmarkId(){return landmark_id_;}
         void setLandmarkId(unsigned int _lmk_id){landmark_id_ = _lmk_id;}
-        FeatureType getType(){return type_id_;}
+        FeatureType getTypeId(){return type_id_;}
 
         /** \brief Adds a constraint from this feature (as a down node)
          */

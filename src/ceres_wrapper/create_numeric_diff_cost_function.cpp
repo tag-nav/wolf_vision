@@ -20,7 +20,7 @@ ceres::CostFunction* createNumericDiffCostFunction(ConstraintBase* _ctr_ptr, boo
     if (_use_wolf_numericdiff)
         throw std::invalid_argument( "Numeric differentiation not implemented in wolf" );
 
-    switch (_ctr_ptr->getType())
+    switch (_ctr_ptr->getTypeId())
     {
         // just for testing
         case CTR_ODOM_2D:

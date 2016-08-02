@@ -127,7 +127,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
             for (auto landmark_it = _landmarks_corner_searched.begin(); landmark_it != _landmarks_corner_searched.end();
                     landmark_it++, jj++)
             {
-                if ((*landmark_it)->getType() == LANDMARK_CORNER)
+                if ((*landmark_it)->getTypeId() == LANDMARK_CORNER)
                 {
                     landmarks_map[jj] = landmark_it;
                     landmarks_index_map[jj] = 0;

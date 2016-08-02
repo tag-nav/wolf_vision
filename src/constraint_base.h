@@ -61,7 +61,7 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 
         /** \brief Returns the constraint type
          **/
-        ConstraintType getType() const;
+        ConstraintType getTypeId() const;
 
         /** \brief Returns the jacobians computation method
          **/
@@ -139,7 +139,7 @@ inline unsigned int ConstraintBase::id()
 
 // IMPLEMENTATION //
 
-inline ConstraintType ConstraintBase::getType() const
+inline ConstraintType ConstraintBase::getTypeId() const
 {
     return type_id_;
 }

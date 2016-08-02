@@ -535,7 +535,7 @@ class SolverQR
             //std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
             //_corrPtr->print();
 
-            switch (_corrPtr->getType())
+            switch (_corrPtr->getTypeId())
             {
                 case CTR_GPS_FIX_2D:
                 {
