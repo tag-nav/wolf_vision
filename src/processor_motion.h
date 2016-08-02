@@ -229,8 +229,6 @@ class ProcessorMotion : public ProcessorBase
          * \param _data the raw motion data
          * \param _data_cov the raw motion data covariance
          * \param _dt the time step (not always needed)
-         * \param _delta the returned motion delta
-         * \param _delta_cov the returned motion delta covariance
          *
          * Rationale:
          *
@@ -257,8 +255,7 @@ class ProcessorMotion : public ProcessorBase
          *
          *  However, other more complicated relations are possible.
          */
-        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
-                                Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov) = 0;
+        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt) = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -461,11 +458,13 @@ inline void ProcessorMotion::integrate()
     updateDt();
 
     // get data and convert it to delta
-    data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_, delta_, delta_cov_);
+    data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
+    //delta_from_data = createDelta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance());
 
     // then integrate delta
     deltaPlusDelta(getBufferPtr()->get().back().delta_integr_, delta_, delta_integrated_, jacobian_prev_,
                    jacobian_curr_);
+    //integrateDelta(deltaFromData);
 
     // and covariance
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,

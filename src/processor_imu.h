@@ -36,8 +36,7 @@ class ProcessorIMU : public ProcessorMotion{
          * @param _delta
          * @param _delta_cov
          */
-        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
-                                Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
+        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
         {
             // TODO: all the work to be done here
         }
