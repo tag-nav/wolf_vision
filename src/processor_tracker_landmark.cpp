@@ -18,9 +18,15 @@ ProcessorTrackerLandmark::ProcessorTrackerLandmark(ProcessorType _tp, const std:
 ProcessorTrackerLandmark::~ProcessorTrackerLandmark()
 {
     for ( auto match : matches_landmark_from_incoming_)
+    {
         delete match.second;
+        match.second = nullptr;
+    }
     for ( auto match : matches_landmark_from_last_)
+    {
         delete match.second;
+        match.second = nullptr;
+    }
 }
 
 unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
