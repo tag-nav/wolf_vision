@@ -45,6 +45,7 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
                                 Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
         {
+            // TODO: Make these two also Map, and do a remap in data2delta
             Eigen::Vector3s measured_acc(_data.segment(0,3));        // acc  = data[0:2]
             Eigen::Vector3s measured_gyro(_data.segment(3,3));       // gyro = data[3:5]
 
@@ -152,7 +153,7 @@ class ProcessorIMU : public ProcessorMotion{
 //        CaptureIMU* capture_imu_ptr_; //specific pointer to capture imu data object
 
     private:
-        Eigen::Vector3s bias_acc_;
+        Eigen::Vector3s bias_acc_; // TODO: Make these two also Map, and do a remap in data2delta
         Eigen::Vector3s bias_gyro_;
 
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
@@ -166,6 +167,8 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<const Eigen::Vector3s> bias_gyro1_, bias_gyro2_;
         Eigen::Map<Eigen::Vector3s> bias_gyro_out_;
 
+        // TODO: if we want to use these helper remaps, then build one for the state, size 16, and one for the deltas, size 10
+        // or otherwise put an if() with the vector sizes so that the function can decide if remapping the biases or not.
         void remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out);
 
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
