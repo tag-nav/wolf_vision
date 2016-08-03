@@ -13,5 +13,5 @@ lib/
 ./Wolf.includes
 ./Wolf/
 /CMakeLists.txt.user
-
 src/examples/map_polyline_example_write.yaml
+*.gch

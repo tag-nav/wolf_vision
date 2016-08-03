@@ -50,28 +50,28 @@ IF (0) # These cannot compile on MacOSX -- we'll fix it some day.
     # Testing a ccolamd test
     ADD_EXECUTABLE(test_ccolamd solver/test_ccolamd.cpp)
     TARGET_LINK_LIBRARIES(test_ccolamd ${PROJECT_NAME})
-    
+
     # Testing a blocks ccolamd test
     ADD_EXECUTABLE(test_ccolamd_blocks solver/test_ccolamd_blocks.cpp)
     TARGET_LINK_LIBRARIES(test_ccolamd_blocks ${PROJECT_NAME})
-    
+
     # Testing an incremental blocks ccolamd test
     ADD_EXECUTABLE(test_incremental_ccolamd_blocks solver/test_incremental_ccolamd_blocks.cpp)
     TARGET_LINK_LIBRARIES(test_incremental_ccolamd_blocks ${PROJECT_NAME})
-    
+
     # Testing an incremental QR with block ccolamd test
     ADD_EXECUTABLE(test_iQR solver/test_iQR.cpp)
     TARGET_LINK_LIBRARIES(test_iQR ${PROJECT_NAME})
-    
+
     # Testing QR solver test tending to wolf
     ADD_EXECUTABLE(test_iQR_wolf solver/test_iQR_wolf.cpp)
     TARGET_LINK_LIBRARIES(test_iQR_wolf ${PROJECT_NAME})
-    
+
     # Testing SPQR simple test
     #ADD_EXECUTABLE(test_SPQR solver/test_SPQR.cpp)
     #TARGET_LINK_LIBRARIES(test_SPQR ${PROJECT_NAME})
 ENDIF(0)
-    
+
 ENDIF(Suitesparse_FOUND)
 
 # Building and populating the wolf tree 
@@ -120,45 +120,48 @@ TARGET_LINK_LIBRARIES(test_processor_tracker_feature ${PROJECT_NAME})
 ADD_EXECUTABLE(test_processor_tracker_landmark test_processor_tracker_landmark.cpp)
 TARGET_LINK_LIBRARIES(test_processor_tracker_landmark ${PROJECT_NAME})
 
-#IF (laser_scan_utils_FOUND)
-#    ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
-#    TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
-#ENDIF (laser_scan_utils_FOUND)
+# Processor IMU test
+ADD_EXECUTABLE(test_processor_imu test_processor_imu.cpp)
+TARGET_LINK_LIBRARIES(test_processor_imu ${PROJECT_NAME})
+
+# IF (laser_scan_utils_FOUND)
+#     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
+#     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
+# #ENDIF (laser_scan_utils_FOUND)
 
 IF(faramotics_FOUND)
     IF (laser_scan_utils_FOUND)
         ADD_EXECUTABLE(test_ceres_2_lasers test_ceres_2_lasers.cpp)
-        TARGET_LINK_LIBRARIES(test_ceres_2_lasers 
-                                ${pose_state_time_LIBRARIES} 
+        TARGET_LINK_LIBRARIES(test_ceres_2_lasers
+                                ${pose_state_time_LIBRARIES}
                                 ${faramotics_LIBRARIES}
                                 ${PROJECT_NAME})
         ADD_EXECUTABLE(test_ceres_2_lasers_polylines test_ceres_2_lasers_polylines.cpp)
-        TARGET_LINK_LIBRARIES(test_ceres_2_lasers_polylines 
-                                ${pose_state_time_LIBRARIES} 
+        TARGET_LINK_LIBRARIES(test_ceres_2_lasers_polylines
+                                ${pose_state_time_LIBRARIES}
                                 ${faramotics_LIBRARIES}
                                 ${PROJECT_NAME})
         ADD_EXECUTABLE(test_2_lasers_offline test_2_lasers_offline.cpp)
-        TARGET_LINK_LIBRARIES(test_2_lasers_offline 
-                                ${pose_state_time_LIBRARIES} 
+        TARGET_LINK_LIBRARIES(test_2_lasers_offline
+                                ${pose_state_time_LIBRARIES}
                                 ${faramotics_LIBRARIES}
                                 ${PROJECT_NAME})
         ADD_EXECUTABLE(test_faramotics_simulation test_faramotics_simulation.cpp)
-        TARGET_LINK_LIBRARIES(test_faramotics_simulation 
-                                ${pose_state_time_LIBRARIES} 
+        TARGET_LINK_LIBRARIES(test_faramotics_simulation
+                                ${pose_state_time_LIBRARIES}
                                 ${faramotics_LIBRARIES}
                                 ${PROJECT_NAME})
 #        ADD_EXECUTABLE(test_autodiff test_autodiff.cpp)
-#        TARGET_LINK_LIBRARIES(test_autodiff 
-#                                ${pose_state_time_LIBRARIES} 
+#        TARGET_LINK_LIBRARIES(test_autodiff
+#                                ${pose_state_time_LIBRARIES}
 #                                ${faramotics_LIBRARIES}
 #                                ${PROJECT_NAME})
 #        IF(Suitesparse_FOUND)
 #            ADD_EXECUTABLE(test_iQR_wolf2 solver/test_iQR_wolf2.cpp)
-#            TARGET_LINK_LIBRARIES(test_iQR_wolf2 
-#                                ${pose_state_time_LIBRARIES} 
+#            TARGET_LINK_LIBRARIES(test_iQR_wolf2
+#                                ${pose_state_time_LIBRARIES}
 #                                ${faramotics_LIBRARIES}
 #                                ${PROJECT_NAME})
-#        ENDIF(Suitesparse_FOUND)                      
+#        ENDIF(Suitesparse_FOUND)
     ENDIF (laser_scan_utils_FOUND)
 ENDIF(faramotics_FOUND)
-
