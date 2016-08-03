@@ -42,7 +42,7 @@ static ProcessorParamsBase* createProcessorParamsImage(const std::string & _file
             dd->edgeThreshold               = dd_yaml["edge threshold"].as<unsigned int>();
             dd->firstLevel                  = dd_yaml["first level"].as<unsigned int>();
             dd->WTA_K                       = dd_yaml["WTA_K"].as<unsigned int>();
-            dd->scoreType                   = dd_yaml["score type"].as<int>(); // cv::ORB::HARRIS_SCORE
+            dd->scoreType                   = dd_yaml["score type"].as<int>(); // enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
             dd->patchSize                   = dd_yaml["patch size"].as<unsigned int>();
             p->detector_descriptor_params_ptr = dd;
         }else
