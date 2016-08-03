@@ -5,9 +5,6 @@
  *      \author: jsola
  */
 
-
-
-
 #include "wolf.h"
 #include "problem.h"
 #include "map_base.h"
