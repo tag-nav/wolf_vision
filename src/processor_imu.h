@@ -77,10 +77,10 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
         {
           assert(_x.size() == 16 && "Wrong _x vector size");
-          assert(_delta.size() == 16 && "Wrong _delta vector size");
+          assert(_delta.size() == 10 && "Wrong _delta vector size");
           assert(_x_plus_delta.size() == 16 && "Wrong _x_plus_delta vector size");
 
-          remap(_x, _delta, _x_plus_delta);
+          remapState(_x, _delta, _x_plus_delta);
 
           deltaPlusDelta(_x, _delta, _x_plus_delta);
         }
@@ -95,10 +95,10 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
         {
           assert(_delta1.size() == 16 && "Wrong _delta1 vector size");
-          assert(_delta2.size() == 16 && "Wrong _delta2 vector size");
+          assert(_delta2.size() == 10 && "Wrong _delta2 vector size");
           assert(_delta1_plus_delta2.size() == 16 && "Wrong _delta1_plus_delta2 vector size");
 
-          remap(_delta1, _delta2, _delta1_plus_delta2);
+          remapDelta(_delta1, _delta2, _delta1_plus_delta2);
 
           p_out_ = p1_ + p2_;
           q_out_ = q1_ * q2_;
@@ -137,8 +137,8 @@ class ProcessorIMU : public ProcessorMotion{
 
         virtual Eigen::VectorXs deltaZero() const
         {
-            Eigen::VectorXs tmp(16);
-            tmp <<  0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0;  // p, q, v, ba, bg
+            Eigen::VectorXs tmp(10);
+            tmp <<  0,0,0,  0,0,0,1,  0,0,0;  // p, q, v
             return tmp;
         }
 
@@ -177,9 +177,8 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<const Eigen::Vector3s> bias_gyro1_, bias_gyro2_;
         Eigen::Map<Eigen::Vector3s> bias_gyro_out_;
 
-        // TODO: if we want to use these helper remaps, then build one for the state, size 16, and one for the deltas, size 10
-        // or otherwise put an if() with the vector sizes so that the function can decide if remapping the biases or not.
-        void remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out);
+        void remapState(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out);
+        void remapDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
 
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
         ///< (first-order propagation from *measurementCovariance*).
@@ -193,7 +192,7 @@ class ProcessorIMU : public ProcessorMotion{
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
-inline void ProcessorIMU::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
+inline void ProcessorIMU::remapState(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
 {
     new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x1.data());
     new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x1.data() + 3);
@@ -212,6 +211,22 @@ inline void ProcessorIMU::remap(const Eigen::VectorXs& _x1, const Eigen::VectorX
     new (&v_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data() + 7);
     new (&bias_acc_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 10);
     new (&bias_gyro_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 13);
+
+}
+
+inline void ProcessorIMU::remapDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out)
+{
+    new (&p1_) Eigen::Map<const Eigen::Vector3s>(_delta1.data());
+    new (&q1_) Eigen::Map<const Eigen::Quaternions>(_delta1.data() + 3);
+    new (&v1_) Eigen::Map<const Eigen::Vector3s>(_delta1.data() + 7);
+
+    new (&p2_) Eigen::Map<const Eigen::Vector3s>(_delta2.data());
+    new (&q2_) Eigen::Map<const Eigen::Quaternions>(_delta2.data()+ 3);
+    new (&v2_) Eigen::Map<const Eigen::Vector3s>(_delta2.data() + 7);
+
+    new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data());
+    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 3);
+    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 7);
 
 }
 
