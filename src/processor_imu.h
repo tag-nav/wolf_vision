@@ -82,6 +82,12 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                      Eigen::VectorXs& _delta2_minus_delta1) { };
 
+        /** \brief Adds a delta-increment into the pre-integrated Delta-state
+        * \param _delta the delta increment to add
+        *
+        * This function implements the pre-integrated measurements update :
+        *   Delta_ik = Delta_ij (+) _delta_jk
+        */
         virtual void integrateDelta(const Eigen::VectorXs& _delta)
         {
           // TODO: all the work to be done here

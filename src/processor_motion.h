@@ -224,7 +224,8 @@ class ProcessorMotion : public ProcessorBase
         /** \brief convert raw CaptureMotion data to the delta-state format
          *
          * This function accesses the members data_ (as produced by extractData()) and dt_,
-         * and computes the value of the delta-state delta_.
+         * and computes the value of the delta-state delta_. Note that this value is
+         * held by the member delta_ of the class that calls it.
          *
          * \param _data the raw motion data
          * \param _data_cov the raw motion data covariance
@@ -473,7 +474,6 @@ inline void ProcessorMotion::integrate()
     integrateDelta(delta_);
 
     // and covariance
-    // TODO:
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,
                          delta_integrated_cov_);
 
