@@ -18,13 +18,6 @@ class ProcessorIMU : public ProcessorMotion{
         ProcessorIMU();
         virtual ~ProcessorIMU();
 
-
-        /// Bias interactions
-        void setAccelerometerBias(const Eigen::Vector3s& _bias) { bias_acc_ = _bias; }
-        void setGyroBias(const Eigen::Vector3s& _bias) { bias_gyro_ = _bias; }
-        const Eigen::Vector3s& getAccelerometerBias() { return bias_acc_; }
-        const Eigen::Vector3s& getGyroBias() { return bias_gyro_; }
-
         // not redefining main operations (they should be the same for all derived classes)
 
     protected:
@@ -44,23 +37,25 @@ class ProcessorIMU : public ProcessorMotion{
          */
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
         {
-            // TODO: Make these two also Map, and do a remap in data2delta
-            Eigen::Vector3s measured_acc(_data.segment(0,3));        // acc  = data[0:2]
-            Eigen::Vector3s measured_gyro(_data.segment(3,3));       // gyro = data[3:5]
-
             // remap
+            new (&measured_acc_) Eigen::Map<Eigen::Vector3s>(data_.data());
+            new (&measured_gyro_) Eigen::Map<Eigen::Vector3s>(data_.data() + 3);
+
             new (&p_out_) Eigen::Map<Eigen::Vector3s>(delta_.data());
             new (&q_out_) Eigen::Map<Eigen::Quaternions>(delta_.data() + 3);
             new (&v_out_) Eigen::Map<Eigen::Vector3s>(delta_.data() + 7);
+
+            new (&bias_acc_) Eigen::Map<Eigen::Vector3s>(x_.data() + 10);
+            new (&bias_gyro_) Eigen::Map<Eigen::Vector3s>(x_.data() + 13);
 
             /// Position delta
             p_out_ = v_out_ * dt_; /// FIXME change v_out by p_ij or v_Delta
 
             /// Velocity delta
-            v_out_ = q_out_._transformVector((measured_acc - bias_acc_) * _dt); // FIXME: q_out_ here should be q_ij or q_Delta
+            v_out_ = q_out_._transformVector((measured_acc_ - bias_acc_) * _dt); // FIXME: q_out_ here should be q_ij or q_Delta
 
             /// Quaternion delta
-            Eigen::v2q((measured_gyro - bias_gyro_) * _dt, q_out_);
+            Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_);
 
           }
 
@@ -129,7 +124,14 @@ class ProcessorIMU : public ProcessorMotion{
         */
         virtual void integrateDelta()
         {
-          // TODO: all the work to be done here
+          /* In the case of IMU, updating the pre-integrated measurements
+           * corresponds to adding latest delta to the pre-integrated measurements
+           * with the composition rules defined by the state :
+           *
+           * delta_preintegrated_ik = delta_preintegrated_ij (+) delta_jk
+           *
+           * */
+          deltaPlusDelta(delta_integrated_, delta_ , delta_integrated_);
         }
 
         virtual Eigen::VectorXs deltaZero() const
@@ -160,8 +162,11 @@ class ProcessorIMU : public ProcessorMotion{
 //        CaptureIMU* capture_imu_ptr_; //specific pointer to capture imu data object
 
     private:
-        Eigen::Vector3s bias_acc_; // TODO: Make these two also Map, and do a remap in data2delta
-        Eigen::Vector3s bias_gyro_;
+        Eigen::Map<Eigen::Vector3s> bias_acc_;
+        Eigen::Map<Eigen::Vector3s> bias_gyro_;
+
+        Eigen::Map<Eigen::Vector3s> measured_acc_;
+        Eigen::Map<Eigen::Vector3s> measured_gyro_;
 
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
         Eigen::Map<Eigen::Vector3s> p_out_;
