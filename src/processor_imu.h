@@ -32,27 +32,20 @@ class ProcessorIMU : public ProcessorMotion{
          * @param _data
          * @param _data_cov
          * @param _dt
-         * @param _delta
-         * @param _delta_cov
          */
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
         {
             // remap
-            new (&measured_acc_) Eigen::Map<Eigen::Vector3s>(data_.data());
-            new (&measured_gyro_) Eigen::Map<Eigen::Vector3s>(data_.data() + 3);
-
-            new (&p_out_) Eigen::Map<Eigen::Vector3s>(delta_.data());
-            new (&q_out_) Eigen::Map<Eigen::Quaternions>(delta_.data() + 3);
-            new (&v_out_) Eigen::Map<Eigen::Vector3s>(delta_.data() + 7);
-
-            new (&bias_acc_) Eigen::Map<Eigen::Vector3s>(x_.data() + 10);
-            new (&bias_gyro_) Eigen::Map<Eigen::Vector3s>(x_.data() + 13);
+            remapMeasurements(_data);
+            remapDelta(delta_);
+            remapBias(x_);
+            remapPreintegratedMeasurements(delta_integrated_);
 
             /// Position delta
-            p_out_ = v_out_ * dt_; /// FIXME change v_out by p_ij or v_Delta
+            p_out_ = velocity_preint_ * dt_;
 
             /// Velocity delta
-            v_out_ = q_out_._transformVector((measured_acc_ - bias_acc_) * _dt); // FIXME: q_out_ here should be q_ij or q_Delta
+            v_out_ = orientation_preint_._transformVector((measured_acc_ - bias_acc_) * _dt);
 
             /// Quaternion delta
             Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_);
@@ -168,6 +161,10 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<Eigen::Vector3s> measured_acc_;
         Eigen::Map<Eigen::Vector3s> measured_gyro_;
 
+        Eigen::Map<Eigen::Vector3s> position_preint_;
+        Eigen::Map<Eigen::Quaternions> orientation_preint_;
+        Eigen::Map<Eigen::Vector3s> velocity_preint_;
+
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
         Eigen::Map<Eigen::Vector3s> p_out_;
         Eigen::Map<const Eigen::Quaternions> q1_, q2_;
@@ -181,6 +178,10 @@ class ProcessorIMU : public ProcessorMotion{
 
         void remapState(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_out);
         void remapDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
+        void remapDelta(Eigen::VectorXs& _delta_out);
+        void remapBias(const Eigen::VectorXs& _state);
+        void remapMeasurements(const Eigen::VectorXs& _data);
+        void remapPreintegratedMeasurements(const Eigen::VectorXs& _preint);
 
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
         ///< (first-order propagation from *measurementCovariance*).
@@ -211,7 +212,6 @@ inline void ProcessorIMU::remapState(const Eigen::VectorXs& _x, const Eigen::Vec
     new (&v_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data() + 7);
     new (&bias_acc_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 10);
     new (&bias_gyro_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 13);
-
 }
 
 inline void ProcessorIMU::remapDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out)
@@ -227,7 +227,32 @@ inline void ProcessorIMU::remapDelta(const Eigen::VectorXs& _delta1, const Eigen
     new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data());
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 3);
     new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 7);
+}
 
+inline void ProcessorIMU::remapDelta(Eigen::VectorXs& _delta_out)
+{
+    new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data());
+    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 3);
+    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 7);
+}
+
+inline void ProcessorIMU::remapBias(const Eigen::VectorXs& _state)
+{
+  new (&bias_acc_) Eigen::Map<const Eigen::Vector3s>(_state.data() + 10);
+  new (&bias_gyro_) Eigen::Map<const Eigen::Vector3s>(_state.data() + 13);
+}
+
+inline void ProcessorIMU::remapMeasurements(const Eigen::VectorXs& _data)
+{
+  new (&measured_acc_) Eigen::Map<const Eigen::Vector3s>(_data.data());
+  new (&measured_gyro_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
+}
+
+inline void ProcessorIMU::remapPreintegratedMeasurements(const Eigen::VectorXs& _preint)
+{
+  new (&position_preint_) Eigen::Map<const Eigen::Vector3s>(_preint.data());
+  new (&orientation_preint_) Eigen::Map<const Eigen::Quaternions>(_preint.data() + 3);
+  new (&velocity_preint_) Eigen::Map<const Eigen::Vector3s>(_preint.data() + 7);
 }
 
 } // namespace wolf
