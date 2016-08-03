@@ -49,9 +49,9 @@ class ProcessorIMU : public ProcessorMotion{
             Eigen::Vector3s measured_gyro(_data.segment(3,3));       // gyro = data[3:5]
 
             // remap
-            new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta.data());
-            new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data() + 3);
-            new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta.data() + 7);
+            new (&p_out_) Eigen::Map<Eigen::Vector3s>(delta_.data());
+            new (&q_out_) Eigen::Map<Eigen::Quaternions>(delta_.data() + 3);
+            new (&v_out_) Eigen::Map<Eigen::Vector3s>(delta_.data() + 7);
 
             /// Position delta
             p_out_ = v_out_ * dt_; /// FIXME change v_out by p_ij or v_Delta
@@ -61,9 +61,6 @@ class ProcessorIMU : public ProcessorMotion{
 
             /// Quaternion delta
             Eigen::v2q((measured_gyro - bias_gyro_) * _dt, q_out_);
-
-            // Null bias deltas
-            _delta.tail(6) = Eigen::VectorXs::Zero(6); // TODO: See if we can avoid consuming time here
 
           }
 
@@ -177,7 +174,7 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<const Eigen::Vector3s> bias_gyro1_, bias_gyro2_;
         Eigen::Map<Eigen::Vector3s> bias_gyro_out_;
 
-        void remapState(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out);
+        void remapState(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_out);
         void remapDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
 
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
@@ -192,19 +189,17 @@ class ProcessorIMU : public ProcessorMotion{
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
-inline void ProcessorIMU::remapState(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
+inline void ProcessorIMU::remapState(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_out)
 {
-    new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x1.data());
-    new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x1.data() + 3);
-    new (&v1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 7);
-    new (&bias_acc1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 10);
-    new (&bias_gyro1_) Eigen::Map<const Eigen::Vector3s>(_x1.data() + 13);
+    new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x.data());
+    new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x.data() + 3);
+    new (&v1_) Eigen::Map<const Eigen::Vector3s>(_x.data() + 7);
+    new (&bias_acc1_) Eigen::Map<const Eigen::Vector3s>(_x.data() + 10);
+    new (&bias_gyro1_) Eigen::Map<const Eigen::Vector3s>(_x.data() + 13);
 
-    new (&p2_) Eigen::Map<const Eigen::Vector3s>(_x2.data());
-    new (&q2_) Eigen::Map<const Eigen::Quaternions>(_x2.data()+ 3);
-    new (&v2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 7);
-    new (&bias_acc2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 10);
-    new (&bias_gyro2_) Eigen::Map<const Eigen::Vector3s>(_x2.data() + 13);
+    new (&p2_) Eigen::Map<const Eigen::Vector3s>(_delta.data());
+    new (&q2_) Eigen::Map<const Eigen::Quaternions>(_delta.data()+ 3);
+    new (&v2_) Eigen::Map<const Eigen::Vector3s>(_delta.data() + 7);
 
     new (&p_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data());
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_x_out.data() + 3);
