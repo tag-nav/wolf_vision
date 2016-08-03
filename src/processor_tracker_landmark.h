@@ -173,7 +173,10 @@ inline void ProcessorTrackerLandmark::advance()
 {
     //std::cout << "ProcessorTrackerLandmark::advance" << std::endl;
     for ( auto match : matches_landmark_from_last_)
+    {
         delete match.second;
+        match.second = nullptr;
+    }
 
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
 
@@ -187,7 +190,10 @@ inline void ProcessorTrackerLandmark::reset()
 {
     //std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
     for ( auto match : matches_landmark_from_last_)
+    {
         delete match.second;
+        match.second = nullptr;
+    }
 
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
 

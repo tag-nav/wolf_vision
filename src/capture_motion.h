@@ -1,67 +1,100 @@
+/**
+ * \file capture_motion2.h
+ *
+ *  Created on: Mar 16, 2016
+ *      \author: jsola
+ */
 
-#ifndef CAPTURE_RELATIVE_H_
-#define CAPTURE_RELATIVE_H_
+#ifndef SRC_CAPTURE_MOTION_H_
+#define SRC_CAPTURE_MOTION_H_
 
-//Wolf includes
+// Wolf includes
 #include "capture_base.h"
+#include "motion_buffer.h"
 
-//std includes
-//
-
+// STL includes
+#include <list>
+#include <algorithm>
+#include <iterator>
+#include <utility>
 
 namespace wolf {
 
-//class CaptureBase
+/** \brief Base class for motion Captures.
+ *
+ * This class implements Captures for sensors integrating motion.
+ *
+ * The raw data of this type of captures is required to be in the form of a vector --> see attribute data_.
+ *
+ * It contains a MotionBuffer buffer of Motion pre-integrated motions that is being filled
+ * by the motion processors (deriving from ProcessorMotion) --> See Motion, MotionBuffer, and ProcessorMotion.
+ *
+ * This buffer contains the integrated motion:
+ *  - since the last key-Frame
+ *  - until the frame of this capture.
+ *
+ * Once a keyframe is generated, this buffer is frozen and kept in the Capture for eventual later uses.
+ * It is then used to compute the factor that links the Frame of this capture to the previous key-frame in the Trajectory.
+ */
+
 class CaptureMotion : public CaptureBase
 {
-    protected:
-        Eigen::VectorXs data_; ///< Raw data.
-        Eigen::MatrixXs data_covariance_; ///< Noise of the capture.
-        TimeStamp final_time_stamp_; ///< Final Time stamp
-
-
+        // public interface:
     public:
-        CaptureMotion(const std::string& _type, const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
-
-        CaptureMotion(const std::string& _type, const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
-        virtual ~CaptureMotion();
-
-        Eigen::VectorXs getData()
+        CaptureMotion(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, FrameBase* _origin_frame_ptr) :
+                CaptureBase("MOTION 2", _ts, _sensor_ptr), data_(_data), data_cov_(_data_cov), buffer_(), origin_frame_ptr_(_origin_frame_ptr)
         {
-              return data_;
+            //
+        }
+        virtual ~CaptureMotion()
+        {
+            //
+        }
+        const Eigen::VectorXs& getData() const
+        {
+            return data_;
+        }
+        const Eigen::MatrixXs& getDataCovariance() const
+        {
+            return data_cov_;
+        }
+        void setData(const Eigen::VectorXs& _data)
+        {
+            data_ = _data;
+        }
+        void setDataCovariance(const Eigen::MatrixXs& _data_cov)
+        {
+            data_cov_ = _data_cov;
+        }
+        MotionBuffer* getBufferPtr()
+        {
+            return &buffer_;
+        }
+        const MotionBuffer* getBufferPtr() const
+        {
+            return &buffer_;
+        }
+        const Eigen::VectorXs& getDelta() const
+        {
+            return buffer_.get().back().delta_integr_;
+        }
+        FrameBase* getOriginFramePtr()
+        {
+            return origin_frame_ptr_;
+        }
+        void setOriginFramePtr(FrameBase* _frame_ptr)
+        {
+            origin_frame_ptr_ = _frame_ptr;
         }
 
-        Eigen::MatrixXs getDataCovariance()
-        {
-              return data_covariance_;
-        }
-
-        virtual void integrateCapture(CaptureMotion* _new_capture) = 0;
-
-        virtual CaptureMotion* interpolateCapture(const TimeStamp& _ts) = 0;
-
-        TimeStamp getInitTimeStamp() const;
-
-        TimeStamp getFinalTimeStamp() const;
-
-        void setInitTimeStamp(const TimeStamp & _ts);
-
-        void setFinalTimeStamp(const TimeStamp & _ts);
-
-        // TODO Move it to ProcessorX class()
-        //      Rename to computeFrameInitialGuess() ... for instance
-        //      Another name could be provideFrameInitialGuess();
-        //Should be virtual in ProcessorBase with an empty/error message
-        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now) const = 0;
-
+        // member data:
+    private:
+        Eigen::VectorXs data_;        ///< Motion data in form of vector mandatory
+        Eigen::MatrixXs data_cov_;    ///< Motion data in form of vector mandatory
+        MotionBuffer buffer_;         ///< Buffer of motions between this Capture and the next one.
+        FrameBase* origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
 
 } // namespace wolf
 
-#endif
+#endif /* SRC_CAPTURE_MOTION_H_ */

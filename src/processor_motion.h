@@ -9,8 +9,8 @@
 #define PROCESSOR_MOTION_H_
 
 // Wolf
+#include "capture_motion.h"
 #include "processor_base.h"
-#include "capture_motion2.h"
 #include "time_stamp.h"
 
 namespace wolf
@@ -139,14 +139,14 @@ class ProcessorMotion : public ProcessorBase
         /** \brief Finds the capture that contains the closest previous motion of _ts
          * \return a pointer to the capture (if it exist) or a nullptr (otherwise)
          */
-        CaptureMotion2* findCaptureContainingTimeStamp(const TimeStamp& _ts) const;
+        CaptureMotion* findCaptureContainingTimeStamp(const TimeStamp& _ts) const;
 
         /** Composes the deltas in two pre-integrated Captures
          * \param _cap1_ptr pointer to the first Capture
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
          * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
          */
-        void sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr, Eigen::VectorXs& _delta1_plus_delta2);
+        void sumDeltas(CaptureMotion* _cap1_ptr, CaptureMotion* _cap2_ptr, Eigen::VectorXs& _delta1_plus_delta2);
 
         /** Composes two delta covariances
          * \param _delta_cov1 covariance of the first delta
@@ -190,7 +190,7 @@ class ProcessorMotion : public ProcessorBase
     protected:
         void updateDt();
         void integrate();
-        void reintegrate(CaptureMotion2* _capture_ptr);
+        void reintegrate(CaptureMotion* _capture_ptr);
 
         /** Pre-process incoming Capture
          *
@@ -320,8 +320,8 @@ class ProcessorMotion : public ProcessorBase
         Size delta_size_;    ///< the size of the deltas
         Size data_size_; ///< the size of the incoming data
         CaptureBase* origin_ptr_;
-        CaptureMotion2* last_ptr_;
-        CaptureMotion2* incoming_ptr_;
+        CaptureMotion* last_ptr_;
+        CaptureMotion* incoming_ptr_;
 
     protected:
         // helpers to avoid allocation
@@ -387,13 +387,13 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
     assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
 
     // make (empty) origin Capture
-    origin_ptr_ = new CaptureMotion2(_origin_frame->getTimeStamp(), this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
+    origin_ptr_ = new CaptureMotion(_origin_frame->getTimeStamp(), this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                      Eigen::MatrixXs::Zero(data_size_, data_size_), nullptr);
     // Add origin capture to origin frame
     _origin_frame->addCapture(origin_ptr_);
 
     // make (emtpy) last Capture
-    last_ptr_ = new CaptureMotion2(_origin_frame->getTimeStamp(), this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
+    last_ptr_ = new CaptureMotion(_origin_frame->getTimeStamp(), this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                    Eigen::MatrixXs::Zero(data_size_, data_size_), _origin_frame);
 
     // Make frame at last Capture
@@ -408,14 +408,14 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
     //std::cout << "ProcessorMotion::process:" << std::endl;
-    incoming_ptr_ = (CaptureMotion2*)(_incoming_ptr);
+    incoming_ptr_ = (CaptureMotion*)(_incoming_ptr);
     preProcess();
     integrate();
 
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         // key_capture
-        CaptureMotion2* key_capture_ptr = last_ptr_;
+        CaptureMotion* key_capture_ptr = last_ptr_;
         FrameBase* key_frame_ptr = key_capture_ptr->getFramePtr();
 
         // Set the frame as key
@@ -436,7 +436,7 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
         key_feature_ptr->addConstraint(createConstraint(key_feature_ptr, origin_ptr_->getFramePtr()));
 
         // new last capture
-        last_ptr_ = new CaptureMotion2(key_frame_ptr->getTimeStamp(), this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
+        last_ptr_ = new CaptureMotion(key_frame_ptr->getTimeStamp(), this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                        Eigen::MatrixXs::Zero(data_size_, data_size_), key_frame_ptr);
 
         // create a new last frame
@@ -492,7 +492,7 @@ inline void ProcessorMotion::integrate()
     //std::cout << delta_integrated_cov_ << std::endl;
 }
 
-inline void ProcessorMotion::reintegrate(CaptureMotion2* _capture_ptr)
+inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
 {
     //std::cout << "ProcessorMotion::reintegrate" << std::endl;
     Motion zero_motion; // call constructor with params // TODO use motionZero(ts)
@@ -540,13 +540,13 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
 
     // find capture in which the new keyframe is interpolated
-    CaptureMotion2* capture_ptr = findCaptureContainingTimeStamp(ts);
+    CaptureMotion* capture_ptr = findCaptureContainingTimeStamp(ts);
     assert(capture_ptr != nullptr && "ProcessorMotion::keyFrameCallback: no motion capture containing the required TimeStamp found");
 
     FrameBase* key_capture_origin = capture_ptr->getOriginFramePtr();
 
     // create motion capture
-    CaptureMotion2* key_capture_ptr = new CaptureMotion2(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
+    CaptureMotion* key_capture_ptr = new CaptureMotion(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
                                                          Eigen::MatrixXs::Zero(data_size_, data_size_), key_capture_origin);
 
     // add motion capture to keyframe
@@ -686,7 +686,7 @@ inline void ProcessorMotion::getMotion(const TimeStamp& _ts, Motion& _motion) co
     capture_ptr->getBufferPtr()->getMotion(_ts, _motion);
 }
 
-inline CaptureMotion2* ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
+inline CaptureMotion* ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
 {
     //std::cout << "ProcessorMotion::findCaptureContainingTimeStamp: ts = " << _ts.getSeconds() << "." << _ts.getNanoSeconds() << std::endl;
     auto capture_ptr = last_ptr_;
@@ -698,7 +698,7 @@ inline CaptureMotion2* ProcessorMotion::findCaptureContainingTimeStamp(const Tim
 
         // go to the previous motion capture
         else if (capture_ptr == last_ptr_)
-            capture_ptr = (CaptureMotion2*)origin_ptr_;
+            capture_ptr = (CaptureMotion*)origin_ptr_;
         else if (capture_ptr->getOriginFramePtr() == nullptr)
             return nullptr;
         else
@@ -707,13 +707,13 @@ inline CaptureMotion2* ProcessorMotion::findCaptureContainingTimeStamp(const Tim
             if (capture_base_ptr == nullptr)
                 return nullptr;
             else
-                capture_ptr = (CaptureMotion2*)capture_base_ptr;
+                capture_ptr = (CaptureMotion*)capture_base_ptr;
         }
     }
     return capture_ptr;
 }
 
-inline void ProcessorMotion::sumDeltas(CaptureMotion2* _cap1_ptr, CaptureMotion2* _cap2_ptr,
+inline void ProcessorMotion::sumDeltas(CaptureMotion* _cap1_ptr, CaptureMotion* _cap2_ptr,
                                        Eigen::VectorXs& _delta1_plus_delta2)
 {
     // TODO: what should it return, now? also covariance? jacobians? a new CaptureMotion..?

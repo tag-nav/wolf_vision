@@ -13,9 +13,5 @@ CaptureVoid::~CaptureVoid()
 	//std::cout << "deleting CaptureVoid " << nodeId() << std::endl;
 }
 
-Eigen::VectorXs CaptureVoid::computeFramePose(const TimeStamp& _now) const
-{
-    return Eigen::VectorXs::Zero(3);
-}
 
 } // namespace wolf

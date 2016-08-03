@@ -23,12 +23,4 @@ rawgpsutils::SatellitesObs &CaptureGPS::getData()
 }
 
 
-/*
- * Dummy implementation of the method, only because it's pure virtual
- */
-Eigen::VectorXs CaptureGPS::computeFramePose(const TimeStamp &_now) const
-{
-    return Eigen::Vector3s(0, 0, 0);
-}
-
 } //namespace wolf

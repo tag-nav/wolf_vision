@@ -10,6 +10,7 @@ landmarks:
     orientation: [1]
     position fixed: true
     orientation fixed: true
+    classification: 0
     first_id: 0
     first_defined: false
     last_defined: false
@@ -24,6 +25,7 @@ landmarks:
     orientation: [4]
     position fixed: true
     orientation fixed: true
+    classification: 0
     first_id: -2
     first_defined: false
     last_defined: true
@@ -40,6 +42,7 @@ landmarks:
     orientation: [6]
     position fixed: true
     orientation fixed: true
+    classification: 0
     first_id: 0
     first_defined: true
     last_defined: false

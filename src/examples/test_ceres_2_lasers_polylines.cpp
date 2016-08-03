@@ -245,7 +245,7 @@ int main(int argc, char** argv)
     problem.addSensor(laser_2_sensor);
     problem.setProcessorMotion(odom_processor);
 
-    CaptureMotion2* odom_capture = new CaptureMotion2(ts,odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor, nullptr);
+    CaptureMotion* odom_capture = new CaptureMotion(ts,odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor, nullptr);
 
     // Simulated robot
     FaramoticsRobot robot(argc, argv, laser_1_pose, laser_2_pose);

@@ -32,14 +32,5 @@ void CaptureGPSFix::process()
 	getFeatureListPtr()->front()->addConstraint(new ConstraintGPS2D(getFeatureListPtr()->front(), getFramePtr()));
 }
 
-Eigen::VectorXs CaptureGPSFix::computeFramePose(const TimeStamp& _now) const
-{
-	return data_;
-}
-
-//void CaptureGPSFix::printSelf(unsigned int _ntabs, std::ostream & _ost) const
-//{
-//	return data_;
-//}
 
 } //namespace wolf

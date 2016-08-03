@@ -38,7 +38,6 @@ IF(OpenCV_FOUND)
 ENDIF(OpenCV_FOUND)
 
 # YAML with yaml-cpp
-#SET(YAMLCPP_USE_STATIC_LIBS TRUE) #Use static library : not working: TO BE REVISED
 FIND_PACKAGE(YamlCpp)
 IF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library FOUND: yaml-cpp related sources will be built.")
@@ -103,9 +102,7 @@ SET(HDRS
     capture_base.h
     capture_fix.h
     capture_gps_fix.h
-    capture_motion.h
     capture_motion2.h
-    capture_odom_2D.h
     capture_void.h
     constraint_analytic.h
     constraint_base.h
@@ -174,7 +171,8 @@ SET(HDRS
     state_quaternion.h
     time_stamp.h
     trajectory_base.h
-    wolf_manager.h)
+    # wolf_manager.h
+    )
    
 SET(HDRS_DTASSC
     data_association/matrix.h
@@ -188,8 +186,6 @@ SET(SRCS
     capture_base.cpp
     capture_gps_fix.cpp
     capture_fix.cpp
-    capture_motion.cpp
-    capture_odom_2D.cpp
     capture_void.cpp
     constraint_base.cpp
     constraint_analytic.cpp
@@ -234,7 +230,6 @@ SET(SRCS
     sensor_odom_2D.cpp
     time_stamp.cpp
     trajectory_base.cpp
-    wolf_manager.cpp
     data_association/association_solver.cpp
     data_association/association_node.cpp
     data_association/association_tree.cpp
@@ -266,7 +261,6 @@ IF (laser_scan_utils_FOUND)
     SET(HDRS ${HDRS}
         capture_laser_2D.h
         sensor_laser_2D.h
-        #processor_laser_2D.h
         processor_tracker_landmark_corner.h
         processor_tracker_landmark_polyline.h
         processor_tracker_feature_corner.h
@@ -274,7 +268,6 @@ IF (laser_scan_utils_FOUND)
     SET(SRCS ${SRCS}
         capture_laser_2D.cpp
         sensor_laser_2D.cpp
-        #processor_laser_2D.cpp
         processor_tracker_landmark_corner.cpp
         processor_tracker_landmark_polyline.cpp
         processor_tracker_feature_corner.cpp
