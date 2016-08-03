@@ -88,7 +88,7 @@ class ProcessorIMU : public ProcessorMotion{
         * This function implements the pre-integrated measurements update :
         *   Delta_ik = Delta_ij (+) _delta_jk
         */
-        virtual void integrateDelta(const Eigen::VectorXs& _delta)
+        virtual void integrateDelta()
         {
           // TODO: all the work to be done here
         }
