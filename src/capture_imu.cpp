@@ -22,10 +22,10 @@ CaptureIMU::~CaptureIMU()
     //std::cout << "Destroying CaptureIMU capture...\n";
 }
 
-inline void CaptureIMU::process()
-{
-
-}
+//inline void CaptureIMU::process()
+//{
+    //sensor_ptr_->getProcessorListPtr()->front()->process(this);
+//}
 
 Eigen::VectorXs CaptureIMU::computeFramePose(const TimeStamp& _now) const
 {
@@ -49,4 +49,3 @@ CaptureIMU* CaptureIMU::interpolateCapture(const TimeStamp& _ts)
 }
 
 } //namespace wolf
-

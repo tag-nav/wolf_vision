@@ -22,7 +22,7 @@ class CaptureIMU : public CaptureMotion
          **/
         virtual ~CaptureIMU();
 
-        virtual void process();
+        //virtual void process();
 
         virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now = 0) const;
 

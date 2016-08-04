@@ -407,10 +407,12 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
 
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
-    //std::cout << "ProcessorMotion::process:" << std::endl;
+    std::cout << "ProcessorMotion::process:" << std::endl;
     incoming_ptr_ = (CaptureMotion*)(_incoming_ptr);
     preProcess();
+    std::cout << "out preprocess" << std::endl;
     integrate();
+    std::cout << "out integrate" << std::endl;
 
     if (voteForKeyFrame() && permittedKeyFrame())
     {
@@ -462,18 +464,24 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 
 inline void ProcessorMotion::integrate()
 {
+    std::cout << "in dt" << std::endl;
+
     // Set dt
     updateDt();
+    std::cout << "out dt" << std::endl;
 
     // get data and convert it to delta
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
+    std::cout << "out data2delta" << std::endl;
 
     // then integrate the current delta to pre-integrated measurements
     integrateDelta();
+    std::cout << "out integrateDelta" << std::endl;
 
     // and covariance
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,
                          delta_integrated_cov_);
+    std::cout << "out cov" << std::endl;
 
     // then push it into buffer
     getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(),
@@ -483,6 +491,8 @@ inline void ProcessorMotion::integrate()
                                              delta_integrated_cov_,
                                              Eigen::MatrixXs::Zero(delta_size_, delta_size_),
                                              Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
+    std::cout << "out pushback" << std::endl;
+
 
     //std::cout << "motion integrated: " << getBufferPtr()->get().size()-1 << std::endl;
     //std::cout << "\tts: " << getBufferPtr()->get().back().ts_.getSeconds() << "." << getBufferPtr()->get().back().ts_.getNanoSeconds() << std::endl;
@@ -727,7 +737,11 @@ inline bool ProcessorMotion::isMotion()
 
 inline void ProcessorMotion::updateDt()
 {
+    std::cout << "out updatedt" << std::endl;
+    std::cout << incoming_ptr_->getTimeStamp().get() << std::endl;
     dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->get().back().ts_;
+    std::cout << "out update dt" << std::endl;
+
 }
 
 inline const MotionBuffer* ProcessorMotion::getBufferPtr() const

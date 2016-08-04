@@ -39,6 +39,10 @@ int main(int argc, char** argv)
         filename_gyro = argv[2];
         data_file_acc.open(filename_acc);
         data_file_gyro.open(filename_gyro);
+
+        std::string dummy;
+        getline(data_file_acc, dummy); getline(data_file_gyro, dummy);
+
         if(!data_file_acc.is_open() || !data_file_gyro.is_open()){
             std::cerr << "Failed to open data files... Exiting" << std::endl;
             return 1;
@@ -65,16 +69,20 @@ int main(int argc, char** argv)
     while(!data_file_acc.eof()){
         data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
         data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
+
         t.set(mti_clock);
 
         imu_ptr = new CaptureIMU(t, sensor_ptr_, data_);
 
+        std::cout << "in process" << std::endl;
+
         imu_ptr ->process();
+
+        std::cout << "out process" << std::endl;
+
     }
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
-
-    // TODO : Main loop
 
     delete wolf_problem_ptr_;
 
