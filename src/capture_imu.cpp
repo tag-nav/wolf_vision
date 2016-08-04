@@ -4,8 +4,8 @@ namespace wolf {
 
 
 CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr,
-                             const Eigen::Vector6s& _data) :
-        CaptureMotion(_init_ts, _sensor_ptr, _data )
+                             const Eigen::Vector6s& _acc_gyro_data) :
+        CaptureMotion(_init_ts, _sensor_ptr, _acc_gyro_data )
 {
     setType("IMU");
 }
@@ -19,33 +19,8 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr,
 
 CaptureIMU::~CaptureIMU()
 {
-    //std::cout << "Destroying CaptureIMU capture...\n";
+    //
 }
 
-//inline void CaptureIMU::process()
-//{
-    //sensor_ptr_->getProcessorListPtr()->front()->process(this);
-//}
-
-Eigen::VectorXs CaptureIMU::computeFramePose(const TimeStamp& _now) const
-{
-
-    return Eigen::Vector3s::Identity();
-}
-
-void CaptureIMU::addConstraints()
-{
-
-}
-
-void CaptureIMU::integrateCapture(CaptureMotion* _new_capture)
-{
-
-}
-
-CaptureIMU* CaptureIMU::interpolateCapture(const TimeStamp& _ts)
-{
-    return nullptr;
-}
 
 } //namespace wolf

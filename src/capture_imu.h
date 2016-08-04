@@ -15,6 +15,7 @@ class CaptureIMU : public CaptureMotion
         /*CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance);
 
         CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance, FrameBase* _origin_frame_ptr);*/
+
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
@@ -22,15 +23,6 @@ class CaptureIMU : public CaptureMotion
          **/
         virtual ~CaptureIMU();
 
-        //virtual void process();
-
-        virtual Eigen::VectorXs computeFramePose(const TimeStamp& _now = 0) const;
-
-        virtual void addConstraints();
-
-        virtual void integrateCapture(CaptureMotion* _new_capture);
-
-        virtual CaptureIMU* interpolateCapture(const TimeStamp& _ts);
 };
 
 } // namespace wolf
