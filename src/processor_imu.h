@@ -167,16 +167,20 @@ class ProcessorIMU : public ProcessorMotion{
 //        CaptureIMU* capture_imu_ptr_; //specific pointer to capture imu data object
 
     private:
+        // Maps to the biases in the keyframe's state
         Eigen::Map<Eigen::Vector3s> bias_acc_;
         Eigen::Map<Eigen::Vector3s> bias_gyro_;
 
+        // Maps to the received measurements
         Eigen::Map<Eigen::Vector3s> measured_acc_;
         Eigen::Map<Eigen::Vector3s> measured_gyro_;
 
+        // Maps to the pos, quat and vel of the pre-integrated delta
         Eigen::Map<Eigen::Vector3s> position_preint_;
         Eigen::Map<Eigen::Quaternions> orientation_preint_;
         Eigen::Map<Eigen::Vector3s> velocity_preint_;
 
+        // Maps to pos, quat, vel, to be used as temporaries
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
         Eigen::Map<Eigen::Vector3s> p_out_;
         Eigen::Map<const Eigen::Quaternions> q1_, q2_;
@@ -190,6 +194,7 @@ class ProcessorIMU : public ProcessorMotion{
 //        Eigen::Map<const Eigen::Vector3s> bias_gyro1_;
 //        Eigen::Map<Eigen::Vector3s> bias_gyro_out_;
 
+        // Helper functions to remap several magnitudes
         void remapState(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_out);
         void remapDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
         void remapDelta(Eigen::VectorXs& _delta_out);
