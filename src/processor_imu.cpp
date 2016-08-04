@@ -21,13 +21,11 @@ ProcessorIMU::ProcessorIMU() :
         v2_(nullptr),
         v_out_(nullptr),
         bias_acc1_(nullptr),
-        bias_acc2_(nullptr),
         bias_acc_out_(nullptr),
         bias_gyro1_(nullptr),
-        bias_gyro2_(nullptr),
         bias_gyro_out_(nullptr)
 {
-    //
+
 }
 
 ProcessorIMU::~ProcessorIMU()

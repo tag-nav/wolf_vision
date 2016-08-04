@@ -45,7 +45,7 @@ class ProcessorIMU : public ProcessorMotion{
             p_out_ = velocity_preint_ * dt_;
 
             /// Velocity delta
-            v_out_ = orientation_preint_._transformVector((measured_acc_ - bias_acc_) * _dt);
+            v_out_ = orientation_preint_ * ((measured_acc_ - bias_acc_) * _dt);
 
             /// Quaternion delta
             Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_);
@@ -67,15 +67,16 @@ class ProcessorIMU : public ProcessorMotion{
 
           remapState(_x, _delta, _x_plus_delta);
 
-          /// TODO : Get gravity vector
+          const Scalar dT = last_ptr_->getTimeStamp().get() - origin_ptr_->getTimeStamp().get();
+
           /// Position update
-          //p_out_ = p1_ + v1_ * dt_ + 0.5 * gravity * dt_ * dt_ + q1_._transformVector(p2_);
+          p_out_ = p1_ + v1_ * dT + q1_ * p2_;
 
           /// Quaternion update
           q_out_ = q1_ * q2_;
 
           /// Velocity update
-          //v_out_ = v1_ + gravity * dt_ + q1_._transformVector(v2_);
+          v_out_ = v1_ + Eigen::Vector3s::Constant(0.0,0.0,9.81) * dT + q1_ * v2_;
 
         }
 
@@ -180,9 +181,9 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<Eigen::Quaternions> q_out_;
         Eigen::Map<const Eigen::Vector3s> v1_, v2_;
         Eigen::Map<Eigen::Vector3s> v_out_;
-        Eigen::Map<const Eigen::Vector3s> bias_acc1_, bias_acc2_;
+        Eigen::Map<const Eigen::Vector3s> bias_acc1_;
         Eigen::Map<Eigen::Vector3s> bias_acc_out_;
-        Eigen::Map<const Eigen::Vector3s> bias_gyro1_, bias_gyro2_;
+        Eigen::Map<const Eigen::Vector3s> bias_gyro1_;
         Eigen::Map<Eigen::Vector3s> bias_gyro_out_;
 
         void remapState(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_out);
