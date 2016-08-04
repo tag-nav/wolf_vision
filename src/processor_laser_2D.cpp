@@ -10,6 +10,12 @@ ProcessorLaser2D::ProcessorLaser2D() : ProcessorBase(PRC_LIDAR, "LASER 2D"),
     //
 }
 
+ProcessorLaser2D::ProcessorLaser2D(const ProcessorParamsLaser2D& _params) :
+        parameters_(_params), sensor_laser_ptr_(nullptr), capture_laser_ptr_(nullptr)
+{
+    //
+}
+
 ProcessorLaser2D::~ProcessorLaser2D()
 {
 }
@@ -168,7 +174,7 @@ void ProcessorLaser2D::establishConstraintsMHTree()
                     landmarks_index_map[jj] = 0;
                     //std::cout << "Landmark: " << (*j_it)->nodeId() << " - jj: " << jj << std::endl;
                     //If aperture difference is small enough, proceed with Mahalanobis distance. Otherwise Set prob to 0 to force unassociation
-                    if (fabs(pi2pi(((FeatureCorner2D*)(*feature_it))->getAperture() - (*landmark_it)->getDescriptor(0))) < MAX_ACCEPTED_APERTURE_DIFF)
+                    if (fabs(pi2pi(((FeatureCorner2D*)(*feature_it))->getAperture() - (*landmark_it)->getDescriptor(0))) < parameters_.max_accepted_aperture_diff)
                     {
                         dm2 = computeSquaredMahalanobisDistances(*feature_it, expected_features[*landmark_it], expected_features_covs[*landmark_it], Eigen::MatrixXs::Zero(3,1))(0);//Mahalanobis squared
                         prob = (dm2 < 5*5 ? 5*erfc( sqrt(dm2/2) ) : 0); //prob = erfc( sqrt(dm2/2) ); //prob = erfc( sqrt(dm2)/1.4142136 );// sqrt(2) = 1.4142136
@@ -483,7 +489,7 @@ bool ProcessorLaser2D::fitNewContainer(FeatureCorner2D* _corner_feature_ptr, Lan
     //std::cout << "Trying container... aperture = " << _corner_ptr->getMeasurement()(3) << std::endl;
 
     // It has to be 90º corner feature
-    if (std::fabs(pi2pi(_corner_feature_ptr->getMeasurement()(3) + M_PI / 2)) < MAX_ACCEPTED_APERTURE_DIFF)
+    if (std::fabs(pi2pi(_corner_feature_ptr->getMeasurement()(3) + M_PI / 2)) < parameters_.max_accepted_aperture_diff)
     {
         // Check all existing corners searching a container
         for (auto landmark_it = getProblem()->getMapPtr()->getLandmarkListPtr()->rbegin(); landmark_it != getProblem()->getMapPtr()->getLandmarkListPtr()->rend(); landmark_it++)
@@ -608,8 +614,8 @@ void ProcessorLaser2D::createContainerLandmark(FeatureCorner2D* _corner_ptr, con
                                                             corner_pose,
                                                             _feature_idx,
                                                             _corner_idx,
-                                                            CONTAINER_WIDTH,
-                                                            CONTAINER_LENGTH);
+                                                            parameters_.container_width,
+                                                            parameters_.container_length);
     // create new constraint (feature to container)
     _corner_ptr->addConstraint(new ConstraintContainer(_corner_ptr, new_landmark,_feature_idx));
 

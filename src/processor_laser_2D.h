@@ -56,12 +56,16 @@ struct ProcessorParamsLaser2D : public ProcessorParamsBase
 
 class ProcessorLaser2D : public ProcessorBase
 {
+    private:
+        ProcessorParamsLaser2D parameters_;
+
     protected:
         SensorLaser2D* sensor_laser_ptr_; //specific pointer to sensor laser 2D object
         CaptureLaser2D* capture_laser_ptr_; // specific pointer to capture laser 2D object
 
     public:
         ProcessorLaser2D();
+        ProcessorLaser2D(const ProcessorParamsLaser2D& _params);
         virtual ~ProcessorLaser2D();
 
         void process(CaptureBase *_capture_ptr);
