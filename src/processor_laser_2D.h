@@ -67,21 +67,13 @@ class ProcessorLaser2D : public ProcessorBase
         void process(CaptureBase *_capture_ptr);
 
         virtual bool voteForKeyFrame();
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr){return false;};
+        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tolerance){return false;};
         virtual void init(CaptureBase* _origin_ptr);
 
-    protected:
-//        virtual void preProcess(){}
-//        virtual void postProcess(){}
-
-        // JS: These two fcns can be removed and substituted by process() above.
     private:
         void extractFeatures(CaptureBase* _capture_ptr);
         void establishConstraints(CaptureBase* _capture_ptr_);
 
-        // JOAN_S IS TAKING RISKS HERE. DELETE ALL FROM HERE DOWNWARDS IF YOU WANT TO MIGRATE FROM CAPTURE_LASER_2D TO HERE
-
-    private:
         unsigned int extractCorners(std::list<laserscanutils::Corner> & _corner_list) const;
         unsigned int extractLines(std::list<laserscanutils::Line> & _line_list) const;
         void createFeatures(std::list<laserscanutils::Corner> & _corner_list) const;

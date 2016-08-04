@@ -647,7 +647,6 @@ ProcessorBase* ProcessorLaser2D::create(const std::string& _unique_name, const P
     return prc_ptr;
 }
 
-
 } // namespace wolf
 
 
