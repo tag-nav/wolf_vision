@@ -95,15 +95,18 @@ class ProcessorIMU : public ProcessorMotion{
           p_out_ = p1_ + p2_;
           q_out_ = q1_ * q2_;
           v_out_ = v1_ + v2_;
-          bias_acc_out_ = bias_acc_;
-          bias_gyro_out_ = bias_gyro_;
+
+          // TODO: remove these Map's because biases are constant during pre-integration. We should be OK with the variables bias_acc_ and bias_gyro_ above.
+          //          bias_acc_out_ = bias_acc_;
+          //          bias_gyro_out_ = bias_gyro_;
         }
 
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                     Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                     Eigen::MatrixXs& _jacobian2)
         {
-            // TODO: all the work to be done here
+            deltaPlusDelta(_delta1, _delta2, _delta1_plus_delta2);
+            // TODO: all the work to be done here about Jacobians
         }
 
         // NOTE: This function is not needed -- I don't know what is it doing here, probably old code.
@@ -154,6 +157,7 @@ class ProcessorIMU : public ProcessorMotion{
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
         {
             // TODO: all the work to be done here
+            // TODO: This is the equivalent to MakeFactor() in the code that you checked (was it in gtsam?)
             return nullptr;
         }
 
@@ -179,10 +183,12 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<Eigen::Quaternions> q_out_;
         Eigen::Map<const Eigen::Vector3s> v1_, v2_;
         Eigen::Map<Eigen::Vector3s> v_out_;
-        Eigen::Map<const Eigen::Vector3s> bias_acc1_;
-        Eigen::Map<Eigen::Vector3s> bias_acc_out_;
-        Eigen::Map<const Eigen::Vector3s> bias_gyro1_;
-        Eigen::Map<Eigen::Vector3s> bias_gyro_out_;
+
+        // TODO: remove these Map's because biases are constant during pre-integration. We should be OK with the variables bias_acc_ and bias_gyro_ above.
+//        Eigen::Map<const Eigen::Vector3s> bias_acc1_;
+//        Eigen::Map<Eigen::Vector3s> bias_acc_out_;
+//        Eigen::Map<const Eigen::Vector3s> bias_gyro1_;
+//        Eigen::Map<Eigen::Vector3s> bias_gyro_out_;
 
         void remapState(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_out);
         void remapDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
@@ -208,8 +214,9 @@ inline void ProcessorIMU::remapState(const Eigen::VectorXs& _x, const Eigen::Vec
     new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x.data());
     new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x.data() + 3);
     new (&v1_) Eigen::Map<const Eigen::Vector3s>(_x.data() + 7);
-    new (&bias_acc1_) Eigen::Map<const Eigen::Vector3s>(_x.data() + 10);
-    new (&bias_gyro1_) Eigen::Map<const Eigen::Vector3s>(_x.data() + 13);
+    // TODO: remove these Map's because biases are constant during pre-integration. We should be OK with the variables bias_acc_ and bias_gyro_ above.
+    //    new (&bias_acc1_) Eigen::Map<const Eigen::Vector3s>(_x.data() + 10);
+    //    new (&bias_gyro1_) Eigen::Map<const Eigen::Vector3s>(_x.data() + 13);
 
     new (&p2_) Eigen::Map<const Eigen::Vector3s>(_delta.data());
     new (&q2_) Eigen::Map<const Eigen::Quaternions>(_delta.data() + 3);
@@ -218,8 +225,9 @@ inline void ProcessorIMU::remapState(const Eigen::VectorXs& _x, const Eigen::Vec
     new (&p_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data());
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_x_out.data() + 3);
     new (&v_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data() + 7);
-    new (&bias_acc_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 10);
-    new (&bias_gyro_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 13);
+    // TODO: remove these Map's because biases are constant during pre-integration. We should be OK with the variables bias_acc_ and bias_gyro_ above.
+    //    new (&bias_acc_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 10);
+    //    new (&bias_gyro_out_) Eigen::Map<const Eigen::Vector3s>(_x_out.data() + 13);
 }
 
 inline void ProcessorIMU::remapDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out)

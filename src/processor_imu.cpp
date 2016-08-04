@@ -19,11 +19,12 @@ ProcessorIMU::ProcessorIMU() :
         q_out_(nullptr),
         v1_(nullptr),
         v2_(nullptr),
-        v_out_(nullptr),
-        bias_acc1_(nullptr),
-        bias_acc_out_(nullptr),
-        bias_gyro1_(nullptr),
-        bias_gyro_out_(nullptr)
+        v_out_(nullptr)
+        // TODO: remove these Map's because biases are constant during pre-integration. We should be OK with the variables bias_acc_ and bias_gyro_ above.
+        //        bias_acc1_(nullptr),
+        //        bias_acc_out_(nullptr),
+        //        bias_gyro1_(nullptr),
+        //        bias_gyro_out_(nullptr)
 {
 
 }
