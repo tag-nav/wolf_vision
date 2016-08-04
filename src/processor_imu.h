@@ -22,9 +22,6 @@ class ProcessorIMU : public ProcessorMotion{
 
     protected:
 
-//        virtual void preProcess(){}
-//        virtual void postProcess(){}
-
         // Helper functions
 
         /**
@@ -109,15 +106,16 @@ class ProcessorIMU : public ProcessorMotion{
             // TODO: all the work to be done here
         }
 
-        /** \brief Computes the delta-state the goes from one delta-state to another
-         * \param _delta1 the initial delta
-         * \param _delta2 the final delta
-         * \param _delta2_minus_delta1 the delta-state. It has the format of a delta-state.
-         *
-         * This function implements the composition (-) so that _delta2_minus_delta1 = _delta2 (-) _delta1.
-         */
-        virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                     Eigen::VectorXs& _delta2_minus_delta1) { };
+        // NOTE: This function is not needed -- I don't know what is it doing here, probably old code.
+        //        /** \brief Computes the delta-state the goes from one delta-state to another
+        //         * \param _delta1 the initial delta
+        //         * \param _delta2 the final delta
+        //         * \param _delta2_minus_delta1 the delta-state. It has the format of a delta-state.
+        //         *
+        //         * This function implements the composition (-) so that _delta2_minus_delta1 = _delta2 (-) _delta1.
+        //         */
+        //        virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+        //                                     Eigen::VectorXs& _delta2_minus_delta1) { };
 
         /** \brief Adds a delta-increment into the pre-integrated Delta-state
         * \param _delta the delta increment to add
