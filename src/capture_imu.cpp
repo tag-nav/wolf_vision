@@ -3,19 +3,19 @@
 namespace wolf {
 
 
-CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr,
+CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr,
                              const Eigen::Vector6s& _data) :
-        CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data)
+        CaptureMotion(_init_ts, _sensor_ptr, _data )
 {
     setType("IMU");
 }
 
-CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr,
+/*CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr,
                              const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance) :
-        CaptureMotion(_init_ts, _final_ts, _sensor_ptr, _data, _data_covariance)
+        CaptureMotion(_init_ts, _sensor_ptr, _data, _data_covariance)
 {
     setType("IMU");
-}
+}*/
 
 CaptureIMU::~CaptureIMU()
 {
@@ -30,7 +30,7 @@ inline void CaptureIMU::process()
 Eigen::VectorXs CaptureIMU::computeFramePose(const TimeStamp& _now) const
 {
 
-
+    return Eigen::Vector3s::Identity();
 }
 
 void CaptureIMU::addConstraints()
@@ -45,7 +45,7 @@ void CaptureIMU::integrateCapture(CaptureMotion* _new_capture)
 
 CaptureIMU* CaptureIMU::interpolateCapture(const TimeStamp& _ts)
 {
-
+    return nullptr;
 }
 
 } //namespace wolf

@@ -103,6 +103,7 @@ SET(HDRS
     capture_fix.h
     capture_gps_fix.h
     capture_motion2.h
+    capture_imu.h
     capture_void.h
     constraint_analytic.h
     constraint_base.h
@@ -187,6 +188,7 @@ SET(HDRS_DTASSC
 SET(SRCS
     capture_base.cpp
     capture_gps_fix.cpp
+    capture_imu.cpp
     capture_fix.cpp
     capture_void.cpp
     constraint_base.cpp

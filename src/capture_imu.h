@@ -10,10 +10,11 @@ class CaptureIMU : public CaptureMotion
 {
     public:
 
-        CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data);
+        CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data);
 
-        CaptureIMU(const TimeStamp& _init_ts, const TimeStamp& _final_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance);
+        /*CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance);
 
+        CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance, FrameBase* _origin_frame_ptr);*/
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
