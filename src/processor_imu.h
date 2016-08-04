@@ -39,7 +39,7 @@ class ProcessorIMU : public ProcessorMotion{
             remapPreintegratedMeasurements(delta_integrated_);
 
             /// Position delta
-            p_out_ = velocity_preint_ * dt_;
+            p_out_ = velocity_preint_ * _dt;
 
             /// Velocity delta
             v_out_ = orientation_preint_ * ((measured_acc_ - bias_acc_) * _dt);
