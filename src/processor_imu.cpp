@@ -4,6 +4,7 @@ namespace wolf {
 
 ProcessorIMU::ProcessorIMU() :
         ProcessorMotion(PRC_IMU, "IMU", 16, 10, 6),
+        gravity_(0.0, 0.0, -9.8),
         bias_acc_(nullptr),
         bias_gyro_(nullptr),
         measured_acc_(nullptr),
@@ -20,11 +21,6 @@ ProcessorIMU::ProcessorIMU() :
         v1_(nullptr),
         v2_(nullptr),
         v_out_(nullptr)
-        // TODO: remove these Map's because biases are constant during pre-integration. We should be OK with the variables bias_acc_ and bias_gyro_ above.
-        //        bias_acc1_(nullptr),
-        //        bias_acc_out_(nullptr),
-        //        bias_gyro1_(nullptr),
-        //        bias_gyro_out_(nullptr)
 {
 
 }
