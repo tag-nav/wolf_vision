@@ -5,10 +5,6 @@
  *      \author: dtsbourg
  */
 
-//std
-#include <iostream>
-#include <fstream>
-
 //Wolf
 #include "wolf.h"
 #include "problem.h"
@@ -17,6 +13,11 @@
 #include "state_block.h"
 #include "state_quaternion.h"
 #include "processor_imu.h"
+
+//std
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 
 int main(int argc, char** argv)
 {
@@ -51,9 +52,9 @@ int main(int argc, char** argv)
         }
     }
 
-     TimeStamp t;
-     float mti_clock, tmp;
-     Eigen::Vector6s data_;
+    TimeStamp t;
+    float mti_clock, tmp;
+    Eigen::Vector6s data_;
 
     // Wolf problem
     Problem* wolf_problem_ptr_ = new Problem(FRM_PQVBB_3D);
