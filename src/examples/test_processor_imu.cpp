@@ -109,13 +109,13 @@ int main(int argc, char** argv)
     t0 = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().front().ts_;
     tf = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
     int N = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().size();
-    std::cout << "t0       : " << t0.get() << " s" << std::endl;
-    std::cout << "tf       : " << tf.get() << " s" << std::endl;
-    std::cout << "duration : " << tf-t0 << " s" << std::endl;
-    std::cout << "N samples: " << N << std::endl;
-    std::cout << "frequency: " << (N-1)/(tf-t0) << " Hz" << std::endl;
-    std::cout << "CPU:       " << elapsed_secs << " s" << std::endl;
-    std::cout << "integr/s : " << (N-1)/elapsed_secs << " ips" << std::endl;
+    std::cout << "t0        : " << t0.get() << " s" << std::endl;
+    std::cout << "tf        : " << tf.get() << " s" << std::endl;
+    std::cout << "duration  : " << tf-t0 << " s" << std::endl;
+    std::cout << "N samples : " << N << std::endl;
+    std::cout << "frequency : " << (N-1)/(tf-t0) << " Hz" << std::endl;
+    std::cout << "CPU       : " << elapsed_secs << " s" << std::endl;
+    std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
 
 
 
