@@ -39,6 +39,8 @@ int main(int argc, char** argv)
         filename_gyro = argv[2];
         data_file_acc.open(filename_acc);
         data_file_gyro.open(filename_gyro);
+        std::cout << "Acc  file: " << filename_acc << std::endl;
+        std::cout << "Gyro file: " << filename_gyro << std::endl;
 
         std::string dummy;
         getline(data_file_acc, dummy); getline(data_file_gyro, dummy);
@@ -83,9 +85,12 @@ int main(int argc, char** argv)
         imu_ptr ->process();
 
 
-        std::cout << "\nCurrent    delta: " << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_.transpose();
-        std::cout << "\nIntegrated delta: " << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose();
-        std::cout << "\nIntegrated state: " << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().transpose();
+        std::cout << "\nCurrent    delta: " << std::fixed << std::setprecision(3) << std::setw(8) << std::right
+        << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_.transpose();
+        std::cout << "\nIntegrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
+        << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose();
+//        std::cout << "\nIntegrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
+//        << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().transpose();
         std::cout << std::endl;
 
     }
