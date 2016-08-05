@@ -402,15 +402,17 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
     // Make frame at last Capture
     makeFrame(last_ptr_, _origin_frame->getState(), NON_KEY_FRAME);
 
+    // Reset deltas
+    delta_ = deltaZero();
+    delta_integrated_ = deltaZero();
+
     getBufferPtr()->get().clear();
-    getBufferPtr()->get().push_back(
-            Motion( {_origin_frame->getTimeStamp(), deltaZero(), deltaZero(), Eigen::MatrixXs::Zero(delta_size_, delta_size_),
-                     Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
+    getBufferPtr()->get().push_back(motionZero(_origin_frame->getTimeStamp()));
+
 }
 
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
-    std::cout << "ProcessorMotion::process:" << std::endl;
     incoming_ptr_ = (CaptureMotion*)(_incoming_ptr);
     preProcess();
     integrate();
@@ -499,15 +501,7 @@ inline void ProcessorMotion::integrate()
 inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
 {
     //std::cout << "ProcessorMotion::reintegrate" << std::endl;
-    Motion zero_motion; // call constructor with params // TODO use motionZero(ts)
-    zero_motion.ts_ = _capture_ptr->getOriginFramePtr()->getTimeStamp();
-    zero_motion.delta_ = deltaZero();
-    zero_motion.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-    zero_motion.delta_integr_ = deltaZero();
-    zero_motion.jacobian_0.setIdentity();
-    zero_motion.delta_integr_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-
-    _capture_ptr->getBufferPtr()->get().push_front(zero_motion);
+    _capture_ptr->getBufferPtr()->get().push_front(motionZero(_capture_ptr->getOriginFramePtr()->getTimeStamp()));
 
     auto motion_it = _capture_ptr->getBufferPtr()->get().begin();
     auto prev_motion_it = motion_it;
@@ -518,10 +512,8 @@ inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
     {
         deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, motion_it->delta_integr_, jacobian_prev,
                        jacobian_curr);
-        //std::cout << "delta reintegrated" << std::endl;
         deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_, motion_it->delta_cov_, jacobian_prev, jacobian_curr,
                              motion_it->delta_integr_cov_);
-        //std::cout << "delta_cov reintegrated" << std::endl;
 
         //std::cout << "\tmotion reintegrated: " << std::distance(_capture_ptr->getBufferPtr()->get().begin(), motion_it) << std::endl;
         //std::cout << "\t\tts: " << motion_it->ts_.getSeconds() << "." << motion_it->ts_.getNanoSeconds() << std::endl;
