@@ -91,7 +91,7 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
         StateBlock* getVPtr() const;
 
         void setState(const Eigen::VectorXs& _st);
-        Eigen::VectorXs getState() const;
+        virtual Eigen::VectorXs getState() const;
         void getState(Eigen::VectorXs& state) const;
 
 

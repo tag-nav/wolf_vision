@@ -13,6 +13,9 @@
 #include "processor_base.h"
 #include "time_stamp.h"
 
+// std
+#include <iomanip>
+
 namespace wolf
 {
 
@@ -224,13 +227,12 @@ class ProcessorMotion : public ProcessorBase
         /** \brief convert raw CaptureMotion data to the delta-state format
          *
          * This function accesses the members data_ (as produced by extractData()) and dt_,
-         * and computes the value of the delta-state delta_.
+         * and computes the value of the delta-state delta_. Note that this value is
+         * held by the member delta_ of the class that calls it.
          *
          * \param _data the raw motion data
          * \param _data_cov the raw motion data covariance
          * \param _dt the time step (not always needed)
-         * \param _delta the returned motion delta
-         * \param _delta_cov the returned motion delta covariance
          *
          * Rationale:
          *
@@ -257,8 +259,7 @@ class ProcessorMotion : public ProcessorBase
          *
          *  However, other more complicated relations are possible.
          */
-        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
-                                Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov) = 0;
+        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt) = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -293,13 +294,20 @@ class ProcessorMotion : public ProcessorBase
                                     Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                     Eigen::MatrixXs& _jacobian2) = 0;
 
+        /** \brief Adds the current delta-increment into the pre-integrated Delta-state
+        *
+        * This function implements the pre-integrated measurements update :
+        *   Delta_ik = Delta_ij (+) _delta_jk
+        */
+        virtual void integrateDelta() = 0;
+
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
          *
          * Examples (see documentation of the the class for info on Eigen::VectorXs):
          *   - 2D odometry: a 3-vector with all zeros, e.g. VectorXs::Zero(3)
          *   - 3D odometry: delta type is a PQ vector: 7-vector with [0,0,0, 0,0,0,1]
-         *   - IMU: PQVBB 16-vector with [0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0]
+         *   - IMU: PQVBB 16-vector with [0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0] // FIXME : no biases in the delta !!
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
@@ -402,10 +410,12 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
 
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 {
-    //std::cout << "ProcessorMotion::process:" << std::endl;
+    std::cout << "ProcessorMotion::process:" << std::endl;
     incoming_ptr_ = (CaptureMotion*)(_incoming_ptr);
     preProcess();
+    std::cout << "out preprocess" << std::endl;
     integrate();
+    std::cout << "out integrate" << std::endl;
 
     if (voteForKeyFrame() && permittedKeyFrame())
     {
@@ -457,21 +467,26 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 
 inline void ProcessorMotion::integrate()
 {
+    std::cout << "in dt" << std::endl;
+
     // Set dt
     updateDt();
+    std::cout << "out dt" << std::endl;
 
     // get data and convert it to delta
-    data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_, delta_, delta_cov_);
+    data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
+    std::cout << "out data2delta" << std::endl;
 
-    // then integrate delta
-    deltaPlusDelta(getBufferPtr()->get().back().delta_integr_, delta_, delta_integrated_, jacobian_prev_,
-                   jacobian_curr_);
+    // then integrate the current delta to pre-integrated measurements
+    integrateDelta();
+    std::cout << "out integrateDelta" << std::endl;
 
     // and covariance
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,
                          delta_integrated_cov_);
+    std::cout << "out cov" << std::endl;
 
-        // then push it into buffer
+    // then push it into buffer
     getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(),
                                              delta_,
                                              delta_integrated_,
@@ -479,6 +494,8 @@ inline void ProcessorMotion::integrate()
                                              delta_integrated_cov_,
                                              Eigen::MatrixXs::Zero(delta_size_, delta_size_),
                                              Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
+    std::cout << "out pushback" << std::endl;
+
 
     //std::cout << "motion integrated: " << getBufferPtr()->get().size()-1 << std::endl;
     //std::cout << "\tts: " << getBufferPtr()->get().back().ts_.getSeconds() << "." << getBufferPtr()->get().back().ts_.getNanoSeconds() << std::endl;
@@ -723,7 +740,11 @@ inline bool ProcessorMotion::isMotion()
 
 inline void ProcessorMotion::updateDt()
 {
+    std::cout << "in updatedt" << std::endl;
+    std::cout << incoming_ptr_->getTimeStamp().get() << std::endl;
     dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->get().back().ts_;
+    std::cout << "out update dt: " << std::setprecision(6) << dt_ << std::endl;
+
 }
 
 inline const MotionBuffer* ProcessorMotion::getBufferPtr() const

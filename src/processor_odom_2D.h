@@ -26,8 +26,7 @@ class ProcessorOdom2D : public ProcessorMotion
     public:
         ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th);
         virtual ~ProcessorOdom2D();
-        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
-                                Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov);
+        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt);
 
         virtual bool voteForKeyFrame()
         {
@@ -65,6 +64,7 @@ class ProcessorOdom2D : public ProcessorMotion
                             Eigen::MatrixXs& _jacobian2);
         virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                      Eigen::VectorXs& _delta2_minus_delta1);
+        void integrateDelta();
         Eigen::VectorXs deltaZero() const;
         Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts);
 
@@ -87,22 +87,18 @@ inline ProcessorOdom2D::~ProcessorOdom2D()
 {
 }
 
-inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt,
-                                        Eigen::VectorXs& _delta, Eigen::MatrixXs& _delta_cov)
+inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
 {
     //std::cout << "ProcessorOdom2d::data2delta" << std::endl;
 
-    assert(_delta.size() == delta_size_ && "Wrong _delta vector size");
-    assert(_delta_cov.rows() == delta_size_ && "Wrong _delta_cov size");
-    assert(_delta_cov.cols() == delta_size_ && "Wrong _delta_cov size");
     assert(_data.size() == data_size_ && "Wrong _data vector size");
     assert(_data_cov.rows() == data_size_ && "Wrong _data_cov size");
     assert(_data_cov.cols() == data_size_ && "Wrong _data_cov size");
 
     // 1/2 turn + straight + 1/2 turn
-    _delta(0) = cos(_data(1)/2) * _data(0);
-    _delta(1) = sin(_data(1)/2) * _data(0);
-    _delta(2) = _data(1);
+    delta_(0) = cos(_data(1)/2) * _data(0);
+    delta_(1) = sin(_data(1)/2) * _data(0);
+    delta_(2) = _data(1);
 
     // Fill delta covariance
     Eigen::MatrixXs J(3,2);
@@ -113,7 +109,7 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eige
     J(1,1) = _data(0) / 2 * cos(_data(1) / 2);
     J(2,1) = 1;
 
-    _delta_cov = J * _data_cov * J.transpose();
+    delta_cov_ = J * _data_cov * J.transpose();
 
     //std::cout << "data cov:" << std::endl << _data_cov << std::endl;
     //std::cout << "delta cov:" << std::endl << _delta_cov << std::endl;
@@ -207,6 +203,11 @@ inline void ProcessorOdom2D::deltaMinusDelta(const Eigen::VectorXs& _delta1, con
 
 //    std::cout << "-----------------------------------------------" << std::endl;
 //    std::cout << "_delta2_minus_delta1: " << _delta2_minus_delta1.transpose() << std::endl;
+}
+
+inline void ProcessorOdom2D::integrateDelta()
+{
+    deltaPlusDelta(delta_integrated_, delta_ , delta_integrated_);
 }
 
 inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const

@@ -8,7 +8,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_ROOT}/Modules/; ../cmake_modules)
 MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
 
-#find dependencies. 
+#find dependencies.
 FIND_PACKAGE(Ceres QUIET) #Ceres is not required
 IF(Ceres_FOUND)
     MESSAGE("Ceres Library FOUND: Ceres related sources will be built.")
@@ -46,7 +46,7 @@ IF(YAMLCPP_FOUND)
 ELSEIF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library NOT FOUND!")
 ENDIF(YAMLCPP_FOUND)
-    
+
 # SuiteSparse doesn't have find*.cmake:
 FIND_PATH(
     Suitesparse_INCLUDE_DIRS
@@ -103,6 +103,7 @@ SET(HDRS
     capture_fix.h
     capture_gps_fix.h
     capture_motion2.h
+    capture_imu.h
     capture_void.h
     constraint_analytic.h
     constraint_base.h
@@ -130,6 +131,7 @@ SET(HDRS
     feature_odom_2D.h
     feature_polyline_2D.h
     frame_base.h
+    frame_imu.h
     hardware_base.h
     landmark_base.h
     landmark_corner_2D.h
@@ -174,17 +176,19 @@ SET(HDRS
     # wolf_manager.h
     )
    
+
 SET(HDRS_DTASSC
     data_association/matrix.h
     data_association/association_solver.h
     data_association/association_node.h
     data_association/association_tree.h
     data_association/association_nnls.h)
-    
+
 #sources
 SET(SRCS
     capture_base.cpp
     capture_gps_fix.cpp
+    capture_imu.cpp
     capture_fix.cpp
     capture_void.cpp
     constraint_base.cpp
@@ -197,6 +201,7 @@ SET(SRCS
     feature_odom_2D.cpp
     feature_polyline_2D.cpp
     frame_base.cpp
+    frame_imu.cpp
     hardware_base.cpp
     landmark_base.cpp
     landmark_corner_2D.cpp
@@ -239,7 +244,7 @@ SET(SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
         ceres_wrapper/auto_diff_cost_function_wrapper.h
-        ceres_wrapper/ceres_manager.h 
+        ceres_wrapper/ceres_manager.h
         ceres_wrapper/cost_function_wrapper.h
         ceres_wrapper/create_auto_diff_cost_function.h
         ceres_wrapper/create_auto_diff_cost_function_ceres.h
@@ -285,7 +290,7 @@ IF (raw_gps_utils_FOUND)
         )
 ENDIF(raw_gps_utils_FOUND)
 
-# OpenCV 
+# OpenCV
 IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
@@ -363,17 +368,17 @@ INSTALL(TARGETS ${PROJECT_NAME}
       RUNTIME DESTINATION bin
       LIBRARY DESTINATION lib/iri-algorithms
       ARCHIVE DESTINATION lib/iri-algorithms)
-        
-#install headers         
-INSTALL(FILES ${HDRS_BASE} 
+
+#install headers
+INSTALL(FILES ${HDRS_BASE}
     DESTINATION include/iri-algorithms/wolf)
-INSTALL(FILES ${HDRS} 
+INSTALL(FILES ${HDRS}
     DESTINATION include/iri-algorithms/wolf)
-INSTALL(FILES ${HDRS_DTASSC} 
+INSTALL(FILES ${HDRS_DTASSC}
     DESTINATION include/iri-algorithms/wolf/data_association)
-INSTALL(FILES ${HDRS_WRAPPER} 
+INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
-INSTALL(FILES ${HDRS_SOLVER} 
+INSTALL(FILES ${HDRS_SOLVER}
     DESTINATION include/iri-algorithms/wolf/solver)
 
 INSTALL(FILES ../Findwolf.cmake DESTINATION ${CMAKE_ROOT}/Modules/)
