@@ -59,15 +59,6 @@ int main(int argc, char** argv)
     extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, nullptr);
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
-
-//    SensorBase* sensor_ptr_ = new SensorIMU( new StateBlock(Eigen::VectorXs::Zero(3)),
-//                                             new StateQuaternion(),
-//                                             new StateBlock(Eigen::VectorXs::Zero(6)));
-//
-//    ProcessorIMU* processor_ptr_ = new ProcessorIMU();
-
-//    wolf_problem_ptr_->addSensor(sensor_ptr_);
-//    sensor_ptr_->addProcessor(processor_ptr_);
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
     // Set the origin
@@ -89,11 +80,13 @@ int main(int argc, char** argv)
 
         imu_ptr = new CaptureIMU(t, sensor_ptr, data_);
 
-        std::cout << "in process" << std::endl;
-
         imu_ptr ->process();
 
-        std::cout << "out process" << std::endl;
+
+        std::cout << "\nCurrent    delta: " << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_.transpose();
+        std::cout << "\nIntegrated delta: " << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose();
+        std::cout << "\nIntegrated state: " << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().transpose();
+        std::cout << std::endl;
 
     }
 
