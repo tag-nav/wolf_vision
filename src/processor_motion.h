@@ -315,7 +315,7 @@ class ProcessorMotion : public ProcessorBase
 
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin) = 0;
 
-        Motion motionZero(TimeStamp& _ts);
+        Motion motionZero(const TimeStamp& _ts);
 
     protected:
         // Attributes
@@ -739,7 +739,7 @@ inline MotionBuffer* ProcessorMotion::getBufferPtr()
     return last_ptr_->getBufferPtr();
 }
 
-inline Motion ProcessorMotion::motionZero(TimeStamp& _ts)
+inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
 {
     return Motion(
             {_ts,
