@@ -413,9 +413,7 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
     std::cout << "ProcessorMotion::process:" << std::endl;
     incoming_ptr_ = (CaptureMotion*)(_incoming_ptr);
     preProcess();
-    std::cout << "out preprocess" << std::endl;
     integrate();
-    std::cout << "out integrate" << std::endl;
 
     if (voteForKeyFrame() && permittedKeyFrame())
     {
@@ -435,7 +433,6 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
                                                        Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-8);
 
-        //std::cout << "New odom2d feature:" << key_feature_ptr->id() << ": " << key_feature_ptr->getMeasurement() << std::endl << key_feature_ptr->getMeasurementCovariance() << std::endl;
 
         key_capture_ptr->addFeature(key_feature_ptr);
         key_feature_ptr->addConstraint(createConstraint(key_feature_ptr, origin_ptr_->getFramePtr()));
@@ -467,24 +464,19 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 
 inline void ProcessorMotion::integrate()
 {
-    std::cout << "in dt" << std::endl;
 
     // Set dt
     updateDt();
-    std::cout << "out dt" << std::endl;
 
     // get data and convert it to delta
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
-    std::cout << "out data2delta" << std::endl;
 
     // then integrate the current delta to pre-integrated measurements
     integrateDelta();
-    std::cout << "out integrateDelta" << std::endl;
 
     // and covariance
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,
                          delta_integrated_cov_);
-    std::cout << "out cov" << std::endl;
 
     // then push it into buffer
     getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(),
@@ -494,13 +486,12 @@ inline void ProcessorMotion::integrate()
                                              delta_integrated_cov_,
                                              Eigen::MatrixXs::Zero(delta_size_, delta_size_),
                                              Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
-    std::cout << "out pushback" << std::endl;
 
 
-    //std::cout << "motion integrated: " << getBufferPtr()->get().size()-1 << std::endl;
-    //std::cout << "\tts: " << getBufferPtr()->get().back().ts_.getSeconds() << "." << getBufferPtr()->get().back().ts_.getNanoSeconds() << std::endl;
-    //xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, x_);
-    //std::cout << "\tx_integrated_: " << x_.transpose() << std::endl;
+    //    std::cout << "motion integrated: " << getBufferPtr()->get().size()-1 << std::endl;
+    //    std::cout << "\tts: " << getBufferPtr()->get().back().ts_.getSeconds() << "." << getBufferPtr()->get().back().ts_.getNanoSeconds() << std::endl;
+    //    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, x_);
+    //    std::cout << "\tx_integrated_: " << x_.transpose() << std::endl;
     //std::cout << "\tdelta_integrated_cov_" << std::endl;
     //std::cout << delta_integrated_cov_ << std::endl;
 }
@@ -726,12 +717,6 @@ inline CaptureMotion* ProcessorMotion::findCaptureContainingTimeStamp(const Time
     return capture_ptr;
 }
 
-inline void ProcessorMotion::sumDeltas(CaptureMotion* _cap1_ptr, CaptureMotion* _cap2_ptr,
-                                       Eigen::VectorXs& _delta1_plus_delta2)
-{
-    // TODO: what should it return, now? also covariance? jacobians? a new CaptureMotion..?
-    //deltaPlusDelta(_cap1_ptr->getDelta(), _cap2_ptr->getDelta(), _delta1_plus_delta2);
-}
 
 inline bool ProcessorMotion::isMotion()
 {
@@ -740,10 +725,7 @@ inline bool ProcessorMotion::isMotion()
 
 inline void ProcessorMotion::updateDt()
 {
-    std::cout << "in updatedt" << std::endl;
-    std::cout << incoming_ptr_->getTimeStamp().get() << std::endl;
     dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->get().back().ts_;
-    std::cout << "out update dt: " << std::setprecision(6) << dt_ << std::endl;
 
 }
 
