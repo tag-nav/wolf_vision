@@ -140,12 +140,10 @@ inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::Vec
     assert(_x_plus_delta.size() == 16 && "Wrong _x_plus_delta vector size");
     remapState(_x, _delta, _x_plus_delta);
     const Scalar dT = last_ptr_->getTimeStamp().get() - origin_ptr_->getTimeStamp().get();
-    /// Position update
+
+    // state updates
     p_out_ = p1_ + v1_ * dT + q1_ * p2_;
-    /// Quaternion update
     q_out_ = q1_ * q2_;
-    /// Velocity update
-    //v_out_ = v1_ + Eigen::Vector3s::Constant(0.0, 0.0, 9.81) * dT + q1_ * v2_;
     v_out_ = v1_ + gravity_ * dT + q1_ * v2_;
 }
 
