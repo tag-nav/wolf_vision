@@ -12,6 +12,7 @@
 #include "factory.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
+#include "frame_imu.h"
 
 namespace wolf
 {
@@ -144,6 +145,17 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs&
                     new FrameBase(_frame_type, _time_stamp, new StateBlock(_frame_state.head(3)),
                                   new StateQuaternion(_frame_state.segment<4>(3)),
                                   new StateBlock(_frame_state.tail(3))));
+        }
+        case FRM_PQVBB_3D:
+        {
+            assert(_frame_state.size() == 16 && "Wrong state vector size");
+            return trajectory_ptr_->addFrame(
+                    new FrameIMU(_frame_type, _time_stamp, // t
+                                 new StateBlock(_frame_state.head(3)), // p
+                                 new StateQuaternion(_frame_state.segment<4>(3)), // q
+                                 new StateBlock(_frame_state.segment<3>(3)), // v
+                                 new StateBlock(_frame_state.segment<3>(3)), // ab
+                                 new StateBlock(_frame_state.tail(3)))); // wb
         }
         default:
             throw std::runtime_error(

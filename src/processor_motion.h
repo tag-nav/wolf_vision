@@ -13,6 +13,9 @@
 #include "processor_base.h"
 #include "time_stamp.h"
 
+// std
+#include <iomanip>
+
 namespace wolf
 {
 
@@ -737,10 +740,10 @@ inline bool ProcessorMotion::isMotion()
 
 inline void ProcessorMotion::updateDt()
 {
-    std::cout << "out updatedt" << std::endl;
+    std::cout << "in updatedt" << std::endl;
     std::cout << incoming_ptr_->getTimeStamp().get() << std::endl;
     dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->get().back().ts_;
-    std::cout << "out update dt" << std::endl;
+    std::cout << "out update dt: " << std::setprecision(6) << dt_ << std::endl;
 
 }
 

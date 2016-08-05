@@ -176,6 +176,8 @@ class Problem : public NodeBase
         FrameBase* createFrame(FrameKeyType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
+        ProcessorMotion* getProcessorMotionPtr();
+
         /** \brief Get the state at last timestamp (and return timestamp via parameter)
          */
         Eigen::VectorXs getCurrentState();
@@ -312,6 +314,11 @@ class Problem : public NodeBase
         SensorBase* getSensorPtr(const std::string& _sensor_name);
 
 };
+
+inline ProcessorMotion* Problem::getProcessorMotionPtr()
+{
+    return processor_motion_ptr_;
+}
 
 } // namespace wolf
 

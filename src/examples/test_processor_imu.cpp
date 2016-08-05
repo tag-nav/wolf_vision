@@ -55,14 +55,29 @@ int main(int argc, char** argv)
 
     // Wolf problem
     Problem* wolf_problem_ptr_ = new Problem(FRM_PQVBB_3D);
-    SensorBase* sensor_ptr_ = new SensorIMU( new StateBlock(Eigen::VectorXs::Zero(3)),
-                                             new StateQuaternion(),
-                                             new StateBlock(Eigen::VectorXs::Zero(6)));
+    Eigen::VectorXs extrinsics(7);
+    extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
+    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, nullptr);
+    wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
-    ProcessorIMU* processor_ptr_ = new ProcessorIMU();
+//    SensorBase* sensor_ptr_ = new SensorIMU( new StateBlock(Eigen::VectorXs::Zero(3)),
+//                                             new StateQuaternion(),
+//                                             new StateBlock(Eigen::VectorXs::Zero(6)));
+//
+//    ProcessorIMU* processor_ptr_ = new ProcessorIMU();
 
-    wolf_problem_ptr_->addSensor(sensor_ptr_);
-    sensor_ptr_->addProcessor(processor_ptr_);
+//    wolf_problem_ptr_->addSensor(sensor_ptr_);
+//    sensor_ptr_->addProcessor(processor_ptr_);
+    std::cout << "sensor & processor created and added to wolf problem" << std::endl;
+
+    // Set the origin
+    data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
+    data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
+    t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
+    Eigen::VectorXs x0(16);
+    x0 << 0,0,0,  0,0,0,1,  0,0,0, 0,0,0, 0,0,0;
+
+    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     CaptureIMU* imu_ptr;
 
@@ -70,9 +85,9 @@ int main(int argc, char** argv)
         data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
         data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
 
-        t.set(mti_clock);
+        t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
 
-        imu_ptr = new CaptureIMU(t, sensor_ptr_, data_);
+        imu_ptr = new CaptureIMU(t, sensor_ptr, data_);
 
         std::cout << "in process" << std::endl;
 
@@ -82,7 +97,6 @@ int main(int argc, char** argv)
 
     }
 
-    std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
     delete wolf_problem_ptr_;
 

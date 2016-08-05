@@ -86,9 +86,9 @@ class ProcessorIMU : public ProcessorMotion{
          */
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
         {
-          assert(_delta1.size() == 16 && "Wrong _delta1 vector size");
+          assert(_delta1.size() == 10 && "Wrong _delta1 vector size");
           assert(_delta2.size() == 10 && "Wrong _delta2 vector size");
-          assert(_delta1_plus_delta2.size() == 16 && "Wrong _delta1_plus_delta2 vector size");
+          assert(_delta1_plus_delta2.size() == 10 && "Wrong _delta1_plus_delta2 vector size");
 
           remapDelta(_delta1, _delta2, _delta1_plus_delta2);
 
