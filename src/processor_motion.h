@@ -406,6 +406,7 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
     delta_ = deltaZero();
     delta_integrated_ = deltaZero();
 
+    // clear buffer and reset
     getBufferPtr()->get().clear();
     getBufferPtr()->get().push_back(motionZero(_origin_frame->getTimeStamp()));
 
