@@ -70,7 +70,7 @@ int main(int argc, char** argv)
     data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
     t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
     Eigen::VectorXs x0(16);
-    x0 << 0,1,0,  0,0,0,1,  1,0,0, 0,0,.001, 0,0,.002; // Try some non-zero biases
+    x0 << 0,1,0,  0,0,0,1,  1,0,0,  0,0,.001,  0,0,.002; // Try some non-zero biases
 
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
