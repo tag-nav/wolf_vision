@@ -265,10 +265,11 @@ class ProcessorMotion : public ProcessorBase
          * \param _x the initial state
          * \param _delta the delta-state
          * \param _x_plus_delta the updated state. It has the same format as the initial state.
+         * \param _Dt the time interval between the origin state and the Delta
          *
          * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
          */
-        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta,
+        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
                                 Eigen::VectorXs& _x_plus_delta) = 0;
 
         /** \brief composes a delta-state on top of another delta-state
@@ -307,7 +308,7 @@ class ProcessorMotion : public ProcessorBase
          * Examples (see documentation of the the class for info on Eigen::VectorXs):
          *   - 2D odometry: a 3-vector with all zeros, e.g. VectorXs::Zero(3)
          *   - 3D odometry: delta type is a PQ vector: 7-vector with [0,0,0, 0,0,0,1]
-         *   - IMU: PQVBB 16-vector with [0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0] // FIXME : no biases in the delta !!
+         *   - IMU: PQVBB 16-vector with [0,0,0, 0,0,0,1, 0,0,0] // No biases in the delta !!
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
@@ -631,7 +632,7 @@ inline Eigen::VectorXs& ProcessorMotion::getState(const TimeStamp& _ts)
 
 inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
-    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(_ts), _x);
+    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(_ts), _ts - origin_ptr_->getTimeStamp(), _x);
 }
 
 inline const Eigen::VectorXs& ProcessorMotion::getCurrentState()
@@ -648,7 +649,8 @@ inline const Eigen::VectorXs& ProcessorMotion::getCurrentState(TimeStamp& _ts)
 
 inline const void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 {
-    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, _x);
+    Scalar Dt = getBufferPtr()->get().back().ts_ - origin_ptr_->getTimeStamp();
+    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, Dt, _x);
 }
 
 inline const void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts)

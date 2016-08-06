@@ -87,16 +87,20 @@ int main(int argc, char** argv)
         t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
 
         imu_ptr = new CaptureIMU(t, sensor_ptr, data_);
-
         imu_ptr ->process();
+        delete imu_ptr;
 
 
-//        std::cout << "\nCurrent    delta: " << std::fixed << std::setprecision(3) << std::setw(8) << std::right
-//        << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_.transpose();
-//        std::cout << "\nIntegrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
-//        << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose();
-//        std::cout << "\nIntegrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
-//        << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().transpose();
+//        std::cout << "Current    delta: " << std::fixed << std::setprecision(3) << std::setw(8) << std::right
+//        << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_.transpose() << std::endl;
+
+//        std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
+//        << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
+
+        Eigen::VectorXs x = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+        std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
+        << x.head(10).transpose() << std::endl;
+
 //        std::cout << std::endl;
 
     }

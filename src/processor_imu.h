@@ -18,7 +18,8 @@ class ProcessorIMU : public ProcessorMotion{
         ProcessorIMU();
         virtual ~ProcessorIMU();
 
-        // not redefining main operations (they should be the same for all derived classes)
+    public:
+        const Eigen::Vector3s& getGravity() const;
 
     protected:
 
@@ -36,11 +37,12 @@ class ProcessorIMU : public ProcessorMotion{
          * \param _x the initial state
          * \param _delta the delta-state
          * \param _x_plus_delta the updated state. It has the same format as the initial state.
+         * \param _Dt the time interval between the origin state and the Delta
          *
          * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
          */
-        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta,
-                                Eigen::VectorXs& _x_plus_delta);
+        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
+                                Eigen::VectorXs& _x_plus_delta );
 
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
@@ -102,7 +104,7 @@ class ProcessorIMU : public ProcessorMotion{
         void remapDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
         void remapDelta(Eigen::VectorXs& _delta_out);
         void remapBias(const Eigen::VectorXs& _state);
-        void remapMeasurements(const Eigen::VectorXs& _data);
+        void remapData(const Eigen::VectorXs& _data);
         void remapPreintegratedMeasurements(const Eigen::VectorXs& _preint);
 
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
@@ -117,10 +119,15 @@ class ProcessorIMU : public ProcessorMotion{
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
+inline const Eigen::Vector3s& ProcessorIMU::getGravity() const
+{
+    return gravity_;
+}
+
 inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
 {
     // remap
-    remapMeasurements(_data);
+    remapData(_data);
     remapDelta(delta_);
     remapBias(x_);
     remapPreintegratedMeasurements(delta_integrated_);
@@ -132,19 +139,19 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_);
 }
 
-inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta,
+inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
                                      Eigen::VectorXs& _x_plus_delta)
 {
     assert(_x.size() == 16 && "Wrong _x vector size");
     assert(_delta.size() == 10 && "Wrong _delta vector size");
     assert(_x_plus_delta.size() == 16 && "Wrong _x_plus_delta vector size");
+    assert(_Dt > 0 && "Time interval _Dt is not positive!");
     remapState(_x, _delta, _x_plus_delta);
-    const Scalar dT = last_ptr_->getTimeStamp().get() - origin_ptr_->getTimeStamp().get();
 
     // state updates
-    p_out_ = p1_ + v1_ * dT + q1_ * p2_;
+    p_out_ = p1_ + v1_ * _Dt + q1_ * p2_ + gravity_ * _Dt * _Dt / 2 ;
     q_out_ = q1_ * q2_;
-    v_out_ = v1_ + gravity_ * dT + q1_ * v2_;
+    v_out_ = v1_ + gravity_ * _Dt + q1_ * v2_;
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -245,7 +252,7 @@ inline void ProcessorIMU::remapBias(const Eigen::VectorXs& _state)
     new (&bias_gyro_) Eigen::Map<const Eigen::Vector3s>(_state.data() + 13);
 }
 
-inline void ProcessorIMU::remapMeasurements(const Eigen::VectorXs& _data)
+inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
 {
     new (&measured_acc_) Eigen::Map<const Eigen::Vector3s>(_data.data());
     new (&measured_gyro_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);

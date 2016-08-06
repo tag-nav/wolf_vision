@@ -57,7 +57,7 @@ class ProcessorOdom2D : public ProcessorMotion
         Scalar elapsed_time_th_;
 
     private:
-        void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
+        void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                             Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
@@ -115,7 +115,7 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eige
     //std::cout << "delta cov:" << std::endl << _delta_cov << std::endl;
 }
 
-inline void ProcessorOdom2D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
+inline void ProcessorOdom2D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta)
 {
     //std::cout << "ProcessorOdom2d::xPlusDelta" << std::endl;
 

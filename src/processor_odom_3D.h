@@ -48,7 +48,7 @@ class ProcessorOdom3D : public ProcessorMotion
 //        virtual void postProcess(){}
 
     private:
-        void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta);
+        void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                             Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
@@ -100,7 +100,7 @@ inline void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eige
     delta_cov_ = Eigen::MatrixXs::Identity(delta_size_, delta_size_) * 0.01;
 }
 
-inline void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, Eigen::VectorXs& _x_plus_delta)
+inline void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta)
 {
     assert(_x.size() == 7 && "Wrong _x vector size");
     assert(_delta.size() == 7 && "Wrong _delta vector size");
