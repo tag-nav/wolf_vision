@@ -109,7 +109,6 @@ class ProcessorIMU : public ProcessorMotion{
         // Helper functions to remap several magnitudes
         void remapPQV(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
         void remapDelta(Eigen::VectorXs& _delta_out);
-        void remapBias(const Eigen::VectorXs& _state);
         void remapData(const Eigen::VectorXs& _data);
 
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
@@ -217,9 +216,10 @@ inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _moti
 
 inline void ProcessorIMU::resetDerived()
 {
+    // Remap biases for the integration at the origin frame's biases
     frame_imu_ptr_ = (FrameIMU*)((origin_ptr_->getFramePtr()));
-    new (&bias_acc_) Eigen::Map<const Eigen::Vector3s>(frame_imu_ptr_->getBAPtr()->getVector().data());
-    new (&bias_gyro_) Eigen::Map<const Eigen::Vector3s>(frame_imu_ptr_->getBGPtr()->getVector().data());
+    new (&bias_acc_)  Eigen::Map<const Eigen::Vector3s>(frame_imu_ptr_->getBAPtr()->getVector().data()); // acc  bias
+    new (&bias_gyro_) Eigen::Map<const Eigen::Vector3s>(frame_imu_ptr_->getBGPtr()->getVector().data()); // gyro bias
 }
 
 
@@ -249,12 +249,6 @@ inline void ProcessorIMU::remapDelta(Eigen::VectorXs& _delta_out)
     new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data());
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 3);
     new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 7);
-}
-
-inline void ProcessorIMU::remapBias(const Eigen::VectorXs& _state)
-{
-    new (&bias_acc_) Eigen::Map<const Eigen::Vector3s>(_state.data() + 10);
-    new (&bias_gyro_) Eigen::Map<const Eigen::Vector3s>(_state.data() + 13);
 }
 
 inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
