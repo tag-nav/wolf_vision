@@ -319,7 +319,7 @@ inline Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i& _cell
 //				 * \param senPtr pointer to the sensor under consideration.
 //				 * \return a map of all observations that are visible from the sensor, ordered according to the information gain.
 //				 */
-//				std::map<double, observation_ptr_t> projectAll(const sensor_ptr_t & senPtr, size_t & numVis);
+//				std::map<double, observation_ptr_t> projectAll(const sensor_ptr_t & senPtr, Size & numVis);
 
 //				/**
 //				 * Predict observed appearance.

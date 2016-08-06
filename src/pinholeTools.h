@@ -161,7 +161,7 @@ namespace pinhole {
                 if (d.size() == 0) return 1.0;
                 Scalar s = 1.0;
                 Scalar r2i = 1.0;
-                for (size_t i = 0; i < d.size(); i++) { //   here we are doing:
+                for (Size i = 0; i < d.size(); i++) { //   here we are doing:
                     r2i = r2i * r2; //                    r2i = r^(2*(i+1))
                     s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
 //                    std::cout << "s: " << s << std::endl;
@@ -202,7 +202,7 @@ namespace pinhole {
              */
             template<class VD, class VU>
             Eigen::Vector2s distortPoint(const VD & d, const VU & up) {
-                size_t n = d.size();
+                Size n = d.size();
                 if (n == 0)
                     return up;
                 else {
@@ -210,7 +210,7 @@ namespace pinhole {
                     return distortFactor(d, r2) * up;
 //					Scalar s = 1.0;
 //					Scalar r2i = 1.0;
-//					for (size_t i = 0; i < n; i++) { //   here we are doing:
+//					for (Size i = 0; i < n; i++) { //   here we are doing:
 //						r2i = r2i * r2; //                    r2i = r^(2*(i+1))
 //						s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
 //					}
@@ -241,7 +241,7 @@ namespace pinhole {
              */
             template<class VD, class VUp, class VUd, class MUD_up>
             void distortPoint(const VD & d, const VUp & up, VUd & ud, MUD_up & UD_up) {
-                size_t n = d.size();
+                Size n = d.size();
                 Eigen::Vector2s R2_up;
                 Eigen::Vector2s S_up;
 
@@ -260,7 +260,7 @@ namespace pinhole {
                     Scalar r2im1 = 1.0; //r2*(i-1)
                     Scalar S_r2 = 0.0;
 
-                    for (size_t i = 0; i < n; i++) { //.. here we are doing:
+                    for (Size i = 0; i < n; i++) { //.. here we are doing:
                         r2i = r2i * r2; //................. r2i = r^(2*(i+1))
                         s += d(i) * r2i; //................ s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
 
@@ -288,7 +288,7 @@ namespace pinhole {
             // c is correction?
             template<class VC, class VU>
             Eigen::Vector2s undistortPoint(const VC & c, const VU & ud) {
-                size_t n = c.size();
+                Size n = c.size();
                 if (n == 0)
                     return ud;
                 else {
@@ -297,7 +297,7 @@ namespace pinhole {
                     return distortFactor(c, r2) * ud;
 //					Scalar s = 1.0;
 //					Scalar r2i = 1.0;
-//					for (size_t i = 0; i < n; i++) { //   here we are doing:
+//					for (Size i = 0; i < n; i++) { //   here we are doing:
 //						r2i = r2i * r2; //                    r2i = r^(2*(i+1))
 //						s += c(i) * r2i; //                   s = 1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...
 //					}
@@ -307,7 +307,7 @@ namespace pinhole {
 
             template<class VC, class VUd, class VUp, class MUP_ud>
             void undistortPoint(const VC & c, const VUd & ud, VUp & up, MUP_ud & UP_ud) {
-                size_t n = c.size();
+                Size n = c.size();
                 Eigen::Vector2s R2_ud;
                 Eigen::Vector2s S_ud;
 
@@ -326,7 +326,7 @@ namespace pinhole {
                     Scalar r2im1 = 1.0; //r2*(i-1)
                     Scalar S_r2 = 0.0;
 
-                    for (size_t i = 0; i < n; i++) { //.. here we are doing:
+                    for (Size i = 0; i < n; i++) { //.. here we are doing:
                         r2i = r2i * r2; //................. r2i = r^(2*(i+1))
                         s += c(i) * r2i; //................ s = 1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...
 
@@ -602,14 +602,14 @@ namespace pinhole {
              */
             template<class Vk, class Vd, class Vc>
             void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c) {
-                size_t size = c.size();
+                Size size = c.size();
 
                 if (size != 0) {
 
                     Scalar r_max = sqrt(k(0)*k(0) / (k(2)*k(2)) + k(1)*k(1) / (k(3)*k(3)));
                     Scalar rd_max = 1.1 * r_max;
 
-                    size_t N_samples = 200; // number of samples
+                    Size N_samples = 200; // number of samples
                     Scalar iN_samples = 1 / (Scalar) N_samples;
                     Scalar rd_n, rc_2, rd_2;
 //                    vec rd(N_samples+1), rc(N_samples+1);
@@ -618,7 +618,7 @@ namespace pinhole {
                     Eigen::MatrixXs Rd(N_samples+1, size);
 
 
-                    for (size_t sample = 0; sample <= N_samples; sample++) {
+                    for (Size sample = 0; sample <= N_samples; sample++) {
 
                         rc(sample) = sample * rd_max * iN_samples; // sample * rd_max / N_samples
                         rc_2 = rc(sample) * rc(sample);
@@ -627,7 +627,7 @@ namespace pinhole {
 
                         rd_n = rd(sample); // start with rd
 
-                        for (size_t order = 0; order < size; order++) {
+                        for (Size order = 0; order < size; order++) {
                             rd_n *= rd_2; // increment:
                             Rd(sample, order) = rd_n; // we have : rd^3, rd^5, rd^7, ...
                         }

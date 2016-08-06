@@ -124,7 +124,7 @@ void ActiveSearchGrid::blockCell(const cv::Rect & _roi)
         //    ACTIVE SEARCH ALGORITHMS
         ////////////////////////////////////////////////////////
 
-        map<double, observation_ptr_t> ActiveSearch::projectAll(const sensor_ptr_t & senPtr, size_t & numVis) {
+        map<double, observation_ptr_t> ActiveSearch::projectAll(const sensor_ptr_t & senPtr, Size & numVis) {
             map<double, observation_ptr_t> visObs;
             for (SensorAbstract::DataManagerList::iterator dmaIter = senPtr->dataManagerList().begin(); dmaIter!=senPtr->dataManagerList().end(); dmaIter++ )
               {
