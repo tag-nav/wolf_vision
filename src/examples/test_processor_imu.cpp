@@ -70,7 +70,7 @@ int main(int argc, char** argv)
     data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
     t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
     Eigen::VectorXs x0(16);
-    x0 << 0,1,0,  0,0,0,1,  1,0,0, 0,0,0, 0,0,0;
+    x0 << 0,1,0,  0,0,0,1,  1,0,0, 0,0,.001, 0,0,.002; // Try some non-zero biases
 
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -109,11 +109,11 @@ int main(int argc, char** argv)
     // Final state
     std::cout << "\nIntegration results ----------------------------------------------------------------------------------------------" << std::endl;
     std::cout << "Initial    state: " << std::fixed << std::setprecision(3) << std::setw(8)
-    << x0.head(10).transpose() << std::endl;
+    << x0.head(16).transpose() << std::endl;
     std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
     << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
     std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
-    << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(10).transpose() << std::endl;
+    << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(16).transpose() << std::endl;
 
 
     // Print statistics

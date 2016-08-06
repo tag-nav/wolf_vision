@@ -183,6 +183,9 @@ inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::Vec
     p_out_ = p1_ + v1_ * _Dt + q1_ * p2_ + gdt * _Dt / 2 ;
     q_out_ = q1_ * q2_;
     v_out_ = v1_ + q1_ * v2_ + gdt;
+
+    // bypass constant biases
+    _x_plus_delta.tail(6) = _x.tail(6);
 }
 
 inline void ProcessorIMU::integrateDelta()
