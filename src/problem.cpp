@@ -153,8 +153,8 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs&
                     new FrameIMU(_frame_type, _time_stamp, // t
                                  new StateBlock(_frame_state.head(3)), // p
                                  new StateQuaternion(_frame_state.segment<4>(3)), // q
-                                 new StateBlock(_frame_state.segment<3>(3)), // v
-                                 new StateBlock(_frame_state.segment<3>(3)), // ab
+                                 new StateBlock(_frame_state.segment<3>(7)), // v
+                                 new StateBlock(_frame_state.segment<3>(10)), // ab
                                  new StateBlock(_frame_state.tail(3)))); // wb
         }
         default:
