@@ -136,7 +136,8 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     // remap
     remapData(_data);
     remapDelta(delta_);
-    remapBias(x_);
+
+    //    std::cout << "data2delta: bias acc: " << bias_acc_.transpose() << " gyro: " << bias_gyro_.transpose() << std::endl;
 
     // create delta
     p_out_ = velocity_preint_ * _dt;
