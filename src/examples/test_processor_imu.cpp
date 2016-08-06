@@ -60,18 +60,17 @@ int main(int argc, char** argv)
 
     // Wolf problem
     Problem* wolf_problem_ptr_ = new Problem(FRM_PQVBB_3D);
-    Eigen::VectorXs extrinsics(7);
-    extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, nullptr);
+    Eigen::VectorXs IMU_extrinsics(7);
+    IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
+    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, nullptr);
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
-    std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
     // Set the origin
     data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
     data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
     t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
     Eigen::VectorXs x0(16);
-    x0 << 0,0,0,  0,0,0,1,  0,0,0, 0,0,0, 0,0,0;
+    x0 << 0,1,0,  0,0,0,1,  1,0,0, 0,0,0, 0,0,0;
 
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -96,19 +95,30 @@ int main(int argc, char** argv)
 
 //        std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
 //        << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
-
-        Eigen::VectorXs x = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-        std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
-        << x.head(10).transpose() << std::endl;
-
+//
+//        Eigen::VectorXs x = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+//        std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
+//        << x.head(10).transpose() << std::endl;
+//
 //        std::cout << std::endl;
 
     }
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 
+    // Final state
+    std::cout << "\nIntegration results ----------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << "Initial    state: " << std::fixed << std::setprecision(3) << std::setw(8)
+    << x0.head(10).transpose() << std::endl;
+    std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
+    << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
+    std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
+    << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(10).transpose() << std::endl;
+
+
     // Print statistics
-    std::cout << std::endl;
+    std::cout << "\nStatistics -----------------------------------------------------------------------------------" << std::endl;
+    std::cout << "If you want meaningful CPU metrics, remove all couts in the loop, and compile in RELEASE mode!" << std::endl;
     TimeStamp t0, tf;
     t0 = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().front().ts_;
     tf = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
@@ -118,7 +128,8 @@ int main(int argc, char** argv)
     std::cout << "duration  : " << tf-t0 << " s" << std::endl;
     std::cout << "N samples : " << N << std::endl;
     std::cout << "frequency : " << (N-1)/(tf-t0) << " Hz" << std::endl;
-    std::cout << "CPU       : " << elapsed_secs << " s" << std::endl;
+    std::cout << "CPU time  : " << elapsed_secs << " s" << std::endl;
+    std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
 
 
