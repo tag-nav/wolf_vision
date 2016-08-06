@@ -135,8 +135,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     // remap
     remapData(_data);
     remapDelta(delta_);
-
-    //    std::cout << "data2delta: bias acc: " << bias_acc_.transpose() << " gyro: " << bias_gyro_.transpose() << std::endl;
+    // delta_ is _out_
 
     // create delta
     p_out_ = velocity_preint_ * _dt;
@@ -160,6 +159,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
     assert(_delta1_plus_delta2.size() == 10 && "Wrong _delta1_plus_delta2 vector size");
 
     remapPQV(_delta1, _delta2, _delta1_plus_delta2);
+    // _delta1              is _in_1_
+    // _delta2              is _in_2_
+    // _delta1_plus_delta2  is _out_
 
     // delta pre-integration
     p_out_ = p_in_1_ + p_in_2_;
@@ -174,14 +176,18 @@ inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::Vec
     assert(_delta.size() == 10 && "Wrong _delta vector size");
     assert(_x_plus_delta.size() == 16 && "Wrong _x_plus_delta vector size");
     assert(_Dt > 0 && "Time interval _Dt is not positive!");
+
     remapPQV(_x, _delta, _x_plus_delta);
+    // _x               is _in_1_
+    // _delta           is _in_2_
+    // _x_plus_delta    is _out_
 
     Eigen::Vector3s gdt = gravity_ * _Dt;
 
     // state updates
-    p_out_ = p_in_1_ + v_in_1_ * _Dt + q_in_1_ * p_in_2_ + gdt * _Dt / 2 ;
+    p_out_ = q_in_1_ * p_in_2_ + p_in_1_ + v_in_1_ * _Dt + gdt * _Dt / 2 ;
     q_out_ = q_in_1_ * q_in_2_;
-    v_out_ = v_in_1_ + q_in_1_ * v_in_2_ + gdt;
+    v_out_ = q_in_1_ * v_in_2_ + v_in_1_ + gdt;
 
     // bypass constant biases
     _x_plus_delta.tail(6) = _x.tail(6);
