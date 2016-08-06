@@ -88,6 +88,7 @@ class ProcessorMotion : public ProcessorBase
         // Instructions to the processor:
 
         virtual void process(CaptureBase* _incoming_ptr);
+        virtual void resetDerived();
 
         // Queries to the processor:
 
@@ -407,10 +408,12 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
     delta_ = deltaZero();
     delta_integrated_ = deltaZero();
 
-    // clear buffer and reset
+    // clear and reset buffer
     getBufferPtr()->get().clear();
     getBufferPtr()->get().push_back(motionZero(_origin_frame->getTimeStamp()));
 
+    // Reset derived things
+    resetDerived();
 }
 
 inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
@@ -455,6 +458,8 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
                                                  deltaZero(),
                                                  Eigen::MatrixXs::Zero(delta_size_, delta_size_),
                                                  Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
+        // reset derived things
+        resetDerived();
 
         getProblem()->keyFrameCallback(key_frame_ptr, this, time_tolerance_);
 
@@ -617,6 +622,11 @@ inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Ei
     FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
     return new_frame_ptr;
+}
+
+inline void ProcessorMotion::resetDerived()
+{
+    // Blank function, to be implemented in derived classes
 }
 
 inline bool ProcessorMotion::voteForKeyFrame()
