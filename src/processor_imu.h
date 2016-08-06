@@ -33,17 +33,6 @@ class ProcessorIMU : public ProcessorMotion{
          */
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt);
 
-        /** \brief composes a delta-state on top of a state
-         * \param _x the initial state
-         * \param _delta the delta-state
-         * \param _x_plus_delta the updated state. It has the same format as the initial state.
-         * \param _Dt the time interval between the origin state and the Delta
-         *
-         * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
-         */
-        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
-                                Eigen::VectorXs& _x_plus_delta );
-
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
          * \param _delta2 the second delta-state
@@ -57,6 +46,17 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                     Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                     Eigen::MatrixXs& _jacobian2);
+
+        /** \brief composes a delta-state on top of a state
+         * \param _x the initial state
+         * \param _delta the delta-state
+         * \param _x_plus_delta the updated state. It has the same format as the initial state.
+         * \param _Dt the time interval between the origin state and the Delta
+         *
+         * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
+         */
+        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
+                                Eigen::VectorXs& _x_plus_delta );
 
 
         /** \brief Adds a delta-increment into the pre-integrated Delta-state
@@ -139,21 +139,6 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_);
 }
 
-inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
-                                     Eigen::VectorXs& _x_plus_delta)
-{
-    assert(_x.size() == 16 && "Wrong _x vector size");
-    assert(_delta.size() == 10 && "Wrong _delta vector size");
-    assert(_x_plus_delta.size() == 16 && "Wrong _x_plus_delta vector size");
-    assert(_Dt > 0 && "Time interval _Dt is not positive!");
-    remapState(_x, _delta, _x_plus_delta);
-
-    // state updates
-    p_out_ = p1_ + v1_ * _Dt + q1_ * p2_ + gravity_ * _Dt * _Dt / 2 ;
-    q_out_ = q1_ * q2_;
-    v_out_ = v1_ + gravity_ * _Dt + q1_ * v2_;
-}
-
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                          Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                          Eigen::MatrixXs& _jacobian2)
@@ -172,6 +157,23 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
     p_out_ = p1_ + p2_;
     q_out_ = q1_ * q2_;
     v_out_ = v1_ + v2_;
+}
+
+inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
+                                     Eigen::VectorXs& _x_plus_delta)
+{
+    assert(_x.size() == 16 && "Wrong _x vector size");
+    assert(_delta.size() == 10 && "Wrong _delta vector size");
+    assert(_x_plus_delta.size() == 16 && "Wrong _x_plus_delta vector size");
+    assert(_Dt > 0 && "Time interval _Dt is not positive!");
+    remapState(_x, _delta, _x_plus_delta);
+
+    Eigen::Vector3s gdt = gravity_ * _Dt;
+
+    // state updates
+    p_out_ = p1_ + v1_ * _Dt + q1_ * p2_ + gdt * _Dt / 2 ;
+    q_out_ = q1_ * q2_;
+    v_out_ = v1_ + q1_ * v2_ + gdt;
 }
 
 inline void ProcessorIMU::integrateDelta()

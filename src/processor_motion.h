@@ -261,17 +261,6 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt) = 0;
 
-        /** \brief composes a delta-state on top of a state
-         * \param _x the initial state
-         * \param _delta the delta-state
-         * \param _x_plus_delta the updated state. It has the same format as the initial state.
-         * \param _Dt the time interval between the origin state and the Delta
-         *
-         * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
-         */
-        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
-                                Eigen::VectorXs& _x_plus_delta) = 0;
-
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
          * \param _delta2 the second delta-state
@@ -294,6 +283,17 @@ class ProcessorMotion : public ProcessorBase
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                     Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                     Eigen::MatrixXs& _jacobian2) = 0;
+
+        /** \brief composes a delta-state on top of a state
+         * \param _x the initial state
+         * \param _delta the delta-state
+         * \param _x_plus_delta the updated state. It has the same format as the initial state.
+         * \param _Dt the time interval between the origin state and the Delta
+         *
+         * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
+         */
+        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
+                                Eigen::VectorXs& _x_plus_delta) = 0;
 
         /** \brief Adds the current delta-increment into the pre-integrated Delta-state
         *
