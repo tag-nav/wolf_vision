@@ -4,11 +4,14 @@ MESSAGE("Starting WOLF CMakeLists ...")
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 #CMAKE modules
-SET(CMAKE_MODULE_PATH ${CMAKE_ROOT}/Modules/; ../cmake_modules)
+
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
-
 #find dependencies.
+
+FIND_PACKAGE(Eigen 3 REQUIRED)
+
 FIND_PACKAGE(Ceres QUIET) #Ceres is not required
 IF(Ceres_FOUND)
     MESSAGE("Ceres Library FOUND: Ceres related sources will be built.")
