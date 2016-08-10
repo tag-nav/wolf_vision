@@ -395,7 +395,7 @@ INSTALL(FILES ${HDRS_WRAPPER}
 INSTALL(FILES ${HDRS_SOLVER}
     DESTINATION include/iri-algorithms/wolf/solver)
 
-INSTALL(FILES ../Findwolf.cmake DESTINATION ${CMAKE_ROOT}/Modules/)
+INSTALL(FILES ../cmake_modules/Findwolf.cmake DESTINATION "lib/cmake/${PROJECT_NAME}")
 
 #Build examples & tests
 MESSAGE("Building examples and tests.")
