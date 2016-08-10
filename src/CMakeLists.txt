@@ -376,10 +376,12 @@ ENDIF (YAMLCPP_FOUND)
 
 #install library
 #=============================================================
-INSTALL(TARGETS ${PROJECT_NAME}
+INSTALL(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
       RUNTIME DESTINATION bin
       LIBRARY DESTINATION lib/iri-algorithms
       ARCHIVE DESTINATION lib/iri-algorithms)
+
+install(EXPORT ${PROJECT_NAME}Targets DESTINATION lib/cmake/${PROJECT_NAME})
 
 #install headers
 INSTALL(FILES ${HDRS_BASE}
