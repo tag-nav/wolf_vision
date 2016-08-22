@@ -205,8 +205,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      *
      * To implement this, we need to accept Dt in the API. Important notes:
      *  - Dt is the total time increment of the pre-integrated Delta, _delta2, as opposed to dt, which is the IMU time step.
-     *    - During preintegration, however, we are integrating just the last step, and therefore in such cases we have Dt = dt.
      *    - During regular delta composition, Dt is the time interval of the second Delta.
+     *    - During pre-integration, we are integrating just the last IMU step, and therefore in such cases we have Dt = dt.
      */
 
 }
