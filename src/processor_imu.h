@@ -137,6 +137,11 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     remapDelta(delta_);
     // delta_ is _out_
 
+    /*  MATHS of delta creation
+        dq = exp(wdt)
+        dv = Dq * (a*dt) * Dq'
+        dp = (3/2)*dv*dt
+    */
     // create delta
     p_out_ = velocity_preint_ * _dt;
     Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
@@ -163,6 +168,14 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
     // _delta2              is _in_2_
     // _delta1_plus_delta2  is _out_
 
+    /* MATHS of delta pre-integration
+        Dq = Dq * exp(w*dt)
+        Dv = Dv + Dq * exp(a*dt) * Dq' = Dv + dv
+        Dp = Dp + (3/2)*dv*dt = Dp + dp
+
+        warning : only Dq represents a real preintegrated rotation (physically)
+                    Dv and Dp are not physical representations of preintegrated velocity and position
+    */
     // delta pre-integration
     p_out_ = p_in_1_ + p_in_2_;
     q_out_ = q_in_1_ * q_in_2_;
