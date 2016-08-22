@@ -137,7 +137,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     remapDelta(delta_);
     // delta_ is _out_
 
-    /*  MATHS of delta creation
+    /*  MATHS of delta creation -- forster-15
         dq = exp(wdt)
         dv = Dq * (a*dt) * Dq'
         dp = (3/2)*dv*dt
@@ -146,6 +146,17 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     p_out_ = velocity_preint_ * _dt;
     Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
     v_out_ = orientation_preint_ * ((measured_acc_ - bias_acc_) * _dt);
+
+    /* MATHS of delta creation -- Sola-16
+     * dp = 1/2 * (a-a_b) * dt^2
+     * dv = (a-a_b) * dt
+     * dq = exp((w-w_b)*dt)
+     */
+    // According to Sola-16
+//    v_out_ = (measured_acc_ - bias_acc_) * _dt;
+//    p_out_ = v_out_ * _dt / 2;
+//    Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
+
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -168,18 +179,36 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
     // _delta2              is _in_2_
     // _delta1_plus_delta2  is _out_
 
-    /* MATHS of delta pre-integration
-        Dq = Dq * exp(w*dt)
-        Dv = Dv + Dq * exp(a*dt) * Dq' = Dv + dv
-        Dp = Dp + (3/2)*dv*dt = Dp + dp
+    /* MATHS of delta pre-integration according to Forster-15
+        Dq = Dq * exp(w*dt)             = Dq * dq
+        Dv = Dv + Dq * exp(a*dt) * Dq'  = Dv + dv
+        Dp = Dp + (3/2)*dv*dt           = Dp + dp
 
         warning : only Dq represents a real preintegrated rotation (physically)
                     Dv and Dp are not physical representations of preintegrated velocity and position
     */
+
     // delta pre-integration
     p_out_ = p_in_1_ + p_in_2_;
     q_out_ = q_in_1_ * q_in_2_;
     v_out_ = v_in_1_ + v_in_2_;
+
+    /* MATHS according to Sola-16
+     * Dp = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp
+     * Dv = Dv + Dq*(a-a_b)^2                   = Dv + Dq*dv
+     * Dq = Dq * exp((w-w_b)*dt)                = Dq * dq
+     *
+     * where (dp, dv, dq) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
+     *
+     * warning: All deltas (Dp, Dv, Dq) are physically interpretable: they represent the position, velocity and orientation of a body with
+     * respect to a reference frame that is non-rotating and free-falling at the acceleration of gravity.
+     *
+     * To implement this, we need to accept Dt in the API. Important notes:
+     *  - Dt is the total time increment of the pre-integrated Delta, _delta2, as opposed to dt, which is the IMU time step.
+     *    - During preintegration, however, we are integrating just the last step, and therefore in such cases we have Dt = dt.
+     *    - During regular delta composition, Dt is the time interval of the second Delta.
+     */
+
 }
 
 inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
