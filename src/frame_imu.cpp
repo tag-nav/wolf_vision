@@ -8,16 +8,16 @@ namespace wolf {
 
   FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr, StateBlock* _ba_ptr, StateBlock* _bg_ptr) :
               FrameBase(_ts, _p_ptr, _o_ptr, _v_ptr),
-              ba_ptr_(_ba_ptr),
-              bg_ptr_(_bg_ptr)
+              acc_bias_ptr_(_ba_ptr),
+              gyro_bias_ptr_(_bg_ptr)
   {
       setType("IMU");
   }
 
   FrameIMU::FrameIMU(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr, StateBlock* _ba_ptr, StateBlock* _bg_ptr) :
             FrameBase(_tp, _ts, _p_ptr, _o_ptr, _v_ptr),
-            ba_ptr_(_ba_ptr),
-            bg_ptr_(_bg_ptr)
+            acc_bias_ptr_(_ba_ptr),
+            gyro_bias_ptr_(_bg_ptr)
   {
       setType("IMU");
   }
@@ -46,17 +46,17 @@ namespace wolf {
               getProblem()->removeStateBlockPtr(v_ptr_);
           delete v_ptr_;
       }
-      if (ba_ptr_ != nullptr)
+      if (acc_bias_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-              getProblem()->removeStateBlockPtr(ba_ptr_);
-          delete ba_ptr_;
+              getProblem()->removeStateBlockPtr(acc_bias_ptr_);
+          delete acc_bias_ptr_;
       }
-      if (bg_ptr_ != nullptr)
+      if (gyro_bias_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-              getProblem()->removeStateBlockPtr(bg_ptr_);
-          delete bg_ptr_;
+              getProblem()->removeStateBlockPtr(gyro_bias_ptr_);
+          delete gyro_bias_ptr_;
       }
 
 
@@ -85,11 +85,11 @@ namespace wolf {
           if (v_ptr_ != nullptr)
               getProblem()->addStateBlockPtr(v_ptr_);
 
-          if (ba_ptr_ != nullptr)
-              getProblem()->addStateBlockPtr(ba_ptr_);
+          if (acc_bias_ptr_ != nullptr)
+              getProblem()->addStateBlockPtr(acc_bias_ptr_);
 
-          if (bg_ptr_ != nullptr)
-              getProblem()->addStateBlockPtr(bg_ptr_);
+          if (gyro_bias_ptr_ != nullptr)
+              getProblem()->addStateBlockPtr(gyro_bias_ptr_);
       }
   }
 
@@ -99,8 +99,8 @@ namespace wolf {
       assert(_st.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize())    +
                             (o_ptr_==nullptr ? 0 : o_ptr_->getSize())    +
                             (v_ptr_==nullptr ? 0 : v_ptr_->getSize())    +
-                            (ba_ptr_==nullptr ? 0 : ba_ptr_->getSize())  +
-                            (bg_ptr_==nullptr ? 0 : bg_ptr_->getSize())) &&
+                            (acc_bias_ptr_==nullptr ? 0 : acc_bias_ptr_->getSize())  +
+                            (gyro_bias_ptr_==nullptr ? 0 : gyro_bias_ptr_->getSize())) &&
                             "In FrameBase::setState wrong state size");
 
       unsigned int index = 0;
@@ -119,14 +119,14 @@ namespace wolf {
           v_ptr_->setVector(_st.segment(index, v_ptr_->getSize()));
           index += v_ptr_->getSize();
       }
-      if (ba_ptr_!=nullptr)
+      if (acc_bias_ptr_!=nullptr)
       {
-          ba_ptr_->setVector(_st.segment(index, ba_ptr_->getSize()));
-          index += ba_ptr_->getSize();
+          acc_bias_ptr_->setVector(_st.segment(index, acc_bias_ptr_->getSize()));
+          index += acc_bias_ptr_->getSize();
       }
-      if (bg_ptr_!=nullptr)
+      if (gyro_bias_ptr_!=nullptr)
       {
-          bg_ptr_->setVector(_st.segment(index, bg_ptr_->getSize()));
+          gyro_bias_ptr_->setVector(_st.segment(index, gyro_bias_ptr_->getSize()));
           //   index += bg_ptr_->getSize();
       }
   }
@@ -136,8 +136,8 @@ namespace wolf {
       Eigen::VectorXs state((p_ptr_==nullptr ? 0 : p_ptr_->getSize())    +
                             (o_ptr_==nullptr ? 0 : o_ptr_->getSize())    +
                             (v_ptr_==nullptr ? 0 : v_ptr_->getSize())    +
-                            (ba_ptr_==nullptr ? 0 : ba_ptr_->getSize())  +
-                            (bg_ptr_==nullptr ? 0 : bg_ptr_->getSize()));
+                            (acc_bias_ptr_==nullptr ? 0 : acc_bias_ptr_->getSize())  +
+                            (gyro_bias_ptr_==nullptr ? 0 : gyro_bias_ptr_->getSize()));
 
       getState(state);
 
@@ -149,8 +149,8 @@ namespace wolf {
       assert(state.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize())    +
                               (o_ptr_==nullptr ? 0 : o_ptr_->getSize())    +
                               (v_ptr_==nullptr ? 0 : v_ptr_->getSize())    +
-                              (ba_ptr_==nullptr ? 0 : ba_ptr_->getSize())  +
-                              (bg_ptr_==nullptr ? 0 : bg_ptr_->getSize())));
+                              (acc_bias_ptr_==nullptr ? 0 : acc_bias_ptr_->getSize())  +
+                              (gyro_bias_ptr_==nullptr ? 0 : gyro_bias_ptr_->getSize())));
 
       unsigned int index = 0;
       if (p_ptr_!=nullptr)
@@ -168,14 +168,14 @@ namespace wolf {
           state.segment(index, v_ptr_->getSize()) = v_ptr_->getVector();
           index += v_ptr_->getSize();
       }
-      if (ba_ptr_!=nullptr)
+      if (acc_bias_ptr_!=nullptr)
       {
-          state.segment(index, ba_ptr_->getSize()) = ba_ptr_->getVector();
-          index += ba_ptr_->getSize();
+          state.segment(index, acc_bias_ptr_->getSize()) = acc_bias_ptr_->getVector();
+          index += acc_bias_ptr_->getSize();
       }
-      if (bg_ptr_!=nullptr)
+      if (gyro_bias_ptr_!=nullptr)
       {
-          state.segment(index, bg_ptr_->getSize()) = bg_ptr_->getVector();
+          state.segment(index, gyro_bias_ptr_->getSize()) = gyro_bias_ptr_->getVector();
         //  index += bg_ptr_->getSize();
       }
   }
@@ -205,17 +205,17 @@ namespace wolf {
               if (getProblem() != nullptr)
                   getProblem()->updateStateBlockPtr(v_ptr_);
           }
-          if (ba_ptr_ != nullptr)
+          if (acc_bias_ptr_ != nullptr)
           {
-              ba_ptr_->fix();
+              acc_bias_ptr_->fix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(ba_ptr_);
+                  getProblem()->updateStateBlockPtr(acc_bias_ptr_);
           }
-          if (bg_ptr_ != nullptr)
+          if (gyro_bias_ptr_ != nullptr)
           {
-              bg_ptr_->fix();
+              gyro_bias_ptr_->fix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(bg_ptr_);
+                  getProblem()->updateStateBlockPtr(gyro_bias_ptr_);
           }
       }
       else if (status_ == ST_ESTIMATED)
@@ -238,17 +238,17 @@ namespace wolf {
               if (getProblem() != nullptr)
                   getProblem()->updateStateBlockPtr(v_ptr_);
           }
-          if (ba_ptr_ != nullptr)
+          if (acc_bias_ptr_ != nullptr)
           {
-              ba_ptr_->unfix();
+              acc_bias_ptr_->unfix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(ba_ptr_);
+                  getProblem()->updateStateBlockPtr(acc_bias_ptr_);
           }
-          if (bg_ptr_ != nullptr)
+          if (gyro_bias_ptr_ != nullptr)
           {
-              bg_ptr_->fix();
+              gyro_bias_ptr_->fix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(bg_ptr_);
+                  getProblem()->updateStateBlockPtr(gyro_bias_ptr_);
           }
       }
   }

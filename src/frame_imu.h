@@ -21,8 +21,8 @@ namespace wolf {
   class FrameIMU : public FrameBase
   {
       protected:
-          StateBlock* ba_ptr_;      ///< Accleration bias state block pointer
-          StateBlock* bg_ptr_;      ///< Gyrometer bias state block pointer
+          StateBlock* acc_bias_ptr_;      ///< Accleration bias state block pointer
+          StateBlock* gyro_bias_ptr_;      ///< Gyrometer bias state block pointer
       public:
           /** \brief Constructor of non-key Frame with only time stamp
            *
@@ -81,12 +81,12 @@ namespace wolf {
 
   inline StateBlock* FrameIMU::getBAPtr() const
   {
-      return ba_ptr_;
+      return acc_bias_ptr_;
   }
 
   inline StateBlock* FrameIMU::getBGPtr() const
   {
-      return bg_ptr_;
+      return gyro_bias_ptr_;
   }
 } // namespace wolf
 
