@@ -180,9 +180,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
     // _delta1_plus_delta2  is _out_
 
     /* MATHS of delta pre-integration according to Forster-15
-        Dq = Dq * exp(w*dt)             = Dq * dq
-        Dv = Dv + Dq * exp(a*dt) * Dq'  = Dv + dv
-        Dp = Dp + (3/2)*dv*dt           = Dp + dp
+        Dp_ = Dp + (3/2)*dv*dt           = Dp + dp
+        Dq_ = Dq * exp(w*dt)             = Dq * dq
+        Dv_ = Dv + Dq * exp(a*dt) * Dq'  = Dv + dv
 
         warning : only Dq represents a real preintegrated rotation (physically)
                     Dv and Dp are not physical representations of preintegrated velocity and position
@@ -194,9 +194,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
     v_out_ = v_in_1_ + v_in_2_;
 
     /* MATHS according to Sola-16
-     * Dp = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp
-     * Dv = Dv + Dq*(a-a_b)^2                   = Dv + Dq*dv
-     * Dq = Dq * exp((w-w_b)*dt)                = Dq * dq
+     * Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp
+     * Dq' = Dq * exp((w-w_b)*dt)                = Dq * dq
+     * Dv' = Dv + Dq*(a-a_b)^2                   = Dv + Dq*dv
      *
      * where (dp, dv, dq) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
      *
@@ -208,6 +208,11 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      *    - During regular delta composition, Dt is the time interval of the second Delta.
      *    - During pre-integration, we are integrating just the last IMU step, and therefore in such cases we have Dt = dt.
      */
+
+     // delta pre-integration
+     p_out_ = p_in_1_ + v_in_1_ * dt_ + q_in_1_ * p_in_2_;
+     q_out_ = q_in_1_ * q_in_2_;
+     v_out_ = v_in_1_ + q_in_1_ * v_in_2_;
 
 }
 
