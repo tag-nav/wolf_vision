@@ -142,10 +142,6 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
         dv = Dq * (a*dt) * Dq'
         dp = (3/2)*dv*dt
     */
-    // create delta
-    p_out_ = velocity_preint_ * _dt;
-    Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
-    v_out_ = orientation_preint_ * ((measured_acc_ - bias_acc_) * _dt);
 
     /* MATHS of delta creation -- Sola-16
      * dp = 1/2 * (a-a_b) * dt^2
@@ -157,6 +153,16 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
 //    p_out_ = v_out_ * _dt / 2;
 //    Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
 
+    // create delta
+    #ifdef FORSTER_15
+        p_out_ = velocity_preint_ * _dt;
+        Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
+        v_out_ = orientation_preint_ * ((measured_acc_ - bias_acc_) * _dt);
+    #else //Use SOLA-16 convention by default
+        v_out_ = (measured_acc_ - bias_acc_) * _dt;
+        p_out_ = v_out_ * _dt / 2;
+        Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
+    #endif
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -188,11 +194,6 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
                     Dv and Dp are not physical representations of preintegrated velocity and position
     */
 
-    // delta pre-integration
-    p_out_ = p_in_1_ + p_in_2_;
-    q_out_ = q_in_1_ * q_in_2_;
-    v_out_ = v_in_1_ + v_in_2_;
-
     /* MATHS according to Sola-16
      * Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp
      * Dq' = Dq * exp((w-w_b)*dt)                = Dq * dq
@@ -210,9 +211,15 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      */
 
      // delta pre-integration
-     p_out_ = p_in_1_ + v_in_1_ * dt_ + q_in_1_ * p_in_2_;
-     q_out_ = q_in_1_ * q_in_2_;
-     v_out_ = v_in_1_ + q_in_1_ * v_in_2_;
+    #ifdef FORSTER_15
+        p_out_ = p_in_1_ + p_in_2_;
+        q_out_ = q_in_1_ * q_in_2_;
+        v_out_ = v_in_1_ + v_in_2_;
+    #else //Use SOLA-16 convention by default
+        p_out_ = p_in_1_ + v_in_1_ * dt_ + q_in_1_ * p_in_2_;
+        q_out_ = q_in_1_ * q_in_2_;
+        v_out_ = v_in_1_ + q_in_1_ * v_in_2_;
+    #endif
 
 }
 
