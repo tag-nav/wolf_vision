@@ -75,6 +75,9 @@ namespace wolf {
           /** \brief Sets the Frame status (see wolf.h for Frame status)
            **/
           void setStatus(StateStatus _st);
+
+          Eigen::Vector3s acc_bias_at_preintegratio_time_;
+          Eigen::Vector3s gyro_bias_at_preintegratio_time_;
   };
 
   // IMPLEMENTATION //
