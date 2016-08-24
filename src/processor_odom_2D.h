@@ -58,9 +58,9 @@ class ProcessorOdom2D : public ProcessorMotion
 
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta);
-        void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2);
+        void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                            Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
+                            const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                             Eigen::MatrixXs& _jacobian2);
         virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                      Eigen::VectorXs& _delta2_minus_delta1);
@@ -134,7 +134,7 @@ inline void ProcessorOdom2D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
 //    std::cout << "_x_plus_delta: " << _x_plus_delta.transpose() << std::endl;
 }
 
-inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
+inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2)
 {
     //std::cout << "ProcessorOdom2d::deltaPlusDelta" << std::endl;
     assert(_delta1.size() == delta_size_ && "Wrong _delta1 vector size");
@@ -154,6 +154,7 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
 }
 
 inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+                                            const Scalar _Dt2,
                                             Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                             Eigen::MatrixXs& _jacobian2)
 {
@@ -207,7 +208,7 @@ inline void ProcessorOdom2D::deltaMinusDelta(const Eigen::VectorXs& _delta1, con
 
 inline void ProcessorOdom2D::integrateDelta()
 {
-    deltaPlusDelta(delta_integrated_, delta_ , delta_integrated_);
+    deltaPlusDelta(delta_integrated_, delta_ , dt_, delta_integrated_);
 }
 
 inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const

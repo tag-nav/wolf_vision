@@ -37,16 +37,17 @@ class ProcessorIMU : public ProcessorMotion{
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
          * \param _delta2 the second delta-state
+         * \param _Dt2 the second delta-state's time delta
          * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
          *
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2
          */
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                    Eigen::VectorXs& _delta1_plus_delta2);
+                                    const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2);
 
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                    Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
-                                    Eigen::MatrixXs& _jacobian2);
+                                    const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2,
+                                    Eigen::MatrixXs& _jacobian1, Eigen::MatrixXs& _jacobian2);
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -166,15 +167,15 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                         Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
-                                         Eigen::MatrixXs& _jacobian2)
+                                         const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2,
+                                         Eigen::MatrixXs& _jacobian1, Eigen::MatrixXs& _jacobian2)
 {
-    deltaPlusDelta(_delta1, _delta2, _delta1_plus_delta2);
+    deltaPlusDelta(_delta1, _delta2, _Dt2, _delta1_plus_delta2);
     // TODO: all the work to be done here about Jacobians
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                         Eigen::VectorXs& _delta1_plus_delta2)
+                                         const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2)
 {
     assert(_delta1.size() == 10 && "Wrong _delta1 vector size");
     assert(_delta2.size() == 10 && "Wrong _delta2 vector size");
@@ -256,7 +257,7 @@ inline void ProcessorIMU::integrateDelta()
      * delta_preintegrated_ik = delta_preintegrated_ij (+) delta_jk
      *
      * */
-    deltaPlusDelta(delta_integrated_, delta_, delta_integrated_);
+    deltaPlusDelta(delta_integrated_, delta_, dt_, delta_integrated_);
 }
 
 inline Eigen::VectorXs ProcessorIMU::deltaZero() const
