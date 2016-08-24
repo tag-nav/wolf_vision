@@ -49,6 +49,13 @@ namespace wolf {
            **/
           FrameIMU(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr, StateBlock* _ba_ptr = nullptr, StateBlock* _bg_ptr = nullptr);
 
+          /** \brief Constructor with type, time stamp and state vector
+          * \param _tp indicates frame type. Generally either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
+          * \param _ts is the time stamp associated to this frame, provided in seconds
+          * \param _x state vector
+          **/
+         FrameIMU(const FrameKeyType & _tp, const TimeStamp& _ts, Eigen::VectorXs& _x);
+
           /** \brief Default destructor (not recommended)
            *
            * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
@@ -76,8 +83,8 @@ namespace wolf {
            **/
           void setStatus(StateStatus _st);
 
-          Eigen::Vector3s acc_bias_at_preintegratio_time_;
-          Eigen::Vector3s gyro_bias_at_preintegratio_time_;
+          Eigen::Vector3s acc_bias_at_preintegration_time_;
+          Eigen::Vector3s gyro_bias_at_preintegration_time_;
   };
 
   // IMPLEMENTATION //
