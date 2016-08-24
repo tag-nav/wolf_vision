@@ -144,7 +144,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     */
 
     /* MATHS of delta creation -- Sola-16
-     * dp = 1/2 * (a-a_b) * dt^2
+     * dp = 1/2 * (a-a_b) * dt^2 = 1/2 * dv * dt
      * dv = (a-a_b) * dt
      * dq = exp((w-w_b)*dt)
      */
