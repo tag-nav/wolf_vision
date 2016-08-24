@@ -27,7 +27,7 @@ class ProcessorIMU : public ProcessorMotion{
         // Helper functions
 
         /**
-         * @brief extractData Extract data from the capture_imu object and store them
+         * @brief Extract data from the IMU and create a delta-state for one IMU step
          * @param _data
          * @param _data_cov
          * @param _dt
@@ -41,6 +41,8 @@ class ProcessorIMU : public ProcessorMotion{
          * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
          *
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2
+         *
+         * See its definition for more comments about the inner maths.
          */
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                     const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2);
@@ -138,32 +140,18 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     remapDelta(delta_);
     // delta_ is _out_
 
-    /*  MATHS of delta creation -- forster-15
-        dq = exp(wdt)
-        dv = Dq * (a*dt) * Dq'
-        dp = (3/2)*dv*dt
-    */
-
     /* MATHS of delta creation -- Sola-16
      * dp = 1/2 * (a-a_b) * dt^2
      * dv = (a-a_b) * dt
      * dq = exp((w-w_b)*dt)
      */
-    // According to Sola-16
-//    v_out_ = (measured_acc_ - bias_acc_) * _dt;
-//    p_out_ = v_out_ * _dt / 2;
-//    Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
 
     // create delta
-    #ifdef FORSTER_15
-        p_out_ = velocity_preint_ * _dt;
-        Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
-        v_out_ = orientation_preint_ * ((measured_acc_ - bias_acc_) * _dt);
-    #else //Use SOLA-16 convention by default
-        v_out_ = (measured_acc_ - bias_acc_) * _dt;
-        p_out_ = v_out_ * _dt / 2;
-        Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
-    #endif
+    //Use SOLA-16 convention by default
+    v_out_ = (measured_acc_ - bias_acc_) * _dt;
+    p_out_ = v_out_ * _dt / 2;
+    Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
+
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -186,44 +174,27 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
     // _delta2              is _in_2_
     // _delta1_plus_delta2  is _out_
 
-    /* MATHS of delta pre-integration according to Forster-15
-        Dp_ = Dp + (3/2)*dv*dt           = Dp + dp
-        Dv_ = Dv + Dq * exp(a*dt) * Dq'  = Dv + dv
-        Dq_ = Dq * exp(w*dt)             = Dq * dq
-
-        warning : only Dq represents a real preintegrated rotation (physically)
-                    Dv and Dp are not physical representations of preintegrated velocity and position
-    */
 
     /* MATHS according to Sola-16
-     * Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp
-     * Dv' = Dv + Dq*(a-a_b)^2                   = Dv + Dq*dv
-     * Dq' = Dq * exp((w-w_b)*dt)                = Dq * dq
+     * Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp   if  dp = 1/2*(a-a_b)*dt^2
+     * Dv' = Dv + Dq*(a-a_b)*dt                  = Dv + Dq*dv           if  dv = (a-a_b)*dt
+     * Dq' = Dq * exp((w-w_b)*dt)                = Dq * dq              if  dq = exp((w-w_b)*dt)
      *
      * where (dp, dv, dq) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
      *
      * warning: All deltas (Dp, Dv, Dq) are physically interpretable: they represent the position, velocity and orientation of a body with
      * respect to a reference frame that is non-rotating and free-falling at the acceleration of gravity.
-     *
-     * To implement this, we need to accept Dt in the API. Important notes:
-     *  - Dt is the total time increment of the pre-integrated Delta, _delta2, as opposed to dt, which is the IMU time step.
-     *    - During regular delta composition, Dt is the time interval of the second Delta. (ie, during the composition of 2 preintegrated Deltas)
-     *    - During pre-integration, we are integrating just the last IMU step, and therefore in such cases we have Dt = dt.
      */
 
     // delta pre-integration
-    // Note: we might be (and in fact we are) calling this fcn with the same input and output,
+    // For the math, use SOLA-16 convention by default
+    // Note: we might be (and in fact we are) calling this fcn with the same input and output:
+    //     deltaPlusDelta(delta_integrated_, delta_, dt_, delta_integrated_);
     // that is, _delta1 and _delta1_plus_delta2 point to the same memory locations.
     // Therefore, to avoid aliasing, we proceed in the order p -> v -> q
-    #ifdef FORSTER_15
-        p_out_ = p_in_1_ + p_in_2_;
-        v_out_ = v_in_1_ + v_in_2_;
-        q_out_ = q_in_1_ * q_in_2_;
-    #else //Use SOLA-16 convention by default
-        p_out_ = p_in_1_ + v_in_1_ * _Dt2 + q_in_1_ * p_in_2_;
-        v_out_ = v_in_1_ + q_in_1_ * v_in_2_;
-        q_out_ = q_in_1_ * q_in_2_;
-    #endif
+    p_out_ = p_in_1_ + v_in_1_ * _Dt2 + q_in_1_ * p_in_2_;
+    v_out_ = v_in_1_ + q_in_1_ * v_in_2_;
+    q_out_ = q_in_1_ * q_in_2_;
 
 }
 
