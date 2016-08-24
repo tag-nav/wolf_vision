@@ -155,11 +155,13 @@ class ProcessorMotion : public ProcessorBase
         /** Composes two delta covariances
          * \param _delta_cov1 covariance of the first delta
          * \param _delta_cov2 covariance of the delta to be composed
+         * \param _Dt2 the second delta-state's time delta
          * \param _jacobian1 jacobian of the composition w.r.t. _delta1
          * \param _jacobian2 jacobian of the composition w.r.t. _delta2
          * \param _delta_cov1_plus_delta_cov2 the covariance of the composition.
          */
         void deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1, const Eigen::MatrixXs& _delta_cov2,
+                                  const Scalar _Dt2,
                                   const Eigen::MatrixXs& _jacobian1, const Eigen::MatrixXs& _jacobian2,
                                   Eigen::MatrixXs& _delta_cov1_plus_delta_cov2);
         /** Set the origin of all motion for this processor
@@ -265,16 +267,18 @@ class ProcessorMotion : public ProcessorBase
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
          * \param _delta2 the second delta-state
+         * \param _Dt2 the second delta-state's time delta
          * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
          *
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2.
          */
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                    Eigen::VectorXs& _delta1_plus_delta2) = 0;
+                                    const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2) = 0;
 
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
          * \param _delta2 the second delta-state
+         * \param _Dt2 the second delta-state's time delta
          * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
          * \param _jacobian1 the jacobian of the composition w.r.t. _delta1.
          * \param _jacobian2 the jacobian of the composition w.r.t. _delta2.
@@ -282,8 +286,8 @@ class ProcessorMotion : public ProcessorBase
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2 and its jacobians.
          */
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                    Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
-                                    Eigen::MatrixXs& _jacobian2) = 0;
+                                    const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2,
+                                    Eigen::MatrixXs& _jacobian1, Eigen::MatrixXs& _jacobian2) = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -358,7 +362,9 @@ inline ProcessorMotion::~ProcessorMotion()
 }
 
 inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1,
-                                                  const Eigen::MatrixXs& _delta_cov2, const Eigen::MatrixXs& _jacobian1,
+                                                  const Eigen::MatrixXs& _delta_cov2,
+                                                  const Scalar _Dt2,
+                                                  const Eigen::MatrixXs& _jacobian1,
                                                   const Eigen::MatrixXs& _jacobian2,
                                                   Eigen::MatrixXs& _delta_cov1_plus_delta_cov2)
 {
@@ -484,7 +490,11 @@ inline void ProcessorMotion::integrate()
     integrateDelta();
 
     // and covariance
-    deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,
+    deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_,
+                         delta_cov_,
+                         dt_,
+                         jacobian_prev_,
+                         jacobian_curr_,
                          delta_integrated_cov_);
 
     // then push it into buffer
@@ -517,9 +527,19 @@ inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
     Eigen::MatrixXs jacobian_prev(delta_size_, delta_size_), jacobian_curr(delta_size_, delta_size_);
     while (motion_it != _capture_ptr->getBufferPtr()->get().end())
     {
-        deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, motion_it->delta_integr_, jacobian_prev,
+        const Scalar dt = motion_it->ts_ - prev_motion_it->ts_;
+        deltaPlusDelta(prev_motion_it->delta_integr_,
+                       motion_it->delta_,
+                       dt,
+                       motion_it->delta_integr_,
+                       jacobian_prev,
                        jacobian_curr);
-        deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_, motion_it->delta_cov_, jacobian_prev, jacobian_curr,
+
+        deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_,
+                             motion_it->delta_cov_,
+                             dt,
+                             jacobian_prev,
+                             jacobian_curr,
                              motion_it->delta_integr_cov_);
 
         //std::cout << "\tmotion reintegrated: " << std::distance(_capture_ptr->getBufferPtr()->get().begin(), motion_it) << std::endl;

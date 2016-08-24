@@ -49,8 +49,9 @@ class ProcessorOdom3D : public ProcessorMotion
 
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta);
-        void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2);
+        void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+                            const Scalar _Dt2,
                             Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                             Eigen::MatrixXs& _jacobian2);
         virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -112,7 +113,7 @@ inline void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
     q_out_ = q1_ * q2_;
 }
 
-inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta1_plus_delta2)
+inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2)
 {
     assert(_delta1.size() == 7 && "Wrong _delta1 vector size");
     assert(_delta2.size() == 7 && "Wrong _delta2 vector size");
@@ -124,6 +125,7 @@ inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
 }
 
 inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+                                            const Scalar _Dt2,
                                             Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                                             Eigen::MatrixXs& _jacobian2)
 {
@@ -155,7 +157,7 @@ inline void ProcessorOdom3D::deltaMinusDelta(const Eigen::VectorXs& _delta1, con
 
 inline void ProcessorOdom3D::integrateDelta()
 {
-    deltaPlusDelta(delta_integrated_, delta_ , delta_integrated_);
+    deltaPlusDelta(delta_integrated_, delta_ , dt_, delta_integrated_);
 }
 
 inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
