@@ -188,8 +188,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
 
     /* MATHS of delta pre-integration according to Forster-15
         Dp_ = Dp + (3/2)*dv*dt           = Dp + dp
-        Dq_ = Dq * exp(w*dt)             = Dq * dq
         Dv_ = Dv + Dq * exp(a*dt) * Dq'  = Dv + dv
+        Dq_ = Dq * exp(w*dt)             = Dq * dq
 
         warning : only Dq represents a real preintegrated rotation (physically)
                     Dv and Dp are not physical representations of preintegrated velocity and position
@@ -197,8 +197,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
 
     /* MATHS according to Sola-16
      * Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp
-     * Dq' = Dq * exp((w-w_b)*dt)                = Dq * dq
      * Dv' = Dv + Dq*(a-a_b)^2                   = Dv + Dq*dv
+     * Dq' = Dq * exp((w-w_b)*dt)                = Dq * dq
      *
      * where (dp, dv, dq) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
      *
@@ -211,15 +211,18 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      *    - During pre-integration, we are integrating just the last IMU step, and therefore in such cases we have Dt = dt.
      */
 
-     // delta pre-integration
+    // delta pre-integration
+    // Note: we might be (and in fact we are) calling this fcn with the same input and output,
+    // that is, _delta1 and _delta1_plus_delta2 point to the same memory locations.
+    // Therefore, to avoid aliasing, we proceed in the order p -> v -> q
     #ifdef FORSTER_15
         p_out_ = p_in_1_ + p_in_2_;
-        q_out_ = q_in_1_ * q_in_2_;
         v_out_ = v_in_1_ + v_in_2_;
-    #else //Use SOLA-16 convention by default
-        p_out_ = p_in_1_ + v_in_1_ * dt_ + q_in_1_ * p_in_2_;
         q_out_ = q_in_1_ * q_in_2_;
+    #else //Use SOLA-16 convention by default
+        p_out_ = p_in_1_ + v_in_1_ * _Dt2 + q_in_1_ * p_in_2_;
         v_out_ = v_in_1_ + q_in_1_ * v_in_2_;
+        q_out_ = q_in_1_ * q_in_2_;
     #endif
 
 }
@@ -241,8 +244,8 @@ inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::Vec
 
     // state updates
     p_out_ = q_in_1_ * p_in_2_ + p_in_1_ + v_in_1_ * _Dt + gdt * _Dt / 2 ;
-    q_out_ = q_in_1_ * q_in_2_;
     v_out_ = q_in_1_ * v_in_2_ + v_in_1_ + gdt;
+    q_out_ = q_in_1_ * q_in_2_;
 
     // bypass constant biases
     _x_plus_delta.tail(6) = _x.tail(6);
