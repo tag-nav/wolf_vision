@@ -35,7 +35,6 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, Eigen::VectorX
         FrameBase(_tp, _ts, new StateBlock(3), new StateQuaternion(), new StateBlock(3)),
         acc_bias_ptr_(new StateBlock(3)),
         gyro_bias_ptr_(new StateBlock(3))
-
 {
     assert(_x.size() == 16 && "Wrong vector size! Must be 16.");
     setState(_x);

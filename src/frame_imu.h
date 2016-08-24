@@ -52,7 +52,7 @@ namespace wolf {
           /** \brief Constructor with type, time stamp and state vector
           * \param _tp indicates frame type. Generally either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
           * \param _ts is the time stamp associated to this frame, provided in seconds
-          * \param _x state vector
+          * \param _x state vector of size 16, organized as [position, quaternion, velocity, acc_bias, gyro_bias]
           **/
          FrameIMU(const FrameKeyType & _tp, const TimeStamp& _ts, Eigen::VectorXs& _x);
 
