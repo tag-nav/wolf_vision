@@ -3,6 +3,7 @@
 #include "trajectory_base.h"
 #include "capture_base.h"
 #include "state_block.h"
+#include "state_quaternion.h"
 
 namespace wolf {
 
@@ -12,6 +13,10 @@ namespace wolf {
               gyro_bias_ptr_(_bg_ptr)
   {
       setType("IMU");
+      if (acc_bias_ptr_ != nullptr)
+          acc_bias_at_preintegration_time_ = acc_bias_ptr_->getVector();
+      if (gyro_bias_ptr_ != nullptr)
+          gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
   }
 
   FrameIMU::FrameIMU(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr, StateBlock* _ba_ptr, StateBlock* _bg_ptr) :
@@ -20,7 +25,22 @@ namespace wolf {
             gyro_bias_ptr_(_bg_ptr)
   {
       setType("IMU");
-  }
+      if (acc_bias_ptr_ != nullptr)
+          acc_bias_at_preintegration_time_ = acc_bias_ptr_->getVector();
+      if (gyro_bias_ptr_ != nullptr)
+          gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
+}
+
+FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, Eigen::VectorXs& _x) :
+        FrameBase(_tp, _ts, new StateBlock(3), new StateQuaternion(), new StateBlock(3)),
+        acc_bias_ptr_(new StateBlock(3)),
+        gyro_bias_ptr_(new StateBlock(3))
+
+{
+    assert(_x.size() == 16 && "Wrong vector size! Must be 16.");
+    setState(_x);
+}
+
 
   FrameIMU::~FrameIMU()
   {
@@ -123,12 +143,14 @@ namespace wolf {
       {
           acc_bias_ptr_->setVector(_st.segment(index, acc_bias_ptr_->getSize()));
           index += acc_bias_ptr_->getSize();
+          acc_bias_at_preintegration_time_ = acc_bias_ptr_->getVector();
       }
       if (gyro_bias_ptr_!=nullptr)
       {
           gyro_bias_ptr_->setVector(_st.segment(index, gyro_bias_ptr_->getSize()));
           //   index += bg_ptr_->getSize();
-      }
+          gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
+     }
   }
 
   Eigen::VectorXs FrameIMU::getState() const
