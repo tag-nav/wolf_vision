@@ -116,7 +116,7 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const TimeStamp& _time
     return createFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
 }
 
-FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs& _frame_state,
+FrameBase* Problem::createFrame(FrameKeyType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
     //std::cout << "Problem::createFrame" << std::endl;
@@ -128,34 +128,28 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_type, const Eigen::VectorXs&
         {
             assert(_frame_state.size() == 3 && "Wrong state vector size");
             return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_type, _time_stamp, new StateBlock(_frame_state.head(2)),
+                    new FrameBase(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(2)),
                                   new StateBlock(_frame_state.tail(1))));
         }
         case FRM_PO_3D:
         {
             assert(_frame_state.size() == 7 && "Wrong state vector size");
             return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_type, _time_stamp, new StateBlock(_frame_state.head(3)),
+                    new FrameBase(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
                                   new StateQuaternion(_frame_state.tail(4))));
         }
         case FRM_POV_3D:
         {
             assert(_frame_state.size() == 10 && "Wrong state vector size");
             return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_type, _time_stamp, new StateBlock(_frame_state.head(3)),
+                    new FrameBase(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
                                   new StateQuaternion(_frame_state.segment<4>(3)),
                                   new StateBlock(_frame_state.tail(3))));
         }
         case FRM_PQVBB_3D:
         {
             assert(_frame_state.size() == 16 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(
-                    new FrameIMU(_frame_type, _time_stamp, // t
-                                 new StateBlock(_frame_state.head(3)), // p
-                                 new StateQuaternion(_frame_state.segment<4>(3)), // q
-                                 new StateBlock(_frame_state.segment<3>(7)), // v
-                                 new StateBlock(_frame_state.segment<3>(10)), // ab
-                                 new StateBlock(_frame_state.tail(3)))); // wb
+            return trajectory_ptr_->addFrame(new FrameIMU(_frame_key_type, _time_stamp, _frame_state));
         }
         default:
             throw std::runtime_error(
