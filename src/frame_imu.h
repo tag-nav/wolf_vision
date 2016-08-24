@@ -54,7 +54,7 @@ namespace wolf {
           * \param _ts is the time stamp associated to this frame, provided in seconds
           * \param _x state vector of size 16, organized as [position, quaternion, velocity, acc_bias, gyro_bias]
           **/
-         FrameIMU(const FrameKeyType & _tp, const TimeStamp& _ts, Eigen::VectorXs& _x);
+         FrameIMU(const FrameKeyType & _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x);
 
           /** \brief Default destructor (not recommended)
            *

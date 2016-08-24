@@ -31,7 +31,7 @@ namespace wolf {
           gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
 }
 
-FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, Eigen::VectorXs& _x) :
+FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
         FrameBase(_tp, _ts, new StateBlock(3), new StateQuaternion(), new StateBlock(3)),
         acc_bias_ptr_(new StateBlock(3)),
         gyro_bias_ptr_(new StateBlock(3))
