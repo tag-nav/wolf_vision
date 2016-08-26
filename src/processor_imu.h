@@ -10,6 +10,7 @@
 
 // STL
 #include <deque>
+#include <cmath> //needed to compute LogMapDerivative (right jacobian Jr)
 
 
 namespace wolf {
@@ -78,6 +79,17 @@ class ProcessorIMU : public ProcessorMotion{
         void resetDerived();
 
         virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin);
+
+    private:
+
+        /*                  Compute Jr (Right Jacobian which corresponds to the jacobian of log)
+            Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in 
+            G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
+            logmap( Rhat * expmap(omega) ) \approx logmap( Rhat ) + Jrinv * omega
+            where Jrinv = LogmapDerivative(omega);
+            This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega)
+        */
+        Eigen::Matrix3s LogmapDerivative(const Eigen::Vector3s& _omega);
 
     private:
 
@@ -290,6 +302,22 @@ inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
 {
     new (&measured_acc_) Eigen::Map<const Eigen::Vector3s>(_data.data());
     new (&measured_gyro_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
+}
+
+inline Eigen::Matrix3s ProcessorIMU::LogmapDerivative(const Eigen::Vector3s& _omega)
+{
+    using std::cos;
+    using std::sin;
+
+    Scalar theta2 = _omega.dot(_omega);
+    if (theta2 <= Constants::EPS_SMALL)
+        return Eigen::Matrix3s::Identity(); //Or should we use 
+    Scalar theta = std::sqrt(theta2);  // rotation angle
+    Eigen::Matrix3s W;
+    W << 0, -_omega(2), _omega(1), _omega(2), 0, -_omega(0), -_omega(1), _omega(0), 0; //Skew symmetric matrix corresponding to _omega, element of so(3)
+    Eigen::Matrix3s m1;
+    m1.noalias() = (1 / (theta * theta) - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
+    return Eigen::Matrix3s::Identity() + 0.5 * W + m1; //is this really more optimized?
 }
 
 } // namespace wolf
