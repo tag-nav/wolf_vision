@@ -85,13 +85,19 @@ class ProcessorIMU : public ProcessorMotion{
     private:
 
         /*                  Compute Jr (Right Jacobian which corresponds to the jacobian of log)
-            Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in 
+            Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
             G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
             logmap( Rhat * expmap(omega) ) \approx logmap( Rhat ) + Jrinv * omega
             where Jrinv = LogmapDerivative(omega);
             This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega)
         */
         Eigen::Matrix3s LogmapDerivative(const Eigen::Vector3s& _omega);
+
+        /*
+         Returns the skew-symmetric matrix of vector _v
+        */
+        inline Eigen::Matrix3s skew(const Eigen::Vector3s& _v);
+        inline Eigen::Matrix3s skew(const Scalar& _x,const Scalar& _y, const Scalar& _z);
 
     private:
 
@@ -133,8 +139,8 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Matrix<Scalar,9,9> preint_meas_cov_;
 
         ///Jacobians
-        Eigen::Matrix<Scalar,9,3> preintegrated_H_biasAcc_;
-        Eigen::Matrix<Scalar,9,3> preintegrated_H_biasOmega_;
+        Eigen::Matrix<Scalar,6,3> preintegrated_H_biasAcc_; /// [dP dv]
+        Eigen::Matrix<Scalar,10,3> preintegrated_H_biasOmega_; /// [dP dv dq]
 
     public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
@@ -334,7 +340,7 @@ inline Eigen::Matrix3s ProcessorIMU::LogmapDerivative(const Eigen::Vector3s& _om
 
     Scalar theta2 = _omega.dot(_omega);
     if (theta2 <= Constants::EPS_SMALL)
-        return Eigen::Matrix3s::Identity(); //Or should we use 
+        return Eigen::Matrix3s::Identity(); //Or should we use
     Scalar theta = std::sqrt(theta2);  // rotation angle
     Eigen::Matrix3s W;
     W << 0, -_omega(2), _omega(1), _omega(2), 0, -_omega(0), -_omega(1), _omega(0), 0; //Skew symmetric matrix corresponding to _omega, element of so(3)
@@ -342,6 +348,21 @@ inline Eigen::Matrix3s ProcessorIMU::LogmapDerivative(const Eigen::Vector3s& _om
     m1.noalias() = (1 / (theta * theta) - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix3s::Identity() + 0.5 * W + m1; //is this really more optimized?
 }
+
+
+inline Eigen::Matrix3s skew(const Scalar& _x, const Scalar& _y, const Scalar& _z)
+{
+  return (Eigen::Matrix3s() <<
+      0.0, -_z, +_y,
+      +_z, 0.0, -_x,
+      -_y, +_x, 0.0).finished();
+}
+
+inline Eigen::Matrix3s skew(const Eigen::Vector3s& _v)
+{
+    return skew(_v(0), _v(1), _v(2));
+}
+
 
 } // namespace wolf
 
