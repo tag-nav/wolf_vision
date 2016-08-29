@@ -99,6 +99,9 @@ class ProcessorIMU : public ProcessorMotion{
         inline Eigen::Matrix3s skew(const Eigen::Vector3s& _v);
         inline Eigen::Matrix3s skew(const Scalar& _x,const Scalar& _y, const Scalar& _z);
 
+        //return the vee vector of matrix _m
+        inline Eigen::Vector3s vee(const Eigen::Matrix3s& _m);
+
     private:
 
         // Casted pointer to IMU frame
@@ -190,28 +193,36 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      *
      * we have :
      * N_D(i,j) = A(j-1) * N_D(i,j-1) + B(j-1) * N_d(j-1)
+     * with A = [-(1/2)*DR(i,,j-1)*(a(j-1) - a_b(i))*Dt*Dt    Dt  1
+     *             DR(j-1,j)                                  0   0           ==> Matches PQV formulation
+     *           -DR(i,j)*(a(j-1) - a_b(i))*Dt^               1   0]
+     *
      * with A = [DR(j-1,j)                                  0   0
      *          -DR(i,j)*(a(j-1) - a_b(i))*Dt^               1   0
      *          -(1/2)*DR(i,,j-1)*(a(j-1) - a_b(i))*Dt*Dt    Dt  1]
      *
-     * and B = [Jr(j-1)*Dt          0
+     * and B = [    0       (1/2)*DR(i,j-1)*Dt*Dt
+     *              0          DR(i,j-1)*Dt                                  ==> Matches PQV formulation
+     *             Jr(j-1)*Dt          0          ]
+     *
+     *     B = [Jr(j-1)*Dt          0
      *              0          DR(i,j-1)*Dt
      *              0       (1/2)*DR(i,j-1)*Dt*Dt]
      *
-     * We substitute DR byt DQ
-     * This substitution introduces some problems to face : scalar products on DQ will not work as expected
-     * We may have to use the minimal form (means DQ --> DR --> vee(DR) which produces a vector)
-     * A becomes of sizes 3x10 instead of 3x9 (unless we stay in minimal form) and N_D is size 10 vector column (9 if minimal form is used)
+     * We cannot substitute DR by DQ
      *
      * WARNING : (a(j-1) - a_b(i)) is _data.head(3) : means that this operation does not make sense if we compose two integrated Deltas
      */
 
-     _jacobian1.resize(3,10);
+     _jacobian1.resize(3,9);
      _jacobian1.setZero();
-     _jacobian1.block<1,4>(0,0) = _delta1.head(4).transpose(); //check if this is working --> block considered as row_vector ?
-     _jacobian1.block<1,4>(1,0) = _delta1.head(4) * (-_Dt2); //*_data.head(3)
-     _jacobian1.block<1,4>(2,0) = _delta1.head(4) * _Dt2 * (-_Dt2/2); //*_data.head(3)
-     //Need access to _data here. And Scalar product on quaternion will not work as scalar product on rotation matrix
+     _jacobian1.block<1,3>(1,0) = vee(q_in_1_.toRotationMatrix()).transpose(); //check if this is working --> block considered as row_vector ?
+     _jacobian1.block<1,3>(2,0) = vee(q_in_1_.toRotationMatrix()).transpose() * (-_Dt2); //*_data.head(3)
+     _jacobian1.block<1,3>(0,0) = vee(q_in_1_.toRotationMatrix()).transpose() * _Dt2 * (-_Dt2/2); //*_data.head(3)
+     //Need access to _data here.
+     _jacobian1.block<1,3>(0,6) << 1,1,1;
+     _jacobian1.block<1,3>(2,3) << 1,1,1;
+     _jacobian1.block<1,3>(0,3) << _Dt2, _Dt2, _Dt2;
 
 }
 
@@ -355,14 +366,15 @@ inline Eigen::Matrix3s ProcessorIMU::LogmapDerivative(const Eigen::Vector3s& _om
         return Eigen::Matrix3s::Identity(); //Or should we use
     Scalar theta = std::sqrt(theta2);  // rotation angle
     Eigen::Matrix3s W;
-    W << 0, -_omega(2), _omega(1), _omega(2), 0, -_omega(0), -_omega(1), _omega(0), 0; //Skew symmetric matrix corresponding to _omega, element of so(3)
+    //W << 0, -_omega(2), _omega(1), _omega(2), 0, -_omega(0), -_omega(1), _omega(0), 0; //Skew symmetric matrix corresponding to _omega, element of so(3)
+    W = skew(_omega);
     Eigen::Matrix3s m1;
     m1.noalias() = (1 / (theta * theta) - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix3s::Identity() + 0.5 * W + m1; //is this really more optimized?
 }
 
 
-inline Eigen::Matrix3s skew(const Scalar& _x, const Scalar& _y, const Scalar& _z)
+inline Eigen::Matrix3s ProcessorIMU::skew(const Scalar& _x, const Scalar& _y, const Scalar& _z)
 {
   return (Eigen::Matrix3s() <<
       0.0, -_z, +_y,
@@ -370,9 +382,14 @@ inline Eigen::Matrix3s skew(const Scalar& _x, const Scalar& _y, const Scalar& _z
       -_y, +_x, 0.0).finished();
 }
 
-inline Eigen::Matrix3s skew(const Eigen::Vector3s& _v)
+inline Eigen::Matrix3s ProcessorIMU::skew(const Eigen::Vector3s& _v)
 {
     return skew(_v(0), _v(1), _v(2));
+}
+
+inline Eigen::Vector3s ProcessorIMU::vee(const Eigen::Matrix3s& _m)
+{
+    return (Eigen::Vector3s() << _m(2,1), _m(0,2), _m(1,0)).finished();
 }
 
 
