@@ -41,6 +41,8 @@ class ProcessorIMU : public ProcessorMotion{
          * \param _Dt2 the second delta-state's time delta
          * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
          *
+         *
+         * _jacobian1 is A (9x9) _jacobian2 should be B (9x6) but not here..
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2
          *
          * See its definition for more comments about the inner maths.
@@ -172,6 +174,27 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
 {
     deltaPlusDelta(_delta1, _delta2, _Dt2, _delta1_plus_delta2);
     // TODO: all the work to be done here about Jacobians
+
+    /*                                  JACOBIANS according to FORSTER
+     *                                      For noise integration :
+     * in compact Matrix form, with N_D(i,k) = [R_n(i,k) DV_n(i,k) DP_n(i,k)] and IMU measurement noise N_d(k) = [w_n a_n]
+     * with (i,k) meaning "from i to k" and R_n, V_n and P_n respectively the noises associated to Delta_rotation, Delta_velocity and Delta_position
+     * We note DR(i,k), DV(i,k) and DP(i,k) respectively the integrated Deltas in rotation, velocity and position from i to k
+     * Dt is the total integration time (from origin to current)
+     *
+     * we have :
+     * N_D(i,j) = A(j-1) * N_D(i,j-1) + B(j-1) * N_d(j-1)
+     * with A = [DR(j-1,j)                                  0   0
+     *          -DR(i,j)*(a(j-1) - a_b(i)*Dt^               1   0
+     *          -(1/2)*DR(i,,j-1)*(a(j-1) - a_b(i)*Dt*Dt    Dt  1]
+     *
+     * and B = [Jr(j-1)*Dt          0
+     *              0          DR(i,j-1)*Dt
+     *              0       (1/2)*DR(i,j-1)*Dt*Dt]
+     *
+     * We substitute DR byt DQ
+     * A becomes of sizes 10x10 instead of 9x9 and N_D is size 10 vector column
+     */
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
