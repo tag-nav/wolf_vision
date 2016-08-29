@@ -42,7 +42,7 @@ class ProcessorIMU : public ProcessorMotion{
          * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
          *
          *
-         * _jacobian1 is A (9x9) _jacobian2 should be B (9x6) but not here..
+         * _jacobian1 is A (3x9) _jacobian2 should be B (3x6) but not here..
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2
          *
          * See its definition for more comments about the inner maths.
@@ -185,16 +185,28 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      * we have :
      * N_D(i,j) = A(j-1) * N_D(i,j-1) + B(j-1) * N_d(j-1)
      * with A = [DR(j-1,j)                                  0   0
-     *          -DR(i,j)*(a(j-1) - a_b(i)*Dt^               1   0
-     *          -(1/2)*DR(i,,j-1)*(a(j-1) - a_b(i)*Dt*Dt    Dt  1]
+     *          -DR(i,j)*(a(j-1) - a_b(i))*Dt^               1   0
+     *          -(1/2)*DR(i,,j-1)*(a(j-1) - a_b(i))*Dt*Dt    Dt  1]
      *
      * and B = [Jr(j-1)*Dt          0
      *              0          DR(i,j-1)*Dt
      *              0       (1/2)*DR(i,j-1)*Dt*Dt]
      *
      * We substitute DR byt DQ
-     * A becomes of sizes 10x10 instead of 9x9 and N_D is size 10 vector column
+     * This substitution introduces some problems to face : scalar products on DQ will not work as expected
+     * We may have to use the minimal form (means DQ --> DR --> vee(DR) which produces a vector)
+     * A becomes of sizes 3x10 instead of 3x9 (unless we stay in minimal form) and N_D is size 10 vector column (9 if minimal form is used)
+     *
+     * WARNING : (a(j-1) - a_b(i)) is _data.head(3) : means that this operation does not make sense if we compose two integrated Deltas
      */
+
+     _jacobian1.resize(3,10);
+     _jacobian1.setZero();
+     _jacobian1.block<1,4>(0,0) = _delta1.head(4).transpose(); //check if this is working --> block considered as row_vector ?
+     _jacobian1.block<1,4>(1,0) = _delta1.head(4) * (-_Dt2); //*_data.head(3)
+     _jacobian1.block<1,4>(2,0) = _delta1.head(4) * _Dt2 * (-_Dt2/2); //*_data.head(3)
+     //Need access to _data here. And Scalar product on quaternion will not work as scalar product on rotation matrix
+
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
