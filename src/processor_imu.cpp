@@ -3,7 +3,7 @@
 namespace wolf {
 
 ProcessorIMU::ProcessorIMU() :
-        ProcessorMotion(PRC_IMU, "IMU", 16, 10, 6),
+        ProcessorMotion(PRC_IMU, "IMU", 16, 10, 9, 6),
         frame_imu_ptr_(nullptr),
         gravity_(0.0, 0.0, -9.8),
         bias_acc_(nullptr),
