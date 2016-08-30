@@ -67,6 +67,8 @@ class ProcessorIMU : public ProcessorMotion{
         */
         virtual void integrateDelta();
 
+        /** \brief Delta representing the null motion
+         */
         virtual Eigen::VectorXs deltaZero() const;
 
         virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts);
@@ -77,15 +79,23 @@ class ProcessorIMU : public ProcessorMotion{
 
     private:
 
-        /*  Compute Jr (Right Jacobian which corresponds to the jacobian of log)
+        /*  Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
             Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
             G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
             logmap( Rhat * expmap(omega) ) \approx logmap( Rhat ) + Jrinv * omega
             where Jrinv = LogmapDerivative(omega);
             This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega)
         */
-        Eigen::Matrix3s LogmapDerivative(const Eigen::Vector3s& _omega);
+        Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega);
 
+        /** \brief Compute Jr (Right Jacobian)
+         * Right Jacobian for exp map in SO(3) - equation (10.86) and following equations in
+         *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
+         *  expmap( theta + d_theta ) \approx expmap(theta) * expmap(Jr * d_theta)
+         *  where Jr = expMapDerivative(theta);
+         *  This maps a perturbation in the tangent space (d_theta) to a perturbation on the manifold (expmap(Jr * d_theta))
+         */
+        Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega);
         /*
          Returns the skew-symmetric matrix of vector _v
         */
@@ -366,7 +376,7 @@ inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
     new (&measured_gyro_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
 }
 
-inline Eigen::Matrix3s ProcessorIMU::LogmapDerivative(const Eigen::Vector3s& _omega)
+inline Eigen::Matrix3s ProcessorIMU::logMapDerivative(const Eigen::Vector3s& _omega)
 {
     using std::cos;
     using std::sin;
@@ -379,9 +389,27 @@ inline Eigen::Matrix3s ProcessorIMU::LogmapDerivative(const Eigen::Vector3s& _om
     //W << 0, -_omega(2), _omega(1), _omega(2), 0, -_omega(0), -_omega(1), _omega(0), 0; //Skew symmetric matrix corresponding to _omega, element of so(3)
     W = skew(_omega);
     Eigen::Matrix3s m1;
-    m1.noalias() = (1 / (theta * theta) - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
+    m1.noalias() = (1 / theta2 - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix3s::Identity() + 0.5 * W + m1; //is this really more optimized?
 }
+
+Eigen::Matrix3s ProcessorIMU::expMapDerivative(const Eigen::Vector3s& _omega)
+{
+    using std::cos;
+    using std::sin;
+
+    Scalar theta2 = _omega.dot(_omega);
+    if (theta2 <= Constants::EPS_SMALL)
+        return Eigen::Matrix3s::Identity();
+    Scalar theta = std::sqrt(theta2);  // rotation angle
+    Eigen::Matrix3s W;
+    W = skew(_omega);
+    Eigen::Matrix3s m1, m2;
+    m1.noalias() = (1 - cos(theta)) / theta2 * W;
+    m2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
+    return Eigen::Matrix3s::Identity() + m1 + m2;
+}
+
 
 
 inline Eigen::Matrix3s ProcessorIMU::skew(const Scalar& _x, const Scalar& _y, const Scalar& _z)
