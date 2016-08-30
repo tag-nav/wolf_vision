@@ -483,7 +483,7 @@ inline void ProcessorMotion::integrate()
     // Set dt
     updateDt();
 
-    // get data and convert it to delta
+    // get data and convert it to delta, and obtain also the delta covariance
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
 
     // then integrate the current delta to pre-integrated measurements
