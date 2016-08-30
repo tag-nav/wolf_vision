@@ -3,14 +3,7 @@
 
 // Wolf
 #include "processor_motion.h"
-#include "wolf.h"
 #include "frame_imu.h"
-#include "sensor_imu.h"
-#include "state_block.h"
-
-// STL
-#include <deque>
-#include <cmath> //needed to compute LogMapDerivative (right jacobian Jr)
 
 
 namespace wolf {
@@ -84,7 +77,7 @@ class ProcessorIMU : public ProcessorMotion{
 
     private:
 
-        /*                  Compute Jr (Right Jacobian which corresponds to the jacobian of log)
+        /*  Compute Jr (Right Jacobian which corresponds to the jacobian of log)
             Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
             G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
             logmap( Rhat * expmap(omega) ) \approx logmap( Rhat ) + Jrinv * omega
@@ -148,6 +141,23 @@ class ProcessorIMU : public ProcessorMotion{
     public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
+
+}
+
+/////////////////////////////////////////////////////////
+// IMPLEMENTATION. Put your implementation includes here
+/////////////////////////////////////////////////////////
+
+// Wolf
+#include "state_block.h"
+
+// STL
+#include <cmath> //needed to compute LogMapDerivative (right jacobian Jr)
+
+
+
+
+namespace wolf{
 
 inline const Eigen::Vector3s& ProcessorIMU::getGravity() const
 {
