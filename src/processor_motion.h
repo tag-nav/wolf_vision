@@ -368,20 +368,10 @@ inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_
                                                   const Eigen::MatrixXs& _jacobian2,
                                                   Eigen::MatrixXs& _delta_cov1_plus_delta_cov2)
 {
-    //std::cout << "delta_1_cov" << std::endl;
-    //std::cout << _delta_cov1 << std::endl;
-    //std::cout << "delta_2_cov" << std::endl;
-    //std::cout << _delta_cov2 << std::endl;
-    //std::cout << "_jacobian1" << std::endl;
-    //std::cout << _jacobian1 << std::endl;
-    //std::cout << "_jacobian2" << std::endl;
-    //std::cout << _jacobian2 << std::endl;
 
     _delta_cov1_plus_delta_cov2 = _jacobian1 * _delta_cov1 * _jacobian1.transpose()
             + _jacobian2 * _delta_cov2 * _jacobian2.transpose();
 
-    //std::cout << "_delta_cov1_plus_delta_cov2" << std::endl;
-    //std::cout << _delta_cov1_plus_delta_cov2 << std::endl;
 }
 
 inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
@@ -487,7 +477,8 @@ inline void ProcessorMotion::integrate()
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
 
     // then integrate the current delta to pre-integrated measurements
-    integrateDelta();
+    // integrateDelta(); // FIXME: this is not needed and also it was not computing Jacobians.
+    deltaPlusDelta(delta_integrated_, delta_ , dt_, delta_integrated_,jacobian_prev_,jacobian_curr_);
 
     // and covariance
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_,
