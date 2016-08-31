@@ -184,6 +184,22 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     p_out_ = v_out_ * _dt / 2;
     Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
 
+    //Compute jacobian of delta wrt data
+
+    /*                  MATHS : jacobians
+     * substituting (a-a_b) and (w-w_b) respectively by (a-a_b+a_n) and (w-w_b+w_n) (measurement noise is additive)
+     *         an        wn
+     *   dp [0.5*dt*dt   0  ]       
+     *   dv [   dt       0  ]
+     *   dR [   0      dt*exp(wj*dt) ]
+     */
+
+     Eigen::Matrix<wolf::Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<wolf::Scalar,9,6>::Zero();
+     jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
+     jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
+     jacobian_delta_noise.block<3,3>(6,3) = Eigen::Matrix3s::Identity() * _dt * skew(measured_gyro_ * _dt); //not so sure about this one
+
+     //delta_cov = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -201,36 +217,56 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      *
      * we have :
      * N_D(i,j) = A(j-1) * N_D(i,j-1) + B(j-1) * N_d(j-1)
-     * with A = [-(1/2)*DR(i,,j-1)*(a(j-1) - a_b(i))*Dt*Dt    Dt  1
-     *             DR(j-1,j)                                  0   0           ==> Matches PQV formulation
-     *           -DR(i,j)*(a(j-1) - a_b(i))*Dt^               1   0]
      *
      * with A = [DR(j-1,j)                                  0   0
      *          -DR(i,j)*(a(j-1) - a_b(i))*Dt^               1   0
      *          -(1/2)*DR(i,,j-1)*(a(j-1) - a_b(i))*Dt*Dt    Dt  1]
      *
-     * and B = [    0       (1/2)*DR(i,j-1)*Dt*Dt
-     *              0          DR(i,j-1)*Dt                                  ==> Matches PQV formulation
-     *             Jr(j-1)*Dt          0          ]
-     *
      *     B = [Jr(j-1)*Dt          0
      *              0          DR(i,j-1)*Dt
      *              0       (1/2)*DR(i,j-1)*Dt*Dt]
      *
-     * We cannot substitute DR by DQ
-     *
      * WARNING : (a(j-1) - a_b(i)) is _data.head(3) : means that this operation does not make sense if we compose two integrated Deltas
      */
 
+     /// FORSTER version
+     /*
      _jacobian1.resize(3,9);
      _jacobian1.setZero();
      _jacobian1.block<1,3>(1,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose(); //check if this is working --> block considered as row_vector ?
-     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * (-_Dt2); //*_data.head(3)
-     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * _Dt2 * (-_Dt2/2); //*_data.head(3)
+     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * (-_Dt2); // *_data.head(3)
+     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * _Dt2 * (-_Dt2/2); // *_data.head(3)
      //Need access to _data here.
      _jacobian1.block<1,3>(0,6) << 1,1,1;
      _jacobian1.block<1,3>(2,3) << 1,1,1;
      _jacobian1.block<1,3>(0,3) << _Dt2, _Dt2, _Dt2;
+     */
+
+     /*
+      * _jacobian1 and _jacobian2 are jacobians of _delta1_plus_delta2 w.r.t. _delta1 and _delta2
+      * let us note this : D3 = D1 (+) D2, with D=[DP, DV, DR] (We will use the minimal form here) 
+      * Note : PVQ FORMULATION
+      *
+      * _jacobian1 =    [1  _Dt2    DP2                     _jacobian2 =    [DR1   0   0
+      *                  0    1     DV2                                       0   DR1  0  
+      *                  0    1     DR2 ]                                     0    0  DR1]
+      */
+      Eigen::Matrix3s DR1 = q_in_1_.toRotationMatrix();
+
+      _jacobian1.resize(9,9);
+      _jacobian1 = Eigen::Matrix<wolf::Scalar,9,9>::Identity();
+      _jacobian1.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _Dt2;
+      //_jacobian1.block<3,3>(0,6) = Eigen::Matrix3s::Identity() * p_in_2_; // FIXME: THIS IS FALSE --> COEFFICIENT-WISE NEEDED
+      //_jacobian1.block<3,3>(3,6) = Eigen::Matrix3s::Identity() * v_in_2_; // FIXME: THIS IS FALSE --> COEFFICIENT-WISE NEEDED
+      _jacobian1.block<3,3>(6,6) = q_in_2_.toRotationMatrix();
+      _jacobian1.block<3,3>(3,0) = Eigen::Matrix3s::Identity();
+
+      _jacobian2.resize(9,9);
+      _jacobian2.setZero();
+      _jacobian2.block<3,3>(0,0) = DR1;
+      _jacobian2.block<3,3>(3,3) = DR1;
+      _jacobian2.block<3,3>(6,6) = DR1;
+
 
      /*
      *                                  For biases :
