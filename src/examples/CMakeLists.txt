@@ -25,8 +25,8 @@ ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
 TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
 
 # Testing Eigen Permutations
-ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
-TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
+#TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
 
 # Testing Sorting Key Frames
 ADD_EXECUTABLE(test_sort_keyframes test_sort_keyframes.cpp)
@@ -74,7 +74,7 @@ ENDIF(0)
 
 ENDIF(Suitesparse_FOUND)
 
-# Building and populating the wolf tree 
+# Building and populating the wolf tree
 # ADD_EXECUTABLE(test_wolf_tree test_wolf_tree.cpp)
 # TARGET_LINK_LIBRARIES(test_wolf_tree ${PROJECT_NAME})
 

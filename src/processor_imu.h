@@ -3,14 +3,7 @@
 
 // Wolf
 #include "processor_motion.h"
-#include "wolf.h"
 #include "frame_imu.h"
-#include "sensor_imu.h"
-#include "state_block.h"
-
-// STL
-#include <deque>
-#include <cmath> //needed to compute LogMapDerivative (right jacobian Jr)
 
 
 namespace wolf {
@@ -42,7 +35,7 @@ class ProcessorIMU : public ProcessorMotion{
          * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
          *
          *
-         * _jacobian1 is A (9x9) _jacobian2 should be B (9x6) but not here..
+         * _jacobian1 is A (3x9) _jacobian2 should be B (3x6) but not here..
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2
          *
          * See its definition for more comments about the inner maths.
@@ -74,6 +67,8 @@ class ProcessorIMU : public ProcessorMotion{
         */
         virtual void integrateDelta();
 
+        /** \brief Delta representing the null motion
+         */
         virtual Eigen::VectorXs deltaZero() const;
 
         virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts);
@@ -84,14 +79,26 @@ class ProcessorIMU : public ProcessorMotion{
 
     private:
 
-        /*                  Compute Jr (Right Jacobian which corresponds to the jacobian of log)
+        /*  Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
             Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
             G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
             logmap( Rhat * expmap(omega) ) \approx logmap( Rhat ) + Jrinv * omega
-            where Jrinv = LogmapDerivative(omega);
+            where Jrinv = logMapDerivative(omega);
             This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega)
         */
-        Eigen::Matrix3s LogmapDerivative(const Eigen::Vector3s& _omega);
+        Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega);
+
+        /** \brief Compute Jr (Right Jacobian)
+         * Right Jacobian for exp map in SO(3) - equation (10.86) and following equations in
+         *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
+         *  expmap( theta + d_theta ) \approx expmap(theta) * expmap(Jr * d_theta)
+         *  where Jr = expMapDerivative(theta);
+         *  This maps a perturbation in the tangent space (d_theta) to a perturbation on the manifold (expmap(Jr * d_theta))
+         */
+        Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega);
+
+        //return the vee vector of matrix _m
+        inline Eigen::Vector3s vee(const Eigen::Matrix3s& _m);
 
     private:
 
@@ -140,6 +147,20 @@ class ProcessorIMU : public ProcessorMotion{
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
+}
+
+/////////////////////////////////////////////////////////
+// IMPLEMENTATION. Put your implementation includes here
+/////////////////////////////////////////////////////////
+
+// Wolf
+#include "state_block.h"
+
+// STL
+#include <cmath> //needed to compute logMapDerivative (right jacobian Jr)
+
+namespace wolf{
+
 inline const Eigen::Vector3s& ProcessorIMU::getGravity() const
 {
     return gravity_;
@@ -183,20 +204,41 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      *
      * we have :
      * N_D(i,j) = A(j-1) * N_D(i,j-1) + B(j-1) * N_d(j-1)
-     * with A = [DR(j-1,j)                                  0   0
-     *          -DR(i,j)*(a(j-1) - a_b(i)*Dt^               1   0
-     *          -(1/2)*DR(i,,j-1)*(a(j-1) - a_b(i)*Dt*Dt    Dt  1]
+     * with A = [-(1/2)*DR(i,,j-1)*(a(j-1) - a_b(i))*Dt*Dt    Dt  1
+     *             DR(j-1,j)                                  0   0           ==> Matches PQV formulation
+     *           -DR(i,j)*(a(j-1) - a_b(i))*Dt^               1   0]
      *
-     * and B = [Jr(j-1)*Dt          0
+     * with A = [DR(j-1,j)                                  0   0
+     *          -DR(i,j)*(a(j-1) - a_b(i))*Dt^               1   0
+     *          -(1/2)*DR(i,,j-1)*(a(j-1) - a_b(i))*Dt*Dt    Dt  1]
+     *
+     * and B = [    0       (1/2)*DR(i,j-1)*Dt*Dt
+     *              0          DR(i,j-1)*Dt                                  ==> Matches PQV formulation
+     *             Jr(j-1)*Dt          0          ]
+     *
+     *     B = [Jr(j-1)*Dt          0
      *              0          DR(i,j-1)*Dt
      *              0       (1/2)*DR(i,j-1)*Dt*Dt]
      *
-     * We substitute DR byt DQ
-     * A becomes of sizes 10x10 instead of 9x9 and N_D is size 10 vector column
+     * We cannot substitute DR by DQ
      *
+     * WARNING : (a(j-1) - a_b(i)) is _data.head(3) : means that this operation does not make sense if we compose two integrated Deltas
+     */
+
+     _jacobian1.resize(3,9);
+     _jacobian1.setZero();
+     _jacobian1.block<1,3>(1,0) = vee(q_in_1_.toRotationMatrix()).transpose(); //check if this is working --> block considered as row_vector ?
+     _jacobian1.block<1,3>(2,0) = vee(q_in_1_.toRotationMatrix()).transpose() * (-_Dt2); //*_data.head(3)
+     _jacobian1.block<1,3>(0,0) = vee(q_in_1_.toRotationMatrix()).transpose() * _Dt2 * (-_Dt2/2); //*_data.head(3)
+     //Need access to _data here.
+     _jacobian1.block<1,3>(0,6) << 1,1,1;
+     _jacobian1.block<1,3>(2,3) << 1,1,1;
+     _jacobian1.block<1,3>(0,3) << _Dt2, _Dt2, _Dt2;
+
+     /*
      *                                  For biases :
      * The jacobians wrt the biases have the following form, derived from \cite{FORSTER}
-
+     *
      * preintegrated_H_biasAcc_ (6 x 3) =   [ dP/db_a
      *                                        dv/db_a
      *                                                  ] // Note that there is no jacobian of the orientation wrt
@@ -207,6 +249,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      *                                        dq/db_g  ] // Note that the orientation jacobian is converted to minimal form
      *
      */
+
      /// Get the rotation matrix associated to the preintegrated orientation quaternion
      Eigen::Matrix3s orientation_preint_rot_ =  Eigen::skew(Eigen::q2v(orientation_preint_quat_));
 
@@ -235,7 +278,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      Eigen::Quaternions q_tmp = Eigen::v2q((measured_gyro_ - bias_gyro_) * _Dt2);
      Eigen::Matrix3s R_eq = Eigen::skew(Eigen::q2v(q_tmp.conjugate()));
      /**********************************/
-     preintegrated_H_biasOmega_.bottomRows<3>() += R_eq *  preintegrated_H_biasOmega_.bottomRows<3>() * _Dt2 * LogmapDerivative((measured_gyro_ - bias_gyro_) * _Dt2);
+     preintegrated_H_biasOmega_.bottomRows<3>() += R_eq *  preintegrated_H_biasOmega_.bottomRows<3>() * _Dt2 * logMapDerivative((measured_gyro_ - bias_gyro_) * _Dt2);
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -368,7 +411,7 @@ inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
     new (&measured_gyro_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
 }
 
-inline Eigen::Matrix3s ProcessorIMU::LogmapDerivative(const Eigen::Vector3s& _omega)
+inline Eigen::Matrix3s ProcessorIMU::logMapDerivative(const Eigen::Vector3s& _omega)
 {
     using std::cos;
     using std::sin;
@@ -378,10 +421,34 @@ inline Eigen::Matrix3s ProcessorIMU::LogmapDerivative(const Eigen::Vector3s& _om
         return Eigen::Matrix3s::Identity(); //Or should we use
     Scalar theta = std::sqrt(theta2);  // rotation angle
     Eigen::Matrix3s W;
-    W << 0, -_omega(2), _omega(1), _omega(2), 0, -_omega(0), -_omega(1), _omega(0), 0; //Skew symmetric matrix corresponding to _omega, element of so(3)
+    W = Eigen::skew(_omega);
     Eigen::Matrix3s m1;
-    m1.noalias() = (1 / (theta * theta) - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
+    m1.noalias() = (1 / theta2 - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix3s::Identity() + 0.5 * W + m1; //is this really more optimized?
+}
+
+
+Eigen::Matrix3s ProcessorIMU::expMapDerivative(const Eigen::Vector3s& _omega)
+{
+    using std::cos;
+    using std::sin;
+
+    Scalar theta2 = _omega.dot(_omega);
+    if (theta2 <= Constants::EPS_SMALL)
+        return Eigen::Matrix3s::Identity();
+    Scalar theta = std::sqrt(theta2);  // rotation angle
+    Eigen::Matrix3s W;
+    W = Eigen::skew(_omega);
+    Eigen::Matrix3s m1, m2;
+    m1.noalias() = (1 - cos(theta)) / theta2 * W;
+    m2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
+    return Eigen::Matrix3s::Identity() + m1 + m2;
+}
+
+
+inline Eigen::Vector3s ProcessorIMU::vee(const Eigen::Matrix3s& _m)
+{
+    return (Eigen::Vector3s() << _m(2,1), _m(0,2), _m(1,0)).finished();
 }
 
 } // namespace wolf

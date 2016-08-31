@@ -82,7 +82,7 @@ class ProcessorMotion : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
+        ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -229,9 +229,9 @@ class ProcessorMotion : public ProcessorBase
 
         /** \brief convert raw CaptureMotion data to the delta-state format
          *
-         * This function accesses the members data_ (as produced by extractData()) and dt_,
-         * and computes the value of the delta-state delta_. Note that this value is
-         * held by the member delta_ of the class that calls it.
+         * This function accepts raw data and time step dt,
+         * and computes the value of the delta-state and its covariance. Note that these values are
+         * held by the members delta_ and delta_cov_.
          *
          * \param _data the raw motion data
          * \param _data_cov the raw motion data covariance
@@ -248,7 +248,7 @@ class ProcessorMotion : public ProcessorBase
          * which is unaware of the needs of this processor.
          *
          * Additionally, sometimes the data format is in the form of a
-         * velocity, while the delta is in the form of an increment.
+         * velocity, or a higher derivative, while the delta is in the form of an increment.
          * In such cases, converting from data to delta-state needs integrating
          * the data over the period dt.
          *
@@ -275,7 +275,7 @@ class ProcessorMotion : public ProcessorBase
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
                                     const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2) = 0;
 
-        /** \brief composes a delta-state on top of another delta-state
+        /** \brief composes a delta-state on top of another delta-state, and computes the Jacobians
          * \param _delta1 the first delta-state
          * \param _delta2 the second delta-state
          * \param _Dt2 the second delta-state's time delta
@@ -293,7 +293,7 @@ class ProcessorMotion : public ProcessorBase
          * \param _x the initial state
          * \param _delta the delta-state
          * \param _x_plus_delta the updated state. It has the same format as the initial state.
-         * \param _Dt the time interval between the origin state and the Delta
+         * \param _Dt the time interval spanned by the Delta
          *
          * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
          */
@@ -313,7 +313,7 @@ class ProcessorMotion : public ProcessorBase
          * Examples (see documentation of the the class for info on Eigen::VectorXs):
          *   - 2D odometry: a 3-vector with all zeros, e.g. VectorXs::Zero(3)
          *   - 3D odometry: delta type is a PQ vector: 7-vector with [0,0,0, 0,0,0,1]
-         *   - IMU: PQVBB 16-vector with [0,0,0, 0,0,0,1, 0,0,0] // No biases in the delta !!
+         *   - IMU: PQVBB 10-vector with [0,0,0, 0,0,0,1, 0,0,0] // No biases in the delta !!
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
@@ -327,6 +327,7 @@ class ProcessorMotion : public ProcessorBase
         // Attributes
         Size x_size_;    ///< The size of the state vector
         Size delta_size_;    ///< the size of the deltas
+        Size delta_cov_size_; ///< the size of the delta covariances matrix
         Size data_size_; ///< the size of the incoming data
         CaptureBase* origin_ptr_;
         CaptureMotion* last_ptr_;
@@ -346,8 +347,8 @@ class ProcessorMotion : public ProcessorBase
 
 };
 
-inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _data_size, const Scalar& _time_tolerance) :
-        ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), origin_ptr_(
+inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance) :
+        ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), delta_cov_size_(_delta_cov_size), data_size_(_data_size), origin_ptr_(
                 nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_cov_(
                 delta_size_, delta_size_), delta_integrated_(_delta_size), delta_integrated_cov_(delta_size_, delta_size_), data_(
                 _data_size), jacobian_prev_(delta_size_, delta_size_), jacobian_curr_(delta_size_, delta_size_)
@@ -368,20 +369,10 @@ inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_
                                                   const Eigen::MatrixXs& _jacobian2,
                                                   Eigen::MatrixXs& _delta_cov1_plus_delta_cov2)
 {
-    //std::cout << "delta_1_cov" << std::endl;
-    //std::cout << _delta_cov1 << std::endl;
-    //std::cout << "delta_2_cov" << std::endl;
-    //std::cout << _delta_cov2 << std::endl;
-    //std::cout << "_jacobian1" << std::endl;
-    //std::cout << _jacobian1 << std::endl;
-    //std::cout << "_jacobian2" << std::endl;
-    //std::cout << _jacobian2 << std::endl;
 
     _delta_cov1_plus_delta_cov2 = _jacobian1 * _delta_cov1 * _jacobian1.transpose()
             + _jacobian2 * _delta_cov2 * _jacobian2.transpose();
 
-    //std::cout << "_delta_cov1_plus_delta_cov2" << std::endl;
-    //std::cout << _delta_cov1_plus_delta_cov2 << std::endl;
 }
 
 inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
@@ -483,11 +474,12 @@ inline void ProcessorMotion::integrate()
     // Set dt
     updateDt();
 
-    // get data and convert it to delta
+    // get data and convert it to delta, and obtain also the delta covariance
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
 
     // then integrate the current delta to pre-integrated measurements
-    integrateDelta();
+    // integrateDelta(); // FIXME: this is not needed and also it was not computing Jacobians.
+    deltaPlusDelta(delta_integrated_, delta_ , dt_, delta_integrated_,jacobian_prev_,jacobian_curr_);
 
     // and covariance
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_,
