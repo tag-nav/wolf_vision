@@ -325,10 +325,10 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         // Attributes
-        Size x_size_;    ///< The size of the state vector
-        Size delta_size_;    ///< the size of the deltas
-        Size delta_cov_size_; ///< the size of the delta covariances matrix
-        Size data_size_; ///< the size of the incoming data
+        Size x_size_;           ///< The size of the state vector
+        Size delta_size_;       ///< the size of the deltas
+        Size delta_cov_size_;   ///< the size of the delta covariances matrix
+        Size data_size_;        ///< the size of the incoming data
         CaptureBase* origin_ptr_;
         CaptureMotion* last_ptr_;
         CaptureMotion* incoming_ptr_;

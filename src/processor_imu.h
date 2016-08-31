@@ -79,23 +79,28 @@ class ProcessorIMU : public ProcessorMotion{
 
     private:
 
-        /*  Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
-            Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
-            G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
-            logmap( Rhat * expmap(omega) ) \approx logmap( Rhat ) + Jrinv * omega
-            where Jrinv = logMapDerivative(omega);
-            This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega)
-        */
-        Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega);
-
         /** \brief Compute Jr (Right Jacobian)
          * Right Jacobian for exp map in SO(3) - equation (10.86) and following equations in
          *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
          *  expmap( theta + d_theta ) \approx expmap(theta) * expmap(Jr * d_theta)
          *  where Jr = expMapDerivative(theta);
          *  This maps a perturbation in the tangent space (d_theta) to a perturbation on the manifold (expmap(Jr * d_theta))
+         *  so that:
+         *
+         *      exp(theta+dtheta) = exp(theta)*exp(Jr(theta)*dtheta)
          */
         Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega);
+
+        /** \brief Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
+         *  Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
+         *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
+         *  logmap( Rhat * expmap(omega) ) \approx logmap( Rhat ) + Jrinv * omega
+         *  where Jrinv = logMapDerivative(omega);
+         *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega) so that
+         *
+         *      log(exp(theta)*exp(dtheta)) = theta + Jrinv(theta)*dtheta
+         */
+        Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega);
 
     private:
 
