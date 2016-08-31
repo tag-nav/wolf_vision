@@ -93,12 +93,6 @@ class ProcessorIMU : public ProcessorMotion{
         */
         Eigen::Matrix3s LogmapDerivative(const Eigen::Vector3s& _omega);
 
-        /*
-         Returns the skew-symmetric matrix of vector _v
-        */
-        inline Eigen::Matrix3s skew(const Eigen::Vector3s& _v);
-        inline Eigen::Matrix3s skew(const Scalar& _x,const Scalar& _y, const Scalar& _z);
-
     private:
 
         // Casted pointer to IMU frame
@@ -117,7 +111,7 @@ class ProcessorIMU : public ProcessorMotion{
 
         // Maps to the pos, quat and vel of the pre-integrated delta
         Eigen::Map<Eigen::Vector3s> position_preint_;
-        Eigen::Map<Eigen::Quaternions> orientation_preint_;
+        Eigen::Map<Eigen::Quaternions> orientation_preint_quat_;
         Eigen::Map<Eigen::Vector3s> velocity_preint_;
 
         // Maps to pos, quat, vel, to be used as temporaries
@@ -179,7 +173,6 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
                                          Eigen::MatrixXs& _jacobian1, Eigen::MatrixXs& _jacobian2)
 {
     deltaPlusDelta(_delta1, _delta2, _Dt2, _delta1_plus_delta2);
-    // TODO: all the work to be done here about Jacobians
 
     /*                                  JACOBIANS according to FORSTER
      *                                      For noise integration :
@@ -200,7 +193,49 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      *
      * We substitute DR byt DQ
      * A becomes of sizes 10x10 instead of 9x9 and N_D is size 10 vector column
+     *
+     *                                  For biases :
+     * The jacobians wrt the biases have the following form, derived from \cite{FORSTER}
+
+     * preintegrated_H_biasAcc_ (6 x 3) =   [ dP/db_a
+     *                                        dv/db_a
+     *                                                  ] // Note that there is no jacobian of the orientation wrt
+     *                                                    // the accelerometer bias
+     *
+     * preintegrated_H_biasOmega_ (9 x 3) = [ dP/db_g
+     *                                        dv/db_g
+     *                                        dq/db_g  ] // Note that the orientation jacobian is converted to minimal form
+     *
      */
+     /// Get the rotation matrix associated to the preintegrated orientation quaternion
+     Eigen::Matrix3s orientation_preint_rot_ =  Eigen::skew(Eigen::q2v(orientation_preint_quat_));
+
+     /// dP/db_a -- Jacobian of postion w.r.t accelerometer bias
+     /// dP/db_a += dv/db_a - 0.5 * delta_R * dt * dt
+     preintegrated_H_biasAcc_.topRows<3>() += preintegrated_H_biasAcc_.bottomRows<3>() * _Dt2
+                                           -  0.5 * _Dt2 * _Dt2 * orientation_preint_rot_;
+
+     /// dv/db_a -- Jacobian of velocity w.r.t accelerometer bias
+     /// dv/db_a -= delta_R * dt
+     preintegrated_H_biasAcc_.bottomRows<3>() -= orientation_preint_rot_ * _Dt2;
+
+     /// dP/db_g -- Jacobian of position w.r.t gyro bias
+     /// dP/db_g += dv/db_g * dt - 0.5 * delta_R * (a - b_a)^ * dt * dt * dR/db_g
+     preintegrated_H_biasOmega_.topRows<3>() += preintegrated_H_biasOmega_.block<3,3>(3,0) * _Dt2
+                                             -  0.5 * _Dt2 * _Dt2 * orientation_preint_rot_ * Eigen::skew(measured_acc_ - bias_acc_) * preintegrated_H_biasOmega_.bottomRows<3>();
+
+     /// dv/db_g -- Jacobian of velocity w.r.t gyro bias
+     /// dv/db_g -= delta_R * dt * (a - b_a)^ * dR/db_g
+     preintegrated_H_biasOmega_.block<3,3>(3,0) -= orientation_preint_rot_ *_Dt2 * Eigen::skew(measured_acc_ - bias_acc_) * preintegrated_H_biasOmega_.bottomRows<3>();
+
+     /// dR/db_g -- Jacobian of orientation w.r.t gyro bias
+     /// dR/db_g += R.t * dR/db_g * Jr * dt       where Jr  == right Jacobian
+     ///                                                R.t == [exp((omega - b_g) * dt)]^{-1}
+     /***** FIXME: Optimise this ! ******/
+     Eigen::Quaternions q_tmp = Eigen::v2q((measured_gyro_ - bias_gyro_) * _Dt2);
+     Eigen::Matrix3s R_eq = Eigen::skew(Eigen::q2v(q_tmp.conjugate()));
+     /**********************************/
+     preintegrated_H_biasOmega_.bottomRows<3>() += R_eq *  preintegrated_H_biasOmega_.bottomRows<3>() * _Dt2 * LogmapDerivative((measured_gyro_ - bias_gyro_) * _Dt2);
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -348,21 +383,6 @@ inline Eigen::Matrix3s ProcessorIMU::LogmapDerivative(const Eigen::Vector3s& _om
     m1.noalias() = (1 / (theta * theta) - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix3s::Identity() + 0.5 * W + m1; //is this really more optimized?
 }
-
-
-inline Eigen::Matrix3s skew(const Scalar& _x, const Scalar& _y, const Scalar& _z)
-{
-  return (Eigen::Matrix3s() <<
-      0.0, -_z, +_y,
-      +_z, 0.0, -_x,
-      -_y, +_x, 0.0).finished();
-}
-
-inline Eigen::Matrix3s skew(const Eigen::Vector3s& _v)
-{
-    return skew(_v(0), _v(1), _v(2));
-}
-
 
 } // namespace wolf
 

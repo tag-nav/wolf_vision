@@ -11,7 +11,7 @@ ProcessorIMU::ProcessorIMU() :
         measured_acc_(nullptr),
         measured_gyro_(nullptr),
         position_preint_    (delta_integrated_.data() + 0),
-        orientation_preint_ (delta_integrated_.data() + 3),
+        orientation_preint_quat_ (delta_integrated_.data() + 3),
         velocity_preint_    (delta_integrated_.data() + 7),
         p_in_1_(nullptr), p_in_2_(nullptr), p_out_(nullptr),
         q_in_1_(nullptr), q_in_2_(nullptr), q_out_(nullptr),
