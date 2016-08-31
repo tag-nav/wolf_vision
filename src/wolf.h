@@ -70,7 +70,7 @@ const Scalar EPS_SMALL = 1e-16;
  * - VectorXf   Vector of floats - defined by Eigen
  * - VectorXd   Vector of doubles - defined by Eigen
  * - VectorXs   Vector of either double of float, depending on the type \b Scalar, defined by Wolf.
- * 
+ *
  */
 namespace Eigen  // Eigen namespace extension
 {
@@ -248,7 +248,7 @@ typedef enum
     FEATURE_GPS_PSEUDORANGE,
     FEATURE_ODOM_2D,
     FEATURE_MOTION,
-    FEATURE_POINT_IMAGE, 
+    FEATURE_POINT_IMAGE,
     FEATURE_LINE_2D,
     FEATURE_POLYLINE_2D
 }FeatureType;
@@ -414,6 +414,16 @@ inline void v2q(const Eigen::VectorXs& _v, Eigen::Map<Eigen::Quaternions>& _q){
     }
 }
 
+inline Eigen::Quaternions v2q(const Eigen::VectorXs& _v){
+    wolf::Scalar angle = _v.norm();
+    if (angle < wolf::Constants::EPS)
+        return Eigen::Quaternions::Identity();
+    else
+    {
+        return Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
+    }
+}
+
 inline void q2v(const Eigen::Quaternions& _q, Eigen::VectorXs& _v){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
     _v = aa.axis() * aa.angle();
@@ -422,6 +432,18 @@ inline void q2v(const Eigen::Quaternions& _q, Eigen::VectorXs& _v){
 inline void q2v(const Eigen::Map<const Eigen::Quaternions>& _q, Eigen::VectorXs& _v){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
     _v = aa.axis() * aa.angle();
+}
+
+inline Eigen::VectorXs q2v(const Eigen::Quaternions& _q){
+    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
+    return aa.axis() * aa.angle();
+}
+
+inline Eigen::Matrix3s skew(const Eigen::VectorXs& _v) {
+    return (Eigen::Matrix3s() <<
+         0.0  , -_v(2), +_v(1),
+        +_v(2),  0.0  , -_v(0),
+        -_v(1), +_v(0),  0.0  ).finished();
 }
 
 }
