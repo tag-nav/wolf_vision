@@ -439,6 +439,11 @@ inline Eigen::VectorXs q2v(const Eigen::Quaternions& _q){
     return aa.axis() * aa.angle();
 }
 
+inline Eigen::Vector3s R2v(const Eigen::Matrix3s & _R){
+    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_R);
+    return aa.axis() * aa.angle();
+}
+
 inline Eigen::Matrix3s skew(const Eigen::VectorXs& _v) {
     return (Eigen::Matrix3s() <<
          0.0  , -_v(2), +_v(1),
