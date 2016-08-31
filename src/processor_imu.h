@@ -29,10 +29,10 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt);
 
         /** \brief composes a delta-state on top of another delta-state
-         * \param _delta1 the first delta-state
-         * \param _delta2 the second delta-state
-         * \param _Dt2 the second delta-state's time delta
-         * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
+         * \param _delta_preint the first delta-state
+         * \param _delta the second delta-state
+         * \param _dt the second delta-state's time delta
+         * \param _delta_preint_plus_delta the delta2 composed on top of delta1. It has the format of delta-state.
          *
          *
          * _jacobian1 is A (3x9) _jacobian2 should be B (3x6) but not here..
@@ -40,11 +40,11 @@ class ProcessorIMU : public ProcessorMotion{
          *
          * See its definition for more comments about the inner maths.
          */
-        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                    const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2);
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
+                                    const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta);
 
-        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                    const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2,
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
+                                    const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta,
                                     Eigen::MatrixXs& _jacobian1, Eigen::MatrixXs& _jacobian2);
 
         /** \brief composes a delta-state on top of a state
@@ -186,11 +186,11 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
 
 }
 
-inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                         const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2,
+inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
+                                         const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta,
                                          Eigen::MatrixXs& _jacobian1, Eigen::MatrixXs& _jacobian2)
 {
-    deltaPlusDelta(_delta1, _delta2, _Dt2, _delta1_plus_delta2);
+    deltaPlusDelta(_delta_preint, _delta, _dt, _delta_preint_plus_delta);
 
     /*                                  JACOBIANS according to FORSTER
      *                                      For noise integration :
@@ -225,12 +225,12 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      _jacobian1.resize(3,9);
      _jacobian1.setZero();
      _jacobian1.block<1,3>(1,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose(); //check if this is working --> block considered as row_vector ?
-     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * (-_Dt2); //*_data.head(3)
-     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * _Dt2 * (-_Dt2/2); //*_data.head(3)
+     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * (-_dt); //*_data.head(3)
+     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * _dt * (-_dt/2); //*_data.head(3)
      //Need access to _data here.
      _jacobian1.block<1,3>(0,6) << 1,1,1;
      _jacobian1.block<1,3>(2,3) << 1,1,1;
-     _jacobian1.block<1,3>(0,3) << _Dt2, _Dt2, _Dt2;
+     _jacobian1.block<1,3>(0,3) << _dt, _dt, _dt;
 
      /*
      *                                  For biases :
@@ -252,40 +252,42 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
 
      /// dP/db_a -- Jacobian of postion w.r.t accelerometer bias
      /// dP/db_a += dv/db_a - 0.5 * delta_R * dt * dt
-     preintegrated_H_biasAcc_.topRows<3>() += preintegrated_H_biasAcc_.bottomRows<3>() * _Dt2
-                                           -  0.5 * _Dt2 * _Dt2 * orientation_preint_rot_;
+     preintegrated_H_biasAcc_.topRows<3>() += preintegrated_H_biasAcc_.bottomRows<3>() * _dt
+                                           -  0.5 * _dt * _dt * orientation_preint_rot_;
 
      /// dv/db_a -- Jacobian of velocity w.r.t accelerometer bias
      /// dv/db_a -= delta_R * dt
-     preintegrated_H_biasAcc_.bottomRows<3>() -= orientation_preint_rot_ * _Dt2;
+     preintegrated_H_biasAcc_.bottomRows<3>() -= orientation_preint_rot_ * _dt;
 
      /// dP/db_g -- Jacobian of position w.r.t gyro bias
      /// dP/db_g += dv/db_g * dt - 0.5 * delta_R * (a - b_a)^ * dt * dt * dR/db_g
-     preintegrated_H_biasOmega_.topRows<3>() += preintegrated_H_biasOmega_.block<3,3>(3,0) * _Dt2
-                                             -  0.5 * _Dt2 * _Dt2 * orientation_preint_rot_ * Eigen::skew(measured_acc_ - bias_acc_) * preintegrated_H_biasOmega_.bottomRows<3>();
+     preintegrated_H_biasOmega_.topRows<3>() += preintegrated_H_biasOmega_.block<3,3>(3,0) * _dt
+                                             -  0.5 * _dt * _dt * orientation_preint_rot_ * Eigen::skew(measured_acc_ - bias_acc_) * preintegrated_H_biasOmega_.bottomRows<3>();
 
      /// dv/db_g -- Jacobian of velocity w.r.t gyro bias
      /// dv/db_g -= delta_R * dt * (a - b_a)^ * dR/db_g
-     preintegrated_H_biasOmega_.block<3,3>(3,0) -= orientation_preint_rot_ *_Dt2 * Eigen::skew(measured_acc_ - bias_acc_) * preintegrated_H_biasOmega_.bottomRows<3>();
+     preintegrated_H_biasOmega_.block<3,3>(3,0) -= orientation_preint_rot_ *_dt * Eigen::skew(measured_acc_ - bias_acc_) * preintegrated_H_biasOmega_.bottomRows<3>();
 
      /// dR/db_g -- Jacobian of orientation w.r.t gyro bias
      /// dR/db_g += R.t * dR/db_g * Jr * dt       where Jr  == right Jacobian
      ///                                                R.t == [exp((omega - b_g) * dt)]^{-1}
      /***** FIXME: Optimise this ! ******/
-     Eigen::Quaternions q_tmp = Eigen::v2q((measured_gyro_ - bias_gyro_) * _Dt2);
+     // JS: if q_tmp = exp(w*dt) then q_tmp.conjugate() = exp(-w*dt) !
+     // JS: Or use Rodrigues formula to go directly to R_eq.
+     Eigen::Quaternions q_tmp = Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt);
      Eigen::Matrix3s R_eq = q_tmp.conjugate().toRotationMatrix();
      /**********************************/
-     preintegrated_H_biasOmega_.bottomRows<3>() += R_eq *  preintegrated_H_biasOmega_.bottomRows<3>() * _Dt2 * logMapDerivative((measured_gyro_ - bias_gyro_) * _Dt2);
+     preintegrated_H_biasOmega_.bottomRows<3>() = R_eq *  preintegrated_H_biasOmega_.bottomRows<3>() * _dt * expMapDerivative((measured_gyro_ - bias_gyro_) * _dt);
 }
 
-inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                         const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2)
+inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
+                                         const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta)
 {
-    assert(_delta1.size() == 10 && "Wrong _delta1 vector size");
-    assert(_delta2.size() == 10 && "Wrong _delta2 vector size");
-    assert(_delta1_plus_delta2.size() == 10 && "Wrong _delta1_plus_delta2 vector size");
+    assert(_delta_preint.size() == 10 && "Wrong _delta1 vector size");
+    assert(_delta.size() == 10 && "Wrong _delta2 vector size");
+    assert(_delta_preint_plus_delta.size() == 10 && "Wrong _delta1_plus_delta2 vector size");
 
-    remapPQV(_delta1, _delta2, _delta1_plus_delta2);
+    remapPQV(_delta_preint, _delta, _delta_preint_plus_delta);
     // _delta1              is _in_1_
     // _delta2              is _in_2_
     // _delta1_plus_delta2  is _out_
@@ -308,7 +310,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
     //     deltaPlusDelta(delta_integrated_, delta_, dt_, delta_integrated_);
     // that is, _delta1 and _delta1_plus_delta2 point to the same memory locations.
     // Therefore, to avoid aliasing, we proceed in the order p -> v -> q
-    p_out_ = p_in_1_ + v_in_1_ * _Dt2 + q_in_1_ * p_in_2_;
+    p_out_ = p_in_1_ + v_in_1_ * _dt + q_in_1_ * p_in_2_;
     v_out_ = v_in_1_ + q_in_1_ * v_in_2_;
     q_out_ = q_in_1_ * q_in_2_;
 
