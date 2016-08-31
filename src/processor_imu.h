@@ -97,9 +97,6 @@ class ProcessorIMU : public ProcessorMotion{
          */
         Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega);
 
-        //return the vee vector of matrix _m
-        inline Eigen::Vector3s vee(const Eigen::Matrix3s& _m);
-
     private:
 
         // Casted pointer to IMU frame
@@ -227,9 +224,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
 
      _jacobian1.resize(3,9);
      _jacobian1.setZero();
-     _jacobian1.block<1,3>(1,0) = vee(q_in_1_.toRotationMatrix()).transpose(); //check if this is working --> block considered as row_vector ?
-     _jacobian1.block<1,3>(2,0) = vee(q_in_1_.toRotationMatrix()).transpose() * (-_Dt2); //*_data.head(3)
-     _jacobian1.block<1,3>(0,0) = vee(q_in_1_.toRotationMatrix()).transpose() * _Dt2 * (-_Dt2/2); //*_data.head(3)
+     _jacobian1.block<1,3>(1,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose(); //check if this is working --> block considered as row_vector ?
+     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * (-_Dt2); //*_data.head(3)
+     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * _Dt2 * (-_Dt2/2); //*_data.head(3)
      //Need access to _data here.
      _jacobian1.block<1,3>(0,6) << 1,1,1;
      _jacobian1.block<1,3>(2,3) << 1,1,1;
@@ -251,7 +248,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      */
 
      /// Get the rotation matrix associated to the preintegrated orientation quaternion
-     Eigen::Matrix3s orientation_preint_rot_ =  Eigen::skew(Eigen::q2v(orientation_preint_quat_));
+     Eigen::Matrix3s orientation_preint_rot_ =  orientation_preint_quat_.toRotationMatrix();
 
      /// dP/db_a -- Jacobian of postion w.r.t accelerometer bias
      /// dP/db_a += dv/db_a - 0.5 * delta_R * dt * dt
@@ -276,7 +273,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta1, const E
      ///                                                R.t == [exp((omega - b_g) * dt)]^{-1}
      /***** FIXME: Optimise this ! ******/
      Eigen::Quaternions q_tmp = Eigen::v2q((measured_gyro_ - bias_gyro_) * _Dt2);
-     Eigen::Matrix3s R_eq = Eigen::skew(Eigen::q2v(q_tmp.conjugate()));
+     Eigen::Matrix3s R_eq = q_tmp.conjugate().toRotationMatrix();
      /**********************************/
      preintegrated_H_biasOmega_.bottomRows<3>() += R_eq *  preintegrated_H_biasOmega_.bottomRows<3>() * _Dt2 * logMapDerivative((measured_gyro_ - bias_gyro_) * _Dt2);
 }
@@ -445,11 +442,6 @@ Eigen::Matrix3s ProcessorIMU::expMapDerivative(const Eigen::Vector3s& _omega)
     return Eigen::Matrix3s::Identity() + m1 + m2;
 }
 
-
-inline Eigen::Vector3s ProcessorIMU::vee(const Eigen::Matrix3s& _m)
-{
-    return (Eigen::Vector3s() << _m(2,1), _m(0,2), _m(1,0)).finished();
-}
 
 } // namespace wolf
 

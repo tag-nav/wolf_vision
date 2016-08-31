@@ -446,6 +446,11 @@ inline Eigen::Matrix3s skew(const Eigen::VectorXs& _v) {
         -_v(1), +_v(0),  0.0  ).finished();
 }
 
+inline Eigen::Vector3s vee(const Eigen::Matrix3s& _m)
+{
+    return (Eigen::Vector3s() << _m(2,1), _m(0,2), _m(1,0)).finished();
+}
+
 }
 
 
