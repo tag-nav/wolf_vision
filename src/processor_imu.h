@@ -139,6 +139,7 @@ class ProcessorIMU : public ProcessorMotion{
         ///Jacobians
         Eigen::Matrix<Scalar,6,3> preintegrated_H_biasAcc_; /// [dP dv]
         Eigen::Matrix<Scalar,10,3> preintegrated_H_biasOmega_; /// [dP dv dq]
+        Eigen::Matrix<Scalar,9,9> delta_cov_;
 
     public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
@@ -199,7 +200,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
      jacobian_delta_noise.block<3,3>(6,3) = Eigen::Matrix3s::Identity() * _dt * skew(measured_gyro_ * _dt); //not so sure about this one
 
-     //delta_cov = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
+     delta_cov_ = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
@@ -234,7 +235,6 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      _jacobian1.resize(3,9);
      _jacobian1.setZero();
      _jacobian1.block<1,3>(1,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose(); //check if this is working --> block considered as row_vector ?
-<<<<<<< HEAD
      _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * (-_Dt2); // *_data.head(3)
      _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * _Dt2 * (-_Dt2/2); // *_data.head(3)
      //Need access to _data here.
@@ -256,7 +256,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 
       _jacobian1.resize(9,9);
       _jacobian1 = Eigen::Matrix<wolf::Scalar,9,9>::Identity();
-      _jacobian1.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _Dt2;
+      _jacobian1.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt;
       //_jacobian1.block<3,3>(0,6) = Eigen::Matrix3s::Identity() * p_in_2_; // FIXME: THIS IS FALSE --> COEFFICIENT-WISE NEEDED
       //_jacobian1.block<3,3>(3,6) = Eigen::Matrix3s::Identity() * v_in_2_; // FIXME: THIS IS FALSE --> COEFFICIENT-WISE NEEDED
       _jacobian1.block<3,3>(6,6) = q_in_2_.toRotationMatrix();
@@ -267,15 +267,6 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
       _jacobian2.block<3,3>(0,0) = DR1;
       _jacobian2.block<3,3>(3,3) = DR1;
       _jacobian2.block<3,3>(6,6) = DR1;
-
-=======
-     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * (-_dt); //*_data.head(3)
-     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * _dt * (-_dt/2); //*_data.head(3)
-     //Need access to _data here.
-     _jacobian1.block<1,3>(0,6) << 1,1,1;
-     _jacobian1.block<1,3>(2,3) << 1,1,1;
-     _jacobian1.block<1,3>(0,3) << _dt, _dt, _dt;
->>>>>>> 00e0c221404a8adb517dea8978d5966fdcea2bed
 
      /*
      *                                  For biases :
