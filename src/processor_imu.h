@@ -82,12 +82,12 @@ class ProcessorIMU : public ProcessorMotion{
         /** \brief Compute Jr (Right Jacobian)
          * Right Jacobian for exp map in SO(3) - equation (10.86) and following equations in
          *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
-         *  expmap( theta + d_theta ) \approx expmap(theta) * expmap(Jr * d_theta)
-         *  where Jr = expMapDerivative(theta);
-         *  This maps a perturbation in the tangent space (d_theta) to a perturbation on the manifold (expmap(Jr * d_theta))
+         *  expmap( omega + d_omega ) \approx expmap(omega) * expmap(Jr * d_omega)
+         *  where Jr = expMapDerivative(omega);
+         *  This maps a perturbation in the tangent space (d_omega) to a perturbation on the manifold (expmap(Jr * d_omega))
          *  so that:
          *
-         *      exp(theta+dtheta) = exp(theta)*exp(Jr(theta)*dtheta)
+         *      exp(omega+domega) = exp(omega)*exp(Jr(omega)*domega)
          */
         Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega);
 
@@ -98,7 +98,7 @@ class ProcessorIMU : public ProcessorMotion{
          *  where Jrinv = logMapDerivative(omega);
          *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega) so that
          *
-         *      log(exp(theta)*exp(dtheta)) = theta + Jrinv(theta)*dtheta
+         *      log(exp(omega)*exp(domega)) = omega + Jrinv(omega)*domega
          */
         Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega);
 
