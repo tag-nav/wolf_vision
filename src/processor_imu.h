@@ -47,6 +47,9 @@ class ProcessorIMU : public ProcessorMotion{
                                     const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta,
                                     Eigen::MatrixXs& _jacobian1, Eigen::MatrixXs& _jacobian2);
 
+        virtual void deltaMinusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
+                                     const Scalar _dt, Eigen::VectorXs& _delta_preint_minus_delta);
+
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
          * \param _delta the delta-state
@@ -320,14 +323,14 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
                                          const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta)
 {
-    assert(_delta_preint.size() == 10 && "Wrong _delta1 vector size");
-    assert(_delta.size() == 10 && "Wrong _delta2 vector size");
-    assert(_delta_preint_plus_delta.size() == 10 && "Wrong _delta1_plus_delta2 vector size");
+    assert(_delta_preint.size() == 10 && "Wrong _delta_preint vector size");
+    assert(_delta.size() == 10 && "Wrong _delta vector size");
+    assert(_delta_preint_plus_delta.size() == 10 && "Wrong _delta_preint_plus_delta vector size");
 
     remapPQV(_delta_preint, _delta, _delta_preint_plus_delta);
-    // _delta1              is _in_1_
-    // _delta2              is _in_2_
-    // _delta1_plus_delta2  is _out_
+    // _delta_preint             is _in_1_
+    // _delta                    is _in_2_
+    // _delta_preint_plus_delta  is _out_
 
 
     /* MATHS according to Sola-16
@@ -350,7 +353,33 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     p_out_ = p_in_1_ + v_in_1_ * _dt + q_in_1_ * p_in_2_;
     v_out_ = v_in_1_ + q_in_1_ * v_in_2_;
     q_out_ = q_in_1_ * q_in_2_;
+}
 
+inline void ProcessorIMU::deltaMinusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
+                                          const Scalar _dt, Eigen::VectorXs& _delta_preint_minus_delta)
+{
+    assert(_delta_preint.size() == 10 && "Wrong _delta_preint vector size");
+    assert(_delta.size() == 10 && "Wrong _delta vector size");
+    assert(_delta_preint_minus_delta.size() == 10 && "Wrong _delta_preint_minus_delta vector size");
+
+    remapPQV(_delta_preint, _delta, _delta_preint_minus_delta);
+    // _delta_preint             is _in_1_
+    // _delta                    is _in_2_
+    // _delta_preint_plus_delta  is _out_
+
+    /* MATHS according to SOLA-16 (see deltaPlusDelta for derivation)
+    *
+    * Let delta be a delta-state :
+    *   delta = [p, q, v]
+    * Then the negation of this delta is :
+    *   delta_neg = [-p, q*, -v]     where * = conjugate operator
+    * We then have :
+    *   delta1 (-) delta = delta1 (+) delta_neg
+    * Which yields the following, using SOLA-16 maths
+    */
+    p_out_ = p_in_1_ + v_in_1_ * _dt - q_in_1_ * p_in_2_;
+    v_out_ = v_in_1_ - q_in_1_ * v_in_2_;
+    q_out_ = q_in_1_ * q_in_2_.conjugate();
 }
 
 inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
