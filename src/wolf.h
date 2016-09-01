@@ -441,9 +441,21 @@ inline Eigen::VectorXs q2v(const Eigen::Quaternions& _q){
     return aa.axis() * aa.angle();
 }
 
-inline Eigen::Vector3s R2v(const Eigen::Matrix3s & _R){
+inline Eigen::Vector3s R2v(const Eigen::Matrix3s& _R){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_R);
     return aa.axis() * aa.angle();
+}
+
+inline Eigen::Matrix3s v2R(const Eigen::Vector3s& _v){
+    wolf::Scalar angle = _v.norm();
+    if (angle < wolf::Constants::EPS)
+    {
+        return Eigen::Matrix3s::Identity();
+    }
+    else
+    {
+        return Eigen::AngleAxiss(angle, _v/angle).toRotationMatrix();
+    }
 }
 
 inline Eigen::Matrix3s skew(const Eigen::VectorXs& _v) {

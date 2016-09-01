@@ -195,7 +195,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     /*                  MATHS : jacobians
      * substituting (a-a_b) and (w-w_b) respectively by (a-a_b+a_n) and (w-w_b+w_n) (measurement noise is additive)
      *         an        wn
-     *   dp [0.5*dt*dt   0  ]       
+     *   dp [0.5*dt*dt   0  ]
      *   dv [   dt       0  ]
      *   dR [   0      dt*exp(wj*dt) ]
      */
@@ -250,11 +250,11 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 
      /*
       * _jacobian1 and _jacobian2 are jacobians of _delta1_plus_delta2 w.r.t. _delta1 and _delta2
-      * let us note this : D3 = D1 (+) D2, with D=[DP, DV, DR] (We will use the minimal form here) 
+      * let us note this : D3 = D1 (+) D2, with D=[DP, DV, DR] (We will use the minimal form here)
       * Note : PVQ FORMULATION
       *
       * _jacobian1 =    [1  _Dt2    DP2                     _jacobian2 =    [DR1   0   0
-      *                  0    1     DV2                                       0   DR1  0  
+      *                  0    1     DV2                                       0   DR1  0
       *                  0    1     DR2 ]                                     0    0  DR1]
       */
       Eigen::Matrix3s DR1 = q_in_1_.toRotationMatrix();
@@ -290,6 +290,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 
      /// Get the rotation matrix associated to the preintegrated orientation quaternion
      Eigen::Matrix3s orientation_preint_rot_ =  orientation_preint_quat_.toRotationMatrix();
+     Eigen::Matrix3s corrected_acc_ss        =  Eigen::skew(measured_acc_ - bias_acc_);
+     Eigen::Vector3s corrected_gyro          =  measured_gyro_ - bias_gyro_;
 
      /// dP/db_a -- Jacobian of postion w.r.t accelerometer bias
      /// dP/db_a += dv/db_a - 0.5 * delta_R * dt * dt
@@ -303,22 +305,16 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      /// dP/db_g -- Jacobian of position w.r.t gyro bias
      /// dP/db_g += dv/db_g * dt - 0.5 * delta_R * (a - b_a)^ * dt * dt * dR/db_g
      preintegrated_H_biasOmega_.topRows<3>() += preintegrated_H_biasOmega_.block<3,3>(3,0) * _dt
-                                             -  0.5 * _dt * _dt * orientation_preint_rot_ * Eigen::skew(measured_acc_ - bias_acc_) * preintegrated_H_biasOmega_.bottomRows<3>();
+                                             -  0.5 * _dt * _dt * orientation_preint_rot_ * corrected_acc_ss * preintegrated_H_biasOmega_.bottomRows<3>();
 
      /// dv/db_g -- Jacobian of velocity w.r.t gyro bias
      /// dv/db_g -= delta_R * dt * (a - b_a)^ * dR/db_g
-     preintegrated_H_biasOmega_.block<3,3>(3,0) -= orientation_preint_rot_ *_dt * Eigen::skew(measured_acc_ - bias_acc_) * preintegrated_H_biasOmega_.bottomRows<3>();
+     preintegrated_H_biasOmega_.block<3,3>(3,0) -= orientation_preint_rot_ *_dt * corrected_acc_ss * preintegrated_H_biasOmega_.bottomRows<3>();
 
      /// dR/db_g -- Jacobian of orientation w.r.t gyro bias
-     /// dR/db_g += R.t * dR/db_g * Jr * dt       where Jr  == right Jacobian
-     ///                                                R.t == [exp((omega - b_g) * dt)]^{-1}
-     /***** FIXME: Optimise this ! ******/
-     // JS: if q_tmp = exp(w*dt) then q_tmp.conjugate() = exp(-w*dt) !
-     // JS: Or use Rodrigues formula to go directly to R_eq.
-     Eigen::Quaternions q_tmp = Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt);
-     Eigen::Matrix3s R_eq = q_tmp.conjugate().toRotationMatrix();
-     /**********************************/
-     preintegrated_H_biasOmega_.bottomRows<3>() = R_eq *  preintegrated_H_biasOmega_.bottomRows<3>() * _dt * expMapDerivative((measured_gyro_ - bias_gyro_) * _dt);
+     /// dR/db_g = R.t * dR/db_g * Jr * dt       where Jr  == right Jacobian
+     ///                                               R.t == [exp(- (omega - b_g) * dt)]
+     preintegrated_H_biasOmega_.bottomRows<3>() = Eigen::v2R(-corrected_gyro * _dt) *  preintegrated_H_biasOmega_.bottomRows<3>() * _dt * expMapDerivative((measured_gyro_ - bias_gyro_) * _dt);
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
