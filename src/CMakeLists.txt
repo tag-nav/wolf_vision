@@ -112,6 +112,7 @@ SET(HDRS
     constraint_epipolar.h
     constraint_image.h
     constraint_image_new_landmark.h
+    constraint_imu.h
     constraint_sparse.h
     constraint_fix.h
     constraint_gps_2D.h

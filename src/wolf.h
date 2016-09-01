@@ -153,7 +153,8 @@ typedef enum
     CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_EPIPOLAR,               ///< Epipolar constraint
     CTR_AHP,                    ///< Anchored Homogeneous Point constraint
-    CTR_AHP_NL                  ///< Anchored Homogeneous Point constraint (temporal, to be removed)
+    CTR_AHP_NL,                 ///< Anchored Homogeneous Point constraint (temporal, to be removed)
+    CTR_IMU                     ///< IMU constraint
 
 } ConstraintType;
 
