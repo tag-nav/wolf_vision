@@ -20,6 +20,7 @@
 #include "../constraint_container.h"
 #include "../constraint_image.h"
 #include "../constraint_image_new_landmark.h"
+#include "../constraint_imu.h"
 
 
 // Wolf and ceres auto_diff creators
@@ -104,6 +105,11 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _
             else
                 return createAutoDiffCostFunctionCeres<ConstraintImageNewLandmark>(_ctr_ptr);
 
+        case CTR_IMU:
+            if (_use_wolf_autodiff)
+                return createAutoDiffCostFunctionWrapper<ConstraintIMU>(_ctr_ptr);
+            else
+                return createAutoDiffCostFunctionCeres<ConstraintIMU>(_ctr_ptr);
 
             /* For adding a new constraint, add the #include and a case:
             case CTR_ENUM:
