@@ -127,6 +127,7 @@ SET(HDRS
     feature_corner_2D.h
     feature_gps_fix.h
     feature_gps_pseudorange.h
+    feature_imu.h
     feature_fix.h
     feature_odom_2D.h
     feature_polyline_2D.h
@@ -175,7 +176,7 @@ SET(HDRS
     trajectory_base.h
     # wolf_manager.h
     )
-   
+
 
 SET(HDRS_DTASSC
     data_association/matrix.h
@@ -197,6 +198,7 @@ SET(SRCS
     feature_corner_2D.cpp
     feature_gps_fix.cpp
     feature_gps_pseudorange.cpp
+    feature_imu.cpp
     feature_fix.cpp
     feature_odom_2D.cpp
     feature_polyline_2D.cpp
