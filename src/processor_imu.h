@@ -13,9 +13,6 @@ class ProcessorIMU : public ProcessorMotion{
         ProcessorIMU();
         virtual ~ProcessorIMU();
 
-    public:
-        const Eigen::Vector3s& getGravity() const;
-
     protected:
 
         // Helper functions
@@ -166,11 +163,6 @@ class ProcessorIMU : public ProcessorMotion{
 #include <cmath> //needed to compute logMapDerivative (right jacobian Jr)
 
 namespace wolf{
-
-inline const Eigen::Vector3s& ProcessorIMU::getGravity() const
-{
-    return gravity_;
-}
 
 inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
 {

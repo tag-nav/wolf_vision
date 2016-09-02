@@ -472,6 +472,12 @@ inline Eigen::Vector3s vee(const Eigen::Matrix3s& _m)
 
 }
 
+namespace wolf {
+    inline const Eigen::Vector3s gravity(void) {
+        return Eigen::Vector3s(0,0,-9.8);
+    }
+}
+
 
 
 #endif /* WOLF_H_ */
