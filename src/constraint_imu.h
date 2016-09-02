@@ -86,31 +86,33 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _o1, c
                                        const T* const _p2, const T* const _o2, const T* const _v2,
                                        T* _residuals) const
 {
+
+
     // MAPS
     Eigen::Map<Eigen::Matrix<T,9,1> > residuals_map(_residuals);
 
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1_map(_p1);
-    Eigen::Map<const Eigen::Quaternion<T> > q1_map(_o1);
+    Eigen::Map<const Eigen::Quaternion<T> > q1_map(_o1); // R^4
     Eigen::Map<const Eigen::Matrix<T,3,1> > v1_map(_v1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > ba_map(_ba);
     Eigen::Map<const Eigen::Matrix<T,3,1> > bg_map(_bg);
 
     Eigen::Map<const Eigen::Matrix<T,3,1> > p2_map(_p2);
-    Eigen::Map<const Eigen::Quaternion<T> > q2_map(_o2);
+    Eigen::Map<const Eigen::Quaternion<T> > q2_map(_o2); // R^4
     Eigen::Map<const Eigen::Matrix<T,3,1> > v2_map(_v2);
 
     wolf::Scalar dt; /// FIXME : fetch real dt.
     Eigen::Vector3s g(wolf::gravity());
 
-    Eigen::Map<Eigen::Matrix<T, 9, 1>> expected_measurement;
-    Eigen::Map<Eigen::Matrix<T, 10, 1>> predicted_delta;
-    Eigen::Map<Eigen::Matrix<T, 10, 1>> corrected_delta;
+    Eigen::Matrix<T, 10, 1> expected_measurement;
+    Eigen::Matrix<T, 10, 1> predicted_delta;
+    Eigen::Matrix<T, 10, 1> corrected_delta;
     // Predicted delta
-    predicted_delta = predictDelta(_p1, _o1, _v1, _p2, _o2, _v2);
+//    predicted_delta = predictDelta(_p1, _o1, _v1, _p2, _o2, _v2);
 
 
     // Residual
-    residuals_map = expected_measurement - getMeasurement().cast<T>();
+//    residuals_map = expected_measurement - getMeasurement().cast<T>();
 
     // TODO: Something like this:
     // residual = minimal ( Delta_corrected (-) Delta_predicted )
@@ -123,12 +125,14 @@ template<typename T>
 Eigen::Matrix<T, 10, 1> ConstraintIMU::predictDelta(const T* const _p1, const T* const _q1, const T* const _v1,
                                                     const T* const _p2, const T* const _q2, const T* const _v2)
 {
-    Eigen::Map<Eigen::Matrix<T, 10, 1>> predicted_delta;
+    Eigen::Matrix<T, 10, 1> predicted_delta;
 
     /* MATHS according to SOLA-16
     *
     *
     */
+    Scalar dt = 1.0; // FIXME get the right dt
+    Eigen::Vector3s g(wolf::gravity());
     // predicted delta
     /// Predicted P
     predicted_delta.head(3) = _q1.conjugate() * (_p2 - _p1 - _v1 * dt - 0.5 * g * dt * dt);
