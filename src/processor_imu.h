@@ -259,16 +259,22 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      */
 
      /// FORSTER version
-     /*
+     /* with _jacobian1 = A and _jacobian2 = B
      _jacobian1.resize(3,9);
      _jacobian1.setZero();
      _jacobian1.block<1,3>(1,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose(); //check if this is working --> block considered as row_vector ?
-     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * (-_Dt2); // *_data.head(3)
-     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * _Dt2 * (-_Dt2/2); // *_data.head(3)
+     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * (-_dt); // *_data.head(3)
+     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * _dt * (-_dt/2); // *_data.head(3)
      //Need access to _data here.
      _jacobian1.block<1,3>(0,6) << 1,1,1;
      _jacobian1.block<1,3>(2,3) << 1,1,1;
-     _jacobian1.block<1,3>(0,3) << _Dt2, _Dt2, _Dt2;
+     _jacobian1.block<1,3>(0,3) << _dt2, _dt2, _dt2;
+
+     //_jacobian2.resize(3,6);
+     _jacobian2.setZero();
+     _jacobian2.block<3,3>(0,3) = LogmapDerivative(q_in_1_) * _dt;
+     _jacobian2.block<3,3>(1,3) = q_in_1_.toRotationMatrix() * _dt;
+     _jacobian2.block<3,3>(2,3) = q_in_1_.toRotationMatrix() * _dt * dt_ * 0.5;
      */
 
      /*
