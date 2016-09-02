@@ -38,16 +38,25 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
     private:
         // Helper functions, TODO: implement them all from Sola-16. Use stored biases, jacobians, and all state blocks, as internal variables. Change the API at your will, this is just a suggestion.
         template<typename T>
-        Eigen::Matrix<T, 10, 1> predictDelta();
+        Eigen::Matrix<T, 10, 1> predictDelta(const T* const _p1, const T* const _q1, const T* const _v1,
+                                             const T* const _p2, const T* const _q2, const T* const _v2);
 
         template<typename T>
         Eigen::Matrix<T, 10, 1> correctDelta(const Eigen::Matrix<T, 10, 1>& _delta);
 
         template<typename T>
-        Eigen::Matrix<T, 10, 1> deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, const Eigen::Matrix<T, 10, 1>& _delta2);
+        void deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, const Eigen::Matrix<T, 10, 1>& _delta2, Eigen::Matrix<T, 10, 1>& _delta1_minus_delta2);
 
         template<typename T>
         Eigen::Matrix<T, 9, 1> minimalDeltaError(const Eigen::Matrix<T, 10, 1>& _delta_error);
+
+        // Maps to pos, quat, vel, to be used as temporaries
+        Eigen::Map<const Eigen::Vector3s> p_in_1_, p_in_2_;
+        Eigen::Map<Eigen::Vector3s> p_out_;
+        Eigen::Map<const Eigen::Quaternions> q_in_1_, q_in_2_;
+        Eigen::Map<Eigen::Quaternions> q_out_;
+        Eigen::Map<const Eigen::Vector3s> v_in_1_, v_in_2_;
+        Eigen::Map<Eigen::Vector3s> v_out_;
 
 
 };
@@ -59,7 +68,10 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMU* _ftr_ptr, FrameIMU* _frame_ptr, 
                                                     _frame_ptr->getBAPtr(), _frame_ptr->getBGPtr(),
                                                     _ftr_ptr->getFramePtr()->getPPtr(),
                                                     _ftr_ptr->getFramePtr()->getOPtr(),
-                                                    _ftr_ptr->getFramePtr()->getVPtr())
+                                                    _ftr_ptr->getFramePtr()->getVPtr()),
+                                                    p_in_1_(nullptr), p_in_2_(nullptr), p_out_(nullptr),
+                                                    q_in_1_(nullptr), q_in_2_(nullptr), q_out_(nullptr),
+                                                    v_in_1_(nullptr), v_in_2_(nullptr), v_out_(nullptr)
 {
     setType("IMU");
 }
@@ -90,15 +102,12 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _o1, c
     wolf::Scalar dt; /// FIXME : fetch real dt.
     Eigen::Vector3s g(wolf::gravity());
 
-    Eigen::Matrix<T, 9, 1> expected_measurement;
+    Eigen::Map<Eigen::Matrix<T, 9, 1>> expected_measurement;
+    Eigen::Map<Eigen::Matrix<T, 10, 1>> predicted_delta;
+    Eigen::Map<Eigen::Matrix<T, 10, 1>> corrected_delta;
+    // Predicted delta
+    predicted_delta = predictDelta(_p1, _o1, _v1, _p2, _o2, _v2);
 
-    // Expected measurement
-    /// Expected P
-    expected_measurement.head(3) = q1_map.conjugate() * (p2_map - p1_map - v1_map * dt - 0.5 * g * dt * dt);
-    /// Expected v
-    expected_measurement.block<3,1>(3,0) = q1_map.conjugate() * (v2_map - v1_map - g * dt);
-    /// Expected q -> minimal space
-    expected_measurement.tail(3) = Eigen::v2q(q1_map.conjugate() * q2_map);
 
     // Residual
     residuals_map = expected_measurement - getMeasurement().cast<T>();
@@ -109,6 +118,66 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _o1, c
 
     return true;
 }
+
+template<typename T>
+Eigen::Matrix<T, 10, 1> ConstraintIMU::predictDelta(const T* const _p1, const T* const _q1, const T* const _v1,
+                                                    const T* const _p2, const T* const _q2, const T* const _v2)
+{
+    Eigen::Map<Eigen::Matrix<T, 10, 1>> predicted_delta;
+
+    /* MATHS according to SOLA-16
+    *
+    *
+    */
+    // predicted delta
+    /// Predicted P
+    predicted_delta.head(3) = _q1.conjugate() * (_p2 - _p1 - _v1 * dt - 0.5 * g * dt * dt);
+    /// Predicted v
+    predicted_delta.block<3,1>(3,0) = _q1.conjugate() * (_v2 - _v1 - g * dt);
+    /// Predicted q
+    predicted_delta.tail(4) = _q1.conjugate() * _q2;
+
+    return predicted_delta;
+}
+
+template<typename T>
+Eigen::Matrix<T, 10, 1> ConstraintIMU::correctDelta(const Eigen::Matrix<T, 10, 1>& _delta)
+{
+    /* MATHS according to SOLA-16
+    *
+    *
+    */
+
+}
+
+template<typename T>
+void ConstraintIMU::deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, const Eigen::Matrix<T, 10, 1>& _delta2,
+                                    Eigen::Matrix<T, 10, 1>& _delta1_minus_delta2)
+{
+    remapPQV(_delta1, _delta2, _delta1_minus_delta2);
+
+    /* MATHS according to SOLA-16 (see deltaPlusDelta for derivation)
+    *
+    * Let delta be a delta-state :
+    *   delta = [p, q, v]
+    * Then the negation of this delta is :
+    *   delta_neg = [-p, q*, -v]     where * = conjugate operator
+    * We then have :
+    *   delta1 (-) delta = delta1 (+) delta_neg
+    * Which yields the following, using SOLA-16 maths
+    */
+    wolf::Scalar _dt;
+    p_out_ = p_in_1_ + v_in_1_ * _dt - q_in_1_ * p_in_2_;
+    v_out_ = v_in_1_ - q_in_1_ * v_in_2_;
+    q_out_ = q_in_1_ * q_in_2_.conjugate();
+}
+
+template<typename T>
+Eigen::Matrix<T, 9, 1> ConstraintIMU::minimalDeltaError(const Eigen::Matrix<T, 10, 1>& _delta_error)
+{
+
+}
+
 
 inline JacobianMethod ConstraintIMU::getJacobianMethod() const
 {
