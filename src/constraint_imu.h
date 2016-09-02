@@ -36,10 +36,9 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         static wolf::ConstraintBase* create(FeatureIMU* _feature_ptr, NodeBase* _correspondant_ptr);
 
     private:
-        // Helper functions, TODO: implement them all from Sola-16. Use stored biases, jacobians, and all state blocks, as internal variables. Change the API at your will, this is just a suggestion.
+        // Helper functions
         template<typename T>
-        Eigen::Matrix<T, 10, 1> predictDelta(const T* const _p1, const T* const _q1, const T* const _v1,
-                                             const T* const _p2, const T* const _q2, const T* const _v2);
+        Eigen::Matrix<T, 10, 1> predictDelta();
 
         template<typename T>
         Eigen::Matrix<T, 10, 1> correctDelta(const Eigen::Matrix<T, 10, 1>& _delta);
@@ -50,15 +49,29 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         template<typename T>
         Eigen::Matrix<T, 9, 1> minimalDeltaError(const Eigen::Matrix<T, 10, 1>& _delta_error);
 
-        // Maps to pos, quat, vel, to be used as temporaries
-        Eigen::Map<const Eigen::Vector3s> p_in_1_, p_in_2_;
-        Eigen::Map<Eigen::Vector3s> p_out_;
-        Eigen::Map<const Eigen::Quaternions> q_in_1_, q_in_2_;
-        Eigen::Map<Eigen::Quaternions> q_out_;
-        Eigen::Map<const Eigen::Vector3s> v_in_1_, v_in_2_;
-        Eigen::Map<Eigen::Vector3s> v_out_;
+    protected:
+        /// Previous state
+        Eigen::VectorXs prev_p_;              ///< Position state block pointer
+        Eigen::Quaternions prev_o_;           ///< Orientation state block pointer
+        Eigen::VectorXs prev_v_;              ///< Linear velocity state block pointer
+        Eigen::Vector3s prev_acc_bias_;       ///< Accleration bias state block pointer
+        Eigen::Vector3s prev_gyro_bias_;      ///< Gyrometer bias state block pointer
 
+        /// Current state
+        Eigen::VectorXs curr_p_;              ///< Position state block pointer
+        Eigen::Quaternions curr_o_;           ///< Orientation state block pointer
+        Eigen::VectorXs curr_v_;              ///< Linear velocity state block pointer
 
+        /// Jacobians
+        Eigen::Matrix<Scalar,6,3> preintegrated_H_biasAcc_;    /// [dP dv]
+        Eigen::Matrix<Scalar,10,3> preintegrated_H_biasOmega_; /// [dP dv dq]
+
+        /// Preintegrated delta
+        Eigen::VectorXs preint_delta_;
+
+        /// Metrics
+        const wolf::Scalar dt_;
+        const Eigen::Vector3s g_;
 };
 
 inline ConstraintIMU::ConstraintIMU(FeatureIMU* _ftr_ptr, FrameIMU* _frame_ptr, bool _apply_loss_function,
@@ -69,9 +82,8 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMU* _ftr_ptr, FrameIMU* _frame_ptr, 
                                                     _ftr_ptr->getFramePtr()->getPPtr(),
                                                     _ftr_ptr->getFramePtr()->getOPtr(),
                                                     _ftr_ptr->getFramePtr()->getVPtr()),
-                                                    p_in_1_(nullptr), p_in_2_(nullptr), p_out_(nullptr),
-                                                    q_in_1_(nullptr), q_in_2_(nullptr), q_out_(nullptr),
-                                                    v_in_1_(nullptr), v_in_2_(nullptr), v_out_(nullptr)
+                                                    dt_(1.0), g_(wolf::gravity())
+
 {
     setType("IMU");
 }
@@ -89,7 +101,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _o1, c
 
 
     // MAPS
-    Eigen::Map<Eigen::Matrix<T,9,1> > residuals_map(_residuals);
+    Eigen::Map<Eigen::Matrix<T,10,1> > residuals_map(_residuals);
 
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1_map(_p1);
     Eigen::Map<const Eigen::Quaternion<T> > q1_map(_o1); // R^4
@@ -101,29 +113,20 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _o1, c
     Eigen::Map<const Eigen::Quaternion<T> > q2_map(_o2); // R^4
     Eigen::Map<const Eigen::Matrix<T,3,1> > v2_map(_v2);
 
-    wolf::Scalar dt; /// FIXME : fetch real dt.
-    Eigen::Vector3s g(wolf::gravity());
-
+    Eigen::Matrix<T, 10, 1> residual;
     Eigen::Matrix<T, 10, 1> expected_measurement;
-    Eigen::Matrix<T, 10, 1> predicted_delta;
-    Eigen::Matrix<T, 10, 1> corrected_delta;
-    // Predicted delta
-//    predicted_delta = predictDelta(_p1, _o1, _v1, _p2, _o2, _v2);
-
+    Eigen::Matrix<T, 10, 1> predicted_delta = predictDelta();
+    Eigen::Matrix<T, 10, 1> corrected_delta = correctDelta(expected_measurement);
 
     // Residual
-//    residuals_map = expected_measurement - getMeasurement().cast<T>();
-
-    // TODO: Something like this:
-    // residual = minimal ( Delta_corrected (-) Delta_predicted )
-    // residuals_map = minimalDeltaError( deltaMinusDelta( correctDelta( getMeasurement() ), predictDelta() ) );
+    deltaMinusDelta(corrected_delta, predicted_delta, residual);
+    residuals_map = minimalDeltaError(residual);
 
     return true;
 }
 
 template<typename T>
-Eigen::Matrix<T, 10, 1> ConstraintIMU::predictDelta(const T* const _p1, const T* const _q1, const T* const _v1,
-                                                    const T* const _p2, const T* const _q2, const T* const _v2)
+Eigen::Matrix<T, 10, 1> ConstraintIMU::predictDelta()
 {
     Eigen::Matrix<T, 10, 1> predicted_delta;
 
@@ -131,15 +134,14 @@ Eigen::Matrix<T, 10, 1> ConstraintIMU::predictDelta(const T* const _p1, const T*
     *
     *
     */
-    Scalar dt = 1.0; // FIXME get the right dt
-    Eigen::Vector3s g(wolf::gravity());
+
     // predicted delta
     /// Predicted P
-    predicted_delta.head(3) = _q1.conjugate() * (_p2 - _p1 - _v1 * dt - 0.5 * g * dt * dt);
+    predicted_delta.head(3) = prev_o_.conjugate() * (curr_p_ - prev_p_ - prev_v_ * dt_ - 0.5 * g_ * dt_ * dt_);
     /// Predicted v
-    predicted_delta.block<3,1>(3,0) = _q1.conjugate() * (_v2 - _v1 - g * dt);
+    predicted_delta.segment(3,3) = prev_o_.conjugate() * (curr_v_ - prev_v_ - g_ * dt_);
     /// Predicted q
-    predicted_delta.tail(4) = _q1.conjugate() * _q2;
+    predicted_delta.tail(4) = prev_o_.conjugate() * curr_o_;
 
     return predicted_delta;
 }
@@ -151,7 +153,22 @@ Eigen::Matrix<T, 10, 1> ConstraintIMU::correctDelta(const Eigen::Matrix<T, 10, 1
     *
     *
     */
+    Eigen::Matrix<T, 10, 3> preintegrated_H_biasAcc_padded_ = preintegrated_H_biasAcc_.resize(10, 3);
 
+    Eigen::Matrix<T, 10, 1> delta_corr;
+
+    /// Position
+    delta_corr.head(3) = _delta.head(3) + preintegrated_H_biasOmega_.topRows<3>() * prev_gyro_bias_
+                                        + preintegrated_H_biasAcc_.topRows<3>()   * prev_acc_bias_;
+
+    /// Velocity
+    delta_corr.segment(3,3) = _delta.segment(3,3) + preintegrated_H_biasOmega_.block<3,3>(3,0) * prev_gyro_bias_
+                                                  + preintegrated_H_biasAcc_.block<3,3>(3,0)   * prev_acc_bias_;
+
+    /// Orientation
+    delta_corr.tail(4) = _delta.tail(4) * preintegrated_H_biasOmega_.tail(4) * prev_gyro_bias_; /// FIXME : Verify math
+
+    return delta_corr;
 }
 
 template<typename T>
@@ -160,26 +177,39 @@ void ConstraintIMU::deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, cons
 {
     remapPQV(_delta1, _delta2, _delta1_minus_delta2);
 
-    /* MATHS according to SOLA-16 (see deltaPlusDelta for derivation)
+    /* MATHS according to SOLA-16
     *
-    * Let delta be a delta-state :
-    *   delta = [p, q, v]
-    * Then the negation of this delta is :
-    *   delta_neg = [-p, q*, -v]     where * = conjugate operator
-    * We then have :
-    *   delta1 (-) delta = delta1 (+) delta_neg
-    * Which yields the following, using SOLA-16 maths
     */
-    wolf::Scalar _dt;
-    p_out_ = p_in_1_ + v_in_1_ * _dt - q_in_1_ * p_in_2_;
-    v_out_ = v_in_1_ - q_in_1_ * v_in_2_;
-    q_out_ = q_in_1_ * q_in_2_.conjugate();
+
+    /// Position
+    _delta1_minus_delta2.head(3) = _delta2.tail(4).conjugate() * (_delta1.head(3) - _delta2.head(3) - _delta2.segment(3,3) * dt_);
+
+    /// Velocity
+    _delta1_minus_delta2.segment(3,3) = _delta2.tail(4).conjugate() * (_delta1.segment(3,3) - _delta2.segment(3,3));
+
+    /// Orientation
+    _delta1_minus_delta2.tail(4) = _delta2.tail(4).conjugate() * _delta1.tail(4);
 }
 
 template<typename T>
 Eigen::Matrix<T, 9, 1> ConstraintIMU::minimalDeltaError(const Eigen::Matrix<T, 10, 1>& _delta_error)
 {
+    Eigen::Matrix<T, 9, 1> delta_minimal;
 
+    /* MATHS according to SOLA-16
+    *
+    */
+
+    /// Position
+    delta_minimal.head(3) = _delta_error.head(3);
+
+    /// Velocity
+    delta_minimal.segment(3,3) = _delta_error.head(3);
+
+    /// Orientation
+    delta_minimal.tail(3) = Eigen::q2v(_delta_error.tail(4));
+
+    return delta_minimal;
 }
 
 
