@@ -75,7 +75,7 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBase* _sensor_pt
                                     FrameBase* _origin_frame_ptr) :
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
-        data_cov_(Eigen::MatrixXs::Identity(_data.rows(), _data.cols())),
+        data_cov_(Eigen::MatrixXs::Identity(_data.rows(), _data.rows())),
         buffer_(),
         origin_frame_ptr_(_origin_frame_ptr)
 {
