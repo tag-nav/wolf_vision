@@ -19,9 +19,4 @@ FeatureIMU::~FeatureIMU()
     //
 }
 
-void FeatureIMU::findConstraints()
-{
-
-}
-
 } // namespace wolf

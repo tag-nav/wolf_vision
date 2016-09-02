@@ -14,7 +14,7 @@ class FeatureIMU : public FeatureBase
 {
     public:
         /** \brief Constructor from capture pointer and measure dim
-         * 
+         *
          */
         FeatureIMU();
 
@@ -32,14 +32,6 @@ class FeatureIMU : public FeatureBase
          *
          **/
         virtual ~FeatureIMU();
-
-        /** \brief Generic interface to find constraints
-         *
-         * TBD
-         * Generic interface to find constraints between this feature and a map (static/slam) or a previous feature
-         *
-         **/
-        virtual void findConstraints();
 
 };
 
