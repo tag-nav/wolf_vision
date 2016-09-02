@@ -54,8 +54,8 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         Eigen::VectorXs prev_p_;              ///< Position state block pointer
         Eigen::Quaternions prev_o_;           ///< Orientation state block pointer
         Eigen::VectorXs prev_v_;              ///< Linear velocity state block pointer
-        Eigen::VectorXs prev_acc_bias_;       ///< Accleration bias state block pointer
-        Eigen::VectorXs prev_gyro_bias_;      ///< Gyrometer bias state block pointer
+        Eigen::Vector3s prev_acc_bias_;       ///< Accleration bias state block pointer
+        Eigen::Vector3s prev_gyro_bias_;      ///< Gyrometer bias state block pointer
 
         /// Current state
         Eigen::VectorXs curr_p_;              ///< Position state block pointer
@@ -141,7 +141,7 @@ Eigen::Matrix<T, 10, 1> ConstraintIMU::predictDelta()
     /// Predicted P
     predicted_delta.head(3) = prev_o_.conjugate() * (curr_p_ - prev_p_ - prev_v_ * dt_ - 0.5 * g_ * dt_ * dt_);
     /// Predicted v
-    predicted_delta.block<3,1>(3,0) = prev_o_.conjugate() * (curr_v_ - prev_v_ - g_ * dt_);
+    predicted_delta.segment(3,3) = prev_o_.conjugate() * (curr_v_ - prev_v_ - g_ * dt_);
     /// Predicted q
     predicted_delta.tail(4) = prev_o_.conjugate() * curr_o_;
 
@@ -155,7 +155,22 @@ Eigen::Matrix<T, 10, 1> ConstraintIMU::correctDelta(const Eigen::Matrix<T, 10, 1
     *
     *
     */
+    Eigen::Matrix<T, 10, 3> preintegrated_H_biasAcc_padded_ = preintegrated_H_biasAcc_.resize(10, 3);
 
+    Eigen::Matrix<T, 10, 1> delta_corr;
+
+    /// Position
+    delta_corr.head(3) = _delta.head(3) + preintegrated_H_biasOmega_.topRows<3>() * prev_gyro_bias_
+                                        + preintegrated_H_biasAcc_.topRows<3>()   * prev_acc_bias_;
+
+    /// Velocity
+    delta_corr.segment(3,3) = _delta.segment(3,3) + preintegrated_H_biasOmega_.block<3,3>(3,0) * prev_gyro_bias_
+                                                  + preintegrated_H_biasAcc_.block<3,3>(3,0)   * prev_acc_bias_;
+
+    /// Orientation
+    delta_corr.tail(4) = _delta.tail(4) * preintegrated_H_biasOmega_.tail(4) * prev_gyro_bias_; /// FIXME : Verify math
+
+    return _delta + preintegrated_H_biasOmega_ * prev_gyro_bias_ + preintegrated_H_biasAcc_padded_ * prev_acc_bias_;
 }
 
 template<typename T>
@@ -169,10 +184,10 @@ void ConstraintIMU::deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, cons
     */
 
     /// Position
-    _delta1_minus_delta2.head(3) = _delta2.tail(4).conjugate() * (_delta1.head(3) - _delta2.head(3) - _delta2.block<3,1>(3,0) * dt_);
+    _delta1_minus_delta2.head(3) = _delta2.tail(4).conjugate() * (_delta1.head(3) - _delta2.head(3) - _delta2.segment(3,3) * dt_);
 
     /// Velocity
-    _delta1_minus_delta2.block<3,1>(3,0) = _delta2.tail(4).conjugate() * (_delta1.block<3,1>(3,0) - _delta2.block<3,1>(3,0));
+    _delta1_minus_delta2.segment(3,3) = _delta2.tail(4).conjugate() * (_delta1.segment(3,3) - _delta2.segment(3,3));
 
     /// Orientation
     _delta1_minus_delta2.tail(4) = _delta2.tail(4).conjugate() * _delta1.tail(4);
