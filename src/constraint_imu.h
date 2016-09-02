@@ -36,7 +36,7 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         static wolf::ConstraintBase* create(FeatureIMU* _feature_ptr, NodeBase* _correspondant_ptr);
 
     private:
-        // Helper functions, TODO: implement them all from Sola-16. Use stored biases, jacobians, and all state blocks, as internal variables. Change the API at your will, this is just a suggestion.
+        // Helper functions
         template<typename T>
         Eigen::Matrix<T, 10, 1> predictDelta();
 
@@ -101,7 +101,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _o1, c
 
 
     // MAPS
-    Eigen::Map<Eigen::Matrix<T,9,1> > residuals_map(_residuals);
+    Eigen::Map<Eigen::Matrix<T,10,1> > residuals_map(_residuals);
 
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1_map(_p1);
     Eigen::Map<const Eigen::Quaternion<T> > q1_map(_o1); // R^4
@@ -113,16 +113,14 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _o1, c
     Eigen::Map<const Eigen::Quaternion<T> > q2_map(_o2); // R^4
     Eigen::Map<const Eigen::Matrix<T,3,1> > v2_map(_v2);
 
+    Eigen::Matrix<T, 10, 1> residual;
     Eigen::Matrix<T, 10, 1> expected_measurement;
-    Eigen::Matrix<T, 10, 1> predicted_delta;
-    Eigen::Matrix<T, 10, 1> corrected_delta;
+    Eigen::Matrix<T, 10, 1> predicted_delta = predictDelta();
+    Eigen::Matrix<T, 10, 1> corrected_delta = correctDelta(expected_measurement);
 
     // Residual
-//    residuals_map = expected_measurement - getMeasurement().cast<T>();
-
-    // TODO: Something like this:
-    // residual = minimal ( Delta_corrected (-) Delta_predicted )
-    // residuals_map = minimalDeltaError( deltaMinusDelta( correctDelta( getMeasurement() ), predictDelta() ) );
+    deltaMinusDelta(corrected_delta, predicted_delta, residual);
+    residuals_map = minimalDeltaError(residual);
 
     return true;
 }
