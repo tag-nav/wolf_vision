@@ -61,20 +61,27 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _o1, c
     Eigen::Map<Eigen::Matrix<T,9,1> > residuals_map(_residuals);
 
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1_map(_p1);
-    Eigen::Map<const Eigen::Quaternions > q1_map(_o1);
+    Eigen::Map<const Eigen::Quaternion<T> > q1_map(_o1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > v1_map(_v1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > ba_map(_ba);
     Eigen::Map<const Eigen::Matrix<T,3,1> > bg_map(_bg);
 
     Eigen::Map<const Eigen::Matrix<T,3,1> > p2_map(_p2);
-    Eigen::Map<const Eigen::Quaternions > q2_map(_o2);
+    Eigen::Map<const Eigen::Quaternion<T> > q2_map(_o2);
     Eigen::Map<const Eigen::Matrix<T,3,1> > v2_map(_v2);
+
+    wolf::Scalar dt; /// FIXME : fetch real dt.
+    Eigen::Vector3s g(wolf::gravity());
 
     Eigen::Matrix<T, 9, 1> expected_measurement;
 
     // Expected measurement
-    
-
+    /// Expected P
+    expected_measurement.head(3) = q1_map.conjugate() * (p2_map - p1_map - v1_map * dt - 0.5 * g * dt * dt);
+    /// Expected v
+    expected_measurement.block<3,1>(3,0) = q1_map.conjugate() * (v2_map - v1_map - g * dt);
+    /// Expected q -> minimal space
+    expected_measurement.tail(3) = Eigen::v2q(q1_map.conjugate() * q2_map);
     // Error
     residuals_map = expected_measurement - getMeasurement().cast<T>();
 
