@@ -79,13 +79,13 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
 
         template<typename T>
         void deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, const Eigen::Matrix<T, 10, 1>& _delta2,
-                             Eigen::Matrix<T, 10, 1>& _delta1_minus_delta2) const
+                             Eigen::Matrix<T, 10, 1>& _delta1_minus_delta2)
         {
             /* MATHS according to SOLA-16
              *
              */
-             Eigen::Map<Eigen::Quaternion<T>> q_ij(_delta2.tail(4).data());
              Eigen::Map<Eigen::Quaternion<T>> q_ik(_delta1.tail(4).data());
+             Eigen::Map<Eigen::Quaternion<T>> q_ij(_delta2.tail(4).data());
 
             /// Position
             _delta1_minus_delta2.head(3) = q_ij.conjugate() * (_delta1.head(3) - _delta2.head(3) - _delta2.segment(3, 3) * dt_);
