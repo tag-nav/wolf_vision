@@ -164,20 +164,18 @@ void ConstraintIMU::deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, cons
 {
     remapPQV(_delta1, _delta2, _delta1_minus_delta2);
 
-    /* MATHS according to SOLA-16 (see deltaPlusDelta for derivation)
+    /* MATHS according to SOLA-16
     *
-    * Let delta be a delta-state :
-    *   delta = [p, q, v]
-    * Then the negation of this delta is :
-    *   delta_neg = [-p, q*, -v]     where * = conjugate operator
-    * We then have :
-    *   delta1 (-) delta = delta1 (+) delta_neg
-    * Which yields the following, using SOLA-16 maths
     */
-    wolf::Scalar _dt;
-    //p_out_ = p_in_1_ + v_in_1_ * _dt - q_in_1_ * p_in_2_;
-    //v_out_ = v_in_1_ - q_in_1_ * v_in_2_;
-    //q_out_ = q_in_1_ * q_in_2_.conjugate();
+
+    /// Position
+    _delta1_minus_delta2.head(3) = _delta2.tail(4).conjugate() * (_delta1.head(3) - _delta2.head(3) - _delta2.block<3,1>(3,0) * dt_);
+
+    /// Velocity
+    _delta1_minus_delta2.block<3,1>(3,0) = _delta2.tail(4).conjugate() * (_delta1.block<3,1>(3,0) - _delta2.block<3,1>(3,0));
+
+    /// Orientation
+    _delta1_minus_delta2.tail(4) = _delta2.tail(4).conjugate() * _delta1.tail(4);
 }
 
 template<typename T>
