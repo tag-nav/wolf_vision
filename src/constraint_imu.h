@@ -170,7 +170,7 @@ Eigen::Matrix<T, 10, 1> ConstraintIMU::correctDelta(const Eigen::Matrix<T, 10, 1
     /// Orientation
     delta_corr.tail(4) = _delta.tail(4) * preintegrated_H_biasOmega_.tail(4) * prev_gyro_bias_; /// FIXME : Verify math
 
-    return _delta + preintegrated_H_biasOmega_ * prev_gyro_bias_ + preintegrated_H_biasAcc_padded_ * prev_acc_bias_;
+    return delta_corr;
 }
 
 template<typename T>
@@ -196,7 +196,22 @@ void ConstraintIMU::deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, cons
 template<typename T>
 Eigen::Matrix<T, 9, 1> ConstraintIMU::minimalDeltaError(const Eigen::Matrix<T, 10, 1>& _delta_error)
 {
+    Eigen::Matrix<T, 9, 1> delta_minimal;
 
+    /* MATHS according to SOLA-16
+    *
+    */
+
+    /// Position
+    delta_minimal.head(3) = _delta_error.head(3);
+
+    /// Velocity
+    delta_minimal.segment(3,3) = _delta_error.head(3);
+
+    /// Orientation
+    delta_minimal.tail(3) = Eigen::q2v(_delta_error.tail(4));
+
+    return delta_minimal;
 }
 
 
