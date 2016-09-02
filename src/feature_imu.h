@@ -14,11 +14,9 @@ class FeatureIMU : public FeatureBase
 {
     public:
         /** \brief Constructor from capture pointer and measure dim
-         *
-         * \param _dim_measurement the dimension of the measurement space
-         *
+         * 
          */
-        FeatureIMU(unsigned int _dim_measurement);
+        FeatureIMU();
 
         /** \brief Constructor from capture pointer and measure
          *

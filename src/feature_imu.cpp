@@ -2,8 +2,8 @@
 
 namespace wolf {
 
-FeatureIMU::FeatureIMU(unsigned int _dim_measurement) :
-    FeatureBase(FEATURE_IMU, "IMU", _dim_measurement)
+FeatureIMU::FeatureIMU() :
+    FeatureBase(FEATURE_IMU, "IMU", 6)
 {
     //
 }
