@@ -47,32 +47,33 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
              */
             // predicted delta
             /// Predicted P
-            predicted_delta.head(3) = prev_o_.conjugate() * (curr_p_ - prev_p_ - prev_v_ * dt_ - 0.5 * g_ * dt_ * dt_);
+            predicted_delta.head(3) = (prev_o_.conjugate() * (curr_p_ - prev_p_ - prev_v_ * dt_ - 0.5 * g_ * dt_ * dt_)).cast<T>();
             /// Predicted v
-            predicted_delta.segment(3, 3) = prev_o_.conjugate() * (curr_v_ - prev_v_ - g_ * dt_);
+            predicted_delta.segment(3, 3) = (prev_o_.conjugate() * (curr_v_ - prev_v_ - g_ * dt_)).cast<T>();
             /// Predicted q
-            predicted_delta.tail(4) = (prev_o_.conjugate() * curr_o_).coeffs();
+            predicted_delta.tail(4) = (prev_o_.conjugate() * curr_o_).coeffs().cast<T>();
             return predicted_delta;
         }
 
         template<typename T>
         Eigen::Matrix<T, 10, 1> correctDelta(const Eigen::Matrix<T, 10, 1>& _delta) const
         {
+
             /* MATHS according to SOLA-16
              *
              *
              */
-//            Eigen::Matrix<T, 10, 3> preintegrated_H_biasAcc_padded_ = preintegrated_H_biasAcc_.resize(10, 3);
+
             Eigen::Matrix<T, 10, 1> delta_corr;
             /// Position
-            delta_corr.head(3) = _delta.head(3) + preintegrated_H_biasOmega_.topRows<3>() * prev_gyro_bias_
-                    + preintegrated_H_biasAcc_.topRows<3>() * prev_acc_bias_;
+            delta_corr.head(3) =  _delta.head(3) + (preintegrated_H_biasOmega_.topRows<3>() * prev_gyro_bias_
+                                                 +  preintegrated_H_biasAcc_.topRows<3>()   * prev_acc_bias_).cast<T>();
             /// Velocity
             delta_corr.segment(3, 3) = _delta.segment(3, 3)
-                    + preintegrated_H_biasOmega_.block<3, 3>(3, 0) * prev_gyro_bias_
-                    + preintegrated_H_biasAcc_.block<3, 3>(3, 0) * prev_acc_bias_;
+                    + (preintegrated_H_biasOmega_.block<3, 3>(3, 0) * prev_gyro_bias_
+                    +    preintegrated_H_biasAcc_.block<3, 3>(3, 0) * prev_acc_bias_).cast<T>();
             /// Orientation
-            delta_corr.tail(4) = (Eigen::Quaternion<T>(_delta.tail(4)) * Eigen::Quaternion<T>(preintegrated_H_biasOmega_.bottomRows<4>() * prev_gyro_bias_)).coeffs(); /// FIXME : Verify math
+            // delta_corr.tail(4) = _delta.tail(4) * preintegrated_H_biasOmega_.bottomRows(4) * prev_gyro_bias_;
             return delta_corr;
         }
 
@@ -80,27 +81,29 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         void deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, const Eigen::Matrix<T, 10, 1>& _delta2,
                              Eigen::Matrix<T, 10, 1>& _delta1_minus_delta2) const
         {
-//            remapPQV(_delta1, _delta2, _delta1_minus_delta2);
             /* MATHS according to SOLA-16
              *
              */
+             Eigen::Map<Eigen::Quaternion<T>> q_ij(_delta2.tail(4).data());
+             Eigen::Map<Eigen::Quaternion<T>> q_ik(_delta1.tail(4).data());
+
             /// Position
-            _delta1_minus_delta2.head(3) = Eigen::Map<Eigen::Quaternion<T>>(_delta2.tail(4).data()).conjugate()
-                    * (_delta1.head(3) - _delta2.head(3) - _delta2.segment(3, 3) * dt_);
+            _delta1_minus_delta2.head(3) = q_ij.conjugate() * (_delta1.head(3) - _delta2.head(3) - _delta2.segment(3, 3) * dt_);
             /// Velocity
-            _delta1_minus_delta2.segment(3, 3) = _delta2.tail(4).conjugate()
-                    * (_delta1.segment(3, 3) - _delta2.segment(3, 3));
+            _delta1_minus_delta2.segment(3, 3) = q_ij.conjugate() * (_delta1.segment(3, 3) - _delta2.segment(3, 3));
             /// Orientation
-            _delta1_minus_delta2.tail(4) = _delta2.tail(4).conjugate() * _delta1.tail(4);
+            _delta1_minus_delta2.tail(4) = (q_ij.conjugate() * q_ik).coeffs();
         }
 
         template<typename T>
         Eigen::Matrix<T, 9, 1> minimalDeltaError(const Eigen::Matrix<T, 10, 1>& _delta_error) const
         {
+
             Eigen::Matrix<T, 9, 1> delta_minimal;
             /* MATHS according to SOLA-16
              *
              */
+             /*
             /// Position
             delta_minimal.head(3) = _delta_error.head(3);
             /// Velocity
@@ -108,6 +111,7 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
             /// Orientation
             delta_minimal.tail(3) = Eigen::q2v(Eigen::Quaternion<T>(_delta_error.tail(4)));
             return delta_minimal;
+            */
         }
 
     protected:
@@ -180,8 +184,8 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _o1, c
     Eigen::Matrix<T, 10, 1> corrected_delta = correctDelta(expected_measurement);
 
     // Residual
-    deltaMinusDelta(corrected_delta, predicted_delta, residual);
-    residuals_map = minimalDeltaError(residual);
+    //deltaMinusDelta(corrected_delta, predicted_delta, residual);
+    //residuals_map = minimalDeltaError(residual);
 
     return true;
 }
