@@ -78,15 +78,16 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
 
         template<typename T>
         void deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, const Eigen::Matrix<T, 10, 1>& _delta2,
-                             Eigen::Matrix<T, 10, 1>& _delta1_minus_delta2) const
+                             Eigen::Matrix<T, 10, 1>& _delta1_minus_delta2)
         {
 //            remapPQV(_delta1, _delta2, _delta1_minus_delta2);
             /* MATHS according to SOLA-16
              *
              */
             /// Position
-            _delta1_minus_delta2.head(3) = Eigen::Map<Eigen::Quaternion<T>>(_delta2.tail(4).data()).conjugate()
-                    * (_delta1.head(3) - _delta2.head(3) - _delta2.segment(3, 3) * dt_);
+            //_delta1_minus_delta2.head(3) = Eigen::Map<Eigen::Quaternion<T>>(_delta2.tail(4).data()).conjugate()
+            Eigen::Map<Eigen::Quaternion<T>> tmp = (_delta2.tail(4).data()).conjugate();
+            _delta1_minus_delta2.head(3) = tmp * (_delta1.head(3) - _delta2.head(3) - _delta2.segment(3, 3) * dt_);
             /// Velocity
             _delta1_minus_delta2.segment(3, 3) = _delta2.tail(4).conjugate()
                     * (_delta1.segment(3, 3) - _delta2.segment(3, 3));
