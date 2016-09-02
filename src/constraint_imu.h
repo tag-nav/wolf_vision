@@ -6,6 +6,9 @@
 #include "feature_imu.h"
 #include "frame_imu.h"
 
+// ceres
+//#include "jet.h"
+
 namespace wolf {
 
 class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
@@ -73,22 +76,22 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
                     + (preintegrated_H_biasOmega_.block<3, 3>(3, 0) * prev_gyro_bias_
                     +    preintegrated_H_biasAcc_.block<3, 3>(3, 0) * prev_acc_bias_).cast<T>();
             /// Orientation
-            // delta_corr.tail(4) = _delta.tail(4) * preintegrated_H_biasOmega_.bottomRows(4) * prev_gyro_bias_;
+            //delta_corr.tail(4) = (Eigen::Quaternion<T>(_delta.tail(4)) * Eigen::v2q(preintegrated_H_biasOmega_.bottomRows(3) * (prev_gyro_bias_) ) ).coeffs(); // consider current_gyr9o_bias
             return delta_corr;
         }
 
         template<typename T>
         void deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, const Eigen::Matrix<T, 10, 1>& _delta2,
-                             Eigen::Matrix<T, 10, 1>& _delta1_minus_delta2)
+                             Eigen::Matrix<T, 10, 1>& _delta1_minus_delta2) const
         {
             /* MATHS according to SOLA-16
              *
              */
-             Eigen::Map<Eigen::Quaternion<T>> q_ik(_delta1.tail(4).data());
-             Eigen::Map<Eigen::Quaternion<T>> q_ij(_delta2.tail(4).data());
+             Eigen::Map<const Eigen::Quaternion<T>> q_ik(_delta1.tail(4).data());
+             Eigen::Map<const Eigen::Quaternion<T>> q_ij(_delta2.tail(4).data());
 
             /// Position
-            _delta1_minus_delta2.head(3) = q_ij.conjugate() * (_delta1.head(3) - _delta2.head(3) - _delta2.segment(3, 3) * dt_);
+            _delta1_minus_delta2.head(3) = q_ij.conjugate() * (_delta1.head(3) - _delta2.head(3) - _delta2.segment(3, 3) * T(dt_));
             /// Velocity
             _delta1_minus_delta2.segment(3, 3) = q_ij.conjugate() * (_delta1.segment(3, 3) - _delta2.segment(3, 3));
             /// Orientation
@@ -103,15 +106,20 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
             /* MATHS according to SOLA-16
              *
              */
-             /*
+
             /// Position
             delta_minimal.head(3) = _delta_error.head(3);
             /// Velocity
-            delta_minimal.segment(3, 3) = _delta_error.head(3);
+            delta_minimal.segment(3, 3) = _delta_error.segment(3,3);
             /// Orientation
-            delta_minimal.tail(3) = Eigen::q2v(Eigen::Quaternion<T>(_delta_error.tail(4)));
+            Eigen::Matrix<T, 4, 1> x = _delta_error.tail(4);
+            Eigen::Quaternion<T> q_tmp(x.data());
+            Eigen::Matrix<T,3,1> axis = q_tmp.vec().normalized();
+            T angle = T(2) * atan2(q_tmp.vec().norm(), q_tmp.w());
+            delta_minimal.tail(3) = axis * angle;
+
+
             return delta_minimal;
-            */
         }
 
     protected:
@@ -184,9 +192,9 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _o1, c
     Eigen::Matrix<T, 10, 1> corrected_delta = correctDelta(expected_measurement);
 
     // Residual
-    //deltaMinusDelta(corrected_delta, predicted_delta, residual);
+    deltaMinusDelta(corrected_delta, predicted_delta, residual);
     //residuals_map = minimalDeltaError(residual);
-
+    minimalDeltaError(expected_measurement);
     return true;
 }
 

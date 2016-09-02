@@ -437,7 +437,7 @@ inline void q2v(const Eigen::Map<const Eigen::Quaternions>& _q, Eigen::VectorXs&
 }
 
 template<typename T>
-inline Eigen::Matrix<T, Eigen::Dynamic, 1> q2v(const Eigen::Quaternion<T>& _q){
+inline Eigen::Matrix<T, -1, 1> q2v(const Eigen::Quaternion<T>& _q){
     Eigen::AngleAxis<T> aa = Eigen::AngleAxis<T>(_q);
     return aa.axis() * aa.angle();
 }
