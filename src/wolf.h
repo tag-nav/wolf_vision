@@ -395,7 +395,30 @@ typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
 } // namespace wolf
 
 // Quaternion things
+#include <cmath>
 namespace Eigen{
+
+template<typename T>
+inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T,3,1> _v){
+    using namespace std;
+    Eigen::Quaternion<T> q;
+    T angle = _v.norm();
+    T angle_half = angle/(T)2;
+    if (angle > wolf::Constants::EPS)
+    {
+        q.w() = cos(angle_half);
+        q.vec() = _v / angle * sin(angle_half);
+        return q;
+    }
+    else
+    {
+        q.w() = cos(angle_half);
+        q.vec() = (T)0.5 * _v * (1 - angle_half*angle_half/6); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
+        return q;
+
+    }
+}
+
 inline void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
     wolf::Scalar angle = _v.norm();
     if (angle < wolf::Constants::EPS)
@@ -437,9 +460,19 @@ inline void q2v(const Eigen::Map<const Eigen::Quaternions>& _q, Eigen::VectorXs&
 }
 
 template<typename T>
-inline Eigen::Matrix<T, -1, 1> q2v(const Eigen::Quaternion<T>& _q){
-    Eigen::AngleAxis<T> aa = Eigen::AngleAxis<T>(_q);
-    return aa.axis() * aa.angle();
+inline Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q){
+    Eigen::Matrix<T,3,1> vec = _q.vec();
+    T vecnorm = vec.norm();
+    if (vecnorm > wolf::Constants::EPS)
+    { // regular angle-axis conversion
+        T angle = atan2(vecnorm,_q.w());
+        return vec * angle / vecnorm;
+    }
+    else
+    { // small-angle approximation using truncated Taylor series
+        T r = vecnorm / _q.w();
+        return vec * ( (T)1.0 - r*r ) / _q.w();
+    }
 }
 
 
