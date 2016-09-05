@@ -179,7 +179,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
 
 
     // MAPS
-    Eigen::Map<Eigen::Matrix<T,10,1> > residuals_map(_residuals);
+    Eigen::Map<Eigen::Matrix<T,10,1> > residuals(_residuals);
 
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
     Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
@@ -210,9 +210,9 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Matrix<T,3,1> do_error =  q2v(dq_correct.conjugate() * dq_predict); // In the name, 'o' of orientation, not 'q'
 
     // Assign to residuals vector
-    residuals_map.head(3)       = dp_error;
-    residuals_map.segment(3,3)  = dv_error;
-    residuals_map.tail(3)       = do_error;
+    residuals.head(3)       = dp_error;
+    residuals.segment(3,3)  = dv_error;
+    residuals.tail(3)       = do_error;
 
     return true;
 }
