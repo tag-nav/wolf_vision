@@ -110,7 +110,7 @@ class ProcessorIMU : public ProcessorMotion{
          *
          *  Who's correct? Let's see:
          *
-         *  fix: Taking the log on both sides, we observe
+         *  fix: Taking the log on both sides, and assuming Rhat = exp(omega), we observe
          *
          *      exp(omega)*exp(d_omega) = exp(omega+Jrinv(onega)*d_omega)
          *

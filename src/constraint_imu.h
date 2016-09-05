@@ -20,7 +20,6 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
          **/
         virtual ~ConstraintIMU();
 
@@ -33,90 +32,6 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
 
     public:
         static wolf::ConstraintBase* create(FeatureIMU* _feature_ptr, NodeBase* _correspondant_ptr);
-
-    protected:
-//        // Helper functions
-//        template<typename T>
-//        Eigen::Matrix<T, 10, 1> predictDelta() const
-//        {
-//            Eigen::Matrix<T, 10, 1> predicted_delta;
-//            /* MATHS according to SOLA-16
-//             *
-//             *
-//             */
-//            // predicted delta
-//            /// Predicted P
-//            predicted_delta.head(3) = (prev_o_.conjugate() * (curr_p_ - prev_p_ - prev_v_ * dt_ - 0.5 * g_ * dt_ * dt_)).cast<T>();
-//            /// Predicted v
-//            predicted_delta.segment(3, 3) = (prev_o_.conjugate() * (curr_v_ - prev_v_ - g_ * dt_)).cast<T>();
-//            /// Predicted q
-//            predicted_delta.tail(4) = (prev_o_.conjugate() * curr_o_).coeffs().cast<T>();
-//            return predicted_delta;
-//        }
-//
-//        template<typename T>
-//        Eigen::Matrix<T, 10, 1> correctDelta(const Eigen::Matrix<T, 10, 1>& _delta) const
-//        {
-//
-//            /* MATHS according to SOLA-16
-//             *
-//             *
-//             */
-//
-//            Eigen::Matrix<T, 10, 1> delta_corr;
-//            /// Position
-//            delta_corr.head(3) =  _delta.head(3) + (jac_delta_preint_to_gyro_bias_.topRows<3>() * prev_gyro_bias_
-//                                                 +  jac_delta_preint_to_acc_bias_.topRows<3>()   * prev_acc_bias_).cast<T>();
-//            /// Velocity
-//            delta_corr.segment(3, 3) = _delta.segment(3, 3)
-//                    + (jac_delta_preint_to_gyro_bias_.block<3, 3>(3, 0) * prev_gyro_bias_
-//                    +    jac_delta_preint_to_acc_bias_.block<3, 3>(3, 0) * prev_acc_bias_).cast<T>();
-//            /// Orientation
-//            //delta_corr.tail(4) = (Eigen::Quaternion<T>(_delta.tail(4)) * Eigen::v2q(preintegrated_H_biasOmega_.bottomRows(3) * (prev_gyro_bias_) ) ).coeffs(); // consider current_gyr9o_bias
-//            return delta_corr;
-//        }
-//
-//        template<typename T>
-//        void deltaMinusDelta(const Eigen::Matrix<T, 10, 1>& _delta1, const Eigen::Matrix<T, 10, 1>& _delta2,
-//                             Eigen::Matrix<T, 10, 1>& _delta1_minus_delta2) const
-//        {
-//            /* MATHS according to SOLA-16
-//             *
-//             */
-//             Eigen::Map<const Eigen::Quaternion<T>> q_ik(_delta1.tail(4).data());
-//             Eigen::Map<const Eigen::Quaternion<T>> q_ij(_delta2.tail(4).data());
-//
-//            /// Position
-//            _delta1_minus_delta2.head(3) = q_ij.conjugate() * (_delta1.head(3) - _delta2.head(3) - _delta2.segment(3, 3) * T(dt_));
-//            /// Velocity
-//            _delta1_minus_delta2.segment(3, 3) = q_ij.conjugate() * (_delta1.segment(3, 3) - _delta2.segment(3, 3));
-//            /// Orientation
-//            _delta1_minus_delta2.tail(4) = (q_ij.conjugate() * q_ik).coeffs();
-//        }
-//
-//        template<typename T>
-//        Eigen::Matrix<T, 9, 1> minimalDeltaError(const Eigen::Matrix<T, 10, 1>& _delta_error) const
-//        {
-//
-//            Eigen::Matrix<T, 9, 1> delta_minimal;
-//            /* MATHS according to SOLA-16
-//             *
-//             */
-//
-//            /// Position
-//            delta_minimal.head(3) = _delta_error.head(3);
-//            /// Velocity
-//            delta_minimal.segment(3, 3) = _delta_error.segment(3,3);
-//            /// Orientation
-//            Eigen::Matrix<T, 4, 1> x = _delta_error.tail(4);
-//            Eigen::Quaternion<T> q_tmp(x.data());
-//            Eigen::Matrix<T,3,1> axis = q_tmp.vec().normalized();
-//            T angle = T(2) * atan2(q_tmp.vec().norm(), q_tmp.w());
-//            delta_minimal.tail(3) = axis * angle;
-//
-//
-//            return delta_minimal;
-//        }
 
     private:
         /// Preintegrated delta
@@ -148,19 +63,19 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMU* _ftr_ptr, FrameIMU* _frame_ptr, 
                                                     _ftr_ptr->getFramePtr()->getPPtr(),
                                                     _ftr_ptr->getFramePtr()->getOPtr(),
                                                     _ftr_ptr->getFramePtr()->getVPtr()),
-                                                    dp_preint_(_ftr_ptr->dp_preint_), // dp, dv, dq at preintegration time
-                                                    dv_preint_(_ftr_ptr->dv_preint_),
-                                                    dq_preint_(_ftr_ptr->dq_preint_),
-                                                    acc_bias_preint_(_ftr_ptr->acc_bias_preint_), // state biases at preintegration time
-                                                    gyro_bias_preint_(_ftr_ptr->gyro_bias_preint_),
-                                                    dDp_dab_(_ftr_ptr->dDp_dab_), // Jacs of dp dv dq wrt biases
-                                                    dDv_dab_(_ftr_ptr->dDv_dab_),
-                                                    dDp_dwb_(_ftr_ptr->dDp_dwb_),
-                                                    dDv_dwb_(_ftr_ptr->dDv_dwb_),
-                                                    dDq_dwb_(_ftr_ptr->dDq_dwb_),
-                                                    dt_(frame_ptr_->getTimeStamp()-feature_ptr_->getFramePtr()->getTimeStamp()),
-                                                    dt_2_(dt_*dt_),
-                                                    g_(wolf::gravity())
+        dp_preint_(_ftr_ptr->dp_preint_), // dp, dv, dq at preintegration time
+        dv_preint_(_ftr_ptr->dv_preint_),
+        dq_preint_(_ftr_ptr->dq_preint_),
+        acc_bias_preint_(_ftr_ptr->acc_bias_preint_), // state biases at preintegration time
+        gyro_bias_preint_(_ftr_ptr->gyro_bias_preint_),
+        dDp_dab_(_ftr_ptr->dDp_dab_), // Jacs of dp dv dq wrt biases
+        dDv_dab_(_ftr_ptr->dDv_dab_),
+        dDp_dwb_(_ftr_ptr->dDp_dwb_),
+        dDv_dwb_(_ftr_ptr->dDv_dwb_),
+        dDq_dwb_(_ftr_ptr->dDq_dwb_),
+        dt_(frame_ptr_->getTimeStamp()-feature_ptr_->getFramePtr()->getTimeStamp()),
+        dt_2_(dt_*dt_),
+        g_(wolf::gravity())
 
 {
     setType("IMU");
@@ -176,11 +91,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
                                        const T* const _p2, const T* const _q2, const T* const _v2,
                                        T* _residuals) const
 {
-
-
     // MAPS
-    Eigen::Map<Eigen::Matrix<T,10,1> > residuals(_residuals);
-
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
     Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > v1(_v1);
@@ -191,23 +102,25 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
     Eigen::Map<const Eigen::Matrix<T,3,1> > v2(_v2);
 
+    Eigen::Map<Eigen::Matrix<T,10,1> > residuals(_residuals);
+
 
     // Predict delta: d_pred = x2 (-) x1
     Eigen::Matrix<T,3,1> dp_predict = q1.conjugate() * ( p2 - p1 - v1 * (T)dt_ - (T)0.5 * g_.cast<T>() * (T)dt_2_ );
     Eigen::Matrix<T,3,1> dv_predict = q1.conjugate() * ( v2 - v1 - g_.cast<T>() * (T)dt_ );
     Eigen::Quaternion<T> dq_predict = q1.conjugate() * q2;
 
-    // Correct measured delta
-    Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>()*(ab - acc_bias_preint_.cast<T>()) + dDp_dwb_.cast<T>()*(wb - gyro_bias_preint_.cast<T>());
-    Eigen::Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>()*(ab - acc_bias_preint_.cast<T>()) + dDv_dwb_.cast<T>()*(wb - gyro_bias_preint_.cast<T>());
-    Eigen::Matrix<T,3,1> do_step = dDq_dwb_.cast<T>()*(wb - gyro_bias_preint_.cast<T>());
-    Eigen::Quaternion<T> dq_step = v2q(do_step);
-    Eigen::Quaternion<T> dq_correct = dq_preint_.cast<T>() * dq_step;
+    // Correct measured delta: delta_corr = delta + J_bias * (bias - bias_measured)
+    Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * (ab - acc_bias_preint_.cast<T>()) + dDp_dwb_.cast<T>() * (wb - gyro_bias_preint_.cast<T>());
+    Eigen::Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * (ab - acc_bias_preint_.cast<T>()) + dDv_dwb_.cast<T>() * (wb - gyro_bias_preint_.cast<T>());
+    Eigen::Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * (wb - gyro_bias_preint_.cast<T>());
+    Eigen::Quaternion<T> dq_correct = dq_preint_.cast<T>() * v2q(do_step);
 
-    // Delta error in minimal form
-    Eigen::Matrix<T,3,1> dp_error =  dp_predict - dp_correct;
-    Eigen::Matrix<T,3,1> dv_error =  dv_predict - dv_correct;
-    Eigen::Matrix<T,3,1> do_error =  q2v(dq_correct.conjugate() * dq_predict); // In the name, 'o' of orientation, not 'q'
+    // Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
+    // Note the Dt here is zero because it's the delta-time between the same time stamps!
+    Eigen::Matrix<T,3,1> dp_error   = dp_predict - dp_correct;
+    Eigen::Matrix<T,3,1> dv_error   = dv_predict - dv_correct;
+    Eigen::Matrix<T,3,1> do_error   = q2v(dq_correct.conjugate() * dq_predict); // In the name, 'o' of orientation, not 'q'
 
     // Assign to residuals vector
     residuals.head(3)       = dp_error;
