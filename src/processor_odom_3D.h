@@ -43,9 +43,6 @@ class ProcessorOdom3D : public ProcessorMotion
         virtual ~ProcessorOdom3D();
         virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt);
 
-    protected:
-//        virtual void preProcess(){}
-//        virtual void postProcess(){}
 
     private:
         void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta);
@@ -96,7 +93,7 @@ inline void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eige
     delta_.head(3) = _data.head(3);
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(delta_.data() + 3);
 
-    Eigen::v2q(_data.tail(3), q_out_);
+    v2q(_data.tail(3), q_out_);
     // TODO: fill delta covariance
     delta_cov_ = Eigen::MatrixXs::Identity(delta_size_, delta_size_) * 0.01;
 }

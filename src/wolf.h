@@ -392,18 +392,13 @@ struct FeatureMatch
 
 typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
 
-} // namespace wolf
-
-// Quaternion things
-#include <cmath>
-namespace Eigen{
 
 template<typename T>
 inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T,3,1> _v){
     using namespace std;
     Eigen::Quaternion<T> q;
     T angle = _v.norm();
-    T angle_half = angle/(T)2;
+    T angle_half = angle/2.0;
     if (angle > wolf::Constants::EPS)
     {
         q.w() = cos(angle_half);
@@ -413,7 +408,7 @@ inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T,3,1> _v){
     else
     {
         q.w() = cos(angle_half);
-        q.vec() = (T)0.5 * _v * (1 - angle_half*angle_half/6); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
+        q.vec() = (T)0.5 * _v * ((T)1.0 - angle_half*angle_half/(T)6); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
         return q;
 
     }
@@ -510,12 +505,10 @@ inline Eigen::Vector3s vee(const Eigen::Matrix3s& _m)
     return (Eigen::Vector3s() << _m(2,1), _m(0,2), _m(1,0)).finished();
 }
 
-}
 
-namespace wolf {
-    inline const Eigen::Vector3s gravity(void) {
-        return Eigen::Vector3s(0,0,-9.8);
-    }
+inline const Eigen::Vector3s gravity(void) {
+    return Eigen::Vector3s(0,0,-9.8);
+}
 }
 
 

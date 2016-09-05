@@ -13,10 +13,6 @@ namespace wolf {
 class FeatureIMU : public FeatureBase
 {
     public:
-        /** \brief Constructor from capture pointer and measure dim
-         *
-         */
-        FeatureIMU();
 
         /** \brief Constructor from capture pointer and measure
          *
@@ -24,7 +20,7 @@ class FeatureIMU : public FeatureBase
          * \param _meas_covariance the noise of the measurement
          *
          */
-        FeatureIMU(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
+        FeatureIMU(const Eigen::VectorXs& _delta_preintegrated, const Eigen::MatrixXs& _delta_preintegrated_covariance);
 
         /** \brief Default destructor (not recommended)
          *
@@ -32,6 +28,23 @@ class FeatureIMU : public FeatureBase
          *
          **/
         virtual ~FeatureIMU();
+
+    public: // TODO eventually produce getters for these and then go private
+        /// Preintegrated delta
+        Eigen::Vector3s dp_preint_;
+        Eigen::Vector3s dv_preint_;
+        Eigen::Quaternions dq_preint_;
+
+        // Used biases
+        Eigen::Vector3s acc_bias_preint_;       ///< Accleration bias used for delta preintegration
+        Eigen::Vector3s gyro_bias_preint_;      ///< Gyrometer bias used for delta preintegration
+
+        // Jacobians of preintegrated deltas wrt biases
+        Eigen::Matrix3s dDp_dab_;
+        Eigen::Matrix3s dDv_dab_;
+        Eigen::Matrix3s dDp_dwb_;
+        Eigen::Matrix3s dDv_dwb_;
+        Eigen::Matrix3s dDq_dwb_;
 
 };
 

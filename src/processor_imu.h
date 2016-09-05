@@ -211,7 +211,8 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     //Use SOLA-16 convention by default
     v_out_ = (measured_acc_ - bias_acc_) * _dt;
     p_out_ = v_out_ * _dt / 2;
-    Eigen::v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
+//    Eigen::
+    v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
 
     //Compute jacobian of delta wrt data
 
@@ -319,7 +320,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 
      /// Get the rotation matrix associated to the preintegrated orientation quaternion
      Eigen::Matrix3s orientation_preint_rot_ =  orientation_preint_quat_.toRotationMatrix();
-     Eigen::Matrix3s corrected_acc_ss        =  Eigen::skew(measured_acc_ - bias_acc_);
+     Eigen::Matrix3s corrected_acc_ss        =  skew(measured_acc_ - bias_acc_);
      Eigen::Vector3s corrected_gyro          =  measured_gyro_ - bias_gyro_;
 
      /// dP/db_a -- Jacobian of postion w.r.t accelerometer bias
@@ -343,7 +344,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      /// dR/db_g -- Jacobian of orientation w.r.t gyro bias
      /// dR/db_g = R.t * dR/db_g * Jr * dt       where Jr  == right Jacobian
      ///                                               R.t == [exp(- (omega - b_g) * dt)]
-     preintegrated_H_biasOmega_.bottomRows<3>() = Eigen::v2R(-corrected_gyro * _dt) *  preintegrated_H_biasOmega_.bottomRows<3>() * _dt * expMapDerivative((measured_gyro_ - bias_gyro_) * _dt);
+     preintegrated_H_biasOmega_.bottomRows<3>() = v2R(-corrected_gyro * _dt) *  preintegrated_H_biasOmega_.bottomRows<3>() * _dt * expMapDerivative((measured_gyro_ - bias_gyro_) * _dt);
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
@@ -512,7 +513,7 @@ inline Eigen::Matrix3s ProcessorIMU::logMapDerivative(const Eigen::Vector3s& _om
         return Eigen::Matrix3s::Identity(); //Or should we use
     Scalar theta = std::sqrt(theta2);  // rotation angle
     Eigen::Matrix3s W;
-    W = Eigen::skew(_omega);
+    W = skew(_omega);
     Eigen::Matrix3s m1;
     m1.noalias() = (1 / theta2 - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix3s::Identity() + 0.5 * W + m1; //is this really more optimized?
@@ -529,7 +530,7 @@ Eigen::Matrix3s ProcessorIMU::expMapDerivative(const Eigen::Vector3s& _omega)
         return Eigen::Matrix3s::Identity();
     Scalar theta = std::sqrt(theta2);  // rotation angle
     Eigen::Matrix3s W;
-    W = Eigen::skew(_omega);
+    W = skew(_omega);
     Eigen::Matrix3s m1, m2;
     m1.noalias() = (1 - cos(theta)) / theta2 * W;
     m2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
