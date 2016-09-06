@@ -294,10 +294,14 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
       _jacobian1.resize(9,9);
       _jacobian1 = Eigen::Matrix<wolf::Scalar,9,9>::Identity();
       _jacobian1.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt;
-      //_jacobian1.block<3,3>(0,6) = Eigen::Matrix3s::Identity() * p_in_2_; // FIXME: THIS IS FALSE --> COEFFICIENT-WISE NEEDED
-      //_jacobian1.block<3,3>(3,6) = Eigen::Matrix3s::Identity() * v_in_2_; // FIXME: THIS IS FALSE --> COEFFICIENT-WISE NEEDED
       _jacobian1.block<3,3>(6,6) = q_in_2_.toRotationMatrix();
       _jacobian1.block<3,3>(3,0) = Eigen::Matrix3s::Identity();
+      /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
+        d(Ra)/d(d_theta) = -R{theta} * skew[a] *Jr{theta}
+       */
+      _jacobian1.block<3,3>(0,6) = - DR1 * skew(p_in_2_) * expMapDerivative(q2v(q_in_1_)) ; // FIXME: CHECK THIS
+      _jacobian1.block<3,3>(3,6) = - DR1 * skew(v_in_2_) * expMapDerivative(q2v(q_in_1_)); // FIXME: CHECK THIS
+      
 
       _jacobian2.resize(9,9);
       _jacobian2.setZero();
