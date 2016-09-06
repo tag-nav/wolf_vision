@@ -94,7 +94,7 @@ inline void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eige
     delta_.head(3) = _data.head(3);
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(delta_.data() + 3);
 
-    v2q(_data.tail(3), q_out_);
+    q_out_ = v2q(_data.tail(3));
     // TODO: fill delta covariance
     delta_cov_ = Eigen::MatrixXs::Identity(delta_size_, delta_size_) * 0.01;
 }

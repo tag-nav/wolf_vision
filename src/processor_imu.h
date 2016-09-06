@@ -212,8 +212,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     //Use SOLA-16 convention by default
     v_out_ = (measured_acc_ - bias_acc_) * _dt;
     p_out_ = v_out_ * _dt / 2;
-//    Eigen::
-    v2q((measured_gyro_ - bias_gyro_) * _dt, q_out_); // q_out_
+    q_out_ = v2q((measured_gyro_ - bias_gyro_) * _dt);
 
     //Compute jacobian of delta wrt data
 

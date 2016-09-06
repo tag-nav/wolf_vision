@@ -12,13 +12,14 @@
 
 namespace wolf{
 
-inline Scalar pi2pi(const Scalar& angle)
+template<typename T>
+inline T pi2pi(const T& angle)
 {
-    return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
+    return (angle > (T)0 ? fmod(angle + (T)M_PI, (T)(2 * M_PI)) - (T)M_PI : fmod(angle - (T)M_PI, (T)(2 * M_PI)) + (T)M_PI);
 }
 
-template<typename T>
-inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T,3,1> _v){
+template<typename T, int Rows>
+inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T,Rows,1> _v){
     using namespace std;
     Eigen::Quaternion<T> q;
     T angle = _v.norm();
@@ -38,33 +39,14 @@ inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T,3,1> _v){
     }
 }
 
-inline void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
-    wolf::Scalar angle = _v.norm();
-    if (angle < wolf::Constants::EPS)
-        _q = Eigen::Quaternions::Identity();
-    else
-    {
-        _q = Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
-    }
-}
-
-inline void v2q(const Eigen::VectorXs& _v, Eigen::Map<Eigen::Quaternions>& _q){
-    wolf::Scalar angle = _v.norm();
-    if (angle < wolf::Constants::EPS)
-        _q = Eigen::Quaternions::Identity();
-    else
-    {
-        _q = Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
-    }
-}
 
 inline Eigen::Quaternions v2q(const Eigen::VectorXs& _v){
     wolf::Scalar angle = _v.norm();
     if (angle < wolf::Constants::EPS)
-        return Eigen::Quaternions::Identity();
+        return std::move(Eigen::Quaternions::Identity());
     else
     {
-        return Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
+        return std::move(Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle)));
     }
 }
 
@@ -85,43 +67,43 @@ inline Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q){
     if (vecnorm > wolf::Constants::EPS)
     { // regular angle-axis conversion
         T angle = atan2(vecnorm,_q.w());
-        return vec * angle / vecnorm;
+        return std::move(vec * angle / vecnorm);
     }
     else
     { // small-angle approximation using truncated Taylor series
         T r = vecnorm / _q.w();
-        return vec * ( (T)1.0 - r*r ) / _q.w();
+        return std::move(vec * ( (T)1.0 - r*r ) / _q.w());
     }
 }
 
 
 inline Eigen::VectorXs q2v(const Eigen::Quaternions& _q){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
-    return aa.axis() * aa.angle();
+    return std::move(aa.axis() * aa.angle());
 }
 
 inline Eigen::Vector3s R2v(const Eigen::Matrix3s& _R){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_R);
-    return aa.axis() * aa.angle();
+    return std::move(aa.axis() * aa.angle());
 }
 
 inline Eigen::Matrix3s v2R(const Eigen::Vector3s& _v){
     wolf::Scalar angle = _v.norm();
     if (angle < wolf::Constants::EPS)
     {
-        return Eigen::Matrix3s::Identity();
+        return std::move(Eigen::Matrix3s::Identity());
     }
     else
     {
-        return Eigen::AngleAxiss(angle, _v/angle).toRotationMatrix();
+        return std::move(Eigen::AngleAxiss(angle, _v/angle).toRotationMatrix());
     }
 }
 
 inline Eigen::Matrix3s skew(const Eigen::VectorXs& _v) {
-    return (Eigen::Matrix3s() <<
+    return std::move((Eigen::Matrix3s() <<
          0.0  , -_v(2), +_v(1),
         +_v(2),  0.0  , -_v(0),
-        -_v(1), +_v(0),  0.0  ).finished();
+        -_v(1), +_v(0),  0.0  ).finished());
 }
 
 inline Eigen::Vector3s vee(const Eigen::Matrix3s& _m)
@@ -147,14 +129,14 @@ inline Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega)
 
     Scalar theta2 = _omega.dot(_omega);
     if (theta2 <= Constants::EPS_SMALL)
-        return Eigen::Matrix3s::Identity();
+        return std::move(Eigen::Matrix3s::Identity());
     Scalar theta = std::sqrt(theta2);  // rotation angle
     Eigen::Matrix3s W;
     W = skew(_omega);
     Eigen::Matrix3s m1, m2;
     m1.noalias() = (1 - cos(theta)) / theta2 * W;
     m2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
-    return Eigen::Matrix3s::Identity() + m1 + m2;
+    return std::move(Eigen::Matrix3s::Identity() + m1 + m2);
 }
 
 
@@ -202,13 +184,13 @@ inline Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega)
 
     Scalar theta2 = _omega.dot(_omega);
     if (theta2 <= Constants::EPS_SMALL)
-        return Eigen::Matrix3s::Identity(); //Or should we use
+        return std::move(Eigen::Matrix3s::Identity()); //Or should we use
     Scalar theta = std::sqrt(theta2);  // rotation angle
     Eigen::Matrix3s W;
     W = skew(_omega);
     Eigen::Matrix3s m1;
     m1.noalias() = (1 / theta2 - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
-    return Eigen::Matrix3s::Identity() + 0.5 * W + m1; //is this really more optimized?
+    return std::move(Eigen::Matrix3s::Identity() + 0.5 * W + m1); //is this really more optimized?
 }
 
 
