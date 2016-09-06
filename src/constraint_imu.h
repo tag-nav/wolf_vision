@@ -5,6 +5,7 @@
 #include "constraint_sparse.h"
 #include "feature_imu.h"
 #include "frame_imu.h"
+#include "rotations.h"
 
 
 namespace wolf {

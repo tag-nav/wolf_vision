@@ -1,4 +1,5 @@
 #include "processor_tracker_landmark_corner.h"
+#include "rotations.h"
 
 namespace wolf
 {

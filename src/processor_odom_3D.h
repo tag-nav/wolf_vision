@@ -10,6 +10,7 @@
 
 #include "processor_motion.h"
 #include "constraint_odom_2D.h"
+#include "rotations.h"
 
 
 namespace wolf {

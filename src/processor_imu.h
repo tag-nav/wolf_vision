@@ -4,6 +4,7 @@
 // Wolf
 #include "processor_motion.h"
 #include "frame_imu.h"
+#include "rotations.h"
 
 
 namespace wolf {
