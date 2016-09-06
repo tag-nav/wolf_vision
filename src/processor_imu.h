@@ -190,6 +190,7 @@ class ProcessorIMU : public ProcessorMotion{
 
 // STL
 #include <cmath> //needed to compute logMapDerivative (right jacobian Jr)
+#include <unsupported/Eigen/MatrixFunctions>
 
 namespace wolf{
 
@@ -227,7 +228,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      Eigen::Matrix<wolf::Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<wolf::Scalar,9,6>::Zero();
      jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
      jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
-     jacobian_delta_noise.block<3,3>(6,3) = Eigen::Matrix3s::Identity() * _dt * skew(measured_gyro_ * _dt); //not so sure about this one
+     jacobian_delta_noise.block<3,3>(6,3) =_dt * skew(measured_gyro_ * _dt).exp();
 
      delta_cov_ = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
 }
@@ -292,10 +293,14 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
       _jacobian1.resize(9,9);
       _jacobian1 = Eigen::Matrix<wolf::Scalar,9,9>::Identity();
       _jacobian1.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt;
-      //_jacobian1.block<3,3>(0,6) = Eigen::Matrix3s::Identity() * p_in_2_; // FIXME: THIS IS FALSE --> COEFFICIENT-WISE NEEDED
-      //_jacobian1.block<3,3>(3,6) = Eigen::Matrix3s::Identity() * v_in_2_; // FIXME: THIS IS FALSE --> COEFFICIENT-WISE NEEDED
       _jacobian1.block<3,3>(6,6) = q_in_2_.toRotationMatrix();
       _jacobian1.block<3,3>(3,0) = Eigen::Matrix3s::Identity();
+      /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
+        d(Ra)/d(d_theta) = -R{theta} * skew[a] *Jr{theta}
+       */
+      _jacobian1.block<3,3>(0,6) = - DR1 * skew(p_in_2_) * expMapDerivative(q2v(q_in_1_)) ; // FIXME: CHECK THIS
+      _jacobian1.block<3,3>(3,6) = - DR1 * skew(v_in_2_) * expMapDerivative(q2v(q_in_1_)); // FIXME: CHECK THIS
+      
 
       _jacobian2.resize(9,9);
       _jacobian2.setZero();
