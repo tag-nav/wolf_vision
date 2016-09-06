@@ -89,7 +89,7 @@ class ProcessorIMU : public ProcessorMotion{
          *
          *      exp(omega+d_omega) = exp(omega)*exp(Jr(omega)*d_omega)
          */
-        Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega);
+//        Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega);
 
         /** \brief Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
          *  Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
@@ -128,7 +128,7 @@ class ProcessorIMU : public ProcessorMotion{
          *  And also, as d_omega is small, we'd have Jrinv(d_omega) \approx Identity all the time,
          *  whereas Jrinv(omega) is in the general case far from Identity.
          */
-        Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega);
+//        Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega);
 
     private:
 
@@ -503,39 +503,6 @@ inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
     new (&measured_gyro_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
 }
 
-inline Eigen::Matrix3s ProcessorIMU::logMapDerivative(const Eigen::Vector3s& _omega)
-{
-    using std::cos;
-    using std::sin;
-
-    Scalar theta2 = _omega.dot(_omega);
-    if (theta2 <= Constants::EPS_SMALL)
-        return Eigen::Matrix3s::Identity(); //Or should we use
-    Scalar theta = std::sqrt(theta2);  // rotation angle
-    Eigen::Matrix3s W;
-    W = skew(_omega);
-    Eigen::Matrix3s m1;
-    m1.noalias() = (1 / theta2 - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
-    return Eigen::Matrix3s::Identity() + 0.5 * W + m1; //is this really more optimized?
-}
-
-
-Eigen::Matrix3s ProcessorIMU::expMapDerivative(const Eigen::Vector3s& _omega)
-{
-    using std::cos;
-    using std::sin;
-
-    Scalar theta2 = _omega.dot(_omega);
-    if (theta2 <= Constants::EPS_SMALL)
-        return Eigen::Matrix3s::Identity();
-    Scalar theta = std::sqrt(theta2);  // rotation angle
-    Eigen::Matrix3s W;
-    W = skew(_omega);
-    Eigen::Matrix3s m1, m2;
-    m1.noalias() = (1 - cos(theta)) / theta2 * W;
-    m2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
-    return Eigen::Matrix3s::Identity() + m1 + m2;
-}
 
 
 } // namespace wolf

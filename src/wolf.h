@@ -506,10 +506,95 @@ inline Eigen::Vector3s vee(const Eigen::Matrix3s& _m)
 }
 
 
+/** \brief Compute Jr (Right Jacobian)
+ * Right Jacobian for exp map in SO(3) - equation (10.86) and following equations in
+ *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
+ *      expmap( omega + d_omega ) \approx expmap(omega) * expmap(Jr * d_omega)
+ *  where Jr = expMapDerivative(omega);
+ *  This maps a perturbation in the tangent space (d_omega) to a perturbation on the manifold (expmap(Jr * d_omega))
+ *  so that:
+ *
+ *      exp(omega+d_omega) = exp(omega)*exp(Jr(omega)*d_omega)
+ */
+inline Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega)
+{
+    using std::cos;
+    using std::sin;
+
+    Scalar theta2 = _omega.dot(_omega);
+    if (theta2 <= Constants::EPS_SMALL)
+        return Eigen::Matrix3s::Identity();
+    Scalar theta = std::sqrt(theta2);  // rotation angle
+    Eigen::Matrix3s W;
+    W = skew(_omega);
+    Eigen::Matrix3s m1, m2;
+    m1.noalias() = (1 - cos(theta)) / theta2 * W;
+    m2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
+    return Eigen::Matrix3s::Identity() + m1 + m2;
+}
+
+
+/** \brief Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
+ *  Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
+ *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
+ *      logmap( Rhat * expmap( omega ) ) \approx logmap( Rhat ) + Jrinv *  omega   (1) original write with omega
+ *      logmap( Rhat * expmap(d_omega) ) \approx logmap( Rhat ) + Jrinv * d_omega  (1) adapted write with d_omega (JS)
+ *  where Jrinv = logMapDerivative(omega);
+ *
+ *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega) so that
+ *
+ *      log(exp(omega)*exp(d_omega)) = omega + Jrinv(omega)*d_omega
+ *
+ *  or, having R = exp(omega),
+ *
+ *      log(R*exp(d_omega)) = log(R) + Jrinv(omega)*d_omega ??? FIXME: this does not fit with the comment above (1)
+ *                                                                     where it states Jrinv(d_omega) and not Jrinv(omega)
+ *                                                                     (in the original form, omega is the argument of the function)
+ *
+ *  Who's correct? Let's see:
+ *
+ *  fix: Taking the log on both sides, and assuming Rhat = exp(omega), we observe
+ *
+ *      exp(omega)*exp(d_omega) = exp(omega+Jrinv(onega)*d_omega)
+ *
+ *  If we define dw as
+ *
+ *      dw = Jrinv(omega)*d_omega <==> d_omega=Jr*dw, where Jrinv = Jr^-1, logically.
+ *
+ *  then substituting above we get:
+ *
+ *      exp(omega+dw) = exp(omega)*exp(Jr*dw)
+ *
+ *  exactly as in expMapDerivative().
+ *
+ *  This makes sense: in fact Chirikjian describes Jrinv(omega) and not Jrinv(d_omega).
+ *  And also, as d_omega is small, we'd have Jrinv(d_omega) \approx Identity all the time,
+ *  whereas Jrinv(omega) is in the general case far from Identity.
+ */
+inline Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega)
+{
+    using std::cos;
+    using std::sin;
+
+    Scalar theta2 = _omega.dot(_omega);
+    if (theta2 <= Constants::EPS_SMALL)
+        return Eigen::Matrix3s::Identity(); //Or should we use
+    Scalar theta = std::sqrt(theta2);  // rotation angle
+    Eigen::Matrix3s W;
+    W = skew(_omega);
+    Eigen::Matrix3s m1;
+    m1.noalias() = (1 / theta2 - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
+    return Eigen::Matrix3s::Identity() + 0.5 * W + m1; //is this really more optimized?
+}
+
+
+
 inline const Eigen::Vector3s gravity(void) {
     return Eigen::Vector3s(0,0,-9.8);
 }
-}
+
+
+} // namespace wolf
 
 
 
