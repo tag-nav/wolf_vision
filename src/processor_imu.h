@@ -227,7 +227,9 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      Eigen::Matrix<wolf::Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<wolf::Scalar,9,6>::Zero();
      jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
      jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
-     jacobian_delta_noise.block<3,3>(6,3) = Eigen::Matrix3s::Identity() * _dt * skew(measured_gyro_ * _dt); //not so sure about this one
+     //TODO :
+        //FIXME : exp() below is Rodrigues' formula for matrix
+     //jacobian_delta_noise.block<3,3>(6,3) =_dt * exp(skew(measured_gyro_ * _dt)); //not so sure about this one
 
      delta_cov_ = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
 }
