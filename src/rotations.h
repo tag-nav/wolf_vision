@@ -20,6 +20,8 @@ inline T pi2pi(const T& angle)
 
 template<typename T, int Rows>
 inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1> _v){
+//template<typename Derived, typename T, int Rows>
+//inline Eigen::Quaternion<T> v2q(Eigen::MatrixBase<Derived> _v){
     using namespace std;
     Eigen::Quaternion<T> q;
     T angle = _v.norm();
