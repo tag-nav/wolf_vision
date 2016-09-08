@@ -146,7 +146,7 @@ FrameBase* Problem::createFrame(FrameKeyType _frame_key_type, const Eigen::Vecto
                                   new StateQuaternion(_frame_state.segment<4>(3)),
                                   new StateBlock(_frame_state.tail(3))));
         }
-        case FRM_PQVBB_3D:
+        case FRM_PVQBB_3D:
         {
             assert(_frame_state.size() == 16 && "Wrong state vector size");
             return trajectory_ptr_->addFrame(new FrameIMU(_frame_key_type, _time_stamp, _frame_state));

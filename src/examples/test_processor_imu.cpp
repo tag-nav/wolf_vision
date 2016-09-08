@@ -71,7 +71,7 @@ int main(int argc, char** argv)
     Eigen::Vector6s data_;
 
     // Wolf problem
-    Problem* wolf_problem_ptr_ = new Problem(FRM_PQVBB_3D);
+    Problem* wolf_problem_ptr_ = new Problem(FRM_PVQBB_3D);
     Eigen::VectorXs IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, nullptr);
