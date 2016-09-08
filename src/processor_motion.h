@@ -300,12 +300,6 @@ class ProcessorMotion : public ProcessorBase
         virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
                                 Eigen::VectorXs& _x_plus_delta) = 0;
 
-        /** \brief Adds the current delta-increment into the pre-integrated Delta-state
-        *
-        * This function implements the pre-integrated measurements update :
-        *   Delta_ik = Delta_ij (+) _delta_jk
-        */
-        virtual void integrateDelta() = 0;
 
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
@@ -478,7 +472,6 @@ inline void ProcessorMotion::integrate()
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
 
     // then integrate the current delta to pre-integrated measurements
-    // integrateDelta(); // FIXME: this is not needed and also it was not computing Jacobians.
     deltaPlusDelta(delta_integrated_, delta_ , dt_, delta_integrated_,jacobian_prev_,jacobian_curr_);
 
     // and covariance
