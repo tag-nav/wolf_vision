@@ -241,9 +241,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
         d(Ra)/d(d_theta) = -R{theta} * skew[a] *Jr{theta}
        */
       _jacobian1.block<3,3>(0,6) = - DR1 * skew<Scalar>(p_in_2_) * expMapDerivative(q2v(q_in_1_)) ; // FIXME: CHECK THIS
-      _jacobian1.block<3,3>(3,6) = - DR1 * skew<Scalar>(v_in_2_) * expMapDerivative(q2v(q_in_1_)); // FIXME: CHECK THIS
+      _jacobian1.block<3,3>(3,6) = - DR1 * skew((Eigen::Vector3s)v_in_2_) * expMapDerivative(q2v(q_in_1_)); // FIXME: CHECK THIS
       
-
       _jacobian2.resize(9,9);
       _jacobian2.setZero();
       _jacobian2.block<3,3>(0,0) = DR1;
