@@ -82,7 +82,7 @@ class ProcessorMotion : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
+        ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, Size _delta_jac_size = 0, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -322,6 +322,7 @@ class ProcessorMotion : public ProcessorBase
         Size x_size_;           ///< The size of the state vector
         Size delta_size_;       ///< the size of the deltas
         Size delta_cov_size_;   ///< the size of the delta covariances matrix
+        Size delta_jac_size_;   ///< the size of jacobian wrt deltas matrix
         Size data_size_;        ///< the size of the incoming data
         CaptureBase* origin_ptr_;
         CaptureMotion* last_ptr_;
@@ -341,12 +342,17 @@ class ProcessorMotion : public ProcessorBase
 
 };
 
-inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance) :
-        ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), delta_cov_size_(_delta_cov_size), data_size_(_data_size), origin_ptr_(
+inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, Size _delta_jac_size, const Scalar& _time_tolerance) :
+        ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), delta_cov_size_(_delta_cov_size), data_size_(_data_size),  delta_jac_size_(_delta_jac_size), origin_ptr_(
                 nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_cov_(
-                delta_size_, delta_size_), delta_integrated_(_delta_size), delta_integrated_cov_(delta_size_, delta_size_), data_(
+                _delta_cov_size, _delta_cov_size), delta_integrated_(_delta_size), delta_integrated_cov_(_delta_cov_size, _delta_cov_size), data_(
                 _data_size), jacobian_prev_(delta_size_, delta_size_), jacobian_curr_(delta_size_, delta_size_)
 {
+    if(delta_jac_size_ == 0){ //by default, use the size of deltas
+        delta_jac_size_ = _delta_size;
+        jacobian_prev_.resize(delta_jac_size_,delta_jac_size_);
+        jacobian_curr_.resize(delta_jac_size_,delta_jac_size_);
+    }
     //
 }
 
@@ -429,7 +435,7 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
-                                                       Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-8);
+                                                       Eigen::MatrixXs::Identity(delta_jac_size_, delta_jac_size_)*1e-8);
 
 
         key_capture_ptr->addFeature(key_feature_ptr);
@@ -447,8 +453,8 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
         getBufferPtr()->get().push_back(Motion( {key_frame_ptr->getTimeStamp(),
                                                  deltaZero(),
                                                  deltaZero(),
-                                                 Eigen::MatrixXs::Zero(delta_size_, delta_size_),
-                                                 Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
+                                                 Eigen::MatrixXs::Zero(delta_jac_size_, delta_jac_size_),
+                                                 Eigen::MatrixXs::Zero(delta_jac_size_, delta_jac_size_)}));
         // reset derived things
         resetDerived();
 
@@ -488,8 +494,8 @@ inline void ProcessorMotion::integrate()
                                              delta_integrated_,
                                              delta_cov_,
                                              delta_integrated_cov_,
-                                             Eigen::MatrixXs::Zero(delta_size_, delta_size_),
-                                             Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
+                                             Eigen::MatrixXs::Zero(delta_jac_size_, delta_jac_size_),
+                                             Eigen::MatrixXs::Zero(delta_jac_size_, delta_jac_size_)}));
 
 
     //    std::cout << "motion integrated: " << getBufferPtr()->get().size()-1 << std::endl;
@@ -755,10 +761,10 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
             {_ts,
              deltaZero(),
              deltaZero(),
-             Eigen::MatrixXs::Zero(delta_size_, delta_size_),
-             Eigen::MatrixXs::Zero(delta_size_, delta_size_),
-             Eigen::MatrixXs::Identity(delta_size_, delta_size_),
-             Eigen::MatrixXs::Identity(delta_size_, delta_size_)});
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
+             Eigen::MatrixXs::Identity(delta_jac_size_, delta_jac_size_),
+             Eigen::MatrixXs::Identity(delta_jac_size_, delta_jac_size_)});
 }
 
 } // namespace wolf
