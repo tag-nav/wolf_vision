@@ -322,8 +322,8 @@ class ProcessorMotion : public ProcessorBase
         Size x_size_;           ///< The size of the state vector
         Size delta_size_;       ///< the size of the deltas
         Size delta_cov_size_;   ///< the size of the delta covariances matrix
-        Size delta_jac_size_;   ///< the size of jacobian wrt deltas matrix
         Size data_size_;        ///< the size of the incoming data
+        Size delta_jac_size_;   ///< the size of jacobian wrt deltas matrix
         CaptureBase* origin_ptr_;
         CaptureMotion* last_ptr_;
         CaptureMotion* incoming_ptr_;
@@ -346,13 +346,8 @@ inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _t
         ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), delta_cov_size_(_delta_cov_size), data_size_(_data_size),  delta_jac_size_(_delta_jac_size), origin_ptr_(
                 nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_cov_(
                 _delta_cov_size, _delta_cov_size), delta_integrated_(_delta_size), delta_integrated_cov_(_delta_cov_size, _delta_cov_size), data_(
-                _data_size), jacobian_prev_(delta_size_, delta_size_), jacobian_curr_(delta_size_, delta_size_)
+                _data_size), jacobian_prev_(delta_jac_size_, delta_jac_size_), jacobian_curr_(delta_jac_size_, delta_jac_size_)
 {
-    if(delta_jac_size_ == 0){ //by default, use the size of deltas
-        delta_jac_size_ = _delta_size;
-        jacobian_prev_.resize(delta_jac_size_,delta_jac_size_);
-        jacobian_curr_.resize(delta_jac_size_,delta_jac_size_);
-    }
     //
 }
 
