@@ -19,7 +19,7 @@ inline T pi2pi(const T& angle)
 }
 
 template<typename T, int Rows>
-inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T,Rows,1> _v){
+inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1> _v){
     using namespace std;
     Eigen::Quaternion<T> q;
     T angle = _v.norm();
@@ -33,29 +33,28 @@ inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T,Rows,1> _v){
     else
     {
         q.w() = cos(angle_half);
-        q.vec() = (T)0.5 * _v * ((T)1.0 - angle_half*angle_half/(T)6); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
+        q.vec() = _v * ( (T)0.5 - angle_half*angle_half/(T)12.0 ); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
         return q;
-
     }
 }
 
 
-inline Eigen::Quaternions v2q(const Eigen::VectorXs& _v){
+inline Eigen::Quaternions v2q(const Eigen::Vector3s& _v){
     wolf::Scalar angle = _v.norm();
     if (angle < wolf::Constants::EPS)
-        return std::move(Eigen::Quaternions::Identity());
+        return Eigen::Quaternions::Identity();
     else
     {
-        return std::move(Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle)));
+        return Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
     }
 }
 
-inline void q2v(const Eigen::Quaternions& _q, Eigen::VectorXs& _v){
+inline void q2v(const Eigen::Quaternions& _q, Eigen::Vector3s& _v){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
     _v = aa.axis() * aa.angle();
 }
 
-inline void q2v(const Eigen::Map<const Eigen::Quaternions>& _q, Eigen::VectorXs& _v){
+inline void q2v(const Eigen::Map<const Eigen::Quaternions>& _q, Eigen::Vector3s& _v){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
     _v = aa.axis() * aa.angle();
 }
@@ -67,48 +66,50 @@ inline Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q){
     if (vecnorm > wolf::Constants::EPS)
     { // regular angle-axis conversion
         T angle = atan2(vecnorm,_q.w());
-        return std::move(vec * angle / vecnorm);
+        return vec * angle / vecnorm;
     }
     else
     { // small-angle approximation using truncated Taylor series
         T r = vecnorm / _q.w();
-        return std::move(vec * ( (T)1.0 - r*r ) / _q.w());
+        return vec * ( (T)1.0 - r*r ) / _q.w();
     }
 }
 
 
 inline Eigen::VectorXs q2v(const Eigen::Quaternions& _q){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
-    return std::move(aa.axis() * aa.angle());
+    return aa.axis() * aa.angle();
 }
 
 inline Eigen::Vector3s R2v(const Eigen::Matrix3s& _R){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_R);
-    return std::move(aa.axis() * aa.angle());
+    return aa.axis() * aa.angle();
 }
 
 inline Eigen::Matrix3s v2R(const Eigen::Vector3s& _v){
     wolf::Scalar angle = _v.norm();
     if (angle < wolf::Constants::EPS)
     {
-        return std::move(Eigen::Matrix3s::Identity());
+        return Eigen::Matrix3s::Identity();
     }
     else
     {
-        return std::move(Eigen::AngleAxiss(angle, _v/angle).toRotationMatrix());
+        return Eigen::AngleAxiss(angle, _v/angle).toRotationMatrix();
     }
 }
 
-inline Eigen::Matrix3s skew(const Eigen::VectorXs& _v) {
-    return std::move((Eigen::Matrix3s() <<
+template<typename T>
+inline Eigen::Matrix<T, 3, 3> skew(const Eigen::Matrix<T, 3, 1>& _v) {
+    return (Eigen::Matrix<T, 3, 3>() <<
          0.0  , -_v(2), +_v(1),
         +_v(2),  0.0  , -_v(0),
-        -_v(1), +_v(0),  0.0  ).finished());
+        -_v(1), +_v(0),  0.0  ).finished();
 }
 
-inline Eigen::Vector3s vee(const Eigen::Matrix3s& _m)
+template<typename T>
+inline Eigen::Matrix<T, 3, 1> vee(const Eigen::Matrix<T, 3, 3>& _m)
 {
-    return (Eigen::Vector3s() << _m(2,1), _m(0,2), _m(1,0)).finished();
+    return (Eigen::Matrix<T, 3, 1>() << _m(2,1), _m(0,2), _m(1,0)).finished();
 }
 
 
@@ -122,21 +123,21 @@ inline Eigen::Vector3s vee(const Eigen::Matrix3s& _m)
  *
  *      exp(omega+d_omega) = exp(omega)*exp(Jr(omega)*d_omega)
  */
-inline Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega)
+template<typename T, int Rows>
+inline Eigen::Matrix<T, 3, 3> expMapDerivative(const Eigen::Matrix<T, Rows, 1>& _omega)
 {
-    using std::cos;
-    using std::sin;
+//    using std::cos;
+//    using std::sin;
 
-    Scalar theta2 = _omega.dot(_omega);
+    T theta2 = _omega.dot(_omega);
+    Eigen::Matrix<T, 3, 3> W(skew<T>(_omega));
     if (theta2 <= Constants::EPS_SMALL)
-        return std::move(Eigen::Matrix3s::Identity());
-    Scalar theta = std::sqrt(theta2);  // rotation angle
-    Eigen::Matrix3s W;
-    W = skew(_omega);
-    Eigen::Matrix3s m1, m2;
-    m1.noalias() = (1 - cos(theta)) / theta2 * W;
+        return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W; // Small angle approximation
+    T theta = std::sqrt(theta2);  // rotation angle
+    Eigen::Matrix<T, 3, 3> m1, m2;
+    m1.noalias() = ((T)1 - cos(theta)) / theta2 * W;
     m2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
-    return std::move(Eigen::Matrix3s::Identity() + m1 + m2);
+    return Eigen::Matrix<T, 3, 3>::Identity() + m1 + m2;
 }
 
 
@@ -177,20 +178,21 @@ inline Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega)
  *  And also, as d_omega is small, we'd have Jrinv(d_omega) \approx Identity all the time,
  *  whereas Jrinv(omega) is in the general case far from Identity.
  */
-inline Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega)
+template<typename T, int Rows>
+inline Eigen::Matrix<T, 3, 3> logMapDerivative(const Eigen::Matrix<T, Rows, 1>& _omega)
 {
-    using std::cos;
-    using std::sin;
+//    using std::cos;
+//    using std::sin;
 
-    Scalar theta2 = _omega.dot(_omega);
+    T theta2 = _omega.dot(_omega);
+    Eigen::Matrix<T, 3, 3> W(skew(_omega));
     if (theta2 <= Constants::EPS_SMALL)
-        return std::move(Eigen::Matrix3s::Identity()); //Or should we use
-    Scalar theta = std::sqrt(theta2);  // rotation angle
-    Eigen::Matrix3s W;
-    W = skew(_omega);
-    Eigen::Matrix3s m1;
-    m1.noalias() = (1 / theta2 - (1 + cos(theta)) / (2 * theta * sin(theta))) * (W * W);
-    return std::move(Eigen::Matrix3s::Identity() + 0.5 * W + m1); //is this really more optimized?
+        return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
+    T theta = std::sqrt(theta2);  // rotation angle
+    ;
+    Eigen::Matrix<T, 3, 3> m1;
+    m1.noalias() = ((T)1 / theta2 - (1 + cos(theta)) / ((T)2 * theta * sin(theta))) * (W * W);
+    return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W + m1; //is this really more optimized?
 }
 
 
