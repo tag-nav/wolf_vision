@@ -24,7 +24,6 @@ ProcessorIMU::~ProcessorIMU()
 {
 }
 
-
 ProcessorBase* ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
 {
     ProcessorIMU* prc_ptr = new ProcessorIMU();

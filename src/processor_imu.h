@@ -60,13 +60,6 @@ class ProcessorIMU : public ProcessorMotion{
                                 Eigen::VectorXs& _x_plus_delta );
 
 
-        /** \brief Adds a delta-increment into the pre-integrated Delta-state
-        * \param _delta the delta increment to add
-        *
-        * This function implements the pre-integrated measurements update :
-        *   Delta_ik = Delta_ij (+) _delta_jk
-        */
-        virtual void integrateDelta();
 
         /** \brief Delta representing the null motion
          */
@@ -80,56 +73,6 @@ class ProcessorIMU : public ProcessorMotion{
 
     private:
 
-        /** \brief Compute Jr (Right Jacobian)
-         * Right Jacobian for exp map in SO(3) - equation (10.86) and following equations in
-         *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
-         *      expmap( omega + d_omega ) \approx expmap(omega) * expmap(Jr * d_omega)
-         *  where Jr = expMapDerivative(omega);
-         *  This maps a perturbation in the tangent space (d_omega) to a perturbation on the manifold (expmap(Jr * d_omega))
-         *  so that:
-         *
-         *      exp(omega+d_omega) = exp(omega)*exp(Jr(omega)*d_omega)
-         */
-//        Eigen::Matrix3s expMapDerivative(const Eigen::Vector3s& _omega);
-
-        /** \brief Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
-         *  Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
-         *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
-         *      logmap( Rhat * expmap( omega ) ) \approx logmap( Rhat ) + Jrinv *  omega   (1) original write with omega
-         *      logmap( Rhat * expmap(d_omega) ) \approx logmap( Rhat ) + Jrinv * d_omega  (1) adapted write with d_omega (JS)
-         *  where Jrinv = logMapDerivative(omega);
-         *
-         *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega) so that
-         *
-         *      log(exp(omega)*exp(d_omega)) = omega + Jrinv(omega)*d_omega
-         *
-         *  or, having R = exp(omega),
-         *
-         *      log(R*exp(d_omega)) = log(R) + Jrinv(omega)*d_omega ??? FIXME: this does not fit with the comment above (1)
-         *                                                                     where it states Jrinv(d_omega) and not Jrinv(omega)
-         *                                                                     (in the original form, omega is the argument of the function)
-         *
-         *  Who's correct? Let's see:
-         *
-         *  fix: Taking the log on both sides, and assuming Rhat = exp(omega), we observe
-         *
-         *      exp(omega)*exp(d_omega) = exp(omega+Jrinv(onega)*d_omega)
-         *
-         *  If we define dw as
-         *
-         *      dw = Jrinv(omega)*d_omega <==> d_omega=Jr*dw, where Jrinv = Jr^-1, logically.
-         *
-         *  then substituting above we get:
-         *
-         *      exp(omega+dw) = exp(omega)*exp(Jr*dw)
-         *
-         *  exactly as in expMapDerivative().
-         *
-         *  This makes sense: in fact Chirikjian describes Jrinv(omega) and not Jrinv(d_omega).
-         *  And also, as d_omega is small, we'd have Jrinv(d_omega) \approx Identity all the time,
-         *  whereas Jrinv(omega) is in the general case far from Identity.
-         */
-//        Eigen::Matrix3s logMapDerivative(const Eigen::Vector3s& _omega);
 
     private:
 
@@ -162,7 +105,7 @@ class ProcessorIMU : public ProcessorMotion{
 
 
         // Helper functions to remap several magnitudes
-        void remapPQV(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
+        void remapPVQ(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
         void remapDelta(Eigen::VectorXs& _delta_out);
         void remapData(const Eigen::VectorXs& _data);
 
@@ -171,9 +114,8 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Matrix<Scalar,9,9> preint_meas_cov_;
 
         ///Jacobians
-        Eigen::Matrix<Scalar,6,3> preintegrated_H_biasAcc_; /// [dP dv]
-        Eigen::Matrix<Scalar,10,3> preintegrated_H_biasOmega_; /// [dP dv dq]
-        Eigen::Matrix<Scalar,9,9> delta_cov_;
+        Eigen::Matrix<Scalar,6,3> dDpv_dab_; /// [dP dv]
+        Eigen::Matrix<Scalar,10,3> dDpvq_dwb_; /// [dP dv dq]
 
     public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
@@ -213,7 +155,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     //Use SOLA-16 convention by default
     v_out_ = (measured_acc_ - bias_acc_) * _dt;
     p_out_ = v_out_ * _dt / 2;
-    q_out_ = v2q((measured_gyro_ - bias_gyro_) * _dt);
+    q_out_ = v2q<Scalar,3>((measured_gyro_ - bias_gyro_) * _dt);
 
     //Compute jacobian of delta wrt data
 
@@ -228,7 +170,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      Eigen::Matrix<wolf::Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<wolf::Scalar,9,6>::Zero();
      jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
      jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
-     jacobian_delta_noise.block<3,3>(6,3) =_dt * skew(measured_gyro_ * _dt).exp();
+     jacobian_delta_noise.block<3,3>(6,3) =_dt * skew<Scalar>(measured_gyro_ * _dt).exp();
 
      delta_cov_ = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
 }
@@ -298,8 +240,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
       /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
         d(Ra)/d(d_theta) = -R{theta} * skew[a] *Jr{theta}
        */
-      _jacobian1.block<3,3>(0,6) = - DR1 * skew(p_in_2_) * expMapDerivative(q2v(q_in_1_)) ; // FIXME: CHECK THIS
-      _jacobian1.block<3,3>(3,6) = - DR1 * skew(v_in_2_) * expMapDerivative(q2v(q_in_1_)); // FIXME: CHECK THIS
+      _jacobian1.block<3,3>(0,6) = - DR1 * skew<Scalar>(p_in_2_) * expMapDerivative(q2v(q_in_1_)) ; // FIXME: CHECK THIS
+      _jacobian1.block<3,3>(3,6) = - DR1 * skew<Scalar>(v_in_2_) * expMapDerivative(q2v(q_in_1_)); // FIXME: CHECK THIS
       
 
       _jacobian2.resize(9,9);
@@ -325,31 +267,31 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 
      /// Get the rotation matrix associated to the preintegrated orientation quaternion
      Eigen::Matrix3s orientation_preint_rot_ =  orientation_preint_quat_.toRotationMatrix();
-     Eigen::Matrix3s corrected_acc_ss        =  skew(measured_acc_ - bias_acc_);
+     Eigen::Matrix3s corrected_acc_ss        =  skew<Scalar>(measured_acc_ - bias_acc_);
      Eigen::Vector3s corrected_gyro          =  measured_gyro_ - bias_gyro_;
 
      /// dP/db_a -- Jacobian of postion w.r.t accelerometer bias
      /// dP/db_a += dv/db_a - 0.5 * delta_R * dt * dt
-     preintegrated_H_biasAcc_.topRows<3>() += preintegrated_H_biasAcc_.bottomRows<3>() * _dt
+     dDpv_dab_.topRows<3>() += dDpv_dab_.bottomRows<3>() * _dt
                                            -  0.5 * _dt * _dt * orientation_preint_rot_;
 
      /// dv/db_a -- Jacobian of velocity w.r.t accelerometer bias
      /// dv/db_a -= delta_R * dt
-     preintegrated_H_biasAcc_.bottomRows<3>() -= orientation_preint_rot_ * _dt;
+     dDpv_dab_.bottomRows<3>() -= orientation_preint_rot_ * _dt;
 
      /// dP/db_g -- Jacobian of position w.r.t gyro bias
      /// dP/db_g += dv/db_g * dt - 0.5 * delta_R * (a - b_a)^ * dt * dt * dR/db_g
-     preintegrated_H_biasOmega_.topRows<3>() += preintegrated_H_biasOmega_.block<3,3>(3,0) * _dt
-                                             -  0.5 * _dt * _dt * orientation_preint_rot_ * corrected_acc_ss * preintegrated_H_biasOmega_.bottomRows<3>();
+     dDpvq_dwb_.topRows<3>() += dDpvq_dwb_.block<3,3>(3,0) * _dt
+                                             -  0.5 * _dt * _dt * orientation_preint_rot_ * corrected_acc_ss * dDpvq_dwb_.bottomRows<3>();
 
      /// dv/db_g -- Jacobian of velocity w.r.t gyro bias
      /// dv/db_g -= delta_R * dt * (a - b_a)^ * dR/db_g
-     preintegrated_H_biasOmega_.block<3,3>(3,0) -= orientation_preint_rot_ *_dt * corrected_acc_ss * preintegrated_H_biasOmega_.bottomRows<3>();
+     dDpvq_dwb_.block<3,3>(3,0) -= orientation_preint_rot_ *_dt * corrected_acc_ss * dDpvq_dwb_.bottomRows<3>();
 
      /// dR/db_g -- Jacobian of orientation w.r.t gyro bias
      /// dR/db_g = R.t * dR/db_g * Jr * dt       where Jr  == right Jacobian
      ///                                               R.t == [exp(- (omega - b_g) * dt)]
-     preintegrated_H_biasOmega_.bottomRows<3>() = v2R(-corrected_gyro * _dt) *  preintegrated_H_biasOmega_.bottomRows<3>() * _dt * expMapDerivative((measured_gyro_ - bias_gyro_) * _dt);
+     dDpvq_dwb_.bottomRows<3>() = v2R(-corrected_gyro * _dt) *  dDpvq_dwb_.bottomRows<3>() * _dt * expMapDerivative<Scalar,3>((measured_gyro_ - bias_gyro_) * _dt);
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
@@ -359,7 +301,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     assert(_delta.size() == 10 && "Wrong _delta vector size");
     assert(_delta_preint_plus_delta.size() == 10 && "Wrong _delta_preint_plus_delta vector size");
 
-    remapPQV(_delta_preint, _delta, _delta_preint_plus_delta);
+    remapPVQ(_delta_preint, _delta, _delta_preint_plus_delta);
     // _delta_preint             is _in_1_
     // _delta                    is _in_2_
     // _delta_preint_plus_delta  is _out_
@@ -394,7 +336,7 @@ inline void ProcessorIMU::deltaMinusDelta(const Eigen::VectorXs& _delta_preint, 
     assert(_delta.size() == 10 && "Wrong _delta vector size");
     assert(_delta_preint_minus_delta.size() == 10 && "Wrong _delta_preint_minus_delta vector size");
 
-    remapPQV(_delta_preint, _delta, _delta_preint_minus_delta);
+    remapPVQ(_delta_preint, _delta, _delta_preint_minus_delta);
     // _delta_preint             is _in_1_
     // _delta                    is _in_2_
     // _delta_preint_plus_delta  is _out_
@@ -402,9 +344,9 @@ inline void ProcessorIMU::deltaMinusDelta(const Eigen::VectorXs& _delta_preint, 
     /* MATHS according to SOLA-16 (see deltaPlusDelta for derivation)
     *
     * Let delta be a delta-state :
-    *   delta = [p, q, v]
+    *   delta = [p, v, q]
     * Then the negation of this delta is :
-    *   delta_neg = [-p, q*, -v]     where * = conjugate operator
+    *   delta_neg = [-p, -v, q*]     where * = conjugate operator // this is wrong, see Sola-16
     * We then have :
     *   delta1 (-) delta = delta1 (+) delta_neg
     * Which yields the following, using SOLA-16 maths
@@ -422,7 +364,7 @@ inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::Vec
     assert(_x_plus_delta.size() == 16 && "Wrong _x_plus_delta vector size");
     assert(_Dt > 0 && "Time interval _Dt is not positive!");
 
-    remapPQV(_x, _delta, _x_plus_delta);
+    remapPVQ(_x, _delta, _x_plus_delta);
     // _x               is _in_1_
     // _delta           is _in_2_
     // _x_plus_delta    is _out_
@@ -438,21 +380,9 @@ inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::Vec
     _x_plus_delta.tail(6) = _x.tail(6);
 }
 
-inline void ProcessorIMU::integrateDelta()
-{
-    /* In the case of IMU, updating the pre-integrated measurements
-     * corresponds to adding latest delta to the pre-integrated measurements
-     * with the composition rules defined by the state :
-     *
-     * delta_preintegrated_ik = delta_preintegrated_ij (+) delta_jk
-     *
-     * */
-    deltaPlusDelta(delta_integrated_, delta_, dt_, delta_integrated_);
-}
-
 inline Eigen::VectorXs ProcessorIMU::deltaZero() const
 {
-    return (Eigen::VectorXs(10) << 0,0,0,  0,0,0,1,  0,0,0 ).finished(); // p, q, v
+    return (Eigen::VectorXs(10) << 0,0,0,  0,0,0,  0,0,0,1 ).finished(); // p, v, q
 }
 
 inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
@@ -480,26 +410,26 @@ inline ConstraintBase* ProcessorIMU::createConstraint(FeatureBase* _feature_moti
     return nullptr;
 }
 
-inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out)
+inline void ProcessorIMU::remapPVQ(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out)
 {
     new (&p_in_1_) Eigen::Map<const Eigen::Vector3s>(_delta1.data());
-    new (&q_in_1_) Eigen::Map<const Eigen::Quaternions>(_delta1.data() + 3);
-    new (&v_in_1_) Eigen::Map<const Eigen::Vector3s>(_delta1.data() + 7);
+    new (&v_in_1_) Eigen::Map<const Eigen::Vector3s>(_delta1.data() + 3);
+    new (&q_in_1_) Eigen::Map<const Eigen::Quaternions>(_delta1.data() + 6);
 
     new (&p_in_2_) Eigen::Map<const Eigen::Vector3s>(_delta2.data());
-    new (&q_in_2_) Eigen::Map<const Eigen::Quaternions>(_delta2.data() + 3);
-    new (&v_in_2_) Eigen::Map<const Eigen::Vector3s>(_delta2.data() + 7);
+    new (&v_in_2_) Eigen::Map<const Eigen::Vector3s>(_delta2.data() + 3);
+    new (&q_in_2_) Eigen::Map<const Eigen::Quaternions>(_delta2.data() + 6);
 
     new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data());
-    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 3);
-    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 7);
+    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 3);
+    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 6);
 }
 
 inline void ProcessorIMU::remapDelta(Eigen::VectorXs& _delta_out)
 {
     new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data());
-    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 3);
-    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 7);
+    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 3);
+    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 6);
 }
 
 inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
