@@ -20,8 +20,6 @@ inline T pi2pi(const T& angle)
 
 template<typename T, int Rows>
 inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1> _v){
-//template<typename Derived, typename T, int Rows>
-//inline Eigen::Quaternion<T> v2q(Eigen::MatrixBase<Derived> _v){
     using namespace std;
     Eigen::Quaternion<T> q;
     T angle = _v.norm();
@@ -39,6 +37,25 @@ inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1> _v){
         return q;
     }
 }
+//template<typename Derived>
+//inline Eigen::Quaternion<typename Derived::Scalar> v2q(Eigen::MatrixBase<Derived> _v){
+//    using namespace std;
+//    Eigen::Quaternion<typename Derived::Scalar> q;
+//    typename Derived::Scalar angle = _v.norm();
+//    typename Derived::Scalar angle_half = angle/2.0;
+//    if (angle > wolf::Constants::EPS)
+//    {
+//        q.w() = cos(angle_half);
+//        q.vec() = _v / angle * sin(angle_half);
+//        return q;
+//    }
+//    else
+//    {
+//        q.w() = cos(angle_half);
+//        q.vec() = _v * ( (typename Derived::Scalar)0.5 - angle_half*angle_half/(typename Derived::Scalar)12.0 ); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
+//        return q;
+//    }
+//}
 
 
 inline Eigen::Quaternions v2q(const Eigen::Vector3s& _v){
