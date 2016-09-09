@@ -155,7 +155,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     //Use SOLA-16 convention by default
     v_out_ = (measured_acc_ - bias_acc_) * _dt;
     p_out_ = v_out_ * _dt / 2;
-    q_out_ = v2q<Scalar,3>((measured_gyro_ - bias_gyro_) * _dt);
+    q_out_ = v2q((measured_gyro_ - bias_gyro_) * _dt);
 
     //Compute jacobian of delta wrt data
 
@@ -206,9 +206,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      /* with _jacobian1 = A and _jacobian2 = B
      _jacobian1.resize(3,9);
      _jacobian1.setZero();
-     _jacobian1.block<1,3>(1,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose(); //check if this is working --> block considered as row_vector ?
-     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * (-_dt); // *_data.head(3)
-     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.toRotationMatrix()).transpose() * _dt * (-_dt/2); // *_data.head(3)
+     _jacobian1.block<1,3>(1,0) = Eigen::vee(q_in_1_.matrix()).transpose(); //check if this is working --> block considered as row_vector ?
+     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.matrix()).transpose() * (-_dt); // *_data.head(3)
+     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.matrix()).transpose() * _dt * (-_dt/2); // *_data.head(3)
      //Need access to _data here.
      _jacobian1.block<1,3>(0,6) << 1,1,1;
      _jacobian1.block<1,3>(2,3) << 1,1,1;
@@ -217,8 +217,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      //_jacobian2.resize(3,6);
      _jacobian2.setZero();
      _jacobian2.block<3,3>(0,3) = LogmapDerivative(q_in_1_) * _dt;
-     _jacobian2.block<3,3>(1,3) = q_in_1_.toRotationMatrix() * _dt;
-     _jacobian2.block<3,3>(2,3) = q_in_1_.toRotationMatrix() * _dt * dt_ * 0.5;
+     _jacobian2.block<3,3>(1,3) = q_in_1_.matrix() * _dt;
+     _jacobian2.block<3,3>(2,3) = q_in_1_.matrix() * _dt * dt_ * 0.5;
      */
 
      /*
@@ -230,12 +230,12 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
       *                  0    1     DV2                                       0   DR1  0
       *                  0    1     DR2 ]                                     0    0  DR1]
       */
-      Eigen::Matrix3s DR1 = q_in_1_.toRotationMatrix();
+    Eigen::Matrix3s DR1 = q_in_1_.matrix();
 
       _jacobian1.resize(9,9);
       _jacobian1 = Eigen::Matrix<wolf::Scalar,9,9>::Identity();
       _jacobian1.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt;
-      _jacobian1.block<3,3>(6,6) = q_in_2_.toRotationMatrix();
+      _jacobian1.block<3,3>(6,6) = q_in_2_.matrix();
       _jacobian1.block<3,3>(3,0) = Eigen::Matrix3s::Identity();
       /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
         d(Ra)/d(d_theta) = -R{theta} * skew[a] *Jr{theta}
@@ -265,7 +265,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      */
 
      /// Get the rotation matrix associated to the preintegrated orientation quaternion
-     Eigen::Matrix3s orientation_preint_rot_ =  orientation_preint_quat_.toRotationMatrix();
+     Eigen::Matrix3s orientation_preint_rot_ =  orientation_preint_quat_.matrix();
      Eigen::Matrix3s corrected_acc_ss        =  skew<Scalar>(measured_acc_ - bias_acc_);
      Eigen::Vector3s corrected_gyro          =  measured_gyro_ - bias_gyro_;
 
