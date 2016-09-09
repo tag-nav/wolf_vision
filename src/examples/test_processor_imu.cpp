@@ -20,7 +20,7 @@
 #include <iomanip>
 #include <ctime>
 
-#define DEBUG_RESULTS
+//#define DEBUG_RESULTS
 
 
 int main(int argc, char** argv)
