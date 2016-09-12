@@ -150,24 +150,26 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
 
     // create delta
     //Use SOLA-16 convention by default
-    v_out_ = (measured_acc_ - bias_acc_) * _dt;
+    Eigen::Vector3s a = measured_acc_ - bias_acc_;
+    Eigen::Vector3s w = measured_gyro_ - bias_gyro_;
+    v_out_ = a * _dt;
     p_out_ = v_out_ * _dt / 2;
-    q_out_ = v2q((measured_gyro_ - bias_gyro_) * _dt);
+    q_out_ = v2q(w * _dt);
 
     //Compute jacobian of delta wrt data
 
     /*                  MATHS : jacobians
-     * substituting (a-a_b) and (w-w_b) respectively by (a-a_b+a_n) and (w-w_b+w_n) (measurement noise is additive)
+     * substituting a and w respectively by (a+a_n) and (w+w_n) (measurement noise is additive)
      *         an        wn
-     *   dp [0.5*dt*dt   0  ]
-     *   dv [   dt       0  ]
-     *   dR [   0      dt*exp(wj*dt) ]
+     *   dp [0.5*I*dt*dt   0  ]
+     *   dv [   I*dt       0  ]
+     *   dR [   0      dt*exp(w*dt) ]
      */
 
      Eigen::Matrix<wolf::Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<wolf::Scalar,9,6>::Zero();
      jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
      jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
-     jacobian_delta_noise.block<3,3>(6,3) =_dt * v2R(measured_gyro_ * _dt);
+     jacobian_delta_noise.block<3,3>(6,3) =_dt * v2R(w * _dt);
 
      delta_cov_ = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
 }
@@ -225,26 +227,26 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
       *
       * _jacobian1 =    [1  _Dt2    DP2                     _jacobian2 =    [DR1   0   0
       *                  0    1     DV2                                       0   DR1  0
-      *                  0    1     DR2 ]                                     0    0  DR1]
+      *                  0    1     DR2 ]                                     0    0  Jr^-1]
       */
     Eigen::Matrix3s DR1 = q_in_1_.matrix();
 
       _jacobian1.resize(9,9);
-      _jacobian1 = Eigen::Matrix<wolf::Scalar,9,9>::Identity();
-      _jacobian1.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt;
-      _jacobian1.block<3,3>(6,6) = q_in_2_.matrix();
-      _jacobian1.block<3,3>(3,0) = Eigen::Matrix3s::Identity();
+      _jacobian1 = Eigen::Matrix<wolf::Scalar,9,9>::Identity(); // DP_dp
+      _jacobian1.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // DP_dv
+      _jacobian1.block<3,3>(3,0) = Eigen::Matrix3s::Identity(); // DV_dv
+      _jacobian1.block<3,3>(6,6) = q_in_2_.matrix(); // DA_da (angle / angle)
       /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
         d(Ra)/d(d_theta) = -R{theta} * skew[a] *Jr{theta}
        */
-      _jacobian1.block<3,3>(0,6) = - DR1 * skew<Scalar>(p_in_2_) * expMapDerivative(q2v(q_in_1_)) ; // FIXME: CHECK THIS
-      _jacobian1.block<3,3>(3,6) = - DR1 * skew((Eigen::Vector3s)v_in_2_) * expMapDerivative(q2v(q_in_1_)); // FIXME: CHECK THIS
+      _jacobian1.block<3,3>(0,6) = - DR1 * skew<Scalar>(p_in_2_) * jac_SO3_right(q2v(q_in_1_)) ; // FIXME: CHECK THIS
+      _jacobian1.block<3,3>(3,6) = - DR1 * skew((Eigen::Vector3s)v_in_2_) * jac_SO3_right(q2v(q_in_1_)); // FIXME: CHECK THIS
       
       _jacobian2.resize(9,9);
       _jacobian2.setZero();
       _jacobian2.block<3,3>(0,0) = DR1;
       _jacobian2.block<3,3>(3,3) = DR1;
-      _jacobian2.block<3,3>(6,6) = DR1;
+      _jacobian2.block<3,3>(6,6) = jac_SO3_right_inv(q2v(q_in_1_));
 
      /*
      *                                  For biases :
@@ -287,7 +289,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      /// dR/db_g -- Jacobian of orientation w.r.t gyro bias
      /// dR/db_g = R.t * dR/db_g * Jr * dt       where Jr  == right Jacobian
      ///                                               R.t == [exp(- (omega - b_g) * dt)]
-     dDpvq_dwb_.bottomRows<3>() = v2R(-corrected_gyro * _dt) *  dDpvq_dwb_.bottomRows<3>() * _dt * expMapDerivative<Scalar,3>((measured_gyro_ - bias_gyro_) * _dt);
+     dDpvq_dwb_.bottomRows<3>() = v2R(-corrected_gyro * _dt) *  dDpvq_dwb_.bottomRows<3>() * _dt * jac_SO3_right<Scalar,3>((measured_gyro_ - bias_gyro_) * _dt);
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
