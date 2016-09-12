@@ -12,30 +12,74 @@
 
 namespace wolf{
 
+///////////////////////////////////////////////////////////
+// Check Matrix sizes, both statically and dynamically
+
+template <int Size, int DesiredSize>
+struct StaticSizeCheck {
+        template <typename T>
+        StaticSizeCheck(const T&) {
+            static_assert(Size == DesiredSize, "Size of static Vector or Matrix does not match");
+        }
+};
+
+template <int DesiredSize>
+struct StaticSizeCheck<Eigen::Dynamic, DesiredSize> {
+        template <typename T>
+        StaticSizeCheck(const T& t) {
+            assert(t == DesiredSize && "Size of dynamic Vector or Matrix does not match");
+        }
+};
+
+template <int DesiredR, int DesiredC>
+struct MatrixSizeCheck {
+        template <typename T>
+        static void check(const T& t) {
+            StaticSizeCheck<T::RowsAtCompileTime, DesiredR>(t.rows());
+            StaticSizeCheck<T::ColsAtCompileTime, DesiredC>(t.cols());
+        }
+};
+
+
+//////////////////////////////////////////////////////////////
+// Simple angular functions
 template<typename T>
 inline T pi2pi(const T& angle)
 {
     return (angle > (T)0 ? fmod(angle + (T)M_PI, (T)(2 * M_PI)) - (T)M_PI : fmod(angle - (T)M_PI, (T)(2 * M_PI)) + (T)M_PI);
 }
 
-template<typename T>
-inline Eigen::Matrix<T, 3, 3> skew(const Eigen::Matrix<T, 3, 1>& _v) {
+
+///////////////////////////////////////////////////////////////
+// Rotation conversions
+
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBase<Derived>& _v){
+
+    MatrixSizeCheck<3,1>::check(_v);
+    typedef typename Derived::Scalar T;
+
     return (Eigen::Matrix<T, 3, 3>() <<
          0.0  , -_v(2), +_v(1),
         +_v(2),  0.0  , -_v(0),
         -_v(1), +_v(0),  0.0  ).finished();
 }
 
-template<typename T>
-inline Eigen::Matrix<T, 3, 1> vee(const Eigen::Matrix<T, 3, 3>& _m)
-{
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> vee(const Eigen::MatrixBase<Derived>& _m){
+
+    MatrixSizeCheck<3,3>::check(_m);
+    typedef typename Derived::Scalar T;
+
     return (Eigen::Matrix<T, 3, 1>() << _m(2,1), _m(0,2), _m(1,0)).finished();
 }
 
 
+template<typename Derived>
+inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<Derived>& _v){
 
-template<typename T, int Rows>
-inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1>& _v){
+    MatrixSizeCheck<3,1>::check(_v);
+    typedef typename Derived::Scalar T;
 
     Eigen::Quaternion<T> q;
     T angle = _v.norm();
@@ -53,44 +97,8 @@ inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1>& _v){
         return q;
     }
 }
-//template<typename Derived>
-//inline Eigen::Quaternion<typename Derived::Scalar> v2q(Eigen::MatrixBase<Derived> _v){
-//
-//    Eigen::Quaternion<typename Derived::Scalar> q;
-//    typename Derived::Scalar angle = _v.norm();
-//    typename Derived::Scalar angle_half = angle/2.0;
-//    if (angle > wolf::Constants::EPS)
-//    {
-//        q.w() = cos(angle_half);
-//        q.vec() = _v / angle * sin(angle_half);
-//        return q;
-//    }
-//    else
-//    {
-//        q.w() = cos(angle_half);
-//        q.vec() = _v * ( (typename Derived::Scalar)0.5 - angle_half*angle_half/(typename Derived::Scalar)12.0 ); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
-//        return q;
-//    }
-//}
 
 
-inline Eigen::Quaternions v2q(const Eigen::Vector3s& _v){
-    wolf::Scalar angle = _v.norm();
-    if (angle > wolf::Constants::EPS)
-        return Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
-    else
-    {
-        Eigen::Quaternions q;
-        q.w() = cos(angle/2.0);
-        q.vec() = _v * ( 0.5 - angle*angle/48.0 ); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
-        return q;
-    }
-}
-
-inline void q2v(const Eigen::Quaternions& _q, Eigen::Vector3s& _v){
-    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
-    _v = aa.axis() * aa.angle();
-}
 
 template<typename T>
 inline Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q){
@@ -114,8 +122,12 @@ inline Eigen::VectorXs q2v(const Eigen::Quaternions& _q){
     return aa.axis() * aa.angle();
 }
 
-template<typename T, int Rows>
-inline Eigen::Matrix<T, 3, 3> v2R(const Eigen::Matrix<T, Rows, 1>& _v){
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> v2R(const Eigen::MatrixBase<Derived>& _v){
+
+    MatrixSizeCheck<3,1>::check(_v);
+    typedef typename Derived::Scalar T;
+
     T angle = _v.norm();
     if (angle < wolf::Constants::EPS)
         return Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
@@ -123,25 +135,20 @@ inline Eigen::Matrix<T, 3, 3> v2R(const Eigen::Matrix<T, Rows, 1>& _v){
         return Eigen::AngleAxis<T>(angle, _v/angle).matrix();
 }
 
-inline Eigen::Matrix3s v2R(const Eigen::Vector3s& _v){
-    wolf::Scalar angle = _v.norm();
-    if (angle < wolf::Constants::EPS)
-        return Eigen::Matrix3s::Identity() + skew(_v);
-    else
-        return Eigen::AngleAxiss(angle, _v/angle).matrix();
-}
 
-template<typename T, int Rows, int Cols>
-inline Eigen::Matrix<T, 3, 1> R2v(const Eigen::Matrix<T, Rows, Cols>& _R){
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> R2v(const Eigen::MatrixBase<Derived>& _R){
+
+    MatrixSizeCheck<3,3>::check(_R);
+    typedef typename Derived::Scalar T;
+
     Eigen::AngleAxis<T> aa = Eigen::AngleAxis<T>(_R);
     return aa.axis() * aa.angle();
 }
 
-inline Eigen::Vector3s R2v(const Eigen::Matrix3s& _R){
-    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_R);
-    return aa.axis() * aa.angle();
-}
 
+/////////////////////////////////////////////////////////////////
+// Jacobians of SO(3)
 
 /** \brief Compute Jr (Right Jacobian)
  * Right Jacobian for exp map in SO(3) - equation (10.86) and following equations in
@@ -153,12 +160,15 @@ inline Eigen::Vector3s R2v(const Eigen::Matrix3s& _R){
  *
  *      exp(omega+d_omega) = exp(omega)*exp(Jr(omega)*d_omega)
  */
-template<typename T, int Rows>
-inline Eigen::Matrix<T, 3, 3> jac_SO3_right(const Eigen::Matrix<T, Rows, 1>& _omega)
-{
+
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::MatrixBase<Derived>& _omega){
+
+    MatrixSizeCheck<3,1>::check(_omega);
+    typedef typename Derived::Scalar T;
 
     T theta2 = _omega.dot(_omega);
-    Eigen::Matrix<T, 3, 3> W(skew<T>(_omega));
+    Eigen::Matrix<T, 3, 3> W(skew(_omega));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W; // Small angle approximation
     T theta = sqrt(theta2);  // rotation angle
@@ -172,46 +182,25 @@ inline Eigen::Matrix<T, 3, 3> jac_SO3_right(const Eigen::Matrix<T, Rows, 1>& _om
 /** \brief Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
  *  Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
- *      logmap( Rhat * expmap( omega ) ) \approx logmap( Rhat ) + Jrinv *  omega   (1) original write with omega
- *      logmap( Rhat * expmap(d_omega) ) \approx logmap( Rhat ) + Jrinv * d_omega  (1) adapted write with d_omega (JS)
+ *      logmap( Rhat * expmap(d_omega) ) \approx logmap( Rhat ) + Jrinv * d_omega
  *  where Jrinv = logMapDerivative(omega);
  *
  *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega) so that
  *
- *      log(exp(omega)*exp(d_omega)) = omega + Jrinv(omega)*d_omega
+ *      log( exp(omega) * exp(d_omega) ) = omega + Jrinv(omega) * d_omega
  *
  *  or, having R = exp(omega),
  *
- *      log(R*exp(d_omega)) = log(R) + Jrinv(omega)*d_omega ??? FIXME: this does not fit with the comment above (1)
- *                                                                     where it states Jrinv(d_omega) and not Jrinv(omega)
- *                                                                     (in the original form, omega is the argument of the function)
- *
- *  Who's correct? Let's see:
- *
- *  fix: Taking the log on both sides, and assuming Rhat = exp(omega), we observe
- *
- *      exp(omega)*exp(d_omega) = exp(omega+Jrinv(onega)*d_omega)
- *
- *  If we define dw as
- *
- *      dw = Jrinv(omega)*d_omega <==> d_omega=Jr*dw, where Jrinv = Jr^-1, logically.
- *
- *  then substituting above we get:
- *
- *      exp(omega+dw) = exp(omega)*exp(Jr*dw)
- *
- *  exactly as in expMapDerivative().
- *
- *  This makes sense: in fact Chirikjian describes Jrinv(omega) and not Jrinv(d_omega).
- *  And also, as d_omega is small, we'd have Jrinv(d_omega) \approx Identity all the time,
- *  whereas Jrinv(omega) is in the general case far from Identity.
+ *      log( R * exp(d_omega) ) = log(R) + Jrinv(omega) * d_omega
  */
-template<typename T, int Rows>
-inline Eigen::Matrix<T, 3, 3> jac_SO3_right_inv(const Eigen::Matrix<T, Rows, 1>& _omega)
-{
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eigen::MatrixBase<Derived>& _omega){
+
+    MatrixSizeCheck<3,1>::check(_omega);
+    typedef typename Derived::Scalar T;
 
     T theta2 = _omega.dot(_omega);
-    Eigen::Matrix<T, 3, 3> W(skew<T>(_omega));
+    Eigen::Matrix<T, 3, 3> W(skew(_omega));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
     T theta = std::sqrt(theta2);  // rotation angle
@@ -220,22 +209,24 @@ inline Eigen::Matrix<T, 3, 3> jac_SO3_right_inv(const Eigen::Matrix<T, Rows, 1>&
     return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W + m2; //is this really more optimized?
 }
 
-/** \brief Compute Jr (Right Jacobian)
- * Right Jacobian for exp map in SO(3) - equation (10.86) and following equations in
+/** \brief Compute Jl (Left Jacobian)
+ * Left Jacobian for exp map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
- *      expmap( omega + d_omega ) \approx expmap(omega) * expmap(Jr * d_omega)
- *  where Jr = expMapDerivative(omega);
- *  This maps a perturbation in the tangent space (d_omega) to a perturbation on the manifold (expmap(Jr * d_omega))
+ *      expmap( omega + d_omega ) \approx expmap(Jl * d_omega) * expmap(omega)
+ *  where Jl = jac_SO3_left(omega);
+ *  This maps a perturbation in the tangent space (d_omega) to a perturbation on the manifold (expmap(Jl * d_omega))
  *  so that:
  *
- *      exp(omega+d_omega) = exp(omega)*exp(Jr(omega)*d_omega)
+ *      exp(omega+d_omega) = exp(Jr(omega)*d_omega)*exp(omega)
  */
-template<typename T, int Rows>
-inline Eigen::Matrix<T, 3, 3> jac_SO3_left(const Eigen::Matrix<T, Rows, 1>& _omega)
-{
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::MatrixBase<Derived>& _omega){
+
+    MatrixSizeCheck<3,1>::check(_omega);
+    typedef typename Derived::Scalar T;
 
     T theta2 = _omega.dot(_omega);
-    Eigen::Matrix<T, 3, 3> W(skew<T>(_omega));
+    Eigen::Matrix<T, 3, 3> W(skew(_omega));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W; // Small angle approximation
     T theta = sqrt(theta2);  // rotation angle
@@ -246,46 +237,25 @@ inline Eigen::Matrix<T, 3, 3> jac_SO3_left(const Eigen::Matrix<T, Rows, 1>& _ome
 }
 
 
-/** \brief Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
- *  Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
+/** \brief Compute Jl_inv (inverse of Left Jacobian which corresponds to the jacobian of log)
+ *  Left Jacobian for Log map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
- *      logmap( Rhat * expmap( omega ) ) \approx logmap( Rhat ) + Jrinv *  omega   (1) original write with omega
- *      logmap( Rhat * expmap(d_omega) ) \approx logmap( Rhat ) + Jrinv * d_omega  (1) adapted write with d_omega (JS)
- *  where Jrinv = logMapDerivative(omega);
+ *      logmap( expmap(d_omega) * Rhat ) \approx logmap( Rhat ) + Jlinv * d_omega
+ *  where Jlinv = jac_SO3_left_inv(omega);
  *
- *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega) so that
+ *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jlinv * omega) so that
  *
- *      log(exp(omega)*exp(d_omega)) = omega + Jrinv(omega)*d_omega
+ *      log( exp(d_omega) * exp(omega) ) = omega + Jlinv(omega) * d_omega
  *
  *  or, having R = exp(omega),
  *
- *      log(R*exp(d_omega)) = log(R) + Jrinv(omega)*d_omega ??? FIXME: this does not fit with the comment above (1)
- *                                                                     where it states Jrinv(d_omega) and not Jrinv(omega)
- *                                                                     (in the original form, omega is the argument of the function)
- *
- *  Who's correct? Let's see:
- *
- *  fix: Taking the log on both sides, and assuming Rhat = exp(omega), we observe
- *
- *      exp(omega)*exp(d_omega) = exp(omega+Jrinv(onega)*d_omega)
- *
- *  If we define dw as
- *
- *      dw = Jrinv(omega)*d_omega <==> d_omega=Jr*dw, where Jrinv = Jr^-1, logically.
- *
- *  then substituting above we get:
- *
- *      exp(omega+dw) = exp(omega)*exp(Jr*dw)
- *
- *  exactly as in expMapDerivative().
- *
- *  This makes sense: in fact Chirikjian describes Jrinv(omega) and not Jrinv(d_omega).
- *  And also, as d_omega is small, we'd have Jrinv(d_omega) \approx Identity all the time,
- *  whereas Jrinv(omega) is in the general case far from Identity.
+ *      log( exp(d_omega) * R ) = log(R) + Jlinv(omega) * d_omega
  */
-template<typename T, int Rows>
-inline Eigen::Matrix<T, 3, 3> jac_SO3_left_inv(const Eigen::Matrix<T, Rows, 1>& _omega)
-{
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eigen::MatrixBase<Derived>& _omega){
+
+    MatrixSizeCheck<3,1>::check(_omega);
+    typedef typename Derived::Scalar T;
 
     T theta2 = _omega.dot(_omega);
     Eigen::Matrix<T, 3, 3> W(skew(_omega));
