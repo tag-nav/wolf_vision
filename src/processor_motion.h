@@ -336,8 +336,8 @@ class ProcessorMotion : public ProcessorBase
         Eigen::VectorXs delta_integrated_;      ///< integrated delta
         Eigen::MatrixXs delta_integrated_cov_;  ///< integrated delta covariance
         Eigen::VectorXs data_;                  ///< current data
-        Eigen::MatrixXs jacobian_prev_;         ///< jacobian of delta composition w.r.t previous delta integrated
-        Eigen::MatrixXs jacobian_curr_;         ///< jacobian of delta composition w.r.t current delta
+        Eigen::MatrixXs jacobian_delta_preint_; ///< jacobian of delta composition w.r.t previous delta integrated
+        Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
 
 };
 
@@ -345,7 +345,7 @@ inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _t
         ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), delta_cov_size_(_delta_cov_size), data_size_(_data_size), origin_ptr_(
                 nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_cov_(
                 _delta_cov_size, _delta_cov_size), delta_integrated_(_delta_size), delta_integrated_cov_(_delta_cov_size, _delta_cov_size), data_(
-                _data_size), jacobian_prev_(delta_cov_size_, delta_cov_size_), jacobian_curr_(delta_cov_size_, delta_cov_size_)
+                _data_size), jacobian_delta_preint_(delta_cov_size_, delta_cov_size_), jacobian_delta_(delta_cov_size_, delta_cov_size_)
 {
     //
 }
@@ -472,14 +472,14 @@ inline void ProcessorMotion::integrate()
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
 
     // then integrate the current delta to pre-integrated measurements
-    deltaPlusDelta(delta_integrated_, delta_ , dt_, delta_integrated_,jacobian_prev_,jacobian_curr_);
+    deltaPlusDelta(delta_integrated_, delta_ , dt_, delta_integrated_,jacobian_delta_preint_,jacobian_delta_);
 
     // and covariance
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_,
                          delta_cov_,
                          dt_,
-                         jacobian_prev_,
-                         jacobian_curr_,
+                         jacobian_delta_preint_,
+                         jacobian_delta_,
                          delta_integrated_cov_);
 
     // then push it into buffer
