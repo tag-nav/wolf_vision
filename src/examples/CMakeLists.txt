@@ -1,6 +1,8 @@
 # Matrix product test
 #ADD_EXECUTABLE(test_matrix_prod test_matrix_prod.cpp)
 
+#ADD_EXECUTABLE(test_eigen_template test_eigen_template.cpp)
+
 # Map load and save test
 ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
 TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
