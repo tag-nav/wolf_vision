@@ -4,7 +4,6 @@
 // Wolf
 #include "processor_motion.h"
 #include "frame_imu.h"
-#include "rotations.h"
 
 
 namespace wolf {
@@ -111,7 +110,7 @@ class ProcessorIMU : public ProcessorMotion{
 
         ///< COVARIANCE OF: [PreintPOSITION PreintVELOCITY PreintROTATION]
         ///< (first-order propagation from *measurementCovariance*).
-        Eigen::Matrix<Scalar,9,9> preint_meas_cov_;
+        Eigen::Matrix<Scalar,9,9> preint_meas_cov_; // [pp pv pq ; vp vv vq ; qp qv qq]
 
         ///Jacobians
         Eigen::Matrix<Scalar,6,3> dDpv_dab_; /// [dP dv]
@@ -129,10 +128,8 @@ class ProcessorIMU : public ProcessorMotion{
 
 // Wolf
 #include "state_block.h"
+#include "rotations.h"
 
-// STL
-#include <cmath> //needed to compute logMapDerivative (right jacobian Jr)
-#include <unsupported/Eigen/MatrixFunctions>
 
 namespace wolf{
 
@@ -170,7 +167,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      Eigen::Matrix<wolf::Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<wolf::Scalar,9,6>::Zero();
      jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
      jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
-     jacobian_delta_noise.block<3,3>(6,3) =_dt * skew<Scalar>(measured_gyro_ * _dt).exp();
+     jacobian_delta_noise.block<3,3>(6,3) =_dt * v2R(measured_gyro_ * _dt);
 
      delta_cov_ = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
 }

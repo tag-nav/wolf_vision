@@ -18,9 +18,25 @@ inline T pi2pi(const T& angle)
     return (angle > (T)0 ? fmod(angle + (T)M_PI, (T)(2 * M_PI)) - (T)M_PI : fmod(angle - (T)M_PI, (T)(2 * M_PI)) + (T)M_PI);
 }
 
+template<typename T>
+inline Eigen::Matrix<T, 3, 3> skew(const Eigen::Matrix<T, 3, 1>& _v) {
+    return (Eigen::Matrix<T, 3, 3>() <<
+         0.0  , -_v(2), +_v(1),
+        +_v(2),  0.0  , -_v(0),
+        -_v(1), +_v(0),  0.0  ).finished();
+}
+
+template<typename T>
+inline Eigen::Matrix<T, 3, 1> vee(const Eigen::Matrix<T, 3, 3>& _m)
+{
+    return (Eigen::Matrix<T, 3, 1>() << _m(2,1), _m(0,2), _m(1,0)).finished();
+}
+
+
+
 template<typename T, int Rows>
 inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1> _v){
-    using namespace std;
+
     Eigen::Quaternion<T> q;
     T angle = _v.norm();
     T angle_half = angle/2.0;
@@ -39,7 +55,7 @@ inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1> _v){
 }
 //template<typename Derived>
 //inline Eigen::Quaternion<typename Derived::Scalar> v2q(Eigen::MatrixBase<Derived> _v){
-//    using namespace std;
+//
 //    Eigen::Quaternion<typename Derived::Scalar> q;
 //    typename Derived::Scalar angle = _v.norm();
 //    typename Derived::Scalar angle_half = angle/2.0;
@@ -60,20 +76,18 @@ inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1> _v){
 
 inline Eigen::Quaternions v2q(const Eigen::Vector3s& _v){
     wolf::Scalar angle = _v.norm();
-    if (angle < wolf::Constants::EPS)
-        return Eigen::Quaternions::Identity();
+    if (angle > wolf::Constants::EPS)
+        return Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
     else
     {
-        return Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
+        Eigen::Quaternions q;
+        q.w() = cos(angle/2.0);
+        q.vec() = _v * ( 0.5 - angle*angle/48.0 ); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
+        return q;
     }
 }
 
 inline void q2v(const Eigen::Quaternions& _q, Eigen::Vector3s& _v){
-    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
-    _v = aa.axis() * aa.angle();
-}
-
-inline void q2v(const Eigen::Map<const Eigen::Quaternions>& _q, Eigen::Vector3s& _v){
     Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
     _v = aa.axis() * aa.angle();
 }
@@ -108,27 +122,9 @@ inline Eigen::Vector3s R2v(const Eigen::Matrix3s& _R){
 inline Eigen::Matrix3s v2R(const Eigen::Vector3s& _v){
     wolf::Scalar angle = _v.norm();
     if (angle < wolf::Constants::EPS)
-    {
-        return Eigen::Matrix3s::Identity();
-    }
+        return Eigen::Matrix3s::Identity() + skew(_v);
     else
-    {
-        return Eigen::AngleAxiss(angle, _v/angle).toRotationMatrix();
-    }
-}
-
-template<typename T>
-inline Eigen::Matrix<T, 3, 3> skew(const Eigen::Matrix<T, 3, 1>& _v) {
-    return (Eigen::Matrix<T, 3, 3>() <<
-         0.0  , -_v(2), +_v(1),
-        +_v(2),  0.0  , -_v(0),
-        -_v(1), +_v(0),  0.0  ).finished();
-}
-
-template<typename T>
-inline Eigen::Matrix<T, 3, 1> vee(const Eigen::Matrix<T, 3, 3>& _m)
-{
-    return (Eigen::Matrix<T, 3, 1>() << _m(2,1), _m(0,2), _m(1,0)).finished();
+        return Eigen::AngleAxiss(angle, _v/angle).matrix();
 }
 
 
@@ -145,14 +141,12 @@ inline Eigen::Matrix<T, 3, 1> vee(const Eigen::Matrix<T, 3, 3>& _m)
 template<typename T, int Rows>
 inline Eigen::Matrix<T, 3, 3> expMapDerivative(const Eigen::Matrix<T, Rows, 1>& _omega)
 {
-//    using std::cos;
-//    using std::sin;
 
     T theta2 = _omega.dot(_omega);
     Eigen::Matrix<T, 3, 3> W(skew<T>(_omega));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W; // Small angle approximation
-    T theta = std::sqrt(theta2);  // rotation angle
+    T theta = sqrt(theta2);  // rotation angle
     Eigen::Matrix<T, 3, 3> m1, m2;
     m1.noalias() = ((T)1 - cos(theta)) / theta2 * W;
     m2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
@@ -200,15 +194,12 @@ inline Eigen::Matrix<T, 3, 3> expMapDerivative(const Eigen::Matrix<T, Rows, 1>& 
 template<typename T, int Rows>
 inline Eigen::Matrix<T, 3, 3> logMapDerivative(const Eigen::Matrix<T, Rows, 1>& _omega)
 {
-//    using std::cos;
-//    using std::sin;
 
     T theta2 = _omega.dot(_omega);
     Eigen::Matrix<T, 3, 3> W(skew(_omega));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
     T theta = std::sqrt(theta2);  // rotation angle
-    ;
     Eigen::Matrix<T, 3, 3> m1;
     m1.noalias() = ((T)1 / theta2 - (1 + cos(theta)) / ((T)2 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W + m1; //is this really more optimized?
