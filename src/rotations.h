@@ -35,7 +35,7 @@ inline Eigen::Matrix<T, 3, 1> vee(const Eigen::Matrix<T, 3, 3>& _m)
 
 
 template<typename T, int Rows>
-inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1> _v){
+inline Eigen::Quaternion<T> v2q(Eigen::Matrix<T, Rows, 1>& _v){
 
     Eigen::Quaternion<T> q;
     T angle = _v.norm();
@@ -114,9 +114,13 @@ inline Eigen::VectorXs q2v(const Eigen::Quaternions& _q){
     return aa.axis() * aa.angle();
 }
 
-inline Eigen::Vector3s R2v(const Eigen::Matrix3s& _R){
-    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_R);
-    return aa.axis() * aa.angle();
+template<typename T, int Rows>
+inline Eigen::Matrix<T, 3, 3> v2R(const Eigen::Matrix<T, Rows, 1>& _v){
+    T angle = _v.norm();
+    if (angle < wolf::Constants::EPS)
+        return Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
+    else
+        return Eigen::AngleAxis<T>(angle, _v/angle).matrix();
 }
 
 inline Eigen::Matrix3s v2R(const Eigen::Vector3s& _v){
@@ -125,6 +129,17 @@ inline Eigen::Matrix3s v2R(const Eigen::Vector3s& _v){
         return Eigen::Matrix3s::Identity() + skew(_v);
     else
         return Eigen::AngleAxiss(angle, _v/angle).matrix();
+}
+
+template<typename T, int Rows, int Cols>
+inline Eigen::Matrix<T, 3, 1> R2v(const Eigen::Matrix<T, Rows, Cols>& _R){
+    Eigen::AngleAxis<T> aa = Eigen::AngleAxis<T>(_R);
+    return aa.axis() * aa.angle();
+}
+
+inline Eigen::Vector3s R2v(const Eigen::Matrix3s& _R){
+    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_R);
+    return aa.axis() * aa.angle();
 }
 
 
