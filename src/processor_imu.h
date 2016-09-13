@@ -344,9 +344,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     dDv_dwb_ -= M * _dt;
 
     /// dR/dwb -- Jacobian of orientation w.r.t gyro bias
-    /// dR/dwb = R.t * dR/dwb * Jr * dt       where Jr  == right Jacobian
+    /// dR/dwb += R.t * dR/dwb * Jr * dt       where Jr  == right Jacobian
     ///                                             R.t == [exp(- (w - wb) * dt)]
-    dDq_dwb_ = v2R(-corrected_gyro * _dt) * dDq_dwb_ * jac_SO3_right(corrected_gyro * _dt) * _dt; // FIXME This is most certainly wrong!
+    dDq_dwb_ += v2R(-corrected_gyro * _dt) * dDq_dwb_ * jac_SO3_right(corrected_gyro * _dt) * _dt; // FIXME This is most certainly wrong!
 
 
     ///////////////////////////////////////////////////////////////////////////
