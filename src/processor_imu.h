@@ -165,7 +165,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      *     dR [   0      dt*exp(w*dt) ]
      */
 
-    Eigen::Matrix<wolf::Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<wolf::Scalar,9,6>::Zero();
+    Eigen::Matrix<Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<Scalar,9,6>::Zero();
     jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
     jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
     jacobian_delta_noise.block<3,3>(6,3) =_dt * v2R(w * _dt);
@@ -223,11 +223,23 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      *   dDv'/dDf = - R(Dq) * skew(dv) * Jr(Df)
      *   dDf'/dDf = I
      *
+     * which gives
+     *
+     *   [ I     I*dt   -R(Dq)*skew(dp)*Jr(Df)
+     *     0      I     -R(Dq)*skew(dv)*Jr(Df)
+     *     0      0      I                     ] // log(exp(Df)exp(df)) = Df + Jr^-1*df --> dDf'/dDf = I
+     *
      * and wrt delta (_jacobian_delta) is:
      *
      *   dDp'/ddp = R(Dq)
      *   dDv'/ddv = R(Dq)
      *   dDf'/ddf = Jr(Df)^-1
+     *
+     * which gives
+     *
+     *   [ R    0    0
+     *     0    R    0
+     *     0    0   Jr^-1 ] // log(exp(Df)exp(df)) = Df + Jr^-1*df --> dDf'/ddf = Jr^-1
      */
 
     // TODO see if we can remove all these coments below:
@@ -283,20 +295,16 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      */
     Eigen::Matrix3s R_1 = q_in_1_.matrix();
 
-    _jacobian_delta_preint.resize(9,9);
-    _jacobian_delta_preint = Eigen::Matrix<wolf::Scalar,9,9>::Identity(); // DP_dp
-    _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // DP_dv
-    _jacobian_delta_preint.block<3,3>(3,0) = Eigen::Matrix3s::Identity(); // DV_dv
-    _jacobian_delta_preint.block<3,3>(6,6) = Eigen::Matrix3s::Identity(); // log(exp(Da)exp(da)) = Da + Jr^-1*da --> DA_Da = 1
+    _jacobian_delta_preint.setIdentity(9,9);                                       // dDp'/ddp, dDv'/ddv, dDf'/ddf
+    _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // dDp'/ddv
     /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
-        d(Ra)/d(d_theta) = -R{theta} * skew[a] *Jr{theta}
+        d(R a)/d(df) = -R{Df} * skew[a] *Jr{Df}
      */
     Eigen::Matrix3s Jr = jac_SO3_right(q2v(q_in_1_));
-    _jacobian_delta_preint.block<3,3>(0,6) = - R_1 * skew(p_in_2_) * Jr ; // DP_da
-    _jacobian_delta_preint.block<3,3>(3,6) = - R_1 * skew(v_in_2_) * Jr ; // DV_da
+    _jacobian_delta_preint.block<3,3>(0,6) = - R_1 * skew(p_in_2_) * Jr ; // dDp'/ddf
+    _jacobian_delta_preint.block<3,3>(3,6) = - R_1 * skew(v_in_2_) * Jr ; // dDv'/ddf
 
-    _jacobian_delta.resize(9,9);
-    _jacobian_delta.setZero();
+    _jacobian_delta.setZero(9,9);
     _jacobian_delta.block<3,3>(0,0) = R_1;
     _jacobian_delta.block<3,3>(3,3) = R_1;
     _jacobian_delta.block<3,3>(6,6) = jac_SO3_right_inv(q2v(q_in_1_));
@@ -318,35 +326,26 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      *
      */
 
-    /// Get the rotation matrix associated to the preintegrated orientation quaternion
-    Eigen::Matrix3s corrected_acc_skew =  skew(measured_acc_ - bias_acc_);
-    Eigen::Vector3s corrected_gyro     =  measured_gyro_ - bias_gyro_;
+    /// Get the acc and gyro measurements corrected with the estimated bias
+    Eigen::Matrix3s acc_skew =  skew(measured_acc_ - bias_acc_);
+    Eigen::Vector3s gyro     =  measured_gyro_ - bias_gyro_;
 
     // temporaries
     Scalar dt2_2      = 0.5 * _dt * _dt;
-    Eigen::Matrix3s M = R_1 * corrected_acc_skew * dDq_dwb_;
-    //     Eigen::Matrix3s M = R_1 * corrected_acc_skew * dDpvq_dwb_.bottomRows<3>();
+    Eigen::Matrix3s M = R_1 * acc_skew * dDq_dwb_;
 
-    /// dP/dab -- Jacobian of postion w.r.t accelerometer bias
-    /// dP/dab += dv/dab - 0.5 * delta_R * dt * dt
+    // Jacobian incremental updates wrt bias
+    // dP/dab += dv/dab - 0.5 * delta_R * dt * dt
+    // dv/dab -= delta_R * dt
+    // dP/dwb += dv/dwb * dt - 0.5 * delta_R * (a - ab)^ * dt * dt * dR/dwb
+    // dv/dwb -= delta_R * dt * (a - ab)^ * dR/dwb
+    // dR/dwb += R.t * dR/dwb * Jr * dt       where Jr  == right Jacobian
+    //                                             R.t == [exp(- (w - wb) * dt)]
     dDp_dab_ += dDv_dab_ * _dt -  R_1 * dt2_2;
-
-    /// dv/dab -- Jacobian of velocity w.r.t accelerometer bias
-    /// dv/dab -= delta_R * dt
     dDv_dab_ -= R_1 * _dt;
-
-    /// dP/dwb -- Jacobian of position w.r.t gyro bias
-    /// dP/dwb += dv/dwb * dt - 0.5 * delta_R * (a - ab)^ * dt * dt * dR/dwb
     dDp_dwb_ += dDv_dwb_ * _dt - M * dt2_2;
-
-    /// dv/dwb -- Jacobian of velocity w.r.t gyro bias
-    /// dv/dwb -= delta_R * dt * (a - ab)^ * dR/dwb
     dDv_dwb_ -= M * _dt;
-
-    /// dR/dwb -- Jacobian of orientation w.r.t gyro bias
-    /// dR/dwb += R.t * dR/dwb * Jr * dt       where Jr  == right Jacobian
-    ///                                             R.t == [exp(- (w - wb) * dt)]
-    dDq_dwb_ += v2R(-corrected_gyro * _dt) * dDq_dwb_ * jac_SO3_right(corrected_gyro * _dt) * _dt; // FIXME This is most certainly wrong!
+    dDq_dwb_ += v2R( - gyro * _dt) * dDq_dwb_ * jac_SO3_right(gyro * _dt) * _dt; // FIXME This is most certainly wrong!
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -454,6 +453,13 @@ inline void ProcessorIMU::resetDerived()
     frame_imu_ptr_ = (FrameIMU*)((origin_ptr_->getFramePtr()));
     new (&bias_acc_)  Eigen::Map<const Eigen::Vector3s>(frame_imu_ptr_->getBAPtr()->getVector().data()); // acc  bias
     new (&bias_gyro_) Eigen::Map<const Eigen::Vector3s>(frame_imu_ptr_->getBGPtr()->getVector().data()); // gyro bias
+
+    // reset jacobians wrt bias
+    dDp_dab_.setZero();
+    dDv_dab_.setZero();
+    dDp_dwb_.setZero();
+    dDv_dwb_.setZero();
+    dDq_dwb_.setZero();
 }
 
 
