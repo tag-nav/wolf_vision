@@ -89,12 +89,12 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<Eigen::Vector3s> measured_acc_;
         Eigen::Map<Eigen::Vector3s> measured_gyro_;
 
-        // Maps to the pos, quat and vel of the pre-integrated delta
+        // Maps to pos, vel, quat of the pre-integrated delta
         Eigen::Map<Eigen::Vector3s> position_preint_;
         Eigen::Map<Eigen::Vector3s> velocity_preint_;
         Eigen::Map<Eigen::Quaternions> orientation_preint_quat_;
 
-        // Maps to pos, quat, vel, to be used as temporaries
+        // Maps to pos, vel, quat, to be used as temporaries
         Eigen::Map<const Eigen::Vector3s> p_in_1_, p_in_2_;
         Eigen::Map<Eigen::Vector3s> p_out_;
         Eigen::Map<const Eigen::Vector3s> v_in_1_, v_in_2_;
@@ -108,9 +108,7 @@ class ProcessorIMU : public ProcessorMotion{
         void remapDelta(Eigen::VectorXs& _delta_out);
         void remapData(const Eigen::VectorXs& _data);
 
-        ///Jacobians
-//        Eigen::Matrix<Scalar,6,3> dDpv_dab_;  /// d [dp dv]    / d ab
-//        Eigen::Matrix<Scalar,9,3> dDpvq_dwb_; /// d [dp dv dq] / d wb
+        ///Jacobians of preintegrated delta wrt IMU biases
         Eigen::Matrix3s dDp_dab_;
         Eigen::Matrix3s dDv_dab_;
         Eigen::Matrix3s dDp_dwb_;
@@ -141,7 +139,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     // remap
     remapData(_data);
     remapDelta(delta_);
-    // delta_ is _out_
+    // delta_ is [p,v,q]_out_
 
     /* MATHS of delta creation -- Sola-16
      * dp = 1/2 * (a-a_b) * dt^2 = 1/2 * dv * dt
@@ -167,12 +165,12 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      *     dR [   0      dt*exp(w*dt) ]
      */
 
-     Eigen::Matrix<wolf::Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<wolf::Scalar,9,6>::Zero();
-     jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
-     jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
-     jacobian_delta_noise.block<3,3>(6,3) =_dt * v2R(w * _dt);
+    Eigen::Matrix<wolf::Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<wolf::Scalar,9,6>::Zero();
+    jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
+    jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
+    jacobian_delta_noise.block<3,3>(6,3) =_dt * v2R(w * _dt);
 
-     delta_cov_ = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
+    delta_cov_ = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
@@ -186,40 +184,53 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     // 1. Start by computing the Jacobians before updating the deltas. This avoids aliasing.
 
     /* MATHS according to Sola-16
-     * Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp   if  dp = 1/2*(a-a_b)*dt^2
-     * Dv' = Dv + Dq*(a-a_b)*dt                  = Dv + Dq*dv           if  dv = (a-a_b)*dt
-     * Dq' = Dq * exp((w-w_b)*dt)                = Dq * dq              if  dq = exp((w-w_b)*dt)
+     *
+     * 1. Notation
+     *
+     *     We use D or Delta (with capital D) to refer to the preintegrated delta.
+     *     We use d or delta (with lowercase d) to refer to the recent delta.
+     *     We use p, v, q as in Dp, Dv, Dq to refer to the deltas of position, velocity, and quaternion
+     *     We use f, as in Df, df, to refer to the angle vector 'phi' equivalent to the quaternion deltas (see below)
+     *
+     * 2. Expression of the delta integration step:
+     *
+     *     Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp   if  dp = 1/2*(a-a_b)*dt^2
+     *     Dv' = Dv + Dq*(a-a_b)*dt                  = Dv + Dq*dv           if  dv = (a-a_b)*dt
+     *     Dq' = Dq * exp((w-w_b)*dt)                = Dq * dq              if  dq = exp((w-w_b)*dt)
      *
      * where (dp, dv, dq) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
      *
      * warning: All deltas (Dp, Dv, Dq) are physically interpretable: they represent the position, velocity and orientation of a body with
      * respect to a reference frame that is non-rotating and free-falling at the acceleration of gravity.
      *
-     * Jacobians derived from the expression above:
+     * 3. Jacobians derived from the expression above:
+     *
      * Note: we use f for 'phi' to indicate the angle so that Dq = exp(Df), and dq = exp(df)
      *       we have the following relations:
+     *
      *                 Dq = exp(Df) --> Df = log(Dq)
      *                 dq = exp(df) --> df = log(dq)
      *                 exp(Df + df) = exp(Df) * exp( Jr(Df) * df )
      *                 log( exp(Df) * exp(df) ) = Df + Jr(Df)^-1 * df
      *                 d (R(Df) * x) / d Df = - R(Df) * skew(x) * Jr(Df)
      *
-     * then, the Jacobian wrt Delta is:
+     * then, the Jacobian wrt Delta (_jacobian_delta_preint) is obtained by inspection of 2.:
      *
      *   dDp'/dDp = I
      *   dDp'/dDv = I*dt
-     *   dDp'/dDf = - R(Dq) * skew<Scalar>(dp) * Jr(Df)
+     *   dDp'/dDf = - R(Dq) * skew(dp) * Jr(Df)
      *   dDv'/dCv = I
-     *   dDv'/dDf = - R(Dq) * skew<Scalar>(dv) * Jr(Df)
+     *   dDv'/dDf = - R(Dq) * skew(dv) * Jr(Df)
      *   dDf'/dDf = I
      *
-     * and wrt delta is:
+     * and wrt delta (_jacobian_delta) is:
      *
      *   dDp'/ddp = R(Dq)
      *   dDv'/ddv = R(Dq)
      *   dDf'/ddf = Jr(Df)^-1
      */
 
+    // TODO see if we can remove all these coments below:
 
     /*                                  JACOBIANS according to FORSTER
      *                                      For noise integration :
@@ -242,14 +253,14 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      * WARNING : (a(j-1) - a_b(i)) is _data.head(3) : means that this operation does not make sense if we compose two integrated Deltas
      */
 
-     /// FORSTER version
-     /* with _jacobian1 = A and _jacobian2 = B
+    /// FORSTER version
+    /* with _jacobian1 = A and _jacobian2 = B
      _jacobian1.resize(3,9);
      _jacobian1.setZero();
      _jacobian1.block<1,3>(1,0) = Eigen::vee(q_in_1_.matrix()).transpose(); //check if this is working --> block considered as row_vector ?
      _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.matrix()).transpose() * (-_dt); // *_data.head(3)
      _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.matrix()).transpose() * _dt * (-_dt/2); // *_data.head(3)
-     //Need access to _data here.
+     // Need access to _data here.
      _jacobian1.block<1,3>(0,6) << 1,1,1;
      _jacobian1.block<1,3>(2,3) << 1,1,1;
      _jacobian1.block<1,3>(0,3) << _dt2, _dt2, _dt2;
@@ -261,86 +272,86 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      _jacobian2.block<3,3>(2,3) = q_in_1_.matrix() * _dt * dt_ * 0.5;
      */
 
-     /*
-      * _jacobian1 and _jacobian2 are jacobians of _delta1_plus_delta2 w.r.t. _delta1 and _delta2
-      * let us note this : D3 = D1 (+) D2, with D=[DP, DV, DR] (We will use the minimal form here)
-      * Note : PVQ FORMULATION
-      *
-      * _jacobian1 =    [1   _dt    DP2                     _jacobian2 =    [DR1   0   0
-      *                  0    1     DV2                                       0   DR1  0
-      *                  0    0     DR2 ]                                     0    0  Jr^-1]
-      */
+    /*
+     * _jacobian1 and _jacobian2 are jacobians of _delta1_plus_delta2 w.r.t. _delta1 and _delta2
+     * let us note this : D3 = D1 (+) D2, with D=[DP, DV, DR] (We will use the minimal form here)
+     * Note : PVQ FORMULATION
+     *
+     * _jacobian1 =    [1   _dt    DP2                     _jacobian2 =    [DR1   0   0
+     *                  0    1     DV2                                       0   DR1  0
+     *                  0    0     DR2 ]                                     0    0  Jr^-1]
+     */
     Eigen::Matrix3s R_1 = q_in_1_.matrix();
 
-      _jacobian_delta_preint.resize(9,9);
-      _jacobian_delta_preint = Eigen::Matrix<wolf::Scalar,9,9>::Identity(); // DP_dp
-      _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // DP_dv
-      _jacobian_delta_preint.block<3,3>(3,0) = Eigen::Matrix3s::Identity(); // DV_dv
-      _jacobian_delta_preint.block<3,3>(6,6) = Eigen::Matrix3s::Identity(); // log(exp(Da)exp(da)) = Da + Jr^-1*da --> DA_Da = 1
-      /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
+    _jacobian_delta_preint.resize(9,9);
+    _jacobian_delta_preint = Eigen::Matrix<wolf::Scalar,9,9>::Identity(); // DP_dp
+    _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // DP_dv
+    _jacobian_delta_preint.block<3,3>(3,0) = Eigen::Matrix3s::Identity(); // DV_dv
+    _jacobian_delta_preint.block<3,3>(6,6) = Eigen::Matrix3s::Identity(); // log(exp(Da)exp(da)) = Da + Jr^-1*da --> DA_Da = 1
+    /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
         d(Ra)/d(d_theta) = -R{theta} * skew[a] *Jr{theta}
-       */
-      Eigen::Matrix3s Jr = jac_SO3_right(q2v(q_in_1_));
-      _jacobian_delta_preint.block<3,3>(0,6) = - R_1 * skew(p_in_2_) * Jr ; // DP_da
-      _jacobian_delta_preint.block<3,3>(3,6) = - R_1 * skew(v_in_2_) * Jr ; // DV_da
-      
-      _jacobian_delta.resize(9,9);
-      _jacobian_delta.setZero();
-      _jacobian_delta.block<3,3>(0,0) = R_1;
-      _jacobian_delta.block<3,3>(3,3) = R_1;
-      _jacobian_delta.block<3,3>(6,6) = jac_SO3_right_inv(q2v(q_in_1_));
+     */
+    Eigen::Matrix3s Jr = jac_SO3_right(q2v(q_in_1_));
+    _jacobian_delta_preint.block<3,3>(0,6) = - R_1 * skew(p_in_2_) * Jr ; // DP_da
+    _jacobian_delta_preint.block<3,3>(3,6) = - R_1 * skew(v_in_2_) * Jr ; // DV_da
 
-      /////////////////////////////////////////////////////////
-      // 2. Get the Jacobians wrt the biases
-     /*
+    _jacobian_delta.resize(9,9);
+    _jacobian_delta.setZero();
+    _jacobian_delta.block<3,3>(0,0) = R_1;
+    _jacobian_delta.block<3,3>(3,3) = R_1;
+    _jacobian_delta.block<3,3>(6,6) = jac_SO3_right_inv(q2v(q_in_1_));
+
+    /////////////////////////////////////////////////////////
+    // 2. Get the Jacobians wrt the biases
+    /*
      *                                  For biases :
      * The jacobians wrt the biases have the following form, derived from \cite{FORSTER}
      *
-     * dDpv_dab_  (6 x 3) = [ dDp/dab
-     *                        dDv/dab
-     *                                ] // Note that there is no jacobian of the orientation wrt
-     *                                                    // the accelerometer bias
+     *     dDp_dab_ = dDp/dab
+     *     dDv_dab_ = dDv/dab
+     *                         // Note that there is no jacobian of the orientation wrt
+     *                         // the accelerometer bias
      *
-     * dDpvq_dwb_ (9 x 3) = [ dDp/dwb
-     *                        dDv/dwb
-     *                        dDq/dwb  ] // Note that the orientation jacobian is converted to minimal form
+     *     dDp_dwb_ = dDp/dwb
+     *     dDv_dwb_ = dDv/dwb
+     *     dDq_dwb_ = dDq/dwb  ] // Note that the orientation jacobian is converted to minimal form
      *
      */
 
-     /// Get the rotation matrix associated to the preintegrated orientation quaternion
-     Eigen::Matrix3s corrected_acc_skew =  skew(measured_acc_ - bias_acc_);
-     Eigen::Vector3s corrected_gyro     =  measured_gyro_ - bias_gyro_;
+    /// Get the rotation matrix associated to the preintegrated orientation quaternion
+    Eigen::Matrix3s corrected_acc_skew =  skew(measured_acc_ - bias_acc_);
+    Eigen::Vector3s corrected_gyro     =  measured_gyro_ - bias_gyro_;
 
-     // temporaries
-     Scalar dt2_2      = 0.5 * _dt * _dt;
-     Eigen::Matrix3s M = R_1 * corrected_acc_skew * dDq_dwb_;
-//     Eigen::Matrix3s M = R_1 * corrected_acc_skew * dDpvq_dwb_.bottomRows<3>();
+    // temporaries
+    Scalar dt2_2      = 0.5 * _dt * _dt;
+    Eigen::Matrix3s M = R_1 * corrected_acc_skew * dDq_dwb_;
+    //     Eigen::Matrix3s M = R_1 * corrected_acc_skew * dDpvq_dwb_.bottomRows<3>();
 
-     /// dP/dab -- Jacobian of postion w.r.t accelerometer bias
-     /// dP/dab += dv/dab - 0.5 * delta_R * dt * dt
-     dDp_dab_ += dDv_dab_ * _dt -  R_1 * dt2_2;
+    /// dP/dab -- Jacobian of postion w.r.t accelerometer bias
+    /// dP/dab += dv/dab - 0.5 * delta_R * dt * dt
+    dDp_dab_ += dDv_dab_ * _dt -  R_1 * dt2_2;
 
-     /// dv/dab -- Jacobian of velocity w.r.t accelerometer bias
-     /// dv/dab -= delta_R * dt
-     dDv_dab_ -= R_1 * _dt;
+    /// dv/dab -- Jacobian of velocity w.r.t accelerometer bias
+    /// dv/dab -= delta_R * dt
+    dDv_dab_ -= R_1 * _dt;
 
-     /// dP/dwb -- Jacobian of position w.r.t gyro bias
-     /// dP/dwb += dv/dwb * dt - 0.5 * delta_R * (a - ab)^ * dt * dt * dR/dwb
-     dDp_dwb_ += dDv_dwb_ * _dt - M * dt2_2;
+    /// dP/dwb -- Jacobian of position w.r.t gyro bias
+    /// dP/dwb += dv/dwb * dt - 0.5 * delta_R * (a - ab)^ * dt * dt * dR/dwb
+    dDp_dwb_ += dDv_dwb_ * _dt - M * dt2_2;
 
-     /// dv/dwb -- Jacobian of velocity w.r.t gyro bias
-     /// dv/dwb -= delta_R * dt * (a - ab)^ * dR/dwb
-     dDv_dwb_ -= M * _dt;
+    /// dv/dwb -- Jacobian of velocity w.r.t gyro bias
+    /// dv/dwb -= delta_R * dt * (a - ab)^ * dR/dwb
+    dDv_dwb_ -= M * _dt;
 
-     /// dR/dwb -- Jacobian of orientation w.r.t gyro bias
-     /// dR/dwb = R.t * dR/dwb * Jr * dt       where Jr  == right Jacobian
-     ///                                             R.t == [exp(- (w - wb) * dt)]
-     dDq_dwb_ = v2R(-corrected_gyro * _dt) * dDq_dwb_ * jac_SO3_right(corrected_gyro * _dt) * _dt; // FIXME This is most certainly wrong!
+    /// dR/dwb -- Jacobian of orientation w.r.t gyro bias
+    /// dR/dwb = R.t * dR/dwb * Jr * dt       where Jr  == right Jacobian
+    ///                                             R.t == [exp(- (w - wb) * dt)]
+    dDq_dwb_ = v2R(-corrected_gyro * _dt) * dDq_dwb_ * jac_SO3_right(corrected_gyro * _dt) * _dt; // FIXME This is most certainly wrong!
 
 
-     ///////////////////////////////////////////////////////////////////////////
-     // 3. Update the deltas down here to avoid aliasing in the Jacobians section
-     deltaPlusDelta(_delta_preint, _delta, _dt, _delta_preint_plus_delta);
+    ///////////////////////////////////////////////////////////////////////////
+    // 3. Update the deltas down here to avoid aliasing in the Jacobians section
+    deltaPlusDelta(_delta_preint, _delta, _dt, _delta_preint_plus_delta);
 
 }
 
@@ -392,7 +403,7 @@ inline void ProcessorIMU::deltaMinusDelta(const Eigen::VectorXs& _delta_1, const
     // _delta_1_minus_delta_2   is _out_
 
     /* MATHS according to SOLA-16 (see deltaPlusDelta for derivation)
-    */
+     */
     p_out_ = p_in_1_ + v_in_1_ * _dt - q_in_1_ * p_in_2_;
     v_out_ = v_in_1_ - q_in_1_ * v_in_2_;
     q_out_ = q_in_1_ * q_in_2_.conjugate();
