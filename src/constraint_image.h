@@ -49,6 +49,18 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         bool operator ()(const T* const _current_frame_p, const T* const _current_frame_o, const T* const _anchor_frame_p,
                          const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _residuals) const
         {
+            // test TODO remove this
+            Eigen::Quaternion<T> qwr, qrc;
+            Eigen::Matrix<T,3,1> pwr, prc, phc, phw ;
+//            Eigen::Transform<T,3> T();
+            Eigen::Matrix<T,4,4> M_W_R, M_R_C;
+            M_W_R << qwr.matrix(), pwr, (T)0, (T)0, (T)0, (T)1;
+            M_R_C << qrc.matrix(), prc, (T)0, (T)0, (T)0, (T)1;
+            phw = M_W_R*M_R_C*phc;
+
+
+
+
             // Do the magic here
             Eigen::Map<const Eigen::Matrix<T, 3, 1> > translation_F1_world2robot(_current_frame_p); //translation_world2robot
             Eigen::Map<const Eigen::Matrix<T, 4, 1> > quaternion_F1_world2robot(_current_frame_o);
