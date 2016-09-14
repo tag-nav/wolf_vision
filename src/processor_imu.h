@@ -293,21 +293,25 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      *                  0    1     DV2                                       0   DR1  0
      *                  0    0     DR2 ]                                     0    0  Jr^-1]
      */
-    Eigen::Matrix3s R_1 = q_in_1_.matrix();
+
+    // Some useful temporaries
+    Eigen::Matrix3s R_1     = q_in_1_.matrix();
+    Eigen::Vector3s theta_1 = q2v(q_in_1_);
+    Eigen::MatrixXs Jr_1    = jac_SO3_right(theta_1);
 
     _jacobian_delta_preint.setIdentity(9,9);                                       // dDp'/ddp, dDv'/ddv, dDf'/ddf
     _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // dDp'/ddv
     /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
         d(R a)/d(df) = -R{Df} * skew[a] *Jr{Df}
      */
-    Eigen::Matrix3s Jr = jac_SO3_right(q2v(q_in_1_));
+    Eigen::Matrix3s Jr = jac_SO3_right(theta_1);
     _jacobian_delta_preint.block<3,3>(0,6) = - R_1 * skew(p_in_2_) * Jr ; // dDp'/ddf
     _jacobian_delta_preint.block<3,3>(3,6) = - R_1 * skew(v_in_2_) * Jr ; // dDv'/ddf
 
     _jacobian_delta.setZero(9,9);
     _jacobian_delta.block<3,3>(0,0) = R_1;
     _jacobian_delta.block<3,3>(3,3) = R_1;
-    _jacobian_delta.block<3,3>(6,6) = jac_SO3_right_inv(q2v(q_in_1_));
+    _jacobian_delta.block<3,3>(6,6) = Jr_1;
 
     /////////////////////////////////////////////////////////
     // 2. Get the Jacobians wrt the biases
@@ -326,26 +330,40 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      *
      */
 
-    /// Get the acc and gyro measurements corrected with the estimated bias
+
+    // Jacobian incremental updates wrt bias
+    //
+    // dDp/dab += dv/dab * dt - 0.5 * DR * dt^2                                 // Sola 15 -- OK Forster
+    //
+    // dDv/dab -= delta_R * dt                                                  // Sola 15 -- OK Forster
+    //
+    // dDp/dwb += dv/dwb * dt - 0.5 * DR * [a - ab]^ * Jr * dt^2                // Sola 15
+    // dDp/dwb += dv/dwb * dt - 0.5 * DR * [a - ab]^ * dDR/dwb * dt^2           // Forster
+    //
+    // dDv/dwb -= DR * [a - ab]^ * Jr * dt                                      // Sola 15
+    // dDv/dwb -= DR * [a - ab]^ * dR/dwb * dt                                  // Forster
+    //
+    // dDf/dwb -= dR.t * Jr * dt      where Jr  == right Jacobian               // Sola 16 -- OK Forster
+    //                                     dR.t == exp(- (w - wb) * dt)
+
+    // acc and gyro measurements corrected with the estimated bias
     Eigen::Matrix3s acc_skew =  skew(measured_acc_ - bias_acc_);
-    Eigen::Vector3s gyro     =  measured_gyro_ - bias_gyro_;
+    Eigen::Vector3s omega    =  measured_gyro_ - bias_gyro_;
 
     // temporaries
     Scalar dt2_2      = 0.5 * _dt * _dt;
-    Eigen::Matrix3s M = R_1 * acc_skew * dDq_dwb_;
+    Eigen::Matrix3s M = R_1 * acc_skew * Jr_1;                                      // Sola 15
+    //    Eigen::Matrix3s M = R_1 * acc_skew * dDq_dwb_;                            // Forster
+    /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
+        d(R a)/d(df) = -R{Df} * skew[a] *Jr{Df}
+     */
 
-    // Jacobian incremental updates wrt bias
-    // dP/dab += dv/dab - 0.5 * delta_R * dt * dt
-    // dv/dab -= delta_R * dt
-    // dP/dwb += dv/dwb * dt - 0.5 * delta_R * (a - ab)^ * dt * dt * dR/dwb
-    // dv/dwb -= delta_R * dt * (a - ab)^ * dR/dwb
-    // dR/dwb += R.t * dR/dwb * Jr * dt       where Jr  == right Jacobian
-    //                                             R.t == [exp(- (w - wb) * dt)]
     dDp_dab_ += dDv_dab_ * _dt -  R_1 * dt2_2;
     dDv_dab_ -= R_1 * _dt;
+
     dDp_dwb_ += dDv_dwb_ * _dt - M * dt2_2;
     dDv_dwb_ -= M * _dt;
-    dDq_dwb_ += v2R( - gyro * _dt) * dDq_dwb_ * jac_SO3_right(gyro * _dt) * _dt; // FIXME This is most certainly wrong!
+    dDq_dwb_ -= v2R( - omega * _dt) * jac_SO3_right(omega * _dt) * _dt; // See SOLA-16
 
 
     ///////////////////////////////////////////////////////////////////////////
