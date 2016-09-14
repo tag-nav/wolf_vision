@@ -56,7 +56,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             Eigen::Matrix<T,4,4> M_W_R, M_R_C;
             M_W_R << qwr.matrix(), pwr, (T)0, (T)0, (T)0, (T)1;
             M_R_C << qrc.matrix(), prc, (T)0, (T)0, (T)0, (T)1;
-            phw = M_W_R*M_R_C*phc;
+            //phw = M_W_R*M_R_C*phc;
 
 
 
