@@ -49,13 +49,50 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         bool operator ()(const T* const _current_frame_p, const T* const _current_frame_o, const T* const _anchor_frame_p,
                          const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _residuals) const
         {
-            // test TODO remove this
-            Eigen::Quaternion<T> qwr, qrc;
-            Eigen::Matrix<T,3,1> pwr, prc, phc, phw ;
+
+
+            Eigen::Map<const Eigen::Matrix<T, 3, 1> > pwr1(_current_frame_p);
+            Eigen::Map<const Eigen::Matrix<T, 3, 1> > pwr0(_anchor_frame_p);
+            Eigen::Matrix<T, 3, 1> prc = anchor_sensor_extrinsics_p_.cast<T>();
+
+            Eigen::Quaternion<T> qwr1, qwr0, qrc;
+            qwr0 = _anchor_frame_o;
+            qwr1 = _current_frame_o;
+            qrc = anchor_sensor_extrinsics_o_.cast<T>();
+
+            Eigen::Matrix<T,3,1>  phc, phw ;
+            Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_map(_lmk_hmg);
+            phc(0) = landmark_map(0);
+            phc(1) = landmark_map(1);
+            phc(2) = landmark_map(2);
+            T inverse_dist = landmark_map(3); // inverse distance
+
 //            Eigen::Transform<T,3> T();
-            Eigen::Matrix<T,4,4> M_W_R, M_R_C;
-            M_W_R << qwr.matrix(), pwr, (T)0, (T)0, (T)0, (T)1;
-            M_R_C << qrc.matrix(), prc, (T)0, (T)0, (T)0, (T)1;
+            Eigen::Matrix<T,4,4> M_R0_C0, M_W_R0, M_W_R1, M_R1_C1;
+//            M_W_R << qwr.matrix(), pwr, (T)0, (T)0, (T)0, (T)1;
+//            M_R_C << qrc.matrix(), prc, (T)0, (T)0, (T)0, (T)1;
+
+            M_R0_C0.block(0,0,3,3) << qrc.matrix();
+            M_R0_C0.col(3).head(3) << prc;
+            M_R0_C0.row(3) << (T)0, (T)0, (T)0, (T)1;
+
+            M_W_R0.block(0,0,3,3) << qwr0.matrix();
+            M_W_R0.col(3).head(3) << pwr0;
+            M_W_R0.row(3) << (T)0, (T)0, (T)0, (T)1;
+
+            Eigen::Matrix<T,4,1> test;
+            test = M_W_R0*M_R0_C0*landmark_map;
+
+            std::cout << "test: " << test(0) << "\t" << test(1) << "\t" << test(2) << "\t" << test(3) << std::endl;
+
+
+            /* NO SON MATRICES DE TRANSFORMACION, SOLO MATRICES NORMALES. BUSCA LA CLASE Eigen::Transform */
+
+//            M_R_C.block(0,0,3,3) << qrc0.matrix();
+//            M_R_C.col(3).head(3) << prc;
+//            M_R_C.row(3) << (T)0, (T)0, (T)0, (T)1;
+
+
             //phw = M_W_R*M_R_C*phc;
 
 
@@ -210,6 +247,15 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
             //    std::cout << "\ntranslation_world2camera:\n" << translation_world2camera(0) << "\t" << translation_world2camera(1)
             //    << "\t" << translation_world2camera(2) << std::endl;
+
+            Eigen::Matrix<T, 4, 1> testing_value;
+            Eigen::Matrix<T,4,4> M_test;
+            M_test.block(0,0,3,3) << rotation_world2camera;
+            M_test.col(3).head(3) << translation_world2camera;
+            M_test.row(3) << (T)0, (T)0, (T)0, (T)1;
+            testing_value = M_test * landmarkmap;
+            std::cout << "testing_value: " << testing_value(0) << "\t" << testing_value(1) << "\t" << testing_value(2) << "\t" << testing_value(3) << std::endl;
+
             // world in camera1 coordinates
             Eigen::Matrix<T, 3, 3> rotation_camera1_2world;
             rotation_camera1_2world = rotation_robot2camera.transpose() * rotation_F1_world2robot.transpose();
