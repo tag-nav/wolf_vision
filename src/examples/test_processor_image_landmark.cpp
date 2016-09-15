@@ -185,9 +185,9 @@ int main(int argc, char** argv)
         {
             ceres::Solver::Summary summary = ceres_manager.solve();
             std::cout << summary.FullReport() << std::endl;
+            cv::waitKey(0);
         }
 
-        cv::waitKey(0);
         std::cout << "END OF ITERATION" << std::endl;
 
         f++;

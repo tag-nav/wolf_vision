@@ -129,8 +129,8 @@ int main()
     // current frame p; current frame o; anchor frame p; anchor frame o; homogeneous vector landmark, residual
 
 
-//    std::cout << "Residual computed" << std::endl;
-//    std::cout << "Residual = " << residuals[0] << "   " << residuals[1] << std::endl;
+    std::cout << "Residual computed" << std::endl;
+    std::cout << "Residual = " << residuals[0] << "   " << residuals[1] << std::endl;
 
 
     delete wolf_problem_ptr_;

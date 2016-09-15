@@ -253,6 +253,8 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         virtual void getLandmarkInReference(LandmarkAHP* _landmark, Eigen::Vector3s _translation, Eigen::Matrix3s _rotation, Eigen::Vector3s& _point3D);
 
+        virtual void LandmarkInCurrentReferenceFrame(LandmarkAHP* _landmark,Eigen::Vector3s& _point3D);
+
         // These only to debug, will disappear one day soon
     public:
         virtual void drawFeatures(cv::Mat& _image);

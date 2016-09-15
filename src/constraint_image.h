@@ -77,27 +77,15 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
 //            Eigen::Matrix<T,3,1>  phc, phw ;
             Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_map(_lmk_hmg);
-//            phc(0) = landmark_map(0);
-//            phc(1) = landmark_map(1);
-//            phc(2) = landmark_map(2);
-//            T inverse_dist_c = landmark_map(3); // inverse distance
+
 
             Eigen::Matrix<T,4,4> M_R0_C0, M_W_R0, M_R1_W, M_C1_R1;
 
-            std::cout << "rotation matrix:\n"
-                      << qwr1.matrix()(0,0) << "\t" << qwr1.matrix()(0,1) << "\t" << qwr1.matrix()(0,2) << std::endl
-                      << qwr1.matrix()(1,0) << "\t" << qwr1.matrix()(1,1) << "\t" << qwr1.matrix()(1,2) << std::endl
-                      << qwr1.matrix()(2,0) << "\t" << qwr1.matrix()(2,1) << "\t" << qwr1.matrix()(2,2) << std::endl;
+//            std::cout << "rotation matrix:\n"
+//                      << qwr1.matrix()(0,0) << "\t" << qwr1.matrix()(0,1) << "\t" << qwr1.matrix()(0,2) << std::endl
+//                      << qwr1.matrix()(1,0) << "\t" << qwr1.matrix()(1,1) << "\t" << qwr1.matrix()(1,2) << std::endl
+//                      << qwr1.matrix()(2,0) << "\t" << qwr1.matrix()(2,1) << "\t" << qwr1.matrix()(2,2) << std::endl;
 
-            Eigen::Matrix<T,3,3> tm;
-            tm(0,0) = (T)1; tm(0,1) = (T)2; tm(0,2) = (T)3;
-            tm(1,0) = (T)4; tm(1,1) = (T)5; tm(1,2) = (T)6;
-            tm(2,0) = (T)7; tm(2,1) = (T)8; tm(2,2) = (T)9;
-
-            std::cout << "test matrix for numbers:\n"
-                      << tm(0,0) << "\t" << tm(0,1) << "\t" << tm(0,2) << std::endl
-                      << tm(1,0) << "\t" << tm(1,1) << "\t" << tm(1,2) << std::endl
-                      << tm(2,0) << "\t" << tm(2,1) << "\t" << tm(2,2) << std::endl;
 
             // FROM CAMERA0 TO WORLD
 
@@ -112,7 +100,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             Eigen::Matrix<T,4,1> test;
             test = M_W_R0*M_R0_C0*landmark_map;
 
-            std::cout << "\ntest:\n" << test(0) << "\t" << test(1) << "\t" << test(2) << "\t" << test(3) << std::endl;
+//            std::cout << "\ntest:\n" << test(0) << "\t" << test(1) << "\t" << test(2) << "\t" << test(3) << std::endl;
 
 
             // FROM WORLD TO CAMERA1
@@ -128,39 +116,43 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             Eigen::Matrix<T,4,1> test2;
             test2 = M_C1_R1*M_R1_W*test;
 
-            std::cout << "\ntest2:\n" << test2(0) << "\t" << test2(1) << "\t" << test2(2) << "\t" << test2(3) << std::endl;
+//            std::cout << "\ntest2:\n" << test2(0) << "\t" << test2(1) << "\t" << test2(2) << "\t" << test2(3) << std::endl;
 
-            Eigen::Matrix<T,3,1> v_value;
-            v_value(0) = test2(0);
-            v_value(1) = test2(1);
-            v_value(2) = test2(2);
+            Eigen::Matrix<T,3,1> v;
+            v(0) = test2(0);
+            v(1) = test2(1);
+            v(2) = test2(2);
+//            T inverse_dist = test2(3); // inverse distance
 
+            // ==================================================
+            Eigen::Matrix<T, 3, 1> u_;
+            u_ = K * v;
 
-            // NEXT STEP
+            Eigen::Matrix<T, 2, 1> u_12;
+            u_12(0) = u_(0);
+            u_12(1) = u_(1);
 
-
-            Eigen::Matrix<T, 3, 1> u_value;
-            u_value = K * v_value;
-
-            Eigen::Matrix<T, 2, 1> u_12_value;
-            u_12_value(0) = u_value(0);
-            u_12_value(1) = u_value(1);
-
-            Eigen::Matrix<T, 2, 1> u_val;
-            if (u_value(2) != T(0))
+            Eigen::Matrix<T, 2, 1> u;
+            if (u_(2) != T(0))
             {
-                u_val = u_12_value / u_value(2);
+                u = u_12 / u_(2);
             }
             else
             {
-                u_val = u_12_value;
+                u = u_12;
             }
-            std::cout << "\nu_val:\n" << u_val(0) << "\t" << u_val(1) << std::endl;
-            Eigen::Matrix<T, 2, 1> feature_position = getMeasurement().cast<T>();
-            std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
-            Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap2(_residuals);
-            residualsmap2 = getMeasurementSquareRootInformation().cast<T>() * (u_val - feature_position);
-            std::cout << "\nRESIDUALS:\n" << residualsmap2[0] << "\t" << residualsmap2[1] << std::endl;
+//            std::cout << "\nu:\n" << u(0) << "\t" << u(1) << std::endl;
+
+            // ==================================================
+            //    std::cout << "==============================================\nCONSTRAINT INFO" << std::endl;
+            //    std::cout << "Estimation of the Projection:\n\t" << u(0) << "\n\t" << u(1) << std::endl;
+//            std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
+            Eigen::Matrix<T, 2, 1> feature_pos = getMeasurement().cast<T>();
+
+            Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap(_residuals);
+            residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
+            std::cout << "\nRESIDUALS:\n" << residualsmap[0] << "\t" << residualsmap[1] << std::endl;
+
 
 
 
@@ -241,235 +233,6 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
 
 
-            /* OLD WAY */
-
-            std::cout << "\n============== constraint old method ============" << std::endl;
-
-            // Do the magic here
-            Eigen::Map<const Eigen::Matrix<T, 3, 1> > translation_F1_world2robot(_current_frame_p); //translation_world2robot
-            Eigen::Map<const Eigen::Matrix<T, 4, 1> > quaternion_F1_world2robot(_current_frame_o);
-            Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap(_residuals);
-            //    std::cout << "probot:\n" << translation_F1_world2robot(0) << "\t" << translation_F1_world2robot(1)
-            //              << "\t" << translation_F1_world2robot(2) << std::endl;
-            //    std::cout << "quaternion_F1_world2robot:\n" << quaternion_F1_world2robot(0) << "\t" << quaternion_F1_world2robot(1)
-            //    << "\t" << quaternion_F1_world2robot(2) << "\t" << quaternion_F1_world2robot(3)<< std::endl;
-            //    std::cout << "residuals:\n" << residualsmap(0) << "\t" << residualsmap(1) << std::endl;
-
-//            Eigen::Matrix<T, 4, 1> k_params = anchor_sensor_intrinsics_.cast<T>();
-//            Eigen::Matrix<T, 3, 3> K;
-//            K(0, 0) = k_params(2);
-//            K(0, 1) = T(0);
-//            K(0, 2) = k_params(0);
-//            K(1, 0) = T(0);
-//            K(1, 1) = k_params(3);
-//            K(1, 2) = k_params(1);
-//            K(2, 0) = T(0);
-//            K(2, 1) = T(0);
-//            K(2, 2) = T(1);
-
-            //    std::cout << "K matrix:\n" << K(0,0) << "\t" << K(0,1) << "\t" << K(0,2) << "\n"
-            //              << K(1,0) << "\t" << K(1,1) << "\t" << K(1,2) << "\n"
-            //              << K(2,0) << "\t" << K(2,1) << "\t" << K(2,2) << "\n" << std::endl;
-            Eigen::Matrix<T, 3, 1> translation_robot2camera = anchor_sensor_extrinsics_p_.cast<T>();
-            Eigen::Matrix<T, 4, 1> quaternion_robot2camera = anchor_sensor_extrinsics_o_.cast<T>();
-            //    std::cout << "translation_robot2camera:\n" << translation_robot2camera(0) << "\t" << translation_robot2camera(1)
-            //              << "\t" << translation_robot2camera(2) << std::endl;
-            //    std::cout << "quaternion_robot2camera:\n" << quaternion_robot2camera(0) << "\t" << quaternion_robot2camera(1) << "\t"
-            //              << quaternion_robot2camera(2) << "\t" << quaternion_robot2camera(3)<< std::endl;
-            Eigen::Map<const Eigen::Matrix<T, 3, 1> > translation_F0_world2robot(_anchor_frame_p);
-            Eigen::Map<const Eigen::Matrix<T, 4, 1> > quaternion_F0_world2robot(_anchor_frame_o);
-            //    std::cout << "translation_F0_world2robot:\n" << translation_F0_world2robot(0) << "\t" << translation_F0_world2robot(1)
-            //              << "\t" << translation_F0_world2robot(2) << std::endl;
-            //    std::cout << "quaternion_F0_world2robot:\n" << quaternion_F0_world2robot(0) << "\t" << quaternion_F0_world2robot(1) << "\t"
-            //              << quaternion_F0_world2robot(2) << "\t" << quaternion_F0_world2robot(3)<< std::endl;
-            Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmarkmap(_lmk_hmg);
-            Eigen::Matrix<T, 3, 1> m;
-            m(0) = landmarkmap(0);
-            m(1) = landmarkmap(1);
-            m(2) = landmarkmap(2);
-            T inv_dist = landmarkmap(3); // inverse distance
-            //    std::cout << "m:\n" << m(0) << "\t" << m(1) << "\t" << m(2) << "\ninverse depth: " << landmarkmap(3) << std::endl;
-            /* making the rotations manually now */
-            Eigen::Matrix<T, 3, 3> rotation_F1_world2robot;
-            rotation_F1_world2robot(0, 0) = pow(quaternion_F1_world2robot(3), 2) + pow(quaternion_F1_world2robot(0), 2)
-                    - pow(quaternion_F1_world2robot(1), 2) - pow(quaternion_F1_world2robot(2), 2);
-            rotation_F1_world2robot(0, 1) = T(2)
-                    * (quaternion_F1_world2robot(0) * quaternion_F1_world2robot(1)
-                            + quaternion_F1_world2robot(3) * quaternion_F1_world2robot(2));
-            rotation_F1_world2robot(0, 2) = T(2)
-                    * (quaternion_F1_world2robot(0) * quaternion_F1_world2robot(2)
-                            + quaternion_F1_world2robot(3) * quaternion_F1_world2robot(1));
-            rotation_F1_world2robot(1, 0) = T(2)
-                    * (quaternion_F1_world2robot(0) * quaternion_F1_world2robot(1)
-                            - quaternion_F1_world2robot(3) * quaternion_F1_world2robot(2));
-            rotation_F1_world2robot(1, 1) = pow(quaternion_F1_world2robot(3), 2) - pow(quaternion_F1_world2robot(0), 2)
-                    + pow(quaternion_F1_world2robot(1), 2) - pow(quaternion_F1_world2robot(2), 2);
-            rotation_F1_world2robot(1, 2) = T(2)
-                    * (quaternion_F1_world2robot(1) * quaternion_F1_world2robot(2)
-                            + quaternion_F1_world2robot(3) * quaternion_F1_world2robot(0));
-            rotation_F1_world2robot(2, 0) = T(2)
-                    * (quaternion_F1_world2robot(0) * quaternion_F1_world2robot(2)
-                            - quaternion_F1_world2robot(3) * quaternion_F1_world2robot(1));
-            rotation_F1_world2robot(2, 1) = T(2)
-                    * (quaternion_F1_world2robot(1) * quaternion_F1_world2robot(2)
-                            - quaternion_F1_world2robot(3) * quaternion_F1_world2robot(0));
-            rotation_F1_world2robot(2, 2) = pow(quaternion_F1_world2robot(3), 2) - pow(quaternion_F1_world2robot(0), 2)
-                    - pow(quaternion_F1_world2robot(1), 2) + pow(quaternion_F1_world2robot(2), 2);
-
-                std::cout << "\nrotation F1 world to robot:\n"
-                          << rotation_F1_world2robot(0,0) << "\t" << rotation_F1_world2robot(0,1) << "\t" << rotation_F1_world2robot(0,2) << "\n"
-                          << rotation_F1_world2robot(1,0) << "\t" << rotation_F1_world2robot(1,1) << "\t" << rotation_F1_world2robot(1,2) << "\n"
-                          << rotation_F1_world2robot(2,0) << "\t" << rotation_F1_world2robot(2,1) << "\t" << rotation_F1_world2robot(2,2) << "\n\n";
-            Eigen::Matrix<T, 3, 3> rotation_F0_world2robot;
-            rotation_F0_world2robot(0, 0) = pow(quaternion_F0_world2robot(3), 2) + pow(quaternion_F0_world2robot(0), 2)
-                    - pow(quaternion_F0_world2robot(1), 2) - pow(quaternion_F0_world2robot(2), 2);
-            rotation_F0_world2robot(0, 1) = T(2)
-                    * (quaternion_F0_world2robot(0) * quaternion_F0_world2robot(1)
-                            + quaternion_F0_world2robot(3) * quaternion_F0_world2robot(2));
-            rotation_F0_world2robot(0, 2) = T(2)
-                    * (quaternion_F0_world2robot(0) * quaternion_F0_world2robot(2)
-                            + quaternion_F0_world2robot(3) * quaternion_F0_world2robot(1));
-            rotation_F0_world2robot(1, 0) = T(2)
-                    * (quaternion_F0_world2robot(0) * quaternion_F0_world2robot(1)
-                            - quaternion_F0_world2robot(3) * quaternion_F0_world2robot(2));
-            rotation_F0_world2robot(1, 1) = pow(quaternion_F0_world2robot(3), 2) - pow(quaternion_F0_world2robot(0), 2)
-                    + pow(quaternion_F0_world2robot(1), 2) - pow(quaternion_F0_world2robot(2), 2);
-            rotation_F0_world2robot(1, 2) = T(2)
-                    * (quaternion_F0_world2robot(1) * quaternion_F0_world2robot(2)
-                            + quaternion_F0_world2robot(3) * quaternion_F0_world2robot(0));
-            rotation_F0_world2robot(2, 0) = T(2)
-                    * (quaternion_F0_world2robot(0) * quaternion_F0_world2robot(2)
-                            - quaternion_F0_world2robot(3) * quaternion_F0_world2robot(1));
-            rotation_F0_world2robot(2, 1) = T(2)
-                    * (quaternion_F0_world2robot(1) * quaternion_F0_world2robot(2)
-                            - quaternion_F0_world2robot(3) * quaternion_F0_world2robot(0));
-            rotation_F0_world2robot(2, 2) = pow(quaternion_F0_world2robot(3), 2) - pow(quaternion_F0_world2robot(0), 2)
-                    - pow(quaternion_F0_world2robot(1), 2) + pow(quaternion_F0_world2robot(2), 2);
-
-            //    std::cout << "\nrotation F0 world to robot:\n"
-            //              << rotation_F0_world2robot(0,0) << "\t" << rotation_F0_world2robot(0,1) << "\t" << rotation_F0_world2robot(0,2) << "\n"
-            //              << rotation_F0_world2robot(1,0) << "\t" << rotation_F0_world2robot(1,1) << "\t" << rotation_F0_world2robot(1,2) << "\n"
-            //              << rotation_F0_world2robot(2,0) << "\t" << rotation_F0_world2robot(2,1) << "\t" << rotation_F0_world2robot(2,2) << "\n\n";
-            Eigen::Matrix<T, 3, 3> rotation_robot2camera;
-            rotation_robot2camera(0, 0) = pow(quaternion_robot2camera(3), 2) + pow(quaternion_robot2camera(0), 2)
-                    - pow(quaternion_robot2camera(1), 2) - pow(quaternion_robot2camera(2), 2);
-            rotation_robot2camera(0, 1) = T(2)
-                    * (quaternion_robot2camera(0) * quaternion_robot2camera(1)
-                            + quaternion_robot2camera(3) * quaternion_robot2camera(2));
-            rotation_robot2camera(0, 2) = T(2)
-                    * (quaternion_robot2camera(0) * quaternion_robot2camera(2)
-                            + quaternion_robot2camera(3) * quaternion_robot2camera(1));
-            rotation_robot2camera(1, 0) = T(2)
-                    * (quaternion_robot2camera(0) * quaternion_robot2camera(1)
-                            - quaternion_robot2camera(3) * quaternion_robot2camera(2));
-            rotation_robot2camera(1, 1) = pow(quaternion_robot2camera(3), 2) - pow(quaternion_robot2camera(0), 2)
-                    + pow(quaternion_robot2camera(1), 2) - pow(quaternion_robot2camera(2), 2);
-            rotation_robot2camera(1, 2) = T(2)
-                    * (quaternion_robot2camera(1) * quaternion_robot2camera(2)
-                            + quaternion_robot2camera(3) * quaternion_robot2camera(0));
-            rotation_robot2camera(2, 0) = T(2)
-                    * (quaternion_robot2camera(0) * quaternion_robot2camera(2)
-                            - quaternion_robot2camera(3) * quaternion_robot2camera(1));
-            rotation_robot2camera(2, 1) = T(2)
-                    * (quaternion_robot2camera(1) * quaternion_robot2camera(2)
-                            - quaternion_robot2camera(3) * quaternion_robot2camera(0));
-            rotation_robot2camera(2, 2) = pow(quaternion_robot2camera(3), 2) - pow(quaternion_robot2camera(0), 2)
-                    - pow(quaternion_robot2camera(1), 2) + pow(quaternion_robot2camera(2), 2);
-
-            //    std::cout << "\nrotation robot to camera:\n"
-            //              << rotation_robot2camera(0,0) << "\t" << rotation_robot2camera(0,1) << "\t" << rotation_robot2camera(0,2) << "\n"
-            //              << rotation_robot2camera(1,0) << "\t" << rotation_robot2camera(1,1) << "\t" << rotation_robot2camera(1,2) << "\n"
-            //              << rotation_robot2camera(2,0) << "\t" << rotation_robot2camera(2,1) << "\t" << rotation_robot2camera(2,2) << "\n\n";
-            /* end making the rotations */
-            // ==================================================
-            // camera in world coordinates
-            Eigen::Matrix<T, 3, 3> rotation_world2camera;
-            rotation_world2camera = rotation_F0_world2robot * rotation_robot2camera;
-
-            //    std::cout << "\nrotation_world2camera:\n"
-            //              << rotation_world2camera(0,0) << "\t" << rotation_world2camera(0,1) << "\t" << rotation_world2camera(0,2) << "\n"
-            //              << rotation_world2camera(1,0) << "\t" << rotation_world2camera(1,1) << "\t" << rotation_world2camera(1,2) << "\n"
-            //              << rotation_world2camera(2,0) << "\t" << rotation_world2camera(2,1) << "\t" << rotation_world2camera(2,2) << "\n";
-            Eigen::Matrix<T, 3, 1> translation_world2camera;
-            translation_world2camera = (rotation_F0_world2robot * translation_robot2camera)
-                    + translation_F0_world2robot;
-
-            //    std::cout << "\ntranslation_world2camera:\n" << translation_world2camera(0) << "\t" << translation_world2camera(1)
-            //    << "\t" << translation_world2camera(2) << std::endl;
-
-            Eigen::Matrix<T, 4, 1> testing_value;
-            Eigen::Matrix<T,4,4> M_test;
-            M_test.block(0,0,3,3) << rotation_world2camera;
-            M_test.col(3).head(3) << translation_world2camera;
-            M_test.row(3) << (T)0, (T)0, (T)0, (T)1;
-            testing_value = M_test * landmarkmap;
-            std::cout << "\ntesting_value:\n" << testing_value(0) << "\t" << testing_value(1) << "\t" << testing_value(2) << "\t" << testing_value(3) << std::endl;
-
-            // world in camera1 coordinates
-            Eigen::Matrix<T, 3, 3> rotation_camera1_2world;
-            rotation_camera1_2world = rotation_robot2camera.transpose() * rotation_F1_world2robot.transpose();
-
-            //    std::cout << "\nrotation_camera1_2world:\n"
-            //              << rotation_camera1_2world(0,0) << "\t" << rotation_camera1_2world(0,1) << "\t" << rotation_camera1_2world(0,2) << "\n"
-            //              << rotation_camera1_2world(1,0) << "\t" << rotation_camera1_2world(1,1) << "\t" << rotation_camera1_2world(1,2) << "\n"
-            //              << rotation_camera1_2world(2,0) << "\t" << rotation_camera1_2world(2,1) << "\t" << rotation_camera1_2world(2,2) << "\n";
-            Eigen::Matrix<T, 3, 1> translation_camera1_2world;
-            translation_camera1_2world = (rotation_robot2camera.transpose()
-                    * (-rotation_F1_world2robot.transpose() * translation_F1_world2robot))
-                    + (-rotation_robot2camera.transpose() * translation_robot2camera);
-            //    std::cout << "\ntranslation_camera1_2world:\n" << translation_camera1_2world(0) << "\t" << translation_camera1_2world(1)
-            //    << "\t" << translation_camera1_2world(2) << std::endl;
-            // camera in camera1 coordinates, through world
-            Eigen::Matrix<T, 3, 3> rotation_camera1_2camera;
-            rotation_camera1_2camera = rotation_camera1_2world * rotation_world2camera;
-            //    std::cout << "\nrotation_camera1_2camera:\n"
-            //              << rotation_camera1_2camera(0,0) << "\t" << rotation_camera1_2camera(0,1) << "\t" << rotation_camera1_2camera(0,2) << "\n"
-            //              << rotation_camera1_2camera(1,0) << "\t" << rotation_camera1_2camera(1,1) << "\t" << rotation_camera1_2camera(1,2) << "\n"
-            //              << rotation_camera1_2camera(2,0) << "\t" << rotation_camera1_2camera(2,1) << "\t" << rotation_camera1_2camera(2,2) << "\n";
-            Eigen::Matrix<T, 3, 1> translation_camera1_2camera;
-            translation_camera1_2camera = (rotation_camera1_2world * translation_world2camera)
-                    + translation_camera1_2world;
-            //    std::cout << "\ntranslation_camera1_2camera:\n" << translation_camera1_2camera(0) << "\t" << translation_camera1_2camera(1)
-            //    << "\t" << translation_camera1_2camera(2) << std::endl;
-            // put "m" in the camera1 reference
-            Eigen::Matrix<T, 3, 1> v;
-            v = (rotation_camera1_2camera * m) + (translation_camera1_2camera * inv_dist); // vector defining the line of sight in the new camera
-               std::cout << "\ntesting_value2:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << "\t" << inv_dist<< std::endl;
-
-
-
-
-
-            // ==================================================
-            Eigen::Matrix<T, 3, 1> u_;
-            u_ = K * v;
-            //    std::cout << "\nu_:\n" << u_(0) << "\t" << u_(1) << "\t" << u_(2) << std::endl;
-            //    Eigen::Matrix<T,3,1> m2;
-            //    m2 = rotation_c2c1*K.inverse()*u_;
-            //    std::cout << "m2:\n" << m2(0) << "\t" << m2(1) << "\t" << m2(2) << std::endl;
-            Eigen::Matrix<T, 2, 1> u_12;
-            u_12(0) = u_(0);
-            u_12(1) = u_(1);
-            Eigen::Matrix<T, 2, 1> u;
-            if (u_(2) != T(0))
-            {
-                u = u_12 / u_(2);
-                //std::cout << "u_(2) != 0" << std::endl;
-            }
-            else
-            {
-                u = u_12;
-                //std::cout << "u_(2) == 0" << std::endl;
-            }
-            std::cout << "\nu:\n" << u(0) << "\t" << u(1) << std::endl;
-            // ==================================================
-            //    std::cout << "==============================================\nCONSTRAINT INFO" << std::endl;
-            //    std::cout << "Estimation of the Projection:\n\t" << u(0) << "\n\t" << u(1) << std::endl;
-            std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
-            Eigen::Matrix<T, 2, 1> feature_pos = getMeasurement().cast<T>();
-            //std::cout << "Square Root Information:\n" << getMeasurementSquareRootInformation() << std::endl;
-            residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
-            std::cout << "\nRESIDUALS:\n" << residualsmap[0] << "\t" << residualsmap[1] << std::endl;
             return true;
         }
 

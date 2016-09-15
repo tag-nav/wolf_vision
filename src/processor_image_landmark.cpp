@@ -158,12 +158,13 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         /* project */
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_in_ptr;
 
-        changeOfReferenceFrame(landmark_ptr,translation,rotation);
+//        changeOfReferenceFrame(landmark_ptr,translation,rotation);
 
         Eigen::Vector3s point3D;
 
-        getLandmarkInReference(landmark_ptr,translation,rotation,point3D);
+//        getLandmarkInReference(landmark_ptr,translation,rotation,point3D);
 
+        LandmarkInCurrentReferenceFrame(landmark_ptr,point3D);
 
         Eigen::Vector2s point2D;
 //        point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
@@ -406,6 +407,62 @@ void ProcessorImageLandmark::changeOfReferenceFrame(LandmarkAHP* _landmark,Eigen
     _rotation = rotation_camera1_2camera;
 }
 
+void ProcessorImageLandmark::LandmarkInCurrentReferenceFrame(LandmarkAHP* _landmark,Eigen::Vector3s& _point3D)
+{
+    Eigen::Vector3s pwr1 = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
+    Eigen::Vector3s pwr0 = _landmark->getAnchorFrame()->getPPtr()->getVector();
+    Eigen::Vector3s prc = this->getSensorPtr()->getPPtr()->getVector();
+
+    Eigen::Quaternion<Scalar> qwr1, qwr0, qrc;
+    Eigen::Vector4s quaternion_anchor = _landmark->getAnchorFrame()->getOPtr()->getVector();
+    Eigen::Vector4s quaternion_current_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
+    Eigen::Vector4s quaternion_sensor = this->getSensorPtr()->getOPtr()->getVector();
+    qwr0 = quaternion_anchor;
+    qwr1 = quaternion_current_frame;
+    qrc = quaternion_sensor;
+
+//            Eigen::Matrix<T,3,1>  phc, phw ;
+    Eigen::Vector4s _lmk_hmg = _landmark->getPPtr()->getVector();
+
+
+    Eigen::Matrix4s M_R0_C0, M_W_R0, M_R1_W, M_C1_R1;
+
+
+
+    // FROM CAMERA0 TO WORLD
+
+    M_R0_C0.block(0,0,3,3) << qrc.matrix();
+    M_R0_C0.col(3).head(3) << prc;
+    M_R0_C0.row(3) << 0, 0, 0, 1;
+
+    M_W_R0.block(0,0,3,3) << qwr0.matrix();
+    M_W_R0.col(3).head(3) << pwr0;
+    M_W_R0.row(3) << 0, 0, 0, 1;
+
+    Eigen::Vector4s test;
+    test = M_W_R0*M_R0_C0*_lmk_hmg;
+
+
+
+    // FROM WORLD TO CAMERA1
+
+    M_R1_W.block(0,0,3,3) << qwr1.matrix().transpose();
+    M_R1_W.col(3).head(3) << (-qwr1.matrix().transpose()*pwr1);
+    M_R1_W.row(3) << 0, 0,0, 1;
+
+    M_C1_R1.block(0,0,3,3) << qrc.matrix().transpose();
+    M_C1_R1.col(3).head(3) << (-qrc.matrix().transpose()*prc);
+    M_C1_R1.row(3) << 0, 0, 0, 1;
+
+    Eigen::Vector4s test2;
+    test2 = M_C1_R1*M_R1_W*test;
+
+
+    _point3D(0) = test2(0) / test2(3);
+    _point3D(1) = test2(1) / test2(3);
+    _point3D(2) = test2(2) / test2(3);
+}
+
 void ProcessorImageLandmark::rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation)
 {
 
@@ -542,11 +599,13 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
     {
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_base_ptr;
 
-        changeOfReferenceFrame(landmark_ptr,translation,rotation);
+//        changeOfReferenceFrame(landmark_ptr,translation,rotation);
 
         Eigen::Vector3s point3D;
 
-        getLandmarkInReference(landmark_ptr,translation,rotation,point3D);
+//        getLandmarkInReference(landmark_ptr,translation,rotation,point3D);
+
+        LandmarkInCurrentReferenceFrame(landmark_ptr,point3D);
 
         Eigen::Vector2s point2D;
 //        point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
