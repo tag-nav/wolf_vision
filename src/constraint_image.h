@@ -86,6 +86,63 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             std::cout << "test: " << test(0) << "\t" << test(1) << "\t" << test(2) << "\t" << test(3) << std::endl;
 
 
+            Eigen::Transform<T,4,4> test_mat;
+            test_mat(0,0) = qrc.matrix()(0,0); test_mat(0,1) = qrc.matrix()(0,1); test_mat(0,2) = qrc.matrix()(0,2); test_mat(0,3) = prc(0);
+            test_mat(1,0) = qrc.matrix()(1,0); test_mat(1,1) = qrc.matrix()(1,1); test_mat(1,2) = qrc.matrix()(1,2); test_mat(1,3) = prc(1);
+            test_mat(2,0) = qrc.matrix()(2,0); test_mat(2,1) = qrc.matrix()(2,1); test_mat(2,2) = qrc.matrix()(2,2); test_mat(2,3) = prc(2);
+            test_mat(3,0) = (T)0; test_mat(3,1) = (T)0; test_mat(3,2) = (T)0; test_mat(3,3) = (T)1;
+
+            std::cout << "Transform matrix:\n"
+                      << test_mat(0,0) << "\t" << test_mat(0,1) << "\t" << test_mat(0,2) << "\t" << test_mat(0,3) << std::endl
+                      << test_mat(1,0) << "\t" << test_mat(1,1) << "\t" << test_mat(1,2) << "\t" << test_mat(1,3) << std::endl
+                      << test_mat(2,0) << "\t" << test_mat(2,1) << "\t" << test_mat(2,2) << "\t" << test_mat(2,3) << std::endl
+                      << test_mat(3,0) << "\t" << test_mat(3,1) << "\t" << test_mat(3,2) << "\t" << test_mat(3,3) << std::endl;
+
+
+            Eigen::Transform<T,4,4> t;
+            t(0,0) = (T)1; t(0,1) = (T)0; t(0,2) = (T)0; t(0,3) = (T)0;
+            t(1,0) = (T)0; t(1,1) = (T)1; t(1,2) = (T)0; t(1,3) = (T)3;
+            t(2,0) = (T)0; t(2,1) = (T)0; t(2,2) = (T)1; t(2,3) = (T)2;
+            t(3,0) = (T)0; t(3,1) = (T)0; t(3,2) = (T)0; t(3,3) = (T)1;
+
+            //Eigen::Translation<T,3> translation(prc);
+            Eigen::Translation<T,3> translation;
+            translation.x() = (T)3;
+            translation.y() = (T)2;
+            translation.z() = (T)0;
+
+            Eigen::Vector4s test_quaternion = {0,2,0,1};
+            Eigen::Quaternion<T> rotation;
+            rotation= test_quaternion.cast<T>();
+
+            std::cout << "rotation matrix:\n"
+                      << rotation.matrix()(0,0) << "\t" << rotation.matrix()(0,1) << "\t" << rotation.matrix()(0,2) << std::endl
+                      << rotation.matrix()(1,0) << "\t" << rotation.matrix()(1,1) << "\t" << rotation.matrix()(1,2) << std::endl
+                      << rotation.matrix()(2,0) << "\t" << rotation.matrix()(2,1) << "\t" << rotation.matrix()(2,2) << std::endl;
+
+            std::cout << "rotation transposed matrix:\n"
+                      << rotation.matrix().transpose()(0,0) << "\t" << rotation.matrix().transpose()(0,1) << "\t" << rotation.matrix().transpose()(0,2) << std::endl
+                      << rotation.matrix().transpose()(1,0) << "\t" << rotation.matrix().transpose()(1,1) << "\t" << rotation.matrix().transpose()(1,2) << std::endl
+                      << rotation.matrix().transpose()(2,0) << "\t" << rotation.matrix().transpose()(2,1) << "\t" << rotation.matrix().transpose()(2,2) << std::endl;
+
+            Eigen::Transform<T,3,Eigen::Affine> combined = translation * rotation;
+
+
+            std::cout << "Combined Transform matrix:\n"
+                      << combined(0,0) << "\t" << combined(0,1) << "\t" << combined(0,2) << "\t" << combined(0,3) << std::endl
+                      << combined(1,0) << "\t" << combined(1,1) << "\t" << combined(1,2) << "\t" << combined(1,3) << std::endl
+                      << combined(2,0) << "\t" << combined(2,1) << "\t" << combined(2,2) << "\t" << combined(2,3) << std::endl
+                      << combined(3,0) << "\t" << combined(3,1) << "\t" << combined(3,2) << "\t" << combined(3,3) << std::endl;
+
+            Eigen::Transform<T,3,Eigen::Affine> combined_inv = combined.inverse(Eigen::Affine);
+
+            std::cout << "Combined inverse Transform matrix:\n"
+                      << combined_inv(0,0) << "\t" << combined_inv(0,1) << "\t" << combined_inv(0,2) << "\t" << combined_inv(0,3) << std::endl
+                      << combined_inv(1,0) << "\t" << combined_inv(1,1) << "\t" << combined_inv(1,2) << "\t" << combined_inv(1,3) << std::endl
+                      << combined_inv(2,0) << "\t" << combined_inv(2,1) << "\t" << combined_inv(2,2) << "\t" << combined_inv(2,3) << std::endl
+                      << combined_inv(3,0) << "\t" << combined_inv(3,1) << "\t" << combined_inv(3,2) << "\t" << combined_inv(3,3) << std::endl;
+
+
             /* NO SON MATRICES DE TRANSFORMACION, SOLO MATRICES NORMALES. BUSCA LA CLASE Eigen::Transform */
 
 //            M_R_C.block(0,0,3,3) << qrc0.matrix();
@@ -94,6 +151,12 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
 
             //phw = M_W_R*M_R_C*phc;
+
+
+
+
+
+
 
 
 
