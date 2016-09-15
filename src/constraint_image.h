@@ -50,6 +50,21 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                          const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _residuals) const
         {
 
+            std::cout << "\n============== constraint new method ============" << std::endl;
+
+            Eigen::Matrix<T, 4, 1> k_params = anchor_sensor_intrinsics_.cast<T>();
+            Eigen::Matrix<T, 3, 3> K;
+            K(0, 0) = k_params(2);
+            K(0, 1) = T(0);
+            K(0, 2) = k_params(0);
+            K(1, 0) = T(0);
+            K(1, 1) = k_params(3);
+            K(1, 2) = k_params(1);
+            K(2, 0) = T(0);
+            K(2, 1) = T(0);
+            K(2, 2) = T(1);
+
+
 
             Eigen::Map<const Eigen::Matrix<T, 3, 1> > pwr1(_current_frame_p);
             Eigen::Map<const Eigen::Matrix<T, 3, 1> > pwr0(_anchor_frame_p);
@@ -60,17 +75,31 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             qwr1 = _current_frame_o;
             qrc = anchor_sensor_extrinsics_o_.cast<T>();
 
-            Eigen::Matrix<T,3,1>  phc, phw ;
+//            Eigen::Matrix<T,3,1>  phc, phw ;
             Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_map(_lmk_hmg);
-            phc(0) = landmark_map(0);
-            phc(1) = landmark_map(1);
-            phc(2) = landmark_map(2);
-            T inverse_dist = landmark_map(3); // inverse distance
+//            phc(0) = landmark_map(0);
+//            phc(1) = landmark_map(1);
+//            phc(2) = landmark_map(2);
+//            T inverse_dist_c = landmark_map(3); // inverse distance
 
-//            Eigen::Transform<T,3> T();
-            Eigen::Matrix<T,4,4> M_R0_C0, M_W_R0, M_W_R1, M_R1_C1;
-//            M_W_R << qwr.matrix(), pwr, (T)0, (T)0, (T)0, (T)1;
-//            M_R_C << qrc.matrix(), prc, (T)0, (T)0, (T)0, (T)1;
+            Eigen::Matrix<T,4,4> M_R0_C0, M_W_R0, M_R1_W, M_C1_R1;
+
+            std::cout << "rotation matrix:\n"
+                      << qwr1.matrix()(0,0) << "\t" << qwr1.matrix()(0,1) << "\t" << qwr1.matrix()(0,2) << std::endl
+                      << qwr1.matrix()(1,0) << "\t" << qwr1.matrix()(1,1) << "\t" << qwr1.matrix()(1,2) << std::endl
+                      << qwr1.matrix()(2,0) << "\t" << qwr1.matrix()(2,1) << "\t" << qwr1.matrix()(2,2) << std::endl;
+
+            Eigen::Matrix<T,3,3> tm;
+            tm(0,0) = (T)1; tm(0,1) = (T)2; tm(0,2) = (T)3;
+            tm(1,0) = (T)4; tm(1,1) = (T)5; tm(1,2) = (T)6;
+            tm(2,0) = (T)7; tm(2,1) = (T)8; tm(2,2) = (T)9;
+
+            std::cout << "test matrix for numbers:\n"
+                      << tm(0,0) << "\t" << tm(0,1) << "\t" << tm(0,2) << std::endl
+                      << tm(1,0) << "\t" << tm(1,1) << "\t" << tm(1,2) << std::endl
+                      << tm(2,0) << "\t" << tm(2,1) << "\t" << tm(2,2) << std::endl;
+
+            // FROM CAMERA0 TO WORLD
 
             M_R0_C0.block(0,0,3,3) << qrc.matrix();
             M_R0_C0.col(3).head(3) << prc;
@@ -83,83 +112,138 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             Eigen::Matrix<T,4,1> test;
             test = M_W_R0*M_R0_C0*landmark_map;
 
-            std::cout << "test: " << test(0) << "\t" << test(1) << "\t" << test(2) << "\t" << test(3) << std::endl;
+            std::cout << "\ntest:\n" << test(0) << "\t" << test(1) << "\t" << test(2) << "\t" << test(3) << std::endl;
 
 
-            Eigen::Transform<T,4,4> test_mat;
-            test_mat(0,0) = qrc.matrix()(0,0); test_mat(0,1) = qrc.matrix()(0,1); test_mat(0,2) = qrc.matrix()(0,2); test_mat(0,3) = prc(0);
-            test_mat(1,0) = qrc.matrix()(1,0); test_mat(1,1) = qrc.matrix()(1,1); test_mat(1,2) = qrc.matrix()(1,2); test_mat(1,3) = prc(1);
-            test_mat(2,0) = qrc.matrix()(2,0); test_mat(2,1) = qrc.matrix()(2,1); test_mat(2,2) = qrc.matrix()(2,2); test_mat(2,3) = prc(2);
-            test_mat(3,0) = (T)0; test_mat(3,1) = (T)0; test_mat(3,2) = (T)0; test_mat(3,3) = (T)1;
+            // FROM WORLD TO CAMERA1
 
-            std::cout << "Transform matrix:\n"
-                      << test_mat(0,0) << "\t" << test_mat(0,1) << "\t" << test_mat(0,2) << "\t" << test_mat(0,3) << std::endl
-                      << test_mat(1,0) << "\t" << test_mat(1,1) << "\t" << test_mat(1,2) << "\t" << test_mat(1,3) << std::endl
-                      << test_mat(2,0) << "\t" << test_mat(2,1) << "\t" << test_mat(2,2) << "\t" << test_mat(2,3) << std::endl
-                      << test_mat(3,0) << "\t" << test_mat(3,1) << "\t" << test_mat(3,2) << "\t" << test_mat(3,3) << std::endl;
+            M_R1_W.block(0,0,3,3) << qwr1.matrix().transpose();
+            M_R1_W.col(3).head(3) << (-qwr1.matrix().transpose()*pwr1);
+            M_R1_W.row(3) << (T)0, (T)0, (T)0, (T)1;
 
+            M_C1_R1.block(0,0,3,3) << qrc.matrix().transpose();
+            M_C1_R1.col(3).head(3) << (-qrc.matrix().transpose()*prc);
+            M_C1_R1.row(3) << (T)0, (T)0, (T)0, (T)1;
 
-            Eigen::Transform<T,4,4> t;
-            t(0,0) = (T)1; t(0,1) = (T)0; t(0,2) = (T)0; t(0,3) = (T)0;
-            t(1,0) = (T)0; t(1,1) = (T)1; t(1,2) = (T)0; t(1,3) = (T)3;
-            t(2,0) = (T)0; t(2,1) = (T)0; t(2,2) = (T)1; t(2,3) = (T)2;
-            t(3,0) = (T)0; t(3,1) = (T)0; t(3,2) = (T)0; t(3,3) = (T)1;
+            Eigen::Matrix<T,4,1> test2;
+            test2 = M_C1_R1*M_R1_W*test;
 
-            //Eigen::Translation<T,3> translation(prc);
-            Eigen::Translation<T,3> translation;
-            translation.x() = (T)3;
-            translation.y() = (T)2;
-            translation.z() = (T)0;
+            std::cout << "\ntest2:\n" << test2(0) << "\t" << test2(1) << "\t" << test2(2) << "\t" << test2(3) << std::endl;
 
-            Eigen::Vector4s test_quaternion = {0,2,0,1};
-            Eigen::Quaternion<T> rotation;
-            rotation= test_quaternion.cast<T>();
-
-            std::cout << "rotation matrix:\n"
-                      << rotation.matrix()(0,0) << "\t" << rotation.matrix()(0,1) << "\t" << rotation.matrix()(0,2) << std::endl
-                      << rotation.matrix()(1,0) << "\t" << rotation.matrix()(1,1) << "\t" << rotation.matrix()(1,2) << std::endl
-                      << rotation.matrix()(2,0) << "\t" << rotation.matrix()(2,1) << "\t" << rotation.matrix()(2,2) << std::endl;
-
-            std::cout << "rotation transposed matrix:\n"
-                      << rotation.matrix().transpose()(0,0) << "\t" << rotation.matrix().transpose()(0,1) << "\t" << rotation.matrix().transpose()(0,2) << std::endl
-                      << rotation.matrix().transpose()(1,0) << "\t" << rotation.matrix().transpose()(1,1) << "\t" << rotation.matrix().transpose()(1,2) << std::endl
-                      << rotation.matrix().transpose()(2,0) << "\t" << rotation.matrix().transpose()(2,1) << "\t" << rotation.matrix().transpose()(2,2) << std::endl;
-
-            Eigen::Transform<T,3,Eigen::Affine> combined = translation * rotation;
+            Eigen::Matrix<T,3,1> v_value;
+            v_value(0) = test2(0);
+            v_value(1) = test2(1);
+            v_value(2) = test2(2);
 
 
-            std::cout << "Combined Transform matrix:\n"
-                      << combined(0,0) << "\t" << combined(0,1) << "\t" << combined(0,2) << "\t" << combined(0,3) << std::endl
-                      << combined(1,0) << "\t" << combined(1,1) << "\t" << combined(1,2) << "\t" << combined(1,3) << std::endl
-                      << combined(2,0) << "\t" << combined(2,1) << "\t" << combined(2,2) << "\t" << combined(2,3) << std::endl
-                      << combined(3,0) << "\t" << combined(3,1) << "\t" << combined(3,2) << "\t" << combined(3,3) << std::endl;
-
-            Eigen::Transform<T,3,Eigen::Affine> combined_inv = combined.inverse(Eigen::Affine);
-
-            std::cout << "Combined inverse Transform matrix:\n"
-                      << combined_inv(0,0) << "\t" << combined_inv(0,1) << "\t" << combined_inv(0,2) << "\t" << combined_inv(0,3) << std::endl
-                      << combined_inv(1,0) << "\t" << combined_inv(1,1) << "\t" << combined_inv(1,2) << "\t" << combined_inv(1,3) << std::endl
-                      << combined_inv(2,0) << "\t" << combined_inv(2,1) << "\t" << combined_inv(2,2) << "\t" << combined_inv(2,3) << std::endl
-                      << combined_inv(3,0) << "\t" << combined_inv(3,1) << "\t" << combined_inv(3,2) << "\t" << combined_inv(3,3) << std::endl;
+            // NEXT STEP
 
 
-            /* NO SON MATRICES DE TRANSFORMACION, SOLO MATRICES NORMALES. BUSCA LA CLASE Eigen::Transform */
+            Eigen::Matrix<T, 3, 1> u_value;
+            u_value = K * v_value;
 
-//            M_R_C.block(0,0,3,3) << qrc0.matrix();
-//            M_R_C.col(3).head(3) << prc;
-//            M_R_C.row(3) << (T)0, (T)0, (T)0, (T)1;
+            Eigen::Matrix<T, 2, 1> u_12_value;
+            u_12_value(0) = u_value(0);
+            u_12_value(1) = u_value(1);
 
-
-            //phw = M_W_R*M_R_C*phc;
+            Eigen::Matrix<T, 2, 1> u_val;
+            if (u_value(2) != T(0))
+            {
+                u_val = u_12_value / u_value(2);
+            }
+            else
+            {
+                u_val = u_12_value;
+            }
+            std::cout << "\nu_val:\n" << u_val(0) << "\t" << u_val(1) << std::endl;
+            Eigen::Matrix<T, 2, 1> feature_position = getMeasurement().cast<T>();
+            std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
+            Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap2(_residuals);
+            residualsmap2 = getMeasurementSquareRootInformation().cast<T>() * (u_val - feature_position);
+            std::cout << "\nRESIDUALS:\n" << residualsmap2[0] << "\t" << residualsmap2[1] << std::endl;
 
 
 
 
+            /* TRANSFORM MATRIX APPROACH */
+
+
+//            Eigen::Transform<T,4,4> test_mat;
+//            test_mat(0,0) = qrc.matrix()(0,0); test_mat(0,1) = qrc.matrix()(0,1); test_mat(0,2) = qrc.matrix()(0,2); test_mat(0,3) = prc(0);
+//            test_mat(1,0) = qrc.matrix()(1,0); test_mat(1,1) = qrc.matrix()(1,1); test_mat(1,2) = qrc.matrix()(1,2); test_mat(1,3) = prc(1);
+//            test_mat(2,0) = qrc.matrix()(2,0); test_mat(2,1) = qrc.matrix()(2,1); test_mat(2,2) = qrc.matrix()(2,2); test_mat(2,3) = prc(2);
+//            test_mat(3,0) = (T)0; test_mat(3,1) = (T)0; test_mat(3,2) = (T)0; test_mat(3,3) = (T)1;
+
+//            std::cout << "Transform matrix:\n"
+//                      << test_mat(0,0) << "\t" << test_mat(0,1) << "\t" << test_mat(0,2) << "\t" << test_mat(0,3) << std::endl
+//                      << test_mat(1,0) << "\t" << test_mat(1,1) << "\t" << test_mat(1,2) << "\t" << test_mat(1,3) << std::endl
+//                      << test_mat(2,0) << "\t" << test_mat(2,1) << "\t" << test_mat(2,2) << "\t" << test_mat(2,3) << std::endl
+//                      << test_mat(3,0) << "\t" << test_mat(3,1) << "\t" << test_mat(3,2) << "\t" << test_mat(3,3) << std::endl;
+
+
+//            Eigen::Transform<T,4,4> t;
+//            t(0,0) = (T)1; t(0,1) = (T)0; t(0,2) = (T)0; t(0,3) = (T)0;
+//            t(1,0) = (T)0; t(1,1) = (T)1; t(1,2) = (T)0; t(1,3) = (T)3;
+//            t(2,0) = (T)0; t(2,1) = (T)0; t(2,2) = (T)1; t(2,3) = (T)2;
+//            t(3,0) = (T)0; t(3,1) = (T)0; t(3,2) = (T)0; t(3,3) = (T)1;
+
+//            //Eigen::Translation<T,3> translation(prc);
+//            Eigen::Translation<T,3> translation;
+//            translation.x() = (T)3;
+//            translation.y() = (T)2;
+//            translation.z() = (T)0;
+
+//            Eigen::Vector4s test_quaternion = {0,2,0,1};
+//            Eigen::Quaternion<T> rotation;
+//            rotation= test_quaternion.cast<T>();
+
+//            std::cout << "rotation matrix:\n"
+//                      << rotation.matrix()(0,0) << "\t" << rotation.matrix()(0,1) << "\t" << rotation.matrix()(0,2) << std::endl
+//                      << rotation.matrix()(1,0) << "\t" << rotation.matrix()(1,1) << "\t" << rotation.matrix()(1,2) << std::endl
+//                      << rotation.matrix()(2,0) << "\t" << rotation.matrix()(2,1) << "\t" << rotation.matrix()(2,2) << std::endl;
+
+//            std::cout << "rotation transposed matrix:\n"
+//                      << rotation.matrix().transpose()(0,0) << "\t" << rotation.matrix().transpose()(0,1) << "\t" << rotation.matrix().transpose()(0,2) << std::endl
+//                      << rotation.matrix().transpose()(1,0) << "\t" << rotation.matrix().transpose()(1,1) << "\t" << rotation.matrix().transpose()(1,2) << std::endl
+//                      << rotation.matrix().transpose()(2,0) << "\t" << rotation.matrix().transpose()(2,1) << "\t" << rotation.matrix().transpose()(2,2) << std::endl;
+
+//            Eigen::Transform<T,3,Eigen::Affine> combined = translation * rotation;
+
+
+//            std::cout << "Combined Transform matrix:\n"
+//                      << combined(0,0) << "\t" << combined(0,1) << "\t" << combined(0,2) << "\t" << combined(0,3) << std::endl
+//                      << combined(1,0) << "\t" << combined(1,1) << "\t" << combined(1,2) << "\t" << combined(1,3) << std::endl
+//                      << combined(2,0) << "\t" << combined(2,1) << "\t" << combined(2,2) << "\t" << combined(2,3) << std::endl
+//                      << combined(3,0) << "\t" << combined(3,1) << "\t" << combined(3,2) << "\t" << combined(3,3) << std::endl;
+
+//            Eigen::Transform<T,3,Eigen::Affine> combined_inv = combined.inverse(Eigen::Affine);
+
+//            std::cout << "Combined inverse Transform matrix:\n"
+//                      << combined_inv(0,0) << "\t" << combined_inv(0,1) << "\t" << combined_inv(0,2) << "\t" << combined_inv(0,3) << std::endl
+//                      << combined_inv(1,0) << "\t" << combined_inv(1,1) << "\t" << combined_inv(1,2) << "\t" << combined_inv(1,3) << std::endl
+//                      << combined_inv(2,0) << "\t" << combined_inv(2,1) << "\t" << combined_inv(2,2) << "\t" << combined_inv(2,3) << std::endl
+//                      << combined_inv(3,0) << "\t" << combined_inv(3,1) << "\t" << combined_inv(3,2) << "\t" << combined_inv(3,3) << std::endl;
+
+
+//            /* NO SON MATRICES DE TRANSFORMACION, SOLO MATRICES NORMALES. BUSCA LA CLASE Eigen::Transform */
+
+////            M_R_C.block(0,0,3,3) << qrc0.matrix();
+////            M_R_C.col(3).head(3) << prc;
+////            M_R_C.row(3) << (T)0, (T)0, (T)0, (T)1;
+
+
+//            //phw = M_W_R*M_R_C*phc;
+
+
+
+            /* END OF THE TRANSFORM MATRIX APPROACH */
 
 
 
 
+            /* OLD WAY */
 
+            std::cout << "\n============== constraint old method ============" << std::endl;
 
             // Do the magic here
             Eigen::Map<const Eigen::Matrix<T, 3, 1> > translation_F1_world2robot(_current_frame_p); //translation_world2robot
@@ -170,17 +254,19 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             //    std::cout << "quaternion_F1_world2robot:\n" << quaternion_F1_world2robot(0) << "\t" << quaternion_F1_world2robot(1)
             //    << "\t" << quaternion_F1_world2robot(2) << "\t" << quaternion_F1_world2robot(3)<< std::endl;
             //    std::cout << "residuals:\n" << residualsmap(0) << "\t" << residualsmap(1) << std::endl;
-            Eigen::Matrix<T, 4, 1> k_params = anchor_sensor_intrinsics_.cast<T>();
-            Eigen::Matrix<T, 3, 3> K;
-            K(0, 0) = k_params(2);
-            K(0, 1) = T(0);
-            K(0, 2) = k_params(0);
-            K(1, 0) = T(0);
-            K(1, 1) = k_params(3);
-            K(1, 2) = k_params(1);
-            K(2, 0) = T(0);
-            K(2, 1) = T(0);
-            K(2, 2) = T(1);
+
+//            Eigen::Matrix<T, 4, 1> k_params = anchor_sensor_intrinsics_.cast<T>();
+//            Eigen::Matrix<T, 3, 3> K;
+//            K(0, 0) = k_params(2);
+//            K(0, 1) = T(0);
+//            K(0, 2) = k_params(0);
+//            K(1, 0) = T(0);
+//            K(1, 1) = k_params(3);
+//            K(1, 2) = k_params(1);
+//            K(2, 0) = T(0);
+//            K(2, 1) = T(0);
+//            K(2, 2) = T(1);
+
             //    std::cout << "K matrix:\n" << K(0,0) << "\t" << K(0,1) << "\t" << K(0,2) << "\n"
             //              << K(1,0) << "\t" << K(1,1) << "\t" << K(1,2) << "\n"
             //              << K(2,0) << "\t" << K(2,1) << "\t" << K(2,2) << "\n" << std::endl;
@@ -212,7 +298,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                             + quaternion_F1_world2robot(3) * quaternion_F1_world2robot(2));
             rotation_F1_world2robot(0, 2) = T(2)
                     * (quaternion_F1_world2robot(0) * quaternion_F1_world2robot(2)
-                            - quaternion_F1_world2robot(3) * quaternion_F1_world2robot(1));
+                            + quaternion_F1_world2robot(3) * quaternion_F1_world2robot(1));
             rotation_F1_world2robot(1, 0) = T(2)
                     * (quaternion_F1_world2robot(0) * quaternion_F1_world2robot(1)
                             - quaternion_F1_world2robot(3) * quaternion_F1_world2robot(2));
@@ -223,17 +309,17 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                             + quaternion_F1_world2robot(3) * quaternion_F1_world2robot(0));
             rotation_F1_world2robot(2, 0) = T(2)
                     * (quaternion_F1_world2robot(0) * quaternion_F1_world2robot(2)
-                            + quaternion_F1_world2robot(3) * quaternion_F1_world2robot(1));
+                            - quaternion_F1_world2robot(3) * quaternion_F1_world2robot(1));
             rotation_F1_world2robot(2, 1) = T(2)
                     * (quaternion_F1_world2robot(1) * quaternion_F1_world2robot(2)
                             - quaternion_F1_world2robot(3) * quaternion_F1_world2robot(0));
             rotation_F1_world2robot(2, 2) = pow(quaternion_F1_world2robot(3), 2) - pow(quaternion_F1_world2robot(0), 2)
                     - pow(quaternion_F1_world2robot(1), 2) + pow(quaternion_F1_world2robot(2), 2);
 
-            //    std::cout << "\nrotation F1 world to robot:\n"
-            //              << rotation_F1_world2robot(0,0) << "\t" << rotation_F1_world2robot(0,1) << "\t" << rotation_F1_world2robot(0,2) << "\n"
-            //              << rotation_F1_world2robot(1,0) << "\t" << rotation_F1_world2robot(1,1) << "\t" << rotation_F1_world2robot(1,2) << "\n"
-            //              << rotation_F1_world2robot(2,0) << "\t" << rotation_F1_world2robot(2,1) << "\t" << rotation_F1_world2robot(2,2) << "\n\n";
+                std::cout << "\nrotation F1 world to robot:\n"
+                          << rotation_F1_world2robot(0,0) << "\t" << rotation_F1_world2robot(0,1) << "\t" << rotation_F1_world2robot(0,2) << "\n"
+                          << rotation_F1_world2robot(1,0) << "\t" << rotation_F1_world2robot(1,1) << "\t" << rotation_F1_world2robot(1,2) << "\n"
+                          << rotation_F1_world2robot(2,0) << "\t" << rotation_F1_world2robot(2,1) << "\t" << rotation_F1_world2robot(2,2) << "\n\n";
             Eigen::Matrix<T, 3, 3> rotation_F0_world2robot;
             rotation_F0_world2robot(0, 0) = pow(quaternion_F0_world2robot(3), 2) + pow(quaternion_F0_world2robot(0), 2)
                     - pow(quaternion_F0_world2robot(1), 2) - pow(quaternion_F0_world2robot(2), 2);
@@ -242,7 +328,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                             + quaternion_F0_world2robot(3) * quaternion_F0_world2robot(2));
             rotation_F0_world2robot(0, 2) = T(2)
                     * (quaternion_F0_world2robot(0) * quaternion_F0_world2robot(2)
-                            - quaternion_F0_world2robot(3) * quaternion_F0_world2robot(1));
+                            + quaternion_F0_world2robot(3) * quaternion_F0_world2robot(1));
             rotation_F0_world2robot(1, 0) = T(2)
                     * (quaternion_F0_world2robot(0) * quaternion_F0_world2robot(1)
                             - quaternion_F0_world2robot(3) * quaternion_F0_world2robot(2));
@@ -253,7 +339,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                             + quaternion_F0_world2robot(3) * quaternion_F0_world2robot(0));
             rotation_F0_world2robot(2, 0) = T(2)
                     * (quaternion_F0_world2robot(0) * quaternion_F0_world2robot(2)
-                            + quaternion_F0_world2robot(3) * quaternion_F0_world2robot(1));
+                            - quaternion_F0_world2robot(3) * quaternion_F0_world2robot(1));
             rotation_F0_world2robot(2, 1) = T(2)
                     * (quaternion_F0_world2robot(1) * quaternion_F0_world2robot(2)
                             - quaternion_F0_world2robot(3) * quaternion_F0_world2robot(0));
@@ -272,7 +358,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                             + quaternion_robot2camera(3) * quaternion_robot2camera(2));
             rotation_robot2camera(0, 2) = T(2)
                     * (quaternion_robot2camera(0) * quaternion_robot2camera(2)
-                            - quaternion_robot2camera(3) * quaternion_robot2camera(1));
+                            + quaternion_robot2camera(3) * quaternion_robot2camera(1));
             rotation_robot2camera(1, 0) = T(2)
                     * (quaternion_robot2camera(0) * quaternion_robot2camera(1)
                             - quaternion_robot2camera(3) * quaternion_robot2camera(2));
@@ -283,7 +369,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                             + quaternion_robot2camera(3) * quaternion_robot2camera(0));
             rotation_robot2camera(2, 0) = T(2)
                     * (quaternion_robot2camera(0) * quaternion_robot2camera(2)
-                            + quaternion_robot2camera(3) * quaternion_robot2camera(1));
+                            - quaternion_robot2camera(3) * quaternion_robot2camera(1));
             rotation_robot2camera(2, 1) = T(2)
                     * (quaternion_robot2camera(1) * quaternion_robot2camera(2)
                             - quaternion_robot2camera(3) * quaternion_robot2camera(0));
@@ -317,7 +403,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             M_test.col(3).head(3) << translation_world2camera;
             M_test.row(3) << (T)0, (T)0, (T)0, (T)1;
             testing_value = M_test * landmarkmap;
-            std::cout << "testing_value: " << testing_value(0) << "\t" << testing_value(1) << "\t" << testing_value(2) << "\t" << testing_value(3) << std::endl;
+            std::cout << "\ntesting_value:\n" << testing_value(0) << "\t" << testing_value(1) << "\t" << testing_value(2) << "\t" << testing_value(3) << std::endl;
 
             // world in camera1 coordinates
             Eigen::Matrix<T, 3, 3> rotation_camera1_2world;
@@ -348,7 +434,12 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             // put "m" in the camera1 reference
             Eigen::Matrix<T, 3, 1> v;
             v = (rotation_camera1_2camera * m) + (translation_camera1_2camera * inv_dist); // vector defining the line of sight in the new camera
-            //    std::cout << "\nv:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << std::endl;
+               std::cout << "\ntesting_value2:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << "\t" << inv_dist<< std::endl;
+
+
+
+
+
             // ==================================================
             Eigen::Matrix<T, 3, 1> u_;
             u_ = K * v;
@@ -370,15 +461,15 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                 u = u_12;
                 //std::cout << "u_(2) == 0" << std::endl;
             }
-            //        std::cout << "\nu:\n" << u(0) << "\t" << u(1) << std::endl;
+            std::cout << "\nu:\n" << u(0) << "\t" << u(1) << std::endl;
             // ==================================================
             //    std::cout << "==============================================\nCONSTRAINT INFO" << std::endl;
             //    std::cout << "Estimation of the Projection:\n\t" << u(0) << "\n\t" << u(1) << std::endl;
-            //    std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
+            std::cout << "Feature measurement:\n" << getMeasurement() << std::endl;
             Eigen::Matrix<T, 2, 1> feature_pos = getMeasurement().cast<T>();
             //std::cout << "Square Root Information:\n" << getMeasurementSquareRootInformation() << std::endl;
             residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
-            //    std::cout << "RESIDUALS: \n\t" << residualsmap[0] << "\n\t" << residualsmap[1] << std::endl;
+            std::cout << "\nRESIDUALS:\n" << residualsmap[0] << "\t" << residualsmap[1] << std::endl;
             return true;
         }
 

@@ -25,8 +25,8 @@ int main()
     /* Do this while there aren't extrinsic parameters on the yaml */
     Eigen::Vector7s extrinsic_cam;
     extrinsic_cam[0] = 0; //px
-    extrinsic_cam[1] = 0; //py
-    extrinsic_cam[2] = 0; //pz
+    extrinsic_cam[1] = 3; //py
+    extrinsic_cam[2] = 2; //pz
     extrinsic_cam[3] = 0; //qx
     extrinsic_cam[4] = 0; //qy
     extrinsic_cam[5] = 0; //qz
@@ -46,12 +46,12 @@ int main()
     // create the current frame
     Eigen::Vector7s frame_pos_ori;
     frame_pos_ori[0] = 0; //px
-    frame_pos_ori[1] = 0; //py
-    frame_pos_ori[2] = 0; //pz
-    frame_pos_ori[3] = 0; //qx
-    frame_pos_ori[4] = 0; //qy
-    frame_pos_ori[5] = 0; //qz
-    frame_pos_ori[6] = 1; //qw
+    frame_pos_ori[1] = 4; //py
+    frame_pos_ori[2] = 2; //pz
+    frame_pos_ori[3] = 0.2; //qx
+    frame_pos_ori[4] = 0.5; //qy
+    frame_pos_ori[5] = 0.1; //qz
+    frame_pos_ori[6] = 0.83666; //qw
     const Eigen::VectorXs frame_val = frame_pos_ori;
 
     FrameBase* last_frame = new FrameBase(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
@@ -129,8 +129,8 @@ int main()
     // current frame p; current frame o; anchor frame p; anchor frame o; homogeneous vector landmark, residual
 
 
-    std::cout << "Residual computed" << std::endl;
-    std::cout << "Residual = " << residuals[0] << "   " << residuals[1] << std::endl;
+//    std::cout << "Residual computed" << std::endl;
+//    std::cout << "Residual = " << residuals[0] << "   " << residuals[1] << std::endl;
 
 
     delete wolf_problem_ptr_;
