@@ -337,11 +337,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     //
     // dDv/dab -= delta_R * dt                                                  // Sola 15 -- OK Forster
     //
-    // dDp/dwb += dv/dwb * dt - 0.5 * DR * [a - ab]^ * Jr * dt^2                // Sola 15
-    // dDp/dwb += dv/dwb * dt - 0.5 * DR * [a - ab]^ * dDR/dwb * dt^2           // Forster
+    // dDp/dwb += dv/dwb * dt - 0.5 * DR * [a - ab]^ * dDf/dwb * dt^2           // Sola 16 -- OK Forster
     //
-    // dDv/dwb -= DR * [a - ab]^ * Jr * dt                                      // Sola 15
-    // dDv/dwb -= DR * [a - ab]^ * dR/dwb * dt                                  // Forster
+    // dDv/dwb -= DR * [a - ab]^ * dDf/dwb * dt                                 // Sola 16 -- OK Forster
     //
     // dDf/dwb -= dR.t * Jr * dt      where Jr  == right Jacobian               // Sola 16 -- OK Forster
     //                                     dR.t == exp(- (w - wb) * dt)
@@ -350,21 +348,21 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     Eigen::Matrix3s acc_skew =  skew(measured_acc_ - bias_acc_);
     Eigen::Vector3s omega    =  measured_gyro_ - bias_gyro_;
 
-    // temporaries
-    Scalar dt2_2      = 0.5 * _dt * _dt;
-    Eigen::Matrix3s M = R_1 * acc_skew * Jr_1;                                      // Sola 15
-    //    Eigen::Matrix3s M = R_1 * acc_skew * dDq_dwb_;                            // Forster
     /* Cf. Joan SOLA > Kinematics pdf, p.33 -> Jacobian wrt rotation vector
         d(R a)/d(df) = -R{Df} * skew[a] *Jr{Df}
      */
+
+    // temporaries
+    Scalar dt2_2      = 0.5 * _dt * _dt;
+    Eigen::Matrix3s M = R_1 * acc_skew * dDq_dwb_;                            // Sola 16 -- OK Forster
 
     dDp_dab_ += dDv_dab_ * _dt -  R_1 * dt2_2;
     dDv_dab_ -= R_1 * _dt;
 
     dDp_dwb_ += dDv_dwb_ * _dt - M * dt2_2;
     dDv_dwb_ -= M * _dt;
-    dDq_dwb_ -= v2R( - omega * _dt) * jac_SO3_right(omega * _dt) * _dt; // See SOLA-16
 
+    dDq_dwb_ -= v2R( - omega * _dt) * jac_SO3_right(omega * _dt) * _dt; // See SOLA-16
 
     ///////////////////////////////////////////////////////////////////////////
     // 3. Update the deltas down here to avoid aliasing in the Jacobians section
