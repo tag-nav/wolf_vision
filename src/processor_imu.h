@@ -390,7 +390,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      *
      * where (dp, dv, dq) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
      *
-     * warning: All deltas (Dp, Dv, Dq) are physically interpretable: they represent the position, velocity and orientation of a body with
+     * warning: All deltas (Dp, Dv, Dq) are physically interpretable:
+     * they represent the position, velocity and orientation of a body with
      * respect to a reference frame that is non-rotating and free-falling at the acceleration of gravity.
      */
 
