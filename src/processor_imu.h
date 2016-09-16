@@ -244,8 +244,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 
     // TODO see if we can remove all these coments below:
 
-    /*                                  JACOBIANS according to FORSTER
-     *                                      For noise integration :
+    /* MATHS according to FORSTER                         
+     *                                     JACOBIANS For noise integration :
      * in compact Matrix form, with N_D(i,k) = [R_n(i,k) DV_n(i,k) DP_n(i,k)] and IMU measurement noise N_d(k) = [w_n a_n]
      * with (i,k) meaning "from i to k" and R_n, V_n and P_n respectively the noises associated to Delta_rotation, Delta_velocity and Delta_position
      * We note DR(i,k), DV(i,k) and DP(i,k) respectively the integrated Deltas in rotation, velocity and position from i to k
@@ -263,25 +263,6 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      *              0       (1/2)*DR(i,j-1)*Dt*Dt]
      *
      * WARNING : (a(j-1) - a_b(i)) is _data.head(3) : means that this operation does not make sense if we compose two integrated Deltas
-     */
-
-    /// FORSTER version
-    /* with _jacobian1 = A and _jacobian2 = B
-     _jacobian1.resize(3,9);
-     _jacobian1.setZero();
-     _jacobian1.block<1,3>(1,0) = Eigen::vee(q_in_1_.matrix()).transpose(); //check if this is working --> block considered as row_vector ?
-     _jacobian1.block<1,3>(2,0) = Eigen::vee(q_in_1_.matrix()).transpose() * (-_dt); // *_data.head(3)
-     _jacobian1.block<1,3>(0,0) = Eigen::vee(q_in_1_.matrix()).transpose() * _dt * (-_dt/2); // *_data.head(3)
-     // Need access to _data here.
-     _jacobian1.block<1,3>(0,6) << 1,1,1;
-     _jacobian1.block<1,3>(2,3) << 1,1,1;
-     _jacobian1.block<1,3>(0,3) << _dt2, _dt2, _dt2;
-
-     //_jacobian2.resize(3,6);
-     _jacobian2.setZero();
-     _jacobian2.block<3,3>(0,3) = LogmapDerivative(q_in_1_) * _dt;
-     _jacobian2.block<3,3>(1,3) = q_in_1_.matrix() * _dt;
-     _jacobian2.block<3,3>(2,3) = q_in_1_.matrix() * _dt * dt_ * 0.5;
      */
 
     // Some useful temporaries
