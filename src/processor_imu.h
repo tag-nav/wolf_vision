@@ -284,16 +284,6 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      _jacobian2.block<3,3>(2,3) = q_in_1_.matrix() * _dt * dt_ * 0.5;
      */
 
-    /*
-     * _jacobian1 and _jacobian2 are jacobians of _delta1_plus_delta2 w.r.t. _delta1 and _delta2
-     * let us note this : D3 = D1 (+) D2, with D=[DP, DV, DR] (We will use the minimal form here)
-     * Note : PVQ FORMULATION
-     *
-     * _jacobian1 =    [1   _dt    DP2                     _jacobian2 =    [DR1   0   0
-     *                  0    1     DV2                                       0   DR1  0
-     *                  0    0     DR2 ]                                     0    0  Jr^-1]
-     */
-
     // Some useful temporaries
     Eigen::Matrix3s R_1     = q_in_1_.matrix();
     Eigen::Vector3s theta_1 = q2v(q_in_1_);
