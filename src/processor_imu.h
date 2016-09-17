@@ -162,15 +162,36 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      *            an           wn
      *     dp [0.5*I*dt*dt     0      ]
      * J = dv [   I*dt         0      ]
-     *     dR [   0      dt*exp(w*dt) ]
+     *     do [   0       dt*Jr(w*dt) ] // orientation in minimal form --> tangent space
      */
 
-    Eigen::Matrix<Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<Scalar,9,6>::Zero();
-    jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
-    jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
-    jacobian_delta_noise.block<3,3>(6,3) =_dt * v2R(w * _dt);
+    // we go the sparse way:
+    Eigen::Matrix3s DP_dan = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
+    Eigen::Matrix3s DV_dan = Eigen::Matrix3s::Identity() * _dt;
+    //    Eigen::Matrix3s DO_dwn = jac_SO3_right(w * _dt) * _dt; // Since wdt is small, we could use here  Jr(wdt) ~ (I - 0.5*[wdt]_x)  and go much faster.
+    Eigen::Matrix3s DO_dwn = (Eigen::Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
 
-    delta_cov_ = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
+    /* Covariance
+     *       [ A  B  0
+     * COV =   B' C  0
+     *         0  0  D ]
+     *
+     * where A, B, C and D are computed below
+     */
+    delta_cov_.block<3,3>(0,0) = DP_dan*_data_cov.block<3,3>(0,0)*DP_dan.transpose(); // A
+    delta_cov_.block<3,3>(0,3) = DP_dan*_data_cov.block<3,3>(0,0)*DV_dan.transpose(); // B
+    delta_cov_.block<3,3>(3,0) = delta_cov_.block<3,3>(0,3).transpose();              // B'
+    delta_cov_.block<3,3>(3,3) = DV_dan*_data_cov.block<3,3>(0,0)*DV_dan.transpose(); // C
+    delta_cov_.block<3,3>(6,6) = DO_dwn*_data_cov.block<3,3>(3,3)*DO_dwn.transpose(); // D
+
+    // the dense way has many zeros... comment out the code but leave it for reference
+    //    Eigen::Matrix<Scalar,9,6> jacobian_delta_noise = Eigen::Matrix<Scalar,9,6>::Zero();
+    //    jacobian_delta_noise.block<3,3>(0,0) = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
+    //    jacobian_delta_noise.block<3,3>(3,0) = Eigen::Matrix3s::Identity() * _dt;
+    //    jacobian_delta_noise.block<3,3>(6,3) = _dt * jac_SO3_right(w * _dt);
+    //
+    //    delta_cov_ = jacobian_delta_noise * _data_cov * jacobian_delta_noise.transpose();
+
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
@@ -219,21 +240,21 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      *   dDp'/dDp = I
      *   dDp'/dDv = I*dt
      *   dDp'/dDf = - R(Dq) * skew(dp) * Jr(Df)
-     *   dDv'/dCv = I
+     *   dDv'/dDv = I
      *   dDv'/dDf = - R(Dq) * skew(dv) * Jr(Df)
-     *   dDf'/dDf = I
+     *   dDf'/dDf = dR * Jr(Df)
      *
      * which gives
      *
      *   [ I     I*dt   -R(Dq)*skew(dp)*Jr(Df)
      *     0      I     -R(Dq)*skew(dv)*Jr(Df)
-     *     0      0      I                     ] // log(exp(Df)exp(df)) = Df + Jr^-1*df --> dDf'/dDf = I
+     *     0      0      dR*Jr(Df)             ] // log(exp(Df)exp(df)) = Df + Jr^-1*df --> dDf'/dDf = I
      *
      * and wrt delta (_jacobian_delta) is:
      *
      *   dDp'/ddp = R(Dq)
      *   dDv'/ddv = R(Dq)
-     *   dDf'/ddf = Jr(Df)^-1
+     *   dDf'/ddf = Jr(df)
      *
      * which gives
      *
