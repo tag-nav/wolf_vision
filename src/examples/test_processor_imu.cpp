@@ -34,15 +34,17 @@ int main(int argc, char** argv)
     //load files containing accelerometer and gyroscope data
     const char * filename_acc;
     const char * filename_gyro;
+
     //prepare creation of file if DEBUG_RESULTS activated
-    #ifdef DEBUG_RESULTS
-        std::ofstream debug_results;
-        debug_results.open("debug_results.dat");
-        if(debug_results)
-            debug_results << "%%TimeStamp\t" << "dp_x\t" << "dp_y\t" << "dp_z\t" << "dq_x\t" << "dq_y\t" << "dq_z\t" << "dq_w\t" << "dv_x\t" << "dv_y\t" << "dv_z\t"
-                          << "Dp_x\t" << "Dp_y\t" << "Dp_z\t" << "Dq_x\t" << "Dq_y\t" << "Dq_z\t" << "Dq_w\t" << "Dv_x\t" << "Dv_y\t" << "Dv_z\t"
-                          << "X_x\t" << "X_y\t" << "X_z\t" << "Xq_x\t" << "Xq_y\t" << "Xq_z\t" << "Xq_w\t" << "Xv_x\t" << "Xv_y\t" << "Xv_z\t" << std::endl;     
-    #endif
+#ifdef DEBUG_RESULTS
+    std::ofstream debug_results;
+    debug_results.open("debug_results.dat");
+    if(debug_results)
+        debug_results << "%%TimeStamp\t"
+                      << "dp_x\t" << "dp_y\t" << "dp_z\t" << "dq_x\t" << "dq_y\t" << "dq_z\t" << "dq_w\t" << "dv_x\t" << "dv_y\t" << "dv_z\t"
+                      << "Dp_x\t" << "Dp_y\t" << "Dp_z\t" << "Dq_x\t" << "Dq_y\t" << "Dq_z\t" << "Dq_w\t" << "Dv_x\t" << "Dv_y\t" << "Dv_z\t"
+                      << "X_x\t" << "X_y\t" << "X_z\t" << "Xq_x\t" << "Xq_y\t" << "Xq_z\t" << "Xq_w\t" << "Xv_x\t" << "Xv_y\t" << "Xv_z\t" << std::endl;
+#endif
 
     if (argc < 3)
     {
@@ -88,13 +90,6 @@ int main(int argc, char** argv)
 
     CaptureIMU* imu_ptr;
 
-    #ifdef DEBUG_RESULTS
-        Eigen::VectorXs delta_debug;
-        Eigen::VectorXs delta_integr_debug;
-        Eigen::VectorXs x_debug;
-        TimeStamp ts;
-    #endif
-
     using namespace std;
     clock_t begin = clock();
     while(!data_file_acc.eof()){
@@ -107,31 +102,37 @@ int main(int argc, char** argv)
         imu_ptr ->process();
         delete imu_ptr;
 
-        #ifdef DEBUG_RESULTS
-            // std::cout << "Current    delta: " << std::fixed << std::setprecision(3) << std::setw(8) << std::right
-            // << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_.transpose() << std::endl;
+#ifdef DEBUG_RESULTS
 
-            // std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
-            // << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
+        Eigen::VectorXs delta_debug;
+        Eigen::VectorXs delta_integr_debug;
+        Eigen::VectorXs x_debug;
+        TimeStamp ts;
 
-            // Eigen::VectorXs x = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-            // std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
-            // << x.head(10).transpose() << std::endl;
+        // std::cout << "Current    delta: " << std::fixed << std::setprecision(3) << std::setw(8) << std::right
+        // << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_.transpose() << std::endl;
 
-            // std::cout << std::endl;
-            delta_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_;
-            delta_integr_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
-            x_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-            ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
+        // std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
+        // << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
 
-            if(debug_results)
-                debug_results << ts.get() << "\t" << delta_debug(0) << "\t" << delta_debug(1) << "\t" << delta_debug(2) << "\t" << delta_debug(3) << "\t" << delta_debug(4) << "\t"
-                                          << delta_debug(5) << "\t" << delta_debug(6) << "\t" << delta_debug(7) << "\t" << delta_debug(8) << "\t" << delta_debug(9) << "\t"
-                                          << delta_integr_debug(0) << "\t" << delta_integr_debug(1) << "\t" << delta_integr_debug(2) << "\t" << delta_integr_debug(3) << "\t" << delta_integr_debug(4) << "\t"
-                                          << delta_integr_debug(5) << "\t" << delta_integr_debug(6) << "\t" << delta_integr_debug(7) << "\t" << delta_integr_debug(8) << "\t" << delta_integr_debug(9) << "\t"  
-                                          << x_debug(0) << "\t" << x_debug(1) << "\t" << x_debug(2) << "\t" << x_debug(3) << "\t" << x_debug(4) << "\t" 
-                                          << x_debug(5) << "\t" << x_debug(6) << "\t" << x_debug(7) << "\t" << x_debug(8) << "\t" << x_debug(9) << "\n"; 
-        #endif
+        // Eigen::VectorXs x = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+        // std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
+        // << x.head(10).transpose() << std::endl;
+
+        // std::cout << std::endl;
+        delta_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_;
+        delta_integr_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
+        x_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+        ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
+
+        if(debug_results)
+            debug_results << ts.get() << "\t" << delta_debug(0) << "\t" << delta_debug(1) << "\t" << delta_debug(2) << "\t" << delta_debug(3) << "\t" << delta_debug(4) << "\t"
+            << delta_debug(5) << "\t" << delta_debug(6) << "\t" << delta_debug(7) << "\t" << delta_debug(8) << "\t" << delta_debug(9) << "\t"
+            << delta_integr_debug(0) << "\t" << delta_integr_debug(1) << "\t" << delta_integr_debug(2) << "\t" << delta_integr_debug(3) << "\t" << delta_integr_debug(4) << "\t"
+            << delta_integr_debug(5) << "\t" << delta_integr_debug(6) << "\t" << delta_integr_debug(7) << "\t" << delta_integr_debug(8) << "\t" << delta_integr_debug(9) << "\t"
+            << x_debug(0) << "\t" << x_debug(1) << "\t" << x_debug(2) << "\t" << x_debug(3) << "\t" << x_debug(4) << "\t"
+            << x_debug(5) << "\t" << x_debug(6) << "\t" << x_debug(7) << "\t" << x_debug(8) << "\t" << x_debug(9) << "\n";
+#endif
 
     }
     clock_t end = clock();
@@ -150,10 +151,12 @@ int main(int argc, char** argv)
     // Print statistics
     std::cout << "\nStatistics -----------------------------------------------------------------------------------" << std::endl;
     std::cout << "If you want meaningful CPU metrics, remove all couts in the loop / remove DEBUG_RESULTS definition variable, and compile in RELEASE mode!" << std::endl;
-    #ifdef DEBUG_RESULTS
-        std::cout << "\t\tWARNING : DEBUG_RESULTS ACTIVATED - slows the process (writing results to result_debugs.dat file)" << std::endl;
-        debug_results.close();
-    #endif
+
+#ifdef DEBUG_RESULTS
+    std::cout << "\t\tWARNING : DEBUG_RESULTS ACTIVATED - slows the process (writing results to result_debugs.dat file)" << std::endl;
+    debug_results.close();
+#endif
+
     TimeStamp t0, tf;
     t0 = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().front().ts_;
     tf = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
@@ -166,8 +169,6 @@ int main(int argc, char** argv)
     std::cout << "CPU time  : " << elapsed_secs << " s" << std::endl;
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
-
-
 
     delete wolf_problem_ptr_;
 
