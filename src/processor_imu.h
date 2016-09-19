@@ -162,14 +162,15 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      *            an           wn
      *     dp [0.5*I*dt*dt     0      ]
      * J = dv [   I*dt         0      ]
-     *     do [   0       dt*Jr(w*dt) ] // orientation in minimal form --> tangent space
+     *     do [   0           I*dt    ] // see Sola-16
      */
 
     // we go the sparse way:
     Eigen::Matrix3s DP_dan = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
     Eigen::Matrix3s DV_dan = Eigen::Matrix3s::Identity() * _dt;
     //    Eigen::Matrix3s DO_dwn = jac_SO3_right(w * _dt) * _dt; // Since wdt is small, we could use here  Jr(wdt) ~ (I - 0.5*[wdt]_x)  and go much faster.
-    Eigen::Matrix3s DO_dwn = (Eigen::Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
+    //    Eigen::Matrix3s DO_dwn = (Eigen::Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
+    Eigen::Matrix3s DO_dwn = Eigen::Matrix3s::Identity() * _dt; // integrate theta = omega*dt, then derivate wrt omega
 
     /* Covariance
      *       [ A  B  0
