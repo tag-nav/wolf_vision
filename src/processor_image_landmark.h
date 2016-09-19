@@ -35,7 +35,7 @@ struct DetectorDescriptorParamsBase
 {
         DetectorDescriptorType type; ///< Type of algorithm. Accepted values in wolf.h
         unsigned int nominal_pattern_radius = 0; ///< Radius of the pattern before scaling //18 for brisk
-        //should this be here? doesn't it depend on the descriptor?
+        // should this be here? doesn't it depend on the descriptor?
 };
 
 struct DetectorDescriptorParamsBrisk : public DetectorDescriptorParamsBase
