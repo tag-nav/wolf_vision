@@ -112,21 +112,6 @@ void ProcessorImageLandmark::postProcess()
         drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
         drawTrackingFeatures(image,tracker_candidates_,tracker_candidates_);
     }
-    if (origin_ptr_!=nullptr)
-    {
-        for(auto feature_ptr : *origin_ptr_->getFeatureListPtr())
-        {
-            for(auto constraint_ptr : *feature_ptr->getConstraintListPtr())
-            {
-//                Eigen::Vector2s residuals;
-//                Eigen::Vector3s robot_p = origin_ptr_->getFramePtr()->getPPtr()->getVector();
-//                Eigen::Vector4s robot_o = origin_ptr_->getFramePtr()->getOPtr()->getVector();
-//                Eigen::Vector4s landmark = constraint_ptr->getLandmarkOtherPtr()->getPPtr()->getVector();
-//                (*((ConstraintImage*) constraint_ptr))(robot_p.data(), robot_o.data(), landmark.data(), residuals.data());
-            }
-        }
-
-    }
 }
 
 unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _landmark_list_in,
@@ -134,7 +119,6 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                                                           LandmarkMatchMap& _feature_landmark_correspondences)
 {
     /* tracker with project */
-
     unsigned int roi_width = params_.matcher.roi_width;
     unsigned int roi_heigth = params_.matcher.roi_height;
     unsigned int roi_x;
@@ -143,40 +127,28 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     cv::Mat candidate_descriptors;
     std::vector<cv::DMatch> cv_matches;
 
-    //std::cout << "Number of features to track: " << _landmark_list_in.size() << std::endl;
+//    std::cout << "Number of features to track: " << _landmark_list_in.size() << std::endl;
 
-    //referenceWorldToCamera(world2cam_translation_,world2cam_orientation_);
-
-    Eigen::Vector3s translation;
-    Eigen::Matrix3s rotation;
-
-//    changeOfReferenceFrame(translation,rotation);
 
     //FeatureBaseList features_from_landmark;
     for (auto landmark_in_ptr : _landmark_list_in)//_feature_list_in)
     {
+        std::cout << "\nThe Landmark is... ";
+
         /* project */
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_in_ptr;
-
-//        changeOfReferenceFrame(landmark_ptr,translation,rotation);
-
         Eigen::Vector3s point3D;
-
-//        getLandmarkInReference(landmark_ptr,translation,rotation,point3D);
+        Eigen::Vector2s point2D;
 
         LandmarkInCurrentReferenceFrame(landmark_ptr,point3D);
 
-        Eigen::Vector2s point2D;
 //        point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
 //                                        ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point3D);
         point2D = pinhole::projectPointToNormalizedPlane(point3D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
 
-        std::cout << "point2D x: " << point2D(0) << "\ty: " << point2D(1) << std::endl;
-
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {
-            std::cout << "is in image" << std::endl;
             /* tracking */
 
             roi_x = (point2D[0]) - (roi_heigth / 2);
@@ -199,7 +171,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
                 if (normalized_score > params_.matcher.min_normalized_score)
                 {
-                    std::cout << "TRACKED\n\n" << std::endl;
+                    std::cout << "FOUND" << std::endl;
                     FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
                                 candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                             Eigen::Matrix2s::Identity());
@@ -211,7 +183,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                 }
                 else
                 {
-                    std::cout << "NOT TRACKED" << std::endl;
+                    std::cout << "NOT FOUND" << std::endl;
                 }
                 for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
                 {
@@ -222,11 +194,11 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
             else
             {
                 //this one means that the detector/descriptor searched the roi, but didn't find ANYTHING at all. So, NOT tracked.
-                std::cout << "not detected / NOT TRACKED\n\n" << std::endl;
+                std::cout << "NOT DETECTED/FOUND" << std::endl;
             }
         }
         else
-            std::cout << "is NOT in image" << std::endl;
+            std::cout << "NOT in the image" << std::endl;
     }
     //std::cout << "Number of Features tracked: " << _feature_list_out.size() << std::endl;
     landmarks_tracked_ = _feature_list_out.size();
@@ -329,7 +301,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
-//    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
+    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
     if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
     {
         return new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
@@ -496,7 +468,7 @@ unsigned int ProcessorImageLandmark::detect(cv::Mat _image, cv::Rect& _roi, std:
 
     adaptRoi(_image_roi, _image, _roi);
 
-    std::cout << "ROI: " << _image_roi.cols << "; " << _image_roi.rows << std::endl;
+//    std::cout << "ROI: " << _image_roi.cols << "; " << _image_roi.rows << std::endl;
 
     detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
     detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
@@ -506,7 +478,7 @@ unsigned int ProcessorImageLandmark::detect(cv::Mat _image, cv::Rect& _roi, std:
         _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
         _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
     }
-    std::cout << "Features detected: " << _new_keypoints.size() << std::endl;
+//    std::cout << "Features detected: " << _new_keypoints.size() << std::endl;
     return _new_keypoints.size();
 }
 
@@ -571,11 +543,11 @@ void ProcessorImageLandmark::drawTrackingFeatures(cv::Mat _image, std::list<cv::
 {
     // These "tracking features" are the feature to be used in tracking as well as its candidates
 
-    for(auto target_point : _target_list)
-    {
-        //target
-        //cv::circle(_image, target_point, 2, cv::Scalar(0.0, 255.0, 255.0), -1, 8, 0);
-    }
+//    for(auto target_point : _target_list)
+//    {
+//        //target
+//        //cv::circle(_image, target_point, 2, cv::Scalar(0.0, 255.0, 255.0), -1, 8, 0);
+//    }
     for(auto candidate_point : _candidates_list)
     {
         //candidate - cyan
@@ -592,31 +564,18 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
     cv::Mat image = image_incoming_.clone();
     LandmarkBaseList* last_landmark_list = getProblem()->getMapPtr()->getLandmarkListPtr();
 
-    Eigen::Vector3s translation;
-    Eigen::Matrix3s rotation;
-
     for (auto landmark_base_ptr : *last_landmark_list)
     {
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_base_ptr;
-
-//        changeOfReferenceFrame(landmark_ptr,translation,rotation);
-
         Eigen::Vector3s point3D;
-
-//        getLandmarkInReference(landmark_ptr,translation,rotation,point3D);
+        Eigen::Vector2s point2D;
 
         LandmarkInCurrentReferenceFrame(landmark_ptr,point3D);
 
-        Eigen::Vector2s point2D;
 //        point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
 //                                        ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point3D);
         point2D = pinhole::projectPointToNormalizedPlane(point3D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
-
-        std::cout << "Landmark " << counter << std::endl;
-        std::cout << "x: " << point2D[0] << "; y: " << point2D[1] << std::endl;
-        std::cout << "is in the image?: "
-                  << pinhole::isInImage(point2D,params_.image.width,params_.image.height) << std::endl;
 
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {
@@ -642,7 +601,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
     cv::putText(image, std::to_string(counter), label_for_landmark_point2,
                 cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
-    std::cout << "\n\n\n\nlandmarks tracked: " << landmarks_tracked_ << "\ttotal landmarks: " << counter << std::endl;
+    std::cout << "\n\nLandmarks tracked: " << landmarks_tracked_ << "\t\tTotal landmarks: " << counter << std::endl;
 
     cv::imshow("Feature tracker", image);
     _image = image;
