@@ -89,8 +89,8 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
             // FROM CAMERA0 TO WORLD
 
-            M_R0_C0.block(0,0,3,3) << qrc.matrix();
-            M_R0_C0.col(3).head(3) << prc;
+            M_R0_C0.block(0,0,3,3) << qrc.matrix(); // TODO make all blocks with the template
+            M_R0_C0.col(3).head(3) << prc; // block<3,1>(3,0) o topRight<3,1>(3,0) o algo aixi.
             M_R0_C0.row(3) << (T)0, (T)0, (T)0, (T)1;
 
             M_W_R0.block(0,0,3,3) << qwr0.matrix();
@@ -178,53 +178,57 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 //            t(1,0) = (T)0; t(1,1) = (T)1; t(1,2) = (T)0; t(1,3) = (T)3;
 //            t(2,0) = (T)0; t(2,1) = (T)0; t(2,2) = (T)1; t(2,3) = (T)2;
 //            t(3,0) = (T)0; t(3,1) = (T)0; t(3,2) = (T)0; t(3,3) = (T)1;
+//
+            //Eigen::Translation<T,3> translation(prc);
+            Eigen::Translation<T,3> translation;
+            translation.x() = (T)1;
+            translation.y() = (T)2;
+            translation.z() = (T)3;
 
-//            //Eigen::Translation<T,3> translation(prc);
-//            Eigen::Translation<T,3> translation;
-//            translation.x() = (T)3;
-//            translation.y() = (T)2;
-//            translation.z() = (T)0;
+            Eigen::Vector4s test_quaternion = {3,2,-1,1};
+            test_quaternion.normalize();
+            Eigen::Quaternion<T> rotation;
+            rotation= test_quaternion.cast<T>();
 
-//            Eigen::Vector4s test_quaternion = {0,2,0,1};
-//            Eigen::Quaternion<T> rotation;
-//            rotation= test_quaternion.cast<T>();
+            std::cout << "rotation matrix:\n" //<< rotation.matrix().cast<Scalar>() << std::endl;
+                      << rotation.matrix()(0,0) << "\t" << rotation.matrix()(0,1) << "\t" << rotation.matrix()(0,2) << std::endl
+                      << rotation.matrix()(1,0) << "\t" << rotation.matrix()(1,1) << "\t" << rotation.matrix()(1,2) << std::endl
+                      << rotation.matrix()(2,0) << "\t" << rotation.matrix()(2,1) << "\t" << rotation.matrix()(2,2) << std::endl;
 
-//            std::cout << "rotation matrix:\n"
-//                      << rotation.matrix()(0,0) << "\t" << rotation.matrix()(0,1) << "\t" << rotation.matrix()(0,2) << std::endl
-//                      << rotation.matrix()(1,0) << "\t" << rotation.matrix()(1,1) << "\t" << rotation.matrix()(1,2) << std::endl
-//                      << rotation.matrix()(2,0) << "\t" << rotation.matrix()(2,1) << "\t" << rotation.matrix()(2,2) << std::endl;
+            std::cout << "rotation transposed matrix:\n" //<< rotation.cast<Scalar>().matrix().transpose() << std::endl;
+                      << rotation.matrix().transpose()(0,0) << "\t" << rotation.matrix().transpose()(0,1) << "\t" << rotation.matrix().transpose()(0,2) << std::endl
+                      << rotation.matrix().transpose()(1,0) << "\t" << rotation.matrix().transpose()(1,1) << "\t" << rotation.matrix().transpose()(1,2) << std::endl
+                      << rotation.matrix().transpose()(2,0) << "\t" << rotation.matrix().transpose()(2,1) << "\t" << rotation.matrix().transpose()(2,2) << std::endl;
 
-//            std::cout << "rotation transposed matrix:\n"
-//                      << rotation.matrix().transpose()(0,0) << "\t" << rotation.matrix().transpose()(0,1) << "\t" << rotation.matrix().transpose()(0,2) << std::endl
-//                      << rotation.matrix().transpose()(1,0) << "\t" << rotation.matrix().transpose()(1,1) << "\t" << rotation.matrix().transpose()(1,2) << std::endl
-//                      << rotation.matrix().transpose()(2,0) << "\t" << rotation.matrix().transpose()(2,1) << "\t" << rotation.matrix().transpose()(2,2) << std::endl;
+            Eigen::Transform<T,3,Eigen::Affine> combined = translation * rotation;
 
-//            Eigen::Transform<T,3,Eigen::Affine> combined = translation * rotation;
+            Eigen::Transform<T,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
+            //            v = T_R1_C1.inverse() * T_W_R1.inverse() * T_W_R0 : T_R1_C0 * p_hmg;
 
 
-//            std::cout << "Combined Transform matrix:\n"
-//                      << combined(0,0) << "\t" << combined(0,1) << "\t" << combined(0,2) << "\t" << combined(0,3) << std::endl
-//                      << combined(1,0) << "\t" << combined(1,1) << "\t" << combined(1,2) << "\t" << combined(1,3) << std::endl
-//                      << combined(2,0) << "\t" << combined(2,1) << "\t" << combined(2,2) << "\t" << combined(2,3) << std::endl
-//                      << combined(3,0) << "\t" << combined(3,1) << "\t" << combined(3,2) << "\t" << combined(3,3) << std::endl;
+            std::cout << "Combined Transform matrix:\n"
+                      << combined(0,0) << "\t" << combined(0,1) << "\t" << combined(0,2) << "\t" << combined(0,3) << std::endl
+                      << combined(1,0) << "\t" << combined(1,1) << "\t" << combined(1,2) << "\t" << combined(1,3) << std::endl
+                      << combined(2,0) << "\t" << combined(2,1) << "\t" << combined(2,2) << "\t" << combined(2,3) << std::endl
+                      << combined(3,0) << "\t" << combined(3,1) << "\t" << combined(3,2) << "\t" << combined(3,3) << std::endl;
 
-//            Eigen::Transform<T,3,Eigen::Affine> combined_inv = combined.inverse(Eigen::Affine);
+            Eigen::Transform<T,3,Eigen::Affine> combined_inv = combined.inverse(Eigen::Affine);
 
-//            std::cout << "Combined inverse Transform matrix:\n"
-//                      << combined_inv(0,0) << "\t" << combined_inv(0,1) << "\t" << combined_inv(0,2) << "\t" << combined_inv(0,3) << std::endl
-//                      << combined_inv(1,0) << "\t" << combined_inv(1,1) << "\t" << combined_inv(1,2) << "\t" << combined_inv(1,3) << std::endl
-//                      << combined_inv(2,0) << "\t" << combined_inv(2,1) << "\t" << combined_inv(2,2) << "\t" << combined_inv(2,3) << std::endl
-//                      << combined_inv(3,0) << "\t" << combined_inv(3,1) << "\t" << combined_inv(3,2) << "\t" << combined_inv(3,3) << std::endl;
+            std::cout << "Combined inverse Transform matrix:\n"
+                      << combined_inv(0,0) << "\t" << combined_inv(0,1) << "\t" << combined_inv(0,2) << "\t" << combined_inv(0,3) << std::endl
+                      << combined_inv(1,0) << "\t" << combined_inv(1,1) << "\t" << combined_inv(1,2) << "\t" << combined_inv(1,3) << std::endl
+                      << combined_inv(2,0) << "\t" << combined_inv(2,1) << "\t" << combined_inv(2,2) << "\t" << combined_inv(2,3) << std::endl
+                      << combined_inv(3,0) << "\t" << combined_inv(3,1) << "\t" << combined_inv(3,2) << "\t" << combined_inv(3,3) << std::endl;
 
 
 //            /* NO SON MATRICES DE TRANSFORMACION, SOLO MATRICES NORMALES. BUSCA LA CLASE Eigen::Transform */
 
-////            M_R_C.block(0,0,3,3) << qrc0.matrix();
-////            M_R_C.col(3).head(3) << prc;
-////            M_R_C.row(3) << (T)0, (T)0, (T)0, (T)1;
+//            M_R_C.block(0,0,3,3) << qrc0.matrix();
+//            M_R_C.col(3).head(3) << prc;
+//            M_R_C.row(3) << (T)0, (T)0, (T)0, (T)1;
 
 
-//            //phw = M_W_R*M_R_C*phc;
+            //phw = M_W_R*M_R_C*phc;
 
 
 
