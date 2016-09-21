@@ -45,6 +45,8 @@ class SensorCamera : public SensorBase
 
         Eigen::VectorXs getDistortionVector(){return distortion_;}
         Eigen::VectorXs getCorrectionVector(){return correction_;}
+        Eigen::Matrix3s getIntrinsicMatrix() {return K_;}
+
         int getImgWidth(){return img_width_;}
         int getImgHeight(){return img_height_;}
 
@@ -53,6 +55,9 @@ class SensorCamera : public SensorBase
         int img_height_;
         Eigen::VectorXs distortion_;
         Eigen::VectorXs correction_;
+        Eigen::Matrix3s K_;
+
+        virtual Eigen::Matrix3s setIntrinsicMatrix(Eigen::Vector4s _pinhole_model);
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)

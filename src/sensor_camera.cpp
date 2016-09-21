@@ -25,10 +25,12 @@ SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsC
     p_ptr_ = new StateBlock(_extrinsics.head(3));
     o_ptr_ = new StateQuaternion(_extrinsics.tail(4));
     intrinsic_ptr_ = new StateBlock(_intrinsics_ptr->pinhole_model);
+    K_ = setIntrinsicMatrix(_intrinsics_ptr->pinhole_model);
     pinhole::computeCorrectionModel(intrinsic_ptr_->getVector(), distortion_, correction_);
-    std::cout << "\tintrinsic_ptr  : " << intrinsic_ptr_->getVector().transpose() << std::endl;
-    std::cout << "\tdistortion  : " << distortion_.transpose() << std::endl;
-    std::cout << "\tcorrection  : " << correction_.transpose() << std::endl;
+//    std::cout << "\tintrinsic_ptr  : " << intrinsic_ptr_->getVector().transpose() << std::endl;
+//    std::cout << "\tintrinsic matrix  : " << K_ << std::endl;
+//    std::cout << "\tdistortion  : " << distortion_.transpose() << std::endl;
+//    std::cout << "\tcorrection  : " << correction_.transpose() << std::endl;
     std::cout << "\tp_ptr  : " << p_ptr_->getVector().transpose() << std::endl;
     std::cout << "\to_ptr  : " << o_ptr_->getVector().transpose() << std::endl;
 }
@@ -38,6 +40,20 @@ SensorCamera::~SensorCamera()
 {
     //
 }
+
+Eigen::Matrix3s SensorCamera::setIntrinsicMatrix(Eigen::Vector4s _pinhole_model)
+{
+    Eigen::Matrix3s K;
+    K(0, 0) = _pinhole_model(2);
+    K(0, 1) = 0;
+    K(0, 2) = _pinhole_model(0);
+    K(1, 0) = 0;
+    K(1, 1) = _pinhole_model(3);
+    K(1, 2) = _pinhole_model(1);
+    K.row(2) << 0, 0, 1;
+    return K;
+}
+
 
 // Define the factory method
 SensorBase* SensorCamera::create(const std::string& _unique_name, //
