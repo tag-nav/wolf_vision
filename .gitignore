@@ -17,3 +17,5 @@ src/examples/map_polyline_example_write.yaml
 *.gch
 
 *.dat
+
+.DS_Store
