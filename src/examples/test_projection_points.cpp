@@ -435,6 +435,52 @@ int main(int argc, char** argv)
                  test_jacobian_complete.row(1).col(0) << " " << test_jacobian_complete.row(1).col(1) << std::endl;
 
 
+
+
+
+
+    /* Test */
+    std::cout << "\n\n\n\nTEST\n" << std::endl;
+
+    Eigen::Matrix3s K;
+    K(0,0) = 830.748734;    K(0,1) = 0;             K(0,2) = 327.219132;
+    K(1,0) = 0;             K(1,1) = 831.18208;     K(1,2) = 234.720244;
+    K(2,0) = 0;             K(2,1) = 0;             K(2,2) = 1;
+
+    Eigen::Vector4s K_params = {327.219132,234.720244, 830.748734,831.18208};
+
+    std::cout << "K:\n" << K << std::endl;
+
+    Eigen::Vector4s distortion_vector = {0.0006579999999999999, 0.023847, -0.001878, 0.007706999999999999};
+
+    std::cout << "\nDistortion vector:\n" << distortion_vector << std::endl;
+
+    Eigen::Vector4s correction_vector;
+    pinhole::computeCorrectionModel(K_params,distortion_vector,correction_vector);
+
+    std::cout << "\nCorrection vector:\n" << correction_vector << std::endl;
+
+    Eigen::Vector3s test_point3D;
+    Eigen::Vector2s test_point2D = {600,600};
+
+
+
+    test_point2D = pinhole::depixellizePoint(K_params,test_point2D);
+    std::cout << "\ntest_point2D DEPIXELIZED:\n" << test_point2D << std::endl;
+    test_point2D = pinhole::undistortPoint(correction_vector,test_point2D);
+    std::cout << "\ntest_point2D UNDISTORTED:\n" << test_point2D << std::endl;
+    test_point3D = pinhole::backprojectPointFromNormalizedPlane(test_point2D,2);
+    std::cout << "\ntest_point3D BACKPROJECTED:\n" << test_point3D << std::endl;
+
+
+
+    test_point2D = pinhole::projectPointToNormalizedPlane(test_point3D);
+    std::cout << "\ntest_point2D NORMALIZED:\n" << test_point2D << std::endl;
+    test_point2D = pinhole::distortPoint(distortion_vector,test_point2D);
+    std::cout << "\ntest_point2D DISTORTED:\n" << test_point2D << std::endl;
+    test_point2D = pinhole::pixellizePoint(K_params,test_point2D);
+    std::cout << "\ntest_point2D PIXELIZED:\n" << test_point2D << std::endl;
+
 }
 
 
