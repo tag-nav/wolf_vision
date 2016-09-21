@@ -100,6 +100,7 @@ void ProcessorImageLandmark::preProcess()
     tracker_roi_.clear();
     detector_roi_.clear();
     tracker_candidates_.clear();
+    feat_lmk_found_.clear();
 }
 
 void ProcessorImageLandmark::postProcess()
@@ -110,7 +111,9 @@ void ProcessorImageLandmark::postProcess()
         drawFeatures(image);
         drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));
         drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
-        drawTrackingFeatures(image,tracker_candidates_,tracker_candidates_);
+        //drawTrackingFeatures(image,tracker_candidates_,tracker_candidates_);
+        drawFeaturesFromLandmarks(image);
+
     }
 }
 
@@ -180,6 +183,10 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                     incoming_point_ptr->setTrackId(incoming_point_ptr->id());
 
                     _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, normalized_score});
+
+                    feat_lmk_found_.push_back(incoming_point_ptr);
+                    std::cout << "FEATURE IN POINT X: " << incoming_point_ptr->getKeypoint().pt.x << "\tY: "
+                                 << incoming_point_ptr->getKeypoint().pt.y << std::endl;
                 }
                 else
                 {
@@ -200,7 +207,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         else
             std::cout << "NOT in the image" << std::endl;
     }
-    //std::cout << "Number of Features tracked: " << _feature_list_out.size() << std::endl;
+    std::cout << "\n\n\tNumber of Features tracked: " << _feature_list_out.size() << std::endl;
     landmarks_tracked_ = _feature_list_out.size();
     return _feature_list_out.size();
 }
@@ -301,7 +308,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
-    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
+//    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
     if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
     {
         return new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
@@ -543,11 +550,6 @@ void ProcessorImageLandmark::drawTrackingFeatures(cv::Mat _image, std::list<cv::
 {
     // These "tracking features" are the feature to be used in tracking as well as its candidates
 
-//    for(auto target_point : _target_list)
-//    {
-//        //target
-//        //cv::circle(_image, target_point, 2, cv::Scalar(0.0, 255.0, 255.0), -1, 8, 0);
-//    }
     for(auto candidate_point : _candidates_list)
     {
         //candidate - cyan
@@ -555,6 +557,22 @@ void ProcessorImageLandmark::drawTrackingFeatures(cv::Mat _image, std::list<cv::
     }
 
     cv::imshow("Feature tracker", _image);
+
+}
+
+void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
+{
+
+    for(auto feature_point : feat_lmk_found_)
+    {
+        //candidate - cyan
+        cv::Point point = ((FeaturePointImage*)feature_point)->getKeypoint().pt;
+        cv::circle(_image, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
+        std::cout << "Feature X: " << point.x << "\tY: " << point.y << std::endl;
+    }
+
+    cv::imshow("Feature tracker", _image);
+    //cv::waitKey(0);
 
 }
 
@@ -601,7 +619,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
     cv::putText(image, std::to_string(counter), label_for_landmark_point2,
                 cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
-    std::cout << "\n\nLandmarks tracked: " << landmarks_tracked_ << "\t\tTotal landmarks: " << counter << std::endl;
+    std::cout << "\t\tTotal landmarks: " << counter << std::endl;
 
     cv::imshow("Feature tracker", image);
     _image = image;

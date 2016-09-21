@@ -120,6 +120,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
+        FeatureBaseList feat_lmk_found_;
 
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
@@ -260,6 +261,8 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         virtual void drawFeatures(cv::Mat& _image);
 
         virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
+
+        virtual void drawFeaturesFromLandmarks(cv::Mat _image);
 
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
 
