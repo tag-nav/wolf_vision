@@ -16,7 +16,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         Eigen::Vector3s anchor_sensor_extrinsics_p_;
         Eigen::Vector4s anchor_sensor_extrinsics_o_;
         Eigen::Matrix3s K_;
-        Eigen::Vector4s distortion_;
+        Eigen::VectorXs distortion_;
         FeaturePointImage feature_image_;
 
     public:
@@ -34,7 +34,6 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             setType("AHP");
             K_ = ((SensorCamera*)(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
             distortion_ = ((SensorCamera*)(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
-
         }
 
         /** \brief Default destructor (not recommended)
@@ -91,16 +90,15 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
 //            std::cout << "\nv:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << "\t" << landmark_hmg_c1(3) << std::endl;
 
-
             // ==================================================
             /* DISTORTION ATTEMPT */
             Eigen::Matrix<T,3,1> test_distortion;
-            Eigen::Matrix<T,4,1> distortion_vector = distortion_.cast<T>();
+            Eigen::Matrix<T,Eigen::Dynamic,1> distortion_vector = distortion_.cast<T>();
             //test_distortion = pinhole::distortPoint(distortion_vector,test_distortion);
-            //std::cout << "\ntest_point2D DISTORTED:\n" << test_distortion << std::endl;
+            //std::cout << "\ntest_point2D DISTORTED:\n" << test_distortion(0) << std::endl;
 
 
-            T r2 = v(0) * v(0) + v(1) * v(1) +  v(2) * v(2); // this is the norm squared: r2 = ||u||^2
+            T r2 = v(0) * v(0) + v(1) * v(1); // this is the norm squared: r2 = ||u||^2
             //return distortFactor(d, r2) * up;
 
 
@@ -120,17 +118,21 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             if (s < (T)0.6) s = (T)1.0;
             test_distortion(0) = s * v(0);
             test_distortion(1) = s * v(1);
-            test_distortion(2) = s * v(2);
+            test_distortion(2) = v(2);
             /* END OF THE ATTEMPT */
+
 
             Eigen::Matrix<T, 3, 1> u_;
             u_ = K * test_distortion;
+//            u_ = K * v;
 
             Eigen::Matrix<T, 2, 1> u_12;
             u_12 = u_.head(2);
 
             Eigen::Matrix<T, 2, 1> u;
             u = u_12 / u_(2);
+
+//            std::cout << "u: " << u(0) << "\t" << u(1) << std::endl;
 
             // ==================================================
 

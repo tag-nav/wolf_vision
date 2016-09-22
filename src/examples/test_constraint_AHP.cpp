@@ -68,7 +68,7 @@ int main()
 
 
     // create the feature
-    cv::KeyPoint kp; kp.pt = {5,5};
+    cv::KeyPoint kp; kp.pt = {20,40};
     cv::Mat desc;
 
     FeaturePointImage* feat_point_image_ptr = new FeaturePointImage(kp, desc, Eigen::Matrix2s::Identity());
@@ -83,24 +83,52 @@ int main()
 //    std::cout << "point2D x: " << point2D(0) << "; y: " << point2D(1) << "; z: " << point2D(2) << std::endl;
     Scalar depth = 2; // arbitrary value
 
-    Eigen::Vector4s k_params = image_ptr->getSensorPtr()->getIntrinsicPtr()->getVector();
-    Eigen::Matrix3s K;
-    K(0,0) = k_params(2);       K(0,1) = 0;                    K(0,2) = k_params(0);
-    K(1,0) = 0;                 K(1,1) = k_params(3);          K(1,2) = k_params(1);
-    K(2,0) = 0;                 K(2,1) = 0;                    K(2,2) = 1;
-
-//    std::cout << "K: " << k_params << std::endl;
+    Eigen::Matrix3s K = ((SensorCamera*)(image_ptr->getSensorPtr()))->getIntrinsicMatrix();
 
     Eigen::Vector3s unitary_vector;
     unitary_vector = K.inverse() * point2D;
     unitary_vector.normalize();
 //    std::cout << "unitary_vector: " << unitary_vector(0) << "\t" << unitary_vector(1) << "\t" << unitary_vector(2) << std::endl;
 
-
     FrameBase* anchor_frame = new FrameBase(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
     //FrameBase* anchor_frame = wolf_problem_ptr_->getTrajectoryPtr()->getLastFramePtr();
 
-    Eigen::Vector4s vec_homogeneous = {unitary_vector(0),unitary_vector(1),unitary_vector(2),1/depth};
+
+
+    /* DISTORTION ATTEMPT */
+    Eigen::Vector3s test_undistortion;
+    Eigen::VectorXs correction_vector = ((SensorCamera*)(image_ptr->getSensorPtr()))->getCorrectionVector();
+    //test_distortion = pinhole::distortPoint(distortion_vector,test_distortion);
+    //std::cout << "\ntest_point2D DISTORTED:\n" << test_distortion(0) << std::endl;
+
+
+    Scalar r2 = unitary_vector(0) * unitary_vector(0) + unitary_vector(1) * unitary_vector(1); // this is the norm squared: r2 = ||u||^2
+    //return distortFactor(d, r2) * up;
+
+
+    Scalar s = 1.0;
+    Scalar r2i = 1.0;
+    //T i;
+    //for (i = (T)0; i == (distortion_vector.cols()-1) ; i = i +(T)1) { //   here we are doing:
+        r2i = r2i * r2;                                   //   r2i = r^(2*(i+1))
+        s = s + (correction_vector(0) * r2i);             //   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
+        r2i = r2i * r2;
+        s = s + (correction_vector(1) * r2i);
+        r2i = r2i * r2;
+        s = s + (correction_vector(2) * r2i);
+        r2i = r2i * r2;
+        s = s + (correction_vector(3) * r2i);
+    //}
+    if (s < 0.6) s = 1.0;
+    test_undistortion(0) = s * unitary_vector(0);
+    test_undistortion(1) = s * unitary_vector(1);
+    test_undistortion(2) = unitary_vector(2);
+    /* END OF THE ATTEMPT */
+
+
+
+    Eigen::Vector4s vec_homogeneous = {test_undistortion(0),test_undistortion(1),test_undistortion(2),1/depth};
+
 //    std::cout << "unitary_vec x: " << vec_homogeneous(0) << "; y: " << vec_homogeneous(1) << "; z: " << vec_homogeneous(2) << std::endl;
 
     LandmarkAHP* landmark = new LandmarkAHP(vec_homogeneous, anchor_frame, image_ptr->getSensorPtr(), feat_point_image_ptr->getDescriptor());

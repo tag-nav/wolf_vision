@@ -121,6 +121,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
         FeatureBaseList feat_lmk_found_;
+        std::list<Scalar> landmark_found_number_;
 
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
@@ -247,12 +248,6 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
         virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches);
-
-        virtual void rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation);
-
-        virtual void changeOfReferenceFrame(LandmarkAHP* _landmark, Eigen::Vector3s& _translation, Eigen::Matrix3s& _rotation);
-
-        virtual void getLandmarkInReference(LandmarkAHP* _landmark, Eigen::Vector3s _translation, Eigen::Matrix3s _rotation, Eigen::Vector3s& _point3D);
 
         virtual void LandmarkInCurrentReferenceFrame(LandmarkAHP* _landmark,Eigen::Vector3s& _point3D);
 
