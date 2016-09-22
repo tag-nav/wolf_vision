@@ -149,7 +149,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
 
     // create delta
     //Use SOLA-16 convention by default
-    Eigen::Vector3s a = measured_acc_ - bias_acc_;
+    Eigen::Vector3s a = measured_acc_  - bias_acc_;
     Eigen::Vector3s w = measured_gyro_ - bias_gyro_;
     v_out_ = a * _dt;
     p_out_ = v_out_ * _dt / 2;
@@ -278,20 +278,19 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     // dDf/dwb = dR.tr * dDf/dwb - Jr((w - wb)*dt) * dt
 
     // acc and gyro measurements corrected with the estimated bias
-    Eigen::Matrix3s acc_skew =  skew(measured_acc_ - bias_acc_);
-    Eigen::Vector3s omega    =  measured_gyro_ - bias_gyro_;
+    Eigen::Vector3s a =  measured_acc_  - bias_acc_;
+    Eigen::Vector3s w =  measured_gyro_ - bias_gyro_;
 
     // temporaries
     Scalar dt2_2            = 0.5 * _dt * _dt;
-    Eigen::Matrix3s M_tmp   = DR * acc_skew * dDq_dwb_;                            // Sola 16 -- OK Forster
+    Eigen::Matrix3s M_tmp   = DR * skew(a) * dDq_dwb_;                            // Sola 16 -- OK Forster
 
     dDp_dab_.noalias()  += dDv_dab_ * _dt -  DR * dt2_2;
     dDv_dab_            -= DR * _dt;
-
     dDp_dwb_.noalias()  += dDv_dwb_ * _dt - M_tmp * dt2_2;
     dDv_dwb_            -= M_tmp * _dt;
-
-    dDq_dwb_             = dR.transpose() * dDq_dwb_ - jac_SO3_right(omega * _dt) * _dt; // See SOLA-16
+    //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16
+    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Eigen::Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // See SOLA-16
 
     ///////////////////////////////////////////////////////////////////////////
     // 3. Update the deltas down here to avoid aliasing in the Jacobians section
