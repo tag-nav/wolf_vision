@@ -21,7 +21,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         FeaturePointImage feature_image_;
 
     public:
-        static const unsigned int N_BLOCKS = 5; //TODO: Prueba a comentarlo
+//        static const unsigned int N_BLOCKS = 5; //TODO: Prueba a comentarlo
 
         ConstraintImage(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, LandmarkAHP* _landmark_ptr,
                         bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :

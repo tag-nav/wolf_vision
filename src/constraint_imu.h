@@ -13,7 +13,7 @@ namespace wolf {
 class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
 {
     public:
-        static const unsigned int N_BLOCKS = 8;
+//        static const unsigned int N_BLOCKS = 8;
 
         ConstraintIMU(FeatureIMU* _ftr_ptr, FrameIMU* _frame_ptr, bool _apply_loss_function = false,
                       ConstraintStatus _status = CTR_ACTIVE);

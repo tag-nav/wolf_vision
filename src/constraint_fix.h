@@ -11,7 +11,7 @@ namespace wolf {
 class ConstraintFix: public ConstraintSparse<3,2,1>
 {
     public:
-        static const unsigned int N_BLOCKS = 2;
+//        static const unsigned int N_BLOCKS = 2;
 
         ConstraintFix(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<3, 2, 1>(CTR_FIX, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),
