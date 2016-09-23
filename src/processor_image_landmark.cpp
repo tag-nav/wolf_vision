@@ -174,6 +174,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                 //the matcher is now inside the match function
                 Scalar normalized_score = match(target_descriptor,candidate_descriptors,candidate_keypoints,cv_matches);
 
+                std::cout << "min normalizes score: " << params_.matcher.min_normalized_score << std::endl;
                 if (normalized_score > params_.matcher.min_normalized_score)
                 {
                     std::cout << "FOUND" << std::endl;
@@ -188,7 +189,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
                     feat_lmk_found_.push_back(incoming_point_ptr);
                     landmark_found_number_.push_back(lmk_nbr);
-                    std::cout << "4" << std::endl;
+                    std::cout << "list: " << landmark_found_number_.back() << std::endl;
                     std::cout << "LMK " << lmk_nbr << "; FEATURE IN POINT X: " << incoming_point_ptr->getKeypoint().pt.x
                               << "\tY: " << incoming_point_ptr->getKeypoint().pt.y << std::endl;
                 }
@@ -209,7 +210,9 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
             }
         }
         else
+        {
             std::cout << "NOT in the image" << std::endl;
+        }
 
         lmk_nbr++;
     }
@@ -504,7 +507,12 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
 {
 
     Eigen::VectorXs v(landmark_found_number_.size());
-
+    unsigned int j =0;
+    for (auto lmk_found_nbr_ : landmark_found_number_)
+    {
+        v(j) = lmk_found_nbr_;
+        j++;
+    }
 
     unsigned int i = 0;
     for(auto feature_point : feat_lmk_found_)
@@ -512,14 +520,14 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
         //candidate - cyan
         cv::Point point = ((FeaturePointImage*)feature_point)->getKeypoint().pt;
         cv::circle(_image, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
-        //cv::putText(_image, std::to_string(v(i)), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+        cv::Point point2 = point;
+        point2.x = point2.x - 16;
+        cv::putText(_image, std::to_string((unsigned int)v(i)), point2,
+                    cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0));
         i++;
-        std::cout << "Feature X: " << point.x << "\tY: " << point.y << std::endl;
     }
 
     cv::imshow("Feature tracker", _image);
-    //cv::waitKey(0);
-
 }
 
 void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
