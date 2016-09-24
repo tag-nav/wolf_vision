@@ -52,8 +52,8 @@ class ProcessorIMU : public ProcessorMotion{
         const Eigen::Vector3s gravity_;
 
         // Maps to the biases in the keyframe's state
-        Eigen::Map<Eigen::Vector3s> bias_acc_;
-        Eigen::Map<Eigen::Vector3s> bias_gyro_;
+        Eigen::Vector3s bias_acc_;
+        Eigen::Vector3s bias_gyro_;
 
         // Maps to the received measurements
         Eigen::Map<Eigen::Vector3s> measured_acc_;
@@ -117,10 +117,11 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      * dq = exp((w-w_b)*dt)
      */
 
-    // create delta
-    //Use SOLA-16 convention by default
+    // acc and gyro measurements corrected with the estimated bias
     Eigen::Vector3s a = measured_acc_  - bias_acc_;
     Eigen::Vector3s w = measured_gyro_ - bias_gyro_;
+
+    // create delta
     v_out_ = a * _dt;
     p_out_ = v_out_ * _dt / 2;
     q_out_ = v2q(w * _dt);
@@ -248,8 +249,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     // dDf/dwb = dR.tr * dDf/dwb - Jr((w - wb)*dt) * dt
 
     // acc and gyro measurements corrected with the estimated bias
-    Eigen::Vector3s a =  measured_acc_  - bias_acc_;
-    Eigen::Vector3s w =  measured_gyro_ - bias_gyro_;
+    Eigen::Vector3s a = measured_acc_  - bias_acc_;
+    Eigen::Vector3s w = measured_gyro_ - bias_gyro_;
 
     // temporaries
     Scalar dt2_2            = 0.5 * _dt * _dt;
@@ -345,10 +346,12 @@ inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _moti
 
 inline void ProcessorIMU::resetDerived()
 {
-    // Remap biases for the integration at the origin frame's biases
+    // Cast a pointer to origin IMU frame
     frame_imu_ptr_ = (FrameIMU*)((origin_ptr_->getFramePtr()));
-    new (&bias_acc_)  Eigen::Map<const Eigen::Vector3s>(frame_imu_ptr_->getBAPtr()->getVector().data()); // acc  bias
-    new (&bias_gyro_) Eigen::Map<const Eigen::Vector3s>(frame_imu_ptr_->getBGPtr()->getVector().data()); // gyro bias
+
+    // Assign biases for the integration at the origin frame's biases
+    bias_acc_  = frame_imu_ptr_->getBAPtr()->getVector(); // acc  bias
+    bias_gyro_ = frame_imu_ptr_->getBGPtr()->getVector(); // gyro bias
 
     // reset jacobians wrt bias
     dDp_dab_.setZero();
