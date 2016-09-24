@@ -82,7 +82,7 @@ class ProcessorMotion : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, Size _delta_jac_size = 0, const Scalar& _time_tolerance = 0.1);
+        ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -341,7 +341,7 @@ class ProcessorMotion : public ProcessorBase
 
 };
 
-inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, Size _delta_jac_size, const Scalar& _time_tolerance) :
+inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance) :
         ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), delta_cov_size_(_delta_cov_size), data_size_(_data_size), origin_ptr_(
                 nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_cov_(
                 _delta_cov_size, _delta_cov_size), delta_integrated_(_delta_size), delta_integrated_cov_(_delta_cov_size, _delta_cov_size), data_(
@@ -464,7 +464,6 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 
 inline void ProcessorMotion::integrate()
 {
-
     // Set dt
     updateDt();
 
@@ -472,7 +471,12 @@ inline void ProcessorMotion::integrate()
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
 
     // then integrate the current delta to pre-integrated measurements
-    deltaPlusDelta(delta_integrated_, delta_ , dt_, delta_integrated_,jacobian_delta_preint_,jacobian_delta_);
+    deltaPlusDelta(delta_integrated_,
+                   delta_ ,
+                   dt_,
+                   delta_integrated_,
+                   jacobian_delta_preint_,
+                   jacobian_delta_);
 
     // and covariance
     deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_,
@@ -490,26 +494,17 @@ inline void ProcessorMotion::integrate()
                                              delta_integrated_cov_,
                                              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
                                              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)}));
-
-
-    //    std::cout << "motion integrated: " << getBufferPtr()->get().size()-1 << std::endl;
-    //    std::cout << "\tts: " << getBufferPtr()->get().back().ts_.getSeconds() << "." << getBufferPtr()->get().back().ts_.getNanoSeconds() << std::endl;
-    //    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, x_);
-    //    std::cout << "\tx_integrated_: " << x_.transpose() << std::endl;
-    //std::cout << "\tdelta_integrated_cov_" << std::endl;
-    //std::cout << delta_integrated_cov_ << std::endl;
 }
 
 inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
 {
-    //std::cout << "ProcessorMotion::reintegrate" << std::endl;
+    // start with empty motion
     _capture_ptr->getBufferPtr()->get().push_front(motionZero(_capture_ptr->getOriginFramePtr()->getTimeStamp()));
 
     auto motion_it = _capture_ptr->getBufferPtr()->get().begin();
     auto prev_motion_it = motion_it;
     motion_it++;
 
-    Eigen::MatrixXs jacobian_prev(delta_size_, delta_size_), jacobian_curr(delta_size_, delta_size_);
     while (motion_it != _capture_ptr->getBufferPtr()->get().end())
     {
         const Scalar dt = motion_it->ts_ - prev_motion_it->ts_;
@@ -517,20 +512,15 @@ inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
                        motion_it->delta_,
                        dt,
                        motion_it->delta_integr_,
-                       jacobian_prev,
-                       jacobian_curr);
+                       jacobian_delta_preint_,
+                       jacobian_delta_);
 
         deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_,
                              motion_it->delta_cov_,
                              dt,
-                             jacobian_prev,
-                             jacobian_curr,
+                             jacobian_delta_preint_,
+                             jacobian_delta_,
                              motion_it->delta_integr_cov_);
-
-        //std::cout << "\tmotion reintegrated: " << std::distance(_capture_ptr->getBufferPtr()->get().begin(), motion_it) << std::endl;
-        //std::cout << "\t\tts: " << motion_it->ts_.getSeconds() << "." << motion_it->ts_.getNanoSeconds() << std::endl;
-        //xPlusDelta(_capture_ptr->getOriginFramePtr()->getState(), motion_it->delta_integr_, x_);
-        //std::cout << "\t\tx_integrated_: " << x_.transpose() << std::endl;
 
         motion_it++;
         prev_motion_it++;
