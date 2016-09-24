@@ -14,9 +14,6 @@ class ProcessorIMU : public ProcessorMotion{
         virtual ~ProcessorIMU();
 
     protected:
-
-        // Helper functions
-
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
                                 const Scalar _dt);
@@ -30,16 +27,14 @@ class ProcessorIMU : public ProcessorMotion{
                                     Eigen::VectorXs& _delta_preint_plus_delta,
                                     Eigen::MatrixXs& _jacobian_delta_preint,
                                     Eigen::MatrixXs& _jacobian_delta);
-        virtual void deltaMinusDelta(const Eigen::VectorXs& _delta_1,
-                                     const Eigen::VectorXs& _delta_2,
-                                     const Scalar _dt,
-                                     Eigen::VectorXs& _delta_1_minus_delta_2);
         virtual void xPlusDelta(const Eigen::VectorXs& _x,
                                 const Eigen::VectorXs& _delta,
                                 const Scalar _Dt,
                                 Eigen::VectorXs& _x_plus_delta );
         virtual Eigen::VectorXs deltaZero() const;
-        virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts);
+        virtual Motion interpolate(const Motion& _motion_ref,
+                                   Motion& _motion,
+                                   TimeStamp& _ts);
 
         void resetDerived();
 
@@ -307,25 +302,6 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     p_out_ = p_in_1_ + v_in_1_ * _dt + q_in_1_ * p_in_2_;
     v_out_ = v_in_1_ + q_in_1_ * v_in_2_;
     q_out_ = q_in_1_ * q_in_2_;
-}
-
-inline void ProcessorIMU::deltaMinusDelta(const Eigen::VectorXs& _delta_1, const Eigen::VectorXs& _delta_2,
-                                          const Scalar _dt, Eigen::VectorXs& _delta_1_minus_delta_2)
-{
-    assert(_delta_1.size() == 10 && "Wrong _delta_1 vector size");
-    assert(_delta_2.size() == 10 && "Wrong _delta_2 vector size");
-    assert(_delta_1_minus_delta_2.size() == 10 && "Wrong _delta_1_minus_delta_2 vector size");
-
-    remapPVQ(_delta_1, _delta_2, _delta_1_minus_delta_2);
-    // _delta_1                 is _in_1_
-    // _delta_2                 is _in_2_
-    // _delta_1_minus_delta_2   is _out_
-
-    /* MATHS according to SOLA-16 (see deltaPlusDelta for derivation)
-     */
-    p_out_ = p_in_1_ + v_in_1_ * _dt - q_in_1_ * p_in_2_;
-    v_out_ = v_in_1_ - q_in_1_ * v_in_2_;
-    q_out_ = q_in_1_ * q_in_2_.conjugate();
 }
 
 inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,

@@ -42,15 +42,11 @@ class ProcessorOdom3D : public ProcessorMotion
     public:
         ProcessorOdom3D();
         virtual ~ProcessorOdom3D();
+
+    private:
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
                                 const Scalar _dt);
-
-    private:
-        void xPlusDelta(const Eigen::VectorXs& _x,
-                        const Eigen::VectorXs& _delta,
-                        const Scalar _Dt,
-                        Eigen::VectorXs& _x_plus_delta);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                             const Eigen::VectorXs& _delta2,
                             const Scalar _Dt2,
@@ -58,8 +54,13 @@ class ProcessorOdom3D : public ProcessorMotion
         void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                             const Eigen::VectorXs& _delta2,
                             const Scalar _Dt2,
-                            Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
+                            Eigen::VectorXs& _delta1_plus_delta2,
+                            Eigen::MatrixXs& _jacobian1,
                             Eigen::MatrixXs& _jacobian2);
+        void xPlusDelta(const Eigen::VectorXs& _x,
+                        const Eigen::VectorXs& _delta,
+                        const Scalar _Dt,
+                        Eigen::VectorXs& _x_plus_delta);
         Eigen::VectorXs deltaZero() const;
         Motion interpolate(const Motion& _motion_ref,
                            Motion& _motion,

@@ -26,21 +26,12 @@ class ProcessorOdom2D : public ProcessorMotion
     public:
         ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th);
         virtual ~ProcessorOdom2D();
-        virtual void data2delta(const Eigen::VectorXs& _data,
-                                const Eigen::MatrixXs& _data_cov,
-                                const Scalar _dt);
         virtual bool voteForKeyFrame();
 
     protected:
-        Scalar dist_traveled_th_;
-        Scalar cov_det_th_;
-        Scalar elapsed_time_th_;
-
-    private:
-        void xPlusDelta(const Eigen::VectorXs& _x,
-                        const Eigen::VectorXs& _delta,
-                        const Scalar _Dt,
-                        Eigen::VectorXs& _x_plus_delta);
+        virtual void data2delta(const Eigen::VectorXs& _data,
+                                const Eigen::MatrixXs& _data_cov,
+                                const Scalar _dt);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                             const Eigen::VectorXs& _delta2,
                             const Scalar _Dt2,
@@ -51,16 +42,26 @@ class ProcessorOdom2D : public ProcessorMotion
                             Eigen::VectorXs& _delta1_plus_delta2,
                             Eigen::MatrixXs& _jacobian1,
                             Eigen::MatrixXs& _jacobian2);
+        void xPlusDelta(const Eigen::VectorXs& _x,
+                        const Eigen::VectorXs& _delta,
+                        const Scalar _Dt,
+                        Eigen::VectorXs& _x_plus_delta);
         Eigen::VectorXs deltaZero() const;
         Motion interpolate(const Motion& _motion_ref,
                            Motion& _motion,
                            TimeStamp& _ts);
 
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin);
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion,
+                                                 FrameBase* _frame_origin);
+
+    protected:
+        Scalar dist_traveled_th_;
+        Scalar cov_det_th_;
+        Scalar elapsed_time_th_;
 
         // Factory method
-        public:
-            static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+    public:
+        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 };
 
 inline ProcessorOdom2D::ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th) :
