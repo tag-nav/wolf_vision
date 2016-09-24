@@ -139,7 +139,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     // we go the sparse way:
     Eigen::Matrix3s ddp_dan = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
     Eigen::Matrix3s ddv_dan = Eigen::Matrix3s::Identity() * _dt;
-    //    Eigen::Matrix3s ddf_dwn = jac_SO3_right(w * _dt) * _dt; // Since wdt is small, we could use here  Jr(wdt) ~ (I - 0.5*[wdt]_x)  and go much faster.
+    //    Eigen::Matrix3s ddf_dwn = jac_SO3_right(w * _dt) * _dt; // Since w*dt is small, we could use here  Jr(wdt) ~ (I - 0.5*[wdt]_x)  and go much faster.
     Eigen::Matrix3s ddf_dwn = (Eigen::Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
 
     /* Covariance is sparse:

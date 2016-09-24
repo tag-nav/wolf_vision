@@ -150,7 +150,9 @@ class ProcessorMotion : public ProcessorBase
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
          * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
          */
-        void sumDeltas(CaptureMotion* _cap1_ptr, CaptureMotion* _cap2_ptr, Eigen::VectorXs& _delta1_plus_delta2);
+        void sumDeltas(CaptureMotion* _cap1_ptr,
+                       CaptureMotion* _cap2_ptr,
+                       Eigen::VectorXs& _delta1_plus_delta2);
 
         /** Composes two delta covariances
          * \param _delta_cov1 covariance of the first delta
@@ -160,9 +162,11 @@ class ProcessorMotion : public ProcessorBase
          * \param _jacobian2 jacobian of the composition w.r.t. _delta2
          * \param _delta_cov1_plus_delta_cov2 the covariance of the composition.
          */
-        void deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1, const Eigen::MatrixXs& _delta_cov2,
+        void deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1,
+                                  const Eigen::MatrixXs& _delta_cov2,
                                   const Scalar _Dt2,
-                                  const Eigen::MatrixXs& _jacobian1, const Eigen::MatrixXs& _jacobian2,
+                                  const Eigen::MatrixXs& _jacobian1,
+                                  const Eigen::MatrixXs& _jacobian2,
                                   Eigen::MatrixXs& _delta_cov1_plus_delta_cov2);
         /** Set the origin of all motion for this processor
          * \param _origin_frame the key frame to be the origin
@@ -262,7 +266,9 @@ class ProcessorMotion : public ProcessorBase
          *
          *  However, other more complicated relations are possible.
          */
-        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt) = 0;
+        virtual void data2delta(const Eigen::VectorXs& _data,
+                                const Eigen::MatrixXs& _data_cov,
+                                const Scalar _dt) = 0;
 
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
@@ -272,8 +278,10 @@ class ProcessorMotion : public ProcessorBase
          *
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2.
          */
-        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                    const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2) = 0;
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1,
+                                    const Eigen::VectorXs& _delta2,
+                                    const Scalar _Dt2,
+                                    Eigen::VectorXs& _delta1_plus_delta2) = 0;
 
         /** \brief composes a delta-state on top of another delta-state, and computes the Jacobians
          * \param _delta1 the first delta-state
@@ -285,9 +293,12 @@ class ProcessorMotion : public ProcessorBase
          *
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2 and its jacobians.
          */
-        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                    const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2,
-                                    Eigen::MatrixXs& _jacobian1, Eigen::MatrixXs& _jacobian2) = 0;
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1,
+                                    const Eigen::VectorXs& _delta2,
+                                    const Scalar _Dt2,
+                                    Eigen::VectorXs& _delta1_plus_delta2,
+                                    Eigen::MatrixXs& _jacobian1,
+                                    Eigen::MatrixXs& _jacobian2) = 0;
 
         /** \brief composes a delta-state on top of a state
          * \param _x the initial state
@@ -297,7 +308,9 @@ class ProcessorMotion : public ProcessorBase
          *
          * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
          */
-        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
+        virtual void xPlusDelta(const Eigen::VectorXs& _x,
+                                const Eigen::VectorXs& _delta,
+                                const Scalar _Dt,
                                 Eigen::VectorXs& _x_plus_delta) = 0;
 
 
