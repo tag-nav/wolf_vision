@@ -17,53 +17,28 @@ class ProcessorIMU : public ProcessorMotion{
 
         // Helper functions
 
-        /**
-         * @brief Extract data from the IMU and create a delta-state for one IMU step
-         * @param _data
-         * @param _data_cov
-         * @param _dt
-         */
-        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt);
-
-        /** \brief composes a delta-state on top of another delta-state
-         * \param _delta_preint the first delta-state
-         * \param _delta the second delta-state
-         * \param _dt the second delta-state's time delta
-         * \param _delta_preint_plus_delta the delta2 composed on top of delta1. It has the format of delta-state.
-         *
-         *
-         * _jacobian1 is A (3x9) _jacobian2 should be B (3x6) but not here..
-         * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2
-         *
-         * See its definition for more comments about the inner maths.
-         */
-        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
-                                    const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta);
-
-        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
-                                    const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta,
-                                    Eigen::MatrixXs& _jacobian_delta_preint, Eigen::MatrixXs& _jacobian_delta);
-
-        virtual void deltaMinusDelta(const Eigen::VectorXs& _delta_1, const Eigen::VectorXs& _delta_2,
-                                     const Scalar _dt, Eigen::VectorXs& _delta_1_minus_delta_2);
-
-        /** \brief composes a delta-state on top of a state
-         * \param _x the initial state
-         * \param _delta the delta-state
-         * \param _x_plus_delta the updated state. It has the same format as the initial state.
-         * \param _Dt the time interval between the origin state and the Delta
-         *
-         * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
-         */
-        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
+        virtual void data2delta(const Eigen::VectorXs& _data,
+                                const Eigen::MatrixXs& _data_cov,
+                                const Scalar _dt);
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
+                                    const Eigen::VectorXs& _delta,
+                                    const Scalar _dt,
+                                    Eigen::VectorXs& _delta_preint_plus_delta);
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
+                                    const Eigen::VectorXs& _delta,
+                                    const Scalar _dt,
+                                    Eigen::VectorXs& _delta_preint_plus_delta,
+                                    Eigen::MatrixXs& _jacobian_delta_preint,
+                                    Eigen::MatrixXs& _jacobian_delta);
+        virtual void deltaMinusDelta(const Eigen::VectorXs& _delta_1,
+                                     const Eigen::VectorXs& _delta_2,
+                                     const Scalar _dt,
+                                     Eigen::VectorXs& _delta_1_minus_delta_2);
+        virtual void xPlusDelta(const Eigen::VectorXs& _x,
+                                const Eigen::VectorXs& _delta,
+                                const Scalar _Dt,
                                 Eigen::VectorXs& _x_plus_delta );
-
-
-
-        /** \brief Delta representing the null motion
-         */
         virtual Eigen::VectorXs deltaZero() const;
-
         virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts);
 
         void resetDerived();

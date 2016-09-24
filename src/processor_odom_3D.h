@@ -42,22 +42,31 @@ class ProcessorOdom3D : public ProcessorMotion
     public:
         ProcessorOdom3D();
         virtual ~ProcessorOdom3D();
-        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt);
-
+        virtual void data2delta(const Eigen::VectorXs& _data,
+                                const Eigen::MatrixXs& _data_cov,
+                                const Scalar _dt);
 
     private:
-        void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta);
-        void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2);
-        void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+        void xPlusDelta(const Eigen::VectorXs& _x,
+                        const Eigen::VectorXs& _delta,
+                        const Scalar _Dt,
+                        Eigen::VectorXs& _x_plus_delta);
+        void deltaPlusDelta(const Eigen::VectorXs& _delta1,
+                            const Eigen::VectorXs& _delta2,
+                            const Scalar _Dt2,
+                            Eigen::VectorXs& _delta1_plus_delta2);
+        void deltaPlusDelta(const Eigen::VectorXs& _delta1,
+                            const Eigen::VectorXs& _delta2,
                             const Scalar _Dt2,
                             Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
                             Eigen::MatrixXs& _jacobian2);
-        virtual void deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                     Eigen::VectorXs& _delta2_minus_delta1);
         Eigen::VectorXs deltaZero() const;
-        Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts);
+        Motion interpolate(const Motion& _motion_ref,
+                           Motion& _motion,
+                           TimeStamp& _ts);
 
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin);
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion,
+                                                 FrameBase* _frame_origin);
 
     private:
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
@@ -138,18 +147,6 @@ inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     // TODO: fill the jacobians
     _jacobian1 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
     _jacobian2 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
-}
-
-inline void ProcessorOdom3D::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                             Eigen::VectorXs& _delta2_minus_delta1)
-{
-    assert(_delta1.size() == delta_size_ && "Wrong _delta1 vector size");
-    assert(_delta2.size() == delta_size_ && "Wrong _delta2 vector size");
-    assert(_delta2_minus_delta1.size() == delta_size_ && "Wrong _delta2_minus_delta1 vector size");
-
-    remap(_delta1, _delta2, _delta2_minus_delta1);
-    p_out_ = q1_.conjugate() * (p2_ - p1_);
-    q_out_ = q1_.conjugate() * q2_;
 }
 
 inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
