@@ -130,15 +130,15 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
 
     /* MATHS : jacobian d_n, of delta wrt noise
      * substituting a and w respectively by (a+a_n) and (w+w_n) (measurement noise is additive)
-     *              an           wn
-     *       dp [0.5*I*dt*dt     0      ]
-     * d_n = dv [   I*dt         0      ]
-     *       df [   0           Jr*dt   ] // see Sola-16
+     *                an           wn
+     *         dp [0.5*I*dt*dt     0      ]
+     * dd_dn = dv [   I*dt         0      ]
+     *         df [   0           Jr*dt   ] // see Sola-16
      */
 
     // we go the sparse way:
-    Eigen::Matrix3s ddp_dan = Eigen::Matrix3s::Identity() * 0.5 * _dt * _dt;
     Eigen::Matrix3s ddv_dan = Eigen::Matrix3s::Identity() * _dt;
+    Eigen::Matrix3s ddp_dan = ddv_dan * _dt / 2;
     //    Eigen::Matrix3s ddf_dwn = jac_SO3_right(w * _dt) * _dt; // Since w*dt is small, we could use here  Jr(wdt) ~ (I - 0.5*[wdt]_x)  and go much faster.
     Eigen::Matrix3s ddf_dwn = (Eigen::Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
 
@@ -149,11 +149,11 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      *
      * where A, B, C and D are computed below
      */
-    delta_cov_.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // A
-    delta_cov_.block<3,3>(0,3).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // B
-    delta_cov_.block<3,3>(3,0)           = delta_cov_.block<3,3>(0,3).transpose();                // B'
-    delta_cov_.block<3,3>(3,3).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // C
-    delta_cov_.block<3,3>(6,6).noalias() = ddf_dwn*_data_cov.block<3,3>(3,3)*ddf_dwn.transpose(); // D
+    delta_cov_.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // A = cov(dp)
+    delta_cov_.block<3,3>(0,3).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // B = cov(dp,dv)
+    delta_cov_.block<3,3>(3,0)           = delta_cov_.block<3,3>(0,3).transpose();                // B'= cov(dv,dp)
+    delta_cov_.block<3,3>(3,3).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // C = cov(dv)
+    delta_cov_.block<3,3>(6,6).noalias() = ddf_dwn*_data_cov.block<3,3>(3,3)*ddf_dwn.transpose(); // D = cov(df)
 
 }
 
@@ -175,45 +175,27 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      *     We use d or delta (with lowercase d) to refer to the recent delta.
      *     We use p, v, q as in Dp, Dv, Dq to refer to the deltas of position, velocity, and quaternion
      *     We use f, as in Df, df, to refer to deltas of the angle vector 'phi'
-     *          equivalent to the quaternion deltas (see below),
-     *          that is,    Dq = Exp(Df), dq = Exp(df)
-     *          and / or    DR = Exp(Df), dR = Exp(df).
+     *          equivalent to the quaternion deltas,
+     *          that is,    Dq = Exp(Df), dq = Exp(df), Df = Log(Dq), df = Log(dq)
+     *          and / or    DR = Exp(Df), dR = Exp(df), etc.
      *
-     * 2. Expression of the delta integration step:
+     * 2. Expression of the delta integration step, D' = D (+) d:
      *
-     *     Dp' = Dp + Dv*dt + Dq*dp   if  dp = 1/2*(a-a_b)*dt^2
-     *     Dv' = Dv + Dq*dv           if  dv = (a-a_b)*dt
-     *     Dq' = Dq * dq              if  dq = Exp((w-w_b)*dt)
+     *     Dp' = Dp + Dv*dt + Dq*dp
+     *     Dv' = Dv + Dq*dv
+     *     Dq' = Dq * dq
      *
-     * where (dp, dv, dq) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
-     *
-     * warning: All deltas (Dp, Dv, Dq) are physically interpretable: they represent the position, velocity and orientation of a body with
-     * respect to a reference frame that is non-rotating and free-falling at the acceleration of gravity.
+     * where d = (dp, dv, dq) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
      *
      * 3. Jacobians derived from the expression above: (see Sola-16):
      *
-     * With respect to Delta, D_D, is:
-     *
-     *   dDp'/dDp = I
-     *   dDp'/dDv = I*dt
-     *   dDp'/dDf = - DR * skew(dp)
-     *   dDv'/dDv = I
-     *   dDv'/dDf = - DR * skew(dv)
-     *   dDf'/dDf = dR.tr
-     *
-     * which gives _jacobian_delta_preint = D_D as:
+     * 3.a With respect to Delta, gives _jacobian_delta_preint = D_D as:
      *
      *   D_D = [ I     I*dt   -DR*skew(dp)
      *           0      I     -DR*skew(dv)
      *           0      0      dR.tr       ] // See Sola-16
      *
-     * and wrt delta, D_d, is:
-     *
-     *   dDp'/ddp = DR
-     *   dDv'/ddv = DR
-     *   dDf'/ddf = I
-     *
-     * which gives _jacobian_delta = D_d as:
+     * 3.b. With respect to delta, gives _jacobian_delta = D_d as:
      *
      *   D_d = [ DR   0    0
      *           0    DR   0
@@ -221,17 +203,17 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      */
 
     // Some useful temporaries
-    Eigen::Matrix3s DR      = q_in_1_.matrix();
-    Eigen::Matrix3s dR      = q_in_2_.matrix();
+    Eigen::Matrix3s DR      = q_in_1_.matrix(); // First  Delta, DR
+    Eigen::Matrix3s dR      = q_in_2_.matrix(); // Second delta, dR
 
-    // Jac wrt preintegrated delta, D_D
+    // Jac wrt preintegrated delta, D_D = dD'/dD
     _jacobian_delta_preint.setIdentity(9,9);                                    // dDp'/ddp, dDv'/ddv, dDf'/ddf
     _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // dDp'/ddv
     _jacobian_delta_preint.block<3,3>(0,6).noalias() = - DR * skew(p_in_2_) ;   // dDp'/ddf
     _jacobian_delta_preint.block<3,3>(3,6).noalias() = - DR * skew(v_in_2_) ;   // dDv'/ddf
     _jacobian_delta_preint.block<3,3>(6,6) =   dR.transpose();                  // dDf'/ddf
 
-    // Jac wrt current delta, D_d
+    // Jac wrt current delta, D_d = dD'/dd
     _jacobian_delta.setZero(9,9);
     _jacobian_delta.block<3,3>(0,0) = DR;
     _jacobian_delta.block<3,3>(3,3) = DR;
@@ -243,7 +225,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     //
     // Integration of Jacobian wrt bias
     // dDp/dab += dDv/dab * dt - 0.5 * DR * dt^2
-    // dDv/dab -= dR * dt
+    // dDv/dab -= DR * dt
     // dDp/dwb += dDv/dwb * dt - 0.5 * DR * [a - ab]_x * dDf/dwb * dt^2
     // dDv/dwb -= DR * [a - ab]_x * dDf/dwb * dt
     // dDf/dwb = dR.tr * dDf/dwb - Jr((w - wb)*dt) * dt
@@ -254,14 +236,14 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 
     // temporaries
     Scalar dt2_2            = 0.5 * _dt * _dt;
-    Eigen::Matrix3s M_tmp   = DR * skew(a) * dDq_dwb_;                            // Sola 16 -- OK Forster
+    Eigen::Matrix3s M_tmp   = DR * skew(a) * dDq_dwb_;
 
     dDp_dab_.noalias()  += dDv_dab_ * _dt -  DR * dt2_2;
     dDv_dab_            -= DR * _dt;
     dDp_dwb_.noalias()  += dDv_dwb_ * _dt - M_tmp * dt2_2;
     dDv_dwb_            -= M_tmp * _dt;
-    //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16
-    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Eigen::Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // See SOLA-16
+    //    dDq_dwb_       = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
+    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Eigen::Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
 
     ///////////////////////////////////////////////////////////////////////////
     // 3. Update the deltas down here to avoid aliasing in the Jacobians section
@@ -277,10 +259,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     assert(_delta_preint_plus_delta.size() == 10 && "Wrong _delta_preint_plus_delta vector size");
 
     remapPVQ(_delta_preint, _delta, _delta_preint_plus_delta);
-    // _delta_preint             is _in_1_
-    // _delta                    is _in_2_
-    // _delta_preint_plus_delta  is _out_
-
+    // _delta_preint             is *_in_1_
+    // _delta                    is *_in_2_
+    // _delta_preint_plus_delta  is *_out_
 
     /* MATHS according to Sola-16
      * Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp   if  dp = 1/2*(a-a_b)*dt^2
@@ -289,13 +270,11 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      *
      * where (dp, dv, dq) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
      *
-     * warning: All deltas (Dp, Dv, Dq) are physically interpretable:
+     * Note: All deltas (Dp, Dv, Dq) are physically interpretable:
      * they represent the position, velocity and orientation of a body with
      * respect to a reference frame that is non-rotating and free-falling at the acceleration of gravity.
      */
 
-    // delta pre-integration
-    // For the math, use SOLA-16 convention by default
     // Note: we might be (and in fact we are) calling this fcn with the same input and output:
     //     deltaPlusDelta(delta_integrated_, delta_, dt_, delta_integrated_);
     // that is, _delta1 and _delta1_plus_delta2 point to the same memory locations.
