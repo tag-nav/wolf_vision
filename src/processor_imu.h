@@ -59,11 +59,6 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<Eigen::Vector3s> measured_acc_;
         Eigen::Map<Eigen::Vector3s> measured_gyro_;
 
-        // Maps to pos, vel, quat of the pre-integrated delta
-        Eigen::Map<Eigen::Vector3s> position_preint_;
-        Eigen::Map<Eigen::Vector3s> velocity_preint_;
-        Eigen::Map<Eigen::Quaternions> orientation_preint_quat_;
-
         // Maps to pos, vel, quat, to be used as temporaries
         Eigen::Map<const Eigen::Vector3s> p_in_1_, p_in_2_;
         Eigen::Map<Eigen::Vector3s> p_out_;
