@@ -19,6 +19,7 @@
 #include <fstream>
 #include <iomanip>
 #include <ctime>
+#include <cmath>
 
 //#define DEBUG_RESULTS
 
@@ -146,6 +147,10 @@ int main(int argc, char** argv)
     << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
     std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
     << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(16).transpose() << std::endl;
+    std::cout << "Integrated std  : " << std::fixed << std::setprecision(3) << std::setw(8)
+    << (wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
+    //    std::cout << "Integrated cov  : \n" << std::fixed << std::setprecision(3) << std::setw(8)
+    //    << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_ << std::endl;
 
 
     // Print statistics
