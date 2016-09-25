@@ -29,7 +29,7 @@ class ProcessorIMU : public ProcessorMotion{
                                     Eigen::MatrixXs& _jacobian_delta);
         virtual void xPlusDelta(const Eigen::VectorXs& _x,
                                 const Eigen::VectorXs& _delta,
-                                const Scalar _Dt,
+                                const Scalar _dt,
                                 Eigen::VectorXs& _x_plus_delta );
         virtual Eigen::VectorXs deltaZero() const;
         virtual Motion interpolate(const Motion& _motion_ref,
@@ -279,23 +279,23 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     q_out_ = q_in_1_ * q_in_2_;
 }
 
-inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
+inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _dt,
                                      Eigen::VectorXs& _x_plus_delta)
 {
     assert(_x.size() == 16 && "Wrong _x vector size");
     assert(_delta.size() == 10 && "Wrong _delta vector size");
     assert(_x_plus_delta.size() == 16 && "Wrong _x_plus_delta vector size");
-    assert(_Dt >= 0 && "Time interval _Dt is negative!");
+    assert(_dt >= 0 && "Time interval _Dt is negative!");
 
     remapPVQ(_x, _delta, _x_plus_delta);
     // _x               is _in_1_
     // _delta           is _in_2_
     // _x_plus_delta    is _out_
 
-    Eigen::Vector3s gdt = gravity_ * _Dt;
+    Eigen::Vector3s gdt = gravity_ * _dt;
 
     // state updates
-    p_out_ = q_in_1_ * p_in_2_ + p_in_1_ + v_in_1_ * _Dt + gdt * _Dt / 2 ;
+    p_out_ = q_in_1_ * p_in_2_ + p_in_1_ + v_in_1_ * _dt + gdt * _dt / 2 ;
     v_out_ = q_in_1_ * v_in_2_ + v_in_1_ + gdt;
     q_out_ = q_in_1_ * q_in_2_;
 
