@@ -144,10 +144,8 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         Eigen::Vector3s point3D;
         Eigen::Vector2s point2D;
 
-        LandmarkInCurrentReferenceFrame(landmark_ptr,point3D);
+        LandmarkInCurrentCamera(landmark_ptr,point3D);
 
-//        point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
-//                                        ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point3D);
         point2D = pinhole::projectPointToNormalizedPlane(point3D);
         point2D = pinhole::distortPoint(((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point2D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
@@ -285,10 +283,13 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 
     Eigen::Matrix3s K = ((SensorCamera*)(this->getSensorPtr()))->getIntrinsicMatrix();
 
-    Eigen::Vector3s unitary_vector;
-    unitary_vector = K.inverse() * point2D;
-    unitary_vector.normalize();
+    Eigen::Vector3s hmg_ldmk_point;
+    hmg_ldmk_point = K.inverse() * point2D;
+//    unitary_vector.normalize();
 //    std::cout << "unitary_vector: " << unitary_vector(0) << "\t" << unitary_vector(1) << "\t" << unitary_vector(2) << std::endl;
+
+    Eigen::Vector2s ldmk_point;
+    ldmk_point = hmg_ldmk_point.head(2)/hmg_ldmk_point(3);
 
     FrameBase* anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
 
@@ -300,7 +301,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     //std::cout << "\ntest_point2D DISTORTED:\n" << test_distortion(0) << std::endl;
 
 
-    Scalar r2 = unitary_vector(0) * unitary_vector(0) + unitary_vector(1) * unitary_vector(1); // this is the norm squared: r2 = ||u||^2
+    Scalar r2 = ldmk_point(0) * ldmk_point(0) + ldmk_point(1) * ldmk_point(1); // this is the norm squared: r2 = ||u||^2
     //return distortFactor(d, r2) * up;
 
 
@@ -318,9 +319,9 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
         s = s + (correction_vector(3) * r2i);
     //}
     if (s < 0.6) s = 1.0;
-    test_undistortion(0) = s * unitary_vector(0);
-    test_undistortion(1) = s * unitary_vector(1);
-    test_undistortion(2) = unitary_vector(2);
+    test_undistortion(0) = s * ldmk_point(0);
+    test_undistortion(1) = s * ldmk_point(1);
+    test_undistortion(2) = 1;
     /* END OF THE ATTEMPT */
 
 
@@ -346,7 +347,7 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
 
 // ==================================================================== My own functions
 
-void ProcessorImageLandmark::LandmarkInCurrentReferenceFrame(LandmarkAHP* _landmark,Eigen::Vector3s& _point3D)
+void ProcessorImageLandmark::LandmarkInCurrentCamera(LandmarkAHP* _landmark,Eigen::Vector3s& _point3D)
 {
     Eigen::Vector3s pwr1 = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
     Eigen::Vector3s pwr0 = _landmark->getAnchorFrame()->getPPtr()->getVector();
@@ -542,10 +543,8 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
         Eigen::Vector3s point3D;
         Eigen::Vector2s point2D;
 
-        LandmarkInCurrentReferenceFrame(landmark_ptr,point3D);
+        LandmarkInCurrentCamera(landmark_ptr,point3D);
 
-//        point2D = pinhole::projectPoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),
-//                                        ((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point3D);
         point2D = pinhole::projectPointToNormalizedPlane(point3D);
         point2D = pinhole::distortPoint(((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point2D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
