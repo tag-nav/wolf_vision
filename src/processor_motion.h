@@ -501,9 +501,10 @@ inline void ProcessorMotion::integrate()
                                              delta_,
                                              delta_integrated_,
                                              delta_cov_,
-                                             delta_integrated_cov_,
-                                             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
-                                             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)}));
+                                             delta_integrated_cov_
+//                                             jacobian_delta_preint_,
+//                                             jacobian_delta_
+                                             }));
 }
 
 inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
@@ -755,9 +756,10 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
              deltaZero(),
              deltaZero(),
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
-             Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_),
-             Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_)});
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)
+//             Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_),
+//             Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_)
+             });
 }
 
 } // namespace wolf
