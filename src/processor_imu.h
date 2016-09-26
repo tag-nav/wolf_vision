@@ -159,42 +159,52 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 
     remapPVQ(_delta_preint, _delta, _delta_preint_plus_delta);
 
-    //////////////////////////////////////////////////////////
-    // 1. Start by computing the Jacobians before updating the deltas. This avoids aliasing.
-
-    /* MATHS according to Sola-16
+    /* This function has four stages:
      *
-     * 1. Notation
+     * 1. Computing the Jacobians of the delta integration wrt noise: this is for the covariance propagation.
      *
-     *     We use D or Delta (with capital D) to refer to the preintegrated delta.
-     *     We use d or delta (with lowercase d) to refer to the recent delta.
-     *     We use p, v, q as in Dp, Dv, Dq to refer to the deltas of position, velocity, and quaternion
-     *     We use f, as in Df, df, to refer to deltas of the angle vector 'phi'
-     *          equivalent to the quaternion deltas,
+     * 2. Integrating the Jacobians wrt the biases: this is for Delta correction upon bias changes.
+     *
+     * 3. Actually integrating the deltas: this is the regular integration; it is performed at the end to avoid aliasing in the previous sections.
+     *
+     *
+     * MATHS according to Sola-16, proof-checked against Forster-16
+     *
+     * A. Notation for the HELP comments
+     *
+     *     - We use D or Delta (with uppercase D) to refer to the preintegrated delta.
+     *     - We use d or delta (with lowercase d) to refer to the recent delta.
+     *     - We use p, v, q, (as in Dp, Dv, Dq) to refer to the deltas of position, velocity, and quaternion
+     *     - We use f, (as in Df, df) to refer to deltas of the angle vector 'phi' equivalent to the quaternion deltas,
+     *
      *          that is,    Dq = Exp(Df), dq = Exp(df), Df = Log(Dq), df = Log(dq)
      *          and / or    DR = Exp(Df), dR = Exp(df), etc.
      *
-     * 2. Expression of the delta integration step, D' = D (+) d:
+     * B. Expression of the delta integration step, D' = D (+) d:
      *
      *     Dp' = Dp + Dv*dt + Dq*dp
      *     Dv' = Dv + Dq*dv
      *     Dq' = Dq * dq
      *
-     * where d = (dp, dv, dq) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
+     * where d = (dp, dv, dq) needs to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
+     */
+
+    /*/////////////////////////////////////////////////////////
+     * 1. Jacobians for covariance propagation.
      *
-     * 3. Jacobians derived from the expression above: (see Sola-16):
-     *
-     * 3.a With respect to Delta, gives _jacobian_delta_preint = D_D as:
+     * 1.a. With respect to Delta, gives _jacobian_delta_preint = D_D as:
      *
      *   D_D = [ I     I*dt   -DR*skew(dp)
      *           0      I     -DR*skew(dv)
      *           0      0      dR.tr       ] // See Sola-16
      *
-     * 3.b. With respect to delta, gives _jacobian_delta = D_d as:
+     * 1.b. With respect to delta, gives _jacobian_delta = D_d as:
      *
      *   D_d = [ DR   0    0
      *           0    DR   0
      *           0    0    I ] // See Sola-16
+     *
+     * Note: covariance propagation, i.e.,  P+ = D_D * P * D_D' + D_d * M * D_d', is done in ProcessorMotion.
      */
 
     // Some useful temporaries
@@ -202,7 +212,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     Eigen::Matrix3s dR      = q_in_2_.matrix(); // Second delta, dR
 
     // Jac wrt preintegrated delta, D_D = dD'/dD
-    _jacobian_delta_preint.setIdentity(9,9);                                    // dDp'/ddp, dDv'/ddv, dDf'/ddf
+    _jacobian_delta_preint.setIdentity(9,9);                                    // dDp'/ddp, dDv'/ddv, all zeros
     _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // dDp'/ddv
     _jacobian_delta_preint.block<3,3>(0,6).noalias() = - DR * skew(p_in_2_) ;   // dDp'/ddf
     _jacobian_delta_preint.block<3,3>(3,6).noalias() = - DR * skew(v_in_2_) ;   // dDv'/ddf
@@ -214,16 +224,19 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     _jacobian_delta.block<3,3>(3,3) = DR;
     _jacobian_delta.block<3,3>(6,6) = Eigen::Matrix3s::Identity();
 
-    /////////////////////////////////////////////////////////
-    // 2. Integrate the Jacobians wrt the biases --
-    // See Sola 16 -- OK Forster
-    //
-    // Integration of Jacobian wrt bias
-    // dDp/dab += dDv/dab * dt - 0.5 * DR * dt^2
-    // dDv/dab -= DR * dt
-    // dDp/dwb += dDv/dwb * dt - 0.5 * DR * [a - ab]_x * dDf/dwb * dt^2
-    // dDv/dwb -= DR * [a - ab]_x * dDf/dwb * dt
-    // dDf/dwb = dR.tr * dDf/dwb - Jr((w - wb)*dt) * dt
+
+
+     /*////////////////////////////////////////////////////////
+      * 2. Integrate the Jacobians wrt the biases --
+      * See Sola 16 -- OK Forster
+      *
+      * Integration of Jacobian wrt bias
+      * dDp/dab += dDv/dab * dt - 0.5 * DR * dt^2
+      * dDv/dab -= DR * dt
+      * dDp/dwb += dDv/dwb * dt - 0.5 * DR * [a - ab]_x * dDf/dwb * dt^2
+      * dDv/dwb -= DR * [a - ab]_x * dDf/dwb * dt
+      * dDf/dwb = dR.tr * dDf/dwb - Jr((w - wb)*dt) * dt
+      */
 
     // acc and gyro measurements corrected with the estimated bias
     Eigen::Vector3s a = measured_acc_  - bias_acc_;
@@ -240,8 +253,10 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     //    dDq_dwb_       = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
     dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Eigen::Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
 
-    ///////////////////////////////////////////////////////////////////////////
-    // 3. Update the deltas down here to avoid aliasing in the Jacobians section
+
+    /*//////////////////////////////////////////////////////////////////////////
+     * 3. Update the deltas down here to avoid aliasing in the Jacobians section
+     */
     deltaPlusDelta(_delta_preint, _delta, _dt, _delta_preint_plus_delta);
 
 }
