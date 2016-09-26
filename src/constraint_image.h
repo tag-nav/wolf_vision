@@ -88,10 +88,10 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             v_hmg = landmark_hmg_c1.head(3);
 //            T inverse_dist_c1 = landmark_hmg_c1(3); // inverse distance
 
-//            std::cout << "\nv:\n" << v(0) << "\t" << v(1) << "\t" << v(2) << "\t" << landmark_hmg_c1(3) << std::endl;
+            //std::cout << "\nv:\n" << v_hmg(0) << "\t" << v_hmg(1) << "\t" << v_hmg(2) << "\t" << landmark_hmg_c1(3) << std::endl;
 
             Eigen::Matrix<T,2,1> v;
-            v = v_hmg.head(2)/v_hmg(3);
+            v = v_hmg.head(2)/v_hmg(2);
 
             // ==================================================
             /* DISTORTION ATTEMPT */
@@ -121,7 +121,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             if (s < (T)0.6) s = (T)1.0;
             test_distortion(0) = s * v(0);
             test_distortion(1) = s * v(1);
-            test_distortion(2) = 1;
+            test_distortion(2) = (T)1;
             /* END OF THE ATTEMPT */
 
 

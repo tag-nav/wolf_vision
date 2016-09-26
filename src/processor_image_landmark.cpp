@@ -289,7 +289,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 //    std::cout << "unitary_vector: " << unitary_vector(0) << "\t" << unitary_vector(1) << "\t" << unitary_vector(2) << std::endl;
 
     Eigen::Vector2s ldmk_point;
-    ldmk_point = hmg_ldmk_point.head(2)/hmg_ldmk_point(3);
+    ldmk_point = hmg_ldmk_point.head(2)/hmg_ldmk_point(2);
 
     FrameBase* anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
 
@@ -298,12 +298,11 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     Eigen::Vector3s test_undistortion;
     Eigen::VectorXs correction_vector = ((SensorCamera*)(this->getSensorPtr()))->getCorrectionVector();
     //test_distortion = pinhole::distortPoint(distortion_vector,test_distortion);
-    //std::cout << "\ntest_point2D DISTORTED:\n" << test_distortion(0) << std::endl;
+    //std::cout << "\ntest_point2D DISTORTED:\n" << test_undistortion(0) << std::endl;
 
 
-    Scalar r2 = ldmk_point(0) * ldmk_point(0) + ldmk_point(1) * ldmk_point(1); // this is the norm squared: r2 = ||u||^2
+    Scalar r2 = ldmk_point.squaredNorm();//ldmk_point(0) * ldmk_point(0) + ldmk_point(1) * ldmk_point(1); // ldmk_point.squaredNorm();
     //return distortFactor(d, r2) * up;
-
 
     Scalar s = 1.0;
     Scalar r2i = 1.0;
@@ -408,7 +407,7 @@ Scalar ProcessorImageLandmark::match(cv::Mat _target_descriptor, cv::Mat _candid
 {
     matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
-
+    std::cout << "normalized score: " << normalized_score << std::endl;
     return normalized_score;
 }
 
