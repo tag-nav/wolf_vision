@@ -107,6 +107,8 @@ class ProcessorIMU : public ProcessorMotion{
 
         //Functions to test jacobians with finite difference method
         IMU_jac_deltas finite_diff_ab(const Scalar _dt, Eigen::VectorXs& _data, const wolf::Scalar& da_b);
+        void ProcessorIMU::finite_diff_noise(const Scalar _dt, Eigen::VectorXs& _data, const Eigen::Vector<wolf::Scalar,9,1> _Delta_noise, 
+                                            const Eigen::Vector<wolf::Scalar,9,1> _delta_noise);
 };
 
 }

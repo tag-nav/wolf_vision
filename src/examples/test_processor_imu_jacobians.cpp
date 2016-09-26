@@ -31,22 +31,35 @@ int main(int argc, char** argv)
 
     TimeStamp t;
     Eigen::Vector6s data_;
+    data_ << 0,0,0, 0,0,0;
 
     // Wolf problem
     Problem* wolf_problem_ptr_ = new Problem(FRM_PVQBB_3D);
     Eigen::VectorXs IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, nullptr);
-    wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
+    //SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, nullptr);
+    //wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Set the origin
     t.set(0.0001); // clock in 0,1 ms ticks
     Eigen::VectorXs x0(16);
     x0 << 0,1,0,  1,0,0,  0,0,0,1,  0,0,.000,  0,0,.000;
 
-    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
+    //wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
-    CaptureIMU* imu_ptr;
+    //CaptureIMU* imu_ptr;
+
+    ProcessorIMU processor_imu;
+    processor_imu.setOrigin(x0, t);
+    wolf::Scalar ddelta_bias = 0.0001;
+    struct IMU_jac_deltas = processor_imu.finite_diff_ab(0.001, data_, ddelta_bias);
+
+    Eigen::Matrix3s dDp_dabx_;
+    Eigen::Matrix3s dDp_daby_;
+    Eigen::Matrix3s dDp_dabz_;
+    Eigen::Matrix3s dDv_dabx_;
+    Eigen::Matrix3s dDv_daby_;
+    Eigen::Matrix3s dDv_dabz_;
 
     delete wolf_problem_ptr_;
 
