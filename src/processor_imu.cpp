@@ -10,9 +10,9 @@ ProcessorIMU::ProcessorIMU() :
         gyro_bias_(Eigen::Vector3s::Zero()),
         acc_measured_(nullptr),
         gyro_measured_(nullptr),
-        dp_1_(nullptr), dp_2_(nullptr), dp_out_(nullptr),
-        dv_1_(nullptr), dv_2_(nullptr), dv_out_(nullptr),
-        dq_1_(nullptr), dq_2_(nullptr), dq_out_(nullptr)
+        Dp_(nullptr), dp_(nullptr), Dp_out_(nullptr),
+        Dv_(nullptr), dv_(nullptr), Dv_out_(nullptr),
+        Dq_(nullptr), dq_(nullptr), Dq_out_(nullptr)
 {
     //
 }
