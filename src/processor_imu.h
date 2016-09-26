@@ -7,6 +7,21 @@
 
 
 namespace wolf {
+    struct IMU_jac_deltas{
+
+        IMU_jac_deltas(Eigen::Matrix3s _dDp_dab, Eigen::Matrix3s _dDv_dab, Eigen::Matrix3s _dDp_dwb, Eigen::Matrix3s _dDv_dwb, Eigen::Matrix3s _dDq_dwb, 
+                       Eigen::VectorXs _delta_preint_plus_delta, Eigen::VectorXs _delta_preint ) : dDp_dab_(_dDp_dab), dDv_dab_(_dDv_dab), dDp_dwb_(_dDp_dwb), 
+                       dDv_dwb_(_dDv_dwb), dDq_dwb_(_dDq_dwb), delta_preint_plus_delta_(_delta_preint_plus_delta), delta_preint_(_delta_preint) {}
+
+        private:
+        Eigen::Matrix3s dDp_dab_;
+        Eigen::Matrix3s dDv_dab_;
+        Eigen::Matrix3s dDp_dwb_;
+        Eigen::Matrix3s dDv_dwb_;
+        Eigen::Matrix3s dDq_dwb_;
+        Eigen::VectorXs& delta_preint_plus_delta_;
+        Eigen::VectorXs& delta_preint_;
+    }
 
 class ProcessorIMU : public ProcessorMotion{
     public:
@@ -386,7 +401,7 @@ inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
 
 
 //Functions to test jacobians with finite difference method
-inline void ProcessorIMU::finite_diff_ab(, const Scalar _dt, const Eigen::VectorXs& _data, const wolf::Scalar& da_b)
+inline void ProcessorIMU::finite_diff_ab(const Scalar _dt, const Eigen::VectorXs& _data, const wolf::Scalar& da_b)
 {
     //TODO : need to use a reset function here to make sure jacobians have not been used before --> reset everything
     ///Define all the needed variables                  d_ is to note that this is used only during finite difference step
@@ -439,8 +454,12 @@ inline void ProcessorIMU::finite_diff_ab(, const Scalar _dt, const Eigen::Vector
         //TODO : need to reset stuff here
         bias_acc_ = Eigen::Vector3s::Zero();
         bias_gyro_ = igen::Vector3s::Zero();
-        //data2delta
 
+        // add da_b
+        _data[i] = _data[i] + da_b;
+        //data2delta
+        data2delta(_data, data_cov_d1, _dt);
+        deltaPlusDelta(delta_preint_d1, delta_, _dt, delta_preint_plus_delta_d1, jacobian_delta_preint_d1, jacobian_delta_d1);
     }
      
 }
