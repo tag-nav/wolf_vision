@@ -16,6 +16,15 @@ namespace wolf {
                        delta_preint_plus_delta_vect(_delta_preint_plus_delta_vect), delta_preint_vect(_delta_preint_vect) {}
 
         private:
+            /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
+              Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
+              place 1 : added da_bx in data
+              place 2 : added da_by in data
+              place 3 : added da_bz in data
+              place 4 : added dw_bx in data
+              place 5 : added dw_by in data
+              place 6 : added dw_bz in data
+             */
             Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_plus_delta_vect;
             Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_vect;
             Eigen::Matrix<Eigen::Matrix3s,7,1> dDp_dab_vect;
@@ -448,6 +457,15 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vect
     delta_preint_plus_delta_d1 = Eigen::VectorXs::Zero(10);
     delta_preint_d1 = Eigen::VectorXs::Zero(10);
 
+    /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
+      Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
+      place 1 : added da_bx in data
+      place 2 : added da_by in data
+      place 3 : added da_bz in data
+      place 4 : added dw_bx in data
+      place 5 : added dw_by in data
+      place 6 : added dw_bz in data
+     */
     Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_plus_delta_vect;
     Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_vect;
     Eigen::Matrix<Eigen::Matrix3s,7,1> dDp_dab_vect;
