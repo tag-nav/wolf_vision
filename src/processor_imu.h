@@ -78,6 +78,9 @@ class ProcessorIMU : public ProcessorMotion{
 
     public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+
+        //Functions to test jacobians with finite difference method
+        void ProcessorIMU finite_diff_ab(const wolf::Scalar& da_b);
 };
 
 }
@@ -381,6 +384,66 @@ inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
     new (&gyro_measured_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
 }
 
+
+//Functions to test jacobians with finite difference method
+inline void ProcessorIMU::finite_diff_ab(, const Scalar _dt, const Eigen::VectorXs& _data, const wolf::Scalar& da_b)
+{
+    //TODO : need to use a reset function here to make sure jacobians have not been used before --> reset everything
+    ///Define all the needed variables                  d_ is to note that this is used only during finite difference step
+
+    /// _d0 are members without effect of da_b
+    Eigen::MatrixXs data_cov_d0;
+    Eigen::MatrixXs jacobian_delta_preint_d0;
+    Eigen::MatrixXs jacobian_delta_d0;
+    Eigen::VectorXs& delta_preint_plus_delta_d0;
+    Eigen::VectorXs& delta_preint_d0;
+    data_cov_d0.resize(6,6);
+    jacobian_delta_preint_d0.resize(9,9);
+    jacobian_delta_d0.resize(9,9);
+    delta_preint_plus_delta_d0.resize(10);
+    delta_preint_d0.resize(10);
+
+    //set all variables to 0
+    data_cov_d0 = Eigen::MatrixXs::Zero(6,6);
+    jacobian_delta_preint_d0 = Eigen::MatrixXs::Zero(9,9);
+    jacobian_delta_d0 = Eigen::MatrixXs::Zero(9,9);
+    delta_preint_plus_delta_d0 = Eigen::VectorXs::Zero(10);
+    delta_preint_d0 = Eigen::VectorXs::Zero(10);
+
+    /// _d1 are members with effect of da_b
+    Eigen::MatrixXs data_cov_d1;
+    Eigen::MatrixXs jacobian_delta_preint_d1;
+    Eigen::MatrixXs jacobian_delta_d1;
+    Eigen::VectorXs& delta_preint_plus_delta_d1;
+    Eigen::VectorXs& delta_preint_d1;
+    data_cov_d1.resize(6,6);
+    jacobian_delta_preint_d1.resize(9,9);
+    jacobian_delta_d1.resize(9,9);
+    delta_preint_plus_delta_d1.resize(10);
+    delta_preint_d1.resize(10);
+
+    //set all variables to 0
+    data_cov_d1 = Eigen::MatrixXs::Zero(6,6);
+    jacobian_delta_preint_d1 = Eigen::MatrixXs::Zero(9,9);
+    jacobian_delta_d1 = Eigen::MatrixXs::Zero(9,9);
+    delta_preint_plus_delta_d1 = Eigen::VectorXs::Zero(10);
+    delta_preint_d1 = Eigen::VectorXs::Zero(10);
+
+
+    //Deltas without use of da_b
+    data2delta(_data, data_cov_d0, _dt);
+    deltaPlusDelta(delta_preint_d0, delta_, _dt, delta_preint_plus_delta_d0, jacobian_delta_preint_d0, jacobian_delta_d0);
+
+    // propagate da_b
+    for(int i=0; i<1; i++){
+        //TODO : need to reset stuff here
+        bias_acc_ = Eigen::Vector3s::Zero();
+        bias_gyro_ = igen::Vector3s::Zero();
+        //data2delta
+
+    }
+     
+}
 
 
 } // namespace wolf
