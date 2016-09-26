@@ -35,12 +35,9 @@ class ProcessorIMU : public ProcessorMotion{
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
                                    TimeStamp& _ts);
-
+        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion,
+                                                 FrameBase* _frame_origin);
         void resetDerived();
-
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin);
-
-    private:
 
 
     private:
@@ -51,27 +48,21 @@ class ProcessorIMU : public ProcessorMotion{
         // gravity vector
         const Eigen::Vector3s gravity_;
 
-        // Maps to the biases in the keyframe's state
-        Eigen::Vector3s bias_acc_;
-        Eigen::Vector3s bias_gyro_;
+        // Biases in the first keyframe's state for pre-integration
+        Eigen::Vector3s acc_bias_;
+        Eigen::Vector3s gyro_bias_;
 
         // Maps to the received measurements
-        Eigen::Map<Eigen::Vector3s> measured_acc_;
-        Eigen::Map<Eigen::Vector3s> measured_gyro_;
+        Eigen::Map<Eigen::Vector3s> acc_measured_;
+        Eigen::Map<Eigen::Vector3s> gyro_measured_;
 
         // Maps to pos, vel, quat, to be used as temporaries
-        Eigen::Map<const Eigen::Vector3s> p_in_1_, p_in_2_;
-        Eigen::Map<Eigen::Vector3s> p_out_;
-        Eigen::Map<const Eigen::Vector3s> v_in_1_, v_in_2_;
-        Eigen::Map<Eigen::Vector3s> v_out_;
-        Eigen::Map<const Eigen::Quaternions> q_in_1_, q_in_2_;
-        Eigen::Map<Eigen::Quaternions> q_out_;
-
-
-        // Helper functions to remap several magnitudes
-        void remapPVQ(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
-        void remapDelta(Eigen::VectorXs& _delta_out);
-        void remapData(const Eigen::VectorXs& _data);
+        Eigen::Map<const Eigen::Vector3s> dp_1_, dp_2_;
+        Eigen::Map<Eigen::Vector3s> dp_out_;
+        Eigen::Map<const Eigen::Vector3s> dv_1_, dv_2_;
+        Eigen::Map<Eigen::Vector3s> dv_out_;
+        Eigen::Map<const Eigen::Quaternions> dq_1_, dq_2_;
+        Eigen::Map<Eigen::Quaternions> dq_out_;
 
         ///Jacobians of preintegrated delta wrt IMU biases
         Eigen::Matrix3s dDp_dab_;
@@ -79,6 +70,11 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Matrix3s dDp_dwb_;
         Eigen::Matrix3s dDv_dwb_;
         Eigen::Matrix3s dDq_dwb_;
+
+        // Helper functions to remap several magnitudes
+        void remapPVQ(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
+        void remapDelta(Eigen::VectorXs& _delta_out);
+        void remapData(const Eigen::VectorXs& _data);
 
     public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
@@ -113,13 +109,13 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
      */
 
     // acc and gyro measurements corrected with the estimated bias
-    Eigen::Vector3s a = measured_acc_  - bias_acc_;
-    Eigen::Vector3s w = measured_gyro_ - bias_gyro_;
+    Eigen::Vector3s a = acc_measured_  - acc_bias_;
+    Eigen::Vector3s w = gyro_measured_ - gyro_bias_;
 
     // create delta
-    v_out_ = a * _dt;
-    p_out_ = v_out_ * _dt / 2;
-    q_out_ = v2q(w * _dt);
+    dv_out_ = a * _dt;
+    dp_out_ = dv_out_ * _dt / 2;
+    dq_out_ = v2q(w * _dt);
 
     //Compute jacobian of delta wrt data noise
 
@@ -208,14 +204,14 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      */
 
     // Some useful temporaries
-    Eigen::Matrix3s DR      = q_in_1_.matrix(); // First  Delta, DR
-    Eigen::Matrix3s dR      = q_in_2_.matrix(); // Second delta, dR
+    Eigen::Matrix3s DR      = dq_1_.matrix(); // First  Delta, DR
+    Eigen::Matrix3s dR      = dq_2_.matrix(); // Second delta, dR
 
     // Jac wrt preintegrated delta, D_D = dD'/dD
     _jacobian_delta_preint.setIdentity(9,9);                                    // dDp'/ddp, dDv'/ddv, all zeros
     _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // dDp'/ddv
-    _jacobian_delta_preint.block<3,3>(0,6).noalias() = - DR * skew(p_in_2_) ;   // dDp'/ddf
-    _jacobian_delta_preint.block<3,3>(3,6).noalias() = - DR * skew(v_in_2_) ;   // dDv'/ddf
+    _jacobian_delta_preint.block<3,3>(0,6).noalias() = - DR * skew(dp_2_) ;   // dDp'/ddf
+    _jacobian_delta_preint.block<3,3>(3,6).noalias() = - DR * skew(dv_2_) ;   // dDv'/ddf
     _jacobian_delta_preint.block<3,3>(6,6) =   dR.transpose();                  // dDf'/ddf
 
     // Jac wrt current delta, D_d = dD'/dd
@@ -239,8 +235,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
       */
 
     // acc and gyro measurements corrected with the estimated bias
-    Eigen::Vector3s a = measured_acc_  - bias_acc_;
-    Eigen::Vector3s w = measured_gyro_ - bias_gyro_;
+    Eigen::Vector3s a = acc_measured_  - acc_bias_;
+    Eigen::Vector3s w = gyro_measured_ - gyro_bias_;
 
     // temporaries
     Scalar dt2_2            = 0.5 * _dt * _dt;
@@ -269,8 +265,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     assert(_delta_preint_plus_delta.size() == 10 && "Wrong _delta_preint_plus_delta vector size");
 
     remapPVQ(_delta_preint, _delta, _delta_preint_plus_delta);
-    // _delta_preint             is *_in_1_
-    // _delta                    is *_in_2_
+    // _delta_preint             is *_1_
+    // _delta                    is *_2_
     // _delta_preint_plus_delta  is *_out_
 
     /* MATHS according to Sola-16
@@ -289,9 +285,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     //     deltaPlusDelta(delta_integrated_, delta_, dt_, delta_integrated_);
     // that is, _delta1 and _delta1_plus_delta2 point to the same memory locations.
     // Therefore, to avoid aliasing, we proceed in the order p -> v -> q
-    p_out_ = p_in_1_ + v_in_1_ * _dt + q_in_1_ * p_in_2_;
-    v_out_ = v_in_1_ + q_in_1_ * v_in_2_;
-    q_out_ = q_in_1_ * q_in_2_;
+    dp_out_ = dp_1_ + dv_1_ * _dt + dq_1_ * dp_2_;
+    dv_out_ = dv_1_ + dq_1_ * dv_2_;
+    dq_out_ = dq_1_ * dq_2_;
 }
 
 inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _dt,
@@ -303,16 +299,16 @@ inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::Vec
     assert(_dt >= 0 && "Time interval _Dt is negative!");
 
     remapPVQ(_x, _delta, _x_plus_delta);
-    // _x               is _in_1_
-    // _delta           is _in_2_
+    // _x               is _1_
+    // _delta           is _2_
     // _x_plus_delta    is _out_
 
     Eigen::Vector3s gdt = gravity_ * _dt;
 
     // state updates
-    p_out_ = q_in_1_ * p_in_2_ + p_in_1_ + v_in_1_ * _dt + gdt * _dt / 2 ;
-    v_out_ = q_in_1_ * v_in_2_ + v_in_1_ + gdt;
-    q_out_ = q_in_1_ * q_in_2_;
+    dp_out_ = dq_1_ * dp_2_ + dp_1_ + dv_1_ * _dt + gdt * _dt / 2 ;
+    dv_out_ = dq_1_ * dv_2_ + dv_1_ + gdt;
+    dq_out_ = dq_1_ * dq_2_;
 
     // bypass constant biases
     _x_plus_delta.tail(6) = _x.tail(6);
@@ -339,8 +335,8 @@ inline void ProcessorIMU::resetDerived()
     frame_imu_ptr_ = (FrameIMU*)((origin_ptr_->getFramePtr()));
 
     // Assign biases for the integration at the origin frame's biases
-    bias_acc_  = frame_imu_ptr_->getBAPtr()->getVector(); // acc  bias
-    bias_gyro_ = frame_imu_ptr_->getBGPtr()->getVector(); // gyro bias
+    acc_bias_  = frame_imu_ptr_->getBAPtr()->getVector(); // acc  bias
+    gyro_bias_ = frame_imu_ptr_->getBGPtr()->getVector(); // gyro bias
 
     // reset jacobians wrt bias
     dDp_dab_.setZero();
@@ -359,30 +355,30 @@ inline ConstraintBase* ProcessorIMU::createConstraint(FeatureBase* _feature_moti
 
 inline void ProcessorIMU::remapPVQ(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out)
 {
-    new (&p_in_1_) Eigen::Map<const Eigen::Vector3s>(_delta1.data());
-    new (&v_in_1_) Eigen::Map<const Eigen::Vector3s>(_delta1.data() + 3);
-    new (&q_in_1_) Eigen::Map<const Eigen::Quaternions>(_delta1.data() + 6);
+    new (&dp_1_) Eigen::Map<const Eigen::Vector3s>(_delta1.data());
+    new (&dv_1_) Eigen::Map<const Eigen::Vector3s>(_delta1.data() + 3);
+    new (&dq_1_) Eigen::Map<const Eigen::Quaternions>(_delta1.data() + 6);
 
-    new (&p_in_2_) Eigen::Map<const Eigen::Vector3s>(_delta2.data());
-    new (&v_in_2_) Eigen::Map<const Eigen::Vector3s>(_delta2.data() + 3);
-    new (&q_in_2_) Eigen::Map<const Eigen::Quaternions>(_delta2.data() + 6);
+    new (&dp_2_) Eigen::Map<const Eigen::Vector3s>(_delta2.data());
+    new (&dv_2_) Eigen::Map<const Eigen::Vector3s>(_delta2.data() + 3);
+    new (&dq_2_) Eigen::Map<const Eigen::Quaternions>(_delta2.data() + 6);
 
-    new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data());
-    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 3);
-    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 6);
+    new (&dp_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data());
+    new (&dv_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 3);
+    new (&dq_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 6);
 }
 
 inline void ProcessorIMU::remapDelta(Eigen::VectorXs& _delta_out)
 {
-    new (&p_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data());
-    new (&v_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 3);
-    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 6);
+    new (&dp_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data());
+    new (&dv_out_) Eigen::Map<Eigen::Vector3s>(_delta_out.data() + 3);
+    new (&dq_out_) Eigen::Map<Eigen::Quaternions>(_delta_out.data() + 6);
 }
 
 inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
 {
-    new (&measured_acc_) Eigen::Map<const Eigen::Vector3s>(_data.data());
-    new (&measured_gyro_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
+    new (&acc_measured_) Eigen::Map<const Eigen::Vector3s>(_data.data());
+    new (&gyro_measured_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
 }
 
 

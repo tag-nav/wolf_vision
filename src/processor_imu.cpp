@@ -6,13 +6,13 @@ ProcessorIMU::ProcessorIMU() :
         ProcessorMotion(PRC_IMU, "IMU", 16, 10, 9, 6),
         frame_imu_ptr_(nullptr),
         gravity_(wolf::gravity()),
-        bias_acc_(Eigen::Vector3s::Zero()),
-        bias_gyro_(Eigen::Vector3s::Zero()),
-        measured_acc_(nullptr),
-        measured_gyro_(nullptr),
-        p_in_1_(nullptr), p_in_2_(nullptr), p_out_(nullptr),
-        v_in_1_(nullptr), v_in_2_(nullptr), v_out_(nullptr),
-        q_in_1_(nullptr), q_in_2_(nullptr), q_out_(nullptr)
+        acc_bias_(Eigen::Vector3s::Zero()),
+        gyro_bias_(Eigen::Vector3s::Zero()),
+        acc_measured_(nullptr),
+        gyro_measured_(nullptr),
+        dp_1_(nullptr), dp_2_(nullptr), dp_out_(nullptr),
+        dv_1_(nullptr), dv_2_(nullptr), dv_out_(nullptr),
+        dq_1_(nullptr), dq_2_(nullptr), dq_out_(nullptr)
 {
     //
 }
