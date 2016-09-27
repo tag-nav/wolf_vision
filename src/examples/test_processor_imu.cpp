@@ -89,19 +89,20 @@ int main(int argc, char** argv)
 
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
-    CaptureIMU* imu_ptr;
+    CaptureIMU* imu_ptr( new CaptureIMU(t, sensor_ptr, data_) );
 
     using namespace std;
     clock_t begin = clock();
     while(!data_file_acc.eof()){
+
         data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
         data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
-
         t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
 
-        imu_ptr = new CaptureIMU(t, sensor_ptr, data_);
+        imu_ptr->setData(data_);
+        imu_ptr->setTimeStamp(t);
+
         imu_ptr ->process();
-        delete imu_ptr;
 
 #ifdef DEBUG_RESULTS
 
@@ -175,6 +176,7 @@ int main(int argc, char** argv)
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
 
+    delete imu_ptr;
     delete wolf_problem_ptr_;
 
     return 0;
