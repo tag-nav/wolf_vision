@@ -108,7 +108,7 @@ class ProcessorIMU : public ProcessorMotion{
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 
         //Functions to test jacobians with finite difference method
-        IMU_jac_deltas finite_diff_ab(const Scalar _dt, Eigen::VectorXs& _data, const wolf::Scalar& da_b);
+        IMU_jac_deltas finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b);
         //void finite_diff_noise(const Scalar _dt, Eigen::VectorXs& _data, const Eigen::Vector<wolf::Scalar,9,1> _Delta_noise, const Eigen::Vector<wolf::Scalar,9,1> _delta_noise);
 };
 
@@ -423,12 +423,12 @@ void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv
 }
 
 //Functions to test jacobians with finite difference method
-inline IMU_jac_deltas ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::VectorXs& _data, const wolf::Scalar& da_b)
+inline IMU_jac_deltas ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b)
 {
     //TODO : need to use a reset function here to make sure jacobians have not been used before --> reset everything
     ///Define all the needed variables                  d_ is to note that this is used only during finite difference step
 
-    Eigen::VectorXs data0;
+    Eigen::Vector6s data0;
     data0 = _data;
     /// _d0 are members without effect of da_b
     Eigen::MatrixXs data_cov_d0;

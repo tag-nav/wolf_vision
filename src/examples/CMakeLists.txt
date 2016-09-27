@@ -134,6 +134,10 @@ TARGET_LINK_LIBRARIES(test_mpu ${PROJECT_NAME})
 ADD_EXECUTABLE(test_rotation test_rotation.cpp)
 TARGET_LINK_LIBRARIES(test_rotation ${PROJECT_NAME})
 
+# Processor IMU - Jacobian checking test
+ADD_EXECUTABLE(test_processor_imu_jacobians test_processor_imu_jacobians.cpp)
+TARGET_LINK_LIBRARIES(test_processor_imu_jacobians ${PROJECT_NAME})
+
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
 #     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
