@@ -65,12 +65,32 @@ int main(int argc, char** argv)
               place 6 : added dw_bz in data
     */
 
-    Eigen::Matrix3s dDp_dabx_;
-    Eigen::Matrix3s dDp_daby_;
-    Eigen::Matrix3s dDp_dabz_;
-    Eigen::Matrix3s dDv_dabx_;
-    Eigen::Matrix3s dDv_daby_;
-    Eigen::Matrix3s dDv_dabz_;
+    Eigen::VectorXs delta_preint_plus_delta;
+    Eigen::VectorXs delta_preint;
+    Eigen::Matrix3s dDp_dab;
+    Eigen::Matrix3s dDv_dab;
+    Eigen::Matrix3s dDp_dwb;
+    Eigen::Matrix3s dDv_dwb;
+
+    /*
+        dDp_dab = [dDp_dab_x, dDp_dab_y, dDp_dab_z]
+        dDp_dab_x = (dDp(ab_x + dab_x, ab_y, ab_z) - dDp(ab_x,ab_y,ab_z)) / dab_x
+        dDp_dab_x = (dDp(ab_x, ab_y + dab_y, ab_z) - dDp(ab_x,ab_y,ab_z)) / dab_y
+        dDp_dab_x = (dDp(ab_x, ab_y, ab_z + dab_z) - dDp(ab_x,ab_y,ab_z)) / dab_z
+
+        similar for dDv_dab
+        note dDp_dab_x, dDp_dab_y, dDp_dab_z, dDv_dab_x, dDv_dab_y, dDv_dab_z are 3x1 vectors !
+     */
+
+     for(int i=0;i<3;i++){
+         dDp_dab.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect(i+1).head(3) - bias_jac.delta_preint_vect(0).head(3))/ddelta_bias;
+         dDv_dab.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect(i+1).segment(3,3) - bias_jac.delta_preint_vect(0).segment(3,3))/ddelta_bias;
+
+         dDp_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect(i+3).head(3) - bias_jac.delta_preint_vect(0).head(3))/ddelta_bias;
+         dDv_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect(i+3).segment(3,3) - bias_jac.delta_preint_vect(0).segment(3,3))/ddelta_bias;
+     }
+
+     
 
     delete wolf_problem_ptr_;
 
