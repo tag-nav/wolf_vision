@@ -30,9 +30,9 @@ int main(int argc, char** argv)
 
     std::cout << std::endl << "==================== processor IMU test ======================" << std::endl;
 
+    //load files containing accelerometer and gyroscope data
     std::ifstream data_file_acc;
     std::ifstream data_file_gyro;
-    //load files containing accelerometer and gyroscope data
     const char * filename_acc;
     const char * filename_gyro;
 
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
     if (argc < 3)
     {
-        std::cout << "missing input argument : needs 2 arguments (path to accelerometer file and path to gyroscope data)." << std::endl;
+        std::cout << "Missing input argument! : needs 2 arguments (path to accelerometer file and path to gyroscope data)." << std::endl;
     }
     else
     {
@@ -69,10 +69,6 @@ int main(int argc, char** argv)
         }
     }
 
-    TimeStamp t;
-    float mti_clock, tmp;
-    Eigen::Vector6s data_;
-
     // Wolf problem
     Problem* wolf_problem_ptr_ = new Problem(FRM_PVQBB_3D);
     Eigen::VectorXs IMU_extrinsics(7);
@@ -80,28 +76,39 @@ int main(int argc, char** argv)
     SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, nullptr);
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
-    // Set the origin
+    // Time and data variables
+    TimeStamp t;
+    Scalar mti_clock, tmp;
+    Eigen::Vector6s data_;
+
+    // Get initial data
     data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
     data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
     t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
+
+    // Set the origin
     Eigen::VectorXs x0(16);
     x0 << 0,1,0,  1,0,0,  0,0,0,1,  0,0,.001,  0,0,.002; // Try some non-zero biases
-
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
+    // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     CaptureIMU* imu_ptr( new CaptureIMU(t, sensor_ptr, data_) );
 
+    // main loop
     using namespace std;
     clock_t begin = clock();
     while(!data_file_acc.eof()){
 
+        // read new data
         data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
         data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
         t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
 
+        // assign data to capture
         imu_ptr->setData(data_);
         imu_ptr->setTimeStamp(t);
 
+        // process data in capture
         imu_ptr ->process();
 
 #ifdef DEBUG_RESULTS
@@ -150,8 +157,6 @@ int main(int argc, char** argv)
     << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(16).transpose() << std::endl;
     std::cout << "Integrated std  : " << std::fixed << std::setprecision(3) << std::setw(8)
     << (wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
-    //    std::cout << "Integrated cov  : \n" << std::fixed << std::setprecision(3) << std::setw(8)
-    //    << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_ << std::endl;
 
 
     // Print statistics

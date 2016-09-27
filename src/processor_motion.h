@@ -749,6 +749,13 @@ inline MotionBuffer* ProcessorMotion::getBufferPtr()
     return last_ptr_->getBufferPtr();
 }
 
+inline void ProcessorMotion::sumDeltas(CaptureMotion* _cap1_ptr, CaptureMotion* _cap2_ptr,
+                                       Eigen::VectorXs& _delta1_plus_delta2)
+{
+    Scalar dt = _cap2_ptr->getTimeStamp() - _cap1_ptr->getTimeStamp();
+    deltaPlusDelta(_cap1_ptr->getDelta(),_cap2_ptr->getDelta(), dt, _delta1_plus_delta2);
+}
+
 inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
 {
     return Motion(
