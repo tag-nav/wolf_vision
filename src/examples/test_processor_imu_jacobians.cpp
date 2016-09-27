@@ -166,6 +166,70 @@ int main(int argc, char** argv)
         }
       */
 
+    /*              Numerical method to check jacobians wrt noise
+
+                                                            dDp_dP = [dDp_dPx, dDp_dPy, dDp_dPz]
+    dDp_dPx = ((p + dPx) - p)/dPx = Id
+    dDp_dPy = ((p + dPy) - p)/dPy = Id
+    dDp_dPz = ((p + dPz) - p)/dPz = Id
+
+                                                            dDp_dV = [dDp_dVx, dDp_dVy, dDp_dVz]
+    dDp_dVx = ((v + dVx)*dt - v*dt)/dVx = Id*dt
+    dDp_dVy = ((v + dVy)*dt - v*dt)/dVy = Id*dt
+    dDp_dVz = ((v + dVz)*dt - v*dt)/dVz = Id*dt
+
+                                                            dDp_dO = [dDp_dOx, dDp_dOy, dDp_dOz]
+    dDp_dOx = (( dR(Theta + dthetax)*dp ) - ( dR(Theta)*dp ))/dthetax 
+            = (( dR(Theta) * exp(dthetax,0,0)*dp ) - ( dR(Theta)*dp ))/dthetax
+    dDp_dOy = (( dR(Theta) * exp(0,dthetay,0)*dp ) - ( dR(Theta)*dp ))/dthetay
+    dDp_dOz = (( dR(Theta) * exp(0,0,dthetaz)*dp ) - ( dR(Theta)*dp ))/dthetaz
+
+                                                            dDv_dP = [dDv_dPx, dDv_dPy, dDv_dPz] = [0, 0, 0]
+
+                                                            dDv_dV = [dDv_dVx, dDv_dVy, dDv_dVz]
+    dDv_dVx = ((v + dVx) - p)/dVx = Id
+    dDv_dVy = ((v + dVy) - p)/dVy = Id
+    dDv_dVz = ((v + dVz) - p)/dVz = Id
+    
+                                                            dDv_dO = [dDv_dOx, dDv_dOy, dDv_dOz]
+    dDv_dOx = (( dR(Theta + dthetax)*dv ) - ( dR(Theta)*dv ))/dthetax 
+            = (( dR(Theta) * exp(dthetax,0,0)*dv ) - ( dR(Theta)*dv ))/dthetax
+    dDv_dOx = (( dR(Theta) * exp(0,dthetay,0)*dv ) - ( dR(Theta)*dv ))/dthetay
+    dDv_dOz = (( dR(Theta) * exp(0,0,dthetaz)*dv ) - ( dR(Theta)*dv ))/dthetaz
+
+                                                            dDp_dp = [dDp_dpx, dDp_dpy, dDp_dpz]
+    dDp_dpx = ( dR*(p + dpx) - dR*(p))/dpx
+    dDp_dpy = ( dR*(p + dpy) - dR*(p))/dpy
+    dDp_dpz = ( dR*(p + dpz) - dR*(p))/dpy
+
+                                                            dDp_dv = [dDp_dvx, dDp_dvy, dDp_dvz] = [0, 0, 0]
+    
+                                                            dDp_do = [dDp_dox, dDp_doy, dDp_doz] = [0, 0, 0]
+
+                                                            dDv_dp = [dDv_dpx, dDv_dpy, dDv_dpz] = [0, 0, 0]
+                                                            
+                                                            dDv_dv = [dDv_dvx, dDv_dvy, dDv_dvz]
+    dDv_dvx = ( dR*(v + dvx) - dR*(v))/dvx
+    dDv_dvy = ( dR*(v + dvy) - dR*(v))/dvy
+    dDv_dvz = ( dR*(v + dvz) - dR*(v))/dvz
+
+                                                            dDv_do = [dDv_dox, dDv_doy, dDv_doz] = [0, 0, 0]
+
+                                                            dDo_dp = dDo_dv = dDo_dP = dDo_dV = [0, 0, 0]
+
+            TODO : DOUBLE-CHECK THE FOLLOWING !!
+                                                            dDo_dO = [dDo_dOx, dDo_dOy, dDo_dOz]
+    dDo_dOx = log( dR(Theta).transpose() * dR(Theta+dThetax) )/dThetax
+            = log( dR(Theta).transpose() * dR(Theta)*exp(dThetax,0,0) )/dThetax = Idx
+    dDo_dOy = log( dR(Theta).transpose() * dR(Theta)*exp(0,dThetay,0) )/dThetay = Idy
+    dDo_dOz = log( dR(Theta).transpose() * dR(Theta)*exp(0,0,dThetaz) )/dThetaz = Idz
+
+                                                            dDo_do = [dDo_dox, dDo_doy, dDo_doz]
+    dDo_dox = log( dR(Theta+dThetax).transpose() * dR(Theta) )/dThetax
+            = log( (dR(Theta)*exp(dThetax,0,0)).transpose() * dR(Theta) )/dThetax
+    dDo_doy = log( (dR(Theta)*exp(0,dThetay,0)).transpose() * dR(Theta) )/dThetay
+    dDo_doz = log( (dR(Theta)*exp(0,0,dThetaz)).transpose() * dR(Theta) )/dThetaz
+     */
     delete wolf_problem_ptr_;
 
     return 0;
