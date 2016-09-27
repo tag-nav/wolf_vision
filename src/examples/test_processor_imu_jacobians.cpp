@@ -65,12 +65,15 @@ int main(int argc, char** argv)
               place 6 : added dw_bz in data
     */
 
+    Eigen::Map<const Eigen::Quaternions> q_in_1_, q_in_2_;
+
     Eigen::VectorXs delta_preint_plus_delta;
     Eigen::VectorXs delta_preint;
     Eigen::Matrix3s dDp_dab;
     Eigen::Matrix3s dDv_dab;
     Eigen::Matrix3s dDp_dwb;
     Eigen::Matrix3s dDv_dwb;
+    Eigen::Matrix3s dDq_dwb;
 
     /*
         dDp_dab = [dDp_dab_x, dDp_dab_y, dDp_dab_z]
@@ -114,6 +117,27 @@ int main(int argc, char** argv)
         dDq_dwb_y = log( dR(wb).trans() * dR(wb - dwb_y))/dwb_y
         dDq_dwb_z = log( dR(wb).trans() * dR(wb + dwb_z))/dwb_z
        */
+
+    new (&q_in_1_) Eigen::Map<const Eigen::Quaternions>(bias_jac.delta_preint_vect(0).data() + 6);
+    for(int i=0;i<3;i++){
+        new (&q_in_2_) Eigen::Map<const Eigen::Quaternions>(bias_jac.delta_preint_plus_delta_vect(i+1).data() + 6);
+        dDq_dwb.block<3,1>(0,i) = R2v(wolf::q2R(q_in_2_) * wolf::q2R(q_in_1_))/ddelta_bias;
+     }
+
+     /*
+        This jacobian must be checked :
+
+        std::vector<bool> dDq_dwb_check;
+        dDq_dwb_check.clear()
+        dDq_dwb_check.reserve(6);
+
+        for(int i = 0; i<6; i++){
+            if((dDq_dwb - dDq_dwb_vect(i+1)) < wolf::Constants::EPS)
+                dDq_dwb_check.pushback(true);
+            else
+                dDq_dwb_check.pushback(false);
+        }
+      */
 
     delete wolf_problem_ptr_;
 
