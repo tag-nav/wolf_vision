@@ -170,7 +170,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
             if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
             {
                 //the matcher is now inside the match function
-                Scalar normalized_score = match(target_descriptor,candidate_descriptors,candidate_keypoints,cv_matches);
+                Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
 
                 std::cout << "min normalizes score: " << params_.matcher.min_normalized_score << std::endl;
                 if (normalized_score > params_.matcher.min_normalized_score)
@@ -272,61 +272,20 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 {
     FeaturePointImage* feat_point_image_ptr = (FeaturePointImage*) _feature_ptr;
-
-    Eigen::Vector3s point2D;
-    point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
-    point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
-    point2D[2] = 1;
-
-//    std::cout << "point2D x: " << point2D(0) << "; y: " << point2D(1) << "; z: " << point2D(2) << std::endl;
-    Scalar depth = 2; // arbitrary value
-
-    Eigen::Matrix3s K = ((SensorCamera*)(this->getSensorPtr()))->getIntrinsicMatrix();
-
-    Eigen::Vector3s hmg_ldmk_point;
-    hmg_ldmk_point = K.inverse() * point2D;
-//    unitary_vector.normalize();
-//    std::cout << "unitary_vector: " << unitary_vector(0) << "\t" << unitary_vector(1) << "\t" << unitary_vector(2) << std::endl;
-
-    Eigen::Vector2s ldmk_point;
-    ldmk_point = hmg_ldmk_point.head(2)/hmg_ldmk_point(2);
-
     FrameBase* anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
 
+    Eigen::Vector2s point2D;
+    point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
+    point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
 
-    /* DISTORTION ATTEMPT */
-    Eigen::Vector3s test_undistortion;
-    Eigen::VectorXs correction_vector = ((SensorCamera*)(this->getSensorPtr()))->getCorrectionVector();
-    //test_distortion = pinhole::distortPoint(distortion_vector,test_distortion);
-    //std::cout << "\ntest_point2D DISTORTED:\n" << test_undistortion(0) << std::endl;
+    Scalar depth = 2; // arbitrary value
+    Eigen::Vector4s vec_homogeneous;
 
-
-    Scalar r2 = ldmk_point.squaredNorm();//ldmk_point(0) * ldmk_point(0) + ldmk_point(1) * ldmk_point(1); // ldmk_point.squaredNorm();
-    //return distortFactor(d, r2) * up;
-
-    Scalar s = 1.0;
-    Scalar r2i = 1.0;
-    //T i;
-    //for (i = (T)0; i == (distortion_vector.cols()-1) ; i = i +(T)1) { //   here we are doing:
-        r2i = r2i * r2;                                   //   r2i = r^(2*(i+1))
-        s = s + (correction_vector(0) * r2i);             //   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
-        r2i = r2i * r2;
-        s = s + (correction_vector(1) * r2i);
-        r2i = r2i * r2;
-        s = s + (correction_vector(2) * r2i);
-        r2i = r2i * r2;
-        s = s + (correction_vector(3) * r2i);
-    //}
-    if (s < 0.6) s = 1.0;
-    test_undistortion(0) = s * ldmk_point(0);
-    test_undistortion(1) = s * ldmk_point(1);
-    test_undistortion(2) = 1;
-    /* END OF THE ATTEMPT */
-
-
-
-    Eigen::Vector4s vec_homogeneous = {test_undistortion(0),test_undistortion(1),test_undistortion(2),1/depth};
-//    std::cout << "unitary_vec x: " << unitary_vec(0) << "; y: " << unitary_vec(1) << "; z: " << unitary_vec(2) << std::endl;
+    point2D = pinhole::depixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
+    point2D = pinhole::undistortPoint(((SensorCamera*)(this->getSensorPtr()))->getCorrectionVector(),point2D);
+    vec_homogeneous = {point2D(0)*(1/depth),point2D(1)*(1/depth),1/depth,1/depth};
+//    std::cout << "vec_homogeneous_2 x: " << vec_homogeneous(0) << "; y: " << vec_homogeneous(1) << "; z: " << vec_homogeneous(2)
+//              << "; inv_dist: " << vec_homogeneous(3) << std::endl;
 
     return new LandmarkAHP(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
 }
@@ -336,11 +295,13 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
 //    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
     if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
     {
+        //std::cout << "Are equal" << std::endl;
         return new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
-        //std::cout << "DO NOTHING" << std::endl;
     }
-    else
+    else// (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() != last_ptr_->getFramePtr())
+    {
         return new ConstraintImage(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
+    }
 }
 
 
@@ -397,13 +358,12 @@ void ProcessorImageLandmark::LandmarkInCurrentCamera(LandmarkAHP* _landmark,Eige
     test2 = M_C1_R1*M_R1_W*test;
 
 
-    _point3D(0) = test2(0) / test2(3);
-    _point3D(1) = test2(1) / test2(3);
-    _point3D(2) = test2(2) / test2(3);
+    _point3D(0) = test2(0);
+    _point3D(1) = test2(1);
+    _point3D(2) = test2(2);
 }
 
-Scalar ProcessorImageLandmark::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors,
-                             std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches)
+Scalar ProcessorImageLandmark::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches)
 {
     matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
