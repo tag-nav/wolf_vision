@@ -39,6 +39,8 @@ class ProcessorIMU : public ProcessorMotion{
         ProcessorIMU();
         virtual ~ProcessorIMU();
 
+        void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
+
     protected:
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
@@ -107,8 +109,7 @@ class ProcessorIMU : public ProcessorMotion{
 
         //Functions to test jacobians with finite difference method
         IMU_jac_deltas finite_diff_ab(const Scalar _dt, Eigen::VectorXs& _data, const wolf::Scalar& da_b);
-        void ProcessorIMU::finite_diff_noise(const Scalar _dt, Eigen::VectorXs& _data, const Eigen::Vector<wolf::Scalar,9,1> _Delta_noise, 
-                                            const Eigen::Vector<wolf::Scalar,9,1> _delta_noise);
+        //void finite_diff_noise(const Scalar _dt, Eigen::VectorXs& _data, const Eigen::Vector<wolf::Scalar,9,1> _Delta_noise, const Eigen::Vector<wolf::Scalar,9,1> _delta_noise);
 };
 
 }
@@ -412,6 +413,14 @@ inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
     new (&gyro_measured_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
 }
 
+void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb)
+{
+    _dDp_dab = dDp_dab_;
+    _dDv_dab = dDv_dab_;
+    _dDp_dwb = dDp_dwb_;
+    _dDv_dwb = dDv_dwb_;
+    _dDq_dwb = dDq_dwb_;
+}
 
 //Functions to test jacobians with finite difference method
 inline IMU_jac_deltas ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::VectorXs& _data, const wolf::Scalar& da_b)
