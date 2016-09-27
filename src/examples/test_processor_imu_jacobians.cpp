@@ -90,7 +90,22 @@ int main(int argc, char** argv)
          dDv_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect(i+3).segment(3,3) - bias_jac.delta_preint_vect(0).segment(3,3))/ddelta_bias;
      }
 
-     
+     /*
+        We just computed dDp_dab, dDp_dwb, dDv_dab and dDv_dwb
+        These must be compared to elements in dDp_dab_vect, dDv_dab_vect, dDp_dwb_vect and dDv_dwb_vect;
+
+        std::vector<bool> dDp_dab_check;
+        dDp_dab_check.clear()
+        dDp_dab_check.reserve(6);
+
+        for(int i = 0; i<6; i++){
+            if((dDp_dab - dDp_dab_vect(i+1)) < wolf::Constants::EPS)
+                dDp_dab_check.pushback(true);
+            else
+                dDp_dab_check.pushback(false);
+        }
+        
+      */
 
     delete wolf_problem_ptr_;
 
