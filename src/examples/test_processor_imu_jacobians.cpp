@@ -65,7 +65,7 @@ int main(int argc, char** argv)
               place 6 : added dw_bz in data
     */
 
-    Eigen::Map<const Eigen::Quaternions> q_in_1_, q_in_2_;
+    //Eigen::Map<Eigen::Quaternions> q_in_1_, q_in_2_;
 
     Eigen::VectorXs delta_preint_plus_delta;
     Eigen::VectorXs delta_preint;
@@ -144,11 +144,12 @@ int main(int argc, char** argv)
         dDq_dwb_z = log( dR(wb).trans() * dR(wb + dwb_z))/dwb_z
        */
 
-    new (&q_in_1_) Eigen::Map<const Eigen::Quaternions>(bias_jac.delta_preint_vect(0).data() + 6);
+    ///TODO : NOT WORKING - FIX ME
+    /*new (&q_in_1_) Eigen::Map<Eigen::Quaternions>(bias_jac.delta_preint_vect(0).data() + 6);
     for(int i=0;i<3;i++){
-        new (&q_in_2_) Eigen::Map<const Eigen::Quaternions>(bias_jac.delta_preint_plus_delta_vect(i+1).data() + 6);
-        dDq_dwb.block<3,1>(0,i) = R2v(wolf::q2R(q_in_2_).transpose() * wolf::q2R(q_in_1_))/ddelta_bias;
-     }
+        new (&q_in_2_) Eigen::Map<Eigen::Quaternions>(bias_jac.delta_preint_plus_delta_vect(i+1).data() + 6);
+        dDq_dwb.block<3,1>(0,i) = R2v( q_in_1_.matrix().transpose() * q_in_2_.matrix())/ddelta_bias;
+     }*/
 
      /*
         This jacobian must be checked :
