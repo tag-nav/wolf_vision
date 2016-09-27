@@ -104,8 +104,16 @@ int main(int argc, char** argv)
             else
                 dDp_dab_check.pushback(false);
         }
-        
       */
+
+      /*
+        dDq_dab = 0_{3x3}
+        dDq_dwb = [dDq_dwb_x, dDq_dwb_y, dDq_dwb_z]
+        dDq_dwb_x = log( dR(wb).trans() * dR(wb - dwb_x))/dwb_x
+                  = log( dR(wb).trans() * exp((wx - wbx - dwb_x)dt, (wy - wby)dt, (wy - wby)dt))/dwb_x
+        dDq_dwb_y = log( dR(wb).trans() * dR(wb - dwb_y))/dwb_y
+        dDq_dwb_z = log( dR(wb).trans() * dR(wb + dwb_z))/dwb_z
+       */
 
     delete wolf_problem_ptr_;
 
