@@ -104,13 +104,13 @@ int main(int argc, char** argv)
 
         dDp_dab_check.clear();
         dDv_dab_check.clear();
-        dDp_dab_check.reserve(6);
-        dDv_dab_check.reserve(6);
+        dDp_dab_check.reserve(3);
+        dDv_dab_check.reserve(3);
 
         dDp_dwb_check.clear();
         dDv_dwb_check.clear();
-        dDp_dwb_check.reserve(6);
-        dDv_dwb_check.reserve(6);
+        dDp_dwb_check.reserve(3);
+        dDv_dwb_check.reserve(3);
 
         for(int i = 0; i<3; i++){
             if((dDp_dab - bias_jac.dDp_dab_vect(i+1)) < wolf::Constants::EPS)
