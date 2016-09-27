@@ -87,8 +87,8 @@ namespace wolf {
            **/
           void setStatus(StateStatus _st);
 
-          Eigen::Vector3s acc_bias_at_preintegration_time_;
-          Eigen::Vector3s gyro_bias_at_preintegration_time_;
+//          Eigen::Vector3s acc_bias_at_preintegration_time_;
+//          Eigen::Vector3s gyro_bias_at_preintegration_time_;
   };
 
   // IMPLEMENTATION //

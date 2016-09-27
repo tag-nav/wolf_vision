@@ -12,11 +12,11 @@ FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr,
         FrameBase(_ts, _p_ptr, (StateBlock*)((_o_ptr)), _v_ptr), acc_bias_ptr_(_ba_ptr), gyro_bias_ptr_(_bg_ptr)
 {
     setType("IMU");
-    if (acc_bias_ptr_ != nullptr)
-        acc_bias_at_preintegration_time_ = acc_bias_ptr_->getVector();
-
-    if (gyro_bias_ptr_ != nullptr)
-        gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
+//    if (acc_bias_ptr_ != nullptr)
+//        acc_bias_at_preintegration_time_ = acc_bias_ptr_->getVector();
+//
+//    if (gyro_bias_ptr_ != nullptr)
+//        gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
 }
 
 FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr,
@@ -24,11 +24,11 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlock* _p
         FrameBase(_tp, _ts, _p_ptr, (StateBlock*)((_o_ptr)), _v_ptr), acc_bias_ptr_(_ba_ptr), gyro_bias_ptr_(_bg_ptr)
 {
     setType("IMU");
-    if (acc_bias_ptr_ != nullptr)
-        acc_bias_at_preintegration_time_ = acc_bias_ptr_->getVector();
-
-    if (gyro_bias_ptr_ != nullptr)
-        gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
+//    if (acc_bias_ptr_ != nullptr)
+//        acc_bias_at_preintegration_time_ = acc_bias_ptr_->getVector();
+//
+//    if (gyro_bias_ptr_ != nullptr)
+//        gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
 }
 
 FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
@@ -142,13 +142,13 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
       {
           acc_bias_ptr_->setVector(_st.segment(index, acc_bias_ptr_->getSize()));
           index += acc_bias_ptr_->getSize();
-          acc_bias_at_preintegration_time_ = acc_bias_ptr_->getVector();
+//          acc_bias_at_preintegration_time_ = acc_bias_ptr_->getVector();
       }
       if (gyro_bias_ptr_!=nullptr)
       {
           gyro_bias_ptr_->setVector(_st.segment(index, gyro_bias_ptr_->getSize()));
           //   index += bg_ptr_->getSize();
-          gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
+//          gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
      }
   }
 
