@@ -141,12 +141,13 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
         /* project */
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_in_ptr;
-        Eigen::Vector3s point3D;
+        Eigen::Vector3s point2D_hmg;
         Eigen::Vector2s point2D;
 
-        LandmarkInCurrentCamera(landmark_ptr,point3D);
+        LandmarkInCurrentCamera(landmark_ptr,point2D_hmg);
 
-        point2D = pinhole::projectPointToNormalizedPlane(point3D);
+        //point2D = pinhole::projectPointToNormalizedPlane(point2D_hmg);
+        point2D = point2D_hmg.head(2)/point2D_hmg(2);
         point2D = pinhole::distortPoint(((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point2D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
 
@@ -499,12 +500,13 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
     for (auto landmark_base_ptr : *last_landmark_list)
     {
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_base_ptr;
-        Eigen::Vector3s point3D;
+        Eigen::Vector3s point2D_hmg;
         Eigen::Vector2s point2D;
 
-        LandmarkInCurrentCamera(landmark_ptr,point3D);
+        LandmarkInCurrentCamera(landmark_ptr,point2D_hmg);
 
-        point2D = pinhole::projectPointToNormalizedPlane(point3D);
+        //point2D = pinhole::projectPointToNormalizedPlane(point2D_hmg);
+        point2D = point2D_hmg.head(2)/point2D_hmg(2);
         point2D = pinhole::distortPoint(((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point2D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
 
