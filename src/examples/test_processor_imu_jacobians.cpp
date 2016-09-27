@@ -52,7 +52,18 @@ int main(int argc, char** argv)
     ProcessorIMU processor_imu;
     processor_imu.setOrigin(x0, t);
     wolf::Scalar ddelta_bias = 0.0001;
-    struct IMU_jac_deltas = processor_imu.finite_diff_ab(0.001, data_, ddelta_bias);
+    struct IMU_jac_deltas bias_jac = processor_imu.finite_diff_ab(0.001, data_, ddelta_bias);
+
+    /* IMU_jac_deltas struct form :
+    contains vectors of size 7 :
+    Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
+              place 1 : added da_bx in data
+              place 2 : added da_by in data
+              place 3 : added da_bz in data
+              place 4 : added dw_bx in data
+              place 5 : added dw_by in data
+              place 6 : added dw_bz in data
+    */
 
     Eigen::Matrix3s dDp_dabx_;
     Eigen::Matrix3s dDp_daby_;

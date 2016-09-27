@@ -15,7 +15,7 @@ namespace wolf {
                        dDv_dab_vect(_dDv_dab_vect), dDp_dwb_vect(_dDp_dwb_vect), dDv_dwb_vect(_dDv_dwb_vect), dDq_dwb_vect(_dDq_dwb_vect), 
                        delta_preint_plus_delta_vect(_delta_preint_plus_delta_vect), delta_preint_vect(_delta_preint_vect) {}
 
-        private:
+        public:
             /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
               Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
               place 1 : added da_bx in data
@@ -521,9 +521,8 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vect
         dDq_dwb_vect(i+1) = dDq_dwb_;
     }
 
-    IMU_jac_deltas bias_jaccobians(dDp_dab_vect, dDv_dab_vect, dDp_dwb_vect, dDv_dwb_vect, dDq_dwb_vect, delta_preint_plus_delta_vect, delta_preint_vect);
-    return bias_jaccobians;
-     
+    IMU_jac_deltas bias_jacobians(dDp_dab_vect, dDv_dab_vect, dDp_dwb_vect, dDv_dwb_vect, dDq_dwb_vect, delta_preint_plus_delta_vect, delta_preint_vect);
+    return bias_jacobians;
 }
 
 /*inline void ProcessorIMU::finite_diff_noise(const Scalar _dt, Eigen::VectorXs& _data, const wolf::Scalar& da_b)
