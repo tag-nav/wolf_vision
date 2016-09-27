@@ -98,14 +98,40 @@ int main(int argc, char** argv)
         These must be compared to elements in dDp_dab_vect, dDv_dab_vect, dDp_dwb_vect and dDv_dwb_vect;
 
         std::vector<bool> dDp_dab_check;
-        dDp_dab_check.clear()
-        dDp_dab_check.reserve(6);
+        std::vector<bool> dDv_dab_check;
+        std::vector<bool> dDp_dwb_check;
+        std::vector<bool> dDv_dwb_check;
 
-        for(int i = 0; i<6; i++){
-            if((dDp_dab - dDp_dab_vect(i+1)) < wolf::Constants::EPS)
+        dDp_dab_check.clear();
+        dDv_dab_check.clear();
+        dDp_dab_check.reserve(6);
+        dDv_dab_check.reserve(6);
+
+        dDp_dwb_check.clear();
+        dDv_dwb_check.clear();
+        dDp_dwb_check.reserve(6);
+        dDv_dwb_check.reserve(6);
+
+        for(int i = 0; i<3; i++){
+            if((dDp_dab - bias_jac.dDp_dab_vect(i+1)) < wolf::Constants::EPS)
                 dDp_dab_check.pushback(true);
             else
                 dDp_dab_check.pushback(false);
+
+            if((dDv_dab) - bias_jac.dDv_dab_vect(i+1) < wolf::Constants::EPS)
+                dDv_dab_check.pushback(true);
+            else
+                dDv_dab_check.pushback(false);
+            
+            if((dDp_dwb - bias_jac.dDp_dwb_vect(i+3)) < wolf::Constants::EPS)
+                dDp_dwb_check.pushback(true);
+            else
+                dDp_dwb_check.pushback(false);
+
+            if((dDv_dwb - bias_jac.dDv_dwb_vect(i+3)) < wolf::Constants::EPS)
+                dDv_dwb_check.pushback(true);
+            else
+                dDv_dwb_check.pushback(false);
         }
       */
 
