@@ -14,7 +14,9 @@ ProcessorIMU::ProcessorIMU() :
         Dv_(nullptr), dv_(nullptr), Dv_out_(nullptr),
         Dq_(nullptr), dq_(nullptr), Dq_out_(nullptr)
 {
-    //
+    // Set constant parts of Jacobians
+    jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
+    jacobian_delta_.setIdentity(9,9);                                           //
 }
 
 ProcessorIMU::~ProcessorIMU()

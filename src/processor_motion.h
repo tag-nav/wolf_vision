@@ -162,11 +162,11 @@ class ProcessorMotion : public ProcessorBase
          * \param _jacobian2 jacobian of the composition w.r.t. _delta2
          * \param _delta_cov1_plus_delta_cov2 the covariance of the composition.
          */
-        void deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1,
-                                  const Eigen::MatrixXs& _delta_cov2,
+        void deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta1_cov,
+                                  const Eigen::MatrixXs& _delta2_cov,
                                   const Eigen::MatrixXs& _jacobian1,
                                   const Eigen::MatrixXs& _jacobian2,
-                                  Eigen::MatrixXs& _delta_cov1_plus_delta_cov2);
+                                  Eigen::MatrixXs& _delta1_plus_delta2_cov);
         /** Set the origin of all motion for this processor
          * \param _origin_frame the key frame to be the origin
          */
@@ -368,15 +368,15 @@ inline ProcessorMotion::~ProcessorMotion()
         incoming_ptr_->destruct();
 }
 
-inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1,
-                                                  const Eigen::MatrixXs& _delta_cov2,
+inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta1_cov,
+                                                  const Eigen::MatrixXs& _delta2_cov,
                                                   const Eigen::MatrixXs& _jacobian1,
                                                   const Eigen::MatrixXs& _jacobian2,
-                                                  Eigen::MatrixXs& _delta_cov1_plus_delta_cov2)
+                                                  Eigen::MatrixXs& _delta1_plus_delta2_cov)
 {
 
-    _delta_cov1_plus_delta_cov2 = _jacobian1 * _delta_cov1 * _jacobian1.transpose()
-            + _jacobian2 * _delta_cov2 * _jacobian2.transpose();
+    _delta1_plus_delta2_cov =   _jacobian1 * _delta1_cov * _jacobian1.transpose()
+                              + _jacobian2 * _delta2_cov * _jacobian2.transpose();
 
 }
 
@@ -481,7 +481,7 @@ inline void ProcessorMotion::integrate()
     // get data and convert it to delta, and obtain also the delta covariance
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
 
-    // then integrate the current delta to pre-integrated measurements
+    // then integrate the current delta to pre-integrated measurements, and get Jacobians
     deltaPlusDelta(delta_integrated_,
                    delta_ ,
                    dt_,
@@ -489,12 +489,16 @@ inline void ProcessorMotion::integrate()
                    jacobian_delta_preint_,
                    jacobian_delta_);
 
+    delta_integrated_cov_ =   jacobian_delta_preint_ * getBufferPtr()->get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
+                              + jacobian_delta_ * delta_cov_ * jacobian_delta_.transpose();
+
+
     // and covariance
-    deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_,
-                         delta_cov_,
-                         jacobian_delta_preint_,
-                         jacobian_delta_,
-                         delta_integrated_cov_);
+//    deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_,
+//                         delta_cov_,
+//                         jacobian_delta_preint_,
+//                         jacobian_delta_,
+//                         delta_integrated_cov_);
 
     // then push it into buffer
     getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(),
@@ -526,11 +530,14 @@ inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
                        jacobian_delta_preint_,
                        jacobian_delta_);
 
-        deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_,
-                             motion_it->delta_cov_,
-                             jacobian_delta_preint_,
-                             jacobian_delta_,
-                             motion_it->delta_integr_cov_);
+        delta_integrated_cov_ =   jacobian_delta_preint_ * getBufferPtr()->get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
+                                  + jacobian_delta_ * delta_cov_ * jacobian_delta_.transpose();
+
+//        deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_,
+//                             motion_it->delta_cov_,
+//                             jacobian_delta_preint_,
+//                             jacobian_delta_,
+//                             motion_it->delta_integr_cov_);
 
         motion_it++;
         prev_motion_it++;

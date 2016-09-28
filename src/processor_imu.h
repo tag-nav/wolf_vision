@@ -204,21 +204,21 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
      */
 
     // Some useful temporaries
-    Eigen::Matrix3s DR      = Dq_.matrix(); // First  Delta, DR
-    Eigen::Matrix3s dR      = dq_.matrix(); // Second delta, dR
+    Eigen::Matrix3s DR = Dq_.matrix(); // First  Delta, DR
+    Eigen::Matrix3s dR = dq_.matrix(); // Second delta, dR
 
     // Jac wrt preintegrated delta, D_D = dD'/dD
-    _jacobian_delta_preint.setIdentity(9,9);                                    // dDp'/ddp, dDv'/ddv, all zeros
-    _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // dDp'/ddv
-    _jacobian_delta_preint.block<3,3>(0,6).noalias() = - DR * skew(dp_) ;   // dDp'/ddf
-    _jacobian_delta_preint.block<3,3>(3,6).noalias() = - DR * skew(dv_) ;   // dDv'/ddf
-    _jacobian_delta_preint.block<3,3>(6,6) =   dR.transpose();                  // dDf'/ddf
+//    _jacobian_delta_preint.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
+    _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // dDp'/dDv = I*dt
+    _jacobian_delta_preint.block<3,3>(0,6).noalias() = - DR * skew(dp_) ;       // dDp'/dDf
+    _jacobian_delta_preint.block<3,3>(3,6).noalias() = - DR * skew(dv_) ;       // dDv'/dDf
+    _jacobian_delta_preint.block<3,3>(6,6) =   dR.transpose();                  // dDf'/dDf
 
     // Jac wrt current delta, D_d = dD'/dd
-    _jacobian_delta.setZero(9,9);
-    _jacobian_delta.block<3,3>(0,0) = DR;
-    _jacobian_delta.block<3,3>(3,3) = DR;
-    _jacobian_delta.block<3,3>(6,6) = Eigen::Matrix3s::Identity();
+//    _jacobian_delta.setIdentity(9,9);                                           //
+    _jacobian_delta.block<3,3>(0,0) = DR;                                       // dDp'/ddp
+    _jacobian_delta.block<3,3>(3,3) = DR;                                       // dDv'/ddv
+    //    _jacobian_delta.block<3,3>(6,6) = Eigen::Matrix3s::Identity();        // dDf'/ddf = I
 
 
 
@@ -231,7 +231,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
       * dDv/dab -= DR * dt
       * dDp/dwb += dDv/dwb * dt - 0.5 * DR * [a - ab]_x * dDf/dwb * dt^2
       * dDv/dwb -= DR * [a - ab]_x * dDf/dwb * dt
-      * dDf/dwb = dR.tr * dDf/dwb - Jr((w - wb)*dt) * dt
+      * dDf/dwb  = dR.tr * dDf/dwb - Jr((w - wb)*dt) * dt
       */
 
     // acc and gyro measurements corrected with the estimated bias
