@@ -154,19 +154,6 @@ class ProcessorMotion : public ProcessorBase
                        CaptureMotion* _cap2_ptr,
                        Eigen::VectorXs& _delta1_plus_delta2);
 
-        /** Composes two delta covariances
-         * \param _delta_cov1 covariance of the first delta
-         * \param _delta_cov2 covariance of the delta to be composed
-         * \param _Dt2 the second delta-state's time delta
-         * \param _jacobian1 jacobian of the composition w.r.t. _delta1
-         * \param _jacobian2 jacobian of the composition w.r.t. _delta2
-         * \param _delta_cov1_plus_delta_cov2 the covariance of the composition.
-         */
-        void deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta1_cov,
-                                  const Eigen::MatrixXs& _delta2_cov,
-                                  const Eigen::MatrixXs& _jacobian1,
-                                  const Eigen::MatrixXs& _jacobian2,
-                                  Eigen::MatrixXs& _delta1_plus_delta2_cov);
         /** Set the origin of all motion for this processor
          * \param _origin_frame the key frame to be the origin
          */
@@ -368,18 +355,6 @@ inline ProcessorMotion::~ProcessorMotion()
         incoming_ptr_->destruct();
 }
 
-inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta1_cov,
-                                                  const Eigen::MatrixXs& _delta2_cov,
-                                                  const Eigen::MatrixXs& _jacobian1,
-                                                  const Eigen::MatrixXs& _jacobian2,
-                                                  Eigen::MatrixXs& _delta1_plus_delta2_cov)
-{
-
-    _delta1_plus_delta2_cov =   _jacobian1 * _delta1_cov * _jacobian1.transpose()
-                              + _jacobian2 * _delta2_cov * _jacobian2.transpose();
-
-}
-
 inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
     // make a new key frame
@@ -489,16 +464,9 @@ inline void ProcessorMotion::integrate()
                    jacobian_delta_preint_,
                    jacobian_delta_);
 
-    delta_integrated_cov_ =   jacobian_delta_preint_ * getBufferPtr()->get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
-                              + jacobian_delta_ * delta_cov_ * jacobian_delta_.transpose();
-
-
     // and covariance
-//    deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_,
-//                         delta_cov_,
-//                         jacobian_delta_preint_,
-//                         jacobian_delta_,
-//                         delta_integrated_cov_);
+    delta_integrated_cov_ =   jacobian_delta_preint_ * getBufferPtr()->get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
+                            + jacobian_delta_        * delta_cov_                                     * jacobian_delta_.transpose();
 
     // then push it into buffer
     getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(),
@@ -506,8 +474,6 @@ inline void ProcessorMotion::integrate()
                                              delta_integrated_,
                                              delta_cov_,
                                              delta_integrated_cov_
-//                                             jacobian_delta_preint_,
-//                                             jacobian_delta_
                                              }));
 }
 
@@ -522,7 +488,10 @@ inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
 
     while (motion_it != _capture_ptr->getBufferPtr()->get().end())
     {
+        // get dt
         const Scalar dt = motion_it->ts_ - prev_motion_it->ts_;
+
+        // integrate delta into delta_integr
         deltaPlusDelta(prev_motion_it->delta_integr_,
                        motion_it->delta_,
                        dt,
@@ -530,15 +499,13 @@ inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
                        jacobian_delta_preint_,
                        jacobian_delta_);
 
+        // integrate covariances
         delta_integrated_cov_ =   jacobian_delta_preint_ * getBufferPtr()->get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
                                   + jacobian_delta_ * delta_cov_ * jacobian_delta_.transpose();
 
-//        deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_,
-//                             motion_it->delta_cov_,
-//                             jacobian_delta_preint_,
-//                             jacobian_delta_,
-//                             motion_it->delta_integr_cov_);
+        // XXX: Are we not pushing into buffer?
 
+        // advance in buffer
         motion_it++;
         prev_motion_it++;
     }
@@ -600,7 +567,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
 
     capture_ptr->setOriginFramePtr(_keyframe_ptr);
 
-    // reintegrate own buffer
+    // reintegrate own buffer // XXX: where is the result of re-integration stored?
     reintegrate(capture_ptr);
 
     // modify feature and constraint (if they exist)
