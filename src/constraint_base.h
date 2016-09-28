@@ -16,11 +16,17 @@ class NodeTerminus;
 
 namespace wolf {
 
+//class ConstraintBase;
+//typedef ConstraintBase* ConstraintBasePtr;
+//typedef std::list<ConstraintBase*> ConstraintBaseList;
+//typedef ConstraintBaseList::iterator ConstraintBaseIter;
+
 //TODO: add a member to indicate how jacobian is computed, called "jacobian_method_"
 //class ConstraintBase
-class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
+class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
 {
     private:
+        ProblemPtr problem_ptr_;
         static unsigned int constraint_id_count_;
     protected:
         unsigned int constraint_id_;
@@ -130,6 +136,10 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
         /** \brief Returns a pointer to the landmark constrained to
          **/
         LandmarkBase* getLandmarkOtherPtr();
+
+        Problem* getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+
 };
 
 inline unsigned int ConstraintBase::id()

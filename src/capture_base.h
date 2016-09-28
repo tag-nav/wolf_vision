@@ -18,11 +18,19 @@ class SensorBase;
 
 namespace wolf{
 
+//class CaptureBase;
+//typedef CaptureBase* CaptureBasePtr;
+//typedef std::list<CaptureBase*> CaptureBaseList;
+//typedef CaptureBaseList::iterator CaptureBaseIter;
 
 //class CaptureBase
-class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
+class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
 {
     private:
+        ProblemPtr problem_ptr_;
+        FrameBasePtr frame_ptr_;
+        FeatureBaseList feature_list_;
+
         static unsigned int capture_id_count_;
     protected:
         unsigned int capture_id_;
@@ -57,6 +65,7 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
         /** \brief Gets Frame pointer
          **/
         FrameBase* getFramePtr() const;
+        void setFramePtr(const FrameBasePtr _frm_ptr);
 
         /** \brief Gets a pointer to feature list
          **/
@@ -81,7 +90,11 @@ class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
 
         /** \brief Call all the processors for this Capture
          */
-        virtual void process(); 
+        virtual void process();
+
+        Problem* getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+
 
 };
 
@@ -100,6 +113,11 @@ inline FeatureBase* CaptureBase::addFeature(FeatureBase* _ft_ptr)
 inline FrameBase* CaptureBase::getFramePtr() const
 {
     return upperNodePtr();
+}
+
+inline void CaptureBase::setFramePtr(const FrameBasePtr _frm_ptr)
+{
+    frame_ptr_ = _frm_ptr;
 }
 
 inline FeatureBaseList* CaptureBase::getFeatureListPtr()

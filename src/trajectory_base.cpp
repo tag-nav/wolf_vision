@@ -3,7 +3,7 @@
 namespace wolf {
 
 TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
-    NodeLinked(MID, "TRAJECTORY"),
+//    NodeLinked(MID, "TRAJECTORY"),
     frame_structure_(_frame_structure), last_key_frame_ptr_(nullptr)
 {
     //
@@ -22,10 +22,15 @@ FrameBase* TrajectoryBase::addFrame(FrameBase* _frame_ptr)
         if (last_key_frame_ptr_ == nullptr || last_key_frame_ptr_->getTimeStamp() < _frame_ptr->getTimeStamp())
             last_key_frame_ptr_ = _frame_ptr;
 
-        insertDownNode(_frame_ptr, computeFrameOrder(_frame_ptr));
+        frame_list_.insert(computeFrameOrder(_frame_ptr), _frame_ptr);
+//        insertDownNode(_frame_ptr, computeFrameOrder(_frame_ptr));
     }
     else
+    {
+        frame_list_.push_back(_frame_ptr);
+        _frame_ptr->setTrajectoryPtr(this);
         addDownNode(_frame_ptr);
+    }
 
     return _frame_ptr;
 }

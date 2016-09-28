@@ -310,10 +310,12 @@ class StateBlock;
 typedef Problem* ProblemPtr;
 
 //Map
+typedef MapBase* MapBasePtr;
 typedef std::list<MapBase*> MapBaseList;
 typedef MapBaseList::iterator MapBaseIter;
 
 //Landmark
+typedef LandmarkBase* LandmarkBasePtr;
 typedef std::list<LandmarkBase*> LandmarkBaseList;
 typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
@@ -321,11 +323,16 @@ typedef LandmarkBaseList::iterator LandmarkBaseIter;
 typedef std::list<LandmarkCorner2D*> LandmarkCorner2DList;
 typedef LandmarkCorner2DList::iterator LandmarkCorner2DIter;
 
+// - Trajectory
+typedef TrajectoryBase* TrajectoryBasePtr;
+
 // - Frame
+typedef FrameBase* FrameBasePtr;
 typedef std::list<FrameBase*> FrameBaseList;
 typedef FrameBaseList::iterator FrameBaseIter;
 
 // - Capture
+typedef CaptureBase* CaptureBasePtr;
 typedef std::list<CaptureBase*> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
@@ -334,6 +341,7 @@ typedef std::list<CaptureMotion*> CaptureRelativeList;
 typedef CaptureRelativeList::iterator CaptureRelativeIter;
 
 // - Feature
+typedef FeatureBase* FeatureBasePtr;
 typedef std::list<FeatureBase*> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
 
@@ -346,10 +354,12 @@ typedef std::list<FeaturePolyline2D*> FeaturePolyline2DList;
 typedef FeaturePolyline2DList::iterator FeaturePolyline2DIter;
 
 // - Constraint
+typedef ConstraintBase* ConstraintBasePtr;
 typedef std::list<ConstraintBase*> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
 // - Sensors
+typedef SensorBase* SensorBasePtr;
 typedef std::list<SensorBase*> SensorBaseList;
 typedef SensorBaseList::iterator SensorBaseIter;
 
@@ -358,6 +368,7 @@ typedef std::map<unsigned int, TransSensor*> TransSensorMap;
 typedef TransSensorMap::iterator TransSensorIter;
 
 // - Processors
+typedef ProcessorBase* ProcessorBasePtr;
 typedef std::list<ProcessorBase*> ProcessorBaseList;
 typedef ProcessorBaseList::iterator ProcessorBaseIter;
 

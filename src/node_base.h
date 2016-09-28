@@ -3,6 +3,7 @@
 
 // Wolf includes
 #include "wolf.h"
+#include "problem.h"
 
 
 namespace wolf {

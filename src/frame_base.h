@@ -12,17 +12,19 @@ class StateBlock;
 //Wolf includes
 #include "wolf.h"
 #include "time_stamp.h"
-#include "node_linked.h"
-#include "node_constrained.h"
 
 //std includes
 
 namespace wolf {
 
 //class FrameBase
-class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
+class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
 {
     private:
+        ProblemPtr problem_ptr_;
+        TrajectoryBasePtr trajectory_ptr_;
+        CaptureBaseList capture_list_;
+
         static unsigned int frame_id_count_;
     protected:
         unsigned int frame_id_;
@@ -97,22 +99,27 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
 
         // Wolf tree access ---------------------------------------------------
 
-        TrajectoryBase* getTrajectoryPtr() const;
+        TrajectoryBasePtr getTrajectoryPtr() const;
+        void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr);
 
-        FrameBase* getPreviousFrame() const;
-        FrameBase* getNextFrame() const;
+        FrameBasePtr getPreviousFrame() const;
+        FrameBasePtr getNextFrame() const;
 
         CaptureBaseList* getCaptureListPtr();
-        CaptureBase* addCapture(CaptureBase* _capt_ptr);
+        CaptureBasePtr addCapture(CaptureBase* _capt_ptr);
         void removeCapture(CaptureBaseIter& _capt_iter);
-        void removeCapture(CaptureBase* _capt_ptr);
-        CaptureBase* hasCaptureOf(const SensorBase* _sensor_ptr);
+        void removeCapture(CaptureBasePtr _capt_ptr);
+        CaptureBasePtr hasCaptureOf(const SensorBasePtr _sensor_ptr);
 
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
+
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+
 
 
     private:
@@ -124,14 +131,22 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
         void setStatus(StateStatus _st);
 
 
+
+
 };
+
+} // namespace wolf
+
+#include "capture_base.h"
+
+namespace wolf {
+
+// IMPLEMENTATION //
 
 inline unsigned int FrameBase::id()
 {
     return frame_id_;
 }
-
-// IMPLEMENTATION //
 
 inline bool FrameBase::isKey() const
 {
@@ -186,17 +201,21 @@ inline StateBlock* FrameBase::getVPtr() const
 
 inline TrajectoryBase* FrameBase::getTrajectoryPtr() const
 {
-    return upperNodePtr();
+    return trajectory_ptr_;
+//    return upperNodePtr();
 }
 
 inline CaptureBaseList* FrameBase::getCaptureListPtr()
 {
-    return getDownNodeListPtr();
+    return & capture_list_;
+//    return getDownNodeListPtr();
 }
 
 inline CaptureBase* FrameBase::addCapture(CaptureBase* _capt_ptr)
 {
-    addDownNode(_capt_ptr);
+    capture_list_.push_back(_capt_ptr);
+    _capt_ptr->setFramePtr(this);
+//    addDownNode(_capt_ptr);
     return _capt_ptr;
 }
 

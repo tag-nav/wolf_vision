@@ -10,7 +10,6 @@ class LandmarkBase;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
 
 //std includes
 
@@ -19,6 +18,8 @@ namespace wolf {
 //class MapBase
 class MapBase : public NodeLinked<Problem,LandmarkBase>
 {
+    private:
+        ProblemPtr problem_ptr_;
     public:
         MapBase();
 
@@ -47,6 +48,9 @@ class MapBase : public NodeLinked<Problem,LandmarkBase>
         
         void load(const std::string& _map_file_yaml);
         void save(const std::string& _map_file_yaml, const std::string& _map_name = "Map automatically saved by Wolf");
+
+        Problem* getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
 
     private:
         std::string dateTimeNow();

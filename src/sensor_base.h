@@ -10,11 +10,11 @@ class StateBlock;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
 
 //std includes
 
 namespace wolf {
+
 
 /** \brief base struct for intrinsic sensor parameters
  *
@@ -26,10 +26,15 @@ struct IntrinsicsBase
         std::string name;
 };
 
-class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
+class SensorBase : public NodeBase // NodeLinked<HardwareBase, ProcessorBase>
 {
     private:
+        Problem* problem_ptr_;
+        HardwareBase* hardware_ptr_;
+        ProcessorBaseList processor_list_;
+
         static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
+
     protected:
         unsigned int sensor_id_;   // sensor ID
         SensorType type_id_;       // the type of sensor. See wolf.h for a list of all sensor types.
@@ -119,7 +124,16 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
 
         Eigen::MatrixXs getNoiseCov();
 
+        Problem* getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+
 };
+
+}
+
+#include "processor_base.h"
+
+namespace wolf{
 
 inline unsigned int SensorBase::id()
 {
@@ -133,13 +147,16 @@ inline wolf::SensorType SensorBase::typeId()
 
 inline ProcessorBase* SensorBase::addProcessor(ProcessorBase* _proc_ptr)
 {
-    addDownNode(_proc_ptr);
+    processor_list_.push_back(_proc_ptr);
+    _proc_ptr->setSensorPtr(this);
+//    addDownNode(_proc_ptr);
     return _proc_ptr;
 }
 
 inline ProcessorBaseList* SensorBase::getProcessorListPtr()
 {
-    return getDownNodeListPtr();
+    return & processor_list_;
+//    return getDownNodeListPtr();
 }
 
 inline StateBlock* SensorBase::getPPtr() const

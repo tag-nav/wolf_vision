@@ -9,9 +9,11 @@ class NodeTerminus;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
+#include "problem.h"
 
 namespace wolf {
+
+
 
 /** \brief base struct for processor parameters
  *
@@ -24,8 +26,11 @@ struct ProcessorParamsBase
 };
 
 //class ProcessorBase
-class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
+class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
 {
+    private:
+        Problem* problem_ptr_;
+        SensorBase* sensor_ptr_;
     public:
         ProcessorBase(ProcessorType _tp, const std::string& _type, const Scalar& _time_tolerance = 0);
 
@@ -59,8 +64,12 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
         SensorBase* getSensorPtr();
         const SensorBase* getSensorPtr() const;
+        void setSensorPtr(SensorBase* _sen_ptr){sensor_ptr_ = _sen_ptr;}
 
         virtual bool isMotion();
+
+        Problem* getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
 
     private:
         static unsigned int processor_id_count_;
@@ -89,12 +98,14 @@ inline unsigned int ProcessorBase::id()
 
 inline SensorBase* ProcessorBase::getSensorPtr()
 {
-    return upperNodePtr();
+    return sensor_ptr_;
+//    return upperNodePtr();
 }
 
 inline const SensorBase* ProcessorBase::getSensorPtr() const
 {
-    return upperNodePtr();
+    return sensor_ptr_;
+//    return upperNodePtr();
 }
 
 } // namespace wolf

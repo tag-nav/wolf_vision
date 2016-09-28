@@ -17,10 +17,16 @@ class ConstraintBase;
 
 namespace wolf {
 
+//class FeatureBase;
+//typedef FeatureBase* FeatureBasePtr;
+//typedef std::list<FeatureBase*> FeatureBaseList;
+//typedef FeatureBaseList::iterator FeatureBaseIter;
+
 //class FeatureBase
-class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
+class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBase>
 {
     private:
+        ProblemPtr problem_ptr_;
         static unsigned int feature_id_count_;
     protected:
         unsigned int feature_id_;
@@ -96,6 +102,10 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
         
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         
+        Problem* getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+
+
 };
 
 inline unsigned int FeatureBase::id()

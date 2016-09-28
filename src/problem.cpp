@@ -26,12 +26,16 @@ std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); ret
 
 Problem::Problem(FrameStructure _frame_structure) :
         NodeBase("PROBLEM", ""), //
-        location_(TOP), trajectory_ptr_(new TrajectoryBase(_frame_structure)), map_ptr_(new MapBase), hardware_ptr_(
-                new HardwareBase), processor_motion_ptr_(nullptr), origin_setted_(false)
+        location_(TOP),
+        hardware_ptr_(new HardwareBase),
+        trajectory_ptr_(new TrajectoryBase(_frame_structure)),
+        map_ptr_(new MapBase),
+        processor_motion_ptr_(nullptr),
+        origin_setted_(false)
 {
-    trajectory_ptr_->linkToUpperNode(this);
-    map_ptr_->linkToUpperNode(this);
-    hardware_ptr_->linkToUpperNode(this);
+    trajectory_ptr_->setProblem(this);
+    map_ptr_->setProblem(this);
+    hardware_ptr_->setProblem(this);
 }
 
 Problem::~Problem()

@@ -14,8 +14,12 @@ class Problem;
 namespace wolf {
 
 //class HardwareBase
-class HardwareBase : public NodeLinked<Problem, SensorBase>
+class HardwareBase //: public NodeLinked<Problem, SensorBase>
 {
+    private:
+        Problem* problem_ptr_;
+        SensorBaseList sensor_list_;
+
     public:
         HardwareBase();
 
@@ -34,6 +38,8 @@ class HardwareBase : public NodeLinked<Problem, SensorBase>
 
         SensorBaseList* getSensorListPtr();
 
+        Problem* getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
 };
 
 } // namespace wolf
@@ -44,12 +50,15 @@ namespace wolf {
 
 inline void HardwareBase::removeSensor(const SensorBaseIter& _sensor_iter)
 {
-    removeDownNode(_sensor_iter);
+    sensor_list_.erase(_sensor_iter);
+    delete * _sensor_iter;
+//    removeDownNode(_sensor_iter);
 }
 
 inline SensorBaseList* HardwareBase::getSensorListPtr()
 {
-    return getDownNodeListPtr();
+    return & sensor_list_;
+//    return getDownNodeListPtr();
 }
 
 } // namespace wolf

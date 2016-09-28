@@ -20,15 +20,22 @@ class StateBlock;
 
 namespace wolf {
 
+//class LandmarkBase;
+//typedef LandmarkBase* LandmarkBasePtr;
+//typedef std::list<LandmarkBase*> LandmarkBaseList;
+//typedef LandmarkBaseList::iterator LandmarkBaseIter;
+
+
 //class LandmarkParamsBase {}; ///< class for landmark parameters. Derive it to define your parameters.
 
 // TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
 
 //class LandmarkBase
-class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
+class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
 {
     private:
+        ProblemPtr problem_ptr_;
         static unsigned int landmark_id_count_;
         
     protected:
@@ -122,6 +129,10 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         const LandmarkType getTypeId() const;
 
         virtual YAML::Node saveToYaml() const;
+
+        Problem* getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+
 
 };
 

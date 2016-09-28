@@ -20,6 +20,10 @@ struct ProcessorParamsBase;
 
 
 namespace wolf {
+
+//class Problem;
+//typedef Problem* ProblemPtr;
+
 enum Notification
 {
     ADD,
@@ -50,17 +54,17 @@ struct ConstraintNotification
  * - up_node_: A regular pointer to a derived node object, specified by the template parameter UpperType.
  *
  */
-class Problem : public NodeBase
+class Problem //: public NodeBase
 {
     public:
-        typedef NodeBase* LowerNodePtr; // Necessatry for destruct() of node_linked
+//        typedef NodeBase* LowerNodePtr; // Necessatry for destruct() of node_linked
 
     protected:
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
         NodeLocation location_; // TODO: should it be in node_base?
+        HardwareBase* hardware_ptr_;
         TrajectoryBase* trajectory_ptr_;
         MapBase* map_ptr_;
-        HardwareBase* hardware_ptr_;
         ProcessorMotion* processor_motion_ptr_;
         StateBlockList state_block_ptr_list_;
         std::list<StateBlockNotification> state_block_notification_list_;
@@ -306,7 +310,7 @@ class Problem : public NodeBase
          *
          * This empty function is needed by the destruct() node_linked function.
          */
-        void removeDownNode(const LowerNodePtr _ptr){};
+//        void removeDownNode(const LowerNodePtr _ptr){};
 
         /** \brief get a sensor pointer by its name
          * \param _sensor_name The sensor name, as it was installed with installSensor()

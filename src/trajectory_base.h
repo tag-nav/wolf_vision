@@ -10,16 +10,22 @@ class FrameBase;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
 
 //std includes
 
 
 namespace wolf {
 
+//class TrajectoryBase;
+//typedef TrajectoryBase* TrajectoryBasePtr;
+
 //class TrajectoryBase
-class TrajectoryBase : public NodeLinked<Problem,FrameBase>
+class TrajectoryBase //: public NodeBase // NodeLinked<Problem,FrameBase>
 {
+    private:
+        ProblemPtr problem_ptr_;
+        std::list<FrameBase*> frame_list_;
+
     protected:
         FrameStructure frame_structure_; // Defines the structure of the Frames in the Trajectory.
         FrameBase* last_key_frame_ptr_;  // keeps pointer to the last key frame
@@ -77,21 +83,30 @@ class TrajectoryBase : public NodeLinked<Problem,FrameBase>
         /** \brief Finds the closes key frame to a given timestamp
          **/
         FrameBase* closestKeyFrameToTimeStamp(const TimeStamp& _ts);
+
+        Problem* getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+
 };
 
 inline void TrajectoryBase::removeFrame(const FrameBaseIter& _frame_iter)
 {
-    removeDownNode(_frame_iter);
+//    removeDownNode(_frame_iter);
+
+    frame_list_.erase(_frame_iter);
+    delete * _frame_iter;
 }
 
 inline FrameBaseList* TrajectoryBase::getFrameListPtr()
 {
-    return getDownNodeListPtr();
+//    return getDownNodeListPtr();
+    return & frame_list_;
 }
 
 inline FrameBase* TrajectoryBase::getLastFramePtr()
 {
-    return getDownNodeListPtr()->back();
+//    return getDownNodeListPtr()->back();
+    return frame_list_.back();
 }
 
 inline FrameBase* TrajectoryBase::getLastKeyFramePtr()
