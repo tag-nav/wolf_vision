@@ -240,7 +240,7 @@ int main(int argc, char** argv)
                                                             //other solution to investigate
     dDo_dOx = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * dr(theta+dthetax) )/dthetax
             = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(dthetax,0,0)) )/dthetax
-            = log( (_Delta * _delta).transpose() * (_Delta_noisy * _delta))
+            = log( (_Delta * _delta).transpose() * (_Delta * _delta_noisy))
     dDo_dOy = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,dthetay,0)) )/dthetay
     dDo_dOz = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,0,dthetaz)) )/dthetaz
 
