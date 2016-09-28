@@ -6,6 +6,7 @@
  */
 
 #include "processor_tracker_landmark.h"
+#include "map_base.h"
 
 namespace wolf
 {
@@ -60,11 +61,11 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
         findLandmarks(new_landmarks, new_features_incoming_, matches_landmark_from_incoming_);
 
         // Append all new Features to the Capture's list of Features
-        incoming_ptr_->addDownNodeList(new_features_incoming_);
+        incoming_ptr_->addFeatureList(new_features_incoming_);
     }
 
     // Append all new Features to the Capture's list of Features
-    last_ptr_->addDownNodeList(new_features_last_);
+    last_ptr_->addFeatureList(new_features_last_);
     //std::cout << "\tnew last features added " << std::endl;
 
     // Append new landmarks to the map
@@ -113,7 +114,7 @@ unsigned int ProcessorTrackerLandmark::processKnown()
     unsigned int found_landmarks = findLandmarks(*(getProblem()->getMapPtr()->getLandmarkListPtr()),
                                                  known_features_list_incoming, matches_landmark_from_incoming_);
     // Append found incoming features
-    incoming_ptr_->addDownNodeList(known_features_list_incoming);
+    incoming_ptr_->addFeatureList(known_features_list_incoming);
 
     //std::cout << "end of processKnown:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;

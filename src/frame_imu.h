@@ -10,11 +10,11 @@ class StateQuaternion;
 }
 
 //Wolf includes
-#include "wolf.h"
+//#include "wolf.h"
 #include "frame_base.h"
-#include "time_stamp.h"
-#include "node_linked.h"
-#include "node_constrained.h"
+//#include "time_stamp.h"
+//#include "node_linked.h"
+//#include "node_constrained.h"
 
 
 namespace wolf {

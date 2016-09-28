@@ -2,7 +2,6 @@
 #include "landmark_base.h"
 #include "constraint_base.h"
 #include "map_base.h"
-#include "node_terminus.h"
 #include "state_block.h"
 #include "yaml/yaml_conversion.h"
 

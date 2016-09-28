@@ -92,12 +92,6 @@ inline bool ProcessorBase::isMotion()
     return false;
 }
 
-}
-
-//#include "problem.h"
-
-namespace wolf {
-
 inline unsigned int ProcessorBase::id()
 {
     return processor_id_;

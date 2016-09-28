@@ -54,7 +54,7 @@ unsigned int ProcessorTrackerFeature::processKnown()
         }
     }
     // Append not destructed incoming features -> this empties known_features_incoming_
-    incoming_ptr_->addDownNodeList(known_features_incoming_);
+    incoming_ptr_->addFeatureList(known_features_incoming_);
     std::cout << "Added to incoming features: " << incoming_ptr_->getFeatureListPtr()->size() << std::endl;
 
     return matches_last_from_incoming_.size();
@@ -84,11 +84,11 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
         trackFeatures(new_features_last_, new_features_incoming_, matches_last_from_incoming_);
 
         // Append all new Features to the incoming Captures' list of Features
-        incoming_ptr_->addDownNodeList(new_features_incoming_);
+        incoming_ptr_->addFeatureList(new_features_incoming_);
     }
 
     // Append all new Features to the last Captures' list of Features
-    last_ptr_->addDownNodeList(new_features_last_);
+    last_ptr_->addFeatureList(new_features_last_);
 
     // return the number of new features detected in \b last
     return n;

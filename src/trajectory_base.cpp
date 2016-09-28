@@ -1,4 +1,5 @@
 #include "trajectory_base.h"
+#include "frame_base.h"
 
 namespace wolf {
 
@@ -29,7 +30,7 @@ FrameBase* TrajectoryBase::addFrame(FrameBase* _frame_ptr)
     {
         frame_list_.push_back(_frame_ptr);
         _frame_ptr->setTrajectoryPtr(this);
-        addDownNode(_frame_ptr);
+        addFrame(_frame_ptr);
     }
 
     return _frame_ptr;

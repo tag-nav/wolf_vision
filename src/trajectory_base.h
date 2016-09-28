@@ -6,6 +6,7 @@
 namespace wolf{
 class Problem;
 class FrameBase;
+class TimeStamp;
 }
 
 //Wolf includes
