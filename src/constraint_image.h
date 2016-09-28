@@ -84,14 +84,14 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 //            std::cout << "\nlandmark_hmg_c1:\n" << landmark_hmg_c1(0) << "\t" << landmark_hmg_c1(1) << "\t" << landmark_hmg_c1(2) << "\t" << landmark_hmg_c1(3) << std::endl;
 
 
-            Eigen::Matrix<T,3,1> v_hmg;
-            v_hmg = landmark_hmg_c1.head(3);
+            Eigen::Matrix<T,3,1> v_normalized;
+            v_normalized = landmark_hmg_c1.head(3)/landmark_hmg_c1(3);
 //            T inverse_dist_c1 = landmark_hmg_c1(3); // inverse distance
 
             //std::cout << "\nv:\n" << v_hmg(0) << "\t" << v_hmg(1) << "\t" << v_hmg(2) << "\t" << landmark_hmg_c1(3) << std::endl;
 
             Eigen::Matrix<T,2,1> v;
-            v = v_hmg.head(2)/v_hmg(2);
+            v = v_normalized.head(2);
 
             // ==================================================
             /* DISTORTION ATTEMPT */
