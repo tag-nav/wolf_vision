@@ -108,8 +108,21 @@ class ProcessorIMU : public ProcessorMotion{
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
 
         //Functions to test jacobians with finite difference method
+
+        /* params :
+            _data : input data vector (size 6 : ax,ay,az,wx,wy,wz)
+            _dt : time interval between 2 IMU measurements
+            da_b : bias noise to add - scalar because adding the same noise to each component of bias (abx, aby, abz, wbx, wby, wbz) one by one. 
+         */
         IMU_jac_deltas finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b);
-        //void finite_diff_noise(const Scalar _dt, Eigen::VectorXs& _data, const Eigen::Vector<wolf::Scalar,9,1> _Delta_noise, const Eigen::Vector<wolf::Scalar,9,1> _delta_noise);
+
+        /* params :
+            _data : input data vector (size 6 : ax,ay,az,wx,wy,wz)
+            _dt : time interval between 2 IMU measurements
+            _Delta_noise : noise to add to Delta_preint (D1 in D = D1 + d), vector 9 because rotation expressed as a vector (R2v(q.matrix()))
+            _delta_noise : noise to add to instantaneous delta (d in D = D1 + d), vector 9 because rotation expressed as a vector (R2v(q.matrix()))
+         */
+        void finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise);
 };
 
 }
@@ -525,7 +538,7 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vect
     return bias_jacobians;
 }
 
-/*inline void ProcessorIMU::finite_diff_noise(const Scalar _dt, Eigen::VectorXs& _data, const wolf::Scalar& da_b)
+inline void ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise)
 {
     Eigen::MatrixXs jacobian_delta_preint_d0;
     Eigen::MatrixXs jacobian_delta_d0;
@@ -536,7 +549,7 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vect
 
     Eigen::MatrixXs jacobian_delta_preint_d1;
     Eigen::MatrixXs jacobian_delta_d1;
-}*/
+}
 
 } // namespace wolf
 
