@@ -45,12 +45,12 @@ int main(int argc, char** argv)
 
     unsigned int nfeatures = 500;
     float scaleFactor = 1.2;
-    unsigned int nlevels = 1;
-    unsigned int edgeThreshold = 4;
+    unsigned int nlevels = 3;
+    unsigned int edgeThreshold = 3;
     unsigned int firstLevel = 0;
     unsigned int WTA_K = 2;                  //# See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
     unsigned int scoreType = 0;              //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
-    unsigned int patchSize = 31;
+    unsigned int patchSize = 3;
 
     detector_descriptor_ptr_ = new cv::ORB(nfeatures, //
                                            scaleFactor, //
@@ -93,8 +93,17 @@ int main(int argc, char** argv)
     cv::waitKey(0);
 
     std::vector<cv::KeyPoint> target_keypoints;
+    std::vector<cv::KeyPoint> current_keypoints;
     cv::Mat target_descriptors;
+    cv::Mat current_descriptors;
     cv::Mat image_roi_ = frame[f % buffer_size];
+
+
+    unsigned int roi_width = 30;
+    unsigned int roi_heigth = 30;
+    unsigned int roi_x;
+    unsigned int roi_y;
+
 
     detector_descriptor_ptr_->detect(image_roi_, target_keypoints);
     detector_descriptor_ptr_->compute(image_roi_, target_keypoints, target_descriptors);
@@ -104,42 +113,101 @@ int main(int argc, char** argv)
 
     while(!(frame[f % buffer_size].empty()))
     {
-
         std::vector<cv::KeyPoint> keypoints;
         cv::Mat descriptors;
         cv::Mat image_roi = frame[f % buffer_size];
         std::vector<cv::DMatch> cv_matches;
 
         unsigned int tracked_keypoints = 0;
-        detector_descriptor_ptr_->detect(image_roi, keypoints);
-        detector_descriptor_ptr_->compute(image_roi, keypoints, descriptors);
 
         for(int j = 0; j < target_keypoints.size(); j++)
         {
+            roi_x = (target_keypoints[j].pt.x) - (roi_heigth / 2);
+            roi_y = (target_keypoints[j].pt.y) - (roi_width / 2);
+            cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+
+            //inflate
+            roi.x = roi.x - pattern_radius;
+            roi.y = roi.y - pattern_radius;
+            roi.width = roi.width + 2*pattern_radius;
+            roi.height = roi.height + 2*pattern_radius;
+
+            //trim
+            if(roi.x < 0)
+            {
+                int diff_x = -roi.x;
+                roi.x = 0;
+                roi.width = roi.width - diff_x;
+            }
+            if(roi.y < 0)
+            {
+                int diff_y = -roi.y;
+                roi.y = 0;
+                roi.height = roi.height - diff_y;
+            }
+            if((unsigned int)(roi.x + roi.width) > img_width)
+            {
+                int diff_width = img_width - (roi.x + roi.width);
+                roi.width = roi.width+diff_width;
+            }
+            if((unsigned int)(roi.y + roi.height) > img_height)
+            {
+                int diff_height = img_height - (roi.y + roi.height);
+                roi.height = roi.height+diff_height;
+            }
+
+            //assign
+            cv::Mat test_image = image_roi(roi);
+
+            detector_descriptor_ptr_->detect(test_image, keypoints);
+            detector_descriptor_ptr_->compute(test_image, keypoints, descriptors);
+
+
+
+
             cv::Mat target_descriptor; //B(cv::Rect(0,0,vec_length,1));
             target_descriptor = target_descriptors(cv::Rect(0,j,target_descriptors.cols,1));
 
-            matcher_ptr_->match(target_descriptor, descriptors, cv_matches);
-            Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/size_bits;
-            std::cout << "normalized score: " << normalized_score << std::endl;
-            if(normalized_score < 0.8)
+            if(keypoints.size() != 0)
             {
-                std::cout << "not tracked" << std::endl;
+                matcher_ptr_->match(target_descriptor, descriptors, cv_matches);
+                Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/size_bits;
+                std::cout << "normalized score: " << normalized_score << std::endl;
+                if(normalized_score < 0.8)
+                {
+                    std::cout << "not tracked" << std::endl;
+                }
+                else
+                {
+                    std::cout << "tracked" << std::endl;
+                    tracked_keypoints++;
+                    cv::Point point,t_point;
+                    point.x = keypoints[cv_matches[0].trainIdx].pt.x + roi.x;
+                    point.y = keypoints[cv_matches[0].trainIdx].pt.y + roi.y;
+                    t_point.x = target_keypoints[j].pt.x;
+                    t_point.y = target_keypoints[j].pt.y;
+
+                    cv::circle(image_roi, t_point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
+                    cv::circle(image_roi, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
+                    cv::putText(image_roi, std::to_string(j), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+
+                    //introduce in list - tracked point
+//                    cv::KeyPoint tracked_kp = keypoints[cv_matches[0].trainIdx];
+//                    tracked_kp.pt.x = tracked_kp.pt.x + roi.x;
+//                    tracked_kp.pt.y = tracked_kp.pt.y + roi.y;
+//                    current_keypoints.push_back(tracked_kp);
+
+//                    cv::Mat tracked_desc;
+//                    tracked_desc = descriptors(cv::Rect(0,cv_matches[0].trainIdx,target_descriptors.cols,1));
+//                    current_descriptors.push_back(tracked_desc);
+
+                    //introduce in list - target point
+                    current_keypoints.push_back(target_keypoints[j]);
+                    current_descriptors.push_back(target_descriptor);
+                }
             }
             else
-            {
-                std::cout << "tracked" << std::endl;
-                tracked_keypoints++;
-                cv::Point point,t_point;
-                point.x = keypoints[cv_matches[0].trainIdx].pt.x;
-                point.y = keypoints[cv_matches[0].trainIdx].pt.y;
-                t_point.x = target_keypoints[j].pt.x;
-                t_point.y = target_keypoints[j].pt.y;
-
-                cv::circle(image_roi, t_point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
-                cv::circle(image_roi, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
-                cv::putText(image_roi, std::to_string(j), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
-            }
+                std::cout << "not tracked" << std::endl;
 
         }
 
@@ -147,12 +215,21 @@ int main(int argc, char** argv)
         std::cout << "percentage: " << ((float)((float)tracked_keypoints/(float)target_keypoints.size()))*100 << "%" << std::endl;
 
 
+        if(tracked_keypoints == 0)
+        {
+            detector_descriptor_ptr_->detect(image_roi_, target_keypoints);
+            detector_descriptor_ptr_->compute(image_roi_, target_keypoints, target_descriptors);
+            std::cout << "numbre of new keypoints to be tracked: " << target_keypoints.size() << std::endl;
+        }
+        else
+        {
+            target_keypoints = current_keypoints;
+            target_descriptors = current_descriptors;
+            current_keypoints.clear();
+        }
+
         cv::imshow("Feature tracker", image_roi);
         cv::waitKey(0);
-
-
-        target_keypoints = keypoints;
-        target_descriptors = descriptors;
 
         f++;
         capture >> frame[f % buffer_size];
