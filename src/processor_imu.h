@@ -512,8 +512,8 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vect
     // propagate da_b
     for(int i=0; i<6; i++){
         //need to reset stuff here
-        bias_acc_ = Eigen::Vector3s::Zero();
-        bias_gyro_ = Eigen::Vector3s::Zero();
+        acc_bias_ = Eigen::Vector3s::Zero();
+        gyro_bias_ = Eigen::Vector3s::Zero();
         dDp_dab_.setZero();
         dDv_dab_.setZero();
         dDp_dwb_.setZero();
