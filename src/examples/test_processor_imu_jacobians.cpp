@@ -86,11 +86,11 @@ int main(int argc, char** argv)
      */
 
      for(int i=0;i<3;i++){
-         dDp_dab.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect(i+1).head(3) - bias_jac.delta_preint_vect(0).head(3))/ddelta_bias;
-         dDv_dab.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect(i+1).segment(3,3) - bias_jac.delta_preint_vect(0).segment(3,3))/ddelta_bias;
+         dDp_dab.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+1).head(3) - bias_jac.delta_preint_vect_(0).head(3))/ddelta_bias;
+         dDv_dab.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+1).segment(3,3) - bias_jac.delta_preint_vect_(0).segment(3,3))/ddelta_bias;
 
-         dDp_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect(i+3).head(3) - bias_jac.delta_preint_vect(0).head(3))/ddelta_bias;
-         dDv_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect(i+3).segment(3,3) - bias_jac.delta_preint_vect(0).segment(3,3))/ddelta_bias;
+         dDp_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+3).head(3) - bias_jac.delta_preint_vect_(0).head(3))/ddelta_bias;
+         dDv_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+3).segment(3,3) - bias_jac.delta_preint_vect_(0).segment(3,3))/ddelta_bias;
      }
 
      /*
@@ -169,33 +169,33 @@ int main(int argc, char** argv)
     /*              Numerical method to check jacobians wrt noise
 
                                                             dDp_dP = [dDp_dPx, dDp_dPy, dDp_dPz]
-    dDp_dPx = ((p + dPx) - p)/dPx = Id
-    dDp_dPy = ((p + dPy) - p)/dPy = Id
-    dDp_dPz = ((p + dPz) - p)/dPz = Id
+    dDp_dPx = ((P + dPx) - P)/dPx = Id
+    dDp_dPy = ((P + dPy) - P)/dPy = Id
+    dDp_dPz = ((P + dPz) - P)/dPz = Id
 
                                                             dDp_dV = [dDp_dVx, dDp_dVy, dDp_dVz]
-    dDp_dVx = ((v + dVx)*dt - v*dt)/dVx = Id*dt
-    dDp_dVy = ((v + dVy)*dt - v*dt)/dVy = Id*dt
-    dDp_dVz = ((v + dVz)*dt - v*dt)/dVz = Id*dt
+    dDp_dVx = ((V + dVx)*dt - V*dt)/dVx = Id*dt
+    dDp_dVy = ((V + dVy)*dt - V*dt)/dVy = Id*dt
+    dDp_dVz = ((V + dVz)*dt - V*dt)/dVz = Id*dt
 
                                                             dDp_dO = [dDp_dOx, dDp_dOy, dDp_dOz]
-    dDp_dOx = (( dR(Theta + dthetax)*dp ) - ( dR(Theta)*dp ))/dthetax 
-            = (( dR(Theta) * exp(dthetax,0,0)*dp ) - ( dR(Theta)*dp ))/dthetax
-    dDp_dOy = (( dR(Theta) * exp(0,dthetay,0)*dp ) - ( dR(Theta)*dp ))/dthetay
-    dDp_dOz = (( dR(Theta) * exp(0,0,dthetaz)*dp ) - ( dR(Theta)*dp ))/dthetaz
+    dDp_dOx = (( dR(Theta + dThetax)*dp ) - ( dR(Theta)*dp ))/dThetax 
+            = (( dR(Theta) * exp(dThetax,0,0)*dp ) - ( dR(Theta)*dp ))/dThetax
+    dDp_dOy = (( dR(Theta) * exp(0,dThetay,0)*dp ) - ( dR(Theta)*dp ))/dThetay
+    dDp_dOz = (( dR(Theta) * exp(0,0,dThetaz)*dp ) - ( dR(Theta)*dp ))/dThetaz
 
                                                             dDv_dP = [dDv_dPx, dDv_dPy, dDv_dPz] = [0, 0, 0]
 
                                                             dDv_dV = [dDv_dVx, dDv_dVy, dDv_dVz]
-    dDv_dVx = ((v + dVx) - p)/dVx = Id
-    dDv_dVy = ((v + dVy) - p)/dVy = Id
-    dDv_dVz = ((v + dVz) - p)/dVz = Id
+    dDv_dVx = ((V + dVx) - V)/dVx = Id
+    dDv_dVy = ((V + dVy) - V)/dVy = Id
+    dDv_dVz = ((V + dVz) - V)/dVz = Id
     
                                                             dDv_dO = [dDv_dOx, dDv_dOy, dDv_dOz]
-    dDv_dOx = (( dR(Theta + dthetax)*dv ) - ( dR(Theta)*dv ))/dthetax 
-            = (( dR(Theta) * exp(dthetax,0,0)*dv ) - ( dR(Theta)*dv ))/dthetax
-    dDv_dOx = (( dR(Theta) * exp(0,dthetay,0)*dv ) - ( dR(Theta)*dv ))/dthetay
-    dDv_dOz = (( dR(Theta) * exp(0,0,dthetaz)*dv ) - ( dR(Theta)*dv ))/dthetaz
+    dDv_dOx = (( dR(Theta + dThetax)*dv ) - ( dR(Theta)*dv ))/dThetax 
+            = (( dR(Theta) * exp(dThetax,0,0)*dv ) - ( dR(Theta)*dv ))/dThetax
+    dDv_dOx = (( dR(Theta) * exp(0,dThetay,0)*dv ) - ( dR(Theta)*dv ))/dThetay
+    dDv_dOz = (( dR(Theta) * exp(0,0,dThetaz)*dv ) - ( dR(Theta)*dv ))/dThetaz
 
                                                             dDp_dp = [dDp_dpx, dDp_dpy, dDp_dpz]
     dDp_dpx = ( dR*(p + dpx) - dR*(p))/dpx
@@ -223,12 +223,27 @@ int main(int argc, char** argv)
             = log( dR(Theta).transpose() * dR(Theta)*exp(dThetax,0,0) )/dThetax = Idx
     dDo_dOy = log( dR(Theta).transpose() * dR(Theta)*exp(0,dThetay,0) )/dThetay = Idy
     dDo_dOz = log( dR(Theta).transpose() * dR(Theta)*exp(0,0,dThetaz) )/dThetaz = Idz
+                                                            
+                                                            //other solution to investigate
+    dDo_dOx = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta+dThetax) * dr(theta) )/dThetax
+            = log( (dR(Theta) * dr(theta)).transpose() * (dR(Theta)*exp(dThetax,0,0)) * dr(theta) )/dThetax
+            = log( (_Delta * _delta).transpose() * (_Delta_noisy * _delta))
+    dDo_dOy = log( (dR(Theta) * dr(theta)).transpose() * (dR(Theta)*exp(0,dThetay,0)) * dr(theta) )/dThetay
+    dDo_dOz = log( (dR(Theta) * dr(theta)).transpose() * (dR(Theta)*exp(0,0,dThetaz)) * dr(theta) )/dThetaz
 
                                                             dDo_do = [dDo_dox, dDo_doy, dDo_doz]
     dDo_dox = log( dR(Theta+dThetax).transpose() * dR(Theta) )/dThetax
             = log( (dR(Theta)*exp(dThetax,0,0)).transpose() * dR(Theta) )/dThetax
     dDo_doy = log( (dR(Theta)*exp(0,dThetay,0)).transpose() * dR(Theta) )/dThetay
     dDo_doz = log( (dR(Theta)*exp(0,0,dThetaz)).transpose() * dR(Theta) )/dThetaz
+
+                                                            //other solution to investigate
+    dDo_dOx = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * dr(theta+dthetax) )/dthetax
+            = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(dthetax,0,0)) )/dthetax
+            = log( (_Delta * _delta).transpose() * (_Delta_noisy * _delta))
+    dDo_dOy = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,dthetay,0)) )/dthetay
+    dDo_dOz = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,0,dthetaz)) )/dthetaz
+
      */
     delete wolf_problem_ptr_;
 
