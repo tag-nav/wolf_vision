@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 
     std::cout << "TEST: " << wolf_path << "/src/examples/camera_params.yaml" << std::endl;
 
-    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
+    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params_ueye.yaml");
     SensorCamera* camera_ptr_ = (SensorCamera*)sensor_ptr;
 
 

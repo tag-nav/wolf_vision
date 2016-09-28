@@ -279,12 +279,20 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
     point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
 
-    Scalar depth = 2; // arbitrary value
+    Scalar distance = 2; // arbitrary value
     Eigen::Vector4s vec_homogeneous;
 
     point2D = pinhole::depixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
     point2D = pinhole::undistortPoint(((SensorCamera*)(this->getSensorPtr()))->getCorrectionVector(),point2D);
-    vec_homogeneous = {point2D(0)*(1/depth),point2D(1)*(1/depth),1/depth,1/depth};
+
+    Eigen::Vector3s point3D;
+    point3D.head(2) = point2D;
+    point3D(2) = 1;
+
+    point3D.normalize();
+
+
+    vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
 //    std::cout << "vec_homogeneous_2 x: " << vec_homogeneous(0) << "; y: " << vec_homogeneous(1) << "; z: " << vec_homogeneous(2)
 //              << "; inv_dist: " << vec_homogeneous(3) << std::endl;
 
