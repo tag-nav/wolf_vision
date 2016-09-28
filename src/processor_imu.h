@@ -7,32 +7,56 @@
 
 
 namespace wolf {
-    struct IMU_jac_deltas{ //struct used for checking jacobians by finite difference
+    struct IMU_jac_bias{ //struct used for checking jacobians by finite difference
 
-        IMU_jac_deltas(Eigen::Matrix<Eigen::Matrix3s,7,1> _dDp_dab_vect, Eigen::Matrix<Eigen::Matrix3s,7,1> _dDv_dab_vect, Eigen::Matrix<Eigen::Matrix3s,7,1> _dDp_dwb_vect, 
+        IMU_jac_bias(Eigen::Matrix<Eigen::Matrix3s,7,1> _dDp_dab_vect, Eigen::Matrix<Eigen::Matrix3s,7,1> _dDv_dab_vect, Eigen::Matrix<Eigen::Matrix3s,7,1> _dDp_dwb_vect, 
                        Eigen::Matrix<Eigen::Matrix3s,7,1> _dDv_dwb_vect, Eigen::Matrix<Eigen::Matrix3s,7,1> _dDq_dwb_vect, 
-                       Eigen::Matrix<Eigen::VectorXs,7,1> _delta_preint_plus_delta_vect, Eigen::Matrix<Eigen::VectorXs,7,1> _delta_preint_vect ) : dDp_dab_vect(_dDp_dab_vect), 
-                       dDv_dab_vect(_dDv_dab_vect), dDp_dwb_vect(_dDp_dwb_vect), dDv_dwb_vect(_dDv_dwb_vect), dDq_dwb_vect(_dDq_dwb_vect), 
-                       delta_preint_plus_delta_vect(_delta_preint_plus_delta_vect), delta_preint_vect(_delta_preint_vect) {}
+                       Eigen::Matrix<Eigen::VectorXs,7,1> _delta_preint_plus_delta_vect, Eigen::Matrix<Eigen::VectorXs,7,1> _delta_preint_vect ) : dDp_dab_vect_(_dDp_dab_vect), 
+                       dDv_dab_vect_(_dDv_dab_vect), dDp_dwb_vect_(_dDp_dwb_vect), dDv_dwb_vect_(_dDv_dwb_vect), dDq_dwb_vect_(_dDq_dwb_vect), 
+                       delta_preint_plus_delta_vect_(_delta_preint_plus_delta_vect), delta_preint_vect_(_delta_preint_vect) {}
 
         public:
             /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
               Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
-              place 1 : added da_bx in data
-              place 2 : added da_by in data
-              place 3 : added da_bz in data
-              place 4 : added dw_bx in data
-              place 5 : added dw_by in data
-              place 6 : added dw_bz in data
+              place 1 : added da_bx in data         place 2 : added da_by in data       place 3 : added da_bz in data
+              place 4 : added dw_bx in data         place 5 : added dw_by in data       place 6 : added dw_bz in data
+
+              delta_preint_plus_delta_vect_ and delta_preint_vect_ set to size 17 toi avoid use of dynamic vectors.
+              7 first elements are related to bias noise
+              10 last elements are related to noise in deltas and Deltas
              */
-            Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_plus_delta_vect;
-            Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_vect;
-            Eigen::Matrix<Eigen::Matrix3s,7,1> dDp_dab_vect;
-            Eigen::Matrix<Eigen::Matrix3s,7,1> dDv_dab_vect;
-            Eigen::Matrix<Eigen::Matrix3s,7,1> dDp_dwb_vect;
-            Eigen::Matrix<Eigen::Matrix3s,7,1> dDv_dwb_vect;
-            Eigen::Matrix<Eigen::Matrix3s,7,1> dDq_dwb_vect;
+            Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_plus_delta_vect_; // D2 in D2 = D1 + d
+            Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_vect_;            // D1 in D2 = D1 + d
+            Eigen::Matrix<Eigen::Matrix3s,7,1> dDp_dab_vect_;
+            Eigen::Matrix<Eigen::Matrix3s,7,1> dDv_dab_vect_;
+            Eigen::Matrix<Eigen::Matrix3s,7,1> dDp_dwb_vect_;
+            Eigen::Matrix<Eigen::Matrix3s,7,1> dDv_dwb_vect_;
+            Eigen::Matrix<Eigen::Matrix3s,7,1> dDq_dwb_vect_;
     };
+
+    struct IMU_jac_deltas{
+
+        IMU_jac_deltas(Eigen::VectorXs _Delta0, Eigen::VectorXs _delta0, Eigen::Matrix<Eigen::VectorXs,10,1> _Delta_noisy_vect, Eigen::Matrix<Eigen::VectorXs,10,1> _Delta_noisy_vect, 
+                        Eigen::Matrix<Eigen::Matrix3s,10,1> _jacobian_delta_preint_vect, Eigen::Matrix<Eigen::Matrix3s,10,1> _jacobian_delta_vect :
+                        Delta0_(_Delta0), delta0_(_delta0), Delta_noisy_vect_(_Delta_noisy_vect), delta_noisy_vect_(_delta_noisy_vect)
+                       jacobian_delta_preint_vect_(_jacobian_delta_preint_vect), jacobian_delta_vect_(_jacobian_delta_vect) {}
+        
+        public:
+            /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
+              Elements at place 0 are those not affected by the bias noise that we add (Delta_noise, delta_noise -> dPx, dpx, dVx, dvx,..., dOz,doz).
+                            jacobian_delta_preint_vect_                                                            jacobian_delta_vect_
+                            0: + 0,                                                                                 0: + 0
+                            1: +dPx, 2: +dPy, 3: +dPz                                                               1: + dpx, 2: +dpy, 3: +dpz
+                            4: +dVx, 5: +dVy, 6: +dVz                                                               4: + dvx, 5: +dvy, 6: +dvz
+                            7: +dOx, 8: +dOy, 9: +dOz                                                               7: + dox, 8: +doy, 9: +doz
+             */
+            Eigen::VectorXs Delta0_; //this will contain the Delta not affected by noise
+            Eigen::VectorXs delta0_; //this will contain the delta not affected by noise
+            Eigen::Matrix<Eigen::VectorXs,10,1> Delta_noisy_vect_; //this will contain the Deltas affected by noises
+            Eigen::Matrix<Eigen::VectorXs,10,1> delta_noisy_vect_; //this will contain the deltas affected by noises
+            Eigen::Matrix<Eigen::Matrix3s,11,1> jacobian_delta_preint_vect_;
+            Eigen::Matrix<Eigen::Matrix3s,11,1> jacobian_delta_vect_;
+    }
 
 class ProcessorIMU : public ProcessorMotion{
     public:

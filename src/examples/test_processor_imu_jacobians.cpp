@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     ProcessorIMU processor_imu;
     processor_imu.setOrigin(x0, t);
     wolf::Scalar ddelta_bias = 0.0001;
-    struct IMU_jac_deltas bias_jac = processor_imu.finite_diff_ab(0.001, data_, ddelta_bias);
+    struct IMU_jac_bias bias_jac = processor_imu.finite_diff_ab(0.001, data_, ddelta_bias);
 
     /* IMU_jac_deltas struct form :
     contains vectors of size 7 :
