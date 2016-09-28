@@ -7,7 +7,7 @@ namespace wolf {
 unsigned int FeatureBase::feature_id_count_ = 0;
 
 FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, unsigned int _dim_measurement) :
-    NodeConstrained(MID, "FEATURE", _type),
+    NodeBase("FEATURE", _type),
     feature_id_(++feature_id_count_),
     type_id_(_tp),
     measurement_(_dim_measurement)
@@ -16,7 +16,7 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, unsigned int
 }
 
 FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
-	NodeConstrained(MID, "FEATURE", _type),
+	NodeBase("FEATURE", _type),
     feature_id_(++feature_id_count_),
     type_id_(_tp),
 	measurement_(_measurement),
@@ -33,10 +33,10 @@ FeatureBase::~FeatureBase()
 	//std::cout << "deleting FeatureBase " << nodeId() << std::endl;
     is_deleting_ = true;
 
-    while (!getConstrainedByListPtr()->empty())
+    while (!constrained_by_list_.empty())
     {
         //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-        getConstrainedByListPtr()->front()->destruct();
+        constrained_by_list_.front()->destruct();
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
@@ -44,7 +44,9 @@ FeatureBase::~FeatureBase()
 
 ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
 {
-    addDownNode(_co_ptr);
+    constrained_by_list_.push_back(_co_ptr);
+    _co_ptr->setFeaturePtr(this);
+//    addDownNode(_co_ptr);
     // add constraint to be added in solver
     if (getProblem() != nullptr)
         getProblem()->addConstraintPtr(_co_ptr);
@@ -55,12 +57,14 @@ ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
 
 FrameBase* FeatureBase::getFramePtr() const
 {
-    return upperNodePtr()->upperNodePtr();
+    return capture_ptr_->getFramePtr();
+//    return upperNodePtr()->upperNodePtr();
 }
 
 ConstraintBaseList* FeatureBase::getConstraintListPtr()
 {
-    return getDownNodeListPtr();
+    return & constrained_by_list_;
+//    return getDownNodeListPtr();
 }
 
 void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)

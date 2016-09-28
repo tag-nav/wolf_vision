@@ -4,6 +4,7 @@
 
 //Wolf includes
 #include "constraint_sparse.h"
+#include "frame_base.h"
 
 
 namespace wolf {

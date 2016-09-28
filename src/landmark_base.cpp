@@ -11,7 +11,7 @@ namespace wolf {
 unsigned int LandmarkBase::landmark_id_count_ = 0;
 
 LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr) :
-            NodeConstrained(MID, "LANDMARK", _type),
+            NodeBase("LANDMARK", _type),
             landmark_id_(++landmark_id_count_),
             type_id_(_tp),
             status_(LANDMARK_CANDIDATE),
@@ -41,10 +41,10 @@ LandmarkBase::~LandmarkBase()
     }
 	//std::cout << "states deleted" << std::endl;
 
-	while (!getConstrainedByListPtr()->empty())
+	while (!constrained_by_list_.empty())
 	{
 	    //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-	    getConstrainedByListPtr()->front()->destruct();
+	    constrained_by_list_.front()->destruct();
         //std::cout << "deleted " << std::endl;
 	}
 	//std::cout << "constraints deleted" << std::endl;

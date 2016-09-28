@@ -9,6 +9,7 @@ class NodeTerminus;
 
 //Wolf includes
 #include "wolf.h"
+#include "node_base.h"
 #include "problem.h"
 
 namespace wolf {
@@ -79,6 +80,12 @@ class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
         ProcessorType type_id_;
         Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
 };
+
+}
+
+#include "constraint_base.h"
+
+namespace wolf {
 
 inline bool ProcessorBase::isMotion()
 {

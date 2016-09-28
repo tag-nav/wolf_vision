@@ -9,7 +9,7 @@ class Problem;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
+//#include "node_linked.h"
 
 namespace wolf {
 
@@ -29,6 +29,10 @@ class HardwareBase //: public NodeLinked<Problem, SensorBase>
          *
          **/
         virtual ~HardwareBase();
+        void destruct()
+        {
+            // TODO fill code
+        }
 
         virtual SensorBase* addSensor(SensorBase* _sensor_ptr);
 

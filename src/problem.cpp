@@ -25,7 +25,7 @@ std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); ret
 
 
 Problem::Problem(FrameStructure _frame_structure) :
-        NodeBase("PROBLEM", ""), //
+//        NodeBase("PROBLEM", ""), //
         location_(TOP),
         hardware_ptr_(new HardwareBase),
         trajectory_ptr_(new TrajectoryBase(_frame_structure)),
@@ -416,7 +416,8 @@ MapBase* Problem::addMap(MapBase* _map_ptr)
 {
     // TODO: not necessary but update map maybe..
     map_ptr_ = _map_ptr;
-    map_ptr_->linkToUpperNode(this);
+    map_ptr_->setProblem(this);
+//    map_ptr_->linkToUpperNode(this);
 
     return map_ptr_;
 }
@@ -424,7 +425,8 @@ MapBase* Problem::addMap(MapBase* _map_ptr)
 TrajectoryBase* Problem::addTrajectory(TrajectoryBase* _trajectory_ptr)
 {
     trajectory_ptr_ = _trajectory_ptr;
-    trajectory_ptr_->linkToUpperNode(this);
+    trajectory_ptr_->setProblem(this);
+//    trajectory_ptr_->linkToUpperNode(this);
 
     return trajectory_ptr_;
 }

@@ -7,16 +7,19 @@ class HardwareBase;
 class TrajectoryBase;
 class MapBase;
 class ProcessorMotion;
+class StateBlock;
 class TimeStamp;
 struct IntrinsicsBase;
 struct ProcessorParamsBase;
 }
 
 //wolf includes
-#include "node_base.h"
+#include "wolf.h"
+//#include "node_base.h"
 
 // std includes
 #include <utility> // pair
+#include <map>
 
 
 namespace wolf {

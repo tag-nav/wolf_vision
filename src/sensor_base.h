@@ -10,6 +10,7 @@ class StateBlock;
 
 //Wolf includes
 #include "wolf.h"
+#include "node_base.h"
 
 //std includes
 

@@ -11,7 +11,8 @@ class SensorBase;
 //Wolf includes
 #include "wolf.h"
 #include "time_stamp.h"
-#include "node_linked.h"
+#include "node_base.h"
+//#include "node_linked.h"
 
 //std includes
 //
@@ -56,16 +57,24 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
          **/
         virtual ~CaptureBase();
 
+        void destruct()
+        {
+            // TODO fill code
+        }
+
         unsigned int id();
 
         /** \brief Adds a Feature to the down node list
          **/
         FeatureBase* addFeature(FeatureBase* _ft_ptr);
+        void addFeatureList(FeatureBaseList& _new_ft_list);
+
 
         /** \brief Gets Frame pointer
          **/
         FrameBase* getFramePtr() const;
         void setFramePtr(const FrameBasePtr _frm_ptr);
+        void unlinkFromFrame(){frame_ptr_ = nullptr;}
 
         /** \brief Gets a pointer to feature list
          **/
@@ -98,6 +107,12 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
 
 };
 
+}
+
+#include "feature_base.h"
+
+namespace wolf{
+
 inline unsigned int CaptureBase::id()
 {
     return capture_id_;
@@ -106,13 +121,16 @@ inline unsigned int CaptureBase::id()
 inline FeatureBase* CaptureBase::addFeature(FeatureBase* _ft_ptr)
 {
     //std::cout << "Adding feature" << std::endl;
-    addDownNode(_ft_ptr);
+    feature_list_.push_back(_ft_ptr);
+    _ft_ptr->setCapturePtr(this);
+//    addDownNode(_ft_ptr);
     return _ft_ptr;
 }
 
 inline FrameBase* CaptureBase::getFramePtr() const
 {
-    return upperNodePtr();
+    return frame_ptr_;
+//    return upperNodePtr();
 }
 
 inline void CaptureBase::setFramePtr(const FrameBasePtr _frm_ptr)
@@ -122,7 +140,8 @@ inline void CaptureBase::setFramePtr(const FrameBasePtr _frm_ptr)
 
 inline FeatureBaseList* CaptureBase::getFeatureListPtr()
 {
-    return getDownNodeListPtr();
+    return & feature_list_;
+//    return getDownNodeListPtr();
 }
 
 inline TimeStamp CaptureBase::getTimeStamp() const

@@ -10,8 +10,10 @@ class StateBlock;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
-#include "node_constrained.h"
+#include "node_base.h"
+#include "time_stamp.h"
+//#include "node_linked.h"
+//#include "node_constrained.h"
 
 //std includes
 
@@ -36,6 +38,8 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
 {
     private:
         ProblemPtr problem_ptr_;
+        MapBasePtr map_ptr_;
+        ConstraintBaseList constrained_by_list_;
         static unsigned int landmark_id_count_;
         
     protected:
@@ -65,6 +69,11 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
          *
          **/
         virtual ~LandmarkBase();
+
+        void destruct()
+        {
+            // TODO fill code here
+        }
 
         /** \brief Returns landmark_id_, the landmark unique id
          **/
@@ -130,6 +139,21 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
 
         virtual YAML::Node saveToYaml() const;
 
+        void addConstrainedBy(ConstraintBase* _ctr_ptr)
+        {
+            constrained_by_list_.push_back(_ctr_ptr);
+        }
+        unsigned int getHits() const
+        {
+            return constrained_by_list_.size();
+        }
+        ConstraintBaseList* getConstrainedByListPtr()
+        {
+            return &constrained_by_list_;
+        }
+
+
+        void setMapPtr(MapBasePtr _map_ptr){map_ptr_ = _map_ptr;}
         Problem* getProblem(){return problem_ptr_;}
         void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
 
@@ -162,8 +186,10 @@ inline void LandmarkBase::unfix()
 
 inline void LandmarkBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
 {
-    NodeConstrained::removeConstrainedBy(_ctr_ptr);
-    if (getConstrainedByListPtr()->empty())
+    constrained_by_list_.remove(_ctr_ptr);
+//    NodeConstrained::removeConstrainedBy(_ctr_ptr);
+    if (constrained_by_list_.empty())
+//    if (getConstrainedByListPtr()->empty())
         this->destruct();
 }
 

@@ -10,7 +10,7 @@ namespace wolf {
 unsigned int FrameBase::frame_id_count_ = 0;
 
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
-            NodeConstrained(MID, "FRAME", "BASE"),
+            NodeBase("FRAME", "BASE"),
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
             time_stamp_(_ts),
@@ -23,7 +23,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
 }
 
 FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
-            NodeConstrained(MID, "FRAME", "BASE"),
+            NodeBase("FRAME", "BASE"),
             frame_id_(++frame_id_count_),
             type_id_(_tp),
             time_stamp_(_ts),
@@ -62,11 +62,12 @@ FrameBase::~FrameBase()
 
     //std::cout << "states deleted" << std::endl;
 
-
-    while (!getConstrainedByListPtr()->empty())
+    while (!constrained_by_list_.empty())
+//    while (!getConstrainedByListPtr()->empty())
     {
         //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-        getConstrainedByListPtr()->front()->destruct();
+        constrained_by_list_.front()->destruct();
+//        getConstrainedByListPtr()->front()->destruct();
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
@@ -162,7 +163,7 @@ void FrameBase::getState(Eigen::VectorXs& state) const
     }
 }
 
-CaptureBase* FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
+CaptureBasePtr FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
 {
     for (auto capture_ptr : *getCaptureListPtr())
         if (capture_ptr->getSensorPtr() == _sensor_ptr)
@@ -224,6 +225,12 @@ FrameBase* FrameBase::getNextFrame() const
     }
     std::cout << "next frame not found!" << std::endl;
     return nullptr;
+}
+
+void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
+{
+    _cap_ptr->unlinkFromFrame();
+    capture_list_.remove(_cap_ptr);
 }
 
 void FrameBase::setStatus(StateStatus _st)

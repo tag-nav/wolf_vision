@@ -1,11 +1,13 @@
 #include "processor_base.h"
+#include "capture_base.h"
+#include "frame_base.h"
 
 namespace wolf {
 
 unsigned int ProcessorBase::processor_id_count_ = 0;
 
 ProcessorBase::ProcessorBase(ProcessorType _tp, const std::string& _type, const Scalar& _time_tolerance) :
-        NodeLinked(MID, "PROCESSOR"),
+        NodeBase("PROCESSOR"),
         processor_id_(++processor_id_count_),
         type_id_(_tp),
         time_tolerance_(_time_tolerance)

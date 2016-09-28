@@ -12,6 +12,7 @@ class StateBlock;
 //Wolf includes
 #include "wolf.h"
 #include "time_stamp.h"
+#include "node_base.h"
 
 //std includes
 
@@ -24,6 +25,7 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
         ProblemPtr problem_ptr_;
         TrajectoryBasePtr trajectory_ptr_;
         CaptureBaseList capture_list_;
+        ConstraintBaseList constrained_by_list_;
 
         static unsigned int frame_id_count_;
     protected:
@@ -64,6 +66,10 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
          * 
          **/
         virtual ~FrameBase();
+        void destruct()
+        {
+            // TODO fill code
+        }
 
         unsigned int id();
 
@@ -107,18 +113,39 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
 
         CaptureBaseList* getCaptureListPtr();
         CaptureBasePtr addCapture(CaptureBase* _capt_ptr);
-        void removeCapture(CaptureBaseIter& _capt_iter);
-        void removeCapture(CaptureBasePtr _capt_ptr);
-        CaptureBasePtr hasCaptureOf(const SensorBasePtr _sensor_ptr);
+        void removeCapture(const CaptureBaseIter& _capt_iter);
+        void removeCapture(const CaptureBasePtr _capt_ptr);
+        CaptureBasePtr hasCaptureOf(const SensorBase* _sensor_ptr);
+        void unlinkCapture(CaptureBasePtr _cap_ptr);
 
         void getConstraintList(ConstraintBaseList & _ctr_list);
+
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+
+        virtual void addConstrainedBy(ConstraintBase* _ctr_ptr)
+        {
+            constrained_by_list_.push_back(_ctr_ptr);
+        }
+        virtual void removeConstrainedBy(ConstraintBase* _ctr_ptr)
+        {
+            constrained_by_list_.remove(_ctr_ptr);
+        }
+        unsigned int getHits() const
+        {
+            return constrained_by_list_.size();
+        }
+        ConstraintBaseList* getConstrainedByListPtr()
+        {
+            return &constrained_by_list_;
+        }
+
+
+
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
-
-        ProblemPtr getProblem(){return problem_ptr_;}
-        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 
 
@@ -219,16 +246,20 @@ inline CaptureBase* FrameBase::addCapture(CaptureBase* _capt_ptr)
     return _capt_ptr;
 }
 
-inline void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
+inline void FrameBase::removeCapture(const CaptureBaseIter& _capt_iter)
 {
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
-    removeDownNode(_capt_iter);
+    capture_list_.erase(_capt_iter);
+    delete *_capt_iter;
+//    removeDownNode(_capt_iter);
 }
 
-inline void FrameBase::removeCapture(CaptureBase* _capt_ptr)
+inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
 {
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
-    removeDownNode(_capt_ptr);
+    capture_list_.remove(_capt_ptr);
+    delete _capt_ptr;
+//    removeDownNode(_capt_ptr);
 }
 
 inline StateStatus FrameBase::getStatus() const

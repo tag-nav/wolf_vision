@@ -8,7 +8,7 @@ namespace wolf {
 unsigned int ConstraintBase::constraint_id_count_ = 0;
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status) :
-    NodeLinked(BOTTOM, "CONSTRAINT"),
+    NodeBase("CONSTRAINT", "Base"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_ABSOLUTE),
@@ -23,7 +23,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
 
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function, ConstraintStatus _status) :
-    NodeLinked(BOTTOM, "CONSTRAINT"),
+    NodeBase("CONSTRAINT", "Base"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_FRAME),
@@ -39,7 +39,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, bool _
 
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, bool _apply_loss_function, ConstraintStatus _status) :
-    NodeLinked(BOTTOM, "CONSTRAINT"),
+    NodeBase("CONSTRAINT"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_FEATURE),
@@ -55,7 +55,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, bo
 
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status) :
-    NodeLinked(BOTTOM, "CONSTRAINT"),
+    NodeBase("CONSTRAINT"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_LANDMARK),
@@ -108,7 +108,8 @@ const Eigen::MatrixXs& ConstraintBase::getMeasurementSquareRootInformation() con
 
 CaptureBase* ConstraintBase::getCapturePtr() const
 {
-	return upperNodePtr()->upperNodePtr();
+    return getFeaturePtr()->getCapturePtr();
+//	return upperNodePtr()->upperNodePtr();
 }
 
 void ConstraintBase::setStatus(ConstraintStatus _status)

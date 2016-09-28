@@ -9,8 +9,9 @@ class ConstraintBase;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
-#include "node_constrained.h"
+#include "node_base.h"
+//#include "node_linked.h"
+//#include "node_constrained.h"
 
 //std includes
 
@@ -27,6 +28,9 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
 {
     private:
         ProblemPtr problem_ptr_;
+        CaptureBasePtr capture_ptr_;
+        ConstraintBaseList constrained_by_list_;
+
         static unsigned int feature_id_count_;
     protected:
         unsigned int feature_id_;
@@ -56,6 +60,10 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          */
         virtual ~FeatureBase();
+        void destruct()
+        {
+            // TODO fill code
+        }
 
         unsigned int id();
         unsigned int trackId(){return track_id_;}
@@ -71,6 +79,7 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
         /** \brief Gets the capture pointer
          */
         CaptureBase* getCapturePtr() const;
+        void setCapturePtr(CaptureBase* _cap_ptr){capture_ptr_ = _cap_ptr;}
 
         /** \brief Gets the frame pointer
          */
@@ -102,6 +111,23 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
         
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         
+        virtual void addConstrainedBy(ConstraintBase* _ctr_ptr)
+        {
+            constrained_by_list_.push_back(_ctr_ptr);
+        }
+        virtual void removeConstrainedBy(ConstraintBase* _ctr_ptr)
+        {
+            constrained_by_list_.remove(_ctr_ptr);
+        }
+        unsigned int getHits() const
+        {
+            return constrained_by_list_.size();
+        }
+        ConstraintBaseList* getConstrainedByListPtr()
+        {
+            return &constrained_by_list_;
+        }
+
         Problem* getProblem(){return problem_ptr_;}
         void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
 
@@ -115,7 +141,8 @@ inline unsigned int FeatureBase::id()
 
 inline CaptureBase* FeatureBase::getCapturePtr() const
 {
-    return upperNodePtr();
+    return capture_ptr_;
+//    return upperNodePtr();
 }
 
 inline Scalar FeatureBase::getMeasurement(unsigned int _ii) const

@@ -39,6 +39,10 @@ class TrajectoryBase //: public NodeBase // NodeLinked<Problem,FrameBase>
          *
          **/        
         virtual ~TrajectoryBase();
+        void destruct()
+        {
+            // TODO fill code
+        }
         
         /** \brief Add a frame to the trajectory
          **/

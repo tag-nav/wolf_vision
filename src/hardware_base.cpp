@@ -1,4 +1,5 @@
 #include "hardware_base.h"
+#include "sensor_base.h"
 
 
 namespace wolf {

@@ -19,10 +19,10 @@ ProcessorTracker::ProcessorTracker(ProcessorType _tp, const std::string& _type, 
 
 ProcessorTracker::~ProcessorTracker()
 {
-    if (last_ptr_ != nullptr && last_ptr_->upperNodePtr() == nullptr)
+    if (last_ptr_ != nullptr && last_ptr_->getFramePtr() == nullptr)
         last_ptr_->destruct();
 
-    if (incoming_ptr_ != nullptr && incoming_ptr_->upperNodePtr() == nullptr)
+    if (incoming_ptr_ != nullptr && incoming_ptr_->getFramePtr() == nullptr)
         incoming_ptr_->destruct();
 
     while (!new_features_last_.empty())
@@ -169,7 +169,7 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& 
 
     // Capture last_ is added to the new keyframe
     FrameBase* last_old_frame = last_ptr_->getFramePtr();
-    last_old_frame->unlinkDownNode(last_ptr_);
+    last_old_frame->unlinkCapture(last_ptr_);
     last_old_frame->destruct();
     _keyframe_ptr->addCapture(last_ptr_);
 

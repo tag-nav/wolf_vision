@@ -9,7 +9,8 @@ class NodeTerminus;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
+#include "node_base.h"
+//#include "node_linked.h"
 
 //std includes
 //
@@ -63,6 +64,11 @@ class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
          **/
         virtual ~ConstraintBase();
 
+        void destruct()
+        {
+            // TODO implement something
+        }
+
         unsigned int id();
 
         /** \brief Returns the constraint type
@@ -96,6 +102,7 @@ class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
         /** \brief Returns a pointer to the feature constrained from
          **/
         FeatureBase* getFeaturePtr() const;
+        void setFeaturePtr(const FeatureBasePtr _ft_ptr){feature_ptr_ = _ft_ptr;}
 
         /** \brief Returns a pointer to its capture
          **/
@@ -142,6 +149,13 @@ class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
 
 };
 
+}
+
+#include "frame_base.h"
+#include "sensor_base.h"
+
+namespace wolf{
+
 inline unsigned int ConstraintBase::id()
 {
     return constraint_id_;
@@ -156,7 +170,8 @@ inline ConstraintType ConstraintBase::getTypeId() const
 
 inline FeatureBase* ConstraintBase::getFeaturePtr() const
 {
-    return upperNodePtr();
+    return feature_ptr_;
+//    return upperNodePtr();
 }
 
 inline ConstraintCategory ConstraintBase::getCategory() const

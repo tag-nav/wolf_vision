@@ -16,10 +16,12 @@ class LandmarkBase;
 namespace wolf {
 
 //class MapBase
-class MapBase : public NodeLinked<Problem,LandmarkBase>
+class MapBase //: public NodeLinked<Problem,LandmarkBase>
 {
     private:
         ProblemPtr problem_ptr_;
+        LandmarkBaseList landmark_list_;
+
     public:
         MapBase();
 
@@ -28,6 +30,10 @@ class MapBase : public NodeLinked<Problem,LandmarkBase>
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          **/        
         ~MapBase();
+        void destruct()
+        {
+            // TODO fill code
+        }
         
         /** \brief Adds a landmark
          *
@@ -58,7 +64,8 @@ class MapBase : public NodeLinked<Problem,LandmarkBase>
 
 inline LandmarkBaseList* MapBase::getLandmarkListPtr()
 {
-    return getDownNodeListPtr();
+    return & landmark_list_;
+//    return getDownNodeListPtr();
 }
 
 } // namespace wolf
