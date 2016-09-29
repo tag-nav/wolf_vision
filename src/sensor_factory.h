@@ -225,6 +225,10 @@ inline std::string Factory<SensorBase,
   return "SensorFactory";
 }
 
+#define WOLF_REGISTER_SENSOR(SensorType, SensorName) \
+  const bool SensorName##Registered = \
+    wolf::SensorFactory::get().registerCreator(SensorType, SensorName::create); \
+
 } /* namespace wolf */
 
 #endif /* SENSOR_FACTORY_H_ */

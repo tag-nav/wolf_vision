@@ -87,7 +87,9 @@ namespace wolf {
 //}
 namespace
 {
-const bool registered_laser = SensorFactory::get().registerCreator("LASER 2D", SensorLaser2D::create);
+//const bool registered_laser = SensorFactory::get().registerCreator("LASER 2D", SensorLaser2D::create);
 //const bool registered_laser_params = IntrinsicsFactory::get().registerCreator("LASER 2D", createIntrinsicsLaser2D);
+
+WOLF_REGISTER_SENSOR("LASER 2D", SensorLaser2D)
 }
 } // namespace wolf
