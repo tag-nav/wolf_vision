@@ -44,7 +44,7 @@ FeatureBase::~FeatureBase()
 
 ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
 {
-    constrained_by_list_.push_back(_co_ptr);
+    constraint_list_.push_back(_co_ptr);
     _co_ptr->setFeaturePtr(this);
 //    addDownNode(_co_ptr);
     // add constraint to be added in solver
@@ -63,7 +63,7 @@ FrameBase* FeatureBase::getFramePtr() const
 
 ConstraintBaseList* FeatureBase::getConstraintListPtr()
 {
-    return & constrained_by_list_;
+    return & constraint_list_;
 //    return getDownNodeListPtr();
 }
 
@@ -71,6 +71,24 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
 	for(auto c_it = getConstraintListPtr()->begin(); c_it != getConstraintListPtr()->end(); ++c_it)
 		_ctr_list.push_back((*c_it));
+}
+
+void FeatureBase::destruct()
+{
+    // TODO implement something
+    if (!is_deleting_)
+    {
+        if (capture_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            capture_ptr_->removeFeature(this);
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
 }
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)

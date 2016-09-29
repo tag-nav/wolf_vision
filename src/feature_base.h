@@ -10,18 +10,12 @@ class ConstraintBase;
 //Wolf includes
 #include "wolf.h"
 #include "node_base.h"
-//#include "node_linked.h"
-//#include "node_constrained.h"
 
 //std includes
 
 
 namespace wolf {
 
-//class FeatureBase;
-//typedef FeatureBase* FeatureBasePtr;
-//typedef std::list<FeatureBase*> FeatureBaseList;
-//typedef FeatureBaseList::iterator FeatureBaseIter;
 
 //class FeatureBase
 class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBase>
@@ -29,6 +23,7 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
     private:
         ProblemPtr problem_ptr_;
         CaptureBasePtr capture_ptr_;
+        ConstraintBaseList constraint_list_;
         ConstraintBaseList constrained_by_list_;
 
         static unsigned int feature_id_count_;
@@ -60,10 +55,7 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          */
         virtual ~FeatureBase();
-        void destruct()
-        {
-            // TODO fill code
-        }
+        void destruct();
 
         unsigned int id();
         unsigned int trackId(){return track_id_;}
@@ -75,6 +67,10 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
         /** \brief Adds a constraint from this feature (as a down node)
          */
         ConstraintBase* addConstraint(ConstraintBase* _co_ptr);
+
+        /** \brief Removes a constraint (as a down node)
+         */
+        void removeConstraint(ConstraintBasePtr _co_ptr);
 
         /** \brief Gets the capture pointer
          */
@@ -134,9 +130,21 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
 
 };
 
+}
+
+#include "constraint_base.h"
+
+namespace wolf{
+
 inline unsigned int FeatureBase::id()
 {
     return feature_id_;
+}
+
+inline void FeatureBase::removeConstraint(ConstraintBasePtr _co_ptr)
+{
+    constraint_list_.remove(_co_ptr);
+    delete _co_ptr;
 }
 
 inline CaptureBase* FeatureBase::getCapturePtr() const

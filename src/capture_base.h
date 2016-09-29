@@ -10,19 +10,13 @@ class SensorBase;
 
 //Wolf includes
 #include "wolf.h"
-#include "time_stamp.h"
 #include "node_base.h"
-//#include "node_linked.h"
+#include "time_stamp.h"
 
 //std includes
 //
 
 namespace wolf{
-
-//class CaptureBase;
-//typedef CaptureBase* CaptureBasePtr;
-//typedef std::list<CaptureBase*> CaptureBaseList;
-//typedef CaptureBaseList::iterator CaptureBaseIter;
 
 //class CaptureBase
 class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
@@ -57,10 +51,7 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
          **/
         virtual ~CaptureBase();
 
-        void destruct()
-        {
-            // TODO fill code
-        }
+        void destruct();
 
         unsigned int id();
 
@@ -68,6 +59,7 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
          **/
         FeatureBase* addFeature(FeatureBase* _ft_ptr);
         void addFeatureList(FeatureBaseList& _new_ft_list);
+        void removeFeature(FeatureBasePtr _ft_ptr);
 
 
         /** \brief Gets Frame pointer
@@ -109,6 +101,7 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
 
 }
 
+#include "frame_base.h"
 #include "feature_base.h"
 
 namespace wolf{

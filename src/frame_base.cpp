@@ -233,6 +233,24 @@ void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
     capture_list_.remove(_cap_ptr);
 }
 
+void FrameBase::destruct()
+{
+    // TODO fill code
+    if (!is_deleting_)
+    {
+        if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            trajectory_ptr_->removeFrame(this);
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
+}
+
 void FrameBase::setStatus(StateStatus _st)
 {
     // TODO: Separate the three fixes and unfixes to the wolfproblem lists

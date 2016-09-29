@@ -37,6 +37,30 @@ void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
     feature_list_.splice(feature_list_.end(), _new_ft_list);
 }
 
+void CaptureBase::destruct()
+{
+    // TODO fill code
+    if (!is_deleting_)
+    {
+        if (frame_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            frame_ptr_->removeCapture(this);
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
+}
+
+void CaptureBase::removeFeature(FeatureBasePtr _ft_ptr)
+{
+    feature_list_.remove(_ft_ptr);
+    delete _ft_ptr;
+}
+
 void CaptureBase::process()
 {
     // Call all processors assigned to the sensor that captured this data

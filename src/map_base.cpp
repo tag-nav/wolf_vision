@@ -18,8 +18,8 @@
 
 namespace wolf {
 
-MapBase::MapBase() //:
-//    NodeLinked(MID, "MAP", "BASE")
+MapBase::MapBase() :
+    NodeBase("MAP")
 {
     //std::cout << "MapBase::MapBase(): " << __LINE__ << std::endl;
 }

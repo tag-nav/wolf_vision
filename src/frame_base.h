@@ -66,10 +66,7 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
          * 
          **/
         virtual ~FrameBase();
-        void destruct()
-        {
-            // TODO fill code
-        }
+        void destruct();
 
         unsigned int id();
 
@@ -139,7 +136,6 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
         {
             return &constrained_by_list_;
         }
-
 
 
 
@@ -238,7 +234,7 @@ inline CaptureBaseList* FrameBase::getCaptureListPtr()
 //    return getDownNodeListPtr();
 }
 
-inline CaptureBase* FrameBase::addCapture(CaptureBase* _capt_ptr)
+inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
 {
     capture_list_.push_back(_capt_ptr);
     _capt_ptr->setFramePtr(this);

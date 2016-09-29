@@ -12,8 +12,6 @@ class StateBlock;
 #include "wolf.h"
 #include "node_base.h"
 #include "time_stamp.h"
-//#include "node_linked.h"
-//#include "node_constrained.h"
 
 //std includes
 
@@ -21,11 +19,6 @@ class StateBlock;
 #include "yaml-cpp/yaml.h"
 
 namespace wolf {
-
-//class LandmarkBase;
-//typedef LandmarkBase* LandmarkBasePtr;
-//typedef std::list<LandmarkBase*> LandmarkBaseList;
-//typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
 
 //class LandmarkParamsBase {}; ///< class for landmark parameters. Derive it to define your parameters.

@@ -10,17 +10,12 @@ class NodeTerminus;
 //Wolf includes
 #include "wolf.h"
 #include "node_base.h"
-//#include "node_linked.h"
 
 //std includes
 //
 
 namespace wolf {
 
-//class ConstraintBase;
-//typedef ConstraintBase* ConstraintBasePtr;
-//typedef std::list<ConstraintBase*> ConstraintBaseList;
-//typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
 //TODO: add a member to indicate how jacobian is computed, called "jacobian_method_"
 //class ConstraintBase
@@ -64,10 +59,7 @@ class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
          **/
         virtual ~ConstraintBase();
 
-        void destruct()
-        {
-            // TODO implement something
-        }
+        void destruct();
 
         unsigned int id();
 
@@ -151,6 +143,7 @@ class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
 
 }
 
+#include "problem.h"
 #include "frame_base.h"
 #include "sensor_base.h"
 
@@ -211,6 +204,24 @@ inline FrameBase* ConstraintBase::getFrameOtherPtr()
 inline FeatureBase* ConstraintBase::getFeatureOtherPtr()
 {
     return feature_ptr_;
+}
+
+inline void ConstraintBase::destruct()
+{
+    // TODO implement something
+    if (!is_deleting_)
+    {
+        if (feature_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            feature_ptr_->removeConstraint(this);
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
 }
 
 inline LandmarkBase* ConstraintBase::getLandmarkOtherPtr()

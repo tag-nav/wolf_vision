@@ -10,13 +10,14 @@ class LandmarkBase;
 
 //Wolf includes
 #include "wolf.h"
+#include "node_base.h"
 
 //std includes
 
 namespace wolf {
 
 //class MapBase
-class MapBase //: public NodeLinked<Problem,LandmarkBase>
+class MapBase : public NodeBase //: public NodeLinked<Problem,LandmarkBase>
 {
     private:
         ProblemPtr problem_ptr_;

@@ -9,12 +9,12 @@ class Problem;
 
 //Wolf includes
 #include "wolf.h"
-//#include "node_linked.h"
+#include "node_base.h"
 
 namespace wolf {
 
 //class HardwareBase
-class HardwareBase //: public NodeLinked<Problem, SensorBase>
+class HardwareBase : public NodeBase //: public NodeLinked<Problem, SensorBase>
 {
     private:
         Problem* problem_ptr_;

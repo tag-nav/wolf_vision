@@ -15,7 +15,6 @@ struct ProcessorParamsBase;
 
 //wolf includes
 #include "wolf.h"
-//#include "node_base.h"
 
 // std includes
 #include <utility> // pair
@@ -24,8 +23,6 @@ struct ProcessorParamsBase;
 
 namespace wolf {
 
-//class Problem;
-//typedef Problem* ProblemPtr;
 
 enum Notification
 {
