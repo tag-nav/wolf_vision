@@ -91,12 +91,14 @@ class SensorBase : public NodeBase // NodeLinked<HardwareBase, ProcessorBase>
          *
          **/
         virtual ~SensorBase();
+        void destruct();
 
         unsigned int id();
 
         SensorType typeId();
 
         ProcessorBase* addProcessor(ProcessorBase* _proc_ptr);
+        void removeProcessor(ProcessorBasePtr _prc_ptr);
 
         ProcessorBaseList* getProcessorListPtr();
 
@@ -133,8 +135,15 @@ class SensorBase : public NodeBase // NodeLinked<HardwareBase, ProcessorBase>
 }
 
 #include "processor_base.h"
+#include "hardware_base.h"
 
 namespace wolf{
+
+inline void SensorBase::removeProcessor(ProcessorBasePtr _prc_ptr)
+{
+    processor_list_.remove(_prc_ptr);
+    delete _prc_ptr;
+}
 
 inline unsigned int SensorBase::id()
 {
@@ -183,6 +192,24 @@ inline bool SensorBase::isExtrinsicDynamic()
 inline Eigen::VectorXs SensorBase::getNoiseStd()
 {
     return noise_std_;
+}
+
+inline void SensorBase::destruct()
+{
+    // TODO fill code
+    if (!is_deleting_)
+    {
+        if (hardware_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            hardware_ptr_->removeSensor(this);
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
 }
 
 inline Eigen::MatrixXs SensorBase::getNoiseCov()

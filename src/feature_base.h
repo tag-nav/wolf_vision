@@ -132,6 +132,8 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
 
 }
 
+// IMPLEMENTATION
+
 #include "constraint_base.h"
 
 namespace wolf{

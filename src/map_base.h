@@ -33,7 +33,9 @@ class MapBase : public NodeBase //: public NodeLinked<Problem,LandmarkBase>
         ~MapBase();
         void destruct()
         {
-            // TODO fill code
+            // TODO fill code (see TrajectoryBase::destruct() )
+            if (!is_deleting_)
+                delete this;
         }
         
         /** \brief Adds a landmark

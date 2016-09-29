@@ -66,7 +66,7 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
          * 
          **/
         virtual ~FrameBase();
-        void destruct();
+        void destruct(); // XXX Nobody calls this never
 
         unsigned int id();
 

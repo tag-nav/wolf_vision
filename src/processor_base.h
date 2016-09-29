@@ -41,6 +41,7 @@ class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
          *
          **/
         virtual ~ProcessorBase();
+        void destruct();
 
         unsigned int id();
 
@@ -86,6 +87,25 @@ class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
 #include "constraint_base.h"
 
 namespace wolf {
+
+inline void ProcessorBase::destruct()
+{
+    // TODO fill code
+    if (!is_deleting_)
+    {
+        if (sensor_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            sensor_ptr_->removeProcessor(this);
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
+}
+
 
 inline bool ProcessorBase::isMotion()
 {

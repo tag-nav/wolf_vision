@@ -63,10 +63,7 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
          **/
         virtual ~LandmarkBase();
 
-        void destruct()
-        {
-            // TODO fill code here
-        }
+        void destruct();
 
         /** \brief Returns landmark_id_, the landmark unique id
          **/
@@ -153,6 +150,12 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
 
 };
 
+}
+
+#include "map_base.h"
+
+namespace wolf{
+
 inline unsigned int LandmarkBase::id()
 {
     return landmark_id_;
@@ -234,6 +237,24 @@ inline Scalar LandmarkBase::getDescriptor(unsigned int _ii) const
 inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
 {
     return descriptor_;
+}
+
+inline void LandmarkBase::destruct()
+{
+    // TODO implement something
+    if (!is_deleting_)
+    {
+        if (map_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            map_ptr_->removeLandmark(this);
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
 }
 
 inline const LandmarkType LandmarkBase::getTypeId() const
