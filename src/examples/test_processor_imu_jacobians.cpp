@@ -69,21 +69,11 @@ int main(int argc, char** argv)
     /* IMU_jac_deltas struct form :
     contains vectors of size 7 :
     Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
-              place 1 : added da_bx in data
-              place 2 : added da_by in data
-              place 3 : added da_bz in data
-              place 4 : added dw_bx in data
-              place 5 : added dw_by in data
-              place 6 : added dw_bz in data
+                place 1 : added da_bx in data         place 2 : added da_by in data       place 3 : added da_bz in data
+                place 4 : added dw_bx in data         place 5 : added dw_by in data       place 6 : added dw_bz in data
     */
 
-    Eigen::VectorXs delta_preint_plus_delta;
-    Eigen::VectorXs delta_preint;
-    Eigen::Matrix3s dDp_dab;
-    Eigen::Matrix3s dDv_dab;
-    Eigen::Matrix3s dDp_dwb;
-    Eigen::Matrix3s dDv_dwb;
-    Eigen::Matrix3s dDq_dwb;
+    Eigen::Matrix3s dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb;
 
     /*
         dDp_dab = [dDp_dab_x, dDp_dab_y, dDp_dab_z]
@@ -102,15 +92,15 @@ int main(int argc, char** argv)
         dDq_dwb_z = log( dR(wb).trans() * dR(wb + dwb_z))/dwb_z
      */
 
-     new (&q_in_1) Eigen::Map<Eigen::Quaternions>(bias_jac.delta_preint_vect_(0).data() + 6);
+     new (&q_in_1) Eigen::Map<Eigen::Quaternions>(bias_jac.Delta0_.data() + 6);
      for(int i=0;i<3;i++){
-         dDp_dab.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+1).head(3) - bias_jac.delta_preint_vect_(0).head(3))/ddelta_bias;
-         dDv_dab.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+1).segment(3,3) - bias_jac.delta_preint_vect_(0).segment(3,3))/ddelta_bias;
+         dDp_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
+         dDv_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).segment(3,3) - bias_jac.Delta0_.segment(3,3))/ddelta_bias;
 
-         dDp_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+3).head(3) - bias_jac.delta_preint_vect_(0).head(3))/ddelta_bias;
-         dDv_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+3).segment(3,3) - bias_jac.delta_preint_vect_(0).segment(3,3))/ddelta_bias;
+         dDp_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
+         dDv_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).segment(3,3) - bias_jac.Delta0_.segment(3,3))/ddelta_bias;
 
-         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.delta_preint_plus_delta_vect_(i+1).data() + 6);
+         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i).data() + 6);
          dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
      }
 
