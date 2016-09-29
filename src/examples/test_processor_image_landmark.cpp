@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 
     std::cout << "TEST: " << wolf_path << "/src/examples/camera_params.yaml" << std::endl;
 
-    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params_ueye.yaml");
+    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
     SensorCamera* camera_ptr_ = (SensorCamera*)sensor_ptr;
 
 
@@ -187,7 +187,14 @@ int main(int argc, char** argv)
         {
             ceres::Solver::Summary summary = ceres_manager.solve();
             std::cout << summary.FullReport() << std::endl;
-            //cv::waitKey(0);
+
+
+            std::cout << "Last key frame pose: "
+                      << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
+            std::cout << "Last key frame orientation: "
+                      << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
+
+            cv::waitKey(0);
         }
 
         std::cout << "END OF ITERATION\n=================================" << std::endl;
