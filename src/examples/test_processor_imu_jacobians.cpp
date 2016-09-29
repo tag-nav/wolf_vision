@@ -23,6 +23,11 @@
 
 //#define DEBUG_RESULTS
 
+using namespace wolf;
+
+void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq0, Eigen::Map<Eigen::Quaternions>& _dq0);
+void remapJacDeltas_quat(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq, Eigen::Map<Eigen::Quaternions>& _dq, const int& place );
+
 int main(int argc, char** argv)
 {
     using namespace wolf;
@@ -52,7 +57,13 @@ int main(int argc, char** argv)
     ProcessorIMU processor_imu;
     processor_imu.setOrigin(x0, t);
     wolf::Scalar ddelta_bias = 0.0001;
-    struct IMU_jac_bias bias_jac = processor_imu.finite_diff_ab(0.001, data_, ddelta_bias);
+    wolf::Scalar dt = 0.001;
+    struct IMU_jac_bias bias_jac = processor_imu.finite_diff_ab(dt, data_, ddelta_bias);
+
+    Eigen::Map<Eigen::Quaternions> Dq0(NULL);
+    Eigen::Map<Eigen::Quaternions> dq0(NULL);
+    Eigen::Map<Eigen::Quaternions> Dq_noisy(NULL);
+    Eigen::Map<Eigen::Quaternions> dq_noisy(NULL);
 
     /* IMU_jac_deltas struct form :
     contains vectors of size 7 :
@@ -238,14 +249,88 @@ int main(int argc, char** argv)
     dDo_doz = log( (dR(Theta)*exp(0,0,dThetaz)).transpose() * dR(Theta) )/dThetaz
 
                                                             //other solution to investigate
-    dDo_dOx = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * dr(theta+dthetax) )/dthetax
+    dDo_dox = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * dr(theta+dthetax) )/dthetax
             = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(dthetax,0,0)) )/dthetax
             = log( (_Delta * _delta).transpose() * (_Delta * _delta_noisy))
-    dDo_dOy = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,dthetay,0)) )/dthetay
-    dDo_dOz = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,0,dthetaz)) )/dthetaz
+    dDo_doy = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,dthetay,0)) )/dthetay
+    dDo_doz = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,0,dthetaz)) )/dthetaz
 
      */
+
+     //taking care of noise now
+    Eigen::VectorXs Delta_noise;
+    Eigen::VectorXs delta_noise;
+    Delta_noise.resize(10);
+    delta_noise.resize(10);
+    Delta_noise << 0.001, 0.001, 0.001, 0.001, 0.001, 0.002, 0.002, 0.002;
+    delta_noise << 0.001, 0.001, 0.001, 0.001, 0.001, 0.002, 0.002, 0.002;
+
+    struct IMU_jac_deltas deltas_jac = processor_imu.finite_diff_noise(dt, data_, Delta_noise, delta_noise);
+
+    /* reminder : 
+                            jacobian_delta_preint_vect_                                                            jacobian_delta_vect_
+                            0: + 0,                                                                                 0: + 0
+                            1: +dPx, 2: +dPy, 3: +dPz                                                               1: + dpx, 2: +dpy, 3: +dpz
+                            4: +dVx, 5: +dVy, 6: +dVz                                                               4: + dvx, 5: +dvy, 6: +dvz
+                            7: +dOx, 8: +dOy, 9: +dOz                                                               7: + dox, 8: +doy, 9: +doz
+    */
+
+    Eigen::Matrix3s dDp_dP, dDp_dV, dDp_dO, dDv_dP, dDv_dV, dDv_dO, dDo_dP, dDo_dV, dDo_dO;
+    Eigen::Matrix3s dDp_dp, dDp_dv, dDp_do, dDv_dp, dDv_dv, dDv_do, dDo_dp, dDo_dv, dDo_do; 
+
+    remapJacDeltas_quat0(deltas_jac, Dq0, dq0);
+
+    //dDp_dP and dDv_dV
+    for(int i = 0; i < 3; i++){
+
+        //dDp_dPx = ((P + dPx) - P)/dPx
+        dDp_dP.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i).head(3) - deltas_jac.Delta0_.head(3))/Delta_noise(i);
+        //Dp_dVx = ((V + dVx)*dt - V*dt)/dVx
+        dDp_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i+3).segment(3,3)*dt - deltas_jac.Delta0_.segment(3,3)*dt)/Delta_noise(i+3);
+        //dDp_dOx = (( dR(Theta) * exp(dThetax,0,0)*dp ) - ( dR(Theta)*dp ))/dThetax
+        remapJacDeltas_quat(deltas_jac, Dq_noisy, dq_noisy, i+6);
+        dDp_dO.block<3,1>(0,i) = (Dq_noisy.matrix() * deltas_jac.delta0_.head(3)) - (Dq0.matrix()* deltas_jac.delta0_.head(3))/Delta_noise(i+6);
+
+        //dDv_dP = [0, 0, 0]
+        //dDv_dVx = ((V + dVx) - V)/dVx
+        dDv_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i).segment(3,3) - deltas_jac.Delta0_.segment(3,3))/Delta_noise(i+3);
+        //dDv_dOx = (( dR(Theta) * exp(dThetax,0,0)*dv ) - ( dR(Theta)*dv ))/dThetax
+        dDv_dO.block<3,1>(0,i) = (Dq_noisy.matrix() * deltas_jac.delta0_.segment(3,3)) - (Dq0.matrix()* deltas_jac.delta0_.segment(3,3))/Delta_noise(i+6);
+
+        //dDo_dP = dDo_dV = [0, 0, 0]
+        //dDo_dOx = log( (dR(Theta) * dr(theta)).transpose() * (dR(Theta)*exp(dThetax,0,0)) * dr(theta) )/dThetax
+        dDo_dO.block<3,1>(0,i) = R2v( (Dq0.matrix() * dq0.matrix()).transpose() * (Dq_noisy.matrix() * dq0.matrix()) )/Delta_noise(i+6);
+
+        //dDp_dpx = ( dR*(p + dpx) - dR*(p))/dpx
+        dDp_dp.block<3,1>(0,i) = ( (Dq0.matrix() * deltas_jac.delta_noisy_vect_(i).head(3)) - (Dq0.matrix() * deltas_jac.delta0_.head(3)) )/delta_noise(i);
+        //dDp_dv = dDp_do = [0, 0, 0]
+
+        //dDv_dp = [0, 0, 0]
+        //dDv_dvx = ( dR*(v + dvx) - dR*(v))/dvx
+        dDv_dv.block<3,1>(0,i) = ( (Dq0 * deltas_jac.delta_noisy_vect_(i+3).segment(3,3)) - (Dq0 * deltas_jac.delta0_.segment(3,3)) )/delta_noise(i+3);
+        //dDv_do = [0, 0, 0]
+
+        //dDo_dp = dDo_dv = [0, 0, 0]
+        //dDo_dox = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(dthetax,0,0)) )/dthetax
+         dDo_do.block<3,1>(0,i) = R2v( (Dq0.matrix() * dq0.matrix()).transpose() * (Dq0.matrix() * dq_noisy.matrix()) )/Delta_noise(i+6);
+    }
+
     delete wolf_problem_ptr_;
 
     return 0;
+}
+
+using namespace wolf;
+
+void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq0, Eigen::Map<Eigen::Quaternions>& _dq0){
+
+        new (&_Dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta0_.data() + 6);
+        new (&_dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta0_.data() + 6);
+}
+
+void remapJacDeltas_quat(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq, Eigen::Map<Eigen::Quaternions>& _dq, const int& place ){
+    
+    assert(place < _jac_delta.Delta_noisy_vect_.size());
+    new (&_Dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta_noisy_vect_(place).data() + 6);
+    new (&_dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta_noisy_vect_(place).data() + 6);
 }
