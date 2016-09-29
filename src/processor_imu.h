@@ -10,18 +10,17 @@ namespace wolf {
     struct IMU_jac_bias{ //struct used for checking jacobians by finite difference
 
         IMU_jac_bias(Eigen::Matrix3s _dDp_dab, Eigen::Matrix3s _dDv_dab, Eigen::Matrix3s _dDp_dwb, Eigen::Matrix3s _dDv_dwb, Eigen::Matrix3s _dDq_dwb, 
-                       Eigen::Matrix<Eigen::VectorXs,7,1> _delta_preint_plus_delta_vect, Eigen::Matrix<Eigen::VectorXs,7,1> _delta_preint_vect ) : dDp_dab_(_dDp_dab), 
+                       Eigen::Matrix<Eigen::VectorXs,6,1> _Deltas_noisy_vect, Eigen::VectorXs _Delta0 ) : dDp_dab_(_dDp_dab), 
                        dDv_dab_(_dDv_dab), dDp_dwb_(_dDp_dwb), dDv_dwb_(_dDv_dwb), dDq_dwb_(_dDq_dwb), 
-                       delta_preint_plus_delta_vect_(_delta_preint_plus_delta_vect), delta_preint_vect_(_delta_preint_vect) {}
+                       Deltas_noisy_vect_(_Deltas_noisy_vect), Delta0_(_Delta0) {}
 
         public:
             /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
-              Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
               place 1 : added da_bx in data         place 2 : added da_by in data       place 3 : added da_bz in data
               place 4 : added dw_bx in data         place 5 : added dw_by in data       place 6 : added dw_bz in data
              */
-            Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_plus_delta_vect_; // D2 in D2 = D1 + d
-            Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_vect_;            // D1 in D2 = D1 + d
+            Eigen::Matrix<Eigen::VectorXs,6,1> Deltas_noisy_vect_;
+            Eigen::VectorXs Delta0_;            // D1 in D2 = D1 + d
             Eigen::Matrix3s dDp_dab_;
             Eigen::Matrix3s dDv_dab_;
             Eigen::Matrix3s dDp_dwb_;
@@ -458,77 +457,48 @@ void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv
 inline IMU_jac_bias ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b)
 {
     //TODO : need to use a reset function here to make sure jacobians have not been used before --> reset everything
-    ///Define all the needed variables                  d_ is to note that this is used only during finite difference step
-
+    ///Define all the needed variables
+    Eigen::VectorXs Delta0;
+    Eigen::Matrix<Eigen::VectorXs,6,1> Deltas_noisy_vect;
     Eigen::Vector6s data0;
     data0 = _data;
-    /// _d0 are members without effect of da_b
-    Eigen::MatrixXs data_cov_d0;
-    Eigen::MatrixXs jacobian_delta_preint_d0;
-    Eigen::MatrixXs jacobian_delta_d0;
-    Eigen::VectorXs delta_preint_plus_delta_d0;
-    Eigen::VectorXs delta_preint_d0;
-    data_cov_d0.resize(6,6);
-    jacobian_delta_preint_d0.resize(9,9);
-    jacobian_delta_d0.resize(9,9);
-    delta_preint_plus_delta_d0.resize(10);
-    delta_preint_d0.resize(10);
+
+    Eigen::MatrixXs data_cov;
+    Eigen::MatrixXs jacobian_delta_preint;
+    Eigen::MatrixXs jacobian_delta;
+    Eigen::VectorXs delta_preint_plus_delta0;
+    Eigen::VectorXs delta_preint0;
+    data_cov.resize(6,6);
+    jacobian_delta_preint.resize(9,9);
+    jacobian_delta.resize(9,9);
+    delta_preint_plus_delta0.resize(10);
+    delta_preint0.resize(10);
 
     //set all variables to 0
-    data_cov_d0 = Eigen::MatrixXs::Zero(6,6);
-    jacobian_delta_preint_d0 = Eigen::MatrixXs::Zero(9,9);
-    jacobian_delta_d0 = Eigen::MatrixXs::Zero(9,9);
-    delta_preint_plus_delta_d0 = Eigen::VectorXs::Zero(10);
-    delta_preint_d0 = Eigen::VectorXs::Zero(10);
-
-    /// _d1 are members with effect of da_bx
-    Eigen::MatrixXs data_cov_d1;
-    Eigen::MatrixXs jacobian_delta_preint_d1;
-    Eigen::MatrixXs jacobian_delta_d1;
-    Eigen::VectorXs delta_preint_plus_delta_d1;
-    Eigen::VectorXs delta_preint_d1;
-    data_cov_d1.resize(6,6);
-    jacobian_delta_preint_d1.resize(9,9);
-    jacobian_delta_d1.resize(9,9);
-    delta_preint_plus_delta_d1.resize(10);
-    delta_preint_d1.resize(10);
-
-    //set all variables to 0
-    data_cov_d1 = Eigen::MatrixXs::Zero(6,6);
-    jacobian_delta_preint_d1 = Eigen::MatrixXs::Zero(9,9);
-    jacobian_delta_d1 = Eigen::MatrixXs::Zero(9,9);
-    delta_preint_plus_delta_d1 = Eigen::VectorXs::Zero(10);
-    delta_preint_d1 = Eigen::VectorXs::Zero(10);
+    data_cov = Eigen::MatrixXs::Zero(6,6);
+    jacobian_delta_preint = Eigen::MatrixXs::Zero(9,9);
+    jacobian_delta = Eigen::MatrixXs::Zero(9,9);
+    delta_preint_plus_delta0 << 0,0,0, 0,0,0, 1,0,0,0;
+    delta_preint0 << 0,0,0, 0,0,0, 1,0,0,0;
 
     /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
-      Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
-      place 1 : added da_bx in data
-      place 2 : added da_by in data
-      place 3 : added da_bz in data
-      place 4 : added dw_bx in data
-      place 5 : added dw_by in data
-      place 6 : added dw_bz in data
+        place 1 : added da_bx in data         place 2 : added da_by in data       place 3 : added da_bz in data
+        place 4 : added dw_bx in data         place 5 : added dw_by in data       place 6 : added dw_bz in data
      */
-    Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_plus_delta_vect;
-    Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_vect;
-    Eigen::Matrix3s dDp_dab;
-    Eigen::Matrix3s dDv_dab;
-    Eigen::Matrix3s dDp_dwb;
-    Eigen::Matrix3s dDv_dwb;
-    Eigen::Matrix3s dDq_dwb;
+
+    Eigen::Matrix3s dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb;
 
     //Deltas without use of da_b
-    data2delta(_data, data_cov_d0, _dt);
-    deltaPlusDelta(delta_preint_d0, delta_, _dt, delta_preint_plus_delta_d0, jacobian_delta_preint_d0, jacobian_delta_d0);
-    delta_preint_plus_delta_vect(0) = delta_preint_plus_delta_d0;
-    delta_preint_vect(0) = delta_preint_d0;
+    data2delta(_data, data_cov, _dt);
+    deltaPlusDelta(delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
+    Delta0 = delta_preint_plus_delta0; //this is the first preintegrated delta, not affected by any added bias noise
     dDp_dab = dDp_dab_;
     dDv_dab = dDv_dab_;
     dDp_dwb = dDp_dwb_;
     dDv_dwb = dDv_dwb_;
     dDq_dwb = dDq_dwb_;
 
-    // propagate da_b
+    // propagate bias noise
     for(int i=0; i<6; i++){
         //need to reset stuff here
         acc_bias_ = Eigen::Vector3s::Zero();
@@ -538,17 +508,19 @@ inline IMU_jac_bias ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vector
         dDp_dwb_.setZero();
         dDv_dwb_.setZero();
         dDq_dwb_.setZero();
+        delta_preint_plus_delta0 << 0,0,0, 0,0,0, 1,0,0,0;
+        delta_preint0 << 0,0,0, 0,0,0, 1,0,0,0;
+        data_cov = Eigen::MatrixXs::Zero(6,6);
 
         // add da_b
         _data(i) = data0(i) + da_b;
         //data2delta
-        data2delta(_data, data_cov_d1, _dt);
-        deltaPlusDelta(delta_preint_d1, delta_, _dt, delta_preint_plus_delta_d1, jacobian_delta_preint_d1, jacobian_delta_d1);
-        delta_preint_plus_delta_vect(i+1) = delta_preint_plus_delta_d1;
-        delta_preint_vect(i+1) = delta_preint_d1;
+        data2delta(_data, data_cov, _dt);
+        deltaPlusDelta(delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
+        Deltas_noisy_vect(i) = delta_preint_plus_delta0; //preintegrated deltas affected by added bias noise
     }
 
-    IMU_jac_bias bias_jacobians(dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb, delta_preint_plus_delta_vect, delta_preint_vect);
+    IMU_jac_bias bias_jacobians(dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb, Deltas_noisy_vect, Delta0);
     return bias_jacobians;
 }
 
