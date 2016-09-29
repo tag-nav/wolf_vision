@@ -64,6 +64,7 @@ int main(int argc, char** argv)
     Eigen::Map<Eigen::Quaternions> dq0(NULL);
     Eigen::Map<Eigen::Quaternions> Dq_noisy(NULL);
     Eigen::Map<Eigen::Quaternions> dq_noisy(NULL);
+    Eigen::Map<Eigen::Quaternions> q_in_1(NULL), q_in_2(NULL);
 
     /* IMU_jac_deltas struct form :
     contains vectors of size 7 :
@@ -75,8 +76,6 @@ int main(int argc, char** argv)
               place 5 : added dw_by in data
               place 6 : added dw_bz in data
     */
-
-    //Eigen::Map<Eigen::Quaternions> q_in_1_, q_in_2_;
 
     Eigen::VectorXs delta_preint_plus_delta;
     Eigen::VectorXs delta_preint;
@@ -94,14 +93,25 @@ int main(int argc, char** argv)
 
         similar for dDv_dab
         note dDp_dab_x, dDp_dab_y, dDp_dab_z, dDv_dab_x, dDv_dab_y, dDv_dab_z are 3x1 vectors !
+
+        dDq_dab = 0_{3x3}
+        dDq_dwb = [dDq_dwb_x, dDq_dwb_y, dDq_dwb_z]
+        dDq_dwb_x = log( dR(wb).trans() * dR(wb - dwb_x))/dwb_x
+                  = log( dR(wb).trans() * exp((wx - wbx - dwb_x)dt, (wy - wby)dt, (wy - wby)dt))/dwb_x
+        dDq_dwb_y = log( dR(wb).trans() * dR(wb - dwb_y))/dwb_y
+        dDq_dwb_z = log( dR(wb).trans() * dR(wb + dwb_z))/dwb_z
      */
 
+     new (&q_in_1) Eigen::Map<Eigen::Quaternions>(bias_jac.delta_preint_vect_(0).data() + 6);
      for(int i=0;i<3;i++){
          dDp_dab.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+1).head(3) - bias_jac.delta_preint_vect_(0).head(3))/ddelta_bias;
          dDv_dab.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+1).segment(3,3) - bias_jac.delta_preint_vect_(0).segment(3,3))/ddelta_bias;
 
          dDp_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+3).head(3) - bias_jac.delta_preint_vect_(0).head(3))/ddelta_bias;
          dDv_dwb.block<3,1>(0,i) = (bias_jac.delta_preint_plus_delta_vect_(i+3).segment(3,3) - bias_jac.delta_preint_vect_(0).segment(3,3))/ddelta_bias;
+
+         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.delta_preint_plus_delta_vect_(i+1).data() + 6);
+         dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
      }
 
      /*
@@ -145,22 +155,6 @@ int main(int argc, char** argv)
                 dDv_dwb_check.pushback(false);
         }
       */
-
-      /*
-        dDq_dab = 0_{3x3}
-        dDq_dwb = [dDq_dwb_x, dDq_dwb_y, dDq_dwb_z]
-        dDq_dwb_x = log( dR(wb).trans() * dR(wb - dwb_x))/dwb_x
-                  = log( dR(wb).trans() * exp((wx - wbx - dwb_x)dt, (wy - wby)dt, (wy - wby)dt))/dwb_x
-        dDq_dwb_y = log( dR(wb).trans() * dR(wb - dwb_y))/dwb_y
-        dDq_dwb_z = log( dR(wb).trans() * dR(wb + dwb_z))/dwb_z
-       */
-
-    ///TODO : NOT WORKING - FIX ME
-    /*new (&q_in_1_) Eigen::Map<Eigen::Quaternions>(bias_jac.delta_preint_vect(0).data() + 6);
-    for(int i=0;i<3;i++){
-        new (&q_in_2_) Eigen::Map<Eigen::Quaternions>(bias_jac.delta_preint_plus_delta_vect(i+1).data() + 6);
-        dDq_dwb.block<3,1>(0,i) = R2v( q_in_1_.matrix().transpose() * q_in_2_.matrix())/ddelta_bias;
-     }*/
 
      /*
         This jacobian must be checked :
