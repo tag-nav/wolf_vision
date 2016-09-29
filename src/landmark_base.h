@@ -4,7 +4,6 @@
 // Fwd references
 namespace wolf{
 class MapBase;
-class NodeTerminus;
 class StateBlock;
 }
 
@@ -33,6 +32,7 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
         ProblemPtr problem_ptr_;
         MapBasePtr map_ptr_;
         ConstraintBaseList constrained_by_list_;
+
         static unsigned int landmark_id_count_;
         
     protected:

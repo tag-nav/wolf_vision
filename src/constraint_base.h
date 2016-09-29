@@ -4,7 +4,6 @@
 // Forward declarations for node templates
 namespace wolf{
 class FeatureBase;
-class NodeTerminus;
 }
 
 //Wolf includes
@@ -23,16 +22,19 @@ class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
 {
     private:
         ProblemPtr problem_ptr_;
+        FeatureBasePtr feature_ptr_;                    ///< FeatureBase pointer (upper node)
+
         static unsigned int constraint_id_count_;
+
     protected:
         unsigned int constraint_id_;
         ConstraintType type_id_;                        ///< type of constraint (types defined at wolf.h)
         ConstraintCategory category_;                   ///< category of constraint (types defined at wolf.h)
         ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
         bool apply_loss_function_;                      ///< flag for applying loss function to this constraint
-        FrameBase* frame_ptr_;                          ///< FrameBase pointer (for category CTR_FRAME)
-        FeatureBase* feature_ptr_;                      ///< FeatureBase pointer (for category CTR_FEATURE)
-        LandmarkBase* landmark_ptr_;                    ///< LandmarkBase pointer (for category CTR_LANDMARK)
+        FrameBase* frame_other_ptr_;                    ///< FrameBase pointer (for category CTR_FRAME)
+        FeatureBase* feature_other_ptr_;                ///< FeatureBase pointer (for category CTR_FEATURE)
+        LandmarkBase* landmark_other_ptr_;              ///< LandmarkBase pointer (for category CTR_LANDMARK)
 
     public:
 
@@ -198,12 +200,12 @@ inline void ConstraintBase::setApplyLossFunction(const bool _apply)
 
 inline FrameBase* ConstraintBase::getFrameOtherPtr()
 {
-    return frame_ptr_;
+    return frame_other_ptr_;
 }
 
 inline FeatureBase* ConstraintBase::getFeatureOtherPtr()
 {
-    return feature_ptr_;
+    return feature_other_ptr_;
 }
 
 inline void ConstraintBase::destruct()
@@ -211,10 +213,10 @@ inline void ConstraintBase::destruct()
     // TODO implement something
     if (!is_deleting_)
     {
-        if (feature_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        if (feature_other_ptr_ != nullptr) // && !up_node_ptr_->isTop())
         {
             //std::cout << "upper node is not WolfProblem " << std::endl;
-            feature_ptr_->removeConstraint(this);
+            feature_other_ptr_->removeConstraint(this);
         }
         else
         {
@@ -226,7 +228,7 @@ inline void ConstraintBase::destruct()
 
 inline LandmarkBase* ConstraintBase::getLandmarkOtherPtr()
 {
-    return landmark_ptr_;
+    return landmark_other_ptr_;
 }
 
 } // namespace wolf

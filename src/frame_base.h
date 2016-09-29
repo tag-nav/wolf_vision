@@ -28,6 +28,7 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
         ConstraintBaseList constrained_by_list_;
 
         static unsigned int frame_id_count_;
+
     protected:
         unsigned int frame_id_;
         FrameKeyType type_id_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)

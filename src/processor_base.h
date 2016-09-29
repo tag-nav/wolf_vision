@@ -3,14 +3,12 @@
 
 // Fwd refs
 namespace wolf{
-class Problem;
 class SensorBase;
 }
 
 //Wolf includes
 #include "wolf.h"
 #include "node_base.h"
-//#include "problem.h"
 
 namespace wolf {
 

@@ -13,9 +13,9 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
     category_(CTR_ABSOLUTE),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
-    frame_ptr_(nullptr),
-    feature_ptr_(nullptr),
-    landmark_ptr_(nullptr)
+    frame_other_ptr_(nullptr),
+    feature_other_ptr_(nullptr),
+    landmark_other_ptr_(nullptr)
 {
     //std::cout << "creating ConstraintBase " << std::endl;
 }
@@ -28,12 +28,12 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, bool _
     category_(CTR_FRAME),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
-    frame_ptr_(_frame_ptr),
-    feature_ptr_(nullptr),
-    landmark_ptr_(nullptr)
+    frame_other_ptr_(_frame_ptr),
+    feature_other_ptr_(nullptr),
+    landmark_other_ptr_(nullptr)
 {
     // add constraint to frame
-    frame_ptr_->addConstrainedBy(this);
+    frame_other_ptr_->addConstrainedBy(this);
 }
 
 
@@ -44,12 +44,12 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, bo
     category_(CTR_FEATURE),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
-    frame_ptr_(nullptr),
-    feature_ptr_(_feature_ptr),
-    landmark_ptr_(nullptr)
+    frame_other_ptr_(nullptr),
+    feature_other_ptr_(_feature_ptr),
+    landmark_other_ptr_(nullptr)
 {
     // add constraint to feature
-    feature_ptr_->addConstrainedBy(this);
+    feature_other_ptr_->addConstrainedBy(this);
 }
 
 
@@ -60,12 +60,12 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, 
     category_(CTR_LANDMARK),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
-    frame_ptr_(nullptr),
-    feature_ptr_(nullptr),
-    landmark_ptr_(_landmark_ptr)
+    frame_other_ptr_(nullptr),
+    feature_other_ptr_(nullptr),
+    landmark_other_ptr_(_landmark_ptr)
 {
     // add constraint to landmark
-    landmark_ptr_->addConstrainedBy(this);
+    landmark_other_ptr_->addConstrainedBy(this);
 }
 
 ConstraintBase::~ConstraintBase()
@@ -80,12 +80,12 @@ ConstraintBase::~ConstraintBase()
     //std::cout << "removeConstraintPtr " << std::endl;
 
     // remove constraint to frame/landmark/feature
-    if (frame_ptr_ != nullptr)
-        frame_ptr_->removeConstrainedBy(this);
-    if (feature_ptr_ != nullptr)
-        feature_ptr_->removeConstrainedBy(this);
-    if (landmark_ptr_ != nullptr)
-        landmark_ptr_->removeConstrainedBy(this);
+    if (frame_other_ptr_ != nullptr)
+        frame_other_ptr_->removeConstrainedBy(this);
+    if (feature_other_ptr_ != nullptr)
+        feature_other_ptr_->removeConstrainedBy(this);
+    if (landmark_other_ptr_ != nullptr)
+        landmark_other_ptr_->removeConstrainedBy(this);
 
     //std::cout << "removed constraints to " << std::endl;
 }

@@ -3,8 +3,8 @@
 
 // Fwd dependencies
 namespace wolf{
-class SensorBase;
 class Problem;
+class SensorBase;
 }
 
 //Wolf includes

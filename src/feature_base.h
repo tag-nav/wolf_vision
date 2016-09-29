@@ -27,6 +27,7 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
         ConstraintBaseList constrained_by_list_;
 
         static unsigned int feature_id_count_;
+
     protected:
         unsigned int feature_id_;
         unsigned int track_id_; // ID of the feature track

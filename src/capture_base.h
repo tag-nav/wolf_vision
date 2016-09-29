@@ -5,7 +5,6 @@
 namespace wolf{
 class FrameBase;
 class FeatureBase;
-class SensorBase;
 }
 
 //Wolf includes
@@ -27,6 +26,7 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
         FeatureBaseList feature_list_;
 
         static unsigned int capture_id_count_;
+
     protected:
         unsigned int capture_id_;
         TimeStamp time_stamp_; ///< Time stamp

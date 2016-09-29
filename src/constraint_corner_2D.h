@@ -30,7 +30,7 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 
 		LandmarkCorner2D* getLandmarkPtr()
 		{
-			return (LandmarkCorner2D*) landmark_ptr_;
+			return (LandmarkCorner2D*) landmark_other_ptr_;
 		}
 
 		template <typename T>

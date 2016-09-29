@@ -44,7 +44,7 @@ class ConstraintPoint2D: public ConstraintSparse<2,2,1,2,1,2>
 
         LandmarkPolyline2D* getLandmarkPtr()
 		{
-			return (LandmarkPolyline2D*) landmark_ptr_;
+			return (LandmarkPolyline2D*) landmark_other_ptr_;
 		}
 
         int getLandmarkPointId()
