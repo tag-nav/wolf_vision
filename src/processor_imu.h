@@ -39,7 +39,7 @@ namespace wolf {
         public:
             /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
               Elements at place 0 are those not affected by the bias noise that we add (Delta_noise, delta_noise -> dPx, dpx, dVx, dvx,..., dOz,doz).
-                            jacobian_delta_preint_vect_                                                            jacobian_delta_vect_
+                            Delta_noisy_vect_                                                                       delta_noisy_vect_
                             0: + 0,                                                                                 0: + 0
                             1: +dPx, 2: +dPy, 3: +dPz                                                               1: + dpx, 2: +dpy, 3: +dpz
                             4: +dVx, 5: +dVy, 6: +dVz                                                               4: + dvx, 5: +dvy, 6: +dvz

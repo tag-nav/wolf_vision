@@ -116,59 +116,38 @@ int main(int argc, char** argv)
 
      /*
         We just computed dDp_dab, dDp_dwb, dDv_dab and dDv_dwb
-        These must be compared to elements in dDp_dab_vect, dDv_dab_vect, dDp_dwb_vect and dDv_dwb_vect;
+        These must be compared to elements in IMU_jac_bias struct
 
-        std::vector<bool> dDp_dab_check;
-        std::vector<bool> dDv_dab_check;
-        std::vector<bool> dDp_dwb_check;
-        std::vector<bool> dDv_dwb_check;
+        bool dDp_dab_check;
+        bool dDv_dab_check;
+        bool dDp_dwb_check;
+        bool dDv_dwb_check;
+        bool dDq_dwb_check;
 
-        dDp_dab_check.clear();
-        dDv_dab_check.clear();
-        dDp_dab_check.reserve(3);
-        dDv_dab_check.reserve(3);
+        if((dDp_dab - bias_jac.dDp_dab_) < wolf::Constants::EPS)
+            dDp_dab_check = true;
+        else
+            dDp_dab_check = false;
 
-        dDp_dwb_check.clear();
-        dDv_dwb_check.clear();
-        dDp_dwb_check.reserve(3);
-        dDv_dwb_check.reserve(3);
-
-        for(int i = 0; i<3; i++){
-            if((dDp_dab - bias_jac.dDp_dab_vect(i+1)) < wolf::Constants::EPS)
-                dDp_dab_check.pushback(true);
+        if((dDv_dab - bias_jac.dDv_dab_) < wolf::Constants::EPS)
+                dDv_dab_check = true;
             else
-                dDp_dab_check.pushback(false);
+                dDv_dab_check = false;
 
-            if((dDv_dab) - bias_jac.dDv_dab_vect(i+1) < wolf::Constants::EPS)
-                dDv_dab_check.pushback(true);
-            else
-                dDv_dab_check.pushback(false);
-            
-            if((dDp_dwb - bias_jac.dDp_dwb_vect(i+3)) < wolf::Constants::EPS)
-                dDp_dwb_check.pushback(true);
-            else
-                dDp_dwb_check.pushback(false);
+        if((dDp_dwb - bias_jac.dDp_dwb_) < wolf::Constants::EPS)
+            dDp_dwb_check = true;
+        else
+            dDp_dwb_check = false;
 
-            if((dDv_dwb - bias_jac.dDv_dwb_vect(i+3)) < wolf::Constants::EPS)
-                dDv_dwb_check.pushback(true);
-            else
-                dDv_dwb_check.pushback(false);
-        }
-      */
+        if((dDv_dwb - bias_jac.dDv_dwb_) < wolf::Constants::EPS)
+            dDv_dwb_check = true;
+        else
+            dDv_dwb_check = false;
 
-     /*
-        This jacobian must be checked :
-
-        std::vector<bool> dDq_dwb_check;
-        dDq_dwb_check.clear()
-        dDq_dwb_check.reserve(6);
-
-        for(int i = 0; i<6; i++){
-            if((dDq_dwb - dDq_dwb_vect(i+1)) < wolf::Constants::EPS)
-                dDq_dwb_check.pushback(true);
-            else
-                dDq_dwb_check.pushback(false);
-        }
+        if((dDq_dwb - bias_jac.dDq_dwb_) < wolf::Constants::EPS)
+            dDq_dwb_check = true;
+        else
+            dDq_dwb_check = false;
       */
 
     /*              Numerical method to check jacobians wrt noise
