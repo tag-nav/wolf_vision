@@ -608,7 +608,8 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
     for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
     {
         //fist we need to reset some stuff
-        Eigen::Vector3s dqv_tmp;
+        Eigen::Matrix3s dqr_tmp;
+        Eigen::Vector3s dtheta = Eigen::Vector3s::Zero();
         jacobian_delta_preint.setZero();
         jacobian_delta.setZero();
         acc_bias_.setZero();
@@ -616,9 +617,10 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
 
         delta_ = delta0;
         remapDelta(delta_); //not sure that we need this
-        dqv_tmp = q2v(Dq_out_);
-        dqv_tmp(i) += _delta_noise(i+6);
-        Dq_out_ = v2q(dqv_tmp); //orientation noise has been added
+        dqr_tmp = Dq_out_.matrix();
+        dtheta(i) +=  _delta_noise(i+6); //introduce perturbation
+        dqr_tmp = dqr_tmp * v2R(dtheta);
+        Dq_out_ = v2q(R2v(dqr_tmp)); //orientation noise has been added
         deltaPlusDelta(Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         delta_noisy_vect(i+6) = delta_;
     }
@@ -641,7 +643,8 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
     for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
     {
         //fist we need to reset some stuff
-        Eigen::Vector3s dQv_tmp;
+        Eigen::Matrix3s dQr_tmp;
+        Eigen::Vector3s dtheta = Eigen::Vector3s::Zero();
         jacobian_delta_preint.setZero();
         jacobian_delta.setZero();
         acc_bias_.setZero();
@@ -649,9 +652,10 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
 
         Delta_ = Delta0;
         remapDelta(Delta_); //this time we need it
-        dQv_tmp = q2v(Dq_out_);
-        dQv_tmp(i) += _Delta_noise(i+6); //orientation noise has been added
-        Dq_out_ = v2q(dQv_tmp); 
+        dQr_tmp = Dq_out_.matrix();
+        dtheta(i) += _Delta_noise(i+6); //introduce perturbation
+        dQr_tmp = dQr_tmp * v2R(dtheta);
+        Dq_out_ = v2q(R2v(dQr_tmp)); //orientation noise has been added
         deltaPlusDelta(Delta_, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         Delta_noisy_vect(i+6) = Delta_;
     }
