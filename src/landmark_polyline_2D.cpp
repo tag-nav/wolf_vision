@@ -244,7 +244,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     // Change constraints from remove_state to remain_state
     ConstraintBaseList old_constraints_list = *getConstrainedByListPtr();
     std::cout << "changing constraints: " << old_constraints_list.size() << std::endl;
-    ConstraintBase* new_ctr_ptr = nullptr;
+    ConstraintBasePtr new_ctr_ptr = nullptr;
     for (auto ctr_ptr : old_constraints_list)
     {
         if (ctr_ptr->getTypeId() == CTR_POINT_2D)
@@ -324,7 +324,7 @@ void LandmarkPolyline2D::registerNewStateBlocks()
 }
 
 // static
-LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
+LandmarkBasePtr LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
 {
     // Parse YAML node with lmk info and data
     unsigned int    id              = _lmk_node["id"].as<unsigned int>();

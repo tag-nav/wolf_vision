@@ -117,7 +117,7 @@ class LandmarkPolyline2D : public LandmarkBase
 
         /** Factory method to create new landmarks from YAML nodes
          */
-        static LandmarkBase* create(const YAML::Node& _lmk_node);
+        static LandmarkBasePtr create(const YAML::Node& _lmk_node);
 
         YAML::Node saveToYaml() const;
 };

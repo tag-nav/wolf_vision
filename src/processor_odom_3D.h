@@ -66,8 +66,12 @@ class ProcessorOdom3D : public ProcessorMotion
                            Motion& _motion,
                            TimeStamp& _ts);
 
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion,
-                                                 FrameBase* _frame_origin);
+//<<<<<<< e72779277b2cbd56ce81286c43b51ae2b4934110
+//        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion,
+//                                                 FrameBase* _frame_origin);
+//=======
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
+//>>>>>>> typedef all pointers to base classes
 
     private:
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
@@ -78,7 +82,7 @@ class ProcessorOdom3D : public ProcessorMotion
 
     // Factory method
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
 };
 
 
@@ -164,7 +168,7 @@ inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _m
     return tmp;
 }
 
-inline ConstraintBase* ProcessorOdom3D::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
+inline ConstraintBasePtr ProcessorOdom3D::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
     return new ConstraintOdom2D(_feature_motion, _frame_origin);
 }

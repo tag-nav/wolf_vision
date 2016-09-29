@@ -283,8 +283,10 @@ typedef enum
 /////////////////////////////////////////////////////////////////////////
 // - forwards for pointers
 
-class NodeTerminus;
 class Problem;
+class HardwareBase;
+class IntrinsicsBase;
+class ProcessorParamsBase;
 class MapBase;
 class LandmarkBase;
 class LandmarkCorner2D;
@@ -302,21 +304,29 @@ class SensorLaser2D;
 class TransSensor;
 class ProcessorBase;
 class StateBlock;
+class LocalParametrizationBase;
+class NodeBase;
 
 
 // TODO: No seria millor que cada classe es defineixi aquests typedefs?
 
+// NodeBase
+typedef NodeBase* NodeBasePtr;
+
 //Problem
 typedef Problem* ProblemPtr;
 
+// Hardware
+typedef HardwareBase* HardwareBasePtr;
+
 //Map
 typedef MapBase* MapBasePtr;
-typedef std::list<MapBase*> MapBaseList;
+typedef std::list<MapBasePtr> MapBaseList;
 typedef MapBaseList::iterator MapBaseIter;
 
 //Landmark
 typedef LandmarkBase* LandmarkBasePtr;
-typedef std::list<LandmarkBase*> LandmarkBaseList;
+typedef std::list<LandmarkBasePtr> LandmarkBaseList;
 typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
 //Landmark corner 2D
@@ -363,6 +373,9 @@ typedef SensorBase* SensorBasePtr;
 typedef std::list<SensorBase*> SensorBaseList;
 typedef SensorBaseList::iterator SensorBaseIter;
 
+// Intrinsics
+typedef IntrinsicsBase* IntrinsicsBasePtr;
+
 // - transSensor
 typedef std::map<unsigned int, TransSensor*> TransSensorMap;
 typedef TransSensorMap::iterator TransSensorIter;
@@ -372,30 +385,36 @@ typedef ProcessorBase* ProcessorBasePtr;
 typedef std::list<ProcessorBase*> ProcessorBaseList;
 typedef ProcessorBaseList::iterator ProcessorBaseIter;
 
+// Processor params
+typedef ProcessorParamsBase* ProcessorParamsBasePtr;
+
 // - State
 typedef std::list<StateBlock*> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
+
+// Local Parametrization
+typedef LocalParametrizationBase* LocalParametrizationBasePtr;
 
 
 // Match Feature - Landmark
 struct LandmarkMatch
 {
-        LandmarkBase* landmark_ptr_;
+        LandmarkBasePtr landmark_ptr_;
         Scalar normalized_score_;
 };
 
 // Match map Feature - Landmark
-typedef std::map<FeatureBase*, LandmarkMatch*> LandmarkMatchMap;
+typedef std::map<FeatureBasePtr, LandmarkMatch*> LandmarkMatchMap;
 
 
 // Feature-Feature correspondence
 struct FeatureMatch
 {
-        FeatureBase* feature_ptr_;
+        FeatureBasePtr feature_ptr_;
         Scalar normalized_score_;
 };
 
-typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
+typedef std::map<FeatureBasePtr, FeatureMatch> FeatureMatchMap;
 
 
 

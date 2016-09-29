@@ -55,14 +55,14 @@ void SensorGPS::registerNewStateBlocks()
 }
 
 // Define the factory method
-SensorBase* SensorGPS::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_p,
-                              const IntrinsicsBase* _intrinsics)
+SensorBasePtr SensorGPS::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_p,
+                              const IntrinsicsBasePtr _intrinsics)
 {
     // decode extrinsics vector
     assert(_extrinsics_p.size() == 3 && "Bad extrinsics vector length. Should be 3 for 3D.");
     StateBlock* pos_ptr = new StateBlock(_extrinsics_p, true);
     StateBlock* ori_ptr = nullptr;
-    SensorBase* sen = new SensorGPS(pos_ptr, ori_ptr, nullptr, nullptr, nullptr); // TODO: how to init these last three pointers?
+    SensorBasePtr sen = new SensorGPS(pos_ptr, ori_ptr, nullptr, nullptr, nullptr); // TODO: how to init these last three pointers?
     sen->setName(_unique_name);
     return sen;
 }

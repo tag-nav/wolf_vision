@@ -15,7 +15,7 @@ void SolverManager::solve()
 
 }
 
-//void SolverManager::computeCovariances(WolfProblem* _problem_ptr)
+//void SolverManager::computeCovariances(WolfProblemPtr _problem_ptr)
 //{
 //}
 
@@ -59,7 +59,7 @@ void SolverManager::update(const WolfProblemPtr _problem_ptr)
 	}
 }
 
-void SolverManager::addConstraint(ConstraintBase* _corr_ptr)
+void SolverManager::addConstraint(ConstraintBasePtr _corr_ptr)
 {
 	//TODO MatrixXs J; Vector e;
     // getResidualsAndJacobian(_corr_ptr, J, e);
@@ -145,7 +145,7 @@ void SolverManager::updateStateUnitStatus(StateBlock* _st_ptr)
 //	_st_ptr->setPendingStatus(NOT_PENDING);
 }
 
-ceres::CostFunction* SolverManager::createCostFunction(ConstraintBase* _corrPtr)
+ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPtr)
 {
 	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
 	//_corrPtr->print();

@@ -42,7 +42,7 @@ FeatureBase::~FeatureBase()
     //std::cout << "constraints deleted" << std::endl;
 }
 
-ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
+ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
 {
     constraint_list_.push_back(_co_ptr);
     _co_ptr->setFeaturePtr(this);
@@ -55,7 +55,7 @@ ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
     return _co_ptr;
 }
 
-FrameBase* FeatureBase::getFramePtr() const
+FrameBasePtr FeatureBase::getFramePtr() const
 {
     return capture_ptr_->getFramePtr();
 //    return upperNodePtr()->upperNodePtr();

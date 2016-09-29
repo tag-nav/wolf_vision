@@ -19,7 +19,7 @@ namespace wolf
 {
 namespace
 {
-static ProcessorParamsBase* createProcessorParamsImage(const std::string & _filename_dot_yaml)
+static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _filename_dot_yaml)
 {
     using std::string;
     using YAML::Node;

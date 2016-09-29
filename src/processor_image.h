@@ -164,7 +164,7 @@ class ProcessorImage : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
+        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature);
 
         /** \brief Vote for KeyFrame generation
          *
@@ -189,7 +189,7 @@ class ProcessorImage : public ProcessorTrackerFeature
          *
          * Creates a constraint from feature to feature
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
     private:
 
@@ -234,7 +234,7 @@ class ProcessorImage : public ProcessorTrackerFeature
 
         // These only to debug, will disappear one day soon
     public:
-        virtual void drawFeatures(CaptureBase* const _last_ptr);
+        virtual void drawFeatures(CaptureBasePtr const _last_ptr);
 
         virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
 
@@ -243,7 +243,7 @@ class ProcessorImage : public ProcessorTrackerFeature
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
 
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
 
 
 };
@@ -255,7 +255,7 @@ inline bool ProcessorImage::voteForKeyFrame()
     return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
 }
 
-inline ConstraintBase* ProcessorImage::createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr)
+inline ConstraintBasePtr ProcessorImage::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
 {
     ConstraintEpipolar* const_epipolar_ptr = new ConstraintEpipolar(_feature_ptr, _feature_other_ptr);
     return const_epipolar_ptr; // TODO Crear constraint

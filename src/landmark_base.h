@@ -85,7 +85,7 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
         /** \brief Remove the given constraint from the list. 
          *  If list becomes empty, deletes this object by calling destruct()
          **/
-        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
+        void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
@@ -129,7 +129,7 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
 
         virtual YAML::Node saveToYaml() const;
 
-        void addConstrainedBy(ConstraintBase* _ctr_ptr)
+        void addConstrainedBy(ConstraintBasePtr _ctr_ptr)
         {
             constrained_by_list_.push_back(_ctr_ptr);
         }
@@ -144,8 +144,8 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
 
 
         void setMapPtr(MapBasePtr _map_ptr){map_ptr_ = _map_ptr;}
-        Problem* getProblem(){return problem_ptr_;}
-        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 
 };
@@ -180,7 +180,7 @@ inline void LandmarkBase::unfix()
     this->setStatus(LANDMARK_ESTIMATED);
 }
 
-inline void LandmarkBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
+inline void LandmarkBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.remove(_ctr_ptr);
 //    NodeConstrained::removeConstrainedBy(_ctr_ptr);

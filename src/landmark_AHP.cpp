@@ -8,8 +8,8 @@ namespace wolf {
 
 /* Landmark - Anchored Homogeneous Point*/
 LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position_homogeneous,
-                         FrameBase* _anchor_frame,
-                         SensorBase* _anchor_sensor,
+                         FrameBasePtr _anchor_frame,
+                         SensorBasePtr _anchor_sensor,
                          cv::Mat _2D_descriptor) :
     LandmarkBase(LANDMARK_AHP, "AHP", new StateHomogeneous3D(_position_homogeneous)),
     cv_descriptor_(_2D_descriptor.clone()),
@@ -36,14 +36,14 @@ YAML::Node LandmarkAHP::saveToYaml() const
 }
 
 
-wolf::LandmarkBase* LandmarkAHP::create(const YAML::Node& _node)
+wolf::LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
 {
     unsigned int        id          = _node["id"]           .as< unsigned int     >();
     Eigen::VectorXs     pos_homog   = _node["position"]     .as< Eigen::VectorXs  >();
     std::vector<int>    v           = _node["descriptor"]   .as< std::vector<int> >();
     cv::Mat desc(v);
 
-    LandmarkBase* lmk = new LandmarkAHP(pos_homog, nullptr, nullptr, desc);
+    LandmarkBasePtr lmk = new LandmarkAHP(pos_homog, nullptr, nullptr, desc);
     lmk->setId(id);
     return lmk;
 }

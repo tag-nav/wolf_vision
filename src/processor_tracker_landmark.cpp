@@ -89,7 +89,7 @@ void ProcessorTrackerLandmark::createNewLandmarks(LandmarkBaseList& _new_landmar
     for (auto new_feature_ptr : new_features_last_)
     {
         // create new landmark
-        LandmarkBase* new_lmk_ptr = createLandmark(new_feature_ptr);
+        LandmarkBasePtr new_lmk_ptr = createLandmark(new_feature_ptr);
         //std::cout << "\tnew_landmark: " << new_lmk_ptr->id() << std::endl;
         _new_landmarks.push_back(new_lmk_ptr);
         // create new correspondence

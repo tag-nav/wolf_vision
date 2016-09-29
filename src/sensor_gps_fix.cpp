@@ -21,8 +21,8 @@ Scalar SensorGPSFix::getNoise() const
 }
 
 // Define the factory method
-SensorBase* SensorGPSFix::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics,
-                                 const IntrinsicsBase* _intrinsics)
+SensorBasePtr SensorGPSFix::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics,
+                                 const IntrinsicsBasePtr _intrinsics)
 {
     assert((_extrinsics.size() == 2 || _extrinsics.size() == 3)
             && "Bad extrinsic vector size. Should be 2 for 2D, 3 for 3D.");

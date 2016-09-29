@@ -70,8 +70,8 @@ int main(void)
     cout << "\n================== Intrinsics Factory ===================" << endl;
 
     // Use params factory for camera intrinsics
-    IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", WOLF_CONFIG + "/camera.yaml");
-    ProcessorParamsBase* params_ptr = ProcessorParamsFactory::get().create("IMAGE", WOLF_CONFIG + "/processor_image_ORB.yaml");
+    IntrinsicsBasePtr intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", WOLF_CONFIG + "/camera.yaml");
+    ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::get().create("IMAGE", WOLF_CONFIG + "/processor_image_ORB.yaml");
 
     cout << "CAMERA with intrinsics      : " << ((IntrinsicsCamera*)intr_cam_ptr)->pinhole_model.transpose() << endl;
     cout << "Processor IMAGE image width : " << ((ProcessorParamsImage*)params_ptr)->image.width << endl;

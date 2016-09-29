@@ -76,18 +76,18 @@ namespace wolf
  *
  * The method ProcessorOdom2D::create() exists in the ProcessorOdom2D class as a static method.
  * All these ProcessorXxx::create() methods need to have exactly the same API, regardless of the processor type.
- * This API includes a processor name, and a pointer to a base struct of parameters, ProcessorParamsBase*,
+ * This API includes a processor name, and a pointer to a base struct of parameters, ProcessorParamsBasePtr,
  * that can be derived for each derived processor.
  *
  * Here is an example of ProcessorOdom2D::create() extracted from processor_odom_2D.h:
  *
  *     \code
- *     static ProcessorBase* create(const std::string& _name, ProcessorParamsBase* _params)
+ *     static ProcessorBasePtr create(const std::string& _name, ProcessorParamsBasePtr _params)
  *     {
  *         // cast _params to good type
  *         ProcessorParamsOdom2D* params = (ProcessorParamsOdom2D*)_params;
  *
- *         ProcessorBase* prc = new ProcessorOdom2D(params);
+ *         ProcessorBasePtr prc = new ProcessorOdom2D(params);
  *         prc->setName(_name); // pass the name to the created ProcessorOdom2D.
  *         return prc;
  *     }
@@ -134,13 +134,13 @@ namespace wolf
  *     // Note: ProcessorOdom2D::create() is already registered, automatically.
  *
  *     // First create the sensor (See SensorFactory for details)
- *     SensorBase* sensor_ptr = SensorFactory::get().create ( "ODOM 2D" , "Main odometer" , extrinsics , &intrinsics );
+ *     SensorBasePtr sensor_ptr = SensorFactory::get().create ( "ODOM 2D" , "Main odometer" , extrinsics , &intrinsics );
  *
  *     // To create a odometry integrator, provide a type="ODOM 2D", a name="main odometry", and a pointer to the parameters struct:
  *
  *     ProcessorParamsOdom2D  params({...});   // fill in the derived struct (note: ProcessorOdom2D actually has no input params)
  *
- *     ProcessorBase* processor_ptr =
+ *     ProcessorBasePtr processor_ptr =
  *         ProcessorFactory::get().create ( "ODOM 2D" , "main odometry" , &params );
  *
  *     // Bind processor to sensor
@@ -169,13 +169,13 @@ namespace wolf
 class ProcessorFactory
 {
     public:
-        typedef ProcessorBase* (*CreateProcessorCallback)(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        typedef ProcessorBasePtr (*CreateProcessorCallback)(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
     private:
         typedef std::map<std::string, CreateProcessorCallback> CallbackMap;
     public:
         bool registerCreator(const std::string& _processor_type, CreateProcessorCallback createFn);
         bool unregisterCreator(const std::string& _processor_type);
-        ProcessorBase* create(const std::string& _processor_type, const std::string& _unique_name, const ProcessorParamsBase* _params = nullptr);
+        ProcessorBasePtr create(const std::string& _processor_type, const std::string& _unique_name, const ProcessorParamsBasePtr _params = nullptr);
     private:
         CallbackMap callbacks_;
 

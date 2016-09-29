@@ -21,11 +21,11 @@ ProcessorGPS::~ProcessorGPS()
 {
 }
 
-void ProcessorGPS::init(CaptureBase* _capture_ptr)
+void ProcessorGPS::init(CaptureBasePtr _capture_ptr)
 {
 }
 
-void ProcessorGPS::process(CaptureBase* _capture_ptr)
+void ProcessorGPS::process(CaptureBasePtr _capture_ptr)
 {
     std::cout << "ProcessorGPS::process(GPScapture)" << std::endl;
     //TODO add assert with dynamic_cast when it will be ready
@@ -53,12 +53,12 @@ bool ProcessorGPS::voteForKeyFrame()
     return false;
 }
 
-bool ProcessorGPS::keyFrameCallback(wolf::FrameBase*, const Scalar& _time_tol)
+bool ProcessorGPS::keyFrameCallback(wolf::FrameBasePtr, const Scalar& _time_tol)
 {
     return false;
 }
 
-wolf::ProcessorBase* ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+wolf::ProcessorBasePtr ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
     ProcessorGPS* prc_ptr = new ProcessorGPS();
     prc_ptr->setName(_unique_name);

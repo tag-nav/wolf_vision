@@ -25,10 +25,10 @@ bool ProcessorBase::permittedKeyFrame()
     return getProblem()->permitKeyFrame(this);
 }
 
-void ProcessorBase::makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type)
+void ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
-    FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
+    FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
     if (_type == KEY_FRAME)
         // Keyframe callback in order to let the other processors to establish their constraints

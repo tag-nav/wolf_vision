@@ -17,7 +17,7 @@ namespace wolf {
 class HardwareBase : public NodeBase //: public NodeLinked<Problem, SensorBase>
 {
     private:
-        Problem* problem_ptr_;
+        ProblemPtr problem_ptr_;
         SensorBaseList sensor_list_;
 
     public:
@@ -36,16 +36,16 @@ class HardwareBase : public NodeBase //: public NodeLinked<Problem, SensorBase>
                 delete this;
         }
 
-        virtual SensorBase* addSensor(SensorBase* _sensor_ptr);
+        virtual SensorBasePtr addSensor(SensorBasePtr _sensor_ptr);
 
         void removeSensor(const SensorBaseIter& _sensor_iter);
 
-        void removeSensor(SensorBase* _sensor_ptr);
+        void removeSensor(SensorBasePtr _sensor_ptr);
 
         SensorBaseList* getSensorListPtr();
 
-        Problem* getProblem(){return problem_ptr_;}
-        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 };
 
 } // namespace wolf

@@ -40,14 +40,14 @@ int main(int argc, char** argv)
     ceres::Solver::Summary summary_ceres_diff, summary_wolf_diff;
 
     // loading variables
-    std::map<unsigned int, FrameBase*> index_2_frame_ptr_ceres_diff;
-    std::map<unsigned int, FrameBase*> index_2_frame_ptr_wolf_diff;
-    std::map<FrameBase*, unsigned int> frame_ptr_2_index_wolf_diff;
+    std::map<unsigned int, FrameBasePtr> index_2_frame_ptr_ceres_diff;
+    std::map<unsigned int, FrameBasePtr> index_2_frame_ptr_wolf_diff;
+    std::map<FrameBasePtr, unsigned int> frame_ptr_2_index_wolf_diff;
 
     // Wolf problem
-    Problem* wolf_problem_ceres_diff = new Problem(FRM_PO_2D);
-    Problem* wolf_problem_wolf_diff = new Problem(FRM_PO_2D);
-    SensorBase* sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
+    ProblemPtr wolf_problem_ceres_diff = new Problem(FRM_PO_2D);
+    ProblemPtr wolf_problem_wolf_diff = new Problem(FRM_PO_2D);
+    SensorBasePtr sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
     // Ceres wrappers
     ceres::Solver::Options ceres_options;
@@ -114,8 +114,8 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add frame to problem
-                    FrameBase* vertex_frame_ptr_ceres_diff = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
-                    FrameBase* vertex_frame_ptr_wolf_diff = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBasePtr vertex_frame_ptr_ceres_diff = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBasePtr vertex_frame_ptr_wolf_diff = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
                     wolf_problem_ceres_diff->getTrajectoryPtr()->addFrame(vertex_frame_ptr_ceres_diff);
                     wolf_problem_wolf_diff->getTrajectoryPtr()->addFrame(vertex_frame_ptr_wolf_diff);
                     // store
@@ -225,18 +225,18 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add capture, feature and constraint to problem
-                    FeatureBase* feature_ptr_ceres_diff = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
-                    FeatureBase* feature_ptr_wolf_diff = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_ceres_diff = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_wolf_diff = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_ceres_diff = new CaptureVoid(TimeStamp(0), sensor);
                     CaptureVoid* capture_ptr_wolf_diff = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_ceres_diff.find(edge_old) != index_2_frame_ptr_ceres_diff.end() && "edge from vertex not added!");
                     assert(index_2_frame_ptr_wolf_diff.find(edge_old) != index_2_frame_ptr_wolf_diff.end() && "edge from vertex not added!");
-                    FrameBase* frame_old_ptr_ceres_diff = index_2_frame_ptr_ceres_diff[edge_old];
-                    FrameBase* frame_old_ptr_wolf_diff = index_2_frame_ptr_wolf_diff[edge_old];
+                    FrameBasePtr frame_old_ptr_ceres_diff = index_2_frame_ptr_ceres_diff[edge_old];
+                    FrameBasePtr frame_old_ptr_wolf_diff = index_2_frame_ptr_wolf_diff[edge_old];
                     assert(index_2_frame_ptr_ceres_diff.find(edge_new) != index_2_frame_ptr_ceres_diff.end() && "edge to vertex not added!");
                     assert(index_2_frame_ptr_wolf_diff.find(edge_new) != index_2_frame_ptr_wolf_diff.end() && "edge to vertex not added!");
-                    FrameBase* frame_new_ptr_ceres_diff = index_2_frame_ptr_ceres_diff[edge_new];
-                    FrameBase* frame_new_ptr_wolf_diff = index_2_frame_ptr_wolf_diff[edge_new];
+                    FrameBasePtr frame_new_ptr_ceres_diff = index_2_frame_ptr_ceres_diff[edge_new];
+                    FrameBasePtr frame_new_ptr_wolf_diff = index_2_frame_ptr_wolf_diff[edge_new];
                     frame_new_ptr_ceres_diff->addCapture(capture_ptr_ceres_diff);
                     frame_new_ptr_wolf_diff->addCapture(capture_ptr_wolf_diff);
                     capture_ptr_ceres_diff->addFeature(feature_ptr_ceres_diff);
@@ -260,8 +260,8 @@ int main(int argc, char** argv)
         printf("\nError opening file\n");
 
     // PRIOR
-    FrameBase* first_frame_ceres_diff = wolf_problem_ceres_diff->getTrajectoryPtr()->getFrameListPtr()->front();
-    FrameBase* first_frame_wolf_diff = wolf_problem_wolf_diff->getTrajectoryPtr()->getFrameListPtr()->front();
+    FrameBasePtr first_frame_ceres_diff = wolf_problem_ceres_diff->getTrajectoryPtr()->getFrameListPtr()->front();
+    FrameBasePtr first_frame_wolf_diff = wolf_problem_wolf_diff->getTrajectoryPtr()->getFrameListPtr()->front();
     CaptureFix* initial_covariance_ceres_diff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_ceres_diff->getState(), Eigen::Matrix3s::Identity() * 0.01);
     CaptureFix* initial_covariance_wolf_diff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_wolf_diff->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_ceres_diff->addCapture(initial_covariance_ceres_diff);

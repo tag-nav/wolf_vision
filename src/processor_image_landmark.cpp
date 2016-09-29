@@ -284,7 +284,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
     return n_new_features;
 }
 
-LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
+LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_ptr)
 {
     FeaturePointImage* feat_point_image_ptr = (FeaturePointImage*) _feature_ptr;
 
@@ -317,7 +317,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     unitary_vector.normalize();
 //    std::cout << "unitary_vector: " << unitary_vector(0) << "\t" << unitary_vector(1) << "\t" << unitary_vector(2) << std::endl;
 
-    FrameBase* anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
+    FrameBasePtr anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
 
     // TODO: Poner el anchor del punto (ahora mismo está en el 0 del world, pero no hay código por si cambia)
 
@@ -328,7 +328,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     return new LandmarkAHP(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
 }
 
-ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
+ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
 //    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
     if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
@@ -594,7 +594,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
 
 //namespace wolf{
 
-ProcessorBase* ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+ProcessorBasePtr ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
     ProcessorImageLandmark* prc_ptr = new ProcessorImageLandmark(*((ProcessorParamsImage*)_params));
     prc_ptr->setName(_unique_name);

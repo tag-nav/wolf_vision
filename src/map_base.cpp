@@ -29,7 +29,7 @@ MapBase::~MapBase()
 	//std::cout << "deleting MapBase " << nodeId() << std::endl;
 }
 
-LandmarkBase* MapBase::addLandmark(LandmarkBase* _landmark_ptr)
+LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)
 {
 	//std::cout << "MapBase::addLandmark" << std::endl;
     landmark_list_.push_back(_landmark_ptr);
@@ -52,7 +52,7 @@ void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)
     landmark_list_.splice(landmark_list_.end(), _landmark_list);
 }
 
-void MapBase::removeLandmark(LandmarkBase* _landmark_ptr)
+void MapBase::removeLandmark(LandmarkBasePtr _landmark_ptr)
 {
     landmark_list_.remove(_landmark_ptr);
     delete _landmark_ptr;
@@ -77,7 +77,7 @@ void MapBase::load(const std::string& _map_file_dot_yaml)
     for (unsigned int i = 0; i < nlandmarks; i++)
     {
         YAML::Node lmk_node = map["landmarks"][i];
-        LandmarkBase* lmk_ptr = LandmarkFactory::get().create(lmk_node["type"].as<std::string>(), lmk_node);
+        LandmarkBasePtr lmk_ptr = LandmarkFactory::get().create(lmk_node["type"].as<std::string>(), lmk_node);
         addLandmark(lmk_ptr);
     }
 
@@ -95,7 +95,7 @@ void MapBase::save(const std::string& _map_file_yaml, const std::string& _map_na
 
     emitter << "landmarks"  << YAML::BeginSeq;
 
-    for (LandmarkBase* lmk_ptr : *getLandmarkListPtr())
+    for (LandmarkBasePtr lmk_ptr : *getLandmarkListPtr())
     {
         emitter << YAML::Flow << lmk_ptr->saveToYaml();
     }

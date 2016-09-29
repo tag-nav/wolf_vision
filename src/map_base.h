@@ -42,7 +42,7 @@ class MapBase : public NodeBase //: public NodeLinked<Problem,LandmarkBase>
          *
          * Adds a landmark to the Map. It also updates the lists of StateBlocks that are used by the solver.
          **/
-        virtual LandmarkBase* addLandmark(LandmarkBase* _landmark_ptr);
+        virtual LandmarkBasePtr addLandmark(LandmarkBasePtr _landmark_ptr);
 
         /** \brief Adds a landmark
          *
@@ -51,15 +51,15 @@ class MapBase : public NodeBase //: public NodeLinked<Problem,LandmarkBase>
         virtual void addLandmarkList(LandmarkBaseList _landmark_list);
 
         void removeLandmark(const LandmarkBaseIter& _landmark_iter);
-        void removeLandmark(LandmarkBase* _landmark_ptr);
+        void removeLandmark(LandmarkBasePtr _landmark_ptr);
 
         LandmarkBaseList* getLandmarkListPtr();
         
         void load(const std::string& _map_file_yaml);
         void save(const std::string& _map_file_yaml, const std::string& _map_name = "Map automatically saved by Wolf");
 
-        Problem* getProblem(){return problem_ptr_;}
-        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
     private:
         std::string dateTimeNow();

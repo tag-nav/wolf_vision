@@ -71,13 +71,13 @@ unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int
     return new_features_last_.size();
 }
 
-LandmarkBase* ProcessorTrackerLandmarkDummy::createLandmark(FeatureBase* _feature_ptr)
+LandmarkBasePtr ProcessorTrackerLandmarkDummy::createLandmark(FeatureBasePtr _feature_ptr)
 {
     //std::cout << "ProcessorTrackerLandmarkDummy::createLandmark" << std::endl;
     return new LandmarkCorner2D(new StateBlock(2), new StateBlock(1), _feature_ptr->getMeasurement(0));
 }
 
-ConstraintBase* ProcessorTrackerLandmarkDummy::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
+ConstraintBasePtr ProcessorTrackerLandmarkDummy::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
     std::cout << "\tProcessorTrackerLandmarkDummy::createConstraint" << std::endl;
     std::cout << "\t\tfeature " << _feature_ptr->getMeasurement() << std::endl;

@@ -29,7 +29,7 @@ bool ProcessorFactory::unregisterCreator(const std::string& _processor_type)
     return callbacks_.erase(_processor_type) == 1;
 }
 
-ProcessorBase* ProcessorFactory::create(const std::string& _processor_type, const std::string& _name, const ProcessorParamsBase* _params)
+ProcessorBasePtr ProcessorFactory::create(const std::string& _processor_type, const std::string& _name, const ProcessorParamsBasePtr _params)
 {
     CallbackMap::const_iterator creator_callback_it = callbacks_.find(_processor_type);
     if (creator_callback_it == callbacks_.end())

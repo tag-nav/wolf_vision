@@ -6,7 +6,7 @@ namespace wolf{
 
 unsigned int CaptureBase::capture_id_count_ = 0;
 
-CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBase* _sensor_ptr) :
+CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr) :
         NodeBase("CAPTURE", _type),
 //        NodeLinked(MID, "CAPTURE", _type),
         capture_id_(++capture_id_count_),

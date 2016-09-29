@@ -17,14 +17,14 @@ namespace wolf
 // Match Feature - Landmark
 struct LandmarkMatch
 {
-        LandmarkBase* landmark_ptr_;
+        LandmarkBasePtr landmark_ptr_;
         Scalar normalized_score_;
 
         LandmarkMatch() :
                 landmark_ptr_(nullptr), normalized_score_(0.0)
         {
         }
-        LandmarkMatch(LandmarkBase* _landmark_ptr, const Scalar& _normalized_score) :
+        LandmarkMatch(LandmarkBasePtr _landmark_ptr, const Scalar& _normalized_score) :
                 landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
         {
 
@@ -32,7 +32,7 @@ struct LandmarkMatch
 };
 
 // Match map Feature - Landmark
-typedef std::map<FeatureBase*, LandmarkMatch> LandmarkMatchMap;
+typedef std::map<FeatureBasePtr, LandmarkMatch> LandmarkMatchMap;
 
 /** \brief Landmark tracker processor
  *
@@ -167,7 +167,7 @@ class ProcessorTrackerLandmark2 : public ProcessorTracker
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
          */
-        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr) = 0;
+        virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr) = 0;
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
@@ -178,7 +178,7 @@ class ProcessorTrackerLandmark2 : public ProcessorTracker
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr) = 0;
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr) = 0;
 
         /** \brief Establish constraints between features in Captures \b last and \b origin
          */

@@ -16,7 +16,7 @@ HardwareBase::~HardwareBase()
 	//std::cout << "deleting HardwareBase " << nodeId() << std::endl;
 }
 
-SensorBase* HardwareBase::addSensor(SensorBase* _sensor_ptr)
+SensorBasePtr HardwareBase::addSensor(SensorBasePtr _sensor_ptr)
 {
     //std::cout << "adding sensor..." << std::endl;
     sensor_list_.push_back(_sensor_ptr);
@@ -30,7 +30,7 @@ SensorBase* HardwareBase::addSensor(SensorBase* _sensor_ptr)
 
 }
 
-void HardwareBase::removeSensor(SensorBase* _sensor_ptr)
+void HardwareBase::removeSensor(SensorBasePtr _sensor_ptr)
 {
     sensor_list_.remove(_sensor_ptr);
     delete _sensor_ptr;

@@ -23,11 +23,11 @@ class TrajectoryBase : public NodeBase //: public NodeBase // NodeLinked<Problem
 {
     private:
         ProblemPtr problem_ptr_;
-        std::list<FrameBase*> frame_list_;
+        std::list<FrameBasePtr> frame_list_;
 
     protected:
         FrameStructure frame_structure_; // Defines the structure of the Frames in the Trajectory.
-        FrameBase* last_key_frame_ptr_;  // keeps pointer to the last key frame
+        FrameBasePtr last_key_frame_ptr_;  // keeps pointer to the last key frame
         
     public:
         TrajectoryBase(FrameStructure _frame_sturcture);
@@ -42,7 +42,7 @@ class TrajectoryBase : public NodeBase //: public NodeBase // NodeLinked<Problem
         
         /** \brief Add a frame to the trajectory
          **/
-        FrameBase* addFrame(FrameBase* _frame_ptr);
+        FrameBasePtr addFrame(FrameBasePtr _frame_ptr);
 
         /** \brief Remove a frame to the trajectory
          **/
@@ -55,15 +55,15 @@ class TrajectoryBase : public NodeBase //: public NodeBase // NodeLinked<Problem
 
         /** \brief Returns a pointer to last frame
          **/
-        FrameBase* getLastFramePtr();
+        FrameBasePtr getLastFramePtr();
 
         /** \brief Returns a pointer to last key frame
          */
-        FrameBase* getLastKeyFramePtr();
+        FrameBasePtr getLastKeyFramePtr();
 
         /** \brief Sets the pointer to last key frame
          */
-        void setLastKeyFramePtr(FrameBase* _key_frame_ptr);
+        void setLastKeyFramePtr(FrameBasePtr _key_frame_ptr);
 
         /** \brief Returns a list of all constraints in the trajectory thru reference
          **/
@@ -75,7 +75,7 @@ class TrajectoryBase : public NodeBase //: public NodeBase // NodeLinked<Problem
 
         /** \brief Sorts the frame by timestamp
          **/
-        void sortFrame(FrameBase* _frame_iter);
+        void sortFrame(FrameBasePtr _frame_iter);
 
         void moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
         {
@@ -88,14 +88,14 @@ class TrajectoryBase : public NodeBase //: public NodeBase // NodeLinked<Problem
 
         /** \brief Compute the position where the frame should be
          **/
-        FrameBaseIter computeFrameOrder(FrameBase* _frame_ptr);
+        FrameBaseIter computeFrameOrder(FrameBasePtr _frame_ptr);
 
         /** \brief Finds the closes key frame to a given timestamp
          **/
-        FrameBase* closestKeyFrameToTimeStamp(const TimeStamp& _ts);
+        FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts);
 
-        Problem* getProblem(){return problem_ptr_;}
-        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 };
 
@@ -124,18 +124,18 @@ inline FrameBaseList* TrajectoryBase::getFrameListPtr()
     return & frame_list_;
 }
 
-inline FrameBase* TrajectoryBase::getLastFramePtr()
+inline FrameBasePtr TrajectoryBase::getLastFramePtr()
 {
 //    return getDownNodeListPtr()->back();
     return frame_list_.back();
 }
 
-inline FrameBase* TrajectoryBase::getLastKeyFramePtr()
+inline FrameBasePtr TrajectoryBase::getLastKeyFramePtr()
 {
     return last_key_frame_ptr_;
 }
 
-inline void TrajectoryBase::setLastKeyFramePtr(FrameBase* _key_frame_ptr)
+inline void TrajectoryBase::setLastKeyFramePtr(FrameBasePtr _key_frame_ptr)
 {
     last_key_frame_ptr_ = _key_frame_ptr;
 }

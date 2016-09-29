@@ -28,7 +28,7 @@ bool SensorFactory::unregisterCreator(const std::string& _sensor_type)
     return callbacks_.erase(_sensor_type) == 1;
 }
 
-SensorBase* SensorFactory::create(const std::string& _sensor_type, const std::string& _name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBase* _intrinsics)
+SensorBasePtr SensorFactory::create(const std::string& _sensor_type, const std::string& _name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBasePtr _intrinsics)
 {
     CallbackMap::const_iterator creator_callback_it = callbacks_.find(_sensor_type);
     if (creator_callback_it == callbacks_.end())

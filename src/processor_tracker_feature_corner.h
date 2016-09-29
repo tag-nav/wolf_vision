@@ -89,7 +89,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
+        virtual bool correctFeatureDrift(const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature);
 
         /** \brief Vote for KeyFrame generation
          *
@@ -122,7 +122,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
     private:
 
@@ -149,8 +149,8 @@ inline void ProcessorTrackerFeatureCorner::postProcess()
 {
 }
 
-inline bool ProcessorTrackerFeatureCorner::correctFeatureDrift(const FeatureBase* _last_feature,
-                                                              FeatureBase* _incoming_feature)
+inline bool ProcessorTrackerFeatureCorner::correctFeatureDrift(const FeatureBasePtr _last_feature,
+                                                              FeatureBasePtr _incoming_feature)
 {
     return true;
 }

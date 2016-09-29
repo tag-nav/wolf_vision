@@ -52,8 +52,8 @@ const laserscanutils::LaserScanParams& SensorLaser2D::getScanParams() const
 }
 
 // Define the factory method
-SensorBase* SensorLaser2D::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po,
-                                  const IntrinsicsBase* _intrinsics)
+SensorBasePtr SensorLaser2D::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po,
+                                  const IntrinsicsBasePtr _intrinsics)
 {
     // decode extrinsics vector
     assert(_extrinsics_po.size() == 3 && "Bad extrinsics vector length. Should be 3 for 2D.");
@@ -80,9 +80,9 @@ SensorBase* SensorLaser2D::create(const std::string& _unique_name, const Eigen::
 //#include "yaml-cpp/yaml.h"
 namespace wolf {
 //// Yaml parser here !
-//IntrinsicsBase* createIntrinsicsLaser2D(const std::string& _filename_dot_yaml)
+//IntrinsicsBasePtr createIntrinsicsLaser2D(const std::string& _filename_dot_yaml)
 //{
-//    IntrinsicsBase* params; // dummy
+//    IntrinsicsBasePtr params; // dummy
 //    return params;
 //}
 namespace

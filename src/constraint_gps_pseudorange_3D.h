@@ -24,7 +24,7 @@ class ConstraintGPSPseudorange3D: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
 
 public:
 
-    ConstraintGPSPseudorange3D(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+    ConstraintGPSPseudorange3D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 3, 4, 3, 1, 3, 4>(CTR_GPS_PR_3D, _apply_loss_function, _status,
                             _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to map frame
                             _ftr_ptr->getFramePtr()->getOPtr(), // orientation of the vehicle's frame wrt map frame
@@ -77,8 +77,8 @@ protected:
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
-    static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                                        NodeBase* _correspondant_ptr = nullptr)
+    static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
+                                        NodeBasePtr _correspondant_ptr = nullptr)
     {
         return new ConstraintGPSPseudorange3D(_feature_ptr);
     }

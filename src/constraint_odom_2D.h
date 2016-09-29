@@ -12,7 +12,7 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
     public:
 //        static const unsigned int N_BLOCKS = 4;
 
-        ConstraintOdom2D(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+        ConstraintOdom2D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<3, 2, 1, 2, 1>(CTR_ODOM_2D, _frame_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("ODOM 2D");
@@ -40,10 +40,10 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
         }
 
     public:
-        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                                            NodeBase* _correspondant_ptr)
+        static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
+                                            NodeBasePtr _correspondant_ptr)
         {
-            return new ConstraintOdom2D(_feature_ptr, (FrameBase*)_correspondant_ptr);
+            return new ConstraintOdom2D(_feature_ptr, (FrameBasePtr)_correspondant_ptr);
         }
 
 };

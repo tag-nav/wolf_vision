@@ -19,7 +19,7 @@
 
 using namespace wolf;
 
-void printFrames(Problem* _problem_ptr)
+void printFrames(ProblemPtr _problem_ptr)
 {
     std::cout << "TRAJECTORY:" << std::endl;
     for (auto frm : *(_problem_ptr->getTrajectoryPtr()->getFrameListPtr()))
@@ -31,11 +31,11 @@ int main()
     Problem problem(FRM_PO_2D);
 
     problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.1));
-    FrameBase* frm2 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.2));
-    FrameBase* frm3 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.3));
+    FrameBasePtr frm2 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.2));
+    FrameBasePtr frm3 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.3));
     problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.4));
-    FrameBase* frm5 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.5));
-    FrameBase* frm6 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.6));
+    FrameBasePtr frm5 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.5));
+    FrameBasePtr frm6 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.6));
 
     printFrames(&problem);
 
@@ -64,12 +64,12 @@ int main()
 
     printFrames(&problem);
 
-    FrameBase* frm7 = problem.createFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.7));
+    FrameBasePtr frm7 = problem.createFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.7));
     std::cout << std::endl << "created Key Frame " << frm7->id() << " TS: " << 0.7 << std::endl;
 
     printFrames(&problem);
 
-    FrameBase* frm8 = problem.createFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.35));
+    FrameBasePtr frm8 = problem.createFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.35));
     std::cout << std::endl << "created Key Frame " << frm8->id() << " TS: " << 0.35 << std::endl;
 
     printFrames(&problem);

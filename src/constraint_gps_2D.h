@@ -14,7 +14,7 @@ class ConstraintGPS2D : public ConstraintSparse<2, 2>
     public:
 //        static const unsigned int N_BLOCKS = 1;
 
-        ConstraintGPS2D(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+        ConstraintGPS2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<2, 2>(CTR_GPS_FIX_2D, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr())
         {
             setType("GPS FIX 2D");

@@ -30,7 +30,7 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
     protected:
         unsigned int capture_id_;
         TimeStamp time_stamp_; ///< Time stamp
-        SensorBase* sensor_ptr_; ///< Pointer to sensor
+        SensorBasePtr sensor_ptr_; ///< Pointer to sensor
 
         // Allow precomputing global frames for accelerating code.
         //Eigen::Vector3s sensor_pose_global_; ///< Sensor pose in world frame: composition of the frame pose and the sensor pose. TODO: use state units
@@ -42,7 +42,7 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
 
     public:
 
-        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBase* _sensor_ptr);
+        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr);
 
         /** \brief Default destructor (not recommended)
          *
@@ -57,14 +57,14 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
 
         /** \brief Adds a Feature to the down node list
          **/
-        FeatureBase* addFeature(FeatureBase* _ft_ptr);
+        FeatureBasePtr addFeature(FeatureBasePtr _ft_ptr);
         void addFeatureList(FeatureBaseList& _new_ft_list);
         void removeFeature(FeatureBasePtr _ft_ptr);
 
 
         /** \brief Gets Frame pointer
          **/
-        FrameBase* getFramePtr() const;
+        FrameBasePtr getFramePtr() const;
         void setFramePtr(const FrameBasePtr _frm_ptr);
         void unlinkFromFrame(){frame_ptr_ = nullptr;}
 
@@ -79,7 +79,7 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
 
         TimeStamp getTimeStamp() const;
 
-        SensorBase* getSensorPtr() const;
+        SensorBasePtr getSensorPtr() const;
 
         StateBlock* getSensorPPtr() const;
 
@@ -93,8 +93,8 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
          */
         virtual void process();
 
-        Problem* getProblem(){return problem_ptr_;}
-        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 
 };
@@ -111,7 +111,7 @@ inline unsigned int CaptureBase::id()
     return capture_id_;
 }
 
-inline FeatureBase* CaptureBase::addFeature(FeatureBase* _ft_ptr)
+inline FeatureBasePtr CaptureBase::addFeature(FeatureBasePtr _ft_ptr)
 {
     //std::cout << "Adding feature" << std::endl;
     feature_list_.push_back(_ft_ptr);
@@ -120,7 +120,7 @@ inline FeatureBase* CaptureBase::addFeature(FeatureBase* _ft_ptr)
     return _ft_ptr;
 }
 
-inline FrameBase* CaptureBase::getFramePtr() const
+inline FrameBasePtr CaptureBase::getFramePtr() const
 {
     return frame_ptr_;
 //    return upperNodePtr();
@@ -142,7 +142,7 @@ inline TimeStamp CaptureBase::getTimeStamp() const
     return time_stamp_;
 }
 
-inline SensorBase* CaptureBase::getSensorPtr() const
+inline SensorBasePtr CaptureBase::getSensorPtr() const
 {
     return sensor_ptr_;
 }

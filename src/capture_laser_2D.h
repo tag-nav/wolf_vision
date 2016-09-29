@@ -17,7 +17,7 @@ class CaptureLaser2D : public CaptureBase
     public:
         /** \brief Constructor with ranges
          **/
-        CaptureLaser2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges);
+        CaptureLaser2D(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const std::vector<float>& _ranges);
 
         /** \brief Default destructor (not recommended)
          *

@@ -13,7 +13,7 @@
 
 namespace wolf {
 
-ceres::CostFunction* createNumericDiffCostFunction(ConstraintBase* _ctr_ptr, bool _use_wolf_numericdiff);
+ceres::CostFunction* createNumericDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool _use_wolf_numericdiff);
 
 } // namespace wolf
 

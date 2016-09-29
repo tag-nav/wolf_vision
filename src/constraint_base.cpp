@@ -21,7 +21,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
 }
 
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
@@ -37,7 +37,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, bool _
 }
 
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, bool _apply_loss_function, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
@@ -53,7 +53,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, bo
 }
 
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT"),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
@@ -105,7 +105,7 @@ const Eigen::MatrixXs& ConstraintBase::getMeasurementSquareRootInformation() con
     return getFeaturePtr()->getMeasurementSquareRootInformation();
 }
 
-CaptureBase* ConstraintBase::getCapturePtr() const
+CaptureBasePtr ConstraintBase::getCapturePtr() const
 {
     return getFeaturePtr()->getCapturePtr();
 //	return upperNodePtr()->upperNodePtr();

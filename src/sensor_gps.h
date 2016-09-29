@@ -48,7 +48,7 @@ public:
     virtual void registerNewStateBlocks();
 
 public:
-    static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_p, const IntrinsicsBase* _intrinsics);
+    static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_p, const IntrinsicsBasePtr _intrinsics);
 
 
 };

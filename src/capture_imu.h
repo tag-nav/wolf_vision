@@ -10,9 +10,15 @@ class CaptureIMU : public CaptureMotion
 {
     public:
 
-        CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data);
+        CaptureIMU(const TimeStamp& _init_ts, SensorBasePtr _sensor_ptr, const Eigen::Vector6s& _data);
 
-        /*CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance);*/
+//<<<<<<< e72779277b2cbd56ce81286c43b51ae2b4934110
+//        /*CaptureIMU(const TimeStamp& _init_ts, SensorBase* _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance);*/
+//=======
+//        /*CaptureIMU(const TimeStamp& _init_ts, SensorBasePtr _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance);
+//
+//        CaptureIMU(const TimeStamp& _init_ts, SensorBasePtr _sensor_ptr, const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance, FrameBasePtr _origin_frame_ptr);*/
+//>>>>>>> typedef all pointers to base classes
 
         /** \brief Default destructor (not recommended)
          *

@@ -71,14 +71,14 @@ int main(int argc, char** argv)
     double t_sigma_manual = 0;
 
     // loading variables
-    std::map<unsigned int, FrameBase*> index_2_frame_ptr_full;
-    std::map<unsigned int, FrameBase*> index_2_frame_ptr_prun;
-    std::map<FrameBase*, unsigned int> frame_ptr_2_index_prun;
+    std::map<unsigned int, FrameBasePtr> index_2_frame_ptr_full;
+    std::map<unsigned int, FrameBasePtr> index_2_frame_ptr_prun;
+    std::map<FrameBasePtr, unsigned int> frame_ptr_2_index_prun;
 
     // Wolf problem
-    Problem* wolf_problem_full = new Problem(FRM_PO_2D);
-    Problem* wolf_problem_prun = new Problem(FRM_PO_2D);
-    SensorBase* sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
+    ProblemPtr wolf_problem_full = new Problem(FRM_PO_2D);
+    ProblemPtr wolf_problem_prun = new Problem(FRM_PO_2D);
+    SensorBasePtr sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
     Eigen::SparseMatrix<Scalar> Lambda(0,0);
 
@@ -149,8 +149,8 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add frame to problem
-                    FrameBase* vertex_frame_ptr_full = new FrameBase(KEY_FRAME, TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
-                    FrameBase* vertex_frame_ptr_prun = new FrameBase(KEY_FRAME, TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBasePtr vertex_frame_ptr_full = new FrameBase(KEY_FRAME, TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBasePtr vertex_frame_ptr_prun = new FrameBase(KEY_FRAME, TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
                     wolf_problem_full->getTrajectoryPtr()->addFrame(vertex_frame_ptr_full);
                     wolf_problem_prun->getTrajectoryPtr()->addFrame(vertex_frame_ptr_prun);
                     // store
@@ -263,18 +263,18 @@ int main(int argc, char** argv)
 
                     //std::cout << "Adding edge... " << std::endl;
                     // add capture, feature and constraint to problem
-                    FeatureBase* feature_ptr_full = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
-                    FeatureBase* feature_ptr_prun = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_full = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_prun = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_full = new CaptureVoid(TimeStamp(0), sensor);
                     CaptureVoid* capture_ptr_prun = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_full.find(edge_old) != index_2_frame_ptr_full.end() && "edge from vertex not added!");
                     assert(index_2_frame_ptr_prun.find(edge_old) != index_2_frame_ptr_prun.end() && "edge from vertex not added!");
-                    FrameBase* frame_old_ptr_full = index_2_frame_ptr_full[edge_old];
-                    FrameBase* frame_old_ptr_prun = index_2_frame_ptr_prun[edge_old];
+                    FrameBasePtr frame_old_ptr_full = index_2_frame_ptr_full[edge_old];
+                    FrameBasePtr frame_old_ptr_prun = index_2_frame_ptr_prun[edge_old];
                     assert(index_2_frame_ptr_full.find(edge_new) != index_2_frame_ptr_full.end() && "edge to vertex not added!");
                     assert(index_2_frame_ptr_prun.find(edge_new) != index_2_frame_ptr_prun.end() && "edge to vertex not added!");
-                    FrameBase* frame_new_ptr_full = index_2_frame_ptr_full[edge_new];
-                    FrameBase* frame_new_ptr_prun = index_2_frame_ptr_prun[edge_new];
+                    FrameBasePtr frame_new_ptr_full = index_2_frame_ptr_full[edge_new];
+                    FrameBasePtr frame_new_ptr_prun = index_2_frame_ptr_prun[edge_new];
                     frame_new_ptr_full->addCapture(capture_ptr_full);
                     frame_new_ptr_prun->addCapture(capture_ptr_prun);
                     capture_ptr_full->addFeature(feature_ptr_full);
@@ -323,8 +323,8 @@ int main(int argc, char** argv)
         printf("\nError opening file\n");
 
     // PRIOR
-    FrameBase* first_frame_full = wolf_problem_full->getTrajectoryPtr()->getFrameListPtr()->front();
-    FrameBase* first_frame_prun = wolf_problem_prun->getTrajectoryPtr()->getFrameListPtr()->front();
+    FrameBasePtr first_frame_full = wolf_problem_full->getTrajectoryPtr()->getFrameListPtr()->front();
+    FrameBasePtr first_frame_prun = wolf_problem_prun->getTrajectoryPtr()->getFrameListPtr()->front();
     CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
     CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_full->addCapture(initial_covariance_full);

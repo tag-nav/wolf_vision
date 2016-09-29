@@ -30,8 +30,8 @@ struct IntrinsicsBase
 class SensorBase : public NodeBase // NodeLinked<HardwareBase, ProcessorBase>
 {
     private:
-        Problem* problem_ptr_;
-        HardwareBase* hardware_ptr_;
+        ProblemPtr problem_ptr_;
+        HardwareBasePtr hardware_ptr_;
         ProcessorBaseList processor_list_;
 
         static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
@@ -97,7 +97,7 @@ class SensorBase : public NodeBase // NodeLinked<HardwareBase, ProcessorBase>
 
         SensorType typeId();
 
-        ProcessorBase* addProcessor(ProcessorBase* _proc_ptr);
+        ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
         void removeProcessor(ProcessorBasePtr _prc_ptr);
 
         ProcessorBaseList* getProcessorListPtr();
@@ -127,8 +127,8 @@ class SensorBase : public NodeBase // NodeLinked<HardwareBase, ProcessorBase>
 
         Eigen::MatrixXs getNoiseCov();
 
-        Problem* getProblem(){return problem_ptr_;}
-        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 };
 
@@ -155,7 +155,7 @@ inline wolf::SensorType SensorBase::typeId()
     return type_id_;
 }
 
-inline ProcessorBase* SensorBase::addProcessor(ProcessorBase* _proc_ptr)
+inline ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
 {
     processor_list_.push_back(_proc_ptr);
     _proc_ptr->setSensorPtr(this);

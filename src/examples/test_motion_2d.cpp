@@ -50,11 +50,11 @@ int main()
     Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2, 2) * 0.01;
 
     // Create Wolf tree nodes
-    Problem* problem_ptr = new Problem(FRM_PO_2D);
-    SensorBase* sensor_odom_ptr = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::Vector2s::Zero(), true),
+    ProblemPtr problem_ptr = new Problem(FRM_PO_2D);
+    SensorBasePtr sensor_odom_ptr = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::Vector2s::Zero(), true),
                                             new StateBlock(Eigen::Vector1s::Zero(), true),
                                             new StateBlock(Eigen::VectorXs::Zero(0), true), 0);
-    SensorBase* sensor_fix_ptr = new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
+    SensorBasePtr sensor_fix_ptr = new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
     ProcessorOdom2D* odom2d_ptr = new ProcessorOdom2D(100,100,100);
     // Assemble Wolf tree by linking the nodes
     sensor_odom_ptr->addProcessor(odom2d_ptr);
@@ -70,7 +70,7 @@ int main()
 
 
     // Origin Key Frame
-    FrameBase* origin_frame = problem_ptr->createFrame(KEY_FRAME, x0, t0);
+    FrameBasePtr origin_frame = problem_ptr->createFrame(KEY_FRAME, x0, t0);
 
     // Prior covariance
     CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), sensor_fix_ptr, x0, init_cov);
@@ -206,7 +206,7 @@ int main()
     TimeStamp t_split = t0 + 0.13;
     std::cout << "Split time:                  " << t_split - t0 << std::endl;
 
-    FrameBase* new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
+    FrameBasePtr new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
 
     odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 

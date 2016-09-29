@@ -28,8 +28,8 @@ struct ProcessorParamsBase
 class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
 {
     private:
-        Problem* problem_ptr_;
-        SensorBase* sensor_ptr_;
+        ProblemPtr problem_ptr_;
+        SensorBasePtr sensor_ptr_;
     public:
         ProcessorBase(ProcessorType _tp, const std::string& _type, const Scalar& _time_tolerance = 0);
 
@@ -43,7 +43,7 @@ class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
 
         unsigned int id();
 
-        virtual void process(CaptureBase* _capture_ptr) = 0;
+        virtual void process(CaptureBasePtr _capture_ptr) = 0;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -58,18 +58,18 @@ class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
 
         /**\brief make a Frame with the provided Capture
          */
-        virtual void makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
+        virtual void makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
 
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tolerance) = 0;
+        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tolerance) = 0;
 
-        SensorBase* getSensorPtr();
-        const SensorBase* getSensorPtr() const;
-        void setSensorPtr(SensorBase* _sen_ptr){sensor_ptr_ = _sen_ptr;}
+        SensorBasePtr getSensorPtr();
+        const SensorBasePtr getSensorPtr() const;
+        void setSensorPtr(SensorBasePtr _sen_ptr){sensor_ptr_ = _sen_ptr;}
 
         virtual bool isMotion();
 
-        Problem* getProblem(){return problem_ptr_;}
-        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
     private:
         static unsigned int processor_id_count_;
@@ -115,13 +115,13 @@ inline unsigned int ProcessorBase::id()
     return processor_id_;
 }
 
-inline SensorBase* ProcessorBase::getSensorPtr()
+inline SensorBasePtr ProcessorBase::getSensorPtr()
 {
     return sensor_ptr_;
 //    return upperNodePtr();
 }
 
-inline const SensorBase* ProcessorBase::getSensorPtr() const
+inline const SensorBasePtr ProcessorBase::getSensorPtr() const
 {
     return sensor_ptr_;
 //    return upperNodePtr();

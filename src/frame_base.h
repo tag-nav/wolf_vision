@@ -110,22 +110,22 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
         FrameBasePtr getNextFrame() const;
 
         CaptureBaseList* getCaptureListPtr();
-        CaptureBasePtr addCapture(CaptureBase* _capt_ptr);
+        CaptureBasePtr addCapture(CaptureBasePtr _capt_ptr);
         void removeCapture(const CaptureBaseIter& _capt_iter);
         void removeCapture(const CaptureBasePtr _capt_ptr);
-        CaptureBasePtr hasCaptureOf(const SensorBase* _sensor_ptr);
+        CaptureBasePtr hasCaptureOf(const SensorBasePtr _sensor_ptr);
         void unlinkCapture(CaptureBasePtr _cap_ptr);
 
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
         ProblemPtr getProblem(){return problem_ptr_;}
-        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
-        virtual void addConstrainedBy(ConstraintBase* _ctr_ptr)
+        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr)
         {
             constrained_by_list_.push_back(_ctr_ptr);
         }
-        virtual void removeConstrainedBy(ConstraintBase* _ctr_ptr)
+        virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
         {
             constrained_by_list_.remove(_ctr_ptr);
         }
@@ -223,7 +223,7 @@ inline StateBlock* FrameBase::getVPtr() const
     return v_ptr_;
 }
 
-inline TrajectoryBase* FrameBase::getTrajectoryPtr() const
+inline TrajectoryBasePtr FrameBase::getTrajectoryPtr() const
 {
     return trajectory_ptr_;
 //    return upperNodePtr();

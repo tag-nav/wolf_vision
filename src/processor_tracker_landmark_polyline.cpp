@@ -58,8 +58,8 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
     //std::cout << "ProcessorTrackerLandmarkPolyline::findLandmarks: " << _landmarks_searched.size() << " features: " << polylines_incoming_.size()  << std::endl;
 
     // COMPUTING ALL EXPECTED FEATURES
-    std::map<LandmarkBase*, Eigen::MatrixXs> expected_features;
-    std::map<LandmarkBase*, Eigen::MatrixXs> expected_features_covs;
+    std::map<LandmarkBasePtr, Eigen::MatrixXs> expected_features;
+    std::map<LandmarkBasePtr, Eigen::MatrixXs> expected_features_covs;
     for (auto landmark : _landmarks_searched)
         if (landmark->getTypeId() == LANDMARK_POLYLINE_2D)
         {
@@ -334,7 +334,7 @@ void ProcessorTrackerLandmarkPolyline::extractPolylines(CaptureLaser2D* _capture
     //std::cout << _polyline_list.size() << " polylines extracted" << std::endl;
 }
 
-void ProcessorTrackerLandmarkPolyline::expectedFeature(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& expected_feature_,
+void ProcessorTrackerLandmarkPolyline::expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& expected_feature_,
                                                    Eigen::MatrixXs& expected_feature_cov_)
 {
     assert(_landmark_ptr->getTypeId() == LANDMARK_POLYLINE_2D && "ProcessorTrackerLandmarkPolyline::expectedFeature: Bad landmark type");
@@ -482,7 +482,7 @@ void ProcessorTrackerLandmarkPolyline::createNewLandmarks(LandmarkBaseList& _new
 {
     //std::cout << "ProcessorTrackerLandmarkPolyline::createNewLandmarks" << std::endl;
     FeaturePolyline2D* polyline_ft_ptr;
-    LandmarkBase* new_lmk_ptr;
+    LandmarkBasePtr new_lmk_ptr;
     for (auto new_feature_ptr : new_features_last_)
     {
         // create new landmark
@@ -504,7 +504,7 @@ void ProcessorTrackerLandmarkPolyline::createNewLandmarks(LandmarkBaseList& _new
     }
 }
 
-LandmarkBase* ProcessorTrackerLandmarkPolyline::createLandmark(FeatureBase* _feature_ptr)
+LandmarkBasePtr ProcessorTrackerLandmarkPolyline::createLandmark(FeatureBasePtr _feature_ptr)
 {
     assert(_feature_ptr->getTypeId() == FEATURE_POLYLINE_2D);
     //std::cout << "ProcessorTrackerLandmarkPolyline::createLandmark" << std::endl;
@@ -1001,13 +1001,13 @@ void ProcessorTrackerLandmarkPolyline::postProcess()
     classifyPolilines(getProblem()->getMapPtr()->getLandmarkListPtr());
 }
 
-ConstraintBase* ProcessorTrackerLandmarkPolyline::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
+ConstraintBasePtr ProcessorTrackerLandmarkPolyline::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
     // not used
     return nullptr;
 }
 
-ProcessorBase* ProcessorTrackerLandmarkPolyline::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+ProcessorBasePtr ProcessorTrackerLandmarkPolyline::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
     ProcessorParamsPolyline* params = (ProcessorParamsPolyline*)_params;
     ProcessorTrackerLandmarkPolyline* prc_ptr = new ProcessorTrackerLandmarkPolyline(*params);

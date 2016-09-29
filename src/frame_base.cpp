@@ -163,7 +163,7 @@ void FrameBase::getState(Eigen::VectorXs& state) const
     }
 }
 
-CaptureBasePtr FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
+CaptureBasePtr FrameBase::hasCaptureOf(const SensorBasePtr _sensor_ptr)
 {
     for (auto capture_ptr : *getCaptureListPtr())
         if (capture_ptr->getSensorPtr() == _sensor_ptr)
@@ -177,7 +177,7 @@ void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)
 		(*c_it)->getConstraintList(_ctr_list);
 }
 
-FrameBase* FrameBase::getPreviousFrame() const
+FrameBasePtr FrameBase::getPreviousFrame() const
 {
     //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
     if (getTrajectoryPtr() == nullptr)
@@ -207,7 +207,7 @@ FrameBase* FrameBase::getPreviousFrame() const
     return nullptr;
 }
 
-FrameBase* FrameBase::getNextFrame() const
+FrameBasePtr FrameBase::getNextFrame() const
 {
     //std::cout << "finding next frame of " << this->node_id_ << std::endl;
 	auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin();

@@ -67,7 +67,7 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
 
         /** \brief Adds a constraint from this feature (as a down node)
          */
-        ConstraintBase* addConstraint(ConstraintBase* _co_ptr);
+        ConstraintBasePtr addConstraint(ConstraintBasePtr _co_ptr);
 
         /** \brief Removes a constraint (as a down node)
          */
@@ -75,12 +75,12 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
 
         /** \brief Gets the capture pointer
          */
-        CaptureBase* getCapturePtr() const;
-        void setCapturePtr(CaptureBase* _cap_ptr){capture_ptr_ = _cap_ptr;}
+        CaptureBasePtr getCapturePtr() const;
+        void setCapturePtr(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
 
         /** \brief Gets the frame pointer
          */
-        FrameBase* getFramePtr() const;
+        FrameBasePtr getFramePtr() const;
 
         /** \brief Gets the constraint list (down nodes) pointer
          */
@@ -108,11 +108,11 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
         
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         
-        virtual void addConstrainedBy(ConstraintBase* _ctr_ptr)
+        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr)
         {
             constrained_by_list_.push_back(_ctr_ptr);
         }
-        virtual void removeConstrainedBy(ConstraintBase* _ctr_ptr)
+        virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
         {
             constrained_by_list_.remove(_ctr_ptr);
         }
@@ -125,8 +125,8 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
             return &constrained_by_list_;
         }
 
-        Problem* getProblem(){return problem_ptr_;}
-        void setProblem(Problem* _prob_ptr){problem_ptr_ = _prob_ptr;}
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 
 };
@@ -150,7 +150,7 @@ inline void FeatureBase::removeConstraint(ConstraintBasePtr _co_ptr)
     delete _co_ptr;
 }
 
-inline CaptureBase* FeatureBase::getCapturePtr() const
+inline CaptureBasePtr FeatureBase::getCapturePtr() const
 {
     return capture_ptr_;
 //    return upperNodePtr();

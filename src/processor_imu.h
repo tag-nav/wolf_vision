@@ -35,8 +35,8 @@ class ProcessorIMU : public ProcessorMotion{
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
                                    TimeStamp& _ts);
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion,
-                                                 FrameBase* _frame_origin);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion,
+                                                   FrameBasePtr _frame_origin);
         void resetDerived();
 
 
@@ -77,7 +77,7 @@ class ProcessorIMU : public ProcessorMotion{
         void remapData(const Eigen::VectorXs& _data);
 
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
 };
 
 }
@@ -346,10 +346,9 @@ inline void ProcessorIMU::resetDerived()
     dDq_dwb_.setZero();
 }
 
-
-inline ConstraintBase* ProcessorIMU::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
+inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
-    // return new ConstraintIMU(_feature_motion, _frame_origin);
+    // TODO: return new ConstraintIMU(_feature_motion, _frame_origin);
     return nullptr;
 }
 

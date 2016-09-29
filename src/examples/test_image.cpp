@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 
     std::cout << "Wolf path: " << wolf_path << std::endl;
 
-    Problem* wolf_problem_ = new Problem(FRM_PO_3D);
+    ProblemPtr wolf_problem_ = new Problem(FRM_PO_3D);
 
     //=====================================================
     // Method 1: Use data generated here for sensor and processor
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
 
     // SENSOR
     // one-liner API
-    SensorBase* sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_path + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_path + "/src/examples/camera_params.yaml");
     SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
 
     // PROCESSOR
