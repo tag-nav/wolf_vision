@@ -35,6 +35,8 @@ Wolf can be used within ROS for an easy integration. We provide examples of ROS 
 Dependencies
 ------------
 
+! Please notice that we are detailing two installation procedures below. If you are familiar with `ROS` and more especially the [`catkin_tools`](https://catkin-tools.readthedocs.io/en/latest/index.html) package then you may jump directly to the 'Using the `catkin_tools` package' section.
+
 ### Eigen
 
 [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
@@ -210,6 +212,69 @@ Alternatively, you can set up the environment variables in your GUIs only. Follo
 ### Wolf ROS Node
 
 `$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
+
+
+
+Using the `catkin_tools` package
+--------------------------------
+
+1. Install `catkin_tools` :
+
+  [`installation webpage.`](https://catkin-tools.readthedocs.io/en/latest/installing.html)
+
+  * Installing on Ubuntu with `apt-get`
+
+    ```terminal
+    $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
+    $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+    $ sudo apt-get update
+    $ sudo apt-get install python-catkin-tools
+    ```
+
+  * Installing with [`pip`](https://pip.pypa.io/en/stable/installing/)
+
+    ```terminal
+    $ sudo pip install -U catkin_tools
+    ```
+
+2. Create a `catkin workspace` :
+
+  ```terminal
+  $ cd ~/my_folder/
+  $ create mkdir -p wolf_ws/src
+  $ cd wolf_ws/src
+  ```
+
+3. Download `Ceres` :
+
+  ```terminal
+  $ git clone https://github.com/artivis/ceres_solver.git
+  ```
+
+4. Download `wolf` :
+
+  ```terminal
+  $ git clone https://github.com/artivis/wolf.git
+  ```
+
+  At this point you might need to switch to the `catkin_build` branch of the wolf project.
+
+  ```terminal
+  $ cd wolf
+  $ git checkout catkin_build
+  ```
+
+5. Download `wolf_ros` :
+
+  ```terminal
+  $ git clone https://github.com/IRI-MobileRobotics/Wolf_ros.git
+  ```
+
+6. Let's Compile !
+
+  ```terminal
+  $ catkin build
+  ```
 
 Inspiring Links
 ---------------
