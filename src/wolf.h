@@ -283,32 +283,23 @@ typedef enum
 /////////////////////////////////////////////////////////////////////////
 // - forwards for pointers
 
+class NodeBase;
 class Problem;
 class HardwareBase;
+class SensorBase;
 class IntrinsicsBase;
+class ProcessorBase;
 class ProcessorParamsBase;
-class MapBase;
-class LandmarkBase;
-class LandmarkCorner2D;
 class TrajectoryBase;
 class FrameBase;
 class CaptureBase;
 class CaptureMotion;
-class CaptureLaser2D;
 class FeatureBase;
-class FeatureCorner2D;
-class FeaturePolyline2D;
 class ConstraintBase;
-class SensorBase;
-class SensorLaser2D;
-class TransSensor;
-class ProcessorBase;
+class MapBase;
+class LandmarkBase;
 class StateBlock;
 class LocalParametrizationBase;
-class NodeBase;
-
-
-// TODO: No seria millor que cada classe es defineixi aquests typedefs?
 
 // NodeBase
 typedef NodeBase* NodeBasePtr;
@@ -319,19 +310,21 @@ typedef Problem* ProblemPtr;
 // Hardware
 typedef HardwareBase* HardwareBasePtr;
 
-//Map
-typedef MapBase* MapBasePtr;
-typedef std::list<MapBasePtr> MapBaseList;
-typedef MapBaseList::iterator MapBaseIter;
+// - Sensors
+typedef SensorBase* SensorBasePtr;
+typedef std::list<SensorBase*> SensorBaseList;
+typedef SensorBaseList::iterator SensorBaseIter;
 
-//Landmark
-typedef LandmarkBase* LandmarkBasePtr;
-typedef std::list<LandmarkBasePtr> LandmarkBaseList;
-typedef LandmarkBaseList::iterator LandmarkBaseIter;
+// Intrinsics
+typedef IntrinsicsBase* IntrinsicsBasePtr;
 
-//Landmark corner 2D
-typedef std::list<LandmarkCorner2D*> LandmarkCorner2DList;
-typedef LandmarkCorner2DList::iterator LandmarkCorner2DIter;
+// - Processors
+typedef ProcessorBase* ProcessorBasePtr;
+typedef std::list<ProcessorBase*> ProcessorBaseList;
+typedef ProcessorBaseList::iterator ProcessorBaseIter;
+
+// Processor params
+typedef ProcessorParamsBase* ProcessorParamsBasePtr;
 
 // - Trajectory
 typedef TrajectoryBase* TrajectoryBasePtr;
@@ -355,46 +348,27 @@ typedef FeatureBase* FeatureBasePtr;
 typedef std::list<FeatureBase*> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
 
-// - Feature Corner 2D
-typedef std::list<FeatureCorner2D*> FeatureCorner2DList;
-typedef FeatureCorner2DList::iterator FeatureCorner2DIter;
-
-// - Feature Polyline 2D
-typedef std::list<FeaturePolyline2D*> FeaturePolyline2DList;
-typedef FeaturePolyline2DList::iterator FeaturePolyline2DIter;
-
 // - Constraint
 typedef ConstraintBase* ConstraintBasePtr;
 typedef std::list<ConstraintBase*> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
-// - Sensors
-typedef SensorBase* SensorBasePtr;
-typedef std::list<SensorBase*> SensorBaseList;
-typedef SensorBaseList::iterator SensorBaseIter;
+//Map
+typedef MapBase* MapBasePtr;
+typedef std::list<MapBasePtr> MapBaseList;
+typedef MapBaseList::iterator MapBaseIter;
 
-// Intrinsics
-typedef IntrinsicsBase* IntrinsicsBasePtr;
+//Landmark
+typedef LandmarkBase* LandmarkBasePtr;
+typedef std::list<LandmarkBasePtr> LandmarkBaseList;
+typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
-// - transSensor
-typedef std::map<unsigned int, TransSensor*> TransSensorMap;
-typedef TransSensorMap::iterator TransSensorIter;
-
-// - Processors
-typedef ProcessorBase* ProcessorBasePtr;
-typedef std::list<ProcessorBase*> ProcessorBaseList;
-typedef ProcessorBaseList::iterator ProcessorBaseIter;
-
-// Processor params
-typedef ProcessorParamsBase* ProcessorParamsBasePtr;
-
-// - State
+// - State blocks
 typedef std::list<StateBlock*> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
 
 // Local Parametrization
 typedef LocalParametrizationBase* LocalParametrizationBasePtr;
-
 
 // Match Feature - Landmark
 struct LandmarkMatch
