@@ -28,18 +28,21 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
     }
     else
     {
+        //        addFrame(_frame_ptr);
         frame_list_.push_back(_frame_ptr);
-        _frame_ptr->setTrajectoryPtr(this);
-        addFrame(_frame_ptr);
     }
+
+    // link up
+    _frame_ptr->setTrajectoryPtr(this);
+    _frame_ptr->setProblem(getProblem());
 
     return _frame_ptr;
 }
 
 void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
-	for(auto fr_it = getFrameListPtr()->begin(); fr_it != getFrameListPtr()->end(); ++fr_it)
-		(*fr_it)->getConstraintList(_ctr_list);
+	for(auto fr_ptr : *getFrameListPtr())
+		fr_ptr->getConstraintList(_ctr_list);
 }
 
 void TrajectoryBase::sortFrame(FrameBasePtr _frame_ptr)

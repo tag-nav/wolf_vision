@@ -35,69 +35,43 @@ class TrajectoryBase : public NodeBase //: public NodeBase // NodeLinked<Problem
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
          **/        
         virtual ~TrajectoryBase();
         void destruct();
         
-        /** \brief Add a frame to the trajectory
-         **/
-        FrameBasePtr addFrame(FrameBasePtr _frame_ptr);
-
-        /** \brief Remove a frame to the trajectory
-         **/
-        void removeFrame(const FrameBaseIter& _frame_iter);
-        void removeFrame(const FrameBasePtr _frame_ptr);
-
-        /** \brief Returns a pointer to frame list
-         **/
-        FrameBaseList* getFrameListPtr();
-
-        /** \brief Returns a pointer to last frame
-         **/
-        FrameBasePtr getLastFramePtr();
-
-        /** \brief Returns a pointer to last key frame
-         */
-        FrameBasePtr getLastKeyFramePtr();
-
-        /** \brief Sets the pointer to last key frame
-         */
-        void setLastKeyFramePtr(FrameBasePtr _key_frame_ptr);
-
-        /** \brief Returns a list of all constraints in the trajectory thru reference
-         **/
-        void getConstraintList(ConstraintBaseList & _ctr_list);
-        
-        /** \brief Returns the frame structure (see wolf.h)
-         **/
+        // Properties
         FrameStructure getFrameStructure() const;
 
-        /** \brief Sorts the frame by timestamp
-         **/
-        void sortFrame(FrameBasePtr _frame_iter);
-
-        void moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
-        {
-            if (*_place != _frm_ptr)
-                {
-                    frame_list_.remove(_frm_ptr);
-                    frame_list_.insert(_place, _frm_ptr);
-                }
-        }
-
-        /** \brief Compute the position where the frame should be
-         **/
-        FrameBaseIter computeFrameOrder(FrameBasePtr _frame_ptr);
-
-        /** \brief Finds the closes key frame to a given timestamp
-         **/
-        FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts);
-
+        // Problem
         ProblemPtr getProblem(){return problem_ptr_;}
         void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
+        // Frames
+        FrameBasePtr addFrame(FrameBasePtr _frame_ptr);
+        void removeFrame(const FrameBaseIter& _frame_iter);
+        void removeFrame(const FrameBasePtr _frame_ptr);
+        FrameBaseList* getFrameListPtr();
+        FrameBasePtr getLastFramePtr();
+        FrameBasePtr getLastKeyFramePtr();
+        FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts);
+        void setLastKeyFramePtr(FrameBasePtr _key_frame_ptr);
+        void sortFrame(FrameBasePtr _frame_iter);
+        void moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place);
+        FrameBaseIter computeFrameOrder(FrameBasePtr _frame_ptr);
+
+        // constraints
+        void getConstraintList(ConstraintBaseList & _ctr_list);
+
 };
+
+inline void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
+{
+    if (*_place != _frm_ptr)
+    {
+        frame_list_.remove(_frm_ptr);
+        frame_list_.insert(_place, _frm_ptr);
+    }
+}
 
 }
 

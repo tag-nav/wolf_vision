@@ -34,6 +34,7 @@ LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)
 	//std::cout << "MapBase::addLandmark" << std::endl;
     landmark_list_.push_back(_landmark_ptr);
     _landmark_ptr->setMapPtr(this);
+    _landmark_ptr->setProblem(getProblem());
 //    addDownNode(_landmark_ptr);
     _landmark_ptr->registerNewStateBlocks();
     return _landmark_ptr;

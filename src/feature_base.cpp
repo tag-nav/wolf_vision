@@ -46,6 +46,7 @@ ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
 {
     constraint_list_.push_back(_co_ptr);
     _co_ptr->setFeaturePtr(this);
+    _co_ptr->setProblem(getProblem());
 //    addDownNode(_co_ptr);
     // add constraint to be added in solver
     if (getProblem() != nullptr)
@@ -69,8 +70,8 @@ ConstraintBaseList* FeatureBase::getConstraintListPtr()
 
 void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
-	for(auto c_it = getConstraintListPtr()->begin(); c_it != getConstraintListPtr()->end(); ++c_it)
-		_ctr_list.push_back((*c_it));
+	for(ConstraintBasePtr c_ptr : *getConstraintListPtr())
+		_ctr_list.push_back(c_ptr);
 }
 
 void FeatureBase::destruct()
@@ -99,6 +100,5 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse(); // retrieve factor U  in the decomposition
 }
-
 
 } // namespace wolf

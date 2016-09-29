@@ -69,6 +69,7 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
          **/
         unsigned int id();
         void setId(unsigned int _id);
+        const LandmarkType getTypeId() const;
 
         /** \brief Sets the Landmark status
          **/
@@ -82,65 +83,31 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
          **/
         void unfix();
 
-        /** \brief Remove the given constraint from the list. 
-         *  If list becomes empty, deletes this object by calling destruct()
-         **/
-        void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
-
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
 
-        /** \brief Gets the position state block pointer
-         **/
         StateBlock* getPPtr() const;
-
-        /** \brief Gets the orientation state block pointer
-         **/
         StateBlock* getOPtr() const;
-
-        /** \brief Gets a vector of all state blocks pointers
-         **/
+        void setPPtr(StateBlock* _st_ptr);
+        void setOPtr(StateBlock* _st_ptr);
         virtual std::vector<StateBlock*> getStateBlockVector() const;
 
-        /** \brief Sets the position state block pointer
-         **/
-        void setPPtr(StateBlock* _st_ptr);
-
-        /** \brief Sets the orientation state block pointer
-         **/
-        void setOPtr(StateBlock* _st_ptr);
-
-        /** \brief Sets the descriptor
-         **/
+        const Eigen::VectorXs& getDescriptor() const;        
+        Scalar getDescriptor(unsigned int _ii) const;
         void setDescriptor(const Eigen::VectorXs& _descriptor);
 
-        /** \brief Gets the descriptor
-         **/
-        const Eigen::VectorXs& getDescriptor() const;        
-        
-        /** \brief Returns _ii component of descriptor vector
-         **/
-        Scalar getDescriptor(unsigned int _ii) const;
-
-        /** \brief Return the type of the landmark
-         **/
-        const LandmarkType getTypeId() const;
 
         virtual YAML::Node saveToYaml() const;
 
-        void addConstrainedBy(ConstraintBasePtr _ctr_ptr)
-        {
-            constrained_by_list_.push_back(_ctr_ptr);
-        }
-        unsigned int getHits() const
-        {
-            return constrained_by_list_.size();
-        }
-        ConstraintBaseList* getConstrainedByListPtr()
-        {
-            return &constrained_by_list_;
-        }
+        void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        unsigned int getHits() const;
+        ConstraintBaseList* getConstrainedByListPtr();
+        /** \brief Remove the given constraint from the list.
+         *  If list becomes empty, deletes this object by calling destruct()
+         **/
+        void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
+
 
 
         void setMapPtr(MapBasePtr _map_ptr){map_ptr_ = _map_ptr;}
@@ -178,6 +145,21 @@ inline void LandmarkBase::unfix()
 {
     //std::cout << "Unfixing frame " << nodeId() << std::endl;
     this->setStatus(LANDMARK_ESTIMATED);
+}
+
+inline void LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+}
+
+inline unsigned int LandmarkBase::getHits() const
+{
+    return constrained_by_list_.size();
+}
+
+inline ConstraintBaseList* LandmarkBase::getConstrainedByListPtr()
+{
+    return &constrained_by_list_;
 }
 
 inline void LandmarkBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)

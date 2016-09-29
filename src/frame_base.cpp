@@ -11,6 +11,7 @@ unsigned int FrameBase::frame_id_count_ = 0;
 
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeBase("FRAME", "BASE"),
+            problem_ptr_(nullptr),
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
             time_stamp_(_ts),
@@ -24,6 +25,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
 
 FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeBase("FRAME", "BASE"),
+            problem_ptr_(nullptr),
             frame_id_(++frame_id_count_),
             type_id_(_tp),
             time_stamp_(_ts),
@@ -163,20 +165,6 @@ void FrameBase::getState(Eigen::VectorXs& state) const
     }
 }
 
-CaptureBasePtr FrameBase::hasCaptureOf(const SensorBasePtr _sensor_ptr)
-{
-    for (auto capture_ptr : *getCaptureListPtr())
-        if (capture_ptr->getSensorPtr() == _sensor_ptr)
-            return capture_ptr;
-    return nullptr;
-}
-
-void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)
-{
-	for(auto c_it = getCaptureListPtr()->begin(); c_it != getCaptureListPtr()->end(); ++c_it)
-		(*c_it)->getConstraintList(_ctr_list);
-}
-
 FrameBasePtr FrameBase::getPreviousFrame() const
 {
     //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
@@ -225,12 +213,6 @@ FrameBasePtr FrameBase::getNextFrame() const
     }
     std::cout << "next frame not found!" << std::endl;
     return nullptr;
-}
-
-void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
-{
-    _cap_ptr->unlinkFromFrame();
-    capture_list_.remove(_cap_ptr);
 }
 
 void FrameBase::destruct()

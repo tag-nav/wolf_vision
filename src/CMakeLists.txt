@@ -148,9 +148,9 @@ SET(HDRS
     map_base.h
     motion_buffer.h
     node_base.h
-    node_constrained.h
-    node_linked.h
-    node_terminus.h
+#    node_constrained.h
+#    node_linked.h
+#    node_terminus.h
     problem.h
     processor_base.h
     processor_imu.h

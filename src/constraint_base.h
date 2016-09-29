@@ -145,8 +145,11 @@ class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
 
 }
 
+// IMPLEMENTATION //
+
 #include "problem.h"
 #include "frame_base.h"
+#include "feature_base.h"
 #include "sensor_base.h"
 
 namespace wolf{
@@ -155,8 +158,6 @@ inline unsigned int ConstraintBase::id()
 {
     return constraint_id_;
 }
-
-// IMPLEMENTATION //
 
 inline ConstraintType ConstraintBase::getTypeId() const
 {

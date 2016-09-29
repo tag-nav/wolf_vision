@@ -101,17 +101,6 @@ typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of r
 
 namespace wolf {
 
-/** \brief Enumeration of node locations at Wolf Tree
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    TOP = 1,   ///< root node location. This is the one that commands jobs down the tree.
-    MID,   ///< middle nodes. These delegate jobs to lower nodes.
-    BOTTOM ///< lowest level nodes. These are the ones that do not delegate any longer and have to do the job.
-} NodeLocation;
-
 /** \brief Enumeration of all possible frames
  *
  * You may add items to this list as needed. Be concise with names, and document your entries.
@@ -287,9 +276,9 @@ class NodeBase;
 class Problem;
 class HardwareBase;
 class SensorBase;
-class IntrinsicsBase;
+struct IntrinsicsBase;
 class ProcessorBase;
-class ProcessorParamsBase;
+struct ProcessorParamsBase;
 class TrajectoryBase;
 class FrameBase;
 class CaptureBase;
@@ -299,6 +288,7 @@ class ConstraintBase;
 class MapBase;
 class LandmarkBase;
 class StateBlock;
+class StateQuaternion;
 class LocalParametrizationBase;
 
 // NodeBase
@@ -364,8 +354,10 @@ typedef std::list<LandmarkBasePtr> LandmarkBaseList;
 typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
 // - State blocks
-typedef std::list<StateBlock*> StateBlockList;
+typedef StateBlock* StateBlockPtr;
+typedef std::list<StateBlockPtr> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
+typedef StateQuaternion* StateQuaternionPtr;
 
 // Local Parametrization
 typedef LocalParametrizationBase* LocalParametrizationBasePtr;

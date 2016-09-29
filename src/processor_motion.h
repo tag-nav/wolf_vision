@@ -346,17 +346,29 @@ class ProcessorMotion : public ProcessorBase
 
 namespace wolf{
 
-//<<<<<<< 7a61d878aa04153fc3be0cfa659a108296632f1e
-inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance) :
-        ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), delta_cov_size_(_delta_cov_size), data_size_(_data_size), origin_ptr_(
-//=======
-
-//inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance) :
-//        ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), origin_ptr_(
-//>>>>>>> [WIP] Node Linked, still not compiling
-                nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_cov_(
-                _delta_cov_size, _delta_cov_size), delta_integrated_(_delta_size), delta_integrated_cov_(_delta_cov_size, _delta_cov_size), data_(
-                _data_size), jacobian_delta_preint_(delta_cov_size_, delta_cov_size_), jacobian_delta_(delta_cov_size_, delta_cov_size_)
+inline ProcessorMotion::ProcessorMotion(ProcessorType _tp,
+                                        const std::string& _type,
+                                        Size _state_size,
+                                        Size _delta_size,
+                                        Size _delta_cov_size,
+                                        Size _data_size,
+                                        const Scalar& _time_tolerance) :
+                ProcessorBase(_tp, _type, _time_tolerance),
+                x_size_(_state_size),
+                delta_size_(_delta_size),
+                delta_cov_size_(_delta_cov_size),
+                data_size_(_data_size), origin_ptr_(nullptr),
+                last_ptr_(nullptr),
+                incoming_ptr_(nullptr),
+                dt_(0.0),
+                x_(_state_size),
+                delta_(_delta_size),
+                delta_cov_(_delta_cov_size, _delta_cov_size),
+                delta_integrated_(_delta_size),
+                delta_integrated_cov_(_delta_cov_size, _delta_cov_size),
+                data_(_data_size),
+                jacobian_delta_preint_(delta_cov_size_, delta_cov_size_),
+                jacobian_delta_(delta_cov_size_, delta_cov_size_)
 {
     //
 }

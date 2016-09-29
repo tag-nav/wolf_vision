@@ -65,71 +65,58 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
         void setLandmarkId(unsigned int _lmk_id){landmark_id_ = _lmk_id;}
         FeatureType getTypeId(){return type_id_;}
 
-        /** \brief Adds a constraint from this feature (as a down node)
-         */
-        ConstraintBasePtr addConstraint(ConstraintBasePtr _co_ptr);
-
-        /** \brief Removes a constraint (as a down node)
-         */
-        void removeConstraint(ConstraintBasePtr _co_ptr);
-
-        /** \brief Gets the capture pointer
-         */
-        CaptureBasePtr getCapturePtr() const;
-        void setCapturePtr(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
-
-        /** \brief Gets the frame pointer
-         */
-        FrameBasePtr getFramePtr() const;
-
-        /** \brief Gets the constraint list (down nodes) pointer
-         */
-        ConstraintBaseList* getConstraintListPtr();
-        
-        void getConstraintList(ConstraintBaseList & _ctr_list);
-
-        const Eigen::VectorXs& getMeasurement() const;
-        
         /** \brief Returns _ii component of measurement vector
-         * 
+         *
          * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
          **/
         Scalar getMeasurement(unsigned int _ii) const;
-
-        /** \brief Returns a reference to the feature measurement covariance
-         **/
+        void setMeasurement(const Eigen::VectorXs& _meas);
+        void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         const Eigen::MatrixXs& getMeasurementCovariance() const;
-
-        /** \brief Returns a reference to the feature measurement square root information
-         **/
         const Eigen::MatrixXs& getMeasurementSquareRootInformation() const;
 
-        void setMeasurement(const Eigen::VectorXs& _meas);
-        
-        void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
-        
-        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr)
-        {
-            constrained_by_list_.push_back(_ctr_ptr);
-        }
-        virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
-        {
-            constrained_by_list_.remove(_ctr_ptr);
-        }
-        unsigned int getHits() const
-        {
-            return constrained_by_list_.size();
-        }
-        ConstraintBaseList* getConstrainedByListPtr()
-        {
-            return &constrained_by_list_;
-        }
 
         ProblemPtr getProblem(){return problem_ptr_;}
         void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
+        FrameBasePtr getFramePtr() const;
+
+        CaptureBasePtr getCapturePtr() const;
+        void setCapturePtr(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
+
+        ConstraintBasePtr addConstraint(ConstraintBasePtr _co_ptr);
+        void removeConstraint(ConstraintBasePtr _co_ptr);
+        ConstraintBaseList* getConstraintListPtr();
+        void getConstraintList(ConstraintBaseList & _ctr_list);
+
+        const Eigen::VectorXs& getMeasurement() const;
+        
+        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        unsigned int getHits() const;
+        ConstraintBaseList* getConstrainedByListPtr();
 
 };
+
+inline void FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+}
+
+inline void FeatureBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.remove(_ctr_ptr);
+}
+
+inline unsigned int FeatureBase::getHits() const
+{
+    return constrained_by_list_.size();
+}
+
+inline wolf::ConstraintBaseList* FeatureBase::getConstrainedByListPtr()
+{
+    return &constrained_by_list_;
+}
 
 }
 

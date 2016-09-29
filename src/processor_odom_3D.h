@@ -66,12 +66,7 @@ class ProcessorOdom3D : public ProcessorMotion
                            Motion& _motion,
                            TimeStamp& _ts);
 
-//<<<<<<< e72779277b2cbd56ce81286c43b51ae2b4934110
-//        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion,
-//                                                 FrameBase* _frame_origin);
-//=======
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
-//>>>>>>> typedef all pointers to base classes
 
     private:
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;

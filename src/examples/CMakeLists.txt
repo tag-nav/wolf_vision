@@ -1,4 +1,8 @@
 # Matrix product test
+ADD_EXECUTABLE(test_clean test_clean.cpp)
+TARGET_LINK_LIBRARIES(test_clean ${PROJECT_NAME})
+
+# Matrix product test
 #ADD_EXECUTABLE(test_matrix_prod test_matrix_prod.cpp)
 
 #ADD_EXECUTABLE(test_eigen_template test_eigen_template.cpp)

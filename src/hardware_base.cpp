@@ -20,6 +20,7 @@ SensorBasePtr HardwareBase::addSensor(SensorBasePtr _sensor_ptr)
 {
     //std::cout << "adding sensor..." << std::endl;
     sensor_list_.push_back(_sensor_ptr);
+    _sensor_ptr->setProblem(getProblem());
 //	addDownNode(_sensor_ptr);
     //std::cout << "added!" << std::endl;
 

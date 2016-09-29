@@ -61,7 +61,6 @@ class Problem //: public NodeBase
 
     protected:
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
-        NodeLocation location_; // TODO: should it be in node_base?
         HardwareBasePtr hardware_ptr_;
         TrajectoryBasePtr trajectory_ptr_;
         MapBasePtr map_ptr_;

@@ -103,8 +103,11 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
 
         // Wolf tree access ---------------------------------------------------
 
+        ProblemPtr getProblem();
+        void setProblem(ProblemPtr _prob_ptr);
+
         TrajectoryBasePtr getTrajectoryPtr() const;
-        void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr){trajectory_ptr_ = _trj_ptr;}
+        void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr);
 
         FrameBasePtr getPreviousFrame() const;
         FrameBasePtr getNextFrame() const;
@@ -116,28 +119,12 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
         CaptureBasePtr hasCaptureOf(const SensorBasePtr _sensor_ptr);
         void unlinkCapture(CaptureBasePtr _cap_ptr);
 
-        void getConstraintList(ConstraintBaseList & _ctr_list);
+        void getConstraintList(ConstraintBaseList& _ctr_list);
 
-        ProblemPtr getProblem(){return problem_ptr_;}
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
-
-        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr)
-        {
-            constrained_by_list_.push_back(_ctr_ptr);
-        }
-        virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
-        {
-            constrained_by_list_.remove(_ctr_ptr);
-        }
-        unsigned int getHits() const
-        {
-            return constrained_by_list_.size();
-        }
-        ConstraintBaseList* getConstrainedByListPtr()
-        {
-            return &constrained_by_list_;
-        }
-
+        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        unsigned int getHits() const;
+        ConstraintBaseList* getConstrainedByListPtr();
 
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
@@ -147,15 +134,8 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
 
 
     private:
-        /** \brief Gets the Frame status (see wolf.h for Frame status)
-         **/
         StateStatus getStatus() const;
-        /** \brief Sets the Frame status (see wolf.h for Frame status)
-         **/
         void setStatus(StateStatus _st);
-
-
-
 
 };
 
@@ -239,6 +219,7 @@ inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
 {
     capture_list_.push_back(_capt_ptr);
     _capt_ptr->setFramePtr(this);
+    _capt_ptr->setProblem(getProblem());
 //    addDownNode(_capt_ptr);
     return _capt_ptr;
 }
@@ -262,6 +243,62 @@ inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
 inline StateStatus FrameBase::getStatus() const
 {
     return status_;
+}
+
+
+inline CaptureBasePtr FrameBase::hasCaptureOf(const SensorBasePtr _sensor_ptr)
+{
+    for (CaptureBasePtr capture_ptr : *getCaptureListPtr())
+        if (capture_ptr->getSensorPtr() == _sensor_ptr)
+            return capture_ptr;
+    return nullptr;
+}
+
+inline void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
+{
+    _cap_ptr->unlinkFromFrame();
+    capture_list_.remove(_cap_ptr);
+}
+
+inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
+{
+    for (CaptureBasePtr c_ptr : *getCaptureListPtr())
+        c_ptr->getConstraintList(_ctr_list);
+}
+
+inline ProblemPtr FrameBase::getProblem()
+{
+    return problem_ptr_;
+}
+
+inline void FrameBase::setProblem(ProblemPtr _prob_ptr)
+{
+    problem_ptr_ = _prob_ptr;
+}
+
+inline void FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+}
+
+inline void FrameBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.remove(_ctr_ptr);
+}
+
+inline unsigned int FrameBase::getHits() const
+{
+    return constrained_by_list_.size();
+}
+
+inline ConstraintBaseList* FrameBase::getConstrainedByListPtr()
+{
+    return &constrained_by_list_;
+}
+
+inline void FrameBase::setTrajectoryPtr(TrajectoryBasePtr _trj_ptr)
+{
+    trajectory_ptr_ = _trj_ptr;
 }
 
 } // namespace wolf
