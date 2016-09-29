@@ -32,9 +32,9 @@ namespace wolf {
     struct IMU_jac_deltas{
 
         IMU_jac_deltas(Eigen::VectorXs _Delta0, Eigen::VectorXs _delta0, Eigen::Matrix<Eigen::VectorXs,9,1> _Delta_noisy_vect, Eigen::Matrix<Eigen::VectorXs,9,1> _delta_noisy_vect, 
-                        Eigen::Matrix<Eigen::Matrix3s,10,1> _jacobian_delta_preint_vect, Eigen::Matrix<Eigen::Matrix3s,10,1> _jacobian_delta_vect ) :
+                        Eigen::Matrix3s _jacobian_delta_preint, Eigen::Matrix3s _jacobian_delta ) :
                         Delta0_(_Delta0), delta0_(_delta0), Delta_noisy_vect_(_Delta_noisy_vect), delta_noisy_vect_(_delta_noisy_vect), 
-                       jacobian_delta_preint_vect_(_jacobian_delta_preint_vect), jacobian_delta_vect_(_jacobian_delta_vect) {}
+                       jacobian_delta_preint_(_jacobian_delta_preint), jacobian_delta_(_jacobian_delta) {}
         
         public:
             /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
@@ -49,8 +49,8 @@ namespace wolf {
             Eigen::VectorXs delta0_; //this will contain the delta not affected by noise
             Eigen::Matrix<Eigen::VectorXs,9,1> Delta_noisy_vect_; //this will contain the Deltas affected by noises
             Eigen::Matrix<Eigen::VectorXs,9,1> delta_noisy_vect_; //this will contain the deltas affected by noises
-            Eigen::Matrix<Eigen::Matrix3s,10,1> jacobian_delta_preint_vect_;
-            Eigen::Matrix<Eigen::Matrix3s,10,1> jacobian_delta_vect_;
+            Eigen::Matrix3s jacobian_delta_preint_;
+            Eigen::Matrix3s jacobian_delta_;
     };
 
 class ProcessorIMU : public ProcessorMotion{
@@ -572,8 +572,8 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
     jacobian_delta.resize(9,9);
     jacobian_delta_preint = Eigen::MatrixXs::Zero(9,9);
     jacobian_delta = Eigen::MatrixXs::Zero(9,9);
-    Eigen::Matrix<Eigen::Matrix3s,10,1> jacobian_delta_preint_vect;
-    Eigen::Matrix<Eigen::Matrix3s,10,1> jacobian_delta_vect;
+    Eigen::Matrix3s jacobian_delta_preint0;
+    Eigen::Matrix3s jacobian_delta0;
 
     Eigen::MatrixXs data_cov;
     data_cov.resize(6,6);
@@ -587,8 +587,8 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
 
     data2delta(_data, data_cov, _dt); //Affects dp_out, dv_out and dq_out
     deltaPlusDelta(Delta0, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta); 
-    jacobian_delta_preint_vect(0) = jacobian_delta_preint;
-    jacobian_delta_vect(0) = jacobian_delta;
+    jacobian_delta_preint0 = jacobian_delta_preint;
+    jacobian_delta0 = jacobian_delta;
 
     //We compute all the jacobians wrt deltas and noisy deltas
     for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
@@ -603,7 +603,6 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
         delta_(i) = delta_(i) + _delta_noise(i); //noise has been added
         deltaPlusDelta(Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         delta_noisy_vect(i) = delta_;
-        jacobian_delta_vect(i+1) = jacobian_delta;
     }
 
     for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
@@ -622,7 +621,6 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
         Dq_out_ = v2q(dqv_tmp); //orientation noise has been added
         deltaPlusDelta(Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         delta_noisy_vect(i+6) = delta_;
-        jacobian_delta_vect(i+7) = jacobian_delta;
     }
 
     //We compute all the jacobians wrt Deltas and noisy Deltas
@@ -638,7 +636,6 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
         Delta_(i) = Delta_(i) + _Delta_noise(i); //noise has been added
         deltaPlusDelta(Delta_, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         Delta_noisy_vect(i) = Delta_;
-        jacobian_delta_preint_vect(i+1) = jacobian_delta_preint;
     }
 
     for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
@@ -657,10 +654,9 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
         Dq_out_ = v2q(dQv_tmp); 
         deltaPlusDelta(Delta_, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         Delta_noisy_vect(i+6) = Delta_;
-        jacobian_delta_preint_vect(i+7) = jacobian_delta_preint;
     }
     
-    IMU_jac_deltas jac_deltas(Delta0, delta0, Delta_noisy_vect, delta_noisy_vect, jacobian_delta_preint_vect, jacobian_delta_vect);
+    IMU_jac_deltas jac_deltas(Delta0, delta0, Delta_noisy_vect, delta_noisy_vect, jacobian_delta_preint0, jacobian_delta0);
     return jac_deltas;
 
 }
