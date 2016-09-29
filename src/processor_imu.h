@@ -9,10 +9,9 @@
 namespace wolf {
     struct IMU_jac_bias{ //struct used for checking jacobians by finite difference
 
-        IMU_jac_bias(Eigen::Matrix<Eigen::Matrix3s,7,1> _dDp_dab_vect, Eigen::Matrix<Eigen::Matrix3s,7,1> _dDv_dab_vect, Eigen::Matrix<Eigen::Matrix3s,7,1> _dDp_dwb_vect, 
-                       Eigen::Matrix<Eigen::Matrix3s,7,1> _dDv_dwb_vect, Eigen::Matrix<Eigen::Matrix3s,7,1> _dDq_dwb_vect, 
-                       Eigen::Matrix<Eigen::VectorXs,7,1> _delta_preint_plus_delta_vect, Eigen::Matrix<Eigen::VectorXs,7,1> _delta_preint_vect ) : dDp_dab_vect_(_dDp_dab_vect), 
-                       dDv_dab_vect_(_dDv_dab_vect), dDp_dwb_vect_(_dDp_dwb_vect), dDv_dwb_vect_(_dDv_dwb_vect), dDq_dwb_vect_(_dDq_dwb_vect), 
+        IMU_jac_bias(Eigen::Matrix3s _dDp_dab, Eigen::Matrix3s _dDv_dab, Eigen::Matrix3s _dDp_dwb, Eigen::Matrix3s _dDv_dwb, Eigen::Matrix3s _dDq_dwb, 
+                       Eigen::Matrix<Eigen::VectorXs,7,1> _delta_preint_plus_delta_vect, Eigen::Matrix<Eigen::VectorXs,7,1> _delta_preint_vect ) : dDp_dab_(_dDp_dab), 
+                       dDv_dab_(_dDv_dab), dDp_dwb_(_dDp_dwb), dDv_dwb_(_dDv_dwb), dDq_dwb_(_dDq_dwb), 
                        delta_preint_plus_delta_vect_(_delta_preint_plus_delta_vect), delta_preint_vect_(_delta_preint_vect) {}
 
         public:
@@ -20,18 +19,14 @@ namespace wolf {
               Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
               place 1 : added da_bx in data         place 2 : added da_by in data       place 3 : added da_bz in data
               place 4 : added dw_bx in data         place 5 : added dw_by in data       place 6 : added dw_bz in data
-
-              delta_preint_plus_delta_vect_ and delta_preint_vect_ set to size 17 toi avoid use of dynamic vectors.
-              7 first elements are related to bias noise
-              10 last elements are related to noise in deltas and Deltas
              */
             Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_plus_delta_vect_; // D2 in D2 = D1 + d
             Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_vect_;            // D1 in D2 = D1 + d
-            Eigen::Matrix<Eigen::Matrix3s,7,1> dDp_dab_vect_;
-            Eigen::Matrix<Eigen::Matrix3s,7,1> dDv_dab_vect_;
-            Eigen::Matrix<Eigen::Matrix3s,7,1> dDp_dwb_vect_;
-            Eigen::Matrix<Eigen::Matrix3s,7,1> dDv_dwb_vect_;
-            Eigen::Matrix<Eigen::Matrix3s,7,1> dDq_dwb_vect_;
+            Eigen::Matrix3s dDp_dab_;
+            Eigen::Matrix3s dDv_dab_;
+            Eigen::Matrix3s dDp_dwb_;
+            Eigen::Matrix3s dDv_dwb_;
+            Eigen::Matrix3s dDq_dwb_;
     };
 
     struct IMU_jac_deltas{
@@ -516,22 +511,22 @@ inline IMU_jac_bias ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vector
      */
     Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_plus_delta_vect;
     Eigen::Matrix<Eigen::VectorXs,7,1> delta_preint_vect;
-    Eigen::Matrix<Eigen::Matrix3s,7,1> dDp_dab_vect;
-    Eigen::Matrix<Eigen::Matrix3s,7,1> dDv_dab_vect;
-    Eigen::Matrix<Eigen::Matrix3s,7,1> dDp_dwb_vect;
-    Eigen::Matrix<Eigen::Matrix3s,7,1> dDv_dwb_vect;
-    Eigen::Matrix<Eigen::Matrix3s,7,1> dDq_dwb_vect;
+    Eigen::Matrix3s dDp_dab;
+    Eigen::Matrix3s dDv_dab;
+    Eigen::Matrix3s dDp_dwb;
+    Eigen::Matrix3s dDv_dwb;
+    Eigen::Matrix3s dDq_dwb;
 
     //Deltas without use of da_b
     data2delta(_data, data_cov_d0, _dt);
     deltaPlusDelta(delta_preint_d0, delta_, _dt, delta_preint_plus_delta_d0, jacobian_delta_preint_d0, jacobian_delta_d0);
     delta_preint_plus_delta_vect(0) = delta_preint_plus_delta_d0;
     delta_preint_vect(0) = delta_preint_d0;
-    dDp_dab_vect(0) = dDp_dab_;
-    dDv_dab_vect(0) = dDv_dab_;
-    dDp_dwb_vect(0) = dDp_dwb_;
-    dDv_dwb_vect(0) = dDv_dwb_;
-    dDq_dwb_vect(0) = dDq_dwb_;
+    dDp_dab = dDp_dab_;
+    dDv_dab = dDv_dab_;
+    dDp_dwb = dDp_dwb_;
+    dDv_dwb = dDv_dwb_;
+    dDq_dwb = dDq_dwb_;
 
     // propagate da_b
     for(int i=0; i<6; i++){
@@ -551,14 +546,9 @@ inline IMU_jac_bias ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vector
         deltaPlusDelta(delta_preint_d1, delta_, _dt, delta_preint_plus_delta_d1, jacobian_delta_preint_d1, jacobian_delta_d1);
         delta_preint_plus_delta_vect(i+1) = delta_preint_plus_delta_d1;
         delta_preint_vect(i+1) = delta_preint_d1;
-        dDp_dab_vect(i+1) = dDp_dab_;
-        dDv_dab_vect(i+1) = dDv_dab_;
-        dDp_dwb_vect(i+1) = dDp_dwb_;
-        dDv_dwb_vect(i+1) = dDv_dwb_;
-        dDq_dwb_vect(i+1) = dDq_dwb_;
     }
 
-    IMU_jac_bias bias_jacobians(dDp_dab_vect, dDv_dab_vect, dDp_dwb_vect, dDv_dwb_vect, dDq_dwb_vect, delta_preint_plus_delta_vect, delta_preint_vect);
+    IMU_jac_bias bias_jacobians(dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb, delta_preint_plus_delta_vect, delta_preint_vect);
     return bias_jacobians;
 }
 
