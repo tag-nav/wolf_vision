@@ -36,9 +36,9 @@ namespace wolf {
 
     struct IMU_jac_deltas{
 
-        IMU_jac_deltas(Eigen::VectorXs _Delta0, Eigen::VectorXs _delta0, Eigen::Matrix<Eigen::VectorXs,10,1> _Delta_noisy_vect, Eigen::Matrix<Eigen::VectorXs,10,1> _Delta_noisy_vect, 
-                        Eigen::Matrix<Eigen::Matrix3s,10,1> _jacobian_delta_preint_vect, Eigen::Matrix<Eigen::Matrix3s,10,1> _jacobian_delta_vect :
-                        Delta0_(_Delta0), delta0_(_delta0), Delta_noisy_vect_(_Delta_noisy_vect), delta_noisy_vect_(_delta_noisy_vect)
+        IMU_jac_deltas(Eigen::VectorXs _Delta0, Eigen::VectorXs _delta0, Eigen::Matrix<Eigen::VectorXs,9,1> _Delta_noisy_vect, Eigen::Matrix<Eigen::VectorXs,9,1> _delta_noisy_vect, 
+                        Eigen::Matrix<Eigen::Matrix3s,10,1> _jacobian_delta_preint_vect, Eigen::Matrix<Eigen::Matrix3s,10,1> _jacobian_delta_vect ) :
+                        Delta0_(_Delta0), delta0_(_delta0), Delta_noisy_vect_(_Delta_noisy_vect), delta_noisy_vect_(_delta_noisy_vect), 
                        jacobian_delta_preint_vect_(_jacobian_delta_preint_vect), jacobian_delta_vect_(_jacobian_delta_vect) {}
         
         public:
@@ -52,11 +52,11 @@ namespace wolf {
              */
             Eigen::VectorXs Delta0_; //this will contain the Delta not affected by noise
             Eigen::VectorXs delta0_; //this will contain the delta not affected by noise
-            Eigen::Matrix<Eigen::VectorXs,10,1> Delta_noisy_vect_; //this will contain the Deltas affected by noises
-            Eigen::Matrix<Eigen::VectorXs,10,1> delta_noisy_vect_; //this will contain the deltas affected by noises
-            Eigen::Matrix<Eigen::Matrix3s,11,1> jacobian_delta_preint_vect_;
-            Eigen::Matrix<Eigen::Matrix3s,11,1> jacobian_delta_vect_;
-    }
+            Eigen::Matrix<Eigen::VectorXs,9,1> Delta_noisy_vect_; //this will contain the Deltas affected by noises
+            Eigen::Matrix<Eigen::VectorXs,9,1> delta_noisy_vect_; //this will contain the deltas affected by noises
+            Eigen::Matrix<Eigen::Matrix3s,10,1> jacobian_delta_preint_vect_;
+            Eigen::Matrix<Eigen::Matrix3s,10,1> jacobian_delta_vect_;
+    };
 
 class ProcessorIMU : public ProcessorMotion{
     public:
@@ -138,7 +138,7 @@ class ProcessorIMU : public ProcessorMotion{
             _dt : time interval between 2 IMU measurements
             da_b : bias noise to add - scalar because adding the same noise to each component of bias (abx, aby, abz, wbx, wby, wbz) one by one. 
          */
-        IMU_jac_deltas finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b);
+        IMU_jac_bias finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b);
 
         /* params :
             _data : input data vector (size 6 : ax,ay,az,wx,wy,wz)
@@ -146,7 +146,7 @@ class ProcessorIMU : public ProcessorMotion{
             _Delta_noise : noise to add to Delta_preint (D1 in D = D1 + d), vector 9 because rotation expressed as a vector (R2v(q.matrix()))
             _delta_noise : noise to add to instantaneous delta (d in D = D1 + d), vector 9 because rotation expressed as a vector (R2v(q.matrix()))
          */
-        void finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise);
+        IMU_jac_deltas finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise);
 };
 
 }
@@ -460,7 +460,7 @@ void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv
 }
 
 //Functions to test jacobians with finite difference method
-inline IMU_jac_deltas ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b)
+inline IMU_jac_bias ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b)
 {
     //TODO : need to use a reset function here to make sure jacobians have not been used before --> reset everything
     ///Define all the needed variables                  d_ is to note that this is used only during finite difference step
