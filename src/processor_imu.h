@@ -558,21 +558,121 @@ inline IMU_jac_bias ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vector
         dDq_dwb_vect(i+1) = dDq_dwb_;
     }
 
-    IMU_jac_deltas bias_jacobians(dDp_dab_vect, dDv_dab_vect, dDp_dwb_vect, dDv_dwb_vect, dDq_dwb_vect, delta_preint_plus_delta_vect, delta_preint_vect);
+    IMU_jac_bias bias_jacobians(dDp_dab_vect, dDv_dab_vect, dDp_dwb_vect, dDv_dwb_vect, dDq_dwb_vect, delta_preint_plus_delta_vect, delta_preint_vect);
     return bias_jacobians;
 }
 
-inline void ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise)
+inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise)
 {
-    Eigen::MatrixXs jacobian_delta_preint_d0;
-    Eigen::MatrixXs jacobian_delta_d0;
-    jacobian_delta_preint_d0.resize(9,9);
-    jacobian_delta_d0.resize(9,9);
-    jacobian_delta_preint_d0 = Eigen::MatrixXs::Zero(9,9);
-    jacobian_delta_d0 = Eigen::MatrixXs::Zero(9,9);
+    //TODO : need to use a reset function here to make sure jacobians have not been used before --> reset everything
+
+    //we do not propagate any noise from data vector
+    Eigen::VectorXs Delta0;
+    Eigen::VectorXs Delta_;
+    Eigen::VectorXs delta0;
+    Eigen::VectorXs delta_preint_plus_delta;
+    Delta0.resize(10);
+    delta0.resize(10);
+    delta_preint_plus_delta.resize(10);
+    Delta0.setZero();
+    delta_preint_plus_delta.setZero();
+    Eigen::MatrixXs jacobian_delta_preint;
+    Eigen::MatrixXs jacobian_delta;
+    jacobian_delta_preint.resize(9,9);
+    jacobian_delta.resize(9,9);
+    jacobian_delta_preint = Eigen::MatrixXs::Zero(9,9);
+    jacobian_delta = Eigen::MatrixXs::Zero(9,9);
+    Eigen::Matrix<Eigen::Matrix3s,10,1> jacobian_delta_preint_vect;
+    Eigen::Matrix<Eigen::Matrix3s,10,1> jacobian_delta_vect;
+
+    Eigen::MatrixXs data_cov;
+    data_cov.resize(6,6);
+    data_cov = Eigen::MatrixXs::Zero(6,6);
+
+    Eigen::Matrix<Eigen::VectorXs,9,1> Delta_noisy_vect; //this will contain the Deltas affected by noises
+    Eigen::Matrix<Eigen::VectorXs,9,1> delta_noisy_vect; //this will contain the deltas affected by noises
 
     Eigen::MatrixXs jacobian_delta_preint_d1;
     Eigen::MatrixXs jacobian_delta_d1;
+
+    data2delta(_data, data_cov, _dt); //Affects dp_out, dv_out and dq_out
+    deltaPlusDelta(Delta0, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta); 
+    jacobian_delta_preint_vect(0) = jacobian_delta_preint;
+    jacobian_delta_vect(0) = jacobian_delta;
+
+    //We compute all the jacobians wrt deltas and noisy deltas
+    for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
+    {
+        //fist we need to reset some stuff
+        jacobian_delta_preint.setZero();
+        jacobian_delta.setZero();
+        acc_bias_.setZero();
+        gyro_bias_.setZero();
+
+        delta_ = delta0;
+        delta_(i) = delta_(i) + _delta_noise(i); //noise has been added
+        deltaPlusDelta(Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
+        delta_noisy_vect(i) = delta_;
+        jacobian_delta_vect(i+1) = jacobian_delta;
+    }
+
+    for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
+    {
+        //fist we need to reset some stuff
+        Eigen::Vector3s dqv_tmp;
+        jacobian_delta_preint.setZero();
+        jacobian_delta.setZero();
+        acc_bias_.setZero();
+        gyro_bias_.setZero();
+
+        delta_ = delta0;
+        remapDelta(delta_); //not sure that we need this
+        dqv_tmp = q2v(Dq_out_);
+        dqv_tmp(i) += _delta_noise(i+6);
+        Dq_out_ = v2q(dqv_tmp); //orientation noise has been added
+        deltaPlusDelta(Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
+        delta_noisy_vect(i+6) = delta_;
+        jacobian_delta_vect(i+7) = jacobian_delta;
+    }
+
+    //We compute all the jacobians wrt Deltas and noisy Deltas
+    for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
+    {
+        //fist we need to reset some stuff
+        jacobian_delta_preint.setZero();
+        jacobian_delta.setZero();
+        acc_bias_.setZero();
+        gyro_bias_.setZero();
+
+        Delta_ = Delta0;
+        Delta_(i) = Delta_(i) + _Delta_noise(i); //noise has been added
+        deltaPlusDelta(Delta_, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
+        Delta_noisy_vect(i) = Delta_;
+        jacobian_delta_preint_vect(i+1) = jacobian_delta_preint;
+    }
+
+    for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
+    {
+        //fist we need to reset some stuff
+        Eigen::Vector3s dQv_tmp;
+        jacobian_delta_preint.setZero();
+        jacobian_delta.setZero();
+        acc_bias_.setZero();
+        gyro_bias_.setZero();
+
+        Delta_ = Delta0;
+        remapDelta(Delta_); //this time we need it
+        dQv_tmp = q2v(Dq_out_);
+        dQv_tmp(i) += _Delta_noise(i+6); //orientation noise has been added
+        Dq_out_ = v2q(dQv_tmp); 
+        deltaPlusDelta(Delta_, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
+        Delta_noisy_vect(i+6) = Delta_;
+        jacobian_delta_preint_vect(i+7) = jacobian_delta_preint;
+    }
+    
+    IMU_jac_deltas jac_deltas(Delta0, delta0, Delta_noisy_vect, delta_noisy_vect, jacobian_delta_preint_vect, jacobian_delta_vect);
+    return jac_deltas;
+
 }
 
 } // namespace wolf
