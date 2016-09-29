@@ -120,7 +120,6 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
         void unlinkCapture(CaptureBasePtr _cap_ptr);
 
         void getConstraintList(ConstraintBaseList& _ctr_list);
-
         virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;

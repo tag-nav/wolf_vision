@@ -294,6 +294,9 @@ class LocalParametrizationBase;
 // NodeBase
 typedef NodeBase* NodeBasePtr;
 
+// NodeBase
+typedef NodeBase* NodeBasePtr;
+
 //Problem
 typedef Problem* ProblemPtr;
 

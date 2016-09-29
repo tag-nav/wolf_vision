@@ -74,8 +74,6 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
          */
         virtual void process();
 
-
-
 };
 
 }
