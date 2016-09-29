@@ -106,7 +106,7 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
         // Wolf tree access ---------------------------------------------------
 
         TrajectoryBasePtr getTrajectoryPtr() const;
-        void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr);
+        void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr){trajectory_ptr_ = _trj_ptr;}
 
         FrameBasePtr getPreviousFrame() const;
         FrameBasePtr getNextFrame() const;

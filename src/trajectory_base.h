@@ -81,6 +81,15 @@ class TrajectoryBase //: public NodeBase // NodeLinked<Problem,FrameBase>
          **/
         void sortFrame(FrameBase* _frame_iter);
 
+        void moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
+        {
+            if (*_place != _frm_ptr)
+                {
+                    frame_list_.remove(_frm_ptr);
+                    frame_list_.insert(_place, _frm_ptr);
+                }
+        }
+
         /** \brief Compute the position where the frame should be
          **/
         FrameBaseIter computeFrameOrder(FrameBase* _frame_ptr);

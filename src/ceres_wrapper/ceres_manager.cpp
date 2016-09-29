@@ -1,4 +1,7 @@
 #include "ceres_manager.h"
+#include "../trajectory_base.h"
+#include "../map_base.h"
+#include "../landmark_base.h"
 
 namespace wolf {
 

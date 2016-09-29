@@ -44,7 +44,7 @@ void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 void TrajectoryBase::sortFrame(FrameBase* _frame_ptr)
 {
-    moveDownNode(_frame_ptr, computeFrameOrder(_frame_ptr));
+    moveFrame(_frame_ptr, computeFrameOrder(_frame_ptr));
 }
 
 FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBase* _frame_ptr)

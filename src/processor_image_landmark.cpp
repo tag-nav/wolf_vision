@@ -7,6 +7,8 @@
 #include "constraint_image_new_landmark.h"
 #include "sensor_camera.h"
 #include "pinholeTools.h"
+#include "trajectory_base.h"
+#include "map_base.h"
 
 #include <Eigen/Geometry>
 
