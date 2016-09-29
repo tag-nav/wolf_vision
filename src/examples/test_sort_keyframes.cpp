@@ -9,6 +9,7 @@
 #include "../wolf.h"
 #include "../problem.h"
 #include "../frame_base.h"
+#include "../trajectory_base.h"
 
 // STL includes
 #include <list>

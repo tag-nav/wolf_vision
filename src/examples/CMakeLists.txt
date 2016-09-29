@@ -19,8 +19,8 @@ ADD_EXECUTABLE(test_state_quaternion test_state_quaternion.cpp)
 TARGET_LINK_LIBRARIES(test_state_quaternion ${PROJECT_NAME})
 
 # NodeLinked class test
-ADD_EXECUTABLE(test_node_linked test_node_linked.cpp)
-TARGET_LINK_LIBRARIES(test_node_linked ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_node_linked test_node_linked.cpp)
+#TARGET_LINK_LIBRARIES(test_node_linked ${PROJECT_NAME})
 
 # Testing virtual hierarchy -- solving diamond of death
 ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
