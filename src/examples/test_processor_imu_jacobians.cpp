@@ -333,7 +333,7 @@ int main(int argc, char** argv)
         std::cout << "dDp_dV : \n" << dDp_dV << "\n deltas_jac.jacobian_delta_preint_.block(0,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,3,3,3) << std::endl;
     }
 
-    if(dDp_dV.isApprox(deltas_jac.jacobian_delta_preint_.block(0,6,3,3), wolf::Constants::EPS) )
+    if(dDp_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(0,6,3,3), wolf::Constants::EPS) )
         std::cout<< "dDp_dO jacobian is correct !" << std::endl;
     else{
         std::cout<< "dDp_dO jacobian is not correct ..." << std::endl;
