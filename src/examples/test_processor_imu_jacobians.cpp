@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     //CaptureIMU* imu_ptr;
 
     ProcessorIMU processor_imu;
-    processor_imu.setOrigin(x0, t);
+    //processor_imu.setOrigin(x0, t);
     wolf::Scalar ddelta_bias = 0.0001;
     wolf::Scalar dt = 0.001;
     struct IMU_jac_bias bias_jac = processor_imu.finite_diff_ab(dt, data_, ddelta_bias);
@@ -91,6 +91,7 @@ int main(int argc, char** argv)
         dDq_dwb_y = log( dR(wb).trans() * dR(wb - dwb_y))/dwb_y
         dDq_dwb_z = log( dR(wb).trans() * dR(wb + dwb_z))/dwb_z
      */
+
 
      new (&q_in_1) Eigen::Map<Eigen::Quaternions>(bias_jac.Delta0_.data() + 6);
      for(int i=0;i<3;i++){
@@ -220,13 +221,11 @@ int main(int argc, char** argv)
 
      */
 
-     //taking care of noise now
-    Eigen::VectorXs Delta_noise;
-    Eigen::VectorXs delta_noise;
-    Delta_noise.resize(10);
-    delta_noise.resize(10);
-    Delta_noise << 0.001, 0.001, 0.001, 0.001, 0.001, 0.002, 0.002, 0.002;
-    delta_noise << 0.001, 0.001, 0.001, 0.001, 0.001, 0.002, 0.002, 0.002;
+     //taking care of noise now 
+    Eigen::Matrix<wolf::Scalar,9,1> Delta_noise;
+    Eigen::Matrix<wolf::Scalar,9,1> delta_noise;
+    Delta_noise << 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.002, 0.002, 0.002;
+    delta_noise << 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.002, 0.002, 0.002;
 
     struct IMU_jac_deltas deltas_jac = processor_imu.finite_diff_noise(dt, data_, Delta_noise, delta_noise);
 
@@ -277,6 +276,7 @@ int main(int argc, char** argv)
         //dDo_dox = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(dthetax,0,0)) )/dthetax
          dDo_do.block<3,1>(0,i) = R2v( (Dq0.matrix() * dq0.matrix()).transpose() * (Dq0.matrix() * dq_noisy.matrix()) )/Delta_noise(i+6);
     }
+
 
     delete wolf_problem_ptr_;
 
