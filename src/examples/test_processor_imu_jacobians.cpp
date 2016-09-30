@@ -141,6 +141,42 @@ int main(int argc, char** argv)
             dDq_dwb_check = false;
       */
 
+    if(dDp_dab.isApprox(bias_jac.dDp_dab_, wolf::Constants::EPS) )
+        std::cout<< "dDp_dab_ jacobian is correct !" << std::endl;
+    else{
+        std::cout<< "dDp_dab_ jacobian is not correct ..." << std::endl;
+        std::cout << "dDp_dab : \n" << dDp_dab << "\n bias_jac.dDp_dab_ :\n" << bias_jac.dDp_dab_ << std::endl;
+    }
+
+    if(dDv_dab.isApprox(bias_jac.dDv_dab_, wolf::Constants::EPS) )
+        std::cout<< "dDv_dab_ jacobian is correct !" << std::endl;
+    else{
+        std::cout<< "dDv_dab_ jacobian is not correct ..." << std::endl;
+        std::cout << "dDv_dab_ : \n" << dDv_dab << "\n bias_jac.dDv_dab_ :\n" << bias_jac.dDv_dab_ << std::endl;
+    }
+
+    if(dDp_dwb.isApprox(bias_jac.dDp_dwb_, wolf::Constants::EPS) )
+        std::cout<< "dDp_dwb_ jacobian is correct !" << std::endl;
+    else{
+        std::cout<< "dDp_dwb_ jacobian is not correct ..." << std::endl;
+        std::cout << "dDp_dwb_ : \n" << dDp_dwb << "\n bias_jac.dDp_dwb_ :\n" << bias_jac.dDp_dwb_ << std::endl;
+    }
+
+    if(dDv_dwb.isApprox(bias_jac.dDv_dwb_, wolf::Constants::EPS) )
+        std::cout<< "dDv_dwb_ jacobian is correct !" << std::endl;
+    else{
+        std::cout<< "dDv_dwb_ jacobian is not correct ..." << std::endl;
+        std::cout << "dDv_dwb_ : \n" << dDv_dwb << "\n bias_jac.dDv_dwb_ :\n" << bias_jac.dDv_dwb_ << std::endl;
+    }
+
+    if(dDq_dwb.isApprox(bias_jac.dDq_dwb_, wolf::Constants::EPS) )
+        std::cout<< "dDq_dwb_ jacobian is correct !" << std::endl;
+    else{
+        std::cout<< "dDq_dwb_ jacobian is not correct ..." << std::endl;
+        std::cout << "dDq_dwb_ : \n" << dDq_dwb << "\n bias_jac.dDq_dwb_ :\n" << bias_jac.dDq_dwb_ << std::endl;
+    }
+
+
     /*              Numerical method to check jacobians wrt noise
 
                                                             dDp_dP = [dDp_dPx, dDp_dPy, dDp_dPz]
