@@ -26,6 +26,13 @@ MapBase::MapBase() :
 
 MapBase::~MapBase()
 {
+    is_deleting_ = true;
+    while (!landmark_list_.empty())
+    {
+        delete landmark_list_.front();
+        landmark_list_.pop_front();
+    }
+
 	//std::cout << "deleting MapBase " << nodeId() << std::endl;
 }
 

@@ -40,6 +40,7 @@ SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBl
 
 SensorBase::~SensorBase()
 {
+    is_deleting_ = true;
     // Remove State Blocks
     if (p_ptr_ != nullptr && !extrinsic_dynamic_)
     {
@@ -61,6 +62,13 @@ SensorBase::~SensorBase()
             getProblem()->removeStateBlockPtr(intrinsic_ptr_);
         delete intrinsic_ptr_;
     }
+
+    while (!processor_list_.empty())
+    {
+        delete processor_list_.front();
+        processor_list_.pop_front();
+    }
+
 
 }
 

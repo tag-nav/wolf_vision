@@ -40,6 +40,13 @@ FeatureBase::~FeatureBase()
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
+
+    while (!constraint_list_.empty())
+    {
+        delete constraint_list_.front();
+        constraint_list_.pop_front();
+    }
+
 }
 
 ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)

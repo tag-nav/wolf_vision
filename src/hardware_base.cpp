@@ -13,6 +13,12 @@ HardwareBase::HardwareBase() :
 
 HardwareBase::~HardwareBase()
 {
+    is_deleting_ = true;
+    while (!sensor_list_.empty())
+    {
+        delete sensor_list_.front();
+        sensor_list_.pop_front();
+    }
 	//std::cout << "deleting HardwareBase " << nodeId() << std::endl;
 }
 

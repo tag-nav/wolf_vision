@@ -73,6 +73,13 @@ FrameBase::~FrameBase()
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
+
+    while (!capture_list_.empty())
+    {
+        delete capture_list_.front();
+        capture_list_.pop_front();
+    }
+
 }
 
 void FrameBase::registerNewStateBlocks()

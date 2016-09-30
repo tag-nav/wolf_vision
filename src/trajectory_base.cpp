@@ -12,6 +12,13 @@ TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
 
 TrajectoryBase::~TrajectoryBase()
 {
+    is_deleting_ = true;
+    while (!frame_list_.empty())
+    {
+        delete frame_list_.front();
+        frame_list_.pop_front();
+    }
+
     //std::cout << "deleting TrajectoryBase " << nodeId() << std::endl;
 }
 
