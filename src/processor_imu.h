@@ -20,7 +20,7 @@ namespace wolf {
               place 4 : added dw_bx in data         place 5 : added dw_by in data       place 6 : added dw_bz in data
              */
             Eigen::Matrix<Eigen::VectorXs,6,1> Deltas_noisy_vect_;
-            Eigen::VectorXs Delta0_;            // D1 in D2 = D1 + d
+            Eigen::VectorXs Delta0_;
             Eigen::Matrix3s dDp_dab_;
             Eigen::Matrix3s dDv_dab_;
             Eigen::Matrix3s dDp_dwb_;
@@ -589,8 +589,8 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
         remapDelta(delta_); //not sure that we need this
         dqr_tmp = Dq_out_.matrix();
         dtheta(i) +=  _delta_noise(i+6); //introduce perturbation
-        dqr_tmp = dqr_tmp * v2R(dtheta);
-        Dq_out_ = v2q(R2v(dqr_tmp)); //orientation noise has been added
+        dqr_tmp = dqr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
+        Dq_out_ = v2q(R2v(dqr_tmp)); //orientation noise has been added --> get back to quaternion form
         deltaPlusDelta(Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         delta_noisy_vect(i+6) = delta_;
     }
@@ -624,8 +624,8 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
         remapDelta(Delta_); //this time we need it
         dQr_tmp = Dq_out_.matrix();
         dtheta(i) += _Delta_noise(i+6); //introduce perturbation
-        dQr_tmp = dQr_tmp * v2R(dtheta);
-        Dq_out_ = v2q(R2v(dQr_tmp)); //orientation noise has been added
+        dQr_tmp = dQr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
+        Dq_out_ = v2q(R2v(dQr_tmp)); //orientation noise has been added --> get back to quaternion form
         deltaPlusDelta(Delta_, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         Delta_noisy_vect(i+6) = Delta_;
     }
