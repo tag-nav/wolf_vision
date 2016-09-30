@@ -513,7 +513,8 @@ inline IMU_jac_bias ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vector
         data_cov = Eigen::MatrixXs::Zero(6,6);
 
         // add da_b
-        _data(i) = data0(i) + da_b;
+        _data = data0;
+        _data(i) = _data(i) - da_b; //- because a = a_m − a_b + a_n, in out case, a = a_m − a_b - da_b + a_n
         //data2delta
         data2delta(_data, data_cov, _dt);
         deltaPlusDelta(delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
