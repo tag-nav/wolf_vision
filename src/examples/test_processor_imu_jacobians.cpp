@@ -108,41 +108,7 @@ int main(int argc, char** argv)
          dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
      }
 
-     /*
-        We just computed dDp_dab, dDp_dwb, dDv_dab and dDv_dwb
-        These must be compared to elements in IMU_jac_bias struct
-
-        bool dDp_dab_check;
-        bool dDv_dab_check;
-        bool dDp_dwb_check;
-        bool dDv_dwb_check;
-        bool dDq_dwb_check;
-
-        if((dDp_dab - bias_jac.dDp_dab_) < wolf::Constants::EPS)
-            dDp_dab_check = true;
-        else
-            dDp_dab_check = false;
-
-        if((dDv_dab - bias_jac.dDv_dab_) < wolf::Constants::EPS)
-                dDv_dab_check = true;
-            else
-                dDv_dab_check = false;
-
-        if((dDp_dwb - bias_jac.dDp_dwb_) < wolf::Constants::EPS)
-            dDp_dwb_check = true;
-        else
-            dDp_dwb_check = false;
-
-        if((dDv_dwb - bias_jac.dDv_dwb_) < wolf::Constants::EPS)
-            dDv_dwb_check = true;
-        else
-            dDv_dwb_check = false;
-
-        if((dDq_dwb - bias_jac.dDq_dwb_) < wolf::Constants::EPS)
-            dDq_dwb_check = true;
-        else
-            dDq_dwb_check = false;
-      */
+     //Check the jacobians wrt to bias using finite difference
 
     if(dDp_dab.isApprox(bias_jac.dDp_dab_, wolf::Constants::EPS) )
         std::cout<< "dDp_dab_ jacobian is correct !" << std::endl;
@@ -237,14 +203,8 @@ int main(int argc, char** argv)
 
                                                             dDo_dp = dDo_dv = dDo_dP = dDo_dV = [0, 0, 0]
 
-            TODO : DOUBLE-CHECK THE FOLLOWING !!
                                                             dDo_dO = [dDo_dOx, dDo_dOy, dDo_dOz]
-    dDo_dOx = log( dR(Theta).transpose() * dR(Theta+dThetax) )/dThetax
-            = log( dR(Theta).transpose() * dR(Theta)*exp(dThetax,0,0) )/dThetax = Idx
-    dDo_dOy = log( dR(Theta).transpose() * dR(Theta)*exp(0,dThetay,0) )/dThetay = Idy
-    dDo_dOz = log( dR(Theta).transpose() * dR(Theta)*exp(0,0,dThetaz) )/dThetaz = Idz
                                                             
-                                                            //other solution to investigate
     dDo_dOx = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta+dThetax) * dr(theta) )/dThetax
             = log( (dR(Theta) * dr(theta)).transpose() * (dR(Theta)*exp(dThetax,0,0)) * dr(theta) )/dThetax
             = log( (_Delta * _delta).transpose() * (_Delta_noisy * _delta))
@@ -252,18 +212,12 @@ int main(int argc, char** argv)
     dDo_dOz = log( (dR(Theta) * dr(theta)).transpose() * (dR(Theta)*exp(0,0,dThetaz)) * dr(theta) )/dThetaz
 
                                                             dDo_do = [dDo_dox, dDo_doy, dDo_doz]
-    dDo_dox = log( dR(Theta+dThetax).transpose() * dR(Theta) )/dThetax
-            = log( (dR(Theta)*exp(dThetax,0,0)).transpose() * dR(Theta) )/dThetax
-    dDo_doy = log( (dR(Theta)*exp(0,dThetay,0)).transpose() * dR(Theta) )/dThetay
-    dDo_doz = log( (dR(Theta)*exp(0,0,dThetaz)).transpose() * dR(Theta) )/dThetaz
 
-                                                            //other solution to investigate
     dDo_dox = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * dr(theta+dthetax) )/dthetax
             = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(dthetax,0,0)) )/dthetax
             = log( (_Delta * _delta).transpose() * (_Delta * _delta_noisy))
     dDo_doy = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,dthetay,0)) )/dthetay
     dDo_doz = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,0,dthetaz)) )/dthetaz
-
      */
 
      //taking care of noise now 
@@ -287,7 +241,6 @@ int main(int argc, char** argv)
 
     remapJacDeltas_quat0(deltas_jac, Dq0, dq0);
 
-    //dDp_dP and dDv_dV
     for(int i = 0; i < 3; i++){
 
         //dDp_dPx = ((P + dPx) - P)/dPx
