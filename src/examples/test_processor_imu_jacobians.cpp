@@ -73,7 +73,7 @@ int main(int argc, char** argv)
                 place 4 : added dw_bx in data         place 5 : added dw_by in data       place 6 : added dw_bz in data
     */
 
-    Eigen::Matrix3s dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb;
+    Eigen::Matrix3s dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dab, dDq_dwb;
 
     /*
         dDp_dab = [dDp_dab_x, dDp_dab_y, dDp_dab_z]
@@ -100,6 +100,9 @@ int main(int argc, char** argv)
 
          dDp_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
          dDv_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).segment(3,3) - bias_jac.Delta0_.segment(3,3))/ddelta_bias;
+
+         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i).data() + 6);
+         dDq_dab.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
 
          new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i+3).data() + 6);
          dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
@@ -175,6 +178,12 @@ int main(int argc, char** argv)
         std::cout<< "dDq_dwb_ jacobian is not correct ..." << std::endl;
         std::cout << "dDq_dwb_ : \n" << dDq_dwb << "\n bias_jac.dDq_dwb_ :\n" << bias_jac.dDq_dwb_ << std::endl;
     }
+
+    //Check jacobians that are supposed to be Zeros just in case
+    if(dDq_dab.isZero(wolf::Constants::EPS))
+        std::cout<< "dDq_dab_ jacobian is correct (Zero) !" << std::endl;
+    else
+        std::cout<< "dDq_dab_ jacobian is not Zero :" << dDq_dab << std::endl;
 
 
     /*              Numerical method to check jacobians wrt noise
