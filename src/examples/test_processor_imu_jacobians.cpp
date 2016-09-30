@@ -12,7 +12,7 @@
 #include "capture_imu.h"
 #include "state_block.h"
 #include "state_quaternion.h"
-#include "processor_imu.h"
+#include "processor_imu_UnitTester.h"
 
 //std
 #include <iostream>
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 
     //CaptureIMU* imu_ptr;
 
-    ProcessorIMU processor_imu;
+    ProcessorIMU_UnitTester processor_imu;
     //processor_imu.setOrigin(x0, t);
     wolf::Scalar ddelta_bias = 0.0001;
     wolf::Scalar dt = 0.001;
