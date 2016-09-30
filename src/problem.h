@@ -91,18 +91,11 @@ class Problem //: public NodeBase
          */
         virtual void destruct() final;
 
-        /** \brief Sets an origin frame with a covariance
-         *
-         * Sets an origin frame with a covariance
-         *
-         */
-        virtual void setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov,
-                               const TimeStamp& _ts);
+        // Properties -----------------------------------------
+        unsigned int getFrameStructureSize();
 
-
-        /** \brief add sensor to hardware
-         * \param _sen_ptr pointer to the sensor to add
-         */
+        // Hardware branch ------------------------------------
+        HardwareBasePtr getHardwarePtr();
         void addSensor(SensorBasePtr _sen_ptr);
 
         /** \brief Factory method to install (create and add) sensors only from its properties
@@ -126,6 +119,12 @@ class Problem //: public NodeBase
                                   const std::string& _unique_sensor_name, //
                                   const Eigen::VectorXs& _extrinsics, //
                                   const std::string& _intrinsics_filename);
+
+        /** \brief get a sensor pointer by its name
+         * \param _sensor_name The sensor name, as it was installed with installSensor()
+         */
+        SensorBasePtr getSensorPtr(const std::string& _sensor_name);
+
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
@@ -162,10 +161,14 @@ class Problem //: public NodeBase
          */
         void setProcessorMotion(ProcessorMotion* _processor_motion_ptr);
         void setProcessorMotion(const std::string& _unique_processor_name);
+        ProcessorMotion* getProcessorMotionPtr();
 
-        void loadMap(const std::string& _filename_dot_yaml);
-        void saveMap(const std::string& _filename_dot_yaml, const std::string& _map_name = "Map automatically saved by Wolf");
 
+        // Trajectory branch ----------------------------------
+        TrajectoryBasePtr addTrajectory(TrajectoryBasePtr _trajectory_ptr);
+        TrajectoryBasePtr getTrajectoryPtr();
+        virtual void setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov,
+                               const TimeStamp& _ts);
         /** \brief Create Frame of the correct size
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
@@ -179,21 +182,13 @@ class Problem //: public NodeBase
         FrameBasePtr createFrame(FrameKeyType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
-        ProcessorMotion* getProcessorMotionPtr();
-
-        /** \brief Get the state at last timestamp (and return timestamp via parameter)
-         */
         Eigen::VectorXs getCurrentState();
         Eigen::VectorXs getCurrentState(TimeStamp& _ts);
         void getCurrentState(Eigen::VectorXs& state);
         void getCurrentState(Eigen::VectorXs& state, TimeStamp& _ts);
-
-        /** \brief Get the state at a given timestamp
-         */
         Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
         void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
 
-        unsigned int getFrameStructureSize();
         Eigen::VectorXs zeroState();
 
         /** \brief Give the permission to a processor to create a new keyFrame
@@ -206,9 +201,43 @@ class Problem //: public NodeBase
          */
         void keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _processor_ptr, const Scalar& _time_tolerance);
 
-        LandmarkBasePtr addLandmark(LandmarkBasePtr _lmk_ptr);
+        /** \brief Returns a pointer to last frame
+         **/
+        FrameBasePtr getLastFramePtr();
 
+        /** \brief Returns a pointer to last key frame
+         */
+        FrameBasePtr getLastKeyFramePtr();
+
+
+
+
+        // Map branch -----------------------------------------
+        MapBasePtr addMap(MapBasePtr _map_ptr);
+        MapBasePtr getMapPtr();
+        LandmarkBasePtr addLandmark(LandmarkBasePtr _lmk_ptr);
         void addLandmarkList(LandmarkBaseList _lmk_list);
+        void loadMap(const std::string& _filename_dot_yaml);
+        void saveMap(const std::string& _filename_dot_yaml, const std::string& _map_name = "Map automatically saved by Wolf");
+
+
+
+        // Covariances -------------------------------------------
+        void clearCovariance();
+        void addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov);
+        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row = 0,
+                                const int _col=0);
+        bool getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance);
+        Eigen::MatrixXs getFrameCovariance(FrameBasePtr _frame_ptr);
+        bool getLandmarkCovariance(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& _covariance);
+        Eigen::MatrixXs getLandmarkCovariance(LandmarkBasePtr _landmark_ptr);
+
+
+        // Solver management ----------------------------------------
+
+        /** \brief Gets a pointer to the state units list
+         */
+        StateBlockList* getStateListPtr();
 
         /** \brief Adds a new state block to be added to solver manager
          */
@@ -222,6 +251,15 @@ class Problem //: public NodeBase
          */
         void removeStateBlockPtr(StateBlock* _state_ptr);
 
+        /** \brief Gets a queue of state blocks notification to be handled by the solver
+         */
+        std::list<StateBlockNotification>& getStateBlockNotificationList();
+
+
+        /** \brief Gets a queue of constraint notification to be handled by the solver
+         */
+        std::list<ConstraintNotification>& getConstraintNotificationList();
+
         /** \brief Adds a new constraint to be added to solver manager
          */
         ConstraintBasePtr addConstraintPtr(ConstraintBasePtr _constraint_ptr);
@@ -229,92 +267,6 @@ class Problem //: public NodeBase
         /** \brief Adds a constraint to be removed to solver manager
          */
         void removeConstraintPtr(ConstraintBasePtr _constraint_ptr);
-
-        /** \brief Clear covariance
-         */
-        void clearCovariance();
-
-        /** \brief Adds a new covariance block
-         */
-        void addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov);
-
-        /** \brief Gets a covariance block
-         */
-        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row = 0,
-                                const int _col=0);
-
-        /** \brief Gets the covariance of a frame
-         */
-        bool getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance);
-        Eigen::MatrixXs getFrameCovariance(FrameBasePtr _frame_ptr);
-
-        /** \brief Gets the covariance of a landmark
-         */
-        bool getLandmarkCovariance(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& _covariance);
-        Eigen::MatrixXs getLandmarkCovariance(LandmarkBasePtr _landmark_ptr);
-
-        /** \brief Adds a map
-         */
-        MapBasePtr addMap(MapBasePtr _map_ptr);
-
-        /** \brief Adds a trajectory
-         */
-        TrajectoryBasePtr addTrajectory(TrajectoryBasePtr _trajectory_ptr);
-
-        /** \brief Gets a pointer to map
-         */
-        MapBasePtr getMapPtr();
-
-        /** \brief Gets a pointer to trajectory
-         */
-        TrajectoryBasePtr getTrajectoryPtr();
-
-        /** \brief Gets a pointer to Hardware
-         */
-        HardwareBasePtr getHardwarePtr();
-
-        /** \brief Returns a pointer to last frame
-         **/
-        FrameBasePtr getLastFramePtr();
-
-        /** \brief Returns a pointer to last key frame
-         */
-        FrameBasePtr getLastKeyFramePtr();
-
-        /** \brief Gets a pointer to the state units list
-         */
-        StateBlockList* getStateListPtr();
-
-        /** \brief Gets a queue of state blocks notification to be handled by the solver
-         */
-        std::list<StateBlockNotification>& getStateBlockNotificationList();
-
-        /** \brief Gets a queue of constraint notification to be handled by the solver
-         */
-        std::list<ConstraintNotification>& getConstraintNotificationList();
-
-        /** \brief get top node (this)
-         */
-        ProblemPtr getTop();
-
-        /** \brief get this node
-         */
-        ProblemPtr getProblem();
-
-        /** \brief Returns a true (is top)
-         */
-        bool isTop();
-
-        /** \brief Remove Down Node
-         *
-         * This empty function is needed by the destruct() node_linked function.
-         */
-//        void removeDownNode(const LowerNodePtr _ptr){};
-
-        /** \brief get a sensor pointer by its name
-         * \param _sensor_name The sensor name, as it was installed with installSensor()
-         */
-        SensorBasePtr getSensorPtr(const std::string& _sensor_name);
 
 };
 
@@ -340,20 +292,6 @@ inline std::list<ConstraintNotification>& Problem::getConstraintNotificationList
     return constraint_notification_list_;
 }
 
-inline ProblemPtr Problem::getProblem()
-{
-    return this;
-}
-
-inline ProblemPtr Problem::getTop()
-{
-    return this;
-}
-
-inline bool Problem::isTop()
-{
-    return true;
-}
 
 } // namespace wolf
 
