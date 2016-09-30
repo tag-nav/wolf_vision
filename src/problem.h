@@ -150,7 +150,7 @@ class Problem //: public NodeBase
          * \param _corresponding_sensor_name corresponding sensor name, used to bind the processor to the particular instance of the sensor
          * \param _params_filename name of formatted file (xml, yaml, etc) defining the processor parameters.
          */
-        void installProcessor(const std::string& _prc_type, //
+        ProcessorBasePtr installProcessor(const std::string& _prc_type, //
                               const std::string& _unique_processor_name, //
                               const std::string& _corresponding_sensor_name, //
                               const std::string& _params_filename = "");

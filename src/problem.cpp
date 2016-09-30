@@ -92,7 +92,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     return prc_ptr;
 }
 
-void Problem::installProcessor(const std::string& _prc_type, //
+ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
                                const std::string& _unique_processor_name, //
                                const std::string& _corresponding_sensor_name, //
                                const std::string& _params_filename)
@@ -101,11 +101,11 @@ void Problem::installProcessor(const std::string& _prc_type, //
     if (sen_ptr == nullptr)
         throw std::runtime_error("Sensor not found. Cannot bind Processor.");
     if (_params_filename == "")
-        installProcessor(_prc_type, _unique_processor_name, sen_ptr, nullptr);
+        return installProcessor(_prc_type, _unique_processor_name, sen_ptr, nullptr);
     else
     {
         ProcessorParamsBasePtr prc_params = ProcessorParamsFactory::get().create(_prc_type, _params_filename);
-        installProcessor(_prc_type, _unique_processor_name, sen_ptr, prc_params);
+        return installProcessor(_prc_type, _unique_processor_name, sen_ptr, prc_params);
     }
 }
 
