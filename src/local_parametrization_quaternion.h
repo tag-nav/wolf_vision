@@ -48,19 +48,37 @@ typedef enum {
  *   \f]
  *
  */
+template <unsigned int DeltaReference/* = DQ_GLOBAL*/>
 class LocalParametrizationQuaternion : public LocalParametrizationBase
 {
-    private:
-        QuaternionDeltaReference delta_reference_;
-    public:
-        LocalParametrizationQuaternion(QuaternionDeltaReference _delta_ref = DQ_GLOBAL);
-        virtual ~LocalParametrizationQuaternion();
+protected:
 
-        virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _q,
-                          const Eigen::Map<const Eigen::VectorXs>& _delta_theta,
-                          Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const;
-        virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _q, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
+  QuaternionDeltaReference delta_reference_;
+
+public:
+
+  LocalParametrizationQuaternion() :
+    LocalParametrizationBase(4, 3)
+  {
+    //
+  }
+
+  virtual ~LocalParametrizationQuaternion()
+  {
+    //
+  }
+
+  virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _q,
+                    const Eigen::Map<const Eigen::VectorXs>& _delta_theta,
+                    Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const;
+
+  virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _q,
+                               Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
 };
+
+// @TODO : considere typedef
+// typedef LocalParametrizationQuaternion<DQ_GLOBAL> LocalParametrizationQuaternionG;
+// typedef LocalParametrizationQuaternion<DQ_LOCAL>  LocalParametrizationQuaternionL;
 
 } // namespace wolf
 
