@@ -526,8 +526,6 @@ inline IMU_jac_bias ProcessorIMU::finite_diff_ab(const Scalar _dt, Eigen::Vector
 
 inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise)
 {
-    //TODO : need to use a reset function here to make sure jacobians have not been used before --> reset everything
-
     //we do not propagate any noise from data vector
     Eigen::VectorXs Delta0;
     Eigen::VectorXs Delta_;
@@ -546,6 +544,8 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
     jacobian_delta = Eigen::MatrixXs::Zero(9,9);
     Eigen::MatrixXs jacobian_delta_preint0;
     Eigen::MatrixXs jacobian_delta0;
+    jacobian_delta_preint0.setZero();
+    jacobian_delta0.setZero();;
 
     Eigen::MatrixXs data_cov;
     data_cov.resize(6,6);
@@ -553,9 +553,6 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
 
     Eigen::Matrix<Eigen::VectorXs,9,1> Delta_noisy_vect; //this will contain the Deltas affected by noises
     Eigen::Matrix<Eigen::VectorXs,9,1> delta_noisy_vect; //this will contain the deltas affected by noises
-
-    Eigen::MatrixXs jacobian_delta_preint_d1;
-    Eigen::MatrixXs jacobian_delta_d1;
 
     data2delta(_data, data_cov, _dt); //Affects dp_out, dv_out and dq_out
     deltaPlusDelta(Delta0, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta); 
