@@ -273,7 +273,8 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 {
     FeaturePointImage* feat_point_image_ptr = (FeaturePointImage*) _feature_ptr;
-    FrameBase* anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
+//    FrameBase* anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
+    FrameBase* anchor_frame = getLastPtr()->getFramePtr();
 
     Eigen::Vector2s point2D;
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
@@ -301,29 +302,29 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
-//    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
-    if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
-    {
-        //std::cout << "Are equal" << std::endl;
-        return new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
-    }
-    else// (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() != last_ptr_->getFramePtr())
-    {
-        return new ConstraintImage(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
-    }
-
-/* test */
-
-//    //    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
+////    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
 //    if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
 //    {
 //        //std::cout << "Are equal" << std::endl;
-//        return nullptr; //new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
+//        return new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
 //    }
 //    else// (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() != last_ptr_->getFramePtr())
 //    {
 //        return new ConstraintImage(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
 //    }
+
+/* test */
+
+    //    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
+    if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
+    {
+        //std::cout << "Are equal" << std::endl;
+        return nullptr; //new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
+    }
+    else// (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() != last_ptr_->getFramePtr())
+    {
+        return new ConstraintImage(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
+    }
 }
 
 
@@ -331,13 +332,14 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
 
 void ProcessorImageLandmark::LandmarkInCurrentCamera(LandmarkAHP* _landmark,Eigen::Vector3s& _point3D)
 {
-    Eigen::Vector3s pwr1 = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
+    Eigen::Vector3s pwr1 = getLastPtr()->getFramePtr()->getPPtr()->getVector();
+//            getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
     Eigen::Vector3s pwr0 = _landmark->getAnchorFrame()->getPPtr()->getVector();
     Eigen::Vector3s prc = this->getSensorPtr()->getPPtr()->getVector();
 
     Eigen::Quaternion<Scalar> qwr1, qwr0, qrc;
     Eigen::Vector4s quaternion_anchor = _landmark->getAnchorFrame()->getOPtr()->getVector();
-    Eigen::Vector4s quaternion_current_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr()->getOPtr()->getVector();
+    Eigen::Vector4s quaternion_current_frame = getLastPtr()->getFramePtr()->getOPtr()->getVector();
     Eigen::Vector4s quaternion_sensor = this->getSensorPtr()->getOPtr()->getVector();
     qwr0 = quaternion_anchor;
     qwr1 = quaternion_current_frame;
@@ -539,7 +541,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
             point.y = point2D[1];
 
             cv::circle(image, point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
-            cv::putText(image, std::to_string(counter), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+            cv::putText(image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
             counter++;
         }
     }

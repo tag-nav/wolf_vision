@@ -103,7 +103,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         }detector_descriptor_params_;
 
         /* pinhole params */
-        Eigen::Vector4s k_parameters_;
+//        Eigen::Vector4s k_parameters_;
         Eigen::Vector2s distortion_;
         Eigen::Vector2s correction_;
 
