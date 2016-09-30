@@ -361,6 +361,38 @@ int main(int argc, char** argv)
         std::cout << "dDo_dO : \n" << dDo_dO << "\n deltas_jac.jacobian_delta_preint_.block(6,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) << std::endl;
     }
 
+     Eigen::Matrix3s dDp_dp_a, dDp_dv_a, dDp_do_a, dDv_dp_a, dDv_dv_a, dDv_do_a, dDo_dp_a, dDo_dv_a, dDo_do_a;
+     dDp_dp_a = deltas_jac.jacobian_delta_.block(0,0,3,3);
+     dDp_dv_a = deltas_jac.jacobian_delta_.block(0,3,3,3);
+     dDp_do_a = deltas_jac.jacobian_delta_.block(0,6,3,3);
+     dDv_dp_a = deltas_jac.jacobian_delta_.block(3,0,3,3);
+     dDv_dv_a = deltas_jac.jacobian_delta_.block(3,3,3,3);
+     dDv_do_a = deltas_jac.jacobian_delta_.block(3,6,3,3);
+     dDo_dp_a = deltas_jac.jacobian_delta_.block(6,0,3,3);
+     dDo_dv_a = deltas_jac.jacobian_delta_.block(6,3,3,3);
+     dDo_do_a = deltas_jac.jacobian_delta_.block(6,6,3,3);
+
+    if(dDp_dp.isApprox(dDp_dp_a, wolf::Constants::EPS) )
+        std::cout<< "dDp_dp jacobian is correct !" << std::endl;
+    else{
+        std::cout<< "dDp_dp jacobian is not correct ..." << std::endl;
+        std::cout << "dDp_dp : \n" << dDv_dp << "\n dDp_dp_a :\n" << dDp_dp_a << std::endl;
+    }
+
+    if(dDv_dv.isApprox(dDv_dv_a, wolf::Constants::EPS) )
+        std::cout<< "dDv_dv jacobian is correct !" << std::endl;
+    else{
+        std::cout<< "dDv_dv jacobian is not correct ..." << std::endl;
+        std::cout << "dDv_dv : \n" << dDv_dv << "\n dDv_dv_a :\n" << dDv_dv_a << std::endl;
+    }
+
+    if(dDo_do.isApprox(dDo_do_a, wolf::Constants::EPS) )
+        std::cout<< "dDo_do jacobian is correct !" << std::endl;
+    else{
+        std::cout<< "dDo_do jacobian is not correct ..." << std::endl;
+        std::cout << "dDo_do : \n" << dDo_do << "\n dDo_do_a :\n" << dDo_do_a << std::endl;
+    }
+
     delete wolf_problem_ptr_;
 
     return 0;
