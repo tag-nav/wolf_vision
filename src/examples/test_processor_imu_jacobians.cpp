@@ -101,7 +101,7 @@ int main(int argc, char** argv)
          dDp_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
          dDv_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).segment(3,3) - bias_jac.Delta0_.segment(3,3))/ddelta_bias;
 
-         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i).data() + 6);
+         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i+3).data() + 6);
          dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
      }
 
@@ -291,7 +291,7 @@ int main(int argc, char** argv)
 
         //dDv_dP = [0, 0, 0]
         //dDv_dVx = ((V + dVx) - V)/dVx
-        dDv_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i).segment(3,3) - deltas_jac.Delta0_.segment(3,3))/Delta_noise(i+3);
+        dDv_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i+3).segment(3,3) - deltas_jac.Delta0_.segment(3,3))/Delta_noise(i+3);
         //dDv_dOx = (( dR(Theta) * exp(dThetax,0,0)*dv ) - ( dR(Theta)*dv ))/dThetax
         dDv_dO.block<3,1>(0,i) = (Dq_noisy.matrix() * deltas_jac.delta0_.segment(3,3)) - (Dq0.matrix()* deltas_jac.delta0_.segment(3,3))/Delta_noise(i+6);
 
