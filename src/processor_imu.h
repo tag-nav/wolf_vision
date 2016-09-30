@@ -31,7 +31,7 @@ namespace wolf {
     struct IMU_jac_deltas{
 
         IMU_jac_deltas(Eigen::VectorXs _Delta0, Eigen::VectorXs _delta0, Eigen::Matrix<Eigen::VectorXs,9,1> _Delta_noisy_vect, Eigen::Matrix<Eigen::VectorXs,9,1> _delta_noisy_vect, 
-                        Eigen::Matrix3s _jacobian_delta_preint, Eigen::Matrix3s _jacobian_delta ) :
+                        Eigen::MatrixXs _jacobian_delta_preint, Eigen::MatrixXs _jacobian_delta ) :
                         Delta0_(_Delta0), delta0_(_delta0), Delta_noisy_vect_(_Delta_noisy_vect), delta_noisy_vect_(_delta_noisy_vect), 
                        jacobian_delta_preint_(_jacobian_delta_preint), jacobian_delta_(_jacobian_delta) {}
         
@@ -48,8 +48,8 @@ namespace wolf {
             Eigen::VectorXs delta0_; //this will contain the delta not affected by noise
             Eigen::Matrix<Eigen::VectorXs,9,1> Delta_noisy_vect_; //this will contain the Deltas affected by noises
             Eigen::Matrix<Eigen::VectorXs,9,1> delta_noisy_vect_; //this will contain the deltas affected by noises
-            Eigen::Matrix3s jacobian_delta_preint_;
-            Eigen::Matrix3s jacobian_delta_;
+            Eigen::MatrixXs jacobian_delta_preint_;
+            Eigen::MatrixXs jacobian_delta_;
     };
 
 class ProcessorIMU : public ProcessorMotion{
@@ -544,8 +544,8 @@ inline IMU_jac_deltas ProcessorIMU::finite_diff_noise(const Scalar& _dt, Eigen::
     jacobian_delta.resize(9,9);
     jacobian_delta_preint = Eigen::MatrixXs::Zero(9,9);
     jacobian_delta = Eigen::MatrixXs::Zero(9,9);
-    Eigen::Matrix3s jacobian_delta_preint0;
-    Eigen::Matrix3s jacobian_delta0;
+    Eigen::MatrixXs jacobian_delta_preint0;
+    Eigen::MatrixXs jacobian_delta0;
 
     Eigen::MatrixXs data_cov;
     data_cov.resize(6,6);
