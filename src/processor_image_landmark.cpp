@@ -311,6 +311,19 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
     {
         return new ConstraintImage(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
     }
+
+/* test */
+
+//    //    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
+//    if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
+//    {
+//        //std::cout << "Are equal" << std::endl;
+//        return nullptr; //new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
+//    }
+//    else// (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() != last_ptr_->getFramePtr())
+//    {
+//        return new ConstraintImage(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
+//    }
 }
 
 
