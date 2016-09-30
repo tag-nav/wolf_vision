@@ -182,12 +182,14 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     Eigen::MatrixXs jacobian_delta;
     jacobian_delta_preint.resize(9,9);
     jacobian_delta.resize(9,9);
-    jacobian_delta_preint = Eigen::MatrixXs::Zero(9,9);
-    jacobian_delta = Eigen::MatrixXs::Zero(9,9);
+    jacobian_delta_preint.setIdentity(9,9);
+    jacobian_delta.setIdentity(9,9);
     Eigen::MatrixXs jacobian_delta_preint0;
     Eigen::MatrixXs jacobian_delta0;
-    jacobian_delta_preint0.setZero();
-    jacobian_delta0.setZero();;
+    jacobian_delta_preint0.resize(9,9);
+    jacobian_delta0.resize(9,9);
+    jacobian_delta_preint0.setIdentity(9,9);
+    jacobian_delta0.setIdentity(9,9);
 
     Eigen::MatrixXs data_cov;
     data_cov.resize(6,6);
@@ -205,8 +207,8 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
     {
         //fist we need to reset some stuff
-        jacobian_delta_preint.setZero();
-        jacobian_delta.setZero();
+        jacobian_delta_preint.setIdentity(9,9);
+        jacobian_delta.setIdentity(9,9);
         acc_bias_.setZero();
         gyro_bias_.setZero();
 
@@ -221,8 +223,8 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         //fist we need to reset some stuff
         Eigen::Matrix3s dqr_tmp;
         Eigen::Vector3s dtheta = Eigen::Vector3s::Zero();
-        jacobian_delta_preint.setZero();
-        jacobian_delta.setZero();
+        jacobian_delta_preint.setIdentity(9,9);
+        jacobian_delta.setIdentity(9,9);
         acc_bias_.setZero();
         gyro_bias_.setZero();
 
@@ -240,8 +242,8 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
     {
         //fist we need to reset some stuff
-        jacobian_delta_preint.setZero();
-        jacobian_delta.setZero();
+        jacobian_delta_preint.setIdentity(9,9);
+        jacobian_delta.setIdentity(9,9);
         acc_bias_.setZero();
         gyro_bias_.setZero();
 
@@ -256,8 +258,8 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         //fist we need to reset some stuff
         Eigen::Matrix3s dQr_tmp;
         Eigen::Vector3s dtheta = Eigen::Vector3s::Zero();
-        jacobian_delta_preint.setZero();
-        jacobian_delta.setZero();
+        jacobian_delta_preint.setIdentity(9,9);
+        jacobian_delta.setIdentity(9,9);
         acc_bias_.setZero();
         gyro_bias_.setZero();
 
