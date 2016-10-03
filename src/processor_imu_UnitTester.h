@@ -75,7 +75,7 @@ namespace wolf {
             _Delta_noise : noise to add to Delta_preint (D1 in D = D1 + d), vector 9 because rotation expressed as a vector (R2v(q.matrix()))
             _delta_noise : noise to add to instantaneous delta (d in D = D1 + d), vector 9 because rotation expressed as a vector (R2v(q.matrix()))
          */
-        IMU_jac_deltas finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise);
+        IMU_jac_deltas finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise, const Eigen::Matrix<wolf::Scalar,10,1>& _Delta0);
 
         public:
         static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
@@ -166,32 +166,31 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     return bias_jacobians;
 }
 
-inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise)
+inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise, const Eigen::Matrix<wolf::Scalar,10,1>& _Delta0)
 {
     //we do not propagate any noise from data vector
-    Eigen::VectorXs Delta0;
-    Eigen::VectorXs Delta_;
-    Eigen::VectorXs delta0;
+    Eigen::VectorXs Delta_; //will contain the preintegrated Delta affected by added noise
+    Eigen::VectorXs delta0; //will contain the delta not affected by added noise
+    // delta_ that /will contain the delta affected by added noise is declared in processor_motion.h
     Eigen::VectorXs delta_preint_plus_delta;
-    Delta0.resize(10);
     delta0.resize(10);
     delta_preint_plus_delta.resize(10);
-    Delta0.setZero();
-    delta_preint_plus_delta.setZero();
-    Eigen::MatrixXs jacobian_delta_preint;
-    Eigen::MatrixXs jacobian_delta;
+    delta_preint_plus_delta << 0,0,0 ,0,0,0, 1,0,0,0;
+
+    Eigen::MatrixXs jacobian_delta_preint;  //will be used as input for deltaPlusDelta
+    Eigen::MatrixXs jacobian_delta;         //will be used as input for deltaPlusDelta
     jacobian_delta_preint.resize(9,9);
     jacobian_delta.resize(9,9);
     jacobian_delta_preint.setIdentity(9,9);
     jacobian_delta.setIdentity(9,9);
-    Eigen::MatrixXs jacobian_delta_preint0;
-    Eigen::MatrixXs jacobian_delta0;
+    Eigen::MatrixXs jacobian_delta_preint0; //will contain the jacobian we want to check
+    Eigen::MatrixXs jacobian_delta0;        //will contain the jacobian we want to check
     jacobian_delta_preint0.resize(9,9);
     jacobian_delta0.resize(9,9);
     jacobian_delta_preint0.setIdentity(9,9);
     jacobian_delta0.setIdentity(9,9);
 
-    Eigen::MatrixXs data_cov;
+    Eigen::MatrixXs data_cov;   //will be used filled with Zeros as input for data2delta
     data_cov.resize(6,6);
     data_cov = Eigen::MatrixXs::Zero(6,6);
 
@@ -199,7 +198,8 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     Eigen::Matrix<Eigen::VectorXs,9,1> delta_noisy_vect; //this will contain the deltas affected by noises
 
     data2delta(_data, data_cov, _dt); //Affects dp_out, dv_out and dq_out
-    deltaPlusDelta(Delta0, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta); 
+    delta0 = delta_;        //save the delta that is not affected by noise
+    deltaPlusDelta(_Delta0, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta); 
     jacobian_delta_preint0 = jacobian_delta_preint;
     jacobian_delta0 = jacobian_delta;
 
@@ -214,7 +214,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
 
         delta_ = delta0;
         delta_(i) = delta_(i) + _delta_noise(i); //noise has been added
-        deltaPlusDelta(Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
+        deltaPlusDelta(_Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         delta_noisy_vect(i) = delta_;
     }
 
@@ -234,7 +234,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         dtheta(i) +=  _delta_noise(i+6); //introduce perturbation
         dqr_tmp = dqr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
         Dq_out_ = v2q(R2v(dqr_tmp)); //orientation noise has been added --> get back to quaternion form
-        deltaPlusDelta(Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
+        deltaPlusDelta(_Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         delta_noisy_vect(i+6) = delta_;
     }
 
@@ -247,7 +247,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         acc_bias_.setZero();
         gyro_bias_.setZero();
 
-        Delta_ = Delta0;
+        Delta_ = _Delta0;
         Delta_(i) = Delta_(i) + _Delta_noise(i); //noise has been added
         deltaPlusDelta(Delta_, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         Delta_noisy_vect(i) = Delta_;
@@ -263,7 +263,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         acc_bias_.setZero();
         gyro_bias_.setZero();
 
-        Delta_ = Delta0;
+        Delta_ = _Delta0;
         remapDelta(Delta_); //this time we need it
         dQr_tmp = Dq_out_.matrix();
         dtheta(i) += _Delta_noise(i+6); //introduce perturbation
@@ -273,7 +273,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         Delta_noisy_vect(i+6) = Delta_;
     }
     
-    IMU_jac_deltas jac_deltas(Delta0, delta0, Delta_noisy_vect, delta_noisy_vect, jacobian_delta_preint0, jacobian_delta0);
+    IMU_jac_deltas jac_deltas(_Delta0, delta0, Delta_noisy_vect, delta_noisy_vect, jacobian_delta_preint0, jacobian_delta0);
     return jac_deltas;
 
 }
