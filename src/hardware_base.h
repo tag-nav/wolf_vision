@@ -35,16 +35,13 @@ class HardwareBase : public NodeBase //: public NodeLinked<Problem, SensorBase>
                 delete this;
         }
 
-        virtual SensorBasePtr addSensor(SensorBasePtr _sensor_ptr);
-
-        void removeSensor(const SensorBaseIter& _sensor_iter);
-
-        void removeSensor(SensorBasePtr _sensor_ptr);
-
-        SensorBaseList* getSensorListPtr();
-
         ProblemPtr getProblem(){return problem_ptr_;}
         void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
+
+        virtual SensorBasePtr addSensor(SensorBasePtr _sensor_ptr);
+        SensorBaseList* getSensorListPtr();
+        void removeSensor(const SensorBaseIter& _sensor_iter);
+        void removeSensor(SensorBasePtr _sensor_ptr);
 };
 
 } // namespace wolf

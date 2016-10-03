@@ -31,44 +31,33 @@ class MapBase : public NodeBase //: public NodeLinked<Problem,LandmarkBase>
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          **/        
         ~MapBase();
-        void destruct()
-        {
-            // TODO fill code (see TrajectoryBase::destruct() )
-            if (!is_deleting_)
-                delete this;
-        }
+        void destruct();
         
-        /** \brief Adds a landmark
-         *
-         * Adds a landmark to the Map. It also updates the lists of StateBlocks that are used by the solver.
-         **/
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
+
         virtual LandmarkBasePtr addLandmark(LandmarkBasePtr _landmark_ptr);
-
-        /** \brief Adds a landmark
-         *
-         * Adds a landmark to the Map. It also updates the lists of StateBlocks that are used by the solver.
-         **/
         virtual void addLandmarkList(LandmarkBaseList _landmark_list);
-
         void removeLandmark(const LandmarkBaseIter& _landmark_iter);
         void removeLandmark(LandmarkBasePtr _landmark_ptr);
-
         LandmarkBaseList* getLandmarkListPtr();
         
         void load(const std::string& _map_file_yaml);
         void save(const std::string& _map_file_yaml, const std::string& _map_name = "Map automatically saved by Wolf");
 
-        ProblemPtr getProblem(){return problem_ptr_;}
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
-
     private:
         std::string dateTimeNow();
 };
 
+inline void MapBase::destruct()
+{
+    if (!is_deleting_)
+        delete this;
+}
+
 inline LandmarkBaseList* MapBase::getLandmarkListPtr()
 {
     return & landmark_list_;
-//    return getDownNodeListPtr();
 }
 
 } // namespace wolf
