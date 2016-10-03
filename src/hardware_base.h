@@ -31,7 +31,6 @@ class HardwareBase : public NodeBase //: public NodeLinked<Problem, SensorBase>
         virtual ~HardwareBase();
         void destruct()
         {
-            // TODO fill code (see TrajectoryBase::destruct() )
             if (!is_deleting_)
                 delete this;
         }

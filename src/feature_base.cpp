@@ -98,7 +98,6 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 void FeatureBase::destruct()
 {
-    // TODO implement something
     if (!is_deleting_)
     {
         if (capture_ptr_ != nullptr) // && !up_node_ptr_->isTop())

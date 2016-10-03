@@ -19,7 +19,6 @@ ProcessorBase::ProcessorBase(ProcessorType _tp, const std::string& _type, const 
 
 ProcessorBase::~ProcessorBase()
 {
-    //
 }
 
 bool ProcessorBase::permittedKeyFrame()

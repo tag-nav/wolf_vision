@@ -170,7 +170,6 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
     _delta1_plus_delta2(2) = _delta1(2) + _delta2(2);
 
-    // TODO: fill the jacobians
     _jacobian1 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
     _jacobian1(0,2) = -sin(_delta1(2))*_delta2(0) - cos(_delta1(2))*_delta2(1);
     _jacobian1(1,2) =  cos(_delta1(2))*_delta2(0) - sin(_delta1(2))*_delta2(1);

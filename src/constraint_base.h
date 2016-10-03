@@ -16,7 +16,6 @@ class FeatureBase;
 namespace wolf {
 
 
-//TODO: add a member to indicate how jacobian is computed, called "jacobian_method_"
 //class ConstraintBase
 class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
 {
@@ -219,7 +218,6 @@ inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr()
 
 inline void ConstraintBase::destruct()
 {
-    // TODO implement something
     if (!is_deleting_)
     {
         if (feature_other_ptr_ != nullptr) // && !up_node_ptr_->isTop())

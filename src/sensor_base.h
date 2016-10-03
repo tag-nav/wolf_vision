@@ -204,7 +204,6 @@ inline Eigen::VectorXs SensorBase::getNoiseStd()
 
 inline void SensorBase::destruct()
 {
-    // TODO fill code
     if (!is_deleting_)
     {
         if (hardware_ptr_ != nullptr) // && !up_node_ptr_->isTop())

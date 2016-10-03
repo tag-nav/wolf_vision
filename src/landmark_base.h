@@ -230,7 +230,6 @@ inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
 
 inline void LandmarkBase::destruct()
 {
-    // TODO implement something
     if (!is_deleting_)
     {
         if (map_ptr_ != nullptr) // && !up_node_ptr_->isTop())

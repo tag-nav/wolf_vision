@@ -33,8 +33,8 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
         SensorBasePtr sensor_ptr_; ///< Pointer to sensor
 
         // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
-        StateBlock* sensor_p_ptr_; //TODO: initialize this at construction time; delete it at destruction time
-        StateBlock* sensor_o_ptr_; //TODO: initialize this at construction time; delete it at destruction time
+        StateBlock* sensor_p_ptr_;
+        StateBlock* sensor_o_ptr_;
 
     public:
 

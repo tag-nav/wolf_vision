@@ -226,7 +226,6 @@ FrameBasePtr FrameBase::getNextFrame() const
 
 void FrameBase::destruct()
 {
-    // TODO fill code
     if (!is_deleting_)
     {
         if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())

@@ -33,7 +33,6 @@ CaptureBase::~CaptureBase()
 
 void CaptureBase::destruct()
 {
-    // TODO fill code
     if (!is_deleting_)
     {
         if (frame_ptr_ != nullptr) // && !up_node_ptr_->isTop())
