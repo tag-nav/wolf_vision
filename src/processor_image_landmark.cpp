@@ -164,48 +164,84 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
             cv::Mat target_descriptor = landmark_ptr->getCvDescriptor();
 
+            cv::KeyPoint best_keypoint;
+            cv::Mat best_descriptor;
+            Scalar best_score = 0;
+
 
             //lists used to debug
             tracker_roi_.push_back(roi);
 
-            if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
+            for(unsigned int n = 0; n < 3; n++)
             {
-                //the matcher is now inside the match function
-                Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
 
-                std::cout << "min normalizes score: " << params_.matcher.min_normalized_score << std::endl;
-                if (normalized_score > params_.matcher.min_normalized_score)
+                if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
                 {
-                    std::cout << "FOUND" << std::endl;
-                    FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
-                                candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
-                            Eigen::Matrix2s::Identity());
+                    //the matcher is now inside the match function
+                    Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
+                    std::cout << "min normalizes score: " << params_.matcher.min_normalized_score << std::endl;
+
+                    if (normalized_score > params_.matcher.min_normalized_score)
+                    {
+                        if(normalized_score > 0.95)
+                        {
+                            std::cout << "FOUND" << std::endl;
+                            FeaturePointImage* incoming_point_ptr = new FeaturePointImage(candidate_keypoints[cv_matches[0].trainIdx],
+                                    (candidate_descriptors.row(cv_matches[0].trainIdx)), Eigen::Matrix2s::Identity());
+                            incoming_point_ptr->setTrackId(incoming_point_ptr->id());
+                            _feature_list_out.push_back(incoming_point_ptr);
+
+                            _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, normalized_score});
+
+                            feat_lmk_found_.push_back(incoming_point_ptr);
+                            landmark_found_number_.push_back(lmk_nbr);
+                            std::cout << "list: " << landmark_found_number_.back() << std::endl;
+                            std::cout << "LMK " << lmk_nbr << "; FEATURE IN POINT X: " << incoming_point_ptr->getKeypoint().pt.x
+                                      << "\tY: " << incoming_point_ptr->getKeypoint().pt.y << std::endl;
+
+                            break;
+                        }
+                        else
+                        {
+                            if(normalized_score > best_score)
+                            {
+                                best_keypoint = candidate_keypoints[cv_matches[0].trainIdx];
+                                best_descriptor = candidate_descriptors.row(cv_matches[0].trainIdx);
+                                best_score = normalized_score;
+                            }
+                        }
+                    }
+                    else
+                        std::cout << "NOT FOUND" << std::endl;
+
+                    for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
+                    {
+                        tracker_candidates_.push_back(candidate_keypoints[i].pt);
+                    }
+                }
+                else
+                {
+                    //this one means that the detector/descriptor searched the roi, but didn't find ANYTHING at all. So, NOT tracked.
+                    std::cout << "NOT DETECTED/FOUND" << std::endl;
+                }
+                if(n == 2 && best_score != 0)
+                {
+                    std::cout << "BEST KEYPOINT" << std::endl;
+                    FeaturePointImage* incoming_point_ptr = new FeaturePointImage(best_keypoint, best_descriptor, Eigen::Matrix2s::Identity());
+                    incoming_point_ptr->setTrackId(incoming_point_ptr->id());
                     _feature_list_out.push_back(incoming_point_ptr);
 
-                    incoming_point_ptr->setTrackId(incoming_point_ptr->id());
-
-                    _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, normalized_score});
+                    _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, best_score});
 
                     feat_lmk_found_.push_back(incoming_point_ptr);
                     landmark_found_number_.push_back(lmk_nbr);
                     std::cout << "list: " << landmark_found_number_.back() << std::endl;
                     std::cout << "LMK " << lmk_nbr << "; FEATURE IN POINT X: " << incoming_point_ptr->getKeypoint().pt.x
                               << "\tY: " << incoming_point_ptr->getKeypoint().pt.y << std::endl;
-                }
-                else
-                {
-                    std::cout << "NOT FOUND" << std::endl;
-                }
-                for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
-                {
-                    tracker_candidates_.push_back(candidate_keypoints[i].pt);
 
+                    break;
                 }
-            }
-            else
-            {
-                //this one means that the detector/descriptor searched the roi, but didn't find ANYTHING at all. So, NOT tracked.
-                std::cout << "NOT DETECTED/FOUND" << std::endl;
+
             }
         }
         else
