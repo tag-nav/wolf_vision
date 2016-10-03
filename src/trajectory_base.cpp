@@ -5,6 +5,7 @@ namespace wolf {
 
 TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
     NodeBase("TRAJECTORY"),
+    problem_ptr_(nullptr),
     frame_structure_(_frame_structure), last_key_frame_ptr_(nullptr)
 {
     //
@@ -18,12 +19,21 @@ TrajectoryBase::~TrajectoryBase()
         delete frame_list_.front();
         frame_list_.pop_front();
     }
-
     //std::cout << "deleting TrajectoryBase " << nodeId() << std::endl;
+}
+
+void TrajectoryBase::destruct()
+{
+    if (!is_deleting_)
+        delete this;
 }
 
 FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
 {
+    // link up
+    _frame_ptr->setTrajectoryPtr(this);
+    _frame_ptr->setProblem(getProblem());
+
     if (_frame_ptr->isKey())
     {
         _frame_ptr->registerNewStateBlocks();
@@ -39,12 +49,9 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
         frame_list_.push_back(_frame_ptr);
     }
 
-    // link up
-    _frame_ptr->setTrajectoryPtr(this);
-    _frame_ptr->setProblem(getProblem());
-
     return _frame_ptr;
 }
+
 
 void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {

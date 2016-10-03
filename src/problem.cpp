@@ -202,14 +202,18 @@ void Problem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
     assert(state.size() == getFrameStructureSize() && "Problem::getStateAtTimeStamp: bad state size");
 
     if (processor_motion_ptr_ != nullptr)
+    {
         processor_motion_ptr_->getState(_ts, state);
+    }
     else
     {
         FrameBasePtr closest_frame = trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
         if (closest_frame != nullptr)
+        {
             closest_frame->getState(state);
-        else
+        }else{
             state = zeroState();
+        }
     }
 }
 
@@ -243,6 +247,8 @@ Eigen::VectorXs Problem::zeroState()
     Eigen::VectorXs state = Eigen::VectorXs::Zero(getFrameStructureSize());
     if (trajectory_ptr_->getFrameStructure() == FRM_PO_3D || trajectory_ptr_->getFrameStructure() == FRM_POV_3D)
         state(6) = 1;
+    if (trajectory_ptr_->getFrameStructure() == FRM_PVQBB_3D)
+        state(9) = 1;
     return state;
 }
 
@@ -415,7 +421,6 @@ Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr)
 
 MapBasePtr Problem::addMap(MapBasePtr _map_ptr)
 {
-    // TODO: not necessary but update map maybe..
     map_ptr_ = _map_ptr;
     map_ptr_->setProblem(this);
 //    map_ptr_->linkToUpperNode(this);
@@ -427,7 +432,6 @@ TrajectoryBasePtr Problem::addTrajectory(TrajectoryBasePtr _trajectory_ptr)
 {
     trajectory_ptr_ = _trajectory_ptr;
     trajectory_ptr_->setProblem(this);
-//    trajectory_ptr_->linkToUpperNode(this);
 
     return trajectory_ptr_;
 }

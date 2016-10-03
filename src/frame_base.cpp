@@ -12,6 +12,7 @@ unsigned int FrameBase::frame_id_count_ = 0;
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeBase("FRAME", "BASE"),
             problem_ptr_(nullptr),
+            trajectory_ptr_(nullptr),
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
             time_stamp_(_ts),
@@ -26,6 +27,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
 FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeBase("FRAME", "BASE"),
             problem_ptr_(nullptr),
+            trajectory_ptr_(nullptr),
             frame_id_(++frame_id_count_),
             type_id_(_tp),
             time_stamp_(_ts),

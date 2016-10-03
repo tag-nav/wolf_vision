@@ -138,10 +138,11 @@ class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
          **/
         LandmarkBasePtr getLandmarkOtherPtr();
 
-        ProblemPtr getProblem(){return problem_ptr_;}
+        ProblemPtr getProblem();
         void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 };
+
 
 }
 
@@ -153,6 +154,13 @@ class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
 #include "sensor_base.h"
 
 namespace wolf{
+
+inline wolf::ProblemPtr ConstraintBase::getProblem()
+{
+    if (problem_ptr_ == nullptr && feature_ptr_ != nullptr)
+        problem_ptr_ = feature_ptr_->getProblem();
+    return problem_ptr_;
+}
 
 inline unsigned int ConstraintBase::id()
 {

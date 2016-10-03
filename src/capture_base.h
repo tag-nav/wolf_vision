@@ -52,7 +52,7 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
         void setTimeStamp(const TimeStamp& _ts);
         void setTimeStampToNow();
 
-        ProblemPtr getProblem(){return problem_ptr_;}
+        ProblemPtr getProblem();
         void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
         FrameBasePtr getFramePtr() const;
@@ -84,6 +84,13 @@ class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
 
 namespace wolf{
 
+inline ProblemPtr CaptureBase::getProblem()
+{
+    if (problem_ptr_ == nullptr && frame_ptr_ != nullptr)
+        setProblem(frame_ptr_->getProblem());
+
+    return problem_ptr_;
+}
 
 inline wolf::StateBlock* CaptureBase::getSensorPPtr() const
 {
@@ -101,12 +108,6 @@ inline wolf::StateBlock* CaptureBase::getSensorOPtr() const
         return getSensorPtr()->getOPtr();
 }
 
-inline void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
-{
-    for (auto feature_ptr : _new_ft_list)
-        feature_ptr->setCapturePtr(this);
-    feature_list_.splice(feature_list_.end(), _new_ft_list);
-}
 
 inline void CaptureBase::removeFeature(FeatureBasePtr _ft_ptr)
 {
