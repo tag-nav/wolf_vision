@@ -76,8 +76,8 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
         const Eigen::MatrixXs& getMeasurementSquareRootInformation() const;
 
 
-        ProblemPtr getProblem(){return problem_ptr_;}
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
+        ProblemPtr getProblem();
+        void setProblem(ProblemPtr _prob_ptr);
 
         FrameBasePtr getFramePtr() const;
 
@@ -98,6 +98,14 @@ class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBas
 
 };
 
+}
+
+// IMPLEMENTATION
+
+#include "constraint_base.h"
+
+namespace wolf{
+
 inline void FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.push_back(_ctr_ptr);
@@ -113,18 +121,17 @@ inline unsigned int FeatureBase::getHits() const
     return constrained_by_list_.size();
 }
 
+inline ProblemPtr FeatureBase::getProblem()
+{
+    if (problem_ptr_ == nullptr && capture_ptr_ != nullptr)
+        problem_ptr_ = capture_ptr_->getProblem();
+    return problem_ptr_;
+}
+
 inline wolf::ConstraintBaseList* FeatureBase::getConstrainedByListPtr()
 {
     return &constrained_by_list_;
 }
-
-}
-
-// IMPLEMENTATION
-
-#include "constraint_base.h"
-
-namespace wolf{
 
 inline unsigned int FeatureBase::id()
 {

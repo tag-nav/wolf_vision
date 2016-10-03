@@ -11,6 +11,8 @@ unsigned int LandmarkBase::landmark_id_count_ = 0;
 
 LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr) :
             NodeBase("LANDMARK", _type),
+            problem_ptr_(nullptr),
+            map_ptr_(nullptr),
             landmark_id_(++landmark_id_count_),
             type_id_(_tp),
             status_(LANDMARK_CANDIDATE),

@@ -43,8 +43,8 @@ class TrajectoryBase : public NodeBase //: public NodeBase // NodeLinked<Problem
         FrameStructure getFrameStructure() const;
 
         // Problem
-        ProblemPtr getProblem(){return problem_ptr_;}
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
+        ProblemPtr getProblem() { return problem_ptr_; }
+        void setProblem(ProblemPtr _prob_ptr);
 
         // Frames
         FrameBasePtr addFrame(FrameBasePtr _frame_ptr);
@@ -64,6 +64,17 @@ class TrajectoryBase : public NodeBase //: public NodeBase // NodeLinked<Problem
 
 };
 
+}
+
+#include "feature_base.h"
+
+namespace wolf{
+
+inline void TrajectoryBase::setProblem(ProblemPtr _prob_ptr)
+{
+    problem_ptr_ = _prob_ptr;
+}
+
 inline void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
 {
     if (*_place != _frm_ptr)
@@ -72,12 +83,6 @@ inline void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _plac
         frame_list_.insert(_place, _frm_ptr);
     }
 }
-
-}
-
-#include "feature_base.h"
-
-namespace wolf{
 
 inline void TrajectoryBase::removeFrame(const FrameBaseIter& _frame_iter)
 {
@@ -114,23 +119,6 @@ inline void TrajectoryBase::setLastKeyFramePtr(FrameBasePtr _key_frame_ptr)
     last_key_frame_ptr_ = _key_frame_ptr;
 }
 
-inline void TrajectoryBase ::destruct()
-{
-    // TODO implement something
-    if (!is_deleting_)
-    {
-//        if (problem_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-//        {
-//            //std::cout << "upper node is not WolfProblem " << std::endl;
-//            problem_ptr_->removeTrajectory(this);
-//        }
-//        else
-//        {
-            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
-            delete this;
-//        }
-    }
-}
 
 inline FrameStructure TrajectoryBase::getFrameStructure() const
 {

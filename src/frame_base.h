@@ -140,11 +140,21 @@ class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
 
 } // namespace wolf
 
+// IMPLEMENTATION //
+
 #include "capture_base.h"
+#include "trajectory_base.h"
 
 namespace wolf {
 
-// IMPLEMENTATION //
+inline ProblemPtr FrameBase::getProblem()
+{
+    if (problem_ptr_ == nullptr && trajectory_ptr_ != nullptr)
+        setProblem(trajectory_ptr_->getProblem());
+
+    return problem_ptr_;
+}
+
 
 inline unsigned int FrameBase::id()
 {
@@ -265,10 +275,6 @@ inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
         c_ptr->getConstraintList(_ctr_list);
 }
 
-inline ProblemPtr FrameBase::getProblem()
-{
-    return problem_ptr_;
-}
 
 inline void FrameBase::setProblem(ProblemPtr _prob_ptr)
 {

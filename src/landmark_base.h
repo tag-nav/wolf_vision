@@ -111,7 +111,7 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
 
 
         void setMapPtr(MapBasePtr _map_ptr){map_ptr_ = _map_ptr;}
-        ProblemPtr getProblem(){return problem_ptr_;}
+        ProblemPtr getProblem();
         void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 
@@ -122,6 +122,13 @@ class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
 #include "map_base.h"
 
 namespace wolf{
+
+inline wolf::ProblemPtr LandmarkBase::getProblem()
+{
+    if (problem_ptr_ == nullptr && map_ptr_ != nullptr)
+        problem_ptr_ = map_ptr_->getProblem();
+    return problem_ptr_;
+}
 
 inline unsigned int LandmarkBase::id()
 {

@@ -19,7 +19,8 @@
 namespace wolf {
 
 MapBase::MapBase() :
-    NodeBase("MAP")
+    NodeBase("MAP"),
+    problem_ptr_(nullptr)
 {
     //std::cout << "MapBase::MapBase(): " << __LINE__ << std::endl;
 }
@@ -52,9 +53,10 @@ void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)
 	//std::cout << "MapBase::addLandmarkList" << std::endl;
 	LandmarkBaseList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
 //	addDownNodeList(_landmark_list);
-    for (auto landmark_ptr : lmk_list_copy)
+    for (LandmarkBasePtr landmark_ptr : lmk_list_copy)
     {
         landmark_ptr->setMapPtr(this);
+        landmark_ptr->setProblem(getProblem());
         landmark_ptr->registerNewStateBlocks();
     }
     landmark_list_.splice(landmark_list_.end(), _landmark_list);

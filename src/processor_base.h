@@ -68,7 +68,7 @@ class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
 
         virtual bool isMotion();
 
-        ProblemPtr getProblem(){return problem_ptr_;}
+        ProblemPtr getProblem();
         void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
     private:
@@ -82,9 +82,18 @@ class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
 
 }
 
+#include "sensor_base.h"
 #include "constraint_base.h"
 
 namespace wolf {
+
+inline wolf::ProblemPtr ProcessorBase::getProblem()
+{
+    if (problem_ptr_ == nullptr && sensor_ptr_ != nullptr)
+        problem_ptr_ = sensor_ptr_->getProblem();
+    return problem_ptr_;
+
+}
 
 inline void ProcessorBase::destruct()
 {

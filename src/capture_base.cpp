@@ -8,7 +8,8 @@ unsigned int CaptureBase::capture_id_count_ = 0;
 
 CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr) :
         NodeBase("CAPTURE", _type),
-//        NodeLinked(MID, "CAPTURE", _type),
+        problem_ptr_(nullptr),
+        frame_ptr_(nullptr),
         capture_id_(++capture_id_count_),
         time_stamp_(_ts),
         sensor_ptr_(_sensor_ptr),
@@ -56,6 +57,18 @@ void CaptureBase::process()
         (*processor_iter)->process(this);
     }
 }
+
+void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
+{
+    for (FeatureBasePtr feature_ptr : _new_ft_list)
+    {
+        feature_ptr->setCapturePtr(this);
+        if (getProblem() != nullptr)
+            feature_ptr->setProblem(getProblem());
+    }
+    feature_list_.splice(feature_list_.end(), _new_ft_list);
+}
+
 
 } // namespace wolf
 
