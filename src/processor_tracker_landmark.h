@@ -118,7 +118,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
         void advance();
         void reset();
 
-        /**\brief Process new Features
+        /** \brief Process new Features
          *
          */
         unsigned int processNew(const unsigned int& _max_features);
@@ -204,7 +204,11 @@ inline void ProcessorTrackerLandmark::establishConstraints()
     //std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
 
     for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
-        last_feature->addConstraint(createConstraint(last_feature, matches_landmark_from_last_[last_feature]->landmark_ptr_));
+    {
+        ConstraintBase* ctr_ptr = createConstraint(last_feature, matches_landmark_from_last_[last_feature]->landmark_ptr_);
+        if (ctr_ptr != nullptr)
+            last_feature->addConstraint(ctr_ptr);
+    }
 }
 
 }// namespace wolf
