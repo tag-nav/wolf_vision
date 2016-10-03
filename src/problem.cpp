@@ -230,6 +230,8 @@ unsigned int Problem::getFrameStructureSize()
             return 7;
         case FRM_POV_3D:
             return 10;
+        case FRM_PVQBB_3D:
+            return 16;
         default:
             throw std::runtime_error(
                     "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
