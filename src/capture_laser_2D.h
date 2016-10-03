@@ -3,6 +3,9 @@
 #define CAPTURE_LASER_2D_H_
 
 //wolf forward declarations
+namespace wolf{
+class SensorLaser2D;
+}
 
 //wolf includes
 #include "capture_base.h"
