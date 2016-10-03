@@ -58,7 +58,14 @@ int main(int argc, char** argv)
     //processor_imu.setOrigin(x0, t);
     wolf::Scalar ddelta_bias = 0.000001;
     wolf::Scalar dt = 0.001;
-    struct IMU_jac_bias bias_jac = processor_imu.finite_diff_ab(dt, data_, ddelta_bias);
+
+    //defining a random Delta to begin with (not to use Origin point)
+    Eigen::Matrix<wolf::Scalar,10,1> Delta0;
+    Delta0 = Eigen::Matrix<wolf::Scalar,10,1>::Random();
+    Eigen::Map<Eigen::Quaternions> Delta0_quat(Delta0.data()+6);
+    Delta0_quat.normalize();
+
+    struct IMU_jac_bias bias_jac = processor_imu.finite_diff_ab(dt, data_, ddelta_bias, Delta0);
 
     Eigen::Map<Eigen::Quaternions> Dq0(NULL);
     Eigen::Map<Eigen::Quaternions> dq0(NULL);
@@ -225,11 +232,6 @@ int main(int argc, char** argv)
     Eigen::Matrix<wolf::Scalar,9,1> delta_noise;
     Delta_noise << 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001;
     delta_noise << 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001;
-    //defining a random Delta to begin with (not to use Origin point)
-    Eigen::Matrix<wolf::Scalar,10,1> Delta0;
-    Delta0 = Eigen::Matrix<wolf::Scalar,10,1>::Random();
-    Eigen::Map<Eigen::Quaternions> Delta0_quat(Delta0.data()+6);
-    Delta0_quat.normalize();
 
     struct IMU_jac_deltas deltas_jac = processor_imu.finite_diff_noise(dt, data_, Delta_noise, delta_noise, Delta0);
 

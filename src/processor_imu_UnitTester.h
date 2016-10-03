@@ -67,7 +67,7 @@ namespace wolf {
             _dt : time interval between 2 IMU measurements
             da_b : bias noise to add - scalar because adding the same noise to each component of bias (abx, aby, abz, wbx, wby, wbz) one by one. 
          */
-        IMU_jac_bias finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b);
+        IMU_jac_bias finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b, const Eigen::Matrix<wolf::Scalar,10,1>& _delta_preint0);
 
         /* params :
             _data : input data vector (size 6 : ax,ay,az,wx,wy,wz)
@@ -95,7 +95,7 @@ namespace wolf {
 namespace wolf{
 
     //Functions to test jacobians with finite difference method
-inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b)
+inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b, const Eigen::Matrix<wolf::Scalar,10,1>& _delta_preint0)
 {
     //TODO : need to use a reset function here to make sure jacobians have not been used before --> reset everything
     ///Define all the needed variables
@@ -108,19 +108,16 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     Eigen::MatrixXs jacobian_delta_preint;
     Eigen::MatrixXs jacobian_delta;
     Eigen::VectorXs delta_preint_plus_delta0;
-    Eigen::VectorXs delta_preint0;
     data_cov.resize(6,6);
     jacobian_delta_preint.resize(9,9);
     jacobian_delta.resize(9,9);
     delta_preint_plus_delta0.resize(10);
-    delta_preint0.resize(10);
 
     //set all variables to 0
     data_cov = Eigen::MatrixXs::Zero(6,6);
     jacobian_delta_preint = Eigen::MatrixXs::Zero(9,9);
     jacobian_delta = Eigen::MatrixXs::Zero(9,9);
     delta_preint_plus_delta0 << 0,0,0, 0,0,0, 1,0,0,0;
-    delta_preint0 << 0,0,0, 0,0,0, 1,0,0,0;
 
     /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
         place 1 : added da_bx in data         place 2 : added da_by in data       place 3 : added da_bz in data
@@ -131,7 +128,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
 
     //Deltas without use of da_b
     data2delta(_data, data_cov, _dt);
-    deltaPlusDelta(delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
+    deltaPlusDelta(_delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
     Delta0 = delta_preint_plus_delta0; //this is the first preintegrated delta, not affected by any added bias noise
     dDp_dab = dDp_dab_;
     dDv_dab = dDv_dab_;
@@ -150,7 +147,6 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
         dDv_dwb_.setZero();
         dDq_dwb_.setZero();
         delta_preint_plus_delta0 << 0,0,0, 0,0,0, 1,0,0,0;
-        delta_preint0 << 0,0,0, 0,0,0, 1,0,0,0;
         data_cov = Eigen::MatrixXs::Zero(6,6);
 
         // add da_b
@@ -158,7 +154,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
         _data(i) = _data(i) - da_b; //- because a = a_m − a_b + a_n, in out case, a = a_m − a_b - da_b + a_n
         //data2delta
         data2delta(_data, data_cov, _dt);
-        deltaPlusDelta(delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
+        deltaPlusDelta(_delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
         Deltas_noisy_vect(i) = delta_preint_plus_delta0; //preintegrated deltas affected by added bias noise
     }
 
