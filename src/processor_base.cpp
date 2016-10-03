@@ -19,6 +19,7 @@ ProcessorBase::ProcessorBase(ProcessorType _tp, const std::string& _type, const 
 
 ProcessorBase::~ProcessorBase()
 {
+    is_deleting_ = true;
 }
 
 bool ProcessorBase::permittedKeyFrame()

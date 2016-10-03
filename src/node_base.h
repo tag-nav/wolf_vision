@@ -87,6 +87,7 @@ namespace wolf{
 inline NodeBase::NodeBase(const std::string& _class, const std::string& _type, const std::string& _name) :
         node_id_(++node_id_count_), node_class_(_class), node_type_(_type), node_name_(_name)
 {
+    is_deleting_ = false;
     //
 }
 
