@@ -86,7 +86,7 @@ class S : public enable_shared_from_this<S>
         void setP(shared_ptr<P>& _P){P_ptr_ = _P;}
         shared_ptr<H> getH(){
             shared_ptr<H> H_sh = H_ptr_.lock();
-            // if (h_sh) // check will be made by caller after all
+            // if (H_sh) // check will be made by caller after all
             return H_sh;
         }
         void setH(shared_ptr<H> _H){H_ptr_ = _H;}
@@ -103,13 +103,13 @@ class p : public enable_shared_from_this<p>
         ~p(){cout << "destruct p" << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
-            // if (p_sh) // check will be made by caller after all
+            // if (P_sh) // check will be made by caller after all
             return P_sh;
         }
         void setP(shared_ptr<P>& _P){P_ptr_ = _P;}
         shared_ptr<S> getS(){
             shared_ptr<S> S_sh = S_ptr_.lock();
-            // if (h_sh) // check will be made by caller after all
+            // if (S_sh) // check will be made by caller after all
             return S_sh;
         }
         void setS(shared_ptr<S> _S){S_ptr_ = _S;}
@@ -213,7 +213,7 @@ class c : public enable_shared_from_this<c>
         ~c(){cout << "destruct c" << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
-            // if (p_sh) // check will be made by caller after all
+            // if (P_sh) // check will be made by caller after all
             return P_sh;
         }
         void setP(shared_ptr<P>& _P){P_ptr_ = _P;}
@@ -253,7 +253,7 @@ class L : public enable_shared_from_this<L>
         ~L(){cout << "destruct L" << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
-            // if (p_sh) // check will be made by caller after all
+            // if (P_sh) // check will be made by caller after all
             return P_sh;
         }
         void setP(shared_ptr<P>& _P){P_ptr_ = _P;}
