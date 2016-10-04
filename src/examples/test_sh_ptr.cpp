@@ -369,40 +369,42 @@ shared_ptr<L> M::addL(shared_ptr<L> _L)
 using namespace wolf;
 int main()
 {
-    shared_ptr<P> problem = make_shared<P>();
-    problem->setup();
+    shared_ptr<P> Pp = make_shared<P>();
+    Pp->setup();
 
     // H
-    problem->getH()->addS(make_shared<S>());
-    problem->getH()->addS(make_shared<S>());
-    for (auto S : problem->getH()->getSlist())
+    for (int i = 0; i < 2; i++)
     {
-        S->addp(make_shared<p>());
-        S->addp(make_shared<p>());
+        shared_ptr<S> Sp = Pp->getH()->addS(make_shared<S>());
+        for (int i = 0; i < 2; i++)
+        {
+            shared_ptr<p> pp = Sp->addp(make_shared<p>());
+        }
     }
 
     // T
-    problem->getT()->addF(make_shared<F>());
-    problem->getT()->addF(make_shared<F>());
-    for (auto F : problem->getT()->getFlist())
+    for (int i = 0; i < 2; i++)
     {
-        F->addC(make_shared<C>());
-        F->addC(make_shared<C>());
-        for (auto C : F->getClist())
+        shared_ptr<F> Fp = Pp->getT()->addF(make_shared<F>());
+        for (int i = 0; i < 2; i++)
         {
-            C->addf(make_shared<f>());
-            C->addf(make_shared<f>());
-            for (auto f : C->getflist())
+            shared_ptr<C> Cp = Fp->addC(make_shared<C>());
+            for (int i = 0; i < 2; i++)
             {
-                f->addc(make_shared<c>());
-                f->addc(make_shared<c>());
+                shared_ptr<f> fp = Cp->addf(make_shared<f>());
+                for (int i = 0; i < 2; i++)
+                {
+                    shared_ptr<c> cp = fp->addc(make_shared<c>());
+                }
             }
         }
     }
 
     // M
-    problem->getM()->addL(make_shared<L>());
-    problem->getM()->addL(make_shared<L>());
+    for (int i = 0; i < 2; i++)
+    {
+        shared_ptr<L> Lp = Pp->getM()->addL(make_shared<L>());
+    }
 
     cout << "Wolf tree created. Exiting main()." << endl;
 
