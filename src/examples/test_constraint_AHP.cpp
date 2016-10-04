@@ -1,5 +1,5 @@
 #include "landmark_AHP.h"
-#include "constraint_image.h"
+#include "constraint_AHP.h"
 #include "state_block.h"
 #include "state_quaternion.h"
 #include "sensor_camera.h"
@@ -110,7 +110,7 @@ int main()
 
 
     // Create the constraint
-    ConstraintImage* constraint_ptr = new ConstraintImage(feat_point_image_ptr, last_frame,(LandmarkAHP*)landmark);
+    ConstraintAHP* constraint_ptr = new ConstraintAHP(feat_point_image_ptr, last_frame,(LandmarkAHP*)landmark);
 
     feat_point_image_ptr->addConstraint(constraint_ptr);
     std::cout << "Constraint AHP created" << std::endl;
@@ -123,7 +123,7 @@ int main()
     Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getVector();
     Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
     Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
-    (*((ConstraintImage*) constraint_ptr))(current_frame_p.data(), current_frame_o.data(),
+    (*((ConstraintAHP*) constraint_ptr))(current_frame_p.data(), current_frame_o.data(),
                                            anchor_frame_p.data(),anchor_frame_o.data(),
                                            landmark_.data(), residuals.data());
     // current frame p; current frame o; anchor frame p; anchor frame o; homogeneous vector landmark, residual

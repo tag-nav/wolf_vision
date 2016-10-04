@@ -3,7 +3,7 @@
 #include "landmark_corner_2D.h"
 #include "landmark_AHP.h"
 #include "constraint_corner_2D.h"
-#include "constraint_image.h"
+#include "constraint_AHP.h"
 #include "constraint_image_new_landmark.h"
 #include "sensor_camera.h"
 #include "pinholeTools.h"
@@ -320,18 +320,6 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
 {
-////    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
-//    if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
-//    {
-//        //std::cout << "Are equal" << std::endl;
-//        return new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
-//    }
-//    else// (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() != last_ptr_->getFramePtr())
-//    {
-//        return new ConstraintImage(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
-//    }
-
-/* test */
 
     //    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
     if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
@@ -341,7 +329,7 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
     }
     else// (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() != last_ptr_->getFramePtr())
     {
-        return new ConstraintImage(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
+        return new ConstraintAHP(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
     }
 }
 
