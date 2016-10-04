@@ -37,7 +37,10 @@ class c; // constraint
 class M; // map
 class L; // landmark
 
-// all wolf tree is here
+
+//////////////////////////////////////////////////////////////////////////////////
+// DECLARE WOLF TREE
+
 class P : public enable_shared_from_this<P>
 {
         shared_ptr<H> H_ptr_;
@@ -289,7 +292,8 @@ class L : public enable_shared_from_this<L>
         void setM(const shared_ptr<M> _M){M_ptr_ = _M;}
 };
 
-//////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATION of some methods
 
 P::P(){
     cout << "construct P" << endl;
@@ -365,6 +369,9 @@ shared_ptr<L> M::addL(shared_ptr<L> _L)
 }
 
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+// MAIN
 
 using namespace wolf;
 int main()
