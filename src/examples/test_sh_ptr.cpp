@@ -67,7 +67,7 @@ class H : public enable_shared_from_this<H>
         }
         void setP(const shared_ptr<P> _P){P_ptr_ = _P;}
         list<shared_ptr<S>>& getSlist() {return S_list_;}
-        void addS(shared_ptr<S> _S);
+        shared_ptr<S> addS(shared_ptr<S> _S);
 };
 
 class S : public enable_shared_from_this<S>
@@ -94,7 +94,7 @@ class S : public enable_shared_from_this<S>
         }
         void setH(const shared_ptr<H> _H){H_ptr_ = _H;}
         list<shared_ptr<p>>& getplist() {return p_list_;}
-        void addp(shared_ptr<p> _p);
+        shared_ptr<p> addp(shared_ptr<p> _p);
 };
 
 class p : public enable_shared_from_this<p>
@@ -133,7 +133,7 @@ class T : public enable_shared_from_this<T>
         }
         void setP(const shared_ptr<P> _P){P_ptr_ = _P;}
         list<shared_ptr<F>>& getFlist() {return F_list_;}
-        void addF(shared_ptr<F> _F);
+        shared_ptr<F> addF(shared_ptr<F> _F);
 };
 
 class F : public enable_shared_from_this<F>
@@ -160,7 +160,7 @@ class F : public enable_shared_from_this<F>
         }
         void setT(const shared_ptr<T> _T){T_ptr_ = _T;}
         list<shared_ptr<C>>& getClist() {return C_list_;}
-        void addC(shared_ptr<C> _C);
+        shared_ptr<C> addC(shared_ptr<C> _C);
 };
 
 class C : public enable_shared_from_this<C>
@@ -187,7 +187,7 @@ class C : public enable_shared_from_this<C>
         }
         void setF(const shared_ptr<F> _F){F_ptr_ = _F;}
         list<shared_ptr<f>>& getflist() {return f_list_;}
-        void addf(shared_ptr<f> _f);
+        shared_ptr<f> addf(shared_ptr<f> _f);
 };
 
 class f : public enable_shared_from_this<f>
@@ -215,7 +215,7 @@ class f : public enable_shared_from_this<f>
         }
         void setC(const shared_ptr<C> _C){C_ptr_ = _C;}
         list<shared_ptr<c>>& getclist() {return c_list_;} // Make a list of shareds from weaks? NO! then what?
-        void addc(shared_ptr<c> _c); // use the same 'add' API, or transfer this to be mastered by the 'c' class?
+        shared_ptr<c> addc(shared_ptr<c> _c); // use the same 'add' API, or transfer this to be mastered by the 'c' class?
 };
 
 class c : public enable_shared_from_this<c>
@@ -259,7 +259,7 @@ class M : public enable_shared_from_this<M>
         }
         void setP(const shared_ptr<P> _P){P_ptr_ = _P;}
         list<shared_ptr<L>>& getLlist() {return L_list_;}
-        void addL(shared_ptr<L> _L);
+        shared_ptr<L> addL(shared_ptr<L> _L);
 };
 
 
@@ -308,53 +308,60 @@ void P::setup()
     cout << "P is set up" << endl;
 }
 
-void H::addS(shared_ptr<S> _S)
+shared_ptr<S> H::addS(shared_ptr<S> _S)
 {
     S_list_.push_back(_S);
     _S->setH(shared_from_this());
     _S->setP(getP());
+    return _S;
 }
 
-void S::addp(shared_ptr<p> _p)
+shared_ptr<p> S::addp(shared_ptr<p> _p)
 {
     p_list_.push_back(_p);
     _p->setS(shared_from_this());
     _p->setP(getP());
+    return _p;
 }
 
-void T::addF(shared_ptr<F> _F)
+shared_ptr<F> T::addF(shared_ptr<F> _F)
 {
     F_list_.push_back(_F);
     _F->setT(shared_from_this());
     _F->setP(getP());
+    return _F;
 }
 
-void F::addC(shared_ptr<C> _C)
+shared_ptr<C> F::addC(shared_ptr<C> _C)
 {
     C_list_.push_back(_C);
     _C->setF(shared_from_this());
     _C->setP(getP());
+    return _C;
 }
 
-void C::addf(shared_ptr<f> _f)
+shared_ptr<f> C::addf(shared_ptr<f> _f)
 {
     f_list_.push_back(_f);
     _f->setC(shared_from_this());
     _f->setP(getP());
+    return _f;
 }
 
-void f::addc(shared_ptr<c> _c)
+shared_ptr<c> f::addc(shared_ptr<c> _c)
 {
     c_list_.push_back(_c);
     _c->setf(shared_from_this());
     _c->setP(getP());
+    return _c;
 }
 
-void M::addL(shared_ptr<L> _L)
+shared_ptr<L> M::addL(shared_ptr<L> _L)
 {
     L_list_.push_back(_L);
     _L->setM(shared_from_this());
     _L->setP(getP());
+    return _L;
 }
 
 }
