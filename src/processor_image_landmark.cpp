@@ -110,8 +110,8 @@ void ProcessorImageLandmark::postProcess()
     {
         cv::Mat image;
         drawFeatures(image);
-        drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));
-        drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
+        //drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));
+        //drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
         //drawTrackingFeatures(image,tracker_candidates_,tracker_candidates_);
         drawFeaturesFromLandmarks(image);
 
@@ -137,7 +137,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     //FeatureBaseList features_from_landmark;
     for (auto landmark_in_ptr : _landmark_list_in)//_feature_list_in)
     {
-        std::cout << "\nThe Landmark is... ";
+        std::cout << "\nLandmark number [" << lmk_nbr << "] in ";
 
         /* project */
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_in_ptr;
@@ -164,84 +164,52 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
             cv::Mat target_descriptor = landmark_ptr->getCvDescriptor();
 
-            cv::KeyPoint best_keypoint;
-            cv::Mat best_descriptor;
-            Scalar best_score = 0;
-
+            std::cout << "pixel: " << point2D.transpose() << std::endl;
+            std::cout << "target_descriptor[" << lmk_nbr << "]:\n" << target_descriptor.row(0) << std::endl;
 
             //lists used to debug
             tracker_roi_.push_back(roi);
 
-            for(unsigned int n = 0; n < 3; n++)
+            if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
             {
+                //the matcher is now inside the match function
+                Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
 
-                if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
+                std::cout << "candidate keypoints size: " << candidate_keypoints.size() << std::endl;
+
+                if (normalized_score > params_.matcher.min_normalized_score)
                 {
-                    //the matcher is now inside the match function
-                    Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
-                    std::cout << "min normalizes score: " << params_.matcher.min_normalized_score << std::endl;
+                    std::cout << "FOUND // normalized score: " << normalized_score << std::endl;
+                    std::cout << "Feature in pixel: " << candidate_keypoints[cv_matches[0].trainIdx].pt << std::endl;
+                    std::cout << "Feature descriptor:\n" << candidate_descriptors.row(cv_matches[0].trainIdx) << std::endl;
 
-                    if (normalized_score > params_.matcher.min_normalized_score)
-                    {
-                        if(normalized_score > 0.95)
-                        {
-                            std::cout << "FOUND" << std::endl;
-                            FeaturePointImage* incoming_point_ptr = new FeaturePointImage(candidate_keypoints[cv_matches[0].trainIdx],
-                                    (candidate_descriptors.row(cv_matches[0].trainIdx)), Eigen::Matrix2s::Identity());
-                            incoming_point_ptr->setTrackId(incoming_point_ptr->id());
-                            _feature_list_out.push_back(incoming_point_ptr);
 
-                            _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, normalized_score});
-
-                            feat_lmk_found_.push_back(incoming_point_ptr);
-                            landmark_found_number_.push_back(lmk_nbr);
-                            std::cout << "list: " << landmark_found_number_.back() << std::endl;
-                            std::cout << "LMK " << lmk_nbr << "; FEATURE IN POINT X: " << incoming_point_ptr->getKeypoint().pt.x
-                                      << "\tY: " << incoming_point_ptr->getKeypoint().pt.y << std::endl;
-
-                            break;
-                        }
-                        else
-                        {
-                            if(normalized_score > best_score)
-                            {
-                                best_keypoint = candidate_keypoints[cv_matches[0].trainIdx];
-                                best_descriptor = candidate_descriptors.row(cv_matches[0].trainIdx);
-                                best_score = normalized_score;
-                            }
-                        }
-                    }
-                    else
-                        std::cout << "NOT FOUND" << std::endl;
-
-                    for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
-                    {
-                        tracker_candidates_.push_back(candidate_keypoints[i].pt);
-                    }
-                }
-                else
-                {
-                    //this one means that the detector/descriptor searched the roi, but didn't find ANYTHING at all. So, NOT tracked.
-                    std::cout << "NOT DETECTED/FOUND" << std::endl;
-                }
-                if(n == 2 && best_score != 0)
-                {
-                    std::cout << "BEST KEYPOINT" << std::endl;
-                    FeaturePointImage* incoming_point_ptr = new FeaturePointImage(best_keypoint, best_descriptor, Eigen::Matrix2s::Identity());
+                    FeaturePointImage* incoming_point_ptr = new FeaturePointImage(candidate_keypoints[cv_matches[0].trainIdx],
+                            (candidate_descriptors.row(cv_matches[0].trainIdx)), Eigen::Matrix2s::Identity());
                     incoming_point_ptr->setTrackId(incoming_point_ptr->id());
                     _feature_list_out.push_back(incoming_point_ptr);
 
-                    _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, best_score});
+                    _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, normalized_score});
 
                     feat_lmk_found_.push_back(incoming_point_ptr);
                     landmark_found_number_.push_back(lmk_nbr);
-                    std::cout << "list: " << landmark_found_number_.back() << std::endl;
-                    std::cout << "LMK " << lmk_nbr << "; FEATURE IN POINT X: " << incoming_point_ptr->getKeypoint().pt.x
-                              << "\tY: " << incoming_point_ptr->getKeypoint().pt.y << std::endl;
+//                    std::cout << "list: " << landmark_found_number_.back() << std::endl;
+//                    std::cout << "LMK " << lmk_nbr << "; FEATURE IN POINT X: " << incoming_point_ptr->getKeypoint().pt.x
+//                              << "\tY: " << incoming_point_ptr->getKeypoint().pt.y << std::endl;
 
-                    break;
                 }
+                else
+                    std::cout << "NOT FOUND" << std::endl;
 
+                for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
+                {
+                    tracker_candidates_.push_back(candidate_keypoints[i].pt);
+                }
+            }
+            else
+            {
+                //this one means that the detector/descriptor searched the roi, but didn't find ANYTHING at all. So, NOT tracked.
+                std::cout << "NOT DETECTED/FOUND" << std::endl;
             }
         }
         else
@@ -278,8 +246,15 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
             detector_roi_.push_back(roi);
             if (detect(image_last_, roi, new_keypoints, new_descriptors))
             {
+                std::vector<cv::KeyPoint> list_keypoints = new_keypoints;
+                unsigned int index = 0;
                 keypoint_filter.retainBest(new_keypoints,1);
-                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
+                for( int i = 0; i < list_keypoints.size(); i++)
+                {
+                    if(list_keypoints[i].pt == new_keypoints[0].pt)
+                        index = i;
+                }
+                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
                 point_ptr->setTrackId(point_ptr->id());
                 addNewFeatureLast(point_ptr);
                 active_search_grid_.hitCell(new_keypoints[0]);
@@ -427,7 +402,7 @@ Scalar ProcessorImageLandmark::match(cv::Mat _target_descriptor, cv::Mat _candid
 {
     matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
-    std::cout << "normalized score: " << normalized_score << std::endl;
+    //std::cout << "normalized score: " << normalized_score << std::endl;
     return normalized_score;
 }
 
@@ -538,11 +513,12 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
     for(auto feature_point : feat_lmk_found_)
     {
         //candidate - cyan
-        cv::Point point = ((FeaturePointImage*)feature_point)->getKeypoint().pt;
+        cv::Point2f point = ((FeaturePointImage*)feature_point)->getKeypoint().pt;
         cv::circle(_image, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
-        cv::Point point2 = point;
+        std::cout << "feature number [" << (unsigned int)v(i)+1 << "] in: " << point << std::endl;
+        cv::Point2f point2 = point;
         point2.x = point2.x - 16;
-        cv::putText(_image, std::to_string((unsigned int)v(i)), point2,
+        cv::putText(_image, std::to_string((unsigned int)v(i)+1), point2,
                     cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0));
         i++;
     }
@@ -572,9 +548,11 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {
 
-            cv::Point point;
+            cv::Point2f point;
             point.x = point2D[0];
             point.y = point2D[1];
+
+            std::cout << "landmark proj number [" << landmark_ptr->id() << "] in: " << point << std::endl;
 
             cv::circle(image, point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
             cv::putText(image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));

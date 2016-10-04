@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     cv::Feature2D* detector_descriptor_ptr_;
     cv::DescriptorMatcher* matcher_ptr_;
 
-    unsigned int nfeatures = 1 ;
+    unsigned int nfeatures = 20;
     float scaleFactor = 1.2;
     unsigned int nlevels = 8;
     unsigned int edgeThreshold = 16;
@@ -99,11 +99,13 @@ int main(int argc, char** argv)
     cv::waitKey(0);
 
     std::vector<cv::KeyPoint> target_keypoints;
+    std::vector<cv::KeyPoint> tracked_keypoints_;
+    std::vector<cv::KeyPoint> tracked_keypoints_2;
     std::vector<cv::KeyPoint> current_keypoints;
-    std::vector<cv::KeyPoint> current_keypoints2;
     cv::Mat target_descriptors;
+    cv::Mat tracked_descriptors;
+    cv::Mat tracked_descriptors2;
     cv::Mat current_descriptors;
-    cv::Mat current_descriptors2;
     cv::Mat image_original = frame[f % buffer_size].clone();
     cv::Mat image_graphics;
 
@@ -202,12 +204,12 @@ int main(int argc, char** argv)
                     if(normalized_score < 0.8)
                     {
                         std::cout << "not tracked" << std::endl;
-                        std::cout << "choosen_descriptor:\n" << descriptors.row(cv_matches[0].trainIdx) << std::endl;
+//                        std::cout << "choosen_descriptor:\n" << descriptors.row(cv_matches[0].trainIdx) << std::endl;
                     }
                     else
                     {
                         std::cout << "tracked" << std::endl;
-                        std::cout << "choosen_descriptor:\n" << descriptors.row(cv_matches[0].trainIdx) << std::endl;
+//                        std::cout << "choosen_descriptor:\n" << descriptors.row(cv_matches[0].trainIdx) << std::endl;
                         matched = true;
 
 
@@ -231,20 +233,23 @@ int main(int argc, char** argv)
                         tracked_kp.pt.x = tracked_kp.pt.x + roi.x;
                         tracked_kp.pt.y = tracked_kp.pt.y + roi.y;
                         if(f==0)
-                            current_keypoints.push_back(tracked_kp);
+                            tracked_keypoints_.push_back(tracked_kp);
                         else
-                            current_keypoints2.push_back(tracked_kp);
+                            tracked_keypoints_2.push_back(tracked_kp);
 
                         cv::Mat tracked_desc;
                         tracked_desc = descriptors(cv::Rect(0,cv_matches[0].trainIdx,target_descriptors.cols,1));
                         if(f==0)
-                            current_descriptors.push_back(tracked_desc);
+                            tracked_descriptors.push_back(tracked_desc);
                         else
-                            current_descriptors2.push_back(tracked_desc);
+                            tracked_descriptors2.push_back(tracked_desc);
 
                         //introduce in list - target point
-                        //                    current_keypoints.push_back(target_keypoints[j]);
-                        //                    current_descriptors.push_back(target_descriptor);
+                        if(f==0)
+                        {
+                            current_keypoints.push_back(target_keypoints[j]);
+                            current_descriptors.push_back(target_descriptor);
+                        }
 
                         if (f == 0 && normalized_score == 1)n_first_1++;
                         if (f == 1 && normalized_score == 1)n_second_1++;
@@ -260,7 +265,7 @@ int main(int argc, char** argv)
         }
 
         std::cout << "\ntracked keypoints: " << tracked_keypoints << "/" << target_keypoints.size() << std::endl;
-        std::cout << "percentage: " << ((float)((float)tracked_keypoints/(float)target_keypoints.size()))*100 << "%" << std::endl;
+        std::cout << "percentage first: " << ((float)((float)tracked_keypoints/(float)target_keypoints.size()))*100 << "%" << std::endl;
         std::cout << "Number of perfect first matches: " << n_first_1 << std::endl;
         std::cout << "Number of perfect second matches: " << n_second_1 << std::endl;
 
@@ -268,7 +273,7 @@ int main(int argc, char** argv)
         {
             detector_descriptor_ptr_->detect(image, target_keypoints);
             detector_descriptor_ptr_->compute(image, target_keypoints, target_descriptors);
-            std::cout << "numbre of new keypoints to be tracked: " << target_keypoints.size() << std::endl;
+            std::cout << "number of new keypoints to be tracked: " << target_keypoints.size() << std::endl;
         }
         else
         {
@@ -303,6 +308,8 @@ int main(int argc, char** argv)
             target_keypoints = current_keypoints;
             current_descriptors.copyTo(target_descriptors);
             current_keypoints.clear();
+            current_descriptors.release();
+
 
             std::cout << "\nAFTER THE ADVANCE" << std::endl;
 //            for(unsigned int i = 0; i < target_keypoints.size(); i++)
@@ -320,6 +327,7 @@ int main(int argc, char** argv)
 
         }
 
+        tracked_keypoints = 0;
         cv::imshow("Feature tracker", image_graphics);
         cv::waitKey(0);
 
