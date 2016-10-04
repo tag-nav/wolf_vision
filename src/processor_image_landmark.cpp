@@ -111,7 +111,7 @@ void ProcessorImageLandmark::postProcess()
         cv::Mat image;
         drawFeatures(image);
         //drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));
-        //drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
+        drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
         //drawTrackingFeatures(image,tracker_candidates_,tracker_candidates_);
         drawFeaturesFromLandmarks(image);
 
@@ -254,15 +254,21 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
                     if(list_keypoints[i].pt == new_keypoints[0].pt)
                         index = i;
                 }
-                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
-                point_ptr->setTrackId(point_ptr->id());
-                addNewFeatureLast(point_ptr);
-                active_search_grid_.hitCell(new_keypoints[0]);
-                active_search_grid_.blockCell(roi);
 
-                //std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
+                std::cout << "response: " << new_keypoints[0].response << std::endl;
+                if(new_keypoints[0].response > 0.0005)
+                {
+                    list_response_.push_back(new_keypoints[0].response);
+                    FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
+                    point_ptr->setTrackId(point_ptr->id());
+                    addNewFeatureLast(point_ptr);
+                    active_search_grid_.hitCell(new_keypoints[0]);
+                    active_search_grid_.blockCell(roi);
 
-                n_new_features++;
+                    //std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
+
+                    n_new_features++;
+                }
 
             }
             else
@@ -532,6 +538,14 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
     cv::Mat image = image_incoming_.clone();
     LandmarkBaseList* last_landmark_list = getProblem()->getMapPtr()->getLandmarkListPtr();
 
+    unsigned int response_counter = 0;
+    Eigen::VectorXs response_vector(last_landmark_list->size());
+    for (auto response : list_response_)
+    {
+        response_vector(response_counter) = response;
+        response_counter++;
+    }
+
     for (auto landmark_base_ptr : *last_landmark_list)
     {
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_base_ptr;
@@ -556,6 +570,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
 
             cv::circle(image, point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
             cv::putText(image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+//            cv::putText(image, std::to_string(response_vector[counter]), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
             counter++;
         }
     }

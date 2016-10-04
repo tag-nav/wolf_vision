@@ -122,6 +122,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         std::list<cv::Point> tracker_candidates_;
         FeatureBaseList feat_lmk_found_;
         std::list<Scalar> landmark_found_number_;
+        std::list<float> list_response_;
 
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
