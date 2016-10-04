@@ -75,6 +75,8 @@ class S : public enable_shared_from_this<S>
         weak_ptr<P> P_ptr_;
         weak_ptr<H> H_ptr_;
         list<shared_ptr<p>> p_list_;
+
+        list<weak_ptr<C>> C_list_; // List of all captures
     public:
         S(){cout << "construct S" << endl;}
         ~S(){cout << "destruct S" << endl;}
@@ -137,6 +139,8 @@ class F : public enable_shared_from_this<F>
         weak_ptr<P> P_ptr_;
         weak_ptr<T> T_ptr_;
         list<shared_ptr<C>> C_list_;
+
+        list<weak_ptr<c>> c_by_list; // list of constraints to this frame
     public:
         F(){cout << "construct F" << endl;}
         ~F(){cout << "destruct F" << endl;}
@@ -161,6 +165,8 @@ class C : public enable_shared_from_this<C>
         weak_ptr<P> P_ptr_;
         weak_ptr<F> F_ptr_;
         list<shared_ptr<f>> f_list_;
+
+        weak_ptr<S> S_ptr_; // sensor
     public:
         C(){cout << "construct C" << endl;}
         ~C(){cout << "destruct C" << endl;}
@@ -185,6 +191,9 @@ class f : public enable_shared_from_this<f>
         weak_ptr<P> P_ptr_;
         weak_ptr<C> C_ptr_;
         list<shared_ptr<c>> c_list_; // change to list<weak_ptr<c>> ???
+
+        list<weak_ptr<c>> c_by_list; // list of constraints to this feature
+
     public:
         f(){cout << "construct f" << endl;}
         ~f(){cout << "destruct f" << endl;}
@@ -208,6 +217,11 @@ class c : public enable_shared_from_this<c>
 {
         weak_ptr<P> P_ptr_;
         weak_ptr<f> f_ptr_; // change this to shared??
+
+        // can we have just one pointer? Derive 3 classes from c?
+        weak_ptr<F> F_other_ptr_; // change this to shared?
+        weak_ptr<f> f_other_ptr_; // change this to shared?
+        weak_ptr<L> L_other_ptr_; // change this to shared?
     public:
         c(){cout << "construct c" << endl;}
         ~c(){cout << "destruct c" << endl;}
@@ -247,7 +261,10 @@ class M : public enable_shared_from_this<M>
 class L : public enable_shared_from_this<L>
 {
         weak_ptr<P> P_ptr_;
-        weak_ptr<M> M_ptr_; // change this to shared??
+        weak_ptr<M> M_ptr_;
+
+        list<weak_ptr<c>> c_by_list; // list of constraints to this landmark
+
     public:
         L(){cout << "construct L" << endl;}
         ~L(){cout << "destruct L" << endl;}
