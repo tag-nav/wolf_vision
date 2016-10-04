@@ -383,6 +383,8 @@ int main()
     problem->getM()->addL(make_shared<L>());
     problem->getM()->addL(make_shared<L>());
 
+    cout << "Wolf tree created. Exiting main()." << endl;
+
     return 1;
 }
 
