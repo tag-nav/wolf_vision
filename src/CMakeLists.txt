@@ -228,7 +228,6 @@ SET(SRCS
     processor_tracker_landmark_dummy.cpp
     sensor_base.cpp
     sensor_camera.cpp
-    sensor_factory.cpp
     sensor_gps.cpp
     sensor_gps_fix.cpp
     sensor_imu.cpp
