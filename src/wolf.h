@@ -262,16 +262,14 @@ typedef enum
     LANDMARK_CANDIDATE = 1,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
     LANDMARK_ESTIMATED,   ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
     LANDMARK_FIXED,       ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
-    LANDMARK_OUT_OF_VIEW, ///< A landmark out of the field of view. Association with it is not allowed, so does not pose constraints for the solver
-    LANDMARK_OLD          ///< An old landmark. Association with it not allowed, but old constraints can still be taken into account by the solver.
 } LandmarkStatus;
 
 
 /////////////////////////////////////////////////////////////////////////
-//      TYPEDEFS FOR POINTERS AND ITERATORS IN THE WOLF TREE
+//      TYPEDEFS FOR POINTERS, LISTS AND ITERATORS IN THE WOLF TREE
 /////////////////////////////////////////////////////////////////////////
-// - forwards for pointers
 
+// - forwards for pointers
 class NodeBase;
 class Problem;
 class HardwareBase;
@@ -290,9 +288,6 @@ class LandmarkBase;
 class StateBlock;
 class StateQuaternion;
 class LocalParametrizationBase;
-
-// NodeBase
-typedef NodeBase* NodeBasePtr;
 
 // NodeBase
 typedef NodeBase* NodeBasePtr;
