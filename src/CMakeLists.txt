@@ -217,7 +217,6 @@ SET(SRCS
     node_base.cpp
     problem.cpp
     processor_base.cpp
-    processor_factory.cpp
     processor_imu.cpp
     processor_odom_2D.cpp
     processor_odom_3D.cpp
