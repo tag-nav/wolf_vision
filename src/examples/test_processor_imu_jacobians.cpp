@@ -97,6 +97,11 @@ int main(int argc, char** argv)
                   = log( dR(wb).transpose() * exp((wx - wbx - dwb_x)dt, (wy - wby)dt, (wy - wby)dt))/dwb_x
         dDq_dwb_y = log( dR(wb).transpose() * dR(wb - dwb_y))/dwb_y
         dDq_dwb_z = log( dR(wb).transpose() * dR(wb + dwb_z))/dwb_z
+
+        Note : dDq_dwb must be computed recursively ! So comparing the one returned by processor_imu and the numerical 
+        one will have no sense if we aredoing this from a random Delta. The Delta here should be the origin.
+        dDq_dwb_ = dR.tr()*dDq_dwb - Jr(wdt)*dt
+        Then at first step, dR.tr() = Id, dDq_dwb = 0_{3x3}, which boils down to dDq_dwb_ = Jr(wdt)*dt 
      */
 
 

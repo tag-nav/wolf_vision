@@ -135,6 +135,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     dDp_dwb = dDp_dwb_;
     dDv_dwb = dDv_dwb_;
     dDq_dwb = dDq_dwb_;
+    
 
     // propagate bias noise
     for(int i=0; i<6; i++){
@@ -202,15 +203,9 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     //We compute all the jacobians wrt deltas and noisy deltas
     for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
     {
-        //fist we need to reset some stuff
-        jacobian_delta_preint.setIdentity(9,9);
-        jacobian_delta.setIdentity(9,9);
-        acc_bias_.setZero();
-        gyro_bias_.setZero();
 
         delta_ = delta0;
         delta_(i) = delta_(i) + _delta_noise(i); //noise has been added
-        deltaPlusDelta(_Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         delta_noisy_vect(i) = delta_;
     }
 
@@ -219,10 +214,6 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         //fist we need to reset some stuff
         Eigen::Matrix3s dqr_tmp;
         Eigen::Vector3s dtheta = Eigen::Vector3s::Zero();
-        jacobian_delta_preint.setIdentity(9,9);
-        jacobian_delta.setIdentity(9,9);
-        acc_bias_.setZero();
-        gyro_bias_.setZero();
 
         delta_ = delta0;
         remapDelta(delta_); //not sure that we need this
@@ -230,22 +221,14 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         dtheta(i) +=  _delta_noise(i+6); //introduce perturbation
         dqr_tmp = dqr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
         Dq_out_ = v2q(R2v(dqr_tmp)); //orientation noise has been added --> get back to quaternion form
-        deltaPlusDelta(_Delta0, delta_, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         delta_noisy_vect(i+6) = delta_;
     }
 
     //We compute all the jacobians wrt Deltas and noisy Deltas
     for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
     {
-        //fist we need to reset some stuff
-        jacobian_delta_preint.setIdentity(9,9);
-        jacobian_delta.setIdentity(9,9);
-        acc_bias_.setZero();
-        gyro_bias_.setZero();
-
         Delta_ = _Delta0;
         Delta_(i) = Delta_(i) + _Delta_noise(i); //noise has been added
-        deltaPlusDelta(Delta_, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         Delta_noisy_vect(i) = Delta_;
     }
 
@@ -254,10 +237,6 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         //fist we need to reset some stuff
         Eigen::Matrix3s dQr_tmp;
         Eigen::Vector3s dtheta = Eigen::Vector3s::Zero();
-        jacobian_delta_preint.setIdentity(9,9);
-        jacobian_delta.setIdentity(9,9);
-        acc_bias_.setZero();
-        gyro_bias_.setZero();
 
         Delta_ = _Delta0;
         remapDelta(Delta_); //this time we need it
@@ -265,7 +244,6 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         dtheta(i) += _Delta_noise(i+6); //introduce perturbation
         dQr_tmp = dQr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
         Dq_out_ = v2q(R2v(dQr_tmp)); //orientation noise has been added --> get back to quaternion form
-        deltaPlusDelta(Delta_, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta);
         Delta_noisy_vect(i+6) = Delta_;
     }
     
