@@ -164,6 +164,10 @@ class F : public enable_shared_from_this<F>
         void setT(const shared_ptr<T> _T){T_ptr_ = _T;}
         list<shared_ptr<C>>& getClist() {return C_list_;}
         shared_ptr<C> addC(shared_ptr<C> _C);
+        void addcby(shared_ptr<c> _cby)
+        {
+            c_by_list.push_back(_cby);
+        }
 };
 
 class C : public enable_shared_from_this<C>
@@ -219,6 +223,10 @@ class f : public enable_shared_from_this<f>
         void setC(const shared_ptr<C> _C){C_ptr_ = _C;}
         list<shared_ptr<c>>& getclist() {return c_list_;} // Make a list of shareds from weaks? NO! then what?
         shared_ptr<c> addc(shared_ptr<c> _c); // use the same 'add' API, or transfer this to be mastered by the 'c' class?
+        void addcby(shared_ptr<c> _cby)
+        {
+            c_by_list.push_back(_cby);
+        }
 };
 
 class c : public enable_shared_from_this<c>
@@ -232,6 +240,9 @@ class c : public enable_shared_from_this<c>
         weak_ptr<L> L_other_ptr_; // change this to shared?
     public:
         c(){cout << "construct c" << endl;}
+        c(shared_ptr<F> _F_other);
+        c(shared_ptr<f> _f_other);
+        c(shared_ptr<L> _L_other);
         ~c(){cout << "destruct c" << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
@@ -290,6 +301,10 @@ class L : public enable_shared_from_this<L>
             return M_sh;
         }
         void setM(const shared_ptr<M> _M){M_ptr_ = _M;}
+        void addcby(shared_ptr<c> _cby)
+        {
+            c_by_list.push_back(_cby);
+        }
 };
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -360,6 +375,21 @@ shared_ptr<c> f::addc(shared_ptr<c> _c)
     return _c;
 }
 
+c::c(shared_ptr<F> _F_other)
+{
+    F_other_ptr_ = _F_other;
+}
+
+c::c(shared_ptr<f> _f_other)
+{
+    f_other_ptr_ = _f_other;
+}
+
+c::c(shared_ptr<L> _L_other)
+{
+    L_other_ptr_ = _L_other;
+}
+
 shared_ptr<L> M::addL(shared_ptr<L> _L)
 {
     L_list_.push_back(_L);
@@ -367,6 +397,7 @@ shared_ptr<L> M::addL(shared_ptr<L> _L)
     _L->setP(getP());
     return _L;
 }
+
 
 }
 
@@ -389,6 +420,12 @@ int main()
         }
     }
 
+    // M
+    for (int i = 0; i < 2; i++)
+    {
+        shared_ptr<L> Lp = Pp->getM()->addL(make_shared<L>());
+    }
+
     // T
     for (int i = 0; i < 2; i++)
     {
@@ -399,21 +436,30 @@ int main()
             for (int i = 0; i < 2; i++)
             {
                 shared_ptr<f> fp = Cp->addf(make_shared<f>());
+                list<shared_ptr<L>>::iterator Lit = Pp->getM()->getLlist().begin();
                 for (int i = 0; i < 2; i++)
                 {
-                    shared_ptr<c> cp = fp->addc(make_shared<c>());
+                    shared_ptr<c> cp = fp->addc(make_shared<c>(*Lit));
+                    if(*Lit)
+                        (*Lit)->addcby(cp);
+                    else
+                        cout << "Could not constrain lmk" << endl;
+
+                    Lit++;
                 }
             }
         }
     }
 
-    // M
-    for (int i = 0; i < 2; i++)
-    {
-        shared_ptr<L> Lp = Pp->getM()->addL(make_shared<L>());
-    }
+    cout << "Wolf tree created." << endl;
 
-    cout << "Wolf tree created. Exiting main()." << endl;
+    cout << "Removing constraints" << endl;
+
+    cout << "Removing landmarks" << endl;
+
+    cout << "Removing frames" << endl;
+
+    cout << "Exiting main()." << endl;
 
     return 1;
 }
