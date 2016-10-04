@@ -4,6 +4,10 @@
 
 #ADD_EXECUTABLE(test_eigen_template test_eigen_template.cpp)
 
+# Complete Wolf tree skeleton with smart pointers
+ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
+
+
 # Map load and save test
 ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
 TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
