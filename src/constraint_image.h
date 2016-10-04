@@ -88,12 +88,12 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             v_normalized = landmark_hmg_c1.head(3);// /landmark_hmg_c1(3);
 //            T inverse_dist_c1 = landmark_hmg_c1(3); // inverse distance
 
-            std::cout << "\nv_normalized:\n" << v_normalized(0) << "\t" << v_normalized(1) << "\t"
-                      << v_normalized(2) << "\t" << landmark_hmg_c1(3) << std::endl;
+//            std::cout << "\nv_normalized:\n" << v_normalized(0) << "\t" << v_normalized(1) << "\t"
+//                      << v_normalized(2) << "\t" << landmark_hmg_c1(3) << std::endl;
 
             Eigen::Matrix<T,2,1> v;
             v = v_normalized.head(2)/v_normalized(2);
-            std::cout << "\nv:\n" << v(0) << "\t" << v(1) << std::endl;
+//            std::cout << "\nv:\n" << v(0) << "\t" << v(1) << std::endl;
 
             // ==================================================
             /* DISTORTION ATTEMPT */
@@ -101,12 +101,10 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             Eigen::Matrix<T,Eigen::Dynamic,1> distortion_vector = distortion_.cast<T>();
             //std::cout << "\ntest_point2D DISTORTED:\n" << test_distortion(0) << std::endl;
 
-
-            T r2 = v.squaredNorm();//v(0) * v(0) + v(1) * v(1); // this is the norm squared: r2 = ||u||^2
+            T r2 = v.squaredNorm(); // this is the norm squared: r2 = ||u||^2
 
             T s = (T)1.0;
             T r2i = (T)1.0;
-            //T i;
             for (int i = 0; i < distortion_vector.cols() ; i++) { //   here we are doing:
                 r2i = r2i * r2;                                   //   r2i = r^(2*(i+1))
                 s = s + (distortion_vector(i) * r2i);             //   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
@@ -115,7 +113,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             if (s < (T)0.6) s = (T)1.0;
             distored_point(0) = s * v(0);
             distored_point(1) = s * v(1);
-            std::cout << "\ndistored_point:\n" << distored_point(0) << "\t" << distored_point(1) << std::endl;
+//            std::cout << "\ndistored_point:\n" << distored_point(0) << "\t" << distored_point(1) << std::endl;
             /* END OF THE ATTEMPT */
 
 
@@ -123,7 +121,7 @@ class ConstraintImage : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             u(0) = K(0,0)*distored_point(0)+K(0,2);
             u(1) = K(1,1)*distored_point(1)+K(1,2);
 
-            std::cout << "u: " << u(0) << "\t" << u(1) << std::endl;
+//            std::cout << "u: " << u(0) << "\t" << u(1) << std::endl;
 
             // ==================================================
 
