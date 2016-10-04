@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     cv::Feature2D* detector_descriptor_ptr_;
     cv::DescriptorMatcher* matcher_ptr_;
 
-    unsigned int nfeatures = 20;
+    unsigned int nfeatures = 500;
     float scaleFactor = 1.2;
     unsigned int nlevels = 8;
     unsigned int edgeThreshold = 16;
