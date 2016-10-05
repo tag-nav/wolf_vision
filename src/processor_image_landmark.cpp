@@ -4,7 +4,6 @@
 #include "landmark_AHP.h"
 #include "constraint_corner_2D.h"
 #include "constraint_AHP.h"
-#include "constraint_image_new_landmark.h"
 #include "sensor_camera.h"
 #include "pinholeTools.h"
 
@@ -110,8 +109,8 @@ void ProcessorImageLandmark::postProcess()
     {
         cv::Mat image;
         drawFeatures(image);
-        //drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));
-        drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
+        drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));
+        //drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
         //drawTrackingFeatures(image,tracker_candidates_,tracker_candidates_);
         drawFeaturesFromLandmarks(image);
 
@@ -325,7 +324,7 @@ ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_p
     if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
     {
         //std::cout << "Are equal" << std::endl;
-        return nullptr; //new ConstraintImageNewLandmark(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
+        return nullptr;
     }
     else// (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() != last_ptr_->getFramePtr())
     {
@@ -463,7 +462,7 @@ void ProcessorImageLandmark::inflateRoi(cv::Rect& _roi)
 void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
 {
 
-    inflateRoi(_roi);
+    //inflateRoi(_roi);
     trimRoi(_roi);
 
     tracker_roi_inflated_.push_back(_roi);
