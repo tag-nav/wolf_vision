@@ -126,6 +126,10 @@ TARGET_LINK_LIBRARIES(test_processor_tracker_landmark ${PROJECT_NAME})
 ADD_EXECUTABLE(test_processor_imu test_processor_imu.cpp)
 TARGET_LINK_LIBRARIES(test_processor_imu ${PROJECT_NAME})
 
+# MPU6050 IMU test
+ADD_EXECUTABLE(test_mpu test_mpu.cpp)
+TARGET_LINK_LIBRARIES(test_mpu ${PROJECT_NAME})
+
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
 #     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
