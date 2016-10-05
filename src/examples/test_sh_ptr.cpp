@@ -748,17 +748,17 @@ int main()
     cout << "\nRemoving constraints -------------------------" << endl;
     removeConstraints(Pp);
 
-//    cout << "\nRemoving problem ---------------------------" << endl;
-//    Pp.reset();
-
-//    cout << "\nRebuilding problem ---------------------------" << endl;
-//    Pp = buildProblem(N);
-
 //    cout << "\nRemoving landmarks ---------------------------" << endl;
 //    removeLandmarks(Pp);
 
 //    cout << "\nRemoving frames ------------------------------" << endl;
 //    removeFrames(Pp);
+
+//    cout << "\nRemoving problem ---------------------------" << endl;
+//    Pp.reset();
+
+//    cout << "\nRebuilding problem ---------------------------" << endl;
+//    Pp = buildProblem(N);
 
     //------------------------------------------------------------------
 
