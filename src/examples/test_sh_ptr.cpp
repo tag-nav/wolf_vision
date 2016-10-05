@@ -567,10 +567,30 @@ void print_cF(const shared_ptr<P>& Pp)
     for (auto Fp : Pp->getT()->getFlist())
     {
         cout << "F" << Fp->id << " @ " << Fp.get() << endl;
-        for (auto Cp : Fp->getCbyList())
+        for (auto cp : Fp->getCbyList())
         {
-            cout << " -> c" << Cp->id << " @ " << Cp.get()
-                    << " -> F" << Cp->getFother()->id << " @ " << Cp->getFother().get() << endl;
+            cout << " -> c" << cp->id << " @ " << cp.get()
+                    << " -> F" << cp->getFother()->id << " @ " << cp->getFother().get() << endl;
+        }
+    }
+}
+
+void print_cf(const shared_ptr<P>& Pp)
+{
+    cout << "Feature constraints" << endl;
+    for (auto Fp : Pp->getT()->getFlist())
+    {
+        for (auto Cp : Fp->getClist())
+        {
+            for (auto fp : Cp->getflist())
+            {
+                cout << "f" << fp->id << " @ " << fp.get() << endl;
+                for (auto cp : fp->getCbyList())
+                {
+                cout << " -> c" << cp->id << " @ " << cp.get()
+                        << " -> f" << cp->getfother()->id << " @ " << cp->getfother().get() << endl;
+                }
+            }
         }
     }
 }
@@ -581,10 +601,10 @@ void print_cL(const shared_ptr<P>& Pp)
     for (auto Lp : Pp->getM()->getLlist())
     {
         cout << "L" << Lp->id << " @ " << Lp.get() << endl;
-        for (auto Cp : Lp->getCbyList())
+        for (auto cp : Lp->getCbyList())
         {
-            cout << " -> c" << Cp->id << " @ " << Cp.get()
-                    << " -> L" << Cp->getLother()->id << " @ " << Cp->getLother().get() << endl;
+            cout << " -> c" << cp->id << " @ " << cp.get()
+                    << " -> L" << cp->getLother()->id << " @ " << cp->getLother().get() << endl;
         }
     }
 }
@@ -601,6 +621,7 @@ void print_c(const shared_ptr<P>& Pp)
                 for (auto cp : fp->getclist())
                 {
                     if (cp)
+                    {
                         switch (cp->type)
                         {
                             case c::cF:
@@ -619,6 +640,7 @@ void print_c(const shared_ptr<P>& Pp)
                                 cout << "Bad constraint" << endl;
                                 break;
                         }
+                    }
                 }
             }
         }
@@ -735,6 +757,8 @@ int main()
     cout << "\nShowing constraints --------------------------" << endl;
     cout<<endl;
     print_cF(Pp);
+    cout<<endl;
+    print_cf(Pp);
     cout<<endl;
     print_cL(Pp);
     cout<<endl;
