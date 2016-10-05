@@ -24,6 +24,7 @@
 #include <fcntl.h>
 
 //#define DEBUG_RESULTS
+#define FROM_FILE
 
 int _kbhit();
 
@@ -31,6 +32,30 @@ int main(int argc, char** argv)
 {
     using namespace wolf;
 
+    #ifdef FROM_FILE
+        std::ifstream data_file;
+        const char * filename;
+
+        if (argc < 2)
+        {
+            std::cout << "Missing input argument! : needs 1 argument (path to data file)." << std::endl;
+            return 1;
+        }
+        else
+        {
+            filename = argv[1];
+            data_file.open(filename);
+            std::cout << "file: " << filename << std::endl;
+
+            std::string dummy;
+            getline(data_file, dummy);
+
+        if(!data_file.is_open()){
+            std::cerr << "Failed to open data files... Exiting" << std::endl;
+            return 1;
+        }
+    }
+    #else
     int fd,n;
     ///prepare MPU here
     if (argc < 2)
@@ -66,6 +91,7 @@ int main(int argc, char** argv)
     toptions.c_cc[VMIN]  = 0;
     toptions.c_cc[VTIME] = 10;
     tcsetattr(fd, TCSANOW, &toptions);
+    #endif
 
     // Wolf problem
     Problem* wolf_problem_ptr_ = new Problem(FRM_PVQBB_3D);
@@ -94,6 +120,12 @@ int main(int argc, char** argv)
     clock_t begin = clock();
     std::cout << "\n\t\t\t\tENTERING MAIN LOOP - Please press ENTER to exit loop\n" << std::endl;
 
+    #ifdef FROM_FILE
+    while(!data_file.eof()){
+        // read new data
+        data_file >> mpu_clock >> data_[0] >> data_[1] >> data_[2] >> data_[3] >> data_[4] >> data_[5];
+        t.set(mpu_clock); //
+    #else
     while(!_kbhit()){
         // read new data
         do n = read(fd, buf, 1);//READ IT
@@ -109,6 +141,7 @@ int main(int argc, char** argv)
             mpu_clock += 0.001;
             t.set(mpu_clock);
         }
+        #endif
 
         // assign data to capture
         imu_ptr->setData(data_);
