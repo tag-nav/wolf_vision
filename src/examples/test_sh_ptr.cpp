@@ -82,7 +82,7 @@ class S : public enable_shared_from_this<S>
         weak_ptr<H> H_ptr_;
         list<shared_ptr<p>> p_list_;
 
-        list<weak_ptr<C>> C_list_; // List of all captures
+        //        list<weak_ptr<C>> C_list_; // List of all captures
 
     public:
         S(){cout << "construct S" << endl;}
@@ -320,12 +320,15 @@ class L : public enable_shared_from_this<L>
         }
         void remove_c_by(shared_ptr<c> _cby)
         {
-            c_by_list.remove_if( // remove _cby
-                    [_cby](std::weak_ptr<c> p){
+            c_by_list.remove_if( // remove _cby if it exists
+                    [_cby](std::weak_ptr<c> p)
+                    {
                         std::shared_ptr<c> sp = p.lock();
                         if(_cby && sp)
                             return _cby == sp;
-                        return false;});
+                        else
+                            return false;
+                    });
             if (c_by_list.empty())
                 getM()->removeL(shared_from_this());
         }
