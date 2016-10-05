@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     if (argc == 1)
     {
         //filename = "/home/jtarraso/Vídeos/House interior.mp4";
-        filename = "/home/jtarraso/Vídeos/gray.mp4";
+        filename = "/home/jtarraso/Vídeos/gray1.mp4";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
@@ -181,7 +181,7 @@ int main(int argc, char** argv)
         image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(60);
+        cv::waitKey(0);
 
         if((f%buffer_size) == 10)
         {
