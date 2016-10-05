@@ -83,12 +83,14 @@ class S : public enable_shared_from_this<S>
         weak_ptr<P> P_ptr_;
         weak_ptr<H> H_ptr_;
         list<shared_ptr<p>> p_list_;
+        static int id_count_;
 
         //        list<shared_ptr<C>> C_list_; // List of all captures
 
     public:
-        S(){cout << "construct ·-S" << endl;}
-        ~S(){cout << "destruct ·-S" << endl;}
+        int id;
+        S():id(++id_count_){cout << "construct + S" << id << endl;}
+        ~S(){cout << "destruct + S" << id << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
              if (!P_sh)
@@ -110,10 +112,12 @@ class p : public enable_shared_from_this<p>
     private:
         weak_ptr<P> P_ptr_;
         weak_ptr<S> S_ptr_;
+        static int id_count_;
 
     public:
-        p(){cout << "construct   ·-p" << endl;}
-        ~p(){cout << "destruct   ·-p" << endl;}
+        int id;
+        p():id(++id_count_){cout << "construct   + p" << id << endl;}
+        ~p(){cout << "destruct   + p" << id << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
             if (!P_sh)
@@ -155,11 +159,13 @@ class F : public enable_shared_from_this<F>
 
         list<shared_ptr<c>> c_by_list; // list of constraints to this frame
 
+        static int id_count_;
         bool is_deleting;
 
     public:
-        F() : is_deleting(false){cout << "construct ·-F" << endl;}
-        ~F(){cout << "destruct ·-F" << endl;}
+        int id;
+        F() :is_deleting(false),id(++id_count_){cout << "construct + F" << id << endl;}
+        ~F(){cout << "destruct + F" << id << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
             if (!P_sh)
@@ -191,10 +197,13 @@ class C : public enable_shared_from_this<C>
         list<shared_ptr<f>> f_list_;
 
         weak_ptr<S> S_ptr_; // sensor
+        static int id_count_;
+        bool is_deleting;
 
     public:
-        C(){cout << "construct   ·-C" << endl;}
-        ~C(){cout << "destruct   ·-C" << endl;}
+        int id;
+        C():is_deleting(false),id(++id_count_){cout << "construct   + C" << id << endl;}
+        ~C(){cout << "destruct   + C" << id << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
             if (!P_sh)
@@ -222,11 +231,13 @@ class f : public enable_shared_from_this<f>
 
         list<shared_ptr<c>> c_by_list; // list of constraints to this feature
 
+        static int id_count_;
         bool is_deleting;
 
     public:
-        f():is_deleting(false){cout << "construct     ·-f" << endl;}
-        ~f(){cout << "destruct     ·-f" << endl;}
+        int id;
+        f():is_deleting(false),id(++id_count_){cout << "construct     + f" << id << endl;}
+        ~f(){cout << "destruct     + f" << id << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
             if (!P_sh)
@@ -260,13 +271,17 @@ class c : public enable_shared_from_this<c>
         weak_ptr<f> f_other_ptr_; // change this to shared?
         weak_ptr<L> L_other_ptr_; // change this to shared?
 
+        static int id_count_;
+        bool is_deleting;
+
     public:
+        int id;
         enum{c0, cF, cf, cL} type;
-        c(){type = c0; cout << "construct       ·-c" << endl;}
+        c():is_deleting(false),id(++id_count_){type = c0; cout << "construct       + c" << id << endl;}
         c(shared_ptr<F> _F_other);
         c(shared_ptr<f> _f_other);
         c(shared_ptr<L> _L_other);
-        ~c(){cout << "destruct       ·-c" << endl;}
+        ~c(){cout << "destruct       + c" << id << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
             if (!P_sh)
@@ -313,11 +328,13 @@ class L : public enable_shared_from_this<L>
 
         list<shared_ptr<c>> c_by_list; // list of constraints to this landmark
 
+        static int id_count_;
         bool is_deleting;
 
     public:
-        L():is_deleting(false){cout << "construct ·-L" << endl;}
-        ~L(){cout << "destruct ·-L" << endl;}
+        int id;
+        L():is_deleting(false),id(++id_count_){cout << "construct + L" << id << endl;}
+        ~L(){cout << "destruct + L" << id << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
             if (!P_sh)
@@ -392,10 +409,16 @@ void F::remove()
 {
     if (!is_deleting){
         is_deleting = true;
+        cout << "Removing   F" << id << endl;
         shared_ptr<F> Fp = shared_from_this();
+        // remove from upstream
+        getT()->getFlist().remove(Fp);
+        // remove downstream
+        while (!C_list_.empty())
+            C_list_.front()->remove();
+        // remove constrained
         while (!c_by_list.empty())
             c_by_list.front()->remove();
-        getT()->getFlist().remove(Fp);
     }
 }
 
@@ -408,10 +431,19 @@ shared_ptr<f> C::add_f(shared_ptr<f> _f)
 }
 void C::remove()
 {
-    shared_ptr<C> Cp = shared_from_this();
-    getF()->getClist().remove(Cp);
-    if (getF()->getClist().empty())
-        getF()->remove();
+    if (!is_deleting)
+    {
+        is_deleting = true;
+        cout << "Removing     C" << id << endl;
+        shared_ptr<C> Cp = shared_from_this();
+        // remove upstream
+        getF()->getClist().remove(Cp);
+        if (getF()->getClist().empty() && getF()->getCbyList().empty())
+            getF()->remove();
+        // remove downstream
+        while (!f_list_.empty())
+            f_list_.front()->remove();
+    }
 }
 
 shared_ptr<c> f::add_c(shared_ptr<c> _c)
@@ -425,63 +457,75 @@ void f::remove()
 {
     if (!is_deleting){
         is_deleting = true;
+        cout << "Removing       f" << id << endl;
         shared_ptr<f> fp = shared_from_this();
+        // remove upstream
         getC()->getflist().remove(fp);
         if (getC()->getflist().empty())
             getC()->remove();
+        // remove downstream
+        while (!c_list_.empty())
+            c_list_.front()->remove();
+        // remove constrained
         while (!c_by_list.empty())
             c_by_list.front()->remove();
     }
 }
 
-c::c(shared_ptr<F> _F_other)
+c::c(shared_ptr<F> _F_other):is_deleting(false),id(++id_count_)
 {
-    cout << "construct       ·-c -> F" << endl;
+    cout << "construct       + c" << id << " -> F" << _F_other->id << endl;
     type = cF;
     F_other_ptr_ = _F_other;
 }
 
-c::c(shared_ptr<f> _f_other)
+c::c(shared_ptr<f> _f_other):is_deleting(false),id(++id_count_)
 {
-    cout << "construct       ·-c -> f" << endl;
+    cout << "construct       + c" << id << " -> f" << _f_other->id << endl;
     type = cf;
     f_other_ptr_ = _f_other;
 }
 
-c::c(shared_ptr<L> _L_other)
+c::c(shared_ptr<L> _L_other):is_deleting(false),id(++id_count_)
 {
-    cout << "construct       ·-c -> L" << endl;
+    cout << "construct       + c" << id << " -> L" << _L_other->id << endl;
     type = cL;
     L_other_ptr_ = _L_other;
 }
 void c::remove()
 {
-    shared_ptr<c> cp = shared_from_this();
+    if (!is_deleting)
+    {
+        is_deleting = true;
+        cout << "Removing         c" << id << endl;
+        shared_ptr<c> cp = shared_from_this();
 
-    // remove own: feature
-    getf()->getclist().remove(cp);
-    if (getf()->getclist().empty())
-        getf()->remove();
+        // remove upstream
+        getf()->getclist().remove(cp);
+        if (getf()->getclist().empty() && getf()->getCbyList().empty())
+            getf()->remove();
 
-    // remove other: {Frame, feature, Landmark}
-    switch (type){
-        case c::cF:
-            getFother()->getCbyList().remove(cp);
-            if (getFother()->getCbyList().empty())
-                getFother()->remove();
-            break;
-        case c::cf:
-            getfother()->getCbyList().remove(cp);
-            if (getfother()->getCbyList().empty())
-                getfother()->remove();
-            break;
-        case c::cL:
-            getLother()->getCbyList().remove(cp);
-            if (getLother()->getCbyList().empty())
-                getLother()->remove();
-            break;
-        default:
-            break;
+        // remove other: {Frame, feature, Landmark}
+        switch (type)
+        {
+            case c::cF:
+                getFother()->getCbyList().remove(cp);
+                if (getFother()->getCbyList().empty() && getFother()->getClist().empty())
+                    getFother()->remove();
+                break;
+            case c::cf:
+                getfother()->getCbyList().remove(cp);
+                if (getfother()->getCbyList().empty() && getfother()->getclist().empty())
+                    getfother()->remove();
+                break;
+            case c::cL:
+                getLother()->getCbyList().remove(cp);
+                if (getLother()->getCbyList().empty())
+                    getLother()->remove();
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -493,14 +537,18 @@ shared_ptr<L> M::add_L(shared_ptr<L> _L)
     _L->setP(getP());
     return _L;
 }
+
 void L::remove()
 {
     if (!is_deleting){
         is_deleting = true;
+        cout << "Removing   L" << id << endl;
         shared_ptr<L> Lp = shared_from_this();
+        // remove upstream
+        getM()->getLlist().remove(Lp);
+        // remove constrained
         while (!c_by_list.empty())
             c_by_list.front()->remove();
-        getM()->getLlist().remove(Lp);
     }
 }
 
@@ -518,10 +566,11 @@ void print_cF(const shared_ptr<P>& Pp)
     cout << "Frame constraints" << endl;
     for (auto Fp : Pp->getT()->getFlist())
     {
-        cout << "F: " << Fp.get() << endl;
+        cout << "F" << Fp->id << " @ " << Fp.get() << endl;
         for (auto Cp : Fp->getCbyList())
         {
-            cout << " -> c: " << Cp.get() << " -> " << Cp->getFother().get() << endl;
+            cout << " -> c" << Cp->id << " @ " << Cp.get()
+                    << " -> F" << Cp->getFother()->id << " @ " << Cp->getFother().get() << endl;
         }
     }
 }
@@ -531,10 +580,11 @@ void print_cL(const shared_ptr<P>& Pp)
     cout << "Landmark constraints" << endl;
     for (auto Lp : Pp->getM()->getLlist())
     {
-        cout << "L: " << Lp.get() << endl;
+        cout << "L" << Lp->id << " @ " << Lp.get() << endl;
         for (auto Cp : Lp->getCbyList())
         {
-            cout << " -> c: " << Cp.get() << " -> " << Cp->getLother().get() << endl;
+            cout << " -> c" << Cp->id << " @ " << Cp.get()
+                    << " -> L" << Cp->getLother()->id << " @ " << Cp->getLother().get() << endl;
         }
     }
 }
@@ -554,13 +604,16 @@ void print_c(const shared_ptr<P>& Pp)
                         switch (cp->type)
                         {
                             case c::cF:
-                                cout << "c: " << cp.get() << " -> F " << cp->getFother() << endl;
+                                cout << "c" << cp->id << " @ " << cp.get()
+                                << " -> F" << cp->getFother()->id << " @ " << cp->getFother() << endl;
                                 break;
                             case c::cf:
-                                cout << "c: " << cp.get() << " -> f " << cp->getfother() << endl;
+                                cout << "c" << cp->id << " @ " << cp.get()
+                                << " -> f" << cp->getfother()->id << " @ " << cp->getfother() << endl;
                                 break;
                             case c::cL:
-                                cout << "c: " << cp.get() << " -> L " << cp->getLother() << endl;
+                                cout << "c" << cp->id << " @ " << cp.get()
+                                << " -> L" << cp->getLother()->id << " @ " << cp->getLother() << endl;
                                 break;
                             default:
                                 cout << "Bad constraint" << endl;
@@ -572,16 +625,10 @@ void print_c(const shared_ptr<P>& Pp)
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-// MAIN
-
-int main()
+shared_ptr<P> buildProblem(int N)
 {
-    int N = 3;
-
     shared_ptr<P> Pp = make_shared<P>();
     Pp->setup();
-
     // H
     for (int Si = 0; Si < 2; Si++)
     {
@@ -591,16 +638,14 @@ int main()
             shared_ptr<p> pp = Sp->add_p(make_shared<p>());
         }
     }
-
     // M
     for (int Li = 0; Li < 2; Li++)
     {
         shared_ptr<L> Lp = Pp->getM()->add_L(make_shared<L>());
     }
-
     // T
-    list<shared_ptr<L>>::iterator Lit = Pp->getM()->getLlist().begin();
-    vector<weak_ptr<F>> Fvec(N);
+    list<shared_ptr<L> >::iterator Lit = Pp->getM()->getLlist().begin();
+    vector<weak_ptr<F> > Fvec(N);
     for (int Fi = 0; Fi < N; Fi++)
     {
         shared_ptr<F> Fp = Pp->getT()->add_F(make_shared<F>());
@@ -621,10 +666,10 @@ int main()
                 }
                 else // motion constraint
                 {
-                    shared_ptr<F> Fp = Fvec.at(Fi).lock();
+                    shared_ptr<F> Fp = Fvec.at(Fi-1).lock();
                     if (Fp)
                     {
-                        shared_ptr<c> cp = fp->add_c(make_shared<c>(Fvec.at(Fi).lock()));
+                        shared_ptr<c> cp = fp->add_c(make_shared<c>(Fp));
                         Fp->add_c_by(cp);
                     }
                     else
@@ -633,7 +678,58 @@ int main()
             }
         }
     }
+    return Pp;
+}
 
+// init ID factories
+int S::id_count_ = 0;
+int p::id_count_ = 0;
+int F::id_count_ = 0;
+int C::id_count_ = 0;
+int f::id_count_ = 0;
+int c::id_count_ = 0;
+int L::id_count_ = 0;
+
+// tests
+void removeConstraints(const shared_ptr<P>& Pp)
+{
+    cout << "Removing constraint type L ----------" << endl;
+    Pp->getT()->getFlist().front()->getClist().front()->getflist().front()->getclist().front()->remove();
+    cout << "Removing constraint type L ----------" << endl;
+    Pp->getT()->getFlist().front()->getClist().front()->getflist().front()->getclist().front()->remove();
+    cout << "Removing constraint type F ----------" << endl;
+    Pp->getT()->getFlist().back()->getClist().front()->getflist().front()->getclist().front()->remove();
+    cout << "Removing constraint type L ----------" << endl;
+    Pp->getT()->getFlist().back()->getClist().back()->getflist().front()->getclist().front()->remove();
+    cout << "Removing constraint type F ----------" << endl;
+    Pp->getT()->getFlist().back()->getClist().front()->getflist().front()->getclist().front()->remove();
+}
+
+void removeLandmarks(const shared_ptr<P>& Pp)
+{
+    cout << "Removing landmark ----------" << endl;
+    Pp->getM()->getLlist().front()->remove();
+    cout << "Removing landmark ----------" << endl;
+    Pp->getM()->getLlist().front()->remove();
+}
+
+void removeFrames(const shared_ptr<P>& Pp)
+{
+    cout << "Removing frame ----------" << endl;
+    Pp->getT()->getFlist().back()->remove();
+    cout << "Removing frame ----------" << endl;
+    Pp->getT()->getFlist().front()->remove();
+    cout << "Removing frame ----------" << endl;
+    Pp->getT()->getFlist().back()->remove();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// MAIN
+int main()
+{
+    int N = 3;
+
+    shared_ptr<P> Pp = buildProblem(N);
     cout << "Wolf tree created ----------------------------" << endl;
 
     cout << "\nShowing constraints --------------------------" << endl;
@@ -644,16 +740,27 @@ int main()
     cout<<endl;
     print_c(Pp);
 
+
+    //------------------------------------------------------------------
+    // Several tests. Uncomment the desired test.
+    // Run only one test at a time, otherwise you'll get segfaults!
+
     cout << "\nRemoving constraints -------------------------" << endl;
-    Pp->getT()->getFlist().front()->getClist().front()->getflist().front()->getclist().front()->remove();
-    Pp->getT()->getFlist().front()->getClist().front()->getflist().front()->getclist().front()->remove();
-    Pp->getT()->getFlist().back()->getClist().front()->getflist().front()->getclist().front()->remove();
-    Pp->getT()->getFlist().front()->getClist().back()->getflist().front()->getclist().front()->remove();
+    removeConstraints(Pp);
 
+//    cout << "\nRemoving problem ---------------------------" << endl;
+//    Pp.reset();
 
-    cout << "\nRemoving landmarks ---------------------------" << endl;
+//    cout << "\nRebuilding problem ---------------------------" << endl;
+//    Pp = buildProblem(N);
 
-    cout << "\nRemoving frames ------------------------------" << endl;
+//    cout << "\nRemoving landmarks ---------------------------" << endl;
+//    removeLandmarks(Pp);
+
+//    cout << "\nRemoving frames ------------------------------" << endl;
+//    removeFrames(Pp);
+
+    //------------------------------------------------------------------
 
     cout << "\nExiting main() -------------------------------" << endl;
 
