@@ -344,7 +344,6 @@ P::P(){
 
 void P::setup()
 {
-    shared_ptr<P> pp = shared_from_this();
     H_ptr_->setP(shared_from_this());
     T_ptr_->setP(shared_from_this());
     M_ptr_->setP(shared_from_this());
