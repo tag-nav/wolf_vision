@@ -167,14 +167,12 @@ inline ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
     processor_list_.push_back(_proc_ptr);
     _proc_ptr->setSensorPtr(this);
     _proc_ptr->setProblem(getProblem());
-//    addDownNode(_proc_ptr);
     return _proc_ptr;
 }
 
 inline ProcessorBaseList* SensorBase::getProcessorListPtr()
 {
     return & processor_list_;
-//    return getDownNodeListPtr();
 }
 
 inline StateBlock* SensorBase::getPPtr() const

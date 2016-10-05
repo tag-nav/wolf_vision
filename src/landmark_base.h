@@ -172,9 +172,7 @@ inline ConstraintBaseList* LandmarkBase::getConstrainedByListPtr()
 inline void LandmarkBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.remove(_ctr_ptr);
-//    NodeConstrained::removeConstrainedBy(_ctr_ptr);
     if (constrained_by_list_.empty())
-//    if (getConstrainedByListPtr()->empty())
         this->destruct();
 }
 
