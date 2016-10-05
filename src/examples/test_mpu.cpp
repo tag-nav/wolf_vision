@@ -20,19 +20,52 @@
 #include <iomanip>
 #include <ctime>
 #include <cmath>
+#include <termios.h>
+#include <fcntl.h>
 
 //#define DEBUG_RESULTS
+
+int _kbhit();
 
 int main(int argc, char** argv)
 {
     using namespace wolf;
 
-    //prepare MPU here
+    int fd,n;
+    ///prepare MPU here
     if (argc < 2)
     {
-        std::cout << "Missing input argument! : needs 1 argument : way to MPU device. (usually /dev/ttyACM#)\n 
-        Please make sure that you have rights to access the device and that your user belongs to the dialout group." << std::endl;
+        std::cout << "Missing input argument! : needs 1 argument : way to MPU device. (usually /dev/ttyACM#)\n Please make sure that you have rights to access the device and that your user belongs to the dialout group." << std::endl;
+        return 1;
     }
+    unsigned char buf[64] = {0};
+	wolf::Scalar gravity = 9.81;
+	wolf::Scalar sec_to_rad = 3.14159265359/180.0;
+	wolf::Scalar accel_LSB = 1.0/8192.0; // = 4.0/32768.0
+	wolf::Scalar gyro_LSB = 1.0/131.0; // = 250.0/32768.0
+    wolf::Scalar accel_LSB_g = accel_LSB * gravity;
+	wolf::Scalar gyro_LSB_rad = gyro_LSB * sec_to_rad;
+    //wolf::Scalar Ax, Ay, Az, Gx, Gy, Gz;
+
+    struct termios toptions;
+    //open serial port
+    std::cout << "open port...\n" << std::endl;
+    fd = open(argv[1], O_RDWR | O_NOCTTY);
+    if (fd != -1)
+        std::cout << "MPU openned successfully! \n" << std::endl;
+    else
+        std::cout << "MPU could not be openned... \n" << std::endl;
+
+    //configuring termios
+    tcgetattr(fd, &toptions);
+    cfsetispeed(&toptions, B1000000);
+    cfsetospeed(&toptions, B1000000);
+    toptions.c_cflag     |= (CLOCAL | CREAD);
+    toptions.c_lflag     &= ~(ICANON | ECHO | ECHOE | ISIG);
+    toptions.c_oflag     &= ~OPOST;
+    toptions.c_cc[VMIN]  = 0;
+    toptions.c_cc[VTIME] = 10;
+    tcsetattr(fd, TCSANOW, &toptions);
 
     // Wolf problem
     Problem* wolf_problem_ptr_ = new Problem(FRM_PVQBB_3D);
@@ -44,13 +77,13 @@ int main(int argc, char** argv)
     // Time and data variables
     TimeStamp t;
     Eigen::Vector6s data_;
-    Scalar mpu_clock, tmp;
+    Scalar mpu_clock = 0;
 
     t.set(mpu_clock * 0.0001); // clock in 0,1 ms ticks
 
     // Set the origin
     Eigen::VectorXs x0(16);
-    x0 << 0,1,0,  1,0,0,  0,0,0,1,  0,0,.001,  0,0,.002; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,  1,0,0,0,  0,0,.001,  0,0,.002; // Try some non-zero biases
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
@@ -59,9 +92,23 @@ int main(int argc, char** argv)
     // main loop
     using namespace std;
     clock_t begin = clock();
+    std::cout << "\n\t\t\t\tENTERING MAIN LOOP - Please press ENTER to exit loop\n" << std::endl;
 
     while(!_kbhit()){
         // read new data
+        do n = read(fd, buf, 1);//READ IT
+        while (buf[0]!=0x47); //control character has been found
+        n = read(fd, buf, 12);//read the data
+        if (n>3){ //construct data_ from IMU input
+			data_(0)   = (wolf::Scalar)((int16_t)((buf[1]<<8)|buf[0]))*accel_LSB_g;
+			data_(1)   = (wolf::Scalar)((int16_t)((buf[3]<<8)|buf[2]))*accel_LSB_g;
+			data_(2)   = (wolf::Scalar)((int16_t)((buf[5]<<8)|buf[4]))*accel_LSB_g;
+			data_(3)   = (wolf::Scalar)((int16_t)((buf[7]<<8)|buf[6]))*gyro_LSB_rad;
+			data_(4)   = (wolf::Scalar)((int16_t)((buf[9]<<8)|buf[8]))*gyro_LSB_rad;
+			data_(5)   = (wolf::Scalar)((int16_t)((buf[11]<<8)|buf[10]))*gyro_LSB_rad;
+            mpu_clock += 0.001;
+            t.set(mpu_clock);
+        }
 
         // assign data to capture
         imu_ptr->setData(data_);
@@ -134,4 +181,16 @@ int main(int argc, char** argv)
 
     return 0;
 
+}
+
+int _kbhit()
+{
+    struct timeval tv;
+    fd_set fds;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds); //STDIN_FILENO is 0
+    select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+    return FD_ISSET(STDIN_FILENO, &fds);
 }
