@@ -107,10 +107,10 @@ void ProcessorImageLandmark::postProcess()
 {
     if (last_ptr_!=nullptr)
     {
-        cv::Mat image;
-        drawFeatures(image);
+        cv::Mat image = image_incoming_.clone();
         drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));
-        //drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
+        drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
+        drawFeatures(image);
         //drawTrackingFeatures(image,tracker_candidates_,tracker_candidates_);
         drawFeaturesFromLandmarks(image);
 
@@ -521,10 +521,10 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
     cv::imshow("Feature tracker", _image);
 }
 
-void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
+void ProcessorImageLandmark::drawFeatures(cv::Mat _image)
 {
     unsigned int counter = 0;
-    cv::Mat image = image_incoming_.clone();
+//    cv::Mat image = image_incoming_.clone();
     LandmarkBaseList* last_landmark_list = getProblem()->getMapPtr()->getLandmarkListPtr();
 
     unsigned int response_counter = 0;
@@ -558,8 +558,8 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
 
             std::cout << "landmark proj number [" << landmark_ptr->id() << "] in: " << point << std::endl;
 
-            cv::circle(image, point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
-            cv::putText(image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+            cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
+            cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
 //            cv::putText(image, std::to_string(response_vector[counter]), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
             counter++;
         }
@@ -567,19 +567,19 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat& _image)
     cv::Point label_for_landmark_point;
     label_for_landmark_point.x = 3;
     label_for_landmark_point.y = 10;
-    cv::putText(image, std::to_string(landmarks_tracked_), label_for_landmark_point,
+    cv::putText(_image, std::to_string(landmarks_tracked_), label_for_landmark_point,
                 cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
     cv::Point label_for_landmark_point2;
     label_for_landmark_point2.x = 3;
     label_for_landmark_point2.y = 20;
-    cv::putText(image, std::to_string(counter), label_for_landmark_point2,
+    cv::putText(_image, std::to_string(counter), label_for_landmark_point2,
                 cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
     std::cout << "\t\tTotal landmarks: " << counter << std::endl;
 
-    cv::imshow("Feature tracker", image);
-    _image = image;
+    cv::imshow("Feature tracker", _image);
+    //_image = image;
 }
 
 

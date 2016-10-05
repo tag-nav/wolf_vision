@@ -254,7 +254,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         // These only to debug, will disappear one day soon
     public:
-        virtual void drawFeatures(cv::Mat& _image);
+        virtual void drawFeatures(cv::Mat _image);
 
         virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
 
