@@ -369,10 +369,6 @@ ProcessorBasePtr ProcessorTrackerLandmarkCorner::create(const std::string& _uniq
 
 // Register in the SensorFactory
 #include "processor_factory.h"
-//#include "factory.h"
 namespace wolf {
-namespace
-{
-const bool registered_prc_laser = ProcessorFactory::get().registerCreator("LASER 2D", ProcessorTrackerLandmarkCorner::create);
-}
+WOLF_REGISTER_PROCESSOR("LASER 2D", ProcessorLaser2D)
 } // namespace wolf

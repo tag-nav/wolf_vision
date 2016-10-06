@@ -39,10 +39,6 @@ SensorBasePtr SensorIMU::create(const std::string& _unique_name, const Eigen::Ve
 
 // Register in the SensorFactory
 #include "sensor_factory.h"
-//#include "factory.h"
 namespace wolf {
-namespace
-{
-const bool registered_imu = SensorFactory::get().registerCreator("IMU", SensorIMU::create);
-}
+WOLF_REGISTER_SENSOR("IMU", SensorIMU)
 } // namespace wolf
