@@ -183,7 +183,7 @@ namespace wolf
 //        CallbackMap callbacks_;
 //>>>>>>> node-linked-removed
 
-typedef Factory<ProcessorBase, const std::string&, const ProcessorParamsBase*> ProcessorFactory;
+typedef Factory<ProcessorBase, const std::string&, const ProcessorParamsBasePtr> ProcessorFactory;
 
 template<>
 inline std::string ProcessorFactory::getClass()
@@ -191,9 +191,11 @@ inline std::string ProcessorFactory::getClass()
   return "ProcessorFactory";
 }
 
+
+
 #define WOLF_REGISTER_PROCESSOR(ProcessorType, ProcessorName) \
-  namespace wolf{ namespace{ const bool ProcessorName##Registered = \
-    ProcessorFactory::get().registerCreator(ProcessorType, ProcessorName::create); }};\
+  namespace{ const bool ProcessorName##Registered = \
+    ProcessorFactory::get().registerCreator(ProcessorType, ProcessorName::create); }\
 
 } /* namespace wolf */
 

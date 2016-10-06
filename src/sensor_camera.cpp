@@ -77,9 +77,10 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
 //#include "factory.h"
 namespace wolf
 {
-namespace
-{
-const bool registered_camera = SensorFactory::get().registerCreator("CAMERA", SensorCamera::create);
-}
+//namespace
+//{
+//const bool registered_camera = SensorFactory::get().registerCreator("CAMERA", SensorCamera::create);
+WOLF_REGISTER_SENSOR("CAMERA", SensorCamera)
+//}
 } // namespace wolf
 

@@ -230,19 +230,19 @@ namespace wolf
 
 typedef Factory<SensorBase,
                 const std::string&,
-                const Eigen::VectorXs&, const IntrinsicsBase*> SensorFactory;
+                const Eigen::VectorXs&, const IntrinsicsBasePtr> SensorFactory;
 
 template<>
 inline std::string Factory<SensorBase,
                            const std::string&,
-                           const Eigen::VectorXs&, const IntrinsicsBase*>::getClass()
+                           const Eigen::VectorXs&, const IntrinsicsBasePtr>::getClass()
 {
   return "SensorFactory";
 }
 
 #define WOLF_REGISTER_SENSOR(SensorType, SensorName) \
-  namespace wolf{ namespace{ const bool SensorName##Registered = \
-    SensorFactory::get().registerCreator(SensorType, SensorName::create); }}\
+  namespace{ const bool SensorName##Registered = \
+    SensorFactory::get().registerCreator(SensorType, SensorName::create); }\
 
 } /* namespace wolf */
 
