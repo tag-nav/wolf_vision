@@ -492,6 +492,7 @@ c::c(shared_ptr<L> _L_other):is_deleting(false),id(++id_count_)
     type = cL;
     L_other_ptr_ = _L_other;
 }
+
 void c::remove()
 {
     if (!is_deleting)
@@ -647,6 +648,10 @@ void print_c(const shared_ptr<P>& Pp)
     }
 }
 
+/** Build problem
+ * See the problem built here:
+ *   https://docs.google.com/drawings/d/1vYmhBjJz7AHxOdy0gV-77hqsOYfGVuvUmnRVB-Zfp_Q/edit
+ */
 shared_ptr<P> buildProblem(int N)
 {
     shared_ptr<P> Pp = make_shared<P>();
