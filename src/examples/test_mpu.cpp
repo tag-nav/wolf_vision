@@ -23,7 +23,7 @@
 #include <termios.h>
 #include <fcntl.h>
 
-//#define DEBUG_RESULTS
+#define DEBUG_RESULTS
 #define FROM_FILE
 
 int _kbhit();
@@ -91,6 +91,16 @@ int main(int argc, char** argv)
     toptions.c_cc[VMIN]  = 0;
     toptions.c_cc[VTIME] = 10;
     tcsetattr(fd, TCSANOW, &toptions);
+    #endif
+
+    #ifdef DEBUG_RESULTS
+    std::ofstream debug_results;
+    debug_results.open("debug_results.dat");
+    if(debug_results)
+        debug_results << "%%TimeStamp\t"
+                      << "dp_x\t" << "dp_y\t" << "dp_z\t" << "dv_x\t" << "dv_y\t" << "dv_z\t" << "dq_x\t" << "dq_y\t" << "dq_z\t" << "dq_w\t"
+                      << "Dp_x\t" << "Dp_y\t" << "Dp_z\t" << "Dv_x\t" << "Dv_y\t" << "Dv_z\t" << "Dq_x\t" << "Dq_y\t" << "Dq_z\t" << "Dq_w\t"
+                      << "X_x\t" << "X_y\t" << "X_z\t" << "Xv_x\t" << "Xv_y\t" << "Xv_z\t" << "Xq_x\t" << "Xq_y\t" << "Xq_z\t" << "Xq_w\t" << std::endl;
     #endif
 
     // Wolf problem
