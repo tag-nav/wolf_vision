@@ -407,18 +407,16 @@ shared_ptr<C> F::add_C(shared_ptr<C> _C)
 }
 void F::remove()
 {
-    if (!is_deleting){
+    if (!is_deleting)
+    {
         is_deleting = true;
         cout << "Removing   F" << id << endl;
-        shared_ptr<F> Fp = shared_from_this();
-        // remove from upstream
-        getT()->getFlist().remove(Fp);
-        // remove downstream
+        shared_ptr<F> Fp = shared_from_this();  // keep this alive while removing it
+        getT()->getFlist().remove(Fp);          // remove from upstream
         while (!C_list_.empty())
-            C_list_.front()->remove();
-        // remove constrained
+            C_list_.front()->remove();          // remove downstream
         while (!c_by_list.empty())
-            c_by_list.front()->remove();
+            c_by_list.front()->remove();        // remove constrained
     }
 }
 
@@ -435,14 +433,12 @@ void C::remove()
     {
         is_deleting = true;
         cout << "Removing     C" << id << endl;
-        shared_ptr<C> Cp = shared_from_this();
-        // remove upstream
-        getF()->getClist().remove(Cp);
+        shared_ptr<C> Cp = shared_from_this();  // keep this alive while removing it
+        getF()->getClist().remove(Cp);          // remove from upstream
         if (getF()->getClist().empty() && getF()->getCbyList().empty())
-            getF()->remove();
-        // remove downstream
+            getF()->remove();                   // remove upstream
         while (!f_list_.empty())
-            f_list_.front()->remove();
+            f_list_.front()->remove();          // remove downstream
     }
 }
 
@@ -455,20 +451,18 @@ shared_ptr<c> f::add_c(shared_ptr<c> _c)
 }
 void f::remove()
 {
-    if (!is_deleting){
+    if (!is_deleting)
+    {
         is_deleting = true;
         cout << "Removing       f" << id << endl;
-        shared_ptr<f> fp = shared_from_this();
-        // remove upstream
-        getC()->getflist().remove(fp);
+        shared_ptr<f> fp = shared_from_this();  // keep this alive while removing it
+        getC()->getflist().remove(fp);          // remove from upstream
         if (getC()->getflist().empty())
-            getC()->remove();
-        // remove downstream
+            getC()->remove();                   // remove upstream
         while (!c_list_.empty())
-            c_list_.front()->remove();
-        // remove constrained
+            c_list_.front()->remove();          // remove downstream
         while (!c_by_list.empty())
-            c_by_list.front()->remove();
+            c_by_list.front()->remove();        // remove constrained
     }
 }
 
@@ -499,12 +493,10 @@ void c::remove()
     {
         is_deleting = true;
         cout << "Removing         c" << id << endl;
-        shared_ptr<c> cp = shared_from_this();
-
-        // remove upstream
-        getf()->getclist().remove(cp);
+        shared_ptr<c> cp = shared_from_this();  // keep this alive while removing it
+        getf()->getclist().remove(cp);          // remove from upstream
         if (getf()->getclist().empty() && getf()->getCbyList().empty())
-            getf()->remove();
+            getf()->remove();                   // remove upstream
 
         // remove other: {Frame, feature, Landmark}
         switch (type)
@@ -541,15 +533,14 @@ shared_ptr<L> M::add_L(shared_ptr<L> _L)
 
 void L::remove()
 {
-    if (!is_deleting){
+    if (!is_deleting)
+    {
         is_deleting = true;
         cout << "Removing   L" << id << endl;
-        shared_ptr<L> Lp = shared_from_this();
-        // remove upstream
-        getM()->getLlist().remove(Lp);
-        // remove constrained
+        shared_ptr<L> Lp = shared_from_this();  // keep this alive while removing it
+        getM()->getLlist().remove(Lp);          // remove from upstream
         while (!c_by_list.empty())
-            c_by_list.front()->remove();
+            c_by_list.front()->remove();        // remove constrained
     }
 }
 
