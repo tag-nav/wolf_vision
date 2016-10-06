@@ -18,8 +18,7 @@
 #include "../constraint_point_2D.h"
 #include "../constraint_point_to_line_2D.h"
 #include "../constraint_container.h"
-#include "../constraint_image.h"
-#include "../constraint_image_new_landmark.h"
+#include "../constraint_AHP.h"
 
 
 // Wolf and ceres auto_diff creators
@@ -88,21 +87,15 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _
 
         case CTR_EPIPOLAR:
             if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintImage>(_ctr_ptr);
+                return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
             else
-                return createAutoDiffCostFunctionCeres<ConstraintImage>(_ctr_ptr);
+                return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
 
         case CTR_AHP:
             if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintImage>(_ctr_ptr);
+                return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
             else
-                return createAutoDiffCostFunctionCeres<ConstraintImage>(_ctr_ptr);
-
-        case CTR_AHP_NL:
-            if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintImageNewLandmark>(_ctr_ptr);
-            else
-                return createAutoDiffCostFunctionCeres<ConstraintImageNewLandmark>(_ctr_ptr);
+                return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
 
 
             /* For adding a new constraint, add the #include and a case:

@@ -34,22 +34,16 @@ static ProcessorParamsBase* createProcessorParamsImage(const std::string & _file
         if(dd_yaml["type"].as<string>() == "ORB")
         {
             DetectorDescriptorParamsOrb* dd = new DetectorDescriptorParamsOrb;
-            dd->type                     = DD_ORB;
-            dd->nominal_pattern_radius   = dd_yaml["nominal pattern radius"].as<unsigned int>();
-            dd->nfeatures                = dd_yaml["nfeatures"].as<unsigned int>();
-            dd->scaleFactor              = dd_yaml["scale factor"].as<float>();
-            dd->nlevels                  = dd_yaml["nlevels"].as<unsigned int>();
-            dd->edgeThreshold            = dd_yaml["edge threshold"].as<unsigned int>();
-            dd->firstLevel               = dd_yaml["first level"].as<unsigned int>();
-            dd->WTA_K                    = dd_yaml["WTA_K"].as<unsigned int>();
-            string st = dd_yaml["score type"].as<string>();
-            if (st == "cv::ORB::HARRIS_SCORE")
-                dd->scoreType            = cv::ORB::HARRIS_SCORE;
-            else
-            {
-                std::cout << "Unknown score type" << std::endl;
-            }
-            dd->patchSize                = dd_yaml["patch size"].as<unsigned int>();
+            dd->type                        = DD_ORB;
+            dd->nfeatures                   = dd_yaml["nfeatures"].as<unsigned int>();
+            dd->scaleFactor                 = dd_yaml["scale factor"].as<float>();
+            dd->nlevels                     = dd_yaml["nlevels"].as<unsigned int>();
+            dd->edgeThreshold               = dd_yaml["edge threshold"].as<unsigned int>();
+            std::cout << "edgeThreshold: " << dd->edgeThreshold << std::endl;
+            dd->firstLevel                  = dd_yaml["first level"].as<unsigned int>();
+            dd->WTA_K                       = dd_yaml["WTA_K"].as<unsigned int>();
+            dd->scoreType                   = dd_yaml["score type"].as<int>(); // enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
+            dd->patchSize                   = dd_yaml["patch size"].as<unsigned int>();
             p->detector_descriptor_params_ptr = dd;
         }else
         {
@@ -59,13 +53,7 @@ static ProcessorParamsBase* createProcessorParamsImage(const std::string & _file
 
         Node m = params["matcher"];
         p->matcher.min_normalized_score = m["minimum normalized score"].as<Scalar>();
-        string sn = m["similarity norm"].as<string>();
-        if(sn == "cv::NORM_HAMMING")
-            p->matcher.similarity_norm  = cv::NORM_HAMMING;
-        else
-        {
-            std::cout << "Unknown distance type" << std::endl;
-        }
+        p->matcher.similarity_norm      = m["similarity norm"].as<int>(); // enum { NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 };
         p->matcher.roi_width            = m["roi"]["width"].as<unsigned int>();
         p->matcher.roi_height           = m["roi"]["height"].as<unsigned int>();
 

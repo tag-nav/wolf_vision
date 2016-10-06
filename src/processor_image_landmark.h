@@ -9,8 +9,8 @@
 #include "state_quaternion.h"
 #include "active_search.h"
 #include "processor_tracker_landmark.h"
-#include "constraint_epipolar.h"
 #include "landmark_AHP.h"
+#include "processor_image_params.h"
 
 // OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
@@ -24,68 +24,6 @@
 
 
 namespace wolf {
-
-enum DetectorDescriptorType
-{
-    DD_BRISK,
-    DD_ORB
-};
-
-struct DetectorDescriptorParamsBase
-{
-        DetectorDescriptorType type; ///< Type of algorithm. Accepted values in wolf.h
-        unsigned int nominal_pattern_radius = 0; ///< Radius of the pattern before scaling //18 for brisk
-        //should this be here? doesn't it depend on the descriptor?
-};
-
-struct DetectorDescriptorParamsBrisk : public DetectorDescriptorParamsBase
-{
-        unsigned int threshold=30; ///< on the keypoint strength to declare it key-point
-        unsigned int octaves=0; ///< Multi-scale evaluation. 0: no multi-scale
-        float pattern_scale=1.0f; ///< Scale of the base pattern wrt the nominal one
-};
-
-struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
-{
-        unsigned int nfeatures=500; ///< Nbr of features to extract
-        float scaleFactor=1.2f; ///< Scale factor between two consecutive scales of the image pyramid
-        unsigned int nlevels=1;///< Number of levels in the pyramid. Default: 8
-        unsigned int edgeThreshold=4; ///< ? //Default: 31
-        unsigned int firstLevel=0;
-        unsigned int WTA_K=2;
-        unsigned int scoreType=cv::ORB::HARRIS_SCORE; ///< Type of score to rank the detected points
-        unsigned int patchSize=31;
-};
-
-struct ProcessorParamsImage : public ProcessorParamsBase
-{
-        struct Image
-        {
-                unsigned int width; ///< image width (horizontal dimension or nbr of columns)
-                unsigned int height; ///< image height (vertical dimension or nbr of rows)
-        }image;
-
-        DetectorDescriptorParamsBase* detector_descriptor_params_ptr;
-
-        struct Matcher
-        {
-                Scalar min_normalized_score; ///< [-1..0]: awful match; 1: perfect match; out of [-1,1]: error
-                int similarity_norm; ///< Norm used to measure the distance between two descriptors
-                unsigned int roi_width; ///< Width of the roi used in tracking
-                unsigned int roi_height; ///< Height of the roi used in tracking
-        }matcher;
-        struct Active_search
-        {
-                unsigned int grid_width; ///< cells per horizontal dimension of image
-                unsigned int grid_height; ///< cells per vertical dimension of image
-                unsigned int separation; ///< Distance between the border of the cell and the border of the associated ROI
-        }active_search;
-        struct Algorithm
-        {
-                unsigned int max_new_features; ///< Max nbr. of features to detect in one frame
-                unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
-        }algorithm;
-};
 
 class ProcessorImageLandmark : public ProcessorTrackerLandmark
 {
@@ -103,7 +41,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         }detector_descriptor_params_;
 
         /* pinhole params */
-        Eigen::Vector4s k_parameters_;
+//        Eigen::Vector4s k_parameters_;
         Eigen::Vector2s distortion_;
         Eigen::Vector2s correction_;
 
@@ -120,6 +58,9 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
         std::list<cv::Point> tracker_candidates_;
+        FeatureBaseList feat_lmk_found_;
+        std::list<Scalar> landmark_found_number_;
+        std::list<float> list_response_;
 
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
@@ -245,19 +186,17 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          */
         virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
-        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches);
+        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
-        virtual void rotationMatrix(Eigen::Matrix3s& _rotation_matrix, Eigen::Vector4s _orientation);
-
-        virtual void changeOfReferenceFrame(LandmarkAHP* _landmark, Eigen::Vector3s& _translation, Eigen::Matrix3s& _rotation);
-
-        virtual void getLandmarkInReference(LandmarkAHP* _landmark, Eigen::Vector3s _translation, Eigen::Matrix3s _rotation, Eigen::Vector3s& _point3D);
+        virtual void LandmarkInCurrentCamera(LandmarkAHP* _landmark, Eigen::Vector4s& _point3D_hmg);
 
         // These only to debug, will disappear one day soon
     public:
-        virtual void drawFeatures(cv::Mat& _image);
+        virtual void drawFeatures(cv::Mat _image);
 
         virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
+
+        virtual void drawFeaturesFromLandmarks(cv::Mat _image);
 
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
 

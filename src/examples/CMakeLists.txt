@@ -110,6 +110,18 @@ IF(OpenCV_FOUND)
     # Processor Image Landmark test
     ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
     TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
+
+    # Constraint test
+    ADD_EXECUTABLE(test_constraint_AHP test_constraint_AHP.cpp)
+    TARGET_LINK_LIBRARIES(test_constraint_AHP ${PROJECT_NAME})
+
+    # ORB tracker test
+    ADD_EXECUTABLE(test_tracker_ORB test_tracker_ORB.cpp)
+    TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
+
+    # ORB tracker test
+    ADD_EXECUTABLE(test_ROI_ORB test_ROI_ORB.cpp)
+    TARGET_LINK_LIBRARIES(test_ROI_ORB ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
 
 # Processor Tracker Feature test
