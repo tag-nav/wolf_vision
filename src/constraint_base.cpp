@@ -116,7 +116,6 @@ const Eigen::MatrixXs& ConstraintBase::getMeasurementSquareRootInformation() con
 CaptureBasePtr ConstraintBase::getCapturePtr() const
 {
     return getFeaturePtr()->getCapturePtr();
-//	return upperNodePtr()->upperNodePtr();
 }
 
 void ConstraintBase::setStatus(ConstraintStatus _status)

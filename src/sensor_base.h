@@ -27,7 +27,7 @@ struct IntrinsicsBase
         std::string name;
 };
 
-class SensorBase : public NodeBase // NodeLinked<HardwareBase, ProcessorBase>
+class SensorBase : public NodeBase
 {
     private:
         ProblemPtr problem_ptr_;
@@ -167,14 +167,12 @@ inline ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
     processor_list_.push_back(_proc_ptr);
     _proc_ptr->setSensorPtr(this);
     _proc_ptr->setProblem(getProblem());
-//    addDownNode(_proc_ptr);
     return _proc_ptr;
 }
 
 inline ProcessorBaseList* SensorBase::getProcessorListPtr()
 {
     return & processor_list_;
-//    return getDownNodeListPtr();
 }
 
 inline StateBlock* SensorBase::getPPtr() const
@@ -206,16 +204,10 @@ inline void SensorBase::destruct()
 {
     if (!is_deleting_)
     {
-        if (hardware_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-        {
-            //std::cout << "upper node is not WolfProblem " << std::endl;
+        if (hardware_ptr_ != nullptr)
             hardware_ptr_->removeSensor(this);
-        }
         else
-        {
-            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
             delete this;
-        }
     }
 }
 

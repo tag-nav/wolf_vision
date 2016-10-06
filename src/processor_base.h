@@ -25,7 +25,7 @@ struct ProcessorParamsBase
 };
 
 //class ProcessorBase
-class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
+class ProcessorBase : public NodeBase
 {
     private:
         ProblemPtr problem_ptr_;
@@ -126,13 +126,11 @@ inline unsigned int ProcessorBase::id()
 inline SensorBasePtr ProcessorBase::getSensorPtr()
 {
     return sensor_ptr_;
-//    return upperNodePtr();
 }
 
 inline const SensorBasePtr ProcessorBase::getSensorPtr() const
 {
     return sensor_ptr_;
-//    return upperNodePtr();
 }
 
 } // namespace wolf

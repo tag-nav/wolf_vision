@@ -69,7 +69,6 @@ ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
     constraint_list_.push_back(_co_ptr);
     _co_ptr->setFeaturePtr(this);
     _co_ptr->setProblem(getProblem());
-//    addDownNode(_co_ptr);
     // add constraint to be added in solver
     if (getProblem() != nullptr)
         getProblem()->addConstraintPtr(_co_ptr);
@@ -81,13 +80,11 @@ ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
 FrameBasePtr FeatureBase::getFramePtr() const
 {
     return capture_ptr_->getFramePtr();
-//    return upperNodePtr()->upperNodePtr();
 }
 
 ConstraintBaseList* FeatureBase::getConstraintListPtr()
 {
     return & constraint_list_;
-//    return getDownNodeListPtr();
 }
 
 void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)

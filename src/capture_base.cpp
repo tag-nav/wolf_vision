@@ -35,16 +35,10 @@ void CaptureBase::destruct()
 {
     if (!is_deleting_)
     {
-        if (frame_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-        {
-            //std::cout << "upper node is not WolfProblem " << std::endl;
+        if (frame_ptr_ != nullptr)
             frame_ptr_->removeCapture(this);
-        }
         else
-        {
-            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
             delete this;
-        }
     }
 }
 

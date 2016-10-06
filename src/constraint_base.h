@@ -17,7 +17,7 @@ namespace wolf {
 
 
 //class ConstraintBase
-class ConstraintBase : public NodeBase // NodeLinked<FeatureBase, NodeTerminus>
+class ConstraintBase : public NodeBase
 {
     private:
         ProblemPtr problem_ptr_;
@@ -174,7 +174,6 @@ inline ConstraintType ConstraintBase::getTypeId() const
 inline FeatureBasePtr ConstraintBase::getFeaturePtr() const
 {
     return feature_ptr_;
-//    return upperNodePtr();
 }
 
 inline ConstraintCategory ConstraintBase::getCategory() const
@@ -220,16 +219,10 @@ inline void ConstraintBase::destruct()
 {
     if (!is_deleting_)
     {
-        if (feature_other_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-        {
-            //std::cout << "upper node is not WolfProblem " << std::endl;
+        if (feature_other_ptr_ != nullptr)
             feature_other_ptr_->removeConstraint(this);
-        }
         else
-        {
-            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
             delete this;
-        }
     }
 }
 
