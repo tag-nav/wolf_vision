@@ -150,9 +150,7 @@ class ProcessorImage : public ProcessorTrackerFeature
          */
         virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
-        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches);
-
-        virtual void filterFeatureLists(FeatureBaseList _original_list, FeatureBaseList& _filtered_list);
+        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
 
 
@@ -177,7 +175,7 @@ inline bool ProcessorImage::voteForKeyFrame()
 {
 //    std::cout << "voteForKeyFrame?: "
 //            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
-    return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
+    return (incoming_ptr_->getFeatureListPtr()->size() < 10);
 }
 
 inline ConstraintBasePtr ProcessorImage::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)

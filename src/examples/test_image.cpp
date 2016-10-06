@@ -154,7 +154,7 @@ int main(int argc, char** argv)
         image_ptr->process();
         //cv::imshow("test",frame[f % buffer_size]);
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(5);
+        cv::waitKey(100);
 
         f++;
         capture >> frame[f % buffer_size];
