@@ -16,7 +16,8 @@ int main(int argc, char** argv)
     const char * filename;
     if (argc == 1)
     {
-        filename = "/home/jtarraso/Vídeos/gray.mp4";
+//        filename = "/home/jtarraso/Vídeos/gray.mp4";
+        filename = "/home/jtarraso/Imágenes/Test_ORB.png";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")

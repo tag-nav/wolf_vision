@@ -9,6 +9,8 @@
 #include "active_search.h"
 #include "processor_tracker_feature.h"
 #include "constraint_epipolar.h"
+#include "processor_image_params.h"
+
 
 // OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
@@ -23,83 +25,6 @@
 
 
 namespace wolf {
-
-enum DetectorDescriptorType
-{
-    DD_BRISK,
-    DD_ORB
-};
-
-struct DetectorDescriptorParamsBase
-{
-        DetectorDescriptorType type; ///< Type of algorithm. Accepted values in wolf.h
-        unsigned int nominal_pattern_radius = 18; ///< Radius of the pattern before scaling
-        //should this be here? doesn't it depend on the descriptor?
-};
-
-struct DetectorDescriptorParamsBrisk : public DetectorDescriptorParamsBase
-{
-        unsigned int threshold=30; ///< on the keypoint strength to declare it key-point
-        unsigned int octaves=0; ///< Multi-scale evaluation. 0: no multi-scale
-        float pattern_scale=1.0f; ///< Scale of the base pattern wrt the nominal one
-};
-
-struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
-{
-        unsigned int nfeatures=500; ///< Nbr of features to extract
-        float scaleFactor=1.2f; ///< Scale factor between two consecutive scales of the image pyramid
-        unsigned int nlevels=1;///< Number of levels in the pyramid. Default: 8
-        unsigned int edgeThreshold=4; ///< ? //Default: 31
-        unsigned int firstLevel=0;
-        unsigned int WTA_K=2;
-        unsigned int scoreType=cv::ORB::HARRIS_SCORE; ///< Type of score to rank the detected points
-        unsigned int patchSize=31;
-};
-
-struct ProcessorParamsImage : public ProcessorParamsBase
-{
-        struct Image
-        {
-                unsigned int width; ///< image width (horizontal dimension or nbr of columns)
-                unsigned int height; ///< image height (vertical dimension or nbr of rows)
-        }image;
-
-        DetectorDescriptorParamsBase* detector_descriptor_params_ptr;
-
-//        struct Detector
-//        {
-//                unsigned int threshold; ///< on the keypoint strength to declare it key-point
-//                unsigned int threshold_new_features; ///< on the keypoint strength to declare it key-point
-//                unsigned int octaves; ///< Multi-scale evaluation. 0: no multi-scale
-//                unsigned int nominal_pattern_radius; ///< Radius of the detector pattern before scaling
-//                unsigned int pattern_radius; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
-//        }detector;
-//        struct Descriptor
-//        {
-//                unsigned int nominal_pattern_radius; ///< Radius of the descriptor pattern before scaling
-//                float pattern_scale; ///< Scale of the base pattern wrt the nominal one
-//                unsigned int pattern_radius; ///< radius of the pattern used to describe a key-point at pattern_scale = 1.0 and octaves = 0
-//                unsigned int size_bits; ///< length of the descriptor vector in bits
-//        }descriptor;
-        struct Matcher
-        {
-                Scalar min_normalized_score; ///< [-1..0]: awful match; 1: perfect match; out of [-1,1]: error
-                int similarity_norm; ///< Norm used to measure the distance between two descriptors
-                unsigned int roi_width; ///< Width of the roi used in tracking
-                unsigned int roi_height; ///< Height of the roi used in tracking
-        }matcher;
-        struct Active_search
-        {
-                unsigned int grid_width; ///< cells per horizontal dimension of image
-                unsigned int grid_height; ///< cells per vertical dimension of image
-                unsigned int separation; ///< Distance between the border of the cell and the border of the associated ROI
-        }active_search;
-        struct Algorithm
-        {
-                unsigned int max_new_features; ///< Max nbr. of features to detect in one frame
-                unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
-        }algorithm;
-};
 
 class ProcessorImage : public ProcessorTrackerFeature
 {

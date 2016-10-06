@@ -96,7 +96,6 @@ int main()
         {
             DetectorDescriptorParamsOrb* dd = new DetectorDescriptorParamsOrb;
             dd->type                    = DD_ORB;
-            dd->nominal_pattern_radius  = dd_yaml["nominal pattern radius"].as<unsigned int>();
             dd->nfeatures               = dd_yaml["nfeatures"].as<unsigned int>();
             dd->scaleFactor             = dd_yaml["scale factor"].as<float>();
             dd->nlevels                 = dd_yaml["nlevels"].as<unsigned int>();

@@ -7,7 +7,6 @@ image:
 
 detector-descriptor:
     type: "ORB"         # This affects the structure below. See processor_image_BRISK.yaml for another example
-    nominal pattern radius: 2 # 0 # 18?
     nfeatures: 500
     scale factor: 1.2
     nlevels: 8
@@ -27,7 +26,7 @@ matcher:
 active search:
     grid width: 10
     grid height: 8
-    separation: 0
+    separation: 5
 
 algorithm:
     maximum new features: 40

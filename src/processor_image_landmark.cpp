@@ -31,8 +31,8 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorParamsImage _params) :
                                                      params_brisk->octaves, //
                                                      params_brisk->pattern_scale);
 
-            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((_dd_params->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
-                                                                   (unsigned int)((_dd_params->nominal_pattern_radius)*params_brisk->pattern_scale));
+            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
+                                                                   (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
 
             detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
 
@@ -50,13 +50,9 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorParamsImage _params) :
                                                    params_orb->scoreType, //
                                                    params_orb->patchSize);
 
-            detector_descriptor_params_.pattern_radius_ =
-                    (unsigned int)( (_dd_params->nominal_pattern_radius) * pow(params_orb->scaleFactor, params_orb->nlevels-1) );
+            std::cout << "===================edgeTh size: " << params_orb->edgeThreshold << std::endl;
 
-            std::cout << "nominal pattern radius: " << _dd_params->nominal_pattern_radius << std::endl;
-            std::cout << "scale factor: " << params_orb->scaleFactor << std::endl;
-            std::cout << "nlevels: " << params_orb->nlevels << std::endl;
-
+            detector_descriptor_params_.pattern_radius_ = params_orb->edgeThreshold;
             detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
 
             break;
@@ -465,7 +461,7 @@ void ProcessorImageLandmark::inflateRoi(cv::Rect& _roi)
 void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
 {
 
-    //inflateRoi(_roi);
+    inflateRoi(_roi);
     trimRoi(_roi);
 
     tracker_roi_inflated_.push_back(_roi);
