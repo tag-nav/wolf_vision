@@ -745,6 +745,18 @@ void removeFrames(const shared_ptr<P>& Pp)
     Pp->getT()->getFlist().back()->remove();
 }
 
+void removeLmksAndFrames(const shared_ptr<P>& Pp)
+{
+    cout << "Removing landmark ----------" << endl;
+    Pp->getM()->getLlist().front()->remove();
+    cout << "Removing frame ----------" << endl;
+    Pp->getT()->getFlist().front()->remove();
+    cout << "Removing landmark ----------" << endl;
+    Pp->getM()->getLlist().front()->remove();
+    cout << "Removing frame ----------" << endl;
+    Pp->getT()->getFlist().back()->remove();
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 // MAIN
 int main()
@@ -769,14 +781,17 @@ int main()
     // Several tests. Uncomment the desired test.
     // Run only one test at a time, otherwise you'll get segfaults!
 
-    cout << "\nRemoving constraints -------------------------" << endl;
-    removeConstraints(Pp);
+//    cout << "\nRemoving constraints -------------------------" << endl;
+//    removeConstraints(Pp);
 
 //    cout << "\nRemoving landmarks ---------------------------" << endl;
 //    removeLandmarks(Pp);
 
 //    cout << "\nRemoving frames ------------------------------" << endl;
 //    removeFrames(Pp);
+
+    cout << "\nRemoving lmks and frames ------------------------------" << endl;
+    removeLmksAndFrames(Pp);
 
 //    cout << "\nRemoving problem ---------------------------" << endl;
 //    Pp.reset();
