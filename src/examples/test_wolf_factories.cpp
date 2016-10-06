@@ -16,7 +16,7 @@
 #include "../processor_odom_3D.h"
 #include "../processor_imu.h"
 #include "../processor_gps.h"
-#include "../processor_image.h"
+#include "../processor_image_feature.h"
 
 #include "../problem.h"
 

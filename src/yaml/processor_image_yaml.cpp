@@ -9,7 +9,7 @@
 #include "yaml_conversion.h"
 
 // wolf
-#include "../processor_image.h"
+#include "../processor_image_feature.h"
 #include "../factory.h"
 
 // yaml-cpp library

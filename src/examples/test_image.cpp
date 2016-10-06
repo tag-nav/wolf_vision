@@ -3,7 +3,7 @@
 //Wolf includes
 #include "sensor_camera.h"
 #include "capture_image.h"
-#include "processor_image.h"
+#include "processor_image_feature.h"
 
 //#include "feature_point_image.h"
 //#include "state_block.h"
@@ -27,8 +27,8 @@ int main(int argc, char** argv)
 {
     using namespace wolf;
 
-    //ProcessorImage test
-    std::cout << std::endl << " ========= ProcessorImage test ===========" << std::endl << std::endl;
+    //ProcessorImageFeature test
+    std::cout << std::endl << " ========= ProcessorImageFeature test ===========" << std::endl << std::endl;
 
     cv::VideoCapture capture;
     const char * filename;
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
     //    // select the kind of detector-descriptor parameters
     //    tracker_params.detector_descriptor_params_ptr = &orb_params; // choose ORB
     //
-    //    ProcessorImage* prc_image = new ProcessorImage(tracker_params);
+    //    ProcessorImageFeature* prc_image = new ProcessorImageFeature(tracker_params);
     //
     //    sen_cam_->addProcessor(prc_image);
     //=====================================================

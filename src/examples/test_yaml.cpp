@@ -7,7 +7,7 @@
 
 #include "pinholeTools.h"
 #include "yaml/yaml_conversion.h"
-#include "processor_image.h"
+#include "processor_image_feature.h"
 #include "factory.h"
 
 #include <yaml-cpp/yaml.h>
