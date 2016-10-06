@@ -16,6 +16,7 @@ struct IntrinsicsBase;
 
 // wolf
 #include "wolf.h"
+#include "factory.h"
 
 // std
 #include <string>
@@ -211,32 +212,37 @@ namespace wolf
  *
  * You can also check the code in the example file ````src/examples/test_wolf_factories.cpp````.
  */
-class SensorFactory
+//<<<<<<< HEAD
+//=======
+//class SensorFactory
+//{
+//    public:
+//        typedef SensorBasePtr (*CreateSensorCallback)(const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBasePtr _intrinsics);
+//    private:
+//        typedef std::map<std::string, CreateSensorCallback> CallbackMap;
+//    public:
+//        bool registerCreator(const std::string& _sensor_type, CreateSensorCallback createFn);
+//        bool unregisterCreator(const std::string& _sensor_type);
+//        SensorBasePtr create(const std::string& _sensor_type, const std::string& _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBasePtr _intrinsics = nullptr);
+//    private:
+//        CallbackMap callbacks_;
+//>>>>>>> node-linked-removed
+
+typedef Factory<SensorBase,
+                const std::string&,
+                const Eigen::VectorXs&, const IntrinsicsBasePtr> SensorFactory;
+
+template<>
+inline std::string Factory<SensorBase,
+                           const std::string&,
+                           const Eigen::VectorXs&, const IntrinsicsBasePtr>::getClass()
 {
-    public:
-        typedef SensorBasePtr (*CreateSensorCallback)(const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBasePtr _intrinsics);
-    private:
-        typedef std::map<std::string, CreateSensorCallback> CallbackMap;
-    public:
-        bool registerCreator(const std::string& _sensor_type, CreateSensorCallback createFn);
-        bool unregisterCreator(const std::string& _sensor_type);
-        SensorBasePtr create(const std::string& _sensor_type, const std::string& _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBasePtr _intrinsics = nullptr);
-    private:
-        CallbackMap callbacks_;
+  return "SensorFactory";
+}
 
-        // Singleton ---------------------------------------------------
-        // This class is a singleton. The code below guarantees this.
-        // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
-    public:
-        static SensorFactory& get(); // Unique point of access
-
-    public: // see http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
-        SensorFactory(const SensorFactory&) = delete;
-        void operator=(SensorFactory const&) = delete;
-    private:
-        SensorFactory() { }
-        ~SensorFactory() { }
-};
+#define WOLF_REGISTER_SENSOR(SensorType, SensorName) \
+  namespace{ const bool SensorName##Registered = \
+    SensorFactory::get().registerCreator(SensorType, SensorName::create); }\
 
 } /* namespace wolf */
 

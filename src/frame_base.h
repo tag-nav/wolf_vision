@@ -19,7 +19,7 @@ class StateBlock;
 namespace wolf {
 
 //class FrameBase
-class FrameBase : public NodeBase // NodeConstrained<TrajectoryBase,CaptureBase>
+class FrameBase : public NodeBase
 {
     private:
         ProblemPtr problem_ptr_;
@@ -215,13 +215,11 @@ inline StateBlock* FrameBase::getVPtr() const
 inline TrajectoryBasePtr FrameBase::getTrajectoryPtr() const
 {
     return trajectory_ptr_;
-//    return upperNodePtr();
 }
 
 inline CaptureBaseList* FrameBase::getCaptureListPtr()
 {
     return & capture_list_;
-//    return getDownNodeListPtr();
 }
 
 inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
@@ -229,7 +227,6 @@ inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
     capture_list_.push_back(_capt_ptr);
     _capt_ptr->setFramePtr(this);
     _capt_ptr->setProblem(getProblem());
-//    addDownNode(_capt_ptr);
     return _capt_ptr;
 }
 
@@ -238,7 +235,6 @@ inline void FrameBase::removeCapture(const CaptureBaseIter& _capt_iter)
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
     capture_list_.erase(_capt_iter);
     delete *_capt_iter;
-//    removeDownNode(_capt_iter);
 }
 
 inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
@@ -246,7 +242,6 @@ inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
     capture_list_.remove(_capt_ptr);
     delete _capt_ptr;
-//    removeDownNode(_capt_ptr);
 }
 
 inline StateStatus FrameBase::getStatus() const

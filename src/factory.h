@@ -8,6 +8,9 @@
 #ifndef FACTORY_H_
 #define FACTORY_H_
 
+// wolf
+#include "wolf.h"
+
 // std
 #include <string>
 #include <map>
@@ -228,17 +231,18 @@ namespace wolf
  *  - Problem::installProcessor() : to install processors in WOLF Problem.
  *
  */
-template<class TypeBase, class TypeInput>
+template<class TypeBase, typename... TypeInput>
 class Factory
 {
     public:
-        typedef TypeBase* (*CreatorCallback)(const TypeInput & _input); // example of creator callback (see typedefs below)
+        // example of creator callback (see typedefs below)
+        typedef TypeBase* (*CreatorCallback)(TypeInput... _input);
     private:
         typedef std::map<std::string, CreatorCallback> CallbackMap;
     public:
         bool registerCreator(const std::string& _type, CreatorCallback createFn);
         bool unregisterCreator(const std::string& _type);
-        TypeBase* create(const std::string& _type, const TypeInput& _input = "");
+        TypeBase* create(const std::string& _type, TypeInput... _input);
         std::string getClass();
 
     private:
@@ -257,8 +261,8 @@ class Factory
         ~Factory() { }
 };
 
-template<class TypeBase, class TypeInput>
-inline bool Factory<TypeBase, TypeInput>::registerCreator(const std::string& _type, CreatorCallback createFn)
+template<class TypeBase, typename... TypeInput>
+inline bool Factory<TypeBase, TypeInput...>::registerCreator(const std::string& _type, CreatorCallback createFn)
 {
     bool reg = callbacks_.insert(typename CallbackMap::value_type(_type, createFn)).second;
     if (reg)
@@ -269,33 +273,34 @@ inline bool Factory<TypeBase, TypeInput>::registerCreator(const std::string& _ty
     return reg;
 }
 
-template<class TypeBase, class TypeInput>
-inline bool Factory<TypeBase, TypeInput>::unregisterCreator(const std::string& _type)
+template<class TypeBase, typename... TypeInput>
+inline bool Factory<TypeBase, TypeInput...>::unregisterCreator(const std::string& _type)
 {
     return callbacks_.erase(_type) == 1;
 }
 
-template<class TypeBase, class TypeInput>
-inline TypeBase* Factory<TypeBase, TypeInput>::create(const std::string& _type, const TypeInput& _input)
+template<class TypeBase, typename... TypeInput>
+inline TypeBase* Factory<TypeBase, TypeInput...>::create(const std::string& _type, TypeInput... _input)
 {
     typename CallbackMap::const_iterator creator_callback_it = callbacks_.find(_type);
+
     if (creator_callback_it == callbacks_.end())
         // not found
         throw std::runtime_error("Unknown type. Possibly you tried to use an unregistered creator.");
+
     // Invoke the creation function
-    TypeBase* p = (creator_callback_it->second)(_input);
-    return p;
+    return (creator_callback_it->second)(std::forward<TypeInput>(_input)...);
 }
 
-template<class TypeBase, class TypeInput>
-inline Factory<TypeBase, TypeInput>& Factory<TypeBase, TypeInput>::get()
+template<class TypeBase, typename... TypeInput>
+inline Factory<TypeBase, TypeInput...>& Factory<TypeBase, TypeInput...>::get()
 {
     static Factory instance_;
     return instance_;
 }
 
-template<class TypeBase, class TypeInput>
-inline std::string Factory<TypeBase, TypeInput>::getClass()
+template<class TypeBase, typename... TypeInput>
+inline std::string Factory<TypeBase, TypeInput...>::getClass()
 {
     return "Factory<class TypeBase>";
 }
@@ -312,24 +317,24 @@ inline std::string Factory<TypeBase, TypeInput>::getClass()
 namespace wolf
 {
 
-typedef Factory<IntrinsicsBase, std::string>        IntrinsicsFactory;
-typedef Factory<ProcessorParamsBase, std::string>   ProcessorParamsFactory;
-typedef Factory<LandmarkBase, YAML::Node>           LandmarkFactory;
+typedef Factory<IntrinsicsBase, const std::string&>      IntrinsicsFactory;
+typedef Factory<ProcessorParamsBase, const std::string&> ProcessorParamsFactory;
+typedef Factory<LandmarkBase, const YAML::Node&>         LandmarkFactory;
 
 template<>
-inline std::string Factory<IntrinsicsBase, std::string>::getClass()
+inline std::string Factory<IntrinsicsBase, const std::string&>::getClass()
 {
     return "IntrinsicsFactory";
 }
 
 template<>
-inline std::string Factory<ProcessorParamsBase, std::string>::getClass()
+inline std::string Factory<ProcessorParamsBase, const std::string&>::getClass()
 {
     return "ProcessorParamsFactory";
 }
 
 template<>
-inline std::string Factory<LandmarkBase, YAML::Node>::getClass()
+inline std::string Factory<LandmarkBase, const YAML::Node&>::getClass()
 {
     return "LandmarkFactory";
 }

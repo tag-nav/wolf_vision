@@ -72,10 +72,6 @@ SensorBasePtr SensorGPS::create(const std::string& _unique_name, const Eigen::Ve
 
 // Register in the SensorFactory
 #include "sensor_factory.h"
-//#include "factory.h"
 namespace wolf {
-namespace
-{
-const bool registered_gps = SensorFactory::get().registerCreator("GPS", SensorGPS::create);
-}
+WOLF_REGISTER_SENSOR("GPS",SensorGPS)
 } // namespace wolf

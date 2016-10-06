@@ -16,6 +16,7 @@ struct ProcessorParamsBase;
 
 // wolf
 #include "wolf.h"
+#include "factory.h"
 
 // std
 #include <string>
@@ -166,32 +167,35 @@ namespace wolf
  *
  * You can also check the code in the example file ````src/examples/test_wolf_factories.cpp````.
  */
-class ProcessorFactory
+//<<<<<<< HEAD
+//=======
+//class ProcessorFactory
+//{
+//    public:
+//        typedef ProcessorBasePtr (*CreateProcessorCallback)(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
+//    private:
+//        typedef std::map<std::string, CreateProcessorCallback> CallbackMap;
+//    public:
+//        bool registerCreator(const std::string& _processor_type, CreateProcessorCallback createFn);
+//        bool unregisterCreator(const std::string& _processor_type);
+//        ProcessorBasePtr create(const std::string& _processor_type, const std::string& _unique_name, const ProcessorParamsBasePtr _params = nullptr);
+//    private:
+//        CallbackMap callbacks_;
+//>>>>>>> node-linked-removed
+
+typedef Factory<ProcessorBase, const std::string&, const ProcessorParamsBasePtr> ProcessorFactory;
+
+template<>
+inline std::string ProcessorFactory::getClass()
 {
-    public:
-        typedef ProcessorBasePtr (*CreateProcessorCallback)(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
-    private:
-        typedef std::map<std::string, CreateProcessorCallback> CallbackMap;
-    public:
-        bool registerCreator(const std::string& _processor_type, CreateProcessorCallback createFn);
-        bool unregisterCreator(const std::string& _processor_type);
-        ProcessorBasePtr create(const std::string& _processor_type, const std::string& _unique_name, const ProcessorParamsBasePtr _params = nullptr);
-    private:
-        CallbackMap callbacks_;
+  return "ProcessorFactory";
+}
 
-        // Singleton ---------------------------------------------------
-        // This class is a singleton. The code below guarantees this.
-        // See: http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
-    public:
-        static ProcessorFactory& get(); // Unique point of access
 
-    public: // see http://stackoverflow.com/questions/1008019/c-singleton-design-pattern
-        ProcessorFactory(const ProcessorFactory&) = delete;
-        void operator=(ProcessorFactory const&) = delete;
-    private:
-        ProcessorFactory() { }
-        ~ProcessorFactory() { }
-};
+
+#define WOLF_REGISTER_PROCESSOR(ProcessorType, ProcessorName) \
+  namespace{ const bool ProcessorName##Registered = \
+    ProcessorFactory::get().registerCreator(ProcessorType, ProcessorName::create); }\
 
 } /* namespace wolf */
 

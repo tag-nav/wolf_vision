@@ -37,8 +37,8 @@ int main(){
     cout << "q  = " << q.transpose() << "   with norm = " << q.norm() << "\nda = " << da.transpose() << endl;
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
 
-    LocalParametrizationQuaternion Qpar;
-    LocalParametrizationQuaternion Qpar_loc(DQ_LOCAL);
+    LocalParametrizationQuaternion<DQ_GLOBAL> Qpar;
+    LocalParametrizationQuaternion<DQ_LOCAL> Qpar_loc;
 
     cout << "\nGLOBAL D_QUAT plus()" << endl;
     Map<const VectorXs> q_const(q.data(),4);

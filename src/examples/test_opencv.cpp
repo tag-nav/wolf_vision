@@ -71,11 +71,11 @@ int main(int argc, char** argv)
     cv::moveWindow("Feature tracker", 0, 0);
 
     // set image processors
-    cv::BRISK detector(30, 0, 1.0);
-    cv::BRISK descriptor(30, 0, 1.0);
-    cv::BFMatcher matcher(cv::NORM_HAMMING);
-//    cv::ORB detector();
-//    cv::ORB descriptor();
+//    cv::BRISK detector(30, 0, 1.0);
+//    cv::BRISK descriptor(30, 0, 1.0);
+    cv::BFMatcher matcher(cv::NORM_HAMMING2);
+    cv::ORB detector(1000,1.2,8,16,0,3,0,31);
+    cv::ORB descriptor(1000,1.2,8,16,0,3,0,31);
 //    cv::FlannBasedMatcher matcher;
 
     // declare all variables
@@ -152,7 +152,7 @@ int main(int argc, char** argv)
                 //-- Select only "good" matches (i.e. those at a distance which is small)
                 for (unsigned int i = 0; i < matches.size(); i++)
                 {
-                    if (matches[i].distance <= 100) //std::max(2*min_dist, 0.02) )
+                    if (matches[i].distance <= 50) //std::max(2*min_dist, 0.02) )
                     {
                         good_matches.push_back(matches[i]);
                         matched_1.push_back(keypoints_1[matches[i].trainIdx].pt);
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
                 if (good_matches.size() > 20) // Minimum is 8 points, but we need more for robustness
                 {
                     // find fundamental matrix using RANSAC, return set of inliers as bool vector
-                    cv::Mat F = findFundamentalMat(matched_1, matched_2, cv::FM_RANSAC, 3.0, 0.99, inliers_bool);
+                    cv::Mat F = findFundamentalMat(matched_1, matched_2, cv::FM_RANSAC, 3.0, 0.98, inliers_bool);
 
                     std::cout << "F = " << F << std::endl;
 

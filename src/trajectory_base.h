@@ -19,7 +19,7 @@ class TimeStamp;
 namespace wolf {
 
 //class TrajectoryBase
-class TrajectoryBase : public NodeBase //: public NodeBase // NodeLinked<Problem,FrameBase>
+class TrajectoryBase : public NodeBase
 {
     private:
         ProblemPtr problem_ptr_;
@@ -86,26 +86,22 @@ inline void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _plac
 
 inline void TrajectoryBase::removeFrame(const FrameBaseIter& _frame_iter)
 {
-//    removeDownNode(_frame_iter);
     frame_list_.erase(_frame_iter);
     delete * _frame_iter;
 }
 inline void TrajectoryBase::removeFrame(const FrameBasePtr _frame_ptr)
 {
-//    removeDownNode(_frame_ptr);
     frame_list_.remove(_frame_ptr);
     delete _frame_ptr;
 }
 
 inline FrameBaseList* TrajectoryBase::getFrameListPtr()
 {
-//    return getDownNodeListPtr();
     return & frame_list_;
 }
 
 inline FrameBasePtr TrajectoryBase::getLastFramePtr()
 {
-//    return getDownNodeListPtr()->back();
     return frame_list_.back();
 }
 

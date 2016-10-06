@@ -110,7 +110,7 @@ SET(HDRS
     constraint_container.h
     constraint_corner_2D.h
     constraint_epipolar.h
-    constraint_image.h
+    constraint_AHP.h
     constraint_image_new_landmark.h
     constraint_imu.h
     constraint_sparse.h
@@ -148,9 +148,6 @@ SET(HDRS
     map_base.h
     motion_buffer.h
     node_base.h
-#    node_constrained.h
-#    node_linked.h
-#    node_terminus.h
     problem.h
     processor_base.h
     processor_imu.h
@@ -175,7 +172,6 @@ SET(HDRS
     state_quaternion.h
     time_stamp.h
     trajectory_base.h
-    # wolf_manager.h
     )
 
 
@@ -220,7 +216,6 @@ SET(SRCS
     node_base.cpp
     problem.cpp
     processor_base.cpp
-    processor_factory.cpp
     processor_imu.cpp
     processor_odom_2D.cpp
     processor_odom_3D.cpp
@@ -231,7 +226,6 @@ SET(SRCS
     processor_tracker_landmark_dummy.cpp
     sensor_base.cpp
     sensor_camera.cpp
-    sensor_factory.cpp
     sensor_gps.cpp
     sensor_gps_fix.cpp
     sensor_imu.cpp

@@ -25,8 +25,8 @@ ProcessorImage::ProcessorImage(ProcessorParamsImage _params) :
                                                      params_brisk->octaves, //
                                                      params_brisk->pattern_scale);
 
-            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((_dd_params->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
-                                                                   (unsigned int)((_dd_params->nominal_pattern_radius)*params_brisk->pattern_scale));
+            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
+                                                                   (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
 
             detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
 
@@ -44,9 +44,7 @@ ProcessorImage::ProcessorImage(ProcessorParamsImage _params) :
                                                    params_orb->scoreType, //
                                                    params_orb->patchSize);
 
-            detector_descriptor_params_.pattern_radius_ =
-                    (unsigned int)( (_dd_params->nominal_pattern_radius) * pow(params_orb->scaleFactor, params_orb->nlevels-1) );
-
+            detector_descriptor_params_.pattern_radius_ = params_orb->edgeThreshold;
             detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
 
             break;
@@ -527,9 +525,6 @@ ProcessorBasePtr ProcessorImage::create(const std::string& _unique_name, const P
 // Register in the SensorFactory
 #include "processor_factory.h"
 namespace wolf {
-namespace
-{
-const bool registered_prc_image = ProcessorFactory::get().registerCreator("IMAGE", ProcessorImage::create);
-}
+WOLF_REGISTER_PROCESSOR("IMAGE", ProcessorImage)
 } // namespace wolf
 

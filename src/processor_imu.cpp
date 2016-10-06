@@ -35,9 +35,8 @@ ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const Pro
 
 // Register in the SensorFactory
 #include "processor_factory.h"
-namespace wolf {
-namespace
+
+namespace wolf
 {
-const bool registered_prc_imu = ProcessorFactory::get().registerCreator("IMU", ProcessorIMU::create);
+WOLF_REGISTER_PROCESSOR("IMU", ProcessorIMU)
 }
-} // namespace wolf

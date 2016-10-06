@@ -73,21 +73,9 @@ SensorBasePtr SensorLaser2D::create(const std::string& _unique_name, const Eigen
 
 
 // Register in the SensorFactory and the ParameterFactory
-//#include "sensor_factory.h"
-//#include "intrinsics_factory.h"
 #include "sensor_factory.h"
-//#include "factory.h"
-//#include "yaml-cpp/yaml.h"
+//#include "intrinsics_factory.h"
 namespace wolf {
-//// Yaml parser here !
-//IntrinsicsBasePtr createIntrinsicsLaser2D(const std::string& _filename_dot_yaml)
-//{
-//    IntrinsicsBasePtr params; // dummy
-//    return params;
-//}
-namespace
-{
-const bool registered_laser = SensorFactory::get().registerCreator("LASER 2D", SensorLaser2D::create);
+WOLF_REGISTER_SENSOR("LASER 2D", SensorLaser2D)
 //const bool registered_laser_params = IntrinsicsFactory::get().registerCreator("LASER 2D", createIntrinsicsLaser2D);
-}
 } // namespace wolf

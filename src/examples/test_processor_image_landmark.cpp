@@ -126,6 +126,7 @@ int main(int argc, char** argv)
     /* Do this while there aren't extrinsic parameters on the yaml */
 
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
+
     SensorCamera* camera_ptr_ = (SensorCamera*)sensor_ptr;
 
 
@@ -179,16 +180,23 @@ int main(int argc, char** argv)
         image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(5);
+        cv::waitKey(0);
 
-        if((f%buffer_size) == 1)
+        if((f%buffer_size) == 10)
         {
             ceres::Solver::Summary summary = ceres_manager.solve();
             std::cout << summary.FullReport() << std::endl;
+
+
+            std::cout << "Last key frame pose: "
+                      << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
+            std::cout << "Last key frame orientation: "
+                      << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
+
+            cv::waitKey(0);
         }
 
-        cv::waitKey(0);
-        std::cout << "END OF ITERATION" << std::endl;
+        std::cout << "END OF ITERATION\n=================================" << std::endl;
 
         f++;
         capture >> frame[f % buffer_size];
