@@ -62,9 +62,11 @@ class NodeBase
         std::string node_type_;  ///< Text label identifying the type or subclass of node ("Pin Hole", "Point 2D", etc)
         std::string node_name_;  ///< Text label identifying each specific object ("left camera", "LIDAR 1", "PointGrey", "Andrew", etc)
 
+        bool is_deleting_;
+
     public: 
 
-        NodeBase(const std::string& _class, const std::string& _type, const std::string& _name = "");
+        NodeBase(const std::string& _class, const std::string& _type = "Undefined", const std::string& _name = "");
         virtual ~NodeBase();
 
         unsigned int nodeId() const;
@@ -85,6 +87,7 @@ namespace wolf{
 inline NodeBase::NodeBase(const std::string& _class, const std::string& _type, const std::string& _name) :
         node_id_(++node_id_count_), node_class_(_class), node_type_(_type), node_name_(_name)
 {
+    is_deleting_ = false;
     //
 }
 

@@ -19,20 +19,31 @@
 namespace wolf {
 
 MapBase::MapBase() :
-    NodeLinked(MID, "MAP", "BASE")
+    NodeBase("MAP"),
+    problem_ptr_(nullptr)
 {
     //std::cout << "MapBase::MapBase(): " << __LINE__ << std::endl;
 }
 
 MapBase::~MapBase()
 {
+    is_deleting_ = true;
+    while (!landmark_list_.empty())
+    {
+        delete landmark_list_.front();
+        landmark_list_.pop_front();
+    }
+
 	//std::cout << "deleting MapBase " << nodeId() << std::endl;
 }
 
-LandmarkBase* MapBase::addLandmark(LandmarkBase* _landmark_ptr)
+LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)
 {
 	//std::cout << "MapBase::addLandmark" << std::endl;
-    addDownNode(_landmark_ptr);
+    landmark_list_.push_back(_landmark_ptr);
+    _landmark_ptr->setMapPtr(this);
+    _landmark_ptr->setProblem(getProblem());
+//    addDownNode(_landmark_ptr);
     _landmark_ptr->registerNewStateBlocks();
     return _landmark_ptr;
 }
@@ -41,19 +52,28 @@ void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)
 {
 	//std::cout << "MapBase::addLandmarkList" << std::endl;
 	LandmarkBaseList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
-	addDownNodeList(_landmark_list);
-    for (auto landmark_ptr : lmk_list_copy)
+//	addDownNodeList(_landmark_list);
+    for (LandmarkBasePtr landmark_ptr : lmk_list_copy)
+    {
+        landmark_ptr->setMapPtr(this);
+        landmark_ptr->setProblem(getProblem());
         landmark_ptr->registerNewStateBlocks();
+    }
+    landmark_list_.splice(landmark_list_.end(), _landmark_list);
 }
 
-void MapBase::removeLandmark(LandmarkBase* _landmark_ptr)
+void MapBase::removeLandmark(LandmarkBasePtr _landmark_ptr)
 {
-    removeDownNode(_landmark_ptr->nodeId());
+    landmark_list_.remove(_landmark_ptr);
+    delete _landmark_ptr;
+//    removeDownNode(_landmark_ptr->nodeId());
 }
 
 void MapBase::removeLandmark(const LandmarkBaseIter& _landmark_iter)
 {
-    removeDownNode(_landmark_iter);
+    landmark_list_.erase(_landmark_iter);
+    delete * _landmark_iter;
+//    removeDownNode(_landmark_iter);
 }
 
 void MapBase::load(const std::string& _map_file_dot_yaml)
@@ -67,7 +87,7 @@ void MapBase::load(const std::string& _map_file_dot_yaml)
     for (unsigned int i = 0; i < nlandmarks; i++)
     {
         YAML::Node lmk_node = map["landmarks"][i];
-        LandmarkBase* lmk_ptr = LandmarkFactory::get().create(lmk_node["type"].as<std::string>(), lmk_node);
+        LandmarkBasePtr lmk_ptr = LandmarkFactory::get().create(lmk_node["type"].as<std::string>(), lmk_node);
         addLandmark(lmk_ptr);
     }
 
@@ -85,7 +105,7 @@ void MapBase::save(const std::string& _map_file_yaml, const std::string& _map_na
 
     emitter << "landmarks"  << YAML::BeginSeq;
 
-    for (LandmarkBase* lmk_ptr : *getLandmarkListPtr())
+    for (LandmarkBasePtr lmk_ptr : *getLandmarkListPtr())
     {
         emitter << YAML::Flow << lmk_ptr->saveToYaml();
     }

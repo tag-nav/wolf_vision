@@ -10,15 +10,19 @@ class LandmarkBase;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
+#include "node_base.h"
 
 //std includes
 
 namespace wolf {
 
 //class MapBase
-class MapBase : public NodeLinked<Problem,LandmarkBase>
+class MapBase : public NodeBase //: public NodeLinked<Problem,LandmarkBase>
 {
+    private:
+        ProblemPtr problem_ptr_;
+        LandmarkBaseList landmark_list_;
+
     public:
         MapBase();
 
@@ -27,22 +31,15 @@ class MapBase : public NodeLinked<Problem,LandmarkBase>
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          **/        
         ~MapBase();
+        void destruct();
         
-        /** \brief Adds a landmark
-         *
-         * Adds a landmark to the Map. It also updates the lists of StateBlocks that are used by the solver.
-         **/
-        virtual LandmarkBase* addLandmark(LandmarkBase* _landmark_ptr);
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
-        /** \brief Adds a landmark
-         *
-         * Adds a landmark to the Map. It also updates the lists of StateBlocks that are used by the solver.
-         **/
+        virtual LandmarkBasePtr addLandmark(LandmarkBasePtr _landmark_ptr);
         virtual void addLandmarkList(LandmarkBaseList _landmark_list);
-
         void removeLandmark(const LandmarkBaseIter& _landmark_iter);
-        void removeLandmark(LandmarkBase* _landmark_ptr);
-
+        void removeLandmark(LandmarkBasePtr _landmark_ptr);
         LandmarkBaseList* getLandmarkListPtr();
         
         void load(const std::string& _map_file_yaml);
@@ -52,9 +49,15 @@ class MapBase : public NodeLinked<Problem,LandmarkBase>
         std::string dateTimeNow();
 };
 
+inline void MapBase::destruct()
+{
+    if (!is_deleting_)
+        delete this;
+}
+
 inline LandmarkBaseList* MapBase::getLandmarkListPtr()
 {
-    return getDownNodeListPtr();
+    return & landmark_list_;
 }
 
 } // namespace wolf

@@ -1,9 +1,11 @@
 #include "trajectory_base.h"
+#include "frame_base.h"
 
 namespace wolf {
 
 TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
-    NodeLinked(MID, "TRAJECTORY"),
+    NodeBase("TRAJECTORY"),
+    problem_ptr_(nullptr),
     frame_structure_(_frame_structure), last_key_frame_ptr_(nullptr)
 {
     //
@@ -11,37 +13,58 @@ TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
 
 TrajectoryBase::~TrajectoryBase()
 {
+    is_deleting_ = true;
+    while (!frame_list_.empty())
+    {
+        delete frame_list_.front();
+        frame_list_.pop_front();
+    }
     //std::cout << "deleting TrajectoryBase " << nodeId() << std::endl;
 }
 
-FrameBase* TrajectoryBase::addFrame(FrameBase* _frame_ptr)
+void TrajectoryBase::destruct()
 {
+    if (!is_deleting_)
+        delete this;
+}
+
+FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
+{
+    // link up
+    _frame_ptr->setTrajectoryPtr(this);
+    _frame_ptr->setProblem(getProblem());
+
     if (_frame_ptr->isKey())
     {
         _frame_ptr->registerNewStateBlocks();
         if (last_key_frame_ptr_ == nullptr || last_key_frame_ptr_->getTimeStamp() < _frame_ptr->getTimeStamp())
             last_key_frame_ptr_ = _frame_ptr;
 
-        insertDownNode(_frame_ptr, computeFrameOrder(_frame_ptr));
+        frame_list_.insert(computeFrameOrder(_frame_ptr), _frame_ptr);
+//        insertDownNode(_frame_ptr, computeFrameOrder(_frame_ptr));
     }
     else
-        addDownNode(_frame_ptr);
+    {
+        //        addFrame(_frame_ptr);
+        frame_list_.push_back(_frame_ptr);
+    }
 
     return _frame_ptr;
 }
 
+
 void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
-	for(auto fr_it = getFrameListPtr()->begin(); fr_it != getFrameListPtr()->end(); ++fr_it)
-		(*fr_it)->getConstraintList(_ctr_list);
+	for(auto fr_ptr : *getFrameListPtr())
+		fr_ptr->getConstraintList(_ctr_list);
 }
 
-void TrajectoryBase::sortFrame(FrameBase* _frame_ptr)
+void TrajectoryBase::sortFrame(FrameBasePtr _frame_ptr)
 {
-    moveDownNode(_frame_ptr, computeFrameOrder(_frame_ptr));
+    moveFrame(_frame_ptr, computeFrameOrder(_frame_ptr));
 }
 
-FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBase* _frame_ptr)
+FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
 {
     for (auto frm_rit = getFrameListPtr()->rbegin(); frm_rit != getFrameListPtr()->rend(); frm_rit++)
         if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isKey() && (*frm_rit)->getTimeStamp() < _frame_ptr->getTimeStamp())
@@ -49,9 +72,9 @@ FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBase* _frame_ptr)
     return getFrameListPtr()->begin();
 }
 
-FrameBase* TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
+FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
 {
-    FrameBase* closest_kf = nullptr;
+    FrameBasePtr closest_kf = nullptr;
     Scalar min_dt = 1e9;
 
     for (auto frm_rit = getFrameListPtr()->rbegin(); frm_rit != getFrameListPtr()->rend(); frm_rit++)

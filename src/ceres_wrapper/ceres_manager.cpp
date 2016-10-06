@@ -1,8 +1,11 @@
 #include "ceres_manager.h"
+#include "../trajectory_base.h"
+#include "../map_base.h"
+#include "../landmark_base.h"
 
 namespace wolf {
 
-CeresManager::CeresManager(Problem* _wolf_problem, const ceres::Solver::Options& _ceres_options, const bool _use_wolf_auto_diff) :
+CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Options& _ceres_options, const bool _use_wolf_auto_diff) :
     ceres_options_(_ceres_options),
     wolf_problem_(_wolf_problem),
     use_wolf_auto_diff_(_use_wolf_auto_diff)
@@ -272,7 +275,7 @@ void CeresManager::update()
 	assert(ceres_problem_->NumResidualBlocks() == id_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
-void CeresManager::addConstraint(ConstraintBase* _ctr_ptr, unsigned int _id)
+void CeresManager::addConstraint(ConstraintBasePtr _ctr_ptr, unsigned int _id)
 {
     id_2_costfunction_[_id] = createCostFunction(_ctr_ptr);
 
@@ -340,7 +343,7 @@ void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
 }
 
-ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
+ceres::CostFunction* CeresManager::createCostFunction(ConstraintBasePtr _corrPtr)
 {
 	assert(_corrPtr != nullptr);
 	//std::cout << "creating cost function for constraint " << _corrPtr->id() << std::endl;

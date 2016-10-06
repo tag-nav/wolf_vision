@@ -10,7 +10,7 @@ namespace wolf {
 class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 {
     public:
-        ConstraintOdom2DAnalytic(FeatureBase* _ftr_ptr, FrameBase* _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+        ConstraintOdom2DAnalytic(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintRelative2DAnalytic(_ftr_ptr, CTR_ODOM_2D, _frame_ptr, _apply_loss_function, _status)
         {
             setType("ODOM 2D ANALYTIC");
@@ -105,10 +105,10 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 
 
     public:
-        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                                            NodeBase* _correspondant_ptr)
+        static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
+                                            NodeBasePtr _correspondant_ptr)
         {
-            return new ConstraintOdom2DAnalytic(_feature_ptr, (FrameBase*)_correspondant_ptr);
+            return new ConstraintOdom2DAnalytic(_feature_ptr, (FrameBasePtr)_correspondant_ptr);
         }
 
 };

@@ -15,7 +15,7 @@ void SolverManager::solve()
 
 }
 
-//void SolverManager::computeCovariances(WolfProblem* _problem_ptr)
+//void SolverManager::computeCovariances(WolfProblemPtr _problem_ptr)
 //{
 //}
 
@@ -59,7 +59,7 @@ void SolverManager::update(const WolfProblemPtr _problem_ptr)
 	}
 }
 
-void SolverManager::addConstraint(ConstraintBase* _corr_ptr)
+void SolverManager::addConstraint(ConstraintBasePtr _corr_ptr)
 {
 	//TODO MatrixXs J; Vector e;
     // getResidualsAndJacobian(_corr_ptr, J, e);
@@ -145,7 +145,7 @@ void SolverManager::updateStateUnitStatus(StateBlock* _st_ptr)
 //	_st_ptr->setPendingStatus(NOT_PENDING);
 }
 
-ceres::CostFunction* SolverManager::createCostFunction(ConstraintBase* _corrPtr)
+ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPtr)
 {
 	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
 	//_corrPtr->print();
@@ -207,6 +207,23 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBase* _corrPtr)
 		{
 			ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<ConstraintCorner2D,
+													specific_ptr->measurementSize,
+													specific_ptr->block0Size,
+													specific_ptr->block1Size,
+													specific_ptr->block2Size,
+													specific_ptr->block3Size,
+													specific_ptr->block4Size,
+													specific_ptr->block5Size,
+													specific_ptr->block6Size,
+													specific_ptr->block7Size,
+													specific_ptr->block8Size,
+													specific_ptr->block9Size>(specific_ptr);
+			break;
+		}
+		case CTR_IMU:
+		{
+			ConstraintIMU* specific_ptr = (ConstraintIMU*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<ConstraintIMU,
 													specific_ptr->measurementSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,

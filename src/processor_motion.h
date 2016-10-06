@@ -82,12 +82,13 @@ class ProcessorMotion : public ProcessorBase
 
         // This is the main public interface
     public:
-        ProcessorMotion(ProcessorType _tp, const std::string& _type, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance = 0.1);
+        ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
 
-        virtual void process(CaptureBase* _incoming_ptr);
+        virtual void process(CaptureBasePtr _incoming_ptr);
+        virtual void resetDerived();
 
         // Queries to the processor:
 
@@ -149,22 +150,14 @@ class ProcessorMotion : public ProcessorBase
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
          * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
          */
-        void sumDeltas(CaptureMotion* _cap1_ptr, CaptureMotion* _cap2_ptr, Eigen::VectorXs& _delta1_plus_delta2);
+        void sumDeltas(CaptureMotion* _cap1_ptr,
+                       CaptureMotion* _cap2_ptr,
+                       Eigen::VectorXs& _delta1_plus_delta2);
 
-        /** Composes two delta covariances
-         * \param _delta_cov1 covariance of the first delta
-         * \param _delta_cov2 covariance of the delta to be composed
-         * \param _jacobian1 jacobian of the composition w.r.t. _delta1
-         * \param _jacobian2 jacobian of the composition w.r.t. _delta2
-         * \param _delta_cov1_plus_delta_cov2 the covariance of the composition.
-         */
-        void deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1, const Eigen::MatrixXs& _delta_cov2,
-                                  const Eigen::MatrixXs& _jacobian1, const Eigen::MatrixXs& _jacobian2,
-                                  Eigen::MatrixXs& _delta_cov1_plus_delta_cov2);
         /** Set the origin of all motion for this processor
          * \param _origin_frame the key frame to be the origin
          */
-        void setOrigin(FrameBase* _origin_frame);
+        void setOrigin(FrameBasePtr _origin_frame);
 
         /** Set the origin of all motion for this processor
          * \param _x_origin the state at the origin
@@ -172,7 +165,7 @@ class ProcessorMotion : public ProcessorBase
          */
         void setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin);
 
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol);
+        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol);
 
         // Helper functions:
     public:
@@ -182,7 +175,7 @@ class ProcessorMotion : public ProcessorBase
 
         //        void reset(CaptureMotion2* _capture_ptr);
 
-        FrameBase* makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type);
+        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type);
 
         MotionBuffer* getBufferPtr();
 
@@ -226,9 +219,9 @@ class ProcessorMotion : public ProcessorBase
 
         /** \brief convert raw CaptureMotion data to the delta-state format
          *
-         * This function accesses the members data_ (as produced by extractData()) and dt_,
-         * and computes the value of the delta-state delta_. Note that this value is
-         * held by the member delta_ of the class that calls it.
+         * This function accepts raw data and time step dt,
+         * and computes the value of the delta-state and its covariance. Note that these values are
+         * held by the members delta_ and delta_cov_.
          *
          * \param _data the raw motion data
          * \param _data_cov the raw motion data covariance
@@ -245,7 +238,7 @@ class ProcessorMotion : public ProcessorBase
          * which is unaware of the needs of this processor.
          *
          * Additionally, sometimes the data format is in the form of a
-         * velocity, while the delta is in the form of an increment.
+         * velocity, or a higher derivative, while the delta is in the form of an increment.
          * In such cases, converting from data to delta-state needs integrating
          * the data over the period dt.
          *
@@ -259,47 +252,53 @@ class ProcessorMotion : public ProcessorBase
          *
          *  However, other more complicated relations are possible.
          */
-        virtual void data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt) = 0;
-
-        /** \brief composes a delta-state on top of a state
-         * \param _x the initial state
-         * \param _delta the delta-state
-         * \param _x_plus_delta the updated state. It has the same format as the initial state.
-         *
-         * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
-         */
-        virtual void xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta,
-                                Eigen::VectorXs& _x_plus_delta) = 0;
+        virtual void data2delta(const Eigen::VectorXs& _data,
+                                const Eigen::MatrixXs& _data_cov,
+                                const Scalar _dt) = 0;
 
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
          * \param _delta2 the second delta-state
+         * \param _dt2 the second delta-state's time delta
          * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
          *
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2.
          */
-        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1,
+                                    const Eigen::VectorXs& _delta2,
+                                    const Scalar _dt2,
                                     Eigen::VectorXs& _delta1_plus_delta2) = 0;
 
-        /** \brief composes a delta-state on top of another delta-state
+        /** \brief composes a delta-state on top of another delta-state, and computes the Jacobians
          * \param _delta1 the first delta-state
          * \param _delta2 the second delta-state
+         * \param _dt2 the second delta-state's time delta
          * \param _delta1_plus_delta2 the delta2 composed on top of delta1. It has the format of delta-state.
          * \param _jacobian1 the jacobian of the composition w.r.t. _delta1.
          * \param _jacobian2 the jacobian of the composition w.r.t. _delta2.
          *
          * This function implements the composition (+) so that _delta1_plus_delta2 = _delta1 (+) _delta2 and its jacobians.
          */
-        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-                                    Eigen::VectorXs& _delta1_plus_delta2, Eigen::MatrixXs& _jacobian1,
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1,
+                                    const Eigen::VectorXs& _delta2,
+                                    const Scalar _dt2,
+                                    Eigen::VectorXs& _delta1_plus_delta2,
+                                    Eigen::MatrixXs& _jacobian1,
                                     Eigen::MatrixXs& _jacobian2) = 0;
 
-        /** \brief Adds the current delta-increment into the pre-integrated Delta-state
-        *
-        * This function implements the pre-integrated measurements update :
-        *   Delta_ik = Delta_ij (+) _delta_jk
-        */
-        virtual void integrateDelta() = 0;
+        /** \brief composes a delta-state on top of a state
+         * \param _x the initial state
+         * \param _delta the delta-state
+         * \param _x_plus_delta the updated state. It has the same format as the initial state.
+         * \param _dt the time interval spanned by the Delta
+         *
+         * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
+         */
+        virtual void xPlusDelta(const Eigen::VectorXs& _x,
+                                const Eigen::VectorXs& _delta,
+                                const Scalar _dt,
+                                Eigen::VectorXs& _x_plus_delta) = 0;
+
 
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
@@ -307,22 +306,23 @@ class ProcessorMotion : public ProcessorBase
          * Examples (see documentation of the the class for info on Eigen::VectorXs):
          *   - 2D odometry: a 3-vector with all zeros, e.g. VectorXs::Zero(3)
          *   - 3D odometry: delta type is a PQ vector: 7-vector with [0,0,0, 0,0,0,1]
-         *   - IMU: PQVBB 16-vector with [0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0] // FIXME : no biases in the delta !!
+         *   - IMU: PQVBB 10-vector with [0,0,0, 0,0,0,1, 0,0,0] // No biases in the delta !!
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
         virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts) = 0;
 
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin) = 0;
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) = 0;
 
         Motion motionZero(const TimeStamp& _ts);
 
     protected:
         // Attributes
-        Size x_size_;    ///< The size of the state vector
-        Size delta_size_;    ///< the size of the deltas
-        Size data_size_; ///< the size of the incoming data
-        CaptureBase* origin_ptr_;
+        Size x_size_;           ///< The size of the state vector
+        Size delta_size_;       ///< the size of the deltas
+        Size delta_cov_size_;   ///< the size of the delta covariances matrix
+        Size data_size_;        ///< the size of the incoming data
+        CaptureBasePtr origin_ptr_;
         CaptureMotion* last_ptr_;
         CaptureMotion* incoming_ptr_;
 
@@ -335,16 +335,40 @@ class ProcessorMotion : public ProcessorBase
         Eigen::VectorXs delta_integrated_;      ///< integrated delta
         Eigen::MatrixXs delta_integrated_cov_;  ///< integrated delta covariance
         Eigen::VectorXs data_;                  ///< current data
-        Eigen::MatrixXs jacobian_prev_;         ///< jacobian of delta composition w.r.t previous delta integrated
-        Eigen::MatrixXs jacobian_curr_;         ///< jacobian of delta composition w.r.t current delta
+        Eigen::MatrixXs jacobian_delta_preint_; ///< jacobian of delta composition w.r.t previous delta integrated
+        Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
 
 };
 
-inline ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, size_t _state_size, size_t _delta_size, size_t _data_size, const Scalar& _time_tolerance) :
-        ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), data_size_(_data_size), origin_ptr_(
-                nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr), dt_(0.0), x_(_state_size), delta_(_delta_size), delta_cov_(
-                delta_size_, delta_size_), delta_integrated_(_delta_size), delta_integrated_cov_(delta_size_, delta_size_), data_(
-                _data_size), jacobian_prev_(delta_size_, delta_size_), jacobian_curr_(delta_size_, delta_size_)
+}
+
+#include "frame_base.h"
+
+namespace wolf{
+
+inline ProcessorMotion::ProcessorMotion(ProcessorType _tp,
+                                        const std::string& _type,
+                                        Size _state_size,
+                                        Size _delta_size,
+                                        Size _delta_cov_size,
+                                        Size _data_size,
+                                        const Scalar& _time_tolerance) :
+                ProcessorBase(_tp, _type, _time_tolerance),
+                x_size_(_state_size),
+                delta_size_(_delta_size),
+                delta_cov_size_(_delta_cov_size),
+                data_size_(_data_size), origin_ptr_(nullptr),
+                last_ptr_(nullptr),
+                incoming_ptr_(nullptr),
+                dt_(0.0),
+                x_(_state_size),
+                delta_(_delta_size),
+                delta_cov_(_delta_cov_size, _delta_cov_size),
+                delta_integrated_(_delta_size),
+                delta_integrated_cov_(_delta_cov_size, _delta_cov_size),
+                data_(_data_size),
+                jacobian_delta_preint_(delta_cov_size_, delta_cov_size_),
+                jacobian_delta_(delta_cov_size_, delta_cov_size_)
 {
     //
 }
@@ -355,36 +379,15 @@ inline ProcessorMotion::~ProcessorMotion()
         incoming_ptr_->destruct();
 }
 
-inline void ProcessorMotion::deltaCovPlusDeltaCov(const Eigen::MatrixXs& _delta_cov1,
-                                                  const Eigen::MatrixXs& _delta_cov2, const Eigen::MatrixXs& _jacobian1,
-                                                  const Eigen::MatrixXs& _jacobian2,
-                                                  Eigen::MatrixXs& _delta_cov1_plus_delta_cov2)
-{
-    //std::cout << "delta_1_cov" << std::endl;
-    //std::cout << _delta_cov1 << std::endl;
-    //std::cout << "delta_2_cov" << std::endl;
-    //std::cout << _delta_cov2 << std::endl;
-    //std::cout << "_jacobian1" << std::endl;
-    //std::cout << _jacobian1 << std::endl;
-    //std::cout << "_jacobian2" << std::endl;
-    //std::cout << _jacobian2 << std::endl;
-
-    _delta_cov1_plus_delta_cov2 = _jacobian1 * _delta_cov1 * _jacobian1.transpose()
-            + _jacobian2 * _delta_cov2 * _jacobian2.transpose();
-
-    //std::cout << "_delta_cov1_plus_delta_cov2" << std::endl;
-    //std::cout << _delta_cov1_plus_delta_cov2 << std::endl;
-}
-
 inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
     // make a new key frame
-    FrameBase* key_frame_ptr = getProblem()->createFrame(KEY_FRAME, _x_origin, _ts_origin);
+    FrameBasePtr key_frame_ptr = getProblem()->createFrame(KEY_FRAME, _x_origin, _ts_origin);
     // set the key frame as origin
     setOrigin(key_frame_ptr);
 }
 
-inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
+inline void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 {
     assert(_origin_frame->getTrajectoryPtr() != nullptr && "ProcessorMotion::setOrigin: origin frame must be in the trajectory.");
     assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
@@ -406,13 +409,15 @@ inline void ProcessorMotion::setOrigin(FrameBase* _origin_frame)
     delta_ = deltaZero();
     delta_integrated_ = deltaZero();
 
-    // clear buffer and reset
+    // clear and reset buffer
     getBufferPtr()->get().clear();
     getBufferPtr()->get().push_back(motionZero(_origin_frame->getTimeStamp()));
 
+    // Reset derived things
+    resetDerived();
 }
 
-inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
+inline void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 {
     incoming_ptr_ = (CaptureMotion*)(_incoming_ptr);
     preProcess();
@@ -422,7 +427,7 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
     {
         // key_capture
         CaptureMotion* key_capture_ptr = last_ptr_;
-        FrameBase* key_frame_ptr = key_capture_ptr->getFramePtr();
+        FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
 
         // Set the frame as key
         key_frame_ptr->setState(getCurrentState());
@@ -430,11 +435,11 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
         key_frame_ptr->setKey();
 
         // create motion constraint and add it to the new keyframe
-        FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION, "MOTION",
+        FeatureBasePtr key_feature_ptr = new FeatureBase(FEATURE_MOTION, "MOTION",
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
-                                                       Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-8);
+                                                       Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_)*1e-8);
 
 
         key_capture_ptr->addFeature(key_feature_ptr);
@@ -452,8 +457,10 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
         getBufferPtr()->get().push_back(Motion( {key_frame_ptr->getTimeStamp(),
                                                  deltaZero(),
                                                  deltaZero(),
-                                                 Eigen::MatrixXs::Zero(delta_size_, delta_size_),
-                                                 Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
+                                                 Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
+                                                 Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)}));
+        // reset derived things
+        resetDerived();
 
         getProblem()->keyFrameCallback(key_frame_ptr, this, time_tolerance_);
 
@@ -467,66 +474,68 @@ inline void ProcessorMotion::process(CaptureBase* _incoming_ptr)
 
 inline void ProcessorMotion::integrate()
 {
-
     // Set dt
     updateDt();
 
-    // get data and convert it to delta
+    // get data and convert it to delta, and obtain also the delta covariance
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
 
-    // then integrate the current delta to pre-integrated measurements
-    integrateDelta();
+    // then integrate the current delta to pre-integrated measurements, and get Jacobians
+    deltaPlusDelta(delta_integrated_,
+                   delta_ ,
+                   dt_,
+                   delta_integrated_,
+                   jacobian_delta_preint_,
+                   jacobian_delta_);
 
     // and covariance
-    deltaCovPlusDeltaCov(getBufferPtr()->get().back().delta_integr_cov_, delta_cov_, jacobian_prev_, jacobian_curr_,
-                         delta_integrated_cov_);
+    delta_integrated_cov_ =   jacobian_delta_preint_ * getBufferPtr()->get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
+                            + jacobian_delta_        * delta_cov_                                     * jacobian_delta_.transpose();
 
     // then push it into buffer
     getBufferPtr()->get().push_back(Motion( {incoming_ptr_->getTimeStamp(),
                                              delta_,
                                              delta_integrated_,
                                              delta_cov_,
-                                             delta_integrated_cov_,
-                                             Eigen::MatrixXs::Zero(delta_size_, delta_size_),
-                                             Eigen::MatrixXs::Zero(delta_size_, delta_size_)}));
-
-
-    //    std::cout << "motion integrated: " << getBufferPtr()->get().size()-1 << std::endl;
-    //    std::cout << "\tts: " << getBufferPtr()->get().back().ts_.getSeconds() << "." << getBufferPtr()->get().back().ts_.getNanoSeconds() << std::endl;
-    //    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, x_);
-    //    std::cout << "\tx_integrated_: " << x_.transpose() << std::endl;
-    //std::cout << "\tdelta_integrated_cov_" << std::endl;
-    //std::cout << delta_integrated_cov_ << std::endl;
+                                             delta_integrated_cov_
+                                             }));
 }
 
 inline void ProcessorMotion::reintegrate(CaptureMotion* _capture_ptr)
 {
-    //std::cout << "ProcessorMotion::reintegrate" << std::endl;
+    // start with empty motion
     _capture_ptr->getBufferPtr()->get().push_front(motionZero(_capture_ptr->getOriginFramePtr()->getTimeStamp()));
 
     auto motion_it = _capture_ptr->getBufferPtr()->get().begin();
     auto prev_motion_it = motion_it;
     motion_it++;
 
-    Eigen::MatrixXs jacobian_prev(delta_size_, delta_size_), jacobian_curr(delta_size_, delta_size_);
     while (motion_it != _capture_ptr->getBufferPtr()->get().end())
     {
-        deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, motion_it->delta_integr_, jacobian_prev,
-                       jacobian_curr);
-        deltaCovPlusDeltaCov(prev_motion_it->delta_integr_cov_, motion_it->delta_cov_, jacobian_prev, jacobian_curr,
-                             motion_it->delta_integr_cov_);
+        // get dt
+        const Scalar dt = motion_it->ts_ - prev_motion_it->ts_;
 
-        //std::cout << "\tmotion reintegrated: " << std::distance(_capture_ptr->getBufferPtr()->get().begin(), motion_it) << std::endl;
-        //std::cout << "\t\tts: " << motion_it->ts_.getSeconds() << "." << motion_it->ts_.getNanoSeconds() << std::endl;
-        //xPlusDelta(_capture_ptr->getOriginFramePtr()->getState(), motion_it->delta_integr_, x_);
-        //std::cout << "\t\tx_integrated_: " << x_.transpose() << std::endl;
+        // integrate delta into delta_integr
+        deltaPlusDelta(prev_motion_it->delta_integr_,
+                       motion_it->delta_,
+                       dt,
+                       motion_it->delta_integr_,
+                       jacobian_delta_preint_,
+                       jacobian_delta_);
 
+        // integrate covariances
+        delta_integrated_cov_ =   jacobian_delta_preint_ * getBufferPtr()->get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
+                                  + jacobian_delta_ * delta_cov_ * jacobian_delta_.transpose();
+
+        // XXX: Are we not pushing into buffer?
+
+        // advance in buffer
         motion_it++;
         prev_motion_it++;
     }
 }
 
-inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
+inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol)
 {
     assert(_keyframe_ptr->getTrajectoryPtr() != nullptr && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
     //std::cout << "ProcessorMotion::keyFrameCallback: ts = " << _keyframe_ptr->getTimeStamp().getSeconds() << "." << _keyframe_ptr->getTimeStamp().getNanoSeconds() << std::endl;
@@ -540,7 +549,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
     CaptureMotion* capture_ptr = findCaptureContainingTimeStamp(ts);
     assert(capture_ptr != nullptr && "ProcessorMotion::keyFrameCallback: no motion capture containing the required TimeStamp found");
 
-    FrameBase* key_capture_origin = capture_ptr->getOriginFramePtr();
+    FrameBasePtr key_capture_origin = capture_ptr->getOriginFramePtr();
 
     // create motion capture
     CaptureMotion* key_capture_ptr = new CaptureMotion(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
@@ -567,7 +576,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
     //std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
 
     // create motion constraint and add it to the new keyframe
-    FeatureBase* key_feature_ptr = new FeatureBase(FEATURE_MOTION, "MOTION",
+    FeatureBasePtr key_feature_ptr = new FeatureBase(FEATURE_MOTION, "MOTION",
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
@@ -582,13 +591,13 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBase* _keyframe_ptr, const Sc
 
     capture_ptr->setOriginFramePtr(_keyframe_ptr);
 
-    // reintegrate own buffer
+    // reintegrate own buffer // XXX: where is the result of re-integration stored?
     reintegrate(capture_ptr);
 
     // modify feature and constraint (if they exist)
     if (!capture_ptr->getFeatureListPtr()->empty())
     {
-        FeatureBase* feature_ptr = capture_ptr->getFeatureListPtr()->front();
+        FeatureBasePtr feature_ptr = capture_ptr->getFeatureListPtr()->front();
         // modify feature
         feature_ptr->setMeasurement(capture_ptr->getBufferPtr()->get().back().delta_integr_);
         feature_ptr->setMeasurementCovariance(capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
@@ -610,12 +619,17 @@ inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer
     last_ptr_->getBufferPtr()->split(_t_split, _oldest_part);
 }
 
-inline FrameBase* ProcessorMotion::makeFrame(CaptureBase* _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type)
+inline FrameBasePtr ProcessorMotion::makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
-    FrameBase* new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
+    FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
     return new_frame_ptr;
+}
+
+inline void ProcessorMotion::resetDerived()
+{
+    // Blank function, to be implemented in derived classes
 }
 
 inline bool ProcessorMotion::voteForKeyFrame()
@@ -631,7 +645,7 @@ inline Eigen::VectorXs& ProcessorMotion::getState(const TimeStamp& _ts)
 
 inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
-    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(_ts), _x);
+    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->getDelta(_ts), _ts - origin_ptr_->getTimeStamp(), _x);
 }
 
 inline const Eigen::VectorXs& ProcessorMotion::getCurrentState()
@@ -648,7 +662,8 @@ inline const Eigen::VectorXs& ProcessorMotion::getCurrentState(TimeStamp& _ts)
 
 inline const void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 {
-    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, _x);
+    Scalar Dt = getBufferPtr()->get().back().ts_ - origin_ptr_->getTimeStamp();
+    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBufferPtr()->get().back().delta_integr_, Dt, _x);
 }
 
 inline const void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts)
@@ -700,7 +715,7 @@ inline CaptureMotion* ProcessorMotion::findCaptureContainingTimeStamp(const Time
             return nullptr;
         else
         {
-            CaptureBase* capture_base_ptr = capture_ptr->getOriginFramePtr()->hasCaptureOf(getSensorPtr());
+            CaptureBasePtr capture_base_ptr = capture_ptr->getOriginFramePtr()->hasCaptureOf(getSensorPtr());
             if (capture_base_ptr == nullptr)
                 return nullptr;
             else
@@ -732,16 +747,24 @@ inline MotionBuffer* ProcessorMotion::getBufferPtr()
     return last_ptr_->getBufferPtr();
 }
 
+inline void ProcessorMotion::sumDeltas(CaptureMotion* _cap1_ptr, CaptureMotion* _cap2_ptr,
+                                       Eigen::VectorXs& _delta1_plus_delta2)
+{
+    Scalar dt = _cap2_ptr->getTimeStamp() - _cap1_ptr->getTimeStamp();
+    deltaPlusDelta(_cap1_ptr->getDelta(),_cap2_ptr->getDelta(), dt, _delta1_plus_delta2);
+}
+
 inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
 {
     return Motion(
             {_ts,
              deltaZero(),
              deltaZero(),
-             Eigen::MatrixXs::Zero(delta_size_, delta_size_),
-             Eigen::MatrixXs::Zero(delta_size_, delta_size_),
-             Eigen::MatrixXs::Identity(delta_size_, delta_size_),
-             Eigen::MatrixXs::Identity(delta_size_, delta_size_)});
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)
+//             Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_),
+//             Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_)
+             });
 }
 
 } // namespace wolf

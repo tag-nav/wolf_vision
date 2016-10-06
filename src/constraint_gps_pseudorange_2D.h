@@ -28,7 +28,7 @@ namespace wolf {
 class ConstraintGPSPseudorange2D : public ConstraintSparse<1, 2, 1, 3, 1, 3, 1>
 {
 public:
-    ConstraintGPSPseudorange2D(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+    ConstraintGPSPseudorange2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 2, 1, 3, 1, 3, 1>(CTR_GPS_PR_2D,
                                                   _apply_loss_function,
                                                   _status,

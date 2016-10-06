@@ -90,8 +90,8 @@ unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const unsigned int
     return new_features_last_.size();
 }
 
-ConstraintBase* ProcessorTrackerFeatureCorner::createConstraint(FeatureBase* _feature_ptr,
-                                                                FeatureBase* _feature_other_ptr)
+ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr _feature_ptr,
+                                                                FeatureBasePtr _feature_other_ptr)
 {
     // Getting landmark ptr
     LandmarkCorner2D* landmark_ptr = nullptr;

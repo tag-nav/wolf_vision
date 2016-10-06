@@ -3,6 +3,9 @@
 #define CAPTURE_LASER_2D_H_
 
 //wolf forward declarations
+namespace wolf{
+class SensorLaser2D;
+}
 
 //wolf includes
 #include "capture_base.h"
@@ -17,7 +20,7 @@ class CaptureLaser2D : public CaptureBase
     public:
         /** \brief Constructor with ranges
          **/
-        CaptureLaser2D(const TimeStamp& _ts, SensorBase* _sensor_ptr, const std::vector<float>& _ranges);
+        CaptureLaser2D(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const std::vector<float>& _ranges);
 
         /** \brief Default destructor (not recommended)
          *

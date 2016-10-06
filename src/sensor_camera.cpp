@@ -56,9 +56,9 @@ Eigen::Matrix3s SensorCamera::setIntrinsicMatrix(Eigen::Vector4s _pinhole_model)
 
 
 // Define the factory method
-SensorBase* SensorCamera::create(const std::string& _unique_name, //
+SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
                                  const Eigen::VectorXs& _extrinsics_pq, //
-                                 const IntrinsicsBase* _intrinsics)
+                                 const IntrinsicsBasePtr _intrinsics)
 {
     assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
 

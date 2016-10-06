@@ -81,7 +81,7 @@ class NodeLinked : public NodeBase
         bool is_deleting_; ///< This node is being deleted.
 
     private:
-        Problem* problem_ptr_;
+        ProblemPtr problem_ptr_;
 
     public:
 
@@ -197,11 +197,11 @@ class NodeLinked : public NodeBase
 
         /** \brief Gets a pointer to the tree top node - direct method
          **/
-        Problem* getProblem();
+        ProblemPtr getProblem();
 
         /** \brief Gets a pointer to the tree top node - recursive method
          **/
-        Problem* getTop();
+        ProblemPtr getTop();
 
 };
 
@@ -425,7 +425,7 @@ inline void NodeLinked<UpperType, LowerType>::unlinkDownNode(const LowerNodeIter
 }
 
 template<class UpperType, class LowerType>
-Problem* NodeLinked<UpperType, LowerType>::getProblem()
+ProblemPtr NodeLinked<UpperType, LowerType>::getProblem()
 {
     if (problem_ptr_ == nullptr)
         problem_ptr_ = getTop();
@@ -433,7 +433,7 @@ Problem* NodeLinked<UpperType, LowerType>::getProblem()
 }
 
 template<class UpperType, class LowerType>
-inline Problem* NodeLinked<UpperType, LowerType>::getTop()
+inline ProblemPtr NodeLinked<UpperType, LowerType>::getTop()
 {
     if (up_node_ptr_ != nullptr)
         return up_node_ptr_->getTop();

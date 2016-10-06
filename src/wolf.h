@@ -70,7 +70,7 @@ const Scalar EPS_SMALL = 1e-16;
  * - VectorXf   Vector of floats - defined by Eigen
  * - VectorXd   Vector of doubles - defined by Eigen
  * - VectorXs   Vector of either double of float, depending on the type \b Scalar, defined by Wolf.
- * 
+ *
  */
 namespace Eigen  // Eigen namespace extension
 {
@@ -101,17 +101,6 @@ typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of r
 
 namespace wolf {
 
-/** \brief Enumeration of node locations at Wolf Tree
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    TOP = 1,   ///< root node location. This is the one that commands jobs down the tree.
-    MID,   ///< middle nodes. These delegate jobs to lower nodes.
-    BOTTOM ///< lowest level nodes. These are the ones that do not delegate any longer and have to do the job.
-} NodeLocation;
-
 /** \brief Enumeration of all possible frames
  *
  * You may add items to this list as needed. Be concise with names, and document your entries.
@@ -131,7 +120,7 @@ typedef enum
     FRM_PO_2D = 1,  ///< 2D frame containing position (x,y) and orientation angle.
     FRM_PO_3D,      ///< 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
     FRM_POV_3D,     ///< 3D frame with position, orientation quaternion, and linear velocity (vx,vy,vz)
-    FRM_PQVBB_3D    ///< 3D frame with pos, orient quat, velocity, acc bias (abx,aby,abz), and gyro bias (wbx,wby,wbz).
+    FRM_PVQBB_3D    ///< 3D frame with pos, velocity, orient quat, acc bias (abx,aby,abz), and gyro bias (wbx,wby,wbz).
 } FrameStructure;
 
 /** \brief Enumeration of all possible constraints
@@ -153,7 +142,8 @@ typedef enum
     CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
     CTR_EPIPOLAR,               ///< Epipolar constraint
     CTR_AHP,                    ///< Anchored Homogeneous Point constraint
-    CTR_AHP_NL                  ///< Anchored Homogeneous Point constraint (temporal, to be removed)
+    CTR_AHP_NL,                 ///< Anchored Homogeneous Point constraint (temporal, to be removed)
+    CTR_IMU                     ///< IMU constraint
 
 } ConstraintType;
 
@@ -246,9 +236,10 @@ typedef enum
     FEATURE_FIX,
     FEATURE_GPS_FIX,
     FEATURE_GPS_PSEUDORANGE,
+    FEATURE_IMU,
     FEATURE_ODOM_2D,
     FEATURE_MOTION,
-    FEATURE_POINT_IMAGE, 
+    FEATURE_POINT_IMAGE,
     FEATURE_LINE_2D,
     FEATURE_POLYLINE_2D
 }FeatureType;
@@ -271,59 +262,68 @@ typedef enum
     LANDMARK_CANDIDATE = 1,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
     LANDMARK_ESTIMATED,   ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
     LANDMARK_FIXED,       ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
-    LANDMARK_OUT_OF_VIEW, ///< A landmark out of the field of view. Association with it is not allowed, so does not pose constraints for the solver
-    LANDMARK_OLD          ///< An old landmark. Association with it not allowed, but old constraints can still be taken into account by the solver.
 } LandmarkStatus;
 
 
 /////////////////////////////////////////////////////////////////////////
-//      TYPEDEFS FOR POINTERS AND ITERATORS IN THE WOLF TREE
+//      TYPEDEFS FOR POINTERS, LISTS AND ITERATORS IN THE WOLF TREE
 /////////////////////////////////////////////////////////////////////////
-// - forwards for pointers
 
-class NodeTerminus;
+// - forwards for pointers
+class NodeBase;
 class Problem;
-class MapBase;
-class LandmarkBase;
-class LandmarkCorner2D;
+class HardwareBase;
+class SensorBase;
+struct IntrinsicsBase;
+class ProcessorBase;
+struct ProcessorParamsBase;
 class TrajectoryBase;
 class FrameBase;
 class CaptureBase;
 class CaptureMotion;
-class CaptureLaser2D;
 class FeatureBase;
-class FeatureCorner2D;
-class FeaturePolyline2D;
 class ConstraintBase;
-class SensorBase;
-class SensorLaser2D;
-class TransSensor;
-class ProcessorBase;
+class MapBase;
+class LandmarkBase;
 class StateBlock;
+class StateQuaternion;
+class LocalParametrizationBase;
 
-
-// TODO: No seria millor que cada classe es defineixi aquests typedefs?
+// NodeBase
+typedef NodeBase* NodeBasePtr;
 
 //Problem
 typedef Problem* ProblemPtr;
 
-//Map
-typedef std::list<MapBase*> MapBaseList;
-typedef MapBaseList::iterator MapBaseIter;
+// Hardware
+typedef HardwareBase* HardwareBasePtr;
 
-//Landmark
-typedef std::list<LandmarkBase*> LandmarkBaseList;
-typedef LandmarkBaseList::iterator LandmarkBaseIter;
+// - Sensors
+typedef SensorBase* SensorBasePtr;
+typedef std::list<SensorBase*> SensorBaseList;
+typedef SensorBaseList::iterator SensorBaseIter;
 
-//Landmark corner 2D
-typedef std::list<LandmarkCorner2D*> LandmarkCorner2DList;
-typedef LandmarkCorner2DList::iterator LandmarkCorner2DIter;
+// Intrinsics
+typedef IntrinsicsBase* IntrinsicsBasePtr;
+
+// - Processors
+typedef ProcessorBase* ProcessorBasePtr;
+typedef std::list<ProcessorBase*> ProcessorBaseList;
+typedef ProcessorBaseList::iterator ProcessorBaseIter;
+
+// Processor params
+typedef ProcessorParamsBase* ProcessorParamsBasePtr;
+
+// - Trajectory
+typedef TrajectoryBase* TrajectoryBasePtr;
 
 // - Frame
+typedef FrameBase* FrameBasePtr;
 typedef std::list<FrameBase*> FrameBaseList;
 typedef FrameBaseList::iterator FrameBaseIter;
 
 // - Capture
+typedef CaptureBase* CaptureBasePtr;
 typedef std::list<CaptureBase*> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
@@ -332,99 +332,62 @@ typedef std::list<CaptureMotion*> CaptureRelativeList;
 typedef CaptureRelativeList::iterator CaptureRelativeIter;
 
 // - Feature
+typedef FeatureBase* FeatureBasePtr;
 typedef std::list<FeatureBase*> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
 
-// - Feature Corner 2D
-typedef std::list<FeatureCorner2D*> FeatureCorner2DList;
-typedef FeatureCorner2DList::iterator FeatureCorner2DIter;
-
-// - Feature Polyline 2D
-typedef std::list<FeaturePolyline2D*> FeaturePolyline2DList;
-typedef FeaturePolyline2DList::iterator FeaturePolyline2DIter;
-
 // - Constraint
+typedef ConstraintBase* ConstraintBasePtr;
 typedef std::list<ConstraintBase*> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
-// - Sensors
-typedef std::list<SensorBase*> SensorBaseList;
-typedef SensorBaseList::iterator SensorBaseIter;
+//Map
+typedef MapBase* MapBasePtr;
+typedef std::list<MapBasePtr> MapBaseList;
+typedef MapBaseList::iterator MapBaseIter;
 
-// - transSensor
-typedef std::map<unsigned int, TransSensor*> TransSensorMap;
-typedef TransSensorMap::iterator TransSensorIter;
+//Landmark
+typedef LandmarkBase* LandmarkBasePtr;
+typedef std::list<LandmarkBasePtr> LandmarkBaseList;
+typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
-// - Processors
-typedef std::list<ProcessorBase*> ProcessorBaseList;
-typedef ProcessorBaseList::iterator ProcessorBaseIter;
-
-// - State
-typedef std::list<StateBlock*> StateBlockList;
+// - State blocks
+typedef StateBlock* StateBlockPtr;
+typedef std::list<StateBlockPtr> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
+typedef StateQuaternion* StateQuaternionPtr;
 
+// Local Parametrization
+typedef LocalParametrizationBase* LocalParametrizationBasePtr;
 
 // Match Feature - Landmark
 struct LandmarkMatch
 {
-        LandmarkBase* landmark_ptr_;
+        LandmarkBasePtr landmark_ptr_;
         Scalar normalized_score_;
 };
 
 // Match map Feature - Landmark
-typedef std::map<FeatureBase*, LandmarkMatch*> LandmarkMatchMap;
-
-
-inline Scalar pi2pi(const Scalar& angle)
-{
-    return (angle > 0 ? fmod(angle + M_PI, 2 * M_PI) - M_PI : fmod(angle - M_PI, 2 * M_PI) + M_PI);
-}
+typedef std::map<FeatureBasePtr, LandmarkMatch*> LandmarkMatchMap;
 
 
 // Feature-Feature correspondence
 struct FeatureMatch
 {
-        FeatureBase* feature_ptr_;
+        FeatureBasePtr feature_ptr_;
         Scalar normalized_score_;
 };
 
-typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
+typedef std::map<FeatureBasePtr, FeatureMatch> FeatureMatchMap;
+
+
+
+inline const Eigen::Vector3s gravity(void) {
+    return Eigen::Vector3s(0,0,-9.8);
+}
+
 
 } // namespace wolf
-
-// Quaternion things
-namespace Eigen{
-inline void v2q(const Eigen::VectorXs& _v, Eigen::Quaternions& _q){
-    wolf::Scalar angle = _v.norm();
-    if (angle < wolf::Constants::EPS)
-        _q = Eigen::Quaternions::Identity();
-    else
-    {
-        _q = Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
-    }
-}
-
-inline void v2q(const Eigen::VectorXs& _v, Eigen::Map<Eigen::Quaternions>& _q){
-    wolf::Scalar angle = _v.norm();
-    if (angle < wolf::Constants::EPS)
-        _q = Eigen::Quaternions::Identity();
-    else
-    {
-        _q = Eigen::Quaternions(Eigen::AngleAxiss(angle, _v/angle));
-    }
-}
-
-inline void q2v(const Eigen::Quaternions& _q, Eigen::VectorXs& _v){
-    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
-    _v = aa.axis() * aa.angle();
-}
-
-inline void q2v(const Eigen::Map<const Eigen::Quaternions>& _q, Eigen::VectorXs& _v){
-    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
-    _v = aa.axis() * aa.angle();
-}
-
-}
 
 
 

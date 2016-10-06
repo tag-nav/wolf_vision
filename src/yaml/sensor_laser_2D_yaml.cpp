@@ -21,7 +21,7 @@ namespace wolf
 {
 namespace {
 // intrinsics creator
-IntrinsicsBase* createIntrinsicsLaser2D(const std::string& _filename_dot_yaml)
+IntrinsicsBasePtr createIntrinsicsLaser2D(const std::string& _filename_dot_yaml)
 {
     // TODO: Parse YAML <-- maybe we want this out of this file?
     IntrinsicsLaser2D* params; // dummy

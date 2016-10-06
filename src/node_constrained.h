@@ -38,11 +38,11 @@ class NodeConstrained : public NodeLinked<UpperType, LowerType>
         {
         }
 
-        virtual void addConstrainedBy(ConstraintBase* _ctr_ptr)
+        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr)
         {
             constrained_by_list_.push_back(_ctr_ptr);
         }
-        virtual void removeConstrainedBy(ConstraintBase* _ctr_ptr)
+        virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
         {
             constrained_by_list_.remove(_ctr_ptr);
         }

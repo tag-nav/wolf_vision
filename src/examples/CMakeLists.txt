@@ -1,5 +1,8 @@
+
 # Matrix product test
 #ADD_EXECUTABLE(test_matrix_prod test_matrix_prod.cpp)
+
+#ADD_EXECUTABLE(test_eigen_template test_eigen_template.cpp)
 
 # Map load and save test
 ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
@@ -17,16 +20,16 @@ ADD_EXECUTABLE(test_state_quaternion test_state_quaternion.cpp)
 TARGET_LINK_LIBRARIES(test_state_quaternion ${PROJECT_NAME})
 
 # NodeLinked class test
-ADD_EXECUTABLE(test_node_linked test_node_linked.cpp)
-TARGET_LINK_LIBRARIES(test_node_linked ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_node_linked test_node_linked.cpp)
+#TARGET_LINK_LIBRARIES(test_node_linked ${PROJECT_NAME})
 
 # Testing virtual hierarchy -- solving diamond of death
 ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
 TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
 
 # Testing Eigen Permutations
-ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
-TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
+#TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
 
 # Testing Sorting Key Frames
 ADD_EXECUTABLE(test_sort_keyframes test_sort_keyframes.cpp)
@@ -74,7 +77,7 @@ ENDIF(0)
 
 ENDIF(Suitesparse_FOUND)
 
-# Building and populating the wolf tree 
+# Building and populating the wolf tree
 # ADD_EXECUTABLE(test_wolf_tree test_wolf_tree.cpp)
 # TARGET_LINK_LIBRARIES(test_wolf_tree ${PROJECT_NAME})
 

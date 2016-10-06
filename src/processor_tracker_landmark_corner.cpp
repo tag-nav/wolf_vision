@@ -1,4 +1,5 @@
 #include "processor_tracker_landmark_corner.h"
+#include "rotations.h"
 
 namespace wolf
 {
@@ -50,8 +51,8 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
     Scalar dm2;
 
     // COMPUTING ALL EXPECTED FEATURES
-    std::map<LandmarkBase*, Eigen::Vector4s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Vector4s> > > expected_features;
-    std::map<LandmarkBase*, Eigen::Matrix3s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Matrix3s> > > expected_features_covs;
+    std::map<LandmarkBasePtr, Eigen::Vector4s, std::less<LandmarkBasePtr>, Eigen::aligned_allocator<std::pair<LandmarkBasePtr, Eigen::Vector4s> > > expected_features;
+    std::map<LandmarkBasePtr, Eigen::Matrix3s, std::less<LandmarkBasePtr>, Eigen::aligned_allocator<std::pair<LandmarkBasePtr, Eigen::Matrix3s> > > expected_features_covs;
     for (auto landmark : not_matched_landmarks)
         expectedFeature(landmark, expected_features[landmark], expected_features_covs[landmark]);
 
@@ -103,8 +104,8 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         unsigned int ii, jj;
 
         // COMPUTING ALL EXPECTED FEATURES
-        std::map<LandmarkBase*, Eigen::Vector4s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Vector4s> > > expected_features;
-        std::map<LandmarkBase*, Eigen::Matrix3s, std::less<LandmarkBase*>, Eigen::aligned_allocator<std::pair<LandmarkBase*, Eigen::Matrix3s> > > expected_features_covs;
+        std::map<LandmarkBasePtr, Eigen::Vector4s, std::less<LandmarkBasePtr>, Eigen::aligned_allocator<std::pair<LandmarkBasePtr, Eigen::Vector4s> > > expected_features;
+        std::map<LandmarkBasePtr, Eigen::Matrix3s, std::less<LandmarkBasePtr>, Eigen::aligned_allocator<std::pair<LandmarkBasePtr, Eigen::Matrix3s> > > expected_features_covs;
         for (auto landmark : _landmarks_corner_searched)
             expectedFeature(landmark, expected_features[landmark], expected_features_covs[landmark]);
         //std::cout << "expected features!" << std::endl;
@@ -278,7 +279,7 @@ void ProcessorTrackerLandmarkCorner::extractCorners(CaptureLaser2D* _capture_las
     }*/
 }
 
-void ProcessorTrackerLandmarkCorner::expectedFeature(LandmarkBase* _landmark_ptr, Eigen::Vector4s& expected_feature_,
+void ProcessorTrackerLandmarkCorner::expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::Vector4s& expected_feature_,
                                                    Eigen::Matrix3s& expected_feature_cov_)
 {
     //std::cout << "ProcessorTrackerLandmarkCorner::expectedFeature: " << std::endl;
@@ -295,7 +296,7 @@ void ProcessorTrackerLandmarkCorner::expectedFeature(LandmarkBase* _landmark_ptr
     // ------------ expected feature covariance
     Eigen::MatrixXs Sigma = Eigen::MatrixXs::Zero(6, 6);
     // closer keyframe with computed covariance
-    FrameBase* key_frame_ptr = (origin_ptr_ != nullptr ? origin_ptr_->getFramePtr() : nullptr);
+    FrameBasePtr key_frame_ptr = (origin_ptr_ != nullptr ? origin_ptr_->getFramePtr() : nullptr);
     // If all covariance blocks are stored wolfproblem (filling upper diagonal only)
     if (key_frame_ptr != nullptr &&
         // Sigma_rr
@@ -327,7 +328,7 @@ void ProcessorTrackerLandmarkCorner::expectedFeature(LandmarkBase* _landmark_ptr
         expected_feature_cov_ = Eigen::Matrix3s::Identity()*0.1;
 }
 
-Eigen::VectorXs ProcessorTrackerLandmarkCorner::computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr,
+Eigen::VectorXs ProcessorTrackerLandmarkCorner::computeSquaredMahalanobisDistances(const FeatureBasePtr _feature_ptr,
                                                                           const Eigen::Vector4s& _expected_feature,
                                                                           const Eigen::Matrix3s& _expected_feature_cov,
                                                                           const Eigen::MatrixXs& _mu)
@@ -356,7 +357,7 @@ Eigen::VectorXs ProcessorTrackerLandmarkCorner::computeSquaredMahalanobisDistanc
     return squared_mahalanobis_distances;
 }
 
-ProcessorBase* ProcessorTrackerLandmarkCorner::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+ProcessorBasePtr ProcessorTrackerLandmarkCorner::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
     ProcessorParamsLaser* params = (ProcessorParamsLaser*)_params;
     ProcessorTrackerLandmarkCorner* prc_ptr = new ProcessorTrackerLandmarkCorner(params->line_finder_params_, params->new_corners_th, params->loop_frames_th);

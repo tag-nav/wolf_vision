@@ -8,7 +8,9 @@ unsigned int SensorBase::sensor_id_count_ = 0;
 
 SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr,
                        const unsigned int _noise_size, const bool _extr_dyn) :
-        NodeLinked(MID, "SENSOR", _type),
+        NodeBase("SENSOR", _type),
+        problem_ptr_(nullptr),
+        hardware_ptr_(nullptr),
         sensor_id_(++sensor_id_count_), // simple ID factory
         type_id_(_tp),
         p_ptr_(_p_ptr),
@@ -23,7 +25,9 @@ SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlo
 
 SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr,
                        const Eigen::VectorXs & _noise_std, const bool _extr_dyn) :
-        NodeLinked(MID, "SENSOR", _type),
+        NodeBase("SENSOR", _type),
+        problem_ptr_(nullptr),
+        hardware_ptr_(nullptr),
         sensor_id_(++sensor_id_count_), // simple ID factory
         type_id_(_tp),
         p_ptr_(_p_ptr),
@@ -40,6 +44,7 @@ SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBl
 
 SensorBase::~SensorBase()
 {
+    is_deleting_ = true;
     // Remove State Blocks
     if (p_ptr_ != nullptr && !extrinsic_dynamic_)
     {
@@ -61,6 +66,13 @@ SensorBase::~SensorBase()
             getProblem()->removeStateBlockPtr(intrinsic_ptr_);
         delete intrinsic_ptr_;
     }
+
+    while (!processor_list_.empty())
+    {
+        delete processor_list_.front();
+        processor_list_.pop_front();
+    }
+
 
 }
 

@@ -42,7 +42,7 @@ unsigned int ProcessorTrackerLandmark2::processNew(const unsigned int& _max_feat
     for (auto new_feature_ptr : new_features_last_)
     {
         // create new landmark
-        LandmarkBase* new_lmk_ptr = createLandmark(new_feature_ptr);
+        LandmarkBasePtr new_lmk_ptr = createLandmark(new_feature_ptr);
         new_landmarks.push_back(new_lmk_ptr);
         // create new correspondence
         matches_landmark_from_last_[new_feature_ptr] = LandmarkMatch(new_lmk_ptr, 1); // max score

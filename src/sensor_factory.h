@@ -79,11 +79,11 @@ namespace wolf
  * The method SensorCamera::create() exists in the SensorCamera class as a static method.
  * All these ````SensorXxx::create()```` methods need to have exactly the same API, regardless of the sensor type.
  * This API includes a sensor name, a vector of extrinsic parameters,
- * and a pointer to a base struct of intrinsic parameters, IntrinsicsBase*,
+ * and a pointer to a base struct of intrinsic parameters, IntrinsicsBasePtr,
  * that can be derived for each derived sensor:
  *
  *      \code
- *      static SensorBase* create(const std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
+ *      static SensorBasePtr create(const std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBasePtr _intrinsics)
  *      \endcode
  *
  * See further down for an implementation example.
@@ -128,7 +128,7 @@ namespace wolf
  * Here is an example of SensorCamera::create() extracted from sensor_camera.cpp:
  *
  *     \code
- *      static SensorBase* create(const std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBase* _intrinsics)
+ *      static SensorBasePtr create(const std::string& _name, Eigen::VectorXs& _extrinsics_pq, IntrinsicsBasePtr _intrinsics)
  *      {
  *          // check extrinsics vector
  *          assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
@@ -195,7 +195,7 @@ namespace wolf
  *      Eigen::VectorXs   extrinsics_1(7);        // give it some values...
  *      IntrinsicsCamera  intrinsics_1({...});    // see IntrinsicsFactory to fill in the derived struct
  *
- *      SensorBase* camera_1_ptr =
+ *      SensorBasePtr camera_1_ptr =
  *          SensorFactory::get().create ( "CAMERA" , "Front-left camera" , extrinsics_1 , &intrinsics_1 );
  *
  *      // A second camera... with a different name!
@@ -203,7 +203,7 @@ namespace wolf
  *      Eigen::VectorXs   extrinsics_2(7);
  *      IntrinsicsCamera  intrinsics_2({...});
  *
- *      SensorBase* camera_2_ptr =
+ *      SensorBasePtr camera_2_ptr =
  *          SensorFactory::get().create( "CAMERA" , "Front-right camera" , extrinsics_2 , &intrinsics_2 );
  *
  *      return 0;
@@ -212,6 +212,21 @@ namespace wolf
  *
  * You can also check the code in the example file ````src/examples/test_wolf_factories.cpp````.
  */
+//<<<<<<< HEAD
+//=======
+//class SensorFactory
+//{
+//    public:
+//        typedef SensorBasePtr (*CreateSensorCallback)(const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBasePtr _intrinsics);
+//    private:
+//        typedef std::map<std::string, CreateSensorCallback> CallbackMap;
+//    public:
+//        bool registerCreator(const std::string& _sensor_type, CreateSensorCallback createFn);
+//        bool unregisterCreator(const std::string& _sensor_type);
+//        SensorBasePtr create(const std::string& _sensor_type, const std::string& _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBasePtr _intrinsics = nullptr);
+//    private:
+//        CallbackMap callbacks_;
+//>>>>>>> node-linked-removed
 
 typedef Factory<SensorBase,
                 const std::string&,

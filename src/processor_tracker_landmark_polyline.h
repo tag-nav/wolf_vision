@@ -134,7 +134,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
          */
-        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr);
+        virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
 
         /** \brief Establish constraints between features in Captures \b last and \b origin
          */
@@ -153,13 +153,13 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem. JV: I disagree..
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
     private:
 
         void extractPolylines(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _polyline_list);
 
-        void expectedFeature(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& expected_feature_,
+        void expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& expected_feature_,
                              Eigen::MatrixXs& expected_feature_cov_);
 
         Eigen::VectorXs computeSquaredMahalanobisDistances(const Eigen::Vector2s& _feature,
@@ -171,7 +171,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
                                bool _A_extreme, bool _B_extreme);
     // Factory method
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
 };
 
 inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params) :

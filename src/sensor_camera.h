@@ -62,9 +62,9 @@ class SensorCamera : public SensorBase
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
-        static SensorBase* create(const std::string & _unique_name, //
+        static SensorBasePtr create(const std::string & _unique_name, //
                                   const Eigen::VectorXs& _extrinsics, //
-                                  const IntrinsicsBase* _intrinsics);
+                                  const IntrinsicsBasePtr _intrinsics);
 
 };
 

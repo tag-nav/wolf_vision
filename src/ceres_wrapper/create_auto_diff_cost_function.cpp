@@ -19,7 +19,7 @@
 #include "../constraint_point_to_line_2D.h"
 #include "../constraint_container.h"
 #include "../constraint_AHP.h"
-
+#include "../constraint_imu.h"
 
 // Wolf and ceres auto_diff creators
 #include "create_auto_diff_cost_function_wrapper.h"
@@ -27,7 +27,7 @@
 
 namespace wolf {
 
-ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _use_wolf_autodiff)
+ceres::CostFunction* createAutoDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool _use_wolf_autodiff)
 {
     switch (_ctr_ptr->getTypeId())
     {
@@ -97,6 +97,11 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _
             else
                 return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
 
+        case CTR_IMU:
+            if (_use_wolf_autodiff)
+                return createAutoDiffCostFunctionWrapper<ConstraintIMU>(_ctr_ptr);
+            else
+                return createAutoDiffCostFunctionCeres<ConstraintIMU>(_ctr_ptr);
 
             /* For adding a new constraint, add the #include and a case:
             case CTR_ENUM:

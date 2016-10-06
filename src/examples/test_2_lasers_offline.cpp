@@ -154,9 +154,9 @@ int main(int argc, char** argv)
     odom_params.dist_traveled_th_ = 5;
     odom_params.elapsed_time_th_ = 10;
     ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.installProcessor("ODOM 2D", "main odometry", odom_sensor, &odom_params);
-    //SensorBase* gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
-    SensorBase* laser_1_sensor = problem.installSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
-    SensorBase* laser_2_sensor = problem.installSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
+    //SensorBasePtr gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
+    SensorBasePtr laser_1_sensor = problem.installSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
+    SensorBasePtr laser_2_sensor = problem.installSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
     problem.installProcessor("LASER 2D", "front laser processor", laser_1_sensor, &laser_1_processor_params);
     problem.installProcessor("LASER 2D", "rear laser processor", laser_2_sensor, &laser_2_processor_params);
 

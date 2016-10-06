@@ -5,106 +5,152 @@
 namespace wolf{
 class FrameBase;
 class FeatureBase;
-class SensorBase;
 }
 
 //Wolf includes
 #include "wolf.h"
+#include "node_base.h"
 #include "time_stamp.h"
-#include "node_linked.h"
 
 //std includes
 //
 
 namespace wolf{
 
-
 //class CaptureBase
-class CaptureBase : public NodeLinked<FrameBase, FeatureBase>
+class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
 {
     private:
+        ProblemPtr problem_ptr_;
+        FrameBasePtr frame_ptr_;
+        FeatureBaseList feature_list_;
+
         static unsigned int capture_id_count_;
+
     protected:
         unsigned int capture_id_;
         TimeStamp time_stamp_; ///< Time stamp
-        SensorBase* sensor_ptr_; ///< Pointer to sensor
-
-        // Allow precomputing global frames for accelerating code.
-        //Eigen::Vector3s sensor_pose_global_; ///< Sensor pose in world frame: composition of the frame pose and the sensor pose. TODO: use state units
-        //Eigen::Vector3s inverse_sensor_pose_; ///< World pose in the sensor frame: inverse of the global_pose_. TODO: use state units
+        SensorBasePtr sensor_ptr_; ///< Pointer to sensor
 
         // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
-        StateBlock* sensor_p_ptr_; //TODO: initialize this at construction time; delete it at destruction time
-        StateBlock* sensor_o_ptr_; //TODO: initialize this at construction time; delete it at destruction time
+        StateBlock* sensor_p_ptr_;
+        StateBlock* sensor_o_ptr_;
 
     public:
 
-        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBase* _sensor_ptr);
+        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr);
 
         /** \brief Default destructor (not recommended)
          *
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
          **/
         virtual ~CaptureBase();
+        void destruct();
 
         unsigned int id();
-
-        /** \brief Adds a Feature to the down node list
-         **/
-        FeatureBase* addFeature(FeatureBase* _ft_ptr);
-
-        /** \brief Gets Frame pointer
-         **/
-        FrameBase* getFramePtr() const;
-
-        /** \brief Gets a pointer to feature list
-         **/
-        FeatureBaseList* getFeatureListPtr();
-
-        /** \brief Fills the provided list with all constraints related to this capture
-         **/
-        //TODO: Check if it could be removed. THen remove it also at every wolf tree level.
-        void getConstraintList(ConstraintBaseList & _ctr_list);
-
         TimeStamp getTimeStamp() const;
-
-        SensorBase* getSensorPtr() const;
-
-        StateBlock* getSensorPPtr() const;
-
-        StateBlock* getSensorOPtr() const;
-
         void setTimeStamp(const TimeStamp& _ts);
-
         void setTimeStampToNow();
+
+        ProblemPtr getProblem();
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
+
+        FrameBasePtr getFramePtr() const;
+        void setFramePtr(const FrameBasePtr _frm_ptr);
+        void unlinkFromFrame(){frame_ptr_ = nullptr;}
+
+        FeatureBasePtr addFeature(FeatureBasePtr _ft_ptr);
+        FeatureBaseList* getFeatureListPtr();
+        void addFeatureList(FeatureBaseList& _new_ft_list);
+        void removeFeature(FeatureBasePtr _ft_ptr);
+
+        void getConstraintList(ConstraintBaseList& _ctr_list);
+
+        SensorBasePtr getSensorPtr() const;
+        StateBlock* getSensorPPtr() const;
+        StateBlock* getSensorOPtr() const;
 
         /** \brief Call all the processors for this Capture
          */
-        virtual void process(); 
+        virtual void process();
 
 };
+
+}
+
+#include "sensor_base.h"
+#include "frame_base.h"
+#include "feature_base.h"
+
+namespace wolf{
+
+inline ProblemPtr CaptureBase::getProblem()
+{
+    if (problem_ptr_ == nullptr && frame_ptr_ != nullptr)
+        setProblem(frame_ptr_->getProblem());
+
+    return problem_ptr_;
+}
+
+inline wolf::StateBlock* CaptureBase::getSensorPPtr() const
+{
+    if (getSensorPtr()->isExtrinsicDynamic())
+        return sensor_p_ptr_;
+    else
+        return getSensorPtr()->getPPtr();
+}
+
+inline wolf::StateBlock* CaptureBase::getSensorOPtr() const
+{
+    if (getSensorPtr()->isExtrinsicDynamic())
+        return sensor_o_ptr_;
+    else
+        return getSensorPtr()->getOPtr();
+}
+
+
+inline void CaptureBase::removeFeature(FeatureBasePtr _ft_ptr)
+{
+    feature_list_.remove(_ft_ptr);
+    delete _ft_ptr;
+}
 
 inline unsigned int CaptureBase::id()
 {
     return capture_id_;
 }
 
-inline FeatureBase* CaptureBase::addFeature(FeatureBase* _ft_ptr)
+inline FeatureBasePtr CaptureBase::addFeature(FeatureBasePtr _ft_ptr)
 {
     //std::cout << "Adding feature" << std::endl;
-    addDownNode(_ft_ptr);
+    feature_list_.push_back(_ft_ptr);
+    _ft_ptr->setCapturePtr(this);
+    _ft_ptr->setProblem(getProblem());
+//    addDownNode(_ft_ptr);
     return _ft_ptr;
 }
 
-inline FrameBase* CaptureBase::getFramePtr() const
+inline FrameBasePtr CaptureBase::getFramePtr() const
 {
-    return upperNodePtr();
+    return frame_ptr_;
+//    return upperNodePtr();
+}
+
+inline void CaptureBase::setFramePtr(const FrameBasePtr _frm_ptr)
+{
+    frame_ptr_ = _frm_ptr;
 }
 
 inline FeatureBaseList* CaptureBase::getFeatureListPtr()
 {
-    return getDownNodeListPtr();
+    return & feature_list_;
+//    return getDownNodeListPtr();
+}
+
+inline void CaptureBase::getConstraintList(ConstraintBaseList& _ctr_list)
+{
+    for (FeatureBasePtr f_ptr : *getFeatureListPtr())
+        f_ptr->getConstraintList(_ctr_list);
 }
 
 inline TimeStamp CaptureBase::getTimeStamp() const
@@ -112,7 +158,7 @@ inline TimeStamp CaptureBase::getTimeStamp() const
     return time_stamp_;
 }
 
-inline SensorBase* CaptureBase::getSensorPtr() const
+inline SensorBasePtr CaptureBase::getSensorPtr() const
 {
     return sensor_ptr_;
 }

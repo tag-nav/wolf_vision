@@ -4,14 +4,15 @@
 // Fwd refs
 namespace wolf{
 class SensorBase;
-class NodeTerminus;
 }
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
+#include "node_base.h"
 
 namespace wolf {
+
+
 
 /** \brief base struct for processor parameters
  *
@@ -24,8 +25,11 @@ struct ProcessorParamsBase
 };
 
 //class ProcessorBase
-class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
+class ProcessorBase : public NodeBase // NodeLinked<SensorBase, NodeTerminus>
 {
+    private:
+        ProblemPtr problem_ptr_;
+        SensorBasePtr sensor_ptr_;
     public:
         ProcessorBase(ProcessorType _tp, const std::string& _type, const Scalar& _time_tolerance = 0);
 
@@ -35,10 +39,11 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
          *
          **/
         virtual ~ProcessorBase();
+        void destruct();
 
         unsigned int id();
 
-        virtual void process(CaptureBase* _capture_ptr) = 0;
+        virtual void process(CaptureBasePtr _capture_ptr) = 0;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -53,14 +58,18 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
 
         /**\brief make a Frame with the provided Capture
          */
-        virtual void makeFrame(CaptureBase* _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
+        virtual void makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
 
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tolerance) = 0;
+        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tolerance) = 0;
 
-        SensorBase* getSensorPtr();
-        const SensorBase* getSensorPtr() const;
+        SensorBasePtr getSensorPtr();
+        const SensorBasePtr getSensorPtr() const;
+        void setSensorPtr(SensorBasePtr _sen_ptr){sensor_ptr_ = _sen_ptr;}
 
         virtual bool isMotion();
+
+        ProblemPtr getProblem();
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
     private:
         static unsigned int processor_id_count_;
@@ -71,30 +80,59 @@ class ProcessorBase : public NodeLinked<SensorBase, NodeTerminus>
         Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
 };
 
+}
+
+#include "sensor_base.h"
+#include "constraint_base.h"
+
+namespace wolf {
+
+inline wolf::ProblemPtr ProcessorBase::getProblem()
+{
+    if (problem_ptr_ == nullptr && sensor_ptr_ != nullptr)
+        problem_ptr_ = sensor_ptr_->getProblem();
+    return problem_ptr_;
+
+}
+
+inline void ProcessorBase::destruct()
+{
+    if (!is_deleting_)
+    {
+        if (sensor_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            sensor_ptr_->removeProcessor(this);
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
+}
+
+
 inline bool ProcessorBase::isMotion()
 {
     return false;
 }
-
-}
-
-//#include "problem.h"
-
-namespace wolf {
 
 inline unsigned int ProcessorBase::id()
 {
     return processor_id_;
 }
 
-inline SensorBase* ProcessorBase::getSensorPtr()
+inline SensorBasePtr ProcessorBase::getSensorPtr()
 {
-    return upperNodePtr();
+    return sensor_ptr_;
+//    return upperNodePtr();
 }
 
-inline const SensorBase* ProcessorBase::getSensorPtr() const
+inline const SensorBasePtr ProcessorBase::getSensorPtr() const
 {
-    return upperNodePtr();
+    return sensor_ptr_;
+//    return upperNodePtr();
 }
 
 } // namespace wolf

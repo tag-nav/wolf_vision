@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
 
     // Wolf problem
-    Problem* wolf_problem_ptr_ = new Problem(FRM_PO_3D);
+    ProblemPtr wolf_problem_ptr_ = new Problem(FRM_PO_3D);
 
     //=====================================================
     // Method 1: Use data generated here for sensor and processor
@@ -125,9 +125,8 @@ int main(int argc, char** argv)
     const Eigen::VectorXs extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
-    std::cout << "TEST: " << wolf_path << "/src/examples/camera_params.yaml" << std::endl;
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
 
-    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
     SensorCamera* camera_ptr_ = (SensorCamera*)sensor_ptr;
 
 

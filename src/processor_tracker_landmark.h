@@ -143,7 +143,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
          */
-        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr) = 0;
+        virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr) = 0;
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
@@ -154,7 +154,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr) = 0;
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr) = 0;
 
         /** \brief Establish constraints between features in Captures \b last and \b origin
          */
@@ -165,13 +165,13 @@ class ProcessorTrackerLandmark : public ProcessorTracker
 }// namespace wolf
 
 // IMPLEMENTATION
+#include "landmark_base.h"
 
 #include <utility>
 namespace wolf
 {
 inline void ProcessorTrackerLandmark::advance()
 {
-    //std::cout << "ProcessorTrackerLandmark::advance" << std::endl;
     for ( auto match : matches_landmark_from_last_)
     {
         delete match.second;
@@ -182,8 +182,8 @@ inline void ProcessorTrackerLandmark::advance()
 
     new_features_last_ = std::move(new_features_incoming_);
 
-    //for (auto match : matches_landmark_from_last_)
-    //        std::cout << "\t" << match.first->id() << " to " << match.second->landmark_ptr_->id() << std::endl;
+    for (auto match : matches_landmark_from_last_)
+            std::cout << "\t" << match.first->id() << " to " << match.second->landmark_ptr_->id() << std::endl;
 }
 
 inline void ProcessorTrackerLandmark::reset()

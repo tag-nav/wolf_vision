@@ -3,19 +3,23 @@
 
 // Fwd dependencies
 namespace wolf{
-class SensorBase;
 class Problem;
+class SensorBase;
 }
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
+#include "node_base.h"
 
 namespace wolf {
 
 //class HardwareBase
-class HardwareBase : public NodeLinked<Problem, SensorBase>
+class HardwareBase : public NodeBase //: public NodeLinked<Problem, SensorBase>
 {
+    private:
+        ProblemPtr problem_ptr_;
+        SensorBaseList sensor_list_;
+
     public:
         HardwareBase();
 
@@ -25,31 +29,40 @@ class HardwareBase : public NodeLinked<Problem, SensorBase>
          *
          **/
         virtual ~HardwareBase();
+        void destruct()
+        {
+            if (!is_deleting_)
+                delete this;
+        }
 
-        virtual SensorBase* addSensor(SensorBase* _sensor_ptr);
+        ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
-        void removeSensor(const SensorBaseIter& _sensor_iter);
-
-        void removeSensor(SensorBase* _sensor_ptr);
-
+        virtual SensorBasePtr addSensor(SensorBasePtr _sensor_ptr);
         SensorBaseList* getSensorListPtr();
-
+        void removeSensor(const SensorBaseIter& _sensor_iter);
+        void removeSensor(SensorBasePtr _sensor_ptr);
 };
 
 } // namespace wolf
 
 // IMPLEMENTATION
 
+#include "sensor_base.h"
+
 namespace wolf {
 
 inline void HardwareBase::removeSensor(const SensorBaseIter& _sensor_iter)
 {
-    removeDownNode(_sensor_iter);
+    sensor_list_.erase(_sensor_iter);
+    delete * _sensor_iter;
+//    removeDownNode(_sensor_iter);
 }
 
 inline SensorBaseList* HardwareBase::getSensorListPtr()
 {
-    return getDownNodeListPtr();
+    return & sensor_list_;
+//    return getDownNodeListPtr();
 }
 
 } // namespace wolf

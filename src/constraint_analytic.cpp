@@ -13,7 +13,7 @@ ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, bool _apply_loss_func
     resizeVectors();
 }
 
-ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
+ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
                                        StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
                                        StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
             ConstraintBase(_tp, _frame_ptr, _apply_loss_function, _status),
@@ -23,7 +23,7 @@ ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, FrameBase* _frame_ptr
     resizeVectors();
 }
 
-ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, FeatureBase* _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
+ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
                                        StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
                                        StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
             ConstraintBase( _tp, _feature_ptr, _apply_loss_function, _status),
@@ -34,7 +34,7 @@ ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, FeatureBase* _feature
 }
 
 
-ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
+ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
                                        StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
                                        StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
             ConstraintBase( _tp, _landmark_ptr, _apply_loss_function, _status),

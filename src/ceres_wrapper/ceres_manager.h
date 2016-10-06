@@ -42,11 +42,11 @@ class CeresManager
 		ceres::Problem* ceres_problem_;
 		ceres::Solver::Options ceres_options_;
 		ceres::Covariance* covariance_;
-		Problem* wolf_problem_;
+		ProblemPtr wolf_problem_;
 		bool use_wolf_auto_diff_;
 
 	public:
-        CeresManager(Problem* _wolf_problem, const ceres::Solver::Options& _ceres_options = ceres::Solver::Options(), const bool _use_wolf_auto_diff = true);
+        CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Options& _ceres_options = ceres::Solver::Options(), const bool _use_wolf_auto_diff = true);
 
 		~CeresManager();
 
@@ -62,7 +62,7 @@ class CeresManager
 
 		void update();
 
-		void addConstraint(ConstraintBase* _corr_ptr, unsigned int _id);
+		void addConstraint(ConstraintBasePtr _corr_ptr, unsigned int _id);
 
 		void removeConstraint(const unsigned int& _corr_idx);
 
@@ -74,7 +74,7 @@ class CeresManager
 
 		void updateStateBlockStatus(StateBlock* _st_ptr);
 
-		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr);
+		ceres::CostFunction* createCostFunction(ConstraintBasePtr _corrPtr);
 };
 
 inline ceres::Solver::Options& CeresManager::getSolverOptions()

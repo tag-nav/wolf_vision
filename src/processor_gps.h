@@ -31,13 +31,13 @@ class ProcessorGPS : public ProcessorBase
     public:
         ProcessorGPS();
         virtual ~ProcessorGPS();
-        virtual void init(CaptureBase* _capture_ptr);
-        virtual void process(CaptureBase* _capture_ptr);
+        virtual void init(CaptureBasePtr _capture_ptr);
+        virtual void process(CaptureBasePtr _capture_ptr);
         virtual bool voteForKeyFrame();
-        virtual bool keyFrameCallback(wolf::FrameBase*, const Scalar& _time_tol);
+        virtual bool keyFrameCallback(wolf::FrameBasePtr, const Scalar& _time_tol);
 
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
 
 };
 

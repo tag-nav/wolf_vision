@@ -7,8 +7,12 @@ namespace wolf {
 unsigned int FeatureBase::feature_id_count_ = 0;
 
 FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, unsigned int _dim_measurement) :
-    NodeConstrained(MID, "FEATURE", _type),
+    NodeBase("FEATURE", _type),
+    problem_ptr_(nullptr),
+    capture_ptr_(nullptr),
     feature_id_(++feature_id_count_),
+    track_id_(0),
+    landmark_id_(0),
     type_id_(_tp),
     measurement_(_dim_measurement)
 {
@@ -16,8 +20,12 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, unsigned int
 }
 
 FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
-	NodeConstrained(MID, "FEATURE", _type),
+	NodeBase("FEATURE", _type),
+    problem_ptr_(nullptr),
+    capture_ptr_(nullptr),
     feature_id_(++feature_id_count_),
+    track_id_(0),
+    landmark_id_(0),
     type_id_(_tp),
 	measurement_(_measurement),
 	measurement_covariance_(_meas_covariance)
@@ -33,18 +41,35 @@ FeatureBase::~FeatureBase()
 	//std::cout << "deleting FeatureBase " << nodeId() << std::endl;
     is_deleting_ = true;
 
-    while (!getConstrainedByListPtr()->empty())
+    while (!constrained_by_list_.empty())
     {
         //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-        getConstrainedByListPtr()->front()->destruct();
+        constrained_by_list_.front()->destruct();
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
+
+    while (!constraint_list_.empty())
+    {
+        delete constraint_list_.front();
+        constraint_list_.pop_front();
+    }
+
 }
 
-ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
+void FeatureBase::setProblem(ProblemPtr _prob_ptr)
 {
-    addDownNode(_co_ptr);
+    problem_ptr_ = _prob_ptr;
+}
+
+
+
+ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
+{
+    constraint_list_.push_back(_co_ptr);
+    _co_ptr->setFeaturePtr(this);
+    _co_ptr->setProblem(getProblem());
+//    addDownNode(_co_ptr);
     // add constraint to be added in solver
     if (getProblem() != nullptr)
         getProblem()->addConstraintPtr(_co_ptr);
@@ -53,20 +78,39 @@ ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
     return _co_ptr;
 }
 
-FrameBase* FeatureBase::getFramePtr() const
+FrameBasePtr FeatureBase::getFramePtr() const
 {
-    return upperNodePtr()->upperNodePtr();
+    return capture_ptr_->getFramePtr();
+//    return upperNodePtr()->upperNodePtr();
 }
 
 ConstraintBaseList* FeatureBase::getConstraintListPtr()
 {
-    return getDownNodeListPtr();
+    return & constraint_list_;
+//    return getDownNodeListPtr();
 }
 
 void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
-	for(auto c_it = getConstraintListPtr()->begin(); c_it != getConstraintListPtr()->end(); ++c_it)
-		_ctr_list.push_back((*c_it));
+	for(ConstraintBasePtr c_ptr : *getConstraintListPtr())
+		_ctr_list.push_back(c_ptr);
+}
+
+void FeatureBase::destruct()
+{
+    if (!is_deleting_)
+    {
+        if (capture_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            capture_ptr_->removeFeature(this);
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
 }
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
@@ -77,6 +121,5 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse(); // retrieve factor U  in the decomposition
 }
-
 
 } // namespace wolf

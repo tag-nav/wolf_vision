@@ -20,7 +20,7 @@ namespace wolf
 
 namespace
 {
-static IntrinsicsBase* createIntrinsicsCamera(const std::string & _filename_dot_yaml)
+static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_dot_yaml)
 {
     YAML::Node camera_config = YAML::LoadFile(_filename_dot_yaml);
 

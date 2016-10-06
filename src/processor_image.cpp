@@ -107,7 +107,7 @@ void ProcessorImage::postProcess()
 //    drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
 }
 
-bool ProcessorImage::correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature)
+bool ProcessorImage::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
 {
     std::vector<cv::DMatch> matches_mat;
     FeaturePointImage* feat_incoming_ptr = (FeaturePointImage*)_incoming_feature;
@@ -275,14 +275,14 @@ void ProcessorImage::filterFeatureLists(FeatureBaseList _original_list, FeatureB
     unsigned int counter_repeated_features = 0;
     unsigned int counter_total_repeated_features = 0;
 
-    for (std::list<FeatureBase*>::const_iterator first_feature_iterator = _original_list.begin();
+    for (std::list<FeatureBasePtr>::const_iterator first_feature_iterator = _original_list.begin();
                                                  first_feature_iterator != _original_list.end();
                                                  first_feature_iterator++)
     {
         FeaturePointImage* tested_feature_ptr = (FeaturePointImage*)*first_feature_iterator;
         bool repeated_feature = false;
 
-        for (std::list<FeatureBase*>::const_iterator second_feature_iterator = first_feature_iterator;
+        for (std::list<FeatureBasePtr>::const_iterator second_feature_iterator = first_feature_iterator;
                                                      second_feature_iterator != _original_list.begin();
                                                      second_feature_iterator--)
         {
@@ -492,7 +492,7 @@ void ProcessorImage::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::
     cv::imshow("Feature tracker", _image);
 }
 
-void ProcessorImage::drawFeatures(CaptureBase* const _last_ptr)
+void ProcessorImage::drawFeatures(CaptureBasePtr const _last_ptr)
 {
     for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
     {
@@ -511,7 +511,7 @@ void ProcessorImage::drawFeatures(CaptureBase* const _last_ptr)
 }
 
 
-ProcessorBase* ProcessorImage::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+ProcessorBasePtr ProcessorImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
     ProcessorImage* prc_ptr = new ProcessorImage(*((ProcessorParamsImage*)_params));
     prc_ptr->setName(_unique_name);

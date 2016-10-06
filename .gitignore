@@ -17,4 +17,5 @@ src/examples/map_polyline_example_write.yaml
 *.gch
 /CMakeFiles/
 /CMakeCache.txt
-
+*.dat
+.DS_Store

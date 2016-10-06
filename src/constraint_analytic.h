@@ -38,7 +38,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_FRAME
          *
          **/
-        ConstraintAnalytic(ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
+        ConstraintAnalytic(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
                          StateBlock* _state0Ptr,
                          StateBlock* _state1Ptr = nullptr,
                          StateBlock* _state2Ptr = nullptr,
@@ -55,7 +55,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_FEATURE
          *
          **/
-        ConstraintAnalytic(ConstraintType _tp, FeatureBase* _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
+        ConstraintAnalytic(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
                          StateBlock* _state0Ptr,
                          StateBlock* _state1Ptr = nullptr,
                          StateBlock* _state2Ptr = nullptr,
@@ -72,7 +72,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_LANDMARK
          *
          **/
-        ConstraintAnalytic(ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
+        ConstraintAnalytic(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
                          StateBlock* _state0Ptr,
                          StateBlock* _state1Ptr = nullptr,
                          StateBlock* _state2Ptr = nullptr,

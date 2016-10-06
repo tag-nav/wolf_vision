@@ -19,10 +19,10 @@ ProcessorTracker::ProcessorTracker(ProcessorType _tp, const std::string& _type, 
 
 ProcessorTracker::~ProcessorTracker()
 {
-    if (last_ptr_ != nullptr && last_ptr_->upperNodePtr() == nullptr)
+    if (last_ptr_ != nullptr && last_ptr_->getFramePtr() == nullptr)
         last_ptr_->destruct();
 
-    if (incoming_ptr_ != nullptr && incoming_ptr_->upperNodePtr() == nullptr)
+    if (incoming_ptr_ != nullptr && incoming_ptr_->getFramePtr() == nullptr)
         incoming_ptr_->destruct();
 
     while (!new_features_last_.empty())
@@ -37,9 +37,9 @@ ProcessorTracker::~ProcessorTracker()
     }
 }
 
-void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
+void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 {
-    //std::cout << "-----nProcessorTracker::process():" << std::endl;
+    std::cout << "-----ProcessorTracker::process():" << std::endl;
     //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
     //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
@@ -51,7 +51,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // FIRST TIME
     if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
     {
-        //std::cout << "FIRST TIME" << std::endl;
+        std::cout << "FIRST TIME" << std::endl;
         //std::cout << "Features in origin: " << 0 << "; in last: " << 0 << std::endl;
 
         // advance
@@ -75,7 +75,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // SECOND TIME or after KEY FRAME CALLBACK
     else if (origin_ptr_ == nullptr)
     {
-        //std::cout << "SECOND TIME or after KEY FRAME CALLBACK" << std::endl;
+        std::cout << "SECOND TIME or after KEY FRAME CALLBACK" << std::endl;
         //std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
         // First we track the known Features
@@ -97,7 +97,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     // OTHER TIMES
     else
     {
-        //std::cout << "OTHER TIMES" << std::endl;
+        std::cout << "OTHER TIMES" << std::endl;
         //std::cout << "Features in origin: " << origin_ptr_->getFeatureListPtr()->size() << "; in last: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
 
         // 1. First we track the known Features and create new constraints as needed
@@ -153,7 +153,7 @@ void ProcessorTracker::process(CaptureBase* const _incoming_ptr)
     //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
 }
 
-bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _time_tol)
+bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol)
 {
     assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame allways");
     Scalar time_tol = std::max(time_tolerance_, _time_tol);
@@ -168,8 +168,8 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& 
     //std::cout << "ProcessorTracker::keyFrameCallback in sensor " << getSensorPtr()->id() << std::endl;
 
     // Capture last_ is added to the new keyframe
-    FrameBase* last_old_frame = last_ptr_->getFramePtr();
-    last_old_frame->unlinkDownNode(last_ptr_);
+    FrameBasePtr last_old_frame = last_ptr_->getFramePtr();
+    last_old_frame->unlinkCapture(last_ptr_);
     last_old_frame->destruct();
     _keyframe_ptr->addCapture(last_ptr_);
 
@@ -185,7 +185,7 @@ bool ProcessorTracker::keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& 
     return true;
 }
 
-void ProcessorTracker::setKeyFrame(CaptureBase* _capture_ptr)
+void ProcessorTracker::setKeyFrame(CaptureBasePtr _capture_ptr)
 {
     assert(_capture_ptr != nullptr && _capture_ptr->getFramePtr() != nullptr && "ProcessorTracker::setKeyFrame: null capture or capture without frame");
     if (!_capture_ptr->getFramePtr()->isKey())
@@ -195,7 +195,7 @@ void ProcessorTracker::setKeyFrame(CaptureBase* _capture_ptr)
         // Set state to the keyframe
         _capture_ptr->getFramePtr()->setState(getProblem()->getStateAtTimeStamp(_capture_ptr->getTimeStamp()));
         // Call the new keyframe callback in order to let the other processors to establish their constraints
-        getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), (ProcessorBase*)((this)), time_tolerance_);
+        getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), (ProcessorBasePtr)((this)), time_tolerance_);
     }
 }
 

@@ -6,6 +6,8 @@
 #include "constraint_AHP.h"
 #include "sensor_camera.h"
 #include "pinholeTools.h"
+#include "trajectory_base.h"
+#include "map_base.h"
 
 #include <Eigen/Geometry>
 
@@ -284,7 +286,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
     return n_new_features;
 }
 
-LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
+LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_ptr)
 {
     FeaturePointImage* feat_point_image_ptr = (FeaturePointImage*) _feature_ptr;
 //    FrameBase* anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
@@ -316,7 +318,7 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
     return lmk_ahp_ptr;
 }
 
-ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
+ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
 
     //    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
@@ -584,7 +586,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat _image)
 
 //namespace wolf{
 
-ProcessorBase* ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+ProcessorBasePtr ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
     ProcessorImageLandmark* prc_ptr = new ProcessorImageLandmark(*((ProcessorParamsImage*)_params));
     prc_ptr->setName(_unique_name);

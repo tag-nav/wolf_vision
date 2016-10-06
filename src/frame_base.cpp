@@ -10,7 +10,9 @@ namespace wolf {
 unsigned int FrameBase::frame_id_count_ = 0;
 
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
-            NodeConstrained(MID, "FRAME", "BASE"),
+            NodeBase("FRAME", "BASE"),
+            problem_ptr_(nullptr),
+            trajectory_ptr_(nullptr),
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
             time_stamp_(_ts),
@@ -23,7 +25,9 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
 }
 
 FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
-            NodeConstrained(MID, "FRAME", "BASE"),
+            NodeBase("FRAME", "BASE"),
+            problem_ptr_(nullptr),
+            trajectory_ptr_(nullptr),
             frame_id_(++frame_id_count_),
             type_id_(_tp),
             time_stamp_(_ts),
@@ -62,14 +66,22 @@ FrameBase::~FrameBase()
 
     //std::cout << "states deleted" << std::endl;
 
-
-    while (!getConstrainedByListPtr()->empty())
+    while (!constrained_by_list_.empty())
+//    while (!getConstrainedByListPtr()->empty())
     {
         //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-        getConstrainedByListPtr()->front()->destruct();
+        constrained_by_list_.front()->destruct();
+//        getConstrainedByListPtr()->front()->destruct();
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
+
+    while (!capture_list_.empty())
+    {
+        delete capture_list_.front();
+        capture_list_.pop_front();
+    }
+
 }
 
 void FrameBase::registerNewStateBlocks()
@@ -162,21 +174,7 @@ void FrameBase::getState(Eigen::VectorXs& state) const
     }
 }
 
-CaptureBase* FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
-{
-    for (auto capture_ptr : *getCaptureListPtr())
-        if (capture_ptr->getSensorPtr() == _sensor_ptr)
-            return capture_ptr;
-    return nullptr;
-}
-
-void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)
-{
-	for(auto c_it = getCaptureListPtr()->begin(); c_it != getCaptureListPtr()->end(); ++c_it)
-		(*c_it)->getConstraintList(_ctr_list);
-}
-
-FrameBase* FrameBase::getPreviousFrame() const
+FrameBasePtr FrameBase::getPreviousFrame() const
 {
     //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
     if (getTrajectoryPtr() == nullptr)
@@ -206,7 +204,7 @@ FrameBase* FrameBase::getPreviousFrame() const
     return nullptr;
 }
 
-FrameBase* FrameBase::getNextFrame() const
+FrameBasePtr FrameBase::getNextFrame() const
 {
     //std::cout << "finding next frame of " << this->node_id_ << std::endl;
 	auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin();
@@ -224,6 +222,23 @@ FrameBase* FrameBase::getNextFrame() const
     }
     std::cout << "next frame not found!" << std::endl;
     return nullptr;
+}
+
+void FrameBase::destruct()
+{
+    if (!is_deleting_)
+    {
+        if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+        {
+            //std::cout << "upper node is not WolfProblem " << std::endl;
+            trajectory_ptr_->removeFrame(this);
+        }
+        else
+        {
+            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+            delete this;
+        }
+    }
 }
 
 void FrameBase::setStatus(StateStatus _st)

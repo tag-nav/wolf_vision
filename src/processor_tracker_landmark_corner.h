@@ -145,7 +145,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
          */
-        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr);
+        virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
@@ -156,22 +156,22 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
     private:
 
         void extractCorners(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _corner_list);
 
-        void expectedFeature(LandmarkBase* _landmark_ptr, Eigen::Vector4s& expected_feature_,
+        void expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::Vector4s& expected_feature_,
                              Eigen::Matrix3s& expected_feature_cov_);
 
-        Eigen::VectorXs computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr,
+        Eigen::VectorXs computeSquaredMahalanobisDistances(const FeatureBasePtr _feature_ptr,
                                                            const Eigen::Vector4s& _expected_feature,
                                                            const Eigen::Matrix3s& _expected_feature_cov,
                                                            const Eigen::MatrixXs& _mu);
     // Factory method
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
 };
 
 inline ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
@@ -201,7 +201,7 @@ inline unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const unsi
     return new_features_last_.size();
 }
 
-inline LandmarkBase* ProcessorTrackerLandmarkCorner::createLandmark(FeatureBase* _feature_ptr)
+inline LandmarkBasePtr ProcessorTrackerLandmarkCorner::createLandmark(FeatureBasePtr _feature_ptr)
 {
     //std::cout << "ProcessorTrackerLandmarkCorner::createLandmark" << std::endl;
 
@@ -212,7 +212,7 @@ inline LandmarkBase* ProcessorTrackerLandmarkCorner::createLandmark(FeatureBase*
                                 new StateBlock(feature_global_pose.tail(1)), _feature_ptr->getMeasurement()(3));
 }
 
-inline ConstraintBase* ProcessorTrackerLandmarkCorner::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
+inline ConstraintBasePtr ProcessorTrackerLandmarkCorner::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
     assert(_feature_ptr != nullptr && _landmark_ptr != nullptr && "ProcessorTrackerLandmarkCorner::createConstraint: feature and landmark pointers can not be nullptr!");
 

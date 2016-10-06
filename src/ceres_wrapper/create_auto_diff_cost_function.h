@@ -12,7 +12,7 @@
 #include "ceres/cost_function.h"
 
 namespace wolf {
-    ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _use_wolf_autodiff);
+    ceres::CostFunction* createAutoDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool _use_wolf_autodiff);
 
 }
 

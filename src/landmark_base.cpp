@@ -2,7 +2,6 @@
 #include "landmark_base.h"
 #include "constraint_base.h"
 #include "map_base.h"
-#include "node_terminus.h"
 #include "state_block.h"
 #include "yaml/yaml_conversion.h"
 
@@ -11,7 +10,9 @@ namespace wolf {
 unsigned int LandmarkBase::landmark_id_count_ = 0;
 
 LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr) :
-            NodeConstrained(MID, "LANDMARK", _type),
+            NodeBase("LANDMARK", _type),
+            problem_ptr_(nullptr),
+            map_ptr_(nullptr),
             landmark_id_(++landmark_id_count_),
             type_id_(_tp),
             status_(LANDMARK_CANDIDATE),
@@ -41,10 +42,10 @@ LandmarkBase::~LandmarkBase()
     }
 	//std::cout << "states deleted" << std::endl;
 
-	while (!getConstrainedByListPtr()->empty())
+	while (!constrained_by_list_.empty())
 	{
 	    //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-	    getConstrainedByListPtr()->front()->destruct();
+	    constrained_by_list_.front()->destruct();
         //std::cout << "deleted " << std::endl;
 	}
 	//std::cout << "constraints deleted" << std::endl;
