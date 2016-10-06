@@ -186,7 +186,8 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
                     FeaturePointImage* incoming_point_ptr = new FeaturePointImage(candidate_keypoints[cv_matches[0].trainIdx],
                             (candidate_descriptors.row(cv_matches[0].trainIdx)), Eigen::Matrix2s::Identity());
-                    incoming_point_ptr->setTrackId(incoming_point_ptr->id());
+                    incoming_point_ptr->setTrackId(landmark_in_ptr->id());
+                    incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
                     _feature_list_out.push_back(incoming_point_ptr);
 
                     _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, normalized_score});
@@ -256,7 +257,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
                 }
 
                 std::cout << "response: " << new_keypoints[0].response << std::endl;
-                if(new_keypoints[0].response > 0.0005)
+                if(new_keypoints[0].response > 0.00005)
                 {
                     list_response_.push_back(new_keypoints[0].response);
                     FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
@@ -314,7 +315,9 @@ LandmarkBase* ProcessorImageLandmark::createLandmark(FeatureBase* _feature_ptr)
 //    std::cout << "vec_homogeneous_2 x: " << vec_homogeneous(0) << "; y: " << vec_homogeneous(1) << "; z: " << vec_homogeneous(2)
 //              << "; inv_dist: " << vec_homogeneous(3) << std::endl;
 
-    return new LandmarkAHP(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
+    LandmarkAHP* lmk_ahp_ptr = new LandmarkAHP(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
+    _feature_ptr->setLandmarkId(lmk_ahp_ptr->id());
+    return lmk_ahp_ptr;
 }
 
 ConstraintBase* ProcessorImageLandmark::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
@@ -513,8 +516,8 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
         std::cout << "feature number [" << (unsigned int)v(i)+1 << "] in: " << point << std::endl;
         cv::Point2f point2 = point;
         point2.x = point2.x - 16;
-        cv::putText(_image, std::to_string((unsigned int)v(i)+1), point2,
-                    cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0));
+        cv::putText(_image, std::to_string(((FeaturePointImage*)feature_point)->landmarkId()), point2,
+                    cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
         i++;
     }
 
@@ -558,8 +561,8 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat _image)
 
             std::cout << "landmark proj number [" << landmark_ptr->id() << "] in: " << point << std::endl;
 
-            cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
-            cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+            cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);
+            cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0) );
 //            cv::putText(image, std::to_string(response_vector[counter]), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
             counter++;
         }
