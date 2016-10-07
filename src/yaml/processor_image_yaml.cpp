@@ -69,6 +69,7 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
         Node alg = params["algorithm"];
         p->algorithm.max_new_features = alg["maximum new features"].as<unsigned int>();
         p->algorithm.min_features_for_keyframe = alg["minimum features for new keyframe"].as<unsigned int>();
+        p->algorithm.min_response_for_new_features = alg["minimum response for new features"].as<float>();
 
     }
 
