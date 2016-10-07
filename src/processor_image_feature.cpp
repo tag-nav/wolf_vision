@@ -114,7 +114,7 @@ void ProcessorImageFeature::postProcess()
 unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
-    std::cout << "\n---------------- trackFeatures ----------------" << std::endl;
+//    std::cout << "\n---------------- trackFeatures ----------------" << std::endl;
 
     unsigned int roi_width = params_.matcher.roi_width;
     unsigned int roi_heigth = params_.matcher.roi_height;
@@ -270,8 +270,8 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                         index = i;
                 }
 
-                std::cout << "response: " << new_keypoints[0].response << std::endl;
-                if(new_keypoints[0].response > 0.00005)
+//                std::cout << "response: " << new_keypoints[0].response << std::endl;
+                if(new_keypoints[0].response > 0.0001)
                 {
                     FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
                     point_ptr->setTrackId(point_ptr->id());
