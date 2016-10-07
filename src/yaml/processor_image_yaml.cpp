@@ -39,7 +39,6 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
             dd->scaleFactor                 = dd_yaml["scale factor"].as<float>();
             dd->nlevels                     = dd_yaml["nlevels"].as<unsigned int>();
             dd->edgeThreshold               = dd_yaml["edge threshold"].as<unsigned int>();
-            std::cout << "edgeThreshold: " << dd->edgeThreshold << std::endl;
             dd->firstLevel                  = dd_yaml["first level"].as<unsigned int>();
             dd->WTA_K                       = dd_yaml["WTA_K"].as<unsigned int>();
             dd->scoreType                   = dd_yaml["score type"].as<int>(); // enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };

@@ -182,8 +182,20 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          */
         virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
+        /**
+         * \brief Does the match between a target descriptor and (potentially) multiple candidate descriptors of a Feature.
+         * \param _target_descriptor descriptor of the target
+         * \param _candidate_descriptors descriptors of the candidates
+         * \param _cv_matches output variable in which the best result will be stored (in the position [0])
+         * \return normalized score of similarity (1 - exact match; 0 - complete mismatch)
+         */
         virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
+        /**
+         * \brief The function changes the reference of the landmark from the camera in which it was created to the current one.
+         * \param _landmark landmark to change
+         * \param _point3D_hmg output value, when the landmark is referenced by the current camera
+         */
         virtual void LandmarkInCurrentCamera(LandmarkAHP* _landmark, Eigen::Vector4s& _point3D_hmg);
 
         // These only to debug, will disappear one day soon

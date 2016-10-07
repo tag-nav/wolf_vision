@@ -147,6 +147,13 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
          */
         virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
+        /**
+         * \brief Does the match between a target descriptor and (potentially) multiple candidate descriptors of a Feature.
+         * \param _target_descriptor descriptor of the target
+         * \param _candidate_descriptors descriptors of the candidates
+         * \param _cv_matches output variable in which the best result will be stored (in the position [0])
+         * \return normalized score of similarity (1 - exact match; 0 - complete mismatch)
+         */
         virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
 

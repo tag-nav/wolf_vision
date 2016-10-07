@@ -144,7 +144,6 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
             cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
 
             active_search_grid_.hitCell(point2D);
-            active_search_grid_.blockCell(roi);
 
             cv::Mat target_descriptor = landmark_ptr->getCvDescriptor();
 
@@ -229,7 +228,6 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
                     active_search_grid_.hitCell(new_keypoints[0]);
-                    active_search_grid_.blockCell(roi);
                     n_new_features++;
                 }
 
@@ -402,17 +400,14 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
     for(auto feature_point : feat_lmk_found_)
     {
         cv::Point2f point = ((FeaturePointImage*)feature_point)->getKeypoint().pt;
-
         cv::circle(_image, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
 //        std::cout << "feature of landmark [" << ((FeaturePointImage*)feature_point)->landmarkId() << "] in: " << point << std::endl;
 
         cv::Point2f point2 = point;
         point2.x = point2.x - 16;
-
         cv::putText(_image, std::to_string(((FeaturePointImage*)feature_point)->landmarkId()), point2,
                     cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
     }
-
     cv::imshow("Feature tracker", _image);
 }
 

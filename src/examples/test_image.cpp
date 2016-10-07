@@ -68,7 +68,6 @@ int main(int argc, char** argv)
         throw std::runtime_error("WOLF_ROOT environment not loaded.");
 
     std::string wolf_path( tmp );
-
     std::cout << "Wolf path: " << wolf_path << std::endl;
 
     ProblemPtr wolf_problem_ptr_ = new Problem(FRM_PO_3D);
@@ -117,9 +116,6 @@ int main(int argc, char** argv)
     // Method 2: Use factory to create sensor and processor
     //=====================================================
 
-    // SENSOR
-    // one-liner API
-
     /* Do this while there aren't extrinsic parameters on the yaml */
     Eigen::Vector7s extrinsic_cam;
     extrinsic_cam[0] = 0; //px
@@ -133,6 +129,8 @@ int main(int argc, char** argv)
     const Eigen::VectorXs extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
+    // SENSOR
+    // one-liner API
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
     SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
 
@@ -173,7 +171,6 @@ int main(int argc, char** argv)
         std::cout << "\n=============== Frame #: " << f << " in buffer: " << f%buffer_size << " ===============" << std::endl;
 
         t.setToNow();
-
         clock_t t1 = clock();
 
         // Old method with non-factory objects

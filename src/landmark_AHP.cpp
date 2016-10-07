@@ -16,7 +16,6 @@ LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position_homogeneous,
     anchor_frame_(_anchor_frame),
     anchor_sensor_(_anchor_sensor)
 {
-//    std::cout << "created lmk AHP with m = " << getPPtr()->getVector().transpose() << std::endl;
 }
 
 LandmarkAHP::~LandmarkAHP()

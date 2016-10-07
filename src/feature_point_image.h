@@ -36,7 +36,6 @@ class FeaturePointImage : public FeatureBase
             keypoint_.pt.y = float(measurement_(1));
         }
 
-        //_known_or_new: known = true; new = false;
         FeaturePointImage(const cv::KeyPoint& _keypoint,
                           const cv::Mat& _descriptor, bool _is_known) :
                 FeatureBase(FEATURE_POINT_IMAGE, "POINT IMAGE", Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
@@ -46,9 +45,6 @@ class FeaturePointImage : public FeatureBase
             measurement_(0) = Scalar(_keypoint.pt.x);
             measurement_(1) = Scalar(_keypoint.pt.y);
             is_known_=_is_known;
-//            std::cout << "FEATURE TESTING\n";
-//            std::cout << "Measurement:\n" << getMeasurement() << std::endl;
-//            std::cout << "Measurement Sqrt:\n" << getMeasurementSquareRootInformation() << std::endl;
         }
 
         FeaturePointImage(const cv::KeyPoint& _keypoint,

@@ -128,7 +128,6 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
 
         active_search_grid_.hitCell(feature_ptr->getKeypoint());
-        active_search_grid_.blockCell(roi);
 
         cv::Mat target_descriptor = feature_ptr->getDescriptor();
 
@@ -183,9 +182,7 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
     Scalar normalized_score = match(origin_descriptor,incoming_descriptor,matches_mat);
 
     if(normalized_score > params_.matcher.min_normalized_score)
-    {
         return true;
-    }
     else
     {
         /* CORRECT */
@@ -253,7 +250,6 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
                     active_search_grid_.hitCell(new_keypoints[0]);
-                    active_search_grid_.blockCell(roi);
 
                     n_new_features++;
                 }

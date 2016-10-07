@@ -95,8 +95,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             v = v_normalized.head(2)/v_normalized(2);
 //            std::cout << "\nv:\n" << v(0) << "\t" << v(1) << std::endl;
 
-            // ==================================================
-            /* DISTORTION ATTEMPT */
             Eigen::Matrix<T,2,1> distored_point;
             Eigen::Matrix<T,Eigen::Dynamic,1> distortion_vector = distortion_.cast<T>();
             //std::cout << "\ntest_point2D DISTORTED:\n" << test_distortion(0) << std::endl;
@@ -108,13 +106,11 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             for (int i = 0; i < distortion_vector.cols() ; i++) { //   here we are doing:
                 r2i = r2i * r2;                                   //   r2i = r^(2*(i+1))
                 s = s + (distortion_vector(i) * r2i);             //   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
-
             }
             if (s < (T)0.6) s = (T)1.0;
             distored_point(0) = s * v(0);
             distored_point(1) = s * v(1);
 //            std::cout << "\ndistored_point:\n" << distored_point(0) << "\t" << distored_point(1) << std::endl;
-            /* END OF THE ATTEMPT */
 
 
             Eigen::Matrix<T, 2, 1> u;
