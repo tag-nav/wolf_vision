@@ -15,12 +15,7 @@ struct IntrinsicsBase;
 }
 
 // wolf
-#include "wolf.h"
 #include "factory.h"
-
-// std
-#include <string>
-#include <map>
 
 namespace wolf
 {
@@ -212,30 +207,13 @@ namespace wolf
  *
  * You can also check the code in the example file ````src/examples/test_wolf_factories.cpp````.
  */
-//<<<<<<< HEAD
-//=======
-//class SensorFactory
-//{
-//    public:
-//        typedef SensorBasePtr (*CreateSensorCallback)(const std::string & _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBasePtr _intrinsics);
-//    private:
-//        typedef std::map<std::string, CreateSensorCallback> CallbackMap;
-//    public:
-//        bool registerCreator(const std::string& _sensor_type, CreateSensorCallback createFn);
-//        bool unregisterCreator(const std::string& _sensor_type);
-//        SensorBasePtr create(const std::string& _sensor_type, const std::string& _unique_name, const Eigen::VectorXs& _extrinsics, const IntrinsicsBasePtr _intrinsics = nullptr);
-//    private:
-//        CallbackMap callbacks_;
-//>>>>>>> node-linked-removed
 
 typedef Factory<SensorBase,
                 const std::string&,
                 const Eigen::VectorXs&, const IntrinsicsBasePtr> SensorFactory;
 
 template<>
-inline std::string Factory<SensorBase,
-                           const std::string&,
-                           const Eigen::VectorXs&, const IntrinsicsBasePtr>::getClass()
+inline std::string SensorFactory::getClass()
 {
   return "SensorFactory";
 }

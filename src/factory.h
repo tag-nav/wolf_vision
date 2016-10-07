@@ -317,24 +317,26 @@ inline std::string Factory<TypeBase, TypeInput...>::getClass()
 namespace wolf
 {
 
-typedef Factory<IntrinsicsBase, const std::string&>      IntrinsicsFactory;
-typedef Factory<ProcessorParamsBase, const std::string&> ProcessorParamsFactory;
-typedef Factory<LandmarkBase, const YAML::Node&>         LandmarkFactory;
-
+typedef Factory<IntrinsicsBase,
+        const std::string&> IntrinsicsFactory;
 template<>
-inline std::string Factory<IntrinsicsBase, const std::string&>::getClass()
+inline std::string IntrinsicsFactory::getClass()
 {
     return "IntrinsicsFactory";
 }
 
+typedef Factory<ProcessorParamsBase,
+        const std::string&> ProcessorParamsFactory;
 template<>
-inline std::string Factory<ProcessorParamsBase, const std::string&>::getClass()
+inline std::string ProcessorParamsFactory::getClass()
 {
     return "ProcessorParamsFactory";
 }
 
+typedef Factory<LandmarkBase,
+        const YAML::Node&>  LandmarkFactory;
 template<>
-inline std::string Factory<LandmarkBase, const YAML::Node&>::getClass()
+inline std::string LandmarkFactory::getClass()
 {
     return "LandmarkFactory";
 }
