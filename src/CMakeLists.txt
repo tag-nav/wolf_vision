@@ -167,6 +167,7 @@ SET(HDRS
     sensor_gps_fix.h
     sensor_imu.h
     sensor_odom_2D.h
+    sensor_odom_3D.h
     state_block.h
     state_homogeneous_3D.h
     state_quaternion.h
@@ -230,6 +231,7 @@ SET(SRCS
     sensor_gps_fix.cpp
     sensor_imu.cpp
     sensor_odom_2D.cpp
+    sensor_odom_3D.cpp
     time_stamp.cpp
     trajectory_base.cpp
     data_association/association_solver.cpp
