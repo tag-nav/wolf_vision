@@ -99,9 +99,9 @@ void ProcessorImageFeature::postProcess()
 {
     if (last_ptr_!=nullptr)
     {
-        drawFeatures(last_ptr_);
-        drawRoi(image_last_,detector_roi_,cv::Scalar(0.0,255.0, 255.0));   //detector roi(now only shown when it collides with the the image)
-        drawRoi(image_last_,tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));   //tracker roi
+        drawFeatures();
+        drawRoi(image_last_,detector_roi_,cv::Scalar(0.0,255.0, 255.0));   //active search roi
+        drawRoi(image_last_,tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));  //tracker roi
         drawTrackingFeatures(image_last_,tracker_target_);
     }
 }
@@ -226,7 +226,6 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
 
 unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_new_features)
 {
-//    std::cout << "\n---------------- detectNewFeatures -------------" << std::endl;
     cv::Rect roi;
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
@@ -248,7 +247,6 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                     if(list_keypoints[i].pt == new_keypoints[0].pt)
                         index = i;
                 }
-
                 if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
                 {
                     FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
@@ -259,17 +257,12 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
 
                     n_new_features++;
                 }
-
             }
             else
-            {
                 active_search_grid_.blockCell(roi);
-            }
         }
         else
-        {
             break;
-        }
     }
 
     std::cout << "DetectNewFeatures - Number of new features detected: " << n_new_features << std::endl;
@@ -359,38 +352,33 @@ void ProcessorImageFeature::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Re
 
 void ProcessorImageFeature::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list)
 {
-    // These "tracking features" are the features to be used in tracking
+    // draw the target of the tracking
     for(auto target_point : _target_list)
-    {
-        //target
         cv::circle(_image, target_point, 7, cv::Scalar(255.0, 0.0, 255.0), 1, 3, 0);
-    }
+
     cv::imshow("Feature tracker", _image);
 }
 
 void ProcessorImageFeature::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
 {
     for (auto roi : _roi_list)
-    {
         cv::rectangle(_image, roi, _color, 1, 8, 0);
-    }
+
     cv::imshow("Feature tracker", _image);
 }
 
-void ProcessorImageFeature::drawFeatures(CaptureBasePtr const _last_ptr)
+void ProcessorImageFeature::drawFeatures()
 {
     for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
     {
         FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
         if (point_ptr->isKnown())
-        {
             cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 255.0, 51.0), -1, 3, 0);
-        }
         else
-        {
             cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(0.0, 0.0, 255.0), -1, 3, 0);
-        }
-        cv::putText(image_last_, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+
+        cv::putText(image_last_, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt,
+                    cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
     }
     cv::imshow("Feature tracker", image_last_);
 }

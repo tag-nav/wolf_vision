@@ -103,9 +103,9 @@ void ProcessorImageLandmark::postProcess()
     if (last_ptr_!=nullptr)
     {
         cv::Mat image = image_incoming_.clone();
-        drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));
-        drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0));
-        drawFeatures(image);
+        drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
+        drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
+        drawLandmarks(image);
         drawFeaturesFromLandmarks(image);
     }
 }
@@ -235,14 +235,10 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 
             }
             else
-            {
                 active_search_grid_.blockCell(roi);
-            }
         }
         else
-        {
             break;
-        }
     }
 
     std::cout << "Number of new features detected: " << n_new_features << std::endl;
@@ -280,16 +276,10 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
 
 ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
-
     if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
-    {
-        // Are equal
         return nullptr;
-    }
     else
-    {
         return new ConstraintAHP(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
-    }
 }
 
 
@@ -402,9 +392,8 @@ void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::R
 void ProcessorImageLandmark::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
 {
     for (auto roi : _roi_list)
-    {
         cv::rectangle(_image, roi, _color, 1, 8, 0);
-    }
+
     cv::imshow("Feature tracker", _image);
 }
 
@@ -427,7 +416,7 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
     cv::imshow("Feature tracker", _image);
 }
 
-void ProcessorImageLandmark::drawFeatures(cv::Mat _image)
+void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
 {
     unsigned int counter = 0;
     LandmarkBaseList* last_landmark_list = getProblem()->getMapPtr()->getLandmarkListPtr();
@@ -448,7 +437,6 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat _image)
 
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {
-
             cv::Point2f point;
             point.x = point2D[0];
             point.y = point2D[1];
