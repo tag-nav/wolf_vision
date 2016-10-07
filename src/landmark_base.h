@@ -20,13 +20,12 @@ class StateBlock;
 namespace wolf {
 
 
-//class LandmarkParamsBase {}; ///< class for landmark parameters. Derive it to define your parameters.
 
 // TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
 
 //class LandmarkBase
-class LandmarkBase : public NodeBase // NodeConstrained<MapBase, NodeTerminus>
+class LandmarkBase : public NodeBase
 {
     private:
         ProblemPtr problem_ptr_;
@@ -172,9 +171,7 @@ inline ConstraintBaseList* LandmarkBase::getConstrainedByListPtr()
 inline void LandmarkBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.remove(_ctr_ptr);
-//    NodeConstrained::removeConstrainedBy(_ctr_ptr);
     if (constrained_by_list_.empty())
-//    if (getConstrainedByListPtr()->empty())
         this->destruct();
 }
 

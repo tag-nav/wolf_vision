@@ -148,9 +148,6 @@ SET(HDRS
     map_base.h
     motion_buffer.h
     node_base.h
-#    node_constrained.h
-#    node_linked.h
-#    node_terminus.h
     problem.h
     processor_base.h
     processor_imu.h
@@ -175,7 +172,6 @@ SET(HDRS
     state_quaternion.h
     time_stamp.h
     trajectory_base.h
-    # wolf_manager.h
     )
 
 

@@ -15,8 +15,5 @@ ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const 
 // Register in the SensorFactory
 #include "processor_factory.h"
 namespace wolf {
-//namespace
-//{
 WOLF_REGISTER_PROCESSOR("ODOM 3D", ProcessorOdom3D)
-//}
 } // namespace wolf

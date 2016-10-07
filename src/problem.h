@@ -54,10 +54,8 @@ struct ConstraintNotification
  * - up_node_: A regular pointer to a derived node object, specified by the template parameter UpperType.
  *
  */
-class Problem //: public NodeBase
+class Problem
 {
-    public:
-//        typedef NodeBasePtr LowerNodePtr; // Necessatry for destruct() of node_linked
 
     protected:
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;

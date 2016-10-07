@@ -67,11 +67,9 @@ FrameBase::~FrameBase()
     //std::cout << "states deleted" << std::endl;
 
     while (!constrained_by_list_.empty())
-//    while (!getConstrainedByListPtr()->empty())
     {
         //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
         constrained_by_list_.front()->destruct();
-//        getConstrainedByListPtr()->front()->destruct();
         //std::cout << "deleted " << std::endl;
     }
     //std::cout << "constraints deleted" << std::endl;
@@ -229,15 +227,9 @@ void FrameBase::destruct()
     if (!is_deleting_)
     {
         if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-        {
-            //std::cout << "upper node is not WolfProblem " << std::endl;
             trajectory_ptr_->removeFrame(this);
-        }
         else
-        {
-            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
             delete this;
-        }
     }
 }
 

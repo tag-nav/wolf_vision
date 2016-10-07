@@ -41,7 +41,6 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
             last_key_frame_ptr_ = _frame_ptr;
 
         frame_list_.insert(computeFrameOrder(_frame_ptr), _frame_ptr);
-//        insertDownNode(_frame_ptr, computeFrameOrder(_frame_ptr));
     }
     else
     {

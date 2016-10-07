@@ -17,7 +17,7 @@ class LandmarkBase;
 namespace wolf {
 
 //class MapBase
-class MapBase : public NodeBase //: public NodeLinked<Problem,LandmarkBase>
+class MapBase : public NodeBase
 {
     private:
         ProblemPtr problem_ptr_;

@@ -1019,10 +1019,6 @@ ProcessorBasePtr ProcessorTrackerLandmarkPolyline::create(const std::string& _un
 
 // Register in the SensorFactory
 #include "processor_factory.h"
-//#include "factory.h"
 namespace wolf {
-namespace
-{
-const bool registered_prc_laser = ProcessorFactory::get().registerCreator("POLYLINE", ProcessorTrackerLandmarkPolyline::create);
-}
+WOLF_REGISTER_PROCESSOR("POLYLINE", ProcessorTrackerPolyline)
 } // namespace wolf

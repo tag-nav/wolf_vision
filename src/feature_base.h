@@ -18,7 +18,7 @@ namespace wolf {
 
 
 //class FeatureBase
-class FeatureBase : public NodeBase // NodeConstrained<CaptureBase,ConstraintBase>
+class FeatureBase : public NodeBase
 {
     private:
         ProblemPtr problem_ptr_;
@@ -147,7 +147,6 @@ inline void FeatureBase::removeConstraint(ConstraintBasePtr _co_ptr)
 inline CaptureBasePtr FeatureBase::getCapturePtr() const
 {
     return capture_ptr_;
-//    return upperNodePtr();
 }
 
 inline Scalar FeatureBase::getMeasurement(unsigned int _ii) const
