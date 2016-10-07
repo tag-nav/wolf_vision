@@ -80,31 +80,27 @@ class ProcessorOdom3D : public ProcessorMotion
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
 };
 
-
-inline ProcessorOdom3D::ProcessorOdom3D() :
-        ProcessorMotion(PRC_ODOM_3D, "ODOM 3D", 7, 7, 7, 6),
-        p1_(nullptr),
-        p2_(nullptr),
-        p_out_(nullptr),
-        q1_(nullptr),
-        q2_(nullptr),
-        q_out_(nullptr)
-{
-    //
-}
-
-inline ProcessorOdom3D::~ProcessorOdom3D()
-{
-}
-
 inline void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
 {
     delta_.head(3) = _data.head(3);
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(delta_.data() + 3);
-
     q_out_ = v2q(_data.tail<3>());
-    // TODO: fill delta covariance
-    delta_cov_ = Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 0.01;
+
+    /* Jacobians of d = data2delta(data, dt)
+     * with: d =    [Dp Dq]
+     *       data = [dp do]
+     *
+     *       Dp = dp
+     *       Dq = v2q(do)
+     *
+     * dDp/ddp = I
+     * dDp/ddo = 0
+     * dDo/ddp = 0
+     * dDo/ddo = I
+     *
+     * so, J = I, and delta_cov = _data_cov
+     */
+    delta_cov_ = _data_cov;
 }
 
 inline void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta)
@@ -117,6 +113,7 @@ inline void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
 
     p_out_ = p1_ + q1_ * p2_;
     q_out_ = q1_ * q2_;
+
 }
 
 inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2)
@@ -138,15 +135,36 @@ inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     assert(_delta1.size() == delta_size_ && "Wrong _delta1 vector size");
     assert(_delta2.size() == delta_size_ && "Wrong _delta2 vector size");
     assert(_delta1_plus_delta2.size() == delta_size_ && "Wrong _delta1_plus_delta2 vector size");
-    // TODO: assert sizes of jacobians
+    assert(_jacobian1.rows() == delta_cov_size_ && _jacobian1.cols() == delta_cov_size_ && "Wrong _jacobian1 size");
+    assert(_jacobian2.rows() == delta_cov_size_ && _jacobian2.cols() == delta_cov_size_ && "Wrong _jacobian2 size");
 
     remap(_delta1, _delta2, _delta1_plus_delta2);
     p_out_ = p1_ + q1_ * p2_;
     q_out_ = q1_ * q2_;
 
-    // TODO: fill the jacobians
-    _jacobian1 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
-    _jacobian2 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
+    /* Jacobians of D' = D (+) d
+     * with: D = [Dp Dq]
+     *       d = [dp dq]
+     *
+     * dDp'/dDp = I
+     * dDp'/dDo = -DR * skew(dp)   // (Sola 16, ex. B.3.2 and Sec. 7.2.3)
+     * dDo'/dDp = 0
+     * dDo'/dDo = dR.tr            // (Sola 16, Sec. 7.2.3)
+     *
+     * dDp'/ddp = DR
+     * dDp'/ddo = 0
+     * dDo'/ddp = 0
+     * dDo'/ddo = I
+     */
+
+    // temporaries
+    Eigen::Matrix3s DR = q1_.matrix();
+    Eigen::Matrix3s dR = q2_.matrix();
+
+    // fill Jacobians -- parts not shown are constant and set at construction time.
+    _jacobian1.block<3,3>(0,3) = - DR * skew(p2_);  // (Sola 16, ex. B.3.2 and Sec. 7.2.3)
+    _jacobian1.block<3,3>(3,3) = dR.transpose();    // (Sola 16, Sec. 7.2.3)
+    _jacobian2.block<3,3>(0,0) = DR;                // (Sola 16, Sec. 7.2.3)
 }
 
 inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const

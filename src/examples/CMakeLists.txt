@@ -8,6 +8,10 @@
 ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
 TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
 
+# test_processor_odom_3D
+ADD_EXECUTABLE(test_processor_odom_3D test_processor_odom_3D.cpp)
+TARGET_LINK_LIBRARIES(test_processor_odom_3D ${PROJECT_NAME})
+
 ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
 TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
 
