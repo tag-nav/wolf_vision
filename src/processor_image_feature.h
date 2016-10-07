@@ -33,7 +33,7 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
         cv::DescriptorMatcher* matcher_ptr_;
         cv::Feature2D* detector_descriptor_ptr_;
     protected:
-        ProcessorParamsImage params_;       // Struct with parameters of the processors
+        ProcessorParamsImage params_;           // Struct with parameters of the processors
         ActiveSearchGrid active_search_grid_;   // Active Search
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
         struct
@@ -152,7 +152,7 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 
 
 
-        // These only to debug, will disappear one day soon
+        // These only to debug, will disappear one day
     public:
         virtual void drawFeatures();
         virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list);
@@ -167,8 +167,6 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 
 inline bool ProcessorImageFeature::voteForKeyFrame()
 {
-//    std::cout << "voteForKeyFrame?: "
-//            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
     return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
 }
 
