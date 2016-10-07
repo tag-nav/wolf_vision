@@ -68,8 +68,14 @@ SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
                                    const Eigen::VectorXs& _extrinsics, //
                                    const std::string& _intrinsics_filename)
 {
-    IntrinsicsBasePtr intr_ptr = IntrinsicsFactory::get().create(_sen_type, _intrinsics_filename);
-    return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
+    if (_intrinsics_filename != "")
+    {
+        IntrinsicsBasePtr intr_ptr = IntrinsicsFactory::get().create(_sen_type, _intrinsics_filename);
+        return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
+    }
+    else
+        return installSensor(_sen_type, _unique_sensor_name, _extrinsics, nullptr);
+
 }
 
 ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //

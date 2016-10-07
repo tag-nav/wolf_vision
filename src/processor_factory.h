@@ -15,12 +15,9 @@ struct ProcessorParamsBase;
 }
 
 // wolf
-#include "wolf.h"
 #include "factory.h"
 
 // std
-#include <string>
-#include <map>
 
 namespace wolf
 {
@@ -167,30 +164,15 @@ namespace wolf
  *
  * You can also check the code in the example file ````src/examples/test_wolf_factories.cpp````.
  */
-//<<<<<<< HEAD
-//=======
-//class ProcessorFactory
-//{
-//    public:
-//        typedef ProcessorBasePtr (*CreateProcessorCallback)(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
-//    private:
-//        typedef std::map<std::string, CreateProcessorCallback> CallbackMap;
-//    public:
-//        bool registerCreator(const std::string& _processor_type, CreateProcessorCallback createFn);
-//        bool unregisterCreator(const std::string& _processor_type);
-//        ProcessorBasePtr create(const std::string& _processor_type, const std::string& _unique_name, const ProcessorParamsBasePtr _params = nullptr);
-//    private:
-//        CallbackMap callbacks_;
-//>>>>>>> node-linked-removed
 
-typedef Factory<ProcessorBase, const std::string&, const ProcessorParamsBasePtr> ProcessorFactory;
-
+typedef Factory<ProcessorBase,
+        const std::string&,
+        const ProcessorParamsBasePtr> ProcessorFactory;
 template<>
 inline std::string ProcessorFactory::getClass()
 {
   return "ProcessorFactory";
 }
-
 
 
 #define WOLF_REGISTER_PROCESSOR(ProcessorType, ProcessorName) \
