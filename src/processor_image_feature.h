@@ -30,8 +30,6 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 {
 
     protected:
-        //cv::FeatureDetector* detector_ptr_;
-        //cv::DescriptorExtractor* descriptor_ptr_;
         cv::DescriptorMatcher* matcher_ptr_;
         cv::Feature2D* detector_descriptor_ptr_;
     protected:

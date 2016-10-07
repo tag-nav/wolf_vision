@@ -27,8 +27,8 @@ int main(int argc, char** argv)
     const char * filename;
     if (argc == 1)
     {
-        //filename = "/home/jtarraso/Vídeos/House interior.mp4";
-        filename = "/home/jtarraso/Vídeos/gray.mp4";
+        filename = "/home/jtarraso/Videos/House_interior.mp4";
+//        filename = "/home/jtarraso/Vídeos/gray.mp4";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
@@ -180,7 +180,7 @@ int main(int argc, char** argv)
         image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(0);
+        cv::waitKey(30);
 
         if((f%buffer_size) == 10)
         {
@@ -193,7 +193,7 @@ int main(int argc, char** argv)
             std::cout << "Last key frame orientation: "
                       << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
 
-            cv::waitKey(0);
+            //cv::waitKey(0);
         }
 
         std::cout << "END OF ITERATION\n=================================" << std::endl;

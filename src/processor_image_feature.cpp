@@ -114,7 +114,6 @@ void ProcessorImageFeature::postProcess()
 unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
-//    std::cout << "\n---------------- trackFeatures ----------------" << std::endl;
 
     unsigned int roi_width = params_.matcher.roi_width;
     unsigned int roi_heigth = params_.matcher.roi_height;
@@ -125,13 +124,9 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
     cv::Mat candidate_descriptors;
     std::vector<cv::DMatch> cv_matches;
 
-//    std::cout << "Number of features to track: " << _feature_list_in.size() << std::endl;
-
     for (auto feature_base_ptr : _feature_list_in)//_feature_list_in)
     {
         FeaturePointImage* feature_ptr = (FeaturePointImage*)feature_base_ptr;
-
-        //std::cout << "\nSearch feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
 
         roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
@@ -151,7 +146,6 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
             Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
             if (normalized_score > params_.matcher.min_normalized_score)
             {
-                std::cout << "\t <--TRACKED" << std::endl;
                 FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
@@ -163,23 +157,24 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
             }
             else
             {
-                std::cout << "\t <--NOT TRACKED" << std::endl;
+                //lists used to debug
                 tracker_target_.pop_back();
                 tracker_roi_.pop_back();
             }
             for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
             {
+                //list used to debug
                 tracker_candidates_.push_back(candidate_keypoints[i].pt);
             }
         }
         else
         {
-            std::cout << "\t <--NOT FOUND" << std::endl;
+           //lists used to debug
             tracker_target_.pop_back();
             tracker_roi_.pop_back();
         }
     }
-    std::cout << "Number of Features tracked: " << _feature_list_out.size() << std::endl;
+    std::cout << "TrackFeatures - Number of Features tracked: " << _feature_list_out.size() << std::endl;
     return _feature_list_out.size();
 }
 
@@ -217,8 +212,6 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
         FeaturePointImage* feat_last_ptr = (FeaturePointImage*)_last_feature;
         active_search_grid_.hitCell(feat_last_ptr->getKeypoint());
 
-//        std::cout << "Search feature last: " << feat_last_ptr->trackId() << " at: " << feat_last_ptr->getKeypoint().pt;
-
         roi_x = (feat_last_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
         roi_y = (feat_last_ptr->getKeypoint().pt.y) - (roi_width / 2);
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
@@ -230,17 +223,13 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
             {
                 feat_incoming_ptr->setKeypoint(correction_keypoints[correction_matches[0].trainIdx]);
                 feat_incoming_ptr->setDescriptor(correction_descriptors.row(correction_matches[0].trainIdx));
-
-//                std::cout << "\n=============== END CORRECTION true =================" << std::endl;
                 return true;
             }
             else
             {
-//                std::cout << "\n=============== END CORRECTION false =================" << std::endl;
                 return false;
             }
         }
-//        std::cout << "\n=============== No CORRECTION -> false =================" << std::endl;
         return false;
     }
 }
@@ -270,16 +259,13 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                         index = i;
                 }
 
-//                std::cout << "response: " << new_keypoints[0].response << std::endl;
-                if(new_keypoints[0].response > 0.0001)
+                if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
                 {
                     FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
                     active_search_grid_.hitCell(new_keypoints[0]);
                     active_search_grid_.blockCell(roi);
-
-                    //std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 
                     n_new_features++;
                 }
@@ -296,8 +282,7 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
         }
     }
 
-    std::cout << "Number of new features detected: " << n_new_features << std::endl;
-
+    std::cout << "DetectNewFeatures - Number of new features detected: " << n_new_features << std::endl;
     return n_new_features;
 }
 
@@ -366,7 +351,6 @@ void ProcessorImageFeature::trimRoi(cv::Rect& _roi)
 
 void ProcessorImageFeature::inflateRoi(cv::Rect& _roi)
 {
-    // now both the detector and descriptor patter_radius is the same, but when not, shouldn't the method have that as input parameter?
     int inflation_rate = detector_descriptor_params_.pattern_radius_;
 
     _roi.x = _roi.x - inflation_rate;
@@ -403,7 +387,6 @@ void ProcessorImageFeature::drawTrackingFeatures(cv::Mat _image, std::list<cv::P
 //    }
 
     cv::imshow("Feature tracker", _image);
-
 }
 
 void ProcessorImageFeature::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)

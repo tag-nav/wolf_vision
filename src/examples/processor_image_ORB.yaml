@@ -31,6 +31,7 @@ active search:
 algorithm:
     maximum new features: 40
     minimum features for new keyframe: 40
+    minimum response for new features: 0.0001
     
 draw: # Not implemented yet. Use it to control drawing options
     features: true
