@@ -40,6 +40,8 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
                 unsigned int size_bits_; ///< length of the descriptor vector in bits
         }detector_descriptor_params_;
 
+        unsigned int landmarks_tracked_ = 0;
+
         /* pinhole params */
 //        Eigen::Vector4s k_parameters_;
         Eigen::Vector2s distortion_;
@@ -57,12 +59,9 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
         FeatureBaseList feat_lmk_found_;
-        std::list<Scalar> landmark_found_number_;
 
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
-
-        unsigned int landmarks_tracked_ = 0;
 
     public:
         ProcessorImageLandmark(ProcessorParamsImage _params);

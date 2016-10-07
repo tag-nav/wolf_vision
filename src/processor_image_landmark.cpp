@@ -494,7 +494,6 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat _image)
     std::cout << "\t\tTotal landmarks: " << counter << std::endl;
 
     cv::imshow("Feature tracker", _image);
-    //_image = image;
 }
 
 
