@@ -20,13 +20,13 @@ matcher:
     minimum normalized score: 0.8
     similarity norm: 6  # enum { NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 };
     roi:
-        width: 50
-        height: 50
+        width: 25
+        height: 25
 
 active search:
-    grid width: 10
-    grid height: 8
-    separation: 8
+    grid width: 16
+    grid height: 12
+    separation: 5
 
 algorithm:
     maximum new features: 40

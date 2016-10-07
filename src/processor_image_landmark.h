@@ -54,13 +54,10 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
-        std::list<cv::Rect> tracker_roi_inflated_;
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
-        std::list<cv::Point> tracker_candidates_;
         FeatureBaseList feat_lmk_found_;
         std::list<Scalar> landmark_found_number_;
-        std::list<float> list_response_;
 
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
@@ -193,11 +190,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         // These only to debug, will disappear one day soon
     public:
         virtual void drawFeatures(cv::Mat _image);
-
-        virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
-
         virtual void drawFeaturesFromLandmarks(cv::Mat _image);
-
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
 
 };

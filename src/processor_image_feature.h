@@ -47,7 +47,6 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
         std::list<cv::Rect> tracker_roi_inflated_;
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
-        std::list<cv::Point> tracker_candidates_;
 
     public:
         ProcessorImageFeature(ProcessorParamsImage _params);
@@ -156,11 +155,8 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
         // These only to debug, will disappear one day soon
     public:
         virtual void drawFeatures(CaptureBasePtr const _last_ptr);
-
-        virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
-
+        virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list);
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
-
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
 
     public:
@@ -173,7 +169,7 @@ inline bool ProcessorImageFeature::voteForKeyFrame()
 {
 //    std::cout << "voteForKeyFrame?: "
 //            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
-    return (incoming_ptr_->getFeatureListPtr()->size() < 10);
+    return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
 }
 
 inline ConstraintBasePtr ProcessorImageFeature::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)

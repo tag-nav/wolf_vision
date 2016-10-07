@@ -29,7 +29,6 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
 
             detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
                                                                    (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
-
             detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
 
             break;
@@ -87,16 +86,13 @@ void ProcessorImageFeature::preProcess()
     active_search_grid_.renew();
 
     //The visualization part is only for debugging. The casts above are necessary.
-
     if(last_ptr_ != nullptr)
         resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()));
 
     // Clear of the lists used to debug
     tracker_roi_.clear();
-    tracker_roi_inflated_.clear();
     detector_roi_.clear();
     tracker_target_.clear();
-    tracker_candidates_.clear();
 }
 
 void ProcessorImageFeature::postProcess()
@@ -106,8 +102,7 @@ void ProcessorImageFeature::postProcess()
         drawFeatures(last_ptr_);
         drawRoi(image_last_,detector_roi_,cv::Scalar(0.0,255.0, 255.0));   //detector roi(now only shown when it collides with the the image)
         drawRoi(image_last_,tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));   //tracker roi
-//    drawRoi(image_last_,tracker_roi_inflated_,cv::Scalar(225.0, 0.0, 255.0));   //inflated roi(now only shown when it collides with the the image)
-        drawTrackingFeatures(image_last_,tracker_target_,tracker_candidates_);
+        drawTrackingFeatures(image_last_,tracker_target_);
     }
 }
 
@@ -124,7 +119,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
     cv::Mat candidate_descriptors;
     std::vector<cv::DMatch> cv_matches;
 
-    for (auto feature_base_ptr : _feature_list_in)//_feature_list_in)
+    for (auto feature_base_ptr : _feature_list_in)
     {
         FeaturePointImage* feature_ptr = (FeaturePointImage*)feature_base_ptr;
 
@@ -132,7 +127,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
 
-        active_search_grid_.hitCell(feature_ptr->getKeypoint());  //TODO: Mirar el hitcell en este punto
+        active_search_grid_.hitCell(feature_ptr->getKeypoint());
         active_search_grid_.blockCell(roi);
 
         cv::Mat target_descriptor = feature_ptr->getDescriptor();
@@ -161,11 +156,6 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
                 tracker_target_.pop_back();
                 tracker_roi_.pop_back();
             }
-            for (unsigned int i = 0; i < candidate_keypoints.size(); i++)
-            {
-                //list used to debug
-                tracker_candidates_.push_back(candidate_keypoints[i].pt);
-            }
         }
         else
         {
@@ -192,7 +182,7 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
 
     Scalar normalized_score = match(origin_descriptor,incoming_descriptor,matches_mat);
 
-    if(normalized_score > 0.8)
+    if(normalized_score > params_.matcher.min_normalized_score)
     {
         return true;
     }
@@ -219,7 +209,7 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
         if (detect(image_incoming_, roi, correction_keypoints, correction_descriptors))
         {
             Scalar normalized_score_correction = match(origin_descriptor,correction_descriptors,correction_matches);
-            if(normalized_score_correction > 0.8)
+            if(normalized_score_correction > params_.matcher.min_normalized_score)
             {
                 feat_incoming_ptr->setKeypoint(correction_keypoints[correction_matches[0].trainIdx]);
                 feat_incoming_ptr->setDescriptor(correction_descriptors.row(correction_matches[0].trainIdx));
@@ -300,7 +290,6 @@ unsigned int ProcessorImageFeature::detect(cv::Mat _image, cv::Rect& _roi, std::
                                     cv::Mat& new_descriptors)
 {
     cv::Mat _image_roi;
-
     adaptRoi(_image_roi, _image, _roi);
 
     detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
@@ -363,29 +352,19 @@ void ProcessorImageFeature::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Re
 {
     inflateRoi(_roi);
     trimRoi(_roi);
-
-    tracker_roi_inflated_.push_back(_roi);
-
     _image_roi = _image(_roi);
 }
 
 // draw functions ===================================================================
 
-void ProcessorImageFeature::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list)
+void ProcessorImageFeature::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list)
 {
-    // These "tracking features" are the feature to be used in tracking as well as its candidates
-
+    // These "tracking features" are the features to be used in tracking
     for(auto target_point : _target_list)
     {
         //target
         cv::circle(_image, target_point, 7, cv::Scalar(255.0, 0.0, 255.0), 1, 3, 0);
     }
-//    for(auto candidate_point : _candidates_list)
-//    {
-//        //candidate - cyan
-//        cv::circle(_image, candidate_point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
-//    }
-
     cv::imshow("Feature tracker", _image);
 }
 

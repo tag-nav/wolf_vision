@@ -186,7 +186,7 @@ int main(int argc, char** argv)
 
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(30);
+        cv::waitKey(1);
 
 //        if((f%buffer_size) == 4)
 //        {
