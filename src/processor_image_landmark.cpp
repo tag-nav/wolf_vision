@@ -122,14 +122,9 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     cv::Mat candidate_descriptors;
     std::vector<cv::DMatch> cv_matches;
 
-//    std::cout << "Number of features to track: " << _landmark_list_in.size() << std::endl;
-
     unsigned int lmk_nbr = 0;
-    for (auto landmark_in_ptr : _landmark_list_in)//_feature_list_in)
+    for (auto landmark_in_ptr : _landmark_list_in)
     {
-        std::cout << "\nLandmark number [" << lmk_nbr << "] in ";
-
-        /* project */
         LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_in_ptr;
         Eigen::Vector4s point3D_hmg;
         Eigen::Vector3s point2D_hmg;
@@ -144,35 +139,30 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
         {
-            /* tracking */
-
             roi_x = (point2D[0]) - (roi_heigth / 2);
             roi_y = (point2D[1]) - (roi_width / 2);
             cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
 
-            active_search_grid_.hitCell(point2D);  //TODO: Mirar el hitcell en este punto
+            active_search_grid_.hitCell(point2D);
             active_search_grid_.blockCell(roi);
 
             cv::Mat target_descriptor = landmark_ptr->getCvDescriptor();
 
-            std::cout << "pixel: " << point2D.transpose() << std::endl;
-            std::cout << "target_descriptor[" << lmk_nbr << "]:\n" << target_descriptor.row(0) << std::endl;
+//            std::cout << "pixel: " << point2D.transpose() << std::endl;
+//            std::cout << "target_descriptor[" << lmk_nbr << "]:\n" << target_descriptor.row(0) << std::endl;
 
             //lists used to debug
             tracker_roi_.push_back(roi);
 
             if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
             {
-                //the matcher is now inside the match function
                 Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
-
-                std::cout << "candidate keypoints size: " << candidate_keypoints.size() << std::endl;
 
                 if (normalized_score > params_.matcher.min_normalized_score)
                 {
-                    std::cout << "FOUND // normalized score: " << normalized_score << std::endl;
-                    std::cout << "Feature in pixel: " << candidate_keypoints[cv_matches[0].trainIdx].pt << std::endl;
-                    std::cout << "Feature descriptor:\n" << candidate_descriptors.row(cv_matches[0].trainIdx) << std::endl;
+//                    std::cout << "FOUND // normalized score: " << normalized_score << std::endl;
+//                    std::cout << "Feature in pixel: " << candidate_keypoints[cv_matches[0].trainIdx].pt << std::endl;
+//                    std::cout << "Feature descriptor:\n" << candidate_descriptors.row(cv_matches[0].trainIdx) << std::endl;
 
 
                     FeaturePointImage* incoming_point_ptr = new FeaturePointImage(candidate_keypoints[cv_matches[0].trainIdx],
@@ -188,21 +178,14 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 //                              << "\tY: " << incoming_point_ptr->getKeypoint().pt.y << std::endl;
 
                 }
-                else
-                {
+//                else
 //                    std::cout << "NOT FOUND" << std::endl;
-                }
             }
-            else
-            {
-                //this one means that the detector/descriptor searched the roi, but didn't find ANYTHING at all. So, NOT tracked.
+//            else
 //                std::cout << "NOT DETECTED/FOUND" << std::endl;
-            }
         }
-        else
-        {
+//        else
 //            std::cout << "NOT in the image" << std::endl;
-        }
 
         lmk_nbr++;
     }
@@ -213,13 +196,11 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
 bool ProcessorImageLandmark::voteForKeyFrame()
 {
-    //TODO: Keep the number of landmarks that are in the image and compare it to a fixed number
     return landmarks_tracked_ < params_.algorithm.min_features_for_keyframe;
 }
 
 unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_features)
 {
-    //std::cout << "\n---------------- detectNewFeatures -------------" << std::endl;
     cv::Rect roi;
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
