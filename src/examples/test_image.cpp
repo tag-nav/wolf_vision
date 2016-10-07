@@ -123,7 +123,7 @@ int main(int argc, char** argv)
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
+    wolf_problem_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
 
     //=====================================================
 

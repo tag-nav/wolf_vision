@@ -76,7 +76,7 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
 }
 
 // Register in the SensorFactory
-const bool registered_prc_image_par = ProcessorParamsFactory::get().registerCreator("IMAGE FEATURE", createProcessorParamsImage);
+const bool registered_prc_image_feature_par = ProcessorParamsFactory::get().registerCreator("IMAGE FEATURE", createProcessorParamsImage);
 const bool registered_prc_image_landmark_par = ProcessorParamsFactory::get().registerCreator("IMAGE LANDMARK", createProcessorParamsImage);
 
 
