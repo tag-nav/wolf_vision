@@ -18,7 +18,7 @@ class FeatureBase;
 namespace wolf{
 
 //class CaptureBase
-class CaptureBase : public NodeBase // NodeLinked<FrameBase, FeatureBase>
+class CaptureBase : public NodeBase
 {
     private:
         ProblemPtr problem_ptr_;

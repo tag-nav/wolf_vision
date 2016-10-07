@@ -8,6 +8,9 @@
 #ifndef FACTORY_H_
 #define FACTORY_H_
 
+// wolf
+#include "wolf.h"
+
 // std
 #include <string>
 #include <map>

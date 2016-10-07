@@ -448,9 +448,6 @@ ProcessorBasePtr ProcessorImageFeature::create(const std::string& _unique_name, 
 // Register in the SensorFactory
 #include "processor_factory.h"
 namespace wolf {
-namespace
-{
-const bool registered_prc_image = ProcessorFactory::get().registerCreator("IMAGE", ProcessorImageFeature::create);
-}
+WOLF_REGISTER_PROCESSOR("IMAGE FEATURE", ProcessorImageFeature)
 } // namespace wolf
 

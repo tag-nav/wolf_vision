@@ -16,9 +16,5 @@ ProcessorBasePtr ProcessorOdom2D::create(const std::string& _unique_name, const 
 // Register in the ProcessorFactory
 #include "processor_factory.h"
 namespace wolf {
-//namespace
-//{
-//const bool registered_prc_odom_2d = ProcessorFactory::get().registerCreator("ODOM 2D", ProcessorOdom2D::create);
 WOLF_REGISTER_PROCESSOR("ODOM 2D", ProcessorOdom2D)
-//}
 } // namespace wolf

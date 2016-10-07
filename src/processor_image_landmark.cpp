@@ -592,16 +592,13 @@ ProcessorBasePtr ProcessorImageLandmark::create(const std::string& _unique_name,
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
-//} // namespace wolf
-}
+
+} // namespace wolf
+
 
 // Register in the SensorFactory
 #include "processor_factory.h"
 namespace wolf {
-namespace
-{
-const bool registered_prc_image = ProcessorFactory::get().registerCreator("IMAGE LANDMARK", ProcessorImageLandmark::create);
-}
+WOLF_REGISTER_PROCESSOR("IMAGE LANDMARK", ProcessorImageLandmark)
 } // namespace wolf
 
-//}
