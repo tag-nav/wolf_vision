@@ -747,8 +747,6 @@ void removeLmksAndFrames(const shared_ptr<P>& Pp)
     Pp->getM()->getLlist().front()->remove();
     cout << "Removing frame ----------" << endl;
     Pp->getT()->getFlist().front()->remove();
-    cout << "Removing landmark ----------" << endl;
-    Pp->getM()->getLlist().front()->remove();
     cout << "Removing frame ----------" << endl;
     Pp->getT()->getFlist().back()->remove();
 }
