@@ -38,7 +38,7 @@ class CaptureBase : public NodeBase
 
     public:
 
-        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr);
+        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr = nullptr);
 
         /** \brief Default destructor (not recommended)
          *
@@ -67,12 +67,14 @@ class CaptureBase : public NodeBase
         void getConstraintList(ConstraintBaseList& _ctr_list);
 
         SensorBasePtr getSensorPtr() const;
+        virtual void setSensorPtr(const SensorBasePtr sensor_ptr);
+
         StateBlock* getSensorPPtr() const;
         StateBlock* getSensorOPtr() const;
 
         /** \brief Call all the processors for this Capture
          */
-        virtual void process();
+        //virtual void process();
 
 };
 
@@ -161,6 +163,11 @@ inline TimeStamp CaptureBase::getTimeStamp() const
 inline SensorBasePtr CaptureBase::getSensorPtr() const
 {
     return sensor_ptr_;
+}
+
+inline void CaptureBase::setSensorPtr(const SensorBasePtr sensor_ptr)
+{
+  sensor_ptr_ = sensor_ptr;
 }
 
 inline void CaptureBase::setTimeStamp(const TimeStamp& _ts)

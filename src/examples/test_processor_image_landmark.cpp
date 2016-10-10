@@ -177,7 +177,8 @@ int main(int argc, char** argv)
         image_ptr = new CaptureImage(t, camera_ptr_, frame[f % buffer_size]);
 
         /* process */
-        image_ptr->process();
+        //image_ptr->process();
+        camera_ptr_->addCapture(image_ptr);
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
         cv::waitKey(0);

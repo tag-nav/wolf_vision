@@ -130,10 +130,13 @@ class SensorBase : public NodeBase
         ProblemPtr getProblem();
         void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
+        bool addCapture(const CaptureBasePtr capture_ptr);
+
 };
 
 }
 
+#include "capture_base.h"
 #include "processor_base.h"
 #include "hardware_base.h"
 
@@ -214,6 +217,18 @@ inline void SensorBase::destruct()
 inline Eigen::MatrixXs SensorBase::getNoiseCov()
 {
     return noise_cov_;
+}
+
+inline bool SensorBase::addCapture(const CaptureBasePtr capture_ptr)
+{
+  capture_ptr->setSensorPtr(this);
+
+  for (const auto processor : processor_list_)
+  {
+    processor->process(capture_ptr);
+  }
+
+  return true;
 }
 
 } // namespace wolf

@@ -42,14 +42,14 @@ void CaptureBase::destruct()
     }
 }
 
-void CaptureBase::process()
-{
-    // Call all processors assigned to the sensor that captured this data
-    for (auto processor_iter = sensor_ptr_->getProcessorListPtr()->begin(); processor_iter != sensor_ptr_->getProcessorListPtr()->end(); ++processor_iter)
-    {
-        (*processor_iter)->process(this);
-    }
-}
+//void CaptureBase::process()
+//{
+//    // Call all processors assigned to the sensor that captured this data
+//    for (auto processor_iter = sensor_ptr_->getProcessorListPtr()->begin(); processor_iter != sensor_ptr_->getProcessorListPtr()->end(); ++processor_iter)
+//    {
+//        (*processor_iter)->process(this);
+//    }
+//}
 
 void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
 {
