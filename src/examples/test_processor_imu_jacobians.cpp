@@ -65,6 +65,8 @@ int main(int argc, char** argv)
     Eigen::Map<Eigen::Quaternions> Delta0_quat(Delta0.data()+6);
     Delta0_quat.normalize();
 
+    std::cout << "\ninput Delta0 : " << Delta0 << std::endl;
+
     struct IMU_jac_bias bias_jac = processor_imu.finite_diff_ab(dt, data_, ddelta_bias, Delta0);
 
     Eigen::Map<Eigen::Quaternions> Dq0(NULL);
