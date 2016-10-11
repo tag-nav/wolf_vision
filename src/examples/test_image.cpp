@@ -35,8 +35,8 @@ int main(int argc, char** argv)
     const char * filename;
     if (argc == 1)
     {
-        filename = "/home/jtarraso/Videos/House_interior.mp4";
-        //filename = "/home/jtarraso/Vídeos/gray.mp4";
+//        filename = "/home/jtarraso/Videos/House_interior.mp4";
+        filename = "/home/jtarraso/Vídeos/gray.mp4";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
@@ -143,17 +143,16 @@ int main(int argc, char** argv)
 
 
 
-    // Ceres wrapper
-    ceres::Solver::Options ceres_options;
-    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
-    ceres_options.max_line_search_step_contraction = 1e-3;
-    //    ceres_options.minimizer_progress_to_stdout = false;
-    //    ceres_options.line_search_direction_type = ceres::LBFGS;
-    //    ceres_options.max_num_iterations = 100;
-    google::InitGoogleLogging(argv[0]);
+//    // Ceres wrapper
+//    ceres::Solver::Options ceres_options;
+//    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+//    ceres_options.max_line_search_step_contraction = 1e-3;
+//    //    ceres_options.minimizer_progress_to_stdout = false;
+//    //    ceres_options.line_search_direction_type = ceres::LBFGS;
+//    //    ceres_options.max_num_iterations = 100;
+//    google::InitGoogleLogging(argv[0]);
 
-    CeresManager ceres_manager(&(*wolf_problem_ptr_), ceres_options);
-
+//    CeresManager ceres_manager(&(*wolf_problem_ptr_), ceres_options);
 
 
 
@@ -181,9 +180,8 @@ int main(int argc, char** argv)
         image_ptr = new CaptureImage(t, camera_ptr, frame[f % buffer_size]);
         image_ptr->process();
 
-
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(1);
+        cv::waitKey(0);
 
 //        if((f%buffer_size) == 4)
 //        {

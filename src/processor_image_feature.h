@@ -47,6 +47,8 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
         std::list<cv::Rect> tracker_roi_inflated_;
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
+        unsigned int complete_target_size_ = 1;
+        unsigned int target_size_ = 1;
 
     public:
         ProcessorImageFeature(ProcessorParamsImage _params);

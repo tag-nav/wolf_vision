@@ -128,7 +128,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
         cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
 
         active_search_grid_.hitCell(feature_ptr->getKeypoint());
-
+        complete_target_size_++;
         cv::Mat target_descriptor = feature_ptr->getDescriptor();
 
         //lists used to debug
@@ -246,6 +246,7 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                 }
                 if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
                 {
+                    std::cout << "response: " << new_keypoints[0].response << std::endl;
                     FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
@@ -271,7 +272,8 @@ Scalar ProcessorImageFeature::match(cv::Mat _target_descriptor, cv::Mat _candida
 {
     matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
-    //std::cout << "normalized score: " << normalized_score << std::endl;
+    std::cout << "target descriptor: " << _target_descriptor.row(0) << std::endl;
+    std::cout << "normalized score: " << normalized_score << std::endl;
     return normalized_score;
 }
 
@@ -365,18 +367,37 @@ void ProcessorImageFeature::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_lis
 
 void ProcessorImageFeature::drawFeatures()
 {
+    unsigned int known_feature_counter = 0;
+    unsigned int new_feature_counter = 0;
+
     for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
     {
         FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
         if (point_ptr->isKnown())
+        {
             cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 255.0, 51.0), -1, 3, 0);
+            known_feature_counter++;
+        }
         else
+        {
             cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(0.0, 0.0, 255.0), -1, 3, 0);
+            new_feature_counter++;
+        }
 
         cv::putText(image_last_, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt,
                     cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
     }
     cv::imshow("Feature tracker", image_last_);
+
+    std::cout << "\nKnown: " << known_feature_counter << std::endl;
+    std::cout << "New: " << new_feature_counter << std::endl;
+    std::cout << "Known features tracked: " << known_feature_counter << "/" << target_size_ << std::endl;
+    std::cout << "Percentage known: " << ((float)known_feature_counter/(float)target_size_)*100 << "%" << std::endl;
+    std::cout << "Features tracked: " << (*(last_ptr_->getFeatureListPtr())).size() << "/" << complete_target_size_ << std::endl;
+    std::cout << "Percentage: " << ((float)(*(last_ptr_->getFeatureListPtr())).size()/(float)complete_target_size_)*100 << "%" << std::endl;
+
+    target_size_ = (*(last_ptr_->getFeatureListPtr())).size();
+    complete_target_size_ = 0;
 }
 
 
