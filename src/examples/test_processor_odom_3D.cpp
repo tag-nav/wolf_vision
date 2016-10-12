@@ -34,17 +34,16 @@ int main ()
 
     Vector6s data((Vector6s() << d_pos , d_theta).finished());
 
-    Scalar dt = 0.001;
+    Scalar dt = 0.01;
 
-    for (TimeStamp t = 0; t < 5; t += dt)
+    for (TimeStamp t = 0; t < 5 - Constants::EPS; t += dt)
     {
-        cout << "t: " << t.get();
 
         CaptureIMU* cap_odo = new CaptureIMU(t, sen, data);
 
         cap_odo->process();
 
-        cout << "   x: " << problem->getCurrentState().transpose() << endl;
+        cout << "t: " << t.get() << "   x: " << problem->getCurrentState().transpose() << endl;
 
     }
 

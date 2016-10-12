@@ -6,3 +6,8 @@
  */
 
 #include "constraint_odom_3D.h"
+#include "factory.h"
+
+namespace wolf {
+// TODO: register into constraint factory
+}
