@@ -13,7 +13,7 @@ detector-descriptor:
     edge threshold: 16 #16
     first level: 0 
     WTA_K: 2            # See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
-    score type: 1       #enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
+    score type: 0       #enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
     patch size: 31
 
 matcher:

@@ -55,10 +55,23 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     }
 
     // 2. active search params
-    active_search_grid_.setParameters(_params.image.width, _params.image.height,
+
+//    image_.width_ = ((SensorCamera*)getSensorPtr())->getImgWidth();
+//    image_.height_ = ((SensorCamera*)getSensorPtr())->getImgHeight();
+//    image_.width_ = ((SensorCamera*)(getProblem()->getSensorPtr("PinHole")))->getImgWidth();
+//    image_.height_ = ((SensorCamera*)(getProblem()->getSensorPtr("PinHole")))->getImgHeight();
+    image_.width_ = _params.image.width;
+    image_.height_ = _params.image.height;
+
+    active_search_grid_.setParameters(image_.width_,image_.height_,
             _params.active_search.grid_width, _params.active_search.grid_height,
             detector_descriptor_params_.pattern_radius_,
             _params.active_search.separation);
+
+//    active_search_grid_.setParameters(_params.image.width, _params.image.height,
+//            _params.active_search.grid_width, _params.active_search.grid_height,
+//            detector_descriptor_params_.pattern_radius_,
+//            _params.active_search.separation);
 
     // 3. matcher params
     matcher_ptr_ = new cv::BFMatcher(_params.matcher.similarity_norm);
@@ -68,7 +81,8 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
 //Destructor
 ProcessorImageFeature::~ProcessorImageFeature()
 {
-
+    delete detector_descriptor_ptr_;
+    delete matcher_ptr_;
 }
 
 void ProcessorImageFeature::preProcess()
@@ -77,8 +91,8 @@ void ProcessorImageFeature::preProcess()
 
     if (last_ptr_ == nullptr) // do this just one time!
     {
-        params_.image.width = image_incoming_.cols;
-        params_.image.height = image_incoming_.rows;
+        image_.width_ = image_incoming_.cols;
+        image_.height_ = image_incoming_.rows;
         active_search_grid_.resizeImage(image_incoming_.cols, image_incoming_.rows);
         std::cout << "resized active-search image size!" << std::endl;
     }
@@ -317,14 +331,14 @@ void ProcessorImageFeature::trimRoi(cv::Rect& _roi)
         _roi.y = 0;
         _roi.height = _roi.height - diff_y;
     }
-    if((unsigned int)(_roi.x + _roi.width) > params_.image.width)
+    if((unsigned int)(_roi.x + _roi.width) > image_.width_)
     {
-        int diff_width = params_.image.width - (_roi.x + _roi.width);
+        int diff_width = image_.width_ - (_roi.x + _roi.width);
         _roi.width = _roi.width+diff_width;
     }
-    if((unsigned int)(_roi.y + _roi.height) > params_.image.height)
+    if((unsigned int)(_roi.y + _roi.height) > image_.height_)
     {
-        int diff_height = params_.image.height - (_roi.y + _roi.height);
+        int diff_height = image_.height_ - (_roi.y + _roi.height);
         _roi.height = _roi.height+diff_height;
     }
 }

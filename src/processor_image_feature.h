@@ -42,6 +42,12 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
                 unsigned int size_bits_; ///< length of the descriptor vector in bits
         }detector_descriptor_params_;
 
+        struct
+        {
+                unsigned int width_; ///< width of the image
+                unsigned int height_; ///< height of the image
+        }image_;
+
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
