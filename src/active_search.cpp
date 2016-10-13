@@ -16,10 +16,10 @@ ActiveSearchGrid::ActiveSearchGrid() : separation_(0), margin_(0) {}
 ActiveSearchGrid::ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v, const int & _n_cells_h,
                                    const int & _n_cells_v, const int & _margin, const int & _separation)
 {
-    setParameters(_img_size_h, _img_size_v, _n_cells_h, _n_cells_v, _margin, _separation);
+    setup(_img_size_h, _img_size_v, _n_cells_h, _n_cells_v, _margin, _separation);
 }
 
-void ActiveSearchGrid::setParameters(const int & _img_size_h, const int & _img_size_v,
+void ActiveSearchGrid::setup(const int & _img_size_h, const int & _img_size_v,
                    const int & _n_cells_h, const int & _n_cells_v,
                    const int & _margin, const int & _separation)
     {
