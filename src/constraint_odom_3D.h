@@ -17,9 +17,10 @@ namespace wolf
 class ConstraintOdom3D : public ConstraintSparse<6,3,4,3,4>
 {
     public:
-        ConstraintOdom3D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function,
-                         ConstraintStatus _status);
+        ConstraintOdom3D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function = false,
+                         ConstraintStatus _status = CTR_ACTIVE);
         virtual ~ConstraintOdom3D();
+        JacobianMethod getJacobianMethod() const {return JAC_AUTO;}
 
         template<typename T>
                 bool operator ()(const T* const _p1,
@@ -88,7 +89,7 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* con
     Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > p2(_p2);
     Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
-    Eigen::Map<Eigen::Matrix<T,10,1> > residuals(_residuals);
+    Eigen::Map<Eigen::Matrix<T,6,1> > residuals(_residuals);
 
     // estimate motion increment, dp, dq;
     Eigen::Matrix<T,3,1> dp = q1.conjugate() * (p2 - p1);
@@ -100,8 +101,10 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* con
 
     // residual
     // residuals.head<3>() = dq.conjugate() * (dp_m - dp); // see note below
-    residuals.head<3>() = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
-    residuals.tail<3>() = q2v(dq.conjugate() * dq_m);
+    residuals.head(3) = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
+    residuals.tail(3) = q2v(dq.conjugate() * dq_m);
+
+    return true;
 }
 
 } /* namespace wolf */
