@@ -34,8 +34,8 @@ algorithm:
     minimum response for new features: 80 #0.0005
     
 draw: # Used to control drawing options
-    features: true
-    target: true
+    primary draw: true
+    secondary draw: true
     detection roi: true
     tracking roi: true
     

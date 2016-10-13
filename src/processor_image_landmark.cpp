@@ -61,13 +61,7 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorParamsImage _params) :
             throw std::runtime_error("Unknown detector-descriptor type");
     }
 
-    // 2. active search params
-//    active_search_grid_.setParameters(_params.image.width, _params.image.height,
-//            _params.active_search.grid_width, _params.active_search.grid_height,
-//            detector_descriptor_params_.pattern_radius_,
-//            _params.active_search.separation);
-
-    // 3. matcher params
+    // 2. matcher params
     matcher_ptr_ = new cv::BFMatcher(_params.matcher.similarity_norm);
 
 }
@@ -82,7 +76,7 @@ void ProcessorImageLandmark::setup(SensorCamera* _camera_ptr)
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
 
-    active_search_grid_.setParameters(image_.width_,image_.height_,
+    active_search_grid_.setup(image_.width_,image_.height_,
             params_.active_search.grid_width, params_.active_search.grid_height,
             detector_descriptor_params_.pattern_radius_,
             params_.active_search.separation);
@@ -91,15 +85,6 @@ void ProcessorImageLandmark::setup(SensorCamera* _camera_ptr)
 void ProcessorImageLandmark::preProcess()
 {
     image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
-
-    if (last_ptr_ == nullptr) // do this just one time!
-    {
-        params_.image.width = image_incoming_.cols;
-        params_.image.height = image_incoming_.rows;
-        active_search_grid_.resizeImage(image_incoming_.cols, image_incoming_.rows);
-        std::cout << "resized active-search image size!" << std::endl;
-    }
-
     active_search_grid_.renew();
 
 
@@ -114,10 +99,10 @@ void ProcessorImageLandmark::postProcess()
     if (last_ptr_!=nullptr)
     {
         cv::Mat image = image_incoming_.clone();
-        drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
-        drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
-        drawLandmarks(image);
-        drawFeaturesFromLandmarks(image);
+        if(params_.draw.tracker_roi) drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
+        if(params_.draw.detector_roi) drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
+        if(params_.draw.primary_drawing) drawLandmarks(image);
+        if(params_.draw.secondary_drawing) drawFeaturesFromLandmarks(image);
     }
 }
 

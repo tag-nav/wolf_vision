@@ -71,7 +71,7 @@ void ProcessorImageFeature::setup(SensorCamera* _camera_ptr)
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
 
-    active_search_grid_.setParameters(image_.width_,image_.height_,
+    active_search_grid_.setup(image_.width_,image_.height_,
             params_.active_search.grid_width, params_.active_search.grid_height,
             detector_descriptor_params_.pattern_radius_,
             params_.active_search.separation);
@@ -82,11 +82,11 @@ void ProcessorImageFeature::preProcess()
     image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
     active_search_grid_.renew();
 
-    //The visualization part is only for debugging. The casts above are necessary.
+
+    //The visualization functions and variables
     if(last_ptr_ != nullptr)
         resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()));
 
-    // Clear of the lists used to debug
     tracker_roi_.clear();
     detector_roi_.clear();
     tracker_target_.clear();
@@ -96,10 +96,11 @@ void ProcessorImageFeature::postProcess()
 {
     if (last_ptr_!=nullptr)
     {
-        if(params_.draw.features) drawFeatures();
-        if(params_.draw.detector_roi) drawRoi(image_last_,detector_roi_,cv::Scalar(0.0,255.0, 255.0));   //active search roi
-        if(params_.draw.tracker_roi) drawRoi(image_last_,tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));  //tracker roi
-        if(params_.draw.target) drawTarget(image_last_,tracker_target_);
+        cv::Mat image = image_last_.clone();
+        if(params_.draw.primary_drawing) drawFeatures(image);
+        if(params_.draw.detector_roi) drawRoi(image,detector_roi_,cv::Scalar(0.0,255.0, 255.0));   //active search roi
+        if(params_.draw.tracker_roi) drawRoi(image,tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));  //tracker roi
+        if(params_.draw.secondary_drawing) drawTarget(image,tracker_target_);
     }
 }
 
@@ -362,7 +363,7 @@ void ProcessorImageFeature::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_lis
     cv::imshow("Feature tracker", _image);
 }
 
-void ProcessorImageFeature::drawFeatures()
+void ProcessorImageFeature::drawFeatures(cv::Mat _image)
 {
     unsigned int known_feature_counter = 0;
     unsigned int new_feature_counter = 0;
@@ -372,19 +373,19 @@ void ProcessorImageFeature::drawFeatures()
         FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
         if (point_ptr->isKnown())
         {
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 255.0, 51.0), -1, 3, 0);
+            cv::circle(_image, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 255.0, 51.0), -1, 3, 0);
             known_feature_counter++;
         }
         else
         {
-            cv::circle(image_last_, point_ptr->getKeypoint().pt, 4, cv::Scalar(0.0, 0.0, 255.0), -1, 3, 0);
+            cv::circle(_image, point_ptr->getKeypoint().pt, 4, cv::Scalar(0.0, 0.0, 255.0), -1, 3, 0);
             new_feature_counter++;
         }
 
-        cv::putText(image_last_, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt,
+        cv::putText(_image, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt,
                     cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
     }
-    cv::imshow("Feature tracker", image_last_);
+    cv::imshow("Feature tracker", _image);
 
     std::cout << "\nKnown: " << known_feature_counter << std::endl;
     std::cout << "New: " << new_feature_counter << std::endl;

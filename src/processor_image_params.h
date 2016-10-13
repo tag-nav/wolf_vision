@@ -67,8 +67,8 @@ struct ProcessorParamsImage : public ProcessorParamsBase
 
         struct Draw
         {
-                bool features; ///< draw the features found in the image
-                bool target; ///< draw the target of the features found in the image
+                bool primary_drawing; ///< draw the features found in the image
+                bool secondary_drawing; ///< draw the target of the features found in the image
                 bool detector_roi; ///< draw the roi in which new features are searched
                 bool tracker_roi; ///< draw the roi used to track features from the last frame
         }draw;

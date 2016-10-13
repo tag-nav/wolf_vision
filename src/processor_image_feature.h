@@ -168,7 +168,7 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 
         // These only to debug, will disappear one day
     public:
-        virtual void drawFeatures();
+        virtual void drawFeatures(cv::Mat _image);
         virtual void drawTarget(cv::Mat _image, std::list<cv::Point> _target_list);
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
