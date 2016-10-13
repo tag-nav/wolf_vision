@@ -51,6 +51,38 @@ template<typename T>
 inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* const _q1, const T* const _p2,
                                                 const T* const _q2, T* _residuals) const
 {
+
+    /* Residual expression
+     * -------------------
+     *
+     * Given two states x_i, x_j, with
+     *
+     *   x_i = [p_i , q_i]
+     *
+     * we define the (-) operator as
+     *
+     *   x_j (-) x_i = [q_i.conj * (p_j - p_i) , q_i.conj * q_j]
+     *
+     * we also define Log and Exp maps as
+     *
+     *   Log(x) = [p, log(q)]
+     *   Exp(v) = [p, exp(o)]
+     *
+     * where
+     *
+     *   v = [p,o] is the vector representation of a [p,q] pose.
+     *
+     * Note: The Log and Exp maps are here implemented as q2v() and v2q() respectively.
+     *
+     * Finally the residual is developed as follows. Given a measurement m
+     *
+     *   m = [p_m, o_m] \in R^6
+     *
+     * then
+     *
+     *   r = log [ exp(m) (-) ( x_j (-) x_i ) ]
+     */
+
     // MAPS
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
     Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
@@ -67,7 +99,8 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* con
     Eigen::Quaternion<T> dq_m = v2q(getMeasurement().tail<3>());
 
     // residual
-    residuals.head<3>() = dp_m - dp;
+    // residuals.head<3>() = dq.conjugate() * (dp_m - dp); // see note below
+    residuals.head<3>() = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
     residuals.tail<3>() = q2v(dq.conjugate() * dq_m);
 }
 

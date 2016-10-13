@@ -39,7 +39,7 @@ int main ()
     for (TimeStamp t = 0; t < 5 - Constants::EPS; t += dt)
     {
 
-        CaptureIMU* cap_odo = new CaptureIMU(t, sen, data);
+        CaptureMotion* cap_odo = new CaptureMotion(t, sen, data);
 
         cap_odo->process();
 

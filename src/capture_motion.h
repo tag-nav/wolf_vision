@@ -66,7 +66,7 @@ class CaptureMotion : public CaptureBase
         // member data:
     private:
         Eigen::VectorXs data_;        ///< Motion data in form of vector mandatory
-        Eigen::MatrixXs data_cov_;    ///< Motion data in form of vector mandatory
+        Eigen::MatrixXs data_cov_;    ///< Motion data covariance
         MotionBuffer buffer_;         ///< Buffer of motions between this Capture and the next one.
         FrameBasePtr origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
