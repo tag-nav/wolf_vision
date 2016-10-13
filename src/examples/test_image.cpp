@@ -136,7 +136,8 @@ int main(int argc, char** argv)
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_ptr_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
+    ProcessorImageFeature* prc_img_ptr = (ProcessorImageFeature*) wolf_problem_ptr_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
+    prc_img_ptr->setup(camera_ptr);
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
 
@@ -181,7 +182,7 @@ int main(int argc, char** argv)
         image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(0);
+        cv::waitKey(20);
 
 //        if((f%buffer_size) == 4)
 //        {

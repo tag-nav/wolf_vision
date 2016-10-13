@@ -8,12 +8,12 @@ image:
 detector-descriptor:
     type: "ORB"         # This affects the structure below. See processor_image_BRISK.yaml for another example
     nfeatures: 100
-    scale factor: 1.05
+    scale factor: 1.2
     nlevels: 8
     edge threshold: 16 #16
     first level: 0 
     WTA_K: 2            # See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
-    score type: 0       #enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
+    score type: 1       #enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
     patch size: 31
 
 matcher:
@@ -31,11 +31,11 @@ active search:
 algorithm:
     maximum new features: 40
     minimum features for new keyframe: 40
-    minimum response for new features: 0.0005
+    minimum response for new features: 80 #0.0005
     
-draw: # Not implemented yet. Use it to control drawing options
+draw: # Used to control drawing options
     features: true
+    target: true
     detection roi: true
-    tracking roi: false
-    inflated tracking roi: true
+    tracking roi: true
     

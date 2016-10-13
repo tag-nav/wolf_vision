@@ -70,6 +70,12 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
         p->algorithm.min_features_for_keyframe = alg["minimum features for new keyframe"].as<unsigned int>();
         p->algorithm.min_response_for_new_features = alg["minimum response for new features"].as<float>();
 
+        Node draw = params["draw"];
+        p->draw.features = draw["features"].as<bool>();
+        p->draw.target = draw["target"].as<bool>();
+        p->draw.detector_roi = draw["detection roi"].as<bool>();
+        p->draw.tracker_roi = draw["tracking roi"].as<bool>();
+
     }
 
     return p;

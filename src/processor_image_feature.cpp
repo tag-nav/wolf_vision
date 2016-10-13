@@ -54,26 +54,7 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
             throw std::runtime_error("Unknown detector-descriptor type");
     }
 
-    // 2. active search params
-
-//    image_.width_ = ((SensorCamera*)getSensorPtr())->getImgWidth();
-//    image_.height_ = ((SensorCamera*)getSensorPtr())->getImgHeight();
-//    image_.width_ = ((SensorCamera*)(getProblem()->getSensorPtr("PinHole")))->getImgWidth();
-//    image_.height_ = ((SensorCamera*)(getProblem()->getSensorPtr("PinHole")))->getImgHeight();
-    image_.width_ = _params.image.width;
-    image_.height_ = _params.image.height;
-
-    active_search_grid_.setParameters(image_.width_,image_.height_,
-            _params.active_search.grid_width, _params.active_search.grid_height,
-            detector_descriptor_params_.pattern_radius_,
-            _params.active_search.separation);
-
-//    active_search_grid_.setParameters(_params.image.width, _params.image.height,
-//            _params.active_search.grid_width, _params.active_search.grid_height,
-//            detector_descriptor_params_.pattern_radius_,
-//            _params.active_search.separation);
-
-    // 3. matcher params
+    // 2. matcher params
     matcher_ptr_ = new cv::BFMatcher(_params.matcher.similarity_norm);
 
 }
@@ -85,18 +66,20 @@ ProcessorImageFeature::~ProcessorImageFeature()
     delete matcher_ptr_;
 }
 
+void ProcessorImageFeature::setup(SensorCamera* _camera_ptr)
+{
+    image_.width_ = _camera_ptr->getImgWidth();
+    image_.height_ = _camera_ptr->getImgHeight();
+
+    active_search_grid_.setParameters(image_.width_,image_.height_,
+            params_.active_search.grid_width, params_.active_search.grid_height,
+            detector_descriptor_params_.pattern_radius_,
+            params_.active_search.separation);
+}
+
 void ProcessorImageFeature::preProcess()
 {
     image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
-
-    if (last_ptr_ == nullptr) // do this just one time!
-    {
-        image_.width_ = image_incoming_.cols;
-        image_.height_ = image_incoming_.rows;
-        active_search_grid_.resizeImage(image_incoming_.cols, image_incoming_.rows);
-        std::cout << "resized active-search image size!" << std::endl;
-    }
-
     active_search_grid_.renew();
 
     //The visualization part is only for debugging. The casts above are necessary.
@@ -113,10 +96,10 @@ void ProcessorImageFeature::postProcess()
 {
     if (last_ptr_!=nullptr)
     {
-        drawFeatures();
-        drawRoi(image_last_,detector_roi_,cv::Scalar(0.0,255.0, 255.0));   //active search roi
-        drawRoi(image_last_,tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));  //tracker roi
-        drawTrackingFeatures(image_last_,tracker_target_);
+        if(params_.draw.features) drawFeatures();
+        if(params_.draw.detector_roi) drawRoi(image_last_,detector_roi_,cv::Scalar(0.0,255.0, 255.0));   //active search roi
+        if(params_.draw.tracker_roi) drawRoi(image_last_,tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));  //tracker roi
+        if(params_.draw.target) drawTarget(image_last_,tracker_target_);
     }
 }
 
@@ -260,7 +243,7 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                 }
                 if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
                 {
-                    std::cout << "response: " << new_keypoints[0].response << std::endl;
+//                    std::cout << "response: " << new_keypoints[0].response << std::endl;
                     FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
@@ -286,8 +269,8 @@ Scalar ProcessorImageFeature::match(cv::Mat _target_descriptor, cv::Mat _candida
 {
     matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
-    std::cout << "target descriptor: " << _target_descriptor.row(0) << std::endl;
-    std::cout << "normalized score: " << normalized_score << std::endl;
+//    std::cout << "target descriptor: " << _target_descriptor.row(0) << std::endl;
+//    std::cout << "normalized score: " << normalized_score << std::endl;
     return normalized_score;
 }
 
@@ -362,7 +345,7 @@ void ProcessorImageFeature::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Re
 
 // draw functions ===================================================================
 
-void ProcessorImageFeature::drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list)
+void ProcessorImageFeature::drawTarget(cv::Mat _image, std::list<cv::Point> _target_list)
 {
     // draw the target of the tracking
     for(auto target_point : _target_list)

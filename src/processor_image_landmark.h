@@ -39,6 +39,11 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
                 unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
                 unsigned int size_bits_; ///< length of the descriptor vector in bits
         }detector_descriptor_params_;
+        struct
+        {
+                unsigned int width_; ///< width of the image
+                unsigned int height_; ///< height of the image
+        }image_;
 
         unsigned int landmarks_tracked_ = 0;
 
@@ -66,6 +71,8 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
     public:
         ProcessorImageLandmark(ProcessorParamsImage _params);
         virtual ~ProcessorImageLandmark();
+
+        virtual void setup(SensorCamera* _camera_ptr);
 
     protected:
 

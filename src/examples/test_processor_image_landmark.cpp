@@ -27,8 +27,8 @@ int main(int argc, char** argv)
     const char * filename;
     if (argc == 1)
     {
-        filename = "/home/jtarraso/Videos/House_interior.mp4";
-//        filename = "/home/jtarraso/Vídeos/gray.mp4";
+//        filename = "/home/jtarraso/Videos/House_interior.mp4";
+        filename = "/home/jtarraso/Vídeos/gray.mp4";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
@@ -126,13 +126,14 @@ int main(int argc, char** argv)
     /* Do this while there aren't extrinsic parameters on the yaml */
 
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
-
     SensorCamera* camera_ptr_ = (SensorCamera*)sensor_ptr;
 
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
+    ProcessorImageLandmark* prc_img_ptr = (ProcessorImageLandmark*) wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
+    prc_img_ptr->setup(camera_ptr_);
+    std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;

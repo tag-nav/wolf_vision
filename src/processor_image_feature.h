@@ -41,7 +41,6 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
                 unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
                 unsigned int size_bits_; ///< length of the descriptor vector in bits
         }detector_descriptor_params_;
-
         struct
         {
                 unsigned int width_; ///< width of the image
@@ -59,6 +58,8 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
     public:
         ProcessorImageFeature(ProcessorParamsImage _params);
         virtual ~ProcessorImageFeature();
+
+        virtual void setup(SensorCamera* _camera_ptr);
 
     protected:
 
@@ -165,12 +166,10 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
         virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
 
-
-
         // These only to debug, will disappear one day
     public:
         virtual void drawFeatures();
-        virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list);
+        virtual void drawTarget(cv::Mat _image, std::list<cv::Point> _target_list);
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
 

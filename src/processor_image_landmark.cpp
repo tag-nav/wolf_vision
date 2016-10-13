@@ -62,10 +62,10 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorParamsImage _params) :
     }
 
     // 2. active search params
-    active_search_grid_.setParameters(_params.image.width, _params.image.height,
-            _params.active_search.grid_width, _params.active_search.grid_height,
-            detector_descriptor_params_.pattern_radius_,
-            _params.active_search.separation);
+//    active_search_grid_.setParameters(_params.image.width, _params.image.height,
+//            _params.active_search.grid_width, _params.active_search.grid_height,
+//            detector_descriptor_params_.pattern_radius_,
+//            _params.active_search.separation);
 
     // 3. matcher params
     matcher_ptr_ = new cv::BFMatcher(_params.matcher.similarity_norm);
@@ -75,6 +75,17 @@ ProcessorImageLandmark::ProcessorImageLandmark(ProcessorParamsImage _params) :
 ProcessorImageLandmark::~ProcessorImageLandmark()
 {
     //
+}
+
+void ProcessorImageLandmark::setup(SensorCamera* _camera_ptr)
+{
+    image_.width_ = _camera_ptr->getImgWidth();
+    image_.height_ = _camera_ptr->getImgHeight();
+
+    active_search_grid_.setParameters(image_.width_,image_.height_,
+            params_.active_search.grid_width, params_.active_search.grid_height,
+            detector_descriptor_params_.pattern_radius_,
+            params_.active_search.separation);
 }
 
 void ProcessorImageLandmark::preProcess()

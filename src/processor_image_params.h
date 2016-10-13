@@ -64,6 +64,14 @@ struct ProcessorParamsImage : public ProcessorParamsBase
                 unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
                 float min_response_for_new_features; ///< minimum value of the response to create a new feature
         }algorithm;
+
+        struct Draw
+        {
+                bool features; ///< draw the features found in the image
+                bool target; ///< draw the target of the features found in the image
+                bool detector_roi; ///< draw the roi in which new features are searched
+                bool tracker_roi; ///< draw the roi used to track features from the last frame
+        }draw;
 };
 }
 
