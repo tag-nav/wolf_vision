@@ -24,6 +24,7 @@ int main ()
 {
 
     Problem* problem = new Problem(FRM_PO_3D);
+    CeresManager* ceres_manager = new CeresManager(problem);
 
     SensorBase* sen = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(),"");
     problem->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
@@ -46,6 +47,8 @@ int main ()
 
         cout << "   x: " << problem->getCurrentState().transpose() << endl;
 
+        ceres::Solver::Summary summary = ceres_manager->solve();
+        cout << summary << endl;
     }
 
     delete problem;
