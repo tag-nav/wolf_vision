@@ -25,9 +25,9 @@ int main()
         - pi2pi                                                            
         - skew                                                             OK
         - vee                                                              OK
-        - v2q                                                              OK (precision wolf::Constants::EPS)
-        - Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)       OK (precision wolf::Constants::EPS)
-        - Eigen::VectorXs q2v(const Eigen::Quaternions& _q)                OK (precision wolf::Constants::EPS)
+        - v2q                                                              v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)       v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - Eigen::VectorXs q2v(const Eigen::Quaternions& _q)                v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
         - v2R
         - R2v
         - jac_SO3_right
@@ -115,6 +115,53 @@ int main()
          std::cout << "Diff between vectors (rot_vector1 - quat_to_v1x) : \n" << rot_vector1 - quat_to_v1x << std::endl;
     }
 
-    //v2R, R2v
-    
+    ///v2R, R2v
+                                        //First test is to verify we get the good result with v -> v2R -> R2v -> v
+                                        //test 2 : how small can angles in rotation vector be ?
+        //v2R
+    //we re-use rot_vector0 and rot_vector1 defined above
+    Eigen::Matrix3s rot0, rot1;
+    rot0 = v2R(rot_vector0);
+    rot1 = v2R(rot_vector1);
+
+        //R2v
+    Eigen::Vector3s rot0_vec, rot1_vec;
+    rot0_vec = R2v(rot0);
+    rot1_vec = R2v(rot1);
+
+        //check now
+    if(rot0_vec.isApprox(rot_vector0, wolf::Constants::EPS))
+        std::cout << "v2R, R2v ok with small angles \n" << std::endl;
+    else{
+        std::cout << "v2R, R2v NOT ok with small angles - intput rotation vector : \n" << rot_vector0 << "\n corresponding matrix : \n " <<
+        rot0 << "\n returned rotation vector : \n"<< rot0_vec << std::endl;
+        std::cout << "Diff between vectors (rot_vector - rot_vec) : " << rot_vector0 - rot0_vec << std::endl;
+    }
+
+    if(rot1_vec.isApprox(rot_vector1, wolf::Constants::EPS))
+        std::cout << "v2R, R2v ok with large angles \n" << std::endl;
+    else{
+        std::cout << "v2R, R2v NOT ok with large angles - intput rotation vector : \n" << rot_vector1 << "\n corresponding matrix : \n " <<
+        rot1 << "\n returned rotation vector : \n"<< rot1_vec << std::endl;
+        std::cout << "Diff between vectors (rot_vector - rot_vec) : " << rot_vector1 - rot1_vec << std::endl;
+    }
+
+                                        //let's see how small the angles can be here
+    wolf::Scalar scale = 1;
+    Eigen::Matrix3s rotation_mat;
+    Eigen::Vector3s rv;
+    for(int i = 0; i<8; i++){
+        rotation_mat = Eigen::Matrix3s::Random() * scale;
+        //rotation_mat(0,0) = 1.0;
+        //rotation_mat(1,1) = 1.0;
+        //rotation_mat(2,2) = 1.0;
+
+        rv = R2v(rotation_mat);
+        if(rv == Eigen::Vector3s::Zero()){
+            std::cout << "\n limit reached at scale " << scale << ", rotation matrix is : \n" << rotation_mat << "\n rv is : \n" << rv << std::endl;
+            break;
+        }
+        scale = scale*0.1;
+    }
+
 }
