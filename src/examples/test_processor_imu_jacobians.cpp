@@ -56,16 +56,24 @@ int main(int argc, char** argv)
 
     ProcessorIMU_UnitTester processor_imu;
     //processor_imu.setOrigin(x0, t);
-    wolf::Scalar ddelta_bias = 0.000001;
+    wolf::Scalar ddelta_bias = 0.00000001;
     wolf::Scalar dt = 0.001;
 
     //defining a random Delta to begin with (not to use Origin point)
     Eigen::Matrix<wolf::Scalar,10,1> Delta0;
     Delta0 = Eigen::Matrix<wolf::Scalar,10,1>::Random();
+    Delta0.head<3>() = Delta0.head<3>()*100;
+    Delta0.segment<3>(3) = Delta0.segment<3>(3)*10;
+    Eigen::Vector3s ang0;
+    ang0 << 120.08, 12.36, 54.32; 
+    //Delta0 << 0,0,0, 0,0,0, 1,0,0,0;
     Eigen::Map<Eigen::Quaternions> Delta0_quat(Delta0.data()+6);
+    Delta0_quat = v2q(ang0);
     Delta0_quat.normalize();
+    ang0 = q2v(Delta0_quat);
 
     std::cout << "\ninput Delta0 : " << Delta0 << std::endl;
+    std::cout << "\n rotation vector we start with : : " << ang0 << std::endl;
 
     struct IMU_jac_bias bias_jac = processor_imu.finite_diff_ab(dt, data_, ddelta_bias, Delta0);
 
@@ -106,7 +114,7 @@ int main(int argc, char** argv)
         Then at first step, dR.tr() = Id, dDq_dwb = 0_{3x3}, which boils down to dDq_dwb_ = Jr(wdt)*dt 
      */
 
-
+     Eigen::Matrix<wolf::Scalar,10,1> Delta1, Delta2, Delta3;
      new (&q_in_1) Eigen::Map<Eigen::Quaternions>(bias_jac.Delta0_.data() + 6);
      for(int i=0;i<3;i++){
          dDp_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
@@ -120,18 +128,32 @@ int main(int argc, char** argv)
 
          new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i+3).data() + 6);
          dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
+         //std::cout << "matrix operation result :" << i << "\n" << q_in_1.matrix().transpose() * q_in_2.matrix() << std::endl;
+         //std::cout << "matrix operation result to vector :" << i << "\n" << R2v( q_in_1.matrix().transpose() * q_in_2.matrix()) << std::endl;
      }
+/*     Delta1 = bias_jac.Deltas_noisy_vect_(3);
+     Delta2 = bias_jac.Deltas_noisy_vect_(4);
+     Delta3 = bias_jac.Deltas_noisy_vect_(5);
+
+     if( (Delta1 == Delta2 || Delta1 == Delta3 ))
+        std::cout << "\n problem" << std::endl;
+    else
+        std::cout << "\n no problem" << std::endl;
+    if(Delta2 == Delta3)
+        std::cout << "\n problem" << std::endl;
+    else
+        std::cout << "\n no problem" << std::endl;*/
 
      //Check the jacobians wrt to bias using finite difference
 
-    if(dDp_dab.isApprox(bias_jac.dDp_dab_, 0.001) )
+    if(dDp_dab.isApprox(bias_jac.dDp_dab_, 0.0001) )
         std::cout<< "dDp_dab_ jacobian is correct !" << std::endl;
     else{
         std::cout<< "\t\tdDp_dab_ jacobian is not correct ..." << std::endl;
         std::cout << "dDp_dab : \n" << dDp_dab << "\n bias_jac.dDp_dab_ :\n" << bias_jac.dDp_dab_ << "\n" << std::endl;
     }
 
-    if(dDv_dab.isApprox(bias_jac.dDv_dab_, 0.001) )
+    if(dDv_dab.isApprox(bias_jac.dDv_dab_, wolf::Constants::EPS) )
         std::cout<< "dDv_dab_ jacobian is correct !" << std::endl;
     else{
         std::cout<< "\t\tdDv_dab_ jacobian is not correct ..." << std::endl;
@@ -152,7 +174,7 @@ int main(int argc, char** argv)
         std::cout << "dDv_dwb_ : \n" << dDv_dwb << "\n bias_jac.dDv_dwb_ :\n" << bias_jac.dDv_dwb_ << "\n" <<  std::endl;
     }
 
-    if(dDq_dwb.isApprox(bias_jac.dDq_dwb_, 0.001) )
+    if(dDq_dwb.isApprox(bias_jac.dDq_dwb_, 0.1) )
         std::cout<< "dDq_dwb_ jacobian is correct !" << std::endl;
     else{
         std::cout<< "\t\tdDq_dwb_ jacobian is not correct ..." << std::endl;
@@ -237,8 +259,8 @@ int main(int argc, char** argv)
      //taking care of noise now 
     Eigen::Matrix<wolf::Scalar,9,1> Delta_noise;
     Eigen::Matrix<wolf::Scalar,9,1> delta_noise;
-    Delta_noise << 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001;
-    delta_noise << 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001;
+    Delta_noise << 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001;
+    delta_noise << 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001;
 
     struct IMU_jac_deltas deltas_jac = processor_imu.finite_diff_noise(dt, data_, Delta_noise, delta_noise, Delta0);
 
@@ -300,6 +322,7 @@ int main(int argc, char** argv)
     else{
         std::cout<< "\t\tdDp_dP jacobian is not correct ..." << std::endl;
         std::cout << "dDp_dP : \n" << dDp_dP << "\n deltas_jac.jacobian_delta_preint_.block(0,0,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,0,3,3) << "\n" << std::endl;
+        std::cout << "dDp_dP_a - dDp_dP : \n" << deltas_jac.jacobian_delta_preint_.block(0,0,3,3) - dDp_dP <<  "\n" << std::endl;
     }
 
     if(dDp_dV.isApprox(deltas_jac.jacobian_delta_preint_.block(0,3,3,3), wolf::Constants::EPS) )
@@ -307,6 +330,7 @@ int main(int argc, char** argv)
     else{
         std::cout<< "\t\tdDp_dV jacobian is not correct ..." << std::endl;
         std::cout << "dDp_dV : \n" << dDp_dV << "\n deltas_jac.jacobian_delta_preint_.block(0,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,3,3,3) << "\n" << std::endl;
+        std::cout << "dDp_dV_a - dDp_dV : \n" << deltas_jac.jacobian_delta_preint_.block(0,3,3,3) - dDp_dV <<  "\n" << std::endl;
     }
 
     if(dDp_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(0,6,3,3), 0.00001) )
@@ -314,6 +338,7 @@ int main(int argc, char** argv)
     else{
         std::cout<< "\t\tdDp_dO jacobian is not correct ..." << std::endl;
         std::cout << "dDp_dO : \n" << dDp_dO << "\n deltas_jac.jacobian_delta_preint_.block(0,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,6,3,3) << "\n" << std::endl;
+        std::cout << "dDp_dO_a - dDp_dO : \n" << deltas_jac.jacobian_delta_preint_.block(0,6,3,3) - dDp_dO <<  "\n" << std::endl;
     }
 
     if(dDv_dV.isApprox(deltas_jac.jacobian_delta_preint_.block(3,3,3,3), wolf::Constants::EPS) )
@@ -321,6 +346,7 @@ int main(int argc, char** argv)
     else{
         std::cout<< "\t\tdDv_dV jacobian is not correct ..." << std::endl;
         std::cout << "dDv_dV : \n" << dDv_dV << "\n deltas_jac.jacobian_delta_preint_.block(3,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(3,3,3,3) << "\n" << std::endl;
+        std::cout << "dDv_dV_a - dDv_dV : \n" << deltas_jac.jacobian_delta_preint_.block(3,3,3,3) - dDv_dV <<  "\n" << std::endl;    
     }
 
     if(dDv_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(3,6,3,3), 0.00001) )
@@ -328,13 +354,15 @@ int main(int argc, char** argv)
     else{
         std::cout<< "\t\tdDv_dO jacobian is not correct ..." << std::endl;
         std::cout << "dDv_dO : \n" << dDv_dO << "\n deltas_jac.jacobian_delta_preint_.block(3,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(3,6,3,3) << "\n" << std::endl;
+        std::cout << "dDv_dO_a - dDv_dO : \n" << deltas_jac.jacobian_delta_preint_.block(3,6,3,3) - dDv_dO <<  "\n" << std::endl;
     }
 
-    if(dDo_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(6,6,3,3), wolf::Constants::EPS) )
+    if(dDo_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(6,6,3,3), 0.0001) )
         std::cout<< "dDo_dO jacobian is correct !" << std::endl;
     else{
         std::cout<< "\t\tdDo_dO jacobian is not correct ..." << std::endl;
         std::cout << "dDo_dO : \n" << dDo_dO << "\n deltas_jac.jacobian_delta_preint_.block(6,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) << "\n" << std::endl;
+        std::cout << "dDo_dO_a - dDo_dO : \n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) - dDo_dO <<  "\n" << std::endl;
     }
 
      Eigen::Matrix3s dDp_dp_a, dDv_dv_a, dDo_do_a;
@@ -347,6 +375,7 @@ int main(int argc, char** argv)
     else{
         std::cout<< "\t\tdDp_dp jacobian is not correct ..." << std::endl;
         std::cout << "dDp_dp : \n" << dDv_dp << "\n dDp_dp_a :\n" << dDp_dp_a << "\n" << std::endl;
+        std::cout << "dDp_dp_a - dDp_dp : \n" << dDp_dp_a - dDv_dp <<  "\n" << std::endl;
     }
 
     if(dDv_dv.isApprox(dDv_dv_a, wolf::Constants::EPS) )
@@ -354,13 +383,15 @@ int main(int argc, char** argv)
     else{
         std::cout<< "\t\tdDv_dv jacobian is not correct ..." << std::endl;
         std::cout << "dDv_dv : \n" << dDv_dv << "\n dDv_dv_a :\n" << dDv_dv_a << "\n" << std::endl;
+        std::cout << "dDv_dv_a - dDv_dv : \n" << dDv_dv_a - dDv_dv <<  "\n" << std::endl;
     }
 
-    if(dDo_do.isApprox(dDo_do_a, wolf::Constants::EPS) )
+    if(dDo_do.isApprox(dDo_do_a, 0.0001) )
         std::cout<< "dDo_do jacobian is correct !" << std::endl;
     else{
         std::cout<< "\t\tdDo_do jacobian is not correct ..." << std::endl;
         std::cout << "dDo_do : \n" << dDo_do << "\n dDo_do_a :\n" << dDo_do_a << "\n" << std::endl;
+        std::cout << "dDo_do_a - dDo_do : \n" << dDo_do_a - dDo_do <<  "\n" << std::endl;
     }
 
     delete wolf_problem_ptr_;
