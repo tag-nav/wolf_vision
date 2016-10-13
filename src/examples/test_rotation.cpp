@@ -164,4 +164,19 @@ int main()
         scale = scale*0.1;
     }
 
+                                      // testing new path : vector -> quaternion -> matrix -> vector
+    scale = 1;
+    for(int i = 0; i< 8; i++){
+    Eigen::Vector3s vector_ = Eigen::Vector3s::Random()*scale;
+    Eigen::Quaternions quat_ = v2q(vector_);
+    Eigen::Matrix3s mat_ = quat_.matrix();
+    Eigen::Vector3s vector_bis = R2v(mat_);
+
+    if(!vector_bis.isApprox(vector_, wolf::Constants::EPS)){
+        std::cout << "problem in vector -> quaternion -> matrix -> vector at scale " << scale << "\n input vector : \n" << vector_ << "\n returned vector : \n" << vector_bis << std::endl;
+        std::cout << "Diff (returned_vector - input vector) = \n" << vector_bis - vector_ << std::endl;
+        break;
+    }
+    scale = scale*0.1;
+    }
 }
