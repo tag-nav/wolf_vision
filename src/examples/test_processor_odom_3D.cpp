@@ -10,6 +10,7 @@
 #include "sensor_odom_2D.h"
 #include "processor_odom_3D.h"
 #include "capture_imu.h"
+#include "ceres_wrapper/ceres_manager.h"
 
 using namespace wolf;
 using std::cout;
@@ -20,10 +21,12 @@ using Eigen::Vector7s;
 using Eigen::Quaternions;
 using Eigen::VectorXs;
 
+
 int main ()
 {
 
     Problem* problem = new Problem(FRM_PO_3D);
+    CeresManager ceres_manager(problem);
 
     SensorBase* sen = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(),"");
     problem->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
@@ -36,7 +39,7 @@ int main ()
 
     Scalar dt = 0.01;
 
-    for (TimeStamp t = 0; t < 5 - Constants::EPS; t += dt)
+    for (TimeStamp t = 0; t < .02 - Constants::EPS; t += dt)
     {
 
         CaptureMotion* cap_odo = new CaptureMotion(t, sen, data);
@@ -45,8 +48,13 @@ int main ()
 
         cout << "t: " << t.get() << "   x: " << problem->getCurrentState().transpose() << endl;
 
+        ceres::Solver::Summary summary = ceres_manager.solve();
+
+        cout << summary.BriefReport() << endl;
+
     }
 
-    delete problem;
+    //    delete problem; // XXX Why is this throwing segfault?
+
     return 0;
 }
