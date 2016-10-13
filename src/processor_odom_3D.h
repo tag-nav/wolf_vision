@@ -9,7 +9,7 @@
 #define SRC_PROCESSOR_ODOM_3D_H_
 
 #include "processor_motion.h"
-#include "constraint_odom_2D.h"
+#include "constraint_odom_3D.h"
 #include "rotations.h"
 
 
@@ -65,6 +65,7 @@ class ProcessorOdom3D : public ProcessorMotion
         Motion interpolate(const Motion& _motion_ref,
                            Motion& _motion,
                            TimeStamp& _ts);
+        bool voteForKeyFrame();
 
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
 
@@ -82,7 +83,7 @@ class ProcessorOdom3D : public ProcessorMotion
 
 inline void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
 {
-    delta_.head(3) = _data.head(3);
+    delta_.head<3>() = _data.head<3>();
     new (&q_out_) Eigen::Map<Eigen::Quaternions>(delta_.data() + 3);
     q_out_ = v2q(_data.tail<3>());
 
@@ -181,9 +182,14 @@ inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _m
     return tmp;
 }
 
+inline bool ProcessorOdom3D::voteForKeyFrame()
+{
+    return true;
+}
+
 inline ConstraintBasePtr ProcessorOdom3D::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
-    return new ConstraintOdom2D(_feature_motion, _frame_origin);
+    return new ConstraintOdom3D(_feature_motion, _frame_origin);
 }
 
 inline void ProcessorOdom3D::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
