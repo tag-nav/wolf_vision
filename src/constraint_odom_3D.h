@@ -57,16 +57,16 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* con
      *
      * Given two states x_i, x_j, with
      *
-     *   x_i = [p_i , q_i]
+     *   x_i = [p_i , q_i] // position and quaternion: PQ pose
      *
      * we define the (-) operator as
      *
-     *   x_j (-) x_i = [q_i.conj * (p_j - p_i) , q_i.conj * q_j]
+     *   x_j (-) x_i = [q_i.conj * (p_j - p_i) , q_i.conj * q_j] // PQ pose increment
      *
      * we also define Log and Exp maps as
      *
-     *   Log(x) = [p, log(q)]
-     *   Exp(v) = [p, exp(o)]
+     *   Log(x) = [p, log(q)]   // PQ pose to vector pose
+     *   Exp(v) = [p, exp(o)]   // vector pose to PQ pose
      *
      * where
      *
