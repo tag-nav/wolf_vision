@@ -30,22 +30,21 @@ int main ()
     problem->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
     problem->getProcessorMotionPtr()->setOrigin((Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
 
-    Vector3s d_pos   ((Vector3s() << 0.1, 0.2, 0.3).finished());
-    Vector3s d_theta ((Vector3s() << 0.01,0.02,0.03).finished());
+    Vector3s d_pos   ((Vector3s() << 0.1, 0, 0).finished());        // advance 0.1m
+    Vector3s d_theta ((Vector3s() << 0, 0, M_PI/180).finished());   // turn 1 deg
 
-    Vector6s data((Vector6s() << d_pos , d_theta).finished());
+    Vector6s data((Vector6s() << d_pos , d_theta).finished()); // will integrate this data repeatedly
 
-    Scalar dt = 0.001;
+    Scalar dt = 0.01;
 
-    for (TimeStamp t = 0; t < 5; t += dt)
+    for (TimeStamp t = 0; t < 5 - Constants::EPS; t += dt)
     {
-        cout << "t: " << t.get();
 
-        CaptureIMU* cap_odo = new CaptureIMU(t, sen, data);
+        CaptureMotion* cap_odo = new CaptureMotion(t, sen, data);
 
         cap_odo->process();
 
-        cout << "   x: " << problem->getCurrentState().transpose() << endl;
+        cout << "t: " << t.get() << "   x: " << problem->getCurrentState().transpose() << endl;
 
         ceres::Solver::Summary summary = ceres_manager->solve();
         cout << summary << endl;

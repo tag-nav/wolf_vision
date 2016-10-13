@@ -120,6 +120,7 @@ SET(HDRS
     constraint_gps_pseudorange_2D.h
     constraint_odom_2D.h
     constraint_odom_2D_analytic.h
+    constraint_odom_3D.h
     constraint_point_2D.h
     constraint_point_to_line_2D.h
     constraint_relative_2D_analytic.h
@@ -192,6 +193,7 @@ SET(SRCS
     capture_void.cpp
     constraint_base.cpp
     constraint_analytic.cpp
+    # constraint_odom_3D.cpp // nothing in the cpp
     feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
