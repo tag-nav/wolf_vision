@@ -244,7 +244,7 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                 }
                 if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
                 {
-//                    std::cout << "response: " << new_keypoints[0].response << std::endl;
+                    std::cout << "response: " << new_keypoints[0].response << std::endl;
                     FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
@@ -387,8 +387,7 @@ void ProcessorImageFeature::drawFeatures(cv::Mat _image)
     }
     cv::imshow("Feature tracker", _image);
 
-    std::cout << "\nKnown: " << known_feature_counter << std::endl;
-    std::cout << "New: " << new_feature_counter << std::endl;
+    std::cout << "\nKnown: " << known_feature_counter << "\tNew: " << new_feature_counter << std::endl;
     std::cout << "Known features tracked: " << known_feature_counter << "/" << target_size_ << std::endl;
     std::cout << "Percentage known: " << ((float)known_feature_counter/(float)target_size_)*100 << "%" << std::endl;
     std::cout << "Features tracked: " << (*(last_ptr_->getFeatureListPtr())).size() << "/" << complete_target_size_ << std::endl;

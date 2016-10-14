@@ -133,7 +133,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         point2D = pinhole::distortPoint(((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point2D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
 
-        if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
+        if(pinhole::isInImage(point2D,image_.width_,image_.height_))
         {
             roi_x = (point2D[0]) - (roi_heigth / 2);
             roi_y = (point2D[1]) - (roi_width / 2);
@@ -354,14 +354,14 @@ void ProcessorImageLandmark::trimRoi(cv::Rect& _roi)
         _roi.y = 0;
         _roi.height = _roi.height - diff_y;
     }
-    if((unsigned int)(_roi.x + _roi.width) > params_.image.width)
+    if((unsigned int)(_roi.x + _roi.width) > image_.width_)
     {
-        int diff_width = params_.image.width - (_roi.x + _roi.width);
+        int diff_width = image_.width_ - (_roi.x + _roi.width);
         _roi.width = _roi.width+diff_width;
     }
-    if((unsigned int)(_roi.y + _roi.height) > params_.image.height)
+    if((unsigned int)(_roi.y + _roi.height) > image_.height_)
     {
-        int diff_height = params_.image.height - (_roi.y + _roi.height);
+        int diff_height = image_.height_ - (_roi.y + _roi.height);
         _roi.height = _roi.height+diff_height;
     }
 }
@@ -426,7 +426,7 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
         point2D = pinhole::distortPoint(((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point2D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
 
-        if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
+        if(pinhole::isInImage(point2D,image_.width_,image_.height_))
         {
             cv::Point2f point;
             point.x = point2D[0];

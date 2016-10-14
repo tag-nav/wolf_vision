@@ -37,12 +37,6 @@ struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
 
 struct ProcessorParamsImage : public ProcessorParamsBase
 {
-        struct Image
-        {
-                unsigned int width; ///< image width (horizontal dimension or nbr of columns)
-                unsigned int height; ///< image height (vertical dimension or nbr of rows)
-        }image;
-
         DetectorDescriptorParamsBase* detector_descriptor_params_ptr;
 
         struct Matcher

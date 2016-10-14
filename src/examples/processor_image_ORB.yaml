@@ -1,10 +1,6 @@
 processor type: "IMAGE ORB"
 processor name: "ORB feature tracker"
 
-image:
-    width: 640
-    height: 480
-
 detector-descriptor:
     type: "ORB"         # This affects the structure below. See processor_image_BRISK.yaml for another example
     nfeatures: 100
@@ -36,6 +32,6 @@ algorithm:
 draw: # Used to control drawing options
     primary draw: true
     secondary draw: true
-    detection roi: true
+    detection roi: false
     tracking roi: true
     
