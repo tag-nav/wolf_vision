@@ -116,6 +116,7 @@ int main(int argc, char** argv)
      */
 
      std::cout << "\n input data : \n" << data_ << std::endl;
+
      new (&q_in_1) Eigen::Map<Eigen::Quaternions>(bias_jac.Delta0_.data() + 6);
      for(int i=0;i<3;i++){
          dDp_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
@@ -265,6 +266,7 @@ int main(int argc, char** argv)
      //taking care of noise now 
     Eigen::Matrix<wolf::Scalar,9,1> Delta_noise;
     Eigen::Matrix<wolf::Scalar,9,1> delta_noise;
+
     Delta_noise << 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001;
     delta_noise << 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001;
 
