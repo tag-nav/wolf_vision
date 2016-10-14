@@ -133,6 +133,8 @@ int main(int argc, char** argv)
     // one-liner API
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
     SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
+    camera_ptr->setImgWidth(img_width);
+    camera_ptr->setImgHeight(img_height);
 
     // PROCESSOR
     // one-liner API

@@ -126,13 +126,15 @@ int main(int argc, char** argv)
     /* Do this while there aren't extrinsic parameters on the yaml */
 
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
-    SensorCamera* camera_ptr_ = (SensorCamera*)sensor_ptr;
+    SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
+    camera_ptr->setImgWidth(img_width);
+    camera_ptr->setImgHeight(img_height);
 
 
     // PROCESSOR
     // one-liner API
     ProcessorImageLandmark* prc_img_ptr = (ProcessorImageLandmark*) wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
-    prc_img_ptr->setup(camera_ptr_);
+    prc_img_ptr->setup(camera_ptr);
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
 
@@ -175,7 +177,7 @@ int main(int argc, char** argv)
         clock_t t1 = clock();
 
         // Preferred method with factory objects:
-        image_ptr = new CaptureImage(t, camera_ptr_, frame[f % buffer_size]);
+        image_ptr = new CaptureImage(t, camera_ptr, frame[f % buffer_size]);
 
         /* process */
         image_ptr->process();
