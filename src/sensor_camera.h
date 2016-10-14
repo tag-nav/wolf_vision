@@ -49,6 +49,8 @@ class SensorCamera : public SensorBase
 
         int getImgWidth(){return img_width_;}
         int getImgHeight(){return img_height_;}
+        void setImgWidth(int _w){img_width_ = _w;}
+        void setImgHeight(int _h){img_height_ = _h;}
 
     private:
         int img_width_;
