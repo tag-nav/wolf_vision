@@ -19,7 +19,7 @@ class TimeStamp;
 namespace wolf {
 
 //class TrajectoryBase
-class TrajectoryBase : public NodeBase
+class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<TrajectoryBase>
 {
     private:
         ProblemWPtr problem_ptr_;

@@ -22,7 +22,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
     public:
         static const unsigned int N_BLOCKS = 5; //TODO: Prueba a comentarlo
 
-        ConstraintAHP(FeatureBase* _ftr_ptr, FrameBase* _current_frame_ptr, LandmarkAHP* _landmark_ptr,
+        ConstraintAHP(FeatureBasePtr _ftr_ptr, FrameBasePtr _current_frame_ptr, LandmarkAHP* _landmark_ptr,
                         bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP, _landmark_ptr, _apply_loss_function, _status,
                                              _current_frame_ptr->getPPtr(), _current_frame_ptr->getOPtr(), _landmark_ptr->getAnchorFrame()->getPPtr()
@@ -202,10 +202,10 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         }
 
 //    public:
-//        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+//        static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
 //                                            NodeBase* _correspondant_ptr)
 //        {
-//            return new ConstraintAHP(_feature_ptr, (FrameBase*)_correspondant_ptr);
+//            return new ConstraintAHP(_feature_ptr, (FrameBasePtr)_correspondant_ptr);
 //        }
 
 };

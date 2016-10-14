@@ -32,6 +32,7 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
 {
     // link up
     _frame_ptr->setTrajectoryPtr(this);
+//    _frame_ptr->setTrajectoryPtr(shared_from_this());
     _frame_ptr->setProblem(getProblem());
 
     if (_frame_ptr->isKey())

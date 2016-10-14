@@ -289,8 +289,8 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_ptr)
 {
     FeaturePointImage* feat_point_image_ptr = (FeaturePointImage*) _feature_ptr;
-//    FrameBase* anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
-    FrameBase* anchor_frame = getLastPtr()->getFramePtr();
+//    FrameBasePtr anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
+    FrameBasePtr anchor_frame = getLastPtr()->getFramePtr();
 
     Eigen::Vector2s point2D;
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;

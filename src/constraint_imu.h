@@ -32,7 +32,7 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         virtual JacobianMethod getJacobianMethod() const;
 
     public:
-        static wolf::ConstraintBase* create(FeatureIMU* _feature_ptr, NodeBase* _correspondant_ptr);
+        static wolf::ConstraintBasePtr create(FeatureIMU* _feature_ptr, NodeBase* _correspondant_ptr);
 
     private:
         /// Preintegrated delta
@@ -136,7 +136,7 @@ inline JacobianMethod ConstraintIMU::getJacobianMethod() const
     return JAC_AUTO;
 }
 
-inline wolf::ConstraintBase* ConstraintIMU::create(FeatureIMU* _feature_ptr, NodeBase* _correspondant_ptr)
+inline wolf::ConstraintBasePtr ConstraintIMU::create(FeatureIMU* _feature_ptr, NodeBase* _correspondant_ptr)
 {
     return new ConstraintIMU(_feature_ptr, (FrameIMU*)(_correspondant_ptr));
 }

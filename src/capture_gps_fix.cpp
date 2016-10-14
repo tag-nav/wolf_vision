@@ -29,7 +29,8 @@ void CaptureGPSFix::process()
     addFeature(new FeatureGPSFix(data_,data_covariance_));
 
     // ADD CONSTRAINT
-	getFeatureListPtr()->front()->addConstraint(new ConstraintGPS2D(getFeatureListPtr()->front(), getFramePtr()));
+//    getFeatureListPtr()->front()->addConstraint(new ConstraintGPS2D(getFeatureListPtr()->front(), getFramePtr()));
+    getFeatureListPtr()->front()->addConstraint(new ConstraintGPS2D(getFeatureListPtr()->front()));
 }
 
 

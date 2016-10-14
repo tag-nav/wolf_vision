@@ -20,7 +20,7 @@ int main()
     std::cout << "Wolf path: " << wolf_path << std::endl;
 
     // Wolf problem
-    Problem* wolf_problem_ptr_ = new Problem(FRM_PO_3D);
+    ProblemPtr wolf_problem_ptr_ = new Problem(FRM_PO_3D);
 
     /* Do this while there aren't extrinsic parameters on the yaml */
     Eigen::Vector7s extrinsic_cam;
@@ -35,7 +35,7 @@ int main()
     const Eigen::VectorXs extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
-    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
     SensorCamera* camera_ptr_ = (SensorCamera*)sensor_ptr;
 
     // PROCESSOR
@@ -54,7 +54,7 @@ int main()
     frame_pos_ori[6] = 0.83666; //qw
     const Eigen::VectorXs frame_val = frame_pos_ori;
 
-    FrameBase* last_frame = new FrameBase(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
+    FrameBasePtr last_frame = new FrameBase(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
     std::cout << "Last frame" << std::endl;
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
 
@@ -74,8 +74,8 @@ int main()
     FeaturePointImage* feat_point_image_ptr = new FeaturePointImage(kp, desc, Eigen::Matrix2s::Identity());
     image_ptr->addFeature(feat_point_image_ptr);
 
-    FrameBase* anchor_frame = new FrameBase(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
-    //FrameBase* anchor_frame = wolf_problem_ptr_->getTrajectoryPtr()->getLastFramePtr();
+    FrameBasePtr anchor_frame = new FrameBase(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
+    //FrameBasePtr anchor_frame = wolf_problem_ptr_->getTrajectoryPtr()->getLastFramePtr();
 
 
     // create the landmark

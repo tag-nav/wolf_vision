@@ -211,7 +211,7 @@ inline void ProcessorTrackerLandmark::establishConstraints()
 
     for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
     {
-        ConstraintBase* ctr_ptr = createConstraint(last_feature, matches_landmark_from_last_[last_feature]->landmark_ptr_);
+        ConstraintBasePtr ctr_ptr = createConstraint(last_feature, matches_landmark_from_last_[last_feature]->landmark_ptr_);
         if (ctr_ptr != nullptr)
             last_feature->addConstraint(ctr_ptr);
     }

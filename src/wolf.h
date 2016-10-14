@@ -299,13 +299,14 @@ typedef Problem* ProblemPtr;
 typedef Problem* ProblemWPtr;
 
 // Hardware
+//typedef std::shared_ptr<HardwareBase> HardwareBasePtr;
 typedef HardwareBase* HardwareBasePtr;
 typedef HardwareBase* HardwareBaseWPtr;
 
 // - Sensors
 typedef SensorBase* SensorBasePtr;
 typedef SensorBase* SensorBaseWPtr;
-typedef std::list<SensorBase*> SensorBaseList;
+typedef std::list<SensorBasePtr> SensorBaseList;
 typedef SensorBaseList::iterator SensorBaseIter;
 
 // Intrinsics
@@ -314,26 +315,27 @@ typedef IntrinsicsBase* IntrinsicsBasePtr;
 // - Processors
 typedef ProcessorBase* ProcessorBasePtr;
 typedef ProcessorBase* ProcessorBaseWPtr;
-typedef std::list<ProcessorBase*> ProcessorBaseList;
+typedef std::list<ProcessorBasePtr> ProcessorBaseList;
 typedef ProcessorBaseList::iterator ProcessorBaseIter;
 
 // Processor params
 typedef ProcessorParamsBase* ProcessorParamsBasePtr;
 
 // - Trajectory
+//typedef std::shared_ptr<TrajectoryBase> TrajectoryBasePtr;
 typedef TrajectoryBase* TrajectoryBasePtr;
 typedef TrajectoryBase* TrajectoryBaseWPtr;
 
 // - Frame
 typedef FrameBase* FrameBasePtr;
 typedef FrameBase* FrameBaseWPtr;
-typedef std::list<FrameBase*> FrameBaseList;
+typedef std::list<FrameBasePtr> FrameBaseList;
 typedef FrameBaseList::iterator FrameBaseIter;
 
 // - Capture
 typedef CaptureBase* CaptureBasePtr;
 typedef CaptureBase* CaptureBaseWPtr;
-typedef std::list<CaptureBase*> CaptureBaseList;
+typedef std::list<CaptureBasePtr> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
 // - Capture Relative
@@ -343,13 +345,13 @@ typedef CaptureRelativeList::iterator CaptureRelativeIter;
 // - Feature
 typedef FeatureBase* FeatureBasePtr;
 typedef FeatureBase* FeatureBaseWPtr;
-typedef std::list<FeatureBase*> FeatureBaseList;
+typedef std::list<FeatureBasePtr> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
 
 // - Constraint
 typedef ConstraintBase* ConstraintBasePtr;
 typedef ConstraintBase* ConstraintBaseWPtr;
-typedef std::list<ConstraintBase*> ConstraintBaseList;
+typedef std::list<ConstraintBasePtr> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
 //Map
