@@ -13,7 +13,6 @@ class FeatureBase;
 #include "time_stamp.h"
 
 //std includes
-//
 
 namespace wolf{
 
@@ -39,13 +38,9 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
     public:
 
         CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         **/
         virtual ~CaptureBase();
         void destruct();
+        void remove();
 
         unsigned int id();
         TimeStamp getTimeStamp() const;
@@ -83,6 +78,21 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 #include "feature_base.h"
 
 namespace wolf{
+
+inline void CaptureBase::remove()
+{
+    if (!is_deleting_)
+    {
+        is_deleting_ = true;
+        std::cout << "Removing     C" << id() << std::endl;
+        //                shared_ptr<C> this_C = shared_from_this();  // keep this alive while removing it
+        frame_ptr_->getCaptureListPtr()->remove(this);          // remove from upstream
+        if (frame_ptr_->getCaptureListPtr()->empty() && frame_ptr_->getConstrainedByListPtr()->empty())
+            frame_ptr_->remove();                   // remove upstream
+        while (!feature_list_.empty())
+            feature_list_.front()->remove();          // remove downstream
+    }
+}
 
 inline ProblemPtr CaptureBase::getProblem()
 {

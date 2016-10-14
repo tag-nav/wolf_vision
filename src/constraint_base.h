@@ -11,7 +11,6 @@ class FeatureBase;
 #include "node_base.h"
 
 //std includes
-//
 
 namespace wolf {
 
@@ -53,14 +52,9 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          **/
         ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         * 
-         **/
         virtual ~ConstraintBase();
-
         void destruct();
+        void remove();
 
         unsigned int id();
 
@@ -151,8 +145,47 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 #include "frame_base.h"
 #include "feature_base.h"
 #include "sensor_base.h"
+#include "landmark_base.h"
 
 namespace wolf{
+
+inline void ConstraintBase::remove()
+{
+    if (!is_deleting_)
+    {
+        is_deleting_ = true;
+        std::cout << "Removing         c" << id() << std::endl;
+        //                shared_ptr<c> this_c = shared_from_this();  // keep this alive while removing it
+        feature_ptr_->getConstraintListPtr()->remove(this);          // remove from upstream
+        if (feature_ptr_->getConstraintListPtr()->empty() && feature_ptr_->getConstrainedByListPtr()->empty())
+            feature_ptr_->remove();                   // remove upstream
+
+        // remove other: {Frame, feature, Landmark}
+        switch (category_)
+        {
+            case CTR_FRAME:
+                frame_other_ptr_->getConstrainedByListPtr()->remove(this);
+                if (frame_other_ptr_->getConstrainedByListPtr()->empty() && frame_other_ptr_->getCaptureListPtr()->empty())
+                    frame_other_ptr_->remove();
+                break;
+            case CTR_FEATURE:
+                feature_other_ptr_->getConstrainedByListPtr()->remove(this);
+                if (feature_other_ptr_->getConstrainedByListPtr()->empty() && feature_other_ptr_->getConstraintListPtr()->empty())
+                    feature_other_ptr_->remove();
+                break;
+            case CTR_LANDMARK:
+                landmark_other_ptr_->getConstrainedByListPtr()->remove(this);
+                if (landmark_other_ptr_->getConstrainedByListPtr()->empty())
+                    landmark_other_ptr_->remove();
+                break;
+            case CTR_ABSOLUTE:
+                break;
+            default:
+                break;
+        }
+    }
+
+}
 
 inline wolf::ProblemPtr ConstraintBase::getProblem()
 {

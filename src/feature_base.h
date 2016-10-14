@@ -13,7 +13,6 @@ class ConstraintBase;
 
 //std includes
 
-
 namespace wolf {
 
 
@@ -51,12 +50,9 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
          */
         FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         */
         virtual ~FeatureBase();
         void destruct();
+        void remove();
 
         unsigned int id();
         unsigned int trackId(){return track_id_;}
@@ -126,6 +122,23 @@ inline ProblemPtr FeatureBase::getProblem()
     if (problem_ptr_ == nullptr && capture_ptr_ != nullptr)
         problem_ptr_ = capture_ptr_->getProblem();
     return problem_ptr_;
+}
+
+inline void FeatureBase::remove()
+{
+    if (!is_deleting_)
+    {
+        is_deleting_ = true;
+        std::cout << "Removing       f" << id() << std::endl;
+        //                shared_ptr<f> this_f = shared_from_this();  // keep this alive while removing it
+        capture_ptr_->getFeatureListPtr()->remove(this);          // remove from upstream
+        if (capture_ptr_->getFeatureListPtr()->empty())
+            capture_ptr_->remove();                   // remove upstream
+        while (!constraint_list_.empty())
+            constraint_list_.front()->remove();          // remove downstream
+        while (!constrained_by_list_.empty())
+            constrained_by_list_.front()->remove();        // remove constrained
+    }
 }
 
 inline wolf::ConstraintBaseList* FeatureBase::getConstrainedByListPtr()

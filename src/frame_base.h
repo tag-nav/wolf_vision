@@ -61,13 +61,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
          **/        
         FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         * 
-         **/
         virtual ~FrameBase();
         void destruct(); // XXX Nobody calls this never
+        void remove();
 
         unsigned int id();
 
@@ -242,6 +238,21 @@ inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
     capture_list_.remove(_capt_ptr);
     delete _capt_ptr;
+}
+
+inline void FrameBase::remove()
+{
+    if (!is_deleting_)
+    {
+        is_deleting_ = true;
+        std::cout << "Removing   F" << id() << std::endl;
+        //        std::shared_ptr<F> this_F = shared_from_this();  // keep this alive while removing it
+        trajectory_ptr_->getFrameListPtr()->remove(this);          // remove from upstream
+        while (!capture_list_.empty())
+            capture_list_.front()->remove();          // remove downstream
+        while (!constrained_by_list_.empty())
+            constrained_by_list_.front()->remove();        // remove constrained
+    }
 }
 
 inline StateStatus FrameBase::getStatus() const
