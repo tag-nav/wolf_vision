@@ -163,7 +163,6 @@ int main()
         }
         scale = scale*0.1;
     }
-
                                       // testing new path : vector -> quaternion -> matrix -> vector
     scale = 1;
     for(int i = 0; i< 8; i++){
