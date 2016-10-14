@@ -92,7 +92,7 @@ int main ()
 
     Scalar dt = 0.1;
 
-    for (TimeStamp t = 0; t < .4 - Constants::EPS; t += dt)
+    for (TimeStamp t = dt; t < .4 - Constants::EPS; t += dt)
     {
 
         CaptureMotion* cap_odo = new CaptureMotion(t, sen, data);
