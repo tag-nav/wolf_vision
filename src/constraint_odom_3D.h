@@ -29,7 +29,32 @@ class ConstraintOdom3D : public ConstraintSparse<6,3,4,3,4>
                                  const T* const _q2,
                                  T* _residuals) const;
 
+    private:
+        template<typename T>
+        void printRes(const Eigen::Matrix<T, 6, 1>& r) const;
+
+
 };
+
+template<typename T>
+inline void ConstraintOdom3D::printRes(const Eigen::Matrix<T, 6, 1>& r) const
+{
+    std::cout << "Jet residual = " << std::endl;
+    std::cout << r(0) << std::endl;
+    std::cout << r(1) << std::endl;
+    std::cout << r(2) << std::endl;
+    std::cout << r(3) << std::endl;
+    std::cout << r(4) << std::endl;
+    std::cout << r(5) << std::endl;
+}
+
+template<>
+inline void ConstraintOdom3D::printRes (const  Eigen::Matrix<Scalar,6,1> & r) const
+{
+    std::cout << "Scalar residual = " << std::endl;
+    std::cout << r.transpose() << std::endl;
+}
+
 
 inline ConstraintOdom3D::ConstraintOdom3D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function,
                                           ConstraintStatus _status) :
@@ -96,13 +121,17 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* con
     Eigen::Quaternion<T> dq = q1.conjugate() * q2;
 
     // measured motion increment, dp_m, dq_m
-    Eigen::Map<Eigen::Matrix<T,3,1>> dp_m(getMeasurement().data());
-    Eigen::Quaternion<T> dq_m = v2q(getMeasurement().tail<3>());
+    Eigen::Matrix<T,3,1> dp_m = getMeasurement().head<3>().cast<T>();
+    Eigen::Quaternion<T> dq_m = v2q(getMeasurement().tail<3>()).cast<T>();
 
     // residual
     // residuals.head<3>() = dq.conjugate() * (dp_m - dp); // see note below
     residuals.head(3) = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
     residuals.tail(3) = q2v(dq.conjugate() * dq_m);
+
+    Eigen::Matrix<T,6,1> r = residuals;
+
+//    printRes(r);
 
     return true;
 }

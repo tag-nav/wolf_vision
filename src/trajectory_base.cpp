@@ -16,7 +16,7 @@ TrajectoryBase::~TrajectoryBase()
     is_deleting_ = true;
     while (!frame_list_.empty())
     {
-        delete frame_list_.front();
+        frame_list_.front()->destruct();
         frame_list_.pop_front();
     }
     //std::cout << "deleting TrajectoryBase " << nodeId() << std::endl;
@@ -66,7 +66,7 @@ void TrajectoryBase::sortFrame(FrameBasePtr _frame_ptr)
 FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
 {
     for (auto frm_rit = getFrameListPtr()->rbegin(); frm_rit != getFrameListPtr()->rend(); frm_rit++)
-        if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isKey() && (*frm_rit)->getTimeStamp() < _frame_ptr->getTimeStamp())
+        if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isKey() && (*frm_rit)->getTimeStamp() <= _frame_ptr->getTimeStamp())
             return frm_rit.base();
     return getFrameListPtr()->begin();
 }

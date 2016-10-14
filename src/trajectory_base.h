@@ -55,7 +55,7 @@ class TrajectoryBase : public NodeBase
         FrameBasePtr getLastKeyFramePtr();
         FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts);
         void setLastKeyFramePtr(FrameBasePtr _key_frame_ptr);
-        void sortFrame(FrameBasePtr _frame_iter);
+        void sortFrame(FrameBasePtr _frm_ptr);
         void moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place);
         FrameBaseIter computeFrameOrder(FrameBasePtr _frame_ptr);
 
