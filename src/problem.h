@@ -17,8 +17,6 @@ struct ProcessorParamsBase;
 #include "wolf.h"
 
 // std includes
-#include <utility> // pair
-#include <map>
 
 
 namespace wolf {
