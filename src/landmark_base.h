@@ -28,8 +28,8 @@ namespace wolf {
 class LandmarkBase : public NodeBase
 {
     private:
-        ProblemPtr problem_ptr_;
-        MapBasePtr map_ptr_;
+        ProblemWPtr problem_ptr_;
+        MapBaseWPtr map_ptr_;
         ConstraintBaseList constrained_by_list_;
 
         static unsigned int landmark_id_count_;

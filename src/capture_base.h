@@ -21,8 +21,8 @@ namespace wolf{
 class CaptureBase : public NodeBase
 {
     private:
-        ProblemPtr problem_ptr_;
-        FrameBasePtr frame_ptr_;
+        ProblemWPtr problem_ptr_;
+        FrameBaseWPtr frame_ptr_;
         FeatureBaseList feature_list_;
 
         static unsigned int capture_id_count_;

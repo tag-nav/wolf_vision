@@ -11,6 +11,7 @@
 //includes from std lib
 #include <list>
 #include <map>
+#include <memory> // shared_ptr and weak_ptr
 
 //includes from Eigen lib
 #include <eigen3/Eigen/Dense>
@@ -291,15 +292,19 @@ class LocalParametrizationBase;
 
 // NodeBase
 typedef NodeBase* NodeBasePtr;
+typedef NodeBase* NodeBaseWPtr;
 
 //Problem
 typedef Problem* ProblemPtr;
+typedef Problem* ProblemWPtr;
 
 // Hardware
 typedef HardwareBase* HardwareBasePtr;
+typedef HardwareBase* HardwareBaseWPtr;
 
 // - Sensors
 typedef SensorBase* SensorBasePtr;
+typedef SensorBase* SensorBaseWPtr;
 typedef std::list<SensorBase*> SensorBaseList;
 typedef SensorBaseList::iterator SensorBaseIter;
 
@@ -308,6 +313,7 @@ typedef IntrinsicsBase* IntrinsicsBasePtr;
 
 // - Processors
 typedef ProcessorBase* ProcessorBasePtr;
+typedef ProcessorBase* ProcessorBaseWPtr;
 typedef std::list<ProcessorBase*> ProcessorBaseList;
 typedef ProcessorBaseList::iterator ProcessorBaseIter;
 
@@ -316,14 +322,17 @@ typedef ProcessorParamsBase* ProcessorParamsBasePtr;
 
 // - Trajectory
 typedef TrajectoryBase* TrajectoryBasePtr;
+typedef TrajectoryBase* TrajectoryBaseWPtr;
 
 // - Frame
 typedef FrameBase* FrameBasePtr;
+typedef FrameBase* FrameBaseWPtr;
 typedef std::list<FrameBase*> FrameBaseList;
 typedef FrameBaseList::iterator FrameBaseIter;
 
 // - Capture
 typedef CaptureBase* CaptureBasePtr;
+typedef CaptureBase* CaptureBaseWPtr;
 typedef std::list<CaptureBase*> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
@@ -333,21 +342,25 @@ typedef CaptureRelativeList::iterator CaptureRelativeIter;
 
 // - Feature
 typedef FeatureBase* FeatureBasePtr;
+typedef FeatureBase* FeatureBaseWPtr;
 typedef std::list<FeatureBase*> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
 
 // - Constraint
 typedef ConstraintBase* ConstraintBasePtr;
+typedef ConstraintBase* ConstraintBaseWPtr;
 typedef std::list<ConstraintBase*> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
 //Map
 typedef MapBase* MapBasePtr;
+typedef MapBase* MapBaseWPtr;
 typedef std::list<MapBasePtr> MapBaseList;
 typedef MapBaseList::iterator MapBaseIter;
 
 //Landmark
 typedef LandmarkBase* LandmarkBasePtr;
+typedef LandmarkBase* LandmarkBaseWPtr;
 typedef std::list<LandmarkBasePtr> LandmarkBaseList;
 typedef LandmarkBaseList::iterator LandmarkBaseIter;
 

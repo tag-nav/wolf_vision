@@ -22,7 +22,7 @@ namespace wolf {
 class FrameBase : public NodeBase
 {
     private:
-        ProblemPtr problem_ptr_;
+        ProblemWPtr problem_ptr_;
         TrajectoryBasePtr trajectory_ptr_;
         CaptureBaseList capture_list_;
         ConstraintBaseList constrained_by_list_;

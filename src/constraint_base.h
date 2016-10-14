@@ -20,8 +20,8 @@ namespace wolf {
 class ConstraintBase : public NodeBase
 {
     private:
-        ProblemPtr problem_ptr_;
-        FeatureBasePtr feature_ptr_;                    ///< FeatureBase pointer (upper node)
+        ProblemWPtr problem_ptr_;
+        FeatureBaseWPtr feature_ptr_;                    ///< FeatureBase pointer (upper node)
 
         static unsigned int constraint_id_count_;
 
@@ -31,9 +31,9 @@ class ConstraintBase : public NodeBase
         ConstraintCategory category_;                   ///< category of constraint (types defined at wolf.h)
         ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
         bool apply_loss_function_;                      ///< flag for applying loss function to this constraint
-        FrameBasePtr frame_other_ptr_;                    ///< FrameBase pointer (for category CTR_FRAME)
-        FeatureBasePtr feature_other_ptr_;                ///< FeatureBase pointer (for category CTR_FEATURE)
-        LandmarkBasePtr landmark_other_ptr_;              ///< LandmarkBase pointer (for category CTR_LANDMARK)
+        FrameBaseWPtr frame_other_ptr_;                    ///< FrameBase pointer (for category CTR_FRAME)
+        FeatureBaseWPtr feature_other_ptr_;                ///< FeatureBase pointer (for category CTR_FEATURE)
+        LandmarkBaseWPtr landmark_other_ptr_;              ///< LandmarkBase pointer (for category CTR_LANDMARK)
 
     public:
 

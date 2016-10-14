@@ -20,7 +20,7 @@ namespace wolf {
 class MapBase : public NodeBase
 {
     private:
-        ProblemPtr problem_ptr_;
+        ProblemWPtr problem_ptr_;
         LandmarkBaseList landmark_list_;
 
     public:

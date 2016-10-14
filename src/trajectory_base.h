@@ -22,7 +22,7 @@ namespace wolf {
 class TrajectoryBase : public NodeBase
 {
     private:
-        ProblemPtr problem_ptr_;
+        ProblemWPtr problem_ptr_;
         std::list<FrameBasePtr> frame_list_;
 
     protected:

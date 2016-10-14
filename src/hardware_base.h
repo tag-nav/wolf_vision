@@ -17,7 +17,7 @@ namespace wolf {
 class HardwareBase : public NodeBase //: public NodeLinked<Problem, SensorBase>
 {
     private:
-        ProblemPtr problem_ptr_;
+        ProblemWPtr problem_ptr_;
         SensorBaseList sensor_list_;
 
     public:

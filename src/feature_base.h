@@ -21,8 +21,8 @@ namespace wolf {
 class FeatureBase : public NodeBase
 {
     private:
-        ProblemPtr problem_ptr_;
-        CaptureBasePtr capture_ptr_;
+        ProblemWPtr problem_ptr_;
+        CaptureBaseWPtr capture_ptr_;
         ConstraintBaseList constraint_list_;
         ConstraintBaseList constrained_by_list_;
 
