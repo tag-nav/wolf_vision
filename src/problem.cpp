@@ -29,7 +29,7 @@ Problem::Problem(FrameStructure _frame_structure) :
         trajectory_ptr_(new TrajectoryBase(_frame_structure)),
         map_ptr_(new MapBase),
         processor_motion_ptr_(nullptr),
-        origin_setted_(false)
+        origin_is_set_(false)
 {
     hardware_ptr_->setProblem(this);
     trajectory_ptr_->setProblem(this);
@@ -87,7 +87,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
 
     // setting the origin in all processor motion if origin already setted
-    if (prc_ptr->isMotion() && origin_setted_)
+    if (prc_ptr->isMotion() && origin_is_set_)
         ((ProcessorMotion*)prc_ptr)->setOrigin(getLastKeyFramePtr());
 
     // setting the main processor motion
@@ -486,7 +486,7 @@ wolf::SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
 
 void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov, const TimeStamp& _ts)
 {
-    if (!origin_setted_)
+    if (!origin_is_set_)
     {
         // Create origin frame
         FrameBasePtr origin_frame_ptr = createFrame(KEY_FRAME, _origin_pose, _ts);
@@ -503,7 +503,7 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::Matrix
                 if (processor_ptr->isMotion())
                     ((ProcessorMotion*)processor_ptr)->setOrigin(origin_frame_ptr);
 
-        origin_setted_ = true;
+        origin_is_set_ = true;
     }
     else
         throw std::runtime_error("Origin already setted!");

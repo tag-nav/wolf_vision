@@ -43,48 +43,25 @@ struct ConstraintNotification
 
 
 /** \brief Wolf problem node element in the Wolf Tree
- * 
- * A node has five main data members:
- * - An unique ID to identify it over the whole Wolf Tree (inherited from Node)
- * - A label indicating the node nature (inherited from Node)
- * - An enum indicating tree location (see NodeLocation enum at wolf.h)
- * - down_node_list_: A list of shared pointers to derived node objects, specified by the template parameter LowerType.
- * - up_node_: A regular pointer to a derived node object, specified by the template parameter UpperType.
- *
  */
 class Problem
 {
 
     protected:
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
-        HardwareBasePtr hardware_ptr_;
-        TrajectoryBasePtr trajectory_ptr_;
-        MapBasePtr map_ptr_;
-        ProcessorMotion* processor_motion_ptr_;
-        StateBlockList state_block_ptr_list_;
+        HardwareBasePtr     hardware_ptr_;
+        TrajectoryBasePtr   trajectory_ptr_;
+        MapBasePtr          map_ptr_;
+        ProcessorMotion*    processor_motion_ptr_;
+        StateBlockList      state_block_ptr_list_;
         std::list<StateBlockNotification> state_block_notification_list_;
         std::list<ConstraintNotification> constraint_notification_list_;
-        bool origin_setted_;
+        bool origin_is_set_;
 
     public:
 
-        /** \brief Constructor from frame structure
-         *
-         */
         Problem(FrameStructure _frame_structure);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         */
         virtual ~Problem();
-
-        /** \brief Wolf destructor
-         *
-         * Wolf destructor (please use it instead of delete for guaranteeing the wolf tree integrity)
-         *
-         */
         virtual void destruct() final;
 
         // Properties -----------------------------------------
