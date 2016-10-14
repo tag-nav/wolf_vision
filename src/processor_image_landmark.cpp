@@ -191,7 +191,8 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
 bool ProcessorImageLandmark::voteForKeyFrame()
 {
-    return landmarks_tracked_ < params_.algorithm.min_features_for_keyframe;
+    return true;
+//    return landmarks_tracked_ < params_.algorithm.min_features_for_keyframe;
 }
 
 unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_features)

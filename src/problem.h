@@ -266,6 +266,9 @@ class Problem
          */
         void removeConstraintPtr(ConstraintBasePtr _constraint_ptr);
 
+    public:
+        void print();
+
 };
 
 } // namespace wolf
