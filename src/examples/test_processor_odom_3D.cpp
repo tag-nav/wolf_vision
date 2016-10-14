@@ -14,6 +14,8 @@
 #include "landmark_base.h"
 #include "ceres_wrapper/ceres_manager.h"
 
+#include <cstdlib>
+
 using namespace wolf;
 using std::cout;
 using std::endl;
@@ -38,13 +40,14 @@ void print(Problem* P)
     cout << "T" << endl;
     for (auto F : *(P->getTrajectoryPtr()->getFrameListPtr() ) )
     {
-        cout << (F->isKey() ?  "  KF" : "  F") << F->id() << (F->isFixed() ?  ", fixed" : ", estim") << ", ts=" << F->getTimeStamp().get() << endl;
+        cout << (F->isKey() ?  "  KF" : "  F") << F->id() << (F->isFixed() ?  ", fixed" : ", estim") << ", ts=" << F->getTimeStamp().get();
+        cout << ",\t x = ( " << F->getState().transpose() << ")" << endl;
         for (auto C : *(F->getCaptureListPtr() ) )
         {
             cout << "    C" << C->id() << endl;
             for (auto f : *(C->getFeatureListPtr() ) )
             {
-                cout << "      f" << f->id() << ", m = ( " << std::setprecision(2) << f->getMeasurement().transpose() << ")" << endl;
+                cout << "      f" << f->id() << ",            \t m = ( " << std::setprecision(2) << f->getMeasurement().transpose() << ")" << endl;
                 for (auto c : *(f->getConstraintListPtr() ) )
                 {
                     cout << "        c" << c->id();
@@ -75,8 +78,19 @@ void print(Problem* P)
 }
 
 
-int main ()
+int main (int argc, char** argv)
 {
+    cout << "\n========= Test ProcessorOdom3D ===========" << endl;
+
+    TimeStamp tf;
+    if (argc == 1)
+        tf = 0.3;
+    else
+    {
+
+        tf.set(strtod(argv[1],nullptr));
+    }
+    cout << "Final timestamp tf = " << tf.get() << " s" << endl;
 
     Problem* problem = new Problem(FRM_PO_3D);
     CeresManager ceres_manager(problem);
@@ -92,16 +106,20 @@ int main ()
 
     Scalar dt = 0.1;
 
-    for (TimeStamp t = dt; t < .4 - Constants::EPS; t += dt)
+    cout << "t: " << 0 << "  \t\t\t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
+    print(problem);
+    cout << "--------------------------------------------------------------" << endl;
+
+    for (TimeStamp t = dt; t < tf - Constants::EPS; t += dt)
     {
 
         CaptureMotion* cap_odo = new CaptureMotion(t, sen, data);
 
         cap_odo->process();
 
-        cout << "t: " << t.get() << "   x: " << problem->getCurrentState().transpose() << endl;
-
+        cout << "t: " << t.get() << "  \t\t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
         print(problem);
+        cout << "--------------------------------------------------------------" << endl;
 
         ceres::Solver::Summary summary = ceres_manager.solve();
 
