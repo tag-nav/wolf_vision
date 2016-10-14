@@ -76,7 +76,7 @@ FrameBase::~FrameBase()
 
     while (!capture_list_.empty())
     {
-        delete capture_list_.front();
+        capture_list_.front()->destruct();
         capture_list_.pop_front();
     }
 

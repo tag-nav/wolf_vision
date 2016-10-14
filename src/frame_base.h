@@ -234,14 +234,14 @@ inline void FrameBase::removeCapture(const CaptureBaseIter& _capt_iter)
 {
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
     capture_list_.erase(_capt_iter);
-    delete *_capt_iter;
+    //delete *_capt_iter;
 }
 
 inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
 {
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
     capture_list_.remove(_capt_ptr);
-    delete _capt_ptr;
+    //delete _capt_ptr;
 }
 
 inline StateStatus FrameBase::getStatus() const

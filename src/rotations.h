@@ -111,7 +111,7 @@ inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<D
 
     Eigen::Quaternion<T> q;
     T angle = _v.norm();
-    T angle_half = angle / 2.0;
+    T angle_half = angle / (T)2.0;
     if (angle > wolf::Constants::EPS)
     {
         q.w() = cos(angle_half);

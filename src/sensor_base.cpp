@@ -69,7 +69,7 @@ SensorBase::~SensorBase()
 
     while (!processor_list_.empty())
     {
-        delete processor_list_.front();
+        processor_list_.front()->destruct();
         processor_list_.pop_front();
     }
 

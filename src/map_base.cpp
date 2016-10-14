@@ -30,7 +30,7 @@ MapBase::~MapBase()
     is_deleting_ = true;
     while (!landmark_list_.empty())
     {
-        delete landmark_list_.front();
+        landmark_list_.front()->destruct();
         landmark_list_.pop_front();
     }
 

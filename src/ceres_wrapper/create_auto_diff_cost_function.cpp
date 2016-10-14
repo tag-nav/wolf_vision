@@ -14,6 +14,7 @@
 #include "../constraint_gps_pseudorange_3D.h"
 #include "../constraint_gps_pseudorange_2D.h"
 #include "../constraint_odom_2D.h"
+#include "../constraint_odom_3D.h"
 #include "../constraint_corner_2D.h"
 #include "../constraint_point_2D.h"
 #include "../constraint_point_to_line_2D.h"
@@ -48,6 +49,12 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool
                 return createAutoDiffCostFunctionWrapper<ConstraintOdom2D>(_ctr_ptr);
             else
                 return createAutoDiffCostFunctionCeres<ConstraintOdom2D>(_ctr_ptr);
+
+        case CTR_ODOM_3D:
+            if (_use_wolf_autodiff)
+                return createAutoDiffCostFunctionWrapper<ConstraintOdom3D>(_ctr_ptr);
+            else
+                return createAutoDiffCostFunctionCeres<ConstraintOdom3D>(_ctr_ptr);
 
         case CTR_CORNER_2D:
             if (_use_wolf_autodiff)

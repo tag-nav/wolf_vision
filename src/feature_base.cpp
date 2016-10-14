@@ -51,7 +51,7 @@ FeatureBase::~FeatureBase()
 
     while (!constraint_list_.empty())
     {
-        delete constraint_list_.front();
+        constraint_list_.front()->destruct();
         constraint_list_.pop_front();
     }
 

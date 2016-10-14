@@ -16,7 +16,7 @@ HardwareBase::~HardwareBase()
     is_deleting_ = true;
     while (!sensor_list_.empty())
     {
-        delete sensor_list_.front();
+        sensor_list_.front()->destruct();
         sensor_list_.pop_front();
     }
 	//std::cout << "deleting HardwareBase " << nodeId() << std::endl;
@@ -27,9 +27,7 @@ SensorBasePtr HardwareBase::addSensor(SensorBasePtr _sensor_ptr)
     //std::cout << "adding sensor..." << std::endl;
     sensor_list_.push_back(_sensor_ptr);
     _sensor_ptr->setProblem(getProblem());
-//	addDownNode(_sensor_ptr);
     //std::cout << "added!" << std::endl;
-
 
     _sensor_ptr->registerNewStateBlocks();
 
@@ -40,8 +38,7 @@ SensorBasePtr HardwareBase::addSensor(SensorBasePtr _sensor_ptr)
 void HardwareBase::removeSensor(SensorBasePtr _sensor_ptr)
 {
     sensor_list_.remove(_sensor_ptr);
-    delete _sensor_ptr;
-//    removeDownNode(_sensor_ptr->nodeId());
+//    delete _sensor_ptr;
 }
 
 } // namespace wolf

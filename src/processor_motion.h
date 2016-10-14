@@ -459,6 +459,9 @@ inline void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                                                  deltaZero(),
                                                  Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
                                                  Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)}));
+        delta_integrated_ = deltaZero();
+        delta_integrated_cov_.setZero();
+
         // reset derived things
         resetDerived();
 
