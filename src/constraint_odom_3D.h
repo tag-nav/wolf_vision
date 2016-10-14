@@ -131,7 +131,7 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* con
 
     Eigen::Matrix<T,6,1> r = residuals;
 
-    printRes(r);
+//    printRes(r);
 
     return true;
 }
