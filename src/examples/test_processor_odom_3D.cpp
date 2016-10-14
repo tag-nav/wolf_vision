@@ -130,7 +130,7 @@ int main (int argc, char** argv)
 
     }
 
-        delete problem; // XXX Why is this throwing segfault?
+        //delete problem; // XXX Why is this throwing segfault?
 
     return 0;
 }
