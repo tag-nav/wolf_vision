@@ -268,17 +268,17 @@ class Problem
 
 };
 
-inline ProcessorMotion* Problem::getProcessorMotionPtr()
-{
-    return processor_motion_ptr_;
-}
-
 } // namespace wolf
 
 // IMPLEMENTATION
 
 namespace wolf
 {
+
+inline ProcessorMotion* Problem::getProcessorMotionPtr()
+{
+    return processor_motion_ptr_;
+}
 
 inline std::list<StateBlockNotification>& Problem::getStateBlockNotificationList()
 {
