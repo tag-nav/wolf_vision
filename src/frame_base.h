@@ -19,7 +19,7 @@ class StateBlock;
 namespace wolf {
 
 //class FrameBase
-class FrameBase : public NodeBase
+class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase>
 {
     private:
         ProblemWPtr problem_ptr_;

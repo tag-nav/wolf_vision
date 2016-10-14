@@ -18,7 +18,7 @@ class FeatureBase;
 namespace wolf{
 
 //class CaptureBase
-class CaptureBase : public NodeBase
+class CaptureBase : public NodeBase, public std::enable_shared_from_this<CaptureBase>
 {
     private:
         ProblemWPtr problem_ptr_;

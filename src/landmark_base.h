@@ -25,7 +25,7 @@ namespace wolf {
 // TODO: init and end Time stamps
 
 //class LandmarkBase
-class LandmarkBase : public NodeBase
+class LandmarkBase : public NodeBase, public std::enable_shared_from_this<LandmarkBase>
 {
     private:
         ProblemWPtr problem_ptr_;

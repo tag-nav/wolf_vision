@@ -18,7 +18,7 @@ namespace wolf {
 
 
 //class FeatureBase
-class FeatureBase : public NodeBase
+class FeatureBase : public NodeBase, public std::enable_shared_from_this<FeatureBase>
 {
     private:
         ProblemWPtr problem_ptr_;

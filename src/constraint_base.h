@@ -17,7 +17,7 @@ namespace wolf {
 
 
 //class ConstraintBase
-class ConstraintBase : public NodeBase
+class ConstraintBase : public NodeBase, public std::enable_shared_from_this<ConstraintBase>
 {
     private:
         ProblemWPtr problem_ptr_;
