@@ -38,7 +38,7 @@ SensorBasePtr HardwareBase::addSensor(SensorBasePtr _sensor_ptr)
 void HardwareBase::removeSensor(SensorBasePtr _sensor_ptr)
 {
     sensor_list_.remove(_sensor_ptr);
-    delete _sensor_ptr;
+//    delete _sensor_ptr;
 }
 
 } // namespace wolf

@@ -106,15 +106,16 @@ int main (int argc, char** argv)
 
     Scalar dt = 0.1;
 
+    CaptureMotion* cap_odo = new CaptureMotion(TimeStamp(0), sen, data);
+
     cout << "t: " << 0 << "  \t\t\t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
     print(problem);
     cout << "--------------------------------------------------------------" << endl;
 
     for (TimeStamp t = dt; t < tf - Constants::EPS; t += dt)
     {
-
-        CaptureMotion* cap_odo = new CaptureMotion(t, sen, data);
-
+        cap_odo->setTimeStamp(t);
+        cap_odo->setData(data);
         cap_odo->process();
 
         cout << "t: " << t.get() << "  \t\t x = ( " << problem->getCurrentState().transpose() << ")" << endl;

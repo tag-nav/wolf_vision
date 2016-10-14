@@ -26,7 +26,7 @@ CaptureBase::~CaptureBase()
     is_deleting_ = true;
     while (!feature_list_.empty())
     {
-        delete feature_list_.front();
+        feature_list_.front()->destruct();
         feature_list_.pop_front();
     }
 }
