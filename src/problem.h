@@ -130,7 +130,6 @@ class Problem
         /** \brief Set the processor motion
          *
          * Set the processor motion. It will provide the state.
-         *
          */
         void setProcessorMotion(ProcessorMotion* _processor_motion_ptr);
         void setProcessorMotion(const std::string& _unique_processor_name);

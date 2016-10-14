@@ -31,7 +31,7 @@ class HardwareBase : public NodeBase //: public NodeLinked<Problem, SensorBase>
         virtual ~HardwareBase();
         void destruct()
         {
-            if (!is_deleting_)
+            if (!is_removing_)
                 delete this;
         }
 

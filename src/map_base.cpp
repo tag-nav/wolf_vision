@@ -27,7 +27,7 @@ MapBase::MapBase() :
 
 MapBase::~MapBase()
 {
-    is_deleting_ = true;
+    is_removing_ = true;
     while (!landmark_list_.empty())
     {
         delete landmark_list_.front();

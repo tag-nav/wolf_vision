@@ -39,7 +39,7 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen:
 FeatureBase::~FeatureBase()
 {
 	//std::cout << "deleting FeatureBase " << nodeId() << std::endl;
-    is_deleting_ = true;
+    is_removing_ = true;
 
     while (!constrained_by_list_.empty())
     {
@@ -95,7 +95,7 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 void FeatureBase::destruct()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
         if (capture_ptr_ != nullptr) // && !up_node_ptr_->isTop())
         {

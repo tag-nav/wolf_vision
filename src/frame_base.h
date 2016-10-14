@@ -242,9 +242,9 @@ inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
 
 inline void FrameBase::remove()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
-        is_deleting_ = true;
+        is_removing_ = true;
         std::cout << "Removing   F" << id() << std::endl;
         //        std::shared_ptr<F> this_F = shared_from_this();  // keep this alive while removing it
         trajectory_ptr_->getFrameListPtr()->remove(this);          // remove from upstream

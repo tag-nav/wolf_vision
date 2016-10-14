@@ -151,9 +151,9 @@ namespace wolf{
 
 inline void ConstraintBase::remove()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
-        is_deleting_ = true;
+        is_removing_ = true;
         std::cout << "Removing         c" << id() << std::endl;
         //                shared_ptr<c> this_c = shared_from_this();  // keep this alive while removing it
         feature_ptr_->getConstraintListPtr()->remove(this);          // remove from upstream
@@ -250,7 +250,7 @@ inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr()
 
 inline void ConstraintBase::destruct()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
         if (feature_other_ptr_ != nullptr)
             feature_other_ptr_->removeConstraint(this);

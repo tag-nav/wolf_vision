@@ -81,9 +81,9 @@ namespace wolf{
 
 inline void CaptureBase::remove()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
-        is_deleting_ = true;
+        is_removing_ = true;
         std::cout << "Removing     C" << id() << std::endl;
         //                shared_ptr<C> this_C = shared_from_this();  // keep this alive while removing it
         frame_ptr_->getCaptureListPtr()->remove(this);          // remove from upstream

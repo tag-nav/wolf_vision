@@ -51,7 +51,7 @@ class MapBase : public NodeBase
 
 inline void MapBase::destruct()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
         delete this;
 }
 

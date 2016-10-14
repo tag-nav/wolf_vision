@@ -42,7 +42,7 @@ FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock*
 FrameBase::~FrameBase()
 {
 	//std::cout << "deleting FrameBase " << id() << std::endl;
-    is_deleting_ = true;
+    is_removing_ = true;
 
 	// Remove Frame State Blocks
 	if (p_ptr_ != nullptr)
@@ -224,7 +224,7 @@ FrameBasePtr FrameBase::getNextFrame() const
 
 void FrameBase::destruct()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
         if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())
             trajectory_ptr_->removeFrame(this);

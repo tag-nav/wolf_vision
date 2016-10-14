@@ -25,7 +25,7 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, S
 LandmarkBase::~LandmarkBase()
 {
 	//std::cout << "deleting LandmarkBase " << nodeId() << std::endl;
-    is_deleting_ = true;
+    is_removing_ = true;
 
     // Remove Frame State Blocks
     if (p_ptr_ != nullptr)

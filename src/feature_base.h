@@ -126,9 +126,9 @@ inline ProblemPtr FeatureBase::getProblem()
 
 inline void FeatureBase::remove()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
-        is_deleting_ = true;
+        is_removing_ = true;
         std::cout << "Removing       f" << id() << std::endl;
         //                shared_ptr<f> this_f = shared_from_this();  // keep this alive while removing it
         capture_ptr_->getFeatureListPtr()->remove(this);          // remove from upstream

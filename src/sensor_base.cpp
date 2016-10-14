@@ -44,7 +44,7 @@ SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBl
 
 SensorBase::~SensorBase()
 {
-    is_deleting_ = true;
+    is_removing_ = true;
     // Remove State Blocks
     if (p_ptr_ != nullptr && !extrinsic_dynamic_)
     {

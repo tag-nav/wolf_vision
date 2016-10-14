@@ -97,7 +97,7 @@ inline wolf::ProblemPtr ProcessorBase::getProblem()
 
 inline void ProcessorBase::destruct()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
         if (sensor_ptr_ != nullptr) // && !up_node_ptr_->isTop())
         {

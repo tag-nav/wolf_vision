@@ -202,7 +202,7 @@ inline Eigen::VectorXs SensorBase::getNoiseStd()
 
 inline void SensorBase::destruct()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
         if (hardware_ptr_ != nullptr)
             hardware_ptr_->removeSensor(this);

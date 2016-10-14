@@ -119,9 +119,9 @@ namespace wolf{
 
 inline void LandmarkBase::remove()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
-        is_deleting_ = true;
+        is_removing_ = true;
         std::cout << "Removing   L" << id() << std::endl;
         //                shared_ptr<L> this_L = shared_from_this();  // keep this alive while removing it
         map_ptr_->getLandmarkListPtr()->remove(this);          // remove from upstream
@@ -235,7 +235,7 @@ inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
 
 inline void LandmarkBase::destruct()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
         if (map_ptr_ != nullptr) // && !up_node_ptr_->isTop())
         {

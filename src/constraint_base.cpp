@@ -79,7 +79,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr
 ConstraintBase::~ConstraintBase()
 {
 	//std::cout << "deleting ConstraintBase " << nodeId() << std::endl;
-    is_deleting_ = true;
+    is_removing_ = true;
 
     // add constraint to be removed from solver
     if (getProblem() != nullptr)

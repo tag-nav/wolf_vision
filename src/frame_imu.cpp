@@ -44,7 +44,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
   FrameIMU::~FrameIMU()
   {
   	//std::cout << "deleting FrameIMU " << id() << std::endl;
-      is_deleting_ = true;
+      is_removing_ = true;
 
   	// Remove Frame State Blocks
   	if (p_ptr_ != nullptr)

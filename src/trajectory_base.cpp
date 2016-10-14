@@ -13,7 +13,7 @@ TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
 
 TrajectoryBase::~TrajectoryBase()
 {
-    is_deleting_ = true;
+    is_removing_ = true;
     while (!frame_list_.empty())
     {
         delete frame_list_.front();
@@ -24,7 +24,7 @@ TrajectoryBase::~TrajectoryBase()
 
 void TrajectoryBase::destruct()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
         delete this;
 }
 

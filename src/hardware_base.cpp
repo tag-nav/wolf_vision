@@ -13,7 +13,7 @@ HardwareBase::HardwareBase() :
 
 HardwareBase::~HardwareBase()
 {
-    is_deleting_ = true;
+    is_removing_ = true;
     while (!sensor_list_.empty())
     {
         delete sensor_list_.front();

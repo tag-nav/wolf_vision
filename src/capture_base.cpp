@@ -23,7 +23,7 @@ CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorB
 CaptureBase::~CaptureBase()
 {
     //std::cout << "deleting CaptureBase " << nodeId() << std::endl;
-    is_deleting_ = true;
+    is_removing_ = true;
     while (!feature_list_.empty())
     {
         delete feature_list_.front();
@@ -33,7 +33,7 @@ CaptureBase::~CaptureBase()
 
 void CaptureBase::destruct()
 {
-    if (!is_deleting_)
+    if (!is_removing_)
     {
         if (frame_ptr_ != nullptr)
             frame_ptr_->removeCapture(this);
