@@ -10,10 +10,9 @@
 namespace wolf {
     struct IMU_jac_bias{ //struct used for checking jacobians by finite difference
 
-        IMU_jac_bias(Eigen::Matrix3s _dDp_dab, Eigen::Matrix3s _dDv_dab, Eigen::Matrix3s _dDp_dwb, Eigen::Matrix3s _dDv_dwb, Eigen::Matrix3s _dDq_dwb, 
-                       Eigen::Matrix<Eigen::VectorXs,6,1> _Deltas_noisy_vect, Eigen::VectorXs _Delta0 ) : dDp_dab_(_dDp_dab), 
-                       dDv_dab_(_dDv_dab), dDp_dwb_(_dDp_dwb), dDv_dwb_(_dDv_dwb), dDq_dwb_(_dDq_dwb), 
-                       Deltas_noisy_vect_(_Deltas_noisy_vect), Delta0_(_Delta0) {}
+        IMU_jac_bias(Eigen::Matrix<Eigen::VectorXs,6,1> _Deltas_noisy_vect, Eigen::VectorXs _Delta0 , Eigen::Matrix3s _dDp_dab, Eigen::Matrix3s _dDv_dab, 
+                    Eigen::Matrix3s _dDp_dwb, Eigen::Matrix3s _dDv_dwb, Eigen::Matrix3s _dDq_dwb) : Deltas_noisy_vect_(_Deltas_noisy_vect), Delta0_(_Delta0) ,
+                    dDp_dab_(_dDp_dab), dDv_dab_(_dDv_dab), dDp_dwb_(_dDp_dwb), dDv_dwb_(_dDv_dwb), dDq_dwb_(_dDq_dwb){}
 
         public:
             /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
@@ -159,7 +158,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
         Deltas_noisy_vect(i) = delta_preint_plus_delta0; //preintegrated deltas affected by added bias noise
     }
 
-    IMU_jac_bias bias_jacobians(dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb, Deltas_noisy_vect, Delta0);
+    IMU_jac_bias bias_jacobians(Deltas_noisy_vect, Delta0, dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb);
     return bias_jacobians;
 }
 
