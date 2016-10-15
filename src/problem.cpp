@@ -38,9 +38,9 @@ Problem::Problem(FrameStructure _frame_structure) :
 
 Problem::~Problem()
 {
-    hardware_ptr_->destruct();
-    trajectory_ptr_->destruct();
-    map_ptr_->destruct();
+//    hardware_ptr_->remove();
+//    trajectory_ptr_->remove();
+//    map_ptr_->remove();
 }
 
 void Problem::destruct()

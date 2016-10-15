@@ -296,7 +296,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
             ctr_ptr->getFeaturePtr()->addConstraint(new_ctr_ptr);
 
             // delete constraint
-            ctr_ptr->destruct();
+            ctr_ptr->remove();
 
             new_ctr_ptr = nullptr;
         }

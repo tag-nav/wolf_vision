@@ -606,7 +606,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
         // modify constraint
         if (!feature_ptr->getConstraintListPtr()->empty())
         {
-            feature_ptr->getConstraintListPtr()->front()->destruct();
+            feature_ptr->getConstraintListPtr()->front()->remove();
             feature_ptr->addConstraint(createConstraint(feature_ptr, _keyframe_ptr));
         }
     }

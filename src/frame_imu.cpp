@@ -85,7 +85,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
       while (!getConstrainedByListPtr()->empty())
       {
           //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-          getConstrainedByListPtr()->front()->destruct();
+          getConstrainedByListPtr()->front()->remove();
           //std::cout << "deleted " << std::endl;
       }
       //std::cout << "constraints deleted" << std::endl;

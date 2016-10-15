@@ -30,7 +30,7 @@ LandmarkBase::~LandmarkBase()
 	while (!constrained_by_list_.empty())
 	{
 	    //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-	    constrained_by_list_.front()->destruct();
+	    constrained_by_list_.front()->remove();
         //std::cout << "deleted " << std::endl;
 	}
 	//std::cout << "constraints deleted" << std::endl;
