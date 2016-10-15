@@ -363,7 +363,8 @@ typedef std::list<MapBasePtr> MapBaseList;
 typedef MapBaseList::iterator MapBaseIter;
 
 //Landmark
-typedef LandmarkBase* LandmarkBasePtr;
+//typedef LandmarkBase* LandmarkBasePtr;// TODO remove line
+typedef std::shared_ptr<LandmarkBase> LandmarkBasePtr;
 typedef LandmarkBase* LandmarkBaseWPtr;
 typedef std::list<LandmarkBasePtr> LandmarkBaseList;
 typedef LandmarkBaseList::iterator LandmarkBaseIter;

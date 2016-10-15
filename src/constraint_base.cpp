@@ -70,7 +70,8 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr
     apply_loss_function_(_apply_loss_function),
     frame_other_ptr_(nullptr),
     feature_other_ptr_(nullptr),
-    landmark_other_ptr_(_landmark_ptr)
+    landmark_other_ptr_(_landmark_ptr.get()) // TODO remove line
+    //landmark_other_ptr_(_landmark_ptr) // TODO uncomment line
 {
     // add constraint to landmark
     landmark_other_ptr_->addConstrainedBy(this);

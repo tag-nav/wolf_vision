@@ -261,7 +261,9 @@ inline void ConstraintBase::destruct()
 
 inline LandmarkBasePtr ConstraintBase::getLandmarkOtherPtr()
 {
-    return landmark_other_ptr_;
+    //    return landmark_other_ptr_;// TODO remove line
+    //    return landmark_other_ptr_.lock();// TODO uncomment line
+    return std::shared_ptr<LandmarkBase>(landmark_other_ptr_);// TODO remove line
 }
 
 } // namespace wolf
