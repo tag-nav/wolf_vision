@@ -53,7 +53,6 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
         virtual ~ConstraintBase();
-        void destruct();
         void remove();
 
         unsigned int id();
@@ -160,6 +159,11 @@ inline void ConstraintBase::remove()
         if (feature_ptr_->getConstraintListPtr()->empty() && feature_ptr_->getConstrainedByListPtr()->empty())
             feature_ptr_->remove();                   // remove upstream
 
+        // add constraint to be removed from solver
+        if (getProblem() != nullptr)
+            getProblem()->removeConstraintPtr(this);
+
+
         // remove other: {Frame, feature, Landmark}
         switch (category_)
         {
@@ -246,17 +250,6 @@ inline FrameBasePtr ConstraintBase::getFrameOtherPtr()
 inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr()
 {
     return feature_other_ptr_;
-}
-
-inline void ConstraintBase::destruct()
-{
-    if (!is_removing_)
-    {
-        if (feature_other_ptr_ != nullptr)
-            feature_other_ptr_->removeConstraint(this);
-        else
-            delete this;
-    }
 }
 
 inline LandmarkBasePtr ConstraintBase::getLandmarkOtherPtr()

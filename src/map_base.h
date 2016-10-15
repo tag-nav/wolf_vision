@@ -31,7 +31,7 @@ class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
          * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
          **/        
         ~MapBase();
-        void destruct();
+//        void destruct();
         
         ProblemPtr getProblem(){return problem_ptr_;}
         void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
@@ -49,11 +49,11 @@ class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
         std::string dateTimeNow();
 };
 
-inline void MapBase::destruct()
-{
-    if (!is_removing_)
-        delete this;
-}
+//inline void MapBase::destruct()
+//{
+//    if (!is_removing_)
+//        delete this;
+//}
 
 inline LandmarkBaseList* MapBase::getLandmarkListPtr()
 {

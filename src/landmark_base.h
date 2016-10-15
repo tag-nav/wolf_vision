@@ -55,7 +55,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
          **/
         LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
         virtual ~LandmarkBase();
-        void destruct();
+//        void destruct();
         void remove();
 
         /** \brief Returns landmark_id_, the landmark unique id
@@ -114,6 +114,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
 #include "map_base.h"
 #include "constraint_base.h"
+#include "state_block.h"
 
 namespace wolf{
 
@@ -124,9 +125,27 @@ inline void LandmarkBase::remove()
         is_removing_ = true;
         std::cout << "Removing   L" << id() << std::endl;
         LandmarkBasePtr this_L = shared_from_this();  // keep this alive while removing it
-        map_ptr_->getLandmarkListPtr()->remove(shared_from_this());          // remove from upstream
+
+        // Remove State Blocks
+        if (p_ptr_ != nullptr)
+        {
+            if (getProblem() != nullptr)
+                getProblem()->removeStateBlockPtr(p_ptr_);
+            delete p_ptr_;
+        }
+        if (o_ptr_ != nullptr)
+        {
+            if (getProblem() != nullptr)
+                getProblem()->removeStateBlockPtr(o_ptr_);
+            delete o_ptr_;
+        }
+
+        // remove from upstream
+        map_ptr_->getLandmarkListPtr()->remove(shared_from_this());
+
+        // remove constrained by
         while (!constrained_by_list_.empty())
-            constrained_by_list_.front()->remove();        // remove constrained
+            constrained_by_list_.front()->remove();
     }
 }
 
@@ -180,7 +199,7 @@ inline void LandmarkBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.remove(_ctr_ptr);
     if (constrained_by_list_.empty())
-        this->destruct();
+        this->remove();
 }
 
 inline StateBlock* LandmarkBase::getPPtr() const
@@ -233,22 +252,22 @@ inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
     return descriptor_;
 }
 
-inline void LandmarkBase::destruct()
-{
-    if (!is_removing_)
-    {
-        if (map_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-        {
-            //std::cout << "upper node is not WolfProblem " << std::endl;
-            map_ptr_->removeLandmark(shared_from_this());
-        }
-        else
-        {
-            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
-            //            delete this;//TODO remove line
-        }
-    }
-}
+//inline void LandmarkBase::destruct()
+//{
+//    if (!is_removing_)
+//    {
+//        if (map_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+//        {
+//            //std::cout << "upper node is not WolfProblem " << std::endl;
+//            map_ptr_->removeLandmark(shared_from_this());
+//        }
+//        else
+//        {
+//            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+//            //            delete this;//TODO remove line
+//        }
+//    }
+//}
 
 inline const LandmarkType LandmarkBase::getTypeId() const
 {

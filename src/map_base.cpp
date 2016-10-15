@@ -22,19 +22,19 @@ MapBase::MapBase() :
     NodeBase("MAP"),
     problem_ptr_(nullptr)
 {
-    //std::cout << "MapBase::MapBase(): " << __LINE__ << std::endl;
+    std::cout << "created M"<< std::endl;
 }
 
 MapBase::~MapBase()
 {
-    is_removing_ = true;
-    while (!landmark_list_.empty())
-    {
-        delete landmark_list_.front();
-        landmark_list_.pop_front();
-    }
-
-	//std::cout << "deleting MapBase " << nodeId() << std::endl;
+//    is_removing_ = true;
+//    while (!landmark_list_.empty())
+//    {
+//        delete landmark_list_.front();
+//        landmark_list_.pop_front();
+//    }
+//
+	std::cout << "destructed M" << nodeId() << std::endl;
 }
 
 LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)

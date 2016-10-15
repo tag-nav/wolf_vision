@@ -79,24 +79,8 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr
 
 ConstraintBase::~ConstraintBase()
 {
-	//std::cout << "deleting ConstraintBase " << nodeId() << std::endl;
-    is_removing_ = true;
 
-    // add constraint to be removed from solver
-    if (getProblem() != nullptr)
-        getProblem()->removeConstraintPtr(this);
-
-    //std::cout << "removeConstraintPtr " << std::endl;
-
-    // remove constraint to frame/landmark/feature
-    if (frame_other_ptr_ != nullptr)
-        frame_other_ptr_->removeConstrainedBy(this);
-    if (feature_other_ptr_ != nullptr)
-        feature_other_ptr_->removeConstrainedBy(this);
-    if (landmark_other_ptr_ != nullptr)
-        landmark_other_ptr_->removeConstrainedBy(this);
-
-    //std::cout << "removed constraints to " << std::endl;
+    std::cout << "destructing         c" << id() << std::endl;
 }
 
 const Eigen::VectorXs& ConstraintBase::getMeasurement() const

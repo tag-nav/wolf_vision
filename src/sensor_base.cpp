@@ -44,7 +44,14 @@ SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBl
 
 SensorBase::~SensorBase()
 {
+    std::cout << "destructed   S" << id() << std::endl;
+}
+
+inline void SensorBase::remove()
+{
     is_removing_ = true;
+    SensorBasePtr this_sen = shared_from_this(); // protect it while removing links
+
     // Remove State Blocks
     if (p_ptr_ != nullptr && !extrinsic_dynamic_)
     {
@@ -67,14 +74,16 @@ SensorBase::~SensorBase()
         delete intrinsic_ptr_;
     }
 
+    // remove downstream processors
     while (!processor_list_.empty())
     {
-        delete processor_list_.front();
-        processor_list_.pop_front();
+        processor_list_.front()->remove();
+        //        delete processor_list_.front();
+        //        processor_list_.pop_front();
     }
 
-
 }
+
 
 void SensorBase::fix()
 {

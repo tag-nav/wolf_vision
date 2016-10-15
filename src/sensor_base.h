@@ -91,7 +91,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          *
          **/
         virtual ~SensorBase();
-        void destruct();
+//        void destruct();
+        void remove();
 
         unsigned int id();
 
@@ -201,17 +202,17 @@ inline Eigen::VectorXs SensorBase::getNoiseStd()
     return noise_std_;
 }
 
-inline void SensorBase::destruct()
-{
-    if (!is_removing_)
-    {
-        if (hardware_ptr_ != nullptr)
-            //            hardware_ptr_->removeSensor(this); // TODO remove line
-            hardware_ptr_->removeSensor(shared_from_this());
-        else
-            delete this;
-    }
-}
+//inline void SensorBase::destruct()
+//{
+//    if (!is_removing_)
+//    {
+//        if (hardware_ptr_ != nullptr)
+//            //            hardware_ptr_->removeSensor(this); // TODO remove line
+//            hardware_ptr_->removeSensor(shared_from_this());
+//        else
+//            delete this;
+//    }
+//}
 
 inline Eigen::MatrixXs SensorBase::getNoiseCov()
 {

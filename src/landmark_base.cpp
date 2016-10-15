@@ -27,20 +27,6 @@ LandmarkBase::~LandmarkBase()
 	//std::cout << "deleting LandmarkBase " << nodeId() << std::endl;
     is_removing_ = true;
 
-    // Remove Frame State Blocks
-    if (p_ptr_ != nullptr)
-    {
-        if (getProblem() != nullptr)
-            getProblem()->removeStateBlockPtr(p_ptr_);
-        delete p_ptr_;
-    }
-    if (o_ptr_ != nullptr)
-    {
-        if (getProblem() != nullptr)
-            getProblem()->removeStateBlockPtr(o_ptr_);
-        delete o_ptr_;
-    }
-	//std::cout << "states deleted" << std::endl;
 
 	while (!constrained_by_list_.empty())
 	{
