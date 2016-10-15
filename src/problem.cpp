@@ -58,7 +58,8 @@ SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
                                    const Eigen::VectorXs& _extrinsics, //
                                    IntrinsicsBasePtr _intrinsics)
 {
-    SensorBasePtr sen_ptr = SensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
+    //    SensorBasePtr sen_ptr = SensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics); // TODO uncomment line
+    SensorBasePtr sen_ptr = std::shared_ptr<SensorBase>(SensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics)); // TODO remove line after fixing Factory return type
     addSensor(sen_ptr);
     return sen_ptr;
 }

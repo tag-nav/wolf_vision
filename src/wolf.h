@@ -304,7 +304,8 @@ typedef std::shared_ptr<HardwareBase> HardwareBasePtr;
 typedef HardwareBase* HardwareBaseWPtr;
 
 // - Sensors
-typedef SensorBase* SensorBasePtr;
+//typedef SensorBase* SensorBasePtr; // TODO remove line
+typedef std::shared_ptr<SensorBase> SensorBasePtr;
 typedef SensorBase* SensorBaseWPtr;
 typedef std::list<SensorBasePtr> SensorBaseList;
 typedef SensorBaseList::iterator SensorBaseIter;

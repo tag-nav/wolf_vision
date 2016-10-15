@@ -27,7 +27,7 @@ struct IntrinsicsBase
         std::string name;
 };
 
-class SensorBase : public NodeBase
+class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBase>
 {
     private:
         ProblemPtr problem_ptr_;
@@ -165,7 +165,8 @@ inline wolf::SensorType SensorBase::typeId()
 inline ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
 {
     processor_list_.push_back(_proc_ptr);
-    _proc_ptr->setSensorPtr(this);
+    //    _proc_ptr->setSensorPtr(this); // TODO remove line
+    _proc_ptr->setSensorPtr(shared_from_this());
     _proc_ptr->setProblem(getProblem());
     return _proc_ptr;
 }
@@ -205,7 +206,8 @@ inline void SensorBase::destruct()
     if (!is_removing_)
     {
         if (hardware_ptr_ != nullptr)
-            hardware_ptr_->removeSensor(this);
+            //            hardware_ptr_->removeSensor(this); // TODO remove line
+            hardware_ptr_->removeSensor(shared_from_this());
         else
             delete this;
     }

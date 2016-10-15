@@ -62,7 +62,8 @@ SensorBasePtr SensorGPS::create(const std::string& _unique_name, const Eigen::Ve
     assert(_extrinsics_p.size() == 3 && "Bad extrinsics vector length. Should be 3 for 3D.");
     StateBlock* pos_ptr = new StateBlock(_extrinsics_p, true);
     StateBlock* ori_ptr = nullptr;
-    SensorBasePtr sen = new SensorGPS(pos_ptr, ori_ptr, nullptr, nullptr, nullptr); // TODO: how to init these last three pointers?
+    //    SensorBasePtr sen = new SensorGPS(pos_ptr, ori_ptr, nullptr, nullptr, nullptr); // TODO remove line
+    SensorBasePtr sen = std::make_shared<SensorGPS>(SensorGPS(pos_ptr, ori_ptr, nullptr, nullptr, nullptr));
     sen->setName(_unique_name);
     return sen;
 }
