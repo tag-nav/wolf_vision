@@ -8,7 +8,6 @@ unsigned int FeatureBase::feature_id_count_ = 0;
 
 FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, unsigned int _dim_measurement) :
     NodeBase("FEATURE", _type),
-    problem_ptr_(nullptr),
     capture_ptr_(nullptr),
     feature_id_(++feature_id_count_),
     track_id_(0),
@@ -21,7 +20,6 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, unsigned int
 
 FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
 	NodeBase("FEATURE", _type),
-    problem_ptr_(nullptr),
     capture_ptr_(nullptr),
     feature_id_(++feature_id_count_),
     track_id_(0),
@@ -57,13 +55,6 @@ FeatureBase::~FeatureBase()
     std::cout << "destructed       f" << id() << std::endl;
 
 }
-
-void FeatureBase::setProblem(ProblemPtr _prob_ptr)
-{
-    problem_ptr_ = _prob_ptr;
-}
-
-
 
 ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
 {

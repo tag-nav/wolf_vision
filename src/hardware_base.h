@@ -14,18 +14,14 @@ class SensorBase;
 namespace wolf {
 
 //class HardwareBase
-class HardwareBase : public NodeBase //: public NodeLinked<Problem, SensorBase>
+class HardwareBase : public NodeBase
 {
     private:
-        ProblemWPtr problem_ptr_;
         SensorBaseList sensor_list_;
 
     public:
         HardwareBase();
         virtual ~HardwareBase();
-
-        ProblemPtr getProblem(){return problem_ptr_;}
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
         virtual SensorBasePtr addSensor(SensorBasePtr _sensor_ptr);
         SensorBaseList* getSensorListPtr();

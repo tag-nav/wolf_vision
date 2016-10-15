@@ -19,8 +19,7 @@
 namespace wolf {
 
 MapBase::MapBase() :
-    NodeBase("MAP"),
-    problem_ptr_(nullptr)
+    NodeBase("MAP")
 {
     std::cout << "created M"<< std::endl;
 }

@@ -20,7 +20,6 @@ namespace wolf {
 class FeatureBase : public NodeBase, public std::enable_shared_from_this<FeatureBase>
 {
     private:
-        ProblemWPtr problem_ptr_;
         CaptureBaseWPtr capture_ptr_;
         ConstraintBaseList constraint_list_;
         ConstraintBaseList constrained_by_list_;
@@ -73,7 +72,6 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 
 
         ProblemPtr getProblem();
-        void setProblem(ProblemPtr _prob_ptr);
 
         FrameBasePtr getFramePtr() const;
 

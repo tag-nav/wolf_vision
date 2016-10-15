@@ -30,7 +30,6 @@ struct IntrinsicsBase
 class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBase>
 {
     private:
-        ProblemPtr problem_ptr_;
         HardwareBasePtr hardware_ptr_;
         ProcessorBaseList processor_list_;
 
@@ -129,7 +128,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         Eigen::MatrixXs getNoiseCov();
 
         ProblemPtr getProblem();
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 };
 

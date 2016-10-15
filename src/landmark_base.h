@@ -28,7 +28,6 @@ namespace wolf {
 class LandmarkBase : public NodeBase, public std::enable_shared_from_this<LandmarkBase>
 {
     private:
-        ProblemWPtr problem_ptr_;
         MapBaseWPtr map_ptr_;
         ConstraintBaseList constrained_by_list_;
 
@@ -105,7 +104,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
         void setMapPtr(MapBasePtr _map_ptr){map_ptr_ = _map_ptr.get();} // TODO remove .get()
         ProblemPtr getProblem();
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 
 };

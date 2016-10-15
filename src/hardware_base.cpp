@@ -5,8 +5,7 @@
 namespace wolf {
 
 HardwareBase::HardwareBase() :
-        NodeBase("HARDWARE"),
-        problem_ptr_(nullptr)
+        NodeBase("HARDWARE")
 {
     //std::cout << "HardwareBase::HardwareBase(): " << __LINE__ << std::endl;
 }

@@ -22,7 +22,6 @@ namespace wolf {
 class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<TrajectoryBase>
 {
     private:
-        ProblemWPtr problem_ptr_;
         std::list<FrameBasePtr> frame_list_;
 
     protected:
@@ -41,10 +40,6 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
         
         // Properties
         FrameStructure getFrameStructure() const;
-
-        // Problem
-        ProblemPtr getProblem() { return problem_ptr_; }
-        void setProblem(ProblemPtr _prob_ptr);
 
         // Frames
         FrameBasePtr addFrame(FrameBasePtr _frame_ptr);
@@ -69,11 +64,6 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
 #include "feature_base.h"
 
 namespace wolf{
-
-inline void TrajectoryBase::setProblem(ProblemPtr _prob_ptr)
-{
-    problem_ptr_ = _prob_ptr;
-}
 
 inline void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
 {

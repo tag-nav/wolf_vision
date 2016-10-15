@@ -57,12 +57,13 @@ class NodeBase
         static unsigned int node_id_count_; ///< Object counter (acts as simple ID factory)
 
     protected:
+        ProblemWPtr problem_ptr_;
+        bool is_removing_;
+
         unsigned int node_id_;   ///< Node id. It is unique over the whole Wolf Tree
         std::string node_class_; ///< Text label identifying the class of node ("SENSOR", "FEATURE", etc)
         std::string node_type_;  ///< Text label identifying the type or subclass of node ("Pin Hole", "Point 2D", etc)
         std::string node_name_;  ///< Text label identifying each specific object ("left camera", "LIDAR 1", "PointGrey", "Andrew", etc)
-
-        bool is_removing_;
 
     public: 
 
@@ -76,6 +77,10 @@ class NodeBase
 
         void setType(const std::string& _name){node_type_ = _name;};
         void setName(const std::string& _name);
+
+        virtual ProblemPtr getProblem(){return problem_ptr_;}
+        void setProblem(ProblemPtr _prob_ptr) {problem_ptr_ = _prob_ptr;}
+
 };
 
 } // namespace wolf
@@ -85,9 +90,8 @@ class NodeBase
 namespace wolf{
 
 inline NodeBase::NodeBase(const std::string& _class, const std::string& _type, const std::string& _name) :
-        node_id_(++node_id_count_), node_class_(_class), node_type_(_type), node_name_(_name)
+        problem_ptr_(nullptr), is_removing_(false), node_id_(++node_id_count_), node_class_(_class), node_type_(_type), node_name_(_name)
 {
-    is_removing_ = false;
     //
 }
 

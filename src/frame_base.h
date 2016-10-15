@@ -22,7 +22,6 @@ namespace wolf {
 class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase>
 {
     private:
-        ProblemWPtr problem_ptr_;
         TrajectoryBasePtr trajectory_ptr_;
         CaptureBaseList capture_list_;
         ConstraintBaseList constrained_by_list_;
@@ -100,7 +99,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         // Wolf tree access ---------------------------------------------------
 
         ProblemPtr getProblem();
-        void setProblem(ProblemPtr _prob_ptr);
 
         TrajectoryBasePtr getTrajectoryPtr() const;
         void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr);
@@ -281,11 +279,6 @@ inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
         c_ptr->getConstraintList(_ctr_list);
 }
 
-
-inline void FrameBase::setProblem(ProblemPtr _prob_ptr)
-{
-    problem_ptr_ = _prob_ptr;
-}
 
 inline void FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {

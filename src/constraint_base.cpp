@@ -8,7 +8,6 @@ unsigned int ConstraintBase::constraint_id_count_ = 0;
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),
-    problem_ptr_(nullptr),
     feature_ptr_(nullptr),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
@@ -25,7 +24,6 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),
-    problem_ptr_(nullptr),
     feature_ptr_(nullptr),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
@@ -43,7 +41,6 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT"),
-    problem_ptr_(nullptr),
     feature_ptr_(nullptr),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
@@ -61,7 +58,6 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_ptr, 
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT"),
-    problem_ptr_(nullptr),
     feature_ptr_(nullptr),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),

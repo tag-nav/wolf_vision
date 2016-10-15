@@ -19,7 +19,6 @@ namespace wolf {
 class ConstraintBase : public NodeBase, public std::enable_shared_from_this<ConstraintBase>
 {
     private:
-        ProblemWPtr problem_ptr_;
         FeatureBaseWPtr feature_ptr_;                    ///< FeatureBase pointer (upper node)
 
         static unsigned int constraint_id_count_;
@@ -131,7 +130,6 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         LandmarkBasePtr getLandmarkOtherPtr();
 
         ProblemPtr getProblem();
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
 };
 

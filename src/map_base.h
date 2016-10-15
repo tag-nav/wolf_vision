@@ -20,7 +20,6 @@ namespace wolf {
 class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
 {
     private:
-        ProblemWPtr problem_ptr_;
         LandmarkBaseList landmark_list_;
 
     public:
@@ -33,9 +32,6 @@ class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
         ~MapBase();
 //        void destruct();
         
-        ProblemPtr getProblem(){return problem_ptr_;}
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
-
         virtual LandmarkBasePtr addLandmark(LandmarkBasePtr _landmark_ptr);
         virtual void addLandmarkList(LandmarkBaseList _landmark_list);
         void removeLandmark(const LandmarkBaseIter& _landmark_iter);

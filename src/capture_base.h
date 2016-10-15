@@ -20,7 +20,6 @@ namespace wolf{
 class CaptureBase : public NodeBase, public std::enable_shared_from_this<CaptureBase>
 {
     private:
-        ProblemWPtr problem_ptr_;
         FrameBaseWPtr frame_ptr_;
         FeatureBaseList feature_list_;
 
@@ -48,7 +47,6 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void setTimeStampToNow();
 
         ProblemPtr getProblem();
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
         FrameBasePtr getFramePtr() const;
         void setFramePtr(const FrameBasePtr _frm_ptr);
