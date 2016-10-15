@@ -41,7 +41,8 @@ LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)
 {
 	//std::cout << "MapBase::addLandmark" << std::endl;
     landmark_list_.push_back(_landmark_ptr);
-    _landmark_ptr->setMapPtr(this);
+    //    _landmark_ptr->setMapPtr(this); // TODO remove line
+    _landmark_ptr->setMapPtr(shared_from_this());
     _landmark_ptr->setProblem(getProblem());
     _landmark_ptr->registerNewStateBlocks();
     return _landmark_ptr;
@@ -53,7 +54,8 @@ void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)
 	LandmarkBaseList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
     for (LandmarkBasePtr landmark_ptr : lmk_list_copy)
     {
-        landmark_ptr->setMapPtr(this);
+        //        landmark_ptr->setMapPtr(this); // TODO remove line
+        landmark_ptr->setMapPtr(shared_from_this());
         landmark_ptr->setProblem(getProblem());
         landmark_ptr->registerNewStateBlocks();
     }

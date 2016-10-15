@@ -299,8 +299,8 @@ typedef Problem* ProblemPtr;
 typedef Problem* ProblemWPtr;
 
 // Hardware
-//typedef std::shared_ptr<HardwareBase> HardwareBasePtr;
-typedef HardwareBase* HardwareBasePtr;
+typedef std::shared_ptr<HardwareBase> HardwareBasePtr;
+//typedef HardwareBase* HardwareBasePtr; // TODO remove line
 typedef HardwareBase* HardwareBaseWPtr;
 
 // - Sensors
@@ -322,8 +322,8 @@ typedef ProcessorBaseList::iterator ProcessorBaseIter;
 typedef ProcessorParamsBase* ProcessorParamsBasePtr;
 
 // - Trajectory
-//typedef std::shared_ptr<TrajectoryBase> TrajectoryBasePtr;
-typedef TrajectoryBase* TrajectoryBasePtr;
+typedef std::shared_ptr<TrajectoryBase> TrajectoryBasePtr;
+//typedef TrajectoryBase* TrajectoryBasePtr; // TODO remove line
 typedef TrajectoryBase* TrajectoryBaseWPtr;
 
 // - Frame
@@ -355,7 +355,8 @@ typedef std::list<ConstraintBasePtr> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
 //Map
-typedef MapBase* MapBasePtr;
+typedef std::shared_ptr<MapBase> MapBasePtr;
+//typedef MapBase* MapBasePtr; // TODO remove line
 typedef MapBase* MapBaseWPtr;
 typedef std::list<MapBasePtr> MapBaseList;
 typedef MapBaseList::iterator MapBaseIter;

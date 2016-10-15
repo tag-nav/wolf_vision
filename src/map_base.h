@@ -17,7 +17,7 @@ class LandmarkBase;
 namespace wolf {
 
 //class MapBase
-class MapBase : public NodeBase
+class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
 {
     private:
         ProblemWPtr problem_ptr_;
