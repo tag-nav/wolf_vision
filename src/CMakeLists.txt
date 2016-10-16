@@ -186,51 +186,51 @@ SET(HDRS_DTASSC
 #sources
 SET(SRCS
     capture_base.cpp
-#    capture_gps_fix.cpp
+    capture_gps_fix.cpp
     capture_imu.cpp
     capture_fix.cpp
-#    capture_void.cpp
+    capture_void.cpp
     constraint_base.cpp
-#    constraint_analytic.cpp
+    constraint_analytic.cpp
     feature_base.cpp
     feature_corner_2D.cpp
-#    feature_gps_fix.cpp
-#    feature_gps_pseudorange.cpp
+    feature_gps_fix.cpp
+    feature_gps_pseudorange.cpp
     feature_imu.cpp
     feature_fix.cpp
-#    feature_odom_2D.cpp
+    feature_odom_2D.cpp
 #    feature_polyline_2D.cpp
     frame_base.cpp
     frame_imu.cpp
     hardware_base.cpp
     landmark_base.cpp
     landmark_corner_2D.cpp
-#    landmark_container.cpp
-#    landmark_point_3d.cpp
-#    landmark_line_2D.cpp
+    landmark_container.cpp
+    landmark_point_3d.cpp
+    landmark_line_2D.cpp
 #    landmark_polyline_2D.cpp
     local_parametrization_base.cpp
     local_parametrization_quaternion.cpp
-#    local_parametrization_homogeneous.cpp
+    local_parametrization_homogeneous.cpp
 #    local_parametrization_polyline_extreme.cpp
     map_base.cpp
     node_base.cpp
     problem.cpp
     processor_base.cpp
     processor_imu.cpp
-#    processor_odom_2D.cpp
-#    processor_odom_3D.cpp
+    processor_odom_2D.cpp
+    processor_odom_3D.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
     processor_tracker_feature_dummy.cpp
     processor_tracker_landmark.cpp
     processor_tracker_landmark_dummy.cpp
     sensor_base.cpp
-#    sensor_camera.cpp
-#    sensor_gps.cpp
-#    sensor_gps_fix.cpp
+    sensor_camera.cpp
+    sensor_gps.cpp
+    sensor_gps_fix.cpp
     sensor_imu.cpp
-#    sensor_odom_2D.cpp
+    sensor_odom_2D.cpp
     time_stamp.cpp
     trajectory_base.cpp
 #    data_association/association_solver.cpp
@@ -302,12 +302,12 @@ IF (OpenCV_FOUND)
         active_search.h
         )
     SET(SRCS ${SRCS}
-#        capture_image.cpp
-#        feature_point_image.cpp
-#        landmark_AHP.cpp
-#        processor_image.cpp
+        capture_image.cpp
+        feature_point_image.cpp
+        landmark_AHP.cpp
+        processor_image.cpp
 #        processor_image_landmark.cpp
-#        active_search.cpp
+        active_search.cpp
         )
 ENDIF(OpenCV_FOUND)
 
@@ -324,12 +324,12 @@ IF(YAMLCPP_FOUND)
 
     # sources
     SET(SRCS ${SRCS}
-#        yaml/sensor_camera_yaml.cpp
-#        yaml/processor_image_yaml.cpp
+        yaml/sensor_camera_yaml.cpp
+        yaml/processor_image_yaml.cpp
         )
     IF(laser_scan_utils_FOUND)
         SET(SRCS ${SRCS}
-#            yaml/sensor_laser_2D_yaml.cpp
+            yaml/sensor_laser_2D_yaml.cpp
             )
     ENDIF(laser_scan_utils_FOUND)
 ENDIF(YAMLCPP_FOUND)

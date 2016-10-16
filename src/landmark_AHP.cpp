@@ -44,7 +44,7 @@ wolf::LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
     std::vector<int>    v           = _node["descriptor"]   .as< std::vector<int> >();
     cv::Mat desc(v);
 
-    LandmarkBasePtr lmk = new LandmarkAHP(pos_homog, nullptr, nullptr, desc);
+    LandmarkBasePtr lmk = std::make_shared<LandmarkAHP>(pos_homog, nullptr, nullptr, desc);
     lmk->setId(id);
     return lmk;
 }

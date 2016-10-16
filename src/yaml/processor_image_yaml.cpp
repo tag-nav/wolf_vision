@@ -24,7 +24,7 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
     using std::string;
     using YAML::Node;
 
-    ProcessorParamsImage* p = new ProcessorParamsImage;
+    std::shared_ptr<ProcessorParamsImage> p = std::make_shared<ProcessorParamsImage>();
 
     Node params = YAML::LoadFile(_filename_dot_yaml);
 

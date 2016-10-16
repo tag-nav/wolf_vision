@@ -34,7 +34,7 @@ class SensorCamera : public SensorBase
          **/
         SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, int _img_width, int _img_height);
 
-        SensorCamera(const Eigen::VectorXs & _extrinsics, const IntrinsicsCamera * _intrinsics_ptr);
+        SensorCamera(const Eigen::VectorXs & _extrinsics, const std::shared_ptr<IntrinsicsCamera> _intrinsics_ptr);
 
         /** \brief Default destructor (not recommended)
          *

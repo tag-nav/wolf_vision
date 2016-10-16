@@ -14,7 +14,7 @@ SensorCamera::SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _
     //
 }
 
-SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsCamera* _intrinsics_ptr) :
+SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const std::shared_ptr<IntrinsicsCamera> _intrinsics_ptr) :
                 SensorBase(SEN_CAMERA, "CAMERA", nullptr, nullptr, nullptr, 2), // will initialize state blocks later
                 img_width_(_intrinsics_ptr->width), //
                 img_height_(_intrinsics_ptr->height), //
@@ -62,9 +62,8 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
 {
     assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
 
-    IntrinsicsCamera* intrinsics_ptr = (IntrinsicsCamera*)_intrinsics;
-    //    SensorCamera* sen_ptr = new SensorCamera(_extrinsics_pq, intrinsics_ptr); // TODO remove line
-    std::shared_ptr<SensorCamera> sen_ptr = std::make_shared<SensorCamera>(SensorCamera(_extrinsics_pq, intrinsics_ptr));
+    std::shared_ptr<IntrinsicsCamera> intrinsics_ptr = std::static_pointer_cast<IntrinsicsCamera>(_intrinsics);
+    std::shared_ptr<SensorCamera> sen_ptr = std::make_shared<SensorCamera>(_extrinsics_pq, intrinsics_ptr);
     sen_ptr->setName(_unique_name);
 
     return sen_ptr;

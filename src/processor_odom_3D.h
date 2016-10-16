@@ -165,7 +165,7 @@ inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _m
 
 inline ConstraintBasePtr ProcessorOdom3D::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
-    return new ConstraintOdom2D(_feature_motion, _frame_origin);
+    return std::make_shared<ConstraintOdom2D>(_feature_motion, _frame_origin);
 }
 
 inline void ProcessorOdom3D::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
