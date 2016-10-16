@@ -152,34 +152,56 @@ inline void ConstraintBase::remove()
     {
         is_removing_ = true;
         std::cout << "Removing         c" << id() << std::endl;
-        //                shared_ptr<c> this_c = shared_from_this();  // keep this alive while removing it
-        feature_ptr_->getConstraintListPtr()->remove(this);          // remove from upstream
-        if (feature_ptr_->getConstraintListPtr()->empty() && feature_ptr_->getConstrainedByListPtr()->empty())
-            feature_ptr_->remove();                   // remove upstream
+        ConstraintBasePtr this_c = shared_from_this();  // keep this alive while removing it
+        FeatureBasePtr ftr = feature_ptr_.lock();
+        if (ftr)
+        {
+            ftr->getConstraintListPtr()->remove(this_c);          // remove from upstream
+            if (ftr->getConstraintListPtr()->empty() && ftr->getConstrainedByListPtr()->empty())
+                ftr->remove();                   // remove upstream
+        }
 
         // add constraint to be removed from solver
         if (getProblem() != nullptr)
-            getProblem()->removeConstraintPtr(this);
+            getProblem()->removeConstraintPtr(this_c);
 
 
         // remove other: {Frame, feature, Landmark}
         switch (category_)
         {
             case CTR_FRAME:
-                frame_other_ptr_->getConstrainedByListPtr()->remove(this);
-                if (frame_other_ptr_->getConstrainedByListPtr()->empty() && frame_other_ptr_->getCaptureListPtr()->empty())
-                    frame_other_ptr_->remove();
-                break;
+            {
+                FrameBasePtr frm_o = frame_other_ptr_.lock();
+                if (frm_o)
+                {
+                    frm_o->getConstrainedByListPtr()->remove(this_c);
+                    if (frm_o->getConstrainedByListPtr()->empty() && frm_o->getCaptureListPtr()->empty())
+                        frm_o->remove();
+                }
+            }
+            break;
             case CTR_FEATURE:
-                feature_other_ptr_->getConstrainedByListPtr()->remove(this);
-                if (feature_other_ptr_->getConstrainedByListPtr()->empty() && feature_other_ptr_->getConstraintListPtr()->empty())
-                    feature_other_ptr_->remove();
+            {
+                FeatureBasePtr ftr_o = feature_other_ptr_.lock();
+                if (ftr_o)
+                {
+                    ftr_o->getConstrainedByListPtr()->remove(this_c);
+                    if (ftr_o->getConstrainedByListPtr()->empty() && ftr_o->getConstraintListPtr()->empty())
+                        ftr_o->remove();
+                }
                 break;
+            }
             case CTR_LANDMARK:
-                landmark_other_ptr_->getConstrainedByListPtr()->remove(this);
-                if (landmark_other_ptr_->getConstrainedByListPtr()->empty())
-                    landmark_other_ptr_->remove();
+            {
+                LandmarkBasePtr lmk_o = landmark_other_ptr_.lock();
+                if (lmk_o)
+                {
+                    lmk_o->getConstrainedByListPtr()->remove(this_c);
+                    if (lmk_o->getConstrainedByListPtr()->empty())
+                        lmk_o->remove();
+                }
                 break;
+            }
             case CTR_ABSOLUTE:
                 break;
             default:
@@ -191,9 +213,17 @@ inline void ConstraintBase::remove()
 
 inline wolf::ProblemPtr ConstraintBase::getProblem()
 {
-    if (problem_ptr_ == nullptr && feature_ptr_ != nullptr)
-        problem_ptr_ = feature_ptr_->getProblem();
-    return problem_ptr_;
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb)
+    {
+        FeatureBasePtr ftr = feature_ptr_.lock();
+        if (ftr)
+        {
+            prb = ftr->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
+    return prb;
 }
 
 inline unsigned int ConstraintBase::id()
@@ -208,7 +238,7 @@ inline ConstraintType ConstraintBase::getTypeId() const
 
 inline FeatureBasePtr ConstraintBase::getFeaturePtr() const
 {
-    return feature_ptr_;
+    return feature_ptr_.lock();
 }
 
 inline ConstraintCategory ConstraintBase::getCategory() const
@@ -234,27 +264,26 @@ inline void ConstraintBase::setApplyLossFunction(const bool _apply)
             std::cout << "constraint not linked with Problem, apply loss function change not notified" << std::endl;
         else
         {
-            getProblem()->removeConstraintPtr(this);
-            getProblem()->addConstraintPtr(this);
+            ConstraintBasePtr this_c = shared_from_this();
+            getProblem()->removeConstraintPtr(this_c);
+            getProblem()->addConstraintPtr(this_c);
         }
     }
 }
 
 inline FrameBasePtr ConstraintBase::getFrameOtherPtr()
 {
-    return frame_other_ptr_;
+    return frame_other_ptr_.lock();
 }
 
 inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr()
 {
-    return feature_other_ptr_;
+    return feature_other_ptr_.lock();
 }
 
 inline LandmarkBasePtr ConstraintBase::getLandmarkOtherPtr()
 {
-    //    return landmark_other_ptr_;// TODO remove line
-    //    return landmark_other_ptr_.lock();// TODO uncomment line
-    return std::shared_ptr<LandmarkBase>(landmark_other_ptr_);// TODO remove line
+    return landmark_other_ptr_.lock();
 }
 
 } // namespace wolf

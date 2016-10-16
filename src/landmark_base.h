@@ -102,7 +102,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
 
 
-        void setMapPtr(MapBasePtr _map_ptr){map_ptr_ = _map_ptr.get();} // TODO remove .get()
+        void setMapPtr(MapBasePtr _map_ptr){map_ptr_ = _map_ptr;}
         ProblemPtr getProblem();
 
 
@@ -139,7 +139,7 @@ inline void LandmarkBase::remove()
         }
 
         // remove from upstream
-        map_ptr_->getLandmarkListPtr()->remove(shared_from_this());
+        map_ptr_.lock()->getLandmarkListPtr()->remove(shared_from_this());
 
         // remove constrained by
         while (!constrained_by_list_.empty())
@@ -149,9 +149,17 @@ inline void LandmarkBase::remove()
 
 inline wolf::ProblemPtr LandmarkBase::getProblem()
 {
-    if (problem_ptr_ == nullptr && map_ptr_ != nullptr)
-        problem_ptr_ = map_ptr_->getProblem();
-    return problem_ptr_;
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb)
+    {
+        MapBasePtr map = map_ptr_.lock();
+        if (map)
+        {
+            prb = map->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
+    return prb;
 }
 
 inline unsigned int LandmarkBase::id()

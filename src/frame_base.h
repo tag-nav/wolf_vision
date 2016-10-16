@@ -22,7 +22,7 @@ namespace wolf {
 class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase>
 {
     private:
-        TrajectoryBasePtr trajectory_ptr_;
+        TrajectoryBaseWPtr trajectory_ptr_;
         CaptureBaseList capture_list_;
         ConstraintBaseList constrained_by_list_;
 
@@ -143,10 +143,18 @@ namespace wolf {
 
 inline ProblemPtr FrameBase::getProblem()
 {
-    if (problem_ptr_ == nullptr && trajectory_ptr_ != nullptr)
-        setProblem(trajectory_ptr_->getProblem());
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb)
+    {
+        TrajectoryBasePtr trj = trajectory_ptr_.lock();
+        if (trj)
+        {
+            prb = trj->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
 
-    return problem_ptr_;
+    return prb;
 }
 
 
@@ -208,7 +216,7 @@ inline StateBlock* FrameBase::getVPtr() const
 
 inline TrajectoryBasePtr FrameBase::getTrajectoryPtr() const
 {
-    return trajectory_ptr_;
+    return trajectory_ptr_.lock();
 }
 
 inline CaptureBaseList* FrameBase::getCaptureListPtr()
@@ -219,7 +227,7 @@ inline CaptureBaseList* FrameBase::getCaptureListPtr()
 inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
 {
     capture_list_.push_back(_capt_ptr);
-    _capt_ptr->setFramePtr(this);
+    _capt_ptr->setFramePtr(shared_from_this());
     _capt_ptr->setProblem(getProblem());
     return _capt_ptr;
 }
@@ -228,14 +236,14 @@ inline void FrameBase::removeCapture(const CaptureBaseIter& _capt_iter)
 {
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
     capture_list_.erase(_capt_iter);
-    delete *_capt_iter;
+//    delete *_capt_iter;
 }
 
 inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
 {
     //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
     capture_list_.remove(_capt_ptr);
-    delete _capt_ptr;
+//    delete _capt_ptr;
 }
 
 inline void FrameBase::remove()
@@ -244,8 +252,8 @@ inline void FrameBase::remove()
     {
         is_removing_ = true;
         std::cout << "Removing   F" << id() << std::endl;
-        //        std::shared_ptr<F> this_F = shared_from_this();  // keep this alive while removing it
-        trajectory_ptr_->getFrameListPtr()->remove(this);          // remove from upstream
+        FrameBasePtr this_F = shared_from_this();  // keep this alive while removing it
+        trajectory_ptr_.lock()->getFrameListPtr()->remove(this_F);          // remove from upstream
         while (!capture_list_.empty())
             capture_list_.front()->remove();          // remove downstream
         while (!constrained_by_list_.empty())

@@ -8,7 +8,7 @@ unsigned int CaptureBase::capture_id_count_ = 0;
 
 CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr) :
         NodeBase("CAPTURE", _type),
-        frame_ptr_(nullptr),
+        frame_ptr_(), // nullptr
         capture_id_(++capture_id_count_),
         time_stamp_(_ts),
         sensor_ptr_(_sensor_ptr),
@@ -25,20 +25,20 @@ CaptureBase::~CaptureBase()
     is_removing_ = true;
     while (!feature_list_.empty())
     {
-        delete feature_list_.front();
+//        delete feature_list_.front();
         feature_list_.pop_front();
     }
 }
 
 void CaptureBase::destruct()
 {
-    if (!is_removing_)
-    {
-        if (frame_ptr_ != nullptr)
-            frame_ptr_->removeCapture(this);
-        else
-            delete this;
-    }
+//    if (!is_removing_)
+//    {
+//        if (frame_ptr_ != nullptr)
+//            frame_ptr_->removeCapture(this);
+//        else
+//            delete this;
+//    }
 }
 
 void CaptureBase::process()
@@ -46,7 +46,7 @@ void CaptureBase::process()
     // Call all processors assigned to the sensor that captured this data
     for (auto processor_iter = sensor_ptr_->getProcessorListPtr()->begin(); processor_iter != sensor_ptr_->getProcessorListPtr()->end(); ++processor_iter)
     {
-        (*processor_iter)->process(this);
+        (*processor_iter)->process(shared_from_this());
     }
 }
 
@@ -54,7 +54,7 @@ void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
 {
     for (FeatureBasePtr feature_ptr : _new_ft_list)
     {
-        feature_ptr->setCapturePtr(this);
+        feature_ptr->setCapturePtr(shared_from_this());
         if (getProblem() != nullptr)
             feature_ptr->setProblem(getProblem());
     }

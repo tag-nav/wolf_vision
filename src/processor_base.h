@@ -10,6 +10,9 @@ class SensorBase;
 #include "wolf.h"
 #include "node_base.h"
 
+// std
+#include <memory>
+
 namespace wolf {
 
 
@@ -25,11 +28,10 @@ struct ProcessorParamsBase
 };
 
 //class ProcessorBase
-class ProcessorBase : public NodeBase
+class ProcessorBase : public NodeBase, public std::enable_shared_from_this<ProcessorBase>
 {
     private:
-        ProblemPtr problem_ptr_;
-        SensorBasePtr sensor_ptr_;
+        SensorBaseWPtr sensor_ptr_;
     public:
         ProcessorBase(ProcessorType _tp, const std::string& _type, const Scalar& _time_tolerance = 0);
 
@@ -40,6 +42,10 @@ class ProcessorBase : public NodeBase
          **/
         virtual ~ProcessorBase();
         void destruct();
+        void remove()
+        {
+            sensor_ptr_.lock()->getProcessorListPtr()->remove(shared_from_this());
+        }
 
         unsigned int id();
 
@@ -69,7 +75,6 @@ class ProcessorBase : public NodeBase
         virtual bool isMotion();
 
         ProblemPtr getProblem();
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
     private:
         static unsigned int processor_id_count_;
@@ -89,27 +94,34 @@ namespace wolf {
 
 inline wolf::ProblemPtr ProcessorBase::getProblem()
 {
-    if (problem_ptr_ == nullptr && sensor_ptr_ != nullptr)
-        problem_ptr_ = sensor_ptr_->getProblem();
-    return problem_ptr_;
-
+    ProblemPtr prb = problem_ptr_.lock();
+    if (prb)
+    {
+        SensorBasePtr sen = sensor_ptr_.lock();
+        if (sen)
+        {
+            prb = sen->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
+    return prb;
 }
 
 inline void ProcessorBase::destruct()
 {
-    if (!is_removing_)
-    {
-        if (sensor_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-        {
-            //std::cout << "upper node is not WolfProblem " << std::endl;
-            sensor_ptr_->removeProcessor(this);
-        }
-        else
-        {
-            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
-            delete this;
-        }
-    }
+//    if (!is_removing_)
+//    {
+//        if (sensor_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+//        {
+//            //std::cout << "upper node is not WolfProblem " << std::endl;
+//            sensor_ptr_->removeProcessor(this);
+//        }
+//        else
+//        {
+//            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+//            delete this;
+//        }
+//    }
 }
 
 
@@ -125,12 +137,12 @@ inline unsigned int ProcessorBase::id()
 
 inline SensorBasePtr ProcessorBase::getSensorPtr()
 {
-    return sensor_ptr_;
+    return sensor_ptr_.lock();
 }
 
 inline const SensorBasePtr ProcessorBase::getSensorPtr() const
 {
-    return sensor_ptr_;
+    return sensor_ptr_.lock();
 }
 
 } // namespace wolf

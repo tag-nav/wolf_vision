@@ -277,6 +277,7 @@ class HardwareBase;
 class SensorBase;
 struct IntrinsicsBase;
 class ProcessorBase;
+class ProcessorMotion;
 struct ProcessorParamsBase;
 class TrajectoryBase;
 class FrameBase;
@@ -291,22 +292,22 @@ class StateQuaternion;
 class LocalParametrizationBase;
 
 // NodeBase
-typedef NodeBase* NodeBasePtr;
-typedef NodeBase* NodeBaseWPtr;
+typedef std::shared_ptr<NodeBase> NodeBasePtr;
+typedef std::weak_ptr<NodeBase> NodeBaseWPtr;
 
 //Problem
-typedef Problem* ProblemPtr;
-typedef Problem* ProblemWPtr;
+typedef std::shared_ptr<Problem> ProblemPtr;
+typedef std::weak_ptr<Problem> ProblemWPtr;
 
 // Hardware
 typedef std::shared_ptr<HardwareBase> HardwareBasePtr;
 //typedef HardwareBase* HardwareBasePtr; // TODO remove line
-typedef HardwareBase* HardwareBaseWPtr;
+typedef std::weak_ptr<HardwareBase> HardwareBaseWPtr;
 
 // - Sensors
 //typedef SensorBase* SensorBasePtr; // TODO remove line
 typedef std::shared_ptr<SensorBase> SensorBasePtr;
-typedef SensorBase* SensorBaseWPtr;
+typedef std::weak_ptr<SensorBase> SensorBaseWPtr;
 typedef std::list<SensorBasePtr> SensorBaseList;
 typedef SensorBaseList::iterator SensorBaseIter;
 
@@ -314,28 +315,30 @@ typedef SensorBaseList::iterator SensorBaseIter;
 typedef IntrinsicsBase* IntrinsicsBasePtr;
 
 // - Processors
-typedef ProcessorBase* ProcessorBasePtr;
-typedef ProcessorBase* ProcessorBaseWPtr;
+typedef std::shared_ptr<ProcessorBase> ProcessorBasePtr;
+typedef std::weak_ptr<ProcessorBase> ProcessorBaseWPtr;
 typedef std::list<ProcessorBasePtr> ProcessorBaseList;
 typedef ProcessorBaseList::iterator ProcessorBaseIter;
 
 // Processor params
 typedef ProcessorParamsBase* ProcessorParamsBasePtr;
 
+// ProcessorMotion
+typedef std::shared_ptr<ProcessorMotion> ProcessorMotionPtr;
+
 // - Trajectory
 typedef std::shared_ptr<TrajectoryBase> TrajectoryBasePtr;
-//typedef TrajectoryBase* TrajectoryBasePtr; // TODO remove line
-typedef TrajectoryBase* TrajectoryBaseWPtr;
+typedef std::weak_ptr<TrajectoryBase> TrajectoryBaseWPtr;
 
 // - Frame
-typedef FrameBase* FrameBasePtr;
-typedef FrameBase* FrameBaseWPtr;
+typedef std::shared_ptr<FrameBase> FrameBasePtr;
+typedef std::weak_ptr<FrameBase> FrameBaseWPtr;
 typedef std::list<FrameBasePtr> FrameBaseList;
 typedef FrameBaseList::iterator FrameBaseIter;
 
 // - Capture
-typedef CaptureBase* CaptureBasePtr;
-typedef CaptureBase* CaptureBaseWPtr;
+typedef std::shared_ptr<CaptureBase> CaptureBasePtr;
+typedef std::weak_ptr<CaptureBase> CaptureBaseWPtr;
 typedef std::list<CaptureBasePtr> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
@@ -344,28 +347,28 @@ typedef std::list<CaptureMotion*> CaptureRelativeList;
 typedef CaptureRelativeList::iterator CaptureRelativeIter;
 
 // - Feature
-typedef FeatureBase* FeatureBasePtr;
-typedef FeatureBase* FeatureBaseWPtr;
+typedef std::shared_ptr<FeatureBase> FeatureBasePtr;
+typedef std::weak_ptr<FeatureBase> FeatureBaseWPtr;
 typedef std::list<FeatureBasePtr> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
 
 // - Constraint
-typedef ConstraintBase* ConstraintBasePtr;
-typedef ConstraintBase* ConstraintBaseWPtr;
+typedef std::shared_ptr<ConstraintBase> ConstraintBasePtr;
+typedef std::weak_ptr<ConstraintBase> ConstraintBaseWPtr;
 typedef std::list<ConstraintBasePtr> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
 //Map
 typedef std::shared_ptr<MapBase> MapBasePtr;
 //typedef MapBase* MapBasePtr; // TODO remove line
-typedef MapBase* MapBaseWPtr;
+typedef std::weak_ptr<MapBase> MapBaseWPtr;
 typedef std::list<MapBasePtr> MapBaseList;
 typedef MapBaseList::iterator MapBaseIter;
 
 //Landmark
 //typedef LandmarkBase* LandmarkBasePtr;// TODO remove line
 typedef std::shared_ptr<LandmarkBase> LandmarkBasePtr;
-typedef LandmarkBase* LandmarkBaseWPtr;
+typedef std::weak_ptr<LandmarkBase> LandmarkBaseWPtr;
 typedef std::list<LandmarkBasePtr> LandmarkBaseList;
 typedef LandmarkBaseList::iterator LandmarkBaseIter;
 

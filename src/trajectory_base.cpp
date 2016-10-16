@@ -5,7 +5,6 @@ namespace wolf {
 
 TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
     NodeBase("TRAJECTORY"),
-    problem_ptr_(nullptr),
     frame_structure_(_frame_structure), last_key_frame_ptr_(nullptr)
 {
     //

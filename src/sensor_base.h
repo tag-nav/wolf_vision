@@ -30,7 +30,7 @@ struct IntrinsicsBase
 class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBase>
 {
     private:
-        HardwareBasePtr hardware_ptr_;
+        HardwareBaseWPtr hardware_ptr_;
         ProcessorBaseList processor_list_;
 
         static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
@@ -140,15 +140,22 @@ namespace wolf{
 
 inline wolf::ProblemPtr SensorBase::getProblem()
 {
-    if (problem_ptr_ == nullptr && hardware_ptr_ != nullptr)
-        problem_ptr_ = hardware_ptr_->getProblem();
-    return problem_ptr_;
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb){
+        HardwareBasePtr hw = hardware_ptr_.lock();
+    if (hw)
+    {
+        prb = hw->getProblem();
+        problem_ptr_ = prb;
+    }
+    }
+    return prb;
 }
 
 inline void SensorBase::removeProcessor(ProcessorBasePtr _prc_ptr)
 {
     processor_list_.remove(_prc_ptr);
-    delete _prc_ptr;
+//    delete _prc_ptr;
 }
 
 inline unsigned int SensorBase::id()

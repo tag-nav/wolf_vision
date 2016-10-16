@@ -48,12 +48,12 @@ class Problem
 {
 
     protected:
-        std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
         HardwareBasePtr     hardware_ptr_;
         TrajectoryBasePtr   trajectory_ptr_;
         MapBasePtr          map_ptr_;
-        ProcessorMotion*    processor_motion_ptr_;
+        ProcessorMotionPtr  processor_motion_ptr_;
         StateBlockList      state_block_ptr_list_;
+        std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
         std::list<StateBlockNotification> state_block_notification_list_;
         std::list<ConstraintNotification> constraint_notification_list_;
         bool origin_is_set_;
@@ -133,7 +133,7 @@ class Problem
          */
         void setProcessorMotion(ProcessorMotion* _processor_motion_ptr);
         void setProcessorMotion(const std::string& _unique_processor_name);
-        ProcessorMotion* getProcessorMotionPtr();
+        ProcessorMotionPtr getProcessorMotionPtr();
 
 
         // Trajectory branch ----------------------------------
@@ -242,7 +242,7 @@ class Problem
 
 };
 
-inline ProcessorMotion* Problem::getProcessorMotionPtr()
+inline ProcessorMotionPtr Problem::getProcessorMotionPtr()
 {
     return processor_motion_ptr_;
 }

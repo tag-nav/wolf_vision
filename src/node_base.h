@@ -78,7 +78,7 @@ class NodeBase
         void setType(const std::string& _name){node_type_ = _name;};
         void setName(const std::string& _name);
 
-        virtual ProblemPtr getProblem(){return problem_ptr_;}
+        virtual ProblemPtr getProblem(){return problem_ptr_.lock();}
         void setProblem(ProblemPtr _prob_ptr) {problem_ptr_ = _prob_ptr;}
 
 };
@@ -90,7 +90,12 @@ class NodeBase
 namespace wolf{
 
 inline NodeBase::NodeBase(const std::string& _class, const std::string& _type, const std::string& _name) :
-        problem_ptr_(nullptr), is_removing_(false), node_id_(++node_id_count_), node_class_(_class), node_type_(_type), node_name_(_name)
+        problem_ptr_(), // nullptr
+        is_removing_(false),
+        node_id_(++node_id_count_),
+        node_class_(_class),
+        node_type_(_type),
+        node_name_(_name)
 {
     //
 }

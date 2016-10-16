@@ -50,7 +50,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 
         FrameBasePtr getFramePtr() const;
         void setFramePtr(const FrameBasePtr _frm_ptr);
-        void unlinkFromFrame(){frame_ptr_ = nullptr;}
+        void unlinkFromFrame(){frame_ptr_.reset();}
 
         FeatureBasePtr addFeature(FeatureBasePtr _ft_ptr);
         FeatureBaseList* getFeatureListPtr();
@@ -83,10 +83,14 @@ inline void CaptureBase::remove()
     {
         is_removing_ = true;
         std::cout << "Removing     C" << id() << std::endl;
-        //                shared_ptr<C> this_C = shared_from_this();  // keep this alive while removing it
-        frame_ptr_->getCaptureListPtr()->remove(this);          // remove from upstream
-        if (frame_ptr_->getCaptureListPtr()->empty() && frame_ptr_->getConstrainedByListPtr()->empty())
-            frame_ptr_->remove();                   // remove upstream
+        CaptureBasePtr this_C = shared_from_this();  // keep this alive while removing it
+        FrameBasePtr frm = frame_ptr_.lock();
+        if (frm)
+        {
+            frm->getCaptureListPtr()->remove(this_C);          // remove from upstream
+            if (frm->getCaptureListPtr()->empty() && frm->getConstrainedByListPtr()->empty())
+                frm->remove();                   // remove upstream
+        }
         while (!feature_list_.empty())
             feature_list_.front()->remove();          // remove downstream
     }
@@ -94,10 +98,18 @@ inline void CaptureBase::remove()
 
 inline ProblemPtr CaptureBase::getProblem()
 {
-    if (problem_ptr_ == nullptr && frame_ptr_ != nullptr)
-        setProblem(frame_ptr_->getProblem());
+    ProblemPtr prb = problem_ptr_.lock();
+    if (prb)
+    {
+        FrameBasePtr frm = frame_ptr_.lock();
+        if (frm)
+        {
+            prb = frm->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
 
-    return problem_ptr_;
+    return prb;
 }
 
 inline wolf::StateBlock* CaptureBase::getSensorPPtr() const
@@ -120,7 +132,7 @@ inline wolf::StateBlock* CaptureBase::getSensorOPtr() const
 inline void CaptureBase::removeFeature(FeatureBasePtr _ft_ptr)
 {
     feature_list_.remove(_ft_ptr);
-    delete _ft_ptr;
+//    delete _ft_ptr;
 }
 
 inline unsigned int CaptureBase::id()
@@ -132,16 +144,14 @@ inline FeatureBasePtr CaptureBase::addFeature(FeatureBasePtr _ft_ptr)
 {
     //std::cout << "Adding feature" << std::endl;
     feature_list_.push_back(_ft_ptr);
-    _ft_ptr->setCapturePtr(this);
+    _ft_ptr->setCapturePtr(shared_from_this());
     _ft_ptr->setProblem(getProblem());
-//    addDownNode(_ft_ptr);
     return _ft_ptr;
 }
 
 inline FrameBasePtr CaptureBase::getFramePtr() const
 {
-    return frame_ptr_;
-//    return upperNodePtr();
+    return frame_ptr_.lock();
 }
 
 inline void CaptureBase::setFramePtr(const FrameBasePtr _frm_ptr)

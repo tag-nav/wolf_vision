@@ -117,9 +117,17 @@ inline unsigned int FeatureBase::getHits() const
 
 inline ProblemPtr FeatureBase::getProblem()
 {
-    if (problem_ptr_ == nullptr && capture_ptr_ != nullptr)
-        problem_ptr_ = capture_ptr_->getProblem();
-    return problem_ptr_;
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb)
+    {
+        CaptureBasePtr cap = capture_ptr_.lock();
+        if (cap)
+        {
+            prb = cap->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
+    return prb;
 }
 
 inline void FeatureBase::remove()
@@ -128,10 +136,14 @@ inline void FeatureBase::remove()
     {
         is_removing_ = true;
         std::cout << "Removing       f" << id() << std::endl;
-        //                shared_ptr<f> this_f = shared_from_this();  // keep this alive while removing it
-        capture_ptr_->getFeatureListPtr()->remove(this);          // remove from upstream
-        if (capture_ptr_->getFeatureListPtr()->empty())
-            capture_ptr_->remove();                   // remove upstream
+        std::shared_ptr<FeatureBase> this_f = shared_from_this();  // keep this alive while removing it
+        CaptureBasePtr cap = capture_ptr_.lock();
+        if (cap)
+        {
+            cap->getFeatureListPtr()->remove(this_f);          // remove from upstream
+            if (cap->getFeatureListPtr()->empty())
+                cap->remove();                   // remove upstream
+        }
         while (!constraint_list_.empty())
             constraint_list_.front()->remove();          // remove downstream
         while (!constrained_by_list_.empty())
@@ -152,12 +164,12 @@ inline unsigned int FeatureBase::id()
 inline void FeatureBase::removeConstraint(ConstraintBasePtr _co_ptr)
 {
     constraint_list_.remove(_co_ptr);
-    delete _co_ptr;
+//    delete _co_ptr;
 }
 
 inline CaptureBasePtr FeatureBase::getCapturePtr() const
 {
-    return capture_ptr_;
+    return capture_ptr_.lock();
 }
 
 inline Scalar FeatureBase::getMeasurement(unsigned int _ii) const
