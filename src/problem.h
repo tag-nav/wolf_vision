@@ -62,7 +62,6 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         Problem(FrameStructure _frame_structure);
         virtual ~Problem();
-        virtual void destruct() final;
 
         // Properties -----------------------------------------
         unsigned int getFrameStructureSize();
@@ -131,7 +130,7 @@ class Problem : public std::enable_shared_from_this<Problem>
          *
          * Set the processor motion. It will provide the state.
          */
-        void setProcessorMotion(ProcessorMotion* _processor_motion_ptr);
+        void setProcessorMotion(ProcessorMotionPtr _processor_motion_ptr);
         void setProcessorMotion(const std::string& _unique_processor_name);
         ProcessorMotionPtr getProcessorMotionPtr();
 

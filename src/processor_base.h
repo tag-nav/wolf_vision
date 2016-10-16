@@ -34,18 +34,8 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
         SensorBaseWPtr sensor_ptr_;
     public:
         ProcessorBase(ProcessorType _tp, const std::string& _type, const Scalar& _time_tolerance = 0);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~ProcessorBase();
-        void destruct();
-        void remove()
-        {
-            sensor_ptr_.lock()->getProcessorListPtr()->remove(shared_from_this());
-        }
+        void remove();
 
         unsigned int id();
 
@@ -92,6 +82,11 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
 namespace wolf {
 
+inline void ProcessorBase::remove()
+{
+    sensor_ptr_.lock()->getProcessorListPtr()->remove(shared_from_this());
+}
+
 inline wolf::ProblemPtr ProcessorBase::getProblem()
 {
     ProblemPtr prb = problem_ptr_.lock();
@@ -107,8 +102,8 @@ inline wolf::ProblemPtr ProcessorBase::getProblem()
     return prb;
 }
 
-inline void ProcessorBase::destruct()
-{
+//inline void ProcessorBase::destruct()
+//{
 //    if (!is_removing_)
 //    {
 //        if (sensor_ptr_ != nullptr) // && !up_node_ptr_->isTop())
@@ -122,7 +117,7 @@ inline void ProcessorBase::destruct()
 //            delete this;
 //        }
 //    }
-}
+//}
 
 
 inline bool ProcessorBase::isMotion()

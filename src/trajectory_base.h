@@ -30,13 +30,7 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
         
     public:
         TrajectoryBase(FrameStructure _frame_sturcture);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         **/        
         virtual ~TrajectoryBase();
-        void destruct();
         
         // Properties
         FrameStructure getFrameStructure() const;

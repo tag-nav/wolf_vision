@@ -376,7 +376,7 @@ inline ProcessorMotion::ProcessorMotion(ProcessorType _tp,
 inline ProcessorMotion::~ProcessorMotion()
 {
     if (incoming_ptr_!= nullptr)
-        incoming_ptr_->destruct();
+        incoming_ptr_->remove();
 }
 
 inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)

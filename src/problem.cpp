@@ -43,10 +43,10 @@ Problem::~Problem()
 //    map_ptr_->remove();
 }
 
-void Problem::destruct()
-{
-    delete this;
-}
+//void Problem::destruct()
+//{
+//    delete this;
+//}
 
 void Problem::addSensor(SensorBasePtr _sen_ptr)
 {
@@ -75,7 +75,7 @@ SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
         return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
     }
     else
-        return installSensor(_sen_type, _unique_sensor_name, _extrinsics, nullptr);
+        return installSensor(_sen_type, _unique_sensor_name, _extrinsics, std::shared_ptr<IntrinsicsBase>());
 
 }
 
@@ -89,11 +89,11 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
 
     // setting the origin in all processor motion if origin already setted
     if (prc_ptr->isMotion() && origin_is_set_)
-        ((ProcessorMotion*)prc_ptr)->setOrigin(getLastKeyFramePtr());
+        (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastKeyFramePtr());
 
     // setting the main processor motion
     if (prc_ptr->isMotion() && processor_motion_ptr_ == nullptr)
-        processor_motion_ptr_ = (ProcessorMotion*)prc_ptr;
+        processor_motion_ptr_ = std::static_pointer_cast<ProcessorMotion>(prc_ptr);
 
     return prc_ptr;
 }
@@ -115,7 +115,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     }
 }
 
-void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
+void Problem::setProcessorMotion(ProcessorMotionPtr _processor_motion_ptr)
 {
     processor_motion_ptr_ = _processor_motion_ptr;
 }
@@ -136,29 +136,26 @@ FrameBasePtr Problem::createFrame(FrameKeyType _frame_key_type, const Eigen::Vec
         case FRM_PO_2D:
         {
             assert(_frame_state.size() == 3 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(2)),
+            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(2)),
                                   new StateBlock(_frame_state.tail(1))));
         }
         case FRM_PO_3D:
         {
             assert(_frame_state.size() == 7 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
+            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
                                   new StateQuaternion(_frame_state.tail(4))));
         }
         case FRM_POV_3D:
         {
             assert(_frame_state.size() == 10 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
+            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
                                   new StateQuaternion(_frame_state.segment<4>(3)),
                                   new StateBlock(_frame_state.tail(3))));
         }
         case FRM_PVQBB_3D:
         {
             assert(_frame_state.size() == 16 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(new FrameIMU(_frame_key_type, _time_stamp, _frame_state));
+            return trajectory_ptr_->addFrame(std::make_shared<FrameIMU>(_frame_key_type, _time_stamp, _frame_state));
         }
         default:
             throw std::runtime_error(
@@ -428,8 +425,7 @@ Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr)
 MapBasePtr Problem::addMap(MapBasePtr _map_ptr)
 {
     map_ptr_ = _map_ptr;
-    map_ptr_->setProblem(this);
-//    map_ptr_->linkToUpperNode(this);
+    map_ptr_->setProblem(shared_from_this());
 
     return map_ptr_;
 }
@@ -437,7 +433,7 @@ MapBasePtr Problem::addMap(MapBasePtr _map_ptr)
 TrajectoryBasePtr Problem::addTrajectory(TrajectoryBasePtr _trajectory_ptr)
 {
     trajectory_ptr_ = _trajectory_ptr;
-    trajectory_ptr_->setProblem(this);
+    trajectory_ptr_->setProblem(shared_from_this());
 
     return trajectory_ptr_;
 }
@@ -492,9 +488,9 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::Matrix
         // Create origin frame
         FrameBasePtr origin_frame_ptr = createFrame(KEY_FRAME, _origin_pose, _ts);
         // FIXME: create a fix sensor
-        IntrinsicsBase fix_instrinsics;
-        SensorBasePtr fix_sensor_ptr = installSensor("GPS", "initial pose", Eigen::VectorXs::Zero(3), &fix_instrinsics );
-        CaptureFix* init_capture = new CaptureFix(_ts, fix_sensor_ptr, _origin_pose, _origin_cov);
+        IntrinsicsBasePtr fix_instrinsics; // nullptr
+        SensorBasePtr fix_sensor_ptr = installSensor("GPS", "initial pose", Eigen::VectorXs::Zero(3), fix_instrinsics );
+        std::shared_ptr<CaptureFix> init_capture = std::make_shared<CaptureFix>(_ts, fix_sensor_ptr, _origin_pose, _origin_cov);
         origin_frame_ptr->addCapture(init_capture);
         init_capture->process();
 
@@ -502,7 +498,7 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::Matrix
         for (auto sensor_ptr : (*hardware_ptr_->getSensorListPtr()))
             for (auto processor_ptr : (*sensor_ptr->getProcessorListPtr()))
                 if (processor_ptr->isMotion())
-                    ((ProcessorMotion*)processor_ptr)->setOrigin(origin_frame_ptr);
+                    (std::static_pointer_cast<ProcessorMotion>(processor_ptr))->setOrigin(origin_frame_ptr);
 
         origin_is_set_ = true;
     }

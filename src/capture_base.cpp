@@ -30,8 +30,8 @@ CaptureBase::~CaptureBase()
     }
 }
 
-void CaptureBase::destruct()
-{
+//void CaptureBase::destruct()
+//{
 //    if (!is_removing_)
 //    {
 //        if (frame_ptr_ != nullptr)
@@ -39,7 +39,7 @@ void CaptureBase::destruct()
 //        else
 //            delete this;
 //    }
-}
+//}
 
 void CaptureBase::process()
 {

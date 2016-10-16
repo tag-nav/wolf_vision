@@ -50,7 +50,6 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
         virtual ~FeatureBase();
-        void destruct();
         void remove();
 
         unsigned int id();

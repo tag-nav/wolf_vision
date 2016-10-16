@@ -15,17 +15,17 @@ TrajectoryBase::~TrajectoryBase()
     is_removing_ = true;
     while (!frame_list_.empty())
     {
-        delete frame_list_.front();
+//        delete frame_list_.front();
         frame_list_.pop_front();
     }
     //std::cout << "deleting TrajectoryBase " << nodeId() << std::endl;
 }
 
-void TrajectoryBase::destruct()
-{
-    if (!is_removing_)
-        delete this;
-}
+//void TrajectoryBase::destruct()
+//{
+//    if (!is_removing_)
+//        delete this;
+//}
 
 FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
 {

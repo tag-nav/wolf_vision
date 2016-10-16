@@ -188,7 +188,7 @@ SET(SRCS
     capture_base.cpp
 #    capture_gps_fix.cpp
 #    capture_imu.cpp
-#    capture_fix.cpp
+    capture_fix.cpp
 #    capture_void.cpp
     constraint_base.cpp
 #    constraint_analytic.cpp
@@ -197,11 +197,11 @@ SET(SRCS
 #    feature_gps_fix.cpp
 #    feature_gps_pseudorange.cpp
 #    feature_imu.cpp
-#    feature_fix.cpp
+    feature_fix.cpp
 #    feature_odom_2D.cpp
 #    feature_polyline_2D.cpp
     frame_base.cpp
-#    frame_imu.cpp
+    frame_imu.cpp
     hardware_base.cpp
     landmark_base.cpp
 #    landmark_corner_2D.cpp
@@ -210,7 +210,7 @@ SET(SRCS
 #    landmark_line_2D.cpp
 #    landmark_polyline_2D.cpp
     local_parametrization_base.cpp
-#    local_parametrization_quaternion.cpp
+    local_parametrization_quaternion.cpp
 #    local_parametrization_homogeneous.cpp
 #    local_parametrization_polyline_extreme.cpp
     map_base.cpp

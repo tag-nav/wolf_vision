@@ -85,8 +85,8 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 		_ctr_list.push_back(c_ptr);
 }
 
-void FeatureBase::destruct()
-{
+//void FeatureBase::destruct()
+//{
 //    if (!is_removing_)
 //    {
 //        if (capture_ptr_ != nullptr) // && !up_node_ptr_->isTop())
@@ -100,7 +100,7 @@ void FeatureBase::destruct()
 //            delete this;
 //        }
 //    }
-}
+//}
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 {

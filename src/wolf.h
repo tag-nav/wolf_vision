@@ -310,7 +310,7 @@ typedef std::list<SensorBasePtr> SensorBaseList;
 typedef SensorBaseList::iterator SensorBaseIter;
 
 // Intrinsics
-typedef IntrinsicsBase* IntrinsicsBasePtr;
+typedef std::shared_ptr<IntrinsicsBase> IntrinsicsBasePtr;
 
 // - Processors
 typedef std::shared_ptr<ProcessorBase> ProcessorBasePtr;
@@ -319,7 +319,7 @@ typedef std::list<ProcessorBasePtr> ProcessorBaseList;
 typedef ProcessorBaseList::iterator ProcessorBaseIter;
 
 // Processor params
-typedef ProcessorParamsBase* ProcessorParamsBasePtr;
+typedef std::shared_ptr<ProcessorParamsBase> ProcessorParamsBasePtr;
 
 // ProcessorMotion
 typedef std::shared_ptr<ProcessorMotion> ProcessorMotionPtr;

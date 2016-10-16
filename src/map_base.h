@@ -24,13 +24,7 @@ class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
 
     public:
         MapBase();
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         **/        
         ~MapBase();
-//        void destruct();
         
         virtual LandmarkBasePtr addLandmark(LandmarkBasePtr _landmark_ptr);
         virtual void addLandmarkList(LandmarkBaseList _landmark_list);

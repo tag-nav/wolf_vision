@@ -61,7 +61,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
 
         virtual ~FrameBase();
-        void destruct(); // XXX Nobody calls this never
         void remove();
 
         unsigned int id();

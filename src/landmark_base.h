@@ -54,7 +54,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
          **/
         LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
         virtual ~LandmarkBase();
-//        void destruct();
         void remove();
 
         /** \brief Returns landmark_id_, the landmark unique id

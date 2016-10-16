@@ -220,8 +220,8 @@ FrameBasePtr FrameBase::getNextFrame() const
     return nullptr;
 }
 
-void FrameBase::destruct()
-{
+//void FrameBase::destruct()
+//{
 //    if (!is_removing_)
 //    {
 //        if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())
@@ -229,7 +229,7 @@ void FrameBase::destruct()
 //        else
 //            delete this;
 //    }
-}
+//}
 
 void FrameBase::setStatus(StateStatus _st)
 {
