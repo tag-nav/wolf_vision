@@ -233,10 +233,10 @@ SET(SRCS
     sensor_odom_2D.cpp
     time_stamp.cpp
     trajectory_base.cpp
-#    data_association/association_solver.cpp
-#    data_association/association_node.cpp
-#    data_association/association_tree.cpp
-#    data_association/association_nnls.cpp
+    data_association/association_solver.cpp
+    data_association/association_node.cpp
+    data_association/association_tree.cpp
+    data_association/association_nnls.cpp
     )
 
 #optional HDRS and SRCS
