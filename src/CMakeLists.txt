@@ -306,7 +306,7 @@ IF (OpenCV_FOUND)
         feature_point_image.cpp
         landmark_AHP.cpp
         processor_image.cpp
-#        processor_image_landmark.cpp
+        processor_image_landmark.cpp
         active_search.cpp
         )
 ENDIF(OpenCV_FOUND)

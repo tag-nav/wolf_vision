@@ -22,18 +22,18 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
     public:
         static const unsigned int N_BLOCKS = 5; //TODO: Prueba a comentarlo
 
-        ConstraintAHP(FeatureBasePtr _ftr_ptr, FrameBasePtr _current_frame_ptr, LandmarkAHP* _landmark_ptr,
+        ConstraintAHP(FeatureBasePtr _ftr_ptr, FrameBasePtr _current_frame_ptr, std::shared_ptr<LandmarkAHP> _landmark_ptr,
                         bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP, _landmark_ptr, _apply_loss_function, _status,
                                              _current_frame_ptr->getPPtr(), _current_frame_ptr->getOPtr(), _landmark_ptr->getAnchorFrame()->getPPtr()
                                                    ,_landmark_ptr->getAnchorFrame()->getOPtr(),_landmark_ptr->getPPtr()),
                 anchor_sensor_extrinsics_p_(_ftr_ptr->getCapturePtr()->getSensorPPtr()->getVector()),
                 anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getVector()),
-                feature_image_(*((FeaturePointImage*)_ftr_ptr))
+                feature_image_(*std::static_pointer_cast<FeaturePointImage>(_ftr_ptr))
         {
             setType("AHP");
-            K_ = ((SensorCamera*)(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
-            distortion_ = ((SensorCamera*)(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
+            K_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
+            distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
         }
 
         /** \brief Default destructor (not recommended)

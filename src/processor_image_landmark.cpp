@@ -81,7 +81,7 @@ ProcessorImageLandmark::~ProcessorImageLandmark()
 
 void ProcessorImageLandmark::preProcess()
 {
-    image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
+    image_incoming_ = (std::static_pointer_cast<CaptureImage>(incoming_ptr_))->getImage();
 
     if (last_ptr_ == nullptr) // do this just one time!
     {
@@ -137,7 +137,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         std::cout << "\nLandmark number [" << lmk_nbr << "] in ";
 
         /* project */
-        LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_in_ptr;
+        std::shared_ptr<LandmarkAHP> landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
         Eigen::Vector4s point3D_hmg;
         Eigen::Vector3s point2D_hmg;
         Eigen::Vector2s point2D;
@@ -146,7 +146,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
         point2D_hmg = point3D_hmg.head(3);
         point2D = point2D_hmg.head(2)/point2D_hmg(2);
-        point2D = pinhole::distortPoint(((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point2D);
+        point2D = pinhole::distortPoint((std::static_pointer_cast<SensorCamera>(this->getSensorPtr()))->getDistortionVector(),point2D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
 
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
@@ -182,7 +182,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                     std::cout << "Feature descriptor:\n" << candidate_descriptors.row(cv_matches[0].trainIdx) << std::endl;
 
 
-                    FeaturePointImage* incoming_point_ptr = new FeaturePointImage(candidate_keypoints[cv_matches[0].trainIdx],
+                    std::shared_ptr<FeaturePointImage> incoming_point_ptr = std::make_shared<FeaturePointImage>(candidate_keypoints[cv_matches[0].trainIdx],
                             (candidate_descriptors.row(cv_matches[0].trainIdx)), Eigen::Matrix2s::Identity());
                     incoming_point_ptr->setTrackId(landmark_in_ptr->id());
                     incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
@@ -258,7 +258,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
                 if(new_keypoints[0].response > 0.00005)
                 {
                     list_response_.push_back(new_keypoints[0].response);
-                    FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(index), false);
+                    std::shared_ptr<FeaturePointImage> point_ptr = std::make_shared<FeaturePointImage>(new_keypoints[0], new_descriptors.row(index), false);
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
                     active_search_grid_.hitCell(new_keypoints[0]);
@@ -288,7 +288,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 
 LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_ptr)
 {
-    FeaturePointImage* feat_point_image_ptr = (FeaturePointImage*) _feature_ptr;
+    std::shared_ptr<FeaturePointImage> feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
 //    FrameBasePtr anchor_frame = getProblem()->getTrajectoryPtr()->getLastFramePtr();
     FrameBasePtr anchor_frame = getLastPtr()->getFramePtr();
 
@@ -299,8 +299,8 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
     Scalar distance = 2; // arbitrary value
     Eigen::Vector4s vec_homogeneous;
 
-    point2D = pinhole::depixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
-    point2D = pinhole::undistortPoint(((SensorCamera*)(this->getSensorPtr()))->getCorrectionVector(),point2D);
+    point2D = pinhole::depixellizePoint(getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
+    point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensorPtr()))->getCorrectionVector(),point2D);
 
     Eigen::Vector3s point3D;
     point3D.head(2) = point2D;
@@ -313,7 +313,7 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
 //    std::cout << "vec_homogeneous_2 x: " << vec_homogeneous(0) << "; y: " << vec_homogeneous(1) << "; z: " << vec_homogeneous(2)
 //              << "; inv_dist: " << vec_homogeneous(3) << std::endl;
 
-    LandmarkAHP* lmk_ahp_ptr = new LandmarkAHP(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
+    std::shared_ptr<LandmarkAHP> lmk_ahp_ptr = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
     _feature_ptr->setLandmarkId(lmk_ahp_ptr->id());
     return lmk_ahp_ptr;
 }
@@ -322,21 +322,21 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
 {
 
     //    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
-    if (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() == last_ptr_->getFramePtr())
+    if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFramePtr())
     {
         //std::cout << "Are equal" << std::endl;
-        return nullptr;
+        return std::shared_ptr<ConstraintBase>();
     }
     else// (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() != last_ptr_->getFramePtr())
     {
-        return new ConstraintAHP(_feature_ptr, last_ptr_->getFramePtr(),(LandmarkAHP*)_landmark_ptr);
+        return std::make_shared<ConstraintAHP>(_feature_ptr, last_ptr_->getFramePtr(),std::static_pointer_cast<LandmarkAHP>(_landmark_ptr) );
     }
 }
 
 
 // ==================================================================== My own functions
 
-void ProcessorImageLandmark::LandmarkInCurrentCamera(LandmarkAHP* _landmark,Eigen::Vector4s& _point3D_hmg)
+void ProcessorImageLandmark::LandmarkInCurrentCamera(std::shared_ptr<LandmarkAHP> _landmark,Eigen::Vector4s& _point3D_hmg)
 {
     Eigen::Vector3s pwr1 = getLastPtr()->getFramePtr()->getPPtr()->getVector();
 //            getProblem()->getTrajectoryPtr()->getLastFramePtr()->getPPtr()->getVector();
@@ -509,12 +509,12 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
     for(auto feature_point : feat_lmk_found_)
     {
         //candidate - cyan
-        cv::Point2f point = ((FeaturePointImage*)feature_point)->getKeypoint().pt;
+        cv::Point2f point = (std::static_pointer_cast<FeaturePointImage>(feature_point))->getKeypoint().pt;
         cv::circle(_image, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
         std::cout << "feature number [" << (unsigned int)v(i)+1 << "] in: " << point << std::endl;
         cv::Point2f point2 = point;
         point2.x = point2.x - 16;
-        cv::putText(_image, std::to_string(((FeaturePointImage*)feature_point)->landmarkId()), point2,
+        cv::putText(_image, std::to_string((std::static_pointer_cast<FeaturePointImage>(feature_point))->landmarkId()), point2,
                     cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
         i++;
     }
@@ -538,7 +538,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat _image)
 
     for (auto landmark_base_ptr : *last_landmark_list)
     {
-        LandmarkAHP* landmark_ptr = (LandmarkAHP*)landmark_base_ptr;
+        std::shared_ptr<LandmarkAHP> landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
         Eigen::Vector4s point3D_hmg;
         Eigen::Vector3s point2D_hmg;
         Eigen::Vector2s point2D;
@@ -547,7 +547,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat _image)
 
         point2D_hmg = point3D_hmg.head(3);
         point2D = point2D_hmg.head(2)/point2D_hmg(2);
-        point2D = pinhole::distortPoint(((SensorCamera*)(this->getSensorPtr()))->getDistortionVector(),point2D);
+        point2D = pinhole::distortPoint((std::static_pointer_cast<SensorCamera>(getSensorPtr()))->getDistortionVector(),point2D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
 
         if(pinhole::isInImage(point2D,params_.image.width,params_.image.height))
@@ -588,7 +588,7 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat _image)
 
 ProcessorBasePtr ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
-    ProcessorImageLandmark* prc_ptr = new ProcessorImageLandmark(*((ProcessorParamsImage*)_params));
+    std::shared_ptr<ProcessorImageLandmark> prc_ptr = std::make_shared<ProcessorImageLandmark>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
