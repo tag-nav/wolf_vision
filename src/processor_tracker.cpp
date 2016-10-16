@@ -20,19 +20,19 @@ ProcessorTracker::ProcessorTracker(ProcessorType _tp, const std::string& _type, 
 ProcessorTracker::~ProcessorTracker()
 {
     if (last_ptr_ != nullptr && last_ptr_->getFramePtr() == nullptr)
-        last_ptr_->destruct();
+        last_ptr_->remove();
 
     if (incoming_ptr_ != nullptr && incoming_ptr_->getFramePtr() == nullptr)
-        incoming_ptr_->destruct();
+        incoming_ptr_->remove();
 
     while (!new_features_last_.empty())
     {
-        new_features_last_.front()->destruct();
+        new_features_last_.front()->remove();
         new_features_last_.pop_front();
     }
     while (!new_features_incoming_.empty())
     {
-        new_features_incoming_.front()->destruct();
+        new_features_incoming_.front()->remove();
         new_features_incoming_.pop_front();
     }
 }
@@ -114,7 +114,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
             // Advance this
             last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-            last_ptr_->destruct();
+            last_ptr_->remove();
             incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
             last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
             incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
@@ -170,7 +170,7 @@ bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar
     // Capture last_ is added to the new keyframe
     FrameBasePtr last_old_frame = last_ptr_->getFramePtr();
     last_old_frame->unlinkCapture(last_ptr_);
-    last_old_frame->destruct();
+    last_old_frame->remove();
     _keyframe_ptr->addCapture(last_ptr_);
 
     // Detect new Features, initialize Landmarks, create Constraints, ...

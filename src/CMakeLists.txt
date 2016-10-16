@@ -187,16 +187,16 @@ SET(HDRS_DTASSC
 SET(SRCS
     capture_base.cpp
 #    capture_gps_fix.cpp
-#    capture_imu.cpp
+    capture_imu.cpp
     capture_fix.cpp
 #    capture_void.cpp
     constraint_base.cpp
 #    constraint_analytic.cpp
     feature_base.cpp
-#    feature_corner_2D.cpp
+    feature_corner_2D.cpp
 #    feature_gps_fix.cpp
 #    feature_gps_pseudorange.cpp
-#    feature_imu.cpp
+    feature_imu.cpp
     feature_fix.cpp
 #    feature_odom_2D.cpp
 #    feature_polyline_2D.cpp
@@ -204,7 +204,7 @@ SET(SRCS
     frame_imu.cpp
     hardware_base.cpp
     landmark_base.cpp
-#    landmark_corner_2D.cpp
+    landmark_corner_2D.cpp
 #    landmark_container.cpp
 #    landmark_point_3d.cpp
 #    landmark_line_2D.cpp
@@ -217,19 +217,19 @@ SET(SRCS
     node_base.cpp
     problem.cpp
     processor_base.cpp
-#    processor_imu.cpp
+    processor_imu.cpp
 #    processor_odom_2D.cpp
 #    processor_odom_3D.cpp
-#    processor_tracker.cpp
-#    processor_tracker_feature.cpp
-#    processor_tracker_feature_dummy.cpp
-#    processor_tracker_landmark.cpp
-#    processor_tracker_landmark_dummy.cpp
+    processor_tracker.cpp
+    processor_tracker_feature.cpp
+    processor_tracker_feature_dummy.cpp
+    processor_tracker_landmark.cpp
+    processor_tracker_landmark_dummy.cpp
     sensor_base.cpp
 #    sensor_camera.cpp
 #    sensor_gps.cpp
 #    sensor_gps_fix.cpp
-#    sensor_imu.cpp
+    sensor_imu.cpp
 #    sensor_odom_2D.cpp
     time_stamp.cpp
     trajectory_base.cpp

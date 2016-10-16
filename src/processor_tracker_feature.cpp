@@ -45,7 +45,7 @@ unsigned int ProcessorTrackerFeature::processKnown()
                 // Correspondence not confirmed -> Remove correspondence and destruct incoming feature
                 matches_last_from_incoming_.erase(*known_incoming_feature_it);
                 // Destruct the feature
-                (*known_incoming_feature_it)->destruct();
+                (*known_incoming_feature_it)->remove();
                 // Remove from known_features_incoming
                 known_incoming_feature_it = known_features_incoming_.erase(known_incoming_feature_it);
             }
