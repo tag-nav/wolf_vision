@@ -199,7 +199,7 @@ SET(SRCS
     feature_imu.cpp
     feature_fix.cpp
     feature_odom_2D.cpp
-#    feature_polyline_2D.cpp
+    feature_polyline_2D.cpp
     frame_base.cpp
     frame_imu.cpp
     hardware_base.cpp
@@ -208,11 +208,11 @@ SET(SRCS
     landmark_container.cpp
     landmark_point_3d.cpp
     landmark_line_2D.cpp
-#    landmark_polyline_2D.cpp
+    landmark_polyline_2D.cpp
     local_parametrization_base.cpp
     local_parametrization_quaternion.cpp
     local_parametrization_homogeneous.cpp
-#    local_parametrization_polyline_extreme.cpp
+    local_parametrization_polyline_extreme.cpp
     map_base.cpp
     node_base.cpp
     problem.cpp
