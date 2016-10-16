@@ -180,7 +180,8 @@ SET(HDRS_DTASSC
     data_association/association_solver.h
     data_association/association_node.h
     data_association/association_tree.h
-    data_association/association_nnls.h)
+    data_association/association_nnls.h
+    )
 
 #sources
 SET(SRCS
@@ -190,7 +191,7 @@ SET(SRCS
 #    capture_fix.cpp
 #    capture_void.cpp
     constraint_base.cpp
-    constraint_analytic.cpp
+#    constraint_analytic.cpp
     feature_base.cpp
 #    feature_corner_2D.cpp
 #    feature_gps_fix.cpp
@@ -219,7 +220,7 @@ SET(SRCS
 #    processor_imu.cpp
 #    processor_odom_2D.cpp
 #    processor_odom_3D.cpp
-    processor_tracker.cpp
+#    processor_tracker.cpp
 #    processor_tracker_feature.cpp
 #    processor_tracker_feature_dummy.cpp
 #    processor_tracker_landmark.cpp
@@ -232,10 +233,11 @@ SET(SRCS
 #    sensor_odom_2D.cpp
     time_stamp.cpp
     trajectory_base.cpp
-    data_association/association_solver.cpp
-    data_association/association_node.cpp
-    data_association/association_tree.cpp
-    data_association/association_nnls.cpp)
+#    data_association/association_solver.cpp
+#    data_association/association_node.cpp
+#    data_association/association_tree.cpp
+#    data_association/association_nnls.cpp
+    )
 
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
@@ -248,7 +250,8 @@ IF (Ceres_FOUND)
         ceres_wrapper/create_auto_diff_cost_function_wrapper.h
         ceres_wrapper/create_numeric_diff_cost_function.h
         ceres_wrapper/create_numeric_diff_cost_function_ceres.h
-        ceres_wrapper/local_parametrization_wrapper.h )
+        ceres_wrapper/local_parametrization_wrapper.h 
+        )
     SET(SRCS_WRAPPER
 #        ceres_wrapper/ceres_manager.cpp
 #        ceres_wrapper/create_auto_diff_cost_function.cpp
