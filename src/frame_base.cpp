@@ -11,7 +11,7 @@ unsigned int FrameBase::frame_id_count_ = 0;
 
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeBase("FRAME", "BASE"),
-            trajectory_ptr_(nullptr),
+            trajectory_ptr_(),
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
             time_stamp_(_ts),
@@ -25,7 +25,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
 
 FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
             NodeBase("FRAME", "BASE"),
-            trajectory_ptr_(nullptr),
+            trajectory_ptr_(),
             frame_id_(++frame_id_count_),
             type_id_(_tp),
             time_stamp_(_ts),
@@ -74,7 +74,7 @@ FrameBase::~FrameBase()
 
     while (!capture_list_.empty())
     {
-        delete capture_list_.front();
+//        delete capture_list_.front();
         capture_list_.pop_front();
     }
 
@@ -103,9 +103,9 @@ void FrameBase::setKey()
         registerNewStateBlocks();
 
         if (getTrajectoryPtr()->getLastKeyFramePtr() == nullptr || getTrajectoryPtr()->getLastKeyFramePtr()->getTimeStamp() < time_stamp_)
-            getTrajectoryPtr()->setLastKeyFramePtr(this);
+            getTrajectoryPtr()->setLastKeyFramePtr(shared_from_this());
 
-        getTrajectoryPtr()->sortFrame(this);
+        getTrajectoryPtr()->sortFrame(shared_from_this());
     }
 }
 
@@ -222,13 +222,13 @@ FrameBasePtr FrameBase::getNextFrame() const
 
 void FrameBase::destruct()
 {
-    if (!is_removing_)
-    {
-        if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-            trajectory_ptr_->removeFrame(this);
-        else
-            delete this;
-    }
+//    if (!is_removing_)
+//    {
+//        if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+//            trajectory_ptr_->removeFrame(this);
+//        else
+//            delete this;
+//    }
 }
 
 void FrameBase::setStatus(StateStatus _st)

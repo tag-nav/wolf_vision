@@ -301,11 +301,9 @@ typedef std::weak_ptr<Problem> ProblemWPtr;
 
 // Hardware
 typedef std::shared_ptr<HardwareBase> HardwareBasePtr;
-//typedef HardwareBase* HardwareBasePtr; // TODO remove line
 typedef std::weak_ptr<HardwareBase> HardwareBaseWPtr;
 
 // - Sensors
-//typedef SensorBase* SensorBasePtr; // TODO remove line
 typedef std::shared_ptr<SensorBase> SensorBasePtr;
 typedef std::weak_ptr<SensorBase> SensorBaseWPtr;
 typedef std::list<SensorBasePtr> SensorBaseList;
@@ -342,6 +340,9 @@ typedef std::weak_ptr<CaptureBase> CaptureBaseWPtr;
 typedef std::list<CaptureBasePtr> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
+// Capture Motion
+typedef std::shared_ptr<CaptureMotion> CaptureMotionPtr;
+
 // - Capture Relative
 typedef std::list<CaptureMotion*> CaptureRelativeList;
 typedef CaptureRelativeList::iterator CaptureRelativeIter;
@@ -360,13 +361,11 @@ typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
 //Map
 typedef std::shared_ptr<MapBase> MapBasePtr;
-//typedef MapBase* MapBasePtr; // TODO remove line
 typedef std::weak_ptr<MapBase> MapBaseWPtr;
 typedef std::list<MapBasePtr> MapBaseList;
 typedef MapBaseList::iterator MapBaseIter;
 
 //Landmark
-//typedef LandmarkBase* LandmarkBasePtr;// TODO remove line
 typedef std::shared_ptr<LandmarkBase> LandmarkBasePtr;
 typedef std::weak_ptr<LandmarkBase> LandmarkBaseWPtr;
 typedef std::list<LandmarkBasePtr> LandmarkBaseList;

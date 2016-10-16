@@ -44,7 +44,7 @@ struct ConstraintNotification
 
 /** \brief Wolf problem node element in the Wolf Tree
  */
-class Problem
+class Problem : public std::enable_shared_from_this<Problem>
 {
 
     protected:

@@ -31,9 +31,9 @@ Problem::Problem(FrameStructure _frame_structure) :
         processor_motion_ptr_(nullptr),
         origin_is_set_(false)
 {
-    hardware_ptr_->setProblem(this);
-    trajectory_ptr_->setProblem(this);
-    map_ptr_->setProblem(this);
+    hardware_ptr_->setProblem(shared_from_this());
+    trajectory_ptr_->setProblem(shared_from_this());
+    map_ptr_->setProblem(shared_from_this());
 }
 
 Problem::~Problem()

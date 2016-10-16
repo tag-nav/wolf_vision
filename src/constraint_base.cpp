@@ -8,15 +8,15 @@ unsigned int ConstraintBase::constraint_id_count_ = 0;
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),
-    feature_ptr_(nullptr),
+    feature_ptr_(), // nullptr
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_ABSOLUTE),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
-    frame_other_ptr_(nullptr),
-    feature_other_ptr_(nullptr),
-    landmark_other_ptr_(nullptr)
+    frame_other_ptr_(), // nullptr
+    feature_other_ptr_(), // nullptr
+    landmark_other_ptr_() // nullptr
 {
     //std::cout << "creating ConstraintBase " << std::endl;
 }
@@ -24,53 +24,58 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),
-    feature_ptr_(nullptr),
+    feature_ptr_(),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_FRAME),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
     frame_other_ptr_(_frame_ptr),
-    feature_other_ptr_(nullptr),
-    landmark_other_ptr_(nullptr)
+    feature_other_ptr_(),
+    landmark_other_ptr_()
 {
     // add constraint to frame
-    frame_other_ptr_->addConstrainedBy(this);
+    FrameBasePtr frm_o = frame_other_ptr_.lock();
+    if (frm_o)
+        frm_o->addConstrainedBy(shared_from_this());
 }
 
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT"),
-    feature_ptr_(nullptr),
+    feature_ptr_(),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_FEATURE),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
-    frame_other_ptr_(nullptr),
+    frame_other_ptr_(),
     feature_other_ptr_(_feature_ptr),
-    landmark_other_ptr_(nullptr)
+    landmark_other_ptr_()
 {
     // add constraint to feature
-    feature_other_ptr_->addConstrainedBy(this);
+    FeatureBasePtr ftr_o = feature_other_ptr_.lock();
+    if (ftr_o)
+        ftr_o->addConstrainedBy(shared_from_this());
 }
 
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT"),
-    feature_ptr_(nullptr),
+    feature_ptr_(),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     category_(CTR_LANDMARK),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
-    frame_other_ptr_(nullptr),
-    feature_other_ptr_(nullptr),
-    landmark_other_ptr_(_landmark_ptr.get()) // TODO remove line
-    //landmark_other_ptr_(_landmark_ptr) // TODO uncomment line
+    frame_other_ptr_(),
+    feature_other_ptr_(),
+    landmark_other_ptr_(_landmark_ptr)
 {
     // add constraint to landmark
-    landmark_other_ptr_->addConstrainedBy(this);
+    LandmarkBasePtr lmk_o = landmark_other_ptr_.lock();
+    if (lmk_o)
+        lmk_o->addConstrainedBy(shared_from_this());
 }
 
 ConstraintBase::~ConstraintBase()
@@ -106,9 +111,9 @@ void ConstraintBase::setStatus(ConstraintStatus _status)
     else if (_status != status_)
     {
         if (_status == CTR_ACTIVE)
-            getProblem()->addConstraintPtr(this);
+            getProblem()->addConstraintPtr(shared_from_this());
         else if (_status == CTR_INACTIVE)
-            getProblem()->removeConstraintPtr(this);
+            getProblem()->removeConstraintPtr(shared_from_this());
     }
     status_ = _status;
 }
