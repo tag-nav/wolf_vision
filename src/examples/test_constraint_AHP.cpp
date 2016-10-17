@@ -20,7 +20,8 @@ int main()
     std::cout << "Wolf path: " << wolf_path << std::endl;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = new Problem(FRM_PO_3D);
+    ProblemPtr wolf_problem_ptr_ = std::make_shared<Problem>(FRM_PO_3D);
+    wolf_problem_ptr_->setup();
 
     /* Do this while there aren't extrinsic parameters on the yaml */
     Eigen::Vector7s extrinsic_cam;
@@ -36,7 +37,7 @@ int main()
     /* Do this while there aren't extrinsic parameters on the yaml */
 
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
-    SensorCamera* camera_ptr_ = (SensorCamera*)sensor_ptr;
+    std::shared_ptr<SensorCamera> camera_ptr_ = std::static_pointer_cast<SensorCamera>(sensor_ptr);
 
     // PROCESSOR
     // one-liner API
@@ -54,16 +55,16 @@ int main()
     frame_pos_ori[6] = 0.83666; //qw
     const Eigen::VectorXs frame_val = frame_pos_ori;
 
-    FrameBasePtr last_frame = new FrameBase(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
+    FrameBasePtr last_frame = std::make_shared<FrameBase>(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
     std::cout << "Last frame" << std::endl;
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
 
     // Capture
-    CaptureImage* image_ptr;
+    std::shared_ptr<CaptureImage> image_ptr;
     t.setToNow();
     cv::Mat frame; //puede que necesite una imagen
 
-    image_ptr = new CaptureImage(t, camera_ptr_, frame);
+    image_ptr = std::make_shared< CaptureImage>(t, camera_ptr_, frame);
     wolf_problem_ptr_->getLastFramePtr()->addCapture(image_ptr);
 
 
@@ -71,10 +72,10 @@ int main()
     cv::KeyPoint kp; kp.pt = {40,40};
     cv::Mat desc;
 
-    FeaturePointImage* feat_point_image_ptr = new FeaturePointImage(kp, desc, Eigen::Matrix2s::Identity());
+    std::shared_ptr<FeaturePointImage> feat_point_image_ptr = std::make_shared<FeaturePointImage>(kp, desc, Eigen::Matrix2s::Identity());
     image_ptr->addFeature(feat_point_image_ptr);
 
-    FrameBasePtr anchor_frame = new FrameBase(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
+    FrameBasePtr anchor_frame = std::make_shared< FrameBase>(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
     //FrameBasePtr anchor_frame = wolf_problem_ptr_->getTrajectoryPtr()->getLastFramePtr();
 
 
@@ -90,7 +91,7 @@ int main()
 
     point2D = pinhole::depixellizePoint(image_ptr->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
     std::cout << "point2D depixellized: " << point2D.transpose() << std::endl;
-    point2D = pinhole::undistortPoint(((SensorCamera*)(image_ptr->getSensorPtr()))->getCorrectionVector(),point2D);
+    point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(image_ptr->getSensorPtr()))->getCorrectionVector(),point2D);
     std::cout << "point2D undistorted: " << point2D.transpose() << std::endl;
 
     Eigen::Vector3s point3D;
@@ -103,14 +104,14 @@ int main()
     vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
     std::cout << "vec_homogeneous: " << vec_homogeneous.transpose() << std::endl;
 
-    LandmarkAHP* landmark = new LandmarkAHP(vec_homogeneous, anchor_frame, image_ptr->getSensorPtr(), feat_point_image_ptr->getDescriptor());
+    std::shared_ptr<LandmarkAHP> landmark = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, image_ptr->getSensorPtr(), feat_point_image_ptr->getDescriptor());
 
     std::cout << "Landmark AHP created" << std::endl;
 
 
 
     // Create the constraint
-    ConstraintAHP* constraint_ptr = new ConstraintAHP(feat_point_image_ptr, last_frame,(LandmarkAHP*)landmark);
+    ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(feat_point_image_ptr, last_frame,std::static_pointer_cast<LandmarkAHP>(landmark));
 
     feat_point_image_ptr->addConstraint(constraint_ptr);
     std::cout << "Constraint AHP created" << std::endl;
@@ -123,9 +124,10 @@ int main()
     Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getVector();
     Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
     Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
-    (*((ConstraintAHP*) constraint_ptr))(current_frame_p.data(), current_frame_o.data(),
-                                           anchor_frame_p.data(),anchor_frame_o.data(),
-                                           landmark_.data(), residuals.data());
+
+    //    ( * constraint_ptr ) (current_frame_p.data(), current_frame_o.data(),
+    //            anchor_frame_p.data(), anchor_frame_o.data(),
+    //            landmark_.data(), residuals.data());
     // current frame p; current frame o; anchor frame p; anchor frame o; homogeneous vector landmark, residual
 
 
@@ -133,7 +135,7 @@ int main()
     std::cout << "Residual = " << residuals[0] << "   " << residuals[1] << std::endl;
 
 
-    delete wolf_problem_ptr_;
+    wolf_problem_ptr_.reset(); // TODO remove line
 
     return 0;
 

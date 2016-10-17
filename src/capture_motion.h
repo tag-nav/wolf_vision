@@ -41,6 +41,9 @@ class CaptureMotion : public CaptureBase
 {
 
         // public interface:
+    public:
+        typedef std::shared_ptr<CaptureMotion> Ptr;
+        typedef std::weak_ptr<CaptureMotion> WPtr;
 
     public:
         CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,

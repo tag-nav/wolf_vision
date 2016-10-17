@@ -24,6 +24,10 @@ struct IntrinsicsGPS : public IntrinsicsBase
 
 class SensorGPS : public SensorBase
 {
+    public:
+        typedef std::shared_ptr<SensorGPS> Ptr;
+        typedef std::weak_ptr<SensorGPS> WPtr;
+
 protected:
 
     StateBlock* map_p_ptr_; //position of the vehicle where the experiment starts in ecef

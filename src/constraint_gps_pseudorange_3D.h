@@ -31,12 +31,12 @@ public:
                             _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to base frame
                                                                         // orientation of antenna is not needed, because omnidirectional
                             _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter  = receiver time bias
-                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr(), // initial vehicle position wrt ecef frame
-                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr())  // initial vehicle orientation wrt ecef frame
+                            (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getMapPPtr(), // initial vehicle position wrt ecef frame
+                            (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getMapOPtr())  // initial vehicle orientation wrt ecef frame
     {
         setType("GPS PR 3D");
-        sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
-        pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
+        sat_position_ = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getSatPosition();
+        pseudorange_  = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getPseudorange();
 
         //std::cout << "ConstraintGPSPseudorange3D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
     }
@@ -80,7 +80,7 @@ public:
     static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
                                         NodeBasePtr _correspondant_ptr = nullptr)
     {
-        return new ConstraintGPSPseudorange3D(_feature_ptr);
+        return std::make_shared<ConstraintGPSPseudorange3D>(_feature_ptr);
     }
 
 

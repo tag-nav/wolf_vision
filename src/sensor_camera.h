@@ -22,6 +22,10 @@ struct IntrinsicsCamera : public IntrinsicsBase
 class SensorCamera : public SensorBase
 {
     public:
+        typedef std::shared_ptr<SensorCamera> Ptr;
+        typedef std::weak_ptr<SensorCamera> WPtr;
+
+    public:
         /** \brief Constructor with arguments
          *
          * Constructor with arguments

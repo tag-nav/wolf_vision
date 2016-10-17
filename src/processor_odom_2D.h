@@ -24,6 +24,10 @@ struct ProcessorParamsOdom2D : public ProcessorParamsBase
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
+        typedef std::shared_ptr<ProcessorOdom2D> Ptr;
+        typedef std::weak_ptr<ProcessorOdom2D> WPtr;
+
+    public:
         ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th);
         virtual ~ProcessorOdom2D();
         virtual bool voteForKeyFrame();

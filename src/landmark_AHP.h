@@ -15,6 +15,10 @@ namespace wolf {
 /* Landmark - Anchored Homogeneous Point*/
 class LandmarkAHP : public LandmarkBase
 {
+    public:
+        typedef std::shared_ptr<LandmarkAHP> Ptr;
+        typedef std::weak_ptr<LandmarkAHP> WPtr;
+
     protected:
         cv::Mat cv_descriptor_;
         FrameBasePtr anchor_frame_;

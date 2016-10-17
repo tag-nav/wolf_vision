@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = new Problem(FRM_PO_3D);
+    ProblemPtr wolf_problem_ptr_ = std::make_shared<Problem>(FRM_PO_3D);
 
     //=====================================================
     // Method 1: Use data generated here for sensor and processor
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
 
-    SensorCamera* camera_ptr_ = (SensorCamera*)sensor_ptr;
+    SensorCamera::Ptr camera_ptr_ = std::static_pointer_cast<SensorCamera>(sensor_ptr);
 
 
     // PROCESSOR
@@ -149,10 +149,7 @@ int main(int argc, char** argv)
     //    ceres_options.max_num_iterations = 100;
     google::InitGoogleLogging(argv[0]);
 
-    CeresManager ceres_manager(&(*wolf_problem_ptr_), ceres_options);
-
-
-
+    CeresManager ceres_manager(wolf_problem_ptr_, ceres_options);
 
 
 
@@ -202,7 +199,7 @@ int main(int argc, char** argv)
         capture >> frame[f % buffer_size];
     }
 
-    delete wolf_problem_ptr_;
+    wolf_problem_ptr_.reset();
 
     return 0;
 }

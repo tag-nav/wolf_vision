@@ -12,6 +12,10 @@ namespace wolf {
 
 class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 {
+    public:
+        typedef std::shared_ptr<ConstraintAHP> Ptr;
+        typedef std::weak_ptr<ConstraintAHP> WPtr;
+
     protected:
         Eigen::Vector3s anchor_sensor_extrinsics_p_;
         Eigen::Vector4s anchor_sensor_extrinsics_o_;

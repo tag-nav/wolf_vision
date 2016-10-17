@@ -13,6 +13,10 @@ namespace wolf {
 //class LandmarkContainer
 class LandmarkContainer : public LandmarkBase
 {
+    public:
+        typedef std::shared_ptr<LandmarkContainer> Ptr;
+        typedef std::weak_ptr<LandmarkContainer> WPtr;
+
     protected:
         Eigen::MatrixXs corners_;
 

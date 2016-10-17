@@ -22,14 +22,16 @@ namespace wolf {
  */
 class CaptureImage : public CaptureBase
 {
-        typedef std::shared_ptr<SensorCamera> SensorCameraPtr;
+        typedef std::shared_ptr<CaptureImage> Ptr;
+        typedef std::weak_ptr<CaptureImage> WPtr;
+
     protected:
         cv::Mat image_;
         cv::Mat descriptors_;
         std::vector<cv::KeyPoint> keypoints_;
 
     public:
-        CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv);
+        CaptureImage(const TimeStamp& _ts, SensorCamera::Ptr _camera_ptr, cv::Mat _data_cv);
 
         /** \brief Default destructor (not recommended)
          *

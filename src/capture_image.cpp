@@ -3,7 +3,7 @@
 
 namespace wolf {
 
-CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv) :
+CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCamera::Ptr _camera_ptr, cv::Mat _data_cv) :
     CaptureBase("IMAGE", _ts, _camera_ptr), image_(_data_cv)
 {
     //

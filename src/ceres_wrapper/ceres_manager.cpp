@@ -350,7 +350,7 @@ ceres::CostFunction* CeresManager::createCostFunction(ConstraintBasePtr _corrPtr
 
     // analitic jacobian
     if (_corrPtr->getJacobianMethod() == JAC_ANALYTIC)
-        return new CostFunctionWrapper((ConstraintAnalytic*)_corrPtr);
+        return new CostFunctionWrapper((ConstraintAnalytic*)(_corrPtr.get())); // TODO revise pointer types
 
     // auto jacobian
     else if (_corrPtr->getJacobianMethod() == JAC_AUTO)

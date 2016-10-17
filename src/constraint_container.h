@@ -11,13 +11,13 @@ namespace wolf {
 class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 {
 	protected:
-		LandmarkContainer* lmk_ptr_;
+		LandmarkContainer::WPtr lmk_ptr_;
 		unsigned int corner_;
 
 	public:
 		static const unsigned int N_BLOCKS = 4;
 
-	    ConstraintContainer(FeatureBasePtr _ftr_ptr, LandmarkContainer* _lmk_ptr, const unsigned int _corner, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+	    ConstraintContainer(FeatureBasePtr _ftr_ptr, LandmarkContainer::Ptr _lmk_ptr, const unsigned int _corner, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
 			ConstraintSparse<3,2,1,2,1>(CTR_CONTAINER, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
@@ -38,7 +38,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 			//std::cout << "deleting ConstraintContainer " << nodeId() << std::endl;
 		}
 
-		LandmarkContainer* getLandmarkPtr()
+		LandmarkContainer::Ptr getLandmarkPtr()
 		{
 			return lmk_ptr_;
 		}
