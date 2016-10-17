@@ -39,22 +39,7 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen:
 
 FeatureBase::~FeatureBase()
 {
-	//std::cout << "deleting FeatureBase " << nodeId() << std::endl;
-//    is_removing_ = true;
-//
-//    while (!constrained_by_list_.empty())
-//    {
-//        //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-//        constrained_by_list_.front()->remove();
-//        //std::cout << "deleted " << std::endl;
-//    }
-    //std::cout << "constraints deleted" << std::endl;
-
-//    while (!constraint_list_.empty())
-//    {
-//        delete constraint_list_.front();
-//        constraint_list_.pop_front();
-//    }
+//    remove();
     std::cout << "destructed       f" << id() << std::endl;
 }
 

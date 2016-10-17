@@ -44,7 +44,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
   FrameIMU::~FrameIMU()
   {
   	//std::cout << "deleting FrameIMU " << id() << std::endl;
-      is_removing_ = true;
+//      is_removing_ = true;
 
   	// Remove Frame State Blocks
   	if (p_ptr_ != nullptr)
@@ -52,52 +52,52 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
               getProblem()->removeStateBlockPtr(p_ptr_);
   	    delete p_ptr_;
-        p_ptr_ = nullptr;
         std::cout << "deleted  F-IMU-pos block " << p_ptr_ << std::endl;
+        p_ptr_ = nullptr;
   	}
       if (v_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
               getProblem()->removeStateBlockPtr(v_ptr_);
           delete v_ptr_;
+          std::cout << "deleted  F-IMU-vel block " << v_ptr_ << std::endl;
           v_ptr_ = nullptr;
-          std::cout << "deleted  F-IMU-vel block " << p_ptr_ << std::endl;
       }
       if (o_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
               getProblem()->removeStateBlockPtr(o_ptr_);
           delete o_ptr_;
+          std::cout << "deleted  F-IMU-ori block " << o_ptr_ << std::endl;
           o_ptr_ = nullptr;
-          std::cout << "deleted  F-IMU-ori block " << p_ptr_ << std::endl;
       }
       if (acc_bias_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
               getProblem()->removeStateBlockPtr(acc_bias_ptr_);
           delete acc_bias_ptr_;
+          std::cout << "deleted  F-IMU-ab block " << acc_bias_ptr_ << std::endl;
           acc_bias_ptr_ = nullptr;
-          std::cout << "deleted  F-IMU-ab block " << p_ptr_ << std::endl;
       }
       if (gyro_bias_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
               getProblem()->removeStateBlockPtr(gyro_bias_ptr_);
           delete gyro_bias_ptr_;
+          std::cout << "deleted  F-IMU-wb block " << gyro_bias_ptr_ << std::endl;
           gyro_bias_ptr_ = nullptr;
-          std::cout << "deleted  F-IMU-wb block " << p_ptr_ << std::endl;
       }
 
 
       //std::cout << "states deleted" << std::endl;
 
 
-      while (!getConstrainedByListPtr()->empty())
-      {
-          //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-          getConstrainedByListPtr()->front()->remove();
-          //std::cout << "deleted " << std::endl;
-      }
+//      while (!getConstrainedByListPtr()->empty())
+//      {
+//          //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
+//          getConstrainedByListPtr()->front()->remove();
+//          //std::cout << "deleted " << std::endl;
+//      }
       //std::cout << "constraints deleted" << std::endl;
   }
 

@@ -84,6 +84,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr
 
 ConstraintBase::~ConstraintBase()
 {
+//    remove();
     std::cout << "destructed        c" << id() << std::endl;
 }
 

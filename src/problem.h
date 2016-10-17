@@ -240,6 +240,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void removeConstraintPtr(ConstraintBasePtr _constraint_ptr);
 
+        // Print ---------------------------------------
+        void print();
+
 };
 
 inline std::shared_ptr<ProcessorMotion> Problem::getProcessorMotionPtr()

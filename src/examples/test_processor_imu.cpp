@@ -98,6 +98,8 @@ int main(int argc, char** argv)
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     shared_ptr<CaptureIMU> imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data_);
 
+    problem_ptr_->print();
+
     std::cout << "Main loop -----------" << std::endl;
 
     // main loop
@@ -186,6 +188,8 @@ int main(int argc, char** argv)
     std::cout << "CPU time  : " << elapsed_secs << " s" << std::endl;
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
+
+    problem_ptr_->print();
 
     problem_ptr_.reset();
 

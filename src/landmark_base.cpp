@@ -24,17 +24,7 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, S
                 
 LandmarkBase::~LandmarkBase()
 {
-	//std::cout << "deleting LandmarkBase " << nodeId() << std::endl;
-    is_removing_ = true;
-
-
-	while (!constrained_by_list_.empty())
-	{
-	    //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-	    constrained_by_list_.front()->remove();
-        //std::cout << "deleted " << std::endl;
-	}
-	//std::cout << "constraints deleted" << std::endl;
+//    remove();
     std::cout << "destructed    L" << id() << std::endl;
 }
 

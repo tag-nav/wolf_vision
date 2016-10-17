@@ -137,6 +137,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
 #include "capture_base.h"
 #include "trajectory_base.h"
+#include "state_block.h"
 
 namespace wolf {
 
@@ -257,6 +258,39 @@ inline void FrameBase::remove()
             capture_list_.front()->remove();          // remove downstream
         while (!constrained_by_list_.empty())
             constrained_by_list_.front()->remove();        // remove constrained
+
+        // Remove Frame State Blocks
+        if (p_ptr_ != nullptr)
+        {
+            std::cout << "deleting F-pos block " << p_ptr_ << std::endl;
+            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+                getProblem()->removeStateBlockPtr(p_ptr_);
+            std::cout << "deleting F-pos block " << p_ptr_ << std::endl;
+            delete p_ptr_;
+            p_ptr_ = nullptr;
+            std::cout << "deleted  F-pos block " << p_ptr_ << std::endl;
+        }
+        if (o_ptr_ != nullptr)
+        {
+            std::cout << "deleting F-ori block " << o_ptr_  << std::endl;
+            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+                getProblem()->removeStateBlockPtr(o_ptr_);
+            std::cout << "deleting F-ori block " << o_ptr_  << std::endl;
+            delete o_ptr_;
+            o_ptr_ = nullptr;
+            std::cout << "deleted  F-ori block " << o_ptr_  << std::endl;
+        }
+        if (v_ptr_ != nullptr)
+        {
+            std::cout << "deleting F-vel block " << v_ptr_  << std::endl;
+            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+                getProblem()->removeStateBlockPtr(v_ptr_);
+            std::cout << "deleting F-vel block " << v_ptr_  << std::endl;
+            delete v_ptr_;
+            v_ptr_ = nullptr;
+            std::cout << "deleted  F-vel block " << v_ptr_  << std::endl;
+        }
+
     }
 }
 

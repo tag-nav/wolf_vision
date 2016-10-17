@@ -45,42 +45,47 @@ SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBl
 
 SensorBase::~SensorBase()
 {
+//    remove();
     std::cout << "destructed    S" << id() << std::endl;
 }
 
 inline void SensorBase::remove()
 {
-    is_removing_ = true;
-    SensorBasePtr this_sen = shared_from_this(); // protect it while removing links
-
-    // Remove State Blocks
-    if (p_ptr_ != nullptr && !extrinsic_dynamic_)
+    if (!is_removing_)
     {
-        if (getProblem() != nullptr)
-            getProblem()->removeStateBlockPtr(p_ptr_);
-        delete p_ptr_;
-    }
+        is_removing_ = true;
+        SensorBasePtr this_sen = shared_from_this(); // protect it while removing links
 
-    if (o_ptr_ != nullptr && !extrinsic_dynamic_)
-    {
-        if (getProblem() != nullptr)
-            getProblem()->removeStateBlockPtr(o_ptr_);
-        delete o_ptr_;
-    }
+        // Remove State Blocks
+        if (p_ptr_ != nullptr && !extrinsic_dynamic_)
+        {
+            if (getProblem() != nullptr)
+                getProblem()->removeStateBlockPtr(p_ptr_);
+            delete p_ptr_;
+            p_ptr_ = nullptr;
+        }
 
-    if (intrinsic_ptr_ != nullptr)
-    {
-        if (getProblem() != nullptr)
-            getProblem()->removeStateBlockPtr(intrinsic_ptr_);
-        delete intrinsic_ptr_;
-    }
+        if (o_ptr_ != nullptr && !extrinsic_dynamic_)
+        {
+            if (getProblem() != nullptr)
+                getProblem()->removeStateBlockPtr(o_ptr_);
+            delete o_ptr_;
+            o_ptr_ = nullptr;
+        }
 
-    // remove downstream processors
-    while (!processor_list_.empty())
-    {
-        processor_list_.front()->remove();
-        //        delete processor_list_.front();
-        //        processor_list_.pop_front();
+        if (intrinsic_ptr_ != nullptr)
+        {
+            if (getProblem() != nullptr)
+                getProblem()->removeStateBlockPtr(intrinsic_ptr_);
+            delete intrinsic_ptr_;
+            intrinsic_ptr_ = nullptr;
+        }
+
+        // remove downstream processors
+        while (!processor_list_.empty())
+        {
+            processor_list_.front()->remove();
+        }
     }
 
 }

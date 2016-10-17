@@ -20,7 +20,7 @@ ProcessorBase::ProcessorBase(ProcessorType _tp, const std::string& _type, const 
 
 ProcessorBase::~ProcessorBase()
 {
-    is_removing_ = true;
+//    remove();
     std::cout << "destructed      p" << id() << std::endl;
 }
 
