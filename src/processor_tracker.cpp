@@ -62,7 +62,14 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         incoming_ptr_ = nullptr;
 
         // keyframe creation on last
-        makeFrame(last_ptr_, KEY_FRAME);
+        FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
+        if (closest_key_frm && abs(closest_key_frm->getTimeStamp() - last_ptr_->getTimeStamp()) <= time_tolerance_)
+        {
+            closest_key_frm->addCapture(last_ptr_);
+            closest_key_frm->setKey();
+        }
+        else
+            makeFrame(last_ptr_, KEY_FRAME);
 
         // Detect new Features, initialize Landmarks, create Constraints, ...
         processNew(max_new_features_);
@@ -82,7 +89,11 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         processKnown();
 
         // Create a new non-key Frame in the Trajectory with the incoming Capture
-        makeFrame(incoming_ptr_);
+        FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
+        if (closest_key_frm && abs(closest_key_frm->getTimeStamp() - incoming_ptr_->getTimeStamp()) <= time_tolerance_)
+            closest_key_frm->addCapture(incoming_ptr_);
+        else
+            makeFrame(incoming_ptr_);
 
         // Reset the derived Tracker
         reset();
@@ -105,7 +116,13 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         processKnown();
 
         // 2. Then we see if we want and we are allowed to create a KeyFrame
-        if (!(voteForKeyFrame() && permittedKeyFrame()))
+        FrameBasePtr last_key_frm = last_ptr_->getFramePtr();
+        if (!last_key_frm || !last_key_frm->isKey())
+            last_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
+        if (last_key_frm && abs(last_key_frm->getTimeStamp() - last_ptr_->getTimeStamp()) > time_tolerance_)
+            last_key_frm = nullptr;
+
+        if (!((voteForKeyFrame() && permittedKeyFrame()) || last_key_frm ) )
         {
             // We did not create a KeyFrame:
 
@@ -125,7 +142,11 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             processNew(max_new_features_);
 
             // Create a new non-key Frame in the Trajectory with the incoming Capture
-            makeFrame(incoming_ptr_);
+            FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
+            if (closest_key_frm)
+                closest_key_frm->addCapture(incoming_ptr_);
+            else
+                makeFrame(incoming_ptr_);
 
             // Make the last Capture's Frame a KeyFrame so that it gets into the solver
             setKeyFrame(last_ptr_);
@@ -156,7 +177,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol)
 {
     assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame allways");
-    Scalar time_tol = std::max(time_tolerance_, _time_tol);
+    Scalar time_tol = std::min(time_tolerance_, _time_tol);
 
     // Nothing to do if:
     //   - there is no last

@@ -15,7 +15,7 @@ namespace wolf
 {
 
 ProcessorImageLandmark::ProcessorImageLandmark(ProcessorParamsImage _params) :
-    ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, "IMAGE LANDMARK", _params.algorithm.max_new_features),
+    ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, "IMAGE LANDMARK", _params.algorithm.max_new_features, _params.algorithm.time_tolerance),
     matcher_ptr_(nullptr),
     detector_descriptor_ptr_(nullptr),
     params_(_params),
@@ -191,7 +191,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
 bool ProcessorImageLandmark::voteForKeyFrame()
 {
-    return true;
+    return false;
 //    return landmarks_tracked_ < params_.algorithm.min_features_for_keyframe;
 }
 

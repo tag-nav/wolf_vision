@@ -552,11 +552,11 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
     CaptureMotion* capture_ptr = findCaptureContainingTimeStamp(ts);
     assert(capture_ptr != nullptr && "ProcessorMotion::keyFrameCallback: no motion capture containing the required TimeStamp found");
 
-    FrameBasePtr key_capture_origin = capture_ptr->getOriginFramePtr();
+    FrameBasePtr key_frame_origin = capture_ptr->getOriginFramePtr();
 
     // create motion capture
     CaptureMotion* key_capture_ptr = new CaptureMotion(ts, this->getSensorPtr(), Eigen::VectorXs::Zero(data_size_),
-                                                         Eigen::MatrixXs::Zero(data_size_, data_size_), key_capture_origin);
+                                                         Eigen::MatrixXs::Zero(data_size_, data_size_), key_frame_origin);
 
     // add motion capture to keyframe
     _keyframe_ptr->addCapture(key_capture_ptr);
@@ -585,7 +585,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
                                                    Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-8);
     key_capture_ptr->addFeature(key_feature_ptr);
-    key_feature_ptr->addConstraint(createConstraint(key_feature_ptr, key_capture_origin));
+    key_feature_ptr->addConstraint(createConstraint(key_feature_ptr, key_frame_origin));
 
     // Fix the remaining capture
     if (capture_ptr == last_ptr_)
