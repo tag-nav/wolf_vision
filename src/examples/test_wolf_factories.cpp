@@ -31,6 +31,9 @@ int main(void)
 {
     using namespace wolf;
     using namespace std;
+    using std::shared_ptr;
+    using std::make_shared;
+    using std::static_pointer_cast;
 
 
     /**=============================================================================================
@@ -65,7 +68,7 @@ int main(void)
 
     // define some useful parameters
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
-    IntrinsicsOdom2D intr_odom2d;
+    shared_ptr<IntrinsicsOdom2D> intr_odom2d_ptr;
 
     cout << "\n================== Intrinsics Factory ===================" << endl;
 
@@ -73,19 +76,19 @@ int main(void)
     IntrinsicsBasePtr intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", WOLF_CONFIG + "/camera.yaml");
     ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::get().create("IMAGE", WOLF_CONFIG + "/processor_image_ORB.yaml");
 
-    cout << "CAMERA with intrinsics      : " << ((IntrinsicsCamera*)intr_cam_ptr)->pinhole_model.transpose() << endl;
-    cout << "Processor IMAGE image width : " << ((ProcessorParamsImage*)params_ptr)->image.width << endl;
+    cout << "CAMERA with intrinsics      : " << (static_pointer_cast<IntrinsicsCamera>(intr_cam_ptr))->pinhole_model.transpose() << endl;
+    cout << "Processor IMAGE image width : " << (static_pointer_cast<ProcessorParamsImage>(params_ptr))->image.width << endl;
 
     cout << "\n==================== Install Sensors ====================" << endl;
 
     // Install sensors
     problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
     problem.installSensor("CAMERA",     "front right camera",   pq_3d,  WOLF_CONFIG + "/camera.yaml");
-    problem.installSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
+    problem.installSensor("ODOM 2D",    "main odometer",        po_2d,  intr_odom2d_ptr);
     problem.installSensor("GPS FIX",    "GPS fix",              p_3d);
     problem.installSensor("IMU",        "inertial",             pq_3d);
     problem.installSensor("GPS",        "GPS raw",              p_3d);
-    problem.installSensor("ODOM 2D",    "aux odometer",         po_2d,  &intr_odom2d);
+    problem.installSensor("ODOM 2D",    "aux odometer",         po_2d,  intr_odom2d_ptr);
     problem.installSensor("CAMERA", "rear camera", pq_3d, WOLF_ROOT + "/src/examples/camera.yaml");
 
     // print available sensors

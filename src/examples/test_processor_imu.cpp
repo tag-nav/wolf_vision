@@ -27,6 +27,9 @@
 int main(int argc, char** argv)
 {
     using namespace wolf;
+    using std::shared_ptr;
+    using std::make_shared;
+    using std::static_pointer_cast;
 
     std::cout << std::endl << "==================== processor IMU test ======================" << std::endl;
 
@@ -70,10 +73,10 @@ int main(int argc, char** argv)
     }
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = new Problem(FRM_PVQBB_3D);
+    ProblemPtr wolf_problem_ptr_ = make_shared<Problem>(FRM_PVQBB_3D);
     Eigen::VectorXs extrinsics(7);
     extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, nullptr);
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, shared_ptr<IntrinsicsBase>());
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
@@ -92,7 +95,7 @@ int main(int argc, char** argv)
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMU* imu_ptr( new CaptureIMU(t, sensor_ptr, data_) );
+    shared_ptr<CaptureIMU> imu_ptr( make_shared<CaptureIMU>(t, sensor_ptr, data_) );
 
     // main loop
     using namespace std;
@@ -180,9 +183,6 @@ int main(int argc, char** argv)
     std::cout << "CPU time  : " << elapsed_secs << " s" << std::endl;
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
-
-    delete imu_ptr;
-    delete wolf_problem_ptr_;
 
     return 0;
 }

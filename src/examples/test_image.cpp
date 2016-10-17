@@ -26,6 +26,9 @@
 int main(int argc, char** argv)
 {
     using namespace wolf;
+    using std::shared_ptr;
+    using std::make_shared;
+    using std::static_pointer_cast;
 
     //ProcessorImage test
     std::cout << std::endl << " ========= ProcessorImage test ===========" << std::endl << std::endl;
@@ -70,7 +73,7 @@ int main(int argc, char** argv)
 
     std::cout << "Wolf path: " << wolf_path << std::endl;
 
-    ProblemPtr wolf_problem_ = new Problem(FRM_PO_3D);
+    ProblemPtr wolf_problem_ = make_shared<Problem>(FRM_PO_3D);
 
     //=====================================================
     // Method 1: Use data generated here for sensor and processor
@@ -119,7 +122,7 @@ int main(int argc, char** argv)
     // SENSOR
     // one-liner API
     SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_path + "/src/examples/camera_params.yaml");
-    SensorCamera* camera_ptr = (SensorCamera*)sensor_ptr;
+    shared_ptr<SensorCamera> camera_ptr = static_pointer_cast<SensorCamera>(sensor_ptr);
 
     // PROCESSOR
     // one-liner API
@@ -129,7 +132,7 @@ int main(int argc, char** argv)
 
 
     // CAPTURES
-    CaptureImage* image_ptr;
+    shared_ptr<CaptureImage> image_ptr;
 
     unsigned int f  = 1;
     capture >> frame[f % buffer_size];
@@ -150,7 +153,7 @@ int main(int argc, char** argv)
         //        prc_image->process(capture_image_ptr);
 
         // Preferred method with factory objects:
-        image_ptr = new CaptureImage(t, camera_ptr, frame[f % buffer_size]);
+        image_ptr = make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
         image_ptr->process();
         //cv::imshow("test",frame[f % buffer_size]);
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
@@ -160,5 +163,5 @@ int main(int argc, char** argv)
         capture >> frame[f % buffer_size];
     }
 
-    wolf_problem_->destruct();
+//    wolf_problem_->remove();
 }

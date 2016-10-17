@@ -385,5 +385,5 @@ INSTALL(FILES ${HDRS_SOLVER}
 INSTALL(FILES ../Findwolf.cmake DESTINATION ${CMAKE_ROOT}/Modules/)
 
 #Build examples & tests
-#MESSAGE("Building examples and tests.")
-#ADD_SUBDIRECTORY(examples)
+MESSAGE("Building examples and tests.")
+ADD_SUBDIRECTORY(examples)
