@@ -7,6 +7,7 @@ TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
     NodeBase("TRAJECTORY"),
     frame_structure_(_frame_structure), last_key_frame_ptr_(nullptr)
 {
+    std::cout << "constructed T" << std::endl;
     //
 }
 
@@ -19,6 +20,7 @@ TrajectoryBase::~TrajectoryBase()
         frame_list_.pop_front();
     }
     //std::cout << "deleting TrajectoryBase " << nodeId() << std::endl;
+    std::cout << "destructed T" << std::endl;
 }
 
 //void TrajectoryBase::destruct()

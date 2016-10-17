@@ -21,7 +21,7 @@ namespace wolf {
 MapBase::MapBase() :
     NodeBase("MAP")
 {
-    std::cout << "created M"<< std::endl;
+    std::cout << "constructed M"<< std::endl;
 }
 
 MapBase::~MapBase()

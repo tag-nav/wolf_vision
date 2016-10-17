@@ -7,12 +7,12 @@ namespace wolf {
 HardwareBase::HardwareBase() :
         NodeBase("HARDWARE")
 {
-    //std::cout << "HardwareBase::HardwareBase(): " << __LINE__ << std::endl;
+    std::cout << "constructed H" << std::endl;
 }
 
 HardwareBase::~HardwareBase()
 {
-	std::cout << "destructing H" << nodeId() << std::endl;
+	std::cout << "destructed H" << nodeId() << std::endl;
 }
 
 SensorBasePtr HardwareBase::addSensor(SensorBasePtr _sensor_ptr)

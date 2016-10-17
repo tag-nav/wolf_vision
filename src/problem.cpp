@@ -25,11 +25,18 @@ std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); ret
 
 
 Problem::Problem(FrameStructure _frame_structure) :
-        hardware_ptr_(new HardwareBase),
-        trajectory_ptr_(new TrajectoryBase(_frame_structure)),
-        map_ptr_(new MapBase),
-        processor_motion_ptr_(nullptr),
+        hardware_ptr_(),
+        trajectory_ptr_(),
+        map_ptr_(),
+        processor_motion_ptr_(),
         origin_is_set_(false)
+{
+    hardware_ptr_ = std::make_shared<HardwareBase>();
+    trajectory_ptr_ = std::make_shared<TrajectoryBase>(_frame_structure);
+    map_ptr_ = std::make_shared<MapBase>();
+}
+
+void Problem::setup()
 {
     hardware_ptr_->setProblem(shared_from_this());
     trajectory_ptr_->setProblem(shared_from_this());
