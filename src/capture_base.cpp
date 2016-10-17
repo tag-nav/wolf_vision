@@ -16,6 +16,7 @@ CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorB
         sensor_o_ptr_(sensor_ptr_->getOPtr())
 {
     //
+    std::cout << "constructed     C" << id() << std::endl;
 }
 
 
@@ -28,6 +29,7 @@ CaptureBase::~CaptureBase()
 //        delete feature_list_.front();
         feature_list_.pop_front();
     }
+    std::cout << "destructed      C" << id() << std::endl;
 }
 
 //void CaptureBase::destruct()

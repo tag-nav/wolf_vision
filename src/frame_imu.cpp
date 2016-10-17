@@ -52,30 +52,40 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
               getProblem()->removeStateBlockPtr(p_ptr_);
   	    delete p_ptr_;
+        p_ptr_ = nullptr;
+        std::cout << "deleted  F-IMU-pos block " << p_ptr_ << std::endl;
   	}
       if (v_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
               getProblem()->removeStateBlockPtr(v_ptr_);
           delete v_ptr_;
+          v_ptr_ = nullptr;
+          std::cout << "deleted  F-IMU-vel block " << p_ptr_ << std::endl;
       }
       if (o_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
               getProblem()->removeStateBlockPtr(o_ptr_);
           delete o_ptr_;
+          o_ptr_ = nullptr;
+          std::cout << "deleted  F-IMU-ori block " << p_ptr_ << std::endl;
       }
       if (acc_bias_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
               getProblem()->removeStateBlockPtr(acc_bias_ptr_);
           delete acc_bias_ptr_;
+          acc_bias_ptr_ = nullptr;
+          std::cout << "deleted  F-IMU-ab block " << p_ptr_ << std::endl;
       }
       if (gyro_bias_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
               getProblem()->removeStateBlockPtr(gyro_bias_ptr_);
           delete gyro_bias_ptr_;
+          gyro_bias_ptr_ = nullptr;
+          std::cout << "deleted  F-IMU-wb block " << p_ptr_ << std::endl;
       }
 
 
@@ -120,35 +130,38 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
                             (o_ptr_==nullptr ? 0 : o_ptr_->getSize())    +
                             (acc_bias_ptr_==nullptr ? 0 : acc_bias_ptr_->getSize())  +
                             (gyro_bias_ptr_==nullptr ? 0 : gyro_bias_ptr_->getSize())) &&
-                            "In FrameBase::setState wrong state size");
+                            "In FrameBase::setState wrong state size, should be 16!");
 
       unsigned int index = 0;
       if (p_ptr_!=nullptr)
       {
           p_ptr_->setVector(_st.head(p_ptr_->getSize()));
           index += p_ptr_->getSize();
+          std::cout << "set F-pos" << std::endl;
       }
       if (v_ptr_!=nullptr)
       {
           v_ptr_->setVector(_st.segment(index, v_ptr_->getSize()));
           index += v_ptr_->getSize();
+          std::cout << "set F-vel" << std::endl;
       }
       if (o_ptr_!=nullptr)
       {
           o_ptr_->setVector(_st.segment(index, o_ptr_->getSize()));
           index += o_ptr_->getSize();
+          std::cout << "set F-ori" << std::endl;
       }
       if (acc_bias_ptr_!=nullptr)
       {
           acc_bias_ptr_->setVector(_st.segment(index, acc_bias_ptr_->getSize()));
           index += acc_bias_ptr_->getSize();
-//          acc_bias_at_preintegration_time_ = acc_bias_ptr_->getVector();
+          std::cout << "set F-ab" << std::endl;
       }
       if (gyro_bias_ptr_!=nullptr)
       {
           gyro_bias_ptr_->setVector(_st.segment(index, gyro_bias_ptr_->getSize()));
           //   index += bg_ptr_->getSize();
-//          gyro_bias_at_preintegration_time_ = gyro_bias_ptr_->getVector();
+          std::cout << "set F-wb" << std::endl;
      }
   }
 

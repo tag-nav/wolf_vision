@@ -21,6 +21,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
             v_ptr_(_v_ptr)
 {
     //
+    std::cout << "constructed     F" << id() << std::endl;
 }
 
 FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
@@ -35,49 +36,60 @@ FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock*
             v_ptr_(_v_ptr)
 {
     //
+    if (isKey())
+        std::cout << "constructed  KF" << id() << std::endl;
+    else
+        std::cout << "constructed   F" << id() << std::endl;
 }
                 
 FrameBase::~FrameBase()
 {
-	//std::cout << "deleting FrameBase " << id() << std::endl;
+	std::cout << "destructing  F" << id() << std::endl;
     is_removing_ = true;
 
 	// Remove Frame State Blocks
 	if (p_ptr_ != nullptr)
 	{
+        std::cout << "deleting F-pos block " << p_ptr_ << std::endl;
         if (getProblem() != nullptr && type_id_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(p_ptr_);
+        std::cout << "deleting F-pos block " << p_ptr_ << std::endl;
 	    delete p_ptr_;
+        p_ptr_ = nullptr;
+        std::cout << "deleted  F-pos block " << p_ptr_ << std::endl;
 	}
     if (o_ptr_ != nullptr)
     {
+        std::cout << "deleting F-ori block " << o_ptr_  << std::endl;
         if (getProblem() != nullptr && type_id_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(o_ptr_);
+        std::cout << "deleting F-ori block " << o_ptr_  << std::endl;
         delete o_ptr_;
+        o_ptr_ = nullptr;
+        std::cout << "deleted  F-ori block " << o_ptr_  << std::endl;
     }
     if (v_ptr_ != nullptr)
     {
+        std::cout << "deleting F-vel block " << v_ptr_  << std::endl;
         if (getProblem() != nullptr && type_id_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(v_ptr_);
+        std::cout << "deleting F-vel block " << v_ptr_  << std::endl;
         delete v_ptr_;
+        v_ptr_ = nullptr;
+        std::cout << "deleted  F-vel block " << v_ptr_  << std::endl;
     }
-
-    //std::cout << "states deleted" << std::endl;
 
     while (!constrained_by_list_.empty())
     {
-        //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
         constrained_by_list_.front()->remove();
-        //std::cout << "deleted " << std::endl;
     }
-    //std::cout << "constraints deleted" << std::endl;
 
     while (!capture_list_.empty())
     {
-//        delete capture_list_.front();
-        capture_list_.pop_front();
+        capture_list_.front()->remove();
     }
 
+    std::cout << "destructed    F" << id() << std::endl;
 }
 
 void FrameBase::registerNewStateBlocks()

@@ -63,7 +63,7 @@ SensorBasePtr SensorGPS::create(const std::string& _unique_name, const Eigen::Ve
     StateBlock* pos_ptr = new StateBlock(_extrinsics_p, true);
     StateBlock* ori_ptr = nullptr;
     //    SensorBasePtr sen = new SensorGPS(pos_ptr, ori_ptr, nullptr, nullptr, nullptr); // TODO remove line
-    SensorBasePtr sen = std::make_shared<SensorGPS>(SensorGPS(pos_ptr, ori_ptr, nullptr, nullptr, nullptr));
+    SensorBasePtr sen = std::make_shared<SensorGPS>(pos_ptr, ori_ptr, nullptr, nullptr, nullptr);
     sen->setName(_unique_name);
     return sen;
 }

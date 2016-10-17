@@ -16,6 +16,7 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, unsigned int
     measurement_(_dim_measurement)
 {
     //
+    std::cout << "constructed       f" << id() << std::endl;
 }
 
 FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
@@ -32,6 +33,8 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen:
     Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
+
+    std::cout << "constructed       f" << id() << std::endl;
 }
 
 FeatureBase::~FeatureBase()
@@ -53,7 +56,6 @@ FeatureBase::~FeatureBase()
 //        constraint_list_.pop_front();
 //    }
     std::cout << "destructed       f" << id() << std::endl;
-
 }
 
 ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)

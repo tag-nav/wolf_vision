@@ -81,7 +81,7 @@ inline void CaptureBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-        std::cout << "Removing     C" << id() << std::endl;
+        std::cout << "Removing       C" << id() << std::endl;
         CaptureBasePtr this_C = shared_from_this();  // keep this alive while removing it
         FrameBasePtr frm = frame_ptr_.lock();
         if (frm)

@@ -397,22 +397,20 @@ inline void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
     assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
 
     // make (empty) origin Capture
-    origin_ptr_ = std::make_shared<CaptureMotion>(
-            CaptureMotion(_origin_frame->getTimeStamp(),
-                          getSensorPtr(),
-                          Eigen::VectorXs::Zero(data_size_),
-                          Eigen::MatrixXs::Zero(data_size_, data_size_),
-                          nullptr) );
+    origin_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(),
+                                                  getSensorPtr(),
+                                                  Eigen::VectorXs::Zero(data_size_),
+                                                  Eigen::MatrixXs::Zero(data_size_, data_size_),
+                                                  nullptr );
     // Add origin capture to origin frame
     _origin_frame->addCapture(origin_ptr_);
 
     // make (emtpy) last Capture
-    last_ptr_ = std::make_shared<CaptureMotion>(
-            CaptureMotion(_origin_frame->getTimeStamp(),
-                          getSensorPtr(),
-                          Eigen::VectorXs::Zero(data_size_),
-                          Eigen::MatrixXs::Zero(data_size_, data_size_),
-                          _origin_frame) );
+    last_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(),
+                                                getSensorPtr(),
+                                                Eigen::VectorXs::Zero(data_size_),
+                                                Eigen::MatrixXs::Zero(data_size_, data_size_),
+                                                _origin_frame );
 
     // Make frame at last Capture
     makeFrame(last_ptr_, _origin_frame->getState(), NON_KEY_FRAME);
@@ -447,11 +445,11 @@ inline void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         key_frame_ptr->setKey();
 
         // create motion constraint and add it to the new keyframe
-        FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>( FeatureBase(FEATURE_MOTION, "MOTION",
+        FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(FEATURE_MOTION, "MOTION",
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
-                                                       Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_)*1e-8) );
+                                                       Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_)*1e-8 );
 
 
         key_capture_ptr->addFeature(key_feature_ptr);
@@ -567,11 +565,11 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
     FrameBasePtr key_capture_origin = capture_ptr->getOriginFramePtr();
 
     // create motion capture
-    CaptureMotion::Ptr key_capture_ptr = std::make_shared<CaptureMotion>( CaptureMotion(ts,
-                                                                                      getSensorPtr(),
-                                                                                      Eigen::VectorXs::Zero(data_size_),
-                                                                                      Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                                                      key_capture_origin) );
+    CaptureMotion::Ptr key_capture_ptr = std::make_shared<CaptureMotion>(ts,
+                                                                         getSensorPtr(),
+                                                                         Eigen::VectorXs::Zero(data_size_),
+                                                                         Eigen::MatrixXs::Zero(data_size_, data_size_),
+                                                                         key_capture_origin);
 
     // add motion capture to keyframe
     _keyframe_ptr->addCapture(key_capture_ptr);
@@ -594,11 +592,11 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
     //std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
 
     // create motion constraint and add it to the new keyframe
-    FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>( FeatureBase(FEATURE_MOTION, "MOTION",
+    FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(FEATURE_MOTION, "MOTION",
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
-                                                   Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-8) );
+                                                   Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-8);
     key_capture_ptr->addFeature(key_feature_ptr);
     key_feature_ptr->addConstraint(createConstraint(key_feature_ptr, key_capture_origin));
 

@@ -19,6 +19,7 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, S
 			o_ptr_(_o_ptr)
 {
     //
+    std::cout << "constructed   L" << id() << std::endl;
 }
                 
 LandmarkBase::~LandmarkBase()
@@ -34,6 +35,7 @@ LandmarkBase::~LandmarkBase()
         //std::cout << "deleted " << std::endl;
 	}
 	//std::cout << "constraints deleted" << std::endl;
+    std::cout << "destructed    L" << id() << std::endl;
 }
 
 void LandmarkBase::setStatus(LandmarkStatus _st)

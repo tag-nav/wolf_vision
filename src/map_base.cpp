@@ -33,7 +33,7 @@ MapBase::~MapBase()
 //        landmark_list_.pop_front();
 //    }
 //
-	std::cout << "destructed M" << nodeId() << std::endl;
+	std::cout << "destructed  M" << std::endl;
 }
 
 LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)

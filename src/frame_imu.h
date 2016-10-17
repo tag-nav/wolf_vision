@@ -28,6 +28,7 @@ namespace wolf {
       protected:
           StateBlock* acc_bias_ptr_;      ///< Accleration bias state block pointer
           StateBlock* gyro_bias_ptr_;      ///< Gyrometer bias state block pointer
+
       public:
           /** \brief Constructor of non-key Frame with only time stamp
            *

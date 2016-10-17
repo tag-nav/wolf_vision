@@ -13,12 +13,15 @@ ProcessorBase::ProcessorBase(ProcessorType _tp, const std::string& _type, const 
         type_id_(_tp),
         time_tolerance_(_time_tolerance)
 {
+    std::cout << "constructed     p" << id() << std::endl;
+
     //
 }
 
 ProcessorBase::~ProcessorBase()
 {
     is_removing_ = true;
+    std::cout << "destructed      p" << id() << std::endl;
 }
 
 bool ProcessorBase::permittedKeyFrame()
