@@ -61,12 +61,12 @@ int main()
     std::cout << std::endl << "==================== processor tracker landmark test ======================" << std::endl;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = new Problem(FRM_PO_2D);
-    SensorBasePtr sensor_ptr_ = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)),
+    ProblemPtr wolf_problem_ptr_ = std::make_shared<Problem>(FRM_PO_2D);
+    SensorBasePtr sensor_ptr_ = std::make_shared< SensorBase>(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)),
                                              new StateBlock(Eigen::VectorXs::Zero(1)),
                                              new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
-    ProcessorTrackerLandmarkDummy* processor_ptr_ = new ProcessorTrackerLandmarkDummy(5);
+    std::shared_ptr<ProcessorTrackerLandmarkDummy> processor_ptr_ = std::make_shared< ProcessorTrackerLandmarkDummy>(5);
 
     wolf_problem_ptr_->addSensor(sensor_ptr_);
     sensor_ptr_->addProcessor(processor_ptr_);
@@ -75,13 +75,11 @@ int main()
 
     for (auto i = 0; i < 10; i++)
     {
-        processor_ptr_->process(new CaptureVoid(TimeStamp(0), sensor_ptr_));
+        processor_ptr_->process(std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr_));
     }
 
     print_problem_pointers(wolf_problem_ptr_);
 
-
-    delete wolf_problem_ptr_;
 
     return 0;
 }

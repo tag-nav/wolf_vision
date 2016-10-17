@@ -26,7 +26,7 @@ void print(MapBase& _map)
         {
             case LANDMARK_POLYLINE_2D:
             {
-                LandmarkPolyline2D* poly_ptr = (LandmarkPolyline2D*)(lmk_ptr);
+                std::shared_ptr<LandmarkPolyline2D> poly_ptr = std::static_pointer_cast<LandmarkPolyline2D>(lmk_ptr);
                 std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getPPtr()->isFixed();
                 std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getOPtr()->isFixed();
                 std::cout << "\nn points:  " << poly_ptr->getNPoints();
@@ -39,7 +39,7 @@ void print(MapBase& _map)
             }
             case LANDMARK_AHP:
             {
-                LandmarkAHP* ahp_ptr = (LandmarkAHP*)lmk_ptr;
+                std::shared_ptr<LandmarkAHP> ahp_ptr = std::static_pointer_cast<LandmarkAHP>(lmk_ptr);
                 std::cout << "\npos:       " << ahp_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << ahp_ptr->getPPtr()->isFixed();
                 std::cout << "\ndescript:  " << ahp_ptr->getCvDescriptor().t();
                 break;
@@ -67,7 +67,7 @@ int main()
     std::cout << "Pos n = " << n["position"].as<VectorXs>().transpose() << std::endl;
     std::cout << "Des n = " << n["descriptor"].as<VectorXs>().transpose() << std::endl;
 
-    LandmarkAHP lmk_2 = *((LandmarkAHP*)LandmarkAHP::create(n));
+    LandmarkAHP lmk_2 = *(std::static_pointer_cast<LandmarkAHP>(LandmarkAHP::create(n)));
     std::cout << "Pos 2 = " << lmk_2.getPPtr()->getVector().transpose() << std::endl;
     std::cout << "Des 2 = " << lmk_2.getCvDescriptor().t() << std::endl;
 

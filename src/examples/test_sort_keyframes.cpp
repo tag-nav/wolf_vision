@@ -13,6 +13,7 @@
 
 // STL includes
 #include <list>
+#include <memory>
 
 // General includes
 #include <iostream>
@@ -28,51 +29,51 @@ void printFrames(ProblemPtr _problem_ptr)
 
 int main()
 {
-    Problem problem(FRM_PO_2D);
+    ProblemPtr problem_ptr = std::make_shared<Problem>(FRM_PO_2D);
 
-    problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.1));
-    FrameBasePtr frm2 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.2));
-    FrameBasePtr frm3 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.3));
-    problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.4));
-    FrameBasePtr frm5 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.5));
-    FrameBasePtr frm6 = problem.createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.6));
+    problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.1));
+    FrameBasePtr frm2 = problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.2));
+    FrameBasePtr frm3 = problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.3));
+    problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.4));
+    FrameBasePtr frm5 = problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.5));
+    FrameBasePtr frm6 = problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.6));
 
-    printFrames(&problem);
+    printFrames(problem_ptr);
 
     std::cout << std::endl << "Frame " << frm5->id() << " set KEY" << std::endl;
     frm5->setKey();
 
-    printFrames(&problem);
+    printFrames(problem_ptr);
 
     std::cout << std::endl << "Frame " << frm2->id() << " set KEY" << std::endl;
     frm2->setKey();
 
-    printFrames(&problem);
+    printFrames(problem_ptr);
 
     std::cout << std::endl << "Frame " << frm3->id() << " new TimeStamp:" << 0.45 << std::endl;
     frm3->setTimeStamp(TimeStamp(0.45));
 
-    printFrames(&problem);
+    printFrames(problem_ptr);
 
     std::cout << std::endl << "Frame " << frm3->id() << " set KEY" << std::endl;
     frm3->setKey();
 
-    printFrames(&problem);
+    printFrames(problem_ptr);
 
     std::cout << std::endl << "Frame " << frm6->id() << " set KEY" << std::endl;
     frm6->setKey();
 
-    printFrames(&problem);
+    printFrames(problem_ptr);
 
-    FrameBasePtr frm7 = problem.createFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.7));
+    FrameBasePtr frm7 = problem_ptr->createFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.7));
     std::cout << std::endl << "created Key Frame " << frm7->id() << " TS: " << 0.7 << std::endl;
 
-    printFrames(&problem);
+    printFrames(problem_ptr);
 
-    FrameBasePtr frm8 = problem.createFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.35));
+    FrameBasePtr frm8 = problem_ptr->createFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.35));
     std::cout << std::endl << "created Key Frame " << frm8->id() << " TS: " << 0.35 << std::endl;
 
-    printFrames(&problem);
+    printFrames(problem_ptr);
 
 
 
