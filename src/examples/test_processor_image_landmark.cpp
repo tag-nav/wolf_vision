@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     unsigned int img_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
-    unsigned int buffer_size = 20;
+    unsigned int buffer_size = 10;
     std::vector<cv::Mat> frame(buffer_size);
 
     TimeStamp t = 99;
@@ -256,7 +256,7 @@ int main(int argc, char** argv)
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
         cv::waitKey(20);
 
-        if((f%buffer_size) == 10)
+        if((f%buffer_size) == 5)
         {
             ceres::Solver::Summary summary = ceres_manager.solve();
             std::cout << summary.FullReport() << std::endl;
