@@ -79,6 +79,9 @@ namespace wolf
  */
 class ProcessorMotion : public ProcessorBase
 {
+    public:
+        typedef std::shared_ptr<ProcessorMotion> Ptr;
+        typedef std::weak_ptr<ProcessorMotion> WPtr;
 
         // This is the main public interface
     public:

@@ -13,6 +13,10 @@ namespace wolf {
 class FeatureIMU : public FeatureBase
 {
     public:
+        typedef std::shared_ptr<FeatureIMU> Ptr;
+        typedef std::weak_ptr<FeatureIMU> WPtr;
+
+    public:
 
         /** \brief Constructor from capture pointer and measure
          *

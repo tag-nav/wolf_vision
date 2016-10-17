@@ -15,7 +15,7 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
     public:
 //        static const unsigned int N_BLOCKS = 8;
 
-        ConstraintIMU(FeatureIMU* _ftr_ptr, FrameIMU* _frame_ptr, bool _apply_loss_function = false,
+        ConstraintIMU(FeatureIMU::Ptr _ftr_ptr, FrameIMU::Ptr _frame_ptr, bool _apply_loss_function = false,
                       ConstraintStatus _status = CTR_ACTIVE);
 
         /** \brief Default destructor (not recommended)
@@ -32,7 +32,7 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         virtual JacobianMethod getJacobianMethod() const;
 
     public:
-        static wolf::ConstraintBasePtr create(FeatureIMU* _feature_ptr, NodeBase* _correspondant_ptr);
+        static wolf::ConstraintBasePtr create(FeatureIMU::Ptr _feature_ptr, NodeBasePtr _correspondant_ptr);
 
     private:
         /// Preintegrated delta
@@ -56,7 +56,7 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         const Eigen::Vector3s g_; ///< acceleration of gravity in World frame
 };
 
-inline ConstraintIMU::ConstraintIMU(FeatureIMU* _ftr_ptr, FrameIMU* _frame_ptr, bool _apply_loss_function,
+inline ConstraintIMU::ConstraintIMU(FeatureIMU::Ptr _ftr_ptr, FrameIMU::Ptr _frame_ptr, bool _apply_loss_function,
                                     ConstraintStatus _status) :
         ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>(CTR_IMU, _frame_ptr, _apply_loss_function, _status,
                                                     _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),
@@ -136,9 +136,9 @@ inline JacobianMethod ConstraintIMU::getJacobianMethod() const
     return JAC_AUTO;
 }
 
-inline wolf::ConstraintBasePtr ConstraintIMU::create(FeatureIMU* _feature_ptr, NodeBase* _correspondant_ptr)
+inline wolf::ConstraintBasePtr ConstraintIMU::create(FeatureIMU::Ptr _feature_ptr, NodeBasePtr _correspondant_ptr)
 {
-    return new ConstraintIMU(_feature_ptr, (FrameIMU*)(_correspondant_ptr));
+    return std::make_shared<ConstraintIMU>(_feature_ptr, std::static_pointer_cast<FrameIMU>(_correspondant_ptr));
 }
 
 } // namespace wolf

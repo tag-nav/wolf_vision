@@ -40,7 +40,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 
 		LandmarkContainer::Ptr getLandmarkPtr()
 		{
-			return lmk_ptr_;
+			return lmk_ptr_.lock();
 		}
 
 		template <typename T>
@@ -63,11 +63,11 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
             // robot information
             Eigen::Matrix<T,2,2> inverse_R_robot = Eigen::Rotation2D<T>(-_robotO[0]).matrix();
             Eigen::Matrix<T,2,2> R_landmark = Eigen::Rotation2D<T>(_landmarkO[0]).matrix();
-            Eigen::Matrix<T,2,1> corner_position = lmk_ptr_->getCorner(corner_).head<2>().cast<T>();
+            Eigen::Matrix<T,2,1> corner_position = lmk_ptr_.lock()->getCorner(corner_).head<2>().cast<T>();
 
             // Expected measurement
             Eigen::Matrix<T,2,1> expected_measurement_position = inverse_R_sensor * (inverse_R_robot * (landmark_position_map - robot_position_map + R_landmark * corner_position) - sensor_position);
-            T expected_measurement_orientation = _landmarkO[0] - _robotO[0] - T(getCapturePtr()->getSensorPtr()->getOPtr()->getVector()(0)) + T(lmk_ptr_->getCorner(corner_)(2));
+            T expected_measurement_orientation = _landmarkO[0] - _robotO[0] - T(getCapturePtr()->getSensorPtr()->getOPtr()->getVector()(0)) + T(lmk_ptr_.lock()->getCorner(corner_)(2));
 
             // Error
             residuals_map.head(2) = expected_measurement_position - getMeasurement().head<2>().cast<T>();
@@ -131,11 +131,11 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 
 
     public:
-        static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, NodeBasePtr _correspondant_ptr)
+        static ConstraintBasePtr create(FeatureBasePtr _feature_ptr, NodeBasePtr _correspondant_ptr)
         {
             unsigned int corner = 0; // Hard-coded, but this class is nevertheless deprecated.
 
-            return new ConstraintContainer(_feature_ptr, (LandmarkContainer*)_correspondant_ptr, corner);
+            return std::make_shared<ConstraintContainer>(_feature_ptr, std::static_pointer_cast<LandmarkContainer>(_correspondant_ptr), corner);
         }
 
 };

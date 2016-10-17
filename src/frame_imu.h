@@ -21,6 +21,10 @@ namespace wolf {
 
   class FrameIMU : public FrameBase
   {
+      public:
+          typedef std::shared_ptr<FrameIMU> Ptr;
+          typedef std::weak_ptr<FrameIMU> WPtr;
+
       protected:
           StateBlock* acc_bias_ptr_;      ///< Accleration bias state block pointer
           StateBlock* gyro_bias_ptr_;      ///< Gyrometer bias state block pointer

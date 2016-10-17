@@ -51,7 +51,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         HardwareBasePtr     hardware_ptr_;
         TrajectoryBasePtr   trajectory_ptr_;
         MapBasePtr          map_ptr_;
-        ProcessorMotionPtr  processor_motion_ptr_;
+        std::shared_ptr<ProcessorMotion>  processor_motion_ptr_;
         StateBlockList      state_block_ptr_list_;
         std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
         std::list<StateBlockNotification> state_block_notification_list_;
@@ -131,9 +131,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          *
          * Set the processor motion. It will provide the state.
          */
-        void setProcessorMotion(ProcessorMotionPtr _processor_motion_ptr);
+        void setProcessorMotion(std::shared_ptr<ProcessorMotion> _processor_motion_ptr);
         void setProcessorMotion(const std::string& _unique_processor_name);
-        ProcessorMotionPtr getProcessorMotionPtr();
+        std::shared_ptr<ProcessorMotion> getProcessorMotionPtr();
 
 
         // Trajectory branch ----------------------------------
@@ -242,7 +242,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
 };
 
-inline ProcessorMotionPtr Problem::getProcessorMotionPtr()
+inline std::shared_ptr<ProcessorMotion> Problem::getProcessorMotionPtr()
 {
     return processor_motion_ptr_;
 }

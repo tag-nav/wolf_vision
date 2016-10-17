@@ -122,7 +122,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     }
 }
 
-void Problem::setProcessorMotion(ProcessorMotionPtr _processor_motion_ptr)
+void Problem::setProcessorMotion(ProcessorMotion::Ptr _processor_motion_ptr)
 {
     processor_motion_ptr_ = _processor_motion_ptr;
 }
