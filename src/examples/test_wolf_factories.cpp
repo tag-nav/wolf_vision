@@ -92,7 +92,8 @@ int main(void)
     problem.installSensor("CAMERA", "rear camera", pq_3d, WOLF_ROOT + "/src/examples/camera.yaml");
 
     // print available sensors
-    for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
+    for (auto sen : problem.getHardwarePtr()->getSensorList())
+    {
         cout << "Sensor " << setw(2) << left << sen->id()
                 << " | type " << setw(2) << sen->typeId()
                 << ": " << setw(8) << sen->getType()
@@ -109,8 +110,8 @@ int main(void)
 //    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors
-    for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr()))
-        for (auto prc : *(sen->getProcessorListPtr()))
+    for (auto sen : problem.getHardwarePtr()->getSensorList())
+        for (auto prc : sen->getProcessorList())
             cout << "Processor " << setw(2) << left  << prc->id()
             << " | type : " << setw(8) << prc->getType()
             << " | name: " << setw(17) << prc->getName()

@@ -52,7 +52,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void unlinkFromFrame(){frame_ptr_.reset();}
 
         FeatureBasePtr addFeature(FeatureBasePtr _ft_ptr);
-        FeatureBaseList* getFeatureListPtr();
+        FeatureBaseList& getFeatureList();
         void addFeatureList(FeatureBaseList& _new_ft_list);
         void removeFeature(FeatureBasePtr _ft_ptr);
 
@@ -75,25 +75,6 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 #include "feature_base.h"
 
 namespace wolf{
-
-inline void CaptureBase::remove()
-{
-    if (!is_removing_)
-    {
-        is_removing_ = true;
-        std::cout << "Removing       C" << id() << std::endl;
-        CaptureBasePtr this_C = shared_from_this();  // keep this alive while removing it
-        FrameBasePtr frm = frame_ptr_.lock();
-        if (frm)
-        {
-            frm->getCaptureListPtr()->remove(this_C);          // remove from upstream
-            if (frm->getCaptureListPtr()->empty() && frm->getConstrainedByListPtr()->empty())
-                frm->remove();                   // remove upstream
-        }
-        while (!feature_list_.empty())
-            feature_list_.front()->remove();          // remove downstream
-    }
-}
 
 inline ProblemPtr CaptureBase::getProblem()
 {
@@ -158,15 +139,14 @@ inline void CaptureBase::setFramePtr(const FrameBasePtr _frm_ptr)
     frame_ptr_ = _frm_ptr;
 }
 
-inline FeatureBaseList* CaptureBase::getFeatureListPtr()
+inline FeatureBaseList& CaptureBase::getFeatureList()
 {
-    return & feature_list_;
-//    return getDownNodeListPtr();
+    return feature_list_;
 }
 
 inline void CaptureBase::getConstraintList(ConstraintBaseList& _ctr_list)
 {
-    for (FeatureBasePtr f_ptr : *getFeatureListPtr())
+    for (FeatureBasePtr f_ptr : getFeatureList())
         f_ptr->getConstraintList(_ctr_list);
 }
 

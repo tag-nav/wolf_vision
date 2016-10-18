@@ -57,7 +57,7 @@ unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(const LandmarkBaseList
 
 bool ProcessorTrackerLandmarkDummy::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureListPtr()->size() < 5;
+    return incoming_ptr_->getFeatureList().size() < 5;
 }
 
 unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int& _max_features)

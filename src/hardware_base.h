@@ -24,7 +24,7 @@ class HardwareBase : public NodeBase
         virtual ~HardwareBase();
 
         virtual SensorBasePtr addSensor(SensorBasePtr _sensor_ptr);
-        SensorBaseList* getSensorListPtr();
+        SensorBaseList& getSensorList();
         void removeSensor(const SensorBaseIter& _sensor_iter);
         void removeSensor(SensorBasePtr _sensor_ptr);
 };
@@ -43,9 +43,9 @@ inline void HardwareBase::removeSensor(const SensorBaseIter& _sensor_iter)
     //    delete * _sensor_iter; // TODO remove line
 }
 
-inline SensorBaseList* HardwareBase::getSensorListPtr()
+inline SensorBaseList& HardwareBase::getSensorList()
 {
-    return & sensor_list_;
+    return sensor_list_;
 }
 
 } // namespace wolf

@@ -266,7 +266,7 @@ int main(int argc, char** argv)
     // Vehicle poses
     int i = 0;
     Eigen::VectorXs state_poses = Eigen::VectorXs::Zero(n_execution * 3);
-    for (auto frame : *(problem.getTrajectoryPtr()->getFrameListPtr()))
+    for (auto frame : *(problem.getTrajectoryPtr()->getFrameList()))
     {
         state_poses.segment(i, 3) << frame->getPPtr()->getVector(), frame->getOPtr()->getVector();
         i += 3;
@@ -274,8 +274,8 @@ int main(int argc, char** argv)
 
     // Landmarks
     i = 0;
-    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkListPtr()->size() * 2);
-    for (auto landmark : *(problem.getMapPtr()->getLandmarkListPtr()))
+    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkList()->size() * 2);
+    for (auto landmark : *(problem.getMapPtr()->getLandmarkList()))
     {
         landmarks.segment(i, 2) = landmark->getPPtr()->getVector();
         i += 2;
@@ -313,9 +313,9 @@ int main(int argc, char** argv)
     std::getchar();
 
     std::cout << "Problem:" << std::endl;
-    std::cout << "Frames: " << problem.getTrajectoryPtr()->getFrameListPtr()->size() << std::endl;
-    std::cout << "Landmarks: " << problem.getMapPtr()->getLandmarkListPtr()->size() << std::endl;
-    std::cout << "Sensors: " << problem.getHardwarePtr()->getSensorListPtr()->size() << std::endl;
+    std::cout << "Frames: " << problem.getTrajectoryPtr()->getFrameList().size() << std::endl;
+    std::cout << "Landmarks: " << problem.getMapPtr()->getLandmarkList()->size() << std::endl;
+    std::cout << "Sensors: " << problem.getHardwarePtr()->getSensorList()->size() << std::endl;
 
     std::cout << " ========= END ===========" << std::endl << std::endl;
 

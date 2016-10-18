@@ -209,7 +209,7 @@ inline void ProcessorTrackerLandmark::establishConstraints()
     //std::cout << "\tfeatures:" << last_ptr_->getFeatureListPtr()->size() << std::endl;
     //std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
 
-    for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
+    for (auto last_feature : last_ptr_->getFeatureList())
     {
         ConstraintBasePtr ctr_ptr = createConstraint(last_feature, matches_landmark_from_last_[last_feature]->landmark_ptr_);
         if (ctr_ptr != nullptr)

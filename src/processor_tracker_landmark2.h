@@ -216,10 +216,10 @@ inline void ProcessorTrackerLandmark2::reset()
 inline void ProcessorTrackerLandmark2::establishConstraints()
 {
     std::cout << "ProcessorTrackerLandmark2::establishConstraints" << std::endl;
-    std::cout << "\tfeatures:" << last_ptr_->getFeatureListPtr()->size() << std::endl;
+    std::cout << "\tfeatures:" << last_ptr_->getFeatureList().size() << std::endl;
     std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
 
-    for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
+    for (auto last_feature : last_ptr_->getFeatureList())
         last_feature->addConstraint(createConstraint(last_feature, matches_landmark_from_last_[last_feature].landmark_ptr_));
 }
 

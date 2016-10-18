@@ -93,7 +93,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
         void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
-        ConstraintBaseList* getConstrainedByListPtr();
+        ConstraintBaseList& getConstrainedByList();
         /** \brief Remove the given constraint from the list.
          *  If list becomes empty, deletes this object by calling destruct()
          **/
@@ -114,39 +114,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 #include "state_block.h"
 
 namespace wolf{
-
-inline void LandmarkBase::remove()
-{
-    if (!is_removing_)
-    {
-        is_removing_ = true;
-        std::cout << "Removing   L" << id() << std::endl;
-        LandmarkBasePtr this_L = shared_from_this();  // keep this alive while removing it
-
-        // Remove State Blocks
-        if (p_ptr_ != nullptr)
-        {
-            if (getProblem() != nullptr)
-                getProblem()->removeStateBlockPtr(p_ptr_);
-            delete p_ptr_;
-            p_ptr_ = nullptr;
-        }
-        if (o_ptr_ != nullptr)
-        {
-            if (getProblem() != nullptr)
-                getProblem()->removeStateBlockPtr(o_ptr_);
-            delete o_ptr_;
-            o_ptr_ = nullptr;
-        }
-
-        // remove from upstream
-        map_ptr_.lock()->getLandmarkListPtr()->remove(shared_from_this());
-
-        // remove constrained by
-        while (!constrained_by_list_.empty())
-            constrained_by_list_.front()->remove();
-    }
-}
 
 inline wolf::ProblemPtr LandmarkBase::getProblem()
 {
@@ -197,9 +164,9 @@ inline unsigned int LandmarkBase::getHits() const
     return constrained_by_list_.size();
 }
 
-inline ConstraintBaseList* LandmarkBase::getConstrainedByListPtr()
+inline ConstraintBaseList& LandmarkBase::getConstrainedByList()
 {
-    return &constrained_by_list_;
+    return constrained_by_list_;
 }
 
 inline void LandmarkBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)

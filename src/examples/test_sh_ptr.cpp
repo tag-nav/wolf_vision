@@ -160,11 +160,11 @@ class F : public enable_shared_from_this<F>
         list<shared_ptr<c>> c_by_list; // list of constraints to this frame
 
         static int id_count_;
-        bool is_deleting;
+        bool is_removing;
 
     public:
         int id;
-        F() :is_deleting(false),id(++id_count_){cout << "construct + F" << id << endl;}
+        F() :is_removing(false),id(++id_count_){cout << "construct + F" << id << endl;}
         ~F(){cout << "destruct + F" << id << endl;}
         shared_ptr<P> getP(){
             shared_ptr<P> P_sh = P_ptr_.lock();
@@ -407,9 +407,9 @@ shared_ptr<C> F::add_C(shared_ptr<C> _C)
 }
 void F::remove()
 {
-    if (!is_deleting)
+    if (!is_removing)
     {
-        is_deleting = true;
+        is_removing = true;
         cout << "Removing   F" << id << endl;
         shared_ptr<F> this_F = shared_from_this();  // keep this alive while removing it
         getT()->getFlist().remove(this_F);          // remove from upstream

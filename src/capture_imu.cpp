@@ -19,6 +19,7 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, SensorBasePtr _sensor_ptr,
 
 CaptureIMU::~CaptureIMU()
 {
+    std::cout << "destructed     C-IMU" << id() << std::endl;
     //
 }
 

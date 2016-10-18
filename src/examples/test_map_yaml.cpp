@@ -18,7 +18,7 @@ using namespace wolf;
 
 void print(MapBase& _map)
 {
-    for (auto lmk_ptr : *(_map.getLandmarkListPtr()))
+    for (auto lmk_ptr : _map.getLandmarkList())
     {
         std::cout << "Lmk ID:    " << lmk_ptr->id();
         std::cout << "\nLmk type:  " << lmk_ptr->getType();
@@ -95,7 +95,7 @@ int main()
 
 
     std::cout << "Clearing map... " << std::endl;
-    problem.getMapPtr()->getLandmarkListPtr()->clear();
+    problem.getMapPtr()->getLandmarkList().clear();
 
     std::cout << "Re-reading map from file: " << filename << std::endl;
     problem.loadMap(filename);

@@ -88,6 +88,68 @@ ConstraintBase::~ConstraintBase()
     std::cout << "destructed        c" << id() << std::endl;
 }
 
+void ConstraintBase::remove()
+{
+    if (!is_removing_)
+    {
+        is_removing_ = true;
+        std::cout << "Removing         c" << id() << std::endl;
+        ConstraintBasePtr this_c = shared_from_this(); // keep this alive while removing it
+        FeatureBasePtr ftr = feature_ptr_.lock();
+        if (ftr)
+        {
+            ftr->getConstraintList().remove(shared_from_this()); // remove from upstream
+            if (ftr->getConstraintList().empty() && ftr->getConstrainedByList().empty())
+                ftr->remove(); // remove upstream
+        }
+        // add constraint to be removed from solver
+        if (getProblem() != nullptr)
+            getProblem()->removeConstraintPtr(shared_from_this());
+
+        // remove other: {Frame, feature, Landmark}
+        switch (category_)
+        {
+            case CTR_FRAME:
+            {
+                FrameBasePtr frm_o = frame_other_ptr_.lock();
+                if (frm_o)
+                {
+                    frm_o->getConstrainedByList().remove(shared_from_this());
+                    if (frm_o->getConstrainedByList().empty() && frm_o->getCaptureList().empty())
+                        frm_o->remove();
+                }
+            }
+                break;
+            case CTR_FEATURE:
+            {
+                FeatureBasePtr ftr_o = feature_other_ptr_.lock();
+                if (ftr_o)
+                {
+                    ftr_o->getConstrainedByList().remove(shared_from_this());
+                    if (ftr_o->getConstrainedByList().empty() && ftr_o->getConstraintList().empty())
+                        ftr_o->remove();
+                }
+                break;
+            }
+            case CTR_LANDMARK:
+            {
+                LandmarkBasePtr lmk_o = landmark_other_ptr_.lock();
+                if (lmk_o)
+                {
+                    lmk_o->getConstrainedByList().remove(shared_from_this());
+                    if (lmk_o->getConstrainedByList().empty())
+                        lmk_o->remove();
+                }
+                break;
+            }
+            case CTR_ABSOLUTE:
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 const Eigen::VectorXs& ConstraintBase::getMeasurement() const
 {
     return getFeaturePtr()->getMeasurement();

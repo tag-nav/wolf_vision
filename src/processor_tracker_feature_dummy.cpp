@@ -39,7 +39,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
 
 bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureListPtr()->size() < 5;
+    return incoming_ptr_->getFeatureList().size() < 5;
 }
 
 unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features)

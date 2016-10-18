@@ -185,7 +185,7 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
     	getProblem()->addStateBlockPtr(state);
 
     // remove and add all constraints to the point
-    for (auto ctr_ptr : *getConstrainedByListPtr())
+    for (auto ctr_ptr : getConstrainedByList())
         for (auto st_ptr : ctr_ptr->getStatePtrVector())
             if (st_ptr == state && getProblem() != nullptr)
             {
@@ -242,7 +242,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     std::cout << "state block to remove " << remove_state->getVector().transpose() << std::endl;
 
     // Change constraints from remove_state to remain_state
-    ConstraintBaseList old_constraints_list = *getConstrainedByListPtr();
+    ConstraintBaseList old_constraints_list = getConstrainedByList();
     std::cout << "changing constraints: " << old_constraints_list.size() << std::endl;
     ConstraintBasePtr new_ctr_ptr = nullptr;
     for (auto ctr_ptr : old_constraints_list)

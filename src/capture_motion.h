@@ -98,6 +98,7 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_
 
 inline CaptureMotion::~CaptureMotion()
 {
+    std::cout << "destructed     C-Mot" << id() << std::endl;
     //
 }
 

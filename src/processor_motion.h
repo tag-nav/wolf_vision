@@ -379,8 +379,12 @@ inline ProcessorMotion::ProcessorMotion(ProcessorType _tp,
 
 inline ProcessorMotion::~ProcessorMotion()
 {
-    if (incoming_ptr_!= nullptr)
-        incoming_ptr_->remove();
+//    if (origin_ptr_)
+//        origin_ptr_->remove();
+//    if (last_ptr_)
+//        last_ptr_->remove();
+//    if (incoming_ptr_)
+//        incoming_ptr_->remove();
 }
 
 inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
@@ -611,18 +615,18 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
     reintegrate(capture_ptr);
 
     // modify feature and constraint (if they exist)
-    if (!capture_ptr->getFeatureListPtr()->empty())
+    if (!capture_ptr->getFeatureList().empty())
     {
-        FeatureBasePtr feature_ptr = capture_ptr->getFeatureListPtr()->front();
+        FeatureBasePtr feature_ptr = capture_ptr->getFeatureList().front();
         // modify feature
         feature_ptr->setMeasurement(capture_ptr->getBufferPtr()->get().back().delta_integr_);
         feature_ptr->setMeasurementCovariance(capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                               capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
                                               Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-8);
         // modify constraint
-        if (!feature_ptr->getConstraintListPtr()->empty())
+        if (!feature_ptr->getConstraintList().empty())
         {
-            feature_ptr->getConstraintListPtr()->front()->remove();
+            feature_ptr->getConstraintList().front()->remove();
             feature_ptr->addConstraint(createConstraint(feature_ptr, _keyframe_ptr));
         }
     }
@@ -639,6 +643,7 @@ inline FrameBasePtr ProcessorMotion::makeFrame(CaptureBasePtr _capture_ptr, cons
 {
     // We need to create the new free Frame to hold what will become the last Capture
     FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
+
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
     return new_frame_ptr;
 }

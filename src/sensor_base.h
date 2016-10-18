@@ -92,7 +92,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
         void removeProcessor(ProcessorBasePtr _prc_ptr);
 
-        ProcessorBaseList* getProcessorListPtr();
+        ProcessorBaseList& getProcessorList();
 
         StateBlock* getPPtr() const;
 
@@ -169,9 +169,9 @@ inline ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
     return _proc_ptr;
 }
 
-inline ProcessorBaseList* SensorBase::getProcessorListPtr()
+inline ProcessorBaseList& SensorBase::getProcessorList()
 {
-    return & processor_list_;
+    return processor_list_;
 }
 
 inline StateBlock* SensorBase::getPPtr() const

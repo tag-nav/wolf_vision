@@ -270,8 +270,8 @@ bool Problem::permitKeyFrame(ProcessorBasePtr _processor_ptr)
 void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _processor_ptr, const Scalar& _time_tolerance)
 {
     //std::cout << "Problem::keyFrameCallback: processor " << _processor_ptr->getName() << std::endl;
-    for (auto sensor : (*hardware_ptr_->getSensorListPtr()))
-    	for (auto processor : (*sensor->getProcessorListPtr()))
+    for (auto sensor : hardware_ptr_->getSensorList())
+    	for (auto processor : sensor->getProcessorList())
     		if (processor->id() != _processor_ptr->id())
                 processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
 }
@@ -477,12 +477,12 @@ StateBlockList* Problem::getStateListPtr()
 
 wolf::SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
 {
-    auto sen_it = std::find_if(getHardwarePtr()->getSensorListPtr()->begin(),
-                               getHardwarePtr()->getSensorListPtr()->end(), [&](SensorBasePtr sb)
+    auto sen_it = std::find_if(getHardwarePtr()->getSensorList().begin(),
+                               getHardwarePtr()->getSensorList().end(), [&](SensorBasePtr sb)
                                {
                                    return sb->getName() == _sensor_name;
                                }); // lambda function for the find_if
-    if (sen_it == getHardwarePtr()->getSensorListPtr()->end())
+    if (sen_it == getHardwarePtr()->getSensorList().end())
         return nullptr;
 
     return (*sen_it);
@@ -502,8 +502,8 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::Matrix
         init_capture->process();
 
         // notify processors about the new keyframe
-        for (auto sensor_ptr : (*hardware_ptr_->getSensorListPtr()))
-            for (auto processor_ptr : (*sensor_ptr->getProcessorListPtr()))
+        for (auto sensor_ptr : hardware_ptr_->getSensorList())
+            for (auto processor_ptr : sensor_ptr->getProcessorList())
                 if (processor_ptr->isMotion())
                     (std::static_pointer_cast<ProcessorMotion>(processor_ptr))->setOrigin(origin_frame_ptr);
 
@@ -527,26 +527,27 @@ void Problem::print()
 {
     std::cout << "P: wolf tree status:" << std::endl;
     std::cout << "H" << std::endl;
-    for (auto S : *(getHardwarePtr()->getSensorListPtr() ) )
+    for (auto S : getHardwarePtr()->getSensorList() )
     {
         std::cout << "  S" << S->id() << std::endl;
-        for (auto p : *(S->getProcessorListPtr() ) )
+        for (auto p : S->getProcessorList() )
         {
             std::cout << "    p" << p->id() << std::endl;
         }
     }
     std::cout << "T" << std::endl;
-    for (auto F : *(getTrajectoryPtr()->getFrameListPtr() ) )
+    for (auto F : getTrajectoryPtr()->getFrameList() )
     {
         std::cout << (F->isKey() ?  "  KF" : "  F") << F->id() << (F->isFixed() ?  ", fixed" : ", estim") << ", ts=" << std::setprecision(5) << F->getTimeStamp().get();
-        std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")" << std::endl;
-        for (auto C : *(F->getCaptureListPtr() ) )
+        std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
+        std::cout << " T @ " << F->getTrajectoryPtr().get() << std::endl;
+        for (auto C : F->getCaptureList() )
         {
             std::cout << "    C" << C->id() << std::endl;
-            for (auto f : *(C->getFeatureListPtr() ) )
+            for (auto f : C->getFeatureList() )
             {
                 std::cout << "      f" << f->id() << ",            \t m = ( " << std::setprecision(3) << f->getMeasurement().transpose() << ")" << std::endl;
-                for (auto c : *(f->getConstraintListPtr() ) )
+                for (auto c : f->getConstraintList() )
                 {
                     std::cout << "        c" << c->id();
                     switch (c->getCategory())
@@ -569,7 +570,7 @@ void Problem::print()
         }
     }
     std::cout << "M" << std::endl;
-    for (auto L : *(getMapPtr()->getLandmarkListPtr() ) )
+    for (auto L : getMapPtr()->getLandmarkList() )
     {
         std::cout << "  L" << L->id() << std::endl;
     }

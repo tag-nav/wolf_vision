@@ -276,15 +276,14 @@ int main(int argc, char** argv)
         printf("\nError opening file\n");
 
     // PRIOR
-    FrameBasePtr first_frame_autodiff = wolf_problem_autodiff->getTrajectoryPtr()->getFrameListPtr()->front();
-    FrameBasePtr first_frame_analytic = wolf_problem_analytic->getTrajectoryPtr()->getFrameListPtr()->front();
+    FrameBasePtr first_frame_autodiff = wolf_problem_autodiff->getTrajectoryPtr()->getFrameList().front();
+    FrameBasePtr first_frame_analytic = wolf_problem_analytic->getTrajectoryPtr()->getFrameList().front();
     CaptureFix* initial_covariance_autodiff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_autodiff->getState(), Eigen::Matrix3s::Identity() * 0.01);
     CaptureFix* initial_covariance_analytic = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_analytic->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_autodiff->addCapture(initial_covariance_autodiff);
     first_frame_analytic->addCapture(initial_covariance_analytic);
     initial_covariance_autodiff->process();
     initial_covariance_analytic->process();
-    //std::cout << "initial covariance: constraint " << initial_covariance_analytic->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_analytic->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
 
     // SOLVING PROBLEMS
     std::cout << "solving..." << std::endl;

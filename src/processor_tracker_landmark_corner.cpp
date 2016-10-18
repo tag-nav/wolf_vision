@@ -206,10 +206,9 @@ bool ProcessorTrackerLandmarkCorner::voteForKeyFrame()
     // option 2: loop closure (if the newest frame from which a matched landmark was observed is old enough)
     for (auto new_feat : new_features_last_)
     {
-        if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_feat]->landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() > loop_frames_th_)
+        if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_feat]->landmark_ptr_->getConstrainedByList().back()->getCapturePtr()->getFramePtr()->id() > loop_frames_th_)
         {
             std::cout << "------------- NEW KEY FRAME: Option 2 - Loop closure" << std::endl;
-            //std::cout << "\tmatched landmark from frame = " << matches_landmark_from_last_[new_feat]->landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() << std::endl;
             return true;
         }
     }

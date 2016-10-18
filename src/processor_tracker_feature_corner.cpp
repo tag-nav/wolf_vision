@@ -80,7 +80,7 @@ unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList&
 
 bool ProcessorTrackerFeatureCorner::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureListPtr()->size() < n_tracks_th_;
+    return incoming_ptr_->getFeatureList().size() < n_tracks_th_;
 }
 
 unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const unsigned int& _max_features)
@@ -95,7 +95,7 @@ ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr
 {
     // Getting landmark ptr
     LandmarkCorner2D* landmark_ptr = nullptr;
-    for (auto constraint : *(_feature_other_ptr->getConstraintListPtr()))
+    for (auto constraint : *(_feature_other_ptr->getConstraintList()))
         if (constraint->getLandmarkOtherPtr() != nullptr && constraint->getLandmarkOtherPtr()->getTypeId() == LANDMARK_CORNER)
             landmark_ptr = (LandmarkCorner2D*)(constraint->getLandmarkOtherPtr());
 

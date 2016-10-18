@@ -61,15 +61,42 @@ FrameBasePtr FeatureBase::getFramePtr() const
     return capture_ptr_.lock()->getFramePtr();
 }
 
-ConstraintBaseList* FeatureBase::getConstraintListPtr()
+ConstraintBaseList& FeatureBase::getConstraintList()
 {
-    return & constraint_list_;
+    return constraint_list_;
 }
 
 void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
-	for(ConstraintBasePtr c_ptr : *getConstraintListPtr())
+	for(ConstraintBasePtr c_ptr : constraint_list_)
 		_ctr_list.push_back(c_ptr);
+}
+
+void FeatureBase::remove()
+{
+    if (!is_removing_)
+    {
+        is_removing_ = true;
+        std::cout << "Removing       f" << id() << std::endl;
+        std::shared_ptr<FeatureBase> this_f = shared_from_this(); // keep this alive while removing it
+        CaptureBasePtr cap = capture_ptr_.lock();
+        if (cap)
+        {
+            cap->getFeatureList().remove(shared_from_this()); // remove from upstream
+            if (cap->getFeatureList().empty())
+                cap->remove(); // remove upstream
+        }
+        while (!constraint_list_.empty())
+        {
+            constraint_list_.front()->remove(); // remove downstream
+            constraint_list_.pop_front();
+        }
+        while (!constrained_by_list_.empty())
+        {
+            constrained_by_list_.front()->remove(); // remove constrained
+            constrained_by_list_.pop_front();
+        }
+    }
 }
 
 //void FeatureBase::destruct()

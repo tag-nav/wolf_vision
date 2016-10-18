@@ -42,4 +42,17 @@ void ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType _type)
         getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), shared_from_this(), time_tolerance_);
 }
 
+void ProcessorBase::remove()
+{
+    if (!is_removing_)
+    {
+        is_removing_ = true;
+        std::cout << "Removing     p" << id() << std::endl;
+        ProcessorBasePtr this_p = shared_from_this();
+        SensorBasePtr sen = sensor_ptr_.lock();
+        if(sen)
+            sen->getProcessorList().remove(shared_from_this());
+    }
+}
+
 } // namespace wolf

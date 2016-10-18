@@ -98,14 +98,16 @@ int main(int argc, char** argv)
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     shared_ptr<CaptureIMU> imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data_);
 
-    problem_ptr_->print();
+//    problem_ptr_->print();
 
     std::cout << "Main loop -----------" << std::endl;
 
     // main loop
     using namespace std;
     clock_t begin = clock();
-    while(!data_file_acc.eof()){
+    int n = 1;
+    while(!data_file_acc.eof() && n < 1000){
+        n++;
 
         // read new data
         data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
@@ -191,7 +193,9 @@ int main(int argc, char** argv)
 
     problem_ptr_->print();
 
-    problem_ptr_.reset();
+//    imu_ptr->remove();
+
+//    problem_ptr_.reset();
 
     return 0;
 }

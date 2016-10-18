@@ -13,13 +13,10 @@ TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
 
 TrajectoryBase::~TrajectoryBase()
 {
-    is_removing_ = true;
     while (!frame_list_.empty())
     {
-//        delete frame_list_.front();
         frame_list_.pop_front();
     }
-    //std::cout << "deleting TrajectoryBase " << nodeId() << std::endl;
     std::cout << "destructed T" << std::endl;
 }
 
@@ -56,7 +53,7 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
 
 void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
-	for(auto fr_ptr : *getFrameListPtr())
+	for(auto fr_ptr : getFrameList())
 		fr_ptr->getConstraintList(_ctr_list);
 }
 
@@ -67,10 +64,10 @@ void TrajectoryBase::sortFrame(FrameBasePtr _frame_ptr)
 
 FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
 {
-    for (auto frm_rit = getFrameListPtr()->rbegin(); frm_rit != getFrameListPtr()->rend(); frm_rit++)
+    for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); frm_rit++)
         if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isKey() && (*frm_rit)->getTimeStamp() < _frame_ptr->getTimeStamp())
             return frm_rit.base();
-    return getFrameListPtr()->begin();
+    return getFrameList().begin();
 }
 
 FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
@@ -78,7 +75,7 @@ FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
     FrameBasePtr closest_kf = nullptr;
     Scalar min_dt = 1e9;
 
-    for (auto frm_rit = getFrameListPtr()->rbegin(); frm_rit != getFrameListPtr()->rend(); frm_rit++)
+    for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); frm_rit++)
         if ((*frm_rit)->isKey())
         {
             if (std::abs((*frm_rit)->getTimeStamp().get() - _ts.get()) < min_dt)

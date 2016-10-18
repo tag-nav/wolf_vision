@@ -176,8 +176,7 @@ class ProcessorImage : public ProcessorTrackerFeature
 inline bool ProcessorImage::voteForKeyFrame()
 {
 //    std::cout << "voteForKeyFrame?: "
-//            << (((CaptureImage*)((incoming_ptr_)))->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe) << std::endl;
-    return (incoming_ptr_->getFeatureListPtr()->size() < params_.algorithm.min_features_for_keyframe);
+    return (incoming_ptr_->getFeatureList().size() < params_.algorithm.min_features_for_keyframe);
 }
 
 inline ConstraintBasePtr ProcessorImage::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)

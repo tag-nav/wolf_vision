@@ -105,7 +105,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         FrameBasePtr getPreviousFrame() const;
         FrameBasePtr getNextFrame() const;
 
-        CaptureBaseList* getCaptureListPtr();
+        CaptureBaseList& getCaptureList();
         CaptureBasePtr addCapture(CaptureBasePtr _capt_ptr);
         void removeCapture(const CaptureBaseIter& _capt_iter);
         void removeCapture(const CaptureBasePtr _capt_ptr);
@@ -116,7 +116,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
-        ConstraintBaseList* getConstrainedByListPtr();
+        ConstraintBaseList& getConstrainedByList();
 
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
@@ -219,9 +219,9 @@ inline TrajectoryBasePtr FrameBase::getTrajectoryPtr() const
     return trajectory_ptr_.lock();
 }
 
-inline CaptureBaseList* FrameBase::getCaptureListPtr()
+inline CaptureBaseList& FrameBase::getCaptureList()
 {
-    return & capture_list_;
+    return capture_list_;
 }
 
 inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
@@ -246,54 +246,6 @@ inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
 //    delete _capt_ptr;
 }
 
-inline void FrameBase::remove()
-{
-    if (!is_removing_)
-    {
-        is_removing_ = true;
-        std::cout << "Removing   F" << id() << std::endl;
-        FrameBasePtr this_F = shared_from_this();  // keep this alive while removing it
-        trajectory_ptr_.lock()->getFrameListPtr()->remove(this_F);          // remove from upstream
-        while (!capture_list_.empty())
-            capture_list_.front()->remove();          // remove downstream
-        while (!constrained_by_list_.empty())
-            constrained_by_list_.front()->remove();        // remove constrained
-
-        // Remove Frame State Blocks
-        if (p_ptr_ != nullptr)
-        {
-            std::cout << "deleting F-pos block " << p_ptr_ << std::endl;
-            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-                getProblem()->removeStateBlockPtr(p_ptr_);
-            std::cout << "deleting F-pos block " << p_ptr_ << std::endl;
-            delete p_ptr_;
-            p_ptr_ = nullptr;
-            std::cout << "deleted  F-pos block " << p_ptr_ << std::endl;
-        }
-        if (o_ptr_ != nullptr)
-        {
-            std::cout << "deleting F-ori block " << o_ptr_  << std::endl;
-            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-                getProblem()->removeStateBlockPtr(o_ptr_);
-            std::cout << "deleting F-ori block " << o_ptr_  << std::endl;
-            delete o_ptr_;
-            o_ptr_ = nullptr;
-            std::cout << "deleted  F-ori block " << o_ptr_  << std::endl;
-        }
-        if (v_ptr_ != nullptr)
-        {
-            std::cout << "deleting F-vel block " << v_ptr_  << std::endl;
-            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-                getProblem()->removeStateBlockPtr(v_ptr_);
-            std::cout << "deleting F-vel block " << v_ptr_  << std::endl;
-            delete v_ptr_;
-            v_ptr_ = nullptr;
-            std::cout << "deleted  F-vel block " << v_ptr_  << std::endl;
-        }
-
-    }
-}
-
 inline StateStatus FrameBase::getStatus() const
 {
     return status_;
@@ -302,7 +254,7 @@ inline StateStatus FrameBase::getStatus() const
 
 inline CaptureBasePtr FrameBase::hasCaptureOf(const SensorBasePtr _sensor_ptr)
 {
-    for (CaptureBasePtr capture_ptr : *getCaptureListPtr())
+    for (CaptureBasePtr capture_ptr : getCaptureList())
         if (capture_ptr->getSensorPtr() == _sensor_ptr)
             return capture_ptr;
     return nullptr;
@@ -316,7 +268,7 @@ inline void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
 
 inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
 {
-    for (CaptureBasePtr c_ptr : *getCaptureListPtr())
+    for (CaptureBasePtr c_ptr : getCaptureList())
         c_ptr->getConstraintList(_ctr_list);
 }
 
@@ -336,9 +288,9 @@ inline unsigned int FrameBase::getHits() const
     return constrained_by_list_.size();
 }
 
-inline ConstraintBaseList* FrameBase::getConstrainedByListPtr()
+inline ConstraintBaseList& FrameBase::getConstrainedByList()
 {
-    return &constrained_by_list_;
+    return constrained_by_list_;
 }
 
 inline void FrameBase::setTrajectoryPtr(TrajectoryBasePtr _trj_ptr)

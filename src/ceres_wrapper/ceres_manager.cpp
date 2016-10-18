@@ -80,7 +80,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             // first create a vector containing all state blocks
             std::vector<StateBlock*> all_state_blocks, landmark_state_blocks;
             //frame state blocks
-            for(auto fr_ptr : *(wolf_problem_->getTrajectoryPtr()->getFrameListPtr()))
+            for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
             {
                 if (fr_ptr->isKey())
                 {
@@ -89,7 +89,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
                 }
             }
             // landmark state blocks
-            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
+            for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
             {
                 landmark_state_blocks = l_ptr->getStateBlockVector();
                 all_state_blocks.insert(all_state_blocks.end(), landmark_state_blocks.begin(), landmark_state_blocks.end());
@@ -112,7 +112,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             // first create a vector containing all state blocks
             std::vector<StateBlock*> all_state_blocks, landmark_state_blocks;
             //frame state blocks
-            for(auto fr_ptr : *(wolf_problem_->getTrajectoryPtr()->getFrameListPtr()))
+            for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
             {
                 if (fr_ptr->isKey())
                 {
@@ -121,7 +121,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
                 }
             }
             // landmark state blocks
-            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
+            for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
             {
                 landmark_state_blocks = l_ptr->getStateBlockVector();
                 all_state_blocks.insert(all_state_blocks.end(), landmark_state_blocks.begin(), landmark_state_blocks.end());
@@ -156,7 +156,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 
             // landmarks
             std::vector<StateBlock*> landmark_state_blocks;
-            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
+            for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
             {
                 // load state blocks vector
                 landmark_state_blocks = l_ptr->getStateBlockVector();

@@ -21,6 +21,7 @@ ProcessorIMU::ProcessorIMU() :
 
 ProcessorIMU::~ProcessorIMU()
 {
+    std::cout << "destructed      p" << id() << std::endl;
 }
 
 ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)

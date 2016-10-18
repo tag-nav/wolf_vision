@@ -26,11 +26,6 @@ MapBase::MapBase() :
 
 MapBase::~MapBase()
 {
-//    while (!landmark_list_.empty())
-//    {
-//        landmark_list_.front()->remove();
-//    }
-
 	std::cout << "destructed  M" << std::endl;
 }
 
@@ -96,11 +91,11 @@ void MapBase::save(const std::string& _map_file_yaml, const std::string& _map_na
     emitter << "map name"   << _map_name;
     emitter << "date-time" << dateTimeNow(); // Get date and time for archiving purposes
 
-    emitter << "nlandmarks" << getLandmarkListPtr()->size();
+    emitter << "nlandmarks" << getLandmarkList().size();
 
     emitter << "landmarks"  << YAML::BeginSeq;
 
-    for (LandmarkBasePtr lmk_ptr : *getLandmarkListPtr())
+    for (LandmarkBasePtr lmk_ptr : getLandmarkList())
     {
         emitter << YAML::Flow << lmk_ptr->saveToYaml();
     }

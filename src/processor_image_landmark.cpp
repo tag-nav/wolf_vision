@@ -526,17 +526,17 @@ void ProcessorImageLandmark::drawFeatures(cv::Mat _image)
 {
     unsigned int counter = 0;
 //    cv::Mat image = image_incoming_.clone();
-    LandmarkBaseList* last_landmark_list = getProblem()->getMapPtr()->getLandmarkListPtr();
+    LandmarkBaseList& last_landmark_list = getProblem()->getMapPtr()->getLandmarkList();
 
     unsigned int response_counter = 0;
-    Eigen::VectorXs response_vector(last_landmark_list->size());
+    Eigen::VectorXs response_vector(last_landmark_list.size());
     for (auto response : list_response_)
     {
         response_vector(response_counter) = response;
         response_counter++;
     }
 
-    for (auto landmark_base_ptr : *last_landmark_list)
+    for (auto landmark_base_ptr : last_landmark_list)
     {
         std::shared_ptr<LandmarkAHP> landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
         Eigen::Vector4s point3D_hmg;

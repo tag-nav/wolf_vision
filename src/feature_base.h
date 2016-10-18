@@ -79,7 +79,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 
         ConstraintBasePtr addConstraint(ConstraintBasePtr _co_ptr);
         void removeConstraint(ConstraintBasePtr _co_ptr);
-        ConstraintBaseList* getConstraintListPtr();
+        ConstraintBaseList& getConstraintList();
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
         const Eigen::VectorXs& getMeasurement() const;
@@ -87,7 +87,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
-        ConstraintBaseList* getConstrainedByListPtr();
+        ConstraintBaseList& getConstrainedByList();
 
 };
 
@@ -129,30 +129,9 @@ inline ProblemPtr FeatureBase::getProblem()
     return prb;
 }
 
-inline void FeatureBase::remove()
+inline wolf::ConstraintBaseList& FeatureBase::getConstrainedByList()
 {
-    if (!is_removing_)
-    {
-        is_removing_ = true;
-        std::cout << "Removing       f" << id() << std::endl;
-        std::shared_ptr<FeatureBase> this_f = shared_from_this();  // keep this alive while removing it
-        CaptureBasePtr cap = capture_ptr_.lock();
-        if (cap)
-        {
-            cap->getFeatureListPtr()->remove(this_f);          // remove from upstream
-            if (cap->getFeatureListPtr()->empty())
-                cap->remove();                   // remove upstream
-        }
-        while (!constraint_list_.empty())
-            constraint_list_.front()->remove();          // remove downstream
-        while (!constrained_by_list_.empty())
-            constrained_by_list_.front()->remove();        // remove constrained
-    }
-}
-
-inline wolf::ConstraintBaseList* FeatureBase::getConstrainedByListPtr()
-{
-    return &constrained_by_list_;
+    return constrained_by_list_;
 }
 
 inline unsigned int FeatureBase::id()

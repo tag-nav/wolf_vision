@@ -211,7 +211,7 @@ int main()
     odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     std::cout << "New buffer: oldest part:   < ";
-    for (const auto &s : (std::static_pointer_cast<CaptureMotion>(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
+    for (const auto &s : (std::static_pointer_cast<CaptureMotion>(new_keyframe_ptr->getCaptureList().front()))->getBufferPtr()->get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
@@ -221,8 +221,8 @@ int main()
     std::cout << ">" << std::endl;
 
     std::cout << "Processor measurement of new keyframe: " << std::endl;
-    std::cout << "Delta: " << new_keyframe_ptr->getCaptureListPtr()->front()->getFeatureListPtr()->front()->getMeasurement().transpose() << std::endl;
-    std::cout << "Covariance: " << std::endl << new_keyframe_ptr->getCaptureListPtr()->front()->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
+    std::cout << "Delta: " << new_keyframe_ptr->getCaptureList().front()->getFeatureList().front()->getMeasurement().transpose() << std::endl;
+    std::cout << "Covariance: " << std::endl << new_keyframe_ptr->getCaptureList().front()->getFeatureList().front()->getMeasurementCovariance() << std::endl;
 
     std::cout << "getState with TS previous than the last keyframe: " << t_split-0.5 << std::endl;
     std::cout << odom2d_ptr->getState(t_split-0.5) << std::endl;
@@ -273,7 +273,7 @@ int main()
 
 
     std::cout << "All in one row:            < ";
-    for (const auto &s : (std::static_pointer_cast<CaptureMotion>(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
+    for (const auto &s : (std::static_pointer_cast<CaptureMotion>(new_keyframe_ptr->getCaptureList().front()))->getBufferPtr()->get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << "> " << t_split - t0 << " < ";
     for (const auto &s : odom2d_ptr->getBufferPtr()->get())

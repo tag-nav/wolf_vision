@@ -82,15 +82,6 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
 namespace wolf {
 
-inline void ProcessorBase::remove()
-{
-    if (!is_removing_)
-    {
-        is_removing_ = true;
-        sensor_ptr_.lock()->getProcessorListPtr()->remove(shared_from_this());
-    }
-}
-
 inline wolf::ProblemPtr ProcessorBase::getProblem()
 {
     ProblemPtr prb = problem_ptr_.lock();

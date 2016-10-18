@@ -305,10 +305,9 @@ bool ProcessorTrackerLandmarkPolyline::voteForKeyFrame()
     // option 2: loop closure (if the newest frame from which a matched landmark was observed is old enough)
     for (auto new_ftr : new_features_last_)
     {
-        if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_ftr]->landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() > params_.loop_frames_th)
+        if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_ftr]->landmark_ptr_->getConstrainedByList().back()->getCapturePtr()->getFramePtr()->id() > params_.loop_frames_th)
         {
             std::cout << "------------- NEW KEY FRAME: Option 2 - Loop closure" << std::endl;
-            //std::cout << "\tmatched landmark from frame = " << matches_landmark_from_last_[new_ftr].landmark_ptr_->getConstrainedByListPtr()->back()->getCapturePtr()->getFramePtr()->id() << std::endl;
             return true;
         }
     }
@@ -548,7 +547,7 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
     FeaturePolyline2D* polyline_feature;
     LandmarkPolyline2D* polyline_landmark;
 
-    for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
+    for (auto last_feature : *(last_ptr_->getFeatureList()))
     {
         polyline_feature = (FeaturePolyline2D*)last_feature;
         polyline_match = (LandmarkPolylineMatch*)matches_landmark_from_last_[last_feature];
@@ -998,7 +997,7 @@ void ProcessorTrackerLandmarkPolyline::postProcess()
     //std::cout << "postProcess: " << std::endl;
     //std::cout << "New Last features: " << getNewFeaturesListLast().size() << std::endl;
     //std::cout << "Last features: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
-    classifyPolilines(getProblem()->getMapPtr()->getLandmarkListPtr());
+    classifyPolilines(getProblem()->getMapPtr()->getLandmarkList());
 }
 
 ConstraintBasePtr ProcessorTrackerLandmarkPolyline::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)

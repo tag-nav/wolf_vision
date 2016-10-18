@@ -87,7 +87,7 @@ void ProcessorImage::preProcess()
     //The visualization part is only for debugging. The casts above are necessary.
 
     if(last_ptr_ != nullptr)
-        resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()));
+        resetVisualizationFlag(last_ptr_->getFeatureList());
 
     // Clear of the lists used to debug
     tracker_roi_.clear();
@@ -495,7 +495,7 @@ void ProcessorImage::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::
 
 void ProcessorImage::drawFeatures(CaptureBasePtr const _last_ptr)
 {
-    for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
+    for (auto feature_ptr : last_ptr_->getFeatureList())
     {
         std::shared_ptr<FeaturePointImage> point_ptr = std::static_pointer_cast<FeaturePointImage>(feature_ptr);
         if (point_ptr->isKnown())

@@ -30,7 +30,7 @@ class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
         virtual void addLandmarkList(LandmarkBaseList _landmark_list);
         void removeLandmark(const LandmarkBaseIter& _landmark_iter);
         void removeLandmark(LandmarkBasePtr _landmark_ptr);
-        LandmarkBaseList* getLandmarkListPtr();
+        LandmarkBaseList& getLandmarkList();
         
         void load(const std::string& _map_file_yaml);
         void save(const std::string& _map_file_yaml, const std::string& _map_name = "Map automatically saved by Wolf");
@@ -45,9 +45,9 @@ class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
 //        delete this;
 //}
 
-inline LandmarkBaseList* MapBase::getLandmarkListPtr()
+inline LandmarkBaseList& MapBase::getLandmarkList()
 {
-    return & landmark_list_;
+    return landmark_list_;
 }
 
 } // namespace wolf
