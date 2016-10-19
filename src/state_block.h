@@ -107,6 +107,7 @@ inline StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed, LocalPa
         state_(_state),
         local_param_ptr_(_local_param_ptr)
 {
+    std::cout << "constructed           +sb" << std::endl;
 }
 
 inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParametrizationBase* _local_param_ptr) :
@@ -116,6 +117,7 @@ inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParame
         local_param_ptr_(_local_param_ptr)
 {
     //
+    std::cout << "constructed           +sb" << std::endl;
 }
 
 inline StateBlock::~StateBlock()
@@ -125,6 +127,7 @@ inline StateBlock::~StateBlock()
     // thus not in the constructor of any derived class.
     if (local_param_ptr_ != nullptr)
         delete local_param_ptr_;
+    std::cout << "destructed            -sb" << std::endl;
 }
 
 inline Scalar* StateBlock::getPtr()
