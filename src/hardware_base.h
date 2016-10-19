@@ -14,7 +14,7 @@ class SensorBase;
 namespace wolf {
 
 //class HardwareBase
-class HardwareBase : public NodeBase
+class HardwareBase : public NodeBase, public std::enable_shared_from_this<HardwareBase>
 {
     private:
         SensorBaseList sensor_list_;
