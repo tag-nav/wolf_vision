@@ -138,8 +138,8 @@ inline Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)
     }
     else
     { // small-angle approximation using truncated Taylor series
-        T r = vecnorm / _q.w();
-        return vec * ((T)1.0 - r * r) / _q.w();
+        T r2 = vec.squaredNorm() / (_q.w() *_q.w());
+        return vec * ((T)1.0 - r2) / _q.w();
     }
 }
 
