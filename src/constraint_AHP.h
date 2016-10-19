@@ -34,6 +34,9 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             setType("AHP");
             K_ = ((SensorCamera*)(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
             distortion_ = ((SensorCamera*)(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
+
+//            std::cout << "==========CONSTRAINT AHP current frame pos: " << _current_frame_ptr->getPPtr() << "; value: "
+//                      << _current_frame_ptr->getPPtr()->getVector().transpose() << std::endl;
         }
 
         /** \brief Default destructor (not recommended)
