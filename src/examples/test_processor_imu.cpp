@@ -191,11 +191,13 @@ int main(int argc, char** argv)
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
 
-    bool is_ok = problem_ptr_->check();
 
-//    imu_ptr->remove();
+    problem_ptr_->check();
 
-//    problem_ptr_.reset();
+    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
+//    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
+    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
+//    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
 
     return 0;
 }

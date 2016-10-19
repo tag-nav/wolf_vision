@@ -51,7 +51,7 @@ void ProcessorBase::remove()
         ProcessorBasePtr this_p = shared_from_this();
         SensorBasePtr sen = sensor_ptr_.lock();
         if(sen)
-            sen->getProcessorList().remove(shared_from_this());
+            sen->getProcessorList().remove(this_p);
     }
 }
 

@@ -39,7 +39,6 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen:
 
 FeatureBase::~FeatureBase()
 {
-//    remove();
     std::cout << "destructed      -f" << id() << std::endl;
 }
 
@@ -74,6 +73,7 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 void FeatureBase::remove()
 {
+    std::cout << "Remove         f" << id() << std::endl;
     if (!is_removing_)
     {
         is_removing_ = true;
@@ -89,13 +89,12 @@ void FeatureBase::remove()
         while (!constraint_list_.empty())
         {
             constraint_list_.front()->remove(); // remove downstream
-            constraint_list_.pop_front();
         }
         while (!constrained_by_list_.empty())
         {
             constrained_by_list_.front()->remove(); // remove constrained
-            constrained_by_list_.pop_front();
         }
+        std::cout << "Removed        f" << id() << std::endl;
     }
 }
 

@@ -79,7 +79,6 @@ void LandmarkBase::remove()
         while (!constrained_by_list_.empty())
         {
             constrained_by_list_.front()->remove();
-            constrained_by_list_.pop_front();
         }
     }
 }

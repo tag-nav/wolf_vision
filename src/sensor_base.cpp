@@ -107,7 +107,6 @@ inline void SensorBase::remove()
         while (!processor_list_.empty())
         {
             processor_list_.front()->remove();
-            processor_list_.pop_front();
         }
     }
 

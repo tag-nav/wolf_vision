@@ -22,7 +22,6 @@ CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorB
 
 CaptureBase::~CaptureBase()
 {
-//    remove();
     std::cout << "destructed     -C" << id() << std::endl;
 }
 
@@ -49,11 +48,10 @@ void CaptureBase::process()
 
 void CaptureBase::remove()
 {
-//    std::cout << "Remove          C" << id() << std::endl;
-//    std::cout << "C" <<  this_C->id() << " count: " << this_C.use_count() << std::endl;
+    std::cout << "Remove          C" << id() << std::endl;
     if (!is_removing_)
     {
-//        std::cout << "Removing        C" << id() << std::endl;
+        std::cout << "Removing        C" << id() << std::endl;
         is_removing_ = true;
         CaptureBasePtr this_C = shared_from_this();  // keep this alive while removing it
         FrameBasePtr frm = frame_ptr_.lock();
@@ -66,7 +64,6 @@ void CaptureBase::remove()
         while (!feature_list_.empty())
         {
             feature_list_.front()->remove(); // remove downstream
-            feature_list_.pop_front();
         }
         std::cout << "Removed         C" << id() << std::endl;
     }

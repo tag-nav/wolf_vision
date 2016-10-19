@@ -94,12 +94,10 @@ void FrameBase::remove()
         while (!capture_list_.empty())
         {
             capture_list_.front()->remove(); // remove downstream
-            capture_list_.pop_front();
         }
         while (!constrained_by_list_.empty())
         {
             constrained_by_list_.front()->remove(); // remove constrained
-            constrained_by_list_.pop_front();
         }
 
         // Remove Frame State Blocks
