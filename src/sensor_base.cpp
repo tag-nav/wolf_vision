@@ -45,7 +45,31 @@ SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBl
 
 SensorBase::~SensorBase()
 {
-//    remove();
+    // Remove State Blocks
+    if (p_ptr_ != nullptr && !extrinsic_dynamic_)
+    {
+        if (getProblem() != nullptr)
+            getProblem()->removeStateBlockPtr(p_ptr_);
+        delete p_ptr_;
+        p_ptr_ = nullptr;
+    }
+
+    if (o_ptr_ != nullptr && !extrinsic_dynamic_)
+    {
+        if (getProblem() != nullptr)
+            getProblem()->removeStateBlockPtr(o_ptr_);
+        delete o_ptr_;
+        o_ptr_ = nullptr;
+    }
+
+    if (intrinsic_ptr_ != nullptr)
+    {
+        if (getProblem() != nullptr)
+            getProblem()->removeStateBlockPtr(intrinsic_ptr_);
+        delete intrinsic_ptr_;
+        intrinsic_ptr_ = nullptr;
+    }
+
     std::cout << "destructed   -S" << id() << std::endl;
 }
 
@@ -64,7 +88,6 @@ inline void SensorBase::remove()
             delete p_ptr_;
             p_ptr_ = nullptr;
         }
-
         if (o_ptr_ != nullptr && !extrinsic_dynamic_)
         {
             if (getProblem() != nullptr)
@@ -72,7 +95,6 @@ inline void SensorBase::remove()
             delete o_ptr_;
             o_ptr_ = nullptr;
         }
-
         if (intrinsic_ptr_ != nullptr)
         {
             if (getProblem() != nullptr)

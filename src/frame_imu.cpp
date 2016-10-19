@@ -33,7 +33,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
 
   FrameIMU::~FrameIMU()
   {
-      remove();
+//      remove();
       if (acc_bias_ptr_ != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)

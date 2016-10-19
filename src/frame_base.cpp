@@ -60,14 +60,12 @@ void FrameBase::remove()
     {
         std::cout << "Removing      F" << id() << std::endl;
         is_removing_ = true;
-//        FrameBasePtr this_F = shared_from_this(); // TODO: Uncommenting this segfaults 'bad_weak_ptr' // keep this alive while removing it
-//        std::cout << "F count " << this_F.use_count() << std::endl;
+        FrameBasePtr this_F = shared_from_this(); // keep this alive while removing it
         TrajectoryBasePtr trj = trajectory_ptr_.lock();
         if (trj)
         {
             std::cout << "Removing      F" << id() << " from T" << std::endl;
-//            std::cout << "F count " << this_F.use_count() << std::endl;
-            trj->getFrameList().remove(shared_from_this()); // remove from upstream
+            trj->getFrameList().remove(this_F); // remove from upstream
         }
 
         while (!capture_list_.empty())
