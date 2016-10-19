@@ -191,7 +191,7 @@ int main(int argc, char** argv)
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
 
-    problem_ptr_->check();
+    bool is_ok = problem_ptr_->check();
 
 //    imu_ptr->remove();
 

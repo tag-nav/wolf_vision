@@ -242,7 +242,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         // Print and check ---------------------------------------
         void print();
-        void check();
+        bool check();
 
 };
 

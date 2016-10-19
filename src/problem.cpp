@@ -576,41 +576,71 @@ void Problem::print()
     }
 }
 
-void Problem::check()
+bool Problem::check()
 {
-    std::cout << "P: wolf tree integrity:" << std::endl;
-    std::cout << "H" << std::endl;
-    for (auto S : getHardwarePtr()->getSensorList() )
+    bool is_consistent = true;
+    std::cout << std::endl << "Wolf tree integrity -----------------" << std::endl;
+    auto P_raw = this;
+    std::cout << "P @ " << P_raw << std::endl;
+    auto H = hardware_ptr_;
+    std::cout << "H @ " << H.get() << std::endl;
+    is_consistent = is_consistent && (H->getProblem().get() == P_raw);
+    for (auto S : H->getSensorList() )
     {
-        std::cout << "  S" << S->id() << std::endl;
+        std::cout << "  S" << S->id() << " @ " << S.get() << std::endl;
+        std::cout << "    -> P @ " << S->getProblem().get() << std::endl;
+        std::cout << "    -> H @ " << S->getHardwarePtr().get() << std::endl;
+        is_consistent = is_consistent && (S->getProblem().get() == P_raw);
+        is_consistent = is_consistent && (S->getHardwarePtr() == H);
         for (auto p : S->getProcessorList() )
         {
-            std::cout << "    p" << p->id() << " -> S" << p->getSensorPtr()->id() << std::endl;
+            std::cout << "    p" << p->id() << " @ " << p.get() << " -> S" << p->getSensorPtr()->id() << std::endl;
+            std::cout << "      -> P  @ " << p->getProblem().get() << std::endl;
+            std::cout << "      -> S" << p->getSensorPtr()->id() << " @ " << p->getSensorPtr().get() << std::endl;
+            is_consistent = is_consistent && (p->getProblem().get() == P_raw);
+            is_consistent = is_consistent && (p->getSensorPtr() == S);
         }
     }
-    std::cout << "T" << std::endl;
-    for (auto F : getTrajectoryPtr()->getFrameList() )
+    auto T = trajectory_ptr_;
+    std::cout << "T @ " << T.get() << std::endl;
+    is_consistent = is_consistent && (T->getProblem().get() == P_raw);
+    for (auto F : T->getFrameList() )
     {
-        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id() << (F->isFixed() ?  ", fixed" : ", estim") << ", ts=" << std::setprecision(5) << F->getTimeStamp().get();
-        std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
-        std::cout << " T @ " << F->getTrajectoryPtr().get() << std::endl;
+        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id() << " @ " << F.get() << std::endl;
+        std::cout << "    -> P @ " << F->getProblem().get() << std::endl;
+        std::cout << "    -> T @ " << F->getTrajectoryPtr().get() << std::endl;
+        is_consistent = is_consistent && (F->getProblem().get() == P_raw);
+        is_consistent = is_consistent && (F->getTrajectoryPtr() == T);
         for (auto c : F->getConstrainedByList())
         {
             std::cout << "    <- c" << c->id() << " -> F" << c->getFrameOtherPtr()->id() << std::endl;
         }
         for (auto C : F->getCaptureList() )
         {
-            std::cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << std::endl;
+            std::cout << "    C" << C->id() << " @" << C.get() << " -> S" << C->getSensorPtr()->id() << std::endl;
+            std::cout << "      -> P  @ " << C->getProblem().get() << std::endl;
+            std::cout << "      -> F" << C->getFramePtr()->id() << " @ " << C->getFramePtr().get() << std::endl;
+            is_consistent = is_consistent && (C->getProblem().get() == P_raw);
+            is_consistent = is_consistent && (C->getFramePtr() == F);
             for (auto f : C->getFeatureList() )
             {
-                std::cout << "      f" << f->id() << ",            \t m = ( " << std::setprecision(3) << f->getMeasurement().transpose() << ")" << std::endl;
+                std::cout << "      f" << f->id() << " @" << f.get() << std::endl;
+                std::cout << "        -> P  @ " << f->getProblem().get() << std::endl;
+                std::cout << "        -> C" << f->getCapturePtr()->id() << " @ " << f->getCapturePtr().get() << std::endl;
+                is_consistent = is_consistent && (f->getProblem().get() == P_raw);
+                is_consistent = is_consistent && (f->getCapturePtr() == C);
+
                 for (auto c : f->getConstrainedByList())
                 {
                     std::cout << "     <- c" << c->id() << " -> f" << c->getFeatureOtherPtr()->id() << std::endl;
                 }
                 for (auto c : f->getConstraintList() )
                 {
-                    std::cout << "        c" << c->id();
+                    std::cout << "        c" << c->id() << " @" << C.get() << std::endl;
+                    std::cout << "          -> P  @ " << c->getProblem().get() << std::endl;
+                    std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get() << std::endl;
+                    is_consistent = is_consistent && (c->getProblem().get() == P_raw);
+                    is_consistent = is_consistent && (c->getFeaturePtr() == f);
                     switch (c->getCategory())
                     {
                         case CTR_ABSOLUTE:
@@ -630,15 +660,26 @@ void Problem::check()
             }
         }
     }
-    std::cout << "M" << std::endl;
-    for (auto L : getMapPtr()->getLandmarkList() )
+    auto M = map_ptr_;
+    std::cout << "M @ " << M.get() << std::endl;
+    is_consistent = is_consistent && (M->getProblem().get() == P_raw);
+    for (auto L : M->getLandmarkList() )
     {
-        std::cout << "  L" << L->id() << std::endl;
+        std::cout << "  L" << L->id() << " @" << L.get() << std::endl;
+        is_consistent = is_consistent && (L->getProblem().get() == P_raw);
+        is_consistent = is_consistent && (L->getMapPtr() == M);
         for (auto c : L->getConstrainedByList())
         {
             std::cout << "      <- c" << c->id() << " -> L" << c->getLandmarkOtherPtr()->id() << std::endl;
         }
     }
+
+    std::cout << std::endl;
+    std::cout << (is_consistent ? "------ Wolf tree OK" : "------ Wolf tree NOK") << std::endl;
+    std::cout << std::endl;
+
+
+    return is_consistent;
 }
 
 } // namespace wolf
