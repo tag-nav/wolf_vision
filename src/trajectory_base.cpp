@@ -13,24 +13,12 @@ TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
 
 TrajectoryBase::~TrajectoryBase()
 {
-    while (!frame_list_.empty())
-    {
-//        frame_list_.front()->remove();
-        frame_list_.pop_front();
-    }
     std::cout << "destructed T" << std::endl;
 }
-
-//void TrajectoryBase::destruct()
-//{
-//    if (!is_removing_)
-//        delete this;
-//}
 
 FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
 {
     // link up
-    //    _frame_ptr->setTrajectoryPtr(this); // TODO remove line
     _frame_ptr->setTrajectoryPtr(shared_from_this());
     _frame_ptr->setProblem(getProblem());
 
