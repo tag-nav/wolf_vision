@@ -33,11 +33,6 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
             measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
 		}
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~ConstraintPointToLine2D()
         {
             //std::cout << "deleting ConstraintPoint2D " << nodeId() << std::endl;

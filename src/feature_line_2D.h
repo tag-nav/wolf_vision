@@ -33,11 +33,6 @@ class FeatureLine2D : public FeatureBase
         FeatureLine2D(const Eigen::Vector3s & _line_homogeneous_params, const Eigen::Matrix3s & _params_covariance, 
                       Eigen::Vector3s & _point1, Eigen::Vector3s & _point2); 
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         */        
         virtual ~FeatureLine2D();
         
         /** \brief Returns a const reference to first_point_

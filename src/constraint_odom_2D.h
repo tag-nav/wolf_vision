@@ -18,11 +18,6 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
             setType("ODOM 2D");
         }
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~ConstraintOdom2D()
         {
             //

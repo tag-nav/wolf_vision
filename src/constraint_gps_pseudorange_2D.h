@@ -46,11 +46,6 @@ public:
         //std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
     }
 
-    /** \brief Default destructor (not recommended)
-     *
-     * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-     *
-     **/
     virtual ~ConstraintGPSPseudorange2D()
     {
         //std::cout << "deleting ConstraintGPSPseudorange2D " << nodeId() << std::endl;

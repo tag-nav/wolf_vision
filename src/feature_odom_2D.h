@@ -30,11 +30,6 @@ class FeatureOdom2D : public FeatureBase
          */
         FeatureOdom2D(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~FeatureOdom2D();
 
         /** \brief Generic interface to find constraints

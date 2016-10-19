@@ -64,12 +64,6 @@ namespace wolf {
           * \param _x state vector of size 16, organized as [position, quaternion, velocity, acc_bias, gyro_bias]
           **/
          FrameIMU(const FrameKeyType & _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x);
-
-          /** \brief Default destructor (not recommended)
-           *
-           * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-           *
-           **/
           virtual ~FrameIMU();
 
           // Frame values ------------------------------------------------

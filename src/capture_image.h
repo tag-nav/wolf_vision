@@ -32,11 +32,6 @@ class CaptureImage : public CaptureBase
 
     public:
         CaptureImage(const TimeStamp& _ts, SensorCamera::Ptr _camera_ptr, cv::Mat _data_cv);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         */
         virtual ~CaptureImage();
 
         virtual const cv::Mat& getImage() const;

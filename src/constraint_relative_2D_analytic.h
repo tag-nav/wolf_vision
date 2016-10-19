@@ -36,10 +36,6 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
             //
         }
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         **/
         virtual ~ConstraintRelative2DAnalytic()
         {
             //

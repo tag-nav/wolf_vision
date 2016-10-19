@@ -29,11 +29,6 @@ class SensorIMU : public SensorBase
          **/
         SensorIMU(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _a_w_biases_ptr = nullptr);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~SensorIMU();
 
     public:

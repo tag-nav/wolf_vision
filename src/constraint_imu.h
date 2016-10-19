@@ -18,10 +18,6 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         ConstraintIMU(FeatureIMU::Ptr _ftr_ptr, FrameIMU::Ptr _frame_ptr, bool _apply_loss_function = false,
                       ConstraintStatus _status = CTR_ACTIVE);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         **/
         virtual ~ConstraintIMU();
 
         template<typename T>

@@ -40,11 +40,6 @@ class SensorCamera : public SensorBase
 
         SensorCamera(const Eigen::VectorXs & _extrinsics, const std::shared_ptr<IntrinsicsCamera> _intrinsics_ptr);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~SensorCamera();
 
         Eigen::VectorXs getDistortionVector(){return distortion_;}

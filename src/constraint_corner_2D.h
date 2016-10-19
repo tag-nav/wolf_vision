@@ -17,11 +17,6 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
             setType("CORNER 2D");
 		}
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~ConstraintCorner2D()
         {
             //std::cout << "deleting ConstraintCorner2D " << nodeId() << std::endl;
