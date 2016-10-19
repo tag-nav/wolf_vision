@@ -47,6 +47,29 @@ FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock*
                 
 FrameBase::~FrameBase()
 {
+    // Remove Frame State Blocks
+    if (p_ptr_ != nullptr)
+    {
+        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+            getProblem()->removeStateBlockPtr(p_ptr_);
+        delete p_ptr_;
+        p_ptr_ = nullptr;
+    }
+    if (o_ptr_ != nullptr)
+    {
+        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+            getProblem()->removeStateBlockPtr(o_ptr_);
+        delete o_ptr_;
+        o_ptr_ = nullptr;
+    }
+    if (v_ptr_ != nullptr)
+    {
+        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+            getProblem()->removeStateBlockPtr(v_ptr_);
+        delete v_ptr_;
+        v_ptr_ = nullptr;
+    }
+
     if (isKey())
         std::cout << "destructed   KF" << id() << std::endl;
     else
@@ -101,6 +124,7 @@ void FrameBase::remove()
             delete v_ptr_;
             v_ptr_ = nullptr;
         }
+
         std::cout << "Removed       F" << id() << std::endl;
     }
 }

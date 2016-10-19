@@ -26,6 +26,25 @@ LandmarkBase::~LandmarkBase()
 {
 //    remove();
     std::cout << "destructed   -L" << id() << std::endl;
+
+    // Remove State Blocks
+    if (p_ptr_ != nullptr)
+    {
+        if (getProblem() != nullptr)
+            getProblem()->removeStateBlockPtr(p_ptr_);
+
+        delete p_ptr_;
+        p_ptr_ = nullptr;
+    }
+    if (o_ptr_ != nullptr)
+    {
+        if (getProblem() != nullptr)
+            getProblem()->removeStateBlockPtr(o_ptr_);
+
+        delete o_ptr_;
+        o_ptr_ = nullptr;
+    }
+
 }
 
 void LandmarkBase::remove()
@@ -35,6 +54,7 @@ void LandmarkBase::remove()
         is_removing_ = true;
         std::cout << "Removing   L" << id() << std::endl;
         LandmarkBasePtr this_L = shared_from_this(); // keep this alive while removing it
+
         // Remove State Blocks
         if (p_ptr_ != nullptr)
         {
@@ -52,6 +72,7 @@ void LandmarkBase::remove()
             delete o_ptr_;
             o_ptr_ = nullptr;
         }
+
         // remove from upstream
         map_ptr_.lock()->getLandmarkList().remove(shared_from_this());
         // remove constrained by
