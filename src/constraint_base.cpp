@@ -95,12 +95,12 @@ void ConstraintBase::remove()
         is_removing_ = true;
         std::cout << "Removing         c" << id() << std::endl;
         ConstraintBasePtr this_c = shared_from_this(); // keep this alive while removing it
-        FeatureBasePtr ftr = feature_ptr_.lock();
-        if (ftr)
+        FeatureBasePtr f = feature_ptr_.lock();
+        if (f)
         {
-            ftr->getConstraintList().remove(shared_from_this()); // remove from upstream
-            if (ftr->getConstraintList().empty() && ftr->getConstrainedByList().empty())
-                ftr->remove(); // remove upstream
+            f->getConstraintList().remove(shared_from_this()); // remove from upstream
+            if (f->getConstraintList().empty() && f->getConstrainedByList().empty())
+                f->remove(); // remove upstream
         }
         // add constraint to be removed from solver
         if (getProblem() != nullptr)

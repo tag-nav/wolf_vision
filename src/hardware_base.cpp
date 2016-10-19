@@ -12,7 +12,7 @@ HardwareBase::HardwareBase() :
 
 HardwareBase::~HardwareBase()
 {
-	std::cout << "destructed H" << std::endl;
+	std::cout << "destructed -H" << std::endl;
 }
 
 SensorBasePtr HardwareBase::addSensor(SensorBasePtr _sensor_ptr)

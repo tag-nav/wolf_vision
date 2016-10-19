@@ -48,23 +48,26 @@ void CaptureBase::process()
 
 void CaptureBase::remove()
 {
-    std::cout << "Remove          C" << id() << std::endl;
     if (!is_removing_)
     {
-        std::cout << "Removing        C" << id() << std::endl;
         is_removing_ = true;
         CaptureBasePtr this_C = shared_from_this();  // keep this alive while removing it
-        FrameBasePtr frm = frame_ptr_.lock();
-        if (frm)
+
+        // remove from upstream
+        FrameBasePtr F = frame_ptr_.lock();
+        if (F)
         {
-            frm->getCaptureList().remove(this_C); // remove from upstream
-            if (frm->getCaptureList().empty() && frm->getConstrainedByList().empty())
-                frm->remove(); // remove upstream
+            F->getCaptureList().remove(this_C);
+            if (F->getCaptureList().empty() && F->getConstrainedByList().empty())
+                F->remove(); // remove upstream
         }
+
+        // remove downstream
         while (!feature_list_.empty())
         {
             feature_list_.front()->remove(); // remove downstream
         }
+
         std::cout << "Removed         C" << id() << std::endl;
     }
 }

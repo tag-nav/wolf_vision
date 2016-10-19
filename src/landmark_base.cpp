@@ -74,7 +74,10 @@ void LandmarkBase::remove()
         }
 
         // remove from upstream
-        map_ptr_.lock()->getLandmarkList().remove(shared_from_this());
+        auto M = map_ptr_.lock();
+        if (M)
+            M->getLandmarkList().remove(shared_from_this());
+
         // remove constrained by
         while (!constrained_by_list_.empty())
         {

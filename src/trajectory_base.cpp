@@ -13,7 +13,7 @@ TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
 
 TrajectoryBase::~TrajectoryBase()
 {
-    std::cout << "destructed T" << std::endl;
+    std::cout << "destructed -T" << std::endl;
 }
 
 FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)

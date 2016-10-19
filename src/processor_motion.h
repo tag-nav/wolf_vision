@@ -379,12 +379,7 @@ inline ProcessorMotion::ProcessorMotion(ProcessorType _tp,
 
 inline ProcessorMotion::~ProcessorMotion()
 {
-//    if (origin_ptr_)
-//        origin_ptr_->remove();
-//    if (last_ptr_)
-//        last_ptr_->remove();
-//    if (incoming_ptr_)
-//        incoming_ptr_->remove();
+    std::cout << "destructed     -p-Mot" << id() << std::endl;
 }
 
 inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)

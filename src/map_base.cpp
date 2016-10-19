@@ -26,7 +26,7 @@ MapBase::MapBase() :
 
 MapBase::~MapBase()
 {
-	std::cout << "destructed  M" << std::endl;
+	std::cout << "destructed -M" << std::endl;
 }
 
 LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)

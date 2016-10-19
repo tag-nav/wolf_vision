@@ -42,35 +42,6 @@ FeatureBase::~FeatureBase()
     std::cout << "destructed      -f" << id() << std::endl;
 }
 
-ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
-{
-    constraint_list_.push_back(_co_ptr);
-    _co_ptr->setFeaturePtr(shared_from_this());
-    _co_ptr->setProblem(getProblem());
-    // add constraint to be added in solver
-    if (getProblem() != nullptr)
-        getProblem()->addConstraintPtr(_co_ptr);
-    else
-        std::cout << "WARNING: ADDING CONSTRAINT TO A FEATURE NOT CONNECTED WITH PROBLEM." << std::endl;
-    return _co_ptr;
-}
-
-FrameBasePtr FeatureBase::getFramePtr() const
-{
-    return capture_ptr_.lock()->getFramePtr();
-}
-
-ConstraintBaseList& FeatureBase::getConstraintList()
-{
-    return constraint_list_;
-}
-
-void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
-{
-	for(ConstraintBasePtr c_ptr : constraint_list_)
-		_ctr_list.push_back(c_ptr);
-}
-
 void FeatureBase::remove()
 {
     std::cout << "Remove         f" << id() << std::endl;
@@ -79,12 +50,12 @@ void FeatureBase::remove()
         is_removing_ = true;
         std::cout << "Removing       f" << id() << std::endl;
         std::shared_ptr<FeatureBase> this_f = shared_from_this(); // keep this alive while removing it
-        CaptureBasePtr cap = capture_ptr_.lock();
-        if (cap)
+        CaptureBasePtr C = capture_ptr_.lock();
+        if (C)
         {
-            cap->getFeatureList().remove(this_f); // remove from upstream
-            if (cap->getFeatureList().empty())
-                cap->remove(); // remove upstream
+            C->getFeatureList().remove(this_f); // remove from upstream
+            if (C->getFeatureList().empty())
+                C->remove(); // remove upstream
         }
         while (!constraint_list_.empty())
         {
@@ -114,6 +85,35 @@ void FeatureBase::remove()
 //        }
 //    }
 //}
+
+ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
+{
+    constraint_list_.push_back(_co_ptr);
+    _co_ptr->setFeaturePtr(shared_from_this());
+    _co_ptr->setProblem(getProblem());
+    // add constraint to be added in solver
+    if (getProblem() != nullptr)
+        getProblem()->addConstraintPtr(_co_ptr);
+    else
+        std::cout << "WARNING: ADDING CONSTRAINT TO A FEATURE NOT CONNECTED WITH PROBLEM." << std::endl;
+    return _co_ptr;
+}
+
+FrameBasePtr FeatureBase::getFramePtr() const
+{
+    return capture_ptr_.lock()->getFramePtr();
+}
+
+ConstraintBaseList& FeatureBase::getConstraintList()
+{
+    return constraint_list_;
+}
+
+void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
+{
+	for(ConstraintBasePtr c_ptr : constraint_list_)
+		_ctr_list.push_back(c_ptr);
+}
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 {

@@ -10,16 +10,9 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, SensorBasePtr _sensor_ptr,
     setType("IMU");
 }
 
-/*CaptureIMU::CaptureIMU(const TimeStamp& _init_ts, SensorBasePtr _sensor_ptr,
-                             const Eigen::Vector6s& _data, const Eigen::Matrix<Scalar,6,3>& _data_covariance) :
-        CaptureMotion(_init_ts, _sensor_ptr, _data, _data_covariance)
-{
-    setType("IMU");
-}*/
-
 CaptureIMU::~CaptureIMU()
 {
-    std::cout << "destructed      C-IMU" << id() << std::endl;
+//    std::cout << "destructed     -C-IMU" << id() << std::endl;
     //
 }
 

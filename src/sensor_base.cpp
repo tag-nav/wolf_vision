@@ -78,7 +78,7 @@ inline void SensorBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-        SensorBasePtr this_sen = shared_from_this(); // protect it while removing links
+        SensorBasePtr this_S = shared_from_this(); // protect it while removing links
 
         // Remove State Blocks
         if (p_ptr_ != nullptr && !extrinsic_dynamic_)
@@ -102,6 +102,11 @@ inline void SensorBase::remove()
             delete intrinsic_ptr_;
             intrinsic_ptr_ = nullptr;
         }
+
+        // remove from upstream
+        auto H = hardware_ptr_.lock();
+        if (H)
+            H->getSensorList().remove(this_S);
 
         // remove downstream processors
         while (!processor_list_.empty())

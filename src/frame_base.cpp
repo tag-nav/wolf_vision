@@ -78,17 +78,14 @@ FrameBase::~FrameBase()
 
 void FrameBase::remove()
 {
-    std::cout << "Remove        F" << id() << std::endl;
     if (!is_removing_)
     {
-        std::cout << "Removing      F" << id() << std::endl;
         is_removing_ = true;
         FrameBasePtr this_F = shared_from_this(); // keep this alive while removing it
-        TrajectoryBasePtr trj = trajectory_ptr_.lock();
-        if (trj)
+        TrajectoryBasePtr T = trajectory_ptr_.lock();
+        if (T)
         {
-            std::cout << "Removing      F" << id() << " from T" << std::endl;
-            trj->getFrameList().remove(this_F); // remove from upstream
+            T->getFrameList().remove(this_F); // remove from upstream
         }
 
         while (!capture_list_.empty())

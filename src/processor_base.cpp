@@ -49,6 +49,8 @@ void ProcessorBase::remove()
         is_removing_ = true;
         std::cout << "Removing     p" << id() << std::endl;
         ProcessorBasePtr this_p = shared_from_this();
+
+        // remove from upstream
         SensorBasePtr sen = sensor_ptr_.lock();
         if(sen)
             sen->getProcessorList().remove(this_p);
