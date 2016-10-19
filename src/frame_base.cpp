@@ -47,7 +47,6 @@ FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock*
                 
 FrameBase::~FrameBase()
 {
-//    std::cout << "Destruct      F" << id() << std::endl;
     if (isKey())
         std::cout << "destructed   KF" << id() << std::endl;
     else
@@ -62,21 +61,19 @@ void FrameBase::remove()
         std::cout << "Removing      F" << id() << std::endl;
         is_removing_ = true;
 //        FrameBasePtr this_F = shared_from_this(); // TODO: Uncommenting this segfaults 'bad_weak_ptr' // keep this alive while removing it
+//        std::cout << "F count " << this_F.use_count() << std::endl;
         TrajectoryBasePtr trj = trajectory_ptr_.lock();
         if (trj)
         {
             std::cout << "Removing      F" << id() << " from T" << std::endl;
+//            std::cout << "F count " << this_F.use_count() << std::endl;
             trj->getFrameList().remove(shared_from_this()); // remove from upstream
         }
 
         while (!capture_list_.empty())
         {
-//            auto C = capture_list_.front();
-//            std::cout << "C" <<  C->id() << " count: " << C.use_count() << std::endl;
             capture_list_.front()->remove(); // remove downstream
-//            std::cout << "C" <<  C->id() << " count: " << C.use_count() << std::endl;
             capture_list_.pop_front();
-//            std::cout << "C" <<  C->id() << " count: " << C.use_count() << std::endl;
         }
         while (!constrained_by_list_.empty())
         {
