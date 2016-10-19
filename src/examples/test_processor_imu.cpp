@@ -86,7 +86,7 @@ int main(int argc, char** argv)
     Eigen::Vector6s data_;
 
     // Get initial data
-    data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
+    data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2]; // FIXME this leaks
     data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
     t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
 
@@ -196,13 +196,16 @@ int main(int argc, char** argv)
 
 //    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
     problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
-
-    problem_ptr_->check();
-
     problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
 //    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
 
     problem_ptr_->check();
+
+    // delete stuff
+    data_file_acc.close(); // no impact on leaks
+    data_file_gyro.close();
+    delete filename_acc; // No impact on leaks
+    delete filename_gyro;
 
     return 0;
 }
