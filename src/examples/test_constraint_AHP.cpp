@@ -119,12 +119,12 @@ int main()
 
 
     Eigen::Vector2s residuals;
-    Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
-    Eigen::Vector4s current_frame_o = last_frame->getOPtr()->getVector();
-    Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getVector();
-    Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
-    Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
-
+    //    Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
+    //    Eigen::Vector4s current_frame_o = last_frame->getOPtr()->getVector();
+    //    Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getVector();
+    //    Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
+    //    Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
+    //
     //    ( * constraint_ptr ) (current_frame_p.data(), current_frame_o.data(),
     //            anchor_frame_p.data(), anchor_frame_o.data(),
     //            landmark_.data(), residuals.data());
