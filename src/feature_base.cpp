@@ -82,7 +82,7 @@ void FeatureBase::remove()
         CaptureBasePtr cap = capture_ptr_.lock();
         if (cap)
         {
-            cap->getFeatureList().remove(shared_from_this()); // remove from upstream
+            cap->getFeatureList().remove(this_f); // remove from upstream
             if (cap->getFeatureList().empty())
                 cap->remove(); // remove upstream
         }

@@ -240,8 +240,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void removeConstraintPtr(ConstraintBasePtr _constraint_ptr);
 
-        // Print ---------------------------------------
+        // Print and check ---------------------------------------
         void print();
+        void check();
 
 };
 

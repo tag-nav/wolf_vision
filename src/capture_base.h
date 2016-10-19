@@ -28,7 +28,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
     protected:
         unsigned int capture_id_;
         TimeStamp time_stamp_; ///< Time stamp
-        SensorBasePtr sensor_ptr_; ///< Pointer to sensor
+        SensorBaseWPtr sensor_ptr_; ///< Pointer to sensor
 
         // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
         StateBlock* sensor_p_ptr_;
@@ -157,7 +157,7 @@ inline TimeStamp CaptureBase::getTimeStamp() const
 
 inline SensorBasePtr CaptureBase::getSensorPtr() const
 {
-    return sensor_ptr_;
+    return sensor_ptr_.lock();
 }
 
 inline void CaptureBase::setTimeStamp(const TimeStamp& _ts)

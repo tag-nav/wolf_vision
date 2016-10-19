@@ -71,8 +71,12 @@ void FrameBase::remove()
 
         while (!capture_list_.empty())
         {
+//            auto C = capture_list_.front();
+//            std::cout << "C" <<  C->id() << " count: " << C.use_count() << std::endl;
             capture_list_.front()->remove(); // remove downstream
+//            std::cout << "C" <<  C->id() << " count: " << C.use_count() << std::endl;
             capture_list_.pop_front();
+//            std::cout << "C" <<  C->id() << " count: " << C.use_count() << std::endl;
         }
         while (!constrained_by_list_.empty())
         {

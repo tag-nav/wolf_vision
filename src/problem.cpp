@@ -576,5 +576,69 @@ void Problem::print()
     }
 }
 
+void Problem::check()
+{
+    std::cout << "P: wolf tree integrity:" << std::endl;
+    std::cout << "H" << std::endl;
+    for (auto S : getHardwarePtr()->getSensorList() )
+    {
+        std::cout << "  S" << S->id() << std::endl;
+        for (auto p : S->getProcessorList() )
+        {
+            std::cout << "    p" << p->id() << " -> S" << p->getSensorPtr()->id() << std::endl;
+        }
+    }
+    std::cout << "T" << std::endl;
+    for (auto F : getTrajectoryPtr()->getFrameList() )
+    {
+        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id() << (F->isFixed() ?  ", fixed" : ", estim") << ", ts=" << std::setprecision(5) << F->getTimeStamp().get();
+        std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
+        std::cout << " T @ " << F->getTrajectoryPtr().get() << std::endl;
+        for (auto c : F->getConstrainedByList())
+        {
+            std::cout << "    <- c" << c->id() << " -> F" << c->getFrameOtherPtr()->id() << std::endl;
+        }
+        for (auto C : F->getCaptureList() )
+        {
+            std::cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << std::endl;
+            for (auto f : C->getFeatureList() )
+            {
+                std::cout << "      f" << f->id() << ",            \t m = ( " << std::setprecision(3) << f->getMeasurement().transpose() << ")" << std::endl;
+                for (auto c : f->getConstrainedByList())
+                {
+                    std::cout << "     <- c" << c->id() << " -> f" << c->getFeatureOtherPtr()->id() << std::endl;
+                }
+                for (auto c : f->getConstraintList() )
+                {
+                    std::cout << "        c" << c->id();
+                    switch (c->getCategory())
+                    {
+                        case CTR_ABSOLUTE:
+                            std::cout << " --> A" << std::endl;
+                            break;
+                        case CTR_FRAME:
+                            std::cout << " --> F" << c->getFrameOtherPtr()->id() << std::endl;
+                            break;
+                        case CTR_FEATURE:
+                            std::cout << " --> f" << c->getFeatureOtherPtr()->id() << std::endl;
+                            break;
+                        case CTR_LANDMARK:
+                            std::cout << " --> L" << c->getLandmarkOtherPtr()->id() << std::endl;
+                            break;
+                    }
+                }
+            }
+        }
+    }
+    std::cout << "M" << std::endl;
+    for (auto L : getMapPtr()->getLandmarkList() )
+    {
+        std::cout << "  L" << L->id() << std::endl;
+        for (auto c : L->getConstrainedByList())
+        {
+            std::cout << "      <- c" << c->id() << " -> L" << c->getLandmarkOtherPtr()->id() << std::endl;
+        }
+    }
+}
 
 } // namespace wolf

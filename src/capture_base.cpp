@@ -12,8 +12,8 @@ CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorB
         capture_id_(++capture_id_count_),
         time_stamp_(_ts),
         sensor_ptr_(_sensor_ptr),
-        sensor_p_ptr_(sensor_ptr_->getPPtr()),
-        sensor_o_ptr_(sensor_ptr_->getOPtr())
+        sensor_p_ptr_(sensor_ptr_.lock()->getPPtr()),
+        sensor_o_ptr_(sensor_ptr_.lock()->getOPtr())
 {
     //
     std::cout << "constructed     C" << id() << std::endl;
@@ -41,15 +41,16 @@ void CaptureBase::process()
 {
     // Call all processors assigned to the sensor that captured this data
     auto cap = shared_from_this();
-    for (auto processor_iter = sensor_ptr_->getProcessorList().begin(); processor_iter != sensor_ptr_->getProcessorList().end(); ++processor_iter)
-    {
-        (*processor_iter)->process(cap);
-    }
+    auto sen = sensor_ptr_.lock();
+    if (sen)
+        for (auto prc : sen->getProcessorList())
+            prc->process(cap);
 }
 
 void CaptureBase::remove()
 {
     std::cout << "Remove          C" << id() << std::endl;
+//    std::cout << "C" <<  this_C->id() << " count: " << this_C.use_count() << std::endl;
     if (!is_removing_)
     {
         std::cout << "Removing        C" << id() << std::endl;

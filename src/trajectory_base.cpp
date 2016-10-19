@@ -15,6 +15,7 @@ TrajectoryBase::~TrajectoryBase()
 {
     while (!frame_list_.empty())
     {
+//        frame_list_.front()->remove();
         frame_list_.pop_front();
     }
     std::cout << "destructed T" << std::endl;
