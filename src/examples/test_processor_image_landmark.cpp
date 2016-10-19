@@ -11,14 +11,12 @@
 //Wolf
 #include "wolf.h"
 #include "problem.h"
-//#include "sensor_base.h"
 #include "state_block.h"
 #include "processor_image_landmark.h"
-//#include "capture_void.h"
+#include "capture_fix.h"
 #include "processor_odom_3D.h"
 #include "sensor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
-
 
 using Eigen::Vector3s;
 using Eigen::Vector4s;
@@ -36,7 +34,7 @@ int main(int argc, char** argv)
     if (argc == 1)
     {
 //        filename = "/home/jtarraso/Videos/House_interior.mp4";
-        filename = "/home/jtarraso/Vídeos/gray.mp4";
+        filename = "/home/jtarraso/Vídeos/gray1.mp4";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
@@ -150,7 +148,15 @@ int main(int argc, char** argv)
 
     SensorBase* sen_odo_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(),"");
     wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
-    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin((Vector7s()<<0,0,0,0,0,0,1).finished(), t);
+
+    // Origin Key Frame
+    FrameBasePtr origin_frame = wolf_problem_ptr_->createFrame(KEY_FRAME, (Vector7s()<<1,0,0,0,0,0,1).finished(), t);
+    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(origin_frame);
+    origin_frame->fix();
+//    CaptureFix* initial_covariance = new CaptureFix(t, sen_odo_ptr, (Vector7s()<<0,0,0,0,0,0,1).finished(), Eigen::Matrix<Scalar,6,6>::Identity() * 0.1);
+//    origin_frame->addCapture(initial_covariance);
+//    initial_covariance->process();
+//    wolf_problem_ptr_->print();
 
     Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
     CaptureMotion* cap_odo = new CaptureMotion(TimeStamp(0), sen_odo_ptr, data);
@@ -160,12 +166,12 @@ int main(int argc, char** argv)
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
-    //    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
-    //    ceres_options.max_line_search_step_contraction = 1e-3;
+    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+    ceres_options.max_line_search_step_contraction = 1e-3;
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
     //    ceres_options.max_num_iterations = 100;
-    //    google::InitGoogleLogging(argv[0]);
+    google::InitGoogleLogging(argv[0]);
 
     CeresManager ceres_manager(wolf_problem_ptr_, ceres_options);
 
@@ -200,16 +206,35 @@ int main(int argc, char** argv)
         wolf_problem_ptr_->getCurrentState(x_prev, t_prev);
 
         // before the previous state
-        FrameBaseList::iterator f_it = wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->begin();
-        std::cout << (*f_it)->getTimeStamp().get() << std::endl;
-        f_it--;
+//        FrameBaseList::iterator f_it = wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->begin();
+//        FrameBaseList::iterator f_it = wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->end();
+//        std::cout << (*f_it)->getTimeStamp().get() << std::endl;
+//        f_it--;
+//        f_it++;
+
+//        std::cout << "f_it: " << *f_it << std::endl;
+//        std::cout << "f_begin: " << *(wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->begin()) << std::endl;
+//        std::cout << "f_end: " << *(wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->end()) << std::endl;
+//        std::cout << "f_size: " << wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->size() << std::endl;
+
+        FrameBasePtr prev_key_fr_ptr = wolf_problem_ptr_->getLastKeyFramePtr();
+        FrameBasePtr prev_prev_key_fr_ptr = nullptr;
+        for (auto f_it = wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->rbegin(); f_it != wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->rend(); f_it++)
+            if ((*f_it) == prev_key_fr_ptr)
+            {
+                f_it++;
+                if (f_it != wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->rend())
+                    prev_prev_key_fr_ptr = (*f_it);
+                break;
+            }
 
         // compute delta state, and odometry data
-        if (f_it != wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->end())
+        //if (f_it != wolf_problem_ptr_->getTrajectoryPtr()->getFrameListPtr()->end())
+        if (prev_prev_key_fr_ptr)
         {
             // we have two states
-            std::cout << (*f_it)->getTimeStamp().get() << std::endl;
-            Vector7s x_prev_prev = (*f_it)->getState();
+            std::cout << prev_prev_key_fr_ptr->getTimeStamp().get() << std::endl;
+            Vector7s x_prev_prev = prev_prev_key_fr_ptr->getState();
 
             // some maps to avoid local variables
             Eigen::Map<Eigen::Vector3s>     p1(x_prev_prev.data());
@@ -236,7 +261,7 @@ int main(int argc, char** argv)
 
         cap_odo->process();
 
-        wolf_problem_ptr_->print();
+        //wolf_problem_ptr_->print();
 
 
 
@@ -252,12 +277,21 @@ int main(int argc, char** argv)
 
         wolf_problem_ptr_->print();
 
+//        StateBlockList* st_block_list_ptr = wolf_problem_ptr_->getStateListPtr();
+//        for(auto state_block : *st_block_list_ptr)
+//        {
+//            std::cout << "state block: " << state_block->getPtr() << "; size " << (state_block->getSize())
+//                      << "; value: " << state_block->getVector().transpose() <<std::endl;
+//        }
+
+
+
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(20);
+//        cv::waitKey(0);
 
-        if((f%buffer_size) == 5)
-        {
+//        if((f%buffer_size) == 5)
+//        {
             ceres::Solver::Summary summary = ceres_manager.solve();
             std::cout << summary.FullReport() << std::endl;
 
@@ -267,8 +301,8 @@ int main(int argc, char** argv)
             std::cout << "Last key frame orientation: "
                       << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
 
-            //cv::waitKey(0);
-        }
+            cv::waitKey(0);
+//        }
 
         std::cout << "END OF ITERATION\n=================================" << std::endl;
 
