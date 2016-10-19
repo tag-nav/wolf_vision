@@ -94,17 +94,10 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
-        /** \brief Remove the given constraint from the list.
-         *  If list becomes empty, deletes this object by calling remove()
-         **/
-        void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
-
-
 
         void setMapPtr(MapBasePtr _map_ptr){map_ptr_ = _map_ptr;}
         MapBasePtr getMapPtr();
         ProblemPtr getProblem();
-
 
 };
 
@@ -168,13 +161,6 @@ inline unsigned int LandmarkBase::getHits() const
 inline ConstraintBaseList& LandmarkBase::getConstrainedByList()
 {
     return constrained_by_list_;
-}
-
-inline void LandmarkBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
-{
-    constrained_by_list_.remove(_ctr_ptr);
-    if (constrained_by_list_.empty())
-        remove();
 }
 
 inline StateBlock* LandmarkBase::getPPtr() const

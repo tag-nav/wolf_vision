@@ -85,7 +85,6 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         const Eigen::VectorXs& getMeasurement() const;
         
         virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
-        virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
 
@@ -102,11 +101,6 @@ namespace wolf{
 inline void FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.push_back(_ctr_ptr);
-}
-
-inline void FeatureBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
-{
-    constrained_by_list_.remove(_ctr_ptr);
 }
 
 inline unsigned int FeatureBase::getHits() const
