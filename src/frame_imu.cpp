@@ -7,16 +7,20 @@
 
 namespace wolf {
 
-FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr, StateQuaternion* _o_ptr,
+FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr, StateQuaternion* _q_ptr,
                    StateBlock* _ba_ptr, StateBlock* _bg_ptr) :
-        FrameBase(_ts, _p_ptr, (StateBlock*)((_o_ptr)), _v_ptr), acc_bias_ptr_(_ba_ptr), gyro_bias_ptr_(_bg_ptr)
+        FrameBase(_ts, _p_ptr, (StateBlock*)((_q_ptr)), _v_ptr),
+        acc_bias_ptr_(_ba_ptr),
+        gyro_bias_ptr_(_bg_ptr)
 {
     setType("IMU");
 }
 
 FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr,
-                   StateQuaternion* _o_ptr, StateBlock* _ba_ptr, StateBlock* _bg_ptr) :
-        FrameBase(_tp, _ts, _p_ptr, (StateBlock*)((_o_ptr)), _v_ptr), acc_bias_ptr_(_ba_ptr), gyro_bias_ptr_(_bg_ptr)
+                   StateQuaternion* _q_ptr, StateBlock* _ba_ptr, StateBlock* _bg_ptr) :
+        FrameBase(_tp, _ts, _p_ptr, (StateBlock*)((_q_ptr)), _v_ptr),
+        acc_bias_ptr_(_ba_ptr),
+        gyro_bias_ptr_(_bg_ptr)
 {
     setType("IMU");
 }
