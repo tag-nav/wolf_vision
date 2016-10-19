@@ -120,6 +120,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         Eigen::MatrixXs getNoiseCov();
 
         ProblemPtr getProblem();
+        HardwareBasePtr getHardwarePtr();
+        void setHardwarePtr(HardwareBasePtr _hw_ptr);
 
 };
 
@@ -214,6 +216,16 @@ inline Eigen::VectorXs SensorBase::getNoiseStd()
 inline Eigen::MatrixXs SensorBase::getNoiseCov()
 {
     return noise_cov_;
+}
+
+inline HardwareBasePtr SensorBase::getHardwarePtr()
+{
+    return hardware_ptr_.lock();
+}
+
+inline void SensorBase::setHardwarePtr(HardwareBasePtr _hw_ptr)
+{
+    hardware_ptr_ = _hw_ptr;
 }
 
 } // namespace wolf

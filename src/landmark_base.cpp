@@ -129,4 +129,9 @@ YAML::Node LandmarkBase::saveToYaml() const
     return node;
 }
 
+MapBasePtr LandmarkBase::getMapPtr()
+{
+    return map_ptr_.lock();
+}
+
 } // namespace wolf
