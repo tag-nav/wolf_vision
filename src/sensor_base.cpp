@@ -19,7 +19,7 @@ SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlo
         noise_std_(_noise_size),
         noise_cov_(_noise_size, _noise_size)
 {
-    std::cout << "constructed   S" << id() << std::endl;
+    std::cout << "constructed  +S" << id() << std::endl;
     //
 }
 
@@ -40,13 +40,13 @@ SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBl
     for (unsigned int i = 0; i < _noise_std.size(); i++)
         noise_cov_(i, i) = noise_std_(i) * noise_std_(i);
 
-    std::cout << "constructed   S" << id() << std::endl;
+    std::cout << "constructed  +S" << id() << std::endl;
 }
 
 SensorBase::~SensorBase()
 {
 //    remove();
-    std::cout << "destructed    S" << id() << std::endl;
+    std::cout << "destructed   -S" << id() << std::endl;
 }
 
 inline void SensorBase::remove()

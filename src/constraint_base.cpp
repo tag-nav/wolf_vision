@@ -19,7 +19,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
     landmark_other_ptr_() // nullptr
 {
     //std::cout << "creating ConstraintBase " << std::endl;
-    std::cout << "constructed       c" << id() << std::endl;
+    std::cout << "constructed      +c" << id() << std::endl;
 }
 
 
@@ -39,7 +39,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool
     FrameBasePtr frm_o = frame_other_ptr_.lock();
     if (frm_o)
         frm_o->addConstrainedBy(shared_from_this());
-    std::cout << "constructed       c" << id() << std::endl;
+    std::cout << "constructed      +c" << id() << std::endl;
 }
 
 
@@ -59,7 +59,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_ptr, 
     FeatureBasePtr ftr_o = feature_other_ptr_.lock();
     if (ftr_o)
         ftr_o->addConstrainedBy(shared_from_this());
-    std::cout << "constructed       c" << id() << std::endl;
+    std::cout << "constructed      +c" << id() << std::endl;
 }
 
 
@@ -79,13 +79,13 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr
     LandmarkBasePtr lmk_o = landmark_other_ptr_.lock();
     if (lmk_o)
         lmk_o->addConstrainedBy(shared_from_this());
-    std::cout << "constructed       c" << id() << std::endl;
+    std::cout << "constructed      +c" << id() << std::endl;
 }
 
 ConstraintBase::~ConstraintBase()
 {
 //    remove();
-    std::cout << "destructed        c" << id() << std::endl;
+    std::cout << "destructed       -c" << id() << std::endl;
 }
 
 void ConstraintBase::remove()

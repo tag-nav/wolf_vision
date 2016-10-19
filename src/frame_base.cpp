@@ -21,7 +21,10 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
             v_ptr_(_v_ptr)
 {
     //
-    std::cout << "constructed     F" << id() << std::endl;
+    if (isKey())
+        std::cout << "constructed +KF" << id() << std::endl;
+    else
+        std::cout << "constructed  +F" << id() << std::endl;
 }
 
 FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
@@ -37,21 +40,18 @@ FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock*
 {
     //
     if (isKey())
-        std::cout << "constructed  KF" << id() << std::endl;
+        std::cout << "constructed +KF" << id() << std::endl;
     else
-        std::cout << "constructed   F" << id() << std::endl;
+        std::cout << "constructed  +F" << id() << std::endl;
 }
                 
 FrameBase::~FrameBase()
 {
-    std::cout << "Destroy       F" << id() << std::endl;
-
-//    is_removing_ = true;
-//    remove();
+//    std::cout << "Destruct      F" << id() << std::endl;
     if (isKey())
         std::cout << "destructed   KF" << id() << std::endl;
     else
-        std::cout << "destructed    F" << id() << std::endl;
+        std::cout << "destructed   -F" << id() << std::endl;
 }
 
 void FrameBase::remove()

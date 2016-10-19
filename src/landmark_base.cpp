@@ -19,13 +19,13 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, S
 			o_ptr_(_o_ptr)
 {
     //
-    std::cout << "constructed   L" << id() << std::endl;
+    std::cout << "constructed  +L" << id() << std::endl;
 }
                 
 LandmarkBase::~LandmarkBase()
 {
 //    remove();
-    std::cout << "destructed    L" << id() << std::endl;
+    std::cout << "destructed   -L" << id() << std::endl;
 }
 
 void LandmarkBase::remove()

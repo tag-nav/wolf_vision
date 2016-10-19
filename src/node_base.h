@@ -102,7 +102,6 @@ inline NodeBase::NodeBase(const std::string& _class, const std::string& _type, c
 
 inline NodeBase::~NodeBase()
 {
-    std::cout << "destructed N" << std::endl;
     //
 }
 
