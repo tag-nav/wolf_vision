@@ -24,8 +24,10 @@ void CaptureFix::process()
     // ADD CONSTRAINT
     if (data_.size() == 3 && data_covariance_.rows() == 3 && data_covariance_.cols() == 3 )
         getFeatureListPtr()->front()->addConstraint(new ConstraintFix(getFeatureListPtr()->front()));
+    else if (data_.size() == 7 && data_covariance_.rows() == 6 && data_covariance_.cols() == 6 )
+        getFeatureListPtr()->front()->addConstraint(new ConstraintFix3D(getFeatureListPtr()->front()));
     else
-        throw std::runtime_error("fix constraint not implemented in 3D"); // TODO
+        throw std::runtime_error("wrong data size in capture fix"); // TODO
     //std::cout << "ConstraintFix added " << std::endl;
 }
 

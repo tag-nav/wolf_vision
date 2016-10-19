@@ -5,6 +5,7 @@
 #include "capture_base.h"
 #include "feature_fix.h"
 #include "constraint_fix.h"
+#include "constraint_fix_3D.h"
 
 //std includes
 //

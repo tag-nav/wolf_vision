@@ -10,6 +10,7 @@
 // Constraints
 #include "../constraint_sparse.h"
 #include "../constraint_fix.h"
+#include "../constraint_fix_3D.h"
 #include "../constraint_gps_2D.h"
 #include "../constraint_gps_pseudorange_3D.h"
 #include "../constraint_gps_pseudorange_2D.h"
@@ -43,6 +44,12 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool
                 return createAutoDiffCostFunctionWrapper<ConstraintFix>(_ctr_ptr);
             else
                 return createAutoDiffCostFunctionCeres<ConstraintFix>(_ctr_ptr);
+
+        case CTR_FIX_3D:
+            if (_use_wolf_autodiff)
+                return createAutoDiffCostFunctionWrapper<ConstraintFix3D>(_ctr_ptr);
+            else
+                return createAutoDiffCostFunctionCeres<ConstraintFix3D>(_ctr_ptr);
 
         case CTR_ODOM_2D:
             if (_use_wolf_autodiff)
