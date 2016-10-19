@@ -737,7 +737,6 @@ inline bool ProcessorMotion::isMotion()
 inline void ProcessorMotion::updateDt()
 {
     dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->get().back().ts_;
-
 }
 
 inline const MotionBuffer* ProcessorMotion::getBufferPtr() const
