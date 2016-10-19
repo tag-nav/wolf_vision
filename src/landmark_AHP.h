@@ -21,8 +21,8 @@ class LandmarkAHP : public LandmarkBase
 
     protected:
         cv::Mat cv_descriptor_;
-        FrameBasePtr anchor_frame_;
-        SensorBasePtr anchor_sensor_;
+        FrameBasePtr anchor_frame_; // TODO check pointer type
+        SensorBasePtr anchor_sensor_; // TODO check pointer type
 
     public:
         LandmarkAHP(Eigen::Vector4s _position_homogeneous, FrameBasePtr _anchor_frame, SensorBasePtr _anchor_sensor, cv::Mat _2D_descriptor);

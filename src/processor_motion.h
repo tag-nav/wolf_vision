@@ -325,9 +325,9 @@ class ProcessorMotion : public ProcessorBase
         Size delta_size_;       ///< the size of the deltas
         Size delta_cov_size_;   ///< the size of the delta covariances matrix
         Size data_size_;        ///< the size of the incoming data
-        CaptureBasePtr origin_ptr_;
-        CaptureMotion::Ptr last_ptr_;
-        CaptureMotion::Ptr incoming_ptr_;
+        CaptureBasePtr origin_ptr_; // TODO check pointer type
+        CaptureMotion::Ptr last_ptr_; // TODO check pointer type
+        CaptureMotion::Ptr incoming_ptr_; // TODO check pointer type
 
     protected:
         // helpers to avoid allocation

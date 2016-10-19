@@ -37,7 +37,7 @@ struct StateBlockNotification
 struct ConstraintNotification
 {
         Notification notification_;
-        ConstraintBasePtr constraint_ptr_;
+        ConstraintBasePtr constraint_ptr_; // TODO check pointer type
         unsigned int id_;
 };
 

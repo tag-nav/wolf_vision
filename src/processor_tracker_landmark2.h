@@ -17,7 +17,7 @@ namespace wolf
 // Match Feature - Landmark
 struct LandmarkMatch
 {
-        LandmarkBasePtr landmark_ptr_;
+        LandmarkBasePtr landmark_ptr_; // TODO check pointer type
         Scalar normalized_score_;
 
         LandmarkMatch() :
