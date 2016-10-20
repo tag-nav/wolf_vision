@@ -204,8 +204,6 @@ int main(int argc, char** argv)
     // delete stuff
     data_file_acc.close(); // no impact on leaks
     data_file_gyro.close();
-    delete filename_acc; // No impact on leaks
-    delete filename_gyro;
 
     return 0;
 }
