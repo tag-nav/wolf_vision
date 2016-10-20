@@ -137,7 +137,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
 
         // Trajectory branch ----------------------------------
-        TrajectoryBasePtr addTrajectory(TrajectoryBasePtr _trajectory_ptr);
+        TrajectoryBasePtr setTrajectory(TrajectoryBasePtr _trajectory_ptr);
         TrajectoryBasePtr getTrajectoryPtr();
         virtual void setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov,
                                const TimeStamp& _ts);

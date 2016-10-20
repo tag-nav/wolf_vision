@@ -437,7 +437,7 @@ MapBasePtr Problem::addMap(MapBasePtr _map_ptr)
     return map_ptr_;
 }
 
-TrajectoryBasePtr Problem::addTrajectory(TrajectoryBasePtr _trajectory_ptr)
+TrajectoryBasePtr Problem::setTrajectory(TrajectoryBasePtr _trajectory_ptr)
 {
     trajectory_ptr_ = _trajectory_ptr;
     trajectory_ptr_->setProblem(shared_from_this());
