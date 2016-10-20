@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = std::make_shared<Problem>(FRM_PO_3D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
 
     //=====================================================
     // Method 1: Use data generated here for sensor and processor
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
 
 
     // CAPTURES
-    CaptureImage* image_ptr;
+    CaptureImage::Ptr image_ptr;
 
     unsigned int f  = 1;
     capture >> frame[f % buffer_size];
@@ -171,7 +171,7 @@ int main(int argc, char** argv)
         clock_t t1 = clock();
 
         // Preferred method with factory objects:
-        image_ptr = new CaptureImage(t, camera_ptr_, frame[f % buffer_size]);
+        image_ptr = std::make_shared<CaptureImage>(t, camera_ptr_, frame[f % buffer_size]);
 
         /* process */
         image_ptr->process();

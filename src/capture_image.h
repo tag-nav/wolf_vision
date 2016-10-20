@@ -22,6 +22,7 @@ namespace wolf {
  */
 class CaptureImage : public CaptureBase
 {
+    public:
         typedef std::shared_ptr<CaptureImage> Ptr;
         typedef std::weak_ptr<CaptureImage> WPtr;
 
