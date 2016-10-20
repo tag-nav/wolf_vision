@@ -14,8 +14,8 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
 		int landmark_point_id_;
 		int landmark_point_aux_id_;
         unsigned int feature_point_id_;
-        StateBlock* point_state_ptr_;
-        StateBlock* point_aux_state_ptr_;
+        StateBlockPtr point_state_ptr_;
+        StateBlockPtr point_aux_state_ptr_;
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;  ///<  the squared root information matrix
@@ -58,12 +58,12 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
             return feature_point_id_;
         }
 
-        StateBlock* getLandmarkPointPtr()
+        StateBlockPtr getLandmarkPointPtr()
         {
             return point_state_ptr_;
         }
 
-        StateBlock* getLandmarkPointAuxPtr()
+        StateBlockPtr getLandmarkPointAuxPtr()
         {
             return point_state_ptr_;
         }

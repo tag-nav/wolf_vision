@@ -11,7 +11,7 @@ namespace wolf {
 class ConstraintAnalytic: public ConstraintBase
 {
     protected:
-        std::vector<StateBlock*> state_ptr_vector_;
+        std::vector<StateBlockPtr> state_ptr_vector_;
         std::vector<unsigned int> state_block_sizes_vector_;
 
     public:
@@ -22,16 +22,16 @@ class ConstraintAnalytic: public ConstraintBase
          *
          **/
         ConstraintAnalytic(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                         StateBlock* _state0Ptr,
-                         StateBlock* _state1Ptr = nullptr,
-                         StateBlock* _state2Ptr = nullptr,
-                         StateBlock* _state3Ptr = nullptr,
-                         StateBlock* _state4Ptr = nullptr,
-                         StateBlock* _state5Ptr = nullptr,
-                         StateBlock* _state6Ptr = nullptr,
-                         StateBlock* _state7Ptr = nullptr,
-                         StateBlock* _state8Ptr = nullptr,
-                         StateBlock* _state9Ptr = nullptr ) ;
+                         StateBlockPtr _state0Ptr,
+                         StateBlockPtr _state1Ptr = nullptr,
+                         StateBlockPtr _state2Ptr = nullptr,
+                         StateBlockPtr _state3Ptr = nullptr,
+                         StateBlockPtr _state4Ptr = nullptr,
+                         StateBlockPtr _state5Ptr = nullptr,
+                         StateBlockPtr _state6Ptr = nullptr,
+                         StateBlockPtr _state7Ptr = nullptr,
+                         StateBlockPtr _state8Ptr = nullptr,
+                         StateBlockPtr _state9Ptr = nullptr ) ;
 
         /** \brief Constructor of category CTR_FRAME
          *
@@ -39,16 +39,16 @@ class ConstraintAnalytic: public ConstraintBase
          *
          **/
         ConstraintAnalytic(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                         StateBlock* _state0Ptr,
-                         StateBlock* _state1Ptr = nullptr,
-                         StateBlock* _state2Ptr = nullptr,
-                         StateBlock* _state3Ptr = nullptr,
-                         StateBlock* _state4Ptr = nullptr,
-                         StateBlock* _state5Ptr = nullptr,
-                         StateBlock* _state6Ptr = nullptr,
-                         StateBlock* _state7Ptr = nullptr,
-                         StateBlock* _state8Ptr = nullptr,
-                         StateBlock* _state9Ptr = nullptr );
+                         StateBlockPtr _state0Ptr,
+                         StateBlockPtr _state1Ptr = nullptr,
+                         StateBlockPtr _state2Ptr = nullptr,
+                         StateBlockPtr _state3Ptr = nullptr,
+                         StateBlockPtr _state4Ptr = nullptr,
+                         StateBlockPtr _state5Ptr = nullptr,
+                         StateBlockPtr _state6Ptr = nullptr,
+                         StateBlockPtr _state7Ptr = nullptr,
+                         StateBlockPtr _state8Ptr = nullptr,
+                         StateBlockPtr _state9Ptr = nullptr );
 
         /** \brief Constructor of category CTR_FEATURE
          *
@@ -56,16 +56,16 @@ class ConstraintAnalytic: public ConstraintBase
          *
          **/
         ConstraintAnalytic(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                         StateBlock* _state0Ptr,
-                         StateBlock* _state1Ptr = nullptr,
-                         StateBlock* _state2Ptr = nullptr,
-                         StateBlock* _state3Ptr = nullptr,
-                         StateBlock* _state4Ptr = nullptr,
-                         StateBlock* _state5Ptr = nullptr,
-                         StateBlock* _state6Ptr = nullptr,
-                         StateBlock* _state7Ptr = nullptr,
-                         StateBlock* _state8Ptr = nullptr,
-                         StateBlock* _state9Ptr = nullptr ) ;
+                         StateBlockPtr _state0Ptr,
+                         StateBlockPtr _state1Ptr = nullptr,
+                         StateBlockPtr _state2Ptr = nullptr,
+                         StateBlockPtr _state3Ptr = nullptr,
+                         StateBlockPtr _state4Ptr = nullptr,
+                         StateBlockPtr _state5Ptr = nullptr,
+                         StateBlockPtr _state6Ptr = nullptr,
+                         StateBlockPtr _state7Ptr = nullptr,
+                         StateBlockPtr _state8Ptr = nullptr,
+                         StateBlockPtr _state9Ptr = nullptr ) ;
 
         /** \brief Constructor of category CTR_LANDMARK
          *
@@ -73,16 +73,16 @@ class ConstraintAnalytic: public ConstraintBase
          *
          **/
         ConstraintAnalytic(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                         StateBlock* _state0Ptr,
-                         StateBlock* _state1Ptr = nullptr,
-                         StateBlock* _state2Ptr = nullptr,
-                         StateBlock* _state3Ptr = nullptr,
-                         StateBlock* _state4Ptr = nullptr,
-                         StateBlock* _state5Ptr = nullptr,
-                         StateBlock* _state6Ptr = nullptr,
-                         StateBlock* _state7Ptr = nullptr,
-                         StateBlock* _state8Ptr = nullptr,
-                         StateBlock* _state9Ptr = nullptr ) ;
+                         StateBlockPtr _state0Ptr,
+                         StateBlockPtr _state1Ptr = nullptr,
+                         StateBlockPtr _state2Ptr = nullptr,
+                         StateBlockPtr _state3Ptr = nullptr,
+                         StateBlockPtr _state4Ptr = nullptr,
+                         StateBlockPtr _state5Ptr = nullptr,
+                         StateBlockPtr _state6Ptr = nullptr,
+                         StateBlockPtr _state7Ptr = nullptr,
+                         StateBlockPtr _state8Ptr = nullptr,
+                         StateBlockPtr _state9Ptr = nullptr ) ;
 
         virtual ~ConstraintAnalytic();
 
@@ -98,7 +98,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Returns a vector of pointers to the state in which this constraint depends
          *
          **/
-        virtual const std::vector<StateBlock*> getStatePtrVector() const;
+        virtual const std::vector<StateBlockPtr> getStatePtrVector() const;
 
         /** \brief Returns a vector of sizes of the state blocks
          *

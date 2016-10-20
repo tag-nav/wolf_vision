@@ -28,7 +28,7 @@ class SensorGPSFix : public SensorBase
          * \param _noise noise standard deviation
          * 
          **/
-		SensorGPSFix(StateBlock* _p_ptr, StateBlock* _o_ptr, const double& _noise);
+		SensorGPSFix(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const double& _noise);
 
         virtual ~SensorGPSFix();
         

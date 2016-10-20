@@ -9,7 +9,7 @@ namespace wolf {
 
 unsigned int LandmarkBase::landmark_id_count_ = 0;
 
-LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr) :
+LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
             NodeBase("LANDMARK", _type),
             map_ptr_(),
             landmark_id_(++landmark_id_count_),
@@ -128,9 +128,9 @@ void LandmarkBase::registerNewStateBlocks()
     if (getProblem() != nullptr)
     {
         if (p_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(p_ptr_);
+            getProblem()->addStateBlock(p_ptr_);
         if (o_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(o_ptr_);
+            getProblem()->addStateBlock(o_ptr_);
     }
 }
 

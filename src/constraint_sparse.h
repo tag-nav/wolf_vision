@@ -24,7 +24,7 @@ template <const unsigned int MEASUREMENT_SIZE,
 class ConstraintSparse: public ConstraintBase
 {
     protected:
-        std::vector<StateBlock*> state_ptr_vector_;
+        std::vector<StateBlockPtr> state_ptr_vector_;
         std::vector<unsigned int> state_block_sizes_vector_;
 
     public:
@@ -46,16 +46,16 @@ class ConstraintSparse: public ConstraintBase
          *
          **/
         ConstraintSparse(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                         StateBlock* _state0Ptr,
-                         StateBlock* _state1Ptr = nullptr,
-                         StateBlock* _state2Ptr = nullptr,
-                         StateBlock* _state3Ptr = nullptr,
-                         StateBlock* _state4Ptr = nullptr,
-                         StateBlock* _state5Ptr = nullptr,
-                         StateBlock* _state6Ptr = nullptr,
-                         StateBlock* _state7Ptr = nullptr,
-                         StateBlock* _state8Ptr = nullptr,
-                         StateBlock* _state9Ptr = nullptr ) ;
+                         StateBlockPtr _state0Ptr,
+                         StateBlockPtr _state1Ptr = nullptr,
+                         StateBlockPtr _state2Ptr = nullptr,
+                         StateBlockPtr _state3Ptr = nullptr,
+                         StateBlockPtr _state4Ptr = nullptr,
+                         StateBlockPtr _state5Ptr = nullptr,
+                         StateBlockPtr _state6Ptr = nullptr,
+                         StateBlockPtr _state7Ptr = nullptr,
+                         StateBlockPtr _state8Ptr = nullptr,
+                         StateBlockPtr _state9Ptr = nullptr ) ;
 
         /** \brief Constructor of category CTR_FRAME
          *
@@ -63,16 +63,16 @@ class ConstraintSparse: public ConstraintBase
          *
          **/
         ConstraintSparse(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                         StateBlock* _state0Ptr,
-                         StateBlock* _state1Ptr = nullptr,
-                         StateBlock* _state2Ptr = nullptr,
-                         StateBlock* _state3Ptr = nullptr,
-                         StateBlock* _state4Ptr = nullptr,
-                         StateBlock* _state5Ptr = nullptr,
-                         StateBlock* _state6Ptr = nullptr,
-                         StateBlock* _state7Ptr = nullptr,
-                         StateBlock* _state8Ptr = nullptr,
-                         StateBlock* _state9Ptr = nullptr );
+                         StateBlockPtr _state0Ptr,
+                         StateBlockPtr _state1Ptr = nullptr,
+                         StateBlockPtr _state2Ptr = nullptr,
+                         StateBlockPtr _state3Ptr = nullptr,
+                         StateBlockPtr _state4Ptr = nullptr,
+                         StateBlockPtr _state5Ptr = nullptr,
+                         StateBlockPtr _state6Ptr = nullptr,
+                         StateBlockPtr _state7Ptr = nullptr,
+                         StateBlockPtr _state8Ptr = nullptr,
+                         StateBlockPtr _state9Ptr = nullptr );
 
         /** \brief Constructor of category CTR_FEATURE
          *
@@ -80,16 +80,16 @@ class ConstraintSparse: public ConstraintBase
          *
          **/
         ConstraintSparse(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                         StateBlock* _state0Ptr,
-                         StateBlock* _state1Ptr = nullptr,
-                         StateBlock* _state2Ptr = nullptr,
-                         StateBlock* _state3Ptr = nullptr,
-                         StateBlock* _state4Ptr = nullptr,
-                         StateBlock* _state5Ptr = nullptr,
-                         StateBlock* _state6Ptr = nullptr,
-                         StateBlock* _state7Ptr = nullptr,
-                         StateBlock* _state8Ptr = nullptr,
-                         StateBlock* _state9Ptr = nullptr ) ;
+                         StateBlockPtr _state0Ptr,
+                         StateBlockPtr _state1Ptr = nullptr,
+                         StateBlockPtr _state2Ptr = nullptr,
+                         StateBlockPtr _state3Ptr = nullptr,
+                         StateBlockPtr _state4Ptr = nullptr,
+                         StateBlockPtr _state5Ptr = nullptr,
+                         StateBlockPtr _state6Ptr = nullptr,
+                         StateBlockPtr _state7Ptr = nullptr,
+                         StateBlockPtr _state8Ptr = nullptr,
+                         StateBlockPtr _state9Ptr = nullptr ) ;
 
         /** \brief Constructor of category CTR_LANDMARK
          *
@@ -97,16 +97,16 @@ class ConstraintSparse: public ConstraintBase
          *
          **/
         ConstraintSparse(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                         StateBlock* _state0Ptr,
-                         StateBlock* _state1Ptr = nullptr,
-                         StateBlock* _state2Ptr = nullptr,
-                         StateBlock* _state3Ptr = nullptr,
-                         StateBlock* _state4Ptr = nullptr,
-                         StateBlock* _state5Ptr = nullptr,
-                         StateBlock* _state6Ptr = nullptr,
-                         StateBlock* _state7Ptr = nullptr,
-                         StateBlock* _state8Ptr = nullptr,
-                         StateBlock* _state9Ptr = nullptr ) ;
+                         StateBlockPtr _state0Ptr,
+                         StateBlockPtr _state1Ptr = nullptr,
+                         StateBlockPtr _state2Ptr = nullptr,
+                         StateBlockPtr _state3Ptr = nullptr,
+                         StateBlockPtr _state4Ptr = nullptr,
+                         StateBlockPtr _state5Ptr = nullptr,
+                         StateBlockPtr _state6Ptr = nullptr,
+                         StateBlockPtr _state7Ptr = nullptr,
+                         StateBlockPtr _state8Ptr = nullptr,
+                         StateBlockPtr _state9Ptr = nullptr ) ;
 
         virtual ~ConstraintSparse();
 
@@ -122,7 +122,7 @@ class ConstraintSparse: public ConstraintBase
          * Returns a vector of pointers to the state in which this constraint depends
          *
          **/
-        virtual const std::vector<StateBlock*> getStatePtrVector() const;
+        virtual const std::vector<StateBlockPtr> getStatePtrVector() const;
 
         /** \brief Returns the constraint residual size
          *
@@ -161,16 +161,16 @@ ConstraintSparse<MEASUREMENT_SIZE,
                  BLOCK_7_SIZE,
                  BLOCK_8_SIZE,
                  BLOCK_9_SIZE>::ConstraintSparse(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                                                 StateBlock* _state0Ptr,
-                                                 StateBlock* _state1Ptr,
-                                                 StateBlock* _state2Ptr,
-                                                 StateBlock* _state3Ptr,
-                                                 StateBlock* _state4Ptr,
-                                                 StateBlock* _state5Ptr,
-                                                 StateBlock* _state6Ptr,
-                                                 StateBlock* _state7Ptr,
-                                                 StateBlock* _state8Ptr,
-                                                 StateBlock* _state9Ptr ) :
+                                                 StateBlockPtr _state0Ptr,
+                                                 StateBlockPtr _state1Ptr,
+                                                 StateBlockPtr _state2Ptr,
+                                                 StateBlockPtr _state3Ptr,
+                                                 StateBlockPtr _state4Ptr,
+                                                 StateBlockPtr _state5Ptr,
+                                                 StateBlockPtr _state6Ptr,
+                                                 StateBlockPtr _state7Ptr,
+                                                 StateBlockPtr _state8Ptr,
+                                                 StateBlockPtr _state9Ptr ) :
             ConstraintBase(_tp, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
@@ -200,16 +200,16 @@ ConstraintSparse<MEASUREMENT_SIZE,
                  BLOCK_7_SIZE,
                  BLOCK_8_SIZE,
                  BLOCK_9_SIZE>::ConstraintSparse(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                                                 StateBlock* _state0Ptr,
-                                                 StateBlock* _state1Ptr,
-                                                 StateBlock* _state2Ptr,
-                                                 StateBlock* _state3Ptr,
-                                                 StateBlock* _state4Ptr,
-                                                 StateBlock* _state5Ptr,
-                                                 StateBlock* _state6Ptr,
-                                                 StateBlock* _state7Ptr,
-                                                 StateBlock* _state8Ptr,
-                                                 StateBlock* _state9Ptr ) :
+                                                 StateBlockPtr _state0Ptr,
+                                                 StateBlockPtr _state1Ptr,
+                                                 StateBlockPtr _state2Ptr,
+                                                 StateBlockPtr _state3Ptr,
+                                                 StateBlockPtr _state4Ptr,
+                                                 StateBlockPtr _state5Ptr,
+                                                 StateBlockPtr _state6Ptr,
+                                                 StateBlockPtr _state7Ptr,
+                                                 StateBlockPtr _state8Ptr,
+                                                 StateBlockPtr _state9Ptr ) :
             ConstraintBase(_tp, _frame_ptr, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
@@ -239,16 +239,16 @@ ConstraintSparse<MEASUREMENT_SIZE,
                  BLOCK_7_SIZE,
                  BLOCK_8_SIZE,
                  BLOCK_9_SIZE>::ConstraintSparse(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                                                 StateBlock* _state0Ptr,
-                                                 StateBlock* _state1Ptr,
-                                                 StateBlock* _state2Ptr,
-                                                 StateBlock* _state3Ptr,
-                                                 StateBlock* _state4Ptr,
-                                                 StateBlock* _state5Ptr,
-                                                 StateBlock* _state6Ptr,
-                                                 StateBlock* _state7Ptr,
-                                                 StateBlock* _state8Ptr,
-                                                 StateBlock* _state9Ptr ) :
+                                                 StateBlockPtr _state0Ptr,
+                                                 StateBlockPtr _state1Ptr,
+                                                 StateBlockPtr _state2Ptr,
+                                                 StateBlockPtr _state3Ptr,
+                                                 StateBlockPtr _state4Ptr,
+                                                 StateBlockPtr _state5Ptr,
+                                                 StateBlockPtr _state6Ptr,
+                                                 StateBlockPtr _state7Ptr,
+                                                 StateBlockPtr _state8Ptr,
+                                                 StateBlockPtr _state9Ptr ) :
             ConstraintBase( _tp, _feature_ptr, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
@@ -278,16 +278,16 @@ ConstraintSparse<MEASUREMENT_SIZE,
                  BLOCK_7_SIZE,
                  BLOCK_8_SIZE,
                  BLOCK_9_SIZE>::ConstraintSparse(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                                                 StateBlock* _state0Ptr,
-                                                 StateBlock* _state1Ptr,
-                                                 StateBlock* _state2Ptr,
-                                                 StateBlock* _state3Ptr,
-                                                 StateBlock* _state4Ptr,
-                                                 StateBlock* _state5Ptr,
-                                                 StateBlock* _state6Ptr,
-                                                 StateBlock* _state7Ptr,
-                                                 StateBlock* _state8Ptr,
-                                                 StateBlock* _state9Ptr ) :
+                                                 StateBlockPtr _state0Ptr,
+                                                 StateBlockPtr _state1Ptr,
+                                                 StateBlockPtr _state2Ptr,
+                                                 StateBlockPtr _state3Ptr,
+                                                 StateBlockPtr _state4Ptr,
+                                                 StateBlockPtr _state5Ptr,
+                                                 StateBlockPtr _state6Ptr,
+                                                 StateBlockPtr _state7Ptr,
+                                                 StateBlockPtr _state8Ptr,
+                                                 StateBlockPtr _state9Ptr ) :
             ConstraintBase( _tp, _landmark_ptr, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
@@ -449,7 +449,7 @@ template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-const std::vector<StateBlock*> ConstraintSparse<MEASUREMENT_SIZE,
+const std::vector<StateBlockPtr> ConstraintSparse<MEASUREMENT_SIZE,
                                                 BLOCK_0_SIZE,
                                                 BLOCK_1_SIZE,
                                                 BLOCK_2_SIZE,

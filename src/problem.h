@@ -31,7 +31,7 @@ enum Notification
 struct StateBlockNotification
 {
         Notification notification_;
-        StateBlock* state_block_ptr_;
+        StateBlockPtr state_block_ptr_;
         Scalar* scalar_ptr_;
 };
 struct ConstraintNotification
@@ -52,8 +52,8 @@ class Problem : public std::enable_shared_from_this<Problem>
         TrajectoryBasePtr   trajectory_ptr_;
         MapBasePtr          map_ptr_;
         std::shared_ptr<ProcessorMotion>  processor_motion_ptr_;
-        StateBlockList      state_block_ptr_list_;
-        std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
+        StateBlockList      state_block_list_;
+        std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
         std::list<StateBlockNotification> state_block_notification_list_;
         std::list<ConstraintNotification> constraint_notification_list_;
         bool origin_is_set_;
@@ -196,8 +196,8 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         // Covariances -------------------------------------------
         void clearCovariance();
-        void addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov);
-        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row = 0,
+        void addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, const Eigen::MatrixXs& _cov);
+        bool getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, Eigen::MatrixXs& _cov, const int _row = 0,
                                 const int _col=0);
         bool getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getFrameCovariance(FrameBasePtr _frame_ptr);
@@ -207,21 +207,21 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         // Solver management ----------------------------------------
 
-        /** \brief Gets a pointer to the state units list
+        /** \brief Gets a reference to the state units list
          */
-        StateBlockList* getStateListPtr();
+        StateBlockList getStateBlockList();
 
         /** \brief Adds a new state block to be added to solver manager
          */
-        StateBlock* addStateBlockPtr(StateBlock* _state_ptr);
+        StateBlockPtr addStateBlock(StateBlockPtr _state_ptr);
 
         /** \brief Adds a new state block to be updated to solver manager
          */
-        void updateStateBlockPtr(StateBlock* _state_ptr);
+        void updateStateBlockPtr(StateBlockPtr _state_ptr);
 
         /** \brief Adds a state block to be removed to solver manager
          */
-        void removeStateBlockPtr(StateBlock* _state_ptr);
+        void removeStateBlockPtr(StateBlockPtr _state_ptr);
 
         /** \brief Gets a queue of state blocks notification to be handled by the solver
          */

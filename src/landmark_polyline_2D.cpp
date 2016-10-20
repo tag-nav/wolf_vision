@@ -18,7 +18,7 @@ namespace wolf
 {
 
 
-LandmarkPolyline2D::LandmarkPolyline2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id, LandmarkClassification _class) :
+LandmarkPolyline2D::LandmarkPolyline2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id, LandmarkClassification _class) :
         LandmarkBase(LANDMARK_POLYLINE_2D, "POLYLINE 2D", _p_ptr, _o_ptr), first_id_(_first_id), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false), classification_(_class)
 {
     //std::cout << "LandmarkPolyline2D::LandmarkPolyline2D" << std::endl;
@@ -75,7 +75,7 @@ const Eigen::VectorXs& LandmarkPolyline2D::getPointVector(int _i) const
     return point_state_ptr_vector_[_i-first_id_]->getVector();
 }
 
-StateBlock* LandmarkPolyline2D::getPointStateBlockPtr(int _i)
+StateBlockPtr LandmarkPolyline2D::getPointStateBlockPtr(int _i)
 {
 	assert(_i-first_id_ >= 0 && _i-first_id_ <= (int)(point_state_ptr_vector_.size()) && "out of range!");
 	return point_state_ptr_vector_[_i-first_id_];
@@ -100,7 +100,7 @@ void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _de
                                                                  new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.back()) :
                                                                  nullptr)));
         if (getProblem() != nullptr)
-        	getProblem()->addStateBlockPtr(point_state_ptr_vector_.back());
+        	getProblem()->addStateBlock(point_state_ptr_vector_.back());
         last_defined_ = _defined;
 		assert(point_state_ptr_vector_.back()->hasLocalParametrization() ? !last_defined_ : last_defined_);
     }
@@ -111,7 +111,7 @@ void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _de
                                                                   new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.front()) :
                                                                   nullptr)));
         if (getProblem() != nullptr)
-        	getProblem()->addStateBlockPtr(point_state_ptr_vector_.front());
+        	getProblem()->addStateBlock(point_state_ptr_vector_.front());
         first_defined_ = _defined;
         first_id_--;
 		assert(point_state_ptr_vector_.front()->hasLocalParametrization() ? !first_defined_ : first_defined_);
@@ -142,7 +142,7 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
         															 new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.back()) :
         															 nullptr)));
         	if (getProblem() != nullptr)
-        		getProblem()->addStateBlockPtr(point_state_ptr_vector_.back());
+        		getProblem()->addStateBlock(point_state_ptr_vector_.back());
         }
         last_defined_ = _defined;
 		assert(point_state_ptr_vector_.back()->hasLocalParametrization() ? !last_defined_ : last_defined_);
@@ -157,7 +157,7 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
         															  new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.front()) :
         															  nullptr)));
         	if (getProblem() != nullptr)
-        		getProblem()->addStateBlockPtr(point_state_ptr_vector_.front());
+        		getProblem()->addStateBlock(point_state_ptr_vector_.front());
             first_id_--;
         }
 		first_defined_ = _defined;
@@ -169,7 +169,7 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
 
 void LandmarkPolyline2D::defineExtreme(const bool _back)
 {
-    StateBlock* state = (_back ? point_state_ptr_vector_.back() : point_state_ptr_vector_.front());
+    StateBlockPtr state = (_back ? point_state_ptr_vector_.back() : point_state_ptr_vector_.front());
     assert((_back ? !last_defined_: !first_defined_) && "defining an already defined extreme");
     assert(state->hasLocalParametrization() && "not defined extreme without local parameterization");
 
@@ -182,7 +182,7 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
     state->removeLocalParametrization();
 
     if (getProblem() != nullptr)
-    	getProblem()->addStateBlockPtr(state);
+    	getProblem()->addStateBlock(state);
 
     // remove and add all constraints to the point
     for (auto ctr_ptr : getConstrainedByList())
@@ -238,7 +238,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     assert(_remain_id < getLastId() || last_defined_);
 
     // take a defined extreme as remaining
-    StateBlock* remove_state = getPointStateBlockPtr(_remove_id);
+    StateBlockPtr remove_state = getPointStateBlockPtr(_remove_id);
     std::cout << "state block to remove " << remove_state->getVector().transpose() << std::endl;
 
     // Change constraints from remove_state to remain_state
@@ -320,7 +320,7 @@ void LandmarkPolyline2D::registerNewStateBlocks()
     LandmarkBase::registerNewStateBlocks();
 	if (getProblem() != nullptr)
 		for (auto state : point_state_ptr_vector_)
-			getProblem()->addStateBlockPtr(state);
+			getProblem()->addStateBlock(state);
 }
 
 // static

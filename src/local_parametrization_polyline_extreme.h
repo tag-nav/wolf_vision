@@ -20,9 +20,9 @@ namespace wolf {
 class LocalParametrizationPolylineExtreme : public LocalParametrizationBase
 {
     private:
-        StateBlock* reference_point_;
+        StateBlockPtr reference_point_;
     public:
-        LocalParametrizationPolylineExtreme(StateBlock* _reference_point);
+        LocalParametrizationPolylineExtreme(StateBlockPtr _reference_point);
         virtual ~LocalParametrizationPolylineExtreme();
 
         virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _point,

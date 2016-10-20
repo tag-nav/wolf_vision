@@ -29,7 +29,7 @@ class SensorLaser2D : public SensorBase
          * \param _o_ptr StateBlock pointer to the sensor orientation
          * 
          **/        
-        SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr);
+        SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr);
 
         /** \brief Constructor with extrinsics and scan parameters
          *
@@ -37,7 +37,7 @@ class SensorLaser2D : public SensorBase
          * \param _o_ptr StateBlock pointer to the sensor orientation
          *
          **/
-        SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const double& _angle_min, const double& _angle_max, const double& _angle_step, const double& _scan_time, const double& _range_min, const double& _range_max, const double& _range_std_dev, const double& _angle_std_dev);
+        SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const double& _angle_min, const double& _angle_max, const double& _angle_step, const double& _scan_time, const double& _range_min, const double& _range_max, const double& _range_std_dev, const double& _angle_std_dev);
 
         /** \brief Constructor with extrinsics and scan parameters
          *
@@ -46,7 +46,7 @@ class SensorLaser2D : public SensorBase
          * \param _params Scan parameters
          *
          **/
-        SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const laserscanutils::LaserScanParams& _params);
+        SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const laserscanutils::LaserScanParams& _params);
 
         virtual ~SensorLaser2D();
         

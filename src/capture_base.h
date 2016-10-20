@@ -31,8 +31,8 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         SensorBaseWPtr sensor_ptr_; ///< Pointer to sensor
 
         // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
-        StateBlock* sensor_p_ptr_;
-        StateBlock* sensor_o_ptr_;
+        StateBlockPtr sensor_p_ptr_;
+        StateBlockPtr sensor_o_ptr_;
 
     public:
 
@@ -59,8 +59,8 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void getConstraintList(ConstraintBaseList& _ctr_list);
 
         SensorBasePtr getSensorPtr() const;
-        StateBlock* getSensorPPtr() const;
-        StateBlock* getSensorOPtr() const;
+        StateBlockPtr getSensorPPtr() const;
+        StateBlockPtr getSensorOPtr() const;
 
         /** \brief Call all the processors for this Capture
          */
@@ -92,7 +92,7 @@ inline ProblemPtr CaptureBase::getProblem()
     return prb;
 }
 
-inline wolf::StateBlock* CaptureBase::getSensorPPtr() const
+inline wolf::StateBlockPtr CaptureBase::getSensorPPtr() const
 {
     if (getSensorPtr()->isExtrinsicDynamic())
         return sensor_p_ptr_;
@@ -100,7 +100,7 @@ inline wolf::StateBlock* CaptureBase::getSensorPPtr() const
         return getSensorPtr()->getPPtr();
 }
 
-inline wolf::StateBlock* CaptureBase::getSensorOPtr() const
+inline wolf::StateBlockPtr CaptureBase::getSensorOPtr() const
 {
     if (getSensorPtr()->isExtrinsicDynamic())
         return sensor_o_ptr_;

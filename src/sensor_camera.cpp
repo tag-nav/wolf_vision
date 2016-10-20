@@ -6,7 +6,7 @@
 namespace wolf
 {
 
-SensorCamera::SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, //
+SensorCamera::SensorCamera(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, //
                            int _img_width, int _img_height) :
         SensorBase(SEN_CAMERA, "CAMERA", _p_ptr, _o_ptr, _intr_ptr, 2), //
         img_width_(_img_width), img_height_(_img_height)

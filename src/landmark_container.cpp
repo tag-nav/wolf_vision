@@ -4,7 +4,7 @@
 
 namespace wolf {
 
-LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, const Scalar& _witdh, const Scalar& _length) :
+LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Scalar& _witdh, const Scalar& _length) :
 	LandmarkBase(LANDMARK_CONTAINER, "CONTAINER", _p_ptr, _o_ptr),
 	corners_(3,4)
 {
@@ -17,7 +17,7 @@ LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, con
                 M_PI / 4,     3 * M_PI / 4,-3 * M_PI / 4,-M_PI / 4;
 }
 
-LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const Scalar& _witdh, const Scalar& _length) :
+LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const Scalar& _witdh, const Scalar& _length) :
     LandmarkBase(LANDMARK_CONTAINER, "CONTAINER", _p_ptr, _o_ptr),
     corners_(3,4)
 {
@@ -83,7 +83,7 @@ LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, con
     std::cout << "Container center pose... " << container_position.transpose() << " " << container_orientation.transpose() << std::endl;
 }
 
-//LandmarkContainer::LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const Scalar& _witdh, const Scalar& _length) :
+//LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const Scalar& _witdh, const Scalar& _length) :
 //    LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
 //    corners_(3,4)
 //{

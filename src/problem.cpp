@@ -288,27 +288,27 @@ void Problem::addLandmarkList(LandmarkBaseList _lmk_list)
     getMapPtr()->addLandmarkList(_lmk_list);
 }
 
-StateBlock* Problem::addStateBlockPtr(StateBlock* _state_ptr)
+StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 {
     //std::cout << "addStateBlockPtr" << std::endl;
     // add the state unit to the list
-    state_block_ptr_list_.push_back(_state_ptr);
+    state_block_list_.push_back(_state_ptr);
     // queue for solver manager
     state_block_notification_list_.push_back(StateBlockNotification({ADD,_state_ptr}));
 
     return _state_ptr;
 }
 
-void Problem::updateStateBlockPtr(StateBlock* _state_ptr)
+void Problem::updateStateBlockPtr(StateBlockPtr _state_ptr)
 {
     // queue for solver manager
     state_block_notification_list_.push_back(StateBlockNotification({UPDATE,_state_ptr}));
 }
 
-void Problem::removeStateBlockPtr(StateBlock* _state_ptr)
+void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
 {
     // add the state unit to the list
-    state_block_ptr_list_.remove(_state_ptr);
+    state_block_list_.remove(_state_ptr);
 
     // Check if the state addition is still as a notification
     auto state_found_it = state_block_notification_list_.end();
@@ -363,15 +363,15 @@ void Problem::clearCovariance()
     covariances_.clear();
 }
 
-void Problem::addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov)
+void Problem::addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, const Eigen::MatrixXs& _cov)
 {
     assert(_state1->getSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
     assert(_state2->getSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
 
-    covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)] = _cov;
+    covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)] = _cov;
 }
 
-bool Problem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
+bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, Eigen::MatrixXs& _cov, const int _row,
                                  const int _col)
 {
     //std::cout << "entire cov to be filled:" << std::endl << _cov << std::endl;
@@ -380,19 +380,19 @@ bool Problem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen
     //std::cout << "_state1 size: " << _state1->getSize() << std::endl;
     //std::cout << "_state2 size: " << _state2->getSize() << std::endl;
     //std::cout << "part of cov to be filled:" << std::endl <<  _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) << std::endl;
-    //if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
-    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)] << std::endl;
-    //else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
-    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose() << std::endl;
+    //if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)) != covariances_.end())
+    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)] << std::endl;
+    //else if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)) != covariances_.end())
+    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose() << std::endl;
 
     assert(_row + _state1->getSize() <= _cov.rows() && _col + _state2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
 
-    if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
+    if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)) != covariances_.end())
         _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
-                covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)];
-    else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
+                covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)];
+    else if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)) != covariances_.end())
        _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
-                covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose();
+                covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose();
     else
         return false;
 
@@ -467,12 +467,12 @@ FrameBasePtr Problem::getLastFramePtr()
 
 FrameBasePtr Problem::getLastKeyFramePtr()
 {
-    return trajectory_ptr_->getLastKeyFramePtr();;
+    return trajectory_ptr_->getLastKeyFramePtr();
 }
 
-StateBlockList* Problem::getStateListPtr()
+StateBlockList Problem::getStateBlockList()
 {
-    return &state_block_ptr_list_;
+    return state_block_list_;
 }
 
 wolf::SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)

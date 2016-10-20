@@ -66,13 +66,13 @@ class CeresManager
 
 		void removeConstraint(const unsigned int& _corr_idx);
 
-		void addStateBlock(StateBlock* _st_ptr);
+		void addStateBlock(StateBlockPtr _st_ptr);
 
 		void removeStateBlock(double* _st_ptr);
 
 		void removeAllStateBlocks();
 
-		void updateStateBlockStatus(StateBlock* _st_ptr);
+		void updateStateBlockStatus(StateBlockPtr _st_ptr);
 
 		ceres::CostFunction* createCostFunction(ConstraintBasePtr _corrPtr);
 };

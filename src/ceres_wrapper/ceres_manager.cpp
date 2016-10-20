@@ -70,7 +70,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
     wolf_problem_->clearCovariance();
 
     // CREATE DESIRED COVARIANCES LIST
-    std::vector<std::pair<StateBlock*, StateBlock*>> state_block_pairs;
+    std::vector<std::pair<StateBlockPtr, StateBlockPtr>> state_block_pairs;
     std::vector<std::pair<const double*, const double*>> double_pairs;
 
     switch (_blocks)
@@ -78,7 +78,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         case ALL:
         {
             // first create a vector containing all state blocks
-            std::vector<StateBlock*> all_state_blocks, landmark_state_blocks;
+            std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks;
             //frame state blocks
             for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
             {
@@ -110,7 +110,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         case ALL_MARGINALS:
         {
             // first create a vector containing all state blocks
-            std::vector<StateBlock*> all_state_blocks, landmark_state_blocks;
+            std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks;
             //frame state blocks
             for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
             {
@@ -155,7 +155,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), last_key_frame->getOPtr()->getPtr()));
 
             // landmarks
-            std::vector<StateBlock*> landmark_state_blocks;
+            std::vector<StateBlockPtr> landmark_state_blocks;
             for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
             {
                 // load state blocks vector
@@ -297,7 +297,7 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 	// The cost functions will be deleted by ceres_problem destructor (IT MUST HAVE THE OWNERSHIP)
 }
 
-void CeresManager::addStateBlock(StateBlock* _st_ptr)
+void CeresManager::addStateBlock(StateBlockPtr _st_ptr)
 {
     //std::cout << "Adding State Block " << _st_ptr->getPtr() << std::endl;
     //std::cout << " size: " <<  _st_ptr->getSize() << std::endl;
@@ -334,7 +334,7 @@ void CeresManager::removeAllStateBlocks()
 		ceres_problem_->RemoveParameterBlock(parameter_blocks[i]);
 }
 
-void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
+void CeresManager::updateStateBlockStatus(StateBlockPtr _st_ptr)
 {
 	assert(_st_ptr != nullptr);
 	if (_st_ptr->isFixed())

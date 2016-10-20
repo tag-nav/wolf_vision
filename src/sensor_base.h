@@ -38,8 +38,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
     protected:
         unsigned int sensor_id_;   // sensor ID
         SensorType type_id_;       // the type of sensor. See wolf.h for a list of all sensor types.
-        StateBlock* p_ptr_;		// sensor position state block pointer
-        StateBlock* o_ptr_; 	// sensor orientation state block pointer
+        StateBlockPtr p_ptr_;		// sensor position state block pointer
+        StateBlockPtr o_ptr_; 	// sensor orientation state block pointer
 
         /** \brief intrinsic parameters.
          * Use it if desired. By using this StateBlock, WOLF will be able to auto-calibrate these parameters.
@@ -48,7 +48,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * (Note: Many other intrinsic parameters can be stored as members of the classes derived from this.
          * We recommend you use a struct for this purpose if the number of intrinsic parameters is large.)
          */
-        StateBlock* intrinsic_ptr_;
+        StateBlockPtr intrinsic_ptr_;
 
         bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
 
@@ -68,7 +68,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * \param _extr_dyn Flag indicating if extrinsics are dynamic (moving) or static (not moving)
          *
          **/
-        SensorBase(const SensorType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
+        SensorBase(const SensorType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
 
         /** \brief Constructor with noise std vector
          *
@@ -81,7 +81,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * \param _extr_dyn Flag indicating if extrinsics are dynamic (moving) or static (not moving)
          *
          **/
-        SensorBase(const SensorType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
+        SensorBase(const SensorType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
         virtual ~SensorBase();
         void remove();
 
@@ -94,11 +94,11 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         ProcessorBaseList& getProcessorList();
 
-        StateBlock* getPPtr() const;
+        StateBlockPtr getPPtr() const;
 
-        StateBlock* getOPtr() const;
+        StateBlockPtr getOPtr() const;
 
-        StateBlock* getIntrinsicPtr() const;
+        StateBlockPtr getIntrinsicPtr() const;
 
         void fix();
 
@@ -176,17 +176,17 @@ inline ProcessorBaseList& SensorBase::getProcessorList()
     return processor_list_;
 }
 
-inline StateBlock* SensorBase::getPPtr() const
+inline StateBlockPtr SensorBase::getPPtr() const
 {
     return p_ptr_;
 }
 
-inline StateBlock* SensorBase::getOPtr() const
+inline StateBlockPtr SensorBase::getOPtr() const
 {
     return o_ptr_;
 }
 
-inline StateBlock* SensorBase::getIntrinsicPtr() const
+inline StateBlockPtr SensorBase::getIntrinsicPtr() const
 {
     return intrinsic_ptr_;
 }

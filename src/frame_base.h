@@ -33,9 +33,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         FrameKeyType type_id_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
         TimeStamp time_stamp_;   ///< frame time stamp
         StateStatus status_;     ///< status of the estimation of the frame state
-        StateBlock* p_ptr_;      ///< Position state block pointer
-        StateBlock* o_ptr_;      ///< Orientation state block pointer
-        StateBlock* v_ptr_;      ///< Linear velocity state block pointer
+        StateBlockPtr p_ptr_;      ///< Position state block pointer
+        StateBlockPtr o_ptr_;      ///< Orientation state block pointer
+        StateBlockPtr v_ptr_;      ///< Linear velocity state block pointer
         
     public:
 
@@ -47,7 +47,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr). Pass a StateQuaternion if needed.
          * \param _v_ptr StateBlock pointer to the velocity (default: nullptr).
          **/
-        FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
+        FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
         
         /** \brief Constructor with type, time stamp and state pointer
          * 
@@ -58,7 +58,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          * \param _v_ptr StateBlock pointer to the velocity (default: nullptr).
          **/        
-        FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
+        FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
 
         virtual ~FrameBase();
         void remove();
@@ -86,9 +86,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         TimeStamp getTimeStamp() const;
         void getTimeStamp(TimeStamp& _ts) const;
 
-        StateBlock* getPPtr() const;
-        StateBlock* getOPtr() const;
-        StateBlock* getVPtr() const;
+        StateBlockPtr getPPtr() const;
+        StateBlockPtr getOPtr() const;
+        StateBlockPtr getVPtr() const;
 
         void setState(const Eigen::VectorXs& _st);
         virtual Eigen::VectorXs getState() const;
@@ -198,17 +198,17 @@ inline TimeStamp FrameBase::getTimeStamp() const
     return time_stamp_.get();
 }
 
-inline StateBlock* FrameBase::getPPtr() const
+inline StateBlockPtr FrameBase::getPPtr() const
 {
     return p_ptr_;
 }
 
-inline StateBlock* FrameBase::getOPtr() const
+inline StateBlockPtr FrameBase::getOPtr() const
 {
     return o_ptr_;
 }
 
-inline StateBlock* FrameBase::getVPtr() const
+inline StateBlockPtr FrameBase::getVPtr() const
 {
     return v_ptr_;
 }

@@ -6,7 +6,7 @@ namespace wolf {
 
 unsigned int SensorBase::sensor_id_count_ = 0;
 
-SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr,
+SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr,
                        const unsigned int _noise_size, const bool _extr_dyn) :
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
@@ -23,7 +23,7 @@ SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlo
     //
 }
 
-SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr,
+SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr,
                        const Eigen::VectorXs & _noise_std, const bool _extr_dyn) :
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
@@ -157,13 +157,13 @@ void SensorBase::registerNewStateBlocks()
     if (getProblem() != nullptr)
     {
         if (p_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(p_ptr_);
+            getProblem()->addStateBlock(p_ptr_);
 
         if (o_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(o_ptr_);
+            getProblem()->addStateBlock(o_ptr_);
 
         if (intrinsic_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(intrinsic_ptr_);
+            getProblem()->addStateBlock(intrinsic_ptr_);
     }
 }
 

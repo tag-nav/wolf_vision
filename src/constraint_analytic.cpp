@@ -4,8 +4,8 @@
 namespace wolf {
 
 ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                                       StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
-                                       StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
+                                       StateBlockPtr _state0Ptr, StateBlockPtr _state1Ptr, StateBlockPtr _state2Ptr, StateBlockPtr _state3Ptr, StateBlockPtr _state4Ptr,
+                                       StateBlockPtr _state5Ptr, StateBlockPtr _state6Ptr, StateBlockPtr _state7Ptr, StateBlockPtr _state8Ptr, StateBlockPtr _state9Ptr ) :
             ConstraintBase(_tp, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
                                _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
@@ -14,8 +14,8 @@ ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, bool _apply_loss_func
 }
 
 ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                                       StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
-                                       StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
+                                       StateBlockPtr _state0Ptr, StateBlockPtr _state1Ptr, StateBlockPtr _state2Ptr, StateBlockPtr _state3Ptr, StateBlockPtr _state4Ptr,
+                                       StateBlockPtr _state5Ptr, StateBlockPtr _state6Ptr, StateBlockPtr _state7Ptr, StateBlockPtr _state8Ptr, StateBlockPtr _state9Ptr ) :
             ConstraintBase(_tp, _frame_ptr, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
                                _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
@@ -24,8 +24,8 @@ ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, FrameBasePtr _frame_p
 }
 
 ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                                       StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
-                                       StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
+                                       StateBlockPtr _state0Ptr, StateBlockPtr _state1Ptr, StateBlockPtr _state2Ptr, StateBlockPtr _state3Ptr, StateBlockPtr _state4Ptr,
+                                       StateBlockPtr _state5Ptr, StateBlockPtr _state6Ptr, StateBlockPtr _state7Ptr, StateBlockPtr _state8Ptr, StateBlockPtr _state9Ptr ) :
             ConstraintBase( _tp, _feature_ptr, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
                                _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
@@ -35,8 +35,8 @@ ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, FeatureBasePtr _featu
 
 
 ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
-                                       StateBlock* _state0Ptr, StateBlock* _state1Ptr, StateBlock* _state2Ptr, StateBlock* _state3Ptr, StateBlock* _state4Ptr,
-                                       StateBlock* _state5Ptr, StateBlock* _state6Ptr, StateBlock* _state7Ptr, StateBlock* _state8Ptr, StateBlock* _state9Ptr ) :
+                                       StateBlockPtr _state0Ptr, StateBlockPtr _state1Ptr, StateBlockPtr _state2Ptr, StateBlockPtr _state3Ptr, StateBlockPtr _state4Ptr,
+                                       StateBlockPtr _state5Ptr, StateBlockPtr _state6Ptr, StateBlockPtr _state7Ptr, StateBlockPtr _state8Ptr, StateBlockPtr _state9Ptr ) :
             ConstraintBase( _tp, _landmark_ptr, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
                                _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
@@ -147,7 +147,7 @@ const std::vector<Scalar*> ConstraintAnalytic::getStateBlockPtrVector()
     return std::vector<Scalar*>(0); //Not going to happen
 }
 
-const std::vector<StateBlock*> ConstraintAnalytic::getStatePtrVector() const
+const std::vector<StateBlockPtr> ConstraintAnalytic::getStatePtrVector() const
 {
     return state_ptr_vector_;
 }

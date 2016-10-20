@@ -70,7 +70,7 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
-        virtual const std::vector<StateBlock*> getStatePtrVector() const = 0;
+        virtual const std::vector<StateBlockPtr> getStatePtrVector() const = 0;
 
         /** \brief Returns a reference to the feature measurement
          **/

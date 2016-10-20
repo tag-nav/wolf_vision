@@ -367,6 +367,7 @@ typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
 // - - State blocks
 typedef StateBlock* StateBlockPtr;
+typedef StateBlock* StateBlockWPtr;
 typedef std::list<StateBlockPtr> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
 typedef StateQuaternion* StateQuaternionPtr;

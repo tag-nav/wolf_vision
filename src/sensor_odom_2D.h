@@ -30,7 +30,7 @@ class SensorOdom2D : public SensorBase
          * \param _rot_noise_factor rotation noise factor
          * 
          **/
-		SensorOdom2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Scalar& _disp_noise_factor, const Scalar&  _rot_noise_factor);
+		SensorOdom2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Scalar& _disp_noise_factor, const Scalar&  _rot_noise_factor);
 
         virtual ~SensorOdom2D();
         

@@ -27,7 +27,7 @@ class SensorIMU : public SensorBase
          * \param _a_w_biases_ptr StateBlock pointer to the vector of acc and gyro biases
          *
          **/
-        SensorIMU(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _a_w_biases_ptr = nullptr);
+        SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _a_w_biases_ptr = nullptr);
 
         virtual ~SensorIMU();
 

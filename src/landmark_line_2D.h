@@ -30,7 +30,7 @@ class LandmarkLine2D : public LandmarkBase
          * \param _point2 Extreme point 2 in homogeneous coordinates (3-vector)
          *
          **/
-        LandmarkLine2D(StateBlock* _p_ptr, Eigen::Vector3s & _point1, Eigen::Vector3s & _point2);
+        LandmarkLine2D(StateBlockPtr _p_ptr, Eigen::Vector3s & _point1, Eigen::Vector3s & _point2);
 
         virtual ~LandmarkLine2D();
         

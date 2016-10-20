@@ -36,7 +36,7 @@ class SensorCamera : public SensorBase
          * \param _img_height image width in pixels
          *
          **/
-        SensorCamera(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, int _img_width, int _img_height);
+        SensorCamera(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, int _img_width, int _img_height);
 
         SensorCamera(const Eigen::VectorXs & _extrinsics, const std::shared_ptr<IntrinsicsCamera> _intrinsics_ptr);
 

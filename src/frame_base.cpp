@@ -9,7 +9,7 @@ namespace wolf {
 
 unsigned int FrameBase::frame_id_count_ = 0;
 
-FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
+FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
             NodeBase("FRAME", "BASE"),
             trajectory_ptr_(),
             frame_id_(++frame_id_count_),
@@ -27,7 +27,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
         std::cout << "constructed  +F" << id() << std::endl;
 }
 
-FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
+FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
             NodeBase("FRAME", "BASE"),
             trajectory_ptr_(),
             frame_id_(++frame_id_count_),
@@ -129,13 +129,13 @@ void FrameBase::registerNewStateBlocks()
     if (getProblem() != nullptr)
     {
         if (p_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(p_ptr_);
+            getProblem()->addStateBlock(p_ptr_);
 
         if (o_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(o_ptr_);
+            getProblem()->addStateBlock(o_ptr_);
 
         if (v_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(v_ptr_);
+            getProblem()->addStateBlock(v_ptr_);
     }
 }
 

@@ -7,18 +7,18 @@
 
 namespace wolf {
 
-FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr, StateQuaternion* _q_ptr,
-                   StateBlock* _ba_ptr, StateBlock* _bg_ptr) :
-        FrameBase(_ts, _p_ptr, (StateBlock*)((_q_ptr)), _v_ptr),
+FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr, StateQuaternion* _q_ptr,
+                   StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
+        FrameBase(_ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr),
         acc_bias_ptr_(_ba_ptr),
         gyro_bias_ptr_(_bg_ptr)
 {
     setType("IMU");
 }
 
-FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr,
-                   StateQuaternion* _q_ptr, StateBlock* _ba_ptr, StateBlock* _bg_ptr) :
-        FrameBase(_tp, _ts, _p_ptr, (StateBlock*)((_q_ptr)), _v_ptr),
+FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr,
+                   StateQuaternion* _q_ptr, StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
+        FrameBase(_tp, _ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr),
         acc_bias_ptr_(_ba_ptr),
         gyro_bias_ptr_(_bg_ptr)
 {
@@ -60,19 +60,19 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
       if (getProblem() != nullptr)
       {
           if (p_ptr_ != nullptr)
-              getProblem()->addStateBlockPtr(p_ptr_);
+              getProblem()->addStateBlock(p_ptr_);
 
           if (v_ptr_ != nullptr)
-              getProblem()->addStateBlockPtr(v_ptr_);
+              getProblem()->addStateBlock(v_ptr_);
 
           if (o_ptr_ != nullptr)
-              getProblem()->addStateBlockPtr(o_ptr_);
+              getProblem()->addStateBlock(o_ptr_);
 
           if (acc_bias_ptr_ != nullptr)
-              getProblem()->addStateBlockPtr(acc_bias_ptr_);
+              getProblem()->addStateBlock(acc_bias_ptr_);
 
           if (gyro_bias_ptr_ != nullptr)
-              getProblem()->addStateBlockPtr(gyro_bias_ptr_);
+              getProblem()->addStateBlock(gyro_bias_ptr_);
       }
   }
 

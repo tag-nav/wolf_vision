@@ -26,8 +26,8 @@ namespace wolf {
           typedef std::weak_ptr<FrameIMU> WPtr;
 
       protected:
-          StateBlock* acc_bias_ptr_;      ///< Accleration bias state block pointer
-          StateBlock* gyro_bias_ptr_;      ///< Gyrometer bias state block pointer
+          StateBlockPtr acc_bias_ptr_;      ///< Accleration bias state block pointer
+          StateBlockPtr gyro_bias_ptr_;      ///< Gyrometer bias state block pointer
 
       public:
           /** \brief Constructor of non-key Frame with only time stamp
@@ -40,9 +40,9 @@ namespace wolf {
            * \param _ba_ptr StateBlock pointer to the acceleration bias (default: nullptr).
            * \param _bg_ptr StateBlock pointer to the gyrometer bias (default: nullptr).
            **/
-        FrameIMU(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr = nullptr, StateQuaternion* _q_ptr =
+        FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr = nullptr, StateQuaternion* _q_ptr =
                          nullptr,
-                 StateBlock* _ba_ptr = nullptr, StateBlock* _bg_ptr = nullptr);
+                 StateBlockPtr _ba_ptr = nullptr, StateBlockPtr _bg_ptr = nullptr);
 
           /** \brief Constructor with type, time stamp and state pointer
            *
@@ -55,8 +55,8 @@ namespace wolf {
            * \param _ba_ptr StateBlock pointer to the acceleration bias (default: nullptr).
            * \param _bg_ptr StateBlock pointer to the gyrometer bias (default: nullptr).
            **/
-        FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr = nullptr,
-                 StateQuaternion* _q_ptr = nullptr, StateBlock* _ba_ptr = nullptr, StateBlock* _bg_ptr = nullptr);
+        FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr = nullptr,
+                 StateQuaternion* _q_ptr = nullptr, StateBlockPtr _ba_ptr = nullptr, StateBlockPtr _bg_ptr = nullptr);
 
           /** \brief Constructor with type, time stamp and state vector
           * \param _tp indicates frame type. Generally either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
@@ -68,8 +68,8 @@ namespace wolf {
 
           // Frame values ------------------------------------------------
 
-          StateBlock* getBAPtr() const;
-          StateBlock* getBGPtr() const;
+          StateBlockPtr getBAPtr() const;
+          StateBlockPtr getBGPtr() const;
 
           void setState(const Eigen::VectorXs& _st);
           Eigen::VectorXs getState() const;
@@ -92,12 +92,12 @@ namespace wolf {
 
   // IMPLEMENTATION //
 
-  inline StateBlock* FrameIMU::getBAPtr() const
+  inline StateBlockPtr FrameIMU::getBAPtr() const
   {
       return acc_bias_ptr_;
   }
 
-  inline StateBlock* FrameIMU::getBGPtr() const
+  inline StateBlockPtr FrameIMU::getBGPtr() const
   {
       return gyro_bias_ptr_;
   }
