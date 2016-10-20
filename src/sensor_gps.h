@@ -35,11 +35,11 @@ protected:
 
 public:
     //pointer to sensor position, orientation, bias, init vehicle position and orientation
-    SensorGPS(StateBlock *_p_ptr, StateBlock *_o_ptr, StateBlockPtr _bias_ptr, StateBlockPtr _map_position_ptr, StateBlockPtr _map_orientation_ptr);
+    SensorGPS(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _bias_ptr, StateBlockPtr _map_position_ptr, StateBlockPtr _map_orientation_ptr);
 
-    StateBlock *getMapPPtr() const;
+    StateBlockPtr getMapPPtr() const;
 
-    StateBlock *getMapOPtr() const;
+    StateBlockPtr getMapOPtr() const;
 
     virtual ~SensorGPS();
 

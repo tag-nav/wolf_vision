@@ -23,12 +23,12 @@ SensorGPS::~SensorGPS()
     // TODO Check carefully this destructor!
 }
 
-StateBlock *SensorGPS::getMapPPtr() const
+StateBlockPtr SensorGPS::getMapPPtr() const
 {
     return map_p_ptr_;
 }
 
-StateBlock *SensorGPS::getMapOPtr() const
+StateBlockPtr SensorGPS::getMapOPtr() const
 {
     return map_o_ptr_;
 }
@@ -62,7 +62,6 @@ SensorBasePtr SensorGPS::create(const std::string& _unique_name, const Eigen::Ve
     assert(_extrinsics_p.size() == 3 && "Bad extrinsics vector length. Should be 3 for 3D.");
     StateBlockPtr pos_ptr = new StateBlock(_extrinsics_p, true);
     StateBlockPtr ori_ptr = nullptr;
-    //    SensorBasePtr sen = new SensorGPS(pos_ptr, ori_ptr, nullptr, nullptr, nullptr); // TODO remove line
     SensorBasePtr sen = std::make_shared<SensorGPS>(pos_ptr, ori_ptr, nullptr, nullptr, nullptr);
     sen->setName(_unique_name);
     return sen;
