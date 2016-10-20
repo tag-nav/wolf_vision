@@ -73,8 +73,7 @@ int main(int argc, char** argv)
     }
 
     // Wolf problem
-    ProblemPtr problem_ptr_ = make_shared<Problem>(FRM_PVQBB_3D);
-    problem_ptr_->setup();
+    ProblemPtr problem_ptr_ = Problem::create(FRM_PVQBB_3D);
     Eigen::VectorXs extrinsics(7);
     extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     SensorBasePtr sensor_ptr = problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, shared_ptr<IntrinsicsBase>());

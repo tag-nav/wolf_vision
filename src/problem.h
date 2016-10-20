@@ -62,6 +62,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         Problem(FrameStructure _frame_structure);
         void setup();
+        static ProblemPtr create(FrameStructure _frame_structure);
         virtual ~Problem();
 
         // Properties -----------------------------------------
