@@ -996,7 +996,7 @@ void ProcessorTrackerLandmarkPolyline::postProcess()
 {
     //std::cout << "postProcess: " << std::endl;
     //std::cout << "New Last features: " << getNewFeaturesListLast().size() << std::endl;
-    //std::cout << "Last features: " << last_ptr_->getFeatureListPtr()->size() << std::endl;
+    //std::cout << "Last features: " << last_ptr_->getFeatureList().size() << std::endl;
     classifyPolilines(getProblem()->getMapPtr()->getLandmarkList());
 }
 

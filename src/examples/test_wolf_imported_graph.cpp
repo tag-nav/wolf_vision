@@ -312,7 +312,7 @@ int main(int argc, char** argv)
     first_frame_prun->addCapture(initial_covariance_prun);
     initial_covariance_full->process();
     initial_covariance_prun->process();
-    //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_prun->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
+    //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureList().front()->getConstraintFromList().front()->nodeId() << std::endl << initial_covariance_prun->getFeatureList().front()->getMeasurementCovariance() << std::endl;
     Eigen::SparseMatrix<Scalar> DeltaLambda(Lambda.rows(), Lambda.cols());
     insertSparseBlock((Eigen::Matrix3s::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
     Lambda = Lambda + DeltaLambda;

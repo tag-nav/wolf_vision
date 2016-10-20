@@ -268,7 +268,7 @@ int main(int argc, char** argv)
     first_frame_wolf_diff->addCapture(initial_covariance_wolf_diff);
     initial_covariance_ceres_diff->process();
     initial_covariance_wolf_diff->process();
-    //std::cout << "initial covariance: constraint " << initial_covariance_wolf_diff->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_wolf_diff->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
+    //std::cout << "initial covariance: constraint " << initial_covariance_wolf_diff->getFeatureList().front()->getConstraintFromList().front()->nodeId() << std::endl << initial_covariance_wolf_diff->getFeatureList().front()->getMeasurementCovariance() << std::endl;
 
     // COMPUTE COVARIANCES
     std::cout << "computing covariances..." << std::endl;

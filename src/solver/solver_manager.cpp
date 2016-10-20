@@ -29,7 +29,7 @@ void SolverManager::update(const WolfProblemPtr _problem_ptr)
 	else
 	{
 		// ADD/UPDATE STATE UNITS
-		for(auto state_unit_it = _problem_ptr->getStateListPtr()->begin(); state_unit_it!=_problem_ptr->getStateListPtr()->end(); state_unit_it++)
+		for(auto state_unit_it = _problem_ptr->getStateList().begin(); state_unit_it!=_problem_ptr->getStateList().end(); state_unit_it++)
 		{
 			if ((*state_unit_it)->getPendingStatus() == ADD_PENDING)
 				addStateUnit(*state_unit_it);
@@ -40,10 +40,10 @@ void SolverManager::update(const WolfProblemPtr _problem_ptr)
 		//std::cout << "state units updated!" << std::endl;
 
 		// REMOVE STATE UNITS
-		while (!_problem_ptr->getRemovedStateListPtr()->empty())
+		while (!_problem_ptr->getRemovedStateList().empty())
 		{
 			// TODO: remove state unit
-			//_problem_ptr->getRemovedStateListPtr()->pop_front();
+			//_problem_ptr->getRemovedStateList().pop_front();
 		}
 		//std::cout << "state units removed!" << std::endl;
 

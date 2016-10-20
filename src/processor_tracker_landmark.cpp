@@ -34,10 +34,10 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
 {
     std::cout << "ProcessorTrackerLandmark::processNew:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
-    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
     //std::cout << "\tincoming correspondences: " << matches_landmark_from_incoming_.size() << std::endl;
-    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
 
     /* Rationale: A keyFrame will be created using the last Capture.
@@ -70,14 +70,14 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
 
     // Append new landmarks to the map
     getProblem()->addLandmarkList(new_landmarks);
-    //std::cout << "\tnew landmarks added: " << getProblem()->getMapPtr()->getLandmarkListPtr()->size() << std::endl;
+    //std::cout << "\tnew landmarks added: " << getProblem()->getMapPtr()->getLandmarkList().size() << std::endl;
 
     //std::cout << "end of processNew:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
-    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
     //std::cout << "\tincoming correspondences: " << matches_landmark_from_incoming_.size() << std::endl;
-    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
 
     // return the number of new features detected in \b last
@@ -103,10 +103,10 @@ unsigned int ProcessorTrackerLandmark::processKnown()
 {
     //std::cout << "ProcessorTrackerLandmark::processKnown:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
-    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
     //std::cout << "\tincoming correspondences: " << matches_landmark_from_incoming_.size() << std::endl;
-    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
 
     // Find landmarks in incoming_ptr_
@@ -118,10 +118,10 @@ unsigned int ProcessorTrackerLandmark::processKnown()
 
     //std::cout << "end of processKnown:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
-    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
     //std::cout << "\tincoming correspondences: " << matches_landmark_from_incoming_.size() << std::endl;
-    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureListPtr()->size()) << std::endl;
+    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
     return found_landmarks;
 

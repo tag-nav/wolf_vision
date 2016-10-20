@@ -213,10 +213,10 @@ bool ProcessorTrackerLandmarkCorner::voteForKeyFrame()
         }
     }
     //// option 3: less than half matched in origin, matched in incoming (more than half in last)
-    //if (matches_landmark_from_incoming_.size()*2 < origin_ptr_->getFeatureListPtr()->size() && matches_landmark_from_last_.size()*2 > origin_ptr_->getFeatureListPtr()->size())
+    //if (matches_landmark_from_incoming_.size()*2 < origin_ptr_->getFeatureList().size() && matches_landmark_from_last_.size()*2 > origin_ptr_->getFeatureList().size())
     //{
     //    std::cout << "------------- NEW KEY FRAME: Option 3 - " << std::endl;
-    //    //std::cout << "\tmatches in incoming = " << matches_landmark_from_incoming_.size() << std::endl<< "\tmatches in origin = " << origin_ptr_->getFeatureListPtr()->size() << std::endl;
+    //    //std::cout << "\tmatches in incoming = " << matches_landmark_from_incoming_.size() << std::endl<< "\tmatches in origin = " << origin_ptr_->getFeatureList().size() << std::endl;
     //    return true;
     //}
     return false;
