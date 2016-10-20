@@ -134,9 +134,6 @@ int main()
     std::cout << "Residual computed" << std::endl;
     std::cout << "Residual = " << residuals[0] << "   " << residuals[1] << std::endl;
 
-
-    wolf_problem_ptr_.reset(); // TODO remove line
-
     return 0;
 
 }

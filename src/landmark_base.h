@@ -225,7 +225,7 @@ inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
 //        else
 //        {
 //            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
-//            //            delete this;//TODO remove line
+//            //            delete this;
 //        }
 //    }
 //}

@@ -40,7 +40,6 @@ namespace wolf {
 inline void HardwareBase::removeSensor(const SensorBaseIter& _sensor_iter)
 {
     sensor_list_.erase(_sensor_iter);
-    //    delete * _sensor_iter; // TODO remove line
 }
 
 inline SensorBaseList& HardwareBase::getSensorList()

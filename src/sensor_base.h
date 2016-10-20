@@ -165,7 +165,6 @@ inline wolf::SensorType SensorBase::typeId()
 inline ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
 {
     processor_list_.push_back(_proc_ptr);
-    //    _proc_ptr->setSensorPtr(this); // TODO remove line
     _proc_ptr->setSensorPtr(shared_from_this());
     _proc_ptr->setProblem(getProblem());
     return _proc_ptr;
@@ -206,7 +205,6 @@ inline Eigen::VectorXs SensorBase::getNoiseStd()
 //    if (!is_removing_)
 //    {
 //        if (hardware_ptr_ != nullptr)
-//            //            hardware_ptr_->removeSensor(this); // TODO remove line
 //            hardware_ptr_->removeSensor(shared_from_this());
 //        else
 //            delete this;
