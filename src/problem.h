@@ -209,7 +209,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Gets a reference to the state units list
          */
-        StateBlockList getStateBlockList();
+        StateBlockList& getStateBlockList();
 
         /** \brief Adds a new state block to be added to solver manager
          */

@@ -470,7 +470,7 @@ FrameBasePtr Problem::getLastKeyFramePtr()
     return trajectory_ptr_->getLastKeyFramePtr();
 }
 
-StateBlockList Problem::getStateBlockList()
+StateBlockList& Problem::getStateBlockList()
 {
     return state_block_list_;
 }
