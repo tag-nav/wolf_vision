@@ -35,7 +35,7 @@ typedef enum {
  *  - With a local delta,  so that \f${\bf q}^+ = {\bf q} \otimes {\bf q}(d\theta)\f$.
  *  - With a global delta, so that \f${\bf q}^+ = {\bf q}(d\theta) \otimes {\bf q}\f$.
  *
- * The choice is selected at construction time, through an enum QuaternionDeltaReference.
+ * The choice is templated, through an enum QuaternionDeltaReference.
  *
  * In either case, the incremental quaternion \f${\bf q}(d\theta)\f$ is computed from the delta_theta
  * variable, here named \f$d\theta\f$, using
@@ -48,12 +48,9 @@ typedef enum {
  *   \f]
  *
  */
-template <unsigned int DeltaReference/* = DQ_GLOBAL*/>
+template <unsigned int DeltaReference = DQ_LOCAL>
 class LocalParametrizationQuaternion : public LocalParametrizationBase
 {
-protected:
-
-  QuaternionDeltaReference delta_reference_;
 
 public:
 
@@ -76,9 +73,8 @@ public:
                                Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
 };
 
-// @TODO : considere typedef
-// typedef LocalParametrizationQuaternion<DQ_GLOBAL> LocalParametrizationQuaternionG;
-// typedef LocalParametrizationQuaternion<DQ_LOCAL>  LocalParametrizationQuaternionL;
+typedef LocalParametrizationQuaternion<DQ_GLOBAL> LocalParametrizationQuaternionG;
+typedef LocalParametrizationQuaternion<DQ_LOCAL>  LocalParametrizationQuaternionL;
 
 } // namespace wolf
 
