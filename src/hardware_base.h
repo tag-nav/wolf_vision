@@ -25,8 +25,8 @@ class HardwareBase : public NodeBase, public std::enable_shared_from_this<Hardwa
 
         virtual SensorBasePtr addSensor(SensorBasePtr _sensor_ptr);
         SensorBaseList& getSensorList();
-        void removeSensor(const SensorBaseIter& _sensor_iter);
-        void removeSensor(SensorBasePtr _sensor_ptr);
+//        void removeSensor(const SensorBaseIter& _sensor_iter);
+//        void removeSensor(SensorBasePtr _sensor_ptr);
 };
 
 } // namespace wolf
@@ -37,10 +37,10 @@ class HardwareBase : public NodeBase, public std::enable_shared_from_this<Hardwa
 
 namespace wolf {
 
-inline void HardwareBase::removeSensor(const SensorBaseIter& _sensor_iter)
-{
-    sensor_list_.erase(_sensor_iter);
-}
+//inline void HardwareBase::removeSensor(const SensorBaseIter& _sensor_iter)
+//{
+//    sensor_list_.erase(_sensor_iter);
+//}
 
 inline SensorBaseList& HardwareBase::getSensorList()
 {

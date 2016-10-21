@@ -50,17 +50,17 @@ void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)
     landmark_list_.splice(landmark_list_.end(), _landmark_list);
 }
 
-void MapBase::removeLandmark(LandmarkBasePtr _landmark_ptr)
-{
-    landmark_list_.remove(_landmark_ptr);
-//    delete _landmark_ptr;
-}
-
-void MapBase::removeLandmark(const LandmarkBaseIter& _landmark_iter)
-{
-    landmark_list_.erase(_landmark_iter);
-//    delete * _landmark_iter;
-}
+//void MapBase::removeLandmark(LandmarkBasePtr _landmark_ptr)
+//{
+//    landmark_list_.remove(_landmark_ptr);
+////    delete _landmark_ptr;
+//}
+//
+//void MapBase::removeLandmark(const LandmarkBaseIter& _landmark_iter)
+//{
+//    landmark_list_.erase(_landmark_iter);
+////    delete * _landmark_iter;
+//}
 
 void MapBase::load(const std::string& _map_file_dot_yaml)
 {

@@ -107,8 +107,8 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         CaptureBaseList& getCaptureList();
         CaptureBasePtr addCapture(CaptureBasePtr _capt_ptr);
-        void removeCapture(const CaptureBaseIter& _capt_iter);
-        void removeCapture(const CaptureBasePtr _capt_ptr);
+//        void removeCapture(const CaptureBaseIter& _capt_iter);
+//        void removeCapture(const CaptureBasePtr _capt_ptr);
         CaptureBasePtr hasCaptureOf(const SensorBasePtr _sensor_ptr);
         void unlinkCapture(CaptureBasePtr _cap_ptr);
 
@@ -231,19 +231,17 @@ inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
     return _capt_ptr;
 }
 
-inline void FrameBase::removeCapture(const CaptureBaseIter& _capt_iter)
-{
-    //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
-    capture_list_.erase(_capt_iter);
-//    delete *_capt_iter;
-}
-
-inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
-{
-    //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
-    capture_list_.remove(_capt_ptr);
-//    delete _capt_ptr;
-}
+//inline void FrameBase::removeCapture(const CaptureBaseIter& _capt_iter)
+//{
+//    //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
+//    capture_list_.erase(_capt_iter);
+//}
+//
+//inline void FrameBase::removeCapture(const CaptureBasePtr _capt_ptr)
+//{
+//    //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
+//    capture_list_.remove(_capt_ptr);
+//}
 
 inline StateStatus FrameBase::getStatus() const
 {

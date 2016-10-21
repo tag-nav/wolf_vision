@@ -54,7 +54,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         FeatureBasePtr addFeature(FeatureBasePtr _ft_ptr);
         FeatureBaseList& getFeatureList();
         void addFeatureList(FeatureBaseList& _new_ft_list);
-        void removeFeature(FeatureBasePtr _ft_ptr);
+//        void removeFeature(FeatureBasePtr _ft_ptr);
 
         void getConstraintList(ConstraintBaseList& _ctr_list);
 
@@ -109,11 +109,11 @@ inline wolf::StateBlockPtr CaptureBase::getSensorOPtr() const
 }
 
 
-inline void CaptureBase::removeFeature(FeatureBasePtr _ft_ptr)
-{
-    feature_list_.remove(_ft_ptr);
-//    delete _ft_ptr;
-}
+//inline void CaptureBase::removeFeature(FeatureBasePtr _ft_ptr)
+//{
+//    feature_list_.remove(_ft_ptr);
+////    delete _ft_ptr;
+//}
 
 inline unsigned int CaptureBase::id()
 {
