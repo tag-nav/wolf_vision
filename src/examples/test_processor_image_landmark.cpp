@@ -286,7 +286,7 @@ int main(int argc, char** argv)
             std::cout << "Last key frame orientation: "
                       << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
 
-            cv::waitKey(0);
+            cv::waitKey(20);
 //        }
 
         std::cout << "END OF ITERATION\n=================================" << std::endl;
