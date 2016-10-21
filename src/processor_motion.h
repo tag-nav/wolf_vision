@@ -567,11 +567,13 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
     FrameBasePtr key_frame_origin = capture_ptr->getOriginFramePtr();
 
     // create motion capture
+
     CaptureMotion::Ptr key_capture_ptr = std::make_shared<CaptureMotion>(ts,
                                                                          getSensorPtr(),
                                                                          Eigen::VectorXs::Zero(data_size_),
                                                                          Eigen::MatrixXs::Zero(data_size_, data_size_),
                                                                          key_frame_origin);
+
 
     // add motion capture to keyframe
     _keyframe_ptr->addCapture(key_capture_ptr);
@@ -756,7 +758,6 @@ inline bool ProcessorMotion::isMotion()
 inline void ProcessorMotion::updateDt()
 {
     dt_ = incoming_ptr_->getTimeStamp() - getBufferPtr()->get().back().ts_;
-
 }
 
 inline const MotionBuffer* ProcessorMotion::getBufferPtr() const

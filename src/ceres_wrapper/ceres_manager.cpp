@@ -279,7 +279,8 @@ void CeresManager::addConstraint(ConstraintBasePtr _ctr_ptr, unsigned int _id)
 {
     id_2_costfunction_[_id] = createCostFunction(_ctr_ptr);
 
-    //std::cout << "adding residual " << _ctr_ptr->id() << std::endl;
+//    std::cout << "adding residual " << _ctr_ptr->id() << std::endl;
+//    std::cout << "residual pointer " << _ctr_ptr << std::endl;
 
     if (_ctr_ptr->getApplyLossFunction())
         id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateBlockPtrVector());
@@ -299,9 +300,9 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 
 void CeresManager::addStateBlock(StateBlockPtr _st_ptr)
 {
-    //std::cout << "Adding State Block " << _st_ptr->getPtr() << std::endl;
-    //std::cout << " size: " <<  _st_ptr->getSize() << std::endl;
-    //std::cout << " vector: " <<  _st_ptr->getVector() << std::endl;
+//    std::cout << "Adding State Block " << _st_ptr->getPtr() << std::endl;
+//    std::cout << " size: " <<  _st_ptr->getSize() << std::endl;
+//    std::cout << " vector: " <<  _st_ptr->getVector().transpose() << std::endl;
 
     if (_st_ptr->hasLocalParametrization())
     {

@@ -114,26 +114,38 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* con
     // MAPS
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
     Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
+    Eigen::Map<const Eigen::Matrix<T,4,1> > q1_v(_q1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > p2(_p2);
     Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
+    Eigen::Map<const Eigen::Matrix<T,4,1> > q2_v(_q2);
     Eigen::Map<Eigen::Matrix<T,6,1> > residuals(_residuals);
+
+    // std::cout << "p1: " << p1(0) << std::endl << p1(1) << std::endl << p1(2) << std::endl;
+    // std::cout << "q1: " << q1_v(0) << std::endl << q1_v(1) << std::endl << q1_v(2) << std::endl << q1_v(3) << std::endl;
+    // std::cout << "p2: " << p2(0) << std::endl << p2(1) << std::endl << p2(2) << std::endl;
+    // std::cout << "q2: " << q2_v(0) << std::endl << q2_v(1) << std::endl << q2_v(2) << std::endl << q2_v(3) << std::endl;
 
     // estimate motion increment, dp, dq;
     Eigen::Matrix<T,3,1> dp = q1.conjugate() * (p2 - p1);
     Eigen::Quaternion<T> dq = q1.conjugate() * q2;
+    // std::cout << "dp: " << dp(0) << std::endl << dp(1) << std::endl<< dp(2) << std::endl;
+    // std::cout << "dq: " << dq.x() << std::endl << dq.y() << std::endl << dq.z() << std::endl << dq.w() << std::endl;
 
     // measured motion increment, dp_m, dq_m
     Eigen::Matrix<T,3,1> dp_m = getMeasurement().head<3>().cast<T>();
-    Eigen::Quaternion<T> dq_m = v2q(getMeasurement().tail<3>()).cast<T>();
+    //Eigen::Quaternion<T> dq_m = v2q(getMeasurement().tail<3>()).cast<T>();
+    Eigen::Quaternion<T> dq_m(getMeasurement().tail<4>().cast<T>());
+    // std::cout << "meas: " << getMeasurement().transpose() << std::endl;
+    // std::cout << "dq_m: " << dq_m.x() << std::endl << dq_m.y() << std::endl << dq_m.z() << std::endl << dq_m.w() << std::endl;
 
     // residual
     // residuals.head<3>() = dq.conjugate() * (dp_m - dp); // see note below
     residuals.head(3) = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
     residuals.tail(3) = q2v(dq.conjugate() * dq_m);
 
-    Eigen::Matrix<T,6,1> r = residuals;
+    //Eigen::Matrix<T,6,1> r = residuals;
 
-//    printRes(r);
+    //printRes(r);
 
     return true;
 }

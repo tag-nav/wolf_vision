@@ -134,6 +134,7 @@ typedef enum
     CTR_GPS_PR_2D,              ///< 2D GPS Pseudorange constraint.
     CTR_GPS_PR_3D,              ///< 3D GPS Pseudorange constraint.
     CTR_FIX,                    ///< Fix constraint (for priors).
+    CTR_FIX_3D,                    ///< Fix constraint (for priors) in 3D.
     CTR_ODOM_2D,                ///< 2D Odometry constraint .
     CTR_ODOM_3D,                ///< 3D Odometry constraint .
     CTR_CORNER_2D,              ///< 2D corner constraint .

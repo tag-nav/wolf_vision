@@ -102,6 +102,7 @@ SET(HDRS
     capture_base.h
     capture_fix.h
     capture_gps_fix.h
+    capture_motion.h
     capture_imu.h
     capture_void.h
     constraint_analytic.h
@@ -113,6 +114,7 @@ SET(HDRS
     constraint_imu.h
     constraint_sparse.h
     constraint_fix.h
+    constraint_fix_3D.h
     constraint_gps_2D.h
     constraint_gps_pseudorange_3D.h
     constraint_gps_pseudorange_2D.h
@@ -160,6 +162,7 @@ SET(HDRS
     processor_tracker_feature_dummy.h
     processor_tracker_landmark.h
     processor_tracker_landmark_dummy.h
+    rotations.h
     sensor_base.h
     sensor_camera.h
     sensor_factory.h

@@ -38,6 +38,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
             setType("AHP");
             std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+
             K_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
             std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
             distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
