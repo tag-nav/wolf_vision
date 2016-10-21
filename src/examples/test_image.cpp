@@ -187,6 +187,9 @@ int main(int argc, char** argv)
         image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+
+        wolf_problem_->print();
+
         cv::waitKey(20);
 
 //        if((f%buffer_size) == 4)
