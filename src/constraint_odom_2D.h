@@ -10,6 +10,9 @@ namespace wolf {
 class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
 {
     public:
+        typedef std::shared_ptr<ConstraintOdom2D> Ptr;
+
+    public:
 //        static const unsigned int N_BLOCKS = 4;
 
         ConstraintOdom2D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
