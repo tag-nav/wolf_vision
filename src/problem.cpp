@@ -547,9 +547,14 @@ void Problem::print()
     std::cout << "T" << std::endl;
     for (auto F : getTrajectoryPtr()->getFrameList() )
     {
-        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id() << (F->isFixed() ?  ", fixed" : ", estim") << ", ts=" << std::setprecision(5) << F->getTimeStamp().get();
+        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id() << "  <-\t";
+        for (auto cby : F->getConstrainedByList())
+            std::cout << "c" << cby->id() << ",\t";
+        std::cout << std::endl;
+        std::cout << (F->isFixed() ?  "    Fixed" : "    Estim") << ", ts=" << std::setprecision(5) << F->getTimeStamp().get();
         std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
-        std::cout << " T @ " << F->getTrajectoryPtr().get() << std::endl;
+        //        std::cout << " T @ " << F->getTrajectoryPtr().get() << std::endl;
+        std::cout << std::endl;
         for (auto C : F->getCaptureList() )
         {
             std::cout << "    C" << C->id() << std::endl;
@@ -581,7 +586,10 @@ void Problem::print()
     std::cout << "M" << std::endl;
     for (auto L : getMapPtr()->getLandmarkList() )
     {
-        std::cout << "  L" << L->id() << std::endl;
+        std::cout << "  L" << L->id() << "\t<- ";
+        for (auto cby : L->getConstrainedByList())
+            std::cout << "c" << cby->id() << ",\t";
+        std::cout << std::endl;
     }
 }
 
