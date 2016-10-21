@@ -61,7 +61,7 @@ int main()
     std::cout << std::endl << "==================== processor tracker landmark test ======================" << std::endl;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = std::make_shared<Problem>(FRM_PO_2D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_2D);
     SensorBasePtr sensor_ptr_ = std::make_shared< SensorBase>(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)),
                                              new StateBlock(Eigen::VectorXs::Zero(1)),
                                              new StateBlock(Eigen::VectorXs::Zero(2)), 2);
@@ -79,6 +79,8 @@ int main()
     }
 
     print_problem_pointers(wolf_problem_ptr_);
+
+    wolf_problem_ptr_->check();
 
 
     return 0;
