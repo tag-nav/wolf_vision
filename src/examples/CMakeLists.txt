@@ -23,13 +23,9 @@ TARGET_LINK_LIBRARIES(test_local_param ${PROJECT_NAME})
 ADD_EXECUTABLE(test_state_quaternion test_state_quaternion.cpp)
 TARGET_LINK_LIBRARIES(test_state_quaternion ${PROJECT_NAME})
 
-# NodeLinked class test
-#ADD_EXECUTABLE(test_node_linked test_node_linked.cpp)
-#TARGET_LINK_LIBRARIES(test_node_linked ${PROJECT_NAME})
-
 # Testing virtual hierarchy -- solving diamond of death
-ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
-TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
+#TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
 
 # Testing Eigen Permutations
 #ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
@@ -143,10 +139,10 @@ TARGET_LINK_LIBRARIES(test_processor_tracker_landmark ${PROJECT_NAME})
 ADD_EXECUTABLE(test_processor_imu test_processor_imu.cpp)
 TARGET_LINK_LIBRARIES(test_processor_imu ${PROJECT_NAME})
 
-# IF (laser_scan_utils_FOUND)
-#     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
-#     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
-# #ENDIF (laser_scan_utils_FOUND)
+#IF (laser_scan_utils_FOUND)
+#    ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
+#    TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
+#ENDIF (laser_scan_utils_FOUND)
 
 IF(faramotics_FOUND)
     IF (laser_scan_utils_FOUND)
