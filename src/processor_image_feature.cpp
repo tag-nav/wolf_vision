@@ -18,12 +18,12 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     active_search_grid_()
 {
     // 1. detector-descriptor params
-    DetectorDescriptorParamsBase* _dd_params = _params.detector_descriptor_params_ptr;
+    DetectorDescriptorParamsBase::Ptr _dd_params = _params.detector_descriptor_params_ptr;
     switch (_dd_params->type){
         case DD_BRISK:
             {
-            DetectorDescriptorParamsBrisk* params_brisk = (DetectorDescriptorParamsBrisk*) _dd_params;
-            detector_descriptor_ptr_ = new cv::BRISK(params_brisk->threshold, //
+            std::shared_ptr<DetectorDescriptorParamsBrisk> params_brisk = std::static_pointer_cast<DetectorDescriptorParamsBrisk>(_dd_params);
+            detector_descriptor_ptr_ = std::make_shared<cv::BRISK>(params_brisk->threshold, //
                                                      params_brisk->octaves, //
                                                      params_brisk->pattern_scale);
 
@@ -35,8 +35,8 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
             }
         case DD_ORB:
             {
-            DetectorDescriptorParamsOrb* params_orb = (DetectorDescriptorParamsOrb*) _dd_params;
-            detector_descriptor_ptr_ = new cv::ORB(params_orb->nfeatures, //
+            std::shared_ptr<DetectorDescriptorParamsOrb> params_orb = std::static_pointer_cast<DetectorDescriptorParamsOrb>(_dd_params);
+            detector_descriptor_ptr_ = std::make_shared<cv::ORB>(params_orb->nfeatures, //
                                                    params_orb->scaleFactor, //
                                                    params_orb->nlevels, //
                                                    params_orb->edgeThreshold, //
@@ -55,15 +55,14 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     }
 
     // 2. matcher params
-    matcher_ptr_ = new cv::BFMatcher(_params.matcher.similarity_norm);
+    matcher_ptr_ = std::make_shared<cv::BFMatcher>(_params.matcher.similarity_norm);
 
 }
 
 //Destructor
 ProcessorImageFeature::~ProcessorImageFeature()
 {
-    delete detector_descriptor_ptr_;
-    delete matcher_ptr_;
+    //
 }
 
 void ProcessorImageFeature::setup(SensorCamera::Ptr _camera_ptr)

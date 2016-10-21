@@ -12,7 +12,13 @@ enum DetectorDescriptorType
 
 struct DetectorDescriptorParamsBase
 {
+        typedef std::shared_ptr<DetectorDescriptorParamsBase> Ptr;
         DetectorDescriptorType type; ///< Type of algorithm. Accepted values in wolf.h
+        DetectorDescriptorParamsBase(DetectorDescriptorType _type = DD_ORB) : type(_type)
+        {
+            //
+        }
+
 };
 
 struct DetectorDescriptorParamsBrisk : public DetectorDescriptorParamsBase
@@ -37,7 +43,7 @@ struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
 
 struct ProcessorParamsImage : public ProcessorParamsBase
 {
-        DetectorDescriptorParamsBase* detector_descriptor_params_ptr;
+        DetectorDescriptorParamsBase::Ptr detector_descriptor_params_ptr;
 
         struct Matcher
         {

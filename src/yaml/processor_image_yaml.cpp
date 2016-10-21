@@ -33,7 +33,7 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
         Node dd_yaml = params["detector-descriptor"];
         if(dd_yaml["type"].as<string>() == "ORB")
         {
-            DetectorDescriptorParamsOrb* dd = new DetectorDescriptorParamsOrb;
+            std::shared_ptr<DetectorDescriptorParamsOrb> dd = std::make_shared<DetectorDescriptorParamsOrb>();
             dd->type                        = DD_ORB;
             dd->nfeatures                   = dd_yaml["nfeatures"].as<unsigned int>();
             dd->scaleFactor                 = dd_yaml["scale factor"].as<float>();

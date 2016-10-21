@@ -30,8 +30,8 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
     public:
         typedef std::shared_ptr<ProcessorImageLandmark> Ptr;
     protected:
-        cv::DescriptorMatcher* matcher_ptr_;
-        cv::Feature2D* detector_descriptor_ptr_;
+        std::shared_ptr<cv::DescriptorMatcher> matcher_ptr_;
+        std::shared_ptr<cv::Feature2D> detector_descriptor_ptr_;
     protected:
         ProcessorParamsImage params_;           // Struct with parameters of the processors
         ActiveSearchGrid active_search_grid_;   // Active Search
