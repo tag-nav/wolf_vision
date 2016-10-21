@@ -191,6 +191,7 @@ int main(int argc, char** argv)
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
 
 
+    problem_ptr_->print();
     problem_ptr_->check();
 
 //    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
