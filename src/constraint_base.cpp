@@ -75,10 +75,12 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr
     feature_other_ptr_(),
     landmark_other_ptr_(_landmark_ptr)
 {
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
     // add constraint to landmark
     LandmarkBasePtr lmk_o = landmark_other_ptr_.lock();
     if (lmk_o)
-        lmk_o->addConstrainedBy(shared_from_this());
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+        lmk_o->addConstrainedBy(shared_from_this()); // FIXME: cannot do shared_from_this in constructor!
     std::cout << "constructed      +c" << id() << std::endl;
 }
 
