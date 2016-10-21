@@ -56,9 +56,9 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_ptr, 
     landmark_other_ptr_()
 {
     // add constraint to feature
-    FeatureBasePtr ftr_o = feature_other_ptr_.lock();
-    if (ftr_o)
-        ftr_o->addConstrainedBy(shared_from_this()); // FIXME: cannot do shared_from_this in constructor!
+//    FeatureBasePtr ftr_o = feature_other_ptr_.lock();
+//    if (ftr_o)
+//        ftr_o->addConstrainedBy(shared_from_this()); // FIXME: cannot do shared_from_this in constructor!
     std::cout << "constructed      +c" << id() << std::endl;
 }
 

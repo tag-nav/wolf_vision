@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 
     std::cout << "Wolf path: " << wolf_path << std::endl;
 
-    ProblemPtr wolf_problem_ = make_shared<Problem>(FRM_PO_3D);
+    ProblemPtr wolf_problem_ = Problem::create(FRM_PO_3D);
 
     //=====================================================
     // Method 1: Use data generated here for sensor and processor

@@ -120,14 +120,17 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         /** \brief Returns a pointer to the frame constrained to
          **/
         FrameBasePtr getFrameOtherPtr();
+        void setFrameOtherPtr(FrameBasePtr _frm_o){frame_other_ptr_ = _frm_o;}
 
         /** \brief Returns a pointer to the feature constrained to
          **/
         FeatureBasePtr getFeatureOtherPtr();
+        void setFeatureOtherPtr(FeatureBasePtr _ftr_o){feature_other_ptr_ = _ftr_o;}
 
         /** \brief Returns a pointer to the landmark constrained to
          **/
         LandmarkBasePtr getLandmarkOtherPtr();
+        void setLandmarkOtherPtr(LandmarkBasePtr _lmk_o){landmark_other_ptr_ = _lmk_o;}
 
         ProblemPtr getProblem();
 

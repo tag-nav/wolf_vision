@@ -238,7 +238,7 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
                 point_ptr->setTrackId(point_ptr->id());
                 addNewFeatureLast(point_ptr);
                 active_search_grid_.hitCell(new_keypoints[0]);
-                active_search_grid_.blockCell(roi);
+//                active_search_grid_.blockCell(roi);
 
                 //std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 

@@ -182,7 +182,8 @@ inline bool ProcessorImage::voteForKeyFrame()
 inline ConstraintBasePtr ProcessorImage::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
 {
     std::shared_ptr<ConstraintEpipolar> const_epipolar_ptr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr);
-    return const_epipolar_ptr; // TODO Crear constraint
+    const_epipolar_ptr->setFeatureOtherPtr(_feature_other_ptr);
+    return const_epipolar_ptr;
 }
 
 } // namespace wolf
