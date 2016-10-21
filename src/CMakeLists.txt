@@ -102,7 +102,6 @@ SET(HDRS
     capture_base.h
     capture_fix.h
     capture_gps_fix.h
-    capture_motion2.h
     capture_imu.h
     capture_void.h
     constraint_analytic.h
@@ -111,7 +110,6 @@ SET(HDRS
     constraint_corner_2D.h
     constraint_epipolar.h
     constraint_AHP.h
-    constraint_image_new_landmark.h
     constraint_imu.h
     constraint_sparse.h
     constraint_fix.h
