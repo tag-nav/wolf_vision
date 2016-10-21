@@ -211,7 +211,11 @@ inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
 
 inline ConstraintBasePtr ProcessorOdom2D::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
-    return std::make_shared<ConstraintOdom2D>(_feature_motion, _frame_origin);
+    ConstraintOdom2D::Ptr ctr_odom = std::make_shared<ConstraintOdom2D>(_feature_motion, _frame_origin);
+    ctr_odom->setFeaturePtr(_feature_motion);
+    ctr_odom->setFrameOtherPtr(_frame_origin);
+    _frame_origin->addConstrainedBy(ctr_odom);
+    return ctr_odom;
 }
 
 inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
