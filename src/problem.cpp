@@ -161,6 +161,7 @@ FrameBasePtr Problem::createFrame(FrameKeyType _frame_key_type, const Eigen::Vec
         case FRM_POV_3D:
         {
             assert(_frame_state.size() == 10 && "Wrong state vector size");
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
             return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
                                   new StateQuaternion(_frame_state.segment<4>(3)),
                                   new StateBlock(_frame_state.tail(3))));
@@ -275,11 +276,13 @@ bool Problem::permitKeyFrame(ProcessorBasePtr _processor_ptr)
 
 void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _processor_ptr, const Scalar& _time_tolerance)
 {
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
     //std::cout << "Problem::keyFrameCallback: processor " << _processor_ptr->getName() << std::endl;
     for (auto sensor : hardware_ptr_->getSensorList())
     	for (auto processor : sensor->getProcessorList())
     		if (processor->id() != _processor_ptr->id())
                 processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 }
 
 LandmarkBasePtr Problem::addLandmark(LandmarkBasePtr _lmk_ptr)

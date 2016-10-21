@@ -177,7 +177,7 @@ int main(int argc, char** argv)
         image_ptr->process();
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(0);
+        cv::waitKey(30);
 
         if((f%buffer_size) == 10)
         {

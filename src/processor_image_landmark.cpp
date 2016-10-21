@@ -188,7 +188,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                     incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
                     _feature_list_out.push_back(incoming_point_ptr);
 
-                    _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, normalized_score});
+                    _feature_landmark_correspondences[_feature_list_out.back()] = std::make_shared<LandmarkMatch>(landmark_in_ptr, normalized_score);
 
                     feat_lmk_found_.push_back(incoming_point_ptr);
                     landmark_found_number_.push_back(lmk_nbr);
@@ -320,17 +320,24 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
 
 ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 
     //    std::cout << "\nProcessorImageLandmark::createConstraint" << std::endl;
     if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFramePtr())
     {
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         //std::cout << "Are equal" << std::endl;
         return std::shared_ptr<ConstraintBase>();
     }
     else// (((LandmarkAHP*)_landmark_ptr)->getAnchorFrame() != last_ptr_->getFramePtr())
     {
-        return std::make_shared<ConstraintAHP>(_feature_ptr, last_ptr_->getFramePtr(),std::static_pointer_cast<LandmarkAHP>(_landmark_ptr) );
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+        assert (last_ptr_ && "bad last ptr");
+        assert (_landmark_ptr && "bad lmk ptr");
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+        return std::make_shared<ConstraintAHP>(_feature_ptr, last_ptr_->getFramePtr(), std::static_pointer_cast<LandmarkAHP>(_landmark_ptr) );
     }
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 }
 
 

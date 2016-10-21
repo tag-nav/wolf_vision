@@ -59,12 +59,15 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
         // keyframe creation on last
         makeFrame(last_ptr_, KEY_FRAME);
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 
         // Detect new Features, initialize Landmarks, create Constraints, ...
         processNew(max_new_features_);
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 
         // Establish constraints from last
         establishConstraints();
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 
     }
     // SECOND TIME or after KEY FRAME CALLBACK
@@ -77,6 +80,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
         // Create a new non-key Frame in the Trajectory with the incoming Capture
         makeFrame(incoming_ptr_);
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 
         // Reset the derived Tracker
         reset();
@@ -118,15 +122,19 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
             // Create a new non-key Frame in the Trajectory with the incoming Capture
             makeFrame(incoming_ptr_);
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 
             // Make the last Capture's Frame a KeyFrame so that it gets into the solver
             setKeyFrame(last_ptr_);
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 
             // Establish constraints between last and origin
             establishConstraints();
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 
             // Reset the derived Tracker
             reset();
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 
             // Reset this
             origin_ptr_ = last_ptr_;
@@ -174,16 +182,22 @@ bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar
 
 void ProcessorTracker::setKeyFrame(CaptureBasePtr _capture_ptr)
 {
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
     assert(_capture_ptr != nullptr && _capture_ptr->getFramePtr() != nullptr && "ProcessorTracker::setKeyFrame: null capture or capture without frame");
     if (!_capture_ptr->getFramePtr()->isKey())
     {
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         // Set key
         _capture_ptr->getFramePtr()->setKey();
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         // Set state to the keyframe
         _capture_ptr->getFramePtr()->setState(getProblem()->getStateAtTimeStamp(_capture_ptr->getTimeStamp()));
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         // Call the new keyframe callback in order to let the other processors to establish their constraints
-        getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), (ProcessorBasePtr)((this)), time_tolerance_);
+        getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), time_tolerance_);
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
     }
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 }
 
 

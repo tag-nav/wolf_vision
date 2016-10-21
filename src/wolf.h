@@ -380,10 +380,16 @@ struct LandmarkMatch
 {
         LandmarkBasePtr landmark_ptr_;
         Scalar normalized_score_;
+        LandmarkMatch(LandmarkBasePtr _landmark_ptr, Scalar _normalized_score) :
+                landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
+        {
+
+        }
 };
 
 // Match map Feature - Landmark
-typedef std::map<FeatureBasePtr, LandmarkMatch*> LandmarkMatchMap;
+typedef std::shared_ptr<LandmarkMatch> LandmarkMatchPtr;
+typedef std::map<FeatureBasePtr, LandmarkMatchPtr> LandmarkMatchMap;
 
 
 // Feature-Feature correspondence
