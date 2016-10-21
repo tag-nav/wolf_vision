@@ -24,6 +24,10 @@ struct ProcessorParamsOdom2D : public ProcessorParamsBase
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
+        typedef std::shared_ptr<ProcessorOdom2D> Ptr;
+        typedef std::weak_ptr<ProcessorOdom2D> WPtr;
+
+    public:
         ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th);
         virtual ~ProcessorOdom2D();
         virtual bool voteForKeyFrame();
@@ -207,7 +211,11 @@ inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
 
 inline ConstraintBasePtr ProcessorOdom2D::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
-    return new ConstraintOdom2D(_feature_motion, _frame_origin);
+    ConstraintOdom2D::Ptr ctr_odom = std::make_shared<ConstraintOdom2D>(_feature_motion, _frame_origin);
+    ctr_odom->setFeaturePtr(_feature_motion);
+    ctr_odom->setFrameOtherPtr(_frame_origin);
+    _frame_origin->addConstrainedBy(ctr_odom);
+    return ctr_odom;
 }
 
 inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)

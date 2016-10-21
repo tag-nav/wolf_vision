@@ -75,7 +75,7 @@ unsigned int ProcessorTrackerLandmark2::processKnown()
 
     // Find landmarks in incoming_ptr_
     FeatureBaseList known_features_list_incoming;
-    unsigned int found_landmarks = findLandmarks(*(getProblem()->getMapPtr()->getLandmarkListPtr()),
+    unsigned int found_landmarks = findLandmarks(*(getProblem()->getMapPtr()->getLandmarkList()),
                                                  known_features_list_incoming, matches_landmark_from_incoming_);
     // Append found incoming features
     incoming_ptr_->addDownNodeList(known_features_list_incoming);

@@ -22,18 +22,17 @@ namespace wolf {
  */
 class CaptureImage : public CaptureBase
 {
+    public:
+        typedef std::shared_ptr<CaptureImage> Ptr;
+        typedef std::weak_ptr<CaptureImage> WPtr;
+
     protected:
         cv::Mat image_;
         cv::Mat descriptors_;
         std::vector<cv::KeyPoint> keypoints_;
 
     public:
-        CaptureImage(const TimeStamp& _ts, SensorCamera* _camera_ptr, cv::Mat _data_cv);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         */
+        CaptureImage(const TimeStamp& _ts, SensorCamera::Ptr _camera_ptr, cv::Mat _data_cv);
         virtual ~CaptureImage();
 
         virtual const cv::Mat& getImage() const;

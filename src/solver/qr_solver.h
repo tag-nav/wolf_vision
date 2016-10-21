@@ -42,7 +42,7 @@ class SolverQR
         Eigen::SparseQR<Eigen::SparseMatrix<double>, Eigen::NaturalOrdering<int>> solver_;
         Eigen::SparseMatrix<double> A_, R_;
         Eigen::VectorXd b_, x_incr_;
-        std::vector<StateBlock*> nodes_;
+        std::vector<StateBlockPtr> nodes_;
         std::vector<ConstraintBasePtr> constraints_;
         std::vector<CostFunctionBasePtr> cost_functions_;
 
@@ -123,7 +123,7 @@ class SolverQR
             }
         }
 
-        void addStateBlock(StateBlock* _state_ptr)
+        void addStateBlock(StateBlockPtr _state_ptr)
         {
             t_managing_ = clock();
 
@@ -149,7 +149,7 @@ class SolverQR
             time_managing_ += ((double)clock() - t_managing_) / CLOCKS_PER_SEC;
         }
 
-        void updateStateBlockStatus(StateBlock* _state_ptr)
+        void updateStateBlockStatus(StateBlockPtr _state_ptr)
         {
             //TODO
         }

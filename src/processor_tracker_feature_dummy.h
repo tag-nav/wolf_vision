@@ -102,7 +102,7 @@ inline ConstraintBasePtr ProcessorTrackerFeatureDummy::createConstraint(FeatureB
 {
     std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
               << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl;
-    return new ConstraintEpipolar(_feature_ptr, _feature_other_ptr);
+    return std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr);
 }
 
 } // namespace wolf

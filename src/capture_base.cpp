@@ -8,46 +8,67 @@ unsigned int CaptureBase::capture_id_count_ = 0;
 
 CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr) :
         NodeBase("CAPTURE", _type),
-        problem_ptr_(nullptr),
-        frame_ptr_(nullptr),
+        frame_ptr_(), // nullptr
         capture_id_(++capture_id_count_),
         time_stamp_(_ts),
         sensor_ptr_(_sensor_ptr),
-        sensor_p_ptr_(sensor_ptr_->getPPtr()),
-        sensor_o_ptr_(sensor_ptr_->getOPtr())
+        sensor_p_ptr_(sensor_ptr_.lock()->getPPtr()),
+        sensor_o_ptr_(sensor_ptr_.lock()->getOPtr())
 {
     //
+    std::cout << "constructed    +C" << id() << std::endl;
 }
 
 
 CaptureBase::~CaptureBase()
 {
-    //std::cout << "deleting CaptureBase " << nodeId() << std::endl;
-    is_deleting_ = true;
-    while (!feature_list_.empty())
-    {
-        feature_list_.front()->destruct();
-        feature_list_.pop_front();
-    }
+    std::cout << "destructed     -C" << id() << std::endl;
 }
 
-void CaptureBase::destruct()
-{
-    if (!is_deleting_)
-    {
-        if (frame_ptr_ != nullptr)
-            frame_ptr_->removeCapture(this);
-        else
-            delete this;
-    }
-}
+//void CaptureBase::destruct()
+//{
+//    if (!is_removing_)
+//    {
+//        if (frame_ptr_ != nullptr)
+//            frame_ptr_->removeCapture(this);
+//        else
+//            delete this;
+//    }
+//}
 
 void CaptureBase::process()
 {
     // Call all processors assigned to the sensor that captured this data
-    for (auto processor_iter = sensor_ptr_->getProcessorListPtr()->begin(); processor_iter != sensor_ptr_->getProcessorListPtr()->end(); ++processor_iter)
+    auto cap = shared_from_this();
+    auto sen = sensor_ptr_.lock();
+    if (sen)
+        for (auto prc : sen->getProcessorList())
+            prc->process(cap);
+}
+
+void CaptureBase::remove()
+{
+    if (!is_removing_)
     {
-        (*processor_iter)->process(this);
+        is_removing_ = true;
+        CaptureBasePtr this_C = shared_from_this();  // keep this alive while removing it
+
+        // remove from upstream
+        FrameBasePtr F = frame_ptr_.lock();
+        if (F)
+        {
+            F->getCaptureList().remove(this_C);
+            if (F->getCaptureList().empty() && F->getConstrainedByList().empty())
+                F->remove(); // remove upstream
+        }
+
+        // remove downstream
+        while (!feature_list_.empty())
+        {
+            feature_list_.front()->remove(); // remove downstream
+        }
+
+        std::cout << "Removed         C" << id() << std::endl;
     }
 }
 
@@ -55,7 +76,7 @@ void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
 {
     for (FeatureBasePtr feature_ptr : _new_ft_list)
     {
-        feature_ptr->setCapturePtr(this);
+        feature_ptr->setCapturePtr(shared_from_this());
         if (getProblem() != nullptr)
             feature_ptr->setProblem(getProblem());
     }

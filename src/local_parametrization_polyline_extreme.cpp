@@ -3,7 +3,7 @@
 
 namespace wolf {
 
-LocalParametrizationPolylineExtreme::LocalParametrizationPolylineExtreme(StateBlock* _reference_point) :
+LocalParametrizationPolylineExtreme::LocalParametrizationPolylineExtreme(StateBlockPtr _reference_point) :
         LocalParametrizationBase(2, 1),
         reference_point_(_reference_point)
 {

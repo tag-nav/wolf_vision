@@ -25,28 +25,42 @@ std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); ret
 
 
 Problem::Problem(FrameStructure _frame_structure) :
-        hardware_ptr_(new HardwareBase),
-        trajectory_ptr_(new TrajectoryBase(_frame_structure)),
-        map_ptr_(new MapBase),
-        processor_motion_ptr_(nullptr),
-        origin_setted_(false)
+        hardware_ptr_(),
+        trajectory_ptr_(),
+        map_ptr_(),
+        processor_motion_ptr_(),
+        origin_is_set_(false)
 {
-    hardware_ptr_->setProblem(this);
-    trajectory_ptr_->setProblem(this);
-    map_ptr_->setProblem(this);
+    hardware_ptr_ = std::make_shared<HardwareBase>();
+    trajectory_ptr_ = std::make_shared<TrajectoryBase>(_frame_structure);
+    map_ptr_ = std::make_shared<MapBase>();
+}
+
+void Problem::setup()
+{
+    hardware_ptr_->setProblem(shared_from_this());
+    trajectory_ptr_->setProblem(shared_from_this());
+    map_ptr_->setProblem(shared_from_this());
+}
+
+ProblemPtr Problem::create(FrameStructure _frame_structure)
+{
+    ProblemPtr p(std::make_shared<Problem>(_frame_structure));
+    p->setup();
+    return p;
 }
 
 Problem::~Problem()
 {
-    hardware_ptr_->destruct();
-    trajectory_ptr_->destruct();
-    map_ptr_->destruct();
+//    hardware_ptr_->remove();
+//    trajectory_ptr_->remove();
+//    map_ptr_->remove();
 }
 
-void Problem::destruct()
-{
-    delete this;
-}
+//void Problem::destruct()
+//{
+//    delete this;
+//}
 
 void Problem::addSensor(SensorBasePtr _sen_ptr)
 {
@@ -74,7 +88,7 @@ SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
         return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
     }
     else
-        return installSensor(_sen_type, _unique_sensor_name, _extrinsics, nullptr);
+        return installSensor(_sen_type, _unique_sensor_name, _extrinsics, std::shared_ptr<IntrinsicsBase>());
 
 }
 
@@ -87,12 +101,12 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
 
     // setting the origin in all processor motion if origin already setted
-    if (prc_ptr->isMotion() && origin_setted_)
-        ((ProcessorMotion*)prc_ptr)->setOrigin(getLastKeyFramePtr());
+    if (prc_ptr->isMotion() && origin_is_set_)
+        (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastKeyFramePtr());
 
     // setting the main processor motion
     if (prc_ptr->isMotion() && processor_motion_ptr_ == nullptr)
-        processor_motion_ptr_ = (ProcessorMotion*)prc_ptr;
+        processor_motion_ptr_ = std::static_pointer_cast<ProcessorMotion>(prc_ptr);
 
     return prc_ptr;
 }
@@ -114,7 +128,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     }
 }
 
-void Problem::setProcessorMotion(ProcessorMotion* _processor_motion_ptr)
+void Problem::setProcessorMotion(ProcessorMotion::Ptr _processor_motion_ptr)
 {
     processor_motion_ptr_ = _processor_motion_ptr;
 }
@@ -135,29 +149,27 @@ FrameBasePtr Problem::createFrame(FrameKeyType _frame_key_type, const Eigen::Vec
         case FRM_PO_2D:
         {
             assert(_frame_state.size() == 3 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(2)),
+            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(2)),
                                   new StateBlock(_frame_state.tail(1))));
         }
         case FRM_PO_3D:
         {
             assert(_frame_state.size() == 7 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
+            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
                                   new StateQuaternion(_frame_state.tail(4))));
         }
         case FRM_POV_3D:
         {
             assert(_frame_state.size() == 10 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(
-                    new FrameBase(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
                                   new StateQuaternion(_frame_state.segment<4>(3)),
                                   new StateBlock(_frame_state.tail(3))));
         }
         case FRM_PVQBB_3D:
         {
             assert(_frame_state.size() == 16 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(new FrameIMU(_frame_key_type, _time_stamp, _frame_state));
+            return trajectory_ptr_->addFrame(std::make_shared<FrameIMU>(_frame_key_type, _time_stamp, _frame_state));
         }
         default:
             throw std::runtime_error(
@@ -264,11 +276,13 @@ bool Problem::permitKeyFrame(ProcessorBasePtr _processor_ptr)
 
 void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _processor_ptr, const Scalar& _time_tolerance)
 {
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
     //std::cout << "Problem::keyFrameCallback: processor " << _processor_ptr->getName() << std::endl;
-    for (auto sensor : (*hardware_ptr_->getSensorListPtr()))
-    	for (auto processor : (*sensor->getProcessorListPtr()))
+    for (auto sensor : hardware_ptr_->getSensorList())
+    	for (auto processor : sensor->getProcessorList())
     		if (processor->id() != _processor_ptr->id())
                 processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 }
 
 LandmarkBasePtr Problem::addLandmark(LandmarkBasePtr _lmk_ptr)
@@ -283,27 +297,27 @@ void Problem::addLandmarkList(LandmarkBaseList _lmk_list)
     getMapPtr()->addLandmarkList(_lmk_list);
 }
 
-StateBlock* Problem::addStateBlockPtr(StateBlock* _state_ptr)
+StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 {
     //std::cout << "addStateBlockPtr" << std::endl;
     // add the state unit to the list
-    state_block_ptr_list_.push_back(_state_ptr);
+    state_block_list_.push_back(_state_ptr);
     // queue for solver manager
     state_block_notification_list_.push_back(StateBlockNotification({ADD,_state_ptr}));
 
     return _state_ptr;
 }
 
-void Problem::updateStateBlockPtr(StateBlock* _state_ptr)
+void Problem::updateStateBlockPtr(StateBlockPtr _state_ptr)
 {
     // queue for solver manager
     state_block_notification_list_.push_back(StateBlockNotification({UPDATE,_state_ptr}));
 }
 
-void Problem::removeStateBlockPtr(StateBlock* _state_ptr)
+void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
 {
     // add the state unit to the list
-    state_block_ptr_list_.remove(_state_ptr);
+    state_block_list_.remove(_state_ptr);
 
     // Check if the state addition is still as a notification
     auto state_found_it = state_block_notification_list_.end();
@@ -358,15 +372,15 @@ void Problem::clearCovariance()
     covariances_.clear();
 }
 
-void Problem::addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov)
+void Problem::addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, const Eigen::MatrixXs& _cov)
 {
     assert(_state1->getSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
     assert(_state2->getSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
 
-    covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)] = _cov;
+    covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)] = _cov;
 }
 
-bool Problem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row,
+bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, Eigen::MatrixXs& _cov, const int _row,
                                  const int _col)
 {
     //std::cout << "entire cov to be filled:" << std::endl << _cov << std::endl;
@@ -375,19 +389,19 @@ bool Problem::getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen
     //std::cout << "_state1 size: " << _state1->getSize() << std::endl;
     //std::cout << "_state2 size: " << _state2->getSize() << std::endl;
     //std::cout << "part of cov to be filled:" << std::endl <<  _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) << std::endl;
-    //if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
-    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)] << std::endl;
-    //else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
-    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose() << std::endl;
+    //if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)) != covariances_.end())
+    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)] << std::endl;
+    //else if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)) != covariances_.end())
+    //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose() << std::endl;
 
     assert(_row + _state1->getSize() <= _cov.rows() && _col + _state2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
 
-    if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state1, _state2)) != covariances_.end())
+    if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)) != covariances_.end())
         _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
-                covariances_[std::pair<StateBlock*, StateBlock*>(_state1, _state2)];
-    else if (covariances_.find(std::pair<StateBlock*, StateBlock*>(_state2, _state1)) != covariances_.end())
+                covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)];
+    else if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)) != covariances_.end())
        _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
-                covariances_[std::pair<StateBlock*, StateBlock*>(_state2, _state1)].transpose();
+                covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose();
     else
         return false;
 
@@ -427,16 +441,15 @@ Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr)
 MapBasePtr Problem::addMap(MapBasePtr _map_ptr)
 {
     map_ptr_ = _map_ptr;
-    map_ptr_->setProblem(this);
-//    map_ptr_->linkToUpperNode(this);
+    map_ptr_->setProblem(shared_from_this());
 
     return map_ptr_;
 }
 
-TrajectoryBasePtr Problem::addTrajectory(TrajectoryBasePtr _trajectory_ptr)
+TrajectoryBasePtr Problem::setTrajectory(TrajectoryBasePtr _trajectory_ptr)
 {
     trajectory_ptr_ = _trajectory_ptr;
-    trajectory_ptr_->setProblem(this);
+    trajectory_ptr_->setProblem(shared_from_this());
 
     return trajectory_ptr_;
 }
@@ -463,22 +476,22 @@ FrameBasePtr Problem::getLastFramePtr()
 
 FrameBasePtr Problem::getLastKeyFramePtr()
 {
-    return trajectory_ptr_->getLastKeyFramePtr();;
+    return trajectory_ptr_->getLastKeyFramePtr();
 }
 
-StateBlockList* Problem::getStateListPtr()
+StateBlockList& Problem::getStateBlockList()
 {
-    return &state_block_ptr_list_;
+    return state_block_list_;
 }
 
 wolf::SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
 {
-    auto sen_it = std::find_if(getHardwarePtr()->getSensorListPtr()->begin(),
-                               getHardwarePtr()->getSensorListPtr()->end(), [&](SensorBasePtr sb)
+    auto sen_it = std::find_if(getHardwarePtr()->getSensorList().begin(),
+                               getHardwarePtr()->getSensorList().end(), [&](SensorBasePtr sb)
                                {
                                    return sb->getName() == _sensor_name;
                                }); // lambda function for the find_if
-    if (sen_it == getHardwarePtr()->getSensorListPtr()->end())
+    if (sen_it == getHardwarePtr()->getSensorList().end())
         return nullptr;
 
     return (*sen_it);
@@ -486,24 +499,24 @@ wolf::SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
 
 void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov, const TimeStamp& _ts)
 {
-    if (!origin_setted_)
+    if (!origin_is_set_)
     {
         // Create origin frame
         FrameBasePtr origin_frame_ptr = createFrame(KEY_FRAME, _origin_pose, _ts);
         // FIXME: create a fix sensor
-        IntrinsicsBase fix_instrinsics;
-        SensorBasePtr fix_sensor_ptr = installSensor("GPS", "initial pose", Eigen::VectorXs::Zero(3), &fix_instrinsics );
-        CaptureFix* init_capture = new CaptureFix(_ts, fix_sensor_ptr, _origin_pose, _origin_cov);
+        IntrinsicsBasePtr fix_instrinsics; // nullptr
+        SensorBasePtr fix_sensor_ptr = installSensor("GPS", "initial pose", Eigen::VectorXs::Zero(3), fix_instrinsics );
+        std::shared_ptr<CaptureFix> init_capture = std::make_shared<CaptureFix>(_ts, fix_sensor_ptr, _origin_pose, _origin_cov);
         origin_frame_ptr->addCapture(init_capture);
         init_capture->process();
 
         // notify processors about the new keyframe
-        for (auto sensor_ptr : (*hardware_ptr_->getSensorListPtr()))
-            for (auto processor_ptr : (*sensor_ptr->getProcessorListPtr()))
+        for (auto sensor_ptr : hardware_ptr_->getSensorList())
+            for (auto processor_ptr : sensor_ptr->getProcessorList())
                 if (processor_ptr->isMotion())
-                    ((ProcessorMotion*)processor_ptr)->setOrigin(origin_frame_ptr);
+                    (std::static_pointer_cast<ProcessorMotion>(processor_ptr))->setOrigin(origin_frame_ptr);
 
-        origin_setted_ = true;
+        origin_is_set_ = true;
     }
     else
         throw std::runtime_error("Origin already setted!");
@@ -517,6 +530,177 @@ void Problem::loadMap(const std::string& _filename_dot_yaml)
 void Problem::saveMap(const std::string& _filename_dot_yaml, const std::string& _map_name)
 {
     getMapPtr()->save(_filename_dot_yaml, _map_name);
+}
+
+void Problem::print()
+{
+    std::cout << "P: wolf tree status:" << std::endl;
+    std::cout << "H" << std::endl;
+    for (auto S : getHardwarePtr()->getSensorList() )
+    {
+        std::cout << "  S" << S->id() << std::endl;
+        for (auto p : S->getProcessorList() )
+        {
+            std::cout << "    p" << p->id() << std::endl;
+        }
+    }
+    std::cout << "T" << std::endl;
+    for (auto F : getTrajectoryPtr()->getFrameList() )
+    {
+        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id() << "  <--\t";
+        for (auto cby : F->getConstrainedByList())
+            std::cout << "c" << cby->id() << ",\t";
+        std::cout << std::endl;
+        std::cout << (F->isFixed() ?  "    Fixed" : "    Estim") << ", ts=" << std::setprecision(5) << F->getTimeStamp().get();
+        std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
+        //        std::cout << " T @ " << F->getTrajectoryPtr().get() << std::endl;
+        std::cout << std::endl;
+        for (auto C : F->getCaptureList() )
+        {
+            std::cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << std::endl;
+            for (auto f : C->getFeatureList() )
+            {
+                std::cout << "      f" << f->id() << "  <--\t";
+                for (auto cby : f->getConstrainedByList())
+                    std::cout << "c" << cby->id() << ",\t";
+                std::cout << std::endl;
+                        std::cout << "        m = ( " << std::setprecision(3) << f->getMeasurement().transpose() << ")" << std::endl;
+                for (auto c : f->getConstraintList() )
+                {
+                    std::cout << "        c" << c->id();
+                    switch (c->getCategory())
+                    {
+                        case CTR_ABSOLUTE:
+                            std::cout << " --> A" << std::endl;
+                            break;
+                        case CTR_FRAME:
+                            std::cout << " --> F" << c->getFrameOtherPtr()->id() << std::endl;
+                            break;
+                        case CTR_FEATURE:
+                            std::cout << " --> f" << c->getFeatureOtherPtr()->id() << std::endl;
+                            break;
+                        case CTR_LANDMARK:
+                            std::cout << " --> L" << c->getLandmarkOtherPtr()->id() << std::endl;
+                            break;
+                    }
+                }
+            }
+        }
+    }
+    std::cout << "M" << std::endl;
+    for (auto L : getMapPtr()->getLandmarkList() )
+    {
+        std::cout << "  L" << L->id() << "\t<-- ";
+        for (auto cby : L->getConstrainedByList())
+            std::cout << "c" << cby->id() << ",\t";
+        std::cout << std::endl;
+    }
+}
+
+bool Problem::check()
+{
+    bool is_consistent = true;
+    std::cout << std::endl << "Wolf tree integrity -----------------" << std::endl;
+    auto P_raw = this;
+    std::cout << "P @ " << P_raw << std::endl;
+    auto H = hardware_ptr_;
+    std::cout << "H @ " << H.get() << std::endl;
+    is_consistent = is_consistent && (H->getProblem().get() == P_raw);
+    for (auto S : H->getSensorList() )
+    {
+        std::cout << "  S" << S->id() << " @ " << S.get() << std::endl;
+        std::cout << "    -> P @ " << S->getProblem().get() << std::endl;
+        std::cout << "    -> H @ " << S->getHardwarePtr().get() << std::endl;
+        is_consistent = is_consistent && (S->getProblem().get() == P_raw);
+        is_consistent = is_consistent && (S->getHardwarePtr() == H);
+        for (auto p : S->getProcessorList() )
+        {
+            std::cout << "    p" << p->id() << " @ " << p.get() << " -> S" << p->getSensorPtr()->id() << std::endl;
+            std::cout << "      -> P  @ " << p->getProblem().get() << std::endl;
+            std::cout << "      -> S" << p->getSensorPtr()->id() << " @ " << p->getSensorPtr().get() << std::endl;
+            is_consistent = is_consistent && (p->getProblem().get() == P_raw);
+            is_consistent = is_consistent && (p->getSensorPtr() == S);
+        }
+    }
+    auto T = trajectory_ptr_;
+    std::cout << "T @ " << T.get() << std::endl;
+    is_consistent = is_consistent && (T->getProblem().get() == P_raw);
+    for (auto F : T->getFrameList() )
+    {
+        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id() << " @ " << F.get() << std::endl;
+        std::cout << "    -> P @ " << F->getProblem().get() << std::endl;
+        std::cout << "    -> T @ " << F->getTrajectoryPtr().get() << std::endl;
+        is_consistent = is_consistent && (F->getProblem().get() == P_raw);
+        is_consistent = is_consistent && (F->getTrajectoryPtr() == T);
+        for (auto c : F->getConstrainedByList())
+        {
+            std::cout << "    <- c" << c->id() << " -> F" << c->getFrameOtherPtr()->id() << std::endl;
+        }
+        for (auto C : F->getCaptureList() )
+        {
+            std::cout << "    C" << C->id() << " @" << C.get() << " -> S" << C->getSensorPtr()->id() << std::endl;
+            std::cout << "      -> P  @ " << C->getProblem().get() << std::endl;
+            std::cout << "      -> F" << C->getFramePtr()->id() << " @ " << C->getFramePtr().get() << std::endl;
+            is_consistent = is_consistent && (C->getProblem().get() == P_raw);
+            is_consistent = is_consistent && (C->getFramePtr() == F);
+            for (auto f : C->getFeatureList() )
+            {
+                std::cout << "      f" << f->id() << " @" << f.get() << std::endl;
+                std::cout << "        -> P  @ " << f->getProblem().get() << std::endl;
+                std::cout << "        -> C" << f->getCapturePtr()->id() << " @ " << f->getCapturePtr().get() << std::endl;
+                is_consistent = is_consistent && (f->getProblem().get() == P_raw);
+                is_consistent = is_consistent && (f->getCapturePtr() == C);
+
+                for (auto c : f->getConstrainedByList())
+                {
+                    std::cout << "     <- c" << c->id() << " -> f" << c->getFeatureOtherPtr()->id() << std::endl;
+                }
+                for (auto c : f->getConstraintList() )
+                {
+                    std::cout << "        c" << c->id() << " @" << C.get() << std::endl;
+                    std::cout << "          -> P  @ " << c->getProblem().get() << std::endl;
+                    std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get() << std::endl;
+                    is_consistent = is_consistent && (c->getProblem().get() == P_raw);
+                    is_consistent = is_consistent && (c->getFeaturePtr() == f);
+                    switch (c->getCategory())
+                    {
+                        case CTR_ABSOLUTE:
+                            std::cout << " --> A" << std::endl;
+                            break;
+                        case CTR_FRAME:
+                            std::cout << " --> F" << c->getFrameOtherPtr()->id() << std::endl;
+                            break;
+                        case CTR_FEATURE:
+                            std::cout << " --> f" << c->getFeatureOtherPtr()->id() << std::endl;
+                            break;
+                        case CTR_LANDMARK:
+                            std::cout << " --> L" << c->getLandmarkOtherPtr()->id() << std::endl;
+                            break;
+                    }
+                }
+            }
+        }
+    }
+    auto M = map_ptr_;
+    std::cout << "M @ " << M.get() << std::endl;
+    is_consistent = is_consistent && (M->getProblem().get() == P_raw);
+    for (auto L : M->getLandmarkList() )
+    {
+        std::cout << "  L" << L->id() << " @" << L.get() << std::endl;
+        is_consistent = is_consistent && (L->getProblem().get() == P_raw);
+        is_consistent = is_consistent && (L->getMapPtr() == M);
+        for (auto c : L->getConstrainedByList())
+        {
+            std::cout << "      <- c" << c->id() << " -> L" << c->getLandmarkOtherPtr()->id() << std::endl;
+        }
+    }
+
+    std::cout << std::endl;
+    std::cout << (is_consistent ? "------ Wolf tree OK" : "------ Wolf tree NOK") << std::endl;
+    std::cout << std::endl;
+
+
+    return is_consistent;
 }
 
 } // namespace wolf

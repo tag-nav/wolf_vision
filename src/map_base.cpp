@@ -19,29 +19,20 @@
 namespace wolf {
 
 MapBase::MapBase() :
-    NodeBase("MAP"),
-    problem_ptr_(nullptr)
+    NodeBase("MAP")
 {
-    //std::cout << "MapBase::MapBase(): " << __LINE__ << std::endl;
+    std::cout << "constructed M"<< std::endl;
 }
 
 MapBase::~MapBase()
 {
-    is_deleting_ = true;
-    while (!landmark_list_.empty())
-    {
-        landmark_list_.front()->destruct();
-        landmark_list_.pop_front();
-    }
-
-	//std::cout << "deleting MapBase " << nodeId() << std::endl;
+	std::cout << "destructed -M" << std::endl;
 }
 
 LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)
 {
-	//std::cout << "MapBase::addLandmark" << std::endl;
     landmark_list_.push_back(_landmark_ptr);
-    _landmark_ptr->setMapPtr(this);
+    _landmark_ptr->setMapPtr(shared_from_this());
     _landmark_ptr->setProblem(getProblem());
     _landmark_ptr->registerNewStateBlocks();
     return _landmark_ptr;
@@ -49,11 +40,10 @@ LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)
 
 void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)
 {
-	//std::cout << "MapBase::addLandmarkList" << std::endl;
 	LandmarkBaseList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
     for (LandmarkBasePtr landmark_ptr : lmk_list_copy)
     {
-        landmark_ptr->setMapPtr(this);
+        landmark_ptr->setMapPtr(shared_from_this());
         landmark_ptr->setProblem(getProblem());
         landmark_ptr->registerNewStateBlocks();
     }
@@ -63,13 +53,13 @@ void MapBase::addLandmarkList(LandmarkBaseList _landmark_list)
 void MapBase::removeLandmark(LandmarkBasePtr _landmark_ptr)
 {
     landmark_list_.remove(_landmark_ptr);
-    delete _landmark_ptr;
+//    delete _landmark_ptr;
 }
 
 void MapBase::removeLandmark(const LandmarkBaseIter& _landmark_iter)
 {
     landmark_list_.erase(_landmark_iter);
-    delete * _landmark_iter;
+//    delete * _landmark_iter;
 }
 
 void MapBase::load(const std::string& _map_file_dot_yaml)
@@ -97,11 +87,11 @@ void MapBase::save(const std::string& _map_file_yaml, const std::string& _map_na
     emitter << "map name"   << _map_name;
     emitter << "date-time" << dateTimeNow(); // Get date and time for archiving purposes
 
-    emitter << "nlandmarks" << getLandmarkListPtr()->size();
+    emitter << "nlandmarks" << getLandmarkList().size();
 
     emitter << "landmarks"  << YAML::BeginSeq;
 
-    for (LandmarkBasePtr lmk_ptr : *getLandmarkListPtr())
+    for (LandmarkBasePtr lmk_ptr : getLandmarkList())
     {
         emitter << YAML::Flow << lmk_ptr->saveToYaml();
     }

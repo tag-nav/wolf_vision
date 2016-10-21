@@ -50,12 +50,12 @@ int main()
     Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2, 2) * 0.01;
 
     // Create Wolf tree nodes
-    ProblemPtr problem_ptr = new Problem(FRM_PO_2D);
-    SensorBasePtr sensor_odom_ptr = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::Vector2s::Zero(), true),
+    ProblemPtr problem_ptr = std::make_shared<Problem>(FRM_PO_2D);
+    SensorBasePtr sensor_odom_ptr = std::make_shared< SensorBase>(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::Vector2s::Zero(), true),
                                             new StateBlock(Eigen::Vector1s::Zero(), true),
                                             new StateBlock(Eigen::VectorXs::Zero(0), true), 0);
-    SensorBasePtr sensor_fix_ptr = new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
-    ProcessorOdom2D* odom2d_ptr = new ProcessorOdom2D(100,100,100);
+    SensorBasePtr sensor_fix_ptr = std::make_shared< SensorBase>(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
+    ProcessorOdom2D::Ptr odom2d_ptr = std::make_shared< ProcessorOdom2D>(100,100,100);
     // Assemble Wolf tree by linking the nodes
     sensor_odom_ptr->addProcessor(odom2d_ptr);
     problem_ptr->addSensor(sensor_odom_ptr);
@@ -73,7 +73,7 @@ int main()
     FrameBasePtr origin_frame = problem_ptr->createFrame(KEY_FRAME, x0, t0);
 
     // Prior covariance
-    CaptureFix* initial_covariance = new CaptureFix(TimeStamp(0), sensor_fix_ptr, x0, init_cov);
+    CaptureFix::Ptr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensor_fix_ptr, x0, init_cov);
     origin_frame->addCapture(initial_covariance);
     initial_covariance->process();
 
@@ -89,7 +89,7 @@ int main()
     std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
     // Capture to use as container for all incoming data
     t += dt;
-    CaptureMotion* cap_ptr = new CaptureMotion(t, sensor_odom_ptr, data, data_cov, nullptr);
+    CaptureMotion::Ptr cap_ptr = std::make_shared<CaptureMotion>(t, sensor_odom_ptr, data, data_cov, nullptr);
 
     // Check covariance values
     Eigen::Vector3s integrated_x = x0;
@@ -211,7 +211,7 @@ int main()
     odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     std::cout << "New buffer: oldest part:   < ";
-    for (const auto &s : ((CaptureMotion*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
+    for (const auto &s : (std::static_pointer_cast<CaptureMotion>(new_keyframe_ptr->getCaptureList().front()))->getBufferPtr()->get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
@@ -221,8 +221,8 @@ int main()
     std::cout << ">" << std::endl;
 
     std::cout << "Processor measurement of new keyframe: " << std::endl;
-    std::cout << "Delta: " << new_keyframe_ptr->getCaptureListPtr()->front()->getFeatureListPtr()->front()->getMeasurement().transpose() << std::endl;
-    std::cout << "Covariance: " << std::endl << new_keyframe_ptr->getCaptureListPtr()->front()->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
+    std::cout << "Delta: " << new_keyframe_ptr->getCaptureList().front()->getFeatureList().front()->getMeasurement().transpose() << std::endl;
+    std::cout << "Covariance: " << std::endl << new_keyframe_ptr->getCaptureList().front()->getFeatureList().front()->getMeasurementCovariance() << std::endl;
 
     std::cout << "getState with TS previous than the last keyframe: " << t_split-0.5 << std::endl;
     std::cout << odom2d_ptr->getState(t_split-0.5) << std::endl;
@@ -273,7 +273,7 @@ int main()
 
 
     std::cout << "All in one row:            < ";
-    for (const auto &s : ((CaptureMotion*)(new_keyframe_ptr->getCaptureListPtr()->front()))->getBufferPtr()->get())
+    for (const auto &s : (std::static_pointer_cast<CaptureMotion>(new_keyframe_ptr->getCaptureList().front()))->getBufferPtr()->get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << "> " << t_split - t0 << " < ";
     for (const auto &s : odom2d_ptr->getBufferPtr()->get())
@@ -283,7 +283,7 @@ int main()
     // Free allocated memory
     delete ceres_manager_ptr;
     std::cout << "ceres manager deleted" << std::endl;
-    problem_ptr->destruct();
+    problem_ptr.reset();
     std::cout << "problem deleted" << std::endl;
 
     return 0;

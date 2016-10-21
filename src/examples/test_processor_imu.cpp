@@ -27,6 +27,9 @@
 int main(int argc, char** argv)
 {
     using namespace wolf;
+    using std::shared_ptr;
+    using std::make_shared;
+    using std::static_pointer_cast;
 
     std::cout << std::endl << "==================== processor IMU test ======================" << std::endl;
 
@@ -70,11 +73,11 @@ int main(int argc, char** argv)
     }
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = new Problem(FRM_PVQBB_3D);
+    ProblemPtr problem_ptr_ = Problem::create(FRM_PVQBB_3D);
     Eigen::VectorXs extrinsics(7);
     extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, nullptr);
-    wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
+    SensorBasePtr sensor_ptr = problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, shared_ptr<IntrinsicsBase>());
+    problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
     TimeStamp t;
@@ -82,22 +85,28 @@ int main(int argc, char** argv)
     Eigen::Vector6s data_;
 
     // Get initial data
-    data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
+    data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2]; // FIXME this leaks
     data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
     t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
 
     // Set the origin
     Eigen::VectorXs x0(16);
     x0 << 0,1,0,  1,0,0,  0,0,0,1,  0,0,.001,  0,0,.002; // Try some non-zero biases
-    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
+    problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMU* imu_ptr( new CaptureIMU(t, sensor_ptr, data_) );
+    shared_ptr<CaptureIMU> imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data_);
+
+//    problem_ptr_->print();
+
+    std::cout << "Main loop -----------" << std::endl;
 
     // main loop
     using namespace std;
     clock_t begin = clock();
-    while(!data_file_acc.eof()){
+    int n = 1;
+    while(!data_file_acc.eof() && n < 1000){
+        n++;
 
         // read new data
         data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
@@ -129,10 +138,10 @@ int main(int argc, char** argv)
         // << x.head(10).transpose() << std::endl;
 
         // std::cout << std::endl;
-        delta_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_;
-        delta_integr_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
-        x_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-        ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
+        delta_debug = problem_ptr_->getProcessorMotionPtr()->getMotion().delta_;
+        delta_integr_debug = problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
+        x_debug = problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+        ts = problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
 
         if(debug_results)
             debug_results << ts.get() << "\t" << delta_debug(0) << "\t" << delta_debug(1) << "\t" << delta_debug(2) << "\t" << delta_debug(3) << "\t" << delta_debug(4) << "\t"
@@ -152,11 +161,11 @@ int main(int argc, char** argv)
     std::cout << "Initial    state: " << std::fixed << std::setprecision(3) << std::setw(8)
     << x0.head(16).transpose() << std::endl;
     std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
-    << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
+    << problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
     std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
-    << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(16).transpose() << std::endl;
+    << problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(16).transpose() << std::endl;
     std::cout << "Integrated std  : " << std::fixed << std::setprecision(3) << std::setw(8)
-    << (wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
+    << (problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
 
 
     // Print statistics
@@ -169,9 +178,9 @@ int main(int argc, char** argv)
 #endif
 
     TimeStamp t0, tf;
-    t0 = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().front().ts_;
-    tf = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
-    int N = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().size();
+    t0 = problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().front().ts_;
+    tf = problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
+    int N = problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().size();
     std::cout << "t0        : " << t0.get() << " s" << std::endl;
     std::cout << "tf        : " << tf.get() << " s" << std::endl;
     std::cout << "duration  : " << tf-t0 << " s" << std::endl;
@@ -181,8 +190,20 @@ int main(int argc, char** argv)
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
 
-    delete imu_ptr;
-    delete wolf_problem_ptr_;
+
+    problem_ptr_->print();
+    problem_ptr_->check();
+
+//    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
+    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
+    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
+//    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
+
+    problem_ptr_->check();
+
+    // delete stuff
+    data_file_acc.close(); // no impact on leaks
+    data_file_gyro.close();
 
     return 0;
 }

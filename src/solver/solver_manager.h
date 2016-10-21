@@ -37,11 +37,11 @@ class SolverManager
 
 		void removeConstraint(const unsigned int& _corr_idx);
 
-		void addStateUnit(StateBlock* _st_ptr);
+		void addStateUnit(StateBlockPtr _st_ptr);
 
 		void removeAllStateUnits();
 
-		void updateStateUnitStatus(StateBlock* _st_ptr);
+		void updateStateUnitStatus(StateBlockPtr _st_ptr);
 
 		ceres::CostFunction* createCostFunction(ConstraintBasePtr _corrPtr);
 };

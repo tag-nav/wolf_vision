@@ -102,7 +102,7 @@ SET(HDRS
     capture_base.h
     capture_fix.h
     capture_gps_fix.h
-    capture_motion2.h
+    capture_motion.h
     capture_imu.h
     capture_void.h
     constraint_analytic.h
@@ -111,10 +111,10 @@ SET(HDRS
     constraint_corner_2D.h
     constraint_epipolar.h
     constraint_AHP.h
-    constraint_image_new_landmark.h
     constraint_imu.h
     constraint_sparse.h
     constraint_fix.h
+    constraint_fix_3D.h
     constraint_gps_2D.h
     constraint_gps_pseudorange_3D.h
     constraint_gps_pseudorange_2D.h
@@ -151,6 +151,7 @@ SET(HDRS
     node_base.h
     problem.h
     processor_base.h
+    processor_image_params.h
     processor_imu.h
     processor_factory.h
     processor_motion.h
@@ -161,6 +162,7 @@ SET(HDRS
     processor_tracker_feature_dummy.h
     processor_tracker_landmark.h
     processor_tracker_landmark_dummy.h
+    rotations.h
     sensor_base.h
     sensor_camera.h
     sensor_factory.h
@@ -182,7 +184,8 @@ SET(HDRS_DTASSC
     data_association/association_solver.h
     data_association/association_node.h
     data_association/association_tree.h
-    data_association/association_nnls.h)
+    data_association/association_nnls.h
+    )
 
 #sources
 SET(SRCS
@@ -239,7 +242,8 @@ SET(SRCS
     data_association/association_solver.cpp
     data_association/association_node.cpp
     data_association/association_tree.cpp
-    data_association/association_nnls.cpp)
+    data_association/association_nnls.cpp
+    )
 
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
@@ -252,12 +256,14 @@ IF (Ceres_FOUND)
         ceres_wrapper/create_auto_diff_cost_function_wrapper.h
         ceres_wrapper/create_numeric_diff_cost_function.h
         ceres_wrapper/create_numeric_diff_cost_function_ceres.h
-        ceres_wrapper/local_parametrization_wrapper.h )
+        ceres_wrapper/local_parametrization_wrapper.h 
+        )
     SET(SRCS_WRAPPER
         ceres_wrapper/ceres_manager.cpp
         ceres_wrapper/create_auto_diff_cost_function.cpp
         ceres_wrapper/create_numeric_diff_cost_function.cpp
-        ceres_wrapper/local_parametrization_wrapper.cpp )
+        ceres_wrapper/local_parametrization_wrapper.cpp 
+        )
 ELSE(Ceres_FOUND)
     SET(HDRS_WRAPPER)
     SET(SRCS_WRAPPER)
@@ -286,8 +292,8 @@ IF (raw_gps_utils_FOUND)
         processor_gps.h
         )
     SET(SRCS ${SRCS}
-        capture_gps.cpp
-        processor_gps.cpp
+#        capture_gps.cpp
+#        processor_gps.cpp
         )
 ENDIF(raw_gps_utils_FOUND)
 
@@ -297,7 +303,7 @@ IF (OpenCV_FOUND)
         capture_image.h
         feature_point_image.h
         landmark_AHP.h
-        processor_image.h
+        processor_image_feature.h
         processor_image_landmark.h
         active_search.h
         )
@@ -305,7 +311,7 @@ IF (OpenCV_FOUND)
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
-        processor_image.cpp
+        processor_image_feature.cpp
         processor_image_landmark.cpp
         active_search.cpp
         )

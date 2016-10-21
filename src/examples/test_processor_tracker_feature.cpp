@@ -19,16 +19,19 @@
 int main()
 {
     using namespace wolf;
+    using std::shared_ptr;
+    using std::make_shared;
+    using std::static_pointer_cast;
 
     std::cout << std::endl << "==================== processor tracker feature test ======================" << std::endl;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = new Problem(FRM_PO_2D);
-    SensorBasePtr sensor_ptr_ = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)),
+    ProblemPtr wolf_problem_ptr_ = make_shared<Problem>(FRM_PO_2D);
+    SensorBasePtr sensor_ptr_ = make_shared<SensorBase>(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)),
                                              new StateBlock(Eigen::VectorXs::Zero(1)),
                                              new StateBlock(Eigen::VectorXs::Zero(2)), 2);
 
-    ProcessorTrackerFeatureDummy* processor_ptr_ = new ProcessorTrackerFeatureDummy();
+    shared_ptr<ProcessorTrackerFeatureDummy> processor_ptr_ = make_shared<ProcessorTrackerFeatureDummy>();
 
     wolf_problem_ptr_->addSensor(sensor_ptr_);
     sensor_ptr_->addProcessor(processor_ptr_);
@@ -36,9 +39,7 @@ int main()
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
     for (auto i = 0; i < 10; i++)
-        processor_ptr_->process(new CaptureVoid(TimeStamp(0), sensor_ptr_));
-
-    delete wolf_problem_ptr_;
+        processor_ptr_->process(make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr_));
 
     return 0;
 }

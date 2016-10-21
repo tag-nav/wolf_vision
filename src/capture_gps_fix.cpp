@@ -26,10 +26,10 @@ CaptureGPSFix::~CaptureGPSFix()
 void CaptureGPSFix::process()
 {
 	// EXTRACT AND ADD FEATURES
-    addFeature(new FeatureGPSFix(data_,data_covariance_));
+    addFeature(std::make_shared<FeatureGPSFix>(data_,data_covariance_));
 
     // ADD CONSTRAINT
-	getFeatureListPtr()->front()->addConstraint(new ConstraintGPS2D(getFeatureListPtr()->front(), getFramePtr()));
+    getFeatureList().front()->addConstraint(std::make_shared <ConstraintGPS2D>(getFeatureList().front()));
 }
 
 

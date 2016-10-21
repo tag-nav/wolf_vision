@@ -126,7 +126,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
 
     private:
 
-        void extractCorners(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _corner_list);
+        void extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr, FeatureBaseList& _corner_list);
 
 };
 
@@ -134,15 +134,15 @@ inline ProcessorTrackerFeatureCorner::ProcessorTrackerFeatureCorner(const lasers
                                                                     const unsigned int& _n_corners_th) :
         ProcessorTrackerFeature(PRC_TRACKER_FEATURE_CORNER, "TRACKER FEATURE CORNER", 0), line_finder_(_line_finder_params), n_tracks_th_(_n_corners_th), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
 {
-    // TODO Auto-generated constructor stub
+    //
 }
 
 inline ProcessorTrackerFeatureCorner::~ProcessorTrackerFeatureCorner()
 {
     for (auto corner : corners_last_)
-        corner->destruct();
+        corner->remove();
     for (auto corner : corners_incoming_)
-        corner->destruct();
+        corner->remove();
 }
 
 inline void ProcessorTrackerFeatureCorner::postProcess()

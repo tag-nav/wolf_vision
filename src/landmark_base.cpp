@@ -9,10 +9,9 @@ namespace wolf {
 
 unsigned int LandmarkBase::landmark_id_count_ = 0;
 
-LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr) :
+LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
             NodeBase("LANDMARK", _type),
-            problem_ptr_(nullptr),
-            map_ptr_(nullptr),
+            map_ptr_(),
             landmark_id_(++landmark_id_count_),
             type_id_(_tp),
             status_(LANDMARK_CANDIDATE),
@@ -20,36 +19,71 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, S
 			o_ptr_(_o_ptr)
 {
     //
+    std::cout << "constructed  +L" << id() << std::endl;
 }
                 
 LandmarkBase::~LandmarkBase()
 {
-	//std::cout << "deleting LandmarkBase " << nodeId() << std::endl;
-    is_deleting_ = true;
+//    remove();
+    std::cout << "destructed   -L" << id() << std::endl;
 
-    // Remove Frame State Blocks
+    // Remove State Blocks
     if (p_ptr_ != nullptr)
     {
         if (getProblem() != nullptr)
             getProblem()->removeStateBlockPtr(p_ptr_);
+
         delete p_ptr_;
+        p_ptr_ = nullptr;
     }
     if (o_ptr_ != nullptr)
     {
         if (getProblem() != nullptr)
             getProblem()->removeStateBlockPtr(o_ptr_);
-        delete o_ptr_;
-    }
-	//std::cout << "states deleted" << std::endl;
 
-	while (!constrained_by_list_.empty())
-	{
-	    //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-	    constrained_by_list_.front()->destruct();
-	    constrained_by_list_.pop_front();
-        //std::cout << "deleted " << std::endl;
-	}
-	//std::cout << "constraints deleted" << std::endl;
+        delete o_ptr_;
+        o_ptr_ = nullptr;
+    }
+
+}
+
+void LandmarkBase::remove()
+{
+    if (!is_removing_)
+    {
+        is_removing_ = true;
+        std::cout << "Removing   L" << id() << std::endl;
+        LandmarkBasePtr this_L = shared_from_this(); // keep this alive while removing it
+
+        // Remove State Blocks
+        if (p_ptr_ != nullptr)
+        {
+            if (getProblem() != nullptr)
+                getProblem()->removeStateBlockPtr(p_ptr_);
+
+            delete p_ptr_;
+            p_ptr_ = nullptr;
+        }
+        if (o_ptr_ != nullptr)
+        {
+            if (getProblem() != nullptr)
+                getProblem()->removeStateBlockPtr(o_ptr_);
+
+            delete o_ptr_;
+            o_ptr_ = nullptr;
+        }
+
+        // remove from upstream
+        auto M = map_ptr_.lock();
+        if (M)
+            M->getLandmarkList().remove(shared_from_this());
+
+        // remove constrained by
+        while (!constrained_by_list_.empty())
+        {
+            constrained_by_list_.front()->remove();
+        }
+    }
 }
 
 void LandmarkBase::setStatus(LandmarkStatus _st)
@@ -94,9 +128,9 @@ void LandmarkBase::registerNewStateBlocks()
     if (getProblem() != nullptr)
     {
         if (p_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(p_ptr_);
+            getProblem()->addStateBlock(p_ptr_);
         if (o_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(o_ptr_);
+            getProblem()->addStateBlock(o_ptr_);
     }
 }
 
@@ -116,6 +150,11 @@ YAML::Node LandmarkBase::saveToYaml() const
         node["orientation fixed"] = p_ptr_->isFixed();
     }
     return node;
+}
+
+MapBasePtr LandmarkBase::getMapPtr()
+{
+    return map_ptr_.lock();
 }
 
 } // namespace wolf

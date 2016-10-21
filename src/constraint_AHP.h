@@ -12,6 +12,10 @@ namespace wolf {
 
 class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 {
+    public:
+        typedef std::shared_ptr<ConstraintAHP> Ptr;
+        typedef std::weak_ptr<ConstraintAHP> WPtr;
+
     protected:
         Eigen::Vector3s anchor_sensor_extrinsics_p_;
         Eigen::Vector4s anchor_sensor_extrinsics_o_;
@@ -22,25 +26,25 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
     public:
         static const unsigned int N_BLOCKS = 5; //TODO: Prueba a comentarlo
 
-        ConstraintAHP(FeatureBase* _ftr_ptr, FrameBase* _current_frame_ptr, LandmarkAHP* _landmark_ptr,
+        ConstraintAHP(FeatureBasePtr _ftr_ptr, FrameBasePtr _current_frame_ptr, std::shared_ptr<LandmarkAHP> _landmark_ptr,
                         bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP, _landmark_ptr, _apply_loss_function, _status,
                                              _current_frame_ptr->getPPtr(), _current_frame_ptr->getOPtr(), _landmark_ptr->getAnchorFrame()->getPPtr()
                                                    ,_landmark_ptr->getAnchorFrame()->getOPtr(),_landmark_ptr->getPPtr()),
                 anchor_sensor_extrinsics_p_(_ftr_ptr->getCapturePtr()->getSensorPPtr()->getVector()),
                 anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getVector()),
-                feature_image_(*((FeaturePointImage*)_ftr_ptr))
+                feature_image_(*std::static_pointer_cast<FeaturePointImage>(_ftr_ptr))
         {
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
             setType("AHP");
-            K_ = ((SensorCamera*)(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
-            distortion_ = ((SensorCamera*)(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+
+            K_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+            distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         }
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~ConstraintAHP()
         {
             //
@@ -95,8 +99,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             v = v_normalized.head(2)/v_normalized(2);
 //            std::cout << "\nv:\n" << v(0) << "\t" << v(1) << std::endl;
 
-            // ==================================================
-            /* DISTORTION ATTEMPT */
             Eigen::Matrix<T,2,1> distored_point;
             Eigen::Matrix<T,Eigen::Dynamic,1> distortion_vector = distortion_.cast<T>();
             //std::cout << "\ntest_point2D DISTORTED:\n" << test_distortion(0) << std::endl;
@@ -108,13 +110,11 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             for (int i = 0; i < distortion_vector.cols() ; i++) { //   here we are doing:
                 r2i = r2i * r2;                                   //   r2i = r^(2*(i+1))
                 s = s + (distortion_vector(i) * r2i);             //   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
-
             }
             if (s < (T)0.6) s = (T)1.0;
             distored_point(0) = s * v(0);
             distored_point(1) = s * v(1);
 //            std::cout << "\ndistored_point:\n" << distored_point(0) << "\t" << distored_point(1) << std::endl;
-            /* END OF THE ATTEMPT */
 
 
             Eigen::Matrix<T, 2, 1> u;
@@ -202,10 +202,10 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         }
 
 //    public:
-//        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
+//        static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
 //                                            NodeBase* _correspondant_ptr)
 //        {
-//            return new ConstraintAHP(_feature_ptr, (FrameBase*)_correspondant_ptr);
+//            return new ConstraintAHP(_feature_ptr, (FrameBasePtr)_correspondant_ptr);
 //        }
 
 };

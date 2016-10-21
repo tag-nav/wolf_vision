@@ -9,10 +9,9 @@ namespace wolf {
 
 unsigned int FrameBase::frame_id_count_ = 0;
 
-FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
+FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
             NodeBase("FRAME", "BASE"),
-            problem_ptr_(nullptr),
-            trajectory_ptr_(nullptr),
+            trajectory_ptr_(),
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
             time_stamp_(_ts),
@@ -22,12 +21,15 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_pt
             v_ptr_(_v_ptr)
 {
     //
+    if (isKey())
+        std::cout << "constructed +KF" << id() << std::endl;
+    else
+        std::cout << "constructed  +F" << id() << std::endl;
 }
 
-FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
+FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
             NodeBase("FRAME", "BASE"),
-            problem_ptr_(nullptr),
-            trajectory_ptr_(nullptr),
+            trajectory_ptr_(),
             frame_id_(++frame_id_count_),
             type_id_(_tp),
             time_stamp_(_ts),
@@ -37,49 +39,89 @@ FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock*
             v_ptr_(_v_ptr)
 {
     //
+    if (isKey())
+        std::cout << "constructed +KF" << id() << std::endl;
+    else
+        std::cout << "constructed  +F" << id() << std::endl;
 }
                 
 FrameBase::~FrameBase()
 {
-	//std::cout << "deleting FrameBase " << id() << std::endl;
-    is_deleting_ = true;
-
-	// Remove Frame State Blocks
-	if (p_ptr_ != nullptr)
-	{
+    // Remove Frame State Blocks
+    if (p_ptr_ != nullptr)
+    {
         if (getProblem() != nullptr && type_id_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(p_ptr_);
-	    delete p_ptr_;
-	}
+        delete p_ptr_;
+        p_ptr_ = nullptr;
+    }
     if (o_ptr_ != nullptr)
     {
         if (getProblem() != nullptr && type_id_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(o_ptr_);
         delete o_ptr_;
+        o_ptr_ = nullptr;
     }
     if (v_ptr_ != nullptr)
     {
         if (getProblem() != nullptr && type_id_ == KEY_FRAME)
             getProblem()->removeStateBlockPtr(v_ptr_);
         delete v_ptr_;
+        v_ptr_ = nullptr;
     }
 
-    //std::cout << "states deleted" << std::endl;
+    if (isKey())
+        std::cout << "destructed   KF" << id() << std::endl;
+    else
+        std::cout << "destructed   -F" << id() << std::endl;
+}
 
-    while (!constrained_by_list_.empty())
+void FrameBase::remove()
+{
+    if (!is_removing_)
     {
-        //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-        constrained_by_list_.front()->destruct();
-        //std::cout << "deleted " << std::endl;
-    }
-    //std::cout << "constraints deleted" << std::endl;
+        is_removing_ = true;
+        FrameBasePtr this_F = shared_from_this(); // keep this alive while removing it
+        TrajectoryBasePtr T = trajectory_ptr_.lock();
+        if (T)
+        {
+            T->getFrameList().remove(this_F); // remove from upstream
+        }
 
-    while (!capture_list_.empty())
-    {
-        capture_list_.front()->destruct();
-        capture_list_.pop_front();
-    }
+        while (!capture_list_.empty())
+        {
+            capture_list_.front()->remove(); // remove downstream
+        }
+        while (!constrained_by_list_.empty())
+        {
+            constrained_by_list_.front()->remove(); // remove constrained
+        }
 
+        // Remove Frame State Blocks
+        if (p_ptr_ != nullptr)
+        {
+            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+                getProblem()->removeStateBlockPtr(p_ptr_);
+            delete p_ptr_;
+            p_ptr_ = nullptr;
+        }
+        if (o_ptr_ != nullptr)
+        {
+            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+                getProblem()->removeStateBlockPtr(o_ptr_);
+            delete o_ptr_;
+            o_ptr_ = nullptr;
+        }
+        if (v_ptr_ != nullptr)
+        {
+            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+                getProblem()->removeStateBlockPtr(v_ptr_);
+            delete v_ptr_;
+            v_ptr_ = nullptr;
+        }
+
+        std::cout << "Removed       F" << id() << std::endl;
+    }
 }
 
 void FrameBase::registerNewStateBlocks()
@@ -87,13 +129,13 @@ void FrameBase::registerNewStateBlocks()
     if (getProblem() != nullptr)
     {
         if (p_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(p_ptr_);
+            getProblem()->addStateBlock(p_ptr_);
 
         if (o_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(o_ptr_);
+            getProblem()->addStateBlock(o_ptr_);
 
         if (v_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(v_ptr_);
+            getProblem()->addStateBlock(v_ptr_);
     }
 }
 
@@ -105,9 +147,9 @@ void FrameBase::setKey()
         registerNewStateBlocks();
 
         if (getTrajectoryPtr()->getLastKeyFramePtr() == nullptr || getTrajectoryPtr()->getLastKeyFramePtr()->getTimeStamp() < time_stamp_)
-            getTrajectoryPtr()->setLastKeyFramePtr(this);
+            getTrajectoryPtr()->setLastKeyFramePtr(shared_from_this());
 
-        getTrajectoryPtr()->sortFrame(this);
+        getTrajectoryPtr()->sortFrame(shared_from_this());
     }
 }
 
@@ -181,12 +223,12 @@ FrameBasePtr FrameBase::getPreviousFrame() const
     assert(getTrajectoryPtr() != nullptr && "This Frame is not linked to any trajectory");
 
     //look for the position of this node in the upper list (frame list of trajectory)
-    for (auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin(); f_it != getTrajectoryPtr()->getFrameListPtr()->rend(); f_it++ )
+    for (auto f_it = getTrajectoryPtr()->getFrameList().rbegin(); f_it != getTrajectoryPtr()->getFrameList().rend(); f_it++ )
     {
         if ( this->node_id_ == (*f_it)->nodeId() )
         {
         	f_it++;
-        	if (f_it != getTrajectoryPtr()->getFrameListPtr()->rend())
+        	if (f_it != getTrajectoryPtr()->getFrameList().rend())
             {
                 //std::cout << "previous frame found!" << std::endl;
                 return *f_it;
@@ -205,11 +247,11 @@ FrameBasePtr FrameBase::getPreviousFrame() const
 FrameBasePtr FrameBase::getNextFrame() const
 {
     //std::cout << "finding next frame of " << this->node_id_ << std::endl;
-	auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin();
+	auto f_it = getTrajectoryPtr()->getFrameList().rbegin();
 	f_it++; //starting from second last frame
 
     //look for the position of this node in the frame list of trajectory
-    while (f_it != getTrajectoryPtr()->getFrameListPtr()->rend())
+    while (f_it != getTrajectoryPtr()->getFrameList().rend())
     {
         if ( this->node_id_ == (*f_it)->nodeId())
         {
@@ -222,16 +264,16 @@ FrameBasePtr FrameBase::getNextFrame() const
     return nullptr;
 }
 
-void FrameBase::destruct()
-{
-    if (!is_deleting_)
-    {
-        if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-            trajectory_ptr_->removeFrame(this);
-        else
-            delete this;
-    }
-}
+//void FrameBase::destruct()
+//{
+//    if (!is_removing_)
+//    {
+//        if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+//            trajectory_ptr_->removeFrame(this);
+//        else
+//            delete this;
+//    }
+//}
 
 void FrameBase::setStatus(StateStatus _st)
 {

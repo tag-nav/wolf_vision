@@ -323,15 +323,15 @@ int main(int argc, char** argv)
         printf("\nError opening file\n");
 
     // PRIOR
-    FrameBasePtr first_frame_full = wolf_problem_full->getTrajectoryPtr()->getFrameListPtr()->front();
-    FrameBasePtr first_frame_prun = wolf_problem_prun->getTrajectoryPtr()->getFrameListPtr()->front();
+    FrameBasePtr first_frame_full = wolf_problem_full->getTrajectoryPtr()->getFrameList().front();
+    FrameBasePtr first_frame_prun = wolf_problem_prun->getTrajectoryPtr()->getFrameList().front();
     CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
     CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_full->addCapture(initial_covariance_full);
     first_frame_prun->addCapture(initial_covariance_prun);
     initial_covariance_full->process();
     initial_covariance_prun->process();
-    //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureListPtr()->front()->getConstraintFromListPtr()->front()->nodeId() << std::endl << initial_covariance_prun->getFeatureListPtr()->front()->getMeasurementCovariance() << std::endl;
+    //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureList().front()->getConstraintFromList().front()->nodeId() << std::endl << initial_covariance_prun->getFeatureList().front()->getMeasurementCovariance() << std::endl;
     t1 = clock();
     Eigen::SparseMatrix<Scalar> DeltaLambda(Lambda.rows(), Lambda.cols());
     insertSparseBlock((Eigen::Matrix3s::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
@@ -524,7 +524,7 @@ int main(int argc, char** argv)
     }
 
     // PRUNNING
-    std::vector<bool> any_inactive_in_frame(wolf_problem_prun->getTrajectoryPtr()->getFrameListPtr()->size(), false);
+    std::vector<bool> any_inactive_in_frame(wolf_problem_prun->getTrajectoryPtr()->getFrameList().size(), false);
     for (auto c_it = ordered_ctr_ptr.begin(); c_it != ordered_ctr_ptr.end(); c_it++ )
     {
         // Check heuristic: constraint do not share node with any inactive constraint

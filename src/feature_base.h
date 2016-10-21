@@ -13,16 +13,14 @@ class ConstraintBase;
 
 //std includes
 
-
 namespace wolf {
 
 
 //class FeatureBase
-class FeatureBase : public NodeBase
+class FeatureBase : public NodeBase, public std::enable_shared_from_this<FeatureBase>
 {
     private:
-        ProblemPtr problem_ptr_;
-        CaptureBasePtr capture_ptr_;
+        CaptureBaseWPtr capture_ptr_;
         ConstraintBaseList constraint_list_;
         ConstraintBaseList constrained_by_list_;
 
@@ -51,12 +49,8 @@ class FeatureBase : public NodeBase
          */
         FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         */
         virtual ~FeatureBase();
-        void destruct();
+        void remove();
 
         unsigned int id();
         unsigned int trackId(){return track_id_;}
@@ -77,7 +71,6 @@ class FeatureBase : public NodeBase
 
 
         ProblemPtr getProblem();
-        void setProblem(ProblemPtr _prob_ptr);
 
         FrameBasePtr getFramePtr() const;
 
@@ -86,15 +79,14 @@ class FeatureBase : public NodeBase
 
         ConstraintBasePtr addConstraint(ConstraintBasePtr _co_ptr);
         void removeConstraint(ConstraintBasePtr _co_ptr);
-        ConstraintBaseList* getConstraintListPtr();
+        ConstraintBaseList& getConstraintList();
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
         const Eigen::VectorXs& getMeasurement() const;
         
         virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
-        virtual void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
-        ConstraintBaseList* getConstrainedByListPtr();
+        ConstraintBaseList& getConstrainedByList();
 
 };
 
@@ -111,11 +103,6 @@ inline void FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
     constrained_by_list_.push_back(_ctr_ptr);
 }
 
-inline void FeatureBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
-{
-    constrained_by_list_.remove(_ctr_ptr);
-}
-
 inline unsigned int FeatureBase::getHits() const
 {
     return constrained_by_list_.size();
@@ -123,14 +110,22 @@ inline unsigned int FeatureBase::getHits() const
 
 inline ProblemPtr FeatureBase::getProblem()
 {
-    if (problem_ptr_ == nullptr && capture_ptr_ != nullptr)
-        problem_ptr_ = capture_ptr_->getProblem();
-    return problem_ptr_;
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb)
+    {
+        CaptureBasePtr cap = capture_ptr_.lock();
+        if (cap)
+        {
+            prb = cap->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
+    return prb;
 }
 
-inline wolf::ConstraintBaseList* FeatureBase::getConstrainedByListPtr()
+inline wolf::ConstraintBaseList& FeatureBase::getConstrainedByList()
 {
-    return &constrained_by_list_;
+    return constrained_by_list_;
 }
 
 inline unsigned int FeatureBase::id()
@@ -141,12 +136,12 @@ inline unsigned int FeatureBase::id()
 inline void FeatureBase::removeConstraint(ConstraintBasePtr _co_ptr)
 {
     constraint_list_.remove(_co_ptr);
-    delete _co_ptr;
+//    delete _co_ptr;
 }
 
 inline CaptureBasePtr FeatureBase::getCapturePtr() const
 {
-    return capture_ptr_;
+    return capture_ptr_.lock();
 }
 
 inline Scalar FeatureBase::getMeasurement(unsigned int _ii) const

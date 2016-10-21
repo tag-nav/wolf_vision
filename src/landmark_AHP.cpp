@@ -16,7 +16,6 @@ LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position_homogeneous,
     anchor_frame_(_anchor_frame),
     anchor_sensor_(_anchor_sensor)
 {
-//    std::cout << "created lmk AHP with m = " << getPPtr()->getVector().transpose() << std::endl;
 }
 
 LandmarkAHP::~LandmarkAHP()
@@ -44,7 +43,7 @@ wolf::LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
     std::vector<int>    v           = _node["descriptor"]   .as< std::vector<int> >();
     cv::Mat desc(v);
 
-    LandmarkBasePtr lmk = new LandmarkAHP(pos_homog, nullptr, nullptr, desc);
+    LandmarkBasePtr lmk = std::make_shared<LandmarkAHP>(pos_homog, nullptr, nullptr, desc);
     lmk->setId(id);
     return lmk;
 }

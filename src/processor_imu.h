@@ -43,7 +43,7 @@ class ProcessorIMU : public ProcessorMotion{
     private:
 
         // Casted pointer to IMU frame
-        FrameIMU* frame_imu_ptr_;
+        std::shared_ptr<FrameIMU> frame_imu_ptr_;
 
         // gravity vector
         const Eigen::Vector3s gravity_;
@@ -332,7 +332,7 @@ inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _moti
 inline void ProcessorIMU::resetDerived()
 {
     // Cast a pointer to origin IMU frame
-    frame_imu_ptr_ = (FrameIMU*)((origin_ptr_->getFramePtr()));
+    frame_imu_ptr_ = std::static_pointer_cast<FrameIMU>(origin_ptr_->getFramePtr());
 
     // Assign biases for the integration at the origin frame's biases
     acc_bias_  = frame_imu_ptr_->getBAPtr()->getVector(); // acc  bias

@@ -335,7 +335,7 @@ int main(int argc, char** argv)
         //std::cout << "RENDERING..." << std::endl;
         t1 = clock();
         if (step % 3 == 0)
-            robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureListPtr(), 1, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
+            robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureList(), 1, *problem.getMapPtr()->getLandmarkList(), problem.getCurrentState());
             //robot.render(laser_2_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_2_processor->getLastPtr()->getFeatureListPtr(), 2, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
         mean_times(5) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
@@ -362,13 +362,13 @@ int main(int argc, char** argv)
     //	std::cout << "\nTree before deleting..." << std::endl;
 
     // Draw Final result -------------------------
-    robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureListPtr(), 1, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
+    robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureList(), 1, *problem.getMapPtr()->getLandmarkList(), problem.getCurrentState());
 
     // Print Final result in a file -------------------------
     // Vehicle poses
     int i = 0;
     Eigen::VectorXs state_poses = Eigen::VectorXs::Zero(n_execution * 3);
-    for (auto frame : *(problem.getTrajectoryPtr()->getFrameListPtr()))
+    for (auto frame : *(problem.getTrajectoryPtr()->getFrameList()))
     {
         state_poses.segment(i, 3) << frame->getPPtr()->getVector(), frame->getOPtr()->getVector();
         i += 3;
@@ -376,8 +376,8 @@ int main(int argc, char** argv)
 
     // Landmarks
     i = 0;
-    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkListPtr()->size() * 2);
-    for (auto landmark : *(problem.getMapPtr()->getLandmarkListPtr()))
+    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkList()->size() * 2);
+    for (auto landmark : *(problem.getMapPtr()->getLandmarkList()))
     {
         landmarks.segment(i, 2) = landmark->getPPtr()->getVector();
         i += 2;

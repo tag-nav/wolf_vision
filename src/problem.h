@@ -17,8 +17,6 @@ struct ProcessorParamsBase;
 #include "wolf.h"
 
 // std includes
-#include <utility> // pair
-#include <map>
 
 
 namespace wolf {
@@ -33,61 +31,39 @@ enum Notification
 struct StateBlockNotification
 {
         Notification notification_;
-        StateBlock* state_block_ptr_;
+        StateBlockPtr state_block_ptr_;
         Scalar* scalar_ptr_;
 };
 struct ConstraintNotification
 {
         Notification notification_;
-        ConstraintBasePtr constraint_ptr_;
+        ConstraintBasePtr constraint_ptr_; // TODO check pointer type
         unsigned int id_;
 };
 
 
 /** \brief Wolf problem node element in the Wolf Tree
- * 
- * A node has five main data members:
- * - An unique ID to identify it over the whole Wolf Tree (inherited from Node)
- * - A label indicating the node nature (inherited from Node)
- * - An enum indicating tree location (see NodeLocation enum at wolf.h)
- * - down_node_list_: A list of shared pointers to derived node objects, specified by the template parameter LowerType.
- * - up_node_: A regular pointer to a derived node object, specified by the template parameter UpperType.
- *
  */
-class Problem
+class Problem : public std::enable_shared_from_this<Problem>
 {
 
     protected:
-        std::map<std::pair<StateBlock*, StateBlock*>, Eigen::MatrixXs> covariances_;
-        HardwareBasePtr hardware_ptr_;
-        TrajectoryBasePtr trajectory_ptr_;
-        MapBasePtr map_ptr_;
-        ProcessorMotion* processor_motion_ptr_;
-        StateBlockList state_block_ptr_list_;
+        HardwareBasePtr     hardware_ptr_;
+        TrajectoryBasePtr   trajectory_ptr_;
+        MapBasePtr          map_ptr_;
+        std::shared_ptr<ProcessorMotion>  processor_motion_ptr_;
+        StateBlockList      state_block_list_;
+        std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
         std::list<StateBlockNotification> state_block_notification_list_;
         std::list<ConstraintNotification> constraint_notification_list_;
-        bool origin_setted_;
+        bool origin_is_set_;
 
     public:
 
-        /** \brief Constructor from frame structure
-         *
-         */
         Problem(FrameStructure _frame_structure);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         */
+        void setup();
+        static ProblemPtr create(FrameStructure _frame_structure);
         virtual ~Problem();
-
-        /** \brief Wolf destructor
-         *
-         * Wolf destructor (please use it instead of delete for guaranteeing the wolf tree integrity)
-         *
-         */
-        virtual void destruct() final;
 
         // Properties -----------------------------------------
         unsigned int getFrameStructureSize();
@@ -155,15 +131,14 @@ class Problem
         /** \brief Set the processor motion
          *
          * Set the processor motion. It will provide the state.
-         *
          */
-        void setProcessorMotion(ProcessorMotion* _processor_motion_ptr);
+        void setProcessorMotion(std::shared_ptr<ProcessorMotion> _processor_motion_ptr);
         void setProcessorMotion(const std::string& _unique_processor_name);
-        ProcessorMotion* getProcessorMotionPtr();
+        std::shared_ptr<ProcessorMotion> getProcessorMotionPtr();
 
 
         // Trajectory branch ----------------------------------
-        TrajectoryBasePtr addTrajectory(TrajectoryBasePtr _trajectory_ptr);
+        TrajectoryBasePtr setTrajectory(TrajectoryBasePtr _trajectory_ptr);
         TrajectoryBasePtr getTrajectoryPtr();
         virtual void setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov,
                                const TimeStamp& _ts);
@@ -222,8 +197,8 @@ class Problem
 
         // Covariances -------------------------------------------
         void clearCovariance();
-        void addCovarianceBlock(StateBlock* _state1, StateBlock* _state2, const Eigen::MatrixXs& _cov);
-        bool getCovarianceBlock(StateBlock* _state1, StateBlock* _state2, Eigen::MatrixXs& _cov, const int _row = 0,
+        void addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, const Eigen::MatrixXs& _cov);
+        bool getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, Eigen::MatrixXs& _cov, const int _row = 0,
                                 const int _col=0);
         bool getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getFrameCovariance(FrameBasePtr _frame_ptr);
@@ -233,21 +208,21 @@ class Problem
 
         // Solver management ----------------------------------------
 
-        /** \brief Gets a pointer to the state units list
+        /** \brief Gets a reference to the state units list
          */
-        StateBlockList* getStateListPtr();
+        StateBlockList& getStateBlockList();
 
         /** \brief Adds a new state block to be added to solver manager
          */
-        StateBlock* addStateBlockPtr(StateBlock* _state_ptr);
+        StateBlockPtr addStateBlock(StateBlockPtr _state_ptr);
 
         /** \brief Adds a new state block to be updated to solver manager
          */
-        void updateStateBlockPtr(StateBlock* _state_ptr);
+        void updateStateBlockPtr(StateBlockPtr _state_ptr);
 
         /** \brief Adds a state block to be removed to solver manager
          */
-        void removeStateBlockPtr(StateBlock* _state_ptr);
+        void removeStateBlockPtr(StateBlockPtr _state_ptr);
 
         /** \brief Gets a queue of state blocks notification to be handled by the solver
          */
@@ -266,6 +241,10 @@ class Problem
          */
         void removeConstraintPtr(ConstraintBasePtr _constraint_ptr);
 
+        // Print and check ---------------------------------------
+        void print();
+        bool check();
+
 };
 
 } // namespace wolf
@@ -275,7 +254,7 @@ class Problem
 namespace wolf
 {
 
-inline ProcessorMotion* Problem::getProcessorMotionPtr()
+inline ProcessorMotionPtr Problem::getProcessorMotionPtr()
 {
     return processor_motion_ptr_;
 }

@@ -234,15 +234,16 @@ namespace wolf
 template<class TypeBase, typename... TypeInput>
 class Factory
 {
+        typedef std::shared_ptr<TypeBase> TypeBasePtr;
     public:
         // example of creator callback (see typedefs below)
-        typedef TypeBase* (*CreatorCallback)(TypeInput... _input);
+        typedef TypeBasePtr (*CreatorCallback)(TypeInput... _input);
     private:
         typedef std::map<std::string, CreatorCallback> CallbackMap;
     public:
         bool registerCreator(const std::string& _type, CreatorCallback createFn);
         bool unregisterCreator(const std::string& _type);
-        TypeBase* create(const std::string& _type, TypeInput... _input);
+        TypeBasePtr create(const std::string& _type, TypeInput... _input);
         std::string getClass();
 
     private:
@@ -280,7 +281,7 @@ inline bool Factory<TypeBase, TypeInput...>::unregisterCreator(const std::string
 }
 
 template<class TypeBase, typename... TypeInput>
-inline TypeBase* Factory<TypeBase, TypeInput...>::create(const std::string& _type, TypeInput... _input)
+inline typename Factory<TypeBase, TypeInput...>::TypeBasePtr Factory<TypeBase, TypeInput...>::create(const std::string& _type, TypeInput... _input)
 {
     typename CallbackMap::const_iterator creator_callback_it = callbacks_.find(_type);
 

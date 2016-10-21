@@ -10,6 +10,9 @@ namespace wolf {
 class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
 {
     public:
+        typedef std::shared_ptr<ConstraintOdom2D> Ptr;
+
+    public:
 //        static const unsigned int N_BLOCKS = 4;
 
         ConstraintOdom2D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
@@ -18,11 +21,6 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
             setType("ODOM 2D");
         }
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~ConstraintOdom2D()
         {
             //
@@ -43,7 +41,7 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
         static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
                                             NodeBasePtr _correspondant_ptr)
         {
-            return new ConstraintOdom2D(_feature_ptr, (FrameBasePtr)_correspondant_ptr);
+            return std::make_shared<ConstraintOdom2D>(_feature_ptr, std::static_pointer_cast<FrameBase>(_correspondant_ptr) );
         }
 
 };

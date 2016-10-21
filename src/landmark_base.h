@@ -25,11 +25,10 @@ namespace wolf {
 // TODO: init and end Time stamps
 
 //class LandmarkBase
-class LandmarkBase : public NodeBase
+class LandmarkBase : public NodeBase, public std::enable_shared_from_this<LandmarkBase>
 {
     private:
-        ProblemPtr problem_ptr_;
-        MapBasePtr map_ptr_;
+        MapBaseWPtr map_ptr_;
         ConstraintBaseList constrained_by_list_;
 
         static unsigned int landmark_id_count_;
@@ -39,8 +38,8 @@ class LandmarkBase : public NodeBase
         LandmarkType type_id_;     ///< type of landmark. (types defined at wolf.h)
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
-        StateBlock* p_ptr_;     ///< Position state block pointer
-        StateBlock* o_ptr_;     ///< Orientation state block pointer
+        StateBlockPtr p_ptr_;     ///< Position state block pointer
+        StateBlockPtr o_ptr_;     ///< Orientation state block pointer
         Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
 
     public:
@@ -53,16 +52,9 @@ class LandmarkBase : public NodeBase
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          *
          **/
-        LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
+        LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
         virtual ~LandmarkBase();
-
-        void destruct();
+        void remove();
 
         /** \brief Returns landmark_id_, the landmark unique id
          **/
@@ -86,11 +78,11 @@ class LandmarkBase : public NodeBase
          **/
         virtual void registerNewStateBlocks();
 
-        StateBlock* getPPtr() const;
-        StateBlock* getOPtr() const;
-        void setPPtr(StateBlock* _st_ptr);
-        void setOPtr(StateBlock* _st_ptr);
-        virtual std::vector<StateBlock*> getStateBlockVector() const;
+        StateBlockPtr getPPtr() const;
+        StateBlockPtr getOPtr() const;
+        void setPPtr(StateBlockPtr _st_ptr);
+        void setOPtr(StateBlockPtr _st_ptr);
+        virtual std::vector<StateBlockPtr> getStateBlockVector() const;
 
         const Eigen::VectorXs& getDescriptor() const;        
         Scalar getDescriptor(unsigned int _ii) const;
@@ -101,32 +93,35 @@ class LandmarkBase : public NodeBase
 
         void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
-        ConstraintBaseList* getConstrainedByListPtr();
-        /** \brief Remove the given constraint from the list.
-         *  If list becomes empty, deletes this object by calling destruct()
-         **/
-        void removeConstrainedBy(ConstraintBasePtr _ctr_ptr);
-
-
+        ConstraintBaseList& getConstrainedByList();
 
         void setMapPtr(MapBasePtr _map_ptr){map_ptr_ = _map_ptr;}
+        MapBasePtr getMapPtr();
         ProblemPtr getProblem();
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
-
 
 };
 
 }
 
 #include "map_base.h"
+#include "constraint_base.h"
+#include "state_block.h"
 
 namespace wolf{
 
 inline wolf::ProblemPtr LandmarkBase::getProblem()
 {
-    if (problem_ptr_ == nullptr && map_ptr_ != nullptr)
-        problem_ptr_ = map_ptr_->getProblem();
-    return problem_ptr_;
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb)
+    {
+        MapBasePtr map = map_ptr_.lock();
+        if (map)
+        {
+            prb = map->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
+    return prb;
 }
 
 inline unsigned int LandmarkBase::id()
@@ -163,48 +158,41 @@ inline unsigned int LandmarkBase::getHits() const
     return constrained_by_list_.size();
 }
 
-inline ConstraintBaseList* LandmarkBase::getConstrainedByListPtr()
+inline ConstraintBaseList& LandmarkBase::getConstrainedByList()
 {
-    return &constrained_by_list_;
+    return constrained_by_list_;
 }
 
-inline void LandmarkBase::removeConstrainedBy(ConstraintBasePtr _ctr_ptr)
-{
-    constrained_by_list_.remove(_ctr_ptr);
-    if (constrained_by_list_.empty())
-        this->destruct();
-}
-
-inline StateBlock* LandmarkBase::getPPtr() const
+inline StateBlockPtr LandmarkBase::getPPtr() const
 {
     return p_ptr_;
 }
 
-inline StateBlock* LandmarkBase::getOPtr() const
+inline StateBlockPtr LandmarkBase::getOPtr() const
 {
     return o_ptr_;
 }
 
-inline std::vector<StateBlock*> LandmarkBase::getStateBlockVector() const
+inline std::vector<StateBlockPtr> LandmarkBase::getStateBlockVector() const
 {
     if (p_ptr_ == nullptr && o_ptr_ == nullptr)
-        return std::vector<StateBlock*>(0);
+        return std::vector<StateBlockPtr>(0);
 
     if (p_ptr_ == nullptr)
-        return std::vector<StateBlock*>( {o_ptr_});
+        return std::vector<StateBlockPtr>( {o_ptr_});
 
     if (o_ptr_ == nullptr)
-        return std::vector<StateBlock*>( {p_ptr_});
+        return std::vector<StateBlockPtr>( {p_ptr_});
 
-    return std::vector<StateBlock*>( {p_ptr_, o_ptr_});
+    return std::vector<StateBlockPtr>( {p_ptr_, o_ptr_});
 }
 
-inline void LandmarkBase::setPPtr(StateBlock* _st_ptr)
+inline void LandmarkBase::setPPtr(StateBlockPtr _st_ptr)
 {
     p_ptr_ = _st_ptr;
 }
 
-inline void LandmarkBase::setOPtr(StateBlock* _st_ptr)
+inline void LandmarkBase::setOPtr(StateBlockPtr _st_ptr)
 {
     o_ptr_ = _st_ptr;
 }
@@ -225,22 +213,22 @@ inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
     return descriptor_;
 }
 
-inline void LandmarkBase::destruct()
-{
-    if (!is_deleting_)
-    {
-        if (map_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-        {
-            //std::cout << "upper node is not WolfProblem " << std::endl;
-            map_ptr_->removeLandmark(this);
-        }
-        else
-        {
-            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
-            delete this;
-        }
-    }
-}
+//inline void LandmarkBase::destruct()
+//{
+//    if (!is_removing_)
+//    {
+//        if (map_ptr_ != nullptr) // && !up_node_ptr_->isTop())
+//        {
+//            //std::cout << "upper node is not WolfProblem " << std::endl;
+//            map_ptr_->removeLandmark(shared_from_this());
+//        }
+//        else
+//        {
+//            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
+//            //            delete this;
+//        }
+//    }
+//}
 
 inline const LandmarkType LandmarkBase::getTypeId() const
 {

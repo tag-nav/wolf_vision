@@ -41,6 +41,9 @@ class CaptureMotion : public CaptureBase
 {
 
         // public interface:
+    public:
+        typedef std::shared_ptr<CaptureMotion> Ptr;
+        typedef std::weak_ptr<CaptureMotion> WPtr;
 
     public:
         CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
@@ -80,6 +83,7 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //
+    std::cout << "constructed    +C-Mot" << id() << std::endl;
 }
 
 inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
@@ -91,10 +95,12 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //
+    std::cout << "constructed    +C-Mot" << id() << std::endl;
 }
 
 inline CaptureMotion::~CaptureMotion()
 {
+    std::cout << "destructed     -C-Mot" << id() << std::endl;
     //
 }
 

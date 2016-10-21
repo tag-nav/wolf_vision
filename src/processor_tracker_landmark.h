@@ -174,16 +174,15 @@ inline void ProcessorTrackerLandmark::advance()
 {
     for ( auto match : matches_landmark_from_last_)
     {
-        delete match.second;
-        match.second = nullptr;
+        match.second.reset(); // TODO: Should we just remove the entries? What about match.first?
     }
 
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
 
     new_features_last_ = std::move(new_features_incoming_);
 
-    for (auto match : matches_landmark_from_last_)
-            std::cout << "\t" << match.first->id() << " to " << match.second->landmark_ptr_->id() << std::endl;
+//    for (auto match : matches_landmark_from_last_)
+//            std::cout << "\t" << match.first->id() << " to " << match.second->landmark_ptr_->id() << std::endl;
 }
 
 inline void ProcessorTrackerLandmark::reset()
@@ -191,8 +190,7 @@ inline void ProcessorTrackerLandmark::reset()
     //std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
     for ( auto match : matches_landmark_from_last_)
     {
-        delete match.second;
-        match.second = nullptr;
+        match.second.reset(); // TODO: Should we just remove the entries? What about match.first?
     }
 
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
@@ -201,20 +199,6 @@ inline void ProcessorTrackerLandmark::reset()
 
 //    for (auto match : matches_landmark_from_last_)
 //            std::cout << "\t" << match.first->id() << " to " << match.second.landmark_ptr_->id() << std::endl;
-}
-
-inline void ProcessorTrackerLandmark::establishConstraints()
-{
-    //std::cout << "ProcessorTrackerLandmark::establishConstraints" << std::endl;
-    //std::cout << "\tfeatures:" << last_ptr_->getFeatureListPtr()->size() << std::endl;
-    //std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
-
-    for (auto last_feature : *(last_ptr_->getFeatureListPtr()))
-    {
-        ConstraintBase* ctr_ptr = createConstraint(last_feature, matches_landmark_from_last_[last_feature]->landmark_ptr_);
-        if (ctr_ptr != nullptr)
-            last_feature->addConstraint(ctr_ptr);
-    }
 }
 
 }// namespace wolf

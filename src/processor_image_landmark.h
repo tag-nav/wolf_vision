@@ -27,9 +27,11 @@ namespace wolf {
 
 class ProcessorImageLandmark : public ProcessorTrackerLandmark
 {
+    public:
+        typedef std::shared_ptr<ProcessorImageLandmark> Ptr;
     protected:
-        cv::DescriptorMatcher* matcher_ptr_;
-        cv::Feature2D* detector_descriptor_ptr_;
+        std::shared_ptr<cv::DescriptorMatcher> matcher_ptr_;
+        std::shared_ptr<cv::Feature2D> detector_descriptor_ptr_;
     protected:
         ProcessorParamsImage params_;           // Struct with parameters of the processors
         ActiveSearchGrid active_search_grid_;   // Active Search
@@ -39,6 +41,13 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
                 unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
                 unsigned int size_bits_; ///< length of the descriptor vector in bits
         }detector_descriptor_params_;
+        struct
+        {
+                unsigned int width_; ///< width of the image
+                unsigned int height_; ///< height of the image
+        }image_;
+
+        unsigned int landmarks_tracked_ = 0;
 
         /* pinhole params */
 //        Eigen::Vector4s k_parameters_;
@@ -54,22 +63,20 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
-        std::list<cv::Rect> tracker_roi_inflated_;
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
-        std::list<cv::Point> tracker_candidates_;
         FeatureBaseList feat_lmk_found_;
-        std::list<Scalar> landmark_found_number_;
-        std::list<float> list_response_;
 
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
 
-        unsigned int landmarks_tracked_ = 0;
+        std::list<float> list_response_;
 
     public:
         ProcessorImageLandmark(ProcessorParamsImage _params);
         virtual ~ProcessorImageLandmark();
+
+        virtual void setup(SensorCamera::Ptr _camera_ptr);
 
     protected:
 
@@ -186,18 +193,21 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          */
         virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
+        /**
+         * \brief Does the match between a target descriptor and (potentially) multiple candidate descriptors of a Feature.
+         * \param _target_descriptor descriptor of the target
+         * \param _candidate_descriptors descriptors of the candidates
+         * \param _cv_matches output variable in which the best result will be stored (in the position [0])
+         * \return normalized score of similarity (1 - exact match; 0 - complete mismatch)
+         */
         virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
-        virtual void LandmarkInCurrentCamera(LandmarkAHP* _landmark, Eigen::Vector4s& _point3D_hmg);
+        virtual void LandmarkInCurrentCamera(std::shared_ptr<LandmarkAHP> _landmark, Eigen::Vector4s& _point3D_hmg);
 
         // These only to debug, will disappear one day soon
     public:
-        virtual void drawFeatures(cv::Mat _image);
-
-        virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
-
+        virtual void drawLandmarks(cv::Mat _image);
         virtual void drawFeaturesFromLandmarks(cv::Mat _image);
-
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
 
 };

@@ -288,7 +288,7 @@ int main(int argc, char** argv)
 
 //        // draw landmarks
 //        std::vector<double> landmark_vector;
-//        for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+//        for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().end(); landmark_it++)
 //        {
 //            Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
 //            landmark_vector.push_back(*position_ptr); //x
@@ -341,7 +341,7 @@ int main(int argc, char** argv)
 
 //    // Draw Final result -------------------------
 //    std::vector<double> landmark_vector;
-//    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+//    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().end(); landmark_it++)
 //    {
 //        Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
 //        landmark_vector.push_back(*position_ptr); //x
@@ -360,7 +360,7 @@ int main(int argc, char** argv)
     // Vehicle poses
 //    int i = 0;
 //    Eigen::VectorXs state_poses(n_execution * 3);
-//    for (auto frame_it = wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_it != wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->end(); frame_it++)
+//    for (auto frame_it = wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameList().begin(); frame_it != wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameList().end(); frame_it++)
 //    {
 //        state_poses.segment(i, 3) << *(*frame_it)->getPPtr()->getPtr(), *((*frame_it)->getPPtr()->getPtr() + 1), *(*frame_it)->getOPtr()->getPtr();
 //        i += 3;
@@ -368,8 +368,8 @@ int main(int argc, char** argv)
 //
 //    // Landmarks
 //    i = 0;
-//    Eigen::VectorXs landmarks(wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->size() * 2);
-//    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+//    Eigen::VectorXs landmarks(wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().size() * 2);
+//    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().end(); landmark_it++)
 //    {
 //        Eigen::Map<Eigen::Vector2s> landmark((*landmark_it)->getPPtr()->getPtr());
 //        landmarks.segment(i, 2) = landmark;

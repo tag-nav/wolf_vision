@@ -7,7 +7,7 @@
 
 #include "pinholeTools.h"
 #include "yaml/yaml_conversion.h"
-#include "processor_image.h"
+#include "processor_image_feature.h"
 #include "factory.h"
 
 #include <yaml-cpp/yaml.h>
@@ -94,7 +94,7 @@ int main()
         Node dd_yaml = params["detector-descriptor"];
         if(dd_yaml["type"].as<string>() == "ORB")
         {
-            DetectorDescriptorParamsOrb* dd = new DetectorDescriptorParamsOrb;
+            std::shared_ptr<DetectorDescriptorParamsOrb> dd = std::make_shared<DetectorDescriptorParamsOrb>();
             dd->type                    = DD_ORB;
             dd->nfeatures               = dd_yaml["nfeatures"].as<unsigned int>();
             dd->scaleFactor             = dd_yaml["scale factor"].as<float>();
@@ -121,9 +121,9 @@ int main()
         p.active_search.grid_height     = as["grid height"].as<unsigned int>();
         p.active_search.separation      = as["separation"].as<unsigned int>();
 
-        Node img = params["image"];
-        p.image.width                   = img["width"].as<unsigned int>();
-        p.image.height                  = img["height"].as<unsigned int>();
+//        Node img = params["image"];
+//        p.image.width                   = img["width"].as<unsigned int>();
+//        p.image.height                  = img["height"].as<unsigned int>();
 
         Node alg = params["algorithm"];
         p.algorithm.max_new_features            = alg["maximum new features"].as<unsigned int>();

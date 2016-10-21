@@ -40,10 +40,10 @@ void ProcessorGPS::process(CaptureBasePtr _capture_ptr)
     }
     //std::cout << "gps features extracted" << std::endl;
     //std::cout << "Establishing constraints to gps features..." << std::endl;
-    for (auto i_it = capture_gps_ptr_->getFeatureListPtr()->begin();
-            i_it != capture_gps_ptr_->getFeatureListPtr()->end(); i_it++)
+    for (auto i_it = capture_gps_ptr_->getFeatureList().begin();
+            i_it != capture_gps_ptr_->getFeatureList().end(); i_it++)
     {
-        capture_gps_ptr_->getFeatureListPtr()->front()->addConstraint(new ConstraintGPSPseudorange2D((*i_it)));
+        capture_gps_ptr_->getFeatureList().front()->addConstraint(new ConstraintGPSPseudorange2D((*i_it)));
     }
     //std::cout << "Constraints established" << std::endl;
 }

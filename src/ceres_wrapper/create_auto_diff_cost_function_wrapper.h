@@ -36,7 +36,7 @@ AutoDiffCostFunctionWrapperBase<CtrType,
 
     return new AutoDiffCostFunctionWrapperBase<CtrType, CtrType::measurementSize,
                                                CtrType::block0Size,CtrType::block1Size,CtrType::block2Size,CtrType::block3Size,CtrType::block4Size,
-                                               CtrType::block5Size,CtrType::block6Size,CtrType::block7Size,CtrType::block8Size,CtrType::block9Size>((CtrType*)_constraint_ptr);
+                                               CtrType::block5Size,CtrType::block6Size,CtrType::block7Size,CtrType::block8Size,CtrType::block9Size>(std::static_pointer_cast<CtrType>(_constraint_ptr).get()); // TODO revise pointer types
 };
 
 } // namespace wolf

@@ -203,7 +203,11 @@ inline bool ProcessorOdom3D::voteForKeyFrame()
 inline ConstraintBasePtr ProcessorOdom3D::createConstraint(FeatureBasePtr _feature_motion,
                                                            FrameBasePtr _frame_origin)
 {
-    return new ConstraintOdom3D(_feature_motion, _frame_origin);
+    ConstraintOdom3D::Ptr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _frame_origin);
+    ctr_odom->setFeaturePtr(_feature_motion);
+    ctr_odom->setFrameOtherPtr(_frame_origin);
+    _frame_origin->addConstrainedBy(ctr_odom);
+    return ctr_odom;
 }
 
 inline void ProcessorOdom3D::remap(const Eigen::VectorXs& _x1,

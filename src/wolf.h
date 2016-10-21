@@ -11,6 +11,7 @@
 //includes from std lib
 #include <list>
 #include <map>
+#include <memory> // shared_ptr and weak_ptr
 
 //includes from Eigen lib
 #include <eigen3/Eigen/Dense>
@@ -133,6 +134,7 @@ typedef enum
     CTR_GPS_PR_2D,              ///< 2D GPS Pseudorange constraint.
     CTR_GPS_PR_3D,              ///< 3D GPS Pseudorange constraint.
     CTR_FIX,                    ///< Fix constraint (for priors).
+    CTR_FIX_3D,                    ///< Fix constraint (for priors) in 3D.
     CTR_ODOM_2D,                ///< 2D Odometry constraint .
     CTR_ODOM_3D,                ///< 3D Odometry constraint .
     CTR_CORNER_2D,              ///< 2D corner constraint .
@@ -277,6 +279,7 @@ class HardwareBase;
 class SensorBase;
 struct IntrinsicsBase;
 class ProcessorBase;
+class ProcessorMotion;
 struct ProcessorParamsBase;
 class TrajectoryBase;
 class FrameBase;
@@ -291,85 +294,109 @@ class StateQuaternion;
 class LocalParametrizationBase;
 
 // NodeBase
-typedef NodeBase* NodeBasePtr;
+typedef std::shared_ptr<NodeBase> NodeBasePtr;
+typedef std::weak_ptr<NodeBase> NodeBaseWPtr;
 
-//Problem
-typedef Problem* ProblemPtr;
+// Problem
+typedef std::shared_ptr<Problem> ProblemPtr;
+typedef std::weak_ptr<Problem> ProblemWPtr;
 
 // Hardware
-typedef HardwareBase* HardwareBasePtr;
+typedef std::shared_ptr<HardwareBase> HardwareBasePtr;
+typedef std::weak_ptr<HardwareBase> HardwareBaseWPtr;
 
 // - Sensors
-typedef SensorBase* SensorBasePtr;
-typedef std::list<SensorBase*> SensorBaseList;
+typedef std::shared_ptr<SensorBase> SensorBasePtr;
+typedef std::weak_ptr<SensorBase> SensorBaseWPtr;
+typedef std::list<SensorBasePtr> SensorBaseList;
 typedef SensorBaseList::iterator SensorBaseIter;
 
-// Intrinsics
-typedef IntrinsicsBase* IntrinsicsBasePtr;
+// - - Intrinsics
+typedef std::shared_ptr<IntrinsicsBase> IntrinsicsBasePtr;
 
 // - Processors
-typedef ProcessorBase* ProcessorBasePtr;
-typedef std::list<ProcessorBase*> ProcessorBaseList;
+typedef std::shared_ptr<ProcessorBase> ProcessorBasePtr;
+typedef std::weak_ptr<ProcessorBase> ProcessorBaseWPtr;
+typedef std::list<ProcessorBasePtr> ProcessorBaseList;
 typedef ProcessorBaseList::iterator ProcessorBaseIter;
 
-// Processor params
-typedef ProcessorParamsBase* ProcessorParamsBasePtr;
+// - ProcessorMotion
+typedef std::shared_ptr<ProcessorMotion> ProcessorMotionPtr;
+typedef std::weak_ptr<ProcessorMotion> ProcessorMotionWPtr;
 
-// - Trajectory
-typedef TrajectoryBase* TrajectoryBasePtr;
+// - - Processor params
+typedef std::shared_ptr<ProcessorParamsBase> ProcessorParamsBasePtr;
+
+// Trajectory
+typedef std::shared_ptr<TrajectoryBase> TrajectoryBasePtr;
+typedef std::weak_ptr<TrajectoryBase> TrajectoryBaseWPtr;
 
 // - Frame
-typedef FrameBase* FrameBasePtr;
-typedef std::list<FrameBase*> FrameBaseList;
+typedef std::shared_ptr<FrameBase> FrameBasePtr;
+typedef std::weak_ptr<FrameBase> FrameBaseWPtr;
+typedef std::list<FrameBasePtr> FrameBaseList;
 typedef FrameBaseList::iterator FrameBaseIter;
 
 // - Capture
-typedef CaptureBase* CaptureBasePtr;
-typedef std::list<CaptureBase*> CaptureBaseList;
+typedef std::shared_ptr<CaptureBase> CaptureBasePtr;
+typedef std::weak_ptr<CaptureBase> CaptureBaseWPtr;
+typedef std::list<CaptureBasePtr> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
-// - Capture Relative
-typedef std::list<CaptureMotion*> CaptureRelativeList;
-typedef CaptureRelativeList::iterator CaptureRelativeIter;
-
 // - Feature
-typedef FeatureBase* FeatureBasePtr;
-typedef std::list<FeatureBase*> FeatureBaseList;
+typedef std::shared_ptr<FeatureBase> FeatureBasePtr;
+typedef std::weak_ptr<FeatureBase> FeatureBaseWPtr;
+typedef std::list<FeatureBasePtr> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
 
 // - Constraint
-typedef ConstraintBase* ConstraintBasePtr;
-typedef std::list<ConstraintBase*> ConstraintBaseList;
+typedef std::shared_ptr<ConstraintBase> ConstraintBasePtr;
+typedef std::weak_ptr<ConstraintBase> ConstraintBaseWPtr;
+typedef std::list<ConstraintBasePtr> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
-//Map
-typedef MapBase* MapBasePtr;
+// Map
+typedef std::shared_ptr<MapBase> MapBasePtr;
+typedef std::weak_ptr<MapBase> MapBaseWPtr;
 typedef std::list<MapBasePtr> MapBaseList;
 typedef MapBaseList::iterator MapBaseIter;
 
-//Landmark
-typedef LandmarkBase* LandmarkBasePtr;
+// - Landmark
+typedef std::shared_ptr<LandmarkBase> LandmarkBasePtr;
+typedef std::weak_ptr<LandmarkBase> LandmarkBaseWPtr;
 typedef std::list<LandmarkBasePtr> LandmarkBaseList;
 typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
-// - State blocks
+// - - State blocks
 typedef StateBlock* StateBlockPtr;
+typedef StateBlock* StateBlockWPtr;
 typedef std::list<StateBlockPtr> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
 typedef StateQuaternion* StateQuaternionPtr;
 
-// Local Parametrization
+// - - Local Parametrization
 typedef LocalParametrizationBase* LocalParametrizationBasePtr;
 
-// Match Feature - Landmark
+// - - Match Feature - Landmark
 struct LandmarkMatch
 {
         LandmarkBasePtr landmark_ptr_;
         Scalar normalized_score_;
+        LandmarkMatch() :
+                landmark_ptr_(nullptr), normalized_score_(0)
+        {
+
+        }
+        LandmarkMatch(LandmarkBasePtr _landmark_ptr, Scalar _normalized_score) :
+                landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
+        {
+
+        }
 };
 
 // Match map Feature - Landmark
-typedef std::map<FeatureBasePtr, LandmarkMatch*> LandmarkMatchMap;
+typedef std::shared_ptr<LandmarkMatch> LandmarkMatchPtr;
+typedef std::map<FeatureBasePtr, LandmarkMatchPtr> LandmarkMatchMap;
 
 
 // Feature-Feature correspondence

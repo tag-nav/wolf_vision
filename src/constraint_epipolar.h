@@ -22,7 +22,7 @@ class ConstraintEpipolar : public ConstraintBase
 
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
-        virtual const std::vector<StateBlock*> getStatePtrVector() const{return std::vector<StateBlock*>(0);}
+        virtual const std::vector<StateBlockPtr> getStatePtrVector() const{return std::vector<StateBlockPtr>(0);}
 
         /** \brief Returns the constraint residual size
          **/
@@ -30,10 +30,7 @@ class ConstraintEpipolar : public ConstraintBase
 
     public:
         static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
-                                            NodeBasePtr _correspondant_ptr)
-        {
-            return new ConstraintEpipolar(_feature_ptr, (FeatureBasePtr)_correspondant_ptr);
-        }
+                NodeBasePtr _correspondant_ptr);
 
 };
 
@@ -44,6 +41,12 @@ inline ConstraintEpipolar::ConstraintEpipolar(FeatureBasePtr _feature_ptr, Featu
 }
 
 inline ConstraintEpipolar::~ConstraintEpipolar(){}
+
+inline wolf::ConstraintBasePtr ConstraintEpipolar::create(FeatureBasePtr _feature_ptr, //
+        NodeBasePtr _correspondant_ptr)
+{
+    return std::make_shared<ConstraintEpipolar>(_feature_ptr, std::static_pointer_cast<FeatureBase>(_correspondant_ptr));
+}
 
 } // namespace wolf
 

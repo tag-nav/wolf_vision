@@ -72,7 +72,7 @@ ProcessorImage::~ProcessorImage()
 
 void ProcessorImage::preProcess()
 {
-    image_incoming_ = ((CaptureImage*)incoming_ptr_)->getImage();
+    image_incoming_ = (std::static_pointer_cast<CaptureImage>(incoming_ptr_))->getImage();
 
     if (last_ptr_ == nullptr) // do this just one time!
     {
@@ -87,7 +87,7 @@ void ProcessorImage::preProcess()
     //The visualization part is only for debugging. The casts above are necessary.
 
     if(last_ptr_ != nullptr)
-        resetVisualizationFlag(*(last_ptr_->getFeatureListPtr()));
+        resetVisualizationFlag(last_ptr_->getFeatureList());
 
     // Clear of the lists used to debug
     tracker_roi_.clear();
@@ -110,8 +110,8 @@ void ProcessorImage::postProcess()
 bool ProcessorImage::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
 {
     std::vector<cv::DMatch> matches_mat;
-    FeaturePointImage* feat_incoming_ptr = (FeaturePointImage*)_incoming_feature;
-    FeaturePointImage* feat_origin_ptr = (FeaturePointImage*)_origin_feature;
+    std::shared_ptr<FeaturePointImage> feat_incoming_ptr = std::static_pointer_cast<FeaturePointImage>(_incoming_feature);
+    std::shared_ptr<FeaturePointImage> feat_origin_ptr = std::static_pointer_cast<FeaturePointImage>(_origin_feature);
 
     std::cout << "=============== DRIFT =================" << std::endl;
 
@@ -144,7 +144,7 @@ bool ProcessorImage::correctFeatureDrift(const FeatureBasePtr _origin_feature, c
         cv::Mat correction_descriptors;
         std::vector<cv::DMatch> correction_matches;
 
-        FeaturePointImage* feat_last_ptr = (FeaturePointImage*)_last_feature;
+        std::shared_ptr<FeaturePointImage> feat_last_ptr = std::static_pointer_cast<FeaturePointImage>(_last_feature);
         active_search_grid_.hitCell(feat_last_ptr->getKeypoint());
 
         std::cout << "Search feature last: " << feat_last_ptr->trackId() << " at: " << feat_last_ptr->getKeypoint().pt;
@@ -234,11 +234,11 @@ unsigned int ProcessorImage::detectNewFeatures(const unsigned int& _max_new_feat
             if (detect(image_last_, roi, new_keypoints, new_descriptors))
             {
                 keypoint_filter.retainBest(new_keypoints,1);
-                FeaturePointImage* point_ptr = new FeaturePointImage(new_keypoints[0], new_descriptors.row(0), false);
+                std::shared_ptr<FeaturePointImage> point_ptr = std::make_shared<FeaturePointImage>(new_keypoints[0], new_descriptors.row(0), false);
                 point_ptr->setTrackId(point_ptr->id());
                 addNewFeatureLast(point_ptr);
                 active_search_grid_.hitCell(new_keypoints[0]);
-                active_search_grid_.blockCell(roi);
+//                active_search_grid_.blockCell(roi);
 
                 //std::cout << "Added point " << point_ptr->trackId() << " at: " << new_keypoints[0].pt << std::endl;
 
@@ -265,7 +265,7 @@ void ProcessorImage::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
 {
     for (auto feature_base_last_ptr : _feature_list_last)
     {
-        FeaturePointImage* feature_last_ptr = (FeaturePointImage*)feature_base_last_ptr;
+        std::shared_ptr<FeaturePointImage> feature_last_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_last_ptr);
         feature_last_ptr->setIsKnown(true);
     }
 }
@@ -279,14 +279,15 @@ void ProcessorImage::filterFeatureLists(FeatureBaseList _original_list, FeatureB
                                                  first_feature_iterator != _original_list.end();
                                                  first_feature_iterator++)
     {
-        FeaturePointImage* tested_feature_ptr = (FeaturePointImage*)*first_feature_iterator;
+
+        std::shared_ptr<FeaturePointImage> tested_feature_ptr = std::static_pointer_cast<FeaturePointImage>(*first_feature_iterator);
         bool repeated_feature = false;
 
         for (std::list<FeatureBasePtr>::const_iterator second_feature_iterator = first_feature_iterator;
                                                      second_feature_iterator != _original_list.begin();
                                                      second_feature_iterator--)
         {
-           FeaturePointImage* secondary_feature_ptr = (FeaturePointImage*)*second_feature_iterator;
+            std::shared_ptr<FeaturePointImage> secondary_feature_ptr = std::static_pointer_cast<FeaturePointImage>(*second_feature_iterator);
 
            if(tested_feature_ptr->getKeypoint().pt == secondary_feature_ptr->getKeypoint().pt && tested_feature_ptr->id() != secondary_feature_ptr->id())
            {
@@ -343,7 +344,7 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
 
     for (auto feature_base_ptr : filtered_list)//_feature_list_in)
     {
-        FeaturePointImage* feature_ptr = (FeaturePointImage*)feature_base_ptr;
+        std::shared_ptr<FeaturePointImage> feature_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
 
         //std::cout << "\nSearch feature: " << feature_ptr->trackId() << " at: " << feature_ptr->getKeypoint().pt;
 
@@ -368,7 +369,7 @@ unsigned int ProcessorImage::trackFeatures(const FeatureBaseList& _feature_list_
             if (normalized_score > params_.matcher.min_normalized_score)
             {
                 //std::cout << "\t <--TRACKED" << std::endl;
-                FeaturePointImage* incoming_point_ptr = new FeaturePointImage(
+                std::shared_ptr<FeaturePointImage> incoming_point_ptr = std::make_shared<FeaturePointImage>(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         feature_ptr->isKnown());
                 _feature_list_out.push_back(incoming_point_ptr);
@@ -494,9 +495,9 @@ void ProcessorImage::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::
 
 void ProcessorImage::drawFeatures(CaptureBasePtr const _last_ptr)
 {
-    for (auto feature_ptr : *(last_ptr_->getFeatureListPtr()))
+    for (auto feature_ptr : last_ptr_->getFeatureList())
     {
-        FeaturePointImage* point_ptr = (FeaturePointImage*)feature_ptr;
+        std::shared_ptr<FeaturePointImage> point_ptr = std::static_pointer_cast<FeaturePointImage>(feature_ptr);
         if (point_ptr->isKnown())
         {
             cv::circle(image_last_, point_ptr->getKeypoint().pt, 7, cv::Scalar(51.0, 255.0, 51.0), 1, 3, 0);
@@ -513,7 +514,10 @@ void ProcessorImage::drawFeatures(CaptureBasePtr const _last_ptr)
 
 ProcessorBasePtr ProcessorImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
-    ProcessorImage* prc_ptr = new ProcessorImage(*((ProcessorParamsImage*)_params));
+
+    std::shared_ptr<ProcessorImage> prc_ptr = std::make_shared<ProcessorImage>(*std::static_pointer_cast<ProcessorParamsImage>(_params));
+
+//    ProcessorImage* prc_ptr = new ProcessorImage(*((ProcessorParamsImage*)_params));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

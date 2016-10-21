@@ -16,11 +16,6 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
             setType("ODOM 2D ANALYTIC");
         }
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~ConstraintOdom2DAnalytic()
         {
             //
@@ -108,7 +103,7 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
         static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
                                             NodeBasePtr _correspondant_ptr)
         {
-            return new ConstraintOdom2DAnalytic(_feature_ptr, (FrameBasePtr)_correspondant_ptr);
+            return std::make_shared<ConstraintOdom2DAnalytic>(_feature_ptr, std::static_pointer_cast<FrameBase>(_correspondant_ptr) );
         }
 
 };

@@ -14,32 +14,17 @@ class SensorBase;
 namespace wolf {
 
 //class HardwareBase
-class HardwareBase : public NodeBase //: public NodeLinked<Problem, SensorBase>
+class HardwareBase : public NodeBase, public std::enable_shared_from_this<HardwareBase>
 {
     private:
-        ProblemPtr problem_ptr_;
         SensorBaseList sensor_list_;
 
     public:
         HardwareBase();
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~HardwareBase();
-        void destruct()
-        {
-            if (!is_deleting_)
-                delete this;
-        }
-
-        ProblemPtr getProblem(){return problem_ptr_;}
-        void setProblem(ProblemPtr _prob_ptr){problem_ptr_ = _prob_ptr;}
 
         virtual SensorBasePtr addSensor(SensorBasePtr _sensor_ptr);
-        SensorBaseList* getSensorListPtr();
+        SensorBaseList& getSensorList();
         void removeSensor(const SensorBaseIter& _sensor_iter);
         void removeSensor(SensorBasePtr _sensor_ptr);
 };
@@ -55,12 +40,11 @@ namespace wolf {
 inline void HardwareBase::removeSensor(const SensorBaseIter& _sensor_iter)
 {
     sensor_list_.erase(_sensor_iter);
-    delete * _sensor_iter;
 }
 
-inline SensorBaseList* HardwareBase::getSensorListPtr()
+inline SensorBaseList& HardwareBase::getSensorList()
 {
-    return & sensor_list_;
+    return sensor_list_;
 }
 
 } // namespace wolf
