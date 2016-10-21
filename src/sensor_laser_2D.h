@@ -9,11 +9,14 @@
 //laser_scan_utils
 #include "laser_scan_utils/laser_scan.h"
 
+// std
+
 namespace wolf {
 
 struct IntrinsicsLaser2D : public IntrinsicsBase
 {
-    laserscanutils::LaserScanParams scan_params;
+        typedef std::shared_ptr<IntrinsicsLaser2D> Ptr;
+        laserscanutils::LaserScanParams scan_params;
 };
 
 
