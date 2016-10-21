@@ -247,17 +247,17 @@ class Problem : public std::enable_shared_from_this<Problem>
 
 };
 
-inline std::shared_ptr<ProcessorMotion> Problem::getProcessorMotionPtr()
-{
-    return processor_motion_ptr_;
-}
-
 } // namespace wolf
 
 // IMPLEMENTATION
 
 namespace wolf
 {
+
+inline ProcessorMotionPtr Problem::getProcessorMotionPtr()
+{
+    return processor_motion_ptr_;
+}
 
 inline std::list<StateBlockNotification>& Problem::getStateBlockNotificationList()
 {

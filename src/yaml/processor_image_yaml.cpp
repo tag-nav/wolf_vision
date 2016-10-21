@@ -9,7 +9,7 @@
 #include "yaml_conversion.h"
 
 // wolf
-#include "../processor_image.h"
+#include "../processor_image_feature.h"
 #include "../factory.h"
 
 // yaml-cpp library
@@ -39,7 +39,6 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
             dd->scaleFactor                 = dd_yaml["scale factor"].as<float>();
             dd->nlevels                     = dd_yaml["nlevels"].as<unsigned int>();
             dd->edgeThreshold               = dd_yaml["edge threshold"].as<unsigned int>();
-            std::cout << "edgeThreshold: " << dd->edgeThreshold << std::endl;
             dd->firstLevel                  = dd_yaml["first level"].as<unsigned int>();
             dd->WTA_K                       = dd_yaml["WTA_K"].as<unsigned int>();
             dd->scoreType                   = dd_yaml["score type"].as<int>(); // enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
@@ -62,13 +61,16 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
         p->active_search.grid_height    = as["grid height"].as<unsigned int>();
         p->active_search.separation     = as["separation"].as<unsigned int>();
 
-        Node img = params["image"];
-        p->image.width  = img["width"].as<unsigned int>();
-        p->image.height = img["height"].as<unsigned int>();
-
         Node alg = params["algorithm"];
         p->algorithm.max_new_features = alg["maximum new features"].as<unsigned int>();
         p->algorithm.min_features_for_keyframe = alg["minimum features for new keyframe"].as<unsigned int>();
+        p->algorithm.min_response_for_new_features = alg["minimum response for new features"].as<float>();
+
+        Node draw = params["draw"];
+        p->draw.primary_drawing = draw["primary draw"].as<bool>();
+        p->draw.secondary_drawing = draw["secondary draw"].as<bool>();
+        p->draw.detector_roi = draw["detection roi"].as<bool>();
+        p->draw.tracker_roi = draw["tracking roi"].as<bool>();
 
     }
 
@@ -76,7 +78,7 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
 }
 
 // Register in the SensorFactory
-const bool registered_prc_image_par = ProcessorParamsFactory::get().registerCreator("IMAGE", createProcessorParamsImage);
+const bool registered_prc_image_feature_par = ProcessorParamsFactory::get().registerCreator("IMAGE FEATURE", createProcessorParamsImage);
 const bool registered_prc_image_landmark_par = ProcessorParamsFactory::get().registerCreator("IMAGE LANDMARK", createProcessorParamsImage);
 
 

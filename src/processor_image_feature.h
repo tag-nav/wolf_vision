@@ -1,5 +1,5 @@
-#ifndef PROCESSOR_IMAGE_H
-#define PROCESSOR_IMAGE_H
+#ifndef PROCESSOR_IMAGE_FEATURE_H
+#define PROCESSOR_IMAGE_FEATURE_H
 
 // Wolf includes
 #include "sensor_camera.h"
@@ -26,16 +26,16 @@
 
 namespace wolf {
 
-class ProcessorImage : public ProcessorTrackerFeature
+class ProcessorImageFeature : public ProcessorTrackerFeature
 {
+    public:
+        typedef std::shared_ptr<ProcessorImageFeature> Ptr;
 
     protected:
-        //cv::FeatureDetector* detector_ptr_;
-        //cv::DescriptorExtractor* descriptor_ptr_;
         cv::DescriptorMatcher* matcher_ptr_;
         cv::Feature2D* detector_descriptor_ptr_;
     protected:
-        ProcessorParamsImage params_;       // Struct with parameters of the processors
+        ProcessorParamsImage params_;           // Struct with parameters of the processors
         ActiveSearchGrid active_search_grid_;   // Active Search
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
         struct
@@ -43,17 +43,25 @@ class ProcessorImage : public ProcessorTrackerFeature
                 unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
                 unsigned int size_bits_; ///< length of the descriptor vector in bits
         }detector_descriptor_params_;
+        struct
+        {
+                unsigned int width_; ///< width of the image
+                unsigned int height_; ///< height of the image
+        }image_;
 
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
-        std::list<cv::Point> tracker_candidates_;
+        unsigned int complete_target_size_ = 1;
+        unsigned int target_size_ = 1;
 
     public:
-        ProcessorImage(ProcessorParamsImage _params);
-        virtual ~ProcessorImage();
+        ProcessorImageFeature(ProcessorParamsImage _params);
+        virtual ~ProcessorImageFeature();
+
+        virtual void setup(SensorCamera::Ptr _camera_ptr);
 
     protected:
 
@@ -150,21 +158,21 @@ class ProcessorImage : public ProcessorTrackerFeature
          */
         virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
-        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::KeyPoint> _candidate_keypoints, std::vector<cv::DMatch>& _cv_matches);
+        /**
+         * \brief Does the match between a target descriptor and (potentially) multiple candidate descriptors of a Feature.
+         * \param _target_descriptor descriptor of the target
+         * \param _candidate_descriptors descriptors of the candidates
+         * \param _cv_matches output variable in which the best result will be stored (in the position [0])
+         * \return normalized score of similarity (1 - exact match; 0 - complete mismatch)
+         */
+        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
-        virtual void filterFeatureLists(FeatureBaseList _original_list, FeatureBaseList& _filtered_list);
 
-
-
-
-        // These only to debug, will disappear one day soon
+        // These only to debug, will disappear one day
     public:
-        virtual void drawFeatures(CaptureBasePtr const _last_ptr);
-
-        virtual void drawTrackingFeatures(cv::Mat _image, std::list<cv::Point> _target_list, std::list<cv::Point> _candidates_list);
-
+        virtual void drawFeatures(cv::Mat _image);
+        virtual void drawTarget(cv::Mat _image, std::list<cv::Point> _target_list);
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
-
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
 
     public:
@@ -173,13 +181,12 @@ class ProcessorImage : public ProcessorTrackerFeature
 
 };
 
-inline bool ProcessorImage::voteForKeyFrame()
+inline bool ProcessorImageFeature::voteForKeyFrame()
 {
-//    std::cout << "voteForKeyFrame?: "
     return (incoming_ptr_->getFeatureList().size() < params_.algorithm.min_features_for_keyframe);
 }
 
-inline ConstraintBasePtr ProcessorImage::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
+inline ConstraintBasePtr ProcessorImageFeature::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
 {
     std::shared_ptr<ConstraintEpipolar> const_epipolar_ptr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr);
     const_epipolar_ptr->setFeatureOtherPtr(_feature_other_ptr);
@@ -189,4 +196,4 @@ inline ConstraintBasePtr ProcessorImage::createConstraint(FeatureBasePtr _featur
 } // namespace wolf
 
 
-#endif // PROCESSOR_IMAGE_H
+#endif // PROCESSOR_IMAGE_FEATURE_H

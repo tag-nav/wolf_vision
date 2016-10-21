@@ -23,7 +23,6 @@
 #include "../sensor_odom_2D.h"
 #include "../sensor_gps_fix.h"
 #include "../capture_fix.h"
-#include "../capture_odom_2D.h"
 #include "../ceres_wrapper/ceres_manager.h"
 
 // laserscanutils

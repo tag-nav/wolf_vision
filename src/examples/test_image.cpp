@@ -3,7 +3,8 @@
 //Wolf includes
 #include "sensor_camera.h"
 #include "capture_image.h"
-#include "processor_image.h"
+#include "processor_image_feature.h"
+#include "ceres_wrapper/ceres_manager.h"
 
 //#include "feature_point_image.h"
 //#include "state_block.h"
@@ -30,14 +31,14 @@ int main(int argc, char** argv)
     using std::make_shared;
     using std::static_pointer_cast;
 
-    //ProcessorImage test
-    std::cout << std::endl << " ========= ProcessorImage test ===========" << std::endl << std::endl;
+    //ProcessorImageFeature test
+    std::cout << std::endl << " ========= ProcessorImageFeature test ===========" << std::endl << std::endl;
 
     cv::VideoCapture capture;
     const char * filename;
     if (argc == 1)
     {
-        //filename = "/home/jtarraso/Vídeos/House interior.mp4";
+//        filename = "/home/jtarraso/Videos/House_interior.mp4";
         filename = "/home/jtarraso/Vídeos/gray.mp4";
         capture.open(filename);
     }
@@ -70,7 +71,6 @@ int main(int argc, char** argv)
         throw std::runtime_error("WOLF_ROOT environment not loaded.");
 
     std::string wolf_path( tmp );
-
     std::cout << "Wolf path: " << wolf_path << std::endl;
 
     ProblemPtr wolf_problem_ = Problem::create(FRM_PO_3D);
@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     //    // select the kind of detector-descriptor parameters
     //    tracker_params.detector_descriptor_params_ptr = &orb_params; // choose ORB
     //
-    //    ProcessorImage* prc_image = new ProcessorImage(tracker_params);
+    //    ProcessorImageFeature* prc_image = new ProcessorImageFeature(tracker_params);
     //
     //    sen_cam_->addProcessor(prc_image);
     //=====================================================
@@ -119,16 +119,47 @@ int main(int argc, char** argv)
     // Method 2: Use factory to create sensor and processor
     //=====================================================
 
+    /* Do this while there aren't extrinsic parameters on the yaml */
+    Eigen::Vector7s extrinsic_cam;
+    extrinsic_cam[0] = 0; //px
+    extrinsic_cam[1] = 0; //py
+    extrinsic_cam[2] = 0; //pz
+    extrinsic_cam[3] = 0; //qx
+    extrinsic_cam[4] = 0; //qy
+    extrinsic_cam[5] = 0; //qz
+    extrinsic_cam[6] = 1; //qw
+    std::cout << "========extrinsic_cam: " << extrinsic_cam.transpose() << std::endl;
+    const Eigen::VectorXs extr = extrinsic_cam;
+    /* Do this while there aren't extrinsic parameters on the yaml */
+
     // SENSOR
     // one-liner API
     SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_path + "/src/examples/camera_params.yaml");
     shared_ptr<SensorCamera> camera_ptr = static_pointer_cast<SensorCamera>(sensor_ptr);
+    camera_ptr->setImgWidth(img_width);
+    camera_ptr->setImgHeight(img_height);
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_->installProcessor("IMAGE", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
-
+    ProcessorImageFeature::Ptr prc_img_ptr = std::static_pointer_cast<ProcessorImageFeature>( wolf_problem_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml") );
+    prc_img_ptr->setup(camera_ptr);
+    std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
+
+
+
+
+//    // Ceres wrapper
+//    ceres::Solver::Options ceres_options;
+//    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+//    ceres_options.max_line_search_step_contraction = 1e-3;
+//    //    ceres_options.minimizer_progress_to_stdout = false;
+//    //    ceres_options.line_search_direction_type = ceres::LBFGS;
+//    //    ceres_options.max_num_iterations = 100;
+//    google::InitGoogleLogging(argv[0]);
+
+//    CeresManager ceres_manager(&(*wolf_problem_ptr_), ceres_options);
+
 
 
     // CAPTURES
@@ -145,7 +176,6 @@ int main(int argc, char** argv)
         std::cout << "\n=============== Frame #: " << f << " in buffer: " << f%buffer_size << " ===============" << std::endl;
 
         t.setToNow();
-
         clock_t t1 = clock();
 
         // Old method with non-factory objects
@@ -155,13 +185,27 @@ int main(int argc, char** argv)
         // Preferred method with factory objects:
         image_ptr = make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
         image_ptr->process();
-        //cv::imshow("test",frame[f % buffer_size]);
+
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-        cv::waitKey(5);
+        cv::waitKey(20);
+
+//        if((f%buffer_size) == 4)
+//        {
+//            ceres::Solver::Summary summary = ceres_manager.solve();
+//            std::cout << summary.FullReport() << std::endl;
+
+
+//            std::cout << "Last key frame pose: "
+//                      << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
+//            std::cout << "Last key frame orientation: "
+//                      << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
+
+//            cv::waitKey(0);
+//        }
 
         f++;
         capture >> frame[f % buffer_size];
     }
 
-//    wolf_problem_->remove();
+
 }

@@ -16,7 +16,7 @@
 #include "../processor_odom_3D.h"
 #include "../processor_imu.h"
 #include "../processor_gps.h"
-#include "../processor_image.h"
+#include "../processor_image_feature.h"
 
 #include "../problem.h"
 
@@ -77,7 +77,7 @@ int main(void)
     ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::get().create("IMAGE", WOLF_CONFIG + "/processor_image_ORB.yaml");
 
     cout << "CAMERA with intrinsics      : " << (static_pointer_cast<IntrinsicsCamera>(intr_cam_ptr))->pinhole_model.transpose() << endl;
-    cout << "Processor IMAGE image width : " << (static_pointer_cast<ProcessorParamsImage>(params_ptr))->image.width << endl;
+//    cout << "Processor IMAGE image width : " << (static_pointer_cast<ProcessorParamsImage>(params_ptr))->image.width << endl;
 
     cout << "\n==================== Install Sensors ====================" << endl;
 

@@ -7,7 +7,7 @@
 
 #include "pinholeTools.h"
 #include "yaml/yaml_conversion.h"
-#include "processor_image.h"
+#include "processor_image_feature.h"
 #include "factory.h"
 
 #include <yaml-cpp/yaml.h>
@@ -121,9 +121,9 @@ int main()
         p.active_search.grid_height     = as["grid height"].as<unsigned int>();
         p.active_search.separation      = as["separation"].as<unsigned int>();
 
-        Node img = params["image"];
-        p.image.width                   = img["width"].as<unsigned int>();
-        p.image.height                  = img["height"].as<unsigned int>();
+//        Node img = params["image"];
+//        p.image.width                   = img["width"].as<unsigned int>();
+//        p.image.height                  = img["height"].as<unsigned int>();
 
         Node alg = params["algorithm"];
         p.algorithm.max_new_features            = alg["maximum new features"].as<unsigned int>();

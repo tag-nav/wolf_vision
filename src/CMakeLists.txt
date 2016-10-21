@@ -118,6 +118,7 @@ SET(HDRS
     constraint_gps_pseudorange_2D.h
     constraint_odom_2D.h
     constraint_odom_2D_analytic.h
+    constraint_odom_3D.h
     constraint_point_2D.h
     constraint_point_to_line_2D.h
     constraint_relative_2D_analytic.h
@@ -148,6 +149,7 @@ SET(HDRS
     node_base.h
     problem.h
     processor_base.h
+    processor_image_params.h
     processor_imu.h
     processor_factory.h
     processor_motion.h
@@ -165,6 +167,7 @@ SET(HDRS
     sensor_gps_fix.h
     sensor_imu.h
     sensor_odom_2D.h
+    sensor_odom_3D.h
     state_block.h
     state_homogeneous_3D.h
     state_quaternion.h
@@ -190,6 +193,7 @@ SET(SRCS
     capture_void.cpp
     constraint_base.cpp
     constraint_analytic.cpp
+    # constraint_odom_3D.cpp // nothing in the cpp
     feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
@@ -229,6 +233,7 @@ SET(SRCS
     sensor_gps_fix.cpp
     sensor_imu.cpp
     sensor_odom_2D.cpp
+    sensor_odom_3D.cpp
     time_stamp.cpp
     trajectory_base.cpp
     data_association/association_solver.cpp
@@ -295,7 +300,7 @@ IF (OpenCV_FOUND)
         capture_image.h
         feature_point_image.h
         landmark_AHP.h
-        processor_image.h
+        processor_image_feature.h
         processor_image_landmark.h
         active_search.h
         )
@@ -303,7 +308,7 @@ IF (OpenCV_FOUND)
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
-        processor_image.cpp
+        processor_image_feature.cpp
         processor_image_landmark.cpp
         active_search.cpp
         )

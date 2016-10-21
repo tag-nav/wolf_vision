@@ -36,9 +36,9 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool
     landmark_other_ptr_()
 {
     // add constraint to frame
-    FrameBasePtr frm_o = frame_other_ptr_.lock();
-    if (frm_o)
-        frm_o->addConstrainedBy(shared_from_this()); // FIXME: cannot do shared_from_this in constructor!
+//    FrameBasePtr frm_o = frame_other_ptr_.lock();
+//    if (frm_o)
+//        frm_o->addConstrainedBy(shared_from_this()); // FIXME: cannot do shared_from_this in constructor!
     std::cout << "constructed      +c" << id() << std::endl;
 }
 

@@ -21,7 +21,7 @@ ProcessorTrackerFeature::~ProcessorTrackerFeature()
 
 unsigned int ProcessorTrackerFeature::processKnown()
 {
-    std::cout << "ProcessorTrackerFeature::processKnown()" << std::endl;
+//    std::cout << "ProcessorTrackerFeature::processKnown()" << std::endl;
 
     assert(incoming_ptr_->getFeatureList().size() == 0
             && "In ProcessorTrackerFeature::processKnown(): incoming_ptr_ feature list must be empty before processKnown()");
@@ -31,7 +31,7 @@ unsigned int ProcessorTrackerFeature::processKnown()
     // Track features from last_ptr_ to incoming_ptr_
     trackFeatures(last_ptr_->getFeatureList(), known_features_incoming_, matches_last_from_incoming_);
 
-    std::cout << "Tracked: " << known_features_incoming_.size() << std::endl;
+//    std::cout << "Tracked: " << known_features_incoming_.size() << std::endl;
 
     // Check/correct incoming-origin correspondences
     if (origin_ptr_ != nullptr)

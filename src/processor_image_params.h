@@ -37,12 +37,6 @@ struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
 
 struct ProcessorParamsImage : public ProcessorParamsBase
 {
-        struct Image
-        {
-                unsigned int width; ///< image width (horizontal dimension or nbr of columns)
-                unsigned int height; ///< image height (vertical dimension or nbr of rows)
-        }image;
-
         DetectorDescriptorParamsBase* detector_descriptor_params_ptr;
 
         struct Matcher
@@ -62,7 +56,16 @@ struct ProcessorParamsImage : public ProcessorParamsBase
         {
                 unsigned int max_new_features; ///< Max nbr. of features to detect in one frame
                 unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
+                float min_response_for_new_features; ///< minimum value of the response to create a new feature
         }algorithm;
+
+        struct Draw
+        {
+                bool primary_drawing; ///< draw the features found in the image
+                bool secondary_drawing; ///< draw the target of the features found in the image
+                bool detector_roi; ///< draw the roi in which new features are searched
+                bool tracker_roi; ///< draw the roi used to track features from the last frame
+        }draw;
 };
 }
 

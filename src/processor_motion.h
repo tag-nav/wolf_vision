@@ -455,11 +455,11 @@ inline void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         key_feature_ptr->addConstraint(createConstraint(key_feature_ptr, origin_ptr_->getFramePtr()));
 
         // new last capture
-        last_ptr_ = std::make_shared<CaptureMotion>( CaptureMotion(key_frame_ptr->getTimeStamp(),
+        last_ptr_ = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
                                                                    getSensorPtr(),
                                                                    Eigen::VectorXs::Zero(data_size_),
                                                                    Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                                   key_frame_ptr) );
+                                                                   key_frame_ptr);
 
         // create a new last frame
         makeFrame(last_ptr_, key_frame_ptr->getState(), NON_KEY_FRAME);
@@ -471,6 +471,9 @@ inline void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                                                  deltaZero(),
                                                  Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
                                                  Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)}));
+        delta_integrated_ = deltaZero();
+        delta_integrated_cov_.setZero();
+
         // reset derived things
         resetDerived();
 
@@ -561,14 +564,14 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
     CaptureMotion::Ptr capture_ptr = findCaptureContainingTimeStamp(ts);
     assert(capture_ptr != nullptr && "ProcessorMotion::keyFrameCallback: no motion capture containing the required TimeStamp found");
 
-    FrameBasePtr key_capture_origin = capture_ptr->getOriginFramePtr();
+    FrameBasePtr key_frame_origin = capture_ptr->getOriginFramePtr();
 
     // create motion capture
     CaptureMotion::Ptr key_capture_ptr = std::make_shared<CaptureMotion>(ts,
                                                                          getSensorPtr(),
                                                                          Eigen::VectorXs::Zero(data_size_),
                                                                          Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                                         key_capture_origin);
+                                                                         key_frame_origin);
 
     // add motion capture to keyframe
     _keyframe_ptr->addCapture(key_capture_ptr);
@@ -597,7 +600,8 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
                                                    Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-8);
     key_capture_ptr->addFeature(key_feature_ptr);
-    key_feature_ptr->addConstraint(createConstraint(key_feature_ptr, key_capture_origin));
+    auto key_ctr_ptr = createConstraint(key_feature_ptr, key_frame_origin);
+    key_feature_ptr->addConstraint(key_ctr_ptr);
 
     // Fix the remaining capture
     if (capture_ptr == last_ptr_)
@@ -621,7 +625,9 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
         // modify constraint
         if (!feature_ptr->getConstraintList().empty())
         {
-            feature_ptr->getConstraintList().front()->remove();
+            auto ctr = feature_ptr->getConstraintList().front();
+            feature_ptr->getConstraintList().remove(ctr);
+//            feature_ptr->getConstraintList().front()->remove(); //
             feature_ptr->addConstraint(createConstraint(feature_ptr, _keyframe_ptr));
         }
     }
