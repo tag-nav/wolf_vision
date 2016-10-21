@@ -130,16 +130,17 @@ void ProcessorTrackerLandmark::establishConstraints()
     //std::cout << "ProcessorTrackerLandmark::establishConstraints" << std::endl;
     //std::cout << "\tfeatures:" << last_ptr_->getFeatureList().size() << std::endl;
     //std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
-    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
     for (auto last_feature : last_ptr_->getFeatureList())
     {
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+        auto lmk = matches_landmark_from_last_[last_feature]->landmark_ptr_;
         ConstraintBasePtr ctr_ptr = createConstraint(last_feature,
-                                                     matches_landmark_from_last_[last_feature]->landmark_ptr_);
-        if (ctr_ptr != nullptr)
+                                                     lmk);
+        if (ctr_ptr != nullptr) // constraint links
         {
             std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
             last_feature->addConstraint(ctr_ptr);
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+            lmk->addConstrainedBy(ctr_ptr);
             std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         }
         std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
