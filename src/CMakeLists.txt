@@ -272,11 +272,11 @@ IF (laser_scan_utils_FOUND)
         processor_tracker_feature_corner.h
         )
     SET(SRCS ${SRCS}
-#        capture_laser_2D.cpp
-#        sensor_laser_2D.cpp
-#        processor_tracker_landmark_corner.cpp
-#        processor_tracker_landmark_polyline.cpp
-#        processor_tracker_feature_corner.cpp
+        capture_laser_2D.cpp
+        sensor_laser_2D.cpp
+        processor_tracker_landmark_corner.cpp
+        processor_tracker_landmark_polyline.cpp
+        processor_tracker_feature_corner.cpp
         )
 ENDIF(laser_scan_utils_FOUND)
 

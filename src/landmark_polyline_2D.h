@@ -30,6 +30,8 @@ typedef enum
 
 class LandmarkPolyline2D : public LandmarkBase
 {
+    public:
+        typedef std::shared_ptr<LandmarkPolyline2D> Ptr;
     protected:
         std::deque<StateBlockPtr> point_state_ptr_vector_; ///< polyline points state blocks
         int first_id_;

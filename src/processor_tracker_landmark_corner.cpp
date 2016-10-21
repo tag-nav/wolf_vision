@@ -7,7 +7,7 @@ namespace wolf
 void ProcessorTrackerLandmarkCorner::preProcess()
 {
     // extract corners of incoming
-    extractCorners((CaptureLaser2D*)((incoming_ptr_)), corners_incoming_);
+    extractCorners(std::static_pointer_cast<CaptureLaser2D>(incoming_ptr_), corners_incoming_);
 
     // compute transformations
     t_world_robot_ = getProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
@@ -65,7 +65,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         for (auto landmark_it = not_matched_landmarks.begin(); landmark_it != not_matched_landmarks.end(); landmark_it++)
         {
             if ((*landmark_it)->getTypeId() == LANDMARK_CORNER &&
-                fabs(pi2pi(((FeatureCorner2D*)(*feature_it))->getAperture() - (*landmark_it)->getDescriptor(0))) < aperture_error_th_)
+                fabs(pi2pi((std::static_pointer_cast<FeatureCorner2D>(*feature_it))->getAperture() - (*landmark_it)->getDescriptor(0))) < aperture_error_th_)
             {
                 dm2 = computeSquaredMahalanobisDistances((*feature_it), expected_features[*landmark_it],
                                                          expected_features_covs[*landmark_it],
@@ -84,7 +84,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         {
             //std::cout << "closest landmark: " << (*closest_landmark)->id() << std::endl;
             // match
-            matches_landmark_from_incoming_[*feature_it] = new LandmarkMatch({*closest_landmark, closest_dm2});
+            matches_landmark_from_incoming_[*feature_it] = std::make_shared<LandmarkMatch>(*closest_landmark, closest_dm2);
             // erase from the landmarks to be found
             not_matched_landmarks.erase(closest_landmark);
             // move corner feature to output list
@@ -222,13 +222,13 @@ bool ProcessorTrackerLandmarkCorner::voteForKeyFrame()
     return false;
 }
 
-void ProcessorTrackerLandmarkCorner::extractCorners(CaptureLaser2D* _capture_laser_ptr,
+void ProcessorTrackerLandmarkCorner::extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr,
                                                     FeatureBaseList& _corner_list)
 {
     // TODO: sort corners by bearing
     std::list<laserscanutils::CornerPoint> corners;
 
-    corner_finder_.findCorners(_capture_laser_ptr->getScan(), ((SensorLaser2D*)getSensorPtr())->getScanParams(), line_finder_, corners);
+    corner_finder_.findCorners(_capture_laser_ptr->getScan(), (std::static_pointer_cast<SensorLaser2D>(getSensorPtr()))->getScanParams(), line_finder_, corners);
 
     Eigen::Vector4s measurement;
     for (auto corner : corners)
@@ -237,7 +237,7 @@ void ProcessorTrackerLandmarkCorner::extractCorners(CaptureLaser2D* _capture_las
         measurement(2)=corner.orientation_;
         measurement(3)=corner.aperture_;
 
-        _corner_list.push_back(new FeatureCorner2D(measurement, corner.covariance_));
+        _corner_list.push_back(std::make_shared<FeatureCorner2D>(measurement, corner.covariance_));
 
         //std::cout << "new corner detected: " << measurement.head<3>().transpose() << std::endl;
     }
@@ -289,7 +289,7 @@ void ProcessorTrackerLandmarkCorner::expectedFeature(LandmarkBasePtr _landmark_p
     // ------------ expected feature measurement
     expected_feature_.head<2>() = R_sensor_world_.topLeftCorner<2,2>() * (_landmark_ptr->getPPtr()->getVector() - t_world_sensor_.head<2>());
     expected_feature_(2) = _landmark_ptr->getOPtr()->getVector()(0) - t_world_sensor_(2);
-    expected_feature_(3) = ((LandmarkCorner2D*)((_landmark_ptr)))->getAperture();
+    expected_feature_(3) = (std::static_pointer_cast<LandmarkCorner2D>(_landmark_ptr))->getAperture();
     //std::cout << "Expected feature pose: " << expected_feature_.head<3>().transpose() << std::endl;
 
     // ------------ expected feature covariance
@@ -358,8 +358,8 @@ Eigen::VectorXs ProcessorTrackerLandmarkCorner::computeSquaredMahalanobisDistanc
 
 ProcessorBasePtr ProcessorTrackerLandmarkCorner::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
-    ProcessorParamsLaser* params = (ProcessorParamsLaser*)_params;
-    ProcessorTrackerLandmarkCorner* prc_ptr = new ProcessorTrackerLandmarkCorner(params->line_finder_params_, params->new_corners_th, params->loop_frames_th);
+    ProcessorParamsLaser::Ptr params = std::static_pointer_cast<ProcessorParamsLaser>(_params);
+    std::shared_ptr<ProcessorTrackerLandmarkCorner> prc_ptr = std::make_shared<ProcessorTrackerLandmarkCorner>(params->line_finder_params_, params->new_corners_th, params->loop_frames_th);
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

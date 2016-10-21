@@ -60,8 +60,8 @@ SensorBasePtr SensorLaser2D::create(const std::string& _unique_name, const Eigen
     StateBlockPtr pos_ptr = new StateBlock(_extrinsics_po.head(2), true);
     StateBlockPtr ori_ptr = new StateBlock(_extrinsics_po.tail(1), true);
     // cast intrinsics into derived type
-    IntrinsicsLaser2D* params = (IntrinsicsLaser2D*)(_intrinsics);
-    SensorLaser2D* sen = new SensorLaser2D(pos_ptr, ori_ptr, params->scan_params);
+    IntrinsicsLaser2D::Ptr params = std::static_pointer_cast<IntrinsicsLaser2D>(_intrinsics);
+    SensorLaser2D::Ptr sen = std::make_shared<SensorLaser2D>(pos_ptr, ori_ptr, params->scan_params);
     sen->setName(_unique_name);
     return sen;
 }

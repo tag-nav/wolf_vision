@@ -15,6 +15,9 @@ namespace wolf
 
 class FeaturePolyline2D : public FeatureBase
 {
+    public:
+        typedef std::shared_ptr<FeaturePolyline2D> Ptr;
+
     protected:
         Eigen::MatrixXs points_;
         Eigen::MatrixXs points_cov_;

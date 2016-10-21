@@ -36,6 +36,8 @@ const Scalar min_features_ratio_th_ = 0.5;
 
 struct ProcessorParamsLaser : public ProcessorParamsBase
 {
+        typedef std::shared_ptr<ProcessorParamsLaser> Ptr;
+
         laserscanutils::LineFinderIterativeParams line_finder_params_;
         //TODO: add corner_finder_params
         unsigned int new_corners_th;
@@ -97,8 +99,8 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
             ProcessorTrackerLandmark::advance();
             while (!corners_last_.empty())
             {
-                corners_last_.front()->destruct();
-                corners_last_.pop_front();
+                corners_last_.front()->remove();
+                corners_last_.pop_front(); // TODO check if this is needed
             }
             corners_last_ = std::move(corners_incoming_);
         }
@@ -160,7 +162,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 
     private:
 
-        void extractCorners(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _corner_list);
+        void extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr, FeatureBaseList& _corner_list);
 
         void expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::Vector4s& expected_feature_,
                              Eigen::Matrix3s& expected_feature_cov_);
@@ -184,13 +186,13 @@ inline ProcessorTrackerLandmarkCorner::~ProcessorTrackerLandmarkCorner()
 {
     while (!corners_last_.empty())
     {
-        corners_last_.front()->destruct();
-        corners_last_.pop_front();
+        corners_last_.front()->remove();
+        corners_last_.pop_front(); // TODO check if this is needed
     }
     while (!corners_incoming_.empty())
     {
-        corners_incoming_.front()->destruct();
-        corners_incoming_.pop_front();
+        corners_incoming_.front()->remove();
+        corners_incoming_.pop_front(); // TODO check if this is needed
     }
 }
 
@@ -208,15 +210,16 @@ inline LandmarkBasePtr ProcessorTrackerLandmarkCorner::createLandmark(FeatureBas
     // compute feature global pose
     Eigen::Vector3s feature_global_pose = R_world_sensor_ * _feature_ptr->getMeasurement().head<3>() + t_world_sensor_;
     // Create new landmark
-    return new LandmarkCorner2D(new StateBlock(feature_global_pose.head(2)),
-                                new StateBlock(feature_global_pose.tail(1)), _feature_ptr->getMeasurement()(3));
+    return std::make_shared<LandmarkCorner2D>(new StateBlock(feature_global_pose.head(2)),
+                                              new StateBlock(feature_global_pose.tail(1)),
+                                              _feature_ptr->getMeasurement()(3));
 }
 
 inline ConstraintBasePtr ProcessorTrackerLandmarkCorner::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
     assert(_feature_ptr != nullptr && _landmark_ptr != nullptr && "ProcessorTrackerLandmarkCorner::createConstraint: feature and landmark pointers can not be nullptr!");
 
-    return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*)((_landmark_ptr)));
+    return std::make_shared<ConstraintCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>((_landmark_ptr)));
 }
 
 } // namespace wolf

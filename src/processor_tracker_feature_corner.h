@@ -126,7 +126,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
 
     private:
 
-        void extractCorners(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _corner_list);
+        void extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr, FeatureBaseList& _corner_list);
 
 };
 
@@ -140,9 +140,9 @@ inline ProcessorTrackerFeatureCorner::ProcessorTrackerFeatureCorner(const lasers
 inline ProcessorTrackerFeatureCorner::~ProcessorTrackerFeatureCorner()
 {
     for (auto corner : corners_last_)
-        corner->destruct();
+        corner->remove();
     for (auto corner : corners_incoming_)
-        corner->destruct();
+        corner->remove();
 }
 
 inline void ProcessorTrackerFeatureCorner::postProcess()

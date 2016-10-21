@@ -13,7 +13,8 @@ namespace wolf {
 //class LandmarkCorner2D
 class LandmarkCorner2D : public LandmarkBase
 {
-    protected:
+    public:
+        typedef std::shared_ptr<LandmarkCorner2D> Ptr;
         
     public:
         /** \brief Constructor with type, time stamp and the position state pointer
