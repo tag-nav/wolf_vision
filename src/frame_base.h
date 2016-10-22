@@ -251,7 +251,7 @@ inline void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
 
 inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
 {
-    for (CaptureBasePtr c_ptr : getCaptureList())
+    for (auto c_ptr : getCaptureList())
         c_ptr->getConstraintList(_ctr_list);
 }
 

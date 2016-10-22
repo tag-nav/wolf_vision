@@ -94,8 +94,9 @@ ConstraintBaseList& FeatureBase::getConstraintList()
 
 void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
-	for(ConstraintBasePtr c_ptr : constraint_list_)
-		_ctr_list.push_back(c_ptr);
+    _ctr_list.insert(_ctr_list.end(), constraint_list_.begin(), constraint_list_.end());
+//	for(ConstraintBasePtr c_ptr : constraint_list_)
+//		_ctr_list.push_back(c_ptr);
 }
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)

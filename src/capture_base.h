@@ -137,7 +137,7 @@ inline FeatureBaseList& CaptureBase::getFeatureList()
 
 inline void CaptureBase::getConstraintList(ConstraintBaseList& _ctr_list)
 {
-    for (FeatureBasePtr f_ptr : getFeatureList())
+    for (auto f_ptr : getFeatureList())
         f_ptr->getConstraintList(_ctr_list);
 }
 
