@@ -24,7 +24,6 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, S
                 
 LandmarkBase::~LandmarkBase()
 {
-//    remove();
     std::cout << "destructed   -L" << id() << std::endl;
 
     // Remove State Blocks
