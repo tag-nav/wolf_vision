@@ -169,10 +169,10 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
     //std::cout << "-----End of process():" << std::endl;
 }
 
-bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol)
+bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
-    assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame allways");
-    Scalar time_tol = std::min(time_tolerance_, _time_tol);
+    assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame always");
+    Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
 
     // Nothing to do if:
     //   - there is no last
