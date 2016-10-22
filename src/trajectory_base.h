@@ -37,8 +37,6 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
 
         // Frames
         FrameBasePtr addFrame(FrameBasePtr _frame_ptr);
-//        void removeFrame(const FrameBaseIter& _frame_iter);
-//        void removeFrame(const FrameBasePtr _frame_ptr);
         FrameBaseList& getFrameList();
         FrameBasePtr getLastFramePtr();
         FrameBasePtr getLastKeyFramePtr();
@@ -67,17 +65,6 @@ inline void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _plac
         frame_list_.insert(_place, _frm_ptr);
     }
 }
-
-//inline void TrajectoryBase::removeFrame(const FrameBaseIter& _frame_iter)
-//{
-//    frame_list_.erase(_frame_iter);
-////    delete * _frame_iter;
-//}
-//inline void TrajectoryBase::removeFrame(const FrameBasePtr _frame_ptr)
-//{
-//    frame_list_.remove(_frame_ptr);
-////    delete _frame_ptr;
-//}
 
 inline FrameBaseList& TrajectoryBase::getFrameList()
 {

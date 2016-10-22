@@ -28,8 +28,6 @@ class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
         
         virtual LandmarkBasePtr addLandmark(LandmarkBasePtr _landmark_ptr);
         virtual void addLandmarkList(LandmarkBaseList _landmark_list);
-//        void removeLandmark(const LandmarkBaseIter& _landmark_iter);
-//        void removeLandmark(LandmarkBasePtr _landmark_ptr);
         LandmarkBaseList& getLandmarkList();
         
         void load(const std::string& _map_file_yaml);

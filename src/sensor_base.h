@@ -90,7 +90,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         SensorType typeId();
 
         ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
-//        void removeProcessor(ProcessorBasePtr _prc_ptr);
 
         ProcessorBaseList& getProcessorList();
 
@@ -145,12 +144,6 @@ inline wolf::ProblemPtr SensorBase::getProblem()
     }
     return prb;
 }
-
-//inline void SensorBase::removeProcessor(ProcessorBasePtr _prc_ptr)
-//{
-//    processor_list_.remove(_prc_ptr);
-////    delete _prc_ptr;
-//}
 
 inline unsigned int SensorBase::id()
 {

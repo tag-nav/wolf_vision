@@ -78,7 +78,6 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         void setCapturePtr(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
 
         ConstraintBasePtr addConstraint(ConstraintBasePtr _co_ptr);
-//        void removeConstraint(ConstraintBasePtr _co_ptr);
         ConstraintBaseList& getConstraintList();
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
@@ -132,12 +131,6 @@ inline unsigned int FeatureBase::id()
 {
     return feature_id_;
 }
-
-//inline void FeatureBase::removeConstraint(ConstraintBasePtr _co_ptr)
-//{
-//    constraint_list_.remove(_co_ptr);
-////    delete _co_ptr;
-//}
 
 inline CaptureBasePtr FeatureBase::getCapturePtr() const
 {
