@@ -170,9 +170,12 @@ namespace wolf {
 
 inline void ProcessorTrackerFeature::establishConstraints()
 {
-    //    std::cout << "ProcessorTrackerFeature::establishConstraints() " << std::endl;
     for (auto match : matches_origin_from_last_)
-        match.first->addConstraint(createConstraint(match.first, match.second.feature_ptr_));
+    {
+        auto ctr = createConstraint(match.first, match.second.feature_ptr_);
+        match.first->addConstraint(ctr);
+        match.second.feature_ptr_->addConstrainedBy(ctr);
+    }
 }
 
 inline void ProcessorTrackerFeature::advance()
