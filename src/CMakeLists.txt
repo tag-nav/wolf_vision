@@ -196,7 +196,6 @@ SET(SRCS
     capture_void.cpp
     constraint_base.cpp
     constraint_analytic.cpp
-    # constraint_odom_3D.cpp // nothing in the cpp
     feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
