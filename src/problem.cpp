@@ -121,6 +121,53 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     }
 }
 
+wolf::SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
+{
+    auto sen_it = std::find_if(getHardwarePtr()->getSensorList().begin(),
+                               getHardwarePtr()->getSensorList().end(),
+                               [&](SensorBasePtr sb)
+                               {
+                                   return sb->getName() == _sensor_name;
+                               }); // lambda function for the find_if
+
+    if (sen_it == getHardwarePtr()->getSensorList().end())
+        return nullptr;
+
+    return (*sen_it);
+}
+
+ProcessorMotion::Ptr Problem::setProcessorMotion(const std::string& _processor_name)
+{
+    for (auto sen : getHardwarePtr()->getSensorList()) // loop all sensors
+    {
+        auto prc_it = std::find_if(sen->getProcessorList().begin(), // find processor by its name
+                                   sen->getProcessorList().end(),
+                                   [&](ProcessorBasePtr prc)
+                                   {
+                                       return prc->getName() == _processor_name;
+                                   }); // lambda function for the find_if
+
+        if (prc_it != sen->getProcessorList().end())  // found something!
+        {
+            if ((*prc_it)->isMotion()) // found, and it's motion!
+            {
+                std::cout << "Found processor '" << _processor_name << "', of type Motion, and set as the main motion processor." << std::endl;
+                processor_motion_ptr_ = std::static_pointer_cast<ProcessorMotion>(*prc_it);
+                return processor_motion_ptr_;
+            }
+            else // found, but it's not motion!
+            {
+                std::cout << "Found processor '" << _processor_name << "', but not of type Motion!" << std::endl;
+                return nullptr;
+            }
+        }
+    }
+    // nothing found!
+    std::cout << "Processor '" << _processor_name << "' not found!" << std::endl;
+    return nullptr;
+}
+
+
 void Problem::setProcessorMotion(ProcessorMotion::Ptr _processor_motion_ptr)
 {
     processor_motion_ptr_ = _processor_motion_ptr;
@@ -477,18 +524,7 @@ StateBlockList& Problem::getStateBlockList()
     return state_block_list_;
 }
 
-wolf::SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
-{
-    auto sen_it = std::find_if(getHardwarePtr()->getSensorList().begin(),
-                               getHardwarePtr()->getSensorList().end(), [&](SensorBasePtr sb)
-                               {
-                                   return sb->getName() == _sensor_name;
-                               }); // lambda function for the find_if
-    if (sen_it == getHardwarePtr()->getSensorList().end())
-        return nullptr;
 
-    return (*sen_it);
-}
 
 void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov, const TimeStamp& _ts)
 {

@@ -133,7 +133,7 @@ class Problem : public std::enable_shared_from_this<Problem>
          * Set the processor motion. It will provide the state.
          */
         void setProcessorMotion(std::shared_ptr<ProcessorMotion> _processor_motion_ptr);
-        void setProcessorMotion(const std::string& _unique_processor_name);
+        std::shared_ptr<ProcessorMotion> setProcessorMotion(const std::string& _unique_processor_name);
         std::shared_ptr<ProcessorMotion> getProcessorMotionPtr();
 
 
