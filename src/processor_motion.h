@@ -629,7 +629,7 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
         {
             auto ctr = feature_ptr->getConstraintList().front();
             feature_ptr->getConstraintList().remove(ctr);
-//            feature_ptr->getConstraintList().front()->remove(); //
+//            feature_ptr->getConstraintList().front()->remove(); // XXX What happens here?
             feature_ptr->addConstraint(createConstraint(feature_ptr, _keyframe_ptr));
         }
     }
