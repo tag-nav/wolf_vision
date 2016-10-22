@@ -449,16 +449,20 @@ inline void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         key_frame_ptr->setTimeStamp(getBufferPtr()->get().back().ts_);
         key_frame_ptr->setKey();
 
-        // create motion constraint and add it to the new keyframe
+        // create motion feature and add it to the capture
         FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(FEATURE_MOTION, "MOTION",
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                        key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
                                                        Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_)*1e-8 );
-
-
         key_capture_ptr->addFeature(key_feature_ptr);
-        key_feature_ptr->addConstraint(createConstraint(key_feature_ptr, origin_ptr_->getFramePtr()));
+
+        // create motion constraint and link it to parent feature and other frame (which is origin)
+        auto ctr = createConstraint(key_feature_ptr, origin_ptr_->getFramePtr());
+        key_feature_ptr->addConstraint(ctr);
+        ctr->setFeaturePtr(key_feature_ptr);
+        ctr->setFrameOtherPtr(origin_ptr_->getFramePtr());
+        origin_ptr_->getFramePtr()->addConstrainedBy(ctr);
 
         // new last capture
         last_ptr_ = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
@@ -601,15 +605,21 @@ inline bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const 
     //xPlusDelta(key_capture_origin->getState(), key_capture_ptr->getBufferPtr()->get().back().delta_integr_, interpolated_state);
     //std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
 
-    // create motion constraint and add it to the new keyframe
+    // create motion feature and add it to the capture
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(FEATURE_MOTION, "MOTION",
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_,
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_.determinant() > 0 ?
                                                    key_capture_ptr->getBufferPtr()->get().back().delta_integr_cov_ :
                                                    Eigen::MatrixXs::Identity(delta_size_, delta_size_)*1e-8);
     key_capture_ptr->addFeature(key_feature_ptr);
+
+    // create motion constraint and add it to the feature, and link it to the other frame (origin)
     auto key_ctr_ptr = createConstraint(key_feature_ptr, key_frame_origin);
     key_feature_ptr->addConstraint(key_ctr_ptr);
+    key_ctr_ptr->setFeaturePtr(key_feature_ptr);
+    key_ctr_ptr->setFrameOtherPtr(key_frame_origin);
+    key_frame_origin->addConstrainedBy(key_ctr_ptr);
+
 
     // Fix the remaining capture
     if (capture_ptr == last_ptr_)

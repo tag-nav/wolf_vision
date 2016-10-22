@@ -87,6 +87,7 @@ class ProcessorIMU : public ProcessorMotion{
 /////////////////////////////////////////////////////////
 
 // Wolf
+#include "constraint_imu.h"
 #include "state_block.h"
 #include "rotations.h"
 
@@ -349,7 +350,10 @@ inline void ProcessorIMU::resetDerived()
 inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
     // TODO: return new ConstraintIMU(_feature_motion, _frame_origin);
-    return nullptr;
+    auto ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
+    auto frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
+    auto ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu);
+    return ctr_imu;
 }
 
 inline void ProcessorIMU::remapPVQ(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out)

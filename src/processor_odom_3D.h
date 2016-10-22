@@ -204,9 +204,9 @@ inline ConstraintBasePtr ProcessorOdom3D::createConstraint(FeatureBasePtr _featu
                                                            FrameBasePtr _frame_origin)
 {
     ConstraintOdom3D::Ptr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _frame_origin);
-    ctr_odom->setFeaturePtr(_feature_motion);
-    ctr_odom->setFrameOtherPtr(_frame_origin);
-    _frame_origin->addConstrainedBy(ctr_odom);
+//    ctr_odom->setFeaturePtr(_feature_motion);
+//    ctr_odom->setFrameOtherPtr(_frame_origin);
+//    _frame_origin->addConstrainedBy(ctr_odom);
     return ctr_odom;
 }
 

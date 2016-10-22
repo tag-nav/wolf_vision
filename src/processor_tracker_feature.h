@@ -173,6 +173,7 @@ inline void ProcessorTrackerFeature::establishConstraints()
     for (auto match : matches_origin_from_last_)
     {
         auto ctr = createConstraint(match.first, match.second.feature_ptr_);
+        ctr->setFeatureOtherPtr(match.second.feature_ptr_);
         match.first->addConstraint(ctr);
         match.second.feature_ptr_->addConstrainedBy(ctr);
     }
