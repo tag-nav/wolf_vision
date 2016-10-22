@@ -52,9 +52,7 @@ ProblemPtr Problem::create(FrameStructure _frame_structure)
 
 Problem::~Problem()
 {
-//    hardware_ptr_->remove();
-//    trajectory_ptr_->remove();
-//    map_ptr_->remove();
+    std::cout << "destructed  P" << std::endl;
 }
 
 void Problem::addSensor(SensorBasePtr _sen_ptr)
