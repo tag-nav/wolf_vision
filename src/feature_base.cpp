@@ -69,23 +69,6 @@ void FeatureBase::remove()
     }
 }
 
-//void FeatureBase::destruct()
-//{
-//    if (!is_removing_)
-//    {
-//        if (capture_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-//        {
-//            //std::cout << "upper node is not WolfProblem " << std::endl;
-//            capture_ptr_->removeFeature(this);
-//        }
-//        else
-//        {
-//            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
-//            delete this;
-//        }
-//    }
-//}
-
 ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
 {
     constraint_list_.push_back(_co_ptr);

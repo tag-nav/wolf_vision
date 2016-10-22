@@ -213,23 +213,6 @@ inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
     return descriptor_;
 }
 
-//inline void LandmarkBase::destruct()
-//{
-//    if (!is_removing_)
-//    {
-//        if (map_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-//        {
-//            //std::cout << "upper node is not WolfProblem " << std::endl;
-//            map_ptr_->removeLandmark(shared_from_this());
-//        }
-//        else
-//        {
-//            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
-//            //            delete this;
-//        }
-//    }
-//}
-
 inline const LandmarkType LandmarkBase::getTypeId() const
 {
     return type_id_;

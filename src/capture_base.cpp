@@ -25,17 +25,6 @@ CaptureBase::~CaptureBase()
     std::cout << "destructed     -C" << id() << std::endl;
 }
 
-//void CaptureBase::destruct()
-//{
-//    if (!is_removing_)
-//    {
-//        if (frame_ptr_ != nullptr)
-//            frame_ptr_->removeCapture(this);
-//        else
-//            delete this;
-//    }
-//}
-
 void CaptureBase::process()
 {
     // Call all processors assigned to the sensor that captured this data

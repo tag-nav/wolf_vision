@@ -200,17 +200,6 @@ inline Eigen::VectorXs SensorBase::getNoiseStd()
     return noise_std_;
 }
 
-//inline void SensorBase::destruct()
-//{
-//    if (!is_removing_)
-//    {
-//        if (hardware_ptr_ != nullptr)
-//            hardware_ptr_->removeSensor(shared_from_this());
-//        else
-//            delete this;
-//    }
-//}
-
 inline Eigen::MatrixXs SensorBase::getNoiseCov()
 {
     return noise_cov_;

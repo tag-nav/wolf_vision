@@ -264,17 +264,6 @@ FrameBasePtr FrameBase::getNextFrame() const
     return nullptr;
 }
 
-//void FrameBase::destruct()
-//{
-//    if (!is_removing_)
-//    {
-//        if (trajectory_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-//            trajectory_ptr_->removeFrame(this);
-//        else
-//            delete this;
-//    }
-//}
-
 void FrameBase::setStatus(StateStatus _st)
 {
     // TODO: Separate the three fixes and unfixes to the wolfproblem lists

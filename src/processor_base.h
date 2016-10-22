@@ -97,24 +97,6 @@ inline wolf::ProblemPtr ProcessorBase::getProblem()
     return prb;
 }
 
-//inline void ProcessorBase::destruct()
-//{
-//    if (!is_removing_)
-//    {
-//        if (sensor_ptr_ != nullptr) // && !up_node_ptr_->isTop())
-//        {
-//            //std::cout << "upper node is not WolfProblem " << std::endl;
-//            sensor_ptr_->removeProcessor(this);
-//        }
-//        else
-//        {
-//            //std::cout << "upper node is WolfProblem or nullptr" << std::endl;
-//            delete this;
-//        }
-//    }
-//}
-
-
 inline bool ProcessorBase::isMotion()
 {
     return false;

@@ -57,11 +57,6 @@ Problem::~Problem()
 //    map_ptr_->remove();
 }
 
-//void Problem::destruct()
-//{
-//    delete this;
-//}
-
 void Problem::addSensor(SensorBasePtr _sen_ptr)
 {
     getHardwarePtr()->addSensor(_sen_ptr);
