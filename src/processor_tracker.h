@@ -9,7 +9,7 @@
 #define SRC_PROCESSOR_TRACKER_H_
 
 #include "processor_base.h"
-#include "capture_base.h"
+#include "capture_motion.h"
 
 namespace wolf {
 
@@ -89,7 +89,9 @@ class ProcessorTracker : public ProcessorBase
 
         virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
 
+        virtual CaptureBasePtr getOriginPtr();
         virtual CaptureBasePtr getLastPtr();
+        virtual CaptureBasePtr getIncomingPtr();
 
     protected:
         /** Pre-process incoming Capture
@@ -218,9 +220,19 @@ inline void ProcessorTracker::addNewFeatureIncoming(FeatureBasePtr _feature_ptr)
     new_features_incoming_.push_back(_feature_ptr);
 }
 
+inline CaptureBasePtr ProcessorTracker::getOriginPtr()
+{
+    return origin_ptr_;
+}
+
 inline CaptureBasePtr ProcessorTracker::getLastPtr()
 {
     return last_ptr_;
+}
+
+inline CaptureBasePtr ProcessorTracker::getIncomingPtr()
+{
+    return incoming_ptr_;
 }
 
 } // namespace wolf

@@ -319,6 +319,12 @@ class ProcessorMotion : public ProcessorBase
 
         Motion motionZero(const TimeStamp& _ts);
 
+    public:
+        virtual CaptureBasePtr getOriginPtr();
+        virtual CaptureMotion::Ptr getLastPtr();
+        virtual CaptureMotion::Ptr getIncomingPtr();
+
+
     protected:
         // Attributes
         Size x_size_;           ///< The size of the state vector
@@ -789,6 +795,22 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
 //             Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_)
              });
 }
+
+inline CaptureBasePtr ProcessorMotion::getOriginPtr()
+{
+    return origin_ptr_;
+}
+
+inline CaptureMotion::Ptr ProcessorMotion::getLastPtr()
+{
+    return last_ptr_;
+}
+
+inline CaptureMotion::Ptr ProcessorMotion::getIncomingPtr()
+{
+    return incoming_ptr_;
+}
+
 
 } // namespace wolf
 
