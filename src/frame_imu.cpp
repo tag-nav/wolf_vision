@@ -51,7 +51,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
           delete gyro_bias_ptr_;
           gyro_bias_ptr_ = nullptr;
       }
-      std::cout << "destructed    F-IMU" << id() << std::endl;
+      std::cout << "destructed   -F-IMU" << id() << std::endl;
   }
 
   void FrameIMU::registerNewStateBlocks()

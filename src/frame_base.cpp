@@ -71,7 +71,7 @@ FrameBase::~FrameBase()
     }
 
     if (isKey())
-        std::cout << "destructed   KF" << id() << std::endl;
+        std::cout << "destructed  -KF" << id() << std::endl;
     else
         std::cout << "destructed   -F" << id() << std::endl;
 }

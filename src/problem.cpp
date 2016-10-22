@@ -52,7 +52,7 @@ ProblemPtr Problem::create(FrameStructure _frame_structure)
 
 Problem::~Problem()
 {
-    std::cout << "destructed  P" << std::endl;
+    std::cout << "destructed -P" << std::endl;
 }
 
 void Problem::addSensor(SensorBasePtr _sen_ptr)
@@ -527,7 +527,8 @@ void Problem::saveMap(const std::string& _filename_dot_yaml, const std::string& 
 
 void Problem::print()
 {
-    std::cout << "P: wolf tree status:" << std::endl;
+    std::cout << std::endl;
+    std::cout << "P: wolf tree status ---------------------" << std::endl;
     std::cout << "H" << std::endl;
     for (auto S : getHardwarePtr()->getSensorList() )
     {
@@ -588,12 +589,15 @@ void Problem::print()
             std::cout << "c" << cby->id() << ",\t";
         std::cout << std::endl;
     }
+    std::cout << "-----------------------------------------" << std::endl;
+    std::cout << std::endl;
 }
 
 bool Problem::check()
 {
     bool is_consistent = true;
-    std::cout << std::endl << "Wolf tree integrity -----------------" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Wolf tree integrity ---------------------" << std::endl;
     auto P_raw = this;
     std::cout << "P @ " << P_raw << std::endl;
     auto H = hardware_ptr_;
@@ -688,8 +692,8 @@ bool Problem::check()
         }
     }
 
-    std::cout << std::endl;
-    std::cout << (is_consistent ? "------ Wolf tree OK" : "------ Wolf tree NOK") << std::endl;
+//    std::cout << std::endl;
+    std::cout << "--------------------------- Wolf tree " << (is_consistent ? " OK" : "NOK") << std::endl;
     std::cout << std::endl;
 
 
