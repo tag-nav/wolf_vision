@@ -5,7 +5,11 @@
  *      Author: jvallve
  */
 
+// wolf
 #include "processor_tracker.h"
+
+// std
+#include <cmath>
 
 namespace wolf
 {
@@ -39,6 +43,8 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 {
+    using std::abs;
+
     std::cout << "-----ProcessorTracker::process():" << std::endl;
 
     incoming_ptr_ = _incoming_ptr;
