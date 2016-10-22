@@ -275,26 +275,18 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
 
 ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
-    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
-
     if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFramePtr())
     {
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         return std::shared_ptr<ConstraintBase>();
     }
     else
     {
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         assert (last_ptr_ && "bad last ptr");
         assert (_landmark_ptr && "bad lmk ptr");
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         auto current_frame = last_ptr_->getFramePtr();
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         auto landmark = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
         return std::make_shared<ConstraintAHP>(_feature_ptr, current_frame, landmark );
     }
-    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 }
 
 
