@@ -30,9 +30,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
     protected:
         unsigned int frame_id_;
-        FrameKeyType type_id_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
-        TimeStamp time_stamp_;   ///< frame time stamp
-        StateStatus status_;     ///< status of the estimation of the frame state
+        FrameKeyType type_id_;     ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
+        StateStatus status_;       ///< status of the estimation of the frame state
+        TimeStamp time_stamp_;     ///< frame time stamp
         StateBlockPtr p_ptr_;      ///< Position state block pointer
         StateBlockPtr o_ptr_;      ///< Orientation state block pointer
         StateBlockPtr v_ptr_;      ///< Linear velocity state block pointer

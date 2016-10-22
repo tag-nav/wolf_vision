@@ -52,6 +52,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         virtual ~FeatureBase();
         void remove();
 
+        // properties
         unsigned int id();
         unsigned int trackId(){return track_id_;}
         void setTrackId(unsigned int _tr_id){track_id_ = _tr_id;}
@@ -59,17 +60,19 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         void setLandmarkId(unsigned int _lmk_id){landmark_id_ = _lmk_id;}
         FeatureType getTypeId(){return type_id_;}
 
-        /** \brief Returns _ii component of measurement vector
+        // values
+        /* \brief Returns _ii component of measurement vector
          *
          * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
-         **/
+         */
         Scalar getMeasurement(unsigned int _ii) const;
+        const Eigen::VectorXs& getMeasurement() const;
         void setMeasurement(const Eigen::VectorXs& _meas);
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         const Eigen::MatrixXs& getMeasurementCovariance() const;
         const Eigen::MatrixXs& getMeasurementSquareRootInformation() const;
 
-
+        // wolf tree access
         ProblemPtr getProblem();
 
         FrameBasePtr getFramePtr() const;
@@ -79,14 +82,13 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 
         ConstraintBasePtr addConstraint(ConstraintBasePtr _co_ptr);
         ConstraintBaseList& getConstraintList();
-        void getConstraintList(ConstraintBaseList & _ctr_list);
 
-        const Eigen::VectorXs& getMeasurement() const;
-        
         virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
 
+        // all constraints
+        void getConstraintList(ConstraintBaseList & _ctr_list);
 };
 
 }

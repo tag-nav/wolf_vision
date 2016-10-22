@@ -14,8 +14,8 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
             trajectory_ptr_(),
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
-            time_stamp_(_ts),
 			status_(ST_ESTIMATED),
+            time_stamp_(_ts),
 			p_ptr_(_p_ptr),
             o_ptr_(_o_ptr),
             v_ptr_(_v_ptr)
@@ -32,8 +32,8 @@ FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockP
             trajectory_ptr_(),
             frame_id_(++frame_id_count_),
             type_id_(_tp),
-            time_stamp_(_ts),
 			status_(ST_ESTIMATED),
+            time_stamp_(_ts),
 			p_ptr_(_p_ptr),
             o_ptr_(_o_ptr),
             v_ptr_(_v_ptr)

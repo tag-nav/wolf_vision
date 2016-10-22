@@ -86,21 +86,16 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void remove();
 
         unsigned int id();
-
         SensorType typeId();
 
         ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
-
         ProcessorBaseList& getProcessorList();
 
         StateBlockPtr getPPtr() const;
-
         StateBlockPtr getOPtr() const;
-
         StateBlockPtr getIntrinsicPtr() const;
 
         void fix();
-
         void unfix();
 
         /** \brief Adds all stateBlocks of the sensor to the wolfProblem list of new stateBlocks
@@ -113,9 +108,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         bool isExtrinsicDynamic();
 
         void setNoise(const Eigen::VectorXs & _noise_std);
-
         Eigen::VectorXs getNoiseStd();
-
         Eigen::MatrixXs getNoiseCov();
 
         ProblemPtr getProblem();
