@@ -56,32 +56,29 @@ FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockP
 FrameBase::~FrameBase()
 {
     // Remove Frame State Blocks
-    if (getPPtr() != nullptr)
-    {
-        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-            getProblem()->removeStateBlockPtr(getPPtr());
-        delete getPPtr();
-        setPPtr(nullptr);
-    }
-    if (getOPtr() != nullptr)
-    {
-        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-            getProblem()->removeStateBlockPtr(getOPtr());
-        delete getOPtr();
-        setOPtr(nullptr);
-    }
-    if (getVPtr() != nullptr)
-    {
-        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-            getProblem()->removeStateBlockPtr(getVPtr());
-        delete getVPtr();
-        setVPtr(nullptr);
-    }
+    removeStateBlocks();
 
     if (isKey())
         std::cout << "destructed  -KF" << id() << std::endl;
     else
         std::cout << "destructed   -F" << id() << std::endl;
+}
+
+void FrameBase::removeStateBlocks()
+{
+    for (unsigned int i = 0; i < state_block_vec_.size(); i++)
+    {
+        auto sbp = getStateBlockPtr(i);
+        if (sbp != nullptr)
+        {
+            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+            {
+                getProblem()->removeStateBlockPtr(sbp);
+            }
+            delete sbp;
+            setStateBlockPtr(i, nullptr);
+        }
+    }
 }
 
 void FrameBase::remove()
@@ -106,27 +103,9 @@ void FrameBase::remove()
         }
 
         // Remove Frame State Blocks
-        if (getPPtr() != nullptr)
-        {
-            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-                getProblem()->removeStateBlockPtr(getPPtr());
-            delete getPPtr();
-            setPPtr(nullptr);
-        }
-        if (getOPtr() != nullptr)
-        {
-            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-                getProblem()->removeStateBlockPtr(getOPtr());
-            delete getOPtr();
-            setOPtr(nullptr);
-        }
-        if (getVPtr() != nullptr)
-        {
-            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-                getProblem()->removeStateBlockPtr(getVPtr());
-            delete getVPtr();
-            setVPtr(nullptr);
-        }
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+
+        removeStateBlocks();
 
         std::cout << "Removed       F" << id() << std::endl;
     }
