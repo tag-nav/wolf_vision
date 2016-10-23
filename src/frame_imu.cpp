@@ -10,32 +10,26 @@ namespace wolf {
 FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr, StateQuaternion* _q_ptr,
                    StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
         FrameBase(_ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr)//,
-//        acc_bias_ptr_(_ba_ptr),
-//        gyro_bias_ptr_(_bg_ptr)
 {
-    setStateBlockPtr(3, new StateBlock(3)); // acc bias
-    setStateBlockPtr(4, new StateBlock(3)); // gyro bias
+    setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
+    setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
     setType("IMU");
 }
 
 FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr,
                    StateQuaternion* _q_ptr, StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
-        FrameBase(_tp, _ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr)//,
-//        acc_bias_ptr_(_ba_ptr),
-//        gyro_bias_ptr_(_bg_ptr)
+        FrameBase(_tp, _ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr)
 {
-    setStateBlockPtr(3, new StateBlock(3)); // acc bias
-    setStateBlockPtr(4, new StateBlock(3)); // gyro bias
+    setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
+    setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
     setType("IMU");
 }
 
 FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
-        FrameBase(_tp, _ts, new StateBlock(3), new StateQuaternion(), new StateBlock(3))//,
-//        acc_bias_ptr_(new StateBlock(3)),
-//        gyro_bias_ptr_(new StateBlock(3))
+        FrameBase(_tp, _ts, std::make_shared<StateBlock>(3), std::make_shared<StateQuaternion>(), std::make_shared<StateBlock>(3))
 {
-    setStateBlockPtr(3, new StateBlock(3)); // acc bias
-    setStateBlockPtr(4, new StateBlock(3)); // gyro bias
+    setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
+    setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
     assert(_x.size() == 16 && "Wrong vector size! Must be 16.");
     setState(_x);
 }
@@ -45,27 +39,6 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
   {
       std::cout << "destructed   -F-IMU" << id() << std::endl;
   }
-
-//  void FrameIMU::registerNewStateBlocks()
-//  {
-//      if (getProblem() != nullptr)
-//      {
-//          if (getPPtr() != nullptr)
-//              getProblem()->addStateBlock(getPPtr());
-//
-//          if (getVPtr() != nullptr)
-//              getProblem()->addStateBlock(getVPtr());
-//
-//          if (getOPtr() != nullptr)
-//              getProblem()->addStateBlock(getOPtr());
-//
-//          if (getAccBiasPtr() != nullptr)
-//              getProblem()->addStateBlock(getAccBiasPtr());
-//
-//          if (getGyroBiasPtr() != nullptr)
-//              getProblem()->addStateBlock(getGyroBiasPtr());
-//      }
-//  }
 
   void FrameIMU::setState(const Eigen::VectorXs& _st) // Order: PVQ
   {

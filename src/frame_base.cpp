@@ -115,7 +115,7 @@ void FrameBase::removeStateBlocks()
             {
                 getProblem()->removeStateBlockPtr(sbp);
             }
-            delete sbp;
+//            delete sbp;
             setStateBlockPtr(i, nullptr);
         }
     }
@@ -250,7 +250,7 @@ void FrameBase::setStatus(StateStatus _st)
 {
     // TODO: Separate the three fixes and unfixes to the wolfproblem lists
     status_ = _st;
-    // State Blocks
+    // State Blocks : only P, O, V // TODO: see what do we want to do with a global status fixed / unfixed. What about derived classes?
     if (status_ == ST_FIXED)
     {
         if (getPPtr() != nullptr)

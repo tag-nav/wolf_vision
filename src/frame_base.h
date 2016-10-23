@@ -36,7 +36,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         TimeStamp time_stamp_;     ///< frame time stamp
         
     public:
-
         /** \brief Constructor of non-key Frame with only time stamp
          *
          * Constructor with only time stamp
@@ -66,7 +65,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
 
         // Frame properties -----------------------------------------------
-
+    public:
         // KeyFrame / NonKeyFrame
         bool isKey() const;
         void setKey();
@@ -76,15 +75,14 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void unfix();
         bool isFixed() const;
 
-
-
         // Frame values ------------------------------------------------
-
+    public:
         void setTimeStamp(const TimeStamp& _ts);
         TimeStamp getTimeStamp() const;
         void getTimeStamp(TimeStamp& _ts) const;
 
         // State blocks
+    public:
         const std::vector<StateBlockPtr>& getStateBlockVec() const
         {
             return state_block_vec_;
@@ -93,6 +91,14 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         {
             return state_block_vec_;
         }
+        StateBlockPtr getPPtr() const;
+        StateBlockPtr getOPtr() const;
+        StateBlockPtr getVPtr() const;
+        void setPPtr(StateBlockPtr _p_ptr);
+        void setOPtr(StateBlockPtr _o_ptr);
+        void setVPtr(StateBlockPtr _v_ptr);
+
+    protected:
         StateBlockPtr getStateBlockPtr(unsigned int _i) const
         {
             assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
@@ -103,21 +109,15 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
             state_block_vec_[_i] = _sb_ptr;
         }
 
-        StateBlockPtr getPPtr() const;
-        StateBlockPtr getOPtr() const;
-        StateBlockPtr getVPtr() const;
-        void setPPtr(StateBlockPtr _p_ptr);
-        void setOPtr(StateBlockPtr _o_ptr);
-        void setVPtr(StateBlockPtr _v_ptr);
-
         // states
+    public:
         void setState(const Eigen::VectorXs& _st);
         virtual Eigen::VectorXs getState() const;
         void getState(Eigen::VectorXs& state) const;
 
 
         // Wolf tree access ---------------------------------------------------
-
+    public:
         ProblemPtr getProblem();
 
         TrajectoryBasePtr getTrajectoryPtr() const;

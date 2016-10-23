@@ -21,10 +21,6 @@ namespace wolf {
           typedef std::shared_ptr<FrameIMU> Ptr;
           typedef std::weak_ptr<FrameIMU> WPtr;
 
-      protected:
-//          StateBlockPtr acc_bias_ptr_;      ///< Accleration bias state block pointer
-//          StateBlockPtr gyro_bias_ptr_;      ///< Gyrometer bias state block pointer
-
       public:
           /** \brief Constructor of non-key Frame with only time stamp
            *
@@ -71,19 +67,10 @@ namespace wolf {
           Eigen::VectorXs getState() const;
           void getState(Eigen::VectorXs& state) const;
 
-          // Wolf tree access ---------------------------------------------------
-
-          /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
-           **/
-//          virtual void registerNewStateBlocks();
-
       private:
           /** \brief Sets the Frame status (see wolf.h for Frame status)
            **/
           void setStatus(StateStatus _st);
-
-//          Eigen::Vector3s acc_bias_at_preintegration_time_;
-//          Eigen::Vector3s gyro_bias_at_preintegration_time_;
   };
 
   // IMPLEMENTATION //
