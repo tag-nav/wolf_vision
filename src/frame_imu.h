@@ -10,11 +10,7 @@ class StateQuaternion;
 }
 
 //Wolf includes
-//#include "wolf.h"
 #include "frame_base.h"
-//#include "time_stamp.h"
-//#include "node_linked.h"
-//#include "node_constrained.h"
 
 
 namespace wolf {
@@ -26,8 +22,8 @@ namespace wolf {
           typedef std::weak_ptr<FrameIMU> WPtr;
 
       protected:
-          StateBlockPtr acc_bias_ptr_;      ///< Accleration bias state block pointer
-          StateBlockPtr gyro_bias_ptr_;      ///< Gyrometer bias state block pointer
+//          StateBlockPtr acc_bias_ptr_;      ///< Accleration bias state block pointer
+//          StateBlockPtr gyro_bias_ptr_;      ///< Gyrometer bias state block pointer
 
       public:
           /** \brief Constructor of non-key Frame with only time stamp
@@ -68,8 +64,8 @@ namespace wolf {
 
           // Frame values ------------------------------------------------
 
-          StateBlockPtr getBAPtr() const;
-          StateBlockPtr getBGPtr() const;
+          StateBlockPtr getAccBiasPtr() const;
+          StateBlockPtr getGyroBiasPtr() const;
 
           void setState(const Eigen::VectorXs& _st);
           Eigen::VectorXs getState() const;
@@ -92,14 +88,14 @@ namespace wolf {
 
   // IMPLEMENTATION //
 
-  inline StateBlockPtr FrameIMU::getBAPtr() const
+  inline StateBlockPtr FrameIMU::getAccBiasPtr() const
   {
-      return acc_bias_ptr_;
+      return getStateBlockPtr(3);
   }
 
-  inline StateBlockPtr FrameIMU::getBGPtr() const
+  inline StateBlockPtr FrameIMU::getGyroBiasPtr() const
   {
-      return gyro_bias_ptr_;
+      return getStateBlockPtr(4);
   }
 } // namespace wolf
 

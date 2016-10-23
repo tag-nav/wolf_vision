@@ -56,7 +56,7 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMU::Ptr _ftr_ptr, FrameIMU::Ptr _fra
                                     ConstraintStatus _status) :
         ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>(CTR_IMU, _frame_ptr, _apply_loss_function, _status,
                                                     _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),
-                                                    _frame_ptr->getBAPtr(), _frame_ptr->getBGPtr(),
+                                                    _frame_ptr->getAccBiasPtr(), _frame_ptr->getGyroBiasPtr(),
                                                     _ftr_ptr->getFramePtr()->getPPtr(),
                                                     _ftr_ptr->getFramePtr()->getOPtr(),
                                                     _ftr_ptr->getFramePtr()->getVPtr()),

@@ -9,27 +9,33 @@ namespace wolf {
 
 FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr, StateQuaternion* _q_ptr,
                    StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
-        FrameBase(_ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr),
-        acc_bias_ptr_(_ba_ptr),
-        gyro_bias_ptr_(_bg_ptr)
+        FrameBase(_ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr)//,
+//        acc_bias_ptr_(_ba_ptr),
+//        gyro_bias_ptr_(_bg_ptr)
 {
+    setStateBlockPtr(3, new StateBlock(3)); // acc bias
+    setStateBlockPtr(4, new StateBlock(3)); // gyro bias
     setType("IMU");
 }
 
 FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr,
                    StateQuaternion* _q_ptr, StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
-        FrameBase(_tp, _ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr),
-        acc_bias_ptr_(_ba_ptr),
-        gyro_bias_ptr_(_bg_ptr)
+        FrameBase(_tp, _ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr)//,
+//        acc_bias_ptr_(_ba_ptr),
+//        gyro_bias_ptr_(_bg_ptr)
 {
+    setStateBlockPtr(3, new StateBlock(3)); // acc bias
+    setStateBlockPtr(4, new StateBlock(3)); // gyro bias
     setType("IMU");
 }
 
 FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
-        FrameBase(_tp, _ts, new StateBlock(3), new StateQuaternion(), new StateBlock(3)),
-        acc_bias_ptr_(new StateBlock(3)),
-        gyro_bias_ptr_(new StateBlock(3))
+        FrameBase(_tp, _ts, new StateBlock(3), new StateQuaternion(), new StateBlock(3))//,
+//        acc_bias_ptr_(new StateBlock(3)),
+//        gyro_bias_ptr_(new StateBlock(3))
 {
+    setStateBlockPtr(3, new StateBlock(3)); // acc bias
+    setStateBlockPtr(4, new StateBlock(3)); // gyro bias
     assert(_x.size() == 16 && "Wrong vector size! Must be 16.");
     setState(_x);
 }
@@ -37,19 +43,19 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
 
   FrameIMU::~FrameIMU()
   {
-      if (acc_bias_ptr_ != nullptr)
+      if (getAccBiasPtr() != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-              getProblem()->removeStateBlockPtr(acc_bias_ptr_);
-          delete acc_bias_ptr_;
-          acc_bias_ptr_ = nullptr;
+              getProblem()->removeStateBlockPtr(getAccBiasPtr());
+          delete getAccBiasPtr();
+          setStateBlockPtr(3, nullptr);
       }
-      if (gyro_bias_ptr_ != nullptr)
+      if (getGyroBiasPtr() != nullptr)
       {
           if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-              getProblem()->removeStateBlockPtr(gyro_bias_ptr_);
-          delete gyro_bias_ptr_;
-          gyro_bias_ptr_ = nullptr;
+              getProblem()->removeStateBlockPtr(getGyroBiasPtr());
+          delete getGyroBiasPtr();
+          setStateBlockPtr(4, nullptr);
       }
       std::cout << "destructed   -F-IMU" << id() << std::endl;
   }
@@ -58,61 +64,61 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
   {
       if (getProblem() != nullptr)
       {
-          if (p_ptr_ != nullptr)
-              getProblem()->addStateBlock(p_ptr_);
+          if (getPPtr() != nullptr)
+              getProblem()->addStateBlock(getPPtr());
 
-          if (v_ptr_ != nullptr)
-              getProblem()->addStateBlock(v_ptr_);
+          if (getVPtr() != nullptr)
+              getProblem()->addStateBlock(getVPtr());
 
-          if (o_ptr_ != nullptr)
-              getProblem()->addStateBlock(o_ptr_);
+          if (getOPtr() != nullptr)
+              getProblem()->addStateBlock(getOPtr());
 
-          if (acc_bias_ptr_ != nullptr)
-              getProblem()->addStateBlock(acc_bias_ptr_);
+          if (getAccBiasPtr() != nullptr)
+              getProblem()->addStateBlock(getAccBiasPtr());
 
-          if (gyro_bias_ptr_ != nullptr)
-              getProblem()->addStateBlock(gyro_bias_ptr_);
+          if (getGyroBiasPtr() != nullptr)
+              getProblem()->addStateBlock(getGyroBiasPtr());
       }
   }
 
   void FrameIMU::setState(const Eigen::VectorXs& _st) // Order: PVQ
   {
 
-      assert(_st.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize())    +
-                            (v_ptr_==nullptr ? 0 : v_ptr_->getSize())    +
-                            (o_ptr_==nullptr ? 0 : o_ptr_->getSize())    +
-                            (acc_bias_ptr_==nullptr ? 0 : acc_bias_ptr_->getSize())  +
-                            (gyro_bias_ptr_==nullptr ? 0 : gyro_bias_ptr_->getSize())) &&
+      assert(_st.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
+                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
+                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
+                            (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
+                            (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize())) &&
                             "In FrameBase::setState wrong state size, should be 16!");
 
       unsigned int index = 0;
-      if (p_ptr_!=nullptr)
+      if (getPPtr()!=nullptr)
       {
-          p_ptr_->setVector(_st.head(p_ptr_->getSize()));
-          index += p_ptr_->getSize();
+          getPPtr()->setVector(_st.head(getPPtr()->getSize()));
+          index += getPPtr()->getSize();
 //          std::cout << "set F-pos" << std::endl;
       }
-      if (v_ptr_!=nullptr)
+      if (getVPtr()!=nullptr)
       {
-          v_ptr_->setVector(_st.segment(index, v_ptr_->getSize()));
-          index += v_ptr_->getSize();
+          getVPtr()->setVector(_st.segment(index, getVPtr()->getSize()));
+          index += getVPtr()->getSize();
 //          std::cout << "set F-vel" << std::endl;
       }
-      if (o_ptr_!=nullptr)
+      if (getOPtr()!=nullptr)
       {
-          o_ptr_->setVector(_st.segment(index, o_ptr_->getSize()));
-          index += o_ptr_->getSize();
+          getOPtr()->setVector(_st.segment(index, getOPtr()->getSize()));
+          index += getOPtr()->getSize();
 //          std::cout << "set F-ori" << std::endl;
       }
-      if (acc_bias_ptr_!=nullptr)
+      if (getAccBiasPtr()!=nullptr)
       {
-          acc_bias_ptr_->setVector(_st.segment(index, acc_bias_ptr_->getSize()));
-          index += acc_bias_ptr_->getSize();
+          getAccBiasPtr()->setVector(_st.segment(index, getAccBiasPtr()->getSize()));
+          index += getAccBiasPtr()->getSize();
 //          std::cout << "set F-ab" << std::endl;
       }
-      if (gyro_bias_ptr_!=nullptr)
+      if (getGyroBiasPtr()!=nullptr)
       {
-          gyro_bias_ptr_->setVector(_st.segment(index, gyro_bias_ptr_->getSize()));
+          getGyroBiasPtr()->setVector(_st.segment(index, getGyroBiasPtr()->getSize()));
           //   index += bg_ptr_->getSize();
 //          std::cout << "set F-wb" << std::endl;
      }
@@ -120,11 +126,11 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
 
   Eigen::VectorXs FrameIMU::getState() const
   {
-      Eigen::VectorXs state((p_ptr_==nullptr ? 0 : p_ptr_->getSize())    +
-                            (v_ptr_==nullptr ? 0 : v_ptr_->getSize())    +
-                            (o_ptr_==nullptr ? 0 : o_ptr_->getSize())    +
-                            (acc_bias_ptr_==nullptr ? 0 : acc_bias_ptr_->getSize())  +
-                            (gyro_bias_ptr_==nullptr ? 0 : gyro_bias_ptr_->getSize()));
+      Eigen::VectorXs state((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
+                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
+                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
+                            (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
+                            (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize()));
 
       getState(state);
 
@@ -133,36 +139,36 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
 
   void FrameIMU::getState(Eigen::VectorXs& state) const // Order: PVQBB
   {
-      assert(state.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize())    +
-                              (v_ptr_==nullptr ? 0 : v_ptr_->getSize())    +
-                              (o_ptr_==nullptr ? 0 : o_ptr_->getSize())    +
-                              (acc_bias_ptr_==nullptr ? 0 : acc_bias_ptr_->getSize())  +
-                              (gyro_bias_ptr_==nullptr ? 0 : gyro_bias_ptr_->getSize())));
+      assert(state.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
+                              (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
+                              (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
+                              (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
+                              (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize())));
 
       unsigned int index = 0;
-      if (p_ptr_!=nullptr)
+      if (getPPtr()!=nullptr)
       {
-          state.head(p_ptr_->getSize()) = p_ptr_->getVector();
-          index += p_ptr_->getSize();
+          state.head(getPPtr()->getSize()) = getPPtr()->getVector();
+          index += getPPtr()->getSize();
       }
-      if (v_ptr_!=nullptr)
+      if (getVPtr()!=nullptr)
       {
-          state.segment(index, v_ptr_->getSize()) = v_ptr_->getVector();
-          index += v_ptr_->getSize();
+          state.segment(index, getVPtr()->getSize()) = getVPtr()->getVector();
+          index += getVPtr()->getSize();
       }
-      if (o_ptr_!=nullptr)
+      if (getOPtr()!=nullptr)
       {
-          state.segment(index, o_ptr_->getSize()) = o_ptr_->getVector();
-          index += o_ptr_->getSize();
+          state.segment(index, getOPtr()->getSize()) = getOPtr()->getVector();
+          index += getOPtr()->getSize();
       }
-      if (acc_bias_ptr_!=nullptr)
+      if (getAccBiasPtr()!=nullptr)
       {
-          state.segment(index, acc_bias_ptr_->getSize()) = acc_bias_ptr_->getVector();
-          index += acc_bias_ptr_->getSize();
+          state.segment(index, getAccBiasPtr()->getSize()) = getAccBiasPtr()->getVector();
+          index += getAccBiasPtr()->getSize();
       }
-      if (gyro_bias_ptr_!=nullptr)
+      if (getGyroBiasPtr()!=nullptr)
       {
-          state.segment(index, gyro_bias_ptr_->getSize()) = gyro_bias_ptr_->getVector();
+          state.segment(index, getGyroBiasPtr()->getSize()) = getGyroBiasPtr()->getVector();
         //  index += bg_ptr_->getSize();
       }
   }
@@ -174,68 +180,68 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
       // State Blocks
       if (status_ == ST_FIXED)
       {
-          if (p_ptr_ != nullptr)
+          if (getPPtr() != nullptr)
           {
-              p_ptr_->fix();
+              getPPtr()->fix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(p_ptr_);
+                  getProblem()->updateStateBlockPtr(getPPtr());
           }
-          if (v_ptr_ != nullptr)
+          if (getVPtr() != nullptr)
           {
-              v_ptr_->fix();
+              getVPtr()->fix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(v_ptr_);
+                  getProblem()->updateStateBlockPtr(getVPtr());
           }
-          if (o_ptr_ != nullptr)
+          if (getOPtr() != nullptr)
           {
-              o_ptr_->fix();
+              getOPtr()->fix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(o_ptr_);
+                  getProblem()->updateStateBlockPtr(getOPtr());
           }
-          if (acc_bias_ptr_ != nullptr)
+          if (getAccBiasPtr() != nullptr)
           {
-              acc_bias_ptr_->fix();
+              getAccBiasPtr()->fix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(acc_bias_ptr_);
+                  getProblem()->updateStateBlockPtr(getAccBiasPtr());
           }
-          if (gyro_bias_ptr_ != nullptr)
+          if (getGyroBiasPtr() != nullptr)
           {
-              gyro_bias_ptr_->fix();
+              getGyroBiasPtr()->fix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(gyro_bias_ptr_);
+                  getProblem()->updateStateBlockPtr(getGyroBiasPtr());
           }
       }
       else if (status_ == ST_ESTIMATED)
       {
-          if (p_ptr_ != nullptr)
+          if (getPPtr() != nullptr)
           {
-              p_ptr_->unfix();
+              getPPtr()->unfix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(p_ptr_);
+                  getProblem()->updateStateBlockPtr(getPPtr());
           }
-          if (v_ptr_ != nullptr)
+          if (getVPtr() != nullptr)
           {
-              v_ptr_->unfix();
+              getVPtr()->unfix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(v_ptr_);
+                  getProblem()->updateStateBlockPtr(getVPtr());
           }
-          if (o_ptr_ != nullptr)
+          if (getOPtr() != nullptr)
           {
-              o_ptr_->unfix();
+              getOPtr()->unfix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(o_ptr_);
+                  getProblem()->updateStateBlockPtr(getOPtr());
           }
-          if (acc_bias_ptr_ != nullptr)
+          if (getAccBiasPtr() != nullptr)
           {
-              acc_bias_ptr_->unfix();
+              getAccBiasPtr()->unfix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(acc_bias_ptr_);
+                  getProblem()->updateStateBlockPtr(getAccBiasPtr());
           }
-          if (gyro_bias_ptr_ != nullptr)
+          if (getGyroBiasPtr() != nullptr)
           {
-              gyro_bias_ptr_->fix();
+              getGyroBiasPtr()->fix();
               if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(gyro_bias_ptr_);
+                  getProblem()->updateStateBlockPtr(getGyroBiasPtr());
           }
       }
   }

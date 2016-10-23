@@ -336,8 +336,8 @@ inline void ProcessorIMU::resetDerived()
     frame_imu_ptr_ = std::static_pointer_cast<FrameIMU>(origin_ptr_->getFramePtr());
 
     // Assign biases for the integration at the origin frame's biases
-    acc_bias_  = frame_imu_ptr_->getBAPtr()->getVector(); // acc  bias
-    gyro_bias_ = frame_imu_ptr_->getBGPtr()->getVector(); // gyro bias
+    acc_bias_  = frame_imu_ptr_->getAccBiasPtr()->getVector(); // acc  bias
+    gyro_bias_ = frame_imu_ptr_->getGyroBiasPtr()->getVector(); // gyro bias
 
     // reset jacobians wrt bias
     dDp_dab_.setZero();
