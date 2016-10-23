@@ -135,6 +135,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
   void FrameIMU::setStatus(StateStatus _st)
   {
       // TODO: Separate the three fixes and unfixes to the wolfproblem lists
+      // TODO: See what we want to do with globally fixing state blocks
       status_ = _st;
       // State Blocks
       if (status_ == ST_FIXED)
