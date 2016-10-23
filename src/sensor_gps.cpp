@@ -11,48 +11,28 @@ SensorGPS::SensorGPS(StateBlockPtr _p_ptr, //GPS sensor position with respect to
                      StateBlockPtr _map_p_ptr, //initial position of vehicle's frame with respect to starting point frame
                      StateBlockPtr _map_o_ptr) //initial orientation of vehicle's frame with respect to the starting point frame
         :
-        SensorBase(SEN_GPS_RAW, "GPS", _p_ptr, _o_ptr, _bias_ptr, 0),
-        map_p_ptr_(_map_p_ptr),
-        map_o_ptr_(_map_o_ptr)
+        SensorBase(SEN_GPS_RAW, "GPS", _p_ptr, _o_ptr, _bias_ptr, 0)
 {
+    setStateBlockPtr(3, _map_p_ptr); // Map position
+    setStateBlockPtr(4, _map_o_ptr); // Map orientation
     //
 }
 
 SensorGPS::~SensorGPS()
 {
-    // TODO Check carefully this destructor!
+    //
 }
 
 StateBlockPtr SensorGPS::getMapPPtr() const
 {
-    return map_p_ptr_;
+    return getStateBlockPtr(3);
 }
 
 StateBlockPtr SensorGPS::getMapOPtr() const
 {
-    return map_o_ptr_;
+    return getStateBlockPtr(4);
 }
 
-void SensorGPS::registerNewStateBlocks()
-{
-    if (getProblem() != nullptr)
-    {
-        if (p_ptr_ != nullptr)
-            getProblem()->addStateBlock(p_ptr_);
-
-        if (o_ptr_ != nullptr)
-            getProblem()->addStateBlock(o_ptr_);
-
-        if (intrinsic_ptr_ != nullptr)
-            getProblem()->addStateBlock(intrinsic_ptr_);
-
-        if (map_p_ptr_ != nullptr)
-            getProblem()->addStateBlock(map_p_ptr_);
-
-        if (map_o_ptr_ != nullptr)
-            getProblem()->addStateBlock(map_o_ptr_);
-    }
-}
 
 // Define the factory method
 SensorBasePtr SensorGPS::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_p,
