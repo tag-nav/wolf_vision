@@ -40,11 +40,6 @@ class SensorOdom3D : public SensorBase
          **/
         SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _q_ptr, const Scalar& _k_disp_to_disp, const Scalar& _k_disp_to_rot, const Scalar&  _k_rot_to_rot);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~SensorOdom3D();
 
         /** \brief Returns displacement noise factor

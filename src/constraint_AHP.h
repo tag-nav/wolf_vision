@@ -201,12 +201,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             return JAC_AUTO;
         }
 
-//    public:
-//        static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
-//                                            NodeBase* _correspondant_ptr)
-//        {
-//            return new ConstraintAHP(_feature_ptr, (FrameBasePtr)_correspondant_ptr);
-//        }
 
 };
 

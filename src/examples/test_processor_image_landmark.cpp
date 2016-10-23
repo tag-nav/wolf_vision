@@ -72,47 +72,7 @@ int main(int argc, char** argv)
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
 
     //=====================================================
-    // Method 1: Use data generated here for sensor and processor
-    //=====================================================
-
-    //    // SENSOR
-    //    Eigen::Vector4s k = {320,240,320,320};
-    //    SensorCamera* sensor_ptr_ = new SensorCamera(std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
-    //                                                 std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
-    //                                                 std::make_shared<StateBlock>(k,false),img_width,img_height);
-
-    //    wolf_problem_ptr_->getHardwarePtr()->addSensor(sensor_ptr_);
-
-    //    // PROCESSOR
-    //    ProcessorParamsImage tracker_params;
-    //    tracker_params.image = {img_width,  img_height};
-    //    tracker_params.matcher.min_normalized_score = 0.75;
-    //    tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
-    //    tracker_params.matcher.roi_width = 30;
-    //    tracker_params.matcher.roi_height = 30;
-    //    tracker_params.active_search.grid_width = 12;
-    //    tracker_params.active_search.grid_height = 8;
-    //    tracker_params.active_search.separation = 1;
-    //    tracker_params.algorithm.max_new_features =0;
-    //    tracker_params.algorithm.min_features_for_keyframe = 20;
-
-    //    DetectorDescriptorParamsOrb orb_params;
-    //    orb_params.type = DD_ORB;
-
-    //    DetectorDescriptorParamsBrisk brisk_params;
-    //    brisk_params.type = DD_BRISK;
-
-    //    // select the kind of detector-descriptor parameters
-    //    tracker_params.detector_descriptor_params_ptr = &orb_params; // choose ORB
-
-    //    ProcessorImageLandmark* prc_image_ldmk = new ProcessorImageLandmark(tracker_params);
-
-    //    sensor_ptr_->addProcessor(prc_image_ldmk);
-    //=====================================================
-
-
-    //=====================================================
-    // Method 2: Use factory to create sensor and processor
+    // Use factory to create sensor and processor
     //=====================================================
 
     // SENSOR

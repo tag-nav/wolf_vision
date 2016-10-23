@@ -161,7 +161,7 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
 
 LandmarkContainer::~LandmarkContainer()
 {
-    // tODO delete corners
+    //
 }
 
 Scalar LandmarkContainer::getWidth() const

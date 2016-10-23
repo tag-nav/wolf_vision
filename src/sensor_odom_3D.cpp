@@ -51,7 +51,6 @@ SensorBasePtr SensorOdom3D::create(const std::string& _unique_name, const Eigen:
 //    params->k_disp_to_disp = 1.0;
 //    params->k_disp_to_rot = 0.0;
 //    params->k_rot_to_rot = 1.0;
-//    SensorBasePtr odo = new SensorOdom3D(pos_ptr, ori_ptr, params->k_disp_to_disp, params->k_disp_to_rot, params->k_rot_to_rot);
     SensorBasePtr odo = std::make_shared<SensorOdom3D>(pos_ptr, ori_ptr, 1.0, 0.0, 1.0);
     odo->setName(_unique_name);
     return odo;

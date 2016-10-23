@@ -79,7 +79,7 @@ int main (int argc, char** argv)
 
     }
 
-        //delete problem; // XXX Why is this throwing segfault?
+    problem.reset();
 
     return 0;
 }

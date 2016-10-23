@@ -201,7 +201,7 @@ int main(int argc, char** argv)
 
     problem_ptr_->check();
 
-    // delete stuff
+    // close data files
     data_file_acc.close(); // no impact on leaks
     data_file_gyro.close();
 

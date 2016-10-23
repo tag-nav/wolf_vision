@@ -31,25 +31,6 @@ LandmarkBase::~LandmarkBase()
 {
     removeStateBlocks();
     std::cout << "destructed   -L" << id() << std::endl;
-
-    // Remove State Blocks
-//    if (p_ptr_ != nullptr)
-//    {
-//        if (getProblem() != nullptr)
-//            getProblem()->removeStateBlockPtr(p_ptr_);
-//
-//        delete p_ptr_;
-//        p_ptr_ = nullptr;
-//    }
-//    if (o_ptr_ != nullptr)
-//    {
-//        if (getProblem() != nullptr)
-//            getProblem()->removeStateBlockPtr(o_ptr_);
-//
-//        delete o_ptr_;
-//        o_ptr_ = nullptr;
-//    }
-
 }
 
 void LandmarkBase::remove()
@@ -74,22 +55,6 @@ void LandmarkBase::remove()
 
         // Remove State Blocks
         removeStateBlocks();
-//        if (p_ptr_ != nullptr)
-//        {
-//            if (getProblem() != nullptr)
-//                getProblem()->removeStateBlockPtr(p_ptr_);
-//
-//            delete p_ptr_;
-//            p_ptr_ = nullptr;
-//        }
-//        if (o_ptr_ != nullptr)
-//        {
-//            if (getProblem() != nullptr)
-//                getProblem()->removeStateBlockPtr(o_ptr_);
-//
-//            delete o_ptr_;
-//            o_ptr_ = nullptr;
-//        }
     }
 }
 

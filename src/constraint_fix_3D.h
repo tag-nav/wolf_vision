@@ -22,12 +22,6 @@ class ConstraintFix3D: public ConstraintSparse<6,3,4>
             setType("FIX3D");
             //std::cout << "creating ConstraintFix " << std::endl;
         }
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~ConstraintFix3D()
         {
             //

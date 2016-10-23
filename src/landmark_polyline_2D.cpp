@@ -42,7 +42,6 @@ LandmarkPolyline2D::~LandmarkPolyline2D()
         if (getProblem() != nullptr)
             getProblem()->removeStateBlockPtr(point_state_ptr_vector_.front());
 
-//        delete point_state_ptr_vector_.front();
         point_state_ptr_vector_.pop_front();
     }
 }
@@ -295,7 +294,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
             // add new constraint
             ctr_ptr->getFeaturePtr()->addConstraint(new_ctr_ptr);
 
-            // delete constraint
+            // remove constraint
             ctr_ptr->remove();
 
             new_ctr_ptr = nullptr;
@@ -306,9 +305,6 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     if (getProblem() != nullptr)
         getProblem()->removeStateBlockPtr(remove_state);
     std::cout << "state removed " << std::endl;
-
-//    delete remove_state;
-    std::cout << "state deleted " << std::endl;
 
     // remove element from deque
     point_state_ptr_vector_.erase(point_state_ptr_vector_.begin() + _remove_id - first_id_);

@@ -37,7 +37,7 @@ inline StateHomogeneous3D::StateHomogeneous3D(bool _fixed) :
 
 inline StateHomogeneous3D::~StateHomogeneous3D()
 {
-    // The local_param_ptr_ pointer is already deleted by the base class
+    // The local_param_ptr_ pointer is already removed by the base class
 }
 
 } // namespace wolf

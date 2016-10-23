@@ -37,12 +37,6 @@ class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
         std::string dateTimeNow();
 };
 
-//inline void MapBase::destruct()
-//{
-//    if (!is_removing_)
-//        delete this;
-//}
-
 inline LandmarkBaseList& MapBase::getLandmarkList()
 {
     return landmark_list_;
