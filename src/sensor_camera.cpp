@@ -15,16 +15,16 @@ SensorCamera::SensorCamera(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBloc
 }
 
 SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const std::shared_ptr<IntrinsicsCamera> _intrinsics_ptr) :
-                SensorBase(SEN_CAMERA, "CAMERA", new StateBlock(_extrinsics.head(3)), new StateQuaternion(_extrinsics.tail(4)), new StateBlock(_intrinsics_ptr->pinhole_model), 2), // will initialize state blocks later
+                SensorBase(SEN_CAMERA, "CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3)), std::make_shared<StateQuaternion>(_extrinsics.tail(4)), std::make_shared<StateBlock>(_intrinsics_ptr->pinhole_model), 2), // will initialize state blocks later
                 img_width_(_intrinsics_ptr->width), //
                 img_height_(_intrinsics_ptr->height), //
                 distortion_(_intrinsics_ptr->distortion), //
                 correction_(distortion_.size()) // make correction vector of the same size as distortion vector
 {
     assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
-//    p_ptr_ = new StateBlock(_extrinsics.head(3));
-//    o_ptr_ = new StateQuaternion(_extrinsics.tail(4));
-//    intrinsic_ptr_ = new StateBlock(_intrinsics_ptr->pinhole_model);
+//    p_ptr_ = std::make_shared<StateBlock>(_extrinsics.head(3));
+//    o_ptr_ = std::make_shared<StateQuaternion>(_extrinsics.tail(4));
+//    intrinsic_ptr_ = std::make_shared<StateBlock>(_intrinsics_ptr->pinhole_model);
     K_ = setIntrinsicMatrix(_intrinsics_ptr->pinhole_model);
     pinhole::computeCorrectionModel(getIntrinsicPtr()->getVector(), distortion_, correction_);
 //    std::cout << "\tintrinsic_ptr  : " << intrinsic_ptr_->getVector().transpose() << std::endl;

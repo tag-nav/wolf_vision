@@ -103,8 +103,8 @@ ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr
     {
         // Create new landmark
         Eigen::Vector3s feature_global_pose = R_world_sensor_ * _feature_ptr->getMeasurement() + t_world_sensor_;
-        landmark_ptr = std::make_shared<LandmarkCorner2D>(new StateBlock(feature_global_pose.head(2)),
-                                                          new StateBlock(feature_global_pose.tail(1)),
+        landmark_ptr = std::make_shared<LandmarkCorner2D>(std::make_shared<StateBlock>(feature_global_pose.head(2)),
+                                                          std::make_shared<StateBlock>(feature_global_pose.tail(1)),
                                                           _feature_ptr->getMeasurement()(3));
 
         // Add landmark constraint to the other feature

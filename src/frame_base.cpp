@@ -115,7 +115,6 @@ void FrameBase::removeStateBlocks()
             {
                 getProblem()->removeStateBlockPtr(sbp);
             }
-//            delete sbp;
             setStateBlockPtr(i, nullptr);
         }
     }

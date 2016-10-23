@@ -78,7 +78,7 @@ unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int
 LandmarkBasePtr ProcessorTrackerLandmarkDummy::createLandmark(FeatureBasePtr _feature_ptr)
 {
     //std::cout << "ProcessorTrackerLandmarkDummy::createLandmark" << std::endl;
-    return std::make_shared<LandmarkCorner2D>(new StateBlock(2), new StateBlock(1), _feature_ptr->getMeasurement(0));
+    return std::make_shared<LandmarkCorner2D>(std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1), _feature_ptr->getMeasurement(0));
 }
 
 ConstraintBasePtr ProcessorTrackerLandmarkDummy::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)

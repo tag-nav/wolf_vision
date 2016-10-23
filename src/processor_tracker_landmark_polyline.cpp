@@ -521,7 +521,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkPolyline::createLandmark(FeatureBasePtr 
     //std::cout << "New landmark: extremes defined " << polyline_ptr->isFirstDefined() << polyline_ptr->isLastDefined() << std::endl;
 
     // Create new landmark
-    return std::make_shared<LandmarkPolyline2D>(new StateBlock(Eigen::Vector2s::Zero(), true), new StateBlock(Eigen::Vector1s::Zero(), true), points_global, polyline_ptr->isFirstDefined(), polyline_ptr->isLastDefined());
+    return std::make_shared<LandmarkPolyline2D>(std::make_shared<StateBlock>(Eigen::Vector2s::Zero(), true), std::make_shared<StateBlock>(Eigen::Vector1s::Zero(), true), points_global, polyline_ptr->isFirstDefined(), polyline_ptr->isLastDefined());
 }
 
 ProcessorTrackerLandmarkPolyline::~ProcessorTrackerLandmarkPolyline()

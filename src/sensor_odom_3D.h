@@ -38,7 +38,7 @@ class SensorOdom3D : public SensorBase
          * \param _rot_noise_factor rotation noise factor
          *
          **/
-        SensorOdom3D(StateBlock* _p_ptr, StateQuaternion* _q_ptr, const Scalar& _k_disp_to_disp, const Scalar& _k_disp_to_rot, const Scalar&  _k_rot_to_rot);
+        SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _q_ptr, const Scalar& _k_disp_to_disp, const Scalar& _k_disp_to_rot, const Scalar&  _k_rot_to_rot);
 
         /** \brief Default destructor (not recommended)
          *

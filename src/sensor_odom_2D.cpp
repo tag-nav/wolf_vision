@@ -30,8 +30,8 @@ SensorBasePtr SensorOdom2D::create(const std::string& _unique_name, const Eigen:
 {
     // decode extrinsics vector
     assert(_extrinsics_po.size() == 3 && "Bad extrinsics vector length. Should be 3 for 2D.");
-    StateBlockPtr pos_ptr = new StateBlock(_extrinsics_po.head(2), true);
-    StateBlockPtr ori_ptr = new StateBlock(_extrinsics_po.tail(1), true);
+    StateBlockPtr pos_ptr = std::make_shared<StateBlock>(_extrinsics_po.head(2), true);
+    StateBlockPtr ori_ptr = std::make_shared<StateBlock>(_extrinsics_po.tail(1), true);
     // cast intrinsics into derived type
     std::shared_ptr<IntrinsicsOdom2D> params = std::static_pointer_cast<IntrinsicsOdom2D>(_intrinsics);
     std::shared_ptr<SensorOdom2D> odo = std::make_shared<SensorOdom2D>(pos_ptr, ori_ptr, params->k_disp_to_disp, params->k_rot_to_rot);

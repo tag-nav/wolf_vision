@@ -369,10 +369,10 @@ typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
 // - - State blocks
 typedef std::shared_ptr<StateBlock> StateBlockPtr;
-typedef StateBlock* StateBlockWPtr;
+typedef std::weak_ptr<StateBlock> StateBlockWPtr;
 typedef std::list<StateBlockPtr> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
-typedef StateQuaternion* StateQuaternionPtr;
+typedef std::shared_ptr<StateQuaternion> StateQuaternionPtr;
 
 // - - Local Parametrization
 typedef LocalParametrizationBase* LocalParametrizationBasePtr;

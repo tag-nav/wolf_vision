@@ -24,7 +24,7 @@ LandmarkPolyline2D::LandmarkPolyline2D(StateBlockPtr _p_ptr, StateBlockPtr _o_pt
     //std::cout << "LandmarkPolyline2D::LandmarkPolyline2D" << std::endl;
     assert(_points.cols() >= 2 && "LandmarkPolyline2D::LandmarkPolyline2D: 2 points at least needed.");
     for (auto i = 0; i < _points.cols(); i++)
-        point_state_ptr_vector_.push_back(new StateBlock(_points.col(i).head<2>()));
+        point_state_ptr_vector_.push_back(std::make_shared<StateBlock>(_points.col(i).head<2>()));
 
     if (!first_defined_)
         point_state_ptr_vector_.front()->setLocalParametrizationPtr(new LocalParametrizationPolylineExtreme(point_state_ptr_vector_[1]));
@@ -106,7 +106,7 @@ void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _de
     }
     else
     {
-        point_state_ptr_vector_.push_front(new StateBlock(_point.head<2>(), false,
+        point_state_ptr_vector_.push_front(std::make_shared<StateBlock>(_point.head<2>(), false,
                                                           (!_defined ?
                                                                   new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.front()) :
                                                                   nullptr)));
@@ -136,7 +136,7 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
     {
         for (int i = _idx; i < _points.cols(); i++)
         {
-        	point_state_ptr_vector_.push_back(new StateBlock(_points.block(0,i,2,1),
+        	point_state_ptr_vector_.push_back(std::make_shared<StateBlock>(_points.block(0,i,2,1),
         													 false,
         													 (i == _points.cols()-1 && !_defined ?
         															 new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.back()) :
@@ -151,7 +151,7 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
     {
         for (int i = _idx; i >= 0; i--)
         {
-        	point_state_ptr_vector_.push_front(new StateBlock(_points.block(0,i,2,1),
+        	point_state_ptr_vector_.push_front(std::make_shared<StateBlock>(_points.block(0,i,2,1),
         													  false,
         													  (i == 0 && !_defined ?
         															  new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.front()) :
@@ -307,7 +307,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
         getProblem()->removeStateBlockPtr(remove_state);
     std::cout << "state removed " << std::endl;
 
-    delete remove_state;
+//    delete remove_state;
     std::cout << "state deleted " << std::endl;
 
     // remove element from deque
@@ -344,7 +344,7 @@ LandmarkBasePtr LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
     }
 
     // Create a new landmark
-    std::shared_ptr<LandmarkPolyline2D> lmk_ptr = std::make_shared<LandmarkPolyline2D>(new StateBlock(pos, pos_fixed), new StateBlock(ori, ori_fixed), points, first_defined, last_defined, first_id, classification);
+    std::shared_ptr<LandmarkPolyline2D> lmk_ptr = std::make_shared<LandmarkPolyline2D>(std::make_shared<StateBlock>(pos, pos_fixed), std::make_shared<StateBlock>(ori, ori_fixed), points, first_defined, last_defined, first_id, classification);
     lmk_ptr->setId(id);
 
     // fix all points

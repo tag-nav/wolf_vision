@@ -152,7 +152,6 @@ void LandmarkBase::removeStateBlocks()
             {
                 getProblem()->removeStateBlockPtr(sbp);
             }
-//            delete sbp;
             setStateBlockPtr(i, nullptr);
         }
     }

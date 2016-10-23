@@ -189,22 +189,22 @@ FrameBasePtr Problem::createFrame(FrameKeyType _frame_key_type, const Eigen::Vec
         case FRM_PO_2D:
         {
             assert(_frame_state.size() == 3 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(2)),
-                                  new StateBlock(_frame_state.tail(1))));
+            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, std::make_shared<StateBlock>(_frame_state.head(2)),
+                                  std::make_shared<StateBlock>(_frame_state.tail(1))));
         }
         case FRM_PO_3D:
         {
             assert(_frame_state.size() == 7 && "Wrong state vector size");
-            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
-                                  new StateQuaternion(_frame_state.tail(4))));
+            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, std::make_shared<StateBlock>(_frame_state.head(3)),
+                                  std::make_shared<StateQuaternion>(_frame_state.tail(4))));
         }
         case FRM_POV_3D:
         {
             assert(_frame_state.size() == 10 && "Wrong state vector size");
             std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
-            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, new StateBlock(_frame_state.head(3)),
-                                  new StateQuaternion(_frame_state.segment<4>(3)),
-                                  new StateBlock(_frame_state.tail(3))));
+            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, std::make_shared<StateBlock>(_frame_state.head(3)),
+                                  std::make_shared<StateQuaternion>(_frame_state.segment<4>(3)),
+                                  std::make_shared<StateBlock>(_frame_state.tail(3))));
         }
         case FRM_PVQBB_3D:
         {

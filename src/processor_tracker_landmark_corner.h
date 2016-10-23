@@ -210,8 +210,8 @@ inline LandmarkBasePtr ProcessorTrackerLandmarkCorner::createLandmark(FeatureBas
     // compute feature global pose
     Eigen::Vector3s feature_global_pose = R_world_sensor_ * _feature_ptr->getMeasurement().head<3>() + t_world_sensor_;
     // Create new landmark
-    return std::make_shared<LandmarkCorner2D>(new StateBlock(feature_global_pose.head(2)),
-                                              new StateBlock(feature_global_pose.tail(1)),
+    return std::make_shared<LandmarkCorner2D>(std::make_shared<StateBlock>(feature_global_pose.head(2)),
+                                              std::make_shared<StateBlock>(feature_global_pose.tail(1)),
                                               _feature_ptr->getMeasurement()(3));
 }
 

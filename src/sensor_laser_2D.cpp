@@ -57,8 +57,8 @@ SensorBasePtr SensorLaser2D::create(const std::string& _unique_name, const Eigen
 {
     // decode extrinsics vector
     assert(_extrinsics_po.size() == 3 && "Bad extrinsics vector length. Should be 3 for 2D.");
-    StateBlockPtr pos_ptr = new StateBlock(_extrinsics_po.head(2), true);
-    StateBlockPtr ori_ptr = new StateBlock(_extrinsics_po.tail(1), true);
+    StateBlockPtr pos_ptr = std::make_shared<StateBlock>(_extrinsics_po.head(2), true);
+    StateBlockPtr ori_ptr = std::make_shared<StateBlock>(_extrinsics_po.tail(1), true);
     // cast intrinsics into derived type
     IntrinsicsLaser2D::Ptr params = std::static_pointer_cast<IntrinsicsLaser2D>(_intrinsics);
     SensorLaser2D::Ptr sen = std::make_shared<SensorLaser2D>(pos_ptr, ori_ptr, params->scan_params);
