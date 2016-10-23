@@ -42,7 +42,7 @@ LandmarkPolyline2D::~LandmarkPolyline2D()
         if (getProblem() != nullptr)
             getProblem()->removeStateBlockPtr(point_state_ptr_vector_.front());
 
-        delete point_state_ptr_vector_.front();
+//        delete point_state_ptr_vector_.front();
         point_state_ptr_vector_.pop_front();
     }
 }
@@ -95,7 +95,7 @@ void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _de
     // add new extreme
     if (_back)
     {
-        point_state_ptr_vector_.push_back(new StateBlock(_point.head<2>(), false,
+        point_state_ptr_vector_.push_back(std::make_shared<StateBlock>(_point.head<2>(), false,
                                                          (!_defined ?
                                                                  new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.back()) :
                                                                  nullptr)));
