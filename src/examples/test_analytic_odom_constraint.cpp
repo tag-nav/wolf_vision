@@ -61,7 +61,7 @@ int main(int argc, char** argv)
     // Wolf problem
     ProblemPtr wolf_problem_autodiff = new Problem(FRM_PO_2D);
     ProblemPtr wolf_problem_analytic = new Problem(FRM_PO_2D);
-    SensorBasePtr sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)), new StateBlock(Eigen::VectorXs::Zero(1)), new StateBlock(Eigen::VectorXs::Zero(2)), 2);
+    SensorBasePtr sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -128,8 +128,8 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add frame to problem
-                    FrameBasePtr vertex_frame_ptr_autodiff = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
-                    FrameBasePtr vertex_frame_ptr_analytic = new FrameBase(TimeStamp(0), new StateBlock(vertex_pose.head(2)), new StateBlock(vertex_pose.tail(1)));
+                    FrameBasePtr vertex_frame_ptr_autodiff = new FrameBase(TimeStamp(0), std::make_shared<StateBlock>(vertex_pose.head(2)), std::make_shared<StateBlock>(vertex_pose.tail(1)));
+                    FrameBasePtr vertex_frame_ptr_analytic = new FrameBase(TimeStamp(0), std::make_shared<StateBlock>(vertex_pose.head(2)), std::make_shared<StateBlock>(vertex_pose.tail(1)));
                     wolf_problem_autodiff->getTrajectoryPtr()->addFrame(vertex_frame_ptr_autodiff);
                     wolf_problem_analytic->getTrajectoryPtr()->addFrame(vertex_frame_ptr_analytic);
                     // store

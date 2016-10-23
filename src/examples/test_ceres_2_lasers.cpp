@@ -221,10 +221,10 @@ int main(int argc, char** argv)
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
 
     Problem problem(FRM_PO_2D);
-    SensorOdom2D* odom_sensor = new SensorOdom2D(new StateBlock(odom_pose.head(2), true), new StateBlock(odom_pose.tail(1), true), odom_std_factor, odom_std_factor);
-    SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
-    SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
-    SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorOdom2D* odom_sensor = new SensorOdom2D(std::make_shared<StateBlock>(odom_pose.head(2), true), std::make_shared<StateBlock>(odom_pose.tail(1), true), odom_std_factor, odom_std_factor);
+    SensorGPSFix* gps_sensor = new SensorGPSFix(std::make_shared<StateBlock>(gps_pose.head(2), true), std::make_shared<StateBlock>(gps_pose.tail(1), true), gps_std);
+    SensorLaser2D* laser_1_sensor = new SensorLaser2D(std::make_shared<StateBlock>(laser_1_pose.head(2), true), std::make_shared<StateBlock>(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorLaser2D* laser_2_sensor = new SensorLaser2D(std::make_shared<StateBlock>(laser_2_pose.head(2), true), std::make_shared<StateBlock>(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
     ProcessorTrackerLandmarkCorner* laser_1_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2}), 3, 10);
     ProcessorTrackerLandmarkCorner* laser_2_processor = new ProcessorTrackerLandmarkCorner(laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2}), 3, 10);
     ProcessorOdom2D* odom_processor = new ProcessorOdom2D(1,1,100);

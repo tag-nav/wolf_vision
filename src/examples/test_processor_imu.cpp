@@ -195,8 +195,8 @@ int main(int argc, char** argv)
     problem_ptr_->check();
 
 //    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
-    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
-    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
+//    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
+//    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
 //    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
 
     problem_ptr_->check();

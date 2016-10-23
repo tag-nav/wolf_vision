@@ -77,9 +77,9 @@ int main(int argc, char** argv)
 
     //    // SENSOR
     //    Eigen::Vector4s k = {320,240,320,320};
-    //    SensorCamera* sensor_ptr_ = new SensorCamera(new StateBlock(Eigen::Vector3s::Zero()),
-    //                                                 new StateBlock(Eigen::Vector3s::Zero()),
-    //                                                 new StateBlock(k,false),img_width,img_height);
+    //    SensorCamera* sensor_ptr_ = new SensorCamera(std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
+    //                                                 std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
+    //                                                 std::make_shared<StateBlock>(k,false),img_width,img_height);
 
     //    wolf_problem_ptr_->getHardwarePtr()->addSensor(sensor_ptr_);
 

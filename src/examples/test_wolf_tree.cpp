@@ -17,8 +17,8 @@ int main(int argc, char** argv)
     //Welcome message
     std::cout << std::endl << " ========= WOLF TREE test ===========" << std::endl << std::endl;
 
-    SensorOdom2D* odom_sensor_ptr_ = new SensorOdom2D(new StateBlock(Eigen::Vector3s::Zero()),
-                                                      new StateBlock(Eigen::Vector1s::Zero()), 0.1, 0.1);
+    SensorOdom2D* odom_sensor_ptr_ = new SensorOdom2D(std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
+                                                      std::make_shared<StateBlock>(Eigen::Vector1s::Zero()), 0.1, 0.1);
     //std::cout << " odom sensor created!" << std::endl;
 
     WolfManager* wolf_manager_ = new WolfManager(FRM_PO_2D,                             //frame structure

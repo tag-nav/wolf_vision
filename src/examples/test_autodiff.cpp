@@ -121,10 +121,10 @@ int main(int argc, char** argv)
     Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
-    SensorOdom2D odom_sensor(new StateBlock(odom_pose.head(2)), new StateBlock(odom_pose.tail(1)), odom_std_factor, odom_std_factor);
-    SensorGPSFix gps_sensor(new StateBlock(gps_pose.head(2)), new StateBlock(gps_pose.tail(1)), gps_std);
-    SensorLaser2D laser_1_sensor(new StateBlock(laser_1_pose.head(2)), new StateBlock(laser_1_pose.tail(1)));
-    SensorLaser2D laser_2_sensor(new StateBlock(laser_2_pose.head(2)), new StateBlock(laser_2_pose.tail(1)));
+    SensorOdom2D odom_sensor(std::make_shared<StateBlock>(odom_pose.head(2)), std::make_shared<StateBlock>(odom_pose.tail(1)), odom_std_factor, odom_std_factor);
+    SensorGPSFix gps_sensor(std::make_shared<StateBlock>(gps_pose.head(2)), std::make_shared<StateBlock>(gps_pose.tail(1)), gps_std);
+    SensorLaser2D laser_1_sensor(std::make_shared<StateBlock>(laser_1_pose.head(2)), std::make_shared<StateBlock>(laser_1_pose.tail(1)));
+    SensorLaser2D laser_2_sensor(std::make_shared<StateBlock>(laser_2_pose.head(2)), std::make_shared<StateBlock>(laser_2_pose.tail(1)));
     laser_1_sensor.addProcessor(new ProcessorLaser2D());
     laser_2_sensor.addProcessor(new ProcessorLaser2D());
 

@@ -55,7 +55,7 @@ int main()
     frame_pos_ori[6] = 0.83666; //qw
     const Eigen::VectorXs frame_val = frame_pos_ori;
 
-    FrameBasePtr last_frame = std::make_shared<FrameBase>(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
+    FrameBasePtr last_frame = std::make_shared<FrameBase>(t,std::make_shared<StateBlock>(frame_val.head(3)), std::make_shared<StateQuaternion>(frame_val.tail(4)));
     std::cout << "Last frame" << std::endl;
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
 
@@ -75,7 +75,7 @@ int main()
     std::shared_ptr<FeaturePointImage> feat_point_image_ptr = std::make_shared<FeaturePointImage>(kp, desc, Eigen::Matrix2s::Identity());
     image_ptr->addFeature(feat_point_image_ptr);
 
-    FrameBasePtr anchor_frame = std::make_shared< FrameBase>(t,new StateBlock(frame_val.head(3)), new StateQuaternion(frame_val.tail(4)));
+    FrameBasePtr anchor_frame = std::make_shared< FrameBase>(t,std::make_shared<StateBlock>(frame_val.head(3)), std::make_shared<StateQuaternion>(frame_val.tail(4)));
     //FrameBasePtr anchor_frame = wolf_problem_ptr_->getTrajectoryPtr()->getLastFramePtr();
 
 

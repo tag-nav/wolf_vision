@@ -62,9 +62,9 @@ int main()
 
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_2D);
-    SensorBasePtr sensor_ptr_ = std::make_shared< SensorBase>(SEN_ODOM_2D, "ODOM 2D", new StateBlock(Eigen::VectorXs::Zero(2)),
-                                             new StateBlock(Eigen::VectorXs::Zero(1)),
-                                             new StateBlock(Eigen::VectorXs::Zero(2)), 2);
+    SensorBasePtr sensor_ptr_ = std::make_shared< SensorBase>(SEN_ODOM_2D, "ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
+                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
+                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
 
     std::shared_ptr<ProcessorTrackerLandmarkDummy> processor_ptr_ = std::make_shared< ProcessorTrackerLandmarkDummy>(5);
 
