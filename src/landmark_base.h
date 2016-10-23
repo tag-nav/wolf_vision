@@ -75,10 +75,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
          **/
         void unfix();
 
-        /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
-         **/
-//        virtual void registerNewStateBlocks();
-
         // State blocks
         const std::vector<StateBlockPtr>& getStateBlockVec() const
         {
@@ -112,10 +108,9 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         void setPPtr(StateBlockPtr _p_ptr);
         void setOPtr(StateBlockPtr _o_ptr);
         void setVPtr(StateBlockPtr _v_ptr);
-        void registerNewStateBlocks();
+        virtual void registerNewStateBlocks();
     private:
         void removeStateBlocks();
-        //        virtual std::vector<StateBlockPtr> getStateBlockVector() const;
 
     public:
         const Eigen::VectorXs& getDescriptor() const;        
@@ -209,20 +204,6 @@ inline StateBlockPtr LandmarkBase::getOPtr() const
 {
     return o_ptr_;
 }
-
-//inline std::vector<StateBlockPtr> LandmarkBase::getStateBlockVector() const
-//{
-//    if (p_ptr_ == nullptr && o_ptr_ == nullptr)
-//        return std::vector<StateBlockPtr>(0);
-//
-//    if (p_ptr_ == nullptr)
-//        return std::vector<StateBlockPtr>( {o_ptr_});
-//
-//    if (o_ptr_ == nullptr)
-//        return std::vector<StateBlockPtr>( {p_ptr_});
-//
-//    return std::vector<StateBlockPtr>( {p_ptr_, o_ptr_});
-//}
 
 inline void LandmarkBase::setPPtr(StateBlockPtr _st_ptr)
 {
