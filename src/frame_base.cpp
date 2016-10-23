@@ -115,15 +115,23 @@ void FrameBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
     {
-        if (getPPtr() != nullptr)
-            getProblem()->addStateBlock(getPPtr());
-
-        if (getOPtr() != nullptr)
-            getProblem()->addStateBlock(getOPtr());
-
-        if (getVPtr() != nullptr)
-            getProblem()->addStateBlock(getVPtr());
+        for (auto sbp : getStateBlockVec())
+            if (sbp != nullptr)
+                getProblem()->addStateBlock(sbp);
     }
+
+
+//    if (getProblem() != nullptr)
+//    {
+//        if (getPPtr() != nullptr)
+//            getProblem()->addStateBlock(getPPtr());
+//
+//        if (getOPtr() != nullptr)
+//            getProblem()->addStateBlock(getOPtr());
+//
+//        if (getVPtr() != nullptr)
+//            getProblem()->addStateBlock(getVPtr());
+//    }
 }
 
 void FrameBase::setKey()

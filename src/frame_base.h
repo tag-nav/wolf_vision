@@ -137,7 +137,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
-        virtual void registerNewStateBlocks();
+        void registerNewStateBlocks();
 
     private:
         StateStatus getStatus() const;
