@@ -12,14 +12,15 @@ unsigned int FrameBase::frame_id_count_ = 0;
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
             NodeBase("FRAME", "BASE"),
             trajectory_ptr_(),
+            state_block_vec_(6), // allow for 6 state blocks by default. Should be enough in all applications.
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
 			status_(ST_ESTIMATED),
-            time_stamp_(_ts),
-			p_ptr_(_p_ptr),
-            o_ptr_(_o_ptr),
-            v_ptr_(_v_ptr)
+            time_stamp_(_ts)
 {
+    state_block_vec_[0] = _p_ptr;
+    state_block_vec_[1] = _o_ptr;
+    state_block_vec_[2] = _v_ptr;
     //
     if (isKey())
         std::cout << "constructed +KF" << id() << std::endl;
@@ -30,15 +31,16 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
 FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
             NodeBase("FRAME", "BASE"),
             trajectory_ptr_(),
+            state_block_vec_(6), // allow for 6 state blocks by default. Should be enough in all applications.
             frame_id_(++frame_id_count_),
             type_id_(_tp),
 			status_(ST_ESTIMATED),
-            time_stamp_(_ts),
-			p_ptr_(_p_ptr),
-            o_ptr_(_o_ptr),
-            v_ptr_(_v_ptr)
+            time_stamp_(_ts)
 {
-    //
+    state_block_vec_[0] = _p_ptr;
+    state_block_vec_[1] = _o_ptr;
+    state_block_vec_[2] = _v_ptr;
+
     if (isKey())
         std::cout << "constructed +KF" << id() << std::endl;
     else
@@ -48,26 +50,26 @@ FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockP
 FrameBase::~FrameBase()
 {
     // Remove Frame State Blocks
-    if (p_ptr_ != nullptr)
+    if (getPPtr() != nullptr)
     {
         if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-            getProblem()->removeStateBlockPtr(p_ptr_);
-        delete p_ptr_;
-        p_ptr_ = nullptr;
+            getProblem()->removeStateBlockPtr(getPPtr());
+        delete getPPtr();
+        setPPtr(nullptr);
     }
-    if (o_ptr_ != nullptr)
+    if (getOPtr() != nullptr)
     {
         if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-            getProblem()->removeStateBlockPtr(o_ptr_);
-        delete o_ptr_;
-        o_ptr_ = nullptr;
+            getProblem()->removeStateBlockPtr(getOPtr());
+        delete getOPtr();
+        setOPtr(nullptr);
     }
-    if (v_ptr_ != nullptr)
+    if (getVPtr() != nullptr)
     {
         if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-            getProblem()->removeStateBlockPtr(v_ptr_);
-        delete v_ptr_;
-        v_ptr_ = nullptr;
+            getProblem()->removeStateBlockPtr(getVPtr());
+        delete getVPtr();
+        setVPtr(nullptr);
     }
 
     if (isKey())
@@ -98,26 +100,26 @@ void FrameBase::remove()
         }
 
         // Remove Frame State Blocks
-        if (p_ptr_ != nullptr)
+        if (getPPtr() != nullptr)
         {
             if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-                getProblem()->removeStateBlockPtr(p_ptr_);
-            delete p_ptr_;
-            p_ptr_ = nullptr;
+                getProblem()->removeStateBlockPtr(getPPtr());
+            delete getPPtr();
+            setPPtr(nullptr);
         }
-        if (o_ptr_ != nullptr)
+        if (getOPtr() != nullptr)
         {
             if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-                getProblem()->removeStateBlockPtr(o_ptr_);
-            delete o_ptr_;
-            o_ptr_ = nullptr;
+                getProblem()->removeStateBlockPtr(getOPtr());
+            delete getOPtr();
+            setOPtr(nullptr);
         }
-        if (v_ptr_ != nullptr)
+        if (getVPtr() != nullptr)
         {
             if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-                getProblem()->removeStateBlockPtr(v_ptr_);
-            delete v_ptr_;
-            v_ptr_ = nullptr;
+                getProblem()->removeStateBlockPtr(getVPtr());
+            delete getVPtr();
+            setVPtr(nullptr);
         }
 
         std::cout << "Removed       F" << id() << std::endl;
@@ -128,14 +130,14 @@ void FrameBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
     {
-        if (p_ptr_ != nullptr)
-            getProblem()->addStateBlock(p_ptr_);
+        if (getPPtr() != nullptr)
+            getProblem()->addStateBlock(getPPtr());
 
-        if (o_ptr_ != nullptr)
-            getProblem()->addStateBlock(o_ptr_);
+        if (getOPtr() != nullptr)
+            getProblem()->addStateBlock(getOPtr());
 
-        if (v_ptr_ != nullptr)
-            getProblem()->addStateBlock(v_ptr_);
+        if (getVPtr() != nullptr)
+            getProblem()->addStateBlock(getVPtr());
     }
 }
 
@@ -156,34 +158,34 @@ void FrameBase::setKey()
 void FrameBase::setState(const Eigen::VectorXs& _st)
 {
 
-    assert(_st.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize())  +
-                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
-                          (v_ptr_==nullptr ? 0 : v_ptr_->getSize())) &&
+    assert(_st.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())  +
+                          (getOPtr()==nullptr ? 0 : getOPtr()->getSize())  +
+                          (getVPtr()==nullptr ? 0 : getVPtr()->getSize())) &&
                           "In FrameBase::setState wrong state size");
 
     unsigned int index = 0;
-    if (p_ptr_!=nullptr)
+    if (getPPtr()!=nullptr)
     {
-        p_ptr_->setVector(_st.head(p_ptr_->getSize()));
-        index += p_ptr_->getSize();
+        getPPtr()->setVector(_st.head(getPPtr()->getSize()));
+        index += getPPtr()->getSize();
     }
-    if (o_ptr_!=nullptr)
+    if (getOPtr()!=nullptr)
     {
-        o_ptr_->setVector(_st.segment(index, o_ptr_->getSize()));
-        index += p_ptr_->getSize();
+        getOPtr()->setVector(_st.segment(index, getOPtr()->getSize()));
+        index += getOPtr()->getSize();
     }
-    if (v_ptr_!=nullptr)
+    if (getVPtr()!=nullptr)
     {
-        v_ptr_->setVector(_st.segment(index, v_ptr_->getSize()));
-        //   index += v_ptr_->getSize();
+        getVPtr()->setVector(_st.segment(index, getVPtr()->getSize()));
+        //   index += getVPtr()->getSize();
     }
 }
 
 Eigen::VectorXs FrameBase::getState() const
 {
-    Eigen::VectorXs state((p_ptr_==nullptr ? 0 : p_ptr_->getSize()) +
-                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
-                          (v_ptr_==nullptr ? 0 : v_ptr_->getSize()));
+    Eigen::VectorXs state((getPPtr()==nullptr ? 0 : getPPtr()->getSize()) +
+                          (getOPtr()==nullptr ? 0 : getOPtr()->getSize())  +
+                          (getVPtr()==nullptr ? 0 : getVPtr()->getSize()));
 
     getState(state);
 
@@ -192,25 +194,25 @@ Eigen::VectorXs FrameBase::getState() const
 
 void FrameBase::getState(Eigen::VectorXs& state) const
 {
-    assert(state.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize()) +
-                            (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
-                            (v_ptr_==nullptr ? 0 : v_ptr_->getSize())));
+    assert(state.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize()) +
+                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())  +
+                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())));
 
     unsigned int index = 0;
-    if (p_ptr_!=nullptr)
+    if (getPPtr()!=nullptr)
     {
-        state.head(p_ptr_->getSize()) = p_ptr_->getVector();
-        index += p_ptr_->getSize();
+        state.head(getPPtr()->getSize()) = getPPtr()->getVector();
+        index += getPPtr()->getSize();
     }
-    if (o_ptr_!=nullptr)
+    if (getOPtr()!=nullptr)
     {
-        state.segment(index, o_ptr_->getSize()) = o_ptr_->getVector();
-        index += p_ptr_->getSize();
+        state.segment(index, getOPtr()->getSize()) = getOPtr()->getVector();
+        index += getOPtr()->getSize();
     }
-    if (v_ptr_!=nullptr)
+    if (getVPtr()!=nullptr)
     {
-        state.segment(index, v_ptr_->getSize()) = v_ptr_->getVector();
-        //   index += v_ptr_->getSize();
+        state.segment(index, getVPtr()->getSize()) = getVPtr()->getVector();
+        //   index += getVPtr()->getSize();
     }
 }
 
@@ -271,44 +273,44 @@ void FrameBase::setStatus(StateStatus _st)
     // State Blocks
     if (status_ == ST_FIXED)
     {
-        if (p_ptr_ != nullptr)
+        if (getPPtr() != nullptr)
         {
-            p_ptr_->fix();
+            getPPtr()->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(p_ptr_);
+                getProblem()->updateStateBlockPtr(getPPtr());
         }
-        if (o_ptr_ != nullptr)
+        if (getOPtr() != nullptr)
         {
-            o_ptr_->fix();
+            getOPtr()->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(o_ptr_);
+                getProblem()->updateStateBlockPtr(getOPtr());
         }
-        if (v_ptr_ != nullptr)
+        if (getVPtr() != nullptr)
         {
-            v_ptr_->fix();
+            getVPtr()->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(v_ptr_);
+                getProblem()->updateStateBlockPtr(getVPtr());
         }
     }
     else if (status_ == ST_ESTIMATED)
     {
-        if (p_ptr_ != nullptr)
+        if (getPPtr() != nullptr)
         {
-            p_ptr_->unfix();
+            getPPtr()->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(p_ptr_);
+                getProblem()->updateStateBlockPtr(getPPtr());
         }
-        if (o_ptr_ != nullptr)
+        if (getOPtr() != nullptr)
         {
-            o_ptr_->unfix();
+            getOPtr()->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(o_ptr_);
+                getProblem()->updateStateBlockPtr(getOPtr());
         }
-        if (v_ptr_ != nullptr)
+        if (getVPtr() != nullptr)
         {
-            v_ptr_->unfix();
+            getVPtr()->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(v_ptr_);
+                getProblem()->updateStateBlockPtr(getVPtr());
         }
     }
 }

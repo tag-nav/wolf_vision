@@ -25,6 +25,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         TrajectoryBaseWPtr trajectory_ptr_;
         CaptureBaseList capture_list_;
         ConstraintBaseList constrained_by_list_;
+        std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, V.
 
         static unsigned int frame_id_count_;
 
@@ -33,9 +34,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         FrameKeyType type_id_;     ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
         StateStatus status_;       ///< status of the estimation of the frame state
         TimeStamp time_stamp_;     ///< frame time stamp
-        StateBlockPtr p_ptr_;      ///< Position state block pointer
-        StateBlockPtr o_ptr_;      ///< Orientation state block pointer
-        StateBlockPtr v_ptr_;      ///< Linear velocity state block pointer
         
     public:
 
@@ -86,9 +84,30 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         TimeStamp getTimeStamp() const;
         void getTimeStamp(TimeStamp& _ts) const;
 
+        const std::vector<StateBlockPtr>& getStateBlockVec() const
+        {
+            return state_block_vec_;
+        }
+        std::vector<StateBlockPtr>& getStateBlockVec()
+        {
+            return state_block_vec_;
+        }
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const
+        {
+            assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+            return state_block_vec_[_i];
+        }
+        void setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr)
+        {
+            state_block_vec_[_i] = _sb_ptr;
+        }
+
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
         StateBlockPtr getVPtr() const;
+        void setPPtr(StateBlockPtr _p_ptr);
+        void setOPtr(StateBlockPtr _o_ptr);
+        void setVPtr(StateBlockPtr _v_ptr);
 
         void setState(const Eigen::VectorXs& _st);
         virtual Eigen::VectorXs getState() const;
@@ -119,8 +138,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
-
-
 
     private:
         StateStatus getStatus() const;
@@ -198,17 +215,29 @@ inline TimeStamp FrameBase::getTimeStamp() const
 
 inline StateBlockPtr FrameBase::getPPtr() const
 {
-    return p_ptr_;
+    return state_block_vec_[0];
+}
+inline void FrameBase::setPPtr(StateBlockPtr _p_ptr)
+{
+    state_block_vec_[0] = _p_ptr;
 }
 
 inline StateBlockPtr FrameBase::getOPtr() const
 {
-    return o_ptr_;
+    return state_block_vec_[1];
+}
+inline void FrameBase::setOPtr(StateBlockPtr _o_ptr)
+{
+    state_block_vec_[1] = _o_ptr;
 }
 
 inline StateBlockPtr FrameBase::getVPtr() const
 {
-    return v_ptr_;
+    return state_block_vec_[2];
+}
+inline void FrameBase::setVPtr(StateBlockPtr _v_ptr)
+{
+    state_block_vec_[2] = _v_ptr;
 }
 
 inline TrajectoryBasePtr FrameBase::getTrajectoryPtr() const
