@@ -84,6 +84,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         TimeStamp getTimeStamp() const;
         void getTimeStamp(TimeStamp& _ts) const;
 
+        // State blocks
         const std::vector<StateBlockPtr>& getStateBlockVec() const
         {
             return state_block_vec_;
@@ -109,6 +110,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setOPtr(StateBlockPtr _o_ptr);
         void setVPtr(StateBlockPtr _v_ptr);
 
+        // states
         void setState(const Eigen::VectorXs& _st);
         virtual Eigen::VectorXs getState() const;
         void getState(Eigen::VectorXs& state) const;

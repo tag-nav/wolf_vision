@@ -64,23 +64,6 @@ FrameBase::~FrameBase()
         std::cout << "destructed   -F" << id() << std::endl;
 }
 
-void FrameBase::removeStateBlocks()
-{
-    for (unsigned int i = 0; i < state_block_vec_.size(); i++)
-    {
-        auto sbp = getStateBlockPtr(i);
-        if (sbp != nullptr)
-        {
-            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-            {
-                getProblem()->removeStateBlockPtr(sbp);
-            }
-            delete sbp;
-            setStateBlockPtr(i, nullptr);
-        }
-    }
-}
-
 void FrameBase::remove()
 {
     if (!is_removing_)
@@ -119,19 +102,23 @@ void FrameBase::registerNewStateBlocks()
             if (sbp != nullptr)
                 getProblem()->addStateBlock(sbp);
     }
+}
 
-
-//    if (getProblem() != nullptr)
-//    {
-//        if (getPPtr() != nullptr)
-//            getProblem()->addStateBlock(getPPtr());
-//
-//        if (getOPtr() != nullptr)
-//            getProblem()->addStateBlock(getOPtr());
-//
-//        if (getVPtr() != nullptr)
-//            getProblem()->addStateBlock(getVPtr());
-//    }
+void FrameBase::removeStateBlocks()
+{
+    for (unsigned int i = 0; i < state_block_vec_.size(); i++)
+    {
+        auto sbp = getStateBlockPtr(i);
+        if (sbp != nullptr)
+        {
+            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+            {
+                getProblem()->removeStateBlockPtr(sbp);
+            }
+            delete sbp;
+            setStateBlockPtr(i, nullptr);
+        }
+    }
 }
 
 void FrameBase::setKey()
