@@ -75,7 +75,7 @@ namespace wolf {
 
           /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
            **/
-          virtual void registerNewStateBlocks();
+//          virtual void registerNewStateBlocks();
 
       private:
           /** \brief Sets the Frame status (see wolf.h for Frame status)

@@ -43,43 +43,29 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
 
   FrameIMU::~FrameIMU()
   {
-      if (getAccBiasPtr() != nullptr)
-      {
-          if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-              getProblem()->removeStateBlockPtr(getAccBiasPtr());
-          delete getAccBiasPtr();
-          setStateBlockPtr(3, nullptr);
-      }
-      if (getGyroBiasPtr() != nullptr)
-      {
-          if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-              getProblem()->removeStateBlockPtr(getGyroBiasPtr());
-          delete getGyroBiasPtr();
-          setStateBlockPtr(4, nullptr);
-      }
       std::cout << "destructed   -F-IMU" << id() << std::endl;
   }
 
-  void FrameIMU::registerNewStateBlocks()
-  {
-      if (getProblem() != nullptr)
-      {
-          if (getPPtr() != nullptr)
-              getProblem()->addStateBlock(getPPtr());
-
-          if (getVPtr() != nullptr)
-              getProblem()->addStateBlock(getVPtr());
-
-          if (getOPtr() != nullptr)
-              getProblem()->addStateBlock(getOPtr());
-
-          if (getAccBiasPtr() != nullptr)
-              getProblem()->addStateBlock(getAccBiasPtr());
-
-          if (getGyroBiasPtr() != nullptr)
-              getProblem()->addStateBlock(getGyroBiasPtr());
-      }
-  }
+//  void FrameIMU::registerNewStateBlocks()
+//  {
+//      if (getProblem() != nullptr)
+//      {
+//          if (getPPtr() != nullptr)
+//              getProblem()->addStateBlock(getPPtr());
+//
+//          if (getVPtr() != nullptr)
+//              getProblem()->addStateBlock(getVPtr());
+//
+//          if (getOPtr() != nullptr)
+//              getProblem()->addStateBlock(getOPtr());
+//
+//          if (getAccBiasPtr() != nullptr)
+//              getProblem()->addStateBlock(getAccBiasPtr());
+//
+//          if (getGyroBiasPtr() != nullptr)
+//              getProblem()->addStateBlock(getGyroBiasPtr());
+//      }
+//  }
 
   void FrameIMU::setState(const Eigen::VectorXs& _st) // Order: PVQ
   {
