@@ -91,7 +91,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             // landmark state blocks
             for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
             {
-                landmark_state_blocks = l_ptr->getStateBlockVector();
+                landmark_state_blocks = l_ptr->getUsedStateBlockVec();
                 all_state_blocks.insert(all_state_blocks.end(), landmark_state_blocks.begin(), landmark_state_blocks.end());
                 //all_state_blocks.push_back(l_ptr->getPPtr());
                 //all_state_blocks.push_back(l_ptr->getOPtr());
@@ -123,7 +123,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             // landmark state blocks
             for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
             {
-                landmark_state_blocks = l_ptr->getStateBlockVector();
+                landmark_state_blocks = l_ptr->getUsedStateBlockVec();
                 all_state_blocks.insert(all_state_blocks.end(), landmark_state_blocks.begin(), landmark_state_blocks.end());
                 //all_state_blocks.push_back(l_ptr->getPPtr());
                 //all_state_blocks.push_back(l_ptr->getOPtr());
@@ -159,7 +159,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
             {
                 // load state blocks vector
-                landmark_state_blocks = l_ptr->getStateBlockVector();
+                landmark_state_blocks = l_ptr->getUsedStateBlockVec();
 
                 for (auto state_it = landmark_state_blocks.begin(); state_it != landmark_state_blocks.end(); state_it++)
                 {

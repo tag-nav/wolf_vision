@@ -12,6 +12,7 @@ unsigned int LandmarkBase::landmark_id_count_ = 0;
 LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
             NodeBase("LANDMARK", _type),
             map_ptr_(),
+            state_block_vec_(4), // allow for 4 state blocks by default. Should be enough in all applications.
             landmark_id_(++landmark_id_count_),
             type_id_(_tp),
             status_(LANDMARK_CANDIDATE),
@@ -19,30 +20,35 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, S
 			o_ptr_(_o_ptr)
 {
     //
+    state_block_vec_[0] = _p_ptr;
+    state_block_vec_[1] = _o_ptr;
+    state_block_vec_[2] = nullptr;
+    state_block_vec_[3] = nullptr;
     std::cout << "constructed  +L" << id() << std::endl;
 }
                 
 LandmarkBase::~LandmarkBase()
 {
+    removeStateBlocks();
     std::cout << "destructed   -L" << id() << std::endl;
 
     // Remove State Blocks
-    if (p_ptr_ != nullptr)
-    {
-        if (getProblem() != nullptr)
-            getProblem()->removeStateBlockPtr(p_ptr_);
-
-        delete p_ptr_;
-        p_ptr_ = nullptr;
-    }
-    if (o_ptr_ != nullptr)
-    {
-        if (getProblem() != nullptr)
-            getProblem()->removeStateBlockPtr(o_ptr_);
-
-        delete o_ptr_;
-        o_ptr_ = nullptr;
-    }
+//    if (p_ptr_ != nullptr)
+//    {
+//        if (getProblem() != nullptr)
+//            getProblem()->removeStateBlockPtr(p_ptr_);
+//
+//        delete p_ptr_;
+//        p_ptr_ = nullptr;
+//    }
+//    if (o_ptr_ != nullptr)
+//    {
+//        if (getProblem() != nullptr)
+//            getProblem()->removeStateBlockPtr(o_ptr_);
+//
+//        delete o_ptr_;
+//        o_ptr_ = nullptr;
+//    }
 
 }
 
@@ -54,23 +60,6 @@ void LandmarkBase::remove()
         std::cout << "Removing   L" << id() << std::endl;
         LandmarkBasePtr this_L = shared_from_this(); // keep this alive while removing it
 
-        // Remove State Blocks
-        if (p_ptr_ != nullptr)
-        {
-            if (getProblem() != nullptr)
-                getProblem()->removeStateBlockPtr(p_ptr_);
-
-            delete p_ptr_;
-            p_ptr_ = nullptr;
-        }
-        if (o_ptr_ != nullptr)
-        {
-            if (getProblem() != nullptr)
-                getProblem()->removeStateBlockPtr(o_ptr_);
-
-            delete o_ptr_;
-            o_ptr_ = nullptr;
-        }
 
         // remove from upstream
         auto M = map_ptr_.lock();
@@ -82,8 +71,28 @@ void LandmarkBase::remove()
         {
             constrained_by_list_.front()->remove();
         }
+
+        // Remove State Blocks
+        removeStateBlocks();
+//        if (p_ptr_ != nullptr)
+//        {
+//            if (getProblem() != nullptr)
+//                getProblem()->removeStateBlockPtr(p_ptr_);
+//
+//            delete p_ptr_;
+//            p_ptr_ = nullptr;
+//        }
+//        if (o_ptr_ != nullptr)
+//        {
+//            if (getProblem() != nullptr)
+//                getProblem()->removeStateBlockPtr(o_ptr_);
+//
+//            delete o_ptr_;
+//            o_ptr_ = nullptr;
+//        }
     }
 }
+
 
 void LandmarkBase::setStatus(LandmarkStatus _st)
 {
@@ -126,12 +135,29 @@ void LandmarkBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
     {
-        if (p_ptr_ != nullptr)
-            getProblem()->addStateBlock(p_ptr_);
-        if (o_ptr_ != nullptr)
-            getProblem()->addStateBlock(o_ptr_);
+        for (auto sbp : getStateBlockVec())
+            if (sbp != nullptr)
+                getProblem()->addStateBlock(sbp);
     }
 }
+
+void LandmarkBase::removeStateBlocks()
+{
+    for (unsigned int i = 0; i < state_block_vec_.size(); i++)
+    {
+        auto sbp = getStateBlockPtr(i);
+        if (sbp != nullptr)
+        {
+            if (getProblem() != nullptr)
+            {
+                getProblem()->removeStateBlockPtr(sbp);
+            }
+//            delete sbp;
+            setStateBlockPtr(i, nullptr);
+        }
+    }
+}
+
 
 YAML::Node LandmarkBase::saveToYaml() const
 {
@@ -149,11 +175,6 @@ YAML::Node LandmarkBase::saveToYaml() const
         node["orientation fixed"] = p_ptr_->isFixed();
     }
     return node;
-}
-
-MapBasePtr LandmarkBase::getMapPtr()
-{
-    return map_ptr_.lock();
 }
 
 } // namespace wolf
