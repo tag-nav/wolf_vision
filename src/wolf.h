@@ -375,7 +375,7 @@ typedef StateBlockList::iterator StateBlockIter;
 typedef std::shared_ptr<StateQuaternion> StateQuaternionPtr;
 
 // - - Local Parametrization
-typedef LocalParametrizationBase* LocalParametrizationBasePtr;
+typedef std::shared_ptr<LocalParametrizationBase> LocalParametrizationBasePtr;
 
 // - - Match Feature - Landmark
 struct LandmarkMatch
