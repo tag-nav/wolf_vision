@@ -33,7 +33,7 @@ int main (int argc, char** argv)
 
     TimeStamp tf;
     if (argc == 1)
-        tf = 0.3;
+        tf = 1.0;
     else
     {
 
@@ -48,26 +48,23 @@ int main (int argc, char** argv)
     problem->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
     problem->getProcessorMotionPtr()->setOrigin((Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
 
-    Vector3s d_pos   ((Vector3s() << 0.1, 0, 0).finished());        // advance 0.1m
-    Vector3s d_theta ((Vector3s() << 0, 0, M_PI/180).finished());   // turn 1 deg
-
-    Vector6s data((Vector6s() << d_pos , d_theta).finished()); // will integrate this data repeatedly
+    Scalar dx = .1;
+    Scalar dyaw = 2*M_PI/5;
+    Vector6s data((Vector6s() << dx*cos(dyaw/2),dx*sin(dyaw/2),0,0,0,dyaw).finished()); // will integrate this data repeatedly
 
     Scalar dt = 0.1;
 
     CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(0), sen, data);
 
-    cout << "t: " << 0 << "  \t\t\t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
-    problem->print();
+    cout << "t: " << std::setprecision(2) << 0 << "  \t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
 
-    for (TimeStamp t = dt; t < tf - Constants::EPS; t += dt)
+    for (TimeStamp t = dt; t < tf+dt/2; t += dt)
     {
         cap_odo->setTimeStamp(t);
         cap_odo->setData(data);
         cap_odo->process();
 
-        cout << "t: " << t.get() << "  \t\t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
-        problem->print();
+        cout << "t: " << std::setprecision(2) << t.get() << "  \t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
 
         ceres::Solver::Summary summary = ceres_manager.solve();
 
@@ -76,6 +73,8 @@ int main (int argc, char** argv)
 //        cout << summary.BriefReport() << endl;
 
     }
+
+    problem->print();
 
     problem.reset();
 
