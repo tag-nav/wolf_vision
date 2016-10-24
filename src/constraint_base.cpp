@@ -75,7 +75,6 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr
     feature_other_ptr_(),
     landmark_other_ptr_(_landmark_ptr)
 {
-    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
     std::cout << "constructed      +c" << id() << std::endl;
 }
 

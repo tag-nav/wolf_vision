@@ -75,11 +75,11 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
         // Detect new Features, initialize Landmarks, create Constraints, ...
         processNew(max_new_features_);
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+
 
         // Establish constraints from last
         establishConstraints();
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+
 
     }
     // SECOND TIME or after KEY FRAME CALLBACK
