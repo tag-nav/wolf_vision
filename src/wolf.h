@@ -377,28 +377,6 @@ typedef std::shared_ptr<StateQuaternion> StateQuaternionPtr;
 // - - Local Parametrization
 typedef std::shared_ptr<LocalParametrizationBase> LocalParametrizationBasePtr;
 
-// - - Match Feature - Landmark
-struct LandmarkMatch
-{
-        LandmarkBasePtr landmark_ptr_;
-        Scalar normalized_score_;
-        LandmarkMatch() :
-                landmark_ptr_(nullptr), normalized_score_(0)
-        {
-
-        }
-        LandmarkMatch(LandmarkBasePtr _landmark_ptr, Scalar _normalized_score) :
-                landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
-        {
-
-        }
-};
-
-// Match map Feature - Landmark
-typedef std::shared_ptr<LandmarkMatch> LandmarkMatchPtr;
-typedef std::map<FeatureBasePtr, LandmarkMatchPtr> LandmarkMatchMap;
-
-
 // Feature-Feature correspondence
 struct FeatureMatch
 {
