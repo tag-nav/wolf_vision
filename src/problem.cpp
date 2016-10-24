@@ -556,7 +556,7 @@ void Problem::saveMap(const std::string& _filename_dot_yaml, const std::string& 
     getMapPtr()->save(_filename_dot_yaml, _map_name);
 }
 
-void Problem::print()
+void Problem::print(int level)
 {
     std::cout << std::endl;
     std::cout << "P: wolf tree status ---------------------" << std::endl;
@@ -572,24 +572,35 @@ void Problem::print()
     std::cout << "T" << std::endl;
     for (auto F : getTrajectoryPtr()->getFrameList() )
     {
-        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id() << "  <--\t";
-        for (auto cby : F->getConstrainedByList())
-            std::cout << "c" << cby->id() << ",\t";
+        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id();
+        if (level > 0)
+        {
+            std::cout << "  <--\t";
+            for (auto cby : F->getConstrainedByList())
+                std::cout << "c" << cby->id() << ",\t";
+        }
         std::cout << std::endl;
-        std::cout << (F->isFixed() ?  "    Fixed" : "    Estim") << ", ts=" << std::setprecision(5) << F->getTimeStamp().get();
-        std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
-        //        std::cout << " T @ " << F->getTrajectoryPtr().get() << std::endl;
-        std::cout << std::endl;
+        if (level > 1)
+        {
+            std::cout << (F->isFixed() ?  "    Fixed" : "    Estim") << ", ts=" << std::setprecision(5) << F->getTimeStamp().get();
+            std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
+            std::cout << std::endl;
+        }
         for (auto C : F->getCaptureList() )
         {
             std::cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << std::endl;
             for (auto f : C->getFeatureList() )
             {
-                std::cout << "      f" << f->id() << "  <--\t";
-                for (auto cby : f->getConstrainedByList())
-                    std::cout << "c" << cby->id() << ",\t";
+                std::cout << "      f" << f->id();
+                if (level > 0)
+                    {
+                    std::cout<< "  <--\t";
+                    for (auto cby : f->getConstrainedByList())
+                        std::cout << "c" << cby->id() << ",\t";
+                    }
                 std::cout << std::endl;
-                        std::cout << "        m = ( " << std::setprecision(3) << f->getMeasurement().transpose() << ")" << std::endl;
+                if (level > 1)
+                    std::cout << "        m = ( " << std::setprecision(3) << f->getMeasurement().transpose() << ")" << std::endl;
                 for (auto c : f->getConstraintList() )
                 {
                     std::cout << "        c" << c->id();
@@ -615,9 +626,13 @@ void Problem::print()
     std::cout << "M" << std::endl;
     for (auto L : getMapPtr()->getLandmarkList() )
     {
-        std::cout << "  L" << L->id() << "\t<-- ";
-        for (auto cby : L->getConstrainedByList())
-            std::cout << "c" << cby->id() << ",\t";
+        std::cout << "  L" << L->id();
+        if (level > 0)
+            {
+            std::cout << "\t<-- ";
+            for (auto cby : L->getConstrainedByList())
+                std::cout << "c" << cby->id() << ",\t";
+            }
         std::cout << std::endl;
     }
     std::cout << "-----------------------------------------" << std::endl;

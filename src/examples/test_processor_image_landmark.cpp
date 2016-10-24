@@ -103,10 +103,6 @@ int main(int argc, char** argv)
     FrameBasePtr origin_frame = wolf_problem_ptr_->createFrame(KEY_FRAME, (Vector7s()<<1,0,0,0,0,0,1).finished(), t);
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(origin_frame);
     origin_frame->fix();
-//    CaptureFix* initial_covariance = new CaptureFix(t, sen_odo_ptr, (Vector7s()<<0,0,0,0,0,0,1).finished(), Eigen::Matrix<Scalar,6,6>::Identity() * 0.1);
-//    origin_frame->addCapture(initial_covariance);
-//    initial_covariance->process();
-//    wolf_problem_ptr_->print();
 
     std::cout << "t: " << 0 << "  \t\t\t x = ( " << wolf_problem_ptr_->getCurrentState().transpose() << ")" << std::endl;
     std::cout << "--------------------------------------------------------------" << std::endl;
@@ -203,7 +199,7 @@ int main(int argc, char** argv)
 
         cap_odo->process();
 
-        //wolf_problem_ptr_->print();
+        wolf_problem_ptr_->print();
 
 
 

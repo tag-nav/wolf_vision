@@ -243,7 +243,11 @@ class Problem : public std::enable_shared_from_this<Problem>
         void removeConstraintPtr(ConstraintBasePtr _constraint_ptr);
 
         // Print and check ---------------------------------------
-        void print();
+        /**
+         * \brief print wolf tree
+         * \param level : 0: Basic links; 1: with Constrained_by; with 2: Metrics; default: 1.
+         */
+        void print(int level = 1);
         bool check();
 
 };
