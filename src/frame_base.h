@@ -128,7 +128,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         CaptureBaseList& getCaptureList();
         CaptureBasePtr addCapture(CaptureBasePtr _capt_ptr);
-        CaptureBasePtr hasCaptureOf(const SensorBasePtr _sensor_ptr);
+        CaptureBasePtr getCaptureOf(const SensorBasePtr _sensor_ptr);
         void unlinkCapture(CaptureBasePtr _cap_ptr);
 
         void getConstraintList(ConstraintBaseList& _ctr_list);
@@ -266,7 +266,7 @@ inline StateStatus FrameBase::getStatus() const
 }
 
 
-inline CaptureBasePtr FrameBase::hasCaptureOf(const SensorBasePtr _sensor_ptr)
+inline CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr)
 {
     for (CaptureBasePtr capture_ptr : getCaptureList())
         if (capture_ptr->getSensorPtr() == _sensor_ptr)
