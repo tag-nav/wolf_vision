@@ -24,7 +24,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         FeaturePointImage feature_image_;
 
     public:
-        static const unsigned int N_BLOCKS = 5; //TODO: Prueba a comentarlo
 
         ConstraintAHP(FeatureBasePtr _ftr_ptr, FrameBasePtr _current_frame_ptr, std::shared_ptr<LandmarkAHP> _landmark_ptr,
                         bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
