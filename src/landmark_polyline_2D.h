@@ -116,6 +116,7 @@ class LandmarkPolyline2D : public LandmarkBase
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
+        virtual void removeStateBlocks();
 
         /** Factory method to create new landmarks from YAML nodes
          */

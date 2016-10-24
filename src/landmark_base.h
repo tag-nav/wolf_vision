@@ -109,8 +109,8 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         void setOPtr(StateBlockPtr _o_ptr);
         void setVPtr(StateBlockPtr _v_ptr);
         virtual void registerNewStateBlocks();
-    private:
-        void removeStateBlocks();
+    protected:
+        virtual void removeStateBlocks();
 
     public:
         const Eigen::VectorXs& getDescriptor() const;        

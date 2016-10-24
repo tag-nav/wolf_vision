@@ -319,6 +319,24 @@ void LandmarkPolyline2D::registerNewStateBlocks()
 			getProblem()->addStateBlock(state);
 }
 
+void LandmarkPolyline2D::removeStateBlocks()
+{
+    for (unsigned int i = 0; i < point_state_ptr_vector_.size(); i++)
+    {
+        auto sbp = point_state_ptr_vector_[i];
+        if (sbp != nullptr)
+        {
+            if (getProblem() != nullptr)
+            {
+                getProblem()->removeStateBlockPtr(sbp);
+            }
+            point_state_ptr_vector_[i] = nullptr;
+        }
+    }
+    LandmarkBase::removeStateBlocks();
+}
+
+
 // static
 LandmarkBasePtr LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
 {
