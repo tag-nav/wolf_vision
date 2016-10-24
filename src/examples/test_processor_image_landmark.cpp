@@ -108,7 +108,6 @@ int main(int argc, char** argv)
     SensorBasePtr sen_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(),"");
     ProcessorBasePtr prc_ptr = wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
     SensorOdom3D::Ptr sen_odo_ptr = std::static_pointer_cast<SensorOdom3D>(sen_ptr);
-    ProcessorOdom3D::Ptr prc_odo_ptr = std::static_pointer_cast<ProcessorOdom3D>(prc_ptr);
     std::cout << "Odometry sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
 
