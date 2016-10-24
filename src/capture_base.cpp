@@ -1,6 +1,5 @@
 #include "capture_base.h"
 #include "sensor_base.h"
-#include "node_base.h"
 
 namespace wolf{
 
