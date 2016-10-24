@@ -66,6 +66,7 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
         p->algorithm.min_features_for_keyframe = alg["minimum features for new keyframe"].as<unsigned int>();
         p->algorithm.min_response_for_new_features = alg["minimum response for new features"].as<float>();
         p->algorithm.time_tolerance= alg["time tolerance"].as<Scalar>();
+        p->algorithm.distance= alg["distance"].as<Scalar>();
 
         Node draw = params["draw"];
         p->draw.primary_drawing = draw["primary draw"].as<bool>();

@@ -64,6 +64,7 @@ struct ProcessorParamsImage : public ProcessorParamsBase
                 unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
                 float min_response_for_new_features; ///< minimum value of the response to create a new feature
                 Scalar time_tolerance;
+                Scalar distance;
         }algorithm;
 
         struct Draw

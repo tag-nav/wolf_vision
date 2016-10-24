@@ -253,7 +253,7 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
     point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
 
-    Scalar distance = 2; // arbitrary value
+    Scalar distance = params_.algorithm.distance; // arbitrary value
     Eigen::Vector4s vec_homogeneous;
 
     point2D = pinhole::depixellizePoint(getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
