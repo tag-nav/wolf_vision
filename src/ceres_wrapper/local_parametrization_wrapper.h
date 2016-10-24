@@ -7,7 +7,7 @@ class LocalParametrizationBase;
 }
 
 //Ceres includes
-#include "wolf.h"
+#include "../wolf.h"
 #include "ceres/ceres.h"
 
 namespace wolf {
