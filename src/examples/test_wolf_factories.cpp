@@ -64,7 +64,7 @@ int main(void)
 
     // Start creating the problem
 
-    Problem problem(FRM_PO_3D);
+    ProblemPtr problem = Problem::create(FRM_PO_3D);
 
     // define some useful parameters
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
@@ -82,17 +82,17 @@ int main(void)
     cout << "\n==================== Install Sensors ====================" << endl;
 
     // Install sensors
-    problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
-    problem.installSensor("CAMERA",     "front right camera",   pq_3d,  WOLF_CONFIG + "/camera.yaml");
-    problem.installSensor("ODOM 2D",    "main odometer",        po_2d,  intr_odom2d_ptr);
-    problem.installSensor("GPS FIX",    "GPS fix",              p_3d);
-    problem.installSensor("IMU",        "inertial",             pq_3d);
-    problem.installSensor("GPS",        "GPS raw",              p_3d);
-    problem.installSensor("ODOM 2D",    "aux odometer",         po_2d,  intr_odom2d_ptr);
-    problem.installSensor("CAMERA", "rear camera", pq_3d, WOLF_ROOT + "/src/examples/camera.yaml");
+    problem->installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
+    problem->installSensor("CAMERA",     "front right camera",   pq_3d,  WOLF_CONFIG + "/camera.yaml");
+    problem->installSensor("ODOM 2D",    "main odometer",        po_2d,  intr_odom2d_ptr);
+    problem->installSensor("GPS FIX",    "GPS fix",              p_3d);
+    problem->installSensor("IMU",        "inertial",             pq_3d);
+    problem->installSensor("GPS",        "GPS raw",              p_3d);
+    problem->installSensor("ODOM 2D",    "aux odometer",         po_2d,  intr_odom2d_ptr);
+    problem->installSensor("CAMERA", "rear camera", pq_3d, WOLF_ROOT + "/src/examples/camera.yaml");
 
     // print available sensors
-    for (auto sen : problem.getHardwarePtr()->getSensorList())
+    for (auto sen : problem->getHardwarePtr()->getSensorList())
     {
         cout << "Sensor " << setw(2) << left << sen->id()
                 << " | type " << setw(2) << sen->typeId()
@@ -103,14 +103,14 @@ int main(void)
     cout << "\n=================== Install Processors ===================" << endl;
 
     // Install processors and bind them to sensors -- by sensor name!
-    problem.installProcessor("ODOM 2D", "main odometry",    "main odometer");
-    problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer");
-    problem.installProcessor("IMU",     "pre-integrated",   "inertial");
-    problem.installProcessor("IMAGE",   "ORB",              "front left camera", WOLF_CONFIG + "/processor_image_ORB.yaml");
-//    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
+    problem->installProcessor("ODOM 2D", "main odometry",    "main odometer");
+    problem->installProcessor("ODOM 3D", "sec. odometry",    "aux odometer");
+    problem->installProcessor("IMU",     "pre-integrated",   "inertial");
+    problem->installProcessor("IMAGE",   "ORB",              "front left camera", WOLF_CONFIG + "/processor_image_ORB.yaml");
+//    problem->createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors
-    for (auto sen : problem.getHardwarePtr()->getSensorList())
+    for (auto sen : problem->getHardwarePtr()->getSensorList())
         for (auto prc : sen->getProcessorList())
             cout << "Processor " << setw(2) << left  << prc->id()
             << " | type : " << setw(8) << prc->getType()

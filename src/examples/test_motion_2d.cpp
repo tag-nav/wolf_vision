@@ -50,7 +50,7 @@ int main()
     Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2, 2) * 0.01;
 
     // Create Wolf tree nodes
-    ProblemPtr problem_ptr = std::make_shared<Problem>(FRM_PO_2D);
+    ProblemPtr problem_ptr = Problem::create(FRM_PO_2D);
     SensorBasePtr sensor_odom_ptr = std::make_shared< SensorBase>(SEN_ODOM_2D, "ODOM 2D", std::make_shared<StateBlock>(Eigen::Vector2s::Zero(), true),
                                             std::make_shared<StateBlock>(Eigen::Vector1s::Zero(), true),
                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(0), true), 0);

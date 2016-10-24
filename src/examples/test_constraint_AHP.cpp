@@ -20,8 +20,7 @@ int main()
     std::cout << "Wolf path: " << wolf_path << std::endl;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = std::make_shared<Problem>(FRM_PO_3D);
-    wolf_problem_ptr_->setup();
+    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
 
     /* Do this while there aren't extrinsic parameters on the yaml */
     Eigen::Vector7s extrinsic_cam;

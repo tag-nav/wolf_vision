@@ -25,15 +25,13 @@ std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); ret
 
 
 Problem::Problem(FrameStructure _frame_structure) :
-        hardware_ptr_(),
-        trajectory_ptr_(),
-        map_ptr_(),
+        hardware_ptr_(std::make_shared<HardwareBase>()),
+        trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
+        map_ptr_(std::make_shared<MapBase>()),
         processor_motion_ptr_(),
         origin_is_set_(false)
 {
-    hardware_ptr_ = std::make_shared<HardwareBase>();
-    trajectory_ptr_ = std::make_shared<TrajectoryBase>(_frame_structure);
-    map_ptr_ = std::make_shared<MapBase>();
+    //
 }
 
 void Problem::setup()
@@ -45,9 +43,11 @@ void Problem::setup()
 
 ProblemPtr Problem::create(FrameStructure _frame_structure)
 {
-    ProblemPtr p(std::make_shared<Problem>(_frame_structure));
-    p->setup();
-    return p;
+    Problem p(_frame_structure);
+    p.setup();
+//    ProblemPtr p(std::make_shared<Problem>(_frame_structure));
+//    p->setup();
+    return p.shared_from_this();
 }
 
 Problem::~Problem()
@@ -316,13 +316,11 @@ bool Problem::permitKeyFrame(ProcessorBasePtr _processor_ptr)
 
 void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _processor_ptr, const Scalar& _time_tolerance)
 {
-    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
     //std::cout << "Problem::keyFrameCallback: processor " << _processor_ptr->getName() << std::endl;
     for (auto sensor : hardware_ptr_->getSensorList())
     	for (auto processor : sensor->getProcessorList())
     		if (processor->id() != _processor_ptr->id())
                 processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
-    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 }
 
 LandmarkBasePtr Problem::addLandmark(LandmarkBasePtr _lmk_ptr)
@@ -333,7 +331,6 @@ LandmarkBasePtr Problem::addLandmark(LandmarkBasePtr _lmk_ptr)
 
 void Problem::addLandmarkList(LandmarkBaseList _lmk_list)
 {
-    //std::cout << "Problem::addLandmarkList" << std::endl;
     getMapPtr()->addLandmarkList(_lmk_list);
 }
 

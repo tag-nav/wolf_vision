@@ -58,11 +58,12 @@ class Problem : public std::enable_shared_from_this<Problem>
         std::list<ConstraintNotification> constraint_notification_list_;
         bool origin_is_set_;
 
-    public:
-
-        Problem(FrameStructure _frame_structure);
+    private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
+        Problem(FrameStructure _frame_structure); // USE create() below !!
         void setup();
-        static ProblemPtr create(FrameStructure _frame_structure);
+
+    public:
+        static ProblemPtr create(FrameStructure _frame_structure); // USE THIS AS A CONSTRUCTOR!
         virtual ~Problem();
 
         // Properties -----------------------------------------

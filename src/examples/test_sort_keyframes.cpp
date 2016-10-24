@@ -29,7 +29,7 @@ void printFrames(ProblemPtr _problem_ptr)
 
 int main()
 {
-    ProblemPtr problem_ptr = std::make_shared<Problem>(FRM_PO_2D);
+    ProblemPtr problem_ptr = Problem::create(FRM_PO_2D);
 
     problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.1));
     FrameBasePtr frm2 = problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.2));

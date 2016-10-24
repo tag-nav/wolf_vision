@@ -59,7 +59,6 @@ int main (int argc, char** argv)
 
     cout << "t: " << 0 << "  \t\t\t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
     problem->print();
-    cout << "--------------------------------------------------------------" << endl;
 
     for (TimeStamp t = dt; t < tf - Constants::EPS; t += dt)
     {
@@ -69,7 +68,6 @@ int main (int argc, char** argv)
 
         cout << "t: " << t.get() << "  \t\t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
         problem->print();
-        cout << "--------------------------------------------------------------" << endl;
 
         ceres::Solver::Summary summary = ceres_manager.solve();
 
