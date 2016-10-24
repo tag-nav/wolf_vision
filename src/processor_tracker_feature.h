@@ -8,8 +8,10 @@
 #ifndef PROCESSOR_TRACKER_FEATURE_H_
 #define PROCESSOR_TRACKER_FEATURE_H_
 
+//wolf includes
 #include "processor_tracker.h"
 #include "capture_base.h"
+#include "feature_match.h"
 #include "wolf.h"
 
 namespace wolf

@@ -377,14 +377,14 @@ typedef std::shared_ptr<StateQuaternion> StateQuaternionPtr;
 // - - Local Parametrization
 typedef std::shared_ptr<LocalParametrizationBase> LocalParametrizationBasePtr;
 
-// Feature-Feature correspondence
-struct FeatureMatch
-{
-        FeatureBasePtr feature_ptr_;
-        Scalar normalized_score_;
-};
-
-typedef std::map<FeatureBasePtr, FeatureMatch> FeatureMatchMap;
+// // Feature-Feature correspondence
+// struct FeatureMatch
+// {
+//         FeatureBasePtr feature_ptr_;
+//         Scalar normalized_score_;
+// };
+// 
+// typedef std::map<FeatureBasePtr, FeatureMatch> FeatureMatchMap;
 
 
 
