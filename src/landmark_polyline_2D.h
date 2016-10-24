@@ -76,7 +76,7 @@ class LandmarkPolyline2D : public LandmarkBase
 
         /** \brief Gets a vector of all state blocks pointers
          **/
-        virtual std::vector<StateBlockPtr> getStateBlockVector() const;
+        virtual std::vector<StateBlockPtr> getPointsStateBlockVector() const;
 
         /** \brief Adds a new point to the landmark
          * \param _point: the point to be added
@@ -168,7 +168,7 @@ inline int LandmarkPolyline2D::getLastId() const {
 	return first_id_ + (int) (point_state_ptr_vector_.size()) - 1;
 }
 
-inline std::vector<StateBlockPtr> LandmarkPolyline2D::getStateBlockVector() const
+inline std::vector<StateBlockPtr> LandmarkPolyline2D::getPointsStateBlockVector() const
 {
     return std::vector<StateBlockPtr>(point_state_ptr_vector_.begin(), point_state_ptr_vector_.end());
 }

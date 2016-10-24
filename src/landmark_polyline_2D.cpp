@@ -344,7 +344,7 @@ LandmarkBasePtr LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
     lmk_ptr->setId(id);
 
     // fix all points
-    for (auto st_ptr : lmk_ptr->getStateBlockVector())
+    for (auto st_ptr : lmk_ptr->getPointsStateBlockVector())
         st_ptr->fix();
 
     return lmk_ptr;
