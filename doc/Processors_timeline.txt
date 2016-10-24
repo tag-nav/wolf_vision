@@ -3,19 +3,19 @@ ProcessorBase		ProcessorTracker	PrcTrkLandmark		ProcTrkLmkDerived
 process(inc) >		process(inc)		
 						preProcess()
 
-			  processNew() >	processNew()
-						  detectNewFeat() >	detectNewFeat()
-						    createNewLmks()
-						    createLmk() >	createLmk()
-						  findLmks() >		findLmks()
+					  processNew() >	processNew()
+										  detectNewFeat() >	detectNewFeat()
+										    createNewLmks()
+										    createLmk() >	createLmk()
+										  findLmks() >		findLmks()
 
-			  estabConstr() >	estabConstr()
-						  createConstr() >	createConstr()
+					  estabConstr() >	estabConstr()
+										  createConstr() >	createConstr()
 
-			  processKnown() >	processKnown()
-						  findLmks() >		findLmks()
+					  processKnown() >	processKnown()
+										  findLmks() >		findLmks()
 
-			< makeFrame()
+					< makeFrame()
 
 makeFrame()
 P.createFr()
@@ -28,27 +28,27 @@ kfCallback() >		  kfCallback()
 ProcessorBase		ProcessorTracker	PrcTrkFeature		ProcTrkFeatDerived
 =======================================================================================
 process(inc) >		process(inc)		
-			  preProcess() >	preProcess() > 		preProcess()
+					  preProcess() >	preProcess() > 		preProcess()
 
-			  processNew() >	processNew()
-						  detectNewFeat() >	detectNewFeat()
-						  createNewLmks()
-						    createLmk() >	createLmk()
-						  trackFeatures() >	trackFeatures()
+					  processNew() >	processNew()
+										  detectNewFeat() >	detectNewFeat()
+										  createNewLmks()
+										    createLmk() >	createLmk()
+										  trackFeatures() >	trackFeatures()
 
-			    estabConstr() >	estabConstr()
-						  createConstr() >	createConstr()
+			 		    estabConstr() >	estabConstr()
+										  createConstr() >	createConstr()
 
-			  processKnown() >	processKnown()
-						  trackFeatures() >	trackFeatures()
-						  correctFtDrift() >	correctFtDrift()
+					  processKnown() >	processKnown()
+										  trackFeatures() >	trackFeatures()
+										  correctFtDrift() >	correctFtDrift()
 
-			< makeFrame()
+					< makeFrame()
 
 makeFrame()
-P.createFr()
-P.kfCallback()
-kfCallback() >		kfCallback()
+  P.createFr()
+  P.kfCallback()
+  kfCallback() >	kfCallback()
 =======================================================================================
 
 
@@ -56,23 +56,23 @@ kfCallback() >		kfCallback()
 ProcessorBase		ProcessorMotion		PrcMotionDerived
 ==============================================================
 process(inc) >		process(inc)
-			  preProcess() >	preProcess()
+					  preProcess() >	preProcess()
 
-			  integrate()
-			    updateDt()
-			    data2delta() >	data2delta()
-			    deltaPlusDelta() >	deltaPlusDelta()
+					  integrate()
+					    updateDt()
+					    data2delta() >	data2delta()
+					    deltaPlusDelta() >	deltaPlusDelta()
 
-			  voteForKF() >		voteForKF()
+					  voteForKF() >		voteForKF()
 
-			  makeFrame()
+					  makeFrame()
 
-			makeFrame()
-			  P.createFrame()
-			  P.kfCallback()
-			  kfCallback()
+					makeFrame()
+					  P.createFrame()
+					  P.kfCallback()
+					  kfCallback()
 
-			kfCallback()
-			  createConstr() >	createConstr()
-			  reintegrate()
+					kfCallback()
+					  createConstr() >	createConstr()
+					  reintegrate()
 ==============================================================
