@@ -192,14 +192,15 @@ int main(int argc, char** argv)
 
 
     problem_ptr_->print();
-    problem_ptr_->check();
+//    problem_ptr_->check();
 
 //    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
-//    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
+    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
 //    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
 //    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
 
-    problem_ptr_->check();
+    problem_ptr_->print();
+//    problem_ptr_->check();
 
     // close data files
     data_file_acc.close(); // no impact on leaks
