@@ -1006,7 +1006,7 @@ ConstraintBasePtr ProcessorTrackerLandmarkPolyline::createConstraint(FeatureBase
     return nullptr;
 }
 
-ProcessorBasePtr ProcessorTrackerLandmarkPolyline::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
+ProcessorBasePtr ProcessorTrackerLandmarkPolyline::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr)
 {
     ProcessorParamsPolyline::Ptr params = std::static_pointer_cast<ProcessorParamsPolyline>(_params);
     ProcessorTrackerLandmarkPolyline::Ptr prc_ptr = std::make_shared<ProcessorTrackerLandmarkPolyline>(*params);

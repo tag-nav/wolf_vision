@@ -85,7 +85,8 @@ class ProcessorOdom3D : public ProcessorMotion
     // Factory method
     public:
         static ProcessorBasePtr create(const std::string& _unique_name,
-                                       const ProcessorParamsBasePtr _params);
+                                       const ProcessorParamsBasePtr _params,
+                                       const SensorBasePtr sensor_ptr = nullptr);
 };
 
 inline void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data,

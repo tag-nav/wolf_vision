@@ -397,7 +397,7 @@ void ProcessorImageFeature::drawFeatures(cv::Mat _image)
 }
 
 
-ProcessorBasePtr ProcessorImageFeature::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
+ProcessorBasePtr ProcessorImageFeature::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
 {
     ProcessorImageFeature::Ptr prc_ptr = std::make_shared<ProcessorImageFeature>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
     prc_ptr->setName(_unique_name);

@@ -167,7 +167,8 @@ namespace wolf
 
 typedef Factory<ProcessorBase,
         const std::string&,
-        const ProcessorParamsBasePtr> ProcessorFactory;
+        const ProcessorParamsBasePtr,
+        const SensorBasePtr> ProcessorFactory;
 template<>
 inline std::string ProcessorFactory::getClass()
 {

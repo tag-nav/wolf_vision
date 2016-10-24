@@ -101,7 +101,7 @@ int main(int argc, char** argv)
     // PROCESSOR
     // one-liner API
     ProcessorImageLandmark::Ptr prc_img_ptr = std::static_pointer_cast<ProcessorImageLandmark>( wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml") );
-    prc_img_ptr->setup(camera_ptr);
+//    prc_img_ptr->setup(camera_ptr);
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
 
@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     ProcessorBasePtr prc_ptr = wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
     SensorOdom3D::Ptr sen_odo_ptr = std::static_pointer_cast<SensorOdom3D>(sen_ptr);
     ProcessorOdom3D::Ptr prc_odo_ptr = std::static_pointer_cast<ProcessorOdom3D>(prc_ptr);
-    prc_odo_ptr->setup(sen_odo_ptr);
+//    prc_odo_ptr->setup(sen_odo_ptr);
 
 
     // Origin Key Frame

@@ -77,7 +77,7 @@ class ProcessorIMU : public ProcessorMotion{
         void remapData(const Eigen::VectorXs& _data);
 
     public:
-        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
 
 }

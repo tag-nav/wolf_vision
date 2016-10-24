@@ -58,7 +58,7 @@ bool ProcessorGPS::keyFrameCallback(wolf::FrameBasePtr, const Scalar& _time_tol)
     return false;
 }
 
-wolf::ProcessorBasePtr ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
+wolf::ProcessorBasePtr ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
 {
     ProcessorGPS* prc_ptr = new ProcessorGPS();
     prc_ptr->setName(_unique_name);

@@ -482,9 +482,10 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
 
 //namespace wolf{
 
-ProcessorBasePtr ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
+ProcessorBasePtr ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
     std::shared_ptr<ProcessorImageLandmark> prc_ptr = std::make_shared<ProcessorImageLandmark>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
+    prc_ptr->setup(std::static_pointer_cast<SensorCamera>(_sen_ptr));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
