@@ -801,8 +801,6 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
              deltaZero(),
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)
-//             Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_),
-//             Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_)
              });
 }
 

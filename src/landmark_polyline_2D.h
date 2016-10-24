@@ -53,11 +53,11 @@ class LandmarkPolyline2D : public LandmarkBase
         bool isFirstDefined() const;
         bool isLastDefined() const;
 
-        /** \brief Gets wether the polyline is closed or not
+        /** \brief Gets whether the polyline is closed or not
          **/
         bool isClosed() const;
 
-        /** \brief Gets wether the given state block point is defined or not (assumes the state block is in the landmark)
+        /** \brief Gets whether the given state block point is defined or not (assumes the state block is in the landmark)
          **/
         bool isDefined(StateBlockPtr _state_block) const;
 
