@@ -84,7 +84,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         {
             return state_block_vec_;
         }
-        std::vector<StateBlockPtr> getUsedStateBlockVec()
+        std::vector<StateBlockPtr> getUsedStateBlockVec() const
         {
             std::vector<StateBlockPtr> used_state_block_vec(0);
             for (auto sbp : state_block_vec_)
@@ -105,9 +105,9 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
         StateBlockPtr getVPtr() const;
-        void setPPtr(StateBlockPtr _p_ptr);
-        void setOPtr(StateBlockPtr _o_ptr);
-        void setVPtr(StateBlockPtr _v_ptr);
+        void setPPtr(const StateBlockPtr _p_ptr);
+        void setOPtr(const StateBlockPtr _o_ptr);
+        void setVPtr(const StateBlockPtr _v_ptr);
         virtual void registerNewStateBlocks();
     protected:
         virtual void removeStateBlocks();
@@ -205,12 +205,12 @@ inline StateBlockPtr LandmarkBase::getOPtr() const
     return o_ptr_;
 }
 
-inline void LandmarkBase::setPPtr(StateBlockPtr _st_ptr)
+inline void LandmarkBase::setPPtr(const StateBlockPtr _st_ptr)
 {
     p_ptr_ = _st_ptr;
 }
 
-inline void LandmarkBase::setOPtr(StateBlockPtr _st_ptr)
+inline void LandmarkBase::setOPtr(const StateBlockPtr _st_ptr)
 {
     o_ptr_ = _st_ptr;
 }

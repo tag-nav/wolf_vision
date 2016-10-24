@@ -94,9 +94,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
         StateBlockPtr getVPtr() const;
-        void setPPtr(StateBlockPtr _p_ptr);
-        void setOPtr(StateBlockPtr _o_ptr);
-        void setVPtr(StateBlockPtr _v_ptr);
+        void setPPtr(const StateBlockPtr _p_ptr);
+        void setOPtr(const StateBlockPtr _o_ptr);
+        void setVPtr(const StateBlockPtr _v_ptr);
 
     protected:
         StateBlockPtr getStateBlockPtr(unsigned int _i) const
@@ -104,7 +104,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
             assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
             return state_block_vec_[_i];
         }
-        void setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr)
+        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
         {
             state_block_vec_[_i] = _sb_ptr;
         }
@@ -219,7 +219,7 @@ inline StateBlockPtr FrameBase::getPPtr() const
 {
     return state_block_vec_[0];
 }
-inline void FrameBase::setPPtr(StateBlockPtr _p_ptr)
+inline void FrameBase::setPPtr(const StateBlockPtr _p_ptr)
 {
     state_block_vec_[0] = _p_ptr;
 }
@@ -228,7 +228,7 @@ inline StateBlockPtr FrameBase::getOPtr() const
 {
     return state_block_vec_[1];
 }
-inline void FrameBase::setOPtr(StateBlockPtr _o_ptr)
+inline void FrameBase::setOPtr(const StateBlockPtr _o_ptr)
 {
     state_block_vec_[1] = _o_ptr;
 }
@@ -237,7 +237,7 @@ inline StateBlockPtr FrameBase::getVPtr() const
 {
     return state_block_vec_[2];
 }
-inline void FrameBase::setVPtr(StateBlockPtr _v_ptr)
+inline void FrameBase::setVPtr(const StateBlockPtr _v_ptr)
 {
     state_block_vec_[2] = _v_ptr;
 }

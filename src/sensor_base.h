@@ -91,7 +91,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
             assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
             return state_block_vec_[_i];
         }
-        void setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr)
+        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
         {
             state_block_vec_[_i] = _sb_ptr;
         }
@@ -106,9 +106,9 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * We recommend you use a struct for this purpose if the number of intrinsic parameters is large.)
          */
         StateBlockPtr getIntrinsicPtr() const;
-        void setPPtr(StateBlockPtr _p_ptr);
-        void setOPtr(StateBlockPtr _o_ptr);
-        void setIntrinsicPtr(StateBlockPtr _intr_ptr);
+        void setPPtr(const StateBlockPtr _p_ptr);
+        void setOPtr(const StateBlockPtr _o_ptr);
+        void setIntrinsicPtr(const StateBlockPtr _intr_ptr);
         void removeStateBlocks();
 
         ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
@@ -215,17 +215,17 @@ inline HardwareBasePtr SensorBase::getHardwarePtr()
     return hardware_ptr_.lock();
 }
 
-inline void SensorBase::setPPtr(StateBlockPtr _p_ptr)
+inline void SensorBase::setPPtr(const StateBlockPtr _p_ptr)
 {
     setStateBlockPtr(0, _p_ptr);
 }
 
-inline void SensorBase::setOPtr(StateBlockPtr _o_ptr)
+inline void SensorBase::setOPtr(const StateBlockPtr _o_ptr)
 {
     setStateBlockPtr(1, _o_ptr);
 }
 
-inline void SensorBase::setIntrinsicPtr(StateBlockPtr _intr_ptr)
+inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
 {
     setStateBlockPtr(2, _intr_ptr);
 }
