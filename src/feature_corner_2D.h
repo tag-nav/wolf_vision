@@ -14,7 +14,7 @@ class FeatureCorner2D : public FeatureBase
 {
     public:
 
-        FeatureCorner2D(const Eigen::Vector4s & _measurement, const Eigen::Matrix4s & _meas_covariance); //TODO: add const Scalar& aperture);
+        FeatureCorner2D(const Eigen::Vector4s & _measurement, const Eigen::Matrix4s & _meas_covariance);
         virtual ~FeatureCorner2D();
         
         /** \brief Returns aperture
