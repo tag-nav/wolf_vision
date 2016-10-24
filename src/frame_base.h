@@ -60,12 +60,13 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         virtual ~FrameBase();
         void remove();
 
-        unsigned int id();
 
 
 
         // Frame properties -----------------------------------------------
     public:
+        unsigned int id();
+
         // KeyFrame / NonKeyFrame
         bool isKey() const;
         void setKey();
@@ -83,14 +84,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         // State blocks
     public:
-        const std::vector<StateBlockPtr>& getStateBlockVec() const
-        {
-            return state_block_vec_;
-        }
-        std::vector<StateBlockPtr>& getStateBlockVec()
-        {
-            return state_block_vec_;
-        }
+        void registerNewStateBlocks();
+        const std::vector<StateBlockPtr>& getStateBlockVec() const;
+        std::vector<StateBlockPtr>& getStateBlockVec();
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
         StateBlockPtr getVPtr() const;
@@ -99,15 +95,10 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setVPtr(const StateBlockPtr _v_ptr);
 
     protected:
-        StateBlockPtr getStateBlockPtr(unsigned int _i) const
-        {
-            assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
-            return state_block_vec_[_i];
-        }
-        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
-        {
-            state_block_vec_[_i] = _sb_ptr;
-        }
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
+        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+    private:
+        void removeStateBlocks();
 
         // states
     public:
@@ -137,14 +128,10 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         ConstraintBaseList& getConstrainedByList();
 
 
-        /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
-         **/
-        void registerNewStateBlocks();
 
     private:
         StateStatus getStatus() const;
         void setStatus(StateStatus _st);
-        void removeStateBlocks();
 };
 
 } // namespace wolf
@@ -215,6 +202,16 @@ inline TimeStamp FrameBase::getTimeStamp() const
     return time_stamp_.get();
 }
 
+inline const std::vector<StateBlockPtr>& FrameBase::getStateBlockVec() const
+{
+    return state_block_vec_;
+}
+
+inline std::vector<StateBlockPtr>& FrameBase::getStateBlockVec()
+{
+    return state_block_vec_;
+}
+
 inline StateBlockPtr FrameBase::getPPtr() const
 {
     return state_block_vec_[0];
@@ -237,9 +234,21 @@ inline StateBlockPtr FrameBase::getVPtr() const
 {
     return state_block_vec_[2];
 }
+
 inline void FrameBase::setVPtr(const StateBlockPtr _v_ptr)
 {
     state_block_vec_[2] = _v_ptr;
+}
+
+inline StateBlockPtr FrameBase::getStateBlockPtr(unsigned int _i) const
+{
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+    return state_block_vec_[_i];
+}
+
+inline void FrameBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
+{
+    state_block_vec_[_i] = _sb_ptr;
 }
 
 inline TrajectoryBasePtr FrameBase::getTrajectoryPtr() const

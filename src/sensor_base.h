@@ -78,23 +78,10 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         SensorType typeId();
 
         // State blocks
-        const std::vector<StateBlockPtr>& getStateBlockVec() const
-        {
-            return state_block_vec_;
-        }
-        std::vector<StateBlockPtr>& getStateBlockVec()
-        {
-            return state_block_vec_;
-        }
-        StateBlockPtr getStateBlockPtr(unsigned int _i) const
-        {
-            assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
-            return state_block_vec_[_i];
-        }
-        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
-        {
-            state_block_vec_[_i] = _sb_ptr;
-        }
+        const std::vector<StateBlockPtr>& getStateBlockVec() const;
+        std::vector<StateBlockPtr>& getStateBlockVec();
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
+        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
 
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
@@ -132,7 +119,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         ProblemPtr getProblem();
         HardwareBasePtr getHardwarePtr();
-        void setHardwarePtr(HardwareBasePtr _hw_ptr);
+        void setHardwarePtr(const HardwareBasePtr _hw_ptr);
 
 };
 
@@ -180,6 +167,23 @@ inline ProcessorBaseList& SensorBase::getProcessorList()
     return processor_list_;
 }
 
+inline const std::vector<StateBlockPtr>& SensorBase::getStateBlockVec() const
+{
+    return state_block_vec_;
+}
+inline std::vector<StateBlockPtr>& SensorBase::getStateBlockVec()
+{
+    return state_block_vec_;
+}
+inline StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i) const
+{
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+    return state_block_vec_[_i];
+}
+inline void SensorBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
+{
+    state_block_vec_[_i] = _sb_ptr;
+}
 inline StateBlockPtr SensorBase::getPPtr() const
 {
     return getStateBlockPtr(0);
@@ -230,7 +234,7 @@ inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
     setStateBlockPtr(2, _intr_ptr);
 }
 
-inline void SensorBase::setHardwarePtr(HardwareBasePtr _hw_ptr)
+inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
 {
     hardware_ptr_ = _hw_ptr;
 }

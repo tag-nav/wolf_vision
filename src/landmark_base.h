@@ -56,52 +56,24 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
         virtual ~LandmarkBase();
         void remove();
+        virtual YAML::Node saveToYaml() const;
 
-        /** \brief Returns landmark_id_, the landmark unique id
-         **/
+        // Properties
         unsigned int id();
         void setId(unsigned int _id);
         const LandmarkType getTypeId() const;
 
-        /** \brief Sets the Landmark status
-         **/
+        // Fix / unfix
         void setStatus(LandmarkStatus _st);
-
-        /** \brief Sets the Landmark status to fixed
-         **/
         void fix();
-
-        /** \brief Sets the Landmark status to estimated
-         **/
         void unfix();
 
         // State blocks
-        const std::vector<StateBlockPtr>& getStateBlockVec() const
-        {
-            return state_block_vec_;
-        }
-        std::vector<StateBlockPtr>& getStateBlockVec()
-        {
-            return state_block_vec_;
-        }
-        std::vector<StateBlockPtr> getUsedStateBlockVec() const
-        {
-            std::vector<StateBlockPtr> used_state_block_vec(0);
-            for (auto sbp : state_block_vec_)
-                if (sbp)
-                    used_state_block_vec.push_back(sbp);
-            return used_state_block_vec;
-        }
-        StateBlockPtr getStateBlockPtr(unsigned int _i) const
-        {
-            assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
-            return state_block_vec_[_i];
-        }
-        void setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr)
-        {
-            state_block_vec_[_i] = _sb_ptr;
-        }
-
+        const std::vector<StateBlockPtr>& getStateBlockVec() const;
+        std::vector<StateBlockPtr>& getStateBlockVec();
+        std::vector<StateBlockPtr> getUsedStateBlockVec() const;
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
+        void setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr);
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
         StateBlockPtr getVPtr() const;
@@ -112,24 +84,21 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
     protected:
         virtual void removeStateBlocks();
 
+        // Descriptor
     public:
         const Eigen::VectorXs& getDescriptor() const;        
         Scalar getDescriptor(unsigned int _ii) const;
         void setDescriptor(const Eigen::VectorXs& _descriptor);
 
 
-        virtual YAML::Node saveToYaml() const;
-
+        // Navigate wolf tree
         void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
 
-        void setMapPtr(MapBasePtr _map_ptr){map_ptr_ = _map_ptr;}
-        MapBasePtr getMapPtr()
-        {
-            return map_ptr_.lock();
-        }
         ProblemPtr getProblem();
+        void setMapPtr(const MapBasePtr _map_ptr);
+        MapBasePtr getMapPtr();
 
 };
 
@@ -154,6 +123,16 @@ inline wolf::ProblemPtr LandmarkBase::getProblem()
         }
     }
     return prb;
+}
+
+inline MapBasePtr LandmarkBase::getMapPtr()
+{
+    return map_ptr_.lock();
+}
+
+inline void LandmarkBase::setMapPtr(const MapBasePtr _map_ptr)
+{
+    map_ptr_ = _map_ptr;
 }
 
 inline unsigned int LandmarkBase::id()
@@ -193,6 +172,36 @@ inline unsigned int LandmarkBase::getHits() const
 inline ConstraintBaseList& LandmarkBase::getConstrainedByList()
 {
     return constrained_by_list_;
+}
+
+inline const std::vector<StateBlockPtr>& LandmarkBase::getStateBlockVec() const
+{
+    return state_block_vec_;
+}
+
+inline std::vector<StateBlockPtr>& LandmarkBase::getStateBlockVec()
+{
+    return state_block_vec_;
+}
+
+inline std::vector<StateBlockPtr> LandmarkBase::getUsedStateBlockVec() const
+{
+    std::vector<StateBlockPtr> used_state_block_vec(0);
+    for (auto sbp : state_block_vec_)
+        if (sbp)
+            used_state_block_vec.push_back(sbp);
+    return used_state_block_vec;
+}
+
+inline StateBlockPtr LandmarkBase::getStateBlockPtr(unsigned int _i) const
+{
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+    return state_block_vec_[_i];
+}
+
+inline void LandmarkBase::setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr)
+{
+    state_block_vec_[_i] = _sb_ptr;
 }
 
 inline StateBlockPtr LandmarkBase::getPPtr() const
