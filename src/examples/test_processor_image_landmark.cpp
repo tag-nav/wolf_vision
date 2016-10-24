@@ -1,8 +1,8 @@
 /**
- * \file test_processor_tracker_landmark.cpp
+ * \file test_processor_tracker_image_landmark.cpp
  *
  *  Created on: Apr 12, 2016
- *      \author: jvallve
+ *      \author: jtarraso
  */
 
 //std
@@ -82,33 +82,18 @@ int main(int argc, char** argv)
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
 
     // CAMERA SENSOR
-    /* Do this while there aren't extrinsic parameters on the yaml */
-    Eigen::Vector7s extrinsic_cam;
-    extrinsic_cam[0] = 0; //px
-    extrinsic_cam[1] = 0; //py
-    extrinsic_cam[2] = 0; //pz
-    extrinsic_cam[3] = 0; //qx
-    extrinsic_cam[4] = 0; //qy
-    extrinsic_cam[5] = 0; //qz
-    extrinsic_cam[6] = 1; //qw
-    std::cout << "========extrinsic_cam: " << extrinsic_cam.transpose() << std::endl;
-    const Eigen::VectorXs extr = extrinsic_cam;
-    /* Do this while there aren't extrinsic parameters on the yaml */
-
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_path + "/src/examples/camera_params.yaml");
     SensorCamera::Ptr camera_ptr = std::static_pointer_cast<SensorCamera>(sensor_ptr);
     camera_ptr->setImgWidth(img_width);
     camera_ptr->setImgHeight(img_height);
 
     // IMAGE PROCESSOR
-    ProcessorImageLandmark::Ptr prc_img_ptr = std::static_pointer_cast<ProcessorImageLandmark>( wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml") );
-    std::cout << "Image sensor & processor created and added to wolf problem" << std::endl;
+    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
 
     // ODOM SENSOR AND PROCESSOR
     SensorBasePtr sen_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(),"");
     ProcessorBasePtr prc_ptr = wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
     SensorOdom3D::Ptr sen_odo_ptr = std::static_pointer_cast<SensorOdom3D>(sen_ptr);
-    std::cout << "Odometry sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
 
 
@@ -197,7 +182,6 @@ int main(int argc, char** argv)
         else
         {
             // we have two states
-            std::cout << prev_prev_key_fr_ptr->getTimeStamp().get() << std::endl;
             Vector7s x_prev_prev = prev_prev_key_fr_ptr->getState();
 
             // some maps to avoid local variables
@@ -236,7 +220,7 @@ int main(int argc, char** argv)
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
         ceres::Solver::Summary summary = ceres_manager.solve();
-        std::cout << summary.FullReport() << std::endl;
+        std::cout << summary.BriefReport() << std::endl;
 
 
         std::cout << "Last key frame pose: "
