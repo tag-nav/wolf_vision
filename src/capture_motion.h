@@ -59,8 +59,8 @@ class CaptureMotion : public CaptureBase
         void setData(const Eigen::VectorXs& _data);
         void setDataCovariance(const Eigen::MatrixXs& _data_cov);
 
-        MotionBuffer* getBufferPtr();
-        const MotionBuffer* getBufferPtr() const;
+        MotionBuffer& getBuffer();
+        const MotionBuffer& getBuffer() const;
         const Eigen::VectorXs& getDelta() const;
 
         FrameBasePtr getOriginFramePtr();
@@ -124,14 +124,14 @@ inline void CaptureMotion::setDataCovariance(const Eigen::MatrixXs& _data_cov)
     data_cov_ = _data_cov;
 }
 
-inline const wolf::MotionBuffer* CaptureMotion::getBufferPtr() const
+inline const wolf::MotionBuffer& CaptureMotion::getBuffer() const
 {
-    return &buffer_;
+    return buffer_;
 }
 
-inline wolf::MotionBuffer* CaptureMotion::getBufferPtr()
+inline wolf::MotionBuffer& CaptureMotion::getBuffer()
 {
-    return &buffer_;
+    return buffer_;
 }
 
 inline const Eigen::VectorXs& CaptureMotion::getDelta() const

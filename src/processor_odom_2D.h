@@ -233,22 +233,22 @@ inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _m
 inline bool ProcessorOdom2D::voteForKeyFrame()
 {
     //std::cout << "ProcessorOdom2D::voteForKeyFrame: traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
-    if (getBufferPtr()->get().back().delta_integr_.norm() > dist_traveled_th_)
+    if (getBuffer().get().back().delta_integr_.norm() > dist_traveled_th_)
     {
         std::cout << "ProcessorOdom2D:: " << this->id() << "VOTE FOR KEY FRAME traveled distance "
-                << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
+                << getBuffer().get().back().delta_integr_.norm() << std::endl;
         return true;
     }
-    if (getBufferPtr()->get().back().delta_integr_cov_.determinant() > cov_det_th_)
+    if (getBuffer().get().back().delta_integr_cov_.determinant() > cov_det_th_)
     {
         std::cout << "ProcessorOdom2D::  " << this->id() << "VOTE FOR KEY FRAME covariance det "
-                << getBufferPtr()->get().back().delta_integr_cov_.determinant() << std::endl;
+                << getBuffer().get().back().delta_integr_cov_.determinant() << std::endl;
         return true;
     }
-    if (getBufferPtr()->get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > elapsed_time_th_)
+    if (getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > elapsed_time_th_)
     {
         std::cout << "ProcessorOdom2D::  " << this->id() << "VOTE FOR KEY FRAME elapsed time "
-                << getBufferPtr()->get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get()
+                << getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get()
                 << std::endl;
         return true;
     }

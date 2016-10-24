@@ -148,31 +148,31 @@ int main()
             std::cout << "----------- PROCESSOR:" << std::endl;
             std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
             std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
-                      << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ << std::endl;
+                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ << std::endl;
             std::cout << "REFERENCE:" << std::endl;
             std::cout << "State(" << (t - t0) << ") : " << integrated_x.transpose() << std::endl;
             std::cout << "Covariance(" << (t - t0) << ") : " << std::endl << integrated_delta_covariance << std::endl;
             std::cout << "ERROR:" << std::endl;
             std::cout << "State error(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() - integrated_x.transpose() << std::endl;
             std::cout << "Covariance error(" << (t - t0) << ") : " << std::endl
-                      << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_delta_covariance << std::endl;
+                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance << std::endl;
 
             throw std::runtime_error("Integrated state different from reference.");
         }
 
-        if ((odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_delta_covariance).array().abs().maxCoeff() > 1e-10)
+        if ((odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance).array().abs().maxCoeff() > 1e-10)
         {
             std::cout << "----------- PROCESSOR:" << std::endl;
             std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
             std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
-                      << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ << std::endl;
+                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ << std::endl;
             std::cout << "REFERENCE:" << std::endl;
             std::cout << "State(" << (t - t0) << ") : " << integrated_x.transpose() << std::endl;
             std::cout << "Covariance(" << (t - t0) << ") : " << std::endl << integrated_delta_covariance << std::endl;
             std::cout << "ERROR:" << std::endl;
             std::cout << "State error(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() - integrated_x.transpose() << std::endl;
             std::cout << "Covariance error(" << (t - t0) << ") : " << std::endl
-                      << odom2d_ptr->getBufferPtr()->get().back().delta_integr_cov_ - integrated_delta_covariance << std::endl;
+                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance << std::endl;
 //            throw std::runtime_error("Integrated covariance different from reference.");
             std::cout << "TEST COVARIANCE CHECK ------> ERROR: Integrated covariance different from reference." << std::endl;
         }
@@ -198,7 +198,7 @@ int main()
 
     std::cout << "\nSplitting the buffer!\n---------------------" << std::endl;
     std::cout << "Original buffer:           < ";
-    for (const auto &s : odom2d_ptr->getBufferPtr()->get())
+    for (const auto &s : odom2d_ptr->getBuffer().get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
@@ -211,12 +211,12 @@ int main()
     odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     std::cout << "New buffer: oldest part:   < ";
-    for (const auto &s : (std::static_pointer_cast<CaptureMotion>(new_keyframe_ptr->getCaptureList().front()))->getBufferPtr()->get())
+    for (const auto &s : (std::static_pointer_cast<CaptureMotion>(new_keyframe_ptr->getCaptureList().front()))->getBuffer().get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
     std::cout << "Original keeps the newest: < ";
-    for (const auto &s : odom2d_ptr->getBufferPtr()->get())
+    for (const auto &s : odom2d_ptr->getBuffer().get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
@@ -273,10 +273,10 @@ int main()
 
 
     std::cout << "All in one row:            < ";
-    for (const auto &s : (std::static_pointer_cast<CaptureMotion>(new_keyframe_ptr->getCaptureList().front()))->getBufferPtr()->get())
+    for (const auto &s : (std::static_pointer_cast<CaptureMotion>(new_keyframe_ptr->getCaptureList().front()))->getBuffer().get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << "> " << t_split - t0 << " < ";
-    for (const auto &s : odom2d_ptr->getBufferPtr()->get())
+    for (const auto &s : odom2d_ptr->getBuffer().get())
         std::cout << s.ts_ - t0 << ' ';
     std::cout << ">" << std::endl;
 
