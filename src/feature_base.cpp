@@ -39,7 +39,7 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen:
 
 FeatureBase::~FeatureBase()
 {
-    std::cout << "destructed      -f" << id() << std::endl;
+    std::cout << "destructed       -f" << id() << std::endl;
 }
 
 void FeatureBase::remove()
