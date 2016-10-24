@@ -43,7 +43,7 @@ void Problem::setup()
 
 ProblemPtr Problem::create(FrameStructure _frame_structure)
 {
-    ProblemPtr p(new Problem(_frame_structure));
+    ProblemPtr p(new Problem(_frame_structure)); // We use `new` and not `make_shared` since the Problem constructor is private and cannot be passes to `make_shared`.
     p->setup();
     return p->shared_from_this();
 }
