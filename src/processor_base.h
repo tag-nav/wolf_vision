@@ -85,7 +85,7 @@ namespace wolf {
 inline wolf::ProblemPtr ProcessorBase::getProblem()
 {
     ProblemPtr prb = problem_ptr_.lock();
-    if (prb)
+    if (!prb)
     {
         SensorBasePtr sen = sensor_ptr_.lock();
         if (sen)

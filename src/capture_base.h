@@ -76,7 +76,7 @@ namespace wolf{
 inline ProblemPtr CaptureBase::getProblem()
 {
     ProblemPtr prb = problem_ptr_.lock();
-    if (prb)
+    if (!prb)
     {
         FrameBasePtr frm = frame_ptr_.lock();
         if (frm)
