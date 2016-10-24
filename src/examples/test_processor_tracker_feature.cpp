@@ -26,7 +26,7 @@ int main()
     std::cout << std::endl << "==================== processor tracker feature test ======================" << std::endl;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = make_shared<Problem>(FRM_PO_2D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_2D);
     SensorBasePtr sensor_ptr_ = make_shared<SensorBase>(SEN_ODOM_2D, "ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
@@ -40,6 +40,9 @@ int main()
 
     for (auto i = 0; i < 10; i++)
         processor_ptr_->process(make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr_));
+
+    wolf_problem_ptr_->check();
+    wolf_problem_ptr_->print();
 
     return 0;
 }
