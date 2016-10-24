@@ -690,11 +690,7 @@ bool Problem::check()
                 }
                 for (auto c : f->getConstraintList() )
                 {
-                    std::cout << "        c" << c->id() << " @" << C.get() << std::endl;
-                    std::cout << "          -> P  @ " << c->getProblem().get() << std::endl;
-                    std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get() << std::endl;
-                    is_consistent = is_consistent && (c->getProblem().get() == P_raw);
-                    is_consistent = is_consistent && (c->getFeaturePtr() == f);
+                    std::cout << "        c" << c->id() << " @" << C.get();
                     switch (c->getCategory())
                     {
                         case CTR_ABSOLUTE:
@@ -710,6 +706,10 @@ bool Problem::check()
                             std::cout << " --> L" << c->getLandmarkOtherPtr()->id() << std::endl;
                             break;
                     }
+                    std::cout << "          -> P  @ " << c->getProblem().get() << std::endl;
+                    std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get() << std::endl;
+                    is_consistent = is_consistent && (c->getProblem().get() == P_raw);
+                    is_consistent = is_consistent && (c->getFeaturePtr() == f);
                 }
             }
         }
