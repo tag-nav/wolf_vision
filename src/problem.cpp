@@ -43,11 +43,9 @@ void Problem::setup()
 
 ProblemPtr Problem::create(FrameStructure _frame_structure)
 {
-    Problem p(_frame_structure);
-    p.setup();
-//    ProblemPtr p(std::make_shared<Problem>(_frame_structure));
-//    p->setup();
-    return p.shared_from_this();
+    ProblemPtr p(new Problem(_frame_structure));
+    p->setup();
+    return p->shared_from_this();
 }
 
 Problem::~Problem()
