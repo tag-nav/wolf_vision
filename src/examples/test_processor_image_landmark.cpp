@@ -107,8 +107,12 @@ int main(int argc, char** argv)
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
-    SensorBasePtr sen_odo_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(),"");
-    wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
+    SensorBasePtr sen_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(),"");
+    ProcessorBasePtr prc_ptr = wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
+    SensorOdom3D::Ptr sen_odo_ptr = std::static_pointer_cast<SensorOdom3D>(sen_ptr);
+    ProcessorOdom3D::Ptr prc_odo_ptr = std::static_pointer_cast<ProcessorOdom3D>(prc_ptr);
+    prc_odo_ptr->setup(sen_odo_ptr);
+
 
     // Origin Key Frame
     FrameBasePtr origin_frame = wolf_problem_ptr_->createFrame(KEY_FRAME, (Vector7s()<<1,0,0,0,0,0,1).finished(), t);
@@ -220,7 +224,7 @@ int main(int argc, char** argv)
         /* process */
         image_ptr->process();
 
-        wolf_problem_ptr_->print();
+//        wolf_problem_ptr_->print();
 
 //        StateBlockList* st_block_list_ptr = wolf_problem_ptr_->getStateListPtr();
 //        for(auto state_block : *st_block_list_ptr)
