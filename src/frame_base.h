@@ -132,6 +132,12 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
     private:
         StateStatus getStatus() const;
         void setStatus(StateStatus _st);
+
+    public:
+        static FrameBasePtr create(const FrameStructure,
+                                   const FrameKeyType & _tp,
+                                   const TimeStamp& _ts,
+                                   const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(0));
 };
 
 } // namespace wolf

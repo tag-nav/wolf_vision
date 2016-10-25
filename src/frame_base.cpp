@@ -4,6 +4,7 @@
 #include "trajectory_base.h"
 #include "capture_base.h"
 #include "state_block.h"
+#include "state_quaternion.h"
 
 namespace wolf {
 
@@ -293,6 +294,47 @@ void FrameBase::setStatus(StateStatus _st)
                 getProblem()->updateStateBlockPtr(getVPtr());
         }
     }
+}
+
+FrameBasePtr FrameBase::create(const FrameStructure _fs,
+                               const FrameKeyType & _tp,
+                               const TimeStamp& _ts,
+                               const Eigen::VectorXs& _x)
+{
+    StateBlockPtr p_ptr(nullptr);
+    StateBlockPtr o_ptr(nullptr);
+    StateBlockPtr v_ptr(nullptr);
+    switch (_fs)
+    {
+        case FRM_PO_2D:
+        {
+            assert(_x.size() == 3 && "Wrond state vector size. Should be 3 for 2D!");
+            p_ptr = std::make_shared<StateBlock>    (_x.head    <2> ( ) );
+            o_ptr = std::make_shared<StateBlock>    (_x.tail    <1> ( ) );
+            v_ptr = nullptr;
+            break;
+        }
+        case FRM_PO_3D:
+        {
+            assert(_x.size() == 7 && "Wrond state vector size. Should be 7 for 3D!");
+            p_ptr = std::make_shared<StateBlock>        (_x.head    <3> ( ) );
+            o_ptr = std::make_shared<StateQuaternion>   (_x.tail    <4> ( ) );
+            v_ptr = nullptr;
+            break;
+        }
+        case FRM_POV_3D:
+        {
+            assert(_x.size() == 10 && "Wrond state vector size. Should be 10 for 3D!");
+            p_ptr = std::make_shared<StateBlock>        (_x.head    <3> ( ) );
+            o_ptr = std::make_shared<StateQuaternion>   (_x.segment <4> (3) );
+            v_ptr = std::make_shared<StateBlock>        (_x.tail    <3> ( ) );
+            break;
+        }
+        default:
+            throw std::runtime_error("Unknown frame structure. Add appropriate frame structure to the switch statement.");
+
+    }
+    return std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr);
 }
 
 } // namespace wolf

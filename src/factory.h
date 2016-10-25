@@ -318,6 +318,7 @@ inline std::string Factory<TypeBase, TypeInput...>::getClass()
 namespace wolf
 {
 
+// Intrinsics
 typedef Factory<IntrinsicsBase,
         const std::string&> IntrinsicsFactory;
 template<>
@@ -326,6 +327,7 @@ inline std::string IntrinsicsFactory::getClass()
     return "IntrinsicsFactory";
 }
 
+// ProcessorParams
 typedef Factory<ProcessorParamsBase,
         const std::string&> ProcessorParamsFactory;
 template<>
@@ -334,6 +336,7 @@ inline std::string ProcessorParamsFactory::getClass()
     return "ProcessorParamsFactory";
 }
 
+// Landmarks from YAML
 typedef Factory<LandmarkBase,
         const YAML::Node&>  LandmarkFactory;
 template<>
@@ -342,6 +345,16 @@ inline std::string LandmarkFactory::getClass()
     return "LandmarkFactory";
 }
 
+// Frames
+typedef Factory<FrameBase, const FrameStructure, const FrameKeyType&, const TimeStamp&, const Eigen::VectorXs&> FrameFactory;
+template<>
+inline std::string FrameFactory::getClass()
+{
+    return "FrameFactory";
+}
+#define WOLF_REGISTER_FRAME(FrameType, FrameName) \
+  namespace{ const bool FrameName##Registered = \
+    FrameFactory::get().registerCreator(FrameType, FrameName::create); }\
 
 } /* namespace wolf */
 
