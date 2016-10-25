@@ -206,4 +206,30 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
           }
       }
   }
+
+
+
+FrameBasePtr FrameIMU::create(const FrameStructure _fs,
+                              const FrameKeyType & _tp,
+                              const TimeStamp& _ts,
+                              const Eigen::VectorXs& _x)
+{
+
+    assert(_x.size() == 16 && "Wrond state vector size. Should be 16 for an IMU with biases!");
+
+    StateBlockPtr       p_ptr = std::make_shared<StateBlock>      (_x.segment<3>( 0  ));
+    StateQuaternionPtr  q_ptr = std::make_shared<StateQuaternion> (_x.segment<4>( 3  ));
+    StateBlockPtr       v_ptr = std::make_shared<StateBlock>      (_x.segment<3>( 7  ));
+    StateBlockPtr       a_ptr = std::make_shared<StateBlock>      (_x.segment<3>( 10 ));
+    StateBlockPtr       w_ptr = std::make_shared<StateBlock>      (_x.segment<3>( 13 ));
+
+    return std::make_shared<FrameIMU>(_tp, _ts, p_ptr, v_ptr, q_ptr, a_ptr, w_ptr);
 }
+
+} // namespace wolf
+
+#include "factory.h"
+namespace wolf
+{
+WOLF_REGISTER_FRAME("IMU", FrameIMU)
+} // namespace wolf

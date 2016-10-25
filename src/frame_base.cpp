@@ -338,3 +338,9 @@ FrameBasePtr FrameBase::create(const FrameStructure _fs,
 }
 
 } // namespace wolf
+
+#include "factory.h"
+namespace wolf
+{
+WOLF_REGISTER_FRAME("BASE", FrameBase)
+} // namespace wolf
