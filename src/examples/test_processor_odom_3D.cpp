@@ -31,6 +31,16 @@ int main (int argc, char** argv)
 {
     cout << "\n========= Test ProcessorOdom3D ===========" << endl;
 
+    //=====================================================
+    // Environment variable for configuration files
+    char const* tmp = std::getenv( "WOLF_ROOT" );
+    if ( tmp == nullptr )
+        throw std::runtime_error("WOLF_ROOT environment not loaded.");
+    std::string wolf_path( tmp );
+    std::cout << "Wolf path: " << wolf_path << std::endl;
+    //=====================================================
+
+
     TimeStamp tf;
     if (argc == 1)
         tf = 1.0;
@@ -44,7 +54,7 @@ int main (int argc, char** argv)
     ProblemPtr problem = Problem::create(FRM_PO_3D);
     CeresManager ceres_manager(problem);
 
-    SensorBasePtr sen = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(),"");
+    SensorBasePtr sen = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_path + "/src/examples/odom_3D.yaml");
     problem->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
     problem->getProcessorMotionPtr()->setOrigin((Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
 
