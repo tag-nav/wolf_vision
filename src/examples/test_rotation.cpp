@@ -146,19 +146,24 @@ int main()
         std::cout << "Diff between vectors (rot_vector - rot_vec) : " << rot_vector1 - rot1_vec << std::endl;
     }
 
-                                        //let's see how small the angles can be here
+                                        //let's see how small the angles can be here : limit reached at scale/10 =  1e-16
     wolf::Scalar scale = 1;
     Eigen::Matrix3s rotation_mat;
     Eigen::Vector3s rv;
     for(int i = 0; i<8; i++){
         rotation_mat = Eigen::Matrix3s::Random() * scale;
-        //rotation_mat(0,0) = 1.0;
-        //rotation_mat(1,1) = 1.0;
-        //rotation_mat(2,2) = 1.0;
+        rotation_mat(0,0) = 1.0;
+        rotation_mat(1,1) = 1.0;
+        rotation_mat(2,2) = 1.0;
 
-        rv = R2v(rotation_mat);
+        //rv = R2v(rotation_mat); //decomposing R2v below
+        Eigen::AngleAxis<wolf::Scalar> aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+        rv = aa0.axis() * aa0.angle();
+        std::cout << "aa0.axis : " << aa0.axis().transpose() << ",\t aa0.angles :" << aa0.angle() <<std::endl;
+        
         if(rv == Eigen::Vector3s::Zero()){
             std::cout << "\n limit reached at scale " << scale << ", rotation matrix is : \n" << rotation_mat << "\n rv is : \n" << rv << std::endl;
+            //std::cout << "aa0.axis : \n" << aa0.axis() << "\n aa0.angles \n:" << aa0.angle() <<std::endl;
             break;
         }
         scale = scale*0.1;
