@@ -13,9 +13,21 @@ SET(CMAKE_MACOSX_RPATH 1)
 # The project name and the type of project
 PROJECT(wolf)
 
+# EXECUTABLE_OUTPUT_PATH & LIBRARY_OUTPUT_PATH are
+# supercede by LIBRARY_OUTPUT_DIRECTORY & RUNTIME_OUTPUT_DIRECTORY
+# which are properly set by catkin
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-SET(CMAKE_INSTALL_PREFIX /usr/local)
+
+# We'll set the install prefix only is it's empty
+# which shouldn't be the case ...
+string(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "" result)
+IF(result)
+  # This path is actually default on linux
+  SET(CMAKE_INSTALL_PREFIX /usr/local)
+else()
+    message(STATUS "Installation path : " ${CMAKE_INSTALL_PREFIX})
+ENDIF()
 
 IF (NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "DEBUG") 
