@@ -14,7 +14,7 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 
         /** \brief Constructor of category CTR_FRAME
          **/
-        ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+        ConstraintRelative2DAnalytic(FeatureBasePtr _ftr_ptr, ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintAnalytic(_tp, _frame_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             //
@@ -22,7 +22,7 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 
         /** \brief Constructor of category CTR_FEATURE
          **/
-        ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, FeatureBase* _ftr_other_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+        ConstraintRelative2DAnalytic(FeatureBasePtr _ftr_ptr, ConstraintType _tp, FeatureBasePtr _ftr_other_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintAnalytic(_tp, _ftr_other_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _ftr_other_ptr->getFramePtr()->getPPtr(), _ftr_other_ptr->getFramePtr()->getOPtr() )
         {
             //
@@ -30,16 +30,12 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 
         /** \brief Constructor of category CTR_LANDMARK
          **/
-        ConstraintRelative2DAnalytic(FeatureBase* _ftr_ptr, ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+        ConstraintRelative2DAnalytic(FeatureBasePtr _ftr_ptr, ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintAnalytic(_tp, _landmark_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _landmark_ptr->getPPtr(), _landmark_ptr->getOPtr())
         {
             //
         }
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         **/
         virtual ~ConstraintRelative2DAnalytic()
         {
             //

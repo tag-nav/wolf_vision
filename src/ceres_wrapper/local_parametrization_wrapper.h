@@ -7,6 +7,7 @@ class LocalParametrizationBase;
 }
 
 //Ceres includes
+#include "../wolf.h"
 #include "ceres/ceres.h"
 
 namespace wolf {
@@ -14,11 +15,11 @@ namespace wolf {
 class LocalParametrizationWrapper : public ceres::LocalParameterization
 {
     private:
-        LocalParametrizationBase* local_parametrization_ptr_;
+        LocalParametrizationBasePtr local_parametrization_ptr_;
 
     public:
 
-        LocalParametrizationWrapper(LocalParametrizationBase* _local_parametrization_ptr);
+        LocalParametrizationWrapper(LocalParametrizationBasePtr _local_parametrization_ptr);
 
         virtual ~LocalParametrizationWrapper();
 
@@ -37,7 +38,7 @@ class LocalParametrizationWrapper : public ceres::LocalParameterization
 
 namespace wolf {
 
-inline LocalParametrizationWrapper::LocalParametrizationWrapper(LocalParametrizationBase* _local_parametrization_ptr) :
+inline LocalParametrizationWrapper::LocalParametrizationWrapper(LocalParametrizationBasePtr _local_parametrization_ptr) :
         local_parametrization_ptr_(_local_parametrization_ptr)
 {
 }

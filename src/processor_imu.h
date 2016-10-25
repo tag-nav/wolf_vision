@@ -37,11 +37,18 @@ class ProcessorIMU : public ProcessorMotion{
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
                                    TimeStamp& _ts);
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion,
-                                                 FrameBase* _frame_origin);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion,
+                                                   FrameBasePtr _frame_origin);
         void resetDerived();
 
     protected:
+
+        // Casted pointer to IMU frame
+        std::shared_ptr<FrameIMU> frame_imu_ptr_;
+
+        // gravity vector
+        const Eigen::Vector3s gravity_;
+
         // Biases in the first keyframe's state for pre-integration
         Eigen::Vector3s acc_bias_;
         Eigen::Vector3s gyro_bias_;
@@ -70,16 +77,9 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void remapDelta(Eigen::VectorXs& _delta_out);
         virtual void remapData(const Eigen::VectorXs& _data);
 
-    private:
-
-        // Casted pointer to IMU frame
-        FrameIMU* frame_imu_ptr_;
-
-        // gravity vector
-        const Eigen::Vector3s gravity_;
 
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
 
 }
@@ -89,6 +89,7 @@ class ProcessorIMU : public ProcessorMotion{
 /////////////////////////////////////////////////////////
 
 // Wolf
+#include "constraint_imu.h"
 #include "state_block.h"
 #include "rotations.h"
 
@@ -334,11 +335,11 @@ inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _moti
 inline void ProcessorIMU::resetDerived()
 {
     // Cast a pointer to origin IMU frame
-    frame_imu_ptr_ = (FrameIMU*)((origin_ptr_->getFramePtr()));
+    frame_imu_ptr_ = std::static_pointer_cast<FrameIMU>(origin_ptr_->getFramePtr());
 
     // Assign biases for the integration at the origin frame's biases
-    acc_bias_  = frame_imu_ptr_->getBAPtr()->getVector(); // acc  bias
-    gyro_bias_ = frame_imu_ptr_->getBGPtr()->getVector(); // gyro bias
+    acc_bias_  = frame_imu_ptr_->getAccBiasPtr()->getVector(); // acc  bias
+    gyro_bias_ = frame_imu_ptr_->getGyroBiasPtr()->getVector(); // gyro bias
 
     // reset jacobians wrt bias
     dDp_dab_.setZero();
@@ -348,11 +349,13 @@ inline void ProcessorIMU::resetDerived()
     dDq_dwb_.setZero();
 }
 
-
-inline ConstraintBase* ProcessorIMU::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
+inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
-    // return new ConstraintIMU(_feature_motion, _frame_origin);
-    return nullptr;
+    // TODO: return new ConstraintIMU(_feature_motion, _frame_origin);
+    auto ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
+    auto frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
+    auto ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu);
+    return ctr_imu;
 }
 
 inline void ProcessorIMU::remapPVQ(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out)

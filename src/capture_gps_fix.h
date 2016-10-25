@@ -18,15 +18,8 @@ class CaptureGPSFix : public CaptureBase
         Eigen::MatrixXs data_covariance_; ///< Noise of the capture.
 
     public:
-        CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data);
-
-        CaptureGPSFix(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
+        CaptureGPSFix(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data);
+        CaptureGPSFix(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
         virtual ~CaptureGPSFix();
 
         virtual void process();

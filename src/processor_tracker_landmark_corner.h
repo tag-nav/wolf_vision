@@ -36,6 +36,8 @@ const Scalar min_features_ratio_th_ = 0.5;
 
 struct ProcessorParamsLaser : public ProcessorParamsBase
 {
+        typedef std::shared_ptr<ProcessorParamsLaser> Ptr;
+
         laserscanutils::LineFinderIterativeParams line_finder_params_;
         //TODO: add corner_finder_params
         unsigned int new_corners_th;
@@ -97,8 +99,8 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
             ProcessorTrackerLandmark::advance();
             while (!corners_last_.empty())
             {
-                corners_last_.front()->destruct();
-                corners_last_.pop_front();
+                corners_last_.front()->remove();
+                corners_last_.pop_front(); // TODO check if this is needed
             }
             corners_last_ = std::move(corners_incoming_);
         }
@@ -145,7 +147,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
          */
-        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr);
+        virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
@@ -156,22 +158,22 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
     private:
 
-        void extractCorners(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _corner_list);
+        void extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr, FeatureBaseList& _corner_list);
 
-        void expectedFeature(LandmarkBase* _landmark_ptr, Eigen::Vector4s& expected_feature_,
+        void expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::Vector4s& expected_feature_,
                              Eigen::Matrix3s& expected_feature_cov_);
 
-        Eigen::VectorXs computeSquaredMahalanobisDistances(const FeatureBase* _feature_ptr,
+        Eigen::VectorXs computeSquaredMahalanobisDistances(const FeatureBasePtr _feature_ptr,
                                                            const Eigen::Vector4s& _expected_feature,
                                                            const Eigen::Matrix3s& _expected_feature_cov,
                                                            const Eigen::MatrixXs& _mu);
     // Factory method
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
 
 inline ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
@@ -184,13 +186,13 @@ inline ProcessorTrackerLandmarkCorner::~ProcessorTrackerLandmarkCorner()
 {
     while (!corners_last_.empty())
     {
-        corners_last_.front()->destruct();
-        corners_last_.pop_front();
+        corners_last_.front()->remove();
+        corners_last_.pop_front(); // TODO check if this is needed
     }
     while (!corners_incoming_.empty())
     {
-        corners_incoming_.front()->destruct();
-        corners_incoming_.pop_front();
+        corners_incoming_.front()->remove();
+        corners_incoming_.pop_front(); // TODO check if this is needed
     }
 }
 
@@ -201,22 +203,23 @@ inline unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const unsi
     return new_features_last_.size();
 }
 
-inline LandmarkBase* ProcessorTrackerLandmarkCorner::createLandmark(FeatureBase* _feature_ptr)
+inline LandmarkBasePtr ProcessorTrackerLandmarkCorner::createLandmark(FeatureBasePtr _feature_ptr)
 {
     //std::cout << "ProcessorTrackerLandmarkCorner::createLandmark" << std::endl;
 
     // compute feature global pose
     Eigen::Vector3s feature_global_pose = R_world_sensor_ * _feature_ptr->getMeasurement().head<3>() + t_world_sensor_;
     // Create new landmark
-    return new LandmarkCorner2D(new StateBlock(feature_global_pose.head(2)),
-                                new StateBlock(feature_global_pose.tail(1)), _feature_ptr->getMeasurement()(3));
+    return std::make_shared<LandmarkCorner2D>(std::make_shared<StateBlock>(feature_global_pose.head(2)),
+                                              std::make_shared<StateBlock>(feature_global_pose.tail(1)),
+                                              _feature_ptr->getMeasurement()(3));
 }
 
-inline ConstraintBase* ProcessorTrackerLandmarkCorner::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
+inline ConstraintBasePtr ProcessorTrackerLandmarkCorner::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
     assert(_feature_ptr != nullptr && _landmark_ptr != nullptr && "ProcessorTrackerLandmarkCorner::createConstraint: feature and landmark pointers can not be nullptr!");
 
-    return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*)((_landmark_ptr)));
+    return std::make_shared<ConstraintCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>((_landmark_ptr)));
 }
 
 } // namespace wolf

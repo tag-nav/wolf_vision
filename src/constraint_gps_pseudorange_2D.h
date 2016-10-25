@@ -28,7 +28,7 @@ namespace wolf {
 class ConstraintGPSPseudorange2D : public ConstraintSparse<1, 2, 1, 3, 1, 3, 1>
 {
 public:
-    ConstraintGPSPseudorange2D(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+    ConstraintGPSPseudorange2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 2, 1, 3, 1, 3, 1>(CTR_GPS_PR_2D,
                                                   _apply_loss_function,
                                                   _status,
@@ -37,20 +37,15 @@ public:
                                                   _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
                                                                                               // orientation of antenna is not needed, because omnidirectional
                                                   _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter = receiver time bias
-                                                  ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr(), // map position with respect to ecef
-                                                  ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr()) // map orientation with respect to ecef
+                                                  (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr()), // map position with respect to ecef
+                                                  (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr())) // map orientation with respect to ecef
     {
         setType("GPS PR 2D");
-        sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
-        pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
+        sat_position_ = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getSatPosition();
+        pseudorange_  = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getPseudorange();
         //std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
     }
 
-    /** \brief Default destructor (not recommended)
-     *
-     * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-     *
-     **/
     virtual ~ConstraintGPSPseudorange2D()
     {
         //std::cout << "deleting ConstraintGPSPseudorange2D " << nodeId() << std::endl;

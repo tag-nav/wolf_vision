@@ -11,13 +11,13 @@ namespace wolf {
 class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 {
 	protected:
-		LandmarkContainer* lmk_ptr_;
+		LandmarkContainer::WPtr lmk_ptr_;
 		unsigned int corner_;
 
 	public:
 		static const unsigned int N_BLOCKS = 4;
 
-	    ConstraintContainer(FeatureBase* _ftr_ptr, LandmarkContainer* _lmk_ptr, const unsigned int _corner, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+	    ConstraintContainer(FeatureBasePtr _ftr_ptr, LandmarkContainer::Ptr _lmk_ptr, const unsigned int _corner, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
 			ConstraintSparse<3,2,1,2,1>(CTR_CONTAINER, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
@@ -28,19 +28,14 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
             std::cout << "new constraint container: corner idx = " << corner_ << std::endl;
 		}
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
 		virtual ~ConstraintContainer()
 		{
 			//std::cout << "deleting ConstraintContainer " << nodeId() << std::endl;
 		}
 
-		LandmarkContainer* getLandmarkPtr()
+		LandmarkContainer::Ptr getLandmarkPtr()
 		{
-			return lmk_ptr_;
+			return lmk_ptr_.lock();
 		}
 
 		template <typename T>
@@ -63,11 +58,11 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
             // robot information
             Eigen::Matrix<T,2,2> inverse_R_robot = Eigen::Rotation2D<T>(-_robotO[0]).matrix();
             Eigen::Matrix<T,2,2> R_landmark = Eigen::Rotation2D<T>(_landmarkO[0]).matrix();
-            Eigen::Matrix<T,2,1> corner_position = lmk_ptr_->getCorner(corner_).head<2>().cast<T>();
+            Eigen::Matrix<T,2,1> corner_position = lmk_ptr_.lock()->getCorner(corner_).head<2>().cast<T>();
 
             // Expected measurement
             Eigen::Matrix<T,2,1> expected_measurement_position = inverse_R_sensor * (inverse_R_robot * (landmark_position_map - robot_position_map + R_landmark * corner_position) - sensor_position);
-            T expected_measurement_orientation = _landmarkO[0] - _robotO[0] - T(getCapturePtr()->getSensorPtr()->getOPtr()->getVector()(0)) + T(lmk_ptr_->getCorner(corner_)(2));
+            T expected_measurement_orientation = _landmarkO[0] - _robotO[0] - T(getCapturePtr()->getSensorPtr()->getOPtr()->getVector()(0)) + T(lmk_ptr_.lock()->getCorner(corner_)(2));
 
             // Error
             residuals_map.head(2) = expected_measurement_position - getMeasurement().head<2>().cast<T>();
@@ -131,11 +126,11 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 
 
     public:
-        static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, NodeBase* _correspondant_ptr)
+        static ConstraintBasePtr create(FeatureBasePtr _feature_ptr, NodeBasePtr _correspondant_ptr)
         {
             unsigned int corner = 0; // Hard-coded, but this class is nevertheless deprecated.
 
-            return new ConstraintContainer(_feature_ptr, (LandmarkContainer*)_correspondant_ptr, corner);
+            return std::make_shared<ConstraintContainer>(_feature_ptr, std::static_pointer_cast<LandmarkContainer>(_correspondant_ptr), corner);
         }
 
 };

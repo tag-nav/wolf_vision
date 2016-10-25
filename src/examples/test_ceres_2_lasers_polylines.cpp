@@ -23,7 +23,6 @@
 #include "sensor_odom_2D.h"
 #include "sensor_gps_fix.h"
 #include "capture_fix.h"
-#include "capture_odom_2D.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 // laserscanutils
@@ -222,10 +221,10 @@ int main(int argc, char** argv)
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
 
     Problem problem(FRM_PO_2D);
-    SensorOdom2D* odom_sensor = new SensorOdom2D(new StateBlock(odom_pose.head(2), true), new StateBlock(odom_pose.tail(1), true), odom_std_factor, odom_std_factor);
-    SensorGPSFix* gps_sensor = new SensorGPSFix(new StateBlock(gps_pose.head(2), true), new StateBlock(gps_pose.tail(1), true), gps_std);
-    SensorLaser2D* laser_1_sensor = new SensorLaser2D(new StateBlock(laser_1_pose.head(2), true), new StateBlock(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
-    SensorLaser2D* laser_2_sensor = new SensorLaser2D(new StateBlock(laser_2_pose.head(2), true), new StateBlock(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorOdom2D* odom_sensor = new SensorOdom2D(std::make_shared<StateBlock>(odom_pose.head(2), true), std::make_shared<StateBlock>(odom_pose.tail(1), true), odom_std_factor, odom_std_factor);
+    SensorGPSFix* gps_sensor = new SensorGPSFix(std::make_shared<StateBlock>(gps_pose.head(2), true), std::make_shared<StateBlock>(gps_pose.tail(1), true), gps_std);
+    SensorLaser2D* laser_1_sensor = new SensorLaser2D(std::make_shared<StateBlock>(laser_1_pose.head(2), true), std::make_shared<StateBlock>(laser_1_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorLaser2D* laser_2_sensor = new SensorLaser2D(std::make_shared<StateBlock>(laser_2_pose.head(2), true), std::make_shared<StateBlock>(laser_2_pose.tail(1), true), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
 
     wolf::ProcessorParamsPolyline laser_processor_params;
     laser_processor_params.line_finder_params = laserscanutils::LineFinderIterativeParams({0.1, 5, 1, 2});
@@ -256,7 +255,7 @@ int main(int argc, char** argv)
     odom_trajectory.head(3) = ground_truth_pose;
 
     // Origin Key Frame
-    FrameBase* origin_frame = problem.createFrame(KEY_FRAME, ground_truth_pose, ts);
+    FrameBasePtr origin_frame = problem.createFrame(KEY_FRAME, ground_truth_pose, ts);
 
     // Prior covariance
     CaptureFix* initial_covariance = new CaptureFix(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1);

@@ -10,11 +10,12 @@ class StateBlock;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
+#include "node_base.h"
 
 //std includes
 
 namespace wolf {
+
 
 /** \brief base struct for intrinsic sensor parameters
  *
@@ -26,24 +27,18 @@ struct IntrinsicsBase
         std::string name;
 };
 
-class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
+class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBase>
 {
     private:
+        HardwareBaseWPtr hardware_ptr_;
+        ProcessorBaseList processor_list_;
+        std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, intrinsic.
+
         static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
+
     protected:
         unsigned int sensor_id_;   // sensor ID
         SensorType type_id_;       // the type of sensor. See wolf.h for a list of all sensor types.
-        StateBlock* p_ptr_;		// sensor position state block pointer
-        StateBlock* o_ptr_; 	// sensor orientation state block pointer
-
-        /** \brief intrinsic parameters.
-         * Use it if desired. By using this StateBlock, WOLF will be able to auto-calibrate these parameters.
-         * To do so, just unfix() it. After the calibration process, you can fix() it again if desired.
-         *
-         * (Note: Many other intrinsic parameters can be stored as members of the classes derived from this.
-         * We recommend you use a struct for this purpose if the number of intrinsic parameters is large.)
-         */
-        StateBlock* intrinsic_ptr_;
 
         bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
 
@@ -51,7 +46,6 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
 
     public:
-
         /** \brief Constructor with noise size
          *
          * Constructor with parameter vector
@@ -63,7 +57,7 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
          * \param _extr_dyn Flag indicating if extrinsics are dynamic (moving) or static (not moving)
          *
          **/
-        SensorBase(const SensorType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
+        SensorBase(const SensorType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
 
         /** \brief Constructor with noise std vector
          *
@@ -76,32 +70,38 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
          * \param _extr_dyn Flag indicating if extrinsics are dynamic (moving) or static (not moving)
          *
          **/
-        SensorBase(const SensorType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
-
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
+        SensorBase(const SensorType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
         virtual ~SensorBase();
+        void remove();
 
         unsigned int id();
-
         SensorType typeId();
 
-        ProcessorBase* addProcessor(ProcessorBase* _proc_ptr);
+        // State blocks
+        const std::vector<StateBlockPtr>& getStateBlockVec() const;
+        std::vector<StateBlockPtr>& getStateBlockVec();
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
+        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
 
-        ProcessorBaseList* getProcessorListPtr();
+        StateBlockPtr getPPtr() const;
+        StateBlockPtr getOPtr() const;
+        /** \brief intrinsic parameters.
+         * Use it if desired. By using this StateBlock, WOLF will be able to auto-calibrate these parameters.
+         * To do so, just unfix() it. After the calibration process, you can fix() it again if desired.
+         *
+         * (Note: Many other intrinsic parameters can be stored as members of the classes derived from this.
+         * We recommend you use a struct for this purpose if the number of intrinsic parameters is large.)
+         */
+        StateBlockPtr getIntrinsicPtr() const;
+        void setPPtr(const StateBlockPtr _p_ptr);
+        void setOPtr(const StateBlockPtr _o_ptr);
+        void setIntrinsicPtr(const StateBlockPtr _intr_ptr);
+        void removeStateBlocks();
 
-        StateBlock* getPPtr() const;
-
-        StateBlock* getOPtr() const;
-
-        StateBlock* getIntrinsicPtr() const;
+        ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
+        ProcessorBaseList& getProcessorList();
 
         void fix();
-
         void unfix();
 
         /** \brief Adds all stateBlocks of the sensor to the wolfProblem list of new stateBlocks
@@ -114,12 +114,35 @@ class SensorBase : public NodeLinked<HardwareBase, ProcessorBase>
         bool isExtrinsicDynamic();
 
         void setNoise(const Eigen::VectorXs & _noise_std);
-
         Eigen::VectorXs getNoiseStd();
-
         Eigen::MatrixXs getNoiseCov();
 
+        ProblemPtr getProblem();
+        HardwareBasePtr getHardwarePtr();
+        void setHardwarePtr(const HardwareBasePtr _hw_ptr);
+
 };
+
+}
+
+#include "processor_base.h"
+#include "hardware_base.h"
+
+namespace wolf{
+
+inline wolf::ProblemPtr SensorBase::getProblem()
+{
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb){
+        HardwareBasePtr hw = hardware_ptr_.lock();
+    if (hw)
+    {
+        prb = hw->getProblem();
+        problem_ptr_ = prb;
+    }
+    }
+    return prb;
+}
 
 inline unsigned int SensorBase::id()
 {
@@ -131,30 +154,49 @@ inline wolf::SensorType SensorBase::typeId()
     return type_id_;
 }
 
-inline ProcessorBase* SensorBase::addProcessor(ProcessorBase* _proc_ptr)
+inline ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
 {
-    addDownNode(_proc_ptr);
+    processor_list_.push_back(_proc_ptr);
+    _proc_ptr->setSensorPtr(shared_from_this());
+    _proc_ptr->setProblem(getProblem());
     return _proc_ptr;
 }
 
-inline ProcessorBaseList* SensorBase::getProcessorListPtr()
+inline ProcessorBaseList& SensorBase::getProcessorList()
 {
-    return getDownNodeListPtr();
+    return processor_list_;
 }
 
-inline StateBlock* SensorBase::getPPtr() const
+inline const std::vector<StateBlockPtr>& SensorBase::getStateBlockVec() const
 {
-    return p_ptr_;
+    return state_block_vec_;
+}
+inline std::vector<StateBlockPtr>& SensorBase::getStateBlockVec()
+{
+    return state_block_vec_;
+}
+inline StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i) const
+{
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+    return state_block_vec_[_i];
+}
+inline void SensorBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
+{
+    state_block_vec_[_i] = _sb_ptr;
+}
+inline StateBlockPtr SensorBase::getPPtr() const
+{
+    return getStateBlockPtr(0);
 }
 
-inline StateBlock* SensorBase::getOPtr() const
+inline StateBlockPtr SensorBase::getOPtr() const
 {
-    return o_ptr_;
+    return getStateBlockPtr(1);
 }
 
-inline StateBlock* SensorBase::getIntrinsicPtr() const
+inline StateBlockPtr SensorBase::getIntrinsicPtr() const
 {
-    return intrinsic_ptr_;
+    return getStateBlockPtr(2);
 }
 
 inline bool SensorBase::isExtrinsicDynamic()
@@ -170,6 +212,31 @@ inline Eigen::VectorXs SensorBase::getNoiseStd()
 inline Eigen::MatrixXs SensorBase::getNoiseCov()
 {
     return noise_cov_;
+}
+
+inline HardwareBasePtr SensorBase::getHardwarePtr()
+{
+    return hardware_ptr_.lock();
+}
+
+inline void SensorBase::setPPtr(const StateBlockPtr _p_ptr)
+{
+    setStateBlockPtr(0, _p_ptr);
+}
+
+inline void SensorBase::setOPtr(const StateBlockPtr _o_ptr)
+{
+    setStateBlockPtr(1, _o_ptr);
+}
+
+inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
+{
+    setStateBlockPtr(2, _intr_ptr);
+}
+
+inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
+{
+    hardware_ptr_ = _hw_ptr;
 }
 
 } // namespace wolf

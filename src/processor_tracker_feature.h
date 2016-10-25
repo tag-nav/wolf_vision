@@ -112,7 +112,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature) = 0;
+        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature) = 0;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -154,7 +154,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived types to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr) = 0;
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) = 0;
 
         /** \brief Establish constraints between features in Captures \b last and \b origin
          */
@@ -170,9 +170,13 @@ namespace wolf {
 
 inline void ProcessorTrackerFeature::establishConstraints()
 {
-    //    std::cout << "ProcessorTrackerFeature::establishConstraints() " << std::endl;
     for (auto match : matches_origin_from_last_)
-        match.first->addConstraint(createConstraint(match.first, match.second.feature_ptr_));
+    {
+        auto ctr = createConstraint(match.first, match.second.feature_ptr_);
+        ctr->setFeatureOtherPtr(match.second.feature_ptr_);
+        match.first->addConstraint(ctr);
+        match.second.feature_ptr_->addConstrainedBy(ctr);
+    }
 }
 
 inline void ProcessorTrackerFeature::advance()

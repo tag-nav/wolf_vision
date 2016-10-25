@@ -10,18 +10,18 @@
 // Constraints
 #include "../constraint_sparse.h"
 #include "../constraint_fix.h"
+#include "../constraint_fix_3D.h"
 #include "../constraint_gps_2D.h"
 #include "../constraint_gps_pseudorange_3D.h"
 #include "../constraint_gps_pseudorange_2D.h"
 #include "../constraint_odom_2D.h"
+#include "../constraint_odom_3D.h"
 #include "../constraint_corner_2D.h"
 #include "../constraint_point_2D.h"
 #include "../constraint_point_to_line_2D.h"
 #include "../constraint_container.h"
-#include "../constraint_image.h"
-#include "../constraint_image_new_landmark.h"
+#include "../constraint_AHP.h"
 #include "../constraint_imu.h"
-
 
 // Wolf and ceres auto_diff creators
 #include "create_auto_diff_cost_function_wrapper.h"
@@ -29,7 +29,7 @@
 
 namespace wolf {
 
-ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _use_wolf_autodiff)
+ceres::CostFunction* createAutoDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool _use_wolf_autodiff)
 {
     switch (_ctr_ptr->getTypeId())
     {
@@ -45,11 +45,23 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _
             else
                 return createAutoDiffCostFunctionCeres<ConstraintFix>(_ctr_ptr);
 
+        case CTR_FIX_3D:
+            if (_use_wolf_autodiff)
+                return createAutoDiffCostFunctionWrapper<ConstraintFix3D>(_ctr_ptr);
+            else
+                return createAutoDiffCostFunctionCeres<ConstraintFix3D>(_ctr_ptr);
+
         case CTR_ODOM_2D:
             if (_use_wolf_autodiff)
                 return createAutoDiffCostFunctionWrapper<ConstraintOdom2D>(_ctr_ptr);
             else
                 return createAutoDiffCostFunctionCeres<ConstraintOdom2D>(_ctr_ptr);
+
+        case CTR_ODOM_3D:
+            if (_use_wolf_autodiff)
+                return createAutoDiffCostFunctionWrapper<ConstraintOdom3D>(_ctr_ptr);
+            else
+                return createAutoDiffCostFunctionCeres<ConstraintOdom3D>(_ctr_ptr);
 
         case CTR_CORNER_2D:
             if (_use_wolf_autodiff)
@@ -89,21 +101,15 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBase* _ctr_ptr, bool _
 
         case CTR_EPIPOLAR:
             if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintImage>(_ctr_ptr);
+                return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
             else
-                return createAutoDiffCostFunctionCeres<ConstraintImage>(_ctr_ptr);
+                return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
 
         case CTR_AHP:
             if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintImage>(_ctr_ptr);
+                return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
             else
-                return createAutoDiffCostFunctionCeres<ConstraintImage>(_ctr_ptr);
-
-        case CTR_AHP_NL:
-            if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintImageNewLandmark>(_ctr_ptr);
-            else
-                return createAutoDiffCostFunctionCeres<ConstraintImageNewLandmark>(_ctr_ptr);
+                return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
 
         case CTR_IMU:
             if (_use_wolf_autodiff)

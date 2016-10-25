@@ -35,7 +35,7 @@ typedef enum {
  *  - With a local delta,  so that \f${\bf q}^+ = {\bf q} \otimes {\bf q}(d\theta)\f$.
  *  - With a global delta, so that \f${\bf q}^+ = {\bf q}(d\theta) \otimes {\bf q}\f$.
  *
- * The choice is selected at construction time, through an enum QuaternionDeltaReference.
+ * The choice is templated, through an enum QuaternionDeltaReference.
  *
  * In either case, the incremental quaternion \f${\bf q}(d\theta)\f$ is computed from the delta_theta
  * variable, here named \f$d\theta\f$, using
@@ -48,19 +48,33 @@ typedef enum {
  *   \f]
  *
  */
+template <unsigned int DeltaReference = DQ_LOCAL>
 class LocalParametrizationQuaternion : public LocalParametrizationBase
 {
-    private:
-        QuaternionDeltaReference delta_reference_;
-    public:
-        LocalParametrizationQuaternion(QuaternionDeltaReference _delta_ref = DQ_GLOBAL);
-        virtual ~LocalParametrizationQuaternion();
 
-        virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _q,
-                          const Eigen::Map<const Eigen::VectorXs>& _delta_theta,
-                          Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const;
-        virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _q, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
+public:
+
+  LocalParametrizationQuaternion() :
+    LocalParametrizationBase(4, 3)
+  {
+    //
+  }
+
+  virtual ~LocalParametrizationQuaternion()
+  {
+    //
+  }
+
+  virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _q,
+                    const Eigen::Map<const Eigen::VectorXs>& _delta_theta,
+                    Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const;
+
+  virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _q,
+                               Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
 };
+
+typedef LocalParametrizationQuaternion<DQ_GLOBAL> LocalParametrizationQuaternionG;
+typedef LocalParametrizationQuaternion<DQ_LOCAL>  LocalParametrizationQuaternionL;
 
 } // namespace wolf
 

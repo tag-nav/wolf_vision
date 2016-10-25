@@ -8,6 +8,9 @@
 #ifndef FACTORY_H_
 #define FACTORY_H_
 
+// wolf
+#include "wolf.h"
+
 // std
 #include <string>
 #include <map>
@@ -38,9 +41,9 @@ namespace wolf
  *   The returned data is always a pointer to TypeBase.
  *
  *   For example, you may use as __TypeBase__ the following types:
- *     - LandmarkBase: the Factory creates landmarks deriving from LandmarkBase and returns base pointers ````LandmarkBase*```` to them
- *     - IntrinsicsBase: the Factory creates intrinsic parameters deriving from IntrinsicsBase and returns base pointers ````IntrinsicsBase*```` to them
- *     - XxxBase: the Factory creates objects deriving from XxxBase and returns pointers ````XxxBase*```` to them.
+ *     - LandmarkBase: the Factory creates landmarks deriving from LandmarkBase and returns base pointers ````LandmarkBasePtr```` to them
+ *     - IntrinsicsBase: the Factory creates intrinsic parameters deriving from IntrinsicsBase and returns base pointers ````IntrinsicsBasePtr```` to them
+ *     - XxxBase: the Factory creates objects deriving from XxxBase and returns pointers ````XxxBasePtr```` to them.
  *
  * - The class in also templatized on the type of the input parameter of the creator, __TypeInput__:
  *   - ````std::string```` is used when the input parameter is a file name from which to read data (typically a YAML file).
@@ -119,8 +122,8 @@ namespace wolf
  * Two examples:
  *
  *      \code
- *      static IntrinsicsBase* create(const std::string& _intrinsics_dot_yaml)
- *      static LandmarkBase*   create(const YAML::Node& _lmk_yaml_node)
+ *      static IntrinsicsBasePtr create(const std::string& _intrinsics_dot_yaml)
+ *      static LandmarkBasePtr   create(const YAML::Node& _lmk_yaml_node)
  *      \endcode
  *
  * See further down for an implementation example.
@@ -163,13 +166,13 @@ namespace wolf
  * To create e.g. a LandmarkPolyline2D from a YAML node you type:
  *
  *     \code
- *     LandmarkBase* lmk_ptr = Factory<LandmarkBase*, YAML::Node>::get().create("POLYLINE 2D", lmk_yaml_node);
+ *     LandmarkBasePtr lmk_ptr = Factory<LandmarkBasePtr, YAML::Node>::get().create("POLYLINE 2D", lmk_yaml_node);
  *     \endcode
  *
  * or even better, make use of the convenient typedefs:
  *
  *     \code
- *     LandmarkBase* lmk_ptr = LandmarkFactory::get().create("POLYLINE 2D", lmk_yaml_node);
+ *     LandmarkBasePtr lmk_ptr = LandmarkFactory::get().create("POLYLINE 2D", lmk_yaml_node);
  *     \endcode
  *
  * ### Examples
@@ -179,7 +182,7 @@ namespace wolf
  *
  * \code
  *  // Creator (this method is static):
- * LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
+ * LandmarkBasePtr LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
  * {
  *    // Parse YAML node with lmk info and data
  *    unsigned int      id              = _lmk_node["id"].as<unsigned int>();
@@ -194,7 +197,7 @@ namespace wolf
  *    }
  *
  *    // Create a new landmark
- *    LandmarkBase* lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
+ *    LandmarkBasePtr lmk_ptr = new LandmarkPolyline2D(points, first_defined, last_defined, first_id);
  *    lmk_ptr->setId(id);
  *
  *    return lmk_ptr;
@@ -228,17 +231,19 @@ namespace wolf
  *  - Problem::installProcessor() : to install processors in WOLF Problem.
  *
  */
-template<class TypeBase, class TypeInput>
+template<class TypeBase, typename... TypeInput>
 class Factory
 {
+        typedef std::shared_ptr<TypeBase> TypeBasePtr;
     public:
-        typedef TypeBase* (*CreatorCallback)(const TypeInput & _input); // example of creator callback (see typedefs below)
+        // example of creator callback (see typedefs below)
+        typedef TypeBasePtr (*CreatorCallback)(TypeInput... _input);
     private:
         typedef std::map<std::string, CreatorCallback> CallbackMap;
     public:
         bool registerCreator(const std::string& _type, CreatorCallback createFn);
         bool unregisterCreator(const std::string& _type);
-        TypeBase* create(const std::string& _type, const TypeInput& _input = "");
+        TypeBasePtr create(const std::string& _type, TypeInput... _input);
         std::string getClass();
 
     private:
@@ -257,8 +262,8 @@ class Factory
         ~Factory() { }
 };
 
-template<class TypeBase, class TypeInput>
-inline bool Factory<TypeBase, TypeInput>::registerCreator(const std::string& _type, CreatorCallback createFn)
+template<class TypeBase, typename... TypeInput>
+inline bool Factory<TypeBase, TypeInput...>::registerCreator(const std::string& _type, CreatorCallback createFn)
 {
     bool reg = callbacks_.insert(typename CallbackMap::value_type(_type, createFn)).second;
     if (reg)
@@ -269,33 +274,34 @@ inline bool Factory<TypeBase, TypeInput>::registerCreator(const std::string& _ty
     return reg;
 }
 
-template<class TypeBase, class TypeInput>
-inline bool Factory<TypeBase, TypeInput>::unregisterCreator(const std::string& _type)
+template<class TypeBase, typename... TypeInput>
+inline bool Factory<TypeBase, TypeInput...>::unregisterCreator(const std::string& _type)
 {
     return callbacks_.erase(_type) == 1;
 }
 
-template<class TypeBase, class TypeInput>
-inline TypeBase* Factory<TypeBase, TypeInput>::create(const std::string& _type, const TypeInput& _input)
+template<class TypeBase, typename... TypeInput>
+inline typename Factory<TypeBase, TypeInput...>::TypeBasePtr Factory<TypeBase, TypeInput...>::create(const std::string& _type, TypeInput... _input)
 {
     typename CallbackMap::const_iterator creator_callback_it = callbacks_.find(_type);
+
     if (creator_callback_it == callbacks_.end())
         // not found
         throw std::runtime_error("Unknown type. Possibly you tried to use an unregistered creator.");
+
     // Invoke the creation function
-    TypeBase* p = (creator_callback_it->second)(_input);
-    return p;
+    return (creator_callback_it->second)(std::forward<TypeInput>(_input)...);
 }
 
-template<class TypeBase, class TypeInput>
-inline Factory<TypeBase, TypeInput>& Factory<TypeBase, TypeInput>::get()
+template<class TypeBase, typename... TypeInput>
+inline Factory<TypeBase, TypeInput...>& Factory<TypeBase, TypeInput...>::get()
 {
     static Factory instance_;
     return instance_;
 }
 
-template<class TypeBase, class TypeInput>
-inline std::string Factory<TypeBase, TypeInput>::getClass()
+template<class TypeBase, typename... TypeInput>
+inline std::string Factory<TypeBase, TypeInput...>::getClass()
 {
     return "Factory<class TypeBase>";
 }
@@ -312,24 +318,26 @@ inline std::string Factory<TypeBase, TypeInput>::getClass()
 namespace wolf
 {
 
-typedef Factory<IntrinsicsBase, std::string>        IntrinsicsFactory;
-typedef Factory<ProcessorParamsBase, std::string>   ProcessorParamsFactory;
-typedef Factory<LandmarkBase, YAML::Node>           LandmarkFactory;
-
+typedef Factory<IntrinsicsBase,
+        const std::string&> IntrinsicsFactory;
 template<>
-inline std::string Factory<IntrinsicsBase, std::string>::getClass()
+inline std::string IntrinsicsFactory::getClass()
 {
     return "IntrinsicsFactory";
 }
 
+typedef Factory<ProcessorParamsBase,
+        const std::string&> ProcessorParamsFactory;
 template<>
-inline std::string Factory<ProcessorParamsBase, std::string>::getClass()
+inline std::string ProcessorParamsFactory::getClass()
 {
     return "ProcessorParamsFactory";
 }
 
+typedef Factory<LandmarkBase,
+        const YAML::Node&>  LandmarkFactory;
 template<>
-inline std::string Factory<LandmarkBase, YAML::Node>::getClass()
+inline std::string LandmarkFactory::getClass()
 {
     return "LandmarkFactory";
 }

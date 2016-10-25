@@ -20,7 +20,7 @@ namespace wolf
 
 namespace
 {
-static IntrinsicsBase* createIntrinsicsCamera(const std::string & _filename_dot_yaml)
+static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_dot_yaml)
 {
     YAML::Node camera_config = YAML::LoadFile(_filename_dot_yaml);
 
@@ -37,7 +37,7 @@ static IntrinsicsBase* createIntrinsicsCamera(const std::string & _filename_dot_
         VectorXd distortion     = camera_config["distortion_coefficients"]["data"]  .as<VectorXd>();
 
         // Eigen:: to wolf::
-        IntrinsicsCamera* intrinsics_cam = new IntrinsicsCamera;
+        std::shared_ptr<IntrinsicsCamera> intrinsics_cam = std::make_shared<IntrinsicsCamera>();
         intrinsics_cam->type = sensor_type;
         intrinsics_cam->name = sensor_name;
         intrinsics_cam->pinhole_model[0] = intrinsic[2];

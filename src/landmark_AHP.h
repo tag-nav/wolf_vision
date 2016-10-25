@@ -15,25 +15,29 @@ namespace wolf {
 /* Landmark - Anchored Homogeneous Point*/
 class LandmarkAHP : public LandmarkBase
 {
+    public:
+        typedef std::shared_ptr<LandmarkAHP> Ptr;
+        typedef std::weak_ptr<LandmarkAHP> WPtr;
+
     protected:
         cv::Mat cv_descriptor_;
-        FrameBase* anchor_frame_;
-        SensorBase* anchor_sensor_;
+        FrameBasePtr anchor_frame_; // TODO check pointer type
+        SensorBasePtr anchor_sensor_; // TODO check pointer type
 
     public:
-        LandmarkAHP(Eigen::Vector4s _position_homogeneous, FrameBase* _anchor_frame, SensorBase* _anchor_sensor, cv::Mat _2D_descriptor);
+        LandmarkAHP(Eigen::Vector4s _position_homogeneous, FrameBasePtr _anchor_frame, SensorBasePtr _anchor_sensor, cv::Mat _2D_descriptor);
 
         virtual ~LandmarkAHP();
 
         const cv::Mat& getCvDescriptor() const;
         void setCvDescriptor(const cv::Mat& _descriptor);
 
-        const FrameBase*  getAnchorFrame () const;
-        const SensorBase* getAnchorSensor() const;
+        const FrameBasePtr  getAnchorFrame () const;
+        const SensorBasePtr getAnchorSensor() const;
 
-        void setAnchorFrame  (FrameBase*  _anchor_frame );
-        void setAnchorSensor (SensorBase* _anchor_sensor);
-        void setAnchor       (FrameBase*  _anchor_frame , SensorBase* _anchor_sensor);
+        void setAnchorFrame  (FrameBasePtr  _anchor_frame );
+        void setAnchorSensor (SensorBasePtr _anchor_sensor);
+        void setAnchor       (FrameBasePtr  _anchor_frame , SensorBasePtr _anchor_sensor);
 
         YAML::Node saveToYaml() const;
 
@@ -41,7 +45,7 @@ class LandmarkAHP : public LandmarkBase
          * Caution: This creator does not set the landmark's anchor frame and sensor.
          * These need to be set afterwards.
          */
-        static LandmarkBase* create(const YAML::Node& _node);
+        static LandmarkBasePtr create(const YAML::Node& _node);
 };
 
 inline const cv::Mat& LandmarkAHP::getCvDescriptor() const
@@ -54,27 +58,27 @@ inline void LandmarkAHP::setCvDescriptor(const cv::Mat& _descriptor)
     cv_descriptor_ = _descriptor;
 }
 
-inline const FrameBase* LandmarkAHP::getAnchorFrame() const
+inline const FrameBasePtr LandmarkAHP::getAnchorFrame() const
 {
     return anchor_frame_;
 }
 
-inline void LandmarkAHP::setAnchorFrame(FrameBase* _anchor_frame)
+inline void LandmarkAHP::setAnchorFrame(FrameBasePtr _anchor_frame)
 {
     anchor_frame_ = _anchor_frame;
 }
 
-inline const SensorBase* LandmarkAHP::getAnchorSensor() const
+inline const SensorBasePtr LandmarkAHP::getAnchorSensor() const
 {
     return anchor_sensor_;
 }
 
-inline void LandmarkAHP::setAnchorSensor(SensorBase* _anchor_sensor)
+inline void LandmarkAHP::setAnchorSensor(SensorBasePtr _anchor_sensor)
 {
     anchor_sensor_ = _anchor_sensor;
 }
 
-inline void LandmarkAHP::setAnchor(FrameBase* _anchor_frame, SensorBase* _anchor_sensor)
+inline void LandmarkAHP::setAnchor(FrameBasePtr _anchor_frame, SensorBasePtr _anchor_sensor)
 {
     anchor_frame_  = _anchor_frame;
     anchor_sensor_ = _anchor_sensor;

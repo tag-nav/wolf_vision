@@ -1,8 +1,11 @@
 #include "ceres_manager.h"
+#include "../trajectory_base.h"
+#include "../map_base.h"
+#include "../landmark_base.h"
 
 namespace wolf {
 
-CeresManager::CeresManager(Problem* _wolf_problem, const ceres::Solver::Options& _ceres_options, const bool _use_wolf_auto_diff) :
+CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Options& _ceres_options, const bool _use_wolf_auto_diff) :
     ceres_options_(_ceres_options),
     wolf_problem_(_wolf_problem),
     use_wolf_auto_diff_(_use_wolf_auto_diff)
@@ -67,7 +70,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
     wolf_problem_->clearCovariance();
 
     // CREATE DESIRED COVARIANCES LIST
-    std::vector<std::pair<StateBlock*, StateBlock*>> state_block_pairs;
+    std::vector<std::pair<StateBlockPtr, StateBlockPtr>> state_block_pairs;
     std::vector<std::pair<const double*, const double*>> double_pairs;
 
     switch (_blocks)
@@ -75,9 +78,9 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         case ALL:
         {
             // first create a vector containing all state blocks
-            std::vector<StateBlock*> all_state_blocks, landmark_state_blocks;
+            std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks;
             //frame state blocks
-            for(auto fr_ptr : *(wolf_problem_->getTrajectoryPtr()->getFrameListPtr()))
+            for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
             {
                 if (fr_ptr->isKey())
                 {
@@ -86,9 +89,9 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
                 }
             }
             // landmark state blocks
-            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
+            for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
             {
-                landmark_state_blocks = l_ptr->getStateBlockVector();
+                landmark_state_blocks = l_ptr->getUsedStateBlockVec();
                 all_state_blocks.insert(all_state_blocks.end(), landmark_state_blocks.begin(), landmark_state_blocks.end());
                 //all_state_blocks.push_back(l_ptr->getPPtr());
                 //all_state_blocks.push_back(l_ptr->getOPtr());
@@ -107,9 +110,9 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         case ALL_MARGINALS:
         {
             // first create a vector containing all state blocks
-            std::vector<StateBlock*> all_state_blocks, landmark_state_blocks;
+            std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks;
             //frame state blocks
-            for(auto fr_ptr : *(wolf_problem_->getTrajectoryPtr()->getFrameListPtr()))
+            for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
             {
                 if (fr_ptr->isKey())
                 {
@@ -118,9 +121,9 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
                 }
             }
             // landmark state blocks
-            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
+            for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
             {
-                landmark_state_blocks = l_ptr->getStateBlockVector();
+                landmark_state_blocks = l_ptr->getUsedStateBlockVec();
                 all_state_blocks.insert(all_state_blocks.end(), landmark_state_blocks.begin(), landmark_state_blocks.end());
                 //all_state_blocks.push_back(l_ptr->getPPtr());
                 //all_state_blocks.push_back(l_ptr->getOPtr());
@@ -152,11 +155,11 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), last_key_frame->getOPtr()->getPtr()));
 
             // landmarks
-            std::vector<StateBlock*> landmark_state_blocks;
-            for(auto l_ptr : *(wolf_problem_->getMapPtr()->getLandmarkListPtr()))
+            std::vector<StateBlockPtr> landmark_state_blocks;
+            for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
             {
                 // load state blocks vector
-                landmark_state_blocks = l_ptr->getStateBlockVector();
+                landmark_state_blocks = l_ptr->getUsedStateBlockVec();
 
                 for (auto state_it = landmark_state_blocks.begin(); state_it != landmark_state_blocks.end(); state_it++)
                 {
@@ -272,11 +275,12 @@ void CeresManager::update()
 	assert(ceres_problem_->NumResidualBlocks() == id_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
-void CeresManager::addConstraint(ConstraintBase* _ctr_ptr, unsigned int _id)
+void CeresManager::addConstraint(ConstraintBasePtr _ctr_ptr, unsigned int _id)
 {
     id_2_costfunction_[_id] = createCostFunction(_ctr_ptr);
 
-    //std::cout << "adding residual " << _ctr_ptr->id() << std::endl;
+//    std::cout << "adding residual " << _ctr_ptr->id() << std::endl;
+//    std::cout << "residual pointer " << _ctr_ptr << std::endl;
 
     if (_ctr_ptr->getApplyLossFunction())
         id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateBlockPtrVector());
@@ -294,11 +298,11 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 	// The cost functions will be deleted by ceres_problem destructor (IT MUST HAVE THE OWNERSHIP)
 }
 
-void CeresManager::addStateBlock(StateBlock* _st_ptr)
+void CeresManager::addStateBlock(StateBlockPtr _st_ptr)
 {
-    //std::cout << "Adding State Block " << _st_ptr->getPtr() << std::endl;
-    //std::cout << " size: " <<  _st_ptr->getSize() << std::endl;
-    //std::cout << " vector: " <<  _st_ptr->getVector() << std::endl;
+//    std::cout << "Adding State Block " << _st_ptr->getPtr() << std::endl;
+//    std::cout << " size: " <<  _st_ptr->getSize() << std::endl;
+//    std::cout << " vector: " <<  _st_ptr->getVector().transpose() << std::endl;
 
     if (_st_ptr->hasLocalParametrization())
     {
@@ -331,7 +335,7 @@ void CeresManager::removeAllStateBlocks()
 		ceres_problem_->RemoveParameterBlock(parameter_blocks[i]);
 }
 
-void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
+void CeresManager::updateStateBlockStatus(StateBlockPtr _st_ptr)
 {
 	assert(_st_ptr != nullptr);
 	if (_st_ptr->isFixed())
@@ -340,14 +344,14 @@ void CeresManager::updateStateBlockStatus(StateBlock* _st_ptr)
 		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
 }
 
-ceres::CostFunction* CeresManager::createCostFunction(ConstraintBase* _corrPtr)
+ceres::CostFunction* CeresManager::createCostFunction(ConstraintBasePtr _corrPtr)
 {
 	assert(_corrPtr != nullptr);
 	//std::cout << "creating cost function for constraint " << _corrPtr->id() << std::endl;
 
     // analitic jacobian
     if (_corrPtr->getJacobianMethod() == JAC_ANALYTIC)
-        return new CostFunctionWrapper((ConstraintAnalytic*)_corrPtr);
+        return new CostFunctionWrapper((ConstraintAnalytic*)(_corrPtr.get())); // TODO revise pointer types
 
     // auto jacobian
     else if (_corrPtr->getJacobianMethod() == JAC_AUTO)

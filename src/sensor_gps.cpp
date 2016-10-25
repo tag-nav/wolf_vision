@@ -5,64 +5,44 @@
 
 namespace wolf {
 
-SensorGPS::SensorGPS(StateBlock* _p_ptr, //GPS sensor position with respect to the car frame (base frame)
-                     StateBlock* _o_ptr, //GPS sensor orientation with respect to the car frame (base frame)
-                     StateBlock* _bias_ptr,  //GPS sensor time bias
-                     StateBlock* _map_p_ptr, //initial position of vehicle's frame with respect to starting point frame
-                     StateBlock* _map_o_ptr) //initial orientation of vehicle's frame with respect to the starting point frame
+SensorGPS::SensorGPS(StateBlockPtr _p_ptr, //GPS sensor position with respect to the car frame (base frame)
+                     StateBlockPtr _o_ptr, //GPS sensor orientation with respect to the car frame (base frame)
+                     StateBlockPtr _bias_ptr,  //GPS sensor time bias
+                     StateBlockPtr _map_p_ptr, //initial position of vehicle's frame with respect to starting point frame
+                     StateBlockPtr _map_o_ptr) //initial orientation of vehicle's frame with respect to the starting point frame
         :
-        SensorBase(SEN_GPS_RAW, "GPS", _p_ptr, _o_ptr, _bias_ptr, 0),
-        map_p_ptr_(_map_p_ptr),
-        map_o_ptr_(_map_o_ptr)
+        SensorBase(SEN_GPS_RAW, "GPS", _p_ptr, _o_ptr, _bias_ptr, 0)
 {
+    setStateBlockPtr(3, _map_p_ptr); // Map position
+    setStateBlockPtr(4, _map_o_ptr); // Map orientation
     //
 }
 
 SensorGPS::~SensorGPS()
 {
-    // TODO Check carefully this destructor!
+    //
 }
 
-StateBlock *SensorGPS::getMapPPtr() const
+StateBlockPtr SensorGPS::getMapPPtr() const
 {
-    return map_p_ptr_;
+    return getStateBlockPtr(3);
 }
 
-StateBlock *SensorGPS::getMapOPtr() const
+StateBlockPtr SensorGPS::getMapOPtr() const
 {
-    return map_o_ptr_;
+    return getStateBlockPtr(4);
 }
 
-void SensorGPS::registerNewStateBlocks()
-{
-    if (getProblem() != nullptr)
-    {
-        if (p_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(p_ptr_);
-
-        if (o_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(o_ptr_);
-
-        if (intrinsic_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(intrinsic_ptr_);
-
-        if (map_p_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(map_p_ptr_);
-
-        if (map_o_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(map_o_ptr_);
-    }
-}
 
 // Define the factory method
-SensorBase* SensorGPS::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_p,
-                              const IntrinsicsBase* _intrinsics)
+SensorBasePtr SensorGPS::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_p,
+                              const IntrinsicsBasePtr _intrinsics)
 {
     // decode extrinsics vector
     assert(_extrinsics_p.size() == 3 && "Bad extrinsics vector length. Should be 3 for 3D.");
-    StateBlock* pos_ptr = new StateBlock(_extrinsics_p, true);
-    StateBlock* ori_ptr = nullptr;
-    SensorBase* sen = new SensorGPS(pos_ptr, ori_ptr, nullptr, nullptr, nullptr); // TODO: how to init these last three pointers?
+    StateBlockPtr pos_ptr = std::make_shared<StateBlock>(_extrinsics_p, true);
+    StateBlockPtr ori_ptr = nullptr;
+    SensorBasePtr sen = std::make_shared<SensorGPS>(pos_ptr, ori_ptr, nullptr, nullptr, nullptr);
     sen->setName(_unique_name);
     return sen;
 }
@@ -72,10 +52,6 @@ SensorBase* SensorGPS::create(const std::string& _unique_name, const Eigen::Vect
 
 // Register in the SensorFactory
 #include "sensor_factory.h"
-//#include "factory.h"
 namespace wolf {
-namespace
-{
-const bool registered_gps = SensorFactory::get().registerCreator("GPS", SensorGPS::create);
-}
+WOLF_REGISTER_SENSOR("GPS",SensorGPS)
 } // namespace wolf

@@ -9,7 +9,7 @@
 #define SRC_PROCESSOR_TRACKER_H_
 
 #include "processor_base.h"
-#include "capture_base.h"
+#include "capture_motion.h"
 
 namespace wolf {
 
@@ -66,9 +66,9 @@ struct ProcessorParamsTracker : public ProcessorParamsBase
 class ProcessorTracker : public ProcessorBase
 {
     protected:
-        CaptureBase* origin_ptr_;    ///< Pointer to the origin of the tracker.
-        CaptureBase* last_ptr_;      ///< Pointer to the last tracked capture.
-        CaptureBase* incoming_ptr_;  ///< Pointer to the incoming capture being processed.
+        CaptureBasePtr origin_ptr_;   // TODO check pointer type  ///< Pointer to the origin of the tracker.
+        CaptureBasePtr last_ptr_;     // TODO check pointer type  ///< Pointer to the last tracked capture.
+        CaptureBasePtr incoming_ptr_;  // TODO check pointer type ///< Pointer to the incoming capture being processed.
         FeatureBaseList new_features_last_; ///< List of new features in \b last for landmark initialization and new key-frame creation.
         FeatureBaseList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
         unsigned int max_new_features_; ///< max features allowed to detect in one iteration. 0 = no limit
@@ -82,14 +82,16 @@ class ProcessorTracker : public ProcessorBase
          * Usually you do not need to overload this method in derived classes.
          * Overload it only if you want to alter this algorithm.
          */
-        virtual void process(CaptureBase* const _incoming_ptr);
+        virtual void process(CaptureBasePtr const _incoming_ptr);
 
         void setMaxNewFeatures(const unsigned int& _max_new_features);
         const unsigned int getMaxNewFeatures();
 
-        virtual bool keyFrameCallback(FrameBase* _keyframe_ptr, const Scalar& _dt);
+        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
 
-        virtual CaptureBase* getLastPtr();
+        virtual CaptureBasePtr getOriginPtr();
+        virtual CaptureBasePtr getLastPtr();
+        virtual CaptureBasePtr getIncomingPtr();
 
     protected:
         /** Pre-process incoming Capture
@@ -169,7 +171,7 @@ class ProcessorTracker : public ProcessorBase
 
         /**\brief set key Frame to the provided Capture's frame
          */
-        virtual void setKeyFrame(CaptureBase* _capture_ptr);
+        virtual void setKeyFrame(CaptureBasePtr _capture_ptr);
 
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
@@ -181,11 +183,11 @@ class ProcessorTracker : public ProcessorBase
 
     protected:
 
-        void addNewFeatureLast(FeatureBase* _feature_ptr);
+        void addNewFeatureLast(FeatureBasePtr _feature_ptr);
 
         FeatureBaseList& getNewFeaturesListIncoming();
 
-        void addNewFeatureIncoming(FeatureBase* _feature_ptr);
+        void addNewFeatureIncoming(FeatureBasePtr _feature_ptr);
 };
 
 inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_features)
@@ -203,7 +205,7 @@ inline FeatureBaseList& ProcessorTracker::getNewFeaturesListLast()
     return new_features_last_;
 }
 
-inline void ProcessorTracker::addNewFeatureLast(FeatureBase* _feature_ptr)
+inline void ProcessorTracker::addNewFeatureLast(FeatureBasePtr _feature_ptr)
 {
     new_features_last_.push_back(_feature_ptr);
 }
@@ -213,14 +215,24 @@ inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
     return new_features_incoming_;
 }
 
-inline void ProcessorTracker::addNewFeatureIncoming(FeatureBase* _feature_ptr)
+inline void ProcessorTracker::addNewFeatureIncoming(FeatureBasePtr _feature_ptr)
 {
     new_features_incoming_.push_back(_feature_ptr);
 }
 
-inline CaptureBase* ProcessorTracker::getLastPtr()
+inline CaptureBasePtr ProcessorTracker::getOriginPtr()
+{
+    return origin_ptr_;
+}
+
+inline CaptureBasePtr ProcessorTracker::getLastPtr()
 {
     return last_ptr_;
+}
+
+inline CaptureBasePtr ProcessorTracker::getIncomingPtr()
+{
+    return incoming_ptr_;
 }
 
 } // namespace wolf

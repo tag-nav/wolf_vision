@@ -4,14 +4,13 @@
 // Fwd references
 namespace wolf{
 class MapBase;
-class NodeTerminus;
 class StateBlock;
 }
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
-#include "node_constrained.h"
+#include "node_base.h"
+#include "time_stamp.h"
 
 //std includes
 
@@ -20,15 +19,19 @@ class StateBlock;
 
 namespace wolf {
 
-//class LandmarkParamsBase {}; ///< class for landmark parameters. Derive it to define your parameters.
+
 
 // TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
 // TODO: init and end Time stamps
 
 //class LandmarkBase
-class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
+class LandmarkBase : public NodeBase, public std::enable_shared_from_this<LandmarkBase>
 {
     private:
+        MapBaseWPtr map_ptr_;
+        ConstraintBaseList constrained_by_list_;
+        std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O.
+
         static unsigned int landmark_id_count_;
         
     protected:
@@ -36,8 +39,8 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
         LandmarkType type_id_;     ///< type of landmark. (types defined at wolf.h)
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
-        StateBlock* p_ptr_;     ///< Position state block pointer
-        StateBlock* o_ptr_;     ///< Orientation state block pointer
+        StateBlockPtr p_ptr_;     ///< Position state block pointer
+        StateBlockPtr o_ptr_;     ///< Orientation state block pointer
         Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
 
     public:
@@ -50,80 +53,87 @@ class LandmarkBase : public NodeConstrained<MapBase, NodeTerminus>
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          *
          **/
-        LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
+        LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
         virtual ~LandmarkBase();
-
-        /** \brief Returns landmark_id_, the landmark unique id
-         **/
-        unsigned int id();
-        void setId(unsigned int _id);
-
-        /** \brief Sets the Landmark status
-         **/
-        void setStatus(LandmarkStatus _st);
-
-        /** \brief Sets the Landmark status to fixed
-         **/
-        void fix();
-
-        /** \brief Sets the Landmark status to estimated
-         **/
-        void unfix();
-
-        /** \brief Remove the given constraint from the list. 
-         *  If list becomes empty, deletes this object by calling destruct()
-         **/
-        void removeConstrainedBy(ConstraintBase* _ctr_ptr);
-
-        /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
-         **/
-        virtual void registerNewStateBlocks();
-
-        /** \brief Gets the position state block pointer
-         **/
-        StateBlock* getPPtr() const;
-
-        /** \brief Gets the orientation state block pointer
-         **/
-        StateBlock* getOPtr() const;
-
-        /** \brief Gets a vector of all state blocks pointers
-         **/
-        virtual std::vector<StateBlock*> getStateBlockVector() const;
-
-        /** \brief Sets the position state block pointer
-         **/
-        void setPPtr(StateBlock* _st_ptr);
-
-        /** \brief Sets the orientation state block pointer
-         **/
-        void setOPtr(StateBlock* _st_ptr);
-
-        /** \brief Sets the descriptor
-         **/
-        void setDescriptor(const Eigen::VectorXs& _descriptor);
-
-        /** \brief Gets the descriptor
-         **/
-        const Eigen::VectorXs& getDescriptor() const;        
-        
-        /** \brief Returns _ii component of descriptor vector
-         **/
-        Scalar getDescriptor(unsigned int _ii) const;
-
-        /** \brief Return the type of the landmark
-         **/
-        const LandmarkType getTypeId() const;
-
+        void remove();
         virtual YAML::Node saveToYaml() const;
 
+        // Properties
+        unsigned int id();
+        void setId(unsigned int _id);
+        const LandmarkType getTypeId() const;
+
+        // Fix / unfix
+        void setStatus(LandmarkStatus _st);
+        void fix();
+        void unfix();
+
+        // State blocks
+        const std::vector<StateBlockPtr>& getStateBlockVec() const;
+        std::vector<StateBlockPtr>& getStateBlockVec();
+        std::vector<StateBlockPtr> getUsedStateBlockVec() const;
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
+        void setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr);
+        StateBlockPtr getPPtr() const;
+        StateBlockPtr getOPtr() const;
+        StateBlockPtr getVPtr() const;
+        void setPPtr(const StateBlockPtr _p_ptr);
+        void setOPtr(const StateBlockPtr _o_ptr);
+        void setVPtr(const StateBlockPtr _v_ptr);
+        virtual void registerNewStateBlocks();
+    protected:
+        virtual void removeStateBlocks();
+
+        // Descriptor
+    public:
+        const Eigen::VectorXs& getDescriptor() const;        
+        Scalar getDescriptor(unsigned int _ii) const;
+        void setDescriptor(const Eigen::VectorXs& _descriptor);
+
+
+        // Navigate wolf tree
+        void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        unsigned int getHits() const;
+        ConstraintBaseList& getConstrainedByList();
+
+        ProblemPtr getProblem();
+        void setMapPtr(const MapBasePtr _map_ptr);
+        MapBasePtr getMapPtr();
+
 };
+
+}
+
+#include "map_base.h"
+#include "constraint_base.h"
+#include "state_block.h"
+
+namespace wolf{
+
+inline wolf::ProblemPtr LandmarkBase::getProblem()
+{
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb)
+    {
+        MapBasePtr map = map_ptr_.lock();
+        if (map)
+        {
+            prb = map->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
+    return prb;
+}
+
+inline MapBasePtr LandmarkBase::getMapPtr()
+{
+    return map_ptr_.lock();
+}
+
+inline void LandmarkBase::setMapPtr(const MapBasePtr _map_ptr)
+{
+    map_ptr_ = _map_ptr;
+}
 
 inline unsigned int LandmarkBase::id()
 {
@@ -149,43 +159,67 @@ inline void LandmarkBase::unfix()
     this->setStatus(LANDMARK_ESTIMATED);
 }
 
-inline void LandmarkBase::removeConstrainedBy(ConstraintBase* _ctr_ptr)
+inline void LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
-    NodeConstrained::removeConstrainedBy(_ctr_ptr);
-    if (getConstrainedByListPtr()->empty())
-        this->destruct();
+    constrained_by_list_.push_back(_ctr_ptr);
 }
 
-inline StateBlock* LandmarkBase::getPPtr() const
+inline unsigned int LandmarkBase::getHits() const
+{
+    return constrained_by_list_.size();
+}
+
+inline ConstraintBaseList& LandmarkBase::getConstrainedByList()
+{
+    return constrained_by_list_;
+}
+
+inline const std::vector<StateBlockPtr>& LandmarkBase::getStateBlockVec() const
+{
+    return state_block_vec_;
+}
+
+inline std::vector<StateBlockPtr>& LandmarkBase::getStateBlockVec()
+{
+    return state_block_vec_;
+}
+
+inline std::vector<StateBlockPtr> LandmarkBase::getUsedStateBlockVec() const
+{
+    std::vector<StateBlockPtr> used_state_block_vec(0);
+    for (auto sbp : state_block_vec_)
+        if (sbp)
+            used_state_block_vec.push_back(sbp);
+    return used_state_block_vec;
+}
+
+inline StateBlockPtr LandmarkBase::getStateBlockPtr(unsigned int _i) const
+{
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+    return state_block_vec_[_i];
+}
+
+inline void LandmarkBase::setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr)
+{
+    state_block_vec_[_i] = _sb_ptr;
+}
+
+inline StateBlockPtr LandmarkBase::getPPtr() const
 {
     return p_ptr_;
 }
 
-inline StateBlock* LandmarkBase::getOPtr() const
+inline StateBlockPtr LandmarkBase::getOPtr() const
 {
     return o_ptr_;
 }
 
-inline std::vector<StateBlock*> LandmarkBase::getStateBlockVector() const
-{
-    if (p_ptr_ == nullptr && o_ptr_ == nullptr)
-        return std::vector<StateBlock*>(0);
-
-    if (p_ptr_ == nullptr)
-        return std::vector<StateBlock*>( {o_ptr_});
-
-    if (o_ptr_ == nullptr)
-        return std::vector<StateBlock*>( {p_ptr_});
-
-    return std::vector<StateBlock*>( {p_ptr_, o_ptr_});
-}
-
-inline void LandmarkBase::setPPtr(StateBlock* _st_ptr)
+inline void LandmarkBase::setPPtr(const StateBlockPtr _st_ptr)
 {
     p_ptr_ = _st_ptr;
 }
 
-inline void LandmarkBase::setOPtr(StateBlock* _st_ptr)
+inline void LandmarkBase::setOPtr(const StateBlockPtr _st_ptr)
 {
     o_ptr_ = _st_ptr;
 }

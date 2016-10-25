@@ -9,81 +9,114 @@ namespace wolf {
 
 unsigned int FrameBase::frame_id_count_ = 0;
 
-FrameBase::FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
-            NodeConstrained(MID, "FRAME", "BASE"),
+FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
+            NodeBase("FRAME", "BASE"),
+            trajectory_ptr_(),
+            state_block_vec_(6), // allow for 6 state blocks by default. Should be enough in all applications.
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
-            time_stamp_(_ts),
 			status_(ST_ESTIMATED),
-			p_ptr_(_p_ptr),
-            o_ptr_(_o_ptr),
-            v_ptr_(_v_ptr)
+            time_stamp_(_ts)
 {
+    state_block_vec_[0] = _p_ptr;
+    state_block_vec_[1] = _o_ptr;
+    state_block_vec_[2] = _v_ptr;
+    state_block_vec_[3] = nullptr;
+    state_block_vec_[4] = nullptr;
+    state_block_vec_[5] = nullptr;
     //
+    if (isKey())
+        std::cout << "constructed +KF" << id() << std::endl;
+    else
+        std::cout << "constructed  +F" << id() << std::endl;
 }
 
-FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _v_ptr) :
-            NodeConstrained(MID, "FRAME", "BASE"),
+FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
+            NodeBase("FRAME", "BASE"),
+            trajectory_ptr_(),
+            state_block_vec_(6), // allow for 6 state blocks by default. Should be enough in all applications.
             frame_id_(++frame_id_count_),
             type_id_(_tp),
-            time_stamp_(_ts),
 			status_(ST_ESTIMATED),
-			p_ptr_(_p_ptr),
-            o_ptr_(_o_ptr),
-            v_ptr_(_v_ptr)
+            time_stamp_(_ts)
 {
-    //
+    state_block_vec_[0] = _p_ptr;
+    state_block_vec_[1] = _o_ptr;
+    state_block_vec_[2] = _v_ptr;
+    state_block_vec_[3] = nullptr;
+    state_block_vec_[4] = nullptr;
+    state_block_vec_[5] = nullptr;
+
+    if (isKey())
+        std::cout << "constructed +KF" << id() << std::endl;
+    else
+        std::cout << "constructed  +F" << id() << std::endl;
 }
                 
 FrameBase::~FrameBase()
 {
-	//std::cout << "deleting FrameBase " << id() << std::endl;
-    is_deleting_ = true;
+    // Remove Frame State Blocks
+    removeStateBlocks();
 
-	// Remove Frame State Blocks
-	if (p_ptr_ != nullptr)
-	{
-        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-            getProblem()->removeStateBlockPtr(p_ptr_);
-	    delete p_ptr_;
-	}
-    if (o_ptr_ != nullptr)
+    if (isKey())
+        std::cout << "destructed  -KF" << id() << std::endl;
+    else
+        std::cout << "destructed   -F" << id() << std::endl;
+}
+
+void FrameBase::remove()
+{
+    if (!is_removing_)
     {
-        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-            getProblem()->removeStateBlockPtr(o_ptr_);
-        delete o_ptr_;
-    }
-    if (v_ptr_ != nullptr)
-    {
-        if (getProblem() != nullptr && type_id_ == KEY_FRAME)
-            getProblem()->removeStateBlockPtr(v_ptr_);
-        delete v_ptr_;
-    }
+        is_removing_ = true;
+        FrameBasePtr this_F = shared_from_this(); // keep this alive while removing it
+        TrajectoryBasePtr T = trajectory_ptr_.lock();
+        if (T)
+        {
+            T->getFrameList().remove(this_F); // remove from upstream
+        }
 
-    //std::cout << "states deleted" << std::endl;
+        while (!capture_list_.empty())
+        {
+            capture_list_.front()->remove(); // remove downstream
+        }
+        while (!constrained_by_list_.empty())
+        {
+            constrained_by_list_.front()->remove(); // remove constrained
+        }
 
+        // Remove Frame State Blocks
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
 
-    while (!getConstrainedByListPtr()->empty())
-    {
-        //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-        getConstrainedByListPtr()->front()->destruct();
-        //std::cout << "deleted " << std::endl;
+        removeStateBlocks();
+
+        std::cout << "Removed       F" << id() << std::endl;
     }
-    //std::cout << "constraints deleted" << std::endl;
 }
 
 void FrameBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
     {
-        if (p_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(p_ptr_);
+        for (auto sbp : getStateBlockVec())
+            if (sbp != nullptr)
+                getProblem()->addStateBlock(sbp);
+    }
+}
 
-        if (o_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(o_ptr_);
-
-        if (v_ptr_ != nullptr)
-            getProblem()->addStateBlockPtr(v_ptr_);
+void FrameBase::removeStateBlocks()
+{
+    for (unsigned int i = 0; i < state_block_vec_.size(); i++)
+    {
+        auto sbp = getStateBlockPtr(i);
+        if (sbp != nullptr)
+        {
+            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+            {
+                getProblem()->removeStateBlockPtr(sbp);
+            }
+            setStateBlockPtr(i, nullptr);
+        }
     }
 }
 
@@ -95,43 +128,43 @@ void FrameBase::setKey()
         registerNewStateBlocks();
 
         if (getTrajectoryPtr()->getLastKeyFramePtr() == nullptr || getTrajectoryPtr()->getLastKeyFramePtr()->getTimeStamp() < time_stamp_)
-            getTrajectoryPtr()->setLastKeyFramePtr(this);
+            getTrajectoryPtr()->setLastKeyFramePtr(shared_from_this());
 
-        getTrajectoryPtr()->sortFrame(this);
+        getTrajectoryPtr()->sortFrame(shared_from_this());
     }
 }
 
 void FrameBase::setState(const Eigen::VectorXs& _st)
 {
 
-    assert(_st.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize())  +
-                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
-                          (v_ptr_==nullptr ? 0 : v_ptr_->getSize())) &&
+    assert(_st.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())  +
+                          (getOPtr()==nullptr ? 0 : getOPtr()->getSize())  +
+                          (getVPtr()==nullptr ? 0 : getVPtr()->getSize())) &&
                           "In FrameBase::setState wrong state size");
 
     unsigned int index = 0;
-    if (p_ptr_!=nullptr)
+    if (getPPtr()!=nullptr)
     {
-        p_ptr_->setVector(_st.head(p_ptr_->getSize()));
-        index += p_ptr_->getSize();
+        getPPtr()->setVector(_st.head(getPPtr()->getSize()));
+        index += getPPtr()->getSize();
     }
-    if (o_ptr_!=nullptr)
+    if (getOPtr()!=nullptr)
     {
-        o_ptr_->setVector(_st.segment(index, o_ptr_->getSize()));
-        index += p_ptr_->getSize();
+        getOPtr()->setVector(_st.segment(index, getOPtr()->getSize()));
+        index += getOPtr()->getSize();
     }
-    if (v_ptr_!=nullptr)
+    if (getVPtr()!=nullptr)
     {
-        v_ptr_->setVector(_st.segment(index, v_ptr_->getSize()));
-        //   index += v_ptr_->getSize();
+        getVPtr()->setVector(_st.segment(index, getVPtr()->getSize()));
+        //   index += getVPtr()->getSize();
     }
 }
 
 Eigen::VectorXs FrameBase::getState() const
 {
-    Eigen::VectorXs state((p_ptr_==nullptr ? 0 : p_ptr_->getSize()) +
-                          (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
-                          (v_ptr_==nullptr ? 0 : v_ptr_->getSize()));
+    Eigen::VectorXs state((getPPtr()==nullptr ? 0 : getPPtr()->getSize()) +
+                          (getOPtr()==nullptr ? 0 : getOPtr()->getSize())  +
+                          (getVPtr()==nullptr ? 0 : getVPtr()->getSize()));
 
     getState(state);
 
@@ -140,43 +173,29 @@ Eigen::VectorXs FrameBase::getState() const
 
 void FrameBase::getState(Eigen::VectorXs& state) const
 {
-    assert(state.size() == ((p_ptr_==nullptr ? 0 : p_ptr_->getSize()) +
-                            (o_ptr_==nullptr ? 0 : o_ptr_->getSize())  +
-                            (v_ptr_==nullptr ? 0 : v_ptr_->getSize())));
+    assert(state.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize()) +
+                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())  +
+                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())));
 
     unsigned int index = 0;
-    if (p_ptr_!=nullptr)
+    if (getPPtr()!=nullptr)
     {
-        state.head(p_ptr_->getSize()) = p_ptr_->getVector();
-        index += p_ptr_->getSize();
+        state.head(getPPtr()->getSize()) = getPPtr()->getVector();
+        index += getPPtr()->getSize();
     }
-    if (o_ptr_!=nullptr)
+    if (getOPtr()!=nullptr)
     {
-        state.segment(index, o_ptr_->getSize()) = o_ptr_->getVector();
-        index += p_ptr_->getSize();
+        state.segment(index, getOPtr()->getSize()) = getOPtr()->getVector();
+        index += getOPtr()->getSize();
     }
-    if (v_ptr_!=nullptr)
+    if (getVPtr()!=nullptr)
     {
-        state.segment(index, v_ptr_->getSize()) = v_ptr_->getVector();
-        //   index += v_ptr_->getSize();
+        state.segment(index, getVPtr()->getSize()) = getVPtr()->getVector();
+        //   index += getVPtr()->getSize();
     }
 }
 
-CaptureBase* FrameBase::hasCaptureOf(const SensorBase* _sensor_ptr)
-{
-    for (auto capture_ptr : *getCaptureListPtr())
-        if (capture_ptr->getSensorPtr() == _sensor_ptr)
-            return capture_ptr;
-    return nullptr;
-}
-
-void FrameBase::getConstraintList(ConstraintBaseList & _ctr_list)
-{
-	for(auto c_it = getCaptureListPtr()->begin(); c_it != getCaptureListPtr()->end(); ++c_it)
-		(*c_it)->getConstraintList(_ctr_list);
-}
-
-FrameBase* FrameBase::getPreviousFrame() const
+FrameBasePtr FrameBase::getPreviousFrame() const
 {
     //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
     if (getTrajectoryPtr() == nullptr)
@@ -185,12 +204,12 @@ FrameBase* FrameBase::getPreviousFrame() const
     assert(getTrajectoryPtr() != nullptr && "This Frame is not linked to any trajectory");
 
     //look for the position of this node in the upper list (frame list of trajectory)
-    for (auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin(); f_it != getTrajectoryPtr()->getFrameListPtr()->rend(); f_it++ )
+    for (auto f_it = getTrajectoryPtr()->getFrameList().rbegin(); f_it != getTrajectoryPtr()->getFrameList().rend(); f_it++ )
     {
         if ( this->node_id_ == (*f_it)->nodeId() )
         {
         	f_it++;
-        	if (f_it != getTrajectoryPtr()->getFrameListPtr()->rend())
+        	if (f_it != getTrajectoryPtr()->getFrameList().rend())
             {
                 //std::cout << "previous frame found!" << std::endl;
                 return *f_it;
@@ -206,14 +225,14 @@ FrameBase* FrameBase::getPreviousFrame() const
     return nullptr;
 }
 
-FrameBase* FrameBase::getNextFrame() const
+FrameBasePtr FrameBase::getNextFrame() const
 {
     //std::cout << "finding next frame of " << this->node_id_ << std::endl;
-	auto f_it = getTrajectoryPtr()->getFrameListPtr()->rbegin();
+	auto f_it = getTrajectoryPtr()->getFrameList().rbegin();
 	f_it++; //starting from second last frame
 
     //look for the position of this node in the frame list of trajectory
-    while (f_it != getTrajectoryPtr()->getFrameListPtr()->rend())
+    while (f_it != getTrajectoryPtr()->getFrameList().rend())
     {
         if ( this->node_id_ == (*f_it)->nodeId())
         {
@@ -230,47 +249,48 @@ void FrameBase::setStatus(StateStatus _st)
 {
     // TODO: Separate the three fixes and unfixes to the wolfproblem lists
     status_ = _st;
-    // State Blocks
+    // State Blocks : only P, O, V
+    // TODO: see what do we want to do with a global status fixed / unfixed. What about derived classes?
     if (status_ == ST_FIXED)
     {
-        if (p_ptr_ != nullptr)
+        if (getPPtr() != nullptr)
         {
-            p_ptr_->fix();
+            getPPtr()->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(p_ptr_);
+                getProblem()->updateStateBlockPtr(getPPtr());
         }
-        if (o_ptr_ != nullptr)
+        if (getOPtr() != nullptr)
         {
-            o_ptr_->fix();
+            getOPtr()->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(o_ptr_);
+                getProblem()->updateStateBlockPtr(getOPtr());
         }
-        if (v_ptr_ != nullptr)
+        if (getVPtr() != nullptr)
         {
-            v_ptr_->fix();
+            getVPtr()->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(v_ptr_);
+                getProblem()->updateStateBlockPtr(getVPtr());
         }
     }
     else if (status_ == ST_ESTIMATED)
     {
-        if (p_ptr_ != nullptr)
+        if (getPPtr() != nullptr)
         {
-            p_ptr_->unfix();
+            getPPtr()->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(p_ptr_);
+                getProblem()->updateStateBlockPtr(getPPtr());
         }
-        if (o_ptr_ != nullptr)
+        if (getOPtr() != nullptr)
         {
-            o_ptr_->unfix();
+            getOPtr()->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(o_ptr_);
+                getProblem()->updateStateBlockPtr(getOPtr());
         }
-        if (v_ptr_ != nullptr)
+        if (getVPtr() != nullptr)
         {
-            v_ptr_->unfix();
+            getVPtr()->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(v_ptr_);
+                getProblem()->updateStateBlockPtr(getVPtr());
         }
     }
 }

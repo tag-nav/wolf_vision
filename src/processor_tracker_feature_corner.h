@@ -89,7 +89,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
+        virtual bool correctFeatureDrift(const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature);
 
         /** \brief Vote for KeyFrame generation
          *
@@ -122,11 +122,11 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
     private:
 
-        void extractCorners(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _corner_list);
+        void extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr, FeatureBaseList& _corner_list);
 
 };
 
@@ -134,23 +134,23 @@ inline ProcessorTrackerFeatureCorner::ProcessorTrackerFeatureCorner(const lasers
                                                                     const unsigned int& _n_corners_th) :
         ProcessorTrackerFeature(PRC_TRACKER_FEATURE_CORNER, "TRACKER FEATURE CORNER", 0), line_finder_(_line_finder_params), n_tracks_th_(_n_corners_th), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
 {
-    // TODO Auto-generated constructor stub
+    //
 }
 
 inline ProcessorTrackerFeatureCorner::~ProcessorTrackerFeatureCorner()
 {
     for (auto corner : corners_last_)
-        corner->destruct();
+        corner->remove();
     for (auto corner : corners_incoming_)
-        corner->destruct();
+        corner->remove();
 }
 
 inline void ProcessorTrackerFeatureCorner::postProcess()
 {
 }
 
-inline bool ProcessorTrackerFeatureCorner::correctFeatureDrift(const FeatureBase* _last_feature,
-                                                              FeatureBase* _incoming_feature)
+inline bool ProcessorTrackerFeatureCorner::correctFeatureDrift(const FeatureBasePtr _last_feature,
+                                                              FeatureBasePtr _incoming_feature)
 {
     return true;
 }

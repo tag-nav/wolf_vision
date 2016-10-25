@@ -11,6 +11,7 @@
 //includes from std lib
 #include <list>
 #include <map>
+#include <memory> // shared_ptr and weak_ptr
 
 //includes from Eigen lib
 #include <eigen3/Eigen/Dense>
@@ -78,6 +79,7 @@ namespace Eigen  // Eigen namespace extension
 typedef Matrix<wolf::Scalar, 2, 2, RowMajor> Matrix2s;                ///< 2x2 matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 3, 3, RowMajor> Matrix3s;                ///< 3x3 matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 4, 4, RowMajor> Matrix4s;                ///< 4x4 matrix of real Scalar type
+typedef Matrix<wolf::Scalar, 6, 6, RowMajor> Matrix6s;                ///< 6x6 matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 7, 7, RowMajor> Matrix7s;                ///< 7x7 matrix of real Scalar type
 typedef Matrix<wolf::Scalar, Dynamic, Dynamic, RowMajor> MatrixXs;    ///< variable size matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 1, 1> Vector1s;                ///< 1-vector of real Scalar type
@@ -100,17 +102,6 @@ typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of r
 }
 
 namespace wolf {
-
-/** \brief Enumeration of node locations at Wolf Tree
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    TOP = 1,   ///< root node location. This is the one that commands jobs down the tree.
-    MID,   ///< middle nodes. These delegate jobs to lower nodes.
-    BOTTOM ///< lowest level nodes. These are the ones that do not delegate any longer and have to do the job.
-} NodeLocation;
 
 /** \brief Enumeration of all possible frames
  *
@@ -144,7 +135,9 @@ typedef enum
     CTR_GPS_PR_2D,              ///< 2D GPS Pseudorange constraint.
     CTR_GPS_PR_3D,              ///< 3D GPS Pseudorange constraint.
     CTR_FIX,                    ///< Fix constraint (for priors).
+    CTR_FIX_3D,                    ///< Fix constraint (for priors) in 3D.
     CTR_ODOM_2D,                ///< 2D Odometry constraint .
+    CTR_ODOM_3D,                ///< 3D Odometry constraint .
     CTR_CORNER_2D,              ///< 2D corner constraint .
     CTR_POINT_2D,               ///< 2D point constraint .
     CTR_POINT_TO_LINE_2D,       ///< 2D point constraint .
@@ -273,118 +266,148 @@ typedef enum
     LANDMARK_CANDIDATE = 1,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
     LANDMARK_ESTIMATED,   ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
     LANDMARK_FIXED,       ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
-    LANDMARK_OUT_OF_VIEW, ///< A landmark out of the field of view. Association with it is not allowed, so does not pose constraints for the solver
-    LANDMARK_OLD          ///< An old landmark. Association with it not allowed, but old constraints can still be taken into account by the solver.
 } LandmarkStatus;
 
 
 /////////////////////////////////////////////////////////////////////////
-//      TYPEDEFS FOR POINTERS AND ITERATORS IN THE WOLF TREE
+//      TYPEDEFS FOR POINTERS, LISTS AND ITERATORS IN THE WOLF TREE
 /////////////////////////////////////////////////////////////////////////
-// - forwards for pointers
 
-class NodeTerminus;
+// - forwards for pointers
+class NodeBase;
 class Problem;
-class MapBase;
-class LandmarkBase;
-class LandmarkCorner2D;
+class HardwareBase;
+class SensorBase;
+struct IntrinsicsBase;
+class ProcessorBase;
+class ProcessorMotion;
+struct ProcessorParamsBase;
 class TrajectoryBase;
 class FrameBase;
 class CaptureBase;
 class CaptureMotion;
-class CaptureLaser2D;
 class FeatureBase;
-class FeatureCorner2D;
-class FeaturePolyline2D;
 class ConstraintBase;
-class SensorBase;
-class SensorLaser2D;
-class TransSensor;
-class ProcessorBase;
+class MapBase;
+class LandmarkBase;
 class StateBlock;
+class StateQuaternion;
+class LocalParametrizationBase;
 
+// NodeBase
+typedef std::shared_ptr<NodeBase> NodeBasePtr;
+typedef std::weak_ptr<NodeBase> NodeBaseWPtr;
 
-// TODO: No seria millor que cada classe es defineixi aquests typedefs?
+// Problem
+typedef std::shared_ptr<Problem> ProblemPtr;
+typedef std::weak_ptr<Problem> ProblemWPtr;
 
-//Problem
-typedef Problem* ProblemPtr;
+// Hardware
+typedef std::shared_ptr<HardwareBase> HardwareBasePtr;
+typedef std::weak_ptr<HardwareBase> HardwareBaseWPtr;
 
-//Map
-typedef std::list<MapBase*> MapBaseList;
-typedef MapBaseList::iterator MapBaseIter;
+// - Sensors
+typedef std::shared_ptr<SensorBase> SensorBasePtr;
+typedef std::weak_ptr<SensorBase> SensorBaseWPtr;
+typedef std::list<SensorBasePtr> SensorBaseList;
+typedef SensorBaseList::iterator SensorBaseIter;
 
-//Landmark
-typedef std::list<LandmarkBase*> LandmarkBaseList;
-typedef LandmarkBaseList::iterator LandmarkBaseIter;
+// - - Intrinsics
+typedef std::shared_ptr<IntrinsicsBase> IntrinsicsBasePtr;
 
-//Landmark corner 2D
-typedef std::list<LandmarkCorner2D*> LandmarkCorner2DList;
-typedef LandmarkCorner2DList::iterator LandmarkCorner2DIter;
+// - Processors
+typedef std::shared_ptr<ProcessorBase> ProcessorBasePtr;
+typedef std::weak_ptr<ProcessorBase> ProcessorBaseWPtr;
+typedef std::list<ProcessorBasePtr> ProcessorBaseList;
+typedef ProcessorBaseList::iterator ProcessorBaseIter;
+
+// - ProcessorMotion
+typedef std::shared_ptr<ProcessorMotion> ProcessorMotionPtr;
+typedef std::weak_ptr<ProcessorMotion> ProcessorMotionWPtr;
+
+// - - Processor params
+typedef std::shared_ptr<ProcessorParamsBase> ProcessorParamsBasePtr;
+
+// Trajectory
+typedef std::shared_ptr<TrajectoryBase> TrajectoryBasePtr;
+typedef std::weak_ptr<TrajectoryBase> TrajectoryBaseWPtr;
 
 // - Frame
-typedef std::list<FrameBase*> FrameBaseList;
+typedef std::shared_ptr<FrameBase> FrameBasePtr;
+typedef std::weak_ptr<FrameBase> FrameBaseWPtr;
+typedef std::list<FrameBasePtr> FrameBaseList;
 typedef FrameBaseList::iterator FrameBaseIter;
 
 // - Capture
-typedef std::list<CaptureBase*> CaptureBaseList;
+typedef std::shared_ptr<CaptureBase> CaptureBasePtr;
+typedef std::weak_ptr<CaptureBase> CaptureBaseWPtr;
+typedef std::list<CaptureBasePtr> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
-// - Capture Relative
-typedef std::list<CaptureMotion*> CaptureRelativeList;
-typedef CaptureRelativeList::iterator CaptureRelativeIter;
-
 // - Feature
-typedef std::list<FeatureBase*> FeatureBaseList;
+typedef std::shared_ptr<FeatureBase> FeatureBasePtr;
+typedef std::weak_ptr<FeatureBase> FeatureBaseWPtr;
+typedef std::list<FeatureBasePtr> FeatureBaseList;
 typedef FeatureBaseList::iterator FeatureBaseIter;
 
-// - Feature Corner 2D
-typedef std::list<FeatureCorner2D*> FeatureCorner2DList;
-typedef FeatureCorner2DList::iterator FeatureCorner2DIter;
-
-// - Feature Polyline 2D
-typedef std::list<FeaturePolyline2D*> FeaturePolyline2DList;
-typedef FeaturePolyline2DList::iterator FeaturePolyline2DIter;
-
 // - Constraint
-typedef std::list<ConstraintBase*> ConstraintBaseList;
+typedef std::shared_ptr<ConstraintBase> ConstraintBasePtr;
+typedef std::weak_ptr<ConstraintBase> ConstraintBaseWPtr;
+typedef std::list<ConstraintBasePtr> ConstraintBaseList;
 typedef ConstraintBaseList::iterator ConstraintBaseIter;
 
-// - Sensors
-typedef std::list<SensorBase*> SensorBaseList;
-typedef SensorBaseList::iterator SensorBaseIter;
+// Map
+typedef std::shared_ptr<MapBase> MapBasePtr;
+typedef std::weak_ptr<MapBase> MapBaseWPtr;
+typedef std::list<MapBasePtr> MapBaseList;
+typedef MapBaseList::iterator MapBaseIter;
 
-// - transSensor
-typedef std::map<unsigned int, TransSensor*> TransSensorMap;
-typedef TransSensorMap::iterator TransSensorIter;
+// - Landmark
+typedef std::shared_ptr<LandmarkBase> LandmarkBasePtr;
+typedef std::weak_ptr<LandmarkBase> LandmarkBaseWPtr;
+typedef std::list<LandmarkBasePtr> LandmarkBaseList;
+typedef LandmarkBaseList::iterator LandmarkBaseIter;
 
-// - Processors
-typedef std::list<ProcessorBase*> ProcessorBaseList;
-typedef ProcessorBaseList::iterator ProcessorBaseIter;
-
-// - State
-typedef std::list<StateBlock*> StateBlockList;
+// - - State blocks
+typedef std::shared_ptr<StateBlock> StateBlockPtr;
+typedef std::weak_ptr<StateBlock> StateBlockWPtr;
+typedef std::list<StateBlockPtr> StateBlockList;
 typedef StateBlockList::iterator StateBlockIter;
+typedef std::shared_ptr<StateQuaternion> StateQuaternionPtr;
 
+// - - Local Parametrization
+typedef std::shared_ptr<LocalParametrizationBase> LocalParametrizationBasePtr;
 
-// Match Feature - Landmark
+// - - Match Feature - Landmark
 struct LandmarkMatch
 {
-        LandmarkBase* landmark_ptr_;
+        LandmarkBasePtr landmark_ptr_;
         Scalar normalized_score_;
+        LandmarkMatch() :
+                landmark_ptr_(nullptr), normalized_score_(0)
+        {
+
+        }
+        LandmarkMatch(LandmarkBasePtr _landmark_ptr, Scalar _normalized_score) :
+                landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
+        {
+
+        }
 };
 
 // Match map Feature - Landmark
-typedef std::map<FeatureBase*, LandmarkMatch*> LandmarkMatchMap;
+typedef std::shared_ptr<LandmarkMatch> LandmarkMatchPtr;
+typedef std::map<FeatureBasePtr, LandmarkMatchPtr> LandmarkMatchMap;
 
 
 // Feature-Feature correspondence
 struct FeatureMatch
 {
-        FeatureBase* feature_ptr_;
+        FeatureBasePtr feature_ptr_;
         Scalar normalized_score_;
 };
 
-typedef std::map<FeatureBase*, FeatureMatch> FeatureMatchMap;
+typedef std::map<FeatureBasePtr, FeatureMatch> FeatureMatchMap;
 
 
 

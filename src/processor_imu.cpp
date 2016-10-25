@@ -21,11 +21,12 @@ ProcessorIMU::ProcessorIMU() :
 
 ProcessorIMU::~ProcessorIMU()
 {
+    std::cout << "destructed     -p-IMU" << id() << std::endl;
 }
 
-ProcessorBase* ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr)
 {
-    ProcessorIMU* prc_ptr = new ProcessorIMU();
+    std::shared_ptr<ProcessorIMU> prc_ptr = std::make_shared<ProcessorIMU>();
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
@@ -35,9 +36,8 @@ ProcessorBase* ProcessorIMU::create(const std::string& _unique_name, const Proce
 
 // Register in the SensorFactory
 #include "processor_factory.h"
-namespace wolf {
-namespace
+
+namespace wolf
 {
-const bool registered_prc_imu = ProcessorFactory::get().registerCreator("IMU", ProcessorIMU::create);
+WOLF_REGISTER_PROCESSOR("IMU", ProcessorIMU)
 }
-} // namespace wolf

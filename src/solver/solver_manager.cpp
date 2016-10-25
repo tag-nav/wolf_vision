@@ -15,7 +15,7 @@ void SolverManager::solve()
 
 }
 
-//void SolverManager::computeCovariances(WolfProblem* _problem_ptr)
+//void SolverManager::computeCovariances(WolfProblemPtr _problem_ptr)
 //{
 //}
 
@@ -29,7 +29,7 @@ void SolverManager::update(const WolfProblemPtr _problem_ptr)
 	else
 	{
 		// ADD/UPDATE STATE UNITS
-		for(auto state_unit_it = _problem_ptr->getStateListPtr()->begin(); state_unit_it!=_problem_ptr->getStateListPtr()->end(); state_unit_it++)
+		for(auto state_unit_it = _problem_ptr->getStateList().begin(); state_unit_it!=_problem_ptr->getStateList().end(); state_unit_it++)
 		{
 			if ((*state_unit_it)->getPendingStatus() == ADD_PENDING)
 				addStateUnit(*state_unit_it);
@@ -40,10 +40,10 @@ void SolverManager::update(const WolfProblemPtr _problem_ptr)
 		//std::cout << "state units updated!" << std::endl;
 
 		// REMOVE STATE UNITS
-		while (!_problem_ptr->getRemovedStateListPtr()->empty())
+		while (!_problem_ptr->getRemovedStateList().empty())
 		{
 			// TODO: remove state unit
-			//_problem_ptr->getRemovedStateListPtr()->pop_front();
+			//_problem_ptr->getRemovedStateList().pop_front();
 		}
 		//std::cout << "state units removed!" << std::endl;
 
@@ -59,7 +59,7 @@ void SolverManager::update(const WolfProblemPtr _problem_ptr)
 	}
 }
 
-void SolverManager::addConstraint(ConstraintBase* _corr_ptr)
+void SolverManager::addConstraint(ConstraintBasePtr _corr_ptr)
 {
 	//TODO MatrixXs J; Vector e;
     // getResidualsAndJacobian(_corr_ptr, J, e);
@@ -74,7 +74,7 @@ void SolverManager::removeConstraint(const unsigned int& _corr_idx)
     // TODO
 }
 
-void SolverManager::addStateUnit(StateBlock* _st_ptr)
+void SolverManager::addStateUnit(StateBlockPtr _st_ptr)
 {
 	//std::cout << "Adding State Unit " << _st_ptr->nodeId() << std::endl;
 	//_st_ptr->print();
@@ -91,7 +91,7 @@ void SolverManager::addStateUnit(StateBlock* _st_ptr)
 		case ST_THETA:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlock*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		case ST_POINT_1D:
@@ -103,13 +103,13 @@ void SolverManager::addStateUnit(StateBlock* _st_ptr)
 		case ST_VECTOR:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlock*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		case ST_POINT_3D:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlock*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		default:
@@ -131,7 +131,7 @@ void SolverManager::removeAllStateUnits()
 		ceres_problem_->RemoveParameterBlock(parameter_blocks[i]);
 }
 
-void SolverManager::updateStateUnitStatus(StateBlock* _st_ptr)
+void SolverManager::updateStateUnitStatus(StateBlockPtr _st_ptr)
 {
     // TODO
 
@@ -145,7 +145,7 @@ void SolverManager::updateStateUnitStatus(StateBlock* _st_ptr)
 //	_st_ptr->setPendingStatus(NOT_PENDING);
 }
 
-ceres::CostFunction* SolverManager::createCostFunction(ConstraintBase* _corrPtr)
+ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPtr)
 {
 	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
 	//_corrPtr->print();

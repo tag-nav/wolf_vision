@@ -104,10 +104,10 @@ int main(int argc, char** argv)
     #endif
 
     // Wolf problem
-    Problem* wolf_problem_ptr_ = new Problem(FRM_PVQBB_3D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PVQBB_3D);
     Eigen::VectorXs IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, nullptr);
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, IntrinsicsBasePtr());
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMU* imu_ptr( new CaptureIMU(t, sensor_ptr, data_) );
+    CaptureIMU::Ptr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
 
     // main loop
     using namespace std;
@@ -170,7 +170,7 @@ int main(int argc, char** argv)
         delta_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_;
         delta_integr_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
         x_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-        ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
+        ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
 
         if(debug_results)
             debug_results << ts.get() << "\t" << delta_debug(0) << "\t" << delta_debug(1) << "\t" << delta_debug(2) << "\t" << delta_debug(3) << "\t" << delta_debug(4) << "\t"
@@ -207,9 +207,9 @@ int main(int argc, char** argv)
 #endif
 
     TimeStamp t0, tf;
-    t0 = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().front().ts_;
-    tf = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().back().ts_;
-    int N = wolf_problem_ptr_->getProcessorMotionPtr()->getBufferPtr()->get().size();
+    t0 = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().front().ts_;
+    tf = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
+    int N = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().size();
     std::cout << "t0        : " << t0.get() << " s" << std::endl;
     std::cout << "tf        : " << tf.get() << " s" << std::endl;
     std::cout << "duration  : " << tf-t0 << " s" << std::endl;
@@ -218,9 +218,6 @@ int main(int argc, char** argv)
     std::cout << "CPU time  : " << elapsed_secs << " s" << std::endl;
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
-
-    delete imu_ptr;
-    delete wolf_problem_ptr_;
 
     return 0;
 

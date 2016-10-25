@@ -14,7 +14,7 @@ namespace wolf
 void ProcessorTrackerFeatureCorner::preProcess()
 {
     // extract corners of incoming
-    extractCorners((CaptureLaser2D*)((incoming_ptr_)), corners_incoming_);
+    extractCorners(std::static_pointer_cast<CaptureLaser2D>(incoming_ptr_), corners_incoming_);
 
     // store previous transformations
     R_world_sensor_prev_ = R_world_sensor_;
@@ -80,7 +80,7 @@ unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList&
 
 bool ProcessorTrackerFeatureCorner::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureListPtr()->size() < n_tracks_th_;
+    return incoming_ptr_->getFeatureList().size() < n_tracks_th_;
 }
 
 unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const unsigned int& _max_features)
@@ -90,41 +90,41 @@ unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const unsigned int
     return new_features_last_.size();
 }
 
-ConstraintBase* ProcessorTrackerFeatureCorner::createConstraint(FeatureBase* _feature_ptr,
-                                                                FeatureBase* _feature_other_ptr)
+ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr _feature_ptr,
+                                                                FeatureBasePtr _feature_other_ptr)
 {
     // Getting landmark ptr
-    LandmarkCorner2D* landmark_ptr = nullptr;
-    for (auto constraint : *(_feature_other_ptr->getConstraintListPtr()))
+    LandmarkCorner2D::Ptr landmark_ptr = nullptr;
+    for (auto constraint : _feature_other_ptr->getConstraintList())
         if (constraint->getLandmarkOtherPtr() != nullptr && constraint->getLandmarkOtherPtr()->getTypeId() == LANDMARK_CORNER)
-            landmark_ptr = (LandmarkCorner2D*)(constraint->getLandmarkOtherPtr());
+            landmark_ptr = std::static_pointer_cast<LandmarkCorner2D>(constraint->getLandmarkOtherPtr());
 
     if (landmark_ptr == nullptr)
     {
         // Create new landmark
         Eigen::Vector3s feature_global_pose = R_world_sensor_ * _feature_ptr->getMeasurement() + t_world_sensor_;
-        landmark_ptr = new LandmarkCorner2D(new StateBlock(feature_global_pose.head(2)),
-                                            new StateBlock(feature_global_pose.tail(1)),
-                                            _feature_ptr->getMeasurement()(3));
+        landmark_ptr = std::make_shared<LandmarkCorner2D>(std::make_shared<StateBlock>(feature_global_pose.head(2)),
+                                                          std::make_shared<StateBlock>(feature_global_pose.tail(1)),
+                                                          _feature_ptr->getMeasurement()(3));
 
         // Add landmark constraint to the other feature
-        _feature_other_ptr->addConstraint(new ConstraintCorner2D(_feature_other_ptr, landmark_ptr));
+        _feature_other_ptr->addConstraint(std::make_shared<ConstraintCorner2D>(_feature_other_ptr, landmark_ptr));
     }
 
     std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
               << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl
               << " corresponding to landmark " << landmark_ptr->nodeId() << std::endl;
-    return new ConstraintCorner2D(_feature_ptr, landmark_ptr);
+    return std::make_shared<ConstraintCorner2D>(_feature_ptr, landmark_ptr);
 }
 
-void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2D* _capture_laser_ptr,
+void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr,
                                                   FeatureBaseList& _corner_list)
 {
     // TODO: sort corners by bearing
     std::list<laserscanutils::CornerPoint> corners;
 
     std::cout << "Extracting corners..." << std::endl;
-    corner_finder_.findCorners(_capture_laser_ptr->getScan(), ((SensorLaser2D*)getSensorPtr())->getScanParams(), line_finder_, corners);
+    corner_finder_.findCorners(_capture_laser_ptr->getScan(), (std::static_pointer_cast<SensorLaser2D>(getSensorPtr()))->getScanParams(), line_finder_, corners);
 
     Eigen::Vector4s measurement;
     for (auto corner : corners)
@@ -133,7 +133,7 @@ void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2D* _capture_lase
         measurement(2)=corner.orientation_;
         measurement(3)=corner.aperture_;
 
-        _corner_list.push_back(new FeatureCorner2D(measurement, corner.covariance_));
+        _corner_list.push_back(std::make_shared<FeatureCorner2D>(measurement, corner.covariance_));
     }
 
 /*    //variables

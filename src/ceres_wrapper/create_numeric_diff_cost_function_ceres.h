@@ -19,7 +19,7 @@ ceres::NumericDiffCostFunction<CtrType, ceres::CENTRAL,
                                 CtrType::block2Size,CtrType::block3Size,
                                 CtrType::block4Size,CtrType::block5Size,
                                 CtrType::block6Size,CtrType::block7Size,
-                                CtrType::block8Size,CtrType::block9Size>* createNumericDiffCostFunctionCeres(ConstraintBase* _constraint_ptr)
+                                CtrType::block8Size,CtrType::block9Size>* createNumericDiffCostFunctionCeres(ConstraintBasePtr _constraint_ptr)
 {
     static_assert(CtrType::measurementSize != 0,"Measurement size cannot be null!");
     static_assert(!(CtrType::block0Size == 0 ||
@@ -36,7 +36,7 @@ ceres::NumericDiffCostFunction<CtrType, ceres::CENTRAL,
 
     return new ceres::NumericDiffCostFunction<CtrType, ceres::CENTRAL, CtrType::measurementSize,
                                               CtrType::block0Size,CtrType::block1Size,CtrType::block2Size,CtrType::block3Size,CtrType::block4Size,
-                                              CtrType::block5Size,CtrType::block6Size,CtrType::block7Size,CtrType::block8Size,CtrType::block9Size>((CtrType*)_constraint_ptr);
+                                              CtrType::block5Size,CtrType::block6Size,CtrType::block7Size,CtrType::block8Size,CtrType::block9Size>(std::static_pointer_cast<CtrType>(_constraint_ptr).get()); // TODO revise pointer type
 };
 
 

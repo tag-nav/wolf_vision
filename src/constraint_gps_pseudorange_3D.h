@@ -24,29 +24,24 @@ class ConstraintGPSPseudorange3D: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
 
 public:
 
-    ConstraintGPSPseudorange3D(FeatureBase* _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+    ConstraintGPSPseudorange3D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 3, 4, 3, 1, 3, 4>(CTR_GPS_PR_3D, _apply_loss_function, _status,
                             _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to map frame
                             _ftr_ptr->getFramePtr()->getOPtr(), // orientation of the vehicle's frame wrt map frame
                             _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to base frame
                                                                         // orientation of antenna is not needed, because omnidirectional
                             _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter  = receiver time bias
-                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr(), // initial vehicle position wrt ecef frame
-                            ((SensorGPS*)_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr())  // initial vehicle orientation wrt ecef frame
+                            (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getMapPPtr(), // initial vehicle position wrt ecef frame
+                            (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getMapOPtr())  // initial vehicle orientation wrt ecef frame
     {
         setType("GPS PR 3D");
-        sat_position_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getSatPosition();
-        pseudorange_ = ((FeatureGPSPseudorange*)_ftr_ptr)->getPseudorange();
+        sat_position_ = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getSatPosition();
+        pseudorange_  = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getPseudorange();
 
         //std::cout << "ConstraintGPSPseudorange3D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
     }
 
 
-    /** \brief Default destructor (not recommended)
-     *
-     * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-     *
-     **/
     virtual ~ConstraintGPSPseudorange3D()
     {
         //std::cout << "deleting ConstraintGPSPseudorange3D " << nodeId() << std::endl;
@@ -77,10 +72,10 @@ protected:
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
-    static wolf::ConstraintBase* create(FeatureBase* _feature_ptr, //
-                                        NodeBase* _correspondant_ptr = nullptr)
+    static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
+                                        NodeBasePtr _correspondant_ptr = nullptr)
     {
-        return new ConstraintGPSPseudorange3D(_feature_ptr);
+        return std::make_shared<ConstraintGPSPseudorange3D>(_feature_ptr);
     }
 
 

@@ -7,17 +7,24 @@ namespace wolf {
 unsigned int FeatureBase::feature_id_count_ = 0;
 
 FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, unsigned int _dim_measurement) :
-    NodeConstrained(MID, "FEATURE", _type),
+    NodeBase("FEATURE", _type),
+    capture_ptr_(),
     feature_id_(++feature_id_count_),
+    track_id_(0),
+    landmark_id_(0),
     type_id_(_tp),
     measurement_(_dim_measurement)
 {
     //
+    std::cout << "constructed      +f" << id() << std::endl;
 }
 
 FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
-	NodeConstrained(MID, "FEATURE", _type),
+	NodeBase("FEATURE", _type),
+    capture_ptr_(),
     feature_id_(++feature_id_count_),
+    track_id_(0),
+    landmark_id_(0),
     type_id_(_tp),
 	measurement_(_measurement),
 	measurement_covariance_(_meas_covariance)
@@ -26,25 +33,47 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen:
     Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
+
+    std::cout << "constructed      +f" << id() << std::endl;
 }
 
 FeatureBase::~FeatureBase()
 {
-	//std::cout << "deleting FeatureBase " << nodeId() << std::endl;
-    is_deleting_ = true;
-
-    while (!getConstrainedByListPtr()->empty())
-    {
-        //std::cout << "destruct() constraint " << (*constrained_by_list_.begin())->nodeId() << std::endl;
-        getConstrainedByListPtr()->front()->destruct();
-        //std::cout << "deleted " << std::endl;
-    }
-    //std::cout << "constraints deleted" << std::endl;
+    std::cout << "destructed       -f" << id() << std::endl;
 }
 
-ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
+void FeatureBase::remove()
 {
-    addDownNode(_co_ptr);
+    std::cout << "Remove         f" << id() << std::endl;
+    if (!is_removing_)
+    {
+        is_removing_ = true;
+        std::cout << "Removing       f" << id() << std::endl;
+        std::shared_ptr<FeatureBase> this_f = shared_from_this(); // keep this alive while removing it
+        CaptureBasePtr C = capture_ptr_.lock();
+        if (C)
+        {
+            C->getFeatureList().remove(this_f); // remove from upstream
+            if (C->getFeatureList().empty())
+                C->remove(); // remove upstream
+        }
+        while (!constraint_list_.empty())
+        {
+            constraint_list_.front()->remove(); // remove downstream
+        }
+        while (!constrained_by_list_.empty())
+        {
+            constrained_by_list_.front()->remove(); // remove constrained
+        }
+        std::cout << "Removed        f" << id() << std::endl;
+    }
+}
+
+ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
+{
+    constraint_list_.push_back(_co_ptr);
+    _co_ptr->setFeaturePtr(shared_from_this());
+    _co_ptr->setProblem(getProblem());
     // add constraint to be added in solver
     if (getProblem() != nullptr)
         getProblem()->addConstraintPtr(_co_ptr);
@@ -53,20 +82,21 @@ ConstraintBase* FeatureBase::addConstraint(ConstraintBase* _co_ptr)
     return _co_ptr;
 }
 
-FrameBase* FeatureBase::getFramePtr() const
+FrameBasePtr FeatureBase::getFramePtr() const
 {
-    return upperNodePtr()->upperNodePtr();
+    return capture_ptr_.lock()->getFramePtr();
 }
 
-ConstraintBaseList* FeatureBase::getConstraintListPtr()
+ConstraintBaseList& FeatureBase::getConstraintList()
 {
-    return getDownNodeListPtr();
+    return constraint_list_;
 }
 
 void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
-	for(auto c_it = getConstraintListPtr()->begin(); c_it != getConstraintListPtr()->end(); ++c_it)
-		_ctr_list.push_back((*c_it));
+    _ctr_list.insert(_ctr_list.end(), constraint_list_.begin(), constraint_list_.end());
+//	for(ConstraintBasePtr c_ptr : constraint_list_)
+//		_ctr_list.push_back(c_ptr);
 }
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
@@ -77,6 +107,5 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse(); // retrieve factor U  in the decomposition
 }
-
 
 } // namespace wolf

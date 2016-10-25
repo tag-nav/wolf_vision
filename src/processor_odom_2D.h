@@ -24,6 +24,10 @@ struct ProcessorParamsOdom2D : public ProcessorParamsBase
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
+        typedef std::shared_ptr<ProcessorOdom2D> Ptr;
+        typedef std::weak_ptr<ProcessorOdom2D> WPtr;
+
+    public:
         ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th);
         virtual ~ProcessorOdom2D();
         virtual bool voteForKeyFrame();
@@ -51,8 +55,7 @@ class ProcessorOdom2D : public ProcessorMotion
                            Motion& _motion,
                            TimeStamp& _ts);
 
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_motion,
-                                                 FrameBase* _frame_origin);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
 
     protected:
         Scalar dist_traveled_th_;
@@ -61,7 +64,7 @@ class ProcessorOdom2D : public ProcessorMotion
 
         // Factory method
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
 
 inline ProcessorOdom2D::ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th) :
@@ -171,7 +174,6 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
     _delta1_plus_delta2(2) = _delta1(2) + _delta2(2);
 
-    // TODO: fill the jacobians
     _jacobian1 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
     _jacobian1(0,2) = -sin(_delta1(2))*_delta2(0) - cos(_delta1(2))*_delta2(1);
     _jacobian1(1,2) =  cos(_delta1(2))*_delta2(0) - sin(_delta1(2))*_delta2(1);
@@ -207,9 +209,13 @@ inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
     return Eigen::VectorXs::Zero(delta_size_);
 }
 
-inline ConstraintBase* ProcessorOdom2D::createConstraint(FeatureBase* _feature_motion, FrameBase* _frame_origin)
+inline ConstraintBasePtr ProcessorOdom2D::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
-    return new ConstraintOdom2D(_feature_motion, _frame_origin);
+    ConstraintOdom2D::Ptr ctr_odom = std::make_shared<ConstraintOdom2D>(_feature_motion, _frame_origin);
+//    ctr_odom->setFeaturePtr(_feature_motion);
+//    ctr_odom->setFrameOtherPtr(_frame_origin);
+//    _frame_origin->addConstrainedBy(ctr_odom);
+    return ctr_odom;
 }
 
 inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
@@ -227,22 +233,22 @@ inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _m
 inline bool ProcessorOdom2D::voteForKeyFrame()
 {
     //std::cout << "ProcessorOdom2D::voteForKeyFrame: traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
-    if (getBufferPtr()->get().back().delta_integr_.norm() > dist_traveled_th_)
+    if (getBuffer().get().back().delta_integr_.norm() > dist_traveled_th_)
     {
         std::cout << "ProcessorOdom2D:: " << this->id() << "VOTE FOR KEY FRAME traveled distance "
-                << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
+                << getBuffer().get().back().delta_integr_.norm() << std::endl;
         return true;
     }
-    if (getBufferPtr()->get().back().delta_integr_cov_.determinant() > cov_det_th_)
+    if (getBuffer().get().back().delta_integr_cov_.determinant() > cov_det_th_)
     {
         std::cout << "ProcessorOdom2D::  " << this->id() << "VOTE FOR KEY FRAME covariance det "
-                << getBufferPtr()->get().back().delta_integr_cov_.determinant() << std::endl;
+                << getBuffer().get().back().delta_integr_cov_.determinant() << std::endl;
         return true;
     }
-    if (getBufferPtr()->get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > elapsed_time_th_)
+    if (getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > elapsed_time_th_)
     {
         std::cout << "ProcessorOdom2D::  " << this->id() << "VOTE FOR KEY FRAME elapsed time "
-                << getBufferPtr()->get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get()
+                << getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get()
                 << std::endl;
         return true;
     }

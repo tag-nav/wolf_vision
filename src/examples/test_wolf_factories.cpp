@@ -5,6 +5,7 @@
  *      \author: jsola
  */
 
+#include "../hardware_base.h"
 #include "../sensor_gps_fix.h"
 #include "../sensor_camera.h"
 #include "../sensor_odom_2D.h"
@@ -15,7 +16,7 @@
 #include "../processor_odom_3D.h"
 #include "../processor_imu.h"
 #include "../processor_gps.h"
-#include "../processor_image.h"
+#include "../processor_image_feature.h"
 
 #include "../problem.h"
 
@@ -30,6 +31,9 @@ int main(void)
 {
     using namespace wolf;
     using namespace std;
+    using std::shared_ptr;
+    using std::make_shared;
+    using std::static_pointer_cast;
 
 
     /**=============================================================================================
@@ -60,35 +64,36 @@ int main(void)
 
     // Start creating the problem
 
-    Problem problem(FRM_PO_3D);
+    ProblemPtr problem = Problem::create(FRM_PO_3D);
 
     // define some useful parameters
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
-    IntrinsicsOdom2D intr_odom2d;
+    shared_ptr<IntrinsicsOdom2D> intr_odom2d_ptr;
 
     cout << "\n================== Intrinsics Factory ===================" << endl;
 
     // Use params factory for camera intrinsics
-    IntrinsicsBase* intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", WOLF_CONFIG + "/camera.yaml");
-    ProcessorParamsBase* params_ptr = ProcessorParamsFactory::get().create("IMAGE", WOLF_CONFIG + "/processor_image_ORB.yaml");
+    IntrinsicsBasePtr intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", WOLF_CONFIG + "/camera.yaml");
+    ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::get().create("IMAGE", WOLF_CONFIG + "/processor_image_ORB.yaml");
 
-    cout << "CAMERA with intrinsics      : " << ((IntrinsicsCamera*)intr_cam_ptr)->pinhole_model.transpose() << endl;
-    cout << "Processor IMAGE image width : " << ((ProcessorParamsImage*)params_ptr)->image.width << endl;
+    cout << "CAMERA with intrinsics      : " << (static_pointer_cast<IntrinsicsCamera>(intr_cam_ptr))->pinhole_model.transpose() << endl;
+//    cout << "Processor IMAGE image width : " << (static_pointer_cast<ProcessorParamsImage>(params_ptr))->image.width << endl;
 
     cout << "\n==================== Install Sensors ====================" << endl;
 
     // Install sensors
-    problem.installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
-    problem.installSensor("CAMERA",     "front right camera",   pq_3d,  WOLF_CONFIG + "/camera.yaml");
-    problem.installSensor("ODOM 2D",    "main odometer",        po_2d,  &intr_odom2d);
-    problem.installSensor("GPS FIX",    "GPS fix",              p_3d);
-    problem.installSensor("IMU",        "inertial",             pq_3d);
-    problem.installSensor("GPS",        "GPS raw",              p_3d);
-    problem.installSensor("ODOM 2D",    "aux odometer",         po_2d,  &intr_odom2d);
-    problem.installSensor("CAMERA", "rear camera", pq_3d, WOLF_ROOT + "/src/examples/camera.yaml");
+    problem->installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
+    problem->installSensor("CAMERA",     "front right camera",   pq_3d,  WOLF_CONFIG + "/camera.yaml");
+    problem->installSensor("ODOM 2D",    "main odometer",        po_2d,  intr_odom2d_ptr);
+    problem->installSensor("GPS FIX",    "GPS fix",              p_3d);
+    problem->installSensor("IMU",        "inertial",             pq_3d);
+    problem->installSensor("GPS",        "GPS raw",              p_3d);
+    problem->installSensor("ODOM 2D",    "aux odometer",         po_2d,  intr_odom2d_ptr);
+    problem->installSensor("CAMERA", "rear camera", pq_3d, WOLF_ROOT + "/src/examples/camera.yaml");
 
     // print available sensors
-    for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr())){
+    for (auto sen : problem->getHardwarePtr()->getSensorList())
+    {
         cout << "Sensor " << setw(2) << left << sen->id()
                 << " | type " << setw(2) << sen->typeId()
                 << ": " << setw(8) << sen->getType()
@@ -98,15 +103,15 @@ int main(void)
     cout << "\n=================== Install Processors ===================" << endl;
 
     // Install processors and bind them to sensors -- by sensor name!
-    problem.installProcessor("ODOM 2D", "main odometry",    "main odometer");
-    problem.installProcessor("ODOM 3D", "sec. odometry",    "aux odometer");
-    problem.installProcessor("IMU",     "pre-integrated",   "inertial");
-    problem.installProcessor("IMAGE",   "ORB",              "front left camera", WOLF_CONFIG + "/processor_image_ORB.yaml");
-//    problem.createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
+    problem->installProcessor("ODOM 2D", "main odometry",    "main odometer");
+    problem->installProcessor("ODOM 3D", "sec. odometry",    "aux odometer");
+    problem->installProcessor("IMU",     "pre-integrated",   "inertial");
+    problem->installProcessor("IMAGE",   "ORB",              "front left camera", WOLF_CONFIG + "/processor_image_ORB.yaml");
+//    problem->createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors
-    for (auto sen : *(problem.getHardwarePtr()->getSensorListPtr()))
-        for (auto prc : *(sen->getProcessorListPtr()))
+    for (auto sen : problem->getHardwarePtr()->getSensorList())
+        for (auto prc : sen->getProcessorList())
             cout << "Processor " << setw(2) << left  << prc->id()
             << " | type : " << setw(8) << prc->getType()
             << " | name: " << setw(17) << prc->getName()

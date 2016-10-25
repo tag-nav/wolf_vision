@@ -43,8 +43,12 @@ unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(const LandmarkBaseList
         else
         {
             _feature_list_out.push_back(
-                    new FeatureBase(FEATURE_POINT_IMAGE, "POINT IMAGE", landmark_in_ptr->getDescriptor(), Eigen::MatrixXs::Ones(1, 1)));
-            _feature_landmark_correspondences[_feature_list_out.back()] = new LandmarkMatch({landmark_in_ptr, 0});
+                    std::make_shared<FeatureBase>(
+                            FEATURE_POINT_IMAGE,
+                            "POINT IMAGE",
+                            landmark_in_ptr->getDescriptor(),
+                            Eigen::MatrixXs::Ones(1, 1)));
+            _feature_landmark_correspondences[_feature_list_out.back()] = std::make_shared<LandmarkMatch>(landmark_in_ptr, 1);
             std::cout << "\t\tlandmark " << landmark_in_ptr->getDescriptor() << " found!" << std::endl;
         }
     }
@@ -53,7 +57,7 @@ unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(const LandmarkBaseList
 
 bool ProcessorTrackerLandmarkDummy::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureListPtr()->size() < 5;
+    return incoming_ptr_->getFeatureList().size() < 5;
 }
 
 unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int& _max_features)
@@ -65,24 +69,24 @@ unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int
     {
         n_feature_++;
         new_features_last_.push_back(
-                new FeatureBase(FEATURE_POINT_IMAGE, "POINT IMAGE", n_feature_ * Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
+                std::make_shared<FeatureBase>(FEATURE_POINT_IMAGE, "POINT IMAGE", n_feature_ * Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
         std::cout << "\t\tfeature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
     }
     return new_features_last_.size();
 }
 
-LandmarkBase* ProcessorTrackerLandmarkDummy::createLandmark(FeatureBase* _feature_ptr)
+LandmarkBasePtr ProcessorTrackerLandmarkDummy::createLandmark(FeatureBasePtr _feature_ptr)
 {
     //std::cout << "ProcessorTrackerLandmarkDummy::createLandmark" << std::endl;
-    return new LandmarkCorner2D(new StateBlock(2), new StateBlock(1), _feature_ptr->getMeasurement(0));
+    return std::make_shared<LandmarkCorner2D>(std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1), _feature_ptr->getMeasurement(0));
 }
 
-ConstraintBase* ProcessorTrackerLandmarkDummy::createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr)
+ConstraintBasePtr ProcessorTrackerLandmarkDummy::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
     std::cout << "\tProcessorTrackerLandmarkDummy::createConstraint" << std::endl;
     std::cout << "\t\tfeature " << _feature_ptr->getMeasurement() << std::endl;
     std::cout << "\t\tlandmark "<< _landmark_ptr->getDescriptor() << std::endl;
-    return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*)(_landmark_ptr));
+    return std::make_shared<ConstraintCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>(_landmark_ptr) );
 }
 
 } //namespace wolf

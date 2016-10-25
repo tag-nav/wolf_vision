@@ -41,13 +41,16 @@ class CaptureMotion : public CaptureBase
 {
 
         // public interface:
+    public:
+        typedef std::shared_ptr<CaptureMotion> Ptr;
+        typedef std::weak_ptr<CaptureMotion> WPtr;
 
     public:
-        CaptureMotion(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data,
-                      FrameBase* _origin_frame_ptr = nullptr);
+        CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
+                      FrameBasePtr _origin_frame_ptr = nullptr);
 
-        CaptureMotion(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data,
-                      const Eigen::MatrixXs& _data_cov, FrameBase* _origin_frame_ptr = nullptr);
+        CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
+                      const Eigen::MatrixXs& _data_cov, FrameBasePtr _origin_frame_ptr = nullptr);
 
         virtual ~CaptureMotion();
 
@@ -56,23 +59,23 @@ class CaptureMotion : public CaptureBase
         void setData(const Eigen::VectorXs& _data);
         void setDataCovariance(const Eigen::MatrixXs& _data_cov);
 
-        MotionBuffer* getBufferPtr();
-        const MotionBuffer* getBufferPtr() const;
+        MotionBuffer& getBuffer();
+        const MotionBuffer& getBuffer() const;
         const Eigen::VectorXs& getDelta() const;
 
-        FrameBase* getOriginFramePtr();
-        void setOriginFramePtr(FrameBase* _frame_ptr);
+        FrameBasePtr getOriginFramePtr();
+        void setOriginFramePtr(FrameBasePtr _frame_ptr);
 
         // member data:
     private:
         Eigen::VectorXs data_;        ///< Motion data in form of vector mandatory
-        Eigen::MatrixXs data_cov_;    ///< Motion data in form of vector mandatory
+        Eigen::MatrixXs data_cov_;    ///< Motion data covariance
         MotionBuffer buffer_;         ///< Buffer of motions between this Capture and the next one.
-        FrameBase* origin_frame_ptr_; ///< Pointer to the origin frame of the motion
+        FrameBasePtr origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
 
-inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data,
-                                    FrameBase* _origin_frame_ptr) :
+inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
+                                    FrameBasePtr _origin_frame_ptr) :
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
         data_cov_(Eigen::MatrixXs::Identity(_data.rows(), _data.rows())),
@@ -80,10 +83,11 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBase* _sensor_pt
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //
+    std::cout << "constructed    +C-Mot" << id() << std::endl;
 }
 
-inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBase* _sensor_ptr, const Eigen::VectorXs& _data,
-                                    const Eigen::MatrixXs& _data_cov, FrameBase* _origin_frame_ptr) :
+inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
+                                    const Eigen::MatrixXs& _data_cov, FrameBasePtr _origin_frame_ptr) :
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
         data_cov_(_data_cov),
@@ -91,10 +95,12 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBase* _sensor_pt
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //
+    std::cout << "constructed    +C-Mot" << id() << std::endl;
 }
 
 inline CaptureMotion::~CaptureMotion()
 {
+    std::cout << "destructed     -C-Mot" << id() << std::endl;
     //
 }
 
@@ -118,14 +124,14 @@ inline void CaptureMotion::setDataCovariance(const Eigen::MatrixXs& _data_cov)
     data_cov_ = _data_cov;
 }
 
-inline const wolf::MotionBuffer* CaptureMotion::getBufferPtr() const
+inline const wolf::MotionBuffer& CaptureMotion::getBuffer() const
 {
-    return &buffer_;
+    return buffer_;
 }
 
-inline wolf::MotionBuffer* CaptureMotion::getBufferPtr()
+inline wolf::MotionBuffer& CaptureMotion::getBuffer()
 {
-    return &buffer_;
+    return buffer_;
 }
 
 inline const Eigen::VectorXs& CaptureMotion::getDelta() const
@@ -133,12 +139,12 @@ inline const Eigen::VectorXs& CaptureMotion::getDelta() const
     return buffer_.get().back().delta_integr_;
 }
 
-inline wolf::FrameBase* CaptureMotion::getOriginFramePtr()
+inline wolf::FrameBasePtr CaptureMotion::getOriginFramePtr()
 {
     return origin_frame_ptr_;
 }
 
-inline void CaptureMotion::setOriginFramePtr(FrameBase* _frame_ptr)
+inline void CaptureMotion::setOriginFramePtr(FrameBasePtr _frame_ptr)
 {
     origin_frame_ptr_ = _frame_ptr;
 }

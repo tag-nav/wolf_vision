@@ -165,10 +165,10 @@ int main(int argc, char *argv[])
     Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
-    SensorOdom2D odom_sensor(new StateBlock(odom_pose.head(2)), new StateBlock(odom_pose.tail(1)), odom_std_factor, odom_std_factor);
-    SensorGPSFix gps_sensor(new StateBlock(gps_pose.head(2)), new StateBlock(gps_pose.tail(1)), gps_std);
-    SensorLaser2D laser_1_sensor(new StateBlock(laser_1_pose.head(2)), new StateBlock(laser_1_pose.tail(1)), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
-    SensorLaser2D laser_2_sensor(new StateBlock(laser_2_pose.head(2)), new StateBlock(laser_2_pose.tail(1)), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorOdom2D odom_sensor(std::make_shared<StateBlock>(odom_pose.head(2)), std::make_shared<StateBlock>(odom_pose.tail(1)), odom_std_factor, odom_std_factor);
+    SensorGPSFix gps_sensor(std::make_shared<StateBlock>(gps_pose.head(2)), std::make_shared<StateBlock>(gps_pose.tail(1)), gps_std);
+    SensorLaser2D laser_1_sensor(std::make_shared<StateBlock>(laser_1_pose.head(2)), std::make_shared<StateBlock>(laser_1_pose.tail(1)), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
+    SensorLaser2D laser_2_sensor(std::make_shared<StateBlock>(laser_2_pose.head(2)), std::make_shared<StateBlock>(laser_2_pose.tail(1)), laserscanutils::LaserScanParams({M_PI/2,-M_PI/2, -M_PI/720,0.01,0.2,100,0.01,0.01}));
 
     // Initial pose
     pose_odom << 2, 8, 0;
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
 
         // draw landmarks
         std::vector<double> landmark_vector;
-        for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+        for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkList().begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkList().end(); landmark_it++)
         {
             Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
             landmark_vector.push_back(*position_ptr); //x
@@ -348,7 +348,7 @@ int main(int argc, char *argv[])
     // Draw Final result -------------------------
     std::cout << "Drawing final results..." << std::endl;
     std::vector<double> landmark_vector;
-    for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+    for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkList().begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkList().end(); landmark_it++)
     {
         Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
         landmark_vector.push_back(*position_ptr); //x
@@ -368,8 +368,8 @@ int main(int argc, char *argv[])
     // Vehicle poses
     std::cout << "Vehicle poses..." << std::endl;
     int i = 0;
-    Eigen::VectorXs state_poses(wolf_manager_QR->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->size() * 3);
-    for (auto frame_it = wolf_manager_QR->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->begin(); frame_it != wolf_manager_QR->getProblemPtr()->getTrajectoryPtr()->getFrameListPtr()->end(); frame_it++)
+    Eigen::VectorXs state_poses(wolf_manager_QR->getProblemPtr()->getTrajectoryPtr()->getFrameList().size() * 3);
+    for (auto frame_it = wolf_manager_QR->getProblemPtr()->getTrajectoryPtr()->getFrameList().begin(); frame_it != wolf_manager_QR->getProblemPtr()->getTrajectoryPtr()->getFrameList().end(); frame_it++)
     {
         if (complex_angle)
             state_poses.segment(i, 3) << *(*frame_it)->getPPtr()->getPtr(), *((*frame_it)->getPPtr()->getPtr() + 1), atan2(*(*frame_it)->getOPtr()->getPtr(), *((*frame_it)->getOPtr()->getPtr() + 1));
@@ -381,8 +381,8 @@ int main(int argc, char *argv[])
     // Landmarks
     std::cout << "Landmarks..." << std::endl;
     i = 0;
-    Eigen::VectorXs landmarks(wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->size() * 2);
-    for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkListPtr()->end(); landmark_it++)
+    Eigen::VectorXs landmarks(wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkList().size() * 2);
+    for (auto landmark_it = wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkList().begin(); landmark_it != wolf_manager_QR->getProblemPtr()->getMapPtr()->getLandmarkList().end(); landmark_it++)
     {
         Eigen::Map<Eigen::Vector2s> landmark((*landmark_it)->getPPtr()->getPtr());
         landmarks.segment(i, 2) = landmark;

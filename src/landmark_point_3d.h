@@ -18,7 +18,7 @@ class LandmarkPoint3D : public LandmarkBase
         cv::Mat descriptor_;
         Eigen::Vector3s position_;
     public:
-        LandmarkPoint3D(StateBlock* _p_ptr, StateBlock* _o_ptr, Eigen::Vector3s _position, cv::Mat _2D_descriptor);
+        LandmarkPoint3D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, Eigen::Vector3s _position, cv::Mat _2D_descriptor);
 
         virtual ~LandmarkPoint3D();
 

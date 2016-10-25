@@ -10,20 +10,17 @@ class StateQuaternion;
 }
 
 //Wolf includes
-#include "wolf.h"
 #include "frame_base.h"
-#include "time_stamp.h"
-#include "node_linked.h"
-#include "node_constrained.h"
 
 
 namespace wolf {
 
   class FrameIMU : public FrameBase
   {
-      protected:
-          StateBlock* acc_bias_ptr_;      ///< Accleration bias state block pointer
-          StateBlock* gyro_bias_ptr_;      ///< Gyrometer bias state block pointer
+      public:
+          typedef std::shared_ptr<FrameIMU> Ptr;
+          typedef std::weak_ptr<FrameIMU> WPtr;
+
       public:
           /** \brief Constructor of non-key Frame with only time stamp
            *
@@ -35,9 +32,9 @@ namespace wolf {
            * \param _ba_ptr StateBlock pointer to the acceleration bias (default: nullptr).
            * \param _bg_ptr StateBlock pointer to the gyrometer bias (default: nullptr).
            **/
-        FrameIMU(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr = nullptr, StateQuaternion* _o_ptr =
+        FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr = nullptr, StateQuaternionPtr _q_ptr =
                          nullptr,
-                 StateBlock* _ba_ptr = nullptr, StateBlock* _bg_ptr = nullptr);
+                 StateBlockPtr _ba_ptr = nullptr, StateBlockPtr _bg_ptr = nullptr);
 
           /** \brief Constructor with type, time stamp and state pointer
            *
@@ -50,8 +47,8 @@ namespace wolf {
            * \param _ba_ptr StateBlock pointer to the acceleration bias (default: nullptr).
            * \param _bg_ptr StateBlock pointer to the gyrometer bias (default: nullptr).
            **/
-        FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _v_ptr = nullptr,
-                 StateQuaternion* _o_ptr = nullptr, StateBlock* _ba_ptr = nullptr, StateBlock* _bg_ptr = nullptr);
+        FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr = nullptr,
+                 StateQuaternionPtr _q_ptr = nullptr, StateBlockPtr _ba_ptr = nullptr, StateBlockPtr _bg_ptr = nullptr);
 
           /** \brief Constructor with type, time stamp and state vector
           * \param _tp indicates frame type. Generally either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
@@ -59,48 +56,33 @@ namespace wolf {
           * \param _x state vector of size 16, organized as [position, quaternion, velocity, acc_bias, gyro_bias]
           **/
          FrameIMU(const FrameKeyType & _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x);
-
-          /** \brief Default destructor (not recommended)
-           *
-           * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-           *
-           **/
           virtual ~FrameIMU();
 
           // Frame values ------------------------------------------------
 
-          StateBlock* getBAPtr() const;
-          StateBlock* getBGPtr() const;
+          StateBlockPtr getAccBiasPtr() const;
+          StateBlockPtr getGyroBiasPtr() const;
 
           void setState(const Eigen::VectorXs& _st);
           Eigen::VectorXs getState() const;
           void getState(Eigen::VectorXs& state) const;
 
-          // Wolf tree access ---------------------------------------------------
-
-          /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
-           **/
-          virtual void registerNewStateBlocks();
-
       private:
           /** \brief Sets the Frame status (see wolf.h for Frame status)
            **/
           void setStatus(StateStatus _st);
-
-//          Eigen::Vector3s acc_bias_at_preintegration_time_;
-//          Eigen::Vector3s gyro_bias_at_preintegration_time_;
   };
 
   // IMPLEMENTATION //
 
-  inline StateBlock* FrameIMU::getBAPtr() const
+  inline StateBlockPtr FrameIMU::getAccBiasPtr() const
   {
-      return acc_bias_ptr_;
+      return getStateBlockPtr(3);
   }
 
-  inline StateBlock* FrameIMU::getBGPtr() const
+  inline StateBlockPtr FrameIMU::getGyroBiasPtr() const
   {
-      return gyro_bias_ptr_;
+      return getStateBlockPtr(4);
   }
 } // namespace wolf
 

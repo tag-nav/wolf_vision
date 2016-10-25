@@ -35,18 +35,43 @@ const Scalar min_features_ratio_th_ = 0.5;
 // Match Feature - Landmark
 struct LandmarkPolylineMatch : public LandmarkMatch
 {
-         int landmark_match_from_id_;
-         int feature_match_from_id_;
-         int landmark_match_to_id_;
-         int feature_match_to_id_;
+        typedef std::shared_ptr<LandmarkPolylineMatch> Ptr;
+
+        int landmark_match_from_id_;
+        int feature_match_from_id_;
+        int landmark_match_to_id_;
+        int feature_match_to_id_;
+
 //    std::vector<unsigned int> landmark_points_match_;
 //    std::vector<unsigned int> feature_points_match_;
 //    std::vector<unsigned int> feature_points_add_front_;
 //    std::vector<unsigned int> feature_points_add_back_;
+
+        LandmarkPolylineMatch() :
+            landmark_match_from_id_(0),
+            feature_match_from_id_(0),
+            landmark_match_to_id_(0),
+            feature_match_to_id_(0)
+        {
+            //
+        }
+        LandmarkPolylineMatch(int _landmark_match_from_id,
+                              int _feature_match_from_id,
+                              int _landmark_match_to_id,
+                              int _feature_match_to_id) :
+                                  landmark_match_from_id_(_landmark_match_from_id),
+                                  feature_match_from_id_(_feature_match_from_id),
+                                  landmark_match_to_id_(_landmark_match_to_id),
+                                  feature_match_to_id_(_landmark_match_to_id)
+        {
+            //
+        }
 };
 
 struct ProcessorParamsPolyline : public ProcessorParamsBase
 {
+        typedef std::shared_ptr<ProcessorParamsPolyline> Ptr;
+
         laserscanutils::LineFinderIterativeParams line_finder_params;
         Scalar position_error_th;
         unsigned int new_features_th;
@@ -62,6 +87,9 @@ struct ProcessorParamsPolyline : public ProcessorParamsBase
 
 class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 {
+    public:
+        typedef std::shared_ptr<ProcessorTrackerLandmarkPolyline> Ptr;
+
     private:
         laserscanutils::LineFinderIterative line_finder_;
         ProcessorParamsPolyline params_;
@@ -134,7 +162,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          *
          * Implement in derived classes to build the type of landmark you need for this tracker.
          */
-        virtual LandmarkBase* createLandmark(FeatureBase* _feature_ptr);
+        virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
 
         /** \brief Establish constraints between features in Captures \b last and \b origin
          */
@@ -142,7 +170,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 
         /** \brief look for known objects in the list of unclassified polylines
         */
-        void classifyPolilines(LandmarkBaseList* _lmk_list);
+        void classifyPolilines(LandmarkBaseList& _lmk_list);
 
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
@@ -153,13 +181,13 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem. JV: I disagree..
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, LandmarkBase* _landmark_ptr);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
     private:
 
-        void extractPolylines(CaptureLaser2D* _capture_laser_ptr, FeatureBaseList& _polyline_list);
+        void extractPolylines(CaptureLaser2D::Ptr _capture_laser_ptr, FeatureBaseList& _polyline_list);
 
-        void expectedFeature(LandmarkBase* _landmark_ptr, Eigen::MatrixXs& expected_feature_,
+        void expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& expected_feature_,
                              Eigen::MatrixXs& expected_feature_cov_);
 
         Eigen::VectorXs computeSquaredMahalanobisDistances(const Eigen::Vector2s& _feature,
@@ -171,7 +199,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
                                bool _A_extreme, bool _B_extreme);
     // Factory method
     public:
-        static ProcessorBase* create(const std::string& _unique_name, const ProcessorParamsBase* _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
 
 inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params) :
@@ -196,7 +224,7 @@ inline void ProcessorTrackerLandmarkPolyline::advance()
     //std::cout << "\t\tcorners_incoming_: " << polylines_incoming_.size() << std::endl;
     ProcessorTrackerLandmark::advance();
     for (auto polyline : polylines_last_)
-        polyline->destruct();
+        polyline->remove();
     polylines_last_ = std::move(polylines_incoming_);
     //std::cout << "advanced" << std::endl;
 }

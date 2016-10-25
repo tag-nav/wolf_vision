@@ -27,17 +27,12 @@ class SensorIMU : public SensorBase
          * \param _a_w_biases_ptr StateBlock pointer to the vector of acc and gyro biases
          *
          **/
-        SensorIMU(StateBlock* _p_ptr, StateBlock* _o_ptr, StateBlock* _a_w_biases_ptr = nullptr);
+        SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _a_w_biases_ptr = nullptr);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~SensorIMU();
 
     public:
-        static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics = nullptr);
+        static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBasePtr _intrinsics = nullptr);
 
 };
 

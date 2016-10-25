@@ -4,33 +4,34 @@
 // Forward declarations for node templates
 namespace wolf{
 class FeatureBase;
-class NodeTerminus;
 }
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
+#include "node_base.h"
 
 //std includes
-//
 
 namespace wolf {
 
-//TODO: add a member to indicate how jacobian is computed, called "jacobian_method_"
+
 //class ConstraintBase
-class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
+class ConstraintBase : public NodeBase, public std::enable_shared_from_this<ConstraintBase>
 {
     private:
+        FeatureBaseWPtr feature_ptr_;                    ///< FeatureBase pointer (upper node)
+
         static unsigned int constraint_id_count_;
+
     protected:
         unsigned int constraint_id_;
         ConstraintType type_id_;                        ///< type of constraint (types defined at wolf.h)
         ConstraintCategory category_;                   ///< category of constraint (types defined at wolf.h)
         ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
         bool apply_loss_function_;                      ///< flag for applying loss function to this constraint
-        FrameBase* frame_ptr_;                          ///< FrameBase pointer (for category CTR_FRAME)
-        FeatureBase* feature_ptr_;                      ///< FeatureBase pointer (for category CTR_FEATURE)
-        LandmarkBase* landmark_ptr_;                    ///< LandmarkBase pointer (for category CTR_LANDMARK)
+        FrameBaseWPtr frame_other_ptr_;                    ///< FrameBase pointer (for category CTR_FRAME)
+        FeatureBaseWPtr feature_other_ptr_;                ///< FeatureBase pointer (for category CTR_FEATURE)
+        LandmarkBaseWPtr landmark_other_ptr_;              ///< LandmarkBase pointer (for category CTR_LANDMARK)
 
     public:
 
@@ -40,22 +41,18 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 
         /** \brief Constructor of category CTR_FRAME
          **/
-        ConstraintBase(ConstraintType _tp, FrameBase* _frame_ptr, bool _apply_loss_function, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
         /** \brief Constructor of category CTR_FEATURE
          **/
-        ConstraintBase(ConstraintType _tp, FeatureBase* _feature_ptr, bool _apply_loss_function, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
         /** \brief Constructor of category CTR_LANDMARK
          **/
-        ConstraintBase(ConstraintType _tp, LandmarkBase* _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         * 
-         **/
         virtual ~ConstraintBase();
+        void remove();
 
         unsigned int id();
 
@@ -73,7 +70,7 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
-        virtual const std::vector<StateBlock*> getStatePtrVector() const = 0;
+        virtual const std::vector<StateBlockPtr> getStatePtrVector() const = 0;
 
         /** \brief Returns a reference to the feature measurement
          **/
@@ -89,11 +86,12 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 
         /** \brief Returns a pointer to the feature constrained from
          **/
-        FeatureBase* getFeaturePtr() const;
+        FeatureBasePtr getFeaturePtr() const;
+        void setFeaturePtr(const FeatureBasePtr _ft_ptr){feature_ptr_ = _ft_ptr;}
 
         /** \brief Returns a pointer to its capture
          **/
-        CaptureBase* getCapturePtr() const;
+        CaptureBasePtr getCapturePtr() const;
 
         /** \brief Returns the constraint residual size
          **/
@@ -121,32 +119,64 @@ class ConstraintBase : public NodeLinked<FeatureBase, NodeTerminus>
 
         /** \brief Returns a pointer to the frame constrained to
          **/
-        FrameBase* getFrameOtherPtr();
+        FrameBasePtr getFrameOtherPtr();
+        void setFrameOtherPtr(FrameBasePtr _frm_o){frame_other_ptr_ = _frm_o;}
 
         /** \brief Returns a pointer to the feature constrained to
          **/
-        FeatureBase* getFeatureOtherPtr();
+        FeatureBasePtr getFeatureOtherPtr();
+        void setFeatureOtherPtr(FeatureBasePtr _ftr_o){feature_other_ptr_ = _ftr_o;}
 
         /** \brief Returns a pointer to the landmark constrained to
          **/
-        LandmarkBase* getLandmarkOtherPtr();
+        LandmarkBasePtr getLandmarkOtherPtr();
+        void setLandmarkOtherPtr(LandmarkBasePtr _lmk_o){landmark_other_ptr_ = _lmk_o;}
+
+        ProblemPtr getProblem();
+
 };
+
+
+}
+
+// IMPLEMENTATION //
+
+#include "problem.h"
+#include "frame_base.h"
+#include "feature_base.h"
+#include "sensor_base.h"
+#include "landmark_base.h"
+
+namespace wolf{
+
+inline wolf::ProblemPtr ConstraintBase::getProblem()
+{
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb)
+    {
+        FeatureBasePtr ftr = feature_ptr_.lock();
+        if (ftr)
+        {
+            prb = ftr->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
+    return prb;
+}
 
 inline unsigned int ConstraintBase::id()
 {
     return constraint_id_;
 }
 
-// IMPLEMENTATION //
-
 inline ConstraintType ConstraintBase::getTypeId() const
 {
     return type_id_;
 }
 
-inline FeatureBase* ConstraintBase::getFeaturePtr() const
+inline FeatureBasePtr ConstraintBase::getFeaturePtr() const
 {
-    return upperNodePtr();
+    return feature_ptr_.lock();
 }
 
 inline ConstraintCategory ConstraintBase::getCategory() const
@@ -172,25 +202,26 @@ inline void ConstraintBase::setApplyLossFunction(const bool _apply)
             std::cout << "constraint not linked with Problem, apply loss function change not notified" << std::endl;
         else
         {
-            getProblem()->removeConstraintPtr(this);
-            getProblem()->addConstraintPtr(this);
+            ConstraintBasePtr this_c = shared_from_this();
+            getProblem()->removeConstraintPtr(this_c);
+            getProblem()->addConstraintPtr(this_c);
         }
     }
 }
 
-inline FrameBase* ConstraintBase::getFrameOtherPtr()
+inline FrameBasePtr ConstraintBase::getFrameOtherPtr()
 {
-    return frame_ptr_;
+    return frame_other_ptr_.lock();
 }
 
-inline FeatureBase* ConstraintBase::getFeatureOtherPtr()
+inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr()
 {
-    return feature_ptr_;
+    return feature_other_ptr_.lock();
 }
 
-inline LandmarkBase* ConstraintBase::getLandmarkOtherPtr()
+inline LandmarkBasePtr ConstraintBase::getLandmarkOtherPtr()
 {
-    return landmark_ptr_;
+    return landmark_other_ptr_.lock();
 }
 
 } // namespace wolf

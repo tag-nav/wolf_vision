@@ -9,19 +9,23 @@ class ConstraintBase;
 
 //Wolf includes
 #include "wolf.h"
-#include "node_linked.h"
-#include "node_constrained.h"
+#include "node_base.h"
 
 //std includes
 
-
 namespace wolf {
 
+
 //class FeatureBase
-class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
+class FeatureBase : public NodeBase, public std::enable_shared_from_this<FeatureBase>
 {
     private:
+        CaptureBaseWPtr capture_ptr_;
+        ConstraintBaseList constraint_list_;
+        ConstraintBaseList constrained_by_list_;
+
         static unsigned int feature_id_count_;
+
     protected:
         unsigned int feature_id_;
         unsigned int track_id_; // ID of the feature track
@@ -45,12 +49,10 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
          */
         FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         */
         virtual ~FeatureBase();
+        void remove();
 
+        // properties
         unsigned int id();
         unsigned int trackId(){return track_id_;}
         void setTrackId(unsigned int _tr_id){track_id_ = _tr_id;}
@@ -58,54 +60,83 @@ class FeatureBase : public NodeConstrained<CaptureBase,ConstraintBase>
         void setLandmarkId(unsigned int _lmk_id){landmark_id_ = _lmk_id;}
         FeatureType getTypeId(){return type_id_;}
 
-        /** \brief Adds a constraint from this feature (as a down node)
-         */
-        ConstraintBase* addConstraint(ConstraintBase* _co_ptr);
-
-        /** \brief Gets the capture pointer
-         */
-        CaptureBase* getCapturePtr() const;
-
-        /** \brief Gets the frame pointer
-         */
-        FrameBase* getFramePtr() const;
-
-        /** \brief Gets the constraint list (down nodes) pointer
-         */
-        ConstraintBaseList* getConstraintListPtr();
-        
-        void getConstraintList(ConstraintBaseList & _ctr_list);
-
-        const Eigen::VectorXs& getMeasurement() const;
-        
-        /** \brief Returns _ii component of measurement vector
-         * 
+        // values
+        /* \brief Returns _ii component of measurement vector
+         *
          * WARNING: To be fast, it does not check that index _ii is smaller than dimension.
-         **/
+         */
         Scalar getMeasurement(unsigned int _ii) const;
-
-        /** \brief Returns a reference to the feature measurement covariance
-         **/
+        const Eigen::VectorXs& getMeasurement() const;
+        void setMeasurement(const Eigen::VectorXs& _meas);
+        void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         const Eigen::MatrixXs& getMeasurementCovariance() const;
-
-        /** \brief Returns a reference to the feature measurement square root information
-         **/
         const Eigen::MatrixXs& getMeasurementSquareRootInformation() const;
 
-        void setMeasurement(const Eigen::VectorXs& _meas);
-        
-        void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
-        
+        // wolf tree access
+        ProblemPtr getProblem();
+
+        FrameBasePtr getFramePtr() const;
+
+        CaptureBasePtr getCapturePtr() const;
+        void setCapturePtr(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
+
+        ConstraintBasePtr addConstraint(ConstraintBasePtr _co_ptr);
+        ConstraintBaseList& getConstraintList();
+
+        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        unsigned int getHits() const;
+        ConstraintBaseList& getConstrainedByList();
+
+        // all constraints
+        void getConstraintList(ConstraintBaseList & _ctr_list);
 };
+
+}
+
+// IMPLEMENTATION
+
+#include "constraint_base.h"
+
+namespace wolf{
+
+inline void FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+}
+
+inline unsigned int FeatureBase::getHits() const
+{
+    return constrained_by_list_.size();
+}
+
+inline ProblemPtr FeatureBase::getProblem()
+{
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb)
+    {
+        CaptureBasePtr cap = capture_ptr_.lock();
+        if (cap)
+        {
+            prb = cap->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
+    return prb;
+}
+
+inline wolf::ConstraintBaseList& FeatureBase::getConstrainedByList()
+{
+    return constrained_by_list_;
+}
 
 inline unsigned int FeatureBase::id()
 {
     return feature_id_;
 }
 
-inline CaptureBase* FeatureBase::getCapturePtr() const
+inline CaptureBasePtr FeatureBase::getCapturePtr() const
 {
-    return upperNodePtr();
+    return capture_ptr_.lock();
 }
 
 inline Scalar FeatureBase::getMeasurement(unsigned int _ii) const

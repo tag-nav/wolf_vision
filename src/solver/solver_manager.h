@@ -29,21 +29,21 @@ class SolverManager
 
 		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
 
-		//void computeCovariances(WolfProblem* _problem_ptr);
+		//void computeCovariances(WolfProblemPtr _problem_ptr);
 
 		void update(const WolfProblemPtr _problem_ptr);
 
-		void addConstraint(ConstraintBase* _corr_ptr);
+		void addConstraint(ConstraintBasePtr _corr_ptr);
 
 		void removeConstraint(const unsigned int& _corr_idx);
 
-		void addStateUnit(StateBlock* _st_ptr);
+		void addStateUnit(StateBlockPtr _st_ptr);
 
 		void removeAllStateUnits();
 
-		void updateStateUnitStatus(StateBlock* _st_ptr);
+		void updateStateUnitStatus(StateBlockPtr _st_ptr);
 
-		ceres::CostFunction* createCostFunction(ConstraintBase* _corrPtr);
+		ceres::CostFunction* createCostFunction(ConstraintBasePtr _corrPtr);
 };
 
 #endif

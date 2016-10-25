@@ -12,29 +12,30 @@ class StateBlock;
 //Wolf includes
 #include "wolf.h"
 #include "time_stamp.h"
-#include "node_linked.h"
-#include "node_constrained.h"
+#include "node_base.h"
 
 //std includes
 
 namespace wolf {
 
 //class FrameBase
-class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
+class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase>
 {
     private:
+        TrajectoryBaseWPtr trajectory_ptr_;
+        CaptureBaseList capture_list_;
+        ConstraintBaseList constrained_by_list_;
+        std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, V.
+
         static unsigned int frame_id_count_;
+
     protected:
         unsigned int frame_id_;
-        FrameKeyType type_id_;         ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
-        TimeStamp time_stamp_;   ///< frame time stamp
-        StateStatus status_;     ///< status of the estimation of the frame state
-        StateBlock* p_ptr_;      ///< Position state block pointer
-        StateBlock* o_ptr_;      ///< Orientation state block pointer
-        StateBlock* v_ptr_;      ///< Linear velocity state block pointer
+        FrameKeyType type_id_;     ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
+        StateStatus status_;       ///< status of the estimation of the frame state
+        TimeStamp time_stamp_;     ///< frame time stamp
         
     public:
-
         /** \brief Constructor of non-key Frame with only time stamp
          *
          * Constructor with only time stamp
@@ -43,7 +44,7 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr). Pass a StateQuaternion if needed.
          * \param _v_ptr StateBlock pointer to the velocity (default: nullptr).
          **/
-        FrameBase(const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
+        FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
         
         /** \brief Constructor with type, time stamp and state pointer
          * 
@@ -54,20 +55,17 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          * \param _v_ptr StateBlock pointer to the velocity (default: nullptr).
          **/        
-        FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlock* _p_ptr, StateBlock* _o_ptr = nullptr, StateBlock* _v_ptr = nullptr);
+        FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         * 
-         **/
         virtual ~FrameBase();
+        void remove();
 
-        unsigned int id();
 
 
 
         // Frame properties -----------------------------------------------
+    public:
+        unsigned int id();
 
         // KeyFrame / NonKeyFrame
         bool isKey() const;
@@ -78,60 +76,95 @@ class FrameBase : public NodeConstrained<TrajectoryBase,CaptureBase>
         void unfix();
         bool isFixed() const;
 
-
-
         // Frame values ------------------------------------------------
-
+    public:
         void setTimeStamp(const TimeStamp& _ts);
         TimeStamp getTimeStamp() const;
         void getTimeStamp(TimeStamp& _ts) const;
 
-        StateBlock* getPPtr() const;
-        StateBlock* getOPtr() const;
-        StateBlock* getVPtr() const;
+        // State blocks
+    public:
+        void registerNewStateBlocks();
+        const std::vector<StateBlockPtr>& getStateBlockVec() const;
+        std::vector<StateBlockPtr>& getStateBlockVec();
+        StateBlockPtr getPPtr() const;
+        StateBlockPtr getOPtr() const;
+        StateBlockPtr getVPtr() const;
+        void setPPtr(const StateBlockPtr _p_ptr);
+        void setOPtr(const StateBlockPtr _o_ptr);
+        void setVPtr(const StateBlockPtr _v_ptr);
 
+    protected:
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
+        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+    private:
+        void removeStateBlocks();
+
+        // states
+    public:
         void setState(const Eigen::VectorXs& _st);
         virtual Eigen::VectorXs getState() const;
         void getState(Eigen::VectorXs& state) const;
 
 
         // Wolf tree access ---------------------------------------------------
+    public:
+        ProblemPtr getProblem();
 
-        TrajectoryBase* getTrajectoryPtr() const;
+        TrajectoryBasePtr getTrajectoryPtr() const;
+        void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr);
 
-        FrameBase* getPreviousFrame() const;
-        FrameBase* getNextFrame() const;
+        FrameBasePtr getPreviousFrame() const;
+        FrameBasePtr getNextFrame() const;
 
-        CaptureBaseList* getCaptureListPtr();
-        CaptureBase* addCapture(CaptureBase* _capt_ptr);
-        void removeCapture(CaptureBaseIter& _capt_iter);
-        void removeCapture(CaptureBase* _capt_ptr);
-        CaptureBase* hasCaptureOf(const SensorBase* _sensor_ptr);
+        CaptureBaseList& getCaptureList();
+        CaptureBasePtr addCapture(CaptureBasePtr _capt_ptr);
+        CaptureBasePtr getCaptureOf(const SensorBasePtr _sensor_ptr);
+        void unlinkCapture(CaptureBasePtr _cap_ptr);
 
-        void getConstraintList(ConstraintBaseList & _ctr_list);
+        void getConstraintList(ConstraintBaseList& _ctr_list);
+        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        unsigned int getHits() const;
+        ConstraintBaseList& getConstrainedByList();
 
-        /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
-         **/
-        virtual void registerNewStateBlocks();
 
 
     private:
-        /** \brief Gets the Frame status (see wolf.h for Frame status)
-         **/
         StateStatus getStatus() const;
-        /** \brief Sets the Frame status (see wolf.h for Frame status)
-         **/
         void setStatus(StateStatus _st);
-
-
 };
+
+} // namespace wolf
+
+// IMPLEMENTATION //
+
+#include "capture_base.h"
+#include "trajectory_base.h"
+#include "state_block.h"
+
+namespace wolf {
+
+inline ProblemPtr FrameBase::getProblem()
+{
+    ProblemPtr prb = problem_ptr_.lock();
+    if (!prb)
+    {
+        TrajectoryBasePtr trj = trajectory_ptr_.lock();
+        if (trj)
+        {
+            prb = trj->getProblem();
+            problem_ptr_ = prb;
+        }
+    }
+
+    return prb;
+}
+
 
 inline unsigned int FrameBase::id()
 {
     return frame_id_;
 }
-
-// IMPLEMENTATION //
 
 inline bool FrameBase::isKey() const
 {
@@ -169,52 +202,118 @@ inline TimeStamp FrameBase::getTimeStamp() const
     return time_stamp_.get();
 }
 
-inline StateBlock* FrameBase::getPPtr() const
+inline const std::vector<StateBlockPtr>& FrameBase::getStateBlockVec() const
 {
-    return p_ptr_;
+    return state_block_vec_;
 }
 
-inline StateBlock* FrameBase::getOPtr() const
+inline std::vector<StateBlockPtr>& FrameBase::getStateBlockVec()
 {
-    return o_ptr_;
+    return state_block_vec_;
 }
 
-inline StateBlock* FrameBase::getVPtr() const
+inline StateBlockPtr FrameBase::getPPtr() const
 {
-    return v_ptr_;
+    return state_block_vec_[0];
+}
+inline void FrameBase::setPPtr(const StateBlockPtr _p_ptr)
+{
+    state_block_vec_[0] = _p_ptr;
 }
 
-inline TrajectoryBase* FrameBase::getTrajectoryPtr() const
+inline StateBlockPtr FrameBase::getOPtr() const
 {
-    return upperNodePtr();
+    return state_block_vec_[1];
+}
+inline void FrameBase::setOPtr(const StateBlockPtr _o_ptr)
+{
+    state_block_vec_[1] = _o_ptr;
 }
 
-inline CaptureBaseList* FrameBase::getCaptureListPtr()
+inline StateBlockPtr FrameBase::getVPtr() const
 {
-    return getDownNodeListPtr();
+    return state_block_vec_[2];
 }
 
-inline CaptureBase* FrameBase::addCapture(CaptureBase* _capt_ptr)
+inline void FrameBase::setVPtr(const StateBlockPtr _v_ptr)
 {
-    addDownNode(_capt_ptr);
+    state_block_vec_[2] = _v_ptr;
+}
+
+inline StateBlockPtr FrameBase::getStateBlockPtr(unsigned int _i) const
+{
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+    return state_block_vec_[_i];
+}
+
+inline void FrameBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
+{
+    state_block_vec_[_i] = _sb_ptr;
+}
+
+inline TrajectoryBasePtr FrameBase::getTrajectoryPtr() const
+{
+    return trajectory_ptr_.lock();
+}
+
+inline CaptureBaseList& FrameBase::getCaptureList()
+{
+    return capture_list_;
+}
+
+inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
+{
+    capture_list_.push_back(_capt_ptr);
+    _capt_ptr->setFramePtr(shared_from_this());
+    _capt_ptr->setProblem(getProblem());
     return _capt_ptr;
-}
-
-inline void FrameBase::removeCapture(CaptureBaseIter& _capt_iter)
-{
-    //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
-    removeDownNode(_capt_iter);
-}
-
-inline void FrameBase::removeCapture(CaptureBase* _capt_ptr)
-{
-    //std::cout << "removing capture " << (*_capt_iter)->nodeId() << " from Frame " << nodeId() << std::endl;
-    removeDownNode(_capt_ptr);
 }
 
 inline StateStatus FrameBase::getStatus() const
 {
     return status_;
+}
+
+
+inline CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr)
+{
+    for (CaptureBasePtr capture_ptr : getCaptureList())
+        if (capture_ptr->getSensorPtr() == _sensor_ptr)
+            return capture_ptr;
+    return nullptr;
+}
+
+inline void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
+{
+    _cap_ptr->unlinkFromFrame();
+    capture_list_.remove(_cap_ptr);
+}
+
+inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
+{
+    for (auto c_ptr : getCaptureList())
+        c_ptr->getConstraintList(_ctr_list);
+}
+
+
+inline void FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+}
+
+inline unsigned int FrameBase::getHits() const
+{
+    return constrained_by_list_.size();
+}
+
+inline ConstraintBaseList& FrameBase::getConstrainedByList()
+{
+    return constrained_by_list_;
+}
+
+inline void FrameBase::setTrajectoryPtr(TrajectoryBasePtr _trj_ptr)
+{
+    trajectory_ptr_ = _trj_ptr;
 }
 
 } // namespace wolf

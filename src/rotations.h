@@ -111,7 +111,7 @@ inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<D
 
     Eigen::Quaternion<T> q;
     T angle = _v.norm();
-    T angle_half = angle / 2.0;
+    T angle_half = angle / (T)2.0;
     if (angle > wolf::Constants::EPS)
     {
         q.w() = cos(angle_half);
@@ -138,8 +138,8 @@ inline Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)
     }
     else
     { // small-angle approximation using truncated Taylor series
-        T r = vecnorm / _q.w();
-        return vec * ((T)1.0 - r * r) / _q.w();
+        T r2 = vec.squaredNorm() / (_q.w() *_q.w());
+        return vec * ( (T)2.0 -  r2 / (T)1.5 ) / _q.w(); // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
     }
 }
 

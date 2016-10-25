@@ -18,18 +18,18 @@ namespace wolf
 {
 
 
-LandmarkPolyline2D::LandmarkPolyline2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id, LandmarkClassification _class) :
+LandmarkPolyline2D::LandmarkPolyline2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id, LandmarkClassification _class) :
         LandmarkBase(LANDMARK_POLYLINE_2D, "POLYLINE 2D", _p_ptr, _o_ptr), first_id_(_first_id), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false), classification_(_class)
 {
     //std::cout << "LandmarkPolyline2D::LandmarkPolyline2D" << std::endl;
     assert(_points.cols() >= 2 && "LandmarkPolyline2D::LandmarkPolyline2D: 2 points at least needed.");
     for (auto i = 0; i < _points.cols(); i++)
-        point_state_ptr_vector_.push_back(new StateBlock(_points.col(i).head<2>()));
+        point_state_ptr_vector_.push_back(std::make_shared<StateBlock>(_points.col(i).head<2>()));
 
     if (!first_defined_)
-        point_state_ptr_vector_.front()->setLocalParametrizationPtr(new LocalParametrizationPolylineExtreme(point_state_ptr_vector_[1]));
+        point_state_ptr_vector_.front()->setLocalParametrizationPtr(std::make_shared<LocalParametrizationPolylineExtreme>(point_state_ptr_vector_[1]));
     if (!last_defined_)
-        point_state_ptr_vector_.back()->setLocalParametrizationPtr(new LocalParametrizationPolylineExtreme(point_state_ptr_vector_[point_state_ptr_vector_.size() - 2]));
+        point_state_ptr_vector_.back()->setLocalParametrizationPtr(std::make_shared<LocalParametrizationPolylineExtreme>(point_state_ptr_vector_[point_state_ptr_vector_.size() - 2]));
 
     assert(point_state_ptr_vector_.front()->hasLocalParametrization() ? !first_defined_ : first_defined_);
     assert(point_state_ptr_vector_.back()->hasLocalParametrization() ? !last_defined_ : last_defined_);
@@ -37,14 +37,15 @@ LandmarkPolyline2D::LandmarkPolyline2D(StateBlock* _p_ptr, StateBlock* _o_ptr, c
 
 LandmarkPolyline2D::~LandmarkPolyline2D()
 {
-    while (!point_state_ptr_vector_.empty())
-    {
-        if (getProblem() != nullptr)
-            getProblem()->removeStateBlockPtr(point_state_ptr_vector_.front());
-
-        delete point_state_ptr_vector_.front();
-        point_state_ptr_vector_.pop_front();
-    }
+    removeStateBlocks();
+//    while (!point_state_ptr_vector_.empty())
+//    {
+//        if (getProblem() != nullptr)
+//            getProblem()->removeStateBlockPtr(point_state_ptr_vector_.front());
+//
+//        point_state_ptr_vector_.pop_front();
+//    }
+    std::cout << "destructed    L-poly" << id() << std::endl;
 }
 
 void LandmarkPolyline2D::setFirst(const Eigen::VectorXs& _point, bool _defined)
@@ -75,7 +76,7 @@ const Eigen::VectorXs& LandmarkPolyline2D::getPointVector(int _i) const
     return point_state_ptr_vector_[_i-first_id_]->getVector();
 }
 
-StateBlock* LandmarkPolyline2D::getPointStateBlockPtr(int _i)
+StateBlockPtr LandmarkPolyline2D::getPointStateBlockPtr(int _i)
 {
 	assert(_i-first_id_ >= 0 && _i-first_id_ <= (int)(point_state_ptr_vector_.size()) && "out of range!");
 	return point_state_ptr_vector_[_i-first_id_];
@@ -95,23 +96,23 @@ void LandmarkPolyline2D::addPoint(const Eigen::VectorXs& _point, const bool& _de
     // add new extreme
     if (_back)
     {
-        point_state_ptr_vector_.push_back(new StateBlock(_point.head<2>(), false,
+        point_state_ptr_vector_.push_back(std::make_shared<StateBlock>(_point.head<2>(), false,
                                                          (!_defined ?
-                                                                 new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.back()) :
+                                                                 std::make_shared<LocalParametrizationPolylineExtreme>(point_state_ptr_vector_.back()) :
                                                                  nullptr)));
         if (getProblem() != nullptr)
-        	getProblem()->addStateBlockPtr(point_state_ptr_vector_.back());
+        	getProblem()->addStateBlock(point_state_ptr_vector_.back());
         last_defined_ = _defined;
 		assert(point_state_ptr_vector_.back()->hasLocalParametrization() ? !last_defined_ : last_defined_);
     }
     else
     {
-        point_state_ptr_vector_.push_front(new StateBlock(_point.head<2>(), false,
+        point_state_ptr_vector_.push_front(std::make_shared<StateBlock>(_point.head<2>(), false,
                                                           (!_defined ?
-                                                                  new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.front()) :
+                                                                  std::make_shared<LocalParametrizationPolylineExtreme>(point_state_ptr_vector_.front()) :
                                                                   nullptr)));
         if (getProblem() != nullptr)
-        	getProblem()->addStateBlockPtr(point_state_ptr_vector_.front());
+        	getProblem()->addStateBlock(point_state_ptr_vector_.front());
         first_defined_ = _defined;
         first_id_--;
 		assert(point_state_ptr_vector_.front()->hasLocalParametrization() ? !first_defined_ : first_defined_);
@@ -136,13 +137,13 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
     {
         for (int i = _idx; i < _points.cols(); i++)
         {
-        	point_state_ptr_vector_.push_back(new StateBlock(_points.block(0,i,2,1),
+        	point_state_ptr_vector_.push_back(std::make_shared<StateBlock>(_points.block(0,i,2,1),
         													 false,
         													 (i == _points.cols()-1 && !_defined ?
-        															 new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.back()) :
+        															 std::make_shared<LocalParametrizationPolylineExtreme>(point_state_ptr_vector_.back()) :
         															 nullptr)));
         	if (getProblem() != nullptr)
-        		getProblem()->addStateBlockPtr(point_state_ptr_vector_.back());
+        		getProblem()->addStateBlock(point_state_ptr_vector_.back());
         }
         last_defined_ = _defined;
 		assert(point_state_ptr_vector_.back()->hasLocalParametrization() ? !last_defined_ : last_defined_);
@@ -151,13 +152,13 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
     {
         for (int i = _idx; i >= 0; i--)
         {
-        	point_state_ptr_vector_.push_front(new StateBlock(_points.block(0,i,2,1),
+        	point_state_ptr_vector_.push_front(std::make_shared<StateBlock>(_points.block(0,i,2,1),
         													  false,
         													  (i == 0 && !_defined ?
-        															  new LocalParametrizationPolylineExtreme(point_state_ptr_vector_.front()) :
+        															  std::make_shared<LocalParametrizationPolylineExtreme>(point_state_ptr_vector_.front()) :
         															  nullptr)));
         	if (getProblem() != nullptr)
-        		getProblem()->addStateBlockPtr(point_state_ptr_vector_.front());
+        		getProblem()->addStateBlock(point_state_ptr_vector_.front());
             first_id_--;
         }
 		first_defined_ = _defined;
@@ -169,7 +170,7 @@ void LandmarkPolyline2D::addPoints(const Eigen::MatrixXs& _points, const unsigne
 
 void LandmarkPolyline2D::defineExtreme(const bool _back)
 {
-    StateBlock* state = (_back ? point_state_ptr_vector_.back() : point_state_ptr_vector_.front());
+    StateBlockPtr state = (_back ? point_state_ptr_vector_.back() : point_state_ptr_vector_.front());
     assert((_back ? !last_defined_: !first_defined_) && "defining an already defined extreme");
     assert(state->hasLocalParametrization() && "not defined extreme without local parameterization");
 
@@ -182,10 +183,10 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
     state->removeLocalParametrization();
 
     if (getProblem() != nullptr)
-    	getProblem()->addStateBlockPtr(state);
+    	getProblem()->addStateBlock(state);
 
     // remove and add all constraints to the point
-    for (auto ctr_ptr : *getConstrainedByListPtr())
+    for (auto ctr_ptr : getConstrainedByList())
         for (auto st_ptr : ctr_ptr->getStatePtrVector())
             if (st_ptr == state && getProblem() != nullptr)
             {
@@ -238,50 +239,50 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     assert(_remain_id < getLastId() || last_defined_);
 
     // take a defined extreme as remaining
-    StateBlock* remove_state = getPointStateBlockPtr(_remove_id);
+    StateBlockPtr remove_state = getPointStateBlockPtr(_remove_id);
     std::cout << "state block to remove " << remove_state->getVector().transpose() << std::endl;
 
     // Change constraints from remove_state to remain_state
-    ConstraintBaseList old_constraints_list = *getConstrainedByListPtr();
+    ConstraintBaseList old_constraints_list = getConstrainedByList();
     std::cout << "changing constraints: " << old_constraints_list.size() << std::endl;
-    ConstraintBase* new_ctr_ptr = nullptr;
+    ConstraintBasePtr new_ctr_ptr = nullptr;
     for (auto ctr_ptr : old_constraints_list)
     {
         if (ctr_ptr->getTypeId() == CTR_POINT_2D)
         {
-            ConstraintPoint2D* ctr_point_ptr = (ConstraintPoint2D*)ctr_ptr;
+            std::shared_ptr<ConstraintPoint2D> ctr_point_ptr = std::static_pointer_cast<ConstraintPoint2D>(ctr_ptr);
 
             // If landmark point constrained -> new constraint
             if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
-                new_ctr_ptr = new ConstraintPoint2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
-                                                    this,
-                                                    ctr_point_ptr->getFeaturePointId(),
-                                                    _remain_id,
-                                                    ctr_point_ptr->getApplyLossFunction(),
-                                                    ctr_point_ptr->getStatus());
+                new_ctr_ptr = std::make_shared<ConstraintPoint2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
+                                                                  std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
+                                                                  ctr_point_ptr->getFeaturePointId(),
+                                                                  _remain_id,
+                                                                  ctr_point_ptr->getApplyLossFunction(),
+                                                                  ctr_point_ptr->getStatus());
         }
         else if  (ctr_ptr->getTypeId() == CTR_POINT_TO_LINE_2D)
         {
-            ConstraintPointToLine2D* ctr_point_ptr = (ConstraintPointToLine2D*)ctr_ptr;
+            std::shared_ptr<ConstraintPointToLine2D> ctr_point_ptr = std::static_pointer_cast<ConstraintPointToLine2D>(ctr_ptr);
 
             // If landmark point constrained -> new constraint
             if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
-                new_ctr_ptr = new ConstraintPointToLine2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
-                                                                                  this,
-                                                                                  ctr_point_ptr->getFeaturePointId(),
-                                                                                  _remain_id,
-                                                                                  ctr_point_ptr->getLandmarkPointAuxId(),
-                                                                                  ctr_point_ptr->getApplyLossFunction(),
-                                                                                  ctr_point_ptr->getStatus());
+                new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
+                                                                        std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
+                                                                        ctr_point_ptr->getFeaturePointId(),
+                                                                        _remain_id,
+                                                                        ctr_point_ptr->getLandmarkPointAuxId(),
+                                                                        ctr_point_ptr->getApplyLossFunction(),
+                                                                        ctr_point_ptr->getStatus());
             // If landmark point is aux point -> new constraint
             else if (ctr_point_ptr->getLandmarkPointAuxId() == _remove_id)
-                new_ctr_ptr = new ConstraintPointToLine2D((FeaturePolyline2D*)(ctr_ptr->getFeaturePtr()),
-                                                                                  this,
-                                                                                  ctr_point_ptr->getFeaturePointId(),
-                                                                                  ctr_point_ptr->getLandmarkPointId(),
-                                                                                  _remain_id,
-                                                                                  ctr_point_ptr->getApplyLossFunction(),
-                                                                                  ctr_point_ptr->getStatus());
+                new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
+                                                                        std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
+                                                                        ctr_point_ptr->getFeaturePointId(),
+                                                                        ctr_point_ptr->getLandmarkPointId(),
+                                                                        _remain_id,
+                                                                        ctr_point_ptr->getApplyLossFunction(),
+                                                                        ctr_point_ptr->getStatus());
         }
         else
             throw std::runtime_error ("polyline constraint of unknown type");
@@ -295,8 +296,8 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
             // add new constraint
             ctr_ptr->getFeaturePtr()->addConstraint(new_ctr_ptr);
 
-            // delete constraint
-            ctr_ptr->destruct();
+            // remove constraint
+            ctr_ptr->remove();
 
             new_ctr_ptr = nullptr;
         }
@@ -306,9 +307,6 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     if (getProblem() != nullptr)
         getProblem()->removeStateBlockPtr(remove_state);
     std::cout << "state removed " << std::endl;
-
-    delete remove_state;
-    std::cout << "state deleted " << std::endl;
 
     // remove element from deque
     point_state_ptr_vector_.erase(point_state_ptr_vector_.begin() + _remove_id - first_id_);
@@ -320,11 +318,29 @@ void LandmarkPolyline2D::registerNewStateBlocks()
     LandmarkBase::registerNewStateBlocks();
 	if (getProblem() != nullptr)
 		for (auto state : point_state_ptr_vector_)
-			getProblem()->addStateBlockPtr(state);
+			getProblem()->addStateBlock(state);
 }
 
+void LandmarkPolyline2D::removeStateBlocks()
+{
+    for (unsigned int i = 0; i < point_state_ptr_vector_.size(); i++)
+    {
+        auto sbp = point_state_ptr_vector_[i];
+        if (sbp != nullptr)
+        {
+            if (getProblem() != nullptr)
+            {
+                getProblem()->removeStateBlockPtr(sbp);
+            }
+            point_state_ptr_vector_[i] = nullptr;
+        }
+    }
+    LandmarkBase::removeStateBlocks();
+}
+
+
 // static
-LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
+LandmarkBasePtr LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
 {
     // Parse YAML node with lmk info and data
     unsigned int    id              = _lmk_node["id"].as<unsigned int>();
@@ -344,11 +360,11 @@ LandmarkBase* LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
     }
 
     // Create a new landmark
-    LandmarkPolyline2D* lmk_ptr = new LandmarkPolyline2D(new StateBlock(pos, pos_fixed), new StateBlock(ori, ori_fixed), points, first_defined, last_defined, first_id, classification);
+    std::shared_ptr<LandmarkPolyline2D> lmk_ptr = std::make_shared<LandmarkPolyline2D>(std::make_shared<StateBlock>(pos, pos_fixed), std::make_shared<StateBlock>(ori, ori_fixed), points, first_defined, last_defined, first_id, classification);
     lmk_ptr->setId(id);
 
     // fix all points
-    for (auto st_ptr : lmk_ptr->getStateBlockVector())
+    for (auto st_ptr : lmk_ptr->getPointsStateBlockVector())
         st_ptr->fix();
 
     return lmk_ptr;

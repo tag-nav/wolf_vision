@@ -6,6 +6,7 @@
  */
 
 #include "processor_tracker_feature_dummy.h"
+#include "feature_base.h"
 
 namespace wolf
 {
@@ -27,7 +28,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
         }
         else
         {
-            _feature_list_out.push_back(new FeatureBase(FEATURE_POINT_IMAGE, "POINT IMAGE", feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
+            _feature_list_out.push_back(std::make_shared<FeatureBase>(FEATURE_POINT_IMAGE, "POINT IMAGE", feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
             _feature_correspondences[_feature_list_out.back()] = FeatureMatch({feat_in_ptr,0});
             std::cout << "feature " << feat_in_ptr->getMeasurement() << " tracked!" << std::endl;
         }
@@ -38,7 +39,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
 
 bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureListPtr()->size() < 5;
+    return incoming_ptr_->getFeatureList().size() < 5;
 }
 
 unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features)
@@ -50,7 +51,7 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
     {
         n_feature_++;
         new_features_last_.push_back(
-                new FeatureBase(FEATURE_POINT_IMAGE, "POINT IMAGE", n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
+                std::make_shared<FeatureBase>(FEATURE_POINT_IMAGE, "POINT IMAGE", n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
         std::cout << "feature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
     }
 

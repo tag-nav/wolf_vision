@@ -157,7 +157,7 @@ Download and build
 
 **Download:**
 
-`$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf.git`](https://github.com/IRI-MobileRobotics/Wolf.git)
+`$ git clone `[`https://gitlab.iri.upc.edu/mobile_robotics/wolf.git`](https://gitlab.iri.upc.edu/mobile_robotics/wolf.git)
 
 **Build:**
 

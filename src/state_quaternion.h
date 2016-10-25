@@ -28,13 +28,13 @@ inline StateQuaternion::StateQuaternion(const Eigen::Quaternions _quaternion, bo
 }
 
 inline StateQuaternion::StateQuaternion(const Eigen::VectorXs _state, bool _fixed) :
-        StateBlock(_state, _fixed, new LocalParametrizationQuaternion)
+        StateBlock(_state, _fixed, std::make_shared<LocalParametrizationQuaternion<DQ_GLOBAL>>())
 {
     assert(_state.size() == 4 && "The quaternion state vector must be of size 4");
 }
 
 inline StateQuaternion::StateQuaternion(bool _fixed) :
-        StateBlock(4, _fixed, new LocalParametrizationQuaternion)
+        StateBlock(4, _fixed, std::make_shared<LocalParametrizationQuaternion<DQ_GLOBAL>>())
 {
     state_ = Eigen::Quaternions::Identity().coeffs();
     //
@@ -42,7 +42,7 @@ inline StateQuaternion::StateQuaternion(bool _fixed) :
 
 inline StateQuaternion::~StateQuaternion()
 {
-    // The local_param_ptr_ pointer is already deleted by the base class
+    // The local_param_ptr_ pointer is already removed by the base class
 }
 
 } // namespace wolf

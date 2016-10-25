@@ -11,13 +11,7 @@ namespace wolf {
 class CaptureVoid : public CaptureBase
 {
     public:
-        CaptureVoid(const TimeStamp& _ts, SensorBase* _sensor_ptr);
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
+        CaptureVoid(const TimeStamp& _ts, SensorBasePtr _sensor_ptr);
         virtual ~CaptureVoid();
 
 };

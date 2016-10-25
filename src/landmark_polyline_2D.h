@@ -30,8 +30,10 @@ typedef enum
 
 class LandmarkPolyline2D : public LandmarkBase
 {
+    public:
+        typedef std::shared_ptr<LandmarkPolyline2D> Ptr;
     protected:
-        std::deque<StateBlock*> point_state_ptr_vector_; ///< polyline points state blocks
+        std::deque<StateBlockPtr> point_state_ptr_vector_; ///< polyline points state blocks
         int first_id_;
         bool first_defined_;            ///< Wether the first point is an extreme of a line or the line may continue
         bool last_defined_;             ///< Wether the last point is an extreme of a line or the line may continue
@@ -39,25 +41,25 @@ class LandmarkPolyline2D : public LandmarkBase
         LandmarkClassification classification_; ///< The classification of the landmark
 
     public:
-        LandmarkPolyline2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined, unsigned int _first_id = 0, LandmarkClassification _class = UNCLASSIFIED);
+        LandmarkPolyline2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Eigen::MatrixXs& _points, const bool _first_defined, const bool _last_defined, unsigned int _first_id = 0, LandmarkClassification _class = UNCLASSIFIED);
         virtual ~LandmarkPolyline2D();
 
         /** \brief Gets a const reference to the point state block pointer vector
          **/
-        std::deque<StateBlock*>& getPointStatePtrDeque();
+        std::deque<StateBlockPtr>& getPointStatePtrDeque();
 
         /** \brief Gets wether the first/last points are defined or not
          **/
         bool isFirstDefined() const;
         bool isLastDefined() const;
 
-        /** \brief Gets wether the polyline is closed or not
+        /** \brief Gets whether the polyline is closed or not
          **/
         bool isClosed() const;
 
-        /** \brief Gets wether the given state block point is defined or not (assumes the state block is in the landmark)
+        /** \brief Gets whether the given state block point is defined or not (assumes the state block is in the landmark)
          **/
-        bool isDefined(StateBlock* _state_block) const;
+        bool isDefined(StateBlockPtr _state_block) const;
 
         /** \brief Sets the first/last extreme point
          **/
@@ -70,11 +72,11 @@ class LandmarkPolyline2D : public LandmarkBase
 
         const Eigen::VectorXs& getPointVector(int _i) const;
 
-        StateBlock* getPointStateBlockPtr(int _i);
+        StateBlockPtr getPointStateBlockPtr(int _i);
 
         /** \brief Gets a vector of all state blocks pointers
          **/
-        virtual std::vector<StateBlock*> getStateBlockVector() const;
+        virtual std::vector<StateBlockPtr> getPointsStateBlockVector() const;
 
         /** \brief Adds a new point to the landmark
          * \param _point: the point to be added
@@ -114,15 +116,16 @@ class LandmarkPolyline2D : public LandmarkBase
         /** \brief Adds all stateBlocks of the frame to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
+        virtual void removeStateBlocks();
 
         /** Factory method to create new landmarks from YAML nodes
          */
-        static LandmarkBase* create(const YAML::Node& _lmk_node);
+        static LandmarkBasePtr create(const YAML::Node& _lmk_node);
 
         YAML::Node saveToYaml() const;
 };
 
-inline std::deque<StateBlock*>& LandmarkPolyline2D::getPointStatePtrDeque()
+inline std::deque<StateBlockPtr>& LandmarkPolyline2D::getPointStatePtrDeque()
 {
     return point_state_ptr_vector_;
 }
@@ -142,7 +145,7 @@ inline bool LandmarkPolyline2D::isClosed() const
     return closed_;
 }
 
-inline bool LandmarkPolyline2D::isDefined(StateBlock* _state_block) const
+inline bool LandmarkPolyline2D::isDefined(StateBlockPtr _state_block) const
 {
     if (_state_block == point_state_ptr_vector_.front())
         return first_defined_;
@@ -166,9 +169,9 @@ inline int LandmarkPolyline2D::getLastId() const {
 	return first_id_ + (int) (point_state_ptr_vector_.size()) - 1;
 }
 
-inline std::vector<StateBlock*> LandmarkPolyline2D::getStateBlockVector() const
+inline std::vector<StateBlockPtr> LandmarkPolyline2D::getPointsStateBlockVector() const
 {
-    return std::vector<StateBlock*>(point_state_ptr_vector_.begin(), point_state_ptr_vector_.end());
+    return std::vector<StateBlockPtr>(point_state_ptr_vector_.begin(), point_state_ptr_vector_.end());
 }
 
 inline void LandmarkPolyline2D::classify(LandmarkClassification _class)

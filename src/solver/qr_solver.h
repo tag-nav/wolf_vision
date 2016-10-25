@@ -38,13 +38,13 @@ namespace wolf
 class SolverQR
 {
     protected:
-        Problem* problem_ptr_;
+        ProblemPtr problem_ptr_;
         Eigen::SparseQR<Eigen::SparseMatrix<double>, Eigen::NaturalOrdering<int>> solver_;
         Eigen::SparseMatrix<double> A_, R_;
         Eigen::VectorXd b_, x_incr_;
-        std::vector<StateBlock*> nodes_;
-        std::vector<ConstraintBase*> constraints_;
-        std::vector<CostFunctionBase*> cost_functions_;
+        std::vector<StateBlockPtr> nodes_;
+        std::vector<ConstraintBasePtr> constraints_;
+        std::vector<CostFunctionBasePtr> cost_functions_;
 
         // ordering
         Eigen::SparseMatrix<int> A_nodes_;
@@ -61,7 +61,7 @@ class SolverQR
         double time_ordering_, time_solving_, time_managing_;
 
     public:
-        SolverQR(Problem* problem_ptr_) :
+        SolverQR(ProblemPtr problem_ptr_) :
                 problem_ptr_(problem_ptr_), A_(0, 0), R_(0, 0), A_nodes_(0, 0), acc_node_permutation_(0), n_new_constraints_(
                         0), time_ordering_(0), time_solving_(0), time_managing_(0)
         {
@@ -123,7 +123,7 @@ class SolverQR
             }
         }
 
-        void addStateBlock(StateBlock* _state_ptr)
+        void addStateBlock(StateBlockPtr _state_ptr)
         {
             t_managing_ = clock();
 
@@ -149,12 +149,12 @@ class SolverQR
             time_managing_ += ((double)clock() - t_managing_) / CLOCKS_PER_SEC;
         }
 
-        void updateStateBlockStatus(StateBlock* _state_ptr)
+        void updateStateBlockStatus(StateBlockPtr _state_ptr)
         {
             //TODO
         }
 
-        void addConstraint(ConstraintBase* _constraint_ptr)
+        void addConstraint(ConstraintBasePtr _constraint_ptr)
         {
             std::cout << "adding constraint " << _constraint_ptr->nodeId() << std::endl;
             t_managing_ = clock();
@@ -282,7 +282,7 @@ class SolverQR
             unsigned int first_ordered_idx;
             for (unsigned int i = 0; i < n_new_constraints_; i++)
             {
-                ConstraintBase* ct_ptr = constraints_.at(constraints_.size() - 1 - i);
+                ConstraintBasePtr ct_ptr = constraints_.at(constraints_.size() - 1 - i);
                 std::cout << "constraint: " << i << " id: " << constraints_.at(constraints_.size() - 1 - i)->nodeId()
                         << std::endl;
                 for (unsigned int j = 0; j < ct_ptr->getStatePtrVector().size(); j++)
@@ -530,7 +530,7 @@ class SolverQR
             return nodes_.size();
         }
 
-        CostFunctionBase* createCostFunction(ConstraintBase* _corrPtr)
+        CostFunctionBasePtr createCostFunction(ConstraintBasePtr _corrPtr)
         {
             //std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
             //_corrPtr->print();
@@ -540,7 +540,7 @@ class SolverQR
                 case CTR_GPS_FIX_2D:
                 {
                     ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
-                    return (CostFunctionBase*)(new CostFunctionSparse<ConstraintGPS2D, specific_ptr->measurementSize,
+                    return (CostFunctionBasePtr)(new CostFunctionSparse<ConstraintGPS2D, specific_ptr->measurementSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
                             specific_ptr->block6Size, specific_ptr->block7Size, specific_ptr->block8Size,
@@ -550,7 +550,7 @@ class SolverQR
                 case CTR_ODOM_2D:
                 {
                     ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
-                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintOdom2D, specific_ptr->measurementSize,
+                    return (CostFunctionBasePtr)new CostFunctionSparse<ConstraintOdom2D, specific_ptr->measurementSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
                             specific_ptr->block6Size, specific_ptr->block7Size, specific_ptr->block8Size,
@@ -560,7 +560,7 @@ class SolverQR
                 case CTR_CORNER_2D:
                 {
                     ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
-                    return (CostFunctionBase*)new CostFunctionSparse<ConstraintCorner2D, specific_ptr->measurementSize,
+                    return (CostFunctionBasePtr)new CostFunctionSparse<ConstraintCorner2D, specific_ptr->measurementSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
                             specific_ptr->block6Size, specific_ptr->block7Size, specific_ptr->block8Size,

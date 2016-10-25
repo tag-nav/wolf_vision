@@ -10,27 +10,21 @@ namespace wolf {
 class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 {
 	public:
-//		static const unsigned int N_BLOCKS = 4;
 
-		ConstraintCorner2D(FeatureBase* _ftr_ptr, LandmarkCorner2D* _lmk_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+		ConstraintCorner2D(FeatureBasePtr _ftr_ptr, LandmarkCorner2D::Ptr _lmk_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
 			ConstraintSparse<3,2,1,2,1>(CTR_CORNER_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
 		{
             setType("CORNER 2D");
 		}
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         *
-         **/
         virtual ~ConstraintCorner2D()
         {
             //std::cout << "deleting ConstraintCorner2D " << nodeId() << std::endl;
         }
 
-		LandmarkCorner2D* getLandmarkPtr()
+		std::shared_ptr<LandmarkCorner2D> getLandmarkPtr()
 		{
-			return (LandmarkCorner2D*) landmark_ptr_;
+			return std::static_pointer_cast<LandmarkCorner2D>( landmark_other_ptr_.lock() );
 		}
 
 		template <typename T>
@@ -48,9 +42,9 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
         }
 
     public:
-        static ConstraintBase* create(FeatureBase* _feature_ptr, NodeBase* _correspondant_ptr)
+        static ConstraintBasePtr create(FeatureBasePtr _feature_ptr, NodeBasePtr _correspondant_ptr)
         {
-            return new ConstraintCorner2D(_feature_ptr, (LandmarkCorner2D*) _correspondant_ptr);
+            return std::make_shared<ConstraintCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>(_correspondant_ptr) );
         }
 
 };

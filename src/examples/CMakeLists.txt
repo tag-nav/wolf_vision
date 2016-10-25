@@ -1,11 +1,20 @@
+
 # Matrix product test
 #ADD_EXECUTABLE(test_matrix_prod test_matrix_prod.cpp)
 
 #ADD_EXECUTABLE(test_eigen_template test_eigen_template.cpp)
 
+# Complete Wolf tree skeleton with smart pointers
+ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
+
+
 # Map load and save test
 ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
 TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
+
+# test_processor_odom_3D
+ADD_EXECUTABLE(test_processor_odom_3D test_processor_odom_3D.cpp)
+TARGET_LINK_LIBRARIES(test_processor_odom_3D ${PROJECT_NAME})
 
 ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
 TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
@@ -18,13 +27,9 @@ TARGET_LINK_LIBRARIES(test_local_param ${PROJECT_NAME})
 ADD_EXECUTABLE(test_state_quaternion test_state_quaternion.cpp)
 TARGET_LINK_LIBRARIES(test_state_quaternion ${PROJECT_NAME})
 
-# NodeLinked class test
-ADD_EXECUTABLE(test_node_linked test_node_linked.cpp)
-TARGET_LINK_LIBRARIES(test_node_linked ${PROJECT_NAME})
-
 # Testing virtual hierarchy -- solving diamond of death
-ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
-TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
+#TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
 
 # Testing Eigen Permutations
 #ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
@@ -112,6 +117,18 @@ IF(OpenCV_FOUND)
     # Processor Image Landmark test
     ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
     TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
+
+    # Constraint test
+    ADD_EXECUTABLE(test_constraint_AHP test_constraint_AHP.cpp)
+    TARGET_LINK_LIBRARIES(test_constraint_AHP ${PROJECT_NAME})
+
+    # ORB tracker test
+    ADD_EXECUTABLE(test_tracker_ORB test_tracker_ORB.cpp)
+    TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
+
+    # ORB tracker test
+    ADD_EXECUTABLE(test_ROI_ORB test_ROI_ORB.cpp)
+    TARGET_LINK_LIBRARIES(test_ROI_ORB ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
 
 # Processor Tracker Feature test

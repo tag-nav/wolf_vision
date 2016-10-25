@@ -13,6 +13,10 @@ namespace wolf {
 //class LandmarkContainer
 class LandmarkContainer : public LandmarkBase
 {
+    public:
+        typedef std::shared_ptr<LandmarkContainer> Ptr;
+        typedef std::weak_ptr<LandmarkContainer> WPtr;
+
     protected:
         Eigen::MatrixXs corners_;
 
@@ -26,7 +30,7 @@ class LandmarkContainer : public LandmarkBase
          * \param _length descriptor of the landmark: container length
          *
          **/
-		LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, const Scalar& _witdh=2.44, const Scalar& _length=12.2);
+		LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Scalar& _witdh=2.44, const Scalar& _length=12.2);
 
 		/** \brief Constructor with type, time stamp and the position state pointer
 		 *
@@ -51,7 +55,7 @@ class LandmarkContainer : public LandmarkBase
          * \param _length descriptor of the landmark: container length
          *
          **/
-		LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const Scalar& _witdh=2.44, const Scalar& _length=12.2);
+		LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const Scalar& _witdh=2.44, const Scalar& _length=12.2);
 
         /** \brief Constructor with type, time stamp and the position state pointer
          *
@@ -66,13 +70,8 @@ class LandmarkContainer : public LandmarkBase
          * \param _length descriptor of the landmark: container length
          *
          **/
-		//LandmarkContainer(StateBlock* _p_ptr, StateBlock* _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const Scalar& _witdh=2.44, const Scalar& _length=12.2);
+		//LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const Scalar& _witdh=2.44, const Scalar& _length=12.2);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         * 
-         **/
         virtual ~LandmarkContainer();
         
         /** \brief Returns the container width

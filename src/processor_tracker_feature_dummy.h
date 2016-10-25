@@ -42,7 +42,7 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature, FeatureBase* _incoming_feature);
+        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature);
 
         /** \brief Vote for KeyFrame generation
          *
@@ -75,7 +75,7 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
          * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
          * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
-        virtual ConstraintBase* createConstraint(FeatureBase* _feature_ptr, FeatureBase* _feature_other_ptr);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
 };
 
@@ -91,18 +91,18 @@ inline ProcessorTrackerFeatureDummy::~ProcessorTrackerFeatureDummy()
     //
 }
 
-inline bool ProcessorTrackerFeatureDummy::correctFeatureDrift(const FeatureBase* _origin_feature, const FeatureBase* _last_feature,
-                                                              FeatureBase* _incoming_feature)
+inline bool ProcessorTrackerFeatureDummy::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature,
+                                                              FeatureBasePtr _incoming_feature)
 {
     return true;
 }
 
-inline ConstraintBase* ProcessorTrackerFeatureDummy::createConstraint(FeatureBase* _feature_ptr,
-                                                                      FeatureBase* _feature_other_ptr)
+inline ConstraintBasePtr ProcessorTrackerFeatureDummy::createConstraint(FeatureBasePtr _feature_ptr,
+                                                                      FeatureBasePtr _feature_other_ptr)
 {
     std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
               << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl;
-    return new ConstraintEpipolar(_feature_ptr, _feature_other_ptr);
+    return std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr);
 }
 
 } // namespace wolf

@@ -15,7 +15,7 @@
 
 namespace wolf {
 
-ceres::CostFunction* createNumericDiffCostFunction(ConstraintBase* _ctr_ptr, bool _use_wolf_numericdiff)
+ceres::CostFunction* createNumericDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool _use_wolf_numericdiff)
 {
     if (_use_wolf_numericdiff)
         throw std::invalid_argument( "Numeric differentiation not implemented in wolf" );

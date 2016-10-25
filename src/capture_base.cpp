@@ -1,55 +1,76 @@
 #include "capture_base.h"
+#include "sensor_base.h"
 
 namespace wolf{
 
 unsigned int CaptureBase::capture_id_count_ = 0;
 
-CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBase* _sensor_ptr) :
-        NodeLinked(MID, "CAPTURE", _type),
+CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr) :
+        NodeBase("CAPTURE", _type),
+        frame_ptr_(), // nullptr
         capture_id_(++capture_id_count_),
         time_stamp_(_ts),
         sensor_ptr_(_sensor_ptr),
-        sensor_p_ptr_(sensor_ptr_->getPPtr()),
-        sensor_o_ptr_(sensor_ptr_->getOPtr())
+        sensor_p_ptr_(sensor_ptr_.lock()->getPPtr()),
+        sensor_o_ptr_(sensor_ptr_.lock()->getOPtr())
 {
     //
+    std::cout << "constructed    +C" << id() << std::endl;
 }
 
 
 CaptureBase::~CaptureBase()
 {
-	//std::cout << "deleting CaptureBase " << nodeId() << std::endl;
-}
-
-void CaptureBase::getConstraintList(ConstraintBaseList & _ctr_list)
-{
-	for(auto f_it = getFeatureListPtr()->begin(); f_it != getFeatureListPtr()->end(); ++f_it)
-		(*f_it)->getConstraintList(_ctr_list);
+    std::cout << "destructed     -C" << id() << std::endl;
 }
 
 void CaptureBase::process()
 {
     // Call all processors assigned to the sensor that captured this data
-    for (auto processor_iter = sensor_ptr_->getProcessorListPtr()->begin(); processor_iter != sensor_ptr_->getProcessorListPtr()->end(); ++processor_iter)
+    auto cap = shared_from_this();
+    auto sen = sensor_ptr_.lock();
+    if (sen)
+        for (auto prc : sen->getProcessorList())
+            prc->process(cap);
+}
+
+void CaptureBase::remove()
+{
+    if (!is_removing_)
     {
-        (*processor_iter)->process(this);
+        is_removing_ = true;
+        CaptureBasePtr this_C = shared_from_this();  // keep this alive while removing it
+
+        // remove from upstream
+        FrameBasePtr F = frame_ptr_.lock();
+        if (F)
+        {
+            F->getCaptureList().remove(this_C);
+            if (F->getCaptureList().empty() && F->getConstrainedByList().empty())
+                F->remove(); // remove upstream
+        }
+
+        // remove downstream
+        while (!feature_list_.empty())
+        {
+            feature_list_.front()->remove(); // remove downstream
+        }
+
+        std::cout << "Removed         C" << id() << std::endl;
     }
 }
 
-
-StateBlock* CaptureBase::getSensorPPtr() const {
-	if (getSensorPtr()->isExtrinsicDynamic())
-		return sensor_p_ptr_;
-	else
-		return getSensorPtr()->getPPtr();
+void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
+{
+    for (FeatureBasePtr feature_ptr : _new_ft_list)
+    {
+        feature_ptr->setCapturePtr(shared_from_this());
+        if (getProblem() != nullptr)
+            feature_ptr->setProblem(getProblem());
+    }
+    feature_list_.splice(feature_list_.end(), _new_ft_list);
 }
 
-StateBlock* CaptureBase::getSensorOPtr() const {
-	if (getSensorPtr()->isExtrinsicDynamic())
-		return sensor_o_ptr_;
-	else
-		return getSensorPtr()->getOPtr();
-}
 
-}
+} // namespace wolf
 

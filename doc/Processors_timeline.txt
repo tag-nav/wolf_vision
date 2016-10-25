@@ -1,0 +1,78 @@
+ProcessorBase		ProcessorTracker	PrcTrkLandmark		ProcTrkLmkDerived
+======================================================================================
+process(inc) >		process(inc)		
+					  preProcess()
+
+					  processNew() >	processNew()
+										  detectNewFeat() >	detectNewFeat()
+										    createNewLmks()
+										    createLmk() >	createLmk()
+										  findLmks() >		findLmks()
+
+					  estabConstr() >	estabConstr()
+										  createConstr() >	createConstr()
+
+					  processKnown() >	processKnown()
+										  findLmks() >		findLmks()
+
+					< makeFrame()
+
+makeFrame()
+P.createFr()
+P.kfCallback()
+kfCallback() >		  kfCallback()
+=======================================================================================
+
+
+
+ProcessorBase		ProcessorTracker	PrcTrkFeature		ProcTrkFeatDerived
+=======================================================================================
+process(inc) >		process(inc)		
+					  preProcess() >	preProcess() > 		preProcess()
+
+					  processNew() >	processNew()
+										  detectNewFeat() >	detectNewFeat()
+										  createNewLmks()
+										    createLmk() >	createLmk()
+										  trackFeatures() >	trackFeatures()
+
+			 		    estabConstr() >	estabConstr()
+										  createConstr() >	createConstr()
+
+					  processKnown() >	processKnown()
+										  trackFeatures() >	trackFeatures()
+										  correctFtDrift() >	correctFtDrift()
+
+					< makeFrame()
+
+makeFrame()
+  P.createFr()
+  P.kfCallback()
+  kfCallback() >	kfCallback()
+=======================================================================================
+
+
+
+ProcessorBase		ProcessorMotion		PrcMotionDerived
+==============================================================
+process(inc) >		process(inc)
+					  preProcess() >	preProcess()
+
+					  integrate()
+					    updateDt()
+					    data2delta() >	data2delta()
+					    deltaPlusDelta() >	deltaPlusDelta()
+
+					  voteForKF() >		voteForKF()
+
+					  makeFrame()
+
+					makeFrame()
+					  P.createFrame()
+					  P.kfCallback()
+					  kfCallback()
+
+					kfCallback()
+					  createConstr() >	createConstr()
+					  reintegrate()
+==============================================================

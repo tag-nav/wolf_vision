@@ -9,16 +9,21 @@
 //laser_scan_utils
 #include "laser_scan_utils/laser_scan.h"
 
+// std
+
 namespace wolf {
 
 struct IntrinsicsLaser2D : public IntrinsicsBase
 {
-    laserscanutils::LaserScanParams scan_params;
+        typedef std::shared_ptr<IntrinsicsLaser2D> Ptr;
+        laserscanutils::LaserScanParams scan_params;
 };
 
 
 class SensorLaser2D : public SensorBase
 {
+    public:
+        typedef std::shared_ptr<SensorBase> Ptr;
     protected:
         laserscanutils::LaserScanParams scan_params_;
 
@@ -29,7 +34,7 @@ class SensorLaser2D : public SensorBase
          * \param _o_ptr StateBlock pointer to the sensor orientation
          * 
          **/        
-        SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr);
+        SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr);
 
         /** \brief Constructor with extrinsics and scan parameters
          *
@@ -37,7 +42,7 @@ class SensorLaser2D : public SensorBase
          * \param _o_ptr StateBlock pointer to the sensor orientation
          *
          **/
-        SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const double& _angle_min, const double& _angle_max, const double& _angle_step, const double& _scan_time, const double& _range_min, const double& _range_max, const double& _range_std_dev, const double& _angle_std_dev);
+        SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const double& _angle_min, const double& _angle_max, const double& _angle_step, const double& _scan_time, const double& _range_min, const double& _range_max, const double& _range_std_dev, const double& _angle_std_dev);
 
         /** \brief Constructor with extrinsics and scan parameters
          *
@@ -46,13 +51,8 @@ class SensorLaser2D : public SensorBase
          * \param _params Scan parameters
          *
          **/
-        SensorLaser2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const laserscanutils::LaserScanParams& _params);
+        SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const laserscanutils::LaserScanParams& _params);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         * 
-         **/
         virtual ~SensorLaser2D();
         
         void setDefaultScanParams();
@@ -72,8 +72,8 @@ class SensorLaser2D : public SensorBase
         const laserscanutils::LaserScanParams & getScanParams() const;
 
     public:
-        static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po, const IntrinsicsBase* _intrinsics);
-        static IntrinsicsBase* createParams(const std::string& _filename_dot_yaml);
+        static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po, const IntrinsicsBasePtr _intrinsics);
+        static IntrinsicsBasePtr createParams(const std::string& _filename_dot_yaml);
 
 };
 

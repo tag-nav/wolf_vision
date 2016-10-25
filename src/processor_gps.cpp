@@ -21,11 +21,11 @@ ProcessorGPS::~ProcessorGPS()
 {
 }
 
-void ProcessorGPS::init(CaptureBase* _capture_ptr)
+void ProcessorGPS::init(CaptureBasePtr _capture_ptr)
 {
 }
 
-void ProcessorGPS::process(CaptureBase* _capture_ptr)
+void ProcessorGPS::process(CaptureBasePtr _capture_ptr)
 {
     std::cout << "ProcessorGPS::process(GPScapture)" << std::endl;
     //TODO add assert with dynamic_cast when it will be ready
@@ -40,10 +40,10 @@ void ProcessorGPS::process(CaptureBase* _capture_ptr)
     }
     //std::cout << "gps features extracted" << std::endl;
     //std::cout << "Establishing constraints to gps features..." << std::endl;
-    for (auto i_it = capture_gps_ptr_->getFeatureListPtr()->begin();
-            i_it != capture_gps_ptr_->getFeatureListPtr()->end(); i_it++)
+    for (auto i_it = capture_gps_ptr_->getFeatureList().begin();
+            i_it != capture_gps_ptr_->getFeatureList().end(); i_it++)
     {
-        capture_gps_ptr_->getFeatureListPtr()->front()->addConstraint(new ConstraintGPSPseudorange2D((*i_it)));
+        capture_gps_ptr_->getFeatureList().front()->addConstraint(new ConstraintGPSPseudorange2D((*i_it)));
     }
     //std::cout << "Constraints established" << std::endl;
 }
@@ -53,12 +53,12 @@ bool ProcessorGPS::voteForKeyFrame()
     return false;
 }
 
-bool ProcessorGPS::keyFrameCallback(wolf::FrameBase*, const Scalar& _time_tol)
+bool ProcessorGPS::keyFrameCallback(wolf::FrameBasePtr, const Scalar& _time_tol)
 {
     return false;
 }
 
-wolf::ProcessorBase* ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+wolf::ProcessorBasePtr ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
 {
     ProcessorGPS* prc_ptr = new ProcessorGPS();
     prc_ptr->setName(_unique_name);
@@ -71,8 +71,5 @@ wolf::ProcessorBase* ProcessorGPS::create(const std::string& _unique_name, const
 // Register in the SensorFactory
 #include "processor_factory.h"
 namespace wolf {
-namespace
-{
-const bool registered_prc_gps = ProcessorFactory::get().registerCreator("GPS", ProcessorGPS::create);
-}
+WOLF_REGISTER_PROCESSOR("GPS",ProcessorGPS)
 } // namespace wolf

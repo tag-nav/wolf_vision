@@ -1,34 +1,29 @@
 #include "hardware_base.h"
+#include "sensor_base.h"
 
 
 namespace wolf {
 
 HardwareBase::HardwareBase() :
-    NodeLinked(MID, "HARDWARE", "BASE")
+        NodeBase("HARDWARE")
 {
-    //std::cout << "HardwareBase::HardwareBase(): " << __LINE__ << std::endl;
+    std::cout << "constructed H" << std::endl;
 }
 
 HardwareBase::~HardwareBase()
 {
-	//std::cout << "deleting HardwareBase " << nodeId() << std::endl;
+	std::cout << "destructed -H" << std::endl;
 }
 
-SensorBase* HardwareBase::addSensor(SensorBase* _sensor_ptr)
+SensorBasePtr HardwareBase::addSensor(SensorBasePtr _sensor_ptr)
 {
-    //std::cout << "adding sensor..." << std::endl;
-	addDownNode(_sensor_ptr);
-    //std::cout << "added!" << std::endl;
+    sensor_list_.push_back(_sensor_ptr);
+    _sensor_ptr->setProblem(getProblem());
+    _sensor_ptr->setHardwarePtr(shared_from_this());
 
     _sensor_ptr->registerNewStateBlocks();
 
     return _sensor_ptr;
-
-}
-
-void HardwareBase::removeSensor(SensorBase* _sensor_ptr)
-{
-    removeDownNode(_sensor_ptr->nodeId());
 }
 
 } // namespace wolf

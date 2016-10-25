@@ -30,13 +30,8 @@ class SensorOdom2D : public SensorBase
          * \param _rot_noise_factor rotation noise factor
          * 
          **/
-		SensorOdom2D(StateBlock* _p_ptr, StateBlock* _o_ptr, const Scalar& _disp_noise_factor, const Scalar&  _rot_noise_factor);
+		SensorOdom2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Scalar& _disp_noise_factor, const Scalar&  _rot_noise_factor);
 
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         * 
-         **/
         virtual ~SensorOdom2D();
         
         /** \brief Returns displacement noise factor
@@ -55,7 +50,7 @@ class SensorOdom2D : public SensorBase
         
 
 	public:
-        static SensorBase* create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBase* _intrinsics);
+        static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBasePtr _intrinsics);
 
 
 };

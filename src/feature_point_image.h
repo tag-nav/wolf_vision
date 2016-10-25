@@ -20,6 +20,8 @@ namespace wolf {
 //class FeaturePointImage
 class FeaturePointImage : public FeatureBase
 {
+    public:
+        typedef std::shared_ptr<FeaturePointImage>  Ptr;
     protected:
 
         cv::KeyPoint keypoint_;
@@ -30,13 +32,12 @@ class FeaturePointImage : public FeatureBase
         FeaturePointImage(const Eigen::Vector2s & _measurement);
 
         FeaturePointImage(const Eigen::Vector2s & _measurement, const Eigen::Matrix2s& _meas_covariance) :
-                FeatureBase(FEATURE_POINT_IMAGE, "POINT IMAGE", _measurement, _meas_covariance)
+                FeatureBase(FEATURE_POINT_IMAGE, "POINT IMAGE", _measurement, _meas_covariance), is_known_(false)
         {
             keypoint_.pt.x = float(measurement_(0));
             keypoint_.pt.y = float(measurement_(1));
         }
 
-        //_known_or_new: known = true; new = false;
         FeaturePointImage(const cv::KeyPoint& _keypoint,
                           const cv::Mat& _descriptor, bool _is_known) :
                 FeatureBase(FEATURE_POINT_IMAGE, "POINT IMAGE", Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
@@ -46,26 +47,19 @@ class FeaturePointImage : public FeatureBase
             measurement_(0) = Scalar(_keypoint.pt.x);
             measurement_(1) = Scalar(_keypoint.pt.y);
             is_known_=_is_known;
-//            std::cout << "FEATURE TESTING\n";
-//            std::cout << "Measurement:\n" << getMeasurement() << std::endl;
-//            std::cout << "Measurement Sqrt:\n" << getMeasurementSquareRootInformation() << std::endl;
         }
 
         FeaturePointImage(const cv::KeyPoint& _keypoint,
                           const cv::Mat& _descriptor, const Eigen::Matrix2s& _meas_covariance) :
                 FeatureBase(FEATURE_POINT_IMAGE, "POINT IMAGE", Eigen::Vector2s::Zero(), _meas_covariance),
                 keypoint_(_keypoint),
-                descriptor_(_descriptor)
+                descriptor_(_descriptor),
+                is_known_(false)
         {
             measurement_(0) = Scalar(_keypoint.pt.x);
             measurement_(1) = Scalar(_keypoint.pt.y);
         }
 
-
-        /** \brief Default destructor (not recommended)
-         *
-         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
-         */
         virtual ~FeaturePointImage();
 
         const cv::KeyPoint& getKeypoint() const;

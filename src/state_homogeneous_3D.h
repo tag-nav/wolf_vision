@@ -25,19 +25,19 @@ inline StateHomogeneous3D::StateHomogeneous3D(const Eigen::VectorXs _state, bool
         StateBlock(_state, _fixed)
 {
     assert(_state.size() == 4 && "Homogeneous 3D must be size 4.");
-    local_param_ptr_ = new LocalParametrizationHomogeneous;
+    local_param_ptr_ = std::make_shared<LocalParametrizationHomogeneous>();
 }
 
 inline StateHomogeneous3D::StateHomogeneous3D(bool _fixed) :
         StateBlock(4, _fixed)
 {
-    local_param_ptr_ = new LocalParametrizationHomogeneous;
+    local_param_ptr_ = std::make_shared<LocalParametrizationHomogeneous>();
     state_ << 0, 0, 0, 1; // Set origin
 }
 
 inline StateHomogeneous3D::~StateHomogeneous3D()
 {
-    // The local_param_ptr_ pointer is already deleted by the base class
+    // The local_param_ptr_ pointer is already removed by the base class
 }
 
 } // namespace wolf

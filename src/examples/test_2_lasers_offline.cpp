@@ -23,7 +23,6 @@
 #include "../sensor_odom_2D.h"
 #include "../sensor_gps_fix.h"
 #include "../capture_fix.h"
-#include "../capture_odom_2D.h"
 #include "../ceres_wrapper/ceres_manager.h"
 
 // laserscanutils
@@ -154,9 +153,9 @@ int main(int argc, char** argv)
     odom_params.dist_traveled_th_ = 5;
     odom_params.elapsed_time_th_ = 10;
     ProcessorOdom2D* odom_processor = (ProcessorOdom2D*)problem.installProcessor("ODOM 2D", "main odometry", odom_sensor, &odom_params);
-    //SensorBase* gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
-    SensorBase* laser_1_sensor = problem.installSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
-    SensorBase* laser_2_sensor = problem.installSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
+    //SensorBasePtr gps_sensor = problem.installSensor("GPS FIX", "GPS fix", gps_position);
+    SensorBasePtr laser_1_sensor = problem.installSensor("LASER 2D", "front laser", laser_1_pose2D, &laser_1_intrinsics);
+    SensorBasePtr laser_2_sensor = problem.installSensor("LASER 2D", "rear laser", laser_2_pose2D, &laser_2_intrinsics);
     problem.installProcessor("LASER 2D", "front laser processor", laser_1_sensor, &laser_1_processor_params);
     problem.installProcessor("LASER 2D", "rear laser processor", laser_2_sensor, &laser_2_processor_params);
 
@@ -266,7 +265,7 @@ int main(int argc, char** argv)
     // Vehicle poses
     int i = 0;
     Eigen::VectorXs state_poses = Eigen::VectorXs::Zero(n_execution * 3);
-    for (auto frame : *(problem.getTrajectoryPtr()->getFrameListPtr()))
+    for (auto frame : *(problem.getTrajectoryPtr()->getFrameList()))
     {
         state_poses.segment(i, 3) << frame->getPPtr()->getVector(), frame->getOPtr()->getVector();
         i += 3;
@@ -274,8 +273,8 @@ int main(int argc, char** argv)
 
     // Landmarks
     i = 0;
-    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkListPtr()->size() * 2);
-    for (auto landmark : *(problem.getMapPtr()->getLandmarkListPtr()))
+    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkList()->size() * 2);
+    for (auto landmark : *(problem.getMapPtr()->getLandmarkList()))
     {
         landmarks.segment(i, 2) = landmark->getPPtr()->getVector();
         i += 2;
@@ -313,9 +312,9 @@ int main(int argc, char** argv)
     std::getchar();
 
     std::cout << "Problem:" << std::endl;
-    std::cout << "Frames: " << problem.getTrajectoryPtr()->getFrameListPtr()->size() << std::endl;
-    std::cout << "Landmarks: " << problem.getMapPtr()->getLandmarkListPtr()->size() << std::endl;
-    std::cout << "Sensors: " << problem.getHardwarePtr()->getSensorListPtr()->size() << std::endl;
+    std::cout << "Frames: " << problem.getTrajectoryPtr()->getFrameList().size() << std::endl;
+    std::cout << "Landmarks: " << problem.getMapPtr()->getLandmarkList()->size() << std::endl;
+    std::cout << "Sensors: " << problem.getHardwarePtr()->getSensorList()->size() << std::endl;
 
     std::cout << " ========= END ===========" << std::endl << std::endl;
 

@@ -4,7 +4,7 @@
 
 namespace wolf {
 
-SensorGPSFix::SensorGPSFix(StateBlock* _p_ptr, StateBlock* _o_ptr, const double& _noise) :
+SensorGPSFix::SensorGPSFix(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const double& _noise) :
         SensorBase(SEN_GPS_FIX, "GPS FIX", _p_ptr, _o_ptr, nullptr, Eigen::VectorXs::Constant(1,_noise))
 {
     //
@@ -21,13 +21,13 @@ Scalar SensorGPSFix::getNoise() const
 }
 
 // Define the factory method
-SensorBase* SensorGPSFix::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics,
-                                 const IntrinsicsBase* _intrinsics)
+SensorBasePtr SensorGPSFix::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics,
+                                 const IntrinsicsBasePtr _intrinsics)
 {
     assert((_extrinsics.size() == 2 || _extrinsics.size() == 3)
             && "Bad extrinsic vector size. Should be 2 for 2D, 3 for 3D.");
-    StateBlock* pos_ptr = new StateBlock(_extrinsics, true);
-    SensorGPSFix* sen = new SensorGPSFix(pos_ptr, nullptr, 0);
+    StateBlockPtr pos_ptr = std::make_shared<StateBlock>(_extrinsics, true);
+    std::shared_ptr<SensorGPSFix> sen = std::make_shared<SensorGPSFix>(pos_ptr, nullptr, 0);
     sen->setName(_unique_name);
     return sen;
 }
@@ -37,10 +37,6 @@ SensorBase* SensorGPSFix::create(const std::string& _unique_name, const Eigen::V
 
 // Register in the SensorFactory
 #include "sensor_factory.h"
-//#include "factory.h"
 namespace wolf {
-namespace
-{
-const bool registered_gps_fix = SensorFactory::get().registerCreator("GPS FIX", SensorGPSFix::create);
-}
+WOLF_REGISTER_SENSOR("GPS FIX", SensorGPSFix)
 } // namespace wolf

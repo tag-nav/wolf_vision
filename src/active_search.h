@@ -147,7 +147,7 @@ class ActiveSearchGrid {
          * \param _separation minimum separation between existing and new points.
          * \param _margin minimum separation to the edge of the image
          */
-        void setParameters(const int & _img_size_h, const int & _img_size_v,
+        void setup(const int & _img_size_h, const int & _img_size_v,
                            const int & _n_cells_h, const int & _n_cells_v,
                            const int & _margin = 0, const int & _separation = 0);
 
