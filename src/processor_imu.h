@@ -13,6 +13,8 @@ class ProcessorIMU : public ProcessorMotion{
         ProcessorIMU();
         virtual ~ProcessorIMU();
 
+        //void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
+
     protected:
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
@@ -39,8 +41,7 @@ class ProcessorIMU : public ProcessorMotion{
                                                    FrameBasePtr _frame_origin);
         void resetDerived();
 
-
-    private:
+    protected:
 
         // Casted pointer to IMU frame
         std::shared_ptr<FrameIMU> frame_imu_ptr_;
@@ -72,9 +73,10 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Matrix3s dDq_dwb_;
 
         // Helper functions to remap several magnitudes
-        void remapPVQ(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
-        void remapDelta(Eigen::VectorXs& _delta_out);
-        void remapData(const Eigen::VectorXs& _data);
+        virtual void remapPVQ(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
+        virtual void remapDelta(Eigen::VectorXs& _delta_out);
+        virtual void remapData(const Eigen::VectorXs& _data);
+
 
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
@@ -209,7 +211,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     Eigen::Matrix3s dR = dq_.matrix(); // Second delta, dR
 
     // Jac wrt preintegrated delta, D_D = dD'/dD
-//    _jacobian_delta_preint.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
+//    _jacobian_delta_preint.block<6,6>(0,0).setIdentity(6,6);                     // dDp'/dDp, dDv'/dDv, Identities
     _jacobian_delta_preint.block<3,3>(0,3) = Eigen::Matrix3s::Identity() * _dt; // dDp'/dDv = I*dt
     _jacobian_delta_preint.block<3,3>(0,6).noalias() = - DR * skew(dp_) ;       // dDp'/dDf
     _jacobian_delta_preint.block<3,3>(3,6).noalias() = - DR * skew(dv_) ;       // dDv'/dDf
@@ -219,7 +221,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 //    _jacobian_delta.setIdentity(9,9);                                           //
     _jacobian_delta.block<3,3>(0,0) = DR;                                       // dDp'/ddp
     _jacobian_delta.block<3,3>(3,3) = DR;                                       // dDv'/ddv
-    //    _jacobian_delta.block<3,3>(6,6) = Eigen::Matrix3s::Identity();        // dDf'/ddf = I
+//    _jacobian_delta.block<3,3>(6,6) = Eigen::Matrix3s::Identity();        // dDf'/ddf = I
 
 
 
@@ -384,7 +386,14 @@ inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
     new (&gyro_measured_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
 }
 
-
+/*void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb)
+{
+    _dDp_dab = dDp_dab_;
+    _dDv_dab = dDv_dab_;
+    _dDp_dwb = dDp_dwb_;
+    _dDv_dwb = dDv_dwb_;
+    _dDq_dwb = dDq_dwb_;
+}*/
 
 } // namespace wolf
 

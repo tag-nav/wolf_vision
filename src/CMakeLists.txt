@@ -153,6 +153,7 @@ SET(HDRS
     processor_base.h
     processor_image_params.h
     processor_imu.h
+    processor_imu_UnitTester.h
     processor_factory.h
     processor_motion.h
     processor_odom_2D.h
@@ -222,6 +223,7 @@ SET(SRCS
     problem.cpp
     processor_base.cpp
     processor_imu.cpp
+    processor_imu_UnitTester.cpp
     processor_odom_2D.cpp
     processor_odom_3D.cpp
     processor_tracker.cpp
