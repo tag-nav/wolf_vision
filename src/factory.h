@@ -269,7 +269,7 @@ inline bool Factory<TypeBase, TypeInput...>::registerCreator(const std::string& 
     if (reg)
         std::cout << std::setw(22) << std::left << getClass() << " : registered " << _type << std::endl;
     else
-        std::cout << getClass() << " :  " << _type << " already registered. Skipping. " << std::endl;
+        std::cout << std::setw(22) << std::left << getClass() << " : skipping " << _type << ": already registered." << std::endl;
 
     return reg;
 }
