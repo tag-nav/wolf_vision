@@ -218,63 +218,73 @@ Alternatively, you can set up the environment variables in your GUIs only. Follo
 Using the `catkin_tools` package
 --------------------------------
 
-1. Install `catkin_tools` :
+1.  Install `catkin_tools` :
 
-  [`installation webpage.`](https://catkin-tools.readthedocs.io/en/latest/installing.html)
+    [`installation webpage.`](https://catkin-tools.readthedocs.io/en/latest/installing.html)
 
-  * Installing on Ubuntu with `apt-get`
+    .  Installing on Ubuntu with `apt-get`
 
-    ```terminal
-    $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
-    $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
-    $ sudo apt-get update
-    $ sudo apt-get install python-catkin-tools
-    ```
+      ```terminal
+        $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
+        $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+        $ sudo apt-get update
+        $ sudo apt-get install python-catkin-tools
+      ```
 
-  * Installing with [`pip`](https://pip.pypa.io/en/stable/installing/)
+    .  Installing with [`pip`](https://pip.pypa.io/en/stable/installing/)
 
-    ```terminal
-    $ sudo pip install -U catkin_tools
-    ```
+      ```terminal
+        $ sudo pip install -U catkin_tools
+      ```
 
-2. Create a `catkin workspace` :
+2.  Create a `catkin workspace` :
 
-  ```terminal
-  $ cd ~/my_folder/
-  $ create mkdir -p wolf_ws/src
-  $ cd wolf_ws/src
-  ```
+      ```terminal
+      $ cd ~/my_workspace_directory/
+      $ create mkdir -p wolf_ws/src
+      $ cd wolf_ws/src
+      ```
 
-3. Download `Ceres` :
+3.  Download `Ceres` :
 
-  ```terminal
-  $ git clone https://github.com/artivis/ceres_solver.git
-  ```
+    In the previously created directory `~/my_workspace_directory/wolf_ws/src/` clone `Ceres` & `wolf`.
 
-4. Download `wolf` :
+     ```terminal
+        $ git clone https://github.com/artivis/ceres_solver.git
+     ```
 
-  ```terminal
-  $ git clone https://github.com/artivis/wolf.git
-  ```
+4.  Download `wolf` :
 
-  At this point you might need to switch to the `catkin_build` branch of the wolf project.
+      ```terminal
+        $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf.git
+      ```
 
-  ```terminal
-  $ cd wolf
-  $ git checkout catkin_build
-  ```
+    At this point you might need to switch to the `catkin_build` branch of the wolf project.
 
-5. Download `wolf_ros` :
+      ```terminal
+        $ cd wolf
+        $ git checkout catkin_build
+      ```
 
-  ```terminal
-  $ git clone https://github.com/IRI-MobileRobotics/Wolf_ros.git
-  ```
+   .  (optional) Download `wolf_ros` :
 
-6. Let's Compile !
+      ```terminal
+      $ git clone https://github.com/IRI-MobileRobotics/Wolf_ros.git
+      ```
 
-  ```terminal
-  $ catkin build
-  ```
+5.  Let's Compile !
+
+    The command below can be launch from any sub-directory in `~/my_workspace_directory/wolf_ws/`.
+
+      ```terminal
+      $ catkin build
+      ```
+
+6.  Run tests:
+
+      ```terminal
+      $ catkin run_tests
+      ```
 
 Inspiring Links
 ---------------
