@@ -8,10 +8,6 @@
 ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
 
 
-# Map load and save test
-ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
-TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
-
 # test_processor_odom_3D
 ADD_EXECUTABLE(test_processor_odom_3D test_processor_odom_3D.cpp)
 TARGET_LINK_LIBRARIES(test_processor_odom_3D ${PROJECT_NAME})
@@ -50,6 +46,10 @@ IF(YAMLCPP_FOUND)
     # SensorFactory classes test
     ADD_EXECUTABLE(test_wolf_factories test_wolf_factories.cpp)
     TARGET_LINK_LIBRARIES(test_wolf_factories ${PROJECT_NAME})
+
+    # Map load and save test
+    ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
+    TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
 ENDIF(YAMLCPP_FOUND)
 
 IF(Suitesparse_FOUND)
