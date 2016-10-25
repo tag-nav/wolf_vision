@@ -8,6 +8,8 @@
 #include "pinholeTools.h"
 #include "feature_point_image.h"
 
+#include <iomanip> //setprecision
+
 namespace wolf {
 
 class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
@@ -116,7 +118,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             u(0) = K(0,0)*distored_point(0)+K(0,2);
             u(1) = K(1,1)*distored_point(1)+K(1,2);
 
-//            std::cout << "u: " << u(0) << "\t" << u(1) << std::endl;
+            std::cout << "constraint n[" << ((ConstraintAHP*)this)->id() << "] u: " << std::setprecision(3) << u(0) << "\t" << u(1) << std::endl;
 
             // ==================================================
 
@@ -125,65 +127,9 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             Eigen::Matrix<T, 2, 1> feature_pos = getMeasurement().cast<T>();
 
             Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap(_residuals);
+//            std::cout << "SquareRootInformation: " << getMeasurementSquareRootInformation() << std::endl;
             residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
 //            std::cout << "\nRESIDUALS:\n" << residualsmap[0] << "\t" << residualsmap[1] << std::endl;
-
-
-
-
-
-
-
-
-
-            /* CREATE A MATRIX APPROACH */
-
-//            //Eigen::Matrix<T,3,1>  phc, phw ;
-//            Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_map(_lmk_hmg);
-
-
-//            Eigen::Matrix<T,4,4> M_R0_C0, M_W_R0, M_R1_W, M_C1_R1;
-
-
-//            // FROM CAMERA0 TO WORLD
-
-//            M_R0_C0.block(0,0,3,3) << qrc.matrix(); // TODO make all blocks with the template
-//            M_R0_C0.col(3).head(3) << prc; // block<3,1>(3,0) o topRight<3,1>(3,0) o algo aixi.
-//            M_R0_C0.row(3) << (T)0, (T)0, (T)0, (T)1;
-
-//            M_W_R0.block(0,0,3,3) << qwr0.matrix();
-//            M_W_R0.col(3).head(3) << pwr0;
-//            M_W_R0.row(3) << (T)0, (T)0, (T)0, (T)1;
-
-//            Eigen::Matrix<T,4,1> test;
-//            test = M_W_R0*M_R0_C0*landmark_map;
-
-//            std::cout << "\ntest:\n" << test(0) << "\t" << test(1) << "\t" << test(2) << "\t" << test(3) << std::endl;
-
-
-//            // FROM WORLD TO CAMERA1
-
-//            M_R1_W.block(0,0,3,3) << qwr1.matrix().transpose();
-//            M_R1_W.col(3).head(3) << (-qwr1.matrix().transpose()*pwr1);
-//            M_R1_W.row(3) << (T)0, (T)0, (T)0, (T)1;
-
-//            M_C1_R1.block(0,0,3,3) << qrc.matrix().transpose();
-//            M_C1_R1.col(3).head(3) << (-qrc.matrix().transpose()*prc);
-//            M_C1_R1.row(3) << (T)0, (T)0, (T)0, (T)1;
-
-//            Eigen::Matrix<T,4,1> test2;
-//            test2 = M_C1_R1*M_R1_W*test;
-
-//            std::cout << "\ntest2:\n" << test2(0) << "\t" << test2(1) << "\t" << test2(2) << "\t" << test2(3) << std::endl;
-
-//            Eigen::Matrix<T,3,1> v;
-//            v(0) = test2(0);
-//            v(1) = test2(1);
-//            v(2) = test2(2);
-//            T inverse_dist = test2(3); // inverse distance
-
-            /* END OF THE APPROACH*/
-
 
 
             return true;

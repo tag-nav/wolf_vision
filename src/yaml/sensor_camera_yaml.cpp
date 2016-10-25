@@ -44,7 +44,7 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
         intrinsics_cam->pinhole_model[1] = intrinsic[5];
         intrinsics_cam->pinhole_model[2] = intrinsic[0];
         intrinsics_cam->pinhole_model[3] = intrinsic[4];
-        intrinsics_cam->distortion = distortion;
+        intrinsics_cam->distortion = distortion.head<2>();
         intrinsics_cam->width = width;
         intrinsics_cam->height = height;
 

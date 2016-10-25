@@ -10,6 +10,7 @@
 #include "map_base.h"
 
 #include <Eigen/Geometry>
+#include <iomanip> //setprecision
 
 namespace wolf
 {
@@ -285,7 +286,21 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
         assert (_landmark_ptr && "bad lmk ptr");
         auto current_frame = last_ptr_->getFramePtr();
         auto landmark = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
-        return std::make_shared<ConstraintAHP>(_feature_ptr, current_frame, landmark );
+//        return std::make_shared<ConstraintAHP>(_feature_ptr, current_frame, landmark );
+
+        ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(_feature_ptr, current_frame, landmark );
+
+        Eigen::Vector2s residuals;
+        Eigen::Vector3s current_frame_p = last_ptr_->getFramePtr()->getPPtr()->getVector();
+        Eigen::Vector4s current_frame_o = last_ptr_->getFramePtr()->getOPtr()->getVector();
+        Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getVector();
+        Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
+        Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
+
+        ( * constraint_ptr ) (current_frame_p.data(), current_frame_o.data(),
+                anchor_frame_p.data(), anchor_frame_o.data(),
+                landmark_.data(), residuals.data());
+        return constraint_ptr;
     }
 }
 
@@ -411,7 +426,7 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
         //candidate - cyan
         cv::Point2f point = (std::static_pointer_cast<FeaturePointImage>(feature_point))->getKeypoint().pt;
         cv::circle(_image, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
-//        std::cout << "feature of landmark [" << ((FeaturePointImage*)feature_point)->landmarkId() << "] in: " << point << std::endl;
+        std::cout << "feature of landmark [" << (feature_point)->landmarkId() << "] in: " << point << std::endl;
 
         cv::Point2f point2 = point;
         point2.x = point2.x - 16;
@@ -455,7 +470,7 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
             point.x = point2D[0];
             point.y = point2D[1];
 
-//            std::cout << "landmark proj number [" << landmark_ptr->id() << "] in: " << point << std::endl;
+            std::cout << "landmark number [" << landmark_ptr->id() << std::setprecision(3) << "] in: " << point << std::endl;
 
             cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);
             cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0) );

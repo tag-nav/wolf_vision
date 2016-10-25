@@ -13,11 +13,13 @@ int main()
 
     TimeStamp t = 1;
 
-    char const* tmp = std::getenv( "WOLF_ROOT" );
-    if ( tmp == nullptr )
-        throw std::runtime_error("WOLF_ROOT environment not loaded.");
-    std::string wolf_path( tmp );
-    std::cout << "Wolf path: " << wolf_path << std::endl;
+//    char const* tmp = std::getenv( "WOLF_ROOT" );
+//    if ( tmp == nullptr )
+//        throw std::runtime_error("WOLF_ROOT environment not loaded.");
+//    std::string wolf_path( tmp );
+//    std::cout << "Wolf path: " << wolf_path << std::endl;
+    std::string wolf_path("/home/jtarraso/dev/wolf");
+    std::cout << wolf_path << std::endl;
 
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
@@ -35,7 +37,7 @@ int main()
     const Eigen::VectorXs extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params_ueye.yaml");
     std::shared_ptr<SensorCamera> camera_ptr_ = std::static_pointer_cast<SensorCamera>(sensor_ptr);
 
     // PROCESSOR
@@ -88,6 +90,8 @@ int main()
     Scalar distance = 2; // arbitrary value
     Eigen::Vector4s vec_homogeneous;
 
+    Eigen::VectorXs correction_vec = (std::static_pointer_cast<SensorCamera>(image_ptr->getSensorPtr()))->getCorrectionVector();
+    std::cout << "correction vector: " << correction_vec << std::endl;
     point2D = pinhole::depixellizePoint(image_ptr->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
     std::cout << "point2D depixellized: " << point2D.transpose() << std::endl;
     point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(image_ptr->getSensorPtr()))->getCorrectionVector(),point2D);
@@ -118,16 +122,16 @@ int main()
 
 
     Eigen::Vector2s residuals;
-    //    Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
-    //    Eigen::Vector4s current_frame_o = last_frame->getOPtr()->getVector();
-    //    Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getVector();
-    //    Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
-    //    Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
-    //
-    //    ( * constraint_ptr ) (current_frame_p.data(), current_frame_o.data(),
-    //            anchor_frame_p.data(), anchor_frame_o.data(),
-    //            landmark_.data(), residuals.data());
-    // current frame p; current frame o; anchor frame p; anchor frame o; homogeneous vector landmark, residual
+    Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
+    Eigen::Vector4s current_frame_o = last_frame->getOPtr()->getVector();
+    Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getVector();
+    Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
+    Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
+
+    ( * constraint_ptr ) (current_frame_p.data(), current_frame_o.data(),
+            anchor_frame_p.data(), anchor_frame_o.data(),
+            landmark_.data(), residuals.data());
+//    current_frame p; current_frame o; anchor_frame p; anchor_frame o; homogeneous_vector landmark, residual
 
 
     std::cout << "Residual computed" << std::endl;

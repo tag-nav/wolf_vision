@@ -68,11 +68,13 @@ int main(int argc, char** argv)
 
     //=====================================================
     // Environment variable for configuration files
-    char const* tmp = std::getenv( "WOLF_ROOT" );
-    if ( tmp == nullptr )
-        throw std::runtime_error("WOLF_ROOT environment not loaded.");
-    std::string wolf_path( tmp );
-    std::cout << "Wolf path: " << wolf_path << std::endl;
+//    char const* tmp = std::getenv( "WOLF_ROOT" );
+//    if ( tmp == nullptr )
+//        throw std::runtime_error("WOLF_ROOT environment not loaded.");
+//    std::string wolf_path( tmp );
+//    std::cout << "Wolf path: " << wolf_path << std::endl;
+    std::string wolf_path("/home/jtarraso/dev/wolf");
+    std::cout << wolf_path << std::endl;
     //=====================================================
 
 
