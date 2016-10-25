@@ -575,9 +575,9 @@ void Problem::print(int level)
         std::cout << (F->isKey() ?  "  KF" : "  F") << F->id();
         if (level > 0)
         {
-            std::cout << "  <--\t";
+            std::cout << "  <-- ";
             for (auto cby : F->getConstrainedByList())
-                std::cout << "c" << cby->id() << ",\t";
+                std::cout << "c" << cby->id() << " \t";
         }
         std::cout << std::endl;
         if (level > 1)
@@ -596,7 +596,7 @@ void Problem::print(int level)
                     {
                     std::cout<< "  <--\t";
                     for (auto cby : f->getConstrainedByList())
-                        std::cout << "c" << cby->id() << ",\t";
+                        std::cout << "c" << cby->id() << " \t";
                     }
                 std::cout << std::endl;
                 if (level > 1)
@@ -631,7 +631,7 @@ void Problem::print(int level)
             {
             std::cout << "\t<-- ";
             for (auto cby : L->getConstrainedByList())
-                std::cout << "c" << cby->id() << ",\t";
+                std::cout << "c" << cby->id() << " \t";
             }
         std::cout << std::endl;
     }
