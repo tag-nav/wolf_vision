@@ -41,6 +41,8 @@ int main()
      /**********************************************************************************************/
      /// skew + vee
         //skew
+     std::cout<< "\n\n######################################### Test Skew + vee ################################################\n" << std::endl;
+
      Eigen::Vector3s vec3 = Eigen::Vector3s::Random();
      Eigen::Matrix3s skew_mat;
      skew_mat = skew(vec3);
@@ -57,6 +59,8 @@ int main()
     
     /**********************************************************************************************/
     ///v2q + q2v
+    std::cout<< "\n\n######################################### Test v2q + q2v ################################################\n" << std::endl;
+
     Eigen::Vector4s vec0, vec1;
 
         //v2q
@@ -118,6 +122,8 @@ int main()
     }
 
     /**********************************************************************************************/
+    std::cout<< "\n\n######################################### Test v2R + R2v ################################################\n" << std::endl;
+
     ///v2R, R2v
                                         //First test is to verify we get the good result with v -> v2R -> R2v -> v
                                         //test 2 : how small can angles in rotation vector be ?
@@ -150,15 +156,17 @@ int main()
     }
 
     /**********************************************************************************************/
+    std::cout<< "\n\n######################################### Test R2v limits ################################################\n" << std::endl;
+
                                         //let's see how small the angles can be here : limit reached at scale/10 =  1e-16
     wolf::Scalar scale = 1;
     Eigen::Matrix3s rotation_mat;
     Eigen::Vector3s rv;
     for(int i = 0; i<8; i++){
         rotation_mat = Eigen::Matrix3s::Random() * scale;
-        rotation_mat(0,0) = 1.0;
-        rotation_mat(1,1) = 1.0;
-        rotation_mat(2,2) = 1.0;
+        //rotation_mat(0,0) = 1.0;
+        //rotation_mat(1,1) = 1.0;
+        //rotation_mat(2,2) = 1.0;
 
         //rv = R2v(rotation_mat); //decomposing R2v below
         Eigen::AngleAxis<wolf::Scalar> aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
@@ -174,6 +182,8 @@ int main()
     }
 
     /**********************************************************************************************/
+    std::cout<< "\n\n######################################### Test vector -> quaternion -> matrix -> vector ################################################\n" << std::endl;
+
                                       // testing new path : vector -> quaternion -> matrix -> vector
     scale = 1;
     for(int i = 0; i< 8; i++){
@@ -191,8 +201,11 @@ int main()
     }
 
     /**********************************************************************************************/
+    std::cout<< "\n\n######################################### Test Eigen::AngleAxis limits ################################################\n" << std::endl;
+
     //Hypothesis : problem with construction of AngleAxis objects.
     // Example : if R = I + [delta t]_x (happenning in the IMU case with delta t = 0.001). Then angle mays be evaluated as 0 (due to cosinus definition ?) 
+    // Here we try to get the AngleAxis object from a random rotation matrix, then get back to the rotation matrix using Eigen::AngleAxis::toRotationMatrix()
 
     scale = 1;
     Eigen::Matrix3s res, res_i, rotation_mati; //rotation_mat already declared
@@ -221,12 +234,11 @@ int main()
             //std::cout << "aa0.axis : \n" << aa0.axis() << "\n aa0.angles \n:" << aa0.angle() <<std::endl;
             //break;
         }
-        else if(!res_i.isApprox(rotation_mati,wolf::Constants::EPS)){
+        if(!res_i.isApprox(rotation_mati,wolf::Constants::EPS)){
             std::cout << "\n limit reached at scale " << scale << ", rotation matrix is : \n" << rotation_mati << "\n res_i is : \n" << res_i << std::endl;
-            //break;
+            break;
         }
         
         scale = scale*0.1;
     }
-
 }
