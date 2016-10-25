@@ -103,7 +103,7 @@ libglog.so will be installed at **/usr/local/lib**
         $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..
         $ make
         $ sudo make install 
-    
+
 libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/include/ceres**
 
 ### Yaml-cpp. Wolf uses YAML files for configuration and for saving and loading workspaces.
@@ -111,17 +111,17 @@ libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/i
 **(1)** Obtain:
 
 - Ubuntu:
-  
+
   ```
   $ sudo apt-get install libyaml-cpp-dev
   ```
 - Mac:
-  
+
   ```
   $ brew install yaml-cpp
   ```
 We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
-    
+
 ### Laser Scan Utils (Optional. Install only if you want to use IRI's laser scan utils)
 
 **(1)** Download:
@@ -138,7 +138,7 @@ Or, in case you don't have permissions:
     $ cmake ..
     $ make
     $ sudo make install
-    
+
 ### Raw GPS Utils (Optional. Install only if you want to use IRI's raw gps utils)
 
 **(1)** Download:
@@ -151,7 +151,7 @@ Or, in case you don't have permissions:
     $ cmake ..
     $ make
     $ sudo make install
-    
+
 Download and build
 ------------------
 
@@ -171,7 +171,7 @@ Download and build
 
 **Set the WOLF_ROOT environment variable**
 
-We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at run-time. 
+We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at run-time.
 For example, if we want to use YAML files for configuring sensors, `YAML::LoadFile(filename)` needs an absolute path to a `filename`. This name is platform-specific, and many times user-specific.
 
 Usually, these files are out of the WOLF project. But for testing purposes, some of these files exist within the WOLF directories.
@@ -183,12 +183,12 @@ Proceed as follows:
   ```      
   export WOLF_ROOT="/abs/path/to/wolf"
   ```
-  * Then you need to source the file to get effect, 
+  * Then you need to source the file to get effect,
   ```      
   source ~/.bash_profile    // or ~/.bashrc, of course
   ```
 2. If you are using Eclipse or other __GUIs__ and you want this environment variable to be accessed by them, edit the file `/etc/environment` (you need to use `sudo`) and add this line:
-  
+
   ```
   WOLF_ROOT="/abs/path/to/wolf"
   ```   
@@ -266,11 +266,11 @@ Using the `catkin_tools` package
         $ git checkout catkin_build
       ```
 
-   .  (optional) Download `wolf_ros` :
+    (optional) Download `wolf_ros` :
 
       ```terminal
-      $ git clone https://github.com/IRI-MobileRobotics/Wolf_ros.git
-      ```
+        $ git clone https://github.com/IRI-MobileRobotics/Wolf_ros.git
+        ```
 
 5.  Let's Compile !
 
