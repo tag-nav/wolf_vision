@@ -181,7 +181,7 @@ Eigen::MatrixXs LandmarkContainer::getCorners() const
 
 Eigen::VectorXs LandmarkContainer::getCorner(const unsigned int _id) const
 {
-    assert(_id >= 0 && _id <= 4 && "wrong corner id parameter in getCorner(id)");
+    assert(/*_id >= 0 &&*/ _id <= 4 && "wrong corner id parameter in getCorner(id)");
     return corners_.col(_id);
 }
 
