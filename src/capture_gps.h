@@ -10,13 +10,15 @@ namespace wolf {
 
 class CaptureGPS : public CaptureBase
 {
+    public:
+        typedef std::shared_ptr<CaptureGPS> Ptr;
 
 protected:
     rawgpsutils::SatellitesObs obs_;
 
 public:
 
-    CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, rawgpsutils::SatellitesObs &_obs);
+    CaptureGPS(const TimeStamp &_ts, SensorBasePtr _sensor_ptr, rawgpsutils::SatellitesObs &_obs);
     virtual ~CaptureGPS();
 
     rawgpsutils::SatellitesObs &getData();

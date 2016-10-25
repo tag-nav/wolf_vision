@@ -293,8 +293,8 @@ IF (raw_gps_utils_FOUND)
         processor_gps.h
         )
     SET(SRCS ${SRCS}
-#        capture_gps.cpp
-#        processor_gps.cpp
+        capture_gps.cpp
+        processor_gps.cpp
         )
 ENDIF(raw_gps_utils_FOUND)
 
