@@ -32,6 +32,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
     setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
     assert(_x.size() == 16 && "Wrong vector size! Must be 16.");
     setState(_x);
+    setType("IMU");
 }
 
 
