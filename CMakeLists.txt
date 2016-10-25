@@ -1,4 +1,3 @@
-
 # Pre-requisites about cmake itself
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
@@ -10,14 +9,18 @@ endif(COMMAND cmake_policy)
 SET(CMAKE_MACOSX_RPATH 1)
 
 
-# The project name and the type of project
+# The project name
 PROJECT(wolf)
 
-# EXECUTABLE_OUTPUT_PATH & LIBRARY_OUTPUT_PATH are
-# supercede by LIBRARY_OUTPUT_DIRECTORY & RUNTIME_OUTPUT_DIRECTORY
-# which are properly set by catkin
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+
+string(COMPARE EQUAL "${CMAKE_BINARY_DIR}" "" result)
+IF(result)
+  SET(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+ENDIF()
+message(STATUS "Binary path : " ${CMAKE_BINARY_DIR})
+
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
 # We'll set the install prefix only is it's empty
 # which shouldn't be the case ...
@@ -25,9 +28,8 @@ string(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "" result)
 IF(result)
   # This path is actually default on linux
   SET(CMAKE_INSTALL_PREFIX /usr/local)
-else()
-    message(STATUS "Installation path : " ${CMAKE_INSTALL_PREFIX})
 ENDIF()
+message(STATUS "Installation path : " ${CMAKE_INSTALL_PREFIX})
 
 IF (NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "DEBUG") 

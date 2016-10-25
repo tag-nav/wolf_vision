@@ -395,7 +395,8 @@ INSTALL(FILES ${HDRS_WRAPPER}
 INSTALL(FILES ${HDRS_SOLVER}
     DESTINATION include/iri-algorithms/wolf/solver)
 
-INSTALL(FILES ../cmake_modules/Findwolf.cmake DESTINATION "lib/cmake/${PROJECT_NAME}")
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
+    DESTINATION "lib/cmake/${PROJECT_NAME}")
 
 #install Find*.cmake
 configure_file("${CMAKE_SOURCE_DIR}/cmake_modules/wolfConfig.cmake"
