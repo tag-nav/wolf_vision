@@ -35,6 +35,7 @@ int main()
         - jac_SO3_left
         - jac_SO3_left_inv
      */
+     wolf::Scalar scale = 0;
 
      //pi2pi
      
@@ -155,11 +156,38 @@ int main()
         std::cout << "Diff between vectors (rot_vector - rot_vec) : " << rot_vector1 - rot1_vec << std::endl;
     }
 
+    std::cout<< "\n\n######################################### Test R2v --> v2R limits ################################################\n" << std::endl;
+
+    scale = 1;
+    Eigen::Matrix3s v_to_R, initial_matrix;
+    Eigen::Vector3s  R_to_v;
+
+    //Eigen::Vector3s rv;
+    for(int i = 0; i<8; i++){
+        initial_matrix = Eigen::Matrix3s::Random() * scale;
+
+        R_to_v = R2v(initial_matrix); //decomposing R2v below
+        
+        // now we set the diagonal to identity
+        //rotation_mati(0,0) = 1.0;
+        //rotation_mati(1,1) = 1.0;
+        //rotation_mati(2,2) = 1.0;
+        
+        v_to_R = v2R(R_to_v);
+
+        if(!v_to_R.isApprox(initial_matrix,wolf::Constants::EPS)){
+            std::cout << "\n limit reached at scale " << scale << ", rotation matrix is : \n" << initial_matrix << "\n v_to_R is : \n" << v_to_R << std::endl;
+            //std::cout << "aa0.axis : \n" << aa0.axis() << "\n aa0.angles \n:" << aa0.angle() <<std::endl;
+            break;
+        }   
+        scale = scale*0.1;
+    }
+
     /**********************************************************************************************/
     std::cout<< "\n\n######################################### Test R2v limits ################################################\n" << std::endl;
 
                                         //let's see how small the angles can be here : limit reached at scale/10 =  1e-16
-    wolf::Scalar scale = 1;
+    scale = 1;
     Eigen::Matrix3s rotation_mat;
     Eigen::Vector3s rv;
     for(int i = 0; i<8; i++){
