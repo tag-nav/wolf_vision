@@ -12,8 +12,13 @@
 
 namespace wolf {
 
-SensorOdom3D::SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _o_ptr, const Scalar& _k_disp_to_disp, const Scalar& _k_disp_to_rot, const Scalar&  _k_rot_to_rot) :
-        SensorBase(SEN_ODOM_3D, "ODOM 3D", _p_ptr, _o_ptr, nullptr, 6), k_disp_to_disp_(_k_disp_to_disp), k_disp_to_rot_(_k_disp_to_rot), k_rot_to_rot_(_k_rot_to_rot)
+SensorOdom3D::SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _o_ptr, IntrinsicsOdom3D::Ptr params) :
+        SensorBase(SEN_ODOM_3D, "ODOM 3D", _p_ptr, _o_ptr, nullptr, 6),
+        k_disp_to_disp_(params->k_disp_to_disp),
+        k_disp_to_rot_(params->k_disp_to_rot),
+        k_rot_to_rot_(params->k_rot_to_rot),
+        min_disp_var_(params->min_disp_var),
+        min_rot_var_(params->min_rot_var)
 {
     //
 }
@@ -21,21 +26,6 @@ SensorOdom3D::SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _o_ptr, cons
 SensorOdom3D::~SensorOdom3D()
 {
     //
-}
-
-Scalar SensorOdom3D::getDispVarToDispNoiseFactor() const
-{
-    return k_disp_to_disp_;
-}
-
-Scalar SensorOdom3D::getDispVarToRotNoiseFactor() const
-{
-    return k_disp_to_rot_;
-}
-
-Scalar SensorOdom3D::getRotVarToRotNoiseFactor() const
-{
-    return k_rot_to_rot_;
 }
 
 // Define the factory method
@@ -47,11 +37,8 @@ SensorBasePtr SensorOdom3D::create(const std::string& _unique_name, const Eigen:
     StateBlockPtr pos_ptr = std::make_shared<StateBlock>(_extrinsics_po.head(3), true);
     StateQuaternionPtr ori_ptr = std::make_shared<StateQuaternion>(_extrinsics_po.tail(4), true);
     // cast intrinsics into derived type
-//    IntrinsicsOdom3D* params = (IntrinsicsOdom3D*)(_intrinsics);
-//    params->k_disp_to_disp = 1.0;
-//    params->k_disp_to_rot = 0.0;
-//    params->k_rot_to_rot = 1.0;
-    SensorBasePtr odo = std::make_shared<SensorOdom3D>(pos_ptr, ori_ptr, 0.1, 0.1, 0.1);
+    IntrinsicsOdom3D::Ptr params = std::static_pointer_cast<IntrinsicsOdom3D>(_intrinsics);
+    SensorBasePtr odo = std::make_shared<SensorOdom3D>(pos_ptr, ori_ptr, params);
     odo->setName(_unique_name);
     return odo;
 }
