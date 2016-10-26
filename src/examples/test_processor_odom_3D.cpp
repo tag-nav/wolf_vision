@@ -31,14 +31,6 @@ int main (int argc, char** argv)
 {
     cout << "\n========= Test ProcessorOdom3D ===========" << endl;
 
-//    //=====================================================
-//    // Environment variable for configuration files
-//    char const* tmp = std::getenv( "WOLF_ROOT" );
-//    if ( tmp == nullptr )
-//        throw std::runtime_error("WOLF_ROOT environment not loaded.");
-//    std::string wolf_root( tmp );
-//    std::cout << "Wolf root: " << wolf_root << std::endl;
-//    //=====================================================
     GET_WOLF_ROOT
 
 
