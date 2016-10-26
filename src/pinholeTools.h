@@ -181,16 +181,16 @@ namespace pinhole {
 
 
             //TEMPLATE
-            template<class T, class R>
-            R distortFactor(Eigen::Matrix<T,2,1>& d, R r2){
-                if (d.size() == 0) return 1.0;
-                R s = 1.0;
-                R r2i = 1.0;
+            template<class T>
+            T distortFactor(Eigen::Matrix<T,Eigen::Dynamic,1>& d, T r2){
+                if (d.size() == 0) return (T)1.0;
+                T s = (T)1.0;
+                T r2i = (T)1.0;
                 for (unsigned int i = 0; i < d.size(); i++) { //   here we are doing:
                     r2i = r2i * r2; //                    r2i = r^(2*(i+1))
                     s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
                 }
-                if (s < 0.6) s = 1.0;
+                if (s < (T)0.6) s = (T)1.0; // TODO what's this?
                 return s;
             }
 
@@ -220,13 +220,13 @@ namespace pinhole {
 
 
             //TEMPLATE
-            template<class T, class R, class S>
-            Eigen::Matrix<T,2,1> distortPoint(Eigen::Matrix<T,4,1>& d, Eigen::Matrix<T,2,1>& up) {
-                S n = d.size();
+            template<class T>
+            Eigen::Matrix<T, 2, 1> distortPoint(Eigen::Matrix<T, Eigen::Dynamic, 1>& d, Eigen::Matrix<T, 2, 1>& up) {
+                unsigned int n = d.size();
                 if (n == 0)
                     return up;
                 else {
-                    R r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
+                    T r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
                     return distortFactor(d, r2) * up;
                 }
             }
@@ -607,7 +607,7 @@ namespace pinhole {
                 if (size != 0) {
 
                     Scalar r_max = sqrt(k(0)*k(0) / (k(2)*k(2)) + k(1)*k(1) / (k(3)*k(3)));
-                    Scalar rd_max = 1.1 * r_max;
+                    Scalar rd_max = 1.25 * r_max;
 
                     Size N_samples = 200; // number of samples
                     Scalar iN_samples = 1 / (Scalar) N_samples;
