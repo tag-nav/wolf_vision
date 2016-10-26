@@ -167,7 +167,8 @@ int main()
         initial_matrix = Eigen::Matrix3s::Random() * scale;
 
         R_to_v = R2v(initial_matrix); //decomposing R2v below
-        
+        Eigen::AngleAxis<wolf::Scalar> angleAxis_R_to_v = Eigen::AngleAxis<wolf::Scalar>(initial_matrix);
+        std::cout << "angleAxis_R_to_v.axis : " << angleAxis_R_to_v.axis().transpose() << ",\t angleAxis_R_to_v.angles :" << angleAxis_R_to_v.angle() <<std::endl;
         // now we set the diagonal to identity
         //rotation_mati(0,0) = 1.0;
         //rotation_mati(1,1) = 1.0;
