@@ -261,7 +261,7 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
     point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensorPtr()))->getCorrectionVector(),point2D);
 
     Eigen::Vector3s point3D;
-    point3D.head(2) = point2D;
+    point3D.head<2>() = point2D;
     point3D(2) = 1;
 
     point3D.normalize();
@@ -290,16 +290,21 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
 
         ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(_feature_ptr, current_frame, landmark );
 
-        Eigen::Vector2s residuals;
+
+
+        Eigen::Vector2s expectation_;
         Eigen::Vector3s current_frame_p = last_ptr_->getFramePtr()->getPPtr()->getVector();
-        Eigen::Vector4s current_frame_o = last_ptr_->getFramePtr()->getOPtr()->getVector();
+        Eigen::Vector4s current_frame_o  = last_ptr_->getFramePtr()->getOPtr()->getVector();
         Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getVector();
         Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
         Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
 
-        ( * constraint_ptr ) (current_frame_p.data(), current_frame_o.data(),
+//        std::cout << __FILE__ <<":"<< __FUNCTION__ <<"():"<< __LINE__ << std::endl;
+        (*constraint_ptr).expectation(current_frame_p.data(), current_frame_o.data(),
                 anchor_frame_p.data(), anchor_frame_o.data(),
-                landmark_.data(), residuals.data());
+                landmark_.data(),expectation_.data());
+        std::cout << "====================expectation: " << expectation_.transpose() << std::endl;
+//        std::cout << __FILE__ <<":"<< __FUNCTION__ <<"():"<< __LINE__ << std::endl;
         return constraint_ptr;
     }
 }
@@ -471,6 +476,7 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
             point.y = point2D[1];
 
             std::cout << "landmark number [" << landmark_ptr->id() << std::setprecision(3) << "] in: " << point << std::endl;
+
 
             cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);
             cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0) );
