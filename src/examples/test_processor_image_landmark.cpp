@@ -201,7 +201,7 @@ int main(int argc, char** argv)
 
         cap_odo->process();
 
-        wolf_problem_ptr_->print();
+        wolf_problem_ptr_->print(2);
 
 
 

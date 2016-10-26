@@ -11,6 +11,7 @@
 #include "processor_tracker_landmark.h"
 #include "landmark_AHP.h"
 #include "processor_image_params.h"
+#include "constraint_AHP.h"
 
 // OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
