@@ -103,7 +103,8 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
                               (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
                               (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
                               (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
-                              (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize())));
+                              (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize()))
+                              && "Wrong state size! Should be 16 for an IMU with biases!");
 
       unsigned int index = 0;
       if (getPPtr()!=nullptr)
@@ -214,7 +215,7 @@ FrameBasePtr FrameIMU::create(const FrameKeyType & _tp,
                               const Eigen::VectorXs& _x)
 {
 
-    assert(_x.size() == 16 && "Wrond state vector size. Should be 16 for an IMU with biases!");
+    assert(_x.size() == 16 && "Wrong state vector size. Should be 16 for an IMU with biases!");
 
     StateBlockPtr       p_ptr = std::make_shared<StateBlock>      (_x.segment<3>( 0  ));
     StateQuaternionPtr  q_ptr = std::make_shared<StateQuaternion> (_x.segment<4>( 3  ));

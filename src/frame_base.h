@@ -134,15 +134,15 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setStatus(StateStatus _st);
 
     public:
-        static FrameBasePtr create_PO_2D(const FrameKeyType & _tp,
-                                   const TimeStamp& _ts,
-                                   const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(3));
-        static FrameBasePtr create_PO_3D(const FrameKeyType & _tp,
-                                   const TimeStamp& _ts,
-                                   const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(7));
+        static FrameBasePtr create_PO_2D (const FrameKeyType & _tp,
+                                          const TimeStamp& _ts,
+                                          const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(3));
+        static FrameBasePtr create_PO_3D (const FrameKeyType & _tp,
+                                          const TimeStamp& _ts,
+                                          const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(7));
         static FrameBasePtr create_POV_3D(const FrameKeyType & _tp,
-                                   const TimeStamp& _ts,
-                                   const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(10));
+                                          const TimeStamp& _ts,
+                                          const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(10));
 };
 
 } // namespace wolf
