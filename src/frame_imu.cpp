@@ -9,7 +9,7 @@ namespace wolf {
 
 FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr, StateQuaternionPtr _q_ptr,
                    StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
-        FrameBase(_ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr)//,
+        FrameBase(_ts, _p_ptr, _q_ptr, _v_ptr)//,
 {
     setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
     setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
@@ -18,7 +18,7 @@ FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_
 
 FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr,
                    StateQuaternionPtr _q_ptr, StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
-        FrameBase(_tp, _ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr)
+        FrameBase(_tp, _ts, _p_ptr, _q_ptr, _v_ptr)
 {
     setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
     setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
