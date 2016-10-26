@@ -304,7 +304,9 @@ FrameBasePtr FrameBase::create_PO_2D(const FrameKeyType & _tp,
     StateBlockPtr p_ptr ( std::make_shared<StateBlock>    (_x.head    <2> ( ) ) );
     StateBlockPtr o_ptr ( std::make_shared<StateBlock>    (_x.tail    <1> ( ) ) );
     StateBlockPtr v_ptr ( nullptr );
-    return std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr);
+    FrameBasePtr f ( std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr) );
+    f->setType("PO 2D");
+    return f;
 }
 FrameBasePtr FrameBase::create_PO_3D(const FrameKeyType & _tp,
                                      const TimeStamp& _ts,
@@ -312,19 +314,23 @@ FrameBasePtr FrameBase::create_PO_3D(const FrameKeyType & _tp,
 {
     assert(_x.size() == 7 && "Wrong state vector size. Should be 7 for 3D!");
     StateBlockPtr p_ptr ( std::make_shared<StateBlock>      (_x.head    <3> ( ) ) );
-    StateBlockPtr q_ptr ( std::make_shared<StateQuaternion> (_x.tail    <4> ( ) ) );
+    StateBlockPtr o_ptr ( std::make_shared<StateQuaternion> (_x.tail    <4> ( ) ) );
     StateBlockPtr v_ptr ( nullptr );
-    return std::make_shared<FrameBase>(_tp, _ts, p_ptr, q_ptr, v_ptr);
+    FrameBasePtr f ( std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr) );
+    f->setType("PO 3D");
+    return f;
 }
 FrameBasePtr FrameBase::create_POV_3D(const FrameKeyType & _tp,
                                      const TimeStamp& _ts,
                                      const Eigen::VectorXs& _x)
 {
-    assert(_x.size() == 10 && "Wrond state vector size. Should be 10 for 3D!");
+    assert(_x.size() == 10 && "Wrong state vector size. Should be 10 for 3D!");
     StateBlockPtr p_ptr ( std::make_shared<StateBlock>      (_x.head    <3> ( ) ) );
-    StateBlockPtr q_ptr ( std::make_shared<StateQuaternion> (_x.segment <4> (3) ) );
+    StateBlockPtr o_ptr ( std::make_shared<StateQuaternion> (_x.segment <4> (3) ) );
     StateBlockPtr v_ptr ( std::make_shared<StateBlock>      (_x.tail    <3> ( ) ) );
-    return std::make_shared<FrameBase>(_tp, _ts, p_ptr, q_ptr, v_ptr);
+    FrameBasePtr f ( std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr) );
+    f->setType("POV 3D");
+    return f;
 }
 
 } // namespace wolf
