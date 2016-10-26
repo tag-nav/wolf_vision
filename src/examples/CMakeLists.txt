@@ -160,39 +160,39 @@ TARGET_LINK_LIBRARIES(test_processor_imu_jacobians ${PROJECT_NAME})
 #     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
 # #ENDIF (laser_scan_utils_FOUND)
 
-IF(faramotics_FOUND)
-    IF (laser_scan_utils_FOUND)
-        ADD_EXECUTABLE(test_ceres_2_lasers test_ceres_2_lasers.cpp)
-        TARGET_LINK_LIBRARIES(test_ceres_2_lasers
-                                ${pose_state_time_LIBRARIES}
-                                ${faramotics_LIBRARIES}
-                                ${PROJECT_NAME})
-        ADD_EXECUTABLE(test_ceres_2_lasers_polylines test_ceres_2_lasers_polylines.cpp)
-        TARGET_LINK_LIBRARIES(test_ceres_2_lasers_polylines
-                                ${pose_state_time_LIBRARIES}
-                                ${faramotics_LIBRARIES}
-                                ${PROJECT_NAME})
-        ADD_EXECUTABLE(test_2_lasers_offline test_2_lasers_offline.cpp)
-        TARGET_LINK_LIBRARIES(test_2_lasers_offline
-                                ${pose_state_time_LIBRARIES}
-                                ${faramotics_LIBRARIES}
-                                ${PROJECT_NAME})
-        ADD_EXECUTABLE(test_faramotics_simulation test_faramotics_simulation.cpp)
-        TARGET_LINK_LIBRARIES(test_faramotics_simulation
-                                ${pose_state_time_LIBRARIES}
-                                ${faramotics_LIBRARIES}
-                                ${PROJECT_NAME})
-#        ADD_EXECUTABLE(test_autodiff test_autodiff.cpp)
-#        TARGET_LINK_LIBRARIES(test_autodiff
-#                                ${pose_state_time_LIBRARIES}
-#                                ${faramotics_LIBRARIES}
-#                                ${PROJECT_NAME})
-#        IF(Suitesparse_FOUND)
-#            ADD_EXECUTABLE(test_iQR_wolf2 solver/test_iQR_wolf2.cpp)
-#            TARGET_LINK_LIBRARIES(test_iQR_wolf2
-#                                ${pose_state_time_LIBRARIES}
-#                                ${faramotics_LIBRARIES}
-#                                ${PROJECT_NAME})
-#        ENDIF(Suitesparse_FOUND)
-    ENDIF (laser_scan_utils_FOUND)
-ENDIF(faramotics_FOUND)
+# IF(faramotics_FOUND)
+#     IF (laser_scan_utils_FOUND)
+#         ADD_EXECUTABLE(test_ceres_2_lasers test_ceres_2_lasers.cpp)
+#         TARGET_LINK_LIBRARIES(test_ceres_2_lasers
+#                                 ${pose_state_time_LIBRARIES}
+#                                 ${faramotics_LIBRARIES}
+#                                 ${PROJECT_NAME})
+#         ADD_EXECUTABLE(test_ceres_2_lasers_polylines test_ceres_2_lasers_polylines.cpp)
+#         TARGET_LINK_LIBRARIES(test_ceres_2_lasers_polylines
+#                                 ${pose_state_time_LIBRARIES}
+#                                 ${faramotics_LIBRARIES}
+#                                 ${PROJECT_NAME})
+#         ADD_EXECUTABLE(test_2_lasers_offline test_2_lasers_offline.cpp)
+#         TARGET_LINK_LIBRARIES(test_2_lasers_offline
+#                                 ${pose_state_time_LIBRARIES}
+#                                 ${faramotics_LIBRARIES}
+#                                 ${PROJECT_NAME})
+#         ADD_EXECUTABLE(test_faramotics_simulation test_faramotics_simulation.cpp)
+#         TARGET_LINK_LIBRARIES(test_faramotics_simulation
+#                                 ${pose_state_time_LIBRARIES}
+#                                 ${faramotics_LIBRARIES}
+#                                 ${PROJECT_NAME})
+# #        ADD_EXECUTABLE(test_autodiff test_autodiff.cpp)
+# #        TARGET_LINK_LIBRARIES(test_autodiff
+# #                                ${pose_state_time_LIBRARIES}
+# #                                ${faramotics_LIBRARIES}
+# #                                ${PROJECT_NAME})
+# #        IF(Suitesparse_FOUND)
+# #            ADD_EXECUTABLE(test_iQR_wolf2 solver/test_iQR_wolf2.cpp)
+# #            TARGET_LINK_LIBRARIES(test_iQR_wolf2
+# #                                ${pose_state_time_LIBRARIES}
+# #                                ${faramotics_LIBRARIES}
+# #                                ${PROJECT_NAME})
+# #        ENDIF(Suitesparse_FOUND)
+# #     ENDIF (laser_scan_utils_FOUND)
+# # ENDIF(faramotics_FOUND)
