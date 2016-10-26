@@ -309,16 +309,15 @@ inline std::string Factory<TypeBase, TypeInput...>::getClass()
 } // namespace wolf
 
 
-// Some specializations
-
-#include "sensor_base.h"
-#include "processor_base.h"
-#include "landmark_base.h"
 
 namespace wolf
 {
 
+// Some specializations
+//======================
+
 // Intrinsics
+struct IntrinsicsBase;
 typedef Factory<IntrinsicsBase,
         const std::string&> IntrinsicsFactory;
 template<>
@@ -328,6 +327,7 @@ inline std::string IntrinsicsFactory::getClass()
 }
 
 // ProcessorParams
+struct ProcessorParamsBase;
 typedef Factory<ProcessorParamsBase,
         const std::string&> ProcessorParamsFactory;
 template<>
@@ -337,6 +337,7 @@ inline std::string ProcessorParamsFactory::getClass()
 }
 
 // Landmarks from YAML
+class LandmarkBase;
 typedef Factory<LandmarkBase,
         const YAML::Node&>  LandmarkFactory;
 template<>
@@ -346,6 +347,7 @@ inline std::string LandmarkFactory::getClass()
 }
 
 // Frames
+class FrameBase;
 typedef Factory<FrameBase, const FrameKeyType&, const TimeStamp&, const Eigen::VectorXs&> FrameFactory;
 template<>
 inline std::string FrameFactory::getClass()
