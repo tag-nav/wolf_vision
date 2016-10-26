@@ -13,23 +13,27 @@ SET(CMAKE_MACOSX_RPATH 1)
 PROJECT(wolf)
 
 
-string(COMPARE EQUAL "${CMAKE_BINARY_DIR}" "" result)
-IF(result)
-  SET(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-ENDIF()
-message(STATUS "Binary path : " ${CMAKE_BINARY_DIR})
-
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
-
+#string(COMPARE EQUAL "${CMAKE_BINARY_DIR}" "" result)
+#IF(result)
+#  SET(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+#ENDIF()
+#message(STATUS "Binary path : " ${CMAKE_BINARY_DIR})
+#
+#SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+#SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
+#
 # We'll set the install prefix only is it's empty
 # which shouldn't be the case ...
-string(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "" result)
-IF(result)
+#string(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "" result)
+#IF(result)
   # This path is actually default on linux
-  SET(CMAKE_INSTALL_PREFIX /usr/local)
-ENDIF()
-message(STATUS "Installation path : " ${CMAKE_INSTALL_PREFIX})
+#  SET(CMAKE_INSTALL_PREFIX /usr/local)
+#ENDIF()
+#message(STATUS "Installation path : " ${CMAKE_INSTALL_PREFIX})
+
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+SET(CMAKE_INSTALL_PREFIX /usr/local)
 
 IF (NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "DEBUG") 
