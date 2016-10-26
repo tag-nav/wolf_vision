@@ -64,7 +64,6 @@ unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList&
             if (((*feat_out_it)->getMeasurement().head<3>() - expected_feature_pose).squaredNorm() > position_error_th_*position_error_th_)
             {
                 // match
-                //_feature_correspondences[*feat_out_it] = FeatureMatch({feat_in_ptr,0});
                 _feature_correspondences[*feat_out_it] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in_ptr,0}));
                 
                 // move matched feature to list
