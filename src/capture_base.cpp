@@ -24,16 +24,17 @@ CaptureBase::~CaptureBase()
     std::cout << "destructed     -C" << id() << std::endl;
 }
 
-void CaptureBase::process()
-{
-    // Call all processors assigned to the sensor that captured this data
-    auto cap = shared_from_this();
-    auto sen = sensor_ptr_.lock();
-    if (sen)
-        for (auto prc : sen->getProcessorList())
-            prc->process(cap);
-}
+//void CaptureBase::process()
+//{
+//    // Call all processors assigned to the sensor that captured this data
+//    auto cap = shared_from_this();
+//    auto sen = sensor_ptr_.lock();
+//    if (sen)
+//        for (auto prc : sen->getProcessorList())
+//            prc->process(cap);
+//}
 
+//<<<<<<< HEAD
 void CaptureBase::remove()
 {
     if (!is_removing_)
@@ -59,6 +60,16 @@ void CaptureBase::remove()
         std::cout << "Removed         C" << id() << std::endl;
     }
 }
+//=======
+//void CaptureBase::process()
+//{
+//    // Call all processors assigned to the sensor that captured this data
+//    for (auto processor_iter = sensor_ptr_->getProcessorListPtr()->begin(); processor_iter != sensor_ptr_->getProcessorListPtr()->end(); ++processor_iter)
+//    {
+//        (*processor_iter)->process(this);
+//    }
+//}
+//>>>>>>> capture_passby_sensor
 
 void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
 {

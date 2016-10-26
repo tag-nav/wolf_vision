@@ -197,7 +197,8 @@ int main(int argc, char** argv)
         }
         cap_odo->setData(data);
 
-        cap_odo->process();
+        sen_odo_ptr->addCapture(cap_odo);
+//        cap_odo->process();
 
         wolf_problem_ptr_->print();
 
@@ -211,7 +212,8 @@ int main(int argc, char** argv)
         image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
 
         /* process */
-        image_ptr->process();
+        //image_ptr->process();
+        camera_ptr->addCapture(image_ptr);
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 

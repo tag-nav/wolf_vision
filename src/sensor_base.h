@@ -121,10 +121,13 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         HardwareBasePtr getHardwarePtr();
         void setHardwarePtr(const HardwareBasePtr _hw_ptr);
 
+        bool addCapture(const CaptureBasePtr capture_ptr);
+
 };
 
 }
 
+#include "capture_base.h"
 #include "processor_base.h"
 #include "hardware_base.h"
 
@@ -237,6 +240,18 @@ inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
 inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
 {
     hardware_ptr_ = _hw_ptr;
+}
+
+inline bool SensorBase::addCapture(const CaptureBasePtr capture_ptr)
+{
+  capture_ptr->setSensorPtr(shared_from_this());
+
+  for (const auto processor : processor_list_)
+  {
+    processor->process(capture_ptr);
+  }
+
+  return true;
 }
 
 } // namespace wolf

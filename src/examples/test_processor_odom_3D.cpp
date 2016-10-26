@@ -73,7 +73,9 @@ int main (int argc, char** argv)
     {
         cap_odo->setTimeStamp(t);
         cap_odo->setData(data);
-        cap_odo->process();
+
+        sen->addCapture(cap_odo);
+//        cap_odo->process();
 
         cout << "t: " << std::setprecision(2) << t.get() << "  \t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
 
