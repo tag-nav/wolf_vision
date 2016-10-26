@@ -31,6 +31,9 @@ int main (int argc, char** argv)
 {
     cout << "\n========= Test ProcessorOdom3D ===========" << endl;
 
+    GET_WOLF_ROOT
+
+
     TimeStamp tf;
     if (argc == 1)
         tf = 1.0;
@@ -44,8 +47,8 @@ int main (int argc, char** argv)
     ProblemPtr problem = Problem::create(FRM_PO_3D);
     CeresManager ceres_manager(problem);
 
-    SensorBasePtr sen = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(),"");
-    problem->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
+    SensorBasePtr sen = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/odom_3D.yaml");
+    problem->installProcessor("ODOM 3D", "odometry integrator", "odom");
     problem->getProcessorMotionPtr()->setOrigin((Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
 
     Scalar dx = .1;
@@ -62,7 +65,9 @@ int main (int argc, char** argv)
     {
         cap_odo->setTimeStamp(t);
         cap_odo->setData(data);
-        cap_odo->process();
+
+        sen->addCapture(cap_odo);
+//        cap_odo->process();
 
         cout << "t: " << std::setprecision(2) << t.get() << "  \t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
 

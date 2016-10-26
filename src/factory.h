@@ -267,9 +267,9 @@ inline bool Factory<TypeBase, TypeInput...>::registerCreator(const std::string& 
 {
     bool reg = callbacks_.insert(typename CallbackMap::value_type(_type, createFn)).second;
     if (reg)
-        std::cout << std::setw(22) << std::left << getClass() << " : registered " << _type << std::endl;
+        std::cout << std::setw(22) << std::left << getClass() << " <--  registered  " << _type << std::endl;
     else
-        std::cout << getClass() << " :  " << _type << " already registered. Skipping. " << std::endl;
+        std::cout << std::setw(22) << std::left << getClass() << " X--  skipping  " << _type << ": already registered." << std::endl;
 
     return reg;
 }
@@ -309,15 +309,15 @@ inline std::string Factory<TypeBase, TypeInput...>::getClass()
 } // namespace wolf
 
 
-// Some specializations
-
-#include "sensor_base.h"
-#include "processor_base.h"
-#include "landmark_base.h"
 
 namespace wolf
 {
 
+// Some specializations
+//======================
+
+// Intrinsics
+struct IntrinsicsBase;
 typedef Factory<IntrinsicsBase,
         const std::string&> IntrinsicsFactory;
 template<>
@@ -326,6 +326,8 @@ inline std::string IntrinsicsFactory::getClass()
     return "IntrinsicsFactory";
 }
 
+// ProcessorParams
+struct ProcessorParamsBase;
 typedef Factory<ProcessorParamsBase,
         const std::string&> ProcessorParamsFactory;
 template<>
@@ -334,6 +336,8 @@ inline std::string ProcessorParamsFactory::getClass()
     return "ProcessorParamsFactory";
 }
 
+// Landmarks from YAML
+class LandmarkBase;
 typedef Factory<LandmarkBase,
         const YAML::Node&>  LandmarkFactory;
 template<>
@@ -342,6 +346,18 @@ inline std::string LandmarkFactory::getClass()
     return "LandmarkFactory";
 }
 
+// Frames
+class FrameBase;
+class TimeStamp;
+typedef Factory<FrameBase, const FrameKeyType&, const TimeStamp&, const Eigen::VectorXs&> FrameFactory;
+template<>
+inline std::string FrameFactory::getClass()
+{
+    return "FrameFactory";
+}
+#define WOLF_REGISTER_FRAME(FrameType, FrameName) \
+  namespace{ const bool FrameName##Registered = \
+    FrameFactory::get().registerCreator(FrameType, FrameName::create); }\
 
 } /* namespace wolf */
 

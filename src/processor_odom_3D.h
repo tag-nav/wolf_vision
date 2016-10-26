@@ -76,6 +76,7 @@ class ProcessorOdom3D : public ProcessorMotion
 
     private:
         Scalar k_disp_to_disp_, k_disp_to_rot_, k_rot_to_rot_;
+        Scalar min_disp_var_, min_rot_var_;
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
         Eigen::Map<Eigen::Vector3s> p_out_;
         Eigen::Map<const Eigen::Quaternions> q1_, q2_;
@@ -113,8 +114,8 @@ inline void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data,
      */
 
     // We discard _data_cov and create a new one from the measured motion
-    Scalar disp_var = 0.1 + k_disp_to_disp_ * _data.head<3>().norm();
-    Scalar rot_var  = 0.1 + k_disp_to_rot_  * _data.head<3>().norm() + k_rot_to_rot_ * _data.tail<3>().norm();
+    Scalar disp_var = min_disp_var_ + k_disp_to_disp_ * _data.head<3>().norm();
+    Scalar rot_var  = min_rot_var_  + k_disp_to_rot_  * _data.head<3>().norm() + k_rot_to_rot_ * _data.tail<3>().norm();
     Eigen::Matrix6s data_cov(Eigen::Matrix6s::Identity());
     data_cov(0,0) = data_cov(1,1) = data_cov(2,2) = disp_var;
     data_cov(3,3) = data_cov(4,4) = data_cov(5,5) = rot_var;
@@ -228,8 +229,10 @@ inline ConstraintBasePtr ProcessorOdom3D::createConstraint(FeatureBasePtr _featu
 inline void ProcessorOdom3D::setup(SensorOdom3D::Ptr sen_ptr)
 {
     k_disp_to_disp_ = sen_ptr->getDispVarToDispNoiseFactor();
-    k_disp_to_rot_ = sen_ptr->getDispVarToRotNoiseFactor();
-    k_rot_to_rot_ = sen_ptr->getRotVarToRotNoiseFactor();
+    k_disp_to_rot_  = sen_ptr->getDispVarToRotNoiseFactor();
+    k_rot_to_rot_   = sen_ptr->getRotVarToRotNoiseFactor();
+    min_disp_var_   = sen_ptr->getMinDispVar();
+    min_rot_var_    = sen_ptr->getMinRotVar();
 }
 
 inline void ProcessorOdom3D::remap(const Eigen::VectorXs& _x1,

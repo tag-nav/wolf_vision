@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 
 
     cv::Feature2D* detector_descriptor_ptr_;
-    cv::DescriptorMatcher* matcher_ptr_;
+//    cv::DescriptorMatcher* matcher_ptr_;
 
     unsigned int nfeatures = 20;
     float scaleFactor = 1.2;
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     unsigned int scoreType = 0;              //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
     unsigned int patchSize = 31;
 
-    unsigned int fastThreshold = 20;
+//    unsigned int fastThreshold = 20;
 
     unsigned int roi_width = 50;
     unsigned int roi_heigth = 50;
@@ -67,16 +67,16 @@ int main(int argc, char** argv)
                                            patchSize);//,
 //                                           fastThreshold);
 
-    unsigned int nominal_pattern_radius = 0;
-    unsigned int pattern_radius = (unsigned int)( (nominal_pattern_radius) * pow(scaleFactor, nlevels-1));
+//    unsigned int nominal_pattern_radius = 0;
+//    unsigned int pattern_radius = (unsigned int)( (nominal_pattern_radius) * pow(scaleFactor, nlevels-1));
 
 //    std::cout << "nominal pattern radius: " << _dd_params->nominal_pattern_radius << std::endl;
 //    std::cout << "scale factor: " << params_orb->scaleFactor << std::endl;
 //    std::cout << "nlevels: " << params_orb->nlevels << std::endl;
 
-    unsigned int size_bits = detector_descriptor_ptr_->descriptorSize() * 8;
+//    unsigned int size_bits = detector_descriptor_ptr_->descriptorSize() * 8;
 
-    matcher_ptr_ = new cv::BFMatcher(6);
+//    matcher_ptr_ = new cv::BFMatcher(6);
 
 
 

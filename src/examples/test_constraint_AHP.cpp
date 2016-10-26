@@ -16,8 +16,8 @@ int main()
     char const* tmp = std::getenv( "WOLF_ROOT" );
     if ( tmp == nullptr )
         throw std::runtime_error("WOLF_ROOT environment not loaded.");
-    std::string wolf_path( tmp );
-    std::cout << "Wolf path: " << wolf_path << std::endl;
+    std::string wolf_root( tmp );
+    std::cout << "Wolf root: " << wolf_root << std::endl;
 
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
@@ -35,12 +35,12 @@ int main()
     const Eigen::VectorXs extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_path + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_root + "/src/examples/camera_params.yaml");
     std::shared_ptr<SensorCamera> camera_ptr_ = std::static_pointer_cast<SensorCamera>(sensor_ptr);
 
     // PROCESSOR
     // one-liner API
-    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
+    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_ORB.yaml");
 
 
     // create the current frame

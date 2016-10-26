@@ -2,7 +2,7 @@
 
 namespace wolf {
 
-CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBase *_sensor_ptr, rawgpsutils::SatellitesObs &_obs) :
+CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBasePtr _sensor_ptr, rawgpsutils::SatellitesObs &_obs) :
         CaptureBase("GPS", _ts, _sensor_ptr),
         obs_(_obs)
 {

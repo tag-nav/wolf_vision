@@ -5,6 +5,7 @@ namespace wolf
 ProcessorOdom3D::ProcessorOdom3D() :
         ProcessorMotion(PRC_ODOM_3D, "ODOM 3D", 7, 7, 6, 6),
         k_disp_to_disp_(0.1), k_disp_to_rot_(0.1), k_rot_to_rot_(0.1),
+        min_disp_var_(0.1), min_rot_var_(0.1),
         p1_(nullptr), p2_(nullptr), p_out_(nullptr),
         q1_(nullptr), q2_(nullptr), q_out_(nullptr)
 {

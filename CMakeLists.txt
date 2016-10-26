@@ -1,4 +1,3 @@
-
 # Pre-requisites about cmake itself
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
@@ -10,8 +9,27 @@ endif(COMMAND cmake_policy)
 SET(CMAKE_MACOSX_RPATH 1)
 
 
-# The project name and the type of project
+# The project name
 PROJECT(wolf)
+
+
+#string(COMPARE EQUAL "${CMAKE_BINARY_DIR}" "" result)
+#IF(result)
+#  SET(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+#ENDIF()
+#message(STATUS "Binary path : " ${CMAKE_BINARY_DIR})
+#
+#SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+#SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
+#
+# We'll set the install prefix only is it's empty
+# which shouldn't be the case ...
+#string(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "" result)
+#IF(result)
+  # This path is actually default on linux
+#  SET(CMAKE_INSTALL_PREFIX /usr/local)
+#ENDIF()
+#message(STATUS "Installation path : " ${CMAKE_INSTALL_PREFIX})
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
@@ -25,6 +43,12 @@ message(STATUS "Configured to compile in ${CMAKE_BUILD_TYPE} mode.")
 #Set Flags
 SET(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -D_REENTRANT")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -D_REENTRANT")
+
+if(UNIX)
+  # GCC is not strict enough by default, so enable most of the warnings.
+  set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -Werror=all -Werror=extra -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-missing-field-initializers")
+endif(UNIX)
 
 #Set compiler according C++11 support
 include(CheckCXXCompilerFlag)

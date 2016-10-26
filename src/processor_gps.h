@@ -5,13 +5,9 @@
 #ifndef WOLF_PROCESSOR_GPS_H
 #define WOLF_PROCESSOR_GPS_H
 
-namespace wolf
-{
-class CaptureGPS;
-}
-
 // Wolf includes
 #include "processor_base.h"
+#include "capture_gps.h"
 
 // Std includes
 
@@ -20,13 +16,12 @@ namespace wolf {
 
 class ProcessorGPS : public ProcessorBase
 {
+    public:
+        typedef std::shared_ptr<ProcessorGPS> Ptr;
+
     protected:
-        // unused
-        //SensorGPS* sensor_gps_ptr_; //specific pointer to sensor gps object
-        CaptureGPS* capture_gps_ptr_;
-
+        CaptureGPS::Ptr capture_gps_ptr_;
         Scalar gps_covariance_;
-
 
     public:
         ProcessorGPS();

@@ -28,6 +28,8 @@ class CaptureLaser2D : public CaptureBase
         
         laserscanutils::LaserScan& getScan();
 
+        void setSensorPtr(const SensorBasePtr sensor_ptr);
+
     private:
         SensorLaser2D::Ptr laser_ptr_; //specific pointer to sensor laser 2D object
         laserscanutils::LaserScan scan_;
@@ -37,6 +39,12 @@ class CaptureLaser2D : public CaptureBase
 inline laserscanutils::LaserScan& CaptureLaser2D::getScan()
 {
     return scan_;
+}
+
+inline void CaptureLaser2D::setSensorPtr(const SensorBasePtr sensor_ptr)
+{
+  CaptureBase::setSensorPtr(sensor_ptr);
+  laser_ptr_ = std::static_pointer_cast<SensorLaser2D>(sensor_ptr);
 }
 
 } // namespace wolf

@@ -36,7 +36,16 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 
     public:
 
-        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr);
+//<<<<<<< HEAD
+//        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr);
+//=======
+        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr = nullptr);
+
+//        /** \brief Default destructor (not recommended)
+//         *
+//         * Default destructor (please use destruct() instead of delete for guaranteeing the wolf tree integrity)
+//         **/
+//>>>>>>> capture_passby_sensor
         virtual ~CaptureBase();
         void remove();
 
@@ -58,10 +67,21 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void getConstraintList(ConstraintBaseList& _ctr_list);
 
         SensorBasePtr getSensorPtr() const;
+//<<<<<<< HEAD
         StateBlockPtr getSensorPPtr() const;
         StateBlockPtr getSensorOPtr() const;
 
-        virtual void process();
+//        virtual void process();
+//=======
+        virtual void setSensorPtr(const SensorBasePtr sensor_ptr);
+
+//        StateBlock* getSensorPPtr() const;
+//        StateBlock* getSensorOPtr() const;
+//
+//        /** \brief Call all the processors for this Capture
+//         */
+//        //virtual void process();
+//>>>>>>> capture_passby_sensor
 
 };
 
@@ -149,6 +169,11 @@ inline TimeStamp CaptureBase::getTimeStamp() const
 inline SensorBasePtr CaptureBase::getSensorPtr() const
 {
     return sensor_ptr_.lock();
+}
+
+inline void CaptureBase::setSensorPtr(const SensorBasePtr sensor_ptr)
+{
+  sensor_ptr_ = sensor_ptr;
 }
 
 inline void CaptureBase::setTimeStamp(const TimeStamp& _ts)
