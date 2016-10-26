@@ -54,7 +54,7 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         virtual ~ConstraintBase();
         void remove();
 
-        unsigned int id();
+        unsigned int id() const;
 
         /** \brief Returns the constraint type
          **/
@@ -164,7 +164,7 @@ inline wolf::ProblemPtr ConstraintBase::getProblem()
     return prb;
 }
 
-inline unsigned int ConstraintBase::id()
+inline unsigned int ConstraintBase::id() const
 {
     return constraint_id_;
 }
