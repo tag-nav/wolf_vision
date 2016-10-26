@@ -57,5 +57,7 @@ function(wolf_add_gtest target)
   add_dependencies(${target} libgtest)
   target_link_libraries(${target} libgtest)
 
-  add_test(${target} ${target})
+message(WARNING ${CMAKE_BINARY_DIR}/bin)
+
+  add_test(NAME ${target} COMMAND ${target}) #WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 endfunction()
