@@ -66,15 +66,15 @@ int main(int argc, char** argv)
     //=====================================================
 
 
-    //=====================================================
-    // Environment variable for configuration files
-    char const* tmp = std::getenv( "WOLF_ROOT" );
-    if ( tmp == nullptr )
-        throw std::runtime_error("WOLF_ROOT environment not loaded.");
-    std::string wolf_path( tmp );
-    std::cout << "Wolf path: " << wolf_path << std::endl;
-    //=====================================================
-
+//    //=====================================================
+//    // Environment variable for configuration files
+//    char const* tmp = std::getenv( "WOLF_ROOT" );
+//    if ( tmp == nullptr )
+//        throw std::runtime_error("WOLF_ROOT environment not loaded.");
+//    std::string wolf_root( tmp );
+//    std::cout << "Wolf root: " << wolf_root << std::endl;
+//    //=====================================================
+    GET_WOLF_ROOT
 
 
     //=====================================================
@@ -82,16 +82,16 @@ int main(int argc, char** argv)
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
 
     // CAMERA SENSOR
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_path + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params.yaml");
     SensorCamera::Ptr camera_ptr = std::static_pointer_cast<SensorCamera>(sensor_ptr);
     camera_ptr->setImgWidth(img_width);
     camera_ptr->setImgHeight(img_height);
 
     // IMAGE PROCESSOR
-    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml");
+    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_ORB.yaml");
 
     // ODOM SENSOR AND PROCESSOR
-    SensorBasePtr sen_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_path + "/src/examples/odom_3D.yaml");
+    SensorBasePtr sen_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/odom_3D.yaml");
     ProcessorBasePtr prc_ptr = wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom");
     SensorOdom3D::Ptr sen_odo_ptr = std::static_pointer_cast<SensorOdom3D>(sen_ptr);
     //=====================================================

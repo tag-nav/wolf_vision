@@ -70,8 +70,8 @@ int main(int argc, char** argv)
     if ( tmp == nullptr )
         throw std::runtime_error("WOLF_ROOT environment not loaded.");
 
-    std::string wolf_path( tmp );
-    std::cout << "Wolf path: " << wolf_path << std::endl;
+    std::string wolf_root( tmp );
+    std::cout << "Wolf root: " << wolf_root << std::endl;
 
     ProblemPtr wolf_problem_ = Problem::create(FRM_PO_3D);
 
@@ -134,14 +134,14 @@ int main(int argc, char** argv)
 
     // SENSOR
     // one-liner API
-    SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_path + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_root + "/src/examples/camera_params.yaml");
     shared_ptr<SensorCamera> camera_ptr = static_pointer_cast<SensorCamera>(sensor_ptr);
     camera_ptr->setImgWidth(img_width);
     camera_ptr->setImgHeight(img_height);
 
     // PROCESSOR
     // one-liner API
-    ProcessorImageFeature::Ptr prc_img_ptr = std::static_pointer_cast<ProcessorImageFeature>( wolf_problem_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_path + "/src/examples/processor_image_ORB.yaml") );
+    ProcessorImageFeature::Ptr prc_img_ptr = std::static_pointer_cast<ProcessorImageFeature>( wolf_problem_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_ORB.yaml") );
     prc_img_ptr->setup(camera_ptr);
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
