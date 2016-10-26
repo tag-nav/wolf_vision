@@ -8,12 +8,17 @@
 ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
 
 
-# test_processor_odom_3D
-ADD_EXECUTABLE(test_processor_odom_3D test_processor_odom_3D.cpp)
-TARGET_LINK_LIBRARIES(test_processor_odom_3D ${PROJECT_NAME})
+IF(Ceres_FOUND)
+    # test_processor_odom_3D
+    ADD_EXECUTABLE(test_processor_odom_3D test_processor_odom_3D.cpp)
+    TARGET_LINK_LIBRARIES(test_processor_odom_3D ${PROJECT_NAME})
 
-ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
-TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
+    ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
+    TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
+ENDIF(Ceres_FOUND)
+
+
+
 
 # Local parametrizations classes test
 ADD_EXECUTABLE(test_local_param test_local_param.cpp)
@@ -102,9 +107,16 @@ ENDIF(Suitesparse_FOUND)
 #TARGET_LINK_LIBRARIES(test_analytic_odom_constraint ${PROJECT_NAME})
 
 IF(OpenCV_FOUND)
-    # Testing many things for the 3D image odometry
-    ADD_EXECUTABLE(test_image test_image.cpp)
-    TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
+
+    IF(Ceres_FOUND)
+        # Testing many things for the 3D image odometry
+        ADD_EXECUTABLE(test_image test_image.cpp)
+        TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
+
+        # Processor Image Landmark test
+        ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
+        TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
+    ENDIF(Ceres_FOUND)
 
     # Testing opencv matching and fundamental matrix with ransac
     ADD_EXECUTABLE(test_opencv test_opencv.cpp)
@@ -114,9 +126,7 @@ IF(OpenCV_FOUND)
     ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
     TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
 
-    # Processor Image Landmark test
-    ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
-    TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
+
 
     # Constraint test
     ADD_EXECUTABLE(test_constraint_AHP test_constraint_AHP.cpp)
