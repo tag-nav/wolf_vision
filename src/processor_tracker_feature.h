@@ -174,10 +174,10 @@ inline void ProcessorTrackerFeature::establishConstraints()
 {
     for (auto match : matches_origin_from_last_)
     {
-        auto ctr = createConstraint(match.first, match.second.feature_ptr_);
-        ctr->setFeatureOtherPtr(match.second.feature_ptr_);
+        auto ctr = createConstraint(match.first, match.second->feature_ptr_);
+        ctr->setFeatureOtherPtr(match.second->feature_ptr_);
         match.first->addConstraint(ctr);
-        match.second.feature_ptr_->addConstrainedBy(ctr);
+        match.second->feature_ptr_->addConstrainedBy(ctr);
     }
 }
 
@@ -189,7 +189,7 @@ inline void ProcessorTrackerFeature::advance()
     for (auto match : matches_last_from_incoming_)
     {
         matches_last_from_incoming_[match.first] =
-                matches_origin_from_last_[matches_last_from_incoming_[match.first].feature_ptr_];
+                matches_origin_from_last_[matches_last_from_incoming_[match.first]->feature_ptr_];
     }
     matches_origin_from_last_ = std::move(matches_last_from_incoming_);
 

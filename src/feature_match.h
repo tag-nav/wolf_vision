@@ -18,7 +18,8 @@ struct FeatureMatch
         Scalar normalized_score_;
 };
 
-typedef std::map<FeatureBasePtr, FeatureMatch> FeatureMatchMap;
+typedef std::shared_ptr<FeatureMatch> FeatureMatchPtr;
+typedef std::map<FeatureBasePtr, FeatureMatchPtr> FeatureMatchMap;
 
 }//end namespace
 
