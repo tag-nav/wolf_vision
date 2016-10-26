@@ -85,7 +85,7 @@ class ProcessorTracker : public ProcessorBase
         virtual void process(CaptureBasePtr const _incoming_ptr);
 
         void setMaxNewFeatures(const unsigned int& _max_new_features);
-        const unsigned int getMaxNewFeatures();
+        unsigned int getMaxNewFeatures();
 
         virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
 
@@ -195,7 +195,7 @@ inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_fea
     max_new_features_ = _max_new_features;
 }
 
-inline const unsigned int ProcessorTracker::getMaxNewFeatures()
+inline unsigned int ProcessorTracker::getMaxNewFeatures()
 {
     return max_new_features_;
 }

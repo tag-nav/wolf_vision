@@ -4,11 +4,14 @@ MESSAGE("Starting WOLF CMakeLists ...")
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 #CMAKE modules
-SET(CMAKE_MODULE_PATH ${CMAKE_ROOT}/Modules/; ../cmake_modules)
+
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
-
 #find dependencies.
+
+FIND_PACKAGE(Eigen 3 REQUIRED)
+
 FIND_PACKAGE(Ceres QUIET) #Ceres is not required
 IF(Ceres_FOUND)
     MESSAGE("Ceres Library FOUND: Ceres related sources will be built.")
@@ -373,10 +376,12 @@ ENDIF (YAMLCPP_FOUND)
 
 #install library
 #=============================================================
-INSTALL(TARGETS ${PROJECT_NAME}
+INSTALL(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
       RUNTIME DESTINATION bin
       LIBRARY DESTINATION lib/iri-algorithms
       ARCHIVE DESTINATION lib/iri-algorithms)
+
+install(EXPORT ${PROJECT_NAME}Targets DESTINATION lib/cmake/${PROJECT_NAME})
 
 #install headers
 INSTALL(FILES ${HDRS_BASE}
@@ -390,7 +395,16 @@ INSTALL(FILES ${HDRS_WRAPPER}
 INSTALL(FILES ${HDRS_SOLVER}
     DESTINATION include/iri-algorithms/wolf/solver)
 
-INSTALL(FILES ../Findwolf.cmake DESTINATION ${CMAKE_ROOT}/Modules/)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
+    DESTINATION "lib/cmake/${PROJECT_NAME}")
+
+#install Find*.cmake
+configure_file("${CMAKE_SOURCE_DIR}/cmake_modules/wolfConfig.cmake"
+               "${CMAKE_BINARY_DIR}/wolfConfig.cmake" @ONLY)
+
+INSTALL(FILES "${CMAKE_BINARY_DIR}/wolfConfig.cmake" DESTINATION "lib/cmake/${PROJECT_NAME}")
+
+export(PACKAGE ${PROJECT_NAME})
 
 #Build examples & tests
 MESSAGE("Building examples and tests.")
