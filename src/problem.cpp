@@ -199,7 +199,6 @@ FrameBasePtr Problem::createFrame(FrameKeyType _frame_key_type, const Eigen::Vec
         case FRM_POV_3D:
         {
             assert(_frame_state.size() == 10 && "Wrong state vector size");
-            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
             return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, std::make_shared<StateBlock>(_frame_state.head(3)),
                                   std::make_shared<StateQuaternion>(_frame_state.segment<4>(3)),
                                   std::make_shared<StateBlock>(_frame_state.tail(3))));

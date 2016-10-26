@@ -55,7 +55,7 @@ int main (int argc, char** argv)
     CeresManager ceres_manager(problem);
 
     SensorBasePtr sen = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_path + "/src/examples/odom_3D.yaml");
-    problem->installProcessor("ODOM 3D", "odometry integrator", "odom", "");
+    problem->installProcessor("ODOM 3D", "odometry integrator", "odom");
     problem->getProcessorMotionPtr()->setOrigin((Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
 
     Scalar dx = .1;
