@@ -209,8 +209,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
 
 
 
-FrameBasePtr FrameIMU::create(const FrameStructure _fs,
-                              const FrameKeyType & _tp,
+FrameBasePtr FrameIMU::create(const FrameKeyType & _tp,
                               const TimeStamp& _ts,
                               const Eigen::VectorXs& _x)
 {

@@ -296,45 +296,35 @@ void FrameBase::setStatus(StateStatus _st)
     }
 }
 
-FrameBasePtr FrameBase::create(const FrameStructure _fs,
-                               const FrameKeyType & _tp,
-                               const TimeStamp& _ts,
-                               const Eigen::VectorXs& _x)
+FrameBasePtr FrameBase::create_PO_2D(const FrameKeyType & _tp,
+                                     const TimeStamp& _ts,
+                                     const Eigen::VectorXs& _x)
 {
-    StateBlockPtr p_ptr(nullptr);
-    StateBlockPtr o_ptr(nullptr);
-    StateBlockPtr v_ptr(nullptr);
-    switch (_fs)
-    {
-        case FRM_PO_2D:
-        {
-            assert(_x.size() == 3 && "Wrond state vector size. Should be 3 for 2D!");
-            p_ptr = std::make_shared<StateBlock>    (_x.head    <2> ( ) );
-            o_ptr = std::make_shared<StateBlock>    (_x.tail    <1> ( ) );
-            v_ptr = nullptr;
-            break;
-        }
-        case FRM_PO_3D:
-        {
-            assert(_x.size() == 7 && "Wrond state vector size. Should be 7 for 3D!");
-            p_ptr = std::make_shared<StateBlock>        (_x.head    <3> ( ) );
-            o_ptr = std::make_shared<StateQuaternion>   (_x.tail    <4> ( ) );
-            v_ptr = nullptr;
-            break;
-        }
-        case FRM_POV_3D:
-        {
-            assert(_x.size() == 10 && "Wrond state vector size. Should be 10 for 3D!");
-            p_ptr = std::make_shared<StateBlock>        (_x.head    <3> ( ) );
-            o_ptr = std::make_shared<StateQuaternion>   (_x.segment <4> (3) );
-            v_ptr = std::make_shared<StateBlock>        (_x.tail    <3> ( ) );
-            break;
-        }
-        default:
-            throw std::runtime_error("Unknown frame structure. Add appropriate frame structure to the switch statement.");
-
-    }
+    assert(_x.size() == 3 && "Wrong state vector size. Should be 3 for 2D!");
+    StateBlockPtr p_ptr ( std::make_shared<StateBlock>    (_x.head    <2> ( ) ) );
+    StateBlockPtr o_ptr ( std::make_shared<StateBlock>    (_x.tail    <1> ( ) ) );
+    StateBlockPtr v_ptr ( nullptr );
     return std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr);
+}
+FrameBasePtr FrameBase::create_PO_3D(const FrameKeyType & _tp,
+                                     const TimeStamp& _ts,
+                                     const Eigen::VectorXs& _x)
+{
+    assert(_x.size() == 7 && "Wrong state vector size. Should be 7 for 3D!");
+    StateBlockPtr p_ptr ( std::make_shared<StateBlock>      (_x.head    <3> ( ) ) );
+    StateBlockPtr q_ptr ( std::make_shared<StateQuaternion> (_x.tail    <4> ( ) ) );
+    StateBlockPtr v_ptr ( nullptr );
+    return std::make_shared<FrameBase>(_tp, _ts, p_ptr, q_ptr, v_ptr);
+}
+FrameBasePtr FrameBase::create_POV_3D(const FrameKeyType & _tp,
+                                     const TimeStamp& _ts,
+                                     const Eigen::VectorXs& _x)
+{
+    assert(_x.size() == 10 && "Wrond state vector size. Should be 10 for 3D!");
+    StateBlockPtr p_ptr ( std::make_shared<StateBlock>      (_x.head    <3> ( ) ) );
+    StateBlockPtr q_ptr ( std::make_shared<StateQuaternion> (_x.segment <4> (3) ) );
+    StateBlockPtr v_ptr ( std::make_shared<StateBlock>      (_x.tail    <3> ( ) ) );
+    return std::make_shared<FrameBase>(_tp, _ts, p_ptr, q_ptr, v_ptr);
 }
 
 } // namespace wolf
@@ -342,5 +332,7 @@ FrameBasePtr FrameBase::create(const FrameStructure _fs,
 #include "factory.h"
 namespace wolf
 {
-WOLF_REGISTER_FRAME("BASE", FrameBase)
+namespace{ const bool Frame_PO_2D_Registered  = FrameFactory::get().registerCreator("PO 2D",  FrameBase::create_PO_2D ); }
+namespace{ const bool Frame_PO_3D_Registered  = FrameFactory::get().registerCreator("PO 3D",  FrameBase::create_PO_3D ); }
+namespace{ const bool Frame_POV_3D_Registered = FrameFactory::get().registerCreator("POV 3D", FrameBase::create_POV_3D); }
 } // namespace wolf

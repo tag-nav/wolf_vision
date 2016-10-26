@@ -267,9 +267,9 @@ inline bool Factory<TypeBase, TypeInput...>::registerCreator(const std::string& 
 {
     bool reg = callbacks_.insert(typename CallbackMap::value_type(_type, createFn)).second;
     if (reg)
-        std::cout << std::setw(22) << std::left << getClass() << " : registered " << _type << std::endl;
+        std::cout << std::setw(22) << std::left << getClass() << " <--  registered  " << _type << std::endl;
     else
-        std::cout << std::setw(22) << std::left << getClass() << " : skipping " << _type << ": already registered." << std::endl;
+        std::cout << std::setw(22) << std::left << getClass() << " X--  skipping  " << _type << ": already registered." << std::endl;
 
     return reg;
 }
@@ -346,7 +346,7 @@ inline std::string LandmarkFactory::getClass()
 }
 
 // Frames
-typedef Factory<FrameBase, const FrameStructure, const FrameKeyType&, const TimeStamp&, const Eigen::VectorXs&> FrameFactory;
+typedef Factory<FrameBase, const FrameKeyType&, const TimeStamp&, const Eigen::VectorXs&> FrameFactory;
 template<>
 inline std::string FrameFactory::getClass()
 {

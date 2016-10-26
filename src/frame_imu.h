@@ -72,8 +72,7 @@ namespace wolf {
            **/
           void setStatus(StateStatus _st);
       public:
-          static FrameBasePtr create(const FrameStructure,
-                                     const FrameKeyType & _tp,
+          static FrameBasePtr create(const FrameKeyType & _tp,
                                      const TimeStamp& _ts,
                                      const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(16));
 };
