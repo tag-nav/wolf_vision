@@ -8,16 +8,17 @@
 ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
 
 
-# Map load and save test
-ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
-TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
+IF(Ceres_FOUND)
+    # test_processor_odom_3D
+    ADD_EXECUTABLE(test_processor_odom_3D test_processor_odom_3D.cpp)
+    TARGET_LINK_LIBRARIES(test_processor_odom_3D ${PROJECT_NAME})
 
-# test_processor_odom_3D
-ADD_EXECUTABLE(test_processor_odom_3D test_processor_odom_3D.cpp)
-TARGET_LINK_LIBRARIES(test_processor_odom_3D ${PROJECT_NAME})
+    ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
+    TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
+ENDIF(Ceres_FOUND)
 
-ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
-TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
+
+
 
 # Local parametrizations classes test
 ADD_EXECUTABLE(test_local_param test_local_param.cpp)
@@ -50,6 +51,10 @@ IF(YAMLCPP_FOUND)
     # SensorFactory classes test
     ADD_EXECUTABLE(test_wolf_factories test_wolf_factories.cpp)
     TARGET_LINK_LIBRARIES(test_wolf_factories ${PROJECT_NAME})
+
+    # Map load and save test
+    ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
+    TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
 ENDIF(YAMLCPP_FOUND)
 
 IF(Suitesparse_FOUND)
@@ -102,9 +107,16 @@ ENDIF(Suitesparse_FOUND)
 #TARGET_LINK_LIBRARIES(test_analytic_odom_constraint ${PROJECT_NAME})
 
 IF(OpenCV_FOUND)
-    # Testing many things for the 3D image odometry
-    ADD_EXECUTABLE(test_image test_image.cpp)
-    TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
+
+    IF(Ceres_FOUND)
+        # Testing many things for the 3D image odometry
+        ADD_EXECUTABLE(test_image test_image.cpp)
+        TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
+
+        # Processor Image Landmark test
+        ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
+        TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
+    ENDIF(Ceres_FOUND)
 
     # Testing opencv matching and fundamental matrix with ransac
     ADD_EXECUTABLE(test_opencv test_opencv.cpp)
@@ -114,9 +126,7 @@ IF(OpenCV_FOUND)
     ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
     TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
 
-    # Processor Image Landmark test
-    ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
-    TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
+
 
     # Constraint test
     ADD_EXECUTABLE(test_constraint_AHP test_constraint_AHP.cpp)
@@ -160,39 +170,39 @@ TARGET_LINK_LIBRARIES(test_processor_imu_jacobians ${PROJECT_NAME})
 #     TARGET_LINK_LIBRARIES(test_capture_laser_2D ${PROJECT_NAME})
 # #ENDIF (laser_scan_utils_FOUND)
 
-IF(faramotics_FOUND)
-    IF (laser_scan_utils_FOUND)
-        ADD_EXECUTABLE(test_ceres_2_lasers test_ceres_2_lasers.cpp)
-        TARGET_LINK_LIBRARIES(test_ceres_2_lasers
-                                ${pose_state_time_LIBRARIES}
-                                ${faramotics_LIBRARIES}
-                                ${PROJECT_NAME})
-        ADD_EXECUTABLE(test_ceres_2_lasers_polylines test_ceres_2_lasers_polylines.cpp)
-        TARGET_LINK_LIBRARIES(test_ceres_2_lasers_polylines
-                                ${pose_state_time_LIBRARIES}
-                                ${faramotics_LIBRARIES}
-                                ${PROJECT_NAME})
-        ADD_EXECUTABLE(test_2_lasers_offline test_2_lasers_offline.cpp)
-        TARGET_LINK_LIBRARIES(test_2_lasers_offline
-                                ${pose_state_time_LIBRARIES}
-                                ${faramotics_LIBRARIES}
-                                ${PROJECT_NAME})
-        ADD_EXECUTABLE(test_faramotics_simulation test_faramotics_simulation.cpp)
-        TARGET_LINK_LIBRARIES(test_faramotics_simulation
-                                ${pose_state_time_LIBRARIES}
-                                ${faramotics_LIBRARIES}
-                                ${PROJECT_NAME})
-#        ADD_EXECUTABLE(test_autodiff test_autodiff.cpp)
-#        TARGET_LINK_LIBRARIES(test_autodiff
-#                                ${pose_state_time_LIBRARIES}
-#                                ${faramotics_LIBRARIES}
-#                                ${PROJECT_NAME})
-#        IF(Suitesparse_FOUND)
-#            ADD_EXECUTABLE(test_iQR_wolf2 solver/test_iQR_wolf2.cpp)
-#            TARGET_LINK_LIBRARIES(test_iQR_wolf2
-#                                ${pose_state_time_LIBRARIES}
-#                                ${faramotics_LIBRARIES}
-#                                ${PROJECT_NAME})
-#        ENDIF(Suitesparse_FOUND)
-    ENDIF (laser_scan_utils_FOUND)
-ENDIF(faramotics_FOUND)
+# IF(faramotics_FOUND)
+#     IF (laser_scan_utils_FOUND)
+#         ADD_EXECUTABLE(test_ceres_2_lasers test_ceres_2_lasers.cpp)
+#         TARGET_LINK_LIBRARIES(test_ceres_2_lasers
+#                                 ${pose_state_time_LIBRARIES}
+#                                 ${faramotics_LIBRARIES}
+#                                 ${PROJECT_NAME})
+#         ADD_EXECUTABLE(test_ceres_2_lasers_polylines test_ceres_2_lasers_polylines.cpp)
+#         TARGET_LINK_LIBRARIES(test_ceres_2_lasers_polylines
+#                                 ${pose_state_time_LIBRARIES}
+#                                 ${faramotics_LIBRARIES}
+#                                 ${PROJECT_NAME})
+#         ADD_EXECUTABLE(test_2_lasers_offline test_2_lasers_offline.cpp)
+#         TARGET_LINK_LIBRARIES(test_2_lasers_offline
+#                                 ${pose_state_time_LIBRARIES}
+#                                 ${faramotics_LIBRARIES}
+#                                 ${PROJECT_NAME})
+#         ADD_EXECUTABLE(test_faramotics_simulation test_faramotics_simulation.cpp)
+#         TARGET_LINK_LIBRARIES(test_faramotics_simulation
+#                                 ${pose_state_time_LIBRARIES}
+#                                 ${faramotics_LIBRARIES}
+#                                 ${PROJECT_NAME})
+# #        ADD_EXECUTABLE(test_autodiff test_autodiff.cpp)
+# #        TARGET_LINK_LIBRARIES(test_autodiff
+# #                                ${pose_state_time_LIBRARIES}
+# #                                ${faramotics_LIBRARIES}
+# #                                ${PROJECT_NAME})
+# #        IF(Suitesparse_FOUND)
+# #            ADD_EXECUTABLE(test_iQR_wolf2 solver/test_iQR_wolf2.cpp)
+# #            TARGET_LINK_LIBRARIES(test_iQR_wolf2
+# #                                ${pose_state_time_LIBRARIES}
+# #                                ${faramotics_LIBRARIES}
+# #                                ${PROJECT_NAME})
+# #        ENDIF(Suitesparse_FOUND)
+# #     ENDIF (laser_scan_utils_FOUND)
+# # ENDIF(faramotics_FOUND)

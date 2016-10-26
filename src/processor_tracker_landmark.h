@@ -8,8 +8,10 @@
 #ifndef PROCESSOR_TRACKER_LANDMARK_H_
 #define PROCESSOR_TRACKER_LANDMARK_H_
 
+//wolf includes
 #include "processor_tracker.h"
 #include "capture_base.h"
+#include "landmark_match.h"
 
 namespace wolf
 {

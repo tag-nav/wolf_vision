@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>wolf</name>
+  <version>0.0.1</version>
+  <description>Windowed Localization Frames</description>
+
+  <maintainer email="jsola@iri.upc.edu">Joan Sola</maintainer>
+  <maintainer email="jvallve@iri.upc.edu">Joan Vallvé Navarro</maintainer>
+  <maintainer email="todo@todo.com">todo</maintainer>
+
+  <author>Joan Sola</author>
+  <author>Joan Vallvé Navarro</author>
+  <author>todo</author>
+
+  <license>todo</license>
+
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <build_depend>eigen</build_depend>
+
+  <!-- wolf does not REQUIRE the following, they are added here for the dependency tree -->
+  <build_depend>Ceres</build_depend>
+  <build_depend>laser_scan_utils</build_depend>
+  <build_depend>raw_gps_utils</build_depend>
+  <build_depend>OpenCV</build_depend>
+  <build_depend>YAMLCPP</build_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+
+</package>

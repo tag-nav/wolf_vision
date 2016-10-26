@@ -144,7 +144,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
 
                 incoming_point_ptr->setTrackId(feature_ptr->trackId());
 
-                _feature_matches[incoming_point_ptr] = FeatureMatch({feature_base_ptr, normalized_score});
+                _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_base_ptr, normalized_score}));
             }
             else
             {

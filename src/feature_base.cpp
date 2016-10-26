@@ -44,11 +44,9 @@ FeatureBase::~FeatureBase()
 
 void FeatureBase::remove()
 {
-    std::cout << "Remove         f" << id() << std::endl;
     if (!is_removing_)
     {
         is_removing_ = true;
-        std::cout << "Removing       f" << id() << std::endl;
         std::shared_ptr<FeatureBase> this_f = shared_from_this(); // keep this alive while removing it
         CaptureBasePtr C = capture_ptr_.lock();
         if (C)
@@ -65,7 +63,7 @@ void FeatureBase::remove()
         {
             constrained_by_list_.front()->remove(); // remove constrained
         }
-        std::cout << "Removed        f" << id() << std::endl;
+        std::cout << "Removed           f" << id() << std::endl;
     }
 }
 

@@ -61,7 +61,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         // Properties
         unsigned int id();
         void setId(unsigned int _id);
-        const LandmarkType getTypeId() const;
+        LandmarkType getTypeId() const;
 
         // Fix / unfix
         void setStatus(LandmarkStatus _st);
@@ -240,7 +240,7 @@ inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
     return descriptor_;
 }
 
-inline const LandmarkType LandmarkBase::getTypeId() const
+inline LandmarkType LandmarkBase::getTypeId() const
 {
     return type_id_;
 }
