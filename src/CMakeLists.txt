@@ -136,6 +136,7 @@ SET(HDRS
     feature_gps_fix.h
     feature_gps_pseudorange.h
     feature_imu.h
+    feature_match.h
     feature_fix.h
     feature_odom_2D.h
     feature_polyline_2D.h
@@ -145,6 +146,7 @@ SET(HDRS
     landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
+    landmark_match.h
     landmark_point_3d.h
     landmark_line_2D.h
     landmark_polyline_2D.h
@@ -155,6 +157,7 @@ SET(HDRS
     map_base.h
     motion_buffer.h
     node_base.h
+    pinholeTools.h
     problem.h
     processor_base.h
     processor_image_params.h
