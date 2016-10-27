@@ -31,7 +31,7 @@ int main()
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
 
-    shared_ptr<ProcessorTrackerFeatureDummy> processor_ptr_ = make_shared<ProcessorTrackerFeatureDummy>();
+    shared_ptr<ProcessorTrackerFeatureDummy> processor_ptr_ = make_shared<ProcessorTrackerFeatureDummy>(7, 4);
 
     wolf_problem_ptr_->addSensor(sensor_ptr_);
     sensor_ptr_->addProcessor(processor_ptr_);
