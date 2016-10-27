@@ -30,18 +30,11 @@ bool ProcessorBase::permittedKeyFrame()
 
 FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType _type)
 {
-    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+    std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
+
     // We need to create the new free Frame to hold what will become the last Capture
     FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
-
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
-
-    if (_type == KEY_FRAME)
-    {
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
-        // Keyframe callback in order to let the other processors to establish their constraints
-        getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), shared_from_this(), time_tolerance_);
-    }
 
     return new_frame_ptr;
 }
@@ -49,6 +42,8 @@ FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType 
 FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
+    std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
+
     FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
 
     new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
