@@ -131,7 +131,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             last_key_frm = nullptr;
         }
         std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << ": Last key frame " << last_key_frm << std::endl;
-        if (voteForKeyFrame() && permittedKeyFrame() && last_key_frm == nullptr )
+        if (voteForKeyFrame() && permittedKeyFrame() )//&& last_key_frm == nullptr ) // FIXME: This seems not to work!
         {
             std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
             // 2.a. We create a keyframe
