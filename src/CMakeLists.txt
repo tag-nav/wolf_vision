@@ -229,6 +229,7 @@ SET(SRCS
     processor_base.cpp
     processor_imu.cpp
     processor_imu_UnitTester.cpp
+    processor_motion.cpp
     processor_odom_2D.cpp
     processor_odom_3D.cpp
     processor_tracker.cpp
