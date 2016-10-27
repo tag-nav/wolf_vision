@@ -23,22 +23,7 @@ ProcessorTracker::ProcessorTracker(ProcessorType _tp, const std::string& _type, 
 
 ProcessorTracker::~ProcessorTracker()
 {
-    if (last_ptr_ != nullptr && last_ptr_->getFramePtr() == nullptr)
-        last_ptr_->remove();
-
-    if (incoming_ptr_ != nullptr && incoming_ptr_->getFramePtr() == nullptr)
-        incoming_ptr_->remove();
-
-    while (!new_features_last_.empty())
-    {
-        new_features_last_.front()->remove();
-        new_features_last_.pop_front();
-    }
-    while (!new_features_incoming_.empty())
-    {
-        new_features_incoming_.front()->remove();
-        new_features_incoming_.pop_front();
-    }
+    //
 }
 
 void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
