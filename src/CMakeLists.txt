@@ -8,6 +8,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
+IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  set(_WOLF_DEBUG true)
+  #list(APPEND WOLF_COMPILE_OPTIONS _WOLF_DEBUG)
+ENDIF()
+
 #find dependencies.
 
 FIND_PACKAGE(Eigen 3 REQUIRED)
@@ -65,8 +70,29 @@ ELSE (Suitesparse_INCLUDE_DIRS)
    MESSAGE("Suitesparse NOT FOUND: wolf_solver won't be built.")
 ENDIF (Suitesparse_INCLUDE_DIRS)
 
+# Define the directory where will be the configured config.h
+SET(WOLF_CONFIG_DIR ${PROJECT_BINARY_DIR}/conf/internal)
+
+# Create the specified output directory if it does not exist.
+IF(NOT EXISTS "${WOLF_CONFIG_DIR}")
+  message(STATUS "Creating config output directory: ${WOLF_CONFIG_DIR}")
+  file(MAKE_DIRECTORY "${WOLF_CONFIG_DIR}")
+ENDIF()
+IF(EXISTS "${WOLF_CONFIG_DIR}" AND NOT IS_DIRECTORY "${WOLF_CONFIG_DIR}")
+  message(FATAL_ERROR "Bug: Specified CONFIG_DIR: "
+    "${WOLF_CONFIG_DIR} exists, but is not a directory.")
+ENDIF()
+
+# Configure config.h
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/internal/config.h.in "${WOLF_CONFIG_DIR}/config.h")
+
+
 
 #include directories
+
+# Include config.h directory at first.
+include_directories("${PROJECT_BINARY_DIR}/conf")
+
 INCLUDE_DIRECTORIES(.)
 
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
