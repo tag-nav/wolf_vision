@@ -36,7 +36,8 @@ int main(int argc, char** argv)
     if (argc == 1)
     {
 //        filename = "/home/jtarraso/Videos/House_interior.mp4";
-        filename = "/home/jtarraso/Vídeos/gray1.mp4";
+//        filename = "/home/jtarraso/Vídeos/gray1.mp4";
+        filename = "/home/jtarraso/test_video/output2.mpg";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
@@ -80,7 +81,7 @@ int main(int argc, char** argv)
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
 
     // CAMERA SENSOR
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
     SensorCamera::Ptr camera_ptr = std::static_pointer_cast<SensorCamera>(sensor_ptr);
     camera_ptr->setImgWidth(img_width);
     camera_ptr->setImgHeight(img_height);

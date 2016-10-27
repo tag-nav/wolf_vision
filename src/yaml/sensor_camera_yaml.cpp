@@ -49,9 +49,11 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
             intrinsics_cam->distortion = distortion.head<2>();
         else
         {
-            intrinsics_cam->distortion.resize(3);
+            unsigned int dist_size = distortion.size() - 2;
+            unsigned int dist_tail_size = dist_size - 2;
+            intrinsics_cam->distortion.resize(dist_size);
             intrinsics_cam->distortion.head<2>() = distortion.head<2>();
-            intrinsics_cam->distortion(3) = distortion(4);
+            intrinsics_cam->distortion.tail(dist_tail_size) = distortion.tail(dist_tail_size);
         }
         intrinsics_cam->width = width;
         intrinsics_cam->height = height;

@@ -49,12 +49,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         }
 
         template<typename T>
-        Eigen::VectorXs convert(const Eigen::Matrix<T,2,1>& v)
-        {
-            return Eigen::VectorXs(0);
-        }
-
-        template<typename T>
         void expectation(const T* const _current_frame_p, const T* const _current_frame_o, const T* const _anchor_frame_p,
                                     const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _expectation) const
         {
@@ -88,40 +82,40 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
             Eigen::Matrix<T,4,1> landmark_hmg_c1;
             landmark_hmg_c1 = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
-            std::cout << "\nlandmark_hmg_c1:\n" << landmark_hmg_c1(0) << "\t" << landmark_hmg_c1(1) << "\t" << landmark_hmg_c1(2) << "\t" << landmark_hmg_c1(3) << std::endl;
+//            std::cout << "\nlandmark_hmg_c1:\n" << landmark_hmg_c1(0) << "\t" << landmark_hmg_c1(1) << "\t" << landmark_hmg_c1(2) << "\t" << landmark_hmg_c1(3) << std::endl;
 
 
             Eigen::Matrix<T,3,1> v_normalized;
             v_normalized = landmark_hmg_c1.head(3);// /landmark_hmg_c1(3);
 //            T inverse_dist_c1 = landmark_hmg_c1(3); // inverse distance
 
-            std::cout << "\nv_normalized:\n" << v_normalized(0) << "\t" << v_normalized(1) << "\t"
-                      << v_normalized(2) << "\t" << landmark_hmg_c1(3) << std::endl;
+//            std::cout << "\nv_normalized:\n" << v_normalized(0) << "\t" << v_normalized(1) << "\t"
+//                      << v_normalized(2) << "\t" << landmark_hmg_c1(3) << std::endl;
 
             Eigen::Matrix<T,2,1> v;
             v = v_normalized.head(2)/v_normalized(2);
-            std::cout << "\nv:\n" << v(0) << "\t" << v(1) << std::endl;
+//            std::cout << "\nv:\n" << v(0) << "\t" << v(1) << std::endl;
 
             Eigen::Matrix<T,2,1> distored_point;
             Eigen::Matrix<T,Eigen::Dynamic,1> distortion_vector = distortion_.cast<T>();
-            std::cout << "\ndistortion_vector:\n" << distortion_vector(0) << "\t" << distortion_vector(1) << std::endl;
+//            std::cout << "\ndistortion_vector:\n" << distortion_vector(0) << "\t" << distortion_vector(1) << std::endl;
 
             Eigen::Matrix<T,2,1> distored_point_pinhole;
             distored_point_pinhole = pinhole::distortPoint(distortion_vector, v);
 
-            T r2 = v.squaredNorm(); // this is the norm squared: r2 = ||u||^2
-
-            T s = (T)1.0;
-            T r2i = (T)1.0;
-            for (int i = 0; i < distortion_vector.cols() ; i++) { //   here we are doing:
-                r2i = r2i * r2;                                   //   r2i = r^(2*(i+1))
-                s = s + (distortion_vector(i) * r2i);             //   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
-            }
-            if (s < (T)0.6) s = (T)1.0;
-            distored_point(0) = s * v(0);
-            distored_point(1) = s * v(1);
-            std::cout << "\ndistored_point:\n" << distored_point(0) << "\t" << distored_point(1) << std::endl;
-            std::cout << "\ndistored_point_pinhole:\n" << distored_point_pinhole(0) << "\t" << distored_point_pinhole(1) << std::endl;
+//            T r2 = v.squaredNorm(); // this is the norm squared: r2 = ||u||^2
+//
+//            T s = (T)1.0;
+//            T r2i = (T)1.0;
+//            for (int i = 0; i < distortion_vector.size() ; i++) { //   here we are doing:
+//                r2i = r2i * r2;                                   //   r2i = r^(2*(i+1))
+//                s = s + (distortion_vector(i) * r2i);             //   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
+//            }
+//            if (s < (T)0.6) s = (T)1.0;
+//            distored_point(0) = s * v(0);
+//            distored_point(1) = s * v(1);
+//            std::cout << "\ndistored_point:\n" << distored_point(0) << "\t" << distored_point(1) << std::endl;
+//            std::cout << "\ndistored_point_pinhole:\n" << distored_point_pinhole(0) << "\t" << distored_point_pinhole(1) << std::endl;
 
 //            std::cout << "K: " << K << std::endl;
 
@@ -139,7 +133,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                          const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _residuals) const
         {
 
-            Eigen::Matrix<T, Eigen::Dynamic, 1> u ;
+            Eigen::Matrix<T, Eigen::Dynamic, 1> u(2) ;
             expectation(_current_frame_p, _current_frame_o,  _anchor_frame_p,
                           _anchor_frame_o,  _lmk_hmg, u.data()) ;
             // ==================================================
@@ -147,15 +141,11 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             //    std::cout << "\nCONSTRAINT INFO" << std::endl;
 
             Eigen::Matrix<T, 2, 1> feature_pos = getMeasurement().cast<T>();
-            std::cout << __FILE__ <<":"<< __FUNCTION__ <<"():"<< __LINE__ << std::endl;
 
             Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap(_residuals);
-            std::cout << __FILE__ <<":"<< __FUNCTION__ <<"():"<< __LINE__ << std::endl;
 //            std::cout << "SquareRootInformation: " << getMeasurementSquareRootInformation() << std::endl;
             residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
 //            std::cout << "\nRESIDUALS:\n" << residualsmap[0] << "\t" << residualsmap[1] << std::endl;
-
-            std::cout << __FILE__ <<":"<< __FUNCTION__ <<"():"<< __LINE__ << std::endl;
 
             return true;
         }

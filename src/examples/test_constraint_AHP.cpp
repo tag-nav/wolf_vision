@@ -16,8 +16,8 @@ int main()
 
     //=====================================================
     // Environment variable for configuration files
-    GET_WOLF_ROOT
-//    std::string wolf_root("/home/jtarraso/dev/wolf");
+//    GET_WOLF_ROOT
+    std::string wolf_root("/home/jtarraso/dev/wolf");
     std::cout << wolf_root << std::endl;
     //=====================================================
 
@@ -39,7 +39,7 @@ int main()
     const Eigen::VectorXs extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_root + "/src/examples/camera_params_ueye.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_root + "/src/examples/camera_params_ueye_radial_dist.yaml");
     std::shared_ptr<SensorCamera> camera_ptr_ = std::static_pointer_cast<SensorCamera>(sensor_ptr);
 
     // PROCESSOR
@@ -74,7 +74,7 @@ int main()
 
 
     // create the feature
-    cv::KeyPoint kp; kp.pt = {10.2,20.4};
+    cv::KeyPoint kp; kp.pt = {10,20};
     cv::Mat desc;
 
     std::shared_ptr<FeaturePointImage> feat_point_image_ptr = std::make_shared<FeaturePointImage>(kp, desc, Eigen::Matrix2s::Identity());
