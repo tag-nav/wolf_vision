@@ -65,6 +65,8 @@ struct ProcessorParamsTracker : public ProcessorParamsBase
  */
 class ProcessorTracker : public ProcessorBase
 {
+    public:
+        typedef std::shared_ptr<ProcessorTracker> Ptr;
     protected:
         CaptureBasePtr origin_ptr_;   // TODO check pointer type  ///< Pointer to the origin of the tracker.
         CaptureBasePtr last_ptr_;     // TODO check pointer type  ///< Pointer to the last tracked capture.
