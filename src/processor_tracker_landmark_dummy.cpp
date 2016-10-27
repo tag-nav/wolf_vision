@@ -57,6 +57,9 @@ unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(const LandmarkBaseList
 
 bool ProcessorTrackerLandmarkDummy::voteForKeyFrame()
 {
+    std::cout << "N features: " << incoming_ptr_->getFeatureList().size() << std::endl;
+    bool vote = incoming_ptr_->getFeatureList().size() < 4;
+    std::cout << (vote ? "Vote ": "Not vote ") << "for KF" << std::endl;
     return incoming_ptr_->getFeatureList().size() < 4;
 }
 
