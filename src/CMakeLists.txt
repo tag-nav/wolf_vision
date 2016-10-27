@@ -16,6 +16,13 @@ ENDIF()
 
 option(BUILD_EXAMPLES "Build examples" ON)
 
+# Does this has any other interest
+# but for the examples ?
+#IF(BUILD_EXAMPLES)
+  set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
+#ENDIF(BUILD_EXAMPLES)
+
+
 #find dependencies.
 
 FIND_PACKAGE(Eigen 3 REQUIRED)
