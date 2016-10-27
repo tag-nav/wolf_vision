@@ -183,16 +183,12 @@ int main(int argc, char** argv)
         //        prc_image->process(capture_image_ptr);
 
         // Preferred method with factory objects:
-//<<<<<<< HEAD
         image_ptr = make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
 //        image_ptr->process();
 
-//=======
-//        image_ptr = new CaptureImage(t, camera_ptr, frame[f % buffer_size]);
         //image_ptr->process();
         camera_ptr->addCapture(image_ptr);
         //cv::imshow("test",frame[f % buffer_size]);
-//>>>>>>> capture_passby_sensor
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
         wolf_problem_->print();
