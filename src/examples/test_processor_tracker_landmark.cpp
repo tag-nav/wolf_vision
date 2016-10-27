@@ -73,7 +73,7 @@ int main()
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
-    for (auto i = 0; i < 10; i++)
+    for (auto i = 0; i < 5; i++)
     {
         processor_ptr_->process(std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr_));
     }
@@ -82,7 +82,7 @@ int main()
 //
 //    wolf_problem_ptr_->check();
 
-    wolf_problem_ptr_->print();
+    wolf_problem_ptr_->print(2);
 
 
     return 0;

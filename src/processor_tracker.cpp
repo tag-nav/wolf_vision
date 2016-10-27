@@ -71,7 +71,10 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             closest_key_frm->setKey();
         }
         else
-            makeFrame(last_ptr_, KEY_FRAME);
+        {
+            //makeFrame(last_ptr_, KEY_FRAME);
+            makeFrame(last_ptr_, getProblem()->getStateAtTimeStamp(last_ptr_->getTimeStamp()), KEY_FRAME);
+        }
 
         // Detect new Features, initialize Landmarks, create Constraints, ...
         processNew(max_new_features_);
