@@ -39,6 +39,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
 
 bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
 {
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << ":" << "N features: " << incoming_ptr_->getFeatureList().size() << std::endl;
     return incoming_ptr_->getFeatureList().size() < 5;
 }
 

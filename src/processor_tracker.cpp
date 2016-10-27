@@ -121,35 +121,36 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         // 2. Then we see if we want and we are allowed to create a KeyFrame
         FrameBasePtr last_key_frm = last_ptr_->getFramePtr();
         if (!last_key_frm || !last_key_frm->isKey())
+        {
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
             last_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
-        if (last_key_frm && abs(last_key_frm->getTimeStamp() - last_ptr_->getTimeStamp()) > time_tolerance_)
-            last_key_frm = nullptr;
-
-        if (!((voteForKeyFrame() && permittedKeyFrame()) || last_key_frm ) )
-        {
-            // We did not create a KeyFrame:
-
-            // advance the derived tracker
-            advance();
-
-            // Advance this
-            last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-            last_ptr_->remove();
-            incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
-            last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
-            incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
         }
-        else
+        if (last_key_frm && abs(last_key_frm->getTimeStamp() - last_ptr_->getTimeStamp()) > time_tolerance_)
         {
-            // 2.b. Detect new Features, initialize Landmarks, create Constraints, ...
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+            last_key_frm = nullptr;
+        }
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << ": Last key frame " << last_key_frm << std::endl;
+        if (voteForKeyFrame() && permittedKeyFrame() && last_key_frm == nullptr )
+        {
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+            // 2.a. We create a keyframe
+
+            // Detect new Features, initialize Landmarks, create Constraints, ...
             processNew(max_new_features_);
 
             // Create a new non-key Frame in the Trajectory with the incoming Capture
             FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
             if (closest_key_frm)
+            {
+                std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
                 closest_key_frm->addCapture(incoming_ptr_);
+            }
             else
+            {
+                std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
                 makeFrame(incoming_ptr_);
+            }
 
             // Make the last Capture's Frame a KeyFrame so that it gets into the solver
             setKeyFrame(last_ptr_);
@@ -165,6 +166,28 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             last_ptr_ = incoming_ptr_;
             incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
         }
+        else
+        {
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+            // 2.b. We did not create a KeyFrame:
+
+            // advance the derived tracker
+            advance();
+
+            // Advance this
+            last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
+
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+            last_ptr_->remove();
+
+            incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
+
+            std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+            last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
+
+            incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+        }
+
 
     }
     postProcess();

@@ -26,10 +26,10 @@ CaptureBase::~CaptureBase()
 
 void CaptureBase::remove()
 {
-    std::cout << "Remove          C" << id() << std::endl;
+//    std::cout << "Remove          C" << id() << std::endl;
     if (!is_removing_)
     {
-        std::cout << "Removing        C" << id() << std::endl;
+//        std::cout << "Removing        C" << id() << std::endl;
         is_removing_ = true;
         CaptureBasePtr this_C = shared_from_this();  // keep this alive while removing it
 
