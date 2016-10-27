@@ -31,8 +31,6 @@ class HardwareBase : public NodeBase, public std::enable_shared_from_this<Hardwa
 
 // IMPLEMENTATION
 
-#include "sensor_base.h"
-
 namespace wolf {
 
 inline SensorBaseList& HardwareBase::getSensorList()
