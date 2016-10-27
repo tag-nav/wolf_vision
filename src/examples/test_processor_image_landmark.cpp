@@ -221,10 +221,10 @@ int main(int argc, char** argv)
         std::cout << summary.BriefReport() << std::endl;
 
 
-        std::cout << "Last key frame pose: "
-                << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
-        std::cout << "Last key frame orientation: "
-                << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
+//        std::cout << "Last key frame pose: "
+//                << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
+//        std::cout << "Last key frame orientation: "
+//                << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
 
         cv::waitKey(20);
 
