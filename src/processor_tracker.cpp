@@ -134,18 +134,16 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             // Detect new Features, initialize Landmarks, create Constraints, ...
             processNew(max_new_features_);
 
-            // Create a new non-key Frame in the Trajectory with the incoming Capture
+            // Check if a keyframe is close enough so that we can just attach ourselves to it
             FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
-            if (closest_key_frm)
-            {
+            if (closest_key_frm && abs(incoming_ptr_->getTimeStamp() - closest_key_frm->getTimeStamp()) < time_tolerance_)
+                // Attach incoming capture to the keyframe found
                 closest_key_frm->addCapture(incoming_ptr_);
-            }
             else
-            {
+                // Create a new non-key Frame in the Trajectory with the incoming Capture
                 makeFrame(incoming_ptr_);
-            }
 
-            // Make the last Capture's Frame a KeyFrame so that it gets into the solver
+            // Make the last Capture's Frame a KeyFrame
             setKeyFrame(last_ptr_);
 
             // Establish constraints between last and origin
@@ -166,15 +164,13 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             // advance the derived tracker
             advance();
 
-            // Advance this
+            // Attach incoming and remove last
             last_ptr_       ->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
-
             last_ptr_       ->remove();
-
             incoming_ptr_   ->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
 
+            // Advance this
             last_ptr_       = incoming_ptr_; // Incoming Capture takes the place of last Capture
-
             incoming_ptr_   = nullptr; // This line is not really needed, but it makes things clearer.
         }
 
