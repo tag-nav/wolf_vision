@@ -39,8 +39,7 @@ int main()
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
     TimeStamp t(0);
-    Scalar dt = 1.0;
-
+    Scalar dt = 0.5;
     for (auto i = 0; i < 10; i++)
     {
         processor_ptr_->process(make_shared<CaptureVoid>(t, sensor_ptr_));
