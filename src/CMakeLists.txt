@@ -13,6 +13,9 @@ IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
   #list(APPEND WOLF_COMPILE_OPTIONS _WOLF_DEBUG)
 ENDIF()
 
+
+option(BUILD_EXAMPLES "Build examples" ON)
+
 #find dependencies.
 
 FIND_PACKAGE(Eigen 3 REQUIRED)
@@ -436,6 +439,8 @@ INSTALL(FILES "${CMAKE_BINARY_DIR}/wolfConfig.cmake" DESTINATION "lib/cmake/${PR
 
 export(PACKAGE ${PROJECT_NAME})
 
-#Build examples & tests
-MESSAGE("Building examples and tests.")
-ADD_SUBDIRECTORY(examples)
+IF(BUILD_EXAMPLES)
+  #Build examples & tests
+  MESSAGE("Building examples and tests.")
+  ADD_SUBDIRECTORY(examples)
+ENDIF(BUILD_EXAMPLES)
