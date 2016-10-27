@@ -9,7 +9,7 @@ namespace wolf {
 
 FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr, StateQuaternionPtr _q_ptr,
                    StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
-        FrameBase(_ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr)//,
+        FrameBase(_ts, _p_ptr, _q_ptr, _v_ptr)//,
 {
     setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
     setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
@@ -18,7 +18,7 @@ FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_
 
 FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr,
                    StateQuaternionPtr _q_ptr, StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
-        FrameBase(_tp, _ts, _p_ptr, (StateBlockPtr)((_q_ptr)), _v_ptr)
+        FrameBase(_tp, _ts, _p_ptr, _q_ptr, _v_ptr)
 {
     setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
     setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
@@ -103,7 +103,8 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
                               (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
                               (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
                               (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
-                              (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize())));
+                              (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize()))
+                              && "Wrong state size! Should be 16 for an IMU with biases!");
 
       unsigned int index = 0;
       if (getPPtr()!=nullptr)
@@ -206,4 +207,29 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
           }
       }
   }
+
+
+
+FrameBasePtr FrameIMU::create(const FrameKeyType & _tp,
+                              const TimeStamp& _ts,
+                              const Eigen::VectorXs& _x)
+{
+
+    assert(_x.size() == 16 && "Wrong state vector size. Should be 16 for an IMU with biases!");
+
+    StateBlockPtr       p_ptr = std::make_shared<StateBlock>      (_x.segment<3>( 0  ));
+    StateQuaternionPtr  q_ptr = std::make_shared<StateQuaternion> (_x.segment<4>( 3  ));
+    StateBlockPtr       v_ptr = std::make_shared<StateBlock>      (_x.segment<3>( 7  ));
+    StateBlockPtr       a_ptr = std::make_shared<StateBlock>      (_x.segment<3>( 10 ));
+    StateBlockPtr       w_ptr = std::make_shared<StateBlock>      (_x.segment<3>( 13 ));
+
+    return std::make_shared<FrameIMU>(_tp, _ts, p_ptr, v_ptr, q_ptr, a_ptr, w_ptr);
 }
+
+} // namespace wolf
+
+#include "factory.h"
+namespace wolf
+{
+WOLF_REGISTER_FRAME("IMU", FrameIMU)
+} // namespace wolf

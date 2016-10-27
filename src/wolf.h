@@ -378,42 +378,34 @@ typedef std::shared_ptr<StateQuaternion> StateQuaternionPtr;
 // - - Local Parametrization
 typedef std::shared_ptr<LocalParametrizationBase> LocalParametrizationBasePtr;
 
-// - - Match Feature - Landmark
-struct LandmarkMatch
-{
-        LandmarkBasePtr landmark_ptr_;
-        Scalar normalized_score_;
-        LandmarkMatch() :
-                landmark_ptr_(nullptr), normalized_score_(0)
-        {
-
-        }
-        LandmarkMatch(LandmarkBasePtr _landmark_ptr, Scalar _normalized_score) :
-                landmark_ptr_(_landmark_ptr), normalized_score_(_normalized_score)
-        {
-
-        }
-};
-
-// Match map Feature - Landmark
-typedef std::shared_ptr<LandmarkMatch> LandmarkMatchPtr;
-typedef std::map<FeatureBasePtr, LandmarkMatchPtr> LandmarkMatchMap;
-
-
-// Feature-Feature correspondence
-struct FeatureMatch
-{
-        FeatureBasePtr feature_ptr_;
-        Scalar normalized_score_;
-};
-
-typedef std::map<FeatureBasePtr, FeatureMatch> FeatureMatchMap;
+// // Feature-Feature correspondence
+// struct FeatureMatch
+// {
+//         FeatureBasePtr feature_ptr_;
+//         Scalar normalized_score_;
+// };
+// 
+// typedef std::map<FeatureBasePtr, FeatureMatch> FeatureMatchMap;
 
 
 
 inline const Eigen::Vector3s gravity(void) {
     return Eigen::Vector3s(0,0,-9.8);
 }
+
+//===================================================
+// Some macros
+
+//=====================================================
+// Environment variable for configuration files
+// this sets the local variable wolf_root from the environment variable WOLF_ROOT
+#define GET_WOLF_ROOT \
+char const* tmp = std::getenv( "WOLF_ROOT" ); \
+if ( tmp == nullptr ) \
+    throw std::runtime_error("WOLF_ROOT environment not loaded."); \
+std::string wolf_root( tmp ); \
+std::cout << "Wolf root: " << wolf_root << " set at variable 'wolf_root'." << std::endl;
+//=====================================================
 
 
 } // namespace wolf

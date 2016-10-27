@@ -4,6 +4,7 @@
 #include "trajectory_base.h"
 #include "capture_base.h"
 #include "state_block.h"
+#include "state_quaternion.h"
 
 namespace wolf {
 
@@ -295,4 +296,49 @@ void FrameBase::setStatus(StateStatus _st)
     }
 }
 
+FrameBasePtr FrameBase::create_PO_2D(const FrameKeyType & _tp,
+                                     const TimeStamp& _ts,
+                                     const Eigen::VectorXs& _x)
+{
+    assert(_x.size() == 3 && "Wrong state vector size. Should be 3 for 2D!");
+    StateBlockPtr p_ptr ( std::make_shared<StateBlock>    (_x.head    <2> ( ) ) );
+    StateBlockPtr o_ptr ( std::make_shared<StateBlock>    (_x.tail    <1> ( ) ) );
+    StateBlockPtr v_ptr ( nullptr );
+    FrameBasePtr f ( std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr) );
+    f->setType("PO 2D");
+    return f;
+}
+FrameBasePtr FrameBase::create_PO_3D(const FrameKeyType & _tp,
+                                     const TimeStamp& _ts,
+                                     const Eigen::VectorXs& _x)
+{
+    assert(_x.size() == 7 && "Wrong state vector size. Should be 7 for 3D!");
+    StateBlockPtr p_ptr ( std::make_shared<StateBlock>      (_x.head    <3> ( ) ) );
+    StateBlockPtr o_ptr ( std::make_shared<StateQuaternion> (_x.tail    <4> ( ) ) );
+    StateBlockPtr v_ptr ( nullptr );
+    FrameBasePtr f ( std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr) );
+    f->setType("PO 3D");
+    return f;
+}
+FrameBasePtr FrameBase::create_POV_3D(const FrameKeyType & _tp,
+                                     const TimeStamp& _ts,
+                                     const Eigen::VectorXs& _x)
+{
+    assert(_x.size() == 10 && "Wrong state vector size. Should be 10 for 3D!");
+    StateBlockPtr p_ptr ( std::make_shared<StateBlock>      (_x.head    <3> ( ) ) );
+    StateBlockPtr o_ptr ( std::make_shared<StateQuaternion> (_x.segment <4> (3) ) );
+    StateBlockPtr v_ptr ( std::make_shared<StateBlock>      (_x.tail    <3> ( ) ) );
+    FrameBasePtr f ( std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr) );
+    f->setType("POV 3D");
+    return f;
+}
+
+} // namespace wolf
+
+#include "factory.h"
+namespace wolf
+{
+namespace{ const bool Frame_PO_2D_Registered  = FrameFactory::get().registerCreator("PO 2D",  FrameBase::create_PO_2D ); }
+namespace{ const bool Frame_PO_3D_Registered  = FrameFactory::get().registerCreator("PO 3D",  FrameBase::create_PO_3D ); }
+namespace{ const bool Frame_POV_3D_Registered = FrameFactory::get().registerCreator("POV 3D", FrameBase::create_POV_3D); }
 } // namespace wolf

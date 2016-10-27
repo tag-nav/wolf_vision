@@ -100,13 +100,13 @@ class ProcessorMotion : public ProcessorBase
         /** \brief Fills a reference to the state integrated so far
          * \param _x the returned state vector
          */
-        const void getCurrentState(Eigen::VectorXs& _x);
+        void getCurrentState(Eigen::VectorXs& _x);
 
         /** \brief Fills a reference to the state integrated so far and its stamp
          * \param _x the returned state vector
          * \param _ts the returned stamp
          */
-        const void getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts);
+        void getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts);
 
         /** \brief Gets a constant reference to the state integrated so far
          * \return the state vector
@@ -178,7 +178,7 @@ class ProcessorMotion : public ProcessorBase
 
         //        void reset(CaptureMotion2* _capture_ptr);
 
-        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type);
+//        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type = NON_KEY_FRAME);
 
         MotionBuffer& getBuffer();
 
@@ -658,14 +658,14 @@ inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer
     last_ptr_->getBuffer().split(_t_split, _oldest_part);
 }
 
-inline FrameBasePtr ProcessorMotion::makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type)
-{
-    // We need to create the new free Frame to hold what will become the last Capture
-    FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
-
-    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
-    return new_frame_ptr;
-}
+//FrameBasePtr ProcessorMotion::makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type)
+//{
+//    // We need to create the new free Frame to hold what will become the last Capture
+//    FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
+//
+//    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
+//    return new_frame_ptr;
+//}
 
 inline void ProcessorMotion::resetDerived()
 {
@@ -700,13 +700,13 @@ inline const Eigen::VectorXs& ProcessorMotion::getCurrentState(TimeStamp& _ts)
     return x_;
 }
 
-inline const void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
+inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 {
     Scalar Dt = getBuffer().get().back().ts_ - origin_ptr_->getTimeStamp();
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().get().back().delta_integr_, Dt, _x);
 }
 
-inline const void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts)
+inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts)
 {
     getCurrentState(_x);
     _ts = getBuffer().get().back().ts_;

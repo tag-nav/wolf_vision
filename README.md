@@ -35,6 +35,8 @@ Wolf can be used within ROS for an easy integration. We provide examples of ROS 
 Dependencies
 ------------
 
+! Please notice that we are detailing two installation procedures below. If you are familiar with `ROS` and more especially the [`catkin_tools`](https://catkin-tools.readthedocs.io/en/latest/index.html) package then you may jump directly to the 'Using the `catkin_tools` package' section.
+
 ### Eigen
 
 [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
@@ -101,7 +103,7 @@ libglog.so will be installed at **/usr/local/lib**
         $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..
         $ make
         $ sudo make install 
-    
+
 libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/include/ceres**
 
 ### Yaml-cpp. Wolf uses YAML files for configuration and for saving and loading workspaces.
@@ -109,17 +111,17 @@ libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/i
 **(1)** Obtain:
 
 - Ubuntu:
-  
+
   ```
   $ sudo apt-get install libyaml-cpp-dev
   ```
 - Mac:
-  
+
   ```
   $ brew install yaml-cpp
   ```
 We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
-    
+
 ### Laser Scan Utils (Optional. Install only if you want to use IRI's laser scan utils)
 
 **(1)** Download:
@@ -136,7 +138,7 @@ Or, in case you don't have permissions:
     $ cmake ..
     $ make
     $ sudo make install
-    
+
 ### Raw GPS Utils (Optional. Install only if you want to use IRI's raw gps utils)
 
 **(1)** Download:
@@ -149,7 +151,7 @@ Or, in case you don't have permissions:
     $ cmake ..
     $ make
     $ sudo make install
-    
+
 Download and build
 ------------------
 
@@ -169,7 +171,7 @@ Download and build
 
 **Set the WOLF_ROOT environment variable**
 
-We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at run-time. 
+We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at run-time.
 For example, if we want to use YAML files for configuring sensors, `YAML::LoadFile(filename)` needs an absolute path to a `filename`. This name is platform-specific, and many times user-specific.
 
 Usually, these files are out of the WOLF project. But for testing purposes, some of these files exist within the WOLF directories.
@@ -181,12 +183,12 @@ Proceed as follows:
   ```      
   export WOLF_ROOT="/abs/path/to/wolf"
   ```
-  * Then you need to source the file to get effect, 
+  * Then you need to source the file to get effect,
   ```      
   source ~/.bash_profile    // or ~/.bashrc, of course
   ```
 2. If you are using Eclipse or other __GUIs__ and you want this environment variable to be accessed by them, edit the file `/etc/environment` (you need to use `sudo`) and add this line:
-  
+
   ```
   WOLF_ROOT="/abs/path/to/wolf"
   ```   
@@ -210,6 +212,79 @@ Alternatively, you can set up the environment variables in your GUIs only. Follo
 ### Wolf ROS Node
 
 `$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
+
+
+
+Using the `catkin_tools` package
+--------------------------------
+
+1.  Install `catkin_tools` :
+
+    [`installation webpage.`](https://catkin-tools.readthedocs.io/en/latest/installing.html)
+
+    .  Installing on Ubuntu with `apt-get`
+
+      ```terminal
+        $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
+        $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+        $ sudo apt-get update
+        $ sudo apt-get install python-catkin-tools
+      ```
+
+    .  Installing with [`pip`](https://pip.pypa.io/en/stable/installing/)
+
+      ```terminal
+        $ sudo pip install -U catkin_tools
+      ```
+
+2.  Create a `catkin workspace` :
+
+      ```terminal
+      $ cd ~/my_workspace_directory/
+      $ create mkdir -p wolf_ws/src
+      $ cd wolf_ws/src
+      ```
+
+3.  Download `Ceres` :
+
+    In the previously created directory `~/my_workspace_directory/wolf_ws/src/` clone `Ceres` & `wolf`.
+
+     ```terminal
+        $ git clone https://github.com/artivis/ceres_solver.git
+     ```
+
+4.  Download `wolf` :
+
+      ```terminal
+        $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf.git
+      ```
+
+    At this point you might need to switch to the `catkin_build` branch of the wolf project.
+
+      ```terminal
+        $ cd wolf
+        $ git checkout catkin_build
+      ```
+
+    (optional) Download `wolf_ros` :
+
+      ```terminal
+        $ git clone https://github.com/IRI-MobileRobotics/Wolf_ros.git
+        ```
+
+5.  Let's Compile !
+
+    The command below can be launch from any sub-directory in `~/my_workspace_directory/wolf_ws/`.
+
+      ```terminal
+      $ catkin build
+      ```
+
+6.  Run tests:
+
+      ```terminal
+      $ catkin run_tests
+      ```
 
 Inspiring Links
 ---------------
