@@ -89,9 +89,9 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         reset();
 
         // Reset this
-        origin_ptr_ = last_ptr_;
-        last_ptr_ = incoming_ptr_;
-        incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+        origin_ptr_     = last_ptr_;
+        last_ptr_       = incoming_ptr_;
+        incoming_ptr_   = nullptr; // This line is not really needed, but it makes things clearer.
 
     }
     // OTHER TIMES
@@ -138,9 +138,9 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             reset();
 
             // Reset this
-            origin_ptr_ = last_ptr_;
-            last_ptr_ = incoming_ptr_;
-            incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+            origin_ptr_     = last_ptr_;
+            last_ptr_       = incoming_ptr_;
+            incoming_ptr_   = nullptr; // This line is not really needed, but it makes things clearer.
         }
         else
         {
