@@ -20,18 +20,24 @@ ProcessorMotion::~ProcessorMotion()
 
 void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 {
+    WOLF_DEBUG_HERE
+
     incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
+
     preProcess();
     integrate();
+
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         // key_capture
         CaptureMotion::Ptr key_capture_ptr = last_ptr_;
         FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
+
         // Set the frame as key
         key_frame_ptr->setState(getCurrentState());
         key_frame_ptr->setTimeStamp(getBuffer().get().back().ts_);
         key_frame_ptr->setKey();
+
         // create motion feature and add it to the capture
         FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
                 FEATURE_MOTION,
@@ -41,16 +47,19 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                         key_capture_ptr->getBuffer().get().back().delta_integr_cov_ :
                         Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
         key_capture_ptr->addFeature(key_feature_ptr);
+
         // create motion constraint and link it to parent feature and other frame (which is origin)
         auto ctr = createConstraint(key_feature_ptr, origin_ptr_->getFramePtr());
         key_feature_ptr->addConstraint(ctr);
         ctr->setFeaturePtr(key_feature_ptr);
         ctr->setFrameOtherPtr(origin_ptr_->getFramePtr());
         origin_ptr_->getFramePtr()->addConstrainedBy(ctr);
+
         // new last capture
         last_ptr_ = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(), getSensorPtr(),
                                                     Eigen::VectorXs::Zero(data_size_),
                                                     Eigen::MatrixXs::Zero(data_size_, data_size_), key_frame_ptr);
+
         // create a new last frame
 //        makeFrame(last_ptr_, key_frame_ptr->getState(), NON_KEY_FRAME);
         FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, key_frame_ptr->getState(), last_ptr_->getTimeStamp());
@@ -63,9 +72,11 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                                              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)}));
         delta_integrated_ = deltaZero();
         delta_integrated_cov_.setZero();
+
         // reset derived things
         resetDerived();
         getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), time_tolerance_);
+
         //// debug cout
         //Eigen::VectorXs interpolated_state(3);
         //xPlusDelta(origin_ptr_->getFramePtr()->getState(), key_capture_ptr->getBufferPtr()->get().back().delta_integr_, interpolated_state);
@@ -103,6 +114,8 @@ CaptureMotion::Ptr ProcessorMotion::findCaptureContainingTimeStamp(const TimeSta
 
 void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 {
+    WOLF_DEBUG_HERE
+
     assert(_origin_frame->getTrajectoryPtr() != nullptr
             && "ProcessorMotion::setOrigin: origin frame must be in the trajectory.");
     assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
@@ -130,6 +143,8 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 
 bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol)
 {
+    WOLF_DEBUG_HERE
+
     assert(_keyframe_ptr->getTrajectoryPtr() != nullptr
             && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
     //std::cout << "ProcessorMotion::keyFrameCallback: ts = " << _keyframe_ptr->getTimeStamp().getSeconds() << "." << _keyframe_ptr->getTimeStamp().getNanoSeconds() << std::endl;
@@ -209,6 +224,8 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
 
 void ProcessorMotion::integrate()
 {
+    WOLF_DEBUG_HERE
+
     // Set dt
     updateDt();
     // get data and convert it to delta, and obtain also the delta covariance
@@ -225,6 +242,8 @@ void ProcessorMotion::integrate()
 
 void ProcessorMotion::reintegrate(CaptureMotion::Ptr _capture_ptr)
 {
+    WOLF_DEBUG_HERE
+
     // start with empty motion
     _capture_ptr->getBuffer().get().push_front(motionZero(_capture_ptr->getOriginFramePtr()->getTimeStamp()));
     auto motion_it = _capture_ptr->getBuffer().get().begin();

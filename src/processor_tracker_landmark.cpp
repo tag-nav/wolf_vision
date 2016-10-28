@@ -30,6 +30,7 @@ ProcessorTrackerLandmark::~ProcessorTrackerLandmark()
 
 unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
 {
+    WOLF_DEBUG_HERE
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
     //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
@@ -83,6 +84,8 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
 
 void ProcessorTrackerLandmark::createNewLandmarks(LandmarkBaseList& _new_landmarks)
 {
+    WOLF_DEBUG_HERE
+
     for (auto new_feature_ptr : new_features_last_)
     {
         // create new landmark
@@ -98,6 +101,8 @@ void ProcessorTrackerLandmark::createNewLandmarks(LandmarkBaseList& _new_landmar
 
 unsigned int ProcessorTrackerLandmark::processKnown()
 {
+    WOLF_DEBUG_HERE
+
     //std::cout << "ProcessorTrackerLandmark::processKnown:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
     //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
@@ -126,6 +131,8 @@ unsigned int ProcessorTrackerLandmark::processKnown()
 
 void ProcessorTrackerLandmark::establishConstraints()
 {
+    WOLF_DEBUG_HERE
+
     //std::cout << "\tfeatures:" << last_ptr_->getFeatureList().size() << std::endl;
     //std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
     for (auto last_feature : last_ptr_->getFeatureList())

@@ -111,6 +111,8 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                                                           FeatureBaseList& _feature_list_out,
                                                           LandmarkMatchMap& _feature_landmark_correspondences)
 {
+    WOLF_DEBUG_HERE
+
     unsigned int roi_width = params_.matcher.roi_width;
     unsigned int roi_heigth = params_.matcher.roi_height;
     unsigned int roi_x;
@@ -195,12 +197,16 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
 bool ProcessorImageLandmark::voteForKeyFrame()
 {
+    WOLF_DEBUG_HERE
+
     return false;
 //    return landmarks_tracked_ < params_.algorithm.min_features_for_keyframe;
 }
 
 unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_features)
 {
+    WOLF_DEBUG_HERE
+
     cv::Rect roi;
     std::vector<cv::KeyPoint> new_keypoints;
     cv::Mat new_descriptors;
@@ -247,6 +253,8 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 
 LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_ptr)
 {
+    WOLF_DEBUG_HERE
+
     std::shared_ptr<FeaturePointImage> feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
     FrameBasePtr anchor_frame = getLastPtr()->getFramePtr();
 
@@ -276,6 +284,8 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
 
 ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
+    WOLF_DEBUG_HERE
+
     if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFramePtr())
     {
         return std::shared_ptr<ConstraintBase>();

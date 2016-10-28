@@ -375,6 +375,8 @@ inline void ProcessorMotion::resetDerived()
 
 inline bool ProcessorMotion::voteForKeyFrame()
 {
+    WOLF_DEBUG_HERE
+
     return false;
 }
 

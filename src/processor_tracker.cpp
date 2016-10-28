@@ -28,6 +28,8 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 {
+    WOLF_DEBUG_HERE
+
     using std::abs;
 
 //    std::cout << "-----ProcessorTracker::process():" << std::endl;
@@ -81,7 +83,11 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         // Create a new non-key Frame in the Trajectory with the incoming Capture
         FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
         if (closest_key_frm && abs(closest_key_frm->getTimeStamp() - incoming_ptr_->getTimeStamp()) <= time_tolerance_)
+        {
+            // Just append the Capture to the existing keyframe
             closest_key_frm->addCapture(incoming_ptr_);
+            std::cout << "Appended to frame" << closest_key_frm->id() << std::endl;
+      }
         else
         {
             // Create a frame to hold what will become the last Capture
@@ -204,7 +210,9 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             FrameBasePtr key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
             if (key_frm)
             {
-                key_frm->addCapture(incoming_ptr_);
+                WOLF_DEBUG_HERE
+                // Append incoming to existing key-frame
+                key_frm->addCapture(incoming_ptr_); // TODO I think it should be last_ptr_ not incoming!
                 std::cout << "Adhered to existing KF" << key_frm->id() << std::endl;
             }
             else
@@ -242,6 +250,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
 bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
+    WOLF_DEBUG_HERE
+
     assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame always");
     Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
 
@@ -274,6 +284,8 @@ bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar
 
 void ProcessorTracker::setKeyFrame(CaptureBasePtr _capture_ptr)
 {
+    WOLF_DEBUG_HERE
+
     assert(_capture_ptr != nullptr && _capture_ptr->getFramePtr() != nullptr && "ProcessorTracker::setKeyFrame: null capture or capture without frame");
     if (!_capture_ptr->getFramePtr()->isKey())
     {
