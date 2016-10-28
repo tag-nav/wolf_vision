@@ -106,14 +106,14 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 #define FIX
 #ifndef FIX
         // 2. Then we see if we want and we are allowed to create a KeyFrame
-        FrameBasePtr last_key_frm = last_ptr_->getFramePtr();
-        if (!last_key_frm || !last_key_frm->isKey()) // Last frame is missing, or is not key
-            last_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
+        FrameBasePtr closest_key_frm_to_last = last_ptr_->getFramePtr();
+        if (!closest_key_frm_to_last || !closest_key_frm_to_last->isKey()) // Last frame is missing, or is not key
+            closest_key_frm_to_last = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
 
-        if (last_key_frm && abs(last_key_frm->getTimeStamp() - last_ptr_->getTimeStamp()) > time_tolerance_)
-            last_key_frm = nullptr;
+        if (closest_key_frm_to_last && abs(closest_key_frm_to_last->getTimeStamp() - last_ptr_->getTimeStamp()) > time_tolerance_)
+            closest_key_frm_to_last = nullptr;
 
-        if (voteForKeyFrame() && permittedKeyFrame() && last_key_frm == nullptr ) // FIXME: This seems not to work!
+        if (voteForKeyFrame() && permittedKeyFrame() && closest_key_frm_to_last == nullptr ) // FIXME: This seems not to work!
         {
             // 2.a. We create a keyframe
 
@@ -167,14 +167,14 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         //   - Problem allows us to make keyframe
         //   - There is no existing KF very close to our Time Stamp <--- NOT SURE OF THIS
 
-        FrameBasePtr last_key_frm = last_ptr_->getFramePtr();
-        if ( ! ( last_key_frm && last_key_frm->isKey() ) )
-            last_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
+        FrameBasePtr closest_key_frm_to_last = last_ptr_->getFramePtr(); // start with the same last's frame
+        if ( ! ( closest_key_frm_to_last && closest_key_frm_to_last->isKey() ) ) // last F is not KF
+            closest_key_frm_to_last = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
 
-        if (last_key_frm && abs(last_key_frm->getTimeStamp() - last_ptr_->getTimeStamp()) > time_tolerance_)
-            last_key_frm = nullptr;
+        if (closest_key_frm_to_last && abs(closest_key_frm_to_last->getTimeStamp() - last_ptr_->getTimeStamp()) > time_tolerance_) // closest KF is not close enough
+            closest_key_frm_to_last = nullptr;
 
-        if ( !( (voteForKeyFrame() && permittedKeyFrame() ) || last_key_frm ) )
+        if ( !( (voteForKeyFrame() && permittedKeyFrame() ) || closest_key_frm_to_last ) )
         {
             // 2.a. We did not create a KeyFrame:
 
