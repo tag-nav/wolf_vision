@@ -303,7 +303,7 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
         (*constraint_ptr).expectation(current_frame_p.data(), current_frame_o.data(),
                 anchor_frame_p.data(), anchor_frame_o.data(),
                 landmark_.data(),expectation_.data());
-        std::cout << "====================expectation: " << expectation_.transpose() << std::endl;
+//        std::cout << "====================expectation: " << expectation_.transpose() << std::endl;
 //        std::cout << __FILE__ <<":"<< __FUNCTION__ <<"():"<< __LINE__ << std::endl;
         return constraint_ptr;
     }
@@ -475,7 +475,7 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
             point.x = point2D[0];
             point.y = point2D[1];
 
-            std::cout << "landmark number [" << landmark_ptr->id() << std::setprecision(3) << "] in: " << point << std::endl;
+//            std::cout << "landmark number [" << landmark_ptr->id() << std::setprecision(3) << "] in: " << point << std::endl;
 
 
             cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);

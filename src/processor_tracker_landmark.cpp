@@ -30,7 +30,6 @@ ProcessorTrackerLandmark::~ProcessorTrackerLandmark()
 
 unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
 {
-    std::cout << "ProcessorTrackerLandmark::processNew:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
     //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;

@@ -30,7 +30,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 {
     using std::abs;
 
-    std::cout << "-----ProcessorTracker::process():" << std::endl;
+//    std::cout << "-----ProcessorTracker::process():" << std::endl;
 
     incoming_ptr_ = _incoming_ptr;
 
