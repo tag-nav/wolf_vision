@@ -444,6 +444,9 @@ INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
 configure_file("${CMAKE_SOURCE_DIR}/cmake_modules/wolfConfig.cmake"
                "${CMAKE_BINARY_DIR}/wolfConfig.cmake" @ONLY)
 
+INSTALL(FILES "${WOLF_CONFIG_DIR}/config.h"
+DESTINATION include/iri-algorithms/wolf/internal)
+
 INSTALL(FILES "${CMAKE_BINARY_DIR}/wolfConfig.cmake" DESTINATION "lib/cmake/${PROJECT_NAME}")
 
 export(PACKAGE ${PROJECT_NAME})
