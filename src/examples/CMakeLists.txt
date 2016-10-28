@@ -7,6 +7,7 @@
 # Complete Wolf tree skeleton with smart pointers
 ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
 
+ADD_EXECUTABLE(test_wolf_root test_wolf_root.cpp)
 
 IF(Ceres_FOUND)
     # test_processor_odom_3D

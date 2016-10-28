@@ -18,6 +18,8 @@
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/Sparse>
 
+#include "internal/config.h"
+
 namespace wolf {
 
 /**
