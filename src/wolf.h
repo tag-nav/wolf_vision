@@ -410,7 +410,7 @@ std::cout << "Wolf root: " << wolf_root << " set at variable 'wolf_root'." << st
 
 //=====================================================
 #define WOLF_DEBUG_HERE \
-    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+    std::cout << __FILE__ << " : " << __FUNCTION__ << "() : " << __LINE__ << std::endl;
 //=====================================================
 
 } // namespace wolf

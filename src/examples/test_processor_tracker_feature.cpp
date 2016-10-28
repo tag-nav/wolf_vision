@@ -31,18 +31,22 @@ int main()
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
 
-    shared_ptr<ProcessorTrackerFeatureDummy> processor_ptr_ = make_shared<ProcessorTrackerFeatureDummy>();
+    shared_ptr<ProcessorTrackerFeatureDummy> processor_ptr_ = make_shared<ProcessorTrackerFeatureDummy>(7, 4);
 
     wolf_problem_ptr_->addSensor(sensor_ptr_);
     sensor_ptr_->addProcessor(processor_ptr_);
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
+    TimeStamp t(0);
+    Scalar dt = 0.5;
     for (auto i = 0; i < 10; i++)
-        processor_ptr_->process(make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr_));
+    {
+        processor_ptr_->process(make_shared<CaptureVoid>(t, sensor_ptr_));
+        t += dt;
+    }
 
-    wolf_problem_ptr_->check();
-    wolf_problem_ptr_->print();
+    wolf_problem_ptr_->print(2);
 
     return 0;
 }

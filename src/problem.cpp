@@ -6,6 +6,7 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 #include "processor_motion.h"
+#include "processor_tracker.h"
 #include "sensor_base.h"
 #include "sensor_gps.h"
 #include "capture_fix.h"
@@ -565,7 +566,36 @@ void Problem::print(int level)
         std::cout << "  S" << S->id() << std::endl;
         for (auto p : S->getProcessorList() )
         {
-            std::cout << "    p" << p->id() << std::endl;
+            if (p->isMotion())
+            {
+                std::cout << "    pm" << p->id() << std::endl;
+                ProcessorMotion::Ptr pm = std::static_pointer_cast<ProcessorMotion>(p);
+                if (pm->getOriginPtr())
+                    std::cout << "      o: C" << pm->getOriginPtr()->id() << std::endl;
+                if (pm->getLastPtr())
+                    std::cout << "      l: C" << pm->getLastPtr()->id() << std::endl;
+                if (pm->getIncomingPtr())
+                    std::cout << "      i: C" << pm->getIncomingPtr()->id() << std::endl;
+            }
+            else
+            {
+                try
+                {
+                    std::cout << "    pt" << p->id() << std::endl;
+                    ProcessorTracker::Ptr pt = std::static_pointer_cast<ProcessorTracker>(p);
+                    if (pt->getOriginPtr())
+                        std::cout << "      o: C" << pt->getOriginPtr()->id() << std::endl;
+                    if (pt->getLastPtr())
+                        std::cout << "      l: C" << pt->getLastPtr()->id() << std::endl;
+                    if (pt->getIncomingPtr())
+                        std::cout << "      i: C" << pt->getIncomingPtr()->id() << std::endl;
+                }
+                catch (std::runtime_error& e)
+                {
+                    std::cout << "Unknown processor type!" << std::endl;
+                }
+
+            }
         }
     }
     std::cout << "T" << std::endl;
