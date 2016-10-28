@@ -34,6 +34,7 @@ int main()
         - jac_SO3_right_inv
         - jac_SO3_left
         - jac_SO3_left_inv
+        - quaternion composition
      */
      wolf::Scalar scale = 0;
 
@@ -270,4 +271,25 @@ int main()
         
         scale = scale*0.1;
     }
+
+    /**********************************************************************************************/
+    ///Quaternion composition
+    std::cout<< "\n\n######################################### Quaternion composition ################################################\n" << std::endl;
+
+    Eigen::Quaternions q0, q1;
+    q0.setIdentity();
+    Eigen::Vector3s v0, v1;
+    v0 << 30.0*deg_to_rad, 5.0*deg_to_rad, 10.0*deg_to_rad;
+
+    q1 = q0 * v2q(v0); //compose on top of unit quaternion
+
+    //analyze data
+    Eigen::Vector4s vec_q0, vec_q1;
+    vec_q0 << q0.w(), q0.x(), q0.y(), q0.z();
+    vec_q1 << q1.w(), q1.x(), q1.y(), q1.z();
+
+    v1 = q2v(q1);
+
+    std::cout << "\n Initial quaternion : " << vec_q0.transpose() << "\t rotated quaternion : " << vec_q1.transpose() << std::endl;
+    std::cout << "applied rotation : " << v0.transpose() << "\t resulting rotation vector : " << v1.transpose() << std::endl; 
 }
