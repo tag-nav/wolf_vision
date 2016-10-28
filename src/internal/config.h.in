@@ -29,6 +29,8 @@
 
 #cmakedefine _WOLF_DEBUG
 
+#cmakedefine _WOLF_TRACE
+
 #define _WOLF_ROOT_DIR "${_WOLF_ROOT_DIR}"
 
 #endif /* WOLF_INTERNAL_CONFIG_H_ */
