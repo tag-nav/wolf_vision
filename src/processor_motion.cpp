@@ -52,7 +52,10 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                                                     Eigen::VectorXs::Zero(data_size_),
                                                     Eigen::MatrixXs::Zero(data_size_, data_size_), key_frame_ptr);
         // create a new last frame
-        makeFrame(last_ptr_, key_frame_ptr->getState(), NON_KEY_FRAME);
+//        makeFrame(last_ptr_, key_frame_ptr->getState(), NON_KEY_FRAME);
+        FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, key_frame_ptr->getState(), last_ptr_->getTimeStamp());
+        new_frame_ptr->addCapture(last_ptr_); // Add Capture to the new Frame
+
         // reset processor origin
         origin_ptr_ = key_capture_ptr;
         getBuffer().get().push_back(Motion( {key_frame_ptr->getTimeStamp(), deltaZero(), deltaZero(),

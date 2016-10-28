@@ -83,7 +83,12 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         if (closest_key_frm && abs(closest_key_frm->getTimeStamp() - incoming_ptr_->getTimeStamp()) <= time_tolerance_)
             closest_key_frm->addCapture(incoming_ptr_);
         else
-            makeFrame(incoming_ptr_);
+        {
+            // Create a frame to hold what will become the last Capture
+            FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+            new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+            std::cout << "Made frame" << new_frame_ptr->id() << std::endl;
+        }
 
         // Reset the derived Tracker
         reset();
@@ -204,10 +209,14 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             }
             else
             {
-                key_frm = makeFrame(incoming_ptr_);
-                std::cout << "Adhered to new created KF" << key_frm->id() << std::endl;
-                // Make the last Capture's Frame a KeyFrame so that it gets into the solver
+                WOLF_DEBUG_HERE
+                // Make a non-key-frame to hold incoming
+                FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+                new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+
+                // Make the last Capture's Frame a KeyFrame
                 setKeyFrame(last_ptr_);
+                std::cout << "Adhered to new created KF" << key_frm->id() << std::endl;
             }
 
 
