@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 
     // SENSOR
     // one-liner API
-    SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_root + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
     shared_ptr<SensorCamera> camera_ptr = static_pointer_cast<SensorCamera>(sensor_ptr);
     camera_ptr->setImgWidth(img_width);
     camera_ptr->setImgHeight(img_height);
