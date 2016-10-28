@@ -112,7 +112,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             last_key_frm = nullptr;
 
 
-        if (voteForKeyFrame() && permittedKeyFrame() )//&& last_key_frm == nullptr ) // FIXME: This seems not to work!
+        if (voteForKeyFrame() && permittedKeyFrame() && last_key_frm == nullptr ) // FIXME: This seems not to work!
         {
             // 2.a. We create a keyframe
 
