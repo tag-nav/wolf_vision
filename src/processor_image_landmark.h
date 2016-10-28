@@ -73,7 +73,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         std::list<float> list_response_;
 
     public:
-        ProcessorImageLandmark(ProcessorParamsImage _params);
+        ProcessorImageLandmark(const ProcessorParamsImage& _params);
         virtual ~ProcessorImageLandmark();
 
         virtual void setup(SensorCamera::Ptr _camera_ptr);

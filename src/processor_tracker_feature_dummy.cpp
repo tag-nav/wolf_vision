@@ -39,15 +39,20 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
 
 bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureList().size() < 5;
+    std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
+    std::cout << "N features: " << incoming_ptr_->getFeatureList().size() << std::endl;
+    bool vote = incoming_ptr_->getFeatureList().size() < min_feat_for_keyframe_;
+    std::cout << (vote ? "Vote ": "Not vote ") << "for KF" << std::endl;
+
+    return incoming_ptr_->getFeatureList().size() < min_feat_for_keyframe_;
 }
 
 unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features)
 {
-    std::cout << "detecting new features..." << std::endl;
+    std::cout << "Detecting " << _max_features << " new features..." << std::endl;
 
-    // detecting 5 new features
-    for (unsigned int i = 1; i <= 5; i++)
+    // detecting new features
+    for (unsigned int i = 1; i <= _max_features; i++)
     {
         n_feature_++;
         new_features_last_.push_back(

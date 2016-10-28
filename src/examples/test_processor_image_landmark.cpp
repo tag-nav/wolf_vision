@@ -200,7 +200,7 @@ int main(int argc, char** argv)
         sen_odo_ptr->addCapture(cap_odo);
 //        cap_odo->process();
 
-        wolf_problem_ptr_->print();
+//        wolf_problem_ptr_->print();
 
 
 
@@ -221,10 +221,10 @@ int main(int argc, char** argv)
         std::cout << summary.BriefReport() << std::endl;
 
 
-        std::cout << "Last key frame pose: "
-                << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
-        std::cout << "Last key frame orientation: "
-                << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
+//        std::cout << "Last key frame pose: "
+//                << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
+//        std::cout << "Last key frame orientation: "
+//                << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
 
         cv::waitKey(20);
 
@@ -234,6 +234,7 @@ int main(int argc, char** argv)
         capture >> frame[f % buffer_size];
     }
 
+    wolf_problem_ptr_->print();
     wolf_problem_ptr_.reset();
 
     return 0;
