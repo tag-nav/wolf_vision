@@ -35,6 +35,11 @@ YAML::Node LandmarkAHP::saveToYaml() const
     return node;
 }
 
+Eigen::Vector3s LandmarkAHP::getPoint3D() const
+{
+    Eigen::Map<const Eigen::Vector4s> hmg_point(getPPtr()->getVector().data());
+    return hmg_point.head<3>()/hmg_point(3);
+}
 
 wolf::LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
 {
