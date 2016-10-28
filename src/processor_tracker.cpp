@@ -196,14 +196,20 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             processNew(max_new_features_);
 
             // Create a new non-key Frame in the Trajectory with the incoming Capture
-            FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
-            if (closest_key_frm)
-                closest_key_frm->addCapture(incoming_ptr_);
+            FrameBasePtr key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
+            if (key_frm)
+            {
+                key_frm->addCapture(incoming_ptr_);
+                std::cout << "Adhered to existing KF" << key_frm->id() << std::endl;
+            }
             else
-                makeFrame(incoming_ptr_);
+            {
+                key_frm = makeFrame(incoming_ptr_);
+                std::cout << "Adhered to new created KF" << key_frm->id() << std::endl;
+                // Make the last Capture's Frame a KeyFrame so that it gets into the solver
+                setKeyFrame(last_ptr_);
+            }
 
-            // Make the last Capture's Frame a KeyFrame so that it gets into the solver
-            setKeyFrame(last_ptr_);
 
             // Establish constraints between last and origin
             establishConstraints();

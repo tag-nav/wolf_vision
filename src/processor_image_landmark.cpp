@@ -121,7 +121,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     unsigned int lmk_nbr = 0;
     for (auto landmark_in_ptr : _landmark_list_in)
     {
-        std::cout << "\nLandmark number [" << lmk_nbr << "] in ";
+//        std::cout << "Landmark number [" << lmk_nbr << "] in " << std::endl;
 
         /* project */
         std::shared_ptr<LandmarkAHP> landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
@@ -187,7 +187,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
         lmk_nbr++;
     }
-    std::cout << "\n\n\tNumber of Features tracked: " << _feature_list_out.size() << std::endl;
+    std::cout << "\tNumber of Features tracked: " << _feature_list_out.size() << std::endl;
     landmarks_tracked_ = _feature_list_out.size();
     return _feature_list_out.size();
 }
