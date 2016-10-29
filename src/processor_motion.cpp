@@ -146,9 +146,21 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
     resetDerived();
 }
 
-bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol)
+bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
     WOLF_DEBUG_HERE
+
+    Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
+    std::cout << "  Time tol this  " << time_tolerance_ << std::endl;
+    std::cout << "  Time tol other " << _time_tol_other << std::endl;
+    std::cout << "  Time tol eff   " << time_tol << std::endl;
+
+    std::cout << "  Time stamp input F " << _keyframe_ptr->getTimeStamp().get() << std::endl;
+    std::cout << "  Time stamp orig  F " << getOriginPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
+    std::cout << "  Time stamp orig  C " << getOriginPtr()->getTimeStamp().get() << std::endl;
+    std::cout << "  Time stamp last  F " << getLastPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
+    std::cout << "  Time stamp last  C " << getLastPtr()->getTimeStamp().get() << std::endl;
+
 
     assert(_keyframe_ptr->getTrajectoryPtr() != nullptr
             && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");

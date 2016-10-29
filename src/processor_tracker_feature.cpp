@@ -21,6 +21,8 @@ ProcessorTrackerFeature::~ProcessorTrackerFeature()
 
 unsigned int ProcessorTrackerFeature::processKnown()
 {
+    WOLF_DEBUG_HERE
+
 //    std::cout << "ProcessorTrackerFeature::processKnown()" << std::endl;
 
     assert(incoming_ptr_->getFeatureList().size() == 0
@@ -71,6 +73,8 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
      * At the end, all new Features are appended to the lists of known Features in
      * the last and incoming Captures.
      */
+    WOLF_DEBUG_HERE
+
 
     // Populate the last Capture with new Features. The result is in new_features_last_.
     unsigned int n = detectNewFeatures(_max_new_features);

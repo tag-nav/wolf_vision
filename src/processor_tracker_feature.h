@@ -172,6 +172,8 @@ namespace wolf {
 
 inline void ProcessorTrackerFeature::establishConstraints()
 {
+    WOLF_DEBUG_HERE
+
     for (auto match : matches_origin_from_last_)
     {
         auto ctr = createConstraint(match.first, match.second->feature_ptr_);
@@ -182,6 +184,8 @@ inline void ProcessorTrackerFeature::establishConstraints()
 
 inline void ProcessorTrackerFeature::advance()
 {
+    WOLF_DEBUG_HERE
+
     //    std::cout << "ProcessorTrackerFeature::advance()" << std::endl;
 
     // Compose correspondences to get origin_from_incoming
@@ -202,6 +206,8 @@ inline void ProcessorTrackerFeature::advance()
 
 inline void ProcessorTrackerFeature::reset()
 {
+    WOLF_DEBUG_HERE
+
     //    std::cout << "ProcessorTrackerFeature::reset()" << std::endl;
 
     // We also reset here the list of correspondences, which passes from last--incoming to origin--last.
