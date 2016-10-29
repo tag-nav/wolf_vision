@@ -143,7 +143,6 @@ void ProcessorTrackerLandmark::establishConstraints()
         if (ctr_ptr != nullptr) // constraint links
         {
             last_feature->addConstraint(ctr_ptr);
-            ctr_ptr->setLandmarkOtherPtr(lmk);
             lmk->addConstrainedBy(ctr_ptr);
         }
     }

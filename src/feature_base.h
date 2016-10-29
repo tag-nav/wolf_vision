@@ -101,6 +101,7 @@ namespace wolf{
 
 inline void FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
+    _ctr_ptr->setFeatureOtherPtr( shared_from_this() );
     constrained_by_list_.push_back(_ctr_ptr);
 }
 

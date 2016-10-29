@@ -161,6 +161,7 @@ inline void LandmarkBase::unfix()
 
 inline void LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
+    _ctr_ptr->setLandmarkOtherPtr( shared_from_this() );
     constrained_by_list_.push_back(_ctr_ptr);
 }
 

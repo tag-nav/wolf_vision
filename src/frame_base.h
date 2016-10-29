@@ -309,6 +309,7 @@ inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
 
 inline void FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
+    _ctr_ptr->setFrameOtherPtr( shared_from_this() );
     constrained_by_list_.push_back(_ctr_ptr);
 }
 
