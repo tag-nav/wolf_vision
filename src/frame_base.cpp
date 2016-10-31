@@ -87,8 +87,7 @@ void FrameBase::remove()
         }
 
         // Remove Frame State Blocks
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << std::endl;
-
+        WOLF_DEBUG_HERE
         removeStateBlocks();
 
         std::cout << "Removed       F" << id() << std::endl;

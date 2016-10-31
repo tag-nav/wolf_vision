@@ -309,12 +309,10 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
         Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
         Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
 
-//        std::cout << __FILE__ <<":"<< __FUNCTION__ <<"():"<< __LINE__ << std::endl;
         (*constraint_ptr).expectation(current_frame_p.data(), current_frame_o.data(),
                 anchor_frame_p.data(), anchor_frame_o.data(),
                 landmark_.data(),expectation_.data());
 //        std::cout << "====================expectation: " << expectation_.transpose() << std::endl;
-//        std::cout << __FILE__ <<":"<< __FUNCTION__ <<"():"<< __LINE__ << std::endl;
         return constraint_ptr;
     }
 }
