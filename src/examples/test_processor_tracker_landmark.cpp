@@ -81,7 +81,7 @@ int main()
         t += dt;
     }
 
-    wolf_problem_ptr_->print();
+    wolf_problem_ptr_->print(2);
 
 
     return 0;
