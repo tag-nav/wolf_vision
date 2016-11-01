@@ -259,16 +259,31 @@ bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar
 
     assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame always");
 
+    //======================
+    // Start Debug info
     Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
     std::cout << "  Time tol this  " << time_tolerance_ << std::endl;
     std::cout << "  Time tol other " << _time_tol_other << std::endl;
     std::cout << "  Time tol eff   " << time_tol << std::endl;
 
+    if (_keyframe_ptr == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
+
     std::cout << "  Time stamp input F " << _keyframe_ptr->getTimeStamp().get() << std::endl;
-    std::cout << "  Time stamp orig  F " << getOriginPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
-    std::cout << "  Time stamp orig  C " << getOriginPtr()->getTimeStamp().get() << std::endl;
-    std::cout << "  Time stamp last  F " << getLastPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
-    std::cout << "  Time stamp last  C " << getLastPtr()->getTimeStamp().get() << std::endl;
+    if (getOriginPtr()){
+        if (getOriginPtr() == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
+        if (getOriginPtr()->getFramePtr() == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
+        std::cout << "  Time stamp orig  F " << getOriginPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
+        std::cout << "  Time stamp orig  C " << getOriginPtr()->getTimeStamp().get() << std::endl;
+    }
+    if (getLastPtr())
+    {
+        if (getLastPtr() == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
+        if (getLastPtr()->getFramePtr() == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
+        std::cout << "  Time stamp last  F " << getLastPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
+        std::cout << "  Time stamp last  C " << getLastPtr()->getTimeStamp().get() << std::endl;
+    }
+    // End Debug info
+    //======================
 
     // Nothing to do if:
     //   - there is no last

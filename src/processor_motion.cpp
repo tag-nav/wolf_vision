@@ -32,6 +32,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         // key_capture
         CaptureMotion::Ptr key_capture_ptr = last_ptr_;
         FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
+        if (key_frame_ptr == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
 
         // Set the frame as key
         key_frame_ptr->setState(getCurrentState());
