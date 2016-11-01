@@ -201,7 +201,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
             // Create a new non-key Frame in the Trajectory with the incoming Capture
             FrameBasePtr key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
-            if (key_frm)
+            if ( abs(key_frm->getTimeStamp() - incoming_ptr_->getTimeStamp() ) < time_tolerance_)
             {
                 WOLF_DEBUG_HERE
                 // Append incoming to existing key-frame
