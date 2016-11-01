@@ -170,21 +170,15 @@ class ProcessorMotion : public ProcessorBase
 
         virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol);
 
-        // Helper functions:
-    public:
-        // TODO change to protected
-
-        void splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part);
-
-        //        void reset(CaptureMotion2* _capture_ptr);
-
-//        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type = NON_KEY_FRAME);
-
         MotionBuffer& getBuffer();
-
         const MotionBuffer& getBuffer() const;
 
         virtual bool isMotion();
+
+        // Helper functions:
+    protected:
+
+        void splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part);
 
     protected:
         void updateDt();
