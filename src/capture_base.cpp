@@ -15,13 +15,13 @@ CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorB
         sensor_o_ptr_(sensor_ptr_.lock()->getOPtr())
 {
     //
-    std::cout << "constructed    +C" << id() << std::endl;
+//    std::cout << "constructed    +C" << id() << std::endl;
 }
 
 
 CaptureBase::~CaptureBase()
 {
-    std::cout << "destructed     -C" << id() << std::endl;
+//    std::cout << "destructed     -C" << id() << std::endl;
 }
 
 void CaptureBase::remove()
@@ -48,7 +48,7 @@ void CaptureBase::remove()
             feature_list_.front()->remove(); // remove downstream
         }
 
-        std::cout << "Removed         C" << id() << std::endl;
+//        std::cout << "Removed         C" << id() << std::endl;
     }
 }
 

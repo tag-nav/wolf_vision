@@ -15,7 +15,7 @@ ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, Si
 
 ProcessorMotion::~ProcessorMotion()
 {
-    std::cout << "destructed     -p-Mot" << id() << std::endl;
+//    std::cout << "destructed     -p-Mot" << id() << std::endl;
 }
 
 void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)

@@ -16,7 +16,7 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, unsigned int
     measurement_(_dim_measurement)
 {
     //
-    std::cout << "constructed      +f" << id() << std::endl;
+//    std::cout << "constructed      +f" << id() << std::endl;
 }
 
 FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
@@ -34,12 +34,12 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen:
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
 
-    std::cout << "constructed      +f" << id() << std::endl;
+//    std::cout << "constructed      +f" << id() << std::endl;
 }
 
 FeatureBase::~FeatureBase()
 {
-    std::cout << "destructed       -f" << id() << std::endl;
+//    std::cout << "destructed       -f" << id() << std::endl;
 }
 
 void FeatureBase::remove()
@@ -63,7 +63,7 @@ void FeatureBase::remove()
         {
             constrained_by_list_.front()->remove(); // remove constrained
         }
-        std::cout << "Removed           f" << id() << std::endl;
+//        std::cout << "Removed           f" << id() << std::endl;
     }
 }
 

@@ -38,7 +38,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
 
   FrameIMU::~FrameIMU()
   {
-      std::cout << "destructed   -F-IMU" << id() << std::endl;
+//      std::cout << "destructed   -F-IMU" << id() << std::endl;
   }
 
   void FrameIMU::setState(const Eigen::VectorXs& _st) // Order: PVQ

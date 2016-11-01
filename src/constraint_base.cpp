@@ -80,7 +80,6 @@ void ConstraintBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-        std::cout << "Removing         c" << id() << std::endl;
         ConstraintBasePtr this_c = shared_from_this(); // keep this alive while removing it
         FeatureBasePtr f = feature_ptr_.lock();
         if (f)
@@ -134,6 +133,7 @@ void ConstraintBase::remove()
             default:
                 break;
         }
+        std::cout << "Removed          c" << id() << std::endl;
     }
 }
 

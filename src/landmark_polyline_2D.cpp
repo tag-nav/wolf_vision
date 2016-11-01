@@ -45,7 +45,7 @@ LandmarkPolyline2D::~LandmarkPolyline2D()
 //
 //        point_state_ptr_vector_.pop_front();
 //    }
-    std::cout << "destructed    L-poly" << id() << std::endl;
+//    std::cout << "destructed    L-poly" << id() << std::endl;
 }
 
 void LandmarkPolyline2D::setFirst(const Eigen::VectorXs& _point, bool _defined)
