@@ -63,11 +63,11 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
 
     // Append all new Features to the Capture's list of Features
     last_ptr_->addFeatureList(new_features_last_);
-    std::cout << "\tnew last features added " << std::endl;
+//    std::cout << "\tnew last features added " << std::endl;
 
     // Append new landmarks to the map
     getProblem()->addLandmarkList(new_landmarks);
-    std::cout << "\tnew landmarks added: " << getProblem()->getMapPtr()->getLandmarkList().size() << std::endl;
+//    std::cout << "\tnew landmarks added: " << getProblem()->getMapPtr()->getLandmarkList().size() << std::endl;
 
     //std::cout << "end of processNew:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
@@ -88,13 +88,13 @@ void ProcessorTrackerLandmark::createNewLandmarks(LandmarkBaseList& _new_landmar
     {
         // create new landmark
         LandmarkBasePtr new_lmk_ptr = createLandmark(new_feature_ptr);
-        std::cout << "\tnew_landmark: " << new_lmk_ptr->id() << std::endl;
+//        std::cout << "\tnew_landmark: " << new_lmk_ptr->id() << std::endl;
         _new_landmarks.push_back(new_lmk_ptr);
         // create new correspondence
         matches_landmark_from_last_[new_feature_ptr] = std::make_shared<LandmarkMatch>(new_lmk_ptr, 1); // max score
     }
-    std::cout << "\tnew_landmarks: " << _new_landmarks.size() << std::endl;
-    std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
+//    std::cout << "\tnew_landmarks: " << _new_landmarks.size() << std::endl;
+//    std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
 }
 
 unsigned int ProcessorTrackerLandmark::processKnown()
