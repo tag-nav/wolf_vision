@@ -39,7 +39,6 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
 
 bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
 {
-    WOLF_DEBUG_HERE
     std::cout << "N features: " << incoming_ptr_->getFeatureList().size() << std::endl;
     bool vote = incoming_ptr_->getFeatureList().size() < min_feat_for_keyframe_;
     std::cout << (vote ? "Vote ": "Not vote ") << "for KF" << std::endl;

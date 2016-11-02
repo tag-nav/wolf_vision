@@ -204,7 +204,7 @@ int main(int argc, char** argv)
 
         // Image ------------------------------------------------
 
-        clock_t t1 = clock();
+//        clock_t t1 = clock();
 
         // Preferred method with factory objects:
         image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
@@ -213,7 +213,7 @@ int main(int argc, char** argv)
         //image_ptr->process();
         camera_ptr->addCapture(image_ptr);
 
-        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+//        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
         ceres::Solver::Summary summary = ceres_manager.solve();
         std::cout << summary.BriefReport() << std::endl;
@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 
         cv::waitKey(20);
 
-        std::cout << "END OF ITERATION\n=================================" << std::endl;
+        std::cout << "=================================================================================================" << std::endl;
 
         f++;
         capture >> frame[f % buffer_size];

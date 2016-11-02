@@ -31,17 +31,17 @@ bool LocalParametrizationHomogeneous::plus(const Eigen::Map<const Eigen::VectorX
 
     using namespace Eigen;
 
-    double norm_delta = _delta.norm();
-    if (norm_delta > Constants::EPS)
+    double angle = _delta.norm();
+    if (angle > Constants::EPS_SMALL)
     {
         // compute rotation axis -- this guarantees unity norm
-        Vector3s axis = _delta / norm_delta;
+        Vector3s axis = _delta.normalized();
 
         // express delta as a quaternion -- this is exp(delta)
-        Quaternions dq(AngleAxis<Scalar>(norm_delta, axis));
+        Quaternions dq(AngleAxis<Scalar>(angle, axis));
 
         // result as a homogeneous point -- we use the quaternion product for keeping in the 4-sphere
-        _h_plus_delta = (dq * Map<const Quaternions>(_h.data())).coeffs();
+        _h_plus_delta = ( dq * Map<const Quaternions>( _h.data() ) ) .coeffs();
     }
     else
     {

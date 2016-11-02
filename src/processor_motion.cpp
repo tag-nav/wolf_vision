@@ -20,7 +20,6 @@ ProcessorMotion::~ProcessorMotion()
 
 void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 {
-    WOLF_DEBUG_HERE
 
     incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
 
@@ -32,7 +31,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         // key_capture
         CaptureMotion::Ptr key_capture_ptr = last_ptr_;
         FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
-        if (key_frame_ptr == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
 
         // Set the frame as key
         key_frame_ptr->setState(getCurrentState());
@@ -114,7 +112,6 @@ CaptureMotion::Ptr ProcessorMotion::findCaptureContainingTimeStamp(const TimeSta
 
 void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 {
-    WOLF_DEBUG_HERE
 
     assert(_origin_frame->getTrajectoryPtr() != nullptr
             && "ProcessorMotion::setOrigin: origin frame must be in the trajectory.");
@@ -156,7 +153,6 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 
 bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
-    WOLF_DEBUG_HERE
 
     Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
     std::cout << "  Time tol this  " << time_tolerance_ << std::endl;
@@ -253,7 +249,6 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
 
 void ProcessorMotion::integrate()
 {
-    WOLF_DEBUG_HERE
 
     // Set dt
     updateDt();
@@ -275,7 +270,6 @@ void ProcessorMotion::integrate()
 
 void ProcessorMotion::reintegrate(CaptureMotion::Ptr _capture_ptr)
 {
-    WOLF_DEBUG_HERE
 
     // start with empty motion
     _capture_ptr->getBuffer().get().push_front(motionZero(_capture_ptr->getOriginFramePtr()->getTimeStamp()));

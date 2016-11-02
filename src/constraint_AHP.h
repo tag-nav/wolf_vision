@@ -143,9 +143,12 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             Eigen::Matrix<T, 2, 1> feature_pos = getMeasurement().cast<T>();
 
             Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap(_residuals);
-//            std::cout << "SquareRootInformation: " << getMeasurementSquareRootInformation() << std::endl;
+
+            //            std::cout << "SquareRootInformation: " << getMeasurementSquareRootInformation() << std::endl;
+
             residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
-//            std::cout << "\nRESIDUALS:\n" << residualsmap[0] << "\t" << residualsmap[1] << std::endl;
+
+            //            std::cout << "\nRESIDUALS:\n\t" << residualsmap[0] << "\n\t" << residualsmap[1] << std::endl;
 
             return true;
         }

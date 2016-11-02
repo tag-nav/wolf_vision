@@ -15,7 +15,7 @@ SensorCamera::SensorCamera(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBloc
 }
 
 SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const std::shared_ptr<IntrinsicsCamera> _intrinsics_ptr) :
-                SensorBase(SEN_CAMERA, "CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3)), std::make_shared<StateQuaternion>(_extrinsics.tail(4)), std::make_shared<StateBlock>(_intrinsics_ptr->pinhole_model), 1),
+                SensorBase(SEN_CAMERA, "CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics_ptr->pinhole_model, true), 1),
                 img_width_(_intrinsics_ptr->width), //
                 img_height_(_intrinsics_ptr->height), //
                 distortion_(_intrinsics_ptr->distortion), //

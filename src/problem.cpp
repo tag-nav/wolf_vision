@@ -564,6 +564,9 @@ void Problem::print(int level)
     for (auto S : getHardwarePtr()->getSensorList() )
     {
         std::cout << "  S" << S->id() << std::endl;
+        for (auto sb : S->getStateBlockVec() )
+            if (sb != nullptr)
+            std::cout << "          sb " << (sb->isFixed() ? "Fixed" : "Estimated") << std::endl;
         for (auto p : S->getProcessorList() )
         {
             if (p->isMotion())
@@ -615,6 +618,9 @@ void Problem::print(int level)
             std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
             std::cout << std::endl;
         }
+        for (auto sb : F->getStateBlockVec() )
+            if (sb != nullptr)
+            std::cout << "          sb " << (sb->isFixed() ? "Fixed" : "Estimated") << std::endl;
         for (auto C : F->getCaptureList() )
         {
             std::cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << std::endl;
@@ -663,6 +669,9 @@ void Problem::print(int level)
                 std::cout << "c" << cby->id() << " \t";
             }
         std::cout << std::endl;
+        for (auto sb : L->getStateBlockVec() )
+            if (sb != nullptr)
+            std::cout << "          sb " << (sb->isFixed() ? "Fixed" : "Estimated") << std::endl;
     }
     std::cout << "-----------------------------------------" << std::endl;
     std::cout << std::endl;
