@@ -78,7 +78,12 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         //xPlusDelta(origin_ptr_->getFramePtr()->getState(), key_capture_ptr->getBufferPtr()->get().back().delta_integr_, interpolated_state);
         //std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
     }
+
+
     postProcess();
+
+    // clear incoming just in case
+    incoming_ptr_ = nullptr;
 }
 
 CaptureMotion::Ptr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
