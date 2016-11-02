@@ -109,6 +109,9 @@ include_directories("${PROJECT_BINARY_DIR}/conf")
 
 INCLUDE_DIRECTORIES(.)
 
+# include spdlog (logging) third_party
+INCLUDE_DIRECTORIES(../third_party/spdlog/include)
+
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 
 IF(Ceres_FOUND)
