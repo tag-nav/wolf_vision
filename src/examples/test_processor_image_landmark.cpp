@@ -198,7 +198,7 @@ int main(int argc, char** argv)
 
         sen_odo_ptr->addCapture(cap_odo);
 
-//        wolf_problem_ptr_->print(2);
+        wolf_problem_ptr_->print(2);
 
 
 
@@ -212,6 +212,8 @@ int main(int argc, char** argv)
         /* process */
         //image_ptr->process();
         camera_ptr->addCapture(image_ptr);
+
+        wolf_problem_ptr_->print(2);
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
