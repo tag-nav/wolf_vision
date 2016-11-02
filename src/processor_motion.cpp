@@ -133,12 +133,12 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
                                                 Eigen::VectorXs::Zero(data_size_),
                                                 Eigen::MatrixXs::Zero(data_size_, data_size_),
                                                 _origin_frame);
-    // Make frame at last Capture
+    // Make non-key-frame at last Capture
     //    makeFrame(last_ptr_, _origin_frame->getState(), NON_KEY_FRAME);
     FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME,
                                                            _origin_frame->getState(),
                                                            last_ptr_->getTimeStamp());
-    new_frame_ptr->addCapture(last_ptr_); // Add last Capture to the new Frame
+    new_frame_ptr->addCapture(last_ptr_);
 
     // Reset deltas
     delta_ = deltaZero();
