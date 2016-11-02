@@ -198,7 +198,7 @@ int main(int argc, char** argv)
 
         sen_odo_ptr->addCapture(cap_odo);
 
-//        wolf_problem_ptr_->print(2);
+        wolf_problem_ptr_->print(2);
 
 
 
