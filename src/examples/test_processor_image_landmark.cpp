@@ -218,6 +218,7 @@ int main(int argc, char** argv)
         ceres::Solver::Summary summary = ceres_manager.solve();
         std::cout << summary.BriefReport() << std::endl;
 
+        wolf_problem_ptr_->print(2);
 
 //        std::cout << "Last key frame pose: "
 //                << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
@@ -232,7 +233,7 @@ int main(int argc, char** argv)
         capture >> frame[f % buffer_size];
     }
 
-    wolf_problem_ptr_->print();
+    // wolf_problem_ptr_->print(2);
     wolf_problem_ptr_.reset();
 
     return 0;
