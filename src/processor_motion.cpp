@@ -234,16 +234,18 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
                         Eigen::MatrixXs::Identity(delta_size_, delta_size_) * 1e-8);
 
         // modify constraint
-        if (!feature_ptr->getConstraintList().empty())
-        {
-            // get the constraint to be removed later
-            auto ctr_to_remove = feature_ptr->getConstraintList().back(); // there is only one constraint!
+        // Instead of modifying, we remove one ctr, and create a new one.
 
-            auto new_ctr = feature_ptr->addConstraint(createConstraint(feature_ptr, _keyframe_ptr));
-            _keyframe_ptr->addConstrainedBy(new_ctr);
+        // get the constraint to be removed later
+        auto ctr_to_remove = feature_ptr->getConstraintList().back(); // there is only one constraint!
 
-            ctr_to_remove->remove(); // remove old constraint
-        }
+        // create and append new constraint
+        auto new_ctr = feature_ptr->addConstraint(createConstraint(feature_ptr, _keyframe_ptr));
+        _keyframe_ptr->addConstrainedBy(new_ctr);
+
+        // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
+        ctr_to_remove->remove();
+
     }
 
     return true;
