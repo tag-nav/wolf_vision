@@ -119,17 +119,17 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
         /** \brief Returns a pointer to the frame constrained to
          **/
-        FrameBasePtr getFrameOtherPtr();
+        FrameBasePtr getFrameOtherPtr() const;
         void setFrameOtherPtr(FrameBasePtr _frm_o){frame_other_ptr_ = _frm_o;}
 
         /** \brief Returns a pointer to the feature constrained to
          **/
-        FeatureBasePtr getFeatureOtherPtr();
+        FeatureBasePtr getFeatureOtherPtr() const;
         void setFeatureOtherPtr(FeatureBasePtr _ftr_o){feature_other_ptr_ = _ftr_o;}
 
         /** \brief Returns a pointer to the landmark constrained to
          **/
-        LandmarkBasePtr getLandmarkOtherPtr();
+        LandmarkBasePtr getLandmarkOtherPtr() const;
         void setLandmarkOtherPtr(LandmarkBasePtr _lmk_o){landmark_other_ptr_ = _lmk_o;}
 
         ProblemPtr getProblem();
@@ -209,17 +209,17 @@ inline void ConstraintBase::setApplyLossFunction(const bool _apply)
     }
 }
 
-inline FrameBasePtr ConstraintBase::getFrameOtherPtr()
+inline FrameBasePtr ConstraintBase::getFrameOtherPtr() const
 {
     return frame_other_ptr_.lock();
 }
 
-inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr()
+inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr() const
 {
     return feature_other_ptr_.lock();
 }
 
-inline LandmarkBasePtr ConstraintBase::getLandmarkOtherPtr()
+inline LandmarkBasePtr ConstraintBase::getLandmarkOtherPtr() const
 {
     return landmark_other_ptr_.lock();
 }
