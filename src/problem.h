@@ -245,7 +245,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         // Print and check ---------------------------------------
         /**
          * \brief print wolf tree
-         * \param level : 0: Basic links; 1: with Constrained_by; with 2: Metrics; default: 1.
+         * \param level : 0: Basic links; 1: with Constrained_by; 2: with Metrics; 3: with StateBlocks; default: 1.
          */
         void print(int level = 1);
         bool check();
