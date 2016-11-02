@@ -83,7 +83,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     postProcess();
 
     // clear incoming just in case
-    incoming_ptr_ = nullptr;
+    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
 
 CaptureMotion::Ptr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
