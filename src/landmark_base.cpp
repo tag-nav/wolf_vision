@@ -15,9 +15,9 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, S
             state_block_vec_(4), // allow for 4 state blocks by default. Should be enough in all applications.
             landmark_id_(++landmark_id_count_),
             type_id_(_tp),
-            status_(LANDMARK_CANDIDATE),
-			p_ptr_(_p_ptr),
-			o_ptr_(_o_ptr)
+            status_(LANDMARK_CANDIDATE)//,
+//			p_ptr_(_p_ptr),
+//			o_ptr_(_o_ptr)
 {
     //
     state_block_vec_[0] = _p_ptr;
@@ -66,32 +66,32 @@ void LandmarkBase::setStatus(LandmarkStatus _st)
     // State Blocks
     if (status_ == LANDMARK_FIXED)
     {
-        if (p_ptr_!=nullptr)
+        if (getPPtr()!=nullptr)
         {
-            p_ptr_->fix();
+            getPPtr()->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(p_ptr_);
+                getProblem()->updateStateBlockPtr(getPPtr());
         }
-        if (o_ptr_!=nullptr)
+        if (getOPtr()!=nullptr)
         {
-            o_ptr_->fix();
+            getOPtr()->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(o_ptr_);
+                getProblem()->updateStateBlockPtr(getOPtr());
         }
     }
     else if(status_ == LANDMARK_ESTIMATED)
     {
-        if (p_ptr_!=nullptr)
+        if (getPPtr()!=nullptr)
         {
-            p_ptr_->unfix();
+            getPPtr()->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(p_ptr_);
+                getProblem()->updateStateBlockPtr(getPPtr());
         }
-        if (o_ptr_!=nullptr)
+        if (getOPtr()!=nullptr)
         {
-            o_ptr_->unfix();
+            getOPtr()->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(o_ptr_);
+                getProblem()->updateStateBlockPtr(getOPtr());
         }
     }
 }
@@ -128,15 +128,15 @@ YAML::Node LandmarkBase::saveToYaml() const
     YAML::Node node;
     node["id"] = landmark_id_;
     node["type"] = node_type_;
-    if (p_ptr_ != nullptr)
+    if (getPPtr() != nullptr)
     {
-        node["position"] = p_ptr_->getVector();
-        node["position fixed"] = p_ptr_->isFixed();
+        node["position"] = getPPtr()->getVector();
+        node["position fixed"] = getPPtr()->isFixed();
     }
-    if (o_ptr_ != nullptr)
+    if (getOPtr() != nullptr)
     {
-        node["orientation"] = o_ptr_->getVector();
-        node["orientation fixed"] = p_ptr_->isFixed();
+        node["orientation"] = getOPtr()->getVector();
+        node["orientation fixed"] = getOPtr()->isFixed();
     }
     return node;
 }

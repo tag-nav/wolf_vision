@@ -39,8 +39,8 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         LandmarkType type_id_;     ///< type of landmark. (types defined at wolf.h)
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
-        StateBlockPtr p_ptr_;     ///< Position state block pointer
-        StateBlockPtr o_ptr_;     ///< Orientation state block pointer
+//        StateBlockPtr p_ptr_;     ///< Position state block pointer
+//        StateBlockPtr o_ptr_;     ///< Orientation state block pointer
         Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
 
     public:
@@ -207,22 +207,22 @@ inline void LandmarkBase::setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_pt
 
 inline StateBlockPtr LandmarkBase::getPPtr() const
 {
-    return p_ptr_;
+    return getStateBlockPtr(0);
 }
 
 inline StateBlockPtr LandmarkBase::getOPtr() const
 {
-    return o_ptr_;
+    return getStateBlockPtr(1);
 }
 
 inline void LandmarkBase::setPPtr(const StateBlockPtr _st_ptr)
 {
-    p_ptr_ = _st_ptr;
+    setStateBlockPtr(0, _st_ptr);
 }
 
 inline void LandmarkBase::setOPtr(const StateBlockPtr _st_ptr)
 {
-    o_ptr_ = _st_ptr;
+    setStateBlockPtr(1, _st_ptr);
 }
 
 inline void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)
