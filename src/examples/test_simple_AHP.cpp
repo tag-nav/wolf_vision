@@ -281,7 +281,7 @@ int main(int argc, char** argv)
     // ============================================================================================================
 
     wolf_problem_ptr_->print();
-    wolf_problem_ptr_->check();
+//    wolf_problem_ptr_->check();
 
     // New landmark with measured pixels from kf1 (anchor) and kf2 (current)
     Scalar unknown_distance = 10;
