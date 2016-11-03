@@ -15,11 +15,8 @@ LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, S
             state_block_vec_(4), // allow for 4 state blocks by default. Should be enough in all applications.
             landmark_id_(++landmark_id_count_),
             type_id_(_tp),
-            status_(LANDMARK_CANDIDATE)//,
-//			p_ptr_(_p_ptr),
-//			o_ptr_(_o_ptr)
+            status_(LANDMARK_CANDIDATE)
 {
-    //
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = nullptr;
@@ -40,7 +37,6 @@ void LandmarkBase::remove()
         is_removing_ = true;
         std::cout << "Removing   L" << id() << std::endl;
         LandmarkBasePtr this_L = shared_from_this(); // keep this alive while removing it
-
 
         // remove from upstream
         auto M = map_ptr_.lock();
@@ -66,33 +62,47 @@ void LandmarkBase::setStatus(LandmarkStatus _st)
     // State Blocks
     if (status_ == LANDMARK_FIXED)
     {
-        if (getPPtr()!=nullptr)
-        {
-            getPPtr()->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(getPPtr());
-        }
-        if (getOPtr()!=nullptr)
-        {
-            getOPtr()->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(getOPtr());
-        }
+        for (auto sb : state_block_vec_)
+            if (sb != nullptr)
+            {
+                sb->fix();
+                if (getProblem() != nullptr)
+                    getProblem()->updateStateBlockPtr(sb);
+            }
+//        if (getPPtr()!=nullptr)
+//        {
+//            getPPtr()->fix();
+//            if (getProblem() != nullptr)
+//                getProblem()->updateStateBlockPtr(getPPtr());
+//        }
+//        if (getOPtr()!=nullptr)
+//        {
+//            getOPtr()->fix();
+//            if (getProblem() != nullptr)
+//                getProblem()->updateStateBlockPtr(getOPtr());
+//        }
     }
     else if(status_ == LANDMARK_ESTIMATED)
     {
-        if (getPPtr()!=nullptr)
-        {
-            getPPtr()->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(getPPtr());
-        }
-        if (getOPtr()!=nullptr)
-        {
-            getOPtr()->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(getOPtr());
-        }
+        for (auto sb : state_block_vec_)
+            if (sb != nullptr)
+            {
+                sb->unfix();
+                if (getProblem() != nullptr)
+                    getProblem()->updateStateBlockPtr(sb);
+            }
+//        if (getPPtr()!=nullptr)
+//        {
+//            getPPtr()->unfix();
+//            if (getProblem() != nullptr)
+//                getProblem()->updateStateBlockPtr(getPPtr());
+//        }
+//        if (getOPtr()!=nullptr)
+//        {
+//            getOPtr()->unfix();
+//            if (getProblem() != nullptr)
+//                getProblem()->updateStateBlockPtr(getOPtr());
+//        }
     }
 }
 
