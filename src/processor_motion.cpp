@@ -78,7 +78,12 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         //xPlusDelta(origin_ptr_->getFramePtr()->getState(), key_capture_ptr->getBufferPtr()->get().back().delta_integr_, interpolated_state);
         //std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
     }
+
+
     postProcess();
+
+    // clear incoming just in case
+    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
 
 CaptureMotion::Ptr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
@@ -154,16 +159,16 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
 
-    Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
-    std::cout << "  Time tol this  " << time_tolerance_ << std::endl;
-    std::cout << "  Time tol other " << _time_tol_other << std::endl;
-    std::cout << "  Time tol eff   " << time_tol << std::endl;
-
-    std::cout << "  Time stamp input F " << _keyframe_ptr->getTimeStamp().get() << std::endl;
-    std::cout << "  Time stamp orig  F " << getOriginPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
-    std::cout << "  Time stamp orig  C " << getOriginPtr()->getTimeStamp().get() << std::endl;
-    std::cout << "  Time stamp last  F " << getLastPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
-    std::cout << "  Time stamp last  C " << getLastPtr()->getTimeStamp().get() << std::endl;
+    //    Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
+    //    std::cout << "  Time tol this  " << time_tolerance_ << std::endl;
+    //    std::cout << "  Time tol other " << _time_tol_other << std::endl;
+    //    std::cout << "  Time tol eff   " << time_tol << std::endl;
+    //
+    //    std::cout << "  Time stamp input F " << _keyframe_ptr->getTimeStamp().get() << std::endl;
+    //    std::cout << "  Time stamp orig  F " << getOriginPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
+    //    std::cout << "  Time stamp orig  C " << getOriginPtr()->getTimeStamp().get() << std::endl;
+    //    std::cout << "  Time stamp last  F " << getLastPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
+    //    std::cout << "  Time stamp last  C " << getLastPtr()->getTimeStamp().get() << std::endl;
 
 
     assert(_keyframe_ptr->getTrajectoryPtr() != nullptr
@@ -224,7 +229,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
     // modify feature and constraint (if they exist)
     if (!capture_ptr->getFeatureList().empty())
     {
-        FeatureBasePtr feature_ptr = capture_ptr->getFeatureList().front();
+        FeatureBasePtr feature_ptr = capture_ptr->getFeatureList().back(); // there is only one feature!
 
         // modify feature
         feature_ptr->setMeasurement(capture_ptr->getBuffer().get().back().delta_integr_);
@@ -234,14 +239,18 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
                         Eigen::MatrixXs::Identity(delta_size_, delta_size_) * 1e-8);
 
         // modify constraint
-        if (!feature_ptr->getConstraintList().empty())
-        {
-            auto ctr = feature_ptr->getConstraintList().front();
-            feature_ptr->getConstraintList().remove(ctr);
+        // Instead of modifying, we remove one ctr, and create a new one.
 
-            //            feature_ptr->getConstraintList().front()->remove(); // XXX What happens here?
-            feature_ptr->addConstraint(createConstraint(feature_ptr, _keyframe_ptr));
-        }
+        // get the constraint to be removed later
+        auto ctr_to_remove = feature_ptr->getConstraintList().back(); // there is only one constraint!
+
+        // create and append new constraint
+        auto new_ctr = feature_ptr->addConstraint(createConstraint(feature_ptr, _keyframe_ptr));
+        _keyframe_ptr->addConstrainedBy(new_ctr);
+
+        // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
+        ctr_to_remove->remove();
+
     }
 
     return true;

@@ -196,23 +196,24 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
              *               n      n    new features
              */
 
-            // Create a new non-key Frame in the Trajectory with the incoming Capture
             FrameBasePtr key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
             if ( abs(key_frm->getTimeStamp() - incoming_ptr_->getTimeStamp() ) < time_tolerance_)
             {
                 // Append incoming to existing key-frame
-                key_frm->addCapture(incoming_ptr_); // TODO I think it should be last_ptr_ not incoming!
-                std::cout << "Adhered to existing KF" << key_frm->id() << std::endl;
+                key_frm->addCapture(incoming_ptr_);
+                std::cout << "Incoming adhered to existing KF" << key_frm->id() << std::endl;
             }
             else
             {
+                // Create a new non-key Frame in the Trajectory with the incoming Capture
                 // Make a non-key-frame to hold incoming
                 FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
                 new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+                std::cout << "Incoming adhered to new created F" << new_frame_ptr->id() << std::endl;
 
                 // Make the last Capture's Frame a KeyFrame
                 setKeyFrame(last_ptr_);
-                std::cout << "Adhered to new created KF" << key_frm->id() << std::endl;
+                std::cout << "Last set KF" << last_ptr_->getFramePtr()->id() << std::endl;
             }
 
             /**

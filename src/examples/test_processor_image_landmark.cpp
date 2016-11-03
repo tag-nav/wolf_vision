@@ -126,7 +126,7 @@ int main(int argc, char** argv)
     // running CAPTURES preallocated
     CaptureImage::Ptr image_ptr;
     Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
-    CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(0), sen_odo_ptr, data);
+    CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(t), sen_odo_ptr, data);
     //=====================================================
 
 
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
 
         sen_odo_ptr->addCapture(cap_odo);
 
-//        wolf_problem_ptr_->print(2);
+        wolf_problem_ptr_->print(2);
 
 
 
@@ -218,6 +218,7 @@ int main(int argc, char** argv)
         ceres::Solver::Summary summary = ceres_manager.solve();
         std::cout << summary.BriefReport() << std::endl;
 
+        wolf_problem_ptr_->print(2);
 
 //        std::cout << "Last key frame pose: "
 //                << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
@@ -232,7 +233,7 @@ int main(int argc, char** argv)
         capture >> frame[f % buffer_size];
     }
 
-    wolf_problem_ptr_->print();
+    // wolf_problem_ptr_->print(2);
     wolf_problem_ptr_.reset();
 
     return 0;

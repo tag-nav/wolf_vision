@@ -560,13 +560,18 @@ void Problem::print(int level)
 {
     std::cout << std::endl;
     std::cout << "P: wolf tree status ---------------------" << std::endl;
-    std::cout << "H" << std::endl;
+    std::cout << "Hardware" << std::endl;
     for (auto S : getHardwarePtr()->getSensorList() )
     {
         std::cout << "  S" << S->id() << std::endl;
-        for (auto sb : S->getStateBlockVec() )
-            if (sb != nullptr)
-            std::cout << "          sb " << (sb->isFixed() ? "Fixed" : "Estimated") << std::endl;
+        if (level > 2)
+        {
+            std::cout << "    sb:";
+            for (auto sb : S->getStateBlockVec() )
+                if (sb != nullptr)
+                    std::cout << " " << (sb->isFixed() ? "Fix" : "Est");
+            std::cout << std::endl;
+        }
         for (auto p : S->getProcessorList() )
         {
             if (p->isMotion())
@@ -574,9 +579,9 @@ void Problem::print(int level)
                 std::cout << "    pm" << p->id() << std::endl;
                 ProcessorMotion::Ptr pm = std::static_pointer_cast<ProcessorMotion>(p);
                 if (pm->getOriginPtr())
-                    std::cout << "      o: C" << pm->getOriginPtr()->id() << std::endl;
+                    std::cout << "      o: C" << pm->getOriginPtr()->id() << " - F" << pm->getOriginPtr()->getFramePtr()->id() << std::endl;
                 if (pm->getLastPtr())
-                    std::cout << "      l: C" << pm->getLastPtr()->id() << std::endl;
+                    std::cout << "      l: C" << pm->getLastPtr()->id() << " - F" << pm->getLastPtr()->getFramePtr()->id() << std::endl;
                 if (pm->getIncomingPtr())
                     std::cout << "      i: C" << pm->getIncomingPtr()->id() << std::endl;
             }
@@ -587,9 +592,9 @@ void Problem::print(int level)
                     std::cout << "    pt" << p->id() << std::endl;
                     ProcessorTracker::Ptr pt = std::static_pointer_cast<ProcessorTracker>(p);
                     if (pt->getOriginPtr())
-                        std::cout << "      o: C" << pt->getOriginPtr()->id() << std::endl;
+                        std::cout << "      o: C" << pt->getOriginPtr()->id() << " - F" << pt->getOriginPtr()->getFramePtr()->id() << std::endl;
                     if (pt->getLastPtr())
-                        std::cout << "      l: C" << pt->getLastPtr()->id() << std::endl;
+                        std::cout << "      l: C" << pt->getLastPtr()->id() << " - F" << pt->getLastPtr()->getFramePtr()->id() << std::endl;
                     if (pt->getIncomingPtr())
                         std::cout << "      i: C" << pt->getIncomingPtr()->id() << std::endl;
                 }
@@ -601,7 +606,7 @@ void Problem::print(int level)
             }
         }
     }
-    std::cout << "T" << std::endl;
+    std::cout << "Trajectory" << std::endl;
     for (auto F : getTrajectoryPtr()->getFrameList() )
     {
         std::cout << (F->isKey() ?  "  KF" : "  F") << F->id();
@@ -618,9 +623,14 @@ void Problem::print(int level)
             std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
             std::cout << std::endl;
         }
-        for (auto sb : F->getStateBlockVec() )
-            if (sb != nullptr)
-            std::cout << "          sb " << (sb->isFixed() ? "Fixed" : "Estimated") << std::endl;
+        if (level > 2)
+        {
+            std::cout << "    sb:";
+            for (auto sb : F->getStateBlockVec() )
+                if (sb != nullptr)
+                    std::cout << " " << (sb->isFixed() ? "Fix" : "Est");
+            std::cout << std::endl;
+        }
         for (auto C : F->getCaptureList() )
         {
             std::cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << std::endl;
@@ -628,11 +638,11 @@ void Problem::print(int level)
             {
                 std::cout << "      f" << f->id();
                 if (level > 0)
-                    {
+                {
                     std::cout<< "  <--\t";
                     for (auto cby : f->getConstrainedByList())
                         std::cout << "c" << cby->id() << " \t";
-                    }
+                }
                 std::cout << std::endl;
                 if (level > 1)
                     std::cout << "        m = ( " << std::setprecision(3) << f->getMeasurement().transpose() << ")" << std::endl;
@@ -658,20 +668,25 @@ void Problem::print(int level)
             }
         }
     }
-    std::cout << "M" << std::endl;
+    std::cout << "Map" << std::endl;
     for (auto L : getMapPtr()->getLandmarkList() )
     {
         std::cout << "  L" << L->id();
         if (level > 0)
-            {
+        {
             std::cout << "\t<-- ";
             for (auto cby : L->getConstrainedByList())
                 std::cout << "c" << cby->id() << " \t";
-            }
+        }
         std::cout << std::endl;
-        for (auto sb : L->getStateBlockVec() )
-            if (sb != nullptr)
-            std::cout << "          sb " << (sb->isFixed() ? "Fixed" : "Estimated") << std::endl;
+        if (level > 2)
+        {
+            std::cout << "    sb:";
+            for (auto sb : L->getStateBlockVec() )
+                if (sb != nullptr)
+                    std::cout << " " << (sb->isFixed() ? "Fix" : "Est");
+            std::cout << std::endl;
+        }
     }
     std::cout << "-----------------------------------------" << std::endl;
     std::cout << std::endl;
