@@ -39,8 +39,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         LandmarkType type_id_;     ///< type of landmark. (types defined at wolf.h)
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
-//        StateBlockPtr p_ptr_;     ///< Position state block pointer
-//        StateBlockPtr o_ptr_;     ///< Orientation state block pointer
         Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
 
     public:
@@ -149,13 +147,11 @@ inline void LandmarkBase::setId(unsigned int _id)
 
 inline void LandmarkBase::fix()
 {
-    //std::cout << "Fixing frame " << nodeId() << std::endl;
     this->setStatus(LANDMARK_FIXED);
 }
 
 inline void LandmarkBase::unfix()
 {
-    //std::cout << "Unfixing frame " << nodeId() << std::endl;
     this->setStatus(LANDMARK_ESTIMATED);
 }
 
