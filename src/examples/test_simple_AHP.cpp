@@ -250,6 +250,7 @@ int main(int argc, char** argv)
     // ============================================================================================================
     /* 11 */
     ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(feat_point_image_ptr_2, kf4, lmk_ahp_ptr );
+    feat_point_image_ptr_2->addConstraint(constraint_ptr);
 
     // ============================================================================================================
 
