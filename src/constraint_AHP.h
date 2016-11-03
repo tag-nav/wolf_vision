@@ -52,6 +52,8 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         void expectation(const T* const _current_frame_p, const T* const _current_frame_o, const T* const _anchor_frame_p,
                                     const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _expectation) const
         {
+            std::cout << "expectation" << std::endl;
+
             // Maps over the input pointers
             Eigen::Matrix<T, 3, 3> K = K_.cast<T>();
             Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg_c0(_lmk_hmg);
@@ -90,9 +92,9 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             // lmk direction vector
             Eigen::Matrix<T,3,1> v_dir = landmark_hmg_c1.head(3);
 
-            std::cout << "\nv_normalized:\n" << v_dir(0) << "\t" << v_dir(1) << "\t"
-                      << v_dir(2) << "\t" << landmark_hmg_c1(3) << std::endl;
-
+//            std::cout << "\nv_normalized:\n" << v_dir(0) << "\t" << v_dir(1) << "\t"
+//                      << v_dir(2) << "\t" << landmark_hmg_c1(3) << std::endl;
+            WOLF_DEBUG_HERE
             // projected point in canonical sensor
             Eigen::Matrix<T,2,1> point_undistorted;
             point_undistorted = v_dir.head(2)/v_dir(2);
@@ -108,7 +110,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
             expectation(0) = K(0,0) * point_distorted(0) + K(0,2);
             expectation(1) = K(1,1) * point_distorted(1) + K(1,2);
-
+            WOLF_DEBUG_HERE
             //            std::cout << "constraint n[" << id() << "] _expectation: " << _expectation(0) << "\t" << _expectation(1) << std::endl;
 
         }
@@ -132,14 +134,14 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         bool operator ()(const T* const _current_frame_p, const T* const _current_frame_o, const T* const _anchor_frame_p,
                          const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _residuals) const
         {
-
+            std::cout << "operator" << std::endl;
             Eigen::Matrix<T, Eigen::Dynamic, 1> u(2) ;
             expectation(_current_frame_p, _current_frame_o,  _anchor_frame_p,
                           _anchor_frame_o,  _lmk_hmg, u.data()) ;
             // ==================================================
 
             //    std::cout << "\nCONSTRAINT INFO" << std::endl;
-
+            WOLF_DEBUG_HERE
             Eigen::Matrix<T, 2, 1> feature_pos = getMeasurement().cast<T>();
 
             Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap(_residuals);
@@ -148,8 +150,8 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
             residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
 
-            //            std::cout << "\nRESIDUALS:\n\t" << residualsmap[0] << "\n\t" << residualsmap[1] << std::endl;
-
+            std::cout << "\nRESIDUALS:\n\t" << residualsmap[0] << "\n\t" << residualsmap[1] << std::endl;
+            WOLF_DEBUG_HERE
             return true;
         }
 
