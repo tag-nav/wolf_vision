@@ -119,10 +119,30 @@ int main(int argc, char** argv)
 
     std::cout << "pixel 1: " << kp1.pt << std::endl;
     std::cout << "pixel 2: " << kp2.pt << std::endl;
+    //
+    //======== up to here the initial projections ==============
+
+    std::cout << "\n\n";
+
+    //======== now we want to estimate a new lmk ===============
+    //
+    // Features -----------------
+    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_3 = std::make_shared<FeaturePointImage>(kp1, desc, Eigen::Matrix2s::Identity());
+    image_ptr_1->addFeature(feat_point_image_ptr_3);
+
+    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_4 = std::make_shared<FeaturePointImage>(kp2, desc, Eigen::Matrix2s::Identity());
+    image_ptr_2->addFeature(feat_point_image_ptr_4);
 
 
+    // New landmark with measured pixels from kf1 (anchor) and kf2 (current)
+    Scalar unknown_distance = 10;
+    Eigen::Vector4s hmg = {1,2,3,1/unknown_distance};
+    LandmarkAHP::Ptr lmk(std::make_shared<LandmarkAHP>(hmg,kf1,camera_ptr,frame));
 
 
+    // Wolf tree status ----------------------
+    wolf_problem_ptr_->print();
+//    wolf_problem_ptr_->check();
 
 
 
@@ -273,20 +293,6 @@ int main(int argc, char** argv)
 //    cv::KeyPoint kp2; kp2.pt.x = point2D_kf2(0); kp2.pt.y = point2D_kf2(1);
 //    cv::Mat desc;
 
-    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_3 = std::make_shared<FeaturePointImage>(kp1, desc, Eigen::Matrix2s::Identity());
-    image_ptr_1->addFeature(feat_point_image_ptr_3);
-
-    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_4 = std::make_shared<FeaturePointImage>(kp2, desc, Eigen::Matrix2s::Identity());
-    image_ptr_2->addFeature(feat_point_image_ptr_4);
-    // ============================================================================================================
-
-    wolf_problem_ptr_->print();
-//    wolf_problem_ptr_->check();
-
-    // New landmark with measured pixels from kf1 (anchor) and kf2 (current)
-    Scalar unknown_distance = 10;
-    Eigen::Vector4s hmg = {1,2,3,1/unknown_distance};
-    LandmarkAHP::Ptr lmk(std::make_shared<LandmarkAHP>(hmg,kf1,camera_ptr,frame));
 
 //    // ============================================================================================================
 //    /* 10 */
