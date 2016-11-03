@@ -66,6 +66,8 @@ class FeaturePointImage : public FeatureBase
         void setKeypoint(const cv::KeyPoint& _kp)
         {
             keypoint_ = _kp;
+            measurement_(0) = _kp.pt.x;
+            measurement_(1) = _kp.pt.y;
         }
 
         const cv::Mat& getDescriptor() const;
