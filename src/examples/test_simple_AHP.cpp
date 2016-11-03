@@ -94,14 +94,14 @@ int main(int argc, char** argv)
 
     // Constraints------------------
     ConstraintAHP::Ptr constraint_ptr1 = std::make_shared<ConstraintAHP>(feat_point_image_ptr_1, kf1, lmk_ahp_ptr );
-    constraint_ptr1->setFrameOtherPtr(kfa);
     feat_point_image_ptr_1->addConstraint(constraint_ptr1);
+    constraint_ptr1->setFrameOtherPtr(kfa);
     kfa->addConstrainedBy(constraint_ptr1);
     lmk_ahp_ptr->addConstrainedBy(constraint_ptr1);
 
     ConstraintAHP::Ptr constraint_ptr2 = std::make_shared<ConstraintAHP>(feat_point_image_ptr_2, kf2, lmk_ahp_ptr );
-    constraint_ptr2->setFrameOtherPtr(kfa);
     feat_point_image_ptr_2->addConstraint(constraint_ptr2);
+    constraint_ptr2->setFrameOtherPtr(kfa);
     kfa->addConstrainedBy(constraint_ptr2);
     lmk_ahp_ptr->addConstrainedBy(constraint_ptr2);
 
@@ -117,8 +117,8 @@ int main(int argc, char** argv)
     kp1 = feat_point_image_ptr_1->getKeypoint();
     kp2 = feat_point_image_ptr_2->getKeypoint();
 
-    std::cout << "pixel 1: " << kp1.pt << std::endl;
-    std::cout << "pixel 2: " << kp2.pt << std::endl;
+    std::cout << "pixel 1: " << pix1.transpose() << std::endl;
+    std::cout << "pixel 2: " << pix2.transpose() << std::endl;
     //
     //======== up to here the initial projections ==============
 
@@ -134,11 +134,28 @@ int main(int argc, char** argv)
     image_ptr_2->addFeature(feat_point_image_ptr_4);
 
 
-    // New landmark with measured pixels from kf1 (anchor) and kf2 (current)
-    Scalar unknown_distance = 10;
-    Eigen::Vector4s hmg = {1,2,3,1/unknown_distance};
-    LandmarkAHP::Ptr lmk(std::make_shared<LandmarkAHP>(hmg,kf1,camera_ptr,frame));
+    // New landmark with measured pixels from kf0 (anchor) kf1 and kf2 (measurements)
+    Scalar unknown_distance = 1;
+    Matrix3s K = camera_ptr->getIntrinsicMatrix();
+    Vector3s pix1_hmg;
+    pix1_hmg << pix1, 1;
+    Eigen::Vector3s v = K.inverse() * pix1_hmg;
+    Eigen::Vector4s hmg;
+    hmg << v, 1/unknown_distance;
+    LandmarkAHP::Ptr lmk( std::make_shared<LandmarkAHP>(hmg, kf1, camera_ptr, frame) );
+    wolf_problem_ptr_->addLandmark(lmk);
 
+    {ConstraintAHP(feat_point_image_ptr_4, kf2, lmk );} // create and destroy just to waste constraint id = 3
+
+    // New constraint from kf2
+    ConstraintAHP::Ptr ctr4 = std::make_shared<ConstraintAHP>(feat_point_image_ptr_4, kf2, lmk );
+    feat_point_image_ptr_4->addConstraint(ctr4);
+    ctr4->setFrameOtherPtr(kf1);
+    kf1->addConstrainedBy(ctr4);
+    lmk->addConstrainedBy(ctr4);
+
+    Eigen::Vector2s pix4 = ctr4->expectation();
+    std::cout << "pix 4: " << pix4.transpose() << std::endl;
 
     // Wolf tree status ----------------------
     wolf_problem_ptr_->print();
