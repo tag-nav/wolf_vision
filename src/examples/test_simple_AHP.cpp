@@ -97,11 +97,13 @@ int main(int argc, char** argv)
     constraint_ptr1->setFrameOtherPtr(kfa);
     feat_point_image_ptr_1->addConstraint(constraint_ptr1);
     kfa->addConstrainedBy(constraint_ptr1);
+    lmk_ahp_ptr->addConstrainedBy(constraint_ptr1);
 
     ConstraintAHP::Ptr constraint_ptr2 = std::make_shared<ConstraintAHP>(feat_point_image_ptr_2, kf2, lmk_ahp_ptr );
     constraint_ptr2->setFrameOtherPtr(kfa);
     feat_point_image_ptr_2->addConstraint(constraint_ptr2);
     kfa->addConstrainedBy(constraint_ptr2);
+    lmk_ahp_ptr->addConstrainedBy(constraint_ptr2);
 
     // Projections----------------------------
     Eigen::VectorXs pix1(constraint_ptr1->expectation());
@@ -279,6 +281,12 @@ int main(int argc, char** argv)
     // ============================================================================================================
 
     wolf_problem_ptr_->print();
+    wolf_problem_ptr_->check();
+
+    // New landmark with measured pixels from kf1 (anchor) and kf2 (current)
+    Scalar unknown_distance = 10;
+    Eigen::Vector4s hmg = {1,2,3,1/unknown_distance};
+    LandmarkAHP::Ptr lmk(std::make_shared<LandmarkAHP>(hmg,kf1,camera_ptr,frame));
 
 //    // ============================================================================================================
 //    /* 10 */
