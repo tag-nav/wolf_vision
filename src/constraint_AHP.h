@@ -39,6 +39,8 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         {
             setType("AHP");
 
+//            frame_other_ptr_ = _landmark_ptr->getAnchorFrame();
+
             K_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
             distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
         }
@@ -94,7 +96,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
 //            std::cout << "\nv_normalized:\n" << v_dir(0) << "\t" << v_dir(1) << "\t"
 //                      << v_dir(2) << "\t" << landmark_hmg_c1(3) << std::endl;
-            WOLF_DEBUG_HERE
+
             // projected point in canonical sensor
             Eigen::Matrix<T,2,1> point_undistorted;
             point_undistorted = v_dir.head(2)/v_dir(2);
@@ -110,7 +112,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
             expectation(0) = K(0,0) * point_distorted(0) + K(0,2);
             expectation(1) = K(1,1) * point_distorted(1) + K(1,2);
-            WOLF_DEBUG_HERE
+
             //            std::cout << "constraint n[" << id() << "] _expectation: " << _expectation(0) << "\t" << _expectation(1) << std::endl;
 
         }
@@ -118,14 +120,19 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         Eigen::VectorXs expectation() const
         {
             Eigen::VectorXs exp(2);
-            FrameBasePtr frm_current= getFeaturePtr()->getCapturePtr()->getFramePtr();
-            FrameBasePtr frm_anchor = getFrameOtherPtr();
-            LandmarkBasePtr lmk     = getLandmarkOtherPtr();
-            expectation(frm_current->getPPtr()->getVector().data(),
-                        frm_current->getOPtr()->getVector().data(),
-                        frm_anchor ->getPPtr()->getVector().data(),
-                        frm_anchor ->getOPtr()->getVector().data(),
-                        lmk        ->getPPtr()->getVector().data(),
+            FrameBasePtr frm_current    = getFeaturePtr()->getCapturePtr()->getFramePtr();
+            FrameBasePtr frm_anchor     = getFrameOtherPtr();
+            LandmarkBasePtr lmk         = getLandmarkOtherPtr();
+            const Scalar * const frame_current_pos  = frm_current->getPPtr()->getVector().data();
+            const Scalar * const frame_current_ori  = frm_current->getOPtr()->getVector().data();
+            const Scalar * const frame_anchor_pos   = frm_anchor->getPPtr()->getVector().data();
+            const Scalar * const frame_anchor_ori   = frm_anchor->getOPtr()->getVector().data();
+            const Scalar * const lmk_pos_hmg        = lmk->getPPtr()->getVector().data();
+            expectation(frame_current_pos,
+                        frame_current_ori,
+                        frame_anchor_pos,
+                        frame_anchor_ori,
+                        lmk_pos_hmg,
                         exp.data());
             return exp;
         }
