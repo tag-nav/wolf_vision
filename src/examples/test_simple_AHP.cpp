@@ -271,13 +271,15 @@ int main(int argc, char** argv)
 //    cv::KeyPoint kp2; kp2.pt.x = point2D_kf2(0); kp2.pt.y = point2D_kf2(1);
 //    cv::Mat desc;
 
-    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_1 = std::make_shared<FeaturePointImage>(kp1, desc, Eigen::Matrix2s::Identity());
-    image_ptr_1->addFeature(feat_point_image_ptr_1);
+    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_3 = std::make_shared<FeaturePointImage>(kp1, desc, Eigen::Matrix2s::Identity());
+    image_ptr_1->addFeature(feat_point_image_ptr_3);
 
-    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_2 = std::make_shared<FeaturePointImage>(kp2, desc, Eigen::Matrix2s::Identity());
-    image_ptr_2->addFeature(feat_point_image_ptr_2);
+    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_4 = std::make_shared<FeaturePointImage>(kp2, desc, Eigen::Matrix2s::Identity());
+    image_ptr_2->addFeature(feat_point_image_ptr_4);
     // ============================================================================================================
-//
+
+    wolf_problem_ptr_->print();
+
 //    // ============================================================================================================
 //    /* 10 */
 //    /* to test the projection - backprojection */
