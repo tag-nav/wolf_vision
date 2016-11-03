@@ -760,14 +760,47 @@ bool Problem::check()
                             std::cout << " --> A" << std::endl;
                             break;
                         case CTR_FRAME:
-                            std::cout << " --> F" << c->getFrameOtherPtr()->id() << std::endl;
+                        {
+                            auto Fo = c->getFrameOtherPtr();
+                            std::cout << " --> F" << Fo->id() << " <- ";
+                            bool found = false;
+                            for (auto cby : Fo->getConstrainedByList())
+                            {
+                                std::cout << " c" << cby->id();
+                                found = found || (c == cby);
+                            }
+                            std::cout << std::endl;
+                            is_consistent = is_consistent && found;
                             break;
+                        }
                         case CTR_FEATURE:
-                            std::cout << " --> f" << c->getFeatureOtherPtr()->id() << std::endl;
+                        {
+                            auto fo = c->getFeatureOtherPtr();
+                            std::cout << " --> f" << fo->id() << " <- ";
+                            bool found = false;
+                            for (auto cby : fo->getConstrainedByList())
+                            {
+                                std::cout << " c" << cby->id();
+                                found = found || (c == cby);
+                            }
+                            std::cout << std::endl;
+                            is_consistent = is_consistent && found;
                             break;
+                        }
                         case CTR_LANDMARK:
-                            std::cout << " --> L" << c->getLandmarkOtherPtr()->id() << std::endl;
+                        {
+                            auto Lo = c->getLandmarkOtherPtr();
+                            std::cout << " --> L" << Lo->id() << " <- ";
+                            bool found = false;
+                            for (auto cby : Lo->getConstrainedByList())
+                            {
+                                std::cout << " c" << cby->id();
+                                found = found || (c == cby);
+                            }
+                            std::cout << std::endl;
+                            is_consistent = is_consistent && found;
                             break;
+                        }
                     }
                     std::cout << "          -> P  @ " << c->getProblem().get() << std::endl;
                     std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get() << std::endl;
@@ -792,7 +825,7 @@ bool Problem::check()
     }
 
 //    std::cout << std::endl;
-    std::cout << "--------------------------- Wolf tree " << (is_consistent ? " OK" : "NOK") << std::endl;
+    std::cout << "--------------------------- Wolf tree " << (is_consistent ? " OK" : "Not OK !!") << std::endl;
     std::cout << std::endl;
 
 
