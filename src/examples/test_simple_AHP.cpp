@@ -179,8 +179,8 @@ int main(int argc, char** argv)
 //    FrameBase* kf3 = new FrameBase(KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>((Vector3s()<<0,0.5,0).finished()), std::make_shared<StateBlock>((Vector3s()<<0,0,0).finished()));
 //    FrameBase* kf4 = new FrameBase(KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>((Vector3s()<<0,0,0).finished()), std::make_shared<StateBlock>((Vector3s()<<0,0,0).finished()));
 
-    FrameBasePtr kf3 = wolf_problem_ptr_->createFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
-    FrameBasePtr kf4 = wolf_problem_ptr_->createFrame(KEY_FRAME,(Vector7s()<<0,0.5,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf3 = wolf_problem_ptr_->createFrame(KEY_FRAME,(Vector7s()<<0,0.5,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf4 = wolf_problem_ptr_->createFrame(KEY_FRAME,(Vector7s()<<0,0.7,0,0,0,0,1).finished(), TimeStamp(0));
 
     // ============================================================================================================
 
@@ -242,7 +242,7 @@ int main(int argc, char** argv)
     Eigen::Vector4s lmk1_hmg_kf3_w;
     lmk1_hmg_kf3_w = T_W_R1_kf3 * T_R1_C1 * point3D_hmg_kf3;
 
-    std::cout << "3D hmg point: " << (lmk1_hmg_kf3_w.head(3)/(1/distance)).transpose() << std::endl;
+    std::cout << "3D hmg point (kf3): " << (lmk1_hmg_kf3_w.head(3)/(1/distance)).transpose() << std::endl;
 
     std::shared_ptr<LandmarkAHP> lmk_ahp_ptr = std::make_shared<LandmarkAHP>(lmk1_hmg_kf3_w, kf3, camera_ptr, feat_point_image_ptr_1->getDescriptor());
     // ============================================================================================================
@@ -270,5 +270,12 @@ int main(int argc, char** argv)
 
     ceres::Solver::Summary summary = ceres_manager.solve();
     std::cout << summary.FullReport() << std::endl;
+    // ============================================================================================================
+
+    // ============================================================================================================
+    /* 13 */
+    std::cout << "landmark1: " << lmk_hmg_w.transpose() << std::endl;
+    std::cout << "landmark2: " << lmk_ahp_ptr->getPPtr()->getVector().transpose() << std::endl;
+
 
 }
