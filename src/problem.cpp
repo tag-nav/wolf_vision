@@ -648,22 +648,31 @@ void Problem::print(int level)
                     std::cout << "        m = ( " << std::setprecision(3) << f->getMeasurement().transpose() << ")" << std::endl;
                 for (auto c : f->getConstraintList() )
                 {
-                    std::cout << "        c" << c->id();
-                    switch (c->getCategory())
-                    {
-                        case CTR_ABSOLUTE:
-                            std::cout << " --> A" << std::endl;
-                            break;
-                        case CTR_FRAME:
-                            std::cout << " --> F" << c->getFrameOtherPtr()->id() << std::endl;
-                            break;
-                        case CTR_FEATURE:
-                            std::cout << " --> f" << c->getFeatureOtherPtr()->id() << std::endl;
-                            break;
-                        case CTR_LANDMARK:
-                            std::cout << " --> L" << c->getLandmarkOtherPtr()->id() << std::endl;
-                            break;
-                    }
+                    std::cout << "        c" << c->id() << " -->";
+                    if (c->getCategory() == CTR_ABSOLUTE)
+                        std::cout << " A";
+                    if (c->getFrameOtherPtr() != nullptr)
+                        std::cout << " F" << c->getFrameOtherPtr()->id();
+                    if (c->getFeatureOtherPtr() != nullptr)
+                        std::cout << " f" << c->getFeatureOtherPtr()->id();
+                    if (c->getLandmarkOtherPtr() != nullptr)
+                        std::cout << " L" << c->getLandmarkOtherPtr()->id();
+                    std::cout << std::endl;
+//                    switch (c->getCategory())
+//                    {
+//                        case CTR_ABSOLUTE:
+//                            std::cout << " --> A" << std::endl;
+//                            break;
+//                        case CTR_FRAME:
+//                            std::cout << " --> F" << c->getFrameOtherPtr()->id() << std::endl;
+//                            break;
+//                        case CTR_FEATURE:
+//                            std::cout << " --> f" << c->getFeatureOtherPtr()->id() << std::endl;
+//                            break;
+//                        case CTR_LANDMARK:
+//                            std::cout << " --> L" << c->getLandmarkOtherPtr()->id() << std::endl;
+//                            break;
+//                    }
                 }
             }
         }
