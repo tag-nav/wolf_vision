@@ -126,11 +126,7 @@ We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it a
 
 **(1)** Download:
 
-`$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/trunk`](https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/trunk)` laser_scan_utils`
-
-Or, in case you don't have permissions:
-
-`$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/trunk`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/trunk)` laser_scan_utils`
+`$ git clone `[`https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git`](https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git)` laser_scan_utils`
 
 **(2)** Build and install:
 
