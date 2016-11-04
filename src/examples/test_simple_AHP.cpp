@@ -38,87 +38,93 @@ int main(int argc, char** argv)
 
     // ============================================================================================================
     /* 1 */
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
-    // One anchor frame to define the lmk
-    FrameBasePtr kfa = wolf_problem_ptr_->createFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
+    ProblemPtr problem = Problem::create(FRM_PO_3D);
+    // One anchor frame to define the lmk, and a copy to make a constraint
+    FrameBasePtr kf_a = problem->createFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_0 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
     // and two other frames to observe the lmk
-    FrameBasePtr kf1 = wolf_problem_ptr_->createFrame(KEY_FRAME,(Vector7s()<<0,-0.25,0,0,0,0,1).finished(), TimeStamp(0));
-    FrameBasePtr kf2 = wolf_problem_ptr_->createFrame(KEY_FRAME,(Vector7s()<<0, 0.25,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_1 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,-1,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_2 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,+1,0,0,0,0,1).finished(), TimeStamp(0));
 
-    kfa->fix();
-    kf1->fix();
-    kf2->fix();
+    kf_a->fix();
+    kf_0->fix();
+    kf_1->fix();
+    kf_2->fix();
     // ============================================================================================================
 
     // ============================================================================================================
     /* 2 */
     GET_WOLF_ROOT
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,-0.5,0.5,-0.5,0.5).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
-    SensorCamera::Ptr camera_ptr = std::static_pointer_cast<SensorCamera>(sensor_ptr);
+    SensorBasePtr sensor_ptr = problem->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,-0.5,0.5,-0.5,0.5).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
+    SensorCamera::Ptr camera = std::static_pointer_cast<SensorCamera>(sensor_ptr);
     // ============================================================================================================
 
     // ============================================================================================================
     /* 3 */
-    Eigen::Vector3s lmk_p3D = {0,0,1}; // referenced to the camera
-    std::cout << std::endl << "lmk: " << lmk_p3D.transpose() << std::endl;
-    lmk_p3D.normalize();
+    Eigen::Vector3s lmk_dir = {0,0,1}; // in the optical axis of the anchor camera at kfa
+    std::cout << std::endl << "lmk: " << lmk_dir.transpose() << std::endl;
+    lmk_dir.normalize();
     Eigen::Vector4s lmk_hmg_c;
-    Scalar distance = 0.5;
-    lmk_hmg_c = {lmk_p3D(0),lmk_p3D(1),lmk_p3D(2),(1/distance)};
+    Scalar distance = 1.0; // from anchor at kfa
+    lmk_hmg_c = {lmk_dir(0),lmk_dir(1),lmk_dir(2),(1/distance)};
     std::cout << "lmk hmg in C frame: " << lmk_hmg_c.transpose() << std::endl;
     // ============================================================================================================
 
 
     // Captures------------------
-    cv::Mat frame;
-    frame.zeros(2,2,0);
-    CaptureImage::Ptr image_ptr_1 = std::make_shared<CaptureImage>(TimeStamp(0), camera_ptr, frame);
-    CaptureImage::Ptr image_ptr_2 = std::make_shared<CaptureImage>(TimeStamp(0), camera_ptr, frame);
-    kf1->addCapture(image_ptr_1);
-    kf2->addCapture(image_ptr_2);
+    cv::Mat cv_image;
+    cv_image.zeros(2,2,0);
+    CaptureImage::Ptr image_0 = std::make_shared<CaptureImage>(TimeStamp(0), camera, cv_image);
+    CaptureImage::Ptr image_1 = std::make_shared<CaptureImage>(TimeStamp(1), camera, cv_image);
+    CaptureImage::Ptr image_2 = std::make_shared<CaptureImage>(TimeStamp(2), camera, cv_image);
+    kf_0->addCapture(image_0);
+    kf_1->addCapture(image_1);
+    kf_2->addCapture(image_2);
 
     // Features-----------------
-    cv::KeyPoint kp1; //kp1.pt.x = 0; kp1.pt.y = 0;
-    cv::KeyPoint kp2; //kp2.pt.x = 0; kp2.pt.y = 0;
     cv::Mat desc;
 
-    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_1 = std::make_shared<FeaturePointImage>(kp1, desc, Eigen::Matrix2s::Identity());
-    image_ptr_1->addFeature(feat_point_image_ptr_1);
+    cv::KeyPoint kp0;
+    std::shared_ptr<FeaturePointImage> feat_0 = std::make_shared<FeaturePointImage>(kp0, desc, Eigen::Matrix2s::Identity());
+    image_0->addFeature(feat_0);
 
-    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_2 = std::make_shared<FeaturePointImage>(kp2, desc, Eigen::Matrix2s::Identity());
-    image_ptr_2->addFeature(feat_point_image_ptr_2);
+    cv::KeyPoint kp_1;
+    std::shared_ptr<FeaturePointImage> feat_1 = std::make_shared<FeaturePointImage>(kp_1, desc, Eigen::Matrix2s::Identity());
+    image_1->addFeature(feat_1);
+
+    cv::KeyPoint kp_2;
+    std::shared_ptr<FeaturePointImage> feat_2 = std::make_shared<FeaturePointImage>(kp_2, desc, Eigen::Matrix2s::Identity());
+    image_2->addFeature(feat_2);
 
     // Landmark--------------------
-    std::shared_ptr<LandmarkAHP> lmk_ahp_ptr = std::make_shared<LandmarkAHP>(lmk_hmg_c, kfa, camera_ptr, desc);
-    wolf_problem_ptr_->addLandmark(lmk_ahp_ptr);
+    std::shared_ptr<LandmarkAHP> lmk_ahp = std::make_shared<LandmarkAHP>(lmk_hmg_c, kf_a, camera, desc);
+    problem->addLandmark(lmk_ahp);
 
     // Constraints------------------
-    ConstraintAHP::Ptr constraint_ptr1 = std::make_shared<ConstraintAHP>(feat_point_image_ptr_1, kf1, lmk_ahp_ptr );
-    feat_point_image_ptr_1->addConstraint(constraint_ptr1);
-    constraint_ptr1->setFrameOtherPtr(kfa);
-    kfa->addConstrainedBy(constraint_ptr1);
-    lmk_ahp_ptr->addConstrainedBy(constraint_ptr1);
-
-    ConstraintAHP::Ptr constraint_ptr2 = std::make_shared<ConstraintAHP>(feat_point_image_ptr_2, kf2, lmk_ahp_ptr );
-    feat_point_image_ptr_2->addConstraint(constraint_ptr2);
-    constraint_ptr2->setFrameOtherPtr(kfa);
-    kfa->addConstrainedBy(constraint_ptr2);
-    lmk_ahp_ptr->addConstrainedBy(constraint_ptr2);
+    ConstraintAHP::Ptr constraint_ptr0 = ConstraintAHP::create(feat_0, kf_0, lmk_ahp );
+    ConstraintAHP::Ptr constraint_ptr1 = ConstraintAHP::create(feat_1, kf_1, lmk_ahp );
+    ConstraintAHP::Ptr constraint_ptr2 = ConstraintAHP::create(feat_2, kf_2, lmk_ahp );
 
     // Projections----------------------------
-    Eigen::VectorXs pix1(constraint_ptr1->expectation());
-    cv::KeyPoint cvPix1(pix1(0), pix1(1), 16);
-    feat_point_image_ptr_1->setKeypoint(cvPix1);
+    Eigen::VectorXs pix_0(constraint_ptr0->expectation());
+    cv::KeyPoint cvPix_0(pix_0(0), pix_0(1), 16);
+    feat_0->setKeypoint(cvPix_0);
 
-    Eigen::VectorXs pix2(constraint_ptr2->expectation());
-    cv::KeyPoint cvPix2(pix2(0), pix2(1), 16);
-    feat_point_image_ptr_2->setKeypoint(cvPix2);
+    Eigen::VectorXs pix_1(constraint_ptr1->expectation());
+    cv::KeyPoint cvPix_1(pix_1(0), pix_1(1), 16);
+    feat_1->setKeypoint(cvPix_1);
 
-    kp1 = feat_point_image_ptr_1->getKeypoint();
-    kp2 = feat_point_image_ptr_2->getKeypoint();
+    Eigen::VectorXs pix_2(constraint_ptr2->expectation());
+    cv::KeyPoint cvPix_2(pix_2(0), pix_2(1), 16);
+    feat_2->setKeypoint(cvPix_2);
 
-    std::cout << "pixel 1: " << pix1.transpose() << std::endl;
-    std::cout << "pixel 2: " << pix2.transpose() << std::endl;
+    kp0 = feat_0->getKeypoint();
+    kp_1 = feat_1->getKeypoint();
+    kp_2 = feat_2->getKeypoint();
+
+    std::cout << "pixel 0: " << pix_0.transpose() << std::endl;
+    std::cout << "pixel 1: " << pix_1.transpose() << std::endl;
+    std::cout << "pixel 2: " << pix_2.transpose() << std::endl;
     //
     //======== up to here the initial projections ==============
 
@@ -127,38 +133,36 @@ int main(int argc, char** argv)
     //======== now we want to estimate a new lmk ===============
     //
     // Features -----------------
-    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_3 = std::make_shared<FeaturePointImage>(kp1, desc, Eigen::Matrix2s::Identity());
-    image_ptr_1->addFeature(feat_point_image_ptr_3);
+    std::shared_ptr<FeaturePointImage> feat_3 = std::make_shared<FeaturePointImage>(kp_1, desc, Eigen::Matrix2s::Identity());
+    image_1->addFeature(feat_3);
 
-    std::shared_ptr<FeaturePointImage> feat_point_image_ptr_4 = std::make_shared<FeaturePointImage>(kp2, desc, Eigen::Matrix2s::Identity());
-    image_ptr_2->addFeature(feat_point_image_ptr_4);
+    std::shared_ptr<FeaturePointImage> feat_4 = std::make_shared<FeaturePointImage>(kp_2, desc, Eigen::Matrix2s::Identity());
+    image_2->addFeature(feat_4);
 
 
     // New landmark with measured pixels from kf0 (anchor) kf1 and kf2 (measurements)
-    Scalar unknown_distance = 1;
-    Matrix3s K = camera_ptr->getIntrinsicMatrix();
-    Vector3s pix1_hmg;
-    pix1_hmg << pix1, 1;
-    Eigen::Vector3s v = K.inverse() * pix1_hmg;
-    Eigen::Vector4s hmg;
-    hmg << v, 1/unknown_distance;
-    LandmarkAHP::Ptr lmk( std::make_shared<LandmarkAHP>(hmg, kf1, camera_ptr, frame) );
-    wolf_problem_ptr_->addLandmark(lmk);
+    Scalar unknown_distance = 2; // the real distance is 1
+    Matrix3s K = camera->getIntrinsicMatrix();
+    Vector3s pix_0_hmg;
+    pix_0_hmg << pix_0, 1;
+    Eigen::Vector3s dir_0 = K.inverse() * pix_0_hmg;
+    Eigen::Vector4s pnt_hmg_0;
+    pnt_hmg_0 << dir_0, 1/unknown_distance;
+    LandmarkAHP::Ptr lmk( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_0, camera, cv_image) );
+    problem->addLandmark(lmk);
 
-    {ConstraintAHP(feat_point_image_ptr_4, kf2, lmk );} // create and destroy just to waste constraint id = 3
+    // New constraints from kf1 and kf2
+    ConstraintAHP::Ptr ctr_3 = ConstraintAHP::create(feat_3, kf_1, lmk );
+    ConstraintAHP::Ptr ctr_4 = ConstraintAHP::create(feat_4, kf_2, lmk );
 
-    // New constraint from kf2
-    ConstraintAHP::Ptr ctr4 = std::make_shared<ConstraintAHP>(feat_point_image_ptr_4, kf2, lmk );
-    feat_point_image_ptr_4->addConstraint(ctr4);
-    ctr4->setFrameOtherPtr(kf1);
-    kf1->addConstrainedBy(ctr4);
-    lmk->addConstrainedBy(ctr4);
+    Eigen::Vector2s pix_3 = ctr_3->expectation();
+    Eigen::Vector2s pix_4 = ctr_4->expectation();
 
-    Eigen::Vector2s pix4 = ctr4->expectation();
-    std::cout << "pix 4: " << pix4.transpose() << std::endl;
+    std::cout << "pix 3: " << pix_3.transpose() << std::endl;
+    std::cout << "pix 4: " << pix_4.transpose() << std::endl;
 
     // Wolf tree status ----------------------
-    wolf_problem_ptr_->print();
+    problem->print();
 //    wolf_problem_ptr_->check();
 
 
@@ -353,7 +357,7 @@ int main(int argc, char** argv)
 //
 //    // ============================================================================================================
 //    /* 11 */
-//    ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(feat_point_image_ptr_2, kf4, lmk_ahp_ptr );
+//    ConstraintAHP::Ptr constraint_ptr = ConstraintAHP::create(feat_point_image_ptr_2, kf4, lmk_ahp_ptr );
 //    feat_point_image_ptr_2->addConstraint(constraint_ptr);
 //
 //    // ============================================================================================================
