@@ -79,10 +79,10 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::computeJacobian(const Eigen
     assert(_jacobian.rows() == global_size_ && _jacobian.cols() == local_size_ && "Wrong size of Jacobian matrix.");
 
     using namespace Eigen;
-    _jacobian << -_q(0), -_q(1), -_q(2),
-                  _q(3), -_q(2),  _q(1),
-                  _q(2),  _q(3), -_q(0),
-                 -_q(1),  _q(0),  _q(3);
+    _jacobian <<  _q(3),  _q(2), -_q(1),
+                 -_q(2),  _q(3),  _q(0),
+                  _q(1), -_q(0),  _q(3),
+                 -_q(0), -_q(1), -_q(2) ;
     _jacobian /= 2;
 
     return true;
