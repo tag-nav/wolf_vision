@@ -48,6 +48,9 @@ public:
   template<typename... Args>
   void debug(const Args&... args);
 
+  template<typename... Args>
+  void trace(const Args&... args);
+
   void enable_debug(const bool enable);
 
   bool enable_debug();
@@ -93,6 +96,10 @@ Logger::Logger()
   enable_debug(true);
 #endif
 
+#ifdef _WOLF_TRACE
+  console_->set_level(spdlog::level::trace);
+#endif
+
   // Enable asynchronous logging
   // Queue size must be a power of 2
   spdlog::set_async_mode(4096);
@@ -129,6 +136,12 @@ template<typename... Args>
 void Logger::debug(const Args&... args)
 {
   console_->debug(repeat_string("{}", sizeof...(args)).c_str(), args...);
+}
+
+template<typename... Args>
+void Logger::trace(const Args&... args)
+{
+  console_->trace(repeat_string("{}", sizeof...(args)).c_str(), args...);
 }
 
 inline void Logger::enable_debug(const bool enable)
@@ -180,7 +193,7 @@ inline bool Logger::set_async_queue(const std::size_t q_size)
 #ifdef _WOLF_TRACE
   #define WOLF_TRACE(...) \
     char this_file[] = __FILE__;\
-    WOLF_WARN("[", basename(this_file), " l#", __LINE__, \
+    wolf::internal::Logger::get().trace("[", basename(this_file), " l#", __LINE__, \
               " : ", __FUNCTION__, "] ", __VA_ARGS__)
 #else
   #define WOLF_TRACE(...)
