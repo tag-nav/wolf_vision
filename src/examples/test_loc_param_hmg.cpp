@@ -20,20 +20,16 @@ int main()
     
     LocalParametrizationHomogeneous lh;
 
-    Scalar dx = 1e-6;
+    Scalar dx = 1e-8;
     VectorXs h(4);
     VectorXs h0(4);
     VectorXs v(3), v0(3), dv(3);
     MatrixXs J_num(4,3), J_anal(4,3);
-//    Vector4s h(4);
-//    Vector4s h0(4);
-//    Vector3s v(3), v0(3), dv(3);
-//    Matrix<Scalar,4,3> J_num, J_anal;
 
-//    h0.setRandom().normalized();
-    h0.setRandom();
+    h0.setRandom().normalize();
+//    h0.setRandom();
 
-    std::cout << "h0: " << h0.transpose() << std::endl;
+    std::cout << "\nh0: " << h0.transpose() << std::endl;
 
     Map<const VectorXs> _h0(h0.data(), 4);
     Map<const VectorXs> _dv(dv.data(), 3);
