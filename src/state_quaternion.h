@@ -23,18 +23,18 @@ class StateQuaternion : public StateBlock
 };
 
 inline StateQuaternion::StateQuaternion(const Eigen::Quaternions _quaternion, bool _fixed) :
-        StateBlock(_quaternion.coeffs())
+        StateBlock(_quaternion.coeffs(), _fixed, std::make_shared<LocalParametrizationQuaternion<DQ_LOCAL>>())
 {
 }
 
 inline StateQuaternion::StateQuaternion(const Eigen::VectorXs _state, bool _fixed) :
-        StateBlock(_state, _fixed, std::make_shared<LocalParametrizationQuaternion<DQ_GLOBAL>>())
+        StateBlock(_state, _fixed, std::make_shared<LocalParametrizationQuaternion<DQ_LOCAL>>())
 {
     assert(_state.size() == 4 && "The quaternion state vector must be of size 4");
 }
 
 inline StateQuaternion::StateQuaternion(bool _fixed) :
-        StateBlock(4, _fixed, std::make_shared<LocalParametrizationQuaternion<DQ_GLOBAL>>())
+        StateBlock(4, _fixed, std::make_shared<LocalParametrizationQuaternion<DQ_LOCAL>>())
 {
     state_ = Eigen::Quaternions::Identity().coeffs();
     //
