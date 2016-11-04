@@ -39,7 +39,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         {
             setType("AHP");
 
-//            frame_other_ptr_ = _landmark_ptr->getAnchorFrame();
+            frame_other_ptr_ = _landmark_ptr->getAnchorFrame();
 
             K_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
             distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
@@ -54,8 +54,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         void expectation(const T* const _current_frame_p, const T* const _current_frame_o, const T* const _anchor_frame_p,
                                     const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _expectation) const
         {
-            std::cout << "expectation" << std::endl;
-
             // Maps over the input pointers
             Eigen::Matrix<T, 3, 3> K = K_.cast<T>();
             Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg_c0(_lmk_hmg);
