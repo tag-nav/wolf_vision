@@ -169,6 +169,16 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             return JAC_AUTO;
         }
 
+        static ConstraintAHP::Ptr create(FeatureBasePtr _ftr_ptr, FrameBasePtr _frm_current_ptr, LandmarkAHP::Ptr _lmk_ahp_ptr)
+        {
+            Ptr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _frm_current_ptr, _lmk_ahp_ptr);
+            _ftr_ptr->addConstraint(ctr_ahp);
+            ctr_ahp->setFrameOtherPtr(_lmk_ahp_ptr->getAnchorFrame());
+            _lmk_ahp_ptr->getAnchorFrame()->addConstrainedBy(ctr_ahp);
+            _lmk_ahp_ptr->addConstrainedBy(ctr_ahp);
+            return  ctr_ahp;
+        }
+
 
 };
 
