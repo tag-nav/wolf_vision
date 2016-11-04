@@ -153,16 +153,16 @@ int main(int argc, char** argv)
     image_2->addFeature(feat_2);
 
     // Landmark--------------------
-    std::shared_ptr<LandmarkAHP> lmk_ahp = std::make_shared<LandmarkAHP>(lmk_hmg_c, kf_1, camera, desc);
-    problem->addLandmark(lmk_ahp);
-    lmk_ahp->setStatus(LANDMARK_FIXED);
+    std::shared_ptr<LandmarkAHP> lmk_1 = std::make_shared<LandmarkAHP>(lmk_hmg_c, kf_1, camera, desc);
+    problem->addLandmark(lmk_1);
+    lmk_1->setStatus(LANDMARK_FIXED);
 
     // Constraints------------------
-    ConstraintAHP::Ptr ctr_0 = ConstraintAHP::create(feat_0, kf_2, lmk_ahp );
+    ConstraintAHP::Ptr ctr_0 = ConstraintAHP::create(feat_0, kf_2, lmk_1 );
     feat_0->addConstraint(ctr_0);
-    ConstraintAHP::Ptr ctr_1 = ConstraintAHP::create(feat_1, kf_3, lmk_ahp );
+    ConstraintAHP::Ptr ctr_1 = ConstraintAHP::create(feat_1, kf_3, lmk_1 );
     feat_1->addConstraint(ctr_1);
-    ConstraintAHP::Ptr ctr_2 = ConstraintAHP::create(feat_2, kf_4, lmk_ahp );
+    ConstraintAHP::Ptr ctr_2 = ConstraintAHP::create(feat_2, kf_4, lmk_1 );
     feat_2->addConstraint(ctr_2);
 
     // Projections----------------------------
@@ -208,13 +208,13 @@ int main(int argc, char** argv)
     Eigen::Vector3s dir_0 = K.inverse() * pix_0_hmg;
     Eigen::Vector4s pnt_hmg_0;
     pnt_hmg_0 << dir_0, 1/unknown_distance;
-    LandmarkAHP::Ptr lmk( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_2, camera, cv_image) );
-    problem->addLandmark(lmk);
+    LandmarkAHP::Ptr lmk_2( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_2, camera, cv_image) );
+    problem->addLandmark(lmk_2);
 
     // New constraints from kf3 and kf4
-    ConstraintAHP::Ptr ctr_3 = ConstraintAHP::create(feat_3, kf_3, lmk );
+    ConstraintAHP::Ptr ctr_3 = ConstraintAHP::create(feat_3, kf_3, lmk_2 );
     feat_3->addConstraint(ctr_3);
-    ConstraintAHP::Ptr ctr_4 = ConstraintAHP::create(feat_4, kf_4, lmk );
+    ConstraintAHP::Ptr ctr_4 = ConstraintAHP::create(feat_4, kf_4, lmk_2 );
     feat_4->addConstraint(ctr_4);
 
     Eigen::Vector2s pix_3 = ctr_3->expectation();
@@ -248,6 +248,9 @@ int main(int argc, char** argv)
 
     ceres::Solver::Summary summary = ceres_manager.solve();
     std::cout << summary.FullReport() << std::endl;
+
+    std::cout << "Landmark 1: " << lmk_1->getPoint3D().transpose() << std::endl;
+    std::cout << "Landmark 2: " << lmk_2->getPoint3D().transpose() << std::endl;
 
 }
 

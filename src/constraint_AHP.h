@@ -152,8 +152,8 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
             // debug info:
             Eigen::Map<const Eigen::Matrix< T, 4, 1> > landmark(_lmk_hmg);
-            std::cout << "\nLANDMARK  L" <<  getLandmarkOtherPtr()->id() << ":\n\t" << landmark[0] << "\n\t" << landmark[1] << "\n\t" << landmark[2] << "\n\t" << landmark[3] << std::endl;
-            std::cout << "\nRESIDUALS c" <<  id() << ":\n\t" << residuals[0] << "\n\t" << residuals[1] << std::endl;
+//            std::cout << "\nLANDMARK  L" <<  getLandmarkOtherPtr()->id() << ":\n\t" << landmark[0] << "\n\t" << landmark[1] << "\n\t" << landmark[2] << "\n\t" << landmark[3] << std::endl;
+//            std::cout << "\nRESIDUALS c" <<  id() << ":\n\t" << residuals[0] << "\n\t" << residuals[1] << std::endl;
 
             return true;
         }
