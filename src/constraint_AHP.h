@@ -139,7 +139,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         bool operator ()(const T* const _current_frame_p, const T* const _current_frame_o, const T* const _anchor_frame_p,
                          const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _residuals) const
         {
-            std::cout << "operator" << std::endl;
+            std::cout << "operator: " << id() << std::endl;
             Eigen::Matrix<T, Eigen::Dynamic, 1> expected(2) ;
             expectation(_current_frame_p, _current_frame_o,  _anchor_frame_p,
                           _anchor_frame_o,  _lmk_hmg, expected.data()) ;
