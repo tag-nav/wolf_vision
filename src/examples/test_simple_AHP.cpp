@@ -123,7 +123,7 @@ int main(int argc, char** argv)
     Eigen::Vector4s lmk_hmg_c;
     Scalar distance = 1.0; // from anchor at kf1
     lmk_hmg_c = {lmk_dir(0),lmk_dir(1),lmk_dir(2),(1/distance)};
-    std::cout << "lmk hmg in C frame: " << lmk_hmg_c.transpose() << std::endl;
+//    std::cout << "lmk hmg in C frame: " << lmk_hmg_c.transpose() << std::endl;
     // ============================================================================================================
 
 
@@ -188,7 +188,7 @@ int main(int argc, char** argv)
     //
     //======== up to here the initial projections ==============
 
-    std::cout << "\n\n";
+    std::cout << "\n";
 
     //======== now we want to estimate a new lmk ===============
     //
