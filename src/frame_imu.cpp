@@ -11,6 +11,7 @@ FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_
                    StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
         FrameBase(_ts, _p_ptr, _q_ptr, _v_ptr)//,
 {
+    resizeStateBlockVec(5); // could have done push_back, but prefer more explicit locations for the StateBlocks
     setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
     setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
     setType("IMU");
@@ -20,6 +21,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr 
                    StateQuaternionPtr _q_ptr, StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
         FrameBase(_tp, _ts, _p_ptr, _q_ptr, _v_ptr)
 {
+    resizeStateBlockVec(5); // could have done push_back, but prefer more explicit locations for the StateBlocks
     setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
     setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
     setType("IMU");
@@ -28,6 +30,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr 
 FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
         FrameBase(_tp, _ts, std::make_shared<StateBlock>(3), std::make_shared<StateQuaternion>(), std::make_shared<StateBlock>(3))
 {
+    resizeStateBlockVec(5); // could have done push_back, but prefer more explicit locations for the StateBlocks
     setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
     setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
     assert(_x.size() == 16 && "Wrong vector size! Must be 16.");
