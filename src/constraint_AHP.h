@@ -28,7 +28,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
     public:
 
-        ConstraintAHP(FeatureBasePtr _ftr_ptr, FrameBasePtr _current_frame_ptr, std::shared_ptr<LandmarkAHP> _landmark_ptr,
+        ConstraintAHP(FeatureBasePtr _ftr_ptr, FrameBasePtr _current_frame_ptr, LandmarkAHP::Ptr _landmark_ptr,
                         bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP, _landmark_ptr, _apply_loss_function, _status,
                                              _current_frame_ptr->getPPtr(), _current_frame_ptr->getOPtr(), _landmark_ptr->getAnchorFrame()->getPPtr()
