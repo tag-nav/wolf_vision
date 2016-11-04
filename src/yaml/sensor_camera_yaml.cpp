@@ -62,9 +62,9 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
         //=========================================
         // ===== this part for debugging only =====
         //=========================================
-        std::cout << "\n--- Parameters Parsed from YAML file ---" << std::endl;
-        std::cout << "sensor type: " << sensor_type << std::endl;
-        std::cout << "sensor name: " << sensor_name << std::endl;
+//        std::cout << "\n--- Parameters Parsed from YAML file ---" << std::endl;
+//        std::cout << "sensor type: " << sensor_type << std::endl;
+//        std::cout << "sensor name: " << sensor_name << std::endl;
 
 //        // extrinsics discarded in this creator
 //        Vector3d pos            = camera_config["extrinsic"]["position"].as<Vector3d>();
@@ -74,10 +74,10 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
 //        std::cout << "\tposition    : " << pos.transpose() << std::endl;
 //        std::cout << "\torientation : " << ori.transpose() << std::endl;
 
-        std::cout << "sensor intrinsics: " << std::endl;
-        std::cout << "\timage size  : " << width << "x" << height << std::endl;
-        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
-        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
+//        std::cout << "sensor intrinsics: " << std::endl;
+//        std::cout << "\timage size  : " << width << "x" << height << std::endl;
+//        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
+//        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
         //=========================================
         //=========================================
 
