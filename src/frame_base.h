@@ -97,6 +97,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
     protected:
         StateBlockPtr getStateBlockPtr(unsigned int _i) const;
         void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+        void resizeStateBlockVec(int _size);
     private:
         void removeStateBlocks();
 
@@ -259,6 +260,7 @@ inline StateBlockPtr FrameBase::getStateBlockPtr(unsigned int _i) const
 
 inline void FrameBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
     state_block_vec_[_i] = _sb_ptr;
 }
 
@@ -278,6 +280,12 @@ inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
     _capt_ptr->setFramePtr(shared_from_this());
     _capt_ptr->setProblem(getProblem());
     return _capt_ptr;
+}
+
+inline void FrameBase::resizeStateBlockVec(int _size)
+{
+    if (_size > state_block_vec_.size())
+        state_block_vec_.resize(_size);
 }
 
 inline StateStatus FrameBase::getStatus() const

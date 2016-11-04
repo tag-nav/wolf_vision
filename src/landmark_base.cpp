@@ -12,15 +12,13 @@ unsigned int LandmarkBase::landmark_id_count_ = 0;
 LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
             NodeBase("LANDMARK", _type),
             map_ptr_(),
-            state_block_vec_(4), // allow for 4 state blocks by default. Should be enough in all applications.
+            state_block_vec_(2), // allow for 2 state blocks by default. Resize in derived constructors if needed.
             landmark_id_(++landmark_id_count_),
             type_id_(_tp),
             status_(LANDMARK_CANDIDATE)
 {
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
-    state_block_vec_[2] = nullptr;
-    state_block_vec_[3] = nullptr;
     std::cout << "constructed  +L" << id() << std::endl;
 }
                 

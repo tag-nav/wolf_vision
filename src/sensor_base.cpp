@@ -10,7 +10,7 @@ SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlo
                        const unsigned int _noise_size, const bool _extr_dyn) :
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
-        state_block_vec_(6), // allow for 6 state blocks by default. Should be enough in all applications.
+        state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
         sensor_id_(++sensor_id_count_), // simple ID factory
         type_id_(_tp),
         extrinsic_dynamic_(_extr_dyn),
@@ -20,9 +20,6 @@ SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlo
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _intr_ptr;
-    state_block_vec_[3] = nullptr;
-    state_block_vec_[4] = nullptr;
-    state_block_vec_[5] = nullptr;
     std::cout << "constructed  +S" << id() << std::endl;
     //
 }
@@ -31,7 +28,7 @@ SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBl
                        const Eigen::VectorXs & _noise_std, const bool _extr_dyn) :
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
-        state_block_vec_(6), // allow for 6 state blocks by default. Should be enough in all applications.
+        state_block_vec_(6), // allow for 3 state blocks by default. Resize in derived constructors if needed.
         sensor_id_(++sensor_id_count_), // simple ID factory
         type_id_(_tp),
         extrinsic_dynamic_(_extr_dyn),
@@ -41,9 +38,6 @@ SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBl
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _intr_ptr;
-    state_block_vec_[3] = nullptr;
-    state_block_vec_[4] = nullptr;
-    state_block_vec_[5] = nullptr;
     noise_cov_.setZero();
     for (unsigned int i = 0; i < _noise_std.size(); i++)
         noise_cov_(i, i) = noise_std_(i) * noise_std_(i);

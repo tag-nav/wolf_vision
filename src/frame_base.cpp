@@ -13,7 +13,7 @@ unsigned int FrameBase::frame_id_count_ = 0;
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
             NodeBase("FRAME", "BASE"),
             trajectory_ptr_(),
-            state_block_vec_(6), // allow for 6 state blocks by default. Should be enough in all applications.
+            state_block_vec_(3), // allow for 6 state blocks by default. Resize in derived constructors if needed.
             frame_id_(++frame_id_count_),
             type_id_(NON_KEY_FRAME),
 			status_(ST_ESTIMATED),
@@ -22,9 +22,6 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _v_ptr;
-    state_block_vec_[3] = nullptr;
-    state_block_vec_[4] = nullptr;
-    state_block_vec_[5] = nullptr;
     //
     if (isKey())
         std::cout << "constructed +KF" << id() << std::endl;
@@ -35,7 +32,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
 FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
             NodeBase("FRAME", "BASE"),
             trajectory_ptr_(),
-            state_block_vec_(6), // allow for 6 state blocks by default. Should be enough in all applications.
+            state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
             frame_id_(++frame_id_count_),
             type_id_(_tp),
 			status_(ST_ESTIMATED),
@@ -44,9 +41,6 @@ FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockP
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _v_ptr;
-    state_block_vec_[3] = nullptr;
-    state_block_vec_[4] = nullptr;
-    state_block_vec_[5] = nullptr;
 
     if (isKey())
         std::cout << "constructed +KF" << id() << std::endl;
