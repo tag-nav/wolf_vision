@@ -140,23 +140,21 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                          const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _residuals) const
         {
             std::cout << "operator" << std::endl;
-            Eigen::Matrix<T, Eigen::Dynamic, 1> u(2) ;
+            Eigen::Matrix<T, Eigen::Dynamic, 1> expected(2) ;
             expectation(_current_frame_p, _current_frame_o,  _anchor_frame_p,
-                          _anchor_frame_o,  _lmk_hmg, u.data()) ;
-            // ==================================================
+                          _anchor_frame_o,  _lmk_hmg, expected.data()) ;
 
-            //    std::cout << "\nCONSTRAINT INFO" << std::endl;
-            WOLF_DEBUG_HERE
-            Eigen::Matrix<T, 2, 1> feature_pos = getMeasurement().cast<T>();
+            Eigen::Matrix<T, 2, 1> measured = getMeasurement().cast<T>();
 
-            Eigen::Map<Eigen::Matrix<T, 2, 1> > residualsmap(_residuals);
+            Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
 
-            //            std::cout << "SquareRootInformation: " << getMeasurementSquareRootInformation() << std::endl;
+            residuals = getMeasurementSquareRootInformation().cast<T>() * (expected - measured);
 
-            residualsmap = getMeasurementSquareRootInformation().cast<T>() * (u - feature_pos);
+            // debug info:
+            Eigen::Map<const Eigen::Matrix< T, 4, 1> > landmark(_lmk_hmg);
+            std::cout << "\nLANDMARK  L" <<  getLandmarkOtherPtr()->id() << ":\n\t" << landmark[0] << "\n\t" << landmark[1] << "\n\t" << landmark[2] << "\n\t" << landmark[3] << std::endl;
+            std::cout << "\nRESIDUALS c" <<  id() << ":\n\t" << residuals[0] << "\n\t" << residuals[1] << std::endl;
 
-            std::cout << "\nRESIDUALS:\n\t" << residualsmap[0] << "\n\t" << residualsmap[1] << std::endl;
-            WOLF_DEBUG_HERE
             return true;
         }
 
@@ -169,8 +167,11 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
         static ConstraintAHP::Ptr create(FeatureBasePtr _ftr_ptr, FrameBasePtr _frm_current_ptr, LandmarkAHP::Ptr _lmk_ahp_ptr)
         {
+            // construct constraint
             Ptr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _frm_current_ptr, _lmk_ahp_ptr);
-            _ftr_ptr->addConstraint(ctr_ahp);
+
+            // link it to wolf tree
+//            _ftr_ptr->addConstraint(ctr_ahp);
             ctr_ahp->setFrameOtherPtr(_lmk_ahp_ptr->getAnchorFrame());
             _lmk_ahp_ptr->getAnchorFrame()->addConstrainedBy(ctr_ahp);
             _lmk_ahp_ptr->addConstrainedBy(ctr_ahp);

@@ -15,7 +15,63 @@
 #include "constraint_AHP.h"
 #include "ceres_wrapper/ceres_manager.h"
 
-
+/**
+ * This test simulates the following situation:
+ *   - A kf at the origin, we use it as anchor: kf1
+ *   - A kf at the origin, we use it to project lmks onto the anchor frame: kf2
+ *   - A kf at 1m to the right of the origin, kf3
+ *   - A kf at 1m to the left of the origin, kf4
+ *   - A lmk at 1m distance in front of the anchor: L1
+ *     - we use this lmk to project it onto kf2, kf3 and kf4 and obtain measured pixels p0, p1 and p2
+ *   - A lmk initialized at kf1, with measurement p0, at an distance of 2m: L2
+ *     - we project the pixels p3 and p4: we observe that they do not match p1 and p2
+ *     - we use the measurements p1 and p2 to solve the optimization problem on L2: L2 should converge to L1.
+ *   - This is a sketch of the situation:
+ *     - X, Y are the axes in world frame
+ *     - x, z are the axes in anchor camera frame. We have that X=z, Y=-x.
+ *     - Axes Z and y are perpendicular to the drawing; they heve no effect.
+ *
+ *                X,z
+ *                 ^
+ *                 |
+ *              L2 * 2
+ *                .|.
+ *               . | .
+ *              .  |  .
+ *             .   |   .
+ *            . L1 * 1  .
+ *           .   . | .   .
+ *          .  .   |   .  .
+ *      p4 . .     |     . . p3
+ *        .. p2    |    p1 ..
+ *  Y <--+---------+---------+
+ * -x   +1         0        -1
+ *      kf4      kf1        kf3
+ *               kf2
+ *
+ *      camera: (uo,vo) = (320,240)
+ *              (au,av) = (320,320)
+ *
+ *      projection geometry:
+ *
+ *     1:1  2:1  1:0  2:1  1:1
+ *      0   160  320  480  640
+ *      +----+----+----+----+
+ *                |
+ *                |
+ *                | 320
+ *                |
+ *                *
+ *
+ *
+ *      projected pixels:
+ *      p0 = (320,240) // at optical axis or relation 1:0
+ *      p1 = ( 0 ,240) // at 45 deg or relation 1:1
+ *      p2 = (640,240) // at 45 deg or relation 1:1
+ *      p3 = (160,240) // at a relation 2:1
+ *      p4 = (480,240) // at a relation 2:1
+ *
+ */
 int main(int argc, char** argv)
 {
     using namespace wolf;
@@ -25,13 +81,13 @@ int main(int argc, char** argv)
      * 2. crear 1 sensor
      * 3. crear 1 lmk1
      * 4. projectar lmk sobre sensor a fk1
-     * 5. projectar lmk sobre sensor a kf2
+     * 5. projectar lmk sobre sensor a kf4
      * 6. // esborrar lmk lmk_ptr->remove() no cal
      * 7. crear nous kf
      * 8. crear captures
      * 9. crear features amb les mesures de 4 i 5
-     * 10. crear lmk2 des de kf1
-     * 11. crear constraint des del kf2 a lmk2, amb ancora al kf1
+     * 10. crear lmk2 des de kf3
+     * 11. crear constraint des del kf4 a lmk2, amb ancora al kf3
      * 12. solve
      * 13. lmk1 == lmk2 ?
      */
@@ -40,16 +96,16 @@ int main(int argc, char** argv)
     /* 1 */
     ProblemPtr problem = Problem::create(FRM_PO_3D);
     // One anchor frame to define the lmk, and a copy to make a constraint
-    FrameBasePtr kf_a = problem->createFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
-    FrameBasePtr kf_0 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_1 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_2 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
     // and two other frames to observe the lmk
-    FrameBasePtr kf_1 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,-1,0,0,0,0,1).finished(), TimeStamp(0));
-    FrameBasePtr kf_2 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,+1,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_3 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,-1,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_4 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,+1,0,0,0,0,1).finished(), TimeStamp(0));
 
-    kf_a->fix();
-    kf_0->fix();
     kf_1->fix();
     kf_2->fix();
+    kf_3->fix();
+    kf_4->fix();
     // ============================================================================================================
 
     // ============================================================================================================
@@ -61,11 +117,11 @@ int main(int argc, char** argv)
 
     // ============================================================================================================
     /* 3 */
-    Eigen::Vector3s lmk_dir = {0,0,1}; // in the optical axis of the anchor camera at kfa
+    Eigen::Vector3s lmk_dir = {0,0,1}; // in the optical axis of the anchor camera at kf1
     std::cout << std::endl << "lmk: " << lmk_dir.transpose() << std::endl;
     lmk_dir.normalize();
     Eigen::Vector4s lmk_hmg_c;
-    Scalar distance = 1.0; // from anchor at kfa
+    Scalar distance = 1.0; // from anchor at kf1
     lmk_hmg_c = {lmk_dir(0),lmk_dir(1),lmk_dir(2),(1/distance)};
     std::cout << "lmk hmg in C frame: " << lmk_hmg_c.transpose() << std::endl;
     // ============================================================================================================
@@ -77,9 +133,9 @@ int main(int argc, char** argv)
     CaptureImage::Ptr image_0 = std::make_shared<CaptureImage>(TimeStamp(0), camera, cv_image);
     CaptureImage::Ptr image_1 = std::make_shared<CaptureImage>(TimeStamp(1), camera, cv_image);
     CaptureImage::Ptr image_2 = std::make_shared<CaptureImage>(TimeStamp(2), camera, cv_image);
-    kf_0->addCapture(image_0);
-    kf_1->addCapture(image_1);
-    kf_2->addCapture(image_2);
+    kf_2->addCapture(image_0);
+    kf_3->addCapture(image_1);
+    kf_4->addCapture(image_2);
 
     // Features-----------------
     cv::Mat desc;
@@ -97,24 +153,28 @@ int main(int argc, char** argv)
     image_2->addFeature(feat_2);
 
     // Landmark--------------------
-    std::shared_ptr<LandmarkAHP> lmk_ahp = std::make_shared<LandmarkAHP>(lmk_hmg_c, kf_a, camera, desc);
+    std::shared_ptr<LandmarkAHP> lmk_ahp = std::make_shared<LandmarkAHP>(lmk_hmg_c, kf_1, camera, desc);
     problem->addLandmark(lmk_ahp);
+    lmk_ahp->setStatus(LANDMARK_FIXED);
 
     // Constraints------------------
-    ConstraintAHP::Ptr constraint_ptr0 = ConstraintAHP::create(feat_0, kf_0, lmk_ahp );
-    ConstraintAHP::Ptr constraint_ptr1 = ConstraintAHP::create(feat_1, kf_1, lmk_ahp );
-    ConstraintAHP::Ptr constraint_ptr2 = ConstraintAHP::create(feat_2, kf_2, lmk_ahp );
+    ConstraintAHP::Ptr ctr_0 = ConstraintAHP::create(feat_0, kf_2, lmk_ahp );
+    feat_0->addConstraint(ctr_0);
+    ConstraintAHP::Ptr ctr_1 = ConstraintAHP::create(feat_1, kf_3, lmk_ahp );
+    feat_1->addConstraint(ctr_1);
+    ConstraintAHP::Ptr ctr_2 = ConstraintAHP::create(feat_2, kf_4, lmk_ahp );
+    feat_2->addConstraint(ctr_2);
 
     // Projections----------------------------
-    Eigen::VectorXs pix_0(constraint_ptr0->expectation());
+    Eigen::VectorXs pix_0(ctr_0->expectation());
     cv::KeyPoint cvPix_0(pix_0(0), pix_0(1), 16);
     feat_0->setKeypoint(cvPix_0);
 
-    Eigen::VectorXs pix_1(constraint_ptr1->expectation());
+    Eigen::VectorXs pix_1(ctr_1->expectation());
     cv::KeyPoint cvPix_1(pix_1(0), pix_1(1), 16);
     feat_1->setKeypoint(cvPix_1);
 
-    Eigen::VectorXs pix_2(constraint_ptr2->expectation());
+    Eigen::VectorXs pix_2(ctr_2->expectation());
     cv::KeyPoint cvPix_2(pix_2(0), pix_2(1), 16);
     feat_2->setKeypoint(cvPix_2);
 
@@ -140,7 +200,7 @@ int main(int argc, char** argv)
     image_2->addFeature(feat_4);
 
 
-    // New landmark with measured pixels from kf0 (anchor) kf1 and kf2 (measurements)
+    // New landmark with measured pixels from kf2 (anchor) kf3 and kf4 (measurements)
     Scalar unknown_distance = 2; // the real distance is 1
     Matrix3s K = camera->getIntrinsicMatrix();
     Vector3s pix_0_hmg;
@@ -148,12 +208,14 @@ int main(int argc, char** argv)
     Eigen::Vector3s dir_0 = K.inverse() * pix_0_hmg;
     Eigen::Vector4s pnt_hmg_0;
     pnt_hmg_0 << dir_0, 1/unknown_distance;
-    LandmarkAHP::Ptr lmk( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_0, camera, cv_image) );
+    LandmarkAHP::Ptr lmk( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_2, camera, cv_image) );
     problem->addLandmark(lmk);
 
-    // New constraints from kf1 and kf2
-    ConstraintAHP::Ptr ctr_3 = ConstraintAHP::create(feat_3, kf_1, lmk );
-    ConstraintAHP::Ptr ctr_4 = ConstraintAHP::create(feat_4, kf_2, lmk );
+    // New constraints from kf3 and kf4
+    ConstraintAHP::Ptr ctr_3 = ConstraintAHP::create(feat_3, kf_3, lmk );
+    feat_3->addConstraint(ctr_3);
+    ConstraintAHP::Ptr ctr_4 = ConstraintAHP::create(feat_4, kf_4, lmk );
+    feat_4->addConstraint(ctr_4);
 
     Eigen::Vector2s pix_3 = ctr_3->expectation();
     Eigen::Vector2s pix_4 = ctr_4->expectation();
@@ -162,221 +224,45 @@ int main(int argc, char** argv)
     std::cout << "pix 4: " << pix_4.transpose() << std::endl;
 
     // Wolf tree status ----------------------
-    problem->print();
-//    wolf_problem_ptr_->check();
+    problem->print(3);
+//    problem->check();
 
 
 
 
 
 
+    // ========== solve ==================================================================================================
+    /* 12 */
+    // Ceres wrapper
+    ceres::Solver::Options ceres_options;
+    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+    ceres_options.max_line_search_step_contraction = 1e-3;
+    //    ceres_options.minimizer_progress_to_stdout = false;
+    //    ceres_options.line_search_direction_type = ceres::LBFGS;
+    //    ceres_options.max_num_iterations = 100;
+    google::InitGoogleLogging(argv[0]);
+
+    CeresManager ceres_manager(problem, ceres_options);
 
 
-
-
-
-
-
-
-
-
-
-//    // ============================================================================================================
-//    /* 4 */
-//
-//    /* change the reference from world to camera (kf1) */
-//    Eigen::Vector3s pwr1 = kf1->getPPtr()->getVector();
-//    Eigen::Vector3s prc = wolf_problem_ptr_->getSensorPtr("PinHole")->getPPtr()->getVector();
-////    std::cout << "keyframe pose: " << pwr1.transpose() << std::endl;
-////    std::cout << "camera pose:   " << prc.transpose() << std::endl;
-//
-//    Eigen::Translation<Scalar,3> twr1, trc;
-//    twr1.x() = pwr1(0); twr1.y() = pwr1(1); twr1.z() = pwr1(2);
-//    trc.x() = prc(0); trc.y() = prc(1); trc.z() = prc(2);
-//
-//    Eigen::Quaternion<Scalar> qwr1, qwr0, qrc;
-//    Eigen::Vector4s quaternion_current_frame = kf1->getOPtr()->getVector();
-//    Eigen::Vector4s quaternion_sensor = wolf_problem_ptr_->getSensorPtr("PinHole")->getOPtr()->getVector();
-//    qwr1 = quaternion_current_frame;
-//    qrc = quaternion_sensor;
-////    std::cout << "keyframe orientation: " << qwr1.vec().transpose() << " " << qwr1.w() << std::endl;
-////    std::cout << "camera orientation:   " << qrc.vec().transpose() <<  " " << qrc.w() << std::endl;
-//
-//    Eigen::Transform<Scalar,3,Eigen::Affine> T_W_R1, T_R1_C1;
-//    T_W_R1 = twr1 * qwr1;
-//    T_R1_C1 = trc * qrc;
-//
-//    Eigen::Vector4s lmk1_hmg_c1;
-//    lmk1_hmg_c1 = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * lmk_hmg_w;
-////    std::cout << "lmk hmg in c1: " << lmk1_hmg_c1.transpose() << std::endl;
-//
-//    /* project the landmark (kf1) */
-//    Eigen::Vector3s point2D_hmg = lmk1_hmg_c1.head(3);
-//    Eigen::Vector2s point2D_kf1 = point2D_hmg.head(2)/point2D_hmg(2);
-//    point2D_kf1 = pinhole::distortPoint((std::static_pointer_cast<SensorCamera>(wolf_problem_ptr_->getSensorPtr("PinHole")))->getDistortionVector(),point2D_kf1);
-//    point2D_kf1 = pinhole::pixellizePoint(wolf_problem_ptr_->getSensorPtr("PinHole")->getIntrinsicPtr()->getVector(),point2D_kf1);
-//
-//    std::cout << "2D point (kf1): " << point2D_kf1.transpose() << std::endl;
-//
-////    /* to test the projection - backprojection */
-////    point2D_kf1 = pinhole::depixellizePoint(wolf_problem_ptr_->getSensorPtr("PinHole")->getIntrinsicPtr()->getVector(),point2D_kf1);
-////    point2D_kf1 = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(wolf_problem_ptr_->getSensorPtr("PinHole")))->getCorrectionVector(),point2D_kf1);
-////
-////    Eigen::Vector3s point3D;
-////    point3D.head<2>() = point2D_kf1;
-////    point3D(2) = 1;
-////    point3D.normalize();
-////
-////    Eigen::Vector4s point3D_hmg;
-////    point3D_hmg = {point3D(0),point3D(1),point3D(2),1/distance};
-////
-////    Eigen::Vector4s lmk1_hmg_bp_w;
-////    lmk1_hmg_bp_w = T_W_R1 * T_R1_C1 * point3D_hmg;
-////
-////    std::cout << "3D hmg point: " << (lmk1_hmg_bp_w.head(3)/(1/distance)).transpose() << std::endl;
-//
-//    // ============================================================================================================
-//
-//    // ============================================================================================================
-//    /* 5 */
-//
-//    /* change the reference from world to camera (kf2) */
-//    Eigen::Vector3s pwr1_kf2 = kf2->getPPtr()->getVector();
-//    Eigen::Translation<Scalar,3> twr1_;
-//    twr1_.x() = pwr1_kf2(0); twr1_.y() = pwr1_kf2(1); twr1_.z() = pwr1_kf2(2);
-////        std::cout << "keyframe pose: " << pwr1_kf2.transpose() << std::endl;
-////        std::cout << "camera pose:   " << prc.transpose() << std::endl;
-//
-//    Eigen::Quaternion<Scalar> qwr1_kf2;
-//    Eigen::Vector4s quaternion_current_frame_kf2 = kf2->getOPtr()->getVector();
-//    qwr1_kf2 = quaternion_current_frame_kf2;
-////    std::cout << "keyframe orientation: " << qwr1_kf2.vec().transpose() << " " << qwr1_kf2.w() << std::endl;
-////    std::cout << "camera orientation:   " << qrc.vec().transpose() <<  " " << qrc.w() << std::endl;
-//
-//
-//    Eigen::Transform<Scalar,3,Eigen::Affine> T_W_R1_;
-//    T_W_R1_ = twr1_ * qwr1_kf2;
-//
-//    Eigen::Vector4s lmk2_hmg_c1;
-////    std::cout << "lmk hmg in w: " << lmk_hmg_w.transpose() << std::endl;
-//    lmk2_hmg_c1 = T_R1_C1.inverse(Eigen::Affine) * T_W_R1_.inverse(Eigen::Affine) * lmk_hmg_w;
-////    std::cout << "lmk hmg in c1: " << lmk2_hmg_c1.transpose() << std::endl;
-//
-//    /* project the landmark (kf2) */
-//    Eigen::Vector3s point2D_hmg_fk2 = lmk2_hmg_c1.head(3);
-//    Eigen::Vector2s point2D_kf2 = point2D_hmg_fk2.head(2)/point2D_hmg_fk2(2);
-//    point2D_kf2 = pinhole::distortPoint((std::static_pointer_cast<SensorCamera>(wolf_problem_ptr_->getSensorPtr("PinHole")))->getDistortionVector(),point2D_kf2);
-//    point2D_kf2 = pinhole::pixellizePoint(wolf_problem_ptr_->getSensorPtr("PinHole")->getIntrinsicPtr()->getVector(),point2D_kf2);
-//
-//    std::cout << "2D point (kf2): " << point2D_kf2.transpose() << std::endl;
-//
-//    /* to test the projection - backprojection */
-//    point2D_kf2 = pinhole::depixellizePoint(wolf_problem_ptr_->getSensorPtr("PinHole")->getIntrinsicPtr()->getVector(),point2D_kf2);
-//    point2D_kf2 = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(wolf_problem_ptr_->getSensorPtr("PinHole")))->getCorrectionVector(),point2D_kf2);
-//
-//    Eigen::Vector3s point3D;
-//    point3D.head<2>() = point2D_kf2;
-//    point3D(2) = 1;
-//    point3D.normalize();
-//
-//    Eigen::Vector4s point3D_hmg;
-//    point3D_hmg = {point3D(0),point3D(1),point3D(2),1/distance};
-//
-//    Eigen::Vector4s lmk1_hmg_bp_w;
-//    lmk1_hmg_bp_w = T_W_R1_ * T_R1_C1 * point3D_hmg;
-//
-//    std::cout << "3D hmg point (kf2): " << (lmk1_hmg_bp_w.head(3)/(1/distance)).transpose() << std::endl;
-//
-//    // ============================================================================================================
-//
-//    // ============================================================================================================
-//    /* 7 */
-//    FrameBasePtr kf3 = wolf_problem_ptr_->createFrame(KEY_FRAME,(Vector7s()<<0, 0.25,0,0,0,0,1).finished(), TimeStamp(0));
-//    FrameBasePtr kf4 = wolf_problem_ptr_->createFrame(KEY_FRAME,(Vector7s()<<0,-0.25,0,0,0,0,1).finished(), TimeStamp(0));
-//    kf3->fix();
-//    kf4->fix();
-//
-//    // ============================================================================================================
-//
-//    // ============================================================================================================
-//    /* 8 */
-//    cv::Mat frame;
-//    frame.zeros(2,2,0);
-//    CaptureImage::Ptr image_ptr_1 = std::make_shared<CaptureImage>(TimeStamp(0), camera_ptr, frame);
-//    CaptureImage::Ptr image_ptr_2 = std::make_shared<CaptureImage>(TimeStamp(0), camera_ptr, frame);
-//    kf1->addCapture(image_ptr_1);
-//    kf2->addCapture(image_ptr_2);
-//    // ============================================================================================================
-//
-    // ============================================================================================================
-    /* 9 */
-//    cv::KeyPoint kp1; kp1.pt.x = point2D_kf1(0); kp1.pt.y = point2D_kf1(1);
-//    cv::KeyPoint kp2; kp2.pt.x = point2D_kf2(0); kp2.pt.y = point2D_kf2(1);
-//    cv::Mat desc;
-
-
-//    // ============================================================================================================
-//    /* 10 */
-//    /* to test the projection - backprojection */
-//    Eigen::Vector2s p2D_kf3;
-//    p2D_kf3(0)= feat_point_image_ptr_1->getKeypoint().pt.x;
-//    p2D_kf3(1)= feat_point_image_ptr_1->getKeypoint().pt.y;
-//    Eigen::Vector2s point2D_lmk = pinhole::depixellizePoint(wolf_problem_ptr_->getSensorPtr("PinHole")->getIntrinsicPtr()->getVector(), p2D_kf3);
-//    point2D_lmk = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(wolf_problem_ptr_->getSensorPtr("PinHole")))->getCorrectionVector(),point2D_lmk);
-//
-//    Eigen::Vector3s point3D_kf3;
-//    point3D_kf3.head<2>() = point2D_lmk;
-//    point3D_kf3(2) = 1;
-//    point3D_kf3.normalize();
-//
-//    Eigen::Vector4s point3D_hmg_kf3;
-//    point3D_hmg_kf3 = {point3D_kf3(0),point3D_kf3(1),point3D_kf3(2),1/distance};
-//
-//    /* change the reference from world to camera (kf2) */
-//    Eigen::Vector3s pwr1_kf3 = kf3->getPPtr()->getVector();
-//    Eigen::Translation<Scalar,3> twr1_kf3;
-//    twr1_kf3.x() = pwr1_kf3(0); twr1_kf3.y() = pwr1_kf3(1); twr1_kf3.z() = pwr1_kf3(2);
-//    std::cout << "keyframe pose: " << pwr1_kf3.transpose() << std::endl;
-//
-//    Eigen::Quaternion<Scalar> qwr1_kf3;
-//    Eigen::Vector4s quaternion_current_frame_kf3 = kf3->getOPtr()->getVector();
-//    qwr1_kf3 = quaternion_current_frame_kf3;
-//    std::cout << "keyframe orientation: " << qwr1_kf3.vec().transpose() << " " << qwr1_kf3.w() << std::endl;
-//
-//
-//    Eigen::Transform<Scalar,3,Eigen::Affine> T_W_R1_kf3;
-//    T_W_R1_kf3 = twr1_kf3 * qwr1_kf3;
-//
-//    Eigen::Vector4s lmk1_hmg_kf3_w;
-//    lmk1_hmg_kf3_w = T_W_R1_kf3 * T_R1_C1 * point3D_hmg_kf3;
-//
-//    std::cout << "3D hmg point: " << (lmk1_hmg_kf3_w.head(3)/(1/distance)).transpose() << std::endl;
-//
-//    std::shared_ptr<LandmarkAHP> lmk_ahp_ptr = std::make_shared<LandmarkAHP>(lmk1_hmg_kf3_w, kf3, camera_ptr, feat_point_image_ptr_1->getDescriptor());
-//    // ============================================================================================================
-//
-//    // ============================================================================================================
-//    /* 11 */
-//    ConstraintAHP::Ptr constraint_ptr = ConstraintAHP::create(feat_point_image_ptr_2, kf4, lmk_ahp_ptr );
-//    feat_point_image_ptr_2->addConstraint(constraint_ptr);
-//
-//    // ============================================================================================================
-//
-//    // ============================================================================================================
-//    /* 12 */
-//    // Ceres wrapper
-//    ceres::Solver::Options ceres_options;
-//    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
-//    ceres_options.max_line_search_step_contraction = 1e-3;
-//    //    ceres_options.minimizer_progress_to_stdout = false;
-//    //    ceres_options.line_search_direction_type = ceres::LBFGS;
-//    //    ceres_options.max_num_iterations = 100;
-//    google::InitGoogleLogging(argv[0]);
-//
-//    CeresManager ceres_manager(wolf_problem_ptr_, ceres_options);
-//
-//
-//    ceres::Solver::Summary summary = ceres_manager.solve();
-//    std::cout << summary.FullReport() << std::endl;
+    ceres::Solver::Summary summary = ceres_manager.solve();
+    std::cout << summary.FullReport() << std::endl;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
