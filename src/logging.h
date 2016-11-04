@@ -51,10 +51,6 @@ public:
   template<typename... Args>
   void trace(const Args&... args);
 
-  void enable_debug(const bool enable);
-
-  bool enable_debug();
-
   bool set_async_queue(const std::size_t q_size);
 
 protected:
@@ -91,10 +87,6 @@ Logger::Logger()
 {
   // Create main logger
   console_ = spdlog::stdout_color_mt(log_name_);
-
-#ifdef _WOLF_DEBUG
-  enable_debug(true);
-#endif
 
 #ifdef _WOLF_TRACE
   console_->set_level(spdlog::level::trace);
@@ -144,17 +136,6 @@ void Logger::trace(const Args&... args)
   console_->trace(repeat_string("{}", sizeof...(args)).c_str(), args...);
 }
 
-inline void Logger::enable_debug(const bool enable)
-{
-  (enable)? console_->set_level(spdlog::level::debug) :
-            console_->set_level(spdlog::level::info);
-}
-
-inline bool Logger::enable_debug()
-{
-  return console_->level() == spdlog::level::debug;
-}
-
 inline bool Logger::set_async_queue(const std::size_t q_size)
 {
   bool p2 = q_size%2 == 0;
@@ -176,20 +157,16 @@ inline bool Logger::set_async_queue(const std::size_t q_size)
 #define WOLF_ERROR(...) \
   wolf::internal::Logger::get().error(__VA_ARGS__);
 
-#define WOLF_DEBUG(...) \
-  wolf::internal::Logger::get().debug(__VA_ARGS__);
-
-#define WOLF_ENABLE_DEBUG_LOG() \
-  wolf::internal::Logger::get().enable_debug(true);
-
-#define WOLF_DISABLE_DEBUG_LOG() \
-  wolf::internal::Logger::get().enable_debug(false);
+#ifdef _WOLF_DEBUG
+  #define WOLF_DEBUG(...) \
+    wolf::internal::Logger::get().debug(__VA_ARGS__);
+#else
+  #define WOLF_DEBUG(...)
+#endif
 
 #define WOLF_ASYNC_QUEUE_LOG(x) \
   wolf::internal::Logger::get().set_async_queue(x);
 
-// @Todo: re-assess TRACE level (info/debug/error)
-// it should probably be custom while avoiding spdlog trace.
 #ifdef _WOLF_TRACE
   #define WOLF_TRACE(...) \
     char this_file[] = __FILE__;\
