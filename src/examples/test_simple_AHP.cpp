@@ -23,13 +23,13 @@
  *   - A kf at 1m to the left of the origin, kf4
  *   - A lmk at 1m distance in front of the anchor: L1
  *     - we use this lmk to project it onto kf2, kf3 and kf4 and obtain measured pixels p0, p1 and p2
- *   - A lmk initialized at kf1, with measurement p0, at an distance of 2m: L2
+ *   - A lmk initialized at kf1, with measurement p0, at a distance of 2m: L2
  *     - we project the pixels p3 and p4: we observe that they do not match p1 and p2
  *     - we use the measurements p1 and p2 to solve the optimization problem on L2: L2 should converge to L1.
  *   - This is a sketch of the situation:
  *     - X, Y are the axes in world frame
  *     - x, z are the axes in anchor camera frame. We have that X=z, Y=-x.
- *     - Axes Z and y are perpendicular to the drawing; they heve no effect.
+ *     - Axes Z and y are perpendicular to the drawing; they have no effect.
  *
  *                X,z
  *                 ^
@@ -140,8 +140,8 @@ int main(int argc, char** argv)
     // Features-----------------
     cv::Mat desc;
 
-    cv::KeyPoint kp0;
-    std::shared_ptr<FeaturePointImage> feat_0 = std::make_shared<FeaturePointImage>(kp0, desc, Eigen::Matrix2s::Identity());
+    cv::KeyPoint kp_0;
+    std::shared_ptr<FeaturePointImage> feat_0 = std::make_shared<FeaturePointImage>(kp_0, desc, Eigen::Matrix2s::Identity());
     image_0->addFeature(feat_0);
 
     cv::KeyPoint kp_1;
@@ -166,21 +166,17 @@ int main(int argc, char** argv)
     feat_2->addConstraint(ctr_2);
 
     // Projections----------------------------
-    Eigen::VectorXs pix_0(ctr_0->expectation());
-    cv::KeyPoint cvPix_0(pix_0(0), pix_0(1), 16);
-    feat_0->setKeypoint(cvPix_0);
+    Eigen::VectorXs pix_0 = ctr_0->expectation();
+    kp_0 = cv::KeyPoint(pix_0(0), pix_0(1), 0);
+    feat_0->setKeypoint(kp_0);
 
-    Eigen::VectorXs pix_1(ctr_1->expectation());
-    cv::KeyPoint cvPix_1(pix_1(0), pix_1(1), 16);
-    feat_1->setKeypoint(cvPix_1);
+    Eigen::VectorXs pix_1 = ctr_1->expectation();
+    kp_1 = cv::KeyPoint(pix_1(0), pix_1(1), 0);
+    feat_1->setKeypoint(kp_1);
 
-    Eigen::VectorXs pix_2(ctr_2->expectation());
-    cv::KeyPoint cvPix_2(pix_2(0), pix_2(1), 16);
-    feat_2->setKeypoint(cvPix_2);
-
-    kp0 = feat_0->getKeypoint();
-    kp_1 = feat_1->getKeypoint();
-    kp_2 = feat_2->getKeypoint();
+    Eigen::VectorXs pix_2 = ctr_2->expectation();
+    kp_2 = cv::KeyPoint(pix_2(0), pix_2(1), 0);
+    feat_2->setKeypoint(kp_2);
 
     std::cout << "pixel 0: " << pix_0.transpose() << std::endl;
     std::cout << "pixel 1: " << pix_1.transpose() << std::endl;
@@ -208,7 +204,7 @@ int main(int argc, char** argv)
     Eigen::Vector3s dir_0 = K.inverse() * pix_0_hmg;
     Eigen::Vector4s pnt_hmg_0;
     pnt_hmg_0 << dir_0, 1/unknown_distance;
-    LandmarkAHP::Ptr lmk_2( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_2, camera, cv_image) );
+    LandmarkAHP::Ptr lmk_2( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_2, camera, desc) );
     problem->addLandmark(lmk_2);
 
     // New constraints from kf3 and kf4
@@ -249,8 +245,18 @@ int main(int argc, char** argv)
     ceres::Solver::Summary summary = ceres_manager.solve();
     std::cout << summary.FullReport() << std::endl;
 
+    // Test of convergence over the lmk params
+    bool pass = (lmk_2->getPoint3D() - lmk_1->getPoint3D()).isMuchSmallerThan(1,Constants::EPS);
+
+    std::cout << "Landmark 2 below should have converged to Landmark 1:" << std::endl;
     std::cout << "Landmark 1: " << lmk_1->getPoint3D().transpose() << std::endl;
     std::cout << "Landmark 2: " << lmk_2->getPoint3D().transpose() << std::endl;
+    std::cout << "Landmark convergence test " << (pass ? "PASSED" : "FAILED") << std::endl;
+    std::cout << std::endl;
+
+    if (!pass)
+        return -1;
+    return 0;
 
 }
 
