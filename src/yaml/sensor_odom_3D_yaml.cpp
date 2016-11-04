@@ -45,9 +45,9 @@ static IntrinsicsBasePtr createIntrinsicsOdom3D(const std::string & _filename_do
         //=========================================
         // ===== this part for debugging only =====
         //=========================================
-        std::cout << "\n--- Parameters Parsed from YAML file ---" << std::endl;
-        std::cout << "sensor type: " << sensor_type << std::endl;
-        std::cout << "sensor name: " << sensor_name << std::endl;
+//        std::cout << "\n--- Parameters Parsed from YAML file ---" << std::endl;
+//        std::cout << "sensor type: " << sensor_type << std::endl;
+//        std::cout << "sensor name: " << sensor_name << std::endl;
 
         //=========================================
         //=========================================
