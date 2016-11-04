@@ -163,7 +163,7 @@ Download and build
 
 **Build:**
 
-    $ cd Wolf/build
+    $ cd wolf/build
     $ cmake ..
     $ make
     $ sudo make install  //optional in case you want to install wolf library
@@ -211,7 +211,7 @@ Alternatively, you can set up the environment variables in your GUIs only. Follo
 
 ### Wolf ROS Node
 
-`$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
+`$ git clone `[`https://github.com/IRI-MobileRobotics/wolf_ros.git`](https://github.com/IRI-MobileRobotics/wolf_ros.git)
 
 
 
