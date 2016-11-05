@@ -38,7 +38,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
     protected:
         unsigned int sensor_id_;   // sensor ID
-//        SensorType type_id_;       // the type of sensor. See wolf.h for a list of all sensor types.
 
         bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
 
@@ -75,7 +74,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void remove();
 
         unsigned int id();
-//        SensorType typeId();
 
         // State blocks
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
@@ -151,11 +149,6 @@ inline unsigned int SensorBase::id()
 {
     return sensor_id_;
 }
-
-//inline wolf::SensorType SensorBase::typeId()
-//{
-//    return type_id_;
-//}
 
 inline ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
 {
