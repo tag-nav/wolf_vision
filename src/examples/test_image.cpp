@@ -66,11 +66,7 @@ int main(int argc, char** argv)
 
     TimeStamp t = 1;
 
-    char const* tmp = std::getenv( "WOLF_ROOT" );
-    if ( tmp == nullptr )
-        throw std::runtime_error("WOLF_ROOT environment not loaded.");
-
-    std::string wolf_root( tmp );
+    std::string wolf_root = _WOLF_ROOT_DIR;
     std::cout << "Wolf root: " << wolf_root << std::endl;
 
     ProblemPtr wolf_problem_ = Problem::create(FRM_PO_3D);

@@ -31,8 +31,7 @@ int main (int argc, char** argv)
 {
     cout << "\n========= Test ProcessorOdom3D ===========" << endl;
 
-    GET_WOLF_ROOT
-
+    std::string wolf_root = _WOLF_ROOT_DIR;
 
     TimeStamp tf;
     if (argc == 1)

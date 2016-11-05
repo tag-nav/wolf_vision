@@ -400,18 +400,6 @@ inline const Eigen::Vector3s gravity(void) {
 // Some macros
 
 //=====================================================
-// Environment variable for configuration files
-// this sets the local variable wolf_root from the environment variable WOLF_ROOT
-#define GET_WOLF_ROOT \
-char const* tmp = std::getenv( "WOLF_ROOT" ); \
-if ( tmp == nullptr ) \
-    throw std::runtime_error("WOLF_ROOT environment not loaded."); \
-std::string wolf_root( tmp ); \
-std::cout << "Wolf root: " << wolf_root << " set at variable 'wolf_root'." << std::endl;
-//=====================================================
-
-
-//=====================================================
 #define WOLF_DEBUG_HERE \
 { \
     char this_file[] = __FILE__; \

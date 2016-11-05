@@ -110,7 +110,7 @@ int main(int argc, char** argv)
 
     // ============================================================================================================
     /* 2 */
-    GET_WOLF_ROOT
+    std::string wolf_root = _WOLF_ROOT_DIR;
     SensorBasePtr sensor_ptr = problem->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,-0.5,0.5,-0.5,0.5).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
     SensorCamera::Ptr camera = std::static_pointer_cast<SensorCamera>(sensor_ptr);
     // ============================================================================================================

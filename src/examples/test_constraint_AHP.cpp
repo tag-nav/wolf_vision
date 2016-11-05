@@ -16,8 +16,7 @@ int main()
 
     //=====================================================
     // Environment variable for configuration files
-//    GET_WOLF_ROOT
-    std::string wolf_root("/home/jtarraso/dev/wolf");
+    std::string wolf_root = _WOLF_ROOT_DIR;
     std::cout << wolf_root << std::endl;
     //=====================================================
 
