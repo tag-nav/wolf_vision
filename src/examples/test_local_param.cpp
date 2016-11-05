@@ -75,7 +75,7 @@ int main(){
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
     pass = (q_m.norm()-qo.norm()) < 1e-9;
     all_tests_passed = all_tests_passed && pass;
-    cout << "-------------------- Norm test " << (pass ? "PASSED" : "FAIL") << endl;
+    cout << "-------------------- Norm test " << (pass ? "PASSED" : "FAILED") << endl;
 
     Qpar_glob.computeJacobian(q_m,J);
     cout << " J = \n" << J << endl;
@@ -85,7 +85,7 @@ int main(){
 
     pass = (J-J_num).isMuchSmallerThan(1,1e-6);
     all_tests_passed = all_tests_passed && pass;
-    cout << "-------------------- Jacobians test " << (pass ? "PASSED" : "FAIL") << endl;
+    cout << "-------------------- Jacobians test " << (pass ? "PASSED" : "FAILED") << endl;
 
     // Local -------------------------
     cout << "\n----  DQ_LOCAL: qo = q * Exp(da)  ----" << endl;
@@ -94,7 +94,7 @@ int main(){
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
     pass = (q_m.norm()-qo.norm()) < 1e-9;
     all_tests_passed = all_tests_passed && pass;
-    cout << "-------------------- Norm test " << (pass ? "PASSED" : "FAIL") << endl;
+    cout << "-------------------- Norm test " << (pass ? "PASSED" : "FAILED") << endl;
 
     Qpar_loc.computeJacobian(q_m,J);
     cout << " J = \n" << J << endl;
@@ -104,7 +104,7 @@ int main(){
 
     pass = (J-J_num).isMuchSmallerThan(1,1e-6);
     all_tests_passed = all_tests_passed && pass;
-    cout << "-------------------- Jacobians test " << (pass ? "PASSED" : "FAIL") << endl;
+    cout << "-------------------- Jacobians test " << (pass ? "PASSED" : "FAILED") << endl;
 
 
     // HOMOGENEOUS ----------------------------------------
@@ -128,7 +128,7 @@ int main(){
     cout << "ho = " << ho.transpose() << "   with norm: " << ho.norm() << endl;
     pass = (h_m.norm()-ho.norm()) < 1e-9;
     all_tests_passed = all_tests_passed && pass;
-    cout << "-------------------- Norm test " << (pass ? "PASSED" : "FAIL") << endl;
+    cout << "-------------------- Norm test " << (pass ? "PASSED" : "FAILED") << endl;
 
     Hpar.computeJacobian(h_m,J);
     cout << " J = \n" << J << endl;
@@ -138,7 +138,7 @@ int main(){
 
     pass = (J-J_num).isMuchSmallerThan(1,1e-6);
     all_tests_passed = all_tests_passed && pass;
-    cout << "-------------------- Jacobians test " << (pass ? "PASSED" : "FAIL") << endl;
+    cout << "-------------------- Jacobians test " << (pass ? "PASSED" : "FAILED") << endl;
 
     cout << endl << "---------------- " << (all_tests_passed ? "All tests PASSED " : "Some tests FAILED") << " --------------" << endl;
     cout         << "=================================================" << endl;
