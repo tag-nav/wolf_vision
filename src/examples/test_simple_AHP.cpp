@@ -156,6 +156,7 @@ int main(int argc, char** argv)
     std::shared_ptr<LandmarkAHP> lmk_1 = std::make_shared<LandmarkAHP>(lmk_hmg_c, kf_1, camera, desc);
     problem->addLandmark(lmk_1);
     lmk_1->setStatus(LANDMARK_FIXED);
+    std::cout << "Landmark 1: " << lmk_1->point().transpose() << std::endl;
 
     // Constraints------------------
     ConstraintAHP::Ptr ctr_0 = ConstraintAHP::create(feat_0, kf_2, lmk_1 );
@@ -206,6 +207,7 @@ int main(int argc, char** argv)
     pnt_hmg_0 << dir_0, 1/unknown_distance;
     LandmarkAHP::Ptr lmk_2( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_2, camera, desc) );
     problem->addLandmark(lmk_2);
+    std::cout << "Landmark 2: " << lmk_2->point().transpose() << std::endl;
 
     // New constraints from kf3 and kf4
     ConstraintAHP::Ptr ctr_3 = ConstraintAHP::create(feat_3, kf_3, lmk_2 );
@@ -246,11 +248,11 @@ int main(int argc, char** argv)
     std::cout << summary.FullReport() << std::endl;
 
     // Test of convergence over the lmk params
-    bool pass = (lmk_2->getPoint3D() - lmk_1->getPoint3D()).isMuchSmallerThan(1,Constants::EPS);
+    bool pass = (lmk_2->point() - lmk_1->point()).isMuchSmallerThan(1,Constants::EPS);
 
     std::cout << "Landmark 2 below should have converged to Landmark 1:" << std::endl;
-    std::cout << "Landmark 1: " << lmk_1->getPoint3D().transpose() << std::endl;
-    std::cout << "Landmark 2: " << lmk_2->getPoint3D().transpose() << std::endl;
+    std::cout << "Landmark 1: " << lmk_1->point().transpose() << std::endl;
+    std::cout << "Landmark 2: " << lmk_2->point().transpose() << std::endl;
     std::cout << "Landmark convergence test " << (pass ? "PASSED" : "FAILED") << std::endl;
     std::cout << std::endl;
 
