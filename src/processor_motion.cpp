@@ -39,7 +39,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
         // create motion feature and add it to the capture
         FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
-                FEATURE_MOTION,
                 "MOTION",
                 key_capture_ptr->getBuffer().get().back().delta_integr_,
                 key_capture_ptr->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
@@ -203,7 +202,6 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
 
     // create motion feature and add it to the capture
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
-            FEATURE_MOTION,
             "MOTION",
             key_capture_ptr->getBuffer().get().back().delta_integr_,
             key_capture_ptr->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?

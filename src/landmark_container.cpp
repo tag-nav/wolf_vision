@@ -5,7 +5,7 @@
 namespace wolf {
 
 LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Scalar& _witdh, const Scalar& _length) :
-	LandmarkBase(LANDMARK_CONTAINER, "CONTAINER", _p_ptr, _o_ptr),
+	LandmarkBase("CONTAINER", _p_ptr, _o_ptr),
 	corners_(3,4)
 {
     Eigen::VectorXs descriptor(2);
@@ -18,7 +18,7 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
 }
 
 LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Eigen::Vector3s& _corner_1_pose, const Eigen::Vector3s& _corner_2_pose, const int& _corner_1_idx, const int& _corner_2_idx, const Scalar& _witdh, const Scalar& _length) :
-    LandmarkBase(LANDMARK_CONTAINER, "CONTAINER", _p_ptr, _o_ptr),
+    LandmarkBase("CONTAINER", _p_ptr, _o_ptr),
     corners_(3,4)
 {
     Eigen::VectorXs descriptor(2);
@@ -84,7 +84,7 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
 }
 
 //LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const Scalar& _witdh, const Scalar& _length) :
-//    LandmarkBase(LANDMARK_CONTAINER, _p_ptr, _o_ptr),
+//    LandmarkBase(_p_ptr, _o_ptr),
 //    corners_(3,4)
 //{
 //    assert((_corner_A_ptr != nullptr || _corner_B_ptr != nullptr || _corner_C_ptr != nullptr || _corner_D_ptr != nullptr) && "all corner pointer are null in landmark container constructor from corners");

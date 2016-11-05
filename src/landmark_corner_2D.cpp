@@ -4,7 +4,7 @@
 namespace wolf {
 
 LandmarkCorner2D::LandmarkCorner2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Scalar& _aperture) :
-	LandmarkBase(LANDMARK_CORNER, "CORNER 2D", _p_ptr, _o_ptr)
+	LandmarkBase("CORNER 2D", _p_ptr, _o_ptr)
 {
   	setDescriptor(Eigen::VectorXs::Constant(1,_aperture));
 }

@@ -61,7 +61,7 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
     std::map<LandmarkBasePtr, Eigen::MatrixXs> expected_features;
     std::map<LandmarkBasePtr, Eigen::MatrixXs> expected_features_covs;
     for (auto landmark : _landmarks_searched)
-        if (landmark->getTypeId() == LANDMARK_POLYLINE_2D)
+        if (landmark->getType() == "POLYLINE 2D")
         {
             expected_features[landmark] = Eigen::MatrixXs(3, (std::static_pointer_cast<LandmarkPolyline2D>(landmark))->getNPoints());
             expected_features_covs[landmark] = Eigen::MatrixXs(2, 2*(std::static_pointer_cast<LandmarkPolyline2D>(landmark))->getNPoints());
@@ -336,7 +336,7 @@ void ProcessorTrackerLandmarkPolyline::extractPolylines(CaptureLaser2D::Ptr _cap
 void ProcessorTrackerLandmarkPolyline::expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& expected_feature_,
                                                    Eigen::MatrixXs& expected_feature_cov_)
 {
-    assert(_landmark_ptr->getTypeId() == LANDMARK_POLYLINE_2D && "ProcessorTrackerLandmarkPolyline::expectedFeature: Bad landmark type");
+    assert(_landmark_ptr->getType() == "POLYLINE 2D" && "ProcessorTrackerLandmarkPolyline::expectedFeature: Bad landmark type");
     LandmarkPolyline2D::Ptr polyline_landmark = std::static_pointer_cast<LandmarkPolyline2D>(_landmark_ptr);
     assert(expected_feature_.cols() == polyline_landmark->getNPoints() && expected_feature_.rows() == 3 && "ProcessorTrackerLandmarkPolyline::expectedFeature: bad expected_feature_ sizes");
 
@@ -505,7 +505,7 @@ void ProcessorTrackerLandmarkPolyline::createNewLandmarks(LandmarkBaseList& _new
 
 LandmarkBasePtr ProcessorTrackerLandmarkPolyline::createLandmark(FeatureBasePtr _feature_ptr)
 {
-    assert(_feature_ptr->getTypeId() == FEATURE_POLYLINE_2D);
+    assert(_feature_ptr->getType() == "POLYLINE 2D");
     //std::cout << "ProcessorTrackerLandmarkPolyline::createLandmark" << std::endl;
     //std::cout << "Robot global pose: " << t_world_robot_.transpose() << std::endl;
     //std::cout << "Sensor global pose: " << t_world_sensor_.transpose() << std::endl;
@@ -857,7 +857,7 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList& _lmk_
     std::vector<LandmarkClassification> object_class({CONTAINER, SMALL_CONTAINER, PALLET});
 
     for (auto lmk_ptr : _lmk_list)
-        if (lmk_ptr->getTypeId() == LANDMARK_POLYLINE_2D)
+        if (lmk_ptr->getType() == "POLYLINE 2D")
         {
             LandmarkPolyline2D::Ptr polyline_ptr = std::static_pointer_cast<LandmarkPolyline2D>(lmk_ptr);
             auto n_defined_points = polyline_ptr->getNPoints() - (polyline_ptr->isFirstDefined() ? 0 : 1) - (polyline_ptr->isLastDefined() ? 0 : 1);
