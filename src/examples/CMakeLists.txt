@@ -1,7 +1,4 @@
 
-# Local param product test
-ADD_EXECUTABLE(test_loc_param_hmg test_loc_param_hmg.cpp)
-TARGET_LINK_LIBRARIES(test_loc_param_hmg ${PROJECT_NAME})
 
 # Matrix product test
 #ADD_EXECUTABLE(test_matrix_prod test_matrix_prod.cpp)
