@@ -46,6 +46,7 @@ bool LocalParametrizationHomogeneous::plus(const Eigen::Map<const Eigen::VectorX
     {
         dq.w() = 1;
         dq.vec() = _delta/2;
+        dq.normalize();
     }
 
     // result as a homogeneous point -- we use the quaternion product for keeping in the 4-sphere

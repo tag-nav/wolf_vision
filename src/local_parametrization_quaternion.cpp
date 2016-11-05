@@ -31,6 +31,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::plus(const Eigen::Map<const
     {
         dq.w() = 1;
         dq.vec() = _delta_theta/2;
+        dq.normalize();
     }
 
     // result as a quaternion
@@ -69,6 +70,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::plus(const Eigen::Map<cons
     {
         dq.w() = 1;
         dq.vec() = _delta_theta/2;
+        dq.normalize();
     }
 
     // result as a quaternion
