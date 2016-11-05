@@ -78,12 +78,11 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::computeJacobian(const Eigen
     assert(_q.size() == global_size_ && "Wrong size of input quaternion.");
     assert(_jacobian.rows() == global_size_ && _jacobian.cols() == local_size_ && "Wrong size of Jacobian matrix.");
 
-    using namespace Eigen;
-    _jacobian <<  _q(3), -_q(2),  _q(1),
-                  _q(2),  _q(3), -_q(0),
-                 -_q(1),  _q(0),  _q(3),
-                 -_q(0), -_q(1), -_q(2) ;
-    _jacobian /= 2;
+    Eigen::Vector4s qq = _q/2;
+    _jacobian <<  qq(3), -qq(2),  qq(1),
+                  qq(2),  qq(3), -qq(0),
+                 -qq(1),  qq(0),  qq(3),
+                 -qq(0), -qq(1), -qq(2) ;
 
     return true;
 }
@@ -95,12 +94,11 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::computeJacobian(const Eige
     assert(_q.size() == global_size_ && "Wrong size of input quaternion.");
     assert(_jacobian.rows() == global_size_ && _jacobian.cols() == local_size_ && "Wrong size of Jacobian matrix.");
 
-    using namespace Eigen;
-    _jacobian <<  _q(3),  _q(2), -_q(1),
-                 -_q(2),  _q(3),  _q(0),
-                  _q(1), -_q(0),  _q(3),
-                 -_q(0), -_q(1), -_q(2);
-    _jacobian /= 2;
+    Eigen::Vector4s qq = _q/2;
+    _jacobian <<  qq(3),  qq(2), -qq(1),
+                 -qq(2),  qq(3),  qq(0),
+                  qq(1), -qq(0),  qq(3),
+                 -qq(0), -qq(1), -qq(2);
 
     return true;
 }
