@@ -240,51 +240,65 @@ FrameBasePtr FrameBase::getNextFrame() const
 
 void FrameBase::setStatus(StateStatus _st)
 {
-    // TODO: Separate the three fixes and unfixes to the wolfproblem lists
+
     status_ = _st;
-    // State Blocks : only P, O, V
-    // TODO: see what do we want to do with a global status fixed / unfixed. What about derived classes?
+
     if (status_ == ST_FIXED)
     {
-        if (getPPtr() != nullptr)
-        {
-            getPPtr()->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(getPPtr());
-        }
-        if (getOPtr() != nullptr)
-        {
-            getOPtr()->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(getOPtr());
-        }
-        if (getVPtr() != nullptr)
-        {
-            getVPtr()->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(getVPtr());
-        }
+        for (auto sb : state_block_vec_)
+            if (sb != nullptr)
+            {
+                sb->fix();
+                if (getProblem() != nullptr)
+                    getProblem()->updateStateBlockPtr(sb);
+            }
+        //        if (getPPtr() != nullptr)
+        //        {
+        //            getPPtr()->fix();
+        //            if (getProblem() != nullptr)
+        //                getProblem()->updateStateBlockPtr(getPPtr());
+        //        }
+        //        if (getOPtr() != nullptr)
+        //        {
+        //            getOPtr()->fix();
+        //            if (getProblem() != nullptr)
+        //                getProblem()->updateStateBlockPtr(getOPtr());
+        //        }
+        //        if (getVPtr() != nullptr)
+        //        {
+        //            getVPtr()->fix();
+        //            if (getProblem() != nullptr)
+        //                getProblem()->updateStateBlockPtr(getVPtr());
+        //        }
     }
     else if (status_ == ST_ESTIMATED)
     {
-        if (getPPtr() != nullptr)
-        {
-            getPPtr()->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(getPPtr());
-        }
-        if (getOPtr() != nullptr)
-        {
-            getOPtr()->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(getOPtr());
-        }
-        if (getVPtr() != nullptr)
-        {
-            getVPtr()->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(getVPtr());
-        }
+        for (auto sb : state_block_vec_)
+            if (sb != nullptr)
+            {
+                sb->unfix();
+                if (getProblem() != nullptr)
+                    getProblem()->updateStateBlockPtr(sb);
+            }
+
+        //        if (getPPtr() != nullptr)
+        //        {
+        //            getPPtr()->unfix();
+        //            if (getProblem() != nullptr)
+        //                getProblem()->updateStateBlockPtr(getPPtr());
+        //        }
+        //        if (getOPtr() != nullptr)
+        //        {
+        //            getOPtr()->unfix();
+        //            if (getProblem() != nullptr)
+        //                getProblem()->updateStateBlockPtr(getOPtr());
+        //        }
+        //        if (getVPtr() != nullptr)
+        //        {
+        //            getVPtr()->unfix();
+        //            if (getProblem() != nullptr)
+        //                getProblem()->updateStateBlockPtr(getVPtr());
+        //        }
     }
 }
 

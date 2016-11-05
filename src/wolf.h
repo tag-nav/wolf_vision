@@ -40,6 +40,7 @@ namespace wolf {
 typedef double Scalar;        // Use this for double, 64 bit precision
 //typedef long double Scalar;   // Use this for long double, 128 bit precision
 
+
 /**
  * \brief Vector and Matrices size type for the Wolf project
  *
@@ -54,11 +55,6 @@ namespace Constants{
 const Scalar EPS = 1e-8;
 // Wolf smmmmall tolerance
 const Scalar EPS_SMALL = 1e-16;
-
-// use it in odometry covariances for instance.
-//const Scalar MIN_VARIANCE = 1e-6; // 9/5/16: Delete this after 9/6/16 if nobody complains
-
-//const Scalar PI = 3.14159265358979323846264338328; // Use M_PI from math.h. There are a bunch of other useful constants there.
 
 }
 
@@ -316,31 +312,25 @@ typedef std::shared_ptr<StateQuaternion> StateQuaternionPtr;
 // - - Local Parametrization
 typedef std::shared_ptr<LocalParametrizationBase> LocalParametrizationBasePtr;
 
-// // Feature-Feature correspondence
-// struct FeatureMatch
-// {
-//         FeatureBasePtr feature_ptr_;
-//         Scalar normalized_score_;
-// };
-// 
-// typedef std::map<FeatureBasePtr, FeatureMatch> FeatureMatchMap;
 
-
+// ==================================================
+// Some dangling functions
 
 inline const Eigen::Vector3s gravity(void) {
     return Eigen::Vector3s(0,0,-9.8);
 }
+//===================================================
+
 
 //===================================================
 // Some macros
 
-//=====================================================
 #define WOLF_DEBUG_HERE \
 { \
     char this_file[] = __FILE__; \
     std::cout << ">> " << basename(this_file) << " : " << __FUNCTION__ << "() : " << __LINE__ << std::endl; \
 }
-//=====================================================
+//===================================================
 
 } // namespace wolf
 

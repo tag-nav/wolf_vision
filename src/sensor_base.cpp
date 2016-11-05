@@ -97,7 +97,28 @@ void SensorBase::removeStateBlocks()
 
 void SensorBase::fix()
 {
-    // fix only extrinsics
+    for( auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->fix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+}
+
+void SensorBase::unfix()
+{
+    for( auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->unfix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+}
+
+inline void SensorBase::fixExtrinsics()
+{
     for (unsigned int i = 0; i < 2; i++)
     {
         auto sbp = state_block_vec_[i];
@@ -110,9 +131,8 @@ void SensorBase::fix()
     }
 }
 
-void SensorBase::unfix()
+inline void SensorBase::unfixExtrinsics()
 {
-    // unfix only extrinsics
     for (unsigned int i = 0; i < 2; i++)
     {
         auto sbp = state_block_vec_[i];
@@ -124,6 +144,36 @@ void SensorBase::unfix()
         }
     }
 }
+
+inline void SensorBase::fixIntrinsics()
+{
+    for (unsigned int i = 2; i < state_block_vec_.size(); i++)
+    {
+        auto sbp = state_block_vec_[i];
+        if (sbp != nullptr)
+        {
+            sbp->fix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+    }
+}
+
+inline void SensorBase::unfixIntrinsics()
+{
+    for (unsigned int i = 2; i < state_block_vec_.size(); i++)
+    {
+        auto sbp = state_block_vec_[i];
+        if (sbp != nullptr)
+        {
+            sbp->unfix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+    }
+}
+
+
 
 void SensorBase::registerNewStateBlocks()
 {
