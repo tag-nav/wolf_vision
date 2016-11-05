@@ -59,6 +59,7 @@ int main(){
     LocalParametrizationQuaternion<DQ_LOCAL> Qpar_loc;
     bool pass;
 
+    // Global --------------------
     cout << "\nGLOBAL D_QUAT plus() -------------------- " << endl;
     Map<const VectorXs> q_m(q.data(),4);
     Map<const VectorXs> da_m(da.data(),3);
@@ -66,7 +67,7 @@ int main(){
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
 
     Qpar.computeJacobian(q_m,J);
-    cout << " J = \n" << J << endl << endl;
+    cout << " J = \n" << J << endl;
 
     JAC_NUMERIC(Qpar, q_m, J_num, 1e-9)
     cout << " J_num = \n" << J_num << std::endl;
@@ -74,6 +75,7 @@ int main(){
     pass = (J-J_num).isMuchSmallerThan(1,1e-6);
     std::cout << "-------------------- Jacobians test " << (pass ? "PASSED" : "FAIL") << std::endl;
 
+    // Local -------------------------
     cout << "\nLOCAL D_QUAT plus() -------------------- " << endl;
     Qpar_loc.plus(q_m,da_m,qo);
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
