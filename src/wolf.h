@@ -198,23 +198,6 @@ typedef enum
     ST_FIXED = 1,       ///< State fixed, estimated enough or fixed infrastructure.
 } StateStatus;
 
-/** \brief enumeration of all possible Feature types
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    FEATURE_CORNER = 1,
-    FEATURE_FIX,
-    FEATURE_GPS_FIX,
-    FEATURE_GPS_PSEUDORANGE,
-    FEATURE_IMU,
-    FEATURE_ODOM_2D,
-    FEATURE_MOTION,
-    FEATURE_POINT_IMAGE,
-    FEATURE_LINE_2D,
-    FEATURE_POLYLINE_2D
-}FeatureType;
 
 /** \brief Enumeration of all possible landmark types
  *

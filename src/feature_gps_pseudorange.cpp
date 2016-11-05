@@ -3,7 +3,7 @@
 namespace wolf {
 
 FeatureGPSPseudorange::FeatureGPSPseudorange(Eigen::Vector3s &_sat_position, Scalar _pseudorange, Scalar _covariance) :
-        FeatureBase(FEATURE_GPS_PSEUDORANGE, "GPS PR", Eigen::VectorXs::Constant(1,_pseudorange), Eigen::MatrixXs::Identity(1,1)*_covariance),
+        FeatureBase("GPS PR", Eigen::VectorXs::Constant(1,_pseudorange), Eigen::MatrixXs::Identity(1,1)*_covariance),
         sat_position_(_sat_position),
         pseudorange_(_pseudorange)
 {
