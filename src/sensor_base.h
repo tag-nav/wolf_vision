@@ -101,6 +101,10 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         void fix();
         void unfix();
+        void fixExtrinsics();
+        void unfixExtrinsics();
+        void fixIntrinsics();
+        void unfixIntrinsics();
 
         /** \brief Adds all stateBlocks of the sensor to the wolfProblem list of new stateBlocks
          **/
