@@ -27,7 +27,7 @@ int main()
 
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_2D);
-    SensorBasePtr sensor_ptr_ = make_shared<SensorBase>(SEN_ODOM_2D, "ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
+    SensorBasePtr sensor_ptr_ = make_shared<SensorBase>("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
 

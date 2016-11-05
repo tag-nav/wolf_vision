@@ -10,6 +10,9 @@ ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
 
 ADD_EXECUTABLE(test_wolf_root test_wolf_root.cpp)
 
+ADD_EXECUTABLE(test_wolf_logging test_wolf_logging.cpp)
+TARGET_LINK_LIBRARIES(test_wolf_logging ${PROJECT_NAME})
+
 IF(Ceres_FOUND)
     # test_processor_odom_3D
     ADD_EXECUTABLE(test_processor_odom_3D test_processor_odom_3D.cpp)

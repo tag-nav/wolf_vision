@@ -6,13 +6,13 @@ namespace wolf {
 
 unsigned int SensorBase::sensor_id_count_ = 0;
 
-SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr,
+SensorBase::SensorBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr,
                        const unsigned int _noise_size, const bool _extr_dyn) :
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
         state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
         sensor_id_(++sensor_id_count_), // simple ID factory
-        type_id_(_tp),
+//        type_id_(_tp),
         extrinsic_dynamic_(_extr_dyn),
         noise_std_(_noise_size),
         noise_cov_(_noise_size, _noise_size)
@@ -24,13 +24,13 @@ SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlo
     //
 }
 
-SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr,
+SensorBase::SensorBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr,
                        const Eigen::VectorXs & _noise_std, const bool _extr_dyn) :
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
         state_block_vec_(6), // allow for 3 state blocks by default. Resize in derived constructors if needed.
         sensor_id_(++sensor_id_count_), // simple ID factory
-        type_id_(_tp),
+//        type_id_(_tp),
         extrinsic_dynamic_(_extr_dyn),
         noise_std_(_noise_std),
         noise_cov_(_noise_std.size(), _noise_std.size())

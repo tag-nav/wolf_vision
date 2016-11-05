@@ -80,7 +80,7 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
 };
 
 inline ProcessorTrackerFeatureDummy::ProcessorTrackerFeatureDummy(const unsigned int _max_new_features, const unsigned int _min_feat_for_keyframe) :
-        ProcessorTrackerFeature(PRC_TRACKER_DUMMY, "TRACKER FEATURE DUMMY", _max_new_features),
+        ProcessorTrackerFeature("TRACKER FEATURE DUMMY", _max_new_features),
         n_feature_(0), min_feat_for_keyframe_(_min_feat_for_keyframe)
 {
     //

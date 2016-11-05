@@ -8,13 +8,17 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
+# Some wolf compilation options
+
 IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
   set(_WOLF_DEBUG true)
-  #list(APPEND WOLF_COMPILE_OPTIONS _WOLF_DEBUG)
 ENDIF()
 
+option(_WOLF_TRACE "Enable wolf tracing macro" OFF)
 
 option(BUILD_EXAMPLES "Build examples" ON)
+
+
 
 # Does this has any other interest
 # but for the examples ?
@@ -105,6 +109,9 @@ include_directories("${PROJECT_BINARY_DIR}/conf")
 
 INCLUDE_DIRECTORIES(.)
 
+# include spdlog (logging) third_party
+INCLUDE_DIRECTORIES(../third_party/spdlog/include)
+
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 
 IF(Ceres_FOUND)
@@ -189,6 +196,7 @@ SET(HDRS
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
     local_parametrization_polyline_extreme.h
+    logging.h
     map_base.h
     motion_buffer.h
     node_base.h

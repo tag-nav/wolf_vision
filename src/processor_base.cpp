@@ -6,11 +6,11 @@ namespace wolf {
 
 unsigned int ProcessorBase::processor_id_count_ = 0;
 
-ProcessorBase::ProcessorBase(ProcessorType _tp, const std::string& _type, const Scalar& _time_tolerance) :
+ProcessorBase::ProcessorBase(const std::string& _type, const Scalar& _time_tolerance) :
         NodeBase("PROCESSOR"),
         sensor_ptr_(),
         processor_id_(++processor_id_count_),
-        type_id_(_tp),
+//        type_id_(_tp),
         time_tolerance_(_time_tolerance)
 {
     setType(_type);
