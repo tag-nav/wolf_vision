@@ -25,6 +25,9 @@
         _J.col(i) = (_xo - _x0)/dx;  }}
 
 
+
+
+
 int main(){
 
     using namespace Eigen;
@@ -53,6 +56,7 @@ int main(){
 
     LocalParametrizationQuaternion<DQ_GLOBAL> Qpar;
     LocalParametrizationQuaternion<DQ_LOCAL> Qpar_loc;
+    bool pass;
 
     cout << "\nGLOBAL D_QUAT plus()" << endl;
     Map<const VectorXs> q_m(q.data(),4);
@@ -65,7 +69,10 @@ int main(){
 
     MatrixXs J_num(4,3);
     JAC_NUMERIC(Qpar, q_m, J_num, 1e-9)
-    cout << " J_num = \n" << J_num << endl;
+    cout << " J_num = \n" << J_num;
+
+    pass = (J-J_num).isMuchSmallerThan(1,1e-6);
+    std::cout << "Jacobians test " << (pass ? "PASSED" : "FAIL") << std::endl;
 
     cout << "\nLOCAL D_QUAT plus()" << endl;
     Qpar_loc.plus(q_m,da_m,qo);
@@ -76,6 +83,10 @@ int main(){
 
     JAC_NUMERIC(Qpar_loc, q_m, J_num, 1e-9)
     cout << " J_num = \n" << J_num << endl;
+
+    pass = (J-J_num).isMuchSmallerThan(1,1e-6);
+    std::cout << "Jacobians test " << (pass ? "PASSED" : "FAIL") << std::endl;
+
 
     // HOMOGENEOUS ----------------------------------------
     cout << "\nHOMOGENEOUS plus()" << endl;
@@ -101,6 +112,9 @@ int main(){
 
     JAC_NUMERIC(Hpar, q_m, J_num, 1e-9)
     cout << " J_num = \n" << J_num << endl;
+
+    pass = (J-J_num).isMuchSmallerThan(1,1e-6);
+    std::cout << "Jacobians test " << (pass ? "PASSED" : "FAIL") << std::endl;
 
 
     return 0;
