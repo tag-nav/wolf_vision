@@ -8,14 +8,14 @@ namespace wolf
 
 SensorCamera::SensorCamera(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, //
                            int _img_width, int _img_height) :
-        SensorBase(SEN_CAMERA, "CAMERA", _p_ptr, _o_ptr, _intr_ptr, 2), //
+        SensorBase("CAMERA", _p_ptr, _o_ptr, _intr_ptr, 2), //
         img_width_(_img_width), img_height_(_img_height)
 {
     //
 }
 
 SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const std::shared_ptr<IntrinsicsCamera> _intrinsics_ptr) :
-                SensorBase(SEN_CAMERA, "CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3)), std::make_shared<StateQuaternion>(_extrinsics.tail(4)), std::make_shared<StateBlock>(_intrinsics_ptr->pinhole_model), 1),
+                SensorBase("CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics_ptr->pinhole_model, true), 1),
                 img_width_(_intrinsics_ptr->width), //
                 img_height_(_intrinsics_ptr->height), //
                 distortion_(_intrinsics_ptr->distortion), //

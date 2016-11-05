@@ -38,7 +38,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
     protected:
         unsigned int sensor_id_;   // sensor ID
-        SensorType type_id_;       // the type of sensor. See wolf.h for a list of all sensor types.
+//        SensorType type_id_;       // the type of sensor. See wolf.h for a list of all sensor types.
 
         bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
 
@@ -57,7 +57,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * \param _extr_dyn Flag indicating if extrinsics are dynamic (moving) or static (not moving)
          *
          **/
-        SensorBase(const SensorType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
+        SensorBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
 
         /** \brief Constructor with noise std vector
          *
@@ -70,12 +70,12 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * \param _extr_dyn Flag indicating if extrinsics are dynamic (moving) or static (not moving)
          *
          **/
-        SensorBase(const SensorType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
+        SensorBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
         virtual ~SensorBase();
         void remove();
 
         unsigned int id();
-        SensorType typeId();
+//        SensorType typeId();
 
         // State blocks
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
@@ -152,10 +152,10 @@ inline unsigned int SensorBase::id()
     return sensor_id_;
 }
 
-inline wolf::SensorType SensorBase::typeId()
-{
-    return type_id_;
-}
+//inline wolf::SensorType SensorBase::typeId()
+//{
+//    return type_id_;
+//}
 
 inline ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
 {

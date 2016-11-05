@@ -95,8 +95,7 @@ int main(void)
     for (auto sen : problem->getHardwarePtr()->getSensorList())
     {
         cout << "Sensor " << setw(2) << left << sen->id()
-                << " | type " << setw(2) << sen->typeId()
-                << ": " << setw(8) << sen->getType()
+                << " | type " << setw(8) << sen->getType()
                 << " | name: " << sen->getName() << endl;
     }
 

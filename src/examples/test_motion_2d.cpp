@@ -51,10 +51,10 @@ int main()
 
     // Create Wolf tree nodes
     ProblemPtr problem_ptr = Problem::create(FRM_PO_2D);
-    SensorBasePtr sensor_odom_ptr = std::make_shared< SensorBase>(SEN_ODOM_2D, "ODOM 2D", std::make_shared<StateBlock>(Eigen::Vector2s::Zero(), true),
+    SensorBasePtr sensor_odom_ptr = std::make_shared< SensorBase>("ODOM 2D", std::make_shared<StateBlock>(Eigen::Vector2s::Zero(), true),
                                             std::make_shared<StateBlock>(Eigen::Vector1s::Zero(), true),
                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(0), true), 0);
-    SensorBasePtr sensor_fix_ptr = std::make_shared< SensorBase>(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
+    SensorBasePtr sensor_fix_ptr = std::make_shared< SensorBase>("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
     ProcessorOdom2D::Ptr odom2d_ptr = std::make_shared< ProcessorOdom2D>(100,100,100);
     // Assemble Wolf tree by linking the nodes
     sensor_odom_ptr->addProcessor(odom2d_ptr);

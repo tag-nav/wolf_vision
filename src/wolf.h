@@ -198,24 +198,6 @@ typedef enum
     ST_FIXED = 1,       ///< State fixed, estimated enough or fixed infrastructure.
 } StateStatus;
 
-/** \brief Enumeration of all possible sensor types
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    SEN_ODOM_2D = 1,    ///< 2D Odometry measurement from encoders: displacement and rotation.
-    SEN_ODOM_3D,        ///< 3D Odometry measurement from encoders: displacement and rotation.
-    SEN_TWIST_2D,       ///< Twist measurement form encoders or motion command: lineal and angular velocities.
-    SEN_IMU,		    ///< Inertial measurement unit with 3 acceleros, 3 gyros
-    SEN_CAMERA,		    ///< Regular pinhole camera
-    SEN_GPS_FIX,	    ///< GPS fix calculated from a GPS receiver
-    SEN_GPS_RAW,        ///< GPS pseudo ranges, Doppler and satellite ephemerides
-    SEN_LIDAR,		    ///< Laser Range Finder, 2D
-    SEN_RADAR,		    ///< Radar
-    SEN_ABSOLUTE_POSE   ///< Full absolute pose (XYZ+quaternion)
-} SensorType;
-
 /** \brief Enumeration of all possible Processor types
  *
  * You may add items to this list as needed. Be concise with names, and document your entries.

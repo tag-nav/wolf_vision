@@ -13,7 +13,7 @@
 namespace wolf {
 
 SensorOdom3D::SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _o_ptr, IntrinsicsOdom3D::Ptr params) :
-        SensorBase(SEN_ODOM_3D, "ODOM 3D", _p_ptr, _o_ptr, nullptr, 6),
+        SensorBase("ODOM 3D", _p_ptr, _o_ptr, nullptr, 6),
         k_disp_to_disp_(params->k_disp_to_disp),
         k_disp_to_rot_(params->k_disp_to_rot),
         k_rot_to_rot_(params->k_rot_to_rot),
