@@ -22,31 +22,29 @@ void print(MapBase& _map)
     {
         std::cout << "Lmk ID:    " << lmk_ptr->id();
         std::cout << "\nLmk type:  " << lmk_ptr->getType();
-        switch (lmk_ptr->getTypeId())
+        if (lmk_ptr->getType() == "POLYLINE 2D")
         {
-            case LANDMARK_POLYLINE_2D:
-            {
-                std::shared_ptr<LandmarkPolyline2D> poly_ptr = std::static_pointer_cast<LandmarkPolyline2D>(lmk_ptr);
-                std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getPPtr()->isFixed();
-                std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getOPtr()->isFixed();
-                std::cout << "\nn points:  " << poly_ptr->getNPoints();
-                std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
-                std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
-                std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
-                for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
-                    std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getVector().transpose();
-                break;
-            }
-            case LANDMARK_AHP:
-            {
-                std::shared_ptr<LandmarkAHP> ahp_ptr = std::static_pointer_cast<LandmarkAHP>(lmk_ptr);
-                std::cout << "\npos:       " << ahp_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << ahp_ptr->getPPtr()->isFixed();
-                std::cout << "\ndescript:  " << ahp_ptr->getCvDescriptor().t();
-                break;
-            }
-            default:
-                break;
+            std::shared_ptr<LandmarkPolyline2D> poly_ptr = std::static_pointer_cast<LandmarkPolyline2D>(lmk_ptr);
+            std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getPPtr()->isFixed();
+            std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getOPtr()->isFixed();
+            std::cout << "\nn points:  " << poly_ptr->getNPoints();
+            std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
+            std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
+            std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
+            for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
+                std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getVector().transpose();
+            break;
         }
+        else if (lmk_ptr->getType() == "AHP")
+        {
+            std::shared_ptr<LandmarkAHP> ahp_ptr = std::static_pointer_cast<LandmarkAHP>(lmk_ptr);
+            std::cout << "\npos:       " << ahp_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << ahp_ptr->getPPtr()->isFixed();
+            std::cout << "\ndescript:  " << ahp_ptr->getCvDescriptor().t();
+            break;
+        }
+        else
+            break;
+
         std::cout << std::endl;
     }
 }

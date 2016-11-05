@@ -36,7 +36,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         
     protected:
         unsigned int landmark_id_; ///< landmark unique id
-        LandmarkType type_id_;     ///< type of landmark. (types defined at wolf.h)
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
         Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
@@ -51,7 +50,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          *
          **/
-        LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
+        LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
         virtual ~LandmarkBase();
         void remove();
         virtual YAML::Node saveToYaml() const;
@@ -59,7 +58,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         // Properties
         unsigned int id();
         void setId(unsigned int _id);
-        LandmarkType getTypeId() const;
 
         // Fix / unfix
         void setStatus(LandmarkStatus _st);
@@ -235,11 +233,6 @@ inline Scalar LandmarkBase::getDescriptor(unsigned int _ii) const
 inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
 {
     return descriptor_;
-}
-
-inline LandmarkType LandmarkBase::getTypeId() const
-{
-    return type_id_;
 }
 
 } // namespace wolf

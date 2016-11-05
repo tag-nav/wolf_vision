@@ -199,19 +199,6 @@ typedef enum
 } StateStatus;
 
 
-/** \brief Enumeration of all possible landmark types
- *
- */
-typedef enum
-{
-    LANDMARK_POINT = 1,     ///< A Euclidean point landmark, either 3D or 2D
-    LANDMARK_CORNER,    ///< A corner landmark (2D)
-    LANDMARK_CONTAINER,  ///< A container landmark (2D)
-    LANDMARK_LINE_2D,  ///< A line landmark (2D)
-    LANDMARK_POLYLINE_2D,   ///< A polyline landmark (2D)
-    LANDMARK_AHP        ///< An anchored homogeneous point (3D)
-} LandmarkType;
-
 typedef enum
 {
     LANDMARK_CANDIDATE = 1,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver

@@ -96,7 +96,7 @@ ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr
     // Getting landmark ptr
     LandmarkCorner2D::Ptr landmark_ptr = nullptr;
     for (auto constraint : _feature_other_ptr->getConstraintList())
-        if (constraint->getLandmarkOtherPtr() != nullptr && constraint->getLandmarkOtherPtr()->getTypeId() == LANDMARK_CORNER)
+        if (constraint->getLandmarkOtherPtr() != nullptr && constraint->getLandmarkOtherPtr()->getType() == "CORNER")
             landmark_ptr = std::static_pointer_cast<LandmarkCorner2D>(constraint->getLandmarkOtherPtr());
 
     if (landmark_ptr == nullptr)
