@@ -36,7 +36,7 @@ int main(){
 
     cout << endl << endl;
     cout << "=========== Test Local Parametrization ==========" << endl;
-    cout << "====   Quaternion and Homogeneous 3D vector  ====" << endl << endl;
+    cout << "----   Quaternion and Homogeneous 3D vector  ----" << endl << endl;
 
     // test result
     bool all_tests_passed = true;
@@ -62,26 +62,25 @@ int main(){
     cout << "\n--------------- QUATERNION plus() --------------- " << endl;
     cout << "Initial values:" << endl;
     cout << "q  = " << q.transpose() << "   with norm = " << q.norm() << "\nda = " << da.transpose() << endl;
-    cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
 
-    LocalParametrizationQuaternion<DQ_GLOBAL> Qpar;
+    LocalParametrizationQuaternion<DQ_GLOBAL> Qpar_glob;
     LocalParametrizationQuaternion<DQ_LOCAL> Qpar_loc;
 
     // Global --------------------
-    cout << "\nGLOBAL D_QUAT" << endl;
+    cout << "\n----  DQ_GLOBAL: qo = Exp(da) * q  ----" << endl;
     cout << "Results:" << endl;
     Map<const VectorXs> q_m(q.data(),4);
     Map<const VectorXs> da_m(da.data(),3);
-    Qpar.plus(q_m,da_m,qo);
+    Qpar_glob.plus(q_m,da_m,qo);
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
     pass = (q_m.norm()-qo.norm()) < 1e-9;
     all_tests_passed = all_tests_passed && pass;
     cout << "-------------------- Norm test " << (pass ? "PASSED" : "FAIL") << endl;
 
-    Qpar.computeJacobian(q_m,J);
+    Qpar_glob.computeJacobian(q_m,J);
     cout << " J = \n" << J << endl;
 
-    JAC_NUMERIC(Qpar, q_m, J_num, 1e-9)
+    JAC_NUMERIC(Qpar_glob, q_m, J_num, 1e-9)
     cout << " J_num = \n" << J_num << endl;
 
     pass = (J-J_num).isMuchSmallerThan(1,1e-6);
@@ -89,7 +88,7 @@ int main(){
     cout << "-------------------- Jacobians test " << (pass ? "PASSED" : "FAIL") << endl;
 
     // Local -------------------------
-    cout << "\nLOCAL D_QUAT" << endl;
+    cout << "\n----  DQ_LOCAL: qo = q * Exp(da)  ----" << endl;
     cout << "Results:" << endl;
     Qpar_loc.plus(q_m,da_m,qo);
     cout << "qo = " << qo.transpose() << "   with norm = " << qo.norm() << endl;
@@ -141,7 +140,8 @@ int main(){
     all_tests_passed = all_tests_passed && pass;
     cout << "-------------------- Jacobians test " << (pass ? "PASSED" : "FAIL") << endl;
 
-    cout << endl << "-------------------- All tests " << (all_tests_passed ? "PASSED" : "FAIL") << endl;
+    cout << endl << "---------------- " << (all_tests_passed ? "All tests PASSED " : "Some tests FAILED") << " --------------" << endl;
+    cout         << "=================================================" << endl;
 
     if (!all_tests_passed)
         return -1;
