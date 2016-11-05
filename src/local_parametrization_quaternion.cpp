@@ -17,7 +17,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::plus(const Eigen::Map<const
     using namespace Eigen;
 
     double angle = _delta_theta.norm();
-    if (angle > Constants::EPS)
+    if (angle > Constants::EPS_SMALL)
     {
         // compute rotation axis -- this guarantees unity norm
         Vector3s axis = _delta_theta / angle;
@@ -52,7 +52,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::plus(const Eigen::Map<cons
     using namespace Eigen;
 
     double angle = _delta_theta.norm();
-    if (angle > Constants::EPS)
+    if (angle > Constants::EPS_SMALL)
     {
         // compute rotation axis -- this guarantees unity norm
         Vector3s axis = _delta_theta / angle;
