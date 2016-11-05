@@ -76,7 +76,7 @@ class ProcessorTracker : public ProcessorBase
         unsigned int max_new_features_;         ///< max features allowed to detect in one iteration. 0 = no limit
 
     public:
-        ProcessorTracker(ProcessorType _tp, const std::string& _type, const unsigned int _max_new_features = 0, const Scalar& _time_tolerance = 0.1);
+        ProcessorTracker(const std::string& _type, const unsigned int _max_new_features = 0, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorTracker();
 
         /** \brief Full processing of an incoming Capture.

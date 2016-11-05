@@ -2,9 +2,9 @@
 namespace wolf
 {
 
-ProcessorMotion::ProcessorMotion(ProcessorType _tp, const std::string& _type, Size _state_size, Size _delta_size,
+ProcessorMotion::ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size,
                                  Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance) :
-        ProcessorBase(_tp, _type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), delta_cov_size_(
+        ProcessorBase(_type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), delta_cov_size_(
                 _delta_cov_size), data_size_(_data_size), origin_ptr_(), last_ptr_(), incoming_ptr_(), dt_(0.0), x_(
                 _state_size), delta_(_delta_size), delta_cov_(_delta_cov_size, _delta_cov_size), delta_integrated_(
                 _delta_size), delta_integrated_cov_(_delta_cov_size, _delta_cov_size), data_(_data_size), jacobian_delta_preint_(

@@ -11,7 +11,7 @@ namespace wolf
 {
 
 ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
-    ProcessorTrackerFeature(PRC_TRACKER_IMAGE, "IMAGE", _params.algorithm.max_new_features),
+    ProcessorTrackerFeature("IMAGE", _params.algorithm.max_new_features),
     matcher_ptr_(nullptr),
     detector_descriptor_ptr_(nullptr),
     params_(_params),

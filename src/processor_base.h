@@ -33,7 +33,7 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
     private:
         SensorBaseWPtr sensor_ptr_;
     public:
-        ProcessorBase(ProcessorType _tp, const std::string& _type, const Scalar& _time_tolerance = 0);
+        ProcessorBase(const std::string& _type, const Scalar& _time_tolerance = 0);
         virtual ~ProcessorBase();
         void remove();
 
@@ -72,7 +72,6 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
     protected:
         unsigned int processor_id_;
-        ProcessorType type_id_;
         Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
 };
 
