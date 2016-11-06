@@ -10,7 +10,6 @@ ProcessorBase::ProcessorBase(const std::string& _type, const Scalar& _time_toler
         NodeBase("PROCESSOR"),
         sensor_ptr_(),
         processor_id_(++processor_id_count_),
-//        type_id_(_tp),
         time_tolerance_(_time_tolerance)
 {
     setType(_type);

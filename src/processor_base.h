@@ -67,6 +67,8 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         ProblemPtr getProblem();
 
+        void setTimeTolerance(Scalar _time_tolerance);
+
     private:
         static unsigned int processor_id_count_;
 
@@ -115,6 +117,11 @@ inline SensorBasePtr ProcessorBase::getSensorPtr()
 inline const SensorBasePtr ProcessorBase::getSensorPtr() const
 {
     return sensor_ptr_.lock();
+}
+
+inline void ProcessorBase::setTimeTolerance(Scalar _time_tolerance)
+{
+    time_tolerance_ = _time_tolerance;
 }
 
 } // namespace wolf
