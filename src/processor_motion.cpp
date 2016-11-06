@@ -21,7 +21,17 @@ ProcessorMotion::~ProcessorMotion()
 void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 {
 
+    /* Status:
+     * KF --- KF --- F ----
+     *        o      l      i
+     */
+
     incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
+
+    /* Status:
+     * KF --- KF --- F ---- *
+     *        o      l      i
+     */
 
     preProcess();
     integrate();
@@ -32,12 +42,18 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         CaptureMotion::Ptr key_capture_ptr = last_ptr_;
         FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
 
-        // Set the frame as key
+        // Set the frame of key_capture as key
         key_frame_ptr->setState(getCurrentState());
         key_frame_ptr->setTimeStamp(getBuffer().get().back().ts_);
         key_frame_ptr->setKey();
 
-        // create motion feature and add it to the capture
+        /* Status:
+         * KF --- KF --- KF ---
+         *        o      l      i
+         */
+
+
+        // create motion feature and add it to the key_capture
         FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
                 "MOTION",
                 key_capture_ptr->getBuffer().get().back().delta_integr_,
@@ -60,11 +76,17 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, key_frame_ptr->getState(), last_ptr_->getTimeStamp());
         new_frame_ptr->addCapture(last_ptr_); // Add Capture to the new Frame
 
-        // reset processor origin
+        // reset processor origin to the new keyframe's capture
         origin_ptr_ = key_capture_ptr;
         getBuffer().get().push_back(Motion( {key_frame_ptr->getTimeStamp(), deltaZero(), deltaZero(),
                                              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
                                              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)}));
+
+        /* Status:
+         * KF --- KF --- KF --- F ----
+         *               o      l      i
+         */
+
         delta_integrated_ = deltaZero();
         delta_integrated_cov_.setZero();
 
@@ -121,6 +143,11 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
             && "ProcessorMotion::setOrigin: origin frame must be in the trajectory.");
     assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
 
+    /* Status:
+     * * --- * ---
+     * o     l     i
+     */
+
     // make (empty) origin Capture
     origin_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(), getSensorPtr(),
                                                   Eigen::VectorXs::Zero(data_size_),
@@ -128,18 +155,28 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
     // Add origin capture to origin frame
     _origin_frame->addCapture(origin_ptr_);
 
+    /* Status:
+     * KF --- * ---
+     * o      l     i
+     */
+
     // make (emtpy) last Capture
     last_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(),
                                                 getSensorPtr(),
                                                 Eigen::VectorXs::Zero(data_size_),
                                                 Eigen::MatrixXs::Zero(data_size_, data_size_),
                                                 _origin_frame);
-    // Make frame at last Capture
+    // Make non-key-frame at last Capture
     //    makeFrame(last_ptr_, _origin_frame->getState(), NON_KEY_FRAME);
     FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME,
                                                            _origin_frame->getState(),
                                                            last_ptr_->getTimeStamp());
-    new_frame_ptr->addCapture(last_ptr_); // Add last Capture to the new Frame
+    new_frame_ptr->addCapture(last_ptr_);
+
+    /* Status:
+     * KF --- F ---
+     * o      l     i
+     */
 
     // Reset deltas
     delta_ = deltaZero();
