@@ -85,6 +85,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             new_frame_ptr->addCapture(last_ptr_); // Add incoming Capture to the new Frame
             std::cout << "Last appended to new KF" << new_frame_ptr->id() << std::endl;
 
+            getProblem()->keyFrameCallback(new_frame_ptr, shared_from_this(), time_tolerance_);
+
             /* Status:
              *  * ---- KF ---       KF: keyframes; F: frame
              *  o      l      i     captures: origin, last, incoming
