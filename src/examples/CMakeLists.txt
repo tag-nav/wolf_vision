@@ -10,6 +10,9 @@ ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
 
 ADD_EXECUTABLE(test_wolf_root test_wolf_root.cpp)
 
+ADD_EXECUTABLE(test_kf_callback test_kf_callback.cpp)
+TARGET_LINK_LIBRARIES(test_kf_callback ${PROJECT_NAME})
+
 ADD_EXECUTABLE(test_wolf_logging test_wolf_logging.cpp)
 TARGET_LINK_LIBRARIES(test_wolf_logging ${PROJECT_NAME})
 
