@@ -36,9 +36,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     preProcess();
     integrate();
 
-    last_ptr_->getFramePtr()->setState(getCurrentState());
-    last_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
-
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         WOLF_DEBUG_HERE
@@ -312,6 +309,11 @@ void ProcessorMotion::integrate()
     // then push it into buffer
     getBuffer().get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_, delta_cov_,
                                          delta_integrated_cov_}));
+
+    // Update state and time stamps
+    last_ptr_->getFramePtr()->setState(getCurrentState());
+    last_ptr_->setTimeStamp(incoming_ptr_->getTimeStamp());
+    last_ptr_->getFramePtr()->setTimeStamp(last_ptr_->getTimeStamp());
 }
 
 void ProcessorMotion::reintegrate(CaptureMotion::Ptr _capture_ptr)
