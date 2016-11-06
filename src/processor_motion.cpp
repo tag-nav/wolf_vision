@@ -41,6 +41,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
     if (voteForKeyFrame() && permittedKeyFrame())
     {
+        WOLF_DEBUG_HERE
         // key_capture
         CaptureMotion::Ptr key_capture_ptr = last_ptr_;
         FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
@@ -71,9 +72,11 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         origin_ptr_->getFramePtr() -> addConstrainedBy(ctr_ptr);
 
         // new last capture
-        last_ptr_ = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(), getSensorPtr(),
+        last_ptr_ = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
+                                                    getSensorPtr(),
                                                     Eigen::VectorXs::Zero(data_size_),
-                                                    Eigen::MatrixXs::Zero(data_size_, data_size_), key_frame_ptr);
+                                                    Eigen::MatrixXs::Zero(data_size_, data_size_),
+                                                    key_frame_ptr);
 
         // create a new last frame
         FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, key_frame_ptr->getState(), last_ptr_->getTimeStamp());
@@ -97,10 +100,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         resetDerived();
         getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), time_tolerance_);
 
-        //// debug cout
-        //Eigen::VectorXs interpolated_state(3);
-        //xPlusDelta(origin_ptr_->getFramePtr()->getState(), key_capture_ptr->getBufferPtr()->get().back().delta_integr_, interpolated_state);
-        //std::cout << "\tinterpolated state: " << interpolated_state.transpose() << std::endl;
     }
 
 

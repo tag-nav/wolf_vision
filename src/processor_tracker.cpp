@@ -40,13 +40,11 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
     if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
     {
         std::cout << "FIRST TIME" << std::endl;
-        //std::cout << "Features in origin: " << 0 << "; in last: " << 0 << std::endl;
 
         /* Status:
          *  * ---- * ---- * ----        KF: keyframes; F: frame
          *  o      l      i             captures: origin, last, incoming
          */
-
 
         // advance
         advance();
@@ -64,6 +62,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
         if (closest_key_frm && abs(closest_key_frm->getTimeStamp() - last_ptr_->getTimeStamp()) <= time_tolerance_)
         {
+            WOLF_DEBUG_HERE
             closest_key_frm->addCapture(last_ptr_);
             closest_key_frm->setKey();
             std::cout << "Last appended to existing F, set KF" << closest_key_frm->id() << std::endl;
@@ -76,6 +75,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         else
         {
+            WOLF_DEBUG_HERE
             //makeFrame(last_ptr_, KEY_FRAME);
             //makeFrame(last_ptr_, getProblem()->getStateAtTimeStamp(last_ptr_->getTimeStamp()), KEY_FRAME);
 
