@@ -36,6 +36,9 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     preProcess();
     integrate();
 
+    last_ptr_->getFramePtr()->setState(getCurrentState());
+    last_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
+
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         // key_capture
