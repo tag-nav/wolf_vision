@@ -51,7 +51,7 @@ int main()
 
         cout << "Motion-----------------" << endl;
         sen_odo->addCapture(make_shared<CaptureMotion>(t, sen_odo, odo_data));
-        //        cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
+        cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
 
         problem->print(2);
 
