@@ -207,8 +207,8 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
 
     WOLF_DEBUG_HERE
     std::cout << "PM: KF" << _keyframe_ptr->id() << " callback received at ts= " << _keyframe_ptr->getTimeStamp().get() << std::endl;
-    std::cout << "while last ts= " << last_ptr_->getTimeStamp().get() << std::endl;
-    std::cout << "while last's frame ts= " << last_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;
+    std::cout << "    while last ts= " << last_ptr_->getTimeStamp().get() << std::endl;
+    std::cout << "    while last's frame ts= " << last_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;
 
     assert(_keyframe_ptr->getTrajectoryPtr() != nullptr
             && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
