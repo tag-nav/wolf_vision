@@ -35,7 +35,9 @@ int main()
 
     TimeStamp t(0);
     Vector3s x; x << 0,0,0;
+    WOLF_DEBUG_HERE
     problem->setOrigin(x, (Matrix3s::Identity()), t);
+    WOLF_DEBUG_HERE
 
     cout << "x(0) = " << problem->getCurrentState().transpose() << endl;
 
@@ -49,15 +51,15 @@ int main()
         t += dt;
         cout << "=======================\n>> TIME: " << t.get() << endl;
 
-        cout << "Motion-----------------" << endl;
-        sen_odo->addCapture(make_shared<CaptureMotion>(t, sen_odo, odo_data));
-        cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
-
-        problem->print(2);
-
         cout << "Tracker----------------" << endl;
         sen_ftr->addCapture(make_shared<CaptureVoid>(t, sen_ftr));
         problem->print(2);
+
+        cout << "Motion-----------------" << endl;
+        sen_odo->addCapture(make_shared<CaptureMotion>(t, sen_odo, odo_data));
+        cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
+        problem->print(2);
+
     }
 
 
