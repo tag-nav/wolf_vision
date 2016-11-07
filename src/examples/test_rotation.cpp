@@ -210,7 +210,6 @@ int main()
         }
         scale = scale*0.1;
     }
-
     /**********************************************************************************************/
     std::cout<< "\n\n######################################### Test vector -> quaternion -> matrix -> vector ################################################\n" << std::endl;
 
@@ -271,6 +270,41 @@ int main()
         
         scale = scale*0.1;
     }
+
+    std::cout<< "\n\n>>>>>>>>>>>>>>>>> Highlight limitation of Eigen::AngleAxis <<<<<<<<<<<<<<<<<<<<<\n" << std::endl;
+    rotation_mat = skew(Eigen::Vector3s::Random()) *0.0001;
+    rotation_mat(0,0) = 1;
+    rotation_mat(1,1) = 0.999999;
+    rotation_mat(2,2) = 1;
+    Eigen::AngleAxis<wolf::Scalar> aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+    rv = aa0.axis() * aa0.angle();
+
+    std::cout << "\n initial matrix : \n" << rotation_mat << "\nassociated angle axis : " << rv.transpose() << "\t aa0.axis : " << aa0.axis().transpose() << ",\t aa0.angles :" << aa0.angle() <<std::endl;
+
+    rotation_mat(0,0) = 1.0;
+    rotation_mat(1,1) = 1.0;
+    rotation_mat(2,2) = 1.0;
+    aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+    rv = aa0.axis() * aa0.angle();
+
+    std::cout << "\n initial matrix : \n" << rotation_mat << "\nassociated angle axis : " << rv.transpose() << "\t aa0.axis : " << aa0.axis().transpose() << ",\t aa0.angles :" << aa0.angle() <<std::endl;
+
+    rotation_mat = skew(Eigen::Vector3s::Random()) *0.1;
+    rotation_mat(0,0) = 1;
+    rotation_mat(1,1) = 0.9999999;
+    rotation_mat(2,2) = 1;
+    aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+    rv = aa0.axis() * aa0.angle();
+
+    std::cout << "\n initial matrix : \n" << rotation_mat << "\nassociated angle axis : " << rv.transpose() << "\t aa0.axis : " << aa0.axis().transpose() << ",\t aa0.angles :" << aa0.angle() <<std::endl;
+
+    rotation_mat(0,0) = 1.0;
+    rotation_mat(1,1) = 1.0;
+    rotation_mat(2,2) = 1.0;
+    aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+    rv = aa0.axis() * aa0.angle();
+
+    std::cout << "\n initial matrix : \n" << rotation_mat << "\nassociated angle axis : " << rv.transpose() << "\t aa0.axis : " << aa0.axis().transpose() << ",\t aa0.angles :" << aa0.angle() <<std::endl;
 
     /**********************************************************************************************/
     ///Quaternion composition
