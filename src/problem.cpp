@@ -172,12 +172,12 @@ void Problem::setProcessorMotion(ProcessorMotion::Ptr _processor_motion_ptr)
     processor_motion_ptr_ = _processor_motion_ptr;
 }
 
-FrameBasePtr Problem::createFrame(FrameKeyType _frame_type, const TimeStamp& _time_stamp)
+FrameBasePtr Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
 {
     return createFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
 }
 
-FrameBasePtr Problem::createFrame(FrameKeyType _frame_key_type, const Eigen::VectorXs& _frame_state,
+FrameBasePtr Problem::createFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
     //std::cout << "Problem::createFrame" << std::endl;

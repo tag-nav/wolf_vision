@@ -54,8 +54,8 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         /**\brief make a Frame with the provided Capture
          */
-        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
-        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type = NON_KEY_FRAME);
+        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, FrameType _type = NON_KEY_FRAME);
+        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameType _type = NON_KEY_FRAME);
 
         virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tolerance) = 0;
 

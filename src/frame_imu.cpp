@@ -17,7 +17,7 @@ FrameIMU::FrameIMU(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_
     setType("IMU");
 }
 
-FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr,
+FrameIMU::FrameIMU(const FrameType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr,
                    StateQuaternionPtr _q_ptr, StateBlockPtr _ba_ptr, StateBlockPtr _bg_ptr) :
         FrameBase(_tp, _ts, _p_ptr, _q_ptr, _v_ptr)
 {
@@ -27,7 +27,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr 
     setType("IMU");
 }
 
-FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
+FrameIMU::FrameIMU(const FrameType& _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
         FrameBase(_tp, _ts, std::make_shared<StateBlock>(3), std::make_shared<StateQuaternion>(), std::make_shared<StateBlock>(3))
 {
     resizeStateBlockVec(5); // could have done push_back, but prefer more explicit locations for the StateBlocks
@@ -213,7 +213,7 @@ FrameIMU::FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, const Eigen::V
 
 
 
-FrameBasePtr FrameIMU::create(const FrameKeyType & _tp,
+FrameBasePtr FrameIMU::create(const FrameType & _tp,
                               const TimeStamp& _ts,
                               const Eigen::VectorXs& _x)
 {

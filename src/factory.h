@@ -349,7 +349,7 @@ inline std::string LandmarkFactory::getClass()
 // Frames
 class FrameBase;
 class TimeStamp;
-typedef Factory<FrameBase, const FrameKeyType&, const TimeStamp&, const Eigen::VectorXs&> FrameFactory;
+typedef Factory<FrameBase, const FrameType&, const TimeStamp&, const Eigen::VectorXs&> FrameFactory;
 template<>
 inline std::string FrameFactory::getClass()
 {

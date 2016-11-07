@@ -25,13 +25,13 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         TrajectoryBaseWPtr trajectory_ptr_;
         CaptureBaseList capture_list_;
         ConstraintBaseList constrained_by_list_;
-        std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, V.
+        std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order: Position, Orientation, Velocity.
 
         static unsigned int frame_id_count_;
 
     protected:
         unsigned int frame_id_;
-        FrameKeyType type_id_;     ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
+        FrameType type_;     ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
         StateStatus status_;       ///< status of the estimation of the frame state
         TimeStamp time_stamp_;     ///< frame time stamp
         
@@ -55,7 +55,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          * \param _v_ptr StateBlock pointer to the velocity (default: nullptr).
          **/        
-        FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
+        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
 
         virtual ~FrameBase();
         void remove();
@@ -135,13 +135,13 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setStatus(StateStatus _st);
 
     public:
-        static FrameBasePtr create_PO_2D (const FrameKeyType & _tp,
+        static FrameBasePtr create_PO_2D (const FrameType & _tp,
                                           const TimeStamp& _ts,
                                           const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(3));
-        static FrameBasePtr create_PO_3D (const FrameKeyType & _tp,
+        static FrameBasePtr create_PO_3D (const FrameType & _tp,
                                           const TimeStamp& _ts,
                                           const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(7));
-        static FrameBasePtr create_POV_3D(const FrameKeyType & _tp,
+        static FrameBasePtr create_POV_3D(const FrameType & _tp,
                                           const TimeStamp& _ts,
                                           const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(10));
 };
@@ -180,7 +180,7 @@ inline unsigned int FrameBase::id()
 
 inline bool FrameBase::isKey() const
 {
-    return (type_id_ == KEY_FRAME);
+    return (type_ == KEY_FRAME);
 }
 
 inline void FrameBase::fix()

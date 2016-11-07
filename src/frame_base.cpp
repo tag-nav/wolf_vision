@@ -15,7 +15,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
             trajectory_ptr_(),
             state_block_vec_(3), // allow for 6 state blocks by default. Resize in derived constructors if needed.
             frame_id_(++frame_id_count_),
-            type_id_(NON_KEY_FRAME),
+            type_(NON_KEY_FRAME),
 			status_(ST_ESTIMATED),
             time_stamp_(_ts)
 {
@@ -29,12 +29,12 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
         std::cout << "constructed  +F" << id() << std::endl;
 }
 
-FrameBase::FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
+FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
             NodeBase("FRAME", "BASE"),
             trajectory_ptr_(),
             state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
             frame_id_(++frame_id_count_),
-            type_id_(_tp),
+            type_(_tp),
 			status_(ST_ESTIMATED),
             time_stamp_(_ts)
 {
@@ -104,7 +104,7 @@ void FrameBase::removeStateBlocks()
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
         {
-            if (getProblem() != nullptr && type_id_ == KEY_FRAME)
+            if (getProblem() != nullptr && type_ == KEY_FRAME)
             {
                 getProblem()->removeStateBlockPtr(sbp);
             }
@@ -115,9 +115,9 @@ void FrameBase::removeStateBlocks()
 
 void FrameBase::setKey()
 {
-    if (type_id_ != KEY_FRAME)
+    if (type_ != KEY_FRAME)
     {
-        type_id_ = KEY_FRAME;
+        type_ = KEY_FRAME;
         registerNewStateBlocks();
 
         if (getTrajectoryPtr()->getLastKeyFramePtr() == nullptr || getTrajectoryPtr()->getLastKeyFramePtr()->getTimeStamp() < time_stamp_)
@@ -302,7 +302,7 @@ void FrameBase::setStatus(StateStatus _st)
     }
 }
 
-FrameBasePtr FrameBase::create_PO_2D(const FrameKeyType & _tp,
+FrameBasePtr FrameBase::create_PO_2D(const FrameType & _tp,
                                      const TimeStamp& _ts,
                                      const Eigen::VectorXs& _x)
 {
@@ -314,7 +314,7 @@ FrameBasePtr FrameBase::create_PO_2D(const FrameKeyType & _tp,
     f->setType("PO 2D");
     return f;
 }
-FrameBasePtr FrameBase::create_PO_3D(const FrameKeyType & _tp,
+FrameBasePtr FrameBase::create_PO_3D(const FrameType & _tp,
                                      const TimeStamp& _ts,
                                      const Eigen::VectorXs& _x)
 {
@@ -326,7 +326,7 @@ FrameBasePtr FrameBase::create_PO_3D(const FrameKeyType & _tp,
     f->setType("PO 3D");
     return f;
 }
-FrameBasePtr FrameBase::create_POV_3D(const FrameKeyType & _tp,
+FrameBasePtr FrameBase::create_POV_3D(const FrameType & _tp,
                                      const TimeStamp& _ts,
                                      const Eigen::VectorXs& _x)
 {

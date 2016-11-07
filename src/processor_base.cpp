@@ -10,7 +10,6 @@ ProcessorBase::ProcessorBase(const std::string& _type, const Scalar& _time_toler
         NodeBase("PROCESSOR"),
         sensor_ptr_(),
         processor_id_(++processor_id_count_),
-//        type_id_(_tp),
         time_tolerance_(_time_tolerance)
 {
     std::cout << "constructed    +p" << id() << std::endl;
@@ -28,7 +27,7 @@ bool ProcessorBase::permittedKeyFrame()
     return getProblem()->permitKeyFrame(shared_from_this());
 }
 
-FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType _type)
+FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameType _type)
 {
     std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
 
@@ -39,7 +38,7 @@ FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType 
     return new_frame_ptr;
 }
 
-FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type)
+FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameType _type)
 {
     // We need to create the new free Frame to hold what will become the last Capture
     std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
