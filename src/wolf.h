@@ -102,15 +102,13 @@ typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of r
 
 namespace wolf {
 
-/** \brief Enumeration of all possible frames
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
+/** \brief Enumeration of frame types: key-frame or non-key-frame
  */
 typedef enum
 {
     NON_KEY_FRAME = 0,  ///< regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
     KEY_FRAME = 1       ///< key frame. It will stay in the frames window and play at optimizations.
-} FrameKeyType;
+} FrameType;
 
 /** \brief Enumeration of all possible frames
  *

@@ -147,13 +147,13 @@ class Problem : public std::enable_shared_from_this<Problem>
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        FrameBasePtr createFrame(FrameKeyType _frame_key_type, const TimeStamp& _time_stamp);
+        FrameBasePtr createFrame(FrameType _frame_key_type, const TimeStamp& _time_stamp);
 
         /** \brief Create Frame from vector
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        FrameBasePtr createFrame(FrameKeyType _frame_key_type, const Eigen::VectorXs& _frame_state,
+        FrameBasePtr createFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
         Eigen::VectorXs getCurrentState();
