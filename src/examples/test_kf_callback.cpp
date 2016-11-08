@@ -35,15 +35,14 @@ int main()
 
     TimeStamp t(0);
     Vector3s x; x << 0,0,0;
-    WOLF_DEBUG_HERE
-    problem->setOrigin(x, (Matrix3s::Identity()), t);
-    WOLF_DEBUG_HERE
+//    problem->setOrigin(x, (Matrix3s::Identity()), t);
+    problem->getProcessorMotionPtr()->setOrigin(x, t);
 
     cout << "x(0) = " << problem->getCurrentState().transpose() << endl;
 
     Vector2s odo_data;  odo_data << .1, (M_PI / 2);
 
-    problem->print(2);
+    problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
 
     Scalar dt = 1;
     for (auto i = 0; i < 4; i++)
@@ -53,15 +52,16 @@ int main()
 
         cout << "Tracker----------------" << endl;
         sen_ftr->addCapture(make_shared<CaptureVoid>(t, sen_ftr));
-        problem->print(2);
+        problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
 
         cout << "Motion-----------------" << endl;
         sen_odo->addCapture(make_shared<CaptureMotion>(t, sen_odo, odo_data));
         cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
-        problem->print(2);
+        problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
 
     }
 
+    problem->print();
 
 
     return 0;
