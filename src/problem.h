@@ -245,10 +245,13 @@ class Problem : public std::enable_shared_from_this<Problem>
         // Print and check ---------------------------------------
         /**
          * \brief print wolf tree
-         * \param level : 0: Basic links; 1: with Constrained_by; 2: with Metrics; 3: with StateBlocks; default: 1.
+         * \param depth :        levels to show ( 0: H, T, M : 1: H:S:p, T:F, M:L ; 2: T:F:C ; 3: T:F:C:f ; 4: T:F:C:f:c )
+         * \param constr_by:     show constraints pointing to F, f and L.
+         * \param metric :       show metric info (status, time stamps, state vectors, measurements)
+         * \param state_blocks : show state blocks
          */
-        void print(int level = 1);
-        bool check();
+        void print(int depth = 4, bool constr_by = false, bool metric = true, bool state_blocks = false);
+        bool check(int verbose_level = 0);
 
 };
 
