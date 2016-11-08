@@ -13,6 +13,7 @@ SensorGPS::SensorGPS(StateBlockPtr _p_ptr, //GPS sensor position with respect to
         :
         SensorBase("GPS", _p_ptr, _o_ptr, _bias_ptr, 0)
 {
+    getStateBlockVec().resize(5);
     setStateBlockPtr(3, _map_p_ptr); // Map position
     setStateBlockPtr(4, _map_o_ptr); // Map orientation
     //
