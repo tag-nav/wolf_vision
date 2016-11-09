@@ -620,8 +620,12 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     }
                 }
             }
+            else
+                std::cout << "    " << S->getProcessorList().size() << "p" << std::endl;
         }
     }
+    else
+        std::cout << "  " << getHardwarePtr()->getSensorList().size() << "S" << std::endl;
     std::cout << "Trajectory" << std::endl;
     if (depth >= 1)
     {
@@ -686,12 +690,20 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                                     std::cout << std::endl;
                                 }
                             }
+                            else
+                                std::cout << "        " << f->getConstraintList().size() << "c" << std::endl;
                         }
                     }
+                    else
+                        std::cout << "      " << C->getFeatureList().size() << "f" << std::endl;
                 }
             }
+            else
+                std::cout << "    " << F->getCaptureList().size() << "C" << std::endl;
         }
     }
+    else
+        std::cout << "  " << getTrajectoryPtr()->getFrameList().size() << "F" << std::endl;
     std::cout << "Map" << std::endl;
     if (depth >= 1)
     {
@@ -715,6 +727,8 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             }
         }
     }
+    else
+        std::cout << "  " << getMapPtr()->getLandmarkList().size() << "L" << std::endl;
     std::cout << "-----------------------------------------" << std::endl;
     std::cout << std::endl;
 }
