@@ -147,6 +147,21 @@ int main(int argc, char** argv)
     {
         t += dt;
 
+        // Image ------------------------------------------------
+
+        // Preferred method with factory objects:
+        image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
+
+        /* process */
+        //image_ptr->process();
+        camera_ptr->addCapture(image_ptr);
+
+        ceres::Solver::Summary summary = ceres_manager.solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        wolf_problem_ptr_->print(2);
+
+
         // Odometry ---------------------------------------------
         cap_odo->setTimeStamp(t);
 
@@ -200,43 +215,6 @@ int main(int argc, char** argv)
         wolf_problem_ptr_->print(2);
 
 
-
-        // Image ------------------------------------------------
-
-//        clock_t t1 = clock();
-
-        // Preferred method with factory objects:
-        image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
-
-        /* process */
-        //image_ptr->process();
-        camera_ptr->addCapture(image_ptr);
-
-//        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-
-        ceres::Solver::Summary summary = ceres_manager.solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        wolf_problem_ptr_->print(2);
-
-//        CaptureMotion::Ptr cap = wolf_problem_ptr_->getProcessorMotionPtr()->getOriginPtr();
-//        if(cap)
-//        {
-//            FeatureBasePtr ftr = cap->getFeatureList().front();
-//            if(ftr)
-//            {
-//                ConstraintBasePtr ctr = ftr->getConstraintList().front();
-//                if(ctr)
-//                {
-//                    ConstraintOdom3D::Ptr ctr_odom = std::static_pointer_cast<ConstraintOdom3D>(ctr);
-//                    if(ctr_odom)
-//                    {
-//                        std::cout << "ctr_odom3D expectation: " << ctr_odom->expectation().transpose() << std::endl;
-//                        std::cout << "odom3D measurement: " << cap->getFeatureList().front()->getMeasurement().transpose() << std::endl;
-//                    }
-//                }
-//            }
-//        }
 
 
 //        std::cout << "Last key frame pose: "
