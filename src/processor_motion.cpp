@@ -142,22 +142,13 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
             && "ProcessorMotion::setOrigin: origin frame must be in the trajectory.");
     assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
 
-    /* Status:
-     * * --- * ---
-     * o     l     i
-     */
-
     // make (empty) origin Capture
-    origin_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(), getSensorPtr(),
+    origin_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(),
+                                                  getSensorPtr(),
                                                   Eigen::VectorXs::Zero(data_size_),
                                                   Eigen::MatrixXs::Zero(data_size_, data_size_), nullptr);
     // Add origin capture to origin frame
     _origin_frame->addCapture(origin_ptr_);
-
-    /* Status:
-     * KF --- * ---
-     * o      l     i
-     */
 
     // make (emtpy) last Capture
     last_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(),
@@ -166,10 +157,9 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
                                                 Eigen::MatrixXs::Zero(data_size_, data_size_),
                                                 _origin_frame);
     // Make non-key-frame at last Capture
-    //    makeFrame(last_ptr_, _origin_frame->getState(), NON_KEY_FRAME);
     FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME,
                                                            _origin_frame->getState(),
-                                                           last_ptr_->getTimeStamp());
+                                                           _origin_frame->getTimeStamp());
     new_frame_ptr->addCapture(last_ptr_);
 
     /* Status:

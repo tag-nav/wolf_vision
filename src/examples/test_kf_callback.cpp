@@ -20,11 +20,11 @@ int main()
 
     ProblemPtr problem = Problem::create(FRM_PO_2D);
 
-    SensorBasePtr sen_odo    = problem->installSensor("ODOM 2D", "main odometer", (Vector3s()<<0,0,0).finished(),"");
+    SensorBasePtr sen_odo    = problem->installSensor   ("ODOM 2D", "main odometer", (Vector3s()<<0,0,0).finished(),"");
     ProcessorBasePtr prc_odo = problem->installProcessor("ODOM 2D", "odometry integrator", "main odometer", "");
     prc_odo->setTimeTolerance(0.1);
 
-    SensorBasePtr sen_ftr    = problem->installSensor("ODOM 2D", "other odometer", (Vector3s()<<0,0,0).finished(),"");
+    SensorBasePtr sen_ftr    = problem->installSensor   ("ODOM 2D", "other odometer", (Vector3s()<<0,0,0).finished(),"");
     shared_ptr<ProcessorTrackerFeatureDummy> prc_ftr = make_shared<ProcessorTrackerFeatureDummy>(7, 4);
     prc_ftr->setName("tracker");
     sen_ftr->addProcessor(prc_ftr);
@@ -34,8 +34,7 @@ int main()
     cout << "Motion processor : " << problem->getProcessorMotionPtr()->getName() << endl;
 
     TimeStamp t(0);
-    Vector3s x; x << 0,0,0;
-//    problem->setOrigin(x, (Matrix3s::Identity()), t);
+    Vector3s x({0,0,0});
     problem->getProcessorMotionPtr()->setOrigin(x, t);
 
     cout << "x(0) = " << problem->getCurrentState().transpose() << endl;
@@ -60,9 +59,6 @@ int main()
         problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
 
     }
-
-    problem->print();
-
 
     return 0;
 }
