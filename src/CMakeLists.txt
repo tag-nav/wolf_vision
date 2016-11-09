@@ -31,6 +31,8 @@ option(BUILD_EXAMPLES "Build examples" ON)
 
 FIND_PACKAGE(Eigen 3 REQUIRED)
 
+FIND_PACKAGE(Threads REQUIRED)
+
 FIND_PACKAGE(Ceres QUIET) #Ceres is not required
 IF(Ceres_FOUND)
     MESSAGE("Ceres Library FOUND: Ceres related sources will be built.")
@@ -395,10 +397,9 @@ IF(YAMLCPP_FOUND)
     ENDIF(laser_scan_utils_FOUND)
 ENDIF(YAMLCPP_FOUND)
 
-
-
 # create the shared library
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_WRAPPER})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 #Link the created libraries
 #=============================================================
