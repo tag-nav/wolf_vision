@@ -33,7 +33,6 @@ int main (int argc, char** argv)
 
     std::string wolf_root = _WOLF_ROOT_DIR;
 
-
     TimeStamp tf;
     if (argc == 1)
         tf = 1.0;

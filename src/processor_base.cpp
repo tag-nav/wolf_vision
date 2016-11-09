@@ -12,6 +12,7 @@ ProcessorBase::ProcessorBase(const std::string& _type, const Scalar& _time_toler
         processor_id_(++processor_id_count_),
         time_tolerance_(_time_tolerance)
 {
+    setType(_type);
     std::cout << "constructed    +p" << id() << std::endl;
 
     //

@@ -556,197 +556,335 @@ void Problem::saveMap(const std::string& _filename_dot_yaml, const std::string& 
     getMapPtr()->save(_filename_dot_yaml, _map_name);
 }
 
-void Problem::print(int level)
+void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 {
     std::cout << std::endl;
     std::cout << "P: wolf tree status ---------------------" << std::endl;
-    std::cout << "H" << std::endl;
-    for (auto S : getHardwarePtr()->getSensorList() )
+    std::cout << "Hardware" << std::endl;
+    if (depth >= 1)
     {
-        std::cout << "  S" << S->id() << std::endl;
-        for (auto p : S->getProcessorList() )
+        for (auto S : getHardwarePtr()->getSensorList())
         {
-            if (p->isMotion())
+            std::cout << "  S" << S->id() << std::endl;
+            if (state_blocks)
             {
-                std::cout << "    pm" << p->id() << std::endl;
-                ProcessorMotion::Ptr pm = std::static_pointer_cast<ProcessorMotion>(p);
-                if (pm->getOriginPtr())
-                    std::cout << "      o: C" << pm->getOriginPtr()->id() << std::endl;
-                if (pm->getLastPtr())
-                    std::cout << "      l: C" << pm->getLastPtr()->id() << std::endl;
-                if (pm->getIncomingPtr())
-                    std::cout << "      i: C" << pm->getIncomingPtr()->id() << std::endl;
+                std::cout << "    sb:";
+                for (auto sb : S->getStateBlockVec())
+                    if (sb != nullptr)
+                        std::cout << " " << (sb->isFixed() ? "Fix" : "Est");
+                std::cout << std::endl;
+            }
+            if (depth >= 2)
+            {
+                for (auto p : S->getProcessorList())
+                {
+                    if (p->isMotion())
+                    {
+                        std::cout << "    pm" << p->id() << std::endl;
+                        if (depth >= 2)
+                        {
+                            ProcessorMotion::Ptr pm = std::static_pointer_cast<ProcessorMotion>(p);
+                            if (pm->getOriginPtr())
+                                std::cout << "      o: C" << pm->getOriginPtr()->id() << " - F"
+                                        << pm->getOriginPtr()->getFramePtr()->id() << std::endl;
+                            if (pm->getLastPtr())
+                                std::cout << "      l: C" << pm->getLastPtr()->id() << " - F"
+                                        << pm->getLastPtr()->getFramePtr()->id() << std::endl;
+                            if (pm->getIncomingPtr())
+                                std::cout << "      i: C" << pm->getIncomingPtr()->id() << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            std::cout << "    pt" << p->id() << std::endl;
+                            if (depth >= 2)
+                            {
+                                ProcessorTracker::Ptr pt = std::static_pointer_cast<ProcessorTracker>(p);
+                                if (pt->getOriginPtr())
+                                    std::cout << "      o: C" << pt->getOriginPtr()->id() << " - F"
+                                            << pt->getOriginPtr()->getFramePtr()->id() << std::endl;
+                                if (pt->getLastPtr())
+                                    std::cout << "      l: C" << pt->getLastPtr()->id() << " - F"
+                                            << pt->getLastPtr()->getFramePtr()->id() << std::endl;
+                                if (pt->getIncomingPtr())
+                                    std::cout << "      i: C" << pt->getIncomingPtr()->id() << std::endl;
+                            }
+                        }
+                        catch (std::runtime_error& e)
+                        {
+                            std::cout << "Unknown processor type!" << std::endl;
+                        }
+
+                    }
+                }
             }
             else
-            {
-                try
-                {
-                    std::cout << "    pt" << p->id() << std::endl;
-                    ProcessorTracker::Ptr pt = std::static_pointer_cast<ProcessorTracker>(p);
-                    if (pt->getOriginPtr())
-                        std::cout << "      o: C" << pt->getOriginPtr()->id() << std::endl;
-                    if (pt->getLastPtr())
-                        std::cout << "      l: C" << pt->getLastPtr()->id() << std::endl;
-                    if (pt->getIncomingPtr())
-                        std::cout << "      i: C" << pt->getIncomingPtr()->id() << std::endl;
-                }
-                catch (std::runtime_error& e)
-                {
-                    std::cout << "Unknown processor type!" << std::endl;
-                }
-
-            }
+                std::cout << "    " << S->getProcessorList().size() << "p" << std::endl;
         }
     }
-    std::cout << "T" << std::endl;
-    for (auto F : getTrajectoryPtr()->getFrameList() )
+    else
+        std::cout << "  " << getHardwarePtr()->getSensorList().size() << "S" << std::endl;
+    std::cout << "Trajectory" << std::endl;
+    if (depth >= 1)
     {
-        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id();
-        if (level > 0)
+        for (auto F : getTrajectoryPtr()->getFrameList())
         {
-            std::cout << "  <-- ";
-            for (auto cby : F->getConstrainedByList())
-                std::cout << "c" << cby->id() << " \t";
-        }
-        std::cout << std::endl;
-        if (level > 1)
-        {
-            std::cout << (F->isFixed() ?  "    Fixed" : "    Estim") << ", ts=" << std::setprecision(5) << F->getTimeStamp().get();
-            std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
+            std::cout << (F->isKey() ? "  KF" : "  F") << F->id();
+            if (constr_by)
+            {
+                std::cout << "  <-- ";
+                for (auto cby : F->getConstrainedByList())
+                    std::cout << "c" << cby->id() << " \t";
+            }
             std::cout << std::endl;
-        }
-        for (auto C : F->getCaptureList() )
-        {
-            std::cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << std::endl;
-            for (auto f : C->getFeatureList() )
+            if (metric)
             {
-                std::cout << "      f" << f->id();
-                if (level > 0)
-                    {
-                    std::cout<< "  <--\t";
-                    for (auto cby : f->getConstrainedByList())
-                        std::cout << "c" << cby->id() << " \t";
-                    }
+                std::cout << (F->isFixed() ? "    Fixed" : "    Estim") << ", ts=" << std::setprecision(5)
+                        << F->getTimeStamp().get();
+                std::cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
                 std::cout << std::endl;
-                if (level > 1)
-                    std::cout << "        m = ( " << std::setprecision(3) << f->getMeasurement().transpose() << ")" << std::endl;
-                for (auto c : f->getConstraintList() )
+            }
+            if (state_blocks)
+            {
+                std::cout << "    sb:";
+                for (auto sb : F->getStateBlockVec())
+                    if (sb != nullptr)
+                        std::cout << " " << (sb->isFixed() ? "Fix" : "Est");
+                std::cout << std::endl;
+            }
+            if (depth >= 2)
+            {
+                for (auto C : F->getCaptureList())
                 {
-                    std::cout << "        c" << c->id();
-                    switch (c->getCategory())
+                    std::cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << std::endl;
+                    if (depth >= 3)
                     {
-                        case CTR_ABSOLUTE:
-                            std::cout << " --> A" << std::endl;
-                            break;
-                        case CTR_FRAME:
-                            std::cout << " --> F" << c->getFrameOtherPtr()->id() << std::endl;
-                            break;
-                        case CTR_FEATURE:
-                            std::cout << " --> f" << c->getFeatureOtherPtr()->id() << std::endl;
-                            break;
-                        case CTR_LANDMARK:
-                            std::cout << " --> L" << c->getLandmarkOtherPtr()->id() << std::endl;
-                            break;
+                        for (auto f : C->getFeatureList())
+                        {
+                            std::cout << "      f" << f->id();
+                            if (constr_by)
+                            {
+                                std::cout << "  <--\t";
+                                for (auto cby : f->getConstrainedByList())
+                                    std::cout << "c" << cby->id() << " \t";
+                            }
+                            std::cout << std::endl;
+                            if (metric)
+                                std::cout << "        m = ( " << std::setprecision(3) << f->getMeasurement().transpose()
+                                        << ")" << std::endl;
+                            if (depth >= 4)
+                            {
+                                for (auto c : f->getConstraintList())
+                                {
+                                    std::cout << "        c" << c->id() << " -->";
+                                    if (c->getCategory() == CTR_ABSOLUTE)
+                                        std::cout << " A";
+                                    if (c->getFrameOtherPtr() != nullptr)
+                                        std::cout << " F" << c->getFrameOtherPtr()->id();
+                                    if (c->getFeatureOtherPtr() != nullptr)
+                                        std::cout << " f" << c->getFeatureOtherPtr()->id();
+                                    if (c->getLandmarkOtherPtr() != nullptr)
+                                        std::cout << " L" << c->getLandmarkOtherPtr()->id();
+                                    std::cout << std::endl;
+                                }
+                            }
+                            else
+                                std::cout << "        " << f->getConstraintList().size() << "c" << std::endl;
+                        }
                     }
+                    else
+                        std::cout << "      " << C->getFeatureList().size() << "f" << std::endl;
                 }
             }
+            else
+                std::cout << "    " << F->getCaptureList().size() << "C" << std::endl;
         }
     }
-    std::cout << "M" << std::endl;
-    for (auto L : getMapPtr()->getLandmarkList() )
+    else
+        std::cout << "  " << getTrajectoryPtr()->getFrameList().size() << "F" << std::endl;
+    std::cout << "Map" << std::endl;
+    if (depth >= 1)
     {
-        std::cout << "  L" << L->id();
-        if (level > 0)
+        for (auto L : getMapPtr()->getLandmarkList())
+        {
+            std::cout << "  L" << L->id();
+            if (constr_by)
             {
-            std::cout << "\t<-- ";
-            for (auto cby : L->getConstrainedByList())
-                std::cout << "c" << cby->id() << " \t";
+                std::cout << "\t<-- ";
+                for (auto cby : L->getConstrainedByList())
+                    std::cout << "c" << cby->id() << " \t";
             }
-        std::cout << std::endl;
+            std::cout << std::endl;
+            if (state_blocks)
+            {
+                std::cout << "    sb:";
+                for (auto sb : L->getStateBlockVec())
+                    if (sb != nullptr)
+                        std::cout << " " << (sb->isFixed() ? "Fix" : "Est");
+                std::cout << std::endl;
+            }
+        }
     }
+    else
+        std::cout << "  " << getMapPtr()->getLandmarkList().size() << "L" << std::endl;
     std::cout << "-----------------------------------------" << std::endl;
     std::cout << std::endl;
 }
 
-bool Problem::check()
+bool Problem::check(int verbose_level)
 {
     bool is_consistent = true;
     std::cout << std::endl;
     std::cout << "Wolf tree integrity ---------------------" << std::endl;
     auto P_raw = this;
-    std::cout << "P @ " << P_raw << std::endl;
     auto H = hardware_ptr_;
-    std::cout << "H @ " << H.get() << std::endl;
-    is_consistent = is_consistent && (H->getProblem().get() == P_raw);
-    for (auto S : H->getSensorList() )
+    if (verbose_level > 0)
     {
-        std::cout << "  S" << S->id() << " @ " << S.get() << std::endl;
-        std::cout << "    -> P @ " << S->getProblem().get() << std::endl;
-        std::cout << "    -> H @ " << S->getHardwarePtr().get() << std::endl;
+        std::cout << "P @ " << P_raw << std::endl;
+        std::cout << "H @ " << H.get() << std::endl;
+    }
+    is_consistent = is_consistent && (H->getProblem().get() == P_raw);
+    for (auto S : H->getSensorList())
+    {
+        if (verbose_level > 0)
+        {
+            std::cout << "  S" << S->id() << " @ " << S.get() << std::endl;
+            std::cout << "    -> P @ " << S->getProblem().get() << std::endl;
+            std::cout << "    -> H @ " << S->getHardwarePtr().get() << std::endl;
+        }
         is_consistent = is_consistent && (S->getProblem().get() == P_raw);
         is_consistent = is_consistent && (S->getHardwarePtr() == H);
-        for (auto p : S->getProcessorList() )
+        for (auto p : S->getProcessorList())
         {
-            std::cout << "    p" << p->id() << " @ " << p.get() << " -> S" << p->getSensorPtr()->id() << std::endl;
-            std::cout << "      -> P  @ " << p->getProblem().get() << std::endl;
-            std::cout << "      -> S" << p->getSensorPtr()->id() << " @ " << p->getSensorPtr().get() << std::endl;
+            if (verbose_level > 0)
+            {
+                std::cout << "    p" << p->id() << " @ " << p.get() << " -> S" << p->getSensorPtr()->id() << std::endl;
+                std::cout << "      -> P  @ " << p->getProblem().get() << std::endl;
+                std::cout << "      -> S" << p->getSensorPtr()->id() << " @ " << p->getSensorPtr().get() << std::endl;
+            }
             is_consistent = is_consistent && (p->getProblem().get() == P_raw);
             is_consistent = is_consistent && (p->getSensorPtr() == S);
         }
     }
     auto T = trajectory_ptr_;
-    std::cout << "T @ " << T.get() << std::endl;
-    is_consistent = is_consistent && (T->getProblem().get() == P_raw);
-    for (auto F : T->getFrameList() )
+    if (verbose_level > 0)
     {
-        std::cout << (F->isKey() ?  "  KF" : "  F") << F->id() << " @ " << F.get() << std::endl;
-        std::cout << "    -> P @ " << F->getProblem().get() << std::endl;
-        std::cout << "    -> T @ " << F->getTrajectoryPtr().get() << std::endl;
+        std::cout << "T @ " << T.get() << std::endl;
+    }
+    is_consistent = is_consistent && (T->getProblem().get() == P_raw);
+    for (auto F : T->getFrameList())
+    {
+        if (verbose_level > 0)
+        {
+            std::cout << (F->isKey() ? "  KF" : "  F") << F->id() << " @ " << F.get() << std::endl;
+            std::cout << "    -> P @ " << F->getProblem().get() << std::endl;
+            std::cout << "    -> T @ " << F->getTrajectoryPtr().get() << std::endl;
+            for (auto c : F->getConstrainedByList())
+            {
+                std::cout << "    <- c" << c->id() << " -> F" << c->getFrameOtherPtr()->id() << std::endl;
+            }
+        }
         is_consistent = is_consistent && (F->getProblem().get() == P_raw);
         is_consistent = is_consistent && (F->getTrajectoryPtr() == T);
-        for (auto c : F->getConstrainedByList())
+        for (auto C : F->getCaptureList())
         {
-            std::cout << "    <- c" << c->id() << " -> F" << c->getFrameOtherPtr()->id() << std::endl;
-        }
-        for (auto C : F->getCaptureList() )
-        {
-            std::cout << "    C" << C->id() << " @" << C.get() << " -> S" << C->getSensorPtr()->id() << std::endl;
-            std::cout << "      -> P  @ " << C->getProblem().get() << std::endl;
-            std::cout << "      -> F" << C->getFramePtr()->id() << " @ " << C->getFramePtr().get() << std::endl;
+            if (verbose_level > 0)
+            {
+                std::cout << "    C" << C->id() << " @" << C.get() << " -> S" << C->getSensorPtr()->id() << std::endl;
+                std::cout << "      -> P  @ " << C->getProblem().get() << std::endl;
+                std::cout << "      -> F" << C->getFramePtr()->id() << " @ " << C->getFramePtr().get() << std::endl;
+            }
             is_consistent = is_consistent && (C->getProblem().get() == P_raw);
             is_consistent = is_consistent && (C->getFramePtr() == F);
-            for (auto f : C->getFeatureList() )
+            for (auto f : C->getFeatureList())
             {
-                std::cout << "      f" << f->id() << " @" << f.get() << std::endl;
-                std::cout << "        -> P  @ " << f->getProblem().get() << std::endl;
-                std::cout << "        -> C" << f->getCapturePtr()->id() << " @ " << f->getCapturePtr().get() << std::endl;
+                if (verbose_level > 0)
+                {
+                    std::cout << "      f" << f->id() << " @" << f.get() << std::endl;
+                    std::cout << "        -> P  @ " << f->getProblem().get() << std::endl;
+                    std::cout << "        -> C" << f->getCapturePtr()->id() << " @ " << f->getCapturePtr().get()
+                            << std::endl;
+                }
                 is_consistent = is_consistent && (f->getProblem().get() == P_raw);
                 is_consistent = is_consistent && (f->getCapturePtr() == C);
 
-                for (auto c : f->getConstrainedByList())
+                if (verbose_level > 0)
                 {
-                    std::cout << "     <- c" << c->id() << " -> f" << c->getFeatureOtherPtr()->id() << std::endl;
+                    for (auto c : f->getConstrainedByList())
+                    {
+                        std::cout << "     <- c" << c->id() << " -> f" << c->getFeatureOtherPtr()->id() << std::endl;
+                    }
                 }
-                for (auto c : f->getConstraintList() )
+                for (auto c : f->getConstraintList())
                 {
-                    std::cout << "        c" << c->id() << " @" << C.get();
+                    if (verbose_level > 0)
+                        std::cout << "        c" << c->id() << " @" << C.get();
                     switch (c->getCategory())
                     {
                         case CTR_ABSOLUTE:
-                            std::cout << " --> A" << std::endl;
+                            if (verbose_level > 0)
+                                std::cout << " --> A" << std::endl;
                             break;
                         case CTR_FRAME:
-                            std::cout << " --> F" << c->getFrameOtherPtr()->id() << std::endl;
+                        {
+                            auto Fo = c->getFrameOtherPtr();
+                            if (verbose_level > 0)
+                                std::cout << " --> F" << Fo->id() << " <- ";
+                            bool found = false;
+                            for (auto cby : Fo->getConstrainedByList())
+                            {
+                                if (verbose_level > 0)
+                                    std::cout << " c" << cby->id();
+                                found = found || (c == cby);
+                            }
+                            if (verbose_level > 0)
+                                std::cout << std::endl;
+                            is_consistent = is_consistent && found;
                             break;
+                        }
                         case CTR_FEATURE:
-                            std::cout << " --> f" << c->getFeatureOtherPtr()->id() << std::endl;
+                        {
+                            auto fo = c->getFeatureOtherPtr();
+                            if (verbose_level > 0)
+                                std::cout << " --> f" << fo->id() << " <- ";
+                            bool found = false;
+                            for (auto cby : fo->getConstrainedByList())
+                            {
+                                if (verbose_level > 0)
+                                    std::cout << " c" << cby->id();
+                                found = found || (c == cby);
+                            }
+                            if (verbose_level > 0)
+                                std::cout << std::endl;
+                            is_consistent = is_consistent && found;
                             break;
+                        }
                         case CTR_LANDMARK:
-                            std::cout << " --> L" << c->getLandmarkOtherPtr()->id() << std::endl;
+                        {
+                            auto Lo = c->getLandmarkOtherPtr();
+                            if (verbose_level > 0)
+                                std::cout << " --> L" << Lo->id() << " <- ";
+                            bool found = false;
+                            for (auto cby : Lo->getConstrainedByList())
+                            {
+                                if (verbose_level > 0)
+                                    std::cout << " c" << cby->id();
+                                found = found || (c == cby);
+                            }
+                            if (verbose_level > 0)
+                                std::cout << std::endl;
+                            is_consistent = is_consistent && found;
                             break;
+                        }
                     }
-                    std::cout << "          -> P  @ " << c->getProblem().get() << std::endl;
-                    std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get() << std::endl;
+                    if (verbose_level > 0)
+                    {
+                        std::cout << "          -> P  @ " << c->getProblem().get() << std::endl;
+                        std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get()
+                                << std::endl;
+                    }
                     is_consistent = is_consistent && (c->getProblem().get() == P_raw);
                     is_consistent = is_consistent && (c->getFeaturePtr() == f);
                 }
@@ -754,23 +892,27 @@ bool Problem::check()
         }
     }
     auto M = map_ptr_;
-    std::cout << "M @ " << M.get() << std::endl;
+    if (verbose_level > 0)
+        std::cout << "M @ " << M.get() << std::endl;
     is_consistent = is_consistent && (M->getProblem().get() == P_raw);
-    for (auto L : M->getLandmarkList() )
+    for (auto L : M->getLandmarkList())
     {
-        std::cout << "  L" << L->id() << " @" << L.get() << std::endl;
+        if (verbose_level > 0)
+            std::cout << "  L" << L->id() << " @" << L.get() << std::endl;
         is_consistent = is_consistent && (L->getProblem().get() == P_raw);
         is_consistent = is_consistent && (L->getMapPtr() == M);
-        for (auto c : L->getConstrainedByList())
+        bool found = false;
+        for (auto cby : L->getConstrainedByList())
         {
-            std::cout << "      <- c" << c->id() << " -> L" << c->getLandmarkOtherPtr()->id() << std::endl;
+            if (verbose_level > 0)
+                std::cout << "      <- c" << cby->id() << " -> L" << cby->getLandmarkOtherPtr()->id() << std::endl;
+            found = found || (cby->getLandmarkOtherPtr() && L == cby->getLandmarkOtherPtr());
         }
+        is_consistent = is_consistent && found;
     }
 
-//    std::cout << std::endl;
-    std::cout << "--------------------------- Wolf tree " << (is_consistent ? " OK" : "NOK") << std::endl;
+    std::cout << "--------------------------- Wolf tree " << (is_consistent ? " OK" : "Not OK !!") << std::endl;
     std::cout << std::endl;
-
 
     return is_consistent;
 }

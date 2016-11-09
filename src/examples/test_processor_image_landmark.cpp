@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     {
 //        filename = "/home/jtarraso/Videos/House_interior.mp4";
 //        filename = "/home/jtarraso/Vídeos/gray1.mp4";
-        filename = "/home/jtarraso/test_video/output2.mpg";
+        filename = "/home/jtarraso/test_video/output6.mpg";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
     // running CAPTURES preallocated
     CaptureImage::Ptr image_ptr;
     Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
-    CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(0), sen_odo_ptr, data);
+    CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(t), sen_odo_ptr, data);
     //=====================================================
 
 
@@ -197,13 +197,13 @@ int main(int argc, char** argv)
 
         sen_odo_ptr->addCapture(cap_odo);
 
-//        wolf_problem_ptr_->print(2);
+        wolf_problem_ptr_->print(2);
 
 
 
         // Image ------------------------------------------------
 
-        clock_t t1 = clock();
+//        clock_t t1 = clock();
 
         // Preferred method with factory objects:
         image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
@@ -212,10 +212,31 @@ int main(int argc, char** argv)
         //image_ptr->process();
         camera_ptr->addCapture(image_ptr);
 
-        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
+//        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
         ceres::Solver::Summary summary = ceres_manager.solve();
         std::cout << summary.BriefReport() << std::endl;
+
+        wolf_problem_ptr_->print(2);
+
+//        CaptureMotion::Ptr cap = wolf_problem_ptr_->getProcessorMotionPtr()->getOriginPtr();
+//        if(cap)
+//        {
+//            FeatureBasePtr ftr = cap->getFeatureList().front();
+//            if(ftr)
+//            {
+//                ConstraintBasePtr ctr = ftr->getConstraintList().front();
+//                if(ctr)
+//                {
+//                    ConstraintOdom3D::Ptr ctr_odom = std::static_pointer_cast<ConstraintOdom3D>(ctr);
+//                    if(ctr_odom)
+//                    {
+//                        std::cout << "ctr_odom3D expectation: " << ctr_odom->expectation().transpose() << std::endl;
+//                        std::cout << "odom3D measurement: " << cap->getFeatureList().front()->getMeasurement().transpose() << std::endl;
+//                    }
+//                }
+//            }
+//        }
 
 
 //        std::cout << "Last key frame pose: "
@@ -223,15 +244,15 @@ int main(int argc, char** argv)
 //        std::cout << "Last key frame orientation: "
 //                << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
 
-        cv::waitKey(20);
+        cv::waitKey(0);
 
-        std::cout << "END OF ITERATION\n=================================" << std::endl;
+        std::cout << "=================================================================================================" << std::endl;
 
         f++;
         capture >> frame[f % buffer_size];
     }
 
-    wolf_problem_ptr_->print();
+    // wolf_problem_ptr_->print(2);
     wolf_problem_ptr_.reset();
 
     return 0;

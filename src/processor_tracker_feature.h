@@ -172,7 +172,6 @@ namespace wolf {
 
 inline void ProcessorTrackerFeature::establishConstraints()
 {
-    WOLF_DEBUG_HERE
 
     for (auto match : matches_origin_from_last_)
     {
@@ -184,7 +183,6 @@ inline void ProcessorTrackerFeature::establishConstraints()
 
 inline void ProcessorTrackerFeature::advance()
 {
-    WOLF_DEBUG_HERE
 
     //    std::cout << "ProcessorTrackerFeature::advance()" << std::endl;
 
@@ -206,7 +204,6 @@ inline void ProcessorTrackerFeature::advance()
 
 inline void ProcessorTrackerFeature::reset()
 {
-    WOLF_DEBUG_HERE
 
     //    std::cout << "ProcessorTrackerFeature::reset()" << std::endl;
 

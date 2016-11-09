@@ -21,21 +21,9 @@
 int main()
 {
 
-    /**=============================================================================================
-     * Get wolf root directory from the environment variable WOLF_ROOT
-     * To make this work, you need to set the environment variable WOLF_ROOT:
-     *  - To run from terminal, edit your ~/.bashrc, or ~/.bash_profile and add this line:
-     *        export WOLF_ROOT="/path/to/wolf"
-     *  - To run from eclipse, open the 'run configuration' of this executable, tab 'Environment'
-     *    and add variable WOLF_ROOT set to /path/to/wolf
-     */
-    std::string WOLF_ROOT;
-    char* w = std::getenv("WOLF_ROOT");
-    if (w != NULL)
-        WOLF_ROOT = w;
-    else
-        throw std::runtime_error("Environment variable WOLF_ROOT not found");
-    std::cout << "\nwolf root directory: " << WOLF_ROOT << std::endl;
+    //=============================================================================================
+    std::string wolf_root       = _WOLF_ROOT_DIR;
+    std::cout << "\nwolf root directory: " << wolf_root << std::endl;
     //=============================================================================================
 
     using namespace Eigen;
@@ -45,7 +33,7 @@ int main()
 
     // Camera parameters
 
-    YAML::Node camera_config = YAML::LoadFile(WOLF_ROOT + "/src/examples/camera.yaml");
+    YAML::Node camera_config = YAML::LoadFile(wolf_root + "/src/examples/camera.yaml");
 
     if (camera_config["sensor type"])
     {
@@ -87,7 +75,7 @@ int main()
 
     ProcessorParamsImage p;
 
-    Node params = YAML::LoadFile(WOLF_ROOT + "/src/examples/processor_image_ORB.yaml");
+    Node params = YAML::LoadFile(wolf_root + "/src/examples/processor_image_ORB.yaml");
 
     if (params["processor type"])
     {

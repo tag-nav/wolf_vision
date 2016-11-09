@@ -28,7 +28,6 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 {
-    WOLF_DEBUG_HERE
 
     using std::abs;
 
@@ -41,7 +40,11 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
     if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
     {
         std::cout << "FIRST TIME" << std::endl;
-        //std::cout << "Features in origin: " << 0 << "; in last: " << 0 << std::endl;
+
+        /* Status:
+         *  * ---- * ---- * ----        KF: keyframes; F: frame
+         *  o      l      i             captures: origin, last, incoming
+         */
 
         // advance
         advance();
@@ -50,29 +53,55 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         last_ptr_ = incoming_ptr_;
         incoming_ptr_ = nullptr;
 
+        /* Status:
+         *  * ---- * ----           KF: keyframes; F: frame
+         *  o      l      i         captures: origin, last, incoming
+         */
+
         // keyframe creation on last
         FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
         if (closest_key_frm && abs(closest_key_frm->getTimeStamp() - last_ptr_->getTimeStamp()) <= time_tolerance_)
         {
-            std::cout << "Setting key-frame to last_" << std::endl;
+            WOLF_DEBUG_HERE
             closest_key_frm->addCapture(last_ptr_);
             closest_key_frm->setKey();
+            std::cout << "Last appended to existing F, set KF" << closest_key_frm->id() << std::endl;
+
+            /* Status:
+             *  * ---- KF ---       KF: keyframes; F: frame
+             *  o      l      i     captures: origin, last, incoming
+             */
+
         }
         else
         {
+            WOLF_DEBUG_HERE
             //makeFrame(last_ptr_, KEY_FRAME);
             //makeFrame(last_ptr_, getProblem()->getStateAtTimeStamp(last_ptr_->getTimeStamp()), KEY_FRAME);
 
-            std::cout << "Making key-frame with last_" << std::endl;
             FrameBasePtr new_frame_ptr = getProblem()->createFrame(KEY_FRAME,
                                                                    getProblem()->getStateAtTimeStamp(last_ptr_->getTimeStamp()),
                                                                    last_ptr_->getTimeStamp());
             new_frame_ptr->addCapture(last_ptr_); // Add incoming Capture to the new Frame
+            std::cout << "Last appended to new KF" << new_frame_ptr->id() << std::endl;
+
+            getProblem()->keyFrameCallback(new_frame_ptr, shared_from_this(), time_tolerance_);
+
+            /* Status:
+             *  * ---- KF ---       KF: keyframes; F: frame
+             *  o      l      i     captures: origin, last, incoming
+             */
 
         }
 
         // Detect new Features, initialize Landmarks, create Constraints, ...
         processNew(max_new_features_);
+
+        /* Status:
+         *  * ---- KF ---       KF: keyframes; F: frame
+         *  o      l      i     captures: origin, last, incoming
+         *         n            new features
+         */
 
 
         // Establish constraints from last
@@ -85,8 +114,20 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
     {
         std::cout << "SECOND TIME or after KEY FRAME CALLBACK" << std::endl;
 
+        /* Status:
+         *  * ---- KF ---       KF: keyframes; F: frame
+         *  o      l      i     captures: origin, last, incoming
+         *         n            new features
+         */
+
         // First we track the known Features
         processKnown();
+
+        /* Status:
+         *  * ---- KF ---       KF: keyframes; F: frame
+         *  o      l      i     captures: origin, last, incoming
+         *         k      k     known features
+         */
 
         // Create a new non-key Frame in the Trajectory with the incoming Capture
         FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
@@ -94,14 +135,28 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         {
             // Just append the Capture to the existing keyframe
             closest_key_frm->addCapture(incoming_ptr_);
-            std::cout << "Appended to frame" << closest_key_frm->id() << std::endl;
-      }
+            std::cout << "Incoming appended to F" << closest_key_frm->id() << std::endl;
+
+            /* Status:
+             *  * ---- KF --- KF    KF: keyframes; F: frame
+             *  o      l      i     captures: origin, last, incoming
+             *         k      k     known features
+             */
+
+        }
         else
         {
             // Create a frame to hold what will become the last Capture
             FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
             new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
-            std::cout << "Made frame" << new_frame_ptr->id() << std::endl;
+            std::cout << "Incoming in new F" << new_frame_ptr->id() << std::endl;
+
+            /* Status:
+             *  * ---- KF --- F     KF: keyframes; F: frame
+             *  o      l      i     captures: origin, last, incoming
+             *         k      k     known features
+             */
+
         }
 
         // Reset the derived Tracker
@@ -112,6 +167,14 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         last_ptr_       = incoming_ptr_;
         incoming_ptr_   = nullptr; // This line is not really needed, but it makes things clearer.
 
+        std::cout << "origin <-- last <-- incoming" << std::endl;
+
+        /* Status:
+         *  KF -- F/KF --       KF: keyframes; F: frame
+         *  o      l      i     captures: origin, last, incoming
+         *  k      k            known features
+         */
+
     }
     // OTHER TIMES
     else
@@ -120,16 +183,16 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
         // 1. First we track the known Features and create new constraints as needed
 
-        /**
-         * KF --- KF --- F           KF: keyframes; F: frame
+        /* Status:
+         * KF --- KF --- F ----      KF: keyframes; F: frame
          *        o      l      i    captures: origin, last, incoming
          *        k      k           known features
          */
 
         processKnown();
 
-        /**
-         * KF --- KF --- F           KF: keyframes; F: frame
+        /* Status:
+         * KF --- KF --- F ----      KF: keyframes; F: frame
          *        o      l      i    captures: origin, last, incoming
          *        k      k      k    known features
          */
@@ -150,13 +213,12 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
         if ( !( (voteForKeyFrame() && permittedKeyFrame() ) || closest_key_frm_to_last ) )
         {
-            WOLF_DEBUG_HERE
 
             // 2.a. We did not create a KeyFrame:
 
-            /**
-             * KF --- KF --- F ---- *    frames
-             *        o      l      i    captures: incoming
+            /* Status:
+             * KF --- KF --- F ---- *
+             *        o      l      i
              *        k      k      k    known features
              */
 
@@ -164,13 +226,15 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             advance();
 
             // Advance this
-            last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's Frame
+            last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's last Frame
             last_ptr_->remove();
             incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
             last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
             incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 
-            /**
+            std::cout << "last <-- incoming" << std::endl;
+
+            /* Status:
              * KF --- KF ---------- F
              *        o      -      l    - : deleted capture
              *        k      -      k    - : deleted features
@@ -178,11 +242,10 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         else
         {
-            WOLF_DEBUG_HERE
 
             // 2.b. We create a KF
 
-            /**
+            /* Status:
              * KF --- KF --- F ---- *    frames
              *        o      l      i    captures: incoming
              *        k      k      k    known features
@@ -191,7 +254,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             // Detect new Features, initialize Landmarks, create Constraints, ...
             processNew(max_new_features_);
 
-            /**
+            /* Status:
              * After keyframe vote and re-processing last and incoming
              * KF --- KF --- F ---- *
              *        o      l      i
@@ -199,28 +262,27 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
              *               n      n    new features
              */
 
-            // Create a new non-key Frame in the Trajectory with the incoming Capture
             FrameBasePtr key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
             if ( abs(key_frm->getTimeStamp() - incoming_ptr_->getTimeStamp() ) < time_tolerance_)
             {
-                WOLF_DEBUG_HERE
                 // Append incoming to existing key-frame
                 key_frm->addCapture(incoming_ptr_); // TODO I think it should be last_ptr_ not incoming!
-                std::cout << "Adhered to existing KF" << key_frm->id() << std::endl;
+                std::cout << "Incoming adhered to existing KF" << key_frm->id() << std::endl;
             }
             else
             {
-                WOLF_DEBUG_HERE
+                // Create a new non-key Frame in the Trajectory with the incoming Capture
                 // Make a non-key-frame to hold incoming
                 FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
                 new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+                std::cout << "Incoming adhered to new F" << key_frm->id() << std::endl;
 
                 // Make the last Capture's Frame a KeyFrame
                 setKeyFrame(last_ptr_);
-                std::cout << "Adhered to new created KF" << key_frm->id() << std::endl;
+                std::cout << "Set KEY to last F" << key_frm->id() << std::endl;
             }
 
-            /**
+            /* Status:
              * KF --- KF --- KF --- F
              *        o      l      i
              *        k      k      k
@@ -239,7 +301,9 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             last_ptr_ = incoming_ptr_;
             incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 
-            /**
+            std::cout << "origin <-- last <-- incoming" << std::endl;
+
+            /* Status:
              * KF --- KF --- KF --- F
              *               o      l
              *               k      k
@@ -256,34 +320,14 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
     WOLF_DEBUG_HERE
+    std::cout << "PT: KF" << _keyframe_ptr->id() << " callback received at ts= " << _keyframe_ptr->getTimeStamp().get() << std::endl;
+    std::cout << "    while last ts= " << last_ptr_->getTimeStamp().get() << std::endl;
+    std::cout << "    while last's frame ts= " << last_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;
 
     assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame always");
 
-    //======================
-    // Start Debug info
     Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
-    std::cout << "  Time tol this  " << time_tolerance_ << std::endl;
-    std::cout << "  Time tol other " << _time_tol_other << std::endl;
-    std::cout << "  Time tol eff   " << time_tol << std::endl;
 
-    if (_keyframe_ptr == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
-
-    std::cout << "  Time stamp input F " << _keyframe_ptr->getTimeStamp().get() << std::endl;
-    if (getOriginPtr()){
-        if (getOriginPtr() == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
-        if (getOriginPtr()->getFramePtr() == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
-        std::cout << "  Time stamp orig  F " << getOriginPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
-        std::cout << "  Time stamp orig  C " << getOriginPtr()->getTimeStamp().get() << std::endl;
-    }
-    if (getLastPtr())
-    {
-        if (getLastPtr() == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
-        if (getLastPtr()->getFramePtr() == nullptr) {WOLF_DEBUG_HERE; std::runtime_error("bad pointer");}
-        std::cout << "  Time stamp last  F " << getLastPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
-        std::cout << "  Time stamp last  C " << getLastPtr()->getTimeStamp().get() << std::endl;
-    }
-    // End Debug info
-    //======================
 
     // Nothing to do if:
     //   - there is no last
@@ -291,7 +335,6 @@ bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar
     //   - last frame is too far in time from keyframe
     if (last_ptr_ == nullptr || last_ptr_->getFramePtr()->isKey() || std::abs(last_ptr_->getTimeStamp() - _keyframe_ptr->getTimeStamp()) > time_tol)
     {
-        WOLF_DEBUG_HERE
         return false;
     }
 
@@ -317,7 +360,6 @@ bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar
 
 void ProcessorTracker::setKeyFrame(CaptureBasePtr _capture_ptr)
 {
-    WOLF_DEBUG_HERE
 
     assert(_capture_ptr != nullptr && _capture_ptr->getFramePtr() != nullptr && "ProcessorTracker::setKeyFrame: null capture or capture without frame");
     if (!_capture_ptr->getFramePtr()->isKey())

@@ -10,6 +10,9 @@ ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
 
 ADD_EXECUTABLE(test_wolf_root test_wolf_root.cpp)
 
+ADD_EXECUTABLE(test_kf_callback test_kf_callback.cpp)
+TARGET_LINK_LIBRARIES(test_kf_callback ${PROJECT_NAME})
+
 ADD_EXECUTABLE(test_wolf_logging test_wolf_logging.cpp)
 TARGET_LINK_LIBRARIES(test_wolf_logging ${PROJECT_NAME})
 
@@ -145,6 +148,10 @@ IF(OpenCV_FOUND)
     ADD_EXECUTABLE(test_ROI_ORB test_ROI_ORB.cpp)
     TARGET_LINK_LIBRARIES(test_ROI_ORB ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
+
+# Simple AHP test
+ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
+TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
 
 # Processor Tracker Feature test
 ADD_EXECUTABLE(test_processor_tracker_feature test_processor_tracker_feature.cpp)

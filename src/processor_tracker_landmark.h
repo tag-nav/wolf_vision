@@ -174,7 +174,6 @@ namespace wolf
 {
 inline void ProcessorTrackerLandmark::advance()
 {
-    WOLF_DEBUG_HERE
 
     for ( auto match : matches_landmark_from_last_)
     {
@@ -191,7 +190,6 @@ inline void ProcessorTrackerLandmark::advance()
 
 inline void ProcessorTrackerLandmark::reset()
 {
-    WOLF_DEBUG_HERE
 
     //std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
     for ( auto match : matches_landmark_from_last_)

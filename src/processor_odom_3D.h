@@ -213,7 +213,16 @@ inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref,
 
 inline bool ProcessorOdom3D::voteForKeyFrame()
 {
-    return true;
+    if (getBuffer().get().size() > 3)
+    {
+        std::cout << "PM::vote" << std::endl;
+        return true;
+    }
+    else
+    {
+        std::cout << "PM::do not vote" << std::endl;
+        return false;
+    }
 }
 
 inline ConstraintBasePtr ProcessorOdom3D::createConstraint(FeatureBasePtr _feature_motion,

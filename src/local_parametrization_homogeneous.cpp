@@ -31,22 +31,27 @@ bool LocalParametrizationHomogeneous::plus(const Eigen::Map<const Eigen::VectorX
 
     using namespace Eigen;
 
-    double norm_delta = _delta.norm();
-    if (norm_delta > Constants::EPS)
+    double angle = _delta.norm();
+    Quaternions dq;
+    if (angle > Constants::EPS_SMALL)
     {
         // compute rotation axis -- this guarantees unity norm
-        Vector3s axis = _delta / norm_delta;
+        Vector3s axis = _delta.normalized();
 
-        // express delta as a quaternion -- this is exp(delta)
-        Quaternions dq(AngleAxis<Scalar>(norm_delta, axis));
+        // express delta as a quaternion using the angle-axis helper
+        dq = AngleAxis<Scalar>(angle, axis);
 
-        // result as a homogeneous point -- we use the quaternion product for keeping in the 4-sphere
-        _h_plus_delta = (dq * Map<const Quaternions>(_h.data())).coeffs();
     }
-    else
+    else // Consider small angle approx
     {
-        _h_plus_delta = _h;
+        dq.w() = 1;
+        dq.vec() = _delta/2;
+        dq.normalize();
     }
+
+    // result as a homogeneous point -- we use the quaternion product for keeping in the 4-sphere
+    _h_plus_delta = (dq * Map<const Quaternions>(_h.data())).coeffs();
+
     return true;
 }
 
@@ -56,11 +61,11 @@ bool LocalParametrizationHomogeneous::computeJacobian(const Eigen::Map<const Eig
     assert(_h.size() == global_size_ && "Wrong size of input quaternion.");
     assert(_jacobian.rows() == global_size_ && _jacobian.cols() == local_size_ && "Wrong size of Jacobian matrix.");
 
-    _jacobian << -_h(0), -_h(1), -_h(2),
-                  _h(3),  _h(2), -_h(1),
-                 -_h(2),  _h(3),  _h(0),
-                  _h(1), -_h(0),  _h(3);
-    _jacobian /= 2;
+    Eigen::Vector4s hh = _h/2;
+    _jacobian <<  hh(3),  hh(2), -hh(1),
+                 -hh(2),  hh(3),  hh(0),
+                  hh(1), -hh(0),  hh(3),
+                 -hh(0), -hh(1), -hh(2) ;
     return true;
 }
 

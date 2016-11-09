@@ -31,6 +31,16 @@ class ConstraintOdom3D : public ConstraintSparse<6,3,4,3,4>
                                  const T* const _q2,
                                  T* _residuals) const;
 
+        template<typename T>
+                bool expectation(const T* const _p1,
+                                 const T* const _q1,
+                                 const T* const _p2,
+                                 const T* const _q2,
+                                 T* _expectation_dp,
+                                 T* _expectation_dq) const;
+
+        Eigen::VectorXs expectation() const;
+
     private:
         template<typename T>
         void printRes(const Eigen::Matrix<T, 6, 1>& r) const;
@@ -76,6 +86,54 @@ inline ConstraintOdom3D::~ConstraintOdom3D()
 }
 
 template<typename T>
+inline bool wolf::ConstraintOdom3D::expectation(const T* const _p1, const T* const _q1, const T* const _p2,
+                                                const T* const _q2, T* _expectation_dp, T* _expectation_dq) const
+{
+    Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
+    Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
+//    Eigen::Map<const Eigen::Matrix<T,4,1> > q1_v(_q1);
+    Eigen::Map<const Eigen::Matrix<T,3,1> > p2(_p2);
+    Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
+//    Eigen::Map<const Eigen::Matrix<T,4,1> > q2_v(_q2);
+    Eigen::Map<Eigen::Matrix<T,3,1> > expectation_dp(_expectation_dp);
+//    Eigen::Map<Eigen::Matrix<T,4,1> > expectation_dq_v(_expectation_dq);
+    Eigen::Map<Eigen::Quaternion<T> > expectation_dq(_expectation_dq);
+
+
+    // std::cout << "p1: " << p1(0) << std::endl << p1(1) << std::endl << p1(2) << std::endl;
+    // std::cout << "q1: " << q1_v(0) << std::endl << q1_v(1) << std::endl << q1_v(2) << std::endl << q1_v(3) << std::endl;
+    // std::cout << "p2: " << p2(0) << std::endl << p2(1) << std::endl << p2(2) << std::endl;
+    // std::cout << "q2: " << q2_v(0) << std::endl << q2_v(1) << std::endl << q2_v(2) << std::endl << q2_v(3) << std::endl;
+
+    // estimate motion increment, dp, dq;
+    expectation_dp = q1.conjugate() * (p2 - p1);
+    expectation_dq =  q1.conjugate() * q2;
+
+    std::cout << "exp_p: " << expectation_dp(0) << std::endl << expectation_dp(1) << std::endl << expectation_dp(2) << std::endl;
+//    std::cout << "exp_q: " << expectation(3) << std::endl << expectation(4) << std::endl << expectation(5) << std::endl << expectation(6) << std::endl;
+
+    return true;
+}
+
+inline Eigen::VectorXs wolf::ConstraintOdom3D::expectation() const
+{
+    Eigen::VectorXs exp(7);
+    FrameBasePtr frm_current = getFeaturePtr()->getFramePtr();
+    FrameBasePtr frm_origin = getFrameOtherPtr();
+    const Scalar * const frame_current_pos  = frm_current->getPPtr()->getVector().data();
+    const Scalar * const frame_current_ori  = frm_current->getOPtr()->getVector().data();
+    const Scalar * const frame_origin_pos   = frm_origin->getPPtr()->getVector().data();
+    const Scalar * const frame_origin_ori   = frm_origin->getOPtr()->getVector().data();
+    expectation(frame_current_pos,
+                frame_current_ori,
+                frame_origin_pos,
+                frame_origin_ori,
+                exp.data(),
+                exp.data()+3);
+    return exp;
+}
+
+template<typename T>
 inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* const _q1, const T* const _p2,
                                                 const T* const _q2, T* _residuals) const
 {
@@ -112,22 +170,27 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* con
      */
 
     // MAPS
-    Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
-    Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
-    Eigen::Map<const Eigen::Matrix<T,4,1> > q1_v(_q1);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > p2(_p2);
-    Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
-    Eigen::Map<const Eigen::Matrix<T,4,1> > q2_v(_q2);
+//    Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
+//    Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
+//    Eigen::Map<const Eigen::Matrix<T,4,1> > q1_v(_q1);
+//    Eigen::Map<const Eigen::Matrix<T,3,1> > p2(_p2);
+//    Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
+//    Eigen::Map<const Eigen::Matrix<T,4,1> > q2_v(_q2);
     Eigen::Map<Eigen::Matrix<T,6,1> > residuals(_residuals);
+//
+//    // std::cout << "p1: " << p1(0) << std::endl << p1(1) << std::endl << p1(2) << std::endl;
+//    // std::cout << "q1: " << q1_v(0) << std::endl << q1_v(1) << std::endl << q1_v(2) << std::endl << q1_v(3) << std::endl;
+//    // std::cout << "p2: " << p2(0) << std::endl << p2(1) << std::endl << p2(2) << std::endl;
+//    // std::cout << "q2: " << q2_v(0) << std::endl << q2_v(1) << std::endl << q2_v(2) << std::endl << q2_v(3) << std::endl;
+//
+//    // estimate motion increment, dp, dq;
+//    Eigen::Matrix<T,3,1> dp = q1.conjugate() * (p2 - p1);
+//    Eigen::Quaternion<T> dq = q1.conjugate() * q2;
 
-    // std::cout << "p1: " << p1(0) << std::endl << p1(1) << std::endl << p1(2) << std::endl;
-    // std::cout << "q1: " << q1_v(0) << std::endl << q1_v(1) << std::endl << q1_v(2) << std::endl << q1_v(3) << std::endl;
-    // std::cout << "p2: " << p2(0) << std::endl << p2(1) << std::endl << p2(2) << std::endl;
-    // std::cout << "q2: " << q2_v(0) << std::endl << q2_v(1) << std::endl << q2_v(2) << std::endl << q2_v(3) << std::endl;
+    Eigen::Matrix<T, Eigen::Dynamic, 1> expected(7) ;
+    expectation(_p1, _q1, _p2, _q2, expected.data(), expected.data()+3);
 
-    // estimate motion increment, dp, dq;
-    Eigen::Matrix<T,3,1> dp = q1.conjugate() * (p2 - p1);
-    Eigen::Quaternion<T> dq = q1.conjugate() * q2;
+
     // std::cout << "dp: " << dp(0) << std::endl << dp(1) << std::endl<< dp(2) << std::endl;
     // std::cout << "dq: " << dq.x() << std::endl << dq.y() << std::endl << dq.z() << std::endl << dq.w() << std::endl;
 
@@ -140,6 +203,19 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* con
 
     // residual
     // residuals.head<3>() = dq.conjugate() * (dp_m - dp); // see note below
+//    residuals.head(3) = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
+//    residuals.tail(3) = q2v(dq.conjugate() * dq_m);
+
+    Eigen::Matrix<T,3,1> dp = expected.head(3);
+    Eigen::Quaternion<T> dq;// = expected.tail(4);
+    dq.x() = expected(3);
+    dq.y() = expected(4);
+    dq.z() = expected(5);
+    dq.w() = expected(6);
+
+    std::cout << "operator dp: " << dp(0) << std::endl << dp(1) << std::endl << dp(2) << std::endl;
+    std::cout << "operator dq: " << dq.x() << std::endl << dq.y() << std::endl << dq.z() << std::endl << dq.w() << std::endl;
+
     residuals.head(3) = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
     residuals.tail(3) = q2v(dq.conjugate() * dq_m);
 

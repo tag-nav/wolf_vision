@@ -39,7 +39,6 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
 
 bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
 {
-    WOLF_DEBUG_HERE
     std::cout << "N features: " << incoming_ptr_->getFeatureList().size() << std::endl;
     bool vote = incoming_ptr_->getFeatureList().size() < min_feat_for_keyframe_;
     std::cout << (vote ? "Vote ": "Not vote ") << "for KF" << std::endl;
@@ -57,8 +56,9 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
         n_feature_++;
         new_features_last_.push_back(
                 std::make_shared<FeatureBase>("POINT IMAGE", n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
-        std::cout << "feature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
+        //std::cout << "feature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
     }
+    std::cout << new_features_last_.size() << " features detected!" << std::endl;
 
     return new_features_last_.size();
 }

@@ -160,7 +160,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
             tracker_roi_.pop_back();
         }
     }
-    std::cout << "TrackFeatures - Number of Features tracked: " << _feature_list_out.size() << std::endl;
+//    std::cout << "TrackFeatures - Number of Features tracked: " << _feature_list_out.size() << std::endl;
     return _feature_list_out.size();
 }
 

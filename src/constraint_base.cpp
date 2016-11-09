@@ -133,7 +133,7 @@ void ConstraintBase::remove()
             default:
                 break;
         }
-        std::cout << "Removed          c" << id() << std::endl;
+        std::cout << "Removed             c" << id() << std::endl;
     }
 }
 
