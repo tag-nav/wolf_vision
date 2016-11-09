@@ -405,7 +405,13 @@ IF(YAMLCPP_FOUND)
 ENDIF(YAMLCPP_FOUND)
 
 # create the shared library
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS_BASE} ${SRCS} ${SRCS_DTASSC} ${SRCS_WRAPPER})
+ADD_LIBRARY(${PROJECT_NAME} 
+            SHARED 
+            ${SRCS_BASE} 
+            ${SRCS} 
+            #${SRCS_DTASSC} 
+            ${SRCS_WRAPPER}
+            )
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 
@@ -447,8 +453,8 @@ INSTALL(FILES ${HDRS_BASE}
     DESTINATION include/iri-algorithms/wolf)
 INSTALL(FILES ${HDRS}
     DESTINATION include/iri-algorithms/wolf)
-INSTALL(FILES ${HDRS_DTASSC}
-    DESTINATION include/iri-algorithms/wolf/data_association)
+#INSTALL(FILES ${HDRS_DTASSC}
+#    DESTINATION include/iri-algorithms/wolf/data_association)
 INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
 INSTALL(FILES ${HDRS_SOLVER}
