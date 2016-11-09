@@ -12,3 +12,10 @@ target_link_libraries(gtest_example ${PROJECT_NAME})
 
 wolf_add_gtest(gtest_time_stamp gtest_time_stamp.cpp)
 target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
+
+
+# Local parametrizations classes test
+wolf_add_gtest(gtest_local_param gtest_local_param.cpp)
+TARGET_LINK_LIBRARIES(gtest_local_param ${PROJECT_NAME})
+
+
