@@ -560,12 +560,18 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 {
     std::cout << std::endl;
     std::cout << "P: wolf tree status ---------------------" << std::endl;
-    std::cout << "Hardware" << std::endl;
-    if (depth >= 1)
+    std::cout << "Hardware";
+    if (depth < 1)
+        std::cout << "   -- " << getHardwarePtr()->getSensorList().size() << "S" << std::endl;
+    else
     {
+        std::cout << std::endl;
         for (auto S : getHardwarePtr()->getSensorList())
         {
-            std::cout << "  S" << S->id() << std::endl;
+            std::cout << "  S" << S->id();
+            if (depth < 2)
+                std::cout << " -- " << S->getProcessorList().size() << "p";
+            std::cout << std::endl;
             if (state_blocks)
             {
                 std::cout << "    sb:";
@@ -581,36 +587,30 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     if (p->isMotion())
                     {
                         std::cout << "    pm" << p->id() << std::endl;
-                        if (depth >= 2)
-                        {
-                            ProcessorMotion::Ptr pm = std::static_pointer_cast<ProcessorMotion>(p);
-                            if (pm->getOriginPtr())
-                                std::cout << "      o: C" << pm->getOriginPtr()->id() << " - F"
-                                        << pm->getOriginPtr()->getFramePtr()->id() << std::endl;
-                            if (pm->getLastPtr())
-                                std::cout << "      l: C" << pm->getLastPtr()->id() << " - F"
-                                        << pm->getLastPtr()->getFramePtr()->id() << std::endl;
-                            if (pm->getIncomingPtr())
-                                std::cout << "      i: C" << pm->getIncomingPtr()->id() << std::endl;
-                        }
+                        ProcessorMotion::Ptr pm = std::static_pointer_cast<ProcessorMotion>(p);
+                        if (pm->getOriginPtr())
+                            std::cout << "      o: C" << pm->getOriginPtr()->id() << " - F"
+                            << pm->getOriginPtr()->getFramePtr()->id() << std::endl;
+                        if (pm->getLastPtr())
+                            std::cout << "      l: C" << pm->getLastPtr()->id() << " - F"
+                            << pm->getLastPtr()->getFramePtr()->id() << std::endl;
+                        if (pm->getIncomingPtr())
+                            std::cout << "      i: C" << pm->getIncomingPtr()->id() << std::endl;
                     }
                     else
                     {
                         try
                         {
                             std::cout << "    pt" << p->id() << std::endl;
-                            if (depth >= 2)
-                            {
-                                ProcessorTracker::Ptr pt = std::static_pointer_cast<ProcessorTracker>(p);
-                                if (pt->getOriginPtr())
-                                    std::cout << "      o: C" << pt->getOriginPtr()->id() << " - F"
-                                            << pt->getOriginPtr()->getFramePtr()->id() << std::endl;
-                                if (pt->getLastPtr())
-                                    std::cout << "      l: C" << pt->getLastPtr()->id() << " - F"
-                                            << pt->getLastPtr()->getFramePtr()->id() << std::endl;
-                                if (pt->getIncomingPtr())
-                                    std::cout << "      i: C" << pt->getIncomingPtr()->id() << std::endl;
-                            }
+                            ProcessorTracker::Ptr pt = std::static_pointer_cast<ProcessorTracker>(p);
+                            if (pt->getOriginPtr())
+                                std::cout << "      o: C" << pt->getOriginPtr()->id() << " - F"
+                                << pt->getOriginPtr()->getFramePtr()->id() << std::endl;
+                            if (pt->getLastPtr())
+                                std::cout << "      l: C" << pt->getLastPtr()->id() << " - F"
+                                << pt->getLastPtr()->getFramePtr()->id() << std::endl;
+                            if (pt->getIncomingPtr())
+                                std::cout << "      i: C" << pt->getIncomingPtr()->id() << std::endl;
                         }
                         catch (std::runtime_error& e)
                         {
@@ -620,18 +620,19 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     }
                 }
             }
-            else
-                std::cout << "    " << S->getProcessorList().size() << "p" << std::endl;
         }
     }
-    else
-        std::cout << "  " << getHardwarePtr()->getSensorList().size() << "S" << std::endl;
-    std::cout << "Trajectory" << std::endl;
+    std::cout << "Trajectory";
+    if (depth < 1)
+        std::cout << " -- " << getTrajectoryPtr()->getFrameList().size() << "F";
+    std::cout << std::endl;
     if (depth >= 1)
     {
         for (auto F : getTrajectoryPtr()->getFrameList())
         {
             std::cout << (F->isKey() ? "  KF" : "  F") << F->id();
+            if (depth < 2)
+                std::cout << " -- " << F->getCaptureList().size() << "C  ";
             if (constr_by)
             {
                 std::cout << "  <-- ";
@@ -658,12 +659,17 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             {
                 for (auto C : F->getCaptureList())
                 {
-                    std::cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << std::endl;
+                    std::cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id();
+                    if (depth < 3)
+                        std::cout << " -- " << C->getFeatureList().size() << "f";
+                    std::cout << std::endl;
                     if (depth >= 3)
                     {
                         for (auto f : C->getFeatureList())
                         {
                             std::cout << "      f" << f->id();
+                            if (depth < 4)
+                                    std::cout << " -- " << f->getConstraintList().size() << "c  ";
                             if (constr_by)
                             {
                                 std::cout << "  <--\t";
@@ -690,21 +696,16 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                                     std::cout << std::endl;
                                 }
                             }
-                            else
-                                std::cout << "        " << f->getConstraintList().size() << "c" << std::endl;
                         }
                     }
-                    else
-                        std::cout << "      " << C->getFeatureList().size() << "f" << std::endl;
                 }
             }
-            else
-                std::cout << "    " << F->getCaptureList().size() << "C" << std::endl;
         }
     }
-    else
-        std::cout << "  " << getTrajectoryPtr()->getFrameList().size() << "F" << std::endl;
-    std::cout << "Map" << std::endl;
+    std::cout << "Map";
+    if (depth < 1)
+        std::cout << "        -- " << getMapPtr()->getLandmarkList().size() << "L";
+    std::cout << std::endl;
     if (depth >= 1)
     {
         for (auto L : getMapPtr()->getLandmarkList())
@@ -727,8 +728,6 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             }
         }
     }
-    else
-        std::cout << "  " << getMapPtr()->getLandmarkList().size() << "L" << std::endl;
     std::cout << "-----------------------------------------" << std::endl;
     std::cout << std::endl;
 }
