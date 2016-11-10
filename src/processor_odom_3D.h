@@ -213,7 +213,7 @@ inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref,
 
 inline bool ProcessorOdom3D::voteForKeyFrame()
 {
-    if (getBuffer().get().size() > 3)
+    if (getBuffer().get().size() > 15)
     {
         std::cout << "PM::vote" << std::endl;
         return true;
