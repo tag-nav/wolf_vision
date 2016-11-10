@@ -106,10 +106,14 @@ inline bool wolf::ConstraintOdom3D::expectation(const T* const _p_current, const
     // std::cout << "q2: " << q2_v(0) << std::endl << q2_v(1) << std::endl << q2_v(2) << std::endl << q2_v(3) << std::endl;
 
     // estimate motion increment, dp, dq;
-    expectation_dp = q_current.conjugate() * (p_other - p_current);
-    expectation_dq =  q_current.conjugate() * q_other;
+//    expectation_dp = q_current.conjugate() * (p_other - p_current);
+//    expectation_dq =  q_current.conjugate() * q_other;
 
-    std::cout << "exp_p: " << expectation_dp(0) << std::endl << expectation_dp(1) << std::endl << expectation_dp(2) << std::endl;
+    expectation_dp = q_other.conjugate() * (p_current - p_other);
+    expectation_dq =  q_other.conjugate() * q_current;
+
+
+//    std::cout << "exp_p: " << expectation_dp(0) << std::endl << expectation_dp(1) << std::endl << expectation_dp(2) << std::endl;
 //    std::cout << "exp_q: " << expectation(3) << std::endl << expectation(4) << std::endl << expectation(5) << std::endl << expectation(6) << std::endl;
 
     return true;
@@ -198,8 +202,8 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p_current, const
     Eigen::Matrix<T,3,1> dp_m = getMeasurement().head<3>().cast<T>();
     //Eigen::Quaternion<T> dq_m = v2q(getMeasurement().tail<3>()).cast<T>();
     Eigen::Quaternion<T> dq_m(getMeasurement().tail<4>().cast<T>());
-    // std::cout << "meas: " << getMeasurement().transpose() << std::endl;
-    // std::cout << "dq_m: " << dq_m.x() << std::endl << dq_m.y() << std::endl << dq_m.z() << std::endl << dq_m.w() << std::endl;
+//     std::cout << "meas: " << getMeasurement().transpose() << std::endl;
+//     std::cout << "dq_m: " << dq_m.x() << std::endl << dq_m.y() << std::endl << dq_m.z() << std::endl << dq_m.w() << std::endl;
 
     // residual
     // residuals.head<3>() = dq.conjugate() * (dp_m - dp); // see note below
@@ -213,8 +217,8 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p_current, const
     dq.z() = expected(5);
     dq.w() = expected(6);
 
-    std::cout << "operator dp: " << dp(0) << std::endl << dp(1) << std::endl << dp(2) << std::endl;
-    std::cout << "operator dq: " << dq.x() << std::endl << dq.y() << std::endl << dq.z() << std::endl << dq.w() << std::endl;
+//    std::cout << "operator dp: " << dp(0) << std::endl << dp(1) << std::endl << dp(2) << std::endl;
+//    std::cout << "operator dq: " << dq.x() << std::endl << dq.y() << std::endl << dq.z() << std::endl << dq.w() << std::endl;
 
     residuals.head(3) = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
     residuals.tail(3) = q2v(dq.conjugate() * dq_m);
