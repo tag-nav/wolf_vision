@@ -21,22 +21,22 @@ namespace wolf {
  * This processor integrates motion data in the form of 3D odometry.
  *
  * The odometry data is extracted from Captures of the type CaptureOdometry3d.
- * This data comes in the form of a 6-vector, containing the following components:
- *   - a 3d position increment in the local frame of the robot (dx, dy, dz)
- *   - a 3d orientation increment in the local frame of the robot (roll, pitch, yaw)
+ * This data comes in the form of a 6-vector, or a 7-vector, containing the following components:
+ *   - a 3d position increment in the local frame of the robot (dx, dy, dz).
+ *   - a 3d orientation increment in the local frame of the robot (droll, dpitch, dyaw), or quaternion (dqx, dqy, dqz, dqw).
  *
  * The produced integrated deltas are in the form of 7-vectors with the following components:
- *   - a 3d position increment in the local frame of the robot (dx, dy, dz)
- *   - a quaternion orientation increment in the local frame of the robot (qx, qy, qz, qw)
+ *   - a 3d position increment in the local frame of the robot (Dx, Dy, Dz)
+ *   - a quaternion orientation increment in the local frame of the robot (Dqx, Dqy, Dqz, Dqw)
  *
  * The produced states are in the form of 7-vectors with the following components:
- *   - a 3d position increment in the local frame of the robot (dx, dy, dz)
- *   - a quaternion orientation increment in the local frame of the robot (qx, qy, qz, qw)
+ *   - a 3d position of the robot in the world frame (x, y, z)
+ *   - a quaternion orientation of the robot in the world frame (qx, qy, qz, qw)
  *
  * The processor integrates data by ignoring the time increment dt_
  * (as it integrates motion directly, not velocities).
  *
- * All frames are assumed FLU (front, left, up).
+ * All frames are assumed FLU ( x: Front, y: Left, z: Up ).
  */
 class ProcessorOdom3D : public ProcessorMotion
 {
@@ -94,9 +94,26 @@ inline void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data,
                                         const Eigen::MatrixXs& _data_cov,
                                         const Scalar _dt)
 {
-    delta_.head<3>() = _data.head<3>();
-    new (&q_out_) Eigen::Map<Eigen::Quaternions>(delta_.data() + 3);
-    q_out_ = v2q(_data.tail<3>());
+    assert( ( _data.size() == 6 || _data.size() == 7 ) && "Wrond data size. Must be 6 or 7 for 3D.");
+
+    Scalar disp, rot; // displacement and rotation of this motion step
+    if (_data.size() == 6)
+    {
+        // rotation in vector form
+        delta_.head<3>() = _data.head<3>();
+        new (&q_out_) Eigen::Map<Eigen::Quaternions>(delta_.data() + 3);
+        q_out_ = v2q(_data.tail<3>());
+
+        disp = _data.head<3>().norm();
+        rot = _data.tail<3>().norm();
+    }
+    else
+    {
+        // rotation in quaternion form
+        delta_ = _data;
+        disp = _data.head<3>().norm();
+        rot = 2*acos(_data(3));
+    }
 
     /* Jacobians of d = data2delta(data, dt)
      * with: d =    [Dp Dq]
@@ -114,8 +131,8 @@ inline void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data,
      */
 
     // We discard _data_cov and create a new one from the measured motion
-    Scalar disp_var = min_disp_var_ + k_disp_to_disp_ * _data.head<3>().norm();
-    Scalar rot_var  = min_rot_var_  + k_disp_to_rot_  * _data.head<3>().norm() + k_rot_to_rot_ * _data.tail<3>().norm();
+    Scalar disp_var = min_disp_var_ + k_disp_to_disp_ * disp;
+    Scalar rot_var  = min_rot_var_  + k_disp_to_rot_  * disp + k_rot_to_rot_ * rot;
     Eigen::Matrix6s data_cov(Eigen::Matrix6s::Identity());
     data_cov(0,0) = data_cov(1,1) = data_cov(2,2) = disp_var;
     data_cov(3,3) = data_cov(4,4) = data_cov(5,5) = rot_var;
@@ -149,6 +166,7 @@ inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1,
     assert(_delta1_plus_delta2.size() == delta_size_ && "Wrong _delta1_plus_delta2 vector size");
 
     remap(_delta1, _delta2, _delta1_plus_delta2);
+
     p_out_ = p1_ + q1_ * p2_;
     q_out_ = q1_ * q2_;
 }
@@ -204,11 +222,51 @@ inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref,
                                            Motion& _motion,
                                            TimeStamp& _ts)
 {
-    Motion tmp(_motion_ref);
-    tmp.ts_ = _ts;
-    tmp.delta_ = deltaZero();
-    tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_);
-    return tmp;
+    using namespace Eigen;
+
+    // Interpolate between motion_ref and motion, as in:
+    //
+    // motion_ref ------ ts_ ------ motion
+    //                 return
+    //
+    // and return the value at the given time_stamp ts_.
+    //
+    // The position receives linear interpolation:
+    //    p_ret = (ts - t_ref) / t * (p - p_ref)
+    //
+    // the quaternion receives a slerp interpolation
+    //    q_ret = q_ref.slerp( (ts - t_ref) / t , q);
+
+    TimeStamp t_ref = _motion_ref.ts_;
+    TimeStamp t = _motion.ts_;
+    Scalar dt = t - t_ref;
+    Scalar a = (_ts - t_ref)/dt; // interpolation factor (0 to 1)
+    Scalar b = 1-a; // interpolation factor from the tail
+
+    Map<const VectorXs> p_ref(_motion_ref.delta_.data(), 3);
+    Map<const Quaternions> q_ref(_motion_ref.delta_.data() + 3);
+    Map<const VectorXs> p(_motion.delta_.data(), 3);
+    Map<Quaternions> q(_motion.delta_.data() + 3);
+    Motion motion_ret;
+    motion_ret.resize(delta_size_, delta_cov_size_);
+    Map<VectorXs> p_ret(motion_ret.delta_.data(), 3);
+    Map<Quaternions> q_ret(motion_ret.delta_.data() + 3);
+
+    // interpolate deltas
+    p_ret = p_ref + a * (p - p_ref);
+    q_ret = q_ref.slerp(a, q);
+    motion_ret.ts_ = _ts;
+//    motion_ret.delta_ = deltaZero();
+//    motion_ret.delta_cov_ = Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_);
+
+    // interpolate covariances (here we go the brutal way
+    // TODO check these two interpolations, especially the delta_integr_cov.
+    motion_ret.delta_cov_ = a * _motion.delta_cov_;
+    motion_ret.delta_integr_cov_ = b * _motion_ref.delta_integr_cov_ + a * _motion.delta_integr_cov_;
+
+    // TODO implement the remaining _motion
+
+    return motion_ret;
 }
 
 inline bool ProcessorOdom3D::voteForKeyFrame()
