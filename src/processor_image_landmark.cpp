@@ -450,13 +450,13 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
 //    cv::Mat image = image_incoming_.clone();
     LandmarkBaseList& last_landmark_list = getProblem()->getMapPtr()->getLandmarkList();
 
-    unsigned int response_counter = 0;
-    Eigen::VectorXs response_vector(last_landmark_list.size());
-    for (auto response : list_response_)
-    {
-        response_vector(response_counter) = response;
-        response_counter++;
-    }
+//    unsigned int response_counter = 0;
+//    Eigen::VectorXs response_vector(last_landmark_list.size());
+//    for (auto response : list_response_)
+//    {
+//        response_vector(response_counter) = response;
+//        response_counter++;
+//    }
 
     for (auto landmark_base_ptr : last_landmark_list)
     {
@@ -479,7 +479,6 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
             point.y = point2D[1];
 
 //            std::cout << "landmark number [" << landmark_ptr->id() << std::setprecision(3) << "] in: " << point << std::endl;
-
 
             cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);
             cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0) );
