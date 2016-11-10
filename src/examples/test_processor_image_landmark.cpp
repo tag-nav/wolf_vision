@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     }
     std::cout << "Input video file: " << filename << std::endl;
     if(!capture.isOpened()) std::cout << "failed" << std::endl; else std::cout << "succeded" << std::endl;
-    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
+    capture.set(CV_CAP_PROP_POS_MSEC, 6000);
     //=====================================================
 
 
@@ -166,8 +166,11 @@ int main(int argc, char** argv)
         cap_odo->setTimeStamp(t);
 
         // previous state and TS
+        TimeStamp t_prev_prev;
+        Vector7s x_prev_prev;
         Eigen::VectorXs x_prev(7);
         TimeStamp t_prev;
+        Vector7s dx;
         wolf_problem_ptr_->getCurrentState(x_prev, t_prev);
 
         // before the previous state
@@ -178,9 +181,14 @@ int main(int argc, char** argv)
             {
                 f_it++;
                 if (f_it != wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().rend())
+                {
                     prev_prev_key_fr_ptr = (*f_it);
+                }
                 break;
             }
+
+        t_prev_prev = prev_prev_key_fr_ptr->getTimeStamp();
+        x_prev_prev = prev_prev_key_fr_ptr->getState();
 
         // compute delta state, and odometry data
         if (!prev_prev_key_fr_ptr)
@@ -190,9 +198,6 @@ int main(int argc, char** argv)
         }
         else
         {
-            // we have two states
-            Vector7s x_prev_prev = prev_prev_key_fr_ptr->getState();
-
             // some maps to avoid local variables
             Eigen::Map<Eigen::Vector3s>     p1(x_prev_prev.data());
             Eigen::Map<Eigen::Quaternions>  q1(x_prev_prev.data() + 3);
@@ -202,25 +207,27 @@ int main(int argc, char** argv)
             // delta state PQ
             Eigen::Vector3s dp = q1.conjugate() * (p2 - p1);
             Eigen::Quaternions dq = q1.conjugate() * q2;
-            Eigen::Vector3s dtheta = q2v(dq);
+
+            dx.head<3>() = dp;
+            dx.tail<4>() = dq.coeffs();
 
             // odometry data
             data.head<3>() = dp;
-            data.tail<3>() = dtheta;
+            data.tail<3>() = q2v(dq);
         }
+
+
         cap_odo->setData(data);
 
         sen_odo_ptr->addCapture(cap_odo);
 
-        wolf_problem_ptr_->print(2);
+        wolf_problem_ptr_->print(0);
 
+        std::cout << "prev prev ts: " << t_prev_prev.get() << "; x: " << x_prev_prev.transpose() << std::endl;
+        std::cout << "prev      ts: " << t_prev.get() << "; x: " << x_prev.transpose() << std::endl;
+        std::cout << "current   ts: " << t.get() << std::endl;
+        std::cout << "          dt: " << t_prev - t_prev_prev << "; dx: " << dx.transpose() << std::endl;
 
-
-
-//        std::cout << "Last key frame pose: "
-//                << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
-//        std::cout << "Last key frame orientation: "
-//                << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
 
         cv::waitKey(0);
 
