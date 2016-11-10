@@ -1,19 +1,19 @@
 #include "trajectory_base.h"
 #include "frame_base.h"
 
+
 namespace wolf {
 
 TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
     NodeBase("TRAJECTORY"),
     frame_structure_(_frame_structure), last_key_frame_ptr_(nullptr)
 {
-    std::cout << "constructed T" << std::endl;
-    //
+//    WOLF_DEBUG("constructed T");
 }
 
 TrajectoryBase::~TrajectoryBase()
 {
-    std::cout << "destructed -T" << std::endl;
+//    WOLF_DEBUG("destructed -T");
 }
 
 FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)

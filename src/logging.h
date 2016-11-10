@@ -83,7 +83,7 @@ protected:
   }
 };
 
-Logger::Logger()
+inline Logger::Logger()
 {
   // Create main logger
   console_ = spdlog::stdout_color_mt(log_name_);
@@ -101,7 +101,7 @@ Logger::Logger()
   console_->set_pattern("[%t][%H:%M:%S.%F][%l] %v");
 }
 
-Logger::~Logger()
+inline Logger::~Logger()
 {
   spdlog::drop(log_name_);
 }

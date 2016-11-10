@@ -13,14 +13,13 @@ ProcessorBase::ProcessorBase(const std::string& _type, const Scalar& _time_toler
         time_tolerance_(_time_tolerance)
 {
     setType(_type);
-    std::cout << "constructed    +p" << id() << std::endl;
 
-    //
+//    WOLF_DEBUG("constructed    +p" , id());
 }
 
 ProcessorBase::~ProcessorBase()
 {
-    std::cout << "destructed     -p" << id() << std::endl;
+//    WOLF_DEBUG("destructed     -p" , id());
 }
 
 bool ProcessorBase::permittedKeyFrame()
@@ -55,7 +54,7 @@ void ProcessorBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-        std::cout << "Removing     p" << id() << std::endl;
+//        std::cout << "Removing     p" << id() << std::endl;
         ProcessorBasePtr this_p = shared_from_this();
 
         // remove from upstream
