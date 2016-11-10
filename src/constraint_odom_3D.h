@@ -19,23 +19,23 @@ class ConstraintOdom3D : public ConstraintSparse<6,3,4,3,4>
     public:
         typedef std::shared_ptr<ConstraintOdom3D> Ptr;
     public:
-        ConstraintOdom3D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function = false,
+        ConstraintOdom3D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_other_ptr, bool _apply_loss_function = false,
                          ConstraintStatus _status = CTR_ACTIVE);
         virtual ~ConstraintOdom3D();
         JacobianMethod getJacobianMethod() const {return JAC_AUTO;}
 
         template<typename T>
-                bool operator ()(const T* const _p1,
-                                 const T* const _q1,
-                                 const T* const _p2,
-                                 const T* const _q2,
+                bool operator ()(const T* const _p_current,
+                                 const T* const _q_current,
+                                 const T* const _p_other,
+                                 const T* const _q_other,
                                  T* _residuals) const;
 
         template<typename T>
-                bool expectation(const T* const _p1,
-                                 const T* const _q1,
-                                 const T* const _p2,
-                                 const T* const _q2,
+                bool expectation(const T* const _p_current,
+                                 const T* const _q_current,
+                                 const T* const _p_other,
+                                 const T* const _q_other,
                                  T* _expectation_dp,
                                  T* _expectation_dq) const;
 
@@ -68,13 +68,13 @@ inline void ConstraintOdom3D::printRes (const  Eigen::Matrix<Scalar,6,1> & r) co
 }
 
 
-inline ConstraintOdom3D::ConstraintOdom3D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function,
+inline ConstraintOdom3D::ConstraintOdom3D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_other_ptr, bool _apply_loss_function,
                                           ConstraintStatus _status) :
-        ConstraintSparse<6, 3, 4, 3, 4>(CTR_ODOM_3D, _frame_ptr, _apply_loss_function, _status,
+        ConstraintSparse<6, 3, 4, 3, 4>(CTR_ODOM_3D, _frame_other_ptr, _apply_loss_function, _status,
                                         _ftr_ptr->getFramePtr()->getPPtr(), // this frame P
                                         _ftr_ptr->getFramePtr()->getOPtr(), // this frame Q
-                                        _frame_ptr->getPPtr(), // other frame P
-                                        _frame_ptr->getOPtr()) // other frame Q
+                                        _frame_other_ptr->getPPtr(), // other frame P
+                                        _frame_other_ptr->getOPtr()) // other frame Q
 {
     std::cout << "Created Odom3D constraint" << std::endl;
     //
@@ -86,14 +86,14 @@ inline ConstraintOdom3D::~ConstraintOdom3D()
 }
 
 template<typename T>
-inline bool wolf::ConstraintOdom3D::expectation(const T* const _p1, const T* const _q1, const T* const _p2,
-                                                const T* const _q2, T* _expectation_dp, T* _expectation_dq) const
+inline bool wolf::ConstraintOdom3D::expectation(const T* const _p_current, const T* const _q_current, const T* const _p_other,
+                                                const T* const _q_other, T* _expectation_dp, T* _expectation_dq) const
 {
-    Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
-    Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
+    Eigen::Map<const Eigen::Matrix<T,3,1> > p_current(_p_current);
+    Eigen::Map<const Eigen::Quaternion<T> > q_current(_q_current);
 //    Eigen::Map<const Eigen::Matrix<T,4,1> > q1_v(_q1);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > p2(_p2);
-    Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
+    Eigen::Map<const Eigen::Matrix<T,3,1> > p_other(_p_other);
+    Eigen::Map<const Eigen::Quaternion<T> > q_other(_q_other);
 //    Eigen::Map<const Eigen::Matrix<T,4,1> > q2_v(_q2);
     Eigen::Map<Eigen::Matrix<T,3,1> > expectation_dp(_expectation_dp);
 //    Eigen::Map<Eigen::Matrix<T,4,1> > expectation_dq_v(_expectation_dq);
@@ -106,8 +106,8 @@ inline bool wolf::ConstraintOdom3D::expectation(const T* const _p1, const T* con
     // std::cout << "q2: " << q2_v(0) << std::endl << q2_v(1) << std::endl << q2_v(2) << std::endl << q2_v(3) << std::endl;
 
     // estimate motion increment, dp, dq;
-    expectation_dp = q1.conjugate() * (p2 - p1);
-    expectation_dq =  q1.conjugate() * q2;
+    expectation_dp = q_current.conjugate() * (p_other - p_current);
+    expectation_dq =  q_current.conjugate() * q_other;
 
     std::cout << "exp_p: " << expectation_dp(0) << std::endl << expectation_dp(1) << std::endl << expectation_dp(2) << std::endl;
 //    std::cout << "exp_q: " << expectation(3) << std::endl << expectation(4) << std::endl << expectation(5) << std::endl << expectation(6) << std::endl;
@@ -134,8 +134,8 @@ inline Eigen::VectorXs wolf::ConstraintOdom3D::expectation() const
 }
 
 template<typename T>
-inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* const _q1, const T* const _p2,
-                                                const T* const _q2, T* _residuals) const
+inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p_current, const T* const _q_current, const T* const _p_other,
+                                                const T* const _q_other, T* _residuals) const
 {
 
     /* Residual expression
@@ -188,7 +188,7 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p1, const T* con
 //    Eigen::Quaternion<T> dq = q1.conjugate() * q2;
 
     Eigen::Matrix<T, Eigen::Dynamic, 1> expected(7) ;
-    expectation(_p1, _q1, _p2, _q2, expected.data(), expected.data()+3);
+    expectation(_p_current, _q_current, _p_other, _q_other, expected.data(), expected.data()+3);
 
 
     // std::cout << "dp: " << dp(0) << std::endl << dp(1) << std::endl<< dp(2) << std::endl;
