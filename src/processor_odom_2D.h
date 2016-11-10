@@ -105,7 +105,7 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eige
 
     delta_cov_ = J * _data_cov * J.transpose();
 
-    //WOLF_DEBUG_HERE
+    WOLF_TRACE("");
     //std::cout << "data      :" << _data.transpose() << std::endl;
     //std::cout << "data cov  :" << std::endl << _data_cov << std::endl;
     //std::cout << "delta     :" << delta_.transpose() << std::endl;

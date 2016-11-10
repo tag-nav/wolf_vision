@@ -38,7 +38,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
     if (voteForKeyFrame() && permittedKeyFrame())
     {
-        WOLF_DEBUG_HERE
+//        WOLF_TRACE("");
         // key_capture
         CaptureMotion::Ptr key_capture_ptr = last_ptr_;
         FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
@@ -195,7 +195,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
     //    std::cout << "  Time stamp last  F " << getLastPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
     //    std::cout << "  Time stamp last  C " << getLastPtr()->getTimeStamp().get() << std::endl;
 
-    WOLF_DEBUG_HERE
+//    WOLF_TRACE("");
     std::cout << "PM: KF" << _keyframe_ptr->id() << " callback received at ts= " << _keyframe_ptr->getTimeStamp().get() << std::endl;
     std::cout << "    while last ts= " << last_ptr_->getTimeStamp().get() << std::endl;
     std::cout << "    while last's frame ts= " << last_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;
