@@ -339,6 +339,8 @@ class ProcessorMotion : public ProcessorBase
          *
          * so that D_(i+1) = D_i (+) d_(i+1).
          *
+         * NOTE: the operator (+) is implemented as deltaPlusDelta() in each class deriving from this.
+         *
          * This is a schematic sketch of the situation (see more explanations below),
          * before and after calling interpolate():
          *
@@ -379,6 +381,8 @@ class ProcessorMotion : public ProcessorBase
          *
          *   d_I = tau * d_B                    // the fraction of the local delta
          *   D_I = (1-tau) * D_A (+) tau * D_B  // the interpolation of the global Delta
+         *       = D_A (+) d_I
+         *       = deltaPlusDelta(D_A, d_I)     // This form provides an easy implementation.
          *
          * We often break down these 'd' and 'D' deltas into chunks of data, e.g.
          *
@@ -389,6 +393,16 @@ class ProcessorMotion : public ProcessorBase
          *   - etc...
          *
          * which makes it easier to define the operator (+), as we see in the example below.
+         *
+         * The Motion structure adds local and global covariances, that we rename as,
+         *
+         *   - dC: delta_cov_
+         *   - DC: delta_integr_cov_
+         *
+         * and which are integrated as follows
+         *
+         *   dC_I = tau * dC_B
+         *   DC_I = (1-tau) * DC_A + tau * dC_B = DC_A + dC_I
          *
          * Example: For a pose (position and orientation motion, which is the typical case):
          *
