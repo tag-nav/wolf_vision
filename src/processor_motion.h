@@ -307,6 +307,106 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
+        /** \brief Interpolate motion to an intermediate time-stamp
+         *
+         * @param _motion_ref The initial motion reference
+         * @param _motion The final motion. It is modified by the function.
+         * @param _ts The intermediate time stamp: it must be t_ref = _motion_ref.ts_ <= _ts <= _motion.ts_.
+         * @return The interpolated motion, so that _motion = _motion_ref (+) motion_interpolated.
+         *
+         * Let us name A = _motion_ref : initial motion where interpolation starts
+         *             B = _motion     : final motion where interpolation ends
+         *             t = _ts         : time stamp where interpolation is queried.
+         *
+         * and let us define t_A = timestamp at A
+         *                   t_B = timestamp at B
+         *
+         * We can introduce the results of the interpolation as
+         *
+         *             I = motion_interpolated, from t_A to t
+         *             S = motion_second,       from t to t_B
+         *
+         * The Motion structure in wolf has the following members:
+         *
+         *   - ts_           : time stamp
+         *   - delta_        : relative motion between the previous motion and this one. It might be seen as a local motion.
+         *   - delta_integr_ : accumulation of relative deltas, since some origin. It might be seen as a globally defined motion.
+         *
+         * In this documentation, we differentiate these deltas with lowercase d and uppercase D:
+         *
+         *   - d = any_motion.delta_        <-- local delta
+         *   - D = any_motion.delta_integr_ <-- global Delta
+         *
+         * so that D_(i+1) = D_i (+) d_(i+1).
+         *
+         * This is a schematic sketch of the situation (see more explanations below),
+         * before and after calling interpolate():
+         *
+         *   BEFORE                _motion_ref,_ts         _motion      variable names
+         *        ------+-----------+-----------+-----------+----->     time scale
+         *              origin      A                       B           motion short names
+         *              t_origin    t_A         t           t_B         time stamps
+         *                          0           tau         1           interp. factor
+         *              +----D_A----+----------d_B----------+           D_A (+) d_B
+         *              +----------------D_B----------------+           D_B = D_A (+) d_B
+         *
+         *   AFTER                _motion_ref,  return     _motion      variable names and return value
+         *        ------+-----------+-----------+-----------+----->     time scale
+         *                          A           I           S           motion short names
+         *              +----D_A----+----d_I----+----d_S----+           D_A (+) d_I (+) d_S
+         *              +----------D_I----------+----d_S----+           D_I (+) d_S
+         *              +----------------D_S----------------+           D_S
+         *
+         * where 'origin' exists somewhere, but it is irrelevant for the operation of the interpolation.
+         * According to the schematic, and assuming a generic composition operator (+), the motion composition satisfies
+         *
+         *   d_I (+) d_S = d_B
+         *   D_A (+) d_I = D_I
+         *   D_S = D_B
+         *
+         * from where d_I, D_I, d_S and D_S can be derived.
+         *
+         * In general, we do not have information about the particular trajectory taken between A=_motion_ref and B=_motion.
+         * Therefore, we consider a linear intepolation.
+         * The linear interpolation factor is defined from the time stamps,
+         *
+         *     tau = (t - t_A) / (t_B - t_A)
+         *
+         * such that for tau=0 we are at A, and for tau=1 we are at B.
+         *
+         * Conceptually, we want an interpolation such that the local motion 'd' takes the fraction,
+         * and the global motion 'D' is interpolated, that is:
+         *
+         *   d_I = tau * d_B                    // the fraction of the local delta
+         *   D_I = (1-tau) * D_A (+) tau * D_B  // the interpolation of the global Delta
+         *
+         * We often break down these 'd' and 'D' deltas into chunks of data, e.g.
+         *
+         *   - dp = delta of position
+         *   - Dp = delta integrated of position
+         *   - dq = delta of quaternion
+         *   - Da = delta integrated of orientation angle
+         *   - etc...
+         *
+         * which makes it easier to define the operator (+), as we see in the example below.
+         *
+         * Example: For a pose (position and orientation motion, which is the typical case):
+         *
+         *     - t_I  = _ts                         // time stamp of the interpolated motion
+         *     - dp_I = tau*dp_B                    // dp is a 2-vector or a 3-vector
+         *     - da_I = tau*da_B                    // da is an angle, for 2D poses
+         *     - dq_I = Quaternions::Identity().slerp(tau, dq_B)    // dq is a quaternion, for 3D poses
+         *     - Dp_I = (1-tau)*Dp_A + tau*Dp_B     // dp is a 2-vector or a 3-vector.      Also, and easier, Dp_I = Dp_A + dp_I
+         *     - Da_I = (1-tau)*Da_A + tau*Da_B     // da is an angle, for 2D poses.        Also, and easier, Da_I = Da_A + da_I
+         *     - Dq_I = Dq_A.slerp(tau, Dq_B)       // dq is a quaternion, for 3D poses.    Also, and easier, Dq_I = Dq_A * dq_I
+         *     - dp_S = (1-tau)*dp_B
+         *     - da_S = (1-tau)*da_B                // 2D
+         *     - dq_S = dq_I.conjugate() * dq_B     // 3D
+         *     - Dp_S = Dp_B
+         *     - Da_S = Da_B                        // 2D
+         *     - Dq_S = Dq_b                        // 3D
+         *
+         */
         virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts) = 0;
 
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) = 0;
