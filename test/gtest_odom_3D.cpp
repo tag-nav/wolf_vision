@@ -60,8 +60,8 @@ TEST(TestOdom3D, Interpolate0)
     ref.delta_          << 0,0,0, 0,0,0,1;
     ref.delta_integr_   << 0,0,0, 0,0,0,1;
 
-//    WOLF_INFO("ref delta= ", ref.delta_.transpose());
-//    WOLF_INFO("ref Delta= ", ref.delta_integr_.transpose());
+    WOLF_DEBUG("ref delta= ", ref.delta_.transpose());
+    WOLF_DEBUG("ref Delta= ", ref.delta_integr_.transpose());
 
 
     // set final
@@ -70,8 +70,8 @@ TEST(TestOdom3D, Interpolate0)
     final.delta_integr_ << 0,0,0, 0,0,0,1;
     prc.deltaPlusDelta(ref.delta_integr_, final.delta_, (final.ts_ - ref.ts_), final.delta_integr_);
 
-//    WOLF_INFO("final delta= ", final.delta_.transpose());
-//    WOLF_INFO("final Delta= ", final.delta_integr_.transpose());
+    WOLF_DEBUG("final delta= ", final.delta_.transpose());
+    WOLF_DEBUG("final Delta= ", final.delta_integr_.transpose());
 
     // interpolate!
     Motion second = final;
@@ -80,8 +80,8 @@ TEST(TestOdom3D, Interpolate0)
     // 1  2  3  4  5   // 2 = 25% into interpolated, 75% into second
     interpolated = prc.interpolate(ref, second, t);
 
-//    WOLF_INFO("interpolated delta= ", interpolated.delta_.transpose());
-//    WOLF_INFO("interpolated Delta= ", interpolated.delta_integr_.transpose());
+    WOLF_DEBUG("interpolated delta= ", interpolated.delta_.transpose());
+    WOLF_DEBUG("interpolated Delta= ", interpolated.delta_integr_.transpose());
 
     // delta
     ASSERT_TRUE((interpolated.delta_.head<3>() - 0.25 * final.delta_.head<3>()).isMuchSmallerThan(1.0, Constants::EPS));
@@ -91,19 +91,17 @@ TEST(TestOdom3D, Interpolate0)
 
 TEST(TestOdom3D, Interpolate1)
 {
-    /* Conditions:
-     * ref d = id
-     * ref D = id
-     * fin d = pos
-     * fin D = id
-     */
     ProcessorOdom3D prc;
 
     /*
-     * We create several poses: origin, ref, int, second, final
-     * We compute all deltas between them: d_o_r, d_r_i, d_i_s, d_r_f
-     * We create the motions m_r, m_f
-     * We interpolate, and get m_i, m_s
+     * We create several poses: origin, ref, int, second, final, as follows:
+     *
+     *   +---+---+---+---->
+     *   o   r   i  s,f
+     *
+     * We compute all deltas between them: d_or, d_ri, d_is, d_rf
+     * We create the motions R, F
+     * We interpolate, and get I, S
      */
 
     // absolute poses: origin, ref, interp, second=final
@@ -130,7 +128,7 @@ TEST(TestOdom3D, Interpolate1)
     Map<Quaternions>    dq_is(dx_is.data() +3);
     Map<Vector3s>       dp_rf(dx_rf.data(), 3);
     Map<Quaternions>    dq_rf(dx_rf.data() +3);
-    Map<Vector7s>       dx_rs(dx_rf.data(), 7); // dx_rs = dx_rf
+    Map<Vector7s>       dx_rs(dx_rf.data(), 7); // this ensures dx_rs = dx_rf
 
     // Deltas -- always referred to origin
     //         o-r    o-i    o-s    o-f
@@ -149,8 +147,8 @@ TEST(TestOdom3D, Interpolate1)
     Scalar dt_ri = t_i - t_r;
     Scalar dt_rf = t_f - t_r;
 
-    WOLF_INFO("t_o: ", t_o.get(), "; t_r: ", t_r.get(), "; t_i: ", t_i.get(), "; t_f: ", t_f.get());
-    WOLF_INFO("dt_ri: ", dt_ri, "; dt_rf ", dt_rf)
+    WOLF_DEBUG("t_o: ", t_o.get(), "; t_r: ", t_r.get(), "; t_i: ", t_i.get(), "; t_f: ", t_f.get());
+    WOLF_DEBUG("dt_ri: ", dt_ri, "; dt_rf ", dt_rf)
 
     // Constant velocity model
     Vector3s v;
@@ -177,11 +175,11 @@ TEST(TestOdom3D, Interpolate1)
     q_f = q_r * v2q (w * dt_rf);
     x_s = x_f;
 
-    WOLF_INFO("o   = ", x_o.transpose());
-    WOLF_INFO("r   = ", x_r.transpose());
-    WOLF_INFO("i   = ", x_i.transpose());
-    WOLF_INFO("s   = ", x_s.transpose());
-    WOLF_INFO("f   = ", x_f.transpose());
+    WOLF_DEBUG("o   = ", x_o.transpose());
+    WOLF_DEBUG("r   = ", x_r.transpose());
+    WOLF_DEBUG("i   = ", x_i.transpose());
+    WOLF_DEBUG("s   = ", x_s.transpose());
+    WOLF_DEBUG("f   = ", x_f.transpose());
 
     // deltas -- referred to previous delta
     dp_or = q_o.conjugate() * (p_r - p_o);
@@ -209,59 +207,59 @@ TEST(TestOdom3D, Interpolate1)
     I.resize(7,6);
 
     // set ref
-    R.ts_ = t_r;
-    R.delta_          = dx_or; // origin to ref
-    R.delta_integr_   = Dx_or; // origin to ref
+    R.ts_           = t_r;
+    R.delta_        = dx_or; // origin to ref
+    R.delta_integr_ = Dx_or; // origin to ref
 
-    WOLF_INFO("* R.d = ", R.delta_.transpose());
-    WOLF_INFO("  or  = ", dx_or.transpose());
+    WOLF_DEBUG("* R.d = ", R.delta_.transpose());
+    WOLF_DEBUG("  or  = ", dx_or.transpose());
     ASSERT_TRUE((R.delta_        - dx_or).isMuchSmallerThan(1.0, Constants::EPS));
 
-    WOLF_INFO("* R.D = ", R.delta_integr_.transpose());
-    WOLF_INFO("  or  = ", Dx_or.transpose());
+    WOLF_DEBUG("  R.D = ", R.delta_integr_.transpose());
+    WOLF_DEBUG("  or  = ", Dx_or.transpose());
     ASSERT_TRUE((R.delta_integr_ - Dx_or).isMuchSmallerThan(1.0, Constants::EPS));
 
     // set final
-    F.ts_ = t_f;
+    F.ts_           = t_f;
     F.delta_        = dx_rf; // ref to final
     F.delta_integr_ = Dx_of; // origin to final
 
-    WOLF_INFO("* F.d = ", F.delta_.transpose());
-    WOLF_INFO("  rf  = ", dx_rf.transpose());
-    EXPECT_TRUE((F.delta_        - dx_rf).isMuchSmallerThan(1.0, Constants::EPS));
+    WOLF_DEBUG("* F.d = ", F.delta_.transpose());
+    WOLF_DEBUG("  rf  = ", dx_rf.transpose());
+    ASSERT_TRUE((F.delta_        - dx_rf).isMuchSmallerThan(1.0, Constants::EPS));
 
-    WOLF_INFO("* F.D = ", F.delta_integr_.transpose());
-    WOLF_INFO("  of  = ", Dx_of.transpose());
-    EXPECT_TRUE((F.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
+    WOLF_DEBUG("  F.D = ", F.delta_integr_.transpose());
+    WOLF_DEBUG("  of  = ", Dx_of.transpose());
+    ASSERT_TRUE((F.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
 
     S = F; // avoid overwriting final
     WOLF_DEBUG("* S.d = ", S.delta_.transpose());
-    WOLF_INFO("  rs  = ", dx_rs.transpose());
-    EXPECT_TRUE((S.delta_        - dx_rs).isMuchSmallerThan(1.0, Constants::EPS));
+    WOLF_DEBUG("  rs  = ", dx_rs.transpose());
+    ASSERT_TRUE((S.delta_        - dx_rs).isMuchSmallerThan(1.0, Constants::EPS));
 
-    WOLF_INFO("* S.D = ", S.delta_integr_.transpose());
-    WOLF_INFO("  os  = ", Dx_os.transpose());
-    EXPECT_TRUE((S.delta_integr_ - Dx_os).isMuchSmallerThan(1.0, Constants::EPS));
+    WOLF_DEBUG("  S.D = ", S.delta_integr_.transpose());
+    WOLF_DEBUG("  os  = ", Dx_os.transpose());
+    ASSERT_TRUE((S.delta_integr_ - Dx_os).isMuchSmallerThan(1.0, Constants::EPS));
 
     // interpolate!
-    WOLF_INFO("*** INTERPOLATE *** I has been computed; S has changed.");
+    WOLF_DEBUG("*** INTERPOLATE *** I has been computed; S has changed.");
     I = prc.interpolate(R, S, t_i);
 
-    WOLF_INFO("* I.d = ", I.delta_.transpose());
-    WOLF_INFO("  ri  = ", dx_ri.transpose());
-    EXPECT_TRUE((I.delta_        - dx_ri).isMuchSmallerThan(1.0, Constants::EPS));
+    WOLF_DEBUG("* I.d = ", I.delta_.transpose());
+    WOLF_DEBUG("  ri  = ", dx_ri.transpose());
+    ASSERT_TRUE((I.delta_        - dx_ri).isMuchSmallerThan(1.0, Constants::EPS));
 
-    WOLF_INFO("* I.D = ", I.delta_integr_.transpose());
-    WOLF_INFO("  oi  = ", Dx_oi.transpose());
-    EXPECT_TRUE((I.delta_integr_ - Dx_oi).isMuchSmallerThan(1.0, Constants::EPS));
+    WOLF_DEBUG("  I.D = ", I.delta_integr_.transpose());
+    WOLF_DEBUG("  oi  = ", Dx_oi.transpose());
+    ASSERT_TRUE((I.delta_integr_ - Dx_oi).isMuchSmallerThan(1.0, Constants::EPS));
 
-    WOLF_INFO("* S.d = ", S.delta_.transpose());
-    WOLF_INFO("  is  = ", dx_is.transpose());
-    EXPECT_TRUE((S.delta_        - dx_is).isMuchSmallerThan(1.0, Constants::EPS));
+    WOLF_DEBUG("* S.d = ", S.delta_.transpose());
+    WOLF_DEBUG("  is  = ", dx_is.transpose());
+    ASSERT_TRUE((S.delta_        - dx_is).isMuchSmallerThan(1.0, Constants::EPS));
 
-    WOLF_INFO("* S.D = ", S.delta_integr_.transpose());
-    WOLF_INFO("  os  = ", Dx_os.transpose());
-    EXPECT_TRUE((S.delta_integr_ - Dx_os).isMuchSmallerThan(1.0, Constants::EPS));
+    WOLF_DEBUG("  S.D = ", S.delta_integr_.transpose());
+    WOLF_DEBUG("  os  = ", Dx_os.transpose());
+    ASSERT_TRUE((S.delta_integr_ - Dx_os).isMuchSmallerThan(1.0, Constants::EPS));
 
 }
 
