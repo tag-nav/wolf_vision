@@ -334,8 +334,8 @@ class ProcessorMotion : public ProcessorBase
          *
          * In this documentation, we differentiate these deltas with lowercase d and uppercase D:
          *
-         *   - d = any_motion.delta_        <-- local delta
-         *   - D = any_motion.delta_integr_ <-- global Delta
+         *   - d = any_motion.delta_        <-- local delta, from previous to this
+         *   - D = any_motion.delta_integr_ <-- global Delta, from origin to this
          *
          * so that D_(i+1) = D_i (+) d_(i+1).
          *
@@ -368,9 +368,9 @@ class ProcessorMotion : public ProcessorBase
          *
          * from where d_I, D_I, d_S and D_S can be derived.
          *
-         * In general, we do not have information about the particular trajectory taken between A=_motion_ref and B=_motion.
-         * Therefore, we consider a linear intepolation.
-         * The linear interpolation factor is defined from the time stamps,
+         * In general, we do not have information about the particular trajectory taken between A = _motion_ref and B = _motion.
+         * Therefore, we consider a linear interpolation.
+         * The linear interpolation factor 'tau' is defined from the time stamps,
          *
          *     tau = (t - t_A) / (t_B - t_A)
          *
@@ -413,8 +413,8 @@ class ProcessorMotion : public ProcessorBase
          *     - Dp_I = (1-tau)*Dp_A + tau*Dp_B     // dp is a 2-vector or a 3-vector.      Also, and easier, Dp_I = Dp_A + dp_I
          *     - Da_I = (1-tau)*Da_A + tau*Da_B     // da is an angle, for 2D poses.        Also, and easier, Da_I = Da_A + da_I
          *     - Dq_I = Dq_A.slerp(tau, Dq_B)       // dq is a quaternion, for 3D poses.    Also, and easier, Dq_I = Dq_A * dq_I
-         *     - dp_S = (1-tau)*dp_B
-         *     - da_S = (1-tau)*da_B                // 2D
+         *     - dp_S = dq_I.conjugate() * (1-tau)*dp_B // dq is a quaternion; for 2D, use dR (see below)
+         *     - da_S = dR_I' * (1-tau)*da_B        // 2D; dR is a rot matrix
          *     - dq_S = dq_I.conjugate() * dq_B     // 3D
          *     - Dp_S = Dp_B
          *     - Da_S = Da_B                        // 2D

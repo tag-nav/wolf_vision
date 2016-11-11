@@ -234,10 +234,10 @@ inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref,
     // and return the value at the given time_stamp ts_.
     //
     // The position receives linear interpolation:
-    //    p_ret = (ts - t_ref) / t * (p - p_ref)
+    //    p_ret = (ts - t_ref) / dt * (p - p_ref)
     //
     // the quaternion receives a slerp interpolation
-    //    q_ret = q_ref.slerp( (ts - t_ref) / t , q);
+    //    q_ret = q_ref.slerp( (ts - t_ref) / dt , q);
     //
     // See extensive documentation in ProcessorMotion::interpolate().
 
