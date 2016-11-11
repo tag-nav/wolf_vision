@@ -18,15 +18,19 @@
 #include <iostream>
 
 #define JAC_NUMERIC(T, _x0, _J, dx) \
-{    VectorXs dv(3); \
+{ \
+    VectorXs dv(3); \
     Map<const VectorXs> _dv (dv.data(), 3); \
-    VectorXs xo(3); \
+    VectorXs xo(4); \
     Map<VectorXs> _xo (xo.data(), 4); \
-    for (int i = 0; i< 3; i++) {\
+    for (int i = 0; i< 3; i++) \
+    {\
         dv.setZero();\
         dv(i) = dx;\
         T.plus(_x0, _dv, _xo);\
-        _J.col(i) = (_xo - _x0)/dx;  }}
+        _J.col(i) = (_xo - _x0)/dx; \
+    } \
+}
 
 
 using namespace Eigen;
@@ -36,51 +40,39 @@ using namespace wolf;
 TEST(TestLocalParametrization, QuaternionLocal)
 {
 
-    WOLF_INFO("hola");
-
     // Storage
     VectorXs x_storage(22);
     MatrixXs M_storage(1,12); // matrix dimensions do not matter, just storage size.
     x_storage.setRandom();
     M_storage.setZero();
 
-    WOLF_INFO("hola");
     // QUATERNION ------------------------------------------
     Map<VectorXs> q(&x_storage(0),4);
     q.normalize();
 
-    WOLF_INFO("hola");
     Map<VectorXs> da(&x_storage(4),3);
     da /= 10.0;
     Map<VectorXs> qo_m(&x_storage(7),4);
     Map<MatrixXs> J(&M_storage(0,0),4,3);
     MatrixXs J_num(4,3);
 
-    WOLF_INFO("hola");
     LocalParametrizationQuaternion<DQ_LOCAL> Qpar_loc;
 
     Map<const VectorXs> q_m(q.data(),4);
     Map<const VectorXs> da_m(da.data(),3);
 
-    WOLF_INFO("hola");
     Qpar_loc.plus(q_m,da_m,qo_m);
 
-    WOLF_INFO("hola");
     ASSERT_DOUBLE_EQ(qo_m.norm(), 1);
 
-    WOLF_INFO("hola");
     Quaternions qref = Map<Quaternions>(q.data()) * wolf::v2q(da);
     ASSERT_TRUE(qo_m.isApprox( qref.coeffs() ) );
 
-    WOLF_INFO("hola");
     Qpar_loc.computeJacobian(q_m,J);
 
-    WOLF_INFO(__LINE__);
     JAC_NUMERIC(Qpar_loc, q_m, J_num, 1e-9)
 
-    WOLF_INFO(__LINE__);
     ASSERT_NEAR((J-J_num).norm(), 0, 1e-6);
-//    ASSERT_NEAR(J.array(), J_num.array(), 1e-6);
 
     WOLF_INFO(__LINE__);
 
