@@ -153,8 +153,8 @@ class ProcessorMotion : public ProcessorBase
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
          * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
          */
-        void sumDeltas(CaptureMotion* _cap1_ptr,
-                       CaptureMotion* _cap2_ptr,
+        void sumDeltas(CaptureMotion::Ptr _cap1_ptr,
+                       CaptureMotion::Ptr _cap2_ptr,
                        Eigen::VectorXs& _delta1_plus_delta2);
 
         /** Set the origin of all motion for this processor
@@ -568,7 +568,7 @@ inline MotionBuffer& ProcessorMotion::getBuffer()
     return last_ptr_->getBuffer();
 }
 
-inline void ProcessorMotion::sumDeltas(CaptureMotion* _cap1_ptr, CaptureMotion* _cap2_ptr,
+inline void ProcessorMotion::sumDeltas(CaptureMotion::Ptr _cap1_ptr, CaptureMotion::Ptr _cap2_ptr,
                                        Eigen::VectorXs& _delta1_plus_delta2)
 {
     Scalar dt = _cap2_ptr->getTimeStamp() - _cap1_ptr->getTimeStamp();
