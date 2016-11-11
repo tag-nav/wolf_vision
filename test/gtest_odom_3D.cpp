@@ -84,8 +84,8 @@ TEST(TestOdom3D, Interpolate0)
 //    WOLF_INFO("interpolated Delta= ", interpolated.delta_integr_.transpose());
 
     // delta
-    ASSERT_TRUE((interpolated.delta_.head<3>() - 0.25 * final.delta_.head<3>()).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
-    ASSERT_TRUE((second.delta_.head<3>()       - 0.75 * final.delta_.head<3>()).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    ASSERT_TRUE((interpolated.delta_.head<3>() - 0.25 * final.delta_.head<3>()).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_TRUE((second.delta_.head<3>()       - 0.75 * final.delta_.head<3>()).isMuchSmallerThan(1.0, Constants::EPS));
 
 }
 
@@ -162,12 +162,12 @@ TEST(TestOdom3D, Interpolate1)
     /////////// start experiment ///////////////
 
     // set origin and ref states
-    x_o << 0,0,0, 0,0,0,1; q_o.normalize();
-    x_r << 1,0,0, 0,0,0,1; q_r.normalize();
+    x_o << 1,2,3, 4,5,6,7; q_o.normalize();
+    x_r << 7,6,5, 4,3,2,1; q_r.normalize();
 
     // set constant velocity params
-    v << 1,0,0; // linear velocity
-    w << .01,0,0; // angular velocity
+    v << 3,2,1; // linear velocity
+    w << .1,.2,.3; // angular velocity
 
     // compute other poses from model
     p_i = p_r +      v * dt_ri;
@@ -214,11 +214,11 @@ TEST(TestOdom3D, Interpolate1)
 
     WOLF_INFO("* R.d = ", R.delta_.transpose());
     WOLF_INFO("  or  = ", dx_or.transpose());
-    ASSERT_TRUE((R.delta_        - dx_or).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    ASSERT_TRUE((R.delta_        - dx_or).isMuchSmallerThan(1.0, Constants::EPS));
 
     WOLF_INFO("* R.D = ", R.delta_integr_.transpose());
     WOLF_INFO("  or  = ", Dx_or.transpose());
-    ASSERT_TRUE((R.delta_integr_ - Dx_or).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    ASSERT_TRUE((R.delta_integr_ - Dx_or).isMuchSmallerThan(1.0, Constants::EPS));
 
     // set final
     F.ts_ = t_f;
@@ -228,39 +228,40 @@ TEST(TestOdom3D, Interpolate1)
 
     WOLF_INFO("* F.d = ", F.delta_.transpose());
     WOLF_INFO("  rf  = ", dx_rf.transpose());
-    EXPECT_TRUE((F.delta_        - dx_rf).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    EXPECT_TRUE((F.delta_        - dx_rf).isMuchSmallerThan(1.0, Constants::EPS));
 
     WOLF_INFO("* F.D = ", F.delta_integr_.transpose());
     WOLF_INFO("  of  = ", Dx_of.transpose());
-    EXPECT_TRUE((F.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    EXPECT_TRUE((F.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
 
-    // interpolate!
     S = F; // avoid overwriting final
     WOLF_INFO("* S.d = ", S.delta_.transpose());
     WOLF_INFO("  rf  = ", dx_rf.transpose());
-    EXPECT_TRUE((S.delta_        - dx_rf).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    EXPECT_TRUE((S.delta_        - dx_rf).isMuchSmallerThan(1.0, Constants::EPS));
 
     WOLF_INFO("* S.D = ", S.delta_integr_.transpose());
     WOLF_INFO("  of  = ", Dx_of.transpose());
-    EXPECT_TRUE((S.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    EXPECT_TRUE((S.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
 
+    // interpolate!
+    WOLF_INFO("*** INTERPOLATE *** I has been computed; S has changed.");
     I = prc.interpolate(R, S, t_i);
 
     WOLF_INFO("* I.d = ", I.delta_.transpose());
     WOLF_INFO("  ri  = ", dx_ri.transpose());
-    EXPECT_TRUE((I.delta_        - dx_ri).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    EXPECT_TRUE((I.delta_        - dx_ri).isMuchSmallerThan(1.0, Constants::EPS));
 
     WOLF_INFO("* I.D = ", I.delta_integr_.transpose());
     WOLF_INFO("  oi  = ", Dx_oi.transpose());
-    EXPECT_TRUE((I.delta_integr_ - Dx_oi).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    EXPECT_TRUE((I.delta_integr_ - Dx_oi).isMuchSmallerThan(1.0, Constants::EPS));
 
     WOLF_INFO("* S.d = ", S.delta_.transpose());
     WOLF_INFO("  is  = ", dx_is.transpose());
-    EXPECT_TRUE((S.delta_        - dx_is).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    EXPECT_TRUE((S.delta_        - dx_is).isMuchSmallerThan(1.0, Constants::EPS));
 
     WOLF_INFO("* S.D = ", S.delta_integr_.transpose());
     WOLF_INFO("  os  = ", Dx_os.transpose());
-    EXPECT_TRUE((S.delta_integr_ - Dx_os).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
+    EXPECT_TRUE((S.delta_integr_ - Dx_os).isMuchSmallerThan(1.0, Constants::EPS));
 
 }
 

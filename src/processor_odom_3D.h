@@ -271,7 +271,7 @@ inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref,
     motion_int.delta_integr_cov_ = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose() + J_int * _motion.delta_cov_ * J_int.transpose();
 
     // update second delta ( in place update )
-    dp              = (1-tau) * dp;
+    dp              = dq_int.conjugate() * ((1-tau) * dp);
     dq              = dq_int.conjugate() * dq;
     _motion.delta_cov_ = (1-tau) * _motion.delta_cov_; // easy interpolation // TODO check for correcness
     //Dp            = Dp; // trivial, just leave the code commented
