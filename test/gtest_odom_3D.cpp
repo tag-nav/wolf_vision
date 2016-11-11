@@ -130,6 +130,7 @@ TEST(TestOdom3D, Interpolate1)
     Map<Quaternions>    dq_is(dx_is.data() +3);
     Map<Vector3s>       dp_rf(dx_rf.data(), 3);
     Map<Quaternions>    dq_rf(dx_rf.data() +3);
+    Map<Vector7s>       dx_rs(dx_rf.data(), 7); // dx_rs = dx_rf
 
     // Deltas -- always referred to origin
     //         o-r    o-i    o-s    o-f
@@ -144,7 +145,7 @@ TEST(TestOdom3D, Interpolate1)
     Map<Quaternions>    Dq_of(Dx_of.data() +3);
 
     // time stamps and intervals
-    TimeStamp t_o(0), t_r(1), t_i(2), t_f(5); // 2: 25% of motion
+    TimeStamp t_o(0), t_r(1), t_i(2.3), t_f(5); // t_i=2: 25% of motion; t_i=2.3: a general interpolation point
     Scalar dt_ri = t_i - t_r;
     Scalar dt_rf = t_f - t_r;
 
@@ -224,7 +225,6 @@ TEST(TestOdom3D, Interpolate1)
     F.ts_ = t_f;
     F.delta_        = dx_rf; // ref to final
     F.delta_integr_ = Dx_of; // origin to final
-//    prc.deltaPlusDelta(ref.delta_integr_, final.delta_, (final.ts_ - ref.ts_), final.delta_integr_);
 
     WOLF_INFO("* F.d = ", F.delta_.transpose());
     WOLF_INFO("  rf  = ", dx_rf.transpose());
@@ -235,13 +235,13 @@ TEST(TestOdom3D, Interpolate1)
     EXPECT_TRUE((F.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
 
     S = F; // avoid overwriting final
-    WOLF_INFO("* S.d = ", S.delta_.transpose());
-    WOLF_INFO("  rf  = ", dx_rf.transpose());
-    EXPECT_TRUE((S.delta_        - dx_rf).isMuchSmallerThan(1.0, Constants::EPS));
+    WOLF_DEBUG("* S.d = ", S.delta_.transpose());
+    WOLF_INFO("  rs  = ", dx_rs.transpose());
+    EXPECT_TRUE((S.delta_        - dx_rs).isMuchSmallerThan(1.0, Constants::EPS));
 
     WOLF_INFO("* S.D = ", S.delta_integr_.transpose());
-    WOLF_INFO("  of  = ", Dx_of.transpose());
-    EXPECT_TRUE((S.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
+    WOLF_INFO("  os  = ", Dx_os.transpose());
+    EXPECT_TRUE((S.delta_integr_ - Dx_os).isMuchSmallerThan(1.0, Constants::EPS));
 
     // interpolate!
     WOLF_INFO("*** INTERPOLATE *** I has been computed; S has changed.");
