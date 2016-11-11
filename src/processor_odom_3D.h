@@ -237,36 +237,51 @@ inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref,
     // the quaternion receives a slerp interpolation
     //    q_ret = q_ref.slerp( (ts - t_ref) / t , q);
 
+
+    // reference
     TimeStamp t_ref = _motion_ref.ts_;
+//    Map<const VectorXs>     dp_ref(_motion_ref.delta_.data(), 3);
+//    Map<const Quaternions>  dq_ref(_motion_ref.delta_.data() + 3);
+//    Map<const VectorXs>     Dp_ref(_motion_ref.delta_integr_.data(), 3);
+//    Map<const Quaternions>  Dq_ref(_motion_ref.delta_integr_.data() + 3);
+
+    // final
     TimeStamp t = _motion.ts_;
-    Scalar dt = t - t_ref;
-    Scalar a = (_ts - t_ref)/dt; // interpolation factor (0 to 1)
-    Scalar b = 1-a; // interpolation factor from the tail
+    Map<VectorXs>           dp(_motion.delta_.data(), 3);
+    Map<Quaternions>        dq(_motion.delta_.data() + 3);
+//    Map<VectorXs>           Dp(_motion.delta_integr_.data(), 3);
+//    Map<Quaternions>        Dq(_motion.delta_integr_.data() + 3);
 
-    Map<const VectorXs> p_ref(_motion_ref.delta_.data(), 3);
-    Map<const Quaternions> q_ref(_motion_ref.delta_.data() + 3);
-    Map<const VectorXs> p(_motion.delta_.data(), 3);
-    Map<Quaternions> q(_motion.delta_.data() + 3);
-    Motion motion_ret;
-    motion_ret.resize(delta_size_, delta_cov_size_);
-    Map<VectorXs> p_ret(motion_ret.delta_.data(), 3);
-    Map<Quaternions> q_ret(motion_ret.delta_.data() + 3);
+    // interpolated
+    Motion motion_int;
+    motion_int.resize(delta_size_, delta_cov_size_);
+    Map<VectorXs>           dp_int(motion_int.delta_.data(), 3);
+    Map<Quaternions>        dq_int(motion_int.delta_.data() + 3);
+//    Map<VectorXs>           Dp_int(motion_int.delta_integr_.data(), 3);
+//    Map<Quaternions>        Dq_int(motion_int.delta_integr_.data() + 3);
 
-    // interpolate deltas
-    p_ret = p_ref + a * (p - p_ref);
-    q_ret = q_ref.slerp(a, q);
-    motion_ret.ts_ = _ts;
-//    motion_ret.delta_ = deltaZero();
-//    motion_ret.delta_cov_ = Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_);
+    // Jacobians for covariance propagation
+    MatrixXs J_ref(delta_cov_size_, delta_cov_size_);
+    MatrixXs J_int(delta_cov_size_, delta_cov_size_);
 
-    // interpolate covariances (here we go the brutal way
-    // TODO check these two interpolations, especially the delta_integr_cov.
-    motion_ret.delta_cov_ = a * _motion.delta_cov_;
-    motion_ret.delta_integr_cov_ = b * _motion_ref.delta_integr_cov_ + a * _motion.delta_integr_cov_;
+    // interpolate delta
+    Scalar tau = (_ts - t_ref)/(t - t_ref); // interpolation factor (0 to 1)
+    motion_int.ts_  = _ts;
+    dp_int          = tau * dp;
+    dq_int          = Quaternions::Identity().slerp(tau, dq);
+    deltaPlusDelta(_motion_ref.delta_integr_, motion_int.delta_, (t-t_ref), motion_int.delta_integr_, J_ref, J_int);
 
-    // TODO implement the remaining _motion
+    // second delta
+    dp              = (1-tau) * dp;
+    dq              = dq_int.conjugate() * dq;
+    //Dp            = Dp; // trivial, just leave the code commented
+    //Dq            = Dq; // trivial, just leave the code commented
 
-    return motion_ret;
+    // interpolate covariances
+    motion_int.delta_cov_ = tau * _motion.delta_cov_;
+    motion_int.delta_integr_cov_ = (1-tau) * _motion_ref.delta_integr_cov_ + tau * _motion.delta_integr_cov_;
+
+    return motion_int;
 }
 
 inline bool ProcessorOdom3D::voteForKeyFrame()
