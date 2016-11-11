@@ -185,9 +185,6 @@ inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1,
     assert(_jacobian2.rows() == delta_cov_size_ && _jacobian2.cols() == delta_cov_size_ && "Wrong _jacobian2 size");
 
     remap(_delta1, _delta2, _delta1_plus_delta2);
-    p_out_ = p1_ + q1_ * p2_;
-    q_out_ = q1_ * q2_;
-
     /* Jacobians of D' = D (+) d
      * with: D = [Dp Dq]
      *       d = [dp dq]
@@ -211,6 +208,11 @@ inline void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1,
     _jacobian1.block<3,3>(0,3) = - DR * skew(p2_);  // (Sola 16, ex. B.3.2 and Sec. 7.2.3)
     _jacobian1.block<3,3>(3,3) = dR.transpose();    // (Sola 16, Sec. 7.2.3)
     _jacobian2.block<3,3>(0,0) = DR;                // (Sola 16, Sec. 7.2.3)
+
+    // perform composition here to avoid aliasing problems if _delta1 and _delta_plus_delta share the same storage
+    p_out_ = p1_ + q1_ * p2_;
+    q_out_ = q1_ * q2_;
+
 }
 
 inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
