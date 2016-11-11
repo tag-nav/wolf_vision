@@ -242,25 +242,17 @@ inline Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref,
 
     // reference
     TimeStamp t_ref = _motion_ref.ts_;
-//    Map<const VectorXs>     dp_ref(_motion_ref.delta_.data(), 3);
-//    Map<const Quaternions>  dq_ref(_motion_ref.delta_.data() + 3);
-//    Map<const VectorXs>     Dp_ref(_motion_ref.delta_integr_.data(), 3);
-//    Map<const Quaternions>  Dq_ref(_motion_ref.delta_integr_.data() + 3);
 
     // final
     TimeStamp t = _motion.ts_;
     Map<VectorXs>           dp(_motion.delta_.data(), 3);
     Map<Quaternions>        dq(_motion.delta_.data() + 3);
-//    Map<VectorXs>           Dp(_motion.delta_integr_.data(), 3);
-//    Map<Quaternions>        Dq(_motion.delta_integr_.data() + 3);
 
     // interpolated
     Motion motion_int;
     motion_int.resize(delta_size_, delta_cov_size_);
     Map<VectorXs>           dp_int(motion_int.delta_.data(), 3);
     Map<Quaternions>        dq_int(motion_int.delta_.data() + 3);
-//    Map<VectorXs>           Dp_int(motion_int.delta_integr_.data(), 3);
-//    Map<Quaternions>        Dq_int(motion_int.delta_integr_.data() + 3);
 
     // Jacobians for covariance propagation
     MatrixXs J_ref(delta_cov_size_, delta_cov_size_);
