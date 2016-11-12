@@ -28,7 +28,7 @@ void ProcessorOdom3D::setup(SensorOdom3D::Ptr sen_ptr)
 
 void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
 {
-    assert((_data.size() == 6 || _data.size() == 7) && "Wrond data size. Must be 6 or 7 for 3D.");
+    assert((_data.size() == 6 || _data.size() == 7) && "Wrong data size. Must be 6 or 7 for 3D.");
     Scalar disp, rot; // displacement and rotation of this motion step
     if (_data.size() == 6)
     {
@@ -129,6 +129,39 @@ void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorX
 
 Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
 {
+
+    WOLF_DEBUG("motion ref ts: ", _motion_ref.ts_.get());
+    WOLF_DEBUG("interp ts    : ", _ts.get());
+    WOLF_DEBUG("motion ts    : ", _motion.ts_.get());
+
+    if (_ts <= _motion_ref.ts_)
+        return motionZero(_motion_ref.ts_);
+    if (_motion.ts_ <= _ts)
+    {
+        // code from non-segfaulting branch
+        Motion tmp(_motion_ref);
+        tmp.ts_ = _ts;
+        tmp.delta_ = deltaZero();
+        tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_);
+        return tmp;
+    }
+
+    assert(_motion_ref.delta_.size() == delta_size_ && "Wrong delta size");
+    assert(_motion_ref.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_ref.delta_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_ref.delta_integr_.size() == delta_size_ && "Wrong delta size");
+    assert(_motion_ref.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_ref.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion.delta_.size() == delta_size_ && "Wrong delta size");
+    assert(_motion.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion.delta_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion.delta_integr_.size() == delta_size_ && "Wrong delta size");
+    assert(_motion.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_ref.ts_ <= _ts && "Interpolation time stamp out of bounds");
+    assert(_ts <= _motion.ts_ && "Interpolation time stamp out of bounds");
+
+
     using namespace Eigen;
     // Interpolate between motion_ref and motion, as in:
     //
@@ -144,26 +177,33 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion, 
     //    q_ret = q_ref.slerp( (ts - t_ref) / dt , q);
     //
     // See extensive documentation in ProcessorMotion::interpolate().
+
     WOLF_TRACE("");
+
     // reference
     TimeStamp t_ref = _motion_ref.ts_;
+
     // final
     TimeStamp t = _motion.ts_;
     Map<VectorXs> dp(_motion.delta_.data(), 3);
     Map<Quaternions> dq(_motion.delta_.data() + 3);
+
     // interpolated
     Motion motion_int = motionZero(_ts);
     Map<VectorXs> dp_int(motion_int.delta_.data(), 3);
     Map<Quaternions> dq_int(motion_int.delta_.data() + 3);
+
     // Jacobians for covariance propagation
     MatrixXs J_ref(delta_cov_size_, delta_cov_size_);
     MatrixXs J_int(delta_cov_size_, delta_cov_size_);
+
     // interpolate delta
     Scalar tau = (_ts - t_ref) / (t - t_ref); // interpolation factor (0 to 1)
     motion_int.ts_ = _ts;
     dp_int = tau * dp;
     dq_int = Quaternions::Identity().slerp(tau, dq);
     deltaPlusDelta(_motion_ref.delta_integr_, motion_int.delta_, (t - t_ref), motion_int.delta_integr_, J_ref, J_int);
+
     // interpolate covariances
     WOLF_TRACE("J_ref\n", J_ref);
     WOLF_TRACE("J_int\n", J_int);
@@ -173,6 +213,7 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion, 
     motion_int.delta_integr_cov_ = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose()
             + J_int * _motion.delta_cov_ * J_int.transpose();
     WOLF_TRACE("");
+
     // update second delta ( in place update )
     dp = dq_int.conjugate() * ((1 - tau) * dp);
     dq = dq_int.conjugate() * dq;
@@ -180,6 +221,7 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion, 
     //Dp            = Dp; // trivial, just leave the code commented
     //Dq            = Dq; // trivial, just leave the code commented
     //_motion.delta_integr_cov_ = _motion.delta_integr_cov_; // trivial, just leave the code commented
+
     return motion_int;
 }
 
