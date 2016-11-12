@@ -43,9 +43,14 @@ struct Motion
  *
  * The buffer can be queried for motion-integrals and delta-integrals corresponding to a provided time stamp,
  * with the following rules:
- *   - The returned motion-integral or delta-integral is the one immediately before the query time stamp.
- *   - If the query time stamp is later than the last one in the buffer, the last motion-integral or delta-integral is returned.
- *   - It is an error if the query time stamp is earlier than the beginning of the buffer.
+ *   - If the query time stamp is later than the last one in the buffer,
+ *     the last motion-integral or delta-integral is returned.
+ *   - If the query time stamp is earlier than the beginning of the buffer,
+ *     the earliest Motion or Delta is returned.
+ *   - If the query time stamp matches one time stamp in the buffer exactly,
+ *     the returned motion-integral or delta-integral is the one of the queried time stamp.
+ *   - If the query time stamp does not match any time stamp in the buffer,
+ *     the returned motion-integral or delta-integral is the one immediately before the query time stamp.
  */
 class MotionBuffer{
     public:
