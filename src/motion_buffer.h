@@ -8,6 +8,9 @@
 #ifndef SRC_MOTIONBUFFER_H_
 #define SRC_MOTIONBUFFER_H_
 
+#include "wolf.h"
+#include "time_stamp.h"
+
 #include <list>
 #include <algorithm>
 
