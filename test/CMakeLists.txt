@@ -10,6 +10,8 @@ include_directories(${PROJECT_SOURCE_DIR}/third_party/spdlog/include/)
 # Include gtest directory.
 include_directories(${GTEST_INCLUDE_DIRS})
 
+### ADD TESTS BELOW ###
+
 # Create a specific test executable for gtest_example
 wolf_add_gtest(gtest_example gtest_example.cpp)
 target_link_libraries(gtest_example ${PROJECT_NAME})
@@ -24,5 +26,9 @@ TARGET_LINK_LIBRARIES(gtest_local_param ${PROJECT_NAME})
 # Local parametrizations classes test
 wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
 TARGET_LINK_LIBRARIES(gtest_odom_3D ${PROJECT_NAME})
+
+# Local parametrizations classes test
+wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
+TARGET_LINK_LIBRARIES(gtest_motion_buffer ${PROJECT_NAME})
 
 
