@@ -62,7 +62,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
         if (closest_key_frm && abs(closest_key_frm->getTimeStamp() - last_ptr_->getTimeStamp()) <= time_tolerance_)
         {
-            WOLF_DEBUG_HERE
+            WOLF_TRACE("");
             closest_key_frm->addCapture(last_ptr_);
             closest_key_frm->setKey();
             std::cout << "Last appended to existing F, set KF" << closest_key_frm->id() << std::endl;
@@ -75,7 +75,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         else
         {
-            WOLF_DEBUG_HERE
+            WOLF_TRACE("");
             //makeFrame(last_ptr_, KEY_FRAME);
             //makeFrame(last_ptr_, getProblem()->getStateAtTimeStamp(last_ptr_->getTimeStamp()), KEY_FRAME);
 
@@ -319,7 +319,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
 bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
-    WOLF_DEBUG_HERE
+    WOLF_TRACE("");
     std::cout << "PT: KF" << _keyframe_ptr->id() << " callback received at ts= " << _keyframe_ptr->getTimeStamp().get() << std::endl;
     std::cout << "    while last ts= " << last_ptr_->getTimeStamp().get() << std::endl;
     std::cout << "    while last's frame ts= " << last_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;

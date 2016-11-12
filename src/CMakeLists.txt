@@ -14,7 +14,7 @@ IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
   set(_WOLF_DEBUG true)
 ENDIF()
 
-option(_WOLF_TRACE "Enable wolf tracing macro" OFF)
+option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 option(BUILD_EXAMPLES "Build examples" ON)
 

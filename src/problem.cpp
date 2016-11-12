@@ -51,7 +51,7 @@ ProblemPtr Problem::create(FrameStructure _frame_structure)
 
 Problem::~Problem()
 {
-    std::cout << "destructed -P" << std::endl;
+//    WOLF_DEBUG("destructed -P");
 }
 
 void Problem::addSensor(SensorBasePtr _sen_ptr)
@@ -563,12 +563,9 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 
     cout << endl;
     cout << "P: wolf tree status ---------------------" << endl;
-    cout << "Hardware";
-    if (depth < 1)
-        cout << "   -- " << getHardwarePtr()->getSensorList().size() << "S" << endl;
-    else
+    cout << "Hardware" << ((depth < 1) ? ("   -- " + std::to_string(getHardwarePtr()->getSensorList().size()) + "S") : "")  << endl;
+    if (depth >= 1)
     {
-        cout << endl;
         for (auto S : getHardwarePtr()->getSensorList())
         {
             cout << "  S" << S->id();
@@ -625,17 +622,12 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             }
         } // for S
     }
-    cout << "Trajectory";
-    if (depth < 1)
-        cout << " -- " << getTrajectoryPtr()->getFrameList().size() << "F";
-    cout << endl;
+    cout << "Trajectory" << ((depth < 1) ? (" -- " + std::to_string(getTrajectoryPtr()->getFrameList().size()) + "F") : "")  << endl;
     if (depth >= 1)
     {
         for (auto F : getTrajectoryPtr()->getFrameList())
         {
-            cout << (F->isKey() ? "  KF" : "  F") << F->id();
-            if (depth < 2)
-                cout << " -- " << F->getCaptureList().size() << "C  ";
+            cout << (F->isKey() ? "  KF" : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
             if (constr_by)
             {
                 cout << "  <-- ";
@@ -662,17 +654,12 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             {
                 for (auto C : F->getCaptureList())
                 {
-                    cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id();
-                    if (depth < 3)
-                        cout << " -- " << C->getFeatureList().size() << "f";
-                    cout << endl;
+                    cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "") << endl;
                     if (depth >= 3)
                     {
                         for (auto f : C->getFeatureList())
                         {
-                            cout << "      f" << f->id();
-                            if (depth < 4)
-                                    cout << " -- " << f->getConstraintList().size() << "c  ";
+                            cout << "      f" << f->id() << ((depth < 4) ? " -- " + std::to_string(f->getConstraintList().size()) + "c  " : "");
                             if (constr_by)
                             {
                                 cout << "  <--\t";
@@ -705,10 +692,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             }
         } // for F
     }
-    cout << "Map";
-    if (depth < 1)
-        cout << "        -- " << getMapPtr()->getLandmarkList().size() << "L";
-    cout << endl;
+    cout << "Map" << ((depth < 1) ? ("        -- " + std::to_string(getMapPtr()->getLandmarkList().size()) + "L") : "") << endl;
     if (depth >= 1)
     {
         for (auto L : getMapPtr()->getLandmarkList())

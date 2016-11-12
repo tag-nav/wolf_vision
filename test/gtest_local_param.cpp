@@ -6,6 +6,7 @@
  */
 
 #include "utils_gtest.h"
+#include "../src/logging.h"
 
 
 #include "../src/local_parametrization_quaternion.h"
@@ -17,15 +18,19 @@
 #include <iostream>
 
 #define JAC_NUMERIC(T, _x0, _J, dx) \
-{    VectorXs dv(3); \
+{ \
+    VectorXs dv(3); \
     Map<const VectorXs> _dv (dv.data(), 3); \
-    VectorXs xo(3); \
+    VectorXs xo(4); \
     Map<VectorXs> _xo (xo.data(), 4); \
-    for (int i = 0; i< 3; i++) {\
+    for (int i = 0; i< 3; i++) \
+    {\
         dv.setZero();\
         dv(i) = dx;\
         T.plus(_x0, _dv, _xo);\
-        _J.col(i) = (_xo - _x0)/dx;  }}
+        _J.col(i) = (_xo - _x0)/dx; \
+    } \
+}
 
 
 using namespace Eigen;
@@ -34,6 +39,7 @@ using namespace wolf;
 
 TEST(TestLocalParametrization, QuaternionLocal)
 {
+
     // Storage
     VectorXs x_storage(22);
     MatrixXs M_storage(1,12); // matrix dimensions do not matter, just storage size.
@@ -67,6 +73,8 @@ TEST(TestLocalParametrization, QuaternionLocal)
     JAC_NUMERIC(Qpar_loc, q_m, J_num, 1e-9)
 
     ASSERT_NEAR((J-J_num).norm(), 0, 1e-6);
+
+    WOLF_INFO(__LINE__);
 
 }
 

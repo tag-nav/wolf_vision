@@ -21,12 +21,12 @@ namespace wolf {
 MapBase::MapBase() :
     NodeBase("MAP")
 {
-    std::cout << "constructed M"<< std::endl;
+//    std::cout << "constructed M"<< std::endl;
 }
 
 MapBase::~MapBase()
 {
-	std::cout << "destructed -M" << std::endl;
+//	std::cout << "destructed -M" << std::endl;
 }
 
 LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)

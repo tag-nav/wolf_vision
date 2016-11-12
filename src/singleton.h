@@ -40,7 +40,7 @@ public:
   constexpr Singleton(const Singleton&)       = delete;
   //constexpr Singleton(const Singleton&&)      = delete;
 
-  constexpr Singleton& operator=(const Singleton&)  = delete;
+  constexpr Singleton& operator=(const Singleton&) const = delete;
   //constexpr Singleton& operator=(const Singleton&&) = delete;
 
 protected:

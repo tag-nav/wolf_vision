@@ -22,6 +22,9 @@ struct Motion
         Eigen::VectorXs delta_integr_;      ///< the integrated motion or delta-integral
         Eigen::MatrixXs delta_cov_;         ///< covariance of the instantaneous delta
         Eigen::MatrixXs delta_integr_cov_;  ///< covariance of the integrated delta
+    public:
+        void resize(Size ds, Size dcs){delta_.resize(ds); delta_integr_.resize(ds); delta_cov_.resize(dcs,dcs); delta_integr_cov_.resize(dcs,dcs);}
+        void resize(Size ds){resize(ds,ds);}
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
 

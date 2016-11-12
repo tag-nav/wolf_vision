@@ -83,7 +83,7 @@ protected:
   }
 };
 
-Logger::Logger()
+inline Logger::Logger()
 {
   // Create main logger
   console_ = spdlog::stdout_color_mt(log_name_);
@@ -101,7 +101,7 @@ Logger::Logger()
   console_->set_pattern("[%t][%H:%M:%S.%F][%l] %v");
 }
 
-Logger::~Logger()
+inline Logger::~Logger()
 {
   spdlog::drop(log_name_);
 }
@@ -169,9 +169,9 @@ inline bool Logger::set_async_queue(const std::size_t q_size)
 
 #ifdef _WOLF_TRACE
   #define WOLF_TRACE(...) \
-    char this_file[] = __FILE__;\
+    {char this_file[] = __FILE__;\
     wolf::internal::Logger::get().trace("[", basename(this_file), " l#", __LINE__, \
-              " : ", __FUNCTION__, "] ", __VA_ARGS__)
+              " : ", __FUNCTION__, "] ", __VA_ARGS__);}
 #else
   #define WOLF_TRACE(...)
 #endif
