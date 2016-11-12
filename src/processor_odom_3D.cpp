@@ -127,23 +127,35 @@ void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorX
     q_out_ = q1_ * q2_;
 }
 
-Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
+Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_second, TimeStamp& _ts)
 {
 
-    WOLF_DEBUG("motion ref ts: ", _motion_ref.ts_.get());
-    WOLF_DEBUG("interp ts    : ", _ts.get());
-    WOLF_DEBUG("motion ts    : ", _motion.ts_.get());
+//    WOLF_TRACE("motion ref ts: ", _motion_ref.ts_.get());
+//    WOLF_TRACE("interp ts    : ", _ts.get());
+//    WOLF_TRACE("motion ts    : ", _motion_second.ts_.get());
+//
+//    WOLF_TRACE("ref delta size: ", _motion_ref.delta_.size(), " , cov size: ", _motion_ref.delta_cov_.size());
+//    WOLF_TRACE("ref Delta size: ", _motion_ref.delta_integr_.size(), " , cov size: ", _motion_ref.delta_integr_cov_.size());
+//    WOLF_TRACE("sec delta size: ", _motion_second.delta_.size(), " , cov size: ", _motion_second.delta_cov_.size());
+//    WOLF_TRACE("sec Delta size: ", _motion_second.delta_integr_.size(), " , cov size: ", _motion_second.delta_integr_cov_.size());
 
-    if (_ts <= _motion_ref.ts_)
-        return motionZero(_motion_ref.ts_);
-    if (_motion.ts_ <= _ts)
-    {
-        // code from non-segfaulting branch
-        Motion tmp(_motion_ref);
-        tmp.ts_ = _ts;
-        tmp.delta_ = deltaZero();
-        tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_);
-        return tmp;
+    assert(_motion_ref.ts_ <= _ts && "Interpolation time stamp out of bounds");
+    assert(_ts <= _motion_second.ts_ && "Interpolation time stamp out of bounds");
+
+    // resolve out-of-bounds time stamp as if the time stamp was exactly on the bounds
+    if (_ts <= _motion_ref.ts_)     // behave as if _ts == _motion_ref.ts_
+    { // return null motion. Second stays the same.
+        Motion motion_int(_motion_ref);
+        motion_int.delta_ = deltaZero();
+        motion_int.delta_cov_.setZero();
+        return motion_int;
+    }
+    if (_motion_second.ts_ <= _ts)  // behave as if _ts == _motion_second.ts_
+    { // return original second motion. Second motion becomes null motion
+        Motion motion_int(_motion_second);
+        _motion_second.delta_ = deltaZero();
+        _motion_second.delta_cov_.setZero();
+        return motion_int;
     }
 
     assert(_motion_ref.delta_.size() == delta_size_ && "Wrong delta size");
@@ -152,14 +164,12 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion, 
     assert(_motion_ref.delta_integr_.size() == delta_size_ && "Wrong delta size");
     assert(_motion_ref.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_ref.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
-    assert(_motion.delta_.size() == delta_size_ && "Wrong delta size");
-    assert(_motion.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
-    assert(_motion.delta_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
-    assert(_motion.delta_integr_.size() == delta_size_ && "Wrong delta size");
-    assert(_motion.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
-    assert(_motion.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
-    assert(_motion_ref.ts_ <= _ts && "Interpolation time stamp out of bounds");
-    assert(_ts <= _motion.ts_ && "Interpolation time stamp out of bounds");
+    assert(_motion_second.delta_.size() == delta_size_ && "Wrong delta size");
+    assert(_motion_second.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_second.delta_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_second.delta_integr_.size() == delta_size_ && "Wrong delta size");
+    assert(_motion_second.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_second.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
 
 
     using namespace Eigen;
@@ -181,43 +191,42 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion, 
     WOLF_TRACE("");
 
     // reference
-    TimeStamp t_ref = _motion_ref.ts_;
+    TimeStamp           t_ref       = _motion_ref.ts_;
 
     // final
-    TimeStamp t = _motion.ts_;
-    Map<VectorXs> dp(_motion.delta_.data(), 3);
-    Map<Quaternions> dq(_motion.delta_.data() + 3);
+    TimeStamp           t_sec       = _motion_second.ts_;
+    Map<VectorXs>       dp_sec(_motion_second.delta_.data(), 3);
+    Map<Quaternions>    dq_sec(_motion_second.delta_.data() + 3);
 
     // interpolated
-    Motion motion_int = motionZero(_ts);
-    Map<VectorXs> dp_int(motion_int.delta_.data(), 3);
-    Map<Quaternions> dq_int(motion_int.delta_.data() + 3);
+    Motion              motion_int  = motionZero(_ts);
+    Map<VectorXs>       dp_int(motion_int.delta_.data(), 3);
+    Map<Quaternions>    dq_int(motion_int.delta_.data() + 3);
 
     // Jacobians for covariance propagation
-    MatrixXs J_ref(delta_cov_size_, delta_cov_size_);
-    MatrixXs J_int(delta_cov_size_, delta_cov_size_);
+    MatrixXs            J_ref(delta_cov_size_, delta_cov_size_);
+    MatrixXs            J_int(delta_cov_size_, delta_cov_size_);
 
     // interpolate delta
-    Scalar tau = (_ts - t_ref) / (t - t_ref); // interpolation factor (0 to 1)
-    motion_int.ts_ = _ts;
-    dp_int = tau * dp;
-    dq_int = Quaternions::Identity().slerp(tau, dq);
-    deltaPlusDelta(_motion_ref.delta_integr_, motion_int.delta_, (t - t_ref), motion_int.delta_integr_, J_ref, J_int);
+    Scalar     tau  = (_ts - t_ref) / (t_sec - t_ref); // interpolation factor (0 to 1)
+    motion_int.ts_  = _ts;
+    dp_int          = tau * dp_sec;
+    dq_int          = Quaternions::Identity().slerp(tau, dq_sec);
+    deltaPlusDelta(_motion_ref.delta_integr_, motion_int.delta_, (t_sec - t_ref), motion_int.delta_integr_, J_ref, J_int);
 
     // interpolate covariances
     WOLF_TRACE("J_ref\n", J_ref);
     WOLF_TRACE("J_int\n", J_int);
-    motion_int.delta_cov_ = tau * _motion.delta_cov_;
-    WOLF_TRACE("d_cov\n", _motion.delta_cov_);
+    motion_int.delta_cov_           = tau * _motion_second.delta_cov_;
+    WOLF_TRACE("d_cov\n", _motion_second.delta_cov_);
     WOLF_TRACE("D_cov\n", _motion_ref.delta_integr_cov_);
-    motion_int.delta_integr_cov_ = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose()
-            + J_int * _motion.delta_cov_ * J_int.transpose();
+    motion_int.delta_integr_cov_    = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose() + J_int * _motion_second.delta_cov_ * J_int.transpose();
     WOLF_TRACE("");
 
     // update second delta ( in place update )
-    dp = dq_int.conjugate() * ((1 - tau) * dp);
-    dq = dq_int.conjugate() * dq;
-    _motion.delta_cov_ = (1 - tau) * _motion.delta_cov_; // easy interpolation // TODO check for correcness
+    dp_sec          = dq_int.conjugate() * ((1 - tau) * dp_sec);
+    dq_sec          = dq_int.conjugate() * dq_sec;
+    _motion_second.delta_cov_ = (1 - tau) * _motion_second.delta_cov_; // easy interpolation // TODO check for correctness
     //Dp            = Dp; // trivial, just leave the code commented
     //Dq            = Dq; // trivial, just leave the code commented
     //_motion.delta_integr_cov_ = _motion.delta_integr_cov_; // trivial, just leave the code commented
