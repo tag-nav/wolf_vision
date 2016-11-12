@@ -188,8 +188,6 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_s
     //
     // See extensive documentation in ProcessorMotion::interpolate().
 
-    WOLF_TRACE("");
-
     // reference
     TimeStamp           t_ref       = _motion_ref.ts_;
 
@@ -215,13 +213,8 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_s
     deltaPlusDelta(_motion_ref.delta_integr_, motion_int.delta_, (t_sec - t_ref), motion_int.delta_integr_, J_ref, J_int);
 
     // interpolate covariances
-    WOLF_TRACE("J_ref\n", J_ref);
-    WOLF_TRACE("J_int\n", J_int);
     motion_int.delta_cov_           = tau * _motion_second.delta_cov_;
-    WOLF_TRACE("d_cov\n", _motion_second.delta_cov_);
-    WOLF_TRACE("D_cov\n", _motion_ref.delta_integr_cov_);
     motion_int.delta_integr_cov_    = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose() + J_int * _motion_second.delta_cov_ * J_int.transpose();
-    WOLF_TRACE("");
 
     // update second delta ( in place update )
     dp_sec          = dq_int.conjugate() * ((1 - tau) * dp_sec);
