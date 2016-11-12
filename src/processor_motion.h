@@ -309,80 +309,80 @@ class ProcessorMotion : public ProcessorBase
 
         /** \brief Interpolate motion to an intermediate time-stamp
          *
-         * @param _motion_ref The initial motion reference
-         * @param _motion The final motion. It is modified by the function.
-         * @param _ts The intermediate time stamp: it must be t_ref = _motion_ref.ts_ <= _ts <= _motion.ts_.
-         * @return The interpolated motion, so that _motion = _motion_ref (+) motion_interpolated.
+         * @param _motion_ref The motion reference
+         * @param _motion_second The second motion. It is modified by the function (see documentation below).
+         * @param _ts The intermediate time stamp: it must be bounded by  _motion_ref.ts_ <= _ts <= _motion_second.ts_.
+         * @return The interpolated motion (see documentation below).
          *
-         * Let us name A = _motion_ref : initial motion where interpolation starts
-         *             B = _motion     : final motion where interpolation ends
-         *             t = _ts         : time stamp where interpolation is queried.
+         * Let us name R = _motion_ref      : initial motion where interpolation starts
+         *             F = _motion_second   : final motion where interpolation ends
          *
-         * and let us define t_A = timestamp at A
-         *                   t_B = timestamp at B
+         * and let us define t_R            : timestamp at R
+         *                   t_F            : timestamp at F
+         *                   t_I = _ts      : time stamp where interpolation is queried.
          *
          * We can introduce the results of the interpolation as
          *
-         *             I = motion_interpolated, from t_A to t
-         *             S = motion_second,       from t to t_B
+         *             I = motion_interpolated, from t_R to t_I
+         *             S = motion_second,       from t_I to t_F
          *
-         * The Motion structure in wolf has the following members:
+         * The Motion structure in wolf has the following members (among others; see below):
          *
          *   - ts_           : time stamp
          *   - delta_        : relative motion between the previous motion and this one. It might be seen as a local motion.
-         *   - delta_integr_ : accumulation of relative deltas, since some origin. It might be seen as a globally defined motion.
+         *   - delta_integr_ : integration of relative deltas, since some origin. It might be seen as a globally defined motion.
          *
-         * In this documentation, we differentiate these deltas with lowercase d and uppercase D:
+         * In this documentation, we differentiate these deltas with lower-case d and upper-case D:
          *
          *   - d = any_motion.delta_        <-- local delta, from previous to this
          *   - D = any_motion.delta_integr_ <-- global Delta, from origin to this
          *
-         * so that D_(i+1) = D_i (+) d_(i+1).
+         * so that D_(i+1) = D_(i) (+) d_(i+1), where (i) is in {R, I, S} and (i+1) is in {I, S, F}
          *
          * NOTE: the operator (+) is implemented as deltaPlusDelta() in each class deriving from this.
          *
          * This is a schematic sketch of the situation (see more explanations below),
          * before and after calling interpolate():
          *
-         *   BEFORE                _motion_ref,_ts         _motion      variable names
+         *   BEFORE            _motion_ref     _ts    _motion_second    variable names
          *        ------+-----------+-----------+-----------+----->     time scale
-         *              origin      A                       B           motion short names
-         *              t_origin    t_A         t           t_B         time stamps
-         *                          0           tau         1           interp. factor
-         *              +----D_A----+----------d_B----------+           D_A (+) d_B
-         *              +----------------D_B----------------+           D_B = D_A (+) d_B
+         *              origin      R                       F           motion short names
+         *              t_origin   t_R         t_I         t_F          time stamps
+         *                          0          tau          1           interp. factor
+         *              +----D_R----+----------d_F----------+           D_R (+) d_F
+         *              +----------------D_F----------------+           D_F = D_R (+) d_F
          *
-         *   AFTER                _motion_ref,  return     _motion      variable names and return value
+         *   AFTER             _motion_ref    return  _motion_second    variable names and return value
          *        ------+-----------+-----------+-----------+----->     time scale
-         *                          A           I           S           motion short names
-         *              +----D_A----+----d_I----+----d_S----+           D_A (+) d_I (+) d_S
+         *                          R           I           S           motion short names
+         *              +----D_R----+----d_I----+----d_S----+           D_R (+) d_I (+) d_S
          *              +----------D_I----------+----d_S----+           D_I (+) d_S
-         *              +----------------D_S----------------+           D_S
+         *              +----------------D_S----------------+           D_S = D_I (+) d_S = D_R (+) d_I (+) d_S
          *
          * where 'origin' exists somewhere, but it is irrelevant for the operation of the interpolation.
          * According to the schematic, and assuming a generic composition operator (+), the motion composition satisfies
          *
-         *   d_I (+) d_S = d_B
-         *   D_A (+) d_I = D_I
-         *   D_S = D_B
+         *   d_I (+) d_S = d_F
+         *   D_R (+) d_I = D_I
+         *   D_S = D_F
          *
          * from where d_I, D_I, d_S and D_S can be derived.
          *
-         * In general, we do not have information about the particular trajectory taken between A = _motion_ref and B = _motion.
+         * In general, we do not have information about the particular trajectory taken between R = _motion_ref and F = _motion_second.
          * Therefore, we consider a linear interpolation.
          * The linear interpolation factor 'tau' is defined from the time stamps,
          *
-         *     tau = (t - t_A) / (t_B - t_A)
+         *     tau = (t_I - t_R) / (t_F - t_R)
          *
-         * such that for tau=0 we are at A, and for tau=1 we are at B.
+         * such that for tau=0 we are at R, and for tau=1 we are at F.
          *
          * Conceptually, we want an interpolation such that the local motion 'd' takes the fraction,
          * and the global motion 'D' is interpolated, that is:
          *
-         *   d_I = tau * d_B                    // the fraction of the local delta
-         *   D_I = (1-tau) * D_A (+) tau * D_B  // the interpolation of the global Delta
-         *       = D_A (+) d_I
-         *       = deltaPlusDelta(D_A, d_I)     // This form provides an easy implementation.
+         *   d_I = tau * d_F                    // the fraction of the local delta
+         *   D_I = (1-tau) * D_R (+) tau * D_F  // the interpolation of the global Delta
+         *       = D_R (+) d_I
+         *       = deltaPlusDelta(D_R, d_I)     // This form provides an easy implementation.
          *
          * We often break down these 'd' and 'D' deltas into chunks of data, e.g.
          *
@@ -401,27 +401,43 @@ class ProcessorMotion : public ProcessorBase
          *
          * and which are integrated as follows
          *
-         *   dC_I = tau * dC_B
-         *   DC_I = (1-tau) * DC_A + tau * dC_B = DC_A + dC_I
+         *   dC_I = tau * dC_F
+         *   DC_I = (1-tau) * DC_R + tau * dC_F = DC_R + dC_I
          *
-         * Example: For a pose (position and orientation motion, which is the typical case):
+         * Example: For 2D poses
          *
          *     - t_I  = _ts                         // time stamp of the interpolated motion
-         *     - dp_I = tau*dp_B                    // dp is a 2-vector or a 3-vector
-         *     - da_I = tau*da_B                    // da is an angle, for 2D poses
-         *     - dq_I = Quaternions::Identity().slerp(tau, dq_B)    // dq is a quaternion, for 3D poses
-         *     - Dp_I = (1-tau)*Dp_A + tau*Dp_B     // dp is a 2-vector or a 3-vector.      Also, and easier, Dp_I = Dp_A + dp_I
-         *     - Da_I = (1-tau)*Da_A + tau*Da_B     // da is an angle, for 2D poses.        Also, and easier, Da_I = Da_A + da_I
-         *     - Dq_I = Dq_A.slerp(tau, Dq_B)       // dq is a quaternion, for 3D poses.    Also, and easier, Dq_I = Dq_A * dq_I
-         *     - dp_S = dq_I.conjugate() * (1-tau)*dp_B // dq is a quaternion; for 2D, use dR (see below)
-         *     - da_S = dR_I' * (1-tau)*da_B        // 2D; dR is a rot matrix
-         *     - dq_S = dq_I.conjugate() * dq_B     // 3D
-         *     - Dp_S = Dp_B
-         *     - Da_S = Da_B                        // 2D
-         *     - Dq_S = Dq_b                        // 3D
+         *
+         *     - dp_I = tau*dp_F                    // dp is a 2-vector
+         *     - da_I = tau*da_F                    // da is an angle, for 2D poses
+         *
+         *     - Dp_I = (1-tau)*Dp_R + tau*Dp_F     // Dp is a 2-vector.      Also, and easier, Dp_I = Dp_R + dp_I
+         *     - Da_I = (1-tau)*Da_R + tau*Da_F     // Da is an angle.        Also, and easier, Da_I = Da_R + da_I
+         *
+         *     - dp_S = dR_I.tr * (1-tau)*dp_F      // dR.tr is the transposed rotation matrix dorresponding to 'da' above
+         *     - da_S = dR_I.tr * (1-tau)*da_F
+         *
+         *     - Dp_S = Dp_F
+         *     - Da_S = Da_F
+         *
+         * Example: For 3D poses (orientation in quaternion form, which is the best for interpolation using slerp() ):
+         *
+         *     - t_I  = _ts                         // time stamp of the interpolated motion
+         *
+         *     - dp_I = tau*dp_F                    // dp is a 3-vector
+         *     - dq_I = q_1.slerp(tau, dq_F)        // q_1 is the identity quaternion; slerp() interpolates 3D motion.
+         *
+         *     - Dp_I = (1-tau)*Dp_R + tau*Dp_F     // Dp is a 3-vector.      Also, and easier, Dp_I = Dp_R + dp_I
+         *     - Dq_I = Dq_R.slerp(tau, Dq_F)       // Dq is a quaternion.    Also, and easier, Dq_I = Dq_R * dq_I
+         *
+         *     - dp_S = dq_I.conj * (1-tau)*dp_F    // dq is a quaternion.
+         *     - dq_S = dq_I.conj * dq_F
+         *
+         *     - Dp_S = Dp_F
+         *     - Dq_S = Dq_b
          *
          */
-        virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts) = 0;
+        virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion_second, TimeStamp& _ts) = 0;
 
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) = 0;
 
