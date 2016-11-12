@@ -16,6 +16,7 @@
 
 namespace wolf {
 
+using namespace Eigen;
 
 struct Motion
 {
@@ -26,8 +27,13 @@ struct Motion
         Eigen::MatrixXs delta_cov_;         ///< covariance of the instantaneous delta
         Eigen::MatrixXs delta_integr_cov_;  ///< covariance of the integrated delta
     public:
-        void resize(Size ds, Size dcs){delta_.resize(ds); delta_integr_.resize(ds); delta_cov_.resize(dcs,dcs); delta_integr_cov_.resize(dcs,dcs);}
-        void resize(Size ds){resize(ds,ds);}
+        Motion();
+        Motion(const TimeStamp& _ts, Size _delta_size = 0, Size _cov_size = 0);
+        Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, Size _cov_size);
+        Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _delta_cov, const MatrixXs& _delta_int_cov);
+        ~Motion();
+        void resize(Size ds, Size dcs);
+        void resize(Size ds);
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
 
@@ -54,78 +60,17 @@ struct Motion
  */
 class MotionBuffer{
     public:
-        const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const;
-        void getDelta(const TimeStamp& _ts, Eigen::VectorXs& _delta_integr) const;
-        const Motion& getMotion(const TimeStamp& _ts) const;
-        void getMotion(const TimeStamp& _ts, Motion& _motion) const;
-        void split(const TimeStamp& _ts, MotionBuffer& _oldest_buffer);
         std::list<Motion>& get();
         const std::list<Motion>& get() const;
+        const Motion& getMotion(const TimeStamp& _ts) const;
+        void getMotion(const TimeStamp& _ts, Motion& _motion) const;
+        const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const;
+        void getDelta(const TimeStamp& _ts, Eigen::VectorXs& _delta_integr) const;
+        void split(const TimeStamp& _ts, MotionBuffer& _oldest_buffer);
 
     private:
         std::list<Motion> container_;
 };
-
-inline const Eigen::VectorXs& MotionBuffer::getDelta(const TimeStamp& _ts) const
-{
-    return getMotion(_ts).delta_integr_;
-}
-
-inline void MotionBuffer::getDelta(const TimeStamp& _ts, Eigen::VectorXs& _delta_integr) const
-{
-    _delta_integr = getMotion(_ts).delta_integr_;
-}
-
-inline const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const
-{
-    //assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
-    auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion& m)
-    {
-        return m.ts_ <= _ts;
-    });
-    if (previous == container_.rend())
-        // The time stamp is older than the buffer's oldest data.
-        // We could do something here, and throw an error or something, but by now we'll return the first valid data
-        previous--;
-
-    return *previous;
-}
-
-inline void MotionBuffer::getMotion(const TimeStamp& _ts, Motion& _motion) const
-{
-    //assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
-    auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion& m)
-    {
-        return m.ts_ <= _ts;
-    });
-    if (previous == container_.rend())
-        // The time stamp is older than the buffer's oldest data.
-        // We could do something here, but by now we'll return the last valid data
-        previous--;
-
-    _motion = *previous;
-}
-
-
-inline void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _oldest_buffer)
-{
-    assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
-    auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion& m)
-    {
-        return m.ts_ <= _ts;
-    });
-    if (previous == container_.rend())
-    {
-        // The time stamp is more recent than the buffer's most recent data:
-        // return an empty buffer as the _oldest_buffer
-        _oldest_buffer.get().clear();
-    }
-    else
-    {
-        // Transfer part of the buffer
-        _oldest_buffer.container_.splice(_oldest_buffer.container_.begin(), container_, container_.begin(), (previous--).base());
-    }
-}
 
 inline std::list<Motion>& MotionBuffer::get()
 {
@@ -137,8 +82,16 @@ inline const std::list<Motion>& MotionBuffer::get() const
     return container_;
 }
 
+inline const Eigen::VectorXs& MotionBuffer::getDelta(const TimeStamp& _ts) const
+{
+    return getMotion(_ts).delta_integr_;
+}
+
+inline void MotionBuffer::getDelta(const TimeStamp& _ts, Eigen::VectorXs& _delta_integr) const
+{
+    _delta_integr = getMotion(_ts).delta_integr_;
+}
+
 } // namespace wolf
-
-
 
 #endif /* SRC_MOTIONBUFFER_H_ */
