@@ -37,12 +37,12 @@ Motion m2 = newMotion(t2,2,3,1,2);
 Motion m3 = newMotion(t3,3,6,1,3);
 Motion m4 = newMotion(t4,4,10,1,4);
 
-MotionBuffer MB;
+
 }
 
 TEST(MotionBuffer, QueryTimeStamps)
 {
-    MB.get().clear();
+    MotionBuffer MB;
 
     MB.get().push_back(m0);
     MB.get().push_back(m1);
@@ -66,7 +66,7 @@ TEST(MotionBuffer, QueryTimeStamps)
 
 TEST(MotionBuffer, getMotion)
 {
-    MB.get().clear();
+    MotionBuffer MB;
 
     MB.get().push_back(m0);
     ASSERT_EQ(MB.getMotion(t0).delta_, m0.delta_);
@@ -80,21 +80,21 @@ TEST(MotionBuffer, getMotion)
 
 TEST(MotionBuffer, getDelta)
 {
-    MB.get().clear();
+    MotionBuffer MB;
 
     MB.get().push_back(m0);
 
-    ASSERT_TRUE((MB.getDelta(t0)-m0.delta_integr_).isMuchSmallerThan(1, Constants::EPS) );
+    ASSERT_EQ(MB.getDelta(t0), m0.delta_integr_);
 
     MB.get().push_back(m1);
 
-    ASSERT_TRUE((MB.getDelta(t0)-m0.delta_integr_).isMuchSmallerThan(1, Constants::EPS) );
-    ASSERT_TRUE((MB.getDelta(t1)-m1.delta_integr_).isMuchSmallerThan(1, Constants::EPS) );
+    ASSERT_EQ(MB.getDelta(t0), m0.delta_integr_);
+    ASSERT_EQ(MB.getDelta(t1), m1.delta_integr_);
 }
 
 TEST(MotionBuffer, Split)
 {
-    MB.get().clear();
+    MotionBuffer MB;
 
     MB.get().push_back(m0);
     MB.get().push_back(m1);
