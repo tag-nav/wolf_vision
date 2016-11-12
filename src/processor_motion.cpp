@@ -224,11 +224,15 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
     // and give old buffer to new key capture
     capture_ptr->getBuffer().split(ts, key_capture_ptr->getBuffer());
     // interpolate individual delta
-    Motion mot = interpolate(key_capture_ptr->getBuffer().get().back(), // last Motion of old buffer
-            capture_ptr->getBuffer().get().front(), // first motion of new buffer
-            ts);
-    // add to old buffer
-    key_capture_ptr->getBuffer().get().push_back(mot);
+    if (!capture_ptr->getBuffer().get().empty())
+    {
+        // interpolate Motion at the new time stamp
+        Motion mot = interpolate(key_capture_ptr->getBuffer().get().back(), // last Motion of old buffer
+                                 capture_ptr->getBuffer().get().front(), // first motion of new buffer
+                                 ts);
+        // add to old buffer
+        key_capture_ptr->getBuffer().get().push_back(mot);
+    }
 
     // create motion feature and add it to the capture
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
