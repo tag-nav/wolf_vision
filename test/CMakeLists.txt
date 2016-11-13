@@ -10,29 +10,38 @@ include_directories(${PROJECT_SOURCE_DIR}/third_party/spdlog/include/)
 # Include gtest directory.
 include_directories(${GTEST_INCLUDE_DIRS})
 
-### ADD TESTS BELOW ###
+############# USE THIS TEST AS AN EXAMPLE #################
+#                                                         #
+# Create a specific test executable for gtest_example     #
+wolf_add_gtest(gtest_example gtest_example.cpp)           #
+target_link_libraries(gtest_example ${PROJECT_NAME})      #
+#                                                         #
+###########################################################
 
-# Create a specific test executable for gtest_example
-wolf_add_gtest(gtest_example gtest_example.cpp)
-target_link_libraries(gtest_example ${PROJECT_NAME})
 
+################# ADD YOUR TESTS BELOW ####################
+#                                                         #
+#           ==== IN ALPHABETICAL ORDER! ====              #
+#                                                         #
+
+# LocalParametrizationXxx classes test
+wolf_add_gtest(gtest_local_param gtest_local_param.cpp)
+target_link_libraries(gtest_local_param ${PROJECT_NAME})
+
+# MotionBuffer class test
+wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
+target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
+
+# ProcessorOdom3D class test
+wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
+target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
+
+# TimeStamp class test
 wolf_add_gtest(gtest_time_stamp gtest_time_stamp.cpp)
 target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
 
-# Local parametrizations classes test
-wolf_add_gtest(gtest_local_param gtest_local_param.cpp)
-TARGET_LINK_LIBRARIES(gtest_local_param ${PROJECT_NAME})
-
-# Local parametrizations classes test
-wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
-TARGET_LINK_LIBRARIES(gtest_odom_3D ${PROJECT_NAME})
-
-# Local parametrizations classes test
-wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
-TARGET_LINK_LIBRARIES(gtest_motion_buffer ${PROJECT_NAME})
-
-# Local parametrizations classes test
+# TrajectoryBase class test
 wolf_add_gtest(gtest_trajectory gtest_trajectory.cpp)
-TARGET_LINK_LIBRARIES(gtest_trajectory ${PROJECT_NAME})
+target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 
 
