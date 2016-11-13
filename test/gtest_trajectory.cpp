@@ -118,6 +118,7 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     ASSERT_EQ(T->getFrameList().                 size(), 0);
     ASSERT_EQ(P->getStateBlockList().            size(), 0);
     ASSERT_EQ(P->getStateBlockNotificationList().size(), 0);
+
 }
 
 TEST(TrajectoryBase, KeyFramesAreSorted)
@@ -157,6 +158,18 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFramePtr()   ->id(), f3->id());
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f3->id());
+
+    FrameBasePtr f4 = std::make_shared<FrameBase>(NON_KEY_FRAME, 1.5, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
+    T->addFrame(f4);
+    P->print(2,0,1,0);
+    ASSERT_EQ(T->getLastFramePtr()   ->id(), f4->id());
+    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f3->id());
+
+    f4->setKey();
+    P->print(2,0,1,0);
+    ASSERT_EQ(T->getLastFramePtr()   ->id(), f3->id());
+    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f3->id());
+
 }
 
 int main(int argc, char **argv)
