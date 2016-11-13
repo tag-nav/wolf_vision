@@ -74,16 +74,19 @@ TEST(TrajectoryBase, Add_Remove_Frame)
 
     // add frames and keyframes
     T->addFrame(f1); // KF
+    P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), 1);
     ASSERT_EQ(P->getStateBlockList().            size(), 2);
     ASSERT_EQ(P->getStateBlockNotificationList().size(), 2);
 
     T->addFrame(f2); // KF
+    P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), 2);
     ASSERT_EQ(P->getStateBlockList().            size(), 4);
     ASSERT_EQ(P->getStateBlockNotificationList().size(), 4);
 
     T->addFrame(f3); // F
+    P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), 3);
     ASSERT_EQ(P->getStateBlockList().            size(), 4);
     ASSERT_EQ(P->getStateBlockNotificationList().size(), 4);
@@ -92,7 +95,6 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
 
     // remove frames and keyframes
-    P->print(2,0,0,0);
     f2->remove(); // KF
     P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), 2);
@@ -117,6 +119,44 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     ASSERT_EQ(P->getStateBlockNotificationList().size(), 0);
 }
 
+TEST(TrajectoryBase, KeyFramesAreSorted)
+{
+    using std::make_shared;
+
+    ProblemPtr P = Problem::create(FRM_PO_2D);
+    TrajectoryBasePtr T = P->getTrajectoryPtr();
+
+    // Trajectory status:
+    //
+    //  kf1   kf2    f3      frames
+    //   1     2     3       time stamps
+    // --+-----+-----+--->   time
+
+    FrameBasePtr f1 = std::make_shared<FrameBase>(KEY_FRAME,     1, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // 2 non-fixed
+    FrameBasePtr f2 = std::make_shared<FrameBase>(KEY_FRAME,     2, make_shared<StateBlock>(2), make_shared<StateBlock>(1, true)); // 1 fixed, 1 not
+    FrameBasePtr f3 = std::make_shared<FrameBase>(NON_KEY_FRAME, 3, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
+
+    // add frames and keyframes in random order --> keyframes must be sorted after that
+    T->addFrame(f2); // KF2
+    P->print(2,0,0,0);
+    ASSERT_EQ(T->getLastFramePtr()   ->id(), f2->id());
+    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
+
+    T->addFrame(f3); // F3
+    P->print(2,0,0,0);
+    ASSERT_EQ(T->getLastFramePtr()   ->id(), f3->id());
+    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
+
+    T->addFrame(f1); // KF1
+    P->print(2,0,0,0);
+    ASSERT_EQ(T->getLastFramePtr()   ->id(), f3->id());
+    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
+
+    f3->setKey(); // set KF3
+    P->print(2,0,0,0);
+    ASSERT_EQ(T->getLastFramePtr()   ->id(), f3->id());
+    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f3->id());
+}
 
 int main(int argc, char **argv)
 {
