@@ -160,7 +160,7 @@ int main(int argc, char** argv)
                     // Information matrix
                     Lambda.conservativeResize(Lambda.rows()+3,Lambda.cols()+3);
 
-                    //std::cout << "Added vertex! index: " << vertex_index << " nodeId: " << vertex_frame_ptr_prun->nodeId() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
+                    //std::cout << "Added vertex! index: " << vertex_index << " id: " << vertex_frame_ptr_prun->id() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
                 }
             }
             // EDGE
@@ -283,7 +283,7 @@ int main(int argc, char** argv)
                     ConstraintOdom2DAnalytic* constraint_ptr_prun = new ConstraintOdom2DAnalytic(feature_ptr_prun, frame_old_ptr_prun);
                     feature_ptr_full->addConstraint(constraint_ptr_full);
                     feature_ptr_prun->addConstraint(constraint_ptr_prun);
-                    //std::cout << "Added edge! " << constraint_ptr_prun->nodeId() << " from vertex " << constraint_ptr_prun->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_prun->getFrameOtherPtr()->nodeId() << std::endl;
+                    //std::cout << "Added edge! " << constraint_ptr_prun->id() << " from vertex " << constraint_ptr_prun->getCapturePtr()->getFramePtr()->id() << " to " << constraint_ptr_prun->getFrameOtherPtr()->id() << std::endl;
                     //std::cout << "vector " << constraint_ptr_prun->getMeasurement().transpose() << std::endl;
                     //std::cout << "information " << std::endl << edge_information << std::endl;
                     //std::cout << "covariance " << std::endl << constraint_ptr_prun->getMeasurementCovariance() << std::endl;
@@ -331,7 +331,7 @@ int main(int argc, char** argv)
     first_frame_prun->addCapture(initial_covariance_prun);
     initial_covariance_full->process();
     initial_covariance_prun->process();
-    //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureList().front()->getConstraintFromList().front()->nodeId() << std::endl << initial_covariance_prun->getFeatureList().front()->getMeasurementCovariance() << std::endl;
+    //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureList().front()->getConstraintFromList().front()->id() << std::endl << initial_covariance_prun->getFeatureList().front()->getMeasurementCovariance() << std::endl;
     t1 = clock();
     Eigen::SparseMatrix<Scalar> DeltaLambda(Lambda.rows(), Lambda.cols());
     insertSparseBlock((Eigen::Matrix3s::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
@@ -533,7 +533,7 @@ int main(int argc, char** argv)
 
         if (!any_inactive_in_frame[index_frame] && !any_inactive_in_frame[index_frame_other])
         {
-            std::cout << "setting inactive" << (*c_it)->nodeId() << std::endl;
+            std::cout << "setting inactive" << (*c_it)->id() << std::endl;
             (*c_it)->setStatus(CTR_INACTIVE);
             std::cout << "set!" << std::endl;
             any_inactive_in_frame[index_frame] = true;

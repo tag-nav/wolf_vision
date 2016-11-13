@@ -123,7 +123,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
                 feature_it++, ii++)    //ii runs over extracted feature
         {
             features_map[ii] = feature_it;
-            //std::cout << "Feature: " << (*i_it)->nodeId() << std::endl << (*i_it)->getMeasurement().head(3).transpose() << std::endl;
+            //std::cout << "Feature: " << (*i_it)->id() << std::endl << (*i_it)->getMeasurement().head(3).transpose() << std::endl;
             jj = 0;
             for (auto landmark_it = _landmarks_corner_searched.begin(); landmark_it != _landmarks_corner_searched.end();
                     landmark_it++, jj++)
@@ -132,7 +132,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
                 {
                     landmarks_map[jj] = landmark_it;
                     landmarks_index_map[jj] = 0;
-                    //std::cout << "Landmark: " << (*j_it)->nodeId() << " - jj: " << jj << std::endl;
+                    //std::cout << "Landmark: " << (*j_it)->id() << " - jj: " << jj << std::endl;
                     //If aperture difference is small enough, proceed with Mahalanobis distance. Otherwise Set prob to 0 to force unassociation
                     if (fabs(
                             pi2pi(((FeatureCorner2D*)(((*feature_it))))->getAperture()

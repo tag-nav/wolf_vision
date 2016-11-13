@@ -35,7 +35,7 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
 
         virtual ~ConstraintPointToLine2D()
         {
-            //std::cout << "deleting ConstraintPoint2D " << nodeId() << std::endl;
+            //std::cout << "deleting ConstraintPoint2D " << id() << std::endl;
         }
 
         std::shared_ptr<LandmarkPolyline2D> getLandmarkPtr()

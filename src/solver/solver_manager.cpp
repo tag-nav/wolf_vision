@@ -65,7 +65,7 @@ void SolverManager::addConstraint(ConstraintBasePtr _corr_ptr)
     // getResidualsAndJacobian(_corr_ptr, J, e);
     // solverQR->addConstraint(_corr_ptr, J, e);
 
-//	constraint_map_[_corr_ptr->nodeId()] = blockIdx;
+//	constraint_map_[_corr_ptr->id()] = blockIdx;
 	_corr_ptr->setPendingStatus(NOT_PENDING);
 }
 
@@ -76,7 +76,7 @@ void SolverManager::removeConstraint(const unsigned int& _corr_idx)
 
 void SolverManager::addStateUnit(StateBlockPtr _st_ptr)
 {
-	//std::cout << "Adding State Unit " << _st_ptr->nodeId() << std::endl;
+	//std::cout << "Adding State Unit " << _st_ptr->id() << std::endl;
 	//_st_ptr->print();
 
 	switch (_st_ptr->getStateType())
@@ -147,7 +147,7 @@ void SolverManager::updateStateUnitStatus(StateBlockPtr _st_ptr)
 
 ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPtr)
 {
-	//std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
+	//std::cout << "adding ctr " << _corrPtr->id() << std::endl;
 	//_corrPtr->print();
 
 	switch (_corrPtr->getConstraintType())

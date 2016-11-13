@@ -14,7 +14,7 @@ CaptureGPS::CaptureGPS(const TimeStamp &_ts, SensorBasePtr _sensor_ptr, rawgpsut
 
 CaptureGPS::~CaptureGPS()
 {
-    //std::cout << "deleting CaptureGPS " << nodeId() << std::endl;
+    //std::cout << "deleting CaptureGPS " << id() << std::endl;
 }
 
 rawgpsutils::SatellitesObs &CaptureGPS::getData()

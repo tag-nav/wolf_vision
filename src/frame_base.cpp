@@ -187,7 +187,7 @@ void FrameBase::getState(Eigen::VectorXs& state) const
 
 FrameBasePtr FrameBase::getPreviousFrame() const
 {
-    //std::cout << "finding previous frame of " << this->node_id_ << std::endl;
+    //std::cout << "finding previous frame of " << this->frame_id_ << std::endl;
     if (getTrajectoryPtr() == nullptr)
         //std::cout << "This Frame is not linked to any trajectory" << std::endl;
 
@@ -196,7 +196,7 @@ FrameBasePtr FrameBase::getPreviousFrame() const
     //look for the position of this node in the upper list (frame list of trajectory)
     for (auto f_it = getTrajectoryPtr()->getFrameList().rbegin(); f_it != getTrajectoryPtr()->getFrameList().rend(); f_it++ )
     {
-        if ( this->node_id_ == (*f_it)->nodeId() )
+        if ( this->frame_id_ == (*f_it)->id() )
         {
         	f_it++;
         	if (f_it != getTrajectoryPtr()->getFrameList().rend())
@@ -217,14 +217,14 @@ FrameBasePtr FrameBase::getPreviousFrame() const
 
 FrameBasePtr FrameBase::getNextFrame() const
 {
-    //std::cout << "finding next frame of " << this->node_id_ << std::endl;
+    //std::cout << "finding next frame of " << this->frame_id_ << std::endl;
 	auto f_it = getTrajectoryPtr()->getFrameList().rbegin();
 	f_it++; //starting from second last frame
 
     //look for the position of this node in the frame list of trajectory
     while (f_it != getTrajectoryPtr()->getFrameList().rend())
     {
-        if ( this->node_id_ == (*f_it)->nodeId())
+        if ( this->frame_id_ == (*f_it)->id())
         {
         	f_it--;
 			return *f_it;

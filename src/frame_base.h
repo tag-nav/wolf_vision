@@ -191,7 +191,7 @@ inline void FrameBase::fix()
 
 inline void FrameBase::unfix()
 {
-    //std::cout << "Unfixing frame " << nodeId() << std::endl;
+    //std::cout << "Unfixing frame " << id() << std::endl;
     this->setStatus(ST_ESTIMATED);
 }
 
