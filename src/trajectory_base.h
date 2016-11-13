@@ -25,8 +25,8 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
         std::list<FrameBasePtr> frame_list_;
 
     protected:
-        FrameStructure frame_structure_; // Defines the structure of the Frames in the Trajectory.
-        FrameBasePtr last_key_frame_ptr_;   // TODO check pointer type // keeps pointer to the last key frame
+        FrameStructure frame_structure_;  // Defines the structure of the Frames in the Trajectory.
+        FrameBasePtr last_key_frame_ptr_; // keeps pointer to the last key frame
         
     public:
         TrajectoryBase(FrameStructure _frame_sturcture);
