@@ -31,4 +31,8 @@ TARGET_LINK_LIBRARIES(gtest_odom_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 TARGET_LINK_LIBRARIES(gtest_motion_buffer ${PROJECT_NAME})
 
+# Local parametrizations classes test
+wolf_add_gtest(gtest_trajectory gtest_trajectory.cpp)
+TARGET_LINK_LIBRARIES(gtest_trajectory ${PROJECT_NAME})
+
 
