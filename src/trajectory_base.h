@@ -40,6 +40,7 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
         FrameBaseList& getFrameList();
         FrameBasePtr getLastFramePtr();
         FrameBasePtr getLastKeyFramePtr();
+        FrameBasePtr findLastKeyFramePtr();
         FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts);
         void setLastKeyFramePtr(FrameBasePtr _key_frame_ptr);
         void sortFrame(FrameBasePtr _frm_ptr);
