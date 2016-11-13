@@ -74,8 +74,6 @@ TEST(TestLocalParametrization, QuaternionLocal)
 
     ASSERT_NEAR((J-J_num).norm(), 0, 1e-6);
 
-    WOLF_INFO(__LINE__);
-
 }
 
 TEST(TestLocalParametrization, QuaternionGlobal)

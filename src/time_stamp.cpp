@@ -3,6 +3,23 @@
 
 namespace wolf {
 
+std::ostream& operator<<(std::ostream& os, const TimeStamp& _ts)
+{
+    //    std::ios_base::fmtflags fmtfl;
+    //
+    //    //get/set ostream flags and precision digits
+    //    fmtfl = os.flags(std::ios::left);
+    //    os.setf(std::ios::fixed, std::ios::floatfield);
+
+    //    std::streamsize nn;
+    //    nn = os.precision(TimeStamp::TIME_STAMP_DIGITS_);
+
+    os << _ts.time_stamp_; // write obj to stream
+    return os;
+}
+
+
+
 TimeStamp::TimeStamp() :
         time_stamp_(0)
 {

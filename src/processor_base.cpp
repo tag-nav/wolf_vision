@@ -31,21 +31,19 @@ FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameType _ty
 {
     std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
 
-    // We need to create the new free Frame to hold what will become the last Capture
     FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
-    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
+    new_frame_ptr->addCapture(_capture_ptr);
 
     return new_frame_ptr;
 }
 
 FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameType _type)
 {
-    // We need to create the new free Frame to hold what will become the last Capture
     std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
 
     FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
+    new_frame_ptr->addCapture(_capture_ptr);
 
-    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
     return new_frame_ptr;
 }
 

@@ -123,7 +123,7 @@ int main(int argc, char** argv)
                     index_2_frame_ptr_wolf_diff[vertex_index] = vertex_frame_ptr_wolf_diff;
                     frame_ptr_2_index_wolf_diff[vertex_frame_ptr_wolf_diff] = vertex_index;
 
-                    //std::cout << "Added vertex! index: " << vertex_index << " nodeId: " << vertex_frame_ptr_wolf_diff->nodeId() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
+                    //std::cout << "Added vertex! index: " << vertex_index << " id: " << vertex_frame_ptr_wolf_diff->id() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
                 }
             }
             // EDGE
@@ -245,7 +245,7 @@ int main(int argc, char** argv)
                     ConstraintOdom2D* constraint_ptr_wolf_diff = new ConstraintOdom2D(feature_ptr_wolf_diff, frame_old_ptr_wolf_diff);
                     feature_ptr_ceres_diff->addConstraint(constraint_ptr_ceres_diff);
                     feature_ptr_wolf_diff->addConstraint(constraint_ptr_wolf_diff);
-                    //std::cout << "Added edge! " << constraint_ptr_wolf_diff->nodeId() << " from vertex " << constraint_ptr_wolf_diff->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_wolf_diff->getFrameToPtr()->nodeId() << std::endl;
+                    //std::cout << "Added edge! " << constraint_ptr_wolf_diff->id() << " from vertex " << constraint_ptr_wolf_diff->getCapturePtr()->getFramePtr()->id() << " to " << constraint_ptr_wolf_diff->getFrameToPtr()->id() << std::endl;
                     //std::cout << "vector " << constraint_ptr_wolf_diff->getMeasurement().transpose() << std::endl;
                     //std::cout << "information " << std::endl << edge_information << std::endl;
                     //std::cout << "covariance " << std::endl << constraint_ptr_wolf_diff->getMeasurementCovariance() << std::endl;
@@ -268,7 +268,7 @@ int main(int argc, char** argv)
     first_frame_wolf_diff->addCapture(initial_covariance_wolf_diff);
     initial_covariance_ceres_diff->process();
     initial_covariance_wolf_diff->process();
-    //std::cout << "initial covariance: constraint " << initial_covariance_wolf_diff->getFeatureList().front()->getConstraintFromList().front()->nodeId() << std::endl << initial_covariance_wolf_diff->getFeatureList().front()->getMeasurementCovariance() << std::endl;
+    //std::cout << "initial covariance: constraint " << initial_covariance_wolf_diff->getFeatureList().front()->getConstraintFromList().front()->id() << std::endl << initial_covariance_wolf_diff->getFeatureList().front()->getMeasurementCovariance() << std::endl;
 
     // COMPUTE COVARIANCES
     std::cout << "computing covariances..." << std::endl;

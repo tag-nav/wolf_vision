@@ -256,6 +256,7 @@ SET(SRCS_BASE
     local_parametrization_quaternion.cpp
     local_parametrization_homogeneous.cpp
     map_base.cpp
+    motion_buffer.cpp
     node_base.cpp
     problem.cpp
     processor_base.cpp

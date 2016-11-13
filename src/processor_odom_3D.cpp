@@ -2,10 +2,17 @@
 namespace wolf
 {
 
-ProcessorOdom3D::ProcessorOdom3D() :
+ProcessorOdom3D::ProcessorOdom3D(Scalar _k_disp_to_disp,
+                                 Scalar _k_disp_to_rot,
+                                 Scalar _k_rot_to_rot,
+                                 Scalar _min_disp_var,
+                                 Scalar _min_rot_var) :
         ProcessorMotion("ODOM 3D", 7, 7, 6, 6),
-        k_disp_to_disp_(0.1), k_disp_to_rot_(0.1), k_rot_to_rot_(0.1),
-        min_disp_var_(0.1), min_rot_var_(0.1),
+        k_disp_to_disp_(_k_disp_to_disp),
+        k_disp_to_rot_(_k_disp_to_rot),
+        k_rot_to_rot_(_k_rot_to_rot),
+        min_disp_var_(_min_disp_var),
+        min_rot_var_(_min_rot_var),
         p1_(nullptr), p2_(nullptr), p_out_(nullptr),
         q1_(nullptr), q2_(nullptr), q_out_(nullptr)
 {
@@ -139,9 +146,6 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_s
 //    WOLF_TRACE("sec delta size: ", _motion_second.delta_.size(), " , cov size: ", _motion_second.delta_cov_.size());
 //    WOLF_TRACE("sec Delta size: ", _motion_second.delta_integr_.size(), " , cov size: ", _motion_second.delta_integr_cov_.size());
 
-    assert(_motion_ref.ts_ <= _ts && "Interpolation time stamp out of bounds");
-    assert(_ts <= _motion_second.ts_ && "Interpolation time stamp out of bounds");
-
     // resolve out-of-bounds time stamp as if the time stamp was exactly on the bounds
     if (_ts <= _motion_ref.ts_)     // behave as if _ts == _motion_ref.ts_
     { // return null motion. Second stays the same.
@@ -157,6 +161,9 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_s
         _motion_second.delta_cov_.setZero();
         return motion_int;
     }
+
+    assert(_motion_ref.ts_ <= _ts && "Interpolation time stamp out of bounds");
+    assert(_ts <= _motion_second.ts_ && "Interpolation time stamp out of bounds");
 
     assert(_motion_ref.delta_.size() == delta_size_ && "Wrong delta size");
     assert(_motion_ref.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
