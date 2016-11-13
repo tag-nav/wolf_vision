@@ -213,7 +213,6 @@ FrameBasePtr Problem::createFrame(FrameType _frame_key_type, const Eigen::Vector
             throw std::runtime_error(
                     "Unknown frame structure. Add appropriate frame structure to the switch statement.");
     }
-    return trajectory_ptr_->getLastFramePtr();
 }
 
 Eigen::VectorXs Problem::getCurrentState()
