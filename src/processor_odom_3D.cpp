@@ -2,10 +2,17 @@
 namespace wolf
 {
 
-ProcessorOdom3D::ProcessorOdom3D() :
+ProcessorOdom3D::ProcessorOdom3D(Scalar _k_disp_to_disp,
+                                 Scalar _k_disp_to_rot,
+                                 Scalar _k_rot_to_rot,
+                                 Scalar _min_disp_var,
+                                 Scalar _min_rot_var) :
         ProcessorMotion("ODOM 3D", 7, 7, 6, 6),
-        k_disp_to_disp_(0.1), k_disp_to_rot_(0.1), k_rot_to_rot_(0.1),
-        min_disp_var_(0.1), min_rot_var_(0.1),
+        k_disp_to_disp_(_k_disp_to_disp),
+        k_disp_to_rot_(_k_disp_to_rot),
+        k_rot_to_rot_(_k_rot_to_rot),
+        min_disp_var_(_min_disp_var),
+        min_rot_var_(_min_rot_var),
         p1_(nullptr), p2_(nullptr), p_out_(nullptr),
         q1_(nullptr), q2_(nullptr), q_out_(nullptr)
 {
