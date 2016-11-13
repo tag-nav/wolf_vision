@@ -150,8 +150,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
 // IMPLEMENTATION //
 
-#include "capture_base.h"
 #include "trajectory_base.h"
+#include "capture_base.h"
+#include "constraint_base.h"
 #include "state_block.h"
 
 namespace wolf {

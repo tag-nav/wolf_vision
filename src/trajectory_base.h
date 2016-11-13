@@ -52,11 +52,6 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
 
 };
 
-}
-
-#include "feature_base.h"
-
-namespace wolf{
 
 inline void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
 {
