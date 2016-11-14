@@ -97,10 +97,10 @@ inline bool wolf::ConstraintOdom3D::expectation(const T* const _p_current, const
     Eigen::Map<Eigen::Quaternion<T> > expectation_dq(_expectation_dq);
 
 
-    // std::cout << "p1: " << p1(0) << std::endl << p1(1) << std::endl << p1(2) << std::endl;
-    // std::cout << "q1: " << q1_v(0) << std::endl << q1_v(1) << std::endl << q1_v(2) << std::endl << q1_v(3) << std::endl;
-    // std::cout << "p2: " << p2(0) << std::endl << p2(1) << std::endl << p2(2) << std::endl;
-    // std::cout << "q2: " << q2_v(0) << std::endl << q2_v(1) << std::endl << q2_v(2) << std::endl << q2_v(3) << std::endl;
+//     std::cout << "p_current: " << p_current(0) << std::endl << p_current(1) << std::endl << p_current(2) << std::endl;
+//     std::cout << "q_current: " << q_current.x() << std::endl << q_current.y() << std::endl << q_current.z() << std::endl << q_current.w() << std::endl;
+//     std::cout << "p_past: " << p_past(0) << std::endl << p_past(1) << std::endl << p_past(2) << std::endl;
+//     std::cout << "q_past: " << q_past.x() << std::endl << q_past.y() << std::endl << q_past.z() << std::endl << q_past.w() << std::endl;
 
     // estimate motion increment, dp, dq;
     expectation_dp = q_past.conjugate() * (p_current - p_past);
@@ -121,6 +121,10 @@ inline Eigen::VectorXs wolf::ConstraintOdom3D::expectation() const
     const Scalar * const frame_current_ori  = frm_current->getOPtr()->getVector().data();
     const Scalar * const frame_past_pos     = frm_past->getPPtr()->getVector().data();
     const Scalar * const frame_past_ori     = frm_past->getOPtr()->getVector().data();
+
+    std::cout << "frame_current_pos: " << frm_current->getPPtr()->getVector().transpose() << std::endl;
+    std::cout << "frame_past_pos: " << frm_past->getPPtr()->getVector().transpose() << std::endl;
+
     expectation(frame_current_pos,
                 frame_current_ori,
                 frame_past_pos,
