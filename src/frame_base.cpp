@@ -23,10 +23,10 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _v_ptr;
     //
-    if (isKey())
-        std::cout << "constructed +KF" << id() << std::endl;
-    else
-        std::cout << "constructed  +F" << id() << std::endl;
+//    if (isKey())
+//        std::cout << "constructed +KF" << id() << std::endl;
+//    else
+//        std::cout << "constructed  +F" << id() << std::endl;
 }
 
 FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
@@ -42,10 +42,10 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _v_ptr;
 
-    if (isKey())
-        std::cout << "constructed +KF" << id() << std::endl;
-    else
-        std::cout << "constructed  +F" << id() << std::endl;
+//    if (isKey())
+//        std::cout << "constructed +KF" << id() << std::endl;
+//    else
+//        std::cout << "constructed  +F" << id() << std::endl;
 }
                 
 FrameBase::~FrameBase()
@@ -53,10 +53,10 @@ FrameBase::~FrameBase()
     // Remove Frame State Blocks
     removeStateBlocks();
 
-    if (isKey())
-        std::cout << "destructed  -KF" << id() << std::endl;
-    else
-        std::cout << "destructed   -F" << id() << std::endl;
+//    if (isKey())
+//        std::cout << "destructed  -KF" << id() << std::endl;
+//    else
+//        std::cout << "destructed   -F" << id() << std::endl;
 }
 
 void FrameBase::remove()
@@ -83,7 +83,7 @@ void FrameBase::remove()
         // Remove Frame State Blocks
         removeStateBlocks();
 
-        std::cout << "Removed       F" << id() << std::endl;
+//        std::cout << "Removed       F" << id() << std::endl;
     }
 }
 

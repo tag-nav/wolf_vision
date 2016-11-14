@@ -18,13 +18,13 @@ LandmarkBase::LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, State
 {
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
-    std::cout << "constructed  +L" << id() << std::endl;
+//    std::cout << "constructed  +L" << id() << std::endl;
 }
                 
 LandmarkBase::~LandmarkBase()
 {
     removeStateBlocks();
-    std::cout << "destructed   -L" << id() << std::endl;
+//    std::cout << "destructed   -L" << id() << std::endl;
 }
 
 void LandmarkBase::remove()
@@ -32,7 +32,7 @@ void LandmarkBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-        std::cout << "Removing   L" << id() << std::endl;
+//        std::cout << "Removing   L" << id() << std::endl;
         LandmarkBasePtr this_L = shared_from_this(); // keep this alive while removing it
 
         // remove from upstream

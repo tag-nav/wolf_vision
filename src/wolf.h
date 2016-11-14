@@ -8,10 +8,9 @@
 #ifndef WOLF_H_
 #define WOLF_H_
 
-//includes from std lib
-#include <list>
-#include <map>
-#include <memory> // shared_ptr and weak_ptr
+// Enable project-specific definitions and macros
+#include "internal/config.h"
+#include "logging.h"
 
 //includes from Eigen lib
 #include <eigen3/Eigen/Dense>
@@ -19,7 +18,10 @@
 #include <eigen3/Eigen/Sparse>
 #include <libgen.h>
 
-#include "internal/config.h"
+//includes from std lib
+#include <list>
+#include <map>
+#include <memory> // shared_ptr and weak_ptr
 
 namespace wolf {
 
