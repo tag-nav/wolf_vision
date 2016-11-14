@@ -76,6 +76,7 @@ TEST(WolfTestTimeStamp, TimeStampEquality)
 
   ASSERT_EQ(time_stamp.get(), start.get());
 
+  std::this_thread::sleep_for(std::chrono::microseconds(1));
   time_stamp.setToNow();
 
   ASSERT_NE(time_stamp.get(), start.get());
