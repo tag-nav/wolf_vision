@@ -66,7 +66,7 @@ endif()
 
 
 #OPTION(BUILD_DOC "Build Documentation" OFF)
-OPTION(BUILD_TESTS "Build Unit tests" ON)
+#OPTION(BUILD_TESTS "Build Unit tests" ON)
 
 ADD_SUBDIRECTORY(src)
 
@@ -130,14 +130,14 @@ ENDIF(UNIX)
 #############
 ## Testing ##
 #############
-
-if(BUILD_TESTS)
-
+#
+#if(BUILD_TESTS)
+#
 # Enables testing for this directory and below.
 # Note that ctest expects to find a test file in the build directory root.
 # Therefore, this command should be in the source directory root.
-enable_testing()
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/test)
-
-endif()
+#enable_testing()
+#
+#add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+#
+#endif()

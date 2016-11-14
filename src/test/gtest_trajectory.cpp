@@ -9,9 +9,9 @@
 #include "utils_gtest.h"
 #include "../src/logging.h"
 
-#include "../src/problem.h"
-#include "../src/trajectory_base.h"
-#include "../src/frame_base.h"
+#include "../problem.h"
+#include "../trajectory_base.h"
+#include "../frame_base.h"
 
 #include <iostream>
 

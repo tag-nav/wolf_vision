@@ -18,6 +18,7 @@ option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 option(BUILD_EXAMPLES "Build examples" ON)
 
+OPTION(BUILD_TESTS "Build Unit tests" ON)
 
 
 # Does this has any other interest
@@ -481,6 +482,23 @@ export(PACKAGE ${PROJECT_NAME})
 
 IF(BUILD_EXAMPLES)
   #Build examples & tests
-  MESSAGE("Building examples and tests.")
+  MESSAGE("Building examples.")
   ADD_SUBDIRECTORY(examples)
 ENDIF(BUILD_EXAMPLES)
+
+#############
+## Testing ##
+#############
+
+if(BUILD_TESTS)
+  MESSAGE("Building and enabling tests.")
+
+# Enables testing for this directory and below.
+# Note that ctest expects to find a test file in the build directory root.
+# Therefore, this command should be in the source directory root.
+enable_testing()
+
+add_subdirectory(test)
+
+endif()
+

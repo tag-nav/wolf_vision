@@ -1,5 +1,5 @@
 #include "utils_gtest.h"
-#include "../src/time_stamp.h"
+#include "../time_stamp.h"
 
 #include <thread>
 

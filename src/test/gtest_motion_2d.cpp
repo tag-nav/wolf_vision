@@ -8,13 +8,13 @@
 #include "utils_gtest.h"
 
 // Classes under test
-#include "../src/processor_odom_2D.h"
+#include "../processor_odom_2D.h"
 
 // Wolf includes
-#include "../src/capture_fix.h"
-#include "../src/state_block.h"
-#include "../src/wolf.h"
-#include "../src/ceres_wrapper/ceres_manager.h"
+#include "../capture_fix.h"
+#include "../state_block.h"
+#include "../wolf.h"
+#include "../ceres_wrapper/ceres_manager.h"
 
 // STL includes
 #include <map>

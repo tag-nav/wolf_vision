@@ -1,5 +1,5 @@
 # Retrieve googletest from github & compile
-add_subdirectory(${PROJECT_SOURCE_DIR}/test/gtest)
+add_subdirectory(gtest)
 
 # Include config.h directory at first.
 include_directories(${PROJECT_BINARY_DIR}/conf/)
