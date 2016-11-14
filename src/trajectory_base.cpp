@@ -13,7 +13,7 @@ TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
 
 TrajectoryBase::~TrajectoryBase()
 {
-//    WOLF_DEBUG("destructed -T");
+    //
 }
 
 FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
@@ -32,7 +32,6 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
     }
     else
     {
-        //        addFrame(_frame_ptr);
         frame_list_.push_back(_frame_ptr);
     }
 
@@ -57,6 +56,16 @@ FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
         if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isKey() && (*frm_rit)->getTimeStamp() <= _frame_ptr->getTimeStamp())
             return frm_rit.base();
     return getFrameList().begin();
+}
+
+FrameBasePtr TrajectoryBase::findLastKeyFramePtr()
+{
+    // NOTE: Assumes keyframes are sorted by timestamp
+    for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); ++frm_rit)
+        if ((*frm_rit)->isKey())
+            return (*frm_rit);
+
+    return nullptr;
 }
 
 FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)

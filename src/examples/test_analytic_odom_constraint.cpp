@@ -136,7 +136,7 @@ int main(int argc, char** argv)
                     index_2_frame_ptr_autodiff[vertex_index] = vertex_frame_ptr_autodiff;
                     index_2_frame_ptr_analytic[vertex_index] = vertex_frame_ptr_analytic;
 
-                    //std::cout << "Added vertex! index: " << vertex_index << " nodeId: " << vertex_frame_ptr_analytic->nodeId() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
+                    //std::cout << "Added vertex! index: " << vertex_index << " id: " << vertex_frame_ptr_analytic->id() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
                 }
             }
             // EDGE
@@ -248,7 +248,7 @@ int main(int argc, char** argv)
                     capture_ptr_autodiff->addFeature(feature_ptr_autodiff);
                     ConstraintOdom2D* constraint_ptr_autodiff = new ConstraintOdom2D(feature_ptr_autodiff, frame_old_ptr_autodiff);
                     feature_ptr_autodiff->addConstraint(constraint_ptr_autodiff);
-                    //std::cout << "Added autodiff edge! " << constraint_ptr_autodiff->nodeId() << " from vertex " << constraint_ptr_autodiff->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_autodiff->getFrameOtherPtr()->nodeId() << std::endl;
+                    //std::cout << "Added autodiff edge! " << constraint_ptr_autodiff->id() << " from vertex " << constraint_ptr_autodiff->getCapturePtr()->getFramePtr()->id() << " to " << constraint_ptr_autodiff->getFrameOtherPtr()->id() << std::endl;
 
                     // add capture, feature and constraint to problem
                     FeatureBasePtr feature_ptr_analytic = new FeatureBase("FIX", edge_vector, edge_information.inverse());
@@ -261,7 +261,7 @@ int main(int argc, char** argv)
                     capture_ptr_analytic->addFeature(feature_ptr_analytic);
                     ConstraintOdom2DAnalytic* constraint_ptr_analytic = new ConstraintOdom2DAnalytic(feature_ptr_analytic, frame_old_ptr_analytic);
                     feature_ptr_analytic->addConstraint(constraint_ptr_analytic);
-                    //std::cout << "Added analytic edge! " << constraint_ptr_analytic->nodeId() << " from vertex " << constraint_ptr_analytic->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_analytic->getFrameOtherPtr()->nodeId() << std::endl;
+                    //std::cout << "Added analytic edge! " << constraint_ptr_analytic->id() << " from vertex " << constraint_ptr_analytic->getCapturePtr()->getFramePtr()->id() << " to " << constraint_ptr_analytic->getFrameOtherPtr()->id() << std::endl;
                     //std::cout << "vector " << constraint_ptr_analytic->getMeasurement().transpose() << std::endl;
                     //std::cout << "information " << std::endl << edge_information << std::endl;
                     //std::cout << "covariance " << std::endl << constraint_ptr_analytic->getMeasurementCovariance() << std::endl;

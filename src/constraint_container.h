@@ -30,7 +30,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 
 		virtual ~ConstraintContainer()
 		{
-			//std::cout << "deleting ConstraintContainer " << nodeId() << std::endl;
+			//std::cout << "deleting ConstraintContainer " << id() << std::endl;
 		}
 
 		LandmarkContainer::Ptr getLandmarkPtr()
@@ -77,9 +77,9 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
             // Residuals
             residuals_map = getMeasurementSquareRootInformation().cast<T>() * residuals_map;
 
-            //std::cout << "\nCONSTRAINT: " << nodeId() << std::endl;
-            //std::cout << "Feature: " << getFeaturePtr()->nodeId() << std::endl;
-            //std::cout << "Landmark: " << lmk_ptr_->nodeId() << std::endl;
+            //std::cout << "\nCONSTRAINT: " << id() << std::endl;
+            //std::cout << "Feature: " << getFeaturePtr()->id() << std::endl;
+            //std::cout << "Landmark: " << lmk_ptr_->id() << std::endl;
             //std::cout << "measurement:\n\t" << getMeasurement().transpose() << std::endl;
             //
             //std::cout << "robot pose:";

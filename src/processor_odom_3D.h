@@ -44,7 +44,11 @@ class ProcessorOdom3D : public ProcessorMotion
         typedef std::shared_ptr<ProcessorOdom3D> Ptr;
 
     public:
-        ProcessorOdom3D();
+        ProcessorOdom3D(Scalar _k_disp_to_disp = 0.1,
+                        Scalar _k_disp_to_rot = 0.1,
+                        Scalar _k_rot_to_rot = 0.1,
+                        Scalar _min_disp_var = 0.1,
+                        Scalar _min_rot_var = 0.1);
         virtual ~ProcessorOdom3D();
         void setup(SensorOdom3D::Ptr sen_ptr);
 

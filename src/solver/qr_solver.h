@@ -156,7 +156,7 @@ class SolverQR
 
         void addConstraint(ConstraintBasePtr _constraint_ptr)
         {
-            std::cout << "adding constraint " << _constraint_ptr->nodeId() << std::endl;
+            std::cout << "adding constraint " << _constraint_ptr->id() << std::endl;
             t_managing_ = clock();
 
             constraints_.push_back(_constraint_ptr);
@@ -283,7 +283,7 @@ class SolverQR
             for (unsigned int i = 0; i < n_new_constraints_; i++)
             {
                 ConstraintBasePtr ct_ptr = constraints_.at(constraints_.size() - 1 - i);
-                std::cout << "constraint: " << i << " id: " << constraints_.at(constraints_.size() - 1 - i)->nodeId()
+                std::cout << "constraint: " << i << " id: " << constraints_.at(constraints_.size() - 1 - i)->id()
                         << std::endl;
                 for (unsigned int j = 0; j < ct_ptr->getStatePtrVector().size(); j++)
                 {
@@ -532,7 +532,7 @@ class SolverQR
 
         CostFunctionBasePtr createCostFunction(ConstraintBasePtr _corrPtr)
         {
-            //std::cout << "adding ctr " << _corrPtr->nodeId() << std::endl;
+            //std::cout << "adding ctr " << _corrPtr->id() << std::endl;
             //_corrPtr->print();
 
             switch (_corrPtr->getTypeId())

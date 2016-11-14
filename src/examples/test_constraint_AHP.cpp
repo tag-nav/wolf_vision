@@ -69,7 +69,7 @@ int main()
     cv::Mat frame; //puede que necesite una imagen
 
     image_ptr = std::make_shared< CaptureImage>(t, camera_ptr_, frame);
-    wolf_problem_ptr_->getLastFramePtr()->addCapture(image_ptr);
+    last_frame->addCapture(image_ptr);
 
 
     // create the feature

@@ -48,7 +48,7 @@ public:
 
     virtual ~ConstraintGPSPseudorange2D()
     {
-        //std::cout << "deleting ConstraintGPSPseudorange2D " << nodeId() << std::endl;
+        //std::cout << "deleting ConstraintGPSPseudorange2D " << id() << std::endl;
     }
 
     template<typename T>
@@ -96,7 +96,7 @@ inline bool ConstraintGPSPseudorange2D::operator ()(const T* const _vehicle_p, c
 
     if (verbose_level_ >= 2)
     {
-        std::cout << "+OPERATOR()+" << nodeId() << std::endl;
+        std::cout << "+OPERATOR()+" << id() << std::endl;
         std::cout << "_sensor_p(_base): " << _sensor_p[0] << ", " << _sensor_p[1] << ", " << _sensor_p[2] << std::endl;
         std::cout << "_vehicle_p(_map): " << _vehicle_p[0] << ", " << _vehicle_p[1] << std::endl;
         std::cout << "_vehicle_o(_map): " << _vehicle_o[0] << std::endl;

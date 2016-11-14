@@ -72,11 +72,11 @@ TEST(WolfTestTimeStamp, TimeStampEquality)
 
   wolf::TimeStamp time_stamp(start);
 
-  // error: no match for ‘operator==’
-  //ASSERT_EQ(time_stamp, start);
+  ASSERT_EQ(time_stamp, start);
 
   ASSERT_EQ(time_stamp.get(), start.get());
 
+  std::this_thread::sleep_for(std::chrono::microseconds(1));
   time_stamp.setToNow();
 
   ASSERT_NE(time_stamp.get(), start.get());
@@ -100,11 +100,30 @@ TEST(WolfTestTimeStamp, TimeStampInequality)
   //ASSERT_NE(time_stamp, start);
 
   ASSERT_LT(start, time_stamp);
+  ASSERT_LE(start, time_stamp);
+  ASSERT_LE(start, start);
 
   // error: no match for ‘operator>’
-  //ASSERT_GT(time_stamp, start);
+  ASSERT_GT(time_stamp, start);
+  ASSERT_GE(time_stamp, start);
+  ASSERT_GE(start, start);
 
   PRINTF("All good at WolfTestTimeStamp::TimeStampInequality !\n");
+}
+
+TEST(WolfTestTimeStamp, TimeStampOperatorOstream)
+{
+    wolf::TimeStamp t(5);
+    wolf::Scalar dt = 1e-4;
+    t+=dt;
+    std::ostringstream ss1, ss2;
+
+    ss1 << t.get();
+    ss2 << t;
+
+    ASSERT_EQ(ss1.str(), ss2.str());
+
+    PRINTF("All good at WolfTestTimeStamp::TimeStampOperatorOstream !\n");
 }
 
 int main(int argc, char **argv)
