@@ -19,7 +19,6 @@ option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 
 
-
 # Does this has any other interest
 # but for the examples ?
 #IF(BUILD_EXAMPLES)
@@ -113,6 +112,7 @@ INCLUDE_DIRECTORIES(.)
 
 # include spdlog (logging) third_party
 INCLUDE_DIRECTORIES(../third_party/spdlog/include)
+set(SPDLOG_INCLUDE_DIRS "../third_party/spdlog/include/")
 
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 
@@ -175,6 +175,7 @@ SET(HDRS_BASE
     rotations.h
     sensor_base.h
     sensor_factory.h
+    singleton.h
     state_block.h
     state_homogeneous_3D.h
     state_quaternion.h
@@ -473,10 +474,24 @@ DESTINATION include/iri-algorithms/wolf/internal)
 
 INSTALL(FILES "${CMAKE_BINARY_DIR}/wolfConfig.cmake" DESTINATION "lib/cmake/${PROJECT_NAME}")
 
+INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
+
 export(PACKAGE ${PROJECT_NAME})
 
 IF(BUILD_EXAMPLES)
   #Build examples & tests
-  MESSAGE("Building examples and tests.")
+  MESSAGE("Building examples.")
   ADD_SUBDIRECTORY(examples)
 ENDIF(BUILD_EXAMPLES)
+
+#############
+## Testing ##
+#############
+
+if(BUILD_TESTS)
+    
+    MESSAGE("Building tests.")
+    add_subdirectory(test)
+
+endif()
+

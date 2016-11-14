@@ -9,11 +9,11 @@
 
 
 #include "utils_gtest.h"
-#include "../src/logging.h"
+#include "../logging.h"
 
-#include "../src/processor_odom_3D.h"
+#include "../processor_odom_3D.h"
 
-#include "../src/wolf.h"
+#include "../wolf.h"
 
 #include <iostream>
 
