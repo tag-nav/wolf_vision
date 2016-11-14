@@ -145,9 +145,11 @@ IF(OpenCV_FOUND)
     TARGET_LINK_LIBRARIES(test_ROI_ORB ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
 
+IF(Ceres_FOUND)
 # Simple AHP test
 ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
 TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
+ENDIF(Ceres_FOUND)
 
 # Processor Tracker Feature test
 ADD_EXECUTABLE(test_processor_tracker_feature test_processor_tracker_feature.cpp)
