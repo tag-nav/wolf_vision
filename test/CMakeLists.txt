@@ -11,6 +11,10 @@ include_directories(${PROJECT_SOURCE_DIR}/third_party/spdlog/include/)
 
 ## Added these two include_dirs: ######################
 #
+#CMAKE modules
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
+MESSAGE(STATUS ${CMAKE_MODULE_PATH})
+FIND_PACKAGE(Eigen 3 REQUIRED)
 # Include Eigen
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 #
@@ -19,7 +23,7 @@ IF(Ceres_FOUND)
     INCLUDE_DIRECTORIES(${CERES_INCLUDE_DIRS})
 ENDIF(Ceres_FOUND)
 #
-## but still gtest_motion_2d does not work ################
+## and now gtest_motion_2d works ######################
 
 
 # Include gtest directory.
