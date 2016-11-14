@@ -84,7 +84,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         // State blocks
     public:
-        void registerNewStateBlocks();
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
         StateBlockPtr getPPtr() const;
@@ -93,13 +92,14 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setPPtr(const StateBlockPtr _p_ptr);
         void setOPtr(const StateBlockPtr _o_ptr);
         void setVPtr(const StateBlockPtr _v_ptr);
+        void registerNewStateBlocks();
+    private:
+        void removeStateBlocks();
 
     protected:
         StateBlockPtr getStateBlockPtr(unsigned int _i) const;
         void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
         void resizeStateBlockVec(int _size);
-    private:
-        void removeStateBlocks();
 
         // states
     public:
@@ -203,6 +203,8 @@ inline bool FrameBase::isFixed() const
 inline void FrameBase::setTimeStamp(const TimeStamp& _ts)
 {
     time_stamp_ = _ts;
+    if (isKey() && getTrajectoryPtr() != nullptr)
+        getTrajectoryPtr()->sortFrame(shared_from_this());
 }
 
 inline void FrameBase::getTimeStamp(TimeStamp& _ts) const
