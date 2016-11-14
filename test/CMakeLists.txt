@@ -44,4 +44,6 @@ target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
 wolf_add_gtest(gtest_trajectory gtest_trajectory.cpp)
 target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 
-
+# ProcessorMotion in 2D
+wolf_add_gtest(gtest_motion_2d gtest_motion_2d.cpp)
+target_link_libraries(gtest_motion_2d ${PROJECT_NAME})

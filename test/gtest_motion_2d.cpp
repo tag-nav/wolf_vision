@@ -6,13 +6,13 @@
  */
 
 // Classes under test
-#include "processor_odom_2D.h"
+#include "../src/processor_odom_2D.h"
 
 // Wolf includes
-#include "capture_fix.h"
-#include "state_block.h"
-#include "wolf.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "../src/capture_fix.h"
+#include "../src/state_block.h"
+#include "../src/wolf.h"
+#include "../src/ceres_wrapper/ceres_manager.h"
 
 // STL includes
 #include <map>
