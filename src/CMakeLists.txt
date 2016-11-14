@@ -18,8 +18,6 @@ option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 option(BUILD_EXAMPLES "Build examples" ON)
 
-OPTION(BUILD_TESTS "Build Unit tests" ON)
-
 
 # Does this has any other interest
 # but for the examples ?

@@ -66,7 +66,7 @@ endif()
 
 
 #OPTION(BUILD_DOC "Build Documentation" OFF)
-#OPTION(BUILD_TESTS "Build Unit tests" ON)
+OPTION(BUILD_TESTS "Build Unit tests" ON)
 
 ADD_SUBDIRECTORY(src)
 
