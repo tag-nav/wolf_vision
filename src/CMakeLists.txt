@@ -113,6 +113,7 @@ INCLUDE_DIRECTORIES(.)
 
 # include spdlog (logging) third_party
 INCLUDE_DIRECTORIES(../third_party/spdlog/include)
+set(SPDLOG_INCLUDE_DIRS "../third_party/spdlog/include/")
 
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 
@@ -175,6 +176,7 @@ SET(HDRS_BASE
     rotations.h
     sensor_base.h
     sensor_factory.h
+    singleton.h
     state_block.h
     state_homogeneous_3D.h
     state_quaternion.h
@@ -472,6 +474,8 @@ INSTALL(FILES "${WOLF_CONFIG_DIR}/config.h"
 DESTINATION include/iri-algorithms/wolf/internal)
 
 INSTALL(FILES "${CMAKE_BINARY_DIR}/wolfConfig.cmake" DESTINATION "lib/cmake/${PROJECT_NAME}")
+
+INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
 
 export(PACKAGE ${PROJECT_NAME})
 
