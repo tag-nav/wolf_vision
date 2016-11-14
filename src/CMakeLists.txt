@@ -489,14 +489,9 @@ ENDIF(BUILD_EXAMPLES)
 #############
 
 if(BUILD_TESTS)
-  MESSAGE("Building and enabling tests.")
-
-# Enables testing for this directory and below.
-# Note that ctest expects to find a test file in the build directory root.
-# Therefore, this command should be in the source directory root.
-enable_testing()
-
-add_subdirectory(test)
+    
+    MESSAGE("Building tests.")
+    add_subdirectory(test)
 
 endif()
 

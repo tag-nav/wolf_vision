@@ -131,13 +131,9 @@ ENDIF(UNIX)
 ## Testing ##
 #############
 #
-#if(BUILD_TESTS)
-#
-# Enables testing for this directory and below.
-# Note that ctest expects to find a test file in the build directory root.
-# Therefore, this command should be in the source directory root.
-#enable_testing()
-#
-#add_subdirectory(${PROJECT_SOURCE_DIR}/test)
-#
-#endif()
+if(BUILD_TESTS)
+    # Enables testing for this directory and below.
+    # Note that ctest expects to find a test file in the build directory root.
+    # Therefore, this command should be in the source directory root.
+    enable_testing()
+endif()
