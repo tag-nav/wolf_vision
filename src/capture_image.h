@@ -14,6 +14,12 @@
 
 namespace wolf {
 
+//forward declaration to typedef class pointers
+class CaptureImage;
+typedef std::shared_ptr<CaptureImage> CaptureImagePtr;
+typedef std::shared_ptr<const CaptureImage> CaptureImageConst;
+typedef std::weak_ptr<CaptureImage> CaptureImageWPtr;    
+    
 /**
  * \brief class CaptureImage
  *
@@ -22,10 +28,6 @@ namespace wolf {
  */
 class CaptureImage : public CaptureBase
 {
-    public:
-        typedef std::shared_ptr<CaptureImage> Ptr;
-        typedef std::weak_ptr<CaptureImage> WPtr;
-
     protected:
         cv::Mat image_;
         cv::Mat descriptors_;

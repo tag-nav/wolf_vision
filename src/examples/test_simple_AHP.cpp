@@ -130,9 +130,9 @@ int main(int argc, char** argv)
     // Captures------------------
     cv::Mat cv_image;
     cv_image.zeros(2,2,0);
-    CaptureImage::Ptr image_0 = std::make_shared<CaptureImage>(TimeStamp(0), camera, cv_image);
-    CaptureImage::Ptr image_1 = std::make_shared<CaptureImage>(TimeStamp(1), camera, cv_image);
-    CaptureImage::Ptr image_2 = std::make_shared<CaptureImage>(TimeStamp(2), camera, cv_image);
+    CaptureImagePtr image_0 = std::make_shared<CaptureImage>(TimeStamp(0), camera, cv_image);
+    CaptureImagePtr image_1 = std::make_shared<CaptureImage>(TimeStamp(1), camera, cv_image);
+    CaptureImagePtr image_2 = std::make_shared<CaptureImage>(TimeStamp(2), camera, cv_image);
     kf_2->addCapture(image_0);
     kf_3->addCapture(image_1);
     kf_4->addCapture(image_2);

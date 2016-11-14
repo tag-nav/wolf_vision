@@ -9,6 +9,12 @@
 //
 
 namespace wolf {
+    
+//forward declaration to typedef class pointers
+class CaptureGPSFix;
+typedef std::shared_ptr<CaptureGPSFix> CaptureGPSFixPtr;
+typedef std::shared_ptr<const CaptureGPSFix> CaptureGPSFixConstPtr;
+typedef std::weak_ptr<CaptureGPSFix> CaptureGPSFixWPtr;    
 
 //class CaptureGPSFix
 class CaptureGPSFix : public CaptureBase
@@ -21,9 +27,7 @@ class CaptureGPSFix : public CaptureBase
         CaptureGPSFix(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data);
         CaptureGPSFix(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
         virtual ~CaptureGPSFix();
-
         virtual void process();
-
 };
 
 } //namespace wolf

@@ -20,7 +20,7 @@ class ProcessorGPS : public ProcessorBase
         typedef std::shared_ptr<ProcessorGPS> Ptr;
 
     protected:
-        CaptureGPS::Ptr capture_gps_ptr_;
+        CaptureGPSPtr capture_gps_ptr_;
         Scalar gps_covariance_;
 
     public:

@@ -75,7 +75,7 @@ TEST(ProcessorMotion, Motion2D)
     FrameBasePtr origin_frame = problem_ptr->emplaceFrame(KEY_FRAME, x0, t0);
 
     // Prior covariance
-    CaptureFix::Ptr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensor_fix_ptr, x0, init_cov);
+    CaptureFixPtr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensor_fix_ptr, x0, init_cov);
     origin_frame->addCapture(initial_covariance);
     initial_covariance->process();
 
