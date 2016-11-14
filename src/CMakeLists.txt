@@ -175,6 +175,7 @@ SET(HDRS_BASE
     rotations.h
     sensor_base.h
     sensor_factory.h
+    singleton.h
     state_block.h
     state_homogeneous_3D.h
     state_quaternion.h
