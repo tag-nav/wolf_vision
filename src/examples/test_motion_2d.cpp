@@ -80,8 +80,8 @@ int main()
     // Initialize processor motion
     odom2d_ptr->setOrigin(origin_frame);
 
-    std::cout << "Initial pose : " << problem_ptr->getLastFramePtr()->getState().transpose() << std::endl;
-    std::cout << "Initial covariance : " << std::endl << problem_ptr->getLastFramePtr()->getState().transpose() << std::endl;
+    std::cout << "Initial pose : " << problem_ptr->getCurrentState().transpose() << std::endl;
+    std::cout << "Initial covariance : " << std::endl << problem_ptr->getCurrentState().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
@@ -143,7 +143,7 @@ int main()
         integrated_x_vector.push_back(integrated_x);
         integrated_covariance_vector.push_back(integrated_covariance);
 
-        if ((odom2d_ptr->getCurrentState() - integrated_x).norm() > 1e-10)
+        if ((odom2d_ptr->getCurrentState() - integrated_x).norm() > Constants::EPS)
         {
             std::cout << "----------- PROCESSOR:" << std::endl;
             std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
@@ -160,7 +160,7 @@ int main()
             throw std::runtime_error("Integrated state different from reference.");
         }
 
-        if ((odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance).array().abs().maxCoeff() > 1e-10)
+        if ((odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance).array().abs().maxCoeff() > Constants::EPS)
         {
             std::cout << "----------- PROCESSOR:" << std::endl;
             std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
