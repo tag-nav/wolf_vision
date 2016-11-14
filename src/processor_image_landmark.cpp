@@ -210,7 +210,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
     cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
 
-    for (unsigned int n_iterations = 0; _max_features == 0 || n_iterations < _max_features; n_iterations++)
+    for (unsigned int n_iterations = 0; n_iterations < _max_features; n_iterations++)
     {
         if (active_search_grid_.pickRoi(roi))
         {
