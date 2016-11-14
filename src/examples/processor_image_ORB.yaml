@@ -25,7 +25,7 @@ active search:
     separation: 5
 
 algorithm:
-    maximum new features: 40
+    maximum new features: 0
     minimum features for new keyframe: 40
     minimum response for new features: 80 #0.0005
     time tolerance: 0.01
