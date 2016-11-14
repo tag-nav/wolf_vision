@@ -61,14 +61,11 @@ FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
 FrameBasePtr TrajectoryBase::findLastKeyFramePtr()
 {
     // NOTE: Assumes keyframes are sorted by timestamp
-    FrameBasePtr last_kfrm = nullptr;
     for (auto frm_rit = frame_list_.rbegin(); frm_rit != frame_list_.rend(); ++frm_rit)
-        if ((*frm_rit)->isKey())// && (*frm_rit)->getTimeStamp() > last_ts)
-        {
-            last_kfrm = (*frm_rit);
-            break;
-        }
-    return last_kfrm;
+        if ((*frm_rit)->isKey())
+            return (*frm_rit);
+
+    return nullptr;
 }
 
 FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
