@@ -7,6 +7,21 @@ include_directories(${PROJECT_BINARY_DIR}/conf/)
 # Include third party directory.
 include_directories(${PROJECT_SOURCE_DIR}/third_party/spdlog/include/)
 
+
+
+## Added these two include_dirs: ######################
+#
+# Include Eigen
+INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
+#
+# Include Ceres
+IF(Ceres_FOUND)
+    INCLUDE_DIRECTORIES(${CERES_INCLUDE_DIRS})
+ENDIF(Ceres_FOUND)
+#
+## but still gtest_motion_2d does not work ################
+
+
 # Include gtest directory.
 include_directories(${GTEST_INCLUDE_DIRS})
 
