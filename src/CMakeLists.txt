@@ -19,7 +19,6 @@ option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 
 
-
 # Does this has any other interest
 # but for the examples ?
 #IF(BUILD_EXAMPLES)
@@ -481,6 +480,18 @@ export(PACKAGE ${PROJECT_NAME})
 
 IF(BUILD_EXAMPLES)
   #Build examples & tests
-  MESSAGE("Building examples and tests.")
+  MESSAGE("Building examples.")
   ADD_SUBDIRECTORY(examples)
 ENDIF(BUILD_EXAMPLES)
+
+#############
+## Testing ##
+#############
+
+if(BUILD_TESTS)
+    
+    MESSAGE("Building tests.")
+    add_subdirectory(test)
+
+endif()
+

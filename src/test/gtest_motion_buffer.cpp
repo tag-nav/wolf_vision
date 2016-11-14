@@ -7,9 +7,9 @@
 
 
 #include "utils_gtest.h"
-#include "../src/logging.h"
+#include "../logging.h"
 
-#include "../src/motion_buffer.h"
+#include "../motion_buffer.h"
 
 #include <iostream>
 
