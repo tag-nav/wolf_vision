@@ -319,10 +319,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
 bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
-    WOLF_TRACE("");
-    std::cout << "PT: KF" << _keyframe_ptr->id() << " callback received at ts= " << _keyframe_ptr->getTimeStamp().get() << std::endl;
-    std::cout << "    while last ts= " << last_ptr_->getTimeStamp().get() << std::endl;
-    std::cout << "    while last's frame ts= " << last_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;
+    std::cout << "PT: KF" << _keyframe_ptr->id() << " callback received at ts= " << _keyframe_ptr->getTimeStamp().get();
 
     assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame always");
 
@@ -335,9 +332,11 @@ bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar
     //   - last frame is too far in time from keyframe
     if (last_ptr_ == nullptr || last_ptr_->getFramePtr()->isKey() || std::abs(last_ptr_->getTimeStamp() - _keyframe_ptr->getTimeStamp()) > time_tol)
     {
+        std::cout << " --> nothing done" << std::endl;
         return false;
     }
 
+    std::cout << " --> appended last capture" << std::endl;
     //std::cout << "ProcessorTracker::keyFrameCallback in sensor " << getSensorPtr()->id() << std::endl;
 
     // Capture last_ is added to the new keyframe
@@ -356,6 +355,7 @@ bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar
     origin_ptr_ = nullptr;
 
     return true;
+
 }
 
 void ProcessorTracker::setKeyFrame(CaptureBasePtr _capture_ptr)
