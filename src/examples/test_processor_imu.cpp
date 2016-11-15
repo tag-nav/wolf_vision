@@ -118,7 +118,6 @@ int main(int argc, char** argv)
         imu_ptr->setTimeStamp(t);
 
         // process data in capture
-        //imu_ptr ->process();
         sensor_ptr->process(imu_ptr);
 
 #ifdef DEBUG_RESULTS
