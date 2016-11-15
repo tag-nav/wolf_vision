@@ -48,6 +48,7 @@ void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 void TrajectoryBase::sortFrame(FrameBasePtr _frame_ptr)
 {
     moveFrame(_frame_ptr, computeFrameOrder(_frame_ptr));
+    last_key_frame_ptr_ = findLastKeyFramePtr();
 }
 
 FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
