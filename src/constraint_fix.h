@@ -12,6 +12,8 @@ namespace wolf {
 class ConstraintFix: public ConstraintSparse<3,2,1>
 {
     public:
+        typedef std::shared_ptr<ConstraintFix> Ptr;
+    public:
 //        static const unsigned int N_BLOCKS = 2;
 
         ConstraintFix(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
