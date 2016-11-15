@@ -24,12 +24,6 @@ SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const std::shared
     assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
     K_ = setIntrinsicMatrix(_intrinsics_ptr->pinhole_model);
     pinhole::computeCorrectionModel(getIntrinsicPtr()->getVector(), distortion_, correction_);
-    std::cout << "\tintrinsics  : " << getIntrinsicPtr()->getVector().transpose() << std::endl;
-    std::cout << "\tintrinsic matrix  : " << K_ << std::endl;
-//    std::cout << "\tdistortion  : " << distortion_.transpose() << std::endl;
-//    std::cout << "\tcorrection  : " << correction_.transpose() << std::endl;
-    std::cout << "\tp_ptr  : " << getPPtr()->getVector().transpose() << std::endl;
-    std::cout << "\to_ptr  : " << getOPtr()->getVector().transpose() << std::endl;
 }
 
 
@@ -62,6 +56,13 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
     std::shared_ptr<IntrinsicsCamera> intrinsics_ptr = std::static_pointer_cast<IntrinsicsCamera>(_intrinsics);
     std::shared_ptr<SensorCamera> sen_ptr = std::make_shared<SensorCamera>(_extrinsics_pq, intrinsics_ptr);
     sen_ptr->setName(_unique_name);
+
+    std::cout << "Created camera:\n\tintrinsics   : " << sen_ptr->getIntrinsicPtr()->getVector().transpose() << std::endl;
+//    std::cout << "\tintrinsic matrix  : " << K_ << std::endl;
+//    std::cout << "\tdistortion  : " << distortion_.transpose() << std::endl;
+//    std::cout << "\tcorrection  : " << correction_.transpose() << std::endl;
+    std::cout << "\tposition     : " << sen_ptr->getPPtr()->getVector().transpose() << std::endl;
+    std::cout << "\torientation  : " << sen_ptr->getOPtr()->getVector().transpose() << std::endl;
 
     return sen_ptr;
 }
