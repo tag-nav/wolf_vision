@@ -306,12 +306,12 @@ void CeresManager::addStateBlock(StateBlockPtr _st_ptr)
 
     if (_st_ptr->hasLocalParametrization())
     {
-        std::cout << "Local Parametrization to be added:" << _st_ptr->getLocalParametrizationPtr() << std::endl;
+//        std::cout << "Local Parametrization to be added:" << _st_ptr->getLocalParametrizationPtr() << std::endl;
         ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), new LocalParametrizationWrapper(_st_ptr->getLocalParametrizationPtr()));
     }
     else
     {
-        std::cout << "No Local Parametrization to be added" << std::endl;
+//        std::cout << "No Local Parametrization to be added" << std::endl;
         ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), nullptr);
     }
     if (_st_ptr->isFixed())
