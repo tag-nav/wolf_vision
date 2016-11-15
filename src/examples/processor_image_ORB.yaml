@@ -31,6 +31,9 @@ algorithm:
     time tolerance: 0.01
     distance: 20
     
+noise:
+    pixel noise std: 1 # pixels
+    
 draw: # Used to control drawing options
     primary draw: true
     secondary draw: true
