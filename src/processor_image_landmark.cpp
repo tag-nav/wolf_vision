@@ -165,8 +165,10 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 //                    std::cout << "Feature descriptor:\n" << candidate_descriptors.row(cv_matches[0].trainIdx) << std::endl;
 
 
-                    std::shared_ptr<FeaturePointImage> incoming_point_ptr = std::make_shared<FeaturePointImage>(candidate_keypoints[cv_matches[0].trainIdx],
-                            (candidate_descriptors.row(cv_matches[0].trainIdx)), Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
+                    std::shared_ptr<FeaturePointImage> incoming_point_ptr = std::make_shared<FeaturePointImage>(
+                            candidate_keypoints[cv_matches[0].trainIdx],
+                            candidate_descriptors.row(cv_matches[0].trainIdx),
+                            Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
                     incoming_point_ptr->setTrackId(landmark_in_ptr->id());
                     incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
                     _feature_list_out.push_back(incoming_point_ptr);
@@ -229,8 +231,10 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
                 if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
                 {
                     list_response_.push_back(new_keypoints[0].response);
-                    std::shared_ptr<FeaturePointImage> point_ptr = std::make_shared<FeaturePointImage>(new_keypoints[0], new_descriptors.row(index),
-                                                                                                       Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
+                    std::shared_ptr<FeaturePointImage> point_ptr = std::make_shared<FeaturePointImage>(
+                            new_keypoints[0],
+                            new_descriptors.row(index),
+                            Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
                     point_ptr->setIsKnown(false);
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);

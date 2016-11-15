@@ -245,8 +245,10 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                 if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
                 {
                     std::cout << "response: " << new_keypoints[0].response << std::endl;
-                    FeaturePointImage::Ptr point_ptr = std::make_shared<FeaturePointImage>(new_keypoints[0], new_descriptors.row(index),
-                                                                                           Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
+                    FeaturePointImage::Ptr point_ptr = std::make_shared<FeaturePointImage>(
+                            new_keypoints[0],
+                            new_descriptors.row(index),
+                            Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
                     point_ptr->setIsKnown(false);
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
