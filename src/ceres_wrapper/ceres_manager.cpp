@@ -257,7 +257,7 @@ void CeresManager::update()
         {
             case ADD:
             {
-                std::cout << "adding constraint" << std::endl;
+//                std::cout << "adding constraint" << std::endl;
                 addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_,wolf_problem_->getConstraintNotificationList().front().id_);
                 //std::cout << "added" << std::endl;
                 break;

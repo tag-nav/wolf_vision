@@ -221,12 +221,12 @@ int main(int argc, char** argv)
 
         sen_odo_ptr->addCapture(cap_odo);
 
-        wolf_problem_ptr_->print(0);
+//        wolf_problem_ptr_->print(0);
 
-        std::cout << "prev prev ts: " << t_prev_prev.get() << "; x: " << x_prev_prev.transpose() << std::endl;
-        std::cout << "prev      ts: " << t_prev.get() << "; x: " << x_prev.transpose() << std::endl;
-        std::cout << "current   ts: " << t.get() << std::endl;
-        std::cout << "          dt: " << t_prev - t_prev_prev << "; dx: " << dx.transpose() << std::endl;
+//        std::cout << "prev prev ts: " << t_prev_prev.get() << "; x: " << x_prev_prev.transpose() << std::endl;
+//        std::cout << "prev      ts: " << t_prev.get() << "; x: " << x_prev.transpose() << std::endl;
+//        std::cout << "current   ts: " << t.get() << std::endl;
+//        std::cout << "          dt: " << t_prev - t_prev_prev << "; dx: " << dx.transpose() << std::endl;
 
 
         cv::waitKey(0);
