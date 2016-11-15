@@ -268,9 +268,9 @@ void CeresManager::update()
         wolf_problem_->getConstraintNotificationList().pop_front();
     }
     //std::cout << "all constraints added" << std::endl;
-	std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
-    std::cout << "wrapper residual blocks: " << id_2_residual_idx_.size() << std::endl;
-    std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+//	  std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
+//    std::cout << "wrapper residual blocks: " << id_2_residual_idx_.size() << std::endl;
+//    std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
 
 	assert(ceres_problem_->NumResidualBlocks() == id_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
@@ -300,9 +300,9 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 
 void CeresManager::addStateBlock(StateBlockPtr _st_ptr)
 {
-    std::cout << "Adding State Block " << _st_ptr->getPtr() << std::endl;
-    std::cout << " size: " <<  _st_ptr->getSize() << std::endl;
-    std::cout << " vector: " <<  _st_ptr->getVector().transpose() << std::endl;
+//    std::cout << "Adding State Block " << _st_ptr->getPtr() << std::endl;
+//    std::cout << " size: " <<  _st_ptr->getSize() << std::endl;
+//    std::cout << " vector: " <<  _st_ptr->getVector().transpose() << std::endl;
 
     if (_st_ptr->hasLocalParametrization())
     {

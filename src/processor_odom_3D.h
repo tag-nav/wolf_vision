@@ -101,17 +101,17 @@ inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
 
 inline bool ProcessorOdom3D::voteForKeyFrame()
 {
-    if (getBuffer().get().size() > 10)
-    {
-        std::cout << "PM::vote buffer big enough" << std::endl;
-        return true;
-    }
+//    if (getBuffer().get().size() > 20)
+//    {
+//        std::cout << "PM::vote buffer big enough" << std::endl;
+//        return true;
+//    }
     if (delta_integrated_.head(3).norm() > 1)
     {
         std::cout << "PM::vote position delta big enough" << std::endl;
         return true;
     }
-    if (delta_integrated_.tail(3).norm() > 0.5)
+    if (delta_integrated_.tail(4).norm() > 0.7)
     {
         std::cout << "PM::vote orientation delta big enough" << std::endl;
         return true;
