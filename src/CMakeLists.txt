@@ -21,9 +21,12 @@ option(BUILD_EXAMPLES "Build examples" ON)
 
 # Does this has any other interest
 # but for the examples ?
-#IF(BUILD_EXAMPLES)
+IF(BUILD_EXAMPLES)
   set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
-#ENDIF(BUILD_EXAMPLES)
+ENDIF(BUILD_EXAMPLES)
+IF(BUILD_TESTS)
+  set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
+ENDIF(BUILD_TESTS)
 
 
 #find dependencies.
