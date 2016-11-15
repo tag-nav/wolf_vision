@@ -22,48 +22,41 @@ class FeaturePointImage : public FeatureBase
 {
     public:
         typedef std::shared_ptr<FeaturePointImage>  Ptr;
-    protected:
 
-        cv::KeyPoint keypoint_;
+    private:
+        cv::KeyPoint keypoint_; ///< Warning: every write operation to this member needs to write measurement_. See setKeypoint() as an example.
         cv::Mat descriptor_;
         bool is_known_;
 
     public:
-//        FeaturePointImage(const Eigen::Vector2s& _measurement) :
-//                FeatureBase("POINT IMAGE", _measurement, Eigen::MatrixXs::Zero(0, 0)), is_known_(false)
-//        {
-//            keypoint_.pt.x = float(measurement_(0));
-//            keypoint_.pt.y = float(measurement_(1));
-//            //
-//        }
 
-//        FeaturePointImage(const Eigen::Vector2s& _measurement, const Eigen::Matrix2s& _meas_covariance) :
-//                FeatureBase("POINT IMAGE", _measurement, _meas_covariance), is_known_(false)
-//        {
-//            keypoint_.pt.x = float(measurement_(0));
-//            keypoint_.pt.y = float(measurement_(1));
-//        }
-
-//        FeaturePointImage(const cv::KeyPoint& _keypoint, const cv::Mat& _descriptor, bool _is_known) :
-//                FeatureBase("POINT IMAGE", Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()), keypoint_(_keypoint), descriptor_(
-//                        _descriptor)
-//        {
-//            measurement_(0) = Scalar(_keypoint.pt.x);
-//            measurement_(1) = Scalar(_keypoint.pt.y);
-//            is_known_ = _is_known;
-//
-//        }
-
-        FeaturePointImage(const cv::KeyPoint& _keypoint, const cv::Mat& _descriptor,
+        /// Constructor from Eigen measured pixel
+        FeaturePointImage(const Eigen::Vector2s & _measured_pixel,
+                          const cv::Mat& _descriptor,
                           const Eigen::Matrix2s& _meas_covariance) :
-                FeatureBase("POINT IMAGE", Eigen::Vector2s::Zero(), _meas_covariance), keypoint_(_keypoint), descriptor_(
-                        _descriptor), is_known_(false)
+                FeatureBase("POINT IMAGE", _measured_pixel, _meas_covariance),
+                keypoint_(_measured_pixel(0), _measured_pixel(1), 1), // Size 1 is a dummy value
+                descriptor_( _descriptor),
+                is_known_(false)
+        {
+            keypoint_.pt.x = measurement_(0);
+            keypoint_.pt.y = measurement_(1);
+        }
+
+        /// Constructor from OpenCV measured keypoint
+        FeaturePointImage(const cv::KeyPoint& _keypoint,
+                          const cv::Mat& _descriptor,
+                          const Eigen::Matrix2s& _meas_covariance) :
+                FeatureBase("POINT IMAGE", Eigen::Vector2s::Zero(), _meas_covariance),
+                keypoint_(_keypoint),
+                descriptor_(_descriptor),
+                is_known_(false)
         {
             measurement_(0) = Scalar(_keypoint.pt.x);
             measurement_(1) = Scalar(_keypoint.pt.y);
         }
 
-        virtual ~FeaturePointImage();
+       virtual ~FeaturePointImage();
 
         const cv::KeyPoint& getKeypoint() const;
         void setKeypoint(const cv::KeyPoint& _kp);
