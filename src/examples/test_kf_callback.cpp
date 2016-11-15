@@ -50,11 +50,11 @@ int main()
         cout << "=======================\n>> TIME: " << t.get() << endl;
 
         cout << "Tracker----------------" << endl;
-        sen_ftr->addCapture(make_shared<CaptureVoid>(t, sen_ftr));
+        sen_ftr->process(make_shared<CaptureVoid>(t, sen_ftr));
         problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
 
         cout << "Motion-----------------" << endl;
-        sen_odo->addCapture(make_shared<CaptureMotion>(t, sen_odo, odo_data));
+        sen_odo->process(make_shared<CaptureMotion>(t, sen_odo, odo_data));
         cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
         problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
 

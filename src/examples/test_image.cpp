@@ -183,7 +183,7 @@ int main(int argc, char** argv)
 //        image_ptr->process();
 
         //image_ptr->process();
-        camera_ptr->addCapture(image_ptr);
+        camera_ptr->process(image_ptr);
         //cv::imshow("test",frame[f % buffer_size]);
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 

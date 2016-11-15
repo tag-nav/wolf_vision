@@ -154,7 +154,7 @@ int main(int argc, char** argv)
 
         /* process */
         //image_ptr->process();
-        camera_ptr->addCapture(image_ptr);
+        camera_ptr->process(image_ptr);
 
         ceres::Solver::Summary summary = ceres_manager.solve();
         std::cout << summary.BriefReport() << std::endl;
@@ -219,7 +219,7 @@ int main(int argc, char** argv)
 
         cap_odo->setData(data);
 
-        sen_odo_ptr->addCapture(cap_odo);
+        sen_odo_ptr->process(cap_odo);
 
 //        wolf_problem_ptr_->print(0);
 

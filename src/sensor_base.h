@@ -123,7 +123,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         HardwareBasePtr getHardwarePtr();
         void setHardwarePtr(const HardwareBasePtr _hw_ptr);
 
-        bool addCapture(const CaptureBasePtr capture_ptr);
+        bool process(const CaptureBasePtr capture_ptr);
 
 };
 
@@ -239,7 +239,7 @@ inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
     hardware_ptr_ = _hw_ptr;
 }
 
-inline bool SensorBase::addCapture(const CaptureBasePtr capture_ptr)
+inline bool SensorBase::process(const CaptureBasePtr capture_ptr)
 {
   capture_ptr->setSensorPtr(shared_from_this());
 
