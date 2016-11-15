@@ -15,6 +15,8 @@ struct IntrinsicsOdom2D : public IntrinsicsBase
 
 class SensorOdom2D : public SensorBase
 {
+    public:
+        typedef std::shared_ptr<SensorOdom2D> Ptr;
 
     protected:
         Scalar k_disp_to_disp_; ///< ratio of displacement variance to displacement, for odometry noise calculation
