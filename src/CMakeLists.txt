@@ -481,12 +481,6 @@ INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
 
 export(PACKAGE ${PROJECT_NAME})
 
-IF(BUILD_EXAMPLES)
-  #Build examples & tests
-  MESSAGE("Building examples.")
-  ADD_SUBDIRECTORY(examples)
-ENDIF(BUILD_EXAMPLES)
-
 #############
 ## Testing ##
 #############
@@ -497,4 +491,10 @@ if(BUILD_TESTS)
     add_subdirectory(test)
 
 endif()
+
+IF(BUILD_EXAMPLES)
+  #Build examples & tests
+  MESSAGE("Building examples.")
+  ADD_SUBDIRECTORY(examples)
+ENDIF(BUILD_EXAMPLES)
 
