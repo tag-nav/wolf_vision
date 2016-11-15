@@ -159,7 +159,7 @@ int main(int argc, char** argv)
         ceres::Solver::Summary summary = ceres_manager.solve();
         std::cout << summary.BriefReport() << std::endl;
 
-        wolf_problem_ptr_->print(2);
+//        wolf_problem_ptr_->print(2,1,0,0);
 
 
         // Odometry ---------------------------------------------
@@ -221,7 +221,7 @@ int main(int argc, char** argv)
 
         sen_odo_ptr->process(cap_odo);
 
-//        wolf_problem_ptr_->print(0);
+//        wolf_problem_ptr_->print(2,1,0,0);
 
 //        std::cout << "prev prev ts: " << t_prev_prev.get() << "; x: " << x_prev_prev.transpose() << std::endl;
 //        std::cout << "prev      ts: " << t_prev.get() << "; x: " << x_prev.transpose() << std::endl;
