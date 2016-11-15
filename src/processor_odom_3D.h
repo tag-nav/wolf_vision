@@ -101,7 +101,7 @@ inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
 
 inline bool ProcessorOdom3D::voteForKeyFrame()
 {
-    if (getBuffer().get().size() > 5)
+    if (getBuffer().get().size() > 10)
     {
         std::cout << "PM::vote buffer big enough" << std::endl;
         return true;
