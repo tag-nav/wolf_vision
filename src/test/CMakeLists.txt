@@ -12,18 +12,18 @@ include_directories(${PROJECT_SOURCE_DIR}/third_party/spdlog/include/)
 ## Added these two include_dirs: ######################
 #
 #CMAKE modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-MESSAGE(STATUS ${CMAKE_MODULE_PATH})
-
+#SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
+#MESSAGE(STATUS ${CMAKE_MODULE_PATH})
+#
 # Include Eigen
-FIND_PACKAGE(Eigen 3 REQUIRED)
-INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
+#FIND_PACKAGE(Eigen 3 REQUIRED)
+#INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 #
 # Include Ceres
-FIND_PACKAGE(Ceres QUIET) #Ceres is not required
-IF(Ceres_FOUND)
-    INCLUDE_DIRECTORIES(${CERES_INCLUDE_DIRS})
-ENDIF(Ceres_FOUND)
+#FIND_PACKAGE(Ceres QUIET) #Ceres is not required
+#IF(Ceres_FOUND)
+#    INCLUDE_DIRECTORIES(${CERES_INCLUDE_DIRS})
+#ENDIF(Ceres_FOUND)
 #
 ## and now gtest_motion_2d works ######################
 
@@ -44,6 +44,10 @@ target_link_libraries(gtest_example ${PROJECT_NAME})      #
 #                                                         #
 #           ==== IN ALPHABETICAL ORDER! ====              #
 #                                                         #
+
+# FrameBase classes test
+wolf_add_gtest(gtest_frame_base gtest_frame_base.cpp)
+target_link_libraries(gtest_frame_base ${PROJECT_NAME})
 
 # LocalParametrizationXxx classes test
 wolf_add_gtest(gtest_local_param gtest_local_param.cpp)
