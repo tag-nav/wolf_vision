@@ -101,16 +101,24 @@ inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
 
 inline bool ProcessorOdom3D::voteForKeyFrame()
 {
-    if (getBuffer().get().size() > 2)
+    if (getBuffer().get().size() > 10)
     {
-        std::cout << "PM::vote" << std::endl;
+        std::cout << "PM::vote buffer big enough" << std::endl;
         return true;
     }
-    else
+    if (delta_integrated_.head(3).norm() > 1)
     {
-        std::cout << "PM::do not vote" << std::endl;
-        return false;
+        std::cout << "PM::vote position delta big enough" << std::endl;
+        return true;
     }
+    if (delta_integrated_.tail(3).norm() > 0.5)
+    {
+        std::cout << "PM::vote orientation delta big enough" << std::endl;
+        return true;
+    }
+
+    std::cout << "PM::do not vote" << std::endl;
+    return false;
 }
 
 inline ConstraintBasePtr ProcessorOdom3D::createConstraint(FeatureBasePtr _feature_motion,

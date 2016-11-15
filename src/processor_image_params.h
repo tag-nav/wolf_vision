@@ -67,6 +67,12 @@ struct ProcessorParamsImage : public ProcessorParamsBase
                 Scalar distance;
         }algorithm;
 
+        struct Noise
+        {
+                Scalar pixel_noise_std; ///< std noise of the pixel
+                Scalar pixel_noise_var; ///< var noise of the pixel
+        }noise;
+
         struct Draw
         {
                 bool primary_drawing; ///< draw the features found in the image

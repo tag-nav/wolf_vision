@@ -29,32 +29,35 @@ class FeaturePointImage : public FeatureBase
         bool is_known_;
 
     public:
-        FeaturePointImage(const Eigen::Vector2s & _measurement);
+//        FeaturePointImage(const Eigen::Vector2s& _measurement) :
+//                FeatureBase("POINT IMAGE", _measurement, Eigen::MatrixXs::Zero(0, 0)), is_known_(false)
+//        {
+//            keypoint_.pt.x = float(measurement_(0));
+//            keypoint_.pt.y = float(measurement_(1));
+//            //
+//        }
 
-        FeaturePointImage(const Eigen::Vector2s & _measurement, const Eigen::Matrix2s& _meas_covariance) :
-                FeatureBase("POINT IMAGE", _measurement, _meas_covariance), is_known_(false)
-        {
-            keypoint_.pt.x = float(measurement_(0));
-            keypoint_.pt.y = float(measurement_(1));
-        }
+//        FeaturePointImage(const Eigen::Vector2s& _measurement, const Eigen::Matrix2s& _meas_covariance) :
+//                FeatureBase("POINT IMAGE", _measurement, _meas_covariance), is_known_(false)
+//        {
+//            keypoint_.pt.x = float(measurement_(0));
+//            keypoint_.pt.y = float(measurement_(1));
+//        }
 
-        FeaturePointImage(const cv::KeyPoint& _keypoint,
-                          const cv::Mat& _descriptor, bool _is_known) :
-                FeatureBase("POINT IMAGE", Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()),
-                keypoint_(_keypoint),
-                descriptor_(_descriptor)
-        {
-            measurement_(0) = Scalar(_keypoint.pt.x);
-            measurement_(1) = Scalar(_keypoint.pt.y);
-            is_known_=_is_known;
-        }
+//        FeaturePointImage(const cv::KeyPoint& _keypoint, const cv::Mat& _descriptor, bool _is_known) :
+//                FeatureBase("POINT IMAGE", Eigen::Vector2s::Zero(), Eigen::Matrix2s::Identity()), keypoint_(_keypoint), descriptor_(
+//                        _descriptor)
+//        {
+//            measurement_(0) = Scalar(_keypoint.pt.x);
+//            measurement_(1) = Scalar(_keypoint.pt.y);
+//            is_known_ = _is_known;
+//
+//        }
 
-        FeaturePointImage(const cv::KeyPoint& _keypoint,
-                          const cv::Mat& _descriptor, const Eigen::Matrix2s& _meas_covariance) :
-                FeatureBase("POINT IMAGE", Eigen::Vector2s::Zero(), _meas_covariance),
-                keypoint_(_keypoint),
-                descriptor_(_descriptor),
-                is_known_(false)
+        FeaturePointImage(const cv::KeyPoint& _keypoint, const cv::Mat& _descriptor,
+                          const Eigen::Matrix2s& _meas_covariance) :
+                FeatureBase("POINT IMAGE", Eigen::Vector2s::Zero(), _meas_covariance), keypoint_(_keypoint), descriptor_(
+                        _descriptor), is_known_(false)
         {
             measurement_(0) = Scalar(_keypoint.pt.x);
             measurement_(1) = Scalar(_keypoint.pt.y);
@@ -63,18 +66,10 @@ class FeaturePointImage : public FeatureBase
         virtual ~FeaturePointImage();
 
         const cv::KeyPoint& getKeypoint() const;
-        void setKeypoint(const cv::KeyPoint& _kp)
-        {
-            keypoint_ = _kp;
-            measurement_(0) = _kp.pt.x;
-            measurement_(1) = _kp.pt.y;
-        }
+        void setKeypoint(const cv::KeyPoint& _kp);
 
         const cv::Mat& getDescriptor() const;
-        void setDescriptor(const cv::Mat& _descriptor)
-        {
-            descriptor_ = _descriptor;
-        }
+        void setDescriptor(const cv::Mat& _descriptor);
 
         bool isKnown();
         void setIsKnown(bool _is_known);
@@ -92,9 +87,21 @@ inline const cv::KeyPoint& FeaturePointImage::getKeypoint() const
     return keypoint_;
 }
 
+inline void FeaturePointImage::setKeypoint(const cv::KeyPoint& _kp)
+{
+    keypoint_ = _kp;
+    measurement_(0) = _kp.pt.x;
+    measurement_(1) = _kp.pt.y;
+}
+
 inline const cv::Mat& FeaturePointImage::getDescriptor() const
 {
     return descriptor_;
+}
+
+inline void FeaturePointImage::setDescriptor(const cv::Mat& _descriptor)
+{
+    descriptor_ = _descriptor;
 }
 
 inline bool FeaturePointImage::isKnown()

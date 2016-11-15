@@ -240,7 +240,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
             key_capture_ptr->getBuffer().get().back().delta_integr_,
             key_capture_ptr->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
                     key_capture_ptr->getBuffer().get().back().delta_integr_cov_ :
-                    Eigen::MatrixXs::Identity(delta_size_, delta_size_) * 1e-8);
+                    Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
     key_capture_ptr->addFeature(key_feature_ptr);
 
     // create motion constraint and add it to the feature, and link it to the other frame (origin)

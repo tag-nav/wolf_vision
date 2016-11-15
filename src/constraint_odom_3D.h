@@ -76,7 +76,6 @@ inline ConstraintOdom3D::ConstraintOdom3D(FeatureBasePtr _ftr_current_ptr, Frame
                                         _frame_past_ptr->getPPtr(), // past frame P
                                         _frame_past_ptr->getOPtr()) // past frame Q
 {
-    std::cout << "Created Odom3D constraint" << std::endl;
     //
 }
 
@@ -122,8 +121,8 @@ inline Eigen::VectorXs wolf::ConstraintOdom3D::expectation() const
     const Scalar * const frame_past_pos     = frm_past->getPPtr()->getVector().data();
     const Scalar * const frame_past_ori     = frm_past->getOPtr()->getVector().data();
 
-    std::cout << "frame_current_pos: " << frm_current->getPPtr()->getVector().transpose() << std::endl;
-    std::cout << "frame_past_pos: " << frm_past->getPPtr()->getVector().transpose() << std::endl;
+//    std::cout << "frame_current_pos: " << frm_current->getPPtr()->getVector().transpose() << std::endl;
+//    std::cout << "frame_past_pos: " << frm_past->getPPtr()->getVector().transpose() << std::endl;
 
     expectation(frame_current_pos,
                 frame_current_ori,
@@ -196,6 +195,8 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p_current, const
 
     residuals.head(3) = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
     residuals.tail(3) = q2v(dq.conjugate() * dq_m);
+
+    residuals = getMeasurementSquareRootInformation().cast<T>() * residuals;
 
     //Eigen::Matrix<T,6,1> r = residuals;
 

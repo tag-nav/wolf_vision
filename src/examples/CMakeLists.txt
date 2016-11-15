@@ -21,8 +21,8 @@ IF(Ceres_FOUND)
     ADD_EXECUTABLE(test_processor_odom_3D test_processor_odom_3D.cpp)
     TARGET_LINK_LIBRARIES(test_processor_odom_3D ${PROJECT_NAME})
 
-    ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
-    TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
+#    TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
 ENDIF(Ceres_FOUND)
 
 
