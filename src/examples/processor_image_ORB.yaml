@@ -32,7 +32,7 @@ algorithm:
     distance: 20
     
 noise:
-    pixel noise std: 1 # pixels
+    pixel noise std: 0.8 # pixels
     
 draw: # Used to control drawing options
     primary draw: true
