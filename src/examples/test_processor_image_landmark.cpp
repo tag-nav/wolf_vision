@@ -199,17 +199,22 @@ int main(int argc, char** argv)
         else
         {
             // some maps to avoid local variables
-            Eigen::Map<Eigen::Vector3s>     p1(x_prev_prev.data());
-            Eigen::Map<Eigen::Quaternions>  q1(x_prev_prev.data() + 3);
-            Eigen::Map<Eigen::Vector3s>     p2(x_prev.data());
-            Eigen::Map<Eigen::Quaternions>  q2(x_prev.data() + 3);
+            Eigen::Map<Eigen::Vector3s>     p_prev_prev(x_prev_prev.data());
+            Eigen::Map<Eigen::Quaternions>  q_prev_prev(x_prev_prev.data() + 3);
+            Eigen::Map<Eigen::Vector3s>     p_prev(x_prev.data());
+            Eigen::Map<Eigen::Quaternions>  q_prev(x_prev.data() + 3);
+            Eigen::Map<Eigen::Vector3s>     dp(dx.data());
+            Eigen::Map<Eigen::Quaternions>  dq(dx.data() + 3);
 
             // delta state PQ
-            Eigen::Vector3s dp = q1.conjugate() * (p2 - p1);
-            Eigen::Quaternions dq = q1.conjugate() * q2;
+//            Eigen::Vector3s dp = q_prev_prev.conjugate() * (p_prev - p_prev_prev);
+//            Eigen::Quaternions dq = q_prev_prev.conjugate() * q_prev;
+//
+//            dx.head<3>() = dp;
+//            dx.tail<4>() = dq.coeffs();
 
-            dx.head<3>() = dp;
-            dx.tail<4>() = dq.coeffs();
+            dp = q_prev_prev.conjugate() * (p_prev - p_prev_prev);
+            dq = q_prev_prev.conjugate() * q_prev;
 
             // odometry data
             data.head<3>() = dp;
