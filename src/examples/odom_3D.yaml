@@ -6,4 +6,7 @@ motion variances:
     rot_to_rot:     0.001  # rad^2 / rad
     min_disp_var:   0.001  # m^2
     min_rot_var:    0.001  # rad^2
-    
+keyframe vote:
+    max buffer length:  10
+    dist traveled:      0.3
+    angle turned:       0.1

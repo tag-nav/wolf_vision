@@ -22,13 +22,19 @@ struct IntrinsicsOdom3D : public IntrinsicsBase
         Scalar k_rot_to_rot; ///< ratio of rotation variance to rotation, for odometry noise calculation
         Scalar min_disp_var;
         Scalar min_rot_var;
+        Scalar max_buffer_length;
+        Scalar dist_traveled;
+        Scalar angle_turned;
 
         IntrinsicsOdom3D() :
             k_disp_to_disp(0),
             k_disp_to_rot(0),
             k_rot_to_rot(0),
             min_disp_var(0),
-            min_rot_var(0)
+            min_rot_var(0),
+            max_buffer_length(0),
+            dist_traveled(0),
+            angle_turned(0)
         {}
 };
 
@@ -43,6 +49,10 @@ class SensorOdom3D : public SensorBase
         Scalar k_rot_to_rot_; ///< ratio of rotation variance to rotation, for odometry noise calculation
         Scalar min_disp_var_;
         Scalar min_rot_var_;
+
+        Scalar max_buffer_length_;
+        Scalar dist_traveled_;
+        Scalar angle_turned_;
 
     public:
         /** \brief Constructor with arguments
@@ -63,6 +73,10 @@ class SensorOdom3D : public SensorBase
         Scalar getRotVarToRotNoiseFactor() const;
         Scalar getMinDispVar() const;
         Scalar getMinRotVar() const;
+
+        Scalar getMaxBufferLength() const;
+        Scalar getDistTraveled() const;
+        Scalar getAngleTurned() const;
 
 
     public:
@@ -94,6 +108,21 @@ inline Scalar SensorOdom3D::getMinDispVar() const
 inline Scalar SensorOdom3D::getMinRotVar() const
 {
     return min_rot_var_;
+}
+
+inline Scalar SensorOdom3D::getMaxBufferLength() const
+{
+    return max_buffer_length_;
+}
+
+inline Scalar SensorOdom3D::getDistTraveled() const
+{
+    return dist_traveled_;
+}
+
+inline Scalar SensorOdom3D::getAngleTurned() const
+{
+    return angle_turned_;
 }
 
 } /* namespace wolf */

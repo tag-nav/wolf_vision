@@ -12,6 +12,7 @@
 #include "sensor_odom_3D.h"
 #include "constraint_odom_3D.h"
 #include "rotations.h"
+#include <cmath>
 
 
 namespace wolf {
@@ -48,7 +49,10 @@ class ProcessorOdom3D : public ProcessorMotion
                         Scalar _k_disp_to_rot = 0.1,
                         Scalar _k_rot_to_rot = 0.1,
                         Scalar _min_disp_var = 0.1,
-                        Scalar _min_rot_var = 0.1);
+                        Scalar _min_rot_var = 0.1,
+                        Scalar _max_buff_length = 20,
+                        Scalar _dist_traveled = 1,
+                        Scalar _angle_turned = 0.1);
         virtual ~ProcessorOdom3D();
         void setup(SensorOdom3D::Ptr sen_ptr);
 
@@ -81,6 +85,7 @@ class ProcessorOdom3D : public ProcessorMotion
     private:
         Scalar k_disp_to_disp_, k_disp_to_rot_, k_rot_to_rot_;
         Scalar min_disp_var_, min_rot_var_;
+        Scalar max_buff_length_, dist_traveled_, angle_turned_;
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
         Eigen::Map<Eigen::Vector3s> p_out_;
         Eigen::Map<const Eigen::Quaternions> q1_, q2_;
@@ -101,19 +106,30 @@ inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
 
 inline bool ProcessorOdom3D::voteForKeyFrame()
 {
-//    if (getBuffer().get().size() > 20)
-//    {
-//        std::cout << "PM::vote buffer big enough" << std::endl;
-//        return true;
-//    }
-    if (delta_integrated_.head(3).norm() > 1)
+    std::cout << "BufferLength: " << getBuffer().get().size() << std::endl;
+    std::cout << "DistTraveled: " << delta_integrated_.head(3).norm() << std::endl;
+    std::cout << "AngleTurned : " << 2 * acos(delta_integrated_(6)) << std::endl;
+
+    // buffer length
+    if (getBuffer().get().size() > max_buff_length_) // TODO: put this threshold in the YAML file
     {
-        std::cout << "PM::vote position delta big enough" << std::endl;
+        std::cout << "PM::vote: buffer of " << getBuffer().get().size() << " deltas is big enough" << std::endl;
         return true;
     }
-    if (delta_integrated_.tail(4).norm() > 0.7)
+
+    // distance traveled
+    Scalar dist = delta_integrated_.head(3).norm();
+    if (dist > dist_traveled_) // TODO: put this threshold in the YAML file
     {
-        std::cout << "PM::vote orientation delta big enough" << std::endl;
+        std::cout << "PM::vote: position delta of " << dist << "m is big enough" << std::endl;
+        return true;
+    }
+
+    // angle turned
+    Scalar angle = 2 * acos(delta_integrated_(6));
+    if (angle > angle_turned_) // TODO: put this threshold in the YAML file
+    {
+        std::cout << "PM::vote: orientation delta of " << angle * 180 / M_PI << "deg is big enough" << std::endl;
         return true;
     }
 
