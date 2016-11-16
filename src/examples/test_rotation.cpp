@@ -22,7 +22,7 @@
 #include <ctime>
 #include <cmath>
 
-//#define write_results
+#define write_results
 
 int main()
 {
@@ -394,7 +394,128 @@ int main()
         #endif
     }
 
-    std::cout << "\n\t\t********* changing rate of turn *********\n" << std::endl;
+    std::cout << "\n\t\t********* changing rate of turn - same freq for all axis *********\n" << std::endl;
 
+    //reinitialize
+    q0.setIdentity();
+
+    wolf::Scalar alpha, beta, gamma;
+    alpha = 10;
+    beta = 10;
+    gamma = 10;
+    v0 << alpha*deg_to_rad, beta*deg_to_rad, gamma*deg_to_rad;
+
+    for(wolf::Scalar t=0; t<N/dt; t++){
+        v1 << sin(v0(0)*t*dt), sin(v0(1)*t*dt), sin(v0(2)*t*dt);
+        v1 = q2v(v2q(v1));
+        ox(t) = v1(0);
+        oy(t) = v1(1);
+        oz(t) = v1(2);
+        /*ox(t) = pi2pi(v0(0)*t*dt);
+        oy(t) = pi2pi(v0(1)*t*dt);
+        oz(t) = pi2pi(v0(2)*t*dt);*/
+        t_vec(t) = t*dt;
+    }
+
+    for(wolf::Scalar t=0; t<N/dt; t++){
+        if(t!=0){
+            v2 << v0(0)*cos(v0(0)*t*dt), v0(1)*cos(v0(1)*t*dt), v0(2)*cos(v0(2)*t*dt);
+            q0 = q0 * v2q(v2*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
+        }
+        v1 = q2v(q0);   //corresponding rotation vector of current quaternion
+        qox(t) = v1(0); //angle X component
+        qoy(t) = v1(1); //angle Y component
+        qoz(t) = v1(2); //angle Z component
+    }
+
+    //Compute difference between orientation vectors (expected - real)
+    const_diff_ox = ox - qox;
+    const_diff_oy = oy - qoy;
+    const_diff_oz = oz - qoz;
+
+    //get absolute difference
+    cdox_abs = const_diff_ox.array().abs();
+    cdoy_abs = const_diff_oy.array().abs();
+    cdoz_abs = const_diff_oz.array().abs();
+
+    if(cdox_abs.isApprox(vector0,wolf::Constants::EPS) && cdoy_abs.isApprox(vector0,wolf::Constants::EPS) && cdoz_abs.isApprox(vector0,wolf::Constants::EPS))
+        std::cout << "\t quaternion composition with constant rate of turn is OK\n" << std::endl;
+    else{
+        std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
+        std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
+        #ifdef write_results
+            std::ofstream sin_rot0;
+            sin_rot0.open("sin_rot0.dat");
+            if(sin_rot0){
+                sin_rot0 << "%%timestamp\t" << "ox\t" << "oy\t" << "oz\t" << "qox\t" << "qoy\t" << "qoz\t" << "\n";
+                for(int i = 0; i<N/dt; i++)
+                    sin_rot0 << t_vec(i) << "\t" << ox(i) << "\t" << oy(i) << "\t" << oz(i) << "\t" << qox(i) << "\t" << qoy(i) << "\t" << qoz(i) << "\n";
+                sin_rot0.close();
+            }
+            else
+                std::cout << "could not open file sin_rot0" << std::endl;
+        #endif
+    }
+
+    std::cout << "\n\t\t********* changing rate of turn - different freq for 1 axis *********\n" << std::endl;
+
+    //reinitialize
+    q0.setIdentity();
+    alpha = 10;
+    beta = 5;
+    gamma = 10;
+    v0 << alpha*deg_to_rad, beta*deg_to_rad, gamma*deg_to_rad;
+
+    for(wolf::Scalar t=0; t<N/dt; t++){
+        v1 << sin(v0(0)*t*dt), sin(v0(1)*t*dt), sin(v0(2)*t*dt);
+        v1 = q2v(v2q(v1));
+        ox(t) = v1(0);
+        oy(t) = v1(1);
+        oz(t) = v1(2);
+        /*ox(t) = pi2pi(v0(0)*t*dt);
+        oy(t) = pi2pi(v0(1)*t*dt);
+        oz(t) = pi2pi(v0(2)*t*dt);*/
+        t_vec(t) = t*dt;
+    }
+
+    for(wolf::Scalar t=0; t<N/dt; t++){
+        if(t!=0){
+            v2 << v0(0)*cos(v0(0)*t*dt), v0(1)*cos(v0(1)*t*dt), v0(2)*cos(v0(2)*t*dt);
+            q0 = q0 * v2q(v2*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
+        }
+        v1 = q2v(q0);   //corresponding rotation vector of current quaternion
+        qox(t) = v1(0); //angle X component
+        qoy(t) = v1(1); //angle Y component
+        qoz(t) = v1(2); //angle Z component
+    }
+
+    //Compute difference between orientation vectors (expected - real)
+    const_diff_ox = ox - qox;
+    const_diff_oy = oy - qoy;
+    const_diff_oz = oz - qoz;
+
+    //get absolute difference
+    cdox_abs = const_diff_ox.array().abs();
+    cdoy_abs = const_diff_oy.array().abs();
+    cdoz_abs = const_diff_oz.array().abs();
+
+    if(cdox_abs.isApprox(vector0,wolf::Constants::EPS) && cdoy_abs.isApprox(vector0,wolf::Constants::EPS) && cdoz_abs.isApprox(vector0,wolf::Constants::EPS))
+        std::cout << "\t quaternion composition with constant rate of turn is OK\n" << std::endl;
+    else{
+        std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
+        std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
+        #ifdef write_results
+            std::ofstream sin_rot;
+            sin_rot.open("sin_rot.dat");
+            if(sin_rot){
+                sin_rot << "%%timestamp\t" << "ox\t" << "oy\t" << "oz\t" << "qox\t" << "qoy\t" << "qoz\t" << "\n";
+                for(int i = 0; i<N/dt; i++)
+                    sin_rot << t_vec(i) << "\t" << ox(i) << "\t" << oy(i) << "\t" << oz(i) << "\t" << qox(i) << "\t" << qoy(i) << "\t" << qoz(i) << "\n";
+                sin_rot.close();
+            }
+            else
+                std::cout << "could not open file sin_rot" << std::endl;
+        #endif
+    }
 
 }
