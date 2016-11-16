@@ -33,6 +33,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
+        Eigen::VectorXs expectation_;                   ///<  expectation
         
     public:
         /** \brief Constructor from capture pointer and measure dim
@@ -70,6 +71,9 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         const Eigen::MatrixXs& getMeasurementCovariance() const;
         const Eigen::MatrixXs& getMeasurementSquareRootInformation() const;
 
+        const Eigen::VectorXs& getExpectation() const;
+        void setExpectation(const Eigen::VectorXs& expectation);
+
         // wolf tree access
         ProblemPtr getProblem();
 
@@ -87,7 +91,10 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 
         // all constraints
         void getConstraintList(ConstraintBaseList & _ctr_list);
+
 };
+
+
 
 }
 
@@ -161,6 +168,16 @@ inline const Eigen::MatrixXs& FeatureBase::getMeasurementSquareRootInformation()
 inline void FeatureBase::setMeasurement(const Eigen::VectorXs& _meas)
 {
     measurement_ = _meas;
+}
+
+inline const Eigen::VectorXs& FeatureBase::getExpectation() const
+{
+    return expectation_;
+}
+
+inline void FeatureBase::setExpectation(const Eigen::VectorXs& expectation)
+{
+    expectation_ = expectation;
 }
 
 } // namespace wolf

@@ -138,6 +138,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         point2D = pinhole::distortPoint((std::static_pointer_cast<SensorCamera>(this->getSensorPtr()))->getDistortionVector(),point2D);
         point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
 
+
         if(pinhole::isInImage(point2D,image_.width_,image_.height_))
         {
             roi_x = (point2D[0]) - (roi_heigth / 2);
@@ -172,6 +173,8 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                     incoming_point_ptr->setTrackId(landmark_in_ptr->id());
                     incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
                     _feature_list_out.push_back(incoming_point_ptr);
+
+                    incoming_point_ptr->setExpectation(point2D);
 
                     _feature_landmark_correspondences[_feature_list_out.back()] = std::make_shared<LandmarkMatch>(landmark_in_ptr, normalized_score);
 
@@ -237,6 +240,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
                             Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
                     point_ptr->setIsKnown(false);
                     point_ptr->setTrackId(point_ptr->id());
+                    point_ptr->setExpectation(Eigen::Vector2s(new_keypoints[0].pt.x,new_keypoints[0].pt.y));
                     addNewFeatureLast(point_ptr);
                     active_search_grid_.hitCell(new_keypoints[0]);
                     n_new_features++;
@@ -299,7 +303,7 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
         auto landmark = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
 //        return std::make_shared<ConstraintAHP>(_feature_ptr, current_frame, landmark );
 
-        ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(_feature_ptr, current_frame, landmark );
+        ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(_feature_ptr, current_frame, landmark, true);
 
 
 
