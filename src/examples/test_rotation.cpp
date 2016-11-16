@@ -15,6 +15,15 @@
 #include "wolf.h"
 #include "../rotations.h"
 
+//std
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <ctime>
+#include <cmath>
+
+//#define write_results
+
 int main()
 {
     using namespace wolf;
@@ -310,20 +319,81 @@ int main()
     ///Quaternion composition
     std::cout<< "\n\n######################################### Quaternion composition ################################################\n" << std::endl;
 
-    Eigen::Quaternions q0, q1;
+    Eigen::Quaternions q0;
     q0.setIdentity();
-    Eigen::Vector3s v0, v1;
-    v0 << 30.0*deg_to_rad, 5.0*deg_to_rad, 10.0*deg_to_rad;
+    Eigen::Vector3s v0, v1, v2;
+    Eigen::VectorXs const_diff_ox, const_diff_oy, const_diff_oz, ox, oy, oz, qox, qoy, qoz;
+    Eigen::VectorXs cdox_abs, cdoy_abs, cdoz_abs, vector0, t_vec; //= const_diff_## with absolute values
+    const wolf::Scalar dt = 0.001;
+    const wolf::Scalar N = 100;
 
-    q1 = q0 * v2q(v0); //compose on top of unit quaternion
+    std::cout << "\t\t********* constant rate of turn *********\n" << std::endl;
 
-    //analyze data
-    Eigen::Vector4s vec_q0, vec_q1;
-    vec_q0 << q0.w(), q0.x(), q0.y(), q0.z();
-    vec_q1 << q1.w(), q1.x(), q1.y(), q1.z();
+    v0 << 30.0*deg_to_rad, 5.0*deg_to_rad, 10.0*deg_to_rad; //constant rate-of-turn in rad/s
+    const_diff_ox.resize(N/dt);
+    const_diff_oy.resize(N/dt);
+    const_diff_oz.resize(N/dt);
+    cdox_abs.resize(N/dt);
+    cdoy_abs.resize(N/dt);
+    cdoz_abs.resize(N/dt);
+    vector0 = Eigen::VectorXs::Zero(N/dt);
+    t_vec.resize(N/dt);
+    ox.resize(N/dt);
+    oy.resize(N/dt);
+    oz.resize(N/dt);
+    qox.resize(N/dt);
+    qoy.resize(N/dt);
+    qoz.resize(N/dt);
 
-    v1 = q2v(q1);
+    std::cout << "pi2pi..." << std::endl;
+    for(wolf::Scalar t=0; t<N/dt; t++){
+        v2 = q2v(v2q(v0*t*dt));
+        ox(t) = v2(0);
+        oy(t) = v2(1);
+        oz(t) = v2(2);
+        /*ox(t) = pi2pi(v0(0)*t*dt);
+        oy(t) = pi2pi(v0(1)*t*dt);
+        oz(t) = pi2pi(v0(2)*t*dt);*/
+        t_vec(t) = t*dt;
+    }
+    
+    std::cout << "composing..." << std::endl;
+    for(wolf::Scalar t=0; t<N/dt; t++){
+        if(t!=0)
+            q0 = q0 * v2q(v0*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
+        v1 = q2v(q0);   //corresponding rotation vector of current quaternion
+        qox(t) = v1(0); //angle X component
+        qoy(t) = v1(1); //angle Y component
+        qoz(t) = v1(2); //angle Z component
+    }
 
-    std::cout << "\n Initial quaternion : " << vec_q0.transpose() << "\t rotated quaternion : " << vec_q1.transpose() << std::endl;
-    std::cout << "applied rotation : " << v0.transpose() << "\t resulting rotation vector : " << v1.transpose() << std::endl; 
+    //Compute difference between orientation vectors (expected - real)
+    const_diff_ox = ox - qox;
+    const_diff_oy = oy - qoy;
+    const_diff_oz = oz - qoz;
+
+    //get absolute difference
+    cdox_abs = const_diff_ox.array().abs();
+    cdoy_abs = const_diff_oy.array().abs();
+    cdoz_abs = const_diff_oz.array().abs();
+
+    std::cout << "checking..." << std::endl;
+    if(cdox_abs.isApprox(vector0,wolf::Constants::EPS) && cdoy_abs.isApprox(vector0,wolf::Constants::EPS) && cdoz_abs.isApprox(vector0,wolf::Constants::EPS))
+        std::cout << "\t quaternion composition with constant rate of turn is OK\n" << std::endl;
+    else{
+        std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
+        std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
+        #ifdef write_results
+            std::ofstream const_rot;
+            const_rot.open("const_rot.dat");
+            if(const_rot){
+                const_rot << "%%timestamp\t" << "ox\t" << "oy\t" << "oz\t" << "qox\t" << "qoy\t" << "qoz\t" << "\n";
+                for(int i = 0; i<N/dt; i++)
+                    const_rot << t_vec(i) << "\t" << ox(i) << "\t" << oy(i) << "\t" << oz(i) << "\t" << qox(i) << "\t" << qoy(i) << "\t" << qoz(i) << "\n";
+                const_rot.close();
+            }
+            else
+                std::cout << "could not open file const_rot" << std::endl;
+        #endif
+    }
 }
