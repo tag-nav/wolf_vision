@@ -145,6 +145,7 @@ int main(int argc, char** argv)
 
     while(!(frame[f % buffer_size].empty()))
     {
+
         t += dt;
 
         // Image ------------------------------------------------
@@ -229,7 +230,7 @@ int main(int argc, char** argv)
 //        std::cout << "          dt: " << t_prev - t_prev_prev << "; dx: " << dx.transpose() << std::endl;
 
 
-        cv::waitKey(0);
+        cv::waitKey(30);
 
         std::cout << "=================================================================================================" << std::endl;
 
