@@ -345,7 +345,6 @@ int main()
     qoy.resize(N/dt);
     qoz.resize(N/dt);
 
-    std::cout << "pi2pi..." << std::endl;
     for(wolf::Scalar t=0; t<N/dt; t++){
         v2 = q2v(v2q(v0*t*dt));
         ox(t) = v2(0);
@@ -357,7 +356,6 @@ int main()
         t_vec(t) = t*dt;
     }
     
-    std::cout << "composing..." << std::endl;
     for(wolf::Scalar t=0; t<N/dt; t++){
         if(t!=0)
             q0 = q0 * v2q(v0*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
@@ -377,7 +375,6 @@ int main()
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    std::cout << "checking..." << std::endl;
     if(cdox_abs.isApprox(vector0,wolf::Constants::EPS) && cdoy_abs.isApprox(vector0,wolf::Constants::EPS) && cdoz_abs.isApprox(vector0,wolf::Constants::EPS))
         std::cout << "\t quaternion composition with constant rate of turn is OK\n" << std::endl;
     else{
@@ -396,4 +393,8 @@ int main()
                 std::cout << "could not open file const_rot" << std::endl;
         #endif
     }
+
+    std::cout << "\n\t\t********* changing rate of turn *********\n" << std::endl;
+
+
 }
