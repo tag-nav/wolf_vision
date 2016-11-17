@@ -30,7 +30,6 @@ class CaptureImage : public CaptureBase
         cv::Mat image_;
         cv::Mat descriptors_;
         std::vector<cv::KeyPoint> keypoints_;
-        std::list<cv::Rect> tracker_roi_;
 
     public:
         CaptureImage(const TimeStamp& _ts, SensorCamera::Ptr _camera_ptr, cv::Mat _data_cv);
@@ -41,15 +40,7 @@ class CaptureImage : public CaptureBase
         virtual void setKeypoints(const std::vector<cv::KeyPoint>& _keypoints);
         virtual cv::Mat& getDescriptors();
         virtual std::vector<cv::KeyPoint>& getKeypoints();
-
-        std::list<cv::Rect>& getTrackerRoi();
-
 };
-
-inline std::list<cv::Rect>& CaptureImage::getTrackerRoi()
-{
-    return tracker_roi_;
-}
 
 } // namespace wolf
 
