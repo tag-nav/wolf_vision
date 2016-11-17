@@ -115,7 +115,7 @@ TEST(rotations, R2v_v2R_limits)
 
     //Eigen::Vector3s rv;
     for(int i = 0; i<8; i++){
-        initial_matrix = Eigen::Matrix3s::Random() * scale; //FIX ME : Random() will not create a rotation matrix. Then, R2v(initial_matrix) makes no sense at all.
+        initial_matrix = v2R(Eigen::Vector3s::Random() * scale);
 
         R_to_v = R2v(initial_matrix);
         // now we set the diagonal to identity
@@ -139,7 +139,7 @@ TEST(rotations, R2v_v2R_limits2)
     Eigen::Vector3s rv;
 
     for(int i = 0; i<8; i++){
-        rotation_mat = Eigen::Matrix3s::Random() * scale; //FIX ME : Random() will not create a rotation matrix. Then, R2v(initial_matrix) makes no sense at all.
+        rotation_mat = v2R(Eigen::Vector3s::Random() * scale);
         //rotation_mat(0,0) = 1.0;
         //rotation_mat(1,1) = 1.0;
         //rotation_mat(2,2) = 1.0;
