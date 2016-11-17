@@ -166,6 +166,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                             candidate_keypoints[cv_matches[0].trainIdx],
                             candidate_descriptors.row(cv_matches[0].trainIdx),
                             Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
+
                     incoming_point_ptr->setTrackId(landmark_in_ptr->id());
                     incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
                     _feature_list_out.push_back(incoming_point_ptr);
@@ -365,7 +366,6 @@ void ProcessorImageLandmark::LandmarkInCurrentCamera(CaptureBasePtr _capture, st
 
     Eigen::Quaternion<Scalar> qwr1, qwr0, qrc;
     Eigen::Vector4s quaternion_anchor = _landmark->getAnchorFrame()->getOPtr()->getVector();
-    Eigen::Vector4s quaternion_current_frame = getLastPtr()->getFramePtr()->getOPtr()->getVector();
     Eigen::Vector4s quaternion_sensor = this->getSensorPtr()->getOPtr()->getVector();
     qwr0 = quaternion_anchor;
     qwr1 = quaternion_current_frame;
@@ -471,6 +471,8 @@ void ProcessorImageLandmark::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_li
         cv::rectangle(_image, roi, _color, 1, 8, 0);
 
     cv::imshow("Feature tracker", _image);
+//    std::cout << "drawRoi" << std::endl;
+//    cv::waitKey(0);
 }
 
 void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
