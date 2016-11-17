@@ -97,11 +97,13 @@ void ProcessorImageLandmark::postProcess()
     if (last_ptr_!=nullptr)
     {
         cv::Mat image = image_incoming_.clone();
-        if(params_.draw.tracker_roi) drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
+        if(params_.draw.tracker_roi) drawRoi(image, std::static_pointer_cast<CaptureImage>(last_ptr_), cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
         if(params_.draw.detector_roi) drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
         if(params_.draw.primary_drawing) drawLandmarks(image);
         if(params_.draw.secondary_drawing) drawFeaturesFromLandmarks(image);
     }
+    detector_roi_.clear();
+    feat_lmk_found_.clear();
 }
 
 unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _landmark_list_in,
@@ -426,6 +428,16 @@ void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::R
     inflateRoi(_roi);
     trimRoi(_roi);
     _image_roi = _image(_roi);
+}
+
+void ProcessorImageLandmark::drawRoi(cv::Mat _image, CaptureImage::Ptr _capture, cv::Scalar _color)
+{
+    for (auto feature : _capture->getFeatureList())
+        cv::rectangle(_image, std::static_pointer_cast<FeaturePointImage>(feature)->getTrackerRoi(), _color, 1, 8, 0);
+
+    cv::imshow("Feature tracker", _image);
+//    std::cout << "drawRoi" << std::endl;
+//    cv::waitKey(0);
 }
 
 void ProcessorImageLandmark::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
