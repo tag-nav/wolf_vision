@@ -22,6 +22,8 @@
 
 //#define write_results
 
+// THESE ARE UNITARY TESTS FOR METHODS IN ROTATION.H
+
 TEST(rotations, Skew_vee)
 {
     using namespace wolf;
@@ -272,34 +274,10 @@ TEST(rotations, AngleAxis_limits2)
     EXPECT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 }
 
-
-
-int main()
+TEST(rotations, Quat_compos_const_rateOfTurn)
 {
-    using namespace wolf;
-                        // THESE ARE UNITARY TESTS FOR METHODS IN ROTATION.H
-
-    /*
-        LIST OF FUNCTIONS : 
-        - pi2pi                                                            
-        - skew                                                             OK
-        - vee                                                              OK
-        - v2q                                                              v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
-        - Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)       v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
-        - Eigen::VectorXs q2v(const Eigen::Quaternions& _q)                v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
-        - v2R
-        - R2v
-        - jac_SO3_right
-        - jac_SO3_right_inv
-        - jac_SO3_left
-        - jac_SO3_left_inv
-        - quaternion composition
-     */
-
-    /**********************************************************************************************/
-    ///Quaternion composition
-    std::cout<< "\n\n######################################### Quaternion composition ################################################\n" << std::endl;
-
+                                // ********* constant rate of turn *********
+    wolf::Scalar deg_to_rad = M_PI/180.0;
     Eigen::Quaternions q0;
     q0.setIdentity();
     Eigen::Vector3s v0, v1, v2;
@@ -307,8 +285,6 @@ int main()
     Eigen::VectorXs cdox_abs, cdoy_abs, cdoz_abs, vector0, t_vec; //= const_diff_## with absolute values
     const wolf::Scalar dt = 0.001;
     const wolf::Scalar N = 100;
-
-    std::cout << "\t\t********* constant rate of turn *********\n" << std::endl;
 
     v0 << 30.0*deg_to_rad, 5.0*deg_to_rad, 10.0*deg_to_rad; //constant rate-of-turn in rad/s
     const_diff_ox.resize(N/dt);
@@ -356,11 +332,10 @@ int main()
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    if(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS))
-        std::cout << "\t quaternion composition with constant rate of turn is OK\n" << std::endl;
-    else{
-        std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
-        std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
+    if(!((EXPECT_TRUE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)))
+    {
+        //std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
+        //std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
         #ifdef write_results
             std::ofstream const_rot;
             const_rot.open("const_rot.dat");
@@ -371,14 +346,37 @@ int main()
                 const_rot.close();
             }
             else
-                std::cout << "could not open file const_rot" << std::endl;
+                PRINTF("could not open file const_rot");
         #endif
     }
+}
 
-    std::cout << "\n\t\t********* changing rate of turn - same freq for all axis *********\n" << std::endl;
-
-    //reinitialize
+TEST(rotations, Quat_compos_var_rateOfTurn)
+{
+                                //********* changing rate of turn - same freq for all axis *********
+    wolf::Scalar deg_to_rad = M_PI/180.0;
+    Eigen::Quaternions q0;
     q0.setIdentity();
+    Eigen::Vector3s v0, v1, v2;
+    Eigen::VectorXs const_diff_ox, const_diff_oy, const_diff_oz, ox, oy, oz, qox, qoy, qoz;
+    Eigen::VectorXs cdox_abs, cdoy_abs, cdoz_abs, vector0, t_vec; //= const_diff_## with absolute values
+    const wolf::Scalar dt = 0.001;
+    const wolf::Scalar N = 100;
+
+    const_diff_ox.resize(N/dt);
+    const_diff_oy.resize(N/dt);
+    const_diff_oz.resize(N/dt);
+    cdox_abs.resize(N/dt);
+    cdoy_abs.resize(N/dt);
+    cdoz_abs.resize(N/dt);
+    vector0 = Eigen::VectorXs::Zero(N/dt);
+    t_vec.resize(N/dt);
+    ox.resize(N/dt);
+    oy.resize(N/dt);
+    oz.resize(N/dt);
+    qox.resize(N/dt);
+    qoy.resize(N/dt);
+    qoz.resize(N/dt);
 
     wolf::Scalar alpha, beta, gamma;
     alpha = 10;
@@ -419,11 +417,10 @@ int main()
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    if(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS))
-        std::cout << "\t quaternion composition with constant rate of turn is OK\n" << std::endl;
-    else{
-        std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
-        std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
+    if(!((EXPECT_TRUE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)))
+    {
+        //std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
+        //std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
         #ifdef write_results
             std::ofstream sin_rot0;
             sin_rot0.open("sin_rot0.dat");
@@ -434,14 +431,39 @@ int main()
                 sin_rot0.close();
             }
             else
-                std::cout << "could not open file sin_rot0" << std::endl;
+                PRINTF("could not open file sin_rot0");
         #endif
     }
+}
 
-    std::cout << "\n\t\t********* changing rate of turn - different freq for 1 axis *********\n" << std::endl;
-
-    //reinitialize
+TEST(rotations, Quat_compos_var_rateOfTurn_diff)
+{
+    //      ********* changing rate of turn - different freq for 1 axis *********
+    wolf::Scalar deg_to_rad = M_PI/180.0;
+    Eigen::Quaternions q0;
     q0.setIdentity();
+    Eigen::Vector3s v0, v1, v2;
+    Eigen::VectorXs const_diff_ox, const_diff_oy, const_diff_oz, ox, oy, oz, qox, qoy, qoz;
+    Eigen::VectorXs cdox_abs, cdoy_abs, cdoz_abs, vector0, t_vec; //= const_diff_## with absolute values
+    const wolf::Scalar dt = 0.001;
+    const wolf::Scalar N = 100;
+
+    const_diff_ox.resize(N/dt);
+    const_diff_oy.resize(N/dt);
+    const_diff_oz.resize(N/dt);
+    cdox_abs.resize(N/dt);
+    cdoy_abs.resize(N/dt);
+    cdoz_abs.resize(N/dt);
+    vector0 = Eigen::VectorXs::Zero(N/dt);
+    t_vec.resize(N/dt);
+    ox.resize(N/dt);
+    oy.resize(N/dt);
+    oz.resize(N/dt);
+    qox.resize(N/dt);
+    qoy.resize(N/dt);
+    qoz.resize(N/dt);
+
+    wolf::Scalar alpha, beta, gamma;
     alpha = 10;
     beta = 5;
     gamma = 10;
@@ -480,11 +502,10 @@ int main()
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    if(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS))
-        std::cout << "\t quaternion composition with constant rate of turn is OK\n" << std::endl;
-    else{
-        std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
-        std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
+    if(!((EXPECT_TRUE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS))
+    {
+        //std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
+        //std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
         #ifdef write_results
             std::ofstream sin_rot;
             sin_rot.open("sin_rot.dat");
@@ -495,8 +516,33 @@ int main()
                 sin_rot.close();
             }
             else
-                std::cout << "could not open file sin_rot" << std::endl;
+                 PRINTF("could not open file sin_rot");
         #endif
     }
+}
 
+int main()
+{
+    using namespace wolf;
+                        
+
+    /*
+        LIST OF FUNCTIONS : 
+        - pi2pi                                                            
+        - skew -> Skew_vee                                                            OK
+        - vee  -> Skew_vee                                                            OK
+        - v2q                                                              v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)       v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - Eigen::VectorXs q2v(const Eigen::Quaternions& _q)                v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - v2R
+        - R2v
+        - jac_SO3_right
+        - jac_SO3_right_inv
+        - jac_SO3_left
+        - jac_SO3_left_inv
+        - quaternion composition
+     */
+
+     testing::InitGoogleTest(&argc, argv);
+     return RUN_ALL_TESTS();
 }
