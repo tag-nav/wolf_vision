@@ -230,7 +230,7 @@ int main(int argc, char** argv)
 //        std::cout << "          dt: " << t_prev - t_prev_prev << "; dx: " << dx.transpose() << std::endl;
 
 
-        cv::waitKey(30);
+        cv::waitKey(0);
 
         std::cout << "=================================================================================================" << std::endl;
 
