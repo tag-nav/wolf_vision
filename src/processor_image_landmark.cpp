@@ -96,7 +96,7 @@ void ProcessorImageLandmark::postProcess()
 {
     if (last_ptr_!=nullptr)
     {
-        cv::Mat image = image_incoming_.clone();
+        cv::Mat image = image_last_.clone();
         if(params_.draw.tracker_roi) drawRoi(image, std::static_pointer_cast<CaptureImage>(last_ptr_), cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
         if(params_.draw.detector_roi) drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
         if(params_.draw.primary_drawing) drawLandmarks(image);
