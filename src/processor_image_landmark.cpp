@@ -88,9 +88,6 @@ void ProcessorImageLandmark::preProcess()
     image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
     active_search_grid_.renew();
 
-
-    // variables used to debug
-    tracker_roi_.clear();
     detector_roi_.clear();
     feat_lmk_found_.clear();
 }
@@ -152,9 +149,6 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 //            std::cout << "pixel: " << point2D.transpose() << std::endl;
 //            std::cout << "target_descriptor[" << lmk_nbr << "]:\n" << target_descriptor.row(0) << std::endl;
 
-            //lists used to debug
-            tracker_roi_.push_back(roi);
-
             if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
             {
                 Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
@@ -181,6 +175,11 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                     feat_lmk_found_.push_back(incoming_point_ptr);
 //                    std::cout << "LMK " << lmk_nbr << "; FEATURE IN POINT X: " << incoming_point_ptr->getKeypoint().pt.x
 //                              << "\tY: " << incoming_point_ptr->getKeypoint().pt.y << std::endl;
+
+                    // To visualize
+                    cv::Rect roi2 = roi;
+                    trimRoi(roi2);
+                    incoming_point_ptr->setTrackerRoi(roi2);
 
                 }
 //                else
