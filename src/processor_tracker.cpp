@@ -117,7 +117,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         /* Status:
          *  * ---- KF ---       KF: keyframes; F: frame
          *  o      l      i     captures: origin, last, incoming
-         *         n            new features
+         *         k            known features
          */
 
         // First we track the known Features
