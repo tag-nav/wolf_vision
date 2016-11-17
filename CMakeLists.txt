@@ -67,6 +67,17 @@ endif()
 
 #OPTION(BUILD_DOC "Build Documentation" OFF)
 OPTION(BUILD_TESTS "Build Unit tests" ON)
+#############
+## Testing ##
+#############
+#
+if(BUILD_TESTS)
+    # Enables testing for this directory and below.
+    # Note that ctest expects to find a test file in the build directory root.
+    # Therefore, this command should be in the source directory root.
+    #include(CTest) # according to http://public.kitware.com/pipermail/cmake/2012-June/050853.html
+    enable_testing()
+endif()
 
 ADD_SUBDIRECTORY(src)
 
@@ -127,13 +138,3 @@ ELSE(UNIX)
     TARGET  uninstall)
 ENDIF(UNIX)
 
-#############
-## Testing ##
-#############
-#
-if(BUILD_TESTS)
-    # Enables testing for this directory and below.
-    # Note that ctest expects to find a test file in the build directory root.
-    # Therefore, this command should be in the source directory root.
-    enable_testing()
-endif()

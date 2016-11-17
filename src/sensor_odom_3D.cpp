@@ -18,7 +18,10 @@ SensorOdom3D::SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _o_ptr, Intr
         k_disp_to_rot_(params->k_disp_to_rot),
         k_rot_to_rot_(params->k_rot_to_rot),
         min_disp_var_(params->min_disp_var),
-        min_rot_var_(params->min_rot_var)
+        min_rot_var_(params->min_rot_var),
+        max_buffer_length_(params->max_buffer_length),
+        dist_traveled_(params->dist_traveled),
+        angle_turned_(params->angle_turned)
 {
     //
 }

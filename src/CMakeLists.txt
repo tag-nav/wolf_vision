@@ -21,9 +21,14 @@ option(BUILD_EXAMPLES "Build examples" ON)
 
 # Does this has any other interest
 # but for the examples ?
-#IF(BUILD_EXAMPLES)
+IF(BUILD_EXAMPLES)
   set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
-#ENDIF(BUILD_EXAMPLES)
+ENDIF(BUILD_EXAMPLES)
+#
+# yes, for the tests !
+IF(BUILD_TESTS)
+  set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
+ENDIF(BUILD_TESTS)
 
 
 #find dependencies.
@@ -478,12 +483,6 @@ INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
 
 export(PACKAGE ${PROJECT_NAME})
 
-IF(BUILD_EXAMPLES)
-  #Build examples & tests
-  MESSAGE("Building examples.")
-  ADD_SUBDIRECTORY(examples)
-ENDIF(BUILD_EXAMPLES)
-
 #############
 ## Testing ##
 #############
@@ -494,4 +493,10 @@ if(BUILD_TESTS)
     add_subdirectory(test)
 
 endif()
+
+IF(BUILD_EXAMPLES)
+  #Build examples & tests
+  MESSAGE("Building examples.")
+  ADD_SUBDIRECTORY(examples)
+ENDIF(BUILD_EXAMPLES)
 

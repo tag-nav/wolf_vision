@@ -6,13 +6,19 @@ ProcessorOdom3D::ProcessorOdom3D(Scalar _k_disp_to_disp,
                                  Scalar _k_disp_to_rot,
                                  Scalar _k_rot_to_rot,
                                  Scalar _min_disp_var,
-                                 Scalar _min_rot_var) :
+                                 Scalar _min_rot_var,
+                                 Scalar _max_buff_length,
+                                 Scalar _dist_traveled,
+                                 Scalar _angle_turned) :
         ProcessorMotion("ODOM 3D", 7, 7, 6, 6),
         k_disp_to_disp_(_k_disp_to_disp),
         k_disp_to_rot_(_k_disp_to_rot),
         k_rot_to_rot_(_k_rot_to_rot),
         min_disp_var_(_min_disp_var),
         min_rot_var_(_min_rot_var),
+        max_buff_length_(_max_buff_length),
+        dist_traveled_(_dist_traveled),
+        angle_turned_(_angle_turned),
         p1_(nullptr), p2_(nullptr), p_out_(nullptr),
         q1_(nullptr), q2_(nullptr), q_out_(nullptr)
 {
@@ -31,6 +37,9 @@ void ProcessorOdom3D::setup(SensorOdom3D::Ptr sen_ptr)
     k_rot_to_rot_ = sen_ptr->getRotVarToRotNoiseFactor();
     min_disp_var_ = sen_ptr->getMinDispVar();
     min_rot_var_ = sen_ptr->getMinRotVar();
+    max_buff_length_ = sen_ptr->getMaxBufferLength();
+    dist_traveled_ = sen_ptr->getDistTraveled();
+    angle_turned_ = sen_ptr->getAngleTurned();
 }
 
 void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
