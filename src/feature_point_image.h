@@ -27,6 +27,7 @@ class FeaturePointImage : public FeatureBase
         cv::KeyPoint keypoint_; ///< Warning: every write operation to this member needs to write measurement_. See setKeypoint() as an example.
         cv::Mat descriptor_;
         bool is_known_;
+        cv::Rect tracker_roi_;
 
     public:
 
@@ -73,6 +74,8 @@ class FeaturePointImage : public FeatureBase
             return measurement_;
         }*/
 
+        const cv::Rect& getTrackerRoi() const;
+        void setTrackerRoi(const cv::Rect& tracker_roi);
 };
 
 inline const cv::KeyPoint& FeaturePointImage::getKeypoint() const
@@ -105,6 +108,16 @@ inline bool FeaturePointImage::isKnown()
 inline void FeaturePointImage::setIsKnown(bool _is_known)
 {
     is_known_ = _is_known;
+}
+
+inline const cv::Rect& FeaturePointImage::getTrackerRoi() const
+{
+    return tracker_roi_;
+}
+
+inline void FeaturePointImage::setTrackerRoi(const cv::Rect& tracker_roi)
+{
+    tracker_roi_ = tracker_roi;
 }
 
 } // namespace wolf
