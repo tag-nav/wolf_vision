@@ -130,7 +130,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         Eigen::Vector3s point2D_hmg;
         Eigen::Vector2s point2D;
 
-        LandmarkInCurrentCamera(landmark_ptr,point3D_hmg);
+        LandmarkInCurrentCamera(incoming_ptr_, landmark_ptr, point3D_hmg);
 
         point2D_hmg = point3D_hmg.head(3);
         point2D = point2D_hmg.head(2)/point2D_hmg(2);
@@ -486,7 +486,7 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
         Eigen::Vector3s point2D_hmg;
         Eigen::Vector2s point2D;
 
-        LandmarkInCurrentCamera(landmark_ptr,point3D_hmg);
+        LandmarkInCurrentCamera(last_ptr_, landmark_ptr,point3D_hmg);
 
         point2D_hmg = point3D_hmg.head(3);
         point2D = point2D_hmg.head(2)/point2D_hmg(2);
