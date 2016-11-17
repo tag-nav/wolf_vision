@@ -5,9 +5,6 @@
  *      \author: AtDinesh
  */
 
-//std
-#include <iostream>
-
 //Eigen
 #include <eigen3/Eigen/Geometry>
 
@@ -21,61 +18,43 @@
 #include <iomanip>
 #include <ctime>
 #include <cmath>
+#include "utils_gtest.h"
 
 //#define write_results
 
-int main()
+TEST(rotations, Skew_vee)
 {
     using namespace wolf;
-                        // THESE ARE UNITARY TESTS FOR METHODS IN ROTATION.H
-
-    /*
-        LIST OF FUNCTIONS : 
-        - pi2pi                                                            
-        - skew                                                             OK
-        - vee                                                              OK
-        - v2q                                                              v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
-        - Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)       v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
-        - Eigen::VectorXs q2v(const Eigen::Quaternions& _q)                v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
-        - v2R
-        - R2v
-        - jac_SO3_right
-        - jac_SO3_right_inv
-        - jac_SO3_left
-        - jac_SO3_left_inv
-        - quaternion composition
-     */
-     wolf::Scalar scale = 0;
-
-     //pi2pi
-     
-     /**********************************************************************************************/
-     /// skew + vee
-        //skew
-     std::cout<< "\n\n######################################### Test Skew + vee ################################################\n" << std::endl;
-
-     Eigen::Vector3s vec3 = Eigen::Vector3s::Random();
-     Eigen::Matrix3s skew_mat;
-     skew_mat = skew(vec3);
-
-     std::cout << "Input Vector :\n " << vec3 << "\n corresponding skew matrix : \n" << skew_mat << "\n" <<std::endl; 
+    Eigen::Vector3s vec3 = Eigen::Vector3s::Random();
+    Eigen::Matrix3s skew_mat;
+    skew_mat = skew(vec3);
+  
+    std::cout << "Input Vector :\n " << vec3 << "\n corresponding skew matrix : \n" << skew_mat << "\n" <<std::endl; 
 
         // vee
-     Eigen::Vector3s vec3_bis;
-     vec3_bis = vee(skew_mat);
-     if(vec3_bis == vec3)
-        std::cout << "vee() checked \n" << std::endl;
-    else
-        std::cout << "vee() false \n used matrix : " << skew_mat << "\n returned vee vector : \n" << vec3_bis << "\n" << std::endl;
-    
-    /**********************************************************************************************/
-    ///v2q + q2v
-    std::cout<< "\n\n######################################### Test v2q + q2v ################################################\n" << std::endl;
+    Eigen::Vector3s vec3_bis;
+    vec3_bis = vee(skew_mat);
+
+    ASSERT_TRUE(vec3_bis == vec3);
+  /*EXPECT_FALSE(false);
+
+  ASSERT_TRUE(true);
+
+  int my_int = 5;
+
+  ASSERT_EQ(my_int, 5);
+
+  PRINTF("All good at TestTest::DummyTestExample !\n");*/
+}
+
+TEST(rotations, v2q_q2v)
+{
+    //defines scalars
+    wolf::Scalar deg_to_rad = M_PI/180.0;
 
     Eigen::Vector4s vec0, vec1;
 
         //v2q
-    wolf::Scalar deg_to_rad = 3.14159265359/180.0;;
     Eigen::Vector3s rot_vector0, rot_vector1;
     rot_vector0 = Eigen::Vector3s::Random();
     rot_vector1 = rot_vector0 * 100 *deg_to_rad; //far from origin
@@ -100,46 +79,25 @@ int main()
 
      std::cout << "\n quaternion near origin : \n" << vec0 << "\n quaternion far from origin : \n" << vec1 << std::endl;
 
-    if(rot_vector0.isApprox(quat_to_v0, wolf::Constants::EPS))
-        std::cout << "fixed = q2v() is ok near origin \n " << std::endl;
-    else{
-        std::cout << "fixed = q2v() is NOT ok near origin  -  input rotation vector : \n" << rot_vector0 <<
-        "\n returned rotation vector: \n" << quat_to_v0 << std::endl;
-        std::cout << "Diff between vectors (rot_vector0 - quat_to_v0) : \n" << rot_vector0 - quat_to_v0 << std::endl;
-    }
+    ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0, wolf::Constants::EPS))
+    ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1, wolf::Constants::EPS))
+    ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0x, wolf::Constants::EPS))
+    ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1x, wolf::Constants::EPS))
+}
 
-    if(rot_vector1.isApprox(quat_to_v1, wolf::Constants::EPS))
-        std::cout << "fixed = q2v() is ok far from origin \n " << std::endl;
-    else{
-        std::cout << "fixed = q2v() is NOT ok far from origin  -  input rotation vector \n: " << rot_vector1 <<
-         "\n returned rotation vector : \n" << quat_to_v1 << std::endl;
-         std::cout << "Diff between vectors (rot_vector1 - quat_to_v1) : \n" << rot_vector1 - quat_to_v1 << std::endl;
-    }
+TEST(rotations, v2R_R2v)
+{
+    //First test is to verify we get the good result with v -> v2R -> R2v -> v
+    //test 2 : how small can angles in rotation vector be ?
 
-    if(rot_vector0.isApprox(quat_to_v0x, wolf::Constants::EPS))
-        std::cout << "Dynamic = q2v() is ok near origin \n " << std::endl;
-    else{
-        std::cout << "Dynamic = q2v() is NOT ok near origin  -  input rotation vector : \n" << rot_vector0 <<
-         "\n returned rotation vector : \n" << quat_to_v0x << std::endl;
-         std::cout << "Diff between vectors (rot_vector0 - quat_to_v0x) : \n" << rot_vector0 - quat_to_v0x << std::endl;
-    }
+    //definition
+    wolf::Scalar deg_to_rad = M_PI/180.0;
+    Eigen::Vector3s rot_vector0, rot_vector1;
 
-    if(rot_vector1.isApprox(quat_to_v1x, wolf::Constants::EPS))
-        std::cout << "Dynamic = q2v() is ok far from origin \n " << std::endl;
-    else{
-        std::cout << "Dynamic = q2v() is NOT ok far from origin  -  input rotation vector: \n" << rot_vector1 <<
-        "\n returned rotation vector : \n" << quat_to_v1x << std::endl;
-         std::cout << "Diff between vectors (rot_vector1 - quat_to_v1x) : \n" << rot_vector1 - quat_to_v1x << std::endl;
-    }
+    rot_vector0 = Eigen::Vector3s::Random();
+    rot_vector1 = rot_vector0 * 100 *deg_to_rad; //far from origin
+    rot_vector0 = rot_vector0*deg_to_rad;
 
-    /**********************************************************************************************/
-    std::cout<< "\n\n######################################### Test v2R + R2v ################################################\n" << std::endl;
-
-    ///v2R, R2v
-                                        //First test is to verify we get the good result with v -> v2R -> R2v -> v
-                                        //test 2 : how small can angles in rotation vector be ?
-        //v2R
-    //we re-use rot_vector0 and rot_vector1 defined above
     Eigen::Matrix3s rot0, rot1;
     rot0 = v2R(rot_vector0);
     rot1 = v2R(rot_vector1);
@@ -150,31 +108,20 @@ int main()
     rot1_vec = R2v(rot1);
 
         //check now
-    if(rot0_vec.isApprox(rot_vector0, wolf::Constants::EPS))
-        std::cout << "v2R, R2v ok with small angles \n" << std::endl;
-    else{
-        std::cout << "v2R, R2v NOT ok with small angles - intput rotation vector : \n" << rot_vector0 << "\n corresponding matrix : \n " <<
-        rot0 << "\n returned rotation vector : \n"<< rot0_vec << std::endl;
-        std::cout << "Diff between vectors (rot_vector - rot_vec) : " << rot_vector0 - rot0_vec << std::endl;
-    }
+    ASSERT_TRUE(rot0_vec.isApprox(rot_vector0, wolf::Constants::EPS))
+    ASSERT_TRUE(rot1_vec.isApprox(rot_vector1, wolf::Constants::EPS))
+}
 
-    if(rot1_vec.isApprox(rot_vector1, wolf::Constants::EPS))
-        std::cout << "v2R, R2v ok with large angles \n" << std::endl;
-    else{
-        std::cout << "v2R, R2v NOT ok with large angles - intput rotation vector : \n" << rot_vector1 << "\n corresponding matrix : \n " <<
-        rot1 << "\n returned rotation vector : \n"<< rot1_vec << std::endl;
-        std::cout << "Diff between vectors (rot_vector - rot_vec) : " << rot_vector1 - rot1_vec << std::endl;
-    }
-
-    std::cout<< "\n\n######################################### Test R2v --> v2R limits ################################################\n" << std::endl;
-
-    scale = 1;
+TEST(rotations, R2v_v2R_limits)
+{
+    //test 2 : how small can angles in rotation vector be ?
+    wolf::Scalar scale = 1;
     Eigen::Matrix3s v_to_R, initial_matrix;
     Eigen::Vector3s  R_to_v;
 
     //Eigen::Vector3s rv;
     for(int i = 0; i<8; i++){
-        initial_matrix = Eigen::Matrix3s::Random() * scale;
+        initial_matrix = Eigen::Matrix3s::Random() * scale; //FIX ME : Random() will not create a rotation matrix. Then, R2v(initial_matrix) makes no sense at all.
 
         R_to_v = R2v(initial_matrix); //decomposing R2v below
         Eigen::AngleAxis<wolf::Scalar> angleAxis_R_to_v = Eigen::AngleAxis<wolf::Scalar>(initial_matrix);
@@ -193,16 +140,17 @@ int main()
         }   
         scale = scale*0.1;
     }
+}
 
-    /**********************************************************************************************/
-    std::cout<< "\n\n######################################### Test R2v limits ################################################\n" << std::endl;
-
-                                        //let's see how small the angles can be here : limit reached at scale/10 =  1e-16
-    scale = 1;
+TEST(rotations, R2v_v2R_limits)
+{
+    //let's see how small the angles can be here : limit reached at scale/10 =  1e-16
+    wolf::Scalar scale = 1;
     Eigen::Matrix3s rotation_mat;
     Eigen::Vector3s rv;
+
     for(int i = 0; i<8; i++){
-        rotation_mat = Eigen::Matrix3s::Random() * scale;
+        rotation_mat = Eigen::Matrix3s::Random() * scale; //FIX ME : Random() will not create a rotation matrix. Then, R2v(initial_matrix) makes no sense at all.
         //rotation_mat(0,0) = 1.0;
         //rotation_mat(1,1) = 1.0;
         //rotation_mat(2,2) = 1.0;
@@ -219,6 +167,36 @@ int main()
         }
         scale = scale*0.1;
     }
+}
+
+
+
+
+int main()
+{
+    using namespace wolf;
+                        // THESE ARE UNITARY TESTS FOR METHODS IN ROTATION.H
+
+    /*
+        LIST OF FUNCTIONS : 
+        - pi2pi                                                            
+        - skew                                                             OK
+        - vee                                                              OK
+        - v2q                                                              v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)       v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - Eigen::VectorXs q2v(const Eigen::Quaternions& _q)                v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - v2R
+        - R2v
+        - jac_SO3_right
+        - jac_SO3_right_inv
+        - jac_SO3_left
+        - jac_SO3_left_inv
+        - quaternion composition
+     */
+     wolf::Scalar scale = 0;
+
+    std::cout<< "\n\n######################################### Test R2v --> v2R limits ################################################\n" << std::endl;
+
     /**********************************************************************************************/
     std::cout<< "\n\n######################################### Test vector -> quaternion -> matrix -> vector ################################################\n" << std::endl;
 
@@ -248,7 +226,7 @@ int main()
     scale = 1;
     Eigen::Matrix3s res, res_i, rotation_mati; //rotation_mat already declared
     //Eigen::Vector3s rv;
-    for(int i = 0; i<8; i++){
+    for(int i = 0; i<8; i++){ //FIX ME : Random() will not create a rotation matrix. Then, R2v(Random_matrix()) makes no sense at all.
         rotation_mat = Eigen::Matrix3s::Random() * scale;
         rotation_mati = rotation_mat;
 
@@ -280,6 +258,7 @@ int main()
         scale = scale*0.1;
     }
 
+    //FIX ME : 5. Building a rot mat doing this is not safe; You cannot guarantee that R is valid.
     std::cout<< "\n\n>>>>>>>>>>>>>>>>> Highlight limitation of Eigen::AngleAxis <<<<<<<<<<<<<<<<<<<<<\n" << std::endl;
     rotation_mat = skew(Eigen::Vector3s::Random()) *0.0001;
     rotation_mat(0,0) = 1;
