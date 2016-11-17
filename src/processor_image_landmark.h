@@ -210,6 +210,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         virtual void drawLandmarks(cv::Mat _image);
         virtual void drawFeaturesFromLandmarks(cv::Mat _image);
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
+        void drawRoi(cv::Mat _image, CaptureImage::Ptr _capture, cv::Scalar _color);
 
 };
 
