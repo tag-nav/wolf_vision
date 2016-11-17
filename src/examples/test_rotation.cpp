@@ -22,7 +22,7 @@
 #include <ctime>
 #include <cmath>
 
-#define write_results
+//#define write_results
 
 int main()
 {
@@ -375,7 +375,7 @@ int main()
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    if(cdox_abs.isApprox(vector0,wolf::Constants::EPS) && cdoy_abs.isApprox(vector0,wolf::Constants::EPS) && cdoz_abs.isApprox(vector0,wolf::Constants::EPS))
+    if(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS))
         std::cout << "\t quaternion composition with constant rate of turn is OK\n" << std::endl;
     else{
         std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
@@ -438,7 +438,7 @@ int main()
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    if(cdox_abs.isApprox(vector0,wolf::Constants::EPS) && cdoy_abs.isApprox(vector0,wolf::Constants::EPS) && cdoz_abs.isApprox(vector0,wolf::Constants::EPS))
+    if(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS))
         std::cout << "\t quaternion composition with constant rate of turn is OK\n" << std::endl;
     else{
         std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
@@ -499,7 +499,7 @@ int main()
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    if(cdox_abs.isApprox(vector0,wolf::Constants::EPS) && cdoy_abs.isApprox(vector0,wolf::Constants::EPS) && cdoz_abs.isApprox(vector0,wolf::Constants::EPS))
+    if(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS))
         std::cout << "\t quaternion composition with constant rate of turn is OK\n" << std::endl;
     else{
         std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
