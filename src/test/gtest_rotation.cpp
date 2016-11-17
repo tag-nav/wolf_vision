@@ -117,20 +117,15 @@ TEST(rotations, R2v_v2R_limits)
     for(int i = 0; i<8; i++){
         initial_matrix = v2R(Eigen::Vector3s::Random() * scale);
 
-        R_to_v = R2v(initial_matrix);
-        // now we set the diagonal to identity
-        //rotation_mati(0,0) = 1.0;
-        //rotation_mati(1,1) = 1.0;
-        //rotation_mati(2,2) = 1.0;
-        
+        R_to_v = R2v(initial_matrix);     
         v_to_R = v2R(R_to_v);
 
-        EXPECT_TRUE(v_to_R.isApprox(initial_matrix,wolf::Constants::EPS)); //<< "R2v_v2R_limits : reached at scale " << scale << std::endl;
+        EXPECT_TRUE((v_to_R-initial_matrix).isMuchSmallerThan(1,wolf::Constants::EPS)); //<< "R2v_v2R_limits : reached at scale " << scale << std::endl;
         scale = scale*0.1;
     }
 }
 
-TEST(rotations, R2v_v2R_limits2)
+TEST(rotations, R2v_v2R_AAlimits)
 {
     using namespace wolf;
     //let's see how small the angles can be here : limit reached at scale/10 =  1e-16
@@ -194,9 +189,6 @@ TEST(rotations, AngleAxis_limits)
         res = aa0.toRotationMatrix();
         
         // now we set the diagonal to identity
-        rotation_mati(0,0) = 1.0;
-        rotation_mati(1,1) = 1.0;
-        rotation_mati(2,2) = 1.0;
         Eigen::AngleAxis<wolf::Scalar> aa1 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
         rv = aa1.axis() * aa1.angle();
         //std::cout << "aa1.axis : " << aa0.axis().transpose() << ",\t aa1.angles :" << aa0.angle() <<std::endl;
@@ -233,7 +225,7 @@ TEST(rotations, AngleAxis_limits2)
     aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
     rv = aa0.axis() * aa0.angle();
     //checking if rv is 0 vector
-    EXPECT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    EXPECT_TRUE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     rotation_mat = skew(Eigen::Vector3s::Random()) *0.1;
     rotation_mat(0,0) = 1;
@@ -250,7 +242,7 @@ TEST(rotations, AngleAxis_limits2)
     aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
     rv = aa0.axis() * aa0.angle();
     //checking if rv is 0 vector
-    EXPECT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    EXPECT_TRUE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 }
 
 TEST(rotations, Quat_compos_const_rateOfTurn)
