@@ -11,7 +11,7 @@ LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position_homogeneous,
                          FrameBasePtr _anchor_frame,
                          SensorBasePtr _anchor_sensor,
                          cv::Mat _2D_descriptor) :
-    LandmarkBase(LANDMARK_AHP, "AHP", std::make_shared<StateHomogeneous3D>(_position_homogeneous)),
+    LandmarkBase("AHP", std::make_shared<StateHomogeneous3D>(_position_homogeneous)),
     cv_descriptor_(_2D_descriptor.clone()),
     anchor_frame_(_anchor_frame),
     anchor_sensor_(_anchor_sensor)
@@ -35,6 +35,25 @@ YAML::Node LandmarkAHP::saveToYaml() const
     return node;
 }
 
+Eigen::Vector3s LandmarkAHP::getPointInAnchorSensor() const
+{
+    Eigen::Map<const Eigen::Vector4s> hmg_point(getPPtr()->getVector().data());
+    return hmg_point.head<3>()/hmg_point(3);
+}
+
+Eigen::Vector3s LandmarkAHP::point() const
+{
+    using namespace Eigen;
+    Transform<Scalar,3,Affine> T_w_r
+        = Translation<Scalar,3>(getAnchorFrame()->getPPtr()->getVector())
+        * Quaternions(getAnchorFrame()->getOPtr()->getVector().data());
+    Transform<Scalar,3,Affine> T_r_c
+        = Translation<Scalar,3>(getAnchorSensor()->getPPtr()->getVector())
+        * Quaternions(getAnchorSensor()->getOPtr()->getVector().data());
+    Vector4s point_hmg_c = getPPtr()->getVector();
+    Vector4s point_hmg = T_w_r * T_r_c * point_hmg_c;
+    return point_hmg.head<3>()/point_hmg(3);
+}
 
 wolf::LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
 {

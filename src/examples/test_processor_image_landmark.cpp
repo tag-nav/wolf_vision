@@ -36,7 +36,8 @@ int main(int argc, char** argv)
     if (argc == 1)
     {
 //        filename = "/home/jtarraso/Videos/House_interior.mp4";
-        filename = "/home/jtarraso/Vídeos/gray1.mp4";
+//        filename = "/home/jtarraso/Vídeos/gray1.mp4";
+        filename = "/home/jtarraso/test_video/output6.mpg";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
@@ -52,7 +53,7 @@ int main(int argc, char** argv)
     }
     std::cout << "Input video file: " << filename << std::endl;
     if(!capture.isOpened()) std::cout << "failed" << std::endl; else std::cout << "succeded" << std::endl;
-    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
+    capture.set(CV_CAP_PROP_POS_MSEC, 6000);
     //=====================================================
 
 
@@ -66,15 +67,12 @@ int main(int argc, char** argv)
     //=====================================================
 
 
-//    //=====================================================
-//    // Environment variable for configuration files
-//    char const* tmp = std::getenv( "WOLF_ROOT" );
-//    if ( tmp == nullptr )
-//        throw std::runtime_error("WOLF_ROOT environment not loaded.");
-//    std::string wolf_root( tmp );
-//    std::cout << "Wolf root: " << wolf_root << std::endl;
-//    //=====================================================
-    GET_WOLF_ROOT
+    //=====================================================
+    // Environment variable for configuration files
+    std::string wolf_root = _WOLF_ROOT_DIR;
+    std::cout << wolf_root << std::endl;
+    //=====================================================
+
 
 
     //=====================================================
@@ -82,7 +80,7 @@ int main(int argc, char** argv)
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
 
     // CAMERA SENSOR
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
     SensorCamera::Ptr camera_ptr = std::static_pointer_cast<SensorCamera>(sensor_ptr);
     camera_ptr->setImgWidth(img_width);
     camera_ptr->setImgHeight(img_height);
@@ -127,7 +125,7 @@ int main(int argc, char** argv)
     // running CAPTURES preallocated
     CaptureImage::Ptr image_ptr;
     Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
-    CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(0), sen_odo_ptr, data);
+    CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(t), sen_odo_ptr, data);
     //=====================================================
 
 
@@ -149,12 +147,29 @@ int main(int argc, char** argv)
     {
         t += dt;
 
+        // Image ------------------------------------------------
+
+        // Preferred method with factory objects:
+        image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
+
+        /* process */
+        camera_ptr->process(image_ptr);
+
+        ceres::Solver::Summary summary = ceres_manager.solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+//        wolf_problem_ptr_->print(2,1,0,0);
+
+
         // Odometry ---------------------------------------------
         cap_odo->setTimeStamp(t);
 
         // previous state and TS
+        TimeStamp t_prev_prev;
+        Vector7s x_prev_prev;
         Eigen::VectorXs x_prev(7);
         TimeStamp t_prev;
+        Vector7s dx;
         wolf_problem_ptr_->getCurrentState(x_prev, t_prev);
 
         // before the previous state
@@ -165,9 +180,14 @@ int main(int argc, char** argv)
             {
                 f_it++;
                 if (f_it != wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().rend())
+                {
                     prev_prev_key_fr_ptr = (*f_it);
+                }
                 break;
             }
+
+        t_prev_prev = prev_prev_key_fr_ptr->getTimeStamp();
+        x_prev_prev = prev_prev_key_fr_ptr->getState();
 
         // compute delta state, and odometry data
         if (!prev_prev_key_fr_ptr)
@@ -177,9 +197,6 @@ int main(int argc, char** argv)
         }
         else
         {
-            // we have two states
-            Vector7s x_prev_prev = prev_prev_key_fr_ptr->getState();
-
             // some maps to avoid local variables
             Eigen::Map<Eigen::Vector3s>     p1(x_prev_prev.data());
             Eigen::Map<Eigen::Quaternions>  q1(x_prev_prev.data() + 3);
@@ -189,51 +206,37 @@ int main(int argc, char** argv)
             // delta state PQ
             Eigen::Vector3s dp = q1.conjugate() * (p2 - p1);
             Eigen::Quaternions dq = q1.conjugate() * q2;
-            Eigen::Vector3s dtheta = q2v(dq);
+
+            dx.head<3>() = dp;
+            dx.tail<4>() = dq.coeffs();
 
             // odometry data
             data.head<3>() = dp;
-            data.tail<3>() = dtheta;
+            data.tail<3>() = q2v(dq);
         }
+
+
         cap_odo->setData(data);
 
-        sen_odo_ptr->addCapture(cap_odo);
-//        cap_odo->process();
+        sen_odo_ptr->process(cap_odo);
 
-        wolf_problem_ptr_->print();
+//        wolf_problem_ptr_->print(2,1,0,0);
 
-
-
-        // Image ------------------------------------------------
-
-        clock_t t1 = clock();
-
-        // Preferred method with factory objects:
-        image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
-
-        /* process */
-        //image_ptr->process();
-        camera_ptr->addCapture(image_ptr);
-
-        std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
-
-        ceres::Solver::Summary summary = ceres_manager.solve();
-        std::cout << summary.BriefReport() << std::endl;
+//        std::cout << "prev prev ts: " << t_prev_prev.get() << "; x: " << x_prev_prev.transpose() << std::endl;
+//        std::cout << "prev      ts: " << t_prev.get() << "; x: " << x_prev.transpose() << std::endl;
+//        std::cout << "current   ts: " << t.get() << std::endl;
+//        std::cout << "          dt: " << t_prev - t_prev_prev << "; dx: " << dx.transpose() << std::endl;
 
 
-        std::cout << "Last key frame pose: "
-                << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getVector().transpose() << std::endl;
-        std::cout << "Last key frame orientation: "
-                << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getVector().transpose() << std::endl;
+        cv::waitKey(0);
 
-        cv::waitKey(20);
-
-        std::cout << "END OF ITERATION\n=================================" << std::endl;
+        std::cout << "=================================================================================================" << std::endl;
 
         f++;
         capture >> frame[f % buffer_size];
     }
 
+    // wolf_problem_ptr_->print(2);
     wolf_problem_ptr_.reset();
 
     return 0;

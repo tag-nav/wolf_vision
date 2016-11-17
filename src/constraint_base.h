@@ -39,22 +39,26 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          **/
         ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status);
 
-        /** \brief Constructor of category CTR_FRAME
+        /** \brief Constructor valid for all categories (FRAME, FEATURE, LANDMARK)
          **/
-        ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, FeatureBasePtr _feature_other_ptr, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
-        /** \brief Constructor of category CTR_FEATURE
-         **/
-        ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status);
-
-        /** \brief Constructor of category CTR_LANDMARK
-         **/
-        ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status);
+//        /** \brief Constructor of category CTR_FRAME
+//         **/
+//        ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
+//
+//        /** \brief Constructor of category CTR_FEATURE
+//         **/
+//        ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
+//
+//        /** \brief Constructor of category CTR_LANDMARK
+//         **/
+//        ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
         virtual ~ConstraintBase();
         void remove();
 
-        unsigned int id();
+        unsigned int id() const;
 
         /** \brief Returns the constraint type
          **/
@@ -119,17 +123,17 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
         /** \brief Returns a pointer to the frame constrained to
          **/
-        FrameBasePtr getFrameOtherPtr();
+        FrameBasePtr getFrameOtherPtr() const;
         void setFrameOtherPtr(FrameBasePtr _frm_o){frame_other_ptr_ = _frm_o;}
 
         /** \brief Returns a pointer to the feature constrained to
          **/
-        FeatureBasePtr getFeatureOtherPtr();
+        FeatureBasePtr getFeatureOtherPtr() const;
         void setFeatureOtherPtr(FeatureBasePtr _ftr_o){feature_other_ptr_ = _ftr_o;}
 
         /** \brief Returns a pointer to the landmark constrained to
          **/
-        LandmarkBasePtr getLandmarkOtherPtr();
+        LandmarkBasePtr getLandmarkOtherPtr() const;
         void setLandmarkOtherPtr(LandmarkBasePtr _lmk_o){landmark_other_ptr_ = _lmk_o;}
 
         ProblemPtr getProblem();
@@ -164,7 +168,7 @@ inline wolf::ProblemPtr ConstraintBase::getProblem()
     return prb;
 }
 
-inline unsigned int ConstraintBase::id()
+inline unsigned int ConstraintBase::id() const
 {
     return constraint_id_;
 }
@@ -209,17 +213,17 @@ inline void ConstraintBase::setApplyLossFunction(const bool _apply)
     }
 }
 
-inline FrameBasePtr ConstraintBase::getFrameOtherPtr()
+inline FrameBasePtr ConstraintBase::getFrameOtherPtr() const
 {
     return frame_other_ptr_.lock();
 }
 
-inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr()
+inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr() const
 {
     return feature_other_ptr_.lock();
 }
 
-inline LandmarkBasePtr ConstraintBase::getLandmarkOtherPtr()
+inline LandmarkBasePtr ConstraintBase::getLandmarkOtherPtr() const
 {
     return landmark_other_ptr_.lock();
 }

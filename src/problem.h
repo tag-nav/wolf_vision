@@ -145,15 +145,18 @@ class Problem : public std::enable_shared_from_this<Problem>
                                const TimeStamp& _ts);
         /** \brief Create Frame of the correct size
          *
-         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
+         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
+         *   - Create a Frame
+         *   - Add it to Trajectory
+         *   - If it is key-frame, update state-block lists in Problem
          */
-        FrameBasePtr createFrame(FrameKeyType _frame_key_type, const TimeStamp& _time_stamp);
+        FrameBasePtr createFrame(FrameType _frame_key_type, const TimeStamp& _time_stamp);
 
         /** \brief Create Frame from vector
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        FrameBasePtr createFrame(FrameKeyType _frame_key_type, const Eigen::VectorXs& _frame_state,
+        FrameBasePtr createFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
         Eigen::VectorXs getCurrentState();
@@ -245,10 +248,13 @@ class Problem : public std::enable_shared_from_this<Problem>
         // Print and check ---------------------------------------
         /**
          * \brief print wolf tree
-         * \param level : 0: Basic links; 1: with Constrained_by; with 2: Metrics; default: 1.
+         * \param depth :        levels to show ( 0: H, T, M : 1: H:S:p, T:F, M:L ; 2: T:F:C ; 3: T:F:C:f ; 4: T:F:C:f:c )
+         * \param constr_by:     show constraints pointing to F, f and L.
+         * \param metric :       show metric info (status, time stamps, state vectors, measurements)
+         * \param state_blocks : show state blocks
          */
-        void print(int level = 1);
-        bool check();
+        void print(int depth = 4, bool constr_by = false, bool metric = true, bool state_blocks = false);
+        bool check(int verbose_level = 0);
 
 };
 

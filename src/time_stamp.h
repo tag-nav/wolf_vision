@@ -118,7 +118,9 @@ class TimeStamp
          * Comparison operator
          * 
          */
+        bool operator ==(const TimeStamp& ts) const;
         bool operator <(const TimeStamp& ts) const;
+        bool operator >(const TimeStamp& ts) const;
 
         /** \brief comparison operator
          * 
@@ -126,6 +128,7 @@ class TimeStamp
          * 
          */
         bool operator <=(const TimeStamp& ts) const;
+        bool operator >=(const TimeStamp& ts) const;
 
         /** \brief difference operator
          * 
@@ -140,11 +143,7 @@ class TimeStamp
 
         /** \brief Add-assign operator given a scalar_t (seconds)
          */
-        TimeStamp operator +(const Scalar& dt);
-
-        /** \brief Add-assign operator given a Timestamp
-         */
-        TimeStamp operator +(const TimeStamp& dt);
+        TimeStamp operator +(const Scalar& dt) const;
 
         /** \brief Prints time stamp to a given ostream
          *
@@ -153,7 +152,10 @@ class TimeStamp
          */
         void print(std::ostream & ost = std::cout) const;
 
+        friend std::ostream& operator<<(std::ostream& os, const TimeStamp& _ts);
+
 };
+
 
 inline void TimeStamp::setToNow()
 {
@@ -206,20 +208,29 @@ inline void TimeStamp::operator =(const Scalar& ts)
     time_stamp_ = ts;
 }
 
+inline bool TimeStamp::operator ==(const TimeStamp& ts) const
+{
+    return (time_stamp_ == ts.get());
+}
+
 inline bool TimeStamp::operator <(const TimeStamp& ts) const
 {
-    if (time_stamp_ < ts.get())
-        return true;
-    else
-        return false;
+    return (time_stamp_ < ts.get());
+}
+
+inline bool TimeStamp::operator >(const TimeStamp& ts) const
+{
+    return (time_stamp_ > ts.get());
 }
 
 inline bool TimeStamp::operator <=(const TimeStamp& ts) const
 {
-    if (time_stamp_ <= ts.get())
-        return true;
-    else
-        return false;
+    return (time_stamp_ <= ts.get());
+}
+
+inline bool TimeStamp::operator >=(const TimeStamp& ts) const
+{
+    return (time_stamp_ >= ts.get());
 }
 
 inline Scalar TimeStamp::operator -(const TimeStamp& ts) const
@@ -232,7 +243,7 @@ inline void TimeStamp::operator +=(const Scalar& dt)
     time_stamp_ += dt;
 }
 
-inline TimeStamp TimeStamp::operator +(const Scalar& dt)
+inline TimeStamp TimeStamp::operator +(const Scalar& dt) const
 {
     return TimeStamp(time_stamp_ + dt);
 }

@@ -3,7 +3,7 @@
 namespace wolf {
 
 ProcessorIMU::ProcessorIMU() :
-        ProcessorMotion(PRC_IMU, "IMU", 16, 10, 9, 6),
+        ProcessorMotion("IMU", 16, 10, 9, 6),
         frame_imu_ptr_(nullptr),
         gravity_(wolf::gravity()),
         acc_bias_(Eigen::Vector3s::Zero()),
@@ -21,7 +21,7 @@ ProcessorIMU::ProcessorIMU() :
 
 ProcessorIMU::~ProcessorIMU()
 {
-    std::cout << "destructed     -p-IMU" << id() << std::endl;
+//    std::cout << "destructed     -p-IMU" << id() << std::endl;
 }
 
 ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr)

@@ -70,7 +70,7 @@ namespace wolf
 class ProcessorTrackerLandmark : public ProcessorTracker
 {
     public:
-        ProcessorTrackerLandmark(ProcessorType _tp, const std::string& _type, const unsigned int& _max_new_features = 0, const Scalar& _time_tolerance = 0.1);
+        ProcessorTrackerLandmark(const std::string& _type, const unsigned int& _max_new_features = 0, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorTrackerLandmark();
 
     protected:
@@ -174,6 +174,7 @@ namespace wolf
 {
 inline void ProcessorTrackerLandmark::advance()
 {
+
     for ( auto match : matches_landmark_from_last_)
     {
         match.second.reset(); // TODO: Should we just remove the entries? What about match.first?
@@ -189,6 +190,7 @@ inline void ProcessorTrackerLandmark::advance()
 
 inline void ProcessorTrackerLandmark::reset()
 {
+
     //std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
     for ( auto match : matches_landmark_from_last_)
     {

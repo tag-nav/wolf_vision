@@ -6,26 +6,24 @@ namespace wolf {
 
 unsigned int FeatureBase::feature_id_count_ = 0;
 
-FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, unsigned int _dim_measurement) :
+FeatureBase::FeatureBase(const std::string& _type, unsigned int _dim_measurement) :
     NodeBase("FEATURE", _type),
     capture_ptr_(),
     feature_id_(++feature_id_count_),
     track_id_(0),
     landmark_id_(0),
-    type_id_(_tp),
     measurement_(_dim_measurement)
 {
     //
-    std::cout << "constructed      +f" << id() << std::endl;
+//    std::cout << "constructed      +f" << id() << std::endl;
 }
 
-FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
+FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
 	NodeBase("FEATURE", _type),
     capture_ptr_(),
     feature_id_(++feature_id_count_),
     track_id_(0),
     landmark_id_(0),
-    type_id_(_tp),
 	measurement_(_measurement),
 	measurement_covariance_(_meas_covariance)
 {
@@ -34,12 +32,12 @@ FeatureBase::FeatureBase(FeatureType _tp, const std::string& _type, const Eigen:
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
     measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
 
-    std::cout << "constructed      +f" << id() << std::endl;
+//    std::cout << "constructed      +f" << id() << std::endl;
 }
 
 FeatureBase::~FeatureBase()
 {
-    std::cout << "destructed       -f" << id() << std::endl;
+//    std::cout << "destructed       -f" << id() << std::endl;
 }
 
 void FeatureBase::remove()
@@ -63,7 +61,7 @@ void FeatureBase::remove()
         {
             constrained_by_list_.front()->remove(); // remove constrained
         }
-        std::cout << "Removed           f" << id() << std::endl;
+//        std::cout << "Removed           f" << id() << std::endl;
     }
 }
 

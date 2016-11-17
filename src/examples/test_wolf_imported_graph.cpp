@@ -64,7 +64,7 @@ int main(int argc, char** argv)
     // Wolf problem
     ProblemPtr wolf_problem_full = new Problem(FRM_PO_2D);
     ProblemPtr wolf_problem_prun = new Problem(FRM_PO_2D);
-    SensorBasePtr sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
+    SensorBasePtr sensor = new SensorBase("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
 
     Eigen::SparseMatrix<Scalar> Lambda(0,0);
 
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
                     // Information matrix
                     Lambda.conservativeResize(Lambda.rows()+3,Lambda.cols()+3);
 
-                    //std::cout << "Added vertex! index: " << vertex_index << " nodeId: " << vertex_frame_ptr_prun->nodeId() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
+                    //std::cout << "Added vertex! index: " << vertex_index << " id: " << vertex_frame_ptr_prun->id() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
                 }
             }
             // EDGE
@@ -246,8 +246,8 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add capture, feature and constraint to problem
-                    FeatureBasePtr feature_ptr_full = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
-                    FeatureBasePtr feature_ptr_prun = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_full = new FeatureBase("FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_prun = new FeatureBase("FIX", edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_full = new CaptureVoid(TimeStamp(0), sensor);
                     CaptureVoid* capture_ptr_prun = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_full.find(edge_old) != index_2_frame_ptr_full.end() && "edge from vertex not added!");
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
                     ConstraintOdom2D* constraint_ptr_prun = new ConstraintOdom2D(feature_ptr_prun, frame_old_ptr_prun);
                     feature_ptr_full->addConstraint(constraint_ptr_full);
                     feature_ptr_prun->addConstraint(constraint_ptr_prun);
-                    //std::cout << "Added edge! " << constraint_ptr_prun->nodeId() << " from vertex " << constraint_ptr_prun->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_prun->getFrameToPtr()->nodeId() << std::endl;
+                    //std::cout << "Added edge! " << constraint_ptr_prun->id() << " from vertex " << constraint_ptr_prun->getCapturePtr()->getFramePtr()->id() << " to " << constraint_ptr_prun->getFrameToPtr()->id() << std::endl;
                     //std::cout << "vector " << constraint_ptr_prun->getMeasurement().transpose() << std::endl;
                     //std::cout << "information " << std::endl << edge_information << std::endl;
                     //std::cout << "covariance " << std::endl << constraint_ptr_prun->getMeasurementCovariance() << std::endl;
@@ -306,13 +306,13 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBasePtr first_frame_full = wolf_problem_full->getTrajectoryPtr()->getFrameList().front();
     FrameBasePtr first_frame_prun = wolf_problem_prun->getTrajectoryPtr()->getFrameList().front();
-    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSLOUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSLOUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase("ABSLOUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase("ABSLOUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_full->addCapture(initial_covariance_full);
     first_frame_prun->addCapture(initial_covariance_prun);
     initial_covariance_full->process();
     initial_covariance_prun->process();
-    //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureList().front()->getConstraintFromList().front()->nodeId() << std::endl << initial_covariance_prun->getFeatureList().front()->getMeasurementCovariance() << std::endl;
+    //std::cout << "initial covariance: constraint " << initial_covariance_prun->getFeatureList().front()->getConstraintFromList().front()->id() << std::endl << initial_covariance_prun->getFeatureList().front()->getMeasurementCovariance() << std::endl;
     Eigen::SparseMatrix<Scalar> DeltaLambda(Lambda.rows(), Lambda.cols());
     insertSparseBlock((Eigen::Matrix3s::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
     Lambda = Lambda + DeltaLambda;

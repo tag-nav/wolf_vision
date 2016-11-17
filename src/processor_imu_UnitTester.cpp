@@ -6,9 +6,9 @@ ProcessorIMU_UnitTester::ProcessorIMU_UnitTester() : ProcessorIMU(){}
 
 ProcessorIMU_UnitTester::~ProcessorIMU_UnitTester(){}
 
-ProcessorBase* ProcessorIMU_UnitTester::create(const std::string& _unique_name, const ProcessorParamsBase* _params)
+ProcessorBasePtr ProcessorIMU_UnitTester::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr)
 {
-    ProcessorIMU* prc_ptr = new ProcessorIMU();
+    ProcessorIMU::Ptr prc_ptr = std::make_shared<ProcessorIMU>();
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
@@ -21,6 +21,6 @@ ProcessorBase* ProcessorIMU_UnitTester::create(const std::string& _unique_name, 
 namespace wolf {
 namespace
 {
-const bool registered_prc_imu = ProcessorFactory::get().registerCreator("IMU", ProcessorIMU::create);
+//const bool registered_prc_imu = ProcessorFactory::get().registerCreator("IMU UNIT TESTER", ProcessorIMU_UnitTester::create);
 }
 } // namespace wolf

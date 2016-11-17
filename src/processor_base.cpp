@@ -6,21 +6,20 @@ namespace wolf {
 
 unsigned int ProcessorBase::processor_id_count_ = 0;
 
-ProcessorBase::ProcessorBase(ProcessorType _tp, const std::string& _type, const Scalar& _time_tolerance) :
+ProcessorBase::ProcessorBase(const std::string& _type, const Scalar& _time_tolerance) :
         NodeBase("PROCESSOR"),
         sensor_ptr_(),
         processor_id_(++processor_id_count_),
-        type_id_(_tp),
         time_tolerance_(_time_tolerance)
 {
-    std::cout << "constructed    +p" << id() << std::endl;
+    setType(_type);
 
-    //
+//    WOLF_DEBUG("constructed    +p" , id());
 }
 
 ProcessorBase::~ProcessorBase()
 {
-    std::cout << "destructed     -p" << id() << std::endl;
+//    WOLF_DEBUG("destructed     -p" , id());
 }
 
 bool ProcessorBase::permittedKeyFrame()
@@ -28,26 +27,23 @@ bool ProcessorBase::permittedKeyFrame()
     return getProblem()->permitKeyFrame(shared_from_this());
 }
 
-FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType _type)
+FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameType _type)
 {
-    // We need to create the new free Frame to hold what will become the last Capture
+    std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
+
     FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
-
-    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
-
-    if (_type == KEY_FRAME)
-        // Keyframe callback in order to let the other processors to establish their constraints
-        getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), shared_from_this(), time_tolerance_);
+    new_frame_ptr->addCapture(_capture_ptr);
 
     return new_frame_ptr;
 }
 
-FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type)
+FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameType _type)
 {
-    // We need to create the new free Frame to hold what will become the last Capture
-    FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
+    std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
 
-    new_frame_ptr->addCapture(_capture_ptr); // Add incoming Capture to the new Frame
+    FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
+    new_frame_ptr->addCapture(_capture_ptr);
+
     return new_frame_ptr;
 }
 
@@ -56,7 +52,7 @@ void ProcessorBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-        std::cout << "Removing     p" << id() << std::endl;
+//        std::cout << "Removing     p" << id() << std::endl;
         ProcessorBasePtr this_p = shared_from_this();
 
         // remove from upstream

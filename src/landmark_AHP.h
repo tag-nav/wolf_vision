@@ -38,6 +38,8 @@ class LandmarkAHP : public LandmarkBase
         void setAnchorFrame  (FrameBasePtr  _anchor_frame );
         void setAnchorSensor (SensorBasePtr _anchor_sensor);
         void setAnchor       (FrameBasePtr  _anchor_frame , SensorBasePtr _anchor_sensor);
+        Eigen::Vector3s getPointInAnchorSensor() const;
+        Eigen::Vector3s point() const;
 
         YAML::Node saveToYaml() const;
 

@@ -257,7 +257,7 @@ void CeresManager::update()
         {
             case ADD:
             {
-                //std::cout << "adding constraint" << std::endl;
+//                std::cout << "adding constraint" << std::endl;
                 addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_,wolf_problem_->getConstraintNotificationList().front().id_);
                 //std::cout << "added" << std::endl;
                 break;
@@ -268,9 +268,9 @@ void CeresManager::update()
         wolf_problem_->getConstraintNotificationList().pop_front();
     }
     //std::cout << "all constraints added" << std::endl;
-	//std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
-    //std::cout << "wrapper residual blocks: " << id_2_residual_idx_.size() << std::endl;
-    //std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+//	  std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
+//    std::cout << "wrapper residual blocks: " << id_2_residual_idx_.size() << std::endl;
+//    std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
 
 	assert(ceres_problem_->NumResidualBlocks() == id_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
@@ -306,12 +306,12 @@ void CeresManager::addStateBlock(StateBlockPtr _st_ptr)
 
     if (_st_ptr->hasLocalParametrization())
     {
-        //std::cout << "Local Parametrization to be added:" << _st_ptr->getLocalParametrizationPtr() << std::endl;
+//        std::cout << "Local Parametrization to be added:" << _st_ptr->getLocalParametrizationPtr() << std::endl;
         ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), new LocalParametrizationWrapper(_st_ptr->getLocalParametrizationPtr()));
     }
     else
     {
-        //std::cout << "No Local Parametrization to be added" << std::endl;
+//        std::cout << "No Local Parametrization to be added" << std::endl;
         ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), nullptr);
     }
     if (_st_ptr->isFixed())

@@ -8,15 +8,20 @@
 #ifndef WOLF_H_
 #define WOLF_H_
 
-//includes from std lib
-#include <list>
-#include <map>
-#include <memory> // shared_ptr and weak_ptr
+// Enable project-specific definitions and macros
+#include "internal/config.h"
+#include "logging.h"
 
 //includes from Eigen lib
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/Sparse>
+#include <libgen.h>
+
+//includes from std lib
+#include <list>
+#include <map>
+#include <memory> // shared_ptr and weak_ptr
 
 namespace wolf {
 
@@ -37,6 +42,7 @@ namespace wolf {
 typedef double Scalar;        // Use this for double, 64 bit precision
 //typedef long double Scalar;   // Use this for long double, 128 bit precision
 
+
 /**
  * \brief Vector and Matrices size type for the Wolf project
  *
@@ -51,11 +57,6 @@ namespace Constants{
 const Scalar EPS = 1e-8;
 // Wolf smmmmall tolerance
 const Scalar EPS_SMALL = 1e-16;
-
-// use it in odometry covariances for instance.
-//const Scalar MIN_VARIANCE = 1e-6; // 9/5/16: Delete this after 9/6/16 if nobody complains
-
-//const Scalar PI = 3.14159265358979323846264338328; // Use M_PI from math.h. There are a bunch of other useful constants there.
 
 }
 
@@ -103,15 +104,13 @@ typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of r
 
 namespace wolf {
 
-/** \brief Enumeration of all possible frames
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
+/** \brief Enumeration of frame types: key-frame or non-key-frame
  */
 typedef enum
 {
     NON_KEY_FRAME = 0,  ///< regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
     KEY_FRAME = 1       ///< key frame. It will stay in the frames window and play at optimizations.
-} FrameKeyType;
+} FrameType;
 
 /** \brief Enumeration of all possible frames
  *
@@ -195,71 +194,6 @@ typedef enum
     ST_FIXED = 1,       ///< State fixed, estimated enough or fixed infrastructure.
 } StateStatus;
 
-/** \brief Enumeration of all possible sensor types
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    SEN_ODOM_2D = 1,    ///< 2D Odometry measurement from encoders: displacement and rotation.
-    SEN_ODOM_3D,        ///< 3D Odometry measurement from encoders: displacement and rotation.
-    SEN_TWIST_2D,       ///< Twist measurement form encoders or motion command: lineal and angular velocities.
-    SEN_IMU,		    ///< Inertial measurement unit with 3 acceleros, 3 gyros
-    SEN_CAMERA,		    ///< Regular pinhole camera
-    SEN_GPS_FIX,	    ///< GPS fix calculated from a GPS receiver
-    SEN_GPS_RAW,        ///< GPS pseudo ranges, Doppler and satellite ephemerides
-    SEN_LIDAR,		    ///< Laser Range Finder, 2D
-    SEN_RADAR,		    ///< Radar
-    SEN_ABSOLUTE_POSE   ///< Full absolute pose (XYZ+quaternion)
-} SensorType;
-
-/** \brief Enumeration of all possible Processor types
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    PRC_TRACKER_DUMMY = 1, ///< Dummy tracker for tests
-    PRC_TRACKER_IMAGE, ///< Point feature tracker for video sequences
-    PRC_TRACKER_LANDMARK_CORNER, ///< Tracker of corner Landmarks
-    PRC_TRACKER_FEATURE_CORNER, ///<  Tracker of corner Features
-    PRC_GPS_RAW, ///< Raw GPS processor
-    PRC_LIDAR, ///< Laser 2D processor
-    PRC_ODOM_2D, ///< 2D odometry integrator
-    PRC_ODOM_3D, ///< 2D odometry integrator
-    PRC_IMU ///< IMU delta pre-integrator
-} ProcessorType;
-
-/** \brief enumeration of all possible Feature types
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    FEATURE_CORNER = 1,
-    FEATURE_FIX,
-    FEATURE_GPS_FIX,
-    FEATURE_GPS_PSEUDORANGE,
-    FEATURE_IMU,
-    FEATURE_ODOM_2D,
-    FEATURE_MOTION,
-    FEATURE_POINT_IMAGE,
-    FEATURE_LINE_2D,
-    FEATURE_POLYLINE_2D
-}FeatureType;
-
-/** \brief Enumeration of all possible landmark types
- *
- */
-typedef enum
-{
-    LANDMARK_POINT = 1,     ///< A Euclidean point landmark, either 3D or 2D
-    LANDMARK_CORNER,    ///< A corner landmark (2D)
-    LANDMARK_CONTAINER,  ///< A container landmark (2D)
-    LANDMARK_LINE_2D,  ///< A line landmark (2D)
-    LANDMARK_POLYLINE_2D,   ///< A polyline landmark (2D)
-    LANDMARK_AHP        ///< An anchored homogeneous point (3D)
-} LandmarkType;
 
 typedef enum
 {
@@ -378,35 +312,25 @@ typedef std::shared_ptr<StateQuaternion> StateQuaternionPtr;
 // - - Local Parametrization
 typedef std::shared_ptr<LocalParametrizationBase> LocalParametrizationBasePtr;
 
-// // Feature-Feature correspondence
-// struct FeatureMatch
-// {
-//         FeatureBasePtr feature_ptr_;
-//         Scalar normalized_score_;
-// };
-// 
-// typedef std::map<FeatureBasePtr, FeatureMatch> FeatureMatchMap;
 
-
+// ==================================================
+// Some dangling functions
 
 inline const Eigen::Vector3s gravity(void) {
     return Eigen::Vector3s(0,0,-9.8);
 }
+//===================================================
+
 
 //===================================================
 // Some macros
 
-//=====================================================
-// Environment variable for configuration files
-// this sets the local variable wolf_root from the environment variable WOLF_ROOT
-#define GET_WOLF_ROOT \
-char const* tmp = std::getenv( "WOLF_ROOT" ); \
-if ( tmp == nullptr ) \
-    throw std::runtime_error("WOLF_ROOT environment not loaded."); \
-std::string wolf_root( tmp ); \
-std::cout << "Wolf root: " << wolf_root << " set at variable 'wolf_root'." << std::endl;
-//=====================================================
-
+#define WOLF_DEBUG_HERE \
+{ \
+    char this_file[] = __FILE__; \
+    std::cout << ">> " << basename(this_file) << " : " << __FUNCTION__ << "() : " << __LINE__ << std::endl; \
+}
+//===================================================
 
 } // namespace wolf
 

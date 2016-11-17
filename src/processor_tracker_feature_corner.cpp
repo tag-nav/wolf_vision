@@ -96,7 +96,7 @@ ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr
     // Getting landmark ptr
     LandmarkCorner2D::Ptr landmark_ptr = nullptr;
     for (auto constraint : _feature_other_ptr->getConstraintList())
-        if (constraint->getLandmarkOtherPtr() != nullptr && constraint->getLandmarkOtherPtr()->getTypeId() == LANDMARK_CORNER)
+        if (constraint->getLandmarkOtherPtr() != nullptr && constraint->getLandmarkOtherPtr()->getType() == "CORNER")
             landmark_ptr = std::static_pointer_cast<LandmarkCorner2D>(constraint->getLandmarkOtherPtr());
 
     if (landmark_ptr == nullptr)
@@ -111,9 +111,9 @@ ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr
         _feature_other_ptr->addConstraint(std::make_shared<ConstraintCorner2D>(_feature_other_ptr, landmark_ptr));
     }
 
-    std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
-              << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl
-              << " corresponding to landmark " << landmark_ptr->nodeId() << std::endl;
+//    std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
+//              << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl
+//              << " corresponding to landmark " << landmark_ptr->id() << std::endl;
     return std::make_shared<ConstraintCorner2D>(_feature_ptr, landmark_ptr);
 }
 

@@ -107,7 +107,7 @@ inline StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed, LocalPa
         state_(_state),
         local_param_ptr_(_local_param_ptr)
 {
-    std::cout << "constructed           +sb" << std::endl;
+//    std::cout << "constructed           +sb" << std::endl;
 }
 
 inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
@@ -117,12 +117,12 @@ inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParame
         local_param_ptr_(_local_param_ptr)
 {
     //
-    std::cout << "constructed           +sb" << std::endl;
+//    std::cout << "constructed           +sb" << std::endl;
 }
 
 inline StateBlock::~StateBlock()
 {
-    std::cout << "destructed            -sb" << std::endl;
+//    std::cout << "destructed            -sb" << std::endl;
 }
 
 inline Scalar* StateBlock::getPtr()

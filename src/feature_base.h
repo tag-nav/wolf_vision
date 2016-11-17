@@ -30,7 +30,6 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         unsigned int feature_id_;
         unsigned int track_id_; // ID of the feature track
         unsigned int landmark_id_; // ID of the landmark
-        FeatureType type_id_;          ///< Feature type. See wolf.h for a list of all possible features.
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
@@ -40,14 +39,14 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
          * \param _tp type of feature -- see wolf.h
          * \param _dim_measurement the dimension of the measurement space
          */
-        FeatureBase(FeatureType _tp, const std::string& _type, unsigned int _dim_measurement);
+        FeatureBase(const std::string& _type, unsigned int _dim_measurement);
 
         /** \brief Constructor from capture pointer and measure
          * \param _tp type of feature -- see wolf.h
          * \param _measurement the measurement
          * \param _meas_covariance the noise of the measurement
          */
-        FeatureBase(FeatureType _tp, const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
+        FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
 
         virtual ~FeatureBase();
         void remove();
@@ -58,7 +57,6 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         void setTrackId(unsigned int _tr_id){track_id_ = _tr_id;}
         unsigned int landmarkId(){return landmark_id_;}
         void setLandmarkId(unsigned int _lmk_id){landmark_id_ = _lmk_id;}
-        FeatureType getTypeId(){return type_id_;}
 
         // values
         /* \brief Returns _ii component of measurement vector
@@ -101,6 +99,7 @@ namespace wolf{
 
 inline void FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
+    _ctr_ptr->setFeatureOtherPtr( shared_from_this() );
     constrained_by_list_.push_back(_ctr_ptr);
 }
 

@@ -33,7 +33,7 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
     private:
         SensorBaseWPtr sensor_ptr_;
     public:
-        ProcessorBase(ProcessorType _tp, const std::string& _type, const Scalar& _time_tolerance = 0);
+        ProcessorBase(const std::string& _type, const Scalar& _time_tolerance = 0);
         virtual ~ProcessorBase();
         void remove();
 
@@ -53,9 +53,21 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
         virtual bool permittedKeyFrame() final;
 
         /**\brief make a Frame with the provided Capture
+         *
+         * Provide the following functionality:
+         *   - Construct a Frame,
+         *   - Put it in the Trajectory, and
+         *   - Add the provided capture on it.
          */
-        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, FrameKeyType _type = NON_KEY_FRAME);
-        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameKeyType _type = NON_KEY_FRAME);
+        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, FrameType _type = NON_KEY_FRAME);
+        /**\brief make a Frame with the provided Capture
+         *
+         * Provide the following functionality:
+         *   - Construct a Frame,
+         *   - Put it in the Trajectory, and
+         *   - Add the provided capture on it.
+         */
+        FrameBasePtr makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameType _type = NON_KEY_FRAME);
 
         virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tolerance) = 0;
 
@@ -67,12 +79,13 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         ProblemPtr getProblem();
 
+        void setTimeTolerance(Scalar _time_tolerance);
+
     private:
         static unsigned int processor_id_count_;
 
     protected:
         unsigned int processor_id_;
-        ProcessorType type_id_;
         Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
 };
 
@@ -116,6 +129,11 @@ inline SensorBasePtr ProcessorBase::getSensorPtr()
 inline const SensorBasePtr ProcessorBase::getSensorPtr() const
 {
     return sensor_ptr_.lock();
+}
+
+inline void ProcessorBase::setTimeTolerance(Scalar _time_tolerance)
+{
+    time_tolerance_ = _time_tolerance;
 }
 
 } // namespace wolf

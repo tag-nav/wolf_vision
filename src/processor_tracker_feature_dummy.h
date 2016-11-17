@@ -19,12 +19,12 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
 {
 
     public:
-        ProcessorTrackerFeatureDummy();
+        ProcessorTrackerFeatureDummy(const unsigned int _max_new_features, const unsigned int _min_feat_for_keyframe);
         virtual ~ProcessorTrackerFeatureDummy();
 
     protected:
 
-        unsigned int n_feature_;
+        unsigned int n_feature_, min_feat_for_keyframe_;
 
 //        virtual void preProcess() { }
 //        virtual void postProcess() { }
@@ -79,9 +79,9 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
 
 };
 
-inline ProcessorTrackerFeatureDummy::ProcessorTrackerFeatureDummy() :
-        ProcessorTrackerFeature(PRC_TRACKER_DUMMY, "TRACKER FEATURE DUMMY"),
-        n_feature_(0)
+inline ProcessorTrackerFeatureDummy::ProcessorTrackerFeatureDummy(const unsigned int _max_new_features, const unsigned int _min_feat_for_keyframe) :
+        ProcessorTrackerFeature("TRACKER FEATURE DUMMY", _max_new_features),
+        n_feature_(0), min_feat_for_keyframe_(_min_feat_for_keyframe)
 {
     //
 }
@@ -100,8 +100,8 @@ inline bool ProcessorTrackerFeatureDummy::correctFeatureDrift(const FeatureBaseP
 inline ConstraintBasePtr ProcessorTrackerFeatureDummy::createConstraint(FeatureBasePtr _feature_ptr,
                                                                       FeatureBasePtr _feature_other_ptr)
 {
-    std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
-              << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl;
+//    std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
+//              << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl;
     return std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr);
 }
 

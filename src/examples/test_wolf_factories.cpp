@@ -36,21 +36,11 @@ int main(void)
     using std::static_pointer_cast;
 
 
-    /**=============================================================================================
-     * Get wolf root directory from the environment variable WOLF_ROOT
-     * To make this work, you need to set the environment variable WOLF_ROOT:
-     *  - To run from terminal, edit your ~/.bashrc, or ~/.bash_profile and add this line:
-     *        export WOLF_ROOT="/path/to/wolf"
-     *  - To run from eclipse, open the 'run configuration' of this executable, tab 'Environment'
-     *    and add variable WOLF_ROOT set to /path/to/wolf
-     */
-    char* w = std::getenv("WOLF_ROOT");
-    if (w == NULL)
-        throw std::runtime_error("Environment variable WOLF_ROOT not found");
 
-    std::string WOLF_ROOT       = w;
-    std::string WOLF_CONFIG     = WOLF_ROOT + "/src/examples";
-    std::cout << "\nwolf directory for configuration files: " << WOLF_CONFIG << std::endl;
+    //==============================================================================================
+    std::string wolf_root       = _WOLF_ROOT_DIR;
+    std::string wolf_config     = wolf_root + "/src/examples";
+    std::cout << "\nwolf directory for configuration files: " << wolf_config << std::endl;
     //==============================================================================================
 
     cout << "\n====== Registering creators in the Wolf Factories =======" << endl;
@@ -59,7 +49,7 @@ int main(void)
             "There is only one attempt per class, and it is successful!\n"
             "We do this by registering in the class\'s .cpp file.\n"
             "\n"
-            "- See \'" << WOLF_ROOT << "/src/examples/test_wolf_factories.cpp\'\n"
+            "- See \'" << wolf_root << "/src/examples/test_wolf_factories.cpp\'\n"
             "  for the way to install sensors and processors to wolf::Problem." << endl;
 
     // Start creating the problem
@@ -68,13 +58,13 @@ int main(void)
 
     // define some useful parameters
     Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
-    shared_ptr<IntrinsicsOdom2D> intr_odom2d_ptr;
+    shared_ptr<IntrinsicsOdom2D> intr_odom2d_ptr = nullptr;
 
     cout << "\n================== Intrinsics Factory ===================" << endl;
 
     // Use params factory for camera intrinsics
-    IntrinsicsBasePtr intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", WOLF_CONFIG + "/camera.yaml");
-    ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::get().create("IMAGE", WOLF_CONFIG + "/processor_image_ORB.yaml");
+    IntrinsicsBasePtr intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", wolf_config + "/camera_params_ueye_sim.yaml");
+    ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::get().create("IMAGE FEATURE", wolf_config + "/processor_image_ORB.yaml");
 
     cout << "CAMERA with intrinsics      : " << (static_pointer_cast<IntrinsicsCamera>(intr_cam_ptr))->pinhole_model.transpose() << endl;
 //    cout << "Processor IMAGE image width : " << (static_pointer_cast<ProcessorParamsImage>(params_ptr))->image.width << endl;
@@ -83,20 +73,19 @@ int main(void)
 
     // Install sensors
     problem->installSensor("CAMERA",     "front left camera",    pq_3d,  intr_cam_ptr);
-    problem->installSensor("CAMERA",     "front right camera",   pq_3d,  WOLF_CONFIG + "/camera.yaml");
+    problem->installSensor("CAMERA",     "front right camera",   pq_3d,  wolf_config + "/camera_params_ueye_sim.yaml");
     problem->installSensor("ODOM 2D",    "main odometer",        po_2d,  intr_odom2d_ptr);
     problem->installSensor("GPS FIX",    "GPS fix",              p_3d);
     problem->installSensor("IMU",        "inertial",             pq_3d);
-    problem->installSensor("GPS",        "GPS raw",              p_3d);
+//    problem->installSensor("GPS",        "GPS raw",              p_3d);
     problem->installSensor("ODOM 2D",    "aux odometer",         po_2d,  intr_odom2d_ptr);
-    problem->installSensor("CAMERA", "rear camera", pq_3d, WOLF_ROOT + "/src/examples/camera.yaml");
+    problem->installSensor("CAMERA", "rear camera", pq_3d, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
 
     // print available sensors
     for (auto sen : problem->getHardwarePtr()->getSensorList())
     {
         cout << "Sensor " << setw(2) << left << sen->id()
-                << " | type " << setw(2) << sen->typeId()
-                << ": " << setw(8) << sen->getType()
+                << " | type " << setw(8) << sen->getType()
                 << " | name: " << sen->getName() << endl;
     }
 
@@ -104,9 +93,9 @@ int main(void)
 
     // Install processors and bind them to sensors -- by sensor name!
     problem->installProcessor("ODOM 2D", "main odometry",    "main odometer");
-    problem->installProcessor("ODOM 3D", "sec. odometry",    "aux odometer");
+    problem->installProcessor("ODOM 2D", "sec. odometry",    "aux odometer");
     problem->installProcessor("IMU",     "pre-integrated",   "inertial");
-    problem->installProcessor("IMAGE",   "ORB",              "front left camera", WOLF_CONFIG + "/processor_image_ORB.yaml");
+    problem->installProcessor("IMAGE FEATURE",   "ORB",              "front left camera", wolf_config + "/processor_image_ORB.yaml");
 //    problem->createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors

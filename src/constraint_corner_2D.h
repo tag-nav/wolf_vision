@@ -12,14 +12,14 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 	public:
 
 		ConstraintCorner2D(FeatureBasePtr _ftr_ptr, LandmarkCorner2D::Ptr _lmk_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-			ConstraintSparse<3,2,1,2,1>(CTR_CORNER_2D, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
+			ConstraintSparse<3,2,1,2,1>(CTR_CORNER_2D, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
 		{
             setType("CORNER 2D");
 		}
 
         virtual ~ConstraintCorner2D()
         {
-            //std::cout << "deleting ConstraintCorner2D " << nodeId() << std::endl;
+            //std::cout << "deleting ConstraintCorner2D " << id() << std::endl;
         }
 
 		std::shared_ptr<LandmarkCorner2D> getLandmarkPtr()
@@ -87,9 +87,9 @@ inline bool ConstraintCorner2D::operator ()(const T* const _robotP, const T* con
     // Residuals
     residuals_map = getMeasurementSquareRootInformation().topLeftCorner<3,3>().cast<T>() * residuals_map;
 
-    //std::cout << "\nCONSTRAINT: " << nodeId() << std::endl;
-    //std::cout << "Feature: " << getFeaturePtr()->nodeId() << std::endl;
-    //std::cout << "Landmark: " << lmk_ptr_->nodeId() << std::endl;
+    //std::cout << "\nCONSTRAINT: " << id() << std::endl;
+    //std::cout << "Feature: " << getFeaturePtr()->id() << std::endl;
+    //std::cout << "Landmark: " << lmk_ptr_->id() << std::endl;
     //std::cout << "measurement:\n\t" << getMeasurement().transpose() << std::endl;
     //
     //std::cout << "robot pose:";

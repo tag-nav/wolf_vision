@@ -28,7 +28,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
         }
         else
         {
-            _feature_list_out.push_back(std::make_shared<FeatureBase>(FEATURE_POINT_IMAGE, "POINT IMAGE", feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
+            _feature_list_out.push_back(std::make_shared<FeatureBase>("POINT IMAGE", feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
             _feature_correspondences[_feature_list_out.back()] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in_ptr,0}));
             std::cout << "feature " << feat_in_ptr->getMeasurement() << " tracked!" << std::endl;
         }
@@ -39,21 +39,26 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
 
 bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureList().size() < 5;
+    std::cout << "N features: " << incoming_ptr_->getFeatureList().size() << std::endl;
+    bool vote = incoming_ptr_->getFeatureList().size() < min_feat_for_keyframe_;
+    std::cout << (vote ? "Vote ": "Not vote ") << "for KF" << std::endl;
+
+    return incoming_ptr_->getFeatureList().size() < min_feat_for_keyframe_;
 }
 
 unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features)
 {
-    std::cout << "detecting new features..." << std::endl;
+    std::cout << "Detecting " << _max_features << " new features..." << std::endl;
 
-    // detecting 5 new features
-    for (unsigned int i = 1; i <= 5; i++)
+    // detecting new features
+    for (unsigned int i = 1; i <= _max_features; i++)
     {
         n_feature_++;
         new_features_last_.push_back(
-                std::make_shared<FeatureBase>(FEATURE_POINT_IMAGE, "POINT IMAGE", n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
-        std::cout << "feature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
+                std::make_shared<FeatureBase>("POINT IMAGE", n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
+        //std::cout << "feature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
     }
+    std::cout << new_features_last_.size() << " features detected!" << std::endl;
 
     return new_features_last_.size();
 }

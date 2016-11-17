@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     // Wolf problem
     ProblemPtr wolf_problem_ceres_diff = new Problem(FRM_PO_2D);
     ProblemPtr wolf_problem_wolf_diff = new Problem(FRM_PO_2D);
-    SensorBasePtr sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
+    SensorBasePtr sensor = new SensorBase("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
 
     // Ceres wrappers
     ceres::Solver::Options ceres_options;
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
                     index_2_frame_ptr_wolf_diff[vertex_index] = vertex_frame_ptr_wolf_diff;
                     frame_ptr_2_index_wolf_diff[vertex_frame_ptr_wolf_diff] = vertex_index;
 
-                    //std::cout << "Added vertex! index: " << vertex_index << " nodeId: " << vertex_frame_ptr_wolf_diff->nodeId() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
+                    //std::cout << "Added vertex! index: " << vertex_index << " id: " << vertex_frame_ptr_wolf_diff->id() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
                 }
             }
             // EDGE
@@ -225,8 +225,8 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add capture, feature and constraint to problem
-                    FeatureBasePtr feature_ptr_ceres_diff = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
-                    FeatureBasePtr feature_ptr_wolf_diff = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_ceres_diff = new FeatureBase("FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_wolf_diff = new FeatureBase("FIX", edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_ceres_diff = new CaptureVoid(TimeStamp(0), sensor);
                     CaptureVoid* capture_ptr_wolf_diff = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_ceres_diff.find(edge_old) != index_2_frame_ptr_ceres_diff.end() && "edge from vertex not added!");
@@ -245,7 +245,7 @@ int main(int argc, char** argv)
                     ConstraintOdom2D* constraint_ptr_wolf_diff = new ConstraintOdom2D(feature_ptr_wolf_diff, frame_old_ptr_wolf_diff);
                     feature_ptr_ceres_diff->addConstraint(constraint_ptr_ceres_diff);
                     feature_ptr_wolf_diff->addConstraint(constraint_ptr_wolf_diff);
-                    //std::cout << "Added edge! " << constraint_ptr_wolf_diff->nodeId() << " from vertex " << constraint_ptr_wolf_diff->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_wolf_diff->getFrameToPtr()->nodeId() << std::endl;
+                    //std::cout << "Added edge! " << constraint_ptr_wolf_diff->id() << " from vertex " << constraint_ptr_wolf_diff->getCapturePtr()->getFramePtr()->id() << " to " << constraint_ptr_wolf_diff->getFrameToPtr()->id() << std::endl;
                     //std::cout << "vector " << constraint_ptr_wolf_diff->getMeasurement().transpose() << std::endl;
                     //std::cout << "information " << std::endl << edge_information << std::endl;
                     //std::cout << "covariance " << std::endl << constraint_ptr_wolf_diff->getMeasurementCovariance() << std::endl;
@@ -262,13 +262,13 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBasePtr first_frame_ceres_diff = wolf_problem_ceres_diff->getTrajectoryPtr()->getFrameList().front();
     FrameBasePtr first_frame_wolf_diff = wolf_problem_wolf_diff->getTrajectoryPtr()->getFrameList().front();
-    CaptureFix* initial_covariance_ceres_diff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_ceres_diff->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_wolf_diff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_wolf_diff->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_ceres_diff = new CaptureFix(TimeStamp(0), new SensorBase("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_ceres_diff->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_wolf_diff = new CaptureFix(TimeStamp(0), new SensorBase("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_wolf_diff->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_ceres_diff->addCapture(initial_covariance_ceres_diff);
     first_frame_wolf_diff->addCapture(initial_covariance_wolf_diff);
     initial_covariance_ceres_diff->process();
     initial_covariance_wolf_diff->process();
-    //std::cout << "initial covariance: constraint " << initial_covariance_wolf_diff->getFeatureList().front()->getConstraintFromList().front()->nodeId() << std::endl << initial_covariance_wolf_diff->getFeatureList().front()->getMeasurementCovariance() << std::endl;
+    //std::cout << "initial covariance: constraint " << initial_covariance_wolf_diff->getFeatureList().front()->getConstraintFromList().front()->id() << std::endl << initial_covariance_wolf_diff->getFeatureList().front()->getMeasurementCovariance() << std::endl;
 
     // COMPUTE COVARIANCES
     std::cout << "computing covariances..." << std::endl;

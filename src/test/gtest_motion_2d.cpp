@@ -5,14 +5,16 @@
  *      \author: jsola
  */
 
+#include "utils_gtest.h"
+
 // Classes under test
-#include "processor_odom_2D.h"
+#include "../processor_odom_2D.h"
 
 // Wolf includes
-#include "capture_fix.h"
-#include "state_block.h"
-#include "wolf.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "../capture_fix.h"
+#include "../state_block.h"
+#include "../wolf.h"
+#include "../ceres_wrapper/ceres_manager.h"
 
 // STL includes
 #include <map>
@@ -24,7 +26,7 @@
 #include <iostream>
 #include <iomanip>      // std::setprecision
 
-int main()
+TEST(ProcessorMotion, Motion2D)
 {
     std::cout << std::setprecision(3);
 
@@ -51,10 +53,10 @@ int main()
 
     // Create Wolf tree nodes
     ProblemPtr problem_ptr = Problem::create(FRM_PO_2D);
-    SensorBasePtr sensor_odom_ptr = std::make_shared< SensorBase>(SEN_ODOM_2D, "ODOM 2D", std::make_shared<StateBlock>(Eigen::Vector2s::Zero(), true),
+    SensorBasePtr sensor_odom_ptr = std::make_shared< SensorBase>("ODOM 2D", std::make_shared<StateBlock>(Eigen::Vector2s::Zero(), true),
                                             std::make_shared<StateBlock>(Eigen::Vector1s::Zero(), true),
                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(0), true), 0);
-    SensorBasePtr sensor_fix_ptr = std::make_shared< SensorBase>(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
+    SensorBasePtr sensor_fix_ptr = std::make_shared< SensorBase>("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
     ProcessorOdom2D::Ptr odom2d_ptr = std::make_shared< ProcessorOdom2D>(100,100,100);
     // Assemble Wolf tree by linking the nodes
     sensor_odom_ptr->addProcessor(odom2d_ptr);
@@ -80,8 +82,8 @@ int main()
     // Initialize processor motion
     odom2d_ptr->setOrigin(origin_frame);
 
-    std::cout << "Initial pose : " << problem_ptr->getLastFramePtr()->getState().transpose() << std::endl;
-    std::cout << "Initial covariance : " << std::endl << problem_ptr->getLastFramePtr()->getState().transpose() << std::endl;
+    std::cout << "Initial pose : " << problem_ptr->getCurrentState().transpose() << std::endl;
+    std::cout << "Initial covariance : " << std::endl << problem_ptr->getCurrentState().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     std::cout << "\nIntegrating states at synchronous time values..." << std::endl;
@@ -103,6 +105,7 @@ int main()
 
     for (int i = 0; i <= 20; i++)
     {
+        WOLF_TRACE("");
         // Processor
         odom2d_ptr->process(cap_ptr);
 
@@ -143,39 +146,42 @@ int main()
         integrated_x_vector.push_back(integrated_x);
         integrated_covariance_vector.push_back(integrated_covariance);
 
-        if ((odom2d_ptr->getCurrentState() - integrated_x).norm() > 1e-10)
-        {
-            std::cout << "----------- PROCESSOR:" << std::endl;
-            std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
-            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
-                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ << std::endl;
-            std::cout << "REFERENCE:" << std::endl;
-            std::cout << "State(" << (t - t0) << ") : " << integrated_x.transpose() << std::endl;
-            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl << integrated_delta_covariance << std::endl;
-            std::cout << "ERROR:" << std::endl;
-            std::cout << "State error(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() - integrated_x.transpose() << std::endl;
-            std::cout << "Covariance error(" << (t - t0) << ") : " << std::endl
-                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance << std::endl;
+//        if ((odom2d_ptr->getCurrentState() - integrated_x).norm() > Constants::EPS)
+//        {
+//            std::cout << "----------- PROCESSOR:" << std::endl;
+//            std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
+//            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
+//                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ << std::endl;
+//            std::cout << "REFERENCE:" << std::endl;
+//            std::cout << "State(" << (t - t0) << ") : " << integrated_x.transpose() << std::endl;
+//            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl << integrated_delta_covariance << std::endl;
+//            std::cout << "ERROR:" << std::endl;
+//            std::cout << "State error(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() - integrated_x.transpose() << std::endl;
+//            std::cout << "Covariance error(" << (t - t0) << ") : " << std::endl
+//                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance << std::endl;
+//
+//            std::cout << "TEST DELTA CHECK ------> ERROR: Integrated state different from reference." << std::endl;
+//        }
+        EXPECT_TRUE((odom2d_ptr->getCurrentState() - integrated_x).isMuchSmallerThan(1.0,Constants::EPS));
 
-            throw std::runtime_error("Integrated state different from reference.");
-        }
+//        if ((odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance).array().abs().maxCoeff() > Constants::EPS)
+//        {
+//            std::cout << "----------- PROCESSOR:" << std::endl;
+//            std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
+//            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
+//                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ << std::endl;
+//            std::cout << "REFERENCE:" << std::endl;
+//            std::cout << "State(" << (t - t0) << ") : " << integrated_x.transpose() << std::endl;
+//            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl << integrated_delta_covariance << std::endl;
+//            std::cout << "ERROR:" << std::endl;
+//            std::cout << "State error(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() - integrated_x.transpose() << std::endl;
+//            std::cout << "Covariance error(" << (t - t0) << ") : " << std::endl
+//                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance << std::endl;
+//
+//            std::cout << "TEST COVARIANCE CHECK ------> ERROR: Integrated covariance different from reference." << std::endl;
+//        }
+        EXPECT_TRUE((odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance).isMuchSmallerThan(1.0,Constants::EPS));
 
-        if ((odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance).array().abs().maxCoeff() > 1e-10)
-        {
-            std::cout << "----------- PROCESSOR:" << std::endl;
-            std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
-            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
-                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ << std::endl;
-            std::cout << "REFERENCE:" << std::endl;
-            std::cout << "State(" << (t - t0) << ") : " << integrated_x.transpose() << std::endl;
-            std::cout << "Covariance(" << (t - t0) << ") : " << std::endl << integrated_delta_covariance << std::endl;
-            std::cout << "ERROR:" << std::endl;
-            std::cout << "State error(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() - integrated_x.transpose() << std::endl;
-            std::cout << "Covariance error(" << (t - t0) << ") : " << std::endl
-                      << odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance << std::endl;
-//            throw std::runtime_error("Integrated covariance different from reference.");
-            std::cout << "TEST COVARIANCE CHECK ------> ERROR: Integrated covariance different from reference." << std::endl;
-        }
         // Timestamp
         t += dt;
         cap_ptr->setTimeStamp(t);
@@ -232,18 +238,17 @@ int main()
     //std::cout << summary.FullReport() << std::endl;
     ceres_manager_ptr->computeCovariances(ALL_MARGINALS);
 
-    if ((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[12]).array().abs().maxCoeff() > 1e-10)
-    {
-        std::cout << "After solving the problem, covariance of new keyframe:" << std::endl;
-        std::cout << "WOLF:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) << std::endl;
-        std::cout << "REFERENCE:" << std::endl << integrated_covariance_vector[12] << std::endl;
-        std::cout << "ERROR:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[12] << std::endl;
-//        throw std::runtime_error("Integrated covariance different from reference.");
-        std::cout << "1st TEST COVARIANCE CHECK ------> ERROR!: Integrated covariance different from reference." << std::endl;
-
-    }
-    else
-        std::cout << "1st TEST COVARIANCE CHECK ------> OK!" << std::endl;
+//    if ((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[12]).array().abs().maxCoeff() > 1e-10)
+//    {
+//        std::cout << "After solving the problem, covariance of new keyframe:" << std::endl;
+//        std::cout << "WOLF:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) << std::endl;
+//        std::cout << "REFERENCE:" << std::endl << integrated_covariance_vector[12] << std::endl;
+//        std::cout << "ERROR:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[12] << std::endl;
+////        throw std::runtime_error("Integrated covariance different from reference.");
+//        std::cout << "1st TEST COVARIANCE CHECK ------> ERROR!: Integrated covariance different from reference." << std::endl;
+//
+//    }
+    EXPECT_TRUE((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[12]).isMuchSmallerThan(1.0, Constants::EPS));
 
 
     // second split as non-exact timestamp
@@ -258,18 +263,17 @@ int main()
     //std::cout << summary.FullReport() << std::endl;
     ceres_manager_ptr->computeCovariances(ALL_MARGINALS);
 
-    if ((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[5]).array().abs().maxCoeff() > 1e-10)
-    {
-        std::cout << "After solving the problem, covariance of new keyframe:" << std::endl;
-        std::cout << "WOLF:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) << std::endl;
-        std::cout << "REFERENCE:" << std::endl << integrated_covariance_vector[5] << std::endl;
-        std::cout << "ERROR:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[5] << std::endl;
-//        throw std::runtime_error("Integrated covariance different from reference.");
-        std::cout << "2nd TEST COVARIANCE CHECK ------> ERROR!: Integrated covariance different from reference." << std::endl;
-
-    }
-    else
-        std::cout << "2nd TEST COVARIANCE CHECK ------> OK!" << std::endl;
+//    if ((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[5]).array().abs().maxCoeff() > 1e-10)
+//    {
+//        std::cout << "After solving the problem, covariance of new keyframe:" << std::endl;
+//        std::cout << "WOLF:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) << std::endl;
+//        std::cout << "REFERENCE:" << std::endl << integrated_covariance_vector[5] << std::endl;
+//        std::cout << "ERROR:" << std::endl << problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[5] << std::endl;
+////        throw std::runtime_error("Integrated covariance different from reference.");
+//        std::cout << "2nd TEST COVARIANCE CHECK ------> ERROR!: Integrated covariance different from reference." << std::endl;
+//
+//    }
+    EXPECT_TRUE((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[5]).isMuchSmallerThan(1.0, Constants::EPS));
 
 
     std::cout << "All in one row:            < ";
@@ -285,6 +289,12 @@ int main()
     std::cout << "ceres manager deleted" << std::endl;
     problem_ptr.reset();
     std::cout << "problem deleted" << std::endl;
-
-    return 0;
 }
+
+
+int main(int argc, char **argv)
+{
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
+

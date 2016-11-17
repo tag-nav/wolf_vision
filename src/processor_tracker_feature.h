@@ -74,7 +74,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
 
         /** \brief Constructor with type
          */
-        ProcessorTrackerFeature(ProcessorType _tp, const std::string& _type, const unsigned int _max_new_features = 0);
+        ProcessorTrackerFeature(const std::string& _type, const unsigned int _max_new_features = 0);
         virtual ~ProcessorTrackerFeature();
 
     protected:
@@ -172,10 +172,10 @@ namespace wolf {
 
 inline void ProcessorTrackerFeature::establishConstraints()
 {
+
     for (auto match : matches_origin_from_last_)
     {
         auto ctr = createConstraint(match.first, match.second->feature_ptr_);
-        ctr->setFeatureOtherPtr(match.second->feature_ptr_);
         match.first->addConstraint(ctr);
         match.second->feature_ptr_->addConstrainedBy(ctr);
     }
@@ -183,6 +183,7 @@ inline void ProcessorTrackerFeature::establishConstraints()
 
 inline void ProcessorTrackerFeature::advance()
 {
+
     //    std::cout << "ProcessorTrackerFeature::advance()" << std::endl;
 
     // Compose correspondences to get origin_from_incoming
@@ -203,6 +204,7 @@ inline void ProcessorTrackerFeature::advance()
 
 inline void ProcessorTrackerFeature::reset()
 {
+
     //    std::cout << "ProcessorTrackerFeature::reset()" << std::endl;
 
     // We also reset here the list of correspondences, which passes from last--incoming to origin--last.

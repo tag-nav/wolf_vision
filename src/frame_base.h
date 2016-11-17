@@ -25,13 +25,13 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         TrajectoryBaseWPtr trajectory_ptr_;
         CaptureBaseList capture_list_;
         ConstraintBaseList constrained_by_list_;
-        std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, V.
+        std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order: Position, Orientation, Velocity.
 
         static unsigned int frame_id_count_;
 
     protected:
         unsigned int frame_id_;
-        FrameKeyType type_id_;     ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
+        FrameType type_;     ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
         StateStatus status_;       ///< status of the estimation of the frame state
         TimeStamp time_stamp_;     ///< frame time stamp
         
@@ -55,7 +55,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          * \param _v_ptr StateBlock pointer to the velocity (default: nullptr).
          **/        
-        FrameBase(const FrameKeyType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
+        FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
 
         virtual ~FrameBase();
         void remove();
@@ -84,7 +84,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         // State blocks
     public:
-        void registerNewStateBlocks();
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
         StateBlockPtr getPPtr() const;
@@ -93,12 +92,14 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setPPtr(const StateBlockPtr _p_ptr);
         void setOPtr(const StateBlockPtr _o_ptr);
         void setVPtr(const StateBlockPtr _v_ptr);
+        void registerNewStateBlocks();
+    private:
+        void removeStateBlocks();
 
     protected:
         StateBlockPtr getStateBlockPtr(unsigned int _i) const;
         void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
-    private:
-        void removeStateBlocks();
+        void resizeStateBlockVec(int _size);
 
         // states
     public:
@@ -134,13 +135,13 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setStatus(StateStatus _st);
 
     public:
-        static FrameBasePtr create_PO_2D (const FrameKeyType & _tp,
+        static FrameBasePtr create_PO_2D (const FrameType & _tp,
                                           const TimeStamp& _ts,
                                           const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(3));
-        static FrameBasePtr create_PO_3D (const FrameKeyType & _tp,
+        static FrameBasePtr create_PO_3D (const FrameType & _tp,
                                           const TimeStamp& _ts,
                                           const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(7));
-        static FrameBasePtr create_POV_3D(const FrameKeyType & _tp,
+        static FrameBasePtr create_POV_3D(const FrameType & _tp,
                                           const TimeStamp& _ts,
                                           const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(10));
 };
@@ -149,8 +150,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
 // IMPLEMENTATION //
 
-#include "capture_base.h"
 #include "trajectory_base.h"
+#include "capture_base.h"
+#include "constraint_base.h"
 #include "state_block.h"
 
 namespace wolf {
@@ -179,7 +181,7 @@ inline unsigned int FrameBase::id()
 
 inline bool FrameBase::isKey() const
 {
-    return (type_id_ == KEY_FRAME);
+    return (type_ == KEY_FRAME);
 }
 
 inline void FrameBase::fix()
@@ -189,7 +191,7 @@ inline void FrameBase::fix()
 
 inline void FrameBase::unfix()
 {
-    //std::cout << "Unfixing frame " << nodeId() << std::endl;
+    //std::cout << "Unfixing frame " << id() << std::endl;
     this->setStatus(ST_ESTIMATED);
 }
 
@@ -201,6 +203,8 @@ inline bool FrameBase::isFixed() const
 inline void FrameBase::setTimeStamp(const TimeStamp& _ts)
 {
     time_stamp_ = _ts;
+    if (isKey() && getTrajectoryPtr() != nullptr)
+        getTrajectoryPtr()->sortFrame(shared_from_this());
 }
 
 inline void FrameBase::getTimeStamp(TimeStamp& _ts) const
@@ -259,6 +263,7 @@ inline StateBlockPtr FrameBase::getStateBlockPtr(unsigned int _i) const
 
 inline void FrameBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
     state_block_vec_[_i] = _sb_ptr;
 }
 
@@ -278,6 +283,12 @@ inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
     _capt_ptr->setFramePtr(shared_from_this());
     _capt_ptr->setProblem(getProblem());
     return _capt_ptr;
+}
+
+inline void FrameBase::resizeStateBlockVec(int _size)
+{
+    if (_size > state_block_vec_.size())
+        state_block_vec_.resize(_size);
 }
 
 inline StateStatus FrameBase::getStatus() const
@@ -309,6 +320,7 @@ inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
 
 inline void FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
+    _ctr_ptr->setFrameOtherPtr( shared_from_this() );
     constrained_by_list_.push_back(_ctr_ptr);
 }
 

@@ -6,13 +6,12 @@ namespace wolf {
 
 unsigned int SensorBase::sensor_id_count_ = 0;
 
-SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr,
+SensorBase::SensorBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr,
                        const unsigned int _noise_size, const bool _extr_dyn) :
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
-        state_block_vec_(6), // allow for 6 state blocks by default. Should be enough in all applications.
+        state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
         sensor_id_(++sensor_id_count_), // simple ID factory
-        type_id_(_tp),
         extrinsic_dynamic_(_extr_dyn),
         noise_std_(_noise_size),
         noise_cov_(_noise_size, _noise_size)
@@ -20,20 +19,16 @@ SensorBase::SensorBase(const SensorType& _tp, const std::string& _type, StateBlo
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _intr_ptr;
-    state_block_vec_[3] = nullptr;
-    state_block_vec_[4] = nullptr;
-    state_block_vec_[5] = nullptr;
-    std::cout << "constructed  +S" << id() << std::endl;
+//    std::cout << "constructed  +S" << id() << std::endl;
     //
 }
 
-SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr,
+SensorBase::SensorBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr,
                        const Eigen::VectorXs & _noise_std, const bool _extr_dyn) :
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
-        state_block_vec_(6), // allow for 6 state blocks by default. Should be enough in all applications.
+        state_block_vec_(6), // allow for 3 state blocks by default. Resize in derived constructors if needed.
         sensor_id_(++sensor_id_count_), // simple ID factory
-        type_id_(_tp),
         extrinsic_dynamic_(_extr_dyn),
         noise_std_(_noise_std),
         noise_cov_(_noise_std.size(), _noise_std.size())
@@ -41,14 +36,11 @@ SensorBase::SensorBase(const SensorType & _tp, const std::string& _type, StateBl
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _intr_ptr;
-    state_block_vec_[3] = nullptr;
-    state_block_vec_[4] = nullptr;
-    state_block_vec_[5] = nullptr;
     noise_cov_.setZero();
     for (unsigned int i = 0; i < _noise_std.size(); i++)
         noise_cov_(i, i) = noise_std_(i) * noise_std_(i);
 
-    std::cout << "constructed  +S" << id() << std::endl;
+//    std::cout << "constructed  +S" << id() << std::endl;
 }
 
 SensorBase::~SensorBase()
@@ -56,7 +48,7 @@ SensorBase::~SensorBase()
     // Remove State Blocks
     removeStateBlocks();
 
-    std::cout << "destructed   -S" << id() << std::endl;
+//    std::cout << "destructed   -S" << id() << std::endl;
 }
 
 inline void SensorBase::remove()
@@ -103,7 +95,28 @@ void SensorBase::removeStateBlocks()
 
 void SensorBase::fix()
 {
-    // fix only extrinsics
+    for( auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->fix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+}
+
+void SensorBase::unfix()
+{
+    for( auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->unfix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+}
+
+inline void SensorBase::fixExtrinsics()
+{
     for (unsigned int i = 0; i < 2; i++)
     {
         auto sbp = state_block_vec_[i];
@@ -116,9 +129,8 @@ void SensorBase::fix()
     }
 }
 
-void SensorBase::unfix()
+inline void SensorBase::unfixExtrinsics()
 {
-    // unfix only extrinsics
     for (unsigned int i = 0; i < 2; i++)
     {
         auto sbp = state_block_vec_[i];
@@ -130,6 +142,36 @@ void SensorBase::unfix()
         }
     }
 }
+
+inline void SensorBase::fixIntrinsics()
+{
+    for (unsigned int i = 2; i < state_block_vec_.size(); i++)
+    {
+        auto sbp = state_block_vec_[i];
+        if (sbp != nullptr)
+        {
+            sbp->fix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+    }
+}
+
+inline void SensorBase::unfixIntrinsics()
+{
+    for (unsigned int i = 2; i < state_block_vec_.size(); i++)
+    {
+        auto sbp = state_block_vec_[i];
+        if (sbp != nullptr)
+        {
+            sbp->unfix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+    }
+}
+
+
 
 void SensorBase::registerNewStateBlocks()
 {

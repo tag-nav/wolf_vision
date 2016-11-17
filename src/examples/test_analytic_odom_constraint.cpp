@@ -61,7 +61,7 @@ int main(int argc, char** argv)
     // Wolf problem
     ProblemPtr wolf_problem_autodiff = new Problem(FRM_PO_2D);
     ProblemPtr wolf_problem_analytic = new Problem(FRM_PO_2D);
-    SensorBasePtr sensor = new SensorBase(SEN_ODOM_2D, "ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
+    SensorBasePtr sensor = new SensorBase("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -136,7 +136,7 @@ int main(int argc, char** argv)
                     index_2_frame_ptr_autodiff[vertex_index] = vertex_frame_ptr_autodiff;
                     index_2_frame_ptr_analytic[vertex_index] = vertex_frame_ptr_analytic;
 
-                    //std::cout << "Added vertex! index: " << vertex_index << " nodeId: " << vertex_frame_ptr_analytic->nodeId() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
+                    //std::cout << "Added vertex! index: " << vertex_index << " id: " << vertex_frame_ptr_analytic->id() << std::endl << "pose: " << vertex_pose.transpose() << std::endl;
                 }
             }
             // EDGE
@@ -238,7 +238,7 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add capture, feature and constraint to problem
-                    FeatureBasePtr feature_ptr_autodiff = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_autodiff = new FeatureBase("FIX", edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_autodiff = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_autodiff.find(edge_old) != index_2_frame_ptr_autodiff.end() && "edge from vertex not added!");
                     FrameBasePtr frame_old_ptr_autodiff = index_2_frame_ptr_autodiff[edge_old];
@@ -248,10 +248,10 @@ int main(int argc, char** argv)
                     capture_ptr_autodiff->addFeature(feature_ptr_autodiff);
                     ConstraintOdom2D* constraint_ptr_autodiff = new ConstraintOdom2D(feature_ptr_autodiff, frame_old_ptr_autodiff);
                     feature_ptr_autodiff->addConstraint(constraint_ptr_autodiff);
-                    //std::cout << "Added autodiff edge! " << constraint_ptr_autodiff->nodeId() << " from vertex " << constraint_ptr_autodiff->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_autodiff->getFrameOtherPtr()->nodeId() << std::endl;
+                    //std::cout << "Added autodiff edge! " << constraint_ptr_autodiff->id() << " from vertex " << constraint_ptr_autodiff->getCapturePtr()->getFramePtr()->id() << " to " << constraint_ptr_autodiff->getFrameOtherPtr()->id() << std::endl;
 
                     // add capture, feature and constraint to problem
-                    FeatureBasePtr feature_ptr_analytic = new FeatureBase(FEATURE_FIX, "FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_analytic = new FeatureBase("FIX", edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_analytic = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_analytic.find(edge_old) != index_2_frame_ptr_analytic.end() && "edge from vertex not added!");
                     FrameBasePtr frame_old_ptr_analytic = index_2_frame_ptr_analytic[edge_old];
@@ -261,7 +261,7 @@ int main(int argc, char** argv)
                     capture_ptr_analytic->addFeature(feature_ptr_analytic);
                     ConstraintOdom2DAnalytic* constraint_ptr_analytic = new ConstraintOdom2DAnalytic(feature_ptr_analytic, frame_old_ptr_analytic);
                     feature_ptr_analytic->addConstraint(constraint_ptr_analytic);
-                    //std::cout << "Added analytic edge! " << constraint_ptr_analytic->nodeId() << " from vertex " << constraint_ptr_analytic->getCapturePtr()->getFramePtr()->nodeId() << " to " << constraint_ptr_analytic->getFrameOtherPtr()->nodeId() << std::endl;
+                    //std::cout << "Added analytic edge! " << constraint_ptr_analytic->id() << " from vertex " << constraint_ptr_analytic->getCapturePtr()->getFramePtr()->id() << " to " << constraint_ptr_analytic->getFrameOtherPtr()->id() << std::endl;
                     //std::cout << "vector " << constraint_ptr_analytic->getMeasurement().transpose() << std::endl;
                     //std::cout << "information " << std::endl << edge_information << std::endl;
                     //std::cout << "covariance " << std::endl << constraint_ptr_analytic->getMeasurementCovariance() << std::endl;
@@ -278,8 +278,8 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBasePtr first_frame_autodiff = wolf_problem_autodiff->getTrajectoryPtr()->getFrameList().front();
     FrameBasePtr first_frame_analytic = wolf_problem_analytic->getTrajectoryPtr()->getFrameList().front();
-    CaptureFix* initial_covariance_autodiff = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_autodiff->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_analytic = new CaptureFix(TimeStamp(0), new SensorBase(SEN_ABSOLUTE_POSE, "ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_analytic->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_autodiff = new CaptureFix(TimeStamp(0), new SensorBase("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_autodiff->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_analytic = new CaptureFix(TimeStamp(0), new SensorBase("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_analytic->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_autodiff->addCapture(initial_covariance_autodiff);
     first_frame_analytic->addCapture(initial_covariance_analytic);
     initial_covariance_autodiff->process();

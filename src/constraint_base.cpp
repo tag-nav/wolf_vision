@@ -19,11 +19,13 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
     landmark_other_ptr_() // nullptr
 {
     //std::cout << "creating ConstraintBase " << std::endl;
-    std::cout << "constructed        +c" << id() << std::endl;
+//    std::cout << "constructed        +c" << id() << std::endl;
 }
 
+// FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr,
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status) :
+
+ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, FeatureBasePtr _feature_other_ptr, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),
     feature_ptr_(),
     constraint_id_(++constraint_id_count_),
@@ -31,48 +33,63 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool
     category_(CTR_FRAME),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
-    frame_other_ptr_(_frame_ptr),
-    feature_other_ptr_(),
-    landmark_other_ptr_()
+    frame_other_ptr_(_frame_other_ptr),
+    feature_other_ptr_(_feature_other_ptr),
+    landmark_other_ptr_(_landmark_other_ptr)
 {
-    std::cout << "constructed        +c" << id() << std::endl;
+//    std::cout << "constructed        +c" << id() << std::endl;
 }
 
-
-ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status) :
-    NodeBase("CONSTRAINT"),
-    feature_ptr_(),
-    constraint_id_(++constraint_id_count_),
-    type_id_(_tp),
-    category_(CTR_FEATURE),
-    status_(_status),
-    apply_loss_function_(_apply_loss_function),
-    frame_other_ptr_(),
-    feature_other_ptr_(_feature_ptr),
-    landmark_other_ptr_()
-{
-    std::cout << "constructed        +c" << id() << std::endl;
-}
-
-
-ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status) :
-    NodeBase("CONSTRAINT"),
-    feature_ptr_(),
-    constraint_id_(++constraint_id_count_),
-    type_id_(_tp),
-    category_(CTR_LANDMARK),
-    status_(_status),
-    apply_loss_function_(_apply_loss_function),
-    frame_other_ptr_(),
-    feature_other_ptr_(),
-    landmark_other_ptr_(_landmark_ptr)
-{
-    std::cout << "constructed        +c" << id() << std::endl;
-}
+//ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, bool _apply_loss_function, ConstraintStatus _status) :
+//    NodeBase("CONSTRAINT", "Base"),
+//    feature_ptr_(),
+//    constraint_id_(++constraint_id_count_),
+//    type_id_(_tp),
+//    category_(CTR_FRAME),
+//    status_(_status),
+//    apply_loss_function_(_apply_loss_function),
+//    frame_other_ptr_(_frame_other_ptr),
+//    feature_other_ptr_(),
+//    landmark_other_ptr_()
+//{
+////    std::cout << "constructed        +c" << id() << std::endl;
+//}
+//
+//
+//ConstraintBase::ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_other_ptr, bool _apply_loss_function, ConstraintStatus _status) :
+//    NodeBase("CONSTRAINT"),
+//    feature_ptr_(),
+//    constraint_id_(++constraint_id_count_),
+//    type_id_(_tp),
+//    category_(CTR_FEATURE),
+//    status_(_status),
+//    apply_loss_function_(_apply_loss_function),
+//    frame_other_ptr_(),
+//    feature_other_ptr_(_feature_other_ptr),
+//    landmark_other_ptr_()
+//{
+////    std::cout << "constructed        +c" << id() << std::endl;
+//}
+//
+//
+//ConstraintBase::ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status) :
+//    NodeBase("CONSTRAINT"),
+//    feature_ptr_(),
+//    constraint_id_(++constraint_id_count_),
+//    type_id_(_tp),
+//    category_(CTR_LANDMARK),
+//    status_(_status),
+//    apply_loss_function_(_apply_loss_function),
+//    frame_other_ptr_(),
+//    feature_other_ptr_(),
+//    landmark_other_ptr_(_landmark_other_ptr)
+//{
+////    std::cout << "constructed        +c" << id() << std::endl;
+//}
 
 ConstraintBase::~ConstraintBase()
 {
-    std::cout << "destructed         -c" << id() << std::endl;
+//    std::cout << "destructed         -c" << id() << std::endl;
 }
 
 void ConstraintBase::remove()
@@ -80,7 +97,6 @@ void ConstraintBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-        std::cout << "Removing         c" << id() << std::endl;
         ConstraintBasePtr this_c = shared_from_this(); // keep this alive while removing it
         FeatureBasePtr f = feature_ptr_.lock();
         if (f)
@@ -134,6 +150,7 @@ void ConstraintBase::remove()
             default:
                 break;
         }
+//        std::cout << "Removed             c" << id() << std::endl;
     }
 }
 

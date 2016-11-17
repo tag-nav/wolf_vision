@@ -25,11 +25,14 @@ active search:
     separation: 5
 
 algorithm:
-    maximum new features: 40
+    maximum new features: 30
     minimum features for new keyframe: 40
     minimum response for new features: 80 #0.0005
     time tolerance: 0.01
-    distance: 10
+    distance: 20
+    
+noise:
+    pixel noise std: 1 # pixels
     
 draw: # Used to control drawing options
     primary draw: true

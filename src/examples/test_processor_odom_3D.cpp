@@ -31,8 +31,7 @@ int main (int argc, char** argv)
 {
     cout << "\n========= Test ProcessorOdom3D ===========" << endl;
 
-    GET_WOLF_ROOT
-
+    std::string wolf_root = _WOLF_ROOT_DIR;
 
     TimeStamp tf;
     if (argc == 1)
@@ -66,8 +65,7 @@ int main (int argc, char** argv)
         cap_odo->setTimeStamp(t);
         cap_odo->setData(data);
 
-        sen->addCapture(cap_odo);
-//        cap_odo->process();
+        sen->process(cap_odo);
 
         cout << "t: " << std::setprecision(2) << t.get() << "  \t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
 

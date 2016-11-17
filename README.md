@@ -126,11 +126,7 @@ We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it a
 
 **(1)** Download:
 
-`$ svn checkout `[`https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/trunk`](https://devel.iri.upc.edu/labrobotica/algorithms/laser_scan_utils/trunk)` laser_scan_utils`
-
-Or, in case you don't have permissions:
-
-`$ svn checkout `[`https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/trunk`](https://devel.iri.upc.edu/pub/labrobotica/algorithms/laser_scan_utils/trunk)` laser_scan_utils`
+`$ git clone `[`https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git`](https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git)` laser_scan_utils`
 
 **(2)** Build and install:
 
@@ -163,7 +159,7 @@ Download and build
 
 **Build:**
 
-    $ cd Wolf/build
+    $ cd wolf/build
     $ cmake ..
     $ make
     $ sudo make install  //optional in case you want to install wolf library
@@ -211,7 +207,7 @@ Alternatively, you can set up the environment variables in your GUIs only. Follo
 
 ### Wolf ROS Node
 
-`$ git clone `[`https://github.com/IRI-MobileRobotics/Wolf_ros.git`](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
+`$ git clone `[`https://github.com/IRI-MobileRobotics/wolf_ros.git`](https://github.com/IRI-MobileRobotics/wolf_ros.git)
 
 
 

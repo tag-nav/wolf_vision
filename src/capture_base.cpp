@@ -15,30 +15,21 @@ CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorB
         sensor_o_ptr_(sensor_ptr_.lock()->getOPtr())
 {
     //
-    std::cout << "constructed    +C" << id() << std::endl;
+//    std::cout << "constructed    +C" << id() << std::endl;
 }
 
 
 CaptureBase::~CaptureBase()
 {
-    std::cout << "destructed     -C" << id() << std::endl;
+//    std::cout << "destructed     -C" << id() << std::endl;
 }
 
-//void CaptureBase::process()
-//{
-//    // Call all processors assigned to the sensor that captured this data
-//    auto cap = shared_from_this();
-//    auto sen = sensor_ptr_.lock();
-//    if (sen)
-//        for (auto prc : sen->getProcessorList())
-//            prc->process(cap);
-//}
-
-//<<<<<<< HEAD
 void CaptureBase::remove()
 {
+//    std::cout << "Remove          C" << id() << std::endl;
     if (!is_removing_)
     {
+//        std::cout << "Removing        C" << id() << std::endl;
         is_removing_ = true;
         CaptureBasePtr this_C = shared_from_this();  // keep this alive while removing it
 
@@ -57,19 +48,9 @@ void CaptureBase::remove()
             feature_list_.front()->remove(); // remove downstream
         }
 
-        std::cout << "Removed         C" << id() << std::endl;
+//        std::cout << "Removed         C" << id() << std::endl;
     }
 }
-//=======
-//void CaptureBase::process()
-//{
-//    // Call all processors assigned to the sensor that captured this data
-//    for (auto processor_iter = sensor_ptr_->getProcessorListPtr()->begin(); processor_iter != sensor_ptr_->getProcessorListPtr()->end(); ++processor_iter)
-//    {
-//        (*processor_iter)->process(this);
-//    }
-//}
-//>>>>>>> capture_passby_sensor
 
 void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
 {

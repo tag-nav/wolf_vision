@@ -36,7 +36,7 @@ SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 SET(CMAKE_INSTALL_PREFIX /usr/local)
 
 IF (NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE "DEBUG") 
+  SET(CMAKE_BUILD_TYPE "DEBUG")
 ENDIF (NOT CMAKE_BUILD_TYPE)
 message(STATUS "Configured to compile in ${CMAKE_BUILD_TYPE} mode.")
 
@@ -64,6 +64,20 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+
+#OPTION(BUILD_DOC "Build Documentation" OFF)
+OPTION(BUILD_TESTS "Build Unit tests" ON)
+#############
+## Testing ##
+#############
+#
+if(BUILD_TESTS)
+    # Enables testing for this directory and below.
+    # Note that ctest expects to find a test file in the build directory root.
+    # Therefore, this command should be in the source directory root.
+    #include(CTest) # according to http://public.kitware.com/pipermail/cmake/2012-June/050853.html
+    enable_testing()
+endif()
 
 ADD_SUBDIRECTORY(src)
 

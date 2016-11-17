@@ -44,7 +44,17 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
         intrinsics_cam->pinhole_model[1] = intrinsic[5];
         intrinsics_cam->pinhole_model[2] = intrinsic[0];
         intrinsics_cam->pinhole_model[3] = intrinsic[4];
-        intrinsics_cam->distortion = distortion;
+        assert (distortion(2) == 0 && distortion(3) == 0 && "Cannot handle tangential distortion. Please re-calibrate without tangential distortion!");
+        if (distortion(4) == 0)
+            intrinsics_cam->distortion = distortion.head<2>();
+        else
+        {
+            unsigned int dist_size = distortion.size() - 2;
+            unsigned int dist_tail_size = dist_size - 2;
+            intrinsics_cam->distortion.resize(dist_size);
+            intrinsics_cam->distortion.head<2>() = distortion.head<2>();
+            intrinsics_cam->distortion.tail(dist_tail_size) = distortion.tail(dist_tail_size);
+        }
         intrinsics_cam->width = width;
         intrinsics_cam->height = height;
 
@@ -52,9 +62,9 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
         //=========================================
         // ===== this part for debugging only =====
         //=========================================
-        std::cout << "\n--- Parameters Parsed from YAML file ---" << std::endl;
-        std::cout << "sensor type: " << sensor_type << std::endl;
-        std::cout << "sensor name: " << sensor_name << std::endl;
+//        std::cout << "\n--- Parameters Parsed from YAML file ---" << std::endl;
+//        std::cout << "sensor type: " << sensor_type << std::endl;
+//        std::cout << "sensor name: " << sensor_name << std::endl;
 
 //        // extrinsics discarded in this creator
 //        Vector3d pos            = camera_config["extrinsic"]["position"].as<Vector3d>();
@@ -64,10 +74,10 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
 //        std::cout << "\tposition    : " << pos.transpose() << std::endl;
 //        std::cout << "\torientation : " << ori.transpose() << std::endl;
 
-        std::cout << "sensor intrinsics: " << std::endl;
-        std::cout << "\timage size  : " << width << "x" << height << std::endl;
-        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
-        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
+//        std::cout << "sensor intrinsics: " << std::endl;
+//        std::cout << "\timage size  : " << width << "x" << height << std::endl;
+//        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
+//        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
         //=========================================
         //=========================================
 

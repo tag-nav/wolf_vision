@@ -18,7 +18,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 		static const unsigned int N_BLOCKS = 4;
 
 	    ConstraintContainer(FeatureBasePtr _ftr_ptr, LandmarkContainer::Ptr _lmk_ptr, const unsigned int _corner, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-			ConstraintSparse<3,2,1,2,1>(CTR_CONTAINER, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
+			ConstraintSparse<3,2,1,2,1>(CTR_CONTAINER, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
 		{
@@ -30,7 +30,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 
 		virtual ~ConstraintContainer()
 		{
-			//std::cout << "deleting ConstraintContainer " << nodeId() << std::endl;
+			//std::cout << "deleting ConstraintContainer " << id() << std::endl;
 		}
 
 		LandmarkContainer::Ptr getLandmarkPtr()
@@ -77,9 +77,9 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
             // Residuals
             residuals_map = getMeasurementSquareRootInformation().cast<T>() * residuals_map;
 
-            //std::cout << "\nCONSTRAINT: " << nodeId() << std::endl;
-            //std::cout << "Feature: " << getFeaturePtr()->nodeId() << std::endl;
-            //std::cout << "Landmark: " << lmk_ptr_->nodeId() << std::endl;
+            //std::cout << "\nCONSTRAINT: " << id() << std::endl;
+            //std::cout << "Feature: " << getFeaturePtr()->id() << std::endl;
+            //std::cout << "Landmark: " << lmk_ptr_->id() << std::endl;
             //std::cout << "measurement:\n\t" << getMeasurement().transpose() << std::endl;
             //
             //std::cout << "robot pose:";

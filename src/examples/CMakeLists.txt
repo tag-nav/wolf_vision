@@ -1,32 +1,36 @@
 
+
 # Matrix product test
 #ADD_EXECUTABLE(test_matrix_prod test_matrix_prod.cpp)
 
 #ADD_EXECUTABLE(test_eigen_template test_eigen_template.cpp)
 
 # Complete Wolf tree skeleton with smart pointers
-ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
+#ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
 
+ADD_EXECUTABLE(test_wolf_root test_wolf_root.cpp)
+
+ADD_EXECUTABLE(test_kf_callback test_kf_callback.cpp)
+TARGET_LINK_LIBRARIES(test_kf_callback ${PROJECT_NAME})
+
+ADD_EXECUTABLE(test_wolf_logging test_wolf_logging.cpp)
+TARGET_LINK_LIBRARIES(test_wolf_logging ${PROJECT_NAME})
 
 IF(Ceres_FOUND)
     # test_processor_odom_3D
     ADD_EXECUTABLE(test_processor_odom_3D test_processor_odom_3D.cpp)
     TARGET_LINK_LIBRARIES(test_processor_odom_3D ${PROJECT_NAME})
 
-    ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
-    TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_motion_2d test_motion_2d.cpp)
+#    TARGET_LINK_LIBRARIES(test_motion_2d ${PROJECT_NAME})
 ENDIF(Ceres_FOUND)
 
 
 
 
-# Local parametrizations classes test
-ADD_EXECUTABLE(test_local_param test_local_param.cpp)
-TARGET_LINK_LIBRARIES(test_local_param ${PROJECT_NAME})
-
 # State blocks with local parametrizations test
-ADD_EXECUTABLE(test_state_quaternion test_state_quaternion.cpp)
-TARGET_LINK_LIBRARIES(test_state_quaternion ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_state_quaternion test_state_quaternion.cpp)
+#TARGET_LINK_LIBRARIES(test_state_quaternion ${PROJECT_NAME})
 
 # Testing virtual hierarchy -- solving diamond of death
 #ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
@@ -42,19 +46,19 @@ TARGET_LINK_LIBRARIES(test_sort_keyframes ${PROJECT_NAME})
 
 # Enable Yaml config files
 IF(YAMLCPP_FOUND)
-    ADD_EXECUTABLE(test_yaml test_yaml.cpp)
-    TARGET_LINK_LIBRARIES(test_yaml ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_yaml test_yaml.cpp)
+#    TARGET_LINK_LIBRARIES(test_yaml ${PROJECT_NAME})
 
-    ADD_EXECUTABLE(test_yaml_conversions test_yaml_conversions.cpp)
-    TARGET_LINK_LIBRARIES(test_yaml_conversions ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_yaml_conversions test_yaml_conversions.cpp)
+#    TARGET_LINK_LIBRARIES(test_yaml_conversions ${PROJECT_NAME})
 
     # SensorFactory classes test
-    ADD_EXECUTABLE(test_wolf_factories test_wolf_factories.cpp)
-    TARGET_LINK_LIBRARIES(test_wolf_factories ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_wolf_factories test_wolf_factories.cpp)
+#    TARGET_LINK_LIBRARIES(test_wolf_factories ${PROJECT_NAME})
 
     # Map load and save test
-    ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
-    TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_map_yaml test_map_yaml.cpp)
+#    TARGET_LINK_LIBRARIES(test_map_yaml ${PROJECT_NAME})
 ENDIF(YAMLCPP_FOUND)
 
 IF(Suitesparse_FOUND)
@@ -140,6 +144,12 @@ IF(OpenCV_FOUND)
     ADD_EXECUTABLE(test_ROI_ORB test_ROI_ORB.cpp)
     TARGET_LINK_LIBRARIES(test_ROI_ORB ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
+
+IF(Ceres_FOUND)
+# Simple AHP test
+ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
+TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
+ENDIF(Ceres_FOUND)
 
 # Processor Tracker Feature test
 ADD_EXECUTABLE(test_processor_tracker_feature test_processor_tracker_feature.cpp)

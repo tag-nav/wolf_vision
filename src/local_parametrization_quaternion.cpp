@@ -1,5 +1,5 @@
 #include "local_parametrization_quaternion.h"
-
+#include <iostream>
 namespace wolf {
 
 template <>
@@ -17,23 +17,27 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::plus(const Eigen::Map<const
     using namespace Eigen;
 
     double angle = _delta_theta.norm();
-    if (angle > Constants::EPS)
+    Quaternions dq;
+    if (angle > Constants::EPS_SMALL)
     {
         // compute rotation axis -- this guarantees unity norm
         Vector3s axis = _delta_theta / angle;
 
         // express delta_theta as a quaternion using the angle-axis helper
-        Quaternions dq(AngleAxis<Scalar>(angle, axis));
-
-        // result as a quaternion
-        // the delta is in local reference: q * dq
-        _q_plus_delta_theta = (Map<const Quaternions>(_q.data()) * dq).coeffs();
+        dq = AngleAxis<Scalar>(angle, axis);
 
     }
-    else // Consider null rotation
+    else // Consider small angle approx
     {
-        _q_plus_delta_theta = _q;
+        dq.w() = 1;
+        dq.vec() = _delta_theta/2;
+        dq.normalize();
     }
+
+    // result as a quaternion
+    // the delta is in global reference: dq * q
+    _q_plus_delta_theta = (Map<const Quaternions>(_q.data()) * dq).coeffs();
+
     return true;
 }
 
@@ -52,22 +56,27 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::plus(const Eigen::Map<cons
     using namespace Eigen;
 
     double angle = _delta_theta.norm();
-    if (angle > Constants::EPS)
+    Quaternions dq;
+    if (angle > Constants::EPS_SMALL)
     {
         // compute rotation axis -- this guarantees unity norm
         Vector3s axis = _delta_theta / angle;
 
         // express delta_theta as a quaternion using the angle-axis helper
-        Quaternions dq(AngleAxis<Scalar>(angle, axis));
+        dq = AngleAxis<Scalar>(angle, axis);
 
-        // result as a quaternion
-        // the delta is in global reference: dq * q
-        _q_plus_delta_theta = (dq * Map<const Quaternions>(_q.data())).coeffs();
     }
-    else // Consider null rotation
+    else // Consider small angle approx
     {
-        _q_plus_delta_theta = _q;
+        dq.w() = 1;
+        dq.vec() = _delta_theta/2;
+        dq.normalize();
     }
+
+    // result as a quaternion
+    // the delta is in global reference: dq * q
+    _q_plus_delta_theta = (dq * Map<const Quaternions>(_q.data())).coeffs();
+
     return true;
 }
 
@@ -78,12 +87,11 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::computeJacobian(const Eigen
     assert(_q.size() == global_size_ && "Wrong size of input quaternion.");
     assert(_jacobian.rows() == global_size_ && _jacobian.cols() == local_size_ && "Wrong size of Jacobian matrix.");
 
-    using namespace Eigen;
-    _jacobian << -_q(0), -_q(1), -_q(2),
-                  _q(3), -_q(2),  _q(1),
-                  _q(2),  _q(3), -_q(0),
-                 -_q(1),  _q(0),  _q(3);
-    _jacobian /= 2;
+    Eigen::Vector4s qq = _q/2;
+    _jacobian <<  qq(3), -qq(2),  qq(1),
+                  qq(2),  qq(3), -qq(0),
+                 -qq(1),  qq(0),  qq(3),
+                 -qq(0), -qq(1), -qq(2) ;
 
     return true;
 }
@@ -95,12 +103,11 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::computeJacobian(const Eige
     assert(_q.size() == global_size_ && "Wrong size of input quaternion.");
     assert(_jacobian.rows() == global_size_ && _jacobian.cols() == local_size_ && "Wrong size of Jacobian matrix.");
 
-    using namespace Eigen;
-    _jacobian << -_q(0), -_q(1), -_q(2),
-                  _q(3),  _q(2), -_q(1),
-                 -_q(2),  _q(3),  _q(0),
-                  _q(1), -_q(0),  _q(3);
-    _jacobian /= 2;
+    Eigen::Vector4s qq = _q/2;
+    _jacobian <<  qq(3),  qq(2), -qq(1),
+                 -qq(2),  qq(3),  qq(0),
+                  qq(1), -qq(0),  qq(3),
+                 -qq(0), -qq(1), -qq(2);
 
     return true;
 }

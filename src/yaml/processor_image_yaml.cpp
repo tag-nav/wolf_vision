@@ -68,6 +68,10 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
         p->algorithm.time_tolerance= alg["time tolerance"].as<Scalar>();
         p->algorithm.distance= alg["distance"].as<Scalar>();
 
+        Node noi = params["noise"];
+        p->noise.pixel_noise_std = noi["pixel noise std"].as<Scalar>();
+        p->noise.pixel_noise_var = p->noise.pixel_noise_std * p->noise.pixel_noise_std;
+
         Node draw = params["draw"];
         p->draw.primary_drawing = draw["primary draw"].as<bool>();
         p->draw.secondary_drawing = draw["secondary draw"].as<bool>();

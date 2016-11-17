@@ -6,8 +6,7 @@
 namespace wolf {
 
 SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _a_w_biases_ptr) :
-//                SensorBase(SEN_IMU, "IMU", _p_ptr, _o_ptr, (_a_w_biases_ptr == nullptr) ? std::make_shared<StateBlock>(6, false) : _a_w_biases_ptr, 6)
-SensorBase(SEN_IMU, "IMU", _p_ptr, _o_ptr, _a_w_biases_ptr, 6)
+        SensorBase("IMU", _p_ptr, _o_ptr, _a_w_biases_ptr, 6)
 {
     //
 }

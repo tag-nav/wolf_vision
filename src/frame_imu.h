@@ -47,7 +47,7 @@ namespace wolf {
            * \param _ba_ptr StateBlock pointer to the acceleration bias (default: nullptr).
            * \param _bg_ptr StateBlock pointer to the gyrometer bias (default: nullptr).
            **/
-        FrameIMU(const FrameKeyType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr = nullptr,
+        FrameIMU(const FrameType& _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _v_ptr = nullptr,
                  StateQuaternionPtr _q_ptr = nullptr, StateBlockPtr _ba_ptr = nullptr, StateBlockPtr _bg_ptr = nullptr);
 
           /** \brief Constructor with type, time stamp and state vector
@@ -55,7 +55,7 @@ namespace wolf {
           * \param _ts is the time stamp associated to this frame, provided in seconds
           * \param _x state vector of size 16, organized as [position, quaternion, velocity, acc_bias, gyro_bias]
           **/
-         FrameIMU(const FrameKeyType & _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x);
+         FrameIMU(const FrameType & _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x);
           virtual ~FrameIMU();
 
           // Frame values ------------------------------------------------
@@ -72,7 +72,7 @@ namespace wolf {
            **/
           void setStatus(StateStatus _st);
       public:
-          static FrameBasePtr create(const FrameKeyType & _tp,
+          static FrameBasePtr create(const FrameType & _tp,
                                      const TimeStamp& _ts,
                                      const Eigen::VectorXs& _x = Eigen::VectorXs::Zero(16));
 };

@@ -8,9 +8,34 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
+# Some wolf compilation options
+
+IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  set(_WOLF_DEBUG true)
+ENDIF()
+
+option(_WOLF_TRACE "Enable wolf tracing macro" ON)
+
+option(BUILD_EXAMPLES "Build examples" ON)
+
+
+# Does this has any other interest
+# but for the examples ?
+IF(BUILD_EXAMPLES)
+  set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
+ENDIF(BUILD_EXAMPLES)
+#
+# yes, for the tests !
+IF(BUILD_TESTS)
+  set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
+ENDIF(BUILD_TESTS)
+
+
 #find dependencies.
 
 FIND_PACKAGE(Eigen 3 REQUIRED)
+
+FIND_PACKAGE(Threads REQUIRED)
 
 FIND_PACKAGE(Ceres QUIET) #Ceres is not required
 IF(Ceres_FOUND)
@@ -65,9 +90,34 @@ ELSE (Suitesparse_INCLUDE_DIRS)
    MESSAGE("Suitesparse NOT FOUND: wolf_solver won't be built.")
 ENDIF (Suitesparse_INCLUDE_DIRS)
 
+# Define the directory where will be the configured config.h
+SET(WOLF_CONFIG_DIR ${PROJECT_BINARY_DIR}/conf/internal)
+
+# Create the specified output directory if it does not exist.
+IF(NOT EXISTS "${WOLF_CONFIG_DIR}")
+  message(STATUS "Creating config output directory: ${WOLF_CONFIG_DIR}")
+  file(MAKE_DIRECTORY "${WOLF_CONFIG_DIR}")
+ENDIF()
+IF(EXISTS "${WOLF_CONFIG_DIR}" AND NOT IS_DIRECTORY "${WOLF_CONFIG_DIR}")
+  message(FATAL_ERROR "Bug: Specified CONFIG_DIR: "
+    "${WOLF_CONFIG_DIR} exists, but is not a directory.")
+ENDIF()
+
+# Configure config.h
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/internal/config.h.in "${WOLF_CONFIG_DIR}/config.h")
+
+
 
 #include directories
+
+# Include config.h directory at first.
+include_directories("${PROJECT_BINARY_DIR}/conf")
+
 INCLUDE_DIRECTORIES(.)
+
+# include spdlog (logging) third_party
+INCLUDE_DIRECTORIES(../third_party/spdlog/include)
+set(SPDLOG_INCLUDE_DIRS "../third_party/spdlog/include/")
 
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 
@@ -102,23 +152,54 @@ ENDIF(YAMLCPP_FOUND)
 
 #headers
 SET(HDRS_BASE
-    wolf.h)
+    capture_base.h
+    constraint_analytic.h
+    constraint_base.h
+    constraint_sparse.h
+    feature_base.h
+    feature_match.h
+    frame_base.h
+    hardware_base.h
+    landmark_base.h
+    landmark_match.h
+    local_parametrization_base.h
+    local_parametrization_quaternion.h
+    local_parametrization_homogeneous.h
+    logging.h
+    map_base.h
+    motion_buffer.h
+    node_base.h
+    pinholeTools.h
+    problem.h
+    processor_base.h
+    processor_factory.h
+    processor_motion.h
+    processor_tracker.h
+    processor_tracker_feature.h
+    processor_tracker_landmark.h
+    rotations.h
+    sensor_base.h
+    sensor_factory.h
+    singleton.h
+    state_block.h
+    state_homogeneous_3D.h
+    state_quaternion.h
+    time_stamp.h
+    trajectory_base.h
+    wolf.h
+    )
 
 SET(HDRS
-    capture_base.h
     capture_fix.h
     capture_gps_fix.h
     capture_motion.h
     capture_imu.h
     capture_void.h
-    constraint_analytic.h
-    constraint_base.h
     constraint_container.h
     constraint_corner_2D.h
     constraint_epipolar.h
     constraint_AHP.h
     constraint_imu.h
-    constraint_sparse.h
     constraint_fix.h
     constraint_fix_3D.h
     constraint_gps_2D.h
@@ -130,8 +211,6 @@ SET(HDRS
     constraint_point_2D.h
     constraint_point_to_line_2D.h
     constraint_relative_2D_analytic.h
-    constraint_sparse.h
-    feature_base.h
     feature_corner_2D.h
     feature_gps_fix.h
     feature_gps_pseudorange.h
@@ -139,50 +218,26 @@ SET(HDRS
     feature_fix.h
     feature_odom_2D.h
     feature_polyline_2D.h
-    frame_base.h
     frame_imu.h
-    hardware_base.h
-    landmark_base.h
     landmark_corner_2D.h
     landmark_container.h
     landmark_point_3d.h
     landmark_line_2D.h
     landmark_polyline_2D.h
-    local_parametrization_base.h
-    local_parametrization_quaternion.h
-    local_parametrization_homogeneous.h
     local_parametrization_polyline_extreme.h
-    map_base.h
-    motion_buffer.h
-    node_base.h
-    problem.h
-    processor_base.h
     processor_image_params.h
     processor_imu.h
     processor_imu_UnitTester.h
-    processor_factory.h
-    processor_motion.h
     processor_odom_2D.h
     processor_odom_3D.h
-    processor_tracker.h
-    processor_tracker_feature.h
     processor_tracker_feature_dummy.h
-    processor_tracker_landmark.h
     processor_tracker_landmark_dummy.h
-    rotations.h
-    sensor_base.h
     sensor_camera.h
-    sensor_factory.h
     sensor_gps.h
     sensor_gps_fix.h
     sensor_imu.h
     sensor_odom_2D.h
     sensor_odom_3D.h
-    state_block.h
-    state_homogeneous_3D.h
-    state_quaternion.h
-    time_stamp.h
-    trajectory_base.h
     )
 
 
@@ -195,15 +250,36 @@ SET(HDRS_DTASSC
     )
 
 #sources
-SET(SRCS
+SET(SRCS_BASE
     capture_base.cpp
+    constraint_base.cpp
+    constraint_analytic.cpp
+    feature_base.cpp
+    frame_base.cpp
+    hardware_base.cpp
+    landmark_base.cpp
+    local_parametrization_base.cpp
+    local_parametrization_quaternion.cpp
+    local_parametrization_homogeneous.cpp
+    map_base.cpp
+    motion_buffer.cpp
+    node_base.cpp
+    problem.cpp
+    processor_base.cpp
+    processor_motion.cpp
+    processor_tracker.cpp
+    processor_tracker_feature.cpp
+    processor_tracker_landmark.cpp
+    sensor_base.cpp
+    time_stamp.cpp
+    trajectory_base.cpp
+    )
+
+SET(SRCS
     capture_gps_fix.cpp
     capture_imu.cpp
     capture_fix.cpp
     capture_void.cpp
-    constraint_base.cpp
-    constraint_analytic.cpp
-    feature_base.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
     feature_gps_pseudorange.cpp
@@ -211,41 +287,28 @@ SET(SRCS
     feature_fix.cpp
     feature_odom_2D.cpp
     feature_polyline_2D.cpp
-    frame_base.cpp
     frame_imu.cpp
-    hardware_base.cpp
-    landmark_base.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
     landmark_point_3d.cpp
     landmark_line_2D.cpp
     landmark_polyline_2D.cpp
-    local_parametrization_base.cpp
-    local_parametrization_quaternion.cpp
-    local_parametrization_homogeneous.cpp
     local_parametrization_polyline_extreme.cpp
-    map_base.cpp
-    node_base.cpp
-    problem.cpp
-    processor_base.cpp
     processor_imu.cpp
     processor_imu_UnitTester.cpp
     processor_odom_2D.cpp
     processor_odom_3D.cpp
-    processor_tracker.cpp
-    processor_tracker_feature.cpp
     processor_tracker_feature_dummy.cpp
-    processor_tracker_landmark.cpp
     processor_tracker_landmark_dummy.cpp
-    sensor_base.cpp
     sensor_camera.cpp
     sensor_gps.cpp
     sensor_gps_fix.cpp
     sensor_imu.cpp
     sensor_odom_2D.cpp
     sensor_odom_3D.cpp
-    time_stamp.cpp
-    trajectory_base.cpp
+    )
+    
+SET(SRCS_DTASSC
     data_association/association_solver.cpp
     data_association/association_node.cpp
     data_association/association_tree.cpp
@@ -280,16 +343,16 @@ IF (laser_scan_utils_FOUND)
     SET(HDRS ${HDRS}
         capture_laser_2D.h
         sensor_laser_2D.h
+        processor_tracker_feature_corner.h
         processor_tracker_landmark_corner.h
         processor_tracker_landmark_polyline.h
-        processor_tracker_feature_corner.h
         )
     SET(SRCS ${SRCS}
         capture_laser_2D.cpp
         sensor_laser_2D.cpp
+        processor_tracker_feature_corner.cpp
         processor_tracker_landmark_corner.cpp
         processor_tracker_landmark_polyline.cpp
-        processor_tracker_feature_corner.cpp
         )
 ENDIF(laser_scan_utils_FOUND)
 
@@ -307,20 +370,20 @@ ENDIF(raw_gps_utils_FOUND)
 # OpenCV
 IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
+        active_search.h
         capture_image.h
         feature_point_image.h
         landmark_AHP.h
         processor_image_feature.h
         processor_image_landmark.h
-        active_search.h
         )
     SET(SRCS ${SRCS}
+        active_search.cpp
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
         processor_image_feature.cpp
         processor_image_landmark.cpp
-        active_search.cpp
         )
 ENDIF(OpenCV_FOUND)
 
@@ -348,10 +411,16 @@ IF(YAMLCPP_FOUND)
     ENDIF(laser_scan_utils_FOUND)
 ENDIF(YAMLCPP_FOUND)
 
-
-
 # create the shared library
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS} ${SRCS_WRAPPER})
+ADD_LIBRARY(${PROJECT_NAME} 
+            SHARED 
+            ${SRCS_BASE} 
+            ${SRCS} 
+            #${SRCS_DTASSC} 
+            ${SRCS_WRAPPER}
+            )
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+
 
 #Link the created libraries
 #=============================================================
@@ -391,8 +460,8 @@ INSTALL(FILES ${HDRS_BASE}
     DESTINATION include/iri-algorithms/wolf)
 INSTALL(FILES ${HDRS}
     DESTINATION include/iri-algorithms/wolf)
-INSTALL(FILES ${HDRS_DTASSC}
-    DESTINATION include/iri-algorithms/wolf/data_association)
+#INSTALL(FILES ${HDRS_DTASSC}
+#    DESTINATION include/iri-algorithms/wolf/data_association)
 INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
 INSTALL(FILES ${HDRS_SOLVER}
@@ -405,10 +474,29 @@ INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
 configure_file("${CMAKE_SOURCE_DIR}/cmake_modules/wolfConfig.cmake"
                "${CMAKE_BINARY_DIR}/wolfConfig.cmake" @ONLY)
 
+INSTALL(FILES "${WOLF_CONFIG_DIR}/config.h"
+DESTINATION include/iri-algorithms/wolf/internal)
+
 INSTALL(FILES "${CMAKE_BINARY_DIR}/wolfConfig.cmake" DESTINATION "lib/cmake/${PROJECT_NAME}")
+
+INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
 
 export(PACKAGE ${PROJECT_NAME})
 
-#Build examples & tests
-MESSAGE("Building examples and tests.")
-ADD_SUBDIRECTORY(examples)
+#############
+## Testing ##
+#############
+
+if(BUILD_TESTS)
+    
+    MESSAGE("Building tests.")
+    add_subdirectory(test)
+
+endif()
+
+IF(BUILD_EXAMPLES)
+  #Build examples & tests
+  MESSAGE("Building examples.")
+  ADD_SUBDIRECTORY(examples)
+ENDIF(BUILD_EXAMPLES)
+

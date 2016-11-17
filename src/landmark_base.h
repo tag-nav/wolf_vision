@@ -36,11 +36,8 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         
     protected:
         unsigned int landmark_id_; ///< landmark unique id
-        LandmarkType type_id_;     ///< type of landmark. (types defined at wolf.h)
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
-        StateBlockPtr p_ptr_;     ///< Position state block pointer
-        StateBlockPtr o_ptr_;     ///< Orientation state block pointer
         Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
 
     public:
@@ -53,7 +50,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          *
          **/
-        LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
+        LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
         virtual ~LandmarkBase();
         void remove();
         virtual YAML::Node saveToYaml() const;
@@ -61,7 +58,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         // Properties
         unsigned int id();
         void setId(unsigned int _id);
-        LandmarkType getTypeId() const;
 
         // Fix / unfix
         void setStatus(LandmarkStatus _st);
@@ -149,18 +145,17 @@ inline void LandmarkBase::setId(unsigned int _id)
 
 inline void LandmarkBase::fix()
 {
-    //std::cout << "Fixing frame " << nodeId() << std::endl;
     this->setStatus(LANDMARK_FIXED);
 }
 
 inline void LandmarkBase::unfix()
 {
-    //std::cout << "Unfixing frame " << nodeId() << std::endl;
     this->setStatus(LANDMARK_ESTIMATED);
 }
 
 inline void LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
+    _ctr_ptr->setLandmarkOtherPtr( shared_from_this() );
     constrained_by_list_.push_back(_ctr_ptr);
 }
 
@@ -206,22 +201,22 @@ inline void LandmarkBase::setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_pt
 
 inline StateBlockPtr LandmarkBase::getPPtr() const
 {
-    return p_ptr_;
+    return getStateBlockPtr(0);
 }
 
 inline StateBlockPtr LandmarkBase::getOPtr() const
 {
-    return o_ptr_;
+    return getStateBlockPtr(1);
 }
 
 inline void LandmarkBase::setPPtr(const StateBlockPtr _st_ptr)
 {
-    p_ptr_ = _st_ptr;
+    setStateBlockPtr(0, _st_ptr);
 }
 
 inline void LandmarkBase::setOPtr(const StateBlockPtr _st_ptr)
 {
-    o_ptr_ = _st_ptr;
+    setStateBlockPtr(1, _st_ptr);
 }
 
 inline void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)
@@ -238,11 +233,6 @@ inline Scalar LandmarkBase::getDescriptor(unsigned int _ii) const
 inline const Eigen::VectorXs& LandmarkBase::getDescriptor() const
 {
     return descriptor_;
-}
-
-inline LandmarkType LandmarkBase::getTypeId() const
-{
-    return type_id_;
 }
 
 } // namespace wolf

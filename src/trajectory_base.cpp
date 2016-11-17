@@ -1,19 +1,19 @@
 #include "trajectory_base.h"
 #include "frame_base.h"
 
+
 namespace wolf {
 
 TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
     NodeBase("TRAJECTORY"),
     frame_structure_(_frame_structure), last_key_frame_ptr_(nullptr)
 {
-    std::cout << "constructed T" << std::endl;
-    //
+//    WOLF_DEBUG("constructed T");
 }
 
 TrajectoryBase::~TrajectoryBase()
 {
-    std::cout << "destructed -T" << std::endl;
+    //
 }
 
 FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
@@ -32,7 +32,6 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
     }
     else
     {
-        //        addFrame(_frame_ptr);
         frame_list_.push_back(_frame_ptr);
     }
 
@@ -49,14 +48,25 @@ void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 void TrajectoryBase::sortFrame(FrameBasePtr _frame_ptr)
 {
     moveFrame(_frame_ptr, computeFrameOrder(_frame_ptr));
+    last_key_frame_ptr_ = findLastKeyFramePtr();
 }
 
 FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
 {
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); frm_rit++)
-        if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isKey() && (*frm_rit)->getTimeStamp() < _frame_ptr->getTimeStamp())
+        if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isKey() && (*frm_rit)->getTimeStamp() <= _frame_ptr->getTimeStamp())
             return frm_rit.base();
     return getFrameList().begin();
+}
+
+FrameBasePtr TrajectoryBase::findLastKeyFramePtr()
+{
+    // NOTE: Assumes keyframes are sorted by timestamp
+    for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); ++frm_rit)
+        if ((*frm_rit)->isKey())
+            return (*frm_rit);
+
+    return nullptr;
 }
 
 FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
@@ -67,9 +77,10 @@ FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); frm_rit++)
         if ((*frm_rit)->isKey())
         {
-            if (std::abs((*frm_rit)->getTimeStamp().get() - _ts.get()) < min_dt)
+            Scalar dt = std::abs((*frm_rit)->getTimeStamp().get() - _ts.get());
+            if (dt < min_dt)
             {
-                min_dt = std::abs((*frm_rit)->getTimeStamp().get() - _ts.get());
+                min_dt = dt;
                 closest_kf = *frm_rit;
             }
             else

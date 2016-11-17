@@ -66,11 +66,7 @@ int main(int argc, char** argv)
 
     TimeStamp t = 1;
 
-    char const* tmp = std::getenv( "WOLF_ROOT" );
-    if ( tmp == nullptr )
-        throw std::runtime_error("WOLF_ROOT environment not loaded.");
-
-    std::string wolf_root( tmp );
+    std::string wolf_root = _WOLF_ROOT_DIR;
     std::cout << "Wolf root: " << wolf_root << std::endl;
 
     ProblemPtr wolf_problem_ = Problem::create(FRM_PO_3D);
@@ -134,7 +130,7 @@ int main(int argc, char** argv)
 
     // SENSOR
     // one-liner API
-    SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_root + "/src/examples/camera_params.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
     shared_ptr<SensorCamera> camera_ptr = static_pointer_cast<SensorCamera>(sensor_ptr);
     camera_ptr->setImgWidth(img_width);
     camera_ptr->setImgHeight(img_height);
@@ -178,21 +174,11 @@ int main(int argc, char** argv)
         t.setToNow();
         clock_t t1 = clock();
 
-        // Old method with non-factory objects
-        //        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size]);
-        //        prc_image->process(capture_image_ptr);
-
         // Preferred method with factory objects:
-//<<<<<<< HEAD
         image_ptr = make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
-//        image_ptr->process();
 
-//=======
-//        image_ptr = new CaptureImage(t, camera_ptr, frame[f % buffer_size]);
-        //image_ptr->process();
-        camera_ptr->addCapture(image_ptr);
-        //cv::imshow("test",frame[f % buffer_size]);
-//>>>>>>> capture_passby_sensor
+        camera_ptr->process(image_ptr);
+
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
         wolf_problem_->print();

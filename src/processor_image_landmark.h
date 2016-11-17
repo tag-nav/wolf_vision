@@ -11,6 +11,7 @@
 #include "processor_tracker_landmark.h"
 #include "landmark_AHP.h"
 #include "processor_image_params.h"
+#include "constraint_AHP.h"
 
 // OpenCV includes
 #include "opencv2/features2d/features2d.hpp"
@@ -73,7 +74,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         std::list<float> list_response_;
 
     public:
-        ProcessorImageLandmark(ProcessorParamsImage _params);
+        ProcessorImageLandmark(const ProcessorParamsImage& _params);
         virtual ~ProcessorImageLandmark();
 
         virtual void setup(SensorCamera::Ptr _camera_ptr);

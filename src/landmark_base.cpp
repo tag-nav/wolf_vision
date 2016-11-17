@@ -9,28 +9,22 @@ namespace wolf {
 
 unsigned int LandmarkBase::landmark_id_count_ = 0;
 
-LandmarkBase::LandmarkBase(const LandmarkType & _tp, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
+LandmarkBase::LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
             NodeBase("LANDMARK", _type),
             map_ptr_(),
-            state_block_vec_(4), // allow for 4 state blocks by default. Should be enough in all applications.
+            state_block_vec_(2), // allow for 2 state blocks by default. Resize in derived constructors if needed.
             landmark_id_(++landmark_id_count_),
-            type_id_(_tp),
-            status_(LANDMARK_CANDIDATE),
-			p_ptr_(_p_ptr),
-			o_ptr_(_o_ptr)
+            status_(LANDMARK_CANDIDATE)
 {
-    //
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
-    state_block_vec_[2] = nullptr;
-    state_block_vec_[3] = nullptr;
-    std::cout << "constructed  +L" << id() << std::endl;
+//    std::cout << "constructed  +L" << id() << std::endl;
 }
                 
 LandmarkBase::~LandmarkBase()
 {
     removeStateBlocks();
-    std::cout << "destructed   -L" << id() << std::endl;
+//    std::cout << "destructed   -L" << id() << std::endl;
 }
 
 void LandmarkBase::remove()
@@ -38,9 +32,8 @@ void LandmarkBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-        std::cout << "Removing   L" << id() << std::endl;
+//        std::cout << "Removing   L" << id() << std::endl;
         LandmarkBasePtr this_L = shared_from_this(); // keep this alive while removing it
-
 
         // remove from upstream
         auto M = map_ptr_.lock();
@@ -66,33 +59,47 @@ void LandmarkBase::setStatus(LandmarkStatus _st)
     // State Blocks
     if (status_ == LANDMARK_FIXED)
     {
-        if (p_ptr_!=nullptr)
-        {
-            p_ptr_->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(p_ptr_);
-        }
-        if (o_ptr_!=nullptr)
-        {
-            o_ptr_->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(o_ptr_);
-        }
+        for (auto sb : state_block_vec_)
+            if (sb != nullptr)
+            {
+                sb->fix();
+                if (getProblem() != nullptr)
+                    getProblem()->updateStateBlockPtr(sb);
+            }
+//        if (getPPtr()!=nullptr)
+//        {
+//            getPPtr()->fix();
+//            if (getProblem() != nullptr)
+//                getProblem()->updateStateBlockPtr(getPPtr());
+//        }
+//        if (getOPtr()!=nullptr)
+//        {
+//            getOPtr()->fix();
+//            if (getProblem() != nullptr)
+//                getProblem()->updateStateBlockPtr(getOPtr());
+//        }
     }
     else if(status_ == LANDMARK_ESTIMATED)
     {
-        if (p_ptr_!=nullptr)
-        {
-            p_ptr_->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(p_ptr_);
-        }
-        if (o_ptr_!=nullptr)
-        {
-            o_ptr_->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(o_ptr_);
-        }
+        for (auto sb : state_block_vec_)
+            if (sb != nullptr)
+            {
+                sb->unfix();
+                if (getProblem() != nullptr)
+                    getProblem()->updateStateBlockPtr(sb);
+            }
+//        if (getPPtr()!=nullptr)
+//        {
+//            getPPtr()->unfix();
+//            if (getProblem() != nullptr)
+//                getProblem()->updateStateBlockPtr(getPPtr());
+//        }
+//        if (getOPtr()!=nullptr)
+//        {
+//            getOPtr()->unfix();
+//            if (getProblem() != nullptr)
+//                getProblem()->updateStateBlockPtr(getOPtr());
+//        }
     }
 }
 
@@ -128,15 +135,15 @@ YAML::Node LandmarkBase::saveToYaml() const
     YAML::Node node;
     node["id"] = landmark_id_;
     node["type"] = node_type_;
-    if (p_ptr_ != nullptr)
+    if (getPPtr() != nullptr)
     {
-        node["position"] = p_ptr_->getVector();
-        node["position fixed"] = p_ptr_->isFixed();
+        node["position"] = getPPtr()->getVector();
+        node["position fixed"] = getPPtr()->isFixed();
     }
-    if (o_ptr_ != nullptr)
+    if (getOPtr() != nullptr)
     {
-        node["orientation"] = o_ptr_->getVector();
-        node["orientation fixed"] = p_ptr_->isFixed();
+        node["orientation"] = getOPtr()->getVector();
+        node["orientation fixed"] = getOPtr()->isFixed();
     }
     return node;
 }

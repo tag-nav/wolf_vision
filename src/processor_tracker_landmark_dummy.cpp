@@ -13,7 +13,7 @@ namespace wolf
 {
 
 ProcessorTrackerLandmarkDummy::ProcessorTrackerLandmarkDummy(const unsigned int& _max_new_features) :
-        ProcessorTrackerLandmark(PRC_TRACKER_DUMMY, "TRACKER LANDMARK DUMMY", _max_new_features), n_feature_(0), landmark_idx_non_visible_(0)
+        ProcessorTrackerLandmark("TRACKER LANDMARK DUMMY", _max_new_features, 0.1), n_feature_(0), landmark_idx_non_visible_(0)
 {
     //
 
@@ -44,7 +44,6 @@ unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(const LandmarkBaseList
         {
             _feature_list_out.push_back(
                     std::make_shared<FeatureBase>(
-                            FEATURE_POINT_IMAGE,
                             "POINT IMAGE",
                             landmark_in_ptr->getDescriptor(),
                             Eigen::MatrixXs::Ones(1, 1)));
@@ -57,7 +56,10 @@ unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(const LandmarkBaseList
 
 bool ProcessorTrackerLandmarkDummy::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureList().size() < 5;
+    std::cout << "N features: " << incoming_ptr_->getFeatureList().size() << std::endl;
+    bool vote = incoming_ptr_->getFeatureList().size() < 4;
+    std::cout << (vote ? "Vote ": "Not vote ") << "for KF" << std::endl;
+    return incoming_ptr_->getFeatureList().size() < 4;
 }
 
 unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int& _max_features)
@@ -69,7 +71,7 @@ unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int
     {
         n_feature_++;
         new_features_last_.push_back(
-                std::make_shared<FeatureBase>(FEATURE_POINT_IMAGE, "POINT IMAGE", n_feature_ * Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
+                std::make_shared<FeatureBase>("POINT IMAGE", n_feature_ * Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
         std::cout << "\t\tfeature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
     }
     return new_features_last_.size();

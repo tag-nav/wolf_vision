@@ -11,8 +11,8 @@
 namespace wolf
 {
 
-ProcessorTrackerLandmark::ProcessorTrackerLandmark(ProcessorType _tp, const std::string& _type, const unsigned int& _max_new_features, const Scalar& _time_tolerance) :
-    ProcessorTracker(_tp, _type, _max_new_features, _time_tolerance)
+ProcessorTrackerLandmark::ProcessorTrackerLandmark(const std::string& _type, const unsigned int& _max_new_features, const Scalar& _time_tolerance) :
+    ProcessorTracker(_type, _max_new_features, _time_tolerance)
 {
 }
 
@@ -30,7 +30,6 @@ ProcessorTrackerLandmark::~ProcessorTrackerLandmark()
 
 unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
 {
-    std::cout << "ProcessorTrackerLandmark::processNew:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
     //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
@@ -64,11 +63,11 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
 
     // Append all new Features to the Capture's list of Features
     last_ptr_->addFeatureList(new_features_last_);
-    std::cout << "\tnew last features added " << std::endl;
+//    std::cout << "\tnew last features added " << std::endl;
 
     // Append new landmarks to the map
     getProblem()->addLandmarkList(new_landmarks);
-    std::cout << "\tnew landmarks added: " << getProblem()->getMapPtr()->getLandmarkList().size() << std::endl;
+//    std::cout << "\tnew landmarks added: " << getProblem()->getMapPtr()->getLandmarkList().size() << std::endl;
 
     //std::cout << "end of processNew:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
@@ -84,21 +83,23 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
 
 void ProcessorTrackerLandmark::createNewLandmarks(LandmarkBaseList& _new_landmarks)
 {
+
     for (auto new_feature_ptr : new_features_last_)
     {
         // create new landmark
         LandmarkBasePtr new_lmk_ptr = createLandmark(new_feature_ptr);
-        std::cout << "\tnew_landmark: " << new_lmk_ptr->id() << std::endl;
+//        std::cout << "\tnew_landmark: " << new_lmk_ptr->id() << std::endl;
         _new_landmarks.push_back(new_lmk_ptr);
         // create new correspondence
         matches_landmark_from_last_[new_feature_ptr] = std::make_shared<LandmarkMatch>(new_lmk_ptr, 1); // max score
     }
-    std::cout << "\tnew_landmarks: " << _new_landmarks.size() << std::endl;
-    std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
+//    std::cout << "\tnew_landmarks: " << _new_landmarks.size() << std::endl;
+//    std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
 }
 
 unsigned int ProcessorTrackerLandmark::processKnown()
 {
+
     //std::cout << "ProcessorTrackerLandmark::processKnown:" << std::endl;
     //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
     //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
@@ -127,6 +128,7 @@ unsigned int ProcessorTrackerLandmark::processKnown()
 
 void ProcessorTrackerLandmark::establishConstraints()
 {
+
     //std::cout << "\tfeatures:" << last_ptr_->getFeatureList().size() << std::endl;
     //std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
     for (auto last_feature : last_ptr_->getFeatureList())
@@ -137,7 +139,6 @@ void ProcessorTrackerLandmark::establishConstraints()
         if (ctr_ptr != nullptr) // constraint links
         {
             last_feature->addConstraint(ctr_ptr);
-            ctr_ptr->setLandmarkOtherPtr(lmk);
             lmk->addConstrainedBy(ctr_ptr);
         }
     }

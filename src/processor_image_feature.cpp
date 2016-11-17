@@ -11,7 +11,7 @@ namespace wolf
 {
 
 ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
-    ProcessorTrackerFeature(PRC_TRACKER_IMAGE, "IMAGE", _params.algorithm.max_new_features),
+    ProcessorTrackerFeature("IMAGE", _params.algorithm.max_new_features),
     matcher_ptr_(nullptr),
     detector_descriptor_ptr_(nullptr),
     params_(_params),
@@ -139,7 +139,8 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
             {
                 FeaturePointImage::Ptr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
-                        feature_ptr->isKnown());
+                        Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
+                incoming_point_ptr->setIsKnown(feature_ptr->isKnown());
                 _feature_list_out.push_back(incoming_point_ptr);
 
                 incoming_point_ptr->setTrackId(feature_ptr->trackId());
@@ -160,7 +161,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
             tracker_roi_.pop_back();
         }
     }
-    std::cout << "TrackFeatures - Number of Features tracked: " << _feature_list_out.size() << std::endl;
+//    std::cout << "TrackFeatures - Number of Features tracked: " << _feature_list_out.size() << std::endl;
     return _feature_list_out.size();
 }
 
@@ -244,7 +245,11 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                 if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
                 {
                     std::cout << "response: " << new_keypoints[0].response << std::endl;
-                    FeaturePointImage::Ptr point_ptr = std::make_shared<FeaturePointImage>(new_keypoints[0], new_descriptors.row(index), false);
+                    FeaturePointImage::Ptr point_ptr = std::make_shared<FeaturePointImage>(
+                            new_keypoints[0],
+                            new_descriptors.row(index),
+                            Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
+                    point_ptr->setIsKnown(false);
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
                     active_search_grid_.hitCell(new_keypoints[0]);
