@@ -167,10 +167,6 @@ TARGET_LINK_LIBRARIES(test_processor_imu ${PROJECT_NAME})
 ADD_EXECUTABLE(test_mpu test_mpu.cpp)
 TARGET_LINK_LIBRARIES(test_mpu ${PROJECT_NAME})
 
-# UNITARY TEST for rotation
-ADD_EXECUTABLE(test_rotation test_rotation.cpp)
-TARGET_LINK_LIBRARIES(test_rotation ${PROJECT_NAME})
-
 # Processor IMU - Jacobian checking test
 ADD_EXECUTABLE(test_processor_imu_jacobians test_processor_imu_jacobians.cpp)
 TARGET_LINK_LIBRARIES(test_processor_imu_jacobians ${PROJECT_NAME})
