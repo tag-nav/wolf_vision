@@ -30,23 +30,12 @@ TEST(rotations, Skew_vee)
     Eigen::Vector3s vec3 = Eigen::Vector3s::Random();
     Eigen::Matrix3s skew_mat;
     skew_mat = skew(vec3);
-  
-    std::cout << "Input Vector :\n " << vec3 << "\n corresponding skew matrix : \n" << skew_mat << "\n" <<std::endl; 
 
         // vee
     Eigen::Vector3s vec3_bis;
     vec3_bis = vee(skew_mat);
 
     ASSERT_TRUE(vec3_bis == vec3);
-  /*EXPECT_FALSE(false);
-
-  ASSERT_TRUE(true);
-
-  int my_int = 5;
-
-  ASSERT_EQ(my_int, 5);
-
-  PRINTF("All good at TestTest::DummyTestExample !\n");*/
 }
 
 TEST(rotations, v2q_q2v)
@@ -136,12 +125,7 @@ TEST(rotations, R2v_v2R_limits)
         
         v_to_R = v2R(R_to_v);
 
-        if(!v_to_R.isApprox(initial_matrix,wolf::Constants::EPS)){
-            PRINTF("R2v_v2R_limits : reached at scale %d", scale);
-            //std::cout << "\n limit reached at scale " << scale << ", rotation matrix is : \n" << initial_matrix << "\n v_to_R is : \n" << v_to_R << std::endl;
-            //std::cout << "aa0.axis : \n" << aa0.axis() << "\n aa0.angles \n:" << aa0.angle() <<std::endl;
-            break;
-        }   
+        EXPECT_TRUE(v_to_R.isApprox(initial_matrix,wolf::Constants::EPS)); //<< "R2v_v2R_limits : reached at scale " << scale << std::endl;
         scale = scale*0.1;
     }
 }
@@ -182,12 +166,8 @@ TEST(rotations, v2q2R2v)
     Eigen::Matrix3s mat_ = quat_.matrix();
     Eigen::Vector3s vector_bis = R2v(mat_);
 
-    EXPECT_TRUE((vector_-vector_bis).isMuchSmallerThan(1, wolf::Constants::EPS));
-    /*{
-        std::cout << "problem in vector -> quaternion -> matrix -> vector at scale " << scale << "\n input vector : \n" << vector_ << "\n returned vector : \n" << vector_bis << std::endl;
-        std::cout << "Diff (returned_vector - input vector) = \n" << vector_bis - vector_ << std::endl;
-        break;
-    }*/
+    EXPECT_TRUE((vector_-vector_bis).isMuchSmallerThan(1, wolf::Constants::EPS)) << 
+    "problem in vector -> quaternion -> matrix -> vector at scale " << scale << "\t Diff (returned_vector - input vector) = \n" << vector_bis - vector_ << std::endl;
     scale = scale*0.1;
     }
 }
@@ -204,7 +184,7 @@ TEST(rotations, AngleAxis_limits)
     Eigen::Vector3s rv;
 
     for(int i = 0; i<8; i++){ //FIX ME : Random() will not create a rotation matrix. Then, R2v(Random_matrix()) makes no sense at all.
-        rotation_mat = Eigen::Matrix3s::Random() * scale;
+        rotation_mat = v2R(Eigen::Vector3s::Random() * scale);
         rotation_mati = rotation_mat;
 
         //rv = R2v(rotation_mat); //decomposing R2v below
@@ -222,15 +202,8 @@ TEST(rotations, AngleAxis_limits)
         //std::cout << "aa1.axis : " << aa0.axis().transpose() << ",\t aa1.angles :" << aa0.angle() <<std::endl;
         res_i = aa1.toRotationMatrix();
 
-        if(!res.isApprox(rotation_mat,wolf::Constants::EPS)){
-            std::cout << "\n limit reached at scale " << scale << ", rotation matrix is : \n" << rotation_mat << "\n res is : \n" << res << std::endl;
-            //std::cout << "aa0.axis : \n" << aa0.axis() << "\n aa0.angles \n:" << aa0.angle() <<std::endl;
-            //break;
-        }
-        if(!res_i.isApprox(rotation_mati,wolf::Constants::EPS)){
-            std::cout << "\n limit reached at scale " << scale << ", rotation matrix is : \n" << rotation_mati << "\n res_i is : \n" << res_i << std::endl;
-            break;
-        }
+        EXPECT_TRUE(res.isApprox(rotation_mat,wolf::Constants::EPS)) << "limit reached at scale " << scale << std::endl;
+        EXPECT_TRUE(res_i.isApprox(rotation_mati,wolf::Constants::EPS)) << "res_i : limit reached at scale " << scale << std::endl;
         scale = scale*0.1;
     }
 }
