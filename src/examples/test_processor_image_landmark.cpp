@@ -148,7 +148,7 @@ int main(int argc, char** argv)
 
         t += dt;
 
-        // Image ------------------------------------------------
+        // Image ---------------------------------------------
 
         // Preferred method with factory objects:
         image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
@@ -156,13 +156,39 @@ int main(int argc, char** argv)
         /* process */
         camera_ptr->process(image_ptr);
 
+
+        // Cleanup map ---------------------------------------
+
+        std::list<LandmarkBasePtr> lmk_list = wolf_problem_ptr_->getMapPtr()->getLandmarkList();
+
+        for(auto lmk : lmk_list)
+        {
+            TimeStamp t0 = std::static_pointer_cast<LandmarkAHP>(lmk)->getAnchorFrame()->getTimeStamp();
+            //            TimeStamp t;// = t_;
+            if(t - t0 > 2)
+            {
+                unsigned int nbr_ctr = lmk->getConstrainedByList().size();
+                if(nbr_ctr <= 1)
+                {
+                    std::cout << "clean up L" << lmk->id() << std::endl;
+                    lmk->remove();
+//                    cv::waitKey(0);
+                }
+            }
+        }
+        lmk_list.clear();
+
+
+        // Solve -----------------------------------------------
+
         ceres::Solver::Summary summary = ceres_manager.solve();
         std::cout << summary.BriefReport() << std::endl;
 
 //        wolf_problem_ptr_->print(2,1,0,0);
 
 
-        // Odometry ---------------------------------------------
+        // Odometry --------------------------------------------
+
         cap_odo->setTimeStamp(t);
 
         // previous state and TS
@@ -187,9 +213,6 @@ int main(int argc, char** argv)
                 break;
             }
 
-        t_prev_prev = prev_prev_key_fr_ptr->getTimeStamp();
-        x_prev_prev = prev_prev_key_fr_ptr->getState();
-
         // compute delta state, and odometry data
         if (!prev_prev_key_fr_ptr)
         {
@@ -198,6 +221,9 @@ int main(int argc, char** argv)
         }
         else
         {
+            t_prev_prev = prev_prev_key_fr_ptr->getTimeStamp();
+            x_prev_prev = prev_prev_key_fr_ptr->getState();
+
             // some maps to avoid local variables
             Eigen::Map<Eigen::Vector3s>     p1(x_prev_prev.data());
             Eigen::Map<Eigen::Quaternions>  q1(x_prev_prev.data() + 3);
@@ -229,7 +255,9 @@ int main(int argc, char** argv)
 //        std::cout << "          dt: " << t_prev - t_prev_prev << "; dx: " << dx.transpose() << std::endl;
 
 
-        cv::waitKey(0);
+        wolf_problem_ptr_->print(0);
+
+        cv::waitKey(10);
 
         std::cout << "=================================================================================================" << std::endl;
 
