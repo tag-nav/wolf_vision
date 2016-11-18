@@ -47,15 +47,6 @@ static IntrinsicsBasePtr createIntrinsicsOdom3D(const std::string & _filename_do
         params->dist_traveled    = kf_vote["dist traveled"]  .as<Scalar>();
         params->angle_turned    = kf_vote["angle turned"]    .as<Scalar>();
 
-        //=========================================
-        // ===== this part for debugging only =====
-        //=========================================
-//        std::cout << "\n--- Parameters Parsed from YAML file ---" << std::endl;
-//        std::cout << "sensor type: " << sensor_type << std::endl;
-//        std::cout << "sensor name: " << sensor_name << std::endl;
-
-        //=========================================
-        //=========================================
         return params;
     }
 

@@ -17,6 +17,11 @@
 
 namespace wolf {
 
+class ProcessorOdom3DParams : public ProcessorParamsBase
+{
+
+};
+
 /** \brief Processor for 3d odometry integration.
  *
  * This processor integrates motion data in the form of 3D odometry.

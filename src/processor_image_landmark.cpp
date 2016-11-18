@@ -304,8 +304,15 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
         auto current_frame = last_ptr_->getFramePtr();
         auto landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
 
-        ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(_feature_ptr, landmark_ahp, true);
-        landmark_ahp->getAnchorFrame()->addConstrainedBy(constraint_ptr);
+//<<<<<<< 44b4bb943d3543d811b4edaeae7cbf0cb619630f
+//        ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(_feature_ptr, landmark_ahp, true);
+//        landmark_ahp->getAnchorFrame()->addConstrainedBy(constraint_ptr);
+//=======
+//        ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(_feature_ptr, landmark_ahp, true);
+        ConstraintAHP::Ptr constraint_ptr = ConstraintAHP::create(_feature_ptr, landmark_ahp, true);
+
+
+//>>>>>>> [WIP] Transferring odom vote params from sensor to processor
 
 
         Eigen::Vector2s expectation_;
