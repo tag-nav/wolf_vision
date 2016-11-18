@@ -59,6 +59,7 @@ inline void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _plac
     {
         frame_list_.remove(_frm_ptr);
         frame_list_.insert(_place, _frm_ptr);
+        last_key_frame_ptr_ = findLastKeyFramePtr();
     }
 }
 
