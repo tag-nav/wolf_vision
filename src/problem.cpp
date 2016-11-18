@@ -886,15 +886,12 @@ bool Problem::check(int verbose_level)
             std::cout << "  L" << L->id() << " @" << L.get() << std::endl;
         is_consistent = is_consistent && (L->getProblem().get() == P_raw);
         is_consistent = is_consistent && (L->getMapPtr() == M);
-//        bool all_ctr_point_to_me = true;
         for (auto cby : L->getConstrainedByList())
         {
             if (verbose_level > 0)
                 std::cout << "      <- c" << cby->id() << " -> L" << cby->getLandmarkOtherPtr()->id() << std::endl;
-//            all_ctr_point_to_me = all_ctr_point_to_me && (cby->getLandmarkOtherPtr() && L->id() == cby->getLandmarkOtherPtr()->id());
             is_consistent = is_consistent && (cby->getLandmarkOtherPtr() && L->id() == cby->getLandmarkOtherPtr()->id());
         }
-//        is_consistent = is_consistent && all_ctr_point_to_me;
     }
 
     std::cout << "--------------------------- Wolf tree " << (is_consistent ? " OK" : "Not OK !!") << std::endl;
