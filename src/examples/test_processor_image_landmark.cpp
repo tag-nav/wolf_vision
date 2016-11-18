@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     {
 //        filename = "/home/jtarraso/Videos/House_interior.mp4";
 //        filename = "/home/jtarraso/Vídeos/gray1.mp4";
-        filename = "/home/jtarraso/test_video/output6.mpg";
+        filename = "/home/jtarraso/Escritorio/video_test2/sim_video.mpg";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
