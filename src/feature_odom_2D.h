@@ -11,6 +11,12 @@
 
 namespace wolf {
 
+//forward declaration to typedef class pointers
+class FeatureOdom2D;
+typedef std::shared_ptr<FeatureOdom2D> FeatureOdom2DPtr;
+typedef std::shared_ptr<const FeatureOdom2D> FeatureOdom2DConstPtr;
+typedef std::weak_ptr<FeatureOdom2D> FeatureOdom2DWPtr;    
+    
 //class FeatureOdom2D
 class FeatureOdom2D : public FeatureBase
 {

@@ -11,18 +11,15 @@
 
 namespace wolf {
 
-/**
- *
- * Test for the feature point
- *
- **/
-
+//forward declaration to typedef class pointers
+class FeaturePointImage;
+typedef std::shared_ptr<FeaturePointImage> FeaturePointImagePtr;
+typedef std::shared_ptr<const FeaturePointImage> FeaturePointImageConstPtr;
+typedef std::weak_ptr<FeaturePointImage> FeaturePointImageWPtr;
+    
 //class FeaturePointImage
 class FeaturePointImage : public FeatureBase
 {
-    public:
-        typedef std::shared_ptr<FeaturePointImage>  Ptr;
-
     private:
         cv::KeyPoint keypoint_; ///< Warning: every write operation to this member needs to write measurement_. See setKeypoint() as an example.
         cv::Mat descriptor_;

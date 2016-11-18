@@ -8,6 +8,12 @@
 
 
 namespace wolf {
+    
+//forward declaration to typedef class pointers
+class FeatureCorner2D;
+typedef std::shared_ptr<FeatureCorner2D> FeatureCorner2DPtr;
+typedef std::shared_ptr<const FeatureCorner2D> FeatureCorner2DConstPtr;
+typedef std::weak_ptr<FeatureCorner2D> FeatureCorner2DWPtr;
 
 //class FeatureCorner2D
 class FeatureCorner2D : public FeatureBase

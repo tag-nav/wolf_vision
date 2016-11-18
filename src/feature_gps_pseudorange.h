@@ -11,9 +11,13 @@
 
 namespace wolf {
 
+//forward declaration to typedef class pointers
+class FeatureGPSPseudorange;
+typedef std::shared_ptr<FeatureGPSPseudorange> FeatureGPSPseudorangePtr;
+typedef std::shared_ptr<const FeatureGPSPseudorange> FeatureGPSPseudorangeConstPtr;
+typedef std::weak_ptr<FeatureGPSPseudorange> FeatureGPSPseudorangeWPtr;
 
 // TODO manage covariance
-
 class FeatureGPSPseudorange : public FeatureBase
 {
 protected:

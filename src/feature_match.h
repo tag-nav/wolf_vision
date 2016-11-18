@@ -7,6 +7,13 @@
 //wolf nampseace
 namespace wolf {
     
+//forward declaration to typedef class pointers
+struct FeatureMatch;
+typedef std::shared_ptr<FeatureMatch> FeatureMatchPtr;
+typedef std::shared_ptr<const FeatureMatch> FeatureMatchConstPtr;
+typedef std::weak_ptr<FeatureMatch> FeatureMatchWPtr;
+typedef std::map<FeatureBasePtr, FeatureMatchPtr> FeatureMatchMap; //a map is also typedefined  
+    
 /** \brief Match between a feature and a feature
  *
  * Match between a feature and a feature (feature-feature correspondence)
@@ -17,9 +24,6 @@ struct FeatureMatch
         FeatureBasePtr feature_ptr_;
         Scalar normalized_score_;
 };
-
-typedef std::shared_ptr<FeatureMatch> FeatureMatchPtr;
-typedef std::map<FeatureBasePtr, FeatureMatchPtr> FeatureMatchMap;
 
 }//end namespace
 

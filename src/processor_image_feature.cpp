@@ -118,7 +118,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
 
     for (auto feature_base_ptr : _feature_list_in)
     {
-        FeaturePointImage::Ptr feature_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
+        FeaturePointImagePtr feature_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
 
         roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
         roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
@@ -137,7 +137,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
             Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
             if (normalized_score > params_.matcher.min_normalized_score)
             {
-                FeaturePointImage::Ptr incoming_point_ptr = std::make_shared<FeaturePointImage>(
+                FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
                 incoming_point_ptr->setIsKnown(feature_ptr->isKnown());
@@ -168,8 +168,8 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
 bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
 {
     std::vector<cv::DMatch> matches_mat;
-    FeaturePointImage::Ptr feat_incoming_ptr = std::static_pointer_cast<FeaturePointImage>(_incoming_feature);
-    FeaturePointImage::Ptr feat_origin_ptr = std::static_pointer_cast<FeaturePointImage>(_origin_feature);
+    FeaturePointImagePtr feat_incoming_ptr = std::static_pointer_cast<FeaturePointImage>(_incoming_feature);
+    FeaturePointImagePtr feat_origin_ptr = std::static_pointer_cast<FeaturePointImage>(_origin_feature);
 
     cv::Mat origin_descriptor = feat_origin_ptr->getDescriptor();
     cv::Mat incoming_descriptor = feat_incoming_ptr->getDescriptor();
@@ -194,7 +194,7 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
         cv::Mat correction_descriptors;
         std::vector<cv::DMatch> correction_matches;
 
-        FeaturePointImage::Ptr feat_last_ptr = std::static_pointer_cast<FeaturePointImage>(_last_feature);
+        FeaturePointImagePtr feat_last_ptr = std::static_pointer_cast<FeaturePointImage>(_last_feature);
         active_search_grid_.hitCell(feat_last_ptr->getKeypoint());
 
         roi_x = (feat_last_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
@@ -245,7 +245,7 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                 if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
                 {
                     std::cout << "response: " << new_keypoints[0].response << std::endl;
-                    FeaturePointImage::Ptr point_ptr = std::make_shared<FeaturePointImage>(
+                    FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(
                             new_keypoints[0],
                             new_descriptors.row(index),
                             Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
@@ -300,7 +300,7 @@ void ProcessorImageFeature::resetVisualizationFlag(FeatureBaseList& _feature_lis
 {
     for (auto feature_base_last_ptr : _feature_list_last)
     {
-        FeaturePointImage::Ptr feature_last_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_last_ptr);
+        FeaturePointImagePtr feature_last_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_last_ptr);
         feature_last_ptr->setIsKnown(true);
     }
 }
@@ -374,7 +374,7 @@ void ProcessorImageFeature::drawFeatures(cv::Mat _image)
 
     for (auto feature_ptr : last_ptr_->getFeatureList())
     {
-        FeaturePointImage::Ptr point_ptr = std::static_pointer_cast<FeaturePointImage>(feature_ptr);
+        FeaturePointImagePtr point_ptr = std::static_pointer_cast<FeaturePointImage>(feature_ptr);
         if (point_ptr->isKnown())
         {
             cv::circle(_image, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 255.0, 51.0), -1, 3, 0);
