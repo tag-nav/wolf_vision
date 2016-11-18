@@ -16,12 +16,12 @@ matcher:
     minimum normalized score: 0.85
     similarity norm: 6  # enum { NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 };
     roi:
-        width: 30
-        height: 30
+        width: 20
+        height: 20
 
 active search:
-    grid width: 9
-    grid height: 6
+    grid width: 16
+    grid height: 12
     separation: 5
 
 algorithm:
@@ -35,8 +35,8 @@ noise:
     pixel noise std: 2 # pixels
     
 draw: # Used to control drawing options
-    primary draw: false
-    secondary draw: false
-    detection roi: false
-    tracking roi: false
+    primary draw: true
+    secondary draw: true
+    detection roi: true
+    tracking roi: true
     
