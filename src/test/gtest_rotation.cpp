@@ -391,7 +391,7 @@ TEST(rotations, Quat_compos_var_rateOfTurn)
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    EXPECT_TRUE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) << 
+    EXPECT_FALSE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) << 
     "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
 
     #ifdef write_results
@@ -476,7 +476,7 @@ TEST(rotations, Quat_compos_var_rateOfTurn_diff)
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    EXPECT_TRUE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) << 
+    EXPECT_FALSE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) << 
     "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
         //std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
         //std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
