@@ -305,7 +305,7 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
         auto landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
 
         ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(_feature_ptr, landmark_ahp, true);
-
+        landmark_ahp->getAnchorFrame()->addConstrainedBy(constraint_ptr);
 
 
         Eigen::Vector2s expectation_;
