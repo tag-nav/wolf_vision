@@ -17,8 +17,23 @@
 
 namespace wolf {
 
-class ProcessorOdom3DParams : public ProcessorParamsBase
+struct ProcessorOdom3DParams : public ProcessorParamsBase
 {
+        Scalar max_time_span;
+        Scalar max_buff_length;
+        Scalar dist_traveled;
+        Scalar angle_turned;
+
+
+        ProcessorOdom3DParams() :
+            max_time_span(0),
+            max_buff_length(0),
+            dist_traveled(0),
+            angle_turned(0)
+        {
+            type = "ODOM 3D";
+            name = "";
+        }
 
 };
 
