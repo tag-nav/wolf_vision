@@ -26,7 +26,6 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
     protected:
         unsigned int constraint_id_;
         ConstraintType type_id_;                        ///< type of constraint (types defined at wolf.h)
-        ConstraintCategory category_;                   ///< category of constraint (types defined at wolf.h)
         ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
         bool apply_loss_function_;                      ///< flag for applying loss function to this constraint
         FrameBaseWPtr frame_other_ptr_;                    ///< FrameBase pointer (for category CTR_FRAME)
@@ -42,18 +41,6 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         /** \brief Constructor valid for all categories (FRAME, FEATURE, LANDMARK)
          **/
         ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, FeatureBasePtr _feature_other_ptr, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
-
-//        /** \brief Constructor of category CTR_FRAME
-//         **/
-//        ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
-//
-//        /** \brief Constructor of category CTR_FEATURE
-//         **/
-//        ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
-//
-//        /** \brief Constructor of category CTR_LANDMARK
-//         **/
-//        ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
         virtual ~ConstraintBase();
         void remove();
@@ -100,10 +87,6 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         /** \brief Returns the constraint residual size
          **/
         virtual unsigned int getSize() const = 0;
-
-        /** \brief Gets the category
-         */
-        ConstraintCategory getCategory() const;
 
         /** \brief Gets the status
          */
@@ -183,10 +166,10 @@ inline FeatureBasePtr ConstraintBase::getFeaturePtr() const
     return feature_ptr_.lock();
 }
 
-inline ConstraintCategory ConstraintBase::getCategory() const
-{
-    return category_;
-}
+//inline ConstraintCategory ConstraintBase::getCategory() const
+//{
+//    return category_;
+//}
 
 inline ConstraintStatus ConstraintBase::getStatus() const
 {

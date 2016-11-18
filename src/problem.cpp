@@ -674,7 +674,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                                 for (auto c : f->getConstraintList())
                                 {
                                     cout << "        c" << c->id() << " -->";
-                                    if (c->getCategory() == CTR_ABSOLUTE)
+                                    if (c->getFrameOtherPtr() != nullptr && c->getFeatureOtherPtr() != nullptr && c->getLandmarkOtherPtr() != nullptr)
                                         cout << " A";
                                     if (c->getFrameOtherPtr() != nullptr)
                                         cout << " F" << c->getFrameOtherPtr()->id();
@@ -806,69 +806,66 @@ bool Problem::check(int verbose_level)
                 {
                     if (verbose_level > 0)
                         std::cout << "        c" << c->id() << " @" << C.get();
-                    switch (c->getCategory())
+                    if ( !(c->getFrameOtherPtr()) && !(c->getFeatureOtherPtr()) && !(c->getLandmarkOtherPtr()) )    // case ABSOLUTE:
                     {
-                        case CTR_ABSOLUTE:
-                            if (verbose_level > 0)
-                                std::cout << " --> A" << std::endl;
-                            break;
-                        case CTR_FRAME:
+                        if (verbose_level > 0)
+                            std::cout << " --> A" << std::endl;
+                    }
+
+                    if (!(c->getFrameOtherPtr()) )  // case FRAME:
+                    {
+                        auto Fo = c->getFrameOtherPtr();
+                        if (verbose_level > 0)
+                            std::cout << " --> F" << Fo->id() << " <- ";
+                        bool found = false;
+                        for (auto cby : Fo->getConstrainedByList())
                         {
-                            auto Fo = c->getFrameOtherPtr();
                             if (verbose_level > 0)
-                                std::cout << " --> F" << Fo->id() << " <- ";
-                            bool found = false;
-                            for (auto cby : Fo->getConstrainedByList())
-                            {
-                                if (verbose_level > 0)
-                                    std::cout << " c" << cby->id();
-                                found = found || (c == cby);
-                            }
-                            if (verbose_level > 0)
-                                std::cout << std::endl;
-                            is_consistent = is_consistent && found;
-                            break;
+                                std::cout << " c" << cby->id();
+                            found = found || (c == cby);
                         }
-                        case CTR_FEATURE:
+                        if (verbose_level > 0)
+                            std::cout << std::endl;
+                        is_consistent = is_consistent && found;
+                    }
+
+                    if ( !(c->getFeatureOtherPtr()) )   // case FEATURE:
+                    {
+                        auto fo = c->getFeatureOtherPtr();
+                        if (verbose_level > 0)
+                            std::cout << " --> f" << fo->id() << " <- ";
+                        bool found = false;
+                        for (auto cby : fo->getConstrainedByList())
                         {
-                            auto fo = c->getFeatureOtherPtr();
                             if (verbose_level > 0)
-                                std::cout << " --> f" << fo->id() << " <- ";
-                            bool found = false;
-                            for (auto cby : fo->getConstrainedByList())
-                            {
-                                if (verbose_level > 0)
-                                    std::cout << " c" << cby->id();
-                                found = found || (c == cby);
-                            }
-                            if (verbose_level > 0)
-                                std::cout << std::endl;
-                            is_consistent = is_consistent && found;
-                            break;
+                                std::cout << " c" << cby->id();
+                            found = found || (c == cby);
                         }
-                        case CTR_LANDMARK:
+                        if (verbose_level > 0)
+                            std::cout << std::endl;
+                        is_consistent = is_consistent && found;
+                    }
+
+                    if ( !(c->getLandmarkOtherPtr()) )      // case LANDMARK:
+                    {
+                        auto Lo = c->getLandmarkOtherPtr();
+                        if (verbose_level > 0)
+                            std::cout << " --> L" << Lo->id() << " <- ";
+                        bool found = false;
+                        for (auto cby : Lo->getConstrainedByList())
                         {
-                            auto Lo = c->getLandmarkOtherPtr();
                             if (verbose_level > 0)
-                                std::cout << " --> L" << Lo->id() << " <- ";
-                            bool found = false;
-                            for (auto cby : Lo->getConstrainedByList())
-                            {
-                                if (verbose_level > 0)
-                                    std::cout << " c" << cby->id();
-                                found = found || (c == cby);
-                            }
-                            if (verbose_level > 0)
-                                std::cout << std::endl;
-                            is_consistent = is_consistent && found;
-                            break;
+                                std::cout << " c" << cby->id();
+                            found = found || (c == cby);
                         }
+                        if (verbose_level > 0)
+                            std::cout << std::endl;
+                        is_consistent = is_consistent && found;
                     }
                     if (verbose_level > 0)
                     {
                         std::cout << "          -> P  @ " << c->getProblem().get() << std::endl;
-                        std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get()
-                                << std::endl;
+                        std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get() << std::endl;
                     }
                     is_consistent = is_consistent && (c->getProblem().get() == P_raw);
                     is_consistent = is_consistent && (c->getFeaturePtr() == f);
