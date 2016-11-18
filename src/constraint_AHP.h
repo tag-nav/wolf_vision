@@ -30,9 +30,11 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
         ConstraintAHP(FeatureBasePtr    _ftr_ptr,
                       LandmarkAHP::Ptr  _landmark_ptr,
-                      bool              _apply_loss_function    = false,
-                      ConstraintStatus  _status                 = CTR_ACTIVE) :
+                      bool              _apply_loss_function = false,
+                      ConstraintStatus  _status              = CTR_ACTIVE) :
                 ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP,
+                                                   _landmark_ptr->getAnchorFrame(),
+                                                   nullptr,
                                                    _landmark_ptr,
                                                    _apply_loss_function,
                                                    _status,
@@ -47,8 +49,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         {
             setType("AHP");
 
-            frame_other_ptr_ = _landmark_ptr->getAnchorFrame();
-
+            // obtain some intrinsics from provided sensor
             K_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
             distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
         }
@@ -59,8 +60,12 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         }
 
         template<typename T>
-        void expectation(const T* const _current_frame_p, const T* const _current_frame_o, const T* const _anchor_frame_p,
-                                    const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _expectation) const
+        void expectation(const T* const _current_frame_p,
+                         const T* const _current_frame_o,
+                         const T* const _anchor_frame_p,
+                         const T* const _anchor_frame_o,
+                         const T* const _lmk_hmg,
+                         T* _expectation) const
         {
             // Maps over the input pointers
             Eigen::Matrix<T, 3, 3> K = K_.cast<T>();
@@ -100,9 +105,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             // lmk direction vector
             Eigen::Matrix<T,3,1> v_dir = landmark_hmg_c1.head(3);
 
-//            std::cout << "\nv_normalized:\n" << v_dir(0) << "\t" << v_dir(1) << "\t"
-//                      << v_dir(2) << "\t" << landmark_hmg_c1(3) << std::endl;
-
             // projected point in canonical sensor
             Eigen::Matrix<T,2,1> point_undistorted;
             point_undistorted = v_dir.head(2)/v_dir(2);
@@ -118,8 +120,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
             expectation(0) = K(0,0) * point_distorted(0) + K(0,2);
             expectation(1) = K(1,1) * point_distorted(1) + K(1,2);
-
-            //            std::cout << "constraint n[" << id() << "] _expectation: " << _expectation(0) << "\t" << _expectation(1) << std::endl;
 
         }
 
@@ -144,8 +144,12 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         }
 
         template<typename T>
-        bool operator ()(const T* const _current_frame_p, const T* const _current_frame_o, const T* const _anchor_frame_p,
-                         const T* const _anchor_frame_o, const T* const _lmk_hmg, T* _residuals) const
+        bool operator () (const T* const _current_frame_p,
+                          const T* const _current_frame_o,
+                          const T* const _anchor_frame_p,
+                          const T* const _anchor_frame_o,
+                          const T* const _lmk_hmg,
+                          T* _residuals) const
         {
 //            std::cout << "operator: " << id() << std::endl;
             Eigen::Matrix<T, Eigen::Dynamic, 1> expected(2) ;
@@ -173,6 +177,13 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             return JAC_AUTO;
         }
 
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        // TODO: See if we rename this to 'emplace'. Tasks to evaluate:
+        //         - Make it standard for all wolf nodes
+        //         - Put this 'emplace' in ConstraintBase, or ConstraintSparse
+        //         - Keep factory-methods (i.e. like this one)  in ALL derived classes, to be called by the 'emplace' in Base.
+        //            - In such case, make a unique API, or use Variadic
         static ConstraintAHP::Ptr create(FeatureBasePtr     _ftr_ptr,
                                          LandmarkAHP::Ptr   _lmk_ahp_ptr,
                                          bool               _apply_loss_function    = false,
@@ -181,13 +192,13 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             // construct constraint
             Ptr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _lmk_ahp_ptr, _apply_loss_function, _status);
 
-            // link it to wolf tree
-//            _ftr_ptr->addConstraint(ctr_ahp);
-            ctr_ahp->setFrameOtherPtr(_lmk_ahp_ptr->getAnchorFrame());
+            // link it to wolf tree <-- these pointers cannot be set at construction time
             _lmk_ahp_ptr->getAnchorFrame()->addConstrainedBy(ctr_ahp);
             _lmk_ahp_ptr->addConstrainedBy(ctr_ahp);
             return  ctr_ahp;
         }
+        //
+        //////////////////////////////////////////////////////////////////////////////////////////
 
 
 };

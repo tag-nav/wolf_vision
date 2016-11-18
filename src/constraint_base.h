@@ -39,17 +39,21 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          **/
         ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status);
 
-        /** \brief Constructor of category CTR_FRAME
+        /** \brief Constructor valid for all categories (FRAME, FEATURE, LANDMARK)
          **/
-        ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, FeatureBasePtr _feature_other_ptr, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
-        /** \brief Constructor of category CTR_FEATURE
-         **/
-        ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status);
-
-        /** \brief Constructor of category CTR_LANDMARK
-         **/
-        ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status);
+//        /** \brief Constructor of category CTR_FRAME
+//         **/
+//        ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
+//
+//        /** \brief Constructor of category CTR_FEATURE
+//         **/
+//        ConstraintBase(ConstraintType _tp, FeatureBasePtr _feature_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
+//
+//        /** \brief Constructor of category CTR_LANDMARK
+//         **/
+//        ConstraintBase(ConstraintType _tp, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
         virtual ~ConstraintBase();
         void remove();
