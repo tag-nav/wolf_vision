@@ -154,7 +154,6 @@ int main(int argc, char** argv)
         image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
 
         /* process */
-        //image_ptr->process();
         camera_ptr->process(image_ptr);
 
         ceres::Solver::Summary summary = ceres_manager.solve();

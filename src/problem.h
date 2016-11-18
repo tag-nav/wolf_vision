@@ -145,7 +145,10 @@ class Problem : public std::enable_shared_from_this<Problem>
                                const TimeStamp& _ts);
         /** \brief Create Frame of the correct size
          *
-         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
+         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
+         *   - Create a Frame
+         *   - Add it to Trajectory
+         *   - If it is key-frame, update state-block lists in Problem
          */
         FrameBasePtr createFrame(FrameType _frame_key_type, const TimeStamp& _time_stamp);
 

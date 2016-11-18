@@ -70,7 +70,7 @@ inline void ConstraintOdom3D::printRes (const  Eigen::Matrix<Scalar,6,1> & r) co
 
 inline ConstraintOdom3D::ConstraintOdom3D(FeatureBasePtr _ftr_current_ptr, FrameBasePtr _frame_past_ptr, bool _apply_loss_function,
                                           ConstraintStatus _status) :
-        ConstraintSparse<6, 3, 4, 3, 4>(CTR_ODOM_3D, _frame_past_ptr, _apply_loss_function, _status,
+        ConstraintSparse<6, 3, 4, 3, 4>(CTR_ODOM_3D, _frame_past_ptr, nullptr, nullptr, _apply_loss_function, _status,
                                         _ftr_current_ptr->getFramePtr()->getPPtr(), // current frame P
                                         _ftr_current_ptr->getFramePtr()->getOPtr(), // current frame Q
                                         _frame_past_ptr->getPPtr(), // past frame P

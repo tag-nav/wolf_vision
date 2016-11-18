@@ -174,17 +174,11 @@ int main(int argc, char** argv)
         t.setToNow();
         clock_t t1 = clock();
 
-        // Old method with non-factory objects
-        //        capture_image_ptr = new CaptureImage(t, sen_cam_,frame[f % buffer_size]);
-        //        prc_image->process(capture_image_ptr);
-
         // Preferred method with factory objects:
         image_ptr = make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
-//        image_ptr->process();
 
-        //image_ptr->process();
         camera_ptr->process(image_ptr);
-        //cv::imshow("test",frame[f % buffer_size]);
+
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
         wolf_problem_->print();
