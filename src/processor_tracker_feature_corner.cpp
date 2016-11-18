@@ -117,7 +117,7 @@ ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr
     return std::make_shared<ConstraintCorner2D>(_feature_ptr, landmark_ptr);
 }
 
-void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr,
+void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2DPtr _capture_laser_ptr,
                                                   FeatureBaseList& _corner_list)
 {
     // TODO: sort corners by bearing

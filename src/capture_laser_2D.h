@@ -16,10 +16,15 @@ class SensorLaser2D;
 
 namespace wolf {
 
+//forward declaration to typedef class pointers
+class CaptureLaser2D;
+typedef std::shared_ptr<CaptureLaser2D> CaptureLaser2DPtr;
+typedef std::shared_ptr<const CaptureLaser2D> CaptureLaser2DConstPtr;
+typedef std::weak_ptr<CaptureLaser2D> CaptureLaser2DWPtr;      
+    
+    
 class CaptureLaser2D : public CaptureBase
 {
-    public:
-        typedef std::shared_ptr<CaptureLaser2D> Ptr;
     public:
         /** \brief Constructor with ranges
          **/

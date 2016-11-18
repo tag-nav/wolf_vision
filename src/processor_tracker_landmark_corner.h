@@ -162,7 +162,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 
     private:
 
-        void extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr, FeatureBaseList& _corner_list);
+        void extractCorners(CaptureLaser2DPtr _capture_laser_ptr, FeatureBaseList& _corner_list);
 
         void expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::Vector4s& expected_feature_,
                              Eigen::Matrix3s& expected_feature_cov_);

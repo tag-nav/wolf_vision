@@ -185,7 +185,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 
     private:
 
-        void extractPolylines(CaptureLaser2D::Ptr _capture_laser_ptr, FeatureBaseList& _polyline_list);
+        void extractPolylines(CaptureLaser2DPtr _capture_laser_ptr, FeatureBaseList& _polyline_list);
 
         void expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& expected_feature_,
                              Eigen::MatrixXs& expected_feature_cov_);

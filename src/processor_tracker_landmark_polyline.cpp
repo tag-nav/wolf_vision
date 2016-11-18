@@ -314,7 +314,7 @@ bool ProcessorTrackerLandmarkPolyline::voteForKeyFrame()
     return false;
 }
 
-void ProcessorTrackerLandmarkPolyline::extractPolylines(CaptureLaser2D::Ptr _capture_laser_ptr,
+void ProcessorTrackerLandmarkPolyline::extractPolylines(CaptureLaser2DPtr _capture_laser_ptr,
                                                         FeatureBaseList& _polyline_list)
 {
     //std::cout << "ProcessorTrackerLandmarkPolyline::extractPolylines: " << std::endl;

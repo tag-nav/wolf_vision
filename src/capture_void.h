@@ -7,6 +7,13 @@
 
 namespace wolf {
 
+//forward declaration to typedef class pointers
+class CaptureVoid;
+typedef std::shared_ptr<CaptureVoid> CaptureVoidPtr;
+typedef std::shared_ptr<const CaptureVoid> CaptureVoidConstPtr;
+typedef std::weak_ptr<CaptureVoid> CaptureVoidWPtr;      
+   
+    
 //class CaptureVoid
 class CaptureVoid : public CaptureBase
 {

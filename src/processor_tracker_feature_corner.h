@@ -116,7 +116,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
 
     private:
 
-        void extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr, FeatureBaseList& _corner_list);
+        void extractCorners(CaptureLaser2DPtr _capture_laser_ptr, FeatureBaseList& _corner_list);
 
 };
 

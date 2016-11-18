@@ -222,7 +222,7 @@ bool ProcessorTrackerLandmarkCorner::voteForKeyFrame()
     return false;
 }
 
-void ProcessorTrackerLandmarkCorner::extractCorners(CaptureLaser2D::Ptr _capture_laser_ptr,
+void ProcessorTrackerLandmarkCorner::extractCorners(CaptureLaser2DPtr _capture_laser_ptr,
                                                     FeatureBaseList& _corner_list)
 {
     // TODO: sort corners by bearing
