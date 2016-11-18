@@ -109,48 +109,61 @@ void ConstraintBase::remove()
         if (getProblem() != nullptr)
             getProblem()->removeConstraintPtr(shared_from_this());
 
+
+
+
         // remove other: {Frame, feature, Landmark}
-        switch (category_)
+
+
+
+
+        //        switch (category_)
+        //        {
+        //            case CTR_FRAME:
+        //            {
+        //        if (frame_other_ptr_ != nullptr)
+        //        {
+        FrameBasePtr frm_o = frame_other_ptr_.lock();
+        if (frm_o)
         {
-            case CTR_FRAME:
-            {
-                FrameBasePtr frm_o = frame_other_ptr_.lock();
-                if (frm_o)
-                {
-                    frm_o->getConstrainedByList().remove(shared_from_this());
-                    if (frm_o->getConstrainedByList().empty() && frm_o->getCaptureList().empty())
-                        frm_o->remove();
-                }
-            }
-                break;
-            case CTR_FEATURE:
-            {
-                FeatureBasePtr ftr_o = feature_other_ptr_.lock();
-                if (ftr_o)
-                {
-                    ftr_o->getConstrainedByList().remove(shared_from_this());
-                    if (ftr_o->getConstrainedByList().empty() && ftr_o->getConstraintList().empty())
-                        ftr_o->remove();
-                }
-                break;
-            }
-            case CTR_LANDMARK:
-            {
-                LandmarkBasePtr lmk_o = landmark_other_ptr_.lock();
-                if (lmk_o)
-                {
-                    lmk_o->getConstrainedByList().remove(shared_from_this());
-                    if (lmk_o->getConstrainedByList().empty())
-                        lmk_o->remove();
-                }
-                break;
-            }
-            case CTR_ABSOLUTE:
-                break;
-            default:
-                break;
+            frm_o->getConstrainedByList().remove(shared_from_this());
+            if (frm_o->getConstrainedByList().empty() && frm_o->getCaptureList().empty())
+                frm_o->remove();
         }
-//        std::cout << "Removed             c" << id() << std::endl;
+        //            }
+        //                break;
+        //            case CTR_FEATURE:
+        //            {
+        //        if (feature_other_ptr_ != nullptr)
+        //        {
+        FeatureBasePtr ftr_o = feature_other_ptr_.lock();
+        if (ftr_o)
+        {
+            ftr_o->getConstrainedByList().remove(shared_from_this());
+            if (ftr_o->getConstrainedByList().empty() && ftr_o->getConstraintList().empty())
+                ftr_o->remove();
+        }
+        //                break;
+        //            }
+        //            case CTR_LANDMARK:
+        //            {
+        //        if (landmark_other_ptr_ != nullptr)
+        //        {
+        LandmarkBasePtr lmk_o = landmark_other_ptr_.lock();
+        if (lmk_o)
+        {
+            lmk_o->getConstrainedByList().remove(shared_from_this());
+            if (lmk_o->getConstrainedByList().empty())
+                lmk_o->remove();
+        }
+        //                break;
+        //            }
+        //            case CTR_ABSOLUTE:
+        //                break;
+        //            default:
+        //                break;
+        //        }
+        //        std::cout << "Removed             c" << id() << std::endl;
     }
 }
 
