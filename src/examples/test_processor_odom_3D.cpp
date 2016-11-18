@@ -66,7 +66,6 @@ int main (int argc, char** argv)
         cap_odo->setData(data);
 
         sen->process(cap_odo);
-//        cap_odo->process();
 
         cout << "t: " << std::setprecision(2) << t.get() << "  \t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
 

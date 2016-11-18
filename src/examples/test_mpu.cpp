@@ -159,7 +159,6 @@ int main(int argc, char** argv)
 
         // process data in capture
         sensor_ptr->process(imu_ptr);
-//        imu_ptr ->process();
 
         #ifdef DEBUG_RESULTS
 

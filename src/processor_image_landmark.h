@@ -86,13 +86,6 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          */
         void preProcess();
 
-        /**
-         * \brief Does the drawing of the features.
-         *
-         * Used for debugging
-         */
-        void postProcess();
-
         void advance()
         {
             ProcessorTrackerLandmark::advance();
@@ -105,6 +98,13 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
             image_last_ = image_incoming_;
         }
 
+
+        /**
+         * \brief Does the drawing of the features.
+         *
+         * Used for debugging
+         */
+        void postProcess();
 
         //Pure virtual
         /** \brief Find provided landmarks in the incoming capture
@@ -171,20 +171,20 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          * \param new_descriptors output descriptors obtained in the function
          * \return the number of detected features
          */
-        virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,cv::Mat& new_descriptors);
+        unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,cv::Mat& new_descriptors);
 
     private:
         /**
          * \brief Trims the roi of a matrix which exceeds the boundaries of the image
          * \param _roi input/output roi to be trimmed if necessary
          */
-        virtual void trimRoi(cv::Rect& _roi);
+        void trimRoi(cv::Rect& _roi);
 
         /**
          * \brief Augments the designed roi so that the detector and descriptor analize the whole region of interest
          * \param _roi input/output roi to be inflated the necessary amount
          */
-        virtual void inflateRoi(cv::Rect& _roi);
+        void inflateRoi(cv::Rect& _roi);
 
         /**
          * \brief Adapts a certain roi to maximize its performance and assign it to the image. It's composed by inflateRoi and trimRoi.
@@ -192,7 +192,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          * \param _image input image (incoming or last) in which the roi will be applied to obtain \b _image_roi
          * \param _roi input roi to be adapted
          */
-        virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
+        void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
         /**
          * \brief Does the match between a target descriptor and (potentially) multiple candidate descriptors of a Feature.
@@ -201,15 +201,16 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          * \param _cv_matches output variable in which the best result will be stored (in the position [0])
          * \return normalized score of similarity (1 - exact match; 0 - complete mismatch)
          */
-        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
+        Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
-        virtual void LandmarkInCurrentCamera(std::shared_ptr<LandmarkAHP> _landmark, Eigen::Vector4s& _point3D_hmg);
+        void LandmarkInCurrentCamera(CaptureBasePtr _capture, std::shared_ptr<LandmarkAHP> _landmark, Eigen::Vector4s& _point3D_hmg);
 
         // These only to debug, will disappear one day soon
     public:
-        virtual void drawLandmarks(cv::Mat _image);
-        virtual void drawFeaturesFromLandmarks(cv::Mat _image);
-        virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
+        void drawLandmarks(cv::Mat _image);
+        void drawFeaturesFromLandmarks(cv::Mat _image);
+        void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
+        void drawRoi(cv::Mat _image, CaptureImage::Ptr _capture, cv::Scalar _color);
 
 };
 

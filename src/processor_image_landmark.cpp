@@ -88,9 +88,6 @@ void ProcessorImageLandmark::preProcess()
     image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
     active_search_grid_.renew();
 
-
-    // variables used to debug
-    tracker_roi_.clear();
     detector_roi_.clear();
     feat_lmk_found_.clear();
 }
@@ -99,12 +96,14 @@ void ProcessorImageLandmark::postProcess()
 {
     if (last_ptr_!=nullptr)
     {
-        cv::Mat image = image_incoming_.clone();
-        if(params_.draw.tracker_roi) drawRoi(image, tracker_roi_, cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
+        cv::Mat image = image_last_.clone();
+        if(params_.draw.tracker_roi) drawRoi(image, std::static_pointer_cast<CaptureImage>(last_ptr_), cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
         if(params_.draw.detector_roi) drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
         if(params_.draw.primary_drawing) drawLandmarks(image);
         if(params_.draw.secondary_drawing) drawFeaturesFromLandmarks(image);
     }
+    detector_roi_.clear();
+    feat_lmk_found_.clear();
 }
 
 unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _landmark_list_in,
@@ -131,7 +130,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         Eigen::Vector3s point2D_hmg;
         Eigen::Vector2s point2D;
 
-        LandmarkInCurrentCamera(landmark_ptr,point3D_hmg);
+        LandmarkInCurrentCamera(incoming_ptr_, landmark_ptr, point3D_hmg);
 
         point2D_hmg = point3D_hmg.head(3);
         point2D = point2D_hmg.head(2)/point2D_hmg(2);
@@ -152,9 +151,6 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 //            std::cout << "pixel: " << point2D.transpose() << std::endl;
 //            std::cout << "target_descriptor[" << lmk_nbr << "]:\n" << target_descriptor.row(0) << std::endl;
 
-            //lists used to debug
-            tracker_roi_.push_back(roi);
-
             if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
             {
                 Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
@@ -170,6 +166,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                             candidate_keypoints[cv_matches[0].trainIdx],
                             candidate_descriptors.row(cv_matches[0].trainIdx),
                             Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
+
                     incoming_point_ptr->setTrackId(landmark_in_ptr->id());
                     incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
                     _feature_list_out.push_back(incoming_point_ptr);
@@ -181,6 +178,11 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                     feat_lmk_found_.push_back(incoming_point_ptr);
 //                    std::cout << "LMK " << lmk_nbr << "; FEATURE IN POINT X: " << incoming_point_ptr->getKeypoint().pt.x
 //                              << "\tY: " << incoming_point_ptr->getKeypoint().pt.y << std::endl;
+
+                    // To visualize
+                    cv::Rect roi2 = roi;
+                    trimRoi(roi2);
+                    incoming_point_ptr->setTrackerRoi(roi2);
 
                 }
 //                else
@@ -300,19 +302,18 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
         assert (last_ptr_ && "bad last ptr");
         assert (_landmark_ptr && "bad lmk ptr");
         auto current_frame = last_ptr_->getFramePtr();
-        auto landmark = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
-//        return std::make_shared<ConstraintAHP>(_feature_ptr, current_frame, landmark );
+        auto landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
 
-        ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(_feature_ptr, current_frame, landmark, true);
-
+        ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(_feature_ptr, landmark_ahp, true);
+        landmark_ahp->getAnchorFrame()->addConstrainedBy(constraint_ptr);
 
 
         Eigen::Vector2s expectation_;
         Eigen::Vector3s current_frame_p = last_ptr_->getFramePtr()->getPPtr()->getVector();
         Eigen::Vector4s current_frame_o  = last_ptr_->getFramePtr()->getOPtr()->getVector();
-        Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getVector();
-        Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
-        Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
+        Eigen::Vector3s anchor_frame_p = landmark_ahp->getAnchorFrame()->getPPtr()->getVector();
+        Eigen::Vector4s anchor_frame_o = landmark_ahp->getAnchorFrame()->getOPtr()->getVector();
+        Eigen::Vector4s landmark_ = landmark_ahp->getPPtr()->getVector();
 
         (*constraint_ptr).expectation(current_frame_p.data(), current_frame_o.data(),
                 anchor_frame_p.data(), anchor_frame_o.data(),
@@ -325,9 +326,34 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
 
 // ==================================================================== My own functions
 
-void ProcessorImageLandmark::LandmarkInCurrentCamera(std::shared_ptr<LandmarkAHP> _landmark,Eigen::Vector4s& _point3D_hmg)
+void ProcessorImageLandmark::LandmarkInCurrentCamera(CaptureBasePtr _capture, std::shared_ptr<LandmarkAHP> _landmark,Eigen::Vector4s& _point3D_hmg)
 {
-    Eigen::Vector3s pwr1 = getLastPtr()->getFramePtr()->getPPtr()->getVector();
+    Eigen::VectorXs current_state = getProblem()->getStateAtTimeStamp(_capture->getTimeStamp());
+
+    assert((current_state.size() == 7 || current_state.size() == 16) && "Wrong state size! Should be 7 for 3D pose or 16 for IMU.");
+
+    Eigen::Vector3s pwr1;
+    Eigen::Vector4s quaternion_current_frame;
+
+    // TODO: manage different state sizes better!
+    switch(current_state.size())
+    {
+        case 7:
+        {
+            pwr1 = current_state.head<3>();
+            quaternion_current_frame = current_state.tail<4>();
+            break;
+        }
+        case 16:
+        {
+            pwr1 = current_state.head<3>();
+            quaternion_current_frame = current_state.segment<4>(6);
+            break;
+        }
+        default:
+            std::runtime_error("Unrecognized state size. Use 7 or 16");
+    }
+
     Eigen::Vector3s pwr0 = _landmark->getAnchorFrame()->getPPtr()->getVector();
     Eigen::Vector3s prc = this->getSensorPtr()->getPPtr()->getVector();
 
@@ -339,7 +365,6 @@ void ProcessorImageLandmark::LandmarkInCurrentCamera(std::shared_ptr<LandmarkAHP
 
     Eigen::Quaternion<Scalar> qwr1, qwr0, qrc;
     Eigen::Vector4s quaternion_anchor = _landmark->getAnchorFrame()->getOPtr()->getVector();
-    Eigen::Vector4s quaternion_current_frame = getLastPtr()->getFramePtr()->getOPtr()->getVector();
     Eigen::Vector4s quaternion_sensor = this->getSensorPtr()->getOPtr()->getVector();
     qwr0 = quaternion_anchor;
     qwr1 = quaternion_current_frame;
@@ -429,12 +454,24 @@ void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::R
     _image_roi = _image(_roi);
 }
 
+void ProcessorImageLandmark::drawRoi(cv::Mat _image, CaptureImage::Ptr _capture, cv::Scalar _color)
+{
+    for (auto feature : _capture->getFeatureList())
+        cv::rectangle(_image, std::static_pointer_cast<FeaturePointImage>(feature)->getTrackerRoi(), _color, 1, 8, 0);
+
+    cv::imshow("Feature tracker", _image);
+//    std::cout << "drawRoi" << std::endl;
+//    cv::waitKey(0);
+}
+
 void ProcessorImageLandmark::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
 {
     for (auto roi : _roi_list)
         cv::rectangle(_image, roi, _color, 1, 8, 0);
 
     cv::imshow("Feature tracker", _image);
+//    std::cout << "drawRoi" << std::endl;
+//    cv::waitKey(0);
 }
 
 void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
@@ -475,7 +512,7 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
         Eigen::Vector3s point2D_hmg;
         Eigen::Vector2s point2D;
 
-        LandmarkInCurrentCamera(landmark_ptr,point3D_hmg);
+        LandmarkInCurrentCamera(last_ptr_, landmark_ptr,point3D_hmg);
 
         point2D_hmg = point3D_hmg.head(3);
         point2D = point2D_hmg.head(2)/point2D_hmg(2);
