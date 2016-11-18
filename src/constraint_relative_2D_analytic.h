@@ -7,7 +7,14 @@
 #include <Eigen/StdVector>
 
 namespace wolf {
-
+    
+//forward declaration to typedef class pointers
+class ConstraintRelative2DAnalytic;
+typedef std::shared_ptr<ConstraintRelative2DAnalytic> ConstraintRelative2DAnalyticPtr;
+typedef std::shared_ptr<const ConstraintRelative2DAnalytic> ConstraintRelative2DAnalyticConstPtr;
+typedef std::weak_ptr<ConstraintRelative2DAnalytic> ConstraintRelative2DAnalyticWPtr;
+    
+//class
 class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 {
     public:

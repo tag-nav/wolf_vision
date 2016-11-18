@@ -6,14 +6,17 @@
 #include "frame_base.h"
 
 namespace wolf {
-
+    
+//forward declaration to typedef class pointers
+class ConstraintOdom2D;
+typedef std::shared_ptr<ConstraintOdom2D> ConstraintOdom2DPtr;
+typedef std::shared_ptr<const ConstraintOdom2D> ConstraintOdom2DConstPtr;
+typedef std::weak_ptr<ConstraintOdom2D> ConstraintOdom2DWPtr;
+    
+//class
 class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
 {
     public:
-        typedef std::shared_ptr<ConstraintOdom2D> Ptr;
-
-    public:
-
         ConstraintOdom2D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<3, 2, 1, 2, 1>(CTR_ODOM_2D, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {

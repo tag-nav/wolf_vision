@@ -14,6 +14,12 @@
 
 namespace wolf {
 
+//forward declaration to typedef class pointers
+class ConstraintGPSPseudorange2D;
+typedef std::shared_ptr<ConstraintGPSPseudorange2D> ConstraintGPSPseudorange2DPtr;
+typedef std::shared_ptr<const ConstraintGPSPseudorange2D> ConstraintGPSPseudorange2DConstPtr;
+typedef std::weak_ptr<ConstraintGPSPseudorange2D> ConstraintGPSPseudorange2DWPtr;
+    
 /*
  * NB:
  * FROM THIS CLASS AND ALL THE CLASS INCLUDED, THE LIBRARY RAW_GPS_UTILS
@@ -22,13 +28,12 @@ namespace wolf {
  *
  * TODO maybe is no more true
  */
-
-
-
 class ConstraintGPSPseudorange2D : public ConstraintSparse<1, 2, 1, 3, 1, 3, 1>
 {
-public:
-    ConstraintGPSPseudorange2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+    public:
+        ConstraintGPSPseudorange2D(FeatureBasePtr _ftr_ptr, 
+                                   bool _apply_loss_function = false, 
+                                   ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 2, 1, 3, 1, 3, 1>(CTR_GPS_PR_2D,
                                                   _apply_loss_function,
                                                   _status,
@@ -39,39 +44,39 @@ public:
                                                   _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter = receiver time bias
                                                   (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr()), // map position with respect to ecef
                                                   (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr())) // map orientation with respect to ecef
-    {
-        setType("GPS PR 2D");
-        sat_position_ = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getSatPosition();
-        pseudorange_  = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getPseudorange();
-        //std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
-    }
+        {
+            setType("GPS PR 2D");
+            sat_position_ = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getSatPosition();
+            pseudorange_  = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getPseudorange();
+            //std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
+        }
 
-    virtual ~ConstraintGPSPseudorange2D()
-    {
-        //std::cout << "deleting ConstraintGPSPseudorange2D " << id() << std::endl;
-    }
+        virtual ~ConstraintGPSPseudorange2D()
+        {
+            //std::cout << "deleting ConstraintGPSPseudorange2D " << id() << std::endl;
+        }
 
-    template<typename T>
-    bool operator ()(const T* const _vehicle_p, const T* const _vehicle_o, const T* const _sensor_p,
-                     const T* const _bias, const T* const _map_p, const T* const _map_o,
-                     T* _residual) const;
+        template<typename T>
+        bool operator ()(const T* const _vehicle_p, const T* const _vehicle_o, const T* const _sensor_p,
+                        const T* const _bias, const T* const _map_p, const T* const _map_o,
+                        T* _residual) const;
 
-    /** \brief Returns the jacobians computation method
-     *
-     * Returns the jacobians computation method
-     *
-     **/
-    virtual JacobianMethod getJacobianMethod() const
-    {
-        return JAC_AUTO;
-    }
+        /** \brief Returns the jacobians computation method
+        *
+        * Returns the jacobians computation method
+        *
+        **/
+        virtual JacobianMethod getJacobianMethod() const
+        {
+            return JAC_AUTO;
+        }
 
-protected:
-    Eigen::Vector3s sat_position_;
-    Scalar pseudorange_;
+    protected:
+        Eigen::Vector3s sat_position_;
+        Scalar pseudorange_;
 
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
 };
 

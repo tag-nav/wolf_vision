@@ -7,7 +7,14 @@
 #include "landmark_polyline_2D.h"
 
 namespace wolf {
-
+    
+//forward declaration to typedef class pointers
+class ConstraintPointToLine2D;
+typedef std::shared_ptr<ConstraintPointToLine2D> ConstraintPointToLine2DPtr;
+typedef std::shared_ptr<const ConstraintPointToLine2D> ConstraintPointToLine2DConstPtr;
+typedef std::weak_ptr<ConstraintPointToLine2D> ConstraintPointToLine2DWPtr;
+    
+//class
 class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
 {
     protected:

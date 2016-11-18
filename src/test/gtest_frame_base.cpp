@@ -77,7 +77,7 @@ TEST(FrameBase, LinksToTree)
     F1->addCapture(C);
     FeatureBasePtr f = make_shared<FeatureBase>("f", 1);
     C->addFeature(f);
-    ConstraintOdom2D::Ptr c = make_shared<ConstraintOdom2D>(f, F2);
+    ConstraintOdom2DPtr c = make_shared<ConstraintOdom2D>(f, F2);
     f->addConstraint(c);
 
     // c-by link F2 -> c not yet established

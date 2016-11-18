@@ -7,6 +7,12 @@
 #include "landmark_container.h"
 
 namespace wolf {
+    
+//forward declaration to typedef class pointers
+class ConstraintContainer;
+typedef std::shared_ptr<ConstraintContainer> ConstraintContainerPtr;
+typedef std::shared_ptr<const ConstraintContainer> ConstraintContainerConstPtr;
+typedef std::weak_ptr<ConstraintContainer> ConstraintContainerWPtr;
 
 class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 {

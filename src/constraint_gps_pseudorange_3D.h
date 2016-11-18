@@ -10,6 +10,12 @@
 
 namespace wolf {
 
+//forward declaration to typedef class pointers
+class ConstraintGPSPseudorange3D;
+typedef std::shared_ptr<ConstraintGPSPseudorange3D> ConstraintGPSPseudorange3DPtr;
+typedef std::shared_ptr<const ConstraintGPSPseudorange3D> ConstraintGPSPseudorange3DConstPtr;
+typedef std::weak_ptr<ConstraintGPSPseudorange3D> ConstraintGPSPseudorange3DWPtr;
+    
 /*
  * NB:
  * FROM THIS CLASS AND ALL THE CLASS INCLUDED, THE LIBRARY RAW_GPS_UTILS
@@ -18,13 +24,14 @@ namespace wolf {
  *
  * TODO maybe is no more true
  */
-
 class ConstraintGPSPseudorange3D: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
 {
 
-public:
+    public:
 
-    ConstraintGPSPseudorange3D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+        ConstraintGPSPseudorange3D(FeatureBasePtr _ftr_ptr, 
+                                   bool _apply_loss_function = false, 
+                                   ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintSparse<1, 3, 4, 3, 1, 3, 4>(CTR_GPS_PR_3D, _apply_loss_function, _status,
                             _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to map frame
                             _ftr_ptr->getFramePtr()->getOPtr(), // orientation of the vehicle's frame wrt map frame
@@ -33,50 +40,50 @@ public:
                             _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter  = receiver time bias
                             (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getMapPPtr(), // initial vehicle position wrt ecef frame
                             (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getMapOPtr())  // initial vehicle orientation wrt ecef frame
-    {
-        setType("GPS PR 3D");
-        sat_position_ = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getSatPosition();
-        pseudorange_  = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getPseudorange();
+        {
+            setType("GPS PR 3D");
+            sat_position_ = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getSatPosition();
+            pseudorange_  = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getPseudorange();
 
-        //std::cout << "ConstraintGPSPseudorange3D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
-    }
-
-
-    virtual ~ConstraintGPSPseudorange3D()
-    {
-        //std::cout << "deleting ConstraintGPSPseudorange3D " << id() << std::endl;
-    }
+            //std::cout << "ConstraintGPSPseudorange3D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
+        }
 
 
+        virtual ~ConstraintGPSPseudorange3D()
+        {
+            //std::cout << "deleting ConstraintGPSPseudorange3D " << id() << std::endl;
+        }
 
-    template<typename T>
-    bool operator ()(const T* const _vehicle_p, const T* const _vehicle_o, const T* const _sensor_p,
-                     const T* const _bias, const T* const _init_vehicle_p, const T* const _init_vehicle_o,
-                     T* _residual) const;
 
 
-    /** \brief Returns the jacobians computation method
-     *
-     * Returns the jacobians computation method
-     *
-     **/
-    virtual JacobianMethod getJacobianMethod() const
-    {
-        return JAC_AUTO;
-    }
+        template<typename T>
+        bool operator ()(const T* const _vehicle_p, const T* const _vehicle_o, const T* const _sensor_p,
+                        const T* const _bias, const T* const _init_vehicle_p, const T* const _init_vehicle_o,
+                        T* _residual) const;
 
-protected:
-    Eigen::Vector3s sat_position_;
-    Scalar pseudorange_;
 
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+        /** \brief Returns the jacobians computation method
+        *
+        * Returns the jacobians computation method
+        *
+        **/
+        virtual JacobianMethod getJacobianMethod() const
+        {
+            return JAC_AUTO;
+        }
 
-    static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
-                                        NodeBasePtr _correspondant_ptr = nullptr)
-    {
-        return std::make_shared<ConstraintGPSPseudorange3D>(_feature_ptr);
-    }
+    protected:
+        Eigen::Vector3s sat_position_;
+        Scalar pseudorange_;
+
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+
+        static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
+                                            NodeBasePtr _correspondant_ptr = nullptr)
+        {
+            return std::make_shared<ConstraintGPSPseudorange3D>(_feature_ptr);
+        }
 
 
 };

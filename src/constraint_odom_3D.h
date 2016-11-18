@@ -14,10 +14,15 @@
 namespace wolf
 {
 
+//forward declaration to typedef class pointers
+class ConstraintOdom3D;
+typedef std::shared_ptr<ConstraintOdom3D> ConstraintOdom3DPtr;
+typedef std::shared_ptr<const ConstraintOdom3D> ConstraintOdom3DConstPtr;
+typedef std::weak_ptr<ConstraintOdom3D> ConstraintOdom3DWPtr;
+    
+//class
 class ConstraintOdom3D : public ConstraintSparse<6,3,4,3,4>
 {
-    public:
-        typedef std::shared_ptr<ConstraintOdom3D> Ptr;
     public:
         ConstraintOdom3D(FeatureBasePtr _ftr_current_ptr, FrameBasePtr _frame_past_ptr, bool _apply_loss_function = false,
                          ConstraintStatus _status = CTR_ACTIVE);

@@ -7,7 +7,13 @@
 #include <Eigen/StdVector>
 
 namespace wolf {
-
+    
+//forward declaration to typedef class pointers
+class ConstraintAnalytic;
+typedef std::shared_ptr<ConstraintAnalytic> ConstraintAnalyticPtr;
+typedef std::shared_ptr<const ConstraintAnalytic> ConstraintAnalyticConstPtr;
+typedef std::weak_ptr<ConstraintAnalytic> ConstraintAnalyticWPtr;
+  
 class ConstraintAnalytic: public ConstraintBase
 {
     protected:

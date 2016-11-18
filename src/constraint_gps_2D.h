@@ -8,6 +8,12 @@
 #include "frame_base.h"
 
 namespace wolf {
+    
+//forward declaration to typedef class pointers
+class ConstraintGPS2D;
+typedef std::shared_ptr<ConstraintGPS2D> ConstraintGPS2DPtr;
+typedef std::shared_ptr<const ConstraintGPS2D> ConstraintGPS2DConstPtr;
+typedef std::weak_ptr<ConstraintGPS2D> ConstraintGPS2DWPtr;    
 
 class ConstraintGPS2D : public ConstraintSparse<2, 2>
 {

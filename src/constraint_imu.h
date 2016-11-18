@@ -9,7 +9,14 @@
 
 
 namespace wolf {
+    
+//forward declaration to typedef class pointers
+class ConstraintIMU;
+typedef std::shared_ptr<ConstraintIMU> ConstraintIMUPtr;
+typedef std::shared_ptr<const ConstraintIMU> ConstraintIMUConstPtr;
+typedef std::weak_ptr<ConstraintIMU> ConstraintIMUWPtr;
 
+//class
 class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
 {
     public:

@@ -132,7 +132,7 @@ inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
 inline ConstraintBasePtr ProcessorOdom3D::emplaceConstraint(FeatureBasePtr _feature_motion,
                                                            FrameBasePtr _frame_origin)
 {
-    ConstraintOdom3D::Ptr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _frame_origin);
+    ConstraintOdom3DPtr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _frame_origin);
     _feature_motion->addConstraint(ctr_odom);
     _frame_origin->addConstrainedBy(ctr_odom);
     return ctr_odom;
