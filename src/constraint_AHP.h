@@ -28,11 +28,19 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
     public:
 
-        ConstraintAHP(FeatureBasePtr _ftr_ptr, FrameBasePtr _current_frame_ptr, LandmarkAHP::Ptr _landmark_ptr,
-                        bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP, _landmark_ptr, _apply_loss_function, _status,
-                                             _current_frame_ptr->getPPtr(), _current_frame_ptr->getOPtr(), _landmark_ptr->getAnchorFrame()->getPPtr()
-                                                   ,_landmark_ptr->getAnchorFrame()->getOPtr(),_landmark_ptr->getPPtr()),
+        ConstraintAHP(FeatureBasePtr    _ftr_ptr,
+                      LandmarkAHP::Ptr  _landmark_ptr,
+                      bool              _apply_loss_function    = false,
+                      ConstraintStatus  _status                 = CTR_ACTIVE) :
+                ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP,
+                                                   _landmark_ptr,
+                                                   _apply_loss_function,
+                                                   _status,
+                                                   _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(),
+                                                   _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(),
+                                                   _landmark_ptr->getAnchorFrame()->getPPtr(),
+                                                   _landmark_ptr->getAnchorFrame()->getOPtr(),
+                                                   _landmark_ptr->getPPtr()),
                 anchor_sensor_extrinsics_p_(_ftr_ptr->getCapturePtr()->getSensorPPtr()->getVector()),
                 anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getVector()),
                 feature_image_(*std::static_pointer_cast<FeaturePointImage>(_ftr_ptr))
@@ -165,10 +173,13 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             return JAC_AUTO;
         }
 
-        static ConstraintAHP::Ptr create(FeatureBasePtr _ftr_ptr, FrameBasePtr _frm_current_ptr, LandmarkAHP::Ptr _lmk_ahp_ptr)
+        static ConstraintAHP::Ptr create(FeatureBasePtr     _ftr_ptr,
+                                         LandmarkAHP::Ptr   _lmk_ahp_ptr,
+                                         bool               _apply_loss_function    = false,
+                                         ConstraintStatus   _status                 = CTR_ACTIVE)
         {
             // construct constraint
-            Ptr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _frm_current_ptr, _lmk_ahp_ptr);
+            Ptr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _lmk_ahp_ptr, _apply_loss_function, _status);
 
             // link it to wolf tree
 //            _ftr_ptr->addConstraint(ctr_ahp);

@@ -118,7 +118,7 @@ int main()
 
 
     // Create the constraint
-    ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(feat_point_image_ptr, last_frame,std::static_pointer_cast<LandmarkAHP>(landmark));
+    ConstraintAHP::Ptr constraint_ptr = std::make_shared<ConstraintAHP>(feat_point_image_ptr, std::static_pointer_cast<LandmarkAHP>(landmark));
 
     feat_point_image_ptr->addConstraint(constraint_ptr);
     std::cout << "Constraint AHP created" << std::endl;
