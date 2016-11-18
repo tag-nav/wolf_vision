@@ -43,10 +43,6 @@ static IntrinsicsBasePtr createIntrinsicsOdom3D(const std::string & _filename_do
         params->min_disp_var     = variances["min_disp_var"] .as<Scalar>();
         params->min_rot_var      = variances["min_rot_var"]  .as<Scalar>();
 
-        params->max_buffer_length    = kf_vote["max buffer length"]  .as<Scalar>();
-        params->dist_traveled    = kf_vote["dist traveled"]  .as<Scalar>();
-        params->angle_turned    = kf_vote["angle turned"]    .as<Scalar>();
-
         return params;
     }
 

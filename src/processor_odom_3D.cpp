@@ -37,9 +37,6 @@ void ProcessorOdom3D::setup(SensorOdom3D::Ptr sen_ptr)
     k_rot_to_rot_ = sen_ptr->getRotVarToRotNoiseFactor();
     min_disp_var_ = sen_ptr->getMinDispVar();
     min_rot_var_ = sen_ptr->getMinRotVar();
-    max_buff_length_ = sen_ptr->getMaxBufferLength();
-    dist_traveled_ = sen_ptr->getDistTraveled();
-    angle_turned_ = sen_ptr->getAngleTurned();
 }
 
 void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
@@ -245,10 +242,25 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_s
 
 ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
-    std::shared_ptr<ProcessorOdom3D> prc_ptr = std::make_shared<ProcessorOdom3D>();
-    prc_ptr->setup(std::static_pointer_cast<SensorOdom3D>(_sen_ptr));
-    prc_ptr->setName(_unique_name);
-    return prc_ptr;
+    // cast inputs to correct type
+    SensorOdom3D::Ptr sen_odo =std::static_pointer_cast<SensorOdom3D>(_sen_ptr);
+    std::shared_ptr<ProcessorOdom3DParams> prc_odo_params = std::static_pointer_cast<ProcessorOdom3DParams>(_params);
+
+    // construct processor
+    std::shared_ptr<ProcessorOdom3D> prc_odo = std::make_shared<ProcessorOdom3D>(sen_odo->getDispVarToDispNoiseFactor(),
+                                                                                 sen_odo->getDispVarToRotNoiseFactor(),
+                                                                                 sen_odo->getRotVarToRotNoiseFactor(),
+                                                                                 sen_odo->getMinDispVar(),
+                                                                                 sen_odo->getMinRotVar(),
+                                                                                 prc_odo_params->max_buff_length,
+                                                                                 prc_odo_params->dist_traveled,
+                                                                                 prc_odo_params->angle_turned);
+
+    // setup processor
+    //    prc_odo->setup(sen_odo);
+    prc_odo->setName(_unique_name);
+
+    return prc_odo;
 }
 
 }

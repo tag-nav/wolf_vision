@@ -36,9 +36,11 @@ static ProcessorParamsBasePtr createProcessorOdom3DParams(const std::string & _f
 
         IntrinsicsOdom3D::Ptr params = std::make_shared<IntrinsicsOdom3D>();
 
-        params->max_buffer_length    = kf_vote["max buffer length"]  .as<Scalar>();
-        params->dist_traveled    = kf_vote["dist traveled"]  .as<Scalar>();
-        params->angle_turned    = kf_vote["angle turned"]    .as<Scalar>();
+        params->type                = processor_type;
+        params->name                = processor_name;
+        params->max_buffer_length   = kf_vote["max buffer length"]  .as<Scalar>();
+        params->dist_traveled       = kf_vote["dist traveled"]      .as<Scalar>();
+        params->angle_turned        = kf_vote["angle turned"]       .as<Scalar>();
 
         return params;
     }
