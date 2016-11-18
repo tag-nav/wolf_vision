@@ -275,24 +275,24 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
     qoy.resize(N/dt);
     qoz.resize(N/dt);
 
-    for(wolf::Scalar t=0; t<N/dt; t++){
-        v2 = q2v(v2q(v0*t*dt));
-        ox(t) = v2(0);
-        oy(t) = v2(1);
-        oz(t) = v2(2);
-        /*ox(t) = pi2pi(v0(0)*t*dt);
-        oy(t) = pi2pi(v0(1)*t*dt);
-        oz(t) = pi2pi(v0(2)*t*dt);*/
-        t_vec(t) = t*dt;
+    for(wolf::Scalar n=0; n<N/dt; n++){
+        v2 = q2v(v2q(v0*n*dt));
+        ox(n) = v2(0);
+        oy(n) = v2(1);
+        oz(n) = v2(2);
+        /*ox(n) = pi2pi(v0(0)*n*dt);
+        oy(n) = pi2pi(v0(1)*n*dt);
+        oz(n) = pi2pi(v0(2)*n*dt);*/
+        t_vec(n) = n*dt;
     }
     
-    for(wolf::Scalar t=0; t<N/dt; t++){
-        if(t!=0)
+    for(wolf::Scalar n=0; n<N/dt; n++){
+        if(n!=0)
             q0 = q0 * v2q(v0*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
         v1 = q2v(q0);   //corresponding rotation vector of current quaternion
-        qox(t) = v1(0); //angle X component
-        qoy(t) = v1(1); //angle Y component
-        qoz(t) = v1(2); //angle Z component
+        qox(n) = v1(0); //angle X component
+        qoy(n) = v1(1); //angle Y component
+        qoz(n) = v1(2); //angle Z component
     }
 
     //Compute difference between orientation vectors (expected - real)
@@ -305,7 +305,7 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    EXPECT_TRUE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) << 
+    EXPECT_TRUE((ox - qox).isMuchSmallerThan(1,0.000001) && (oy - qoy).isMuchSmallerThan(1,0.000001) && (oz - qoz).isMuchSmallerThan(1,0.000001)) << 
     "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
 
     #ifdef write_results
@@ -358,27 +358,27 @@ TEST(rotations, Quat_compos_var_rateOfTurn)
     gamma = 10;
     v0 << alpha*deg_to_rad, beta*deg_to_rad, gamma*deg_to_rad;
 
-    for(wolf::Scalar t=0; t<N/dt; t++){
-        v1 << sin(v0(0)*t*dt), sin(v0(1)*t*dt), sin(v0(2)*t*dt);
+    for(wolf::Scalar n=0; n<N/dt; n++){
+        v1 << sin(v0(0)*n*dt), sin(v0(1)*n*dt), sin(v0(2)*n*dt);
         v1 = q2v(v2q(v1));
-        ox(t) = v1(0);
-        oy(t) = v1(1);
-        oz(t) = v1(2);
-        /*ox(t) = pi2pi(v0(0)*t*dt);
-        oy(t) = pi2pi(v0(1)*t*dt);
-        oz(t) = pi2pi(v0(2)*t*dt);*/
-        t_vec(t) = t*dt;
+        ox(n) = v1(0);
+        oy(n) = v1(1);
+        oz(n) = v1(2);
+        /*ox(n) = pi2pi(v0(0)*n*dt);
+        oy(n) = pi2pi(v0(1)*n*dt);
+        oz(n) = pi2pi(v0(2)*n*dt);*/
+        t_vec(n) = n*dt;
     }
 
-    for(wolf::Scalar t=0; t<N/dt; t++){
-        if(t!=0){
-            v2 << v0(0)*cos(v0(0)*t*dt), v0(1)*cos(v0(1)*t*dt), v0(2)*cos(v0(2)*t*dt);
+    for(wolf::Scalar n=0; n<N/dt; n++){
+        if(n!=0){
+            v2 << v0(0)*cos(v0(0)*n*dt), v0(1)*cos(v0(1)*n*dt), v0(2)*cos(v0(2)*n*dt);
             q0 = q0 * v2q(v2*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
         }
         v1 = q2v(q0);   //corresponding rotation vector of current quaternion
-        qox(t) = v1(0); //angle X component
-        qoy(t) = v1(1); //angle Y component
-        qoz(t) = v1(2); //angle Z component
+        qox(n) = v1(0); //angle X component
+        qoy(n) = v1(1); //angle Y component
+        qoz(n) = v1(2); //angle Z component
     }
 
     //Compute difference between orientation vectors (expected - real)
@@ -443,27 +443,27 @@ TEST(rotations, Quat_compos_var_rateOfTurn_diff)
     gamma = 10;
     v0 << alpha*deg_to_rad, beta*deg_to_rad, gamma*deg_to_rad;
 
-    for(wolf::Scalar t=0; t<N/dt; t++){
-        v1 << sin(v0(0)*t*dt), sin(v0(1)*t*dt), sin(v0(2)*t*dt);
+    for(wolf::Scalar n=0; n<N/dt; n++){
+        v1 << sin(v0(0)*n*dt), sin(v0(1)*n*dt), sin(v0(2)*n*dt);
         v1 = q2v(v2q(v1));
-        ox(t) = v1(0);
-        oy(t) = v1(1);
-        oz(t) = v1(2);
-        /*ox(t) = pi2pi(v0(0)*t*dt);
-        oy(t) = pi2pi(v0(1)*t*dt);
-        oz(t) = pi2pi(v0(2)*t*dt);*/
-        t_vec(t) = t*dt;
+        ox(n) = v1(0);
+        oy(n) = v1(1);
+        oz(n) = v1(2);
+        /*ox(n) = pi2pi(v0(0)*n*dt);
+        oy(n) = pi2pi(v0(1)*n*dt);
+        oz(n) = pi2pi(v0(2)*n*dt);*/
+        t_vec(n) = n*dt;
     }
 
-    for(wolf::Scalar t=0; t<N/dt; t++){
-        if(t!=0){
-            v2 << v0(0)*cos(v0(0)*t*dt), v0(1)*cos(v0(1)*t*dt), v0(2)*cos(v0(2)*t*dt);
+    for(wolf::Scalar n=0; n<N/dt; n++){
+        if(n!=0){
+            v2 << v0(0)*cos(v0(0)*n*dt), v0(1)*cos(v0(1)*n*dt), v0(2)*cos(v0(2)*n*dt);
             q0 = q0 * v2q(v2*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
         }
         v1 = q2v(q0);   //corresponding rotation vector of current quaternion
-        qox(t) = v1(0); //angle X component
-        qoy(t) = v1(1); //angle Y component
-        qoz(t) = v1(2); //angle Z component
+        qox(n) = v1(0); //angle X component
+        qoy(n) = v1(1); //angle Y component
+        qoz(n) = v1(2); //angle Z component
     }
 
     //Compute difference between orientation vectors (expected - real)
