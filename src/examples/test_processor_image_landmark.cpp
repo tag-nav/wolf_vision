@@ -23,10 +23,33 @@ using Eigen::Vector4s;
 using Eigen::Vector6s;
 using Eigen::Vector7s;
 
+using namespace wolf;
+
+void cleanupMap(const ProblemPtr& wolf_problem_ptr_, const TimeStamp& t, Scalar dt_max,
+                                      Size min_constraints)
+{
+    std::list<LandmarkBasePtr> lmks_to_remove;
+    for (auto lmk : wolf_problem_ptr_->getMapPtr()->getLandmarkList())
+    {
+        TimeStamp t0 = std::static_pointer_cast<LandmarkAHP>(lmk)->getAnchorFrame()->getTimeStamp();
+        if (t - t0 > dt_max)
+        {
+            unsigned int nbr_ctr = lmk->getConstrainedByList().size();
+            if (nbr_ctr <= min_constraints)
+            {
+                lmks_to_remove.push_back(lmk);
+            }
+        }
+    }
+    for (auto lmk : lmks_to_remove)
+    {
+        std::cout << "clean up L" << lmk->id() << std::endl;
+        lmk->remove();
+    }
+}
+
 int main(int argc, char** argv)
 {
-    using namespace wolf;
-
     std::cout << std::endl << "==================== processor image landmark test ======================" << std::endl;
 
     //=====================================================
@@ -157,35 +180,6 @@ int main(int argc, char** argv)
         camera_ptr->process(image_ptr);
 
 
-        // Cleanup map ---------------------------------------
-
-        std::list<LandmarkBasePtr> lmk_list = wolf_problem_ptr_->getMapPtr()->getLandmarkList();
-
-        for(auto lmk : lmk_list)
-        {
-            TimeStamp t0 = std::static_pointer_cast<LandmarkAHP>(lmk)->getAnchorFrame()->getTimeStamp();
-            //            TimeStamp t;// = t_;
-            if(t - t0 > 2)
-            {
-                unsigned int nbr_ctr = lmk->getConstrainedByList().size();
-                if(nbr_ctr <= 1)
-                {
-                    std::cout << "clean up L" << lmk->id() << std::endl;
-                    lmk->remove();
-//                    cv::waitKey(0);
-                }
-            }
-        }
-        lmk_list.clear();
-
-
-        // Solve -----------------------------------------------
-
-        ceres::Solver::Summary summary = ceres_manager.solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-//        wolf_problem_ptr_->print(2,1,0,0);
-
 
         // Odometry --------------------------------------------
 
@@ -260,7 +254,19 @@ int main(int argc, char** argv)
 //        std::cout << "          dt: " << t_prev - t_prev_prev << "; dx: " << dx.transpose() << std::endl;
 
 
-        wolf_problem_ptr_->print(0);
+        // Cleanup map ---------------------------------------
+
+        cleanupMap(wolf_problem_ptr_, t, 2, 5); // dt, min_ctr
+
+
+        // Solve -----------------------------------------------
+
+        ceres::Solver::Summary summary = ceres_manager.solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+
+
+        // Finish loop -----------------------------------------
 
         cv::waitKey(10);
 
