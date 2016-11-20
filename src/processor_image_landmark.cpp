@@ -119,7 +119,6 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     cv::Mat candidate_descriptors;
     std::vector<cv::DMatch> cv_matches;
 
-    unsigned int lmk_nbr = 0;
     for (auto landmark_in_ptr : _landmark_list_in)
     {
 //        std::cout << "Landmark number [" << lmk_nbr << "] in " << std::endl;
@@ -148,20 +147,12 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
             cv::Mat target_descriptor = landmark_ptr->getCvDescriptor();
 
-//            std::cout << "pixel: " << point2D.transpose() << std::endl;
-//            std::cout << "target_descriptor[" << lmk_nbr << "]:\n" << target_descriptor.row(0) << std::endl;
-
             if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
             {
                 Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
 
                 if (normalized_score > params_.matcher.min_normalized_score)
                 {
-//                    std::cout << "FOUND // normalized score: " << normalized_score << std::endl;
-//                    std::cout << "Feature in pixel: " << candidate_keypoints[cv_matches[0].trainIdx].pt << std::endl;
-//                    std::cout << "Feature descriptor:\n" << candidate_descriptors.row(cv_matches[0].trainIdx) << std::endl;
-
-
                     std::shared_ptr<FeaturePointImage> incoming_point_ptr = std::make_shared<FeaturePointImage>(
                             candidate_keypoints[cv_matches[0].trainIdx],
                             candidate_descriptors.row(cv_matches[0].trainIdx),
@@ -176,8 +167,6 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                     _feature_landmark_correspondences[_feature_list_out.back()] = std::make_shared<LandmarkMatch>(landmark_in_ptr, normalized_score);
 
                     feat_lmk_found_.push_back(incoming_point_ptr);
-//                    std::cout << "LMK " << lmk_nbr << "; FEATURE IN POINT X: " << incoming_point_ptr->getKeypoint().pt.x
-//                              << "\tY: " << incoming_point_ptr->getKeypoint().pt.y << std::endl;
 
                     // To visualize
                     cv::Rect roi2 = roi;
@@ -193,8 +182,6 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         }
 //        else
 //            std::cout << "NOT in the image" << std::endl;
-
-        lmk_nbr++;
     }
 //    std::cout << "\tNumber of Features tracked: " << _feature_list_out.size() << std::endl;
     landmarks_tracked_ = _feature_list_out.size();
@@ -480,7 +467,6 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
         //candidate - cyan
         cv::Point2f point = (std::static_pointer_cast<FeaturePointImage>(feature_point))->getKeypoint().pt;
         cv::circle(_image, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
-//        std::cout << "feature of landmark [" << (feature_point)->landmarkId() << "] in: " << point << std::endl;
 
         cv::Point2f point2 = point;
         point2.x = point2.x - 16;
@@ -495,14 +481,6 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
     unsigned int counter = 0;
 //    cv::Mat image = image_incoming_.clone();
     LandmarkBaseList& last_landmark_list = getProblem()->getMapPtr()->getLandmarkList();
-
-//    unsigned int response_counter = 0;
-//    Eigen::VectorXs response_vector(last_landmark_list.size());
-//    for (auto response : list_response_)
-//    {
-//        response_vector(response_counter) = response;
-//        response_counter++;
-//    }
 
     for (auto landmark_base_ptr : last_landmark_list)
     {
@@ -523,8 +501,6 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
             cv::Point2f point;
             point.x = point2D[0];
             point.y = point2D[1];
-
-//            std::cout << "landmark number [" << landmark_ptr->id() << std::setprecision(3) << "] in: " << point << std::endl;
 
             cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);
             cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0) );
