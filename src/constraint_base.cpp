@@ -17,12 +17,8 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
     feature_other_ptr_(), // nullptr
     landmark_other_ptr_() // nullptr
 {
-    //std::cout << "creating ConstraintBase " << std::endl;
 //    std::cout << "constructed        +c" << id() << std::endl;
 }
-
-// FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr,
-
 
 ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, FeatureBasePtr _feature_other_ptr, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),

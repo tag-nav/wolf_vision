@@ -32,7 +32,6 @@ void LandmarkBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-//        std::cout << "Removing   L" << id() << std::endl;
         LandmarkBasePtr this_L = shared_from_this(); // keep this alive while removing it
 
         // remove from upstream
