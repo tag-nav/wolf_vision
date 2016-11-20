@@ -299,31 +299,30 @@ bool ProcessorOdom3D::voteForKeyFrame()
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
     {
-        std::cout << "PM::vote: time span of " << getBuffer().get().back().ts_ - getBuffer().get().front().ts_
-                << " seconds is big enough" << std::endl;
+        std::cout << "PM: vote: time span" << std::endl;
         return true;
     }
     // buffer length
     if (getBuffer().get().size() > max_buff_length_)
     {
-        std::cout << "PM::vote: buffer of " << getBuffer().get().size() << " deltas is big enough" << std::endl;
+        std::cout << "PM: vote: buffer size" << std::endl;
         return true;
     }
     // distance traveled
     Scalar dist = delta_integrated_.head(3).norm();
     if (dist > dist_traveled_)
     {
-        std::cout << "PM::vote: position delta of " << dist << "m is big enough" << std::endl;
+        std::cout << "PM: vote: distance traveled" << std::endl;
         return true;
     }
     // angle turned
     Scalar angle = 2.0 * acos(delta_integrated_(6));
     if (angle > angle_turned_)
     {
-        std::cout << "PM::vote: orientation delta of " << angle * 180 / M_PI << "deg is big enough" << std::endl;
+        std::cout << "PM: vote: angle turned" << std::endl;
         return true;
     }
-    std::cout << "PM::do not vote" << std::endl;
+    std::cout << "PM: do not vote" << std::endl;
     return false;
 }
 
