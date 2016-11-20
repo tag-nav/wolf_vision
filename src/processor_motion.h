@@ -471,6 +471,8 @@ class ProcessorMotion : public ProcessorBase
         Eigen::MatrixXs jacobian_delta_preint_; ///< jacobian of delta composition w.r.t previous delta integrated
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
 
+    private:
+        wolf::TimeStamp getCurrentTimeStamp();
 };
 
 }
@@ -514,6 +516,11 @@ inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().getDelta(_ts), _ts - origin_ptr_->getTimeStamp(), _x);
 }
 
+inline wolf::TimeStamp ProcessorMotion::getCurrentTimeStamp()
+{
+    return getBuffer().get().back().ts_;
+}
+
 inline const Eigen::VectorXs& ProcessorMotion::getCurrentState()
 {
     getCurrentState(x_);
@@ -535,7 +542,7 @@ inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts)
 {
     getCurrentState(_x);
-    _ts = getBuffer().get().back().ts_;
+    _ts = getCurrentTimeStamp();
 }
 
 inline const Motion& ProcessorMotion::getMotion() const

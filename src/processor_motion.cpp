@@ -28,22 +28,23 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         // key_capture
-        CaptureMotion::Ptr key_capture_ptr = last_ptr_;
-        FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
+        //        CaptureMotion::Ptr key_capture_ptr = last_ptr_;
+        //        FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
+        FrameBasePtr key_frame_ptr = last_ptr_->getFramePtr();
 
         // Set the frame of key_capture as key
         key_frame_ptr->setState(getCurrentState());
-        key_frame_ptr->setTimeStamp(getBuffer().get().back().ts_);
+        key_frame_ptr->setTimeStamp(getCurrentTimeStamp());
         key_frame_ptr->setKey();
 
         // create motion feature and add it to the key_capture
         FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
                 "MOTION",
-                key_capture_ptr->getBuffer().get().back().delta_integr_,
-                key_capture_ptr->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
-                        key_capture_ptr->getBuffer().get().back().delta_integr_cov_ :
-                        Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
-        key_capture_ptr->addFeature(key_feature_ptr);
+                last_ptr_->getBuffer().get().back().delta_integr_,
+                last_ptr_->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
+                        last_ptr_->getBuffer().get().back().delta_integr_cov_ :
+                        Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-4); // avoid a strict zero in the covariance
+        last_ptr_->addFeature(key_feature_ptr);
 
         // create motion constraint and link it to parent feature and other frame (which is origin's frame)
         auto ctr_ptr    =  createConstraint(key_feature_ptr, origin_ptr_->getFramePtr());
@@ -51,28 +52,33 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         origin_ptr_->getFramePtr() -> addConstrainedBy(ctr_ptr);
 
         // new last capture
-        last_ptr_ = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
+        CaptureMotion::Ptr new_capture_ptr = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
                                                     getSensorPtr(),
                                                     Eigen::VectorXs::Zero(data_size_),
                                                     Eigen::MatrixXs::Zero(data_size_, data_size_),
                                                     key_frame_ptr);
-
-        // create a new last frame
-        FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, key_frame_ptr->getState(), last_ptr_->getTimeStamp());
-        new_frame_ptr->addCapture(last_ptr_); // Add Capture to the new Frame
-
-        // reset processor origin to the new keyframe's capture
-        origin_ptr_ = key_capture_ptr;
-        getBuffer().get().push_back(Motion( {key_frame_ptr->getTimeStamp(), deltaZero(), deltaZero(),
+        // reset the new buffer
+        new_capture_ptr->getBuffer().get().push_back(Motion( {key_frame_ptr->getTimeStamp(), deltaZero(), deltaZero(),
                                              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
                                              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)}));
 
 
+        // create a new frame
+        FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, key_frame_ptr->getState(), new_capture_ptr->getTimeStamp());
+        new_frame_ptr->addCapture(new_capture_ptr); // Add Capture to the new Frame
+
+        // reset integrals
         delta_integrated_ = deltaZero();
         delta_integrated_cov_.setZero();
 
+        // reset processor origin to the new keyframe's capture
+        origin_ptr_ = last_ptr_;
+        last_ptr_ = new_capture_ptr;
+
         // reset derived things
         resetDerived();
+
+        // callback to other processors
         getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), time_tolerance_);
 
     }
@@ -168,7 +174,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
     assert(_keyframe_ptr->getTrajectoryPtr() != nullptr
             && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
 
-    // get time stamp
+    // get KF's time stamp
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
 
     // find capture in which the new keyframe is interpolated
@@ -188,6 +194,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
     // split the buffer
     // and give old buffer to new key capture
     capture_ptr->getBuffer().split(ts, key_capture_ptr->getBuffer());
+
     // interpolate individual delta
     if (!capture_ptr->getBuffer().get().empty())
     {
