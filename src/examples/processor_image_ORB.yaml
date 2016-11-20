@@ -6,11 +6,11 @@ detector-descriptor:
     nfeatures: 100
     scale factor: 1.2
     nlevels: 8
-    edge threshold: 16 #16
+    edge threshold: 8  # 16
     first level: 0 
     WTA_K: 2            # See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
     score type: 1       #enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
-    patch size: 31
+    patch size: 15   # 31
 
 matcher:
     minimum normalized score: 0.85
@@ -20,9 +20,9 @@ matcher:
         height: 20
 
 active search:
-    grid width: 16
-    grid height: 12
-    separation: 5
+    grid width: 12
+    grid height: 8
+    separation: 10
 
 algorithm:
     maximum new features: 40
@@ -32,11 +32,11 @@ algorithm:
     distance: 20
     
 noise:
-    pixel noise std: 2 # pixels
+    pixel noise std: 1 # pixels
     
 draw: # Used to control drawing options
     primary draw: true
     secondary draw: true
     detection roi: true
-    tracking roi: true
+    tracking roi: false
     
