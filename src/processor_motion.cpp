@@ -20,25 +20,13 @@ ProcessorMotion::~ProcessorMotion()
 
 void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 {
-
-    /* Status:
-     * KF --- KF --- F ----
-     *        o      l      i
-     */
-
     incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
-
-    /* Status:
-     * KF --- KF --- F ---- *
-     *        o      l      i
-     */
 
     preProcess();
     integrate();
 
     if (voteForKeyFrame() && permittedKeyFrame())
     {
-//        WOLF_TRACE("");
         // key_capture
         CaptureMotion::Ptr key_capture_ptr = last_ptr_;
         FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
@@ -47,12 +35,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         key_frame_ptr->setState(getCurrentState());
         key_frame_ptr->setTimeStamp(getBuffer().get().back().ts_);
         key_frame_ptr->setKey();
-
-        /* Status:
-         * KF --- KF --- KF ---
-         *        o      l      i
-         */
-
 
         // create motion feature and add it to the key_capture
         FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
@@ -85,10 +67,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                                              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
                                              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)}));
 
-        /* Status:
-         * KF --- KF --- KF --- F ----
-         *               o      l      i
-         */
 
         delta_integrated_ = deltaZero();
         delta_integrated_cov_.setZero();
@@ -183,19 +161,6 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 
 bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
-
-    //    Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
-    //    std::cout << "  Time tol this  " << time_tolerance_ << std::endl;
-    //    std::cout << "  Time tol other " << _time_tol_other << std::endl;
-    //    std::cout << "  Time tol eff   " << time_tol << std::endl;
-    //
-    //    std::cout << "  Time stamp input F " << _keyframe_ptr->getTimeStamp().get() << std::endl;
-    //    std::cout << "  Time stamp orig  F " << getOriginPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
-    //    std::cout << "  Time stamp orig  C " << getOriginPtr()->getTimeStamp().get() << std::endl;
-    //    std::cout << "  Time stamp last  F " << getLastPtr()->getFramePtr()->getTimeStamp().get() << std::endl;
-    //    std::cout << "  Time stamp last  C " << getLastPtr()->getTimeStamp().get() << std::endl;
-
-//    WOLF_TRACE("");
     std::cout << "PM: KF" << _keyframe_ptr->id() << " callback received at ts= " << _keyframe_ptr->getTimeStamp().get() << std::endl;
     std::cout << "    while last ts= " << last_ptr_->getTimeStamp().get() << std::endl;
     std::cout << "    while last's frame ts= " << last_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;
