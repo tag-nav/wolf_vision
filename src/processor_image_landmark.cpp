@@ -160,6 +160,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
                     incoming_point_ptr->setTrackId(landmark_in_ptr->id());
                     incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
+                    incoming_point_ptr->setScore(normalized_score);
                     _feature_list_out.push_back(incoming_point_ptr);
 
                     incoming_point_ptr->setExpectation(point2D);
@@ -462,15 +463,17 @@ void ProcessorImageLandmark::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_li
 
 void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
 {
+    FeaturePointImage::Ptr ftr;
     for(auto feature_point : feat_lmk_found_)
     {
-        //candidate - cyan
-        cv::Point2f point = (std::static_pointer_cast<FeaturePointImage>(feature_point))->getKeypoint().pt;
+        ftr = std::static_pointer_cast<FeaturePointImage>(feature_point);
+
+        cv::Point2f point = ftr->getKeypoint().pt;
         cv::circle(_image, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
 
         cv::Point2f point2 = point;
         point2.x = point2.x - 16;
-        cv::putText(_image, std::to_string((std::static_pointer_cast<FeaturePointImage>(feature_point))->landmarkId()), point2,
+        cv::putText(_image, std::to_string(ftr->landmarkId()) + "/" + std::to_string((int)(100*ftr->getScore())), point2,
                     cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
     }
     cv::imshow("Feature tracker", _image);
@@ -478,7 +481,7 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
 
 void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
 {
-    unsigned int counter = 0;
+    unsigned int num_lmks_in_img = 0;
 //    cv::Mat image = image_incoming_.clone();
     LandmarkBaseList& last_landmark_list = getProblem()->getMapPtr()->getLandmarkList();
 
@@ -498,13 +501,14 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
 
         if(pinhole::isInImage(point2D,image_.width_,image_.height_))
         {
+            num_lmks_in_img++;
+
             cv::Point2f point;
             point.x = point2D[0];
             point.y = point2D[1];
 
             cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);
             cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0) );
-            counter++;
         }
     }
     cv::Point label_for_landmark_point;
@@ -516,7 +520,7 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
     cv::Point label_for_landmark_point2;
     label_for_landmark_point2.x = 3;
     label_for_landmark_point2.y = 20;
-    cv::putText(_image, std::to_string(counter), label_for_landmark_point2,
+    cv::putText(_image, std::to_string(num_lmks_in_img), label_for_landmark_point2,
                 cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
 //    std::cout << "\t\tTotal landmarks: " << counter << std::endl;
