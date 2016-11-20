@@ -1,4 +1,5 @@
-
+# Dynamically remove objects from list
+# add_executable(test_list_remove test_list_remove.cpp)
 
 # Matrix product test
 #ADD_EXECUTABLE(test_matrix_prod test_matrix_prod.cpp)
