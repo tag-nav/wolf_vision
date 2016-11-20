@@ -102,19 +102,18 @@ int main(int argc, char** argv)
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
 
-    // CAMERA SENSOR
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
-    SensorCamera::Ptr camera_ptr = std::static_pointer_cast<SensorCamera>(sensor_ptr);
-    camera_ptr->setImgWidth(img_width);
-    camera_ptr->setImgHeight(img_height);
-
-    // IMAGE PROCESSOR
-    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_ORB.yaml");
-
     // ODOM SENSOR AND PROCESSOR
     SensorBasePtr sen_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
     ProcessorBasePtr prc_ptr = wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom",            wolf_root + "/src/examples/processor_odom_3D.yaml");
     SensorOdom3D::Ptr sen_odo_ptr = std::static_pointer_cast<SensorOdom3D>(sen_ptr);
+
+    // CAMERA SENSOR AND PROCESSOR
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
+    SensorCamera::Ptr camera_ptr = std::static_pointer_cast<SensorCamera>(sensor_ptr);
+    camera_ptr->setImgWidth(img_width);
+    camera_ptr->setImgHeight(img_height);
+    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_ORB.yaml");
+
     //=====================================================
 
 
@@ -131,6 +130,15 @@ int main(int argc, char** argv)
 
 
     //=====================================================
+    // running CAPTURES preallocated
+    CaptureImage::Ptr image_ptr;
+    Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
+    CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(t, sen_odo_ptr, data);
+    //=====================================================
+
+
+
+    //=====================================================
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
@@ -141,14 +149,6 @@ int main(int argc, char** argv)
     google::InitGoogleLogging(argv[0]);
 
     CeresManager ceres_manager(wolf_problem_ptr_, ceres_options);
-    //=====================================================
-
-
-    //=====================================================
-    // running CAPTURES preallocated
-    CaptureImage::Ptr image_ptr;
-    Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
-    CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(t), sen_odo_ptr, data);
     //=====================================================
 
 
