@@ -27,6 +27,7 @@ class FeaturePointImage : public FeatureBase
         cv::KeyPoint keypoint_; ///< Warning: every write operation to this member needs to write measurement_. See setKeypoint() as an example.
         cv::Mat descriptor_;
         bool is_known_;
+        Scalar score_;
         cv::Rect tracker_roi_;
 
     public:
@@ -38,7 +39,8 @@ class FeaturePointImage : public FeatureBase
                 FeatureBase("POINT IMAGE", _measured_pixel, _meas_covariance),
                 keypoint_(_measured_pixel(0), _measured_pixel(1), 1), // Size 1 is a dummy value
                 descriptor_( _descriptor),
-                is_known_(false)
+                is_known_(false),
+                score_(0)
         {
             keypoint_.pt.x = measurement_(0);
             keypoint_.pt.y = measurement_(1);
@@ -51,7 +53,8 @@ class FeaturePointImage : public FeatureBase
                 FeatureBase("POINT IMAGE", Eigen::Vector2s::Zero(), _meas_covariance),
                 keypoint_(_keypoint),
                 descriptor_(_descriptor),
-                is_known_(false)
+                is_known_(false),
+                score_(0)
         {
             measurement_(0) = Scalar(_keypoint.pt.x);
             measurement_(1) = Scalar(_keypoint.pt.y);
@@ -76,6 +79,16 @@ class FeaturePointImage : public FeatureBase
 
         const cv::Rect& getTrackerRoi() const;
         void setTrackerRoi(const cv::Rect& tracker_roi);
+
+        Scalar getScore() const
+        {
+            return score_;
+        }
+
+        void setScore(Scalar score)
+        {
+            score_ = score;
+        }
 };
 
 inline const cv::KeyPoint& FeaturePointImage::getKeypoint() const
