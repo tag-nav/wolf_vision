@@ -806,15 +806,19 @@ bool Problem::check(int verbose_level)
                 {
                     if (verbose_level > 0)
                         std::cout << "        c" << c->id() << " @" << C.get();
-                    if ( !(c->getFrameOtherPtr()) && !(c->getFeatureOtherPtr()) && !(c->getLandmarkOtherPtr()) )    // case ABSOLUTE:
+
+                    auto Fo = c->getFrameOtherPtr();
+                    auto fo = c->getFeatureOtherPtr();
+                    auto Lo = c->getLandmarkOtherPtr();
+
+                    if ( !Fo && !fo && !Lo )    // case ABSOLUTE:
                     {
                         if (verbose_level > 0)
                             std::cout << " --> A" << std::endl;
                     }
 
-                    if (!(c->getFrameOtherPtr()) )  // case FRAME:
+                    if ( Fo )  // case FRAME:
                     {
-                        auto Fo = c->getFrameOtherPtr();
                         if (verbose_level > 0)
                             std::cout << " --> F" << Fo->id() << " <- ";
                         bool found = false;
@@ -829,9 +833,8 @@ bool Problem::check(int verbose_level)
                         is_consistent = is_consistent && found;
                     }
 
-                    if ( !(c->getFeatureOtherPtr()) )   // case FEATURE:
+                    if ( fo )   // case FEATURE:
                     {
-                        auto fo = c->getFeatureOtherPtr();
                         if (verbose_level > 0)
                             std::cout << " --> f" << fo->id() << " <- ";
                         bool found = false;
@@ -846,9 +849,8 @@ bool Problem::check(int verbose_level)
                         is_consistent = is_consistent && found;
                     }
 
-                    if ( !(c->getLandmarkOtherPtr()) )      // case LANDMARK:
+                    if ( Lo )      // case LANDMARK:
                     {
-                        auto Lo = c->getLandmarkOtherPtr();
                         if (verbose_level > 0)
                             std::cout << " --> L" << Lo->id() << " <- ";
                         bool found = false;
