@@ -13,7 +13,6 @@ namespace wolf {
 class ConstraintFix3D: public ConstraintSparse<6,3,4>
 {
     public:
-//        static const unsigned int N_BLOCKS = 2;
 
         ConstraintFix3D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<6,3,4>(CTR_FIX_3D, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),

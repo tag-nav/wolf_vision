@@ -13,7 +13,6 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
         typedef std::shared_ptr<ConstraintOdom2D> Ptr;
 
     public:
-//        static const unsigned int N_BLOCKS = 4;
 
         ConstraintOdom2D(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintSparse<3, 2, 1, 2, 1>(CTR_ODOM_2D, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())

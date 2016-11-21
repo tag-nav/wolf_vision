@@ -17,8 +17,8 @@ class ConstraintPoint2D: public ConstraintSparse<2,2,1,2,1,2>
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
         Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
-	public:
-//		static const unsigned int N_BLOCKS = 5;
+
+    public:
 
 		ConstraintPoint2D(std::shared_ptr<FeaturePolyline2D> _ftr_ptr, std::shared_ptr<LandmarkPolyline2D> _lmk_ptr, unsigned int _ftr_point_id, int _lmk_point_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
 			ConstraintSparse<2,2,1,2,1,2>(CTR_POINT_2D, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)),
