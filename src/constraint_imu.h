@@ -13,7 +13,9 @@ namespace wolf {
 class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
 {
     public:
+        typedef std::shared_ptr<ConstraintIMU> Ptr;
 
+    public:
         ConstraintIMU(FeatureIMU::Ptr _ftr_ptr, FrameIMU::Ptr _frame_ptr, bool _apply_loss_function = false,
                       ConstraintStatus _status = CTR_ACTIVE);
 
