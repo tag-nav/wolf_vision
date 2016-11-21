@@ -65,16 +65,6 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
          */
         virtual unsigned int detectNewFeatures(const unsigned int& _max_features);
 
-        /** \brief Create a new constraint
-         * \param _feature_ptr pointer to the Feature to constrain
-         * \param _feature_other_ptr FeatureBase pointer to the feature constrained.
-         *
-         * Implement this method in derived classes.
-         * This function only creates the constraint, it doesn't add it to any feature.
-         *
-         * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
-         * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
-         */
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
 };

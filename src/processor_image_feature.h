@@ -119,10 +119,6 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
          */
         virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features);
 
-        /** \brief Create a new constraint
-         *
-         * Creates a constraint from feature to feature
-         */
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
     private:
