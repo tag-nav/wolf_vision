@@ -551,7 +551,11 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts) = 0;
 
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) = 0;
+        /** \brief create a constraint and link it in the wolf tree
+         * \param _feature_motion: the parent feature
+         * \param _frame_origin: the frame constrained by this motion constraint
+         */
+        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) = 0;
 
         Motion motionZero(const TimeStamp& _ts);
 

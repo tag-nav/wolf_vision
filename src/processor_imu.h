@@ -37,7 +37,7 @@ class ProcessorIMU : public ProcessorMotion{
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
                                    TimeStamp& _ts);
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion,
+        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                                    FrameBasePtr _frame_origin);
         void resetDerived();
 
@@ -360,12 +360,24 @@ inline void ProcessorIMU::resetDerived()
     dDq_dwb_.setZero();
 }
 
-inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_motion,
-                                                        FrameBasePtr _frame_origin)
+//<<<<<<< 13d73e2d3fde7d0c8b220e57319ec25cb5426eed
+//inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_motion,
+//                                                        FrameBasePtr _frame_origin)
+//{
+//    auto ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
+//    auto frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
+//    auto ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu);
+//=======
+inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
-    auto ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
-    auto frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
-    auto ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu);
+    FeatureIMU::Ptr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
+    FrameIMU::Ptr frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
+    ConstraintIMU::Ptr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu);
+
+    _feature_motion->addConstraint(ctr_imu);
+    _frame_origin->addConstrainedBy(ctr_imu);
+
+//>>>>>>> Rename ProcessorXx::createConstraint --> emplaceconstraint
     return ctr_imu;
 }
 

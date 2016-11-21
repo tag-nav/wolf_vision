@@ -55,7 +55,7 @@ class ProcessorOdom2D : public ProcessorMotion
                            Motion& _motion,
                            TimeStamp& _ts);
 
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
+        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
 
     protected:
         Scalar dist_traveled_th_;
@@ -211,9 +211,11 @@ inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
     return Eigen::VectorXs::Zero(delta_size_);
 }
 
-inline ConstraintBasePtr ProcessorOdom2D::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
+inline ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
     ConstraintOdom2D::Ptr ctr_odom = std::make_shared<ConstraintOdom2D>(_feature_motion, _frame_origin);
+    _feature_motion->addConstraint(ctr_odom);
+    _frame_origin->addConstrainedBy(ctr_odom);
     return ctr_odom;
 }
 

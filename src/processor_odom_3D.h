@@ -93,7 +93,7 @@ class ProcessorOdom3D : public ProcessorMotion
                            Motion& _motion,
                            TimeStamp& _ts);
         bool voteForKeyFrame();
-        ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion,
+        ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                            FrameBasePtr _frame_origin);
 
     private:
@@ -129,10 +129,12 @@ inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
     return (Eigen::VectorXs(7) << 0,0,0, 0,0,0,1).finished(); // p, q
 }
 
-inline ConstraintBasePtr ProcessorOdom3D::createConstraint(FeatureBasePtr _feature_motion,
+inline ConstraintBasePtr ProcessorOdom3D::emplaceConstraint(FeatureBasePtr _feature_motion,
                                                            FrameBasePtr _frame_origin)
 {
     ConstraintOdom3D::Ptr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _frame_origin);
+    _feature_motion->addConstraint(ctr_odom);
+    _frame_origin->addConstrainedBy(ctr_odom);
     return ctr_odom;
 }
 

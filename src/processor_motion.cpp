@@ -47,7 +47,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         last_ptr_->addFeature(key_feature_ptr);
 
         // create motion constraint and link it to parent feature and other frame (which is origin's frame)
-        auto ctr_ptr    =  createConstraint(key_feature_ptr, origin_ptr_->getFramePtr());
+        auto ctr_ptr    =  emplaceConstraint(key_feature_ptr, origin_ptr_->getFramePtr());
         key_feature_ptr -> addConstraint(ctr_ptr);
         origin_ptr_->getFramePtr() -> addConstrainedBy(ctr_ptr);
 
@@ -216,7 +216,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
     key_capture_ptr->addFeature(key_feature_ptr);
 
     // create motion constraint and add it to the feature, and link it to the other frame (origin)
-    auto key_ctr_ptr = createConstraint(key_feature_ptr, key_frame_origin);
+    auto key_ctr_ptr = emplaceConstraint(key_feature_ptr, key_frame_origin);
     key_feature_ptr->addConstraint(key_ctr_ptr);
     key_frame_origin->addConstrainedBy(key_ctr_ptr);
 
@@ -249,7 +249,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
         auto ctr_to_remove = feature_ptr->getConstraintList().back(); // there is only one constraint!
 
         // create and append new constraint
-        auto new_ctr = feature_ptr->addConstraint(createConstraint(feature_ptr, _keyframe_ptr));
+        auto new_ctr = feature_ptr->addConstraint(emplaceConstraint(feature_ptr, _keyframe_ptr));
         _keyframe_ptr->addConstrainedBy(new_ctr);
 
         // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
