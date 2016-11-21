@@ -70,7 +70,7 @@ namespace wolf {
       private:
           /** \brief Sets the Frame status (see wolf.h for Frame status)
            **/
-          void setStatus(StateStatus _st);
+//          void setStatus(StateStatus _st);
       public:
           static FrameBasePtr create(const FrameType & _tp,
                                      const TimeStamp& _ts,

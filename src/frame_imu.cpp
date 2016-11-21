@@ -137,79 +137,79 @@ FrameIMU::FrameIMU(const FrameType& _tp, const TimeStamp& _ts, const Eigen::Vect
       }
   }
 
-  void FrameIMU::setStatus(StateStatus _st)
-  {
-      // TODO: Separate the three fixes and unfixes to the wolfproblem lists
-      // TODO: See what we want to do with globally fixing state blocks
-      status_ = _st;
-      // State Blocks
-      if (status_ == ST_FIXED)
-      {
-          if (getPPtr() != nullptr)
-          {
-              getPPtr()->fix();
-              if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(getPPtr());
-          }
-          if (getVPtr() != nullptr)
-          {
-              getVPtr()->fix();
-              if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(getVPtr());
-          }
-          if (getOPtr() != nullptr)
-          {
-              getOPtr()->fix();
-              if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(getOPtr());
-          }
-          if (getAccBiasPtr() != nullptr)
-          {
-              getAccBiasPtr()->fix();
-              if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(getAccBiasPtr());
-          }
-          if (getGyroBiasPtr() != nullptr)
-          {
-              getGyroBiasPtr()->fix();
-              if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(getGyroBiasPtr());
-          }
-      }
-      else if (status_ == ST_ESTIMATED)
-      {
-          if (getPPtr() != nullptr)
-          {
-              getPPtr()->unfix();
-              if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(getPPtr());
-          }
-          if (getVPtr() != nullptr)
-          {
-              getVPtr()->unfix();
-              if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(getVPtr());
-          }
-          if (getOPtr() != nullptr)
-          {
-              getOPtr()->unfix();
-              if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(getOPtr());
-          }
-          if (getAccBiasPtr() != nullptr)
-          {
-              getAccBiasPtr()->unfix();
-              if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(getAccBiasPtr());
-          }
-          if (getGyroBiasPtr() != nullptr)
-          {
-              getGyroBiasPtr()->fix();
-              if (getProblem() != nullptr)
-                  getProblem()->updateStateBlockPtr(getGyroBiasPtr());
-          }
-      }
-  }
+//  void FrameIMU::setStatus(StateStatus _st)
+//  {
+//      // TODO: Separate the three fixes and unfixes to the wolfproblem lists
+//      // TODO: See what we want to do with globally fixing state blocks
+//      status_ = _st;
+//      // State Blocks
+//      if (status_ == ST_FIXED)
+//      {
+//          if (getPPtr() != nullptr)
+//          {
+//              getPPtr()->fix();
+//              if (getProblem() != nullptr)
+//                  getProblem()->updateStateBlockPtr(getPPtr());
+//          }
+//          if (getVPtr() != nullptr)
+//          {
+//              getVPtr()->fix();
+//              if (getProblem() != nullptr)
+//                  getProblem()->updateStateBlockPtr(getVPtr());
+//          }
+//          if (getOPtr() != nullptr)
+//          {
+//              getOPtr()->fix();
+//              if (getProblem() != nullptr)
+//                  getProblem()->updateStateBlockPtr(getOPtr());
+//          }
+//          if (getAccBiasPtr() != nullptr)
+//          {
+//              getAccBiasPtr()->fix();
+//              if (getProblem() != nullptr)
+//                  getProblem()->updateStateBlockPtr(getAccBiasPtr());
+//          }
+//          if (getGyroBiasPtr() != nullptr)
+//          {
+//              getGyroBiasPtr()->fix();
+//              if (getProblem() != nullptr)
+//                  getProblem()->updateStateBlockPtr(getGyroBiasPtr());
+//          }
+//      }
+//      else if (status_ == ST_ESTIMATED)
+//      {
+//          if (getPPtr() != nullptr)
+//          {
+//              getPPtr()->unfix();
+//              if (getProblem() != nullptr)
+//                  getProblem()->updateStateBlockPtr(getPPtr());
+//          }
+//          if (getVPtr() != nullptr)
+//          {
+//              getVPtr()->unfix();
+//              if (getProblem() != nullptr)
+//                  getProblem()->updateStateBlockPtr(getVPtr());
+//          }
+//          if (getOPtr() != nullptr)
+//          {
+//              getOPtr()->unfix();
+//              if (getProblem() != nullptr)
+//                  getProblem()->updateStateBlockPtr(getOPtr());
+//          }
+//          if (getAccBiasPtr() != nullptr)
+//          {
+//              getAccBiasPtr()->unfix();
+//              if (getProblem() != nullptr)
+//                  getProblem()->updateStateBlockPtr(getAccBiasPtr());
+//          }
+//          if (getGyroBiasPtr() != nullptr)
+//          {
+//              getGyroBiasPtr()->fix();
+//              if (getProblem() != nullptr)
+//                  getProblem()->updateStateBlockPtr(getGyroBiasPtr());
+//          }
+//      }
+//  }
 
 
 
