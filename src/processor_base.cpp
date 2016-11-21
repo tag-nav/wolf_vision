@@ -27,7 +27,7 @@ bool ProcessorBase::permittedKeyFrame()
     return getProblem()->permitKeyFrame(shared_from_this());
 }
 
-FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameType _type)
+FrameBasePtr ProcessorBase::emplaceFrame(CaptureBasePtr _capture_ptr, FrameType _type)
 {
     std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
 
@@ -37,7 +37,7 @@ FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, FrameType _ty
     return new_frame_ptr;
 }
 
-FrameBasePtr ProcessorBase::makeFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameType _type)
+FrameBasePtr ProcessorBase::emplaceFrame(CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state, FrameType _type)
 {
     std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
 
