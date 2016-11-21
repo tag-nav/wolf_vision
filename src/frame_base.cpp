@@ -126,11 +126,17 @@ void FrameBase::setKey()
 
 void FrameBase::setState(const Eigen::VectorXs& _st)
 {
-
-    assert(_st.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())  +
+    int st_check = 0;
+    for(unsigned int i = 0; i<state_block_vec_.size(); i++){
+        st_check += (state_block_vec_[i]==nullptr ? 0 : state_block_vec_[i]->getSize());
+    }
+    
+    /*assert(_st.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())  +
                           (getOPtr()==nullptr ? 0 : getOPtr()->getSize())  +
                           (getVPtr()==nullptr ? 0 : getVPtr()->getSize())) &&
-                          "In FrameBase::setState wrong state size");
+                          "In FrameBase::setState wrong state size");*/
+
+    assert(_st.size() == st_check && "In FrameBase::setState wrong state size");
 
     unsigned int index = 0;
     if (getPPtr()!=nullptr)
