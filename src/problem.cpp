@@ -172,12 +172,12 @@ void Problem::setProcessorMotion(ProcessorMotion::Ptr _processor_motion_ptr)
     processor_motion_ptr_ = _processor_motion_ptr;
 }
 
-FrameBasePtr Problem::createFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
+FrameBasePtr Problem::emplaceFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
 {
-    return createFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
+    return emplaceFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
 }
 
-FrameBasePtr Problem::createFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
+FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
     //std::cout << "Problem::createFrame" << std::endl;
@@ -534,7 +534,7 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::Matrix
     if (!origin_is_set_)
     {
         // Create origin frame
-        FrameBasePtr origin_frame_ptr = createFrame(KEY_FRAME, _origin_pose, _ts);
+        FrameBasePtr origin_frame_ptr = emplaceFrame(KEY_FRAME, _origin_pose, _ts);
         // FIXME: create a fix sensor
         IntrinsicsBasePtr fix_instrinsics; // nullptr
         SensorBasePtr fix_sensor_ptr = installSensor("GPS", "initial pose", Eigen::VectorXs::Zero(3), fix_instrinsics );

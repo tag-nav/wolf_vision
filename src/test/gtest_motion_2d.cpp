@@ -72,7 +72,7 @@ TEST(ProcessorMotion, Motion2D)
 
 
     // Origin Key Frame
-    FrameBasePtr origin_frame = problem_ptr->createFrame(KEY_FRAME, x0, t0);
+    FrameBasePtr origin_frame = problem_ptr->emplaceFrame(KEY_FRAME, x0, t0);
 
     // Prior covariance
     CaptureFix::Ptr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensor_fix_ptr, x0, init_cov);
@@ -212,7 +212,7 @@ TEST(ProcessorMotion, Motion2D)
     TimeStamp t_split = t0 + 0.13;
     std::cout << "Split time:                  " << t_split - t0 << std::endl;
 
-    FrameBasePtr new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
+    FrameBasePtr new_keyframe_ptr = problem_ptr->emplaceFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
 
     odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
@@ -255,7 +255,7 @@ TEST(ProcessorMotion, Motion2D)
     t_split = t0 + 0.062;
     std::cout << "New split time (assyncronous and older than previous keyframe):  " << t_split - t0 << std::endl;
 
-    new_keyframe_ptr = problem_ptr->createFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
+    new_keyframe_ptr = problem_ptr->emplaceFrame(KEY_FRAME, odom2d_ptr->getState(t_split), t_split);
     odom2d_ptr->keyFrameCallback(new_keyframe_ptr, 0);
 
     // Solve

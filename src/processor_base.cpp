@@ -31,7 +31,7 @@ FrameBasePtr ProcessorBase::emplaceFrame(CaptureBasePtr _capture_ptr, FrameType 
 {
     std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
 
-    FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _capture_ptr->getTimeStamp());
+    FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(_type, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr);
 
     return new_frame_ptr;
@@ -41,7 +41,7 @@ FrameBasePtr ProcessorBase::emplaceFrame(CaptureBasePtr _capture_ptr, const Eige
 {
     std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
 
-    FrameBasePtr new_frame_ptr = getProblem()->createFrame(_type, _state, _capture_ptr->getTimeStamp());
+    FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(_type, _state, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr);
 
     return new_frame_ptr;

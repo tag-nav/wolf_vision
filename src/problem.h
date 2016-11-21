@@ -150,13 +150,13 @@ class Problem : public std::enable_shared_from_this<Problem>
          *   - Add it to Trajectory
          *   - If it is key-frame, update state-block lists in Problem
          */
-        FrameBasePtr createFrame(FrameType _frame_key_type, const TimeStamp& _time_stamp);
+        FrameBasePtr emplaceFrame(FrameType _frame_key_type, const TimeStamp& _time_stamp);
 
         /** \brief Create Frame from vector
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
          */
-        FrameBasePtr createFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
+        FrameBasePtr emplaceFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
         Eigen::VectorXs getCurrentState();

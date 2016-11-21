@@ -31,12 +31,12 @@ int main()
 {
     ProblemPtr problem_ptr = Problem::create(FRM_PO_2D);
 
-    problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.1));
-    FrameBasePtr frm2 = problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.2));
-    FrameBasePtr frm3 = problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.3));
-    problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.4));
-    FrameBasePtr frm5 = problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.5));
-    FrameBasePtr frm6 = problem_ptr->createFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.6));
+    problem_ptr->emplaceFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.1));
+    FrameBasePtr frm2 = problem_ptr->emplaceFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.2));
+    FrameBasePtr frm3 = problem_ptr->emplaceFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.3));
+    problem_ptr->emplaceFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.4));
+    FrameBasePtr frm5 = problem_ptr->emplaceFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.5));
+    FrameBasePtr frm6 = problem_ptr->emplaceFrame(NON_KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.6));
 
     printFrames(problem_ptr);
 
@@ -65,12 +65,12 @@ int main()
 
     printFrames(problem_ptr);
 
-    FrameBasePtr frm7 = problem_ptr->createFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.7));
+    FrameBasePtr frm7 = problem_ptr->emplaceFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.7));
     std::cout << std::endl << "created Key Frame " << frm7->id() << " TS: " << 0.7 << std::endl;
 
     printFrames(problem_ptr);
 
-    FrameBasePtr frm8 = problem_ptr->createFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.35));
+    FrameBasePtr frm8 = problem_ptr->emplaceFrame(KEY_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.35));
     std::cout << std::endl << "created Key Frame " << frm8->id() << " TS: " << 0.35 << std::endl;
 
     printFrames(problem_ptr);

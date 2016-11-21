@@ -96,11 +96,11 @@ int main(int argc, char** argv)
     /* 1 */
     ProblemPtr problem = Problem::create(FRM_PO_3D);
     // One anchor frame to define the lmk, and a copy to make a constraint
-    FrameBasePtr kf_1 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
-    FrameBasePtr kf_2 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_1 = problem->emplaceFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_2 = problem->emplaceFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
     // and two other frames to observe the lmk
-    FrameBasePtr kf_3 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,-1,0,0,0,0,1).finished(), TimeStamp(0));
-    FrameBasePtr kf_4 = problem->createFrame(KEY_FRAME,(Vector7s()<<0,+1,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_3 = problem->emplaceFrame(KEY_FRAME,(Vector7s()<<0,-1,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_4 = problem->emplaceFrame(KEY_FRAME,(Vector7s()<<0,+1,0,0,0,0,1).finished(), TimeStamp(0));
 
     kf_1->fix();
     kf_2->fix();

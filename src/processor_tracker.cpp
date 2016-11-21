@@ -59,7 +59,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         else
         {
             // Make KF
-            FrameBasePtr new_frame_ptr = getProblem()->createFrame(KEY_FRAME,
+            FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME,
                                                                    getProblem()->getStateAtTimeStamp(last_ptr_->getTimeStamp()),
                                                                    last_ptr_->getTimeStamp());
             new_frame_ptr->addCapture(last_ptr_); // Add incoming Capture to the new Frame
@@ -94,7 +94,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         else
         {
             // Create a frame to hold what will become the last Capture
-            FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+            FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
             new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
             WOLF_DEBUG("Incoming in new F" , new_frame_ptr->id() );
         }
@@ -169,7 +169,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             {
                 // Create a new non-key Frame in the Trajectory with the incoming Capture
                 // Make a non-key-frame to hold incoming
-                FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+                FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
                 new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
                 WOLF_DEBUG( "Incoming adhered to new F" , key_frm->id() );
 

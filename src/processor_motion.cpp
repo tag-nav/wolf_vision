@@ -64,7 +64,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
 
         // create a new frame
-        FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME, key_frame_ptr->getState(), new_capture_ptr->getTimeStamp());
+        FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME, key_frame_ptr->getState(), new_capture_ptr->getTimeStamp());
         new_frame_ptr->addCapture(new_capture_ptr); // Add Capture to the new Frame
 
         // reset integrals
@@ -141,7 +141,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
                                                 Eigen::MatrixXs::Zero(data_size_, data_size_),
                                                 _origin_frame);
     // Make non-key-frame at last Capture
-    FrameBasePtr new_frame_ptr = getProblem()->createFrame(NON_KEY_FRAME,
+    FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
                                                            _origin_frame->getState(),
                                                            _origin_frame->getTimeStamp());
     new_frame_ptr->addCapture(last_ptr_);
