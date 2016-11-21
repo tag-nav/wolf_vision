@@ -22,7 +22,6 @@ class ConstraintFix3D: public ConstraintSparse<6,3,4>
                                           _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("FIX3D");
-            //std::cout << "creating ConstraintFix " << std::endl;
         }
         virtual ~ConstraintFix3D()
         {
@@ -32,11 +31,6 @@ class ConstraintFix3D: public ConstraintSparse<6,3,4>
         template<typename T>
         bool operator ()(const T* const _p, const T* const _o, T* _residuals) const;
 
-        /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
-         **/
         virtual JacobianMethod getJacobianMethod() const
         {
             return JAC_AUTO;
