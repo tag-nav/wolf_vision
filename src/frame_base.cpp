@@ -131,36 +131,25 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
         st_check += (state_block_vec_[i]==nullptr ? 0 : state_block_vec_[i]->getSize());
     }
     
-    /*assert(_st.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())  +
-                          (getOPtr()==nullptr ? 0 : getOPtr()->getSize())  +
-                          (getVPtr()==nullptr ? 0 : getVPtr()->getSize())) &&
-                          "In FrameBase::setState wrong state size");*/
-
     assert(_st.size() == st_check && "In FrameBase::setState wrong state size");
 
     unsigned int index = 0;
-    if (getPPtr()!=nullptr)
-    {
-        getPPtr()->setVector(_st.head(getPPtr()->getSize()));
-        index += getPPtr()->getSize();
-    }
-    if (getOPtr()!=nullptr)
-    {
-        getOPtr()->setVector(_st.segment(index, getOPtr()->getSize()));
-        index += getOPtr()->getSize();
-    }
-    if (getVPtr()!=nullptr)
-    {
-        getVPtr()->setVector(_st.segment(index, getVPtr()->getSize()));
-        //   index += getVPtr()->getSize();
-    }
+
+    for (StateBlockPtr sb : state_block_vec_)
+        if (sb)
+        {
+            sb->setVector(_st.segment(index, sb->getSize()));
+            index += sb->getSize();
+        }
 }
 
 Eigen::VectorXs FrameBase::getState() const
 {
-    Eigen::VectorXs state((getPPtr()==nullptr ? 0 : getPPtr()->getSize()) +
-                          (getOPtr()==nullptr ? 0 : getOPtr()->getSize())  +
-                          (getVPtr()==nullptr ? 0 : getVPtr()->getSize()));
+    Size sz = 0;
+    for (auto sb : state_block_vec_)
+        if (sb)
+            sz += sb->getSize();
+    Eigen::VectorXs state(sz);
 
     getState(state);
 
@@ -169,26 +158,21 @@ Eigen::VectorXs FrameBase::getState() const
 
 void FrameBase::getState(Eigen::VectorXs& state) const
 {
-    assert(state.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize()) +
-                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())  +
-                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())));
+    Size sz = 0;
+    for (auto sb : state_block_vec_)
+        if (sb)
+            sz += sb->getSize();
+
+    assert(state.size() == sz && "Wrong state vector size");
 
     unsigned int index = 0;
-    if (getPPtr()!=nullptr)
-    {
-        state.head(getPPtr()->getSize()) = getPPtr()->getVector();
-        index += getPPtr()->getSize();
-    }
-    if (getOPtr()!=nullptr)
-    {
-        state.segment(index, getOPtr()->getSize()) = getOPtr()->getVector();
-        index += getOPtr()->getSize();
-    }
-    if (getVPtr()!=nullptr)
-    {
-        state.segment(index, getVPtr()->getSize()) = getVPtr()->getVector();
-        //   index += getVPtr()->getSize();
-    }
+
+    for (auto sb : state_block_vec_)
+        if (sb)
+        {
+            state.segment(index,sb->getSize()) = sb->getVector();
+            index += sb->getSize();
+        }
 }
 
 FrameBasePtr FrameBase::getPreviousFrame() const

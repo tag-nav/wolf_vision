@@ -111,6 +111,41 @@ TEST(FrameBase, LinksToTree)
     ASSERT_TRUE(F1->getCaptureList().empty());
 }
 
+#include "state_quaternion.h"
+TEST(FrameBase, StateBlockVectors)
+{
+    // Create PQV_3D state blocks
+    StateBlockPtr sbp = make_shared<StateBlock>(3);
+    StateBlockPtr sbv = make_shared<StateBlock>(3);
+    StateQuaternionPtr sbq = make_shared<StateQuaternion>();
+
+    // Create frame
+    FrameBase F(1, sbp, sbq, sbv);
+
+    // Give values to vectors and vector blocks
+    VectorXs x(10), x1(10), x2(10);
+    VectorXs p(3), v(3), q(4);
+    p << 1,2,3;
+    v << 9,8,7;
+    q << .5, -.5, .5, -.5;
+
+    x << p, q, v;
+
+    // Set the state, check that state blocks hold the current states
+    F.setState(x);
+    ASSERT_TRUE((p - F.getPPtr()->getVector()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((q - F.getOPtr()->getVector()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((v - F.getVPtr()->getVector()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+
+    // Get the state, form 1 by reference
+    F.getState(x1);
+    ASSERT_TRUE((x1 - x).isMuchSmallerThan(1, Constants::EPS_SMALL));
+
+    // get the state, form 2 by return value
+    x2 = F.getState();
+    ASSERT_TRUE((x2 - x).isMuchSmallerThan(1, Constants::EPS_SMALL));
+}
+
 
 int main(int argc, char **argv)
 {
