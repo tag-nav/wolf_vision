@@ -55,15 +55,17 @@ int main(int argc, char** argv)
         
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PVQBB_3D);
-    Eigen::VectorXs extrinsics(7);
-    extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, shared_ptr<IntrinsicsBase>());
+    Eigen::VectorXs IMU_extrinsics(7);
+    IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, shared_ptr<IntrinsicsBase>());
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
     TimeStamp t;
     Eigen::Vector6s data_;
     Scalar mpu_clock = 0;
+
+    t.set(mpu_clock);
 
     // Set the origin
     Eigen::VectorXs x0(16);
