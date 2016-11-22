@@ -96,7 +96,9 @@ class ProcessorIMU : public ProcessorMotion{
 
 namespace wolf{
 
-inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
+inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
+                                     const Eigen::MatrixXs& _data_cov,
+                                     const Scalar _dt)
 {
     assert(_data.size() == data_size_ && "Wrong data size!");
 
@@ -151,9 +153,12 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
 
 }
 
-inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
-                                         const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta,
-                                         Eigen::MatrixXs& _jacobian_delta_preint, Eigen::MatrixXs& _jacobian_delta)
+inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
+                                         const Eigen::VectorXs& _delta,
+                                         const Scalar _dt,
+                                         Eigen::VectorXs& _delta_preint_plus_delta,
+                                         Eigen::MatrixXs& _jacobian_delta_preint,
+                                         Eigen::MatrixXs& _jacobian_delta)
 {
 
     remapPQV(_delta_preint, _delta, _delta_preint_plus_delta);
@@ -260,8 +265,10 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 
 }
 
-inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
-                                         const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta)
+inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
+                                         const Eigen::VectorXs& _delta,
+                                         const Scalar _dt,
+                                         Eigen::VectorXs& _delta_preint_plus_delta)
 {
     assert(_delta_preint.size() == 10 && "Wrong _delta_preint vector size");
     assert(_delta.size() == 10 && "Wrong _delta vector size");
@@ -293,7 +300,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     Dq_out_ = Dq_ * dq_;
 }
 
-inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _dt,
+inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x,
+                                     const Eigen::VectorXs& _delta,
+                                     const Scalar _dt,
                                      Eigen::VectorXs& _x_plus_delta)
 {
     assert(_x.size() == 16 && "Wrong _x vector size");
@@ -322,7 +331,9 @@ inline Eigen::VectorXs ProcessorIMU::deltaZero() const
     return (Eigen::VectorXs(10) << 0,0,0,  0,0,0,1,  0,0,0 ).finished(); // p, q, v
 }
 
-inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
+inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref,
+                                        Motion& _motion,
+                                        TimeStamp& _ts)
 {
     Motion tmp(_motion_ref);
     tmp.ts_ = _ts;
@@ -349,7 +360,8 @@ inline void ProcessorIMU::resetDerived()
     dDq_dwb_.setZero();
 }
 
-inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
+inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_motion,
+                                                        FrameBasePtr _frame_origin)
 {
     auto ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
     auto frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
@@ -357,7 +369,9 @@ inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_
     return ctr_imu;
 }
 
-inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out)
+inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1,
+                                   const Eigen::VectorXs& _delta2,
+                                   Eigen::VectorXs& _delta_out)
 {
     new (&Dp_) Eigen::Map<const Eigen::Vector3s>    (_delta1.data() + 0);
     new (&Dq_) Eigen::Map<const Eigen::Quaternions> (_delta1.data() + 3);
