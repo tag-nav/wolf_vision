@@ -107,8 +107,8 @@ void ProcessorImageLandmark::postProcess()
 }
 
 unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _landmark_list_in,
-                                                          FeatureBaseList& _feature_list_out,
-                                                          LandmarkMatchMap& _feature_landmark_correspondences)
+                                                         FeatureBaseList&  _feature_list_out,
+                                                         LandmarkMatchMap& _feature_landmark_correspondences)
 {
 
     unsigned int roi_width = params_.matcher.roi_width;
@@ -373,7 +373,7 @@ void ProcessorImageLandmark::LandmarkInCurrentCamera(CaptureBasePtr _capture, st
     _point3D_hmg = landmark_hmg_c1;
 }
 
-Scalar ProcessorImageLandmark::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches)
+Scalar ProcessorImageLandmark::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches)
 {
     matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
@@ -381,7 +381,7 @@ Scalar ProcessorImageLandmark::match(cv::Mat _target_descriptor, cv::Mat _candid
     return normalized_score;
 }
 
-unsigned int ProcessorImageLandmark::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints, cv::Mat& new_descriptors)
+unsigned int ProcessorImageLandmark::detect(const cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints, cv::Mat& new_descriptors)
 {
     cv::Mat _image_roi;
     adaptRoi(_image_roi, _image, _roi);

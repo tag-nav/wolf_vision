@@ -171,7 +171,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          * \param new_descriptors output descriptors obtained in the function
          * \return the number of detected features
          */
-        unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,cv::Mat& new_descriptors);
+        unsigned int detect(const cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,cv::Mat& new_descriptors);
 
     private:
         /**
@@ -201,7 +201,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          * \param _cv_matches output variable in which the best result will be stored (in the position [0])
          * \return normalized score of similarity (1 - exact match; 0 - complete mismatch)
          */
-        Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
+        Scalar match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
         void LandmarkInCurrentCamera(CaptureBasePtr _capture, std::shared_ptr<LandmarkAHP> _landmark, Eigen::Vector4s& _point3D_hmg);
 
