@@ -39,15 +39,15 @@ namespace wolf
  * We highlight the functions implemented here with a sign  '<--- IMPLEMENTED', and the ones to be implemented by derived classes with '<=== IMPLEMENT'
  *
  *   - On each incoming Capture,
- *     - Track known features in the \b incoming Capture: processKnown()            <--- IMPLEMENTED
+ *     - processKnown() : Track known features in the \b incoming Capture           <--- IMPLEMENTED
  *     - Check if enough Features are still tracked, and vote for a new KeyFrame if this number is too low:
  *     - if voteForKeyFrame()                                                       <=== IMPLEMENT
- *       - Populate the tracker with new Features : processNew()                    <--- IMPLEMENTED
- *       - Make a KeyFrame with the \b last Capture: makeFrame(), setKey()
- *       - Establish constraints of the new Features: establishConstraints()        <--- IMPLEMENTED
- *       - Reset the tracker with the \b last Capture as the new \b origin: reset() <--- IMPLEMENTED
+ *       - processNew() : Populate the tracker with new Features                    <--- IMPLEMENTED
+ *       - makeFrame(), setKey() : Make a KeyFrame with the \b last Capture         <--- IMPLEMENTED
+ *       - establishConstraints() : Establish constraints of the new Features       <--- IMPLEMENTED
+ *       - reset() : Reset the tracker with the \b last Capture as the new \b origin<--- IMPLEMENTED
  *     - else
- *       - Advance the tracker one Capture ahead: advance()                         <--- IMPLEMENTED
+ *       - advance() : Advance the tracker one Capture ahead                        <--- IMPLEMENTED
  *
  * The most important implemented methods are:
  *   - processKnown() : which calls the pure virtual, to be implemented in derived classes:
@@ -61,7 +61,7 @@ namespace wolf
  *
  * Should you need extra functionality for your derived types, you can overload these two methods,
  *
- *   -  preProcess() { }
+ *   -  preProcess()  { }
  *   -  postProcess() { }
  *
  * which are called at the beginning and at the end of process() respectively.
@@ -127,8 +127,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
         unsigned int processNew(const unsigned int& _max_features);
 
         /** \brief Detect new Features
-         * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
-         * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
+         * \param _max_features The maximum number of features to detect.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
