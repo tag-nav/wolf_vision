@@ -83,19 +83,24 @@ int main(int argc, char** argv)
     TimeStamp t;
     Scalar mti_clock, tmp;
     Eigen::Vector6s data;
+    Eigen::Matrix6s data_cov;
+    data_cov.setIdentity();
+//    data_cov.topLeftCorner(3,3)     *= 0.01;
+//    data_cov.bottomRightCorner(3,3) *= 0.01;
 
     // Get initial data
-    data_file_acc >> mti_clock >> data[0] >> data[1] >> data[2]; // FIXME this leaks
+    data_file_acc >> mti_clock >> data[0] >> data[1] >> data[2];
     data_file_gyro >> tmp >> data[3] >> data[4] >> data[5];
     t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
 
     // Set the origin
     Eigen::VectorXs x0(16);
-    x0 << 0,0,0,  0,0,0,1,  1,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
     problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     shared_ptr<CaptureIMU> imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
+    imu_ptr->setDataCovariance(data_cov);
 
 //    problem_ptr_->print();
 
@@ -105,7 +110,7 @@ int main(int argc, char** argv)
     using namespace std;
     clock_t begin = clock();
     int n = 1;
-    while(!data_file_acc.eof() && n < 10000){
+    while(!data_file_acc.eof() && n < 5000){
         n++;
 
         // read new data
@@ -134,14 +139,19 @@ int main(int argc, char** argv)
                 << problem_ptr_->getProcessorMotionPtr()->getMotion().delta_.transpose() << std::endl;
 
         std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
-        << problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
+                << problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
 
         Eigen::VectorXs x = problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+
         std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
-        << x.head(10).transpose() << std::endl;
+                << x.head(10).transpose() << std::endl;
+
+        std::cout << "Integrated std  : " << std::fixed << std::setprecision(3) << std::setw(8)
+                << (problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
 
         std::cout << std::endl;
 
+//#ifdef DEBUG_RESULTS
         // ----- dump to file -----
 
         Eigen::VectorXs delta_debug;
@@ -200,18 +210,6 @@ int main(int argc, char** argv)
     std::cout << "CPU time  : " << elapsed_secs << " s" << std::endl;
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
-
-
-    problem_ptr_->print();
-//    problem_ptr_->check();
-
-//    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
-    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
-//    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->remove();
-//    problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getCaptureList().front()->remove();
-
-    problem_ptr_->print();
-//    problem_ptr_->check();
 
     // close data files
     data_file_acc.close(); // no impact on leaks
