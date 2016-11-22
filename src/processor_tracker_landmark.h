@@ -75,6 +75,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
 
     protected:
 
+        LandmarkBaseList new_landmarks_;        ///< List of new detected landmarks
         LandmarkMatchMap matches_landmark_from_incoming_;
         LandmarkMatchMap matches_landmark_from_last_;
 
@@ -139,7 +140,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
 
         /** \brief Creates a landmark for each of new_features_last_
          **/
-        virtual void createNewLandmarks(LandmarkBaseList& _new_landmarks);
+        virtual void createNewLandmarks();
 
         /** \brief Create one landmark
          *

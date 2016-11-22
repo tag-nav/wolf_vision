@@ -42,13 +42,12 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
     // We first need to populate the \b last Capture with new Features
     unsigned int n = detectNewFeatures(_max_features);
 
-    LandmarkBaseList new_landmarks;
-    createNewLandmarks(new_landmarks);
+    createNewLandmarks();
 
     // Find the new landmarks in incoming_ptr_ (if it's not nullptr)
     if (incoming_ptr_ != nullptr)
     {
-        findLandmarks(new_landmarks, new_features_incoming_, matches_landmark_from_incoming_);
+        findLandmarks(new_landmarks_, new_features_incoming_, matches_landmark_from_incoming_);
 
         // Append all new Features to the Capture's list of Features
         incoming_ptr_->addFeatureList(new_features_incoming_);
@@ -58,20 +57,24 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
     last_ptr_->addFeatureList(new_features_last_);
 
     // Append new landmarks to the map
-    getProblem()->addLandmarkList(new_landmarks);
+    getProblem()->addLandmarkList(new_landmarks_);
 
     // return the number of new features detected in \b last
     return n;
 }
 
-void ProcessorTrackerLandmark::createNewLandmarks(LandmarkBaseList& _new_landmarks)
+void ProcessorTrackerLandmark::createNewLandmarks()
 {
+    // First, make sure the list is empty and will only contain new lmks
+    new_landmarks_.clear();
+
+    // Create a landmark for each new feature in last Capture:
     for (auto new_feature_ptr : new_features_last_)
     {
         // create new landmark
         LandmarkBasePtr new_lmk_ptr = createLandmark(new_feature_ptr);
 
-        _new_landmarks.push_back(new_lmk_ptr);
+        new_landmarks_.push_back(new_lmk_ptr);
 
         // create new correspondence
         matches_landmark_from_last_[new_feature_ptr] = std::make_shared<LandmarkMatch>(new_lmk_ptr, 1); // max score
