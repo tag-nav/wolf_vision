@@ -244,7 +244,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
             break;
     }
 
-    std::cout << "Number of new features detected: " << n_new_features << std::endl;
+    WOLF_DEBUG( "Number of new features detected: " , n_new_features );
     return n_new_features;
 }
 

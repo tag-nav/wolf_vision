@@ -292,37 +292,37 @@ ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const 
 
 bool ProcessorOdom3D::voteForKeyFrame()
 {
-    std::cout << "Time span   : " << getBuffer().get().back().ts_ - getBuffer().get().front().ts_ << std::endl;
-    std::cout << "BufferLength: " << getBuffer().get().size() << std::endl;
-    std::cout << "DistTraveled: " << delta_integrated_.head(3).norm() << std::endl;
-    std::cout << "AngleTurned : " << 2.0 * acos(delta_integrated_(6)) << std::endl;
+    WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
+    WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
+    WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
+    WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
     {
-        std::cout << "PM: vote: time span" << std::endl;
+        WOLF_DEBUG( "PM: vote: time span" );
         return true;
     }
     // buffer length
     if (getBuffer().get().size() > max_buff_length_)
     {
-        std::cout << "PM: vote: buffer size" << std::endl;
+        WOLF_DEBUG( "PM: vote: buffer size" );
         return true;
     }
     // distance traveled
     Scalar dist = delta_integrated_.head(3).norm();
     if (dist > dist_traveled_)
     {
-        std::cout << "PM: vote: distance traveled" << std::endl;
+        WOLF_DEBUG( "PM: vote: distance traveled" );
         return true;
     }
     // angle turned
     Scalar angle = 2.0 * acos(delta_integrated_(6));
     if (angle > angle_turned_)
     {
-        std::cout << "PM: vote: angle turned" << std::endl;
+        WOLF_DEBUG( "PM: vote: angle turned" );
         return true;
     }
-    std::cout << "PM: do not vote" << std::endl;
+    WOLF_DEBUG( "PM: do not vote" );
     return false;
 }
 
