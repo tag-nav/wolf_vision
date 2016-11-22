@@ -28,6 +28,23 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
 
         virtual JacobianMethod getJacobianMethod() const;
 
+        /* Function expectation(...)
+         * params :
+         * Vector3s _p1 : position in imu frame
+         * Vector4s _q1 : orientation quaternion in imu frame
+         * Vector3s _v1 : velocity in imu frame
+         * Vector3s _ab : accelerometer bias in imu frame
+         * Vector3s _wb : gyroscope bias in imu frame
+         * Vector3s _p2 : position in current frame
+         * Vector4s _q2 : orientation quaternion in current frame
+         * Vector3s _v2 : velocity in current frame
+         * Matrix<10,1, wolf::Scalar> _expectation : to retrieve resulting expectation (PVQ)
+        */
+        template<typename T>
+        void expectation(const T* const _p1, const T* const _q1, const T* const _v1, const T* const _ab, const T* _wb,
+                        const T* const _p2, const T* const _q2, const T* const _v2,//const T* const _lmk_hmg,
+                         T* _expectation) const;
+
     public:
         static wolf::ConstraintBasePtr create(FeatureIMUPtr _feature_ptr, NodeBasePtr _correspondant_ptr);
 
@@ -126,6 +143,34 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     residuals.tail(3)       = do_error;
 
     return true;
+}
+
+template<typename T>
+inline void ConstraintIMU::expectation(const T* const _p1, const T* const _q1, const T* const _v1, const T* const _ab, const T* _wb,
+                        const T* const _p2, const T* const _q2, const T* const _v2,//const T* const _lmk_hmg,
+                         T* _expectation) const
+{
+    // MAPS
+    Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
+    Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
+    Eigen::Map<const Eigen::Matrix<T,3,1> > v1(_v1);
+    Eigen::Map<const Eigen::Matrix<T,3,1> > ab(_ab);
+    Eigen::Map<const Eigen::Matrix<T,3,1> > wb(_wb);
+
+    Eigen::Map<const Eigen::Matrix<T,3,1> > p2(_p2);
+    Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
+    Eigen::Map<const Eigen::Matrix<T,3,1> > v2(_v2);
+
+    Eigen::Map<Eigen::Matrix<T,10,1> > expectation(_expectation);
+
+    // Predict delta: d_pred = x2 (-) x1
+    Eigen::Matrix<T,3,1> dp_predict = q1.conjugate() * ( p2 - p1 - v1 * (T)dt_ - (T)0.5 * g_.cast<T>() * (T)dt_2_ );
+    Eigen::Matrix<T,3,1> dv_predict = q1.conjugate() * ( v2 - v1 - g_.cast<T>() * (T)dt_ );
+    Eigen::Quaternion<T> dq_predict = q1.conjugate() * q2;
+
+    expectation.head(3)         = dp_predict;
+    expectation.segment(3,4)    = dq_predict;
+    expectation.tail(3)         = dv_predict;
 }
 
 inline JacobianMethod ConstraintIMU::getJacobianMethod() const
