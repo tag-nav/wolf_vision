@@ -44,7 +44,7 @@ int main(int argc, char** argv)
             data_file.open(filename);
             std::cout << "file: " << filename << std::endl;
 
-            //std::string dummy; //this is needed only first line is headers
+            //std::string dummy; //this is needed only if first line is headers
             //getline(data_file, dummy);
         }
 
@@ -72,15 +72,35 @@ int main(int argc, char** argv)
     x0 << 0,0,0,  0,0,0,  0,0,0,1,  0,0,.001,  0,0,.002; // Try some non-zero biases
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
+    //create a keyframe at origin
+    TimeStamp ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
+    Eigen::VectorXs state_vec = x0;
+    FrameBasePtr last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
+    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
+    
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     CaptureIMU::Ptr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
 
     // main loop
     using namespace std;
     clock_t begin = clock();
-    std::cout << "\n\t\t\t\tENTERING MAIN LOOP - Please press ENTER to exit loop\n" << std::endl;
+    const int keyframe_spacing = 10;
+    int last_keyframe_dt = 0;
 
     while(!data_file.eof()){
+        if(last_keyframe_dt >= keyframe_spacing){
+            ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
+            state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+
+            last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
+            //FrameBasePtr last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts_.get(),std::make_shared<StateBlock>(frame_val.head(3)), std::make_shared<StateQuaternion>(frame_val.tail(4)));
+            wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
+
+            last_keyframe_dt = 0;
+        }
+        else
+            last_keyframe_dt++;
+
         // read new data
         data_file >> mpu_clock >> data_[0] >> data_[1] >> data_[2] >> data_[3] >> data_[4] >> data_[5];
         t.set(mpu_clock); //
@@ -92,6 +112,13 @@ int main(int argc, char** argv)
         // process data in capture
         sensor_ptr->process(imu_ptr);
     }
+
+    //make final a keyframe
+    ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
+    state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+    FrameBasePtr last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
+    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
+
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
