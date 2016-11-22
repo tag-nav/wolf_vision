@@ -116,7 +116,7 @@ int main(int argc, char** argv)
     //make final a keyframe
     ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
     state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-    FrameBasePtr last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
+    last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
 
 
