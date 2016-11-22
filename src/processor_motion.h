@@ -322,15 +322,15 @@ class ProcessorMotion : public ProcessorBase
 
         /** \brief Interpolate motion to an intermediate time-stamp
          *
-         * @param _motion_ref The motion reference
-         * @param _motion_second The second motion. It is modified by the function (see documentation below).
-         * @param _ts The intermediate time stamp: it must be bounded by  _motion_ref.ts_ <= _ts <= _motion_second.ts_.
-         * @return The interpolated motion (see documentation below).
+         * @param _ref    The motion reference
+         * @param _second The second motion. It is modified by the function (see documentation below).
+         * @param _ts     The intermediate time stamp: it must be bounded by  _ref.ts_ <= _ts <= _second.ts_.
+         * @return        The interpolated motion (see documentation below).
          *
          * Let us name
          *
-         *     R = _motion_ref      : initial motion where interpolation starts
-         *     F = _motion_second   : final motion where interpolation ends
+         *     R = _ref      : initial motion where interpolation starts
+         *     F = _second   : final motion where interpolation ends
          *
          * and let us define
          *
@@ -362,7 +362,7 @@ class ProcessorMotion : public ProcessorBase
          * before and after calling `interpolate()`:
          *
          * ```
-         *   BEFORE            _motion_ref     _ts    _motion_second    variable names
+         *   BEFORE               _ref         _ts       _second        variable names
          *        ------+-----------+-----------+-----------+----->     time scale
          *            origin        R                       F           motion short names
          *           t_origin      t_R         t_I         t_F          time stamps
@@ -370,7 +370,7 @@ class ProcessorMotion : public ProcessorBase
          *              +----D_R----+----------d_F----------+           D_R (+) d_F
          *              +----------------D_F----------------+           D_F = D_R (+) d_F
          *
-         *   AFTER             _motion_ref    return  _motion_second    variable names and return value
+         *   AFTER                _ref        return     _second        variable names and return value
          *        ------+-----------+-----------+-----------+----->     time scale
          *                          R           I           S           motion short names
          *              +----D_R----+----d_I----+----d_S----+           D_R (+) d_I (+) d_S
@@ -388,7 +388,7 @@ class ProcessorMotion : public ProcessorBase
          * from where `d_I`, `D_I`, `d_S` and `D_S` can be derived.
          *
          * In general, we do not have information about the particular trajectory
-         * taken between `R = _motion_ref` and `F = _motion_second`.
+         * taken between `R = _ref` and `F = _second`.
          * Therefore, we consider a linear interpolation.
          * The linear interpolation factor 'tau' is defined from the time stamps,
          *
@@ -458,7 +458,7 @@ class ProcessorMotion : public ProcessorBase
          *     Dq_S = Dq_b
          *
          */
-        virtual Motion interpolate(const Motion& _motion_ref, Motion& _motion_second, TimeStamp& _ts) = 0;
+        virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts) = 0;
 
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) = 0;
 
