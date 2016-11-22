@@ -204,7 +204,7 @@ FrameBasePtr Problem::createFrame(FrameType _frame_key_type, const Eigen::Vector
                                   std::make_shared<StateQuaternion>(_frame_state.segment<4>(3)),
                                   std::make_shared<StateBlock>(_frame_state.tail(3))));
         }
-        case FRM_PVQBB_3D:
+        case FRM_PQVBB_3D:
         {
             assert(_frame_state.size() == 16 && "Wrong state vector size");
             return trajectory_ptr_->addFrame(std::make_shared<FrameIMU>(_frame_key_type, _time_stamp, _frame_state));
@@ -288,7 +288,7 @@ unsigned int Problem::getFrameStructureSize()
             return 7;
         case FRM_POV_3D:
             return 10;
-        case FRM_PVQBB_3D:
+        case FRM_PQVBB_3D:
             return 16;
         default:
             throw std::runtime_error(
@@ -301,8 +301,8 @@ Eigen::VectorXs Problem::zeroState()
     Eigen::VectorXs state = Eigen::VectorXs::Zero(getFrameStructureSize());
     if (trajectory_ptr_->getFrameStructure() == FRM_PO_3D || trajectory_ptr_->getFrameStructure() == FRM_POV_3D)
         state(6) = 1;
-    if (trajectory_ptr_->getFrameStructure() == FRM_PVQBB_3D)
-        state(9) = 1;
+    if (trajectory_ptr_->getFrameStructure() == FRM_PQVBB_3D)
+        state(6) = 1;
     return state;
 }
 

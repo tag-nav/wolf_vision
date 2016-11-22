@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     data_ << 10,0.5,3, 100*deg_to_rad,110*deg_to_rad,30*deg_to_rad;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PVQBB_3D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     //SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, nullptr);
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     // Set the origin
     t.set(0.0001); // clock in 0,1 ms ticks
     Eigen::VectorXs x0(16);
-    x0 << 0,1,0,  1,0,0,  0,0,0,1,  0,0,.000,  0,0,.000;
+    x0 << 0,1,0,  1,0,0,  0,0,0,1,  0,0,.000,  0,0,.000; // P Q V B B
 
     //wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 

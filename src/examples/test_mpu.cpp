@@ -104,7 +104,7 @@ int main(int argc, char** argv)
     #endif
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PVQBB_3D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, IntrinsicsBasePtr());

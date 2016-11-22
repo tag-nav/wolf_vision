@@ -73,7 +73,7 @@ int main(int argc, char** argv)
     }
 
     // Wolf problem
-    ProblemPtr problem_ptr_ = Problem::create(FRM_PVQBB_3D);
+    ProblemPtr problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs extrinsics(7);
     extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     SensorBasePtr sensor_ptr = problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, shared_ptr<IntrinsicsBase>());
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 
     // Set the origin
     Eigen::VectorXs x0(16);
-    x0 << 0,1,0,  1,0,0,  0,0,0,1,  0,0,.001,  0,0,.002; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  1,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
     problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)

@@ -121,7 +121,7 @@ typedef enum
     FRM_PO_2D = 1,  ///< 2D frame containing position (x,y) and orientation angle.
     FRM_PO_3D,      ///< 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
     FRM_POV_3D,     ///< 3D frame with position, orientation quaternion, and linear velocity (vx,vy,vz)
-    FRM_PVQBB_3D    ///< 3D frame with pos, velocity, orient quat, acc bias (abx,aby,abz), and gyro bias (wbx,wby,wbz).
+    FRM_PQVBB_3D    ///< 3D frame with pos, orient quat, velocity, acc bias (abx,aby,abz), and gyro bias (wbx,wby,wbz).
 } FrameStructure;
 
 /** \brief Enumeration of all possible constraints
