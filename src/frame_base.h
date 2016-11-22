@@ -101,7 +101,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
         void resizeStateBlockVec(int _size);
 
-        // states
+        // States
     public:
         void setState(const Eigen::VectorXs& _st);
         Eigen::VectorXs getState() const;

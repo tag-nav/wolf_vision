@@ -112,7 +112,7 @@ TEST(FrameBase, LinksToTree)
 }
 
 #include "state_quaternion.h"
-TEST(FrameBase, StateBlockVectors)
+TEST(FrameBase, GetSetState)
 {
     // Create PQV_3D state blocks
     StateBlockPtr sbp = make_shared<StateBlock>(3);
