@@ -227,7 +227,7 @@ class ProcessorMotion : public ProcessorBase
          * Rationale:
          *
          * The delta-state format must be compatible for integration using
-         * the composition functions doing the math in this class: xPlusDelta(), deltaPlusDelta() and deltaMinusDelta().
+         * the composition functions doing the math in this class: xPlusDelta() and deltaPlusDelta().
          * See the class documentation for some Eigen::VectorXs suggestions.
          *
          * The data format is generally not the same as the delta format,
@@ -240,14 +240,27 @@ class ProcessorMotion : public ProcessorBase
          * the data over the period dt.
          *
          * Two trivial implementations would establish:
-         *  - If _data is an increment:
-         *         _delta = _data;
-         *         _delta_cov = _data_cov
-         *  - If _data is a velocity:
-         *         _delta = _data * _dt
-         *         _delta_cov = _data_cov * _dt.
+         *  - If `_data` is an increment:
+         *
+         *         delta_     = _data;
+         *         delta_cov_ = _data_cov
+         *  - If `_data` is a velocity:
+         *
+         *         delta_     = _data * _dt
+         *         delta_cov_ = _data_cov * _dt.
          *
          *  However, other more complicated relations are possible.
+         *  In general, we'll have a nonlinear
+         *  function relating `delta_` to `_data` and `_dt`, as follows:
+         *
+         *      delta_ = f ( _data, _dt)
+         *
+         *  The delta covariance is obtained by classical uncertainty propagation of the data covariance,
+         *  that is, through the Jacobians of `f()`,
+         *
+         *      delta_cov_ = F_data * _data_cov * F_data.transpose
+         *
+         *  where `F_data = d_f/d_data` is the Jacobian of `f()`.
          */
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
