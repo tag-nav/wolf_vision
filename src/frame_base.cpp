@@ -126,12 +126,12 @@ void FrameBase::setKey()
 
 void FrameBase::setState(const Eigen::VectorXs& _st)
 {
-    int st_check = 0;
+    int size = 0;
     for(unsigned int i = 0; i<state_block_vec_.size(); i++){
-        st_check += (state_block_vec_[i]==nullptr ? 0 : state_block_vec_[i]->getSize());
+        size += (state_block_vec_[i]==nullptr ? 0 : state_block_vec_[i]->getSize());
     }
     
-    assert(_st.size() == st_check && "In FrameBase::setState wrong state size");
+    assert(_st.size() == size && "In FrameBase::setState wrong state size");
 
     unsigned int index = 0;
 
@@ -145,11 +145,11 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
 
 Eigen::VectorXs FrameBase::getState() const
 {
-    Size sz = 0;
+    Size size = 0;
     for (auto sb : state_block_vec_)
         if (sb)
-            sz += sb->getSize();
-    Eigen::VectorXs state(sz);
+            size += sb->getSize();
+    Eigen::VectorXs state(size);
 
     getState(state);
 
@@ -158,12 +158,12 @@ Eigen::VectorXs FrameBase::getState() const
 
 void FrameBase::getState(Eigen::VectorXs& state) const
 {
-    Size sz = 0;
+    Size size = 0;
     for (auto sb : state_block_vec_)
         if (sb)
-            sz += sb->getSize();
+            size += sb->getSize();
 
-    assert(state.size() == sz && "Wrong state vector size");
+    assert(state.size() == size && "Wrong state vector size");
 
     unsigned int index = 0;
 
