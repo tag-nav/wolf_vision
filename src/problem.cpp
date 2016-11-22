@@ -299,10 +299,25 @@ unsigned int Problem::getFrameStructureSize()
 Eigen::VectorXs Problem::zeroState()
 {
     Eigen::VectorXs state = Eigen::VectorXs::Zero(getFrameStructureSize());
-    if (trajectory_ptr_->getFrameStructure() == FRM_PO_3D || trajectory_ptr_->getFrameStructure() == FRM_POV_3D)
-        state(6) = 1;
-    if (trajectory_ptr_->getFrameStructure() == FRM_PVQBB_3D)
-        state(9) = 1;
+
+    // Set the quaternion identity for 3D states. Set only the real part to 1:
+    switch (trajectory_ptr_->getFrameStructure())
+    {
+        case FRM_PO_3D:
+        case FRM_POV_3D:
+            state(6) = 1.0;
+            break;
+        case FRM_PVQBB_3D:
+            state(9) = 1;
+            break;
+        default:
+            break;
+    }
+//    if (trajectory_ptr_->getFrameStructure() == FRM_PO_3D || trajectory_ptr_->getFrameStructure() == FRM_POV_3D)
+//        state(6) = 1;
+//    if (trajectory_ptr_->getFrameStructure() == FRM_PVQBB_3D)
+//        state(9) = 1;
+
     return state;
 }
 
