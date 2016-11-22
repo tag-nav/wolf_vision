@@ -63,9 +63,9 @@ namespace wolf {
           StateBlockPtr getAccBiasPtr() const;
           StateBlockPtr getGyroBiasPtr() const;
 
-          void setState(const Eigen::VectorXs& _st);
-          Eigen::VectorXs getState() const;
-          void getState(Eigen::VectorXs& state) const;
+//          void setState(const Eigen::VectorXs& _st);
+//          Eigen::VectorXs getState() const;
+//          void getState(Eigen::VectorXs& state) const;
 
       private:
           /** \brief Sets the Frame status (see wolf.h for Frame status)

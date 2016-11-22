@@ -44,98 +44,192 @@ FrameIMU::FrameIMU(const FrameType& _tp, const TimeStamp& _ts, const Eigen::Vect
 //      std::cout << "destructed   -F-IMU" << id() << std::endl;
   }
 
-  void FrameIMU::setState(const Eigen::VectorXs& _st) // Order: PVQ
-  {
-
-      assert(_st.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
-                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
-                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
-                            (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
-                            (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize())) &&
-                            "In FrameBase::setState wrong state size, should be 16!");
-
-      unsigned int index = 0;
-      if (getPPtr()!=nullptr)
-      {
-          getPPtr()->setVector(_st.head(getPPtr()->getSize()));
-          index += getPPtr()->getSize();
-//          std::cout << "set F-pos" << std::endl;
-      }
-      if (getVPtr()!=nullptr)
-      {
-          getVPtr()->setVector(_st.segment(index, getVPtr()->getSize()));
-          index += getVPtr()->getSize();
-//          std::cout << "set F-vel" << std::endl;
-      }
-      if (getOPtr()!=nullptr)
-      {
-          getOPtr()->setVector(_st.segment(index, getOPtr()->getSize()));
-          index += getOPtr()->getSize();
-//          std::cout << "set F-ori" << std::endl;
-      }
-      if (getAccBiasPtr()!=nullptr)
-      {
-          getAccBiasPtr()->setVector(_st.segment(index, getAccBiasPtr()->getSize()));
-          index += getAccBiasPtr()->getSize();
-//          std::cout << "set F-ab" << std::endl;
-      }
-      if (getGyroBiasPtr()!=nullptr)
-      {
-          getGyroBiasPtr()->setVector(_st.segment(index, getGyroBiasPtr()->getSize()));
-          //   index += bg_ptr_->getSize();
-//          std::cout << "set F-wb" << std::endl;
-     }
-  }
-
-  Eigen::VectorXs FrameIMU::getState() const
-  {
-      Eigen::VectorXs state((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
-                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
-                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
-                            (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
-                            (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize()));
-
-      getState(state);
-
-      return state;
-  }
-
-  void FrameIMU::getState(Eigen::VectorXs& state) const // Order: PVQBB
-  {
-      assert(state.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
-                              (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
-                              (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
-                              (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
-                              (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize()))
-                              && "Wrong state size! Should be 16 for an IMU with biases!");
-
-      unsigned int index = 0;
-      if (getPPtr()!=nullptr)
-      {
-          state.head(getPPtr()->getSize()) = getPPtr()->getVector();
-          index += getPPtr()->getSize();
-      }
-      if (getVPtr()!=nullptr)
-      {
-          state.segment(index, getVPtr()->getSize()) = getVPtr()->getVector();
-          index += getVPtr()->getSize();
-      }
-      if (getOPtr()!=nullptr)
-      {
-          state.segment(index, getOPtr()->getSize()) = getOPtr()->getVector();
-          index += getOPtr()->getSize();
-      }
-      if (getAccBiasPtr()!=nullptr)
-      {
-          state.segment(index, getAccBiasPtr()->getSize()) = getAccBiasPtr()->getVector();
-          index += getAccBiasPtr()->getSize();
-      }
-      if (getGyroBiasPtr()!=nullptr)
-      {
-          state.segment(index, getGyroBiasPtr()->getSize()) = getGyroBiasPtr()->getVector();
-        //  index += bg_ptr_->getSize();
-      }
-  }
+//<<<<<<< Updated upstream
+//  void FrameIMU::setState(const Eigen::VectorXs& _st) // Order: PVQ
+//  {
+//
+//      assert(_st.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
+//                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
+//                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
+//                            (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
+//                            (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize())) &&
+//                            "In FrameBase::setState wrong state size, should be 16!");
+//
+//      unsigned int index = 0;
+//      if (getPPtr()!=nullptr)
+//      {
+//          getPPtr()->setVector(_st.head(getPPtr()->getSize()));
+//          index += getPPtr()->getSize();
+////          std::cout << "set F-pos" << std::endl;
+//      }
+//      if (getVPtr()!=nullptr)
+//      {
+//          getVPtr()->setVector(_st.segment(index, getVPtr()->getSize()));
+//          index += getVPtr()->getSize();
+////          std::cout << "set F-vel" << std::endl;
+//      }
+//      if (getOPtr()!=nullptr)
+//      {
+//          getOPtr()->setVector(_st.segment(index, getOPtr()->getSize()));
+//          index += getOPtr()->getSize();
+////          std::cout << "set F-ori" << std::endl;
+//      }
+//      if (getAccBiasPtr()!=nullptr)
+//      {
+//          getAccBiasPtr()->setVector(_st.segment(index, getAccBiasPtr()->getSize()));
+//          index += getAccBiasPtr()->getSize();
+////          std::cout << "set F-ab" << std::endl;
+//      }
+//      if (getGyroBiasPtr()!=nullptr)
+//      {
+//          getGyroBiasPtr()->setVector(_st.segment(index, getGyroBiasPtr()->getSize()));
+//          //   index += bg_ptr_->getSize();
+////          std::cout << "set F-wb" << std::endl;
+//     }
+//  }
+//
+//  Eigen::VectorXs FrameIMU::getState() const
+//  {
+//      Eigen::VectorXs state((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
+//                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
+//                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
+//                            (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
+//                            (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize()));
+//
+//      getState(state);
+//
+//      return state;
+//  }
+//
+//  void FrameIMU::getState(Eigen::VectorXs& state) const // Order: PVQBB
+//  {
+//      assert(state.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
+//                              (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
+//                              (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
+//                              (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
+//                              (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize()))
+//                              && "Wrong state size! Should be 16 for an IMU with biases!");
+//
+//      unsigned int index = 0;
+//      if (getPPtr()!=nullptr)
+//      {
+//          state.head(getPPtr()->getSize()) = getPPtr()->getVector();
+//          index += getPPtr()->getSize();
+//      }
+//      if (getVPtr()!=nullptr)
+//      {
+//          state.segment(index, getVPtr()->getSize()) = getVPtr()->getVector();
+//          index += getVPtr()->getSize();
+//      }
+//      if (getOPtr()!=nullptr)
+//      {
+//          state.segment(index, getOPtr()->getSize()) = getOPtr()->getVector();
+//          index += getOPtr()->getSize();
+//      }
+//      if (getAccBiasPtr()!=nullptr)
+//      {
+//          state.segment(index, getAccBiasPtr()->getSize()) = getAccBiasPtr()->getVector();
+//          index += getAccBiasPtr()->getSize();
+//      }
+//      if (getGyroBiasPtr()!=nullptr)
+//      {
+//          state.segment(index, getGyroBiasPtr()->getSize()) = getGyroBiasPtr()->getVector();
+//        //  index += bg_ptr_->getSize();
+//      }
+//  }
+//=======
+//  void FrameIMU::setState(const Eigen::VectorXs& _st) // Order: PVQ
+//  {
+//
+//      assert(_st.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
+//                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
+//                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
+//                            (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
+//                            (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize())) &&
+//                            "In FrameBase::setState wrong state size, should be 16!");
+//
+//      unsigned int index = 0;
+//      if (getPPtr()!=nullptr)
+//      {
+//          getPPtr()->setVector(_st.head(getPPtr()->getSize()));
+//          index += getPPtr()->getSize();
+////          std::cout << "set F-pos" << std::endl;
+//      }
+//      if (getVPtr()!=nullptr)
+//      {
+//          getVPtr()->setVector(_st.segment(index, getVPtr()->getSize()));
+//          index += getVPtr()->getSize();
+////          std::cout << "set F-vel" << std::endl;
+//      }
+//      if (getOPtr()!=nullptr)
+//      {
+//          getOPtr()->setVector(_st.segment(index, getOPtr()->getSize()));
+//          index += getOPtr()->getSize();
+////          std::cout << "set F-ori" << std::endl;
+//      }
+//      if (getAccBiasPtr()!=nullptr)
+//      {
+//          getAccBiasPtr()->setVector(_st.segment(index, getAccBiasPtr()->getSize()));
+//          index += getAccBiasPtr()->getSize();
+////          std::cout << "set F-ab" << std::endl;
+//      }
+//      if (getGyroBiasPtr()!=nullptr)
+//      {
+//          getGyroBiasPtr()->setVector(_st.segment(index, getGyroBiasPtr()->getSize()));
+//          //   index += bg_ptr_->getSize();
+////          std::cout << "set F-wb" << std::endl;
+//     }
+//  }
+//
+//  Eigen::VectorXs FrameIMU::getState() const
+//  {
+//      Eigen::VectorXs state((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
+//                            (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
+//                            (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
+//                            (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
+//                            (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize()));
+//
+//      getState(state);
+//
+//      return state;
+//  }
+//
+//  void FrameIMU::getState(Eigen::VectorXs& state) const // Order: PVQBB
+//  {
+//      assert(state.size() == ((getPPtr()==nullptr ? 0 : getPPtr()->getSize())    +
+//                              (getVPtr()==nullptr ? 0 : getVPtr()->getSize())    +
+//                              (getOPtr()==nullptr ? 0 : getOPtr()->getSize())    +
+//                              (getAccBiasPtr()==nullptr ? 0 : getAccBiasPtr()->getSize())  +
+//                              (getGyroBiasPtr()==nullptr ? 0 : getGyroBiasPtr()->getSize())));
+//
+//      unsigned int index = 0;
+//      if (getPPtr()!=nullptr)
+//      {
+//          state.head(getPPtr()->getSize()) = getPPtr()->getVector();
+//          index += getPPtr()->getSize();
+//      }
+//      if (getVPtr()!=nullptr)
+//      {
+//          state.segment(index, getVPtr()->getSize()) = getVPtr()->getVector();
+//          index += getVPtr()->getSize();
+//      }
+//      if (getOPtr()!=nullptr)
+//      {
+//          state.segment(index, getOPtr()->getSize()) = getOPtr()->getVector();
+//          index += getOPtr()->getSize();
+//      }
+//      if (getAccBiasPtr()!=nullptr)
+//      {
+//          state.segment(index, getAccBiasPtr()->getSize()) = getAccBiasPtr()->getVector();
+//          index += getAccBiasPtr()->getSize();
+//      }
+//      if (getGyroBiasPtr()!=nullptr)
+//      {
+//          state.segment(index, getGyroBiasPtr()->getSize()) = getGyroBiasPtr()->getVector();
+//        //  index += bg_ptr_->getSize();
+//      }
+//  }
+//>>>>>>> Stashed changes
 
 //  void FrameIMU::setStatus(StateStatus _st)
 //  {
