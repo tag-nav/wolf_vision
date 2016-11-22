@@ -4,11 +4,6 @@ namespace wolf
 
 ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParams::Ptr _params, SensorOdom3D::Ptr _sensor_ptr) :
                 ProcessorMotion("ODOM 3D", 7, 7, 6, 6),
-//                k_disp_to_disp_ (_sensor_ptr->k_disp_to_disp_   ),
-//                k_disp_to_rot_  (_sensor_ptr->k_disp_to_rot_    ),
-//                k_rot_to_rot_   (_sensor_ptr->k_rot_to_rot_     ),
-//                min_disp_var_   (_sensor_ptr->min_disp_var_     ),
-//                min_rot_var_    (_sensor_ptr->min_rot_var_      ),
                 max_time_span_  (_params ? _params    ->max_time_span   : 1.0  ),
                 max_buff_length_(_params ? _params    ->max_buff_length : 10   ),
                 dist_traveled_  (_params ? _params    ->dist_traveled   : 1.0  ),
@@ -21,31 +16,6 @@ ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParams::Ptr _params, SensorOdom3
             jacobian_delta_.setIdentity(delta_cov_size_, delta_cov_size_);
         }
 
-//ProcessorOdom3D::ProcessorOdom3D(Scalar _k_disp_to_disp,
-//                                 Scalar _k_disp_to_rot,
-//                                 Scalar _k_rot_to_rot,
-//                                 Scalar _min_disp_var,
-//                                 Scalar _min_rot_var,
-//                                 Scalar _max_time_span,
-//                                 Size   _max_buff_length,
-//                                 Scalar _dist_traveled,
-//                                 Scalar _angle_turned) :
-//        ProcessorMotion("ODOM 3D", 7, 7, 6, 6),
-//        k_disp_to_disp_(_k_disp_to_disp),
-//        k_disp_to_rot_(_k_disp_to_rot),
-//        k_rot_to_rot_(_k_rot_to_rot),
-//        min_disp_var_(_min_disp_var),
-//        min_rot_var_(_min_rot_var),
-//        max_time_span_(_max_time_span),
-//        max_buff_length_(_max_buff_length),
-//        dist_traveled_(_dist_traveled),
-//        angle_turned_(_angle_turned),
-//        p1_(nullptr), p2_(nullptr), p_out_(nullptr),
-//        q1_(nullptr), q2_(nullptr), q_out_(nullptr)
-//{
-//    jacobian_delta_preint_.setIdentity(delta_cov_size_, delta_cov_size_);
-//    jacobian_delta_.setIdentity(delta_cov_size_, delta_cov_size_);
-//}
 
 ProcessorOdom3D::~ProcessorOdom3D()
 {
@@ -64,7 +34,7 @@ void ProcessorOdom3D::setup(SensorOdom3D::Ptr sen_ptr)
     }
     else
     {
-        // we steal the parameters from the provided odom3D sensor.
+        // we put default params.
         k_disp_to_disp_ =   0;
         k_disp_to_rot_  =   0;
         k_rot_to_rot_   =   0;
