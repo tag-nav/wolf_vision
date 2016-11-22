@@ -42,5 +42,5 @@ FrameBasePtr FrameIMU::create(const FrameType & _tp,
 #include "factory.h"
 namespace wolf
 {
-WOLF_REGISTER_FRAME("IMU", FrameIMU)
+//WOLF_REGISTER_FRAME("IMU", FrameIMU)
 } // namespace wolf
