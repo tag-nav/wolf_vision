@@ -27,7 +27,7 @@ class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
         ~MapBase();
         
         virtual LandmarkBasePtr addLandmark(LandmarkBasePtr _landmark_ptr);
-        virtual void addLandmarkList(LandmarkBaseList _landmark_list);
+        virtual void addLandmarkList(LandmarkBaseList& _landmark_list);
         LandmarkBaseList& getLandmarkList();
         
         void load(const std::string& _map_file_yaml);

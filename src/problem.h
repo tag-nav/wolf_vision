@@ -193,7 +193,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         MapBasePtr addMap(MapBasePtr _map_ptr);
         MapBasePtr getMapPtr();
         LandmarkBasePtr addLandmark(LandmarkBasePtr _lmk_ptr);
-        void addLandmarkList(LandmarkBaseList _lmk_list);
+        void addLandmarkList(LandmarkBaseList& _lmk_list);
         void loadMap(const std::string& _filename_dot_yaml);
         void saveMap(const std::string& _filename_dot_yaml, const std::string& _map_name = "Map automatically saved by Wolf");
 

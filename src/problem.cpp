@@ -335,7 +335,7 @@ LandmarkBasePtr Problem::addLandmark(LandmarkBasePtr _lmk_ptr)
     return _lmk_ptr;
 }
 
-void Problem::addLandmarkList(LandmarkBaseList _lmk_list)
+void Problem::addLandmarkList(LandmarkBaseList& _lmk_list)
 {
     getMapPtr()->addLandmarkList(_lmk_list);
 }
