@@ -18,14 +18,16 @@ ProcessorTrackerLandmark::ProcessorTrackerLandmark(const std::string& _type, con
 
 ProcessorTrackerLandmark::~ProcessorTrackerLandmark()
 {
-    for ( auto match : matches_landmark_from_incoming_)
-    {
-        match.second.reset(); // TODO: Should we just remove the entries? What about match.first?
-    }
-    for ( auto match : matches_landmark_from_last_)
-    {
-        match.second.reset(); // TODO: Should we just remove the entries? What about match.first?
-    }
+    //    All is shared_ptr: no need to destruct explicitly
+    //
+    //    for ( auto match : matches_landmark_from_incoming_)
+    //    {
+    //        match.second.reset(); // : Should we just remove the entries? What about match.first?
+    //    }
+    //    for ( auto match : matches_landmark_from_last_)
+    //    {
+    //        match.second.reset(); // : Should we just remove the entries? What about match.first?
+    //    }
 }
 
 unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
