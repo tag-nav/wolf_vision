@@ -51,7 +51,7 @@ ProblemPtr Problem::create(FrameStructure _frame_structure)
 
 Problem::~Problem()
 {
-//    WOLF_DEBUG("destructed -P");
+    WOLF_DEBUG("destructed -P");
 }
 
 void Problem::addSensor(SensorBasePtr _sen_ptr)
