@@ -158,7 +158,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          */
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr) = 0;
 
-        /** \brief Establish constraints between features in Captures \b last and \b origin
+        /** \brief Establish constraints between features in Capture \b last and landmarks
          */
         virtual void establishConstraints();
 
@@ -170,6 +170,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
 #include "landmark_base.h"
 
 #include <utility>
+
 namespace wolf
 {
 inline void ProcessorTrackerLandmark::advance()
