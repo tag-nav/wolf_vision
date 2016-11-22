@@ -82,11 +82,11 @@ int main(int argc, char** argv)
     // Time and data variables
     TimeStamp t;
     Scalar mti_clock, tmp;
-    Eigen::Vector6s data_;
+    Eigen::Vector6s data;
 
     // Get initial data
-    data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2]; // FIXME this leaks
-    data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
+    data_file_acc >> mti_clock >> data[0] >> data[1] >> data[2]; // FIXME this leaks
+    data_file_gyro >> tmp >> data[3] >> data[4] >> data[5];
     t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
 
     // Set the origin
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    shared_ptr<CaptureIMU> imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data_);
+    shared_ptr<CaptureIMU> imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
 
 //    problem_ptr_->print();
 
@@ -105,16 +105,19 @@ int main(int argc, char** argv)
     using namespace std;
     clock_t begin = clock();
     int n = 1;
-    while(!data_file_acc.eof() && n < 1000){
+    while(!data_file_acc.eof() && n < 10000){
         n++;
 
         // read new data
-        data_file_acc >> mti_clock >> data_[0] >> data_[1] >> data_[2];
-        data_file_gyro >> tmp >> data_[3] >> data_[4] >> data_[5];
+        data_file_acc >> mti_clock  >> data[0] >> data[1] >> data[2];
+        data_file_gyro >> tmp       >> data[3] >> data[4] >> data[5];
         t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
 
+//        data.setZero();
+//        data(2) = 9.8;
+
         // assign data to capture
-        imu_ptr->setData(data_);
+        imu_ptr->setData(data);
         imu_ptr->setTimeStamp(t);
 
         // process data in capture
@@ -122,22 +125,30 @@ int main(int argc, char** argv)
 
 #ifdef DEBUG_RESULTS
 
+        // --- print to screen ----
+
+        std::cout << "Current    data : " << std::fixed << std::setprecision(3) << std::setw(8) << std::right
+                << data.transpose() << std::endl;
+
+        std::cout << "Current    delta: " << std::fixed << std::setprecision(3) << std::setw(8) << std::right
+                << problem_ptr_->getProcessorMotionPtr()->getMotion().delta_.transpose() << std::endl;
+
+        std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
+        << problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
+
+        Eigen::VectorXs x = problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+        std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
+        << x.head(10).transpose() << std::endl;
+
+        std::cout << std::endl;
+
+        // ----- dump to file -----
+
         Eigen::VectorXs delta_debug;
         Eigen::VectorXs delta_integr_debug;
         Eigen::VectorXs x_debug;
         TimeStamp ts;
 
-        // std::cout << "Current    delta: " << std::fixed << std::setprecision(3) << std::setw(8) << std::right
-        // << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_.transpose() << std::endl;
-
-        // std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
-        // << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
-
-        // Eigen::VectorXs x = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-        // std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
-        // << x.head(10).transpose() << std::endl;
-
-        // std::cout << std::endl;
         delta_debug = problem_ptr_->getProcessorMotionPtr()->getMotion().delta_;
         delta_integr_debug = problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
         x_debug = problem_ptr_->getProcessorMotionPtr()->getCurrentState();
